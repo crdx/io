@@ -13,6 +13,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"crdx.org/io/internal/req"
 )
 
 const (
@@ -128,16 +130,21 @@ func waitForCallback(listener net.Listener, state string) (string, error) {
 }
 
 func exchange(code string, verifier string) (*Credentials, error) {
-	return postForm(url.Values{
+	credentials, err := postForm(url.Values{
 		"grant_type":    {"authorization_code"},
 		"client_id":     {clientID},
 		"code":          {code},
 		"redirect_uri":  {redirectURL},
 		"code_verifier": {verifier},
 	})
+	if err != nil {
+		return nil, fmt.Errorf("exchange the code: %w", err)
+	}
+
+	return credentials, nil
 }
 
-func exchangeRefreshToken(refresh string) (*Credentials, error) {
+func refreshToken(refresh string) (*Credentials, error) {
 	return postForm(url.Values{
 		"grant_type":    {"refresh_token"},
 		"client_id":     {clientID},
@@ -146,25 +153,19 @@ func exchangeRefreshToken(refresh string) (*Credentials, error) {
 	})
 }
 
+const authTimeout = 30 * time.Second
+
+var authClient = req.New(authTimeout)
+
 func postForm(form url.Values) (*Credentials, error) {
-	response, err := http.PostForm(tokenEndpoint(), form)
-	if err != nil {
-		return nil, fmt.Errorf("exchange the code: %w", err)
-	}
-	defer func() { _ = response.Body.Close() }()
-
-	if response.StatusCode != http.StatusOK {
-		return nil, responseError(response)
-	}
-
 	var payload struct {
 		Access    string `json:"access_token"`
 		Refresh   string `json:"refresh_token"`
 		ExpiresIn int64  `json:"expires_in"`
 	}
 
-	if err := json.NewDecoder(response.Body).Decode(&payload); err != nil {
-		return nil, fmt.Errorf("parse the token response: %w", err)
+	if err := authClient.Form(tokenEndpoint(), form, &payload); err != nil {
+		return nil, err
 	}
 
 	if payload.Access == "" {

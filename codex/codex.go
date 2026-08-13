@@ -1,17 +1,16 @@
 package codex
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"runtime"
 	"time"
 
 	"crdx.org/io/harness"
+	"crdx.org/io/internal/req"
 	"crdx.org/io/tool"
 )
 
@@ -21,6 +20,8 @@ const (
 	Model      = "gpt-5.6-sol"
 	Originator = "io"
 )
+
+const turnTimeout = 30 * time.Minute
 
 // Client speaks the Responses API: one request per turn, answered as a stream of events. It owns
 // the conversation, since the endpoint wants the whole of it back every time.
@@ -32,15 +33,15 @@ type Client struct {
 	tools        []tool.Definition
 	session      string
 	history      []json.RawMessage
-	http         *http.Client
+	requests     *req.Client
 }
 
 // New builds a client that authorises every request with the given source.
 func New(tokens TokenSource) *Client {
 	return &Client{
-		tokens:  tokens,
-		session: newToken(),
-		http:    &http.Client{Timeout: 30 * time.Minute},
+		tokens:   tokens,
+		session:  newToken(),
+		requests: req.New(turnTimeout),
 	}
 }
 
@@ -97,29 +98,13 @@ func (self *Client) post() (reply, error) {
 		return reply{}, err
 	}
 
-	body, err := json.Marshal(self.requestBody())
-	if err != nil {
-		return reply{}, fmt.Errorf("encode request: %w", err)
-	}
-
-	request, err := http.NewRequest(http.MethodPost, self.endpoint(), bytes.NewReader(body))
+	stream, err := self.requests.Stream(self.endpoint(), self.requestBody(), self.headers(token))
 	if err != nil {
 		return reply{}, err
 	}
+	defer func() { _ = stream.Close() }()
 
-	self.setHeaders(request, token)
-
-	response, err := self.http.Do(request)
-	if err != nil {
-		return reply{}, err
-	}
-	defer func() { _ = response.Body.Close() }()
-
-	if response.StatusCode != http.StatusOK {
-		return reply{}, responseError(response)
-	}
-
-	return consume(response.Body)
+	return consume(stream)
 }
 
 func (self *Client) endpoint() string {
@@ -145,15 +130,18 @@ func (self *Client) requestBody() request {
 	}
 }
 
-func (self *Client) setHeaders(request *http.Request, token Token) {
-	request.Header.Set("Authorization", "Bearer "+token.Access)
-	request.Header.Set("Chatgpt-Account-Id", token.AccountID)
-	request.Header.Set("Originator", Originator)
-	request.Header.Set("Openai-Beta", "responses=experimental")
-	request.Header.Set("Accept", "text/event-stream")
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Session_id", self.session)
-	request.Header.Set("User-Agent", fmt.Sprintf("io (%s; %s)", runtime.GOOS, runtime.GOARCH))
+func (self *Client) headers(token Token) http.Header {
+	header := http.Header{}
+
+	header.Set("Authorization", "Bearer "+token.Access)
+	header.Set("Chatgpt-Account-Id", token.AccountID)
+	header.Set("Originator", Originator)
+	header.Set("Openai-Beta", "responses=experimental")
+	header.Set("Accept", "text/event-stream")
+	header.Set("Session_id", self.session)
+	header.Set("User-Agent", fmt.Sprintf("io (%s; %s)", runtime.GOOS, runtime.GOARCH))
+
+	return header
 }
 
 type request struct {
@@ -178,22 +166,6 @@ type toolOutput struct {
 	Type   string `json:"type"`
 	CallID string `json:"call_id"`
 	Output string `json:"output"`
-}
-
-func responseError(response *http.Response) error {
-	body, _ := io.ReadAll(io.LimitReader(response.Body, 64*1024))
-
-	var payload struct {
-		Error struct {
-			Message string `json:"message"`
-		} `json:"error"`
-	}
-
-	if json.Unmarshal(body, &payload) != nil || payload.Error.Message == "" {
-		return fmt.Errorf("request failed with status %d: %s", response.StatusCode, body)
-	}
-
-	return fmt.Errorf("%s", payload.Error.Message)
 }
 
 func newToken() string {
