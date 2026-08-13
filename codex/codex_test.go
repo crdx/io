@@ -160,7 +160,7 @@ func TestStreamReportsEachTurnAsItHappens(t *testing.T) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		seen = append(seen, fmt.Sprintf("%d:%s:%s", event.Kind, event.Name, event.Text))
+		seen = append(seen, fmt.Sprintf("%d:%s:%s", event.Kind, event.Name, event.Value))
 	}
 
 	expected := []string{

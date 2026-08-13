@@ -21,7 +21,7 @@ func stream(events ...agent.Event) iter.Seq2[agent.Event, error] {
 }
 
 func text(said string) agent.Event {
-	return agent.Event{Kind: agent.Text, Text: said}
+	return agent.Event{Kind: agent.Text, Value: said}
 }
 
 func rendered(events iter.Seq2[agent.Event, error]) ([]string, error) {
@@ -32,7 +32,7 @@ func rendered(events iter.Seq2[agent.Event, error]) ([]string, error) {
 			return seen, err
 		}
 
-		seen = append(seen, fmt.Sprintf("%d:%s%s", event.Kind, event.Name, event.Text))
+		seen = append(seen, fmt.Sprintf("%d:%s%s", event.Kind, event.Name, event.Value))
 	}
 
 	return seen, nil
@@ -43,7 +43,7 @@ func TestCoalesceHoldsTextUntilSomethingElseHappens(t *testing.T) {
 		text("Let me "),
 		text("look. "),
 		agent.Event{Kind: agent.Call, Name: "weather"},
-		agent.Event{Kind: agent.Result, Name: "weather", Text: "raining"},
+		agent.Event{Kind: agent.Result, Name: "weather", Value: "raining"},
 		text("It is "),
 		text("raining."),
 	))

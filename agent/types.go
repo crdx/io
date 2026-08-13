@@ -46,7 +46,7 @@ const (
 // Event is one thing that happened on the way to an answer.
 type Event struct {
 	Kind      Kind
-	Text      string
+	Value     string
 	Name      string
 	Arguments string
 	ID        string

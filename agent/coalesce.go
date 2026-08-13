@@ -8,17 +8,17 @@ import (
 // Coalesce combines runs of text fragments arrived via streaming into one coherent conversation.
 func Coalesce(events iter.Seq2[Event, error]) iter.Seq2[Event, error] {
 	return func(yield func(Event, error) bool) {
-		var held strings.Builder
+		var buf strings.Builder
 
 		release := func() bool {
-			if held.Len() == 0 {
+			if buf.Len() == 0 {
 				return true
 			}
 
-			text := held.String()
-			held.Reset()
+			str := buf.String()
+			buf.Reset()
 
-			return yield(Event{Kind: Text, Text: text}, nil)
+			return yield(Event{Kind: Text, Value: str}, nil)
 		}
 
 		for event, err := range events {
@@ -31,7 +31,7 @@ func Coalesce(events iter.Seq2[Event, error]) iter.Seq2[Event, error] {
 			}
 
 			if event.Kind == Text {
-				held.WriteString(event.Text)
+				buf.WriteString(event.Value)
 				continue
 			}
 

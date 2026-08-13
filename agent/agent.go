@@ -32,7 +32,7 @@ func (self *Agent) Stream(prompt string) iter.Seq2[Event, error] {
 			listening := true
 
 			reply, err := self.provider.Send(func(text string) bool {
-				listening = yield(Event{Kind: Text, Text: text}, nil)
+				listening = yield(Event{Kind: Text, Value: text}, nil)
 				return listening
 			})
 
@@ -65,7 +65,7 @@ func (self *Agent) Send(prompt string) (string, error) {
 		}
 
 		if event.Kind == Text {
-			answer.WriteString(event.Text)
+			answer.WriteString(event.Value)
 		}
 	}
 
@@ -84,7 +84,7 @@ func (self *Agent) runCalls(calls []ToolCall, yield func(Event, error) bool) boo
 		output := self.runTool(call)
 		results[index] = ToolResult{ID: call.ID, Output: output}
 
-		if !yield(Event{Kind: Result, Name: call.Name, Text: output, ID: call.ID}, nil) {
+		if !yield(Event{Kind: Result, Name: call.Name, Value: output, ID: call.ID}, nil) {
 			return false
 		}
 	}

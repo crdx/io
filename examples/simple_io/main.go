@@ -42,11 +42,11 @@ func answer(assistant *agent.Agent, prompt string) {
 
 		switch event.Kind {
 		case agent.Text:
-			fmt.Print(event.Text)
+			fmt.Print(event.Value)
 		case agent.Call:
 			fmt.Printf("\n· %s %s\n", event.Name, event.Arguments)
 		case agent.Result:
-			fmt.Printf("← %s\n", event.Text)
+			fmt.Printf("← %s\n", event.Value)
 		}
 	}
 
