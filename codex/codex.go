@@ -98,18 +98,18 @@ func encodeItem(item any) json.RawMessage {
 // Send posts the conversation so far and reads the response.
 //
 // https://platform.openai.com/docs/api-reference/responses-streaming
-func (self *Client) Send() (agent.Reply, error) {
-	answered, err := self.post()
+func (self *Client) Send(yield agent.Yield) (agent.Reply, error) {
+	turn, err := self.post(yield)
 	if err != nil {
-		return agent.Reply{Answer: answered.answer}, err
+		return agent.Reply{}, err
 	}
 
-	self.history = append(self.history, answered.items...)
+	self.history = append(self.history, turn.items...)
 
-	return agent.Reply{Answer: answered.answer, Calls: answered.calls()}, nil
+	return agent.Reply{Calls: turn.calls()}, nil
 }
 
-func (self *Client) post() (reply, error) {
+func (self *Client) post(yield agent.Yield) (reply, error) {
 	token, err := self.tokens.Token()
 	if err != nil {
 		return reply{}, err
@@ -121,7 +121,7 @@ func (self *Client) post() (reply, error) {
 	}
 	defer func() { _ = stream.Close() }()
 
-	return consume(stream)
+	return readReply(stream, yield)
 }
 
 func (self *Client) endpoint() string {

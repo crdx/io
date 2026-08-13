@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
 
@@ -32,13 +33,15 @@ func answer(text string) string {
 	return fmt.Sprintf(`{"type":"response.output_text.delta","delta":%q}`, text)
 }
 
-func call(name string, id string, arguments string) string {
+func call(name string, arguments string) string {
 	item := fmt.Sprintf(
-		`{"type":"function_call","call_id":%q,"name":%q,"arguments":%q}`, id, name, arguments,
+		`{"type":"function_call","call_id":%q,"name":%q,"arguments":%q}`, callID, name, arguments,
 	)
 
 	return fmt.Sprintf(`{"type":"response.output_item.done","item":%s}`, item)
 }
+
+const callID = "c1"
 
 const completed = `{"type":"response.completed"}`
 
@@ -103,7 +106,7 @@ func weatherTool(t *testing.T, called *int) tool.Tool {
 func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
 	server, bodies := turns(
 		t,
-		events(call("weather", "c1", `{"city":"London"}`), completed),
+		events(call("weather", `{"city":"London"}`), completed),
 		events(answer("It is raining "), answer("in London."), completed),
 	)
 
@@ -140,6 +143,69 @@ func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
 	}
 }
 
+func TestStreamReportsEachTurnAsItHappens(t *testing.T) {
+	server, _ := turns(
+		t,
+		events(answer("Let me look. "), call("weather", `{"city":"London"}`), completed),
+		events(answer("It is raining in London."), completed),
+	)
+
+	var called int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &called)})
+
+	var seen []string
+
+	for event, err := range assistant.Stream("what is the weather in London?") {
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		seen = append(seen, fmt.Sprintf("%d:%s:%s", event.Kind, event.Name, event.Text))
+	}
+
+	expected := []string{
+		fmt.Sprintf("%d::Let me look. ", agent.Text),
+		fmt.Sprintf("%d:weather:", agent.Call),
+		fmt.Sprintf("%d:weather:raining in London", agent.Result),
+		fmt.Sprintf("%d::It is raining in London.", agent.Text),
+	}
+
+	if !slices.Equal(seen, expected) {
+		t.Errorf("expected %v, got %v", expected, seen)
+	}
+}
+
+// A caller that stops listening ends the turn there and then, rather than reading the rest of a
+// stream into a conversation nobody is holding any more.
+func TestStreamStopsWhenTheCallerDoes(t *testing.T) {
+	server, bodies := turns(
+		t,
+		events(answer("It is raining "), call("weather", `{"city":"London"}`), completed),
+	)
+
+	var called int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &called)})
+
+	var seen int
+
+	for range assistant.Stream("what is the weather in London?") {
+		seen++
+		break
+	}
+
+	if seen != 1 {
+		t.Errorf("expected one event, got %d", seen)
+	}
+
+	if called != 0 {
+		t.Errorf("expected the tool not to run, ran %d times", called)
+	}
+
+	if len(*bodies) != 1 {
+		t.Errorf("expected one request, got %d", len(*bodies))
+	}
+}
+
 func TestSendReportsAnEndpointFailure(t *testing.T) {
 	server, _ := turns(
 		t,
@@ -153,8 +219,7 @@ func TestSendReportsAnEndpointFailure(t *testing.T) {
 	}
 }
 
-// A stream that stops early is not an answer. Taking it for one commits half a turn to the
-// conversation and runs whatever tool calls arrived before the wire went quiet.
+// A stream that stops early is not an answer.
 func TestSendRefusesATruncatedStream(t *testing.T) {
 	server, _ := turns(t, events(answer("It is raining ")))
 
@@ -209,7 +274,7 @@ func TestSendAcceptsTheDoneSentinel(t *testing.T) {
 func TestSendTellsTheModelWhenThereIsNoSuchTool(t *testing.T) {
 	server, bodies := turns(
 		t,
-		events(call("missing", "c1", `{}`), completed),
+		events(call("missing", `{}`), completed),
 		events(answer("Sorry."), completed),
 	)
 

@@ -2,19 +2,21 @@ package agent
 
 import "crdx.org/io/tool"
 
-// Provider is a backend a conversation is held with. The conversation itself belongs to the
-// provider, since what a history looks like is the one thing every wire format disagrees about.
+// Provider is a backend a conversation is held with.
 type Provider interface {
-	Configure(instructions string, tools []tool.Definition)
-	AddUserMessage(prompt string)
-	AddToolResults(results []ToolResult)
-	Send() (Reply, error)
+	Configure(string, []tool.Definition)
+	AddUserMessage(string)
+	AddToolResults([]ToolResult)
+	Send(Yield) (Reply, error)
 }
 
-// Reply is one response: the calls the model made, and the text it said on the way.
+// Yield is handed each fragment of an answer as it arrives, and returns false to end the turn where
+// whoever asked has stopped listening.
+type Yield func(text string) bool
+
+// Reply is what a turn amounted to once it was over: the calls the model made.
 type Reply struct {
-	Answer string
-	Calls  []ToolCall
+	Calls []ToolCall
 }
 
 // ToolCall is one call the model made, in a form no wire format's shape leaks into.
@@ -30,7 +32,27 @@ type ToolResult struct {
 	Output string
 }
 
-// Agent holds a conversation. It draws nothing and reads no prompt.
+// Kind is what an event is.
+type Kind int
+
+// The events a turn is made of: a fragment of the answer, a call the model asked for, and what that
+// call handed back.
+const (
+	Text Kind = iota
+	Call
+	Result
+)
+
+// Event is one thing that happened on the way to an answer.
+type Event struct {
+	Kind      Kind
+	Text      string
+	Name      string
+	Arguments string
+	ID        string
+}
+
+// Agent holds a conversation.
 type Agent struct {
 	provider Provider
 	tools    map[string]tool.Tool

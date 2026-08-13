@@ -2,6 +2,7 @@ package agent
 
 import (
 	"fmt"
+	"iter"
 	"strings"
 
 	"crdx.org/io/tool"
@@ -22,37 +23,75 @@ func New(prompt string, provider Provider, tools []tool.Tool) *Agent {
 	return &Agent{provider: provider, tools: available}
 }
 
-// Send answers one prompt, running the model until it stops asking for tools, and returns what it
-// said.
-func (self *Agent) Send(prompt string) (string, error) {
-	self.provider.AddUserMessage(prompt)
+// Stream answers one prompt, running the model until it stops asking for tools.
+func (self *Agent) Stream(prompt string) iter.Seq2[Event, error] {
+	return func(yield func(Event, error) bool) {
+		self.provider.AddUserMessage(prompt)
 
-	var answer strings.Builder
+		for {
+			listening := true
 
-	for {
-		reply, err := self.provider.Send()
-		answer.WriteString(reply.Answer)
+			reply, err := self.provider.Send(func(text string) bool {
+				listening = yield(Event{Kind: Text, Text: text}, nil)
+				return listening
+			})
 
-		if err != nil {
-			return answer.String(), err
+			switch {
+			case !listening:
+				return
+			case err != nil:
+				yield(Event{}, err)
+				return
+			case len(reply.Calls) == 0:
+				return
+			}
+
+			if !self.runCalls(reply.Calls, yield) {
+				return
+			}
 		}
-
-		if len(reply.Calls) == 0 {
-			return answer.String(), nil
-		}
-
-		self.provider.AddToolResults(self.runTools(reply.Calls))
 	}
 }
 
-func (self *Agent) runTools(calls []ToolCall) []ToolResult {
+// Send answers one prompt the whole way through, and returns everything the model said.
+func (self *Agent) Send(prompt string) (string, error) {
+	var answer strings.Builder
+	var failure error
+
+	for event, err := range self.Stream(prompt) {
+		if err != nil {
+			failure = err
+			break
+		}
+
+		if event.Kind == Text {
+			answer.WriteString(event.Text)
+		}
+	}
+
+	return answer.String(), failure
+}
+
+func (self *Agent) runCalls(calls []ToolCall, yield func(Event, error) bool) bool {
 	results := make([]ToolResult, len(calls))
 
 	for index, call := range calls {
-		results[index] = ToolResult{ID: call.ID, Output: self.runTool(call)}
+		asked := Event{Kind: Call, Name: call.Name, Arguments: call.Arguments, ID: call.ID}
+		if !yield(asked, nil) {
+			return false
+		}
+
+		output := self.runTool(call)
+		results[index] = ToolResult{ID: call.ID, Output: output}
+
+		if !yield(Event{Kind: Result, Name: call.Name, Text: output, ID: call.ID}, nil) {
+			return false
+		}
 	}
 
-	return results
+	self.provider.AddToolResults(results)
+
+	return true
 }
 
 func (self *Agent) runTool(call ToolCall) string {

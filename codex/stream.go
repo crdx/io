@@ -13,8 +13,7 @@ import (
 
 const donePayload = "[DONE]"
 
-// ErrIncomplete is a response the endpoint cut short, usually against a limit. Whatever arrived is
-// still handed back, since it is real, but it is not the whole of what was coming.
+// ErrIncomplete is a response the endpoint cut short, usually against a limit.
 var ErrIncomplete = errors.New("the response was cut short")
 
 // ErrTruncated is a stream that stopped without ever saying it was finished, which means the wire
@@ -22,8 +21,7 @@ var ErrIncomplete = errors.New("the response was cut short")
 var ErrTruncated = errors.New("the stream ended before the response did")
 
 type reply struct {
-	answer string
-	items  []json.RawMessage
+	items []json.RawMessage
 }
 
 func (self *reply) calls() []agent.ToolCall {
@@ -85,24 +83,18 @@ func (self *event) failure() error {
 	return fmt.Errorf("the endpoint sent a %s event with no message", self.Type)
 }
 
-func consume(body io.Reader) (reply, error) {
+func readReply(body io.Reader, yield agent.Yield) (reply, error) {
 	reader := bufio.NewReader(body)
 
-	var answered reply
-	var answer strings.Builder
+	var turn reply
 	var data strings.Builder
-
-	finish := func(err error) (reply, error) {
-		answered.answer = answer.String()
-		return answered, err
-	}
 
 	for {
 		line, err := reader.ReadString('\n')
-		atEnd := errors.Is(err, io.EOF)
+		eof := errors.Is(err, io.EOF)
 
-		if err != nil && !atEnd {
-			return finish(err)
+		if err != nil && !eof {
+			return turn, err
 		}
 
 		switch text := strings.TrimRight(line, "\r\n"); {
@@ -113,20 +105,20 @@ func consume(body io.Reader) (reply, error) {
 			payload := data.String()
 			data.Reset()
 
-			done, err := answered.take(payload, &answer)
+			done, err := turn.step(payload, yield)
 			if done || err != nil {
-				return finish(err)
+				return turn, err
 			}
 		}
 
-		if atEnd {
-			switch done, err := answered.take(data.String(), &answer); {
+		if eof {
+			switch done, err := turn.step(data.String(), yield); {
 			case err != nil:
-				return finish(err)
+				return turn, err
 			case done:
-				return finish(nil)
+				return turn, nil
 			default:
-				return finish(ErrTruncated)
+				return turn, ErrTruncated
 			}
 		}
 	}
@@ -137,7 +129,7 @@ func parseEvent(payload string) (event, bool) {
 	return message, json.Unmarshal([]byte(payload), &message) == nil
 }
 
-func (self *reply) take(payload string, answer *strings.Builder) (bool, error) {
+func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	if payload == "" {
 		return false, nil
 	}
@@ -153,7 +145,9 @@ func (self *reply) take(payload string, answer *strings.Builder) (bool, error) {
 
 	switch message.Type {
 	case "response.output_text.delta":
-		answer.WriteString(message.Delta)
+		if !yield(message.Delta) {
+			return true, nil
+		}
 
 	case "response.output_item.done":
 		if len(message.Item) > 0 {
