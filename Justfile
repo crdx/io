@@ -12,10 +12,14 @@ lint:
     unbuffer go vet ./... | gostack
     unbuffer golangci-lint run --color never | gostack
 
+mega:
+    mega
+
 fix:
     unbuffer golangci-lint run --color never --fix | gostack
 
 test:
     unbuffer go test -cover ./... | gostack --test
 
-check: test fmt lint
+check:
+    steps fmt lint mega test
