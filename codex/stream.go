@@ -1,14 +1,13 @@
 package codex
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"strings"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/sse"
 )
 
 const donePayload = "[DONE]"
@@ -18,7 +17,7 @@ var ErrIncomplete = errors.New("the response was cut short")
 
 // ErrTruncated is a stream that stopped without ever saying it was finished, which means the wire
 // went quiet mid-turn rather than the model reaching an end.
-var ErrTruncated = errors.New("the stream ended before the response did")
+var ErrTruncated = sse.ErrTruncated
 
 type reply struct {
 	items []json.RawMessage
@@ -84,44 +83,13 @@ func (self *event) failure() error {
 }
 
 func readReply(body io.Reader, yield agent.Yield) (reply, error) {
-	reader := bufio.NewReader(body)
-
 	var turn reply
-	var data strings.Builder
 
-	for {
-		line, err := reader.ReadString('\n')
-		eof := errors.Is(err, io.EOF)
+	err := sse.Read(body, func(payload string) (bool, error) {
+		return turn.step(payload, yield)
+	})
 
-		if err != nil && !eof {
-			return turn, err
-		}
-
-		switch text := strings.TrimRight(line, "\r\n"); {
-		case strings.HasPrefix(text, "data:"):
-			data.WriteString(strings.TrimSpace(strings.TrimPrefix(text, "data:")))
-
-		case text == "":
-			payload := data.String()
-			data.Reset()
-
-			done, err := turn.step(payload, yield)
-			if done || err != nil {
-				return turn, err
-			}
-		}
-
-		if eof {
-			switch done, err := turn.step(data.String(), yield); {
-			case err != nil:
-				return turn, err
-			case done:
-				return turn, nil
-			default:
-				return turn, ErrTruncated
-			}
-		}
-	}
+	return turn, err
 }
 
 func parseEvent(payload string) (event, bool) {
@@ -130,10 +98,6 @@ func parseEvent(payload string) (event, bool) {
 }
 
 func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
-	if payload == "" {
-		return false, nil
-	}
-
 	if payload == donePayload {
 		return true, nil
 	}
