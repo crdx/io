@@ -125,6 +125,67 @@ func TestReadingStopsWhenTheReaderIsDone(t *testing.T) {
 	}
 }
 
+func fields(stream string) string {
+	var out strings.Builder
+
+	for line := range strings.SplitSeq(stream, "\n") {
+		field, carried := strings.CutPrefix(strings.TrimRight(line, "\r"), "data:")
+		if carried {
+			out.WriteString(strings.TrimSpace(field))
+		}
+	}
+
+	return out.String()
+}
+
+// Whatever arrives, a reader that never says it has heard enough is told the stream ran out, hears
+// every data field the stream carried and nothing besides, and is never handed an empty payload or
+// one with a newline still in it.
+func FuzzRead(f *testing.F) {
+	for _, seed := range []string{
+		"data: one\n\n",
+		"data: one\ndata: two\n\ndata: end",
+		"\n\n\n",
+		"data:\n\n",
+		"data:   spaced   \r\n\r\n",
+		": comment\nevent: message\nid: 1\nretry: 500\n\n",
+		"data",
+		"datadata: one\n\n",
+		"\r\n",
+		"data: \xff\x00\n\n",
+		"data:0\r0",
+	} {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, stream string) {
+		var seen []string
+
+		err := sse.Read(strings.NewReader(stream), func(payload string) (bool, error) {
+			seen = append(seen, payload)
+			return false, nil
+		})
+
+		if !errors.Is(err, sse.ErrTruncated) {
+			t.Fatalf("expected the stream to run out, got %v", err)
+		}
+
+		for _, payload := range seen {
+			if payload == "" {
+				t.Error("expected no empty payload")
+			}
+
+			if strings.Contains(payload, "\n") {
+				t.Errorf("expected no newline in a payload, got %q", payload)
+			}
+		}
+
+		if joined := strings.Join(seen, ""); joined != fields(stream) {
+			t.Errorf("expected the data fields, got %q", joined)
+		}
+	})
+}
+
 // What the reader makes of a payload is its own affair, and its complaint is the caller's answer.
 func TestTheReadersOwnFailureIsHandedBack(t *testing.T) {
 	refused := errors.New("that made no sense")
