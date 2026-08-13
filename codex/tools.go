@@ -7,7 +7,7 @@ type functionTool struct {
 	Name        string      `json:"name"`
 	Description string      `json:"description"`
 	Strict      bool        `json:"strict"`
-	Parameters  tool.Schema `json:"parameters,omitempty"`
+	Schema      tool.Schema `json:"parameters,omitempty"`
 }
 
 func describe(tools []tool.Definition) []functionTool {
@@ -19,7 +19,7 @@ func describe(tools []tool.Definition) []functionTool {
 			Name:        offer.Name,
 			Description: offer.Description,
 			Strict:      false,
-			Parameters:  offer.Schema,
+			Schema:      offer.Schema,
 		}
 	}
 
