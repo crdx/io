@@ -21,6 +21,16 @@ func (self *Credentials) stale() bool {
 	return time.Now().Add(refreshWindow).UnixMilli() >= self.ExpiresAt
 }
 
+func (self *Credentials) inherit(held *Credentials) {
+	if self.Refresh == "" {
+		self.Refresh = held.Refresh
+	}
+
+	if self.AccountID == "" {
+		self.AccountID = held.AccountID
+	}
+}
+
 // CredentialsPath is where Login writes and Auth reads.
 func CredentialsPath() string {
 	base := os.Getenv("XDG_STATE_HOME")

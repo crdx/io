@@ -89,6 +89,41 @@ func TestStoredRefreshesATokenNearExpiry(t *testing.T) {
 	}
 }
 
+// A refresh response need not carry a refresh token, and when it does not the one already held
+// still stands. Dropping it would turn the next expiry into a fresh login for no reason.
+func TestStoredKeepsTheRefreshTokenTheResponseOmits(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(
+		func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			_, _ = fmt.Fprint(writer, `{"access_token":"new","expires_in":3600}`)
+		}))
+
+	t.Cleanup(server.Close)
+
+	codex.TokenURL = server.URL
+	t.Cleanup(func() { codex.TokenURL = "" })
+
+	path := writeCredentials(t, time.Minute)
+
+	if _, err := codex.StoredAt(path).Token(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	data, err := os.ReadFile(path) //nolint:gosec // the path is the test's own
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var written codex.Credentials
+	if err := json.Unmarshal(data, &written); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if written.Refresh != "refresh-me" {
+		t.Errorf("expected the held refresh token to survive, got %q", written.Refresh)
+	}
+}
+
 func TestStoredLeavesAGoodTokenAlone(t *testing.T) {
 	var grants []string
 

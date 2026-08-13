@@ -80,17 +80,15 @@ func (self *stored) refresh() error {
 		return errors.New("credentials have expired: run the login command again")
 	}
 
-	refreshed, err := exchangeRefreshToken(self.credentials.Refresh)
+	refreshedToken, err := refreshToken(self.credentials.Refresh)
 	if err != nil {
 		return fmt.Errorf("refresh credentials: %w", err)
 	}
 
-	if refreshed.AccountID == "" {
-		refreshed.AccountID = self.credentials.AccountID
-	}
+	refreshedToken.inherit(self.credentials)
 
-	self.credentials = refreshed
-	_ = saveCredentials(self.path, refreshed)
+	self.credentials = refreshedToken
+	_ = saveCredentials(self.path, refreshedToken)
 
 	return nil
 }
