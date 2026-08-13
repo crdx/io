@@ -14,7 +14,13 @@ import (
 	"crdx.org/io/tool"
 )
 
+// —————————————————————————————————————————————————————————————————————————————————————————————————
+// mega:allow-file comment-lines
+// —————————————————————————————————————————————————————————————————————————————————————————————————
+
 // Where the conversation is held, and as what.
+//
+// https://platform.openai.com/docs/api-reference/responses/create
 const (
 	Endpoint   = "https://chatgpt.com/backend-api/codex/responses"
 	Model      = "gpt-5.6-sol"
@@ -25,6 +31,10 @@ const turnTimeout = 30 * time.Minute
 
 // Client speaks the Responses API: one request per turn, answered as a stream of events. It owns
 // the conversation, since the endpoint wants the whole of it back every time.
+//
+// https://platform.openai.com/docs/api-reference/responses/create
+// https://platform.openai.com/docs/api-reference/responses-streaming
+// https://platform.openai.com/docs/guides/conversation-state
 type Client struct {
 	URL string
 
@@ -37,6 +47,8 @@ type Client struct {
 }
 
 // New builds a client that authorises every request with the given source.
+//
+// https://platform.openai.com/docs/guides/prompt-caching
 func New(tokens TokenSource) *Client {
 	return &Client{
 		tokens:   tokens,
@@ -52,6 +64,8 @@ func Auth() *Client {
 }
 
 // Configure takes what every request in the session carries.
+//
+// https://platform.openai.com/docs/guides/function-calling
 func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	self.instructions = instructions
 	self.tools = tools
@@ -59,11 +73,15 @@ func (self *Client) Configure(instructions string, tools []tool.Definition) {
 
 // AddUserMessage appends a prompt to the conversation, as the endpoint expects it in the input
 // list.
+//
+// https://platform.openai.com/docs/guides/conversation-state
 func (self *Client) AddUserMessage(prompt string) {
 	self.history = append(self.history, encodeItem(userMessage{Role: "user", Content: prompt}))
 }
 
 // AddToolResults appends this turn's tool call results to the conversation.
+//
+// https://platform.openai.com/docs/guides/function-calling
 func (self *Client) AddToolResults(results []harness.ToolResult) {
 	for _, result := range results {
 		self.history = append(self.history, encodeItem(toolOutput{
@@ -81,6 +99,8 @@ func encodeItem(item any) json.RawMessage {
 }
 
 // Send posts the conversation so far and reads the response.
+//
+// https://platform.openai.com/docs/api-reference/responses-streaming
 func (self *Client) Send() (harness.Reply, error) {
 	answered, err := self.post()
 	if err != nil {
@@ -144,17 +164,27 @@ func (self *Client) headers(token Token) http.Header {
 	return header
 }
 
+// https://platform.openai.com/docs/api-reference/responses/create
 type request struct {
 	Model             string            `json:"model"`
 	Store             bool              `json:"store"`
-	Stream            bool              `json:"stream"`
-	Input             []json.RawMessage `json:"input"`
-	Include           []string          `json:"include"`
-	PromptCacheKey    string            `json:"prompt_cache_key"`
-	ToolChoice        string            `json:"tool_choice"`
-	ParallelToolCalls bool              `json:"parallel_tool_calls"`
 	Tools             []tool.Definition `json:"tools"`
 	Instructions      string            `json:"instructions,omitempty"`
+	ParallelToolCalls bool              `json:"parallel_tool_calls"`
+
+	// https://platform.openai.com/docs/api-reference/responses-streaming
+	Stream bool `json:"stream"`
+
+	Input []json.RawMessage `json:"input"`
+
+	// https://platform.openai.com/docs/guides/conversation-state
+	Include []string `json:"include"`
+
+	// https://platform.openai.com/docs/guides/prompt-caching
+	PromptCacheKey string `json:"prompt_cache_key"`
+
+	// https://platform.openai.com/docs/guides/function-calling
+	ToolChoice string `json:"tool_choice"`
 }
 
 type userMessage struct {
