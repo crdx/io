@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"time"
 
-	"crdx.org/io/harness"
+	"crdx.org/io/agent"
 	"crdx.org/io/internal/req"
 	"crdx.org/io/tool"
 )
@@ -82,7 +82,7 @@ func (self *Client) AddUserMessage(prompt string) {
 // AddToolResults appends this turn's tool call results to the conversation.
 //
 // https://platform.openai.com/docs/guides/function-calling
-func (self *Client) AddToolResults(results []harness.ToolResult) {
+func (self *Client) AddToolResults(results []agent.ToolResult) {
 	for _, result := range results {
 		self.history = append(self.history, encodeItem(toolOutput{
 			Type:   "function_call_output",
@@ -101,15 +101,15 @@ func encodeItem(item any) json.RawMessage {
 // Send posts the conversation so far and reads the response.
 //
 // https://platform.openai.com/docs/api-reference/responses-streaming
-func (self *Client) Send() (harness.Reply, error) {
+func (self *Client) Send() (agent.Reply, error) {
 	answered, err := self.post()
 	if err != nil {
-		return harness.Reply{Answer: answered.answer}, err
+		return agent.Reply{Answer: answered.answer}, err
 	}
 
 	self.history = append(self.history, answered.items...)
 
-	return harness.Reply{Answer: answered.answer, Calls: answered.calls()}, nil
+	return agent.Reply{Answer: answered.answer, Calls: answered.calls()}, nil
 }
 
 func (self *Client) post() (reply, error) {

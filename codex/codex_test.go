@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/codex"
-	"crdx.org/io/harness"
 	"crdx.org/io/tool"
 )
 
@@ -71,13 +71,13 @@ func turns(t *testing.T, scripted ...string) (*httptest.Server, *[]string) {
 	return server, &bodies
 }
 
-func newAgent(t *testing.T, url string, tools []tool.Tool) *harness.Agent {
+func newAgent(t *testing.T, url string, tools []tool.Tool) *agent.Agent {
 	t.Helper()
 
 	backend := codex.New(codex.Static("token", "account"))
 	backend.URL = url
 
-	return harness.NewAgent("You are a helpful assistant", backend, tools)
+	return agent.New("You are a helpful assistant", backend, tools)
 }
 
 func weatherTool(t *testing.T, called *int) tool.Tool {
@@ -108,9 +108,9 @@ func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
 	)
 
 	var called int
-	agent := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &called)})
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &called)})
 
-	said, err := agent.Send("what is the weather in London?")
+	said, err := assistant.Send("what is the weather in London?")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -146,9 +146,9 @@ func TestSendReportsAnEndpointFailure(t *testing.T) {
 		events(`{"type":"response.failed","response":{"error":{"message":"model overloaded"}}}`),
 	)
 
-	agent := newAgent(t, server.URL, nil)
+	assistant := newAgent(t, server.URL, nil)
 
-	if _, err := agent.Send("hello"); err == nil || err.Error() != "model overloaded" {
+	if _, err := assistant.Send("hello"); err == nil || err.Error() != "model overloaded" {
 		t.Errorf("expected the endpoint's own message, got %v", err)
 	}
 }
@@ -158,9 +158,9 @@ func TestSendReportsAnEndpointFailure(t *testing.T) {
 func TestSendRefusesATruncatedStream(t *testing.T) {
 	server, _ := turns(t, events(answer("It is raining ")))
 
-	agent := newAgent(t, server.URL, nil)
+	assistant := newAgent(t, server.URL, nil)
 
-	said, err := agent.Send("what is the weather in London?")
+	said, err := assistant.Send("what is the weather in London?")
 	if err == nil {
 		t.Fatal("expected a truncated stream to be refused")
 	}
@@ -178,9 +178,9 @@ func TestSendReportsAnIncompleteResponse(t *testing.T) {
 		events(answer("It is raining "), `{"type":"response.incomplete"}`),
 	)
 
-	agent := newAgent(t, server.URL, nil)
+	assistant := newAgent(t, server.URL, nil)
 
-	said, err := agent.Send("what is the weather in London?")
+	said, err := assistant.Send("what is the weather in London?")
 	if !errors.Is(err, codex.ErrIncomplete) {
 		t.Fatalf("expected an incomplete response to be reported, got %v", err)
 	}
@@ -194,9 +194,9 @@ func TestSendReportsAnIncompleteResponse(t *testing.T) {
 func TestSendAcceptsTheDoneSentinel(t *testing.T) {
 	server, _ := turns(t, events(answer("It is raining in London."), "[DONE]"))
 
-	agent := newAgent(t, server.URL, nil)
+	assistant := newAgent(t, server.URL, nil)
 
-	said, err := agent.Send("what is the weather in London?")
+	said, err := assistant.Send("what is the weather in London?")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -213,9 +213,9 @@ func TestSendTellsTheModelWhenThereIsNoSuchTool(t *testing.T) {
 		events(answer("Sorry."), completed),
 	)
 
-	agent := newAgent(t, server.URL, nil)
+	assistant := newAgent(t, server.URL, nil)
 
-	if _, err := agent.Send("hello"); err != nil {
+	if _, err := assistant.Send("hello"); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

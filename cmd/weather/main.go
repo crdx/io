@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/codex"
-	"crdx.org/io/harness"
 	"crdx.org/io/tool"
 )
 
@@ -23,12 +23,12 @@ func main() {
 		},
 	)
 
-	agent := harness.NewAgent(
+	assistant := agent.New(
 		"You are a helpful weatherperson",
 		codex.Auth(),
 		[]tool.Tool{weather},
 	)
 
-	answer, _ := agent.Send("what is the weather in London?")
+	answer, _ := assistant.Send("what is the weather in London?")
 	fmt.Println(answer) // => "London is cloudy, with a chance of meatballs."
 }

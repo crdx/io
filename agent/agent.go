@@ -1,4 +1,4 @@
-package harness
+package agent
 
 import (
 	"fmt"
@@ -7,8 +7,8 @@ import (
 	"crdx.org/io/tool"
 )
 
-// NewAgent builds an agent that talks to a provider with a set of tools on offer.
-func NewAgent(prompt string, provider Provider, tools []tool.Tool) *Agent {
+// New builds an agent that talks to a provider with a set of tools on offer.
+func New(prompt string, provider Provider, tools []tool.Tool) *Agent {
 	definitions := make([]tool.Definition, len(tools))
 	available := make(map[string]tool.Tool, len(tools))
 

@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"crdx.org/io/harness"
+	"crdx.org/io/agent"
 )
 
 const donePayload = "[DONE]"
@@ -26,14 +26,14 @@ type reply struct {
 	items  []json.RawMessage
 }
 
-func (self *reply) calls() []harness.ToolCall {
-	var calls []harness.ToolCall
+func (self *reply) calls() []agent.ToolCall {
+	var calls []agent.ToolCall
 
 	for _, raw := range self.items {
 		var item outputItem
 
 		if json.Unmarshal(raw, &item) == nil && item.Type == "function_call" {
-			calls = append(calls, harness.ToolCall{
+			calls = append(calls, agent.ToolCall{
 				ID:        item.CallID,
 				Name:      item.Name,
 				Arguments: item.Arguments,
