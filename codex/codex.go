@@ -29,8 +29,7 @@ const (
 
 const turnTimeout = 30 * time.Minute
 
-// Client speaks the Responses API: one request per turn, answered as a stream of events. It owns
-// the conversation, since the endpoint wants the whole of it back every time.
+// Client speaks the Responses API: one request per turn, answered as a stream of events.
 //
 // https://platform.openai.com/docs/api-reference/responses/create
 // https://platform.openai.com/docs/api-reference/responses-streaming
@@ -57,8 +56,7 @@ func New(tokens TokenSource) *Client {
 	}
 }
 
-// Auth is a client on the credentials the login command stored, which is what a caller with no
-// opinion about where credentials come from wants.
+// Auth is a client on the credentials the login command stored.
 func Auth() *Client {
 	return New(Stored())
 }
@@ -71,8 +69,7 @@ func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	self.tools = tools
 }
 
-// AddUserMessage appends a prompt to the conversation, as the endpoint expects it in the input
-// list.
+// AddUserMessage appends a prompt to the conversation.
 //
 // https://platform.openai.com/docs/guides/conversation-state
 func (self *Client) AddUserMessage(prompt string) {
