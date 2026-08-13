@@ -39,7 +39,7 @@ type Client struct {
 
 	tokens       TokenSource
 	instructions string
-	tools        []tool.Definition
+	tools        []functionTool
 	session      string
 	history      []json.RawMessage
 	requests     *req.Client
@@ -66,7 +66,7 @@ func Auth() *Client {
 // https://platform.openai.com/docs/guides/function-calling
 func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	self.instructions = instructions
-	self.tools = tools
+	self.tools = describe(tools)
 }
 
 // AddUserMessage appends a prompt to the conversation.
@@ -163,11 +163,11 @@ func (self *Client) headers(token Token) http.Header {
 
 // https://platform.openai.com/docs/api-reference/responses/create
 type request struct {
-	Model             string            `json:"model"`
-	Store             bool              `json:"store"`
-	Tools             []tool.Definition `json:"tools"`
-	Instructions      string            `json:"instructions,omitempty"`
-	ParallelToolCalls bool              `json:"parallel_tool_calls"`
+	Model             string         `json:"model"`
+	Store             bool           `json:"store"`
+	Tools             []functionTool `json:"tools"`
+	Instructions      string         `json:"instructions,omitempty"`
+	ParallelToolCalls bool           `json:"parallel_tool_calls"`
 
 	// https://platform.openai.com/docs/api-reference/responses-streaming
 	Stream bool `json:"stream"`

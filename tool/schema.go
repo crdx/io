@@ -57,22 +57,18 @@ func (self Schema) MarshalJSON() ([]byte, error) {
 	return json.Marshal(rendered)
 }
 
-// Definition is one tool as the endpoint expects it in the request body.
+// Definition is what a tool is, in a form no wire format's shape leaks into.
 type Definition struct {
-	Type        string `json:"type"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Strict      bool   `json:"strict"`
-	Parameters  Schema `json:"parameters,omitempty"`
+	Name        string
+	Description string
+	Schema      Schema
 }
 
-// Describe renders a tool as the endpoint expects to be told about it.
+// Describe says what a tool is, for a provider to offer to the model however it offers things.
 func Describe(subject Tool) Definition {
 	return Definition{
-		Type:        "function",
 		Name:        subject.Name(),
 		Description: subject.Description(),
-		Strict:      false,
-		Parameters:  subject.Schema(),
+		Schema:      subject.Schema(),
 	}
 }

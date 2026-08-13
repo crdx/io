@@ -143,6 +143,29 @@ func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
 	}
 }
 
+// The Responses API takes a tool flat, where the older chat one nests it under a function key, so
+// what a tool is and how this endpoint is told about it are not the same thing.
+func TestToolsAreOfferedInTheResponsesShape(t *testing.T) {
+	server, bodies := turns(t, events(answer("Hello."), completed))
+
+	var called int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &called)})
+
+	if _, err := assistant.Send("hello"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	offered := `"tools":[{"type":"function","name":"weather",` +
+		`"description":"report weather in a city","strict":false,` +
+		`"parameters":{"type":"object","properties":{"city":` +
+		`{"type":"string","description":"the city to look up"}},` +
+		`"required":["city"],"additionalProperties":false}}]`
+
+	if !strings.Contains((*bodies)[0], offered) {
+		t.Errorf("expected %s, got %s", offered, (*bodies)[0])
+	}
+}
+
 func TestStreamReportsEachTurnAsItHappens(t *testing.T) {
 	server, _ := turns(
 		t,
