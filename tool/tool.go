@@ -28,7 +28,7 @@ func Define[T any](
 	render func(args T) string,
 	exec func(args T) (string, error),
 ) Tool {
-	return _tool{
+	return funcTool{
 		name:        name,
 		description: description,
 		schema:      schema,
@@ -42,7 +42,7 @@ func Define[T any](
 				}
 			}
 
-			return _call{
+			return funcCall{
 				render: func() string { return render(args) },
 				exec:   func() (string, error) { return exec(args) },
 			}, nil
