@@ -26,10 +26,10 @@ const (
 	scope        = "openid profile email offline_access"
 )
 
-const loginPatience = 5 * time.Minute
+const chill = 5 * time.Minute
 
 // Login authorises against a ChatGPT subscription and stores the credentials, printing the URL to
-// visit and opening it where it can. It returns once the browser has come back to the callback.
+// visit and opening it where it can.
 func Login() error {
 	verifier := newToken()
 	state := newToken()
@@ -81,12 +81,12 @@ func authoriseAddress(verifier string, state string) string {
 }
 
 func waitForCallback(listener net.Listener, state string) (string, error) {
-	type outcome struct {
+	type transmission struct {
 		code string
 		err  error
 	}
 
-	answered := make(chan outcome, 1)
+	radio := make(chan transmission, 1)
 
 	server := &http.Server{
 		ReadHeaderTimeout: 10 * time.Second,
@@ -95,20 +95,20 @@ func waitForCallback(listener net.Listener, state string) (string, error) {
 
 			if query.Get("state") != state {
 				http.Error(writer, "state did not match", http.StatusBadRequest)
-				answered <- outcome{err: errors.New("the callback state did not match")}
+				radio <- transmission{err: errors.New("the callback state did not match")}
 
 				return
 			}
 
 			if code := query.Get("code"); code != "" {
 				_, _ = fmt.Fprintln(writer, "Authorised. You can close this tab.")
-				answered <- outcome{code: code}
+				radio <- transmission{code: code}
 
 				return
 			}
 
 			http.Error(writer, "no code", http.StatusBadRequest)
-			answered <- outcome{err: errors.New("the callback carried no code")}
+			radio <- transmission{err: errors.New("the callback carried no code")}
 		}),
 	}
 
@@ -122,10 +122,10 @@ func waitForCallback(listener net.Listener, state string) (string, error) {
 	}()
 
 	select {
-	case answer := <-answered:
-		return answer.code, answer.err
-	case <-time.After(loginPatience):
-		return "", errors.New("gave up waiting to be authorised")
+	case transmission := <-radio:
+		return transmission.code, transmission.err
+	case <-time.After(chill):
+		return "", errors.New("gave up waiting")
 	}
 }
 
@@ -180,8 +180,7 @@ func postForm(form url.Values) (*Credentials, error) {
 	}, nil
 }
 
-// TokenURL is the address credentials are traded at, and is the real one when left empty. A test
-// setting it points the refresh at somewhere it can answer.
+// TokenURL is the address credentials are traded at, and is the real one when left empty.
 var TokenURL string
 
 func tokenEndpoint() string {
