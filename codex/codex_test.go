@@ -1,6 +1,7 @@
 package codex_test
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -149,6 +150,59 @@ func TestSendReportsAnEndpointFailure(t *testing.T) {
 
 	if _, err := agent.Send("hello"); err == nil || err.Error() != "model overloaded" {
 		t.Errorf("expected the endpoint's own message, got %v", err)
+	}
+}
+
+// A stream that stops early is not an answer. Taking it for one commits half a turn to the
+// conversation and runs whatever tool calls arrived before the wire went quiet.
+func TestSendRefusesATruncatedStream(t *testing.T) {
+	server, _ := turns(t, events(answer("It is raining ")))
+
+	agent := newAgent(t, server.URL, nil)
+
+	said, err := agent.Send("what is the weather in London?")
+	if err == nil {
+		t.Fatal("expected a truncated stream to be refused")
+	}
+
+	if said != "It is raining " {
+		t.Errorf("expected what did arrive to be handed back, got %q", said)
+	}
+}
+
+// A response cut short by a limit carries real text, so the caller gets it, but must be able to
+// tell it apart from one the model chose to end.
+func TestSendReportsAnIncompleteResponse(t *testing.T) {
+	server, _ := turns(
+		t,
+		events(answer("It is raining "), `{"type":"response.incomplete"}`),
+	)
+
+	agent := newAgent(t, server.URL, nil)
+
+	said, err := agent.Send("what is the weather in London?")
+	if !errors.Is(err, codex.ErrIncomplete) {
+		t.Fatalf("expected an incomplete response to be reported, got %v", err)
+	}
+
+	if said != "It is raining " {
+		t.Errorf("expected what did arrive to be handed back, got %q", said)
+	}
+}
+
+// The endpoint closes a stream with this sentinel, so it ends a turn as surely as any event.
+func TestSendAcceptsTheDoneSentinel(t *testing.T) {
+	server, _ := turns(t, events(answer("It is raining in London."), "[DONE]"))
+
+	agent := newAgent(t, server.URL, nil)
+
+	said, err := agent.Send("what is the weather in London?")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if said != "It is raining in London." {
+		t.Errorf("expected the answer, got %q", said)
 	}
 }
 

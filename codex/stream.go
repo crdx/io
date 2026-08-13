@@ -13,6 +13,14 @@ import (
 
 const donePayload = "[DONE]"
 
+// ErrIncomplete is a response the endpoint cut short, usually against a limit. Whatever arrived is
+// still handed back, since it is real, but it is not the whole of what was coming.
+var ErrIncomplete = errors.New("the response was cut short")
+
+// ErrTruncated is a stream that stopped without ever saying it was finished, which means the wire
+// went quiet mid-turn rather than the model reaching an end.
+var ErrTruncated = errors.New("the stream ended before the response did")
+
 type reply struct {
 	answer string
 	items  []json.RawMessage
@@ -112,8 +120,14 @@ func consume(body io.Reader) (reply, error) {
 		}
 
 		if atEnd {
-			_, err := answered.take(data.String(), &answer)
-			return finish(err)
+			switch done, err := answered.take(data.String(), &answer); {
+			case err != nil:
+				return finish(err)
+			case done:
+				return finish(nil)
+			default:
+				return finish(ErrTruncated)
+			}
 		}
 	}
 }
@@ -146,8 +160,11 @@ func (self *reply) take(payload string, answer *strings.Builder) (bool, error) {
 			self.items = append(self.items, message.Item)
 		}
 
-	case "response.completed", "response.done", "response.incomplete":
+	case "response.completed", "response.done":
 		return true, nil
+
+	case "response.incomplete":
+		return true, ErrIncomplete
 
 	case "response.failed", "error":
 		return true, message.failure()
