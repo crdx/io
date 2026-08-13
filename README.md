@@ -44,24 +44,45 @@ answer, _ := assistant.Send("what is the weather in London?")
 fmt.Println(answer) // => "It's raining in London."
 ```
 
-`Send` triggers a model turn until completion.
+`Send` triggers an agent turn and blocks until completion.
 
+## Streaming
+
+```go
+for event, err := range assistant.Stream("what is the weather in London?") {
+    if err != nil { return err }
+
+    switch event.Kind {
+    case agent.Text:
+        fmt.Print(event.Value)
+    case agent.Call:
+        fmt.Printf("%s: %s\n", event.Name, event.Arguments)
+    case agent.Result:
+        fmt.Printf("← %s\n", event.Value)
+    }
+}
+```
+
+`Send` is `Stream` with the text fragments glued back together.
+
+<!--
 ## Built-in tools (coming soon)
 
 See `tools/` for the implementations of the built-in tools.
 
-| Tool    | Arguments                      | Does                             | Type  |
-|---------|--------------------------------|----------------------------------|-------|
-| `read`  | `path`, `offset`, `limit`      | Read a file                      | Read  |
-| `ls`    | `path`                         | List a directory                 | Read  |
-| `find`  | `pattern`, `path`              | Find files                       | Read  |
-| `grep`  | `pattern`, `path`, `glob`      | Search file contents             | Read  |
-| `write` | `path`, `content`              | Write a whole file               | Write |
-| `edit`  | `path`, `old_text`, `new_text` | Find and replace an exact string | Write |
+| Tool    | Arguments                      | Does                 | Type  |
+|---------|--------------------------------|----------------------|-------|
+| `read`  | `path`, `offset`, `limit`      | Read a file          | Read  |
+| `ls`    | `path`                         | List a directory     | Read  |
+| `find`  | `pattern`, `path`              | Find files           | Read  |
+| `grep`  | `pattern`, `path`, `glob`      | Search file contents | Read  |
+| `write` | `path`, `content`              | Write a whole file   | Write |
+| `edit`  | `path`, `old_text`, `new_text` | Find and replace     | Write |
 
 Read-only calls run concurrently, at most ten at a time.
 
 All path operations are wrapped in an `os.Root`, and writing to `.git` can be optionally denied.
+-->
 
 ## Contributions
 
