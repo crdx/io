@@ -166,6 +166,34 @@ func TestToolsAreOfferedInTheResponsesShape(t *testing.T) {
 	}
 }
 
+// A tool that takes no arguments still needs a schema, or the endpoint is offered a function with
+// no parameters member at all.
+func TestAToolWithNoArgumentsIsStillGivenASchema(t *testing.T) {
+	server, bodies := turns(t, events(answer("Hello."), completed))
+
+	type nothing struct{}
+
+	waiting := tool.Define(
+		"wait",
+		"wait for something to happen",
+		tool.Schema{},
+		func(nothing) string { return "" },
+		func(nothing) (string, error) { return "", nil },
+	)
+
+	assistant := newAgent(t, server.URL, []tool.Tool{waiting})
+
+	if _, err := assistant.Send("hello"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	offered := `"parameters":{"type":"object","properties":{},"additionalProperties":false}`
+
+	if !strings.Contains((*bodies)[0], offered) {
+		t.Errorf("expected %s, got %s", offered, (*bodies)[0])
+	}
+}
+
 func TestStreamReportsEachTurnAsItHappens(t *testing.T) {
 	server, _ := turns(
 		t,

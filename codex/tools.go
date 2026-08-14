@@ -3,11 +3,12 @@ package codex
 import "crdx.org/io/tool"
 
 type functionTool struct {
-	Type        string      `json:"type"`
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	Strict      bool        `json:"strict"`
-	Schema      tool.Schema `json:"parameters,omitempty"`
+	Type        string `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Strict      bool   `json:"strict"`
+
+	Schema tool.Schema `json:"parameters"` // never omitempty: a tool taking nothing still needs one
 }
 
 func describe(tools []tool.Definition) []functionTool {

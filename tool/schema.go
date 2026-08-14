@@ -7,8 +7,9 @@ type DataType string
 
 // The JSON Schema types a parameter may declare.
 const (
-	TypeObject DataType = "object"
-	TypeString DataType = "string"
+	TypeObject  DataType = "object"
+	TypeString  DataType = "string"
+	TypeInteger DataType = "integer"
 )
 
 // Schema is a tool's parameters, in the order the tool declares them.
@@ -19,11 +20,25 @@ type Parameter struct {
 	Name        string
 	Type        DataType
 	Description string
+
+	optional bool
+}
+
+// Optional marks a parameter the model may leave out. An absent argument decodes as its zero value,
+// which is what a call carrying none means, so a tool reads one the same either way.
+func (self Parameter) Optional() Parameter {
+	self.optional = true
+	return self
 }
 
 // String declares a string parameter.
 func String(name string, description string) Parameter {
 	return Parameter{Name: name, Type: TypeString, Description: description}
+}
+
+// Integer declares an integer parameter.
+func Integer(name string, description string) Parameter {
+	return Parameter{Name: name, Type: TypeInteger, Description: description}
 }
 
 type property struct {
@@ -51,7 +66,9 @@ func (self Schema) MarshalJSON() ([]byte, error) {
 			Description: parameter.Description,
 		}
 
-		rendered.Required = append(rendered.Required, parameter.Name)
+		if !parameter.optional {
+			rendered.Required = append(rendered.Required, parameter.Name)
+		}
 	}
 
 	return json.Marshal(rendered)
