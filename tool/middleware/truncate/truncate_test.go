@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"crdx.org/io/tool"
-	"crdx.org/io/truncate"
+	"crdx.org/io/tool/middleware/truncate"
 )
 
 type Args struct {
