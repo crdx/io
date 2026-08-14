@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/codex"
+	"crdx.org/io/provider/codex"
 	"crdx.org/io/tool"
 )
 

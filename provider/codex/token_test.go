@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"crdx.org/io/codex"
+	"crdx.org/io/provider/codex"
 )
 
 func writeCredentials(t *testing.T, expiresIn time.Duration) string {

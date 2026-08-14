@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"crdx.org/io/codex"
+	"crdx.org/io/provider/codex"
 )
 
 func main() {
