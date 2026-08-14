@@ -1,5 +1,3 @@
-// Package truncate caps what a tool hands back. It sits above the tools, which know nothing about
-// it, and applies to nothing by default: a limit is the caller's policy, not the agent's.
 package truncate
 
 import (

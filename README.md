@@ -68,7 +68,7 @@ for event, err := range assistant.Stream("what is the weather in London?") {
 <!--
 ## Built-in tools (coming soon)
 
-See `tools/` for the implementations of the built-in tools.
+See `toolbox/` for the implementations of the built-in tools.
 
 | Tool    | Arguments                      | Does                 | Type  |
 |---------|--------------------------------|----------------------|-------|
