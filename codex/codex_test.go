@@ -143,8 +143,6 @@ func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
 	}
 }
 
-// The Responses API takes a tool flat, where the older chat one nests it under a function key, so
-// what a tool is and how this endpoint is told about it are not the same thing.
 func TestToolsAreOfferedInTheResponsesShape(t *testing.T) {
 	server, bodies := turns(t, events(answer("Hello."), completed))
 
@@ -166,8 +164,6 @@ func TestToolsAreOfferedInTheResponsesShape(t *testing.T) {
 	}
 }
 
-// A tool that takes no arguments still needs a schema, or the endpoint is offered a function with
-// no parameters member at all.
 func TestAToolWithNoArgumentsIsStillGivenASchema(t *testing.T) {
 	server, bodies := turns(t, events(answer("Hello."), completed))
 
@@ -226,8 +222,6 @@ func TestStreamReportsEachTurnAsItHappens(t *testing.T) {
 	}
 }
 
-// A caller that stops listening ends the turn there and then, rather than reading the rest of a
-// stream into a conversation nobody is holding any more.
 func TestStreamStopsWhenTheCallerDoes(t *testing.T) {
 	server, bodies := turns(
 		t,
@@ -270,7 +264,6 @@ func TestSendReportsAnEndpointFailure(t *testing.T) {
 	}
 }
 
-// A stream that stops early is not an answer.
 func TestSendRefusesATruncatedStream(t *testing.T) {
 	server, _ := turns(t, events(answer("It is raining ")))
 
@@ -286,8 +279,6 @@ func TestSendRefusesATruncatedStream(t *testing.T) {
 	}
 }
 
-// A response cut short by a limit carries real text, so the caller gets it, but must be able to
-// tell it apart from one the model chose to end.
 func TestSendReportsAnIncompleteResponse(t *testing.T) {
 	server, _ := turns(
 		t,
@@ -306,7 +297,6 @@ func TestSendReportsAnIncompleteResponse(t *testing.T) {
 	}
 }
 
-// The endpoint closes a stream with this sentinel, so it ends a turn as surely as any event.
 func TestSendAcceptsTheDoneSentinel(t *testing.T) {
 	server, _ := turns(t, events(answer("It is raining in London."), "[DONE]"))
 

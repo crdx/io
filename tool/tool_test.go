@@ -55,8 +55,6 @@ func TestParseBindsTheArgumentsToTheCall(t *testing.T) {
 	}
 }
 
-// A call that cannot be understood is refused at the boundary, which is the whole point of decoding
-// once: nothing is rendered and nothing is run.
 func TestParseRefusesArgumentsItCannotRead(t *testing.T) {
 	var ran bool
 
@@ -74,7 +72,6 @@ func TestParseRefusesArgumentsItCannotRead(t *testing.T) {
 	}
 }
 
-// Absent arguments are the zero value, which is what a call carrying none means.
 func TestParseTakesAbsentArgumentsAsEmpty(t *testing.T) {
 	var ran bool
 

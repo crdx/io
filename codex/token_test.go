@@ -89,8 +89,6 @@ func TestStoredRefreshesATokenNearExpiry(t *testing.T) {
 	}
 }
 
-// A refresh response need not carry a refresh token, and when it does not the one already held
-// still stands.
 func TestStoredKeepsTheRefreshTokenTheResponseOmits(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(
 		func(writer http.ResponseWriter, _ *http.Request) {

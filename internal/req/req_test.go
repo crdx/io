@@ -24,7 +24,6 @@ func refusing(t *testing.T, status int, body string) string {
 	return server.URL
 }
 
-// An endpoint that explains itself is quoted rather than buried under a status code.
 func TestFailureCarriesTheEndpointsOwnMessage(t *testing.T) {
 	url := refusing(t, http.StatusTooManyRequests, `{"error":{"message":"slow down"}}`)
 
@@ -38,8 +37,6 @@ func TestFailureCarriesTheEndpointsOwnMessage(t *testing.T) {
 	}
 }
 
-// An endpoint that says nothing useful still has to be reported as something, and the status and
-// whatever it did send are all there is to go on.
 func TestFailureFallsBackToTheStatus(t *testing.T) {
 	url := refusing(t, http.StatusBadGateway, "the gateway is unwell")
 
@@ -54,7 +51,6 @@ func TestFailureFallsBackToTheStatus(t *testing.T) {
 	}
 }
 
-// Form sends what it was given and reads back what it was answered with.
 func TestFormPostsAndDecodes(t *testing.T) {
 	var sent string
 

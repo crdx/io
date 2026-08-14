@@ -65,8 +65,6 @@ func TestCoalesceHoldsTextUntilSomethingElseHappens(t *testing.T) {
 	}
 }
 
-// Text held back when the stream fails is text the model said, so it is let go before the error
-// rather than lost to it.
 func TestCoalesceLetsHeldTextGoBeforeAnError(t *testing.T) {
 	failure := errors.New("model overloaded")
 
@@ -86,8 +84,6 @@ func TestCoalesceLetsHeldTextGoBeforeAnError(t *testing.T) {
 	}
 }
 
-// A caller that stops listening stops the stream the stage wraps, rather than reading on into a
-// loop that has gone.
 func TestCoalesceStopsWhenTheCallerDoes(t *testing.T) {
 	var read int
 

@@ -7,8 +7,6 @@ import (
 	"crdx.org/io/tool"
 )
 
-// Which arguments are required falls out of the parameters themselves, so an optional one is
-// declared as a property the model may leave out rather than listed twice.
 func TestOptionalParametersAreLeftOutOfRequired(t *testing.T) {
 	schema := tool.Schema{
 		tool.String("path", "path to the file"),
@@ -30,8 +28,6 @@ func TestOptionalParametersAreLeftOutOfRequired(t *testing.T) {
 	}
 }
 
-// A tool taking nothing at all still renders an object, since the endpoint reads the properties
-// rather than the absence of them.
 func TestASchemaWithNoParametersIsStillAnObject(t *testing.T) {
 	rendered, err := json.Marshal(tool.Schema{})
 	if err != nil {
