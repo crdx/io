@@ -10,23 +10,22 @@ type Provider interface {
 	Send(Yield) (Reply, error)
 }
 
-// Yield is handed each fragment of an answer as it arrives, and returns false to end the turn where
-// whoever asked has stopped listening.
+// Yield is handed each fragment of an answer as it arrives, and returns false to end the turn.
 type Yield func(text string) bool
 
-// Reply is what a turn amounted to once it was over: the calls the model made.
+// Reply is a turn once it's over.q
 type Reply struct {
 	Calls []ToolCall
 }
 
-// ToolCall is one call the model made, in a form no wire format's shape leaks into.
+// ToolCall is one call the model made.
 type ToolCall struct {
 	ID        string
 	Name      string
 	Arguments string
 }
 
-// ToolResult is what one call handed back, ready for a provider to fold into its own history.
+// ToolResult is what one call handed back.
 type ToolResult struct {
 	ID     string
 	Output string
@@ -35,20 +34,19 @@ type ToolResult struct {
 // Kind is what an event is.
 type Kind int
 
-// The events a turn is made of: a fragment of the answer, a call the model asked for, and what that
-// call handed back.
 const (
 	Text Kind = iota
 	Call
 	Result
 )
 
-// Event is one thing that happened on the way to an answer.
+// Event is a thing that happened.
 type Event struct {
 	Kind      Kind
-	Value     string
+	Payload   string
 	Name      string
 	Arguments string
+	Render    string
 	ID        string
 }
 

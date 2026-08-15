@@ -32,7 +32,7 @@ func (self *Agent) Stream(prompt string) iter.Seq2[Event, error] {
 			listening := true
 
 			reply, err := self.provider.Send(func(text string) bool {
-				listening = yield(Event{Kind: Text, Value: text}, nil)
+				listening = yield(Event{Kind: Text, Payload: text}, nil)
 				return listening
 			})
 
@@ -65,7 +65,7 @@ func (self *Agent) Send(prompt string) (string, error) {
 		}
 
 		if event.Kind == Text {
-			answer.WriteString(event.Value)
+			answer.WriteString(event.Payload)
 		}
 	}
 
@@ -75,16 +75,31 @@ func (self *Agent) Send(prompt string) (string, error) {
 func (self *Agent) runCalls(calls []ToolCall, yield func(Event, error) bool) bool {
 	results := make([]ToolResult, len(calls))
 
-	for index, call := range calls {
-		asked := Event{Kind: Call, Name: call.Name, Arguments: call.Arguments, ID: call.ID}
-		if !yield(asked, nil) {
+	for index, rawCall := range calls {
+		call, failure := self.parseCall(rawCall)
+
+		event := Event{Kind: Call, Name: rawCall.Name, Arguments: rawCall.Arguments, ID: rawCall.ID}
+		if call != nil {
+			event.Render = call.Render()
+		}
+
+		if !yield(event, nil) {
 			return false
 		}
 
-		output := self.runTool(call)
-		results[index] = ToolResult{ID: call.ID, Output: output}
+		payload := failure
+		if call != nil {
+			payload = exec(call)
+		}
 
-		if !yield(Event{Kind: Result, Name: call.Name, Value: output, ID: call.ID}, nil) {
+		results[index] = ToolResult{ID: rawCall.ID, Output: payload}
+
+		if !yield(Event{
+			Kind:    Result,
+			ID:      rawCall.ID,
+			Name:    rawCall.Name,
+			Payload: payload,
+		}, nil) {
 			return false
 		}
 	}
@@ -94,18 +109,22 @@ func (self *Agent) runCalls(calls []ToolCall, yield func(Event, error) bool) boo
 	return true
 }
 
-func (self *Agent) runTool(call ToolCall) string {
+func (self *Agent) parseCall(call ToolCall) (tool.Call, string) {
 	called, found := self.tools[call.Name]
 	if !found {
-		return fmt.Sprintf("there is no tool called %q", call.Name)
+		return nil, fmt.Sprintf("there is no tool called %q", call.Name)
 	}
 
 	parsed, err := called.Parse(call.Arguments)
 	if err != nil {
-		return err.Error()
+		return nil, err.Error()
 	}
 
-	output, err := parsed.Exec()
+	return parsed, ""
+}
+
+func exec(call tool.Call) string {
+	output, err := call.Exec()
 	if err != nil {
 		return err.Error()
 	}

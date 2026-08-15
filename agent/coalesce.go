@@ -18,7 +18,7 @@ func Coalesce(events iter.Seq2[Event, error]) iter.Seq2[Event, error] {
 			str := buf.String()
 			buf.Reset()
 
-			return yield(Event{Kind: Text, Value: str}, nil)
+			return yield(Event{Kind: Text, Payload: str}, nil)
 		}
 
 		for event, err := range events {
@@ -31,7 +31,7 @@ func Coalesce(events iter.Seq2[Event, error]) iter.Seq2[Event, error] {
 			}
 
 			if event.Kind == Text {
-				buf.WriteString(event.Value)
+				buf.WriteString(event.Payload)
 				continue
 			}
 
