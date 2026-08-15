@@ -11,11 +11,12 @@ const MaxMatches = 100
 
 var skipDirs = map[string]bool{".git": true, "node_modules": true}
 
-// RenderSearch describes a search out loud. A search taking no glob passes an empty string.
+// RenderSearch describes a search out loud. A search taking no glob passes an empty string, and the
+// working directory goes without saying.
 func RenderSearch(pattern string, path string, globPattern string) string {
 	str := pattern
 
-	if path != "" {
+	if path != "" && path != "." {
 		str += " in " + path
 	}
 

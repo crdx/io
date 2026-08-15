@@ -76,8 +76,12 @@ func TestListingSomethingThatIsNotThereIsRefused(t *testing.T) {
 	}
 }
 
-func TestRenderNamesTheWorkingDirectoryWhenNoPathIsGiven(t *testing.T) {
-	if rendered := ls.Render(ls.Args{}); rendered != "." {
-		t.Errorf("expected the working directory, got %q", rendered)
+func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
+	if rendered := ls.Render(ls.Args{}); rendered != "" {
+		t.Errorf("expected nothing, got %q", rendered)
+	}
+
+	if rendered := ls.Render(ls.Args{Path: "."}); rendered != "" {
+		t.Errorf("expected nothing, got %q", rendered)
 	}
 }

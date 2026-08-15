@@ -27,10 +27,10 @@ func New(root *os.Root) tool.Tool {
 	)
 }
 
-// Render names the working directory where no path was given.
+// Render names the path, the working directory going without saying.
 func Render(args Args) string {
-	if args.Path == "" {
-		return "."
+	if args.Path == "." {
+		return ""
 	}
 
 	return args.Path

@@ -116,3 +116,15 @@ func TestHittingTheCapIsSaidOutLoud(t *testing.T) {
 		t.Errorf("expected the cap to be reported, got the last of %q", output[len(output)-80:])
 	}
 }
+
+func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
+	rendered := grep.Render(grep.Args{Pattern: "hello", Path: "."})
+	if rendered != "hello" {
+		t.Errorf("expected the path to go without saying, got %q", rendered)
+	}
+
+	rendered = grep.Render(grep.Args{Pattern: "hello", Path: "internal", Glob: "*.go"})
+	if rendered != "hello in internal matching *.go" {
+		t.Errorf("expected a path and glob to be named, got %q", rendered)
+	}
+}
