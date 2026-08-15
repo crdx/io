@@ -8,13 +8,6 @@ help:
 fmt:
     go fmt ./...
 
-lint:
-    unbuffer go vet ./... | gostack
-    unbuffer golangci-lint run --color never | gostack
-
-mega:
-    mega
-
 fix:
     unbuffer golangci-lint run --color never --fix | gostack
 
@@ -22,4 +15,20 @@ test:
     unbuffer go test -cover ./... | gostack --test
 
 check:
-    steps fmt lint mega test
+    steps fmt vet lint1 lint2 mega test
+
+[private]
+mega:
+    mega
+
+[private]
+vet:
+    unbuffer go vet ./... | gostack
+
+[private]
+lint1:
+    unbuffer golangci-lint run --color never | gostack
+
+[private]
+lint2:
+    fd -tf -g '*.go' | xargs gopls check
