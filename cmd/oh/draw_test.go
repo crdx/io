@@ -51,7 +51,7 @@ func TestASubmittedMessageHasBackgroundRowsAboveAndBelowIt(t *testing.T) {
 // block those calls opened is redrawn on a ticker of its own until it is closed, so a replay that
 // walks away from one leaves it drawing over the conversation that follows.
 func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
-	goroutinesBefore := runtime.NumGoroutine()
+	blocksBefore := blocksStillRunning(t)
 
 	var screenOutput bytes.Buffer
 
@@ -69,9 +69,25 @@ func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
 		},
 	})
 
-	if got := runtime.NumGoroutine(); got > goroutinesBefore {
-		t.Errorf("expected nothing left running, got %d goroutines where there were %d", got, goroutinesBefore)
+	if got := blocksStillRunning(t); got > blocksBefore {
+		t.Errorf("expected the block to have been closed, got %d redrawing where there were %d", got, blocksBefore)
 	}
+}
+
+func blocksStillRunning(t *testing.T) int {
+	t.Helper()
+
+	stacks := make([]byte, 1<<16)
+	for {
+		if wrote := runtime.Stack(stacks, true); wrote < len(stacks) {
+			stacks = stacks[:wrote]
+			break
+		}
+
+		stacks = make([]byte, 2*len(stacks))
+	}
+
+	return strings.Count(string(stacks), "status.(*Block).run(")
 }
 
 // A redraw has nothing on the screen to work from, so it says the conversation again from what it
@@ -158,6 +174,14 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	var replayOutput bytes.Buffer
 	self.screen = output.New(&replayOutput)
 	self.replay()
+
+	plain := theme.Plain(live.String())
+
+	for _, want := range []string{"Check", "Looking at the file.", "first answer.", "one.go", "Done.", "Background processes killed"} {
+		if !strings.Contains(plain, want) {
+			t.Errorf("expected %q on the screen, got %q", want, plain)
+		}
+	}
 
 	if live.String() != replayOutput.String() {
 		t.Errorf("live conversation %q differs from replayed conversation %q", live.String(), replayOutput.String())
@@ -355,13 +379,15 @@ func TestATurnThatLeftACallUnansweredIsClosedByWhatIsAskedNext(t *testing.T) {
 	if got := callPainter.rows["2"]; got != 0 {
 		t.Errorf("expected the call to open a block of its own, got row %d", got)
 	}
+
+	callPainter.close(status.Cancelled) // the block it opened is this test's to shut
 }
 
 // A redraw during a turn opens the block its unanswered calls sit on again, and the turn is given
 // the painter that drew it, so a result still in flight lands on the row it was already on rather
 // than opening a block of its own under the conversation.
 func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
-	goroutinesBefore := runtime.NumGoroutine()
+	blocksBefore := blocksStillRunning(t)
 
 	var screenOutput bytes.Buffer
 
@@ -395,8 +421,8 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 		t.Error("expected the block to close once every call had reported")
 	}
 
-	if got := runtime.NumGoroutine(); got > goroutinesBefore {
-		t.Errorf("expected nothing left running, got %d goroutines where there were %d", got, goroutinesBefore)
+	if got := blocksStillRunning(t); got > blocksBefore {
+		t.Errorf("expected nothing left redrawing, got %d blocks where there were %d", got, blocksBefore)
 	}
 }
 
@@ -420,6 +446,14 @@ func TestAnAnswerStreamedIsTheSameAsTheAnswerReplayed(t *testing.T) {
 	replayPainter := &painter{screen: output.New(&replayOutput)}
 	replayPainter.draw(agent.Event{Kind: agent.Text, Text: answer})
 	replayPainter.screen.End()
+
+	plain := theme.Plain(live.String())
+
+	for _, want := range []string{"Findings", "first thing is", "• one", "• two"} {
+		if !strings.Contains(plain, want) {
+			t.Errorf("expected %q drawn, got %q", want, plain)
+		}
+	}
 
 	if live.String() != replayOutput.String() {
 		t.Errorf("streamed %q, replayed %q", live.String(), replayOutput.String())
