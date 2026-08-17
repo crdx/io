@@ -159,16 +159,17 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 	}
 }
 
+// The words are taken from where they are written, so what is pinned here is which state is
+// reported rather than how it is worded.
 func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
 	system := prompt("/workspace", capRead)
 
-	for _, clause := range []string{
-		"always read-write",
-		"The workspace is read-only",
-	} {
-		if !strings.Contains(system, clause) {
-			t.Errorf("expected %q in %q", clause, system)
-		}
+	if !strings.Contains(system, "The workspace is "+filesystem(false)) {
+		t.Errorf("expected the workspace to be reported read-only, got %q", system)
+	}
+
+	if !strings.Contains(system, "always "+filesystem(true)) {
+		t.Errorf("expected the scratch to be writable whatever the workspace is, got %q", system)
 	}
 
 	if strings.Contains(system, "including /tmp") {
@@ -179,14 +180,20 @@ func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
 func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
 	for name, test := range map[string]struct {
 		currentCaps caps
-		want        string
+		granted     bool
 	}{
-		"granted": {capRead | capShell, "The bash tool is granted"},
-		"refused": {capRead, "The bash tool is refused"},
+		"granted": {capRead | capShell, true},
+		"refused": {capRead, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			if got := prompt("/workspace", test.currentCaps); !strings.Contains(got, test.want) {
-				t.Errorf("expected %q in %q", test.want, got)
+			got := prompt("/workspace", test.currentCaps)
+
+			if want := "The bash tool is " + shellAccess(test.granted); !strings.Contains(got, want) {
+				t.Errorf("expected %q in %q", want, got)
+			}
+
+			if unwanted := "The bash tool is " + shellAccess(!test.granted); strings.Contains(got, unwanted) {
+				t.Errorf("expected no %q in %q", unwanted, got)
 			}
 		})
 	}
