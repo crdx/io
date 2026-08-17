@@ -1,3 +1,5 @@
+mod release
+
 set quiet := true
 set shell := ["bash", "-cu", "-o", "pipefail"]
 
@@ -7,7 +9,7 @@ set positional-arguments
 
 [private]
 help:
-    just --list --unsorted
+    just --list --unsorted --list-submodules
 
 fmt:
     go fmt ./...
@@ -17,6 +19,9 @@ fix:
 
 test:
     unbuffer go test -cover ./... | gostack --test
+
+build:
+    unbuffer go build -trimpath -o dist/oh ./cmd/oh | gostack
 
 check:
     steps fmt vet lint1 lint2 mega test

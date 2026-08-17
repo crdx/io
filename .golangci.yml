@@ -48,6 +48,8 @@ linters:
     - wsl
     - wsl_v5
   exclusions:
+    paths:
+      - "(^|/)node_modules(/|$)"
     rules:
       - path: _test\.go
         linters:
