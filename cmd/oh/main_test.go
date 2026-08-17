@@ -209,7 +209,7 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 	shell := confinedShell(t.TempDir(), t.TempDir(), t.TempDir(), mode, files, processes)
 
 	if shell.Name() != "bash" {
-		t.Errorf("expected the shell to be offered as exec, got %q", shell.Name())
+		t.Errorf("expected the shell to be offered as bash, got %q", shell.Name())
 	}
 
 	if !shell.ReadOnly() {

@@ -9,16 +9,35 @@ import (
 	"crdx.org/io/internal/file"
 )
 
-const (
-	nowReadOnly      = "The workspace is now read-only."
-	nowReadWrite     = "The workspace is now read-write."
-	gitReadOnly      = "The .git directory is now read-only."
-	gitWritable      = "The .git directory is now read-write."
-	backgroundOn     = "Background processes can now outlive shell commands."
-	backgroundKilled = "Background processes have been killed and will no longer outlive shell commands."
-	shellGranted     = "The bash tool can now run shell commands."
-	shellWithheld    = "The bash tool is now refused, and will turn away every command until it is granted again."
+var (
+	nowReadOnly      = workspaceIs(false)
+	nowReadWrite     = workspaceIs(true)
+	gitReadOnly      = historyIs(false)
+	gitWritable      = historyIs(true)
+	backgroundOn     = backgroundIs(true)
+	backgroundKilled = backgroundIs(false)
+	shellGranted     = shellIs(true)
+	shellWithheld    = shellIs(false)
 )
+
+// Nothing above pins the words, so this pins what the words must amount to: a clause that is
+// missing, or one that reads the same whichever way the bit went, would say nothing to the model.
+func TestEveryClauseSaysSomethingAndSaysItBothWays(t *testing.T) {
+	for name, clauses := range map[string][2]string{
+		"workspace":  {nowReadOnly, nowReadWrite},
+		"history":    {gitReadOnly, gitWritable},
+		"background": {backgroundKilled, backgroundOn},
+		"shell":      {shellWithheld, shellGranted},
+	} {
+		if clauses[0] == "" || clauses[1] == "" {
+			t.Errorf("%s: expected a clause either way, got %q and %q", name, clauses[0], clauses[1])
+		}
+
+		if clauses[0] == clauses[1] {
+			t.Errorf("%s: expected the two ways to read differently, both got %q", name, clauses[0])
+		}
+	}
+}
 
 func writable() caps { return capRead | capWrite }
 
