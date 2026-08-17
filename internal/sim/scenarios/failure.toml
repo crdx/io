@@ -1,0 +1,44 @@
+# Every way a turn can go wrong, one per turn, so the harness can be watched meeting each of them.
+#
+#   go run ./cmd/simulate --scenario internal/sim/scenarios/failure.toml
+#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh
+#
+# Ask it four times, and it fails four different ways.
+
+model = "gpt-5.6-sol"
+
+strict = true
+loop = false
+
+delay = "600ms"
+pace = "40ms"
+
+# The wire goes quiet mid-sentence, saying nothing about why. Nothing ever says the turn finished,
+# which is the case the stream reader has to notice for itself.
+[[turn]]
+think = ["This one stops halfway."]
+say = "I was about to say something quite important when"
+truncate = true
+
+# The endpoint gives up, in its own words.
+[[turn]]
+say = "Let me think about that. "
+fail = "the model is overloaded"
+
+# The endpoint runs out of room mid-answer, which is a limit rather than a fault.
+[[turn]]
+say = "I can only get so far before "
+incomplete = true
+
+# The endpoint refuses at the door, before a stream is opened at all.
+[[turn]]
+status = 429
+
+# A call the harness will be asked for, so a turn can be cancelled while it runs and the next
+# request checked for the tool output the endpoint insists on.
+[[turn]]
+say = "Reading that now."
+
+[[turn.call]]
+name = "read"
+arguments = '{"path":"README.md"}'

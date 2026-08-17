@@ -1,0 +1,9 @@
+# An error event with no message, for seeing its raw payload reported by the harness.
+#
+#   just -f rig.just live internal/sim/scenarios/error.toml tmp/workspace hello
+#   tmux attach -t io-rig
+
+model = "gpt-5.6-sol"
+
+[[turn]]
+error-event = '{"type":"error","error":{"code":"overloaded","retry":true}}'

@@ -1,0 +1,68 @@
+# Watch concurrent tool rows fill in against any workspace.
+#
+#   go run ./cmd/simulate --scenario internal/sim/scenarios/parallel.toml
+#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh
+
+model = "gpt-5.6-sol"
+
+strict = true
+loop = false
+
+delay = "600ms"
+pace = "40ms"
+
+# Four read-only calls run as one batch.
+[[turn]]
+think = ["Taking the four of them together rather than one after another."]
+say = "Let me get the shape of this first."
+
+[[turn.call]]
+name = "ls"
+arguments = '{"path":"."}'
+
+[[turn.call]]
+name = "find"
+arguments = '{"pattern":"**/*.go"}'
+
+[[turn.call]]
+name = "find"
+arguments = '{"pattern":"**/*.toml"}'
+
+[[turn.call]]
+name = "grep"
+arguments = '{"pattern":"package","glob":"*.go"}'
+
+# Three concurrent searches expose synchronized spinners.
+[[turn]]
+think = ["Three searches, all at once."]
+say = "Now to find where the drawing happens."
+
+[[turn.call]]
+name = "grep"
+arguments = '{"pattern":"spinner","glob":"*.go"}'
+
+[[turn.call]]
+name = "grep"
+arguments = '{"pattern":"footer","glob":"*.go"}'
+
+[[turn.call]]
+name = "grep"
+arguments = '{"pattern":"cursor","glob":"*.go"}'
+
+# One successful and one failed call share a block.
+[[turn]]
+say = "One more pair, and one of them will not be there."
+
+[[turn.call]]
+name = "ls"
+arguments = '{"path":"."}'
+
+[[turn.call]]
+name = "read"
+arguments = '{"path":"nowhere/at/all.go"}'
+
+[[turn]]
+say = """
+That is the lot: four together, then three together, then a pair where only one of them could be \
+answered.
+"""

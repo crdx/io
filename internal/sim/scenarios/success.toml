@@ -1,0 +1,41 @@
+# A coding session that goes to plan: it searches, reads, and says what it found.
+#
+#   go run ./cmd/simulate --scenario internal/sim/scenarios/success.toml
+#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh
+#
+# Every new session starts at the first turn and takes the next one with each request it makes.
+
+model = "gpt-5.6-sol"
+
+# Hold the conversation to the rules the real endpoint holds it to.
+strict = true
+
+# Start the flow again when it runs out, rather than saying there is no more.
+loop = false
+
+# How long the model thinks before a turn, and how long each word of it takes to arrive.
+delay = "600ms"
+pace = "40ms"
+
+[[turn]]
+think = ["Looking for where the prompt is drawn."]
+say = "I'll have a look at how the editor draws its prompt."
+
+[[turn.call]]
+name = "grep"
+arguments = '{"pattern":"prompt","glob":"*.go"}'
+
+[[turn]]
+think = ["The prompt is drawn by the renderer, so that is the file to read."]
+say = "Found it. Reading the renderer now."
+
+[[turn.call]]
+name = "read"
+arguments = '{"path":"cmd/oh/line/render.go"}'
+
+[[turn]]
+say = """
+The prompt is drawn by `layout`, which wraps the buffer against the terminal width \
+and reports where the cursor landed. Nothing there needs changing to make it sticky: \
+the work belongs in the output layer instead.
+"""

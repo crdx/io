@@ -1,0 +1,41 @@
+# An answer in markdown: a heading, a bold run, a fenced block, a list, and a table that widens as
+# its rows arrive.
+#
+#   go run ./cmd/simulate --scenario internal/sim/scenarios/markdown.toml
+#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh
+
+model = "gpt-5.6-sol"
+
+strict = true
+loop = false
+
+delay = "600ms"
+pace = "40ms"
+
+[[turn]]
+think = ["Laying the answer out."]
+say = """
+# What the tools cost
+
+The **read** tool is cheap and `bash` is not, so the *order* matters. A run looks like this:
+
+```go
+func main() {
+	fmt.Println("hello")
+}
+```
+
+- read first, and read widely
+- run only what the reading could not answer
+    - a nested point, to show the indent
+
+| Tool | What it does                                   |  Cost |
+|:-----|:-----------------------------------------------|------:|
+| read | takes a file and hands it back                 |     1 |
+| grep | walks the tree looking for a pattern           |     4 |
+| bash | runs a command in a sandbox with no network    |    40 |
+
+> The costs are made up, and the table is here to be watched as it draws.
+
+See [the notes](https://example.com/notes) for the rest.
+"""
