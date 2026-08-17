@@ -175,7 +175,7 @@ func (self *conversation) restartArguments() []string {
 		arguments = append(arguments, "--workspace", self.workspace)
 	}
 
-	return append(arguments, "--caps", self.mode.Current().Letters())
+	return append(arguments, "--caps", self.mode.Current().Flags())
 }
 
 func (self *conversation) interrupt() {

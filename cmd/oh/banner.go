@@ -105,23 +105,23 @@ func ruleTo(width int, label string, style theme.Style) string {
 func modes(tools []tool.Tool, shell bool, history bool, background bool, pending bool) string {
 	reads, writes := toolMix(tools)
 
-	return offeredCapability(capRead.letter(), reads > 0, theme.Read, pending) +
-		offeredCapability(capWrite.letter(), writes > 0, theme.Write, pending) +
-		offeredCapability(capShell.letter(), shell, theme.Exec, pending) +
-		offeredCapability(capGit.letter(), history, theme.History, pending) +
-		offeredCapability(capBackground.letter(), background, theme.Background, pending)
+	return offeredCapability(capRead.flag(), reads > 0, theme.Read, pending) +
+		offeredCapability(capWrite.flag(), writes > 0, theme.Write, pending) +
+		offeredCapability(capShell.flag(), shell, theme.Exec, pending) +
+		offeredCapability(capGit.flag(), history, theme.History, pending) +
+		offeredCapability(capBackground.flag(), background, theme.Background, pending)
 }
 
-func offeredCapability(letter string, given bool, style theme.Style, pending bool) string {
+func offeredCapability(flag string, given bool, style theme.Style, pending bool) string {
 	if !given {
 		style = theme.Withheld
 	}
 
-	if pending { // per letter: each ends in a reset that would end an underline drawn over the lot
-		return theme.Pending(style(letter))
+	if pending { // per flag: each ends in a reset that would end an underline drawn over the lot
+		return theme.Pending(style(flag))
 	}
 
-	return style(letter)
+	return style(flag)
 }
 
 func toolMix(tools []tool.Tool) (reads int, writes int) {

@@ -128,11 +128,11 @@ func TestAWaitingPrefixUnderlinesEveryLetter(t *testing.T) {
 
 	got := modes([]tool.Tool{looker}, true, false, false, true)
 
-	if underlineCount := strings.Count(got, "\x1b[4m"); underlineCount != len(capLetters) {
-		t.Errorf("expected %d letters underlined, got %d in %q", len(capLetters), underlineCount, got)
+	if underlineCount := strings.Count(got, "\x1b[4m"); underlineCount != len(capFlags) {
+		t.Errorf("expected %d letters underlined, got %d in %q", len(capFlags), underlineCount, got)
 	}
 
-	if theme.Width(got) != len(capLetters) {
+	if theme.Width(got) != len(capFlags) {
 		t.Errorf("expected the underline to cost no cells, got %d", theme.Width(got))
 	}
 }

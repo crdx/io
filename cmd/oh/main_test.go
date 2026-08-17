@@ -57,7 +57,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 	parsedOptions := parseOptions(t, "-c", "r", "-d", "somewhere")
 
 	if parsedOptions.caps != capRead {
-		t.Errorf("expected reading alone, got %s", parsedOptions.caps.Letters())
+		t.Errorf("expected reading alone, got %s", parsedOptions.caps.Flags())
 	}
 
 	if parsedOptions.workspace != "somewhere" {
@@ -119,7 +119,7 @@ func TestTheWorkingDirectoryIsNotTakenFromThePrompt(t *testing.T) {
 func TestTheDefaultCapabilitiesAreEverythingButTheHistory(t *testing.T) {
 	parsedOptions := parseOptions(t)
 
-	if got := parsedOptions.caps.Letters(); got != "rwx" {
+	if got := parsedOptions.caps.Flags(); got != "rwx" {
 		t.Errorf("expected rwx, got %q", got)
 	}
 
@@ -137,8 +137,8 @@ func TestCapabilitiesAreReadAsTheLettersTheyAreSpelledWith(t *testing.T) {
 			t.Fatalf("%s: unexpected error: %v", capString, err)
 		}
 
-		if got := currentCaps.Letters(); got != capLetters {
-			t.Errorf("%s: expected it written back as %s, got %q", capString, capLetters, got)
+		if got := currentCaps.Flags(); got != capFlags {
+			t.Errorf("%s: expected it written back as %s, got %q", capString, capFlags, got)
 		}
 	}
 
@@ -154,7 +154,7 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	if got := grantedCaps.Letters(); got != "r" {
+	if got := grantedCaps.Flags(); got != "r" {
 		t.Errorf("expected r, got %q", got)
 	}
 }
@@ -392,19 +392,19 @@ func TestNoPolicyGrantsMoreThanItsCapsAskFor(t *testing.T) {
 		granted := writablePaths(workspace, home, currentCaps)
 
 		if !currentCaps.has(capWrite) && slices.Contains(granted, workspace) {
-			t.Errorf("%s: the tree is writable without w, got %v", currentCaps.Letters(), granted)
+			t.Errorf("%s: the tree is writable without w, got %v", currentCaps.Flags(), granted)
 		}
 
 		if !currentCaps.has(capWrite) && !currentCaps.has(capGit) && len(granted) > 0 {
-			t.Errorf("%s: something is writable without w or g, got %v", currentCaps.Letters(), granted)
+			t.Errorf("%s: something is writable without w or g, got %v", currentCaps.Flags(), granted)
 		}
 
 		if !currentCaps.has(capGit) && slices.Contains(granted, metadata) {
-			t.Errorf("%s: the metadata is writable without g, got %v", currentCaps.Letters(), granted)
+			t.Errorf("%s: the metadata is writable without g, got %v", currentCaps.Flags(), granted)
 		}
 
 		if currentCaps.has(capWrite) && !slices.Contains(granted, workspace) {
-			t.Errorf("%s: the tree is not writable with w, got %v", currentCaps.Letters(), granted)
+			t.Errorf("%s: the tree is not writable with w, got %v", currentCaps.Flags(), granted)
 		}
 	}
 }

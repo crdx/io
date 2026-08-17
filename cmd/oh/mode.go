@@ -20,9 +20,9 @@ const (
 
 const switchableCaps = capWrite | capShell | capGit | capBackground // everything but reading
 
-var capMap = []struct {
+var capsMap = []struct {
 	grantedCaps caps
-	symbol      string
+	flag        string
 }{
 	{capRead, "r"},
 	{capWrite, "w"},
@@ -31,25 +31,25 @@ var capMap = []struct {
 	{capBackground, "b"},
 }
 
-var capLetters = allCapabilities().Letters() // as --caps and the rule over the input spell them
+var capFlags = allCaps().Flags() // as --caps and the rule over the input spell them
 
-func allCapabilities() caps {
+func allCaps() caps {
 	var allCaps caps
 
-	for _, cap := range capMap {
+	for _, cap := range capsMap {
 		allCaps |= cap.grantedCaps
 	}
 
 	return allCaps
 }
 
-// Letters returns capabilities in the form Caps reads.
-func (self caps) Letters() string {
+// Flags returns caps in the form Caps reads.
+func (self caps) Flags() string {
 	var out strings.Builder
 
-	for _, cap := range capMap {
+	for _, cap := range capsMap {
 		if self.has(cap.grantedCaps) {
-			out.WriteString(cap.symbol)
+			out.WriteString(cap.flag)
 		}
 	}
 
@@ -58,28 +58,27 @@ func (self caps) Letters() string {
 
 func (self caps) has(want caps) bool { return self&want == want }
 
-func (self caps) letter() string {
-	for _, cap := range capMap {
+func (self caps) flag() string {
+	for _, cap := range capsMap {
 		if cap.grantedCaps == self {
-			return cap.symbol
+			return cap.flag
 		}
 	}
 
 	return ""
 }
 
-// Caps reads capabilities as they are spelled. Reading is granted whether it was asked for or not,
-// an assistant that cannot read a file being no assistant, so r is there for the look of the
-// thing, and a letter naming nothing is refused rather than passed over.
-func Caps(spelled string) (caps, error) {
+// Caps converts flags into real things.
+func Caps(flags string) (caps, error) {
 	grantedCaps := capRead
 
-	for _, letter := range spelled {
-		knownCap, found := namedCapability(string(letter))
+	for _, flag := range flags {
+		knownCap, found := namedCap(string(flag))
 		if !found {
 			return 0, fmt.Errorf(
-				"a capability is spelled with one of the letters %s, and %q is none of them",
-				capLetters, string(letter),
+				"unknown capability flag %q — must be one of %q",
+				string(flag),
+				capFlags,
 			)
 		}
 
@@ -89,9 +88,9 @@ func Caps(spelled string) (caps, error) {
 	return grantedCaps, nil
 }
 
-func namedCapability(letter string) (caps, bool) {
-	for _, knownCap := range capMap {
-		if knownCap.symbol == letter {
+func namedCap(flag string) (caps, bool) {
+	for _, knownCap := range capsMap {
+		if knownCap.flag == flag {
 			return knownCap.grantedCaps, true
 		}
 	}
@@ -119,7 +118,7 @@ func refuseWrite(mode *Mode) func(name string) error {
 	}
 }
 
-// Mode tracks current and model-known capabilities across keypress and turn goroutines.
+// Mode tracks current and model-known caps across keypress and turn goroutines.
 type Mode struct {
 	mutex       sync.Mutex
 	currentCaps caps // what is granted
@@ -131,7 +130,7 @@ func NewMode(currentCaps caps) *Mode {
 	return &Mode{currentCaps: currentCaps, knownCaps: currentCaps}
 }
 
-// NewResumedMode starts with no capabilities reported to the model.
+// NewResumedMode starts with no caps reported to the model.
 func NewResumedMode(currentCaps caps) *Mode {
 	return &Mode{currentCaps: currentCaps}
 }
