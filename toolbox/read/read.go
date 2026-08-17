@@ -66,8 +66,7 @@ func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
 
 	data, err := root.ReadFile(name)
 	if err != nil {
-		var pathError *fs.PathError
-		if errors.As(err, &pathError) {
+		if pathError, ok := errors.AsType[*fs.PathError](err); ok {
 			return "", tool.Statistics{}, fmt.Errorf("%s: %w", args.Path, pathError.Err)
 		}
 
