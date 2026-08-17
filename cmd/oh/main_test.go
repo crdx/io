@@ -15,7 +15,7 @@ import (
 	"crdx.org/io/internal/sandbox"
 )
 
-func bind(t *testing.T, arguments ...string) Opts {
+func bind(t *testing.T, arguments ...string) InputOpts {
 	t.Helper()
 
 	originalArgs := os.Args
@@ -23,7 +23,7 @@ func bind(t *testing.T, arguments ...string) Opts {
 
 	os.Args = append([]string{"oh"}, arguments...)
 
-	bound, err := duckopt.Bind[Opts](usage, "$0")
+	bound, err := duckopt.Bind[InputOpts](usage, "$0")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -31,10 +31,10 @@ func bind(t *testing.T, arguments ...string) Opts {
 	return *bound
 }
 
-func parseOptions(t *testing.T, arguments ...string) invocation {
+func parseOptions(t *testing.T, arguments ...string) Opts {
 	t.Helper()
 
-	settledOptions, err := bind(t, arguments...).invocation()
+	settledOptions, err := bind(t, arguments...).parse()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -60,8 +60,8 @@ func TestEveryOptionIsRead(t *testing.T) {
 		t.Errorf("expected reading alone, got %s", parsedOptions.caps.Flags())
 	}
 
-	if parsedOptions.workspace != "somewhere" {
-		t.Errorf("expected the directory, got %q", parsedOptions.workspace)
+	if parsedOptions.workspacePath != "somewhere" {
+		t.Errorf("expected the directory, got %q", parsedOptions.workspacePath)
 	}
 
 	if parsedOptions := parseOptions(t, "--resume"); !parsedOptions.resume {
@@ -98,16 +98,16 @@ func TestWhateverIsLeftOverIsTheFirstThingSaid(t *testing.T) {
 		t.Errorf("expected the words back as one, got %q", parsedOptions.initialMessage)
 	}
 
-	if parsedOptions.workspace != "." {
-		t.Errorf("expected the current directory, got %q", parsedOptions.workspace)
+	if parsedOptions.workspacePath != "." {
+		t.Errorf("expected the current directory, got %q", parsedOptions.workspacePath)
 	}
 }
 
 func TestTheWorkingDirectoryIsNotTakenFromThePrompt(t *testing.T) {
 	parsedOptions := parseOptions(t, "read", "main.go", "-d", "/tmp")
 
-	if parsedOptions.workspace != "/tmp" {
-		t.Errorf("expected the directory to come from the option, got %q", parsedOptions.workspace)
+	if parsedOptions.workspacePath != "/tmp" {
+		t.Errorf("expected the directory to come from the option, got %q", parsedOptions.workspacePath)
 	}
 
 	if parsedOptions.initialMessage != "read main.go" {
@@ -495,11 +495,11 @@ func TestACommitOnlyShellWithNoRepositoryChangesNothing(t *testing.T) {
 // What the usage allows to be written and what may be true at once are different things, and these
 // are the second: each of them parses, and none of them means anything.
 func TestArgumentsThatContradictEachOtherAreRefused(t *testing.T) {
-	for name, opts := range map[string]Opts{
+	for name, opts := range map[string]InputOpts{
 		"a picker and a directory":  {Resume: true, Workspace: "somewhere"},
 		"a session and a directory": {Resume: true, Session: "one", Workspace: "somewhere"},
 	} {
-		if _, err := opts.invocation(); err == nil {
+		if _, err := opts.parse(); err == nil {
 			t.Errorf("%s: expected an error", name)
 		}
 	}
@@ -508,11 +508,11 @@ func TestArgumentsThatContradictEachOtherAreRefused(t *testing.T) {
 // What is granted is settled each time the harness starts rather than by the session, so picking a
 // stored conversation up under something else is the whole point rather than a contradiction.
 func TestAResumedConversationMayBeGrantedSomethingElse(t *testing.T) {
-	for name, opts := range map[string]Opts{
+	for name, opts := range map[string]InputOpts{
 		"a session and a cap": {Resume: true, Session: "one", Caps: "rx"},
 		"a picker and a cap":  {Resume: true, Caps: "rx"},
 	} {
-		settledOptions, err := opts.invocation()
+		settledOptions, err := opts.parse()
 		if err != nil {
 			t.Errorf("%s: unexpected error: %v", name, err)
 		}

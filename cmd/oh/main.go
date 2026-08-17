@@ -65,7 +65,7 @@ func main() {
 	}
 }
 
-type Opts struct {
+type InputOpts struct {
 	Message   []string `docopt:"<prompt>"`
 	Workspace string   `docopt:"--workspace"`
 	Session   string   `docopt:"<session>"`
@@ -74,17 +74,17 @@ type Opts struct {
 	Version   bool     `docopt:"--version"`
 }
 
-type invocation struct { // what the arguments amount to once settled against each other
-	workspace      string // the workspace
+type Opts struct {
+	workspacePath  string // the workspace
 	initialMessage string // the first prompt
 	resume         bool   // whether to choose a session
 	session        string // the session to resume
 	caps           caps   // initial capabilities
 }
 
-func (opts Opts) invocation() (invocation, error) {
-	self := invocation{
-		workspace:      opts.Workspace,
+func (opts InputOpts) parse() (Opts, error) {
+	self := Opts{
+		workspacePath:  opts.Workspace,
 		initialMessage: strings.Join(opts.Message, " "),
 		resume:         opts.Resume,
 		session:        opts.Session,
@@ -97,31 +97,31 @@ func (opts Opts) invocation() (invocation, error) {
 
 	self.caps = grantedCaps
 
-	if self.resume && self.workspace != "" {
+	if self.resume && self.workspacePath != "" {
 		return self, errors.New("a resumed conversation takes its directory from the session")
 	}
 
-	if self.workspace == "" {
-		self.workspace = "."
+	if self.workspacePath == "" {
+		self.workspacePath = "."
 	}
 
 	return self, nil
 }
 
 func run() ([]string, error) {
-	opts := duckopt.MustBind[Opts](usage, "$0")
+	inputArgs := duckopt.MustBind[InputOpts](usage, "$0")
 
-	if opts.Version {
+	if inputArgs.Version {
 		fmt.Println(version())
 		return nil, nil
 	}
 
-	invocation, err := opts.invocation()
+	args, err := inputArgs.parse()
 	if err != nil {
 		return nil, err
 	}
 
-	resumedSession, err := chooseSession(invocation.resume, invocation.session)
+	resumedSession, err := chooseSession(args.resume, args.session)
 
 	switch {
 	case errors.Is(err, picker.ErrCancelled):
@@ -132,43 +132,43 @@ func run() ([]string, error) {
 		if resumedSession.Head.Provider != "" && resumedSession.Head.Provider != "codex" {
 			return nil, fmt.Errorf("cannot resume a %s session with codex", resumedSession.Head.Provider)
 		}
-		invocation.workspace = resumedSession.Head.Workspace
+		args.workspacePath = resumedSession.Head.Workspace
 	}
 
-	root, err := os.OpenRoot(invocation.workspace)
+	root, err := os.OpenRoot(args.workspacePath)
 	if err != nil {
 		return nil, err
 	}
 
 	defer func() { _ = root.Close() }()
 
-	workspace, err := filepath.Abs(root.Name())
+	workspacePath, err := filepath.Abs(root.Name())
 	if err != nil {
 		return nil, fmt.Errorf("could not resolve the workspace path: %w", err)
 	}
 
-	home := shellHome()
-	if home == "" {
+	homePath := shellHome()
+	if homePath == "" {
 		return nil, errors.New("could not find a home for shell configuration")
 	}
 
-	home, err = filepath.Abs(home)
+	homePath, err = filepath.Abs(homePath)
 	if err != nil {
 		return nil, fmt.Errorf("could not resolve the shell home path: %w", err)
 	}
 
-	if err := os.MkdirAll(home, 0o700); err != nil {
+	if err := os.MkdirAll(homePath, 0o700); err != nil {
 		return nil, fmt.Errorf("could not prepare the shell home: %w", err)
 	}
 
-	mode := NewMode(invocation.caps)
+	mode := NewMode(args.caps)
 
 	if resumedSession != nil {
-		mode = NewResumedMode(invocation.caps)
+		mode = NewResumedMode(args.caps)
 	}
 
 	files := file.New(root, refuseWrite(mode))
-	processes := sandbox.NewProcesses(invocation.caps.has(capBackground))
+	processes := sandbox.NewProcesses(args.caps.has(capBackground))
 	defer func() { _, _ = processes.Disable() }()
 
 	client := connect(os.Getenv(endpointVariable))
@@ -186,7 +186,7 @@ func run() ([]string, error) {
 		}
 	}
 
-	system := prompt(workspace, invocation.caps)
+	system := prompt(workspacePath, args.caps)
 
 	if resumedSession != nil && resumedSession.Head.Prompt != "" {
 		system = resumedSession.Head.Prompt
@@ -194,7 +194,7 @@ func run() ([]string, error) {
 
 	log, err := openSession(resumedSession, store.Header{
 		Model:     client.Model,
-		Workspace: workspace,
+		Workspace: workspacePath,
 		Provider:  "codex",
 		Effort:    client.Effort,
 		Prompt:    system,
@@ -224,7 +224,7 @@ func run() ([]string, error) {
 	}
 	defer func() { _ = tmpRoot.Close() }()
 
-	shell := confinedShell(workspace, home, tmp, mode, files, processes)
+	shell := confinedShell(workspacePath, homePath, tmp, mode, files, processes)
 
 	tools = append(tools, shell)
 	tools = truncate.Tools(tools)
@@ -233,14 +233,14 @@ func run() ([]string, error) {
 		assistant: agent.New(system, client, tools),
 		screen:    output.New(os.Stdout),
 		log:       log,
-		workspace: workspace,
+		workspace: workspacePath,
 		mode:      mode,
 		processes: processes,
 		shell:     shell.Name(),
 
 		label: func(pending bool, frame int, running bool) string {
 			currentCaps := mode.Current()
-			return banner(client.Model, client.Effort, workspace, tools, currentCaps.has(capShell),
+			return banner(client.Model, client.Effort, workspacePath, tools, currentCaps.has(capShell),
 				currentCaps.has(capGit), currentCaps.has(capBackground), pending, frame, running)
 		},
 	}
@@ -254,7 +254,7 @@ func run() ([]string, error) {
 		chat.notify("[" + theme.Subtle(startupBanner) + "]")
 	}
 
-	chat.makeIntroductions(invocation.initialMessage)
+	chat.makeIntroductions(args.initialMessage)
 
 	if chat.restart != nil {
 		return chat.restart, nil
