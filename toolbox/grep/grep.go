@@ -1,14 +1,16 @@
 package grep
 
 import (
+	"bufio"
+	"bytes"
+	"context"
 	"errors"
 	"fmt"
-	"io/fs"
-	"os"
-	"path/filepath"
-	"regexp"
+	"io"
+	"os/exec"
 	"strings"
 
+	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 )
@@ -16,14 +18,14 @@ import (
 // Args is what a search by content takes. An absent path is the working directory, and an absent
 // glob every file below it.
 type Args struct {
-	Pattern string `json:"pattern"`
-	Path    string `json:"path"`
-	Glob    string `json:"glob"`
+	Pattern string `json:"pattern"` // the regular expression
+	Path    string `json:"path"`    // where to search
+	Glob    string `json:"glob"`    // which paths to include
 }
 
 // New builds the grep tool confined to root. A match is reported as path:line:text.
-func New(root *os.Root) tool.Tool {
-	return tool.Define(
+func New(root *file.Root) tool.Tool {
+	definedTool := tool.Define(
 		"grep",
 		"search file contents",
 		tool.Schema{
@@ -32,83 +34,121 @@ func New(root *os.Root) tool.Tool {
 			tool.String("glob", "path filter, e.g. **/*.go").Optional(),
 		},
 		Render,
-		func(args Args) (string, error) { return exec(root, args) },
+		func(ctx context.Context, args Args) (string, error) { return run(ctx, root, args) },
 	)
+
+	return tool.ReadOnly(tool.Concurrent(tool.Focus(definedTool, util.SearchPath)))
 }
 
 // Render describes the search out loud.
-func Render(args Args) string {
+func Render(args Args) (string, string) {
 	return util.RenderSearch(args.Pattern, args.Path, args.Glob)
 }
 
-func exec(root *os.Root, args Args) (string, error) {
+func run(ctx context.Context, root *file.Root, args Args) (string, error) {
 	if args.Pattern == "" {
 		return "", errors.New("pattern is required")
 	}
 
-	expression, err := regexp.Compile(args.Pattern)
-	if err != nil {
-		return "", fmt.Errorf("invalid pattern: %w", err)
-	}
-
-	name, err := util.RootName(root, args.Path)
+	root, name, err := root.Resolve(args.Path)
 	if err != nil {
 		return "", err
 	}
 
-	var matches []string
-	truncated := false
+	commandContext, stop := context.WithCancel(ctx)
+	defer stop()
 
-	err = util.Walk(root.FS(), name, func(path string, entry fs.DirEntry) error {
-		if entry.IsDir() {
-			return nil
-		}
+	arguments := []string{
+		"--no-config",
+		"--with-filename",
+		"--line-number",
+		"--no-heading",
+		"--color=never",
+		"--hidden",
+		"--no-require-git",
+		"--glob=!.git/**",
+		"--no-messages",
+	}
+	if args.Glob != "" {
+		arguments = append(arguments, "--glob="+args.Glob)
+	}
+	arguments = append(arguments, "--regexp="+args.Pattern, "--", name)
 
-		if len(matches) >= util.MaxMatches {
-			truncated = true
+	command := exec.CommandContext(commandContext, "rg", arguments...)
+	command.Dir = root.Name()
 
-			return fs.SkipAll
-		}
-
-		if !withinGlob(args.Glob, name, path) {
-			return nil
-		}
-
-		data, err := fs.ReadFile(root.FS(), path)
-		if err != nil {
-			return nil //nolint:nilerr // an unreadable file is skipped, not fatal
-		}
-
-		for number, line := range strings.Split(string(data), "\n") {
-			if len(matches) >= util.MaxMatches {
-				truncated = true
-
-				break
-			}
-
-			if expression.MatchString(line) {
-				matches = append(matches, fmt.Sprintf("%s:%d:%s", path, number+1, line))
-			}
-		}
-
-		return nil
-	})
+	stdout, err := command.StdoutPipe()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("could not read grep output: %w", err)
 	}
 
-	return util.Report(matches, truncated), nil
+	var stderr bytes.Buffer
+	command.Stderr = &stderr
+
+	if err := command.Start(); err != nil {
+		return "", fmt.Errorf("could not start grep: %w", err)
+	}
+
+	matches, truncated, readErr := readMatches(stdout, name == ".")
+	if truncated {
+		stop()
+	}
+
+	waitErr := command.Wait()
+
+	if ctx.Err() != nil {
+		return "", ctx.Err()
+	}
+	if readErr != nil {
+		return "", fmt.Errorf("could not read grep output: %w", readErr)
+	}
+	if truncated {
+		return util.Report(matches, true), nil
+	}
+	if waitErr != nil {
+		var exitError *exec.ExitError
+		if errors.As(waitErr, &exitError) && exitError.ExitCode() == 1 {
+			return util.Report(nil, false), nil
+		}
+
+		message := strings.TrimSpace(stderr.String())
+		if strings.HasPrefix(message, "rg: regex parse error:") {
+			return "", fmt.Errorf("invalid pattern: %s", strings.TrimPrefix(message, "rg: "))
+		}
+		if message != "" {
+			return "", errors.New(message)
+		}
+
+		return "", fmt.Errorf("grep failed: %w", waitErr)
+	}
+
+	return util.Report(matches, false), nil
 }
 
-func withinGlob(pattern string, root string, path string) bool {
-	if pattern == "" {
-		return true
-	}
+func readMatches(reader io.Reader, trimWorkingDirectory bool) ([]string, bool, error) {
+	bufferedReader := bufio.NewReader(reader)
+	matches := make([]string, 0, util.MaxMatches)
 
-	relative, err := filepath.Rel(root, path)
-	if err != nil {
-		return false
-	}
+	for {
+		line, err := bufferedReader.ReadString('\n')
+		if line != "" {
+			line = strings.TrimSuffix(line, "\n")
+			if trimWorkingDirectory {
+				line = strings.TrimPrefix(line, "./")
+			}
 
-	return util.MatchGlob(pattern, relative)
+			if len(matches) == util.MaxMatches {
+				return matches, true, nil
+			}
+			matches = append(matches, line)
+		}
+
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return matches, false, nil
+			}
+
+			return nil, false, err
+		}
+	}
 }

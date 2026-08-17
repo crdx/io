@@ -1,15 +1,19 @@
 package grep_test
 
 import (
+	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
+	"crdx.org/io/internal/file"
 	"crdx.org/io/toolbox/grep"
 )
 
-func rooted(t *testing.T, files map[string]string) *os.Root {
+func testRoot(t *testing.T, files map[string]string) *file.Root {
 	t.Helper()
 
 	directory := t.TempDir()
@@ -33,10 +37,10 @@ func rooted(t *testing.T, files map[string]string) *os.Root {
 
 	t.Cleanup(func() { _ = root.Close() })
 
-	return root
+	return file.New(root, allowAll)
 }
 
-func exec(t *testing.T, root *os.Root, arguments string) (string, error) {
+func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	t.Helper()
 
 	call, err := grep.New(root).Parse(arguments)
@@ -44,11 +48,11 @@ func exec(t *testing.T, root *os.Root, arguments string) (string, error) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	return call.Exec()
+	return call.Exec(t.Context())
 }
 
 func TestAMatchIsReportedWithItsPathAndLine(t *testing.T) {
-	root := rooted(t, map[string]string{"main.go": "package main\n\nfunc main() {}\n"})
+	root := testRoot(t, map[string]string{"main.go": "package main\n\nfunc main() {}\n"})
 
 	output, err := exec(t, root, `{"pattern":"func main"}`)
 	if err != nil {
@@ -61,7 +65,7 @@ func TestAMatchIsReportedWithItsPathAndLine(t *testing.T) {
 }
 
 func TestAGlobNarrowsWhatIsSearched(t *testing.T) {
-	root := rooted(t, map[string]string{
+	root := testRoot(t, map[string]string{
 		"main.go":   "hello\n",
 		"notes.txt": "hello\n",
 	})
@@ -76,8 +80,25 @@ func TestAGlobNarrowsWhatIsSearched(t *testing.T) {
 	}
 }
 
+func TestIgnoredFilesAreNotSearched(t *testing.T) {
+	root := testRoot(t, map[string]string{
+		".gitignore":          "ignored/\n",
+		"kept.txt":            "hello\n",
+		"ignored/ignored.txt": "hello\n",
+	})
+
+	output, err := exec(t, root, `{"pattern":"hello"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if output != "kept.txt:1:hello" {
+		t.Errorf("expected ignored files to be skipped, got %q", output)
+	}
+}
+
 func TestAPatternThatWillNotCompileIsRefused(t *testing.T) {
-	root := rooted(t, map[string]string{"main.go": "hello\n"})
+	root := testRoot(t, map[string]string{"main.go": "hello\n"})
 
 	_, err := exec(t, root, `{"pattern":"("}`)
 	if err == nil {
@@ -90,7 +111,7 @@ func TestAPatternThatWillNotCompileIsRefused(t *testing.T) {
 }
 
 func TestASearchThatFindsNothingSaysSo(t *testing.T) {
-	root := rooted(t, map[string]string{"main.go": "hello\n"})
+	root := testRoot(t, map[string]string{"main.go": "hello\n"})
 
 	output, err := exec(t, root, `{"pattern":"goodbye"}`)
 	if err != nil {
@@ -103,7 +124,7 @@ func TestASearchThatFindsNothingSaysSo(t *testing.T) {
 }
 
 func TestHittingTheCapIsSaidOutLoud(t *testing.T) {
-	root := rooted(t, map[string]string{
+	root := testRoot(t, map[string]string{
 		"big.txt": strings.Repeat("hello\n", 150),
 	})
 
@@ -117,14 +138,48 @@ func TestHittingTheCapIsSaidOutLoud(t *testing.T) {
 	}
 }
 
-func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
-	rendered := grep.Render(grep.Args{Pattern: "hello", Path: "."})
-	if rendered != "hello" {
-		t.Errorf("expected the path to go without saying, got %q", rendered)
+func TestACancelledContextStopsTheSearch(t *testing.T) {
+	root := testRoot(t, map[string]string{"main.go": "hello\n"})
+
+	bin := t.TempDir()
+	//nolint:gosec // an executable test fixture
+	if err := os.WriteFile(
+		filepath.Join(bin, "rg"),
+		[]byte("#!/bin/sh\nexec /bin/sleep 60\n"),
+		0o700,
+	); err != nil {
+		t.Fatalf("could not write fake rg: %v", err)
+	}
+	t.Setenv("PATH", bin)
+
+	call, err := grep.New(root).Parse(`{"pattern":"hello"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
 
-	rendered = grep.Render(grep.Args{Pattern: "hello", Path: "internal", Glob: "*.go"})
-	if rendered != "hello in internal matching *.go" {
-		t.Errorf("expected a path and glob to be named, got %q", rendered)
+	ctx, cancel := context.WithCancel(t.Context())
+	time.AfterFunc(100*time.Millisecond, cancel)
+
+	startedAt := time.Now()
+	_, err = call.Exec(ctx)
+	if !errors.Is(err, context.Canceled) {
+		t.Errorf("expected context cancellation, got %v", err)
+	}
+	if took := time.Since(startedAt); took > 2*time.Second {
+		t.Errorf("expected the search to stop promptly, took %s", took)
 	}
 }
+
+func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
+	renderedPattern, detail := grep.Render(grep.Args{Pattern: "hello", Path: "."})
+	if renderedPattern != "hello" || detail != "" {
+		t.Errorf("expected the path to go without saying, got %q and %q", renderedPattern, detail)
+	}
+
+	renderedPattern, detail = grep.Render(grep.Args{Pattern: "hello", Path: "internal", Glob: "*.go"})
+	if renderedPattern != "hello" || detail != "in internal matching *.go" {
+		t.Errorf("expected a path and glob to be named, got %q and %q", renderedPattern, detail)
+	}
+}
+
+func allowAll(string) error { return nil }

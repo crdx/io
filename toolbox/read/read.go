@@ -1,25 +1,27 @@
 package read
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"os"
+	"io/fs"
 	"strings"
 
-	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/strutil"
 	"crdx.org/io/tool"
 )
 
 // Args is what a read takes. An absent offset or limit is zero, which means the whole file.
 type Args struct {
-	Path   string `json:"path"`
-	Offset int    `json:"offset"`
-	Limit  int    `json:"limit"`
+	Path   string `json:"path"`   // the file to read
+	Offset int    `json:"offset"` // the first line
+	Limit  int    `json:"limit"`  // the most lines to return
 }
 
 // New builds the read tool confined to root.
-func New(root *os.Root) tool.Tool {
-	return tool.Define(
+func New(root *file.Root) tool.Tool {
+	definedTool := tool.DefineMeasured(
 		"read",
 		"read a file",
 		tool.Schema{
@@ -28,48 +30,62 @@ func New(root *os.Root) tool.Tool {
 			tool.Integer("limit", "max lines").Optional(),
 		},
 		Render,
-		func(args Args) (string, error) { return exec(root, args) },
+		func(_ context.Context, args Args) (string, tool.Statistics, error) { return exec(root, args) },
 	)
+
+	return tool.ReadOnly(tool.Concurrent(tool.FocusPath(definedTool)))
 }
 
-// Render describes a read as path:first-last.
-func Render(args Args) string {
+// Render describes a read as the path, qualified by the lines it asks for.
+func Render(args Args) (string, string) {
+	return args.Path, span(args.Offset, args.Limit)
+}
+
+func span(offset int, limit int) string {
 	switch {
-	case args.Offset > 0 && args.Limit > 0:
-		return fmt.Sprintf("%s:%d-%d", args.Path, args.Offset, args.Offset+args.Limit-1)
-	case args.Offset > 0:
-		return fmt.Sprintf("%s:%d-", args.Path, args.Offset)
-	case args.Limit > 0:
-		return fmt.Sprintf("%s:1-%d", args.Path, args.Limit)
+	case offset > 0 && limit > 0:
+		return fmt.Sprintf("%d-%d", offset, offset+limit-1)
+	case offset > 0:
+		return fmt.Sprintf("%d+", offset)
+	case limit > 0:
+		return fmt.Sprintf("1-%d", limit)
 	default:
-		return args.Path
+		return ""
 	}
 }
 
-func exec(root *os.Root, args Args) (string, error) {
+func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
 	if args.Path == "" {
-		return "", errors.New("path is required")
+		return "", tool.Statistics{}, errors.New("path is required")
 	}
 
-	name, err := util.RootName(root, args.Path)
+	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", err
+		return "", tool.Statistics{}, err
 	}
 
 	data, err := root.ReadFile(name)
 	if err != nil {
-		return "", err
+		var pathError *fs.PathError
+		if errors.As(err, &pathError) {
+			return "", tool.Statistics{}, fmt.Errorf("%s: %w", args.Path, pathError.Err)
+		}
+
+		return "", tool.Statistics{}, err
+	}
+
+	lines := strutil.Lines(string(data))
+	stats := tool.Statistics{
+		Kind: tool.StatsRead, Lines: int64(len(lines)), Bytes: int64(len(data)),
 	}
 
 	if args.Offset <= 0 && args.Limit <= 0 {
-		return string(data), nil
+		return string(data), stats, nil
 	}
-
-	lines := splitLines(data)
 
 	start := max(args.Offset-1, 0)
 	if start >= len(lines) {
-		return "", fmt.Errorf(
+		return "", stats, fmt.Errorf(
 			"offset %d is past the end of the file (%d lines)", args.Offset, len(lines),
 		)
 	}
@@ -79,18 +95,8 @@ func exec(root *os.Root, args Args) (string, error) {
 		end = start + args.Limit
 	}
 
-	return strings.Join(lines[start:end], "\n"), nil
-}
-
-func splitLines(text []byte) []string {
-	if len(text) == 0 {
-		return nil
-	}
-
-	lines := strings.Split(string(text), "\n")
-	if text[len(text)-1] == '\n' {
-		lines = lines[:len(lines)-1]
-	}
-
-	return lines
+	output := strings.Join(lines[start:end], "\n")
+	stats.Lines = int64(end - start)
+	stats.Bytes = int64(len(output))
+	return output, stats, nil
 }

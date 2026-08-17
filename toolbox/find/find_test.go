@@ -6,10 +6,11 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/internal/file"
 	"crdx.org/io/toolbox/find"
 )
 
-func rooted(t *testing.T, paths ...string) *os.Root {
+func testRoot(t *testing.T, paths ...string) *file.Root {
 	t.Helper()
 
 	directory := t.TempDir()
@@ -33,10 +34,10 @@ func rooted(t *testing.T, paths ...string) *os.Root {
 
 	t.Cleanup(func() { _ = root.Close() })
 
-	return root
+	return file.New(root, allowAll)
 }
 
-func exec(t *testing.T, root *os.Root, arguments string) (string, error) {
+func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	t.Helper()
 
 	call, err := find.New(root).Parse(arguments)
@@ -44,11 +45,11 @@ func exec(t *testing.T, root *os.Root, arguments string) (string, error) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	return call.Exec()
+	return call.Exec(t.Context())
 }
 
 func TestAGlobMatchesAcrossDirectories(t *testing.T) {
-	root := rooted(t, "main.go", "inner/deep/thing.go", "inner/notes.txt")
+	root := testRoot(t, "main.go", "inner/deep/thing.go", "inner/notes.txt")
 
 	output, err := exec(t, root, `{"pattern":"**/*.go"}`)
 	if err != nil {
@@ -67,7 +68,7 @@ func TestAGlobMatchesAcrossDirectories(t *testing.T) {
 }
 
 func TestASearchStartsWhereItIsTold(t *testing.T) {
-	root := rooted(t, "main.go", "inner/thing.go")
+	root := testRoot(t, "main.go", "inner/thing.go")
 
 	output, err := exec(t, root, `{"pattern":"*.go","path":"inner"}`)
 	if err != nil {
@@ -80,7 +81,7 @@ func TestASearchStartsWhereItIsTold(t *testing.T) {
 }
 
 func TestTheGitDirectoryIsNotSearched(t *testing.T) {
-	root := rooted(t, ".git/objects/thing.go", "main.go")
+	root := testRoot(t, ".git/objects/thing.go", "main.go")
 
 	output, err := exec(t, root, `{"pattern":"**/*.go"}`)
 	if err != nil {
@@ -93,7 +94,7 @@ func TestTheGitDirectoryIsNotSearched(t *testing.T) {
 }
 
 func TestASearchThatFindsNothingSaysSo(t *testing.T) {
-	root := rooted(t, "main.go")
+	root := testRoot(t, "main.go")
 
 	output, err := exec(t, root, `{"pattern":"**/*.rb"}`)
 	if err != nil {
@@ -106,9 +107,11 @@ func TestASearchThatFindsNothingSaysSo(t *testing.T) {
 }
 
 func TestASearchWithNoPatternIsRefused(t *testing.T) {
-	root := rooted(t, "main.go")
+	root := testRoot(t, "main.go")
 
 	if _, err := exec(t, root, `{}`); err == nil {
 		t.Error("expected a search with no pattern to be refused")
 	}
 }
+
+func allowAll(string) error { return nil }

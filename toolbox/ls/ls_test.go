@@ -5,10 +5,11 @@ import (
 	"path/filepath"
 	"testing"
 
+	"crdx.org/io/internal/file"
 	"crdx.org/io/toolbox/ls"
 )
 
-func rooted(t *testing.T) (*os.Root, string) {
+func testRoot(t *testing.T) (*file.Root, string) {
 	t.Helper()
 
 	directory := t.TempDir()
@@ -20,10 +21,10 @@ func rooted(t *testing.T) (*os.Root, string) {
 
 	t.Cleanup(func() { _ = root.Close() })
 
-	return root, directory
+	return file.New(root, allowAll), directory
 }
 
-func exec(t *testing.T, root *os.Root, arguments string) (string, error) {
+func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	t.Helper()
 
 	call, err := ls.New(root).Parse(arguments)
@@ -31,11 +32,11 @@ func exec(t *testing.T, root *os.Root, arguments string) (string, error) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	return call.Exec()
+	return call.Exec(t.Context())
 }
 
 func TestADirectoryIsMarkedWithASlash(t *testing.T) {
-	root, directory := rooted(t)
+	root, directory := testRoot(t)
 
 	if err := os.Mkdir(filepath.Join(directory, "inner"), 0o750); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -56,7 +57,7 @@ func TestADirectoryIsMarkedWithASlash(t *testing.T) {
 }
 
 func TestAnEmptyDirectorySaysSo(t *testing.T) {
-	root, _ := rooted(t)
+	root, _ := testRoot(t)
 
 	output, err := exec(t, root, `{"path":"."}`)
 	if err != nil {
@@ -69,7 +70,7 @@ func TestAnEmptyDirectorySaysSo(t *testing.T) {
 }
 
 func TestListingSomethingThatIsNotThereIsRefused(t *testing.T) {
-	root, _ := rooted(t)
+	root, _ := testRoot(t)
 
 	if _, err := exec(t, root, `{"path":"nowhere"}`); err == nil {
 		t.Error("expected a missing directory to be refused")
@@ -77,11 +78,13 @@ func TestListingSomethingThatIsNotThereIsRefused(t *testing.T) {
 }
 
 func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
-	if rendered := ls.Render(ls.Args{}); rendered != "" {
-		t.Errorf("expected nothing, got %q", rendered)
+	if renderedPath, _ := ls.Render(ls.Args{}); renderedPath != "" {
+		t.Errorf("expected nothing, got %q", renderedPath)
 	}
 
-	if rendered := ls.Render(ls.Args{Path: "."}); rendered != "" {
-		t.Errorf("expected nothing, got %q", rendered)
+	if renderedPath, _ := ls.Render(ls.Args{Path: "."}); renderedPath != "" {
+		t.Errorf("expected nothing, got %q", renderedPath)
 	}
 }
+
+func allowAll(string) error { return nil }

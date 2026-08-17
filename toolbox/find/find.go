@@ -1,24 +1,25 @@
 package find
 
 import (
+	"context"
 	"errors"
 	"io/fs"
-	"os"
 	"path/filepath"
 
+	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 )
 
 // Args is what a search by name takes. An absent path is the working directory.
 type Args struct {
-	Pattern string `json:"pattern"`
-	Path    string `json:"path"`
+	Pattern string `json:"pattern"` // the name glob
+	Path    string `json:"path"`    // where to search
 }
 
 // New builds the find tool confined to root.
-func New(root *os.Root) tool.Tool {
-	return tool.Define(
+func New(root *file.Root) tool.Tool {
+	definedTool := tool.Define(
 		"find",
 		"find files",
 		tool.Schema{
@@ -29,21 +30,23 @@ func New(root *os.Root) tool.Tool {
 			).Optional(),
 		},
 		Render,
-		func(args Args) (string, error) { return exec(root, args) },
+		func(_ context.Context, args Args) (string, error) { return exec(root, args) },
 	)
+
+	return tool.ReadOnly(tool.Concurrent(tool.Focus(definedTool, util.SearchPath)))
 }
 
 // Render describes the search out loud.
-func Render(args Args) string {
+func Render(args Args) (string, string) {
 	return util.RenderSearch(args.Pattern, args.Path, "")
 }
 
-func exec(root *os.Root, args Args) (string, error) {
+func exec(root *file.Root, args Args) (string, error) {
 	if args.Pattern == "" {
 		return "", errors.New("pattern is required")
 	}
 
-	name, err := util.RootName(root, args.Path)
+	root, name, err := root.Resolve(args.Path)
 	if err != nil {
 		return "", err
 	}

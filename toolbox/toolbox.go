@@ -1,8 +1,7 @@
 package toolbox
 
 import (
-	"os"
-
+	"crdx.org/io/internal/file"
 	"crdx.org/io/tool"
 	"crdx.org/io/toolbox/edit"
 	"crdx.org/io/toolbox/find"
@@ -12,18 +11,14 @@ import (
 	"crdx.org/io/toolbox/write"
 )
 
-// Files builds every file tool confined to root. readOnly leaves write and edit out.
-func Files(root *os.Root, readOnly bool) []tool.Tool {
-	built := []tool.Tool{
+// Rummage builds every file tool confined to root.
+func Rummage(root *file.Root) []tool.Tool {
+	return []tool.Tool{
 		read.New(root),
 		ls.New(root),
 		find.New(root),
 		grep.New(root),
+		write.New(root),
+		edit.New(root),
 	}
-
-	if !readOnly {
-		built = append(built, write.New(root), edit.New(root))
-	}
-
-	return built
 }

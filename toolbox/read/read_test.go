@@ -6,10 +6,12 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/internal/file"
+	"crdx.org/io/tool"
 	"crdx.org/io/toolbox/read"
 )
 
-func rooted(t *testing.T, name string, content string) *os.Root {
+func testRoot(t *testing.T, name string, content string) *file.Root {
 	t.Helper()
 
 	directory := t.TempDir()
@@ -25,10 +27,10 @@ func rooted(t *testing.T, name string, content string) *os.Root {
 
 	t.Cleanup(func() { _ = root.Close() })
 
-	return root
+	return file.New(root, allowAll)
 }
 
-func exec(t *testing.T, root *os.Root, arguments string) (string, error) {
+func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	t.Helper()
 
 	call, err := read.New(root).Parse(arguments)
@@ -36,11 +38,11 @@ func exec(t *testing.T, root *os.Root, arguments string) (string, error) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	return call.Exec()
+	return call.Exec(t.Context())
 }
 
 func TestAFileWithNoRangeComesBackWhole(t *testing.T) {
-	root := rooted(t, "notes.txt", "one\ntwo\nthree\n")
+	root := testRoot(t, "notes.txt", "one\ntwo\nthree\n")
 
 	output, err := exec(t, root, `{"path":"notes.txt"}`)
 	if err != nil {
@@ -53,7 +55,7 @@ func TestAFileWithNoRangeComesBackWhole(t *testing.T) {
 }
 
 func TestALineRangeComesBackOnItsOwn(t *testing.T) {
-	root := rooted(t, "notes.txt", "one\ntwo\nthree\nfour\n")
+	root := testRoot(t, "notes.txt", "one\ntwo\nthree\nfour\n")
 
 	output, err := exec(t, root, `{"path":"notes.txt","offset":2,"limit":2}`)
 	if err != nil {
@@ -65,8 +67,29 @@ func TestALineRangeComesBackOnItsOwn(t *testing.T) {
 	}
 }
 
+func TestALineRangeMeasuresOnlyWhatComesBack(t *testing.T) {
+	root := testRoot(t, "notes.txt", "one\ntwo\nthree\nfour\n")
+	call, err := read.New(root).Parse(`{"path":"notes.txt","offset":2,"limit":2}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	output, err := call.Exec(t.Context())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	stats, ok := tool.Stats(call)
+	if !ok {
+		t.Fatal("expected read statistics")
+	}
+	if stats.Lines != 2 || stats.Bytes != int64(len(output)) {
+		t.Errorf("expected 2 lines and %d bytes, got %d lines and %d bytes", len(output), stats.Lines, stats.Bytes)
+	}
+}
+
 func TestAnOffsetPastTheEndSaysHowLongTheFileIs(t *testing.T) {
-	root := rooted(t, "notes.txt", "one\ntwo\n")
+	root := testRoot(t, "notes.txt", "one\ntwo\n")
 
 	_, err := exec(t, root, `{"path":"notes.txt","offset":9}`)
 	if err == nil {
@@ -80,7 +103,7 @@ func TestAnOffsetPastTheEndSaysHowLongTheFileIs(t *testing.T) {
 
 func TestAHugeFileIsNotCutShort(t *testing.T) {
 	content := strings.Repeat("a line of text\n", 8000)
-	root := rooted(t, "big.txt", content)
+	root := testRoot(t, "big.txt", content)
 
 	output, err := exec(t, root, `{"path":"big.txt"}`)
 	if err != nil {
@@ -92,26 +115,90 @@ func TestAHugeFileIsNotCutShort(t *testing.T) {
 	}
 }
 
+func TestAMissingFileDoesNotExposeHowItWasOpened(t *testing.T) {
+	root := testRoot(t, "notes.txt", "one\n")
+
+	_, err := exec(t, root, `{"path":"missing.txt"}`)
+	if err == nil {
+		t.Fatal("expected a missing file to fail")
+	}
+
+	const expected = "missing.txt: no such file or directory"
+
+	if err.Error() != expected {
+		t.Errorf("expected %q, got %q", expected, err)
+	}
+}
+
 func TestAPathOutsideTheRootIsRefused(t *testing.T) {
-	root := rooted(t, "notes.txt", "one\n")
+	root := testRoot(t, "notes.txt", "one\n")
 
 	if _, err := exec(t, root, `{"path":"../../etc/passwd"}`); err == nil {
 		t.Error("expected a path outside the root to be refused")
 	}
 }
 
+func TestAFileInAMountedRootCanBeRead(t *testing.T) {
+	root := testRoot(t, "notes.txt", "one\n")
+	scratch := testRoot(t, "result.txt", "answer\n")
+	root.Mount("/tmp", scratch)
+
+	output, err := exec(t, root, `{"path":"/tmp/result.txt"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if output != "answer\n" {
+		t.Errorf("got %q, want %q", output, "answer\n")
+	}
+}
+
 func TestAReadWithNoPathIsRefused(t *testing.T) {
-	root := rooted(t, "notes.txt", "one\n")
+	root := testRoot(t, "notes.txt", "one\n")
 
 	if _, err := exec(t, root, `{}`); err == nil {
 		t.Error("expected a read with no path to be refused")
 	}
 }
 
-func TestRenderSaysWhichLinesAreBeingRead(t *testing.T) {
-	rendered := read.Render(read.Args{Path: "notes.txt", Offset: 10, Limit: 5})
+func TestAReadFocusesTheFileName(t *testing.T) {
+	root := testRoot(t, "notes.txt", "one\n")
+	call, err := read.New(root).Parse(`{"path":"somewhere/notes.txt"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-	if rendered != "notes.txt:10-14" {
-		t.Errorf("expected the range, got %q", rendered)
+	focusedCall, ok := call.(tool.FocusedCall)
+	if !ok || focusedCall.Focus() != "notes.txt" {
+		t.Errorf("expected the file name to be focused, got %T", call)
 	}
 }
+
+func TestRenderSaysWhichLinesAreBeingRead(t *testing.T) {
+	renderedPath, detail := read.Render(read.Args{Path: "notes.txt", Offset: 10, Limit: 5})
+
+	if renderedPath != "notes.txt" {
+		t.Errorf("expected the path, got %q", renderedPath)
+	}
+
+	if detail != "10-14" {
+		t.Errorf("expected the range, got %q", detail)
+	}
+}
+
+func TestRenderLeavesAnOpenRangeOpen(t *testing.T) {
+	_, detail := read.Render(read.Args{Path: "notes.txt", Offset: 10})
+
+	if detail != "10+" {
+		t.Errorf("expected an open range, got %q", detail)
+	}
+}
+
+func TestRenderSaysNothingAboutAWholeFile(t *testing.T) {
+	_, detail := read.Render(read.Args{Path: "notes.txt"})
+
+	if detail != "" {
+		t.Errorf("expected no range, got %q", detail)
+	}
+}
+
+func allowAll(string) error { return nil }

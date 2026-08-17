@@ -3,7 +3,10 @@ package util
 import (
 	"fmt"
 	"io/fs"
+	"path/filepath"
 	"strings"
+
+	"crdx.org/io/tool"
 )
 
 // MaxMatches caps what a search hands back.
@@ -11,20 +14,35 @@ const MaxMatches = 100
 
 var skipDirs = map[string]bool{".git": true, "node_modules": true}
 
-// RenderSearch describes a search out loud. A search taking no glob passes an empty string, and the
-// working directory goes without saying.
-func RenderSearch(pattern string, path string, globPattern string) string {
-	str := pattern
+// RenderSearch describes a search out loud, as the pattern and what qualifies it. A search taking
+// no glob passes an empty string, and the working directory goes without saying.
+func RenderSearch(pattern string, path string, globPattern string) (string, string) {
+	var detail string
 
 	if path != "" && path != "." {
-		str += " in " + path
+		detail += "in " + path
 	}
 
 	if globPattern != "" {
-		str += " matching " + globPattern
+		if detail != "" {
+			detail += " "
+		}
+
+		detail += "matching " + globPattern
 	}
 
-	return str
+	return pattern, detail
+}
+
+// SearchPath returns the final component of the path in a rendered search call.
+func SearchPath(call tool.Call) string {
+	detail := strings.TrimPrefix(call.Detail(), "in ")
+	if detail == call.Detail() {
+		return ""
+	}
+
+	path, _, _ := strings.Cut(detail, " matching ")
+	return filepath.Base(path)
 }
 
 // Walk visits every entry below root within filesystem, skipping symlinks and the directories

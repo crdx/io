@@ -1,63 +1,86 @@
 package write
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
+	"strings"
 
-	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/file"
 	"crdx.org/io/tool"
 )
 
 // Args is what a write takes.
 type Args struct {
-	Path    string `json:"path"`
-	Content string `json:"content"`
+	Path    string `json:"path"`    // the file to write
+	Content string `json:"content"` // the full contents
 }
 
-// New builds the write tool confined to root, creating parent directories on the way.
-func New(root *os.Root) tool.Tool {
-	return tool.Define(
-		"write",
-		"write a file, creating or overwriting it",
-		tool.Schema{
-			tool.String("path", "file"),
-			tool.String("content", "full contents"),
-		},
-		Render,
-		func(args Args) (string, error) { return exec(root, args) },
-	)
+// New builds a write tool confined to root.
+func New(root *file.Root) tool.Tool {
+	return writer{
+		Tool: tool.FocusPath(tool.DefineMeasured(
+			"write",
+			"write a file, creating or overwriting it",
+			tool.Schema{
+				tool.String("path", "file"),
+				tool.String("content", "full contents"),
+			},
+			Render,
+			func(_ context.Context, args Args) (string, tool.Statistics, error) { return exec(root, args) },
+		)),
+
+		root: root,
+	}
 }
 
-// Render says how much is being written rather than what.
-func Render(args Args) string {
-	return fmt.Sprintf("%s (%d bytes)", args.Path, len(args.Content))
+type writer struct {
+	tool.Tool // the write tool itself
+
+	root *file.Root // the tree written to
 }
 
-func exec(root *os.Root, args Args) (string, error) {
+func (self writer) ReadOnly() bool { return self.root.RefuseWrite(".") != nil }
+
+// Render names the file, saying how much is being written rather than what.
+func Render(args Args) (string, string) {
+	return args.Path, fmt.Sprintf("%d bytes", len(args.Content))
+}
+
+func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
 	if args.Path == "" {
-		return "", errors.New("path is required")
+		return "", tool.Statistics{}, errors.New("path is required")
 	}
 
-	name, err := util.RootName(root, args.Path)
+	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", err
+		return "", tool.Statistics{}, err
 	}
 
-	if util.WithinGitDir(name) {
-		return "", util.ErrGitDir
+	if err := root.RefuseWrite(name); err != nil {
+		return "", tool.Statistics{}, err
 	}
 
 	if directory := filepath.Dir(name); directory != "." {
 		if err := root.MkdirAll(directory, 0o755); err != nil {
-			return "", err
+			return "", tool.Statistics{}, err
 		}
 	}
 
 	if err := root.WriteFile(name, []byte(args.Content), 0o644); err != nil {
-		return "", err
+		return "", tool.Statistics{}, err
 	}
 
-	return fmt.Sprintf("wrote %d bytes to %s", len(args.Content), args.Path), nil
+	lines := int64(0)
+	if args.Content != "" {
+		lines = int64(strings.Count(args.Content, "\n"))
+		if !strings.HasSuffix(args.Content, "\n") {
+			lines++
+		}
+	}
+	stats := tool.Statistics{
+		Kind: tool.StatsWrite, Lines: lines, Bytes: int64(len(args.Content)),
+	}
+	return fmt.Sprintf("wrote %d bytes to %s", len(args.Content), args.Path), stats, nil
 }

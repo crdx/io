@@ -1,43 +1,43 @@
 package ls
 
 import (
-	"os"
+	"context"
 	"slices"
 	"strings"
 
-	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/file"
 	"crdx.org/io/tool"
 )
 
 // Args is what a listing takes. An absent path is the working directory.
 type Args struct {
-	Path string `json:"path"`
+	Path string `json:"path"` // the directory to list
 }
 
 // New builds the ls tool confined to root. A directory is marked with a trailing slash.
-func New(root *os.Root) tool.Tool {
-	return tool.Define(
+func New(root *file.Root) tool.Tool {
+	return tool.ReadOnly(tool.Concurrent(tool.FocusPath(tool.Define(
 		"ls",
 		"list a directory",
 		tool.Schema{
 			tool.String("path", "directory, defaults to working directory").Optional(),
 		},
 		Render,
-		func(args Args) (string, error) { return exec(root, args) },
-	)
+		func(_ context.Context, args Args) (string, error) { return exec(root, args) },
+	))))
 }
 
 // Render names the path, the working directory going without saying.
-func Render(args Args) string {
+func Render(args Args) (string, string) {
 	if args.Path == "." {
-		return ""
+		return "", ""
 	}
 
-	return args.Path
+	return args.Path, ""
 }
 
-func exec(root *os.Root, args Args) (string, error) {
-	name, err := util.RootName(root, args.Path)
+func exec(root *file.Root, args Args) (string, error) {
+	root, name, err := root.Resolve(args.Path)
 	if err != nil {
 		return "", err
 	}
