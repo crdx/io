@@ -1,6 +1,6 @@
 # io
 
-**io** is an agent harness primitive and world builder written in Go.
+**io** is a collection of agent and world-building primitives written in Go.
 
 ## Installation
 
@@ -8,16 +8,26 @@
 go get crdx.org/io
 ```
 
-## Features
+## Authentication
 
-- TBD
+Implementors handle gluing together the auth flow. Use the example for a reference, or to authenticate yourself so you can get started quickly.
 
-## Non-Features
+```bash
+go run ./cmd/login
+```
 
-- Handoff between providers
-- Context compaction
+## Examples
 
-## Usage
+### weather
+
+A weather lookup tool.
+
+```bash
+go run ./cmd/weather
+```
+
+<details>
+<summary>Expand</summary>
 
 ```go
 type WeatherParams struct {
@@ -40,16 +50,27 @@ assistant := agent.New(
     []tool.Tool{weather},
 )
 
-answer, _ := assistant.Send("what is the weather in London?")
+answer, _ := assistant.Send(ctx, "what is the weather in London?")
 fmt.Println(answer) // => "It's raining in London."
 ```
 
-`Send` triggers an agent turn and blocks until completion.
+`Send` triggers an agent turn and blocks until completion. Cancelling the context ends the request the turn is waiting on, which is the only part of a turn that can be interrupted: a tool that has started cannot be stopped, and is waited for.
 
-## Streaming
+</details>
+
+### streaming
+
+A prompt loop that prints each event as it arrives.
+
+```bash
+go run ./cmd/streaming
+```
+
+<details>
+<summary>Expand</summary>
 
 ```go
-for event, err := range assistant.Stream("what is the weather in London?") {
+for event, err := range assistant.Stream(ctx, "what is the weather in London?") {
     if err != nil { return err }
 
     switch event.Kind {
@@ -65,24 +86,7 @@ for event, err := range assistant.Stream("what is the weather in London?") {
 
 `Send` is `Stream` with the text fragments glued back together.
 
-<!--
-## Built-in tools (coming soon)
-
-See `toolbox/` for the implementations of the built-in tools.
-
-| Tool    | Arguments                      | Does                 | Type  |
-|---------|--------------------------------|----------------------|-------|
-| `read`  | `path`, `offset`, `limit`      | Read a file          | Read  |
-| `ls`    | `path`                         | List a directory     | Read  |
-| `find`  | `pattern`, `path`              | Find files           | Read  |
-| `grep`  | `pattern`, `path`, `glob`      | Search file contents | Read  |
-| `write` | `path`, `content`              | Write a whole file   | Write |
-| `edit`  | `path`, `old_text`, `new_text` | Find and replace     | Write |
-
-Read-only calls run concurrently, at most ten at a time.
-
-All path operations are wrapped in an `os.Root`, and writing to `.git` can be optionally denied.
--->
+</details>
 
 ## Contributions
 
