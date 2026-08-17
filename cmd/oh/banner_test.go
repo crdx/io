@@ -8,7 +8,6 @@ import (
 	"crdx.org/io/cmd/oh/theme"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/tool"
-	"crdx.org/io/toolbox/bash"
 )
 
 func TestTheBannerStartsWithAPermanentActivitySegment(t *testing.T) {
@@ -76,7 +75,11 @@ func TestTheShellIsShownSeparatelyFromWriting(t *testing.T) {
 
 // A shell granted nowhere to write changes nothing, so it must not light the writing letter.
 func TestAReadOnlyShellDoesNotOfferWriting(t *testing.T) {
-	shell := bash.New(nil, func() sandbox.Policy { return sandbox.Policy{Read: []string{"/usr"}} })
+	processes := sandbox.NewProcesses(false)
+	defer func() { _, _ = processes.Disable() }()
+
+	mode := NewMode(capRead | capShell)
+	shell := confinedShell(t.TempDir(), t.TempDir(), t.TempDir(), mode, nil, processes)
 
 	if !shell.ReadOnly() {
 		t.Errorf("expected a shell with no writable path to change nothing")

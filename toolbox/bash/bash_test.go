@@ -41,6 +41,15 @@ func testRoot(t *testing.T) (*file.Root, string) {
 	return file.New(root, allowAll), directory
 }
 
+func fixedShell(root *file.Root, policy func() sandbox.Policy) tool.Tool {
+	return bash.New(
+		root,
+		func() bool { return !policy().Writable() },
+		func(context.Context) (sandbox.Policy, error) { return policy(), nil },
+		sandbox.NewProcesses(false),
+	)
+}
+
 func exec(t *testing.T, root *file.Root, directory string, arguments string) (string, error) {
 	t.Helper()
 
@@ -54,7 +63,7 @@ func exec(t *testing.T, root *file.Root, directory string, arguments string) (st
 		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
 
-	call, err := bash.New(root, func() sandbox.Policy { return policy }).Parse(arguments)
+	call, err := fixedShell(root, func() sandbox.Policy { return policy }).Parse(arguments)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -65,7 +74,7 @@ func exec(t *testing.T, root *file.Root, directory string, arguments string) (st
 func TestTheToolIsCalledExec(t *testing.T) {
 	root, directory := testRoot(t)
 
-	if name := bash.New(root, func() sandbox.Policy { return sandbox.Policy{Write: []string{directory}} }).Name(); name != "bash" {
+	if name := fixedShell(root, func() sandbox.Policy { return sandbox.Policy{Write: []string{directory}} }).Name(); name != "bash" {
 		t.Errorf("got %q, want %q", name, "bash")
 	}
 }
@@ -154,7 +163,7 @@ func TestACommandIsRenderedOnOneLine(t *testing.T) {
 
 func TestACommandRenderingIsMarkedAsBash(t *testing.T) {
 	root, _ := testRoot(t)
-	call, err := bash.New(root, func() sandbox.Policy { return sandbox.Policy{} }).Parse(`{"command":"echo one"}`)
+	call, err := fixedShell(root, func() sandbox.Policy { return sandbox.Policy{} }).Parse(`{"command":"echo one"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -284,7 +293,7 @@ func TestAPolicyIsPassedThroughAsItIs(t *testing.T) {
 		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
 
-	call, err := bash.New(root, func() sandbox.Policy { return policy }).
+	call, err := fixedShell(root, func() sandbox.Policy { return policy }).
 		Parse(`{"command": "echo clobbered > .git/HEAD"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -308,22 +317,34 @@ func TestAPolicyIsPassedThroughAsItIs(t *testing.T) {
 func TestTheToolIsNeverConcurrent(t *testing.T) {
 	root, directory := testRoot(t)
 
-	if bash.New(root, func() sandbox.Policy { return sandbox.Policy{Write: []string{directory}} }).Concurrent() {
+	if fixedShell(root, func() sandbox.Policy { return sandbox.Policy{Write: []string{directory}} }).Concurrent() {
 		t.Errorf("a shell command is not safe to run alongside others")
 	}
 }
 
-// What a shell may do is what its policy grants, so the tool answers for itself from that rather
-// than from anything it is called.
-func TestTheToolChangesNothingWhereThePolicyGrantsNoWrite(t *testing.T) {
+// What a shell may do is the caller's to say and may change between one command and the next, so
+// the tool asks afresh rather than answering from anything it is called.
+func TestTheToolAsksWhetherItChangesAnythingEachTime(t *testing.T) {
 	root, directory := testRoot(t)
 
-	if !bash.New(root, func() sandbox.Policy { return sandbox.Policy{Read: []string{directory}} }).ReadOnly() {
-		t.Errorf("a shell with nowhere to write changes nothing")
+	readOnly := true
+	shell := bash.New(
+		root,
+		func() bool { return readOnly },
+		func(context.Context) (sandbox.Policy, error) {
+			return sandbox.Policy{Write: []string{directory}}, nil
+		},
+		sandbox.NewProcesses(false),
+	)
+
+	if !shell.ReadOnly() {
+		t.Errorf("a shell whose caller grants nowhere to write changes nothing")
 	}
 
-	if bash.New(root, func() sandbox.Policy { return sandbox.Policy{Write: []string{directory}} }).ReadOnly() {
-		t.Errorf("a shell with somewhere to write may change something")
+	readOnly = false
+
+	if shell.ReadOnly() {
+		t.Errorf("a shell whose caller grants somewhere to write may change something")
 	}
 }
 
@@ -339,7 +360,7 @@ func TestACancelledContextStopsTheCommand(t *testing.T) {
 		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
 
-	call, err := bash.New(root, func() sandbox.Policy { return policy }).Parse(`{"command": "sleep 60"}`)
+	call, err := fixedShell(root, func() sandbox.Policy { return policy }).Parse(`{"command": "sleep 60"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -382,7 +403,7 @@ func TestThePolicyIsAskedForEveryCommand(t *testing.T) {
 		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
 
-	built := bash.New(root, func() sandbox.Policy {
+	built := fixedShell(root, func() sandbox.Policy {
 		if writable {
 			return grantedPolicy
 		}

@@ -162,7 +162,7 @@ func confinedShell( // nothing is prepared: what is granted may change between o
 		return !currentCaps.has(capShell) || writablePaths(workspace, home, currentCaps) == nil
 	}
 
-	return bash.Fresh(files, readOnly, fresh, processes)
+	return bash.New(files, readOnly, fresh, processes)
 }
 
 func writablePaths(workspaceDir string, homeDir string, currentCaps caps) []string {

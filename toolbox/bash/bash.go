@@ -20,35 +20,15 @@ type Args struct {
 	Command string `json:"command"` // the command to run
 }
 
-// New builds a sandboxed shell that starts in root. policy is evaluated for each command.
-func New(root *file.Root, policy func() sandbox.Policy) tool.Tool {
-	return newShell(
-		root,
-		func() bool { return !policy().Writable() },
-		func(context.Context) (sandbox.Policy, error) { return policy(), nil },
-		sandbox.Run,
-	)
-}
-
-// Fresh builds a shell that is confined anew for each command, what is granted being the caller's
-// to change in between. An error from fresh turns the command away, so a caller that withholds the
-// shell says so there. readOnly answers for display, without building a policy to ask one.
-func Fresh(
+// New builds a shell that starts in root and is confined anew for each command, what is granted
+// being the caller's to change in between. An error from fresh turns the command away, so a caller
+// that withholds the shell says so there. readOnly answers for display, without building a policy
+// to ask one.
+func New(
 	root *file.Root,
 	readOnly func() bool,
 	fresh func(context.Context) (sandbox.Policy, error),
 	processes *sandbox.Processes,
-) tool.Tool {
-	return newShell(root, readOnly, fresh, processes.Run)
-}
-
-type runCommand func(context.Context, string, string, sandbox.Policy) (sandbox.Result, error)
-
-func newShell(
-	root *file.Root,
-	readOnly func() bool,
-	fresh func(context.Context) (sandbox.Policy, error),
-	run runCommand,
 ) tool.Tool {
 	return shell{
 		Tool: tool.Syntax(tool.DefineMeasured(
@@ -63,7 +43,7 @@ func newShell(
 				if err != nil {
 					return "", tool.Statistics{}, err
 				}
-				return exec(ctx, root, policy, args, run)
+				return exec(ctx, root, policy, args, processes)
 			},
 		), "bash"),
 
@@ -154,13 +134,13 @@ func exec(
 	root *file.Root,
 	policy sandbox.Policy,
 	args Args,
-	run runCommand,
+	processes *sandbox.Processes,
 ) (string, tool.Statistics, error) {
 	if strings.TrimSpace(args.Command) == "" {
 		return "", tool.Statistics{}, errors.New("command is required")
 	}
 
-	result, err := run(ctx, root.Name(), args.Command, policy)
+	result, err := processes.Run(ctx, root.Name(), args.Command, policy)
 	stats := tool.Statistics{
 		Kind: tool.StatsResources, CPUTime: result.CPUTime, PeakMemory: result.PeakMemory,
 	}
