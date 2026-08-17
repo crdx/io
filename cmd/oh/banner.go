@@ -103,7 +103,7 @@ func ruleTo(width int, label string, style theme.Style) string {
 }
 
 func modes(tools []tool.Tool, shell bool, history bool, background bool, pending bool) string {
-	reads, writes := toolMix(tools)
+	reads, writes := separateTools(tools)
 
 	return offeredCapability(capRead.flag(), reads > 0, theme.Read, pending) +
 		offeredCapability(capWrite.flag(), writes > 0, theme.Write, pending) +
@@ -124,7 +124,7 @@ func offeredCapability(flag string, given bool, style theme.Style, pending bool)
 	return style(flag)
 }
 
-func toolMix(tools []tool.Tool) (reads int, writes int) {
+func separateTools(tools []tool.Tool) (reads int, writes int) {
 	for _, offeredTool := range tools {
 		if offeredTool.ReadOnly() {
 			reads++
