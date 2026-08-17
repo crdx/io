@@ -2,11 +2,14 @@
 
 **io** is a collection of agent and world-building primitives written in Go.
 
+## Packages
+
 - `agent`: conversation loop, with streaming, batching, and cancellation
-- `tool`: tools, schemas, middleware, concurrency, and measurement
+- `tool`: tools, schemas, middleware, and concurrency
 - `toolbox`: implementation of read/ls/find/grep/write/edit/bash
 - `session`: session saving and resumption, as an append-only journal
 - `provider/codex`: the Responses API, the OpenAI way (for now)
+- ... and more, soon
 
 ## Installation
 
