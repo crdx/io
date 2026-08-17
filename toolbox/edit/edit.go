@@ -99,7 +99,7 @@ func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
 	return "edited " + args.Path, stats, nil
 }
 
-func changedLines(before string, after string) (addedLines int64, removedLines int64) {
+func changedLines(before string, after string) (int64, int64) {
 	oldLines := strutil.Lines(before)
 	newLines := strutil.Lines(after)
 

@@ -124,7 +124,10 @@ func offeredCapability(flag string, given bool, style theme.Style, pending bool)
 	return style(flag)
 }
 
-func separateTools(tools []tool.Tool) (reads int, writes int) {
+func separateTools(tools []tool.Tool) (int, int) {
+	var reads int
+	var writes int
+
 	for _, offeredTool := range tools {
 		if offeredTool.ReadOnly() {
 			reads++
