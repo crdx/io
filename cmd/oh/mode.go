@@ -99,7 +99,7 @@ func namedCapability(letter string) (caps, bool) {
 	return 0, false
 }
 
-func refusal(mode *Mode) func(name string) error {
+func refuseWrite(mode *Mode) func(name string) error {
 	return func(name string) error {
 		currentCaps := mode.Current() // asked afresh, the person at the keyboard having a say between calls
 

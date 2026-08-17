@@ -169,7 +169,7 @@ func run() ([]string, error) {
 		mode = NewResumedMode(grantedCaps)
 	}
 
-	files := file.New(root, refusal(mode))
+	files := file.New(root, refuseWrite(mode))
 	processes := sandbox.NewProcesses(grantedCaps.has(capBackground))
 	defer func() { _, _ = processes.Disable() }()
 

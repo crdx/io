@@ -46,8 +46,8 @@ type Root struct {
 }
 
 // New builds a Root over an open directory. refuse is checked before each change.
-func New(root *os.Root, refuse func(name string) error) *Root {
-	return &Root{root: root, refuse: refuse, mounts: map[string]*Root{}}
+func New(root *os.Root, refuseWrite func(name string) error) *Root {
+	return &Root{root: root, refuse: refuseWrite, mounts: map[string]*Root{}}
 }
 
 // Mount adds a tree at an absolute path.

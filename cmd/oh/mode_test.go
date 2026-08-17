@@ -180,7 +180,7 @@ func TestTheRuleAnswersForBothHalvesOfTheMode(t *testing.T) {
 		"the tree":    {capRead | capWrite, nil, file.ErrGitDir},
 		"commit only": {capRead | capGit, file.ErrReadOnly, nil},
 	} {
-		refuse := refusal(NewMode(want.currentCaps))
+		refuse := refuseWrite(NewMode(want.currentCaps))
 
 		if got := refuse("main.go"); !errors.Is(got, want.workspace) {
 			t.Errorf("%s: writing a file got %v, want %v", name, got, want.workspace)
