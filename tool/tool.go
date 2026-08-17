@@ -1,3 +1,4 @@
+// Package tool defines a tool, its schema, and the wrappers that decorate one.
 package tool
 
 import (

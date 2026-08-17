@@ -1,3 +1,4 @@
+// Package codex is a provider speaking the Responses API.
 package codex
 
 import (
