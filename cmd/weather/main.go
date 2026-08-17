@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"crdx.org/io/agent"
@@ -10,15 +11,15 @@ import (
 
 func main() {
 	type WeatherParams struct {
-		City string
+		City string // the city to report
 	}
 
 	weather := tool.Define(
 		"weather",
 		"report weather in a city",
 		tool.Schema{tool.String("city", "the city to look up")},
-		func(args WeatherParams) string { return args.City },
-		func(args WeatherParams) (string, error) {
+		func(args WeatherParams) (string, string) { return args.City, "" },
+		func(_ context.Context, _ WeatherParams) (string, error) {
 			return "Cloudy with a chance of meatballs.", nil
 		},
 	)
@@ -29,6 +30,6 @@ func main() {
 		[]tool.Tool{weather},
 	)
 
-	answer, _ := assistant.Send("what is the weather in London?")
+	answer, _ := assistant.Send(context.Background(), "what is the weather in London?")
 	fmt.Println(answer) // => "London is cloudy, with a chance of meatballs."
 }

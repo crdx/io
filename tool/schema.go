@@ -17,11 +17,11 @@ type Schema []Parameter
 
 // Parameter is one argument a tool takes.
 type Parameter struct {
-	Name        string
-	Type        DataType
-	Description string
+	Name        string   // what the argument is called
+	Type        DataType // what kind of value it takes
+	Description string   // what the argument means
 
-	optional bool
+	optional bool // whether the argument may be absent
 }
 
 // Optional marks a parameter the model may leave out. An absent argument decodes as its zero value,
@@ -42,43 +42,43 @@ func Integer(name string, description string) Parameter {
 }
 
 type property struct {
-	Type        DataType `json:"type"`
-	Description string   `json:"description"`
+	Type        DataType `json:"type"`        // what kind of value it takes
+	Description string   `json:"description"` // what the value means
 }
 
 type object struct {
-	Type                 DataType            `json:"type"`
-	Properties           map[string]property `json:"properties"`
-	Required             []string            `json:"required,omitempty"`
-	AdditionalProperties bool                `json:"additionalProperties"`
+	Type                 DataType            `json:"type"`                 // the schema kind
+	Properties           map[string]property `json:"properties"`           // the declared arguments
+	Required             []string            `json:"required,omitempty"`   // the mandatory arguments
+	AdditionalProperties bool                `json:"additionalProperties"` // whether undeclared arguments are accepted
 }
 
 // MarshalJSON renders the parameters as the JSON Schema object the endpoint expects.
 func (self Schema) MarshalJSON() ([]byte, error) {
-	rendered := object{
+	renderedSchema := object{
 		Type:       TypeObject,
 		Properties: make(map[string]property, len(self)),
 	}
 
 	for _, parameter := range self {
-		rendered.Properties[parameter.Name] = property{
+		renderedSchema.Properties[parameter.Name] = property{
 			Type:        parameter.Type,
 			Description: parameter.Description,
 		}
 
 		if !parameter.optional {
-			rendered.Required = append(rendered.Required, parameter.Name)
+			renderedSchema.Required = append(renderedSchema.Required, parameter.Name)
 		}
 	}
 
-	return json.Marshal(rendered)
+	return json.Marshal(renderedSchema)
 }
 
 // Definition is what a tool is, in a form no wire format's shape leaks into.
 type Definition struct {
-	Name        string
-	Description string
-	Schema      Schema
+	Name        string // what the tool is called
+	Description string // what the tool does
+	Schema      Schema // what arguments it takes
 }
 
 // Describe says what a tool is, for a provider to offer to the model however it offers things.

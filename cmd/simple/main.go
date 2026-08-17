@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -34,7 +35,7 @@ func main() {
 }
 
 func answer(assistant *agent.Agent, prompt string) {
-	for event, err := range agent.Coalesce(assistant.Stream(prompt)) {
+	for event, err := range agent.Coalesce(assistant.Stream(context.Background(), prompt)) {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "\n"+err.Error())
 			return
@@ -42,11 +43,11 @@ func answer(assistant *agent.Agent, prompt string) {
 
 		switch event.Kind {
 		case agent.Text:
-			fmt.Print(event.Payload)
+			fmt.Print(event.Text)
 		case agent.Call:
 			fmt.Printf("\n· %s %s\n", event.Name, event.Arguments)
 		case agent.Result:
-			fmt.Printf("← %s\n", event.Payload)
+			fmt.Printf("← %s\n", event.Text)
 		}
 	}
 

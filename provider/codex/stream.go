@@ -1,9 +1,9 @@
 package codex
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 
 	"crdx.org/io/agent"
@@ -20,7 +20,7 @@ var ErrIncomplete = errors.New("the response was cut short")
 var ErrTruncated = sse.ErrTruncated
 
 type reply struct {
-	items []json.RawMessage
+	items []json.RawMessage // the response output items
 }
 
 func (self *reply) calls() []agent.ToolCall {
@@ -42,44 +42,52 @@ func (self *reply) calls() []agent.ToolCall {
 }
 
 type outputItem struct {
-	Type      string `json:"type"`
-	CallID    string `json:"call_id"`
-	Name      string `json:"name"`
-	Arguments string `json:"arguments"`
+	Type      string `json:"type"`      // the kind of item
+	CallID    string `json:"call_id"`   // which call was made
+	Name      string `json:"name"`      // which tool was called
+	Arguments string `json:"arguments"` // what it was called with
 }
 
 type event struct {
-	Type     string          `json:"type"`
-	Delta    string          `json:"delta"`
-	Message  string          `json:"message"`
-	Item     json.RawMessage `json:"item"`
-	Response *eventResponse  `json:"response"`
+	Type     string          `json:"type"`     // what happened
+	Delta    string          `json:"delta"`    // the text added
+	Message  string          `json:"message"`  // an endpoint failure
+	Item     json.RawMessage `json:"item"`     // a completed output item
+	Part     *eventPart      `json:"part"`     // a completed content part
+	Response *eventResponse  `json:"response"` // the completed response
+}
+
+type eventPart struct {
+	Text string `json:"text"` // the completed text
 }
 
 type eventResponse struct {
-	Error *eventError `json:"error"`
+	Error *eventError `json:"error"` // why the response failed
 }
 
 type eventError struct {
-	Message string `json:"message"`
-	Code    string `json:"code"`
+	Message string `json:"message"` // what went wrong
 }
 
-func (self *event) failure() error {
-	if self.Response != nil && self.Response.Error != nil {
-		switch {
-		case self.Response.Error.Message != "":
-			return errors.New(self.Response.Error.Message)
-		case self.Response.Error.Code != "":
-			return errors.New(self.Response.Error.Code)
-		}
+func (self *event) failure(payload string) error {
+	if self.Response != nil && self.Response.Error != nil && self.Response.Error.Message != "" {
+		return errors.New(self.Response.Error.Message)
 	}
 
 	if self.Message != "" {
 		return errors.New(self.Message)
 	}
 
-	return fmt.Errorf("the endpoint sent a %s event with no message", self.Type)
+	return errors.New(prettyJSON(payload))
+}
+
+func prettyJSON(payload string) string {
+	var formattedJSON bytes.Buffer
+	if err := json.Indent(&formattedJSON, []byte(payload), "", "  "); err != nil {
+		return payload
+	}
+
+	return formattedJSON.String()
 }
 
 func readReply(body io.Reader, yield agent.Yield) (reply, error) {
@@ -94,7 +102,18 @@ func readReply(body io.Reader, yield agent.Yield) (reply, error) {
 
 func parseEvent(payload string) (event, bool) {
 	var message event
-	return message, json.Unmarshal([]byte(payload), &message) == nil
+	if json.Unmarshal([]byte(payload), &message) == nil {
+		return message, true
+	}
+
+	var envelope struct {
+		Type string `json:"type"`
+	}
+	if json.Unmarshal([]byte(payload), &envelope) != nil {
+		return event{}, false
+	}
+
+	return event{Type: envelope.Type}, true
 }
 
 func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
@@ -109,8 +128,15 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 
 	switch message.Type {
 	case "response.output_text.delta":
-		if !yield(message.Delta) {
+		if !yield(agent.Event{Kind: agent.Text, Text: message.Delta}) {
 			return true, nil
+		}
+
+	case "response.reasoning_summary_part.done":
+		if message.Part != nil && message.Part.Text != "" {
+			if !yield(agent.Event{Kind: agent.Reasoning, Text: message.Part.Text}) {
+				return true, nil
+			}
 		}
 
 	case "response.output_item.done":
@@ -125,7 +151,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		return true, ErrIncomplete
 
 	case "response.failed", "error":
-		return true, message.failure()
+		return true, message.failure(payload)
 	}
 
 	return false, nil

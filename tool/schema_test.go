@@ -13,30 +13,30 @@ func TestOptionalParametersAreLeftOutOfRequired(t *testing.T) {
 		tool.Integer("offset", "first line to return").Optional(),
 	}
 
-	rendered, err := json.Marshal(schema)
+	schemaJSON, err := json.Marshal(schema)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expected := `{"type":"object","properties":{` +
+	expectedJSON := `{"type":"object","properties":{` +
 		`"offset":{"type":"integer","description":"first line to return"},` +
 		`"path":{"type":"string","description":"path to the file"}},` +
 		`"required":["path"],"additionalProperties":false}`
 
-	if string(rendered) != expected {
-		t.Errorf("expected %s, got %s", expected, rendered)
+	if string(schemaJSON) != expectedJSON {
+		t.Errorf("expected %s, got %s", expectedJSON, schemaJSON)
 	}
 }
 
 func TestASchemaWithNoParametersIsStillAnObject(t *testing.T) {
-	rendered, err := json.Marshal(tool.Schema{})
+	schemaJSON, err := json.Marshal(tool.Schema{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expected := `{"type":"object","properties":{},"additionalProperties":false}`
+	expectedJSON := `{"type":"object","properties":{},"additionalProperties":false}`
 
-	if string(rendered) != expected {
-		t.Errorf("expected %s, got %s", expected, rendered)
+	if string(schemaJSON) != expectedJSON {
+		t.Errorf("expected %s, got %s", expectedJSON, schemaJSON)
 	}
 }

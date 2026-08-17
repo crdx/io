@@ -2,6 +2,7 @@ package req
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,7 +17,7 @@ const bodyLimit = 64 * 1024
 
 // Client is an endpoint spoken to under a timeout, since the default client waits forever.
 type Client struct {
-	http *http.Client
+	http *http.Client // the timed HTTP client
 }
 
 // New builds a client that gives up on a request after the given wait.
@@ -25,13 +26,13 @@ func New(timeout time.Duration) *Client {
 }
 
 // Stream posts a JSON body and hands back the response, which is the caller's to close.
-func (self *Client) Stream(address string, body any, header http.Header) (io.ReadCloser, error) {
-	encoded, err := json.Marshal(body)
+func (self *Client) Stream(ctx context.Context, address string, body any, header http.Header) (io.ReadCloser, error) {
+	encodedBody, err := json.Marshal(body)
 	if err != nil {
 		return nil, fmt.Errorf("encode request: %w", err)
 	}
 
-	request, err := http.NewRequest(http.MethodPost, address, bytes.NewReader(encoded))
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, address, bytes.NewReader(encodedBody))
 	if err != nil {
 		return nil, err
 	}
@@ -46,9 +47,9 @@ func (self *Client) Stream(address string, body any, header http.Header) (io.Rea
 }
 
 // Form posts a form and reads the JSON answer into target.
-func (self *Client) Form(address string, form url.Values, target any) error {
-	request, err := http.NewRequest(
-		http.MethodPost, address, strings.NewReader(form.Encode()),
+func (self *Client) Form(ctx context.Context, address string, form url.Values, target any) error {
+	request, err := http.NewRequestWithContext(
+		ctx, http.MethodPost, address, strings.NewReader(form.Encode()),
 	)
 	if err != nil {
 		return err
@@ -89,8 +90,8 @@ func refusal(response *http.Response) error {
 
 	var payload struct {
 		Error struct {
-			Message string `json:"message"`
-		} `json:"error"`
+			Message string `json:"message"` // what went wrong
+		} `json:"error"` // the endpoint error
 	}
 
 	if json.Unmarshal(body, &payload) != nil || payload.Error.Message == "" {

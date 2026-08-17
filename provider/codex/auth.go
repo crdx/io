@@ -7,14 +7,16 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"crdx.org/io/internal/xdgutil"
 )
 
 // Credentials are what a ChatGPT subscription was authorised as.
 type Credentials struct {
-	Access    string `json:"access"`
-	Refresh   string `json:"refresh"`
-	ExpiresAt int64  `json:"expires_at"`
-	AccountID string `json:"account_id"`
+	Access    string `json:"access"`     // the access token
+	Refresh   string `json:"refresh"`    // the refresh token
+	ExpiresAt int64  `json:"expires_at"` // when access expires
+	AccountID string `json:"account_id"` // the ChatGPT account
 }
 
 func (self *Credentials) stale() bool {
@@ -33,18 +35,7 @@ func (self *Credentials) inherit(held *Credentials) {
 
 // CredentialsPath is where Login writes and Auth reads.
 func CredentialsPath() string {
-	base := os.Getenv("XDG_STATE_HOME")
-
-	if base == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return ""
-		}
-
-		base = filepath.Join(home, ".local", "state")
-	}
-
-	return filepath.Join(base, "org.crdx", "io", "credentials.json")
+	return xdgutil.StatePath("org.crdx", "io", "auth.json")
 }
 
 func loadCredentials(path string) (*Credentials, error) {

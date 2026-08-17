@@ -1,6 +1,7 @@
 package truncate
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,13 +16,13 @@ const Limit = 32 * 1024
 
 // Tools wraps every tool so none of them can answer with more than Limit.
 func Tools(subjects []tool.Tool) []tool.Tool {
-	wrapped := make([]tool.Tool, len(subjects))
+	wrappedTools := make([]tool.Tool, len(subjects))
 
 	for index, subject := range subjects {
-		wrapped[index] = Tool(subject)
+		wrappedTools[index] = Tool(subject)
 	}
 
-	return wrapped
+	return wrappedTools
 }
 
 // Tool wraps one tool so its output is capped.
@@ -30,7 +31,7 @@ func Tool(subject tool.Tool) tool.Tool {
 }
 
 type capped struct {
-	tool.Tool
+	tool.Tool // the tool whose output is capped
 }
 
 func (self capped) Parse(arguments string) (tool.Call, error) {
@@ -43,11 +44,29 @@ func (self capped) Parse(arguments string) (tool.Call, error) {
 }
 
 type cappedCall struct {
-	tool.Call
+	tool.Call // the call whose output is capped
 }
 
-func (self cappedCall) Exec() (string, error) {
-	output, err := self.Call.Exec()
+func (self cappedCall) Focus() string {
+	if focusedCall, ok := self.Call.(tool.FocusedCall); ok {
+		return focusedCall.Focus()
+	}
+
+	return ""
+}
+
+func (self cappedCall) Syntax() string {
+	if syntaxCall, ok := self.Call.(tool.SyntaxCall); ok {
+		return syntaxCall.Syntax()
+	}
+
+	return ""
+}
+
+func (self cappedCall) Statistics() (tool.Statistics, bool) { return tool.Stats(self.Call) }
+
+func (self cappedCall) Exec(ctx context.Context) (string, error) {
+	output, err := self.Call.Exec(ctx)
 	if err != nil {
 		return output, err
 	}

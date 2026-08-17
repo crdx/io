@@ -82,8 +82,8 @@ func authoriseAddress(verifier string, state string) string {
 
 func waitForCallback(listener net.Listener, state string) (string, error) {
 	type transmission struct {
-		code string
-		err  error
+		code string // the authorisation code
+		err  error  // why authorisation failed
 	}
 
 	radio := make(chan transmission, 1)
@@ -159,12 +159,12 @@ var authClient = req.New(authTimeout)
 
 func postForm(form url.Values) (*Credentials, error) {
 	var payload struct {
-		Access    string `json:"access_token"`
-		Refresh   string `json:"refresh_token"`
-		ExpiresIn int64  `json:"expires_in"`
+		Access    string `json:"access_token"`  // the new access token
+		Refresh   string `json:"refresh_token"` // the new refresh token
+		ExpiresIn int64  `json:"expires_in"`    // its lifetime in seconds
 	}
 
-	if err := authClient.Form(tokenEndpoint(), form, &payload); err != nil {
+	if err := authClient.Form(context.Background(), tokenEndpoint(), form, &payload); err != nil {
 		return nil, err
 	}
 
@@ -204,8 +204,8 @@ func accountID(access string) string {
 
 	var claims struct {
 		Auth struct {
-			AccountID string `json:"chatgpt_account_id"`
-		} `json:"https://api.openai.com/auth"`
+			AccountID string `json:"chatgpt_account_id"` // the ChatGPT account
+		} `json:"https://api.openai.com/auth"` // the authorisation claims
 	}
 
 	if json.Unmarshal(body, &claims) != nil {

@@ -10,7 +10,7 @@ import (
 	"crdx.org/io/internal/req"
 )
 
-func refusing(t *testing.T, status int, body string) string {
+func refusingServer(t *testing.T, status int, body string) string {
 	t.Helper()
 
 	server := httptest.NewServer(http.HandlerFunc(
@@ -25,9 +25,9 @@ func refusing(t *testing.T, status int, body string) string {
 }
 
 func TestFailureCarriesTheEndpointsOwnMessage(t *testing.T) {
-	url := refusing(t, http.StatusTooManyRequests, `{"error":{"message":"slow down"}}`)
+	url := refusingServer(t, http.StatusTooManyRequests, `{"error":{"message":"slow down"}}`)
 
-	_, err := req.New(time.Second).Stream(url, map[string]string{}, nil)
+	_, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)
 	if err == nil {
 		t.Fatal("expected the refusal to be reported")
 	}
@@ -38,9 +38,9 @@ func TestFailureCarriesTheEndpointsOwnMessage(t *testing.T) {
 }
 
 func TestFailureFallsBackToTheStatus(t *testing.T) {
-	url := refusing(t, http.StatusBadGateway, "the gateway is unwell")
+	url := refusingServer(t, http.StatusBadGateway, "the gateway is unwell")
 
-	_, err := req.New(time.Second).Stream(url, map[string]string{}, nil)
+	_, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)
 	if err == nil {
 		t.Fatal("expected the refusal to be reported")
 	}
@@ -68,13 +68,13 @@ func TestFormPostsAndDecodes(t *testing.T) {
 
 	t.Cleanup(server.Close)
 
-	var answered struct {
-		Access string `json:"access_token"`
+	var response struct {
+		Access string `json:"access_token"` // the token returned
 	}
 
 	form := map[string][]string{"grant_type": {"refresh_token"}}
 
-	if err := req.New(time.Second).Form(server.URL, form, &answered); err != nil {
+	if err := req.New(time.Second).Form(t.Context(), server.URL, form, &response); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -82,7 +82,7 @@ func TestFormPostsAndDecodes(t *testing.T) {
 		t.Errorf("expected the form to arrive, got %q", sent)
 	}
 
-	if answered.Access != "new" {
-		t.Errorf("expected the answer to be read, got %q", answered.Access)
+	if response.Access != "new" {
+		t.Errorf("expected the answer to be read, got %q", response.Access)
 	}
 }

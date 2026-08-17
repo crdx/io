@@ -20,78 +20,78 @@ func stream(events ...agent.Event) iter.Seq2[agent.Event, error] {
 	}
 }
 
-func text(said string) agent.Event {
-	return agent.Event{Kind: agent.Text, Payload: said}
+func text(content string) agent.Event {
+	return agent.Event{Kind: agent.Text, Text: content}
 }
 
-func rendered(events iter.Seq2[agent.Event, error]) ([]string, error) {
-	var seen []string
+func renderedEvents(events iter.Seq2[agent.Event, error]) ([]string, error) {
+	var eventStrings []string
 
 	for event, err := range events {
 		if err != nil {
-			return seen, err
+			return eventStrings, err
 		}
 
-		seen = append(seen, fmt.Sprintf("%d:%s%s", event.Kind, event.Name, event.Payload))
+		eventStrings = append(eventStrings, fmt.Sprintf("%s:%s%s", event.Kind, event.Name, event.Text))
 	}
 
-	return seen, nil
+	return eventStrings, nil
 }
 
 func TestCoalesceHoldsTextUntilSomethingElseHappens(t *testing.T) {
-	held := agent.Coalesce(stream(
+	coalescedEvents := agent.Coalesce(stream(
 		text("Let me "),
 		text("look. "),
 		agent.Event{Kind: agent.Call, Name: "weather"},
-		agent.Event{Kind: agent.Result, Name: "weather", Payload: "raining"},
+		agent.Event{Kind: agent.Result, Name: "weather", Text: "raining"},
 		text("It is "),
 		text("raining."),
 	))
 
-	seen, err := rendered(held)
+	eventStrings, err := renderedEvents(coalescedEvents)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expected := []string{
-		fmt.Sprintf("%d:Let me look. ", agent.Text),
-		fmt.Sprintf("%d:weather", agent.Call),
-		fmt.Sprintf("%d:weatherraining", agent.Result),
-		fmt.Sprintf("%d:It is raining.", agent.Text),
+	expectedEvents := []string{
+		fmt.Sprintf("%s:Let me look. ", agent.Text),
+		fmt.Sprintf("%s:weather", agent.Call),
+		fmt.Sprintf("%s:weatherraining", agent.Result),
+		fmt.Sprintf("%s:It is raining.", agent.Text),
 	}
 
-	if !slices.Equal(seen, expected) {
-		t.Errorf("expected %v, got %v", expected, seen)
+	if !slices.Equal(eventStrings, expectedEvents) {
+		t.Errorf("expected %v, got %v", expectedEvents, eventStrings)
 	}
 }
 
 func TestCoalesceLetsHeldTextGoBeforeAnError(t *testing.T) {
 	failure := errors.New("model overloaded")
 
-	held := agent.Coalesce(func(yield func(agent.Event, error) bool) {
+	coalescedEvents := agent.Coalesce(func(yield func(agent.Event, error) bool) {
 		if yield(text("It is raining "), nil) {
 			yield(agent.Event{}, failure)
 		}
 	})
 
-	seen, err := rendered(held)
+	eventStrings, err := renderedEvents(coalescedEvents)
 	if !errors.Is(err, failure) {
 		t.Fatalf("expected the failure, got %v", err)
 	}
 
-	if !slices.Equal(seen, []string{fmt.Sprintf("%d:It is raining ", agent.Text)}) {
-		t.Errorf("expected what was said to survive the error, got %v", seen)
+	if !slices.Equal(eventStrings, []string{fmt.Sprintf("%s:It is raining ", agent.Text)}) {
+		t.Errorf("expected what was said to survive the error, got %v", eventStrings)
 	}
 }
 
 func TestCoalesceStopsWhenTheCallerDoes(t *testing.T) {
-	var read int
+	var readEvents int
 
-	counted := func(yield func(agent.Event, error) bool) {
-		asked := agent.Event{Kind: agent.Call, Name: "weather"}
+	countedStream := func(yield func(agent.Event, error) bool) {
+		callEvent := agent.Event{Kind: agent.Call, Name: "weather"}
 
-		for _, event := range []agent.Event{text("It is raining "), asked, asked} {
-			read++
+		for _, event := range []agent.Event{text("It is raining "), callEvent, callEvent} {
+			readEvents++
 
 			if !yield(event, nil) {
 				return
@@ -99,19 +99,19 @@ func TestCoalesceStopsWhenTheCallerDoes(t *testing.T) {
 		}
 	}
 
-	var seen int
+	var eventStrings int
 
-	for range agent.Coalesce(counted) {
-		seen++
+	for range agent.Coalesce(countedStream) {
+		eventStrings++
 		break
 	}
 
-	if seen != 1 {
-		t.Errorf("expected one event, got %d", seen)
+	if eventStrings != 1 {
+		t.Errorf("expected one event, got %d", eventStrings)
 	}
 
-	if read != 2 {
+	if readEvents != 2 {
 		t.Errorf("expected the text and the call that let it go to be all that was read, "+
-			"got %d events", read)
+			"got %d events", readEvents)
 	}
 }

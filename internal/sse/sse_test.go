@@ -10,106 +10,106 @@ import (
 )
 
 func collect(stream string, last string) ([]string, error) {
-	var seen []string
+	var payloads []string
 
 	err := sse.Read(strings.NewReader(stream), func(payload string) (bool, error) {
-		seen = append(seen, payload)
+		payloads = append(payloads, payload)
 		return payload == last, nil
 	})
 
-	return seen, err
+	return payloads, err
 }
 
 func TestFramesArriveOneAtATime(t *testing.T) {
-	seen, err := collect("data: one\n\ndata: two\ndata: three\n\ndata: end\n\n", "end")
+	payloads, err := collect("data: one\n\ndata: two\ndata: three\n\ndata: end\n\n", "end")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expected := []string{"one", "twothree", "end"}
-	if !slices.Equal(seen, expected) {
-		t.Errorf("expected %v, got %v", expected, seen)
+	expectedPayloads := []string{"one", "twothree", "end"}
+	if !slices.Equal(payloads, expectedPayloads) {
+		t.Errorf("expected %v, got %v", expectedPayloads, payloads)
 	}
 }
 
 func TestOtherFieldsAreIgnored(t *testing.T) {
 	stream := ": keeping the line warm\nevent: message\nid: 1\ndata: one\nretry: 500\n\n"
 
-	seen, err := collect(stream, "one")
+	payloads, err := collect(stream, "one")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !slices.Equal(seen, []string{"one"}) {
-		t.Errorf("expected the data alone, got %v", seen)
+	if !slices.Equal(payloads, []string{"one"}) {
+		t.Errorf("expected the data alone, got %v", payloads)
 	}
 }
 
 func TestEmptyFramesAreNotDispatched(t *testing.T) {
-	seen, err := collect("\n\ndata: one\n\n\n\ndata: end\n\n", "end")
+	payloads, err := collect("\n\ndata: one\n\n\n\ndata: end\n\n", "end")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expected := []string{"one", "end"}
-	if !slices.Equal(seen, expected) {
-		t.Errorf("expected %v, got %v", expected, seen)
+	expectedPayloads := []string{"one", "end"}
+	if !slices.Equal(payloads, expectedPayloads) {
+		t.Errorf("expected %v, got %v", expectedPayloads, payloads)
 	}
 }
 
 func TestCarriageReturnsAreNotPartOfThePayload(t *testing.T) {
-	seen, err := collect("data: one\r\n\r\n", "one")
+	payloads, err := collect("data: one\r\n\r\n", "one")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !slices.Equal(seen, []string{"one"}) {
-		t.Errorf("expected the payload without the carriage return, got %q", seen)
+	if !slices.Equal(payloads, []string{"one"}) {
+		t.Errorf("expected the payload without the carriage return, got %q", payloads)
 	}
 }
 
 func TestALoneCarriageReturnStaysInThePayload(t *testing.T) {
-	seen, err := collect("data: one\rtwo\n\n", "one\rtwo")
+	payloads, err := collect("data: one\rtwo\n\n", "one\rtwo")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !slices.Equal(seen, []string{"one\rtwo"}) {
-		t.Errorf("expected the payload whole, got %q", seen)
+	if !slices.Equal(payloads, []string{"one\rtwo"}) {
+		t.Errorf("expected the payload whole, got %q", payloads)
 	}
 }
 
 func TestTheLastFrameCountsWithoutItsBlankLine(t *testing.T) {
-	seen, err := collect("data: one\n\ndata: end", "end")
+	payloads, err := collect("data: one\n\ndata: end", "end")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expected := []string{"one", "end"}
-	if !slices.Equal(seen, expected) {
-		t.Errorf("expected %v, got %v", expected, seen)
+	expectedPayloads := []string{"one", "end"}
+	if !slices.Equal(payloads, expectedPayloads) {
+		t.Errorf("expected %v, got %v", expectedPayloads, payloads)
 	}
 }
 
 func TestAStreamThatEndsEarlyIsTruncated(t *testing.T) {
-	seen, err := collect("data: one\n\n", "end")
+	payloads, err := collect("data: one\n\n", "end")
 	if !errors.Is(err, sse.ErrTruncated) {
 		t.Fatalf("expected a truncated stream to be reported, got %v", err)
 	}
 
-	if !slices.Equal(seen, []string{"one"}) {
-		t.Errorf("expected what did arrive, got %v", seen)
+	if !slices.Equal(payloads, []string{"one"}) {
+		t.Errorf("expected what did arrive, got %v", payloads)
 	}
 }
 
 func TestReadingStopsWhenTheReaderIsDone(t *testing.T) {
-	seen, err := collect("data: end\n\ndata: two\n\n", "end")
+	payloads, err := collect("data: end\n\ndata: two\n\n", "end")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !slices.Equal(seen, []string{"end"}) {
-		t.Errorf("expected nothing after the end, got %v", seen)
+	if !slices.Equal(payloads, []string{"end"}) {
+		t.Errorf("expected nothing after the end, got %v", payloads)
 	}
 }
 
@@ -117,8 +117,8 @@ func fields(stream string) string {
 	var out strings.Builder
 
 	for line := range strings.SplitSeq(stream, "\n") {
-		field, carried := strings.CutPrefix(strings.TrimRight(line, "\r"), "data:")
-		if carried {
+		field, hasData := strings.CutPrefix(strings.TrimRight(line, "\r"), "data:")
+		if hasData {
 			out.WriteString(strings.TrimSpace(field))
 		}
 	}
@@ -144,10 +144,10 @@ func FuzzRead(f *testing.F) {
 	}
 
 	f.Fuzz(func(t *testing.T, stream string) {
-		var seen []string
+		var payloads []string
 
 		err := sse.Read(strings.NewReader(stream), func(payload string) (bool, error) {
-			seen = append(seen, payload)
+			payloads = append(payloads, payload)
 			return false, nil
 		})
 
@@ -155,7 +155,7 @@ func FuzzRead(f *testing.F) {
 			t.Fatalf("expected the stream to run out, got %v", err)
 		}
 
-		for _, payload := range seen {
+		for _, payload := range payloads {
 			if payload == "" {
 				t.Error("expected no empty payload")
 			}
@@ -165,19 +165,19 @@ func FuzzRead(f *testing.F) {
 			}
 		}
 
-		if joined := strings.Join(seen, ""); joined != fields(stream) {
-			t.Errorf("expected the data fields, got %q", joined)
+		if joinedFields := strings.Join(payloads, ""); joinedFields != fields(stream) {
+			t.Errorf("expected the data fields, got %q", joinedFields)
 		}
 	})
 }
 
 func TestTheReadersOwnFailureIsHandedBack(t *testing.T) {
-	refused := errors.New("that made no sense")
+	refusal := errors.New("that made no sense")
 
 	err := sse.Read(strings.NewReader("data: one\n\ndata: two\n\n"),
-		func(string) (bool, error) { return false, refused })
+		func(string) (bool, error) { return false, refusal })
 
-	if !errors.Is(err, refused) {
+	if !errors.Is(err, refusal) {
 		t.Errorf("expected the reader's own failure, got %v", err)
 	}
 }

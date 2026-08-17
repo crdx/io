@@ -1,6 +1,7 @@
 package codex_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/provider/codex"
@@ -16,7 +18,7 @@ import (
 )
 
 type WeatherParams struct {
-	City string `json:"city"`
+	City string `json:"city"` // the city to report
 }
 
 func events(payloads ...string) string {
@@ -83,16 +85,16 @@ func newAgent(t *testing.T, url string, tools []tool.Tool) *agent.Agent {
 	return agent.New("You are a helpful assistant", backend, tools)
 }
 
-func weatherTool(t *testing.T, called *int) tool.Tool {
+func weatherTool(t *testing.T, callCount *int) tool.Tool {
 	t.Helper()
 
 	return tool.Define(
 		"weather",
 		"report weather in a city",
 		tool.Schema{tool.String("city", "the city to look up")},
-		func(args WeatherParams) string { return args.City },
-		func(args WeatherParams) (string, error) {
-			*called++
+		func(args WeatherParams) (string, string) { return args.City, "" },
+		func(_ context.Context, args WeatherParams) (string, error) {
+			*callCount++
 
 			if args.City != "London" {
 				t.Errorf("expected the city to be London, got %q", args.City)
@@ -110,20 +112,20 @@ func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
 		events(answer("It is raining "), answer("in London."), completed),
 	)
 
-	var called int
-	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &called)})
+	var callCount int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &callCount)})
 
-	said, err := assistant.Send("what is the weather in London?")
+	answer, err := assistant.Send(t.Context(), "what is the weather in London?")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if said != "It is raining in London." {
-		t.Errorf("expected the answer, got %q", said)
+	if answer != "It is raining in London." {
+		t.Errorf("expected the answer, got %q", answer)
 	}
 
-	if called != 1 {
-		t.Errorf("expected the tool to run once, ran %d times", called)
+	if callCount != 1 {
+		t.Errorf("expected the tool to run once, ran %d times", callCount)
 	}
 
 	if len(*bodies) != 2 {
@@ -146,21 +148,21 @@ func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
 func TestToolsAreOfferedInTheResponsesShape(t *testing.T) {
 	server, bodies := turns(t, events(answer("Hello."), completed))
 
-	var called int
-	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &called)})
+	var callCount int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &callCount)})
 
-	if _, err := assistant.Send("hello"); err != nil {
+	if _, err := assistant.Send(t.Context(), "hello"); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	offered := `"tools":[{"type":"function","name":"weather",` +
+	toolsJSON := `"tools":[{"type":"function","name":"weather",` +
 		`"description":"report weather in a city","strict":false,` +
 		`"parameters":{"type":"object","properties":{"city":` +
 		`{"type":"string","description":"the city to look up"}},` +
 		`"required":["city"],"additionalProperties":false}}]`
 
-	if !strings.Contains((*bodies)[0], offered) {
-		t.Errorf("expected %s, got %s", offered, (*bodies)[0])
+	if !strings.Contains((*bodies)[0], toolsJSON) {
+		t.Errorf("expected %s, got %s", toolsJSON, (*bodies)[0])
 	}
 }
 
@@ -169,24 +171,24 @@ func TestAToolWithNoArgumentsIsStillGivenASchema(t *testing.T) {
 
 	type nothing struct{}
 
-	waiting := tool.Define(
+	waitingTool := tool.Define(
 		"wait",
 		"wait for something to happen",
 		tool.Schema{},
-		func(nothing) string { return "" },
-		func(nothing) (string, error) { return "", nil },
+		func(nothing) (string, string) { return "", "" },
+		func(context.Context, nothing) (string, error) { return "", nil },
 	)
 
-	assistant := newAgent(t, server.URL, []tool.Tool{waiting})
+	assistant := newAgent(t, server.URL, []tool.Tool{waitingTool})
 
-	if _, err := assistant.Send("hello"); err != nil {
+	if _, err := assistant.Send(t.Context(), "hello"); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	offered := `"parameters":{"type":"object","properties":{},"additionalProperties":false}`
+	schemaJSON := `"parameters":{"type":"object","properties":{},"additionalProperties":false}`
 
-	if !strings.Contains((*bodies)[0], offered) {
-		t.Errorf("expected %s, got %s", offered, (*bodies)[0])
+	if !strings.Contains((*bodies)[0], schemaJSON) {
+		t.Errorf("expected %s, got %s", schemaJSON, (*bodies)[0])
 	}
 }
 
@@ -197,28 +199,29 @@ func TestStreamReportsEachTurnAsItHappens(t *testing.T) {
 		events(answer("It is raining in London."), completed),
 	)
 
-	var called int
-	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &called)})
+	var callCount int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &callCount)})
 
-	var seen []string
+	var eventStrings []string
 
-	for event, err := range assistant.Stream("what is the weather in London?") {
+	for event, err := range assistant.Stream(t.Context(), "what is the weather in London?") {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		seen = append(seen, fmt.Sprintf("%d:%s:%s", event.Kind, event.Name, event.Payload))
+		eventStrings = append(eventStrings, fmt.Sprintf("%s:%s:%s", event.Kind, event.Name, event.Text))
 	}
 
-	expected := []string{
-		fmt.Sprintf("%d::Let me look. ", agent.Text),
-		fmt.Sprintf("%d:weather:", agent.Call),
-		fmt.Sprintf("%d:weather:raining in London", agent.Result),
-		fmt.Sprintf("%d::It is raining in London.", agent.Text),
+	expectedEvents := []string{
+		fmt.Sprintf("%s::what is the weather in London?", agent.Prompt),
+		fmt.Sprintf("%s::Let me look. ", agent.Text),
+		fmt.Sprintf("%s:weather:", agent.Call),
+		fmt.Sprintf("%s:weather:raining in London", agent.Result),
+		fmt.Sprintf("%s::It is raining in London.", agent.Text),
 	}
 
-	if !slices.Equal(seen, expected) {
-		t.Errorf("expected %v, got %v", expected, seen)
+	if !slices.Equal(eventStrings, expectedEvents) {
+		t.Errorf("expected %v, got %v", expectedEvents, eventStrings)
 	}
 }
 
@@ -228,26 +231,75 @@ func TestStreamStopsWhenTheCallerDoes(t *testing.T) {
 		events(answer("It is raining "), call("weather", `{"city":"London"}`), completed),
 	)
 
-	var called int
-	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &called)})
+	var callCount int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &callCount)})
 
-	var seen int
+	var eventCount int
 
-	for range assistant.Stream("what is the weather in London?") {
-		seen++
-		break
+	for event := range assistant.Stream(t.Context(), "what is the weather in London?") {
+		eventCount++
+
+		if event.Kind == agent.Text {
+			break
+		}
 	}
 
-	if seen != 1 {
-		t.Errorf("expected one event, got %d", seen)
+	if eventCount != 2 {
+		t.Errorf("expected the prompt and one answer, got %d events", eventCount)
 	}
 
-	if called != 0 {
-		t.Errorf("expected the tool not to run, ran %d times", called)
+	if callCount != 0 {
+		t.Errorf("expected the tool not to run, ran %d times", callCount)
 	}
 
 	if len(*bodies) != 1 {
 		t.Errorf("expected one request, got %d", len(*bodies))
+	}
+}
+
+// A thought reaches the caller once it is whole, and is not mistaken for the answer.
+func TestStreamReportsReasoningApartFromTheAnswer(t *testing.T) {
+	server, bodies := turns(
+		t,
+		events(
+			`{"type":"response.reasoning_summary_text.delta","delta":"Chec"}`,
+			`{"type":"response.reasoning_summary_text.delta","delta":"king."}`,
+			`{"type":"response.reasoning_summary_part.done",`+
+				`"part":{"type":"summary_text","text":"Checking the sky."}}`,
+			answer("It is raining."),
+			completed,
+		),
+	)
+
+	assistant := newAgent(t, server.URL, nil)
+
+	var reasoningSummaries []string
+	var answer strings.Builder
+
+	for event, err := range assistant.Stream(t.Context(), "what is the weather?") {
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if event.Kind == agent.Reasoning {
+			reasoningSummaries = append(reasoningSummaries, event.Text)
+		}
+
+		if event.Kind == agent.Text {
+			answer.WriteString(event.Text)
+		}
+	}
+
+	if want := []string{"Checking the sky."}; !slices.Equal(reasoningSummaries, want) {
+		t.Errorf("expected %v, got %v", want, reasoningSummaries)
+	}
+
+	if want := "It is raining."; answer.String() != want {
+		t.Errorf("expected the answer alone, got %q", answer.String())
+	}
+
+	if !strings.Contains((*bodies)[0], `"reasoning":{"effort":"high","summary":"auto"}`) {
+		t.Errorf("expected a summary to have been asked for, got %s", (*bodies)[0])
 	}
 }
 
@@ -259,8 +311,41 @@ func TestSendReportsAnEndpointFailure(t *testing.T) {
 
 	assistant := newAgent(t, server.URL, nil)
 
-	if _, err := assistant.Send("hello"); err == nil || err.Error() != "model overloaded" {
+	if _, err := assistant.Send(t.Context(), "hello"); err == nil || err.Error() != "model overloaded" {
 		t.Errorf("expected the endpoint's own message, got %v", err)
+	}
+}
+
+func TestSendShowsAnEndpointFailureWithoutAMessageAsJSON(t *testing.T) {
+	server, _ := turns(t, events(`{"type":"error","error":{"code":"overloaded","retry":true}}`))
+	assistant := newAgent(t, server.URL, nil)
+
+	_, err := assistant.Send(t.Context(), "hello")
+	want := `{
+  "type": "error",
+  "error": {
+    "code": "overloaded",
+    "retry": true
+  }
+}`
+	if err == nil || err.Error() != want {
+		t.Errorf("expected the whole event as JSON, got %v", err)
+	}
+}
+
+func TestSendShowsAnEndpointFailureWithAnUnreadableMessageAsJSON(t *testing.T) {
+	server, _ := turns(t, events(`{"type":"error","message":{"text":"model overloaded"}}`))
+	assistant := newAgent(t, server.URL, nil)
+
+	_, err := assistant.Send(t.Context(), "hello")
+	want := `{
+  "type": "error",
+  "message": {
+    "text": "model overloaded"
+  }
+}`
+	if err == nil || err.Error() != want {
+		t.Errorf("expected the whole event as JSON, got %v", err)
 	}
 }
 
@@ -269,13 +354,13 @@ func TestSendRefusesATruncatedStream(t *testing.T) {
 
 	assistant := newAgent(t, server.URL, nil)
 
-	said, err := assistant.Send("what is the weather in London?")
+	answer, err := assistant.Send(t.Context(), "what is the weather in London?")
 	if err == nil {
 		t.Fatal("expected a truncated stream to be refused")
 	}
 
-	if said != "It is raining " {
-		t.Errorf("expected what did arrive to be handed back, got %q", said)
+	if answer != "It is raining " {
+		t.Errorf("expected what did arrive to be handed back, got %q", answer)
 	}
 }
 
@@ -287,13 +372,13 @@ func TestSendReportsAnIncompleteResponse(t *testing.T) {
 
 	assistant := newAgent(t, server.URL, nil)
 
-	said, err := assistant.Send("what is the weather in London?")
+	answer, err := assistant.Send(t.Context(), "what is the weather in London?")
 	if !errors.Is(err, codex.ErrIncomplete) {
 		t.Fatalf("expected an incomplete response to be reported, got %v", err)
 	}
 
-	if said != "It is raining " {
-		t.Errorf("expected what did arrive to be handed back, got %q", said)
+	if answer != "It is raining " {
+		t.Errorf("expected what did arrive to be handed back, got %q", answer)
 	}
 }
 
@@ -302,13 +387,13 @@ func TestSendAcceptsTheDoneSentinel(t *testing.T) {
 
 	assistant := newAgent(t, server.URL, nil)
 
-	said, err := assistant.Send("what is the weather in London?")
+	answer, err := assistant.Send(t.Context(), "what is the weather in London?")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if said != "It is raining in London." {
-		t.Errorf("expected the answer, got %q", said)
+	if answer != "It is raining in London." {
+		t.Errorf("expected the answer, got %q", answer)
 	}
 }
 
@@ -321,11 +406,60 @@ func TestSendTellsTheModelWhenThereIsNoSuchTool(t *testing.T) {
 
 	assistant := newAgent(t, server.URL, nil)
 
-	if _, err := assistant.Send("hello"); err != nil {
+	if _, err := assistant.Send(t.Context(), "hello"); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	if !strings.Contains((*bodies)[1], `there is no tool called \"missing\"`) {
 		t.Errorf("expected the model to be told, got %s", (*bodies)[1])
+	}
+}
+
+// A request that has been made and is producing nothing is the one thing a turn cannot be talked
+// out of: the flag a harness sets is only read between events, and no event is coming. Cancelling
+// the context ends the request itself, which is what makes the escape key work.
+func TestCancellingTheContextEndsARequestThatIsProducingNothing(t *testing.T) {
+	requestDone := make(chan struct{})
+
+	server := httptest.NewServer(http.HandlerFunc(
+		func(writer http.ResponseWriter, request *http.Request) {
+			writer.Header().Set("Content-Type", "text/event-stream")
+
+			if flusher, ok := writer.(http.Flusher); ok {
+				flusher.Flush()
+			}
+
+			<-request.Context().Done()
+			close(requestDone)
+		},
+	))
+
+	t.Cleanup(server.Close)
+
+	ctx, stop := context.WithCancel(t.Context())
+
+	failure := make(chan error, 1)
+
+	go func() {
+		_, err := newAgent(t, server.URL, nil).Send(ctx, "are you there")
+		failure <- err
+	}()
+
+	time.Sleep(50 * time.Millisecond)
+	stop()
+
+	select {
+	case err := <-failure:
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("expected the turn to report the cancellation, got %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("expected the request to end when the context was cancelled")
+	}
+
+	select {
+	case <-requestDone:
+	case <-time.After(2 * time.Second):
+		t.Error("expected the endpoint to see the connection go")
 	}
 }

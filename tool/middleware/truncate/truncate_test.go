@@ -1,6 +1,7 @@
 package truncate_test
 
 import (
+	"context"
 	"os"
 	"strings"
 	"testing"
@@ -10,7 +11,7 @@ import (
 )
 
 type Args struct {
-	Size int `json:"size"`
+	Size int `json:"size"` // how much output to make
 }
 
 func newTool(t *testing.T) tool.Tool {
@@ -20,8 +21,8 @@ func newTool(t *testing.T) tool.Tool {
 		"generate",
 		"generate output",
 		tool.Schema{tool.Integer("size", "how many lines to generate")},
-		func(args Args) string { return "generate" },
-		func(args Args) (string, error) {
+		func(args Args) (string, string) { return "generate", "" },
+		func(_ context.Context, args Args) (string, error) {
 			return strings.Repeat("a line of text\n", args.Size), nil
 		},
 	)
@@ -35,12 +36,37 @@ func exec(t *testing.T, subject tool.Tool, arguments string) string {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	output, err := call.Exec()
+	output, err := call.Exec(t.Context())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	return output
+}
+
+func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
+	subject := tool.DefineMeasured(
+		"measured",
+		"measure something",
+		tool.Schema{},
+		func(Args) (string, string) { return "measured", "" },
+		func(context.Context, Args) (string, tool.Statistics, error) {
+			return "done", tool.Statistics{Kind: tool.StatsRead, Lines: 3, Bytes: 12}, nil
+		},
+	)
+
+	call, err := truncate.Tool(subject).Parse(`{}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := call.Exec(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	stats, ok := tool.Stats(call)
+	if !ok || stats.Lines != 3 || stats.Bytes != 12 {
+		t.Errorf("got %+v and measured=%v", stats, ok)
+	}
 }
 
 func TestOutputThatFitsIsLeftAlone(t *testing.T) {
@@ -67,15 +93,41 @@ func TestOutputTooBigIsCutAndSaved(t *testing.T) {
 	path := strings.TrimSuffix(strings.Split(output, "the whole of it is in ")[1], "]\n")
 	path = strings.TrimSuffix(strings.TrimSpace(path), "]")
 
-	saved, err := os.ReadFile(path) //nolint:gosec // the path the notice named
+	savedOutput, err := os.ReadFile(path) //nolint:gosec // the path the notice named
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	t.Cleanup(func() { _ = os.Remove(path) })
 
-	if string(saved) != whole {
-		t.Errorf("expected the whole output to be saved, got %d of %d bytes", len(saved), len(whole))
+	if string(savedOutput) != whole {
+		t.Errorf("expected the whole output to be saved, got %d of %d bytes", len(savedOutput), len(whole))
+	}
+}
+
+func TestAWrappedToolKeepsItsSyntax(t *testing.T) {
+	subject := tool.Syntax(newTool(t), "bash")
+	call, err := truncate.Tool(subject).Parse(`{"size":2}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	syntaxCall, ok := call.(tool.SyntaxCall)
+	if !ok || syntaxCall.Syntax() != "bash" {
+		t.Errorf("expected the syntax to survive, got %T", call)
+	}
+}
+
+func TestAWrappedToolKeepsItsFocusedRendering(t *testing.T) {
+	subject := tool.Focus(newTool(t), func(tool.Call) string { return "generate" })
+	call, err := truncate.Tool(subject).Parse(`{"size":2}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	focusedCall, ok := call.(tool.FocusedCall)
+	if !ok || focusedCall.Focus() != "generate" {
+		t.Errorf("expected the focus to survive, got %T", call)
 	}
 }
 
@@ -106,13 +158,13 @@ func TestAnUnwrappedToolIsNotCapped(t *testing.T) {
 }
 
 func TestToolsWrapsEveryTool(t *testing.T) {
-	wrapped := truncate.Tools([]tool.Tool{newTool(t), newTool(t)})
+	wrappedTools := truncate.Tools([]tool.Tool{newTool(t), newTool(t)})
 
-	if len(wrapped) != 2 {
-		t.Fatalf("expected both tools back, got %d", len(wrapped))
+	if len(wrappedTools) != 2 {
+		t.Fatalf("expected both tools back, got %d", len(wrappedTools))
 	}
 
-	for _, subject := range wrapped {
+	for _, subject := range wrappedTools {
 		if !strings.Contains(exec(t, subject, `{"size":4000}`), "truncated at") {
 			t.Error("expected every tool to be capped")
 		}

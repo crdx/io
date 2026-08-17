@@ -16,7 +16,7 @@ import (
 func writeCredentials(t *testing.T, expiresIn time.Duration) string {
 	t.Helper()
 
-	path := filepath.Join(t.TempDir(), "credentials.json")
+	path := filepath.Join(t.TempDir(), "auth.json")
 
 	credentials := fmt.Sprintf(
 		`{"access":"old","refresh":"refresh-me","account_id":"account","expires_at":%d}`,
@@ -43,7 +43,8 @@ func tokenEndpoint(t *testing.T, grants *[]string) {
 
 			writer.Header().Set("Content-Type", "application/json")
 			_, _ = fmt.Fprint(writer, `{"access_token":"new","refresh_token":"next","expires_in":3600}`)
-		}))
+		},
+	))
 
 	t.Cleanup(server.Close)
 
@@ -57,7 +58,7 @@ func TestStoredRefreshesATokenNearExpiry(t *testing.T) {
 	tokenEndpoint(t, &grants)
 	path := writeCredentials(t, time.Minute)
 
-	token, err := codex.StoredAt(path).Token()
+	token, err := codex.StoredCredentialsAt(path).Token()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -79,13 +80,13 @@ func TestStoredRefreshesATokenNearExpiry(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var written codex.Credentials
-	if err := json.Unmarshal(data, &written); err != nil {
+	var credentials codex.Credentials
+	if err := json.Unmarshal(data, &credentials); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if written.Access != "new" || written.Refresh != "next" {
-		t.Errorf("expected the refreshed pair to be written back, got %+v", written)
+	if credentials.Access != "new" || credentials.Refresh != "next" {
+		t.Errorf("expected the refreshed pair to be written back, got %+v", credentials)
 	}
 }
 
@@ -94,7 +95,8 @@ func TestStoredKeepsTheRefreshTokenTheResponseOmits(t *testing.T) {
 		func(writer http.ResponseWriter, _ *http.Request) {
 			writer.Header().Set("Content-Type", "application/json")
 			_, _ = fmt.Fprint(writer, `{"access_token":"new","expires_in":3600}`)
-		}))
+		},
+	))
 
 	t.Cleanup(server.Close)
 
@@ -103,7 +105,7 @@ func TestStoredKeepsTheRefreshTokenTheResponseOmits(t *testing.T) {
 
 	path := writeCredentials(t, time.Minute)
 
-	if _, err := codex.StoredAt(path).Token(); err != nil {
+	if _, err := codex.StoredCredentialsAt(path).Token(); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -112,13 +114,13 @@ func TestStoredKeepsTheRefreshTokenTheResponseOmits(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var written codex.Credentials
-	if err := json.Unmarshal(data, &written); err != nil {
+	var credentials codex.Credentials
+	if err := json.Unmarshal(data, &credentials); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if written.Refresh != "refresh-me" {
-		t.Errorf("expected the held refresh token to survive, got %q", written.Refresh)
+	if credentials.Refresh != "refresh-me" {
+		t.Errorf("expected the held refresh token to survive, got %q", credentials.Refresh)
 	}
 }
 
@@ -128,7 +130,7 @@ func TestStoredLeavesAGoodTokenAlone(t *testing.T) {
 	tokenEndpoint(t, &grants)
 	path := writeCredentials(t, time.Hour)
 
-	token, err := codex.StoredAt(path).Token()
+	token, err := codex.StoredCredentialsAt(path).Token()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -143,7 +145,7 @@ func TestStoredLeavesAGoodTokenAlone(t *testing.T) {
 }
 
 func TestStoredReportsMissingCredentials(t *testing.T) {
-	source := codex.StoredAt(filepath.Join(t.TempDir(), "absent.json"))
+	source := codex.StoredCredentialsAt(filepath.Join(t.TempDir(), "absent.json"))
 
 	if _, err := source.Token(); err == nil {
 		t.Error("expected an error when there are no credentials")

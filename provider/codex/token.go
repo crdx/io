@@ -11,8 +11,8 @@ const refreshWindow = 5 * time.Minute
 
 // Token is what one request is authorised with.
 type Token struct {
-	Access    string
-	AccountID string
+	Access    string // the bearer token
+	AccountID string // the ChatGPT account
 }
 
 // TokenSource hands over a token to make a request with.
@@ -26,31 +26,31 @@ func Static(access string, accountID string) TokenSource {
 }
 
 type static struct {
-	token Token
+	token Token // the token always returned
 }
 
 func (self static) Token() (Token, error) {
 	return self.token, nil
 }
 
-// Stored is the credentials Login wrote, read from disk and refreshed as they age.
-func Stored() TokenSource {
-	return &stored{path: CredentialsPath()}
+// StoredCredentials reads and refreshes credentials written by Login.
+func StoredCredentials() TokenSource {
+	return &credentialStore{path: CredentialsPath()}
 }
 
-// StoredAt is Stored, reading from somewhere other than the usual place.
-func StoredAt(path string) TokenSource {
-	return &stored{path: path}
+// StoredCredentialsAt reads credentials from path.
+func StoredCredentialsAt(path string) TokenSource {
+	return &credentialStore{path: path}
 }
 
-type stored struct {
-	path        string
-	mutex       sync.Mutex
-	credentials *Credentials
+type credentialStore struct {
+	path        string       // where credentials are stored
+	mutex       sync.Mutex   // guards loading and refreshing
+	credentials *Credentials // the credentials currently held
 }
 
 // Token reads the credentials on first use and refreshes them when needed.
-func (self *stored) Token() (Token, error) {
+func (self *credentialStore) Token() (Token, error) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -75,7 +75,7 @@ func (self *stored) Token() (Token, error) {
 	}, nil
 }
 
-func (self *stored) refresh() error {
+func (self *credentialStore) refresh() error {
 	if self.credentials.Refresh == "" {
 		return errors.New("credentials have expired: run the login command again")
 	}

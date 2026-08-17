@@ -1,12 +1,14 @@
 package codex
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"runtime"
+	"slices"
 	"time"
 
 	"crdx.org/io/agent"
@@ -18,16 +20,18 @@ import (
 // mega:allow-file comment-lines
 // —————————————————————————————————————————————————————————————————————————————————————————————————
 
-// Where the conversation is held, and as what.
-//
 // https://platform.openai.com/docs/api-reference/responses/create
+// https://platform.openai.com/docs/guides/reasoning
 const (
-	Endpoint   = "https://chatgpt.com/backend-api/codex/responses"
-	Model      = "gpt-5.6-sol"
-	Originator = "io"
+	Endpoint = "https://chatgpt.com/backend-api/codex/responses"
+	Model    = "gpt-5.6-sol"
+	Effort   = "high"
+	Summary  = "auto" // defined as the "most detailed summarizer available for a model"
+
+	Originator = "io" // who we?
 )
 
-const turnTimeout = 30 * time.Minute
+const turnTimeout = 60 * time.Minute
 
 // Client speaks the Responses API: one request per turn, answered as a stream of events.
 //
@@ -35,14 +39,16 @@ const turnTimeout = 30 * time.Minute
 // https://platform.openai.com/docs/api-reference/responses-streaming
 // https://platform.openai.com/docs/guides/conversation-state
 type Client struct {
-	URL string
+	URL    string // the endpoint address
+	Model  string // the model to ask
+	Effort string // how hard the model should reason
 
-	tokens       TokenSource
-	instructions string
-	tools        []functionTool
-	session      string
-	history      []json.RawMessage
-	requests     *req.Client
+	tokens       TokenSource       // where credentials come from
+	instructions string            // what the model is told
+	tools        []functionTool    // what the model may call
+	session      string            // the conversation key
+	history      []json.RawMessage // the provider conversation state
+	requests     *req.Client       // the HTTP transport
 }
 
 // New builds a client that authorises every request with the given source.
@@ -58,7 +64,7 @@ func New(tokens TokenSource) *Client {
 
 // Auth is a client on the credentials the login command stored.
 func Auth() *Client {
-	return New(Stored())
+	return New(StoredCredentials())
 }
 
 // Configure takes what every request in the session carries.
@@ -89,17 +95,30 @@ func (self *Client) AddToolResults(results []agent.ToolResult) {
 	}
 }
 
-func encodeItem(item any) json.RawMessage {
-	encoded, _ := json.Marshal(item) //nolint:errchkjson // a struct of strings cannot fail
+// Dump hands over the conversation so far, one item per entry, in the order the endpoint expects
+// them back. New state is appended and earlier items are never replaced.
+//
+// https://platform.openai.com/docs/guides/conversation-state
+func (self *Client) Dump() []json.RawMessage {
+	return slices.Clone(self.history)
+}
 
-	return encoded
+// Load takes a conversation back, replacing whatever this client held.
+func (self *Client) Load(items []json.RawMessage) {
+	self.history = slices.Clone(items)
+}
+
+func encodeItem(item any) json.RawMessage {
+	encodedItem, _ := json.Marshal(item) //nolint:errchkjson // a struct of strings cannot fail
+
+	return encodedItem
 }
 
 // Send posts the conversation so far and reads the response.
 //
 // https://platform.openai.com/docs/api-reference/responses-streaming
-func (self *Client) Send(yield agent.Yield) (agent.Reply, error) {
-	turn, err := self.post(yield)
+func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
+	turn, err := self.post(ctx, yield)
 	if err != nil {
 		return agent.Reply{}, err
 	}
@@ -109,13 +128,13 @@ func (self *Client) Send(yield agent.Yield) (agent.Reply, error) {
 	return agent.Reply{Calls: turn.calls()}, nil
 }
 
-func (self *Client) post(yield agent.Yield) (reply, error) {
+func (self *Client) post(ctx context.Context, yield agent.Yield) (reply, error) {
 	token, err := self.tokens.Token()
 	if err != nil {
 		return reply{}, err
 	}
 
-	stream, err := self.requests.Stream(self.endpoint(), self.requestBody(), self.headers(token))
+	stream, err := self.requests.Stream(ctx, self.endpoint(), self.requestBody(), self.headers(token))
 	if err != nil {
 		return reply{}, err
 	}
@@ -132,12 +151,29 @@ func (self *Client) endpoint() string {
 	return Endpoint
 }
 
+func (self *Client) model() string {
+	if self.Model != "" {
+		return self.Model
+	}
+
+	return Model
+}
+
+func (self *Client) effort() string {
+	if self.Effort != "" {
+		return self.Effort
+	}
+
+	return Effort
+}
+
 func (self *Client) requestBody() request {
 	return request{
-		Model:             Model,
+		Model:             self.model(),
 		Store:             false,
 		Stream:            true,
 		Input:             self.history,
+		Reasoning:         reasoning{Effort: self.effort(), Summary: Summary},
 		Include:           []string{"reasoning.encrypted_content"},
 		PromptCacheKey:    self.session,
 		ToolChoice:        "auto",
@@ -163,36 +199,48 @@ func (self *Client) headers(token Token) http.Header {
 
 // https://platform.openai.com/docs/api-reference/responses/create
 type request struct {
-	Model             string         `json:"model"`
-	Store             bool           `json:"store"`
-	Tools             []functionTool `json:"tools"`
-	Instructions      string         `json:"instructions,omitempty"`
-	ParallelToolCalls bool           `json:"parallel_tool_calls"`
+	Model             string         `json:"model"`                  // the model to ask
+	Store             bool           `json:"store"`                  // whether the endpoint stores the response
+	Tools             []functionTool `json:"tools"`                  // what the model may call
+	Instructions      string         `json:"instructions,omitempty"` // what the model is told
+	ParallelToolCalls bool           `json:"parallel_tool_calls"`    // whether calls may be made together
 
 	// https://platform.openai.com/docs/api-reference/responses-streaming
-	Stream bool `json:"stream"`
+	Stream bool `json:"stream"` // whether events are streamed
 
-	Input []json.RawMessage `json:"input"`
+	Input []json.RawMessage `json:"input"` // the conversation so far
 
 	// https://platform.openai.com/docs/guides/conversation-state
-	Include []string `json:"include"`
+	Include []string `json:"include"` // which extra fields are returned
 
 	// https://platform.openai.com/docs/guides/prompt-caching
-	PromptCacheKey string `json:"prompt_cache_key"`
+	PromptCacheKey string `json:"prompt_cache_key"` // the prompt cache identity
 
 	// https://platform.openai.com/docs/guides/function-calling
-	ToolChoice string `json:"tool_choice"`
+	ToolChoice string `json:"tool_choice"` // how the model chooses tools
+
+	// https://platform.openai.com/docs/guides/reasoning
+	Reasoning reasoning `json:"reasoning"` // the requested reasoning settings
+}
+
+// reasoning is how hard the model is asked to think, and how much of that thinking it summarises
+// back. Without a summary asked for, none is sent.
+//
+// https://platform.openai.com/docs/guides/reasoning
+type reasoning struct {
+	Effort  string `json:"effort"`  // how hard the model should reason
+	Summary string `json:"summary"` // how reasoning is reported
 }
 
 type userMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role    string `json:"role"`    // who sent the message
+	Content string `json:"content"` // what they said
 }
 
 type toolOutput struct {
-	Type   string `json:"type"`
-	CallID string `json:"call_id"`
-	Output string `json:"output"`
+	Type   string `json:"type"`    // the kind of item
+	CallID string `json:"call_id"` // which call this answers
+	Output string `json:"output"`  // what the tool returned
 }
 
 func newToken() string {

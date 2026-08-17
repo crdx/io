@@ -1,13 +1,14 @@
 package tool_test
 
 import (
+	"context"
 	"testing"
 
 	"crdx.org/io/tool"
 )
 
 type Params struct {
-	City string `json:"city"`
+	City string `json:"city"` // the city to report
 }
 
 func newTool(t *testing.T, ran *bool) tool.Tool {
@@ -17,8 +18,8 @@ func newTool(t *testing.T, ran *bool) tool.Tool {
 		"weather",
 		"report weather in a city",
 		tool.Schema{tool.String("city", "the city to look up")},
-		func(args Params) string { return args.City },
-		func(args Params) (string, error) {
+		func(args Params) (string, string) { return args.City, "" },
+		func(_ context.Context, args Params) (string, error) {
 			*ran = true
 			return "raining in " + args.City, nil
 		},
@@ -33,15 +34,15 @@ func TestParseBindsTheArgumentsToTheCall(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if rendered := call.Render(); rendered != "London" {
-		t.Errorf("expected the bound arguments, got %q", rendered)
+	if renderedCall := call.Render(); renderedCall != "London" {
+		t.Errorf("expected the bound arguments, got %q", renderedCall)
 	}
 
 	if ran {
 		t.Error("expected rendering not to run the tool")
 	}
 
-	output, err := call.Exec()
+	output, err := call.Exec(t.Context())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -80,7 +81,7 @@ func TestParseTakesAbsentArgumentsAsEmpty(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if rendered := call.Render(); rendered != "" {
-		t.Errorf("expected nothing rendered, got %q", rendered)
+	if renderedCall := call.Render(); renderedCall != "" {
+		t.Errorf("expected nothing rendered, got %q", renderedCall)
 	}
 }
