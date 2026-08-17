@@ -195,10 +195,10 @@ func workspaceIs(writable bool) string {
 
 func shellIs(granted bool) string {
 	if granted {
-		return "The exec tool can now run shell commands."
+		return "The bash tool can now run shell commands."
 	}
 
-	return "The exec tool is now refused, and will turn away every command until it is granted again."
+	return "The bash tool is now refused, and will turn away every command until it is granted again."
 }
 
 func historyIs(writable bool) string {
@@ -214,5 +214,5 @@ func backgroundIs(enabled bool) string {
 		return "Background processes can now outlive shell commands."
 	}
 
-	return "Background processes have been killed and will no longer outlive shell commands."
+	return "Background processes have been killed and new ones will no longer outlive shell commands."
 }

@@ -319,18 +319,18 @@ func TestATurnThatWasStoppedSaysSo(t *testing.T) {
 	}
 }
 
-func TestAnExecCallIsDrawnAsAShellPrompt(t *testing.T) {
+func TestAShellCallIsDrawnAsAShellPrompt(t *testing.T) {
 	var screenOutput bytes.Buffer
-	callPainter := &painter{screen: output.New(&screenOutput)}
+	callPainter := &painter{screen: output.New(&screenOutput), shell: "bash"}
 
-	callPainter.draw(agent.Event{Kind: agent.Call, ID: "1", Name: "exec", Render: "echo hello"})
+	callPainter.draw(agent.Event{Kind: agent.Call, ID: "1", Name: "bash", Render: "echo hello"})
 	callPainter.close(status.Done)
 
 	plain := theme.Plain(screenOutput.String())
 	if !strings.Contains(plain, "$ echo hello") {
 		t.Errorf("got %q, want a shell prompt", plain)
 	}
-	if strings.Contains(plain, "exec echo hello") {
+	if strings.Contains(plain, "bash echo hello") {
 		t.Errorf("got %q, want no tool name", plain)
 	}
 }

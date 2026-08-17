@@ -7,13 +7,13 @@ import (
 	"crdx.org/col"
 )
 
-func TestTheShellPromptUsesTheTerminalsANSIBlue(t *testing.T) {
+func TestTheShellPromptMatchesACommandName(t *testing.T) {
 	originalColorEnabled := colorEnabled
 	colorEnabled = true
 	t.Cleanup(func() { colorEnabled = originalColorEnabled })
 
-	if got := Shell("$"); !strings.Contains(got, "\x1b[34m$") {
-		t.Errorf("got %q, want the standard ANSI blue", got)
+	if got, want := Shell("$"), Function("$"); got != want {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 

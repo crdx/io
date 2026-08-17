@@ -217,7 +217,9 @@ func run() ([]string, error) {
 	}
 	defer func() { _ = tmpRoot.Close() }()
 
-	tools = append(tools, confinedShell(workspace, home, tmp, mode, files, processes))
+	shell := confinedShell(workspace, home, tmp, mode, files, processes)
+
+	tools = append(tools, shell)
 	tools = truncate.Tools(tools)
 
 	chat := &conversation{
@@ -227,6 +229,7 @@ func run() ([]string, error) {
 		workspace: workspace,
 		mode:      mode,
 		processes: processes,
+		shell:     shell.Name(),
 
 		label: func(pending bool, frame int, running bool) string {
 			currentCaps := mode.Current()

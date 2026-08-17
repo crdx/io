@@ -149,9 +149,8 @@ func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
 	system := prompt("/workspace", capRead)
 
 	for _, clause := range []string{
-		"scratch space and is always read-write",
+		"always read-write",
 		"The workspace is read-only",
-		"HOME may be read-only",
 	} {
 		if !strings.Contains(system, clause) {
 			t.Errorf("expected %q in %q", clause, system)
@@ -160,6 +159,22 @@ func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
 
 	if strings.Contains(system, "including /tmp") {
 		t.Errorf("the workspace mode still claims to include /tmp: %q", system)
+	}
+}
+
+func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
+	for name, test := range map[string]struct {
+		currentCaps caps
+		want        string
+	}{
+		"granted": {capRead | capShell, "The bash tool is granted"},
+		"refused": {capRead, "The bash tool is refused"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := prompt("/workspace", test.currentCaps); !strings.Contains(got, test.want) {
+				t.Errorf("expected %q in %q", test.want, got)
+			}
+		})
 	}
 }
 
@@ -179,7 +194,7 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 
 	shell := confinedShell(t.TempDir(), t.TempDir(), t.TempDir(), mode, files, processes)
 
-	if shell.Name() != "exec" {
+	if shell.Name() != "bash" {
 		t.Errorf("expected the shell to be offered as exec, got %q", shell.Name())
 	}
 

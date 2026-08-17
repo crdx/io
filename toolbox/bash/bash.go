@@ -52,7 +52,7 @@ func newShell(
 ) tool.Tool {
 	return shell{
 		Tool: tool.Syntax(tool.DefineMeasured(
-			"exec",
+			"bash",
 			"run a shell command",
 			tool.Schema{
 				tool.String("command", "the command line"),

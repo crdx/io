@@ -65,8 +65,8 @@ func exec(t *testing.T, root *file.Root, directory string, arguments string) (st
 func TestTheToolIsCalledExec(t *testing.T) {
 	root, directory := testRoot(t)
 
-	if name := bash.New(root, func() sandbox.Policy { return sandbox.Policy{Write: []string{directory}} }).Name(); name != "exec" {
-		t.Errorf("got %q, want %q", name, "exec")
+	if name := bash.New(root, func() sandbox.Policy { return sandbox.Policy{Write: []string{directory}} }).Name(); name != "bash" {
+		t.Errorf("got %q, want %q", name, "bash")
 	}
 }
 

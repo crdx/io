@@ -103,8 +103,8 @@ func TestOnlyTheFocusedPartOfArgumentsIsPainted(t *testing.T) {
 }
 
 func TestArgumentsWithSyntaxAreHighlighted(t *testing.T) {
-	label := Label{Name: "exec", Args: "echo one && true", Syntax: "bash"}
-	want := theme.Change("exec") + " " + markdown.Highlight(label.Args, "bash")
+	label := Label{Name: "bash", Args: "echo one && true", Syntax: "bash"}
+	want := theme.Change("bash") + " " + markdown.Highlight(label.Args, "bash")
 
 	if got := label.render(); got != want {
 		t.Errorf("got %q, want %q", got, want)

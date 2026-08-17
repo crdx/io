@@ -54,7 +54,7 @@ var (
 	Read      Style = hex(lime)                            // reading is on offer
 	Write     Style = hex(gold)                            // writing is on offer
 	Exec      Style = hex(red)                             // running a command is on offer
-	Shell     Style = ansi("34")                           // a shell prompt, in the terminal's own blue
+	Shell     Style = hex(steel)                           // a shell prompt, matching the command name
 	History   Style = hex(mauve)                           // changing a repository's own history is on offer
 	Pending   Style = col.Underline                        // waiting on the keypress that follows a prefix
 	Scrolled  Style = hex(lightGrey)                       // how much of the input is out of sight
@@ -134,19 +134,6 @@ func Plain(text string) string {
 func decorate(decoration Style, inner Style) Style {
 	return func(format any, args ...any) string {
 		return decoration(inner(format, args...))
-	}
-}
-
-func ansi(code string) Style {
-	return func(format any, args ...any) string {
-		text := fmt.Sprint(format)
-		if len(args) > 0 {
-			text = fmt.Sprintf(text, args...)
-		}
-		if code == "" || !colorEnabled {
-			return text
-		}
-		return "\x1b[" + code + "m" + text + "\x1b[0m"
 	}
 }
 

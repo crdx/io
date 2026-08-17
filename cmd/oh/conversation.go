@@ -30,6 +30,7 @@ type conversation struct {
 	workspace string                       // where the conversation is being held
 	mode      *Mode                        // what the tools allow
 	processes *sandbox.Processes           // what background commands belong to this conversation
+	shell     string                       // what the shell tool was named, taken from the tool itself
 
 	restart []string // the arguments to start again with, once the terminal has been given back
 
@@ -294,7 +295,7 @@ func (self *conversation) restore(storedSession *session.Session) {
 }
 
 func (self *conversation) newPicasso(live bool) *painter {
-	return &painter{screen: self.screen, live: live, tools: self.assistant.Tool}
+	return &painter{screen: self.screen, live: live, tools: self.assistant.Tool, shell: self.shell}
 }
 
 func (self *conversation) replay() {

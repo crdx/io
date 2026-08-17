@@ -21,6 +21,7 @@ type painter struct {
 	stale  bool            // whether the answer outgrew what the screen can repair
 
 	tools func(string) (tool.Tool, bool) // the tools a call may be rendered by
+	shell string                         // what the shell tool was named, so a call to it is drawn as a prompt
 }
 
 func (self *painter) describe(event agent.Event) (string, string, string, string) {
@@ -77,7 +78,7 @@ func (self *painter) draw(event agent.Event) {
 
 		name := event.Name
 		var nameStyle theme.Style
-		if event.Name == "exec" {
+		if event.Name == self.shell {
 			name = "$"
 			nameStyle = theme.Shell
 		}

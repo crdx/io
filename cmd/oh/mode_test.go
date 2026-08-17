@@ -16,8 +16,8 @@ const (
 	gitWritable      = "The .git directory is now read-write."
 	backgroundOn     = "Background processes can now outlive shell commands."
 	backgroundKilled = "Background processes have been killed and will no longer outlive shell commands."
-	shellGranted     = "The exec tool can now run shell commands."
-	shellWithheld    = "The exec tool is now refused, and will turn away every command until it is granted again."
+	shellGranted     = "The bash tool can now run shell commands."
+	shellWithheld    = "The bash tool is now refused, and will turn away every command until it is granted again."
 )
 
 func writable() caps { return capRead | capWrite }
