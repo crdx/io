@@ -161,16 +161,14 @@ func run() ([]string, error) {
 		return nil, fmt.Errorf("could not prepare the shell home: %w", err)
 	}
 
-	grantedCaps := invocation.caps
-
-	mode := NewMode(grantedCaps)
+	mode := NewMode(invocation.caps)
 
 	if resumedSession != nil {
-		mode = NewResumedMode(grantedCaps)
+		mode = NewResumedMode(invocation.caps)
 	}
 
 	files := file.New(root, refuseWrite(mode))
-	processes := sandbox.NewProcesses(grantedCaps.has(capBackground))
+	processes := sandbox.NewProcesses(invocation.caps.has(capBackground))
 	defer func() { _, _ = processes.Disable() }()
 
 	client := connect(os.Getenv(endpointVariable))
@@ -188,7 +186,7 @@ func run() ([]string, error) {
 		}
 	}
 
-	system := prompt(workspace, grantedCaps)
+	system := prompt(workspace, invocation.caps)
 
 	if resumedSession != nil && resumedSession.Head.Prompt != "" {
 		system = resumedSession.Head.Prompt
