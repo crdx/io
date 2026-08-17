@@ -47,6 +47,11 @@ linters:
     - wrapcheck
     - wsl
     - wsl_v5
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - gosmopolitan
   settings:
     revive:
       rules:

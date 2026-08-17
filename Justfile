@@ -3,6 +3,8 @@ set shell := ["bash", "-cu", "-o", "pipefail"]
 
 import? 'internal.just'
 
+set positional-arguments
+
 [private]
 help:
     just --list --unsorted
@@ -18,6 +20,9 @@ test:
 
 check:
     steps fmt vet lint1 lint2 mega test
+
+oh *args:
+    go run ./cmd/oh "$@"
 
 [private]
 mega:
