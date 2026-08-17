@@ -1,0 +1,228 @@
+package markdown
+
+import (
+	"slices"
+	"strings"
+
+	"crdx.org/col"
+
+	"github.com/yuin/goldmark/ast"
+	east "github.com/yuin/goldmark/extension/ast"
+
+	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/width"
+)
+
+const widest = 30 // no one column may claim the table on the strength of one long word
+
+func (self *renderer) table(node *east.Table) []string {
+	var head []string
+	var body [][]string
+
+	for row := node.FirstChild(); row != nil; row = row.NextSibling() {
+		cells := self.cellsOf(row)
+
+		if _, is := row.(*east.TableHeader); is {
+			head = cells
+			continue
+		}
+
+		body = append(body, cells)
+	}
+
+	if len(head) == 0 {
+		return nil
+	}
+
+	columns := len(head)
+
+	availableColumns := self.columns - (3*columns + 1)
+	if availableColumns < columns {
+		return self.plainTableRows(head, body)
+	}
+
+	widths := layout(head, body, availableColumns)
+
+	rows := []string{border(widths, "┌", "┬", "┐")}
+	rows = append(rows, tableRows(head, node.Alignments, widths, true)...)
+	rows = append(rows, border(widths, "├", "┼", "┤"))
+
+	for index, one := range body {
+		if index > 0 {
+			rows = append(rows, border(widths, "├", "┼", "┤")) // a cell that wrapped is one row still
+		}
+
+		rows = append(rows, tableRows(one, node.Alignments, widths, false)...)
+	}
+
+	return append(rows, border(widths, "└", "┴", "┘"))
+}
+
+func (self *renderer) cellsOf(row ast.Node) []string {
+	var cells []string
+
+	for cell := row.FirstChild(); cell != nil; cell = cell.NextSibling() {
+		cells = append(cells, self.inline(cell))
+	}
+
+	return cells
+}
+
+func (self *renderer) plainTableRows(head []string, body [][]string) []string { // as text, not borders
+	var rows []string
+
+	for _, one := range append([][]string{head}, body...) {
+		rows = append(rows, width.Wrap(strings.Join(one, theme.Border(" | ")), self.columns)...)
+	}
+
+	return rows
+}
+
+func layout(head []string, body [][]string, availableColumns int) []int {
+	columns := len(head)
+
+	natural := make([]int, columns)
+	minimum := make([]int, columns)
+
+	for at := range columns {
+		natural[at] = theme.Width(head[at])
+		minimum[at] = longest(head[at])
+
+		for _, row := range body {
+			if at >= len(row) {
+				continue
+			}
+
+			natural[at] = max(natural[at], theme.Width(row[at]))
+			minimum[at] = max(minimum[at], longest(row[at]))
+		}
+
+		minimum[at] = min(max(minimum[at], 1), widest)
+		natural[at] = max(natural[at], minimum[at])
+	}
+
+	if total(natural) <= availableColumns {
+		return natural
+	}
+
+	if total(minimum) > availableColumns {
+		return share(slices.Repeat([]int{1}, columns), minimum, availableColumns)
+	}
+
+	return share(minimum, natural, availableColumns)
+}
+
+func share(base []int, want []int, availableColumns int) []int {
+	widths := slices.Clone(base)
+
+	growth := total(want) - total(base)
+	spare := availableColumns - total(base)
+
+	if growth > 0 && spare > 0 {
+		for at := range widths {
+			widths[at] += (want[at] - base[at]) * spare / growth
+		}
+	}
+
+	for at := range availableColumns - total(widths) {
+		widths[at%len(widths)]++
+	}
+
+	return widths
+}
+
+func border(widths []int, left string, between string, right string) string {
+	parts := make([]string, len(widths))
+
+	for at, cells := range widths {
+		parts[at] = strings.Repeat("─", cells+2)
+	}
+
+	return theme.Border(left + strings.Join(parts, between) + right)
+}
+
+func tableRows(cells []string, aligns []east.Alignment, widths []int, heading bool) []string {
+	wrappedCells := make([][]string, len(widths))
+	height := 1
+
+	for at := range widths {
+		styledCell := ""
+		if at < len(cells) {
+			styledCell = cells[at]
+		}
+
+		if heading {
+			styledCell = over(col.Bold, styledCell)
+		}
+
+		wrappedCells[at] = width.Wrap(styledCell, widths[at])
+		height = max(height, len(wrappedCells[at]))
+	}
+
+	bar := theme.Border("│")
+	rows := make([]string, height)
+
+	for line := range height {
+		var out strings.Builder
+
+		out.WriteString(bar)
+
+		for at := range widths {
+			text := ""
+			if line < len(wrappedCells[at]) {
+				text = wrappedCells[at][line]
+			}
+
+			out.WriteString(" " + pad(text, widths[at], alignment(aligns, at)) + " " + bar)
+		}
+
+		rows[line] = out.String()
+	}
+
+	return rows
+}
+
+func alignment(aligns []east.Alignment, at int) east.Alignment {
+	if at < len(aligns) {
+		return aligns[at]
+	}
+
+	return east.AlignNone
+}
+
+func pad(text string, cells int, align east.Alignment) string {
+	spare := cells - theme.Width(text)
+	if spare <= 0 {
+		return text
+	}
+
+	switch align {
+	case east.AlignRight:
+		return strings.Repeat(" ", spare) + text
+	case east.AlignCenter:
+		return strings.Repeat(" ", spare/2) + text + strings.Repeat(" ", spare-spare/2)
+	case east.AlignLeft, east.AlignNone:
+	}
+
+	return text + strings.Repeat(" ", spare)
+}
+
+func longest(cell string) int {
+	most := 0
+
+	for word := range strings.FieldsSeq(theme.Plain(cell)) {
+		most = max(most, width.Of(word))
+	}
+
+	return most
+}
+
+func total(values []int) int {
+	sum := 0
+
+	for _, one := range values {
+		sum += one
+	}
+
+	return sum
+}

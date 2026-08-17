@@ -1,0 +1,162 @@
+package output
+
+import (
+	"fmt"
+	"regexp"
+	"strings"
+	"testing"
+)
+
+func screenWithInput() (*Output, *strings.Builder) {
+	screenOutput := &strings.Builder{}
+
+	shownFooter := footer{rows: []string{"> hi"}, cursorColumn: 3, column: 4, stacked: true}
+
+	return &Output{
+		writer:      screenOutput,
+		terminal:    true,
+		column:      4,
+		stacked:     true,
+		input:       shownFooter,
+		shownFooter: shownFooter,
+	}, screenOutput
+}
+
+func TestAnUnchangedInputIsNotDrawnAgain(t *testing.T) {
+	screen, screenOutput := screenWithInput()
+
+	screen.Footer([]string{"> hi"}, 0, 3)
+
+	if got := screenOutput.String(); got != "" {
+		t.Errorf("expected an unchanged input to be left alone, got %q", got)
+	}
+}
+
+// The input initially reuses the cursor's row.
+func TestTheInputTakesNoRowOfItsOwnUntilSomethingHasBeenSaid(t *testing.T) {
+	screenOutput := &strings.Builder{}
+
+	screen := &Output{writer: screenOutput, terminal: true}
+
+	screen.Footer([]string{"> hi"}, 0, 3)
+
+	if got := screenOutput.String(); strings.Contains(got, "\r\n") {
+		t.Errorf("expected the input to be drawn where the cursor was, got %q", got)
+	}
+
+	screenOutput.Reset()
+
+	screen.Line("thinking")
+
+	got := screenOutput.String()
+
+	if want := "\r" + clearBelow + "thinking"; !strings.Contains(got, want) {
+		t.Errorf("expected what was said to take the row the input was on, got %q", got)
+	}
+
+	if want := "thinking\r\n> hi"; !strings.Contains(got, want) {
+		t.Errorf("expected the input to move under what was said, got %q", got)
+	}
+}
+
+// Concurrent spinner drawing must not displace the input cursor.
+func TestWritingToTheConversationPutsTheInputBackWithTheCursorInIt(t *testing.T) {
+	screen, screenOutput := screenWithInput()
+
+	screen.Line("thinking")
+
+	want := "\r\n> hi\r" + fmt.Sprintf(right, 3) + showCursor + endFrame
+
+	if got := screenOutput.String(); !strings.HasSuffix(got, want) {
+		t.Errorf("expected the input to be put back under it, got %q", got)
+	}
+}
+
+func TestTheInputIsTakenOffTheScreenBeforeTheConversationIsWrittenTo(t *testing.T) {
+	screen, screenOutput := screenWithInput()
+
+	screen.Line("thinking")
+
+	want := "\r" + clearBelow + fmt.Sprintf(up, 1) + fmt.Sprintf(right, 4)
+
+	got := screenOutput.String()
+
+	eraseIndex := strings.Index(got, want)
+	if eraseIndex < 0 {
+		t.Fatalf("expected the input to be erased, got %q", got)
+	}
+
+	if writeIndex := strings.Index(got, "thinking"); writeIndex < eraseIndex {
+		t.Errorf("expected the input to come off before the write, got %q", got)
+	}
+}
+
+// Absolute positions become stale when output scrolls.
+func TestNothingIsDrawnAtAPlaceTheScreenCanScrollAwayFrom(t *testing.T) {
+	screen, screenOutput := screenWithInput()
+
+	screen.Line("thinking")
+	screen.Footer([]string{"> hi there"}, 0, 9)
+
+	absolute := regexp.MustCompile(`\x1b\[[0-9;]*[Hfr]|\x1b7|\x1b8`)
+
+	if got := screenOutput.String(); absolute.MatchString(got) {
+		t.Errorf("expected every move to be relative, got %q", got)
+	}
+}
+
+func TestAnInputOfSeveralRowsIsTakenOffAndPutBackWhole(t *testing.T) {
+	screen, screenOutput := screenWithInput()
+
+	screen.Footer([]string{"> one", "two", "three"}, 1, 2)
+	screenOutput.Reset()
+
+	screen.Line("thinking")
+
+	got := screenOutput.String()
+
+	if want := "\r" + fmt.Sprintf(up, 1) + clearBelow; !strings.Contains(got, want) {
+		t.Errorf("expected the erase to start at the top row of the input, got %q", got)
+	}
+
+	if want := "\r\n> one\r\ntwo\r\nthree" + fmt.Sprintf(up, 1); !strings.Contains(got, want) {
+		t.Errorf("expected every row back, cursor on the second, got %q", got)
+	}
+}
+
+// Reset must discard stale input coordinates before clearing.
+func TestResettingClearsTheScreenWithoutErasingFromAStaleRecord(t *testing.T) {
+	screen, screenOutput := screenWithInput()
+
+	screen.Reset()
+
+	got := screenOutput.String()
+
+	if !strings.Contains(got, clearScreen) || !strings.Contains(got, clearScrollback) {
+		t.Errorf("expected the screen and the scrollback to be cleared, got %q", got)
+	}
+
+	if strings.Contains(got, clearBelow) {
+		t.Errorf("expected nothing to be erased where the input used to be, got %q", got)
+	}
+
+	if screen.shownFooter.rows != nil || screen.input.rows != nil {
+		t.Errorf("expected both footers to be forgotten, got %v and %v", screen.shownFooter, screen.input)
+	}
+
+	if screen.column != 0 || screen.midLine || screen.pending || screen.streaming || screen.wrapping {
+		t.Errorf("expected the screen to be forgotten, got %+v", screen)
+	}
+}
+
+func TestWritingWithNoInputShownIsLeftAlone(t *testing.T) {
+	screen, screenOutput := screenWithInput()
+	screen.input = footer{}
+	screen.shownFooter = footer{}
+
+	screen.Line("thinking")
+
+	if got := screenOutput.String(); got != "thinking" {
+		t.Errorf("expected the text and nothing else, got %q", got)
+	}
+}

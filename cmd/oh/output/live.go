@@ -1,0 +1,142 @@
+package output
+
+import (
+	"strings"
+
+	"crdx.org/io/cmd/oh/theme"
+)
+
+const clearRow = "\x1b[K"
+
+// Draw replaces the live region and reports whether every changed row remains on screen.
+func (self *Output) Draw(rows []string) bool {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	if len(rows) == 0 {
+		if len(self.liveRows) == 0 {
+			return true
+		}
+
+		rows = []string{""}
+	}
+
+	if !self.terminal {
+		self.liveRows = rows
+		return true
+	}
+
+	self.measure()
+
+	first := firstDifference(self.liveRows, rows)
+
+	if first == len(rows) && first == len(self.liveRows) {
+		return true
+	}
+
+	if first < self.top {
+		return false
+	}
+
+	if len(self.liveRows) == 0 {
+		self.begin()
+	}
+
+	self.repaint(first, rows)
+
+	return true
+}
+
+func (self *Output) seal() {
+	if len(self.liveRows) == 0 {
+		return
+	}
+
+	if !self.terminal {
+		self.begin()
+		self.write(strings.Join(self.liveRows, "\n"))
+	}
+
+	self.liveRows = nil
+	self.top = 0
+}
+
+func (self *Output) begin() {
+	self.separate(true)
+	self.streaming = true
+
+	if self.midLine {
+		self.newline()
+	}
+
+	self.openPendingLine()
+}
+
+func (self *Output) repaint(first int, rows []string) {
+	var out strings.Builder
+
+	out.WriteString(beginFrame + hideCursor)
+
+	if !self.wrapping {
+		self.wrapping = true
+
+		out.WriteString(noAutoWrap)
+	}
+
+	out.WriteString(self.eraseInput())
+
+	if back := len(self.liveRows) - 1 - first; back >= 0 {
+		out.WriteString(moveUp(back))
+	} else if len(self.liveRows) > 0 {
+		out.WriteString("\r\n") // nothing on screen changed, so the new rows open a row of their own
+	}
+
+	if len(rows) < len(self.liveRows) {
+		out.WriteString("\r" + clearBelow)
+	}
+
+	for at := first; at < len(rows); at++ {
+		if at > first {
+			out.WriteString("\r\n")
+		}
+
+		out.WriteString("\r" + clearRow)
+		out.WriteString(rows[at])
+	}
+
+	self.settle(rows)
+
+	out.WriteString(self.drawInput())
+	out.WriteString(showCursor + endFrame)
+
+	self.raw(out.String())
+}
+
+func (self *Output) settle(rows []string) {
+	self.liveRows = rows
+	self.stacked = true
+	self.midLine = true
+	self.pending = false
+	self.trailingNewlines = 0
+	self.column = theme.Width(rows[len(rows)-1])
+
+	if self.columns > 0 {
+		self.column = min(self.column, self.columns)
+	}
+
+	self.top = 0
+
+	if room := self.lines - len(self.input.rows); self.lines > 0 && len(rows) > room {
+		self.top = len(rows) - room
+	}
+}
+
+func firstDifference(before []string, after []string) int {
+	for at := range min(len(before), len(after)) {
+		if before[at] != after[at] {
+			return at
+		}
+	}
+
+	return min(len(before), len(after))
+}
