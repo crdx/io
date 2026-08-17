@@ -100,7 +100,7 @@ func namedCap(flag string) (caps, bool) {
 
 func refuseWrite(mode *Mode) func(name string) error {
 	return func(name string) error {
-		currentCaps := mode.Current() // asked afresh, the person at the keyboard having a say between calls
+		currentCaps := mode.Current()
 
 		if file.InGitDir(name) {
 			if currentCaps.has(capGit) {
@@ -157,7 +157,7 @@ func (self *Mode) Inject() string {
 	defer self.mutex.Unlock()
 
 	changedCaps := self.currentCaps ^ self.knownCaps
-	if self.knownCaps == 0 { // told nothing so far, so told the state of everything rather than a change
+	if self.knownCaps == 0 {
 		changedCaps = switchableCaps
 	}
 

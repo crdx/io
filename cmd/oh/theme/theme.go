@@ -94,23 +94,19 @@ var (
 
 var colorEnabled = true
 
-// Init settles whether anything is painted at all, and tells col the same, so that the bold and the
-// italic it draws are on the terms the colour is.
+// Init decides whether anything is painted at all.
 func Init(screen any) {
 	colorEnabled = os.Getenv("NO_COLOR") == "" && tty.Is(screen)
 
 	col.InitUnless(!colorEnabled)
 }
 
-// Width is how many cells text takes up once painted, which is everything in it bar the escape
-// sequences that give it its colour.
+// Width is how many cells text takes up once painted.
 func Width(text string) int {
 	return width.Of(Plain(text))
 }
 
-// Plain is text with the escape sequences that give it its colour taken out, for whoever needs to
-// know what is really there. A painted line ends in a colour being put back rather than in the
-// last thing written, so what it ends with is not what it looks like it ends with.
+// Plain is text with the colour escape sequences taken out.
 func Plain(text string) string {
 	var out strings.Builder
 
