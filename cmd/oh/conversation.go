@@ -448,8 +448,8 @@ func (self *conversation) storeItems() {
 	}
 }
 
-func (self *conversation) write(store func() error) {
-	if err := store(); err != nil {
+func (self *conversation) write(record func() error) {
+	if err := record(); err != nil {
 		self.notify(theme.Failure("the conversation could not be stored: " + err.Error()))
 	}
 }
