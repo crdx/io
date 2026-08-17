@@ -427,9 +427,9 @@ func outcomeText(mark string, took time.Duration, stats *tool.Statistics) string
 		statsText = theme.Args(compactDuration(took)) +
 			theme.Detail(", cpu "+compactDuration(stats.CPUTime)+", mem "+formatBytes(stats.PeakMemory))
 	case tool.StatsRead:
-		statsText = theme.Args(stats.Lines) + theme.Detail("L, "+formatBytes(byteCount(stats.Bytes)))
+		statsText = theme.Detail(fmt.Sprint(stats.Lines) + "L, " + formatBytes(byteCount(stats.Bytes)))
 	case tool.StatsWrite:
-		statsText = theme.Args(stats.Lines) + theme.Detail("L")
+		statsText = theme.Detail(fmt.Sprint(stats.Lines) + "L")
 	case tool.StatsDiff:
 		statsText = theme.Success("+%d", stats.Added) +
 			theme.Detail(" ") + theme.Failure("−%d", stats.Removed)
