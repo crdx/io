@@ -14,7 +14,7 @@ import (
 	"golang.org/x/term"
 
 	"crdx.org/io/cmd/oh/key"
-	"crdx.org/io/cmd/oh/session"
+	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/theme"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/width"
@@ -31,7 +31,7 @@ var ErrCancelled = errors.New("cancelled")
 
 // Session shows the sessions newest first and returns the chosen one. Abandoning the choice is
 // ErrCancelled, so a session comes back whenever the error does not.
-func Session(sessions []*session.Session, terminal *os.File, screen io.Writer) (*session.Session, error) {
+func Session(sessions []*store.Session, terminal *os.File, screen io.Writer) (*store.Session, error) {
 	if len(sessions) == 0 {
 		return nil, ErrCancelled
 	}
@@ -55,16 +55,16 @@ func Session(sessions []*session.Session, terminal *os.File, screen io.Writer) (
 }
 
 type state struct {
-	sessions []*session.Session // the sessions on offer
-	decoder  *key.Decoder       // the keyboard input
-	terminal *os.File           // the terminal being controlled
-	screen   io.Writer          // where the list is drawn
+	sessions []*store.Session // the sessions on offer
+	decoder  *key.Decoder     // the keyboard input
+	terminal *os.File         // the terminal being controlled
+	screen   io.Writer        // where the list is drawn
 
 	cursor int // the selected row
 	offset int // the first visible row
 }
 
-func (self *state) run() (*session.Session, error) {
+func (self *state) run() (*store.Session, error) {
 	for {
 		self.draw()
 
@@ -182,7 +182,7 @@ func mark(sessionChosen bool) string {
 	return " "
 }
 
-func title(storedSession *session.Session) string {
+func title(storedSession *store.Session) string {
 	askedText := storedSession.FirstPrompt()
 	if askedText == "" {
 		return "(nothing was asked)"

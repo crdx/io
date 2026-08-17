@@ -11,7 +11,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/output"
-	"crdx.org/io/cmd/oh/session"
+	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/tool"
 )
 
@@ -107,7 +107,7 @@ func TestVisual(t *testing.T) {
 	provider := &fakeProvider{}
 	screen := output.New(os.Stdout)
 
-	log, err := session.Create(t.TempDir(), session.Header{Model: "fake"})
+	log, err := store.Create(t.TempDir(), store.Header{Model: "fake"})
 	if err != nil {
 		t.Fatal(err)
 	}

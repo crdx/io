@@ -10,7 +10,7 @@ import (
 
 	"crdx.org/duckopt/v2"
 	"crdx.org/io/agent"
-	"crdx.org/io/cmd/oh/session"
+	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
 )
@@ -526,7 +526,7 @@ func TestAResumedConversationMayBeGrantedSomethingElse(t *testing.T) {
 func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *conversation {
 	t.Helper()
 
-	log, err := session.Create(t.TempDir(), session.Header{Model: "gpt"})
+	log, err := store.Create(t.TempDir(), store.Header{Model: "gpt"})
 	if err != nil {
 		t.Fatal(err)
 	}

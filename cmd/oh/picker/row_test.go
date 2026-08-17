@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"crdx.org/io/cmd/oh/session"
+	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/theme"
 )
 
@@ -23,7 +23,7 @@ func TestShortDoesNotAbbreviateAHomeDirectoryLookalike(t *testing.T) {
 }
 
 func TestAnUntitledSessionDoesNotPutAnEscapeSequenceThroughTheClipper(t *testing.T) {
-	got := title(&session.Session{})
+	got := title(&store.Session{})
 
 	if strings.ContainsRune(got, '\x1b') {
 		t.Errorf("expected an unpainted title, got %q", got)

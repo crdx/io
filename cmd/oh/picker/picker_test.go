@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/key"
-	"crdx.org/io/cmd/oh/session"
+	"crdx.org/io/cmd/oh/store"
 )
 
 func pickerState() *state {
-	sessions := make([]*session.Session, 3)
+	sessions := make([]*store.Session, 3)
 
 	for index := range sessions {
-		sessions[index] = &session.Session{}
+		sessions[index] = &store.Session{}
 	}
 
 	return &state{sessions: sessions}

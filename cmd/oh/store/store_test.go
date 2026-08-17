@@ -1,4 +1,4 @@
-package session_test
+package store_test
 
 import (
 	"encoding/json"
@@ -11,13 +11,13 @@ import (
 
 	"crdx.org/io/agent"
 
-	"crdx.org/io/cmd/oh/session"
+	"crdx.org/io/cmd/oh/store"
 )
 
 func write(t *testing.T, directory string) string {
 	t.Helper()
 
-	log, err := session.Create(directory, session.Header{
+	log, err := store.Create(directory, store.Header{
 		Model:     "gpt-5.6-sol",
 		Workspace: "/tmp/somewhere",
 		Provider:  "codex",
@@ -74,7 +74,7 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 	directory := t.TempDir()
 	id := write(t, directory)
 
-	storedSession, err := session.Read(directory, id)
+	storedSession, err := store.Read(directory, id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +132,7 @@ func TestASessionIsNamedWithATimeOrderedID(t *testing.T) {
 func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 	directory := t.TempDir()
 
-	log, err := session.Create(directory, session.Header{Model: "gpt-5.6-sol"})
+	log, err := store.Create(directory, store.Header{Model: "gpt-5.6-sol"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +164,7 @@ func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 func TestTheFirstThingSaidTakesTheHeaderWithIt(t *testing.T) {
 	directory := t.TempDir()
 
-	log, err := session.Create(directory, session.Header{Model: "gpt-5.6-sol", Workspace: "/tmp/somewhere"})
+	log, err := store.Create(directory, store.Header{Model: "gpt-5.6-sol", Workspace: "/tmp/somewhere"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -181,7 +181,7 @@ func TestTheFirstThingSaidTakesTheHeaderWithIt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	storedSession, err := session.Read(directory, log.ID())
+	storedSession, err := store.Read(directory, log.ID())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +200,7 @@ func TestTheFirstThingSaidTakesTheHeaderWithIt(t *testing.T) {
 func TestMessagesCountsWhatWasSaidAndNotTheWorkingOut(t *testing.T) {
 	directory := t.TempDir()
 
-	storedSession, err := session.Read(directory, write(t, directory))
+	storedSession, err := store.Read(directory, write(t, directory))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -215,7 +215,7 @@ func TestAnOpenedSessionKeepsWhatWasThereBefore(t *testing.T) {
 	directory := t.TempDir()
 	id := write(t, directory)
 
-	log, err := session.Open(directory, id)
+	log, err := store.Open(directory, id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -228,7 +228,7 @@ func TestAnOpenedSessionKeepsWhatWasThereBefore(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	storedSession, err := session.Read(directory, id)
+	storedSession, err := store.Read(directory, id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -245,7 +245,7 @@ func TestAHalfWrittenLineEndsTheSession(t *testing.T) {
 
 	appendRaw(t, directory, id, `{"kind":"event","event":{"kind":"te`)
 
-	storedSession, err := session.Read(directory, id)
+	storedSession, err := store.Read(directory, id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -264,7 +264,7 @@ func TestListReadsTheNewestFirst(t *testing.T) {
 
 	second := write(t, directory)
 
-	sessions, err := session.List(directory)
+	sessions, err := store.List(directory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -289,7 +289,7 @@ func TestListPutsTheSessionTouchedLastAtTheTop(t *testing.T) {
 	write(t, directory)
 	time.Sleep(2 * time.Millisecond)
 
-	log, err := session.Open(directory, older)
+	log, err := store.Open(directory, older)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -302,7 +302,7 @@ func TestListPutsTheSessionTouchedLastAtTheTop(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sessions, err := session.List(directory)
+	sessions, err := store.List(directory)
 	if err != nil {
 		t.Fatal(err)
 	}

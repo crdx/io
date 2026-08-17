@@ -1,12 +1,12 @@
-// Package session gives oh's metadata and picker views to the core session journal.
-package session
+// Package store gives oh's metadata and picker views to the core session journal.
+package store
 
 import (
 	"encoding/json"
 	"time"
 
 	"crdx.org/io/agent"
-	journal "crdx.org/io/session"
+	"crdx.org/io/session"
 )
 
 // Header is the conversation-specific configuration needed to resume a session.
@@ -20,7 +20,7 @@ type Header struct {
 
 // Writer appends oh records to the core journal.
 type Writer struct {
-	inner *journal.Writer
+	inner *session.Writer
 }
 
 // Create starts an oh session.
@@ -29,7 +29,7 @@ func Create(directory string, head Header) (*Writer, error) {
 	if err != nil {
 		return nil, err
 	}
-	inner, err := journal.Create(directory, metadata)
+	inner, err := session.Create(directory, metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func Create(directory string, head Header) (*Writer, error) {
 
 // Open continues an oh session.
 func Open(directory, id string) (*Writer, error) {
-	inner, err := journal.Open(directory, id)
+	inner, err := session.Open(directory, id)
 	if err != nil {
 		return nil, err
 	}
@@ -72,22 +72,22 @@ type Session struct {
 
 // Read loads one oh session.
 func Read(directory, id string) (*Session, error) {
-	journalSession, err := journal.Read(directory, id)
+	storedSession, err := session.Read(directory, id)
 	if err != nil {
 		return nil, err
 	}
-	return decode(journalSession)
+	return decode(storedSession)
 }
 
 // List loads oh sessions, most recently touched first.
 func List(directory string) ([]*Session, error) {
-	journalSessions, err := journal.List(directory)
+	storedSessions, err := session.List(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	out := make([]*Session, 0, len(journalSessions))
-	for _, item := range journalSessions {
+	out := make([]*Session, 0, len(storedSessions))
+	for _, item := range storedSessions {
 		decodedSession, err := decode(item)
 		if err == nil {
 			out = append(out, decodedSession)
@@ -96,17 +96,17 @@ func List(directory string) ([]*Session, error) {
 	return out, nil
 }
 
-func decode(journalSession *journal.Session) (*Session, error) {
+func decode(storedSession *session.Session) (*Session, error) {
 	var head Header
-	if len(journalSession.Metadata) > 0 {
-		if err := json.Unmarshal(journalSession.Metadata, &head); err != nil {
+	if len(storedSession.Metadata) > 0 {
+		if err := json.Unmarshal(storedSession.Metadata, &head); err != nil {
 			return nil, err
 		}
 	}
 
 	return &Session{
-		ID: journalSession.ID, Head: head, Started: journalSession.Started, Touched: journalSession.Touched,
-		Events: journalSession.Events, Items: journalSession.Items,
+		ID: storedSession.ID, Head: head, Started: storedSession.Started, Touched: storedSession.Touched,
+		Events: storedSession.Events, Items: storedSession.Items,
 	}, nil
 }
 

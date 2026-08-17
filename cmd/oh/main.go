@@ -19,7 +19,7 @@ import (
 
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/picker"
-	"crdx.org/io/cmd/oh/session"
+	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/theme"
 )
 
@@ -194,7 +194,7 @@ func run() ([]string, error) {
 		system = resumedSession.Head.Prompt
 	}
 
-	log, err := openSession(resumedSession, session.Header{
+	log, err := openSession(resumedSession, store.Header{
 		Model:     client.Model,
 		Workspace: workspace,
 		Provider:  "codex",
@@ -284,16 +284,16 @@ func connect(endpoint string) *codex.Client {
 	return client
 }
 
-func chooseSession(resume bool, id string) (*session.Session, error) {
+func chooseSession(resume bool, id string) (*store.Session, error) {
 	if !resume {
 		return nil, nil
 	}
 
 	if id != "" {
-		return session.Read(sessionsDir(), id) // named rather than chosen
+		return store.Read(sessionsDir(), id) // named rather than chosen
 	}
 
-	sessions, err := session.List(sessionsDir())
+	sessions, err := store.List(sessionsDir())
 	if err != nil {
 		return nil, err
 	}
@@ -325,10 +325,10 @@ func mountTmpDir(files *file.Root, tmp string) (*os.Root, error) {
 	return tmpRoot, nil
 }
 
-func openSession(resumedSession *session.Session, head session.Header) (*session.Writer, error) {
+func openSession(resumedSession *store.Session, head store.Header) (*store.Writer, error) {
 	if resumedSession != nil {
-		return session.Open(sessionsDir(), resumedSession.ID)
+		return store.Open(sessionsDir(), resumedSession.ID)
 	}
 
-	return session.Create(sessionsDir(), head)
+	return store.Create(sessionsDir(), head)
 }

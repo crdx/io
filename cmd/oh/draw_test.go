@@ -11,8 +11,8 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/output"
-	"crdx.org/io/cmd/oh/session"
 	"crdx.org/io/cmd/oh/status"
+	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/theme"
 	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
@@ -60,7 +60,7 @@ func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
 		screen:    output.New(&screenOutput),
 	}
 
-	testConversation.restore(&session.Session{
+	testConversation.restore(&store.Session{
 		Events: []agent.Event{
 			{Kind: agent.Prompt, Text: "read them both"},
 			{Kind: agent.Call, ID: "1", Name: "read", Render: "one.go"},
@@ -279,7 +279,7 @@ func (quietProvider) Send(context.Context, agent.Yield) (agent.Reply, error) {
 func testConversation(t *testing.T, screenOutput *bytes.Buffer) *conversation {
 	t.Helper()
 
-	log, err := session.Create(t.TempDir(), session.Header{})
+	log, err := store.Create(t.TempDir(), store.Header{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

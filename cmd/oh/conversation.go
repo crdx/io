@@ -14,9 +14,9 @@ import (
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/line"
 	"crdx.org/io/cmd/oh/output"
-	"crdx.org/io/cmd/oh/session"
 	"crdx.org/io/cmd/oh/spinner"
 	"crdx.org/io/cmd/oh/status"
+	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/theme"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/internal/sandbox"
@@ -25,7 +25,7 @@ import (
 type conversation struct {
 	assistant *agent.Agent                 // the conversation driver
 	screen    *output.Output               // where the conversation is drawn
-	log       *session.Writer              // where the conversation is stored
+	log       *store.Writer                // where the conversation is stored
 	label     func(bool, int, bool) string // what the harness was started with, drawn afresh on the rule
 	workspace string                       // where the conversation is being held
 	mode      *Mode                        // what the tools allow
@@ -280,7 +280,7 @@ func settle(resizeSignals <-chan os.Signal) {
 	}
 }
 
-func (self *conversation) restore(storedSession *session.Session) {
+func (self *conversation) restore(storedSession *store.Session) {
 	if err := self.assistant.Load(storedSession.Items); err != nil {
 		self.notify(theme.Failure("the conversation could not be restored: " + err.Error()))
 		return
