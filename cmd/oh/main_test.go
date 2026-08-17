@@ -379,20 +379,32 @@ func TestAnUnresolvableGoModuleCacheIsIgnored(t *testing.T) {
 	}
 }
 
-// A shell that cannot be confined is never offered unconfined. The tool is still there to be
-// called, and says so when it is, rather than the machine refusing to start over it.
-func TestAPolicyThatCannotBeEnforcedIsAnError(t *testing.T) {
+func TestNoPolicyGrantsMoreThanItsCapsAskFor(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()
+	metadata := filepath.Join(workspace, ".git")
+
+	if err := os.MkdirAll(metadata, 0o700); err != nil {
+		t.Fatal(err)
+	}
 
 	for _, currentCaps := range everyCap {
-		policy, err := shellPolicy(t.Context(), workspace, home, t.TempDir(), currentCaps)
+		granted := writablePaths(workspace, home, currentCaps)
 
-		if enforceable := sandbox.Supported(t.Context(), policy); (err == nil) != (enforceable == nil) {
-			t.Errorf(
-				"expected the policy handed back to be enforceable exactly where there is no "+
-					"error, got error %v against %v", err, enforceable,
-			)
+		if !currentCaps.has(capWrite) && slices.Contains(granted, workspace) {
+			t.Errorf("%s: the tree is writable without w, got %v", currentCaps.Letters(), granted)
+		}
+
+		if !currentCaps.has(capWrite) && !currentCaps.has(capGit) && len(granted) > 0 {
+			t.Errorf("%s: something is writable without w or g, got %v", currentCaps.Letters(), granted)
+		}
+
+		if !currentCaps.has(capGit) && slices.Contains(granted, metadata) {
+			t.Errorf("%s: the metadata is writable without g, got %v", currentCaps.Letters(), granted)
+		}
+
+		if currentCaps.has(capWrite) && !slices.Contains(granted, workspace) {
+			t.Errorf("%s: the tree is not writable with w, got %v", currentCaps.Letters(), granted)
 		}
 	}
 }
