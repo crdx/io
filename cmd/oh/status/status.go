@@ -347,9 +347,10 @@ func (self *Block) redraw() {
 	self.overlay(up+strings.Join(lines, "\n"), theme.Width(lines[len(lines)-1]))
 }
 
-const failureShare = 2 // of the row, as a floor and not a ceiling
-
-const edgeGuard = 2
+const (
+	failureShare = 2 // of the row, as a floor and not a ceiling
+	edgeGuard    = 2
+)
 
 func (self *Block) line(item row) string {
 	outcome := self.outcome(item)
