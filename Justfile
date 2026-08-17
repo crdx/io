@@ -1,7 +1,7 @@
 set quiet := true
 set shell := ["bash", "-cu", "-o", "pipefail"]
 
-import? 'internal.just'
+import? 'local.just'
 
 set positional-arguments
 
