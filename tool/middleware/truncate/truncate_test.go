@@ -3,6 +3,7 @@ package truncate_test
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -78,6 +79,8 @@ func TestOutputThatFitsIsLeftAlone(t *testing.T) {
 }
 
 func TestOutputTooBigIsCutAndSaved(t *testing.T) {
+	t.Setenv("TMPDIR", t.TempDir())
+
 	whole := strings.Repeat("a line of text\n", 4000)
 
 	output := truncate.Output(whole)
@@ -90,15 +93,19 @@ func TestOutputTooBigIsCutAndSaved(t *testing.T) {
 		t.Error("expected the cut to fall on a line boundary")
 	}
 
-	path := strings.TrimSuffix(strings.Split(output, "the whole of it is in ")[1], "]\n")
-	path = strings.TrimSuffix(strings.TrimSpace(path), "]")
+	saved, err := filepath.Glob(filepath.Join(os.TempDir(), "io-output-*.txt"))
+	if err != nil || len(saved) != 1 {
+		t.Fatalf("expected the whole of it saved once, got %v and %v", saved, err)
+	}
 
-	savedOutput, err := os.ReadFile(path) //nolint:gosec // the path the notice named
+	if !strings.Contains(output, saved[0]) {
+		t.Errorf("expected the notice to name the file it saved, got %q", output)
+	}
+
+	savedOutput, err := os.ReadFile(saved[0])
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
-	t.Cleanup(func() { _ = os.Remove(path) })
 
 	if string(savedOutput) != whole {
 		t.Errorf("expected the whole output to be saved, got %d of %d bytes", len(savedOutput), len(whole))
