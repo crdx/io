@@ -1,6 +1,8 @@
 set quiet := true
 set shell := ["bash", "-cu", "-o", "pipefail"]
 
+import? 'internal.just'
+
 [private]
 help:
     just --list --unsorted
