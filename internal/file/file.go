@@ -19,6 +19,9 @@ var ErrReadOnly = errors.New("the filesystem is read-only")
 // ErrGitDir refuses a change inside a repository's own metadata.
 var ErrGitDir = errors.New("refusing to touch anything inside a .git directory")
 
+// ErrOutsideRoot is a path resolving to somewhere the root does not reach.
+var ErrOutsideRoot = errors.New("path is outside the root")
+
 // InGitDir reports whether a path contains a .git component.
 func InGitDir(name string) bool {
 	segments := strings.Split(filepath.Clean(name), string(filepath.Separator))
@@ -59,7 +62,7 @@ func (self *Root) Resolve(path string) (*Root, string, error) {
 	}
 	if !filepath.IsAbs(path) {
 		if !filepath.IsLocal(path) {
-			return nil, "", errors.New("path is outside the root")
+			return nil, "", ErrOutsideRoot
 		}
 
 		return self, path, nil
@@ -75,7 +78,7 @@ func (self *Root) Resolve(path string) (*Root, string, error) {
 		}
 	}
 
-	return nil, "", errors.New("path is outside the root")
+	return nil, "", ErrOutsideRoot
 }
 
 // RefuseWrite returns the current refusal for a path.

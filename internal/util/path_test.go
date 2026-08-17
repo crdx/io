@@ -1,6 +1,7 @@
 package util_test
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -40,8 +41,7 @@ func TestAnAbsolutePathOutsideTheRootSaysSo(t *testing.T) {
 	t.Cleanup(func() { _ = openedRoot.Close() })
 
 	root := file.New(openedRoot, func(string) error { return nil })
-	if _, err := util.RootName(root, filepath.Join(filepath.Dir(directory), "outside")); err == nil ||
-		err.Error() != "path is outside the root" {
+	if _, err := util.RootName(root, filepath.Join(filepath.Dir(directory), "outside")); !errors.Is(err, file.ErrOutsideRoot) {
 		t.Errorf("expected a path outside the root to say so, got %v", err)
 	}
 }
