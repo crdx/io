@@ -57,7 +57,7 @@ func (self *conversation) makeIntroductions(initialPrompt string) {
 	}
 
 	defer restore()
-	defer self.screen.Release()
+	defer func() { self.screen.Release(self.log.Stored()) }()
 
 	keys := keypresses(os.Stdin)
 	resizeSignals := resizes()

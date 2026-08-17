@@ -13,6 +13,7 @@ const (
 
 func (self *Output) fit(text string) string {
 	if self.columns <= 0 {
+		self.openedRows += strings.Count(text, "\n")
 		return text
 	}
 
@@ -43,6 +44,7 @@ func (self *Output) fit(text string) string {
 			}
 
 			self.column = 0
+			self.openedRows++
 
 		case value == '\r':
 			self.column = 0
@@ -54,6 +56,7 @@ func (self *Output) fit(text string) string {
 				out.WriteString("\r\n")
 
 				self.column = 0
+				self.openedRows++
 			}
 
 			self.column = min(self.column+cells, self.columns)

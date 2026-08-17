@@ -32,6 +32,40 @@ func TestAnUnchangedInputIsNotDrawnAgain(t *testing.T) {
 	}
 }
 
+func TestReleasingAUsedConversationComesDownBelowIt(t *testing.T) {
+	screen, screenOutput := screenWithInput()
+
+	screen.Release(true)
+
+	if got := screenOutput.String(); !strings.Contains(got, "\r\n"+autoWrap+showCursor) {
+		t.Errorf("expected the conversation to be left above the next line, got %q", got)
+	}
+}
+
+func TestReleasingAnUnusedConversationErasesItsLine(t *testing.T) {
+	screen, screenOutput := screenWithInput()
+
+	screen.Release(false)
+
+	if got := screenOutput.String(); !strings.Contains(got, "\r"+clearBelow+autoWrap+showCursor) {
+		t.Errorf("expected the unused conversation line to be erased, got %q", got)
+	}
+}
+
+func TestReleasingAnUnusedConversationErasesEveryWrappedRow(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := &Output{writer: screenOutput, terminal: true, columns: 4}
+
+	screen.Line("banner")
+	screen.Footer([]string{">"}, 0, 0)
+	screenOutput.Reset()
+	screen.Release(false)
+
+	if got := screenOutput.String(); !strings.Contains(got, "\r"+moveUp(1)+clearBelow) {
+		t.Errorf("expected both rows of the unused conversation to be erased, got %q", got)
+	}
+}
+
 // The input initially reuses the cursor's row.
 func TestTheInputTakesNoRowOfItsOwnUntilSomethingHasBeenSaid(t *testing.T) {
 	screenOutput := &strings.Builder{}
@@ -127,6 +161,7 @@ func TestAnInputOfSeveralRowsIsTakenOffAndPutBackWhole(t *testing.T) {
 // Reset must discard stale input coordinates before clearing.
 func TestResettingClearsTheScreenWithoutErasingFromAStaleRecord(t *testing.T) {
 	screen, screenOutput := screenWithInput()
+	screen.openedRows = 2
 
 	screen.Reset()
 
@@ -144,7 +179,7 @@ func TestResettingClearsTheScreenWithoutErasingFromAStaleRecord(t *testing.T) {
 		t.Errorf("expected both footers to be forgotten, got %v and %v", screen.shownFooter, screen.input)
 	}
 
-	if screen.column != 0 || screen.midLine || screen.pending || screen.streaming || screen.wrapping {
+	if screen.column != 0 || screen.openedRows != 0 || screen.midLine || screen.pending || screen.streaming || screen.wrapping {
 		t.Errorf("expected the screen to be forgotten, got %+v", screen)
 	}
 }

@@ -46,9 +46,9 @@ func (self *Output) Footer(rows []string, cursorRow int, cursorColumn int) {
 	self.redraw("")
 }
 
-// Release takes the input away and comes down to the line under the conversation, so that whatever
-// the harness was run from carries on immediately below it.
-func (self *Output) Release() {
+// Release takes the input away. A kept conversation leaves the cursor on the line below it; an
+// unused one is erased so whatever ran the harness can reuse its line.
+func (self *Output) Release(keep bool) {
 	if !self.terminal {
 		return
 	}
@@ -56,14 +56,19 @@ func (self *Output) Release() {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	lineBreak := ""
+	landing := ""
 	if self.shownFooter.stacked {
-		lineBreak = "\r\n"
+		if keep {
+			landing = "\r\n"
+		} else {
+			landing = "\r" + moveUp(self.openedRows) + clearBelow
+		}
 	}
 
-	self.raw(self.eraseInput() + lineBreak + autoWrap + showCursor)
+	self.raw(self.eraseInput() + landing + autoWrap + showCursor)
 
 	self.input = footer{}
+	self.openedRows = 0
 	self.wrapping = false
 	self.midLine = false
 	self.pending = false
@@ -81,6 +86,7 @@ func (self *Output) Reset() {
 	self.shownFooter = footer{}
 	self.input = footer{}
 	self.column = 0
+	self.openedRows = 0
 	self.midLine = false
 	self.pending = false
 	self.blank = false

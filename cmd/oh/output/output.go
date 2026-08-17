@@ -29,9 +29,10 @@ type Output struct {
 
 	terminal bool // whether the writer is a terminal
 
-	columns int // the terminal width
-	lines   int // the terminal height
-	column  int // the cursor column
+	columns    int // the terminal width
+	lines      int // the terminal height
+	column     int // the cursor column
+	openedRows int // how many conversation rows precede the current one
 
 	wrapping bool // whether the terminal wraps at its edge
 
