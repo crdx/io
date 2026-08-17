@@ -35,6 +35,7 @@ Options:
     -d, --workspace <dir>    Set working directory and project scope
     -r, --resume             Resume a saved session
     -c, --caps <letters>     Capabilities: rwxgb (read, write, exec, git, bg) [default: rwx]
+    -V, --version            Show the version
     -h, --help               Show this help
 
 Environment:
@@ -70,6 +71,7 @@ type Opts struct {
 	Session   string   `docopt:"<session>"`
 	Caps      string   `docopt:"--caps"`
 	Resume    bool     `docopt:"--resume"`
+	Version   bool     `docopt:"--version"`
 }
 
 type invocation struct { // what the arguments amount to once settled against each other
@@ -107,7 +109,14 @@ func (opts Opts) invocation() (invocation, error) {
 }
 
 func run() ([]string, error) {
-	invocation, err := duckopt.MustBind[Opts](usage, "$0").invocation()
+	opts := duckopt.MustBind[Opts](usage, "$0")
+
+	if opts.Version {
+		fmt.Println(version())
+		return nil, nil
+	}
+
+	invocation, err := opts.invocation()
 	if err != nil {
 		return nil, err
 	}

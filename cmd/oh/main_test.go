@@ -75,6 +75,20 @@ func TestEveryOptionIsRead(t *testing.T) {
 	}
 }
 
+// The version is asked for on its own, so it is read before anything is settled against anything
+// else: a workspace that cannot be opened is no reason to withhold it.
+func TestTheVersionIsAskedForOnItsOwn(t *testing.T) {
+	for _, argument := range []string{"--version", "-V"} {
+		if !bind(t, argument).Version {
+			t.Errorf("expected the version to be asked for by %s", argument)
+		}
+	}
+
+	if version() == "" {
+		t.Error("expected a version, got nothing")
+	}
+}
+
 // What is left over is what to open the conversation with, so it need not be quoted to be one
 // thing: a shell hands it over a word at a time and it goes back together as it was typed.
 func TestWhateverIsLeftOverIsTheFirstThingSaid(t *testing.T) {
