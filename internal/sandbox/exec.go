@@ -19,6 +19,7 @@ const (
 	envPolicy  = "IO_SANDBOX_POLICY"
 	envCommand = "IO_SANDBOX_COMMAND"
 	envWorker  = "IO_SANDBOX_WORKER"
+	envProbe   = "IO_SANDBOX_PROBE"
 )
 
 const (
@@ -31,9 +32,17 @@ const (
 	notStarted = 125         // and the status it leaves, which is one noexec of its own uses
 )
 
-// Init runs sandbox work encoded in the environment and returns immediately otherwise. Programs
+// Init runs sandbox work requested in the environment and returns immediately otherwise. Programs
 // using Run must call it before opening sensitive resources or starting goroutines.
 func Init() {
+	if os.Getenv(envProbe) != "" {
+		if err := applyNetwork(); err != nil {
+			fmt.Fprint(os.Stderr, notice, err, "\n")
+			os.Exit(notStarted)
+		}
+		os.Exit(0)
+	}
+
 	encodedPolicy := os.Getenv(envPolicy)
 	if encodedPolicy == "" {
 		return
