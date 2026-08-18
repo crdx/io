@@ -17,14 +17,16 @@ type Args struct {
 
 // New builds the ls tool confined to root. A directory is marked with a trailing slash.
 func New(root *file.Root) tool.Tool {
-	return tool.ReadOnly(tool.Concurrent(tool.FocusPath(tool.Define(
+	return tool.ReadOnly(tool.Concurrent(tool.FocusPath(tool.DefineMeasured(
 		"ls",
 		"list a directory",
 		tool.Schema{
 			tool.String("path", "directory, defaults to working directory").Optional(),
 		},
 		Render,
-		func(_ context.Context, args Args) (string, error) { return exec(root, args) },
+		func(_ context.Context, args Args) (string, tool.Statistics, error) {
+			return exec(root, args)
+		},
 	))))
 }
 
@@ -37,24 +39,25 @@ func Render(args Args) (string, string) {
 	return pathutil.Shorten(args.Path), ""
 }
 
-func exec(root *file.Root, args Args) (string, error) {
+func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", err
+		return "", tool.Statistics{}, err
 	}
 
 	directory, err := root.Open(name)
 	if err != nil {
-		return "", err
+		return "", tool.Statistics{}, err
 	}
 
 	defer func() { _ = directory.Close() }()
 
 	entries, err := directory.ReadDir(-1)
 	if err != nil {
-		return "", err
+		return "", tool.Statistics{}, err
 	}
 
+	stats := tool.Statistics{Kind: tool.StatsList, Lines: int64(len(entries))}
 	names := make([]string, 0, len(entries))
 
 	for _, entry := range entries {
@@ -66,10 +69,10 @@ func exec(root *file.Root, args Args) (string, error) {
 	}
 
 	if len(names) == 0 {
-		return "(empty)", nil
+		return "(empty)", stats, nil
 	}
 
 	slices.Sort(names)
 
-	return strings.Join(names, "\n"), nil
+	return strings.Join(names, "\n"), stats, nil
 }

@@ -29,6 +29,10 @@ func TestMeasuredStatisticsAreShownAfterCalls(t *testing.T) {
 			stats: tool.Statistics{Kind: tool.StatsRead, Lines: 42, Bytes: 1200},
 			want:  []string{"42L ~300t"},
 		},
+		"list": {
+			stats: tool.Statistics{Kind: tool.StatsList, Lines: 42},
+			want:  []string{"42L"},
+		},
 		"image": {
 			stats: tool.Statistics{Kind: tool.StatsImage, Bytes: 80_943, EstimatedTokens: 1536},
 			want:  []string{"~1.5Kt"},

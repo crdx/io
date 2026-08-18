@@ -53,9 +53,9 @@ func New(
 }
 
 type shell struct {
-	tool.Tool // the shell itself
+	tool.Tool
 
-	readOnly func() bool // whether a command could change anything, asked afresh
+	readOnly func() bool
 }
 
 func (self shell) ReadOnly() bool { return self.readOnly() }

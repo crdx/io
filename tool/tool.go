@@ -68,6 +68,7 @@ type Statistics struct {
 const (
 	StatsResources = "resources"
 	StatsRead      = "read"
+	StatsList      = "list"
 	StatsImage     = "image"
 	StatsWrite     = "write"
 	StatsDiff      = "diff"
