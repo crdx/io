@@ -39,8 +39,9 @@ type Output struct {
 	input       footer // what the input should look like
 	shownFooter footer // what is on the screen
 
-	liveRows []string // the rows of the live region as they were last painted
-	top      int      // the first row of the region the screen still holds
+	liveRows        []string // the rows of the live region as they were last painted
+	liveContentRows int      // how many live rows are content rather than height-preserving blanks
+	top             int      // the first row of the region the screen still holds
 }
 
 // New builds the output over a writer, which is a terminal or is not.

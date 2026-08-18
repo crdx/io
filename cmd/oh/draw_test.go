@@ -34,6 +34,10 @@ func TestWhatWasAskedIsRenderedIntoTheConversation(t *testing.T) {
 		if strings.Contains(plain, "> ") || strings.Contains(plain, "**") {
 			t.Errorf("live=%v: expected no literal prompt or markdown markers, got %q", live, plain)
 		}
+
+		if !strings.HasSuffix(plain, "\n") {
+			t.Errorf("live=%v: expected the submitted message to finish its line immediately, got %q", live, plain)
+		}
 	}
 }
 

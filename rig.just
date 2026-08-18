@@ -49,6 +49,10 @@ say text:
 reload pass="TestVisual": build
     tmux respawn-pane -k -t {{ SESSION }} -e RIG=1 {{ BIN }} -test.run {{ pass }}
 
+# resize the rig terminal to trigger a full conversation repaint
+resize width=WIDTH height=HEIGHT:
+    tmux resize-window -t {{ SESSION }} -x {{ width }} -y {{ height }}
+
 # settle and capture the pane -> tmp/<date>-<name>.txt
 shot name: settle
     mkdir -p tmp

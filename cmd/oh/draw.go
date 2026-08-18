@@ -59,6 +59,7 @@ func (self *painter) draw(event agent.Event) {
 		self.close(status.Cancelled)
 		self.screen.Blank()
 		self.screen.Line(renderSubmittedMessage(event.Text, self.screen.Columns()))
+		self.screen.End()
 		self.screen.Blank()
 
 	case agent.Reasoning:

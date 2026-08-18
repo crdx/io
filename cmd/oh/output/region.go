@@ -96,6 +96,7 @@ func (self *Output) Reset() {
 	self.wrapping = false
 	self.stacked = false
 	self.liveRows = nil
+	self.liveContentRows = 0
 	self.top = 0
 
 	self.measure()

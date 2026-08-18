@@ -123,7 +123,7 @@ func TestWithoutATerminalTheAnswerIsWrittenOnceItIsWhole(t *testing.T) {
 	}
 }
 
-func TestFewerRowsThanBeforeAreRepaired(t *testing.T) {
+func TestAFrameThatShrinksKeepsItsPaintedHeightUntilItIsSealed(t *testing.T) {
 	screen, screenOutput := region()
 
 	screen.Draw([]string{"one", "two", "three"})
@@ -133,8 +133,37 @@ func TestFewerRowsThanBeforeAreRepaired(t *testing.T) {
 		t.Fatal("expected a shorter set of rows to be repaired")
 	}
 
-	if !strings.Contains(screenOutput.String(), clearBelow) {
-		t.Errorf("expected the surplus rows to be cleared, got %q", screenOutput.String())
+	if len(screen.liveRows) != 3 || screen.liveRows[2] != "" || screen.liveContentRows != 2 {
+		t.Fatalf("expected two content rows held at three painted rows, got %q", screen.liveRows)
+	}
+	if got := screenOutput.String(); strings.Contains(got, moveUp(1)) {
+		t.Errorf("expected the cursor not to move up while streaming, got %q", got)
+	}
+
+	screenOutput.Reset()
+	screen.End()
+
+	got := screenOutput.String()
+	if !strings.Contains(got, clearBelow) || !strings.Contains(got, "two") {
+		t.Errorf("expected sealing to repaint the new last row and clear below it, got %q", got)
+	}
+}
+
+func TestRowsThatScrolledOffDoNotReturnWhenTheRegionShrinks(t *testing.T) {
+	screen, _ := region()
+	screen.lines = 4
+
+	if !screen.Draw([]string{"one", "two", "three", "four", "five", "six"}) {
+		t.Fatal("expected the first drawing to be made")
+	}
+	if !screen.Draw([]string{"one", "two", "three", "four", "five"}) {
+		t.Fatal("expected the visible end of the region to be shortened")
+	}
+	if screen.top != 2 {
+		t.Fatalf("expected the first two rows to remain offscreen, got top row %d", screen.top)
+	}
+	if screen.Draw([]string{"one", "TWO", "three", "four", "five"}) {
+		t.Error("expected a change to a row that remains offscreen to require a replay")
 	}
 }
 

@@ -1,6 +1,7 @@
 package output
 
 import (
+	"slices"
 	"strings"
 
 	"crdx.org/io/cmd/oh/theme"
@@ -23,14 +24,21 @@ func (self *Output) Draw(rows []string) bool {
 
 	if !self.terminal {
 		self.liveRows = rows
+		self.liveContentRows = len(rows)
 		return true
 	}
 
 	self.measure()
 
+	contentRows := len(rows)
+	if len(rows) < len(self.liveRows) {
+		rows = append(slices.Clone(rows), make([]string, len(self.liveRows)-len(rows))...)
+	}
+
 	first := firstDifference(self.liveRows, rows)
 
 	if first == len(rows) && first == len(self.liveRows) {
+		self.liveContentRows = contentRows
 		return true
 	}
 
@@ -43,6 +51,7 @@ func (self *Output) Draw(rows []string) bool {
 	}
 
 	self.repaint(first, rows)
+	self.liveContentRows = contentRows
 
 	return true
 }
@@ -55,9 +64,13 @@ func (self *Output) seal() {
 	if !self.terminal {
 		self.begin()
 		self.write(strings.Join(self.liveRows, "\n"))
+	} else if self.liveContentRows < len(self.liveRows) && self.liveContentRows > self.top {
+		rows := slices.Clone(self.liveRows[:self.liveContentRows])
+		self.repaint(len(rows)-1, rows)
 	}
 
 	self.liveRows = nil
+	self.liveContentRows = 0
 	self.top = 0
 }
 
@@ -124,10 +137,8 @@ func (self *Output) settle(rows []string) {
 		self.column = min(self.column, self.columns)
 	}
 
-	self.top = 0
-
 	if room := self.lines - len(self.input.rows); self.lines > 0 && len(rows) > room {
-		self.top = len(rows) - room
+		self.top = max(self.top, len(rows)-room)
 	}
 }
 
