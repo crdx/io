@@ -210,6 +210,27 @@ func TestAGeneratedFileMayBeExecutedWhenGranted(t *testing.T) {
 	}
 }
 
+func TestOnlyAnExactlyGrantedFileMayBeExecuted(t *testing.T) {
+	directory := t.TempDir()
+	exact := filepath.Join(directory, "exact")
+	sibling := filepath.Join(directory, "sibling")
+	for path, content := range map[string]string{
+		exact: "#!/bin/sh\nprintf exact", sibling: "#!/bin/sh\nprintf sibling",
+	} {
+		if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Chmod(path, 0o700); err != nil { //nolint:gosec // the test fixture must be executable
+			t.Fatal(err)
+		}
+	}
+
+	result := run(t, t.TempDir(), exact+"; "+sibling, sandbox.Policy{Exec: []string{exact}})
+	if !strings.Contains(result.Output, "exact") || strings.Contains(result.Output, "sibling") {
+		t.Errorf("the exact-file grant executed the wrong command: %q", result.Output)
+	}
+}
+
 func TestAWriteOutsideThePolicyIsRefused(t *testing.T) {
 	outside := filepath.Join(t.TempDir(), "outside")
 
@@ -252,6 +273,66 @@ func TestAGrantedPathIsReadable(t *testing.T) {
 
 	if !strings.Contains(result.Output, "visible") {
 		t.Errorf("got %q, want it to contain %q", result.Output, "visible")
+	}
+}
+
+func TestOnlyAnExactlyGrantedFileIsReadable(t *testing.T) {
+	directory := t.TempDir()
+	exact := filepath.Join(directory, "exact")
+	sibling := filepath.Join(directory, "sibling")
+	if err := os.WriteFile(exact, []byte("exact"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(sibling, []byte("sibling"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	result := run(t, t.TempDir(), "cat "+exact+"; cat "+sibling, sandbox.Policy{Read: []string{exact}})
+	if !strings.Contains(result.Output, "exact") || strings.Contains(result.Output, "sibling") {
+		t.Errorf("the exact-file grant exposed the wrong content: %q", result.Output)
+	}
+}
+
+func TestOnlyAnExactlyGrantedFileIsWritable(t *testing.T) {
+	directory := t.TempDir()
+	exact := filepath.Join(directory, "exact")
+	sibling := filepath.Join(directory, "sibling")
+	if err := os.WriteFile(exact, []byte("original"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(sibling, []byte("sibling"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	run(t, t.TempDir(), "printf changed > "+exact+"; printf leaked > "+sibling,
+		sandbox.Policy{Write: []string{exact}})
+	content, err := os.ReadFile(exact) //nolint:gosec // reading the test's own file is intended
+	if err != nil || string(content) != "changed" {
+		t.Errorf("exact file got %q and %v", content, err)
+	}
+	content, err = os.ReadFile(sibling) //nolint:gosec // reading the test's own file is intended
+	if err != nil || string(content) != "sibling" {
+		t.Errorf("sibling got %q and %v", content, err)
+	}
+}
+
+func TestAnExactReadGrantInsideAWriteGrantRemainsReadOnly(t *testing.T) {
+	directory := t.TempDir()
+	exact := filepath.Join(directory, "exact")
+	sibling := filepath.Join(directory, "sibling")
+	if err := os.WriteFile(exact, []byte("intact"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	run(t, t.TempDir(), "printf blocked > "+exact+"; printf written > "+sibling,
+		sandbox.Policy{Read: []string{exact}, Write: []string{directory}})
+	content, err := os.ReadFile(exact) //nolint:gosec // reading the test's own file is intended
+	if err != nil || string(content) != "intact" {
+		t.Errorf("read-only file got %q and %v", content, err)
+	}
+	content, err = os.ReadFile(sibling) //nolint:gosec // reading the test's own file is intended
+	if err != nil || string(content) != "written" {
+		t.Errorf("writable sibling got %q and %v", content, err)
 	}
 }
 
