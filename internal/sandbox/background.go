@@ -67,7 +67,7 @@ func superviseSandboxed(encodedPolicy string) error {
 	if err := applyLandlock(policy, version); err != nil {
 		return report(supervisorStatus{Error: err.Error()})
 	}
-	if err := applySeccomp(version >= unixSocketsABI, true); err != nil {
+	if err := applySeccomp(version >= unixSocketsABI); err != nil {
 		return report(supervisorStatus{Error: err.Error()})
 	}
 	if err := unix.Prctl(unix.PR_SET_DUMPABLE, 0, 0, 0, 0); err != nil {

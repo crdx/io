@@ -31,8 +31,8 @@ func blockedFamilies(unixSockets bool) []uint32 {
 	return families
 }
 
-func applySeccomp(unixSockets bool, background bool) error {
-	filter, err := buildFilter(unixSockets, background)
+func applySeccomp(unixSockets bool) error {
+	filter, err := buildFilter(unixSockets)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func applySeccomp(unixSockets bool, background bool) error {
 	return nil
 }
 
-func buildFilter(unixSockets bool, background bool) ([]unix.SockFilter, error) {
+func buildFilter(unixSockets bool) ([]unix.SockFilter, error) {
 	target, err := architecture()
 	if err != nil {
 		return nil, err
@@ -71,20 +71,11 @@ func buildFilter(unixSockets bool, background bool) ([]unix.SockFilter, error) {
 		load(offsetArch),
 		jumpIfEqual(target.audit, 1, 0),
 		ret(actionKillProcess),
-
 		load(offsetNr),
 	}
 
-	if !background {
-		filter = append(filter,
-			jumpIfEqual(uint32(unix.SYS_SETPGID), 0, 1),
-			ret(actionErrno|uint32(unix.EPERM)),
-			jumpIfEqual(uint32(unix.SYS_SETSID), 0, 1),
-			ret(actionErrno|uint32(unix.EPERM)),
-		)
-	}
-
-	filter = append(filter,
+	filter = append(
+		filter,
 		jumpIfEqual(target.socket, 0, uint8(len(blockedSocketFamilies)+1)), //nolint:gosec // a fixed handful
 		load(offsetArgZero),
 	)
@@ -94,7 +85,8 @@ func buildFilter(unixSockets bool, background bool) ([]unix.SockFilter, error) {
 		filter = append(filter, jumpIfEqual(family, uint8(len(blockedSocketFamilies)-index), 0))
 	}
 
-	filter = append(filter,
+	filter = append(
+		filter,
 		ret(actionAllow),
 		ret(actionErrno|uint32(unix.EAFNOSUPPORT)),
 	)

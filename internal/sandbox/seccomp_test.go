@@ -21,7 +21,7 @@ func TestTheSocketFilterAllowsOnlyNamespacedNetworking(t *testing.T) {
 		{name: "with Unix socket isolation", unixSockets: true, unixAction: actionAllow},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			filter, err := buildFilter(test.unixSockets, false)
+			filter, err := buildFilter(test.unixSockets)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -48,27 +48,20 @@ func TestTheSocketFilterAllowsOnlyNamespacedNetworking(t *testing.T) {
 	}
 }
 
-func TestTheSyscallFilterAllowsBackgroundingOnlyWhereAsked(t *testing.T) {
+func TestTheSyscallFilterAllowsProcessSessions(t *testing.T) {
 	target, err := architecture()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, background := range []bool{false, true} {
-		filter, err := buildFilter(true, background)
-		if err != nil {
-			t.Fatal(err)
-		}
+	filter, err := buildFilter(true)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		want := actionErrno | uint32(unix.EPERM)
-		if background {
-			want = actionAllow
-		}
-
-		for _, number := range []uint32{uint32(unix.SYS_SETPGID), uint32(unix.SYS_SETSID)} {
-			if got := evaluate(filter, target.audit, number, 0); got != want {
-				t.Errorf("background %t, syscall %d: got action %#x, want %#x", background, number, got, want)
-			}
+	for _, number := range []uint32{uint32(unix.SYS_SETPGID), uint32(unix.SYS_SETSID)} {
+		if got := evaluate(filter, target.audit, number, 0); got != actionAllow {
+			t.Errorf("syscall %d: got action %#x, want allow", number, got)
 		}
 	}
 }

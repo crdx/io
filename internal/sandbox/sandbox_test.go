@@ -98,6 +98,37 @@ func TestACommandRunsAndReportsItsOutput(t *testing.T) {
 	}
 }
 
+func TestACommandMayStartANewSession(t *testing.T) {
+	result := run(t, t.TempDir(), `setsid sh -c 'printf session-ok'`, sandbox.Policy{})
+	if result.Code != 0 || result.Output != "session-ok" {
+		t.Errorf("got exit status %d with output %q", result.Code, result.Output)
+	}
+}
+
+func TestANewSessionCannotOutliveItsCommand(t *testing.T) {
+	directory := t.TempDir()
+	marker := filepath.Join(directory, "detached")
+	command := "setsid sh -c 'printf started > " + marker +
+		"; sleep 0.2; printf escaped >> " + marker + "' >/dev/null 2>&1 & " +
+		"for _ in {1..100}; do test -s " + marker + " && break; sleep 0.01; done; test -s " + marker
+
+	result := run(t, directory, command, sandbox.Policy{})
+	if result.Code != 0 {
+		t.Fatalf("the detached session did not start: exit status %d with output %q", result.Code, result.Output)
+	}
+
+	content, err := os.ReadFile(marker) //nolint:gosec // reading the test's own marker is intended
+	if err != nil || string(content) != "started" {
+		t.Fatalf("got marker %q, %v before the command ended", content, err)
+	}
+
+	time.Sleep(400 * time.Millisecond)
+	content, err = os.ReadFile(marker) //nolint:gosec // reading the test's own marker is intended
+	if err != nil || string(content) != "started" {
+		t.Errorf("the detached session survived: got marker %q, %v", content, err)
+	}
+}
+
 func TestACommandMayOpenAPseudoterminal(t *testing.T) {
 	if _, err := os.Stat("/dev/ptmx"); err != nil {
 		t.Skipf("no pseudoterminal device: %v", err)

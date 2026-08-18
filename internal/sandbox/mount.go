@@ -124,23 +124,15 @@ func dropCapabilities() error { // the bounding set is what root of a namespace 
 }
 
 func namespaceAttributes(policy Policy) *syscall.SysProcAttr {
-	flags := uintptr(syscall.CLONE_NEWUSER | syscall.CLONE_NEWNET)
+	flags := uintptr(syscall.CLONE_NEWUSER | syscall.CLONE_NEWNET | syscall.CLONE_NEWPID)
 	if policy.usesMountNamespace() {
 		flags |= syscall.CLONE_NEWNS
 	}
 
-	attributes := &syscall.SysProcAttr{
-		Setpgid:      true,
-		Unshareflags: flags,
-		UidMappings:  []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getuid(), Size: 1}},
-		GidMappings:  []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getgid(), Size: 1}},
+	return &syscall.SysProcAttr{
+		Setpgid:     !policy.Background,
+		Cloneflags:  flags,
+		UidMappings: []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getuid(), Size: 1}},
+		GidMappings: []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getgid(), Size: 1}},
 	}
-
-	if policy.Background {
-		attributes.Setpgid = false
-		attributes.Unshareflags = 0
-		attributes.Cloneflags = flags | syscall.CLONE_NEWPID
-	}
-
-	return attributes
 }

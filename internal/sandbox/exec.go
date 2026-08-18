@@ -88,7 +88,7 @@ func execSandboxed(encodedPolicy string, command string) error {
 		return err
 	}
 
-	if err := applySeccomp(version >= unixSocketsABI, policy.Background); err != nil {
+	if err := applySeccomp(version >= unixSocketsABI); err != nil {
 		return err
 	}
 
