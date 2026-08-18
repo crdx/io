@@ -8,17 +8,38 @@ import (
 
 func TestFormatTokenEstimateUsesFourBytesPerToken(t *testing.T) {
 	for bytes, want := range map[int64]string{
-		-1:   "~0t",
-		0:    "~0t",
+		-1:   "0t",
+		0:    "0t",
 		1:    "~1t",
 		4:    "~1t",
 		5:    "~2t",
-		740:  "~185t",
+		740:  "~200t",
 		4000: "~1Kt",
 		5000: "~1.25Kt",
 	} {
 		if got := util.FormatTokenEstimate(bytes, 3); got != want {
 			t.Errorf("FormatTokenEstimate(%d, 3) = %q, want %q", bytes, got, want)
+		}
+	}
+}
+
+// Only nothing reads as nothing, so a handful is said exactly and everything above it rounds to at
+// least a hundred rather than away to zero.
+func TestFormatEstimatedTokenCountRoundsSubKiloValuesToNearestHundred(t *testing.T) {
+	for tokens, want := range map[int64]string{
+		0:    "0t",
+		1:    "~1t",
+		9:    "~9t",
+		10:   "~100t",
+		49:   "~100t",
+		50:   "~100t",
+		949:  "~900t",
+		950:  "~1Kt",
+		999:  "~1Kt",
+		1000: "~1Kt",
+	} {
+		if got := util.FormatEstimatedTokenCount(tokens, 3); got != want {
+			t.Errorf("FormatEstimatedTokenCount(%d, 3) = %q, want %q", tokens, got, want)
 		}
 	}
 }

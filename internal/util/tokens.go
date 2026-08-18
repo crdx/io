@@ -10,18 +10,28 @@ func FormatTokenEstimate[Count count](bytes Count, precision int) string {
 	return FormatEstimatedTokenCount(tokens, precision)
 }
 
-// FormatEstimatedTokenCount renders an estimated token count compactly.
+// FormatEstimatedTokenCount renders an estimate compactly. A handful of tokens is said exactly,
+// since rounding one to a hundred says more than it knows. Anything larger is rounded to the
+// nearest hundred, but never down to nothing: only nothing reads as nothing.
 func FormatEstimatedTokenCount[Count count](tokens Count, precision int) string {
 	if tokens <= 0 {
-		return "~0t"
+		return "0t"
 	}
 
-	const tokensPerKilo = 1000
-	if tokens < tokensPerKilo {
-		return formatScaledUnit(float64(tokens), precision, "~", "t")
+	n := float64(tokens)
+	if n < 10 {
+		return formatScaledUnit(n, precision, "~", "t")
 	}
 
-	return formatScaledUnit(float64(tokens)/tokensPerKilo, precision, "~", "Kt")
+	if n < 1000 {
+		n = max(math.Round(n/100)*100, 100)
+	}
+
+	if n < 1000 {
+		return formatScaledUnit(n, precision, "~", "t")
+	}
+
+	return formatScaledUnit(n/1000, precision, "~", "Kt")
 }
 
 // EstimateImageTokenCount estimates the 32-pixel patches used to encode an image.

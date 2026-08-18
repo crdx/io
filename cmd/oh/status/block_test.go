@@ -84,7 +84,7 @@ func TestStatisticsUseTheirExpectedStyles(t *testing.T) {
 	exec := outcomeText("✓", 0, &tool.Statistics{
 		Kind: tool.StatsResources, PeakMemory: 26 << 20,
 	})
-	wantExec := theme.Detail("~0t 0L 0s 0s 26M")
+	wantExec := theme.Detail("0t 0L 0s 0s 26M")
 	if !strings.Contains(exec, wantExec) {
 		t.Errorf("exec statistics got %q, want styled %q", exec, wantExec)
 	}
