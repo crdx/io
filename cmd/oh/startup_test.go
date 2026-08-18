@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"crdx.org/io/cmd/oh/theme"
 )
 
 // A startup is measured in milliseconds, which the conversation's own duration format rounds away
@@ -20,47 +22,55 @@ func TestTookReportsTheScaleAStartupHappensOn(t *testing.T) {
 	}
 }
 
-func TestSpellWritesALimitTheWayItWasSet(t *testing.T) {
-	for limit, want := range map[time.Duration]string{
-		0:                     "none",
-		5 * time.Minute:       "5m",
-		60 * time.Second:      "1m",
-		90 * time.Second:      "90s",
-		30 * time.Millisecond: "0s",
-	} {
-		if got := formatDuration(limit); got != want {
-			t.Errorf("spell(%v) = %q, want %q", limit, got, want)
-		}
+func TestTheStartupLineUsesTheCompactSummary(t *testing.T) {
+	line := renderStartupBanner(12*time.Millisecond, false, startupInfo{
+		contextFiles: []contextFile{
+			{name: "SYSTEM.md", body: strings.Repeat("x", 740)},
+			{name: "AGENTS.md", body: strings.Repeat("x", 3*1024)},
+		},
+		projectSkills: 2,
+		globalSkills:  3,
+		toolBytes:     2273,
+	})
+	want := "startup=12ms SYSTEM.md=~200t AGENTS.md=~800t skills=2p/3g tools=~600t"
+
+	if plainText := theme.Plain(line); plainText != want {
+		t.Errorf("got %q, want %q", plainText, want)
 	}
 }
 
-func TestSizeWritesAFileLimitInWholeUnits(t *testing.T) {
-	for limit, want := range map[int64]string{
-		0:               "none",
-		256 * megabyte:  "256M",
-		gigabyte:        "1G",
-		1536 * megabyte: "1.5G",
+func TestStartupQuantitiesPutOnlyTheirNumbersInTheNormalForeground(t *testing.T) {
+	for name, test := range map[string]struct {
+		quantity   string
+		unitNormal bool
+		want       string
+	}{
+		"duration":       {"355µs", false, theme.Normal("355") + theme.Subtle("µs")},
+		"file size":      {"1G", true, theme.Normal("1G")},
+		"token estimate": {"~1.22Kt", false, theme.Subtle("~") + theme.Normal("1.22") + theme.Subtle("Kt")},
+		"no number":      {"none", false, theme.Subtle("none")},
 	} {
-		if got := size(limit); got != want {
-			t.Errorf("size(%d) = %q, want %q", limit, got, want)
-		}
+		t.Run(name, func(t *testing.T) {
+			var line startupLine
+			line.quantity(test.quantity, test.unitNormal)
+			if got := line.String(); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
 	}
 }
 
-// The limits are the same whatever is granted, so the line reports them without asking what a
-// command would be confined to.
-func TestTheStartupLineSaysWhatACommandIsHeldTo(t *testing.T) {
-	line := renderStartupBanner(12*time.Millisecond, false)
+func TestNoPromptFilesLeaveNoEmptyField(t *testing.T) {
+	line := theme.Plain(renderStartupBanner(time.Millisecond, false, startupInfo{}))
+	want := "startup=1ms skills=0p/0g tools=0t"
 
-	for _, fact := range []string{"12ms", "5m wall", "1m cpu", "1G file", "4096 open"} {
-		if !strings.Contains(line, fact) {
-			t.Errorf("expected %q in %q", fact, line)
-		}
+	if line != want {
+		t.Errorf("got %q, want %q", line, want)
 	}
 }
 
 func TestAResumedConversationHasNoStartupLine(t *testing.T) {
-	line := renderStartupBanner(time.Millisecond, true)
+	line := renderStartupBanner(time.Millisecond, true, startupInfo{projectSkills: 2})
 
 	if line != "" {
 		t.Errorf("expected no startup line, got %q", line)

@@ -228,10 +228,11 @@ func run() ([]string, error) {
 	}()
 
 	var context string
+	var contextFiles []contextFile
 	if resumedSession != nil && resumedSession.Meta.Context != "" {
 		context = resumedSession.Meta.Context
 	} else {
-		context, _, err = loadContext(
+		context, contextFiles, err = loadContext(
 			root,
 			workspacePath,
 			tmp,
@@ -283,9 +284,14 @@ func run() ([]string, error) {
 		chat.restore(resumedSession)
 	}
 
-	startupBanner := renderStartupBanner(time.Since(startedAt), resumedSession != nil)
-	if startupBanner != "" {
-		chat.notify("[" + theme.Subtle(startupBanner) + "]")
+	startupElapsed := time.Since(startedAt)
+	startup := startupInfo{
+		contextFiles: contextFiles,
+		toolBytes:    codex.ToolsSize(tools),
+	}
+	if resumedSession == nil {
+		banner := renderStartupBanner(startupElapsed, false, startup)
+		chat.notify(theme.Subtle("[") + banner + theme.Subtle("]"))
 	}
 
 	chat.makeIntroductions(args.initialMessage)

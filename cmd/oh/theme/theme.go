@@ -36,6 +36,7 @@ const (
 
 // The mapping of kind of line to colour.
 var (
+	Normal    Style = hex(none)                            // ordinary text in the terminal's foreground
 	Reasoning Style = decorate(col.Italic, hex(lightGrey)) // what the model thought on the way to it
 	Answer    Style = hex(none)                            // the model's reply
 	Call      Style = hex(gold)                            // the name of a call that changes nothing
