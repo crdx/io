@@ -162,7 +162,7 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 // The words are taken from where they are written, so what is pinned here is which state is
 // reported rather than how it is worded.
 func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
-	system := harnessContext("/workspace", capRead, configuredPaths{})
+	system := harnessContext("/workspace", "/state/tmps/session", capRead, configuredPaths{})
 
 	if want := "The workspace (/workspace) is " + filesystem(false); !strings.Contains(system, want) {
 		t.Errorf("expected the workspace to be reported as %q, got %q", want, system)
@@ -174,6 +174,14 @@ func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
 
 	if !strings.Contains(system, "always "+filesystem(true)) {
 		t.Errorf("expected the scratch to be writable whatever the workspace is, got %q", system)
+	}
+
+	if !strings.Contains(system, "/tmp maps to /state/tmps/session on the user's machine") {
+		t.Errorf("expected the scratch backing directory to be reported, got %q", system)
+	}
+
+	if !strings.Contains(system, "/tmp/result.png → /state/tmps/session/result.png") {
+		t.Errorf("expected an example translated scratch path, got %q", system)
 	}
 
 	if strings.Contains(system, "including /tmp") {
@@ -190,7 +198,7 @@ func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
 		"refused": {capRead, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := harnessContext("/workspace", test.currentCaps, configuredPaths{})
+			got := harnessContext("/workspace", "/state/tmps/session", test.currentCaps, configuredPaths{})
 
 			if want := "The bash tool is " + shellAccess(test.granted); !strings.Contains(got, want) {
 				t.Errorf("expected %q in %q", want, got)

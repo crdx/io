@@ -10,6 +10,7 @@ import (
 
 	"crdx.org/hereduck"
 	"crdx.org/io/cmd/oh/skill"
+	"crdx.org/io/internal/pathutil"
 )
 
 const (
@@ -27,6 +28,7 @@ type contextFile struct {
 func loadContext(
 	root *os.Root,
 	workspace string,
+	tmp string,
 	currentCaps caps,
 	paths configuredPaths,
 	skills []skill.Skill,
@@ -47,8 +49,8 @@ func loadContext(
 	}
 
 	return mergeContexts(
+		harnessContext(workspace, tmp, currentCaps, paths),
 		globalContext(globalFile),
-		harnessContext(workspace, currentCaps, paths),
 		projectContext(projectFiles),
 		skill.Prompt(skills),
 	), files, nil
@@ -108,55 +110,110 @@ func globalContext(file *contextFile) string {
 	return file.body
 }
 
-func harnessContext(workspace string, currentCaps caps, paths configuredPaths) string {
-	pathScope := "Tools that accept a path can only access the workspace and /tmp."
-	if len(paths.Read)+len(paths.Write) > 0 {
-		pathScope = "Tools that accept a path can access the workspace, /tmp, and the configured paths listed below."
-	}
-
-	return hereduck.Df(
-		`
-		Your workspace is the current directory, %s.
-
-		- %s
-		- /tmp is your persistent private scratch space. It is always read-write. No other agents have access to yours.
-		- There is no network access. Anything that requires networking must be asked of the user.
-		%s
-
-		# Current State
-
-		- The workspace (%s) is %s
-		- The .git directory within it (%s) is %s
-		- Background processes are %s
-		- The bash tool is %s
-
-		These states can change at any time. You will be told what changed when it does.
-
-		While the workspace is read-only you should consider any task you're given to be a research task.
-	`,
-		workspace,
-		pathScope,
-		configuredPathsPrompt(paths, currentCaps),
-		workspace,
-		filesystem(currentCaps.has(capWrite)),
-		filepath.Join(workspace, ".git"),
-		filesystem(currentCaps.has(capGit)),
-		background(currentCaps.has(capBackground)),
-		shellAccess(currentCaps.has(capShell)),
+func harnessContext(workspace string, tmp string, currentCaps caps, paths configuredPaths) string {
+	return mergeContexts(
+		scopeSection(workspace, paths, currentCaps),
+		networkSection(),
+		tmpSection(tmp),
+		stateSection(workspace, currentCaps),
 	)
 }
 
-func configuredPathsPrompt(paths configuredPaths, currentCaps caps) string {
+func scopeSection(workspace string, paths configuredPaths, currentCaps caps) string {
+	return hereduck.Df(
+		`
+		# Scope
+
+		- Your workspace is the current directory, %s.
+		%s
+	`,
+		workspace,
+		scopeRules(paths, currentCaps),
+	)
+}
+
+func networkSection() string {
+	return hereduck.D(`
+		# Network
+
+		- There is no network access.
+		- Anything that requires networking must be asked of the user.
+	`)
+}
+
+func tmpSection(tmp string) string {
+	tmp = pathutil.Shorten(tmp)
+
+	return hereduck.Df(
+		`
+		# /tmp
+
+		- /tmp is your persistent private scratch space.
+		- It is always read-write.
+		- No other agents have access to yours.
+		- /tmp maps to %s on the user's machine.
+		- Translate /tmp paths to that directory before giving them to the user.
+		- For example: /tmp/result.png → %s
+	`,
+		tmp,
+		filepath.Join(tmp, "result.png"),
+	)
+}
+
+func stateSection(workspace string, currentCaps caps) string {
+	return hereduck.Df(
+		`
+		# State
+
+		%s
+
+		These states can change at any time. You will be told what changed when it does.
+
+		%s
+	`,
+		stateRules(workspace, currentCaps),
+		researchNote(currentCaps),
+	)
+}
+
+func researchNote(currentCaps caps) string {
+	if currentCaps.has(capWrite) {
+		return ""
+	}
+
+	return "If the workspace is read-only you should consider any task you're given to be a research task."
+}
+
+func stateRules(workspace string, currentCaps caps) string {
+	return strings.Join([]string{
+		"- The workspace (" + workspace + ") is " + filesystem(currentCaps.has(capWrite)),
+		"- The .git directory within it (" + filepath.Join(workspace, ".git") + ") is " +
+			filesystem(currentCaps.has(capGit)),
+		"- Background processes are " + background(currentCaps.has(capBackground)),
+		"- The bash tool is " + shellAccess(currentCaps.has(capShell)),
+	}, "\n")
+}
+
+func scopeRules(paths configuredPaths, currentCaps caps) string {
 	var lines []string
+
+	if len(paths.Read)+len(paths.Write) > 0 {
+		lines = append(lines, "- Tools that accept a path can access the workspace, /tmp, and the configured paths listed here.")
+	} else {
+		lines = append(lines, "- Tools that accept a path can only access the workspace and /tmp.")
+	}
+
 	for _, path := range paths.Read {
 		lines = append(lines, "- The configured path "+path+" is read-only.")
 	}
 	for _, path := range paths.Write {
-		lines = append(lines, "- The configured path "+path+" is "+filesystem(currentCaps.has(capWrite))+" and follows the workspace write state.")
+		lines = append(lines, "- The configured path "+path+" is "+
+			filesystem(currentCaps.has(capWrite))+" and follows the workspace write state.")
 	}
 	for _, path := range paths.Exec {
 		lines = append(lines, "- The shell may execute files under "+path+".")
 	}
+
 	return strings.Join(lines, "\n")
 }
 

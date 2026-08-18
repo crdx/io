@@ -203,26 +203,18 @@ func run() ([]string, error) {
 		}
 	}
 
-	system := prompt(workspacePath, args.caps)
-
-	if resumedSession != nil && resumedSession.Meta.Context != "" {
-		system = resumedSession.Meta.Context
-	}
-
-	log, err := openSession(resumedSession, store.Meta{
+	meta := store.Meta{
 		Model:     client.Model,
 		Workspace: workspacePath,
 		Provider:  "codex",
 		Effort:    client.Effort,
-		Context:   system,
-	})
+	}
+
+	log, err := openSession(resumedSession, meta)
 	if err != nil {
 		return nil, err
 	}
-
 	defer func() { _ = log.Close() }()
-
-	tools := toolbox.Rummage(files)
 
 	tmp, err := openTmpDir(log.ID())
 	if err != nil {
@@ -235,19 +227,44 @@ func run() ([]string, error) {
 		}
 	}()
 
+	var context string
+	if resumedSession != nil && resumedSession.Meta.Context != "" {
+		context = resumedSession.Meta.Context
+	} else {
+		context, _, err = loadContext(
+			root,
+			workspacePath,
+			tmp,
+			args.caps,
+			settings.Sandbox,
+			nil,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if resumedSession == nil {
+		meta.Context = context
+		if err := log.SetMeta(meta); err != nil {
+			return nil, err
+		}
+	}
+
 	tmpRoot, err := mountTmpDir(files, tmp)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = tmpRoot.Close() }()
 
+	tools := toolbox.Rummage(files)
 	shell := confinedShell(workspacePath, homePath, tmp, settings.Sandbox, mode, files, processes)
 
 	tools = append(tools, shell)
 	tools = truncate.Tools(tools)
 
 	chat := &conversation{
-		assistant: agent.New(system, client, tools),
+		assistant: agent.New(context, client, tools),
 		screen:    output.New(os.Stdout),
 		log:       log,
 		workspace: workspacePath,
