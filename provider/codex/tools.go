@@ -1,6 +1,10 @@
 package codex
 
-import "crdx.org/io/tool"
+import (
+	"encoding/json"
+
+	"crdx.org/io/tool"
+)
 
 type functionTool struct {
 	Type        string `json:"type"`        // the kind of tool
@@ -25,4 +29,15 @@ func describe(tools []tool.Definition) []functionTool {
 	}
 
 	return offeredTools
+}
+
+// ToolsSize is the number of bytes the tools occupy in their provider wire representation.
+func ToolsSize(tools []tool.Tool) int {
+	definitions := make([]tool.Definition, len(tools))
+	for index, offeredTool := range tools {
+		definitions[index] = tool.Describe(offeredTool)
+	}
+
+	encodedTools, _ := json.Marshal(describe(definitions)) //nolint:errchkjson // all fields have safe encoders
+	return len(encodedTools)
 }
