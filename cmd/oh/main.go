@@ -188,8 +188,8 @@ func run() ([]string, error) {
 
 	system := prompt(workspacePath, args.caps)
 
-	if resumedSession != nil && resumedSession.Head.Prompt != "" {
-		system = resumedSession.Head.Prompt
+	if resumedSession != nil && resumedSession.Head.Context != "" {
+		system = resumedSession.Head.Context
 	}
 
 	log, err := openSession(resumedSession, store.Header{
@@ -197,7 +197,7 @@ func run() ([]string, error) {
 		Workspace: workspacePath,
 		Provider:  "codex",
 		Effort:    client.Effort,
-		Prompt:    system,
+		Context:   system,
 	})
 	if err != nil {
 		return nil, err

@@ -22,7 +22,7 @@ func write(t *testing.T, directory string) string {
 		Workspace: "/tmp/somewhere",
 		Provider:  "codex",
 		Effort:    "high",
-		Prompt:    "You are a coding assistant.",
+		Context:   "You are a coding assistant.",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -91,8 +91,8 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 		t.Errorf("expected the harness settings to survive, got %+v", storedSession.Head)
 	}
 
-	if storedSession.Head.Prompt != "You are a coding assistant." {
-		t.Errorf("expected the prompt to survive, got %+v", storedSession.Head)
+	if storedSession.Head.Context != "You are a coding assistant." {
+		t.Errorf("expected the context to survive, got %+v", storedSession.Head)
 	}
 
 	if len(storedSession.Items) != 1 || string(storedSession.Items[0]) != `{"type":"reasoning"}` {

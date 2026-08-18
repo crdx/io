@@ -15,7 +15,7 @@ type Header struct {
 	Workspace string `json:"workspace"`
 	Provider  string `json:"provider"`
 	Effort    string `json:"effort,omitempty"`
-	Prompt    string `json:"prompt,omitempty"`
+	Context   string `json:"context,omitempty"`
 }
 
 // Writer appends oh records to the core journal.
