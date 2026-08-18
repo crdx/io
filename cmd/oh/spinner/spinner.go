@@ -10,8 +10,8 @@ type Animation interface {
 	Rate() time.Duration
 }
 
-// Activity rotates a gap through the four dots used by the turn marker.
-var Activity Animation = newFrames(300*time.Millisecond, "⠲", "⠴", "⠦", "⠖")
+// Activity sends a twinkling star back and forth while work is underway.
+var Activity Animation = newFrames(125*time.Millisecond, "✦·", "·✦", "·✧", "✧·")
 
 // Frames is an Animation of a fixed run of frames, shown in turn and then again from the start.
 type Frames struct {

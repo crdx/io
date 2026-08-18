@@ -21,7 +21,7 @@ func banner(
 	frame int,
 	running bool,
 ) string {
-	activity := theme.Withheld("⠶")
+	activity := theme.Withheld("✧·")
 	if running {
 		activity = theme.Spinner(spinner.Activity.Frame(frame))
 	}
@@ -48,14 +48,17 @@ func short(effort string) string {
 	}
 }
 
-const padding = 2
+const (
+	leadingPadding  = 1
+	trailingPadding = 2
+)
 
 func rule(width int, left string, right string) string {
 	return styledRule(width, left, theme.Scrolled, right, theme.Subtle)
 }
 
 func bannerRule(width int, banner string, scrolled string) string {
-	if labelWidth(banner)+labelWidth(scrolled) > width {
+	if labelWidth(banner, leadingPadding)+labelWidth(scrolled, trailingPadding) > width {
 		scrolled = ""
 	}
 
@@ -71,35 +74,35 @@ func styledRule(
 ) string {
 	head := ""
 
-	if cells := labelWidth(left); cells > 0 && cells+labelWidth(right) <= width {
+	if cells := labelWidth(left, leadingPadding); cells > 0 && cells+labelWidth(right, trailingPadding) <= width {
 		if leftStyle != nil {
 			left = leftStyle(left)
 		}
 
-		head = theme.Rule(strings.Repeat("─", padding)) + " " + left + " "
+		head = theme.Rule(strings.Repeat("─", leadingPadding)) + " " + left + " "
 		width -= cells
 	}
 
 	return head + ruleTo(width, right, rightStyle)
 }
 
-func labelWidth(label string) int {
+func labelWidth(label string, edgePadding int) int {
 	if label == "" {
 		return 0
 	}
 
-	return theme.Width(label) + padding + 2
+	return theme.Width(label) + edgePadding + 2
 }
 
 func ruleTo(width int, label string, style theme.Style) string {
-	cells := labelWidth(label)
+	cells := labelWidth(label, trailingPadding)
 	if cells == 0 || cells > width {
 		return theme.Rule(strings.Repeat("─", max(width, 0)))
 	}
 
 	return theme.Rule(strings.Repeat("─", width-cells)) +
 		" " + style(label) + " " +
-		theme.Rule(strings.Repeat("─", padding))
+		theme.Rule(strings.Repeat("─", trailingPadding))
 }
 
 func modes(tools []tool.Tool, shell bool, history bool, background bool, pending bool) string {

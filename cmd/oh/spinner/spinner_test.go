@@ -2,22 +2,23 @@ package spinner_test
 
 import (
 	"testing"
+	"time"
 
 	"crdx.org/io/cmd/oh/spinner"
+	"crdx.org/io/cmd/oh/theme"
 )
 
-func TestActivityUsesOnlyTheBottomFourDots(t *testing.T) {
-	const bottomFour = 0x36
-
+func TestActivityIsTwoCellsWide(t *testing.T) {
 	for frame := range 4 {
-		values := []rune(spinner.Activity.Frame(frame))
-		if len(values) != 1 {
-			t.Fatalf("frame %d is not one rune: %q", frame, string(values))
+		value := spinner.Activity.Frame(frame)
+		if width := theme.Width(value); width != 2 {
+			t.Errorf("frame %d is %d cells wide: %q", frame, width, value)
 		}
+	}
+}
 
-		dots := values[0] - 0x2800
-		if dots & ^rune(bottomFour) != 0 {
-			t.Errorf("frame %d uses dots outside the bottom four: %q", frame, string(values))
-		}
+func TestActivityMovesAtATwinklingPace(t *testing.T) {
+	if rate := spinner.Activity.Rate(); rate != 125*time.Millisecond {
+		t.Errorf("got rate %s, want 125ms", rate)
 	}
 }

@@ -12,12 +12,12 @@ import (
 
 func TestTheBannerStartsWithAPermanentActivitySegment(t *testing.T) {
 	idle := banner("gpt-5.6-sol", "high", "/tmp/io", nil, false, false, false, false, 0, false)
-	if want := theme.Withheld("⠶"); !strings.HasPrefix(idle, want) {
+	if want := theme.Withheld("✧·"); !strings.HasPrefix(idle, want) {
 		t.Errorf("expected the idle banner to start with %q, got %q", want, idle)
 	}
 
 	running := banner("gpt-5.6-sol", "high", "/tmp/io", nil, false, false, false, false, 1, true)
-	if want := theme.Spinner("⠴"); !strings.HasPrefix(running, want) {
+	if want := theme.Spinner("·✦"); !strings.HasPrefix(running, want) {
 		t.Errorf("expected the running banner to start with %q, got %q", want, running)
 	}
 
@@ -28,7 +28,7 @@ func TestTheBannerStartsWithAPermanentActivitySegment(t *testing.T) {
 
 func TestTheBannerSitsAtTheLeftOfTheBottomRule(t *testing.T) {
 	got := theme.Plain(bannerRule(40, "⠶ ─ io ─ gpt", "↓ 2"))
-	if !strings.HasPrefix(got, "── ⠶ ─ io ─ gpt ") {
+	if !strings.HasPrefix(got, "─ ⠶ ─ io ─ gpt ") {
 		t.Errorf("expected the banner at the left, got %q", got)
 	}
 	if !strings.HasSuffix(got, " ↓ 2 ──") {
