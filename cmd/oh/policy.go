@@ -182,6 +182,9 @@ func confinedShell(
 
 		policy, err := createSandboxPolicy(ctx, workspaceDir, home, tmpDir, extraPaths, currentCaps)
 		if err != nil {
+			if ctx.Err() != nil {
+				return policy, ctx.Err()
+			}
 			return policy, fmt.Errorf("the shell cannot be confined: %w", err)
 		}
 
