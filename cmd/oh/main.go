@@ -173,6 +173,11 @@ func run() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	configuredRoots, err := mountConfiguredPaths(files, mode, settings.Sandbox)
+	if err != nil {
+		return nil, err
+	}
+	defer closeConfiguredRoots(configuredRoots)
 
 	processes := sandbox.NewProcesses(args.caps.has(capBackground))
 	defer func() { _, _ = processes.Disable() }()
@@ -236,7 +241,7 @@ func run() ([]string, error) {
 	}
 	defer func() { _ = tmpRoot.Close() }()
 
-	shell := confinedShell(workspacePath, homePath, tmp, mode, files, processes)
+	shell := confinedShell(workspacePath, homePath, tmp, settings.Sandbox, mode, files, processes)
 
 	tools = append(tools, shell)
 	tools = truncate.Tools(tools)

@@ -79,7 +79,7 @@ func TestAReadOnlyShellDoesNotOfferWriting(t *testing.T) {
 	defer func() { _, _ = processes.Disable() }()
 
 	mode := NewMode(capRead | capShell)
-	shell := confinedShell(t.TempDir(), t.TempDir(), t.TempDir(), mode, nil, processes)
+	shell := confinedShell(t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, mode, nil, processes)
 
 	if !shell.ReadOnly() {
 		t.Errorf("expected a shell with no writable path to change nothing")
