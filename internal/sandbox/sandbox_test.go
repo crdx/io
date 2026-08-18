@@ -19,6 +19,34 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+func TestPolicyModifiersDoNotChangeTheSourcePolicy(t *testing.T) {
+	source := sandbox.Policy{
+		Read:   []string{"read"},
+		Write:  []string{"write"},
+		Exec:   []string{"exec"},
+		SetEnv: map[string]string{"EXISTING": "original"},
+	}
+
+	modified := source.WithRead("more-read").WithWrite("more-write").WithExec("more-exec").WithSetEnv("ADDED", "value")
+	modified.Read[0] = "changed"
+	modified.Write[0] = "changed"
+	modified.Exec[0] = "changed"
+	modified.SetEnv["EXISTING"] = "changed"
+
+	if source.Read[0] != "read" {
+		t.Errorf("read paths changed to %v", source.Read)
+	}
+	if source.Write[0] != "write" {
+		t.Errorf("write paths changed to %v", source.Write)
+	}
+	if source.Exec[0] != "exec" {
+		t.Errorf("executable paths changed to %v", source.Exec)
+	}
+	if source.SetEnv["EXISTING"] != "original" {
+		t.Errorf("environment changed to %v", source.SetEnv)
+	}
+}
+
 func requireLandlock(t *testing.T) {
 	t.Helper()
 

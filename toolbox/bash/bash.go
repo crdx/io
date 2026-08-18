@@ -63,17 +63,16 @@ func (self shell) ReadOnly() bool { return self.readOnly() }
 // ProtectedPolicy makes .git at each writable root read-only. It does not search nested
 // directories.
 func ProtectedPolicy(policy sandbox.Policy) sandbox.Policy {
-	policy.Read = slices.Clone(policy.Read)
-
+	var readOnlyPaths []string
 	for _, path := range policy.Write {
-		metadata := filepath.Join(path, ".git")
+		gitDir := filepath.Join(path, ".git")
 
-		if pathutil.Exists(metadata) && !slices.Contains(policy.Read, metadata) {
-			policy.Read = append(policy.Read, metadata)
+		if pathutil.Exists(gitDir) && !slices.Contains(policy.Read, gitDir) && !slices.Contains(readOnlyPaths, gitDir) {
+			readOnlyPaths = append(readOnlyPaths, gitDir)
 		}
 	}
 
-	return policy
+	return policy.WithRead(readOnlyPaths...)
 }
 
 // Render flattens a command to one display-safe line and reports its original line count.

@@ -265,7 +265,7 @@ func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()
 
-	policy, err := shellPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capWrite)
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capWrite)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a writable policy here: %v", err)
 	}
@@ -296,7 +296,7 @@ func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 }
 
 func TestBackgroundModeReachesTheShellPolicy(t *testing.T) {
-	policy, err := shellPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, capBackground)
+	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, capBackground)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce background mode here: %v", err)
 	}
@@ -310,7 +310,7 @@ func TestTmpIsAlwaysWritable(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()
 
-	readOnly, err := shellPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, 0)
+	readOnly, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, 0)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a read-only policy here: %v", err)
 	}
@@ -318,7 +318,7 @@ func TestTmpIsAlwaysWritable(t *testing.T) {
 		t.Errorf("expected writable %s, got %v", sandbox.TmpDir, readOnly.Write)
 	}
 
-	readWrite, err := shellPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, capWrite)
+	readWrite, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, capWrite)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a writable policy here: %v", err)
 	}
@@ -347,7 +347,7 @@ func TestConfiguredPathsReachTheShellPolicy(t *testing.T) {
 		Read: []string{readDirectory}, Write: []string{writeDirectory}, Exec: []string{execDirectory},
 	}
 
-	readOnly, err := shellPolicy(t.Context(), workspace, home, t.TempDir(), additional, 0)
+	readOnly, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), additional, 0)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce the configured policy here: %v", err)
 	}
@@ -363,7 +363,7 @@ func TestConfiguredPathsReachTheShellPolicy(t *testing.T) {
 		t.Errorf("configured write path is writable without write capability: %v", readOnly.Write)
 	}
 
-	readWrite, err := shellPolicy(t.Context(), workspace, home, t.TempDir(), additional, capWrite)
+	readWrite, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), additional, capWrite)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce the configured writable policy here: %v", err)
 	}
@@ -396,7 +396,7 @@ func TestAnExistingGoModuleCacheIsReadable(t *testing.T) {
 
 	t.Setenv("GOMODCACHE", modules)
 
-	policy, _ := shellPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capWrite)
+	policy, _ := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capWrite)
 
 	if !slices.Contains(policy.Read, modules) {
 		t.Errorf("got readable paths %v, want %s", policy.Read, modules)
@@ -455,7 +455,7 @@ func TestAReadOnlyShellCannotChangeItsHome(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()
 
-	policy, _ := shellPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, 0)
+	policy, _ := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, 0)
 
 	if policy.Writable() {
 		t.Errorf("got writable paths %v", policy.Write)
@@ -477,7 +477,7 @@ func TestACommitOnlyShellMayChangeTheHistoryAlone(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	policy, err := shellPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capGit)
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capGit)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a writable policy here: %v", err)
 	}
@@ -510,7 +510,7 @@ func TestEveryExistingRepositoryIsProtectedFromTheShell(t *testing.T) {
 		}
 	}
 
-	policy, err := shellPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{
 		Write: []string{additional},
 	}, capWrite)
 	if err != nil {
@@ -526,7 +526,7 @@ func TestEveryExistingRepositoryIsProtectedFromTheShell(t *testing.T) {
 
 // There is nothing to commit into without a repository, so the mode grants the shell nothing.
 func TestACommitOnlyShellWithNoRepositoryChangesNothing(t *testing.T) {
-	policy, err := shellPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, capGit)
+	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, capGit)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a policy here: %v", err)
 	}

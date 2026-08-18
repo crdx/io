@@ -318,7 +318,7 @@ func (self *Processes) Run(
 	}
 
 	policy.Background = true
-	policy.Exec = append(policy.Exec, executable)
+	policy = policy.WithExec(executable)
 
 	if err := validate(ctx, policy); err != nil {
 		return Result{}, err

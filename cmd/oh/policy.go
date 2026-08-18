@@ -45,72 +45,87 @@ func execPaths(workspace string) []string {
 	return paths
 }
 
-func shellPolicy(
+func createSandboxPolicy(
 	ctx context.Context,
-	workspace string,
-	home string,
+	workspaceDir string,
+	homeDir string,
 	tmpDir string,
-	additional configuredPaths,
+	extraPaths configuredPaths,
 	currentCaps caps,
 ) (sandbox.Policy, error) {
-	readPaths := append(slices.Clone(additional.Read), additional.Write...)
-	executablePaths := append(execPaths(workspace), additional.Exec...)
+	readablePaths := slices.Concat(extraPaths.Read, extraPaths.Write)
+	executablePaths := append(append(execPaths(workspaceDir), extraPaths.Exec...), homeDir, sandbox.TmpDir)
+
 	policy := sandbox.Policy{
-		Read:   readPaths,
-		Exec:   append(executablePaths, home, sandbox.TmpDir),
+		Read: readablePaths,
+		Exec: executablePaths,
+
 		TmpDir: tmpDir,
-		Env:    []string{"PATH", "LANG", "TERM", "USER"},
+		Env: []string{
+			"PATH",
+			"LANG",
+			"TERM",
+			"USER",
+		},
 		SetEnv: map[string]string{
 			"GIT_CONFIG_NOSYSTEM": "1",
-			"HOME":                home,
+			"HOME":                homeDir,
 			"TMPDIR":              sandbox.TmpDir,
 		},
-		Timeout:    shellTimeout,
-		CPUTime:    shellCPUTime,
-		FileSize:   shellFileSize,
-		OpenFiles:  shellOpenFiles,
+
+		Timeout:   shellTimeout,
+		CPUTime:   shellCPUTime,
+		FileSize:  shellFileSize,
+		OpenFiles: shellOpenFiles,
+
 		Background: currentCaps.has(capBackground),
 	}
 
 	if modules := goModuleCache(); modules != "" {
-		policy.Read = append(policy.Read, modules)
-		policy.SetEnv["GOMODCACHE"] = modules
+		policy = policy.WithRead(modules).WithSetEnv("GOMODCACHE", modules)
 	}
 
-	grantedPaths := allWritablePaths(workspace, home, additional.Write, currentCaps)
-	if len(grantedPaths) > 0 {
-		writable := policy
-		writable.Read = slices.Clone(policy.Read)
-		writable.Write = grantedPaths
+	writablePathsForPolicy := allWritablePaths(workspaceDir, homeDir, extraPaths.Write, currentCaps)
+	if len(writablePathsForPolicy) == 0 {
+		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir)
+	}
 
-		if !currentCaps.has(capWrite) {
-			writable.Read = append(writable.Read, workspace) // read the tree, change only its .git
-		}
+	writablePolicy := policy.WithWrite(writablePathsForPolicy...)
 
-		if !currentCaps.has(capGit) {
-			var err error
-			protectRoots := append([]string{workspace}, additional.Write...)
-			writable, err = protectedPolicy(writable, protectRoots)
-			if err != nil {
-				return policy, fmt.Errorf("could not find repository metadata to protect: %w", err)
-			}
-		}
+	if !currentCaps.has(capWrite) {
+		writablePolicy = writablePolicy.WithRead(workspaceDir) // read the tree, change only its .git
+	}
 
-		writable.Write = append(writable.Write, sandbox.TmpDir)
-
-		if sandbox.Supported(ctx, writable) == nil {
-			return writable, nil
+	if !currentCaps.has(capGit) {
+		protectRoots := append([]string{workspaceDir}, extraPaths.Write...)
+		var err error
+		writablePolicy, err = protectedPolicy(writablePolicy, protectRoots)
+		if err != nil {
+			return policy, fmt.Errorf("could not find repository metadata to protect: %w", err)
 		}
 	}
 
-	policy.Read = append(policy.Read, workspace, home)
-	policy.Write = append(policy.Write, sandbox.TmpDir)
+	writablePolicy = writablePolicy.WithWrite(sandbox.TmpDir)
+	if sandbox.Supported(ctx, writablePolicy) != nil {
+		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir)
+	}
+
+	return writablePolicy, nil
+}
+
+func readOnlySandboxPolicy(
+	ctx context.Context,
+	policy sandbox.Policy,
+	workspace string,
+	home string,
+) (sandbox.Policy, error) {
+	policy = policy.WithRead(workspace, home).WithWrite(sandbox.TmpDir)
 
 	return policy, sandbox.Supported(ctx, policy)
 }
 
 func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, error) {
-	policy.Read = slices.Clone(policy.Read)
+	var readOnlyPaths []string
 	visited := make(map[string]struct{}, len(roots))
 
 	for _, root := range roots {
@@ -128,8 +143,8 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
 				return nil
 			}
 
-			if !slices.Contains(policy.Read, path) {
-				policy.Read = append(policy.Read, path)
+			if !slices.Contains(policy.Read, path) && !slices.Contains(readOnlyPaths, path) {
+				readOnlyPaths = append(readOnlyPaths, path)
 			}
 			if entry.IsDir() {
 				return filepath.SkipDir
@@ -141,15 +156,15 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
 		}
 	}
 
-	return bash.ProtectedPolicy(policy), nil // also covers .git at other writable roots, such as HOME
+	return bash.ProtectedPolicy(policy.WithRead(readOnlyPaths...)), nil // also covers .git at other writable roots, such as HOME
 }
 
 // ErrShellWithheld is a command turned away before it is confined, the shell not being granted.
 var ErrShellWithheld = errors.New(
-	"shell access is not granted; the person at the keyboard can grant it with ctrl+x x",
+	"shell access is not granted; the user can grant it with ctrl+x x",
 )
 
-func confinedShell( // nothing is prepared: what is granted may change between one command and the next
+func confinedShell(
 	workspace string,
 	home string,
 	tmpDir string,
@@ -165,7 +180,7 @@ func confinedShell( // nothing is prepared: what is granted may change between o
 			return sandbox.Policy{}, ErrShellWithheld
 		}
 
-		policy, err := shellPolicy(ctx, workspace, home, tmpDir, additional, currentCaps)
+		policy, err := createSandboxPolicy(ctx, workspace, home, tmpDir, additional, currentCaps)
 		if err != nil {
 			return policy, fmt.Errorf("the shell cannot be confined: %w", err)
 		}
