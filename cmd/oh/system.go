@@ -213,7 +213,7 @@ func scopeRules(extraPaths configuredPaths, currentCaps caps) string {
 			filesystem(currentCaps.has(capWrite))+" and follows the workspace write state.")
 	}
 	for _, path := range extraPaths.Exec {
-		lines = append(lines, "- The shell may execute files under "+path+".")
+		lines = append(lines, "- The shell may execute files at or under "+path+".")
 	}
 
 	return strings.Join(lines, "\n")
