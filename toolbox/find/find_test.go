@@ -1,6 +1,7 @@
 package find_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -103,6 +104,48 @@ func TestASearchThatFindsNothingSaysSo(t *testing.T) {
 
 	if output != "(no matches)" {
 		t.Errorf("expected no matches to say so, got %q", output)
+	}
+}
+
+func TestMatchCountDoesNotCapSmallResults(t *testing.T) {
+	const matchCount = 150
+	paths := make([]string, matchCount)
+	for i := range matchCount {
+		paths[i] = fmt.Sprintf("file-%03d.txt", i)
+	}
+	root := testRoot(t, paths...)
+
+	output, err := exec(t, root, `{"pattern":"*.txt"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if found := strings.Split(output, "\n"); len(found) != matchCount {
+		t.Errorf("expected all %d small results, got %d", matchCount, len(found))
+	}
+	if strings.Contains(output, "narrow the search") {
+		t.Errorf("expected the complete result, got %q", output)
+	}
+}
+
+func TestHittingTheByteCapIsSaidOutLoud(t *testing.T) {
+	const pathCount = 200
+	paths := make([]string, pathCount)
+	for i := range pathCount {
+		paths[i] = fmt.Sprintf("directory-%03d-%s/file.txt", i, strings.Repeat("x", 80))
+	}
+	root := testRoot(t, paths...)
+
+	output, err := exec(t, root, `{"pattern":"**/*.txt"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(output, "matching output exceeded 16K") {
+		t.Errorf("expected the byte cap to be reported, got the last of %q", output[len(output)-100:])
+	}
+	if strings.Contains(output, paths[pathCount-1]) {
+		t.Errorf("expected later results to be omitted, got %q", output)
 	}
 }
 

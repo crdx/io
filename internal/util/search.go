@@ -10,13 +10,15 @@ import (
 	"crdx.org/io/tool"
 )
 
-// MaxMatches caps what a search hands back.
-const MaxMatches = 100
+// MaxSearchBytes caps the matching content.
+const MaxSearchBytes = 16 * 1024
 
-var skipDirs = map[string]bool{".git": true, "node_modules": true}
+var skipDirs = map[string]bool{
+	".git":         true,
+	"node_modules": true,
+}
 
-// RenderSearch describes a search out loud, as the pattern and what qualifies it. A search taking
-// no glob passes an empty string, and the working directory goes without saying.
+// RenderSearch describes a search.
 func RenderSearch(pattern string, path string, globPattern string) (string, string) {
 	var detail string
 
@@ -46,8 +48,7 @@ func SearchPath(call tool.Call) string {
 	return filepath.Base(path)
 }
 
-// Walk visits every entry below root within filesystem, skipping symlinks and the directories
-// nothing wants searched.
+// Walk visits every entry below root within filesystem, skipping symlinks and the unwanted dirs.
 func Walk(filesystem fs.FS, root string, visit func(path string, entry fs.DirEntry) error) error {
 	return fs.WalkDir(filesystem, root, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
@@ -70,18 +71,36 @@ func Walk(filesystem fs.FS, root string, visit func(path string, entry fs.DirEnt
 	})
 }
 
-// Report renders what a search found, saying so where the cap was hit.
-func Report(matches []string, truncated bool) string {
-	if len(matches) == 0 {
+// AppendSearchResult adds a complete result where it fits within the shared search byte cap.
+func AppendSearchResult(results []string, returnedBytes int64, result string) ([]string, int64, bool) {
+	separatorBytes := 0
+	if len(results) > 0 {
+		separatorBytes = 1
+	}
+	resultBytes := int64(separatorBytes + len(result))
+	if returnedBytes+resultBytes > MaxSearchBytes {
+		return results, returnedBytes, true
+	}
+
+	return append(results, result), returnedBytes + resultBytes, false
+}
+
+// ReportSearchResults renders what a search found, saying so where the byte cap was hit.
+func ReportSearchResults(results []string, truncated bool) string {
+	joinedResults := strings.Join(results, "\n")
+	if truncated {
+		if joinedResults != "" {
+			joinedResults += "\n\n"
+		}
+
+		return fmt.Sprintf(
+			"%s[stopped before matching output exceeded %s; narrow the search to see the rest]",
+			joinedResults, FormatBytes(MaxSearchBytes, 3),
+		)
+	}
+	if joinedResults == "" {
 		return "(no matches)"
 	}
 
-	if truncated {
-		return fmt.Sprintf(
-			"%s\n\n[stopped at %d matches, narrow the search to see the rest]",
-			strings.Join(matches, "\n"), MaxMatches,
-		)
-	}
-
-	return strings.Join(matches, "\n")
+	return joinedResults
 }

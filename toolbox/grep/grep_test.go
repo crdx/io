@@ -154,9 +154,10 @@ func TestASearchThatFindsNothingSaysSo(t *testing.T) {
 	}
 }
 
-func TestHittingTheCapIsSaidOutLoud(t *testing.T) {
+func TestMatchCountDoesNotCapSmallResults(t *testing.T) {
+	const matchCount = 150
 	root := testRoot(t, map[string]string{
-		"big.txt": strings.Repeat("hello\n", 150),
+		"big.txt": strings.Repeat("hello\n", matchCount),
 	})
 
 	output, stats, err := execWithStats(t, root, `{"pattern":"hello"}`)
@@ -164,14 +165,32 @@ func TestHittingTheCapIsSaidOutLoud(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !strings.Contains(output, "narrow the search") {
-		t.Errorf("expected the cap to be reported, got the last of %q", output[len(output)-80:])
+	if stats.Lines != matchCount || stats.Truncated {
+		t.Errorf("expected all %d small matches, got %+v", matchCount, stats)
 	}
-	if stats.Lines != util.MaxMatches || !stats.Truncated {
-		t.Errorf("expected %d capped matching lines, got %+v", util.MaxMatches, stats)
+	if strings.Contains(output, "narrow the search") {
+		t.Errorf("expected the complete result, got %q", output)
 	}
-	if stats.Bytes <= 0 || stats.TotalBytes <= stats.Bytes {
-		t.Errorf("expected returned and total byte counts, got %+v", stats)
+}
+
+func TestHittingTheByteCapIsSaidOutLoud(t *testing.T) {
+	root := testRoot(t, map[string]string{
+		"big.txt": strings.Repeat(strings.Repeat("x", 100)+"\n", 500),
+	})
+
+	output, stats, err := execWithStats(t, root, `{"pattern":"x"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(output, "matching output exceeded 16K") {
+		t.Errorf("expected the byte cap to be reported, got the last of %q", output[len(output)-100:])
+	}
+	if stats.Lines <= 0 || !stats.Truncated {
+		t.Errorf("expected capped matching lines, got %+v", stats)
+	}
+	if stats.Bytes <= 0 || stats.Bytes > util.MaxSearchBytes || stats.TotalBytes != 0 {
+		t.Errorf("expected returned bytes and an unknown total, got %+v", stats)
 	}
 }
 

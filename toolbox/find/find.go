@@ -52,6 +52,7 @@ func exec(root *file.Root, args Args) (string, error) {
 	}
 
 	var matches []string
+	returnedBytes := int64(0)
 	truncated := false
 
 	err = util.Walk(root.FS(), name, func(path string, entry fs.DirEntry) error {
@@ -59,19 +60,18 @@ func exec(root *file.Root, args Args) (string, error) {
 			return nil
 		}
 
-		if len(matches) >= util.MaxMatches {
-			truncated = true
-
-			return fs.SkipAll
-		}
-
 		relativePath, err := filepath.Rel(name, path)
 		if err != nil {
 			return nil //nolint:nilerr // an unrelatable path is skipped, not fatal
 		}
 
-		if util.MatchGlob(args.Pattern, relativePath) {
-			matches = append(matches, path)
+		if !util.MatchGlob(args.Pattern, relativePath) {
+			return nil
+		}
+
+		matches, returnedBytes, truncated = util.AppendSearchResult(matches, returnedBytes, path)
+		if truncated {
+			return fs.SkipAll
 		}
 
 		return nil
@@ -80,5 +80,5 @@ func exec(root *file.Root, args Args) (string, error) {
 		return "", err
 	}
 
-	return util.Report(matches, truncated), nil
+	return util.ReportSearchResults(matches, truncated), nil
 }
