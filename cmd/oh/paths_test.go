@@ -38,12 +38,12 @@ func TestTheConfigurationIsInTheXDGConfigDirectory(t *testing.T) {
 	}
 }
 
-func TestTheSystemPromptIsInTheXDGConfigDirectory(t *testing.T) {
+func TestTheGlobalContextIsInTheXDGConfigDirectory(t *testing.T) {
 	root := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", root)
 
 	want := filepath.Join(root, namespace, app, "SYSTEM.md")
-	if got := systemPath(); got != want {
+	if got := globalContextPath(); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

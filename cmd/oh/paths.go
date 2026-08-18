@@ -19,7 +19,7 @@ func configPath() string {
 	return configDir("config.toml")
 }
 
-func systemPath() string {
+func globalContextPath() string {
 	return configDir("SYSTEM.md")
 }
 
