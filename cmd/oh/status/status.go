@@ -314,7 +314,7 @@ func (self *Block) run() {
 	self.redraw()
 	self.mutex.Unlock()
 
-	ticker := time.NewTicker(spinner.Braille.Rate())
+	ticker := time.NewTicker(spinner.Activity.Rate())
 	defer ticker.Stop()
 
 	for {
@@ -397,7 +397,7 @@ func (self *Block) outcome(item row) string {
 			return ""
 		}
 
-		return outcomeText(theme.Spinner(spinner.Braille.Frame(self.frame)), time.Since(item.startedAt), nil)
+		return outcomeText(theme.Spinner(spinner.Activity.Frame(self.frame)), time.Since(item.startedAt), nil)
 	}
 
 	return outcomeText(glyph(item.state), item.took, item.stats)

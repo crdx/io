@@ -13,11 +13,6 @@ type Animation interface {
 // Activity rotates a gap through the four dots used by the turn marker.
 var Activity Animation = newFrames(300*time.Millisecond, "⠲", "⠴", "⠦", "⠖")
 
-// Braille is the animation shown on a call that is taking its time.
-var Braille Animation = newFrames(
-	150*time.Millisecond, "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏",
-)
-
 // Frames is an Animation of a fixed run of frames, shown in turn and then again from the start.
 type Frames struct {
 	frames []string      // the frames in order
