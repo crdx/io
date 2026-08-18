@@ -173,7 +173,10 @@ func tableRows(cells []string, aligns []east.Alignment, widths []int, heading bo
 				text = wrappedCells[at][line]
 			}
 
-			out.WriteString(" " + pad(text, widths[at], alignment(aligns, at)) + " " + bar)
+			out.WriteString(" ")
+			out.WriteString(pad(text, widths[at], alignment(aligns, at)))
+			out.WriteString(" ")
+			out.WriteString(bar)
 		}
 
 		rows[line] = out.String()
