@@ -25,7 +25,7 @@ type Args struct {
 
 // New builds the grep tool confined to root. A match is reported as path:line:text.
 func New(root *file.Root) tool.Tool {
-	definedTool := tool.Define(
+	definedTool := tool.DefineMeasured(
 		"grep",
 		"search file contents",
 		tool.Schema{
@@ -34,7 +34,9 @@ func New(root *file.Root) tool.Tool {
 			tool.String("glob", "path filter, e.g. **/*.go").Optional(),
 		},
 		Render,
-		func(ctx context.Context, args Args) (string, error) { return run(ctx, root, args) },
+		func(ctx context.Context, args Args) (string, tool.Statistics, error) {
+			return run(ctx, root, args)
+		},
 	)
 
 	return tool.ReadOnly(tool.Concurrent(tool.Focus(definedTool, util.SearchPath)))
@@ -45,18 +47,15 @@ func Render(args Args) (string, string) {
 	return util.RenderSearch(args.Pattern, args.Path, args.Glob)
 }
 
-func run(ctx context.Context, root *file.Root, args Args) (string, error) {
+func run(ctx context.Context, root *file.Root, args Args) (string, tool.Statistics, error) {
 	if args.Pattern == "" {
-		return "", errors.New("pattern is required")
+		return "", tool.Statistics{}, errors.New("pattern is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", err
+		return "", tool.Statistics{}, err
 	}
-
-	commandContext, stop := context.WithCancel(ctx)
-	defer stop()
 
 	arguments := []string{
 		"--no-config",
@@ -74,60 +73,82 @@ func run(ctx context.Context, root *file.Root, args Args) (string, error) {
 	}
 	arguments = append(arguments, "--regexp="+args.Pattern, "--", name)
 
-	command := exec.CommandContext(commandContext, "rg", arguments...)
+	command := exec.CommandContext(ctx, "rg", arguments...)
 	command.Dir = root.Name()
 
 	stdout, err := command.StdoutPipe()
 	if err != nil {
-		return "", fmt.Errorf("could not read grep output: %w", err)
+		return "", tool.Statistics{}, fmt.Errorf("could not read grep output: %w", err)
 	}
 
 	var stderr bytes.Buffer
 	command.Stderr = &stderr
 
 	if err := command.Start(); err != nil {
-		return "", fmt.Errorf("could not start grep: %w", err)
+		return "", tool.Statistics{}, fmt.Errorf("could not start grep: %w", err)
 	}
 
-	matches, truncated, readErr := readMatches(stdout, name == ".")
-	if truncated {
-		stop()
-	}
+	matches, totalBytes, truncated, readErr := readMatches(stdout, name == ".")
 
 	waitErr := command.Wait()
 
 	if ctx.Err() != nil {
-		return "", ctx.Err()
+		return "", tool.Statistics{}, ctx.Err()
 	}
 	if readErr != nil {
-		return "", fmt.Errorf("could not read grep output: %w", readErr)
+		return "", tool.Statistics{}, fmt.Errorf("could not read grep output: %w", readErr)
 	}
+
 	if truncated {
-		return util.Report(matches, true), nil
+		output, stats := searchReport(matches, totalBytes, true)
+		return output, stats, nil
 	}
 	if waitErr != nil {
 		var exitError *exec.ExitError
 		if errors.As(waitErr, &exitError) && exitError.ExitCode() == 1 {
-			return util.Report(nil, false), nil
+			output, stats := searchReport(nil, 0, false)
+			return output, stats, nil
 		}
 
 		message := strings.TrimSpace(stderr.String())
 		if strings.HasPrefix(message, "rg: regex parse error:") {
-			return "", fmt.Errorf("invalid pattern: %s", strings.TrimPrefix(message, "rg: "))
+			return "", tool.Statistics{}, fmt.Errorf("invalid pattern: %s", strings.TrimPrefix(message, "rg: "))
 		}
 		if message != "" {
-			return "", errors.New(message)
+			return "", tool.Statistics{}, errors.New(message)
 		}
 
-		return "", fmt.Errorf("grep failed: %w", waitErr)
+		return "", tool.Statistics{}, fmt.Errorf("grep failed: %w", waitErr)
 	}
 
-	return util.Report(matches, false), nil
+	output, stats := searchReport(matches, totalBytes, false)
+	return output, stats, nil
 }
 
-func readMatches(reader io.Reader, trimWorkingDirectory bool) ([]string, bool, error) {
+func searchReport(matches []string, totalBytes int64, truncated bool) (string, tool.Statistics) {
+	output := util.Report(matches, truncated)
+	returnedBytes := int64(len(output))
+	if truncated {
+		returnedBytes = int64(len(strings.Join(matches, "\n")))
+	}
+	if totalBytes == 0 {
+		totalBytes = returnedBytes
+	}
+
+	return output, tool.Statistics{
+		Kind:       tool.StatsSearch,
+		Lines:      int64(len(matches)),
+		Bytes:      returnedBytes,
+		TotalBytes: totalBytes,
+		Truncated:  truncated,
+	}
+}
+
+func readMatches(reader io.Reader, trimWorkingDirectory bool) ([]string, int64, bool, error) {
 	bufferedReader := bufio.NewReader(reader)
 	matches := make([]string, 0, util.MaxMatches)
+	totalBytes := int64(0)
+	matchCount := 0
 
 	for {
 		line, err := bufferedReader.ReadString('\n')
@@ -137,18 +158,22 @@ func readMatches(reader io.Reader, trimWorkingDirectory bool) ([]string, bool, e
 				line = strings.TrimPrefix(line, "./")
 			}
 
-			if len(matches) == util.MaxMatches {
-				return matches, true, nil
+			if matchCount > 0 {
+				totalBytes++
 			}
-			matches = append(matches, line)
+			totalBytes += int64(len(line))
+			matchCount++
+			if len(matches) < util.MaxMatches {
+				matches = append(matches, line)
+			}
 		}
 
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				return matches, false, nil
+				return matches, totalBytes, matchCount > util.MaxMatches, nil
 			}
 
-			return nil, false, err
+			return nil, 0, false, err
 		}
 	}
 }

@@ -29,7 +29,7 @@ func RenderSearch(pattern string, path string, globPattern string) (string, stri
 			detail += " "
 		}
 
-		detail += "matching " + globPattern
+		detail += "(" + globPattern + ")"
 	}
 
 	return pattern, detail
@@ -42,7 +42,7 @@ func SearchPath(call tool.Call) string {
 		return ""
 	}
 
-	path, _, _ := strings.Cut(detail, " matching ")
+	path, _, _ := strings.Cut(detail, " (")
 	return filepath.Base(path)
 }
 

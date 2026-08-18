@@ -70,6 +70,33 @@ func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
 	}
 }
 
+func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
+	t.Setenv("TMPDIR", t.TempDir())
+	whole := strings.Repeat("a line of text\n", 4000)
+	subject := tool.DefineMeasured(
+		"measured",
+		"measure something",
+		tool.Schema{},
+		func(Args) (string, string) { return "measured", "" },
+		func(context.Context, Args) (string, tool.Statistics, error) {
+			return whole, tool.Statistics{Kind: tool.StatsResources}, nil
+		},
+	)
+
+	call, err := truncate.Tool(subject).Parse(`{}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := call.Exec(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	stats, ok := tool.Stats(call)
+	if !ok || stats.Bytes <= 0 || stats.Bytes > truncate.Limit || stats.TotalBytes != int64(len(whole)) || !stats.Truncated {
+		t.Errorf("expected returned and total output statistics, got %+v and measured=%v", stats, ok)
+	}
+}
+
 func TestOutputThatFitsIsLeftAlone(t *testing.T) {
 	output := truncate.Output("hello\n")
 
@@ -98,6 +125,9 @@ func TestOutputTooBigIsCutAndSaved(t *testing.T) {
 		t.Fatalf("expected the whole of it saved once, got %v and %v", saved, err)
 	}
 
+	if !strings.Contains(output, "truncated at 32K of 58.6K") {
+		t.Errorf("expected compact byte sizes in the notice, got %q", output)
+	}
 	if !strings.Contains(output, saved[0]) {
 		t.Errorf("expected the notice to name the file it saved, got %q", output)
 	}

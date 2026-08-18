@@ -53,6 +53,18 @@ func fixedShell(root *file.Root, policy func() sandbox.Policy) tool.Tool {
 func exec(t *testing.T, root *file.Root, directory string, arguments string) (string, error) {
 	t.Helper()
 
+	output, _, err := execWithStats(t, root, directory, arguments)
+	return output, err
+}
+
+func execWithStats(
+	t *testing.T,
+	root *file.Root,
+	directory string,
+	arguments string,
+) (string, tool.Statistics, error) {
+	t.Helper()
+
 	policy := bash.ProtectedPolicy(sandbox.Policy{
 		Write:   []string{directory},
 		Env:     []string{"PATH"},
@@ -68,7 +80,9 @@ func exec(t *testing.T, root *file.Root, directory string, arguments string) (st
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	return call.Exec(t.Context())
+	output, err := call.Exec(t.Context())
+	stats, _ := tool.Stats(call)
+	return output, stats, err
 }
 
 func TestTheToolIsCalledExec(t *testing.T) {
@@ -82,13 +96,16 @@ func TestTheToolIsCalledExec(t *testing.T) {
 func TestOutputIsReturned(t *testing.T) {
 	root, directory := testRoot(t)
 
-	output, err := exec(t, root, directory, `{"command": "echo hello"}`)
+	output, stats, err := execWithStats(t, root, directory, `{"command": "echo hello"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	if strings.TrimSpace(output) != "hello" {
 		t.Errorf("got %q, want %q", output, "hello")
+	}
+	if stats.Lines != 1 || stats.Bytes != int64(len(output)) || stats.TotalBytes != stats.Bytes {
+		t.Errorf("expected one line and %d returned and total bytes, got %+v", len(output), stats)
 	}
 }
 

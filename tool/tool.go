@@ -57,8 +57,10 @@ type Statistics struct {
 	PeakMemory uint64        `json:"peak_memory,omitempty"`
 	Lines      int64         `json:"lines,omitempty"`
 	Bytes      int64         `json:"bytes,omitempty"`
+	TotalBytes int64         `json:"total_bytes,omitempty"`
 	Added      int64         `json:"added,omitempty"`
 	Removed    int64         `json:"removed,omitempty"`
+	Truncated  bool          `json:"truncated,omitempty"`
 }
 
 // Statistics kinds classify call measurements.
@@ -67,6 +69,7 @@ const (
 	StatsRead      = "read"
 	StatsWrite     = "write"
 	StatsDiff      = "diff"
+	StatsSearch    = "search"
 )
 
 // Statistical is a call that records resource use while it runs.

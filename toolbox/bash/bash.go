@@ -12,6 +12,7 @@ import (
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/strutil"
 	"crdx.org/io/tool"
 )
 
@@ -149,6 +150,9 @@ func exec(
 	}
 
 	reportText := report(result, policy)
+	stats.Lines = int64(len(strutil.Lines(reportText)))
+	stats.Bytes = int64(len(reportText))
+	stats.TotalBytes = stats.Bytes
 
 	if result.Code != 0 {
 		return reportText, stats, ErrCommandFailed

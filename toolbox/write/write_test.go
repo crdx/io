@@ -54,6 +54,23 @@ func TestAFileIsWrittenWithItsParentDirectories(t *testing.T) {
 	}
 }
 
+func TestWriteSizesUseCompactBytes(t *testing.T) {
+	content := strings.Repeat("x", 1536)
+	path, size := write.Render(write.Args{Path: "result.txt", Content: content})
+	if path != "result.txt" || size != "1.5K" {
+		t.Errorf("got path %q and size %q, want result.txt and 1.5K", path, size)
+	}
+
+	root, _ := testRoot(t)
+	result, err := exec(t, root, `{"path":"result.txt","content":"`+content+`"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result != "wrote 1.5K to result.txt" {
+		t.Errorf("got %q, want compact write result", result)
+	}
+}
+
 func TestAnExistingFileIsOverwritten(t *testing.T) {
 	root, directory := testRoot(t)
 

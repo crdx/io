@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/pathutil"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 )
 
@@ -45,7 +47,7 @@ func (self writer) ReadOnly() bool { return self.root.RefuseWrite(".") != nil }
 
 // Render names the file, saying how much is being written rather than what.
 func Render(args Args) (string, string) {
-	return args.Path, fmt.Sprintf("%d bytes", len(args.Content))
+	return pathutil.Shorten(args.Path), util.FormatBytes(len(args.Content), 3)
 }
 
 func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
@@ -82,5 +84,5 @@ func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
 	stats := tool.Statistics{
 		Kind: tool.StatsWrite, Lines: lines, Bytes: int64(len(args.Content)),
 	}
-	return fmt.Sprintf("wrote %d bytes to %s", len(args.Content), args.Path), stats, nil
+	return fmt.Sprintf("wrote %s to %s", util.FormatBytes(len(args.Content), 3), args.Path), stats, nil
 }

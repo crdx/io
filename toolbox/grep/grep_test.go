@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/util"
+	"crdx.org/io/tool"
 	"crdx.org/io/toolbox/grep"
 )
 
@@ -43,12 +45,25 @@ func testRoot(t *testing.T, files map[string]string) *file.Root {
 func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	t.Helper()
 
+	output, _, err := execWithStats(t, root, arguments)
+	return output, err
+}
+
+func execWithStats(
+	t *testing.T,
+	root *file.Root,
+	arguments string,
+) (string, tool.Statistics, error) {
+	t.Helper()
+
 	call, err := grep.New(root).Parse(arguments)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	return call.Exec(t.Context())
+	output, err := call.Exec(t.Context())
+	stats, _ := tool.Stats(call)
+	return output, stats, err
 }
 
 func TestAMatchIsReportedWithItsPathAndLine(t *testing.T) {
@@ -61,6 +76,22 @@ func TestAMatchIsReportedWithItsPathAndLine(t *testing.T) {
 
 	if output != "main.go:3:func main() {}" {
 		t.Errorf("expected the path, line and text, got %q", output)
+	}
+}
+
+func TestTheNumberOfMatchingLinesIsReported(t *testing.T) {
+	root := testRoot(t, map[string]string{"main.go": "hello\ngoodbye\nhello\n"})
+
+	output, stats, err := execWithStats(t, root, `{"pattern":"hello"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if stats.Kind != tool.StatsSearch || stats.Lines != 2 || stats.Truncated {
+		t.Errorf("expected two uncapped matching lines, got %+v", stats)
+	}
+	if stats.Bytes != int64(len(output)) || stats.TotalBytes != stats.Bytes {
+		t.Errorf("expected %d returned and total bytes, got %+v", len(output), stats)
 	}
 }
 
@@ -128,13 +159,19 @@ func TestHittingTheCapIsSaidOutLoud(t *testing.T) {
 		"big.txt": strings.Repeat("hello\n", 150),
 	})
 
-	output, err := exec(t, root, `{"pattern":"hello"}`)
+	output, stats, err := execWithStats(t, root, `{"pattern":"hello"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	if !strings.Contains(output, "narrow the search") {
 		t.Errorf("expected the cap to be reported, got the last of %q", output[len(output)-80:])
+	}
+	if stats.Lines != util.MaxMatches || !stats.Truncated {
+		t.Errorf("expected %d capped matching lines, got %+v", util.MaxMatches, stats)
+	}
+	if stats.Bytes <= 0 || stats.TotalBytes <= stats.Bytes {
+		t.Errorf("expected returned and total byte counts, got %+v", stats)
 	}
 }
 
@@ -177,7 +214,7 @@ func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
 	}
 
 	renderedPattern, detail = grep.Render(grep.Args{Pattern: "hello", Path: "internal", Glob: "*.go"})
-	if renderedPattern != "hello" || detail != "in internal matching *.go" {
+	if renderedPattern != "hello" || detail != "in internal (*.go)" {
 		t.Errorf("expected a path and glob to be named, got %q and %q", renderedPattern, detail)
 	}
 }

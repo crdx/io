@@ -11,16 +11,18 @@ import (
 	"crdx.org/io/cmd/oh/spinner"
 	"crdx.org/io/cmd/oh/theme"
 	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 )
 
-const reveal = time.Second
+const (
+	reveal           = time.Second
+	durationWidth    = 6
+	patience         = 5 * time.Second
+	bytesPerMegabyte = 1 << 20
+)
 
-const durationWidth = 6
-
-const patience = 5 * time.Second // a time is worth saying only where there was a wait to speak of
-
-// State is what became of a call.
+// State is a call.
 type State int
 
 // What a row can say about a call: it is running, it finished, it failed, or it never got anywhere.
@@ -370,7 +372,7 @@ func (self *Block) line(item row) string {
 		label = label.Elide(room)
 	}
 
-	return joinNonEmpty(label.render(), outcome, failureText(failure))
+	return util.JoinNonEmpty(label.render(), outcome, failureText(failure))
 }
 
 func failureText(failure string) string {
@@ -379,18 +381,6 @@ func failureText(failure string) string {
 	}
 
 	return theme.Failure(failure)
-}
-
-func joinNonEmpty(parts ...string) string {
-	nonEmptyParts := make([]string, 0, len(parts))
-
-	for _, part := range parts {
-		if part != "" {
-			nonEmptyParts = append(nonEmptyParts, part)
-		}
-	}
-
-	return strings.Join(nonEmptyParts, " ")
 }
 
 func outcomeSpacing(outcome string) int {
@@ -418,21 +408,33 @@ func outcomeText(mark string, took time.Duration, stats *tool.Statistics) string
 		if took < patience {
 			return mark
 		}
-		return mark + " " + theme.Spinner(formatDuration(took))
+		return mark + " " + theme.Spinner(util.FormatDuration(took))
 	}
 
 	var statsText string
 	switch stats.Kind {
 	case tool.StatsResources:
-		statsText = theme.Args(compactDuration(took)) +
-			theme.Detail(", cpu "+compactDuration(stats.CPUTime)+", mem "+formatBytes(stats.PeakMemory))
+		statsText = theme.Detail(fmt.Sprintf(
+			"%s %dL %s %s %dM",
+			tokenEstimate(stats),
+			stats.Lines,
+			util.CompactDuration(took),
+			util.CompactDuration(stats.CPUTime),
+			stats.PeakMemory/bytesPerMegabyte,
+		))
 	case tool.StatsRead:
-		statsText = theme.Detail(fmt.Sprint(stats.Lines) + "L, " + formatBytes(byteCount(stats.Bytes)))
+		statsText = theme.Detail(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
 	case tool.StatsWrite:
-		statsText = theme.Detail(fmt.Sprint(stats.Lines) + "L")
+		statsText = theme.Detail(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
 	case tool.StatsDiff:
 		statsText = theme.Success("+%d", stats.Added) +
 			theme.Detail(" ") + theme.Failure("−%d", stats.Removed)
+	case tool.StatsSearch:
+		capMarker := ""
+		if stats.Truncated {
+			capMarker = "+"
+		}
+		statsText = theme.Detail(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
 	}
 
 	if statsText == "" {
@@ -441,46 +443,12 @@ func outcomeText(mark string, took time.Duration, stats *tool.Statistics) string
 	return mark + " " + statsText
 }
 
-func compactDuration(took time.Duration) string {
-	if took > -time.Second && took < time.Second {
-		tenths := took.Round(100 * time.Millisecond).Seconds()
-		if tenths == 0 {
-			return "0s"
-		}
-		return fmt.Sprintf("%.1fs", tenths)
+func tokenEstimate(stats *tool.Statistics) string {
+	returned := util.FormatTokenEstimate(stats.Bytes, 2)
+	if stats.TotalBytes > stats.Bytes {
+		return returned + " (of " + util.FormatTokenEstimate(stats.TotalBytes, 2) + ")"
 	}
-	if took%time.Second == 0 && took < time.Minute {
-		return fmt.Sprintf("%ds", int(took.Seconds()))
-	}
-	return formatDuration(took)
-}
-
-func byteCount(bytes int64) uint64 {
-	if bytes <= 0 {
-		return 0
-	}
-
-	return uint64(bytes)
-}
-
-func formatBytes(bytes uint64) string {
-	const unit = uint64(1024)
-	if bytes < unit {
-		return fmt.Sprintf("%dB", bytes)
-	}
-
-	value := float64(bytes)
-	names := []string{"KiB", "MiB", "GiB", "TiB"}
-	for _, name := range names {
-		value /= float64(unit)
-		if value < float64(unit) || name == names[len(names)-1] {
-			if value < 10 {
-				return strings.TrimSuffix(fmt.Sprintf("%.1f", value), ".0") + name
-			}
-			return fmt.Sprintf("%.0f%s", value, name)
-		}
-	}
-	return fmt.Sprintf("%dB", bytes)
+	return returned
 }
 
 func glyph(state State) string {
@@ -494,25 +462,4 @@ func glyph(state State) string {
 	}
 
 	return ""
-}
-
-func formatDuration(took time.Duration) string {
-	switch {
-	case took < time.Minute:
-		return fmt.Sprintf("%d.%ds", int(took.Seconds()), int(took.Milliseconds()%1000)/100)
-	case took < time.Hour:
-		return fmt.Sprintf("%dm%02ds", int(took.Minutes()), int(took.Seconds())%60)
-	case took < 100*time.Hour:
-		return fmt.Sprintf("%dh%02dm", int(took.Hours()), int(took.Minutes())%60)
-	}
-
-	days := int(took.Hours()) / 24
-	switch {
-	case days < 100:
-		return fmt.Sprintf("%dd%02dh", days, int(took.Hours())%24)
-	case days <= 9999:
-		return fmt.Sprintf("%dd", days)
-	default:
-		return "9999d+"
-	}
 }

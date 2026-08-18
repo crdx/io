@@ -8,6 +8,7 @@ import (
 
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 )
 
@@ -19,20 +20,32 @@ func TestMeasuredStatisticsAreShownAfterCalls(t *testing.T) {
 		want  []string
 	}{
 		"resources": {
-			stats: tool.Statistics{Kind: tool.StatsResources, CPUTime: 800 * time.Millisecond, PeakMemory: 92 << 20},
-			want:  []string{"1.4s, cpu 0.8s, mem 92MiB"},
+			stats: tool.Statistics{
+				Kind: tool.StatsResources, CPUTime: 800 * time.Millisecond, PeakMemory: 92 << 20, Lines: 7, Bytes: 1200,
+			},
+			want: []string{"~300t 7L 1.4s 0.8s 92M"},
 		},
 		"read": {
 			stats: tool.Statistics{Kind: tool.StatsRead, Lines: 42, Bytes: 1200},
-			want:  []string{"42L, 1.2KiB"},
+			want:  []string{"42L ~300t"},
 		},
 		"write": {
 			stats: tool.Statistics{Kind: tool.StatsWrite, Lines: 3, Bytes: 17},
-			want:  []string{"3L"},
+			want:  []string{"3L ~5t"},
 		},
 		"diff": {
 			stats: tool.Statistics{Kind: tool.StatsDiff, Added: 3, Removed: 2},
 			want:  []string{"+3 −2"},
+		},
+		"search": {
+			stats: tool.Statistics{Kind: tool.StatsSearch, Lines: 17, Bytes: 1200},
+			want:  []string{"17L ~300t"},
+		},
+		"capped search": {
+			stats: tool.Statistics{
+				Kind: tool.StatsSearch, Lines: 100, Bytes: 32_000, TotalBytes: 80_000, Truncated: true,
+			},
+			want: []string{"100L+ ~8Kt (of ~20Kt)"},
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -46,16 +59,28 @@ func TestMeasuredStatisticsAreShownAfterCalls(t *testing.T) {
 	}
 }
 
-func TestStatisticsHighlightTheirImportantValues(t *testing.T) {
+func TestStatisticsUseTheirExpectedStyles(t *testing.T) {
 	read := outcomeText("✓", 0, &tool.Statistics{Kind: tool.StatsRead, Lines: 45, Bytes: 951})
-	if want := theme.Args(int64(45)) + theme.Detail("L, 951B"); !strings.Contains(read, want) {
+	if want := theme.Detail("45L ~238t"); !strings.Contains(read, want) {
 		t.Errorf("read statistics got %q, want styled %q", read, want)
+	}
+
+	write := outcomeText("✓", 0, &tool.Statistics{Kind: tool.StatsWrite, Lines: 12, Bytes: 1200})
+	if want := theme.Detail("12L ~300t"); !strings.Contains(write, want) {
+		t.Errorf("write statistics got %q, want styled %q", write, want)
+	}
+
+	search := outcomeText("✓", 0, &tool.Statistics{
+		Kind: tool.StatsSearch, Lines: 23, Bytes: 1200, TotalBytes: 2400, Truncated: true,
+	})
+	if want := theme.Detail("23L+ ~300t (of ~600t)"); !strings.Contains(search, want) {
+		t.Errorf("search statistics got %q, want styled %q", search, want)
 	}
 
 	exec := outcomeText("✓", 0, &tool.Statistics{
 		Kind: tool.StatsResources, PeakMemory: 26 << 20,
 	})
-	wantExec := theme.Args("0s") + theme.Detail(", cpu 0s, mem 26MiB")
+	wantExec := theme.Detail("~0t 0L 0s 0s 26M")
 	if !strings.Contains(exec, wantExec) {
 		t.Errorf("exec statistics got %q, want styled %q", exec, wantExec)
 	}
@@ -400,7 +425,7 @@ func TestFormatDuration(t *testing.T) {
 		"1h40m":  100 * time.Minute,
 		"4d04h":  100 * time.Hour,
 	} {
-		if got := formatDuration(took); got != want {
+		if got := util.FormatDuration(took); got != want {
 			t.Errorf("expected %q, got %q", want, got)
 		}
 

@@ -1,4 +1,4 @@
-// Package util is the plumbing the file tools share: paths, walking, globs, and search results.
+// Package util provides small helpers shared across io.
 package util
 
 import "crdx.org/io/internal/file"
