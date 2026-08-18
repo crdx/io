@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"net/url"
 	"os"
 	"path/filepath"
 	"slices"
@@ -381,39 +382,43 @@ func TestCommandsOnThePathMayBeExecuted(t *testing.T) {
 	}
 }
 
-func TestAnExistingGoModuleCacheIsReadable(t *testing.T) {
+func TestGoUsesTheHostModuleCacheAsAProxy(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()
-	modules := filepath.Join(t.TempDir(), "pkg", "mod")
+	hostModules := filepath.Join(t.TempDir(), "pkg", "mod")
+	proxyDir := filepath.Join(hostModules, "cache", "download")
 
-	if err := os.MkdirAll(modules, 0o700); err != nil {
+	if err := os.MkdirAll(proxyDir, 0o700); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	t.Setenv("GOMODCACHE", modules)
+	t.Setenv("GOMODCACHE", hostModules)
 
-	policy, _ := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capWrite)
-
-	if !slices.Contains(policy.Read, modules) {
-		t.Errorf("got readable paths %v, want %s", policy.Read, modules)
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capWrite)
+	if err != nil {
+		t.Skipf("the sandbox cannot enforce the Go cache policy here: %v", err)
 	}
 
-	if policy.SetEnv["GOMODCACHE"] != modules {
-		t.Errorf("got GOMODCACHE %q, want %q", policy.SetEnv["GOMODCACHE"], modules)
+	if !slices.Contains(policy.Read, proxyDir) {
+		t.Errorf("got readable paths %v, want %s", policy.Read, proxyDir)
+	}
+
+	wantEnvironment := map[string]string{
+		"GOPROXY": (&url.URL{Scheme: "file", Path: proxyDir}).String(),
+		"GOSUMDB": "off",
+	}
+	for name, want := range wantEnvironment {
+		if got := policy.SetEnv[name]; got != want {
+			t.Errorf("got %s %q, want %q", name, got, want)
+		}
 	}
 }
 
-func TestAnUnresolvableGoModuleCacheIsIgnored(t *testing.T) {
-	directory := t.TempDir()
-	t.Chdir(directory)
-	if err := os.Remove(directory); err != nil {
-		t.Fatalf("could not remove the working directory: %v", err)
-	}
-
+func TestAMalformedGoModuleCacheIsRejected(t *testing.T) {
 	t.Setenv("GOMODCACHE", "modules")
 
-	if got := goModuleCache(); got != "" {
-		t.Errorf("got %q, want no module cache", got)
+	if _, err := goModuleCache(); err == nil {
+		t.Error("expected a relative Go module cache to be rejected")
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"slices"
@@ -81,8 +82,15 @@ func createSandboxPolicy(
 		Background: currentCaps.has(capBackground),
 	}
 
-	if modules := goModuleCache(); modules != "" {
-		policy = policy.WithRead(modules).WithSetEnv("GOMODCACHE", modules)
+	policy = policy.WithSetEnv("GOPROXY", "off").WithSetEnv("GOSUMDB", "off")
+	modules, err := goModuleCache()
+	if err != nil {
+		return policy, err
+	}
+	if modules != "" {
+		proxyDir := filepath.Join(modules, "cache", "download")
+		proxyURL := (&url.URL{Scheme: "file", Path: proxyDir}).String()
+		policy = policy.WithRead(proxyDir).WithSetEnv("GOPROXY", proxyURL)
 	}
 
 	writablePathsForPolicy := allWritablePaths(workspaceDir, homeDir, extraPaths.Write, currentCaps)
