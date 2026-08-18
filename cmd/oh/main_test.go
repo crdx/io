@@ -514,6 +514,31 @@ func TestACommitOnlyShellMayChangeTheHistoryAlone(t *testing.T) {
 	}
 }
 
+func TestAnExactMetadataWritePathIsProtectedFromTheShell(t *testing.T) {
+	repository := t.TempDir()
+	target := filepath.Join(repository, ".git", "config")
+	if err := os.Mkdir(filepath.Dir(target), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(target, []byte("original"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	alias := filepath.Join(t.TempDir(), "shared")
+	if err := os.Symlink(target, alias); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, path := range []string{target, alias} {
+		policy, err := protectedPolicy(sandbox.Policy{Write: []string{path}}, []string{path})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !slices.Contains(policy.Read, path) {
+			t.Errorf("expected %s to be protected, got %v", path, policy.Read)
+		}
+	}
+}
+
 func TestEveryExistingRepositoryIsProtectedFromTheShell(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()

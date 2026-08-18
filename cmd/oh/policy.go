@@ -158,7 +158,18 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
 		}
 		visited[root] = struct{}{}
 
-		err := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+		resolvedRoot, err := filepath.EvalSymlinks(root)
+		if err != nil {
+			return policy, err
+		}
+		if file.InGitDir(resolvedRoot) {
+			if !slices.Contains(policy.Read, root) {
+				readOnlyPaths = append(readOnlyPaths, root)
+			}
+			continue
+		}
+
+		err = filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
 			if err != nil {
 				return err // missing a branch would grant it write access without knowing what is there
 			}
