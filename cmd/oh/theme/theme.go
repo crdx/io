@@ -28,7 +28,7 @@ const (
 	lime      = "#4c9a2c"
 	teal      = "#8abeb7"
 	steel     = "#81a2be"
-	mauve     = "#b294bb"
+	mauve     = "#c9a6d4"
 	lightGrey = "#969896"
 
 	none = "" // whatever the terminal draws with, which is what donnie asks for as text
