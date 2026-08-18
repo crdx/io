@@ -22,6 +22,31 @@ func screenWithInput() (*Output, *strings.Builder) {
 	}, screenOutput
 }
 
+func TestSynchronisingHoldsNestedFramesBackUntilDrawingFinishes(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := &Output{writer: screenOutput, terminal: true}
+
+	screen.Synchronise(func() {
+		screen.Footer([]string{"> hi"}, 0, 3)
+		screen.Synchronise(func() {
+			screen.Line("thinking")
+		})
+
+		if screenOutput.Len() != 0 {
+			t.Errorf("expected output to be withheld while drawing, got %q", screenOutput.String())
+		}
+	})
+
+	got := screenOutput.String()
+	if strings.Count(got, beginFrame) != 1 || strings.Count(got, endFrame) != 1 {
+		t.Errorf("expected one frame around the whole update, got %q", got)
+	}
+
+	if !strings.HasPrefix(got, beginFrame+hideCursor) || !strings.HasSuffix(got, showCursor+endFrame) {
+		t.Errorf("expected the complete update to be synchronised, got %q", got)
+	}
+}
+
 func TestAnUnchangedInputIsNotDrawnAgain(t *testing.T) {
 	screen, screenOutput := screenWithInput()
 

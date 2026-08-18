@@ -18,6 +18,48 @@ const (
 	clearScrollback = "\x1b[3J" // ED2 does not push what it clears into the history, so it goes too
 )
 
+// Synchronise holds every intermediate update back until draw has finished.
+func (self *Output) Synchronise(draw func()) {
+	if !self.terminal {
+		draw()
+		return
+	}
+
+	self.mutex.Lock()
+	self.synchronising++
+	self.mutex.Unlock()
+
+	defer func() {
+		self.mutex.Lock()
+		defer self.mutex.Unlock()
+
+		self.synchronising--
+		if self.synchronising == 0 {
+			text := self.synchronisedBytes.String()
+			self.synchronisedBytes.Reset()
+			self.writeRaw(beginFrame + hideCursor + text + showCursor + endFrame)
+		}
+	}()
+
+	draw()
+}
+
+func (self *Output) openFrame() string {
+	if self.synchronising > 0 {
+		return ""
+	}
+
+	return beginFrame + hideCursor
+}
+
+func (self *Output) closeFrame() string {
+	if self.synchronising > 0 {
+		return ""
+	}
+
+	return showCursor + endFrame
+}
+
 type footer struct {
 	rows         []string // the input rows
 	cursorRow    int      // the cursor row in the input
@@ -107,7 +149,7 @@ func (self *Output) Reset() {
 func (self *Output) redraw(text string) {
 	var out strings.Builder
 
-	out.WriteString(beginFrame + hideCursor)
+	out.WriteString(self.openFrame())
 
 	if !self.wrapping {
 		self.wrapping = true
@@ -118,7 +160,7 @@ func (self *Output) redraw(text string) {
 	out.WriteString(self.eraseInput())
 	out.WriteString(text)
 	out.WriteString(self.drawInput())
-	out.WriteString(showCursor + endFrame)
+	out.WriteString(self.closeFrame())
 
 	self.raw(out.String())
 }

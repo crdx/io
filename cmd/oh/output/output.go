@@ -34,7 +34,9 @@ type Output struct {
 	column     int // the cursor column
 	openedRows int // how many conversation rows precede the current one
 
-	wrapping bool // whether the terminal wraps at its edge
+	wrapping          bool            // whether the terminal wraps at its edge
+	synchronising     int             // how many whole-screen updates are holding their intermediate frames back
+	synchronisedBytes strings.Builder // output withheld until the outer synchronised update is complete
 
 	input       footer // what the input should look like
 	shownFooter footer // what is on the screen
@@ -257,5 +259,14 @@ func (self *Output) at(text string) {
 }
 
 func (self *Output) raw(text string) {
+	if self.synchronising > 0 {
+		self.synchronisedBytes.WriteString(text)
+		return
+	}
+
+	self.writeRaw(text)
+}
+
+func (self *Output) writeRaw(text string) {
 	_, _ = io.WriteString(self.writer, text)
 }

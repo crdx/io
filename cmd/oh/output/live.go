@@ -88,7 +88,7 @@ func (self *Output) begin() {
 func (self *Output) repaint(first int, rows []string) {
 	var out strings.Builder
 
-	out.WriteString(beginFrame + hideCursor)
+	out.WriteString(self.openFrame())
 
 	if !self.wrapping {
 		self.wrapping = true
@@ -120,7 +120,7 @@ func (self *Output) repaint(first int, rows []string) {
 	self.settle(rows)
 
 	out.WriteString(self.drawInput())
-	out.WriteString(showCursor + endFrame)
+	out.WriteString(self.closeFrame())
 
 	self.raw(out.String())
 }

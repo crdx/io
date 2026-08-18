@@ -333,27 +333,29 @@ func (self *conversation) newPicasso(live bool) *painter {
 }
 
 func (self *conversation) replay() {
-	painter := self.newPicasso(self.turn.running)
+	self.screen.Synchronise(func() {
+		painter := self.newPicasso(self.turn.running)
 
-	for _, record := range self.transcript {
-		if record.notice != "" {
-			painter.close(status.Cancelled)
-			self.screen.Line(record.notice)
+		for _, record := range self.transcript {
+			if record.notice != "" {
+				painter.close(status.Cancelled)
+				self.screen.Line(record.notice)
 
-			continue
+				continue
+			}
+
+			painter.draw(record.event)
 		}
 
-		painter.draw(record.event)
-	}
+		if self.turn.running {
+			self.turn.painter = painter // unanswered calls are on an open block again, on the same rows
+			return
+		}
 
-	if self.turn.running {
-		self.turn.painter = painter // unanswered calls are on an open block again, on the same rows
-		return
-	}
+		painter.close(status.Cancelled)
 
-	painter.close(status.Cancelled)
-
-	self.screen.End()
+		self.screen.End()
+	})
 }
 
 func (self *conversation) redraw() {
@@ -361,8 +363,10 @@ func (self *conversation) redraw() {
 		self.turn.painter.stop() // its ticker would draw over the replay
 	}
 
-	self.screen.Reset()
-	self.replay()
+	self.screen.Synchronise(func() {
+		self.screen.Reset()
+		self.replay()
+	})
 }
 
 func (self *conversation) start(prompt string) {
