@@ -12,7 +12,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	absolute := filepath.Join(t.TempDir(), "skills")
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	contents := "model = \"configured-model\"\neffort = \"low\"\n[skill]\nlookup_dirs = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
+	contents := "model = \"configured-model\"\neffort = \"low\"\n[skill]\nlookup = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
 	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	if settings.Model != "configured-model" || settings.Effort != "low" {
 		t.Errorf("got model %q and effort %q", settings.Model, settings.Effort)
 	}
-	directories := settings.Skill.LookupDirectories
+	directories := settings.Skill.LookupDirs
 	want := []string{
 		absolute,
 		filepath.Join(configurationDirectory, "shared", "skills"),
@@ -45,7 +45,7 @@ func TestConfiguredSettingsAllowsNoSettingsFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Skill.LookupDirectories != nil || settings.Sandbox.Read != nil ||
+	if settings.Skill.LookupDirs != nil || settings.Sandbox.Read != nil ||
 		settings.Sandbox.Write != nil || settings.Sandbox.Exec != nil {
 		t.Errorf("got %#v, want no configured paths", settings)
 	}
@@ -53,7 +53,7 @@ func TestConfiguredSettingsAllowsNoSettingsFile(t *testing.T) {
 
 func TestConfiguredSkillDirectoriesRejectsAnEmptyDirectory(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(path, []byte("[skill]\nlookup_dirs = [\"\"]\n"), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte("[skill]\nlookup = [\"\"]\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 

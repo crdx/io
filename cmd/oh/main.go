@@ -180,7 +180,7 @@ func run() ([]string, error) {
 	}
 	defer closeConfiguredRoots(configuredRoots)
 
-	globalSkillDirs := append([]string{configDir("skills")}, settings.Skill.LookupDirectories...)
+	globalSkillDirs := append([]string{configDir("skills")}, settings.Skill.LookupDirs...)
 	availableSkills, err := skill.Discover(workspaceDir, globalSkillDirs, os.Stderr)
 	if err != nil {
 		return nil, err

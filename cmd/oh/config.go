@@ -18,7 +18,7 @@ type configuredSettings struct {
 	Effort string `toml:"effort"`
 
 	Skill struct {
-		LookupDirectories []string `toml:"lookup_dirs"`
+		LookupDirs []string `toml:"lookup"`
 	} `toml:"skill"`
 	Sandbox configuredPaths `toml:"sandbox"`
 }
@@ -56,7 +56,7 @@ func loadConfiguredSettings(path string) (configuredSettings, error) {
 		name   string
 		values *[]string
 	}{
-		{"skill.lookup_dirs", &settings.Skill.LookupDirectories},
+		{"skill.lookup", &settings.Skill.LookupDirs},
 		{"sandbox.read", &settings.Sandbox.Read},
 		{"sandbox.write", &settings.Sandbox.Write},
 		{"sandbox.exec", &settings.Sandbox.Exec},
