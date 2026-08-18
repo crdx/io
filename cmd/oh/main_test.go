@@ -382,7 +382,7 @@ func TestCommandsOnThePathMayBeExecuted(t *testing.T) {
 	}
 }
 
-func TestGoUsesTheHostModuleCacheAsAProxy(t *testing.T) {
+func TestGoUsesTheShellCacheAndTheHostModuleCacheAsAProxy(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()
 	hostModules := filepath.Join(t.TempDir(), "pkg", "mod")
@@ -394,18 +394,27 @@ func TestGoUsesTheHostModuleCacheAsAProxy(t *testing.T) {
 
 	t.Setenv("GOMODCACHE", hostModules)
 
-	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capWrite)
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, 0)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce the Go cache policy here: %v", err)
 	}
 
+	cacheDir := filepath.Join(home, ".cache")
+	if slices.Contains(policy.Write, home) {
+		t.Errorf("the Go caches made the shell home writable: %v", policy.Write)
+	}
+	if !slices.Contains(policy.Write, cacheDir) {
+		t.Errorf("the shell cache is not writable: %v", policy.Write)
+	}
 	if !slices.Contains(policy.Read, proxyDir) {
 		t.Errorf("got readable paths %v, want %s", policy.Read, proxyDir)
 	}
 
 	wantEnvironment := map[string]string{
-		"GOPROXY": (&url.URL{Scheme: "file", Path: proxyDir}).String(),
-		"GOSUMDB": "off",
+		"GOCACHE":    filepath.Join(cacheDir, goBuildCacheDir),
+		"GOMODCACHE": filepath.Join(cacheDir, goModuleCacheDir),
+		"GOPROXY":    (&url.URL{Scheme: "file", Path: proxyDir}).String(),
+		"GOSUMDB":    "off",
 	}
 	for name, want := range wantEnvironment {
 		if got := policy.SetEnv[name]; got != want {
@@ -452,16 +461,19 @@ func TestNoPolicyGrantsMoreThanItsCapsAskFor(t *testing.T) {
 	}
 }
 
-func TestAReadOnlyShellCannotChangeItsHome(t *testing.T) {
+func TestAReadOnlyShellMayChangeOnlyItsCache(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()
+	cacheDir := filepath.Join(home, ".cache")
 
-	policy, _ := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, 0)
-
-	if policy.Writable() {
-		t.Errorf("got writable paths %v", policy.Write)
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, 0)
+	if err != nil {
+		t.Skipf("the sandbox cannot enforce the shell cache policy here: %v", err)
 	}
 
+	if !slices.Equal(policy.Write, []string{cacheDir, sandbox.TmpDir}) {
+		t.Errorf("got writable paths %v, want only the shell cache and scratch", policy.Write)
+	}
 	if !slices.Contains(policy.Read, home) {
 		t.Errorf("got readable paths %v, want the shell home", policy.Read)
 	}

@@ -23,6 +23,9 @@ const (
 	shellCPUTime   = 60 * time.Second // processor time, which only a busy command spends
 	shellFileSize  = 1024 << 20       // enough for a build artefact, not enough to fill a disk
 	shellOpenFiles = 4096
+
+	goBuildCacheDir  = "go-build"
+	goModuleCacheDir = "go-mod"
 )
 
 func execPaths(workspaceDir string) []string {
@@ -54,12 +57,18 @@ func createSandboxPolicy(
 	extraPaths configuredPaths,
 	currentCaps caps,
 ) (sandbox.Policy, error) {
+	cacheDir := filepath.Join(homeDir, ".cache")
+	if err := os.MkdirAll(cacheDir, 0o700); err != nil {
+		return sandbox.Policy{}, fmt.Errorf("could not prepare the shell cache: %w", err)
+	}
+
 	readablePaths := slices.Concat(extraPaths.Read, extraPaths.Write)
 	executablePaths := append(append(execPaths(workspaceDir), extraPaths.Exec...), homeDir, sandbox.TmpDir)
 
 	policy := sandbox.Policy{
-		Read: readablePaths,
-		Exec: executablePaths,
+		Read:  readablePaths,
+		Write: []string{cacheDir},
+		Exec:  executablePaths,
 
 		TmpDir: tmpDir,
 		Env: []string{
@@ -70,6 +79,8 @@ func createSandboxPolicy(
 		},
 		SetEnv: map[string]string{
 			"GIT_CONFIG_NOSYSTEM": "1",
+			"GOCACHE":             filepath.Join(cacheDir, goBuildCacheDir),
+			"GOMODCACHE":          filepath.Join(cacheDir, goModuleCacheDir),
 			"HOME":                homeDir,
 			"TMPDIR":              sandbox.TmpDir,
 		},
