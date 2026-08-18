@@ -236,7 +236,7 @@ func run() ([]string, error) {
 
 	defer func() {
 		if !log.Stored() {
-			_ = os.Remove(tmpDir) // takes nothing that is not empty regardless
+			_ = os.Remove(tmpDir)
 		}
 	}()
 
@@ -288,8 +288,19 @@ func run() ([]string, error) {
 
 		label: func(pending bool, frame int, running bool) string {
 			currentCaps := mode.Current()
-			return banner(client.Model, client.Effort, workspaceDir, tools, currentCaps.has(capShell),
-				currentCaps.has(capGit), currentCaps.has(capBackground), pending, frame, running)
+
+			return banner(
+				client.Model,
+				client.Effort,
+				workspaceDir,
+				tools,
+				currentCaps.has(capShell),
+				currentCaps.has(capGit),
+				currentCaps.has(capBackground),
+				pending,
+				frame,
+				running,
+			)
 		},
 	}
 
@@ -344,7 +355,7 @@ func chooseSession(resume bool, id string) (*store.Session, error) {
 	}
 
 	if id != "" {
-		return store.Read(sessionsDir(), id) // named rather than chosen
+		return store.Read(sessionsDir(), id)
 	}
 
 	sessions, err := store.List(sessionsDir())
@@ -359,7 +370,7 @@ func chooseSession(resume bool, id string) (*store.Session, error) {
 	return picker.Session(sessions, os.Stdin, os.Stdout)
 }
 
-func openTmpDir(id string) (string, error) { // kept, so a resumed conversation finds its files
+func openTmpDir(id string) (string, error) {
 	tmp := tmpDir(id)
 
 	if err := os.MkdirAll(tmp, 0o700); err != nil {
