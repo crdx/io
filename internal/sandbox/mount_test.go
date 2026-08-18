@@ -1,9 +1,21 @@
 package sandbox
 
 import (
+	"slices"
 	"syscall"
 	"testing"
 )
+
+func TestTheNamespaceProbeCannotRunTestsIfInitIsMissing(t *testing.T) {
+	probe := namespaceProbeCommand(t.Context(), Policy{})
+
+	if !slices.Contains(probe.Args, "-test.run=^$") {
+		t.Errorf("the namespace probe could recursively run tests: %v", probe.Args)
+	}
+	if !slices.Contains(probe.Env, envProbe+"=1") {
+		t.Errorf("the namespace probe does not ask Init to handle it: %v", probe.Env)
+	}
+}
 
 func TestAScratchAsksForAMountNamespace(t *testing.T) {
 	if namespaceAttributes(Policy{}).Cloneflags&syscall.CLONE_NEWNS != 0 {

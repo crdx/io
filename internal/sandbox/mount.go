@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"syscall"
 	"time"
 
@@ -40,14 +41,27 @@ func checkNamespaces(ctx context.Context, policy Policy) error {
 	probeContext, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	probe := exec.CommandContext(probeContext, shell, "-c", "exit")
-	probe.SysProcAttr = namespaceAttributes(policy)
-
-	if err := probe.Run(); err != nil {
+	probe := namespaceProbeCommand(probeContext, policy)
+	output, err := probe.CombinedOutput()
+	message := strings.TrimSpace(strings.TrimPrefix(string(output), notice))
+	if err != nil {
+		if message != "" {
+			return fmt.Errorf("this machine will not give the sandbox its namespaces: %s", message)
+		}
 		return fmt.Errorf("this machine will not give the sandbox its namespaces: %w", err)
+	}
+	if message != probeSucceeded {
+		return errors.New("the executable did not initialise the sandbox namespace probe")
 	}
 
 	return nil
+}
+
+func namespaceProbeCommand(ctx context.Context, policy Policy) *exec.Cmd {
+	probe := exec.CommandContext(ctx, executable, "-test.run=^$")
+	probe.Env = []string{envProbe + "=1"}
+	probe.SysProcAttr = namespaceAttributes(policy)
+	return probe
 }
 
 func applyMounts(policy Policy) error {

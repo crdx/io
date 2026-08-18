@@ -16,6 +16,11 @@ import (
 	"crdx.org/io/internal/sandbox"
 )
 
+func TestMain(testingMain *testing.M) {
+	sandbox.Init()
+	os.Exit(testingMain.Run())
+}
+
 func bind(t *testing.T, arguments ...string) InputOpts {
 	t.Helper()
 
