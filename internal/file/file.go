@@ -72,10 +72,18 @@ func (self *Root) Resolve(path string) (*Root, string, error) {
 		return self, name, nil
 	}
 
+	var resolvedRoot *Root
+	resolvedName := ""
+	resolvedAt := ""
 	for at, mountedRoot := range self.mounts {
-		if name, ok := pathutil.RelativeTo(at, path); ok {
-			return mountedRoot, name, nil
+		if name, ok := pathutil.RelativeTo(at, path); ok && len(at) > len(resolvedAt) {
+			resolvedRoot = mountedRoot
+			resolvedName = name
+			resolvedAt = at
 		}
+	}
+	if resolvedRoot != nil {
+		return resolvedRoot, resolvedName, nil
 	}
 
 	return nil, "", ErrOutsideRoot

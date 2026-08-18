@@ -248,3 +248,21 @@ func TestRefuseGitDir(t *testing.T) {
 		}
 	}
 }
+
+func TestTheMostSpecificMountResolvesANestedPath(t *testing.T) {
+	writable := false
+	root, _ := testRoot(t, &writable)
+	parent, parentPath := testRoot(t, &writable)
+	child, _ := testRoot(t, &writable)
+
+	root.Mount(parentPath, parent)
+	root.Mount(filepath.Join(parentPath, "nested"), child)
+
+	resolved, name, err := root.Resolve(filepath.Join(parentPath, "nested", "file"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolved != child || name != "file" {
+		t.Errorf("got root %p and name %q, want child root %p and name file", resolved, name, child)
+	}
+}
