@@ -4,11 +4,37 @@ package pathutil
 import (
 	"os"
 	"path/filepath"
+	"strings"
 )
+
+const separator = string(os.PathSeparator)
 
 // Abbr returns the final element of path.
 func Abbr(path string) string {
 	return filepath.Base(path)
+}
+
+// Shorten ensures a path is as compact as it can be.
+func Shorten(path string) string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return path
+	}
+
+	home = strings.TrimSuffix(home, separator)
+	if home == "" {
+		return path
+	}
+
+	if path == home {
+		return "~"
+	}
+
+	if rest, below := strings.CutPrefix(path, home+separator); below {
+		return "~" + separator + rest
+	}
+
+	return path
 }
 
 // Exists reports whether path can be statted.

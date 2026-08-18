@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/strutil"
 	"crdx.org/io/tool"
 )
@@ -38,7 +39,7 @@ func New(root *file.Root) tool.Tool {
 
 // Render describes a read as the path, qualified by the lines it asks for.
 func Render(args Args) (string, string) {
-	return args.Path, span(args.Offset, args.Limit)
+	return pathutil.Shorten(args.Path), span(args.Offset, args.Limit)
 }
 
 func span(offset int, limit int) string {

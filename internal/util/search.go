@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/tool"
 )
 
@@ -20,7 +21,7 @@ func RenderSearch(pattern string, path string, globPattern string) (string, stri
 	var detail string
 
 	if path != "" && path != "." {
-		detail += "in " + path
+		detail += "in " + pathutil.Shorten(path)
 	}
 
 	if globPattern != "" {

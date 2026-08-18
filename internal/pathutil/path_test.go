@@ -14,6 +14,33 @@ func TestAbbrReturnsTheLastPathElement(t *testing.T) {
 	}
 }
 
+func TestShortenWritesAPathTheWayTheUserWouldSayIt(t *testing.T) {
+	t.Setenv("HOME", "/home/alice")
+
+	tests := map[string]string{
+		"/home/alice/proj/io":       "~/proj/io",
+		"/home/alice":               "~",
+		"/home/alice-other/project": "/home/alice-other/project", // a lookalike, not the home
+		"/etc/hosts":                "/etc/hosts",
+		"proj/io":                   "proj/io",
+		"":                          "",
+	}
+
+	for path, want := range tests {
+		if got := pathutil.Shorten(path); got != want {
+			t.Errorf("got %q for %q, want %q", got, path, want)
+		}
+	}
+}
+
+func TestShortenLeavesAPathAloneWithoutAHome(t *testing.T) {
+	t.Setenv("HOME", "")
+
+	if got := pathutil.Shorten("/home/alice/proj"); got != "/home/alice/proj" {
+		t.Errorf("got %q, want the path as it went in", got)
+	}
+}
+
 func TestExistsReportsWhatCanBeStatted(t *testing.T) {
 	directory := t.TempDir()
 	if !pathutil.Exists(directory) {

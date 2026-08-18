@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/tool"
 )
 
@@ -33,7 +34,7 @@ func Render(args Args) (string, string) {
 		return "", ""
 	}
 
-	return args.Path, ""
+	return pathutil.Shorten(args.Path), ""
 }
 
 func exec(root *file.Root, args Args) (string, error) {

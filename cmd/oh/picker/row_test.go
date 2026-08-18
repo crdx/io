@@ -14,14 +14,6 @@ func TestClipReturnsNothingWhenThereAreNoColumns(t *testing.T) {
 	}
 }
 
-func TestShortDoesNotAbbreviateAHomeDirectoryLookalike(t *testing.T) {
-	t.Setenv("HOME", "/home/alice")
-
-	if got := short("/home/alice-other/project"); got != "/home/alice-other/project" {
-		t.Errorf("expected a path outside home to be left alone, got %q", got)
-	}
-}
-
 func TestAnUntitledSessionDoesNotPutAnEscapeSequenceThroughTheClipper(t *testing.T) {
 	got := title(&store.Session{})
 

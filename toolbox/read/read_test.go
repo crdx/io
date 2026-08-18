@@ -185,6 +185,16 @@ func TestRenderSaysWhichLinesAreBeingRead(t *testing.T) {
 	}
 }
 
+func TestRenderWritesAPathBelowHomeWithATilde(t *testing.T) {
+	t.Setenv("HOME", "/home/alice")
+
+	renderedPath, _ := read.Render(read.Args{Path: "/home/alice/.agents/skills/golang/SKILL.md"})
+
+	if want := "~/.agents/skills/golang/SKILL.md"; renderedPath != want {
+		t.Errorf("got %q, want %q", renderedPath, want)
+	}
+}
+
 func TestRenderLeavesAnOpenRangeOpen(t *testing.T) {
 	_, detail := read.Render(read.Args{Path: "notes.txt", Offset: 10})
 

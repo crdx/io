@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/strutil"
 	"crdx.org/io/tool"
 )
@@ -46,7 +47,7 @@ func (self editor) ReadOnly() bool { return self.root.RefuseWrite(".") != nil }
 
 // Render names the file.
 func Render(args Args) (string, string) {
-	return args.Path, ""
+	return pathutil.Shorten(args.Path), ""
 }
 
 func exec(root *file.Root, args Args) (string, tool.Statistics, error) {

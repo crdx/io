@@ -18,6 +18,7 @@ import (
 	"crdx.org/io/cmd/oh/theme"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/internal/pathutil"
 )
 
 const (
@@ -157,7 +158,7 @@ func (self *state) row(index int, width int) string {
 		mark(index == self.cursor),
 		ago(storedSession.Touched),
 		messageCount(storedSession.Messages()),
-		short(storedSession.Head.Workspace),
+		pathutil.Shorten(storedSession.Head.Workspace),
 		title(storedSession),
 	)
 
@@ -189,25 +190,6 @@ func title(storedSession *store.Session) string {
 	}
 
 	return strings.ReplaceAll(askedText, "\n", " ")
-}
-
-func short(workspace string) string {
-	if home, err := os.UserHomeDir(); err == nil && home != "" {
-		if workspace == home {
-			return "~"
-		}
-
-		prefix := home
-		if !strings.HasSuffix(prefix, string(os.PathSeparator)) {
-			prefix += string(os.PathSeparator)
-		}
-
-		if trimmedWorkspace, found := strings.CutPrefix(workspace, prefix); found {
-			return "~/" + trimmedWorkspace
-		}
-	}
-
-	return workspace
 }
 
 func ago(when time.Time) string {
