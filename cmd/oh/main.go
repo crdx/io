@@ -35,7 +35,7 @@ Usage:
 Options:
     -d, --workspace <dir>    Set working directory and project scope
     -r, --resume             Resume a saved session
-    -c, --caps <letters>     Capabilities: rwxgb (read, write, exec, git, bg) [default: rwx]
+    -c, --caps <letters>     Capabilities: rwxgb (read, write, exec, git, bg) [default: rx]
     -V, --version            Show the version
     -h, --help               Show this help
 

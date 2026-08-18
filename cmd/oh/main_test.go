@@ -115,12 +115,11 @@ func TestTheWorkingDirectoryIsNotTakenFromThePrompt(t *testing.T) {
 	}
 }
 
-// Nothing said is rwx: history and background processes are only ever opened on purpose.
-func TestTheDefaultCapabilitiesAreEverythingButTheHistory(t *testing.T) {
+func TestTheDefaultCapabilitiesReadAndRunButDoNotWrite(t *testing.T) {
 	parsedOptions := parseOptions(t)
 
-	if got := parsedOptions.caps.Flags(); got != "rwx" {
-		t.Errorf("expected rwx, got %q", got)
+	if got := parsedOptions.caps.Flags(); got != "rx" {
+		t.Errorf("expected rx, got %q", got)
 	}
 
 	if parsedOptions.initialMessage != "" {
