@@ -348,6 +348,36 @@ func TestSendReportsAnEndpointFailure(t *testing.T) {
 	}
 }
 
+func TestSendReportsADirectEndpointFailure(t *testing.T) {
+	tests := []struct {
+		name    string
+		payload string
+		message string
+	}{
+		{
+			name:    "server error",
+			payload: `{"type":"error","error":{"type":"server_error","code":"server_error","message":"An error occurred while processing your request. You can retry your request, or contact us through our help center at help.openai.com if the error persists. Please include the request ID 0e133235-2da5-47a2-8300-2049027f6968 in your message.","param":null},"sequence_number":2}`,
+			message: "An error occurred while processing your request. You can retry your request, or contact us through our help center at help.openai.com if the error persists. Please include the request ID 0e133235-2da5-47a2-8300-2049027f6968 in your message.",
+		},
+		{
+			name:    "service unavailable",
+			payload: `{"type":"error","error":{"type":"service_unavailable_error","code":"server_is_overloaded","message":"Our servers are currently overloaded. Please try again later.","param":null},"sequence_number":2}`,
+			message: "Our servers are currently overloaded. Please try again later.",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			server, _ := turns(t, events(test.payload))
+			assistant := newAgent(t, server.URL, nil)
+
+			if _, err := assistant.Send(t.Context(), "hello"); err == nil || err.Error() != test.message {
+				t.Errorf("expected the endpoint's own message, got %v", err)
+			}
+		})
+	}
+}
+
 func TestSendShowsAnEndpointFailureWithoutAMessageAsJSON(t *testing.T) {
 	server, _ := turns(t, events(`{"type":"error","error":{"code":"overloaded","retry":true}}`))
 	assistant := newAgent(t, server.URL, nil)

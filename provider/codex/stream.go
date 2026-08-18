@@ -52,6 +52,7 @@ type event struct {
 	Type     string          `json:"type"`     // what happened
 	Delta    string          `json:"delta"`    // the text added
 	Message  string          `json:"message"`  // an endpoint failure
+	Error    *eventError     `json:"error"`    // a direct endpoint failure
 	Item     json.RawMessage `json:"item"`     // a completed output item
 	Part     *eventPart      `json:"part"`     // a completed content part
 	Response *eventResponse  `json:"response"` // the completed response
@@ -72,6 +73,10 @@ type eventError struct {
 func (self *event) failure(payload string) error {
 	if self.Response != nil && self.Response.Error != nil && self.Response.Error.Message != "" {
 		return errors.New(self.Response.Error.Message)
+	}
+
+	if self.Error != nil && self.Error.Message != "" {
+		return errors.New(self.Error.Message)
 	}
 
 	if self.Message != "" {
