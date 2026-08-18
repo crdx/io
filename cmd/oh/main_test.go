@@ -162,10 +162,14 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 // The words are taken from where they are written, so what is pinned here is which state is
 // reported rather than how it is worded.
 func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
-	system := prompt("/workspace", capRead)
+	system := harnessContext("/workspace", capRead, configuredPaths{})
 
-	if !strings.Contains(system, "The workspace is "+filesystem(false)) {
-		t.Errorf("expected the workspace to be reported read-only, got %q", system)
+	if want := "The workspace (/workspace) is " + filesystem(false); !strings.Contains(system, want) {
+		t.Errorf("expected the workspace to be reported as %q, got %q", want, system)
+	}
+
+	if want := "The .git directory within it (/workspace/.git) is " + filesystem(false); !strings.Contains(system, want) {
+		t.Errorf("expected the history to be reported as %q, got %q", want, system)
 	}
 
 	if !strings.Contains(system, "always "+filesystem(true)) {
@@ -186,7 +190,7 @@ func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
 		"refused": {capRead, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := prompt("/workspace", test.currentCaps)
+			got := harnessContext("/workspace", test.currentCaps, configuredPaths{})
 
 			if want := "The bash tool is " + shellAccess(test.granted); !strings.Contains(got, want) {
 				t.Errorf("expected %q in %q", want, got)
