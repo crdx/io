@@ -49,7 +49,8 @@ func TestTheBottomRuleKeepsTheBannerBeforeItsScrollMarker(t *testing.T) {
 // What access is on offer comes from what the tools say of themselves, since a world names its
 // tools whatever it likes and a name is no account of what one does.
 func TestAccessComesFromTheToolsRatherThanTheirNames(t *testing.T) {
-	looker := tool.ReadOnly(tool.Define("peek", "", tool.Schema{},
+	looker := tool.ReadOnly(tool.Define(
+		"peek", "", tool.Schema{},
 		func(struct{}) (string, string) { return "", "" },
 		func(context.Context, struct{}) (string, error) { return "", nil },
 	))
@@ -62,7 +63,8 @@ func TestAccessComesFromTheToolsRatherThanTheirNames(t *testing.T) {
 
 // Running a command is its own kind of access, and is not implied by a tool that writes.
 func TestTheShellIsShownSeparatelyFromWriting(t *testing.T) {
-	writer := tool.Define("poke", "", tool.Schema{},
+	writer := tool.Define(
+		"poke", "", tool.Schema{},
 		func(struct{}) (string, string) { return "", "" },
 		func(context.Context, struct{}) (string, error) { return "", nil },
 	)
@@ -94,7 +96,8 @@ func TestAReadOnlyShellDoesNotOfferWriting(t *testing.T) {
 // Whether a repository's own history may be changed is the mode's to say rather than any tool's:
 // the tools report what they may do to a file in the workspace and nothing at all about .git.
 func TestTheHistoryLetterComesFromTheMode(t *testing.T) {
-	looker := tool.ReadOnly(tool.Define("peek", "", tool.Schema{},
+	looker := tool.ReadOnly(tool.Define(
+		"peek", "", tool.Schema{},
 		func(struct{}) (string, string) { return "", "" },
 		func(context.Context, struct{}) (string, error) { return "", nil },
 	))
@@ -106,7 +109,8 @@ func TestTheHistoryLetterComesFromTheMode(t *testing.T) {
 }
 
 func TestTheBackgroundLetterComesFromTheMode(t *testing.T) {
-	looker := tool.ReadOnly(tool.Define("peek", "", tool.Schema{},
+	looker := tool.ReadOnly(tool.Define(
+		"peek", "", tool.Schema{},
 		func(struct{}) (string, string) { return "", "" },
 		func(context.Context, struct{}) (string, error) { return "", nil },
 	))
@@ -121,7 +125,8 @@ func TestTheBackgroundLetterComesFromTheMode(t *testing.T) {
 // A prefix that changed nothing on the screen would be a prefix nobody could tell they had pressed,
 // so every letter is underlined while one waits on the key that names what it does.
 func TestAWaitingPrefixUnderlinesEveryLetter(t *testing.T) {
-	looker := tool.ReadOnly(tool.Define("peek", "", tool.Schema{},
+	looker := tool.ReadOnly(tool.Define(
+		"peek", "", tool.Schema{},
 		func(struct{}) (string, string) { return "", "" },
 		func(context.Context, struct{}) (string, error) { return "", nil },
 	))
