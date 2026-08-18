@@ -52,25 +52,6 @@ func TestTheHeadCarriesTheSessionID(t *testing.T) {
 	}
 }
 
-// A session written before the head carried an ID is still read by the name it is stored under.
-func TestASessionWithNoIDInItsHeadIsStillRead(t *testing.T) {
-	directory := t.TempDir()
-	legacyJournal := `{"kind":"head","time":"2020-01-01T00:00:00Z","meta":{"model":"gpt"}}` + "\n"
-
-	if err := os.WriteFile(filepath.Join(directory, "older.jsonl"), []byte(legacyJournal), 0o600); err != nil {
-		t.Fatal(err)
-	}
-
-	read, err := session.Read(directory, "older")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if read.ID != "older" {
-		t.Errorf("got the ID %q, want %q", read.ID, "older")
-	}
-}
-
 func TestJournalCarriesMetaEventsAndItems(t *testing.T) {
 	directory := t.TempDir()
 	meta := json.RawMessage(`{"world":"weather"}`)

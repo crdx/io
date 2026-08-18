@@ -180,7 +180,7 @@ func Read(directory string, id string) (*Session, error) {
 
 	for lines.Scan() {
 		var line Line
-		if decodeLine(lines.Bytes(), &line) != nil {
+		if json.Unmarshal(lines.Bytes(), &line) != nil {
 			break
 		}
 
@@ -205,31 +205,6 @@ func Read(directory string, id string) (*Session, error) {
 	return storedSession, nil
 }
 
-func decodeLine(data []byte, line *Line) error {
-	if err := json.Unmarshal(data, line); err != nil {
-		return err
-	}
-	if line.Kind != Head || len(line.Meta) > 0 {
-		return nil
-	}
-
-	var legacy struct {
-		Model     string `json:"model"`
-		Workspace string `json:"workspace"`
-		Provider  string `json:"provider"`
-	}
-	if err := json.Unmarshal(data, &legacy); err != nil {
-		return err
-	}
-	if legacy.Model == "" && legacy.Workspace == "" && legacy.Provider == "" {
-		return nil
-	}
-
-	meta, err := json.Marshal(legacy)
-	line.Meta = meta
-	return err
-}
-
 func (s *Session) take(line Line) {
 	if s.Started.IsZero() {
 		s.Started = line.Time
@@ -239,10 +214,6 @@ func (s *Session) take(line Line) {
 	switch line.Kind {
 	case Head:
 		s.Meta = slices.Clone(line.Meta)
-
-		if s.ID == "" {
-			s.ID = line.ID
-		}
 	case Event:
 		if line.Event != nil {
 			s.Events = append(s.Events, *line.Event)
