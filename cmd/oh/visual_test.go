@@ -107,7 +107,7 @@ func TestVisual(t *testing.T) {
 	provider := &fakeProvider{}
 	screen := output.New(os.Stdout)
 
-	log, err := store.Create(t.TempDir(), store.Header{Model: "fake"})
+	log, err := store.Create(t.TempDir(), store.Meta{Model: "fake"})
 	if err != nil {
 		t.Fatal(err)
 	}

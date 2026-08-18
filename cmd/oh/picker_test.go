@@ -30,7 +30,7 @@ func TestPick(t *testing.T) {
 	directory := t.TempDir()
 
 	for index, prompt := range prompts {
-		log, err := store.Create(directory, store.Header{
+		log, err := store.Create(directory, store.Meta{
 			Model:     "gpt-5.6-sol",
 			Workspace: fmt.Sprintf("/home/alice/proj/%d", index),
 			Provider:  "codex",

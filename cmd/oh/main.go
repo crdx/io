@@ -129,10 +129,10 @@ func run() ([]string, error) {
 	case err != nil:
 		return nil, err
 	case resumedSession != nil:
-		if resumedSession.Head.Provider != "" && resumedSession.Head.Provider != "codex" {
-			return nil, fmt.Errorf("cannot resume a %s session with codex", resumedSession.Head.Provider)
+		if resumedSession.Meta.Provider != "" && resumedSession.Meta.Provider != "codex" {
+			return nil, fmt.Errorf("cannot resume a %s session with codex", resumedSession.Meta.Provider)
 		}
-		args.workspacePath = resumedSession.Head.Workspace
+		args.workspacePath = resumedSession.Meta.Workspace
 	}
 
 	root, err := os.OpenRoot(args.workspacePath)
@@ -194,22 +194,22 @@ func run() ([]string, error) {
 	}
 
 	if resumedSession != nil {
-		if resumedSession.Head.Model != "" {
-			client.Model = resumedSession.Head.Model
+		if resumedSession.Meta.Model != "" {
+			client.Model = resumedSession.Meta.Model
 		}
 
-		if resumedSession.Head.Effort != "" {
-			client.Effort = resumedSession.Head.Effort
+		if resumedSession.Meta.Effort != "" {
+			client.Effort = resumedSession.Meta.Effort
 		}
 	}
 
 	system := prompt(workspacePath, args.caps)
 
-	if resumedSession != nil && resumedSession.Head.Context != "" {
-		system = resumedSession.Head.Context
+	if resumedSession != nil && resumedSession.Meta.Context != "" {
+		system = resumedSession.Meta.Context
 	}
 
-	log, err := openSession(resumedSession, store.Header{
+	log, err := openSession(resumedSession, store.Meta{
 		Model:     client.Model,
 		Workspace: workspacePath,
 		Provider:  "codex",
@@ -340,10 +340,10 @@ func mountTmpDir(files *file.Root, tmp string) (*os.Root, error) {
 	return tmpRoot, nil
 }
 
-func openSession(resumedSession *store.Session, head store.Header) (*store.Writer, error) {
+func openSession(resumedSession *store.Session, meta store.Meta) (*store.Writer, error) {
 	if resumedSession != nil {
 		return store.Open(sessionsDir(), resumedSession.ID)
 	}
 
-	return store.Create(sessionsDir(), head)
+	return store.Create(sessionsDir(), meta)
 }

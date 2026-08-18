@@ -17,7 +17,7 @@ import (
 func write(t *testing.T, directory string) string {
 	t.Helper()
 
-	log, err := store.Create(directory, store.Header{
+	log, err := store.Create(directory, store.Meta{
 		Model:     "gpt-5.6-sol",
 		Workspace: "/tmp/somewhere",
 		Provider:  "codex",
@@ -83,16 +83,16 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 		t.Errorf("expected %v, got %v", conversation, storedSession.Events)
 	}
 
-	if want := "gpt-5.6-sol"; storedSession.Head.Model != want {
-		t.Errorf("expected the model to be pinned to %q, got %q", want, storedSession.Head.Model)
+	if want := "gpt-5.6-sol"; storedSession.Meta.Model != want {
+		t.Errorf("expected the model to be pinned to %q, got %q", want, storedSession.Meta.Model)
 	}
 
-	if storedSession.Head.Effort != "high" {
-		t.Errorf("expected the harness settings to survive, got %+v", storedSession.Head)
+	if storedSession.Meta.Effort != "high" {
+		t.Errorf("expected the harness settings to survive, got %+v", storedSession.Meta)
 	}
 
-	if storedSession.Head.Context != "You are a coding assistant." {
-		t.Errorf("expected the context to survive, got %+v", storedSession.Head)
+	if storedSession.Meta.Context != "You are a coding assistant." {
+		t.Errorf("expected the context to survive, got %+v", storedSession.Meta)
 	}
 
 	if len(storedSession.Items) != 1 || string(storedSession.Items[0]) != `{"type":"reasoning"}` {
@@ -101,6 +101,36 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 
 	if want := "what is the weather in London?"; storedSession.FirstPrompt() != want {
 		t.Errorf("expected %q, got %q", want, storedSession.FirstPrompt())
+	}
+}
+
+func TestTheMetaCanIncludeTheGeneratedSessionID(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{Context: "before"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	context := "scratch=" + log.ID()
+	if err := log.SetMeta(store.Meta{Context: context}); err != nil {
+		t.Fatal(err)
+	}
+	if err := log.Event(agent.Event{Kind: agent.Prompt, Text: "store it"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := log.SetMeta(store.Meta{Context: "too late"}); err == nil {
+		t.Error("expected a stored meta to be immutable")
+	}
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := store.Read(directory, log.ID())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if storedSession.Meta.Context != context {
+		t.Errorf("got context %q, want %q", storedSession.Meta.Context, context)
 	}
 }
 
@@ -132,7 +162,7 @@ func TestASessionIsNamedWithATimeOrderedID(t *testing.T) {
 func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 	directory := t.TempDir()
 
-	log, err := store.Create(directory, store.Header{Model: "gpt-5.6-sol"})
+	log, err := store.Create(directory, store.Meta{Model: "gpt-5.6-sol"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,12 +189,12 @@ func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 	}
 }
 
-// The header is written by whatever line reaches the file first, so a session opened by its first
+// The head is written by whatever line reaches the file first, so a session opened by its first
 // event is still a session that starts with what it was started as.
-func TestTheFirstThingSaidTakesTheHeaderWithIt(t *testing.T) {
+func TestTheFirstThingSaidTakesTheHeadWithIt(t *testing.T) {
 	directory := t.TempDir()
 
-	log, err := store.Create(directory, store.Header{Model: "gpt-5.6-sol", Workspace: "/tmp/somewhere"})
+	log, err := store.Create(directory, store.Meta{Model: "gpt-5.6-sol", Workspace: "/tmp/somewhere"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,8 +216,8 @@ func TestTheFirstThingSaidTakesTheHeaderWithIt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if storedSession.Head.Model != "gpt-5.6-sol" || storedSession.Head.Workspace != "/tmp/somewhere" {
-		t.Errorf("expected the header to have gone in first, got %+v", storedSession.Head)
+	if storedSession.Meta.Model != "gpt-5.6-sol" || storedSession.Meta.Workspace != "/tmp/somewhere" {
+		t.Errorf("expected the meta to have gone in first, got %+v", storedSession.Meta)
 	}
 
 	if len(storedSession.Events) != 1 {

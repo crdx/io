@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestReadRejectsASessionWithoutAHeader(t *testing.T) {
+func TestReadRejectsASessionWithoutAHead(t *testing.T) {
 	directory := t.TempDir()
 	if err := os.WriteFile(filepath.Join(directory, "broken.jsonl"), nil, 0o600); err != nil {
 		t.Fatal(err)
@@ -16,7 +16,7 @@ func TestReadRejectsASessionWithoutAHeader(t *testing.T) {
 	}
 }
 
-func TestReadCarriesLegacyOhHeadersIntoMetadata(t *testing.T) {
+func TestReadCarriesLegacyOhHeadFieldsIntoMeta(t *testing.T) {
 	directory := t.TempDir()
 	path := filepath.Join(directory, "old.jsonl")
 	line := `{"kind":"head","time":"2026-01-01T00:00:00Z","model":"old","workspace":"/tmp","provider":"codex"}` + "\n"
@@ -28,8 +28,8 @@ func TestReadCarriesLegacyOhHeadersIntoMetadata(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(storedSession.Metadata) != `{"model":"old","workspace":"/tmp","provider":"codex"}` {
-		t.Errorf("got metadata %s", storedSession.Metadata)
+	if string(storedSession.Meta) != `{"model":"old","workspace":"/tmp","provider":"codex"}` {
+		t.Errorf("got meta %s", storedSession.Meta)
 	}
 }
 

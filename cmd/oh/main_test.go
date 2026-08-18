@@ -570,7 +570,7 @@ func TestAResumedConversationMayBeGrantedSomethingElse(t *testing.T) {
 func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *conversation {
 	t.Helper()
 
-	log, err := store.Create(t.TempDir(), store.Header{Model: "gpt"})
+	log, err := store.Create(t.TempDir(), store.Meta{Model: "gpt"})
 	if err != nil {
 		t.Fatal(err)
 	}

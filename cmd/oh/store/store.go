@@ -9,8 +9,8 @@ import (
 	"crdx.org/io/session"
 )
 
-// Header is the conversation-specific configuration needed to resume a session.
-type Header struct {
+// Meta is the conversation-specific configuration needed to resume a session.
+type Meta struct {
 	Model     string `json:"model"`
 	Workspace string `json:"workspace"`
 	Provider  string `json:"provider"`
@@ -24,12 +24,12 @@ type Writer struct {
 }
 
 // Create starts an oh session.
-func Create(directory string, head Header) (*Writer, error) {
-	metadata, err := json.Marshal(head)
+func Create(directory string, meta Meta) (*Writer, error) {
+	jsonStr, err := json.Marshal(meta)
 	if err != nil {
 		return nil, err
 	}
-	inner, err := session.Create(directory, metadata)
+	inner, err := session.Create(directory, jsonStr)
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +54,15 @@ func (w *Writer) Item(item json.RawMessage) error { return w.inner.Item(item) }
 // ID is the session identifier.
 func (w *Writer) ID() string { return w.inner.ID() }
 
+// SetMeta replaces the meta before the first record is written.
+func (w *Writer) SetMeta(meta Meta) error {
+	jsonStr, err := json.Marshal(meta)
+	if err != nil {
+		return err
+	}
+	return w.inner.SetMeta(jsonStr)
+}
+
 // Stored reports whether anything was written.
 func (w *Writer) Stored() bool { return w.inner.Stored() }
 
@@ -63,7 +72,7 @@ func (w *Writer) Close() error { return w.inner.Close() }
 // Session is an oh session read back.
 type Session struct {
 	ID      string
-	Head    Header
+	Meta    Meta
 	Started time.Time
 	Touched time.Time
 	Events  []agent.Event
@@ -97,16 +106,20 @@ func List(directory string) ([]*Session, error) {
 }
 
 func decode(storedSession *session.Session) (*Session, error) {
-	var head Header
-	if len(storedSession.Metadata) > 0 {
-		if err := json.Unmarshal(storedSession.Metadata, &head); err != nil {
+	var meta Meta
+	if len(storedSession.Meta) > 0 {
+		if err := json.Unmarshal(storedSession.Meta, &meta); err != nil {
 			return nil, err
 		}
 	}
 
 	return &Session{
-		ID: storedSession.ID, Head: head, Started: storedSession.Started, Touched: storedSession.Touched,
-		Events: storedSession.Events, Items: storedSession.Items,
+		ID:      storedSession.ID,
+		Meta:    meta,
+		Started: storedSession.Started,
+		Touched: storedSession.Touched,
+		Events:  storedSession.Events,
+		Items:   storedSession.Items,
 	}, nil
 }
 

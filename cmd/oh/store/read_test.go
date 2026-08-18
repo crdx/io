@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestReadRejectsASessionWithoutAHeader(t *testing.T) {
+func TestReadRejectsASessionWithoutAHead(t *testing.T) {
 	directory := t.TempDir()
 	if err := os.WriteFile(filepath.Join(directory, "broken.jsonl"), nil, 0o600); err != nil {
 		t.Fatal(err)

@@ -1,7 +1,7 @@
 // Package session stores an agent conversation as an append-only JSON-lines journal.
 //
 // Events are the portable transcript. Items are opaque, append-only provider state: a provider
-// hands them out and takes the same bytes back on resume. Metadata belongs to the caller.
+// hands them out and takes the same bytes back on resume. Meta belongs to the caller.
 package session
 
 import (
@@ -36,10 +36,10 @@ type Line struct {
 	Kind Kind      `json:"kind"`
 	Time time.Time `json:"time"`
 
-	ID       string          `json:"id,omitempty"`
-	Metadata json.RawMessage `json:"metadata,omitempty"`
-	Event    *agent.Event    `json:"event,omitempty"`
-	Payload  json.RawMessage `json:"payload,omitempty"`
+	ID      string          `json:"id,omitempty"`
+	Meta    json.RawMessage `json:"meta,omitempty"`
+	Event   *agent.Event    `json:"event,omitempty"`
+	Payload json.RawMessage `json:"payload,omitempty"`
 }
 
 // Writer appends records to a session. The file is made by the first record, so an unused session
@@ -48,16 +48,16 @@ type Writer struct {
 	file      *os.File
 	directory string
 	id        string
-	metadata  json.RawMessage
+	meta      json.RawMessage
 }
 
-// Create starts a session in directory with caller-owned metadata.
-func Create(directory string, metadata json.RawMessage) (*Writer, error) {
+// Create starts a session in directory with caller-owned meta.
+func Create(directory string, meta json.RawMessage) (*Writer, error) {
 	if err := os.MkdirAll(directory, 0o700); err != nil {
 		return nil, err
 	}
 
-	return &Writer{directory: directory, id: newID(), metadata: slices.Clone(metadata)}, nil
+	return &Writer{directory: directory, id: newID(), meta: slices.Clone(meta)}, nil
 }
 
 // Open continues an existing session.
@@ -72,6 +72,16 @@ func Open(directory string, id string) (*Writer, error) {
 	}
 
 	return &Writer{file: file, id: id}, nil
+}
+
+// SetMeta replaces the caller-owned meta before the first record is written.
+func (w *Writer) SetMeta(meta json.RawMessage) error {
+	if w.file != nil {
+		return errors.New("cannot change meta after the session has been stored")
+	}
+
+	w.meta = slices.Clone(meta)
+	return nil
 }
 
 // Event appends one portable conversation event.
@@ -116,7 +126,7 @@ func (w *Writer) ensureOpen() error {
 	}
 	w.file = file
 
-	if err := w.record(Line{Kind: Head, ID: w.id, Metadata: w.metadata}); err != nil {
+	if err := w.record(Line{Kind: Head, ID: w.id, Meta: w.meta}); err != nil {
 		_ = file.Close()
 		_ = os.Remove(file.Name())
 		w.file = nil
@@ -143,12 +153,12 @@ func (w *Writer) record(line Line) error {
 
 // Session is a stored conversation.
 type Session struct {
-	ID       string
-	Metadata json.RawMessage
-	Started  time.Time
-	Touched  time.Time
-	Events   []agent.Event
-	Items    []json.RawMessage
+	ID      string
+	Meta    json.RawMessage
+	Started time.Time
+	Touched time.Time
+	Events  []agent.Event
+	Items   []json.RawMessage
 }
 
 // Read loads one stored session.
@@ -176,11 +186,11 @@ func Read(directory string, id string) (*Session, error) {
 
 		if !sawHead {
 			if line.Kind != Head {
-				return nil, errors.New("session does not start with a header")
+				return nil, errors.New("session does not start with a head")
 			}
 			sawHead = true
 		} else if line.Kind == Head {
-			return nil, errors.New("session contains more than one header")
+			return nil, errors.New("session contains more than one head")
 		}
 
 		storedSession.take(line)
@@ -190,7 +200,7 @@ func Read(directory string, id string) (*Session, error) {
 		return nil, err
 	}
 	if !sawHead {
-		return nil, errors.New("session has no complete header")
+		return nil, errors.New("session has no complete head")
 	}
 	return storedSession, nil
 }
@@ -199,7 +209,7 @@ func decodeLine(data []byte, line *Line) error {
 	if err := json.Unmarshal(data, line); err != nil {
 		return err
 	}
-	if line.Kind != Head || len(line.Metadata) > 0 {
+	if line.Kind != Head || len(line.Meta) > 0 {
 		return nil
 	}
 
@@ -215,8 +225,8 @@ func decodeLine(data []byte, line *Line) error {
 		return nil
 	}
 
-	metadata, err := json.Marshal(legacy)
-	line.Metadata = metadata
+	meta, err := json.Marshal(legacy)
+	line.Meta = meta
 	return err
 }
 
@@ -228,7 +238,7 @@ func (s *Session) take(line Line) {
 
 	switch line.Kind {
 	case Head:
-		s.Metadata = slices.Clone(line.Metadata)
+		s.Meta = slices.Clone(line.Meta)
 
 		if s.ID == "" {
 			s.ID = line.ID

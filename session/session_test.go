@@ -55,7 +55,7 @@ func TestTheHeadCarriesTheSessionID(t *testing.T) {
 // A session written before the head carried an ID is still read by the name it is stored under.
 func TestASessionWithNoIDInItsHeadIsStillRead(t *testing.T) {
 	directory := t.TempDir()
-	legacyJournal := `{"kind":"head","time":"2020-01-01T00:00:00Z","metadata":{"model":"gpt"}}` + "\n"
+	legacyJournal := `{"kind":"head","time":"2020-01-01T00:00:00Z","meta":{"model":"gpt"}}` + "\n"
 
 	if err := os.WriteFile(filepath.Join(directory, "older.jsonl"), []byte(legacyJournal), 0o600); err != nil {
 		t.Fatal(err)
@@ -71,10 +71,10 @@ func TestASessionWithNoIDInItsHeadIsStillRead(t *testing.T) {
 	}
 }
 
-func TestJournalCarriesMetadataEventsAndItems(t *testing.T) {
+func TestJournalCarriesMetaEventsAndItems(t *testing.T) {
 	directory := t.TempDir()
-	metadata := json.RawMessage(`{"world":"weather"}`)
-	writer, err := session.Create(directory, metadata)
+	meta := json.RawMessage(`{"world":"weather"}`)
+	writer, err := session.Create(directory, meta)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,8 +93,8 @@ func TestJournalCarriesMetadataEventsAndItems(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(storedSession.Metadata) != string(metadata) {
-		t.Errorf("got metadata %s, want %s", storedSession.Metadata, metadata)
+	if string(storedSession.Meta) != string(meta) {
+		t.Errorf("got meta %s, want %s", storedSession.Meta, meta)
 	}
 	if len(storedSession.Events) != 1 || storedSession.Events[0].Text != "will it rain?" {
 		t.Errorf("got events %v", storedSession.Events)

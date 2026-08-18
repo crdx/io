@@ -158,7 +158,7 @@ func (self *state) row(index int, width int) string {
 		mark(index == self.cursor),
 		ago(storedSession.Touched),
 		messageCount(storedSession.Messages()),
-		pathutil.Shorten(storedSession.Head.Workspace),
+		pathutil.Shorten(storedSession.Meta.Workspace),
 		title(storedSession),
 	)
 
