@@ -27,3 +27,23 @@ func TestAnAbsoluteXDGStateHomeIsUsed(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
+
+func TestTheConfigurationIsInTheXDGConfigDirectory(t *testing.T) {
+	root := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", root)
+
+	want := filepath.Join(root, namespace, app, "config.toml")
+	if got := configPath(); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestTheSystemPromptIsInTheXDGConfigDirectory(t *testing.T) {
+	root := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", root)
+
+	want := filepath.Join(root, namespace, app, "SYSTEM.md")
+	if got := systemPath(); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}

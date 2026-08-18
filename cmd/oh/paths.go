@@ -11,6 +11,18 @@ func stateDir(parts ...string) string {
 	return xdgutil.StatePath(append([]string{namespace, app}, parts...)...)
 }
 
+func configDir(parts ...string) string {
+	return xdgutil.ConfigPath(append([]string{namespace, app}, parts...)...)
+}
+
+func configPath() string {
+	return configDir("config.toml")
+}
+
+func systemPath() string {
+	return configDir("SYSTEM.md")
+}
+
 func historyPath() string {
 	return stateDir("history")
 }
