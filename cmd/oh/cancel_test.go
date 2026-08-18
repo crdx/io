@@ -92,6 +92,49 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 	t.Error("expected the configured prompt")
 }
 
+func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	history := line.NewHistory("", historyLimit)
+	input := line.NewInput(history)
+
+	self.start("first")
+	interruptedEvents := self.turn.events
+
+	self.apply(input, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
+	self.apply(input, history, key.Key{Code: key.Rune, Value: 'w'})
+
+	if !self.turn.cancelled {
+		t.Fatal("expected the capability change to interrupt the turn")
+	}
+
+	for report := range interruptedEvents {
+		self.take(report)
+	}
+	self.finish()
+
+	if !self.turn.running {
+		t.Fatal("expected the capability change to start a replacement turn")
+	}
+
+	for report := range self.turn.events {
+		self.take(report)
+	}
+	self.finish()
+
+	var prompts []string
+	for _, record := range self.transcript {
+		if record.event.Kind == agent.Prompt {
+			prompts = append(prompts, record.event.Text)
+		}
+	}
+
+	wantPrompts := []string{"first", nowReadOnly}
+	if !slices.Equal(prompts, wantPrompts) {
+		t.Errorf("got prompts %q, want %q", prompts, wantPrompts)
+	}
+}
+
 func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)

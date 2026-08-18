@@ -35,6 +35,7 @@ type conversation struct {
 	restart            []string // the arguments to start again with, once the terminal has been given back
 	queuedPrompt       string   // what to ask as soon as an interrupted turn finishes
 	queuedTurn         bool     // whether an interrupted turn has a replacement
+	queuedModeChange   bool     // whether changed capabilities should restart an interrupted turn
 	getOnWithItMessage string   // what an empty double enter sends
 
 	turn        turn    // the turn in progress
@@ -132,19 +133,19 @@ func (self *conversation) apply(input *line.Input, history *line.History, keypre
 		return false
 
 	case line.Write:
-		self.mode.Toggle(capWrite)
+		self.toggleCapability(capWrite)
 
 	case line.Shell:
-		self.mode.Toggle(capShell)
+		self.toggleCapability(capShell)
 
 	case line.Git:
-		self.mode.Toggle(capGit)
+		self.toggleCapability(capGit)
 
 	case line.Background:
 		if self.mode.Current().has(capBackground) {
 			names, err := self.processes.Disable()
 			if err == nil {
-				self.mode.Toggle(capBackground)
+				self.toggleCapability(capBackground)
 				if len(names) > 0 {
 					self.notify(theme.Stopped("Background processes killed (" + strings.Join(names, ", ") + ")"))
 				}
@@ -153,7 +154,7 @@ func (self *conversation) apply(input *line.Input, history *line.History, keypre
 			}
 		} else {
 			self.processes.Enable()
-			self.mode.Toggle(capBackground)
+			self.toggleCapability(capBackground)
 		}
 
 	case line.Drawn:
@@ -182,10 +183,20 @@ func (self *conversation) submitInput(input *line.Input, history *line.History, 
 	}
 }
 
+func (self *conversation) toggleCapability(whichCaps caps) {
+	self.mode.Toggle(whichCaps)
+
+	if self.turn.running {
+		self.queuedModeChange = true
+		self.interrupt()
+	}
+}
+
 func (self *conversation) cancelTurn() {
 	if self.turn.cancelled {
 		self.queuedPrompt = ""
 		self.queuedTurn = false
+		self.queuedModeChange = false
 	}
 
 	self.interrupt()
@@ -458,7 +469,13 @@ func (self *conversation) finish() {
 		prompt := self.queuedPrompt
 		self.queuedPrompt = ""
 		self.queuedTurn = false
+		self.queuedModeChange = false
 		self.start(prompt)
+	} else if self.queuedModeChange {
+		self.queuedModeChange = false
+		if prompt := self.mode.Inject(); prompt != "" {
+			self.start(prompt)
+		}
 	}
 }
 
