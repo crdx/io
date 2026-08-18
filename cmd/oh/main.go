@@ -174,6 +174,10 @@ func run() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	settings.Sandbox, err = keepExistingConfiguredPaths(settings.Sandbox, os.Stderr)
+	if err != nil {
+		return nil, err
+	}
 	configuredRoots, err := mountConfiguredPaths(files, mode, settings.Sandbox)
 	if err != nil {
 		return nil, err
