@@ -211,13 +211,13 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	}
 
 	for _, event := range events {
-		self.record(event)
+		self.transcript = appendTranscript(self.transcript, event)
 		livePainter.draw(event)
 	}
 	self.notify(theme.Stopped("Background processes killed (bash → sleep)"))
 
 	unansweredCall := agent.Event{Kind: agent.Call, ID: "3", Name: "read", Render: "left.go"}
-	self.record(unansweredCall)
+	self.transcript = appendTranscript(self.transcript, unansweredCall)
 	livePainter.draw(unansweredCall)
 	livePainter.close(status.Cancelled)
 	self.screen.End()

@@ -398,25 +398,29 @@ func (self *conversation) take(report turnEvent) {
 		return
 	}
 
-	self.record(report.event)
-	self.turn.painter.draw(report.event)
+	self.recordEvent(report.event)
+}
 
-	if self.turn.painter.stale { // the answer outgrew the rows the screen can still repair
+func (self *conversation) recordEvent(event agent.Event) {
+	self.transcript = appendTranscript(self.transcript, event)
+	self.turn.painter.draw(event)
+
+	if self.turn.painter.stale {
 		self.redraw()
 	}
 
-	self.store(report.event, &self.turn.pendingEvents)
+	self.writeSessionEvents(self.turn.pendingEvents.Add(event))
 }
 
-func (self *conversation) record(event agent.Event) {
-	if event.Kind == agent.Text && len(self.transcript) > 0 {
-		if last := &self.transcript[len(self.transcript)-1]; last.event.Kind == agent.Text {
+func appendTranscript(transcript []entry, event agent.Event) []entry {
+	if event.Kind == agent.Text && len(transcript) > 0 {
+		if last := &transcript[len(transcript)-1]; last.event.Kind == agent.Text {
 			last.event.Text += event.Text // a long answer is one entry, not thousands of deltas
-			return
+			return transcript
 		}
 	}
 
-	self.transcript = append(self.transcript, entry{event: event})
+	return append(transcript, entry{event: event})
 }
 
 func (self *conversation) notify(notice string) {
@@ -425,17 +429,16 @@ func (self *conversation) notify(notice string) {
 }
 
 func (self *conversation) finish() {
+	if self.turn.cancelled {
+		self.recordEvent(agent.Event{Kind: agent.Interrupted})
+	}
+
 	self.flush(&self.turn.pendingEvents)
 	self.storeItems()
 	self.turn.painter.close(status.Cancelled)
 	self.screen.End()
 
-	switch {
-	case self.turn.cancelled:
-		interruption := agent.Event{Kind: agent.Interrupted}
-		self.record(interruption)
-		self.storeEvents([]agent.Event{interruption})
-	case self.turn.failure != nil:
+	if !self.turn.cancelled && self.turn.failure != nil {
 		self.notify(theme.Failure(self.turn.failure.Error()))
 	}
 
@@ -452,15 +455,11 @@ func (self *conversation) finish() {
 	}
 }
 
-func (self *conversation) store(event agent.Event, pendingEvents *agent.Coalescer) {
-	self.storeEvents(pendingEvents.Add(event))
-}
-
 func (self *conversation) flush(pendingEvents *agent.Coalescer) {
-	self.storeEvents(pendingEvents.Flush())
+	self.writeSessionEvents(pendingEvents.Flush())
 }
 
-func (self *conversation) storeEvents(events []agent.Event) {
+func (self *conversation) writeSessionEvents(events []agent.Event) {
 	for _, event := range events {
 		self.write(func() error { return self.log.Event(event) })
 	}
