@@ -13,6 +13,7 @@ type Action int
 const (
 	Drawn      Action = iota // the line changed, and wants drawing again
 	Accept                   // the line is finished
+	Continue                 // double enter on an empty line: send the get-on-with-it message
 	Cancel                   // escape, or ctrl+d while a turn runs: stop whatever is running
 	Quit                     // ctrl+d on an empty line with nothing running
 	Write                    // ctrl+x w: swap whether files in the workspace may be changed
@@ -24,11 +25,13 @@ const (
 
 // Input edits a line and walks its history.
 type Input struct {
-	buffer   *buffer  // the line being edited
-	history  *History // the stored entries
-	recall   *recall  // the walk through history
-	pasting  bool     // whether pasted text is arriving
-	prefixed bool     // whether ctrl+x went before, so the next key names a mode
+	buffer       *buffer  // the line being edited
+	history      *History // the stored entries
+	recall       *recall  // the walk through history
+	pasting      bool     // whether pasted text is arriving
+	prefixed     bool     // whether ctrl+x went before, so the next key names a mode
+	enterPending bool     // whether one enter awaits a second
+	wasRunning   bool     // whether a turn ran when the previous key was applied
 }
 
 // NewInput builds an empty line.
@@ -44,6 +47,8 @@ func (self *Input) Reset() {
 	self.buffer = &buffer{}
 	self.pasting = false
 	self.prefixed = false
+	self.enterPending = false
+	self.wasRunning = false
 
 	if self.history != nil {
 		self.recall = self.history.recall()
@@ -79,12 +84,27 @@ func (self *Input) Frame(width int) Frame {
 	return framedRows
 }
 
-// Apply handles one keypress. Ctrl+D cancels a running turn, quits on an empty idle line, and
-// otherwise does nothing.
+// Apply handles one keypress.
 func (self *Input) Apply(keypress key.Key, running bool) Action {
+	if self.wasRunning != running {
+		self.enterPending = false
+	}
+	self.wasRunning = running
+
+	if keypress.Code == key.Rune && keypress.Mod.Has(key.Ctrl) &&
+		(keypress.Value == 'c' || keypress.Value == 'u') {
+		self.Reset()
+		return Drawn
+	}
+
 	if self.pasting {
+		self.enterPending = false
 		self.paste(keypress)
 		return Drawn
+	}
+
+	if keypress.Code != key.Enter || keypress.Mod.Has(key.Shift) {
+		self.enterPending = false
 	}
 
 	if self.prefixed {
@@ -96,12 +116,7 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 		return Cancel
 
 	case key.Enter:
-		if keypress.Mod.Has(key.Shift) {
-			self.buffer.Insert([]rune{'\n'})
-			return Drawn
-		}
-
-		return Accept
+		return self.enter(keypress)
 
 	case key.Left:
 		if keypress.Mod.Has(key.Ctrl) {
@@ -153,6 +168,25 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 	return Drawn
 }
 
+func (self *Input) enter(keypress key.Key) Action {
+	if keypress.Mod.Has(key.Shift) {
+		self.buffer.Insert([]rune{'\n'})
+		return Drawn
+	}
+
+	if strings.TrimSpace(self.buffer.String()) != "" {
+		return Accept
+	}
+
+	if self.enterPending {
+		self.enterPending = false
+		return Continue
+	}
+
+	self.enterPending = true
+	return Drawn
+}
+
 const tabStop = 4
 
 func (self *Input) insert(value rune) {
@@ -171,36 +205,33 @@ func (self *Input) rune(keypress key.Key, running bool) Action {
 	}
 
 	switch keypress.Value {
-	case 'c', 'u':
-		self.Reset()
-
 	case 'd':
 		if running {
 			return Cancel
 		}
 
 		if self.buffer.Len() == 0 {
-			return Quit // and a line with something on it is one ctrl+d has nothing to say about
+			return Quit
 		}
 
 	case 'r':
 		return Restart
 
 	case 'x':
-		self.prefixed = true // and the key after it names which mode to swap
+		self.prefixed = true
 	}
 
 	return Drawn
 }
 
-func (self *Input) swap(keypress key.Key) Action { // the letters are those in cmd/oh/mode.go
+func (self *Input) swap(keypress key.Key) Action {
 	self.prefixed = false
 
 	if keypress.Code != key.Rune || keypress.Mod != 0 {
 		return Drawn
 	}
 
-	switch keypress.Value { // and anything else is swallowed rather than typed: a slip is not text
+	switch keypress.Value {
 	case 'w':
 		return Write
 

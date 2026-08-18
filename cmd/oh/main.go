@@ -278,13 +278,14 @@ func run() ([]string, error) {
 	tools = truncate.Tools(tools)
 
 	chat := &conversation{
-		assistant:    agent.New(context, client, tools),
-		screen:       output.New(os.Stdout),
-		log:          log,
-		workspaceDir: workspaceDir,
-		mode:         mode,
-		processes:    processes,
-		shell:        shell.Name(),
+		assistant:          agent.New(context, client, tools),
+		screen:             output.New(os.Stdout),
+		log:                log,
+		workspaceDir:       workspaceDir,
+		mode:               mode,
+		processes:          processes,
+		shell:              shell.Name(),
+		getOnWithItMessage: settings.GetOnWithItMessage,
 
 		label: func(pending bool, frame int, running bool) string {
 			currentCaps := mode.Current()

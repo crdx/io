@@ -330,10 +330,11 @@ func testConversation(t *testing.T, screenOutput *bytes.Buffer) *conversation {
 	backend := quietProvider{}
 
 	return &conversation{
-		assistant: agent.New("", backend, nil),
-		screen:    output.New(screenOutput),
-		log:       log,
-		mode:      NewMode(capRead | capWrite),
+		assistant:          agent.New("", backend, nil),
+		screen:             output.New(screenOutput),
+		log:                log,
+		mode:               NewMode(capRead | capWrite),
+		getOnWithItMessage: defaultGetOnWithItMessage,
 	}
 }
 

@@ -12,7 +12,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	absolute := filepath.Join(t.TempDir(), "skills")
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	contents := "model = \"configured-model\"\neffort = \"low\"\n[skill]\nlookup = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
+	contents := "model = \"configured-model\"\neffort = \"low\"\nget_on_with_it_message = \"carry on\"\n[skill]\nlookup = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
 	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -23,6 +23,9 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	}
 	if settings.Model != "configured-model" || settings.Effort != "low" {
 		t.Errorf("got model %q and effort %q", settings.Model, settings.Effort)
+	}
+	if settings.GetOnWithItMessage != "carry on" {
+		t.Errorf("got get-on-with-it message %q", settings.GetOnWithItMessage)
 	}
 	directories := settings.Skill.LookupDirs
 	want := []string{
@@ -49,6 +52,9 @@ func TestConfiguredSettingsAllowsNoSettingsFile(t *testing.T) {
 		settings.Sandbox.Write != nil || settings.Sandbox.Exec != nil {
 		t.Errorf("got %#v, want no configured paths", settings)
 	}
+	if settings.GetOnWithItMessage != defaultGetOnWithItMessage {
+		t.Errorf("got default get-on-with-it message %q", settings.GetOnWithItMessage)
+	}
 }
 
 func TestConfiguredSkillDirectoriesRejectsAnEmptyDirectory(t *testing.T) {
@@ -62,10 +68,12 @@ func TestConfiguredSkillDirectoriesRejectsAnEmptyDirectory(t *testing.T) {
 	}
 }
 
-func TestConfiguredModelAndEffortCannotBeEmpty(t *testing.T) {
+func TestConfiguredStringsCannotBeEmpty(t *testing.T) {
 	for name, contents := range map[string]string{
-		"model":  "model = \"\"\n",
-		"effort": "effort = \"\"\n",
+		"model":                             "model = \"\"\n",
+		"effort":                            "effort = \"\"\n",
+		"get_on_with_it_message":            "get_on_with_it_message = \"\"\n",
+		"get_on_with_it_message whitespace": "get_on_with_it_message = \"  \"\n",
 	} {
 		t.Run(name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "config.toml")
@@ -76,6 +84,21 @@ func TestConfiguredModelAndEffortCannotBeEmpty(t *testing.T) {
 				t.Errorf("expected empty %s to be rejected", name)
 			}
 		})
+	}
+}
+
+func TestTheConfiguredGetOnWithItMessageIsTrimmed(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte("get_on_with_it_message = \"  carry on  \"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := loadConfiguredSettings(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.GetOnWithItMessage != "carry on" {
+		t.Errorf("got get-on-with-it message %q", settings.GetOnWithItMessage)
 	}
 }
 

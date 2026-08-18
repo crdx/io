@@ -74,12 +74,69 @@ func TestReturnOutsideAPasteFinishesTheLine(t *testing.T) {
 	}
 }
 
+func TestTwoReturnsOnAnEmptyIdleLineAskToContinue(t *testing.T) {
+	self := NewInput(nil)
+
+	if got := self.Apply(key.Key{Code: key.Enter}, false); got != Drawn {
+		t.Errorf("expected the first return to do nothing, got %v", got)
+	}
+
+	if got := self.Apply(key.Key{Code: key.Enter}, false); got != Continue {
+		t.Errorf("expected the second return to continue, got %v", got)
+	}
+}
+
+func TestReturnAcceptsInputDuringARunningTurn(t *testing.T) {
+	self := inputFromKeys(t, "hello")
+
+	if got := self.Apply(key.Key{Code: key.Enter}, true); got != Accept {
+		t.Errorf("expected return to accept the input, got %v", got)
+	}
+
+	if self.Text() != "hello" {
+		t.Errorf("expected what was typed to be left alone, got %q", self.Text())
+	}
+}
+
+func TestTwoReturnsOnAnEmptyRunningLineAskToContinue(t *testing.T) {
+	for name, inputText := range map[string]string{"empty": "", "whitespace": " "} {
+		self := inputFromKeys(t, inputText)
+
+		if got := self.Apply(key.Key{Code: key.Enter}, true); got != Drawn {
+			t.Errorf("%s: expected the first return to leave the turn running, got %v", name, got)
+		}
+
+		if got := self.Apply(key.Key{Code: key.Enter}, true); got != Continue {
+			t.Errorf("%s: expected the second return to continue, got %v", name, got)
+		}
+	}
+}
+
+func TestReturnsMustBeConsecutiveToContinueAnEmptyRunningTurn(t *testing.T) {
+	self := NewInput(nil)
+	self.Apply(key.Key{Code: key.Enter}, true)
+	self.Apply(key.Key{Code: key.Left}, true)
+
+	if got := self.Apply(key.Key{Code: key.Enter}, true); got != Drawn {
+		t.Errorf("expected an intervening key to clear the first return, got %v", got)
+	}
+}
+
+func TestPendingReturnDoesNotSurviveATurnStateChange(t *testing.T) {
+	self := NewInput(nil)
+	self.Apply(key.Key{Code: key.Enter}, true)
+
+	if got := self.Apply(key.Key{Code: key.Enter}, false); got != Drawn {
+		t.Errorf("expected the first idle return to do nothing, got %v", got)
+	}
+}
+
 func TestShiftReturnOpensALine(t *testing.T) {
 	self := NewInput(nil)
 
-	self.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
-	self.Apply(key.Key{Code: key.Enter, Mod: key.Shift}, false)
-	self.Apply(key.Key{Code: key.Rune, Value: 'b'}, false)
+	self.Apply(key.Key{Code: key.Rune, Value: 'a'}, true)
+	self.Apply(key.Key{Code: key.Enter, Mod: key.Shift}, true)
+	self.Apply(key.Key{Code: key.Rune, Value: 'b'}, true)
 
 	if got := self.Text(); got != "a\nb" {
 		t.Errorf("expected two lines, got %q", got)
@@ -270,6 +327,18 @@ func TestACharacterWiderThanTheLineStaysWhereItIs(t *testing.T) {
 
 	if cursorRow != 1 || cursorColumn != 0 {
 		t.Errorf("expected the cursor on the next row, got %d,%d", cursorRow, cursorColumn)
+	}
+}
+
+func TestControlCAndControlUAlwaysClearTheInput(t *testing.T) {
+	for _, value := range []rune{'c', 'u'} {
+		self := inputFromKeys(t, "hello")
+		self.Apply(key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl}, false)
+		self.Apply(key.Key{Code: key.Rune, Value: value, Mod: key.Ctrl}, false)
+
+		if self.Text() != "" || self.Pending() {
+			t.Errorf("ctrl+%c left input %q with pending=%v", value, self.Text(), self.Pending())
+		}
 	}
 }
 

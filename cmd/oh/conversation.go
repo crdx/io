@@ -32,7 +32,10 @@ type conversation struct {
 	processes    *sandbox.Processes           // what background commands belong to this conversation
 	shell        string                       // what the shell tool was named, taken from the tool itself
 
-	restart []string // the arguments to start again with, once the terminal has been given back
+	restart            []string // the arguments to start again with, once the terminal has been given back
+	queuedPrompt       string   // what to ask as soon as an interrupted turn finishes
+	queuedTurn         bool     // whether an interrupted turn has a replacement
+	getOnWithItMessage string   // what an empty double enter sends
 
 	turn        turn    // the turn in progress
 	storedItems int     // how many provider items have been stored
@@ -107,20 +110,13 @@ func (self *conversation) makeIntroductions(initialPrompt string) {
 func (self *conversation) apply(input *line.Input, history *line.History, keypress key.Key) bool {
 	switch input.Apply(keypress, self.turn.running) {
 	case line.Accept:
-		if self.turn.running {
-			break
-		}
+		self.acceptInput(input, history)
 
-		typedInput := strings.TrimSpace(input.Text())
-		input.Reset()
-
-		if typedInput != "" {
-			history.Add(typedInput)
-			self.start(typedInput)
-		}
+	case line.Continue:
+		self.submitInput(input, history, self.getOnWithItMessage)
 
 	case line.Cancel:
-		self.interrupt()
+		self.cancelTurn()
 
 	case line.Quit:
 		return false // the input only asks to leave where there was no turn to stop first
@@ -164,6 +160,41 @@ func (self *conversation) apply(input *line.Input, history *line.History, keypre
 	}
 
 	return true
+}
+
+func (self *conversation) acceptInput(input *line.Input, history *line.History) {
+	self.submitInput(input, history, strings.TrimSpace(input.Text()))
+}
+
+func (self *conversation) submitInput(input *line.Input, history *line.History, message string) {
+	input.Reset()
+
+	if message == "" {
+		return
+	}
+
+	history.Add(message)
+
+	if self.turn.running {
+		self.replaceTurn(message)
+	} else {
+		self.start(message)
+	}
+}
+
+func (self *conversation) cancelTurn() {
+	if self.turn.cancelled {
+		self.queuedPrompt = ""
+		self.queuedTurn = false
+	}
+
+	self.interrupt()
+}
+
+func (self *conversation) replaceTurn(prompt string) {
+	self.queuedPrompt = prompt
+	self.queuedTurn = true
+	self.interrupt()
 }
 
 func (self *conversation) restartArguments() []string {
@@ -354,7 +385,7 @@ func (self *conversation) start(prompt string) {
 		for event, err := range self.assistant.Stream(turnContext, prompt) {
 			events <- turnEvent{event: event, err: err}
 
-			if err != nil || turnContext.Err() != nil {
+			if err != nil {
 				return
 			}
 		}
@@ -400,6 +431,10 @@ func (self *conversation) finish() {
 	self.screen.End()
 
 	switch {
+	case self.turn.cancelled && self.queuedTurn:
+		interruption := agent.Event{Kind: agent.Interrupted}
+		self.record(interruption)
+		self.storeEvents([]agent.Event{interruption})
 	case self.turn.cancelled:
 		self.notify(theme.Stopped("Interrupted"))
 	case self.turn.failure != nil:
@@ -410,6 +445,13 @@ func (self *conversation) finish() {
 
 	self.turn.running = false
 	self.turn.events = nil
+
+	if self.queuedTurn {
+		prompt := self.queuedPrompt
+		self.queuedPrompt = ""
+		self.queuedTurn = false
+		self.start(prompt)
+	}
 }
 
 func (self *conversation) store(event agent.Event, pendingEvents *agent.Coalescer) {

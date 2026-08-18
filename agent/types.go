@@ -62,11 +62,12 @@ type Kind string
 
 // The kinds of event a conversation is made of.
 const (
-	Prompt    Kind = "prompt"    // what was asked
-	Reasoning Kind = "reasoning" // what the model thought on the way to answering
-	Text      Kind = "text"      // what was answered
-	Call      Kind = "call"      // a tool the model asked for
-	Result    Kind = "result"    // what that tool handed back
+	Prompt      Kind = "prompt"      // what was asked
+	Reasoning   Kind = "reasoning"   // what the model thought on the way to answering
+	Text        Kind = "text"        // what was answered
+	Call        Kind = "call"        // a tool the model asked for
+	Result      Kind = "result"      // what that tool handed back
+	Interrupted Kind = "interrupted" // where a replacement prompt stopped a turn
 )
 
 // Event is a thing that happened. The stream of them is the conversation itself, so an event is
