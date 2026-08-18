@@ -130,7 +130,7 @@ func waitForCallback(listener net.Listener, state string) (string, error) {
 }
 
 func exchange(code string, verifier string) (*Credentials, error) {
-	credentials, err := postForm(url.Values{
+	credentials, err := postForm(loginRequests, url.Values{
 		"grant_type":    {"authorization_code"},
 		"client_id":     {clientID},
 		"code":          {code},
@@ -144,8 +144,8 @@ func exchange(code string, verifier string) (*Credentials, error) {
 	return credentials, nil
 }
 
-func refreshToken(refresh string) (*Credentials, error) {
-	return postForm(url.Values{
+func refreshToken(requests *req.Client, refresh string) (*Credentials, error) {
+	return postForm(requests, url.Values{
 		"grant_type":    {"refresh_token"},
 		"client_id":     {clientID},
 		"refresh_token": {refresh},
@@ -155,16 +155,16 @@ func refreshToken(refresh string) (*Credentials, error) {
 
 const authTimeout = 30 * time.Second
 
-var authClient = req.New(authTimeout)
+var loginRequests = req.New(authTimeout)
 
-func postForm(form url.Values) (*Credentials, error) {
+func postForm(requests *req.Client, form url.Values) (*Credentials, error) {
 	var payload struct {
 		Access    string `json:"access_token"`  // the new access token
 		Refresh   string `json:"refresh_token"` // the new refresh token
 		ExpiresIn int64  `json:"expires_in"`    // its lifetime in seconds
 	}
 
-	if err := authClient.Form(context.Background(), tokenEndpoint(), form, &payload); err != nil {
+	if err := requests.Form(context.Background(), tokenEndpoint(), form, &payload); err != nil {
 		return nil, err
 	}
 

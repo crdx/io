@@ -27,7 +27,7 @@ func TestTheHeadCarriesTheSessionID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	head, err := os.ReadFile(filepath.Join(directory, writer.ID()+".jsonl")) //nolint:gosec // the test's own path
+	head, err := os.ReadFile(filepath.Join(directory, writer.ID(), "session.jsonl")) //nolint:gosec // the test's own path
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"crdx.org/io/internal/req"
 )
 
 const refreshWindow = 5 * time.Minute
@@ -18,6 +20,10 @@ type Token struct {
 // TokenSource hands over a token to make a request with.
 type TokenSource interface {
 	Token() (Token, error)
+}
+
+type observedTokenSource interface {
+	observeHTTP(req.Observer)
 }
 
 // Static is a token that is already held, and never changes.
@@ -35,16 +41,17 @@ func (self static) Token() (Token, error) {
 
 // StoredCredentials reads and refreshes credentials written by Login.
 func StoredCredentials() TokenSource {
-	return &credentialStore{path: CredentialsPath()}
+	return &credentialStore{path: CredentialsPath(), requests: req.New(authTimeout)}
 }
 
 // StoredCredentialsAt reads credentials from path.
 func StoredCredentialsAt(path string) TokenSource {
-	return &credentialStore{path: path}
+	return &credentialStore{path: path, requests: req.New(authTimeout)}
 }
 
 type credentialStore struct {
 	path        string       // where credentials are stored
+	requests    *req.Client  // the credential-refresh transport
 	mutex       sync.Mutex   // guards loading and refreshing
 	credentials *Credentials // the credentials currently held
 }
@@ -75,12 +82,16 @@ func (self *credentialStore) Token() (Token, error) {
 	}, nil
 }
 
+func (self *credentialStore) observeHTTP(observer req.Observer) {
+	self.requests.Observe(observer)
+}
+
 func (self *credentialStore) refresh() error {
 	if self.credentials.Refresh == "" {
 		return errors.New("credentials have expired: run the login command again")
 	}
 
-	refreshedToken, err := refreshToken(self.credentials.Refresh)
+	refreshedToken, err := refreshToken(self.requests, self.credentials.Refresh)
 	if err != nil {
 		return fmt.Errorf("refresh credentials: %w", err)
 	}

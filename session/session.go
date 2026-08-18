@@ -66,7 +66,7 @@ func Open(directory string, id string) (*Writer, error) {
 		return nil, err
 	}
 
-	file, err := os.OpenFile(path(directory, id), os.O_WRONLY|os.O_APPEND, 0o600)
+	file, err := os.OpenFile(journalPath(directory, id), os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
 		return nil, err
 	}
@@ -100,6 +100,9 @@ func (w *Writer) ID() string { return w.id }
 // Stored reports whether the lazy writer has made a file.
 func (w *Writer) Stored() bool { return w.file != nil }
 
+// EnsureStored creates the journal and writes its head without adding an event or item.
+func (w *Writer) EnsureStored() error { return w.ensureOpen() }
+
 // Close closes a session that has been stored.
 func (w *Writer) Close() error {
 	if w.file == nil {
@@ -120,8 +123,14 @@ func (w *Writer) ensureOpen() error {
 		return nil
 	}
 
-	file, err := os.OpenFile(path(w.directory, w.id), os.O_WRONLY|os.O_CREATE|os.O_EXCL|os.O_APPEND, 0o600)
+	directory := bundlePath(w.directory, w.id)
+	if err := os.Mkdir(directory, 0o700); err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(journalPath(w.directory, w.id), os.O_WRONLY|os.O_CREATE|os.O_EXCL|os.O_APPEND, 0o600)
 	if err != nil {
+		_ = os.Remove(directory)
 		return err
 	}
 	w.file = file
@@ -129,6 +138,7 @@ func (w *Writer) ensureOpen() error {
 	if err := w.record(Line{Kind: Head, ID: w.id, Meta: w.meta}); err != nil {
 		_ = file.Close()
 		_ = os.Remove(file.Name())
+		_ = os.Remove(directory)
 		w.file = nil
 		return err
 	}
@@ -167,7 +177,7 @@ func Read(directory string, id string) (*Session, error) {
 		return nil, err
 	}
 
-	file, err := os.Open(path(directory, id))
+	file, err := os.Open(journalPath(directory, id))
 	if err != nil {
 		return nil, err
 	}
@@ -235,8 +245,8 @@ func List(directory string) ([]*Session, error) {
 
 	var sessions []*Session
 	for _, entry := range entries {
-		id, found := strings.CutSuffix(entry.Name(), suffix)
-		if !found || entry.IsDir() {
+		id := entry.Name()
+		if !entry.IsDir() || validateID(id) != nil {
 			continue
 		}
 		if storedSession, err := Read(directory, id); err == nil {
@@ -254,11 +264,15 @@ func List(directory string) ([]*Session, error) {
 }
 
 const (
-	suffix  = ".jsonl"
-	maxLine = 16 << 20
+	journalName = "session.jsonl"
+	maxLine     = 16 << 20
 )
 
-func path(directory, id string) string { return filepath.Join(directory, id+suffix) }
+func bundlePath(directory, id string) string { return filepath.Join(directory, id) }
+
+func journalPath(directory, id string) string {
+	return filepath.Join(bundlePath(directory, id), journalName)
+}
 
 func validateID(id string) error {
 	if id == "" || id == "." || id == ".." || filepath.Base(id) != id {

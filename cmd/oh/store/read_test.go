@@ -8,7 +8,10 @@ import (
 
 func TestReadRejectsASessionWithoutAHead(t *testing.T) {
 	directory := t.TempDir()
-	if err := os.WriteFile(filepath.Join(directory, "broken.jsonl"), nil, 0o600); err != nil {
+	if err := os.Mkdir(filepath.Join(directory, "broken"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(directory, "broken", "session.jsonl"), nil, 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := Read(directory, "broken"); err == nil {

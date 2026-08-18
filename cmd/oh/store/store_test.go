@@ -1,15 +1,18 @@
 package store_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/req"
 
 	"crdx.org/io/cmd/oh/store"
 )
@@ -48,7 +51,7 @@ func write(t *testing.T, directory string) string {
 func appendRaw(t *testing.T, directory string, id string, text string) {
 	t.Helper()
 
-	file, err := os.OpenFile(filepath.Join(directory, id+".jsonl"), os.O_WRONLY|os.O_APPEND, 0o600) //nolint:gosec // the path is the test's own
+	file, err := os.OpenFile(filepath.Join(directory, id, "session.jsonl"), os.O_WRONLY|os.O_APPEND, 0o600) //nolint:gosec // the path is the test's own
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -328,5 +331,99 @@ func TestListPutsTheSessionTouchedLastAtTheTop(t *testing.T) {
 
 	if sessions[0].ID != older {
 		t.Errorf("expected the session added to last at the top, got %s", sessions[0].ID)
+	}
+}
+
+func TestHTTPObservationCanCreateTheBundleBeforeTheFirstEvent(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{
+		Model: "model", Effort: "high", Provider: "codex", WorkspaceDir: "/workspace",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	exchange := log.Observer().Start(req.Request{
+		Started: time.Now(), Method: "POST", URL: "https://example.com", Protocol: "HTTP/1.1",
+	})
+	if exchange == nil {
+		t.Fatal("expected the HTTP exchange to be recorded")
+	}
+	if warnings := log.TakeWarnings(); len(warnings) != 0 {
+		t.Fatalf("expected no recorder warnings, got %v", warnings)
+	}
+
+	if err := log.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	bundle := filepath.Join(directory, log.ID())
+	for _, name := range []string{"session.jsonl", "chat.md", "wire.http"} {
+		if _, err := os.Stat(filepath.Join(bundle, name)); err != nil {
+			t.Errorf("expected %s: %v", name, err)
+		}
+	}
+}
+
+func TestTheFirstRecordCreatesACompleteBundle(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{
+		Model: "model", Effort: "high", Provider: "codex", WorkspaceDir: "/workspace",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := log.Item(json.RawMessage(`{"type":"first"}`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	bundle := filepath.Join(directory, log.ID())
+	for _, name := range []string{"session.jsonl", "chat.md", "wire.http"} {
+		info, err := os.Stat(filepath.Join(bundle, name))
+		if err != nil {
+			t.Errorf("expected %s: %v", name, err)
+			continue
+		}
+		if info.Mode().Perm() != 0o600 {
+			t.Errorf("expected %s mode 0600, got %o", name, info.Mode().Perm())
+		}
+	}
+}
+
+func TestOpeningABundleAppendsToTheMarkdownTranscript(t *testing.T) {
+	directory := t.TempDir()
+	id := write(t, directory)
+	path := filepath.Join(directory, id, "chat.md")
+	before, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	log, err := store.Open(directory, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := log.Event(agent.Event{Kind: agent.Prompt, Text: "resumed text"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	after, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.HasPrefix(after, before) || !strings.Contains(string(after), "resumed text") {
+		t.Errorf("expected the transcript to append on resume, got:\n%s", after)
+	}
+	if strings.Count(string(after), "# Conversation") != 1 {
+		t.Errorf("expected one metadata header, got:\n%s", after)
 	}
 }

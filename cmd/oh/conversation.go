@@ -428,6 +428,7 @@ func (self *conversation) recordEvent(event agent.Event) {
 	}
 
 	self.writeSessionEvents(self.turn.pendingEvents.Add(event))
+	self.showStorageWarnings()
 }
 
 func appendTranscript(transcript []entry, event agent.Event) []entry {
@@ -453,6 +454,7 @@ func (self *conversation) finish() {
 
 	self.flush(&self.turn.pendingEvents)
 	self.storeItems()
+	self.showStorageWarnings()
 	self.turn.painter.close(status.Cancelled)
 	self.screen.End()
 
@@ -514,5 +516,11 @@ func (self *conversation) storeItems() {
 func (self *conversation) write(record func() error) {
 	if err := record(); err != nil {
 		self.notify(theme.Failure("the conversation could not be stored: " + err.Error()))
+	}
+}
+
+func (self *conversation) showStorageWarnings() {
+	for _, err := range self.log.TakeWarnings() {
+		self.notify(theme.Failure(err.Error()))
 	}
 }

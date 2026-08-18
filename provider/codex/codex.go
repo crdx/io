@@ -77,6 +77,14 @@ func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	self.tools = describe(tools)
 }
 
+// ObserveHTTP attaches an observer to session requests and credential refreshes.
+func (self *Client) ObserveHTTP(observer req.Observer) {
+	self.requests.Observe(observer)
+	if source, ok := self.tokens.(observedTokenSource); ok {
+		source.observeHTTP(observer)
+	}
+}
+
 // AddUserMessage appends a prompt to the conversation.
 //
 // https://platform.openai.com/docs/guides/conversation-state

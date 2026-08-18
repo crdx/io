@@ -232,6 +232,7 @@ func run() ([]string, error) {
 		return nil, err
 	}
 	defer func() { _ = log.Close() }()
+	client.ObserveHTTP(log.Observer())
 
 	tmpDir, err := openTmpDir(log.ID())
 	if err != nil {
