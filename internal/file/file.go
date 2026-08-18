@@ -38,21 +38,32 @@ func RefuseGitDir(name string) error {
 	return nil
 }
 
+type mountedRoot struct {
+	root  *Root  // the mounted tree
+	name  string // where resolution begins within it
+	exact bool   // for single files
+}
+
 // Root is a directory the tools are confined to, and a rule about what may be changed within it.
 type Root struct {
 	root   *os.Root                // the confinement itself
 	refuse func(name string) error // what stands in the way of changing a path, asked afresh
-	mounts map[string]*Root        // other trees by absolute name
+	mounts map[string]mountedRoot  // other trees by absolute name
 }
 
 // New builds a Root over an open directory. refuse is checked before each change.
 func New(root *os.Root, refuseWrite func(name string) error) *Root {
-	return &Root{root: root, refuse: refuseWrite, mounts: map[string]*Root{}}
+	return &Root{root: root, refuse: refuseWrite, mounts: map[string]mountedRoot{}}
 }
 
 // Mount adds a tree at an absolute path.
 func (self *Root) Mount(path string, root *Root) {
-	self.mounts[filepath.Clean(path)] = root
+	self.mounts[filepath.Clean(path)] = mountedRoot{root: root, name: "."}
+}
+
+// MountFile adds one file from a tree at an absolute path.
+func (self *Root) MountFile(path string, root *Root, name string) {
+	self.mounts[filepath.Clean(path)] = mountedRoot{root: root, name: name, exact: true}
 }
 
 // Resolve finds the tree and local name for a path.
@@ -75,12 +86,15 @@ func (self *Root) Resolve(path string) (*Root, string, error) {
 	var resolvedRoot *Root
 	resolvedName := ""
 	resolvedAt := ""
-	for at, mountedRoot := range self.mounts {
-		if name, ok := pathutil.RelativeTo(at, path); ok && len(at) > len(resolvedAt) {
-			resolvedRoot = mountedRoot
-			resolvedName = name
-			resolvedAt = at
+	for at, mounted := range self.mounts {
+		name, below := pathutil.RelativeTo(at, path)
+		if !below || len(at) <= len(resolvedAt) || (mounted.exact && name != ".") {
+			continue
 		}
+
+		resolvedRoot = mounted.root
+		resolvedName = filepath.Join(mounted.name, name)
+		resolvedAt = at
 	}
 	if resolvedRoot != nil {
 		return resolvedRoot, resolvedName, nil

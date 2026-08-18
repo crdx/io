@@ -129,7 +129,7 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 	for _, want := range []string{
 		"configured path /reference is read-only",
 		"configured path /output is read-write and follows the workspace write state",
-		"shell may execute files under /commands",
+		"shell may execute files at or under /commands",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("system prompt does not contain %q: %q", want, got)

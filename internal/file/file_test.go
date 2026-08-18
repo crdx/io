@@ -257,3 +257,29 @@ func TestTheMostSpecificMountResolvesANestedPath(t *testing.T) {
 		t.Errorf("got root %p and name %q, want child root %p and name file", resolved, name, child)
 	}
 }
+
+func TestAnExactFileMountResolvesOnlyTheNamedFile(t *testing.T) {
+	writable := false
+	root, _ := testRoot(t, &writable)
+	mounted, mountedPath := testRoot(t, &writable)
+	path := filepath.Join(mountedPath, "shared")
+
+	root.MountFile(path, mounted, "shared")
+
+	resolved, name, err := root.Resolve(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolved != mounted || name != "shared" {
+		t.Errorf("got root %p and name %q, want mounted root %p and name shared", resolved, name, mounted)
+	}
+
+	for _, outside := range []string{
+		filepath.Join(mountedPath, "sibling"),
+		filepath.Join(path, "descendant"),
+	} {
+		if _, _, err := root.Resolve(outside); !errors.Is(err, file.ErrOutsideRoot) {
+			t.Errorf("%s resolved with %v, want outside-root refusal", outside, err)
+		}
+	}
+}
