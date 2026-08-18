@@ -168,13 +168,25 @@ func run() ([]string, error) {
 	}
 
 	files := file.New(root, refuseWrite(mode))
+
+	settings, err := loadConfiguredSettings(configPath())
+	if err != nil {
+		return nil, err
+	}
+
 	processes := sandbox.NewProcesses(args.caps.has(capBackground))
 	defer func() { _, _ = processes.Disable() }()
 
 	client := connect(os.Getenv(endpointVariable))
 
 	client.Model = codex.Model
+	if settings.Model != "" {
+		client.Model = settings.Model
+	}
 	client.Effort = codex.Effort
+	if settings.Effort != "" {
+		client.Effort = settings.Effort
+	}
 
 	if resumedSession != nil {
 		if resumedSession.Head.Model != "" {
