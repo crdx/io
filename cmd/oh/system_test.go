@@ -137,6 +137,20 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 	}
 }
 
+func TestTheHarnessDisclosesPrivateLoopbackNetworking(t *testing.T) {
+	got := harnessContext("/workspace", "/tmp/x", capRead, configuredPaths{})
+
+	for _, want := range []string{
+		"private loopback interface",
+		"127.0.0.1 and ::1",
+		"host's loopback interface and external networks are unreachable",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("harness context does not contain %q: %q", want, got)
+		}
+	}
+}
+
 func TestTheResearchNoteIsOnlyMadeWhileTheWorkspaceIsReadOnly(t *testing.T) {
 	const note = "consider any task you're given to be a research task"
 

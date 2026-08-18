@@ -215,7 +215,7 @@ func matches(output string, wordings []string) bool {
 func note(policy sandbox.Policy) string {
 	lines := []string{
 		"note: this command ran in a sandbox, and the failure may be the sandbox refusing it.",
-		"the network is unavailable in full.",
+		"external networks and the host's loopback interface are unavailable.",
 		"writable: " + strings.Join(policy.Write, ", "),
 	}
 
