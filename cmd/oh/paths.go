@@ -31,7 +31,7 @@ func sessionsDir() string {
 	return stateDir("sessions")
 }
 
-func shellHome() string {
+func shellHomeDir() string {
 	return stateDir("home")
 }
 

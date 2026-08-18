@@ -18,11 +18,11 @@ func write(t *testing.T, directory string) string {
 	t.Helper()
 
 	log, err := store.Create(directory, store.Meta{
-		Model:     "gpt-5.6-sol",
-		Workspace: "/tmp/somewhere",
-		Provider:  "codex",
-		Effort:    "high",
-		Context:   "You are a coding assistant.",
+		Model:        "gpt-5.6-sol",
+		WorkspaceDir: "/tmp/somewhere",
+		Provider:     "codex",
+		Effort:       "high",
+		Context:      "You are a coding assistant.",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -194,7 +194,7 @@ func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 func TestTheFirstThingSaidTakesTheHeadWithIt(t *testing.T) {
 	directory := t.TempDir()
 
-	log, err := store.Create(directory, store.Meta{Model: "gpt-5.6-sol", Workspace: "/tmp/somewhere"})
+	log, err := store.Create(directory, store.Meta{Model: "gpt-5.6-sol", WorkspaceDir: "/tmp/somewhere"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -216,7 +216,7 @@ func TestTheFirstThingSaidTakesTheHeadWithIt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if storedSession.Meta.Model != "gpt-5.6-sol" || storedSession.Meta.Workspace != "/tmp/somewhere" {
+	if storedSession.Meta.Model != "gpt-5.6-sol" || storedSession.Meta.WorkspaceDir != "/tmp/somewhere" {
 		t.Errorf("expected the meta to have gone in first, got %+v", storedSession.Meta)
 	}
 

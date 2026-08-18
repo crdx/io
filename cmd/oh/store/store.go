@@ -11,11 +11,11 @@ import (
 
 // Meta is the conversation-specific configuration needed to resume a session.
 type Meta struct {
-	Model     string `json:"model"`
-	Workspace string `json:"workspace"`
-	Provider  string `json:"provider"`
-	Effort    string `json:"effort,omitempty"`
-	Context   string `json:"context,omitempty"`
+	Model        string `json:"model"`
+	WorkspaceDir string `json:"workspaceDir"`
+	Provider     string `json:"provider"`
+	Effort       string `json:"effort,omitempty"`
+	Context      string `json:"context,omitempty"`
 }
 
 // Writer appends oh records to the core journal.

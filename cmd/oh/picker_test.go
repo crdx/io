@@ -31,9 +31,9 @@ func TestPick(t *testing.T) {
 
 	for index, prompt := range prompts {
 		log, err := store.Create(directory, store.Meta{
-			Model:     "gpt-5.6-sol",
-			Workspace: fmt.Sprintf("/home/alice/proj/%d", index),
-			Provider:  "codex",
+			Model:        "gpt-5.6-sol",
+			WorkspaceDir: fmt.Sprintf("/home/alice/proj/%d", index),
+			Provider:     "codex",
 		})
 		if err != nil {
 			t.Fatal(err)

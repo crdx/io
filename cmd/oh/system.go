@@ -27,10 +27,10 @@ type contextFile struct {
 
 func loadContext(
 	root *os.Root,
-	workspace string,
-	tmp string,
+	workspaceDir string,
+	tmpDir string,
 	currentCaps caps,
-	paths configuredPaths,
+	extraPaths configuredPaths,
 	skills []skill.Skill,
 ) (string, []contextFile, error) {
 	globalFile, err := readGlobalContext()
@@ -49,7 +49,7 @@ func loadContext(
 	}
 
 	return mergeContexts(
-		harnessContext(workspace, tmp, currentCaps, paths),
+		harnessContext(workspaceDir, tmpDir, currentCaps, extraPaths),
 		globalContext(globalFile),
 		projectContext(projectFiles),
 		skill.Context(skills),
@@ -110,16 +110,16 @@ func globalContext(file *contextFile) string {
 	return file.body
 }
 
-func harnessContext(workspace string, tmp string, currentCaps caps, paths configuredPaths) string {
+func harnessContext(workspaceDir string, tmpDir string, currentCaps caps, extraPaths configuredPaths) string {
 	return mergeContexts(
-		scopeSection(workspace, paths, currentCaps),
+		scopeSection(workspaceDir, extraPaths, currentCaps),
 		networkSection(),
-		tmpSection(tmp),
-		stateSection(workspace, currentCaps),
+		tmpSection(tmpDir),
+		stateSection(workspaceDir, currentCaps),
 	)
 }
 
-func scopeSection(workspace string, paths configuredPaths, currentCaps caps) string {
+func scopeSection(workspaceDir string, extraPaths configuredPaths, currentCaps caps) string {
 	return hereduck.Df(
 		`
 		# Scope
@@ -127,8 +127,8 @@ func scopeSection(workspace string, paths configuredPaths, currentCaps caps) str
 		- Your workspace is the current directory, %s.
 		%s
 	`,
-		workspace,
-		scopeRules(paths, currentCaps),
+		workspaceDir,
+		scopeRules(extraPaths, currentCaps),
 	)
 }
 
@@ -141,8 +141,8 @@ func networkSection() string {
 	`)
 }
 
-func tmpSection(tmp string) string {
-	tmp = pathutil.Shorten(tmp)
+func tmpSection(tmpDir string) string {
+	tmpDir = pathutil.Shorten(tmpDir)
 
 	return hereduck.Df(
 		`
@@ -155,12 +155,12 @@ func tmpSection(tmp string) string {
 		- Translate /tmp paths to that directory before giving them to the user.
 		- For example: /tmp/result.png → %s
 	`,
-		tmp,
-		filepath.Join(tmp, "result.png"),
+		tmpDir,
+		filepath.Join(tmpDir, "result.png"),
 	)
 }
 
-func stateSection(workspace string, currentCaps caps) string {
+func stateSection(workspaceDir string, currentCaps caps) string {
 	return hereduck.Df(
 		`
 		# State
@@ -171,7 +171,7 @@ func stateSection(workspace string, currentCaps caps) string {
 
 		%s
 	`,
-		stateRules(workspace, currentCaps),
+		stateRules(workspaceDir, currentCaps),
 		researchNote(currentCaps),
 	)
 }
@@ -184,33 +184,33 @@ func researchNote(currentCaps caps) string {
 	return "If the workspace is read-only you should consider any task you're given to be a research task."
 }
 
-func stateRules(workspace string, currentCaps caps) string {
+func stateRules(workspaceDir string, currentCaps caps) string {
 	return strings.Join([]string{
-		"- The workspace (" + workspace + ") is " + filesystem(currentCaps.has(capWrite)),
-		"- The .git directory within it (" + filepath.Join(workspace, ".git") + ") is " +
+		"- The workspace (" + workspaceDir + ") is " + filesystem(currentCaps.has(capWrite)),
+		"- The .git directory within it (" + filepath.Join(workspaceDir, ".git") + ") is " +
 			filesystem(currentCaps.has(capGit)),
 		"- Background processes are " + background(currentCaps.has(capBackground)),
 		"- The bash tool is " + shellAccess(currentCaps.has(capShell)),
 	}, "\n")
 }
 
-func scopeRules(paths configuredPaths, currentCaps caps) string {
+func scopeRules(extraPaths configuredPaths, currentCaps caps) string {
 	var lines []string
 
-	if len(paths.Read)+len(paths.Write) > 0 {
+	if len(extraPaths.Read)+len(extraPaths.Write) > 0 {
 		lines = append(lines, "- Tools that accept a path can access the workspace, /tmp, and the configured paths listed here.")
 	} else {
 		lines = append(lines, "- Tools that accept a path can only access the workspace and /tmp.")
 	}
 
-	for _, path := range paths.Read {
+	for _, path := range extraPaths.Read {
 		lines = append(lines, "- The configured path "+path+" is read-only.")
 	}
-	for _, path := range paths.Write {
+	for _, path := range extraPaths.Write {
 		lines = append(lines, "- The configured path "+path+" is "+
 			filesystem(currentCaps.has(capWrite))+" and follows the workspace write state.")
 	}
-	for _, path := range paths.Exec {
+	for _, path := range extraPaths.Exec {
 		lines = append(lines, "- The shell may execute files under "+path+".")
 	}
 

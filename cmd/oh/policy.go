@@ -24,14 +24,14 @@ const (
 	shellOpenFiles = 4096
 )
 
-func execPaths(workspace string) []string {
-	paths := []string{workspace}
+func execPaths(workspaceDir string) []string {
+	paths := []string{workspaceDir}
 
 	for entry := range strings.SplitSeq(os.Getenv("PATH"), string(os.PathListSeparator)) {
 		if entry == "" {
-			entry = workspace
+			entry = workspaceDir
 		} else if !filepath.IsAbs(entry) {
-			entry = filepath.Join(workspace, entry)
+			entry = filepath.Join(workspaceDir, entry)
 		}
 
 		entry = filepath.Clean(entry)
@@ -116,10 +116,10 @@ func createSandboxPolicy(
 func readOnlySandboxPolicy(
 	ctx context.Context,
 	policy sandbox.Policy,
-	workspace string,
+	workspaceDir string,
 	home string,
 ) (sandbox.Policy, error) {
-	policy = policy.WithRead(workspace, home).WithWrite(sandbox.TmpDir)
+	policy = policy.WithRead(workspaceDir, home).WithWrite(sandbox.TmpDir)
 
 	return policy, sandbox.Supported(ctx, policy)
 }
@@ -165,10 +165,10 @@ var ErrShellWithheld = errors.New(
 )
 
 func confinedShell(
-	workspace string,
+	workspaceDir string,
 	home string,
 	tmpDir string,
-	additional configuredPaths,
+	extraPaths configuredPaths,
 	mode *Mode,
 	files *file.Root,
 	processes *sandbox.Processes,
@@ -180,7 +180,7 @@ func confinedShell(
 			return sandbox.Policy{}, ErrShellWithheld
 		}
 
-		policy, err := createSandboxPolicy(ctx, workspace, home, tmpDir, additional, currentCaps)
+		policy, err := createSandboxPolicy(ctx, workspaceDir, home, tmpDir, extraPaths, currentCaps)
 		if err != nil {
 			return policy, fmt.Errorf("the shell cannot be confined: %w", err)
 		}
@@ -190,20 +190,20 @@ func confinedShell(
 
 	readOnly := func() bool {
 		currentCaps := mode.Current()
-		return !currentCaps.has(capShell) || allWritablePaths(workspace, home, additional.Write, currentCaps) == nil
+		return !currentCaps.has(capShell) || allWritablePaths(workspaceDir, home, extraPaths.Write, currentCaps) == nil
 	}
 
 	return bash.New(files, readOnly, fresh, processes)
 }
 
-func allWritablePaths(workspaceDir, homeDir string, additional []string, currentCaps caps) []string {
+func allWritablePaths(workspaceDir, homeDir string, extraPaths []string, currentCaps caps) []string {
 	paths := writablePaths(workspaceDir, homeDir, currentCaps)
 
 	switch {
 	case currentCaps.has(capWrite):
-		paths = append(paths, additional...)
+		paths = append(paths, extraPaths...)
 	case currentCaps.has(capGit):
-		for _, directory := range additional {
+		for _, directory := range extraPaths {
 			if metadata := filepath.Join(directory, ".git"); pathutil.Exists(metadata) {
 				paths = append(paths, metadata)
 			}

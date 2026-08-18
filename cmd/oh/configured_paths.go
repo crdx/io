@@ -10,12 +10,12 @@ import (
 	"crdx.org/io/internal/pathutil"
 )
 
-func mountConfiguredPaths(files *file.Root, mode *Mode, paths configuredPaths) ([]*os.Root, error) {
-	writable := make(map[string]bool, len(paths.Read)+len(paths.Write))
-	for _, path := range paths.Read {
+func mountConfiguredPaths(files *file.Root, mode *Mode, extraPaths configuredPaths) ([]*os.Root, error) {
+	writable := make(map[string]bool, len(extraPaths.Read)+len(extraPaths.Write))
+	for _, path := range extraPaths.Read {
 		writable[path] = false
 	}
-	for _, path := range paths.Write {
+	for _, path := range extraPaths.Write {
 		writable[path] = true
 	}
 

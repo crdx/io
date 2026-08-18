@@ -60,8 +60,8 @@ func TestEveryOptionIsRead(t *testing.T) {
 		t.Errorf("expected reading alone, got %s", parsedOptions.caps.Flags())
 	}
 
-	if parsedOptions.workspacePath != "somewhere" {
-		t.Errorf("expected the directory, got %q", parsedOptions.workspacePath)
+	if parsedOptions.workspaceDir != "somewhere" {
+		t.Errorf("expected the directory, got %q", parsedOptions.workspaceDir)
 	}
 
 	if parsedOptions := parseOptions(t, "--resume"); !parsedOptions.resume {
@@ -98,16 +98,16 @@ func TestWhateverIsLeftOverIsTheFirstThingSaid(t *testing.T) {
 		t.Errorf("expected the words back as one, got %q", parsedOptions.initialMessage)
 	}
 
-	if parsedOptions.workspacePath != "." {
-		t.Errorf("expected the current directory, got %q", parsedOptions.workspacePath)
+	if parsedOptions.workspaceDir != "." {
+		t.Errorf("expected the current directory, got %q", parsedOptions.workspaceDir)
 	}
 }
 
 func TestTheWorkingDirectoryIsNotTakenFromThePrompt(t *testing.T) {
 	parsedOptions := parseOptions(t, "read", "main.go", "-d", "/tmp")
 
-	if parsedOptions.workspacePath != "/tmp" {
-		t.Errorf("expected the directory to come from the option, got %q", parsedOptions.workspacePath)
+	if parsedOptions.workspaceDir != "/tmp" {
+		t.Errorf("expected the directory to come from the option, got %q", parsedOptions.workspaceDir)
 	}
 
 	if parsedOptions.initialMessage != "read main.go" {
@@ -548,8 +548,8 @@ func TestACommitOnlyShellWithNoRepositoryChangesNothing(t *testing.T) {
 // are the second: each of them parses, and none of them means anything.
 func TestArgumentsThatContradictEachOtherAreRefused(t *testing.T) {
 	for name, opts := range map[string]InputOpts{
-		"a picker and a directory":  {Resume: true, Workspace: "somewhere"},
-		"a session and a directory": {Resume: true, Session: "one", Workspace: "somewhere"},
+		"a picker and a directory":  {Resume: true, WorkspaceDir: "somewhere"},
+		"a session and a directory": {Resume: true, Session: "one", WorkspaceDir: "somewhere"},
 	} {
 		if _, err := opts.parse(); err == nil {
 			t.Errorf("%s: expected an error", name)
@@ -592,9 +592,9 @@ func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *conve
 	t.Cleanup(func() { _ = log.Close() })
 
 	return &conversation{
-		log:       log,
-		workspace: "/tmp/somewhere",
-		mode:      NewMode(currentCaps),
+		log:          log,
+		workspaceDir: "/tmp/somewhere",
+		mode:         NewMode(currentCaps),
 	}
 }
 

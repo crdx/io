@@ -67,16 +67,16 @@ func main() {
 }
 
 type InputOpts struct {
-	Message   []string `docopt:"<prompt>"`
-	Workspace string   `docopt:"--workspace"`
-	Session   string   `docopt:"<session>"`
-	Caps      string   `docopt:"--caps"`
-	Resume    bool     `docopt:"--resume"`
-	Version   bool     `docopt:"--version"`
+	Message      []string `docopt:"<prompt>"`
+	WorkspaceDir string   `docopt:"--workspace"`
+	Session      string   `docopt:"<session>"`
+	Caps         string   `docopt:"--caps"`
+	Resume       bool     `docopt:"--resume"`
+	Version      bool     `docopt:"--version"`
 }
 
 type Opts struct {
-	workspacePath  string // the workspace
+	workspaceDir   string // the workspace dir
 	initialMessage string // the first prompt
 	resume         bool   // whether to choose a session
 	session        string // the session to resume
@@ -85,7 +85,7 @@ type Opts struct {
 
 func (opts InputOpts) parse() (Opts, error) {
 	self := Opts{
-		workspacePath:  opts.Workspace,
+		workspaceDir:   opts.WorkspaceDir,
 		initialMessage: strings.Join(opts.Message, " "),
 		resume:         opts.Resume,
 		session:        opts.Session,
@@ -98,12 +98,12 @@ func (opts InputOpts) parse() (Opts, error) {
 
 	self.caps = grantedCaps
 
-	if self.resume && self.workspacePath != "" {
+	if self.resume && self.workspaceDir != "" {
 		return self, errors.New("a resumed conversation takes its directory from the session")
 	}
 
-	if self.workspacePath == "" {
-		self.workspacePath = "."
+	if self.workspaceDir == "" {
+		self.workspaceDir = "."
 	}
 
 	return self, nil
@@ -133,32 +133,32 @@ func run() ([]string, error) {
 		if resumedSession.Meta.Provider != "" && resumedSession.Meta.Provider != "codex" {
 			return nil, fmt.Errorf("cannot resume a %s session with codex", resumedSession.Meta.Provider)
 		}
-		args.workspacePath = resumedSession.Meta.Workspace
+		args.workspaceDir = resumedSession.Meta.WorkspaceDir
 	}
 
-	root, err := os.OpenRoot(args.workspacePath)
+	root, err := os.OpenRoot(args.workspaceDir)
 	if err != nil {
 		return nil, err
 	}
 
 	defer func() { _ = root.Close() }()
 
-	workspacePath, err := filepath.Abs(root.Name())
+	workspaceDir, err := filepath.Abs(root.Name())
 	if err != nil {
 		return nil, fmt.Errorf("could not resolve the workspace path: %w", err)
 	}
 
-	homePath := shellHome()
-	if homePath == "" {
+	homeDir := shellHomeDir()
+	if homeDir == "" {
 		return nil, errors.New("could not find a home for shell configuration")
 	}
 
-	homePath, err = filepath.Abs(homePath)
+	homeDir, err = filepath.Abs(homeDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not resolve the shell home path: %w", err)
 	}
 
-	if err := os.MkdirAll(homePath, 0o700); err != nil {
+	if err := os.MkdirAll(homeDir, 0o700); err != nil {
 		return nil, fmt.Errorf("could not prepare the shell home: %w", err)
 	}
 
@@ -181,7 +181,7 @@ func run() ([]string, error) {
 	defer closeConfiguredRoots(configuredRoots)
 
 	globalSkillDirs := append([]string{configDir("skills")}, settings.Skill.LookupDirectories...)
-	availableSkills, err := skill.Discover(workspacePath, globalSkillDirs, os.Stderr)
+	availableSkills, err := skill.Discover(workspaceDir, globalSkillDirs, os.Stderr)
 	if err != nil {
 		return nil, err
 	}
@@ -217,10 +217,10 @@ func run() ([]string, error) {
 	}
 
 	meta := store.Meta{
-		Model:     client.Model,
-		Workspace: workspacePath,
-		Provider:  "codex",
-		Effort:    client.Effort,
+		Model:        client.Model,
+		WorkspaceDir: workspaceDir,
+		Provider:     "codex",
+		Effort:       client.Effort,
 	}
 
 	log, err := openSession(resumedSession, meta)
@@ -229,14 +229,14 @@ func run() ([]string, error) {
 	}
 	defer func() { _ = log.Close() }()
 
-	tmp, err := openTmpDir(log.ID())
+	tmpDir, err := openTmpDir(log.ID())
 	if err != nil {
 		return nil, err
 	}
 
 	defer func() {
 		if !log.Stored() {
-			_ = os.Remove(tmp) // takes nothing that is not empty regardless
+			_ = os.Remove(tmpDir) // takes nothing that is not empty regardless
 		}
 	}()
 
@@ -247,8 +247,8 @@ func run() ([]string, error) {
 	} else {
 		context, contextFiles, err = loadContext(
 			root,
-			workspacePath,
-			tmp,
+			workspaceDir,
+			tmpDir,
 			args.caps,
 			settings.Sandbox,
 			availableSkills,
@@ -265,30 +265,30 @@ func run() ([]string, error) {
 		}
 	}
 
-	tmpRoot, err := mountTmpDir(files, tmp)
+	tmpRoot, err := mountTmpDir(files, tmpDir)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = tmpRoot.Close() }()
 
 	tools := toolbox.Rummage(files)
-	shell := confinedShell(workspacePath, homePath, tmp, settings.Sandbox, mode, files, processes)
+	shell := confinedShell(workspaceDir, homeDir, tmpDir, settings.Sandbox, mode, files, processes)
 
 	tools = append(tools, shell)
 	tools = truncate.Tools(tools)
 
 	chat := &conversation{
-		assistant: agent.New(context, client, tools),
-		screen:    output.New(os.Stdout),
-		log:       log,
-		workspace: workspacePath,
-		mode:      mode,
-		processes: processes,
-		shell:     shell.Name(),
+		assistant:    agent.New(context, client, tools),
+		screen:       output.New(os.Stdout),
+		log:          log,
+		workspaceDir: workspaceDir,
+		mode:         mode,
+		processes:    processes,
+		shell:        shell.Name(),
 
 		label: func(pending bool, frame int, running bool) string {
 			currentCaps := mode.Current()
-			return banner(client.Model, client.Effort, workspacePath, tools, currentCaps.has(capShell),
+			return banner(client.Model, client.Effort, workspaceDir, tools, currentCaps.has(capShell),
 				currentCaps.has(capGit), currentCaps.has(capBackground), pending, frame, running)
 		},
 	}
@@ -369,8 +369,8 @@ func openTmpDir(id string) (string, error) { // kept, so a resumed conversation 
 	return tmp, nil
 }
 
-func mountTmpDir(files *file.Root, tmp string) (*os.Root, error) {
-	tmpRoot, err := os.OpenRoot(tmp)
+func mountTmpDir(files *file.Root, tmpDir string) (*os.Root, error) {
+	tmpRoot, err := os.OpenRoot(tmpDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not open the tmp dir: %w", err)
 	}

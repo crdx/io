@@ -23,14 +23,14 @@ import (
 )
 
 type conversation struct {
-	assistant *agent.Agent                 // the conversation driver
-	screen    *output.Output               // where the conversation is drawn
-	log       *store.Writer                // where the conversation is stored
-	label     func(bool, int, bool) string // what the harness was started with, drawn afresh on the rule
-	workspace string                       // where the conversation is being held
-	mode      *Mode                        // what the tools allow
-	processes *sandbox.Processes           // what background commands belong to this conversation
-	shell     string                       // what the shell tool was named, taken from the tool itself
+	assistant    *agent.Agent                 // the conversation driver
+	screen       *output.Output               // where the conversation is drawn
+	log          *store.Writer                // where the conversation is stored
+	label        func(bool, int, bool) string // what the harness was started with, drawn afresh on the rule
+	workspaceDir string                       // where the conversation is being held
+	mode         *Mode                        // what the tools allow
+	processes    *sandbox.Processes           // what background commands belong to this conversation
+	shell        string                       // what the shell tool was named, taken from the tool itself
 
 	restart []string // the arguments to start again with, once the terminal has been given back
 
@@ -172,7 +172,7 @@ func (self *conversation) restartArguments() []string {
 	if self.log.Stored() {
 		arguments = append(arguments, "--resume", self.log.ID())
 	} else {
-		arguments = append(arguments, "--workspace", self.workspace)
+		arguments = append(arguments, "--workspace", self.workspaceDir)
 	}
 
 	return append(arguments, "--caps", self.mode.Current().Flags())
