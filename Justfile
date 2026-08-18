@@ -15,13 +15,13 @@ fmt:
     go fmt ./...
 
 fix:
-    unbuffer golangci-lint run --color never --fix | gostack
+    golangci-lint run --color never --fix
 
 test:
-    unbuffer go test -cover ./... | gostack --test
+    go test -cover ./...
 
 build:
-    unbuffer go build -trimpath -o dist/oh ./cmd/oh | gostack
+    go build -trimpath -o dist/oh ./cmd/oh
 
 check:
     steps fmt vet lint1 lint2 mega test
@@ -35,11 +35,11 @@ mega:
 
 [private]
 vet:
-    unbuffer go vet ./... | gostack
+    go vet ./...
 
 [private]
 lint1:
-    unbuffer golangci-lint run --color never | gostack
+    golangci-lint run --color never
 
 [private]
 lint2:
