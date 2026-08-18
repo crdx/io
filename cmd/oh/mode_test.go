@@ -20,8 +20,6 @@ var (
 	shellWithheld    = shellIs(false)
 )
 
-// Nothing above pins the words, so this pins what the words must amount to: a clause that is
-// missing, or one that reads the same whichever way the bit went, would say nothing to the model.
 func TestEveryClauseSaysSomethingAndSaysItBothWays(t *testing.T) {
 	for name, clauses := range map[string][2]string{
 		"workspace":  {nowReadOnly, nowReadWrite},
@@ -41,7 +39,6 @@ func TestEveryClauseSaysSomethingAndSaysItBothWays(t *testing.T) {
 
 func writable() caps { return capRead | capWrite }
 
-// The prompt of a fresh conversation states the mode it opened in, so there is nothing to add.
 func TestAFreshConversationSaysNothingAboutTheModeItOpenedIn(t *testing.T) {
 	for _, initialCaps := range []caps{capRead, capRead | capWrite, capRead | capGit, capRead | capWrite | capGit} {
 		if got := NewMode(initialCaps).Inject(); got != "" {
@@ -69,7 +66,6 @@ func TestASwappedModeIsAnnouncedOnceAndOnlyOnce(t *testing.T) {
 	}
 }
 
-// The history is its own bit, and moving it says so without saying anything about the workspace.
 func TestBackgroundModeIsAnnouncedOnItsOwn(t *testing.T) {
 	self := NewMode(writable())
 	self.Toggle(capBackground)
@@ -99,7 +95,6 @@ func TestOpeningTheHistoryIsAnnouncedOnItsOwn(t *testing.T) {
 	}
 }
 
-// Both bits moving between one turn and the next is one note with a clause apiece.
 func TestBothSwapsBetweenTurnsAreAnnouncedTogether(t *testing.T) {
 	self := NewMode(writable())
 
@@ -111,7 +106,6 @@ func TestBothSwapsBetweenTurnsAreAnnouncedTogether(t *testing.T) {
 	}
 }
 
-// A mode swapped and swapped straight back is the mode the model already knows about.
 func TestAModeSwappedTwiceIsNotAnnounced(t *testing.T) {
 	self := NewMode(writable())
 
@@ -123,8 +117,6 @@ func TestAModeSwappedTwiceIsNotAnnounced(t *testing.T) {
 	}
 }
 
-// A resumed conversation replays the prompt it was stored with, which states what that conversation
-// opened with rather than what this run was started with.
 func TestAResumedConversationAlwaysSaysWhatTheModeAllows(t *testing.T) {
 	got := NewResumedMode(writable()).Inject()
 
@@ -135,8 +127,6 @@ func TestAResumedConversationAlwaysSaysWhatTheModeAllows(t *testing.T) {
 	}
 }
 
-// The shell is switched like anything else, the tool being offered whether or not it may run, so
-// what changes is what it answers rather than whether the model has heard of it.
 func TestSwitchingTheShellIsAnnounced(t *testing.T) {
 	self := NewMode(capRead | capShell)
 	self.Toggle(capShell)
@@ -167,8 +157,6 @@ func TestTheModeSaysWhatTheWorkspaceAllows(t *testing.T) {
 	}
 }
 
-// The four states are what the rule composes, and each of them means something. The last is the
-// commit-only one, where work already done may be stored without a line of it being edited.
 func TestTheRuleAnswersForBothHalvesOfTheMode(t *testing.T) {
 	for name, want := range map[string]struct {
 		currentCaps caps
@@ -192,7 +180,6 @@ func TestTheRuleAnswersForBothHalvesOfTheMode(t *testing.T) {
 	}
 }
 
-// A keypress swaps the mode on one goroutine while a turn reads it on another.
 func TestTheModeIsSafeToSwapWhileItIsBeingRead(t *testing.T) {
 	self := NewMode(writable())
 

@@ -12,8 +12,6 @@ import (
 	"crdx.org/io/internal/sandbox"
 )
 
-// TestMain makes the test binary its own sandbox stub, which is what any program offering the tool
-// has to do. A run started by Run never reaches the tests.
 func TestMain(m *testing.M) {
 	sandbox.Init()
 	os.Exit(m.Run())
@@ -224,8 +222,6 @@ func TestAGrantedPathIsStillNotWritable(t *testing.T) {
 	}
 }
 
-// A read-only grant is worth nothing if the file can still be emptied, which is what TRUNCATE is
-// for and why the minimum landlock version is what it is.
 func TestAReadableFileCannotBeTruncated(t *testing.T) {
 	grantedDirectory := t.TempDir()
 	target := filepath.Join(grantedDirectory, "keep")
@@ -248,9 +244,6 @@ func TestAReadableFileCannotBeTruncated(t *testing.T) {
 
 const readOnly = "Read-only file system" // what a refusal by the mount rather than the ruleset says
 
-// A read-only path inside a writable one is the whole reason the sandbox takes a mount namespace.
-// Landlock grants a path every right that any rule along the way to it grants, so the inner rule
-// alone would be worth nothing.
 func TestAReadPathInsideAWritePathIsNotWritable(t *testing.T) {
 	directory := t.TempDir()
 	protectedPath := filepath.Join(directory, "held")
@@ -298,7 +291,6 @@ func TestAReadPathInsideAWritePathIsNotWritable(t *testing.T) {
 	}
 }
 
-// Holding one path back is no use if it costs the rest of the workspace.
 func TestTheRestOfTheWorkspaceIsStillWritable(t *testing.T) {
 	directory := t.TempDir()
 	protectedPath := filepath.Join(directory, "held")
@@ -319,7 +311,6 @@ func TestTheRestOfTheWorkspaceIsStillWritable(t *testing.T) {
 	}
 }
 
-// A held path is still readable, or a command could not so much as look at what it may not change.
 func TestAHeldPathIsStillReadable(t *testing.T) {
 	directory := t.TempDir()
 	protectedPath := filepath.Join(directory, "held")
@@ -339,7 +330,6 @@ func TestAHeldPathIsStillReadable(t *testing.T) {
 	}
 }
 
-// The command is handed the namespace, so it must not be handed the privilege that made it.
 func TestTheCommandCannotUndoWhatHoldsAPathBack(t *testing.T) {
 	directory := t.TempDir()
 	protectedPath := filepath.Join(directory, "held")
@@ -563,8 +553,6 @@ func TestALocalSocketPairStillWorks(t *testing.T) {
 	}
 }
 
-// A machine keeps its secrets in /etc as readily as its loader configuration, so what a command
-// needs of it is named file by file and the rest is left where it is.
 func TestOnlyTheNamedPartsOfEtcAreReachable(t *testing.T) {
 	if result := run(t, t.TempDir(), "cat /etc/passwd", sandbox.Policy{}); result.Code != 0 {
 		t.Errorf("a command cannot resolve a user: %q", result.Output)
@@ -575,8 +563,6 @@ func TestOnlyTheNamedPartsOfEtcAreReachable(t *testing.T) {
 	}
 }
 
-// Attaching a scratch replaces what was at /tmp, so a grant beneath it is gone by the time it is
-// applied. Landlock says only that the path is missing, which is true and no help at all.
 func TestAGrantTheScratchWouldCoverIsRefused(t *testing.T) {
 	policy := sandbox.Policy{
 		TmpDir: t.TempDir(),
@@ -589,7 +575,6 @@ func TestAGrantTheScratchWouldCoverIsRefused(t *testing.T) {
 	}
 }
 
-// The scratch itself is granted as /tmp, which is where it is attached and what it is for.
 func TestTheScratchItselfIsNotRefused(t *testing.T) {
 	policy := sandbox.Policy{TmpDir: t.TempDir(), Write: []string{sandbox.TmpDir}}
 
@@ -599,8 +584,6 @@ func TestTheScratchItselfIsNotRefused(t *testing.T) {
 	}
 }
 
-// TMPDIR is advisory and a good deal of software ignores it, so the scratch is what a command
-// insisting on /tmp writes into, and what it left there last time is what it finds there now.
 func TestWhatACommandWritesToTmpLandsInTheScratch(t *testing.T) {
 	scratch := t.TempDir()
 
@@ -688,7 +671,6 @@ func TestAFileMayNotGrowPastTheLimit(t *testing.T) {
 	}
 }
 
-// Processor time is not wall clock: a command that spins hits this while one that waits does not.
 func TestACommandMayNotBurnMoreProcessorTimeThanTheLimit(t *testing.T) {
 	result := run(t, t.TempDir(), "while :; do :; done", sandbox.Policy{
 		CPUTime: time.Second,

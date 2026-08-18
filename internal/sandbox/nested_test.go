@@ -14,7 +14,6 @@ const (
 	homeVariable      = "IO_SANDBOX_HOME"
 )
 
-// A commit-only policy makes .git writable inside an otherwise read-only workspace.
 func TestGitMayCommitWithinAWorkspaceItMayNotOtherwiseChange(t *testing.T) {
 	if os.Getenv(childVariable) != "" {
 		commitUnderLandlock(t)

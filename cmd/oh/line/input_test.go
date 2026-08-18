@@ -52,7 +52,6 @@ func TestAPastedTabBecomesSpaces(t *testing.T) {
 	}
 }
 
-// Inside a paste a return is text; outside one it finishes the line.
 func TestAPasteEndsWhereTheTerminalSaysItDoes(t *testing.T) {
 	self := inputFromKeys(t, pasteStart+"one"+pasteEnd)
 
@@ -87,8 +86,6 @@ func TestShiftReturnOpensALine(t *testing.T) {
 	}
 }
 
-// A terminal lays out cells, so a row of two-cell characters holds half as many of them, and a
-// character that would straddle the end goes on the next row whole.
 func TestWideCharactersWrapByTheCellsTheyTake(t *testing.T) {
 	self := NewInput(nil)
 
@@ -135,8 +132,6 @@ func TestAWordWiderThanTheInputStillWraps(t *testing.T) {
 	}
 }
 
-// Leading whitespace is indentation, not a break, so it takes a row of its own rather than being
-// swallowed the way the whitespace at a break is.
 func TestLeadingWhitespaceKeepsItsRoom(t *testing.T) {
 	frame := (&Input{buffer: &buffer{runes: []rune("    one")}}).Frame(3)
 	want := []string{"   ", "one"}
@@ -146,8 +141,6 @@ func TestLeadingWhitespaceKeepsItsRoom(t *testing.T) {
 	}
 }
 
-// A word too wide for a row starts one of its own before it is cut, so the break falls between
-// words wherever there is one to fall between.
 func TestAnOverlongWordStartsItsOwnRow(t *testing.T) {
 	frame := (&Input{buffer: &buffer{runes: []rune("one abcdef")}}).Frame(5)
 	want := []string{"one", "abcde", "f"}
@@ -181,8 +174,6 @@ func lines(count int) *Input {
 	return self
 }
 
-// Both counts stand above zero at once where the cursor has text on either side of it, so neither
-// edge may be worked out from the other.
 func TestWhatIsOutOfSightIsCountedAtBothEdges(t *testing.T) {
 	self := lines(maxRows * 3)
 
@@ -227,7 +218,6 @@ func TestATallLineIsCutToTheTallestTheInputMayDraw(t *testing.T) {
 	}
 }
 
-// Scrolling is only worth anything if what is being typed is among what is drawn.
 func TestTheCursorStaysWithinTheRowsDrawn(t *testing.T) {
 	self := lines(maxRows * 3)
 
@@ -243,7 +233,6 @@ func TestTheCursorStaysWithinTheRowsDrawn(t *testing.T) {
 	}
 }
 
-// The end of a long line is where the typing is, so that is what the window shows.
 func TestTheEndOfATallLineIsWhatIsDrawn(t *testing.T) {
 	frame := lines(maxRows + 2).Frame(80)
 	rows, cursorRow := frame.Rows, frame.Row
@@ -257,7 +246,6 @@ func TestTheEndOfATallLineIsWhatIsDrawn(t *testing.T) {
 	}
 }
 
-// Moving to the top of a long line scrolls it back, rather than leaving the cursor off the window.
 func TestTheStartOfATallLineIsDrawnWhenTheCursorIsThere(t *testing.T) {
 	self := lines(maxRows * 2)
 
@@ -273,8 +261,6 @@ func TestTheStartOfATallLineIsDrawnWhenTheCursorIsThere(t *testing.T) {
 	}
 }
 
-// A character wider than the line cannot be made to fit, so the row it is on is the row it stays
-// on, and the cursor never sits past the edge.
 func TestACharacterWiderThanTheLineStaysWhereItIs(t *testing.T) {
 	rows, cursorRow, cursorColumn := layout(&buffer{runes: []rune("日"), cursor: 1}, 1)
 
@@ -287,8 +273,6 @@ func TestACharacterWiderThanTheLineStaysWhereItIs(t *testing.T) {
 	}
 }
 
-// Ctrl+x names no mode on its own: the letter after it does, and the pair leaves the line where it
-// was. What becomes of the swap is the harness's business.
 func TestThePrefixAndALetterAskForOneSwap(t *testing.T) {
 	for letter, want := range map[rune]Action{'w': Write, 'g': Git, 'b': Background} {
 		self := NewInput(nil)
@@ -309,8 +293,6 @@ func TestThePrefixAndALetterAskForOneSwap(t *testing.T) {
 	}
 }
 
-// A letter that names no mode is a slip, and a slip that typed a letter into the line would be a
-// worse answer than one that did nothing at all.
 func TestALetterNamingNoModeIsSwallowed(t *testing.T) {
 	self := NewInput(nil)
 
@@ -331,8 +313,6 @@ func TestALetterNamingNoModeIsSwallowed(t *testing.T) {
 	}
 }
 
-// Ctrl+d asks for the turn to stop while one is running, and what has been typed has no say in
-// that: a line half written is the next thing to send, not a reason to keep waiting on this one.
 func TestControlDStopsARunningTurnWhateverIsTyped(t *testing.T) {
 	keypress := key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
 
@@ -349,9 +329,6 @@ func TestControlDStopsARunningTurnWhateverIsTyped(t *testing.T) {
 	}
 }
 
-// With nothing running there is no turn to stop, and ctrl+d is the way out of an empty line. A line
-// with something on it is neither, so nothing is what it comes to: a key that stops a turn one
-// moment and takes a character out of a word the next is one nobody presses in a hurry.
 func TestControlDAtRestLeavesOnlyFromAnEmptyLine(t *testing.T) {
 	keypress := key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
 

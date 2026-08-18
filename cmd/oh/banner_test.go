@@ -46,8 +46,6 @@ func TestTheBottomRuleKeepsTheBannerBeforeItsScrollMarker(t *testing.T) {
 	}
 }
 
-// What access is on offer comes from what the tools say of themselves, since a world names its
-// tools whatever it likes and a name is no account of what one does.
 func TestAccessComesFromTheToolsRatherThanTheirNames(t *testing.T) {
 	looker := tool.ReadOnly(tool.Define(
 		"peek", "", tool.Schema{},
@@ -61,7 +59,6 @@ func TestAccessComesFromTheToolsRatherThanTheirNames(t *testing.T) {
 	}
 }
 
-// Running a command is its own kind of access, and is not implied by a tool that writes.
 func TestTheShellIsShownSeparatelyFromWriting(t *testing.T) {
 	writer := tool.Define(
 		"poke", "", tool.Schema{},
@@ -75,7 +72,6 @@ func TestTheShellIsShownSeparatelyFromWriting(t *testing.T) {
 	}
 }
 
-// A shell granted nowhere to write changes nothing, so it must not light the writing letter.
 func TestAReadOnlyShellDoesNotOfferWriting(t *testing.T) {
 	processes := sandbox.NewProcesses(false)
 	defer func() { _, _ = processes.Disable() }()
@@ -93,8 +89,6 @@ func TestAReadOnlyShellDoesNotOfferWriting(t *testing.T) {
 	}
 }
 
-// Whether a repository's own history may be changed is the mode's to say rather than any tool's:
-// the tools report what they may do to a file in the workspace and nothing at all about .git.
 func TestTheHistoryLetterComesFromTheMode(t *testing.T) {
 	looker := tool.ReadOnly(tool.Define(
 		"peek", "", tool.Schema{},
@@ -122,8 +116,6 @@ func TestTheBackgroundLetterComesFromTheMode(t *testing.T) {
 	}
 }
 
-// A prefix that changed nothing on the screen would be a prefix nobody could tell they had pressed,
-// so every letter is underlined while one waits on the key that names what it does.
 func TestAWaitingPrefixUnderlinesEveryLetter(t *testing.T) {
 	looker := tool.ReadOnly(tool.Define(
 		"peek", "", tool.Schema{},
@@ -142,8 +134,6 @@ func TestAWaitingPrefixUnderlinesEveryLetter(t *testing.T) {
 	}
 }
 
-// The rule is a row of the input as far as the screen is concerned, so a rule that measures wider
-// than the terminal would wrap and take the input's rows down with it.
 func TestTheRuleIsExactlyAsWideAsTheScreen(t *testing.T) {
 	for _, width := range []int{0, 1, 40, 100} {
 		for _, label := range []string{"", "gpt ⠶ 6 tools ⠶ io", strings.Repeat("wide", 40)} {
@@ -162,7 +152,6 @@ func TestTheLabelSitsAtTheRightHandEndOfTheRule(t *testing.T) {
 	}
 }
 
-// A rule carrying a label at either end is still exactly as wide as the screen.
 func TestARuleWithBothLabelsIsExactlyAsWideAsTheScreen(t *testing.T) {
 	for _, width := range []int{0, 1, 20, 40, 100} {
 		if got := theme.Width(rule(width, "↑ 12", "gpt ⠶ io")); got != width {
@@ -171,7 +160,6 @@ func TestARuleWithBothLabelsIsExactlyAsWideAsTheScreen(t *testing.T) {
 	}
 }
 
-// The right-hand label says what the harness is, so the left is the one to go when both cannot fit.
 func TestTheLeftLabelIsDroppedFirst(t *testing.T) {
 	ruleText := rule(18, "↑ 12", "gpt ⠶ io")
 
@@ -184,7 +172,6 @@ func TestTheLeftLabelIsDroppedFirst(t *testing.T) {
 	}
 }
 
-// A label with no room for it is dropped rather than pushing the rule wider than the screen.
 func TestALabelTooWideForTheScreenIsDropped(t *testing.T) {
 	if ruleText := rule(5, "", "far too long"); strings.Contains(ruleText, "far") {
 		t.Errorf("expected the label to be dropped, got %q", ruleText)

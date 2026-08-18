@@ -9,8 +9,6 @@ import (
 	"crdx.org/io/cmd/oh/theme"
 )
 
-// A finished turn leaves its final line terminated, rather than leaving the terminal cursor parked
-// directly after its last character.
 func TestAFinishedTurnEndsWithANewline(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -25,7 +23,6 @@ func TestAFinishedTurnEndsWithANewline(t *testing.T) {
 	}
 }
 
-// The line a finished turn came down to is started by whatever goes on it next, and started once.
 func TestTheNextThingSaidStartsTheLineTheTurnCameDownTo(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -69,8 +66,6 @@ func TestEndingATurnThatSaidNothingComesDownNowhere(t *testing.T) {
 	}
 }
 
-// A line asked to stand apart is set off from what came before it and from what comes after, which
-// is one empty line either side and not two between it and the next.
 func TestALineAskedToStandApartIsSetOffOnBothSides(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -87,8 +82,6 @@ func TestALineAskedToStandApartIsSetOffOnBothSides(t *testing.T) {
 	}
 }
 
-// An empty line stands between two things said, so the first thing said has nothing to stand apart
-// from and starts where it would have anyway.
 func TestNothingIsSetOffFromNothing(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -117,8 +110,6 @@ func TestAskingForTheSameEmptyLineTwiceLeavesOne(t *testing.T) {
 	}
 }
 
-// What the model says stands apart from what it did to find it out, and arrives in as many pieces
-// as it likes: the answer is one thing, not one per delta.
 func TestAnAnswerIsSetApartHoweverManyPiecesItArrivesIn(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -141,7 +132,6 @@ func TestAnAnswerIsSetApartHoweverManyPiecesItArrivesIn(t *testing.T) {
 	}
 }
 
-// Rows follow one another without a gap: they are one thing said between them, not a row each.
 func TestLinesThatAreNotAnswersRunTogether(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -156,8 +146,6 @@ func TestLinesThatAreNotAnswersRunTogether(t *testing.T) {
 	}
 }
 
-// A model that ends its reply on a newline has written the line that ends it, and one more empty
-// line is the gap: two would be the gap and a blank row nobody asked for.
 func TestAnAnswerEndingInNewlinesIsNotPushedFurtherApart(t *testing.T) {
 	for _, trailingNewlines := range []string{"", "\n", "\n\n", "\n\n\n"} {
 		var screenOutput bytes.Buffer
@@ -177,7 +165,6 @@ func TestAnAnswerEndingInNewlinesIsNotPushedFurtherApart(t *testing.T) {
 	}
 }
 
-// A reply that opens on newlines opens on nothing, and is put where it was going anyway.
 func TestAnAnswerOpeningOnNewlinesIsNotPushedFurtherApart(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -192,7 +179,6 @@ func TestAnAnswerOpeningOnNewlinesIsNotPushedFurtherApart(t *testing.T) {
 	}
 }
 
-// A blank row in the middle of a reply is the model's own paragraph, and stays.
 func TestAnAnswerKeepsTheBlankRowsInsideIt(t *testing.T) {
 	var screenOutput bytes.Buffer
 

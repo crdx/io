@@ -8,9 +8,6 @@ import (
 	"crdx.org/io/internal/sim"
 )
 
-// Every scenario that ships is read here, since one that no longer parses is otherwise only found
-// out about by whoever reaches for it, and the arguments of a call are checked as the JSON they
-// are handed to a tool as, which is the part of a scenario easiest to get quietly wrong.
 func TestEveryScenarioThatShipsCanBeRead(t *testing.T) {
 	paths, err := filepath.Glob("scenarios/*.toml")
 	if err != nil {

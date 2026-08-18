@@ -168,8 +168,6 @@ func TestAPathInTheDetailCanBeFocused(t *testing.T) {
 	}
 }
 
-// A call gets a while to finish before its row says it is still going, so a block that finishes
-// quickly fills in without a spinner ever appearing on it.
 func TestARowSaysNothingOfACallUntilItHasBeenGoingAWhile(t *testing.T) {
 	block, output := testBlock()
 
@@ -180,8 +178,6 @@ func TestARowSaysNothingOfACallUntilItHasBeenGoingAWhile(t *testing.T) {
 	}
 }
 
-// A row is coloured by what its call may do, so a call that changes something is apart from one
-// that only looks before either has finished.
 func TestARowIsColouredByWhetherItsCallWrites(t *testing.T) {
 	block, output := testBlock()
 
@@ -192,9 +188,6 @@ func TestARowIsColouredByWhetherItsCallWrites(t *testing.T) {
 	}
 }
 
-// A call that came back before there was any waiting to speak of says only that it is done. A time
-// against every row of a block that filled in at once is a number standing where nothing needs
-// saying.
 func TestAQuickCallIsMarkedWithoutATime(t *testing.T) {
 	block, output := testBlock()
 
@@ -238,8 +231,6 @@ func TestACallThatFailedIsMarkedApartFromOneThatDidNot(t *testing.T) {
 	}
 }
 
-// A cross says a call failed and nothing else, so what it said for itself is put beside it. A
-// failure the model was told about and the person was not is a row that looks like a typo.
 func TestACallThatFailedSaysWhy(t *testing.T) {
 	block, output := testBlock()
 
@@ -253,8 +244,6 @@ func TestACallThatFailedSaysWhy(t *testing.T) {
 	}
 }
 
-// A reason arrives as whatever the tool wrote, which may be a paragraph. A row is drawn where the
-// last one left off, so a newline in it would take the whole block apart.
 func TestAReasonIsPutOnTheOneRow(t *testing.T) {
 	block, output := testBlock()
 
@@ -268,8 +257,6 @@ func TestAReasonIsPutOnTheOneRow(t *testing.T) {
 	}
 }
 
-// A short call leaves most of the row unused, and a reason that fits in what is left is worth more
-// there than the blank would be.
 func TestAReasonTakesTheRoomTheCallDoesNotWant(t *testing.T) {
 	block, output := testBlock()
 
@@ -285,7 +272,6 @@ func TestAReasonTakesTheRoomTheCallDoesNotWant(t *testing.T) {
 	}
 }
 
-// The call is what the row is about, so a reason long enough to bury it is cut down to size first.
 func TestALongReasonLeavesTheCallItIsAbout(t *testing.T) {
 	block, output := testBlock()
 
@@ -305,7 +291,6 @@ func TestALongReasonLeavesTheCallItIsAbout(t *testing.T) {
 	}
 }
 
-// Nothing to say is nothing said: a call that worked carries no reason, and neither does the row.
 func TestAReasonIsKeptOnlyForAFailure(t *testing.T) {
 	block, output := testBlock()
 
@@ -319,8 +304,6 @@ func TestAReasonIsKeptOnlyForAFailure(t *testing.T) {
 	}
 }
 
-// A block closed while calls are still running says so on their rows, rather than leaving them
-// looking like calls still going when nothing is.
 func TestClosingTheBlockMarksWhateverWasStillRunning(t *testing.T) {
 	block, output := testBlock()
 
@@ -342,8 +325,6 @@ func TestClosingTheBlockMarksWhateverWasStillRunning(t *testing.T) {
 	}
 }
 
-// A row is settled by the first thing said about it, so closing a block whose calls have all
-// reported cannot write over what they reported.
 func TestARowIsMarkedOnlyOnce(t *testing.T) {
 	block, output := testBlock()
 
@@ -358,8 +339,6 @@ func TestARowIsMarkedOnlyOnce(t *testing.T) {
 	}
 }
 
-// A label that would push the outcome off the screen gives way to it, since a row running past the
-// width takes every row under it down with it.
 func TestALabelIsCutToLeaveRoomForTheOutcome(t *testing.T) {
 	block, output := testBlock()
 
@@ -375,8 +354,6 @@ func TestALabelIsCutToLeaveRoomForTheOutcome(t *testing.T) {
 	}
 }
 
-// Room kept back for a time that is never shown is room the label could have had, so a call that
-// finished too quickly to be timed gives it back, bar the mark and the uncertain terminal edge.
 func TestALabelTakesTheRoomATimeWouldHaveTakenWhereNoTimeIsShown(t *testing.T) {
 	block, output := testBlock()
 
@@ -395,8 +372,6 @@ func TestALabelTakesTheRoomATimeWouldHaveTakenWhereNoTimeIsShown(t *testing.T) {
 	}
 }
 
-// The label gives room back the moment the time appears beside it, rather than the row growing past
-// the guarded width and taking every row under it down with it.
 func TestALabelGivesRoomBackWhenTheTimeAppears(t *testing.T) {
 	block, output := testBlock()
 
@@ -415,8 +390,6 @@ func TestALabelGivesRoomBackWhenTheTimeAppears(t *testing.T) {
 	}
 }
 
-// Some terminals draw the symbols in a cut, completed row wider than the width tables say. The
-// uncertain cells are taken from the label rather than letting the right edge eat the duration.
 func TestACompletedOutcomeIsKeptBackFromTheTerminalEdge(t *testing.T) {
 	block, output := testBlock()
 	block.columns = 67
@@ -435,7 +408,6 @@ func TestACompletedOutcomeIsKeptBackFromTheTerminalEdge(t *testing.T) {
 	}
 }
 
-// Every form the time takes, none of them wider than the column kept for it.
 func TestFormatDuration(t *testing.T) {
 	for want, took := range map[string]time.Duration{
 		"0.0s":   0,

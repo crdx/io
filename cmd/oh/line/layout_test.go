@@ -16,9 +16,6 @@ var layouts = []string{
 	"\n\nabc\n\n",
 }
 
-// Every prefix of every text, at every room and with the cursor at every position in it, has to
-// come out drawable: no row wider than the room it was given, no cursor off the rows it belongs
-// to, and no row led by the whitespace a break should have eaten.
 func TestEveryLayoutIsDrawable(t *testing.T) {
 	forEachLayout(t, func(t *testing.T, rows []string, cursorRow int, cursorColumn int, room int) {
 		t.Helper()
@@ -43,8 +40,6 @@ func TestEveryLayoutIsDrawable(t *testing.T) {
 	})
 }
 
-// Walking the cursor forward through the text has to walk it forward through the rows as well, so
-// that no keypress moving right ever draws it further left.
 func TestTheCursorNeverGoesBackwards(t *testing.T) {
 	for _, text := range layouts {
 		runes := []rune(text)

@@ -97,8 +97,6 @@ func TestTheScenarioIsPlayedOneTurnPerRequest(t *testing.T) {
 	}
 }
 
-// The endpoint holds the conversation to the rule the real one holds it to: a call the client never
-// answered fails the next request, whatever else is in it.
 func TestACallWithNoOutputIsRefused(t *testing.T) {
 	_, url := serve(t, conversation)
 
@@ -149,9 +147,6 @@ func TestACallWithNoOutputIsRefused(t *testing.T) {
 	}
 }
 
-// A turn dropped while a call was in flight leaves that call unanswered unless something answers
-// it, and the endpoint refuses the next request if nothing did. This is that whole path at once:
-// the agent, the provider's conversation, and the endpoint's own rules.
 func TestATurnDroppedMidCallDoesNotSpoilTheNext(t *testing.T) {
 	_, url := serve(t, conversation)
 

@@ -137,8 +137,6 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 	}
 }
 
-// Calling the work research only makes sense where nothing can be changed, so a writable workspace
-// is not told to treat its tasks that way.
 func TestTheResearchNoteIsOnlyMadeWhileTheWorkspaceIsReadOnly(t *testing.T) {
 	const note = "consider any task you're given to be a research task"
 
@@ -151,8 +149,6 @@ func TestTheResearchNoteIsOnlyMadeWhileTheWorkspaceIsReadOnly(t *testing.T) {
 	}
 }
 
-// The scratch mapping is read out to the user rather than given to a tool, so it is written the way
-// they would say it themselves.
 func TestTheScratchMappingIsWrittenWithATilde(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 

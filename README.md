@@ -48,9 +48,9 @@ answer, _ := assistant.Send(ctx, "what is the weather in London?")
 fmt.Println(answer) // => "It's probably raining."
 ```
 
-`Send` blocks until the turn is over. Cancelling the context ends the request the turn is waiting on, which is the only part of a turn that can be interrupted: a tool that has started cannot be stopped, and is waited for.
+`Send` blocks until the turn is over. Cancelling the context ends the request the turn is waiting on.
 
-`Stream` is the same turn, an event at a time.
+`Stream` is the same turn, but an event at a time.
 
 ```go
 for event, err := range assistant.Stream(ctx, "what is the weather in London?") {

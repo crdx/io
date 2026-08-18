@@ -32,8 +32,6 @@ func main() {
 
 const columns = 80
 
-// The renderer holds nothing between calls, so an answer arriving a byte at a time is drawn from
-// what it says so far and nothing else. Only the last drawing can differ from the whole.
 func TestAnAnswerDrawnADeltaAtATimeIsTheAnswerDrawnAtOnce(t *testing.T) {
 	var last []string
 
@@ -52,8 +50,6 @@ func TestAnAnswerDrawnADeltaAtATimeIsTheAnswerDrawnAtOnce(t *testing.T) {
 	}
 }
 
-// Every frame works out the columns from every row parsed so far, so a table widens as its rows
-// arrive rather than being frozen by whatever was known when its first row came in.
 func TestATableWidensAsItsRowsArrive(t *testing.T) {
 	short := Render("| a | b |\n|---|---|\n| x | y |\n", columns)
 	long := Render("| a | b |\n|---|---|\n| x | y |\n| a much wider cell | y |\n", columns)
@@ -69,8 +65,6 @@ func TestATableWidensAsItsRowsArrive(t *testing.T) {
 	}
 }
 
-// Too narrow for one cell per column, a table is abandoned and said as its rows of text, which is
-// at least readable where broken borders are not.
 func TestATableTooNarrowForItsColumnsIsAbandoned(t *testing.T) {
 	source := "| a | b |\n|---|---|\n| x | y |"
 
@@ -99,8 +93,6 @@ func TestAnUnclosedFenceIsStillCode(t *testing.T) {
 	}
 }
 
-// A delimiter is only a delimiter once something closes it, so an answer cut off partway through a
-// bold run never shows its punctuation and then takes it away again.
 func TestAnUnclosedDelimiterIsLiteral(t *testing.T) {
 	for text, want := range map[string]string{
 		"**bold":         "**bold",
@@ -145,8 +137,6 @@ func TestTheBlocksAreDrawnWithoutTheirPunctuation(t *testing.T) {
 	}
 }
 
-// A line opening on the fence characters with anything after them is content. Closing on it drops
-// the rest of the answer, which is the worst thing a renderer can do to one.
 func TestAFenceIsClosedOnlyByALineThatIsAFence(t *testing.T) {
 	got := theme.Plain(strings.Join(Render("```\none\n```go still open\ntwo\n```\nafter", columns), "\n"))
 
@@ -157,8 +147,6 @@ func TestAFenceIsClosedOnlyByALineThatIsAFence(t *testing.T) {
 	}
 }
 
-// A style inside another is off from its own reset onwards unless the one outside it is opened
-// again, so a bold run with anything styled inside it stops being bold partway through.
 func TestAStyleInsideAnotherKeepsTheOneOutsideIt(t *testing.T) {
 	got := Render("**one `two` three**", columns)[0]
 
@@ -175,8 +163,6 @@ func TestATableHeadingIsDrawnAsMarkdownRatherThanShown(t *testing.T) {
 	}
 }
 
-// Highlighting is chroma's reading of the code and the theme's palette, and nothing of chroma's
-// own: a language it has no lexer for is drawn in the one colour code is drawn in.
 func TestCodeIsHighlightedWhereTheLanguageIsKnown(t *testing.T) {
 	known := Render("```go\nfunc main() {}\n```", columns)
 	unknown := Render("```nosuchlanguage\nfunc main() {}\n```", columns)
@@ -203,8 +189,6 @@ func TestOnlyTheBashExecutableIsHighlighted(t *testing.T) {
 	}
 }
 
-// A code block indented past the width has nothing to indent it by, and a row wider than the
-// terminal is drawn over the edge of it.
 func TestNoBlockOverrunsANarrowTerminal(t *testing.T) {
 	blocks := []string{
 		"```\nabc\n```", "> quoted", "# heading", "- item", "| a | b |\n|---|---|\n| x | y |",

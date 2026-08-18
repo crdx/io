@@ -21,7 +21,6 @@ var prompts = []string{
 	"rename the harness to oh",
 }
 
-// TestPick is the rig's session picker, over a directory of made-up conversations.
 func TestPick(t *testing.T) {
 	if os.Getenv("RIG") == "" {
 		t.Skip("set RIG to drive the picker")

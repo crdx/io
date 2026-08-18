@@ -11,8 +11,6 @@ import (
 	"crdx.org/io/session"
 )
 
-// A file carried out of the directory it was written in still says which session it is, rather than
-// leaving its name the only record of that.
 func TestTheHeadCarriesTheSessionID(t *testing.T) {
 	directory := t.TempDir()
 

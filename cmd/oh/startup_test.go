@@ -8,8 +8,6 @@ import (
 	"crdx.org/io/cmd/oh/theme"
 )
 
-// A startup is measured in milliseconds, which the conversation's own duration format rounds away
-// to nothing.
 func TestTookReportsTheScaleAStartupHappensOn(t *testing.T) {
 	for elapsed, want := range map[time.Duration]string{
 		400 * time.Microsecond:  "400µs",

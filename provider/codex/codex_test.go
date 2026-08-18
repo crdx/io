@@ -290,7 +290,6 @@ func TestStreamStopsWhenTheCallerDoes(t *testing.T) {
 	}
 }
 
-// A thought reaches the caller once it is whole, and is not mistaken for the answer.
 func TestStreamReportsReasoningApartFromTheAnswer(t *testing.T) {
 	server, bodies := turns(
 		t,
@@ -448,9 +447,6 @@ func TestSendTellsTheModelWhenThereIsNoSuchTool(t *testing.T) {
 	}
 }
 
-// A request that has been made and is producing nothing is the one thing a turn cannot be talked
-// out of: the flag a harness sets is only read between events, and no event is coming. Cancelling
-// the context ends the request itself, which is what makes the escape key work.
 func TestCancellingTheContextEndsARequestThatIsProducingNothing(t *testing.T) {
 	requestDone := make(chan struct{})
 

@@ -84,9 +84,6 @@ func TestASequenceIsNotABareEscape(t *testing.T) {
 	}
 }
 
-// A terminal that has not taken up the keyboard protocol sends SS3 for the arrows once it is in
-// application cursor key mode. Read as far as the bracket only, its final letter would arrive as a
-// typed character and land in the line.
 func TestApplicationCursorKeysAreArrows(t *testing.T) {
 	for input, want := range map[string]Code{
 		"\x1bOA": Up,
@@ -109,8 +106,6 @@ func TestApplicationCursorKeysAreArrows(t *testing.T) {
 	}
 }
 
-// Only the control characters that stand for a letter are reported as one. A null is ctrl and
-// space, and reporting it as a backtick is reporting a key that was not pressed.
 func TestOnlyTheLetterControlsCarryALetter(t *testing.T) {
 	if got := plain(0); got.Code != Unknown {
 		t.Errorf("plain(0) = %+v, want unknown", got)

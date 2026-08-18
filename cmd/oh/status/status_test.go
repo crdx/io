@@ -54,8 +54,6 @@ func TestALabelWithNothingQualifyingItIsUnaffected(t *testing.T) {
 	}
 }
 
-// A row has to stay on the line it was printed on, so a label is cut to the cells it has rather
-// than the characters, and a two-cell character that would straddle the end is left out whole.
 func TestALabelIsCutToTheCellsItHasRatherThanTheCharacters(t *testing.T) {
 	elidedLabel := status.Label{Name: "read", Args: "日本語です"}.Elide(11)
 

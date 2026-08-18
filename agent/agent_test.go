@@ -59,8 +59,6 @@ func resultOutputs(provider *callProvider) []string {
 	return outputs
 }
 
-// A turn dropped partway still answers every call the model made, because the next request carries
-// the whole conversation and the endpoint rejects a call with no result.
 func TestStreamAnswersEveryCallOfAnAbandonedTurn(t *testing.T) {
 	tests := map[string]agent.Kind{
 		"dropped while streaming text": agent.Text,
@@ -91,9 +89,6 @@ func TestStreamAnswersEveryCallOfAnAbandonedTurn(t *testing.T) {
 	}
 }
 
-// Every call is away before the first of them reports, so a turn dropped once they are running is
-// answered with what they came back with. Saying they were cancelled would be telling the model
-// something untrue about work it is about to be shown.
 func TestStreamAnswersWithWhateverRanBeforeTheTurnWasDropped(t *testing.T) {
 	provider := &callProvider{}
 	assistant := agent.New("", provider, []tool.Tool{noop()})
@@ -114,8 +109,6 @@ func TestStreamAnswersWithWhateverRanBeforeTheTurnWasDropped(t *testing.T) {
 	}
 }
 
-// Both calls are in flight at once, or neither gets past the barrier. Run one after the other, the
-// first would wait on a release that only the second can bring about, and every call times out.
 func TestStreamRunsEveryCallOfAReplyAtOnce(t *testing.T) {
 	var arrivalBarrier sync.WaitGroup
 
@@ -156,8 +149,6 @@ func TestStreamRunsEveryCallOfAReplyAtOnce(t *testing.T) {
 	}
 }
 
-// A tool that says nothing about running alongside others is left on its own, so a call that writes
-// can never be in flight beside one that reads the same thing.
 func TestStreamLeavesACallThatIsNotConcurrentOnItsOwn(t *testing.T) {
 	var mutex sync.Mutex
 
@@ -196,8 +187,6 @@ func TestStreamLeavesACallThatIsNotConcurrentOnItsOwn(t *testing.T) {
 	}
 }
 
-// What a call took is measured where it is run, so it is the tool's own time rather than however
-// long a display took to notice, and it is written down with the result it belongs to.
 func TestAResultSaysHowLongItsCallTook(t *testing.T) {
 	const slept = 50 * time.Millisecond
 
@@ -279,9 +268,6 @@ func failingTool() tool.Tool {
 	)
 }
 
-// A command that came back with something other than nought is marked as having failed, or the tick
-// against it says a thing that did not happen. What it printed is the result all the same, so the
-// model is handed that rather than only the reason.
 func TestACallThatFailedWithSomethingToSaySaysItAndIsMarkedFailed(t *testing.T) {
 	provider := &oneCallProvider{}
 	assistant := agent.New("", provider, []tool.Tool{failingTool()})
@@ -323,7 +309,6 @@ func (self *notingProvider) Send(context.Context, agent.Yield) (agent.Reply, err
 	return agent.Reply{}, nil
 }
 
-// A note is read before whatever is asked next, and is not a turn of its own.
 func TestANoteGoesAheadOfTheNextPrompt(t *testing.T) {
 	provider := &notingProvider{}
 	self := agent.New("", provider, nil)

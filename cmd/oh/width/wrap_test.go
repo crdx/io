@@ -28,8 +28,6 @@ func TestWrappingBreaksAtSpacesAndMidWordWhereThereAreNone(t *testing.T) {
 	}
 }
 
-// A row that ends inside a run of colour ends with the colour put back, and the row after it opens
-// with the colour again, or the terminal paints the rest of the screen with it.
 func TestAStyleThatSpansABreakIsClosedAndOpenedAgain(t *testing.T) {
 	got := Wrap("\x1b[1mbold words here\x1b[0m", 10)
 

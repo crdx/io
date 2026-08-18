@@ -66,7 +66,6 @@ func TestReleasingAnUnusedConversationErasesEveryWrappedRow(t *testing.T) {
 	}
 }
 
-// The input initially reuses the cursor's row.
 func TestTheInputTakesNoRowOfItsOwnUntilSomethingHasBeenSaid(t *testing.T) {
 	screenOutput := &strings.Builder{}
 
@@ -93,7 +92,6 @@ func TestTheInputTakesNoRowOfItsOwnUntilSomethingHasBeenSaid(t *testing.T) {
 	}
 }
 
-// Concurrent spinner drawing must not displace the input cursor.
 func TestWritingToTheConversationPutsTheInputBackWithTheCursorInIt(t *testing.T) {
 	screen, screenOutput := screenWithInput()
 
@@ -125,7 +123,6 @@ func TestTheInputIsTakenOffTheScreenBeforeTheConversationIsWrittenTo(t *testing.
 	}
 }
 
-// Absolute positions become stale when output scrolls.
 func TestNothingIsDrawnAtAPlaceTheScreenCanScrollAwayFrom(t *testing.T) {
 	screen, screenOutput := screenWithInput()
 
@@ -158,7 +155,6 @@ func TestAnInputOfSeveralRowsIsTakenOffAndPutBackWhole(t *testing.T) {
 	}
 }
 
-// Reset must discard stale input coordinates before clearing.
 func TestResettingClearsTheScreenWithoutErasingFromAStaleRecord(t *testing.T) {
 	screen, screenOutput := screenWithInput()
 	screen.openedRows = 2

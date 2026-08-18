@@ -9,8 +9,6 @@ import (
 	"crdx.org/io/cmd/oh/output"
 )
 
-// Escape means "stop the current turn". At rest there is no cancellation function to call, so
-// pressing it must be harmless rather than a nil-function panic.
 func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 	self := &conversation{screen: output.New(&bytes.Buffer{})}
 	input := line.NewInput(nil)
@@ -26,8 +24,6 @@ func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 	}
 }
 
-// Ctrl+d on an empty line is the way out, and a turn in progress is the thing it stops first: a
-// harness that exited from under a turn would leave what the turn had said unstored.
 func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 	self := &conversation{screen: output.New(&bytes.Buffer{})}
 	input := line.NewInput(nil)
@@ -59,8 +55,6 @@ func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 	}
 }
 
-// What has been typed is not what ctrl+d is about while a turn is running: a turn is stopped by the
-// key that stops turns, whether or not the next thing to say is already half written.
 func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
 	self := &conversation{screen: output.New(&bytes.Buffer{})}
 	input := line.NewInput(nil)

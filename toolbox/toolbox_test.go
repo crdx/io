@@ -83,8 +83,6 @@ func TestEveryToolIsBuiltByDefault(t *testing.T) {
 	}
 }
 
-// Every tool is built whatever the tree allows, so the list the provider is told about is the same
-// list all the way through a conversation.
 func TestEveryToolIsBuiltEvenOverATreeThatCannotBeChanged(t *testing.T) {
 	built := names(t, false)
 

@@ -23,8 +23,6 @@ func TestFormatTokenEstimateUsesFourBytesPerToken(t *testing.T) {
 	}
 }
 
-// Only nothing reads as nothing, so a handful is said exactly and everything above it rounds to at
-// least a hundred rather than away to zero.
 func TestFormatEstimatedTokenCountRoundsSubKiloValuesToNearestHundred(t *testing.T) {
 	for tokens, want := range map[int64]string{
 		0:    "0t",

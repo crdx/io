@@ -12,8 +12,6 @@ func region() (*Output, *strings.Builder) {
 	return &Output{writer: screenOutput, terminal: true, columns: 40, lines: 24}, screenOutput
 }
 
-// A delta usually changes the last row and nothing else, so that is all that is painted again. The
-// cost of a long answer is one row per delta rather than the whole of it.
 func TestOnlyTheRowsThatChangedArePaintedAgain(t *testing.T) {
 	screen, screenOutput := region()
 
@@ -65,9 +63,6 @@ func TestARowRewrittenHigherUpIsReachedByMovingBackToIt(t *testing.T) {
 	}
 }
 
-// A terminal cannot move the cursor into its history, so a difference above what the screen still
-// holds is not a repair anyone can make. Saying so is the whole of the answer: the caller clears
-// and says the conversation again.
 func TestADifferenceAboveTheScreenIsReportedRatherThanRepaired(t *testing.T) {
 	screen, _ := region()
 
@@ -92,8 +87,6 @@ func TestADifferenceAboveTheScreenIsReportedRatherThanRepaired(t *testing.T) {
 	}
 }
 
-// The region is the turn in progress and nothing else. Anything written outside it ends it, so what
-// follows starts on a row of its own rather than over the top of the answer.
 func TestWritingOutsideTheRegionEndsIt(t *testing.T) {
 	screen, _ := region()
 
@@ -111,9 +104,6 @@ func TestWritingOutsideTheRegionEndsIt(t *testing.T) {
 	}
 }
 
-// A row is only settled once nothing further can change it, and markdown offers no such row: the
-// third character of a fence turns the two before it from text into a block. With no terminal to
-// take a row back with, the answer is written once it is whole.
 func TestWithoutATerminalTheAnswerIsWrittenOnceItIsWhole(t *testing.T) {
 	screenOutput := &strings.Builder{}
 
@@ -133,8 +123,6 @@ func TestWithoutATerminalTheAnswerIsWrittenOnceItIsWhole(t *testing.T) {
 	}
 }
 
-// Markdown may become shorter as a delimiter arrives. Rows still on screen are removed in place
-// rather than making the caller clear and replay the conversation.
 func TestFewerRowsThanBeforeAreRepaired(t *testing.T) {
 	screen, screenOutput := region()
 
@@ -150,8 +138,6 @@ func TestFewerRowsThanBeforeAreRepaired(t *testing.T) {
 	}
 }
 
-// The third character of a fence takes the two before it off the screen. The open region keeps an
-// empty row for whatever the fence says next.
 func TestAFrameWithNoRowsErasesWhatWasDrawn(t *testing.T) {
 	screen, screenOutput := region()
 

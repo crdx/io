@@ -16,7 +16,6 @@ import (
 	"crdx.org/io/toolbox/bash"
 )
 
-// TestMain makes the test binary its own sandbox stub, as any program offering the tool must.
 func TestMain(m *testing.M) {
 	sandbox.Init()
 	os.Exit(m.Run())
@@ -130,8 +129,6 @@ func TestAFailureCarriesItsExitStatus(t *testing.T) {
 	}
 }
 
-// A denial reads as an ordinary permission error, which a model will otherwise work around by
-// trying the same thing another way.
 func TestADenialIsExplained(t *testing.T) {
 	root, directory := testRoot(t)
 
@@ -158,8 +155,6 @@ func TestAnOrdinaryFailureIsNotBlamedOnTheSandbox(t *testing.T) {
 	}
 }
 
-// A display draws a call on a row it has measured, so anything that would move the cursor off that
-// row, or be measured as narrower than it draws, must not reach it.
 func TestACommandIsRenderedOnOneLine(t *testing.T) {
 	for name, command := range map[string]string{
 		"newline":        "echo one\necho two",
@@ -259,8 +254,6 @@ func TestAWorkspaceWithoutARepositoryIsLeftAsItIs(t *testing.T) {
 	}
 }
 
-// A working tree is worth what its history is worth, so ProtectedPolicy lets a command read a
-// repository and change nothing in it. Asking for that is the caller's to do.
 func TestARepositoryCannotBeClobbered(t *testing.T) {
 	root, directory := testRoot(t)
 	metadata := repository(t, directory)
@@ -294,8 +287,6 @@ func TestARepositoryCannotBeClobbered(t *testing.T) {
 	}
 }
 
-// The shell holds nothing back on its own account, so a caller that wants a repository protected
-// says so with ProtectedPolicy rather than trusting the tool to know.
 func TestAPolicyIsPassedThroughAsItIs(t *testing.T) {
 	root, directory := testRoot(t)
 	metadata := repository(t, directory)
@@ -330,7 +321,6 @@ func TestAPolicyIsPassedThroughAsItIs(t *testing.T) {
 	}
 }
 
-// One command may be anything at all, so it is never safe to run alongside another.
 func TestTheToolIsNeverConcurrent(t *testing.T) {
 	root, directory := testRoot(t)
 
@@ -339,8 +329,6 @@ func TestTheToolIsNeverConcurrent(t *testing.T) {
 	}
 }
 
-// What a shell may do is the caller's to say and may change between one command and the next, so
-// the tool asks afresh rather than answering from anything it is called.
 func TestTheToolAsksWhetherItChangesAnythingEachTime(t *testing.T) {
 	root, directory := testRoot(t)
 
@@ -365,8 +353,6 @@ func TestTheToolAsksWhetherItChangesAnythingEachTime(t *testing.T) {
 	}
 }
 
-// A stopped turn takes the command down with it, rather than leaving the caller to wait out a sleep
-// nobody wants any more.
 func TestACancelledContextStopsTheCommand(t *testing.T) {
 	root, directory := testRoot(t)
 
@@ -397,8 +383,6 @@ func TestACancelledContextStopsTheCommand(t *testing.T) {
 
 func allowAll(string) error { return nil }
 
-// What a command may reach is asked afresh each time, so a caller may change it between one command
-// and the next without building the tool again.
 func TestThePolicyIsAskedForEveryCommand(t *testing.T) {
 	root, directory := testRoot(t)
 

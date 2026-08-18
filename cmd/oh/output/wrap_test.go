@@ -5,9 +5,6 @@ import (
 	"testing"
 )
 
-// The terminal is told not to wrap, so the conversation is broken up here. A two-cell character
-// counted as one would put a cell more on the row than there is room for, and the terminal would
-// drop it at the margin.
 func TestTheConversationWrapsByCellsRatherThanCharacters(t *testing.T) {
 	screen := &Output{writer: &strings.Builder{}, terminal: true, columns: 5}
 
@@ -28,9 +25,6 @@ func TestAnEscapeSequenceTakesNoRoomOnTheRow(t *testing.T) {
 	}
 }
 
-// A character wider than the terminal cannot be made to fit, so opening a row for it only wastes
-// the row. What matters is that the column never claims to be past the edge, because everything
-// that comes after is measured against the room left on the line.
 func TestACharacterWiderThanTheTerminalStaysWhereItIs(t *testing.T) {
 	screen := &Output{writer: &strings.Builder{}, terminal: true, columns: 1}
 

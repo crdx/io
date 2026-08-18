@@ -76,7 +76,6 @@ func TestMakingDirectoriesIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
 	}
 }
 
-// The answer is asked for afresh, so a tree may be closed and opened again while the harness runs.
 func TestWhetherTheTreeMayBeChangedIsAskedForEveryCall(t *testing.T) {
 	writable := true
 	root, _ := testRoot(t, &writable)
@@ -98,7 +97,6 @@ func TestWhetherTheTreeMayBeChangedIsAskedForEveryCall(t *testing.T) {
 	}
 }
 
-// Reading is never withheld, whatever the tree allows.
 func TestReadingGoesThroughWhileTheTreeIsReadOnly(t *testing.T) {
 	writable := false
 	root, directory := testRoot(t, &writable)
@@ -161,8 +159,6 @@ func openRoot(t *testing.T) (*os.Root, string) {
 	return root, directory
 }
 
-// The rule is asked about the path, not merely about the tree, so it may turn one name away and let
-// the next through.
 func TestARefusalNamesThePathItWasAskedAbout(t *testing.T) {
 	root, directory := openRoot(t)
 
@@ -190,7 +186,6 @@ func TestARefusalNamesThePathItWasAskedAbout(t *testing.T) {
 	}
 }
 
-// A symlink does not give a refused place an allowed second name.
 func TestARefusalAppliesAfterFollowingSymlinks(t *testing.T) {
 	root, directory := openRoot(t)
 
@@ -217,8 +212,6 @@ func TestARefusalAppliesAfterFollowingSymlinks(t *testing.T) {
 	}
 }
 
-// A directory is asked about under its own name, so a write that would make one on the way into a
-// refused place is turned away before it starts.
 func TestMakingADirectoryIsAskedAboutItsOwnName(t *testing.T) {
 	root, directory := openRoot(t)
 
@@ -233,8 +226,6 @@ func TestMakingADirectoryIsAskedAboutItsOwnName(t *testing.T) {
 	}
 }
 
-// What is refused is a path component rather than a substring, so a name merely ending in .git, or
-// beginning with it, is nobody's history and is left alone.
 func TestRefuseGitDir(t *testing.T) {
 	for _, name := range []string{".git", ".git/config", "a/.git/config", "./.git/HEAD"} {
 		if err := file.RefuseGitDir(name); !errors.Is(err, file.ErrGitDir) {

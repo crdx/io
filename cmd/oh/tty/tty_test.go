@@ -19,8 +19,6 @@ func TestNothingButAFileCanBeATerminal(t *testing.T) {
 	}
 }
 
-// Raw writes the protocol to the screen, so a screen that is not the terminal would send it
-// somewhere the terminal never hears, and leave the escapes in whatever it was redirected to.
 func TestRawRefusesAScreenThatIsNotATerminal(t *testing.T) {
 	var screen bytes.Buffer
 

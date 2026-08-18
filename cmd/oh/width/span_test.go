@@ -2,8 +2,6 @@ package width
 
 import "testing"
 
-// The table is searched, not scanned, so a span out of order or overlapping its neighbour is a
-// character silently measured wrong.
 func TestTheSpansAreOrderedAndSeparate(t *testing.T) {
 	for index := range spans {
 		if spans[index].first > spans[index].last {
@@ -16,8 +14,6 @@ func TestTheSpansAreOrderedAndSeparate(t *testing.T) {
 	}
 }
 
-// An emoji that is drawn as one without being asked to takes two cells, and one that needs a
-// variation selector takes one until it gets it.
 func TestTheEmojiDrawnWithoutAskingTakeTwoCells(t *testing.T) {
 	for value, want := range map[rune]int{
 		'⭐': 2,

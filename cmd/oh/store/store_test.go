@@ -134,7 +134,6 @@ func TestTheMetaCanIncludeTheGeneratedSessionID(t *testing.T) {
 	}
 }
 
-// Fixed-width base-62 UUIDv7 IDs sort by creation time.
 func TestASessionIsNamedWithATimeOrderedID(t *testing.T) {
 	directory := t.TempDir()
 
@@ -157,8 +156,6 @@ func TestASessionIsNamedWithATimeOrderedID(t *testing.T) {
 	}
 }
 
-// A harness opened and closed again without a word said is no session, and a directory of empty
-// files nothing was ever asked in is a picker full of nothing to resume.
 func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 	directory := t.TempDir()
 
@@ -189,8 +186,6 @@ func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 	}
 }
 
-// The head is written by whatever line reaches the file first, so a session opened by its first
-// event is still a session that starts with what it was started as.
 func TestTheFirstThingSaidTakesTheHeadWithIt(t *testing.T) {
 	directory := t.TempDir()
 
@@ -225,8 +220,6 @@ func TestTheFirstThingSaidTakesTheHeadWithIt(t *testing.T) {
 	}
 }
 
-// The picker says how much was said in a session, which is what was asked and what came back. The
-// thinking and the tool calls in between are the working out, and are no part of the count.
 func TestMessagesCountsWhatWasSaidAndNotTheWorkingOut(t *testing.T) {
 	directory := t.TempDir()
 
@@ -240,7 +233,6 @@ func TestMessagesCountsWhatWasSaidAndNotTheWorkingOut(t *testing.T) {
 	}
 }
 
-// A conversation carries on in the file it was stored in, so resuming twice is still one session.
 func TestAnOpenedSessionKeepsWhatWasThereBefore(t *testing.T) {
 	directory := t.TempDir()
 	id := write(t, directory)
@@ -268,7 +260,6 @@ func TestAnOpenedSessionKeepsWhatWasThereBefore(t *testing.T) {
 	}
 }
 
-// A session killed partway through a line is a session up to the line before it.
 func TestAHalfWrittenLineEndsTheSession(t *testing.T) {
 	directory := t.TempDir()
 	id := write(t, directory)
@@ -308,8 +299,6 @@ func TestListReadsTheNewestFirst(t *testing.T) {
 	}
 }
 
-// The file name carries the time the session was created and nothing else, so the conversation
-// added to most recently has to reach the top on its own account.
 func TestListPutsTheSessionTouchedLastAtTheTop(t *testing.T) {
 	directory := t.TempDir()
 

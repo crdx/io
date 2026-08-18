@@ -31,8 +31,6 @@ func TestEveryWayOfAbandoningTheChoice(t *testing.T) {
 	}
 }
 
-// An unrecognised sequence is a function key as far as the decoder is concerned, and pressing one
-// should not throw the choice away.
 func TestAnUnrecognisedSequenceChangesNothing(t *testing.T) {
 	if got := pickerState().apply(key.Key{Code: key.Unknown}); got != continuePicking {
 		t.Errorf("expected nothing to happen, got %v", got)

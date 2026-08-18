@@ -95,9 +95,6 @@ func failingTool(name string) tool.Tool {
 	)
 }
 
-// TestVisual is the rig's whole show over a made-up model: the sticky line at the bottom, the
-// spinner, thoughts, a streamed reply, a row per tool call with its mark, and what escape does to
-// all of it while it runs.
 func TestVisual(t *testing.T) {
 	if os.Getenv("RIG") == "" {
 		t.Skip("set RIG to watch it draw")

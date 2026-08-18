@@ -75,8 +75,6 @@ func TestEveryOptionIsRead(t *testing.T) {
 	}
 }
 
-// The version is asked for on its own, so it is read before anything is settled against anything
-// else: a workspace that cannot be opened is no reason to withhold it.
 func TestTheVersionIsAskedForOnItsOwn(t *testing.T) {
 	for _, argument := range []string{"--version", "-V"} {
 		if !bind(t, argument).Version {
@@ -89,8 +87,6 @@ func TestTheVersionIsAskedForOnItsOwn(t *testing.T) {
 	}
 }
 
-// What is left over is what to open the conversation with, so it need not be quoted to be one
-// thing: a shell hands it over a word at a time and it goes back together as it was typed.
 func TestWhateverIsLeftOverIsTheFirstThingSaid(t *testing.T) {
 	parsedOptions := parseOptions(t, "why", "does", "the", "spinner", "stutter")
 
@@ -127,8 +123,6 @@ func TestTheDefaultCapabilitiesReadAndRunButDoNotWrite(t *testing.T) {
 	}
 }
 
-// Capabilities are a set, so the order the letters are written in says nothing, and a letter that
-// names none of them is a typo worth refusing rather than ignoring.
 func TestCapabilitiesAreReadAsTheLettersTheyAreSpelledWith(t *testing.T) {
 	for _, capString := range []string{"rwxgb", "bgxwr", "wxgb"} {
 		currentCaps, err := Caps(capString)
@@ -146,7 +140,6 @@ func TestCapabilitiesAreReadAsTheLettersTheyAreSpelledWith(t *testing.T) {
 	}
 }
 
-// Reading is granted whether it was asked for or not, and is written back either way.
 func TestReadingIsAlwaysGranted(t *testing.T) {
 	grantedCaps, err := Caps("")
 	if err != nil {
@@ -158,8 +151,6 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 	}
 }
 
-// The words are taken from where they are written, so what is pinned here is which state is
-// reported rather than how it is worded.
 func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
 	system := harnessContext("/workspace", "/state/tmps/session", capRead, configuredPaths{})
 
@@ -210,8 +201,6 @@ func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
 	}
 }
 
-// The shell is offered whatever is granted, so a conversation held without it has the same tools as
-// one held with it, and finds out at the call rather than never hearing of the tool at all.
 func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 	workspaceRoot, err := os.OpenRoot(t.TempDir())
 	if err != nil {
@@ -473,8 +462,6 @@ func TestAReadOnlyShellCannotChangeItsHome(t *testing.T) {
 	}
 }
 
-// A commit-only mode grants the metadata and nothing else of the tree, which is what lets a
-// conversation store the work it has done without editing a line of it.
 func TestACommitOnlyShellMayChangeTheHistoryAlone(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()
@@ -531,7 +518,6 @@ func TestEveryExistingRepositoryIsProtectedFromTheShell(t *testing.T) {
 	}
 }
 
-// There is nothing to commit into without a repository, so the mode grants the shell nothing.
 func TestACommitOnlyShellWithNoRepositoryChangesNothing(t *testing.T) {
 	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, capGit)
 	if err != nil {
@@ -543,8 +529,6 @@ func TestACommitOnlyShellWithNoRepositoryChangesNothing(t *testing.T) {
 	}
 }
 
-// What the usage allows to be written and what may be true at once are different things, and these
-// are the second: each of them parses, and none of them means anything.
 func TestArgumentsThatContradictEachOtherAreRefused(t *testing.T) {
 	for name, opts := range map[string]InputOpts{
 		"a picker and a directory":  {Resume: true, WorkspaceDir: "somewhere"},
@@ -556,8 +540,6 @@ func TestArgumentsThatContradictEachOtherAreRefused(t *testing.T) {
 	}
 }
 
-// What is granted is settled each time the harness starts rather than by the session, so picking a
-// stored conversation up under something else is the whole point rather than a contradiction.
 func TestAResumedConversationMayBeGrantedSomethingElse(t *testing.T) {
 	for name, opts := range map[string]InputOpts{
 		"a session and a cap": {Resume: true, Session: "one", Caps: "rx"},
@@ -597,8 +579,6 @@ func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *conve
 	}
 }
 
-// Starting again carries the conversation over by naming it, and asks for the mode it ended up in
-// rather than the one it was started with.
 func TestStartingAgainNamesTheSessionAndKeepsTheMode(t *testing.T) {
 	self := conversationFixture(t, true, capRead|capWrite|capShell)
 
@@ -622,8 +602,6 @@ func TestStartingAgainAsksForWhateverWasSwappedMidConversation(t *testing.T) {
 	}
 }
 
-// A conversation nothing has been said in has no session to carry over, so the workspace is what
-// keeps the new run where this one stood.
 func TestStartingAgainWithNothingStoredKeepsTheWorkspace(t *testing.T) {
 	self := conversationFixture(t, false, capRead|capWrite|capShell)
 

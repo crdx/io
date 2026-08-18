@@ -105,8 +105,6 @@ func TestTheFileKeepsItsMode(t *testing.T) {
 	}
 }
 
-// The refusal is the caller's rule reaching the model through the tool, the tool itself holding no
-// opinion about what a path is worth.
 func TestEditingInsideAGitDirectoryIsRefused(t *testing.T) {
 	root, directory := gitGuardedRoot(t)
 
@@ -167,8 +165,6 @@ func switchableRoot(t *testing.T, writable *bool) (*file.Root, string) {
 	}), directory
 }
 
-// The refusal comes from the tree rather than from the tool, so an edit is turned away without the
-// tool being taken off the model.
 func TestEditingIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
 	writable := false
 	root, directory := switchableRoot(t, &writable)
@@ -189,8 +185,6 @@ func TestEditingIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
 	}
 }
 
-// What the tool says of itself follows the tree, so the harness can show writing as withheld
-// without the tool being taken away.
 func TestTheToolChangesNothingWhileTheTreeIsReadOnly(t *testing.T) {
 	writable := false
 	root, _ := switchableRoot(t, &writable)

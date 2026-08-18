@@ -19,8 +19,6 @@ import (
 	"crdx.org/io/tool/middleware/truncate"
 )
 
-// What was typed is shown in the input, which is drawn over on the way past and is no part of the
-// conversation. Its markdown rendering is said again as a line of its own to put it in scrollback.
 func TestWhatWasAskedIsRenderedIntoTheConversation(t *testing.T) {
 	for _, live := range []bool{true, false} {
 		var screenOutput bytes.Buffer
@@ -48,9 +46,6 @@ func TestASubmittedMessageHasBackgroundRowsAboveAndBelowIt(t *testing.T) {
 	}
 }
 
-// A turn cancelled partway is stored with its calls announced and some of them never answered. The
-// block those calls opened is redrawn on a ticker of its own until it is closed, so a replay that
-// walks away from one leaves it drawing over the conversation that follows.
 func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
 	blocksBefore := blocksStillRunning(t)
 
@@ -91,8 +86,6 @@ func blocksStillRunning(t *testing.T) int {
 	return strings.Count(string(stacks), "status.(*Block).run(")
 }
 
-// A redraw has nothing on the screen to work from, so it says the conversation again from what it
-// kept. What the harness said itself is part of that: it was on the screen, so it comes back.
 func TestReplayingSaysTheWholeConversationAgain(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -156,8 +149,6 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 	}
 }
 
-// A skill is named by the directory it sits in, so every skill is read from a file called the same
-// thing. Standing that name out would say nothing, and the skill's own name is what to look at.
 func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
 	var screenOutput bytes.Buffer
 	callPainter := &painter{screen: output.New(&screenOutput)}
@@ -193,8 +184,6 @@ func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	}
 }
 
-// T30: every durable kind of output takes the same bytes to the screen while it happens and when
-// the transcript is replayed from nothing.
 func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	tools := []tool.Tool{slowTool("read")}
 
@@ -246,8 +235,6 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	}
 }
 
-// A summary arrives as a bold heading with a sentence or two under it, and the harness gives a
-// thought one line, so what was several lines becomes one.
 func TestAThoughtIsFlattenedOntoOneLine(t *testing.T) {
 	tests := map[string]string{
 		"Checking the sky.": "Checking the sky.",
@@ -266,8 +253,6 @@ func TestAThoughtIsFlattenedOntoOneLine(t *testing.T) {
 	}
 }
 
-// How a call is shown is the tool's business and the tool's alone, so what a stored conversation
-// was shown as when it ran is redrawn the way the tool draws it today.
 func TestAStoredCallIsShownTheWayItsToolShowsItNow(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -297,8 +282,6 @@ func TestAStoredCallIsShownTheWayItsToolShowsItNow(t *testing.T) {
 	}
 }
 
-// A tool the conversation outlived cannot say what its call was, so what the call looked like at
-// the time is all there is left to show.
 func TestACallWhoseToolIsGoneKeepsWhatItLookedLike(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -364,8 +347,6 @@ func completeTurn(self *conversation) {
 	self.finish()
 }
 
-// The turn's context is cancelled on the way out of every turn, the ones that ran to the end
-// included, so what the context says is not what the person at the keyboard asked for.
 func TestATurnThatFinishedByItselfIsNotCalledCancelled(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -417,9 +398,6 @@ func TestAShellCallIsDrawnAsAShellPrompt(t *testing.T) {
 	}
 }
 
-// A cancelled turn leaves calls no result ever comes for, and the block holding them is closed when
-// the turn ends. Replaying it has no turn to end, so the next thing asked is what closes it: a
-// block left open would take the calls of every turn after it, and never close at all.
 func TestATurnThatLeftACallUnansweredIsClosedByWhatIsAskedNext(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -441,9 +419,6 @@ func TestATurnThatLeftACallUnansweredIsClosedByWhatIsAskedNext(t *testing.T) {
 	callPainter.close(status.Cancelled) // the block it opened is this test's to shut
 }
 
-// A redraw during a turn opens the block its unanswered calls sit on again, and the turn is given
-// the painter that drew it, so a result still in flight lands on the row it was already on rather
-// than opening a block of its own under the conversation.
 func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 	blocksBefore := blocksStillRunning(t)
 
@@ -484,8 +459,6 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 	}
 }
 
-// The live path and the replay path are one function called with different arguments: an answer
-// arriving in pieces and the same answer replayed from the transcript are the same rows.
 func TestAnAnswerStreamedIsTheSameAsTheAnswerReplayed(t *testing.T) {
 	const answer = "# Findings\n\nThe **first** thing is `read`.\n\n- one\n- two\n"
 
