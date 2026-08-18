@@ -52,7 +52,7 @@ func loadContext(
 		harnessContext(workspace, tmp, currentCaps, paths),
 		globalContext(globalFile),
 		projectContext(projectFiles),
-		skill.Prompt(skills),
+		skill.Context(skills),
 	), files, nil
 }
 

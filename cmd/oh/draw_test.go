@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"path"
 	"runtime"
 	"strings"
 	"testing"
@@ -112,6 +113,63 @@ func TestReplayingSaysTheWholeConversationAgain(t *testing.T) {
 		if !strings.Contains(screenOutput.String(), want) {
 			t.Errorf("expected %q to be drawn again, got %q", want, screenOutput.String())
 		}
+	}
+}
+
+func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
+	const skillPath = "/skills/golang/SKILL.md"
+
+	tests := map[string]struct {
+		tool    string
+		path    string
+		want    string
+		painted string
+	}{
+		"a read of a skill": {
+			tool: "read", path: skillPath,
+			want: "load " + skillPath, painted: theme.Skill("golang"),
+		},
+		"a read of a file": {
+			tool: "read", path: "cmd/oh/draw.go",
+			want: "read cmd/oh/draw.go", painted: theme.Args("draw.go"),
+		},
+		"another tool": {tool: "grep", path: skillPath, want: "grep " + skillPath},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			var screenOutput bytes.Buffer
+			callPainter := &painter{screen: output.New(&screenOutput)}
+
+			callPainter.draw(agent.Event{
+				Kind: agent.Call, ID: "1", Name: test.tool, Render: test.path, Focus: path.Base(test.path),
+			})
+			callPainter.close(status.Done)
+
+			if plain := theme.Plain(screenOutput.String()); !strings.Contains(plain, test.want) {
+				t.Errorf("got %q, want %q", plain, test.want)
+			}
+			if test.painted != "" && !strings.Contains(screenOutput.String(), test.painted) {
+				t.Errorf("got %q, want %q painted", screenOutput.String(), test.painted)
+			}
+		})
+	}
+}
+
+// A skill is named by the directory it sits in, so every skill is read from a file called the same
+// thing. Standing that name out would say nothing, and the skill's own name is what to look at.
+func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
+	var screenOutput bytes.Buffer
+	callPainter := &painter{screen: output.New(&screenOutput)}
+
+	callPainter.draw(agent.Event{
+		Kind: agent.Call, ID: "1", Name: "read",
+		Render: "/skills/golang/SKILL.md", Focus: "SKILL.md",
+	})
+	callPainter.close(status.Done)
+
+	if strings.Contains(screenOutput.String(), theme.Args("SKILL.md")) {
+		t.Errorf("got %q, want the file left dim", screenOutput.String())
 	}
 }
 
@@ -279,7 +337,7 @@ func (quietProvider) Send(context.Context, agent.Yield) (agent.Reply, error) {
 func testConversation(t *testing.T, screenOutput *bytes.Buffer) *conversation {
 	t.Helper()
 
-	log, err := store.Create(t.TempDir(), store.Header{})
+	log, err := store.Create(t.TempDir(), store.Meta{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

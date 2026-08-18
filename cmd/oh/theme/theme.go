@@ -56,6 +56,7 @@ var (
 	Write     Style = hex(gold)                            // writing is on offer
 	Exec      Style = hex(red)                             // running a command is on offer
 	Shell     Style = hex(steel)                           // a shell prompt, matching the command name
+	Skill     Style = hex(mauve)                           // a skill being read
 	History   Style = hex(mauve)                           // changing a repository's own history is on offer
 	Pending   Style = col.Underline                        // waiting on the keypress that follows a prefix
 	Scrolled  Style = hex(lightGrey)                       // how much of the input is out of sight

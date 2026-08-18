@@ -8,9 +8,12 @@ import (
 
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/theme"
 )
+
+const readTool = "read"
 
 type painter struct {
 	screen *output.Output  // where the conversation is drawn
@@ -76,21 +79,35 @@ func (self *painter) draw(event agent.Event) {
 
 		renderedArgs, detail, focus, syntax := self.describe(event)
 
+		// TODO(x): rewrite this mess
 		name := event.Name
 		var nameStyle theme.Style
+		accent := ""
+		var accentStyle theme.Style
+		if event.Name == readTool {
+			if skillName, isSkill := skill.NameFromPath(renderedArgs); isSkill {
+				name = "load"
+				nameStyle = theme.Skill
+				accent = skillName
+				accentStyle = theme.Skill
+				focus = ""
+			}
+		}
 		if event.Name == self.shell {
 			name = "$"
 			nameStyle = theme.Shell
 		}
 
 		self.rows[event.ID] = self.block.Add(status.Label{
-			Name:      name,
-			NameStyle: nameStyle,
-			Args:      renderedArgs,
-			Focus:     focus,
-			Syntax:    syntax,
-			Detail:    detail,
-			ReadOnly:  event.ReadOnly,
+			Name:        name,
+			NameStyle:   nameStyle,
+			Args:        renderedArgs,
+			Focus:       focus,
+			Syntax:      syntax,
+			Detail:      detail,
+			ReadOnly:    event.ReadOnly,
+			Accent:      accent,
+			AccentStyle: accentStyle,
 		})
 
 	case agent.Result:

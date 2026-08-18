@@ -19,6 +19,7 @@ import (
 
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/picker"
+	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/theme"
 )
@@ -179,6 +180,18 @@ func run() ([]string, error) {
 	}
 	defer closeConfiguredRoots(configuredRoots)
 
+	globalSkillDirs := append([]string{configDir("skills")}, settings.Skill.LookupDirectories...)
+	availableSkills, err := skill.Discover(workspacePath, globalSkillDirs, os.Stderr)
+	if err != nil {
+		return nil, err
+	}
+
+	skillRoots, err := skill.MountGlobalSkills(files, availableSkills)
+	if err != nil {
+		return nil, err
+	}
+	defer skill.Close(skillRoots)
+
 	processes := sandbox.NewProcesses(args.caps.has(capBackground))
 	defer func() { _, _ = processes.Disable() }()
 
@@ -238,7 +251,7 @@ func run() ([]string, error) {
 			tmp,
 			args.caps,
 			settings.Sandbox,
-			nil,
+			availableSkills,
 		)
 		if err != nil {
 			return nil, err
@@ -284,10 +297,13 @@ func run() ([]string, error) {
 		chat.restore(resumedSession)
 	}
 
+	projectSkills, globalSkills := skill.Counts(availableSkills)
 	startupElapsed := time.Since(startedAt)
 	startup := startupInfo{
-		contextFiles: contextFiles,
-		toolBytes:    codex.ToolsSize(tools),
+		contextFiles:  contextFiles,
+		projectSkills: projectSkills,
+		globalSkills:  globalSkills,
+		toolBytes:     codex.ToolsSize(tools),
 	}
 	if resumedSession == nil {
 		banner := renderStartupBanner(startupElapsed, false, startup)

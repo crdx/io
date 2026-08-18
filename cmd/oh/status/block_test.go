@@ -65,7 +65,7 @@ func TestMeasuredStatisticsAreShownAfterCalls(t *testing.T) {
 
 func TestStatisticsUseTheirExpectedStyles(t *testing.T) {
 	read := outcomeText("✓", 0, &tool.Statistics{Kind: tool.StatsRead, Lines: 45, Bytes: 951})
-	if want := theme.Detail("45L ~238t"); !strings.Contains(read, want) {
+	if want := theme.Detail("45L ~200t"); !strings.Contains(read, want) {
 		t.Errorf("read statistics got %q, want styled %q", read, want)
 	}
 
@@ -125,6 +125,24 @@ func rowsFromOutput(output *strings.Builder) []string {
 func TestOnlyTheFocusedPartOfArgumentsIsPainted(t *testing.T) {
 	label := Label{Name: "read", Args: "cmd/oh/draw.go", Focus: "draw.go", ReadOnly: true}
 	want := theme.Call("read") + " " + theme.Detail("cmd/oh/") + theme.Args("draw.go")
+
+	if got := label.render(); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestAnAccentAndTheFocusedPartOfArgumentsArePainted(t *testing.T) {
+	label := Label{
+		Name:        "skill",
+		NameStyle:   theme.Skill,
+		Args:        "/skills/guard-basics/SKILL.md",
+		Focus:       "SKILL.md",
+		Accent:      "guard-basics",
+		AccentStyle: theme.Skill,
+	}
+	want := theme.Skill("skill") + " " +
+		theme.Detail("/skills/") + theme.Skill("guard-basics") +
+		theme.Detail("/") + theme.Args("SKILL.md")
 
 	if got := label.render(); got != want {
 		t.Errorf("got %q, want %q", got, want)

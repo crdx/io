@@ -3,6 +3,7 @@ package status
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -36,13 +37,15 @@ const (
 // Label is what a row says: the name of a call, the arguments it was made with, and whatever
 // qualifies those.
 type Label struct {
-	Name      string      // the call name
-	Args      string      // the rendered arguments
-	Focus     string      // the part of the arguments set apart from the rest
-	Syntax    string      // the language the arguments are written in
-	Detail    string      // what qualifies the arguments
-	ReadOnly  bool        // whether the call changes nothing, which decides the colour its name is in
-	NameStyle theme.Style // an explicit style for a tool with its own prompt
+	Name        string      // the call name
+	Args        string      // the rendered arguments
+	Focus       string      // the part of the arguments set apart from the rest
+	Syntax      string      // the language the arguments are written in
+	Detail      string      // what qualifies the arguments
+	ReadOnly    bool        // whether the call changes nothing, which decides the colour its name is in
+	NameStyle   theme.Style // an explicit style for a tool with its own prompt
+	Accent      string      // another part of the arguments set apart from the rest
+	AccentStyle theme.Style // how the accent is painted
 }
 
 // Elide cuts a label to the room it has, so the row stays on the line it was printed on. What
@@ -87,24 +90,38 @@ func (self Label) renderArgs() string {
 		return markdown.Highlight(self.Args, self.Syntax)
 	}
 
-	if self.Focus == "" {
+	type span struct {
+		start int
+		end   int
+		style theme.Style
+	}
+
+	spans := []span{}
+	if at := strings.LastIndex(self.Args, self.Focus); self.Focus != "" && at >= 0 {
+		spans = append(spans, span{start: at, end: at + len(self.Focus), style: theme.Args})
+	}
+	if at := strings.LastIndex(self.Args, self.Accent); self.Accent != "" && self.AccentStyle != nil && at >= 0 {
+		spans = append(spans, span{start: at, end: at + len(self.Accent), style: self.AccentStyle})
+	}
+
+	if len(spans) == 0 {
 		return theme.Args(self.Args)
 	}
 
-	at := strings.LastIndex(self.Args, self.Focus)
-	if at < 0 {
-		return theme.Args(self.Args)
-	}
-
-	end := at + len(self.Focus)
+	sort.Slice(spans, func(i int, j int) bool { return spans[i].start < spans[j].start })
 
 	var out strings.Builder
-	if at > 0 {
-		out.WriteString(theme.Detail(self.Args[:at]))
+	at := 0
+	for _, marked := range spans {
+		if marked.start < at {
+			continue
+		}
+		out.WriteString(theme.Detail(self.Args[at:marked.start]))
+		out.WriteString(marked.style(self.Args[marked.start:marked.end]))
+		at = marked.end
 	}
-	out.WriteString(theme.Args(self.Args[at:end]))
-	if end < len(self.Args) {
-		out.WriteString(theme.Detail(self.Args[end:]))
+	if at < len(self.Args) {
+		out.WriteString(theme.Detail(self.Args[at:]))
 	}
 
 	return out.String()
