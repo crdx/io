@@ -21,7 +21,7 @@ type configuredSettings struct {
 	GetOnWithItMessage string `toml:"get_on_with_it_message"`
 
 	Skill struct {
-		LookupDirs []string `toml:"lookup"`
+		Include []string `toml:"include"`
 	} `toml:"skill"`
 	Sandbox configuredPaths `toml:"sandbox"`
 }
@@ -63,7 +63,7 @@ func loadConfiguredSettings(path string) (configuredSettings, error) {
 		name   string
 		values *[]string
 	}{
-		{"skill.lookup", &settings.Skill.LookupDirs},
+		{"skill.include", &settings.Skill.Include},
 		{"sandbox.read", &settings.Sandbox.Read},
 		{"sandbox.write", &settings.Sandbox.Write},
 		{"sandbox.exec", &settings.Sandbox.Exec},

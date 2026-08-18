@@ -12,7 +12,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	absolute := filepath.Join(t.TempDir(), "skills")
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	contents := "model = \"configured-model\"\neffort = \"low\"\nget_on_with_it_message = \"carry on\"\n[skill]\nlookup = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
+	contents := "model = \"configured-model\"\neffort = \"low\"\nget_on_with_it_message = \"carry on\"\n[skill]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
 	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	if settings.GetOnWithItMessage != "carry on" {
 		t.Errorf("got get-on-with-it message %q", settings.GetOnWithItMessage)
 	}
-	directories := settings.Skill.LookupDirs
+	directories := settings.Skill.Include
 	want := []string{
 		absolute,
 		filepath.Join(configurationDirectory, "shared", "skills"),
@@ -48,7 +48,7 @@ func TestConfiguredSettingsAllowsNoSettingsFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Skill.LookupDirs != nil || settings.Sandbox.Read != nil ||
+	if settings.Skill.Include != nil || settings.Sandbox.Read != nil ||
 		settings.Sandbox.Write != nil || settings.Sandbox.Exec != nil {
 		t.Errorf("got %#v, want no configured paths", settings)
 	}
@@ -59,7 +59,7 @@ func TestConfiguredSettingsAllowsNoSettingsFile(t *testing.T) {
 
 func TestConfiguredSkillDirectoriesRejectsAnEmptyDirectory(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(path, []byte("[skill]\nlookup = [\"\"]\n"), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte("[skill]\ninclude = [\"\"]\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
