@@ -51,8 +51,9 @@ type ToolCall struct {
 
 // ToolResult is what one call handed back.
 type ToolResult struct {
-	ID     string // which call
-	Output string // what the tool returned
+	ID     string     // which call
+	Output string     // what the tool returned
+	Image  tool.Image // visual content the tool returned
 }
 
 // Kind is what an event is. It is a name rather than a number because a conversation is written

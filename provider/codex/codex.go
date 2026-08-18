@@ -4,6 +4,7 @@ package codex
 import (
 	"context"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -91,7 +92,7 @@ func (self *Client) AddToolResults(results []agent.ToolResult) {
 		self.history = append(self.history, encodeItem(toolOutput{
 			Type:   "function_call_output",
 			CallID: result.ID,
-			Output: result.Output,
+			Output: encodeToolOutput(result),
 		}))
 	}
 }
@@ -241,7 +242,41 @@ type userMessage struct {
 type toolOutput struct {
 	Type   string `json:"type"`    // the kind of item
 	CallID string `json:"call_id"` // which call this answers
-	Output string `json:"output"`  // what the tool returned
+	Output any    `json:"output"`  // what the tool returned
+}
+
+type inputContent struct {
+	Type     string `json:"type"`                // the kind of content
+	Text     string `json:"text,omitempty"`      // textual content
+	ImageURL string `json:"image_url,omitempty"` // an inline or remote image
+	Detail   string `json:"detail,omitempty"`    // how closely the model should inspect it
+}
+
+// imageDetail is what the endpoint is asked to look at an image with. Codex names one on every
+// image it returns from a tool, and this is the default it names, so it is what is asked for here.
+const imageDetail = "high"
+
+func encodeToolOutput(result agent.ToolResult) any {
+	if result.Image.MediaType == "" || len(result.Image.Data) == 0 {
+		return result.Output
+	}
+
+	content := make([]inputContent, 0, 2)
+	if result.Output != "" {
+		content = append(content, inputContent{Type: "input_text", Text: result.Output})
+	}
+
+	content = append(content, inputContent{
+		Type: "input_image",
+		ImageURL: fmt.Sprintf(
+			"data:%s;base64,%s",
+			result.Image.MediaType,
+			base64.StdEncoding.EncodeToString(result.Image.Data),
+		),
+		Detail: imageDetail,
+	})
+
+	return content
 }
 
 func newToken() string {

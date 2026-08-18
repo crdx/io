@@ -71,6 +71,8 @@ func (self *cappedCall) Statistics() (tool.Statistics, bool) {
 	return self.statistics, self.measured
 }
 
+func (self *cappedCall) Image() (tool.Image, bool) { return tool.AttachedImage(self.Call) }
+
 func (self *cappedCall) Exec(ctx context.Context) (string, error) {
 	output, err := self.Call.Exec(ctx)
 	cappedOutput, returnedBytes, totalBytes := outputWithSizes(output)

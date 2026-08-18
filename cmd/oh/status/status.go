@@ -424,6 +424,8 @@ func outcomeText(mark string, took time.Duration, stats *tool.Statistics) string
 		))
 	case tool.StatsRead:
 		statsText = theme.Detail(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
+	case tool.StatsImage:
+		statsText = theme.Detail(util.FormatEstimatedTokenCount(stats.EstimatedTokens, 2))
 	case tool.StatsWrite:
 		statsText = theme.Detail(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
 	case tool.StatsDiff:

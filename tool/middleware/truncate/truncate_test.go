@@ -97,6 +97,31 @@ func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
 	}
 }
 
+func TestAnAttachedImagePassesThroughTheOutputCap(t *testing.T) {
+	subject := tool.DefineMeasuredWithImage(
+		"image",
+		"return an image",
+		tool.Schema{},
+		func(Args) (string, string) { return "image", "" },
+		func(context.Context, Args) (string, tool.Image, tool.Statistics, error) {
+			return "image/png image", tool.Image{MediaType: "image/png", Data: []byte{1}}, tool.Statistics{}, nil
+		},
+	)
+
+	call, err := truncate.Tool(subject).Parse(`{}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := call.Exec(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	image, ok := tool.AttachedImage(call)
+	if !ok || image.MediaType != "image/png" || len(image.Data) != 1 {
+		t.Errorf("expected the image to pass through, got %+v and attached=%v", image, ok)
+	}
+}
+
 func TestOutputThatFitsIsLeftAlone(t *testing.T) {
 	output := truncate.Output("hello\n")
 

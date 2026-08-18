@@ -1,6 +1,9 @@
 package read_test
 
 import (
+	"bytes"
+	"image"
+	"image/png"
 	"os"
 	"path/filepath"
 	"strings"
@@ -39,6 +42,65 @@ func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	}
 
 	return call.Exec(t.Context())
+}
+
+func TestAnImageIsAttachedForTheModel(t *testing.T) {
+	content := "\x89PNG\r\n\x1a\n" + strings.Repeat("\x00", 24)
+	root := testRoot(t, "picture.png", content)
+	call, err := read.New(root).Parse(`{"path":"picture.png"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	output, err := call.Exec(t.Context())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if output != "image/png image (32 bytes)" {
+		t.Errorf("expected an image description, got %q", output)
+	}
+
+	image, ok := tool.AttachedImage(call)
+	if !ok {
+		t.Fatal("expected the image to be attached")
+	}
+	if image.MediaType != "image/png" || string(image.Data) != content {
+		t.Errorf("expected the PNG bytes, got %q and %d bytes", image.MediaType, len(image.Data))
+	}
+}
+
+func TestAnImageReportsAnEstimateFromItsDimensions(t *testing.T) {
+	var encoded bytes.Buffer
+	if err := png.Encode(&encoded, image.NewRGBA(image.Rect(0, 0, 64, 33))); err != nil {
+		t.Fatalf("could not encode the test image: %v", err)
+	}
+
+	root := testRoot(t, "picture.png", encoded.String())
+	call, err := read.New(root).Parse(`{"path":"picture.png"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, err := call.Exec(t.Context()); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	stats, ok := tool.Stats(call)
+	if !ok {
+		t.Fatal("expected image statistics")
+	}
+	if stats.Kind != tool.StatsImage || stats.EstimatedTokens != 4 {
+		t.Errorf("expected a four-token image estimate, got %#v", stats)
+	}
+}
+
+func TestAnImageCannotBeReadAsLines(t *testing.T) {
+	content := "\x89PNG\r\n\x1a\n" + strings.Repeat("\x00", 24)
+	root := testRoot(t, "picture.png", content)
+
+	_, err := exec(t, root, `{"path":"picture.png","limit":1}`)
+	if err == nil || err.Error() != "line ranges are not supported for images" {
+		t.Errorf("expected a line range to be refused, got %v", err)
+	}
 }
 
 func TestAFileWithNoRangeComesBackWhole(t *testing.T) {
@@ -85,6 +147,18 @@ func TestALineRangeMeasuresOnlyWhatComesBack(t *testing.T) {
 	}
 	if stats.Lines != 2 || stats.Bytes != int64(len(output)) {
 		t.Errorf("expected 2 lines and %d bytes, got %d lines and %d bytes", len(output), stats.Lines, stats.Bytes)
+	}
+}
+
+func TestALineRangeOfAnEmptyFileIsEmpty(t *testing.T) {
+	root := testRoot(t, "empty.txt", "")
+
+	output, err := exec(t, root, `{"path":"empty.txt","offset":1,"limit":100}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if output != "" {
+		t.Errorf("expected empty output, got %q", output)
 	}
 }
 

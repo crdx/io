@@ -246,7 +246,11 @@ func runBatch(
 				payload, ok = exec(ctx, item.parsedCall)
 			}
 
-			results[index] = ToolResult{ID: item.call.ID, Output: payload}
+			result := ToolResult{ID: item.call.ID, Output: payload}
+			if image, attached := tool.AttachedImage(item.parsedCall); attached {
+				result.Image = image
+			}
+			results[index] = result
 
 			var stats *tool.Statistics
 			if measuredStats, ok := tool.Stats(item.parsedCall); ok {

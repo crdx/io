@@ -52,21 +52,23 @@ type Call interface {
 
 // Statistics are resources consumed by a call, where its tool can measure them.
 type Statistics struct {
-	Kind       string        `json:"kind,omitempty"`
-	CPUTime    time.Duration `json:"cpu_time,omitempty"`
-	PeakMemory uint64        `json:"peak_memory,omitempty"`
-	Lines      int64         `json:"lines,omitempty"`
-	Bytes      int64         `json:"bytes,omitempty"`
-	TotalBytes int64         `json:"total_bytes,omitempty"`
-	Added      int64         `json:"added,omitempty"`
-	Removed    int64         `json:"removed,omitempty"`
-	Truncated  bool          `json:"truncated,omitempty"`
+	Kind            string        `json:"kind,omitempty"`
+	CPUTime         time.Duration `json:"cpu_time,omitempty"`
+	PeakMemory      uint64        `json:"peak_memory,omitempty"`
+	Lines           int64         `json:"lines,omitempty"`
+	Bytes           int64         `json:"bytes,omitempty"`
+	TotalBytes      int64         `json:"total_bytes,omitempty"`
+	EstimatedTokens int64         `json:"estimated_tokens,omitempty"`
+	Added           int64         `json:"added,omitempty"`
+	Removed         int64         `json:"removed,omitempty"`
+	Truncated       bool          `json:"truncated,omitempty"`
 }
 
 // Statistics kinds classify call measurements.
 const (
 	StatsResources = "resources"
 	StatsRead      = "read"
+	StatsImage     = "image"
 	StatsWrite     = "write"
 	StatsDiff      = "diff"
 	StatsSearch    = "search"
@@ -129,6 +131,8 @@ func (self syntaxCall) Syntax() string { return self.language }
 
 func (self syntaxCall) Statistics() (Statistics, bool) { return Stats(self.Call) }
 
+func (self syntaxCall) Image() (Image, bool) { return AttachedImage(self.Call) }
+
 // Focus marks the part of a call rendering a display should set apart.
 func Focus(inner Tool, pick func(Call) string) Tool {
 	return focusedTool{Tool: inner, pick: pick}
@@ -171,6 +175,8 @@ func (self focusedCall) Focus() string { return self.focus }
 
 func (self focusedCall) Statistics() (Statistics, bool) { return Stats(self.Call) }
 
+func (self focusedCall) Image() (Image, bool) { return AttachedImage(self.Call) }
+
 // DefineMeasured builds a tool whose calls report resource statistics.
 func DefineMeasured[T any](
 	name string,
@@ -195,6 +201,37 @@ func DefineMeasured[T any](
 			return &measuredCall{
 				Call: plain,
 				exec: func(ctx context.Context) (string, Statistics, error) {
+					return exec(ctx, args)
+				},
+			}, nil
+		},
+	}
+}
+
+// DefineMeasuredWithImage builds a measured tool whose calls may also return an image.
+func DefineMeasuredWithImage[T any](
+	name string,
+	description string,
+	schema Schema,
+	render func(args T) (string, string),
+	exec func(ctx context.Context, args T) (string, Image, Statistics, error),
+) Tool {
+	return funcTool{
+		name: name, description: description, schema: schema,
+		parse: func(arguments string) (Call, error) {
+			var args T
+			if text := strings.TrimSpace(arguments); text != "" {
+				if err := json.Unmarshal([]byte(text), &args); err != nil {
+					return nil, fmt.Errorf("could not parse the arguments: %w", err)
+				}
+			}
+
+			plain := funcCall{
+				render: func() (string, string) { return render(args) },
+			}
+			return &measuredImageCall{
+				Call: plain,
+				exec: func(ctx context.Context) (string, Image, Statistics, error) {
 					return exec(ctx, args)
 				},
 			}, nil

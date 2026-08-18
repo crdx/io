@@ -145,6 +145,39 @@ func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
 	}
 }
 
+func TestAnImageReturnedByAToolIsSentForTheModelToInspect(t *testing.T) {
+	server, bodies := turns(
+		t,
+		events(call("view", `{}`), completed),
+		events(answer("I can see it."), completed),
+	)
+
+	type nothing struct{}
+	viewTool := tool.DefineMeasuredWithImage(
+		"view",
+		"view an image",
+		tool.Schema{},
+		func(nothing) (string, string) { return "picture.png", "" },
+		func(context.Context, nothing) (string, tool.Image, tool.Statistics, error) {
+			return "image/png image (3 bytes)", tool.Image{
+				MediaType: "image/png",
+				Data:      []byte{1, 2, 3},
+			}, tool.Statistics{}, nil
+		},
+	)
+
+	assistant := newAgent(t, server.URL, []tool.Tool{viewTool})
+	if _, err := assistant.Send(t.Context(), "inspect the image"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	want := `"output":[{"type":"input_text","text":"image/png image (3 bytes)"},` +
+		`{"type":"input_image","image_url":"data:image/png;base64,AQID","detail":"high"}]`
+	if !strings.Contains((*bodies)[1], want) {
+		t.Errorf("expected the tool output to carry an image, got %s", (*bodies)[1])
+	}
+}
+
 func TestToolsAreOfferedInTheResponsesShape(t *testing.T) {
 	server, bodies := turns(t, events(answer("Hello."), completed))
 
