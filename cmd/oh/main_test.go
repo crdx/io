@@ -375,6 +375,9 @@ func TestConfiguredPathsReachTheShellPolicy(t *testing.T) {
 	if !slices.Contains(readWrite.Write, writeDirectory) {
 		t.Errorf("expected %s to be writable, got %v", writeDirectory, readWrite.Write)
 	}
+	if slices.Contains(readWrite.Read, writeDirectory) {
+		t.Errorf("configured write path remained read-only inside its write grant: %v", readWrite.Read)
+	}
 }
 
 func TestCommandsOnThePathMayBeExecuted(t *testing.T) {

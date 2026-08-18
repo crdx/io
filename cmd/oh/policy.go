@@ -109,7 +109,11 @@ func createSandboxPolicy(
 		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir)
 	}
 
-	writablePolicy := policy.WithWrite(writablePathsForPolicy...)
+	writablePolicy := policy
+	if currentCaps.has(capWrite) {
+		writablePolicy = writablePolicy.WithoutRead(extraPaths.Write...)
+	}
+	writablePolicy = writablePolicy.WithWrite(writablePathsForPolicy...)
 
 	if !currentCaps.has(capWrite) {
 		writablePolicy = writablePolicy.WithRead(workspaceDir) // read the tree, change only its .git

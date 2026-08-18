@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -42,6 +43,19 @@ func TestPolicyModifiersDoNotChangeTheSourcePolicy(t *testing.T) {
 	}
 	if source.SetEnv["EXISTING"] != "original" {
 		t.Errorf("environment changed to %v", source.SetEnv)
+	}
+}
+
+func TestWithoutReadRemovesPathsWithoutChangingTheSourcePolicy(t *testing.T) {
+	source := sandbox.Policy{Read: []string{"remove", "keep"}}
+	modified := source.WithoutRead("remove")
+
+	if !slices.Equal(modified.Read, []string{"keep"}) {
+		t.Errorf("got readable paths %v, want only keep", modified.Read)
+	}
+	modified.Read[0] = "changed"
+	if !slices.Equal(source.Read, []string{"remove", "keep"}) {
+		t.Errorf("source readable paths changed to %v", source.Read)
 	}
 }
 

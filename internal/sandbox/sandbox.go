@@ -59,6 +59,14 @@ func (self Policy) WithRead(paths ...string) Policy {
 	return self
 }
 
+// WithoutRead returns a policy without the named readable paths.
+func (self Policy) WithoutRead(paths ...string) Policy {
+	self.Read = slices.DeleteFunc(slices.Clone(self.Read), func(path string) bool {
+		return slices.Contains(paths, path)
+	})
+	return self
+}
+
 // WithWrite returns a policy with additional writable paths.
 func (self Policy) WithWrite(paths ...string) Policy {
 	self.Write = append(slices.Clone(self.Write), paths...)
