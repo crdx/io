@@ -1,6 +1,7 @@
 package main
 
 import (
+	"path/filepath"
 	"strings"
 
 	"crdx.org/io/agent"
@@ -23,8 +24,9 @@ type painter struct {
 	answer strings.Builder // the answer so far, which is rendered again on every delta
 	stale  bool            // whether the answer outgrew what the screen can repair
 
-	tools func(string) (tool.Tool, bool) // the tools a call may be rendered by
-	shell string                         // what the shell tool was named, so a call to it is drawn as a prompt
+	tools        func(string) (tool.Tool, bool) // the tools a call may be rendered by
+	shell        string                         // what the shell tool was named, so a call to it is drawn as a prompt
+	workspaceDir string                         // the prefix omitted from paths inside the workspace
 }
 
 func (self *painter) describe(event agent.Event) (string, string, string, string) {
@@ -41,7 +43,12 @@ func (self *painter) describe(event agent.Event) (string, string, string, string
 					syntax = syntaxCall.Syntax()
 				}
 
-				return parsedCall.Render(), parsedCall.Detail(), focus, syntax
+				rendered := parsedCall.Render()
+				if self.workspaceDir != "" {
+					rendered = strings.TrimPrefix(rendered, self.workspaceDir+string(filepath.Separator))
+				}
+
+				return rendered, parsedCall.Detail(), focus, syntax
 			}
 		}
 	}

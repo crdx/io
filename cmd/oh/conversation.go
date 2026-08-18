@@ -326,7 +326,10 @@ func (self *conversation) restore(storedSession *store.Session) {
 }
 
 func (self *conversation) newPicasso(live bool) *painter {
-	return &painter{screen: self.screen, live: live, tools: self.assistant.Tool, shell: self.shell}
+	return &painter{
+		screen: self.screen, live: live, tools: self.assistant.Tool, shell: self.shell,
+		workspaceDir: self.workspaceDir,
+	}
 }
 
 func (self *conversation) replay() {

@@ -511,3 +511,25 @@ func deltas(text string, count int) []string {
 
 	return pieces
 }
+
+func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
+	const workspaceDir = "/home/alice/project"
+
+	current := tool.FocusPath(slowTool("read"))
+	testConversation := &conversation{
+		assistant:    agent.New("", quietProvider{}, []tool.Tool{current}),
+		workspaceDir: workspaceDir,
+	}
+
+	rendered, detail, focus, syntax := testConversation.newPicasso(false).describe(agent.Event{
+		Name:      "read",
+		Arguments: `{"path":"/home/alice/project/cmd/oh/draw.go"}`,
+	})
+
+	if detail != "" || focus != "draw.go" || syntax != "" {
+		t.Fatalf("unexpected call description %q, %q, %q", detail, focus, syntax)
+	}
+	if rendered != "cmd/oh/draw.go" {
+		t.Errorf("got %q, want the workspace prefix omitted", rendered)
+	}
+}
