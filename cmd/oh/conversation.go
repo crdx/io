@@ -431,12 +431,10 @@ func (self *conversation) finish() {
 	self.screen.End()
 
 	switch {
-	case self.turn.cancelled && self.queuedTurn:
+	case self.turn.cancelled:
 		interruption := agent.Event{Kind: agent.Interrupted}
 		self.record(interruption)
 		self.storeEvents([]agent.Event{interruption})
-	case self.turn.cancelled:
-		self.notify(theme.Stopped("Interrupted"))
 	case self.turn.failure != nil:
 		self.notify(theme.Failure(self.turn.failure.Error()))
 	}

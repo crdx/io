@@ -282,7 +282,46 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	}
 }
 
-func TestEscapeTakesBackAQueuedReplacement(t *testing.T) {
+func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	self := &conversation{
+		assistant: agent.New("", quietProvider{}, nil),
+		screen:    output.New(&bytes.Buffer{}),
+		log:       log,
+		mode:      NewMode(capRead | capWrite),
+	}
+
+	self.start("first")
+	self.interrupt()
+
+	for report := range self.turn.events {
+		self.take(report)
+	}
+	self.finish()
+
+	if err := log.Close(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	storedSession, err := store.Read(directory, log.ID())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	for _, event := range storedSession.Events {
+		if event.Kind == agent.Interrupted {
+			return
+		}
+	}
+
+	t.Error("expected the interruption to be stored in the session log")
+}
+
+func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	history := line.NewHistory("", historyLimit)
@@ -312,8 +351,8 @@ func TestEscapeTakesBackAQueuedReplacement(t *testing.T) {
 		}
 	}
 
-	if !strings.Contains(theme.Plain(screenOutput.String()), "Interrupted") {
-		t.Errorf("expected the notice an interruption without a replacement keeps, got %q", theme.Plain(screenOutput.String()))
+	if strings.Contains(theme.Plain(screenOutput.String()), "Interrupted") {
+		t.Errorf("expected the interruption to stay out of the scrollback, got %q", theme.Plain(screenOutput.String()))
 	}
 }
 

@@ -362,7 +362,7 @@ func TestATurnThatFinishedByItselfIsNotCalledCancelled(t *testing.T) {
 	}
 }
 
-func TestATurnThatWasStoppedSaysSo(t *testing.T) {
+func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
 	var screenOutput bytes.Buffer
 
 	self := testConversation(t, &screenOutput)
@@ -378,8 +378,8 @@ func TestATurnThatWasStoppedSaysSo(t *testing.T) {
 	self.finish()
 
 	plain := theme.Plain(screenOutput.String())
-	if !strings.Contains(plain, "\n\nInterrupted\n") {
-		t.Errorf("expected the interruption to have a line around it, got %q", plain)
+	if strings.Contains(plain, "Interrupted") {
+		t.Errorf("expected the interruption to stay out of the scrollback, got %q", plain)
 	}
 
 	if strings.Contains(screenOutput.String(), "context canceled") { // the stop is why it failed
