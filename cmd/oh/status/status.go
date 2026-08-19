@@ -451,47 +451,79 @@ func outcomeText(mark string, took time.Duration, stats *tool.Stats) string {
 	var statsText string
 	switch stats.Kind {
 	case tool.StatsOutput:
-		if stats.Bytes == 0 && stats.Lines == 0 {
-			statsText = theme.Detail("no output")
-		} else {
-			capMarker := ""
-			if stats.Truncated {
-				capMarker = "+"
-			}
-			statsText = theme.Detail(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
-		}
+		statsText = outputStatsText(stats)
 	case tool.StatsResources:
-		statsText = theme.Detail(fmt.Sprintf(
-			"%dL %s %s %s %dM",
-			stats.Lines,
-			tokenEstimate(stats),
-			util.CompactDuration(took),
-			util.CompactDuration(stats.CPUTime),
-			stats.PeakMemory/bytesPerMegabyte,
-		))
+		statsText = resourcesStatsText(took, stats)
 	case tool.StatsRead:
-		statsText = theme.Detail(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
+		statsText = readStatsText(stats)
 	case tool.StatsList:
-		statsText = theme.Detail(fmt.Sprint(stats.Lines) + "L")
+		statsText = listStatsText(stats)
 	case tool.StatsImage:
-		statsText = theme.Detail(util.FormatEstimatedTokenCount(stats.EstimatedTokens, 2))
+		statsText = imageStatsText(stats)
 	case tool.StatsWrite:
-		statsText = theme.Detail(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
+		statsText = writeStatsText(stats)
 	case tool.StatsDiff:
-		statsText = theme.Success("+%d", stats.Added) +
-			theme.Detail(" ") + theme.Failure("−%d", stats.Removed)
+		statsText = diffStatsText(stats)
 	case tool.StatsSearch:
-		capMarker := ""
-		if stats.Truncated {
-			capMarker = "+"
-		}
-		statsText = theme.Detail(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
+		statsText = searchStatsText(stats)
 	}
 
 	if statsText == "" {
 		return mark
 	}
 	return mark + " " + statsText
+}
+
+func outputStatsText(stats *tool.Stats) string {
+	if stats.Bytes == 0 && stats.Lines == 0 {
+		return theme.Detail("no output")
+	}
+
+	capMarker := ""
+	if stats.Truncated {
+		capMarker = "+"
+	}
+	return theme.Detail(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
+}
+
+func resourcesStatsText(took time.Duration, stats *tool.Stats) string {
+	return theme.Detail(fmt.Sprintf(
+		"%dL %s %s %s %dM",
+		stats.Lines,
+		tokenEstimate(stats),
+		util.CompactDuration(took),
+		util.CompactDuration(stats.CPUTime),
+		stats.PeakMemory/bytesPerMegabyte,
+	))
+}
+
+func readStatsText(stats *tool.Stats) string {
+	return theme.Detail(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
+}
+
+func listStatsText(stats *tool.Stats) string {
+	return theme.Detail(fmt.Sprint(stats.Lines) + "L")
+}
+
+func imageStatsText(stats *tool.Stats) string {
+	return theme.Detail(util.FormatEstimatedTokenCount(stats.EstimatedTokens, 2))
+}
+
+func writeStatsText(stats *tool.Stats) string {
+	return theme.Detail(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
+}
+
+func diffStatsText(stats *tool.Stats) string {
+	return theme.Success("+%d", stats.Added) +
+		theme.Detail(" ") + theme.Failure("−%d", stats.Removed)
+}
+
+func searchStatsText(stats *tool.Stats) string {
+	capMarker := ""
+	if stats.Truncated {
+		capMarker = "+"
+	}
+	return theme.Detail(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
 }
 
 func tokenEstimate(stats *tool.Stats) string {
