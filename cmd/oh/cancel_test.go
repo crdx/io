@@ -92,6 +92,22 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 	t.Error("expected the configured prompt")
 }
 
+func TestAcceptedInputCanImmediatelyBeRecalled(t *testing.T) {
+	self := &conversation{turn: turn{running: true, stop: func() {}}}
+	history := line.NewHistory("", historyLimit)
+	input := line.NewInput(history)
+
+	for _, value := range "latest" {
+		self.apply(input, history, key.Key{Code: key.Rune, Value: value})
+	}
+	self.apply(input, history, key.Key{Code: key.Enter})
+	self.apply(input, history, key.Key{Code: key.Up})
+
+	if input.Text() != "latest" {
+		t.Errorf("expected the latest input to be recalled, got %q", input.Text())
+	}
+}
+
 func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)

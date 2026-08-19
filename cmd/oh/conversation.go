@@ -168,13 +168,12 @@ func (self *conversation) acceptInput(input *line.Input, history *line.History) 
 }
 
 func (self *conversation) submitInput(input *line.Input, history *line.History, message string) {
+	history.Add(message)
 	input.Reset()
 
 	if message == "" {
 		return
 	}
-
-	history.Add(message)
 
 	if self.turn.running {
 		self.replaceTurn(message)
