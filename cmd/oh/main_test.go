@@ -166,7 +166,7 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 }
 
 func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
-	system := harnessContext("/workspace", "/state/tmps/session", capRead, configuredPaths{})
+	system := harnessContext("/workspace", "session-id", "/state/tmps/session", capRead, configuredPaths{})
 
 	if want := "The workspace (/workspace) is " + filesystem(false); !strings.Contains(system, want) {
 		t.Errorf("expected the workspace to be reported as %q, got %q", want, system)
@@ -202,7 +202,7 @@ func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
 		"refused": {capRead, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := harnessContext("/workspace", "/state/tmps/session", test.currentCaps, configuredPaths{})
+			got := harnessContext("/workspace", "session-id", "/state/tmps/session", test.currentCaps, configuredPaths{})
 
 			if want := "The bash tool is " + shellAccess(test.granted); !strings.Contains(got, want) {
 				t.Errorf("expected %q in %q", want, got)

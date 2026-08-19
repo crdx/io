@@ -12,6 +12,7 @@ import (
 var startedAt = time.Now()
 
 type startupInfo struct {
+	sessionID     string
 	contextFiles  []contextFile
 	projectSkills int
 	globalSkills  int
@@ -25,6 +26,9 @@ func renderStartupBanner(elapsed time.Duration, resumed bool, info startupInfo) 
 
 	var line strings.Builder
 	_, _ = line.WriteString(startupDuration(elapsed))
+	if info.sessionID != "" {
+		_, _ = line.WriteString(theme.Subtle(" session=") + theme.Normal(info.sessionID))
+	}
 	for _, file := range info.contextFiles {
 		_, _ = line.WriteString(theme.Subtle(" ") + startupContextFile(file))
 	}

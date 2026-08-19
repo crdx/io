@@ -252,6 +252,7 @@ func run() ([]string, error) {
 		context, contextFiles, err = loadContext(
 			root,
 			workspaceDir,
+			log.ID(),
 			tmpDir,
 			args.caps,
 			settings.Sandbox,
@@ -317,6 +318,7 @@ func run() ([]string, error) {
 	projectSkills, globalSkills := skill.Counts(availableSkills)
 	startupElapsed := time.Since(startedAt)
 	startup := startupInfo{
+		sessionID:     log.ID(),
 		contextFiles:  contextFiles,
 		projectSkills: projectSkills,
 		globalSkills:  globalSkills,

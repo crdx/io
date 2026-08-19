@@ -163,7 +163,3 @@ func linkURL(path string, line string, column string) string {
 
 	return address.String()
 }
-
-func fileURL(path string) string {
-	return linkURL(path, "", "")
-}

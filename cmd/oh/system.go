@@ -28,6 +28,7 @@ type contextFile struct {
 func loadContext(
 	root *os.Root,
 	workspaceDir string,
+	sessionID string,
 	tmpDir string,
 	currentCaps caps,
 	extraPaths configuredPaths,
@@ -49,7 +50,7 @@ func loadContext(
 	}
 
 	return mergeContexts(
-		harnessContext(workspaceDir, tmpDir, currentCaps, extraPaths),
+		harnessContext(workspaceDir, sessionID, tmpDir, currentCaps, extraPaths),
 		globalContext(globalFile),
 		projectContext(projectFiles),
 		skill.Context(skills),
@@ -110,24 +111,26 @@ func globalContext(file *contextFile) string {
 	return file.body
 }
 
-func harnessContext(workspaceDir string, tmpDir string, currentCaps caps, extraPaths configuredPaths) string {
+func harnessContext(workspaceDir string, sessionID string, tmpDir string, currentCaps caps, extraPaths configuredPaths) string {
 	return mergeContexts(
-		scopeSection(workspaceDir, extraPaths, currentCaps),
+		scopeSection(workspaceDir, sessionID, extraPaths, currentCaps),
 		networkSection(),
 		tmpSection(tmpDir),
 		stateSection(workspaceDir, currentCaps),
 	)
 }
 
-func scopeSection(workspaceDir string, extraPaths configuredPaths, currentCaps caps) string {
+func scopeSection(workspaceDir string, sessionID string, extraPaths configuredPaths, currentCaps caps) string {
 	return hereduck.Df(
 		`
 		# Scope
 
 		- Your workspace is the current directory, %s.
+		- Your session ID is %s.
 		%s
 	`,
 		workspaceDir,
+		sessionID,
 		scopeRules(extraPaths, currentCaps),
 	)
 }
