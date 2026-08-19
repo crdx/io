@@ -8,9 +8,16 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/strutil"
 	"crdx.org/io/tool"
+)
+
+const (
+	toolResultPreviewLines = 3
+	toolResultPreviewBytes = 1 << 10
 )
 
 var safeSyntax = regexp.MustCompile(`^[A-Za-z0-9_+.-]+$`)
@@ -94,8 +101,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			writeFence(&output, string(stats), "json")
 		}
 		if event.Text != "" {
-			output.WriteString("**Output**\n\n")
-			writeFence(&output, event.Text, highlightSyntax(event.Highlight))
+			writeToolResultPreview(&output, event.Text, highlightSyntax(event.Highlight))
 		}
 	case agent.StateEvent:
 		writeField(&output, "ID", event.ID)
