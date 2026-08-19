@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"path"
 	"runtime"
 	"strings"
@@ -535,5 +536,35 @@ func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 	}
 	if rendered != "cmd/oh/draw.go" {
 		t.Errorf("got %q, want the workspace prefix omitted", rendered)
+	}
+}
+
+func TestARefusedCallIsDescribedAgainRatherThanFromTheRecord(t *testing.T) {
+	refusing := tool.Implement(
+		tool.Definition{
+			Name:        "shout",
+			Description: "",
+			Schema:      tool.Schema{tool.String("message", "what to shout")},
+		},
+		func(struct{}) (string, string) { return "", "" },
+	).Validate(func(struct{}) error {
+		return errors.New("not in the mood")
+	}).Plain(func(context.Context, struct{}) (string, error) { return "", nil })
+
+	testConversation := &conversation{
+		assistant: agent.New("", quietProvider{}, []tool.Tool{refusing}),
+	}
+
+	rendered, detail, highlight := testConversation.newPicasso(false).describe(agent.Event{
+		Name:      "shout",
+		Arguments: `{"message":"oi"}`,
+		Render:    "", // as a session saved before the call could be described recorded it
+	})
+
+	if detail != "" || highlight != (tool.Highlight{}) {
+		t.Fatalf("unexpected call description %q, %#v", detail, highlight)
+	}
+	if rendered != "oi" {
+		t.Errorf("got %q, want the arguments described again from the record", rendered)
 	}
 }

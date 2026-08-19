@@ -317,6 +317,100 @@ func TestACallThatFailedWithSomethingToSaySaysItAndIsMarkedFailed(t *testing.T) 
 	}
 }
 
+type unparsedCallProvider struct {
+	name      string // the tool called
+	arguments string // what it was called with
+	sent      int    // how many turns were sent
+}
+
+func (self *unparsedCallProvider) Configure(string, []tool.Definition) {}
+func (self *unparsedCallProvider) AddUserMessage(string)               {}
+func (self *unparsedCallProvider) Dump() []json.RawMessage             { return nil }
+func (self *unparsedCallProvider) Load([]json.RawMessage)              {}
+func (self *unparsedCallProvider) AddToolResults([]agent.ToolResult)   {}
+
+func (self *unparsedCallProvider) Send(_ context.Context, _ agent.Yield) (agent.Reply, error) {
+	if self.sent++; self.sent > 1 {
+		return agent.Reply{}, nil
+	}
+
+	return agent.Reply{Calls: []agent.ToolCall{
+		{ID: "a", Name: self.name, Arguments: self.arguments},
+	}}, nil
+}
+
+func unparsedCallRender(t *testing.T, tools []tool.Tool, name string, arguments string) string {
+	t.Helper()
+
+	provider := &unparsedCallProvider{name: name, arguments: arguments}
+	assistant := agent.New("", provider, tools)
+
+	var calls []agent.Event
+
+	for event, err := range assistant.Stream(t.Context(), "go") {
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if event.Kind == agent.Call {
+			calls = append(calls, event)
+		}
+	}
+
+	if len(calls) != 1 {
+		t.Fatalf("expected one call, got %d", len(calls))
+	}
+
+	return calls[0].Render
+}
+
+type shoutArgs struct {
+	Message string `json:"message"`
+	Target  string `json:"target"`
+}
+
+func refusingTool() tool.Tool {
+	return tool.Implement(
+		tool.Definition{
+			Name:        "shout",
+			Description: "",
+			Schema: tool.Schema{
+				tool.String("message", "what to shout"),
+				tool.String("target", "who to shout at"),
+			},
+		},
+		func(shoutArgs) (string, string) { return "", "" },
+	).Validate(func(shoutArgs) error {
+		return errors.New("not in the mood")
+	}).Plain(func(context.Context, shoutArgs) (string, error) { return "", nil })
+}
+
+func TestACallTooMalformedToParseIsStillShownAsItArrived(t *testing.T) {
+	got := unparsedCallRender(t, []tool.Tool{noop()}, "noop", "{not json\nand more besides")
+
+	if got != "{not json" {
+		t.Errorf("expected the arguments as they arrived, cut to one line, got %q", got)
+	}
+}
+
+func TestARefusedCallIsShownAsItsArgumentsInTheOrderTheToolDeclaresThem(t *testing.T) {
+	arguments := `{"target":"you","message":"oi"}`
+	got := unparsedCallRender(t, []tool.Tool{refusingTool()}, "shout", arguments)
+
+	if got != "oi you" {
+		t.Errorf("expected the values in schema order, got %q", got)
+	}
+}
+
+func TestARefusedCallWithNothingToShowFallsBackToItsArguments(t *testing.T) {
+	arguments := `{"message":"   "}`
+	got := unparsedCallRender(t, []tool.Tool{refusingTool()}, "shout", arguments)
+
+	if got != arguments {
+		t.Errorf("expected the raw arguments, got %q", got)
+	}
+}
+
 type notingProvider struct {
 	messages []string // what was added, in the order it was added
 }

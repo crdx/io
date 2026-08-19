@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"crdx.org/io/internal/strutil"
 	"crdx.org/io/tool"
 )
 
@@ -149,7 +150,7 @@ func (self *Agent) answer(results []ToolResult) {
 }
 
 type pendingCall struct {
-	call       ToolCall  // the call as received
+	rawCall    ToolCall  // the call as received
 	parsedCall tool.Call // the call ready to run
 	failure    string    // why parsing failed
 }
@@ -167,7 +168,11 @@ func (self *Agent) runCalls(
 
 	for index, rawCall := range calls {
 		parsedCall, failure := self.parseCall(rawCall)
-		queuedCalls[index] = pendingCall{call: rawCall, parsedCall: parsedCall, failure: failure}
+		queuedCalls[index] = pendingCall{
+			rawCall:    rawCall,
+			parsedCall: parsedCall,
+			failure:    failure,
+		}
 
 		event := Event{
 			Kind:      Call,
@@ -184,6 +189,8 @@ func (self *Agent) runCalls(
 			if highlightedCall, ok := parsedCall.(tool.HighlightedCall); ok {
 				event.Highlight = highlightedCall.Highlight()
 			}
+		} else {
+			event.Render = self.renderUnparsedCall(rawCall)
 		}
 
 		if !yield(event, nil) {
@@ -203,12 +210,12 @@ func (self *Agent) runCalls(
 }
 
 func (self *Agent) batchEnd(queuedCalls []pendingCall, start int) int {
-	if !self.concurrent(queuedCalls[start].call) {
+	if !self.concurrent(queuedCalls[start].rawCall) {
 		return start + 1
 	}
 
 	end := start + 1
-	for end < len(queuedCalls) && self.concurrent(queuedCalls[end].call) {
+	for end < len(queuedCalls) && self.concurrent(queuedCalls[end].rawCall) {
 		end++
 	}
 
@@ -219,6 +226,15 @@ func (self *Agent) concurrent(call ToolCall) bool {
 	calledTool, found := self.tools[call.Name]
 
 	return found && calledTool.Concurrent()
+}
+
+func (self *Agent) renderUnparsedCall(call ToolCall) string {
+	calledTool, found := self.tools[call.Name]
+	if !found {
+		return strutil.FirstLine(call.Arguments)
+	}
+
+	return tool.RenderUnparsedArguments(calledTool, call.Arguments)
 }
 
 func (self *Agent) readOnly(call ToolCall) bool {
@@ -243,7 +259,7 @@ func runBatch(
 				payload, ok = exec(ctx, item.parsedCall)
 			}
 
-			result := ToolResult{ID: item.call.ID, Output: payload}
+			result := ToolResult{ID: item.rawCall.ID, Output: payload}
 			if image, attached := tool.AttachedImage(item.parsedCall); attached {
 				result.Image = image
 			}
@@ -256,8 +272,8 @@ func runBatch(
 
 			done <- Event{
 				Kind:       Result,
-				ID:         item.call.ID,
-				Name:       item.call.Name,
+				ID:         item.rawCall.ID,
+				Name:       item.rawCall.Name,
 				Text:       payload,
 				Failed:     !ok,
 				Took:       time.Since(startedAt),
@@ -306,7 +322,7 @@ func exec(ctx context.Context, call tool.Call) (string, bool) {
 	case err == nil:
 		return output, true
 	case output != "":
-		return output, false // a call that failed with something to say says it, not only why
+		return output, false
 	}
 
 	return err.Error(), false

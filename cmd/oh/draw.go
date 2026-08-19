@@ -31,27 +31,37 @@ type painter struct {
 }
 
 func (self *painter) describe(event agent.Event) (string, string, tool.Highlight) {
-	if self.tools != nil {
-		if calledTool, known := self.tools(event.Name); known {
-			if parsedCall, err := calledTool.Parse(event.Arguments); err == nil {
-				highlight := tool.Highlight{}
-				if highlightedCall, ok := parsedCall.(tool.HighlightedCall); ok {
-					highlight = highlightedCall.Highlight()
-				}
+	calledTool, known := self.calledTool(event.Name)
+	if !known {
+		return event.Render, event.Detail, event.Highlight
+	}
 
-				rendered := parsedCall.Render()
-				if self.workspaceDir != "" {
-					for _, workspaceDir := range []string{self.workspaceDir, pathutil.Shorten(self.workspaceDir)} {
-						rendered = strings.TrimPrefix(rendered, workspaceDir+string(filepath.Separator))
-					}
-				}
+	parsedCall, err := calledTool.Parse(event.Arguments)
+	if err != nil {
+		return tool.RenderUnparsedArguments(calledTool, event.Arguments), event.Detail, event.Highlight
+	}
 
-				return rendered, parsedCall.Detail(), highlight
-			}
+	highlight := tool.Highlight{}
+	if highlightedCall, ok := parsedCall.(tool.HighlightedCall); ok {
+		highlight = highlightedCall.Highlight()
+	}
+
+	rendered := parsedCall.Render()
+	if self.workspaceDir != "" {
+		for _, workspaceDir := range []string{self.workspaceDir, pathutil.Shorten(self.workspaceDir)} {
+			rendered = strings.TrimPrefix(rendered, workspaceDir+string(filepath.Separator))
 		}
 	}
 
-	return event.Render, event.Detail, event.Highlight
+	return rendered, parsedCall.Detail(), highlight
+}
+
+func (self *painter) calledTool(name string) (tool.Tool, bool) {
+	if self.tools == nil {
+		return nil, false
+	}
+
+	return self.tools(name)
 }
 
 func (self *painter) draw(event agent.Event) {

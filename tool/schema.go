@@ -1,6 +1,11 @@
 package tool
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+
+	"crdx.org/io/internal/strutil"
+)
 
 // DataType is the JSON Schema type of one value.
 type DataType string
@@ -88,4 +93,36 @@ func Describe(subject Tool) Definition {
 		Description: subject.Description(),
 		Schema:      subject.Schema(),
 	}
+}
+
+// RenderUnparsedArguments renders arguments where no call could be parsed.
+func RenderUnparsedArguments(subject Tool, arguments string) string {
+	var decoded map[string]json.RawMessage
+	if json.Unmarshal([]byte(arguments), &decoded) != nil {
+		return strutil.FirstLine(arguments)
+	}
+
+	var values []string
+
+	for _, parameter := range subject.Schema() {
+		raw, present := decoded[parameter.Name]
+		if !present {
+			continue
+		}
+
+		var text string
+		if json.Unmarshal(raw, &text) != nil {
+			text = string(raw)
+		}
+
+		if text = strings.TrimSpace(text); text != "" {
+			values = append(values, text)
+		}
+	}
+
+	if len(values) == 0 {
+		return strutil.FirstLine(arguments)
+	}
+
+	return strutil.FirstLine(strings.Join(values, " "))
 }
