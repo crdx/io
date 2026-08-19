@@ -135,7 +135,7 @@ func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, e
 
 	self.history = append(self.history, turn.items...)
 
-	return agent.Reply{Calls: turn.calls()}, nil
+	return agent.Reply{Calls: turn.calls(), Usage: turn.usage}, nil
 }
 
 func (self *Client) post(ctx context.Context, yield agent.Yield) (reply, error) {

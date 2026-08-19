@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"crdx.org/io/cmd/oh/spinner"
@@ -49,9 +50,20 @@ func short(effort string) string {
 }
 
 const (
-	leadingPadding  = 1
-	trailingPadding = 2
+	contextWindowTokens = 274_000
+	leadingPadding      = 1
+	trailingPadding     = 2
 )
+
+func contextUsage(inputTokens int) string {
+	if inputTokens <= 0 {
+		return ""
+	}
+
+	percentage := min(100, (inputTokens*100+contextWindowTokens/2)/contextWindowTokens)
+
+	return theme.Subtle(fmt.Sprintf("%d%%", percentage))
+}
 
 func rule(width int, left string, right string) string {
 	return styledRule(width, left, theme.Scrolled, right, theme.Subtle)

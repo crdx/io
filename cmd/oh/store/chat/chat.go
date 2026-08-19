@@ -102,6 +102,10 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		writeField(&output, "Name", event.Name)
 		output.WriteString("**State**\n\n")
 		writeFence(&output, string(event.State), "json")
+	case agent.ContextUsage:
+		if event.Usage != nil {
+			writeField(&output, "Input tokens", fmt.Sprint(event.Usage.InputTokens))
+		}
 	case agent.Interrupted:
 		output.WriteString("The turn was interrupted.\n\n")
 	}
@@ -150,6 +154,8 @@ func title(kind agent.Kind) string {
 		return "Tool result"
 	case agent.StateEvent:
 		return "State"
+	case agent.ContextUsage:
+		return "Context usage"
 	case agent.Interrupted:
 		return "Interrupted"
 	default:
@@ -165,6 +171,21 @@ func writeField(output *strings.Builder, label, value string) {
 
 func writeBool(output *strings.Builder, label string, value bool) {
 	fmt.Fprintf(output, "- **%s:** `%t`\n", label, value)
+}
+
+func writeToolResultPreview(output *strings.Builder, value, syntax string) {
+	lines := strutil.Lines(value)
+	preview := strings.Join(lines[:min(len(lines), toolResultPreviewLines)], "\n")
+	if len(preview) > toolResultPreviewBytes {
+		end := toolResultPreviewBytes
+		for !utf8.RuneStart(preview[end]) {
+			end--
+		}
+		preview = preview[:end]
+	}
+	output.WriteString("**Output preview (first 3 lines, up to 1 KiB)**\n\n")
+	writeFence(output, preview, syntax)
+	output.WriteString("Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.\n\n")
 }
 
 func writeFence(output *strings.Builder, value, syntax string) {

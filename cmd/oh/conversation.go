@@ -38,9 +38,10 @@ type conversation struct {
 	queuedModeChange   bool     // whether changed capabilities should restart an interrupted turn
 	getOnWithItMessage string   // what an empty double enter sends
 
-	turn        turn    // the turn in progress
-	storedItems int     // how many provider items have been stored
-	transcript  []entry // the conversation as it was drawn, so it can be drawn again
+	turn          turn    // the turn in progress
+	storedItems   int     // how many provider items have been stored
+	contextTokens int     // the input tokens reported for the last completed turn
+	transcript    []entry // the conversation as it was drawn, so it can be drawn again
 }
 
 type entry struct {
@@ -233,9 +234,14 @@ func (self *conversation) show(input *line.Input) {
 	frame := input.Frame(width)
 
 	framedRows := append([]string{rule(width, scrollLabel("↑", frame.Above), "")}, frame.Rows...)
+	inputLabel := self.label(input.Pending(), self.turn.frame, self.turn.running)
+	if usage := contextUsage(self.contextTokens); usage != "" {
+		inputLabel += " " + theme.Subtle("─") + " " + usage
+	}
+
 	framedRows = append(framedRows, bannerRule(
 		width,
-		self.label(input.Pending(), self.turn.frame, self.turn.running),
+		inputLabel,
 		scrollLabel("↓", frame.Below),
 	))
 
@@ -333,6 +339,7 @@ func (self *conversation) restore(storedSession *store.Session) {
 	self.storedItems = len(storedSession.Items)
 
 	for _, event := range storedSession.Events {
+		self.updateContextUsage(event)
 		self.transcript = append(self.transcript, entry{event: event})
 	}
 
@@ -423,6 +430,7 @@ func (self *conversation) take(report turnEvent) {
 }
 
 func (self *conversation) recordEvent(event agent.Event) {
+	self.updateContextUsage(event)
 	self.transcript = appendTranscript(self.transcript, event)
 	self.turn.painter.draw(event)
 
@@ -432,6 +440,12 @@ func (self *conversation) recordEvent(event agent.Event) {
 
 	self.writeSessionEvents(self.turn.pendingEvents.Add(event))
 	self.showStorageWarnings()
+}
+
+func (self *conversation) updateContextUsage(event agent.Event) {
+	if event.Kind == agent.ContextUsage && event.Usage != nil {
+		self.contextTokens = event.Usage.InputTokens
+	}
 }
 
 func appendTranscript(transcript []entry, event agent.Event) []entry {

@@ -26,6 +26,23 @@ func TestTheBannerStartsWithAPermanentActivitySegment(t *testing.T) {
 	}
 }
 
+func TestContextUsageIsAWholePercentageOfTheFixedWindow(t *testing.T) {
+	tests := map[int]string{
+		0:       "",
+		1_370:   "1%",
+		27_400:  "10%",
+		137_000: "50%",
+		274_000: "100%",
+		300_000: "100%",
+	}
+
+	for inputTokens, want := range tests {
+		if got := theme.Plain(contextUsage(inputTokens)); got != want {
+			t.Errorf("contextUsage(%d) = %q, want %q", inputTokens, got, want)
+		}
+	}
+}
+
 func TestTheBannerSitsAtTheLeftOfTheBottomRule(t *testing.T) {
 	got := theme.Plain(bannerRule(40, "⠶ ─ io ─ gpt", "↓ 2"))
 	if !strings.HasPrefix(got, "─ ⠶ ─ io ─ gpt ") {

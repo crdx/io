@@ -7,10 +7,79 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/store/chat"
 )
+
+func TestTranscriptStoresOnlyAToolResultPreview(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "chat.md")
+	recorder, err := chat.Open(path, chat.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{
+		Kind: agent.Result,
+		ID:   "call-1",
+		Name: "read",
+		Text: "first\nsecond\nthird\nsecret fourth\nfifth",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	transcript := string(stored)
+	if !strings.Contains(transcript, "**Output preview (first 3 lines, up to 1 KiB)**\n\n```\nfirst\nsecond\nthird\n```") {
+		t.Errorf("expected a three-line tool result preview, got:\n%s", transcript)
+	}
+	if strings.Contains(transcript, "secret fourth") || strings.Contains(transcript, "fifth") {
+		t.Errorf("expected the full tool result to be omitted, got:\n%s", transcript)
+	}
+	if !strings.Contains(transcript, "[`session.jsonl`](session.jsonl)") || !strings.Contains(transcript, "`event.text`") {
+		t.Errorf("expected a pointer to the complete result, got:\n%s", transcript)
+	}
+}
+
+func TestTranscriptCapsAToolResultPreviewAtOneKiB(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "chat.md")
+	recorder, err := chat.Open(path, chat.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{
+		Kind: agent.Result,
+		ID:   "call-1",
+		Name: "read",
+		Text: strings.Repeat("é", 600),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !utf8.Valid(stored) {
+		t.Error("expected the capped transcript to remain valid UTF-8")
+	}
+	transcript := string(stored)
+	if !strings.Contains(transcript, "\n"+strings.Repeat("é", 512)+"\n```") {
+		t.Errorf("expected a one-KiB tool result preview, got:\n%s", transcript)
+	}
+	if strings.Contains(transcript, strings.Repeat("é", 513)) {
+		t.Errorf("expected the tool result preview to stop at one KiB, got:\n%s", transcript)
+	}
+}
 
 func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "chat.md")

@@ -21,6 +21,7 @@ var ErrTruncated = sse.ErrTruncated
 
 type reply struct {
 	items []json.RawMessage // the response output items
+	usage agent.Usage       // the context used for the request
 }
 
 func (self *reply) calls() []agent.ToolCall {
@@ -64,6 +65,7 @@ type eventPart struct {
 
 type eventResponse struct {
 	Error *eventError `json:"error"` // why the response failed
+	Usage agent.Usage `json:"usage"` // the context used for the request
 }
 
 type eventError struct {
@@ -150,6 +152,9 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		}
 
 	case "response.completed", "response.done":
+		if message.Response != nil {
+			self.usage = message.Response.Usage
+		}
 		return true, nil
 
 	case "response.incomplete":
