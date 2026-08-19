@@ -12,7 +12,7 @@ func TestASearchIsDescribedByItsPatternAndWhatQualifiesIt(t *testing.T) {
 	if pattern != "func New" {
 		t.Errorf("got pattern %q, want the pattern searched for", pattern)
 	}
-	if want := "in internal (*.go)"; detail != want {
+	if want := "internal *.go"; detail != want {
 		t.Errorf("got detail %q, want %q", detail, want)
 	}
 }
@@ -20,7 +20,7 @@ func TestASearchIsDescribedByItsPatternAndWhatQualifiesIt(t *testing.T) {
 func TestASearchBelowHomeIsQualifiedWithATilde(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
-	if _, detail := util.RenderSearch("func New", "/home/alice/proj/io", ""); detail != "in ~/proj/io" {
+	if _, detail := util.RenderSearch("func New", "/home/alice/proj/io", ""); detail != "~/proj/io" {
 		t.Errorf("got detail %q, want the path written with a tilde", detail)
 	}
 }

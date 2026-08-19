@@ -23,7 +23,7 @@ func RenderSearch(pattern string, path string, globPattern string) (string, stri
 	var detail string
 
 	if path != "" && path != "." {
-		detail += "in " + pathutil.Shorten(path)
+		detail = pathutil.Shorten(path)
 	}
 
 	if globPattern != "" {
@@ -31,7 +31,7 @@ func RenderSearch(pattern string, path string, globPattern string) (string, stri
 			detail += " "
 		}
 
-		detail += "(" + globPattern + ")"
+		detail += globPattern
 	}
 
 	return pattern, detail
@@ -39,13 +39,12 @@ func RenderSearch(pattern string, path string, globPattern string) (string, stri
 
 // SearchPath returns the final component of the path in a rendered search call.
 func SearchPath(call tool.Call) string {
-	detail := strings.TrimPrefix(call.Detail(), "in ")
-	if detail == call.Detail() {
+	detail := strings.TrimSpace(call.Detail())
+	if detail == "" {
 		return ""
 	}
 
-	path, _, _ := strings.Cut(detail, " (")
-	return filepath.Base(path)
+	return filepath.Base(detail)
 }
 
 // Walk visits every entry below root within filesystem, skipping symlinks and the unwanted dirs.

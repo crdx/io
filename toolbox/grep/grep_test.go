@@ -240,7 +240,7 @@ func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
 	}
 
 	renderedPattern, detail = grep.Render(grep.Args{Pattern: "hello", Path: "internal", Glob: "*.go"})
-	if renderedPattern != "hello" || detail != "in internal (*.go)" {
+	if renderedPattern != "hello" || detail != "internal *.go" {
 		t.Errorf("expected a path and glob to be named, got %q and %q", renderedPattern, detail)
 	}
 }
