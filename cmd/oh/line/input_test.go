@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"crdx.org/io/cmd/oh/key"
 )
@@ -125,6 +126,33 @@ func TestTwoReturnsOnAnEmptyRunningLineAskToContinue(t *testing.T) {
 		if got := self.Apply(key.Key{Code: key.Enter}, true); got != Continue {
 			t.Errorf("%s: expected the second return to continue, got %v", name, got)
 		}
+	}
+}
+
+func TestDoubleReturnHasACoolOffBeforeItCanContinueAgain(t *testing.T) {
+	now := time.Time{}
+	self := NewInput(nil)
+	self.currentTime = func() time.Time { return now }
+
+	self.Apply(key.Key{Code: key.Enter}, true)
+	if got := self.Apply(key.Key{Code: key.Enter}, true); got != Continue {
+		t.Fatalf("expected the first double return to continue, got %v", got)
+	}
+
+	self.Reset()
+	for range 2 {
+		now = now.Add(continueCoolOff * 9 / 10)
+		if got := self.Apply(key.Key{Code: key.Enter}, true); got != Drawn {
+			t.Errorf("expected a held return to extend the cool-off, got %v", got)
+		}
+	}
+
+	now = now.Add(continueCoolOff)
+	if got := self.Apply(key.Key{Code: key.Enter}, true); got != Drawn {
+		t.Errorf("expected the first return after the cool-off to do nothing, got %v", got)
+	}
+	if got := self.Apply(key.Key{Code: key.Enter}, true); got != Continue {
+		t.Errorf("expected a new double return after the cool-off to continue, got %v", got)
 	}
 }
 

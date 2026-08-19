@@ -2,6 +2,7 @@ package line
 
 import (
 	"strings"
+	"time"
 
 	"crdx.org/io/cmd/oh/key"
 )
@@ -25,19 +26,24 @@ const (
 
 // Input edits a line and walks its history.
 type Input struct {
-	buffer       *buffer  // the line being edited
-	history      *History // the stored entries
-	recall       *recall  // the walk through history
-	pasting      bool     // whether pasted text is arriving
-	pasteStart   int      // where the current paste begins in the buffer
-	prefixed     bool     // whether ctrl+x went before, so the next key names a mode
-	enterPending bool     // whether one enter awaits a second
-	wasRunning   bool     // whether a turn ran when the previous key was applied
+	buffer        *buffer          // the line being edited
+	history       *History         // the stored entries
+	recall        *recall          // the walk through history
+	pasting       bool             // whether pasted text is arriving
+	pasteStart    int              // where the current paste begins in the buffer
+	prefixed      bool             // whether ctrl+x went before, so the next key names a mode
+	enterPending  bool             // whether one enter awaits a second
+	continueAfter time.Time        // when another double enter may continue
+	currentTime   func() time.Time // supplies the time for the continuation cool-off
+	wasRunning    bool             // whether a turn ran when the previous key was applied
 }
 
 // NewInput builds an empty line.
 func NewInput(history *History) *Input {
-	self := &Input{history: history}
+	self := &Input{
+		history:     history,
+		currentTime: time.Now,
+	}
 	self.Reset()
 
 	return self
@@ -170,6 +176,8 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 	return Drawn
 }
 
+const continueCoolOff = time.Second
+
 func (self *Input) enter(keypress key.Key) Action {
 	if keypress.Mod.Has(key.Shift) {
 		self.buffer.Insert([]rune{'\n'})
@@ -180,8 +188,15 @@ func (self *Input) enter(keypress key.Key) Action {
 		return Accept
 	}
 
+	now := self.currentTime()
+	if now.Before(self.continueAfter) {
+		self.continueAfter = now.Add(continueCoolOff)
+		return Drawn
+	}
+
 	if self.enterPending {
 		self.enterPending = false
+		self.continueAfter = now.Add(continueCoolOff)
 		return Continue
 	}
 
