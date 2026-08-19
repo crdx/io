@@ -61,6 +61,10 @@ func TestJournalCarriesMetaEventsAndItems(t *testing.T) {
 	if err := writer.Event(agent.Event{Kind: agent.Prompt, Text: "will it rain?"}); err != nil {
 		t.Fatal(err)
 	}
+	state := json.RawMessage(`{"path":"weather.txt","sha256":"abc"}`)
+	if err := writer.Event(agent.Event{Kind: agent.StateEvent, Name: "file_read", State: state}); err != nil {
+		t.Fatal(err)
+	}
 	if err := writer.Item(json.RawMessage(`{"type":"message"}`)); err != nil {
 		t.Fatal(err)
 	}
@@ -75,8 +79,11 @@ func TestJournalCarriesMetaEventsAndItems(t *testing.T) {
 	if string(storedSession.Meta) != string(meta) {
 		t.Errorf("got meta %s, want %s", storedSession.Meta, meta)
 	}
-	if len(storedSession.Events) != 1 || storedSession.Events[0].Text != "will it rain?" {
+	if len(storedSession.Events) != 2 || storedSession.Events[0].Text != "will it rain?" {
 		t.Errorf("got events %v", storedSession.Events)
+	}
+	if storedState := storedSession.Events[1]; storedState.Kind != agent.StateEvent || string(storedState.State) != string(state) {
+		t.Errorf("got stored state %#v", storedState)
 	}
 	if len(storedSession.Items) != 1 || string(storedSession.Items[0]) != `{"type":"message"}` {
 		t.Errorf("got items %v", storedSession.Items)

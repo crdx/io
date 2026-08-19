@@ -1,7 +1,8 @@
 // Package session stores an agent conversation as an append-only JSON-lines journal.
 //
-// Events are the portable transcript. Items are opaque, append-only provider state: a provider
-// hands them out and takes the same bytes back on resume. Meta belongs to the caller.
+// Events are the portable transcript and durable state transitions. Items are opaque, append-only
+// provider state: a provider hands them out and takes the same bytes back on resume. Meta belongs
+// to the caller.
 package session
 
 import (

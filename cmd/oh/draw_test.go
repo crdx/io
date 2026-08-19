@@ -75,6 +75,33 @@ func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
 	}
 }
 
+func TestRestoringAConversationRestoresStateBeforeReturning(t *testing.T) {
+	var restored string
+	definedTool := tool.Implement(
+		tool.Definition{Name: "stateful", Description: "", Schema: tool.Schema{}},
+		func(struct{}) (string, string) { return "", "" },
+	).Plain(func(context.Context, struct{}) (string, error) { return "", nil })
+	statefulTool := tool.State(definedTool, "test_state", func(state json.RawMessage) error {
+		restored = string(state)
+		return nil
+	})
+
+	var screenOutput bytes.Buffer
+	self := &conversation{
+		assistant: agent.New("", quietProvider{}, []tool.Tool{statefulTool}),
+		screen:    output.New(&screenOutput),
+	}
+	self.restore(&store.Session{Events: []agent.Event{{
+		Kind:  agent.StateEvent,
+		Name:  "test_state",
+		State: json.RawMessage(`{"answer":42}`),
+	}}})
+
+	if restored != `{"answer":42}` {
+		t.Errorf("got restored state %q", restored)
+	}
+}
+
 func blocksStillRunning(t *testing.T) int {
 	t.Helper()
 

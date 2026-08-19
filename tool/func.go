@@ -1,6 +1,9 @@
 package tool
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+)
 
 type funcTool struct {
 	name        string                               // what the tool is called
@@ -14,8 +17,10 @@ func (self funcTool) Description() string { return self.description }
 func (self funcTool) Schema() Schema      { return self.schema }
 func (self funcTool) Concurrent() bool    { return false }
 func (self funcTool) ReadOnly() bool      { return false }
+func (self funcTool) StateKey() string    { return "" }
 
 func (self funcTool) Parse(arguments string) (Call, error) { return self.parse(arguments) }
+func (self funcTool) Restore(json.RawMessage) error        { return nil }
 
 type funcCall struct {
 	render func() (string, string)                   // describes the call

@@ -67,32 +67,35 @@ const (
 	Text        Kind = "text"        // what was answered
 	Call        Kind = "call"        // a tool the model asked for
 	Result      Kind = "result"      // what that tool handed back
+	StateEvent  Kind = "state"       // durable state changed by a successful call
 	Interrupted Kind = "interrupted" // where a replacement prompt stopped a turn
 )
 
-// Event is a thing that happened. The stream of them is the conversation itself, so an event is
-// written down as it stands: one event, one line.
+// Event is a conversation occurrence or durable tool-state transition. The stream of them is the
+// resumable session itself, so an event is written down as it stands: one event, one line.
 //
 // Name and Arguments are what a call was; Render and Detail are only how it looked at the time,
 // kept for a display that no longer has the tool to ask.
 type Event struct {
-	Kind      Kind           `json:"kind"`                // what happened
-	Text      string         `json:"text,omitempty"`      // what was said or thought
-	ID        string         `json:"id,omitempty"`        // which call
-	Name      string         `json:"name,omitempty"`      // which tool
-	Arguments string         `json:"arguments,omitempty"` // what the tool was called with
-	Render    string         `json:"render,omitempty"`    // how the call was shown when it ran
-	Detail    string         `json:"detail,omitempty"`    // what qualified that, for a display to set apart
-	Highlight tool.Highlight `json:"highlight,omitzero"`  // how the rendering is highlighted
-	ReadOnly  bool           `json:"read_only,omitempty"` // whether the tool called changes nothing
-	Failed    bool           `json:"failed,omitempty"`    // whether a call came back with an error rather than a result
-	Took      time.Duration  `json:"took,omitempty"`      // how long a call took to run
-	Stats     *tool.Stats    `json:"stats,omitempty"`     // completion stats for a result
+	Kind      Kind            `json:"kind"`                // what happened
+	Text      string          `json:"text,omitempty"`      // what was said or thought
+	ID        string          `json:"id,omitempty"`        // which call
+	Name      string          `json:"name,omitempty"`      // which tool or state owner
+	Arguments string          `json:"arguments,omitempty"` // what the tool was called with
+	Render    string          `json:"render,omitempty"`    // how the call was shown when it ran
+	Detail    string          `json:"detail,omitempty"`    // what qualified that, for a display to set apart
+	Highlight tool.Highlight  `json:"highlight,omitzero"`  // how the rendering is highlighted
+	ReadOnly  bool            `json:"read_only,omitempty"` // whether the tool called changes nothing
+	Failed    bool            `json:"failed,omitempty"`    // whether a call came back with an error rather than a result
+	Took      time.Duration   `json:"took,omitempty"`      // how long a call took to run
+	Stats     *tool.Stats     `json:"stats,omitempty"`     // completion stats for a result
+	State     json.RawMessage `json:"state,omitempty"`     // an opaque durable tool-state transition
 }
 
 // Agent holds a conversation.
 type Agent struct {
-	provider Provider             // the conversation backend
-	tools    map[string]tool.Tool // the tools by name
-	state    []json.RawMessage    // the append-only state already handed out
+	provider    Provider             // the conversation backend
+	tools       map[string]tool.Tool // the tools by name
+	stateOwners map[string]tool.Tool // the tools by durable state name
+	state       []json.RawMessage    // the append-only provider state already handed out
 }

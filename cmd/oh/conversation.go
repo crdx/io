@@ -322,6 +322,10 @@ func settle(resizeSignals <-chan os.Signal) {
 }
 
 func (self *conversation) restore(storedSession *store.Session) {
+	if err := self.assistant.RestoreState(storedSession.Events); err != nil {
+		self.notify(theme.Failure("the state could not be restored: " + err.Error()))
+		return
+	}
 	if err := self.assistant.Load(storedSession.Items); err != nil {
 		self.notify(theme.Failure("the conversation could not be restored: " + err.Error()))
 		return

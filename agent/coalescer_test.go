@@ -1,7 +1,7 @@
 package agent_test
 
 import (
-	"slices"
+	"reflect"
 	"testing"
 
 	"crdx.org/io/agent"
@@ -20,7 +20,7 @@ func TestCoalescerCanBeDrivenIncrementally(t *testing.T) {
 		{Kind: agent.Text, Text: "one two"},
 		{Kind: agent.Call, Name: "read"},
 	}
-	if !slices.Equal(got, want) {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
-	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -82,7 +82,7 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !slices.Equal(storedSession.Events, conversation) {
+	if !reflect.DeepEqual(storedSession.Events, conversation) {
 		t.Errorf("expected %v, got %v", conversation, storedSession.Events)
 	}
 
@@ -274,7 +274,7 @@ func TestAHalfWrittenLineEndsTheSession(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !slices.Equal(storedSession.Events, conversation) {
+	if !reflect.DeepEqual(storedSession.Events, conversation) {
 		t.Errorf("expected %v, got %v", conversation, storedSession.Events)
 	}
 }

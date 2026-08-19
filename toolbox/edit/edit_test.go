@@ -30,7 +30,7 @@ func testRoot(t *testing.T, content string) (*file.Root, string) {
 	return file.New(root, allowAll), directory
 }
 
-func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
+func exec(t *testing.T, root *file.Root, arguments string) error {
 	t.Helper()
 
 	call, err := edit.New(root).Parse(arguments)
@@ -38,14 +38,14 @@ func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	result, err := call.Exec(t.Context())
-	return result.Output, err
+	_, err = call.Exec(t.Context())
+	return err
 }
 
 func TestTheTextIsReplacedWhereItAppearsOnce(t *testing.T) {
 	root, directory := testRoot(t, "one\ntwo\nthree\n")
 
-	if _, err := exec(t, root, `{"path":"a.txt","old_text":"two","new_text":"2"}`); err != nil {
+	if err := exec(t, root, `{"path":"a.txt","old_text":"two","new_text":"2"}`); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -62,7 +62,7 @@ func TestTheTextIsReplacedWhereItAppearsOnce(t *testing.T) {
 func TestTextAppearingTwiceIsRefused(t *testing.T) {
 	root, directory := testRoot(t, "one\none\n")
 
-	_, err := exec(t, root, `{"path":"a.txt","old_text":"one","new_text":"1"}`)
+	err := exec(t, root, `{"path":"a.txt","old_text":"one","new_text":"1"}`)
 	if err == nil {
 		t.Fatal("expected ambiguous text to be refused")
 	}
@@ -84,7 +84,7 @@ func TestTextAppearingTwiceIsRefused(t *testing.T) {
 func TestTextThatIsNotThereIsRefused(t *testing.T) {
 	root, _ := testRoot(t, "one\n")
 
-	if _, err := exec(t, root, `{"path":"a.txt","old_text":"nine","new_text":"9"}`); err == nil {
+	if err := exec(t, root, `{"path":"a.txt","old_text":"nine","new_text":"9"}`); err == nil {
 		t.Error("expected missing text to be refused")
 	}
 }
@@ -92,7 +92,7 @@ func TestTextThatIsNotThereIsRefused(t *testing.T) {
 func TestTheFileKeepsItsMode(t *testing.T) {
 	root, directory := testRoot(t, "one\n")
 
-	if _, err := exec(t, root, `{"path":"a.txt","old_text":"one","new_text":"1"}`); err != nil {
+	if err := exec(t, root, `{"path":"a.txt","old_text":"one","new_text":"1"}`); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -118,7 +118,7 @@ func TestEditingInsideAGitDirectoryIsRefused(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	_, err := exec(t, root, `{"path":".git/config","old_text":"one","new_text":"1"}`)
+	err := exec(t, root, `{"path":".git/config","old_text":"one","new_text":"1"}`)
 	if !errors.Is(err, file.ErrGitDir) {
 		t.Errorf("expected an edit inside .git to be refused, got %v", err)
 	}
@@ -172,7 +172,7 @@ func TestEditingIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
 
 	arguments := `{"path":"a.txt","old_text":"one","new_text":"two"}`
 
-	if _, err := exec(t, root, arguments); !errors.Is(err, file.ErrReadOnly) {
+	if err := exec(t, root, arguments); !errors.Is(err, file.ErrReadOnly) {
 		t.Errorf("expected the edit to be refused, got %v", err)
 	}
 

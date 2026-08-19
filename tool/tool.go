@@ -3,6 +3,7 @@ package tool
 
 import (
 	"context"
+	"encoding/json"
 	"path"
 	"time"
 
@@ -16,7 +17,9 @@ type Tool interface {
 	Schema() Schema
 	Concurrent() bool
 	ReadOnly() bool
+	StateKey() string
 	Parse(arguments string) (Call, error)
+	Restore(state json.RawMessage) error
 }
 
 // Concurrent marks a tool as safe to run alongside others.
@@ -41,6 +44,21 @@ type readOnly struct {
 
 func (self readOnly) ReadOnly() bool { return true }
 
+// State makes a tool the owner of named durable state.
+func State(inner Tool, name string, restore Restorer) Tool {
+	return stateTool{Tool: inner, name: name, restore: restore}
+}
+
+type stateTool struct {
+	Tool
+
+	name    string
+	restore Restorer
+}
+
+func (self stateTool) StateKey() string                    { return self.name }
+func (self stateTool) Restore(state json.RawMessage) error { return self.restore(state) }
+
 // Call is one decoded invocation. Render and Detail contain unstyled display text. Exec must pass
 // its context to work started outside the process.
 type Call interface {
@@ -50,11 +68,12 @@ type Call interface {
 	Exec(ctx context.Context) (Result, error)
 }
 
-// Result is everything a completed call hands back.
+// Result is everything a completed call hands back or records for restoration.
 type Result struct {
-	Output string // text returned to the model
-	Image  Image  // visual content returned to the model
-	Stats  Stats  // output, change, or resource measurements
+	Output string          // text returned to the model
+	Image  Image           // visual content returned to the model
+	Stats  Stats           // output, change, or resource measurements
+	State  json.RawMessage // an opaque durable transition the agent applies and journals
 }
 
 // Stats describe a call's output, changes, or measured resource use.
@@ -190,6 +209,9 @@ type Validator[T any] func(args T) error
 
 // ResultExecutor runs a tool call.
 type ResultExecutor[T any] func(ctx context.Context, args T) (Result, error)
+
+// Restorer applies one durable state transition from a stored session.
+type Restorer func(state json.RawMessage) error
 
 // Executor runs a plain tool call.
 type Executor[T any] func(ctx context.Context, args T) (string, error)

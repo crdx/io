@@ -97,6 +97,11 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			output.WriteString("**Output**\n\n")
 			writeFence(&output, event.Text, highlightSyntax(event.Highlight))
 		}
+	case agent.StateEvent:
+		writeField(&output, "ID", event.ID)
+		writeField(&output, "Name", event.Name)
+		output.WriteString("**State**\n\n")
+		writeFence(&output, string(event.State), "json")
 	case agent.Interrupted:
 		output.WriteString("The turn was interrupted.\n\n")
 	}
@@ -143,6 +148,8 @@ func title(kind agent.Kind) string {
 		return "Tool call"
 	case agent.Result:
 		return "Tool result"
+	case agent.StateEvent:
+		return "State"
 	case agent.Interrupted:
 		return "Interrupted"
 	default:

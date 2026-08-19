@@ -18,15 +18,19 @@ import (
 func New(prompt string, provider Provider, tools []tool.Tool) *Agent {
 	definitions := make([]tool.Definition, len(tools))
 	availableTools := make(map[string]tool.Tool, len(tools))
+	stateOwners := map[string]tool.Tool{}
 
 	for index, offeredTool := range tools {
 		definitions[index] = tool.Describe(offeredTool)
 		availableTools[offeredTool.Name()] = offeredTool
+		if stateKey := offeredTool.StateKey(); stateKey != "" {
+			stateOwners[stateKey] = offeredTool
+		}
 	}
 
 	provider.Configure(prompt, definitions)
 
-	return &Agent{provider: provider, tools: availableTools}
+	return &Agent{provider: provider, tools: availableTools, stateOwners: stateOwners}
 }
 
 // Dump carries out the provider's append-only conversation state.
@@ -200,7 +204,7 @@ func (self *Agent) runCalls(
 
 	for start := 0; start < len(queuedCalls) && listening; {
 		end := self.batchEnd(queuedCalls, start)
-		listening = runBatch(ctx, queuedCalls[start:end], results[start:end], yield)
+		listening = self.runBatch(ctx, queuedCalls[start:end], results[start:end], yield)
 		start = end
 	}
 
@@ -241,12 +245,17 @@ func (self *Agent) readOnly(call ToolCall) bool {
 	return found && calledTool.ReadOnly()
 }
 
-func runBatch(
+type completedCall struct {
+	result Event
+	state  Event
+}
+
+func (self *Agent) runBatch(
 	ctx context.Context,
 	batch []pendingCall, results []ToolResult,
 	yield func(Event, error) bool,
 ) bool {
-	done := make(chan Event, len(batch))
+	done := make(chan completedCall, len(batch))
 
 	for index, item := range batch {
 		go func() {
@@ -273,7 +282,7 @@ func runBatch(
 				stats = &executionResult.Stats
 			}
 
-			done <- Event{
+			completion := completedCall{result: Event{
 				Kind:   Result,
 				ID:     item.rawCall.ID,
 				Name:   item.rawCall.Name,
@@ -281,21 +290,68 @@ func runBatch(
 				Failed: !ok,
 				Took:   time.Since(startedAt),
 				Stats:  stats,
+			}}
+			if ok && len(executionResult.State) > 0 {
+				completion.state = Event{
+					Kind:  StateEvent,
+					ID:    item.rawCall.ID,
+					Name:  self.tools[item.rawCall.Name].StateKey(),
+					State: executionResult.State,
+				}
 			}
+
+			done <- completion
 		}()
 	}
 
 	listening := true
 
 	for range batch {
-		event := <-done
+		completion := <-done
 
+		if completion.state.Kind != "" {
+			if err := self.restoreState(completion.state); err != nil {
+				if listening {
+					yield(Event{}, err)
+				}
+				return false
+			}
+		}
+		if listening && completion.state.Kind != "" {
+			listening = yield(completion.state, nil)
+		}
 		if listening {
-			listening = yield(event, nil)
+			listening = yield(completion.result, nil)
 		}
 	}
 
 	return listening
+}
+
+// RestoreState replays durable state transitions owned by the available tools.
+func (self *Agent) RestoreState(events []Event) error {
+	for _, event := range events {
+		if event.Kind != StateEvent {
+			continue
+		}
+		if err := self.restoreState(event); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (self *Agent) restoreState(event Event) error {
+	calledTool, known := self.stateOwners[event.Name]
+	if !known {
+		return nil
+	}
+	if err := calledTool.Restore(event.State); err != nil {
+		return fmt.Errorf("could not restore %s state: %w", event.Name, err)
+	}
+
+	return nil
 }
 
 // Tool is the tool of that name, and whether there is one.
