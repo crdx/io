@@ -51,20 +51,12 @@ type cappedCall struct {
 	measured   bool
 }
 
-func (self *cappedCall) Focus() string {
-	if focusedCall, ok := self.Call.(tool.FocusedCall); ok {
-		return focusedCall.Focus()
+func (self *cappedCall) Highlight() tool.Highlight {
+	if highlightedCall, ok := self.Call.(tool.HighlightedCall); ok {
+		return highlightedCall.Highlight()
 	}
 
-	return ""
-}
-
-func (self *cappedCall) Syntax() string {
-	if syntaxCall, ok := self.Call.(tool.SyntaxCall); ok {
-		return syntaxCall.Syntax()
-	}
-
-	return ""
+	return tool.Highlight{}
 }
 
 func (self *cappedCall) Statistics() (tool.Statistics, bool) {

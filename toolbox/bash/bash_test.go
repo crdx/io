@@ -180,9 +180,10 @@ func TestACommandRenderingIsMarkedAsBash(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	syntaxCall, ok := call.(tool.SyntaxCall)
-	if !ok || syntaxCall.Syntax() != "bash" {
-		t.Errorf("expected bash syntax, got %T", call)
+	highlightedCall, ok := call.(tool.HighlightedCall)
+	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"}
+	if !ok || highlightedCall.Highlight() != want {
+		t.Errorf("expected bash highlighting, got %T", call)
 	}
 }
 

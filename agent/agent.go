@@ -181,11 +181,8 @@ func (self *Agent) runCalls(
 			event.Render = parsedCall.Render()
 			event.Detail = parsedCall.Detail()
 
-			if focusedCall, ok := parsedCall.(tool.FocusedCall); ok {
-				event.Focus = focusedCall.Focus()
-			}
-			if syntaxCall, ok := parsedCall.(tool.SyntaxCall); ok {
-				event.Syntax = syntaxCall.Syntax()
+			if highlightedCall, ok := parsedCall.(tool.HighlightedCall); ok {
+				event.Highlight = highlightedCall.Highlight()
 			}
 		}
 

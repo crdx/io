@@ -127,7 +127,10 @@ func rowsFromOutput(output *strings.Builder) []string {
 }
 
 func TestOnlyTheFocusedPartOfArgumentsIsPainted(t *testing.T) {
-	label := Label{Name: "read", Args: "cmd/oh/draw.go", Focus: "draw.go", ReadOnly: true}
+	label := Label{
+		Name: "read", Args: "cmd/oh/draw.go", ReadOnly: true,
+		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
+	}
 	want := theme.Call("read") + " " + theme.Detail("cmd/oh/") + theme.Args("draw.go")
 
 	if got := label.render(); got != want {
@@ -140,7 +143,7 @@ func TestAnAccentAndTheFocusedPartOfArgumentsArePainted(t *testing.T) {
 		Name:        "skill",
 		NameStyle:   theme.Skill,
 		Args:        "/skills/guard-basics/SKILL.md",
-		Focus:       "SKILL.md",
+		Highlight:   tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
 		Accent:      "guard-basics",
 		AccentStyle: theme.Skill,
 	}
@@ -154,7 +157,10 @@ func TestAnAccentAndTheFocusedPartOfArgumentsArePainted(t *testing.T) {
 }
 
 func TestArgumentsWithSyntaxAreHighlighted(t *testing.T) {
-	label := Label{Name: "bash", Args: "echo one && true", Syntax: "bash"}
+	label := Label{
+		Name: "bash", Args: "echo one && true",
+		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
+	}
 	want := theme.Change("bash") + " " + markdown.Highlight(label.Args, "bash")
 
 	if got := label.render(); got != want {
@@ -163,7 +169,10 @@ func TestArgumentsWithSyntaxAreHighlighted(t *testing.T) {
 }
 
 func TestAPathInTheDetailCanBeFocused(t *testing.T) {
-	label := Label{Name: "grep", Args: "text", Detail: "in cmd/oh/draw.go", Focus: "draw.go"}
+	label := Label{
+		Name: "grep", Args: "text", Detail: "in cmd/oh/draw.go",
+		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
+	}
 	want := theme.Change("grep") + " " + theme.Args("text") + " " +
 		theme.Detail("in cmd/oh/") + theme.Args("draw.go")
 

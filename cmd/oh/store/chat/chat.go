@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/tool"
 )
 
 var safeSyntax = regexp.MustCompile(`^[A-Za-z0-9_+.-]+$`)
@@ -62,15 +63,14 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		writeField(&output, "ID", event.ID)
 		writeField(&output, "Name", event.Name)
 		writeBool(&output, "Read only", event.ReadOnly)
-		writeField(&output, "Syntax", event.Syntax)
-		writeField(&output, "Focus", event.Focus)
+		writeField(&output, "Highlight", describeHighlight(event.Highlight))
 		if event.Arguments != "" {
 			output.WriteString("**Arguments**\n\n")
 			writeFence(&output, event.Arguments, "json")
 		}
 		if event.Render != "" {
 			output.WriteString("**Rendering**\n\n")
-			writeFence(&output, event.Render, event.Syntax)
+			writeFence(&output, event.Render, highlightSyntax(event.Highlight))
 		}
 		if event.Detail != "" {
 			output.WriteString("**Detail**\n\n")
@@ -84,7 +84,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			writeField(&output, "Duration", event.Took.String())
 		}
 		writeField(&output, "Detail", event.Detail)
-		writeField(&output, "Focus", event.Focus)
+		writeField(&output, "Highlight", describeHighlight(event.Highlight))
 		if event.Statistics != nil {
 			statistics, err := json.Marshal(event.Statistics)
 			if err != nil {
@@ -95,7 +95,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		}
 		if event.Text != "" {
 			output.WriteString("**Output**\n\n")
-			writeFence(&output, event.Text, event.Syntax)
+			writeFence(&output, event.Text, highlightSyntax(event.Highlight))
 		}
 	case agent.Interrupted:
 		output.WriteString("The turn was interrupted.\n\n")
@@ -103,6 +103,22 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 
 	_, err := self.file.WriteString(output.String())
 	return err
+}
+
+func describeHighlight(highlight tool.Highlight) string {
+	if highlight.Kind == "" {
+		return ""
+	}
+
+	return string(highlight.Kind) + " " + highlight.Value
+}
+
+func highlightSyntax(highlight tool.Highlight) string {
+	if highlight.Kind == tool.HighlightSyntax {
+		return highlight.Value
+	}
+
+	return ""
 }
 
 // Close closes the transcript.

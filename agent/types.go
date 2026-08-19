@@ -83,8 +83,7 @@ type Event struct {
 	Arguments  string           `json:"arguments,omitempty"` // what the tool was called with
 	Render     string           `json:"render,omitempty"`    // how the call was shown when it ran
 	Detail     string           `json:"detail,omitempty"`    // what qualified that, for a display to set apart
-	Focus      string           `json:"focus,omitempty"`     // the part of the rendering set apart from the rest
-	Syntax     string           `json:"syntax,omitempty"`    // the language the rendering is written in
+	Highlight  tool.Highlight   `json:"highlight,omitzero"`  // how the rendering is highlighted
 	ReadOnly   bool             `json:"read_only,omitempty"` // whether the tool called changes nothing
 	Failed     bool             `json:"failed,omitempty"`    // whether a call came back with an error rather than a result
 	Took       time.Duration    `json:"took,omitempty"`      // how long a call took to run

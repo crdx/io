@@ -171,16 +171,17 @@ func TestOutputTooBigIsCutAndSaved(t *testing.T) {
 	}
 }
 
-func TestAWrappedToolKeepsItsSyntax(t *testing.T) {
+func TestAWrappedToolKeepsItsSyntaxHighlighting(t *testing.T) {
 	subject := tool.Syntax(newTool(t), "bash")
 	call, err := truncate.Tool(subject).Parse(`{"size":2}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	syntaxCall, ok := call.(tool.SyntaxCall)
-	if !ok || syntaxCall.Syntax() != "bash" {
-		t.Errorf("expected the syntax to survive, got %T", call)
+	highlightedCall, ok := call.(tool.HighlightedCall)
+	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"}
+	if !ok || highlightedCall.Highlight() != want {
+		t.Errorf("expected the highlighting to survive, got %T", call)
 	}
 }
 
@@ -191,8 +192,9 @@ func TestAWrappedToolKeepsItsFocusedRendering(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	focusedCall, ok := call.(tool.FocusedCall)
-	if !ok || focusedCall.Focus() != "generate" {
+	highlightedCall, ok := call.(tool.HighlightedCall)
+	want := tool.Highlight{Kind: tool.HighlightFocus, Value: "generate"}
+	if !ok || highlightedCall.Highlight() != want {
 		t.Errorf("expected the focus to survive, got %T", call)
 	}
 }

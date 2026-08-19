@@ -139,7 +139,8 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 			callPainter := &painter{screen: output.New(&screenOutput)}
 
 			callPainter.draw(agent.Event{
-				Kind: agent.Call, ID: "1", Name: test.tool, Render: test.path, Focus: path.Base(test.path),
+				Kind: agent.Call, ID: "1", Name: test.tool, Render: test.path,
+				Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: path.Base(test.path)},
 			})
 			callPainter.close(status.Done)
 
@@ -158,8 +159,8 @@ func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
 	callPainter := &painter{screen: output.New(&screenOutput)}
 
 	callPainter.draw(agent.Event{
-		Kind: agent.Call, ID: "1", Name: "read",
-		Render: "/skills/golang/SKILL.md", Focus: "SKILL.md",
+		Kind: agent.Call, ID: "1", Name: "read", Render: "/skills/golang/SKILL.md",
+		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
 	})
 	callPainter.close(status.Done)
 
@@ -523,13 +524,14 @@ func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 		workspaceDir: workspaceDir,
 	}
 
-	rendered, detail, focus, syntax := testConversation.newPicasso(false).describe(agent.Event{
+	rendered, detail, highlight := testConversation.newPicasso(false).describe(agent.Event{
 		Name:      "read",
 		Arguments: `{"path":"/home/alice/project/cmd/oh/draw.go"}`,
 	})
 
-	if detail != "" || focus != "draw.go" || syntax != "" {
-		t.Fatalf("unexpected call description %q, %q, %q", detail, focus, syntax)
+	wantHighlight := tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"}
+	if detail != "" || highlight != wantHighlight {
+		t.Fatalf("unexpected call description %q, %#v", detail, highlight)
 	}
 	if rendered != "cmd/oh/draw.go" {
 		t.Errorf("got %q, want the workspace prefix omitted", rendered)

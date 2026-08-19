@@ -30,18 +30,13 @@ type painter struct {
 	workspaceDir string                         // the prefix omitted from paths inside the workspace
 }
 
-func (self *painter) describe(event agent.Event) (string, string, string, string) {
+func (self *painter) describe(event agent.Event) (string, string, tool.Highlight) {
 	if self.tools != nil {
 		if calledTool, known := self.tools(event.Name); known {
 			if parsedCall, err := calledTool.Parse(event.Arguments); err == nil {
-				focus := ""
-				if focusedCall, ok := parsedCall.(tool.FocusedCall); ok {
-					focus = focusedCall.Focus()
-				}
-
-				syntax := ""
-				if syntaxCall, ok := parsedCall.(tool.SyntaxCall); ok {
-					syntax = syntaxCall.Syntax()
+				highlight := tool.Highlight{}
+				if highlightedCall, ok := parsedCall.(tool.HighlightedCall); ok {
+					highlight = highlightedCall.Highlight()
 				}
 
 				rendered := parsedCall.Render()
@@ -51,12 +46,12 @@ func (self *painter) describe(event agent.Event) (string, string, string, string
 					}
 				}
 
-				return rendered, parsedCall.Detail(), focus, syntax
+				return rendered, parsedCall.Detail(), highlight
 			}
 		}
 	}
 
-	return event.Render, event.Detail, event.Focus, event.Syntax
+	return event.Render, event.Detail, event.Highlight
 }
 
 func (self *painter) draw(event agent.Event) {
@@ -88,7 +83,7 @@ func (self *painter) draw(event agent.Event) {
 			self.rows = map[string]int{}
 		}
 
-		renderedArgs, detail, focus, syntax := self.describe(event)
+		renderedArgs, detail, highlight := self.describe(event)
 
 		// TODO(x): rewrite this mess
 		name := event.Name
@@ -101,7 +96,7 @@ func (self *painter) draw(event agent.Event) {
 				nameStyle = theme.Skill
 				accent = skillName
 				accentStyle = theme.Skill
-				focus = ""
+				highlight = tool.Highlight{}
 			}
 		}
 		if event.Name == self.shell {
@@ -113,8 +108,7 @@ func (self *painter) draw(event agent.Event) {
 			Name:        name,
 			NameStyle:   nameStyle,
 			Args:        renderedArgs,
-			Focus:       focus,
-			Syntax:      syntax,
+			Highlight:   highlight,
 			Detail:      detail,
 			ReadOnly:    event.ReadOnly,
 			Accent:      accent,

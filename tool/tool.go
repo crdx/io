@@ -87,19 +87,28 @@ func Stats(call Call) (Statistics, bool) {
 	return statisticalCall.Statistics()
 }
 
-// FocusedCall has one part of its rendering set apart from the rest.
-type FocusedCall interface {
-	Call
-	Focus() string
+// HighlightKind identifies how a display should highlight a call's rendering.
+type HighlightKind string
+
+// The ways a call rendering may be highlighted.
+const (
+	HighlightSyntax HighlightKind = "syntax"
+	HighlightFocus  HighlightKind = "focus"
+)
+
+// Highlight describes how a display should highlight a call's rendering.
+type Highlight struct {
+	Kind  HighlightKind `json:"kind"`
+	Value string        `json:"value"`
 }
 
-// SyntaxCall has a rendering written in a language a display may highlight.
-type SyntaxCall interface {
+// HighlightedCall has a rendering a display may highlight.
+type HighlightedCall interface {
 	Call
-	Syntax() string
+	Highlight() Highlight
 }
 
-// Syntax marks the language a call rendering is written in.
+// Syntax highlights a call rendering as the named language, replacing any inner highlighter.
 func Syntax(inner Tool, language string) Tool {
 	return syntaxTool{Tool: inner, language: language}
 }
@@ -116,22 +125,26 @@ func (self syntaxTool) Parse(arguments string) (Call, error) {
 		return nil, err
 	}
 
-	return syntaxCall{Call: call, language: self.language}, nil
+	return highlightedCall{
+		Call: call,
+		highlight: Highlight{
+			Kind:  HighlightSyntax,
+			Value: self.language,
+		},
+	}, nil
 }
 
-type syntaxCall struct {
+type highlightedCall struct {
 	Call
 
-	language string
+	highlight Highlight
 }
 
-func (self syntaxCall) Syntax() string { return self.language }
+func (self highlightedCall) Highlight() Highlight           { return self.highlight }
+func (self highlightedCall) Statistics() (Statistics, bool) { return Stats(self.Call) }
+func (self highlightedCall) Image() (Image, bool)           { return AttachedImage(self.Call) }
 
-func (self syntaxCall) Statistics() (Statistics, bool) { return Stats(self.Call) }
-
-func (self syntaxCall) Image() (Image, bool) { return AttachedImage(self.Call) }
-
-// Focus marks the part of a call rendering a display should set apart.
+// Focus sets one part of a call rendering apart, replacing any inner highlighter.
 func Focus(inner Tool, pick func(Call) string) Tool {
 	return focusedTool{Tool: inner, pick: pick}
 }
@@ -160,20 +173,14 @@ func (self focusedTool) Parse(arguments string) (Call, error) {
 		return nil, err
 	}
 
-	return focusedCall{Call: call, focus: self.pick(call)}, nil
+	return highlightedCall{
+		Call: call,
+		highlight: Highlight{
+			Kind:  HighlightFocus,
+			Value: self.pick(call),
+		},
+	}, nil
 }
-
-type focusedCall struct {
-	Call
-
-	focus string
-}
-
-func (self focusedCall) Focus() string { return self.focus }
-
-func (self focusedCall) Statistics() (Statistics, bool) { return Stats(self.Call) }
-
-func (self focusedCall) Image() (Image, bool) { return AttachedImage(self.Call) }
 
 // Renderer describes decoded tool arguments.
 type Renderer[T any] func(args T) (string, string)

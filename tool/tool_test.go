@@ -58,6 +58,28 @@ func TestParseBindsTheArgumentsToTheCall(t *testing.T) {
 	}
 }
 
+func TestAnOuterHighlighterReplacesAnInnerOne(t *testing.T) {
+	var ran bool
+	subject := tool.Syntax(tool.Focus(newTool(t, &ran), func(tool.Call) string {
+		return "London"
+	}), "bash")
+
+	call, err := subject.Parse(`{"city":"London"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	highlightedCall, ok := call.(tool.HighlightedCall)
+	if !ok {
+		t.Fatalf("expected a highlighted call, got %T", call)
+	}
+
+	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"}
+	if got := highlightedCall.Highlight(); got != want {
+		t.Errorf("got %#v, want %#v", got, want)
+	}
+}
+
 func TestParseRefusesArgumentsItCannotRead(t *testing.T) {
 	var ran bool
 

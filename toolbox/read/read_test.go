@@ -241,8 +241,9 @@ func TestAReadFocusesTheFileName(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	focusedCall, ok := call.(tool.FocusedCall)
-	if !ok || focusedCall.Focus() != "notes.txt" {
+	highlightedCall, ok := call.(tool.HighlightedCall)
+	want := tool.Highlight{Kind: tool.HighlightFocus, Value: "notes.txt"}
+	if !ok || highlightedCall.Highlight() != want {
 		t.Errorf("expected the file name to be focused, got %T", call)
 	}
 }

@@ -66,8 +66,9 @@ func TestEveryPathShowingToolFocusesItsLastComponent(t *testing.T) {
 			continue
 		}
 
-		focusedCall, ok := call.(tool.FocusedCall)
-		if !ok || focusedCall.Focus() != test.focus {
+		highlightedCall, ok := call.(tool.HighlightedCall)
+		want := tool.Highlight{Kind: tool.HighlightFocus, Value: test.focus}
+		if !ok || highlightedCall.Highlight() != want {
 			t.Errorf("%s: expected %q to be focused, got %T", subject.Name(), test.focus, call)
 		}
 	}

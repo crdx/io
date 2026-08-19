@@ -37,15 +37,14 @@ const (
 // Label is what a row says: the name of a call, the arguments it was made with, and whatever
 // qualifies those.
 type Label struct {
-	Name        string      // the call name
-	Args        string      // the rendered arguments
-	Focus       string      // the part of the arguments set apart from the rest
-	Syntax      string      // the language the arguments are written in
-	Detail      string      // what qualifies the arguments
-	ReadOnly    bool        // whether the call changes nothing, which decides the colour its name is in
-	NameStyle   theme.Style // an explicit style for a tool with its own prompt
-	Accent      string      // another part of the arguments set apart from the rest
-	AccentStyle theme.Style // how the accent is painted
+	Name        string         // the call name
+	Args        string         // the rendered arguments
+	Highlight   tool.Highlight // how the arguments are highlighted
+	Detail      string         // what qualifies the arguments
+	ReadOnly    bool           // whether the call changes nothing, which decides the colour its name is in
+	NameStyle   theme.Style    // an explicit style for a tool with its own prompt
+	Accent      string         // another part of the arguments set apart from the rest
+	AccentStyle theme.Style    // how the accent is painted
 }
 
 // Elide cuts a label to the room it has, so the row stays on the line it was printed on. What
@@ -86,8 +85,8 @@ func (self Label) render() string {
 }
 
 func (self Label) renderArgs() string {
-	if self.Syntax != "" {
-		return markdown.Highlight(self.Args, self.Syntax)
+	if self.Highlight.Kind == tool.HighlightSyntax {
+		return markdown.Highlight(self.Args, self.Highlight.Value)
 	}
 
 	type span struct {
@@ -97,8 +96,9 @@ func (self Label) renderArgs() string {
 	}
 
 	spans := []span{}
-	if at := strings.LastIndex(self.Args, self.Focus); self.Focus != "" && at >= 0 {
-		spans = append(spans, span{start: at, end: at + len(self.Focus), style: theme.Args})
+	focus := self.focus()
+	if at := strings.LastIndex(self.Args, focus); focus != "" && at >= 0 {
+		spans = append(spans, span{start: at, end: at + len(focus), style: theme.Args})
 	}
 	if at := strings.LastIndex(self.Args, self.Accent); self.Accent != "" && self.AccentStyle != nil && at >= 0 {
 		spans = append(spans, span{start: at, end: at + len(self.Accent), style: self.AccentStyle})
@@ -127,17 +127,26 @@ func (self Label) renderArgs() string {
 	return out.String()
 }
 
+func (self Label) focus() string {
+	if self.Highlight.Kind == tool.HighlightFocus {
+		return self.Highlight.Value
+	}
+
+	return ""
+}
+
 func (self Label) renderDetail() string {
-	if self.Focus == "" || strings.Contains(self.Args, self.Focus) {
+	focus := self.focus()
+	if focus == "" || strings.Contains(self.Args, focus) {
 		return theme.Detail(self.Detail)
 	}
 
-	at := strings.LastIndex(self.Detail, self.Focus)
+	at := strings.LastIndex(self.Detail, focus)
 	if at < 0 {
 		return theme.Detail(self.Detail)
 	}
 
-	end := at + len(self.Focus)
+	end := at + len(focus)
 
 	var out strings.Builder
 	if at > 0 {
