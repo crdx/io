@@ -247,6 +247,51 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 	}
 }
 
+func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
+	workspace := t.TempDir()
+	metadata := filepath.Join(workspace, ".git")
+	if err := os.Mkdir(metadata, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	home := t.TempDir()
+	tmp := t.TempDir()
+	initialCaps := capRead | capWrite | capShell
+	if _, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, initialCaps); err != nil {
+		t.Skipf("the sandbox cannot enforce a shell policy here: %v", err)
+	}
+
+	mode := NewMode(initialCaps)
+	files := file.New(workspaceRoot, refuseWrite(mode))
+	processes := sandbox.NewProcesses(false)
+	defer func() { _, _ = processes.Disable() }()
+	shell := confinedShell(workspace, home, tmp, configuredPaths{}, mode, files, processes)
+
+	run := func() error {
+		call, parseErr := shell.Parse(`{"command":"touch .git/proof"}`)
+		if parseErr != nil {
+			t.Fatal(parseErr)
+		}
+		_, execErr := call.Exec(t.Context())
+		return execErr
+	}
+
+	if err := run(); err == nil {
+		t.Fatal("expected repository metadata to remain read-only before git was granted")
+	}
+
+	mode.Toggle(capGit)
+	if err := run(); err != nil {
+		t.Fatalf("repository metadata remained read-only after git was granted: %v", err)
+	}
+}
+
 func TestTmpMountIsWritableWithoutAShell(t *testing.T) {
 	workspaceRoot, err := os.OpenRoot(t.TempDir())
 	if err != nil {
@@ -268,6 +313,27 @@ func TestTmpMountIsWritableWithoutAShell(t *testing.T) {
 	}
 	if err := resolvedRoot.WriteFile(name, []byte("written"), 0o600); err != nil {
 		t.Fatalf("tmp was not writable: %v", err)
+	}
+}
+
+func TestGrantingWriteAccessRemovesExactReadOnlyMounts(t *testing.T) {
+	workspace := "/workspace"
+	home := "/home"
+	readOnlyFile := "/workspace/reference"
+	policy := grantWriteAccess(sandbox.Policy{
+		Read: []string{workspace, home, readOnlyFile},
+	}, []string{workspace, home})
+
+	for _, writableRoot := range []string{workspace, home} {
+		if slices.Contains(policy.Read, writableRoot) {
+			t.Errorf("writable root %s is also mounted read-only: %#v", writableRoot, policy)
+		}
+		if !slices.Contains(policy.Write, writableRoot) {
+			t.Errorf("writable root %s was not granted write access: %#v", writableRoot, policy)
+		}
+	}
+	if !slices.Contains(policy.Read, readOnlyFile) {
+		t.Errorf("nested read-only file lost its protection: %#v", policy)
 	}
 }
 
