@@ -307,7 +307,7 @@ func resizes() <-chan os.Signal {
 	return resizeSignals
 }
 
-const settling = 100 * time.Millisecond // a drag sends a signal for every column it passes through
+const settling = 100 * time.Millisecond
 
 func settle(resizeSignals <-chan os.Signal) {
 	time.Sleep(settling)
@@ -358,7 +358,7 @@ func (self *conversation) replay() {
 		}
 
 		if self.turn.running {
-			self.turn.painter = painter // unanswered calls are on an open block again, on the same rows
+			self.turn.painter = painter
 			return
 		}
 
@@ -370,7 +370,7 @@ func (self *conversation) replay() {
 
 func (self *conversation) redraw() {
 	if self.turn.running {
-		self.turn.painter.stop() // its ticker would draw over the replay
+		self.turn.painter.stop()
 	}
 
 	self.screen.Synchronise(func() {
