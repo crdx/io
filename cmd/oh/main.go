@@ -291,6 +291,7 @@ func run() ([]string, error) {
 		mode:               mode,
 		processes:          processes,
 		shell:              shell.Name(),
+		notifyTurnFinished: func() { sendTurnFinishedNotification(workspaceDir) },
 		getOnWithItMessage: settings.GetOnWithItMessage,
 
 		label: func(pending bool, frame int, running bool) string {

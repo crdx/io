@@ -23,14 +23,15 @@ import (
 )
 
 type conversation struct {
-	assistant    *agent.Agent                 // the conversation driver
-	screen       *output.Output               // where the conversation is drawn
-	log          *store.Writer                // where the conversation is stored
-	label        func(bool, int, bool) string // what the harness was started with, drawn afresh on the rule
-	workspaceDir string                       // where the conversation is being held
-	mode         *Mode                        // what the tools allow
-	processes    *sandbox.Processes           // what background commands belong to this conversation
-	shell        string                       // what the shell tool was named, taken from the tool itself
+	assistant          *agent.Agent                 // the conversation driver
+	screen             *output.Output               // where the conversation is drawn
+	log                *store.Writer                // where the conversation is stored
+	label              func(bool, int, bool) string // what the harness was started with, drawn afresh on the rule
+	workspaceDir       string                       // where the conversation is being held
+	mode               *Mode                        // what the tools allow
+	processes          *sandbox.Processes           // what background commands belong to this conversation
+	shell              string                       // what the shell tool was named, taken from the tool itself
+	notifyTurnFinished func()                       // how to say that the harness is waiting for input
 
 	restart            []string // the arguments to start again with, once the terminal has been given back
 	queuedPrompt       string   // what to ask as soon as an interrupted turn finishes
@@ -483,6 +484,10 @@ func (self *conversation) finish() {
 
 	self.turn.running = false
 	self.turn.events = nil
+
+	if !self.turn.cancelled && !self.queuedTurn && !self.queuedModeChange && self.notifyTurnFinished != nil {
+		self.notifyTurnFinished()
+	}
 
 	if self.queuedTurn {
 		prompt := self.queuedPrompt

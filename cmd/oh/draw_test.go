@@ -391,6 +391,40 @@ func TestATurnThatFinishedByItselfIsNotCalledCancelled(t *testing.T) {
 	}
 }
 
+func TestACompletedTurnSendsADesktopNotification(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	notifications := 0
+	self.notifyTurnFinished = func() { notifications++ }
+
+	completeTurn(self)
+
+	if notifications != 1 {
+		t.Errorf("got %d notifications, want one", notifications)
+	}
+}
+
+func TestAnInterruptedTurnDoesNotSendADesktopNotification(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	notifications := 0
+	self.notifyTurnFinished = func() { notifications++ }
+
+	self.start("are you there")
+	self.turn.cancelled = true
+	self.turn.stop()
+
+	for report := range self.turn.events {
+		self.take(report)
+	}
+
+	self.finish()
+
+	if notifications != 0 {
+		t.Errorf("got %d notifications, want none", notifications)
+	}
+}
+
 func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
 	var screenOutput bytes.Buffer
 
