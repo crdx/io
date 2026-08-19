@@ -2,12 +2,15 @@
 package bash
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"mvdan.cc/sh/v3/syntax"
 
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/pathutil"
@@ -41,7 +44,7 @@ func New(
 				},
 			},
 			Render,
-		).Measured(func(ctx context.Context, args Args) (string, tool.Statistics, error) {
+		).Validate(validate).Measured(func(ctx context.Context, args Args) (string, tool.Statistics, error) {
 			policy, err := fresh(ctx)
 			if err != nil {
 				return "", tool.Statistics{}, err
@@ -76,9 +79,62 @@ func ProtectedPolicy(policy sandbox.Policy) sandbox.Policy {
 	return policy.WithRead(readOnlyPaths...)
 }
 
-// Render flattens a command to one display-safe line and reports its original line count.
+// Render formats a command into one display-safe line and reports its original line count.
 func Render(args Args) (string, string) {
-	return oneLine(args.Command), spread(args.Command)
+	parsed, err := parse(args.Command)
+	if err != nil {
+		return oneLine(args.Command), spread(args.Command)
+	}
+
+	if hasHereDocument(parsed) { // a body joined onto one line reads as a different command
+		return strutil.FirstLine(args.Command), spread(args.Command)
+	}
+
+	return format(parsed), spread(args.Command)
+}
+
+func hasHereDocument(parsed *syntax.File) bool {
+	found := false
+
+	syntax.Walk(parsed, func(node syntax.Node) bool {
+		if redirect, ok := node.(*syntax.Redirect); ok && redirect.Hdoc != nil {
+			found = true
+		}
+
+		return !found
+	})
+
+	return found
+}
+
+func validate(args Args) error {
+	if strings.TrimSpace(args.Command) == "" {
+		return errors.New("command is required")
+	}
+
+	if _, err := parse(args.Command); err != nil {
+		return fmt.Errorf("invalid Bash command: %w", err)
+	}
+
+	return nil
+}
+
+func parse(command string) (*syntax.File, error) {
+	return syntax.NewParser(syntax.Variant(syntax.LangBash)).Parse(strings.NewReader(command), "")
+}
+
+func format(parsed *syntax.File) string {
+	var output bytes.Buffer
+	if err := syntax.NewPrinter(syntax.SingleLine(true)).Print(&output, parsed); err != nil {
+		panic(err)
+	}
+
+	command := strings.TrimSuffix(output.String(), "\n")
+	if strings.ContainsAny(command, "\n\r") {
+		return oneLine(command)
+	}
+
+	return command
 }
 
 func oneLine(command string) string {
@@ -124,7 +180,7 @@ func hasSeparator(line string) bool {
 
 func spread(command string) string {
 	if lines := strings.Count(strings.TrimRight(command, "\n"), "\n") + 1; lines > 1 {
-		return fmt.Sprintf("%d lines", lines)
+		return fmt.Sprintf("%dL", lines)
 	}
 
 	return ""
@@ -137,10 +193,6 @@ func exec(
 	args Args,
 	processes *sandbox.Processes,
 ) (string, tool.Statistics, error) {
-	if strings.TrimSpace(args.Command) == "" {
-		return "", tool.Statistics{}, errors.New("command is required")
-	}
-
 	result, err := processes.Run(ctx, root.Name(), args.Command, policy)
 	stats := tool.Statistics{
 		Kind: tool.StatsResources, CPUTime: result.CPUTime, PeakMemory: result.PeakMemory,

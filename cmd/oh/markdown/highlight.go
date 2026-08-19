@@ -1,21 +1,27 @@
 package markdown
 
 import (
+	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
+	"mvdan.cc/sh/v3/syntax"
 
 	"crdx.org/io/cmd/oh/theme"
 )
 
 // Highlight paints one line of source in the named language.
 func Highlight(line string, language string) string {
-	if language == "bash" {
+	switch language {
+	case "bash":
 		return bashCommand(line)
+	case "regexp":
+		return highlightRegexpPrefix(line, line, false)
+	default:
+		return highlight([]string{line}, language)[0]
 	}
-
-	return highlight([]string{line}, language)[0]
 }
 
 func highlight(lines []string, language string) []string { // chroma reads it, the theme paints it
@@ -53,15 +59,344 @@ func highlight(lines []string, language string) []string { // chroma reads it, t
 }
 
 func bashCommand(line string) string {
-	command, arguments, found := strings.Cut(line, " ")
-	if command == "" {
-		return theme.Block(line)
+	return highlightBashPrefix(line, line, false)
+}
+
+// HighlightPrefix highlights a prefix using the complete source syntax tree.
+func HighlightPrefix(source string, prefix string, language string, elided bool) string {
+	switch language {
+	case "bash":
+		return highlightBashPrefix(source, prefix, elided)
+	case "regexp":
+		return highlightRegexpPrefix(source, prefix, elided)
+	default:
+		if elided {
+			prefix += "…"
+		}
+		return Highlight(prefix, language)
 	}
-	if !found {
-		return theme.Function(command)
+}
+
+type sourceSpan struct {
+	start int
+	end   int
+	style theme.Style
+}
+
+func highlightBashPrefix(source string, retainedPrefix string, elided bool) string {
+	spans, err := bashCommandSpans(source)
+	if err != nil {
+		if elided {
+			retainedPrefix += "…"
+		}
+		return theme.Block(retainedPrefix)
 	}
 
-	return theme.Function(command) + theme.Block(" "+arguments)
+	boundary := len(retainedPrefix)
+	var output strings.Builder
+	position := 0
+
+	for _, span := range spans {
+		if span.start >= boundary {
+			break
+		}
+		if span.end <= position {
+			continue
+		}
+
+		if position < span.start {
+			output.WriteString(theme.Block(retainedPrefix[position:span.start]))
+		}
+
+		end := min(span.end, boundary)
+		output.WriteString(span.style(retainedPrefix[max(position, span.start):end]))
+		position = end
+	}
+
+	if position < boundary {
+		output.WriteString(theme.Block(retainedPrefix[position:]))
+	}
+
+	if elided {
+		style := theme.Block
+		for _, span := range spans {
+			if span.start <= boundary && boundary < span.end {
+				style = span.style
+				break
+			}
+		}
+		output.WriteString(style("…"))
+	}
+
+	return output.String()
+}
+
+func bashCommandSpans(source string) ([]sourceSpan, error) {
+	parsed, err := syntax.NewParser(syntax.Variant(syntax.LangBash)).Parse(strings.NewReader(source), "")
+	if err != nil {
+		return nil, err
+	}
+
+	var spans []sourceSpan
+	syntax.Walk(parsed, func(node syntax.Node) bool {
+		switch node := node.(type) {
+		case *syntax.CallExpr:
+			for _, word := range node.Args[:min(2, len(node.Args))] {
+				spans = append(spans, sourceSpan{
+					start: int(word.Pos().Offset()),
+					end:   int(word.End().Offset()),
+					style: theme.Function,
+				})
+			}
+		case *syntax.Assign:
+			spans = append(spans, bashAssignmentSpans(node)...)
+		case *syntax.Redirect:
+			spans = append(spans, bashSourceSpan(node.OpPos, node.Op.String(), theme.Operator))
+		case *syntax.Stmt:
+			if node.Semicolon.IsValid() {
+				spans = append(spans, bashSourceSpan(node.Semicolon, ";", theme.Operator))
+			}
+		case *syntax.ForClause:
+			keyword := "for"
+			if node.Select {
+				keyword = "select"
+			}
+			spans = append(spans, bashSourceSpan(node.ForPos, keyword, theme.Keyword))
+			spans = append(spans, bashLoopBodySpans(node.DoPos, node.DonePos)...)
+		case *syntax.WhileClause:
+			keyword := "while"
+			if node.Until {
+				keyword = "until"
+			}
+			spans = append(spans, bashSourceSpan(node.WhilePos, keyword, theme.Keyword))
+			spans = append(spans, bashLoopBodySpans(node.DoPos, node.DonePos)...)
+		case *syntax.IfClause:
+			if node.Position.IsValid() { // "if", "elif" or "else" by turn
+				spans = append(spans, bashKeywordSpan(source, node.Position))
+			}
+			if node.ThenPos.IsValid() {
+				spans = append(spans, bashSourceSpan(node.ThenPos, "then", theme.Keyword))
+			}
+			if node.FiPos.IsValid() { // repeats down the else-chain, harmlessly
+				spans = append(spans, bashSourceSpan(node.FiPos, "fi", theme.Keyword))
+			}
+		case *syntax.CaseClause:
+			spans = append(spans, bashSourceSpan(node.Case, "case", theme.Keyword))
+			if node.In.IsValid() {
+				spans = append(spans, bashSourceSpan(node.In, "in", theme.Keyword))
+			}
+			if node.Esac.IsValid() {
+				spans = append(spans, bashSourceSpan(node.Esac, "esac", theme.Keyword))
+			}
+		case *syntax.CaseItem:
+			if node.OpPos.IsValid() {
+				spans = append(spans, bashSourceSpan(node.OpPos, node.Op.String(), theme.Operator))
+			}
+		case *syntax.WordIter:
+			if node.InPos.IsValid() {
+				spans = append(spans, bashSourceSpan(node.InPos, "in", theme.Keyword))
+			}
+		}
+		return true
+	})
+
+	sort.Slice(spans, func(i int, j int) bool {
+		if spans[i].start == spans[j].start {
+			return spans[i].end < spans[j].end
+		}
+		return spans[i].start < spans[j].start
+	})
+
+	return spans, nil
+}
+
+func bashSourceSpan(position syntax.Pos, text string, style theme.Style) sourceSpan {
+	start := int(position.Offset())
+	return sourceSpan{start: start, end: start + len(text), style: style}
+}
+
+func bashKeywordSpan(source string, position syntax.Pos) sourceSpan {
+	start := int(position.Offset())
+
+	end := start
+	for end < len(source) && source[end] >= 'a' && source[end] <= 'z' {
+		end++
+	}
+
+	return sourceSpan{start: start, end: end, style: theme.Keyword}
+}
+
+func bashLoopBodySpans(doPosition syntax.Pos, donePosition syntax.Pos) []sourceSpan {
+	var spans []sourceSpan
+
+	if doPosition.IsValid() {
+		spans = append(spans, bashSourceSpan(doPosition, "do", theme.Keyword))
+	}
+
+	if donePosition.IsValid() {
+		spans = append(spans, bashSourceSpan(donePosition, "done", theme.Keyword))
+	}
+
+	return spans
+}
+
+func bashAssignmentSpans(assignment *syntax.Assign) []sourceSpan {
+	if assignment.Name == nil {
+		return nil
+	}
+
+	nameEnd := int(assignment.Name.End().Offset())
+	spans := []sourceSpan{{
+		start: int(assignment.Name.Pos().Offset()),
+		end:   nameEnd,
+		style: theme.Block,
+	}}
+
+	valueStart := int(assignment.End().Offset())
+	if assignment.Value != nil {
+		valueStart = int(assignment.Value.Pos().Offset())
+	}
+	spans = append(spans, sourceSpan{start: nameEnd, end: valueStart, style: theme.Operator})
+
+	if assignment.Value != nil {
+		spans = append(spans, sourceSpan{
+			start: valueStart,
+			end:   int(assignment.Value.End().Offset()),
+			style: theme.Block,
+		})
+	}
+
+	return spans
+}
+
+type regexpStyle int
+
+const (
+	regexpLiteral regexpStyle = iota
+	regexpKeyword
+	regexpOperator
+	regexpPunctuation
+)
+
+type styledSpan struct {
+	start int
+	end   int
+	style regexpStyle
+}
+
+func (self regexpStyle) paint() theme.Style {
+	switch self {
+	case regexpKeyword:
+		return theme.Keyword
+	case regexpOperator:
+		return theme.Operator
+	default:
+		return theme.Block
+	}
+}
+
+func highlightRegexpPrefix(source string, retainedPrefix string, elided bool) string {
+	spans := regexpSpans(source)
+	boundary := len(retainedPrefix)
+	var output strings.Builder
+
+	for _, span := range spans {
+		if span.start >= boundary {
+			break
+		}
+
+		output.WriteString(span.style.paint()(retainedPrefix[span.start:min(span.end, boundary)]))
+	}
+
+	if elided {
+		style := regexpLiteral
+		for _, span := range spans {
+			if span.start <= boundary && boundary < span.end {
+				style = span.style
+				break
+			}
+		}
+		output.WriteString(style.paint()("…"))
+	}
+
+	return output.String()
+}
+
+func regexpSpans(source string) []styledSpan {
+	spans := make([]styledSpan, 0, len(source))
+	inCharacterClass := false
+
+	for start := 0; start < len(source); {
+		end := start + 1
+		style := regexpLiteral
+
+		switch source[start] {
+		case '\\':
+			end = regexpEscapeEnd(source, start)
+			style = regexpKeyword
+		case '[':
+			inCharacterClass = true
+			style = regexpPunctuation
+		case ']':
+			inCharacterClass = false
+			style = regexpPunctuation
+		case '-', '&':
+			if inCharacterClass {
+				style = regexpOperator
+			}
+		case '^', '$':
+			if !inCharacterClass { // inside one, "^" negates and both are otherwise literal
+				style = regexpKeyword
+			}
+		case '(', ')':
+			style = regexpPunctuation
+		case '.', '*', '+', '?', '|':
+			if !inCharacterClass {
+				style = regexpOperator
+			}
+		case '{':
+			if !inCharacterClass {
+				end = regexpRepetitionEnd(source, start)
+				style = regexpOperator
+			}
+		default:
+			_, size := utf8.DecodeRuneInString(source[start:])
+			end = start + size
+		}
+
+		if len(spans) > 0 && spans[len(spans)-1].end == start && spans[len(spans)-1].style == style {
+			spans[len(spans)-1].end = end
+		} else {
+			spans = append(spans, styledSpan{start: start, end: end, style: style})
+		}
+		start = end
+	}
+
+	return spans
+}
+
+func regexpEscapeEnd(source string, start int) int {
+	if start+1 >= len(source) {
+		return start + 1
+	}
+
+	_, size := utf8.DecodeRuneInString(source[start+1:])
+	end := start + 1 + size
+	if (source[start+1] == 'p' || source[start+1] == 'P') && end < len(source) && source[end] == '{' {
+		if closeAt := strings.IndexByte(source[end+1:], '}'); closeAt >= 0 {
+			return end + closeAt + 2
+		}
+	}
+
+	return end
+}
+
+func regexpRepetitionEnd(source string, start int) int {
+	if closeAt := strings.IndexByte(source[start+1:], '}'); closeAt >= 0 {
+		return start + closeAt + 2
+	}
+
+	return start + 1
 }
 
 func plainly(lines []string) []string {

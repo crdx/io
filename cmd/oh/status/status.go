@@ -37,24 +37,31 @@ const (
 // Label is what a row says: the name of a call, the arguments it was made with, and whatever
 // qualifies those.
 type Label struct {
-	Name        string         // the call name
-	Args        string         // the rendered arguments
-	Highlight   tool.Highlight // how the arguments are highlighted
-	Detail      string         // what qualifies the arguments
-	ReadOnly    bool           // whether the call changes nothing, which decides the colour its name is in
-	NameStyle   theme.Style    // an explicit style for a tool with its own prompt
-	Accent      string         // another part of the arguments set apart from the rest
-	AccentStyle theme.Style    // how the accent is painted
+	Name         string         // the call name
+	Args         string         // the rendered arguments
+	Highlight    tool.Highlight // how the arguments are highlighted
+	Detail       string         // what qualifies the arguments
+	ReadOnly     bool           // whether the call changes nothing, which decides the colour its name is in
+	NameStyle    theme.Style    // an explicit style for a tool with its own prompt
+	Accent       string         // another part of the arguments set apart from the rest
+	AccentStyle  theme.Style    // how the accent is painted
+	renderedArgs string         // syntax-highlighted arguments retained from the complete source
 }
 
 // Elide cuts a label to the room it has, so the row stays on the line it was printed on. What
 // qualifies the arguments is the first to go, being the least of it.
 func (self Label) Elide(room int) Label {
+	self.renderedArgs = ""
 	self.Name = elide(self.Name, room)
 	room -= width.Of(self.Name) + 1
 
 	if room > 0 {
+		completeArgs := self.Args
 		self.Args = elide(self.Args, room)
+		if self.Highlight.Kind == tool.HighlightSyntax && self.Args != completeArgs {
+			prefix := strings.TrimSuffix(self.Args, ellipsis)
+			self.renderedArgs = markdown.HighlightPrefix(completeArgs, prefix, self.Highlight.Value, true)
+		}
 		room -= width.Of(self.Args) + 1
 	} else {
 		self.Args = ""
@@ -85,6 +92,9 @@ func (self Label) render() string {
 }
 
 func (self Label) renderArgs() string {
+	if self.renderedArgs != "" {
+		return self.renderedArgs
+	}
 	if self.Highlight.Kind == tool.HighlightSyntax {
 		return markdown.Highlight(self.Args, self.Highlight.Value)
 	}

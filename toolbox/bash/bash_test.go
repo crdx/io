@@ -108,11 +108,40 @@ func TestOutputIsReturned(t *testing.T) {
 	}
 }
 
-func TestAnEmptyCommandIsRefused(t *testing.T) {
+func TestExecutionReceivesTheOriginalMultilineCommand(t *testing.T) {
 	root, directory := testRoot(t)
+	arguments := `{"command":"cat <<'EOF'\none # retained\nEOF"}`
 
-	if _, err := exec(t, root, directory, `{"command": "   "}`); err == nil {
-		t.Errorf("the empty command was accepted")
+	output, err := exec(t, root, directory, arguments)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if output != "one # retained\n" {
+		t.Errorf("got %q, want the original here-document body", output)
+	}
+}
+
+func TestAnEmptyCommandIsRefusedDuringParsing(t *testing.T) {
+	call, err := fixedShell(nil, func() sandbox.Policy { return sandbox.Policy{} }).
+		Parse(`{"command": "   "}`)
+
+	if err == nil || err.Error() != "command is required" {
+		t.Fatalf("expected the required-command error, got %v", err)
+	}
+	if call != nil {
+		t.Errorf("expected no call, got %T", call)
+	}
+}
+
+func TestInvalidBashIsRefusedDuringParsing(t *testing.T) {
+	call, err := fixedShell(nil, func() sandbox.Policy { return sandbox.Policy{} }).
+		Parse(`{"command": "if true; then"}`)
+
+	if err == nil || !strings.Contains(err.Error(), "invalid Bash command") {
+		t.Fatalf("expected an invalid Bash error, got %v", err)
+	}
+	if call != nil {
+		t.Errorf("expected no call, got %T", call)
 	}
 }
 
@@ -187,19 +216,53 @@ func TestACommandRenderingIsMarkedAsBash(t *testing.T) {
 	}
 }
 
-func TestCommandLinesAreSeparatedOnOneLine(t *testing.T) {
-	for command, want := range map[string]string{
-		"echo one\necho two":      "echo one; echo two",
-		"echo one;\necho two":     "echo one; echo two",
-		"echo one &&\necho two":   "echo one && echo two",
-		"echo one |\ngrep one":    "echo one | grep one",
-		"if true; then\necho one": "if true; then echo one",
-		"echo one\n\n\necho two":  "echo one; echo two",
+func TestCommandsAreFormattedOnOneLine(t *testing.T) {
+	for name, test := range map[string]struct {
+		command string
+		want    string
+	}{
+		"sequential":           {"echo one\necho two", "echo one; echo two"},
+		"explicit separator":   {"echo one;\necho two", "echo one; echo two"},
+		"conditional pipeline": {"echo one &&\necho two", "echo one && echo two"},
+		"pipeline":             {"echo one |\ngrep one", "echo one | grep one"},
+		"if":                   {"if true; then\necho one\nfi", "if true; then echo one; fi"},
+		"loop":                 {"for item in one two; do\necho $item\ndone", "for item in one two; do echo $item; done"},
+		"group":                {"{\necho one\n}", "{ echo one; }"},
+		"subshell":             {"(\necho one\n)", "(echo one)"},
+		"command substitution": {"echo $(\nprintf one\n)", "echo $(printf one)"},
+		"assignment":           {"GOCACHE=/tmp/io-go-cache go   list", "GOCACHE=/tmp/io-go-cache go list"},
+		"blank lines":          {"echo one\n\n\necho two", "echo one; echo two"},
 	} {
-		renderedCommand, _ := bash.Render(bash.Args{Command: command})
-		if renderedCommand != want {
-			t.Errorf("%q: got %q, want %q", command, renderedCommand, want)
+		renderedCommand, _ := bash.Render(bash.Args{Command: test.command})
+		if renderedCommand != test.want {
+			t.Errorf("%s: got %q, want %q", name, renderedCommand, test.want)
 		}
+	}
+}
+
+func TestCommentsAreOmittedFromTheRenderedSummary(t *testing.T) {
+	command := "echo one # not displayed\necho two"
+	renderedCommand, _ := bash.Render(bash.Args{Command: command})
+
+	if renderedCommand != "echo one; echo two" {
+		t.Errorf("got %q, want comments omitted", renderedCommand)
+	}
+	if !strings.Contains(command, "# not displayed") {
+		t.Error("expected the original command to remain unchanged")
+	}
+}
+
+func TestAHereDocumentIsShownByItsOpeningLineAlone(t *testing.T) {
+	renderedCommand, detail := bash.Render(bash.Args{Command: "cat <<'EOF'\none\nEOF"})
+
+	if strings.ContainsAny(renderedCommand, "\n\r\t") {
+		t.Errorf("expected one line, got %q", renderedCommand)
+	}
+	if renderedCommand != "cat <<'EOF'" {
+		t.Errorf("got %q, want the opening line without the body joined onto it", renderedCommand)
+	}
+	if detail != "3L" {
+		t.Errorf("got %q, want the original line count", detail)
 	}
 }
 
@@ -207,8 +270,8 @@ func TestACommandOverSeveralLinesSaysHowMany(t *testing.T) {
 	for command, want := range map[string]string{
 		"echo one":                  "",
 		"echo one\n":                "",
-		"echo one\necho two":        "2 lines",
-		"echo one\necho two\nls -l": "3 lines",
+		"echo one\necho two":        "2L",
+		"echo one\necho two\nls -l": "3L",
 	} {
 		if _, detail := bash.Render(bash.Args{Command: command}); detail != want {
 			t.Errorf("%q: expected %q, got %q", command, want, detail)

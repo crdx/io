@@ -40,7 +40,7 @@ func New(root *file.Root) tool.Tool {
 		return run(ctx, root, args)
 	})
 
-	return tool.ReadOnly(tool.Concurrent(tool.Focus(definedTool, util.SearchPath)))
+	return tool.ReadOnly(tool.Concurrent(tool.Syntax(tool.Focus(definedTool, util.SearchPath), "regexp")))
 }
 
 // Render describes the search out loud.

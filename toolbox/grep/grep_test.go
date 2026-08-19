@@ -226,6 +226,20 @@ func TestACancelledContextStopsTheSearch(t *testing.T) {
 	}
 }
 
+func TestCallHighlightsItsPatternAsRegexpSyntax(t *testing.T) {
+	root := testRoot(t, nil)
+	call, err := grep.New(root).Parse(`{"pattern":"foo|bar","path":"internal/file.go"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	highlightedCall, ok := call.(tool.HighlightedCall)
+	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "regexp"}
+	if !ok || highlightedCall.Highlight() != want {
+		t.Errorf("expected regexp highlighting, got %T", call)
+	}
+}
+
 func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
 	renderedPattern, detail := grep.Render(grep.Args{Pattern: "hello", Path: "."})
 	if renderedPattern != "hello" || detail != "" {

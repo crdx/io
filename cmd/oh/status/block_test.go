@@ -168,6 +168,77 @@ func TestArgumentsWithSyntaxAreHighlighted(t *testing.T) {
 	}
 }
 
+func TestElidedBashKeepsHighlightingFromTheCompleteCommand(t *testing.T) {
+	source := "go list ordinary"
+	for name, test := range map[string]struct {
+		argumentRoom int
+		plain        string
+		want         string
+	}{
+		"inside executable": {
+			2,
+			"g…",
+			theme.Function("g") + theme.Function(ellipsis),
+		},
+		"at parameter start": {
+			4,
+			"go …",
+			theme.Function("go") + theme.Block(" ") + theme.Function(ellipsis),
+		},
+		"inside parameter": {
+			6,
+			"go li…",
+			theme.Function("go") + theme.Block(" ") + theme.Function("li") + theme.Function(ellipsis),
+		},
+		"at parameter end": {
+			8,
+			"go list…",
+			theme.Function("go") + theme.Block(" ") + theme.Function("list") + theme.Block(ellipsis),
+		},
+		"inside later argument": {
+			12,
+			"go list ord…",
+			theme.Function("go") + theme.Block(" ") + theme.Function("list") + theme.Block(" ord") + theme.Block(ellipsis),
+		},
+	} {
+		label := Label{
+			Name: "bash", Args: source,
+			Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
+		}.Elide(len("bash ") + test.argumentRoom)
+		got := label.renderArgs()
+
+		if got != test.want {
+			t.Errorf("%s: got %q, want %q", name, got, test.want)
+		}
+		if plain := theme.Plain(got); plain != test.plain {
+			t.Errorf("%s: got plain text %q, want %q", name, plain, test.plain)
+		}
+		if cells := theme.Width(got); cells > test.argumentRoom {
+			t.Errorf("%s: used %d cells, want at most %d", name, cells, test.argumentRoom)
+		}
+	}
+}
+
+func TestElidedBashCountsWideUnicodeInTerminalCells(t *testing.T) {
+	argumentRoom := 8
+	label := Label{
+		Name: "bash", Args: "echo 日本語 later",
+		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
+	}.Elide(len("bash ") + argumentRoom)
+	got := label.renderArgs()
+	want := theme.Function("echo") + theme.Block(" ") + theme.Function("日") + theme.Function(ellipsis)
+
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if plain := theme.Plain(got); plain != "echo 日…" {
+		t.Errorf("got plain text %q, want %q", plain, "echo 日…")
+	}
+	if cells := theme.Width(got); cells > argumentRoom {
+		t.Errorf("used %d cells, want at most %d", cells, argumentRoom)
+	}
+}
+
 func TestAPathInTheDetailCanBeFocused(t *testing.T) {
 	label := Label{
 		Name: "grep", Args: "text", Detail: "in cmd/oh/draw.go",

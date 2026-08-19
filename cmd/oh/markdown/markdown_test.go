@@ -180,11 +180,150 @@ func TestCodeIsHighlightedWhereTheLanguageIsKnown(t *testing.T) {
 	}
 }
 
-func TestOnlyTheBashExecutableIsHighlighted(t *testing.T) {
-	got := Highlight("go test ./cmd/oh", "bash")
-	want := theme.Function("go") + theme.Block(" test ./cmd/oh")
+func TestBashCommandNamesAndFirstParametersAreHighlighted(t *testing.T) {
+	for name, test := range map[string]struct {
+		source string
+		want   string
+	}{
+		"simple": {
+			"go test ./cmd/oh",
+			theme.Function("go") + theme.Block(" ") + theme.Function("test") + theme.Block(" ./cmd/oh"),
+		},
+		"assignment": {
+			"GOCACHE=/tmp/io-go-cache go list",
+			theme.Block("GOCACHE") + theme.Operator("=") + theme.Block("/tmp/io-go-cache") +
+				theme.Block(" ") + theme.Function("go") + theme.Block(" ") + theme.Function("list"),
+		},
+		"pipeline": {
+			"printf one | grep one",
+			theme.Function("printf") + theme.Block(" ") + theme.Function("one") + theme.Block(" | ") +
+				theme.Function("grep") + theme.Block(" ") + theme.Function("one"),
+		},
+		"conditional": {
+			"go test && git status --short",
+			theme.Function("go") + theme.Block(" ") + theme.Function("test") + theme.Block(" && ") +
+				theme.Function("git") + theme.Block(" ") + theme.Function("status") + theme.Block(" --short"),
+		},
+		"command substitution": {
+			"echo one $(go list)",
+			theme.Function("echo") + theme.Block(" ") + theme.Function("one") + theme.Block(" $(") +
+				theme.Function("go") + theme.Block(" ") + theme.Function("list") + theme.Block(")"),
+		},
+		"executable only": {
+			"true",
+			theme.Function("true"),
+		},
+	} {
+		if got := Highlight(test.source, "bash"); got != test.want {
+			t.Errorf("%s: got %q, want %q", name, got, test.want)
+		}
+	}
+}
 
-	if got != want {
+func TestMalformedBashFallsBackToOnePlainRun(t *testing.T) {
+	source := "if true; then"
+	if got, want := Highlight(source, "bash"), theme.Block(source); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestBashAssignmentsAndRedirectionsAreHighlighted(t *testing.T) {
+	source := `PATCH=/tmp/change.patch; : >"$PATCH"`
+	want := theme.Block("PATCH") + theme.Operator("=") + theme.Block("/tmp/change.patch") +
+		theme.Operator(";") + theme.Block(" ") + theme.Function(":") + theme.Block(" ") + theme.Operator(">") +
+		theme.Block(`"$PATCH"`)
+
+	if got := Highlight(source, "bash"); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
+	prefix := `PATCH=/tmp/cha`
+	wantPrefix := theme.Block("PATCH") + theme.Operator("=") + theme.Block("/tmp/cha") + theme.Block("…")
+	if got := HighlightPrefix(source, prefix, "bash", true); got != wantPrefix {
+		t.Errorf("elided: got %q, want %q", got, wantPrefix)
+	}
+}
+
+func TestNestedBashSpansDoNotSliceBackwards(t *testing.T) {
+	source := `RESULT=$(printf one)`
+	want := theme.Block("RESULT") + theme.Operator("=") + theme.Block("$(printf one)")
+
+	if got := Highlight(source, "bash"); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestBashForLoopKeywordsAreHighlighted(t *testing.T) {
+	source := "for path in one; do true; done"
+	want := theme.Keyword("for") + theme.Block(" path ") + theme.Keyword("in") +
+		theme.Block(" one; ") + theme.Keyword("do") +
+		theme.Block(" ") + theme.Function("true") + theme.Operator(";") + theme.Block(" ") +
+		theme.Keyword("done")
+
+	if got := Highlight(source, "bash"); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestBashCompoundKeywordsAreHighlighted(t *testing.T) {
+	for name, test := range map[string]struct {
+		source   string
+		keywords []string
+	}{
+		"while": {"while true; do echo one; done", []string{"while", "do", "done"}},
+		"until": {"until false; do echo one; done", []string{"until", "do", "done"}},
+		"if":    {"if true; then echo one; fi", []string{"if", "then", "fi"}},
+		"else":  {"if true; then echo one; else echo two; fi", []string{"if", "then", "else", "fi"}},
+		"elif":  {"if true; then echo one; elif false; then echo two; fi", []string{"if", "then", "elif", "fi"}},
+		"case":  {"case one in one) echo one;; esac", []string{"case", "in", "esac"}},
+	} {
+		got := Highlight(test.source, "bash")
+
+		for _, keyword := range test.keywords {
+			if !strings.Contains(got, theme.Keyword(keyword)) {
+				t.Errorf("%s: expected %q painted as a keyword, got %q", name, keyword, got)
+			}
+		}
+	}
+}
+
+func TestACaseItemTerminatorIsAnOperator(t *testing.T) {
+	got := Highlight("case one in one) echo one;; esac", "bash")
+
+	if !strings.Contains(got, theme.Operator(";;")) {
+		t.Errorf("expected the terminator painted as an operator, got %q", got)
+	}
+}
+
+func TestRegexpSyntaxIsHighlighted(t *testing.T) {
+	source := `^(foo|bar)+\s[0-9]{2,4}$`
+	want := theme.Keyword("^") + theme.Block("(") + theme.Block("foo") +
+		theme.Operator("|") + theme.Block("bar") + theme.Block(")") +
+		theme.Operator("+") + theme.Keyword(`\s`) + theme.Block("[") +
+		theme.Block("0") + theme.Operator("-") + theme.Block("9") +
+		theme.Block("]") + theme.Operator("{2,4}") + theme.Keyword("$")
+
+	if got := Highlight(source, "regexp"); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestARegexpCharacterClassHoldsNoAnchors(t *testing.T) {
+	source := `[^0-9]`
+	want := theme.Block("[") + theme.Block("^0") +
+		theme.Operator("-") + theme.Block("9") + theme.Block("]")
+
+	if got := Highlight(source, "regexp"); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestElidedRegexpKeepsTheStyleOfAPartialEscape(t *testing.T) {
+	source := `foo\p{Greek}bar`
+	prefix := `foo\p{G`
+	want := theme.Block("foo") + theme.Keyword(`\p{G`) + theme.Keyword("…")
+
+	if got := HighlightPrefix(source, prefix, "regexp", true); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

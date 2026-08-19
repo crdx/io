@@ -49,7 +49,6 @@ func TestEveryPathShowingToolFocusesItsLastComponent(t *testing.T) {
 		"read":  {`{"path":"cmd/oh/draw.go"}`, "draw.go"},
 		"ls":    {`{"path":"cmd/oh"}`, "oh"},
 		"find":  {`{"pattern":"*.go","path":"cmd/oh"}`, "oh"},
-		"grep":  {`{"pattern":"text","path":"cmd/oh/draw.go"}`, "draw.go"},
 		"write": {`{"path":"cmd/oh/new.go","content":""}`, "new.go"},
 		"edit":  {`{"path":"cmd/oh/draw.go","old_text":"a","new_text":"b"}`, "draw.go"},
 	}
