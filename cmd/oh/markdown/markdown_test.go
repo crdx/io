@@ -88,8 +88,8 @@ func TestAnUnclosedFenceIsStillCode(t *testing.T) {
 		t.Errorf("expected the open block to be drawn as code, got %q", got)
 	}
 
-	if !strings.HasPrefix(theme.Plain(got[0]), "  ") {
-		t.Errorf("expected the code to be indented, got %q", got[0])
+	if strings.HasPrefix(theme.Plain(got[0]), " ") {
+		t.Errorf("expected the code to start at the left edge, got %q", got[0])
 	}
 }
 

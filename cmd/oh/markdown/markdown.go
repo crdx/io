@@ -90,17 +90,13 @@ func (self *renderer) appendWrapped(styled string) {
 }
 
 func (self *renderer) code(lines []string) {
-	lead, room := margin(self.columns, "  ")
-
 	for _, line := range lines {
 		if strings.TrimSpace(theme.Plain(line)) == "" {
 			self.rows = append(self.rows, "")
 			continue
 		}
 
-		for _, row := range width.Wrap(line, room) {
-			self.rows = append(self.rows, lead+row)
-		}
+		self.rows = append(self.rows, width.Wrap(line, self.columns)...)
 	}
 }
 
