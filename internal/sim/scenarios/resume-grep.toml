@@ -1,0 +1,12 @@
+model = "gpt-5.6-sol"
+strict = true
+
+[[turn]]
+say = "Searching the target before the process restarts."
+
+[[turn.call]]
+name = "grep"
+arguments = '{"pattern":"one","path":"target.txt"}'
+
+[[turn]]
+say = "The matching target is now safely recorded."

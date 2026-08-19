@@ -8,6 +8,8 @@ OH        := "/tmp/io-rig.oh"
 SIM       := "/tmp/io-rig.sim"
 SCENARIO  := "internal/sim/scenarios/success.toml"
 WORKSPACE := "tmp/workspace"
+STATE     := justfile_directory() / "tmp/rig-state"
+SESSIONS  := STATE / "org.crdx/oh/sessions"
 ADDRESS   := "localhost:8117"
 WIDTH     := "100"
 HEIGHT    := "24"
@@ -44,6 +46,69 @@ live scenario=SCENARIO workspace=WORKSPACE opening="" caps="rwx": harness down
     tmux split-window -t {{ SESSION }} -v -e OH_ENDPOINT_URL=http://{{ ADDRESS }} \
         {{ OH }} --workspace {{ workspace }} --caps {{ caps }} {{ opening }}
     tmux select-pane -t {{ SESSION }}.{bottom}
+
+# start an isolated session whose read snapshot can be resumed
+resume-up scenario="internal/sim/scenarios/resume-read.toml": harness down
+    rm -rf {{ STATE }} {{ WORKSPACE }}
+    mkdir -p {{ STATE }} {{ WORKSPACE }}
+    printf 'one\n' > {{ WORKSPACE }}/target.txt
+    tmux new-session -d -s {{ SESSION }} -x {{ WIDTH }} -y {{ HEIGHT }} \
+        {{ SIM }} --scenario {{ scenario }} --address {{ ADDRESS }}
+    tmux set-option -t {{ SESSION }} remain-on-exit on
+    sleep 0.3
+    tmux split-window -t {{ SESSION }} -v \
+        -e OH_ENDPOINT_URL=http://{{ ADDRESS }} -e XDG_STATE_HOME={{ STATE }} \
+        {{ OH }} --workspace {{ WORKSPACE }} --caps rw
+    tmux select-pane -t {{ SESSION }}.{bottom}
+
+# restart the fake endpoint and resume the isolated session
+resume scenario="internal/sim/scenarios/resume-edit.toml": harness
+    #!/bin/bash
+    set -euo pipefail
+    ID="$(find {{ SESSIONS }} -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | head -n 1)"
+    test -n "$ID"
+    tmux respawn-pane -k -t {{ SESSION }}.{top} \
+        {{ SIM }} --scenario {{ scenario }} --address {{ ADDRESS }}
+    sleep 0.3
+    tmux respawn-pane -k -t {{ SESSION }}.{bottom} \
+        -e OH_ENDPOINT_URL=http://{{ ADDRESS }} -e XDG_STATE_HOME={{ STATE }} \
+        {{ OH }} --caps rw --resume "$ID"
+    tmux select-pane -t {{ SESSION }}.{bottom}
+
+# stop the harness while leaving its fake endpoint available
+resume-stop:
+    tmux respawn-pane -k -t {{ SESSION }}.{bottom} /bin/true
+
+# replace the resume target while the harness is stopped
+resume-target content:
+    printf '%s\n' '{{ content }}' > {{ WORKSPACE }}/target.txt
+
+# print the isolated session journal
+resume-journal:
+    #!/bin/bash
+    set -euo pipefail
+    ID="$(find {{ SESSIONS }} -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | head -n 1)"
+    test -n "$ID"
+    cat {{ SESSIONS }}/$ID/session.jsonl
+
+# show the current resume target contents
+resume-target-show:
+    cat {{ WORKSPACE }}/target.txt
+
+# attach to the interactive rig session
+attach:
+    tmux attach-session -t {{ SESSION }}
+
+# print process status and scrollback for both resume panes
+resume-status:
+    #!/bin/bash
+    set -euo pipefail
+    FORMAT='#{pane_index} #{pane_dead} #{pane_dead_status} #{pane_current_command}'
+    tmux list-panes -t {{ SESSION }} -F "$FORMAT"
+    for POSITION in top bottom; do
+        echo "--- $POSITION ---"
+        tmux capture-pane -p -S - -t {{ SESSION }}.$POSITION
+    done
 
 # type into the harness pane and press return
 say text:

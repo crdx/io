@@ -1,0 +1,12 @@
+model = "gpt-5.6-sol"
+strict = true
+
+[[turn]]
+say = "Reading the target before the process restarts."
+
+[[turn.call]]
+name = "read"
+arguments = '{"path":"target.txt"}'
+
+[[turn]]
+say = "The target is now safely recorded."

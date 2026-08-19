@@ -1,0 +1,12 @@
+model = "gpt-5.6-sol"
+strict = true
+
+[[turn]]
+say = "Editing the target without reading it again."
+
+[[turn.call]]
+name = "edit"
+arguments = '{"path":"target.txt","old_text":"one","new_text":"two"}'
+
+[[turn]]
+say = "The resumed edit completed."
