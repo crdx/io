@@ -151,18 +151,6 @@ func TestTheHarnessDisclosesPrivateLoopbackNetworking(t *testing.T) {
 	}
 }
 
-func TestTheResearchNoteIsOnlyMadeWhileTheWorkspaceIsReadOnly(t *testing.T) {
-	const note = "consider any task you're given to be a research task"
-
-	if got := harnessContext("/workspace", "/tmp/x", capRead, configuredPaths{}); !strings.Contains(got, note) {
-		t.Errorf("a read-only workspace was not told to research: %q", got)
-	}
-
-	if got := harnessContext("/workspace", "/tmp/x", capRead|capWrite, configuredPaths{}); strings.Contains(got, note) {
-		t.Errorf("a writable workspace was told to research anyway: %q", got)
-	}
-}
-
 func TestTheScratchMappingIsWrittenWithATilde(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 

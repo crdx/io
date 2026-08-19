@@ -163,6 +163,13 @@ func tmpSection(tmpDir string) string {
 }
 
 func stateSection(workspaceDir string, currentCaps caps) string {
+	rules := strings.Join([]string{
+		"- The workspace (" + workspaceDir + ") is " + filesystem(currentCaps.has(capWrite)),
+		"- The .git directory within it (" + filepath.Join(workspaceDir, ".git") + ") is " + filesystem(currentCaps.has(capGit)),
+		"- Background processes are " + background(currentCaps.has(capBackground)),
+		"- The bash tool is " + shellAccess(currentCaps.has(capShell)),
+	}, "\n")
+
 	return hereduck.Df(
 		`
 		# State
@@ -170,30 +177,9 @@ func stateSection(workspaceDir string, currentCaps caps) string {
 		%s
 
 		These states can change at any time. You will be told what changed when it does.
-
-		%s
 	`,
-		stateRules(workspaceDir, currentCaps),
-		researchNote(currentCaps),
+		rules,
 	)
-}
-
-func researchNote(currentCaps caps) string {
-	if currentCaps.has(capWrite) {
-		return ""
-	}
-
-	return "If the workspace is read-only you should consider any task you're given to be a research task."
-}
-
-func stateRules(workspaceDir string, currentCaps caps) string {
-	return strings.Join([]string{
-		"- The workspace (" + workspaceDir + ") is " + filesystem(currentCaps.has(capWrite)),
-		"- The .git directory within it (" + filepath.Join(workspaceDir, ".git") + ") is " +
-			filesystem(currentCaps.has(capGit)),
-		"- Background processes are " + background(currentCaps.has(capBackground)),
-		"- The bash tool is " + shellAccess(currentCaps.has(capShell)),
-	}, "\n")
 }
 
 func scopeRules(extraPaths configuredPaths, currentCaps caps) string {
