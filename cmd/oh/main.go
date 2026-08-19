@@ -79,7 +79,6 @@ type Opts struct {
 	caps           caps   // initial capabilities
 }
 
-// resuming reports whether a saved session was named.
 func (self Opts) resuming() bool { return self.session != "" }
 
 func (opts InputOpts) parse() (Opts, error) {
