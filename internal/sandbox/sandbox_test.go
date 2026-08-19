@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -12,6 +13,8 @@ import (
 
 	"crdx.org/io/internal/sandbox"
 )
+
+const opensslConfigurationPath = "/etc/ssl/openssl.cnf"
 
 func TestMain(m *testing.M) {
 	sandbox.Init()
@@ -686,6 +689,39 @@ func TestOnlyTheNamedPartsOfEtcAreReachable(t *testing.T) {
 
 	if result := run(t, t.TempDir(), "ls /etc", sandbox.Policy{}); result.Code == 0 {
 		t.Errorf("the whole of /etc was listed: %q", result.Output)
+	}
+}
+
+func TestOpenSSLConfigurationIsReadableWithoutExposingItsDirectory(t *testing.T) {
+	if _, err := os.Stat(opensslConfigurationPath); err != nil {
+		t.Skipf("OpenSSL configuration is unavailable: %v", err)
+	}
+
+	result := run(t, t.TempDir(), "cat "+opensslConfigurationPath+" >/dev/null", sandbox.Policy{})
+	if result.Code != 0 {
+		t.Errorf("OpenSSL configuration is unreadable: %q", result.Output)
+	}
+
+	result = run(t, t.TempDir(), "ls /etc/ssl", sandbox.Policy{})
+	if result.Code == 0 {
+		t.Errorf("the OpenSSL configuration directory was listed: %q", result.Output)
+	}
+}
+
+func TestOpenSSLCanLoadItsSystemConfiguration(t *testing.T) {
+	if _, err := os.Stat(opensslConfigurationPath); err != nil {
+		t.Skipf("OpenSSL configuration is unavailable: %v", err)
+	}
+	if _, err := exec.LookPath("openssl"); err != nil {
+		t.Skipf("OpenSSL is unavailable: %v", err)
+	}
+
+	result := run(t, t.TempDir(), "openssl list -providers", sandbox.Policy{})
+	if result.Code != 0 {
+		t.Fatalf("OpenSSL could not load its system configuration: %q", result.Output)
+	}
+	if !strings.Contains(result.Output, "default") {
+		t.Errorf("OpenSSL did not load the default provider: %q", result.Output)
 	}
 }
 
