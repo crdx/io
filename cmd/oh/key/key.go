@@ -25,6 +25,8 @@ const (
 	Escape
 	PasteStart
 	PasteEnd
+	FocusIn
+	FocusOut
 	Unknown
 )
 
@@ -65,10 +67,11 @@ const (
 	delByte    = '\x7f'
 )
 
-// Enable turns the protocol and bracketed paste on, and Disable puts the terminal back.
+// Enable turns the keyboard protocol, bracketed paste, and focus reporting on. Disable puts the
+// terminal back.
 const (
-	Enable  = "\x1b[>1u\x1b[?2004h"
-	Disable = "\x1b[?2004l\x1b[<u"
+	Enable  = "\x1b[>1u\x1b[?2004h\x1b[?1004h"
+	Disable = "\x1b[?1004l\x1b[?2004l\x1b[<u"
 )
 
 // Next blocks until a key is pressed.
@@ -176,6 +179,10 @@ func csi(parameters string, final rune) Key {
 		return unicodeKey(parameters)
 	case '~':
 		return tilde(parameters)
+	case 'I':
+		return Key{Code: FocusIn}
+	case 'O':
+		return Key{Code: FocusOut}
 	}
 
 	code, found := letters[final]

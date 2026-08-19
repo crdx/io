@@ -57,6 +57,42 @@ func TestAnUnchangedInputIsNotDrawnAgain(t *testing.T) {
 	}
 }
 
+func TestProgressReportsAnIndeterminateTurnAndClearsIt(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := &Output{writer: screenOutput, terminal: true}
+
+	screen.Progress(true)
+	screen.Progress(true)
+	screen.Progress(false)
+
+	if got, want := screenOutput.String(), progressIndeterminate+progressClear; got != want {
+		t.Errorf("got progress report %q, want %q", got, want)
+	}
+}
+
+func TestProgressIsNotWrittenToRedirectedOutput(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := New(screenOutput)
+
+	screen.Progress(true)
+
+	if screenOutput.Len() != 0 {
+		t.Errorf("expected no progress report, got %q", screenOutput.String())
+	}
+}
+
+func TestReleaseClearsActiveProgress(t *testing.T) {
+	screen, screenOutput := screenWithInput()
+	screen.Progress(true)
+	screenOutput.Reset()
+
+	screen.Release(false)
+
+	if got := screenOutput.String(); !strings.Contains(got, progressClear) {
+		t.Errorf("expected progress to be cleared, got %q", got)
+	}
+}
+
 func TestReleasingAUsedConversationComesDownBelowIt(t *testing.T) {
 	screen, screenOutput := screenWithInput()
 

@@ -23,6 +23,15 @@ func decode(t *testing.T, input string) []Key {
 	}
 }
 
+func TestFocusReportingIsRestoredWithTheKeyboardProtocol(t *testing.T) {
+	if !strings.Contains(Enable, "\x1b[?1004h") {
+		t.Errorf("focus reporting is not enabled by %q", Enable)
+	}
+	if !strings.Contains(Disable, "\x1b[?1004l") {
+		t.Errorf("focus reporting is not disabled by %q", Disable)
+	}
+}
+
 func TestEveryLineEndingIsOneEnter(t *testing.T) {
 	for name, input := range map[string]string{
 		"cr":   "a\rb",
@@ -75,6 +84,21 @@ func TestASequenceIsNotABareEscape(t *testing.T) {
 	want := []Key{{Code: Up}, {Code: Escape}, {Code: PasteStart}, {Code: PasteEnd}}
 	if len(got) != len(want) {
 		t.Fatalf("expected %d keys, got %v", len(want), got)
+	}
+
+	for index := range want {
+		if got[index] != want[index] {
+			t.Errorf("expected %v, got %v", want[index], got[index])
+		}
+	}
+}
+
+func TestFocusChangesArriveAsKeys(t *testing.T) {
+	got := decode(t, "\x1b[I\x1b[O")
+	want := []Key{{Code: FocusIn}, {Code: FocusOut}}
+
+	if len(got) != len(want) {
+		t.Fatalf("expected %d focus changes, got %v", len(want), got)
 	}
 
 	for index := range want {

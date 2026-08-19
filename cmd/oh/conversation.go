@@ -39,10 +39,11 @@ type conversation struct {
 	queuedModeChange   bool     // whether changed capabilities should restart an interrupted turn
 	getOnWithItMessage string   // what an empty double enter sends
 
-	turn          turn    // the turn in progress
-	storedItems   int     // how many provider items have been stored
-	contextTokens int     // the input tokens reported for the last completed turn
-	transcript    []entry // the conversation as it was drawn, so it can be drawn again
+	turn            turn    // the turn in progress
+	storedItems     int     // how many provider items have been stored
+	contextTokens   int     // the input tokens reported for the last completed turn
+	terminalFocused bool    // whether the interactive terminal has focus
+	transcript      []entry // the conversation as it was drawn, so it can be drawn again
 }
 
 type entry struct {
@@ -61,6 +62,8 @@ func (self *conversation) makeIntroductions(initialPrompt string) {
 		self.plainly(history, initialPrompt)
 		return
 	}
+
+	self.terminalFocused = true
 
 	defer restore()
 	defer func() { self.screen.Release(self.log.Stored()) }()
@@ -111,6 +114,15 @@ func (self *conversation) makeIntroductions(initialPrompt string) {
 }
 
 func (self *conversation) apply(input *line.Input, history *line.History, keypress key.Key) bool {
+	switch keypress.Code {
+	case key.FocusIn:
+		self.terminalFocused = true
+		return true
+	case key.FocusOut:
+		self.terminalFocused = false
+		return true
+	}
+
 	switch input.Apply(keypress, self.turn.running) {
 	case line.Accept:
 		self.acceptInput(input, history)
@@ -404,6 +416,7 @@ func (self *conversation) start(prompt string) {
 		events:  make(chan turnEvent),
 		painter: self.newPicasso(true),
 	}
+	self.screen.Progress(true)
 
 	events := self.turn.events
 
@@ -466,6 +479,8 @@ func (self *conversation) notify(notice string) {
 }
 
 func (self *conversation) finish() {
+	self.screen.Progress(false)
+
 	if self.turn.cancelled {
 		self.recordEvent(agent.Event{Kind: agent.Interrupted})
 	}
@@ -485,7 +500,7 @@ func (self *conversation) finish() {
 	self.turn.running = false
 	self.turn.events = nil
 
-	if !self.turn.cancelled && !self.queuedTurn && !self.queuedModeChange && self.notifyTurnFinished != nil {
+	if !self.turn.cancelled && !self.queuedTurn && !self.queuedModeChange && !self.terminalFocused && self.notifyTurnFinished != nil {
 		self.notifyTurnFinished()
 	}
 

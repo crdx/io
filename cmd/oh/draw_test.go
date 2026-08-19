@@ -404,6 +404,20 @@ func TestACompletedTurnSendsADesktopNotification(t *testing.T) {
 	}
 }
 
+func TestACompletedTurnDoesNotNotifyWhileTheTerminalIsFocused(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.terminalFocused = true
+	notifications := 0
+	self.notifyTurnFinished = func() { notifications++ }
+
+	completeTurn(self)
+
+	if notifications != 0 {
+		t.Errorf("got %d notifications, want none", notifications)
+	}
+}
+
 func TestAnInterruptedTurnDoesNotSendADesktopNotification(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)

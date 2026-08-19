@@ -30,6 +30,21 @@ func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 	}
 }
 
+func TestTerminalFocusEventsAreTracked(t *testing.T) {
+	self := &conversation{terminalFocused: true}
+	input := line.NewInput(nil)
+
+	self.apply(input, nil, key.Key{Code: key.FocusOut})
+	if self.terminalFocused {
+		t.Error("expected focus-out to mark the terminal unfocused")
+	}
+
+	self.apply(input, nil, key.Key{Code: key.FocusIn})
+	if !self.terminalFocused {
+		t.Error("expected focus-in to mark the terminal focused")
+	}
+}
+
 func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 	self := &conversation{screen: output.New(&bytes.Buffer{})}
 	input := line.NewInput(nil)

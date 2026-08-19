@@ -7,15 +7,17 @@ import (
 )
 
 const (
-	up              = "\x1b[%dA"
-	right           = "\x1b[%dC"
-	clearBelow      = "\x1b[J"
-	beginFrame      = "\x1b[?2026h" // draw the whole thing before showing any of it
-	endFrame        = "\x1b[?2026l"
-	hideCursor      = "\x1b[?25l"
-	showCursor      = "\x1b[?25h"
-	clearScreen     = "\x1b[H\x1b[2J"
-	clearScrollback = "\x1b[3J" // ED2 does not push what it clears into the history, so it goes too
+	up                    = "\x1b[%dA"
+	right                 = "\x1b[%dC"
+	clearBelow            = "\x1b[J"
+	beginFrame            = "\x1b[?2026h" // draw the whole thing before showing any of it
+	endFrame              = "\x1b[?2026l"
+	hideCursor            = "\x1b[?25l"
+	showCursor            = "\x1b[?25h"
+	clearScreen           = "\x1b[H\x1b[2J"
+	clearScrollback       = "\x1b[3J" // ED2 does not push what it clears into the history, so it goes too
+	progressIndeterminate = "\x1b]9;4;3\x1b\\"
+	progressClear         = "\x1b]9;4;0\x1b\\"
 )
 
 // Synchronise holds every intermediate update back until draw has finished.
@@ -88,6 +90,32 @@ func (self *Output) Footer(rows []string, cursorRow int, cursorColumn int) {
 	self.redraw("")
 }
 
+// Progress reports whether a turn is running through the terminal progress protocol.
+func (self *Output) Progress(running bool) {
+	if !self.terminal {
+		return
+	}
+
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	self.setProgress(running)
+}
+
+func (self *Output) setProgress(running bool) {
+	if self.progress == running {
+		return
+	}
+
+	sequence := progressClear
+	if running {
+		sequence = progressIndeterminate
+	}
+
+	self.raw(sequence)
+	self.progress = running
+}
+
 // Release takes the input away. A kept conversation leaves the cursor on the line below it; an
 // unused one is erased so whatever ran the harness can reuse its line.
 func (self *Output) Release(keep bool) {
@@ -97,6 +125,8 @@ func (self *Output) Release(keep bool) {
 
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
+
+	self.setProgress(false)
 
 	landing := ""
 	if self.shownFooter.stacked {

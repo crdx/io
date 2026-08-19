@@ -30,6 +30,7 @@ type Output struct {
 
 	terminal      bool   // whether the writer is a terminal
 	pathWorkspace string // where relative paths drawn in the scrollback begin
+	progress      bool   // whether a turn is reported as running to the terminal
 
 	columns    int // the terminal width
 	lines      int // the terminal height
