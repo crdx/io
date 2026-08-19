@@ -12,6 +12,32 @@ type Params struct {
 	City string `json:"city"` // the city to report
 }
 
+func TestOutputStats(t *testing.T) {
+	for name, test := range map[string]struct {
+		output string
+		lines  int64
+		bytes  int64
+	}{
+		"empty":            {output: "", lines: 0, bytes: 0},
+		"one line":         {output: "hello", lines: 1, bytes: 5},
+		"multiple lines":   {output: "hello\nworld", lines: 2, bytes: 11},
+		"trailing newline": {output: "hello\nworld\n", lines: 2, bytes: 12},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got := tool.OutputStats(test.output)
+			want := tool.Stats{
+				Kind:       tool.StatsOutput,
+				Lines:      test.lines,
+				Bytes:      test.bytes,
+				TotalBytes: test.bytes,
+			}
+			if got != want {
+				t.Errorf("got %#v, want %#v", got, want)
+			}
+		})
+	}
+}
+
 func newTool(t *testing.T, ran *bool) tool.Tool {
 	t.Helper()
 
@@ -110,7 +136,7 @@ func TestParseTakesAbsentArgumentsAsEmpty(t *testing.T) {
 	}
 }
 
-func TestDefineMeasuredValidatesDecodedArgumentsWhenAsked(t *testing.T) {
+func TestDefineStatsValidatesDecodedArgumentsWhenAsked(t *testing.T) {
 	validationError := errors.New("London is unavailable")
 	rendered := false
 	executed := false
@@ -130,9 +156,9 @@ func TestDefineMeasuredValidatesDecodedArgumentsWhenAsked(t *testing.T) {
 			t.Fatalf("expected decoded arguments, got %#v", args)
 		}
 		return validationError
-	}).Measured(func(_ context.Context, _ Params) (string, tool.Statistics, error) {
+	}).Stats(func(_ context.Context, _ Params) (string, tool.Stats, error) {
 		executed = true
-		return "", tool.Statistics{}, nil
+		return "", tool.Stats{}, nil
 	})
 
 	call, err := subject.Parse(`{"city":"London"}`)
@@ -147,7 +173,7 @@ func TestDefineMeasuredValidatesDecodedArgumentsWhenAsked(t *testing.T) {
 	}
 }
 
-func TestDefineMeasuredDoesNotRequireValidation(t *testing.T) {
+func TestDefineStatsDoesNotRequireValidation(t *testing.T) {
 	subject := tool.Implement(
 		tool.Definition{
 			Name:        "weather",
@@ -155,8 +181,8 @@ func TestDefineMeasuredDoesNotRequireValidation(t *testing.T) {
 			Schema:      tool.Schema{tool.String("city", "the city to look up")},
 		},
 		func(args Params) (string, string) { return args.City, "" },
-	).Measured(func(_ context.Context, args Params) (string, tool.Statistics, error) {
-		return args.City, tool.Statistics{}, nil
+	).Stats(func(_ context.Context, args Params) (string, tool.Stats, error) {
+		return args.City, tool.Stats{}, nil
 	})
 
 	call, err := subject.Parse(`{"city":"London"}`)

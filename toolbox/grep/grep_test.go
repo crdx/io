@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"crdx.org/io/internal/file"
-	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 	"crdx.org/io/toolbox/grep"
 )
@@ -53,7 +52,7 @@ func execWithStats(
 	t *testing.T,
 	root *file.Root,
 	arguments string,
-) (string, tool.Statistics, error) {
+) (string, tool.Stats, error) {
 	t.Helper()
 
 	call, err := grep.New(root).Parse(arguments)
@@ -62,7 +61,7 @@ func execWithStats(
 	}
 
 	output, err := call.Exec(t.Context())
-	stats, _ := tool.Stats(call)
+	stats, _ := tool.CallStats(call)
 	return output, stats, err
 }
 
@@ -87,11 +86,8 @@ func TestTheNumberOfMatchingLinesIsReported(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if stats.Kind != tool.StatsSearch || stats.Lines != 2 || stats.Truncated {
-		t.Errorf("expected two uncapped matching lines, got %+v", stats)
-	}
-	if stats.Bytes != int64(len(output)) || stats.TotalBytes != stats.Bytes {
-		t.Errorf("expected %d returned and total bytes, got %+v", len(output), stats)
+	if want := tool.OutputStats(output); stats != want {
+		t.Errorf("got stats %+v, want %+v", stats, want)
 	}
 }
 
@@ -186,11 +182,10 @@ func TestHittingTheByteCapIsSaidOutLoud(t *testing.T) {
 	if !strings.Contains(output, "matching output exceeded 16K") {
 		t.Errorf("expected the byte cap to be reported, got the last of %q", output[len(output)-100:])
 	}
-	if stats.Lines <= 0 || !stats.Truncated {
-		t.Errorf("expected capped matching lines, got %+v", stats)
-	}
-	if stats.Bytes <= 0 || stats.Bytes > util.MaxSearchBytes || stats.TotalBytes != 0 {
-		t.Errorf("expected returned bytes and an unknown total, got %+v", stats)
+	wantStats := tool.OutputStats(output)
+	wantStats.Truncated = true
+	if stats != wantStats {
+		t.Errorf("got stats %+v, want %+v", stats, wantStats)
 	}
 }
 

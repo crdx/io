@@ -265,19 +265,24 @@ func runBatch(
 			}
 			results[index] = result
 
-			var stats *tool.Statistics
-			if measuredStats, ok := tool.Stats(item.parsedCall); ok {
-				stats = &measuredStats
+			var stats *tool.Stats
+			callStats, hasStats := tool.CallStats(item.parsedCall)
+			if item.parsedCall != nil && (!hasStats || callStats.Kind == "") {
+				callStats = tool.OutputStats(payload)
+				hasStats = true
+			}
+			if hasStats {
+				stats = &callStats
 			}
 
 			done <- Event{
-				Kind:       Result,
-				ID:         item.rawCall.ID,
-				Name:       item.rawCall.Name,
-				Text:       payload,
-				Failed:     !ok,
-				Took:       time.Since(startedAt),
-				Statistics: stats,
+				Kind:   Result,
+				ID:     item.rawCall.ID,
+				Name:   item.rawCall.Name,
+				Text:   payload,
+				Failed: !ok,
+				Took:   time.Since(startedAt),
+				Stats:  stats,
 			}
 		}()
 	}

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"crdx.org/io/internal/file"
+	"crdx.org/io/tool"
 	"crdx.org/io/toolbox/find"
 )
 
@@ -41,12 +42,25 @@ func testRoot(t *testing.T, paths ...string) *file.Root {
 func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	t.Helper()
 
+	output, _, err := execWithStats(t, root, arguments)
+	return output, err
+}
+
+func execWithStats(
+	t *testing.T,
+	root *file.Root,
+	arguments string,
+) (string, tool.Stats, error) {
+	t.Helper()
+
 	call, err := find.New(root).Parse(arguments)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	return call.Exec(t.Context())
+	output, err := call.Exec(t.Context())
+	stats, _ := tool.CallStats(call)
+	return output, stats, err
 }
 
 func TestAGlobMatchesAcrossDirectories(t *testing.T) {
@@ -136,7 +150,7 @@ func TestHittingTheByteCapIsSaidOutLoud(t *testing.T) {
 	}
 	root := testRoot(t, paths...)
 
-	output, err := exec(t, root, `{"pattern":"**/*.txt"}`)
+	output, stats, err := execWithStats(t, root, `{"pattern":"**/*.txt"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -146,6 +160,11 @@ func TestHittingTheByteCapIsSaidOutLoud(t *testing.T) {
 	}
 	if strings.Contains(output, paths[pathCount-1]) {
 		t.Errorf("expected later results to be omitted, got %q", output)
+	}
+	wantStats := tool.OutputStats(output)
+	wantStats.Truncated = true
+	if stats != wantStats {
+		t.Errorf("got stats %+v, want %+v", stats, wantStats)
 	}
 }
 

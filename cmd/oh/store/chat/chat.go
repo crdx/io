@@ -85,13 +85,13 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		}
 		writeField(&output, "Detail", event.Detail)
 		writeField(&output, "Highlight", describeHighlight(event.Highlight))
-		if event.Statistics != nil {
-			statistics, err := json.Marshal(event.Statistics)
+		if event.Stats != nil {
+			stats, err := json.Marshal(event.Stats)
 			if err != nil {
 				return err
 			}
-			output.WriteString("**Statistics**\n\n")
-			writeFence(&output, string(statistics), "json")
+			output.WriteString("**Stats**\n\n")
+			writeFence(&output, string(stats), "json")
 		}
 		if event.Text != "" {
 			output.WriteString("**Output**\n\n")

@@ -61,7 +61,7 @@ func execWithStats(
 	root *file.Root,
 	directory string,
 	arguments string,
-) (string, tool.Statistics, error) {
+) (string, tool.Stats, error) {
 	t.Helper()
 
 	policy := bash.ProtectedPolicy(sandbox.Policy{
@@ -80,7 +80,7 @@ func execWithStats(
 	}
 
 	output, err := call.Exec(t.Context())
-	stats, _ := tool.Stats(call)
+	stats, _ := tool.CallStats(call)
 	return output, stats, err
 }
 

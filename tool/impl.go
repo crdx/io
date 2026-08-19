@@ -36,24 +36,24 @@ func (self Impl[T]) Plain(exec Executor[T]) Tool {
 	})
 }
 
-// Measured builds a tool whose calls return text and resource statistics.
-func (self Impl[T]) Measured(exec MeasuredExecutor[T]) Tool {
+// Stats builds a tool whose calls return text and stats.
+func (self Impl[T]) Stats(exec StatsExecutor[T]) Tool {
 	return self.build(func(args T) Call {
-		return &measuredCall{
+		return &statsCall{
 			Call: self.call(args),
-			exec: func(ctx context.Context) (string, Statistics, error) {
+			exec: func(ctx context.Context) (string, Stats, error) {
 				return exec(ctx, args)
 			},
 		}
 	})
 }
 
-// MeasuredWithImage builds a measured tool whose calls may also return an image.
-func (self Impl[T]) MeasuredWithImage(exec MeasuredImageExecutor[T]) Tool {
+// StatsWithImage builds a tool with stats whose calls may also return an image.
+func (self Impl[T]) StatsWithImage(exec StatsWithImageExecutor[T]) Tool {
 	return self.build(func(args T) Call {
-		return &measuredImageCall{
+		return &statsWithImageCall{
 			Call: self.call(args),
-			exec: func(ctx context.Context) (string, Image, Statistics, error) {
+			exec: func(ctx context.Context) (string, Image, Stats, error) {
 				return exec(ctx, args)
 			},
 		}

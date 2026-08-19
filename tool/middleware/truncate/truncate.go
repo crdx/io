@@ -47,8 +47,8 @@ func (self capped) Parse(arguments string) (tool.Call, error) {
 type cappedCall struct {
 	tool.Call // the call whose output is capped
 
-	statistics tool.Statistics
-	measured   bool
+	stats    tool.Stats
+	hasStats bool
 }
 
 func (self *cappedCall) Highlight() tool.Highlight {
@@ -59,8 +59,8 @@ func (self *cappedCall) Highlight() tool.Highlight {
 	return tool.Highlight{}
 }
 
-func (self *cappedCall) Statistics() (tool.Statistics, bool) {
-	return self.statistics, self.measured
+func (self *cappedCall) Stats() (tool.Stats, bool) {
+	return self.stats, self.hasStats
 }
 
 func (self *cappedCall) Image() (tool.Image, bool) { return tool.AttachedImage(self.Call) }
@@ -69,11 +69,11 @@ func (self *cappedCall) Exec(ctx context.Context) (string, error) {
 	output, err := self.Call.Exec(ctx)
 	cappedOutput, returnedBytes, totalBytes := outputWithSizes(output)
 
-	self.statistics, self.measured = tool.Stats(self.Call)
-	if self.measured && (self.statistics.Kind == tool.StatsResources || returnedBytes < totalBytes) {
-		self.statistics.Bytes = int64(returnedBytes)
-		self.statistics.TotalBytes = int64(totalBytes)
-		self.statistics.Truncated = self.statistics.Truncated || returnedBytes < totalBytes
+	self.stats, self.hasStats = tool.CallStats(self.Call)
+	if self.hasStats && (self.stats.Kind == tool.StatsResources || returnedBytes < totalBytes) {
+		self.stats.Bytes = int64(returnedBytes)
+		self.stats.TotalBytes = int64(totalBytes)
+		self.stats.Truncated = self.stats.Truncated || returnedBytes < totalBytes
 	}
 
 	return cappedOutput, err

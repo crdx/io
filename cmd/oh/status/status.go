@@ -216,12 +216,12 @@ func elide(text string, room int) string {
 }
 
 type row struct {
-	label     Label            // what the row says
-	state     State            // how the call ended
-	startedAt time.Time        // when the call began
-	took      time.Duration    // how long the call took
-	failure   string           // why it ended that way, where that was a failure
-	stats     *tool.Statistics // resources or sizes measured by the tool
+	label     Label         // what the row says
+	state     State         // how the call ended
+	startedAt time.Time     // when the call began
+	took      time.Duration // how long the call took
+	failure   string        // why it ended that way, where that was a failure
+	stats     *tool.Stats   // completion stats for the result
 }
 
 // Block displays and redraws a group of tool-call rows. Nothing else may print until it closes.
@@ -286,7 +286,7 @@ func (self *Block) MarkWithStats(
 	state State,
 	took time.Duration,
 	reason string,
-	stats *tool.Statistics,
+	stats *tool.Stats,
 ) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -440,7 +440,7 @@ func (self *Block) outcome(item row) string {
 	return outcomeText(glyph(item.state), item.took, item.stats)
 }
 
-func outcomeText(mark string, took time.Duration, stats *tool.Statistics) string {
+func outcomeText(mark string, took time.Duration, stats *tool.Stats) string {
 	if stats == nil {
 		if took < patience {
 			return mark
@@ -450,11 +450,21 @@ func outcomeText(mark string, took time.Duration, stats *tool.Statistics) string
 
 	var statsText string
 	switch stats.Kind {
+	case tool.StatsOutput:
+		if stats.Bytes == 0 && stats.Lines == 0 {
+			statsText = theme.Detail("no output")
+		} else {
+			capMarker := ""
+			if stats.Truncated {
+				capMarker = "+"
+			}
+			statsText = theme.Detail(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
+		}
 	case tool.StatsResources:
 		statsText = theme.Detail(fmt.Sprintf(
-			"%s %dL %s %s %dM",
-			tokenEstimate(stats),
+			"%dL %s %s %s %dM",
 			stats.Lines,
+			tokenEstimate(stats),
 			util.CompactDuration(took),
 			util.CompactDuration(stats.CPUTime),
 			stats.PeakMemory/bytesPerMegabyte,
@@ -484,7 +494,7 @@ func outcomeText(mark string, took time.Duration, stats *tool.Statistics) string
 	return mark + " " + statsText
 }
 
-func tokenEstimate(stats *tool.Statistics) string {
+func tokenEstimate(stats *tool.Stats) string {
 	returned := util.FormatTokenEstimate(stats.Bytes, 2)
 	if stats.TotalBytes > stats.Bytes {
 		return returned + " (of " + util.FormatTokenEstimate(stats.TotalBytes, 2) + ")"

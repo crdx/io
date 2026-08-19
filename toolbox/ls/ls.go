@@ -26,7 +26,7 @@ func New(root *file.Root) tool.Tool {
 			},
 		},
 		Render,
-	).Measured(func(_ context.Context, args Args) (string, tool.Statistics, error) {
+	).Plain(func(_ context.Context, args Args) (string, error) {
 		return exec(root, args)
 	}))))
 }
@@ -40,25 +40,24 @@ func Render(args Args) (string, string) {
 	return pathutil.Shorten(args.Path), ""
 }
 
-func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
+func exec(root *file.Root, args Args) (string, error) {
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", tool.Statistics{}, err
+		return "", err
 	}
 
 	directory, err := root.Open(name)
 	if err != nil {
-		return "", tool.Statistics{}, err
+		return "", err
 	}
 
 	defer func() { _ = directory.Close() }()
 
 	entries, err := directory.ReadDir(-1)
 	if err != nil {
-		return "", tool.Statistics{}, err
+		return "", err
 	}
 
-	stats := tool.Statistics{Kind: tool.StatsList, Lines: int64(len(entries))}
 	names := make([]string, 0, len(entries))
 
 	for _, entry := range entries {
@@ -70,10 +69,10 @@ func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
 	}
 
 	if len(names) == 0 {
-		return "(empty)", stats, nil
+		return "(empty)", nil
 	}
 
 	slices.Sort(names)
 
-	return strings.Join(names, "\n"), stats, nil
+	return strings.Join(names, "\n"), nil
 }

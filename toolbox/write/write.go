@@ -32,7 +32,7 @@ func New(root *file.Root) tool.Tool {
 				},
 			},
 			Render,
-		).Measured(func(_ context.Context, args Args) (string, tool.Statistics, error) { return exec(root, args) })),
+		).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) { return exec(root, args) })),
 
 		root: root,
 	}
@@ -51,28 +51,28 @@ func Render(args Args) (string, string) {
 	return pathutil.Shorten(args.Path), util.FormatBytes(len(args.Content), 3)
 }
 
-func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
+func exec(root *file.Root, args Args) (string, tool.Stats, error) {
 	if args.Path == "" {
-		return "", tool.Statistics{}, errors.New("path is required")
+		return "", tool.Stats{}, errors.New("path is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", tool.Statistics{}, err
+		return "", tool.Stats{}, err
 	}
 
 	if err := root.RefuseWrite(name); err != nil {
-		return "", tool.Statistics{}, err
+		return "", tool.Stats{}, err
 	}
 
 	if directory := filepath.Dir(name); directory != "." {
 		if err := root.MkdirAll(directory, 0o755); err != nil {
-			return "", tool.Statistics{}, err
+			return "", tool.Stats{}, err
 		}
 	}
 
 	if err := root.WriteFile(name, []byte(args.Content), 0o644); err != nil {
-		return "", tool.Statistics{}, err
+		return "", tool.Stats{}, err
 	}
 
 	lines := int64(0)
@@ -82,7 +82,7 @@ func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
 			lines++
 		}
 	}
-	stats := tool.Statistics{
+	stats := tool.Stats{
 		Kind: tool.StatsWrite, Lines: lines, Bytes: int64(len(args.Content)),
 	}
 	return fmt.Sprintf("wrote %s to %s", util.FormatBytes(len(args.Content), 3), args.Path), stats, nil

@@ -5,6 +5,8 @@ import (
 	"context"
 	"path"
 	"time"
+
+	"crdx.org/io/internal/strutil"
 )
 
 // Tool is one operation the model can call.
@@ -47,8 +49,8 @@ type Call interface {
 	Exec(ctx context.Context) (string, error)
 }
 
-// Statistics are resources consumed by a call, where its tool can measure them.
-type Statistics struct {
+// Stats describe a call's output, changes, or measured resource use.
+type Stats struct {
 	Kind            string        `json:"kind,omitempty"`
 	CPUTime         time.Duration `json:"cpu_time,omitempty"`
 	PeakMemory      uint64        `json:"peak_memory,omitempty"`
@@ -61,8 +63,9 @@ type Statistics struct {
 	Truncated       bool          `json:"truncated,omitempty"`
 }
 
-// Statistics kinds classify call measurements.
+// Stats kinds classify call measurements.
 const (
+	StatsOutput    = "output"
 	StatsResources = "resources"
 	StatsRead      = "read"
 	StatsList      = "list"
@@ -72,19 +75,31 @@ const (
 	StatsSearch    = "search"
 )
 
-// Statistical is a call that records resource use while it runs.
-type Statistical interface {
-	Call
-	Statistics() (Statistics, bool)
+// OutputStats describes the complete output returned by a call.
+func OutputStats(output string) Stats {
+	bytes := int64(len(output))
+
+	return Stats{
+		Kind:       StatsOutput,
+		Lines:      int64(len(strutil.Lines(output))),
+		Bytes:      bytes,
+		TotalBytes: bytes,
+	}
 }
 
-// Stats returns a call's resource statistics and whether it measured any.
-func Stats(call Call) (Statistics, bool) {
-	statisticalCall, ok := call.(Statistical)
+// StatsCall is a call that reports stats after it runs.
+type StatsCall interface {
+	Call
+	Stats() (Stats, bool)
+}
+
+// CallStats returns a call's stats and whether it reported any.
+func CallStats(call Call) (Stats, bool) {
+	callWithStats, ok := call.(StatsCall)
 	if !ok {
-		return Statistics{}, false
+		return Stats{}, false
 	}
-	return statisticalCall.Statistics()
+	return callWithStats.Stats()
 }
 
 // HighlightKind identifies how a display should highlight a call's rendering.
@@ -140,9 +155,9 @@ type highlightedCall struct {
 	highlight Highlight
 }
 
-func (self highlightedCall) Highlight() Highlight           { return self.highlight }
-func (self highlightedCall) Statistics() (Statistics, bool) { return Stats(self.Call) }
-func (self highlightedCall) Image() (Image, bool)           { return AttachedImage(self.Call) }
+func (self highlightedCall) Highlight() Highlight { return self.highlight }
+func (self highlightedCall) Stats() (Stats, bool) { return CallStats(self.Call) }
+func (self highlightedCall) Image() (Image, bool) { return AttachedImage(self.Call) }
 
 // Focus sets one part of a call rendering apart, replacing any inner highlighter.
 func Focus(inner Tool, pick func(Call) string) Tool {
@@ -191,8 +206,8 @@ type Validator[T any] func(args T) error
 // Executor runs a plain tool call.
 type Executor[T any] func(ctx context.Context, args T) (string, error)
 
-// MeasuredExecutor runs a tool call and reports its resource use.
-type MeasuredExecutor[T any] func(ctx context.Context, args T) (string, Statistics, error)
+// StatsExecutor runs a tool call and reports stats.
+type StatsExecutor[T any] func(ctx context.Context, args T) (string, Stats, error)
 
-// MeasuredImageExecutor runs a measured tool call that may return an image.
-type MeasuredImageExecutor[T any] func(ctx context.Context, args T) (string, Image, Statistics, error)
+// StatsWithImageExecutor runs a tool call with stats that may return an image.
+type StatsWithImageExecutor[T any] func(ctx context.Context, args T) (string, Image, Stats, error)

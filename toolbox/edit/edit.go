@@ -32,7 +32,7 @@ func New(root *file.Root) tool.Tool {
 				},
 			},
 			Render,
-		).Measured(func(_ context.Context, args Args) (string, tool.Statistics, error) { return exec(root, args) })),
+		).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) { return exec(root, args) })),
 
 		root: root,
 	}
@@ -51,53 +51,53 @@ func Render(args Args) (string, string) {
 	return pathutil.Shorten(args.Path), ""
 }
 
-func exec(root *file.Root, args Args) (string, tool.Statistics, error) {
+func exec(root *file.Root, args Args) (string, tool.Stats, error) {
 	switch {
 	case args.Path == "":
-		return "", tool.Statistics{}, errors.New("path is required")
+		return "", tool.Stats{}, errors.New("path is required")
 	case args.OldText == "":
-		return "", tool.Statistics{}, errors.New("old_text is required")
+		return "", tool.Stats{}, errors.New("old_text is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", tool.Statistics{}, err
+		return "", tool.Stats{}, err
 	}
 
 	if err := root.RefuseWrite(name); err != nil {
-		return "", tool.Statistics{}, err
+		return "", tool.Stats{}, err
 	}
 
 	data, err := root.ReadFile(name)
 	if err != nil {
-		return "", tool.Statistics{}, err
+		return "", tool.Stats{}, err
 	}
 
 	content := string(data)
 
 	switch strings.Count(content, args.OldText) {
 	case 0:
-		return "", tool.Statistics{}, errors.New("old_text does not appear in the file")
+		return "", tool.Stats{}, errors.New("old_text does not appear in the file")
 	case 1:
 	default:
-		return "", tool.Statistics{}, errors.New(
-			"old_text appears more than once, include more context to disambiguate",
+		return "", tool.Stats{}, errors.New(
+			"old_text appears more than once — include more context to disambiguate",
 		)
 	}
 
 	info, err := root.Stat(name)
 	if err != nil {
-		return "", tool.Statistics{}, err
+		return "", tool.Stats{}, err
 	}
 
 	updatedContent := strings.Replace(content, args.OldText, args.NewText, 1)
 
 	if err := root.WriteFile(name, []byte(updatedContent), info.Mode()); err != nil {
-		return "", tool.Statistics{}, err
+		return "", tool.Stats{}, err
 	}
 
 	addedLines, removedLines := changedLines(args.OldText, args.NewText)
-	stats := tool.Statistics{Kind: tool.StatsDiff, Added: addedLines, Removed: removedLines}
+	stats := tool.Stats{Kind: tool.StatsDiff, Added: addedLines, Removed: removedLines}
 	return "edited " + args.Path, stats, nil
 }
 

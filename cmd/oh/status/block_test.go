@@ -14,43 +14,57 @@ import (
 
 const wide = 100
 
-func TestMeasuredStatisticsAreShownAfterCalls(t *testing.T) {
+func TestStatsAreShownAfterCalls(t *testing.T) {
 	for name, test := range map[string]struct {
-		stats tool.Statistics
+		stats tool.Stats
 		want  []string
 	}{
+		"output": {
+			stats: tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 1200, TotalBytes: 1200},
+			want:  []string{"4L ~300t"},
+		},
+		"empty output": {
+			stats: tool.Stats{Kind: tool.StatsOutput},
+			want:  []string{"no output"},
+		},
+		"capped output": {
+			stats: tool.Stats{
+				Kind: tool.StatsOutput, Lines: 4, Bytes: 1200, TotalBytes: 1200, Truncated: true,
+			},
+			want: []string{"4L+ ~300t"},
+		},
 		"resources": {
-			stats: tool.Statistics{
+			stats: tool.Stats{
 				Kind: tool.StatsResources, CPUTime: 800 * time.Millisecond, PeakMemory: 92 << 20, Lines: 7, Bytes: 1200,
 			},
-			want: []string{"~300t 7L 1.4s 0.8s 92M"},
+			want: []string{"7L ~300t 1.4s 0.8s 92M"},
 		},
 		"read": {
-			stats: tool.Statistics{Kind: tool.StatsRead, Lines: 42, Bytes: 1200},
+			stats: tool.Stats{Kind: tool.StatsRead, Lines: 42, Bytes: 1200},
 			want:  []string{"42L ~300t"},
 		},
 		"list": {
-			stats: tool.Statistics{Kind: tool.StatsList, Lines: 42},
+			stats: tool.Stats{Kind: tool.StatsList, Lines: 42},
 			want:  []string{"42L"},
 		},
 		"image": {
-			stats: tool.Statistics{Kind: tool.StatsImage, Bytes: 80_943, EstimatedTokens: 1536},
+			stats: tool.Stats{Kind: tool.StatsImage, Bytes: 80_943, EstimatedTokens: 1536},
 			want:  []string{"~1.5Kt"},
 		},
 		"write": {
-			stats: tool.Statistics{Kind: tool.StatsWrite, Lines: 3, Bytes: 17},
+			stats: tool.Stats{Kind: tool.StatsWrite, Lines: 3, Bytes: 17},
 			want:  []string{"3L ~5t"},
 		},
 		"diff": {
-			stats: tool.Statistics{Kind: tool.StatsDiff, Added: 3, Removed: 2},
+			stats: tool.Stats{Kind: tool.StatsDiff, Added: 3, Removed: 2},
 			want:  []string{"+3 −2"},
 		},
 		"search": {
-			stats: tool.Statistics{Kind: tool.StatsSearch, Lines: 17, Bytes: 1200},
+			stats: tool.Stats{Kind: tool.StatsSearch, Lines: 17, Bytes: 1200},
 			want:  []string{"17L ~300t"},
 		},
 		"capped search": {
-			stats: tool.Statistics{
+			stats: tool.Stats{
 				Kind: tool.StatsSearch, Lines: 100, Bytes: 32_000, TotalBytes: 80_000, Truncated: true,
 			},
 			want: []string{"100L+ ~8Kt (of ~20Kt)"},
@@ -67,36 +81,46 @@ func TestMeasuredStatisticsAreShownAfterCalls(t *testing.T) {
 	}
 }
 
-func TestStatisticsUseTheirExpectedStyles(t *testing.T) {
-	read := outcomeText("✓", 0, &tool.Statistics{Kind: tool.StatsRead, Lines: 45, Bytes: 951})
+func TestStatsUseTheirExpectedStyles(t *testing.T) {
+	output := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 951})
+	if want := theme.Detail("4L ~200t"); !strings.Contains(output, want) {
+		t.Errorf("output stats got %q, want styled %q", output, want)
+	}
+
+	emptyOutput := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsOutput})
+	if want := theme.Detail("no output"); !strings.Contains(emptyOutput, want) {
+		t.Errorf("empty output stats got %q, want styled %q", emptyOutput, want)
+	}
+
+	read := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsRead, Lines: 45, Bytes: 951})
 	if want := theme.Detail("45L ~200t"); !strings.Contains(read, want) {
-		t.Errorf("read statistics got %q, want styled %q", read, want)
+		t.Errorf("read stats got %q, want styled %q", read, want)
 	}
 
-	write := outcomeText("✓", 0, &tool.Statistics{Kind: tool.StatsWrite, Lines: 12, Bytes: 1200})
+	write := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsWrite, Lines: 12, Bytes: 1200})
 	if want := theme.Detail("12L ~300t"); !strings.Contains(write, want) {
-		t.Errorf("write statistics got %q, want styled %q", write, want)
+		t.Errorf("write stats got %q, want styled %q", write, want)
 	}
 
-	search := outcomeText("✓", 0, &tool.Statistics{
+	search := outcomeText("✓", 0, &tool.Stats{
 		Kind: tool.StatsSearch, Lines: 23, Bytes: 1200, TotalBytes: 2400, Truncated: true,
 	})
 	if want := theme.Detail("23L+ ~300t (of ~600t)"); !strings.Contains(search, want) {
-		t.Errorf("search statistics got %q, want styled %q", search, want)
+		t.Errorf("search stats got %q, want styled %q", search, want)
 	}
 
-	exec := outcomeText("✓", 0, &tool.Statistics{
+	exec := outcomeText("✓", 0, &tool.Stats{
 		Kind: tool.StatsResources, PeakMemory: 26 << 20,
 	})
-	wantExec := theme.Detail("0t 0L 0s 0s 26M")
+	wantExec := theme.Detail("0L 0t 0s 0s 26M")
 	if !strings.Contains(exec, wantExec) {
-		t.Errorf("exec statistics got %q, want styled %q", exec, wantExec)
+		t.Errorf("exec stats got %q, want styled %q", exec, wantExec)
 	}
 
-	edit := outcomeText("✓", 0, &tool.Statistics{Kind: tool.StatsDiff, Added: 2, Removed: 1})
+	edit := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsDiff, Added: 2, Removed: 1})
 	wantEdit := theme.Success("+2") + theme.Detail(" ") + theme.Failure("−1")
 	if !strings.Contains(edit, wantEdit) {
-		t.Errorf("edit statistics got %q, want styled %q", edit, wantEdit)
+		t.Errorf("edit stats got %q, want styled %q", edit, wantEdit)
 	}
 }
 

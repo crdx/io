@@ -254,6 +254,7 @@ func TestStreamAnswersEveryCallOfAFinishedTurn(t *testing.T) {
 }
 
 type oneCallProvider struct {
+	call    agent.ToolCall     // the call to make
 	sent    int                // how many turns were sent
 	results []agent.ToolResult // the results received
 }
@@ -272,7 +273,33 @@ func (self *oneCallProvider) Send(_ context.Context, _ agent.Yield) (agent.Reply
 		return agent.Reply{}, nil
 	}
 
-	return agent.Reply{Calls: []agent.ToolCall{{ID: "a", Name: "failing", Arguments: `{}`}}}, nil
+	call := self.call
+	if call.Name == "" {
+		call = agent.ToolCall{ID: "a", Name: "failing", Arguments: `{}`}
+	}
+	return agent.Reply{Calls: []agent.ToolCall{call}}, nil
+}
+
+func singleResult(t *testing.T, calledTool tool.Tool) agent.Event {
+	t.Helper()
+
+	provider := &oneCallProvider{call: agent.ToolCall{ID: "a", Name: calledTool.Name(), Arguments: `{}`}}
+	assistant := agent.New("", provider, []tool.Tool{calledTool})
+
+	var results []agent.Event
+	for event, err := range assistant.Stream(t.Context(), "go") {
+		if err != nil {
+			t.Fatal(err)
+		}
+		if event.Kind == agent.Result {
+			results = append(results, event)
+		}
+	}
+
+	if len(results) != 1 {
+		t.Fatalf("expected one result, got %d", len(results))
+	}
+	return results[0]
 }
 
 func failingTool() tool.Tool {
@@ -289,31 +316,91 @@ func failingTool() tool.Tool {
 }
 
 func TestACallThatFailedWithSomethingToSaySaysItAndIsMarkedFailed(t *testing.T) {
-	provider := &oneCallProvider{}
-	assistant := agent.New("", provider, []tool.Tool{failingTool()})
+	result := singleResult(t, failingTool())
 
-	var results []agent.Event
-
-	for event, err := range assistant.Stream(t.Context(), "go") {
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if event.Kind == agent.Result {
-			results = append(results, event)
-		}
-	}
-
-	if len(results) != 1 {
-		t.Fatalf("expected one result, got %d", len(results))
-	}
-
-	if !results[0].Failed {
+	if !result.Failed {
 		t.Error("expected the call to be marked as having failed")
 	}
 
-	if !strings.Contains(results[0].Text, "permission denied") {
-		t.Errorf("expected what the command printed, got %q", results[0].Text)
+	if !strings.Contains(result.Text, "permission denied") {
+		t.Errorf("expected what the command printed, got %q", result.Text)
+	}
+}
+
+func plainOutputTool(output string, executionError error) tool.Tool {
+	return tool.Implement(
+		tool.Definition{Name: "output", Description: "", Schema: tool.Schema{}},
+		func(struct{}) (string, string) { return "", "" },
+	).Plain(func(context.Context, struct{}) (string, error) {
+		return output, executionError
+	})
+}
+
+func statsOutputTool(output string, stats tool.Stats) tool.Tool {
+	return tool.Implement(
+		tool.Definition{Name: "output", Description: "", Schema: tool.Schema{}},
+		func(struct{}) (string, string) { return "", "" },
+	).Stats(func(context.Context, struct{}) (string, tool.Stats, error) {
+		return output, stats, nil
+	})
+}
+
+func requireStats(t *testing.T, result agent.Event, want tool.Stats) {
+	t.Helper()
+
+	if result.Stats == nil {
+		t.Fatal("expected result stats")
+	}
+	if *result.Stats != want {
+		t.Errorf("got stats %#v, want %#v", *result.Stats, want)
+	}
+}
+
+func TestAPlainCallReceivesOutputStats(t *testing.T) {
+	const output = "one\ntwo\n"
+	result := singleResult(t, plainOutputTool(output, nil))
+
+	requireStats(t, result, tool.OutputStats(output))
+}
+
+func TestAnEmptyPlainCallReceivesEmptyOutputStats(t *testing.T) {
+	result := singleResult(t, plainOutputTool("", nil))
+
+	requireStats(t, result, tool.OutputStats(""))
+}
+
+func TestAFailedExecutedCallReceivesOutputStats(t *testing.T) {
+	const output = "permission denied\nexit status 1"
+	result := singleResult(t, plainOutputTool(output, errors.New("failed")))
+
+	if !result.Failed {
+		t.Error("expected the call to be marked as having failed")
+	}
+	requireStats(t, result, tool.OutputStats(output))
+}
+
+func TestSpecialisedStatsTakePrecedenceOverOutputStats(t *testing.T) {
+	want := tool.Stats{Kind: tool.StatsSearch, Lines: 17, Bytes: 1200, TotalBytes: 2400, Truncated: true}
+	result := singleResult(t, statsOutputTool("generic output", want))
+
+	requireStats(t, result, want)
+}
+
+func TestAnEmptySpecialisedMeasurementFallsBackToOutputStats(t *testing.T) {
+	const output = "generic output"
+	result := singleResult(t, statsOutputTool(output, tool.Stats{}))
+
+	requireStats(t, result, tool.OutputStats(output))
+}
+
+func TestARefusedCallDoesNotReceiveOutputStats(t *testing.T) {
+	result := singleResult(t, refusingTool())
+
+	if !result.Failed {
+		t.Error("expected the call to be marked as having failed")
+	}
+	if result.Stats != nil {
+		t.Errorf("refused call got stats %#v", result.Stats)
 	}
 }
 

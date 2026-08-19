@@ -142,7 +142,7 @@ func (self *painter) mark(event agent.Event) {
 
 	delete(self.rows, event.ID)
 
-	self.block.MarkWithStats(index, outcome(event.Failed), event.Took, event.Text, event.Statistics)
+	self.block.MarkWithStats(index, outcome(event.Failed), event.Took, event.Text, event.Stats)
 
 	if len(self.rows) == 0 {
 		self.close(status.Done)

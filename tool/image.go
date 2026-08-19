@@ -24,17 +24,17 @@ func AttachedImage(call Call) (Image, bool) {
 	return imagedCall.Image()
 }
 
-type measuredImageCall struct {
+type statsWithImageCall struct {
 	Call
 
-	exec     func(context.Context) (string, Image, Statistics, error)
-	stats    Statistics
+	exec     func(context.Context) (string, Image, Stats, error)
+	stats    Stats
 	image    Image
 	ran      bool
 	hasImage bool
 }
 
-func (self *measuredImageCall) Exec(ctx context.Context) (string, error) {
+func (self *statsWithImageCall) Exec(ctx context.Context) (string, error) {
 	output, image, stats, err := self.exec(ctx)
 	self.stats = stats
 	self.image = image
@@ -43,10 +43,10 @@ func (self *measuredImageCall) Exec(ctx context.Context) (string, error) {
 	return output, err
 }
 
-func (self *measuredImageCall) Statistics() (Statistics, bool) {
+func (self *statsWithImageCall) Stats() (Stats, bool) {
 	return self.stats, self.ran
 }
 
-func (self *measuredImageCall) Image() (Image, bool) {
+func (self *statsWithImageCall) Image() (Image, bool) {
 	return self.image, self.hasImage
 }

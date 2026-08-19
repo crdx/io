@@ -36,7 +36,7 @@ func New(root *file.Root) tool.Tool {
 			},
 		},
 		Render,
-	).Measured(func(ctx context.Context, args Args) (string, tool.Statistics, error) {
+	).Stats(func(ctx context.Context, args Args) (string, tool.Stats, error) {
 		return run(ctx, root, args)
 	})
 
@@ -48,14 +48,14 @@ func Render(args Args) (string, string) {
 	return util.RenderSearch(args.Pattern, args.Path, args.Glob)
 }
 
-func run(ctx context.Context, root *file.Root, args Args) (string, tool.Statistics, error) {
+func run(ctx context.Context, root *file.Root, args Args) (string, tool.Stats, error) {
 	if args.Pattern == "" {
-		return "", tool.Statistics{}, errors.New("pattern is required")
+		return "", tool.Stats{}, errors.New("pattern is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", tool.Statistics{}, err
+		return "", tool.Stats{}, err
 	}
 
 	arguments := []string{
@@ -68,6 +68,7 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.Statisti
 		"--no-require-git",
 		"--glob=!.git/**",
 		"--no-messages",
+		"--max-columns=250",
 	}
 	if args.Glob != "" {
 		arguments = append(arguments, "--glob="+args.Glob)
@@ -82,17 +83,17 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.Statisti
 
 	stdout, err := command.StdoutPipe()
 	if err != nil {
-		return "", tool.Statistics{}, fmt.Errorf("could not read ripgrep output: %w", err)
+		return "", tool.Stats{}, fmt.Errorf("could not read ripgrep output: %w", err)
 	}
 
 	var stderr bytes.Buffer
 	command.Stderr = &stderr
 
 	if err := command.Start(); err != nil {
-		return "", tool.Statistics{}, fmt.Errorf("could not start ripgrep: %w", err)
+		return "", tool.Stats{}, fmt.Errorf("could not start ripgrep: %w", err)
 	}
 
-	matches, returnedBytes, truncated, readErr := readMatches(stdout, name == ".")
+	matches, truncated, readErr := readMatches(stdout, name == ".")
 	if truncated {
 		stopSearch()
 	}
@@ -100,55 +101,47 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.Statisti
 	waitErr := command.Wait()
 
 	if ctx.Err() != nil {
-		return "", tool.Statistics{}, ctx.Err()
+		return "", tool.Stats{}, ctx.Err()
 	}
 	if readErr != nil {
-		return "", tool.Statistics{}, fmt.Errorf("could not read ripgrep output: %w", readErr)
+		return "", tool.Stats{}, fmt.Errorf("could not read ripgrep output: %w", readErr)
 	}
 
 	if truncated {
-		output, stats := searchReport(matches, returnedBytes, true)
+		output, stats := searchReport(matches, true)
 		return output, stats, nil
 	}
 	if waitErr != nil {
 		var exitError *exec.ExitError
 		if errors.As(waitErr, &exitError) && exitError.ExitCode() == 1 {
-			output, stats := searchReport(nil, 0, false)
+			output, stats := searchReport(nil, false)
 			return output, stats, nil
 		}
 
 		message := strings.TrimSpace(stderr.String())
 		if strings.HasPrefix(message, "rg: regex parse error:") {
-			return "", tool.Statistics{}, fmt.Errorf("invalid pattern: %s", strings.TrimPrefix(message, "rg: "))
+			return "", tool.Stats{}, fmt.Errorf("invalid pattern: %s", strings.TrimPrefix(message, "rg: "))
 		}
 		if message != "" {
-			return "", tool.Statistics{}, errors.New(message)
+			return "", tool.Stats{}, errors.New(message)
 		}
 
-		return "", tool.Statistics{}, fmt.Errorf("grep failed: %w", waitErr)
+		return "", tool.Stats{}, fmt.Errorf("grep failed: %w", waitErr)
 	}
 
-	output, stats := searchReport(matches, returnedBytes, false)
+	output, stats := searchReport(matches, false)
 	return output, stats, nil
 }
 
-func searchReport(matches []string, returnedBytes int64, truncated bool) (string, tool.Statistics) {
+func searchReport(matches []string, truncated bool) (string, tool.Stats) {
 	output := util.ReportSearchResults(matches, truncated)
-	totalBytes := returnedBytes
-	if truncated {
-		totalBytes = 0
-	}
+	stats := tool.OutputStats(output)
+	stats.Truncated = truncated
 
-	return output, tool.Statistics{
-		Kind:       tool.StatsSearch,
-		Lines:      int64(len(matches)),
-		Bytes:      returnedBytes,
-		TotalBytes: totalBytes,
-		Truncated:  truncated,
-	}
+	return output, stats
 }
 
-func readMatches(reader io.Reader, trimWorkingDirectory bool) ([]string, int64, bool, error) {
+func readMatches(reader io.Reader, trimWorkingDirectory bool) ([]string, bool, error) {
 	bufferedReader := bufio.NewReader(reader)
 	var matches []string
 	returnedBytes := int64(0)
@@ -164,16 +157,16 @@ func readMatches(reader io.Reader, trimWorkingDirectory bool) ([]string, int64, 
 			var truncated bool
 			matches, returnedBytes, truncated = util.AppendSearchResult(matches, returnedBytes, line)
 			if truncated {
-				return matches, returnedBytes, true, nil
+				return matches, true, nil
 			}
 		}
 
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				return matches, returnedBytes, false, nil
+				return matches, false, nil
 			}
 
-			return nil, 0, false, err
+			return nil, false, err
 		}
 	}
 }

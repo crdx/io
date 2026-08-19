@@ -42,7 +42,7 @@ func New(root *file.Root) tool.Tool {
 			},
 		},
 		Render,
-	).MeasuredWithImage(func(_ context.Context, args Args) (string, tool.Image, tool.Statistics, error) {
+	).StatsWithImage(func(_ context.Context, args Args) (string, tool.Image, tool.Stats, error) {
 		return exec(root, args)
 	})
 
@@ -67,26 +67,26 @@ func span(offset int, limit int) string {
 	}
 }
 
-func exec(root *file.Root, args Args) (string, tool.Image, tool.Statistics, error) {
+func exec(root *file.Root, args Args) (string, tool.Image, tool.Stats, error) {
 	if args.Path == "" {
-		return "", tool.Image{}, tool.Statistics{}, errors.New("path is required")
+		return "", tool.Image{}, tool.Stats{}, errors.New("path is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", tool.Image{}, tool.Statistics{}, err
+		return "", tool.Image{}, tool.Stats{}, err
 	}
 
 	data, err := root.ReadFile(name)
 	if err != nil {
 		if pathError, ok := errors.AsType[*fs.PathError](err); ok {
-			return "", tool.Image{}, tool.Statistics{}, fmt.Errorf("%s: %w", args.Path, pathError.Err)
+			return "", tool.Image{}, tool.Stats{}, fmt.Errorf("%s: %w", args.Path, pathError.Err)
 		}
 
-		return "", tool.Image{}, tool.Statistics{}, err
+		return "", tool.Image{}, tool.Stats{}, err
 	}
 
-	stats := tool.Statistics{Kind: tool.StatsRead, Bytes: int64(len(data))}
+	stats := tool.Stats{Kind: tool.StatsRead, Bytes: int64(len(data))}
 	mediaType := http.DetectContentType(data)
 	if isSupportedImage(mediaType) {
 		if args.Offset > 0 || args.Limit > 0 {

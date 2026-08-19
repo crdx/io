@@ -44,10 +44,10 @@ func New(
 				},
 			},
 			Render,
-		).Validate(validate).Measured(func(ctx context.Context, args Args) (string, tool.Statistics, error) {
+		).Validate(validate).Stats(func(ctx context.Context, args Args) (string, tool.Stats, error) {
 			policy, err := fresh(ctx)
 			if err != nil {
-				return "", tool.Statistics{}, err
+				return "", tool.Stats{}, err
 			}
 			return exec(ctx, root, policy, args, processes)
 		}), "bash"),
@@ -192,9 +192,9 @@ func exec(
 	policy sandbox.Policy,
 	args Args,
 	processes *sandbox.Processes,
-) (string, tool.Statistics, error) {
+) (string, tool.Stats, error) {
 	result, err := processes.Run(ctx, root.Name(), args.Command, policy)
-	stats := tool.Statistics{
+	stats := tool.Stats{
 		Kind: tool.StatsResources, CPUTime: result.CPUTime, PeakMemory: result.PeakMemory,
 	}
 	if err != nil {

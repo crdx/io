@@ -46,16 +46,16 @@ func exec(t *testing.T, subject tool.Tool, arguments string) string {
 	return output
 }
 
-func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
+func TestStatsPassThroughTheOutputCap(t *testing.T) {
 	subject := tool.Implement(
 		tool.Definition{
-			Name:        "measured",
+			Name:        "stats",
 			Description: "measure something",
 			Schema:      tool.Schema{},
 		},
-		func(Args) (string, string) { return "measured", "" },
-	).Measured(func(context.Context, Args) (string, tool.Statistics, error) {
-		return "done", tool.Statistics{Kind: tool.StatsRead, Lines: 3, Bytes: 12}, nil
+		func(Args) (string, string) { return "stats", "" },
+	).Stats(func(context.Context, Args) (string, tool.Stats, error) {
+		return "done", tool.Stats{Kind: tool.StatsRead, Lines: 3, Bytes: 12}, nil
 	})
 
 	call, err := truncate.Tool(subject).Parse(`{}`)
@@ -66,24 +66,24 @@ func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	stats, ok := tool.Stats(call)
+	stats, ok := tool.CallStats(call)
 	if !ok || stats.Lines != 3 || stats.Bytes != 12 {
-		t.Errorf("got %+v and measured=%v", stats, ok)
+		t.Errorf("got %+v and has_stats=%v", stats, ok)
 	}
 }
 
-func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
+func TestTruncatedStatsReportReturnedAndTotalOutput(t *testing.T) {
 	t.Setenv("TMPDIR", t.TempDir())
 	whole := strings.Repeat("a line of text\n", 4000)
 	subject := tool.Implement(
 		tool.Definition{
-			Name:        "measured",
+			Name:        "stats",
 			Description: "measure something",
 			Schema:      tool.Schema{},
 		},
-		func(Args) (string, string) { return "measured", "" },
-	).Measured(func(context.Context, Args) (string, tool.Statistics, error) {
-		return whole, tool.Statistics{Kind: tool.StatsResources}, nil
+		func(Args) (string, string) { return "stats", "" },
+	).Stats(func(context.Context, Args) (string, tool.Stats, error) {
+		return whole, tool.Stats{Kind: tool.StatsResources}, nil
 	})
 
 	call, err := truncate.Tool(subject).Parse(`{}`)
@@ -94,9 +94,9 @@ func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	stats, ok := tool.Stats(call)
+	stats, ok := tool.CallStats(call)
 	if !ok || stats.Bytes <= 0 || stats.Bytes > truncate.Limit || stats.TotalBytes != int64(len(whole)) || !stats.Truncated {
-		t.Errorf("expected returned and total output statistics, got %+v and measured=%v", stats, ok)
+		t.Errorf("expected returned and total output stats, got %+v and has_stats=%v", stats, ok)
 	}
 }
 
@@ -108,8 +108,8 @@ func TestAnAttachedImagePassesThroughTheOutputCap(t *testing.T) {
 			Schema:      tool.Schema{},
 		},
 		func(Args) (string, string) { return "image", "" },
-	).MeasuredWithImage(func(context.Context, Args) (string, tool.Image, tool.Statistics, error) {
-		return "image/png image", tool.Image{MediaType: "image/png", Data: []byte{1}}, tool.Statistics{}, nil
+	).StatsWithImage(func(context.Context, Args) (string, tool.Image, tool.Stats, error) {
+		return "image/png image", tool.Image{MediaType: "image/png", Data: []byte{1}}, tool.Stats{}, nil
 	})
 
 	call, err := truncate.Tool(subject).Parse(`{}`)

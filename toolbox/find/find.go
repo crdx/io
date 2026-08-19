@@ -32,7 +32,9 @@ func New(root *file.Root) tool.Tool {
 			},
 		},
 		Render,
-	).Plain(func(_ context.Context, args Args) (string, error) { return exec(root, args) })
+	).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
+		return exec(root, args)
+	})
 
 	return tool.ReadOnly(tool.Concurrent(tool.Focus(definedTool, util.SearchPath)))
 }
@@ -42,14 +44,14 @@ func Render(args Args) (string, string) {
 	return util.RenderSearch(args.Pattern, args.Path, "")
 }
 
-func exec(root *file.Root, args Args) (string, error) {
+func exec(root *file.Root, args Args) (string, tool.Stats, error) {
 	if args.Pattern == "" {
-		return "", errors.New("pattern is required")
+		return "", tool.Stats{}, errors.New("pattern is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", err
+		return "", tool.Stats{}, err
 	}
 
 	var matches []string
@@ -78,8 +80,12 @@ func exec(root *file.Root, args Args) (string, error) {
 		return nil
 	})
 	if err != nil {
-		return "", err
+		return "", tool.Stats{}, err
 	}
 
-	return util.ReportSearchResults(matches, truncated), nil
+	output := util.ReportSearchResults(matches, truncated)
+	stats := tool.OutputStats(output)
+	stats.Truncated = truncated
+
+	return output, stats, nil
 }

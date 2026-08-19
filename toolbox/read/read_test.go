@@ -84,9 +84,9 @@ func TestAnImageReportsAnEstimateFromItsDimensions(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	stats, ok := tool.Stats(call)
+	stats, ok := tool.CallStats(call)
 	if !ok {
-		t.Fatal("expected image statistics")
+		t.Fatal("expected image stats")
 	}
 	if stats.Kind != tool.StatsImage || stats.EstimatedTokens != 4 {
 		t.Errorf("expected a four-token image estimate, got %#v", stats)
@@ -141,9 +141,9 @@ func TestALineRangeMeasuresOnlyWhatComesBack(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	stats, ok := tool.Stats(call)
+	stats, ok := tool.CallStats(call)
 	if !ok {
-		t.Fatal("expected read statistics")
+		t.Fatal("expected read stats")
 	}
 	if stats.Lines != 2 || stats.Bytes != int64(len(output)) {
 		t.Errorf("expected 2 lines and %d bytes, got %d lines and %d bytes", len(output), stats.Lines, stats.Bytes)

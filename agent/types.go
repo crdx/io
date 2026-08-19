@@ -76,18 +76,18 @@ const (
 // Name and Arguments are what a call was; Render and Detail are only how it looked at the time,
 // kept for a display that no longer has the tool to ask.
 type Event struct {
-	Kind       Kind             `json:"kind"`                // what happened
-	Text       string           `json:"text,omitempty"`      // what was said or thought
-	ID         string           `json:"id,omitempty"`        // which call
-	Name       string           `json:"name,omitempty"`      // which tool
-	Arguments  string           `json:"arguments,omitempty"` // what the tool was called with
-	Render     string           `json:"render,omitempty"`    // how the call was shown when it ran
-	Detail     string           `json:"detail,omitempty"`    // what qualified that, for a display to set apart
-	Highlight  tool.Highlight   `json:"highlight,omitzero"`  // how the rendering is highlighted
-	ReadOnly   bool             `json:"read_only,omitempty"` // whether the tool called changes nothing
-	Failed     bool             `json:"failed,omitempty"`    // whether a call came back with an error rather than a result
-	Took       time.Duration    `json:"took,omitempty"`      // how long a call took to run
-	Statistics *tool.Statistics `json:"stats,omitempty"`     // resources or sizes measured by the tool
+	Kind      Kind           `json:"kind"`                // what happened
+	Text      string         `json:"text,omitempty"`      // what was said or thought
+	ID        string         `json:"id,omitempty"`        // which call
+	Name      string         `json:"name,omitempty"`      // which tool
+	Arguments string         `json:"arguments,omitempty"` // what the tool was called with
+	Render    string         `json:"render,omitempty"`    // how the call was shown when it ran
+	Detail    string         `json:"detail,omitempty"`    // what qualified that, for a display to set apart
+	Highlight tool.Highlight `json:"highlight,omitzero"`  // how the rendering is highlighted
+	ReadOnly  bool           `json:"read_only,omitempty"` // whether the tool called changes nothing
+	Failed    bool           `json:"failed,omitempty"`    // whether a call came back with an error rather than a result
+	Took      time.Duration  `json:"took,omitempty"`      // how long a call took to run
+	Stats     *tool.Stats    `json:"stats,omitempty"`     // completion stats for a result
 }
 
 // Agent holds a conversation.
