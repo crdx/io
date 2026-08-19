@@ -70,14 +70,22 @@ func TestEveryOptionIsRead(t *testing.T) {
 		t.Errorf("expected the directory, got %q", parsedOptions.workspaceDir)
 	}
 
-	if parsedOptions := parseOptions(t, "--resume"); !parsedOptions.resume {
-		t.Errorf("expected resume, got %v", parsedOptions.resume)
-	}
-
 	id := "0347juX1xcrL9W0QKJe0cs"
 
-	if parsedOptions := parseOptions(t, "-r", id); parsedOptions.session != id || !parsedOptions.resume { // and a prompt beside it matches no pattern
+	if parsedOptions := parseOptions(t, "-r", id); parsedOptions.session != id || !parsedOptions.resuming() {
 		t.Errorf("expected the session, got %q", parsedOptions.session)
+	}
+}
+
+func TestASessionMayBeResumedWithAPromptBesideIt(t *testing.T) {
+	parsedOptions := parseOptions(t, "-r", "0347juX1xcrL9W0QKJe0cs", "carry", "on")
+
+	if !parsedOptions.resuming() {
+		t.Error("expected the session to be resumed")
+	}
+
+	if parsedOptions.initialMessage != "carry on" {
+		t.Errorf("expected the prompt beside it, got %q", parsedOptions.initialMessage)
 	}
 }
 
@@ -579,30 +587,22 @@ func TestACommitOnlyShellWithNoRepositoryChangesNothing(t *testing.T) {
 	}
 }
 
-func TestArgumentsThatContradictEachOtherAreRefused(t *testing.T) {
-	for name, opts := range map[string]InputOpts{
-		"a picker and a directory":  {Resume: true, WorkspaceDir: "somewhere"},
-		"a session and a directory": {Resume: true, Session: "one", WorkspaceDir: "somewhere"},
-	} {
-		if _, err := opts.parse(); err == nil {
-			t.Errorf("%s: expected an error", name)
-		}
+func TestAWorkspaceCannotBeGivenWhenResuming(t *testing.T) {
+	opts := InputOpts{Session: "one", WorkspaceDir: "somewhere"}
+	if _, err := opts.parse(); err == nil {
+		t.Error("expected an error")
 	}
 }
 
 func TestAResumedConversationMayBeGrantedSomethingElse(t *testing.T) {
-	for name, opts := range map[string]InputOpts{
-		"a session and a cap": {Resume: true, Session: "one", Caps: "rx"},
-		"a picker and a cap":  {Resume: true, Caps: "rx"},
-	} {
-		settledOptions, err := opts.parse()
-		if err != nil {
-			t.Errorf("%s: unexpected error: %v", name, err)
-		}
+	opts := InputOpts{Session: "one", Caps: "rx"}
+	settledOptions, err := opts.parse()
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
 
-		if settledOptions.caps.has(capWrite) {
-			t.Errorf("%s: expected writing to be held back", name)
-		}
+	if settledOptions.caps.has(capWrite) {
+		t.Error("expected writing to be held back")
 	}
 }
 
@@ -632,7 +632,7 @@ func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *conve
 func TestStartingAgainNamesTheSessionAndKeepsTheMode(t *testing.T) {
 	self := conversationFixture(t, true, capRead|capWrite|capShell)
 
-	want := []string{"--resume", self.log.ID(), "--caps", "rwx"}
+	want := []string{"-r", self.log.ID(), "--caps", "rwx"}
 
 	if got := self.restartArguments(); !slices.Equal(got, want) {
 		t.Errorf("expected %v, got %v", want, got)
@@ -645,7 +645,7 @@ func TestStartingAgainAsksForWhateverWasSwappedMidConversation(t *testing.T) {
 	self.mode.Toggle(capWrite)
 	self.mode.Toggle(capGit)
 
-	want := []string{"--resume", self.log.ID(), "--caps", "rxg"}
+	want := []string{"-r", self.log.ID(), "--caps", "rxg"}
 
 	if got := self.restartArguments(); !slices.Equal(got, want) {
 		t.Errorf("expected %v, got %v", want, got)

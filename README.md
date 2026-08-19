@@ -79,6 +79,14 @@ A coding harness.
 go run ./cmd/oh
 ```
 
+### ohs
+
+Choose and resume an `oh` session.
+
+```bash
+go run ./cmd/ohs
+```
+
 ### simulate
 
 Run simulation scenarios defined in TOML files.

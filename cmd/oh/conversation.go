@@ -212,7 +212,7 @@ func (self *conversation) restartArguments() []string {
 	var arguments []string
 
 	if self.log.Stored() {
-		arguments = append(arguments, "--resume", self.log.ID())
+		arguments = append(arguments, "-r", self.log.ID())
 	} else {
 		arguments = append(arguments, "--workspace", self.workspaceDir)
 	}

@@ -3,6 +3,7 @@ set shell := ["bash", "-cu", "-o", "pipefail"]
 
 SESSION   := "io-rig"
 BIN       := "/tmp/io-rig.test"
+PICKER    := "/tmp/io-rig-picker.test"
 OH        := "/tmp/io-rig.oh"
 SIM       := "/tmp/io-rig.sim"
 SCENARIO  := "internal/sim/scenarios/success.toml"
@@ -22,7 +23,11 @@ up pass="TestVisual": build down
     tmux set-option -t {{ SESSION }} remain-on-exit on
 
 # start the pane on the session picker instead
-pick: (up "TestPick")
+pick: down
+    go test -c -o {{ PICKER }} ./cmd/ohs/
+    tmux new-session -d -s {{ SESSION }} -x {{ WIDTH }} -y {{ HEIGHT }} \
+        -e RIG=1 {{ PICKER }} -test.run TestPick
+    tmux set-option -t {{ SESSION }} remain-on-exit on
 
 # build the harness and the stand-in endpoint
 harness:

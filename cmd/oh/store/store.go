@@ -1,4 +1,4 @@
-// Package store gives oh's metadata and picker views to the core session journal.
+// Package store adds oh's metadata and auxiliary recorders to the core session journal.
 package store
 
 import (

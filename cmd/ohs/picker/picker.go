@@ -13,8 +13,8 @@ import (
 
 	"golang.org/x/term"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/key"
-	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/theme"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/width"
@@ -30,9 +30,38 @@ const (
 // ErrCancelled is the choice being abandoned, which is not a failure and is not a choice either.
 var ErrCancelled = errors.New("cancelled")
 
-// Session shows the sessions newest first and returns the chosen one. Abandoning the choice is
+// Session is the part of a stored session shown by the picker.
+type Session struct {
+	ID           string
+	WorkspaceDir string
+	Touched      time.Time
+	Events       []agent.Event
+}
+
+// FirstPrompt is the first prompt in the session.
+func (self *Session) FirstPrompt() string {
+	for _, event := range self.Events {
+		if event.Kind == agent.Prompt {
+			return event.Text
+		}
+	}
+	return ""
+}
+
+// Messages counts prompts and answers, excluding working events.
+func (self *Session) Messages() int {
+	count := 0
+	for _, event := range self.Events {
+		if event.Kind == agent.Prompt || event.Kind == agent.Text {
+			count++
+		}
+	}
+	return count
+}
+
+// Choose shows the sessions newest first and returns the chosen one. Abandoning the choice is
 // ErrCancelled, so a session comes back whenever the error does not.
-func Session(sessions []*store.Session, terminal *os.File, screen io.Writer) (*store.Session, error) {
+func Choose(sessions []*Session, terminal *os.File, screen io.Writer) (*Session, error) {
 	if len(sessions) == 0 {
 		return nil, ErrCancelled
 	}
@@ -56,16 +85,16 @@ func Session(sessions []*store.Session, terminal *os.File, screen io.Writer) (*s
 }
 
 type state struct {
-	sessions []*store.Session // the sessions on offer
-	decoder  *key.Decoder     // the keyboard input
-	terminal *os.File         // the terminal being controlled
-	screen   io.Writer        // where the list is drawn
+	sessions []*Session   // the sessions on offer
+	decoder  *key.Decoder // the keyboard input
+	terminal *os.File     // the terminal being controlled
+	screen   io.Writer    // where the list is drawn
 
 	cursor int // the selected row
 	offset int // the first visible row
 }
 
-func (self *state) run() (*store.Session, error) {
+func (self *state) run() (*Session, error) {
 	for {
 		self.draw()
 
@@ -158,7 +187,7 @@ func (self *state) row(index int, width int) string {
 		mark(index == self.cursor),
 		ago(storedSession.Touched),
 		messageCount(storedSession.Messages()),
-		pathutil.Shorten(storedSession.Meta.WorkspaceDir),
+		pathutil.Shorten(storedSession.WorkspaceDir),
 		title(storedSession),
 	)
 
@@ -183,7 +212,7 @@ func mark(sessionChosen bool) string {
 	return " "
 }
 
-func title(storedSession *store.Session) string {
+func title(storedSession *Session) string {
 	askedText := storedSession.FirstPrompt()
 	if askedText == "" {
 		return "(nothing was asked)"

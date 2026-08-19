@@ -22,12 +22,16 @@ test:
 
 build:
     go build -trimpath -o dist/oh ./cmd/oh
+    go build -trimpath -o dist/ohs ./cmd/ohs
 
 check:
     steps fmt vet lint1 lint2 mega test
 
 oh *args:
     go run ./cmd/oh "$@"
+
+ohs:
+    go run ./cmd/ohs
 
 [private]
 mega:

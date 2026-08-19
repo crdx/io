@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/session"
 
 	"crdx.org/io/cmd/oh/output"
-	"crdx.org/io/cmd/oh/picker"
-	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/ohs/picker"
 )
 
 var prompts = []string{
@@ -29,11 +29,8 @@ func TestPick(t *testing.T) {
 	directory := t.TempDir()
 
 	for index, prompt := range prompts {
-		log, err := store.Create(directory, store.Meta{
-			Model:        "gpt-5.6-sol",
-			WorkspaceDir: fmt.Sprintf("/home/alice/proj/%d", index),
-			Provider:     "codex",
-		})
+		meta := fmt.Appendf(nil, `{"workspaceDir":"/home/alice/proj/%d"}`, index)
+		log, err := session.Create(directory, meta)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -47,12 +44,12 @@ func TestPick(t *testing.T) {
 		}
 	}
 
-	sessions, err := store.List(directory)
+	sessions, err := loadSessions(directory)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	chosenSession, err := picker.Session(sessions, os.Stdin, os.Stdout)
+	chosenSession, err := picker.Choose(sessions, os.Stdin, os.Stdout)
 	screen := output.New(os.Stdout)
 
 	switch {

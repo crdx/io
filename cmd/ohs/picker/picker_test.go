@@ -5,14 +5,13 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/key"
-	"crdx.org/io/cmd/oh/store"
 )
 
 func pickerState() *state {
-	sessions := make([]*store.Session, 3)
+	sessions := make([]*Session, 3)
 
 	for index := range sessions {
-		sessions[index] = &store.Session{}
+		sessions[index] = &Session{}
 	}
 
 	return &state{sessions: sessions}
@@ -66,7 +65,7 @@ func TestTheCursorStopsAtEitherEnd(t *testing.T) {
 }
 
 func TestAnEmptyListIsNothingToChooseFrom(t *testing.T) {
-	if _, err := Session(nil, nil, nil); !errors.Is(err, ErrCancelled) {
+	if _, err := Choose(nil, nil, nil); !errors.Is(err, ErrCancelled) {
 		t.Errorf("expected the choice to be abandoned, got %v", err)
 	}
 }

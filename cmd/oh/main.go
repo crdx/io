@@ -18,7 +18,6 @@ import (
 	"crdx.org/io/toolbox"
 
 	"crdx.org/io/cmd/oh/output"
-	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/theme"
@@ -29,13 +28,12 @@ const endpointVariable = "OH_ENDPOINT_URL"
 const usage = `oh — coding harness
 
 Usage:
-    $0 [options] --resume [<session>]
     $0 [options] [<prompt>...]
 
 Options:
     -d, --workspace <dir>    Set working directory and project scope
-    -r, --resume             Resume a saved session
-    -c, --caps <letters>     Capabilities: rwxgb (read, write, exec, git, bg) [default: rwx]
+    -r, --resume <session>   Resume the saved session
+    -c, --caps <flags>       Capabilities: rwxgb (read, write, exec, git, bg) [default: rwx]
     -V, --version            Show the version
     -h, --help               Show this help
 
@@ -69,25 +67,25 @@ func main() {
 type InputOpts struct {
 	Message      []string `docopt:"<prompt>"`
 	WorkspaceDir string   `docopt:"--workspace"`
-	Session      string   `docopt:"<session>"`
+	Session      string   `docopt:"--resume"`
 	Caps         string   `docopt:"--caps"`
-	Resume       bool     `docopt:"--resume"`
 	Version      bool     `docopt:"--version"`
 }
 
 type Opts struct {
 	workspaceDir   string // the workspace dir
 	initialMessage string // the first prompt
-	resume         bool   // whether to choose a session
-	session        string // the session to resume
+	session        string // the session to resume, empty to start afresh
 	caps           caps   // initial capabilities
 }
+
+// resuming reports whether a saved session was named.
+func (self Opts) resuming() bool { return self.session != "" }
 
 func (opts InputOpts) parse() (Opts, error) {
 	self := Opts{
 		workspaceDir:   opts.WorkspaceDir,
 		initialMessage: strings.Join(opts.Message, " "),
-		resume:         opts.Resume,
 		session:        opts.Session,
 	}
 
@@ -98,7 +96,7 @@ func (opts InputOpts) parse() (Opts, error) {
 
 	self.caps = grantedCaps
 
-	if self.resume && self.workspaceDir != "" {
+	if self.resuming() && self.workspaceDir != "" {
 		return self, errors.New("a resumed conversation takes its directory from the session")
 	}
 
@@ -122,14 +120,11 @@ func run() ([]string, error) {
 		return nil, err
 	}
 
-	resumedSession, err := chooseSession(args.resume, args.session)
-
-	switch {
-	case errors.Is(err, picker.ErrCancelled):
-		return nil, nil
-	case err != nil:
+	resumedSession, err := loadSession(args.session)
+	if err != nil {
 		return nil, err
-	case resumedSession != nil:
+	}
+	if resumedSession != nil {
 		if resumedSession.Meta.Provider != "" && resumedSession.Meta.Provider != "codex" {
 			return nil, fmt.Errorf("cannot resume a %s session with codex", resumedSession.Meta.Provider)
 		}
@@ -341,7 +336,7 @@ func run() ([]string, error) {
 }
 
 func resumeParams(id string) string {
-	return fmt.Sprintf("%s --resume %s", filepath.Base(os.Args[0]), id)
+	return fmt.Sprintf("%s -r %s", filepath.Base(os.Args[0]), id)
 }
 
 func connect(endpoint string) *codex.Client {
@@ -355,25 +350,12 @@ func connect(endpoint string) *codex.Client {
 	return client
 }
 
-func chooseSession(resume bool, id string) (*store.Session, error) {
-	if !resume {
+func loadSession(id string) (*store.Session, error) {
+	if id == "" {
 		return nil, nil
 	}
 
-	if id != "" {
-		return store.Read(sessionsDir(), id)
-	}
-
-	sessions, err := store.List(sessionsDir())
-	if err != nil {
-		return nil, err
-	}
-
-	if len(sessions) == 0 {
-		return nil, errors.New("there are no stored conversations")
-	}
-
-	return picker.Session(sessions, os.Stdin, os.Stdout)
+	return store.Read(sessionsDir(), id)
 }
 
 func openTmpDir(id string) (string, error) {
