@@ -83,9 +83,11 @@ func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.S
 		}
 	}
 
-	if err := root.WriteFile(name, []byte(args.Content), 0o644); err != nil {
+	writtenContent := []byte(args.Content)
+	if err := root.WriteFile(name, writtenContent, 0o644); err != nil {
 		return "", tool.Stats{}, err
 	}
+	snapshots.Record(root, name, writtenContent)
 
 	lines := int64(0)
 	if args.Content != "" {

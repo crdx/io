@@ -129,7 +129,7 @@ func TestWriteCanCreateAFileThatDoesNotExist(t *testing.T) {
 	}
 }
 
-func TestAnEditMakesTheReadSnapshotStale(t *testing.T) {
+func TestAnEditUpdatesTheReadSnapshot(t *testing.T) {
 	root := testRoot(t, true)
 	writeTestFile(t, root, "one\n")
 	tools := Rummage(root, file.NewSnapshots())
@@ -140,9 +140,27 @@ func TestAnEditMakesTheReadSnapshotStale(t *testing.T) {
 		t.Fatalf("unexpected read error: %v", err)
 	}
 	if err := runTool(t, editTool, `{"path":"a.txt","old_text":"one","new_text":"two"}`); err != nil {
-		t.Fatalf("unexpected edit error: %v", err)
+		t.Fatalf("unexpected first edit error: %v", err)
 	}
-	if err := runTool(t, editTool, `{"path":"a.txt","old_text":"two","new_text":"three"}`); !errors.Is(err, file.ErrChangedSinceRead) {
-		t.Errorf("expected the edit to make the snapshot stale, got %v", err)
+	if err := runTool(t, editTool, `{"path":"a.txt","old_text":"two","new_text":"three"}`); err != nil {
+		t.Fatalf("unexpected second edit error: %v", err)
+	}
+}
+
+func TestAWriteUpdatesTheReadSnapshot(t *testing.T) {
+	root := testRoot(t, true)
+	writeTestFile(t, root, "one\n")
+	tools := Rummage(root, file.NewSnapshots())
+	readTool := toolNamed(t, tools, "read")
+	writeTool := toolNamed(t, tools, "write")
+
+	if err := runTool(t, readTool, `{"path":"a.txt"}`); err != nil {
+		t.Fatalf("unexpected read error: %v", err)
+	}
+	if err := runTool(t, writeTool, `{"path":"a.txt","content":"two\n"}`); err != nil {
+		t.Fatalf("unexpected first write error: %v", err)
+	}
+	if err := runTool(t, writeTool, `{"path":"a.txt","content":"three\n"}`); err != nil {
+		t.Fatalf("unexpected second write error: %v", err)
 	}
 }

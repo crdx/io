@@ -98,9 +98,11 @@ func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.S
 
 	updatedContent := strings.Replace(content, args.OldText, args.NewText, 1)
 
-	if err := root.WriteFile(name, []byte(updatedContent), info.Mode()); err != nil {
+	updatedData := []byte(updatedContent)
+	if err := root.WriteFile(name, updatedData, info.Mode()); err != nil {
 		return "", tool.Stats{}, err
 	}
+	snapshots.Record(root, name, updatedData)
 
 	addedLines, removedLines := changedLines(args.OldText, args.NewText)
 	stats := tool.Stats{Kind: tool.StatsDiff, Added: addedLines, Removed: removedLines}
