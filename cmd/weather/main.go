@@ -14,15 +14,16 @@ func main() {
 		City string // the city to report
 	}
 
-	weather := tool.Define(
-		"weather",
-		"report weather in a city",
-		tool.Schema{tool.String("city", "the city to look up")},
-		func(args WeatherParams) (string, string) { return args.City, "" },
-		func(_ context.Context, _ WeatherParams) (string, error) {
-			return "Cloudy with a chance of meatballs.", nil
+	weather := tool.Implement(
+		tool.Definition{
+			Name:        "weather",
+			Description: "report weather in a city",
+			Schema:      tool.Schema{tool.String("city", "the city to look up")},
 		},
-	)
+		func(args WeatherParams) (string, string) { return args.City, "" },
+	).Plain(func(_ context.Context, _ WeatherParams) (string, error) {
+		return "Cloudy with a chance of meatballs.", nil
+	})
 
 	assistant := agent.New(
 		"You are a helpful weatherperson",

@@ -2,6 +2,7 @@ package tool_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"crdx.org/io/tool"
@@ -14,16 +15,17 @@ type Params struct {
 func newTool(t *testing.T, ran *bool) tool.Tool {
 	t.Helper()
 
-	return tool.Define(
-		"weather",
-		"report weather in a city",
-		tool.Schema{tool.String("city", "the city to look up")},
-		func(args Params) (string, string) { return args.City, "" },
-		func(_ context.Context, args Params) (string, error) {
-			*ran = true
-			return "raining in " + args.City, nil
+	return tool.Implement(
+		tool.Definition{
+			Name:        "weather",
+			Description: "report weather in a city",
+			Schema:      tool.Schema{tool.String("city", "the city to look up")},
 		},
-	)
+		func(args Params) (string, string) { return args.City, "" },
+	).Plain(func(_ context.Context, args Params) (string, error) {
+		*ran = true
+		return "raining in " + args.City, nil
+	})
 }
 
 func TestParseBindsTheArgumentsToTheCall(t *testing.T) {
@@ -83,5 +85,63 @@ func TestParseTakesAbsentArgumentsAsEmpty(t *testing.T) {
 
 	if renderedCall := call.Render(); renderedCall != "" {
 		t.Errorf("expected nothing rendered, got %q", renderedCall)
+	}
+}
+
+func TestDefineMeasuredValidatesDecodedArgumentsWhenAsked(t *testing.T) {
+	validationError := errors.New("London is unavailable")
+	rendered := false
+	executed := false
+
+	subject := tool.Implement(
+		tool.Definition{
+			Name:        "weather",
+			Description: "report weather in a city",
+			Schema:      tool.Schema{tool.String("city", "the city to look up")},
+		},
+		func(_ Params) (string, string) {
+			rendered = true
+			return "", ""
+		},
+	).Validate(func(args Params) error {
+		if args.City != "London" {
+			t.Fatalf("expected decoded arguments, got %#v", args)
+		}
+		return validationError
+	}).Measured(func(_ context.Context, _ Params) (string, tool.Statistics, error) {
+		executed = true
+		return "", tool.Statistics{}, nil
+	})
+
+	call, err := subject.Parse(`{"city":"London"}`)
+	if !errors.Is(err, validationError) {
+		t.Fatalf("expected validation error, got %v", err)
+	}
+	if call != nil {
+		t.Error("expected validation to prevent call construction")
+	}
+	if rendered || executed {
+		t.Error("expected validation not to render or execute the call")
+	}
+}
+
+func TestDefineMeasuredDoesNotRequireValidation(t *testing.T) {
+	subject := tool.Implement(
+		tool.Definition{
+			Name:        "weather",
+			Description: "report weather in a city",
+			Schema:      tool.Schema{tool.String("city", "the city to look up")},
+		},
+		func(args Params) (string, string) { return args.City, "" },
+	).Measured(func(_ context.Context, args Params) (string, tool.Statistics, error) {
+		return args.City, tool.Statistics{}, nil
+	})
+
+	call, err := subject.Parse(`{"city":"London"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if renderedCall := call.Render(); renderedCall != "London" {
+		t.Errorf("expected the bound arguments, got %q", renderedCall)
 	}
 }

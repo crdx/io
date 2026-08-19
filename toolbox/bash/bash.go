@@ -32,21 +32,22 @@ func New(
 	processes *sandbox.Processes,
 ) tool.Tool {
 	return shell{
-		Tool: tool.Syntax(tool.DefineMeasured(
-			"bash",
-			"run a shell command",
-			tool.Schema{
-				tool.String("command", "the command line"),
+		Tool: tool.Syntax(tool.Implement(
+			tool.Definition{
+				Name:        "bash",
+				Description: "run a shell command",
+				Schema: tool.Schema{
+					tool.String("command", "the command line"),
+				},
 			},
 			Render,
-			func(ctx context.Context, args Args) (string, tool.Statistics, error) {
-				policy, err := fresh(ctx)
-				if err != nil {
-					return "", tool.Statistics{}, err
-				}
-				return exec(ctx, root, policy, args, processes)
-			},
-		), "bash"),
+		).Measured(func(ctx context.Context, args Args) (string, tool.Statistics, error) {
+			policy, err := fresh(ctx)
+			if err != nil {
+				return "", tool.Statistics{}, err
+			}
+			return exec(ctx, root, policy, args, processes)
+		}), "bash"),
 
 		readOnly: readOnly,
 	}

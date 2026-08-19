@@ -31,19 +31,20 @@ type Args struct {
 
 // New builds the read tool confined to root.
 func New(root *file.Root) tool.Tool {
-	definedTool := tool.DefineMeasuredWithImage(
-		"read",
-		"read a text or image file",
-		tool.Schema{
-			tool.String("path", "file"),
-			tool.Integer("offset", "first line, 1-indexed").Optional(),
-			tool.Integer("limit", "max lines").Optional(),
+	definedTool := tool.Implement(
+		tool.Definition{
+			Name:        "read",
+			Description: "read a text or image file",
+			Schema: tool.Schema{
+				tool.String("path", "file"),
+				tool.Integer("offset", "first line, 1-indexed").Optional(),
+				tool.Integer("limit", "max lines").Optional(),
+			},
 		},
 		Render,
-		func(_ context.Context, args Args) (string, tool.Image, tool.Statistics, error) {
-			return exec(root, args)
-		},
-	)
+	).MeasuredWithImage(func(_ context.Context, args Args) (string, tool.Image, tool.Statistics, error) {
+		return exec(root, args)
+	})
 
 	return tool.ReadOnly(tool.Concurrent(tool.FocusPath(definedTool)))
 }

@@ -19,16 +19,17 @@ type params struct {
 }
 
 func weather(callCount *int) tool.Tool {
-	return tool.Define(
-		"weather",
-		"report weather in a city",
-		tool.Schema{tool.String("city", "the city to look up")},
-		func(args params) (string, string) { return args.City, "" },
-		func(_ context.Context, args params) (string, error) {
-			*callCount++
-			return "raining in " + args.City, nil
+	return tool.Implement(
+		tool.Definition{
+			Name:        "weather",
+			Description: "report weather in a city",
+			Schema:      tool.Schema{tool.String("city", "the city to look up")},
 		},
-	)
+		func(args params) (string, string) { return args.City, "" },
+	).Plain(func(_ context.Context, args params) (string, error) {
+		*callCount++
+		return "raining in " + args.City, nil
+	})
 }
 
 func serve(t *testing.T, scenario *sim.Scenario) (*sim.Endpoint, string) {

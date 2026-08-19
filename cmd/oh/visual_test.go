@@ -72,13 +72,17 @@ type fakeArgs struct {
 }
 
 func slowTool(name string) tool.Tool {
-	return tool.Define(name, "", tool.Schema{tool.String("path", "file")},
-		func(args fakeArgs) (string, string) { return args.Path, "" },
-		func(context.Context, fakeArgs) (string, error) {
-			time.Sleep(toolTakes)
-			return "one\ntwo\nthree", nil
+	return tool.Implement(
+		tool.Definition{
+			Name:        name,
+			Description: "",
+			Schema:      tool.Schema{tool.String("path", "file")},
 		},
-	)
+		func(args fakeArgs) (string, string) { return args.Path, "" },
+	).Plain(func(context.Context, fakeArgs) (string, error) {
+		time.Sleep(toolTakes)
+		return "one\ntwo\nthree", nil
+	})
 }
 
 func slowReadTool(name string) tool.Tool {
@@ -86,13 +90,17 @@ func slowReadTool(name string) tool.Tool {
 }
 
 func failingTool(name string) tool.Tool {
-	return tool.Define(name, "", tool.Schema{tool.String("path", "file")},
-		func(args fakeArgs) (string, string) { return args.Path, "" },
-		func(context.Context, fakeArgs) (string, error) {
-			time.Sleep(toolTakes)
-			return "", errors.New("permission denied\nnothing was written")
+	return tool.Implement(
+		tool.Definition{
+			Name:        name,
+			Description: "",
+			Schema:      tool.Schema{tool.String("path", "file")},
 		},
-	)
+		func(args fakeArgs) (string, string) { return args.Path, "" },
+	).Plain(func(context.Context, fakeArgs) (string, error) {
+		time.Sleep(toolTakes)
+		return "", errors.New("permission denied\nnothing was written")
+	})
 }
 
 func TestVisual(t *testing.T) {

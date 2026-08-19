@@ -18,15 +18,16 @@ type Args struct {
 func newTool(t *testing.T) tool.Tool {
 	t.Helper()
 
-	return tool.Define(
-		"generate",
-		"generate output",
-		tool.Schema{tool.Integer("size", "how many lines to generate")},
-		func(args Args) (string, string) { return "generate", "" },
-		func(_ context.Context, args Args) (string, error) {
-			return strings.Repeat("a line of text\n", args.Size), nil
+	return tool.Implement(
+		tool.Definition{
+			Name:        "generate",
+			Description: "generate output",
+			Schema:      tool.Schema{tool.Integer("size", "how many lines to generate")},
 		},
-	)
+		func(args Args) (string, string) { return "generate", "" },
+	).Plain(func(_ context.Context, args Args) (string, error) {
+		return strings.Repeat("a line of text\n", args.Size), nil
+	})
 }
 
 func exec(t *testing.T, subject tool.Tool, arguments string) string {
@@ -46,15 +47,16 @@ func exec(t *testing.T, subject tool.Tool, arguments string) string {
 }
 
 func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
-	subject := tool.DefineMeasured(
-		"measured",
-		"measure something",
-		tool.Schema{},
-		func(Args) (string, string) { return "measured", "" },
-		func(context.Context, Args) (string, tool.Statistics, error) {
-			return "done", tool.Statistics{Kind: tool.StatsRead, Lines: 3, Bytes: 12}, nil
+	subject := tool.Implement(
+		tool.Definition{
+			Name:        "measured",
+			Description: "measure something",
+			Schema:      tool.Schema{},
 		},
-	)
+		func(Args) (string, string) { return "measured", "" },
+	).Measured(func(context.Context, Args) (string, tool.Statistics, error) {
+		return "done", tool.Statistics{Kind: tool.StatsRead, Lines: 3, Bytes: 12}, nil
+	})
 
 	call, err := truncate.Tool(subject).Parse(`{}`)
 	if err != nil {
@@ -73,15 +75,16 @@ func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
 func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
 	t.Setenv("TMPDIR", t.TempDir())
 	whole := strings.Repeat("a line of text\n", 4000)
-	subject := tool.DefineMeasured(
-		"measured",
-		"measure something",
-		tool.Schema{},
-		func(Args) (string, string) { return "measured", "" },
-		func(context.Context, Args) (string, tool.Statistics, error) {
-			return whole, tool.Statistics{Kind: tool.StatsResources}, nil
+	subject := tool.Implement(
+		tool.Definition{
+			Name:        "measured",
+			Description: "measure something",
+			Schema:      tool.Schema{},
 		},
-	)
+		func(Args) (string, string) { return "measured", "" },
+	).Measured(func(context.Context, Args) (string, tool.Statistics, error) {
+		return whole, tool.Statistics{Kind: tool.StatsResources}, nil
+	})
 
 	call, err := truncate.Tool(subject).Parse(`{}`)
 	if err != nil {
@@ -98,15 +101,16 @@ func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
 }
 
 func TestAnAttachedImagePassesThroughTheOutputCap(t *testing.T) {
-	subject := tool.DefineMeasuredWithImage(
-		"image",
-		"return an image",
-		tool.Schema{},
-		func(Args) (string, string) { return "image", "" },
-		func(context.Context, Args) (string, tool.Image, tool.Statistics, error) {
-			return "image/png image", tool.Image{MediaType: "image/png", Data: []byte{1}}, tool.Statistics{}, nil
+	subject := tool.Implement(
+		tool.Definition{
+			Name:        "image",
+			Description: "return an image",
+			Schema:      tool.Schema{},
 		},
-	)
+		func(Args) (string, string) { return "image", "" },
+	).MeasuredWithImage(func(context.Context, Args) (string, tool.Image, tool.Statistics, error) {
+		return "image/png image", tool.Image{MediaType: "image/png", Data: []byte{1}}, tool.Statistics{}, nil
+	})
 
 	call, err := truncate.Tool(subject).Parse(`{}`)
 	if err != nil {

@@ -43,10 +43,14 @@ func (self *callProvider) Send(_ context.Context, yield agent.Yield) (agent.Repl
 }
 
 func noop() tool.Tool {
-	return tool.Concurrent(tool.Define("noop", "", tool.Schema{},
+	return tool.Concurrent(tool.Implement(
+		tool.Definition{
+			Name:        "noop",
+			Description: "",
+			Schema:      tool.Schema{},
+		},
 		func(struct{}) (string, string) { return "", "" },
-		func(context.Context, struct{}) (string, error) { return "done", nil },
-	))
+	).Plain(func(context.Context, struct{}) (string, error) { return "done", nil }))
 }
 
 func resultOutputs(provider *callProvider) []string {
@@ -123,20 +127,24 @@ func TestStreamRunsEveryCallOfAReplyAtOnce(t *testing.T) {
 
 	var concurrentCalls atomic.Int32
 
-	barrierTool := tool.Concurrent(tool.Define("noop", "", tool.Schema{},
-		func(struct{}) (string, string) { return "", "" },
-		func(context.Context, struct{}) (string, error) {
-			arrivalBarrier.Done()
-
-			select {
-			case <-release:
-				concurrentCalls.Add(1)
-			case <-time.After(time.Second):
-			}
-
-			return "done", nil
+	barrierTool := tool.Concurrent(tool.Implement(
+		tool.Definition{
+			Name:        "noop",
+			Description: "",
+			Schema:      tool.Schema{},
 		},
-	))
+		func(struct{}) (string, string) { return "", "" },
+	).Plain(func(context.Context, struct{}) (string, error) {
+		arrivalBarrier.Done()
+
+		select {
+		case <-release:
+			concurrentCalls.Add(1)
+		case <-time.After(time.Second):
+		}
+
+		return "done", nil
+	}))
 
 	provider := &callProvider{}
 
@@ -154,23 +162,27 @@ func TestStreamLeavesACallThatIsNotConcurrentOnItsOwn(t *testing.T) {
 
 	runningCalls, maxRunningCalls := 0, 0
 
-	serialTool := tool.Define("noop", "", tool.Schema{},
-		func(struct{}) (string, string) { return "", "" },
-		func(context.Context, struct{}) (string, error) {
-			mutex.Lock()
-			runningCalls++
-			maxRunningCalls = max(maxRunningCalls, runningCalls)
-			mutex.Unlock()
-
-			time.Sleep(20 * time.Millisecond)
-
-			mutex.Lock()
-			runningCalls--
-			mutex.Unlock()
-
-			return "done", nil
+	serialTool := tool.Implement(
+		tool.Definition{
+			Name:        "noop",
+			Description: "",
+			Schema:      tool.Schema{},
 		},
-	)
+		func(struct{}) (string, string) { return "", "" },
+	).Plain(func(context.Context, struct{}) (string, error) {
+		mutex.Lock()
+		runningCalls++
+		maxRunningCalls = max(maxRunningCalls, runningCalls)
+		mutex.Unlock()
+
+		time.Sleep(20 * time.Millisecond)
+
+		mutex.Lock()
+		runningCalls--
+		mutex.Unlock()
+
+		return "done", nil
+	})
 
 	provider := &callProvider{}
 
@@ -190,13 +202,17 @@ func TestStreamLeavesACallThatIsNotConcurrentOnItsOwn(t *testing.T) {
 func TestAResultSaysHowLongItsCallTook(t *testing.T) {
 	const slept = 50 * time.Millisecond
 
-	slow := tool.Concurrent(tool.Define("noop", "", tool.Schema{},
-		func(struct{}) (string, string) { return "", "" },
-		func(context.Context, struct{}) (string, error) {
-			time.Sleep(slept)
-			return "done", nil
+	slow := tool.Concurrent(tool.Implement(
+		tool.Definition{
+			Name:        "noop",
+			Description: "",
+			Schema:      tool.Schema{},
 		},
-	))
+		func(struct{}) (string, string) { return "", "" },
+	).Plain(func(context.Context, struct{}) (string, error) {
+		time.Sleep(slept)
+		return "done", nil
+	}))
 
 	assistant := agent.New("", &callProvider{}, []tool.Tool{slow})
 
@@ -260,12 +276,16 @@ func (self *oneCallProvider) Send(_ context.Context, _ agent.Yield) (agent.Reply
 }
 
 func failingTool() tool.Tool {
-	return tool.Define("failing", "", tool.Schema{},
-		func(struct{}) (string, string) { return "", "" },
-		func(context.Context, struct{}) (string, error) {
-			return "permission denied\nexit status 1", errors.New("the command failed")
+	return tool.Implement(
+		tool.Definition{
+			Name:        "failing",
+			Description: "",
+			Schema:      tool.Schema{},
 		},
-	)
+		func(struct{}) (string, string) { return "", "" },
+	).Plain(func(context.Context, struct{}) (string, error) {
+		return "permission denied\nexit status 1", errors.New("the command failed")
+	})
 }
 
 func TestACallThatFailedWithSomethingToSaySaysItAndIsMarkedFailed(t *testing.T) {

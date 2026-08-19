@@ -88,21 +88,22 @@ func newAgent(t *testing.T, url string, tools []tool.Tool) *agent.Agent {
 func weatherTool(t *testing.T, callCount *int) tool.Tool {
 	t.Helper()
 
-	return tool.Define(
-		"weather",
-		"report weather in a city",
-		tool.Schema{tool.String("city", "the city to look up")},
-		func(args WeatherParams) (string, string) { return args.City, "" },
-		func(_ context.Context, args WeatherParams) (string, error) {
-			*callCount++
-
-			if args.City != "London" {
-				t.Errorf("expected the city to be London, got %q", args.City)
-			}
-
-			return "raining in " + args.City, nil
+	return tool.Implement(
+		tool.Definition{
+			Name:        "weather",
+			Description: "report weather in a city",
+			Schema:      tool.Schema{tool.String("city", "the city to look up")},
 		},
-	)
+		func(args WeatherParams) (string, string) { return args.City, "" },
+	).Plain(func(_ context.Context, args WeatherParams) (string, error) {
+		*callCount++
+
+		if args.City != "London" {
+			t.Errorf("expected the city to be London, got %q", args.City)
+		}
+
+		return "raining in " + args.City, nil
+	})
 }
 
 func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
@@ -153,18 +154,19 @@ func TestAnImageReturnedByAToolIsSentForTheModelToInspect(t *testing.T) {
 	)
 
 	type nothing struct{}
-	viewTool := tool.DefineMeasuredWithImage(
-		"view",
-		"view an image",
-		tool.Schema{},
-		func(nothing) (string, string) { return "picture.png", "" },
-		func(context.Context, nothing) (string, tool.Image, tool.Statistics, error) {
-			return "image/png image (3 bytes)", tool.Image{
-				MediaType: "image/png",
-				Data:      []byte{1, 2, 3},
-			}, tool.Statistics{}, nil
+	viewTool := tool.Implement(
+		tool.Definition{
+			Name:        "view",
+			Description: "view an image",
+			Schema:      tool.Schema{},
 		},
-	)
+		func(nothing) (string, string) { return "picture.png", "" },
+	).MeasuredWithImage(func(context.Context, nothing) (string, tool.Image, tool.Statistics, error) {
+		return "image/png image (3 bytes)", tool.Image{
+			MediaType: "image/png",
+			Data:      []byte{1, 2, 3},
+		}, tool.Statistics{}, nil
+	})
 
 	assistant := newAgent(t, server.URL, []tool.Tool{viewTool})
 	if _, err := assistant.Send(t.Context(), "inspect the image"); err != nil {
@@ -204,13 +206,14 @@ func TestAToolWithNoArgumentsIsStillGivenASchema(t *testing.T) {
 
 	type nothing struct{}
 
-	waitingTool := tool.Define(
-		"wait",
-		"wait for something to happen",
-		tool.Schema{},
+	waitingTool := tool.Implement(
+		tool.Definition{
+			Name:        "wait",
+			Description: "wait for something to happen",
+			Schema:      tool.Schema{},
+		},
 		func(nothing) (string, string) { return "", "" },
-		func(context.Context, nothing) (string, error) { return "", nil },
-	)
+	).Plain(func(context.Context, nothing) (string, error) { return "", nil })
 
 	assistant := newAgent(t, server.URL, []tool.Tool{waitingTool})
 

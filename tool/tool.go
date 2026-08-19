@@ -3,10 +3,7 @@ package tool
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"path"
-	"strings"
 	"time"
 )
 
@@ -178,96 +175,17 @@ func (self focusedCall) Statistics() (Statistics, bool) { return Stats(self.Call
 
 func (self focusedCall) Image() (Image, bool) { return AttachedImage(self.Call) }
 
-// DefineMeasured builds a tool whose calls report resource statistics.
-func DefineMeasured[T any](
-	name string,
-	description string,
-	schema Schema,
-	render func(args T) (string, string),
-	exec func(ctx context.Context, args T) (string, Statistics, error),
-) Tool {
-	return funcTool{
-		name: name, description: description, schema: schema,
-		parse: func(arguments string) (Call, error) {
-			var args T
-			if s := strings.TrimSpace(arguments); s != "" {
-				if err := json.Unmarshal([]byte(s), &args); err != nil {
-					return nil, fmt.Errorf("could not parse the arguments: %w", err)
-				}
-			}
+// Renderer describes decoded tool arguments.
+type Renderer[T any] func(args T) (string, string)
 
-			plain := funcCall{
-				render: func() (string, string) { return render(args) },
-			}
-			return &measuredCall{
-				Call: plain,
-				exec: func(ctx context.Context) (string, Statistics, error) {
-					return exec(ctx, args)
-				},
-			}, nil
-		},
-	}
-}
+// Validator checks decoded tool arguments before a call is constructed.
+type Validator[T any] func(args T) error
 
-// DefineMeasuredWithImage builds a measured tool whose calls may also return an image.
-func DefineMeasuredWithImage[T any](
-	name string,
-	description string,
-	schema Schema,
-	render func(args T) (string, string),
-	exec func(ctx context.Context, args T) (string, Image, Statistics, error),
-) Tool {
-	return funcTool{
-		name: name, description: description, schema: schema,
-		parse: func(arguments string) (Call, error) {
-			var args T
-			if text := strings.TrimSpace(arguments); text != "" {
-				if err := json.Unmarshal([]byte(text), &args); err != nil {
-					return nil, fmt.Errorf("could not parse the arguments: %w", err)
-				}
-			}
+// Executor runs a plain tool call.
+type Executor[T any] func(ctx context.Context, args T) (string, error)
 
-			plain := funcCall{
-				render: func() (string, string) { return render(args) },
-			}
-			return &measuredImageCall{
-				Call: plain,
-				exec: func(ctx context.Context) (string, Image, Statistics, error) {
-					return exec(ctx, args)
-				},
-			}, nil
-		},
-	}
-}
+// MeasuredExecutor runs a tool call and reports its resource use.
+type MeasuredExecutor[T any] func(ctx context.Context, args T) (string, Statistics, error)
 
-// Define builds a tool from functions that render and execute its argument type.
-func Define[T any](
-	name string,
-	description string,
-	schema Schema,
-	render func(args T) (string, string),
-	exec func(ctx context.Context, args T) (string, error),
-) Tool {
-	return funcTool{
-		name:        name,
-		description: description,
-		schema:      schema,
-
-		parse: func(arguments string) (Call, error) {
-			var args T
-
-			if s := strings.TrimSpace(arguments); s != "" {
-				if err := json.Unmarshal([]byte(s), &args); err != nil {
-					return nil, fmt.Errorf("could not parse the arguments: %w", err)
-				}
-			}
-
-			return funcCall{
-				render: func() (string, string) { return render(args) },
-				exec: func(ctx context.Context) (string, error) {
-					return exec(ctx, args)
-				},
-			}, nil
-		},
-	}
-}
+// MeasuredImageExecutor runs a measured tool call that may return an image.
+type MeasuredImageExecutor[T any] func(ctx context.Context, args T) (string, Image, Statistics, error)

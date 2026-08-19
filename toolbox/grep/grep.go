@@ -25,19 +25,20 @@ type Args struct {
 
 // New builds the grep tool confined to root. A match is reported as path:line:text.
 func New(root *file.Root) tool.Tool {
-	definedTool := tool.DefineMeasured(
-		"grep",
-		"search file contents",
-		tool.Schema{
-			tool.String("pattern", "regexp"),
-			tool.String("path", "directory, defaults to working directory").Optional(),
-			tool.String("glob", "path filter, e.g. **/*.go").Optional(),
+	definedTool := tool.Implement(
+		tool.Definition{
+			Name:        "grep",
+			Description: "search file contents",
+			Schema: tool.Schema{
+				tool.String("pattern", "regexp"),
+				tool.String("path", "directory, defaults to working directory").Optional(),
+				tool.String("glob", "path filter, e.g. **/*.go").Optional(),
+			},
 		},
 		Render,
-		func(ctx context.Context, args Args) (string, tool.Statistics, error) {
-			return run(ctx, root, args)
-		},
-	)
+	).Measured(func(ctx context.Context, args Args) (string, tool.Statistics, error) {
+		return run(ctx, root, args)
+	})
 
 	return tool.ReadOnly(tool.Concurrent(tool.Focus(definedTool, util.SearchPath)))
 }

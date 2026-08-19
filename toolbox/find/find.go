@@ -19,19 +19,20 @@ type Args struct {
 
 // New builds the find tool confined to root.
 func New(root *file.Root) tool.Tool {
-	definedTool := tool.Define(
-		"find",
-		"find files",
-		tool.Schema{
-			tool.String("pattern", "glob"),
-			tool.String(
-				"path",
-				"directory, defaults to working directory",
-			).Optional(),
+	definedTool := tool.Implement(
+		tool.Definition{
+			Name:        "find",
+			Description: "find files",
+			Schema: tool.Schema{
+				tool.String("pattern", "glob"),
+				tool.String(
+					"path",
+					"directory, defaults to working directory",
+				).Optional(),
+			},
 		},
 		Render,
-		func(_ context.Context, args Args) (string, error) { return exec(root, args) },
-	)
+	).Plain(func(_ context.Context, args Args) (string, error) { return exec(root, args) })
 
 	return tool.ReadOnly(tool.Concurrent(tool.Focus(definedTool, util.SearchPath)))
 }

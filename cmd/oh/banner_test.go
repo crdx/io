@@ -47,11 +47,14 @@ func TestTheBottomRuleKeepsTheBannerBeforeItsScrollMarker(t *testing.T) {
 }
 
 func TestAccessComesFromTheToolsRatherThanTheirNames(t *testing.T) {
-	looker := tool.ReadOnly(tool.Define(
-		"peek", "", tool.Schema{},
+	looker := tool.ReadOnly(tool.Implement(
+		tool.Definition{
+			Name:        "peek",
+			Description: "",
+			Schema:      tool.Schema{},
+		},
 		func(struct{}) (string, string) { return "", "" },
-		func(context.Context, struct{}) (string, error) { return "", nil },
-	))
+	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
 
 	want := theme.Read("r") + theme.Withheld("w") + theme.Withheld("x") + theme.Withheld("g") + theme.Withheld("b")
 	if got := modes([]tool.Tool{looker}, false, false, false, false); got != want {
@@ -60,11 +63,14 @@ func TestAccessComesFromTheToolsRatherThanTheirNames(t *testing.T) {
 }
 
 func TestTheShellIsShownSeparatelyFromWriting(t *testing.T) {
-	writer := tool.Define(
-		"poke", "", tool.Schema{},
+	writer := tool.Implement(
+		tool.Definition{
+			Name:        "poke",
+			Description: "",
+			Schema:      tool.Schema{},
+		},
 		func(struct{}) (string, string) { return "", "" },
-		func(context.Context, struct{}) (string, error) { return "", nil },
-	)
+	).Plain(func(context.Context, struct{}) (string, error) { return "", nil })
 
 	want := theme.Withheld("r") + theme.Write("w") + theme.Exec("x") + theme.Withheld("g") + theme.Withheld("b")
 	if got := modes([]tool.Tool{writer}, true, false, false, false); got != want {
@@ -90,11 +96,14 @@ func TestAReadOnlyShellDoesNotOfferWriting(t *testing.T) {
 }
 
 func TestTheHistoryLetterComesFromTheMode(t *testing.T) {
-	looker := tool.ReadOnly(tool.Define(
-		"peek", "", tool.Schema{},
+	looker := tool.ReadOnly(tool.Implement(
+		tool.Definition{
+			Name:        "peek",
+			Description: "",
+			Schema:      tool.Schema{},
+		},
 		func(struct{}) (string, string) { return "", "" },
-		func(context.Context, struct{}) (string, error) { return "", nil },
-	))
+	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
 
 	want := theme.Read("r") + theme.Withheld("w") + theme.Withheld("x") + theme.History("g") + theme.Withheld("b")
 	if got := modes([]tool.Tool{looker}, false, true, false, false); got != want {
@@ -103,11 +112,14 @@ func TestTheHistoryLetterComesFromTheMode(t *testing.T) {
 }
 
 func TestTheBackgroundLetterComesFromTheMode(t *testing.T) {
-	looker := tool.ReadOnly(tool.Define(
-		"peek", "", tool.Schema{},
+	looker := tool.ReadOnly(tool.Implement(
+		tool.Definition{
+			Name:        "peek",
+			Description: "",
+			Schema:      tool.Schema{},
+		},
 		func(struct{}) (string, string) { return "", "" },
-		func(context.Context, struct{}) (string, error) { return "", nil },
-	))
+	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
 
 	want := theme.Read("r") + theme.Withheld("w") + theme.Withheld("x") +
 		theme.Withheld("g") + theme.Background("b")
@@ -117,11 +129,14 @@ func TestTheBackgroundLetterComesFromTheMode(t *testing.T) {
 }
 
 func TestAWaitingPrefixUnderlinesEveryLetter(t *testing.T) {
-	looker := tool.ReadOnly(tool.Define(
-		"peek", "", tool.Schema{},
+	looker := tool.ReadOnly(tool.Implement(
+		tool.Definition{
+			Name:        "peek",
+			Description: "",
+			Schema:      tool.Schema{},
+		},
 		func(struct{}) (string, string) { return "", "" },
-		func(context.Context, struct{}) (string, error) { return "", nil },
-	))
+	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
 
 	got := modes([]tool.Tool{looker}, true, false, false, true)
 

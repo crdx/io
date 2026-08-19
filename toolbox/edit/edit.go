@@ -21,17 +21,18 @@ type Args struct {
 // New builds an edit tool confined to root.
 func New(root *file.Root) tool.Tool {
 	return editor{
-		Tool: tool.FocusPath(tool.DefineMeasured(
-			"edit",
-			"replace an exact string in a file, which must appear exactly once",
-			tool.Schema{
-				tool.String("path", "file"),
-				tool.String("old_text", "exact text to replace, including whitespace"),
-				tool.String("new_text", "replacement text"),
+		Tool: tool.FocusPath(tool.Implement(
+			tool.Definition{
+				Name:        "edit",
+				Description: "replace an exact string in a file, which must appear exactly once",
+				Schema: tool.Schema{
+					tool.String("path", "file"),
+					tool.String("old_text", "exact text to replace, including whitespace"),
+					tool.String("new_text", "replacement text"),
+				},
 			},
 			Render,
-			func(_ context.Context, args Args) (string, tool.Statistics, error) { return exec(root, args) },
-		)),
+		).Measured(func(_ context.Context, args Args) (string, tool.Statistics, error) { return exec(root, args) })),
 
 		root: root,
 	}
