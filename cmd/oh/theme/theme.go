@@ -60,7 +60,7 @@ var (
 	History   Style = hex(mauve)                           // changing a repository's own history is on offer
 	Pending   Style = col.Underline                        // waiting on the keypress that follows a prefix
 	Scrolled  Style = hex(lightGrey)                       // how much of the input is out of sight
-	Withheld  Style = hex(lightGrey)                       // that access is not on offer
+	Withheld  Style = decorate(col.Dim, hex(lightGrey))    // that access is not on offer
 	Chosen    Style = hex(copper)                          // the row the cursor is on in a list
 	Typed     Style = hex(none)                            // what was typed, when a stored conversation is replayed
 	User      Style = background("#343541")                // a submitted message, set apart from the model's reply

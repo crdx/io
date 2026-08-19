@@ -7,6 +7,27 @@ import (
 	"crdx.org/col"
 )
 
+func TestDisabledCapabilitiesAreDimmedOverTheirMutedColour(t *testing.T) {
+	originalColorEnabled := colorEnabled
+	colorEnabled = true
+	col.Enable()
+
+	t.Cleanup(func() {
+		colorEnabled = originalColorEnabled
+		col.Disable()
+	})
+
+	got := Withheld("w")
+
+	if !strings.Contains(got, "\x1b[2m") {
+		t.Errorf("expected a dim disabled capability, got %q", got)
+	}
+
+	if !strings.Contains(got, "\x1b[38;2;") {
+		t.Errorf("expected the dimming on top of the muted colour, got %q", got)
+	}
+}
+
 func TestTheShellPromptMatchesACommandName(t *testing.T) {
 	originalColorEnabled := colorEnabled
 	colorEnabled = true
