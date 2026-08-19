@@ -515,6 +515,8 @@ func deltas(text string, count int) []string {
 func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 	const workspaceDir = "/home/alice/project"
 
+	t.Setenv("HOME", "/home/alice")
+
 	current := tool.FocusPath(slowTool("read"))
 	testConversation := &conversation{
 		assistant:    agent.New("", quietProvider{}, []tool.Tool{current}),

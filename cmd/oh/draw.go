@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/tool"
 
 	"crdx.org/io/cmd/oh/markdown"
@@ -45,7 +46,9 @@ func (self *painter) describe(event agent.Event) (string, string, string, string
 
 				rendered := parsedCall.Render()
 				if self.workspaceDir != "" {
-					rendered = strings.TrimPrefix(rendered, self.workspaceDir+string(filepath.Separator))
+					for _, workspaceDir := range []string{self.workspaceDir, pathutil.Shorten(self.workspaceDir)} {
+						rendered = strings.TrimPrefix(rendered, workspaceDir+string(filepath.Separator))
+					}
 				}
 
 				return rendered, parsedCall.Detail(), focus, syntax
