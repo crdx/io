@@ -187,6 +187,8 @@ func run() ([]string, error) {
 		return nil, err
 	}
 
+	availableSkills = skill.ExcludeGlobal(availableSkills, settings.Skill.Exclude)
+
 	skillRoots, err := skill.MountGlobalSkills(files, availableSkills)
 	if err != nil {
 		return nil, err

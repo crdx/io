@@ -22,6 +22,7 @@ type configuredSettings struct {
 
 	Skill struct {
 		Include []string `toml:"include"`
+		Exclude []string `toml:"exclude"`
 	} `toml:"skill"`
 	Sandbox configuredPaths `toml:"sandbox"`
 }
@@ -64,6 +65,7 @@ func loadConfiguredSettings(path string) (configuredSettings, error) {
 		values *[]string
 	}{
 		{"skill.include", &settings.Skill.Include},
+		{"skill.exclude", &settings.Skill.Exclude},
 		{"sandbox.read", &settings.Sandbox.Read},
 		{"sandbox.write", &settings.Sandbox.Write},
 		{"sandbox.exec", &settings.Sandbox.Exec},

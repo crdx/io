@@ -68,6 +68,34 @@ func TestConfiguredSkillDirectoriesRejectsAnEmptyDirectory(t *testing.T) {
 	}
 }
 
+func TestConfiguredSkillExclusionsResolveToAbsoluteDirectories(t *testing.T) {
+	configurationDirectory := t.TempDir()
+	path := filepath.Join(configurationDirectory, "config.toml")
+	if err := os.WriteFile(path, []byte("[skill]\nexclude = [\"skills/pi\"]\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := loadConfiguredSettings(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := filepath.Join(configurationDirectory, "skills", "pi")
+	if len(settings.Skill.Exclude) != 1 || settings.Skill.Exclude[0] != want {
+		t.Errorf("got exclusions %#v, want [%s]", settings.Skill.Exclude, want)
+	}
+}
+
+func TestConfiguredSkillExclusionsRejectAnEmptyDirectory(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte("[skill]\nexclude = [\"\"]\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := loadConfiguredSettings(path); err == nil {
+		t.Error("expected an empty skill directory to be rejected")
+	}
+}
+
 func TestConfiguredStringsCannotBeEmpty(t *testing.T) {
 	for name, contents := range map[string]string{
 		"model":                             "model = \"\"\n",

@@ -53,6 +53,28 @@ func TestDiscoverReadsProjectAndGlobalDirectories(t *testing.T) {
 	}
 }
 
+func TestExcludeGlobalMatchesAbsoluteDirectories(t *testing.T) {
+	project := t.TempDir()
+	globalDirectory := t.TempDir()
+	writeSkill(t, projectSkills(project), "review", "---\nname: review\ndescription: Review this project.\n---\nBody")
+	globalReview := writeSkill(t, globalDirectory, "review", "---\nname: review\ndescription: Review anything.\n---\nBody")
+	writeSkill(t, globalDirectory, "pi", "---\nname: pi\ndescription: Work on pi.\n---\nBody")
+
+	discoveredSkills, err := Discover(project, []string{globalDirectory}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	filteredSkills := ExcludeGlobal(discoveredSkills, []string{filepath.Dir(globalReview)})
+	if len(filteredSkills) != 2 {
+		t.Fatalf("got %#v, want two skills", filteredSkills)
+	}
+	projectReview := filteredSkills[0]
+	globalPi := filteredSkills[1]
+	if projectReview.Name != "review" || projectReview.global || globalPi.Name != "pi" || !globalPi.global {
+		t.Errorf("got %#v, want the project review and global pi skills", filteredSkills)
+	}
+}
+
 func TestDiscoverReadsEveryAdditionalDirectoryOnce(t *testing.T) {
 	first := t.TempDir()
 	second := t.TempDir()

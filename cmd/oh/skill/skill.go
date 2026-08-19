@@ -54,6 +54,25 @@ func Counts(skills []Skill) (int, int) {
 	return project, global
 }
 
+// ExcludeGlobal removes globally-scoped skills in configured absolute directories.
+func ExcludeGlobal(skills []Skill, directories []string) []Skill {
+	excludedDirectories := make(map[string]struct{}, len(directories))
+	for _, directory := range directories {
+		excludedDirectories[directory] = struct{}{}
+	}
+
+	filteredSkills := make([]Skill, 0, len(skills))
+	for _, foundSkill := range skills {
+		_, excluded := excludedDirectories[foundSkill.directory]
+		if foundSkill.global && excluded {
+			continue
+		}
+		filteredSkills = append(filteredSkills, foundSkill)
+	}
+
+	return filteredSkills
+}
+
 // NameFromPath reports the skill a path is the SKILL.md of.
 func NameFromPath(path string) (string, bool) {
 	if filepath.Base(path) != filename {

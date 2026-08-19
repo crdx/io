@@ -8,6 +8,7 @@ get_on_with_it_message = "yes"
 
 [skill]
 include = []
+exclude = []
 
 [sandbox]
 read = []
