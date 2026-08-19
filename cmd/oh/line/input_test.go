@@ -52,6 +52,22 @@ func TestAPastedTabBecomesSpaces(t *testing.T) {
 	}
 }
 
+func TestAPastePreservesRelativeIndentation(t *testing.T) {
+	self := inputFromKeys(t, pasteStart+"    one\n        two\n      three"+pasteEnd)
+
+	if got := self.Text(); got != "one\n    two\n  three" {
+		t.Errorf("expected the paste left-aligned with relative indentation preserved, got %q", got)
+	}
+}
+
+func TestAnAlreadyLeftAlignedPasteKeepsItsIndentation(t *testing.T) {
+	self := inputFromKeys(t, pasteStart+"one\n    two"+pasteEnd)
+
+	if got := self.Text(); got != "one\n    two" {
+		t.Errorf("expected the paste unchanged, got %q", got)
+	}
+}
+
 func TestAPasteEndsWhereTheTerminalSaysItDoes(t *testing.T) {
 	self := inputFromKeys(t, pasteStart+"one"+pasteEnd)
 

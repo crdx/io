@@ -29,6 +29,7 @@ type Input struct {
 	history      *History // the stored entries
 	recall       *recall  // the walk through history
 	pasting      bool     // whether pasted text is arriving
+	pasteStart   int      // where the current paste begins in the buffer
 	prefixed     bool     // whether ctrl+x went before, so the next key names a mode
 	enterPending bool     // whether one enter awaits a second
 	wasRunning   bool     // whether a turn ran when the previous key was applied
@@ -160,6 +161,7 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 
 	case key.PasteStart:
 		self.pasting = true
+		self.pasteStart = self.buffer.Cursor()
 
 	case key.Rune:
 		return self.rune(keypress, running)
@@ -252,11 +254,39 @@ func (self *Input) paste(keypress key.Key) {
 	switch {
 	case keypress.Code == key.PasteEnd:
 		self.pasting = false
+		self.normalisePasteIndentation()
 	case keypress.Code == key.Enter:
 		self.buffer.Insert([]rune{'\n'})
 	case keypress.Code == key.Rune && keypress.Mod == 0:
 		self.insert(keypress.Value)
 	}
+}
+
+func (self *Input) normalisePasteIndentation() {
+	end := self.buffer.Cursor()
+	pasted := string(self.buffer.Runes()[self.pasteStart:end])
+	lines := strings.Split(pasted, "\n")
+	indentation := len(pasted)
+
+	for _, line := range lines {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+
+		indentation = min(indentation, len(line)-len(strings.TrimLeft(line, " ")))
+	}
+
+	if indentation == 0 || indentation == len(pasted) {
+		return
+	}
+
+	for index, line := range lines {
+		leadingSpaces := len(line) - len(strings.TrimLeft(line, " "))
+		lines[index] = line[min(indentation, leadingSpaces):]
+	}
+
+	self.buffer.remove(self.pasteStart, end)
+	self.buffer.Insert([]rune(strings.Join(lines, "\n")))
 }
 
 func (self *Input) walk(direction int) {
