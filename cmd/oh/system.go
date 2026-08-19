@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"crdx.org/hereduck"
 	"crdx.org/io/cmd/oh/skill"
@@ -18,7 +19,59 @@ const (
 	globalContextName    = "SYSTEM.md"
 )
 
-var projectContextNames = []string{"AGENTS.md", "AGENTS.local.md"}
+var (
+	projectContextNames = []string{"AGENTS.md", "AGENTS.local.md"}
+	harnessTemplate     = template.Must(template.New("harness").Funcs(template.FuncMap{
+		"background":   background,
+		"filesystem":   filesystem,
+		"filepathJoin": filepath.Join,
+		"scopeRules":   scopeRules,
+		"shellAccess":  shellAccess,
+	}).Parse(hereduck.D(`
+		# Scope
+
+		- Your workspace is the current directory, {{ .WorkspaceDir }}.
+		- Your session ID is {{ .SessionID }}.
+		{{ scopeRules .ExtraPaths .CurrentCaps }}
+
+		# Network
+
+		- Networking is limited to the sandbox's private loopback interface.
+		- Processes in the same sandbox can communicate over 127.0.0.1 and ::1.
+		- The host's loopback interface and external networks are unreachable.
+		- Anything that requires external networking must be asked of the user.
+
+		# /tmp
+
+		- /tmp is your persistent private scratch space.
+		- It is always read-write.
+		- No other agents have access to yours.
+		- /tmp maps to {{ .TmpDir }} on the user's machine.
+		- Translate /tmp paths to that directory before giving them to the user.
+		- For example: /tmp/result.png → {{ filepathJoin .TmpDir "result.png" }}
+
+		# State
+
+		- The workspace ({{ .WorkspaceDir }}) is {{ filesystem .WorkspaceWritable }}
+		- The .git directory within it ({{ filepathJoin .WorkspaceDir ".git" }}) is {{ filesystem .GitWritable }}
+		- Background processes are {{ background .BackgroundEnabled }}
+		- The bash tool is {{ shellAccess .ShellGranted }}
+
+		These states can change at any time. You will be told what changed when it does.
+	`)))
+)
+
+type harnessTemplateData struct {
+	WorkspaceDir      string
+	SessionID         string
+	TmpDir            string
+	CurrentCaps       caps
+	ExtraPaths        configuredPaths
+	WorkspaceWritable bool
+	GitWritable       bool
+	BackgroundEnabled bool
+	ShellGranted      bool
+}
 
 type contextFile struct {
 	name string // what the file is called
@@ -112,77 +165,23 @@ func globalContext(file *contextFile) string {
 }
 
 func harnessContext(workspaceDir string, sessionID string, tmpDir string, currentCaps caps, extraPaths configuredPaths) string {
-	return mergeContexts(
-		scopeSection(workspaceDir, sessionID, extraPaths, currentCaps),
-		networkSection(),
-		tmpSection(tmpDir),
-		stateSection(workspaceDir, currentCaps),
-	)
-}
+	data := harnessTemplateData{
+		WorkspaceDir:      workspaceDir,
+		SessionID:         sessionID,
+		TmpDir:            pathutil.Shorten(tmpDir),
+		CurrentCaps:       currentCaps,
+		ExtraPaths:        extraPaths,
+		WorkspaceWritable: currentCaps.has(capWrite),
+		GitWritable:       currentCaps.has(capGit),
+		BackgroundEnabled: currentCaps.has(capBackground),
+		ShellGranted:      currentCaps.has(capShell),
+	}
 
-func scopeSection(workspaceDir string, sessionID string, extraPaths configuredPaths, currentCaps caps) string {
-	return hereduck.Df(
-		`
-		# Scope
-
-		- Your workspace is the current directory, %s.
-		- Your session ID is %s.
-		%s
-	`,
-		workspaceDir,
-		sessionID,
-		scopeRules(extraPaths, currentCaps),
-	)
-}
-
-func networkSection() string {
-	return hereduck.D(`
-		# Network
-
-		- Networking is limited to the sandbox's private loopback interface.
-		- Processes in the same sandbox can communicate over 127.0.0.1 and ::1.
-		- The host's loopback interface and external networks are unreachable.
-		- Anything that requires external networking must be asked of the user.
-	`)
-}
-
-func tmpSection(tmpDir string) string {
-	tmpDir = pathutil.Shorten(tmpDir)
-
-	return hereduck.Df(
-		`
-		# /tmp
-
-		- /tmp is your persistent private scratch space.
-		- It is always read-write.
-		- No other agents have access to yours.
-		- /tmp maps to %s on the user's machine.
-		- Translate /tmp paths to that directory before giving them to the user.
-		- For example: /tmp/result.png → %s
-	`,
-		tmpDir,
-		filepath.Join(tmpDir, "result.png"),
-	)
-}
-
-func stateSection(workspaceDir string, currentCaps caps) string {
-	rules := strings.Join([]string{
-		"- The workspace (" + workspaceDir + ") is " + filesystem(currentCaps.has(capWrite)),
-		"- The .git directory within it (" + filepath.Join(workspaceDir, ".git") + ") is " + filesystem(currentCaps.has(capGit)),
-		"- Background processes are " + background(currentCaps.has(capBackground)),
-		"- The bash tool is " + shellAccess(currentCaps.has(capShell)),
-	}, "\n")
-
-	return hereduck.Df(
-		`
-		# State
-
-		%s
-
-		These states can change at any time. You will be told what changed when it does.
-	`,
-		rules,
-	)
+	var rendered strings.Builder
+	if err := harnessTemplate.Execute(&rendered, data); err != nil {
+		panic(err)
+	}
+	return strings.TrimSpace(rendered.String())
 }
 
 func scopeRules(extraPaths configuredPaths, currentCaps caps) string {
