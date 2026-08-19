@@ -213,8 +213,17 @@ func TestACallWorthWaitingForSaysHowLongItTook(t *testing.T) {
 	output.Reset()
 	block.Mark(0, Done, 5*time.Second, "")
 
-	if got := rowsFromOutput(output)[0]; !strings.Contains(got, theme.Spinner("5.0s")) {
+	if got := rowsFromOutput(output)[0]; !strings.Contains(got, theme.Spinner("5s")) {
 		t.Errorf("expected the time it took, got %q", got)
+	}
+}
+
+func TestRunningTimerUsesWholeSecondGranularity(t *testing.T) {
+	block := &Block{revealed: true}
+	item := row{state: Running, startedAt: time.Now().Add(-5500 * time.Millisecond)}
+
+	if got := theme.Plain(block.outcome(item)); got != "✦· 5s" {
+		t.Errorf("expected a whole-second timer, got %q", got)
 	}
 }
 

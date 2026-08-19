@@ -414,7 +414,8 @@ func (self *Block) outcome(item row) string {
 			return ""
 		}
 
-		return outcomeText(theme.Spinner(spinner.Activity.Frame(self.frame)), time.Since(item.startedAt), nil)
+		elapsed := time.Since(item.startedAt).Truncate(time.Second)
+		return outcomeText(theme.Spinner(spinner.Activity.Frame(self.frame)), elapsed, nil)
 	}
 
 	return outcomeText(glyph(item.state), item.took, item.stats)
@@ -425,7 +426,7 @@ func outcomeText(mark string, took time.Duration, stats *tool.Statistics) string
 		if took < patience {
 			return mark
 		}
-		return mark + " " + theme.Spinner(util.FormatDuration(took))
+		return mark + " " + theme.Spinner(util.CompactDuration(took))
 	}
 
 	var statsText string
