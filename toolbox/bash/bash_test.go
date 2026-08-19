@@ -79,9 +79,8 @@ func execWithStats(
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	output, err := call.Exec(t.Context())
-	stats, _ := tool.CallStats(call)
-	return output, stats, err
+	result, err := call.Exec(t.Context())
+	return result.Output, result.Stats, err
 }
 
 func TestTheToolIsCalledExec(t *testing.T) {
@@ -209,9 +208,8 @@ func TestACommandRenderingIsMarkedAsBash(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	highlightedCall, ok := call.(tool.HighlightedCall)
 	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"}
-	if !ok || highlightedCall.Highlight() != want {
+	if call.Highlight() != want {
 		t.Errorf("expected bash highlighting, got %T", call)
 	}
 }
@@ -482,9 +480,9 @@ func TestThePolicyIsAskedForEveryCommand(t *testing.T) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		output, _ := call.Exec(t.Context())
+		result, _ := call.Exec(t.Context())
 
-		return output
+		return result.Output
 	}
 
 	if output := run(); strings.Contains(output, "denied") {

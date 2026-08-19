@@ -60,9 +60,8 @@ func execWithStats(
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	output, err := call.Exec(t.Context())
-	stats, _ := tool.CallStats(call)
-	return output, stats, err
+	result, err := call.Exec(t.Context())
+	return result.Output, result.Stats, err
 }
 
 func TestAMatchIsReportedWithItsPathAndLine(t *testing.T) {
@@ -228,9 +227,8 @@ func TestCallHighlightsItsPatternAsRegexpSyntax(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	highlightedCall, ok := call.(tool.HighlightedCall)
 	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "regexp"}
-	if !ok || highlightedCall.Highlight() != want {
+	if call.Highlight() != want {
 		t.Errorf("expected regexp highlighting, got %T", call)
 	}
 }

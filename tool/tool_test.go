@@ -70,13 +70,13 @@ func TestParseBindsTheArgumentsToTheCall(t *testing.T) {
 		t.Error("expected rendering not to run the tool")
 	}
 
-	output, err := call.Exec(t.Context())
+	result, err := call.Exec(t.Context())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if output != "raining in London" {
-		t.Errorf("expected the output, got %q", output)
+	if result.Output != "raining in London" {
+		t.Errorf("expected the output, got %q", result.Output)
 	}
 
 	if !ran {
@@ -95,13 +95,8 @@ func TestAnOuterHighlighterReplacesAnInnerOne(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	highlightedCall, ok := call.(tool.HighlightedCall)
-	if !ok {
-		t.Fatalf("expected a highlighted call, got %T", call)
-	}
-
 	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"}
-	if got := highlightedCall.Highlight(); got != want {
+	if got := call.Highlight(); got != want {
 		t.Errorf("got %#v, want %#v", got, want)
 	}
 }

@@ -58,9 +58,8 @@ func execWithStats(
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	output, err := call.Exec(t.Context())
-	stats, _ := tool.CallStats(call)
-	return output, stats, err
+	result, err := call.Exec(t.Context())
+	return result.Output, result.Stats, err
 }
 
 func TestAGlobMatchesAcrossDirectories(t *testing.T) {

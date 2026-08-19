@@ -46,7 +46,15 @@ func (self readOnly) ReadOnly() bool { return true }
 type Call interface {
 	Render() string
 	Detail() string
-	Exec(ctx context.Context) (string, error)
+	Highlight() Highlight
+	Exec(ctx context.Context) (Result, error)
+}
+
+// Result is everything a completed call hands back.
+type Result struct {
+	Output string // text returned to the model
+	Image  Image  // visual content returned to the model
+	Stats  Stats  // output, change, or resource measurements
 }
 
 // Stats describe a call's output, changes, or measured resource use.
@@ -87,21 +95,6 @@ func OutputStats(output string) Stats {
 	}
 }
 
-// StatsCall is a call that reports stats after it runs.
-type StatsCall interface {
-	Call
-	Stats() (Stats, bool)
-}
-
-// CallStats returns a call's stats and whether it reported any.
-func CallStats(call Call) (Stats, bool) {
-	callWithStats, ok := call.(StatsCall)
-	if !ok {
-		return Stats{}, false
-	}
-	return callWithStats.Stats()
-}
-
 // HighlightKind identifies how a display should highlight a call's rendering.
 type HighlightKind string
 
@@ -115,12 +108,6 @@ const (
 type Highlight struct {
 	Kind  HighlightKind `json:"kind"`
 	Value string        `json:"value"`
-}
-
-// HighlightedCall has a rendering a display may highlight.
-type HighlightedCall interface {
-	Call
-	Highlight() Highlight
 }
 
 // Syntax highlights a call rendering as the named language, replacing any inner highlighter.
@@ -156,8 +143,6 @@ type highlightedCall struct {
 }
 
 func (self highlightedCall) Highlight() Highlight { return self.highlight }
-func (self highlightedCall) Stats() (Stats, bool) { return CallStats(self.Call) }
-func (self highlightedCall) Image() (Image, bool) { return AttachedImage(self.Call) }
 
 // Focus sets one part of a call rendering apart, replacing any inner highlighter.
 func Focus(inner Tool, pick func(Call) string) Tool {
@@ -202,6 +187,9 @@ type Renderer[T any] func(args T) (string, string)
 
 // Validator checks decoded tool arguments before a call is constructed.
 type Validator[T any] func(args T) error
+
+// ResultExecutor runs a tool call.
+type ResultExecutor[T any] func(ctx context.Context, args T) (Result, error)
 
 // Executor runs a plain tool call.
 type Executor[T any] func(ctx context.Context, args T) (string, error)

@@ -38,22 +38,22 @@ func exec(t *testing.T, subject tool.Tool, arguments string) string {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	output, err := call.Exec(t.Context())
+	result, err := call.Exec(t.Context())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	return output
+	return result.Output
 }
 
-func TestStatsPassThroughTheOutputCap(t *testing.T) {
+func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
 	subject := tool.Implement(
 		tool.Definition{
-			Name:        "stats",
+			Name:        "measured",
 			Description: "measure something",
 			Schema:      tool.Schema{},
 		},
-		func(Args) (string, string) { return "stats", "" },
+		func(Args) (string, string) { return "measured", "" },
 	).Stats(func(context.Context, Args) (string, tool.Stats, error) {
 		return "done", tool.Stats{Kind: tool.StatsRead, Lines: 3, Bytes: 12}, nil
 	})
@@ -62,26 +62,26 @@ func TestStatsPassThroughTheOutputCap(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := call.Exec(t.Context()); err != nil {
+	result, err := call.Exec(t.Context())
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	stats, ok := tool.CallStats(call)
-	if !ok || stats.Lines != 3 || stats.Bytes != 12 {
-		t.Errorf("got %+v and has_stats=%v", stats, ok)
+	if result.Stats.Lines != 3 || result.Stats.Bytes != 12 {
+		t.Errorf("got %+v", result.Stats)
 	}
 }
 
-func TestTruncatedStatsReportReturnedAndTotalOutput(t *testing.T) {
+func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
 	t.Setenv("TMPDIR", t.TempDir())
 	whole := strings.Repeat("a line of text\n", 4000)
 	subject := tool.Implement(
 		tool.Definition{
-			Name:        "stats",
+			Name:        "measured",
 			Description: "measure something",
 			Schema:      tool.Schema{},
 		},
-		func(Args) (string, string) { return "stats", "" },
+		func(Args) (string, string) { return "measured", "" },
 	).Stats(func(context.Context, Args) (string, tool.Stats, error) {
 		return whole, tool.Stats{Kind: tool.StatsResources}, nil
 	})
@@ -90,13 +90,14 @@ func TestTruncatedStatsReportReturnedAndTotalOutput(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := call.Exec(t.Context()); err != nil {
+	result, err := call.Exec(t.Context())
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	stats, ok := tool.CallStats(call)
-	if !ok || stats.Bytes <= 0 || stats.Bytes > truncate.Limit || stats.TotalBytes != int64(len(whole)) || !stats.Truncated {
-		t.Errorf("expected returned and total output stats, got %+v and has_stats=%v", stats, ok)
+	statistics := result.Stats
+	if statistics.Bytes <= 0 || statistics.Bytes > truncate.Limit || statistics.TotalBytes != int64(len(whole)) || !statistics.Truncated {
+		t.Errorf("expected returned and total output statistics, got %+v", statistics)
 	}
 }
 
@@ -116,13 +117,13 @@ func TestAnAttachedImagePassesThroughTheOutputCap(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := call.Exec(t.Context()); err != nil {
+	result, err := call.Exec(t.Context())
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	image, ok := tool.AttachedImage(call)
-	if !ok || image.MediaType != "image/png" || len(image.Data) != 1 {
-		t.Errorf("expected the image to pass through, got %+v and attached=%v", image, ok)
+	if result.Image.MediaType != "image/png" || len(result.Image.Data) != 1 {
+		t.Errorf("expected the image to pass through, got %+v", result.Image)
 	}
 }
 
@@ -178,9 +179,8 @@ func TestAWrappedToolKeepsItsSyntaxHighlighting(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	highlightedCall, ok := call.(tool.HighlightedCall)
 	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"}
-	if !ok || highlightedCall.Highlight() != want {
+	if call.Highlight() != want {
 		t.Errorf("expected the highlighting to survive, got %T", call)
 	}
 }
@@ -192,9 +192,8 @@ func TestAWrappedToolKeepsItsFocusedRendering(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	highlightedCall, ok := call.(tool.HighlightedCall)
 	want := tool.Highlight{Kind: tool.HighlightFocus, Value: "generate"}
-	if !ok || highlightedCall.Highlight() != want {
+	if call.Highlight() != want {
 		t.Errorf("expected the focus to survive, got %T", call)
 	}
 }

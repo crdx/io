@@ -41,7 +41,8 @@ func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	return call.Exec(t.Context())
+	result, err := call.Exec(t.Context())
+	return result.Output, err
 }
 
 func TestAnImageIsAttachedForTheModel(t *testing.T) {
@@ -52,20 +53,16 @@ func TestAnImageIsAttachedForTheModel(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	output, err := call.Exec(t.Context())
+	result, err := call.Exec(t.Context())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if output != "image/png image (32 bytes)" {
-		t.Errorf("expected an image description, got %q", output)
+	if result.Output != "image/png image (32 bytes)" {
+		t.Errorf("expected an image description, got %q", result.Output)
 	}
 
-	image, ok := tool.AttachedImage(call)
-	if !ok {
-		t.Fatal("expected the image to be attached")
-	}
-	if image.MediaType != "image/png" || string(image.Data) != content {
-		t.Errorf("expected the PNG bytes, got %q and %d bytes", image.MediaType, len(image.Data))
+	if result.Image.MediaType != "image/png" || string(result.Image.Data) != content {
+		t.Errorf("expected the PNG bytes, got %q and %d bytes", result.Image.MediaType, len(result.Image.Data))
 	}
 }
 
@@ -80,16 +77,13 @@ func TestAnImageReportsAnEstimateFromItsDimensions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if _, err := call.Exec(t.Context()); err != nil {
+	result, err := call.Exec(t.Context())
+	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	stats, ok := tool.CallStats(call)
-	if !ok {
-		t.Fatal("expected image stats")
-	}
-	if stats.Kind != tool.StatsImage || stats.EstimatedTokens != 4 {
-		t.Errorf("expected a four-token image estimate, got %#v", stats)
+	if result.Stats.Kind != tool.StatsImage || result.Stats.EstimatedTokens != 4 {
+		t.Errorf("expected a four-token image estimate, got %#v", result.Stats)
 	}
 }
 
@@ -136,17 +130,16 @@ func TestALineRangeMeasuresOnlyWhatComesBack(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	output, err := call.Exec(t.Context())
+	result, err := call.Exec(t.Context())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	stats, ok := tool.CallStats(call)
-	if !ok {
-		t.Fatal("expected read stats")
-	}
-	if stats.Lines != 2 || stats.Bytes != int64(len(output)) {
-		t.Errorf("expected 2 lines and %d bytes, got %d lines and %d bytes", len(output), stats.Lines, stats.Bytes)
+	if result.Stats.Lines != 2 || result.Stats.Bytes != int64(len(result.Output)) {
+		t.Errorf(
+			"expected 2 lines and %d bytes, got %d lines and %d bytes",
+			len(result.Output), result.Stats.Lines, result.Stats.Bytes,
+		)
 	}
 }
 
@@ -241,9 +234,8 @@ func TestAReadFocusesTheFileName(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	highlightedCall, ok := call.(tool.HighlightedCall)
 	want := tool.Highlight{Kind: tool.HighlightFocus, Value: "notes.txt"}
-	if !ok || highlightedCall.Highlight() != want {
+	if call.Highlight() != want {
 		t.Errorf("expected the file name to be focused, got %T", call)
 	}
 }

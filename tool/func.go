@@ -19,10 +19,11 @@ func (self funcTool) Parse(arguments string) (Call, error) { return self.parse(a
 
 type funcCall struct {
 	render func() (string, string)                   // describes the call
-	exec   func(ctx context.Context) (string, error) // runs the call
+	exec   func(ctx context.Context) (Result, error) // runs the call
 }
 
-func (self funcCall) Render() string { text, _ := self.render(); return text }
-func (self funcCall) Detail() string { _, detail := self.render(); return detail }
+func (self funcCall) Render() string       { text, _ := self.render(); return text }
+func (self funcCall) Detail() string       { _, detail := self.render(); return detail }
+func (self funcCall) Highlight() Highlight { return Highlight{} }
 
-func (self funcCall) Exec(ctx context.Context) (string, error) { return self.exec(ctx) }
+func (self funcCall) Exec(ctx context.Context) (Result, error) { return self.exec(ctx) }

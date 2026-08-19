@@ -41,42 +41,25 @@ func (self capped) Parse(arguments string) (tool.Call, error) {
 		return nil, err
 	}
 
-	return &cappedCall{Call: call}, nil
+	return cappedCall{Call: call}, nil
 }
 
 type cappedCall struct {
 	tool.Call // the call whose output is capped
-
-	stats    tool.Stats
-	hasStats bool
 }
 
-func (self *cappedCall) Highlight() tool.Highlight {
-	if highlightedCall, ok := self.Call.(tool.HighlightedCall); ok {
-		return highlightedCall.Highlight()
+func (self cappedCall) Exec(ctx context.Context) (tool.Result, error) {
+	result, err := self.Call.Exec(ctx)
+	cappedOutput, returnedBytes, totalBytes := outputWithSizes(result.Output)
+	result.Output = cappedOutput
+
+	if result.Stats.Kind == tool.StatsResources || returnedBytes < totalBytes {
+		result.Stats.Bytes = int64(returnedBytes)
+		result.Stats.TotalBytes = int64(totalBytes)
+		result.Stats.Truncated = result.Stats.Truncated || returnedBytes < totalBytes
 	}
 
-	return tool.Highlight{}
-}
-
-func (self *cappedCall) Stats() (tool.Stats, bool) {
-	return self.stats, self.hasStats
-}
-
-func (self *cappedCall) Image() (tool.Image, bool) { return tool.AttachedImage(self.Call) }
-
-func (self *cappedCall) Exec(ctx context.Context) (string, error) {
-	output, err := self.Call.Exec(ctx)
-	cappedOutput, returnedBytes, totalBytes := outputWithSizes(output)
-
-	self.stats, self.hasStats = tool.CallStats(self.Call)
-	if self.hasStats && (self.stats.Kind == tool.StatsResources || returnedBytes < totalBytes) {
-		self.stats.Bytes = int64(returnedBytes)
-		self.stats.TotalBytes = int64(totalBytes)
-		self.stats.Truncated = self.stats.Truncated || returnedBytes < totalBytes
-	}
-
-	return cappedOutput, err
+	return result, err
 }
 
 // Output caps one reply, cutting at a line boundary where there is one and a rune boundary where

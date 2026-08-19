@@ -41,19 +41,16 @@ func (self *painter) describe(event agent.Event) (string, string, tool.Highlight
 		return tool.RenderUnparsedArguments(calledTool, event.Arguments), event.Detail, event.Highlight
 	}
 
-	highlight := tool.Highlight{}
-	if highlightedCall, ok := parsedCall.(tool.HighlightedCall); ok {
-		highlight = highlightedCall.Highlight()
-	}
+	highlight := parsedCall.Highlight()
 
-	rendered := parsedCall.Render()
+	renderedCall := parsedCall.Render()
 	if self.workspaceDir != "" {
 		for _, workspaceDir := range []string{self.workspaceDir, pathutil.Shorten(self.workspaceDir)} {
-			rendered = strings.TrimPrefix(rendered, workspaceDir+string(filepath.Separator))
+			renderedCall = strings.TrimPrefix(renderedCall, workspaceDir+string(filepath.Separator))
 		}
 	}
 
-	return rendered, parsedCall.Detail(), highlight
+	return renderedCall, parsedCall.Detail(), highlight
 }
 
 func (self *painter) calledTool(name string) (tool.Tool, bool) {

@@ -276,12 +276,12 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 			t.Fatal(parseErr)
 		}
 
-		output, execErr := call.Exec(t.Context())
+		result, execErr := call.Exec(t.Context())
 		if execErr != nil {
 			t.Fatal(execErr)
 		}
-		if output != miseDataDir {
-			t.Errorf("got %q, want %q", output, miseDataDir)
+		if result.Output != miseDataDir {
+			t.Errorf("got %q, want %q", result.Output, miseDataDir)
 		}
 	}
 

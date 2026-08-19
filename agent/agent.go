@@ -186,9 +186,7 @@ func (self *Agent) runCalls(
 			event.Render = parsedCall.Render()
 			event.Detail = parsedCall.Detail()
 
-			if highlightedCall, ok := parsedCall.(tool.HighlightedCall); ok {
-				event.Highlight = highlightedCall.Highlight()
-			}
+			event.Highlight = parsedCall.Highlight()
 		} else {
 			event.Render = self.renderUnparsedCall(rawCall)
 		}
@@ -254,32 +252,32 @@ func runBatch(
 		go func() {
 			startedAt := time.Now()
 
-			payload, ok := item.failure, false
+			executionResult := tool.Result{Output: item.failure}
+			ok := false
 			if item.parsedCall != nil {
-				payload, ok = exec(ctx, item.parsedCall)
+				executionResult, ok = exec(ctx, item.parsedCall)
 			}
 
-			result := ToolResult{ID: item.rawCall.ID, Output: payload}
-			if image, attached := tool.AttachedImage(item.parsedCall); attached {
-				result.Image = image
+			results[index] = ToolResult{
+				ID:     item.rawCall.ID,
+				Output: executionResult.Output,
+				Image:  executionResult.Image,
 			}
-			results[index] = result
+
+			if item.parsedCall != nil && executionResult.Stats.Kind == "" {
+				executionResult.Stats = tool.OutputStats(executionResult.Output)
+			}
 
 			var stats *tool.Stats
-			callStats, hasStats := tool.CallStats(item.parsedCall)
-			if item.parsedCall != nil && (!hasStats || callStats.Kind == "") {
-				callStats = tool.OutputStats(payload)
-				hasStats = true
-			}
-			if hasStats {
-				stats = &callStats
+			if executionResult.Stats.Kind != "" {
+				stats = &executionResult.Stats
 			}
 
 			done <- Event{
 				Kind:   Result,
 				ID:     item.rawCall.ID,
 				Name:   item.rawCall.Name,
-				Text:   payload,
+				Text:   executionResult.Output,
 				Failed: !ok,
 				Took:   time.Since(startedAt),
 				Stats:  stats,
@@ -320,15 +318,16 @@ func (self *Agent) parseCall(call ToolCall) (tool.Call, string) {
 	return parsedCall, ""
 }
 
-func exec(ctx context.Context, call tool.Call) (string, bool) {
-	output, err := call.Exec(ctx)
+func exec(ctx context.Context, call tool.Call) (tool.Result, bool) {
+	result, err := call.Exec(ctx)
 
 	switch {
 	case err == nil:
-		return output, true
-	case output != "":
-		return output, false
+		return result, true
+	case result.Output != "":
+		return result, false
 	}
 
-	return err.Error(), false
+	result.Output = err.Error()
+	return result, false
 }

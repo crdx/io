@@ -38,7 +38,8 @@ func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	return call.Exec(t.Context())
+	result, err := call.Exec(t.Context())
+	return result.Output, err
 }
 
 func TestTheTextIsReplacedWhereItAppearsOnce(t *testing.T) {
