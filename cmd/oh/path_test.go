@@ -1,10 +1,51 @@
 package main
 
 import (
+	"errors"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"crdx.org/io/internal/sandbox"
 )
+
+func TestTmpWouldShadowAWorkspace(t *testing.T) {
+	for _, workspaceDir := range []string{sandbox.TmpDir, filepath.Join(sandbox.TmpDir, "project")} {
+		if !workspacePathIsShadowed(workspaceDir) {
+			t.Errorf("expected %q to be shadowed", workspaceDir)
+		}
+	}
+
+	for _, workspaceDir := range []string{"/", "/tmp-project"} {
+		if workspacePathIsShadowed(workspaceDir) {
+			t.Errorf("did not expect %q to be shadowed", workspaceDir)
+		}
+	}
+}
+
+func TestAWorkspaceUnderTmpIsRefused(t *testing.T) {
+	if err := ensureWorkspaceIsNotShadowed(t.TempDir()); !errors.Is(err, errWorkspaceShadowed) {
+		t.Errorf("got %v, want the workspace shadowing error", err)
+	}
+}
+
+func TestAWorkspaceOutsideTmpIsAccepted(t *testing.T) {
+	if err := ensureWorkspaceIsNotShadowed("/"); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestAWorkspaceNamedThroughTmpIsRefused(t *testing.T) {
+	alias := filepath.Join(t.TempDir(), "root")
+	if err := os.Symlink("/", alias); err != nil {
+		t.Fatalf("could not create workspace alias: %v", err)
+	}
+
+	if err := ensureWorkspaceIsNotShadowed(alias); !errors.Is(err, errWorkspaceShadowed) {
+		t.Errorf("got %v, want the workspace shadowing error", err)
+	}
+}
 
 func TestARelativeXDGStateHomeIsIgnored(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", filepath.Join("inside", "workspace"))

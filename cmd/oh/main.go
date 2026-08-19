@@ -141,6 +141,9 @@ func run() ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not resolve the workspace path: %w", err)
 	}
+	if err := ensureWorkspaceIsNotShadowed(workspaceDir); err != nil {
+		return nil, err
+	}
 
 	homeDir := shellHomeDir()
 	if homeDir == "" {
