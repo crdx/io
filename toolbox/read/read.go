@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"image/gif"
@@ -30,7 +31,7 @@ type Args struct {
 }
 
 // New builds the read tool confined to root.
-func New(root *file.Root) tool.Tool {
+func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	definedTool := tool.Implement(
 		tool.Definition{
 			Name:        "read",
@@ -42,8 +43,11 @@ func New(root *file.Root) tool.Tool {
 			},
 		},
 		Render,
-	).StatsWithImage(func(_ context.Context, args Args) (string, tool.Image, tool.Stats, error) {
+	).Run(func(_ context.Context, args Args) (tool.Result, error) {
 		return exec(root, args)
+	})
+	definedTool = tool.State(definedTool, file.FileReadState, func(payload json.RawMessage) error {
+		return snapshots.RestoreReadState(root, payload)
 	})
 
 	return tool.ReadOnly(tool.Concurrent(tool.FocusPath(definedTool)))
@@ -67,33 +71,33 @@ func span(offset int, limit int) string {
 	}
 }
 
-func exec(root *file.Root, args Args) (string, tool.Image, tool.Stats, error) {
+func exec(root *file.Root, args Args) (tool.Result, error) {
 	if args.Path == "" {
-		return "", tool.Image{}, tool.Stats{}, errors.New("path is required")
+		return tool.Result{}, errors.New("path is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", tool.Image{}, tool.Stats{}, err
+		return tool.Result{}, err
 	}
 
 	data, err := root.ReadFile(name)
 	if err != nil {
 		if pathError, ok := errors.AsType[*fs.PathError](err); ok {
-			return "", tool.Image{}, tool.Stats{}, fmt.Errorf("%s: %w", args.Path, pathError.Err)
+			return tool.Result{}, fmt.Errorf("%s: %w", args.Path, pathError.Err)
 		}
 
-		return "", tool.Image{}, tool.Stats{}, err
+		return tool.Result{}, err
 	}
 
 	stats := tool.Stats{Kind: tool.StatsRead, Bytes: int64(len(data))}
 	mediaType := http.DetectContentType(data)
 	if isSupportedImage(mediaType) {
 		if args.Offset > 0 || args.Limit > 0 {
-			return "", tool.Image{}, stats, errors.New("line ranges are not supported for images")
+			return tool.Result{Stats: stats}, errors.New("line ranges are not supported for images")
 		}
 		if len(data) > maxImageBytes {
-			return "", tool.Image{}, stats, fmt.Errorf("image is larger than the %d-byte limit", maxImageBytes)
+			return tool.Result{Stats: stats}, fmt.Errorf("image is larger than the %d-byte limit", maxImageBytes)
 		}
 
 		stats.Kind = tool.StatsImage
@@ -101,23 +105,28 @@ func exec(root *file.Root, args Args) (string, tool.Image, tool.Stats, error) {
 			stats.EstimatedTokens = util.EstimateImageTokenCount(width, height)
 		}
 
-		image := tool.Image{MediaType: mediaType, Data: data}
-		return fmt.Sprintf("%s image (%d bytes)", mediaType, len(data)), image, stats, nil
+		return successfulResult(
+			args.Path,
+			data,
+			fmt.Sprintf("%s image (%d bytes)", mediaType, len(data)),
+			tool.Image{MediaType: mediaType, Data: data},
+			stats,
+		), nil
 	}
 
 	lines := strutil.Lines(string(data))
 	stats.Lines = int64(len(lines))
 
 	if args.Offset <= 0 && args.Limit <= 0 {
-		return string(data), tool.Image{}, stats, nil
+		return successfulResult(args.Path, data, string(data), tool.Image{}, stats), nil
 	}
 
 	start := max(args.Offset-1, 0)
 	if len(lines) == 0 {
-		return "", tool.Image{}, stats, nil
+		return successfulResult(args.Path, data, "", tool.Image{}, stats), nil
 	}
 	if start >= len(lines) {
-		return "", tool.Image{}, stats, fmt.Errorf(
+		return tool.Result{Stats: stats}, fmt.Errorf(
 			"offset %d is past the end of the file (%d lines)", args.Offset, len(lines),
 		)
 	}
@@ -130,7 +139,24 @@ func exec(root *file.Root, args Args) (string, tool.Image, tool.Stats, error) {
 	output := strings.Join(lines[start:end], "\n")
 	stats.Lines = int64(end - start)
 	stats.Bytes = int64(len(output))
-	return output, tool.Image{}, stats, nil
+	return successfulResult(args.Path, data, output, tool.Image{}, stats), nil
+}
+
+func successfulResult(
+	path string,
+	data []byte,
+	output string,
+	image tool.Image,
+	stats tool.Stats,
+) tool.Result {
+	state := file.EncodeReadState(file.NewReadSnapshot(path, data))
+
+	return tool.Result{
+		State:  state,
+		Output: output,
+		Image:  image,
+		Stats:  stats,
+	}
 }
 
 func isSupportedImage(mediaType string) bool {

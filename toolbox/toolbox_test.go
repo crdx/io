@@ -34,7 +34,7 @@ func names(t *testing.T, writable bool) []string {
 
 	var built []string
 
-	for _, one := range Rummage(testRoot(t, writable)) {
+	for _, one := range Rummage(testRoot(t, writable), file.NewSnapshots()) {
 		built = append(built, one.Name())
 	}
 
@@ -53,7 +53,7 @@ func TestEveryPathShowingToolFocusesItsLastComponent(t *testing.T) {
 		"edit":  {`{"path":"cmd/oh/draw.go","old_text":"a","new_text":"b"}`, "draw.go"},
 	}
 
-	for _, subject := range Rummage(testRoot(t, true)) {
+	for _, subject := range Rummage(testRoot(t, true), file.NewSnapshots()) {
 		test, ok := want[subject.Name()]
 		if !ok {
 			continue

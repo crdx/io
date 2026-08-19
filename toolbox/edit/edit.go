@@ -3,6 +3,7 @@ package edit
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"crdx.org/io/internal/file"
@@ -19,12 +20,12 @@ type Args struct {
 }
 
 // New builds an edit tool confined to root.
-func New(root *file.Root) tool.Tool {
+func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	return editor{
 		Tool: tool.FocusPath(tool.Implement(
 			tool.Definition{
 				Name:        "edit",
-				Description: "replace an exact string in a file, which must appear exactly once",
+				Description: "replace an exact string in a file, which must be read first and appear exactly once",
 				Schema: tool.Schema{
 					tool.String("path", "file"),
 					tool.String("old_text", "exact text to replace, including whitespace"),
@@ -32,7 +33,9 @@ func New(root *file.Root) tool.Tool {
 				},
 			},
 			Render,
-		).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) { return exec(root, args) })),
+		).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
+			return exec(root, snapshots, args)
+		})),
 
 		root: root,
 	}
@@ -51,7 +54,7 @@ func Render(args Args) (string, string) {
 	return pathutil.Shorten(args.Path), ""
 }
 
-func exec(root *file.Root, args Args) (string, tool.Stats, error) {
+func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.Stats, error) {
 	switch {
 	case args.Path == "":
 		return "", tool.Stats{}, errors.New("path is required")
@@ -71,6 +74,9 @@ func exec(root *file.Root, args Args) (string, tool.Stats, error) {
 	data, err := root.ReadFile(name)
 	if err != nil {
 		return "", tool.Stats{}, err
+	}
+	if err := snapshots.Check(root, name, data); err != nil {
+		return "", tool.Stats{}, fmt.Errorf("%w — ensure you read %s before editing it", err, args.Path)
 	}
 
 	content := string(data)

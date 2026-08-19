@@ -1,6 +1,7 @@
 package write_test
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -29,7 +30,20 @@ func testRoot(t *testing.T) (*file.Root, string) {
 func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	t.Helper()
 
-	call, err := write.New(root).Parse(arguments)
+	var args write.Args
+	if err := json.Unmarshal([]byte(arguments), &args); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	snapshots := file.NewSnapshots()
+	resolvedRoot, name, resolveErr := root.Resolve(args.Path)
+	if resolveErr == nil {
+		if content, err := resolvedRoot.ReadFile(name); err == nil {
+			snapshots.Record(resolvedRoot, name, content)
+		}
+	}
+
+	call, err := write.New(root, snapshots).Parse(arguments)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -198,7 +212,7 @@ func TestTheToolChangesNothingWhileTheTreeIsReadOnly(t *testing.T) {
 	writable := false
 	root, _ := switchableRoot(t, &writable)
 
-	built := write.New(root)
+	built := write.New(root, file.NewSnapshots())
 
 	if !built.ReadOnly() {
 		t.Error("expected a tool over a read-only tree to change nothing")

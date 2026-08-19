@@ -273,7 +273,8 @@ func run() ([]string, error) {
 	}
 	defer func() { _ = tmpRoot.Close() }()
 
-	tools := toolbox.Rummage(files)
+	snapshots := file.NewSnapshots()
+	tools := toolbox.Rummage(files, snapshots)
 	shell := confinedShell(workspaceDir, homeDir, tmpDir, settings.Sandbox, mode, files, processes)
 
 	tools = append(tools, shell)

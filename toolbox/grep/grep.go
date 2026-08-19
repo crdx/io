@@ -4,10 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os/exec"
+	"path/filepath"
+	"regexp"
 	"strings"
 
 	"crdx.org/io/internal/file"
@@ -23,8 +26,10 @@ type Args struct {
 	Glob    string `json:"glob"`    // which paths to include
 }
 
+var matchPathPattern = regexp.MustCompile(`^(.+):[0-9]+:`)
+
 // New builds the grep tool confined to root. A match is reported as path:line:text.
-func New(root *file.Root) tool.Tool {
+func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	definedTool := tool.Implement(
 		tool.Definition{
 			Name:        "grep",
@@ -36,8 +41,16 @@ func New(root *file.Root) tool.Tool {
 			},
 		},
 		Render,
-	).Stats(func(ctx context.Context, args Args) (string, tool.Stats, error) {
-		return run(ctx, root, args)
+	).Run(func(ctx context.Context, args Args) (tool.Result, error) {
+		output, stats, err := run(ctx, root, args)
+		return tool.Result{
+			Output: output,
+			Stats:  stats,
+			State:  readStateForMatches(root, args, output),
+		}, err
+	})
+	definedTool = tool.State(definedTool, file.FileReadState, func(payload json.RawMessage) error {
+		return snapshots.RestoreReadState(root, payload)
 	})
 
 	return tool.ReadOnly(tool.Concurrent(tool.Syntax(tool.Focus(definedTool, util.SearchPath), "regexp")))
@@ -139,6 +152,39 @@ func searchReport(matches []string, truncated bool) (string, tool.Stats) {
 	stats.Truncated = truncated
 
 	return output, stats
+}
+
+func readStateForMatches(root *file.Root, args Args, output string) json.RawMessage {
+	searchRoot, _, err := root.Resolve(args.Path)
+	if err != nil {
+		return nil
+	}
+
+	seen := map[string]bool{}
+	var readSnapshots []file.ReadSnapshot
+	for line := range strings.Lines(output) {
+		match := matchPathPattern.FindStringSubmatch(line)
+		if match == nil || seen[match[1]] {
+			continue
+		}
+		seen[match[1]] = true
+
+		content, err := searchRoot.ReadFile(match[1])
+		if err != nil {
+			continue
+		}
+
+		path := match[1]
+		if searchRoot != root {
+			path = filepath.Join(searchRoot.Name(), path)
+		}
+		readSnapshots = append(readSnapshots, file.NewReadSnapshot(path, content))
+	}
+
+	if len(readSnapshots) == 0 {
+		return nil
+	}
+	return file.EncodeReadState(readSnapshots...)
 }
 
 func readMatches(reader io.Reader, trimWorkingDirectory bool) ([]string, bool, error) {

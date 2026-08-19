@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"path/filepath"
 	"strings"
 
@@ -20,19 +21,21 @@ type Args struct {
 }
 
 // New builds a write tool confined to root.
-func New(root *file.Root) tool.Tool {
+func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	return writer{
 		Tool: tool.FocusPath(tool.Implement(
 			tool.Definition{
 				Name:        "write",
-				Description: "write a file, creating or overwriting it",
+				Description: "write a file, creating it or overwriting it (read it first)",
 				Schema: tool.Schema{
 					tool.String("path", "file"),
 					tool.String("content", "full contents"),
 				},
 			},
 			Render,
-		).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) { return exec(root, args) })),
+		).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
+			return exec(root, snapshots, args)
+		})),
 
 		root: root,
 	}
@@ -51,7 +54,7 @@ func Render(args Args) (string, string) {
 	return pathutil.Shorten(args.Path), util.FormatBytes(len(args.Content), 3)
 }
 
-func exec(root *file.Root, args Args) (string, tool.Stats, error) {
+func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.Stats, error) {
 	if args.Path == "" {
 		return "", tool.Stats{}, errors.New("path is required")
 	}
@@ -62,6 +65,15 @@ func exec(root *file.Root, args Args) (string, tool.Stats, error) {
 	}
 
 	if err := root.RefuseWrite(name); err != nil {
+		return "", tool.Stats{}, err
+	}
+
+	currentContent, err := root.ReadFile(name)
+	if err == nil {
+		if err := snapshots.Check(root, name, currentContent); err != nil {
+			return "", tool.Stats{}, fmt.Errorf("%w; read %s before overwriting it", err, args.Path)
+		}
+	} else if !errors.Is(err, fs.ErrNotExist) {
 		return "", tool.Stats{}, err
 	}
 

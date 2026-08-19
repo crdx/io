@@ -36,7 +36,7 @@ func testRoot(t *testing.T, name string, content string) *file.Root {
 func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	t.Helper()
 
-	call, err := read.New(root).Parse(arguments)
+	call, err := read.New(root, file.NewSnapshots()).Parse(arguments)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -48,7 +48,7 @@ func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 func TestAnImageIsAttachedForTheModel(t *testing.T) {
 	content := "\x89PNG\r\n\x1a\n" + strings.Repeat("\x00", 24)
 	root := testRoot(t, "picture.png", content)
-	call, err := read.New(root).Parse(`{"path":"picture.png"}`)
+	call, err := read.New(root, file.NewSnapshots()).Parse(`{"path":"picture.png"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -73,7 +73,7 @@ func TestAnImageReportsAnEstimateFromItsDimensions(t *testing.T) {
 	}
 
 	root := testRoot(t, "picture.png", encoded.String())
-	call, err := read.New(root).Parse(`{"path":"picture.png"}`)
+	call, err := read.New(root, file.NewSnapshots()).Parse(`{"path":"picture.png"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -125,7 +125,7 @@ func TestALineRangeComesBackOnItsOwn(t *testing.T) {
 
 func TestALineRangeMeasuresOnlyWhatComesBack(t *testing.T) {
 	root := testRoot(t, "notes.txt", "one\ntwo\nthree\nfour\n")
-	call, err := read.New(root).Parse(`{"path":"notes.txt","offset":2,"limit":2}`)
+	call, err := read.New(root, file.NewSnapshots()).Parse(`{"path":"notes.txt","offset":2,"limit":2}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -229,7 +229,7 @@ func TestAReadWithNoPathIsRefused(t *testing.T) {
 
 func TestAReadFocusesTheFileName(t *testing.T) {
 	root := testRoot(t, "notes.txt", "one\n")
-	call, err := read.New(root).Parse(`{"path":"somewhere/notes.txt"}`)
+	call, err := read.New(root, file.NewSnapshots()).Parse(`{"path":"somewhere/notes.txt"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

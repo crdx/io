@@ -13,13 +13,13 @@ import (
 )
 
 // Rummage builds every file tool confined to root.
-func Rummage(root *file.Root) []tool.Tool {
+func Rummage(root *file.Root, snapshots *file.Snapshots) []tool.Tool {
 	return []tool.Tool{
-		read.New(root),
+		read.New(root, snapshots),
 		ls.New(root),
 		find.New(root),
-		grep.New(root),
-		write.New(root),
-		edit.New(root),
+		grep.New(root, snapshots),
+		write.New(root, snapshots),
+		edit.New(root, snapshots),
 	}
 }
