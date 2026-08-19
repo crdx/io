@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"crdx.org/io/cmd/oh/pathlink"
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/theme"
 	"crdx.org/io/cmd/oh/tty"
@@ -27,7 +28,8 @@ type Output struct {
 	streaming        bool   // whether an answer is arriving in pieces
 	stacked          bool   // whether anything has been said, and so whether the input has a row to sit under
 
-	terminal bool // whether the writer is a terminal
+	terminal      bool   // whether the writer is a terminal
+	pathWorkspace string // where relative paths drawn in the scrollback begin
 
 	columns    int // the terminal width
 	lines      int // the terminal height
@@ -52,6 +54,12 @@ func New(writer io.Writer) *Output {
 
 	self.measure()
 
+	return self
+}
+
+// PostProcess enables final scrollback transformations relative to workspace.
+func (self *Output) PostProcess(workspace string) *Output {
+	self.pathWorkspace = workspace
 	return self
 }
 
@@ -250,12 +258,22 @@ func (self *Output) count(styledText string) {
 }
 
 func (self *Output) at(text string) {
+	text = self.renderScrollback(text)
+
 	if len(self.shownFooter.rows) == 0 {
 		self.raw(text)
 		return
 	}
 
 	self.redraw(text)
+}
+
+func (self *Output) renderScrollback(text string) string {
+	if !self.terminal || self.pathWorkspace == "" {
+		return text
+	}
+
+	return pathlink.Render(text, self.pathWorkspace)
 }
 
 func (self *Output) raw(text string) {

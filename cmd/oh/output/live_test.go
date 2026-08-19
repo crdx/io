@@ -2,14 +2,53 @@ package output
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"crdx.org/io/cmd/oh/theme"
 )
 
 func region() (*Output, *strings.Builder) {
 	screenOutput := &strings.Builder{}
 
 	return &Output{writer: screenOutput, terminal: true, columns: 40, lines: 24}, screenOutput
+}
+
+func TestPathsAreLinkedAtBothScrollbackDrawingBoundaries(t *testing.T) {
+	workspace := t.TempDir()
+	path := filepath.Join(workspace, "cmd", "oh", "draw.go")
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
+		t.Fatalf("prepare directory: %v", err)
+	}
+	if err := os.WriteFile(path, nil, 0o600); err != nil {
+		t.Fatalf("prepare file: %v", err)
+	}
+
+	screen, screenOutput := region()
+	screen.PostProcess(workspace)
+	screen.drawRow(theme.Detail("cmd/oh/") + theme.Args("draw.go"))
+	screen.Draw([]string{"see cmd/oh/draw.go"})
+
+	if count := strings.Count(screenOutput.String(), "\x1b]8;;file://"); count != 2 {
+		t.Errorf("expected the status row and prose row linked, got %d links in %q", count, screenOutput)
+	}
+}
+
+func TestPathsStayPlainWhenScrollbackIsRedirected(t *testing.T) {
+	workspace := t.TempDir()
+	if err := os.WriteFile(filepath.Join(workspace, "one.go"), nil, 0o600); err != nil {
+		t.Fatalf("prepare file: %v", err)
+	}
+
+	var screenOutput strings.Builder
+	screen := New(&screenOutput).PostProcess(workspace)
+	screen.Line("one.go")
+
+	if got := screenOutput.String(); got != "one.go" {
+		t.Errorf("got %q, want plain redirected output", got)
+	}
 }
 
 func TestOnlyTheRowsThatChangedArePaintedAgain(t *testing.T) {

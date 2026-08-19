@@ -114,7 +114,7 @@ func (self *Output) repaint(first int, rows []string) {
 		}
 
 		out.WriteString("\r" + clearRow)
-		out.WriteString(rows[at])
+		out.WriteString(self.renderScrollback(rows[at]))
 	}
 
 	self.settle(rows)
