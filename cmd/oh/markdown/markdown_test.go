@@ -196,13 +196,32 @@ func TestBashCommandNamesAndFirstParametersAreHighlighted(t *testing.T) {
 		},
 		"pipeline": {
 			"printf one | grep one",
-			theme.Function("printf") + theme.Block(" ") + theme.Function("one") + theme.Block(" | ") +
-				theme.Function("grep") + theme.Block(" ") + theme.Function("one"),
+			theme.Function("printf") + theme.Block(" ") + theme.Function("one") + theme.Block(" ") +
+				theme.Operator("|") + theme.Block(" ") + theme.Function("grep") + theme.Block(" ") +
+				theme.Function("one"),
 		},
-		"conditional": {
+		"combined output pipeline": {
+			"printf one |& grep one",
+			theme.Function("printf") + theme.Block(" ") + theme.Function("one") + theme.Block(" ") +
+				theme.Operator("|&") + theme.Block(" ") + theme.Function("grep") + theme.Block(" ") +
+				theme.Function("one"),
+		},
+		"background": {
+			"sleep 1 & wait",
+			theme.Function("sleep") + theme.Block(" ") + theme.Function("1") + theme.Block(" ") +
+				theme.Operator("&") + theme.Block(" ") + theme.Function("wait"),
+		},
+		"and conditional": {
 			"go test && git status --short",
-			theme.Function("go") + theme.Block(" ") + theme.Function("test") + theme.Block(" && ") +
-				theme.Function("git") + theme.Block(" ") + theme.Function("status") + theme.Block(" --short"),
+			theme.Function("go") + theme.Block(" ") + theme.Function("test") + theme.Block(" ") +
+				theme.Operator("&&") + theme.Block(" ") + theme.Function("git") + theme.Block(" ") +
+				theme.Function("status") + theme.Block(" --short"),
+		},
+		"or conditional": {
+			"go test || git status --short",
+			theme.Function("go") + theme.Block(" ") + theme.Function("test") + theme.Block(" ") +
+				theme.Operator("||") + theme.Block(" ") + theme.Function("git") + theme.Block(" ") +
+				theme.Function("status") + theme.Block(" --short"),
 		},
 		"command substitution": {
 			"echo one $(go list)",

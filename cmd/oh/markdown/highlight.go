@@ -152,6 +152,8 @@ func bashCommandSpans(source string) ([]sourceSpan, error) {
 			spans = append(spans, bashAssignmentSpans(node)...)
 		case *syntax.Redirect:
 			spans = append(spans, bashSourceSpan(node.OpPos, node.Op.String(), theme.Operator))
+		case *syntax.BinaryCmd:
+			spans = append(spans, bashSourceSpan(node.OpPos, node.Op.String(), theme.Operator))
 		case *syntax.Stmt:
 			if node.Semicolon.IsValid() {
 				spans = append(spans, bashSourceSpan(node.Semicolon, ";", theme.Operator))
