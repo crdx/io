@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"crdx.org/io/internal/pathutil"
@@ -64,6 +65,23 @@ func sessionsDir() string {
 
 func shellHomeDir() string {
 	return stateDir("home")
+}
+
+func shellMiseDataDir() string {
+	if dataDir := os.Getenv("MISE_DATA_DIR"); dataDir != "" {
+		return dataDir
+	}
+
+	if dataHome := os.Getenv("XDG_DATA_HOME"); filepath.IsAbs(dataHome) {
+		return filepath.Join(dataHome, "mise")
+	}
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+
+	return filepath.Join(home, ".local", "share", "mise")
 }
 
 func tmpDir(id string) string { // one per session, so a resumed one finds what it left

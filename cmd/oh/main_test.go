@@ -247,6 +247,49 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 	}
 }
 
+func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	miseDataDir := t.TempDir()
+	t.Setenv("MISE_DATA_DIR", miseDataDir)
+
+	home := t.TempDir()
+	tmp := t.TempDir()
+	if _, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, capRead|capShell); err != nil {
+		t.Skipf("the sandbox cannot enforce a shell policy here: %v", err)
+	}
+
+	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
+	mode := NewMode(capRead | capShell)
+	processes := sandbox.NewProcesses(false)
+	defer func() { _, _ = processes.Disable() }()
+
+	shell := confinedShell(workspace, home, tmp, configuredPaths{}, mode, files, processes)
+	run := func() {
+		call, parseErr := shell.Parse(`{"command":"printf %s \"$MISE_DATA_DIR\""}`)
+		if parseErr != nil {
+			t.Fatal(parseErr)
+		}
+
+		output, execErr := call.Exec(t.Context())
+		if execErr != nil {
+			t.Fatal(execErr)
+		}
+		if output != miseDataDir {
+			t.Errorf("got %q, want %q", output, miseDataDir)
+		}
+	}
+
+	run()
+	mode.Toggle(capWrite)
+	run()
+}
+
 func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 	workspace := t.TempDir()
 	metadata := filepath.Join(workspace, ".git")
@@ -340,6 +383,8 @@ func TestGrantingWriteAccessRemovesExactReadOnlyMounts(t *testing.T) {
 func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()
+	miseDataDir := t.TempDir()
+	t.Setenv("MISE_DATA_DIR", miseDataDir)
 
 	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capWrite)
 	if err != nil {
@@ -364,6 +409,10 @@ func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 
 	if policy.SetEnv["HOME"] != home {
 		t.Errorf("got HOME %q, want %q", policy.SetEnv["HOME"], home)
+	}
+
+	if policy.SetEnv["MISE_DATA_DIR"] != miseDataDir {
+		t.Errorf("got MISE_DATA_DIR %q, want %q", policy.SetEnv["MISE_DATA_DIR"], miseDataDir)
 	}
 
 	if policy.SetEnv["TMPDIR"] != sandbox.TmpDir {

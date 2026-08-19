@@ -82,6 +82,7 @@ func createSandboxPolicy(
 			"GOCACHE":             filepath.Join(cacheDir, goBuildCacheDir),
 			"GOMODCACHE":          filepath.Join(cacheDir, goModuleCacheDir),
 			"HOME":                homeDir,
+			"MISE_DATA_DIR":       shellMiseDataDir(),
 			"TMPDIR":              sandbox.TmpDir,
 		},
 
