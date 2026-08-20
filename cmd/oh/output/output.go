@@ -46,6 +46,7 @@ type Output struct {
 
 	liveRows        []string // the rows of the live region as they were last painted
 	liveContentRows int      // how many live rows are content rather than height-preserving blanks
+	liveSeparated   bool     // whether what follows the live region stands apart from it
 	top             int      // the first row of the region the screen still holds
 }
 
@@ -203,9 +204,10 @@ func (self *Output) write(text string) {
 
 func (self *Output) emit(text string) {
 	self.stacked = true
-	self.at(self.fit(text))
+	fitted := self.fit(text)
 	self.advance(text)
 	self.count(text)
+	self.at(fitted)
 }
 
 const apart = 2 // newlines with an empty line between them

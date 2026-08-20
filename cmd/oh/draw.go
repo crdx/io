@@ -13,17 +13,19 @@ import (
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/width"
 )
 
 const readTool = "read"
 
 type painter struct {
-	screen *output.Output  // where the conversation is drawn
-	live   bool            // whether drawing is happening as events arrive
-	block  *status.Block   // the open block of calls
-	rows   map[string]int  // which row of the block a call is being shown on
-	answer strings.Builder // the answer so far, which is rendered again on every delta
-	stale  bool            // whether the answer outgrew what the screen can repair
+	screen    *output.Output  // where the conversation is drawn
+	live      bool            // whether drawing is happening as events arrive
+	block     *status.Block   // the open block of calls
+	rows      map[string]int  // which row of the block a call is being shown on
+	answer    strings.Builder // the answer so far, which is rendered again on every delta
+	reasoning strings.Builder // the reasoning so far, which is rendered again on every delta
+	stale     bool            // whether streamed prose outgrew what the screen can repair
 
 	tools        func(string) (tool.Tool, bool) // the tools a call may be rendered by
 	shell        string                         // what the shell tool was named, so a call to it is drawn as a prompt
@@ -31,26 +33,43 @@ type painter struct {
 }
 
 func (self *painter) describe(event agent.Event) (string, string, tool.Highlight) {
+	subject := event.Subject
+	qualifier := event.Qualifier
+	highlight := event.Highlight
+
 	calledTool, known := self.calledTool(event.Name)
-	if !known {
-		return event.Subject, event.Qualifier, event.Highlight
-	}
-
-	parsedCall, err := calledTool.Parse(event.Arguments)
-	if err != nil {
-		return tool.DescribeUnparsedArguments(calledTool, event.Arguments), event.Qualifier, event.Highlight
-	}
-
-	highlight := parsedCall.Highlight()
-
-	subject := parsedCall.Subject()
-	if self.workspaceDir != "" {
-		for _, workspaceDir := range []string{self.workspaceDir, pathutil.Shorten(self.workspaceDir)} {
-			subject = strings.TrimPrefix(subject, workspaceDir+string(filepath.Separator))
+	if known {
+		parsedCall, err := calledTool.Parse(event.Arguments)
+		if err != nil {
+			subject = tool.DescribeUnparsedArguments(calledTool, event.Arguments)
+		} else {
+			subject = parsedCall.Subject()
+			qualifier = parsedCall.Qualifier()
+			highlight = parsedCall.Highlight()
 		}
 	}
 
-	return subject, parsedCall.Qualifier(), highlight
+	return self.shortenPathPrefix(subject), self.shortenPathPrefix(qualifier), highlight
+}
+
+func (self *painter) shortenPathPrefix(value string) string {
+	if self.workspaceDir != "" {
+		for _, workspaceDir := range []string{self.workspaceDir, pathutil.Shorten(self.workspaceDir)} {
+			rest, hasPrefix := strings.CutPrefix(value, workspaceDir)
+			switch {
+			case !hasPrefix:
+				continue
+			case rest == "":
+				return ""
+			case strings.HasPrefix(rest, string(filepath.Separator)):
+				return strings.TrimPrefix(rest, string(filepath.Separator))
+			case strings.HasPrefix(rest, " "):
+				return strings.TrimPrefix(rest, " ")
+			}
+		}
+	}
+
+	return pathutil.Shorten(value)
 }
 
 func (self *painter) calledTool(name string) (tool.Tool, bool) {
@@ -62,6 +81,16 @@ func (self *painter) calledTool(name string) (tool.Tool, bool) {
 }
 
 func (self *painter) draw(event agent.Event) {
+	if event.Kind != agent.Reasoning && self.reasoning.Len() > 0 {
+		self.screen.End()
+		self.reasoning.Reset()
+		if event.Kind == agent.Text {
+			self.screen.Blank()
+		}
+	}
+	if event.Kind == agent.Reasoning && self.answer.Len() > 0 {
+		self.screen.End()
+	}
 	if event.Kind != agent.Text {
 		self.answer.Reset()
 	}
@@ -75,7 +104,11 @@ func (self *painter) draw(event agent.Event) {
 		self.screen.Blank()
 
 	case agent.Reasoning:
-		self.screen.Line(theme.Reasoning(flatten(event.Text)))
+		self.reasoning.WriteString(event.Text)
+		rows := renderReasoning(self.reasoning.String(), self.screen.Columns())
+		if !self.screen.DrawUnseparated(rows) {
+			self.stale = true
+		}
 
 	case agent.Text:
 		self.answer.WriteString(event.Text)
@@ -124,6 +157,10 @@ func (self *painter) draw(event agent.Event) {
 
 	case agent.Result:
 		self.mark(event)
+
+	case agent.Failure:
+		self.close(status.Cancelled)
+		self.screen.Line(theme.Failure(event.Text))
 	}
 }
 
@@ -179,23 +216,12 @@ func outcome(failed bool) status.State {
 	return status.Done
 }
 
-func flatten(thought string) string {
-	var out strings.Builder
+func renderReasoning(thought string, columns int) []string {
+	rendered := markdown.Render(thought, columns)
+	plain := theme.Plain(strings.Join(rendered, "\n"))
+	stripped := strings.Join(strings.Fields(plain), " ")
 
-	for index, line := range strings.Split(thought, "\n") {
-		line = strings.TrimSpace(strings.ReplaceAll(line, "**", ""))
-		if line == "" {
-			continue
-		}
-
-		if index > 0 && out.Len() > 0 {
-			out.WriteString(" · ")
-		}
-
-		out.WriteString(line)
-	}
-
-	return out.String()
+	return width.Wrap(theme.Reasoning(stripped), columns)
 }
 
 func (self *painter) close(state status.State) {

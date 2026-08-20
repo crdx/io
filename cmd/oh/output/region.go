@@ -67,6 +67,7 @@ type footer struct {
 	cursorRow    int      // the cursor row in the input
 	cursorColumn int      // the cursor column in that row
 	column       int      // the conversation column above
+	separators   int      // rows between the conversation cursor and the input
 	stacked      bool     // whether the input sits below content
 }
 
@@ -169,6 +170,7 @@ func (self *Output) Reset() {
 	self.stacked = false
 	self.liveRows = nil
 	self.liveContentRows = 0
+	self.liveSeparated = false
 	self.top = 0
 
 	self.measure()
@@ -207,7 +209,7 @@ func (self *Output) eraseInput() string {
 		return "\r" + moveUp(shownFooter.cursorRow) + clearBelow
 	}
 
-	return "\r" + moveUp(shownFooter.cursorRow) + clearBelow + moveUp(1) + moveRight(shownFooter.column)
+	return "\r" + moveUp(shownFooter.cursorRow) + clearBelow + moveUp(shownFooter.separators) + moveRight(shownFooter.column)
 }
 
 func (self *Output) drawInput() string {
@@ -218,13 +220,19 @@ func (self *Output) drawInput() string {
 	self.shownFooter = self.input
 	self.shownFooter.column = self.column
 	self.shownFooter.stacked = self.stacked
+	if self.shownFooter.stacked {
+		self.shownFooter.separators = max(0, apart-self.trailingNewlines)
+	}
 
 	var out strings.Builder
 
 	for index, row := range self.input.rows {
-		if index > 0 || self.shownFooter.stacked {
+		switch {
+		case index > 0:
 			out.WriteString("\r\n")
-		} else {
+		case self.shownFooter.separators > 0:
+			out.WriteString(strings.Repeat("\r\n", self.shownFooter.separators))
+		default:
 			out.WriteString("\r")
 		}
 

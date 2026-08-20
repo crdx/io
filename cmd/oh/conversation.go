@@ -463,9 +463,9 @@ func (self *conversation) updateContextUsage(event agent.Event) {
 }
 
 func appendTranscript(transcript []entry, event agent.Event) []entry {
-	if event.Kind == agent.Text && len(transcript) > 0 {
-		if last := &transcript[len(transcript)-1]; last.event.Kind == agent.Text {
-			last.event.Text += event.Text // a long answer is one entry, not thousands of deltas
+	if (event.Kind == agent.Text || event.Kind == agent.Reasoning) && len(transcript) > 0 {
+		if last := &transcript[len(transcript)-1]; last.event.Kind == event.Kind {
+			last.event.Text += event.Text // streamed prose is one entry, not thousands of deltas
 			return transcript
 		}
 	}
@@ -483,6 +483,8 @@ func (self *conversation) finish() {
 
 	if self.turn.cancelled {
 		self.recordEvent(agent.Event{Kind: agent.Interrupted})
+	} else if self.turn.failure != nil {
+		self.recordEvent(agent.Event{Kind: agent.Failure, Text: self.turn.failure.Error()})
 	}
 
 	self.flush(&self.turn.pendingEvents)
@@ -490,10 +492,6 @@ func (self *conversation) finish() {
 	self.showStorageWarnings()
 	self.turn.painter.close(status.Cancelled)
 	self.screen.End()
-
-	if !self.turn.cancelled && self.turn.failure != nil {
-		self.notify(theme.Failure(self.turn.failure.Error()))
-	}
 
 	self.screen.End()
 

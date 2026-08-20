@@ -114,6 +114,8 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		}
 	case agent.Interrupted:
 		output.WriteString("The turn was interrupted.\n\n")
+	case agent.Failure:
+		writeFence(&output, event.Text, "")
 	}
 
 	_, err := self.file.WriteString(output.String())
@@ -164,6 +166,8 @@ func title(kind agent.Kind) string {
 		return "Context usage"
 	case agent.Interrupted:
 		return "Interrupted"
+	case agent.Failure:
+		return "Failure"
 	default:
 		return string(kind)
 	}

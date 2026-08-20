@@ -16,6 +16,7 @@ import (
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
 )
@@ -229,7 +230,8 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 
 	events := []agent.Event{
 		{Kind: agent.Prompt, Text: "**Check** this"},
-		{Kind: agent.Reasoning, Text: "**Reading**\nLooking at the file."},
+		{Kind: agent.Reasoning, Text: "**Reading**\nLooking "},
+		{Kind: agent.Reasoning, Text: "at the file. Need care."},
 		{Kind: agent.Text, Text: "The **first** "},
 		{Kind: agent.Text, Text: "answer.\n"},
 		{Kind: agent.Call, ID: "1", Name: "read", Arguments: `{"path":"one.go"}`, Subject: "old"},
@@ -257,10 +259,13 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 
 	plain := theme.Plain(live.String())
 
-	for _, want := range []string{"Check", "Looking at the file.", "first answer.", "one.go", "Done.", "Background processes killed"} {
+	for _, want := range []string{"Check", "Looking at the file.", "Need care.", "first answer.", "one.go", "Done.", "Background processes killed"} {
 		if !strings.Contains(plain, want) {
 			t.Errorf("expected %q on the screen, got %q", want, plain)
 		}
+	}
+	if !strings.Contains(plain, "Need care.\n\nThe first") {
+		t.Errorf("expected a blank line between reasoning and the answer, got %q", plain)
 	}
 
 	if live.String() != replayOutput.String() {
@@ -268,21 +273,39 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	}
 }
 
-func TestAThoughtIsFlattenedOntoOneLine(t *testing.T) {
-	tests := map[string]string{
-		"Checking the sky.": "Checking the sky.",
-
-		"**Fixing the cancel**\nThe call is never answered.": "Fixing the cancel · The call is never answered.",
-
-		"**Reading**\n\n  Indented, and blank lines between.  \n": "Reading · Indented, and blank lines between.",
-
-		"": "",
+func TestAThoughtHasMarkdownStripped(t *testing.T) {
+	rows := renderReasoning("## **Checking** `one.go`", 40)
+	for index := range rows {
+		rows[index] = theme.Plain(rows[index])
 	}
 
-	for thought, want := range tests {
-		if got := flatten(thought); got != want {
-			t.Errorf("flatten(%q) = %q, want %q", thought, got, want)
-		}
+	if got := strings.Join(rows, "\n"); got != "Checking one.go" {
+		t.Errorf("got reasoning %q with markdown stripped", got)
+	}
+}
+
+func TestAThoughtRunsDirectlyIntoAToolCall(t *testing.T) {
+	var screenOutput bytes.Buffer
+	callPainter := &painter{screen: output.New(&screenOutput)}
+
+	callPainter.draw(agent.Event{Kind: agent.Reasoning, Text: "checking"})
+	callPainter.draw(agent.Event{Kind: agent.Call, ID: "1", Name: "read", Subject: "one.go"})
+	callPainter.close(status.Cancelled)
+
+	plain := theme.Plain(screenOutput.String())
+	if !strings.Contains(plain, "checking\nread one.go") {
+		t.Errorf("expected no blank line between reasoning and the tool call, got %q", plain)
+	}
+}
+
+func TestAThoughtWrapsAtWordBoundaries(t *testing.T) {
+	rows := renderReasoning("one two three four", 9)
+	for index := range rows {
+		rows[index] = theme.Plain(rows[index])
+	}
+
+	if got := strings.Join(rows, "\n"); got != "one two\nthree\nfour" {
+		t.Errorf("got %q, want reasoning wrapped between words", got)
 	}
 }
 
@@ -594,7 +617,14 @@ func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 
 	t.Setenv("HOME", "/home/alice")
 
-	current := tool.FocusPath(slowTool("read"))
+	current := tool.FocusPath(tool.Implement(
+		tool.Definition{
+			Name:        "read",
+			Description: "",
+			Schema:      tool.Schema{tool.String("path", "file")},
+		},
+		func(args fakeArgs) (string, string) { return args.Path, pathutil.Shorten(args.Path) },
+	).Plain(func(context.Context, fakeArgs) (string, error) { return "", nil }))
 	testConversation := &conversation{
 		assistant:    agent.New("", quietProvider{}, []tool.Tool{current}),
 		workspaceDir: workspaceDir,
@@ -606,11 +636,51 @@ func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 	})
 
 	wantHighlight := tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"}
-	if detail != "" || highlight != wantHighlight {
-		t.Fatalf("unexpected call description %q, %#v", detail, highlight)
+	if highlight != wantHighlight {
+		t.Fatalf("unexpected highlight %#v", highlight)
 	}
-	if rendered != "cmd/oh/draw.go" {
-		t.Errorf("got %q, want the workspace prefix omitted", rendered)
+	if rendered != "cmd/oh/draw.go" || detail != "cmd/oh/draw.go" {
+		t.Errorf("got rendering %q and detail %q, want the workspace prefixes omitted", rendered, detail)
+	}
+}
+
+func TestPathPrefixesAreShortened(t *testing.T) {
+	const workspaceDir = "/home/alice/project"
+
+	t.Setenv("HOME", "/home/alice")
+
+	callPainter := &painter{workspaceDir: workspaceDir}
+	tests := map[string]string{
+		workspaceDir:                          "",
+		"~/project":                           "",
+		workspaceDir + " **/*.go":             "**/*.go",
+		"~/project **/*.go":                   "**/*.go",
+		workspaceDir + "/cmd/oh/draw.go":      "cmd/oh/draw.go",
+		"~/project/cmd/oh/draw.go":            "cmd/oh/draw.go",
+		"/home/alice/other.go":                "~/other.go",
+		"/home/alice/projectile/other.go":     "~/projectile/other.go",
+		"~/projectile/cmd/oh/draw.go **/*.go": "~/projectile/cmd/oh/draw.go **/*.go",
+	}
+
+	for value, want := range tests {
+		if got := callPainter.shortenPathPrefix(value); got != want {
+			t.Errorf("shortenPathPrefix(%q) = %q, want %q", value, got, want)
+		}
+	}
+}
+
+func TestRecordedCallPathsAreShortenedWithTheSameFunction(t *testing.T) {
+	t.Setenv("HOME", "/home/alice")
+
+	callPainter := &painter{workspaceDir: "/home/alice/project"}
+	subject, qualifier, _ := callPainter.describe(agent.Event{
+		Name:      "removed",
+		Subject:   "/home/alice/project/file.go",
+		Qualifier: "/home/alice/reference/file.go",
+	})
+
+	if subject != "file.go" || qualifier != "~/reference/file.go" {
+		t.Errorf("got subject %q and qualifier %q, want both path prefixes shortened", subject, qualifier)
 	}
 }
 

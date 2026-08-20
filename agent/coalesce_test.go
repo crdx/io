@@ -40,6 +40,8 @@ func renderedEvents(events iter.Seq2[agent.Event, error]) ([]string, error) {
 
 func TestCoalesceHoldsTextUntilSomethingElseHappens(t *testing.T) {
 	coalescedEvents := agent.Coalesce(stream(
+		agent.Event{Kind: agent.Reasoning, Text: "Need to "},
+		agent.Event{Kind: agent.Reasoning, Text: "look. "},
 		text("Let me "),
 		text("look. "),
 		agent.Event{Kind: agent.Call, Name: "weather"},
@@ -54,6 +56,7 @@ func TestCoalesceHoldsTextUntilSomethingElseHappens(t *testing.T) {
 	}
 
 	expectedEvents := []string{
+		fmt.Sprintf("%s:Need to look. ", agent.Reasoning),
 		fmt.Sprintf("%s:Let me look. ", agent.Text),
 		fmt.Sprintf("%s:weather", agent.Call),
 		fmt.Sprintf("%s:weatherraining", agent.Result),

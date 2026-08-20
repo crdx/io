@@ -13,6 +13,28 @@ import (
 	"crdx.org/io/cmd/oh/store/transcript"
 )
 
+func TestTranscriptPreservesReasoningFormatting(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.Reasoning, Text: "First. Second?\nThird!"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(stored), "First. Second?\nThird!") {
+		t.Errorf("reasoning formatting was not preserved:\n%s", stored)
+	}
+}
+
 func TestTranscriptStoresOnlyAToolResultPreview(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
 	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
@@ -105,6 +127,33 @@ func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {
 	}
 	if !strings.Contains(transcript, "# Conversation") || !strings.Contains(transcript, "## Assistant") {
 		t.Errorf("expected the metadata and event headings, got:\n%s", transcript)
+	}
+}
+
+func TestTranscriptRetainsTurnFailures(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{
+		Kind: agent.Failure, Text: "read: connection reset by peer",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	transcript := string(stored)
+	for _, want := range []string{"## Failure", "read: connection reset by peer"} {
+		if !strings.Contains(transcript, want) {
+			t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)
+		}
 	}
 }
 

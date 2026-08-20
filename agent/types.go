@@ -76,6 +76,7 @@ const (
 	StateEvent   Kind = "state"       // durable state changed by a successful call
 	ContextUsage Kind = "usage"       // how much context a completed turn used
 	Interrupted  Kind = "interrupted" // where a replacement prompt stopped a turn
+	Failure      Kind = "failure"     // why a turn ended before the model completed it
 )
 
 // Event is a conversation occurrence or durable tool-state transition. The stream of them is the

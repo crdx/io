@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/tool"
 )
 
@@ -23,7 +22,7 @@ func DescribeSearch(pattern string, path string, globPattern string) (string, st
 	var qualifier string
 
 	if path != "" && path != "." {
-		qualifier = pathutil.Shorten(path)
+		qualifier = path
 	}
 
 	if globPattern != "" {

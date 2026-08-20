@@ -9,8 +9,17 @@ import (
 
 const clearRow = "\x1b[K"
 
-// Draw replaces the live region and reports whether every changed row remains on screen.
+// Draw replaces the separated live region and reports whether every changed row remains on screen.
 func (self *Output) Draw(rows []string) bool {
+	return self.draw(rows, true)
+}
+
+// DrawUnseparated replaces a live region that runs directly into non-prose output.
+func (self *Output) DrawUnseparated(rows []string) bool {
+	return self.draw(rows, false)
+}
+
+func (self *Output) draw(rows []string, separated bool) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -20,6 +29,10 @@ func (self *Output) Draw(rows []string) bool {
 		}
 
 		rows = []string{""}
+	}
+
+	if len(self.liveRows) == 0 {
+		self.liveSeparated = separated
 	}
 
 	if !self.terminal {
@@ -47,7 +60,7 @@ func (self *Output) Draw(rows []string) bool {
 	}
 
 	if len(self.liveRows) == 0 {
-		self.begin()
+		self.begin(separated)
 	}
 
 	self.repaint(first, rows)
@@ -62,7 +75,7 @@ func (self *Output) seal() {
 	}
 
 	if !self.terminal {
-		self.begin()
+		self.begin(self.liveSeparated)
 		self.write(strings.Join(self.liveRows, "\n"))
 	} else if self.liveContentRows < len(self.liveRows) && self.liveContentRows > self.top {
 		rows := slices.Clone(self.liveRows[:self.liveContentRows])
@@ -71,12 +84,13 @@ func (self *Output) seal() {
 
 	self.liveRows = nil
 	self.liveContentRows = 0
+	self.liveSeparated = false
 	self.top = 0
 }
 
-func (self *Output) begin() {
-	self.separate(true)
-	self.streaming = true
+func (self *Output) begin(separated bool) {
+	self.separate(separated)
+	self.streaming = separated
 
 	if self.midLine {
 		self.newline()

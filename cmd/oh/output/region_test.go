@@ -10,7 +10,7 @@ import (
 func screenWithInput() (*Output, *strings.Builder) {
 	screenOutput := &strings.Builder{}
 
-	shownFooter := footer{rows: []string{"> hi"}, cursorColumn: 3, column: 4, stacked: true}
+	shownFooter := footer{rows: []string{"> hi"}, cursorColumn: 3, column: 4, separators: apart, stacked: true}
 
 	return &Output{
 		writer:      screenOutput,
@@ -148,8 +148,23 @@ func TestTheInputTakesNoRowOfItsOwnUntilSomethingHasBeenSaid(t *testing.T) {
 		t.Errorf("expected what was said to take the row the input was on, got %q", got)
 	}
 
-	if want := "thinking\r\n> hi"; !strings.Contains(got, want) {
-		t.Errorf("expected the input to move under what was said, got %q", got)
+	if want := "thinking\r\n\r\n> hi"; !strings.Contains(got, want) {
+		t.Errorf("expected the input to move under what was said with a blank row, got %q", got)
+	}
+}
+
+func TestFinishingTheConversationKeepsTheFooterInPlace(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := &Output{writer: screenOutput, terminal: true}
+	screen.Footer([]string{"> hi"}, 0, 3)
+	screen.Line("thinking")
+	screenOutput.Reset()
+
+	screen.End()
+
+	got := screenOutput.String()
+	if !strings.Contains(got, "\r\n> hi") || strings.Contains(got, "\r\n\r\n> hi") {
+		t.Errorf("expected the existing blank row to keep the footer in place, got %q", got)
 	}
 }
 
@@ -158,7 +173,7 @@ func TestWritingToTheConversationPutsTheInputBackWithTheCursorInIt(t *testing.T)
 
 	screen.Line("thinking")
 
-	want := "\r\n> hi\r" + fmt.Sprintf(right, 3) + showCursor + endFrame
+	want := "\r\n\r\n> hi\r" + fmt.Sprintf(right, 3) + showCursor + endFrame
 
 	if got := screenOutput.String(); !strings.HasSuffix(got, want) {
 		t.Errorf("expected the input to be put back under it, got %q", got)
@@ -170,7 +185,7 @@ func TestTheInputIsTakenOffTheScreenBeforeTheConversationIsWrittenTo(t *testing.
 
 	screen.Line("thinking")
 
-	want := "\r" + clearBelow + fmt.Sprintf(up, 1) + fmt.Sprintf(right, 4)
+	want := "\r" + clearBelow + fmt.Sprintf(up, apart) + fmt.Sprintf(right, 4)
 
 	got := screenOutput.String()
 
@@ -211,7 +226,7 @@ func TestAnInputOfSeveralRowsIsTakenOffAndPutBackWhole(t *testing.T) {
 		t.Errorf("expected the erase to start at the top row of the input, got %q", got)
 	}
 
-	if want := "\r\n> one\r\ntwo\r\nthree" + fmt.Sprintf(up, 1); !strings.Contains(got, want) {
+	if want := "\r\n\r\n> one\r\ntwo\r\nthree" + fmt.Sprintf(up, 1); !strings.Contains(got, want) {
 		t.Errorf("expected every row back, cursor on the second, got %q", got)
 	}
 }

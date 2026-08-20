@@ -17,11 +17,11 @@ func TestASearchIsDescribedByItsPatternAndWhatQualifiesIt(t *testing.T) {
 	}
 }
 
-func TestASearchBelowHomeIsQualifiedWithATilde(t *testing.T) {
-	t.Setenv("HOME", "/home/alice")
+func TestASearchLeavesPathDisplayProcessingToThePainter(t *testing.T) {
+	const path = "/home/alice/proj/io"
 
-	if _, qualifier := util.DescribeSearch("func New", "/home/alice/proj/io", ""); qualifier != "~/proj/io" {
-		t.Errorf("got qualifier %q, want the path written with a tilde", qualifier)
+	if _, qualifier := util.DescribeSearch("func New", path, ""); qualifier != path {
+		t.Errorf("got %q, want the unprocessed path %q", qualifier, path)
 	}
 }
 
