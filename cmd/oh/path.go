@@ -67,6 +67,15 @@ func shellHomeDir() string {
 	return stateDir("home")
 }
 
+func homeRelativePath(path string) (string, bool) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", false
+	}
+
+	return pathutil.RelativeTo(home, path)
+}
+
 func shellMiseDataDir() string {
 	if dataDir := os.Getenv("MISE_DATA_DIR"); dataDir != "" {
 		return dataDir

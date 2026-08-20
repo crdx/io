@@ -32,15 +32,21 @@ func TestMissingConfiguredPathsAreWarnedAboutAndSkipped(t *testing.T) {
 	if err := os.WriteFile(existingExec, []byte("content"), 0o600); err != nil {
 		t.Fatal(err)
 	}
+	existingHome := filepath.Join(t.TempDir(), "home")
+	if err := os.WriteFile(existingHome, []byte("content"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	missingRead := filepath.Join(t.TempDir(), "missing-read")
 	missingWrite := filepath.Join(t.TempDir(), "missing-write")
 	missingExec := filepath.Join(t.TempDir(), "missing-exec")
+	missingHome := filepath.Join(t.TempDir(), "missing-home")
 
 	var warnings strings.Builder
 	filtered, err := keepExistingConfiguredPaths(configuredPaths{
 		Read:  []string{existingRead, missingRead},
 		Write: []string{existingWrite, missingWrite},
 		Exec:  []string{existingExec, missingExec},
+		Home:  []string{existingHome, missingHome},
 	}, &warnings)
 	if err != nil {
 		t.Fatal(err)
@@ -54,7 +60,10 @@ func TestMissingConfiguredPathsAreWarnedAboutAndSkipped(t *testing.T) {
 	if !slices.Equal(filtered.Exec, []string{existingExec}) {
 		t.Errorf("got executable paths %v, want only %s", filtered.Exec, existingExec)
 	}
-	for _, path := range []string{missingRead, missingWrite, missingExec} {
+	if !slices.Equal(filtered.Home, []string{existingHome}) {
+		t.Errorf("got mapped paths %v, want only %s", filtered.Home, existingHome)
+	}
+	for _, path := range []string{missingRead, missingWrite, missingExec, missingHome} {
 		if !strings.Contains(warnings.String(), "warning: could not mount configured path "+path) {
 			t.Errorf("warning does not name missing path %s: %q", path, warnings.String())
 		}

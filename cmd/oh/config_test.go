@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -135,7 +136,8 @@ func TestConfiguredAccessPathsAreResolved(t *testing.T) {
 	path := filepath.Join(configurationDirectory, "config.toml")
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	contents := "[sandbox]\nread = [\"~/reference\"]\nwrite = [\"output\"]\nexec = [\"/opt/tools\"]\n"
+	contents := "[sandbox]\nread = [\"~/reference\"]\nwrite = [\"output\"]\nexec = [\"/opt/tools\"]\n" +
+		"home = [\"~/.gitconfig\"]\n"
 	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -158,4 +160,21 @@ func TestConfiguredAccessPathsAreResolved(t *testing.T) {
 	assertPaths("read", settings.Sandbox.Read, []string{filepath.Join(home, "reference")})
 	assertPaths("write", settings.Sandbox.Write, []string{filepath.Join(configurationDirectory, "output")})
 	assertPaths("exec", settings.Sandbox.Exec, []string{"/opt/tools"})
+	assertPaths("home", settings.Sandbox.Home, []string{filepath.Join(home, ".gitconfig")})
+}
+
+func TestAPathMappedIntoTheShellHomeMustComeFromTheHomeDirectory(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	t.Setenv("HOME", t.TempDir())
+	if err := os.WriteFile(path, []byte("[sandbox]\nhome = [\"/etc/gitconfig\"]\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := loadConfiguredSettings(path)
+	if err == nil {
+		t.Fatal("expected an error")
+	}
+	if !strings.Contains(err.Error(), "sandbox.home") {
+		t.Errorf("the error does not name the setting: %v", err)
+	}
 }

@@ -33,6 +33,7 @@ type configuredPaths struct {
 	Read  []string `toml:"read"`
 	Write []string `toml:"write"`
 	Exec  []string `toml:"exec"`
+	Home  []string `toml:"home"`
 }
 
 func loadConfiguredSettings(path string) (configuredSettings, error) {
@@ -76,6 +77,7 @@ func loadConfiguredSettings(path string) (configuredSettings, error) {
 		{"sandbox.read", &settings.Sandbox.Read},
 		{"sandbox.write", &settings.Sandbox.Write},
 		{"sandbox.exec", &settings.Sandbox.Exec},
+		{"sandbox.home", &settings.Sandbox.Home},
 	}
 	for _, list := range lists {
 		for index, written := range *list.values {
@@ -84,6 +86,15 @@ func loadConfiguredSettings(path string) (configuredSettings, error) {
 				return settings, fmt.Errorf("%s: %s: %w", shownPath, list.name, err)
 			}
 			(*list.values)[index] = resolved
+		}
+	}
+
+	for _, mapped := range settings.Sandbox.Home {
+		if _, below := homeRelativePath(mapped); !below {
+			return settings, fmt.Errorf(
+				"%s: sandbox.home: %s is not below the home directory, so it has nowhere to land",
+				shownPath, mapped,
+			)
 		}
 	}
 

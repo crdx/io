@@ -180,7 +180,7 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 }
 
 func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
-	system := harnessContext("/workspace", "session-id", "/state/tmps/session", capRead, configuredPaths{})
+	system := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", capRead, configuredPaths{})
 
 	if want := "The workspace (/workspace) is " + filesystem(false); !strings.Contains(system, want) {
 		t.Errorf("expected the workspace to be reported as %q, got %q", want, system)
@@ -216,7 +216,7 @@ func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
 		"refused": {capRead, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := harnessContext("/workspace", "session-id", "/state/tmps/session", test.currentCaps, configuredPaths{})
+			got := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", test.currentCaps, configuredPaths{})
 
 			if want := "The bash tool is " + shellAccess(test.granted); !strings.Contains(got, want) {
 				t.Errorf("expected %q in %q", want, got)
@@ -713,6 +713,111 @@ func TestACommitOnlyShellWithNoRepositoryChangesNothing(t *testing.T) {
 
 	if policy.Writable() {
 		t.Errorf("got writable paths %v", policy.Write)
+	}
+}
+
+func userHomeFile(t *testing.T, relative string, content string) string {
+	t.Helper()
+
+	t.Setenv("HOME", t.TempDir())
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(home, relative)
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	return path
+}
+
+func TestAMappedPathIsReadableAtTheSamePlaceInTheShellHome(t *testing.T) {
+	source := userHomeFile(t, filepath.Join(".config", "git", "ignore"), "*.tmp\n")
+	shellHome := t.TempDir()
+
+	granted, err := furnish(shellHome, []string{source})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(granted, []string{source}) {
+		t.Errorf("got granted paths %v, want %v", granted, []string{source})
+	}
+
+	link := filepath.Join(shellHome, ".config", "git", "ignore")
+	content, err := os.ReadFile(link) //nolint:gosec // a link this test made
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != "*.tmp\n" {
+		t.Errorf("got %q through %s, want %q", content, link, "*.tmp\n")
+	}
+}
+
+func TestNothingMappedLeavesTheShellHomeAlone(t *testing.T) {
+	shellHome := t.TempDir()
+
+	granted, err := furnish(shellHome, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(granted) > 0 {
+		t.Errorf("granted %v while nothing was mapped", granted)
+	}
+
+	entries, err := os.ReadDir(shellHome)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) > 0 {
+		t.Errorf("the shell home gained %d entries", len(entries))
+	}
+}
+
+func TestAStaleLinkInTheShellHomeIsReplaced(t *testing.T) {
+	source := userHomeFile(t, ".gitconfig", "[user]\n")
+	shellHome := t.TempDir()
+
+	link := filepath.Join(shellHome, ".gitconfig")
+	if err := os.Symlink(filepath.Join(t.TempDir(), "gone"), link); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := furnish(shellHome, []string{source}); err != nil {
+		t.Fatal(err)
+	}
+
+	target, err := os.Readlink(link)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if target != source {
+		t.Errorf("the stale link still points at %q, want %q", target, source)
+	}
+}
+
+func TestAMappedPathReachesTheShellPolicy(t *testing.T) {
+	source := userHomeFile(t, ".gitconfig", "[user]\n")
+
+	policy, err := createSandboxPolicy(
+		t.Context(),
+		t.TempDir(),
+		t.TempDir(),
+		t.TempDir(),
+		configuredPaths{Home: []string{source}},
+		capRead,
+	)
+	if err != nil {
+		t.Skipf("the sandbox cannot enforce a policy here: %v", err)
+	}
+
+	if !slices.Contains(policy.Read, source) {
+		t.Errorf("expected %s to be readable, got %v", source, policy.Read)
 	}
 }
 

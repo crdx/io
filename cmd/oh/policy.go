@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -49,6 +50,34 @@ func execPaths(workspaceDir string) []string {
 	return paths
 }
 
+func furnish(homeDir string, sources []string) ([]string, error) {
+	granted := make([]string, 0, len(sources))
+
+	for _, source := range sources {
+		relative, below := homeRelativePath(source)
+		if !below {
+			continue
+		}
+
+		target := filepath.Join(homeDir, relative)
+		if err := os.MkdirAll(filepath.Dir(target), 0o700); err != nil {
+			return nil, err
+		}
+
+		if err := os.Remove(target); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return nil, err
+		}
+
+		if err := os.Symlink(source, target); err != nil {
+			return nil, err
+		}
+
+		granted = append(granted, source)
+	}
+
+	return granted, nil
+}
+
 func createSandboxPolicy(
 	ctx context.Context,
 	workspaceDir string,
@@ -62,7 +91,13 @@ func createSandboxPolicy(
 		return sandbox.Policy{}, fmt.Errorf("could not prepare the shell cache: %w", err)
 	}
 
-	readablePaths := slices.Concat(extraPaths.Read, extraPaths.Write)
+	mappedPaths, err := furnish(homeDir, extraPaths.Home)
+	if err != nil {
+		return sandbox.Policy{}, fmt.Errorf("could not furnish the shell home: %w", err)
+	}
+
+	readablePaths := slices.Concat(extraPaths.Read, extraPaths.Write, mappedPaths)
+
 	executablePaths := append(append(execPaths(workspaceDir), extraPaths.Exec...), homeDir, sandbox.TmpDir)
 
 	policy := sandbox.Policy{

@@ -289,6 +289,7 @@ func run() ([]string, error) {
 			workspaceDir,
 			log.ID(),
 			tmpDir,
+			homeDir,
 			args.caps,
 			settings.Sandbox,
 			availableSkills,

@@ -11,7 +11,6 @@ import (
 
 	"crdx.org/hereduck"
 	"crdx.org/io/cmd/oh/skill"
-	"crdx.org/io/internal/pathutil"
 )
 
 const (
@@ -51,6 +50,13 @@ var (
 		- /tmp is persistent so you should tidy up after yourself and clean up large artifacts
 			- For example: git clones, source trees, binaries
 
+		# Home
+
+		- HOME is {{ .HomeDir }}, which is scratch space for you rather than the user's home
+		- A ~ in the shell means that directory, so a ~ path never reaches anything of the user's
+		- Every path on the user's machine, including the ones above, is written here in full
+		- Write them the same way back, and never abbreviate one to a ~
+
 		# State
 
 		- The workspace ({{ .WorkspaceDir }}) is {{ filesystem .WorkspaceWritable }}
@@ -66,6 +72,7 @@ type harnessTemplateData struct {
 	WorkspaceDir      string
 	SessionID         string
 	TmpDir            string
+	HomeDir           string
 	CurrentCaps       caps
 	ExtraPaths        configuredPaths
 	WorkspaceWritable bool
@@ -84,6 +91,7 @@ func loadContext(
 	workspaceDir string,
 	sessionID string,
 	tmpDir string,
+	homeDir string,
 	currentCaps caps,
 	extraPaths configuredPaths,
 	skills []skill.Skill,
@@ -104,7 +112,7 @@ func loadContext(
 	}
 
 	return mergeContexts(
-		harnessContext(workspaceDir, sessionID, tmpDir, currentCaps, extraPaths),
+		harnessContext(workspaceDir, sessionID, tmpDir, homeDir, currentCaps, extraPaths),
 		globalContext(globalFile),
 		projectContext(projectFiles),
 		skill.Context(skills),
@@ -165,11 +173,12 @@ func globalContext(file *contextFile) string {
 	return file.body
 }
 
-func harnessContext(workspaceDir string, sessionID string, tmpDir string, currentCaps caps, extraPaths configuredPaths) string {
+func harnessContext(workspaceDir string, sessionID string, tmpDir string, homeDir string, currentCaps caps, extraPaths configuredPaths) string {
 	data := harnessTemplateData{
 		WorkspaceDir:      workspaceDir,
 		SessionID:         sessionID,
-		TmpDir:            pathutil.Shorten(tmpDir),
+		TmpDir:            tmpDir,
+		HomeDir:           homeDir,
 		CurrentCaps:       currentCaps,
 		ExtraPaths:        extraPaths,
 		WorkspaceWritable: currentCaps.has(capWrite),

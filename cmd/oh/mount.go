@@ -30,6 +30,7 @@ func keepExistingConfiguredPaths(paths configuredPaths, warnings io.Writer) (con
 		{paths.Read, &filtered.Read},
 		{paths.Write, &filtered.Write},
 		{paths.Exec, &filtered.Exec},
+		{paths.Home, &filtered.Home},
 	}
 
 	for _, list := range lists {
