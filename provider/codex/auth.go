@@ -1,78 +1,59 @@
 package codex
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
-	"crdx.org/io/internal/xdgutil"
+	"crdx.org/io/internal/auth"
 )
 
 // Credentials are what a ChatGPT subscription was authorised as.
-type Credentials struct {
-	Access    string `json:"access"`     // the access token
-	Refresh   string `json:"refresh"`    // the refresh token
-	ExpiresAt int64  `json:"expires_at"` // when access expires
-	AccountID string `json:"account_id"` // the ChatGPT account
+type Credentials = auth.CodexCredentials
+
+func stale(credentials *Credentials) bool {
+	return time.Now().Add(refreshWindow).UnixMilli() >= credentials.ExpiresAt
 }
 
-func (self *Credentials) stale() bool {
-	return time.Now().Add(refreshWindow).UnixMilli() >= self.ExpiresAt
-}
-
-func (self *Credentials) inherit(held *Credentials) {
-	if self.Refresh == "" {
-		self.Refresh = held.Refresh
+func inherit(childCredentials *Credentials, parentCredentials *Credentials) {
+	if childCredentials.Refresh == "" {
+		childCredentials.Refresh = parentCredentials.Refresh
 	}
 
-	if self.AccountID == "" {
-		self.AccountID = held.AccountID
+	if childCredentials.AccountID == "" {
+		childCredentials.AccountID = parentCredentials.AccountID
 	}
 }
 
 // CredentialsPath is where Login writes and Auth reads.
 func CredentialsPath() string {
-	return xdgutil.StatePath("org.crdx", "io", "auth.json")
+	return auth.Path()
 }
 
 func loadCredentials(path string) (*Credentials, error) {
-	if path == "" {
-		return nil, errors.New("could not determine where credentials live")
+	stored, err := auth.Load(path)
+	if errors.Is(err, os.ErrNotExist) || err == nil && stored.Codex == nil {
+		return nil, errors.New("not logged in: run the login command")
 	}
-
-	data, err := os.ReadFile(path) //nolint:gosec // the path is ours, not user input
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, errors.New("not logged in: run the login command")
-		}
-
-		return nil, fmt.Errorf("read credentials: %w", err)
+		return nil, err
 	}
 
-	var credentials Credentials
-	if err := json.Unmarshal(data, &credentials); err != nil {
-		return nil, fmt.Errorf("parse credentials %s: %w", path, err)
-	}
-
-	return &credentials, nil
+	return stored.Codex, nil
 }
 
 func saveCredentials(path string, credentials *Credentials) error {
-	if path == "" {
-		return errors.New("could not determine where credentials live")
+	storedCredentials, err := auth.Load(path)
+	if auth.Unusable(err) {
+		storedCredentials = &auth.Credentials{Version: auth.Version}
+	} else if err != nil {
+		return fmt.Errorf("preserve credentials: %w", err)
 	}
 
-	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
-		return fmt.Errorf("create state directory: %w", err)
+	if storedCredentials.Codex != nil {
+		inherit(credentials, storedCredentials.Codex)
 	}
-
-	data, err := json.Marshal(credentials)
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(path, data, 0o600)
+	storedCredentials.Codex = credentials
+	return auth.Save(path, storedCredentials)
 }

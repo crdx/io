@@ -1,0 +1,99 @@
+package auth_test
+
+import (
+	"errors"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"crdx.org/io/internal/auth"
+)
+
+func TestSaveOpenCodeGoKeyPreservesCodexCredentials(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "auth.json")
+	credentials := &auth.Credentials{
+		Codex: &auth.CodexCredentials{
+			Access:    "access",
+			Refresh:   "refresh",
+			ExpiresAt: 123,
+			AccountID: "account",
+		},
+	}
+	if err := auth.Save(path, credentials); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := auth.SaveOpenCodeGoKey(path, "open-code-key"); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := auth.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.Codex == nil || stored.Codex.Access != "access" || stored.Codex.Refresh != "refresh" || stored.Codex.AccountID != "account" {
+		t.Errorf("Codex credentials were replaced: %+v", stored.Codex)
+	}
+	if stored.OpenCodeGo == nil || stored.OpenCodeGo.APIKey != "open-code-key" {
+		t.Errorf("got OpenCode credentials %+v", stored.OpenCodeGo)
+	}
+
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := info.Mode().Perm(); got != 0o600 {
+		t.Errorf("got permissions %o", got)
+	}
+}
+
+func TestLoadRejectsUnsupportedVersion(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "auth.json")
+	if err := os.WriteFile(path, []byte(`{"version":2}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := auth.Load(path)
+	if !errors.Is(err, auth.ErrUnsupportedVersion) {
+		t.Fatalf("expected an unsupported format to be rejected, got %v", err)
+	}
+	if !strings.Contains(err.Error(), "login command") {
+		t.Errorf("expected the error to say what to do about it, got %q", err)
+	}
+}
+
+func TestSavingReplacesCredentialsInAnOlderFormat(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "auth.json")
+	flat := `{"access":"old","refresh":"refresh-me","account_id":"account","expires_at":1}`
+	if err := os.WriteFile(path, []byte(flat), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := auth.SaveOpenCodeGoKey(path, "key"); err != nil {
+		t.Fatalf("expected logging in again to write over the older format, got %v", err)
+	}
+
+	stored, err := auth.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.OpenCodeGo == nil || stored.OpenCodeGo.APIKey != "key" {
+		t.Errorf("got OpenCode credentials %+v", stored.OpenCodeGo)
+	}
+}
+
+func TestSaveOpenCodeGoKeyCreatesCredentials(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "missing", "auth.json")
+	if err := auth.SaveOpenCodeGoKey(path, "key"); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := auth.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.OpenCodeGo == nil || stored.OpenCodeGo.APIKey != "key" {
+		t.Errorf("got OpenCode credentials %+v", stored.OpenCodeGo)
+	}
+}

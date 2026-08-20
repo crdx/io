@@ -1,7 +1,6 @@
 package codex_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"crdx.org/io/internal/auth"
 	"crdx.org/io/provider/codex"
 )
 
@@ -19,7 +19,7 @@ func writeCredentials(t *testing.T, expiresIn time.Duration) string {
 	path := filepath.Join(t.TempDir(), "auth.json")
 
 	credentials := fmt.Sprintf(
-		`{"access":"old","refresh":"refresh-me","account_id":"account","expires_at":%d}`,
+		`{"version":1,"codex":{"access":"old","refresh":"refresh-me","account_id":"account","expires_at":%d},"opencode-go":{"api_key":"open-code-key"}}`,
 		time.Now().Add(expiresIn).UnixMilli(),
 	)
 
@@ -75,18 +75,16 @@ func TestStoredRefreshesATokenNearExpiry(t *testing.T) {
 		t.Errorf("expected one refresh_token grant, got %v", grants)
 	}
 
-	data, err := os.ReadFile(path) //nolint:gosec // the path is the test's own
+	stored, err := auth.Load(path)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var credentials codex.Credentials
-	if err := json.Unmarshal(data, &credentials); err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if stored.Codex == nil || stored.Codex.Access != "new" || stored.Codex.Refresh != "next" {
+		t.Errorf("expected the refreshed pair to be written back, got %+v", stored.Codex)
 	}
-
-	if credentials.Access != "new" || credentials.Refresh != "next" {
-		t.Errorf("expected the refreshed pair to be written back, got %+v", credentials)
+	if stored.OpenCodeGo == nil || stored.OpenCodeGo.APIKey != "open-code-key" {
+		t.Errorf("expected the OpenCode key to survive, got %+v", stored.OpenCodeGo)
 	}
 }
 
@@ -109,18 +107,13 @@ func TestStoredKeepsTheRefreshTokenTheResponseOmits(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	data, err := os.ReadFile(path) //nolint:gosec // the path is the test's own
+	stored, err := auth.Load(path)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var credentials codex.Credentials
-	if err := json.Unmarshal(data, &credentials); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if credentials.Refresh != "refresh-me" {
-		t.Errorf("expected the held refresh token to survive, got %q", credentials.Refresh)
+	if stored.Codex == nil || stored.Codex.Refresh != "refresh-me" {
+		t.Errorf("expected the held refresh token to survive, got %+v", stored.Codex)
 	}
 }
 

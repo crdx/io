@@ -70,7 +70,7 @@ func (self *credentialStore) Token() (Token, error) {
 		self.credentials = credentials
 	}
 
-	if self.credentials.stale() {
+	if stale(self.credentials) {
 		if err := self.refresh(); err != nil {
 			return Token{}, err
 		}
@@ -96,7 +96,7 @@ func (self *credentialStore) refresh() error {
 		return fmt.Errorf("refresh credentials: %w", err)
 	}
 
-	refreshedToken.inherit(self.credentials)
+	inherit(refreshedToken, self.credentials)
 
 	self.credentials = refreshedToken
 	_ = saveCredentials(self.path, refreshedToken)
