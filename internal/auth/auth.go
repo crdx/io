@@ -15,7 +15,7 @@ import (
 const Version = 1
 
 // ErrUnsupportedVersion is returned when stored credentials are in a format this build cannot read.
-var ErrUnsupportedVersion = errors.New("credentials are in an older format: run the login command again")
+var ErrUnsupportedVersion = errors.New("credentials are in a format this build does not read: run the login command again")
 
 // Unusable reports whether stored credentials could not be read and may be written over afresh.
 func Unusable(err error) bool {
@@ -75,7 +75,8 @@ func Save(path string, credentials *Credentials) error {
 		return errors.New("could not determine where credentials live")
 	}
 
-	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+	directory := filepath.Dir(path)
+	if err := os.MkdirAll(directory, 0o700); err != nil {
 		return fmt.Errorf("create state directory: %w", err)
 	}
 
@@ -85,7 +86,28 @@ func Save(path string, credentials *Credentials) error {
 		return err
 	}
 
-	return os.WriteFile(path, data, 0o600)
+	pending, err := os.CreateTemp(directory, filepath.Base(path)+".*")
+	if err != nil {
+		return fmt.Errorf("write credentials: %w", err)
+	}
+
+	defer func() { _ = os.Remove(pending.Name()) }()
+
+	if _, err := pending.Write(data); err != nil {
+		_ = pending.Close()
+
+		return fmt.Errorf("write credentials: %w", err)
+	}
+
+	if err := pending.Close(); err != nil {
+		return fmt.Errorf("write credentials: %w", err)
+	}
+
+	if err := os.Rename(pending.Name(), path); err != nil {
+		return fmt.Errorf("write credentials: %w", err)
+	}
+
+	return nil
 }
 
 // SaveOpenCodeGoKey updates the OpenCode Go key without replacing other provider credentials.
