@@ -27,6 +27,7 @@ type Credentials struct {
 	Version    int                    `json:"version"`
 	Codex      *CodexCredentials      `json:"codex,omitempty"`
 	OpenCodeGo *OpenCodeGoCredentials `json:"opencode-go,omitempty"`
+	Anthropic  *AnthropicCredentials  `json:"anthropic,omitempty"`
 }
 
 // CodexCredentials are what a ChatGPT subscription was authorised as.
@@ -35,6 +36,13 @@ type CodexCredentials struct {
 	Refresh   string `json:"refresh"`
 	ExpiresAt int64  `json:"expires_at"`
 	AccountID string `json:"account_id"`
+}
+
+// AnthropicCredentials are what a Claude subscription was authorised as.
+type AnthropicCredentials struct {
+	Access    string `json:"access"`
+	Refresh   string `json:"refresh"`
+	ExpiresAt int64  `json:"expires_at"`
 }
 
 // OpenCodeGoCredentials authorise requests against OpenCode Go.

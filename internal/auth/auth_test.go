@@ -48,6 +48,35 @@ func TestSaveOpenCodeGoKeyPreservesCodexCredentials(t *testing.T) {
 	}
 }
 
+func TestAnthropicCredentialsSitBesideTheOthers(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "auth.json")
+	if err := auth.Save(path, &auth.Credentials{
+		Codex: &auth.CodexCredentials{Access: "access", Refresh: "refresh", AccountID: "account"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := auth.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stored.Anthropic = &auth.AnthropicCredentials{Access: "oat", Refresh: "refresh-oat", ExpiresAt: 7}
+	if err := auth.Save(path, stored); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err = auth.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.Codex == nil || stored.Codex.Access != "access" || stored.Codex.AccountID != "account" {
+		t.Errorf("Codex credentials were replaced: %+v", stored.Codex)
+	}
+	if stored.Anthropic == nil || stored.Anthropic.Access != "oat" || stored.Anthropic.Refresh != "refresh-oat" || stored.Anthropic.ExpiresAt != 7 {
+		t.Errorf("got Anthropic credentials %+v", stored.Anthropic)
+	}
+}
+
 func TestLoadRejectsUnsupportedVersion(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "auth.json")
 	if err := os.WriteFile(path, []byte(`{"version":2}`), 0o600); err != nil {

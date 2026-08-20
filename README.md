@@ -10,6 +10,7 @@
 - `session`: session saving and resumption, as an append-only journal
 - `provider/codex`: the Responses API, the OpenAI way
 - `provider/chat`: the OpenAI-compatible Chat Completions API
+- `provider/anthropic`: the Messages API, the Anthropic way
 - ... and more, soon
 
 ## Installation
@@ -25,6 +26,7 @@ Implementors glue the auth flow together themselves. The example is a reference,
 ```bash
 go run ./cmd/login codex
 go run ./cmd/login opencode-go
+go run ./cmd/login anthropic
 ```
 
 ## Usage

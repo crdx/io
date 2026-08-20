@@ -313,6 +313,7 @@ func sensitiveName(name string) bool {
 		"xapikey",
 		"openaiaccountid",
 		"xopenaiaccountid",
+		"chatgptaccountid",
 		"accesstoken",
 		"refreshtoken",
 		"idtoken",

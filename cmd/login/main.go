@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"crdx.org/duckopt/v2"
+	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/chat"
 	"crdx.org/io/provider/codex"
 	"golang.org/x/term"
@@ -17,16 +18,18 @@ import (
 const usage = `io login — store provider credentials
 
 Usage:
-    $0 [codex | opencode-go]
+    $0 [codex | opencode-go | anthropic]
 
 Providers:
     codex         Authorise a ChatGPT subscription with OAuth [default]
     opencode-go   Store an OpenCode Go API key
+    anthropic     Authorise a Claude subscription with OAuth
 `
 
 type inputOpts struct {
 	Codex      bool `docopt:"codex"`
 	OpenCodeGo bool `docopt:"opencode-go"`
+	Anthropic  bool `docopt:"anthropic"`
 }
 
 func main() {
@@ -34,13 +37,20 @@ func main() {
 
 	var path string
 	var err error
-	if options.OpenCodeGo {
+	switch {
+	case options.OpenCodeGo:
 		path = chat.CredentialsPath()
 		err = loginOpenCodeGo(os.Stdin, os.Stdout, path)
-	} else {
+	case options.Anthropic:
+		path = anthropic.CredentialsPath()
+		err = anthropic.Login()
+	case options.Codex:
 		path = codex.CredentialsPath()
 		err = codex.Login()
+	default:
+		err = errors.New("tell me a provider")
 	}
+
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
