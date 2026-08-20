@@ -46,7 +46,7 @@ type Output struct {
 
 	liveRows        []string // the rows of the live region as they were last painted
 	liveContentRows int      // how many live rows are content rather than height-preserving blanks
-	liveSeparated   bool     // whether what follows the live region stands apart from it
+	liveAnswer      bool     // whether the live region holds the answer, and not the thinking before it
 	top             int      // the first row of the region the screen still holds
 }
 
@@ -262,8 +262,6 @@ func (self *Output) count(styledText string) {
 }
 
 func (self *Output) at(text string) {
-	text = self.linkifyScrollback(text)
-
 	if len(self.shownFooter.rows) == 0 {
 		self.raw(text)
 		return

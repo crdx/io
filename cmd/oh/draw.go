@@ -106,14 +106,14 @@ func (self *painter) draw(event agent.Event) {
 	case agent.Reasoning:
 		self.reasoning.WriteString(event.Text)
 		rows := renderReasoning(self.reasoning.String(), self.screen.Columns())
-		if !self.screen.DrawUnseparated(rows) {
+		if !self.screen.DrawReasoning(rows) {
 			self.stale = true
 		}
 
 	case agent.Text:
 		self.answer.WriteString(event.Text)
 
-		if !self.screen.Draw(markdown.Render(self.answer.String(), self.screen.Columns())) {
+		if !self.screen.DrawAnswer(markdown.Render(self.answer.String(), self.screen.Columns())) {
 			self.stale = true
 		}
 

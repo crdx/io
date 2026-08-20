@@ -16,7 +16,7 @@ func region() (*Output, *strings.Builder) {
 	return &Output{writer: screenOutput, terminal: true, columns: 40, lines: 24}, screenOutput
 }
 
-func TestPathsAreLinkedAtBothScrollbackDrawingBoundaries(t *testing.T) {
+func TestOnlyTheAnswerIsLinked(t *testing.T) {
 	workspace := t.TempDir()
 	path := filepath.Join(workspace, "cmd", "oh", "draw.go")
 	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
@@ -29,10 +29,10 @@ func TestPathsAreLinkedAtBothScrollbackDrawingBoundaries(t *testing.T) {
 	screen, screenOutput := region()
 	screen.LinkPathsUnder(workspace)
 	screen.drawRow(style.Subtle("cmd/oh/") + style.Subject("draw.go"))
-	screen.Draw([]string{"see cmd/oh/draw.go"})
+	screen.DrawAnswer([]string{"see cmd/oh/draw.go"})
 
-	if count := strings.Count(screenOutput.String(), "\x1b]8;;file://"); count != 2 {
-		t.Errorf("expected the status row and prose row linked, got %d links in %q", count, screenOutput)
+	if count := strings.Count(screenOutput.String(), "\x1b]8;;file://"); count != 1 {
+		t.Errorf("expected only the answer linked, got %d links in %q", count, screenOutput)
 	}
 }
 
@@ -54,10 +54,10 @@ func TestPathsStayPlainWhenScrollbackIsRedirected(t *testing.T) {
 func TestOnlyTheRowsThatChangedArePaintedAgain(t *testing.T) {
 	screen, screenOutput := region()
 
-	screen.Draw([]string{"one", "two", "three"})
+	screen.DrawAnswer([]string{"one", "two", "three"})
 	screenOutput.Reset()
 
-	screen.Draw([]string{"one", "two", "three!"})
+	screen.DrawAnswer([]string{"one", "two", "three!"})
 
 	got := screenOutput.String()
 
@@ -73,10 +73,10 @@ func TestOnlyTheRowsThatChangedArePaintedAgain(t *testing.T) {
 func TestARowAddedBelowTheRestOpensARowOfItsOwn(t *testing.T) {
 	screen, screenOutput := region()
 
-	screen.Draw([]string{"one", "two"})
+	screen.DrawAnswer([]string{"one", "two"})
 	screenOutput.Reset()
 
-	screen.Draw([]string{"one", "two", "three"})
+	screen.DrawAnswer([]string{"one", "two", "three"})
 
 	if want := "\r\n\r" + clearRow + "three"; !strings.Contains(screenOutput.String(), want) {
 		t.Errorf("expected the new row on a row of its own, got %q", screenOutput.String())
@@ -86,10 +86,10 @@ func TestARowAddedBelowTheRestOpensARowOfItsOwn(t *testing.T) {
 func TestARowRewrittenHigherUpIsReachedByMovingBackToIt(t *testing.T) {
 	screen, screenOutput := region()
 
-	screen.Draw([]string{"one", "two", "three"})
+	screen.DrawAnswer([]string{"one", "two", "three"})
 	screenOutput.Reset()
 
-	screen.Draw([]string{"one", "TWO", "three"})
+	screen.DrawAnswer([]string{"one", "TWO", "three"})
 
 	got := screenOutput.String()
 
@@ -109,7 +109,7 @@ func TestADifferenceAboveTheScreenIsReportedRatherThanRepaired(t *testing.T) {
 
 	rows := []string{"one", "two", "three", "four", "five", "six"}
 
-	if !screen.Draw(rows) {
+	if !screen.DrawAnswer(rows) {
 		t.Fatal("expected the first drawing to be made")
 	}
 
@@ -117,11 +117,11 @@ func TestADifferenceAboveTheScreenIsReportedRatherThanRepaired(t *testing.T) {
 		t.Fatalf("expected %d rows to have scrolled off, got %d", len(rows)-4, screen.top)
 	}
 
-	if screen.Draw([]string{"ONE", "two", "three", "four", "five", "six"}) {
+	if screen.DrawAnswer([]string{"ONE", "two", "three", "four", "five", "six"}) {
 		t.Error("expected a difference above the screen to be reported")
 	}
 
-	if !screen.Draw([]string{"one", "two", "three", "four", "five", "SIX"}) {
+	if !screen.DrawAnswer([]string{"one", "two", "three", "four", "five", "SIX"}) {
 		t.Error("expected a difference on the screen to be repaired")
 	}
 }
@@ -129,14 +129,14 @@ func TestADifferenceAboveTheScreenIsReportedRatherThanRepaired(t *testing.T) {
 func TestWritingOutsideTheRegionEndsIt(t *testing.T) {
 	screen, _ := region()
 
-	screen.Draw([]string{"one", "two"})
+	screen.DrawAnswer([]string{"one", "two"})
 	screen.Line("a line")
 
 	if screen.liveRows != nil {
 		t.Errorf("expected the region to be forgotten, got %q", screen.liveRows)
 	}
 
-	screen.Draw([]string{"three"})
+	screen.DrawAnswer([]string{"three"})
 
 	if len(screen.liveRows) != 1 {
 		t.Errorf("expected a region of its own, got %q", screen.liveRows)
@@ -148,8 +148,8 @@ func TestWithoutATerminalTheAnswerIsWrittenOnceItIsWhole(t *testing.T) {
 
 	screen := New(screenOutput)
 
-	screen.Draw([]string{"one"})
-	screen.Draw([]string{"one", "two"})
+	screen.DrawAnswer([]string{"one"})
+	screen.DrawAnswer([]string{"one", "two"})
 
 	if got := screenOutput.String(); got != "" {
 		t.Errorf("expected the answer to be held back until it was whole, got %q", got)
@@ -165,10 +165,10 @@ func TestWithoutATerminalTheAnswerIsWrittenOnceItIsWhole(t *testing.T) {
 func TestAFrameThatShrinksKeepsItsPaintedHeightUntilItIsSealed(t *testing.T) {
 	screen, screenOutput := region()
 
-	screen.Draw([]string{"one", "two", "three"})
+	screen.DrawAnswer([]string{"one", "two", "three"})
 	screenOutput.Reset()
 
-	if !screen.Draw([]string{"one", "two"}) {
+	if !screen.DrawAnswer([]string{"one", "two"}) {
 		t.Fatal("expected a shorter set of rows to be repaired")
 	}
 
@@ -192,16 +192,16 @@ func TestRowsThatScrolledOffDoNotReturnWhenTheRegionShrinks(t *testing.T) {
 	screen, _ := region()
 	screen.lines = 4
 
-	if !screen.Draw([]string{"one", "two", "three", "four", "five", "six"}) {
+	if !screen.DrawAnswer([]string{"one", "two", "three", "four", "five", "six"}) {
 		t.Fatal("expected the first drawing to be made")
 	}
-	if !screen.Draw([]string{"one", "two", "three", "four", "five"}) {
+	if !screen.DrawAnswer([]string{"one", "two", "three", "four", "five"}) {
 		t.Fatal("expected the visible end of the region to be shortened")
 	}
 	if screen.top != 2 {
 		t.Fatalf("expected the first two rows to remain offscreen, got top row %d", screen.top)
 	}
-	if screen.Draw([]string{"one", "TWO", "three", "four", "five"}) {
+	if screen.DrawAnswer([]string{"one", "TWO", "three", "four", "five"}) {
 		t.Error("expected a change to a row that remains offscreen to require a replay")
 	}
 }
@@ -209,14 +209,14 @@ func TestRowsThatScrolledOffDoNotReturnWhenTheRegionShrinks(t *testing.T) {
 func TestAFrameWithNoRowsErasesWhatWasDrawn(t *testing.T) {
 	screen, screenOutput := region()
 
-	if !screen.Draw(nil) {
+	if !screen.DrawAnswer(nil) {
 		t.Error("expected nothing drawn against nothing to be no trouble")
 	}
 
-	screen.Draw([]string{"``"})
+	screen.DrawAnswer([]string{"``"})
 	screenOutput.Reset()
 
-	if !screen.Draw(nil) {
+	if !screen.DrawAnswer(nil) {
 		t.Fatal("expected an empty frame to be repaired")
 	}
 

@@ -170,7 +170,7 @@ func (self *Output) Reset() {
 	self.stacked = false
 	self.liveRows = nil
 	self.liveContentRows = 0
-	self.liveSeparated = false
+	self.liveAnswer = false
 	self.top = 0
 
 	self.measure()

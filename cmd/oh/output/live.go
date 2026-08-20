@@ -9,17 +9,19 @@ import (
 
 const clearRow = "\x1b[K"
 
-// Draw replaces the separated live region and reports whether every changed row remains on screen.
-func (self *Output) Draw(rows []string) bool {
+// DrawAnswer replaces the live region with the answer, and reports whether every changed row
+// remains on screen.
+func (self *Output) DrawAnswer(rows []string) bool {
 	return self.draw(rows, true)
 }
 
-// DrawUnseparated replaces a live region that runs directly into non-prose output.
-func (self *Output) DrawUnseparated(rows []string) bool {
+// DrawReasoning replaces the live region with the thinking that led to an answer, which runs into
+// whatever is written next rather than standing apart from it.
+func (self *Output) DrawReasoning(rows []string) bool {
 	return self.draw(rows, false)
 }
 
-func (self *Output) draw(rows []string, separated bool) bool {
+func (self *Output) draw(rows []string, answer bool) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -32,7 +34,7 @@ func (self *Output) draw(rows []string, separated bool) bool {
 	}
 
 	if len(self.liveRows) == 0 {
-		self.liveSeparated = separated
+		self.liveAnswer = answer
 	}
 
 	if !self.terminal {
@@ -60,10 +62,10 @@ func (self *Output) draw(rows []string, separated bool) bool {
 	}
 
 	if len(self.liveRows) == 0 {
-		self.begin(separated)
+		self.begin(answer)
 	}
 
-	self.repaint(first, rows)
+	self.repaint(first, rows, answer)
 	self.liveContentRows = contentRows
 
 	return true
@@ -75,22 +77,22 @@ func (self *Output) seal() {
 	}
 
 	if !self.terminal {
-		self.begin(self.liveSeparated)
+		self.begin(self.liveAnswer)
 		self.write(strings.Join(self.liveRows, "\n"))
 	} else if self.liveContentRows < len(self.liveRows) && self.liveContentRows > self.top {
 		rows := slices.Clone(self.liveRows[:self.liveContentRows])
-		self.repaint(len(rows)-1, rows)
+		self.repaint(len(rows)-1, rows, self.liveAnswer)
 	}
 
 	self.liveRows = nil
 	self.liveContentRows = 0
-	self.liveSeparated = false
+	self.liveAnswer = false
 	self.top = 0
 }
 
-func (self *Output) begin(separated bool) {
-	self.separate(separated)
-	self.streaming = separated
+func (self *Output) begin(answer bool) {
+	self.separate(answer)
+	self.streaming = answer
 
 	if self.midLine {
 		self.newline()
@@ -99,7 +101,7 @@ func (self *Output) begin(separated bool) {
 	self.openPendingLine()
 }
 
-func (self *Output) repaint(first int, rows []string) {
+func (self *Output) repaint(first int, rows []string, links bool) {
 	var out strings.Builder
 
 	out.WriteString(self.openFrame())
@@ -127,8 +129,13 @@ func (self *Output) repaint(first int, rows []string) {
 			out.WriteString("\r\n")
 		}
 
+		row := rows[at]
+		if links {
+			row = self.linkifyScrollback(row)
+		}
+
 		out.WriteString("\r" + clearRow)
-		out.WriteString(self.linkifyScrollback(rows[at]))
+		out.WriteString(row)
 	}
 
 	self.settle(rows)
