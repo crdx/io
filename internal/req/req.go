@@ -16,6 +16,9 @@ import (
 const bodyLimit = 64 * 1024
 
 // Client is an endpoint spoken to under a timeout, since the default client waits forever.
+//
+// A header handed to it is copied rather than adopted: a request sets fields of its own on top of
+// what it was given, and a caller reusing one header across requests would otherwise collect them.
 type Client struct {
 	http     *http.Client
 	observer Observer
@@ -33,23 +36,51 @@ func (self *Client) Observe(observer Observer) {
 
 // Stream posts a JSON body and hands back the response, which is the caller's to close.
 func (self *Client) Stream(ctx context.Context, address string, body any, header http.Header) (io.ReadCloser, error) {
-	encodedBody, err := json.Marshal(body)
+	return self.postJSON(ctx, address, body, header)
+}
+
+// JSON posts a JSON body and reads the JSON answer into target.
+func (self *Client) JSON(ctx context.Context, address string, body any, target any) error {
+	header := http.Header{}
+	header.Set("Accept", "application/json")
+
+	responseBody, err := self.postJSON(ctx, address, body, header)
 	if err != nil {
-		return nil, fmt.Errorf("encode request: %w", err)
+		return err
+	}
+	defer func() { _ = responseBody.Close() }()
+
+	if err := json.NewDecoder(responseBody).Decode(target); err != nil {
+		return fmt.Errorf("parse the response: %w", err)
 	}
 
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, address, bytes.NewReader(encodedBody))
+	return nil
+}
+
+// Get fetches an address and reads the JSON answer into target.
+func (self *Client) Get(ctx context.Context, address string, header http.Header, target any) error {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, address, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if header != nil {
-		request.Header = header
+		request.Header = header.Clone()
 	}
 
-	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
 
-	return self.do(request, encodedBody)
+	body, err := self.do(request, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = body.Close() }()
+
+	if err := json.NewDecoder(body).Decode(target); err != nil {
+		return fmt.Errorf("parse the response: %w", err)
+	}
+
+	return nil
 }
 
 // Form posts a form and reads the JSON answer into target.
@@ -75,6 +106,28 @@ func (self *Client) Form(ctx context.Context, address string, form url.Values, t
 	}
 
 	return nil
+}
+
+func (self *Client) postJSON(
+	ctx context.Context, address string, body any, header http.Header,
+) (io.ReadCloser, error) {
+	encodedBody, err := json.Marshal(body)
+	if err != nil {
+		return nil, fmt.Errorf("encode request: %w", err)
+	}
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, address, bytes.NewReader(encodedBody))
+	if err != nil {
+		return nil, err
+	}
+
+	if header != nil {
+		request.Header = header.Clone()
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+
+	return self.do(request, encodedBody)
 }
 
 func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser, error) {
@@ -163,13 +216,21 @@ func refusal(response *http.Response) error {
 
 	var payload struct {
 		Error struct {
-			Message string `json:"message"` // what went wrong
-		} `json:"error"` // the endpoint error
+			Message string `json:"message"`
+		} `json:"error"`
+
+		Detail string `json:"detail"` // what went wrong, said flatly
 	}
 
-	if json.Unmarshal(body, &payload) != nil || payload.Error.Message == "" {
+	if json.Unmarshal(body, &payload) != nil {
 		return fmt.Errorf("request failed with status %d: %s", response.StatusCode, body)
 	}
 
-	return errors.New(payload.Error.Message)
+	for _, said := range []string{payload.Error.Message, payload.Detail} {
+		if said != "" {
+			return errors.New(said)
+		}
+	}
+
+	return fmt.Errorf("request failed with status %d: %s", response.StatusCode, body)
 }
