@@ -13,8 +13,8 @@ func TestTurnFinishedNotificationUsesKittyWhenAvailable(t *testing.T) {
 		"notify",
 		"--icon=utilities-terminal",
 		"--app-name=oh",
-		"oh",
-		"A model in io is waiting for you",
+		"oh — io",
+		"A model is waiting to chat",
 	}
 	if !slices.Equal(command.Args, want) {
 		t.Errorf("got command %q, want %q", command.Args, want)
@@ -31,8 +31,8 @@ func TestTurnFinishedNotificationFallsBackToNotifySend(t *testing.T) {
 		"notify-send",
 		"--app-name=oh",
 		"--icon=utilities-terminal",
-		"oh",
-		"A model in io is waiting for you",
+		"oh — io",
+		"A model is waiting to chat",
 	}
 	if !slices.Equal(command.Args, want) {
 		t.Errorf("got command %q, want %q", command.Args, want)

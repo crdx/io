@@ -18,17 +18,14 @@ func sendTurnFinishedNotification(workspaceDir string) {
 }
 
 func newTurnFinishedNotificationCommand(workspaceDir string, kitty bool) (*exec.Cmd, bool) {
-	body := "A model in " + filepath.Base(workspaceDir) + " is waiting for you"
+	title := "oh — " + filepath.Base(workspaceDir)
+	body := "A model is waiting to chat"
 
 	if kitty {
 		//nolint:gosec // the executable is fixed and the workspace name is passed as one inert argument
-		return exec.Command(
-			"kitten", "notify", "--icon=utilities-terminal", "--app-name=oh", "oh", body,
-		), true
+		return exec.Command("kitten", "notify", "--icon=utilities-terminal", "--app-name=oh", title, body), true
 	}
 
 	//nolint:gosec // the executable is fixed and the workspace name is passed as one inert argument
-	return exec.Command(
-		"notify-send", "--app-name=oh", "--icon=utilities-terminal", "oh", body,
-	), false
+	return exec.Command("notify-send", "--app-name=oh", "--icon=utilities-terminal", title, body), false
 }
