@@ -59,11 +59,11 @@ type stateTool struct {
 func (self stateTool) StateKey() string                    { return self.name }
 func (self stateTool) Restore(state json.RawMessage) error { return self.restore(state) }
 
-// Call is one decoded invocation. Render and Detail contain unstyled display text. Exec must pass
-// its context to work started outside the process.
+// Call is one decoded invocation. Subject and Qualifier contain unstyled display text. Exec must
+// pass its context to work started outside the process.
 type Call interface {
-	Render() string
-	Detail() string
+	Subject() string
+	Qualifier() string
 	Highlight() Highlight
 	Exec(ctx context.Context) (Result, error)
 }
@@ -171,12 +171,12 @@ func Focus(inner Tool, pick func(Call) string) Tool {
 // FocusPath sets apart the last component of a path rendering.
 func FocusPath(inner Tool) Tool {
 	return Focus(inner, func(call Call) string {
-		renderedCall := call.Render()
-		if renderedCall == "" {
+		subject := call.Subject()
+		if subject == "" {
 			return ""
 		}
 
-		return path.Base(renderedCall)
+		return path.Base(subject)
 	})
 }
 
@@ -201,8 +201,8 @@ func (self focusedTool) Parse(arguments string) (Call, error) {
 	}, nil
 }
 
-// Renderer describes decoded tool arguments.
-type Renderer[T any] func(args T) (string, string)
+// Describer reports a call's subject and qualifier from decoded arguments.
+type Describer[T any] func(args T) (string, string)
 
 // Validator checks decoded tool arguments before a call is constructed.
 type Validator[T any] func(args T) error

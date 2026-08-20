@@ -7,18 +7,18 @@ import (
 	"strings"
 )
 
-// Builder binds typed rendering and validation to a tool definition.
+// Builder binds typed describing and validation to a tool definition.
 type Builder[T any] struct {
 	definition Definition
-	render     Renderer[T]
+	describe   Describer[T]
 	validate   Validator[T]
 }
 
-// Implement binds typed rendering to a tool definition.
-func Implement[T any](definition Definition, render Renderer[T]) Builder[T] {
+// Implement binds typed describing to a tool definition.
+func Implement[T any](definition Definition, describe Describer[T]) Builder[T] {
 	return Builder[T]{
 		definition: definition,
-		render:     render,
+		describe:   describe,
 	}
 }
 
@@ -89,6 +89,6 @@ func (self Builder[T]) build(call func(args T) Call) Tool {
 
 func (self Builder[T]) call(args T) funcCall {
 	return funcCall{
-		render: func() (string, string) { return self.render(args) },
+		describe: func() (string, string) { return self.describe(args) },
 	}
 }

@@ -75,13 +75,13 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			output.WriteString("**Arguments**\n\n")
 			writeFence(&output, event.Arguments, "json")
 		}
-		if event.Render != "" {
-			output.WriteString("**Rendering**\n\n")
-			writeFence(&output, event.Render, highlightSyntax(event.Highlight))
+		if event.Subject != "" {
+			output.WriteString("**Subject**\n\n")
+			writeFence(&output, event.Subject, highlightSyntax(event.Highlight))
 		}
-		if event.Detail != "" {
-			output.WriteString("**Detail**\n\n")
-			writeFence(&output, event.Detail, "")
+		if event.Qualifier != "" {
+			output.WriteString("**Qualifier**\n\n")
+			writeFence(&output, event.Qualifier, "")
 		}
 	case agent.Result:
 		writeField(&output, "ID", event.ID)
@@ -90,7 +90,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		if event.Took != 0 {
 			writeField(&output, "Duration", event.Took.String())
 		}
-		writeField(&output, "Detail", event.Detail)
+		writeField(&output, "Qualifier", event.Qualifier)
 		writeField(&output, "Highlight", describeHighlight(event.Highlight))
 		if event.Stats != nil {
 			stats, err := json.Marshal(event.Stats)

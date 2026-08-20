@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"crdx.org/io/internal/file"
-	"crdx.org/io/internal/pathutil"
+
 	"crdx.org/io/internal/strutil"
 	"crdx.org/io/tool"
 )
@@ -32,7 +32,7 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 					tool.String("new_text", "replacement text"),
 				},
 			},
-			Render,
+			Describe,
 		).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
 			return exec(root, snapshots, args)
 		})),
@@ -49,9 +49,9 @@ type editor struct {
 
 func (self editor) ReadOnly() bool { return self.root.RefuseWrite(".") != nil }
 
-// Render names the file.
-func Render(args Args) (string, string) {
-	return pathutil.Shorten(args.Path), ""
+// Describe names the file.
+func Describe(args Args) (string, string) {
+	return args.Path, ""
 }
 
 func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.Stats, error) {

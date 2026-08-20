@@ -31,7 +31,7 @@ func New(root *file.Root) tool.Tool {
 				).Optional(),
 			},
 		},
-		Render,
+		Describe,
 	).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
 		return exec(root, args)
 	})
@@ -39,9 +39,9 @@ func New(root *file.Root) tool.Tool {
 	return tool.ReadOnly(tool.Concurrent(tool.Focus(definedTool, util.SearchPath)))
 }
 
-// Render describes the search out loud.
-func Render(args Args) (string, string) {
-	return util.RenderSearch(args.Pattern, args.Path, "")
+// Describe reports the search's subject and qualifier.
+func Describe(args Args) (string, string) {
+	return util.DescribeSearch(args.Pattern, args.Path, "")
 }
 
 func exec(root *file.Root, args Args) (string, tool.Stats, error) {

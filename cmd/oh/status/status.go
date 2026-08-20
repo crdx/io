@@ -34,44 +34,43 @@ const (
 	Cancelled
 )
 
-// Label is what a row says: the name of a call, the arguments it was made with, and whatever
-// qualifies those.
+// Label is what a row says: the name of a call, its subject, and whatever qualifies that.
 type Label struct {
-	Name         string         // the call name
-	Args         string         // the rendered arguments
-	Highlight    tool.Highlight // how the arguments are highlighted
-	Detail       string         // what qualifies the arguments
-	ReadOnly     bool           // whether the call changes nothing, which decides the colour its name is in
-	NameStyle    theme.Style    // an explicit style for a tool with its own prompt
-	Accent       string         // another part of the arguments set apart from the rest
-	AccentStyle  theme.Style    // how the accent is painted
-	renderedArgs string         // syntax-highlighted arguments retained from the complete source
+	Name            string         // the call name
+	Subject         string         // the rendered subject
+	Highlight       tool.Highlight // how the subject is highlighted
+	Qualifier       string         // what qualifies the subject
+	ReadOnly        bool           // whether the call changes nothing, which decides the colour its name is in
+	NameStyle       theme.Style    // an explicit style for a tool with its own prompt
+	Accent          string         // another part of the subject set apart from the rest
+	AccentStyle     theme.Style    // how the accent is painted
+	renderedSubject string         // syntax-highlighted subject retained from the complete source
 }
 
 // Elide cuts a label to the room it has, so the row stays on the line it was printed on. What
-// qualifies the arguments is the first to go, being the least of it.
+// qualifies the subject is the first to go, being the least of it.
 func (self Label) Elide(room int) Label {
-	self.renderedArgs = ""
+	self.renderedSubject = ""
 	self.Name = elide(self.Name, room)
 	room -= width.Of(self.Name) + 1
 
 	if room > 0 {
-		completeArgs := self.Args
-		self.Args = elide(self.Args, room)
-		if self.Highlight.Kind == tool.HighlightSyntax && self.Args != completeArgs {
-			prefix := strings.TrimSuffix(self.Args, ellipsis)
-			self.renderedArgs = markdown.HighlightPrefix(completeArgs, prefix, self.Highlight.Value, true)
+		completeSubject := self.Subject
+		self.Subject = elide(self.Subject, room)
+		if self.Highlight.Kind == tool.HighlightSyntax && self.Subject != completeSubject {
+			prefix := strings.TrimSuffix(self.Subject, ellipsis)
+			self.renderedSubject = markdown.HighlightPrefix(completeSubject, prefix, self.Highlight.Value, true)
 		}
-		room -= width.Of(self.Args) + 1
+		room -= width.Of(self.Subject) + 1
 	} else {
-		self.Args = ""
+		self.Subject = ""
 		room = 0
 	}
 
 	if room > 0 {
-		self.Detail = elide(self.Detail, room)
+		self.Qualifier = elide(self.Qualifier, room)
 	} else {
-		self.Detail = ""
+		self.Qualifier = ""
 	}
 
 	return self
@@ -80,23 +79,23 @@ func (self Label) Elide(room int) Label {
 func (self Label) render() string {
 	line := self.style()(self.Name)
 
-	if self.Args != "" {
-		line += " " + self.renderArgs()
+	if self.Subject != "" {
+		line += " " + self.renderSubject()
 	}
 
-	if self.Detail != "" {
-		line += " " + self.renderDetail()
+	if self.Qualifier != "" {
+		line += " " + self.renderQualifier()
 	}
 
 	return line
 }
 
-func (self Label) renderArgs() string {
-	if self.renderedArgs != "" {
-		return self.renderedArgs
+func (self Label) renderSubject() string {
+	if self.renderedSubject != "" {
+		return self.renderedSubject
 	}
 	if self.Highlight.Kind == tool.HighlightSyntax {
-		return markdown.Highlight(self.Args, self.Highlight.Value)
+		return markdown.Highlight(self.Subject, self.Highlight.Value)
 	}
 
 	type span struct {
@@ -107,15 +106,15 @@ func (self Label) renderArgs() string {
 
 	spans := []span{}
 	focus := self.focus()
-	if at := strings.LastIndex(self.Args, focus); focus != "" && at >= 0 {
-		spans = append(spans, span{start: at, end: at + len(focus), style: theme.Args})
+	if at := strings.LastIndex(self.Subject, focus); focus != "" && at >= 0 {
+		spans = append(spans, span{start: at, end: at + len(focus), style: theme.Subject})
 	}
-	if at := strings.LastIndex(self.Args, self.Accent); self.Accent != "" && self.AccentStyle != nil && at >= 0 {
+	if at := strings.LastIndex(self.Subject, self.Accent); self.Accent != "" && self.AccentStyle != nil && at >= 0 {
 		spans = append(spans, span{start: at, end: at + len(self.Accent), style: self.AccentStyle})
 	}
 
 	if len(spans) == 0 {
-		return theme.Args(self.Args)
+		return theme.Subject(self.Subject)
 	}
 
 	sort.Slice(spans, func(i int, j int) bool { return spans[i].start < spans[j].start })
@@ -126,12 +125,12 @@ func (self Label) renderArgs() string {
 		if marked.start < at {
 			continue
 		}
-		out.WriteString(theme.Detail(self.Args[at:marked.start]))
-		out.WriteString(marked.style(self.Args[marked.start:marked.end]))
+		out.WriteString(theme.Subtle(self.Subject[at:marked.start]))
+		out.WriteString(marked.style(self.Subject[marked.start:marked.end]))
 		at = marked.end
 	}
-	if at < len(self.Args) {
-		out.WriteString(theme.Detail(self.Args[at:]))
+	if at < len(self.Subject) {
+		out.WriteString(theme.Subtle(self.Subject[at:]))
 	}
 
 	return out.String()
@@ -145,26 +144,26 @@ func (self Label) focus() string {
 	return ""
 }
 
-func (self Label) renderDetail() string {
+func (self Label) renderQualifier() string {
 	focus := self.focus()
-	if focus == "" || strings.Contains(self.Args, focus) {
-		return theme.Detail(self.Detail)
+	if focus == "" || strings.Contains(self.Subject, focus) {
+		return theme.Qualifier(self.Qualifier)
 	}
 
-	at := strings.LastIndex(self.Detail, focus)
+	at := strings.LastIndex(self.Qualifier, focus)
 	if at < 0 {
-		return theme.Detail(self.Detail)
+		return theme.Qualifier(self.Qualifier)
 	}
 
 	end := at + len(focus)
 
 	var out strings.Builder
 	if at > 0 {
-		out.WriteString(theme.Detail(self.Detail[:at]))
+		out.WriteString(theme.Qualifier(self.Qualifier[:at]))
 	}
-	out.WriteString(theme.Args(self.Detail[at:end]))
-	if end < len(self.Detail) {
-		out.WriteString(theme.Detail(self.Detail[end:]))
+	out.WriteString(theme.Subject(self.Qualifier[at:end]))
+	if end < len(self.Qualifier) {
+		out.WriteString(theme.Qualifier(self.Qualifier[end:]))
 	}
 
 	return out.String()
@@ -173,12 +172,12 @@ func (self Label) renderDetail() string {
 func (self Label) width() int {
 	total := width.Of(self.Name)
 
-	if self.Args != "" {
-		total += 1 + width.Of(self.Args)
+	if self.Subject != "" {
+		total += 1 + width.Of(self.Subject)
 	}
 
-	if self.Detail != "" {
-		total += 1 + width.Of(self.Detail)
+	if self.Qualifier != "" {
+		total += 1 + width.Of(self.Qualifier)
 	}
 
 	return total
@@ -476,18 +475,18 @@ func outcomeText(mark string, took time.Duration, stats *tool.Stats) string {
 
 func outputStatsText(stats *tool.Stats) string {
 	if stats.Bytes == 0 && stats.Lines == 0 {
-		return theme.Detail("no output")
+		return theme.Subtle("no output")
 	}
 
 	capMarker := ""
 	if stats.Truncated {
 		capMarker = "+"
 	}
-	return theme.Detail(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
+	return theme.Subtle(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
 }
 
 func resourcesStatsText(took time.Duration, stats *tool.Stats) string {
-	return theme.Detail(fmt.Sprintf(
+	return theme.Subtle(fmt.Sprintf(
 		"%dL %s %s %s %dM",
 		stats.Lines,
 		tokenEstimate(stats),
@@ -498,24 +497,24 @@ func resourcesStatsText(took time.Duration, stats *tool.Stats) string {
 }
 
 func readStatsText(stats *tool.Stats) string {
-	return theme.Detail(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
+	return theme.Subtle(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
 }
 
 func listStatsText(stats *tool.Stats) string {
-	return theme.Detail(fmt.Sprint(stats.Lines) + "L")
+	return theme.Subtle(fmt.Sprint(stats.Lines) + "L")
 }
 
 func imageStatsText(stats *tool.Stats) string {
-	return theme.Detail(util.FormatEstimatedTokenCount(stats.EstimatedTokens, 2))
+	return theme.Subtle(util.FormatEstimatedTokenCount(stats.EstimatedTokens, 2))
 }
 
 func writeStatsText(stats *tool.Stats) string {
-	return theme.Detail(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
+	return theme.Subtle(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
 }
 
 func diffStatsText(stats *tool.Stats) string {
 	return theme.Success("+%d", stats.Added) +
-		theme.Detail(" ") + theme.Failure("−%d", stats.Removed)
+		theme.Subtle(" ") + theme.Failure("−%d", stats.Removed)
 }
 
 func searchStatsText(stats *tool.Stats) string {
@@ -523,7 +522,7 @@ func searchStatsText(stats *tool.Stats) string {
 	if stats.Truncated {
 		capMarker = "+"
 	}
-	return theme.Detail(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
+	return theme.Subtle(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
 }
 
 func tokenEstimate(stats *tool.Stats) string {

@@ -79,12 +79,12 @@ func TestListingSomethingThatIsNotThereIsRefused(t *testing.T) {
 }
 
 func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
-	if renderedPath, _ := ls.Render(ls.Args{}); renderedPath != "" {
-		t.Errorf("expected nothing, got %q", renderedPath)
+	if subject, _ := ls.Describe(ls.Args{}); subject != "" {
+		t.Errorf("expected nothing, got %q", subject)
 	}
 
-	if renderedPath, _ := ls.Render(ls.Args{Path: "."}); renderedPath != "" {
-		t.Errorf("expected nothing, got %q", renderedPath)
+	if subject, _ := ls.Describe(ls.Args{Path: "."}); subject != "" {
+		t.Errorf("expected nothing, got %q", subject)
 	}
 }
 

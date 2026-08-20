@@ -190,12 +190,12 @@ func (self *Agent) runCalls(
 		}
 
 		if parsedCall != nil {
-			event.Render = parsedCall.Render()
-			event.Detail = parsedCall.Detail()
+			event.Subject = parsedCall.Subject()
+			event.Qualifier = parsedCall.Qualifier()
 
 			event.Highlight = parsedCall.Highlight()
 		} else {
-			event.Render = self.renderUnparsedCall(rawCall)
+			event.Subject = self.describeUnparsedCall(rawCall)
 		}
 
 		if !yield(event, nil) {
@@ -233,13 +233,13 @@ func (self *Agent) concurrent(call ToolCall) bool {
 	return found && calledTool.Concurrent()
 }
 
-func (self *Agent) renderUnparsedCall(call ToolCall) string {
+func (self *Agent) describeUnparsedCall(call ToolCall) string {
 	calledTool, found := self.tools[call.Name]
 	if !found {
 		return strutil.FirstLine(call.Arguments)
 	}
 
-	return tool.RenderUnparsedArguments(calledTool, call.Arguments)
+	return tool.DescribeUnparsedArguments(calledTool, call.Arguments)
 }
 
 func (self *Agent) readOnly(call ToolCall) bool {

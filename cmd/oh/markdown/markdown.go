@@ -1,6 +1,6 @@
-// Package markdown lays the model's answer out for a terminal. It is a function of the text and the
-// width and nothing else: a partial answer is the whole of what it says so far, so an answer
-// arriving in pieces is parsed again from the start on every piece rather than resumed.
+// Package markdown lays the model's prose out for a terminal. It is a function of the text and the
+// width and nothing else: partial prose is the whole of what it says so far, so text arriving in
+// pieces is parsed again from the start on every piece rather than resumed.
 package markdown
 
 import (
@@ -24,8 +24,8 @@ const tab = "    " // a tab stop is the terminal's own, and no width here would 
 var parser = goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser()
 
 // Render lays markdown out as the rows to draw, styled and wrapped to the given columns.
-func Render(answer string, columns int) []string {
-	source := []byte(strings.ReplaceAll(answer, "\t", tab))
+func Render(markdown string, columns int) []string {
+	source := []byte(strings.ReplaceAll(markdown, "\t", tab))
 
 	renderer := &renderer{source: source, columns: columns}
 	renderer.blocks(parser.Parse(text.NewReader(source)))

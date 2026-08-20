@@ -81,16 +81,17 @@ const (
 // Event is a conversation occurrence or durable tool-state transition. The stream of them is the
 // resumable session itself, so an event is written down as it stands: one event, one line.
 //
-// Name and Arguments are what a call was; Render and Detail are only how it looked at the time,
-// kept for a display that no longer has the tool to ask.
+// Name and Arguments are what a call was; Subject and Qualifier are only how it looked at the time,
+// kept for a display that no longer has the tool to ask. The JSON keys stay render and detail so
+// sessions written before the rename still read.
 type Event struct {
 	Kind      Kind            `json:"kind"`                // what happened
 	Text      string          `json:"text,omitempty"`      // what was said or thought
 	ID        string          `json:"id,omitempty"`        // which call
 	Name      string          `json:"name,omitempty"`      // which tool or state owner
 	Arguments string          `json:"arguments,omitempty"` // what the tool was called with
-	Render    string          `json:"render,omitempty"`    // how the call was shown when it ran
-	Detail    string          `json:"detail,omitempty"`    // what qualified that, for a display to set apart
+	Subject   string          `json:"render,omitempty"`    // how the call was shown when it ran
+	Qualifier string          `json:"detail,omitempty"`    // what qualified that, for a display to set apart
 	Highlight tool.Highlight  `json:"highlight,omitzero"`  // how the rendering is highlighted
 	ReadOnly  bool            `json:"read_only,omitempty"` // whether the tool called changes nothing
 	Failed    bool            `json:"failed,omitempty"`    // whether a call came back with an error rather than a result

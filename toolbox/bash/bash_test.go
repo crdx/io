@@ -193,10 +193,10 @@ func TestACommandIsRenderedOnOneLine(t *testing.T) {
 		"blank between":  "echo one\n\n\necho two",
 		"leading indent": "  echo one\n    echo two",
 	} {
-		renderedCommand, _ := bash.Render(bash.Args{Command: command})
+		subject, _ := bash.Describe(bash.Args{Command: command})
 
-		if strings.ContainsAny(renderedCommand, "\n\r\t") {
-			t.Errorf("%s: expected one line, got %q", name, renderedCommand)
+		if strings.ContainsAny(subject, "\n\r\t") {
+			t.Errorf("%s: expected one line, got %q", name, subject)
 		}
 	}
 }
@@ -231,19 +231,19 @@ func TestCommandsAreFormattedOnOneLine(t *testing.T) {
 		"assignment":           {"GOCACHE=/tmp/io-go-cache go   list", "GOCACHE=/tmp/io-go-cache go list"},
 		"blank lines":          {"echo one\n\n\necho two", "echo one; echo two"},
 	} {
-		renderedCommand, _ := bash.Render(bash.Args{Command: test.command})
-		if renderedCommand != test.want {
-			t.Errorf("%s: got %q, want %q", name, renderedCommand, test.want)
+		subject, _ := bash.Describe(bash.Args{Command: test.command})
+		if subject != test.want {
+			t.Errorf("%s: got %q, want %q", name, subject, test.want)
 		}
 	}
 }
 
 func TestCommentsAreOmittedFromTheRenderedSummary(t *testing.T) {
 	command := "echo one # not displayed\necho two"
-	renderedCommand, _ := bash.Render(bash.Args{Command: command})
+	subject, _ := bash.Describe(bash.Args{Command: command})
 
-	if renderedCommand != "echo one; echo two" {
-		t.Errorf("got %q, want comments omitted", renderedCommand)
+	if subject != "echo one; echo two" {
+		t.Errorf("got %q, want comments omitted", subject)
 	}
 	if !strings.Contains(command, "# not displayed") {
 		t.Error("expected the original command to remain unchanged")
@@ -251,16 +251,16 @@ func TestCommentsAreOmittedFromTheRenderedSummary(t *testing.T) {
 }
 
 func TestAHereDocumentIsShownByItsOpeningLineAlone(t *testing.T) {
-	renderedCommand, detail := bash.Render(bash.Args{Command: "cat <<'EOF'\none\nEOF"})
+	subject, qualifier := bash.Describe(bash.Args{Command: "cat <<'EOF'\none\nEOF"})
 
-	if strings.ContainsAny(renderedCommand, "\n\r\t") {
-		t.Errorf("expected one line, got %q", renderedCommand)
+	if strings.ContainsAny(subject, "\n\r\t") {
+		t.Errorf("expected one line, got %q", subject)
 	}
-	if renderedCommand != "cat <<'EOF'" {
-		t.Errorf("got %q, want the opening line without the body joined onto it", renderedCommand)
+	if subject != "cat <<'EOF'" {
+		t.Errorf("got %q, want the opening line without the body joined onto it", subject)
 	}
-	if detail != "3L" {
-		t.Errorf("got %q, want the original line count", detail)
+	if qualifier != "3L" {
+		t.Errorf("got %q, want the original line count", qualifier)
 	}
 }
 
@@ -271,8 +271,8 @@ func TestACommandOverSeveralLinesSaysHowMany(t *testing.T) {
 		"echo one\necho two":        "2L",
 		"echo one\necho two\nls -l": "3L",
 	} {
-		if _, detail := bash.Render(bash.Args{Command: command}); detail != want {
-			t.Errorf("%q: expected %q, got %q", command, want, detail)
+		if _, qualifier := bash.Describe(bash.Args{Command: command}); qualifier != want {
+			t.Errorf("%q: expected %q, got %q", command, want, qualifier)
 		}
 	}
 }

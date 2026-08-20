@@ -55,14 +55,14 @@ func (self *renderer) renderInlineNode(node ast.Node) string {
 		return theme.Link(string(node.URL(self.source)))
 
 	case *ast.RawHTML:
-		return theme.Detail(self.raw(node))
+		return theme.Subtle(self.raw(node))
 
 	case *east.TaskCheckBox:
 		if node.IsChecked {
 			return theme.Success("[x] ")
 		}
 
-		return theme.Detail("[ ] ")
+		return theme.Subtle("[ ] ")
 	}
 
 	return self.inline(node)

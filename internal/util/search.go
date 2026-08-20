@@ -18,33 +18,33 @@ var skipDirs = map[string]bool{
 	"node_modules": true,
 }
 
-// RenderSearch describes a search.
-func RenderSearch(pattern string, path string, globPattern string) (string, string) {
-	var detail string
+// DescribeSearch reports a search's subject and qualifier.
+func DescribeSearch(pattern string, path string, globPattern string) (string, string) {
+	var qualifier string
 
 	if path != "" && path != "." {
-		detail = pathutil.Shorten(path)
+		qualifier = pathutil.Shorten(path)
 	}
 
 	if globPattern != "" {
-		if detail != "" {
-			detail += " "
+		if qualifier != "" {
+			qualifier += " "
 		}
 
-		detail += globPattern
+		qualifier += globPattern
 	}
 
-	return pattern, detail
+	return pattern, qualifier
 }
 
-// SearchPath returns the final component of the path in a rendered search call.
+// SearchPath returns the final component of the path in a described search call.
 func SearchPath(call tool.Call) string {
-	detail := strings.TrimSpace(call.Detail())
-	if detail == "" {
+	qualifier := strings.TrimSpace(call.Qualifier())
+	if qualifier == "" {
 		return ""
 	}
 
-	return filepath.Base(detail)
+	return filepath.Base(qualifier)
 }
 
 // Walk visits every entry below root within filesystem, skipping symlinks and the unwanted dirs.

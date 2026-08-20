@@ -28,7 +28,7 @@ func TestPathsAreLinkedAtBothScrollbackDrawingBoundaries(t *testing.T) {
 
 	screen, screenOutput := region()
 	screen.PostProcess(workspace)
-	screen.drawRow(theme.Detail("cmd/oh/") + theme.Args("draw.go"))
+	screen.drawRow(theme.Subtle("cmd/oh/") + theme.Subject("draw.go"))
 	screen.Draw([]string{"see cmd/oh/draw.go"})
 
 	if count := strings.Count(screenOutput.String(), "\x1b]8;;file://"); count != 2 {

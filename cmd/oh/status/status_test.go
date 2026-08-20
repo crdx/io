@@ -8,18 +8,18 @@ import (
 )
 
 func label() status.Label {
-	return status.Label{Name: "grep", Args: "hello", Detail: "in internal"}
+	return status.Label{Name: "grep", Subject: "hello", Qualifier: "in internal"}
 }
 
-func check(t *testing.T, room int, name string, args string, detail string) {
+func check(t *testing.T, room int, name string, subject string, qualifier string) {
 	t.Helper()
 
 	elidedLabel := label().Elide(room)
 
-	if elidedLabel.Name != name || elidedLabel.Args != args || elidedLabel.Detail != detail {
+	if elidedLabel.Name != name || elidedLabel.Subject != subject || elidedLabel.Qualifier != qualifier {
 		t.Errorf(
 			"in %d columns expected %q %q %q, got %q %q %q",
-			room, name, args, detail, elidedLabel.Name, elidedLabel.Args, elidedLabel.Detail,
+			room, name, subject, qualifier, elidedLabel.Name, elidedLabel.Subject, elidedLabel.Qualifier,
 		)
 	}
 }
@@ -47,25 +47,25 @@ func TestTheNameIsTheLastToGo(t *testing.T) {
 }
 
 func TestALabelWithNothingQualifyingItIsUnaffected(t *testing.T) {
-	elidedLabel := status.Label{Name: "ls", Args: "internal"}.Elide(80)
+	elidedLabel := status.Label{Name: "ls", Subject: "internal"}.Elide(80)
 
-	if elidedLabel.Name != "ls" || elidedLabel.Args != "internal" || elidedLabel.Detail != "" {
-		t.Errorf("expected the label to stand, got %q %q %q", elidedLabel.Name, elidedLabel.Args, elidedLabel.Detail)
+	if elidedLabel.Name != "ls" || elidedLabel.Subject != "internal" || elidedLabel.Qualifier != "" {
+		t.Errorf("expected the label to stand, got %q %q %q", elidedLabel.Name, elidedLabel.Subject, elidedLabel.Qualifier)
 	}
 }
 
 func TestALabelIsCutToTheCellsItHasRatherThanTheCharacters(t *testing.T) {
-	elidedLabel := status.Label{Name: "read", Args: "日本語です"}.Elide(11)
+	elidedLabel := status.Label{Name: "read", Subject: "日本語です"}.Elide(11)
 
 	if elidedLabel.Name != "read" {
 		t.Errorf("expected the name to survive, got %q", elidedLabel.Name)
 	}
 
-	if elidedLabel.Args != "日本…" {
-		t.Errorf("expected two characters and an ellipsis, got %q", elidedLabel.Args)
+	if elidedLabel.Subject != "日本…" {
+		t.Errorf("expected two characters and an ellipsis, got %q", elidedLabel.Subject)
 	}
 
-	if got := theme.Width(elidedLabel.Name + " " + elidedLabel.Args); got != 10 {
+	if got := theme.Width(elidedLabel.Name + " " + elidedLabel.Subject); got != 10 {
 		t.Errorf("expected the label to measure 10 cells, got %d", got)
 	}
 }

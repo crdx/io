@@ -83,42 +83,42 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 
 func TestStatsUseTheirExpectedStyles(t *testing.T) {
 	output := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 951})
-	if want := theme.Detail("4L ~200t"); !strings.Contains(output, want) {
+	if want := theme.Subtle("4L ~200t"); !strings.Contains(output, want) {
 		t.Errorf("output stats got %q, want styled %q", output, want)
 	}
 
 	emptyOutput := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsOutput})
-	if want := theme.Detail("no output"); !strings.Contains(emptyOutput, want) {
+	if want := theme.Subtle("no output"); !strings.Contains(emptyOutput, want) {
 		t.Errorf("empty output stats got %q, want styled %q", emptyOutput, want)
 	}
 
 	read := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsRead, Lines: 45, Bytes: 951})
-	if want := theme.Detail("45L ~200t"); !strings.Contains(read, want) {
+	if want := theme.Subtle("45L ~200t"); !strings.Contains(read, want) {
 		t.Errorf("read stats got %q, want styled %q", read, want)
 	}
 
 	write := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsWrite, Lines: 12, Bytes: 1200})
-	if want := theme.Detail("12L ~300t"); !strings.Contains(write, want) {
+	if want := theme.Subtle("12L ~300t"); !strings.Contains(write, want) {
 		t.Errorf("write stats got %q, want styled %q", write, want)
 	}
 
 	search := outcomeText("✓", 0, &tool.Stats{
 		Kind: tool.StatsSearch, Lines: 23, Bytes: 1200, TotalBytes: 2400, Truncated: true,
 	})
-	if want := theme.Detail("23L+ ~300t (of ~600t)"); !strings.Contains(search, want) {
+	if want := theme.Subtle("23L+ ~300t (of ~600t)"); !strings.Contains(search, want) {
 		t.Errorf("search stats got %q, want styled %q", search, want)
 	}
 
 	exec := outcomeText("✓", 0, &tool.Stats{
 		Kind: tool.StatsResources, PeakMemory: 26 << 20,
 	})
-	wantExec := theme.Detail("0L 0t 0s 0s 26M")
+	wantExec := theme.Subtle("0L 0t 0s 0s 26M")
 	if !strings.Contains(exec, wantExec) {
 		t.Errorf("exec stats got %q, want styled %q", exec, wantExec)
 	}
 
 	edit := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsDiff, Added: 2, Removed: 1})
-	wantEdit := theme.Success("+2") + theme.Detail(" ") + theme.Failure("−1")
+	wantEdit := theme.Success("+2") + theme.Subtle(" ") + theme.Failure("−1")
 	if !strings.Contains(edit, wantEdit) {
 		t.Errorf("edit stats got %q, want styled %q", edit, wantEdit)
 	}
@@ -138,8 +138,8 @@ func testBlock() (*Block, *strings.Builder) {
 	return self, output
 }
 
-func callLabel(name string, args string) Label {
-	return Label{Name: name, Args: args, ReadOnly: true}
+func callLabel(name string, subject string) Label {
+	return Label{Name: name, Subject: subject, ReadOnly: true}
 }
 
 var rise = regexp.MustCompile(`^\x1b\[\d+A`)
@@ -152,10 +152,10 @@ func rowsFromOutput(output *strings.Builder) []string {
 
 func TestOnlyTheFocusedPartOfArgumentsIsPainted(t *testing.T) {
 	label := Label{
-		Name: "read", Args: "cmd/oh/draw.go", ReadOnly: true,
+		Name: "read", Subject: "cmd/oh/draw.go", ReadOnly: true,
 		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
 	}
-	want := theme.Call("read") + " " + theme.Detail("cmd/oh/") + theme.Args("draw.go")
+	want := theme.Call("read") + " " + theme.Subtle("cmd/oh/") + theme.Subject("draw.go")
 
 	if got := label.render(); got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -166,14 +166,14 @@ func TestAnAccentAndTheFocusedPartOfArgumentsArePainted(t *testing.T) {
 	label := Label{
 		Name:        "skill",
 		NameStyle:   theme.Skill,
-		Args:        "/skills/guard-basics/SKILL.md",
+		Subject:     "/skills/guard-basics/SKILL.md",
 		Highlight:   tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
 		Accent:      "guard-basics",
 		AccentStyle: theme.Skill,
 	}
 	want := theme.Skill("skill") + " " +
-		theme.Detail("/skills/") + theme.Skill("guard-basics") +
-		theme.Detail("/") + theme.Args("SKILL.md")
+		theme.Subtle("/skills/") + theme.Skill("guard-basics") +
+		theme.Subtle("/") + theme.Subject("SKILL.md")
 
 	if got := label.render(); got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -182,10 +182,10 @@ func TestAnAccentAndTheFocusedPartOfArgumentsArePainted(t *testing.T) {
 
 func TestArgumentsWithSyntaxAreHighlighted(t *testing.T) {
 	label := Label{
-		Name: "bash", Args: "echo one && true",
+		Name: "bash", Subject: "echo one && true",
 		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
 	}
-	want := theme.Change("bash") + " " + markdown.Highlight(label.Args, "bash")
+	want := theme.Change("bash") + " " + markdown.Highlight(label.Subject, "bash")
 
 	if got := label.render(); got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -226,10 +226,10 @@ func TestElidedBashKeepsHighlightingFromTheCompleteCommand(t *testing.T) {
 		},
 	} {
 		label := Label{
-			Name: "bash", Args: source,
+			Name: "bash", Subject: source,
 			Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
 		}.Elide(len("bash ") + test.argumentRoom)
-		got := label.renderArgs()
+		got := label.renderSubject()
 
 		if got != test.want {
 			t.Errorf("%s: got %q, want %q", name, got, test.want)
@@ -246,10 +246,10 @@ func TestElidedBashKeepsHighlightingFromTheCompleteCommand(t *testing.T) {
 func TestElidedBashCountsWideUnicodeInTerminalCells(t *testing.T) {
 	argumentRoom := 8
 	label := Label{
-		Name: "bash", Args: "echo 日本語 later",
+		Name: "bash", Subject: "echo 日本語 later",
 		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
 	}.Elide(len("bash ") + argumentRoom)
-	got := label.renderArgs()
+	got := label.renderSubject()
 	want := theme.Function("echo") + theme.Block(" ") + theme.Function("日") + theme.Function(ellipsis)
 
 	if got != want {
@@ -265,11 +265,11 @@ func TestElidedBashCountsWideUnicodeInTerminalCells(t *testing.T) {
 
 func TestAPathInTheDetailCanBeFocused(t *testing.T) {
 	label := Label{
-		Name: "grep", Args: "text", Detail: "in cmd/oh/draw.go",
+		Name: "grep", Subject: "text", Qualifier: "in cmd/oh/draw.go",
 		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
 	}
-	want := theme.Change("grep") + " " + theme.Args("text") + " " +
-		theme.Detail("in cmd/oh/") + theme.Args("draw.go")
+	want := theme.Change("grep") + " " + theme.Subject("text") + " " +
+		theme.Qualifier("in cmd/oh/") + theme.Subject("draw.go")
 
 	if got := label.render(); got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -281,7 +281,7 @@ func TestARowSaysNothingOfACallUntilItHasBeenGoingAWhile(t *testing.T) {
 
 	block.Add(callLabel("read", "main.go"))
 
-	if got := output.String(); got != theme.Call("read")+" "+theme.Args("main.go") {
+	if got := output.String(); got != theme.Call("read")+" "+theme.Subject("main.go") {
 		t.Errorf("expected the call and nothing else, got %q", got)
 	}
 }
@@ -289,9 +289,9 @@ func TestARowSaysNothingOfACallUntilItHasBeenGoingAWhile(t *testing.T) {
 func TestARowIsColouredByWhetherItsCallWrites(t *testing.T) {
 	block, output := testBlock()
 
-	block.Add(Label{Name: "write", Args: "main.go"})
+	block.Add(Label{Name: "write", Subject: "main.go"})
 
-	if got := output.String(); got != theme.Change("write")+" "+theme.Args("main.go") {
+	if got := output.String(); got != theme.Change("write")+" "+theme.Subject("main.go") {
 		t.Errorf("expected a call that writes to be painted as one, got %q", got)
 	}
 }

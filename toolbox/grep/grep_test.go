@@ -234,14 +234,14 @@ func TestCallHighlightsItsPatternAsRegexpSyntax(t *testing.T) {
 }
 
 func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
-	renderedPattern, detail := grep.Render(grep.Args{Pattern: "hello", Path: "."})
-	if renderedPattern != "hello" || detail != "" {
-		t.Errorf("expected the path to go without saying, got %q and %q", renderedPattern, detail)
+	subject, qualifier := grep.Describe(grep.Args{Pattern: "hello", Path: "."})
+	if subject != "hello" || qualifier != "" {
+		t.Errorf("expected the path to go without saying, got %q and %q", subject, qualifier)
 	}
 
-	renderedPattern, detail = grep.Render(grep.Args{Pattern: "hello", Path: "internal", Glob: "*.go"})
-	if renderedPattern != "hello" || detail != "internal *.go" {
-		t.Errorf("expected a path and glob to be named, got %q and %q", renderedPattern, detail)
+	subject, qualifier = grep.Describe(grep.Args{Pattern: "hello", Path: "internal", Glob: "*.go"})
+	if subject != "hello" || qualifier != "internal *.go" {
+		t.Errorf("expected a path and glob to be named, got %q and %q", subject, qualifier)
 	}
 }
 

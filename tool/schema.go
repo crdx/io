@@ -95,8 +95,8 @@ func Describe(subject Tool) Definition {
 	}
 }
 
-// RenderUnparsedArguments renders arguments where no call could be parsed.
-func RenderUnparsedArguments(subject Tool, arguments string) string {
+// DescribeUnparsedArguments reports the subject of arguments no call could be parsed from.
+func DescribeUnparsedArguments(subject Tool, arguments string) string {
 	var decoded map[string]json.RawMessage
 	if json.Unmarshal([]byte(arguments), &decoded) != nil {
 		return strutil.FirstLine(arguments)

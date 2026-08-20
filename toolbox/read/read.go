@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	"crdx.org/io/internal/file"
-	"crdx.org/io/internal/pathutil"
+
 	"crdx.org/io/internal/strutil"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
@@ -42,7 +42,7 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 				tool.Integer("limit", "max lines").Optional(),
 			},
 		},
-		Render,
+		Describe,
 	).Run(func(_ context.Context, args Args) (tool.Result, error) {
 		return exec(root, args)
 	})
@@ -53,9 +53,9 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	return tool.ReadOnly(tool.Concurrent(tool.FocusPath(definedTool)))
 }
 
-// Render describes a read as the path, qualified by the lines it asks for.
-func Render(args Args) (string, string) {
-	return pathutil.Shorten(args.Path), span(args.Offset, args.Limit)
+// Describe reports a read's subject and qualifier: the path, and the lines it asks for.
+func Describe(args Args) (string, string) {
+	return args.Path, span(args.Offset, args.Limit)
 }
 
 func span(offset int, limit int) string {

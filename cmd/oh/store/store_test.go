@@ -68,7 +68,7 @@ func appendRaw(t *testing.T, directory string, id string, text string) {
 var conversation = []agent.Event{
 	{Kind: agent.Prompt, Text: "what is the weather in London?"},
 	{Kind: agent.Text, Text: "Let me look."},
-	{Kind: agent.Call, ID: "1", Name: "weather", Arguments: `{"city":"London"}`, Render: "London"},
+	{Kind: agent.Call, ID: "1", Name: "weather", Arguments: `{"city":"London"}`, Subject: "London"},
 	{Kind: agent.Result, ID: "1", Name: "weather", Text: "raining"},
 	{Kind: agent.Text, Text: "It is raining."},
 }

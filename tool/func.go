@@ -23,12 +23,12 @@ func (self funcTool) Parse(arguments string) (Call, error) { return self.parse(a
 func (self funcTool) Restore(json.RawMessage) error        { return nil }
 
 type funcCall struct {
-	render func() (string, string)                   // describes the call
-	exec   func(ctx context.Context) (Result, error) // runs the call
+	describe func() (string, string)                   // the call's subject and qualifier
+	exec     func(ctx context.Context) (Result, error) // runs the call
 }
 
-func (self funcCall) Render() string       { text, _ := self.render(); return text }
-func (self funcCall) Detail() string       { _, detail := self.render(); return detail }
+func (self funcCall) Subject() string      { subject, _ := self.describe(); return subject }
+func (self funcCall) Qualifier() string    { _, qualifier := self.describe(); return qualifier }
 func (self funcCall) Highlight() Highlight { return Highlight{} }
 
 func (self funcCall) Exec(ctx context.Context) (Result, error) { return self.exec(ctx) }

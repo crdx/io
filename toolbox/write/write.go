@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"crdx.org/io/internal/file"
-	"crdx.org/io/internal/pathutil"
+
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 )
@@ -32,7 +32,7 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 					tool.String("content", "full contents"),
 				},
 			},
-			Render,
+			Describe,
 		).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
 			return exec(root, snapshots, args)
 		})),
@@ -49,9 +49,9 @@ type writer struct {
 
 func (self writer) ReadOnly() bool { return self.root.RefuseWrite(".") != nil }
 
-// Render names the file, saying how much is being written rather than what.
-func Render(args Args) (string, string) {
-	return pathutil.Shorten(args.Path), util.FormatBytes(len(args.Content), 3)
+// Describe names the file, saying how much is being written rather than what.
+func Describe(args Args) (string, string) {
+	return args.Path, util.FormatBytes(len(args.Content), 3)
 }
 
 func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.Stats, error) {

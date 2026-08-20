@@ -426,7 +426,7 @@ func (self *unparsedCallProvider) Send(_ context.Context, _ agent.Yield) (agent.
 	}}, nil
 }
 
-func unparsedCallRender(t *testing.T, tools []tool.Tool, name string, arguments string) string {
+func unparsedCallSubject(t *testing.T, tools []tool.Tool, name string, arguments string) string {
 	t.Helper()
 
 	provider := &unparsedCallProvider{name: name, arguments: arguments}
@@ -448,7 +448,7 @@ func unparsedCallRender(t *testing.T, tools []tool.Tool, name string, arguments 
 		t.Fatalf("expected one call, got %d", len(calls))
 	}
 
-	return calls[0].Render
+	return calls[0].Subject
 }
 
 type shoutArgs struct {
@@ -473,7 +473,7 @@ func refusingTool() tool.Tool {
 }
 
 func TestACallTooMalformedToParseIsStillShownAsItArrived(t *testing.T) {
-	got := unparsedCallRender(t, []tool.Tool{noop()}, "noop", "{not json\nand more besides")
+	got := unparsedCallSubject(t, []tool.Tool{noop()}, "noop", "{not json\nand more besides")
 
 	if got != "{not json" {
 		t.Errorf("expected the arguments as they arrived, cut to one line, got %q", got)
@@ -482,7 +482,7 @@ func TestACallTooMalformedToParseIsStillShownAsItArrived(t *testing.T) {
 
 func TestARefusedCallIsShownAsItsArgumentsInTheOrderTheToolDeclaresThem(t *testing.T) {
 	arguments := `{"target":"you","message":"oi"}`
-	got := unparsedCallRender(t, []tool.Tool{refusingTool()}, "shout", arguments)
+	got := unparsedCallSubject(t, []tool.Tool{refusingTool()}, "shout", arguments)
 
 	if got != "oi you" {
 		t.Errorf("expected the values in schema order, got %q", got)
@@ -491,7 +491,7 @@ func TestARefusedCallIsShownAsItsArgumentsInTheOrderTheToolDeclaresThem(t *testi
 
 func TestARefusedCallWithNothingToShowFallsBackToItsArguments(t *testing.T) {
 	arguments := `{"message":"   "}`
-	got := unparsedCallRender(t, []tool.Tool{refusingTool()}, "shout", arguments)
+	got := unparsedCallSubject(t, []tool.Tool{refusingTool()}, "shout", arguments)
 
 	if got != arguments {
 		t.Errorf("expected the raw arguments, got %q", got)

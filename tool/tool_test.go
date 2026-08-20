@@ -62,8 +62,8 @@ func TestParseBindsTheArgumentsToTheCall(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if renderedCall := call.Render(); renderedCall != "London" {
-		t.Errorf("expected the bound arguments, got %q", renderedCall)
+	if subject := call.Subject(); subject != "London" {
+		t.Errorf("expected the bound arguments, got %q", subject)
 	}
 
 	if ran {
@@ -126,8 +126,8 @@ func TestParseTakesAbsentArgumentsAsEmpty(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if renderedCall := call.Render(); renderedCall != "" {
-		t.Errorf("expected nothing rendered, got %q", renderedCall)
+	if subject := call.Subject(); subject != "" {
+		t.Errorf("expected nothing rendered, got %q", subject)
 	}
 }
 
@@ -184,7 +184,7 @@ func TestDefineStatsDoesNotRequireValidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if renderedCall := call.Render(); renderedCall != "London" {
-		t.Errorf("expected the bound arguments, got %q", renderedCall)
+	if subject := call.Subject(); subject != "London" {
+		t.Errorf("expected the bound arguments, got %q", subject)
 	}
 }

@@ -40,7 +40,7 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 				tool.String("glob", "path filter, e.g. **/*.go").Optional(),
 			},
 		},
-		Render,
+		Describe,
 	).Run(func(ctx context.Context, args Args) (tool.Result, error) {
 		output, stats, err := run(ctx, root, args)
 		return tool.Result{
@@ -56,9 +56,9 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	return tool.ReadOnly(tool.Concurrent(tool.Syntax(tool.Focus(definedTool, util.SearchPath), "regexp")))
 }
 
-// Render describes the search out loud.
-func Render(args Args) (string, string) {
-	return util.RenderSearch(args.Pattern, args.Path, args.Glob)
+// Describe reports the search's subject and qualifier.
+func Describe(args Args) (string, string) {
+	return util.DescribeSearch(args.Pattern, args.Path, args.Glob)
 }
 
 func run(ctx context.Context, root *file.Root, args Args) (string, tool.Stats, error) {

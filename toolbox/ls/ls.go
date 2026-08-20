@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"crdx.org/io/internal/file"
-	"crdx.org/io/internal/pathutil"
+
 	"crdx.org/io/tool"
 )
 
@@ -25,19 +25,19 @@ func New(root *file.Root) tool.Tool {
 				tool.String("path", "directory, defaults to working directory").Optional(),
 			},
 		},
-		Render,
+		Describe,
 	).Plain(func(_ context.Context, args Args) (string, error) {
 		return exec(root, args)
 	}))))
 }
 
-// Render names the path, the working directory going without saying.
-func Render(args Args) (string, string) {
+// Describe names the path, the working directory going without saying.
+func Describe(args Args) (string, string) {
 	if args.Path == "." {
 		return "", ""
 	}
 
-	return pathutil.Shorten(args.Path), ""
+	return args.Path, ""
 }
 
 func exec(root *file.Root, args Args) (string, error) {

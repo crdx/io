@@ -45,13 +45,13 @@ var (
 	Cancelled Style = hex(lightGrey)                       // the name of a call stopped before it got anywhere
 	Stopped   Style = hex(gold)                            // what the harness says of a turn it was told to stop
 	Failure   Style = hex(red)                             // what went wrong
-	Args      Style = hex(copper)                          // the arguments a call was made with
-	Detail    Style = hex(lightGrey)                       // what qualifies those arguments
+	Subject   Style = hex(copper)                          // the subject of a call
+	Qualifier Style = hex(lightGrey)                       // what qualifies the subject
 	Result    Style = hex(lightGrey)                       // what a call handed back
 	Spinner   Style = hex(copper)                          // the spinner
 	Prompt    Style = hex(copper)                          // the harness prompting the user for text
 	Rule      Style = hex(lightGrey)                       // the line drawn over the input
-	Subtle    Style = hex(lightGrey)                       // what the harness was started with, above the conversation
+	Subtle    Style = hex(lightGrey)                       // dimmed text, a step back from the subject
 	Read      Style = hex(lime)                            // reading is on offer
 	Write     Style = hex(gold)                            // writing is on offer
 	Exec      Style = hex(red)                             // running a command is on offer

@@ -241,40 +241,40 @@ func TestAReadFocusesTheFileName(t *testing.T) {
 }
 
 func TestRenderSaysWhichLinesAreBeingRead(t *testing.T) {
-	renderedPath, detail := read.Render(read.Args{Path: "notes.txt", Offset: 10, Limit: 5})
+	subject, qualifier := read.Describe(read.Args{Path: "notes.txt", Offset: 10, Limit: 5})
 
-	if renderedPath != "notes.txt" {
-		t.Errorf("expected the path, got %q", renderedPath)
+	if subject != "notes.txt" {
+		t.Errorf("expected the path, got %q", subject)
 	}
 
-	if detail != "10-14" {
-		t.Errorf("expected the range, got %q", detail)
+	if qualifier != "10-14" {
+		t.Errorf("expected the range, got %q", qualifier)
 	}
 }
 
-func TestRenderWritesAPathBelowHomeWithATilde(t *testing.T) {
-	t.Setenv("HOME", "/home/alice")
+func TestRenderLeavesPathDisplayProcessingToThePainter(t *testing.T) {
+	const path = "/home/alice/.agents/skills/golang/SKILL.md"
 
-	renderedPath, _ := read.Render(read.Args{Path: "/home/alice/.agents/skills/golang/SKILL.md"})
+	subject, _ := read.Describe(read.Args{Path: path})
 
-	if want := "~/.agents/skills/golang/SKILL.md"; renderedPath != want {
-		t.Errorf("got %q, want %q", renderedPath, want)
+	if subject != path {
+		t.Errorf("got %q, want the unprocessed path %q", subject, path)
 	}
 }
 
 func TestRenderLeavesAnOpenRangeOpen(t *testing.T) {
-	_, detail := read.Render(read.Args{Path: "notes.txt", Offset: 10})
+	_, qualifier := read.Describe(read.Args{Path: "notes.txt", Offset: 10})
 
-	if detail != "10+" {
-		t.Errorf("expected an open range, got %q", detail)
+	if qualifier != "10+" {
+		t.Errorf("expected an open range, got %q", qualifier)
 	}
 }
 
 func TestRenderSaysNothingAboutAWholeFile(t *testing.T) {
-	_, detail := read.Render(read.Args{Path: "notes.txt"})
+	_, qualifier := read.Describe(read.Args{Path: "notes.txt"})
 
-	if detail != "" {
-		t.Errorf("expected no range, got %q", detail)
+	if qualifier != "" {
+		t.Errorf("expected no range, got %q", qualifier)
 	}
 }
 

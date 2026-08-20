@@ -71,7 +71,7 @@ func TestAFileIsWrittenWithItsParentDirectories(t *testing.T) {
 
 func TestWriteSizesUseCompactBytes(t *testing.T) {
 	content := strings.Repeat("x", 1536)
-	path, size := write.Render(write.Args{Path: "result.txt", Content: content})
+	path, size := write.Describe(write.Args{Path: "result.txt", Content: content})
 	if path != "result.txt" || size != "1.5K" {
 		t.Errorf("got path %q and size %q, want result.txt and 1.5K", path, size)
 	}

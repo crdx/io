@@ -33,24 +33,24 @@ type painter struct {
 func (self *painter) describe(event agent.Event) (string, string, tool.Highlight) {
 	calledTool, known := self.calledTool(event.Name)
 	if !known {
-		return event.Render, event.Detail, event.Highlight
+		return event.Subject, event.Qualifier, event.Highlight
 	}
 
 	parsedCall, err := calledTool.Parse(event.Arguments)
 	if err != nil {
-		return tool.RenderUnparsedArguments(calledTool, event.Arguments), event.Detail, event.Highlight
+		return tool.DescribeUnparsedArguments(calledTool, event.Arguments), event.Qualifier, event.Highlight
 	}
 
 	highlight := parsedCall.Highlight()
 
-	renderedCall := parsedCall.Render()
+	subject := parsedCall.Subject()
 	if self.workspaceDir != "" {
 		for _, workspaceDir := range []string{self.workspaceDir, pathutil.Shorten(self.workspaceDir)} {
-			renderedCall = strings.TrimPrefix(renderedCall, workspaceDir+string(filepath.Separator))
+			subject = strings.TrimPrefix(subject, workspaceDir+string(filepath.Separator))
 		}
 	}
 
-	return renderedCall, parsedCall.Detail(), highlight
+	return subject, parsedCall.Qualifier(), highlight
 }
 
 func (self *painter) calledTool(name string) (tool.Tool, bool) {
@@ -90,7 +90,7 @@ func (self *painter) draw(event agent.Event) {
 			self.rows = map[string]int{}
 		}
 
-		renderedArgs, detail, highlight := self.describe(event)
+		subject, qualifier, highlight := self.describe(event)
 
 		// TODO(x): rewrite this mess
 		name := event.Name
@@ -98,7 +98,7 @@ func (self *painter) draw(event agent.Event) {
 		accent := ""
 		var accentStyle theme.Style
 		if event.Name == readTool {
-			if skillName, isSkill := skill.NameFromPath(renderedArgs); isSkill {
+			if skillName, isSkill := skill.NameFromPath(subject); isSkill {
 				name = "load"
 				nameStyle = theme.Skill
 				accent = skillName
@@ -114,9 +114,9 @@ func (self *painter) draw(event agent.Event) {
 		self.rows[event.ID] = self.block.Add(status.Label{
 			Name:        name,
 			NameStyle:   nameStyle,
-			Args:        renderedArgs,
+			Subject:     subject,
 			Highlight:   highlight,
-			Detail:      detail,
+			Qualifier:   qualifier,
 			ReadOnly:    event.ReadOnly,
 			Accent:      accent,
 			AccentStyle: accentStyle,

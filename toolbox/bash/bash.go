@@ -43,7 +43,7 @@ func New(
 					tool.String("command", "the command line"),
 				},
 			},
-			Render,
+			Describe,
 		).Validate(validate).Stats(func(ctx context.Context, args Args) (string, tool.Stats, error) {
 			policy, err := fresh(ctx)
 			if err != nil {
@@ -79,8 +79,8 @@ func ProtectedPolicy(policy sandbox.Policy) sandbox.Policy {
 	return policy.WithRead(readOnlyPaths...)
 }
 
-// Render formats a command into one display-safe line and reports its original line count.
-func Render(args Args) (string, string) {
+// Describe formats a command into one display-safe line and reports its original line count.
+func Describe(args Args) (string, string) {
 	parsed, err := parse(args.Command)
 	if err != nil {
 		return oneLine(args.Command), spread(args.Command)
