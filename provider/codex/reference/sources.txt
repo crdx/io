@@ -1,0 +1,6 @@
+responses-create.md      https://developers.openai.com/api/reference/resources/responses/methods/create.md
+streaming.md             https://developers.openai.com/api/docs/guides/streaming-responses.md
+conversation-state.md    https://developers.openai.com/api/docs/guides/conversation-state.md
+function-calling.md      https://developers.openai.com/api/docs/guides/function-calling.md
+prompt-caching.md        https://developers.openai.com/api/docs/guides/prompt-caching.md
+reasoning.md             https://developers.openai.com/api/docs/guides/reasoning.md

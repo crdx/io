@@ -1,0 +1,8 @@
+messages-create.md    https://platform.claude.com/docs/en/api/messages/create.md
+streaming.md          https://platform.claude.com/docs/en/build-with-claude/streaming.md
+thinking.md           https://platform.claude.com/docs/en/build-with-claude/thinking.md
+effort.md             https://platform.claude.com/docs/en/build-with-claude/effort.md
+prompt-caching.md     https://platform.claude.com/docs/en/build-with-claude/prompt-caching.md
+tool-use.md           https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview.md
+errors.md             https://platform.claude.com/docs/en/api/errors.md
+models.md             https://platform.claude.com/docs/en/about-claude/models/overview.md

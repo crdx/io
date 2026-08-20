@@ -27,6 +27,24 @@ build:
 check:
     steps fmt vet lint1 lint2 mega test
 
+# download the API references for each provider
+refs:
+    #!/bin/bash
+    set -euo pipefail
+    GREEN='\e[32m'
+    NC='\e[0m'
+    for SOURCES in provider/*/reference/sources.txt; do
+        DIRECTORY="$(dirname "$SOURCES")"
+        while read -r NAME ADDRESS; do
+            if [[ -z "$NAME" || "$NAME" == \#* ]]; then
+                continue
+            fi
+            curl -fsSL --retry 2 -o "$DIRECTORY/$NAME" "$ADDRESS"
+            echo -e "${GREEN}${DIRECTORY}/${NAME}${NC} $(wc -c < "$DIRECTORY/$NAME")B"
+        done < "$SOURCES"
+        mega -x "$DIRECTORY"
+    done
+
 oh *args:
     go run ./cmd/oh "$@"
 

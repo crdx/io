@@ -1,0 +1,3 @@
+chat-completions.md    https://developers.openai.com/api/reference/chat-completions/overview.md
+streaming-events.md    https://developers.openai.com/api/reference/resources/chat/subresources/completions/streaming-events.md
+migrate.md             https://developers.openai.com/api/docs/guides/migrate-to-responses.md
