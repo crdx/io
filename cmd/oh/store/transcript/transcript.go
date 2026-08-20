@@ -1,5 +1,5 @@
-// Package chat renders a durable Markdown conversation transcript.
-package chat
+// Package transcript renders a durable Markdown conversation transcript.
+package transcript
 
 import (
 	"encoding/json"

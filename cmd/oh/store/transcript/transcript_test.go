@@ -1,4 +1,4 @@
-package chat_test
+package transcript_test
 
 import (
 	"encoding/json"
@@ -10,12 +10,12 @@ import (
 	"unicode/utf8"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/cmd/oh/store/chat"
+	"crdx.org/io/cmd/oh/store/transcript"
 )
 
 func TestTranscriptStoresOnlyAToolResultPreview(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "chat.md")
-	recorder, err := chat.Open(path, chat.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,8 +48,8 @@ func TestTranscriptStoresOnlyAToolResultPreview(t *testing.T) {
 }
 
 func TestTranscriptCapsAToolResultPreviewAtOneKiB(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "chat.md")
-	recorder, err := chat.Open(path, chat.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,8 +82,8 @@ func TestTranscriptCapsAToolResultPreviewAtOneKiB(t *testing.T) {
 }
 
 func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "chat.md")
-	recorder, err := chat.Open(path, chat.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,8 +109,8 @@ func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {
 }
 
 func TestTranscriptRetainsDurableState(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "chat.md")
-	recorder, err := chat.Open(path, chat.Meta{ID: "session", Started: time.Unix(1, 2)})
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2)})
 	if err != nil {
 		t.Fatal(err)
 	}

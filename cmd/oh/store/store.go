@@ -12,7 +12,7 @@ import (
 	"crdx.org/io/internal/req"
 	"crdx.org/io/session"
 
-	"crdx.org/io/cmd/oh/store/chat"
+	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/cmd/oh/store/wire"
 )
 
@@ -26,8 +26,8 @@ type Meta struct {
 }
 
 const (
-	chatName = "chat.md"
-	wireName = "wire.http"
+	transcriptName = "chat.md"
+	wireName       = "wire.http"
 )
 
 // Writer coordinates the canonical journal and auxiliary bundle recorders.
@@ -37,13 +37,13 @@ type Writer struct {
 	meta      Meta
 	started   time.Time
 
-	canonicalMutex sync.Mutex
-	mutex          sync.Mutex
-	chat           *chat.Recorder
-	wire           *wire.Recorder
-	chatDisabled   bool
-	wireDisabled   bool
-	warnings       []error
+	canonicalMutex     sync.Mutex
+	mutex              sync.Mutex
+	transcript         *transcript.Recorder
+	wire               *wire.Recorder
+	transcriptDisabled bool
+	wireDisabled       bool
+	warnings           []error
 }
 
 // Create starts an oh session.
@@ -88,11 +88,11 @@ func (self *Writer) Event(event agent.Event) error {
 
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
-	if self.chat != nil {
-		if err := self.chat.Event(time.Now(), event); err != nil {
-			_ = self.chat.Close()
-			self.chat = nil
-			self.chatDisabled = true
+	if self.transcript != nil {
+		if err := self.transcript.Event(time.Now(), event); err != nil {
+			_ = self.transcript.Close()
+			self.transcript = nil
+			self.transcriptDisabled = true
 			self.warnings = append(self.warnings, fmt.Errorf("chat.md recording disabled: %w", err))
 		}
 	}
@@ -154,13 +154,13 @@ func (self *Writer) Close() error {
 	canonicalError := self.inner.Close()
 	self.canonicalMutex.Unlock()
 	self.mutex.Lock()
-	chatRecorder := self.chat
+	transcriptRecorder := self.transcript
 	wireRecorder := self.wire
-	self.chat = nil
+	self.transcript = nil
 	self.wire = nil
 	self.mutex.Unlock()
-	if chatRecorder != nil {
-		if err := chatRecorder.Close(); err != nil {
+	if transcriptRecorder != nil {
+		if err := transcriptRecorder.Close(); err != nil {
 			self.queueWarning(fmt.Errorf("chat.md recording disabled: %w", err))
 		}
 	}
@@ -181,16 +181,16 @@ func (self *Writer) ensureAuxiliaryRecorders() {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 	bundleDirectory := filepath.Join(self.directory, self.ID())
-	if self.chat == nil && !self.chatDisabled {
-		recorder, err := chat.Open(filepath.Join(bundleDirectory, chatName), chat.Meta{
+	if self.transcript == nil && !self.transcriptDisabled {
+		recorder, err := transcript.Open(filepath.Join(bundleDirectory, transcriptName), transcript.Meta{
 			ID: self.ID(), Started: self.started, Model: self.meta.Model, Effort: self.meta.Effort,
 			Provider: self.meta.Provider, Workspace: self.meta.WorkspaceDir,
 		})
 		if err != nil {
-			self.chatDisabled = true
+			self.transcriptDisabled = true
 			self.warnings = append(self.warnings, fmt.Errorf("chat.md recording disabled: %w", err))
 		} else {
-			self.chat = recorder
+			self.transcript = recorder
 		}
 	}
 	if self.wire == nil && !self.wireDisabled {
