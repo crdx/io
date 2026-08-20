@@ -294,7 +294,7 @@ func run() ([]string, error) {
 
 	chat := &conversation{
 		assistant:          agent.New(context, client, tools),
-		screen:             output.New(os.Stdout).PostProcess(workspaceDir),
+		screen:             output.New(os.Stdout).LinkPathsUnder(workspaceDir),
 		log:                log,
 		workspaceDir:       workspaceDir,
 		mode:               mode,

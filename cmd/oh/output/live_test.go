@@ -27,7 +27,7 @@ func TestPathsAreLinkedAtBothScrollbackDrawingBoundaries(t *testing.T) {
 	}
 
 	screen, screenOutput := region()
-	screen.PostProcess(workspace)
+	screen.LinkPathsUnder(workspace)
 	screen.drawRow(style.Subtle("cmd/oh/") + style.Subject("draw.go"))
 	screen.Draw([]string{"see cmd/oh/draw.go"})
 
@@ -43,7 +43,7 @@ func TestPathsStayPlainWhenScrollbackIsRedirected(t *testing.T) {
 	}
 
 	var screenOutput strings.Builder
-	screen := New(&screenOutput).PostProcess(workspace)
+	screen := New(&screenOutput).LinkPathsUnder(workspace)
 	screen.Line("one.go")
 
 	if got := screenOutput.String(); got != "one.go" {

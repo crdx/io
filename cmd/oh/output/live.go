@@ -128,7 +128,7 @@ func (self *Output) repaint(first int, rows []string) {
 		}
 
 		out.WriteString("\r" + clearRow)
-		out.WriteString(self.renderScrollback(rows[at]))
+		out.WriteString(self.linkifyScrollback(rows[at]))
 	}
 
 	self.settle(rows)

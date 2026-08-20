@@ -24,13 +24,13 @@ type Output struct {
 	pending          bool   // whether streamed text has not ended in a newline
 	blank            bool   // whether an empty line is owed to whatever is written next
 	trailingNewlines int    // how many newlines the last thing written ended with
-	heldNewlines     string // the newlines an answer ended on, kept back in case it goes on
+	hoardedNewlines  string // the newlines an answer ended on, kept back in case it goes on
 	streaming        bool   // whether an answer is arriving in pieces
 	stacked          bool   // whether anything has been said, and so whether the input has a row to sit under
 
-	terminal      bool
-	pathWorkspace string // where relative paths drawn in the scrollback begin
-	progress      bool   // whether a turn is reported as running to the terminal
+	terminal bool
+	linkRoot string // where relative paths drawn in the scrollback begin, and "" to link nothing
+	progress bool   // whether a turn is reported as running to the terminal
 
 	columns    int // the terminal width
 	lines      int // the terminal height
@@ -59,9 +59,10 @@ func New(writer io.Writer) *Output {
 	return self
 }
 
-// PostProcess enables final scrollback transformations relative to workspace.
-func (self *Output) PostProcess(workspace string) *Output {
-	self.pathWorkspace = workspace
+// LinkPathsUnder marks the paths drawn text names as terminal hyperlinks, resolving the relative
+// ones against root. Nothing is linked until it is given one.
+func (self *Output) LinkPathsUnder(root string) *Output {
+	self.linkRoot = root
 	return self
 }
 
@@ -105,7 +106,7 @@ func (self *Output) Answer(delta string) {
 	trailingNewlines := delta[len(answerText):]
 
 	if answerText == "" {
-		self.heldNewlines += trailingNewlines // an answer that goes on will want these back
+		self.hoardedNewlines += trailingNewlines
 		return
 	}
 
@@ -115,9 +116,9 @@ func (self *Output) Answer(delta string) {
 		self.newline()
 	}
 
-	self.write(self.heldNewlines + style.Answer(answerText))
+	self.write(self.hoardedNewlines + style.Answer(answerText))
 
-	self.heldNewlines = trailingNewlines
+	self.hoardedNewlines = trailingNewlines
 	self.streaming = true
 }
 
@@ -218,7 +219,7 @@ func (self *Output) separate(answering bool) {
 	}
 
 	if !answering {
-		self.heldNewlines = "" // an answer that ended on blank rows ended before them
+		self.hoardedNewlines = "" // an answer that ended on blank rows ended before them
 	}
 }
 
@@ -261,7 +262,7 @@ func (self *Output) count(styledText string) {
 }
 
 func (self *Output) at(text string) {
-	text = self.renderScrollback(text)
+	text = self.linkifyScrollback(text)
 
 	if len(self.shownFooter.rows) == 0 {
 		self.raw(text)
@@ -271,12 +272,12 @@ func (self *Output) at(text string) {
 	self.redraw(text)
 }
 
-func (self *Output) renderScrollback(text string) string {
-	if !self.terminal || self.pathWorkspace == "" {
+func (self *Output) linkifyScrollback(text string) string {
+	if !self.terminal || self.linkRoot == "" {
 		return text
 	}
 
-	return pathlink.Render(text, self.pathWorkspace)
+	return pathlink.Render(text, self.linkRoot)
 }
 
 func (self *Output) raw(text string) {

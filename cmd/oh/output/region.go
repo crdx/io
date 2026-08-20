@@ -164,7 +164,7 @@ func (self *Output) Reset() {
 	self.pending = false
 	self.blank = false
 	self.trailingNewlines = 0
-	self.heldNewlines = ""
+	self.hoardedNewlines = ""
 	self.streaming = false
 	self.wrapping = false
 	self.stacked = false
