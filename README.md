@@ -8,7 +8,8 @@
 - `tool`: tools, schemas, middleware, and concurrency
 - `toolbox`: implementation of read/ls/find/grep/write/edit/bash
 - `session`: session saving and resumption, as an append-only journal
-- `provider/codex`: the Responses API, the OpenAI way (for now)
+- `provider/codex`: the Responses API, the OpenAI way
+- `provider/chat`: the OpenAI-compatible Chat Completions API
 - ... and more, soon
 
 ## Installation
@@ -22,7 +23,8 @@ go get crdx.org/io
 Implementors glue the auth flow together themselves. The example is a reference, and a way to get started quickly.
 
 ```bash
-go run ./cmd/login
+go run ./cmd/login codex
+go run ./cmd/login opencode-go
 ```
 
 ## Usage
@@ -93,7 +95,7 @@ Run simulation scenarios defined in TOML files.
 
 ```bash
 go run ./cmd/simulate --scenario internal/sim/scenarios/success.toml
-OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh
+OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh -m gpt-5.6-sol@high
 ```
 
 ## Examples

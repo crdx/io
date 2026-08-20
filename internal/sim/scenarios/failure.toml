@@ -1,7 +1,7 @@
 # Every way a turn can go wrong, one per turn, so the harness can be watched meeting each of them.
 #
 #   go run ./cmd/simulate --scenario internal/sim/scenarios/failure.toml
-#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh
+#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh -m gpt-5.6-sol@high
 #
 # Ask it four times, and it fails four different ways.
 

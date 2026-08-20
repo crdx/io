@@ -2,7 +2,7 @@
 # its rows arrive.
 #
 #   go run ./cmd/simulate --scenario internal/sim/scenarios/markdown.toml
-#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh
+#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh -m gpt-5.6-sol@high
 
 model = "gpt-5.6-sol"
 

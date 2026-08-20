@@ -1,7 +1,7 @@
 # A coding session that goes to plan: it searches, reads, and says what it found.
 #
 #   go run ./cmd/simulate --scenario internal/sim/scenarios/success.toml
-#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh
+#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh -m gpt-5.6-sol@high
 #
 # Every new session starts at the first turn and takes the next one with each request it makes.
 
