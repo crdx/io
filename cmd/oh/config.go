@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -50,8 +51,10 @@ func loadConfiguredSettings(path string) (configuredSettings, error) {
 		return settings, fmt.Errorf("%s: %w", shownPath, err)
 	}
 
-	if meta.IsDefined("provider") && settings.Provider != codexProvider && settings.Provider != opencodeGoProvider {
-		return settings, fmt.Errorf("%s: provider must be codex or opencode-go", shownPath)
+	if meta.IsDefined("provider") && !slices.Contains(providerNames, settings.Provider) {
+		return settings, fmt.Errorf(
+			"%s: provider must be one of: %s", shownPath, strings.Join(providerNames, ", "),
+		)
 	}
 	if meta.IsDefined("model") && settings.Model == "" {
 		return settings, fmt.Errorf("%s: model is empty, so there is nothing to ask", shownPath)

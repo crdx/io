@@ -3,7 +3,9 @@ package chat
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
+	"slices"
 	"sort"
 
 	"crdx.org/io/agent"
@@ -15,10 +17,18 @@ const donePayload = "[DONE]"
 // ErrTruncated is a stream that stopped without a completion marker.
 var ErrTruncated = sse.ErrTruncated
 
+// ErrIncomplete is a response the endpoint cut short, usually against a limit.
+var ErrIncomplete = errors.New("the response was cut short")
+
 type reply struct {
-	content   string
-	reasoning string
-	tools     map[int]*toolCall
+	content    string
+	reasoning  string
+	tools      map[int]*toolCall
+	stopReason string
+}
+
+func (self *reply) empty() bool {
+	return self.content == "" && self.reasoning == "" && len(self.tools) == 0
 }
 
 func (self *reply) message() message {
@@ -28,6 +38,17 @@ func (self *reply) message() message {
 		ReasoningContent: self.reasoning,
 		ToolCalls:        self.orderedToolCalls(),
 	}
+}
+
+func (self *reply) spoke() bool {
+	return self.content != "" || self.reasoning != ""
+}
+
+func (self *reply) prose() message {
+	said := self.message()
+	said.ToolCalls = nil
+
+	return said
 }
 
 func (self *reply) calls() []agent.ToolCall {
@@ -63,7 +84,8 @@ type chunk struct {
 }
 
 type choice struct {
-	Delta delta `json:"delta"`
+	Delta        delta  `json:"delta"`
+	FinishReason string `json:"finish_reason"`
 }
 
 type delta struct {
@@ -71,6 +93,8 @@ type delta struct {
 	ReasoningContent string          `json:"reasoning_content"`
 	Reasoning        string          `json:"reasoning"`
 	ToolCalls        []toolCallDelta `json:"tool_calls"`
+
+	Refusal string `json:"refusal"`
 }
 
 type toolCallDelta struct {
@@ -108,20 +132,39 @@ func readReply(body io.Reader, yield agent.Yield) (reply, error) {
 	return answer, err
 }
 
+var cutShort = []string{"length", "content_filter"}
+
+func parseChunk(payload string) (chunk, error) {
+	var message chunk
+	if err := json.Unmarshal([]byte(payload), &message); err != nil {
+		return chunk{}, fmt.Errorf("the endpoint sent something unreadable: %s", payload)
+	}
+
+	return message, nil
+}
+
 func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	if payload == donePayload {
+		if slices.Contains(cutShort, self.stopReason) {
+			return true, ErrIncomplete
+		}
+
 		return true, nil
 	}
 
-	var message chunk
-	if json.Unmarshal([]byte(payload), &message) != nil {
-		return false, nil //nolint:nilerr // unrelated SSE events are ignored
+	message, err := parseChunk(payload)
+	if err != nil {
+		return true, err
 	}
 	if message.Error != nil {
 		return true, errors.New(message.Error.Message)
 	}
 	if len(message.Choices) == 0 {
 		return false, nil
+	}
+
+	if reason := message.Choices[0].FinishReason; reason != "" {
+		self.stopReason = reason
 	}
 
 	delta := message.Choices[0].Delta
@@ -135,9 +178,13 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 			return true, nil
 		}
 	}
-	if delta.Content != "" {
-		self.content += delta.Content
-		if !yield(agent.Event{Kind: agent.Text, Text: delta.Content}) {
+	said := delta.Content
+	if said == "" {
+		said = delta.Refusal
+	}
+	if said != "" {
+		self.content += said
+		if !yield(agent.Event{Kind: agent.Text, Text: said}) {
 			return true, nil
 		}
 	}

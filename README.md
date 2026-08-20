@@ -93,12 +93,19 @@ go run ./cmd/ohs
 
 ### simulate
 
-Run simulation scenarios defined in TOML files.
+Stand in for every provider endpoint at once, playing scenarios defined in TOML files.
 
 ```bash
 go run ./cmd/simulate --scenario internal/sim/scenarios/success.toml
-OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh -m gpt-5.6-sol@high
 ```
+
+The simulator deals in wire formats, not providers. A provider speaks one of them, and more than one provider can speak the same one.
+
+| Wire format      | Served at              | Spoken by     |
+|------------------|------------------------|---------------|
+| Responses        | `/v1/codex/responses`  | `codex`       |
+| Chat Completions | `/v1/chat/completions` | `opencode-go` |
+| Messages         | `/v1/messages`         | `anthropic`   |
 
 ## Examples
 

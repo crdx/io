@@ -141,16 +141,28 @@ func exchange(code string, verifier string) (*Credentials, error) {
 		return nil, fmt.Errorf("exchange the code: %w", err)
 	}
 
+	credentials.AccountID, err = accountID(credentials.Access)
+	if err != nil {
+		return nil, fmt.Errorf("exchange the code: %w", err)
+	}
+
 	return credentials, nil
 }
 
 func refreshToken(requests *req.Client, refresh string) (*Credentials, error) {
-	return postForm(requests, url.Values{
+	credentials, err := postForm(requests, url.Values{
 		"grant_type":    {"refresh_token"},
 		"client_id":     {clientID},
 		"refresh_token": {refresh},
 		"scope":         {scope},
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	credentials.AccountID, _ = accountID(credentials.Access)
+
+	return credentials, nil
 }
 
 const authTimeout = 30 * time.Second
@@ -176,7 +188,6 @@ func postForm(requests *req.Client, form url.Values) (*Credentials, error) {
 		Access:    payload.Access,
 		Refresh:   payload.Refresh,
 		ExpiresAt: time.Now().Add(time.Duration(payload.ExpiresIn) * time.Second).UnixMilli(),
-		AccountID: accountID(payload.Access),
 	}, nil
 }
 
@@ -191,15 +202,15 @@ func tokenEndpoint() string {
 	return tokenURL
 }
 
-func accountID(access string) string {
+func accountID(access string) (string, error) {
 	parts := strings.Split(access, ".")
 	if len(parts) < 2 {
-		return ""
+		return "", errors.New("the access token is not a JWT")
 	}
 
 	body, err := base64.RawURLEncoding.DecodeString(parts[1])
 	if err != nil {
-		return ""
+		return "", fmt.Errorf("decode the access token: %w", err)
 	}
 
 	var claims struct {
@@ -208,11 +219,15 @@ func accountID(access string) string {
 		} `json:"https://api.openai.com/auth"`
 	}
 
-	if json.Unmarshal(body, &claims) != nil {
-		return ""
+	if err := json.Unmarshal(body, &claims); err != nil {
+		return "", fmt.Errorf("read the access token claims: %w", err)
 	}
 
-	return claims.Auth.AccountID
+	if claims.Auth.AccountID == "" {
+		return "", errors.New("the access token names no ChatGPT account")
+	}
+
+	return claims.Auth.AccountID, nil
 }
 
 func open(address string) {

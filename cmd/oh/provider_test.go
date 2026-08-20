@@ -77,9 +77,66 @@ func TestResolveProviderSettingsRequiresAModel(t *testing.T) {
 	}
 }
 
+// Anthropic reads its credentials when a turn asks for a token, the way codex does, so connecting
+// on it succeeds even with nothing stored.
+func TestAnthropicConnectsBeforeItNeedsCredentials(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	client, err := connect(modelChoice{provider: anthropicProvider, model: "claude-opus-5", maxOutputTokens: 128_000}, "high", "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if client == nil {
+		t.Fatal("expected a connection")
+	}
+}
+
+func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	tests := []struct {
+		name     string
+		choice   modelChoice
+		endpoint string
+		want     string
+	}{
+		{
+			"codex",
+			modelChoice{provider: codexProvider},
+			"",
+			"codex: Model is empty",
+		},
+		{
+			"opencode-go",
+			modelChoice{provider: opencodeGoProvider, model: "deepseek-v4-pro"},
+			"http://somewhere",
+			"chat: MaxOutputTokens is 0",
+		},
+		{
+			"anthropic",
+			modelChoice{provider: anthropicProvider, maxOutputTokens: 128_000},
+			"",
+			"anthropic: Model is empty",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			client, err := connect(test.choice, "high", test.endpoint)
+
+			if err == nil || !strings.Contains(err.Error(), test.want) {
+				t.Fatalf("expected %q, got %v", test.want, err)
+			}
+
+			if client != nil {
+				t.Errorf("expected no connection to be handed back, got %+v", client)
+			}
+		})
+	}
+}
+
 func TestOpenCodeRequiresLogin(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
-	_, err := connect(opencodeGoProvider, "deepseek-v4-pro", "high", "")
+	_, err := connect(modelChoice{provider: opencodeGoProvider, model: "deepseek-v4-pro", maxOutputTokens: 128_000}, "high", "")
 	if err == nil || !strings.Contains(err.Error(), "login command with opencode-go") {
 		t.Fatalf("got error %v", err)
 	}

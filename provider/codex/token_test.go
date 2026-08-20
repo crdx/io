@@ -1,6 +1,7 @@
 package codex_test
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -12,6 +13,12 @@ import (
 	"crdx.org/io/internal/auth"
 	"crdx.org/io/provider/codex"
 )
+
+func accessToken() string {
+	const claims = `{"https://api.openai.com/auth":{"chatgpt_account_id":"account"}}`
+
+	return "header." + base64.RawURLEncoding.EncodeToString([]byte(claims)) + ".signature"
+}
 
 func writeCredentials(t *testing.T, expiresIn time.Duration) string {
 	t.Helper()
@@ -42,7 +49,7 @@ func tokenEndpoint(t *testing.T, grants *[]string) {
 			*grants = append(*grants, request.PostForm.Get("grant_type"))
 
 			writer.Header().Set("Content-Type", "application/json")
-			_, _ = fmt.Fprint(writer, `{"access_token":"new","refresh_token":"next","expires_in":3600}`)
+			_, _ = fmt.Fprintf(writer, `{"access_token":%q,"refresh_token":"next","expires_in":3600}`, accessToken())
 		},
 	))
 
@@ -63,7 +70,7 @@ func TestStoredRefreshesATokenNearExpiry(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if token.Access != "new" {
+	if token.Access != accessToken() {
 		t.Errorf("expected the refreshed token, got %q", token.Access)
 	}
 
@@ -80,7 +87,7 @@ func TestStoredRefreshesATokenNearExpiry(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if stored.Codex == nil || stored.Codex.Access != "new" || stored.Codex.Refresh != "next" {
+	if stored.Codex == nil || stored.Codex.Access != accessToken() || stored.Codex.Refresh != "next" {
 		t.Errorf("expected the refreshed pair to be written back, got %+v", stored.Codex)
 	}
 	if stored.OpenCodeGo == nil || stored.OpenCodeGo.APIKey != "open-code-key" {
@@ -92,7 +99,7 @@ func TestStoredKeepsTheRefreshTokenTheResponseOmits(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(
 		func(writer http.ResponseWriter, _ *http.Request) {
 			writer.Header().Set("Content-Type", "application/json")
-			_, _ = fmt.Fprint(writer, `{"access_token":"new","expires_in":3600}`)
+			_, _ = fmt.Fprintf(writer, `{"access_token":%q,"expires_in":3600}`, accessToken())
 		},
 	))
 
@@ -114,6 +121,41 @@ func TestStoredKeepsTheRefreshTokenTheResponseOmits(t *testing.T) {
 
 	if stored.Codex == nil || stored.Codex.Refresh != "refresh-me" {
 		t.Errorf("expected the held refresh token to survive, got %+v", stored.Codex)
+	}
+}
+
+func TestStoredKeepsTheAccountARefreshedTokenNoLongerNames(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(
+		func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			_, _ = fmt.Fprint(writer,
+				`{"access_token":"not.a.jwt","refresh_token":"next","expires_in":3600}`)
+		},
+	))
+
+	t.Cleanup(server.Close)
+
+	codex.TokenURL = server.URL
+	t.Cleanup(func() { codex.TokenURL = "" })
+
+	path := writeCredentials(t, time.Minute)
+
+	token, err := codex.StoredCredentialsAt(path).Token()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if token.AccountID != "account" {
+		t.Errorf("expected the account the login stored to stand, got %q", token.AccountID)
+	}
+
+	stored, err := auth.Load(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if stored.Codex == nil || stored.Codex.AccountID != "account" {
+		t.Errorf("expected the account to be written back too, got %+v", stored.Codex)
 	}
 }
 

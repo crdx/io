@@ -1,4 +1,5 @@
-// Package chat is a provider speaking the OpenAI Chat Completions API.
+// Package chat is a provider speaking the OpenAI Chat Completions API, against any endpoint that
+// claims to serve it.
 package chat
 
 import (
@@ -15,30 +16,54 @@ import (
 	"crdx.org/io/tool"
 )
 
+// Efforts are how hard the model may be asked to work, least to most. An OpenAI-compatible endpoint
+// takes these as reasoning_effort, and what any one model behind it honours is its own business.
+//
+// reference/chat-completions.md
+var Efforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
+
 const turnTimeout = 60 * time.Minute
 
 // Client speaks the Chat Completions API: one request per turn, answered as a stream of chunks.
 type Client struct {
-	URL    string // the endpoint address
-	Model  string // the model to ask
-	Effort string // how hard the model should reason
-	Token  string // the bearer token
+	URL             string
+	Token           string
+	Model           string
+	Effort          string
+	MaxOutputTokens int // the ceiling on reasoning and answer together
 
 	instructions string
 	tools        []functionTool
 	history      []json.RawMessage
 	requests     *req.Client
+	observer     req.Observer
 }
 
-// New builds a client for an OpenAI-compatible Chat Completions endpoint.
-func New(url string, model string, effort string, token string) *Client {
-	return &Client{
-		URL:      url,
-		Model:    model,
-		Effort:   effort,
-		Token:    token,
-		requests: req.New(turnTimeout),
+// New builds a client for an OpenAI-compatible Chat Completions endpoint, asking the given model at
+// the given effort. Nothing here has a default: which model to ask, how hard, and how much it may
+// write are the caller's to decide and this package's to carry out, so a client is refused rather
+// than built where any of them is missing.
+func New(
+	url string,
+	token string,
+	model string,
+	effort string,
+	maxOutputTokens int,
+) (*Client, error) {
+	client := &Client{
+		URL:             url,
+		Token:           token,
+		Model:           model,
+		Effort:          effort,
+		MaxOutputTokens: maxOutputTokens,
+		requests:        req.New(turnTimeout),
 	}
+
+	if err := client.settled(); err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }
 
 // Configure takes what every request in the session carries.
@@ -49,6 +74,7 @@ func (self *Client) Configure(instructions string, tools []tool.Definition) {
 
 // ObserveHTTP attaches an observer to session requests.
 func (self *Client) ObserveHTTP(observer req.Observer) {
+	self.observer = observer
 	self.requests.Observe(observer)
 }
 
@@ -57,14 +83,27 @@ func (self *Client) AddUserMessage(prompt string) {
 	self.history = append(self.history, encode(message{Role: "user", Content: prompt}))
 }
 
-// AddToolResults appends this turn's tool call results to the conversation.
+// AddToolResults appends this turn's tool call results to the conversation. A tool message takes
+// only a string, so any images a round returned follow it in a user message of their own, which is
+// the only place this API accepts one.
 func (self *Client) AddToolResults(results []agent.ToolResult) {
+	var images []contentPart
+
 	for _, result := range results {
 		self.history = append(self.history, encode(message{
 			Role:       "tool",
 			ToolCallID: result.ID,
-			Content:    encodeToolResult(result),
+			Content:    toolResultText(result),
 		}))
+
+		if part, carried := imagePart(result); carried {
+			images = append(images, part)
+		}
+	}
+
+	if len(images) > 0 {
+		parts := append([]contentPart{{Type: "text", Text: attachmentNotice}}, images...)
+		self.history = append(self.history, encode(partedMessage{Role: "user", Content: parts}))
 	}
 }
 
@@ -78,7 +117,9 @@ func (self *Client) Load(messages []json.RawMessage) {
 	self.history = slices.Clone(messages)
 }
 
-// Send posts the conversation so far and reads the response.
+// Send posts the conversation so far and reads the response. A turn that fails part-way keeps what
+// the model said and thought before it failed, because that much was already reported to whoever
+// was watching, and a conversation missing it disagrees with what they saw.
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
 	stream, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers())
 	if err != nil {
@@ -88,11 +129,39 @@ func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, e
 
 	answer, err := readReply(stream, yield)
 	if err != nil {
+		if answer.spoke() {
+			self.history = append(self.history, encode(answer.prose()))
+		}
+
 		return agent.Reply{}, err
 	}
 
-	self.history = append(self.history, encode(answer.message()))
+	if !answer.empty() {
+		self.history = append(self.history, encode(answer.message()))
+	}
+
 	return agent.Reply{Calls: answer.calls()}, nil
+}
+
+func (self *Client) settled() error {
+	for _, setting := range []struct {
+		name  string
+		value string
+	}{
+		{"URL", self.URL},
+		{"Model", self.Model},
+		{"Token", self.Token},
+	} {
+		if setting.value == "" {
+			return fmt.Errorf("chat: %s is empty", setting.name)
+		}
+	}
+
+	if self.MaxOutputTokens <= 0 {
+		return fmt.Errorf("chat: MaxOutputTokens is %d, and must be above zero", self.MaxOutputTokens)
+	}
+
+	return nil
 }
 
 func (self *Client) requestBody() request {
@@ -102,15 +171,22 @@ func (self *Client) requestBody() request {
 	}
 	messages = append(messages, self.history...)
 
-	return request{
-		Model:             self.Model,
-		Messages:          messages,
-		Stream:            true,
-		Tools:             self.tools,
-		ToolChoice:        "auto",
-		ParallelToolCalls: true,
-		ReasoningEffort:   self.Effort,
+	body := request{
+		Model:           self.Model,
+		Messages:        messages,
+		Stream:          true,
+		Tools:           self.tools,
+		ReasoningEffort: self.Effort,
+		MaxOutputTokens: self.MaxOutputTokens,
 	}
+
+	if len(self.tools) > 0 {
+		parallel := true
+		body.ToolChoice = "auto"
+		body.ParallelToolCalls = &parallel
+	}
+
+	return body
 }
 
 func (self *Client) headers() http.Header {
@@ -130,9 +206,11 @@ type request struct {
 	Messages          []json.RawMessage `json:"messages"`
 	Stream            bool              `json:"stream"`
 	Tools             []functionTool    `json:"tools,omitempty"`
-	ToolChoice        string            `json:"tool_choice,omitempty"`
-	ParallelToolCalls bool              `json:"parallel_tool_calls,omitempty"`
+	ToolChoice        string            `json:"tool_choice,omitempty"`         // omitempty: "" is not a choice the endpoint takes
+	ParallelToolCalls *bool             `json:"parallel_tool_calls,omitempty"` // a pointer, because false asks for something and the endpoint defaults to true
 	ReasoningEffort   string            `json:"reasoning_effort,omitempty"`
+
+	MaxOutputTokens int `json:"max_completion_tokens"`
 }
 
 type message struct {
@@ -141,6 +219,21 @@ type message struct {
 	ReasoningContent string     `json:"reasoning_content,omitempty"`
 	ToolCallID       string     `json:"tool_call_id,omitempty"`
 	ToolCalls        []toolCall `json:"tool_calls,omitempty"`
+}
+
+type partedMessage struct {
+	Role    string        `json:"role"`
+	Content []contentPart `json:"content"`
+}
+
+type contentPart struct {
+	Type     string    `json:"type"`
+	Text     string    `json:"text,omitempty"`
+	ImageURL *imageURL `json:"image_url,omitempty"`
+}
+
+type imageURL struct {
+	URL string `json:"url"`
 }
 
 type functionTool struct {
@@ -180,18 +273,34 @@ func ToolsSize(tools []tool.Tool) int {
 	return len(encodedTools)
 }
 
-func encodeToolResult(result agent.ToolResult) string {
-	if result.Image.MediaType == "" || len(result.Image.Data) == 0 {
+const attachmentNotice = "Attached image(s) from tool result:"
+
+const emptyOutputNotice = "(no tool output)"
+
+func toolResultText(result agent.ToolResult) string {
+	switch {
+	case result.Output != "":
 		return result.Output
+	case result.Image.MediaType != "" && len(result.Image.Data) > 0:
+		return "(see attached image)"
+	default:
+		return emptyOutputNotice
+	}
+}
+
+func imagePart(result agent.ToolResult) (contentPart, bool) {
+	if result.Image.MediaType == "" || len(result.Image.Data) == 0 {
+		return contentPart{}, false
 	}
 
-	image := fmt.Sprintf(
-		"data:%s;base64,%s",
-		result.Image.MediaType,
-		base64.StdEncoding.EncodeToString(result.Image.Data),
-	)
-	if result.Output == "" {
-		return image
-	}
-	return result.Output + "\n\n" + image
+	return contentPart{
+		Type: "image_url",
+		ImageURL: &imageURL{
+			URL: fmt.Sprintf(
+				"data:%s;base64,%s",
+				result.Image.MediaType,
+				base64.StdEncoding.EncodeToString(result.Image.Data),
+			),
+		},
+	}, true
 }

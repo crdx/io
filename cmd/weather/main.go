@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/provider/codex"
@@ -25,9 +26,15 @@ func main() {
 		return "Cloudy with a chance of meatballs.", nil
 	})
 
+	client, err := codex.Auth("gpt-5.6-sol", "high")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
 	assistant := agent.New(
 		"You are a helpful weatherperson",
-		codex.Auth(),
+		client,
 		[]tool.Tool{weather},
 	)
 

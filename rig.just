@@ -11,6 +11,7 @@ WORKSPACE := "tmp/workspace"
 STATE     := justfile_directory() / "tmp/rig-state"
 SESSIONS  := STATE / "org.crdx/oh/sessions"
 ADDRESS   := "localhost:8117"
+ENDPOINT  := "http://" + ADDRESS + "/v1/codex/responses"
 WIDTH     := "100"
 HEIGHT    := "24"
 
@@ -43,7 +44,7 @@ live scenario=SCENARIO workspace=WORKSPACE opening="" caps="rxw": harness down
         {{ SIM }} --scenario {{ scenario }} --address {{ ADDRESS }}
     tmux set-option -t {{ SESSION }} remain-on-exit on
     sleep 0.3
-    tmux split-window -t {{ SESSION }} -v -e OH_ENDPOINT_URL=http://{{ ADDRESS }} \
+    tmux split-window -t {{ SESSION }} -v -e OH_ENDPOINT_URL={{ ENDPOINT }} \
         {{ OH }} --workspace {{ workspace }} --caps {{ caps }} {{ opening }}
     tmux select-pane -t {{ SESSION }}.{bottom}
 
@@ -57,7 +58,7 @@ resume-up scenario="internal/sim/scenarios/resume-read.toml": harness down
     tmux set-option -t {{ SESSION }} remain-on-exit on
     sleep 0.3
     tmux split-window -t {{ SESSION }} -v \
-        -e OH_ENDPOINT_URL=http://{{ ADDRESS }} -e XDG_STATE_HOME={{ STATE }} \
+        -e OH_ENDPOINT_URL={{ ENDPOINT }} -e XDG_STATE_HOME={{ STATE }} \
         {{ OH }} --workspace {{ WORKSPACE }} --caps rw
     tmux select-pane -t {{ SESSION }}.{bottom}
 
@@ -71,7 +72,7 @@ resume scenario="internal/sim/scenarios/resume-edit.toml": harness
         {{ SIM }} --scenario {{ scenario }} --address {{ ADDRESS }}
     sleep 0.3
     tmux respawn-pane -k -t {{ SESSION }}.{bottom} \
-        -e OH_ENDPOINT_URL=http://{{ ADDRESS }} -e XDG_STATE_HOME={{ STATE }} \
+        -e OH_ENDPOINT_URL={{ ENDPOINT }} -e XDG_STATE_HOME={{ STATE }} \
         {{ OH }} --caps rw --resume "$ID"
     tmux select-pane -t {{ SESSION }}.{bottom}
 

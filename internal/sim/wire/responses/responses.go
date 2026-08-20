@@ -1,15 +1,14 @@
-// Package wire builds the shapes the Responses API sends, so that everything standing in for the
-// endpoint agrees on what it says by construction, rather than by copies of it staying in step.
-// https://platform.openai.com/docs/api-reference/responses-streaming
-package wire
+// Package responses builds the shapes the Responses API sends, so that everything standing in for
+// the endpoint agrees on what it says by construction, rather than by copies of it staying in
+// step. https://platform.openai.com/docs/api-reference/responses-streaming
+package responses
 
 import (
 	"fmt"
-	"strings"
 )
 
-// Done is what the endpoint sends when there is no more.
-const Done = "data: [DONE]\n\n"
+// Done is the payload that marks the end of a response in this format.
+const Done = "[DONE]"
 
 // CompletedResponse ends a turn that went to plan.
 const CompletedResponse = `{"type":"response.completed"}`
@@ -25,19 +24,6 @@ func FailedResponse(message string) string {
 // Error is the endpoint refusing the request outright.
 func Error(message string) string {
 	return fmt.Sprintf(`{"type":"error","message":%q}`, message)
-}
-
-// Body renders events as the body of one response.
-func Body(events ...string) string {
-	var body strings.Builder
-
-	for _, event := range events {
-		body.WriteString("data: ")
-		body.WriteString(event)
-		body.WriteString("\n\n")
-	}
-
-	return body.String()
 }
 
 // Answer is a piece of the model's reply arriving.

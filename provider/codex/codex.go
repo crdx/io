@@ -1,4 +1,5 @@
-// Package codex is a provider speaking the Responses API.
+// Package codex is a provider speaking the Responses API, as the ChatGPT backend serves it rather
+// than as the public API does.
 package codex
 
 import (
@@ -18,20 +19,20 @@ import (
 	"crdx.org/io/tool"
 )
 
-// —————————————————————————————————————————————————————————————————————————————————————————————————
-// mega:allow-file comment-lines
-// —————————————————————————————————————————————————————————————————————————————————————————————————
-
 // https://platform.openai.com/docs/api-reference/responses/create
 // https://platform.openai.com/docs/guides/reasoning
 const (
 	Endpoint = "https://chatgpt.com/backend-api/codex/responses"
-	Model    = "gpt-5.6-sol"
-	Effort   = "high"
 	Summary  = "auto" // defined as the "most detailed summarizer available for a model"
 
 	Originator = "io"
 )
+
+// Efforts are how hard the model may be asked to work, least to most. Not every reasoning model
+// takes every one of them.
+//
+// reference/responses-create.md
+var Efforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
 const turnTimeout = 60 * time.Minute
 
@@ -45,28 +46,45 @@ type Client struct {
 	Model  string
 	Effort string
 
-	tokens       TokenSource       // where credentials come from
-	instructions string            // what the model is told
-	tools        []functionTool    // what the model may call
-	session      string            // the conversation key
-	history      []json.RawMessage // the provider conversation state
-	requests     *req.Client       // the HTTP transport
+	tokens       TokenSource
+	instructions string
+	tools        []functionTool
+	session      string
+	history      []json.RawMessage
+	requests     *req.Client
+	observer     req.Observer // what watches every exchange, where one is attached
 }
 
-// New builds a client that authorises every request with the given source.
+// New builds a client asking the given model at the given effort, authorising every request with
+// the given source. Neither has a default: which model to ask and how hard are the caller's to
+// decide and this package's to carry out, so a client is refused rather than built where either is
+// missing.
+//
+// There is no ceiling to give it. How much a turn may write is one of the things this endpoint
+// keeps to itself, so a caller holding a figure for it has nowhere here to put it and is not asked
+// for one.
 //
 // https://platform.openai.com/docs/guides/prompt-caching
-func New(tokens TokenSource) *Client {
-	return &Client{
+func New(tokens TokenSource, model string, effort string) (*Client, error) {
+	client := &Client{
+		URL:      Endpoint,
+		Model:    model,
+		Effort:   effort,
 		tokens:   tokens,
 		session:  newToken(),
 		requests: req.New(turnTimeout),
 	}
+
+	if err := client.settled(); err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }
 
 // Auth is a client on the credentials the login command stored.
-func Auth() *Client {
-	return New(StoredCredentials())
+func Auth(model string, effort string) (*Client, error) {
+	return New(StoredCredentials(), model, effort)
 }
 
 // Configure takes what every request in the session carries.
@@ -79,6 +97,7 @@ func (self *Client) Configure(instructions string, tools []tool.Definition) {
 
 // ObserveHTTP attaches an observer to session requests and credential refreshes.
 func (self *Client) ObserveHTTP(observer req.Observer) {
+	self.observer = observer
 	self.requests.Observe(observer)
 	if source, ok := self.tokens.(observedTokenSource); ok {
 		source.observeHTTP(observer)
@@ -130,6 +149,8 @@ func encodeItem(item any) json.RawMessage {
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
 	turn, err := self.post(ctx, yield)
 	if err != nil {
+		self.history = append(self.history, turn.prose()...)
+
 		return agent.Reply{}, err
 	}
 
@@ -144,7 +165,7 @@ func (self *Client) post(ctx context.Context, yield agent.Yield) (reply, error) 
 		return reply{}, err
 	}
 
-	stream, err := self.requests.Stream(ctx, self.endpoint(), self.requestBody(), self.headers(token))
+	stream, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers(token))
 	if err != nil {
 		return reply{}, err
 	}
@@ -153,37 +174,30 @@ func (self *Client) post(ctx context.Context, yield agent.Yield) (reply, error) 
 	return readReply(stream, yield)
 }
 
-func (self *Client) endpoint() string {
-	if self.URL != "" {
-		return self.URL
+func (self *Client) settled() error {
+	for _, setting := range []struct {
+		name  string
+		value string
+	}{
+		{"URL", self.URL},
+		{"Model", self.Model},
+		{"Effort", self.Effort},
+	} {
+		if setting.value == "" {
+			return fmt.Errorf("codex: %s is empty", setting.name)
+		}
 	}
 
-	return Endpoint
-}
-
-func (self *Client) model() string {
-	if self.Model != "" {
-		return self.Model
-	}
-
-	return Model
-}
-
-func (self *Client) effort() string {
-	if self.Effort != "" {
-		return self.Effort
-	}
-
-	return Effort
+	return nil
 }
 
 func (self *Client) requestBody() request {
 	return request{
-		Model:             self.model(),
+		Model:             self.Model,
 		Store:             false,
 		Stream:            true,
 		Input:             self.history,
-		Reasoning:         reasoning{Effort: self.effort(), Summary: Summary},
+		Reasoning:         reasoning{Effort: self.Effort, Summary: Summary},
 		Include:           []string{"reasoning.encrypted_content"},
 		PromptCacheKey:    self.session,
 		ToolChoice:        "auto",
@@ -207,7 +221,6 @@ func (self *Client) headers(token Token) http.Header {
 	return header
 }
 
-// https://platform.openai.com/docs/api-reference/responses/create
 type request struct {
 	Model             string         `json:"model"`
 	Store             bool           `json:"store"`
@@ -215,28 +228,19 @@ type request struct {
 	Instructions      string         `json:"instructions,omitempty"`
 	ParallelToolCalls bool           `json:"parallel_tool_calls"`
 
-	// https://platform.openai.com/docs/api-reference/responses-streaming
-	Stream bool `json:"stream"` // whether events are streamed
+	Stream bool `json:"stream"`
 
 	Input []json.RawMessage `json:"input"`
 
-	// https://platform.openai.com/docs/guides/conversation-state
-	Include []string `json:"include"` // which extra fields are returned
+	Include []string `json:"include"`
 
-	// https://platform.openai.com/docs/guides/prompt-caching
-	PromptCacheKey string `json:"prompt_cache_key"` // the prompt cache identity
+	PromptCacheKey string `json:"prompt_cache_key"`
 
-	// https://platform.openai.com/docs/guides/function-calling
-	ToolChoice string `json:"tool_choice"` // how the model chooses tools
+	ToolChoice string `json:"tool_choice"`
 
-	// https://platform.openai.com/docs/guides/reasoning
-	Reasoning reasoning `json:"reasoning"` // the requested reasoning settings
+	Reasoning reasoning `json:"reasoning"`
 }
 
-// reasoning is how hard the model is asked to think, and how much of that thinking it summarises
-// back. Without a summary asked for, none is sent.
-//
-// https://platform.openai.com/docs/guides/reasoning
 type reasoning struct {
 	Effort  string `json:"effort"`
 	Summary string `json:"summary"`
@@ -260,8 +264,6 @@ type inputContent struct {
 	Detail   string `json:"detail,omitempty"`
 }
 
-// imageDetail is what the endpoint is asked to look at an image with. Codex names one on every
-// image it returns from a tool, and this is the default it names, so it is what is asked for here.
 const imageDetail = "high"
 
 func encodeToolOutput(result agent.ToolResult) any {

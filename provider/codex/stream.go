@@ -20,17 +20,16 @@ var ErrIncomplete = errors.New("the response was cut short")
 var ErrTruncated = sse.ErrTruncated
 
 type reply struct {
-	items []json.RawMessage // the response output items
-	usage agent.Usage       // the context used for the request
+	items      []json.RawMessage
+	usage      agent.Usage
+	summarised bool // whether a reasoning summary has been reported this turn
 }
 
 func (self *reply) calls() []agent.ToolCall {
 	var calls []agent.ToolCall
 
 	for _, raw := range self.items {
-		var item outputItem
-
-		if json.Unmarshal(raw, &item) == nil && item.Type == "function_call" {
+		if item := decodeItem(raw); item.Type == "function_call" {
 			calls = append(calls, agent.ToolCall{
 				ID:        item.CallID,
 				Name:      item.Name,
@@ -40,6 +39,29 @@ func (self *reply) calls() []agent.ToolCall {
 	}
 
 	return calls
+}
+
+func (self *reply) prose() []json.RawMessage {
+	kept := make([]json.RawMessage, 0, len(self.items))
+
+	for _, raw := range self.items {
+		if decodeItem(raw).Type != "function_call" {
+			kept = append(kept, raw)
+		}
+	}
+
+	for len(kept) > 0 && decodeItem(kept[len(kept)-1]).Type == "reasoning" {
+		kept = kept[:len(kept)-1]
+	}
+
+	return kept
+}
+
+func decodeItem(raw json.RawMessage) outputItem {
+	var item outputItem
+	_ = json.Unmarshal(raw, &item)
+
+	return item
 }
 
 type outputItem struct {
@@ -141,7 +163,23 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 
 	case "response.reasoning_summary_part.done":
 		if message.Part != nil && message.Part.Text != "" {
+			self.summarised = true
+
 			if !yield(agent.Event{Kind: agent.Reasoning, Text: message.Part.Text}) {
+				return true, nil
+			}
+		}
+
+	case "response.reasoning_text.delta":
+		if message.Delta != "" && !self.summarised {
+			if !yield(agent.Event{Kind: agent.Reasoning, Text: message.Delta}) {
+				return true, nil
+			}
+		}
+
+	case "response.refusal.delta":
+		if message.Delta != "" {
+			if !yield(agent.Event{Kind: agent.Text, Text: message.Delta}) {
 				return true, nil
 			}
 		}

@@ -14,6 +14,7 @@ import (
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/req"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/chat"
 	"crdx.org/io/provider/codex"
 	"crdx.org/io/session"
@@ -32,8 +33,18 @@ const (
 
 	codexProvider      = "codex"
 	opencodeGoProvider = "opencode-go"
+	anthropicProvider  = "anthropic"
 	opencodeGoEndpoint = "https://opencode.ai/zen/go/v1/chat/completions"
+
+	standInToken = "stand-in"
 )
+
+var providerNames = []string{codexProvider, opencodeGoProvider, anthropicProvider}
+
+var defaultEfforts = map[string]string{
+	codexProvider:     "high",
+	anthropicProvider: "high",
+}
 
 const usage = `oh — coding harness
 
@@ -45,8 +56,12 @@ Options:
     -r, --resume <session>                 Resume the saved session
     -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
     -c, --caps <flags>                     Capabilities: rxwgb (read, exec, write, git, bg) [default: rxw]
+    -u, --update                           Update the cached model list, then exit
     -V, --version                          Show the version
     -h, --help                             Show this help
+
+Model selection takes the closest reading of what you name: the whole name first, then an opening,
+then a fragment, so -m sol@hi is enough. An effort of off asks for none, where the model takes it.
 
 Environment:
     OH_ENDPOINT_URL     Talk to somewhere other than the provider's default endpoint
@@ -81,6 +96,7 @@ type InputOpts struct {
 	Session      string   `docopt:"--resume"`
 	Model        string   `docopt:"--model"`
 	Caps         string   `docopt:"--caps"`
+	Update       bool     `docopt:"--update"`
 	Version      bool     `docopt:"--version"`
 }
 
@@ -137,6 +153,10 @@ func run() ([]string, error) {
 	if inputArgs.Version {
 		fmt.Println(version())
 		return nil, nil
+	}
+
+	if inputArgs.Update {
+		return nil, updateModels(os.Stdout, os.Getenv(endpointVariable), modelCachePath())
 	}
 
 	args, err := inputArgs.parse()
@@ -224,7 +244,12 @@ func run() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := connect(providerName, model, effort, os.Getenv(endpointVariable))
+	choice, err := chosenModel(providerName, model)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := connect(choice, effort, os.Getenv(endpointVariable))
 	if err != nil {
 		return nil, err
 	}
@@ -397,8 +422,8 @@ func resolveProviderSettings(
 	}
 	model := settings.Model
 	effort := settings.Effort
-	if effort == "" && providerName == codexProvider {
-		effort = codex.Effort
+	if effort == "" {
+		effort = defaultEfforts[providerName]
 	}
 	if resumedSession != nil {
 		if resumedSession.Meta.Model != "" {
@@ -416,36 +441,64 @@ func resolveProviderSettings(
 		return "", "", "", errors.New("no model selected: use -m provider/model@effort or configure model")
 	}
 
-	return providerName, model, effort, nil
+	return providerName, model, resolveEffort(effort), nil
 }
 
-func connect(providerName string, model string, effort string, endpoint string) (*connection, error) {
-	switch providerName {
+func connect(choice modelChoice, effort string, endpoint string) (*connection, error) {
+	switch choice.provider {
 	case codexProvider:
-		var client *codex.Client
-		if endpoint == "" {
-			client = codex.Auth()
-		} else {
-			client = codex.New(codex.Static("fake", "fake"))
-			client.URL = endpoint
-		}
-		client.Model = model
-		client.Effort = effort
-		return &connection{providerClient: client, toolsSize: codex.ToolsSize}, nil
+		tokens := codex.StoredCredentials()
+		address := codex.Endpoint
 
-	case opencodeGoProvider:
-		token, err := chat.StoredKey()
+		if endpoint != "" {
+			tokens = codex.Static(standInToken, standInToken)
+			address = endpoint
+		}
+
+		client, err := codex.New(tokens, choice.model, effort)
 		if err != nil {
 			return nil, err
 		}
+		client.URL = address
+
+		return &connection{providerClient: client, toolsSize: codex.ToolsSize}, nil
+
+	case opencodeGoProvider:
+		token := standInToken
 		if endpoint == "" {
 			endpoint = opencodeGoEndpoint
+
+			var err error
+			if token, err = chat.StoredKey(); err != nil {
+				return nil, err
+			}
 		}
-		client := chat.New(endpoint, model, effort, token)
+		client, err := chat.New(endpoint, token, choice.model, effort, choice.maxOutputTokens)
+		if err != nil {
+			return nil, err
+		}
+
 		return &connection{providerClient: client, toolsSize: chat.ToolsSize}, nil
 
+	case anthropicProvider:
+		tokens := anthropic.StoredCredentials()
+		address := anthropic.Endpoint
+
+		if endpoint != "" {
+			tokens = anthropic.Static(standInToken)
+			address = endpoint
+		}
+
+		client, err := anthropic.New(tokens, choice.model, effort, choice.maxOutputTokens)
+		if err != nil {
+			return nil, err
+		}
+		client.URL = address
+
+		return &connection{providerClient: client, toolsSize: anthropic.ToolsSize}, nil
+
 	default:
-		return nil, fmt.Errorf("unknown provider %q", providerName)
+		return nil, fmt.Errorf("unknown provider %q", choice.provider)
 	}
 }
 

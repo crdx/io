@@ -86,7 +86,10 @@ func turns(t *testing.T, scripted ...string) (*httptest.Server, *[]string) {
 func newAgent(t *testing.T, url string, tools []tool.Tool) *agent.Agent {
 	t.Helper()
 
-	backend := codex.New(codex.Static("token", "account"))
+	backend, err := codex.New(codex.Static("token", "account"), "gpt-5.6-sol", "high")
+	if err != nil {
+		t.Fatal(err)
+	}
 	backend.URL = url
 
 	return agent.New("You are a helpful assistant", backend, tools)
@@ -111,6 +114,56 @@ func weatherTool(t *testing.T, callCount *int) tool.Tool {
 
 		return "raining in " + args.City, nil
 	})
+}
+
+func TestNewHandsBackAClientHoldingWhatItWasAsked(t *testing.T) {
+	client, err := codex.New(codex.Static("token", "account"), "gpt-5.6-sol", "low")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if client.URL != codex.Endpoint || client.Model != "gpt-5.6-sol" || client.Effort != "low" {
+		t.Errorf("expected what was asked for to be held verbatim, got %+v", client)
+	}
+}
+
+func TestASettingLeftOutIsRefusedRatherThanSubstituted(t *testing.T) {
+	tests := []struct {
+		name   string
+		model  string
+		effort string
+		want   string
+	}{
+		{"model", "", "high", "codex: Model is empty"},
+		{"effort", "gpt-5.6-sol", "", "codex: Effort is empty"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			client, err := codex.New(codex.Static("token", "account"), test.model, test.effort)
+
+			if err == nil || !strings.Contains(err.Error(), test.want) {
+				t.Fatalf("expected %q, got %v", test.want, err)
+			}
+
+			if client != nil {
+				t.Errorf("expected no client to be handed back, got %+v", client)
+			}
+		})
+	}
+}
+
+func TestAuthRefusesWhateverNewWould(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	client, err := codex.Auth("", "high")
+	if err == nil || !strings.Contains(err.Error(), "codex: Model is empty") {
+		t.Fatalf("expected the missing model to be refused, got %v", err)
+	}
+
+	if client != nil {
+		t.Errorf("expected no client to be handed back, got %+v", client)
+	}
 }
 
 func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
@@ -184,6 +237,39 @@ func TestAnImageReturnedByAToolIsSentForTheModelToInspect(t *testing.T) {
 		`{"type":"input_image","image_url":"data:image/png;base64,AQID","detail":"high"}]`
 	if !strings.Contains((*bodies)[1], want) {
 		t.Errorf("expected the tool output to carry an image, got %s", (*bodies)[1])
+	}
+}
+
+// TestNoOutputCeilingIsSent pins a deviation: the public Responses API takes max_output_tokens, and
+// this endpoint refuses any request carrying it. Sending it once made every turn fail.
+func TestNoOutputCeilingIsSent(t *testing.T) {
+	server, bodies := turns(t, events(answer("Hello."), completed))
+
+	if _, err := newAgent(t, server.URL, nil).Send(t.Context(), "hello"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	for _, unwanted := range []string{"max_output_tokens", "max_tokens", "max_completion_tokens"} {
+		if strings.Contains((*bodies)[0], unwanted) {
+			t.Errorf("expected no %s to be sent, got %s", unwanted, (*bodies)[0])
+		}
+	}
+}
+
+func TestARefusalSaidFlatlyIsReportedInTheEndpointsOwnWords(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(
+		func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = fmt.Fprint(writer, `{"detail":"Unsupported parameter: max_output_tokens"}`)
+		},
+	))
+
+	t.Cleanup(server.Close)
+
+	_, err := newAgent(t, server.URL, nil).Send(t.Context(), "hello")
+	if err == nil || err.Error() != "Unsupported parameter: max_output_tokens" {
+		t.Errorf("expected the endpoint's own words, got %v", err)
 	}
 }
 
@@ -448,6 +534,84 @@ func TestSendShowsAnEndpointFailureWithAnUnreadableMessageAsJSON(t *testing.T) {
 	}
 }
 
+func TestStreamReportsRawReasoningFromAModelThatDoesNotSummarise(t *testing.T) {
+	server, _ := turns(
+		t,
+		events(
+			`{"type":"response.reasoning_text.delta","delta":"Chec"}`,
+			`{"type":"response.reasoning_text.delta","delta":"king."}`,
+			answer("It is raining."),
+			completed,
+		),
+	)
+
+	assistant := newAgent(t, server.URL, nil)
+
+	var reasoning strings.Builder
+	for event, err := range assistant.Stream(t.Context(), "what is the weather?") {
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if event.Kind == agent.Reasoning {
+			reasoning.WriteString(event.Text)
+		}
+	}
+
+	if reasoning.String() != "Checking." {
+		t.Errorf("expected the raw reasoning, got %q", reasoning.String())
+	}
+}
+
+func TestASummarisedThoughtIsNotAlsoReportedRaw(t *testing.T) {
+	server, _ := turns(
+		t,
+		events(
+			`{"type":"response.reasoning_summary_part.done",`+
+				`"part":{"type":"summary_text","text":"Checking the sky."}}`,
+			`{"type":"response.reasoning_text.delta","delta":"Checking the sky in full."}`,
+			answer("It is raining."),
+			completed,
+		),
+	)
+
+	assistant := newAgent(t, server.URL, nil)
+
+	var reasoning []string
+	for event, err := range assistant.Stream(t.Context(), "what is the weather?") {
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if event.Kind == agent.Reasoning {
+			reasoning = append(reasoning, event.Text)
+		}
+	}
+
+	if len(reasoning) != 1 || reasoning[0] != "Checking the sky." {
+		t.Errorf("expected the summary alone, got %v", reasoning)
+	}
+}
+
+func TestARefusalIsShownRatherThanSwallowed(t *testing.T) {
+	server, _ := turns(
+		t,
+		events(
+			`{"type":"response.refusal.delta","delta":"I cannot help with that."}`,
+			completed,
+		),
+	)
+
+	assistant := newAgent(t, server.URL, nil)
+
+	reply, err := assistant.Send(t.Context(), "do something forbidden")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if reply != "I cannot help with that." {
+		t.Errorf("expected the refusal to reach the caller, got %q", reply)
+	}
+}
+
 func TestSendRefusesATruncatedStream(t *testing.T) {
 	server, _ := turns(t, events(answer("It is raining ")))
 
@@ -557,5 +721,56 @@ func TestCancellingTheContextEndsARequestThatIsProducingNothing(t *testing.T) {
 	case <-requestDone:
 	case <-time.After(2 * time.Second):
 		t.Error("expected the endpoint to see the connection go")
+	}
+}
+
+func message(text string) string {
+	item := fmt.Sprintf(
+		`{"type":"message","role":"assistant","content":[{"type":"output_text","text":%q}]}`, text,
+	)
+
+	return fmt.Sprintf(`{"type":"response.output_item.done","item":%s}`, item)
+}
+
+func thought(id string) string {
+	item := fmt.Sprintf(`{"type":"reasoning","id":%q,"summary":[]}`, id)
+
+	return fmt.Sprintf(`{"type":"response.output_item.done","item":%s}`, item)
+}
+
+func TestATurnThatFailedKeepsWhatItSaidAndNotWhatItAskedFor(t *testing.T) {
+	server, _ := turns(t, events(
+		thought("rs_kept"),
+		message("Looking it up."),
+		thought("rs_orphaned"),
+		call("weather", `{"city":"London"}`),
+	))
+
+	assistant := newAgent(t, server.URL, nil)
+
+	if _, err := assistant.Send(t.Context(), "what is the weather?"); !errors.Is(err, codex.ErrTruncated) {
+		t.Fatalf("expected a truncated stream to be refused, got %v", err)
+	}
+
+	conversation, err := assistant.Dump()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var held strings.Builder
+	for _, item := range conversation {
+		held.Write(item)
+	}
+
+	for _, want := range []string{"Looking it up.", "rs_kept"} {
+		if !strings.Contains(held.String(), want) {
+			t.Errorf("expected the conversation to hold %q, got %s", want, held.String())
+		}
+	}
+
+	for _, unwanted := range []string{"function_call", "rs_orphaned"} {
+		if strings.Contains(held.String(), unwanted) {
+			t.Errorf("expected %q to be left out, got %s", unwanted, held.String())
+		}
 	}
 }

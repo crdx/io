@@ -99,7 +99,10 @@ func (self *credentialStore) refresh() error {
 	inherit(refreshedToken, self.credentials)
 
 	self.credentials = refreshedToken
-	_ = saveCredentials(self.path, refreshedToken)
+
+	if err := saveCredentials(self.path, refreshedToken); err != nil {
+		return fmt.Errorf("store the refreshed credentials: %w", err)
+	}
 
 	return nil
 }

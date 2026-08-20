@@ -60,6 +60,8 @@ var everyCap = []caps{
 }
 
 func TestEveryOptionIsRead(t *testing.T) {
+	useCachedModels(t)
+
 	parsedOptions := parseOptions(t, "-c", "r", "-d", "somewhere", "-m", "deepseek@hi")
 
 	if parsedOptions.caps != capRead {

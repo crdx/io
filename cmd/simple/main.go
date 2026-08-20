@@ -13,7 +13,13 @@ import (
 )
 
 func main() {
-	assistant := agent.New("You are a helpful assistant.", codex.Auth(), []tool.Tool{})
+	client, err := codex.Auth("gpt-5.6-sol", "high")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	assistant := agent.New("You are a helpful assistant.", client, []tool.Tool{})
 	input := bufio.NewReader(os.Stdin)
 
 	for {

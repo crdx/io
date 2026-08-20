@@ -9,6 +9,11 @@ import (
 
 // Scenario is what the endpoint pretends to be, read from a file. Every new session starts at the
 // first turn and takes the next one with each request it makes.
+//
+// A scenario says what the model does, not how that reaches a client, so the same file is played
+// through whichever provider API the request arrived in. The one exception is error-event, which
+// is a payload written out by hand and therefore only means anything to the API it was written
+// for.
 type Scenario struct {
 	Model string `toml:"model"`
 

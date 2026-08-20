@@ -8,61 +8,56 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"crdx.org/io/internal/sim/wire"
 )
 
-// Endpoint answers requests as the scenario demands.
+// Endpoint answers requests as the scenario demands, in whichever provider API they arrive in.
 type Endpoint struct {
 	scenario *Scenario // what the endpoint acts out
+	dialects []Dialect // the APIs it answers in
 
-	mutex       sync.Mutex      // guards endpoint state
-	sessions    map[string]*run // the conversations in progress
-	requests    []Request       // the requests received
-	nextSession int             // the next session number
-}
-
-type run struct {
-	turn int // the next turn
+	mutex    sync.Mutex // guards endpoint state
+	requests []Request  // the requests received
+	nextID   int        // the next identifier
 }
 
 const exhausted = "The scenario has nothing more to say."
 
-// New builds an endpoint over a scenario.
+// New builds an endpoint over a scenario, answering in every API a provider here speaks.
 func New(scenario *Scenario) *Endpoint {
-	return &Endpoint{scenario: scenario, sessions: map[string]*run{}}
+	return &Endpoint{scenario: scenario, dialects: Dialects()}
 }
+
+// The kinds of item a conversation holds, named the same way whichever API carried them, so that
+// what a test asks about a conversation does not depend on which provider sent it.
+const (
+	Message    = "message"              // something said, by either side
+	CallMade   = "function_call"        // a call the model made
+	CallOutput = "function_call_output" // what a call returned
+)
 
 // Request is one request as the endpoint understood it.
 type Request struct {
-	Session string   // which conversation
-	Model   string   // which model was asked
-	Turn    int      // which scenario turn answered
-	Input   []Entry  // the conversation sent
-	Tools   []string // the tools offered
+	API          string // which provider API it arrived in
+	Session      string
+	Model        string
+	Instructions string
+	Streaming    bool
+	Stored       bool
+	Turn         int
+	Input        []Entry
+	Tools        []string
 }
 
 // Entry is one item of the conversation the request carried.
 type Entry struct {
-	Type    string          `json:"type"`    // the kind of item
-	Role    string          `json:"role"`    // who sent the message
-	Content string          `json:"content"` // what was said
-	CallID  string          `json:"call_id"` // which call
-	Name    string          `json:"name"`    // which tool
-	Output  string          `json:"output"`  // what the tool returned
-	Raw     json.RawMessage `json:"-"`       // the item as received
-}
-
-type body struct {
-	Model          string            `json:"model"`            // the model being asked
-	Stream         bool              `json:"stream"`           // whether events are requested
-	Store          bool              `json:"store"`            // whether storage is requested
-	Instructions   string            `json:"instructions"`     // what the model was told
-	PromptCacheKey string            `json:"prompt_cache_key"` // the conversation key
-	Input          []json.RawMessage `json:"input"`            // the conversation sent
-	Tools          []struct {
-		Name string `json:"name"` // what the tool is called
-	} `json:"tools"` // the tools offered
+	Type      string
+	Role      string
+	Content   string
+	CallID    string
+	Name      string
+	Arguments string
+	Output    string
+	Raw       json.RawMessage
 }
 
 // Requests is every request the endpoint has answered, in order.
@@ -73,206 +68,158 @@ func (self *Endpoint) Requests() []Request {
 	return append([]Request(nil), self.requests...)
 }
 
+// Addresses is where each wire format this endpoint answers in is posted to, below the given base,
+// keyed by format. Which provider to point at which of them is the caller's to know: a format is
+// spoken by however many providers speak it, and this end of it cannot tell them apart.
+func (self *Endpoint) Addresses(base string) map[string]string {
+	addresses := make(map[string]string, len(self.dialects))
+
+	for _, dialect := range self.dialects {
+		addresses[dialect.Name()] = strings.TrimSuffix(base, "/") + versionPrefix + dialect.Path()
+	}
+
+	return addresses
+}
+
+const (
+	versionPrefix = "/v1"
+	modelsPath    = "/v1/models"
+	registryPath  = "/models.dev/api.json"
+)
+
 func (self *Endpoint) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	path := request.URL.Path
+
+	switch {
+	case strings.HasSuffix(path, registryPath):
+		self.serveRegistry(writer, request)
+
+		return
+
+	case strings.HasSuffix(path, modelsPath):
+		self.serveListing(writer)
+
+		return
+	}
+
+	dialect, spoken := self.dialectFor(path)
+	if !spoken {
+		refuse(writer, http.StatusNotFound, "nothing here speaks for "+path)
+
+		return
+	}
+
+	self.answer(writer, request, dialect)
+}
+
+func (self *Endpoint) dialectFor(path string) (Dialect, bool) {
+	for _, dialect := range self.dialects {
+		if strings.HasSuffix(path, dialect.Path()) {
+			return dialect, true
+		}
+	}
+
+	return nil, false
+}
+
+func (self *Endpoint) answer(writer http.ResponseWriter, request *http.Request, dialect Dialect) {
 	raw, err := io.ReadAll(request.Body)
 	if err != nil {
 		refuse(writer, http.StatusBadRequest, "the request could not be read")
+
 		return
 	}
 
-	var sent body
-
-	if json.Unmarshal(raw, &sent) != nil {
+	asked, readable := dialect.Read(request, raw)
+	if !readable {
 		refuse(writer, http.StatusBadRequest, "the request was not json")
-		return
-	}
-
-	askedRequest := self.record(request, sent)
-
-	if failure := self.check(sent, askedRequest); failure != "" {
-		refuse(writer, http.StatusBadRequest, failure)
-		return
-	}
-
-	turn, found := self.scenario.turn(askedRequest.Turn)
-	if !found {
-		self.stream(writer, wire.Body(
-			wire.Answer(exhausted),
-			wire.Message(exhausted),
-			wire.CompletedResponse,
-		))
 
 		return
 	}
 
-	if turn.Status != 0 {
+	self.record(asked)
+
+	if self.scenario.Strict {
+		if failure := dialect.Check(self.scenario, asked); failure != "" {
+			refuse(writer, http.StatusBadRequest, failure)
+
+			return
+		}
+	}
+
+	turn, found := self.scenario.turn(asked.Turn)
+
+	if found && turn.Status != 0 {
 		refuse(writer, turn.Status, "the endpoint is having a moment")
+
 		return
 	}
 
-	self.play(writer, turn)
-}
+	stream := self.open(writer, turn)
 
-func (self *Endpoint) nextID(prefix string) string {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-
-	self.nextSession++
-
-	return fmt.Sprintf("%s_%d", prefix, self.nextSession)
-}
-
-func (self *Endpoint) record(request *http.Request, sent body) Request {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-
-	key := sent.PromptCacheKey
-	if key == "" {
-		key = request.Header.Get("Session_id")
-	}
-
-	held, found := self.sessions[key]
 	if !found {
-		held = &run{}
-		self.sessions[key] = held
+		dialect.Exhausted(stream, exhausted)
+
+		return
 	}
 
-	askedRequest := Request{
-		Session: key,
-		Model:   sent.Model,
-		Turn:    held.turn,
-		Input:   entries(sent.Input),
-	}
+	time.Sleep(self.scenario.delay(turn))
 
-	for _, offeredTool := range sent.Tools {
-		askedRequest.Tools = append(askedRequest.Tools, offeredTool.Name)
-	}
-
-	held.turn++
-
-	self.requests = append(self.requests, askedRequest)
-
-	return askedRequest
+	dialect.Play(stream, self.scenario, turn)
 }
 
-func entries(items []json.RawMessage) []Entry {
-	read := make([]Entry, 0, len(items))
-
-	for _, item := range items {
-		var entry Entry
-
-		_ = json.Unmarshal(item, &entry)
-		entry.Raw = item
-
-		read = append(read, entry)
-	}
-
-	return read
-}
-
-func (self *Endpoint) check(sent body, askedRequest Request) string {
-	if !self.scenario.Strict {
-		return ""
-	}
-
-	switch {
-	case !sent.Stream:
-		return "only streaming responses are supported"
-	case sent.Store:
-		return "this endpoint does not store conversations"
-	case sent.Instructions == "":
-		return "the request carried no instructions"
-	case sent.Model != self.scenario.Model:
-		return fmt.Sprintf("the model %q is not available", sent.Model)
-	}
-
-	answeredCalls := map[string]bool{}
-
-	for _, entry := range askedRequest.Input {
-		if entry.Type == "function_call_output" {
-			answeredCalls[entry.CallID] = true
-		}
-	}
-
-	for _, entry := range askedRequest.Input {
-		if entry.Type == "function_call" && !answeredCalls[entry.CallID] {
-			return "No tool output found for function call " + entry.CallID + "."
-		}
-	}
-
-	return ""
-}
-
-func (self *Endpoint) play(writer http.ResponseWriter, turn Turn) {
+func (self *Endpoint) open(writer http.ResponseWriter, turn Turn) *Stream {
 	writer.Header().Set("Content-Type", "text/event-stream")
 	writer.WriteHeader(http.StatusOK)
 
 	flush := http.NewResponseController(writer)
 
-	send := func(event string) {
-		_, _ = io.WriteString(writer, "data: "+event+"\n\n")
-		_ = flush.Flush()
-	}
-
-	time.Sleep(self.scenario.delay(turn))
-
-	for _, thought := range turn.Think {
-		self.typeWords(send, wire.Thought, thought, self.scenario.pace(turn))
-
-		send(wire.ThinkingPart(thought))
-		send(wire.ReasoningItem(self.nextID("rs"), thought))
-	}
-
-	if turn.Truncate {
-		return
-	}
-
-	if turn.Say != "" {
-		self.typeWords(send, wire.Answer, turn.Say, self.scenario.pace(turn))
-		send(wire.Message(turn.Say))
-	}
-
-	for _, call := range turn.Calls {
-		send(wire.Call(self.nextID("call"), call.Name, call.Arguments))
-	}
-
-	switch {
-	case turn.ErrorEvent != "":
-		send(turn.ErrorEvent)
-	case turn.Fail != "":
-		send(wire.FailedResponse(turn.Fail))
-	case turn.Incomplete:
-		send(wire.IncompleteResponse)
-	default:
-		send(wire.CompletedResponse)
-	}
-
-	_, _ = io.WriteString(writer, wire.Done)
-	_ = flush.Flush()
-}
-
-func (self *Endpoint) typeWords(
-	send func(string),
-	as func(string) string,
-	text string,
-	pace time.Duration,
-) {
-	for index, word := range strings.SplitAfter(text, " ") {
-		if word == "" {
-			continue
-		}
-
-		if index > 0 {
-			time.Sleep(pace)
-		}
-
-		send(as(word))
+	return &Stream{
+		send: func(event string) {
+			_, _ = io.WriteString(writer, "data: "+event+"\n\n")
+			_ = flush.Flush()
+		},
+		pace:   self.scenario.pace(turn),
+		nextID: self.identifier,
 	}
 }
 
-func (self *Endpoint) stream(writer http.ResponseWriter, turn string) {
-	writer.Header().Set("Content-Type", "text/event-stream")
-	_, _ = io.WriteString(writer, turn+wire.Done)
+func (self *Endpoint) identifier(prefix string) string {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	self.nextID++
+
+	return fmt.Sprintf("%s_%d", prefix, self.nextID)
+}
+
+func (self *Endpoint) record(asked Request) {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	self.requests = append(self.requests, asked)
+}
+
+func flatten(content any) string {
+	switch typed := content.(type) {
+	case string:
+		return typed
+
+	case []any:
+		var said strings.Builder
+
+		for _, part := range typed {
+			if held, isObject := part.(map[string]any); isObject {
+				if text, isText := held["text"].(string); isText {
+					said.WriteString(text)
+				}
+			}
+		}
+
+		return said.String()
+	}
+
+	return ""
 }
 
 type refusal struct {

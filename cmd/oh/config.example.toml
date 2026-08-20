@@ -2,6 +2,7 @@
 # Install as $XDG_CONFIG_HOME/org.crdx/oh/config.toml or ~/.config/org.crdx/oh/config.toml.
 # Every setting is optional; remove a setting to use oh's built-in default.
 
+provider = "codex"
 model = "gpt-5.6-sol"
 effort = "high"
 get_on_with_it_message = "yes"

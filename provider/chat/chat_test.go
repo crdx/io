@@ -2,16 +2,294 @@ package chat_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"slices"
+	"strings"
 	"testing"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/provider/chat"
 	"crdx.org/io/tool"
 )
+
+func scriptedServer(t *testing.T, bodies *[]string, payloads ...string) *httptest.Server {
+	t.Helper()
+
+	server := httptest.NewServer(http.HandlerFunc(
+		func(writer http.ResponseWriter, request *http.Request) {
+			body, _ := io.ReadAll(request.Body)
+			*bodies = append(*bodies, string(body))
+
+			writer.Header().Set("Content-Type", "text/event-stream")
+			for _, payload := range payloads {
+				_, _ = fmt.Fprintf(writer, "data: %s\n\n", payload)
+			}
+		},
+	))
+
+	t.Cleanup(server.Close)
+
+	return server
+}
+
+func newClient(t *testing.T, url string) *chat.Client {
+	t.Helper()
+
+	client, err := chat.New(url, "secret", "deepseek-v4-pro", "high", 128_000)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return client
+}
+
+func TestNewHandsBackAClientHoldingWhatItWasAsked(t *testing.T) {
+	client, err := chat.New("http://somewhere/v1/chat/completions", "secret", "deepseek-v4-pro", "low", 64_000)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if client.URL != "http://somewhere/v1/chat/completions" || client.Token != "secret" ||
+		client.Model != "deepseek-v4-pro" || client.Effort != "low" || client.MaxOutputTokens != 64_000 {
+		t.Errorf("expected what was asked for to be held verbatim, got %+v", client)
+	}
+}
+
+func TestASettingLeftOutIsRefusedRatherThanSubstituted(t *testing.T) {
+	tests := []struct {
+		name            string
+		url             string
+		token           string
+		model           string
+		maxOutputTokens int
+		want            string
+	}{
+		{"url", "", "secret", "deepseek-v4-pro", 128_000, "chat: URL is empty"},
+		{"token", "http://somewhere", "", "deepseek-v4-pro", 128_000, "chat: Token is empty"},
+		{"model", "http://somewhere", "secret", "", 128_000, "chat: Model is empty"},
+		{"max tokens", "http://somewhere", "secret", "deepseek-v4-pro", 0, "chat: MaxOutputTokens is 0"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			client, err := chat.New(test.url, test.token, test.model, "high", test.maxOutputTokens)
+
+			if err == nil || !strings.Contains(err.Error(), test.want) {
+				t.Fatalf("expected %q, got %v", test.want, err)
+			}
+
+			if client != nil {
+				t.Errorf("expected no client to be handed back, got %+v", client)
+			}
+		})
+	}
+}
+
+func TestAnImageReturnedByAToolFollowsItInAMessageOfItsOwn(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(t, &bodies,
+		`{"choices":[{"delta":{"content":"seen"}}]}`, "[DONE]")
+
+	client := newClient(t, server.URL)
+	client.AddToolResults([]agent.ToolResult{{
+		ID:     "call-1",
+		Output: "picture.png",
+		Image:  tool.Image{MediaType: "image/png", Data: []byte{1, 2, 3}},
+	}})
+
+	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+		t.Fatal(err)
+	}
+
+	var request struct {
+		Messages []struct {
+			Role    string `json:"role"`
+			Content any    `json:"content"`
+		} `json:"messages"`
+	}
+	if err := json.Unmarshal([]byte(bodies[0]), &request); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(request.Messages) != 2 {
+		t.Fatalf("expected the result and the image beside it, got %+v", request.Messages)
+	}
+
+	if request.Messages[0].Role != "tool" || request.Messages[0].Content != "picture.png" {
+		t.Errorf("expected the tool's own text, got %+v", request.Messages[0])
+	}
+
+	if request.Messages[1].Role != "user" {
+		t.Errorf("expected the image to arrive as a user message, got %+v", request.Messages[1])
+	}
+
+	if !strings.Contains(bodies[0], `"image_url":{"url":"data:image/png;base64,AQID"}`) {
+		t.Errorf("expected the image to be carried as an image part, got %s", bodies[0])
+	}
+}
+
+func TestATurnCutShortAgainstTheTokenLimitIsReported(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(t, &bodies,
+		`{"choices":[{"delta":{"content":"It is raining "}}]}`,
+		`{"choices":[{"delta":{},"finish_reason":"length"}]}`,
+		"[DONE]")
+
+	client := newClient(t, server.URL)
+	client.AddUserMessage("what is the weather?")
+
+	_, err := client.Send(t.Context(), func(agent.Event) bool { return true })
+	if !errors.Is(err, chat.ErrIncomplete) {
+		t.Fatalf("expected an incomplete response to be reported, got %v", err)
+	}
+}
+
+func TestAMalformedChunkIsReportedRatherThanIgnored(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(t, &bodies,
+		`{"choices":[{"delta":{"content":"It is "}}]}`,
+		`{"choices":[{"delta":`,
+		"[DONE]")
+
+	client := newClient(t, server.URL)
+	client.AddUserMessage("hello")
+
+	_, err := client.Send(t.Context(), func(agent.Event) bool { return true })
+	if err == nil || !strings.Contains(err.Error(), "unreadable") {
+		t.Fatalf("expected the malformed frame to be reported, got %v", err)
+	}
+}
+
+func TestAChunkCarryingNothingWeReadIsIgnored(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(t, &bodies,
+		`{"id":"chunk-1","object":"chat.completion.chunk","system_fingerprint":"fp"}`,
+		`{"choices":[{"delta":{"content":"done"}}]}`,
+		"[DONE]")
+
+	client := newClient(t, server.URL)
+	client.AddUserMessage("hello")
+
+	var seen []string
+	if _, err := client.Send(t.Context(), func(event agent.Event) bool {
+		seen = append(seen, event.Text)
+
+		return true
+	}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(seen) != 1 || seen[0] != "done" {
+		t.Errorf("expected a frame we read nothing from to pass quietly, got %v", seen)
+	}
+}
+
+func TestHowCallsAreMadeIsStatedWhenThereAreToolsToCall(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(t, &bodies, `{"choices":[{"delta":{"content":"hi"}}]}`, "[DONE]")
+
+	client := newClient(t, server.URL)
+	client.Configure("", []tool.Definition{{Name: "weather", Description: "report the weather"}})
+	client.AddUserMessage("hello")
+
+	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, want := range []string{`"parallel_tool_calls":true`, `"tool_choice":"auto"`} {
+		if !strings.Contains(bodies[0], want) {
+			t.Errorf("expected %s to be sent rather than left to the endpoint, got %s", want, bodies[0])
+		}
+	}
+}
+
+func TestHowCallsAreMadeIsLeftUnsaidWhenThereAreNoTools(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(t, &bodies, `{"choices":[{"delta":{"content":"hi"}}]}`, "[DONE]")
+
+	client := newClient(t, server.URL)
+	client.AddUserMessage("hello")
+
+	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, unwanted := range []string{"parallel_tool_calls", "tool_choice", "tools"} {
+		if strings.Contains(bodies[0], unwanted) {
+			t.Errorf("expected %s to be left out with nothing to call, got %s", unwanted, bodies[0])
+		}
+	}
+}
+
+func TestARefusalIsReadAsWhatTheModelSaid(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(t, &bodies,
+		`{"choices":[{"delta":{"refusal":"I cannot help with that."}}]}`,
+		`{"choices":[{"delta":{},"finish_reason":"stop"}]}`,
+		"[DONE]")
+
+	client := newClient(t, server.URL)
+	client.AddUserMessage("do something forbidden")
+
+	var seen []string
+	if _, err := client.Send(t.Context(), func(event agent.Event) bool {
+		seen = append(seen, event.Text)
+
+		return true
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(seen) != 1 || seen[0] != "I cannot help with that." {
+		t.Errorf("expected the refusal to be reported as what the model said, got %v", seen)
+	}
+
+	stored := client.Dump()
+	if len(stored) != 2 || !strings.Contains(string(stored[1]), "I cannot help with that.") {
+		t.Errorf("expected the refusal to be kept in the conversation, got %v", stored)
+	}
+}
+
+func TestAnAnswerAFilterTookAwayIsReportedAsCutShort(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(t, &bodies,
+		`{"choices":[{"delta":{"content":"Here is how "}}]}`,
+		`{"choices":[{"delta":{},"finish_reason":"content_filter"}]}`,
+		"[DONE]")
+
+	client := newClient(t, server.URL)
+	client.AddUserMessage("hello")
+
+	_, err := client.Send(t.Context(), func(agent.Event) bool { return true })
+	if !errors.Is(err, chat.ErrIncomplete) {
+		t.Errorf("expected a filtered answer to be reported as cut short, got %v", err)
+	}
+}
+
+func TestATurnThatProducedNothingIsNotStored(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(t, &bodies, `{"choices":[{"delta":{}}]}`, "[DONE]")
+
+	client := newClient(t, server.URL)
+	client.AddUserMessage("hello")
+
+	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+		t.Fatal(err)
+	}
+
+	stored := client.Dump()
+	if len(stored) != 1 {
+		t.Fatalf("expected only the prompt to be stored, got %v", stored)
+	}
+
+	if strings.Contains(string(stored[0]), "assistant") {
+		t.Errorf("expected no assistant message, got %s", stored[0])
+	}
+}
 
 func TestConversationWithStreamingToolCall(t *testing.T) {
 	type sentMessage struct {
@@ -50,7 +328,7 @@ func TestConversationWithStreamingToolCall(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := chat.New(server.URL, "deepseek-v4-pro", "high", "secret")
+	client := newClient(t, server.URL)
 	client.Configure("be useful", []tool.Definition{{Name: "read", Description: "read a file"}})
 	client.AddUserMessage("hello")
 
@@ -98,5 +376,39 @@ func TestConversationWithStreamingToolCall(t *testing.T) {
 	}
 	if messages[2].Content == nil || *messages[2].Content != "" {
 		t.Errorf("got assistant content %v, want an explicit empty string", messages[2].Content)
+	}
+}
+
+// A call is answered by the round that follows it, and a turn that failed never reaches one.
+// Keeping what the model said is therefore not the same as keeping what it asked for: a call left
+// in the conversation with nothing against it has the turn after it refused.
+func TestATurnThatFailedKeepsWhatItSaidAndNotWhatItAskedFor(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(t, &bodies,
+		`{"choices":[{"delta":{"reasoning_content":"Checking the sky."}}]}`,
+		`{"choices":[{"delta":{"content":"Looking it up."}}]}`,
+		`{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","type":"function",`+
+			`"function":{"name":"weather","arguments":"{}"}}]}}]}`)
+
+	client := newClient(t, server.URL)
+	client.AddUserMessage("what is the weather?")
+
+	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); !errors.Is(err, chat.ErrTruncated) {
+		t.Fatalf("expected a truncated stream to be refused, got %v", err)
+	}
+
+	var held strings.Builder
+	for _, item := range client.Dump() {
+		held.Write(item)
+	}
+
+	for _, want := range []string{"Checking the sky.", "Looking it up."} {
+		if !strings.Contains(held.String(), want) {
+			t.Errorf("expected the conversation to hold %q, got %s", want, held.String())
+		}
+	}
+
+	if strings.Contains(held.String(), "call-1") {
+		t.Errorf("expected an unanswerable call to be left out, got %s", held.String())
 	}
 }
