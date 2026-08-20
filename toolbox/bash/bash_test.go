@@ -152,7 +152,7 @@ func TestAFailureCarriesItsExitStatus(t *testing.T) {
 		t.Fatalf("expected the failure to be reported, got %v", err)
 	}
 
-	if !strings.HasPrefix(output, "exited 3:\n") {
+	if !strings.HasPrefix(output, "exit(3):\n") {
 		t.Errorf("got %q, want it to lead with the status and a colon", output)
 	}
 }

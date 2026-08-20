@@ -223,7 +223,7 @@ func report(result sandbox.Result, policy sandbox.Policy) string {
 		return output
 	}
 
-	status := fmt.Sprintf("exited %d", result.Code)
+	status := fmt.Sprintf("exit(%d)", result.Code)
 	if output != "" {
 		status += ":"
 	}
