@@ -140,8 +140,8 @@ func TestTheWorkingDirectoryIsNotTakenFromThePrompt(t *testing.T) {
 func TestTheDefaultCapabilitiesAreEverythingButTheHistory(t *testing.T) {
 	parsedOptions := parseOptions(t)
 
-	if got := parsedOptions.caps.Flags(); got != "rwx" {
-		t.Errorf("expected rwx, got %q", got)
+	if got := parsedOptions.caps.Flags(); got != "rxw" {
+		t.Errorf("expected rxw, got %q", got)
 	}
 
 	if parsedOptions.initialMessage != "" {
@@ -759,7 +759,7 @@ func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *conve
 func TestStartingAgainNamesTheSessionAndKeepsTheMode(t *testing.T) {
 	self := conversationFixture(t, true, capRead|capWrite|capShell)
 
-	want := []string{"-r", self.log.ID(), "--caps", "rwx"}
+	want := []string{"-r", self.log.ID(), "--caps", "rxw"}
 
 	if got := self.restartArguments(); !slices.Equal(got, want) {
 		t.Errorf("expected %v, got %v", want, got)
@@ -782,7 +782,7 @@ func TestStartingAgainAsksForWhateverWasSwappedMidConversation(t *testing.T) {
 func TestStartingAgainWithNothingStoredKeepsTheWorkspace(t *testing.T) {
 	self := conversationFixture(t, false, capRead|capWrite|capShell)
 
-	want := []string{"--workspace", "/tmp/somewhere", "--caps", "rwx"}
+	want := []string{"--workspace", "/tmp/somewhere", "--caps", "rxw"}
 
 	if got := self.restartArguments(); !slices.Equal(got, want) {
 		t.Errorf("expected %v, got %v", want, got)

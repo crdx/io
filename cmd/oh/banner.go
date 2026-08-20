@@ -121,8 +121,8 @@ func modes(tools []tool.Tool, shell bool, history bool, background bool, pending
 	reads, writes := separateTools(tools)
 
 	return offeredCapability(capRead.flag(), reads > 0, theme.Read, pending) +
-		offeredCapability(capWrite.flag(), writes > 0, theme.Write, pending) +
 		offeredCapability(capShell.flag(), shell, theme.Exec, pending) +
+		offeredCapability(capWrite.flag(), writes > 0, theme.Write, pending) +
 		offeredCapability(capGit.flag(), history, theme.History, pending) +
 		offeredCapability(capBackground.flag(), background, theme.Background, pending)
 }

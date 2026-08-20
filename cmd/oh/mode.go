@@ -12,21 +12,21 @@ type caps uint8
 
 const (
 	capRead       caps = 1 << iota // reading, which is granted whatever is asked for
-	capWrite                       // changing files in the workspace
 	capShell                       // running a shell command
+	capWrite                       // changing files in the workspace
 	capGit                         // changing .git
 	capBackground                  // letting a shell command leave processes behind
 )
 
-const switchableCaps = capWrite | capShell | capGit | capBackground // everything but reading
+const switchableCaps = capShell | capWrite | capGit | capBackground // everything but reading
 
 var capsMap = []struct {
 	grantedCaps caps
 	flag        string
 }{
 	{capRead, "r"},
-	{capWrite, "w"},
 	{capShell, "x"},
+	{capWrite, "w"},
 	{capGit, "g"},
 	{capBackground, "b"},
 }

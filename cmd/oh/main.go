@@ -43,7 +43,7 @@ Options:
     -d, --workspace <dir>                  Set working directory and project scope
     -r, --resume <session>                 Resume the saved session
     -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
-    -c, --caps <flags>                     Capabilities: rwxgb (read, write, exec, git, bg) [default: rwx]
+    -c, --caps <flags>                     Capabilities: rxwgb (read, exec, write, git, bg) [default: rxw]
     -V, --version                          Show the version
     -h, --help                             Show this help
 

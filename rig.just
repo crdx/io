@@ -37,7 +37,7 @@ harness:
     go build -o {{ SIM }} ./cmd/simulate/
 
 # run the harness for real against a scenario, in a workspace of its own
-live scenario=SCENARIO workspace=WORKSPACE opening="" caps="rwx": harness down
+live scenario=SCENARIO workspace=WORKSPACE opening="" caps="rxw": harness down
     mkdir -p {{ workspace }}
     tmux new-session -d -s {{ SESSION }} -x {{ WIDTH }} -y {{ HEIGHT }} \
         {{ SIM }} --scenario {{ scenario }} --address {{ ADDRESS }}

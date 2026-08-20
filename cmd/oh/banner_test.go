@@ -73,7 +73,7 @@ func TestAccessComesFromTheToolsRatherThanTheirNames(t *testing.T) {
 		func(struct{}) (string, string) { return "", "" },
 	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
 
-	want := theme.Read("r") + theme.Withheld("w") + theme.Withheld("x") + theme.Withheld("g") + theme.Withheld("b")
+	want := theme.Read("r") + theme.Withheld("x") + theme.Withheld("w") + theme.Withheld("g") + theme.Withheld("b")
 	if got := modes([]tool.Tool{looker}, false, false, false, false); got != want {
 		t.Errorf("expected reading alone to be on offer, got %q", got)
 	}
@@ -89,7 +89,7 @@ func TestTheShellIsShownSeparatelyFromWriting(t *testing.T) {
 		func(struct{}) (string, string) { return "", "" },
 	).Plain(func(context.Context, struct{}) (string, error) { return "", nil })
 
-	want := theme.Withheld("r") + theme.Write("w") + theme.Exec("x") + theme.Withheld("g") + theme.Withheld("b")
+	want := theme.Withheld("r") + theme.Exec("x") + theme.Write("w") + theme.Withheld("g") + theme.Withheld("b")
 	if got := modes([]tool.Tool{writer}, true, false, false, false); got != want {
 		t.Errorf("expected writing and running to be on offer, got %q", got)
 	}
@@ -106,7 +106,7 @@ func TestAReadOnlyShellDoesNotOfferWriting(t *testing.T) {
 		t.Errorf("expected a shell with no writable path to change nothing")
 	}
 
-	want := theme.Read("r") + theme.Withheld("w") + theme.Exec("x") + theme.Withheld("g") + theme.Withheld("b")
+	want := theme.Read("r") + theme.Exec("x") + theme.Withheld("w") + theme.Withheld("g") + theme.Withheld("b")
 	if got := modes([]tool.Tool{shell}, true, false, false, false); got != want {
 		t.Errorf("expected reading and running to be on offer, got %q", got)
 	}
@@ -122,7 +122,7 @@ func TestTheHistoryLetterComesFromTheMode(t *testing.T) {
 		func(struct{}) (string, string) { return "", "" },
 	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
 
-	want := theme.Read("r") + theme.Withheld("w") + theme.Withheld("x") + theme.History("g") + theme.Withheld("b")
+	want := theme.Read("r") + theme.Withheld("x") + theme.Withheld("w") + theme.History("g") + theme.Withheld("b")
 	if got := modes([]tool.Tool{looker}, false, true, false, false); got != want {
 		t.Errorf("expected a commit-only mode to light the history letter alone, got %q", got)
 	}
@@ -138,7 +138,7 @@ func TestTheBackgroundLetterComesFromTheMode(t *testing.T) {
 		func(struct{}) (string, string) { return "", "" },
 	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
 
-	want := theme.Read("r") + theme.Withheld("w") + theme.Withheld("x") +
+	want := theme.Read("r") + theme.Withheld("x") + theme.Withheld("w") +
 		theme.Withheld("g") + theme.Background("b")
 	if got := modes([]tool.Tool{looker}, false, false, true, false); got != want {
 		t.Errorf("expected background mode to light its letter, got %q", got)
