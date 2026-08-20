@@ -227,24 +227,24 @@ type row struct {
 type Block struct {
 	print   func(string)
 	overlay func(string, int) // redraws existing rows
-	live    bool              // whether rows may be redrawn
+	isLive  bool              // whether rows may be redrawn
 	columns int
 
-	mutex    sync.Mutex // guards the changing rows
-	rows     []row
-	frame    int  // the spinner frame
-	revealed bool // whether elapsed times are shown
+	mutex      sync.Mutex // guards the changing rows
+	rows       []row
+	frame      int  // the spinner frame
+	isRevealed bool // whether elapsed times are shown
 
 	stop     chan struct{}  // asks the ticker to stop
 	stopWait sync.WaitGroup // waits for the ticker to end
 }
 
 // New opens an empty block. Non-live blocks ignore redraws.
-func New(print func(string), overlay func(string, int), live bool, columns int) *Block {
+func New(print func(string), overlay func(string, int), isLive bool, columns int) *Block {
 	self := &Block{
 		print:   print,
 		overlay: overlay,
-		live:    live,
+		isLive:  isLive,
 		columns: columns,
 		stop:    make(chan struct{}),
 	}
@@ -330,7 +330,7 @@ func (self *Block) Close(state State) {
 		}
 	}
 
-	self.revealed = false
+	self.isRevealed = false
 
 	self.redraw()
 }
@@ -345,7 +345,7 @@ func (self *Block) run() {
 	}
 
 	self.mutex.Lock()
-	self.revealed = true
+	self.isRevealed = true
 	self.redraw()
 	self.mutex.Unlock()
 
@@ -366,7 +366,7 @@ func (self *Block) run() {
 }
 
 func (self *Block) redraw() {
-	if !self.live || len(self.rows) == 0 {
+	if !self.isLive || len(self.rows) == 0 {
 		return
 	}
 
@@ -428,7 +428,7 @@ func outcomeSpacing(outcome string) int {
 
 func (self *Block) outcome(item row) string {
 	if item.state == Running {
-		if !self.revealed {
+		if !self.isRevealed {
 			return ""
 		}
 

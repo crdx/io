@@ -23,7 +23,7 @@ func Rune(value rune) int {
 	switch {
 	case unicode.In(value, unicode.Mn, unicode.Me, unicode.Cf, unicode.Cc):
 		return 0
-	case wide(value):
+	case isWide(value):
 		return 2
 	}
 
@@ -46,7 +46,7 @@ func Cut(text string, cells int) (string, int) {
 	return text, takenCells
 }
 
-func wide(value rune) bool {
+func isWide(value rune) bool {
 	if value < spans[0].first {
 		return false
 	}

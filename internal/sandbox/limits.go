@@ -12,9 +12,9 @@ import (
 
 func applyLimits(policy Policy) error {
 	limits := []struct {
-		resource int
-		value    uint64
-		set      bool
+		resource    int
+		value       uint64
+		shouldApply bool
 	}{
 		{unix.RLIMIT_CORE, 0, true},
 		{unix.RLIMIT_CPU, uint64(policy.CPUTime.Seconds()), policy.CPUTime > 0},
@@ -23,7 +23,7 @@ func applyLimits(policy Policy) error {
 	}
 
 	for _, limit := range limits {
-		if !limit.set {
+		if !limit.shouldApply {
 			continue
 		}
 

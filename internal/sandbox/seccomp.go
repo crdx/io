@@ -22,17 +22,17 @@ const (
 
 const seccompSetModeFilter = 1
 
-func blockedFamilies(unixSockets bool) []uint32 {
+func blockedFamilies(allowUnixSockets bool) []uint32 {
 	families := []uint32{unix.AF_PACKET, unix.AF_NETLINK}
-	if !unixSockets {
+	if !allowUnixSockets {
 		families = append(families, unix.AF_UNIX)
 	}
 
 	return families
 }
 
-func applySeccomp(unixSockets bool) error {
-	filter, err := buildFilter(unixSockets)
+func applySeccomp(allowUnixSockets bool) error {
+	filter, err := buildFilter(allowUnixSockets)
 	if err != nil {
 		return err
 	}
@@ -60,13 +60,13 @@ func applySeccomp(unixSockets bool) error {
 	return nil
 }
 
-func buildFilter(unixSockets bool) ([]unix.SockFilter, error) {
+func buildFilter(allowUnixSockets bool) ([]unix.SockFilter, error) {
 	target, err := architecture()
 	if err != nil {
 		return nil, err
 	}
 
-	blockedSocketFamilies := blockedFamilies(unixSockets)
+	blockedSocketFamilies := blockedFamilies(allowUnixSockets)
 	filter := []unix.SockFilter{
 		load(offsetArch),
 		jumpIfEqual(target.audit, 1, 0),

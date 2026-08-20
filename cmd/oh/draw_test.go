@@ -22,23 +22,23 @@ import (
 )
 
 func TestWhatWasAskedIsRenderedIntoTheConversation(t *testing.T) {
-	for _, live := range []bool{true, false} {
+	for _, isLive := range []bool{true, false} {
 		var screenOutput bytes.Buffer
 
-		painter := &painter{screen: output.New(&screenOutput), live: live}
+		painter := &painter{screen: output.New(&screenOutput), isLive: isLive}
 		painter.draw(agent.Event{Kind: agent.Prompt, Text: "**weather**\n\n- today"})
 
 		plain := style.Plain(screenOutput.String())
 		if !strings.Contains(plain, " weather\n \n • today") {
-			t.Errorf("live=%v: expected the question's markdown to be rendered, got %q", live, plain)
+			t.Errorf("isLive=%v: expected the question's markdown to be rendered, got %q", isLive, plain)
 		}
 
 		if strings.Contains(plain, "> ") || strings.Contains(plain, "**") {
-			t.Errorf("live=%v: expected no literal prompt or markdown markers, got %q", live, plain)
+			t.Errorf("isLive=%v: expected no literal prompt or markdown markers, got %q", isLive, plain)
 		}
 
 		if !strings.HasSuffix(plain, "\n") {
-			t.Errorf("live=%v: expected the submitted message to finish its line immediately, got %q", live, plain)
+			t.Errorf("isLive=%v: expected the submitted message to finish its line immediately, got %q", isLive, plain)
 		}
 	}
 }
@@ -448,7 +448,7 @@ func TestAnInterruptedTurnDoesNotSendADesktopNotification(t *testing.T) {
 	self.notifyTurnFinished = func() { notifications++ }
 
 	self.start("are you there")
-	self.turn.cancelled = true
+	self.turn.isCancelled = true
 	self.turn.stop()
 
 	for report := range self.turn.events {
@@ -468,7 +468,7 @@ func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
 	self := testConversation(t, &screenOutput)
 
 	self.start("are you there")
-	self.turn.cancelled = true
+	self.turn.isCancelled = true
 	self.turn.stop()
 
 	for report := range self.turn.events {
@@ -534,7 +534,7 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 		screen:    output.New(&screenOutput),
 	}
 
-	testConversation.turn = turn{running: true, painter: testConversation.newPicasso(true)}
+	testConversation.turn = turn{isRunning: true, painter: testConversation.newPicasso(true)}
 
 	testConversation.transcript = []entry{
 		{event: agent.Event{Kind: agent.Prompt, Text: "read it"}},
@@ -569,7 +569,7 @@ func TestAnAnswerStreamedIsTheSameAsTheAnswerReplayed(t *testing.T) {
 
 	var live bytes.Buffer
 
-	livePainter := &painter{screen: output.New(&live), live: true}
+	livePainter := &painter{screen: output.New(&live), isLive: true}
 
 	for _, delta := range deltas(answer, 10) {
 		livePainter.draw(agent.Event{Kind: agent.Text, Text: delta})

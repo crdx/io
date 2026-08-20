@@ -4,7 +4,7 @@ import "testing"
 
 func TestUnixSocketsAreIsolatedWhereLandlockCanEnforceIt(t *testing.T) {
 	old := configuredRuleset(unixSocketsABI - 1)
-	if old.handledAccessFS&accessResolveUnix != 0 || old.scoped&scopeAbstractUnix != 0 {
+	if old.handledAccessFS&accessResolveUnix != 0 || old.scopedRestrictions&scopeAbstractUnix != 0 {
 		t.Error("an older ABI was configured with unsupported Unix socket isolation")
 	}
 
@@ -12,7 +12,7 @@ func TestUnixSocketsAreIsolatedWhereLandlockCanEnforceIt(t *testing.T) {
 	if current.handledAccessFS&accessResolveUnix == 0 {
 		t.Error("pathname Unix sockets were not isolated")
 	}
-	if current.scoped&scopeAbstractUnix == 0 {
+	if current.scopedRestrictions&scopeAbstractUnix == 0 {
 		t.Error("abstract Unix sockets were not isolated")
 	}
 

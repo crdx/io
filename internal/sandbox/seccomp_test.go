@@ -13,15 +13,15 @@ func TestTheSocketFilterAllowsOnlyNamespacedNetworking(t *testing.T) {
 	}
 
 	for _, test := range []struct {
-		name        string
-		unixSockets bool
-		unixAction  uint32
+		name             string
+		allowUnixSockets bool
+		unixAction       uint32
 	}{
 		{name: "before Unix socket isolation", unixAction: actionErrno | uint32(unix.EAFNOSUPPORT)},
-		{name: "with Unix socket isolation", unixSockets: true, unixAction: actionAllow},
+		{name: "with Unix socket isolation", allowUnixSockets: true, unixAction: actionAllow},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			filter, err := buildFilter(test.unixSockets)
+			filter, err := buildFilter(test.allowUnixSockets)
 			if err != nil {
 				t.Fatal(err)
 			}

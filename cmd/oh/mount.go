@@ -15,10 +15,10 @@ import (
 )
 
 type configuredMount struct {
-	root   *os.Root
-	target string
-	name   string
-	exact  bool
+	root    *os.Root
+	target  string
+	name    string
+	isExact bool
 }
 
 func keepExistingConfiguredPaths(paths configuredPaths, warnings io.Writer) (configuredPaths, error) {
@@ -86,7 +86,7 @@ func mountConfiguredPaths(files *file.Root, mode *Mode, extraPaths configuredPat
 		if writable[path] {
 			currentRefusal := refuseWrite(mode)
 			newRefusal = func(name string) error {
-				if mount.exact {
+				if mount.isExact {
 					return currentRefusal(mount.target)
 				}
 				return currentRefusal(filepath.Join(mount.target, name))
@@ -94,7 +94,7 @@ func mountConfiguredPaths(files *file.Root, mode *Mode, extraPaths configuredPat
 		}
 
 		mountedRoot := file.New(mount.root, newRefusal)
-		if mount.exact {
+		if mount.isExact {
 			files.MountFile(path, mountedRoot, mount.name)
 		} else {
 			files.Mount(path, mountedRoot)
@@ -122,7 +122,7 @@ func openConfiguredMount(path string) (configuredMount, error) {
 	}
 	root, err := os.OpenRoot(filepath.Dir(target))
 	return configuredMount{
-		root: root, target: target, name: filepath.Base(target), exact: true,
+		root: root, target: target, name: filepath.Base(target), isExact: true,
 	}, err
 }
 

@@ -21,7 +21,7 @@ func (self *Output) DrawReasoning(rows []string) bool {
 	return self.draw(rows, false)
 }
 
-func (self *Output) draw(rows []string, answer bool) bool {
+func (self *Output) draw(rows []string, isAnswer bool) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -34,10 +34,10 @@ func (self *Output) draw(rows []string, answer bool) bool {
 	}
 
 	if len(self.liveRows) == 0 {
-		self.liveAnswer = answer
+		self.liveAnswer = isAnswer
 	}
 
-	if !self.terminal {
+	if !self.isTerminal {
 		self.liveRows = rows
 		self.liveContentRows = len(rows)
 		return true
@@ -62,10 +62,10 @@ func (self *Output) draw(rows []string, answer bool) bool {
 	}
 
 	if len(self.liveRows) == 0 {
-		self.begin(answer)
+		self.begin(isAnswer)
 	}
 
-	self.repaint(first, rows, answer)
+	self.repaint(first, rows, isAnswer)
 	self.liveContentRows = contentRows
 
 	return true
@@ -76,7 +76,7 @@ func (self *Output) seal() {
 		return
 	}
 
-	if !self.terminal {
+	if !self.isTerminal {
 		self.begin(self.liveAnswer)
 		self.write(strings.Join(self.liveRows, "\n"))
 	} else if self.liveContentRows < len(self.liveRows) && self.liveContentRows > self.top {
@@ -90,24 +90,24 @@ func (self *Output) seal() {
 	self.top = 0
 }
 
-func (self *Output) begin(answer bool) {
-	self.separate(answer)
-	self.streaming = answer
+func (self *Output) begin(isAnswer bool) {
+	self.separate(isAnswer)
+	self.isStreaming = isAnswer
 
-	if self.midLine {
+	if self.isMidLine {
 		self.newline()
 	}
 
 	self.openPendingLine()
 }
 
-func (self *Output) repaint(first int, rows []string, links bool) {
+func (self *Output) repaint(first int, rows []string, shouldLinkPaths bool) {
 	var out strings.Builder
 
 	out.WriteString(self.openFrame())
 
-	if !self.wrapping {
-		self.wrapping = true
+	if !self.isWrapping {
+		self.isWrapping = true
 
 		out.WriteString(noAutoWrap)
 	}
@@ -130,7 +130,7 @@ func (self *Output) repaint(first int, rows []string, links bool) {
 		}
 
 		row := rows[at]
-		if links {
+		if shouldLinkPaths {
 			row = self.linkifyScrollback(row)
 		}
 
@@ -148,9 +148,9 @@ func (self *Output) repaint(first int, rows []string, links bool) {
 
 func (self *Output) settle(rows []string) {
 	self.liveRows = rows
-	self.stacked = true
-	self.midLine = true
-	self.pending = false
+	self.isStacked = true
+	self.isMidLine = true
+	self.hasPendingText = false
 	self.trailingNewlines = 0
 	self.column = style.Width(rows[len(rows)-1])
 

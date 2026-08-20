@@ -30,7 +30,7 @@ type Skill struct {
 	Location    string
 
 	directory string
-	global    bool
+	isGlobal  bool
 }
 
 type metadata struct {
@@ -44,7 +44,7 @@ func Counts(skills []Skill) (int, int) {
 	var global int
 
 	for _, foundSkill := range skills {
-		if foundSkill.global {
+		if foundSkill.isGlobal {
 			global++
 		} else {
 			project++
@@ -64,7 +64,7 @@ func ExcludeGlobal(skills []Skill, directories []string) []Skill {
 	filteredSkills := make([]Skill, 0, len(skills))
 	for _, foundSkill := range skills {
 		_, excluded := excludedDirectories[foundSkill.directory]
-		if foundSkill.global && excluded {
+		if foundSkill.isGlobal && excluded {
 			continue
 		}
 		filteredSkills = append(filteredSkills, foundSkill)
@@ -117,7 +117,7 @@ func Discover(project string, globalDirectories []string, warnings io.Writer) ([
 	return discoveredSkills, nil
 }
 
-func discover(scope string, global bool, warnings io.Writer) ([]Skill, error) {
+func discover(scope string, isGlobal bool, warnings io.Writer) ([]Skill, error) {
 	scopeRoot, err := os.OpenRoot(scope)
 	if errors.Is(err, fs.ErrNotExist) {
 		return nil, nil
@@ -187,7 +187,7 @@ func discover(scope string, global bool, warnings io.Writer) ([]Skill, error) {
 			Description: skillMetadata.Description,
 			Location:    absoluteLocation,
 			directory:   filepath.Dir(absoluteLocation),
-			global:      global,
+			isGlobal:    isGlobal,
 		})
 	}
 
@@ -225,7 +225,7 @@ func MountGlobalSkills(root *file.Root, skills []Skill) ([]*os.Root, error) {
 	var openedRoots []*os.Root
 
 	for _, foundSkill := range skills {
-		if !foundSkill.global {
+		if !foundSkill.isGlobal {
 			continue
 		}
 

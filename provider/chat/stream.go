@@ -27,7 +27,7 @@ type reply struct {
 	stopReason string
 }
 
-func (self *reply) empty() bool {
+func (self *reply) isEmpty() bool {
 	return self.content == "" && self.reasoning == "" && len(self.tools) == 0
 }
 
@@ -40,7 +40,7 @@ func (self *reply) message() message {
 	}
 }
 
-func (self *reply) spoke() bool {
+func (self *reply) hasSpoken() bool {
 	return self.content != "" || self.reasoning != ""
 }
 

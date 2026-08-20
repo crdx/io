@@ -57,9 +57,9 @@ const (
 const handledRights = rightsWrite | accessExecute
 
 type rulesetAttr struct {
-	handledAccessFS  uint64
-	handledAccessNet uint64
-	scoped           uint64
+	handledAccessFS    uint64
+	handledAccessNet   uint64
+	scopedRestrictions uint64
 }
 
 type pathBeneathAttr struct {
@@ -87,7 +87,7 @@ func configuredRuleset(version int) rulesetAttr {
 
 	if version >= unixSocketsABI {
 		attr.handledAccessFS |= accessResolveUnix
-		attr.scoped = scopeAbstractUnix
+		attr.scopedRestrictions = scopeAbstractUnix
 	}
 
 	return attr
@@ -118,7 +118,7 @@ func applyLandlock(policy Policy, version int) error {
 	defer func() { _ = unix.Close(ruleset) }()
 
 	for _, grant := range policy.grants() {
-		if grant.optional && !pathutil.Exists(grant.path) {
+		if grant.isOptional && !pathutil.Exists(grant.path) {
 			continue
 		}
 

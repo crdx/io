@@ -129,14 +129,14 @@ func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, e
 
 	answer, err := readReply(stream, yield)
 	if err != nil {
-		if answer.spoke() {
+		if answer.hasSpoken() {
 			self.history = append(self.history, encode(answer.prose()))
 		}
 
 		return agent.Reply{}, err
 	}
 
-	if !answer.empty() {
+	if !answer.isEmpty() {
 		self.history = append(self.history, encode(answer.message()))
 	}
 

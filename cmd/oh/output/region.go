@@ -22,21 +22,21 @@ const (
 
 // Synchronise holds every intermediate update back until draw has finished.
 func (self *Output) Synchronise(draw func()) {
-	if !self.terminal {
+	if !self.isTerminal {
 		draw()
 		return
 	}
 
 	self.mutex.Lock()
-	self.synchronising++
+	self.nestedUpdates++
 	self.mutex.Unlock()
 
 	defer func() {
 		self.mutex.Lock()
 		defer self.mutex.Unlock()
 
-		self.synchronising--
-		if self.synchronising == 0 {
+		self.nestedUpdates--
+		if self.nestedUpdates == 0 {
 			text := self.synchronisedBytes.String()
 			self.synchronisedBytes.Reset()
 			self.writeRaw(beginFrame + hideCursor + text + showCursor + endFrame)
@@ -47,7 +47,7 @@ func (self *Output) Synchronise(draw func()) {
 }
 
 func (self *Output) openFrame() string {
-	if self.synchronising > 0 {
+	if self.nestedUpdates > 0 {
 		return ""
 	}
 
@@ -55,7 +55,7 @@ func (self *Output) openFrame() string {
 }
 
 func (self *Output) closeFrame() string {
-	if self.synchronising > 0 {
+	if self.nestedUpdates > 0 {
 		return ""
 	}
 
@@ -68,13 +68,13 @@ type footer struct {
 	cursorColumn int
 	column       int  // the conversation column above
 	separators   int  // rows between the conversation cursor and the input
-	stacked      bool // whether the input sits below content
+	isStacked    bool // whether the input sits below content
 }
 
 // Footer draws the input under the conversation, and leaves the cursor sitting in it, which is
 // where someone typing expects to find it.
 func (self *Output) Footer(rows []string, cursorRow int, cursorColumn int) {
-	if !self.terminal {
+	if !self.isTerminal {
 		return
 	}
 
@@ -92,35 +92,35 @@ func (self *Output) Footer(rows []string, cursorRow int, cursorColumn int) {
 }
 
 // Progress reports whether a turn is running through the terminal progress protocol.
-func (self *Output) Progress(running bool) {
-	if !self.terminal {
+func (self *Output) Progress(isRunning bool) {
+	if !self.isTerminal {
 		return
 	}
 
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	self.setProgress(running)
+	self.setProgress(isRunning)
 }
 
-func (self *Output) setProgress(running bool) {
-	if self.progress == running {
+func (self *Output) setProgress(isRunning bool) {
+	if self.isProgressShown == isRunning {
 		return
 	}
 
 	sequence := progressClear
-	if running {
+	if isRunning {
 		sequence = progressIndeterminate
 	}
 
 	self.raw(sequence)
-	self.progress = running
+	self.isProgressShown = isRunning
 }
 
 // Release takes the input away. A kept conversation leaves the cursor on the line below it; an
 // unused one is erased so whatever ran the harness can reuse its line.
-func (self *Output) Release(keep bool) {
-	if !self.terminal {
+func (self *Output) Release(shouldKeep bool) {
+	if !self.isTerminal {
 		return
 	}
 
@@ -130,8 +130,8 @@ func (self *Output) Release(keep bool) {
 	self.setProgress(false)
 
 	landing := ""
-	if self.shownFooter.stacked {
-		if keep {
+	if self.shownFooter.isStacked {
+		if shouldKeep {
 			landing = "\r\n"
 		} else {
 			landing = "\r" + moveUp(self.openedRows) + clearBelow
@@ -142,14 +142,14 @@ func (self *Output) Release(keep bool) {
 
 	self.input = footer{}
 	self.openedRows = 0
-	self.wrapping = false
-	self.midLine = false
-	self.pending = false
+	self.isWrapping = false
+	self.isMidLine = false
+	self.hasPendingText = false
 }
 
 // Reset clears the terminal and forgets all drawing state for a full replay.
 func (self *Output) Reset() {
-	if !self.terminal {
+	if !self.isTerminal {
 		return
 	}
 
@@ -160,14 +160,14 @@ func (self *Output) Reset() {
 	self.input = footer{}
 	self.column = 0
 	self.openedRows = 0
-	self.midLine = false
-	self.pending = false
-	self.blank = false
+	self.isMidLine = false
+	self.hasPendingText = false
+	self.isBlankOwed = false
 	self.trailingNewlines = 0
 	self.hoardedNewlines = ""
-	self.streaming = false
-	self.wrapping = false
-	self.stacked = false
+	self.isStreaming = false
+	self.isWrapping = false
+	self.isStacked = false
 	self.liveRows = nil
 	self.liveContentRows = 0
 	self.liveAnswer = false
@@ -183,8 +183,8 @@ func (self *Output) redraw(text string) {
 
 	out.WriteString(self.openFrame())
 
-	if !self.wrapping {
-		self.wrapping = true
+	if !self.isWrapping {
+		self.isWrapping = true
 
 		out.WriteString(noAutoWrap)
 	}
@@ -205,7 +205,7 @@ func (self *Output) eraseInput() string {
 		return ""
 	}
 
-	if !shownFooter.stacked {
+	if !shownFooter.isStacked {
 		return "\r" + moveUp(shownFooter.cursorRow) + clearBelow
 	}
 
@@ -219,8 +219,8 @@ func (self *Output) drawInput() string {
 
 	self.shownFooter = self.input
 	self.shownFooter.column = self.column
-	self.shownFooter.stacked = self.stacked
-	if self.shownFooter.stacked {
+	self.shownFooter.isStacked = self.isStacked
+	if self.shownFooter.isStacked {
 		self.shownFooter.separators = max(0, apart-self.trailingNewlines)
 	}
 

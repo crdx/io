@@ -13,7 +13,7 @@ import (
 func region() (*Output, *strings.Builder) {
 	screenOutput := &strings.Builder{}
 
-	return &Output{writer: screenOutput, terminal: true, columns: 40, lines: 24}, screenOutput
+	return &Output{writer: screenOutput, isTerminal: true, columns: 40, lines: 24}, screenOutput
 }
 
 func TestOnlyTheAnswerIsLinked(t *testing.T) {

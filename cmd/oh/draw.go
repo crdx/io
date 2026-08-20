@@ -20,12 +20,12 @@ const readTool = "read"
 
 type painter struct {
 	screen    *output.Output
-	live      bool            // whether drawing is happening as events arrive
+	isLive    bool            // whether drawing is happening as events arrive
 	block     *status.Block   // the open block of calls
 	rows      map[string]int  // which row of the block a call is being shown on
 	answer    strings.Builder // the answer so far, which is rendered again on every delta
 	reasoning strings.Builder // the reasoning so far, which is rendered again on every delta
-	stale     bool            // whether streamed prose outgrew what the screen can repair
+	isStale   bool            // whether streamed prose outgrew what the screen can repair
 
 	tools        func(string) (tool.Tool, bool) // the tools a call may be rendered by
 	shell        string                         // what the shell tool was named, so a call to it is drawn as a prompt
@@ -107,14 +107,14 @@ func (self *painter) draw(event agent.Event) {
 		self.reasoning.WriteString(event.Text)
 		rows := renderReasoning(self.reasoning.String(), self.screen.Columns())
 		if !self.screen.DrawReasoning(rows) {
-			self.stale = true
+			self.isStale = true
 		}
 
 	case agent.Text:
 		self.answer.WriteString(event.Text)
 
 		if !self.screen.DrawAnswer(markdown.Render(self.answer.String(), self.screen.Columns())) {
-			self.stale = true
+			self.isStale = true
 		}
 
 	case agent.Call:

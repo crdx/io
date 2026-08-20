@@ -39,9 +39,9 @@ func RefuseGitDir(name string) error {
 }
 
 type mountedRoot struct {
-	root  *Root
-	name  string
-	exact bool // for single files
+	root    *Root
+	name    string
+	isExact bool // for single files
 }
 
 // Root is a directory the tools are confined to, and a rule about what may be changed within it.
@@ -63,7 +63,7 @@ func (self *Root) Mount(path string, root *Root) {
 
 // MountFile adds one file from a tree at an absolute path.
 func (self *Root) MountFile(path string, root *Root, name string) {
-	self.mounts[filepath.Clean(path)] = mountedRoot{root: root, name: name, exact: true}
+	self.mounts[filepath.Clean(path)] = mountedRoot{root: root, name: name, isExact: true}
 }
 
 // Resolve finds the tree and local name for a path.
@@ -88,7 +88,7 @@ func (self *Root) Resolve(path string) (*Root, string, error) {
 	resolvedAt := ""
 	for at, mounted := range self.mounts {
 		name, below := pathutil.RelativeTo(at, path)
-		if !below || len(at) <= len(resolvedAt) || (mounted.exact && name != ".") {
+		if !below || len(at) <= len(resolvedAt) || (mounted.isExact && name != ".") {
 			continue
 		}
 

@@ -141,7 +141,7 @@ func border(widths []int, left string, between string, right string) string {
 	return style.Border(left + strings.Join(parts, between) + right)
 }
 
-func tableRows(cells []string, aligns []east.Alignment, widths []int, heading bool) []string {
+func tableRows(cells []string, aligns []east.Alignment, widths []int, isHeading bool) []string {
 	wrappedCells := make([][]string, len(widths))
 	height := 1
 
@@ -151,7 +151,7 @@ func tableRows(cells []string, aligns []east.Alignment, widths []int, heading bo
 			styledCell = cells[at]
 		}
 
-		if heading {
+		if isHeading {
 			styledCell = over(col.Bold, styledCell)
 		}
 

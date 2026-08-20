@@ -59,7 +59,7 @@ func Init() {
 	switch {
 	case os.Getenv(envWorker) != "":
 		err = execWorker(encodedPolicy, command)
-	case policyBackground(encodedPolicy):
+	case policyAllowsBackground(encodedPolicy):
 		err = superviseSandboxed(encodedPolicy)
 	default:
 		err = execSandboxed(encodedPolicy, command)

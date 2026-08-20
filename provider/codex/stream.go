@@ -20,9 +20,9 @@ var ErrIncomplete = errors.New("the response was cut short")
 var ErrTruncated = sse.ErrTruncated
 
 type reply struct {
-	items      []json.RawMessage
-	usage      agent.Usage
-	summarised bool // whether a reasoning summary has been reported this turn
+	items        []json.RawMessage
+	usage        agent.Usage
+	isSummarised bool // whether a reasoning summary has been reported this turn
 }
 
 func (self *reply) calls() []agent.ToolCall {
@@ -163,7 +163,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 
 	case "response.reasoning_summary_part.done":
 		if message.Part != nil && message.Part.Text != "" {
-			self.summarised = true
+			self.isSummarised = true
 
 			if !yield(agent.Event{Kind: agent.Reasoning, Text: message.Part.Text}) {
 				return true, nil
@@ -171,7 +171,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		}
 
 	case "response.reasoning_text.delta":
-		if message.Delta != "" && !self.summarised {
+		if message.Delta != "" && !self.isSummarised {
 			if !yield(agent.Event{Kind: agent.Reasoning, Text: message.Delta}) {
 				return true, nil
 			}

@@ -35,15 +35,15 @@ type Writer struct {
 	inner     *session.Writer
 	directory string
 	meta      Meta
-	started   time.Time
+	startedAt time.Time
 
-	canonicalMutex     sync.Mutex
-	mutex              sync.Mutex
-	transcript         *transcript.Recorder
-	wire               *wire.Recorder
-	transcriptDisabled bool
-	wireDisabled       bool
-	warnings           []error
+	canonicalMutex    sync.Mutex
+	mutex             sync.Mutex
+	transcript        *transcript.Recorder
+	wire              *wire.Recorder
+	transcriptEnabled bool
+	wireEnabled       bool
+	warnings          []error
 }
 
 // Create starts an oh session.
@@ -56,7 +56,10 @@ func Create(directory string, meta Meta) (*Writer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Writer{inner: inner, directory: directory, meta: meta, started: time.Now()}, nil
+	return &Writer{
+		inner: inner, directory: directory, meta: meta, startedAt: time.Now(),
+		transcriptEnabled: true, wireEnabled: true,
+	}, nil
 }
 
 // Open continues an oh session, and reports session.ErrInUse when another writer holds it.
@@ -70,7 +73,8 @@ func Open(directory, id string) (*Writer, error) {
 		return nil, err
 	}
 	writer := &Writer{
-		inner: inner, directory: directory, meta: storedSession.Meta, started: storedSession.Started,
+		inner: inner, directory: directory, meta: storedSession.Meta, startedAt: storedSession.Started,
+		transcriptEnabled: true, wireEnabled: true,
 	}
 	writer.ensureAuxiliaryRecorders()
 	return writer, nil
@@ -92,7 +96,7 @@ func (self *Writer) Event(event agent.Event) error {
 		if err := self.transcript.Event(time.Now(), event); err != nil {
 			_ = self.transcript.Close()
 			self.transcript = nil
-			self.transcriptDisabled = true
+			self.transcriptEnabled = false
 			self.warnings = append(self.warnings, fmt.Errorf("chat.md recording disabled: %w", err))
 		}
 	}
@@ -181,25 +185,25 @@ func (self *Writer) ensureAuxiliaryRecorders() {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 	bundleDirectory := filepath.Join(self.directory, self.ID())
-	if self.transcript == nil && !self.transcriptDisabled {
+	if self.transcript == nil && self.transcriptEnabled {
 		recorder, err := transcript.Open(filepath.Join(bundleDirectory, transcriptName), transcript.Meta{
-			ID: self.ID(), Started: self.started, Model: self.meta.Model, Effort: self.meta.Effort,
+			ID: self.ID(), Started: self.startedAt, Model: self.meta.Model, Effort: self.meta.Effort,
 			Provider: self.meta.Provider, Workspace: self.meta.WorkspaceDir,
 		})
 		if err != nil {
-			self.transcriptDisabled = true
+			self.transcriptEnabled = false
 			self.warnings = append(self.warnings, fmt.Errorf("chat.md recording disabled: %w", err))
 		} else {
 			self.transcript = recorder
 		}
 	}
-	if self.wire == nil && !self.wireDisabled {
+	if self.wire == nil && self.wireEnabled {
 		recorder, err := wire.Open(filepath.Join(bundleDirectory, wireName), wire.Meta{
-			ID: self.ID(), Started: self.started, Model: self.meta.Model, Effort: self.meta.Effort,
+			ID: self.ID(), Started: self.startedAt, Model: self.meta.Model, Effort: self.meta.Effort,
 			Provider: self.meta.Provider, Workspace: self.meta.WorkspaceDir,
 		}, self.queueWarning)
 		if err != nil {
-			self.wireDisabled = true
+			self.wireEnabled = false
 			self.warnings = append(self.warnings, fmt.Errorf("wire.http recording disabled: %w", err))
 		} else {
 			self.wire = recorder

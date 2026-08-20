@@ -32,7 +32,7 @@ type block struct {
 	text      strings.Builder
 	signature strings.Builder
 	arguments strings.Builder
-	done      bool
+	isDone    bool
 }
 
 func (self *block) argumentsOrEmpty() string {
@@ -77,7 +77,7 @@ func (self *reply) prose() json.RawMessage {
 	return self.assemble(false)
 }
 
-func (self *reply) assemble(withCalls bool) json.RawMessage {
+func (self *reply) assemble(shouldIncludeCalls bool) json.RawMessage {
 	blocks := make([]json.RawMessage, 0, len(self.blocks))
 
 	for _, held := range self.blocks {
@@ -103,7 +103,7 @@ func (self *reply) assemble(withCalls bool) json.RawMessage {
 			}
 
 		case "tool_use":
-			if held.done && withCalls {
+			if held.isDone && shouldIncludeCalls {
 				blocks = append(blocks, encodeItem(toolUse{
 					Type:  "tool_use",
 					ID:    held.id,
@@ -125,7 +125,7 @@ func (self *reply) calls(knownTools []string) []agent.ToolCall {
 	var calls []agent.ToolCall
 
 	for _, held := range self.blocks {
-		if held.kind == "tool_use" && held.done {
+		if held.kind == "tool_use" && held.isDone {
 			calls = append(calls, agent.ToolCall{
 				ID:        held.id,
 				Name:      fromClaudeCodeName(held.name, knownTools),
@@ -274,7 +274,7 @@ func (self *reply) open(message event) {
 	}
 
 	if opened.kind == "redacted_thinking" {
-		opened.done = true
+		opened.isDone = true
 	}
 
 	self.blocks = append(self.blocks, opened)
@@ -311,7 +311,7 @@ func (self *reply) close(message event, yield agent.Yield) bool {
 		return false
 	}
 
-	held.done = true
+	held.isDone = true
 
 	if held.kind == "thinking" && held.text.Len() > 0 {
 		return !yield(agent.Event{Kind: agent.Reasoning, Text: held.text.String()})

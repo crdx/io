@@ -7,11 +7,11 @@ import (
 )
 
 type turn struct {
-	running bool
-	frame   int // the banner spinner frame
+	isRunning bool
+	frame     int // the banner spinner frame
 
-	cancelled bool               // whether the user stopped it
-	stop      context.CancelFunc // stops the provider request
+	isCancelled bool               // whether the user stopped it
+	stop        context.CancelFunc // stops the provider request
 
 	events        chan turnEvent // events arriving from the agent
 	painter       *painter

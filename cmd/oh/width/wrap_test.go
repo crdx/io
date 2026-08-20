@@ -60,7 +60,7 @@ func plain(text string) string {
 	var out strings.Builder
 
 	for _, one := range split(text) {
-		if !one.escape {
+		if !one.isEscape {
 			out.WriteString(one.text)
 		}
 	}

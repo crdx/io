@@ -177,8 +177,8 @@ func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser
 type observedBody struct {
 	io.ReadCloser
 
-	observer ExchangeObserver
-	finished bool
+	observer   ExchangeObserver
+	isFinished bool
 }
 
 func (self *observedBody) Read(buffer []byte) (int, error) {
@@ -194,17 +194,17 @@ func (self *observedBody) Read(buffer []byte) (int, error) {
 
 func (self *observedBody) Close() error {
 	err := self.ReadCloser.Close()
-	if !self.finished {
+	if !self.isFinished {
 		self.finish(err, true)
 	}
 	return err
 }
 
 func (self *observedBody) finish(err error, incomplete bool) {
-	if self.finished {
+	if self.isFinished {
 		return
 	}
-	self.finished = true
+	self.isFinished = true
 	if errors.Is(err, io.EOF) {
 		err = nil
 	}

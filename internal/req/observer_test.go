@@ -14,7 +14,7 @@ type observedExchange struct {
 	request    req.Request
 	response   req.Response
 	body       []byte
-	finished   bool
+	isFinished bool
 	incomplete bool
 	err        error
 }
@@ -29,7 +29,7 @@ func (self observer) Start(request req.Request) req.ExchangeObserver {
 func (self *observedExchange) Response(response req.Response) { self.response = response }
 func (self *observedExchange) Body(body []byte)               { self.body = append(self.body, body...) }
 func (self *observedExchange) Finish(_ time.Time, err error, incomplete bool) {
-	self.finished, self.err, self.incomplete = true, err, incomplete
+	self.isFinished, self.err, self.incomplete = true, err, incomplete
 }
 
 func TestObserverSeesTheBytesConsumedByTheCaller(t *testing.T) {
@@ -56,7 +56,7 @@ func TestObserverSeesTheBytesConsumedByTheCaller(t *testing.T) {
 	if string(exchange.body) != "response" {
 		t.Errorf("got consumed body %q", exchange.body)
 	}
-	if !exchange.finished || !exchange.incomplete || exchange.err != nil {
+	if !exchange.isFinished || !exchange.incomplete || exchange.err != nil {
 		t.Errorf("expected an incomplete close, got %+v", exchange)
 	}
 	if exchange.request.Method != http.MethodPost || exchange.request.Header.Get("X-Test") != "value" {

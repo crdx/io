@@ -52,9 +52,9 @@ func Rows(text string, cells int) []Row {
 }
 
 type atom struct {
-	text   string
-	cells  int
-	escape bool
+	text     string
+	cells    int
+	isEscape bool
 }
 
 func wrapLine(line string, cells int, base int) []Row {
@@ -141,7 +141,7 @@ func reach(atoms []atom, begin int, cells int) (int, int) {
 	for ; end < len(atoms); end++ {
 		one := atoms[end]
 
-		if one.escape {
+		if one.isEscape {
 			continue
 		}
 
@@ -170,7 +170,7 @@ func reach(atoms []atom, begin int, cells int) (int, int) {
 func advance(atoms []atom, begin int) int {
 	end := begin
 
-	for end < len(atoms) && atoms[end].escape {
+	for end < len(atoms) && atoms[end].isEscape {
 		end++
 	}
 
@@ -198,7 +198,7 @@ func stylesAt(atoms []atom) []string {
 
 	for index, one := range atoms {
 		switch {
-		case !one.escape:
+		case !one.isEscape:
 			openStyles[index+1] = openStyles[index]
 		case one.text == reset || one.text == "\x1b[m":
 			openStyles[index+1] = ""
@@ -227,7 +227,7 @@ func split(text string) []atom {
 				end++
 			}
 
-			atoms = append(atoms, atom{text: string(runes[index:end]), escape: true})
+			atoms = append(atoms, atom{text: string(runes[index:end]), isEscape: true})
 			index = end
 
 			continue
@@ -235,7 +235,7 @@ func split(text string) []atom {
 
 		size := Rune(runes[index])
 
-		if size == 0 && len(atoms) > 0 && !atoms[len(atoms)-1].escape {
+		if size == 0 && len(atoms) > 0 && !atoms[len(atoms)-1].isEscape {
 			atoms[len(atoms)-1].text += string(runes[index])
 			index++
 

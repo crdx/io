@@ -26,16 +26,16 @@ const (
 
 // Input edits a line and walks its history.
 type Input struct {
-	buffer        *buffer
-	history       *History
-	recall        *recall
-	pasting       bool
-	pasteStart    int              // where the current paste begins in the buffer
-	prefixed      bool             // whether ctrl+x went before, so the next key names a mode
-	enterPending  bool             // whether one enter awaits a second
-	continueAfter time.Time        // when another double enter may continue
-	currentTime   func() time.Time // supplies the time for the continuation cool-off
-	wasRunning    bool             // whether a turn ran when the previous key was applied
+	buffer         *buffer
+	history        *History
+	recall         *recall
+	isPasting      bool
+	pasteStart     int              // where the current paste begins in the buffer
+	isPrefixed     bool             // whether ctrl+x went before, so the next key names a mode
+	isEnterPending bool             // whether one enter awaits a second
+	continueAfter  time.Time        // when another double enter may continue
+	currentTime    func() time.Time // supplies the time for the continuation cool-off
+	wasRunning     bool             // whether a turn ran when the previous key was applied
 }
 
 // NewInput builds an empty line.
@@ -52,9 +52,9 @@ func NewInput(history *History) *Input {
 // Reset empties the line and starts the walk through history again.
 func (self *Input) Reset() {
 	self.buffer = &buffer{}
-	self.pasting = false
-	self.prefixed = false
-	self.enterPending = false
+	self.isPasting = false
+	self.isPrefixed = false
+	self.isEnterPending = false
 	self.wasRunning = false
 
 	if self.history != nil {
@@ -67,9 +67,9 @@ func (self *Input) Text() string {
 	return self.buffer.String()
 }
 
-// Pending reports whether a mode prefix awaits its command key.
-func (self *Input) Pending() bool {
-	return self.prefixed
+// IsPending reports whether a mode prefix awaits its command key.
+func (self *Input) IsPending() bool {
+	return self.isPrefixed
 }
 
 // Frame is the visible input rows, cursor position, and clipped row counts.
@@ -94,7 +94,7 @@ func (self *Input) Frame(width int) Frame {
 // Apply handles one keypress.
 func (self *Input) Apply(keypress key.Key, running bool) Action {
 	if self.wasRunning != running {
-		self.enterPending = false
+		self.isEnterPending = false
 	}
 	self.wasRunning = running
 
@@ -104,17 +104,17 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 		return Drawn
 	}
 
-	if self.pasting {
-		self.enterPending = false
+	if self.isPasting {
+		self.isEnterPending = false
 		self.paste(keypress)
 		return Drawn
 	}
 
 	if keypress.Code != key.Enter || keypress.Mod.Has(key.Shift) {
-		self.enterPending = false
+		self.isEnterPending = false
 	}
 
-	if self.prefixed {
+	if self.isPrefixed {
 		return self.swap(keypress)
 	}
 
@@ -166,7 +166,7 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 		}
 
 	case key.PasteStart:
-		self.pasting = true
+		self.isPasting = true
 		self.pasteStart = self.buffer.Cursor()
 
 	case key.Rune:
@@ -194,13 +194,13 @@ func (self *Input) enter(keypress key.Key) Action {
 		return Drawn
 	}
 
-	if self.enterPending {
-		self.enterPending = false
+	if self.isEnterPending {
+		self.isEnterPending = false
 		self.continueAfter = now.Add(continueCoolOff)
 		return Continue
 	}
 
-	self.enterPending = true
+	self.isEnterPending = true
 	return Drawn
 }
 
@@ -235,14 +235,14 @@ func (self *Input) rune(keypress key.Key, running bool) Action {
 		return Restart
 
 	case 'x':
-		self.prefixed = true
+		self.isPrefixed = true
 	}
 
 	return Drawn
 }
 
 func (self *Input) swap(keypress key.Key) Action {
-	self.prefixed = false
+	self.isPrefixed = false
 
 	if keypress.Code != key.Rune || keypress.Mod != 0 {
 		return Drawn
@@ -268,7 +268,7 @@ func (self *Input) swap(keypress key.Key) Action {
 func (self *Input) paste(keypress key.Key) {
 	switch {
 	case keypress.Code == key.PasteEnd:
-		self.pasting = false
+		self.isPasting = false
 		self.normalisePasteIndentation()
 	case keypress.Code == key.Enter:
 		self.buffer.Insert([]rune{'\n'})

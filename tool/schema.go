@@ -26,13 +26,13 @@ type Parameter struct {
 	Type        DataType
 	Description string
 
-	optional bool
+	isOptional bool
 }
 
 // Optional marks a parameter the model may leave out. An absent argument decodes as its zero value,
 // which is what a call carrying none means, so a tool reads one the same either way.
 func (self Parameter) Optional() Parameter {
-	self.optional = true
+	self.isOptional = true
 	return self
 }
 
@@ -71,7 +71,7 @@ func (self Schema) MarshalJSON() ([]byte, error) {
 			Description: parameter.Description,
 		}
 
-		if !parameter.optional {
+		if !parameter.isOptional {
 			renderedSchema.Required = append(renderedSchema.Required, parameter.Name)
 		}
 	}

@@ -70,7 +70,7 @@ func TestExcludeGlobalMatchesAbsoluteDirectories(t *testing.T) {
 	}
 	projectReview := filteredSkills[0]
 	globalPi := filteredSkills[1]
-	if projectReview.Name != "review" || projectReview.global || globalPi.Name != "pi" || !globalPi.global {
+	if projectReview.Name != "review" || projectReview.isGlobal || globalPi.Name != "pi" || !globalPi.isGlobal {
 		t.Errorf("got %#v, want the project review and global pi skills", filteredSkills)
 	}
 }

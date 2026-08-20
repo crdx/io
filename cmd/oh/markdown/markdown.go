@@ -36,13 +36,13 @@ func Render(markdown string, columns int) []string {
 type renderer struct {
 	source  []byte // the markdown being drawn, which every node is a position in
 	columns int
-	tight   bool     // whether its blocks stand apart, which those of a tight list do not
+	isTight bool     // whether its blocks stand apart, which those of a tight list do not
 	rows    []string // what has been drawn so far
 }
 
 func (self *renderer) blocks(parent ast.Node) {
 	for node := parent.FirstChild(); node != nil; node = node.NextSibling() {
-		if len(self.rows) > 0 && !self.tight {
+		if len(self.rows) > 0 && !self.isTight {
 			self.rows = append(self.rows, "")
 		}
 
@@ -133,7 +133,7 @@ func (self *renderer) item(marker string, node ast.Node) {
 		return
 	}
 
-	inner := &renderer{source: self.source, columns: room, tight: true}
+	inner := &renderer{source: self.source, columns: room, isTight: true}
 	inner.blocks(node)
 
 	hangingIndent := strings.Repeat(" ", width.Of(marker))

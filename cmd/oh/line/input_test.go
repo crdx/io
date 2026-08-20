@@ -380,8 +380,8 @@ func TestControlCAndControlUAlwaysClearTheInput(t *testing.T) {
 		self.Apply(key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl}, false)
 		self.Apply(key.Key{Code: key.Rune, Value: value, Mod: key.Ctrl}, false)
 
-		if self.Text() != "" || self.Pending() {
-			t.Errorf("ctrl+%c left input %q with pending=%v", value, self.Text(), self.Pending())
+		if self.Text() != "" || self.IsPending() {
+			t.Errorf("ctrl+%c left input %q with pending=%v", value, self.Text(), self.IsPending())
 		}
 	}
 }

@@ -103,7 +103,7 @@ func (self *conversation) makeIntroductions(initialPrompt string) {
 			self.redraw()
 
 		case <-frames.C:
-			if !self.turn.running {
+			if !self.turn.isRunning {
 				continue
 			}
 			self.turn.frame++
@@ -123,7 +123,7 @@ func (self *conversation) apply(input *line.Input, history *line.History, keypre
 		return true
 	}
 
-	switch input.Apply(keypress, self.turn.running) {
+	switch input.Apply(keypress, self.turn.isRunning) {
 	case line.Accept:
 		self.acceptInput(input, history)
 
@@ -137,7 +137,7 @@ func (self *conversation) apply(input *line.Input, history *line.History, keypre
 		return false // the input only asks to leave where there was no turn to stop first
 
 	case line.Restart:
-		if self.turn.running {
+		if self.turn.isRunning {
 			break
 		}
 
@@ -189,7 +189,7 @@ func (self *conversation) submitInput(input *line.Input, history *line.History, 
 		return
 	}
 
-	if self.turn.running {
+	if self.turn.isRunning {
 		self.replaceTurn(message)
 	} else {
 		self.start(message)
@@ -199,14 +199,14 @@ func (self *conversation) submitInput(input *line.Input, history *line.History, 
 func (self *conversation) toggleCapability(whichCaps caps) {
 	self.mode.Toggle(whichCaps)
 
-	if self.turn.running {
+	if self.turn.isRunning {
 		self.queuedModeChange = true
 		self.interrupt()
 	}
 }
 
 func (self *conversation) cancelTurn() {
-	if self.turn.cancelled {
+	if self.turn.isCancelled {
 		self.queuedPrompt = ""
 		self.queuedTurn = false
 		self.queuedModeChange = false
@@ -234,11 +234,11 @@ func (self *conversation) restartArguments() []string {
 }
 
 func (self *conversation) interrupt() {
-	if !self.turn.running {
+	if !self.turn.isRunning {
 		return
 	}
 
-	self.turn.cancelled = true
+	self.turn.isCancelled = true
 	self.turn.stop()
 }
 
@@ -247,7 +247,7 @@ func (self *conversation) show(input *line.Input) {
 	frame := input.Frame(width)
 
 	framedRows := append([]string{rule(width, scrollLabel("↑", frame.Above), "")}, frame.Rows...)
-	inputLabel := self.label(input.Pending(), self.turn.frame, self.turn.running)
+	inputLabel := self.label(input.IsPending(), self.turn.frame, self.turn.isRunning)
 	if usage := contextUsage(self.contextTokens); usage != "" {
 		inputLabel += " " + style.Subtle("─") + " " + usage
 	}
@@ -359,16 +359,16 @@ func (self *conversation) restore(storedSession *store.Session) {
 	self.replay()
 }
 
-func (self *conversation) newPicasso(live bool) *painter {
+func (self *conversation) newPicasso(isLive bool) *painter {
 	return &painter{
-		screen: self.screen, live: live, tools: self.assistant.Tool, shell: self.shell,
+		screen: self.screen, isLive: isLive, tools: self.assistant.Tool, shell: self.shell,
 		workspaceDir: self.workspaceDir,
 	}
 }
 
 func (self *conversation) replay() {
 	self.screen.Synchronise(func() {
-		painter := self.newPicasso(self.turn.running)
+		painter := self.newPicasso(self.turn.isRunning)
 
 		for _, record := range self.transcript {
 			if record.notice != "" {
@@ -381,7 +381,7 @@ func (self *conversation) replay() {
 			painter.draw(record.event)
 		}
 
-		if self.turn.running {
+		if self.turn.isRunning {
 			self.turn.painter = painter
 			return
 		}
@@ -393,7 +393,7 @@ func (self *conversation) replay() {
 }
 
 func (self *conversation) redraw() {
-	if self.turn.running {
+	if self.turn.isRunning {
 		self.turn.painter.stop()
 	}
 
@@ -411,10 +411,10 @@ func (self *conversation) start(prompt string) {
 	turnContext, stop := context.WithCancel(context.Background())
 
 	self.turn = turn{
-		running: true,
-		stop:    stop,
-		events:  make(chan turnEvent),
-		painter: self.newPicasso(true),
+		isRunning: true,
+		stop:      stop,
+		events:    make(chan turnEvent),
+		painter:   self.newPicasso(true),
 	}
 	self.screen.Progress(true)
 
@@ -448,7 +448,7 @@ func (self *conversation) recordEvent(event agent.Event) {
 	self.transcript = appendTranscript(self.transcript, event)
 	self.turn.painter.draw(event)
 
-	if self.turn.painter.stale {
+	if self.turn.painter.isStale {
 		self.redraw()
 	}
 
@@ -481,7 +481,7 @@ func (self *conversation) notify(notice string) {
 func (self *conversation) finish() {
 	self.screen.Progress(false)
 
-	if self.turn.cancelled {
+	if self.turn.isCancelled {
 		self.recordEvent(agent.Event{Kind: agent.Interrupted})
 	} else if self.turn.failure != nil {
 		self.recordEvent(agent.Event{Kind: agent.Failure, Text: self.turn.failure.Error()})
@@ -495,10 +495,10 @@ func (self *conversation) finish() {
 
 	self.screen.End()
 
-	self.turn.running = false
+	self.turn.isRunning = false
 	self.turn.events = nil
 
-	if !self.turn.cancelled && !self.queuedTurn && !self.queuedModeChange && !self.terminalFocused && self.notifyTurnFinished != nil {
+	if !self.turn.isCancelled && !self.queuedTurn && !self.queuedModeChange && !self.terminalFocused && self.notifyTurnFinished != nil {
 		self.notifyTurnFinished()
 	}
 

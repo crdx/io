@@ -27,7 +27,7 @@ type supervisorStatus struct {
 	Error  string `json:"error,omitempty"`
 }
 
-func policyBackground(encodedPolicy string) bool {
+func policyAllowsBackground(encodedPolicy string) bool {
 	var policy Policy
 	return json.Unmarshal([]byte(encodedPolicy), &policy) == nil && policy.Background
 }
@@ -167,8 +167,8 @@ type Processes struct {
 }
 
 type supervised struct {
-	command *exec.Cmd
-	done    chan struct{}
+	command    *exec.Cmd
+	doneSignal chan struct{}
 }
 
 // NewProcesses makes a process set in the given mode.
@@ -206,7 +206,7 @@ func (self *Processes) Disable() ([]string, error) {
 		}
 	}
 	for _, process := range runningProcesses {
-		<-process.done
+		<-process.doneSignal
 	}
 
 	return names, stopError
@@ -379,7 +379,7 @@ func (self *Processes) Run(
 		return Result{}, fmt.Errorf("could not run the command: %w", err)
 	}
 
-	process := &supervised{command: stub, done: make(chan struct{})}
+	process := &supervised{command: stub, doneSignal: make(chan struct{})}
 	self.runningProcesses[process] = struct{}{}
 	self.mutex.Unlock()
 
@@ -390,7 +390,7 @@ func (self *Processes) Run(
 		_ = stub.Wait()
 		self.mutex.Lock()
 		delete(self.runningProcesses, process)
-		close(process.done)
+		close(process.doneSignal)
 		self.mutex.Unlock()
 	}()
 
@@ -417,7 +417,7 @@ func (self *Processes) Run(
 	case reply := <-statusDone:
 		if reply.err != nil {
 			_ = process.command.Process.Kill()
-			<-process.done
+			<-process.doneSignal
 			<-outputDone
 			return Result{Output: output.String()}, fmt.Errorf(
 				"the sandbox supervisor stopped: %w", reply.err,
@@ -426,7 +426,7 @@ func (self *Processes) Run(
 		got = reply.status
 	case <-ctx.Done():
 		_ = process.command.Process.Kill()
-		<-process.done
+		<-process.doneSignal
 		<-outputDone
 		result := Result{Output: output.String()}
 		return stoppedResult(ctx, policy, result)
@@ -436,12 +436,12 @@ func (self *Processes) Run(
 	case err := <-outputDone:
 		if err != nil {
 			_ = process.command.Process.Kill()
-			<-process.done
+			<-process.doneSignal
 			return Result{}, fmt.Errorf("could not read the command output: %w", err)
 		}
 	case <-ctx.Done():
 		_ = process.command.Process.Kill()
-		<-process.done
+		<-process.doneSignal
 		<-outputDone
 		result := got.Result
 		result.Output = output.String()
@@ -451,7 +451,7 @@ func (self *Processes) Run(
 	result := got.Result
 	result.Output = output.String()
 	if got.Error != "" {
-		<-process.done
+		<-process.doneSignal
 		return Result{}, fmt.Errorf("the sandbox could not start: %s", got.Error)
 	}
 	if result.Code == notStarted && strings.HasPrefix(result.Output, notice) {

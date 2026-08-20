@@ -33,11 +33,11 @@ type Meta struct {
 
 // Recorder appends censored logical HTTP exchanges.
 type Recorder struct {
-	mutex  sync.Mutex
-	file   *os.File
-	failed bool
-	next   int
-	report func(error)
+	mutex     sync.Mutex
+	file      *os.File
+	hasFailed bool
+	next      int
+	report    func(error)
 }
 
 // Open opens or creates an HTTP transcript.
@@ -93,7 +93,7 @@ func (self *Recorder) Start(request req.Request) req.ExchangeObserver {
 	defer self.mutex.Unlock()
 	sequence := self.next
 	self.next++
-	exchange := &exchange{recorder: self, sequence: sequence, started: request.Started}
+	exchange := &exchange{recorder: self, sequence: sequence, startedAt: request.Started}
 	self.write(fmt.Sprintf("# exchange %d start %s\n> %s %s %s\n", sequence, request.Started.UTC().Format(time.RFC3339Nano), request.Method, request.URL, request.Protocol))
 	self.writeHeaders(">", request.Header)
 	self.write("\n")
@@ -125,7 +125,7 @@ func (self *Recorder) writeHeaders(prefix string, headers http.Header) {
 	slices.Sort(names)
 	for _, name := range names {
 		for _, value := range headers.Values(name) {
-			if sensitiveName(name) {
+			if isSensitiveName(name) {
 				value = redacted
 			} else {
 				value = censorBearer(value)
@@ -136,7 +136,7 @@ func (self *Recorder) writeHeaders(prefix string, headers http.Header) {
 }
 
 func (self *Recorder) write(value string) {
-	if self.failed || self.file == nil {
+	if self.hasFailed || self.file == nil {
 		return
 	}
 	if _, err := self.file.WriteString(value); err != nil {
@@ -145,10 +145,10 @@ func (self *Recorder) write(value string) {
 }
 
 func (self *Recorder) fail(err error) {
-	if self.failed {
+	if self.hasFailed {
 		return
 	}
-	self.failed = true
+	self.hasFailed = true
 	if self.file != nil {
 		_ = self.file.Close()
 		self.file = nil
@@ -159,28 +159,28 @@ func (self *Recorder) fail(err error) {
 }
 
 type exchange struct {
-	recorder    *Recorder
-	sequence    int
-	started     time.Time
-	contentType string
-	body        bytes.Buffer
-	responded   bool
-	streaming   bool
+	recorder     *Recorder
+	sequence     int
+	startedAt    time.Time
+	contentType  string
+	body         bytes.Buffer
+	hasResponded bool
+	isStreaming  bool
 }
 
 func (self *exchange) Response(response req.Response) {
 	self.recorder.mutex.Lock()
 	defer self.recorder.mutex.Unlock()
-	self.responded = true
+	self.hasResponded = true
 	self.contentType = response.Header.Get("Content-Type")
-	self.streaming = strings.Contains(strings.ToLower(self.contentType), "event-stream")
+	self.isStreaming = strings.Contains(strings.ToLower(self.contentType), "event-stream")
 	self.recorder.write(fmt.Sprintf("\n< %s %s\n", response.Protocol, response.Status))
 	self.recorder.writeHeaders("<", response.Header)
 	self.recorder.write("\n")
 }
 
 func (self *exchange) Body(body []byte) {
-	if !self.streaming {
+	if !self.isStreaming {
 		_, _ = self.body.Write(body)
 		return
 	}
@@ -211,12 +211,12 @@ func (self *exchange) Finish(finished time.Time, err error, incomplete bool) {
 		state = "incomplete close"
 	case errors.Is(err, context.Canceled):
 		state = "cancelled"
-	case err != nil && !self.responded:
+	case err != nil && !self.hasResponded:
 		state = "transport error: " + censorBearer(err.Error())
 	case err != nil:
 		state = "read error: " + censorBearer(err.Error())
 	}
-	self.recorder.write(fmt.Sprintf("# exchange %d end %s elapsed=%s %s\n\n", self.sequence, finished.UTC().Format(time.RFC3339Nano), finished.Sub(self.started), state))
+	self.recorder.write(fmt.Sprintf("# exchange %d end %s elapsed=%s %s\n\n", self.sequence, finished.UTC().Format(time.RFC3339Nano), finished.Sub(self.startedAt), state))
 }
 
 func censorBody(body []byte, contentType string) []byte {
@@ -231,7 +231,7 @@ func censorBody(body []byte, contentType string) []byte {
 		values, err := url.ParseQuery(string(body))
 		if err == nil {
 			for key := range values {
-				if sensitiveName(key) {
+				if isSensitiveName(key) {
 					values[key] = []string{redacted}
 				}
 			}
@@ -274,7 +274,7 @@ func containsSensitiveValue(value any) bool {
 	switch typed := value.(type) {
 	case map[string]any:
 		for key, item := range typed {
-			if sensitiveName(key) || containsSensitiveValue(item) {
+			if isSensitiveName(key) || containsSensitiveValue(item) {
 				return true
 			}
 		}
@@ -288,7 +288,7 @@ func censorValue(value any) {
 	switch typed := value.(type) {
 	case map[string]any:
 		for key, item := range typed {
-			if sensitiveName(key) {
+			if isSensitiveName(key) {
 				typed[key] = redacted
 			} else {
 				censorValue(item)
@@ -301,7 +301,7 @@ func censorValue(value any) {
 	}
 }
 
-func sensitiveName(name string) bool {
+func isSensitiveName(name string) bool {
 	normalised := strings.NewReplacer("-", "", "_", "").Replace(strings.ToLower(name))
 	switch normalised {
 	case

@@ -80,7 +80,7 @@ func (self *startupLine) normal(text string) {
 	_, _ = self.WriteString(style.Normal(text))
 }
 
-func (self *startupLine) quantity(text string, unitNormal bool) {
+func (self *startupLine) quantity(text string, isUnitNormal bool) {
 	numberStart := 0
 	if strings.HasPrefix(text, "~") {
 		self.dim("~")
@@ -96,7 +96,7 @@ func (self *startupLine) quantity(text string, unitNormal bool) {
 		self.dim(text[numberStart:])
 		return
 	}
-	if unitNormal {
+	if isUnitNormal {
 		self.normal(text[numberStart:])
 		return
 	}

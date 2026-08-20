@@ -187,7 +187,7 @@ func readStateForMatches(root *file.Root, args Args, output string) json.RawMess
 	return file.EncodeReadState(readSnapshots...)
 }
 
-func readMatches(reader io.Reader, trimWorkingDirectory bool) ([]string, bool, error) {
+func readMatches(reader io.Reader, shouldTrimWorkingDirectory bool) ([]string, bool, error) {
 	bufferedReader := bufio.NewReader(reader)
 	var matches []string
 	returnedBytes := int64(0)
@@ -196,7 +196,7 @@ func readMatches(reader io.Reader, trimWorkingDirectory bool) ([]string, bool, e
 		line, err := bufferedReader.ReadString('\n')
 		if line != "" {
 			line = strings.TrimSuffix(line, "\n")
-			if trimWorkingDirectory {
+			if shouldTrimWorkingDirectory {
 				line = strings.TrimPrefix(line, "./")
 			}
 

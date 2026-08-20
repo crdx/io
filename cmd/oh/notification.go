@@ -17,11 +17,11 @@ func sendTurnFinishedNotification(workspaceDir string) {
 	_ = command.Run()
 }
 
-func newTurnFinishedNotificationCommand(workspaceDir string, kitty bool) (*exec.Cmd, bool) {
+func newTurnFinishedNotificationCommand(workspaceDir string, isKitty bool) (*exec.Cmd, bool) {
 	title := "oh — " + filepath.Base(workspaceDir)
 	body := "A model is waiting to chat"
 
-	if kitty {
+	if isKitty {
 		//nolint:gosec // the executable is fixed and the workspace name is passed as one inert argument
 		return exec.Command("kitten", "notify", "--icon=utilities-terminal", "--app-name=oh", title, body), true
 	}

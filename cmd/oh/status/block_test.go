@@ -130,7 +130,7 @@ func testBlock() (*Block, *strings.Builder) {
 	self := &Block{
 		print:   func(text string) { output.WriteString(text) },
 		overlay: func(text string, _ int) { output.WriteString(text) },
-		live:    true,
+		isLive:  true,
 		columns: wide,
 		stop:    make(chan struct{}),
 	}
@@ -323,7 +323,7 @@ func TestACallWorthWaitingForSaysHowLongItTook(t *testing.T) {
 }
 
 func TestRunningTimerUsesWholeSecondGranularity(t *testing.T) {
-	block := &Block{revealed: true}
+	block := &Block{isRevealed: true}
 	item := row{state: Running, startedAt: time.Now().Add(-5500 * time.Millisecond)}
 
 	if got := style.Plain(block.outcome(item)); got != "✦· 5s" {
