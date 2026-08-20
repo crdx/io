@@ -30,25 +30,26 @@ var (
 	}).Parse(hereduck.D(`
 		# Scope
 
-		- Your workspace is the current directory, {{ .WorkspaceDir }}.
-		- Your session ID is {{ .SessionID }}.
+		- Your workspace is the current directory, {{ .WorkspaceDir }}
+		- Your session ID is {{ .SessionID }}
 		{{ scopeRules .ExtraPaths .CurrentCaps }}
 
 		# Network
 
-		- Networking is limited to the sandbox's private loopback interface.
-		- Processes in the same sandbox can communicate over 127.0.0.1 and ::1.
-		- The host's loopback interface and external networks are unreachable.
-		- Anything that requires external networking must be asked of the user.
+		- Networking is limited to the sandbox's private loopback interface
+		- Processes in the same sandbox can communicate over 127.0.0.1 and ::1
+		- The host's loopback interface and external networks are unreachable
+		- Anything that requires external networking must be asked of the user
 
 		# /tmp
 
-		- /tmp is your persistent private scratch space.
-		- It is always read-write.
-		- No other agents have access to yours.
-		- /tmp maps to {{ .TmpDir }} on the user's machine.
-		- Translate /tmp paths to that directory before giving them to the user.
-		- For example: /tmp/result.png → {{ filepathJoin .TmpDir "result.png" }}
+		- /tmp is your persistent private scratch space
+		- It's always read-write, and no other agents have access to yours
+		- /tmp maps to {{ .TmpDir }} on the user's machine
+		- Translate /tmp paths to that directory before giving them to the user
+			- For example: /tmp/result.png → {{ filepathJoin .TmpDir "result.png" }}
+		- /tmp is persistent so you should tidy up after yourself and clean up large artifacts
+			- For example: git clones, source trees, binaries
 
 		# State
 

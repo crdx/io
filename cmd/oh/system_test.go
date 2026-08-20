@@ -140,7 +140,7 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 func TestTheHarnessDisclosesTheSessionID(t *testing.T) {
 	got := harnessContext("/workspace", "034session", "/tmp/x", capRead, configuredPaths{})
 
-	if !strings.Contains(got, "Your session ID is 034session.") {
+	if !strings.Contains(got, "Your session ID is 034session") {
 		t.Errorf("harness context does not contain the session ID: %q", got)
 	}
 }
