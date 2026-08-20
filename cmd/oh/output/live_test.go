@@ -113,8 +113,8 @@ func TestADifferenceAboveTheScreenIsReportedRatherThanRepaired(t *testing.T) {
 		t.Fatal("expected the first drawing to be made")
 	}
 
-	if screen.top != len(rows)-4 {
-		t.Fatalf("expected %d rows to have scrolled off, got %d", len(rows)-4, screen.top)
+	if screen.liveRegion.top != len(rows)-4 {
+		t.Fatalf("expected %d rows to have scrolled off, got %d", len(rows)-4, screen.liveRegion.top)
 	}
 
 	if screen.DrawAnswer([]string{"ONE", "two", "three", "four", "five", "six"}) {
@@ -132,14 +132,14 @@ func TestWritingOutsideTheRegionEndsIt(t *testing.T) {
 	screen.DrawAnswer([]string{"one", "two"})
 	screen.Line("a line")
 
-	if screen.liveRows != nil {
-		t.Errorf("expected the region to be forgotten, got %q", screen.liveRows)
+	if screen.liveRegion.rows != nil {
+		t.Errorf("expected the region to be forgotten, got %q", screen.liveRegion.rows)
 	}
 
 	screen.DrawAnswer([]string{"three"})
 
-	if len(screen.liveRows) != 1 {
-		t.Errorf("expected a region of its own, got %q", screen.liveRows)
+	if len(screen.liveRegion.rows) != 1 {
+		t.Errorf("expected a region of its own, got %q", screen.liveRegion.rows)
 	}
 }
 
@@ -172,8 +172,8 @@ func TestAFrameThatShrinksKeepsItsPaintedHeightUntilItIsSealed(t *testing.T) {
 		t.Fatal("expected a shorter set of rows to be repaired")
 	}
 
-	if len(screen.liveRows) != 3 || screen.liveRows[2] != "" || screen.liveContentRows != 2 {
-		t.Fatalf("expected two content rows held at three painted rows, got %q", screen.liveRows)
+	if len(screen.liveRegion.rows) != 3 || screen.liveRegion.rows[2] != "" || screen.liveRegion.contentRows != 2 {
+		t.Fatalf("expected two content rows held at three painted rows, got %q", screen.liveRegion.rows)
 	}
 	if got := screenOutput.String(); strings.Contains(got, moveUp(1)) {
 		t.Errorf("expected the cursor not to move up while streaming, got %q", got)
@@ -198,8 +198,8 @@ func TestRowsThatScrolledOffDoNotReturnWhenTheRegionShrinks(t *testing.T) {
 	if !screen.DrawAnswer([]string{"one", "two", "three", "four", "five"}) {
 		t.Fatal("expected the visible end of the region to be shortened")
 	}
-	if screen.top != 2 {
-		t.Fatalf("expected the first two rows to remain offscreen, got top row %d", screen.top)
+	if screen.liveRegion.top != 2 {
+		t.Fatalf("expected the first two rows to remain offscreen, got top row %d", screen.liveRegion.top)
 	}
 	if screen.DrawAnswer([]string{"one", "TWO", "three", "four", "five"}) {
 		t.Error("expected a change to a row that remains offscreen to require a replay")

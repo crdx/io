@@ -9,6 +9,13 @@ import (
 
 const clearRow = "\x1b[K"
 
+type liveRegion struct {
+	rows        []string // the rows as they were last painted
+	contentRows int      // how many of them are content rather than height-preserving blanks
+	isAnswer    bool     // whether the region holds the answer, and not the thinking before it
+	top         int      // the first row of the region the screen still holds
+}
+
 // DrawAnswer replaces the live region with the answer, and reports whether every changed row
 // remains on screen.
 func (self *Output) DrawAnswer(rows []string) bool {
@@ -26,68 +33,65 @@ func (self *Output) draw(rows []string, isAnswer bool) bool {
 	defer self.mutex.Unlock()
 
 	if len(rows) == 0 {
-		if len(self.liveRows) == 0 {
+		if len(self.liveRegion.rows) == 0 {
 			return true
 		}
 
 		rows = []string{""}
 	}
 
-	if len(self.liveRows) == 0 {
-		self.liveAnswer = isAnswer
+	if len(self.liveRegion.rows) == 0 {
+		self.liveRegion.isAnswer = isAnswer
 	}
 
 	if !self.isTerminal {
-		self.liveRows = rows
-		self.liveContentRows = len(rows)
+		self.liveRegion.rows = rows
+		self.liveRegion.contentRows = len(rows)
 		return true
 	}
 
 	self.measure()
 
 	contentRows := len(rows)
-	if len(rows) < len(self.liveRows) {
-		rows = append(slices.Clone(rows), make([]string, len(self.liveRows)-len(rows))...)
+	if len(rows) < len(self.liveRegion.rows) {
+		rows = append(slices.Clone(rows), make([]string, len(self.liveRegion.rows)-len(rows))...)
 	}
 
-	first := firstDifference(self.liveRows, rows)
+	first := firstDifference(self.liveRegion.rows, rows)
 
-	if first == len(rows) && first == len(self.liveRows) {
-		self.liveContentRows = contentRows
+	if first == len(rows) && first == len(self.liveRegion.rows) {
+		self.liveRegion.contentRows = contentRows
 		return true
 	}
 
-	if first < self.top {
+	if first < self.liveRegion.top {
 		return false
 	}
 
-	if len(self.liveRows) == 0 {
+	if len(self.liveRegion.rows) == 0 {
 		self.begin(isAnswer)
 	}
 
 	self.repaint(first, rows, isAnswer)
-	self.liveContentRows = contentRows
+	self.liveRegion.contentRows = contentRows
 
 	return true
 }
 
 func (self *Output) seal() {
-	if len(self.liveRows) == 0 {
+	if len(self.liveRegion.rows) == 0 {
 		return
 	}
 
 	if !self.isTerminal {
-		self.begin(self.liveAnswer)
-		self.write(strings.Join(self.liveRows, "\n"))
-	} else if self.liveContentRows < len(self.liveRows) && self.liveContentRows > self.top {
-		rows := slices.Clone(self.liveRows[:self.liveContentRows])
-		self.repaint(len(rows)-1, rows, self.liveAnswer)
+		self.begin(self.liveRegion.isAnswer)
+		self.write(strings.Join(self.liveRegion.rows, "\n"))
+	} else if self.liveRegion.contentRows < len(self.liveRegion.rows) && self.liveRegion.contentRows > self.liveRegion.top {
+		rows := slices.Clone(self.liveRegion.rows[:self.liveRegion.contentRows])
+		self.repaint(len(rows)-1, rows, self.liveRegion.isAnswer)
 	}
 
-	self.liveRows = nil
-	self.liveContentRows = 0
-	self.liveAnswer = false
-	self.top = 0
+	self.liveRegion = liveRegion{}
 }
 
 func (self *Output) begin(isAnswer bool) {
@@ -114,13 +118,13 @@ func (self *Output) repaint(first int, rows []string, shouldLinkPaths bool) {
 
 	out.WriteString(self.eraseInput())
 
-	if back := len(self.liveRows) - 1 - first; back >= 0 {
+	if back := len(self.liveRegion.rows) - 1 - first; back >= 0 {
 		out.WriteString(moveUp(back))
-	} else if len(self.liveRows) > 0 {
+	} else if len(self.liveRegion.rows) > 0 {
 		out.WriteString("\r\n") // nothing on screen changed, so the new rows open a row of their own
 	}
 
-	if len(rows) < len(self.liveRows) {
+	if len(rows) < len(self.liveRegion.rows) {
 		out.WriteString("\r" + clearBelow)
 	}
 
@@ -147,7 +151,7 @@ func (self *Output) repaint(first int, rows []string, shouldLinkPaths bool) {
 }
 
 func (self *Output) settle(rows []string) {
-	self.liveRows = rows
+	self.liveRegion.rows = rows
 	self.isStacked = true
 	self.isMidLine = true
 	self.hasPendingText = false
@@ -159,7 +163,7 @@ func (self *Output) settle(rows []string) {
 	}
 
 	if room := self.lines - len(self.input.rows); self.lines > 0 && len(rows) > room {
-		self.top = max(self.top, len(rows)-room)
+		self.liveRegion.top = max(self.liveRegion.top, len(rows)-room)
 	}
 }
 

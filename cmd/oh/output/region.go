@@ -168,10 +168,7 @@ func (self *Output) Reset() {
 	self.isStreaming = false
 	self.isWrapping = false
 	self.isStacked = false
-	self.liveRows = nil
-	self.liveContentRows = 0
-	self.liveAnswer = false
-	self.top = 0
+	self.liveRegion = liveRegion{}
 
 	self.measure()
 
