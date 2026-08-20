@@ -12,7 +12,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	absolute := filepath.Join(t.TempDir(), "skills")
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	contents := "model = \"configured-model\"\neffort = \"low\"\nget_on_with_it_message = \"carry on\"\n[skill]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
+	contents := "provider = \"opencode-go\"\nmodel = \"configured-model\"\neffort = \"low\"\nget_on_with_it_message = \"carry on\"\n[skill]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
 	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -21,8 +21,8 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Model != "configured-model" || settings.Effort != "low" {
-		t.Errorf("got model %q and effort %q", settings.Model, settings.Effort)
+	if settings.Provider != "opencode-go" || settings.Model != "configured-model" || settings.Effort != "low" {
+		t.Errorf("got provider %q, model %q, and effort %q", settings.Provider, settings.Model, settings.Effort)
 	}
 	if settings.GetOnWithItMessage != "carry on" {
 		t.Errorf("got get-on-with-it message %q", settings.GetOnWithItMessage)

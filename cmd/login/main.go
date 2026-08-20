@@ -1,17 +1,90 @@
 package main
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"os"
+	"strings"
 
+	"crdx.org/duckopt/v2"
+	"crdx.org/io/provider/chat"
 	"crdx.org/io/provider/codex"
+	"golang.org/x/term"
 )
 
+const usage = `io login — store provider credentials
+
+Usage:
+    $0 [codex | opencode-go]
+
+Providers:
+    codex         Authorise a ChatGPT subscription with OAuth [default]
+    opencode-go   Store an OpenCode Go API key
+`
+
+type inputOpts struct {
+	Codex      bool `docopt:"codex"`
+	OpenCodeGo bool `docopt:"opencode-go"`
+}
+
 func main() {
-	if err := codex.Login(); err != nil {
+	options := duckopt.MustBind[inputOpts](usage, "$0")
+
+	var path string
+	var err error
+	if options.OpenCodeGo {
+		path = chat.CredentialsPath()
+		err = loginOpenCodeGo(os.Stdin, os.Stdout, path)
+	} else {
+		path = codex.CredentialsPath()
+		err = codex.Login()
+	}
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	fmt.Println("Stored credentials in " + codex.CredentialsPath())
+	fmt.Println("Stored credentials in " + path)
+}
+
+func loginOpenCodeGo(input io.Reader, output io.Writer, path string) error {
+	key, err := readOpenCodeGoKey(input, output)
+	if err != nil {
+		return err
+	}
+
+	return chat.SaveKeyAt(path, key)
+}
+
+func readOpenCodeGoKey(input io.Reader, output io.Writer) (string, error) {
+	if _, err := fmt.Fprint(output, "OpenCode Go API key: "); err != nil {
+		return "", err
+	}
+
+	var key string
+	if terminal, ok := input.(*os.File); ok && term.IsTerminal(int(terminal.Fd())) {
+		data, err := term.ReadPassword(int(terminal.Fd()))
+		if err != nil {
+			return "", fmt.Errorf("read API key: %w", err)
+		}
+		key = string(data)
+		if _, err := fmt.Fprintln(output); err != nil {
+			return "", err
+		}
+	} else {
+		line, err := bufio.NewReader(input).ReadString('\n')
+		if err != nil && !errors.Is(err, io.EOF) {
+			return "", fmt.Errorf("read API key: %w", err)
+		}
+		key = line
+	}
+
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return "", errors.New("OpenCode Go API key is empty")
+	}
+
+	return key, nil
 }

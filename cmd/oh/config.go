@@ -16,6 +16,7 @@ import (
 const defaultGetOnWithItMessage = "yes"
 
 type configuredSettings struct {
+	Provider           string `toml:"provider"`
 	Model              string `toml:"model"`
 	Effort             string `toml:"effort"`
 	GetOnWithItMessage string `toml:"get_on_with_it_message"`
@@ -49,6 +50,9 @@ func loadConfiguredSettings(path string) (configuredSettings, error) {
 		return settings, fmt.Errorf("%s: %w", shownPath, err)
 	}
 
+	if meta.IsDefined("provider") && settings.Provider != codexProvider && settings.Provider != opencodeGoProvider {
+		return settings, fmt.Errorf("%s: provider must be codex or opencode-go", shownPath)
+	}
 	if meta.IsDefined("model") && settings.Model == "" {
 		return settings, fmt.Errorf("%s: model is empty, so there is nothing to ask", shownPath)
 	}

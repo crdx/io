@@ -12,8 +12,11 @@ import (
 	"crdx.org/duckopt/v2"
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/req"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/provider/chat"
 	"crdx.org/io/provider/codex"
+	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 
@@ -23,7 +26,13 @@ import (
 	"crdx.org/io/cmd/oh/theme"
 )
 
-const endpointVariable = "OH_ENDPOINT_URL"
+const (
+	endpointVariable = "OH_ENDPOINT_URL"
+
+	codexProvider      = "codex"
+	opencodeGoProvider = "opencode-go"
+	opencodeGoEndpoint = "https://opencode.ai/zen/go/v1/chat/completions"
+)
 
 const usage = `oh — coding harness
 
@@ -31,14 +40,15 @@ Usage:
     $0 [options] [<prompt>...]
 
 Options:
-    -d, --workspace <dir>    Set working directory and project scope
-    -r, --resume <session>   Resume the saved session
-    -c, --caps <flags>       Capabilities: rwxgb (read, write, exec, git, bg) [default: rwx]
-    -V, --version            Show the version
-    -h, --help               Show this help
+    -d, --workspace <dir>                  Set working directory and project scope
+    -r, --resume <session>                 Resume the saved session
+    -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
+    -c, --caps <flags>                     Capabilities: rwxgb (read, write, exec, git, bg) [default: rwx]
+    -V, --version                          Show the version
+    -h, --help                             Show this help
 
 Environment:
-    OH_ENDPOINT_URL     Talk to somewhere other than the real endpoint
+    OH_ENDPOINT_URL     Talk to somewhere other than the provider's default endpoint
 `
 
 func main() {
@@ -68,6 +78,7 @@ type InputOpts struct {
 	Message      []string `docopt:"<prompt>"`
 	WorkspaceDir string   `docopt:"--workspace"`
 	Session      string   `docopt:"--resume"`
+	Model        string   `docopt:"--model"`
 	Caps         string   `docopt:"--caps"`
 	Version      bool     `docopt:"--version"`
 }
@@ -76,6 +87,9 @@ type Opts struct {
 	workspaceDir   string // the workspace dir
 	initialMessage string // the first prompt
 	session        string // the session to resume, empty to start afresh
+	provider       string // the provider selected with the model, empty to use the configured or saved provider
+	model          string // the explicitly selected model, empty to use the configured or saved model
+	effort         string // the effort paired with an explicitly selected model
 	caps           caps   // initial capabilities
 }
 
@@ -86,6 +100,16 @@ func (opts InputOpts) parse() (Opts, error) {
 		workspaceDir:   opts.WorkspaceDir,
 		initialMessage: strings.Join(opts.Message, " "),
 		session:        opts.Session,
+	}
+
+	if opts.Model != "" {
+		provider, model, effort, err := parseModelSelection(opts.Model)
+		if err != nil {
+			return self, err
+		}
+		self.provider = provider
+		self.model = model
+		self.effort = effort
 	}
 
 	grantedCaps, err := Caps(opts.Caps)
@@ -124,9 +148,6 @@ func run() ([]string, error) {
 		return nil, err
 	}
 	if resumedSession != nil {
-		if resumedSession.Meta.Provider != "" && resumedSession.Meta.Provider != "codex" {
-			return nil, fmt.Errorf("cannot resume a %s session with codex", resumedSession.Meta.Provider)
-		}
 		args.workspaceDir = resumedSession.Meta.WorkspaceDir
 	}
 
@@ -198,32 +219,20 @@ func run() ([]string, error) {
 	processes := sandbox.NewProcesses(args.caps.has(capBackground))
 	defer func() { _, _ = processes.Disable() }()
 
-	client := connect(os.Getenv(endpointVariable))
-
-	client.Model = codex.Model
-	if settings.Model != "" {
-		client.Model = settings.Model
+	providerName, model, effort, err := resolveProviderSettings(args.provider, args.model, args.effort, settings, resumedSession)
+	if err != nil {
+		return nil, err
 	}
-	client.Effort = codex.Effort
-	if settings.Effort != "" {
-		client.Effort = settings.Effort
-	}
-
-	if resumedSession != nil {
-		if resumedSession.Meta.Model != "" {
-			client.Model = resumedSession.Meta.Model
-		}
-
-		if resumedSession.Meta.Effort != "" {
-			client.Effort = resumedSession.Meta.Effort
-		}
+	client, err := connect(providerName, model, effort, os.Getenv(endpointVariable))
+	if err != nil {
+		return nil, err
 	}
 
 	meta := store.Meta{
-		Model:        client.Model,
+		Model:        model,
 		WorkspaceDir: workspaceDir,
-		Provider:     "codex",
-		Effort:       client.Effort,
+		Provider:     providerName,
+		Effort:       effort,
 	}
 
 	log, err := openSession(resumedSession, meta)
@@ -298,8 +307,8 @@ func run() ([]string, error) {
 			currentCaps := mode.Current()
 
 			return banner(
-				client.Model,
-				client.Effort,
+				model,
+				effort,
 				workspaceDir,
 				tools,
 				currentCaps.has(capShell),
@@ -323,7 +332,7 @@ func run() ([]string, error) {
 		contextFiles:  contextFiles,
 		projectSkills: projectSkills,
 		globalSkills:  globalSkills,
-		toolBytes:     codex.ToolsSize(tools),
+		toolBytes:     client.toolsSize(tools),
 	}
 	if resumedSession == nil {
 		banner := renderStartupBanner(startupElapsed, false, startup)
@@ -347,15 +356,96 @@ func resumeParams(id string) string {
 	return fmt.Sprintf("%s -r %s", filepath.Base(os.Args[0]), id)
 }
 
-func connect(endpoint string) *codex.Client {
-	if endpoint == "" {
-		return codex.Auth()
+type providerClient interface {
+	agent.Provider
+	agent.State
+	ObserveHTTP(req.Observer)
+}
+
+type connection struct {
+	providerClient
+
+	toolsSize func([]tool.Tool) int
+}
+
+func resolveProviderSettings(
+	requestedProvider string,
+	requestedModel string,
+	requestedEffort string,
+	settings configuredSettings,
+	resumedSession *store.Session,
+) (string, string, string, error) {
+	providerName := settings.Provider
+	if providerName == "" {
+		providerName = codexProvider
 	}
 
-	client := codex.New(codex.Static("fake", "fake"))
-	client.URL = endpoint
+	sessionProvider := ""
+	if resumedSession != nil {
+		sessionProvider = resumedSession.Meta.Provider
+	}
+	if sessionProvider != "" {
+		providerName = sessionProvider
+	}
+	if requestedProvider != "" {
+		providerName = requestedProvider
+	}
 
-	return client
+	if sessionProvider != "" && providerName != sessionProvider {
+		return "", "", "", fmt.Errorf("cannot resume a %s session with %s", sessionProvider, providerName)
+	}
+	model := settings.Model
+	effort := settings.Effort
+	if effort == "" && providerName == codexProvider {
+		effort = codex.Effort
+	}
+	if resumedSession != nil {
+		if resumedSession.Meta.Model != "" {
+			model = resumedSession.Meta.Model
+		}
+		if resumedSession.Meta.Effort != "" {
+			effort = resumedSession.Meta.Effort
+		}
+	}
+	if requestedModel != "" {
+		model = requestedModel
+		effort = requestedEffort
+	}
+	if model == "" {
+		return "", "", "", errors.New("no model selected: use -m provider/model@effort or configure model")
+	}
+
+	return providerName, model, effort, nil
+}
+
+func connect(providerName string, model string, effort string, endpoint string) (*connection, error) {
+	switch providerName {
+	case codexProvider:
+		var client *codex.Client
+		if endpoint == "" {
+			client = codex.Auth()
+		} else {
+			client = codex.New(codex.Static("fake", "fake"))
+			client.URL = endpoint
+		}
+		client.Model = model
+		client.Effort = effort
+		return &connection{providerClient: client, toolsSize: codex.ToolsSize}, nil
+
+	case opencodeGoProvider:
+		token, err := chat.StoredKey()
+		if err != nil {
+			return nil, err
+		}
+		if endpoint == "" {
+			endpoint = opencodeGoEndpoint
+		}
+		client := chat.New(endpoint, model, effort, token)
+		return &connection{providerClient: client, toolsSize: chat.ToolsSize}, nil
+
+	default:
+		return nil, fmt.Errorf("unknown provider %q", providerName)
+	}
 }
 
 func loadSession(id string) (*store.Session, error) {

@@ -60,7 +60,7 @@ var everyCap = []caps{
 }
 
 func TestEveryOptionIsRead(t *testing.T) {
-	parsedOptions := parseOptions(t, "-c", "r", "-d", "somewhere")
+	parsedOptions := parseOptions(t, "-c", "r", "-d", "somewhere", "-m", "deepseek@hi")
 
 	if parsedOptions.caps != capRead {
 		t.Errorf("expected reading alone, got %s", parsedOptions.caps.Flags())
@@ -70,10 +70,22 @@ func TestEveryOptionIsRead(t *testing.T) {
 		t.Errorf("expected the directory, got %q", parsedOptions.workspaceDir)
 	}
 
+	if parsedOptions.provider != opencodeGoProvider || parsedOptions.model != "deepseek-v4-pro" || parsedOptions.effort != "high" {
+		t.Errorf("expected opencode-go/deepseek-v4-pro@high, got %s/%s@%s", parsedOptions.provider, parsedOptions.model, parsedOptions.effort)
+	}
+
 	id := "0347juX1xcrL9W0QKJe0cs"
 
 	if parsedOptions := parseOptions(t, "-r", id); parsedOptions.session != id || !parsedOptions.resuming() {
 		t.Errorf("expected the session, got %q", parsedOptions.session)
+	}
+}
+
+func TestModelSelectionRequiresModelAndEffort(t *testing.T) {
+	for _, selection := range []string{"model", "model@", "@high", "model@high@extra"} {
+		if _, err := (InputOpts{Model: selection}).parse(); err == nil {
+			t.Errorf("expected %q to be rejected", selection)
+		}
 	}
 }
 
