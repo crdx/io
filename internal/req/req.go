@@ -17,8 +17,8 @@ const bodyLimit = 64 * 1024
 
 // Client is an endpoint spoken to under a timeout, since the default client waits forever.
 type Client struct {
-	http     *http.Client // the timed HTTP client
-	observer Observer     // optional logical exchange observer
+	http     *http.Client
+	observer Observer
 }
 
 // New builds a client that gives up on a request after the given wait.

@@ -159,7 +159,7 @@ func (self *Agent) answer(results []ToolResult) {
 type pendingCall struct {
 	rawCall    ToolCall  // the call as received
 	parsedCall tool.Call // the call ready to run
-	failure    string    // why parsing failed
+	failure    string
 }
 
 func (self *Agent) runCalls(

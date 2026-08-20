@@ -25,9 +25,9 @@ const maxImageBytes = 20 * 1024 * 1024
 
 // Args is what a read takes. An absent offset or limit is zero, which means the whole file.
 type Args struct {
-	Path   string `json:"path"`   // the file to read
-	Offset int    `json:"offset"` // the first line
-	Limit  int    `json:"limit"`  // the most lines to return
+	Path   string `json:"path"`
+	Offset int    `json:"offset"`
+	Limit  int    `json:"limit"`
 }
 
 // New builds the read tool confined to root.

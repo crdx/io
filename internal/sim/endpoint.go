@@ -277,8 +277,8 @@ func (self *Endpoint) stream(writer http.ResponseWriter, turn string) {
 
 type refusal struct {
 	Error struct {
-		Message string `json:"message"` // what went wrong
-	} `json:"error"` // the endpoint error
+		Message string `json:"message"`
+	} `json:"error"`
 }
 
 func refuse(writer http.ResponseWriter, status int, message string) {

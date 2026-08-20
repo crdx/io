@@ -12,7 +12,7 @@ import (
 
 // Args is what a listing takes. An absent path is the working directory.
 type Args struct {
-	Path string `json:"path"` // the directory to list
+	Path string `json:"path"`
 }
 
 // New builds the ls tool confined to root. A directory is marked with a trailing slash.

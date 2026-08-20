@@ -5,8 +5,8 @@ import (
 )
 
 type buffer struct {
-	runes  []rune // the text being edited
-	cursor int    // the insertion point
+	runes  []rune
+	cursor int
 }
 
 func (self *buffer) String() string {

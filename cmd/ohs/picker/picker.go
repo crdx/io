@@ -85,13 +85,13 @@ func Choose(sessions []*Session, terminal *os.File, screen io.Writer) (*Session,
 }
 
 type state struct {
-	sessions []*Session   // the sessions on offer
-	decoder  *key.Decoder // the keyboard input
-	terminal *os.File     // the terminal being controlled
-	screen   io.Writer    // where the list is drawn
+	sessions []*Session
+	decoder  *key.Decoder
+	terminal *os.File
+	screen   io.Writer
 
-	cursor int // the selected row
-	offset int // the first visible row
+	cursor int
+	offset int
 }
 
 func (self *state) run() (*Session, error) {

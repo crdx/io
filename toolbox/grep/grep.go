@@ -21,9 +21,9 @@ import (
 // Args is what a search by content takes. An absent path is the working directory, and an absent
 // glob every file below it.
 type Args struct {
-	Pattern string `json:"pattern"` // the regular expression
-	Path    string `json:"path"`    // where to search
-	Glob    string `json:"glob"`    // which paths to include
+	Pattern string `json:"pattern"`
+	Path    string `json:"path"`
+	Glob    string `json:"glob"`
 }
 
 var matchPathPattern = regexp.MustCompile(`^(.+):[0-9]+:`)

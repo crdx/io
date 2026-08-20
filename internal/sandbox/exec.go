@@ -149,8 +149,8 @@ func configuredEnvironment(allowed []string, set map[string]string) []string {
 
 // Result is what a sandboxed command produced.
 type Result struct {
-	Output     string        `json:"-"`           // stdout and stderr, interleaved as the command wrote them
-	Code       int           `json:"code"`        // the exit status
+	Output     string        `json:"-"` // stdout and stderr, interleaved as the command wrote them
+	Code       int           `json:"code"`
 	CPUTime    time.Duration `json:"cpu_time"`    // user and system processor time together
 	PeakMemory uint64        `json:"peak_memory"` // largest resident set in bytes
 }

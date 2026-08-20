@@ -9,7 +9,7 @@ import (
 )
 
 type Params struct {
-	City string `json:"city"` // the city to report
+	City string `json:"city"`
 }
 
 func TestOutputStats(t *testing.T) {

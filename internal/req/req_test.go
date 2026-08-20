@@ -69,7 +69,7 @@ func TestFormPostsAndDecodes(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	var response struct {
-		Access string `json:"access_token"` // the token returned
+		Access string `json:"access_token"`
 	}
 
 	form := map[string][]string{"grant_type": {"refresh_token"}}

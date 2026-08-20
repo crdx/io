@@ -15,7 +15,7 @@ var Activity Animation = newFrames(125*time.Millisecond, "✦·", "·✦", "·�
 
 // Frames is an Animation of a fixed run of frames, shown in turn and then again from the start.
 type Frames struct {
-	frames []string      // the frames in order
+	frames []string
 	rate   time.Duration // how long each frame is shown for
 }
 

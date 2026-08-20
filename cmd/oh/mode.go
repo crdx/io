@@ -121,7 +121,7 @@ func refuseWrite(mode *Mode) func(name string) error {
 // Mode tracks current and model-known caps across keypress and turn goroutines.
 type Mode struct {
 	mutex       sync.Mutex
-	currentCaps caps // what is granted
+	currentCaps caps
 	knownCaps   caps // what the model thinks is granted (may be outdated now)
 }
 

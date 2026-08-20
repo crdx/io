@@ -21,7 +21,7 @@ import (
 
 // Args is what a shell command takes.
 type Args struct {
-	Command string `json:"command"` // the command to run
+	Command string `json:"command"`
 }
 
 // New builds a shell that starts in root and is confined anew for each command, what is granted

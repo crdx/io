@@ -23,15 +23,15 @@ import (
 )
 
 type conversation struct {
-	assistant          *agent.Agent                 // the conversation driver
-	screen             *output.Output               // where the conversation is drawn
-	log                *store.Writer                // where the conversation is stored
+	assistant          *agent.Agent
+	screen             *output.Output
+	log                *store.Writer
 	label              func(bool, int, bool) string // what the harness was started with, drawn afresh on the rule
-	workspaceDir       string                       // where the conversation is being held
-	mode               *Mode                        // what the tools allow
-	processes          *sandbox.Processes           // what background commands belong to this conversation
-	shell              string                       // what the shell tool was named, taken from the tool itself
-	notifyTurnFinished func()                       // how to say that the harness is waiting for input
+	workspaceDir       string
+	mode               *Mode              // what the tools allow
+	processes          *sandbox.Processes // what background commands belong to this conversation
+	shell              string             // what the shell tool was named, taken from the tool itself
+	notifyTurnFinished func()             // how to say that the harness is waiting for input
 
 	restart            []string // the arguments to start again with, once the terminal has been given back
 	queuedPrompt       string   // what to ask as soon as an interrupted turn finishes
@@ -39,7 +39,7 @@ type conversation struct {
 	queuedModeChange   bool     // whether changed capabilities should restart an interrupted turn
 	getOnWithItMessage string   // what an empty double enter sends
 
-	turn            turn    // the turn in progress
+	turn            turn
 	storedItems     int     // how many provider items have been stored
 	contextTokens   int     // the input tokens reported for the last completed turn
 	terminalFocused bool    // whether the interactive terminal has focus

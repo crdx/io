@@ -8,9 +8,9 @@ import (
 
 func TestWrappingBreaksAtSpacesAndMidWordWhereThereAreNone(t *testing.T) {
 	for _, test := range []struct {
-		text  string   // the text to wrap
-		cells int      // the width available
-		want  []string // the rows expected
+		text  string
+		cells int
+		want  []string
 	}{
 		{"", 8, []string{""}},
 		{"hello", 5, []string{"hello"}},

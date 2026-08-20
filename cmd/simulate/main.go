@@ -42,8 +42,8 @@ func main() {
 var errHelp = errors.New("help")
 
 type options struct {
-	scenario string // the scenario file
-	address  string // where the endpoint listens
+	scenario string
+	address  string
 }
 
 func parse(arguments []string) (options, error) {

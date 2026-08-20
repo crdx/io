@@ -47,14 +47,14 @@ func (self Modifier) Has(mask Modifier) bool {
 
 // Key is one keypress.
 type Key struct {
-	Code  Code     // which key was pressed
-	Value rune     // the typed character
-	Mod   Modifier // which modifiers were held
+	Code  Code
+	Value rune
+	Mod   Modifier
 }
 
 // Decoder reads keypresses off a terminal.
 type Decoder struct {
-	reader *bufio.Reader // the terminal input
+	reader *bufio.Reader
 }
 
 // NewDecoder builds a decoder over a buffered terminal.

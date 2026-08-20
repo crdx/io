@@ -15,7 +15,7 @@ import (
 )
 
 type params struct {
-	City string `json:"city"` // the city to report
+	City string `json:"city"`
 }
 
 func weather(callCount *int) tool.Tool {
@@ -135,8 +135,8 @@ func TestACallWithNoOutputIsRefused(t *testing.T) {
 
 	var refusal struct {
 		Error struct {
-			Message string `json:"message"` // what went wrong
-		} `json:"error"` // the endpoint error
+			Message string `json:"message"`
+		} `json:"error"`
 	}
 
 	if err := json.NewDecoder(response.Body).Decode(&refusal); err != nil {

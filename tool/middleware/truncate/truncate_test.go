@@ -12,7 +12,7 @@ import (
 )
 
 type Args struct {
-	Size int `json:"size"` // how much output to make
+	Size int `json:"size"`
 }
 
 func newTool(t *testing.T) tool.Tool {

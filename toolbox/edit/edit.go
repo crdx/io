@@ -14,9 +14,9 @@ import (
 
 // Args is what an edit takes.
 type Args struct {
-	Path    string `json:"path"`     // the file to edit
-	OldText string `json:"old_text"` // the exact text to replace
-	NewText string `json:"new_text"` // the replacement text
+	Path    string `json:"path"`
+	OldText string `json:"old_text"`
+	NewText string `json:"new_text"`
 }
 
 // New builds an edit tool confined to root.
@@ -42,9 +42,9 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 }
 
 type editor struct {
-	tool.Tool // the edit tool itself
+	tool.Tool
 
-	root *file.Root // the tree edited
+	root *file.Root
 }
 
 func (self editor) ReadOnly() bool { return self.root.RefuseWrite(".") != nil }

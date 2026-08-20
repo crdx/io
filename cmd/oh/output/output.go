@@ -16,7 +16,7 @@ import (
 
 // Output serializes terminal drawing.
 type Output struct {
-	writer io.Writer // where bytes are written
+	writer io.Writer
 
 	mutex sync.Mutex // guards drawing
 
@@ -28,7 +28,7 @@ type Output struct {
 	streaming        bool   // whether an answer is arriving in pieces
 	stacked          bool   // whether anything has been said, and so whether the input has a row to sit under
 
-	terminal      bool   // whether the writer is a terminal
+	terminal      bool
 	pathWorkspace string // where relative paths drawn in the scrollback begin
 	progress      bool   // whether a turn is reported as running to the terminal
 

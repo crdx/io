@@ -7,10 +7,10 @@ import (
 )
 
 type functionTool struct {
-	Type        string `json:"type"`        // the kind of tool
-	Name        string `json:"name"`        // what the tool is called
-	Description string `json:"description"` // what the tool does
-	Strict      bool   `json:"strict"`      // whether its schema is enforced strictly
+	Type        string `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Strict      bool   `json:"strict"`
 
 	Schema tool.Schema `json:"parameters"` // never omitempty: a tool taking nothing still needs one
 }

@@ -63,12 +63,12 @@ func (self *Output) closeFrame() string {
 }
 
 type footer struct {
-	rows         []string // the input rows
-	cursorRow    int      // the cursor row in the input
-	cursorColumn int      // the cursor column in that row
-	column       int      // the conversation column above
-	separators   int      // rows between the conversation cursor and the input
-	stacked      bool     // whether the input sits below content
+	rows         []string
+	cursorRow    int
+	cursorColumn int
+	column       int  // the conversation column above
+	separators   int  // rows between the conversation cursor and the input
+	stacked      bool // whether the input sits below content
 }
 
 // Footer draws the input under the conversation, and leaves the cursor sitting in it, which is

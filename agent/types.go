@@ -39,8 +39,8 @@ type Yield func(Event) bool
 
 // Reply is a turn once it's over.
 type Reply struct {
-	Calls []ToolCall // the calls the model made
-	Usage Usage      // the context used for the request
+	Calls []ToolCall
+	Usage Usage
 }
 
 // Usage is what a completed provider request consumed.
@@ -50,16 +50,16 @@ type Usage struct {
 
 // ToolCall is one call the model made.
 type ToolCall struct {
-	ID        string // which call
-	Name      string // which tool
-	Arguments string // what the tool was called with
+	ID        string
+	Name      string
+	Arguments string
 }
 
 // ToolResult is what one call handed back.
 type ToolResult struct {
-	ID     string     // which call
-	Output string     // what the tool returned
-	Image  tool.Image // visual content the tool returned
+	ID     string
+	Output string
+	Image  tool.Image
 }
 
 // Kind is what an event is. It is a name rather than a number because a conversation is written
@@ -86,26 +86,26 @@ const (
 // kept for a display that no longer has the tool to ask. The JSON keys stay render and detail so
 // sessions written before the rename still read.
 type Event struct {
-	Kind      Kind            `json:"kind"`                // what happened
-	Text      string          `json:"text,omitempty"`      // what was said or thought
-	ID        string          `json:"id,omitempty"`        // which call
-	Name      string          `json:"name,omitempty"`      // which tool or state owner
-	Arguments string          `json:"arguments,omitempty"` // what the tool was called with
-	Subject   string          `json:"render,omitempty"`    // how the call was shown when it ran
-	Qualifier string          `json:"detail,omitempty"`    // what qualified that, for a display to set apart
-	Highlight tool.Highlight  `json:"highlight,omitzero"`  // how the rendering is highlighted
-	ReadOnly  bool            `json:"read_only,omitempty"` // whether the tool called changes nothing
-	Failed    bool            `json:"failed,omitempty"`    // whether a call came back with an error rather than a result
-	Took      time.Duration   `json:"took,omitempty"`      // how long a call took to run
-	Stats     *tool.Stats     `json:"stats,omitempty"`     // completion stats for a result
-	State     json.RawMessage `json:"state,omitempty"`     // an opaque durable tool-state transition
-	Usage     *Usage          `json:"usage,omitempty"`     // context usage after a completed turn
+	Kind      Kind            `json:"kind"`
+	Text      string          `json:"text,omitempty"`
+	ID        string          `json:"id,omitempty"`
+	Name      string          `json:"name,omitempty"` // which tool or state owner
+	Arguments string          `json:"arguments,omitempty"`
+	Subject   string          `json:"render,omitempty"` // how the call was shown when it ran
+	Qualifier string          `json:"detail,omitempty"` // what qualified that, for a display to set apart
+	Highlight tool.Highlight  `json:"highlight,omitzero"`
+	ReadOnly  bool            `json:"read_only,omitempty"`
+	Failed    bool            `json:"failed,omitempty"` // whether a call came back with an error rather than a result
+	Took      time.Duration   `json:"took,omitempty"`
+	Stats     *tool.Stats     `json:"stats,omitempty"`
+	State     json.RawMessage `json:"state,omitempty"` // an opaque durable tool-state transition
+	Usage     *Usage          `json:"usage,omitempty"`
 }
 
 // Agent holds a conversation.
 type Agent struct {
-	provider    Provider             // the conversation backend
-	tools       map[string]tool.Tool // the tools by name
+	provider    Provider
+	tools       map[string]tool.Tool
 	stateOwners map[string]tool.Tool // the tools by durable state name
 	state       []json.RawMessage    // the append-only provider state already handed out
 }

@@ -10,40 +10,40 @@ import (
 // Scenario is what the endpoint pretends to be, read from a file. Every new session starts at the
 // first turn and takes the next one with each request it makes.
 type Scenario struct {
-	Model string `toml:"model"` // the model name reported
+	Model string `toml:"model"`
 
-	Loop bool `toml:"loop"` // whether turns repeat
+	Loop bool `toml:"loop"`
 
-	Strict bool `toml:"strict"` // whether requests are checked
+	Strict bool `toml:"strict"`
 
-	Pace  Duration `toml:"pace"`  // the delay between events
-	Delay Duration `toml:"delay"` // the delay before a response
+	Pace  Duration `toml:"pace"`
+	Delay Duration `toml:"delay"`
 
-	Turns []Turn `toml:"turn"` // the answers in order
+	Turns []Turn `toml:"turn"`
 }
 
 // Turn is one request answered: what the model thinks, says, and asks to be run, in that order.
 type Turn struct {
-	Think []string `toml:"think"` // the reasoning pieces
-	Say   string   `toml:"say"`   // the answer
-	Calls []Call   `toml:"call"`  // the tool calls
+	Think []string `toml:"think"`
+	Say   string   `toml:"say"`
+	Calls []Call   `toml:"call"`
 
-	Pace  Duration `toml:"pace"`  // the delay between events
-	Delay Duration `toml:"delay"` // the delay before responding
+	Pace  Duration `toml:"pace"`
+	Delay Duration `toml:"delay"`
 
-	Fail       string `toml:"fail"`        // the stream failure
-	Incomplete bool   `toml:"incomplete"`  // whether the response is incomplete
-	ErrorEvent string `toml:"error-event"` // a raw error event
+	Fail       string `toml:"fail"`
+	Incomplete bool   `toml:"incomplete"`
+	ErrorEvent string `toml:"error-event"` // a raw error event, in the shape of one API alone
 
-	Truncate bool `toml:"truncate"` // whether the stream ends abruptly
+	Truncate bool `toml:"truncate"`
 
-	Status int `toml:"status"` // the HTTP status
+	Status int `toml:"status"`
 }
 
 // Call is a tool the model asks for.
 type Call struct {
-	Name      string `toml:"name"`      // which tool is called
-	Arguments string `toml:"arguments"` // what it is called with
+	Name      string `toml:"name"`
+	Arguments string `toml:"arguments"`
 }
 
 // Duration is a length of time written the way Go writes one, as in "150ms".

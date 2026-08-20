@@ -11,7 +11,7 @@ import (
 
 func main() {
 	type WeatherParams struct {
-		City string // the city to report
+		City string
 	}
 
 	weather := tool.Implement(

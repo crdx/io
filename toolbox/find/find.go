@@ -13,8 +13,8 @@ import (
 
 // Args is what a search by name takes. An absent path is the working directory.
 type Args struct {
-	Pattern string `json:"pattern"` // the name glob
-	Path    string `json:"path"`    // where to search
+	Pattern string `json:"pattern"`
+	Path    string `json:"path"`
 }
 
 // New builds the find tool confined to root.

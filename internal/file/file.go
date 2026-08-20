@@ -39,16 +39,16 @@ func RefuseGitDir(name string) error {
 }
 
 type mountedRoot struct {
-	root  *Root  // the mounted tree
-	name  string // where resolution begins within it
-	exact bool   // for single files
+	root  *Root
+	name  string
+	exact bool // for single files
 }
 
 // Root is a directory the tools are confined to, and a rule about what may be changed within it.
 type Root struct {
-	root   *os.Root                // the confinement itself
+	root   *os.Root
 	refuse func(name string) error // what stands in the way of changing a path, asked afresh
-	mounts map[string]mountedRoot  // other trees by absolute name
+	mounts map[string]mountedRoot
 }
 
 // New builds a Root over an open directory. refuse is checked before each change.

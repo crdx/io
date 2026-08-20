@@ -18,7 +18,7 @@ import (
 )
 
 type WeatherParams struct {
-	City string `json:"city"` // the city to report
+	City string `json:"city"`
 }
 
 func events(payloads ...string) string {

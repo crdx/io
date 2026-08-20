@@ -1,8 +1,8 @@
 package width
 
 type span struct {
-	first rune // the first wide rune
-	last  rune // the last wide rune
+	first rune
+	last  rune
 }
 
 var spans = []span{

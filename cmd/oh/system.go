@@ -74,8 +74,8 @@ type harnessTemplateData struct {
 }
 
 type contextFile struct {
-	name string // what the file is called
-	body string // its contents
+	name string
+	body string
 }
 
 func loadContext(

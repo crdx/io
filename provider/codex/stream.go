@@ -43,33 +43,33 @@ func (self *reply) calls() []agent.ToolCall {
 }
 
 type outputItem struct {
-	Type      string `json:"type"`      // the kind of item
-	CallID    string `json:"call_id"`   // which call was made
-	Name      string `json:"name"`      // which tool was called
-	Arguments string `json:"arguments"` // what it was called with
+	Type      string `json:"type"`
+	CallID    string `json:"call_id"`
+	Name      string `json:"name"`
+	Arguments string `json:"arguments"`
 }
 
 type event struct {
-	Type     string          `json:"type"`     // what happened
-	Delta    string          `json:"delta"`    // the text added
-	Message  string          `json:"message"`  // an endpoint failure
-	Error    *eventError     `json:"error"`    // a direct endpoint failure
-	Item     json.RawMessage `json:"item"`     // a completed output item
-	Part     *eventPart      `json:"part"`     // a completed content part
-	Response *eventResponse  `json:"response"` // the completed response
+	Type     string          `json:"type"`
+	Delta    string          `json:"delta"`
+	Message  string          `json:"message"`
+	Error    *eventError     `json:"error"`
+	Item     json.RawMessage `json:"item"`
+	Part     *eventPart      `json:"part"`
+	Response *eventResponse  `json:"response"`
 }
 
 type eventPart struct {
-	Text string `json:"text"` // the completed text
+	Text string `json:"text"`
 }
 
 type eventResponse struct {
-	Error *eventError `json:"error"` // why the response failed
-	Usage agent.Usage `json:"usage"` // the context used for the request
+	Error *eventError `json:"error"`
+	Usage agent.Usage `json:"usage"`
 }
 
 type eventError struct {
-	Message string `json:"message"` // what went wrong
+	Message string `json:"message"`
 }
 
 func (self *event) failure(payload string) error {

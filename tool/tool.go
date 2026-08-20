@@ -28,7 +28,7 @@ func Concurrent(inner Tool) Tool {
 }
 
 type concurrent struct {
-	Tool // the tool safe to run concurrently
+	Tool
 }
 
 func (self concurrent) Concurrent() bool { return true }
@@ -39,7 +39,7 @@ func ReadOnly(inner Tool) Tool {
 }
 
 type readOnly struct {
-	Tool // the tool that changes nothing
+	Tool
 }
 
 func (self readOnly) ReadOnly() bool { return true }
@@ -70,8 +70,8 @@ type Call interface {
 
 // Result is everything a completed call hands back or records for restoration.
 type Result struct {
-	Output string          // text returned to the model
-	Image  Image           // visual content returned to the model
+	Output string
+	Image  Image
 	Stats  Stats           // output, change, or resource measurements
 	State  json.RawMessage // an opaque durable transition the agent applies and journals
 }

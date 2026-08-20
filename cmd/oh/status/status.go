@@ -36,15 +36,15 @@ const (
 
 // Label is what a row says: the name of a call, its subject, and whatever qualifies that.
 type Label struct {
-	Name            string         // the call name
-	Subject         string         // the rendered subject
-	Highlight       tool.Highlight // how the subject is highlighted
-	Qualifier       string         // what qualifies the subject
-	ReadOnly        bool           // whether the call changes nothing, which decides the colour its name is in
-	NameStyle       theme.Style    // an explicit style for a tool with its own prompt
-	Accent          string         // another part of the subject set apart from the rest
-	AccentStyle     theme.Style    // how the accent is painted
-	renderedSubject string         // syntax-highlighted subject retained from the complete source
+	Name            string
+	Subject         string
+	Highlight       tool.Highlight
+	Qualifier       string
+	ReadOnly        bool        // whether the call changes nothing, which decides the colour its name is in
+	NameStyle       theme.Style // an explicit style for a tool with its own prompt
+	Accent          string      // another part of the subject set apart from the rest
+	AccentStyle     theme.Style // how the accent is painted
+	renderedSubject string      // syntax-highlighted subject retained from the complete source
 }
 
 // Elide cuts a label to the room it has, so the row stays on the line it was printed on. What
@@ -215,25 +215,25 @@ func elide(text string, room int) string {
 }
 
 type row struct {
-	label     Label         // what the row says
-	state     State         // how the call ended
-	startedAt time.Time     // when the call began
-	took      time.Duration // how long the call took
-	failure   string        // why it ended that way, where that was a failure
-	stats     *tool.Stats   // completion stats for the result
+	label     Label
+	state     State // how the call ended
+	startedAt time.Time
+	took      time.Duration
+	failure   string // why it ended that way, where that was a failure
+	stats     *tool.Stats
 }
 
 // Block displays and redraws a group of tool-call rows. Nothing else may print until it closes.
 type Block struct {
-	print   func(string)      // prints a new row
+	print   func(string)
 	overlay func(string, int) // redraws existing rows
 	live    bool              // whether rows may be redrawn
-	columns int               // the width available
+	columns int
 
 	mutex    sync.Mutex // guards the changing rows
-	rows     []row      // the calls being shown
-	frame    int        // the spinner frame
-	revealed bool       // whether elapsed times are shown
+	rows     []row
+	frame    int  // the spinner frame
+	revealed bool // whether elapsed times are shown
 
 	stop     chan struct{}  // asks the ticker to stop
 	stopWait sync.WaitGroup // waits for the ticker to end

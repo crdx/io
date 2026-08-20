@@ -16,8 +16,8 @@ import (
 )
 
 type callProvider struct {
-	sent    int                // how many turns were sent
-	results []agent.ToolResult // the results received
+	sent    int
+	results []agent.ToolResult
 }
 
 func (self *callProvider) Configure(string, []tool.Definition) {}
@@ -254,9 +254,9 @@ func TestStreamAnswersEveryCallOfAFinishedTurn(t *testing.T) {
 }
 
 type oneCallProvider struct {
-	call    agent.ToolCall     // the call to make
-	sent    int                // how many turns were sent
-	results []agent.ToolResult // the results received
+	call    agent.ToolCall
+	sent    int
+	results []agent.ToolResult
 }
 
 func (self *oneCallProvider) Configure(string, []tool.Definition) {}
@@ -405,9 +405,9 @@ func TestARefusedCallDoesNotReceiveOutputStats(t *testing.T) {
 }
 
 type unparsedCallProvider struct {
-	name      string // the tool called
-	arguments string // what it was called with
-	sent      int    // how many turns were sent
+	name      string
+	arguments string
+	sent      int
 }
 
 func (self *unparsedCallProvider) Configure(string, []tool.Definition) {}
@@ -499,7 +499,7 @@ func TestARefusedCallWithNothingToShowFallsBackToItsArguments(t *testing.T) {
 }
 
 type notingProvider struct {
-	messages []string // what was added, in the order it was added
+	messages []string
 }
 
 func (self *notingProvider) Configure(string, []tool.Definition) {}

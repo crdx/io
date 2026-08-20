@@ -26,10 +26,10 @@ const (
 
 // Input edits a line and walks its history.
 type Input struct {
-	buffer        *buffer          // the line being edited
-	history       *History         // the stored entries
-	recall        *recall          // the walk through history
-	pasting       bool             // whether pasted text is arriving
+	buffer        *buffer
+	history       *History
+	recall        *recall
+	pasting       bool
 	pasteStart    int              // where the current paste begins in the buffer
 	prefixed      bool             // whether ctrl+x went before, so the next key names a mode
 	enterPending  bool             // whether one enter awaits a second
@@ -74,11 +74,11 @@ func (self *Input) Pending() bool {
 
 // Frame is the visible input rows, cursor position, and clipped row counts.
 type Frame struct {
-	Rows   []string // the rows to draw
-	Row    int      // the row the cursor is on
-	Column int      // the column the cursor is at
-	Above  int      // the rows out of sight above
-	Below  int      // the rows out of sight below
+	Rows   []string
+	Row    int
+	Column int
+	Above  int // the rows out of sight above
+	Below  int // the rows out of sight below
 }
 
 // Frame lays out the current input at width.

@@ -9,8 +9,8 @@ import (
 // History is the entries typed before, oldest first, one per line of the file with newlines
 // escaped.
 type History struct {
-	path  string   // where history is stored
-	limit int      // how many entries are kept
+	path  string
+	limit int
 	lines []string // the entries, oldest first
 }
 
@@ -113,9 +113,9 @@ func unescape(line string) string {
 }
 
 type recall struct {
-	lines        []string // the entries being walked
-	index        int      // the current entry
-	pendingInput string   // the unfinished input
+	lines        []string
+	index        int
+	pendingInput string
 }
 
 func (self *recall) Walk(current string, direction int) (string, bool) {

@@ -16,8 +16,8 @@ import (
 
 // Args is what a write takes.
 type Args struct {
-	Path    string `json:"path"`    // the file to write
-	Content string `json:"content"` // the full contents
+	Path    string `json:"path"`
+	Content string `json:"content"`
 }
 
 // New builds a write tool confined to root.
@@ -42,9 +42,9 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 }
 
 type writer struct {
-	tool.Tool // the write tool itself
+	tool.Tool
 
-	root *file.Root // the tree written to
+	root *file.Root
 }
 
 func (self writer) ReadOnly() bool { return self.root.RefuseWrite(".") != nil }

@@ -13,8 +13,8 @@ const refreshWindow = 5 * time.Minute
 
 // Token is what one request is authorised with.
 type Token struct {
-	Access    string // the bearer token
-	AccountID string // the ChatGPT account
+	Access    string
+	AccountID string
 }
 
 // TokenSource hands over a token to make a request with.
@@ -50,10 +50,10 @@ func StoredCredentialsAt(path string) TokenSource {
 }
 
 type credentialStore struct {
-	path        string       // where credentials are stored
-	requests    *req.Client  // the credential-refresh transport
-	mutex       sync.Mutex   // guards loading and refreshing
-	credentials *Credentials // the credentials currently held
+	path        string
+	requests    *req.Client
+	mutex       sync.Mutex // guards loading and refreshing
+	credentials *Credentials
 }
 
 // Token reads the credentials on first use and refreshes them when needed.

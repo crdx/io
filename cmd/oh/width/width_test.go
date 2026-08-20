@@ -34,10 +34,10 @@ func TestTheTableIsInOrderAndDoesNotOverlap(t *testing.T) {
 
 func TestCutStopsShortOfACharacterThatWouldNotFit(t *testing.T) {
 	for _, test := range []struct {
-		text  string // the text to cut
-		cells int    // the width available
-		want  string // the text expected
-		took  int    // the width taken
+		text  string
+		cells int
+		want  string
+		took  int
 	}{
 		{"日本語", 4, "日本", 4},
 		{"日本語", 3, "日", 2}, // the second character would straddle the end

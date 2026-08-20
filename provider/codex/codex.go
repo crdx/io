@@ -30,7 +30,7 @@ const (
 	Effort   = "high"
 	Summary  = "auto" // defined as the "most detailed summarizer available for a model"
 
-	Originator = "io" // who we?
+	Originator = "io"
 )
 
 const turnTimeout = 60 * time.Minute
@@ -41,9 +41,9 @@ const turnTimeout = 60 * time.Minute
 // https://platform.openai.com/docs/api-reference/responses-streaming
 // https://platform.openai.com/docs/guides/conversation-state
 type Client struct {
-	URL    string // the endpoint address
-	Model  string // the model to ask
-	Effort string // how hard the model should reason
+	URL    string
+	Model  string
+	Effort string
 
 	tokens       TokenSource       // where credentials come from
 	instructions string            // what the model is told
@@ -209,16 +209,16 @@ func (self *Client) headers(token Token) http.Header {
 
 // https://platform.openai.com/docs/api-reference/responses/create
 type request struct {
-	Model             string         `json:"model"`                  // the model to ask
-	Store             bool           `json:"store"`                  // whether the endpoint stores the response
-	Tools             []functionTool `json:"tools"`                  // what the model may call
-	Instructions      string         `json:"instructions,omitempty"` // what the model is told
-	ParallelToolCalls bool           `json:"parallel_tool_calls"`    // whether calls may be made together
+	Model             string         `json:"model"`
+	Store             bool           `json:"store"`
+	Tools             []functionTool `json:"tools"`
+	Instructions      string         `json:"instructions,omitempty"`
+	ParallelToolCalls bool           `json:"parallel_tool_calls"`
 
 	// https://platform.openai.com/docs/api-reference/responses-streaming
 	Stream bool `json:"stream"` // whether events are streamed
 
-	Input []json.RawMessage `json:"input"` // the conversation so far
+	Input []json.RawMessage `json:"input"`
 
 	// https://platform.openai.com/docs/guides/conversation-state
 	Include []string `json:"include"` // which extra fields are returned
@@ -238,26 +238,26 @@ type request struct {
 //
 // https://platform.openai.com/docs/guides/reasoning
 type reasoning struct {
-	Effort  string `json:"effort"`  // how hard the model should reason
-	Summary string `json:"summary"` // how reasoning is reported
+	Effort  string `json:"effort"`
+	Summary string `json:"summary"`
 }
 
 type userMessage struct {
-	Role    string `json:"role"`    // who sent the message
-	Content string `json:"content"` // what they said
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
 type toolOutput struct {
-	Type   string `json:"type"`    // the kind of item
-	CallID string `json:"call_id"` // which call this answers
-	Output any    `json:"output"`  // what the tool returned
+	Type   string `json:"type"`
+	CallID string `json:"call_id"`
+	Output any    `json:"output"`
 }
 
 type inputContent struct {
-	Type     string `json:"type"`                // the kind of content
-	Text     string `json:"text,omitempty"`      // textual content
-	ImageURL string `json:"image_url,omitempty"` // an inline or remote image
-	Detail   string `json:"detail,omitempty"`    // how closely the model should inspect it
+	Type     string `json:"type"`
+	Text     string `json:"text,omitempty"`
+	ImageURL string `json:"image_url,omitempty"`
+	Detail   string `json:"detail,omitempty"`
 }
 
 // imageDetail is what the endpoint is asked to look at an image with. Codex names one on every

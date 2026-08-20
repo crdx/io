@@ -19,7 +19,7 @@ import (
 const readTool = "read"
 
 type painter struct {
-	screen    *output.Output  // where the conversation is drawn
+	screen    *output.Output
 	live      bool            // whether drawing is happening as events arrive
 	block     *status.Block   // the open block of calls
 	rows      map[string]int  // which row of the block a call is being shown on

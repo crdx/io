@@ -32,7 +32,7 @@ func Tool(subject tool.Tool) tool.Tool {
 }
 
 type capped struct {
-	tool.Tool // the tool whose output is capped
+	tool.Tool
 }
 
 func (self capped) Parse(arguments string) (tool.Call, error) {
@@ -45,7 +45,7 @@ func (self capped) Parse(arguments string) (tool.Call, error) {
 }
 
 type cappedCall struct {
-	tool.Call // the call whose output is capped
+	tool.Call
 }
 
 func (self cappedCall) Exec(ctx context.Context) (tool.Result, error) {

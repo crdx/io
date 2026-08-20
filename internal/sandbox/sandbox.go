@@ -39,17 +39,17 @@ var base = []grant{
 // networks are denied. Read entries inside Write remain read-only, and TmpDir appears at /tmp.
 // Background policies run through Processes.
 type Policy struct {
-	Read    []string          `json:"read"`    // paths readable
-	Write   []string          `json:"write"`   // paths readable and writable
-	Exec    []string          `json:"exec"`    // paths binaries may run from
-	TmpDir  string            `json:"tmpdir"`  // a directory to appear at /tmp
-	Env     []string          `json:"env"`     // environment variables passed through
-	SetEnv  map[string]string `json:"set_env"` // environment variables set by the caller
-	Timeout time.Duration     `json:"timeout"` // how long a command may run
+	Read    []string          `json:"read"`
+	Write   []string          `json:"write"` // paths readable and writable
+	Exec    []string          `json:"exec"`
+	TmpDir  string            `json:"tmpdir"` // a directory to appear at /tmp
+	Env     []string          `json:"env"`
+	SetEnv  map[string]string `json:"set_env"`
+	Timeout time.Duration     `json:"timeout"`
 
-	CPUTime    time.Duration `json:"cpu_time"`   // how much processor time it may burn
-	FileSize   int64         `json:"file_size"`  // the largest file it may write, in bytes
-	OpenFiles  int64         `json:"open_files"` // how many descriptors it may hold at once
+	CPUTime    time.Duration `json:"cpu_time"`
+	FileSize   int64         `json:"file_size"` // the largest file it may write, in bytes
+	OpenFiles  int64         `json:"open_files"`
 	Background bool          `json:"background"` // whether descendants may outlive the command
 }
 
@@ -102,9 +102,9 @@ func (self Policy) Writable() bool {
 }
 
 type grant struct {
-	path     string // what is granted
-	rights   uint64 // what may be done with it
-	optional bool   // whether its absence is acceptable
+	path     string
+	rights   uint64
+	optional bool
 }
 
 func (self Policy) grants() []grant {

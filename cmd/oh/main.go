@@ -84,13 +84,13 @@ type InputOpts struct {
 }
 
 type Opts struct {
-	workspaceDir   string // the workspace dir
+	workspaceDir   string
 	initialMessage string // the first prompt
 	session        string // the session to resume, empty to start afresh
 	provider       string // the provider selected with the model, empty to use the configured or saved provider
 	model          string // the explicitly selected model, empty to use the configured or saved model
 	effort         string // the effort paired with an explicitly selected model
-	caps           caps   // initial capabilities
+	caps           caps
 }
 
 func (self Opts) resuming() bool { return self.session != "" }

@@ -22,7 +22,7 @@ const (
 )
 
 type fakeProvider struct {
-	turn  int               // the current turn
+	turn  int
 	items []json.RawMessage // the stored provider state
 }
 
@@ -68,7 +68,7 @@ func (self *fakeProvider) Send(_ context.Context, yield agent.Yield) (agent.Repl
 }
 
 type fakeArgs struct {
-	Path string `json:"path"` // the file being named
+	Path string `json:"path"`
 }
 
 func slowTool(name string) tool.Tool {

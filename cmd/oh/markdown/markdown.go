@@ -34,8 +34,8 @@ func Render(markdown string, columns int) []string {
 }
 
 type renderer struct {
-	source  []byte   // the markdown being drawn, which every node is a position in
-	columns int      // the width to lay it out against
+	source  []byte // the markdown being drawn, which every node is a position in
+	columns int
 	tight   bool     // whether its blocks stand apart, which those of a tight list do not
 	rows    []string // what has been drawn so far
 }
