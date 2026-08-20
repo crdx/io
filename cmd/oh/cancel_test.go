@@ -291,6 +291,32 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 	}
 }
 
+func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) {
+	self := &conversation{
+		turn: turn{running: true, events: make(chan turnEvent), stop: func() {}},
+	}
+	history := line.NewHistory("", historyLimit)
+	input := line.NewInput(history)
+
+	for _, value := range "dfd" {
+		self.apply(input, history, key.Key{Code: key.Rune, Value: value})
+	}
+	self.apply(input, history, key.Key{Code: key.Enter})
+
+	if input.Text() != "" {
+		t.Fatalf("expected accepted editor input to disappear, got %q", input.Text())
+	}
+	if !self.turn.running {
+		t.Fatal("expected cancelled turn to remain running until its event channel closes")
+	}
+	if !self.turn.cancelled {
+		t.Fatal("expected the active turn to be marked cancelled")
+	}
+	if !self.queuedTurn || self.queuedPrompt != "dfd" {
+		t.Fatalf("expected dfd to exist only as an invisible queued prompt, got queued=%t prompt=%q", self.queuedTurn, self.queuedPrompt)
+	}
+}
+
 func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{})
