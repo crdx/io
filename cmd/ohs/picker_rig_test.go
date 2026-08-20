@@ -10,7 +10,7 @@ import (
 	"crdx.org/io/session"
 
 	"crdx.org/io/cmd/oh/output"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/ohs/picker"
 )
 
@@ -54,11 +54,11 @@ func TestPick(t *testing.T) {
 
 	switch {
 	case errors.Is(err, picker.ErrCancelled):
-		screen.Line(theme.Cancelled("nothing was chosen"))
+		screen.Line(style.Cancelled("nothing was chosen"))
 	case err != nil:
 		t.Fatal(err)
 	default:
-		screen.Line(theme.Result("chose " + chosenSession.ID + ": " + chosenSession.FirstPrompt()))
+		screen.Line(style.Result("chose " + chosenSession.ID + ": " + chosenSession.FirstPrompt()))
 	}
 
 	screen.End()

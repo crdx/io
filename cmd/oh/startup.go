@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/util"
 )
 
@@ -27,13 +27,13 @@ func renderStartupBanner(elapsed time.Duration, resumed bool, info startupInfo) 
 	var line strings.Builder
 	_, _ = line.WriteString(startupDuration(elapsed))
 	if info.sessionID != "" {
-		_, _ = line.WriteString(theme.Subtle(" session=") + theme.Normal(info.sessionID))
+		_, _ = line.WriteString(style.Subtle(" session=") + style.Normal(info.sessionID))
 	}
 	for _, file := range info.contextFiles {
-		_, _ = line.WriteString(theme.Subtle(" ") + startupContextFile(file))
+		_, _ = line.WriteString(style.Subtle(" ") + startupContextFile(file))
 	}
-	_, _ = line.WriteString(theme.Subtle(" ") + startupSkills(info))
-	_, _ = line.WriteString(theme.Subtle(" ") + startupTools(info))
+	_, _ = line.WriteString(style.Subtle(" ") + startupSkills(info))
+	_, _ = line.WriteString(style.Subtle(" ") + startupTools(info))
 	return line.String()
 }
 
@@ -73,11 +73,11 @@ type startupLine struct {
 }
 
 func (self *startupLine) dim(text string) {
-	_, _ = self.WriteString(theme.Subtle(text))
+	_, _ = self.WriteString(style.Subtle(text))
 }
 
 func (self *startupLine) normal(text string) {
-	_, _ = self.WriteString(theme.Normal(text))
+	_, _ = self.WriteString(style.Normal(text))
 }
 
 func (self *startupLine) quantity(text string, unitNormal bool) {

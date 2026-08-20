@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"crdx.org/io/cmd/oh/markdown"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 )
@@ -71,7 +71,7 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := theme.Plain(outcomeText("✓", 1400*time.Millisecond, &test.stats))
+			got := style.Plain(outcomeText("✓", 1400*time.Millisecond, &test.stats))
 			for _, want := range test.want {
 				if !strings.Contains(got, want) {
 					t.Errorf("got %q, want %q", got, want)
@@ -83,42 +83,42 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 
 func TestStatsUseTheirExpectedStyles(t *testing.T) {
 	output := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 951})
-	if want := theme.Subtle("4L ~200t"); !strings.Contains(output, want) {
+	if want := style.Subtle("4L ~200t"); !strings.Contains(output, want) {
 		t.Errorf("output stats got %q, want styled %q", output, want)
 	}
 
 	emptyOutput := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsOutput})
-	if want := theme.Subtle("no output"); !strings.Contains(emptyOutput, want) {
+	if want := style.Subtle("no output"); !strings.Contains(emptyOutput, want) {
 		t.Errorf("empty output stats got %q, want styled %q", emptyOutput, want)
 	}
 
 	read := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsRead, Lines: 45, Bytes: 951})
-	if want := theme.Subtle("45L ~200t"); !strings.Contains(read, want) {
+	if want := style.Subtle("45L ~200t"); !strings.Contains(read, want) {
 		t.Errorf("read stats got %q, want styled %q", read, want)
 	}
 
 	write := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsWrite, Lines: 12, Bytes: 1200})
-	if want := theme.Subtle("12L ~300t"); !strings.Contains(write, want) {
+	if want := style.Subtle("12L ~300t"); !strings.Contains(write, want) {
 		t.Errorf("write stats got %q, want styled %q", write, want)
 	}
 
 	search := outcomeText("✓", 0, &tool.Stats{
 		Kind: tool.StatsSearch, Lines: 23, Bytes: 1200, TotalBytes: 2400, Truncated: true,
 	})
-	if want := theme.Subtle("23L+ ~300t (of ~600t)"); !strings.Contains(search, want) {
+	if want := style.Subtle("23L+ ~300t (of ~600t)"); !strings.Contains(search, want) {
 		t.Errorf("search stats got %q, want styled %q", search, want)
 	}
 
 	exec := outcomeText("✓", 0, &tool.Stats{
 		Kind: tool.StatsResources, PeakMemory: 26 << 20,
 	})
-	wantExec := theme.Subtle("0L 0t 0s 0s 26M")
+	wantExec := style.Subtle("0L 0t 0s 0s 26M")
 	if !strings.Contains(exec, wantExec) {
 		t.Errorf("exec stats got %q, want styled %q", exec, wantExec)
 	}
 
 	edit := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsDiff, Added: 2, Removed: 1})
-	wantEdit := theme.Success("+2") + theme.Subtle(" ") + theme.Failure("−1")
+	wantEdit := style.Success("+2") + style.Subtle(" ") + style.Failure("−1")
 	if !strings.Contains(edit, wantEdit) {
 		t.Errorf("edit stats got %q, want styled %q", edit, wantEdit)
 	}
@@ -155,7 +155,7 @@ func TestOnlyTheFocusedPartOfArgumentsIsPainted(t *testing.T) {
 		Name: "read", Subject: "cmd/oh/draw.go", ReadOnly: true,
 		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
 	}
-	want := theme.Call("read") + " " + theme.Subtle("cmd/oh/") + theme.Subject("draw.go")
+	want := style.Call("read") + " " + style.Subtle("cmd/oh/") + style.Subject("draw.go")
 
 	if got := label.render(); got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -165,15 +165,15 @@ func TestOnlyTheFocusedPartOfArgumentsIsPainted(t *testing.T) {
 func TestAnAccentAndTheFocusedPartOfArgumentsArePainted(t *testing.T) {
 	label := Label{
 		Name:        "skill",
-		NameStyle:   theme.Skill,
+		NameStyle:   style.Skill,
 		Subject:     "/skills/guard-basics/SKILL.md",
 		Highlight:   tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
 		Accent:      "guard-basics",
-		AccentStyle: theme.Skill,
+		AccentStyle: style.Skill,
 	}
-	want := theme.Skill("skill") + " " +
-		theme.Subtle("/skills/") + theme.Skill("guard-basics") +
-		theme.Subtle("/") + theme.Subject("SKILL.md")
+	want := style.Skill("skill") + " " +
+		style.Subtle("/skills/") + style.Skill("guard-basics") +
+		style.Subtle("/") + style.Subject("SKILL.md")
 
 	if got := label.render(); got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -185,7 +185,7 @@ func TestArgumentsWithSyntaxAreHighlighted(t *testing.T) {
 		Name: "bash", Subject: "echo one && true",
 		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
 	}
-	want := theme.Change("bash") + " " + markdown.Highlight(label.Subject, "bash")
+	want := style.Change("bash") + " " + markdown.Highlight(label.Subject, "bash")
 
 	if got := label.render(); got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -202,27 +202,27 @@ func TestElidedBashKeepsHighlightingFromTheCompleteCommand(t *testing.T) {
 		"inside executable": {
 			2,
 			"g…",
-			theme.Function("g") + theme.Function(ellipsis),
+			style.Function("g") + style.Function(ellipsis),
 		},
 		"at parameter start": {
 			4,
 			"go …",
-			theme.Function("go") + theme.Block(" ") + theme.Function(ellipsis),
+			style.Function("go") + style.Block(" ") + style.Function(ellipsis),
 		},
 		"inside parameter": {
 			6,
 			"go li…",
-			theme.Function("go") + theme.Block(" ") + theme.Function("li") + theme.Function(ellipsis),
+			style.Function("go") + style.Block(" ") + style.Function("li") + style.Function(ellipsis),
 		},
 		"at parameter end": {
 			8,
 			"go list…",
-			theme.Function("go") + theme.Block(" ") + theme.Function("list") + theme.Block(ellipsis),
+			style.Function("go") + style.Block(" ") + style.Function("list") + style.Block(ellipsis),
 		},
 		"inside later argument": {
 			12,
 			"go list ord…",
-			theme.Function("go") + theme.Block(" ") + theme.Function("list") + theme.Block(" ord") + theme.Block(ellipsis),
+			style.Function("go") + style.Block(" ") + style.Function("list") + style.Block(" ord") + style.Block(ellipsis),
 		},
 	} {
 		label := Label{
@@ -234,10 +234,10 @@ func TestElidedBashKeepsHighlightingFromTheCompleteCommand(t *testing.T) {
 		if got != test.want {
 			t.Errorf("%s: got %q, want %q", name, got, test.want)
 		}
-		if plain := theme.Plain(got); plain != test.plain {
+		if plain := style.Plain(got); plain != test.plain {
 			t.Errorf("%s: got plain text %q, want %q", name, plain, test.plain)
 		}
-		if cells := theme.Width(got); cells > test.argumentRoom {
+		if cells := style.Width(got); cells > test.argumentRoom {
 			t.Errorf("%s: used %d cells, want at most %d", name, cells, test.argumentRoom)
 		}
 	}
@@ -250,15 +250,15 @@ func TestElidedBashCountsWideUnicodeInTerminalCells(t *testing.T) {
 		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
 	}.Elide(len("bash ") + argumentRoom)
 	got := label.renderSubject()
-	want := theme.Function("echo") + theme.Block(" ") + theme.Function("日") + theme.Function(ellipsis)
+	want := style.Function("echo") + style.Block(" ") + style.Function("日") + style.Function(ellipsis)
 
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
-	if plain := theme.Plain(got); plain != "echo 日…" {
+	if plain := style.Plain(got); plain != "echo 日…" {
 		t.Errorf("got plain text %q, want %q", plain, "echo 日…")
 	}
-	if cells := theme.Width(got); cells > argumentRoom {
+	if cells := style.Width(got); cells > argumentRoom {
 		t.Errorf("used %d cells, want at most %d", cells, argumentRoom)
 	}
 }
@@ -268,8 +268,8 @@ func TestAPathInTheDetailCanBeFocused(t *testing.T) {
 		Name: "grep", Subject: "text", Qualifier: "in cmd/oh/draw.go",
 		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
 	}
-	want := theme.Change("grep") + " " + theme.Subject("text") + " " +
-		theme.Qualifier("in cmd/oh/") + theme.Subject("draw.go")
+	want := style.Change("grep") + " " + style.Subject("text") + " " +
+		style.Qualifier("in cmd/oh/") + style.Subject("draw.go")
 
 	if got := label.render(); got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -281,7 +281,7 @@ func TestARowSaysNothingOfACallUntilItHasBeenGoingAWhile(t *testing.T) {
 
 	block.Add(callLabel("read", "main.go"))
 
-	if got := output.String(); got != theme.Call("read")+" "+theme.Subject("main.go") {
+	if got := output.String(); got != style.Call("read")+" "+style.Subject("main.go") {
 		t.Errorf("expected the call and nothing else, got %q", got)
 	}
 }
@@ -291,7 +291,7 @@ func TestARowIsColouredByWhetherItsCallWrites(t *testing.T) {
 
 	block.Add(Label{Name: "write", Subject: "main.go"})
 
-	if got := output.String(); got != theme.Change("write")+" "+theme.Subject("main.go") {
+	if got := output.String(); got != style.Change("write")+" "+style.Subject("main.go") {
 		t.Errorf("expected a call that writes to be painted as one, got %q", got)
 	}
 }
@@ -317,7 +317,7 @@ func TestACallWorthWaitingForSaysHowLongItTook(t *testing.T) {
 	output.Reset()
 	block.Mark(0, Done, 5*time.Second, "")
 
-	if got := rowsFromOutput(output)[0]; !strings.Contains(got, theme.Spinner("5s")) {
+	if got := rowsFromOutput(output)[0]; !strings.Contains(got, style.Spinner("5s")) {
 		t.Errorf("expected the time it took, got %q", got)
 	}
 }
@@ -326,7 +326,7 @@ func TestRunningTimerUsesWholeSecondGranularity(t *testing.T) {
 	block := &Block{revealed: true}
 	item := row{state: Running, startedAt: time.Now().Add(-5500 * time.Millisecond)}
 
-	if got := theme.Plain(block.outcome(item)); got != "✦· 5s" {
+	if got := style.Plain(block.outcome(item)); got != "✦· 5s" {
 		t.Errorf("expected a whole-second timer, got %q", got)
 	}
 }
@@ -356,7 +356,7 @@ func TestACallThatFailedSaysWhy(t *testing.T) {
 	output.Reset()
 	block.Mark(0, Failed, 0, "permission denied")
 
-	if got := rowsFromOutput(output)[0]; !strings.Contains(got, theme.Failure("permission denied")) {
+	if got := rowsFromOutput(output)[0]; !strings.Contains(got, style.Failure("permission denied")) {
 		t.Errorf("expected the reason in the colour of a failure, got %q", got)
 	}
 }
@@ -399,8 +399,8 @@ func TestALongReasonLeavesTheCallItIsAbout(t *testing.T) {
 
 	row := rowsFromOutput(output)[0]
 
-	if theme.Width(row) > wide {
-		t.Errorf("expected the row to fit in %d columns, got %d in %q", wide, theme.Width(row), row)
+	if style.Width(row) > wide {
+		t.Errorf("expected the row to fit in %d columns, got %d in %q", wide, style.Width(row), row)
 	}
 
 	if !strings.Contains(row, "main.go") {
@@ -465,8 +465,8 @@ func TestALabelIsCutToLeaveRoomForTheOutcome(t *testing.T) {
 	block.Mark(0, Done, 3*time.Second, "")
 
 	for _, row := range rowsFromOutput(output) {
-		if theme.Width(row) > wide {
-			t.Errorf("expected the row to fit %d columns, got %d in %q", wide, theme.Width(row), row)
+		if style.Width(row) > wide {
+			t.Errorf("expected the row to fit %d columns, got %d in %q", wide, style.Width(row), row)
 		}
 	}
 }
@@ -480,10 +480,10 @@ func TestALabelTakesTheRoomATimeWouldHaveTakenWhereNoTimeIsShown(t *testing.T) {
 	block.Mark(0, Done, time.Millisecond, "")
 
 	for _, row := range rowsFromOutput(output) {
-		if theme.Width(row) != wide-edgeGuard {
+		if style.Width(row) != wide-edgeGuard {
 			t.Errorf(
 				"expected the row to leave its %d-column edge guard, got width %d in %q",
-				edgeGuard, theme.Width(row), row,
+				edgeGuard, style.Width(row), row,
 			)
 		}
 	}
@@ -498,10 +498,10 @@ func TestALabelGivesRoomBackWhenTheTimeAppears(t *testing.T) {
 	block.Mark(0, Done, 3*time.Second, "")
 
 	for _, row := range rowsFromOutput(output) {
-		if theme.Width(row) != wide-edgeGuard {
+		if style.Width(row) != wide-edgeGuard {
 			t.Errorf(
 				"expected the row to leave its %d-column edge guard, got width %d in %q",
-				edgeGuard, theme.Width(row), row,
+				edgeGuard, style.Width(row), row,
 			)
 		}
 	}
@@ -517,10 +517,10 @@ func TestACompletedOutcomeIsKeptBackFromTheTerminalEdge(t *testing.T) {
 	block.Mark(0, Done, 7420*time.Millisecond, "")
 
 	row := rowsFromOutput(output)[0]
-	if got := theme.Plain(row); !strings.HasSuffix(got, "✓ 7.4s") {
+	if got := style.Plain(row); !strings.HasSuffix(got, "✓ 7.4s") {
 		t.Errorf("expected the complete outcome at the end, got %q", got)
 	}
-	if got := theme.Width(row); got > block.columns-edgeGuard {
+	if got := style.Width(row); got > block.columns-edgeGuard {
 		t.Errorf("expected %d guarded columns at the edge, got width %d in %q", edgeGuard, got, row)
 	}
 }

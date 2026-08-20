@@ -9,7 +9,7 @@ import (
 	"github.com/alecthomas/chroma/v2/lexers"
 	"mvdan.cc/sh/v3/syntax"
 
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 )
 
 // Highlight paints one line of source in the named language.
@@ -24,7 +24,7 @@ func Highlight(line string, language string) string {
 	}
 }
 
-func highlight(lines []string, language string) []string { // chroma reads it, the theme paints it
+func highlight(lines []string, language string) []string { // chroma reads it, the style paints it
 	lexer := lexers.Get(language)
 	if language == "" || lexer == nil {
 		return plainly(lines)
@@ -80,7 +80,7 @@ func HighlightPrefix(source string, prefix string, language string, elided bool)
 type sourceSpan struct {
 	start int
 	end   int
-	style theme.Style
+	style style.Style
 }
 
 func highlightBashPrefix(source string, retainedPrefix string, elided bool) string {
@@ -89,7 +89,7 @@ func highlightBashPrefix(source string, retainedPrefix string, elided bool) stri
 		if elided {
 			retainedPrefix += "…"
 		}
-		return theme.Block(retainedPrefix)
+		return style.Block(retainedPrefix)
 	}
 
 	boundary := len(retainedPrefix)
@@ -105,7 +105,7 @@ func highlightBashPrefix(source string, retainedPrefix string, elided bool) stri
 		}
 
 		if position < span.start {
-			output.WriteString(theme.Block(retainedPrefix[position:span.start]))
+			output.WriteString(style.Block(retainedPrefix[position:span.start]))
 		}
 
 		end := min(span.end, boundary)
@@ -114,11 +114,11 @@ func highlightBashPrefix(source string, retainedPrefix string, elided bool) stri
 	}
 
 	if position < boundary {
-		output.WriteString(theme.Block(retainedPrefix[position:]))
+		output.WriteString(style.Block(retainedPrefix[position:]))
 	}
 
 	if elided {
-		style := theme.Block
+		style := style.Block
 		for _, span := range spans {
 			if span.start <= boundary && boundary < span.end {
 				style = span.style
@@ -145,58 +145,58 @@ func bashCommandSpans(source string) ([]sourceSpan, error) {
 				spans = append(spans, sourceSpan{
 					start: int(word.Pos().Offset()),
 					end:   int(word.End().Offset()),
-					style: theme.Function,
+					style: style.Function,
 				})
 			}
 		case *syntax.Assign:
 			spans = append(spans, bashAssignmentSpans(node)...)
 		case *syntax.Redirect:
-			spans = append(spans, bashSourceSpan(node.OpPos, node.Op.String(), theme.Operator))
+			spans = append(spans, bashSourceSpan(node.OpPos, node.Op.String(), style.Operator))
 		case *syntax.BinaryCmd:
-			spans = append(spans, bashSourceSpan(node.OpPos, node.Op.String(), theme.Operator))
+			spans = append(spans, bashSourceSpan(node.OpPos, node.Op.String(), style.Operator))
 		case *syntax.Stmt:
 			if node.Semicolon.IsValid() {
-				spans = append(spans, bashSourceSpan(node.Semicolon, ";", theme.Operator))
+				spans = append(spans, bashSourceSpan(node.Semicolon, ";", style.Operator))
 			}
 		case *syntax.ForClause:
 			keyword := "for"
 			if node.Select {
 				keyword = "select"
 			}
-			spans = append(spans, bashSourceSpan(node.ForPos, keyword, theme.Keyword))
+			spans = append(spans, bashSourceSpan(node.ForPos, keyword, style.Keyword))
 			spans = append(spans, bashLoopBodySpans(node.DoPos, node.DonePos)...)
 		case *syntax.WhileClause:
 			keyword := "while"
 			if node.Until {
 				keyword = "until"
 			}
-			spans = append(spans, bashSourceSpan(node.WhilePos, keyword, theme.Keyword))
+			spans = append(spans, bashSourceSpan(node.WhilePos, keyword, style.Keyword))
 			spans = append(spans, bashLoopBodySpans(node.DoPos, node.DonePos)...)
 		case *syntax.IfClause:
 			if node.Position.IsValid() { // "if", "elif" or "else" by turn
 				spans = append(spans, bashKeywordSpan(source, node.Position))
 			}
 			if node.ThenPos.IsValid() {
-				spans = append(spans, bashSourceSpan(node.ThenPos, "then", theme.Keyword))
+				spans = append(spans, bashSourceSpan(node.ThenPos, "then", style.Keyword))
 			}
 			if node.FiPos.IsValid() { // repeats down the else-chain, harmlessly
-				spans = append(spans, bashSourceSpan(node.FiPos, "fi", theme.Keyword))
+				spans = append(spans, bashSourceSpan(node.FiPos, "fi", style.Keyword))
 			}
 		case *syntax.CaseClause:
-			spans = append(spans, bashSourceSpan(node.Case, "case", theme.Keyword))
+			spans = append(spans, bashSourceSpan(node.Case, "case", style.Keyword))
 			if node.In.IsValid() {
-				spans = append(spans, bashSourceSpan(node.In, "in", theme.Keyword))
+				spans = append(spans, bashSourceSpan(node.In, "in", style.Keyword))
 			}
 			if node.Esac.IsValid() {
-				spans = append(spans, bashSourceSpan(node.Esac, "esac", theme.Keyword))
+				spans = append(spans, bashSourceSpan(node.Esac, "esac", style.Keyword))
 			}
 		case *syntax.CaseItem:
 			if node.OpPos.IsValid() {
-				spans = append(spans, bashSourceSpan(node.OpPos, node.Op.String(), theme.Operator))
+				spans = append(spans, bashSourceSpan(node.OpPos, node.Op.String(), style.Operator))
 			}
 		case *syntax.WordIter:
 			if node.InPos.IsValid() {
-				spans = append(spans, bashSourceSpan(node.InPos, "in", theme.Keyword))
+				spans = append(spans, bashSourceSpan(node.InPos, "in", style.Keyword))
 			}
 		}
 		return true
@@ -212,7 +212,7 @@ func bashCommandSpans(source string) ([]sourceSpan, error) {
 	return spans, nil
 }
 
-func bashSourceSpan(position syntax.Pos, text string, style theme.Style) sourceSpan {
+func bashSourceSpan(position syntax.Pos, text string, style style.Style) sourceSpan {
 	start := int(position.Offset())
 	return sourceSpan{start: start, end: start + len(text), style: style}
 }
@@ -225,18 +225,18 @@ func bashKeywordSpan(source string, position syntax.Pos) sourceSpan {
 		end++
 	}
 
-	return sourceSpan{start: start, end: end, style: theme.Keyword}
+	return sourceSpan{start: start, end: end, style: style.Keyword}
 }
 
 func bashLoopBodySpans(doPosition syntax.Pos, donePosition syntax.Pos) []sourceSpan {
 	var spans []sourceSpan
 
 	if doPosition.IsValid() {
-		spans = append(spans, bashSourceSpan(doPosition, "do", theme.Keyword))
+		spans = append(spans, bashSourceSpan(doPosition, "do", style.Keyword))
 	}
 
 	if donePosition.IsValid() {
-		spans = append(spans, bashSourceSpan(donePosition, "done", theme.Keyword))
+		spans = append(spans, bashSourceSpan(donePosition, "done", style.Keyword))
 	}
 
 	return spans
@@ -251,20 +251,20 @@ func bashAssignmentSpans(assignment *syntax.Assign) []sourceSpan {
 	spans := []sourceSpan{{
 		start: int(assignment.Name.Pos().Offset()),
 		end:   nameEnd,
-		style: theme.Block,
+		style: style.Block,
 	}}
 
 	valueStart := int(assignment.End().Offset())
 	if assignment.Value != nil {
 		valueStart = int(assignment.Value.Pos().Offset())
 	}
-	spans = append(spans, sourceSpan{start: nameEnd, end: valueStart, style: theme.Operator})
+	spans = append(spans, sourceSpan{start: nameEnd, end: valueStart, style: style.Operator})
 
 	if assignment.Value != nil {
 		spans = append(spans, sourceSpan{
 			start: valueStart,
 			end:   int(assignment.Value.End().Offset()),
-			style: theme.Block,
+			style: style.Block,
 		})
 	}
 
@@ -286,14 +286,14 @@ type styledSpan struct {
 	style regexpStyle
 }
 
-func (self regexpStyle) paint() theme.Style {
+func (self regexpStyle) paint() style.Style {
 	switch self {
 	case regexpKeyword:
-		return theme.Keyword
+		return style.Keyword
 	case regexpOperator:
-		return theme.Operator
+		return style.Operator
 	default:
-		return theme.Block
+		return style.Block
 	}
 }
 
@@ -405,16 +405,16 @@ func plainly(lines []string) []string {
 	highlightedLines := make([]string, len(lines))
 
 	for index, line := range lines {
-		highlightedLines[index] = theme.Block(line)
+		highlightedLines[index] = style.Block(line)
 	}
 
 	return highlightedLines
 }
 
-func tokenStyle(token chroma.TokenType) theme.Style {
+func tokenStyle(token chroma.TokenType) style.Style {
 	switch token.Category() {
 	case chroma.Comment:
-		return theme.Comment
+		return style.Comment
 	case chroma.Keyword:
 		return keyword(token)
 	case chroma.Literal:
@@ -422,39 +422,39 @@ func tokenStyle(token chroma.TokenType) theme.Style {
 	case chroma.Name:
 		return name(token)
 	case chroma.Operator:
-		return theme.Operator
+		return style.Operator
 	case chroma.Punctuation:
-		return theme.Punctuation
+		return style.Punctuation
 	case chroma.Text, chroma.Error, chroma.Other, chroma.Generic:
-		return theme.Block
+		return style.Block
 	}
 
-	return theme.Block
+	return style.Block
 }
 
-func keyword(token chroma.TokenType) theme.Style {
+func keyword(token chroma.TokenType) style.Style {
 	if token == chroma.KeywordType {
-		return theme.Type
+		return style.Type
 	}
 
-	return theme.Keyword
+	return style.Keyword
 }
 
-func literal(token chroma.TokenType) theme.Style {
+func literal(token chroma.TokenType) style.Style {
 	if token.SubCategory() == chroma.LiteralNumber {
-		return theme.Number
+		return style.Number
 	}
 
-	return theme.Literal
+	return style.Literal
 }
 
-func name(token chroma.TokenType) theme.Style {
+func name(token chroma.TokenType) style.Style {
 	switch token {
 	case chroma.NameFunction, chroma.NameFunctionMagic:
-		return theme.Function
+		return style.Function
 	case chroma.NameClass, chroma.NameNamespace, chroma.NameBuiltin:
-		return theme.Type
+		return style.Type
 	}
 
-	return theme.Variable
+	return style.Variable
 }

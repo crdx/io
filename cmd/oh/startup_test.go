@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 )
 
 func TestTookReportsTheScaleAStartupHappensOn(t *testing.T) {
@@ -33,7 +33,7 @@ func TestTheStartupLineUsesTheCompactSummary(t *testing.T) {
 	})
 	want := "startup=12ms session=034session SYSTEM.md=~200t AGENTS.md=~800t skills=2p/3g tools=~600t"
 
-	if plainText := theme.Plain(line); plainText != want {
+	if plainText := style.Plain(line); plainText != want {
 		t.Errorf("got %q, want %q", plainText, want)
 	}
 }
@@ -44,10 +44,10 @@ func TestStartupQuantitiesPutOnlyTheirNumbersInTheNormalForeground(t *testing.T)
 		unitNormal bool
 		want       string
 	}{
-		"duration":       {"355µs", false, theme.Normal("355") + theme.Subtle("µs")},
-		"file size":      {"1G", true, theme.Normal("1G")},
-		"token estimate": {"~1.22Kt", false, theme.Subtle("~") + theme.Normal("1.22") + theme.Subtle("Kt")},
-		"no number":      {"none", false, theme.Subtle("none")},
+		"duration":       {"355µs", false, style.Normal("355") + style.Subtle("µs")},
+		"file size":      {"1G", true, style.Normal("1G")},
+		"token estimate": {"~1.22Kt", false, style.Subtle("~") + style.Normal("1.22") + style.Subtle("Kt")},
+		"no number":      {"none", false, style.Subtle("none")},
 	} {
 		t.Run(name, func(t *testing.T) {
 			var line startupLine
@@ -60,7 +60,7 @@ func TestStartupQuantitiesPutOnlyTheirNumbersInTheNormalForeground(t *testing.T)
 }
 
 func TestNoPromptFilesLeaveNoEmptyField(t *testing.T) {
-	line := theme.Plain(renderStartupBanner(time.Millisecond, false, startupInfo{}))
+	line := style.Plain(renderStartupBanner(time.Millisecond, false, startupInfo{}))
 	want := "startup=1ms skills=0p/0g tools=0t"
 
 	if line != want {

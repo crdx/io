@@ -15,7 +15,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/key"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/internal/pathutil"
@@ -159,7 +159,7 @@ func (self *state) draw() {
 	var out strings.Builder
 
 	out.WriteString(clearScreen)
-	out.WriteString(theme.Subtle(clip(header, width)))
+	out.WriteString(style.Subtle(clip(header, width)))
 	out.WriteString("\r\n\r\n")
 
 	for index := self.offset; index < min(self.offset+rows, len(self.sessions)); index++ {
@@ -194,10 +194,10 @@ func (self *state) row(index int, width int) string {
 	line = clip(line, width)
 
 	if index == self.cursor {
-		return theme.Chosen(line)
+		return style.Chosen(line)
 	}
 
-	return theme.Answer(line)
+	return style.Answer(line)
 }
 
 func messageCount(messages int) string {

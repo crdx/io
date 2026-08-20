@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/output"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 )
 
 func TestAFinishedTurnEndsWithANewline(t *testing.T) {
@@ -33,7 +33,7 @@ func TestTheNextThingSaidStartsTheLineTheTurnCameDownTo(t *testing.T) {
 	screen.End()
 	screen.Line("> again")
 
-	if got := screenOutput.String(); got != "banner\n\n"+theme.Answer("hello")+"\n\n> again" {
+	if got := screenOutput.String(); got != "banner\n\n"+style.Answer("hello")+"\n\n> again" {
 		t.Errorf("expected an answer set apart from each, got %q", got)
 	}
 }
@@ -48,7 +48,7 @@ func TestEndingATurnTwiceComesDownOnlyOnce(t *testing.T) {
 	screen.End()
 	screen.Line("> again")
 
-	if got := screenOutput.String(); got != theme.Answer("hello")+"\n\n> again" {
+	if got := screenOutput.String(); got != style.Answer("hello")+"\n\n> again" {
 		t.Errorf("expected one line between each, got %q", got)
 	}
 }
@@ -124,7 +124,7 @@ func TestAnAnswerIsSetApartHoweverManyPiecesItArrivesIn(t *testing.T) {
 	screen.Line("read go.mod")
 
 	want := "read main.go\n\n" +
-		theme.Answer("one ") + theme.Answer("two ") + theme.Answer("three") +
+		style.Answer("one ") + style.Answer("two ") + style.Answer("three") +
 		"\n\nread go.mod"
 
 	if got := screenOutput.String(); got != want {
@@ -174,7 +174,7 @@ func TestAnAnswerOpeningOnNewlinesIsNotPushedFurtherApart(t *testing.T) {
 	screen.Answer("\n")
 	screen.Answer("\n\nhello")
 
-	if got := screenOutput.String(); got != "read main.go\n\n"+theme.Answer("hello") {
+	if got := screenOutput.String(); got != "read main.go\n\n"+style.Answer("hello") {
 		t.Errorf("expected the answer where it was going anyway, got %q", got)
 	}
 }
@@ -188,7 +188,7 @@ func TestAnAnswerKeepsTheBlankRowsInsideIt(t *testing.T) {
 	screen.Answer("\n\n")
 	screen.Answer("two")
 
-	want := theme.Answer("one") + "\n\n" + theme.Answer("two")
+	want := style.Answer("one") + "\n\n" + style.Answer("two")
 
 	if got := screenOutput.String(); got != want {
 		t.Errorf("expected the paragraph break to stay, got %q", got)

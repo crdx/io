@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/status"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 )
 
 func label() status.Label {
@@ -65,7 +65,7 @@ func TestALabelIsCutToTheCellsItHasRatherThanTheCharacters(t *testing.T) {
 		t.Errorf("expected two characters and an ellipsis, got %q", elidedLabel.Subject)
 	}
 
-	if got := theme.Width(elidedLabel.Name + " " + elidedLabel.Subject); got != 10 {
+	if got := style.Width(elidedLabel.Name + " " + elidedLabel.Subject); got != 10 {
 		t.Errorf("expected the label to measure 10 cells, got %d", got)
 	}
 }

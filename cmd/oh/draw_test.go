@@ -15,7 +15,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
@@ -28,7 +28,7 @@ func TestWhatWasAskedIsRenderedIntoTheConversation(t *testing.T) {
 		painter := &painter{screen: output.New(&screenOutput), live: live}
 		painter.draw(agent.Event{Kind: agent.Prompt, Text: "**weather**\n\n- today"})
 
-		plain := theme.Plain(screenOutput.String())
+		plain := style.Plain(screenOutput.String())
 		if !strings.Contains(plain, " weather\n \n • today") {
 			t.Errorf("live=%v: expected the question's markdown to be rendered, got %q", live, plain)
 		}
@@ -44,7 +44,7 @@ func TestWhatWasAskedIsRenderedIntoTheConversation(t *testing.T) {
 }
 
 func TestASubmittedMessageHasBackgroundRowsAboveAndBelowIt(t *testing.T) {
-	got := theme.Plain(renderSubmittedMessage("hello", 8))
+	got := style.Plain(renderSubmittedMessage("hello", 8))
 	want := "        \n hello  \n        "
 
 	if got != want {
@@ -153,11 +153,11 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 	}{
 		"a read of a skill": {
 			tool: "read", path: skillPath,
-			want: "load " + skillPath, painted: theme.Skill("golang"),
+			want: "load " + skillPath, painted: style.Skill("golang"),
 		},
 		"a read of a file": {
 			tool: "read", path: "cmd/oh/draw.go",
-			want: "read cmd/oh/draw.go", painted: theme.Subject("draw.go"),
+			want: "read cmd/oh/draw.go", painted: style.Subject("draw.go"),
 		},
 		"another tool": {tool: "grep", path: skillPath, want: "grep " + skillPath},
 	}
@@ -173,7 +173,7 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 			})
 			callPainter.close(status.Done)
 
-			if plain := theme.Plain(screenOutput.String()); !strings.Contains(plain, test.want) {
+			if plain := style.Plain(screenOutput.String()); !strings.Contains(plain, test.want) {
 				t.Errorf("got %q, want %q", plain, test.want)
 			}
 			if test.painted != "" && !strings.Contains(screenOutput.String(), test.painted) {
@@ -193,7 +193,7 @@ func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
 	})
 	callPainter.close(status.Done)
 
-	if strings.Contains(screenOutput.String(), theme.Subject("SKILL.md")) {
+	if strings.Contains(screenOutput.String(), style.Subject("SKILL.md")) {
 		t.Errorf("got %q, want the file left dim", screenOutput.String())
 	}
 }
@@ -206,7 +206,7 @@ func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 		assistant: agent.New("", quietProvider{}, nil),
 		screen:    output.New(&live),
 	}
-	self.notify(theme.Stopped(notice))
+	self.notify(style.Stopped(notice))
 	self.screen.End()
 
 	var replayOutput bytes.Buffer
@@ -245,7 +245,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 		self.transcript = appendTranscript(self.transcript, event)
 		livePainter.draw(event)
 	}
-	self.notify(theme.Stopped("Background processes killed (bash → sleep)"))
+	self.notify(style.Stopped("Background processes killed (bash → sleep)"))
 
 	unansweredCall := agent.Event{Kind: agent.Call, ID: "3", Name: "read", Subject: "left.go"}
 	self.transcript = appendTranscript(self.transcript, unansweredCall)
@@ -257,7 +257,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	self.screen = output.New(&replayOutput)
 	self.replay()
 
-	plain := theme.Plain(live.String())
+	plain := style.Plain(live.String())
 
 	for _, want := range []string{"Check", "Looking at the file.", "Need care.", "first answer.", "one.go", "Done.", "Background processes killed"} {
 		if !strings.Contains(plain, want) {
@@ -276,7 +276,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 func TestAThoughtHasMarkdownStripped(t *testing.T) {
 	rows := renderReasoning("## **Checking** `one.go`", 40)
 	for index := range rows {
-		rows[index] = theme.Plain(rows[index])
+		rows[index] = style.Plain(rows[index])
 	}
 
 	if got := strings.Join(rows, "\n"); got != "Checking one.go" {
@@ -292,7 +292,7 @@ func TestAThoughtRunsDirectlyIntoAToolCall(t *testing.T) {
 	callPainter.draw(agent.Event{Kind: agent.Call, ID: "1", Name: "read", Subject: "one.go"})
 	callPainter.close(status.Cancelled)
 
-	plain := theme.Plain(screenOutput.String())
+	plain := style.Plain(screenOutput.String())
 	if !strings.Contains(plain, "checking\nread one.go") {
 		t.Errorf("expected no blank line between reasoning and the tool call, got %q", plain)
 	}
@@ -301,7 +301,7 @@ func TestAThoughtRunsDirectlyIntoAToolCall(t *testing.T) {
 func TestAThoughtWrapsAtWordBoundaries(t *testing.T) {
 	rows := renderReasoning("one two three four", 9)
 	for index := range rows {
-		rows[index] = theme.Plain(rows[index])
+		rows[index] = style.Plain(rows[index])
 	}
 
 	if got := strings.Join(rows, "\n"); got != "one two\nthree\nfour" {
@@ -332,7 +332,7 @@ func TestAStoredCallIsShownTheWayItsToolShowsItNow(t *testing.T) {
 		t.Errorf("expected the stored rendering to be redrawn, got %q", screenOutput.String())
 	}
 
-	want := theme.Subtle("cmd/oh/") + theme.Subject("one.go")
+	want := style.Subtle("cmd/oh/") + style.Subject("one.go")
 	if !strings.Contains(screenOutput.String(), want) {
 		t.Errorf("expected the stored call to take the tool's current focus, got %q", screenOutput.String())
 	}
@@ -477,7 +477,7 @@ func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
 
 	self.finish()
 
-	plain := theme.Plain(screenOutput.String())
+	plain := style.Plain(screenOutput.String())
 	if strings.Contains(plain, "Interrupted") {
 		t.Errorf("expected the interruption to stay out of the scrollback, got %q", plain)
 	}
@@ -494,7 +494,7 @@ func TestAShellCallIsDrawnAsAShellPrompt(t *testing.T) {
 	callPainter.draw(agent.Event{Kind: agent.Call, ID: "1", Name: "bash", Subject: "echo hello"})
 	callPainter.close(status.Done)
 
-	plain := theme.Plain(screenOutput.String())
+	plain := style.Plain(screenOutput.String())
 	if !strings.Contains(plain, "$ echo hello") {
 		t.Errorf("got %q, want a shell prompt", plain)
 	}
@@ -583,7 +583,7 @@ func TestAnAnswerStreamedIsTheSameAsTheAnswerReplayed(t *testing.T) {
 	replayPainter.draw(agent.Event{Kind: agent.Text, Text: answer})
 	replayPainter.screen.End()
 
-	plain := theme.Plain(live.String())
+	plain := style.Plain(live.String())
 
 	for _, want := range []string{"Findings", "first thing is", "• one", "• two"} {
 		if !strings.Contains(plain, want) {

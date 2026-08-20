@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 )
 
 func TestClipReturnsNothingWhenThereAreNoColumns(t *testing.T) {
@@ -20,7 +20,7 @@ func TestAnUntitledSessionDoesNotPutAnEscapeSequenceThroughTheClipper(t *testing
 		t.Errorf("expected an unpainted title, got %q", got)
 	}
 
-	if theme.Width(got) != len("(nothing was asked)") {
+	if style.Width(got) != len("(nothing was asked)") {
 		t.Errorf("expected the placeholder title, got %q", got)
 	}
 }

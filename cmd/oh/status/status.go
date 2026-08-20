@@ -10,7 +10,7 @@ import (
 
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/spinner"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
@@ -41,9 +41,9 @@ type Label struct {
 	Highlight       tool.Highlight
 	Qualifier       string
 	ReadOnly        bool        // whether the call changes nothing, which decides the colour its name is in
-	NameStyle       theme.Style // an explicit style for a tool with its own prompt
+	NameStyle       style.Style // an explicit style for a tool with its own prompt
 	Accent          string      // another part of the subject set apart from the rest
-	AccentStyle     theme.Style // how the accent is painted
+	AccentStyle     style.Style // how the accent is painted
 	renderedSubject string      // syntax-highlighted subject retained from the complete source
 }
 
@@ -101,20 +101,20 @@ func (self Label) renderSubject() string {
 	type span struct {
 		start int
 		end   int
-		style theme.Style
+		style style.Style
 	}
 
 	spans := []span{}
 	focus := self.focus()
 	if at := strings.LastIndex(self.Subject, focus); focus != "" && at >= 0 {
-		spans = append(spans, span{start: at, end: at + len(focus), style: theme.Subject})
+		spans = append(spans, span{start: at, end: at + len(focus), style: style.Subject})
 	}
 	if at := strings.LastIndex(self.Subject, self.Accent); self.Accent != "" && self.AccentStyle != nil && at >= 0 {
 		spans = append(spans, span{start: at, end: at + len(self.Accent), style: self.AccentStyle})
 	}
 
 	if len(spans) == 0 {
-		return theme.Subject(self.Subject)
+		return style.Subject(self.Subject)
 	}
 
 	sort.Slice(spans, func(i int, j int) bool { return spans[i].start < spans[j].start })
@@ -125,12 +125,12 @@ func (self Label) renderSubject() string {
 		if marked.start < at {
 			continue
 		}
-		out.WriteString(theme.Subtle(self.Subject[at:marked.start]))
+		out.WriteString(style.Subtle(self.Subject[at:marked.start]))
 		out.WriteString(marked.style(self.Subject[marked.start:marked.end]))
 		at = marked.end
 	}
 	if at < len(self.Subject) {
-		out.WriteString(theme.Subtle(self.Subject[at:]))
+		out.WriteString(style.Subtle(self.Subject[at:]))
 	}
 
 	return out.String()
@@ -147,23 +147,23 @@ func (self Label) focus() string {
 func (self Label) renderQualifier() string {
 	focus := self.focus()
 	if focus == "" || strings.Contains(self.Subject, focus) {
-		return theme.Qualifier(self.Qualifier)
+		return style.Qualifier(self.Qualifier)
 	}
 
 	at := strings.LastIndex(self.Qualifier, focus)
 	if at < 0 {
-		return theme.Qualifier(self.Qualifier)
+		return style.Qualifier(self.Qualifier)
 	}
 
 	end := at + len(focus)
 
 	var out strings.Builder
 	if at > 0 {
-		out.WriteString(theme.Qualifier(self.Qualifier[:at]))
+		out.WriteString(style.Qualifier(self.Qualifier[:at]))
 	}
-	out.WriteString(theme.Subject(self.Qualifier[at:end]))
+	out.WriteString(style.Subject(self.Qualifier[at:end]))
 	if end < len(self.Qualifier) {
-		out.WriteString(theme.Qualifier(self.Qualifier[end:]))
+		out.WriteString(style.Qualifier(self.Qualifier[end:]))
 	}
 
 	return out.String()
@@ -183,15 +183,15 @@ func (self Label) width() int {
 	return total
 }
 
-func (self Label) style() theme.Style {
+func (self Label) style() style.Style {
 	if self.NameStyle != nil {
 		return self.NameStyle
 	}
 	if self.ReadOnly {
-		return theme.Call
+		return style.Call
 	}
 
-	return theme.Change
+	return style.Change
 }
 
 const ellipsis = "…"
@@ -381,7 +381,7 @@ func (self *Block) redraw() {
 		up = fmt.Sprintf("\x1b[%dA", len(self.rows)-1)
 	}
 
-	self.overlay(up+strings.Join(lines, "\n"), theme.Width(lines[len(lines)-1]))
+	self.overlay(up+strings.Join(lines, "\n"), style.Width(lines[len(lines)-1]))
 }
 
 const (
@@ -396,7 +396,7 @@ func (self *Block) line(item row) string {
 	failure := item.failure
 
 	if self.columns > 0 {
-		room := self.columns - edgeGuard - theme.Width(outcome) - outcomeSpacing(outcome)
+		room := self.columns - edgeGuard - style.Width(outcome) - outcomeSpacing(outcome)
 
 		if failure != "" {
 			spare := max(room-label.width()-1, room/failureShare)
@@ -415,7 +415,7 @@ func failureText(failure string) string {
 		return ""
 	}
 
-	return theme.Failure(failure)
+	return style.Failure(failure)
 }
 
 func outcomeSpacing(outcome string) int {
@@ -433,7 +433,7 @@ func (self *Block) outcome(item row) string {
 		}
 
 		elapsed := time.Since(item.startedAt).Truncate(time.Second)
-		return outcomeText(theme.Spinner(spinner.Activity.Frame(self.frame)), elapsed, nil)
+		return outcomeText(style.Spinner(spinner.Activity.Frame(self.frame)), elapsed, nil)
 	}
 
 	return outcomeText(glyph(item.state), item.took, item.stats)
@@ -444,7 +444,7 @@ func outcomeText(mark string, took time.Duration, stats *tool.Stats) string {
 		if took < patience {
 			return mark
 		}
-		return mark + " " + theme.Spinner(util.CompactDuration(took))
+		return mark + " " + style.Spinner(util.CompactDuration(took))
 	}
 
 	var statsText string
@@ -475,18 +475,18 @@ func outcomeText(mark string, took time.Duration, stats *tool.Stats) string {
 
 func outputStatsText(stats *tool.Stats) string {
 	if stats.Bytes == 0 && stats.Lines == 0 {
-		return theme.Subtle("no output")
+		return style.Subtle("no output")
 	}
 
 	capMarker := ""
 	if stats.Truncated {
 		capMarker = "+"
 	}
-	return theme.Subtle(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
+	return style.Subtle(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
 }
 
 func resourcesStatsText(took time.Duration, stats *tool.Stats) string {
-	return theme.Subtle(fmt.Sprintf(
+	return style.Subtle(fmt.Sprintf(
 		"%dL %s %s %s %dM",
 		stats.Lines,
 		tokenEstimate(stats),
@@ -497,24 +497,24 @@ func resourcesStatsText(took time.Duration, stats *tool.Stats) string {
 }
 
 func readStatsText(stats *tool.Stats) string {
-	return theme.Subtle(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
+	return style.Subtle(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
 }
 
 func listStatsText(stats *tool.Stats) string {
-	return theme.Subtle(fmt.Sprint(stats.Lines) + "L")
+	return style.Subtle(fmt.Sprint(stats.Lines) + "L")
 }
 
 func imageStatsText(stats *tool.Stats) string {
-	return theme.Subtle(util.FormatEstimatedTokenCount(stats.EstimatedTokens, 2))
+	return style.Subtle(util.FormatEstimatedTokenCount(stats.EstimatedTokens, 2))
 }
 
 func writeStatsText(stats *tool.Stats) string {
-	return theme.Subtle(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
+	return style.Subtle(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
 }
 
 func diffStatsText(stats *tool.Stats) string {
-	return theme.Success("+%d", stats.Added) +
-		theme.Subtle(" ") + theme.Failure("−%d", stats.Removed)
+	return style.Success("+%d", stats.Added) +
+		style.Subtle(" ") + style.Failure("−%d", stats.Removed)
 }
 
 func searchStatsText(stats *tool.Stats) string {
@@ -522,7 +522,7 @@ func searchStatsText(stats *tool.Stats) string {
 	if stats.Truncated {
 		capMarker = "+"
 	}
-	return theme.Subtle(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
+	return style.Subtle(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
 }
 
 func tokenEstimate(stats *tool.Stats) string {
@@ -536,11 +536,11 @@ func tokenEstimate(stats *tool.Stats) string {
 func glyph(state State) string {
 	switch state {
 	case Failed:
-		return theme.Failure("✗")
+		return style.Failure("✗")
 	case Cancelled:
-		return theme.Cancelled("–")
+		return style.Cancelled("–")
 	case Done, Running:
-		return theme.Success("✓")
+		return style.Success("✓")
 	}
 
 	return ""

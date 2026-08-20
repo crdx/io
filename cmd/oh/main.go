@@ -23,7 +23,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/store"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 )
 
 const (
@@ -54,7 +54,7 @@ Environment:
 func main() {
 	sandbox.Init()
 
-	theme.Init(os.Stdout)
+	style.Init(os.Stdout)
 
 	args, err := run()
 	if err != nil {
@@ -336,7 +336,7 @@ func run() ([]string, error) {
 	}
 	if resumedSession == nil {
 		banner := renderStartupBanner(startupElapsed, false, startup)
-		chat.notify(theme.Subtle("[") + banner + theme.Subtle("]"))
+		chat.notify(style.Subtle("[") + banner + style.Subtle("]"))
 	}
 
 	chat.makeIntroductions(args.initialMessage)
@@ -346,7 +346,7 @@ func run() ([]string, error) {
 	}
 
 	if log.Stored() {
-		fmt.Println(theme.Subtle(resumeParams(log.ID())))
+		fmt.Println(style.Subtle(resumeParams(log.ID())))
 	}
 
 	return nil, nil

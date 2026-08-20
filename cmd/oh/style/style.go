@@ -1,7 +1,7 @@
-// Package theme is every colour the harness draws with, and the one place that decides whether it
+// Package style is every colour the harness draws with, and the one place that decides whether it
 // draws with any. The palette is donnie's, given as it is written there, and the mapping under it
 // says what each kind of line takes from it.
-package theme
+package style
 
 import (
 	"fmt"

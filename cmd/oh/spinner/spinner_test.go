@@ -5,13 +5,13 @@ import (
 	"time"
 
 	"crdx.org/io/cmd/oh/spinner"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 )
 
 func TestActivityIsTwoCellsWide(t *testing.T) {
 	for frame := range 4 {
 		value := spinner.Activity.Frame(frame)
-		if width := theme.Width(value); width != 2 {
+		if width := style.Width(value); width != 2 {
 			t.Errorf("frame %d is %d cells wide: %q", frame, width, value)
 		}
 	}

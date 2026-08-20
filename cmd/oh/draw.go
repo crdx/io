@@ -12,7 +12,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/status"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 )
 
@@ -127,21 +127,21 @@ func (self *painter) draw(event agent.Event) {
 
 		// TODO(x): rewrite this mess
 		name := event.Name
-		var nameStyle theme.Style
+		var nameStyle style.Style
 		accent := ""
-		var accentStyle theme.Style
+		var accentStyle style.Style
 		if event.Name == readTool {
 			if skillName, isSkill := skill.NameFromPath(subject); isSkill {
 				name = "load"
-				nameStyle = theme.Skill
+				nameStyle = style.Skill
 				accent = skillName
-				accentStyle = theme.Skill
+				accentStyle = style.Skill
 				highlight = tool.Highlight{}
 			}
 		}
 		if event.Name == self.shell {
 			name = "$"
-			nameStyle = theme.Shell
+			nameStyle = style.Shell
 		}
 
 		self.rows[event.ID] = self.block.Add(status.Label{
@@ -160,7 +160,7 @@ func (self *painter) draw(event agent.Event) {
 
 	case agent.Failure:
 		self.close(status.Cancelled)
-		self.screen.Line(theme.Failure(event.Text))
+		self.screen.Line(style.Failure(event.Text))
 	}
 }
 
@@ -198,11 +198,11 @@ func renderSubmittedMessage(text string, columns int) string {
 	rows = append(rows, "")
 
 	for index, row := range rows {
-		if room := columns - theme.Width(row); room > 0 {
+		if room := columns - style.Width(row); room > 0 {
 			row += strings.Repeat(" ", room)
 		}
 
-		rows[index] = theme.User(row)
+		rows[index] = style.User(row)
 	}
 
 	return strings.Join(rows, "\n")
@@ -218,10 +218,10 @@ func outcome(failed bool) status.State {
 
 func renderReasoning(thought string, columns int) []string {
 	rendered := markdown.Render(thought, columns)
-	plain := theme.Plain(strings.Join(rendered, "\n"))
+	plain := style.Plain(strings.Join(rendered, "\n"))
 	stripped := strings.Join(strings.Fields(plain), " ")
 
-	return width.Wrap(theme.Reasoning(stripped), columns)
+	return width.Wrap(style.Reasoning(stripped), columns)
 }
 
 func (self *painter) close(state status.State) {

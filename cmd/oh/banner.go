@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"crdx.org/io/cmd/oh/spinner"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/tool"
 )
@@ -22,20 +22,20 @@ func banner(
 	frame int,
 	running bool,
 ) string {
-	activity := theme.Withheld("✧·")
+	activity := style.Withheld("✧·")
 	if running {
-		activity = theme.Spinner(spinner.Activity.Frame(frame))
+		activity = style.Spinner(spinner.Activity.Frame(frame))
 	}
 
 	parts := []string{
 		activity,
 		modes(tools, shell, history, background, pending),
-		theme.Subtle(pathutil.Abbr(directory)),
-		theme.Subtle(model),
-		theme.Subtle(short(effort)),
+		style.Subtle(pathutil.Abbr(directory)),
+		style.Subtle(model),
+		style.Subtle(short(effort)),
 	}
 
-	return strings.Join(parts, " "+theme.Subtle("─")+" ")
+	return strings.Join(parts, " "+style.Subtle("─")+" ")
 }
 
 func short(effort string) string {
@@ -62,11 +62,11 @@ func contextUsage(inputTokens int) string {
 
 	percentage := min(100, (inputTokens*100+contextWindowTokens/2)/contextWindowTokens)
 
-	return theme.Subtle(fmt.Sprintf("%d%%", percentage))
+	return style.Subtle(fmt.Sprintf("%d%%", percentage))
 }
 
 func rule(width int, left string, right string) string {
-	return styledRule(width, left, theme.Scrolled, right, theme.Subtle)
+	return styledRule(width, left, style.Scrolled, right, style.Subtle)
 }
 
 func bannerRule(width int, banner string, scrolled string) string {
@@ -74,15 +74,15 @@ func bannerRule(width int, banner string, scrolled string) string {
 		scrolled = ""
 	}
 
-	return styledRule(width, banner, nil, scrolled, theme.Scrolled)
+	return styledRule(width, banner, nil, scrolled, style.Scrolled)
 }
 
 func styledRule(
 	width int,
 	left string,
-	leftStyle theme.Style,
+	leftStyle style.Style,
 	right string,
-	rightStyle theme.Style,
+	rightStyle style.Style,
 ) string {
 	head := ""
 
@@ -91,7 +91,7 @@ func styledRule(
 			left = leftStyle(left)
 		}
 
-		head = theme.Rule(strings.Repeat("─", leadingPadding)) + " " + left + " "
+		head = style.Rule(strings.Repeat("─", leadingPadding)) + " " + left + " "
 		width -= cells
 	}
 
@@ -103,40 +103,40 @@ func labelWidth(label string, edgePadding int) int {
 		return 0
 	}
 
-	return theme.Width(label) + edgePadding + 2
+	return style.Width(label) + edgePadding + 2
 }
 
-func ruleTo(width int, label string, style theme.Style) string {
+func ruleTo(width int, label string, paint style.Style) string {
 	cells := labelWidth(label, trailingPadding)
 	if cells == 0 || cells > width {
-		return theme.Rule(strings.Repeat("─", max(width, 0)))
+		return style.Rule(strings.Repeat("─", max(width, 0)))
 	}
 
-	return theme.Rule(strings.Repeat("─", width-cells)) +
-		" " + style(label) + " " +
-		theme.Rule(strings.Repeat("─", trailingPadding))
+	return style.Rule(strings.Repeat("─", width-cells)) +
+		" " + paint(label) + " " +
+		style.Rule(strings.Repeat("─", trailingPadding))
 }
 
 func modes(tools []tool.Tool, shell bool, history bool, background bool, pending bool) string {
 	reads, writes := separateTools(tools)
 
-	return offeredCapability(capRead.flag(), reads > 0, theme.Read, pending) +
-		offeredCapability(capShell.flag(), shell, theme.Exec, pending) +
-		offeredCapability(capWrite.flag(), writes > 0, theme.Write, pending) +
-		offeredCapability(capGit.flag(), history, theme.History, pending) +
-		offeredCapability(capBackground.flag(), background, theme.Background, pending)
+	return offeredCapability(capRead.flag(), reads > 0, style.Read, pending) +
+		offeredCapability(capShell.flag(), shell, style.Exec, pending) +
+		offeredCapability(capWrite.flag(), writes > 0, style.Write, pending) +
+		offeredCapability(capGit.flag(), history, style.History, pending) +
+		offeredCapability(capBackground.flag(), background, style.Background, pending)
 }
 
-func offeredCapability(flag string, given bool, style theme.Style, pending bool) string {
+func offeredCapability(flag string, given bool, paint style.Style, pending bool) string {
 	if !given {
-		style = theme.Withheld
+		paint = style.Withheld
 	}
 
 	if pending { // per flag: each ends in a reset that would end an underline drawn over the lot
-		return theme.Pending(style(flag))
+		return style.Pending(paint(flag))
 	}
 
-	return style(flag)
+	return paint(flag)
 }
 
 func separateTools(tools []tool.Tool) (int, int) {

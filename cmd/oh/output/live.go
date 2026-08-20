@@ -4,7 +4,7 @@ import (
 	"slices"
 	"strings"
 
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 )
 
 const clearRow = "\x1b[K"
@@ -145,7 +145,7 @@ func (self *Output) settle(rows []string) {
 	self.midLine = true
 	self.pending = false
 	self.trailingNewlines = 0
-	self.column = theme.Width(rows[len(rows)-1])
+	self.column = style.Width(rows[len(rows)-1])
 
 	if self.columns > 0 {
 		self.column = min(self.column, self.columns)

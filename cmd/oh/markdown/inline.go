@@ -9,7 +9,7 @@ import (
 	east "github.com/yuin/goldmark/extension/ast"
 	"github.com/yuin/goldmark/util"
 
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 )
 
 const reset = "\x1b[0m"
@@ -27,13 +27,13 @@ func (self *renderer) inline(parent ast.Node) string {
 func (self *renderer) renderInlineNode(node ast.Node) string {
 	switch node := node.(type) {
 	case *ast.Text:
-		return theme.Answer(self.text(node)) + lineBreak(node)
+		return style.Answer(self.text(node)) + lineBreak(node)
 
 	case *ast.String:
-		return theme.Answer(string(node.Value))
+		return style.Answer(string(node.Value))
 
 	case *ast.CodeSpan:
-		return theme.Code(self.words(node))
+		return style.Code(self.words(node))
 
 	case *ast.Emphasis:
 		if node.Level >= 2 {
@@ -46,23 +46,23 @@ func (self *renderer) renderInlineNode(node ast.Node) string {
 		return over(col.Strikethrough, self.inline(node))
 
 	case *ast.Link:
-		return theme.Link(self.inline(node)) + theme.Address(" ("+string(node.Destination)+")")
+		return style.Link(self.inline(node)) + style.Address(" ("+string(node.Destination)+")")
 
 	case *ast.Image:
-		return theme.Link(self.inline(node)) + theme.Address(" ("+string(node.Destination)+")")
+		return style.Link(self.inline(node)) + style.Address(" ("+string(node.Destination)+")")
 
 	case *ast.AutoLink:
-		return theme.Link(string(node.URL(self.source)))
+		return style.Link(string(node.URL(self.source)))
 
 	case *ast.RawHTML:
-		return theme.Subtle(self.raw(node))
+		return style.Subtle(self.raw(node))
 
 	case *east.TaskCheckBox:
 		if node.IsChecked {
-			return theme.Success("[x] ")
+			return style.Success("[x] ")
 		}
 
-		return theme.Subtle("[ ] ")
+		return style.Subtle("[ ] ")
 	}
 
 	return self.inline(node)
@@ -111,7 +111,7 @@ func (self *renderer) raw(node *ast.RawHTML) string {
 	return out.String()
 }
 
-func over(paint theme.Style, text string) string { // a style inside another is off from its reset on
+func over(paint style.Style, text string) string { // a style inside another is off from its reset on
 	stylePrefix := strings.TrimSuffix(paint(""), reset)
 	if stylePrefix == "" {
 		return text

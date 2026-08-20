@@ -8,7 +8,7 @@ import (
 
 	"crdx.org/io/cmd/oh/pathlink"
 	"crdx.org/io/cmd/oh/status"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 
 	"golang.org/x/term"
@@ -115,7 +115,7 @@ func (self *Output) Answer(delta string) {
 		self.newline()
 	}
 
-	self.write(self.heldNewlines + theme.Answer(answerText))
+	self.write(self.heldNewlines + style.Answer(answerText))
 
 	self.heldNewlines = trailingNewlines
 	self.streaming = true
@@ -249,7 +249,7 @@ func (self *Output) advance(text string) {
 }
 
 func (self *Output) count(styledText string) {
-	text := theme.Plain(styledText)
+	text := style.Plain(styledText)
 	trailingNewlines := len(text) - len(strings.TrimRight(text, "\n"))
 
 	if trailingNewlines == len(text) {

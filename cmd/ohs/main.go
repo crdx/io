@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	"crdx.org/duckopt/v2"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/ohs/picker"
 	"crdx.org/io/internal/xdgutil"
 	"crdx.org/io/session"
@@ -26,7 +26,7 @@ Options:
 
 func main() {
 	duckopt.MustBind[struct{}](usage, "$0")
-	theme.Init(os.Stdout)
+	style.Init(os.Stdout)
 
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

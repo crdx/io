@@ -12,7 +12,7 @@ import (
 	"crdx.org/io/cmd/oh/line"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/store"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 )
 
 func TestEscapeAtRestDoesNotPanic(t *testing.T) {
@@ -330,8 +330,8 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	}
 	self.finish()
 
-	if strings.Contains(theme.Plain(screenOutput.String()), "Interrupted") {
-		t.Errorf("expected the replaced turn to end silently, got %q", theme.Plain(screenOutput.String()))
+	if strings.Contains(style.Plain(screenOutput.String()), "Interrupted") {
+		t.Errorf("expected the replaced turn to end silently, got %q", style.Plain(screenOutput.String()))
 	}
 
 	if err := log.Close(); err != nil {
@@ -425,8 +425,8 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 		}
 	}
 
-	if strings.Contains(theme.Plain(screenOutput.String()), "Interrupted") {
-		t.Errorf("expected the interruption to stay out of the scrollback, got %q", theme.Plain(screenOutput.String()))
+	if strings.Contains(style.Plain(screenOutput.String()), "Interrupted") {
+		t.Errorf("expected the interruption to stay out of the scrollback, got %q", style.Plain(screenOutput.String()))
 	}
 }
 

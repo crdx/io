@@ -17,7 +17,7 @@ import (
 	"crdx.org/io/cmd/oh/spinner"
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store"
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/internal/sandbox"
 )
@@ -161,7 +161,7 @@ func (self *conversation) apply(input *line.Input, history *line.History, keypre
 			if err == nil {
 				self.toggleCapability(capBackground)
 				if len(names) > 0 {
-					self.notify(theme.Stopped("Background processes killed (" + strings.Join(names, ", ") + ")"))
+					self.notify(style.Stopped("Background processes killed (" + strings.Join(names, ", ") + ")"))
 				}
 			} else {
 				self.processes.Enable()
@@ -249,7 +249,7 @@ func (self *conversation) show(input *line.Input) {
 	framedRows := append([]string{rule(width, scrollLabel("↑", frame.Above), "")}, frame.Rows...)
 	inputLabel := self.label(input.Pending(), self.turn.frame, self.turn.running)
 	if usage := contextUsage(self.contextTokens); usage != "" {
-		inputLabel += " " + theme.Subtle("─") + " " + usage
+		inputLabel += " " + style.Subtle("─") + " " + usage
 	}
 
 	framedRows = append(framedRows, bannerRule(
@@ -342,11 +342,11 @@ func settle(resizeSignals <-chan os.Signal) {
 
 func (self *conversation) restore(storedSession *store.Session) {
 	if err := self.assistant.RestoreState(storedSession.Events); err != nil {
-		self.notify(theme.Failure("the state could not be restored: " + err.Error()))
+		self.notify(style.Failure("the state could not be restored: " + err.Error()))
 		return
 	}
 	if err := self.assistant.Load(storedSession.Items); err != nil {
-		self.notify(theme.Failure("the conversation could not be restored: " + err.Error()))
+		self.notify(style.Failure("the conversation could not be restored: " + err.Error()))
 		return
 	}
 	self.storedItems = len(storedSession.Items)
@@ -529,18 +529,18 @@ func (self *conversation) writeSessionEvents(events []agent.Event) {
 func (self *conversation) storeItems() {
 	items, err := self.assistant.Dump()
 	if err != nil {
-		self.notify(theme.Failure("the conversation state could not be stored: " + err.Error()))
+		self.notify(style.Failure("the conversation state could not be stored: " + err.Error()))
 		return
 	}
 
 	if len(items) < self.storedItems {
-		self.notify(theme.Failure("the provider replaced append-only conversation state"))
+		self.notify(style.Failure("the provider replaced append-only conversation state"))
 		return
 	}
 
 	for _, item := range items[self.storedItems:] {
 		if err := self.log.Item(item); err != nil {
-			self.notify(theme.Failure("the conversation state could not be stored: " + err.Error()))
+			self.notify(style.Failure("the conversation state could not be stored: " + err.Error()))
 			return
 		}
 
@@ -550,12 +550,12 @@ func (self *conversation) storeItems() {
 
 func (self *conversation) write(record func() error) {
 	if err := record(); err != nil {
-		self.notify(theme.Failure("the conversation could not be stored: " + err.Error()))
+		self.notify(style.Failure("the conversation could not be stored: " + err.Error()))
 	}
 }
 
 func (self *conversation) showStorageWarnings() {
 	for _, err := range self.log.TakeWarnings() {
-		self.notify(theme.Failure(err.Error()))
+		self.notify(style.Failure(err.Error()))
 	}
 }

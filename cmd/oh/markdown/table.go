@@ -9,7 +9,7 @@ import (
 	"github.com/yuin/goldmark/ast"
 	east "github.com/yuin/goldmark/extension/ast"
 
-	"crdx.org/io/cmd/oh/theme"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 )
 
@@ -72,7 +72,7 @@ func (self *renderer) plainTableRows(head []string, body [][]string) []string { 
 	var rows []string
 
 	for _, one := range append([][]string{head}, body...) {
-		rows = append(rows, width.Wrap(strings.Join(one, theme.Border(" | ")), self.columns)...)
+		rows = append(rows, width.Wrap(strings.Join(one, style.Border(" | ")), self.columns)...)
 	}
 
 	return rows
@@ -85,7 +85,7 @@ func layout(head []string, body [][]string, availableColumns int) []int {
 	minimum := make([]int, columns)
 
 	for at := range columns {
-		natural[at] = theme.Width(head[at])
+		natural[at] = style.Width(head[at])
 		minimum[at] = longest(head[at])
 
 		for _, row := range body {
@@ -93,7 +93,7 @@ func layout(head []string, body [][]string, availableColumns int) []int {
 				continue
 			}
 
-			natural[at] = max(natural[at], theme.Width(row[at]))
+			natural[at] = max(natural[at], style.Width(row[at]))
 			minimum[at] = max(minimum[at], longest(row[at]))
 		}
 
@@ -138,7 +138,7 @@ func border(widths []int, left string, between string, right string) string {
 		parts[at] = strings.Repeat("─", cells+2)
 	}
 
-	return theme.Border(left + strings.Join(parts, between) + right)
+	return style.Border(left + strings.Join(parts, between) + right)
 }
 
 func tableRows(cells []string, aligns []east.Alignment, widths []int, heading bool) []string {
@@ -159,7 +159,7 @@ func tableRows(cells []string, aligns []east.Alignment, widths []int, heading bo
 		height = max(height, len(wrappedCells[at]))
 	}
 
-	bar := theme.Border("│")
+	bar := style.Border("│")
 	rows := make([]string, height)
 
 	for line := range height {
@@ -194,7 +194,7 @@ func alignment(aligns []east.Alignment, at int) east.Alignment {
 }
 
 func pad(text string, cells int, align east.Alignment) string {
-	spare := cells - theme.Width(text)
+	spare := cells - style.Width(text)
 	if spare <= 0 {
 		return text
 	}
@@ -213,7 +213,7 @@ func pad(text string, cells int, align east.Alignment) string {
 func longest(cell string) int {
 	most := 0
 
-	for word := range strings.FieldsSeq(theme.Plain(cell)) {
+	for word := range strings.FieldsSeq(style.Plain(cell)) {
 		most = max(most, width.Of(word))
 	}
 
