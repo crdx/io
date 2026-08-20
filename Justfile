@@ -30,6 +30,9 @@ check:
 oh *args:
     go run ./cmd/oh "$@"
 
+ohm *args:
+    go run ./cmd/oh -crx "$@"
+
 ohs:
     go run ./cmd/ohs
 
