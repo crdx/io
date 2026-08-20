@@ -14,10 +14,10 @@ import (
 const FileReadState = "file_read"
 
 // ErrNotRead is returned when no successful read has recorded a file.
-var ErrNotRead = errors.New("file has not been read")
+var ErrNotRead = errors.New("file has not been read yet")
 
 // ErrChangedSinceRead is returned when a file no longer has the contents that were read.
-var ErrChangedSinceRead = errors.New("file has changed since it was read")
+var ErrChangedSinceRead = errors.New("file has changed since it was last read")
 
 // ReadSnapshot identifies the contents exposed from one path.
 type ReadSnapshot struct {
@@ -68,6 +68,9 @@ func (self *Snapshots) RestoreReadState(root *Root, payload json.RawMessage) err
 
 	for _, snapshot := range state.Files {
 		resolvedRoot, name, err := root.Resolve(snapshot.Path)
+		if errors.Is(err, ErrOutsideRoot) {
+			continue
+		}
 		if err != nil {
 			return err
 		}
