@@ -33,8 +33,21 @@ type State interface {
 	Load([]json.RawMessage)
 }
 
-// Yield is handed each piece of a turn as it arrives, and returns false to end the turn. A provider
-// reports what it has by kind: what the model is thinking, and what it is saying.
+// Model is one model a provider offers.
+type Model struct {
+	ID      string   `json:"id"`
+	Name    string   `json:"name,omitempty"`
+	Efforts []string `json:"efforts,omitempty"`
+	Context int      `json:"context,omitempty"`
+	Output  int      `json:"output,omitempty"`
+}
+
+// Lister is a provider that can say which models it offers.
+type Lister interface {
+	Models(context.Context) ([]Model, error)
+}
+
+// Yield is handed each piece of a turn as it arrives, and returns false to end the turn.
 type Yield func(Event) bool
 
 // Reply is a turn once it's over.
