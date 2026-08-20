@@ -3,6 +3,7 @@ package store_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -13,6 +14,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/req"
+	"crdx.org/io/session"
 
 	"crdx.org/io/cmd/oh/store"
 )
@@ -425,5 +427,22 @@ func TestOpeningABundleAppendsToTheMarkdownTranscript(t *testing.T) {
 	}
 	if strings.Count(string(after), "# Conversation") != 1 {
 		t.Errorf("expected one metadata header, got:\n%s", after)
+	}
+}
+
+func TestAnOpenSessionIsRefusedToASecondWriter(t *testing.T) {
+	directory := t.TempDir()
+	id := write(t, directory)
+
+	first, err := store.Open(directory, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = first.Close() }()
+
+	second, err := store.Open(directory, id)
+	if !errors.Is(err, session.ErrInUse) {
+		_ = second.Close()
+		t.Fatalf("expected the second writer to be refused, got %v", err)
 	}
 }

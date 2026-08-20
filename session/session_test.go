@@ -2,6 +2,7 @@ package session_test
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -87,5 +88,50 @@ func TestJournalCarriesMetaEventsAndItems(t *testing.T) {
 	}
 	if len(storedSession.Items) != 1 || string(storedSession.Items[0]) != `{"type":"message"}` {
 		t.Errorf("got items %v", storedSession.Items)
+	}
+}
+
+func storedSession(t *testing.T, directory string) *session.Writer {
+	t.Helper()
+
+	writer, err := session.Create(directory, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := writer.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
+		t.Fatal(err)
+	}
+
+	return writer
+}
+
+func TestASessionInUseIsRefusedToASecondWriter(t *testing.T) {
+	directory := t.TempDir()
+	writer := storedSession(t, directory)
+	defer func() { _ = writer.Close() }()
+
+	second, err := session.Open(directory, writer.ID())
+	if !errors.Is(err, session.ErrInUse) {
+		_ = second.Close()
+		t.Fatalf("expected the second writer to be refused, got %v", err)
+	}
+}
+
+func TestASessionInUseIsGivenUpOnceItIsClosed(t *testing.T) {
+	directory := t.TempDir()
+	writer := storedSession(t, directory)
+
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	second, err := session.Open(directory, writer.ID())
+	if err != nil {
+		t.Fatalf("expected the closed session to be free, got %v", err)
+	}
+
+	if err := second.Close(); err != nil {
+		t.Fatal(err)
 	}
 }

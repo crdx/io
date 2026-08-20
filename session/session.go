@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"syscall"
 	"time"
 
 	"crdx.org/io/agent"
@@ -61,7 +62,10 @@ func Create(directory string, meta json.RawMessage) (*Writer, error) {
 	return &Writer{directory: directory, id: newID(), meta: slices.Clone(meta)}, nil
 }
 
-// Open continues an existing session.
+// ErrInUse reports that another writer holds the session's journal.
+var ErrInUse = errors.New("the session is already open elsewhere")
+
+// Open continues an existing session, holding its journal against other writers until it is closed.
 func Open(directory string, id string) (*Writer, error) {
 	if err := validateID(id); err != nil {
 		return nil, err
@@ -72,7 +76,20 @@ func Open(directory string, id string) (*Writer, error) {
 		return nil, err
 	}
 
+	if err := lockJournal(file); err != nil {
+		_ = file.Close()
+		return nil, err
+	}
+
 	return &Writer{file: file, id: id}, nil
+}
+
+func lockJournal(file *os.File) error {
+	err := syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
+	if errors.Is(err, syscall.EWOULDBLOCK) {
+		return ErrInUse
+	}
+	return err
 }
 
 // SetMeta replaces the caller-owned meta before the first record is written.
@@ -131,6 +148,13 @@ func (w *Writer) ensureOpen() error {
 
 	file, err := os.OpenFile(journalPath(w.directory, w.id), os.O_WRONLY|os.O_CREATE|os.O_EXCL|os.O_APPEND, 0o600)
 	if err != nil {
+		_ = os.Remove(directory)
+		return err
+	}
+
+	if err := lockJournal(file); err != nil {
+		_ = file.Close()
+		_ = os.Remove(file.Name())
 		_ = os.Remove(directory)
 		return err
 	}

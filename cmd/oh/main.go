@@ -16,6 +16,7 @@ import (
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/provider/chat"
 	"crdx.org/io/provider/codex"
+	"crdx.org/io/session"
 	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
@@ -477,9 +478,14 @@ func mountTmpDir(files *file.Root, tmpDir string) (*os.Root, error) {
 }
 
 func openSession(resumedSession *store.Session, meta store.Meta) (*store.Writer, error) {
-	if resumedSession != nil {
-		return store.Open(sessionsDir(), resumedSession.ID)
+	if resumedSession == nil {
+		return store.Create(sessionsDir(), meta)
 	}
 
-	return store.Create(sessionsDir(), meta)
+	log, err := store.Open(sessionsDir(), resumedSession.ID)
+	if errors.Is(err, session.ErrInUse) {
+		return nil, fmt.Errorf("session %s is already open", resumedSession.ID)
+	}
+
+	return log, err
 }

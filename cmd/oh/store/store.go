@@ -59,7 +59,7 @@ func Create(directory string, meta Meta) (*Writer, error) {
 	return &Writer{inner: inner, directory: directory, meta: meta, started: time.Now()}, nil
 }
 
-// Open continues an oh session.
+// Open continues an oh session, and reports session.ErrInUse when another writer holds it.
 func Open(directory, id string) (*Writer, error) {
 	storedSession, err := Read(directory, id)
 	if err != nil {
