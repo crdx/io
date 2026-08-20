@@ -312,8 +312,8 @@ func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) 
 	if !self.turn.isCancelled {
 		t.Fatal("expected the active turn to be marked cancelled")
 	}
-	if !self.queuedTurn || self.queuedPrompt != "dfd" {
-		t.Fatalf("expected dfd to exist only as an invisible queued prompt, got queued=%t prompt=%q", self.queuedTurn, self.queuedPrompt)
+	if !self.queuedTurn.isReplacement || self.queuedTurn.prompt != "dfd" {
+		t.Fatalf("expected dfd to exist only as an invisible queued prompt, got queued=%t prompt=%q", self.queuedTurn.isReplacement, self.queuedTurn.prompt)
 	}
 }
 
@@ -476,5 +476,132 @@ func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
 
 	if input.Text() != "a" {
 		t.Errorf("expected what was typed to be left alone, got %q", input.Text())
+	}
+}
+
+func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
+	tests := map[string]struct {
+		isCancelled bool
+		wantKept    bool
+	}{
+		"a turn already cancelled": {isCancelled: true, wantKept: false},
+		"a turn still running":     {isCancelled: false, wantKept: true},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			self := &conversation{
+				turn: turn{isRunning: true, isCancelled: test.isCancelled, stop: func() {}},
+			}
+			self.queuedTurn.prompt = "later"
+			self.queuedTurn.isReplacement = true
+			self.queuedTurn.isModeChange = true
+
+			self.cancelTurn()
+
+			kept := self.queuedTurn.isReplacement && self.queuedTurn.isModeChange && self.queuedTurn.prompt == "later"
+			if kept != test.wantKept {
+				t.Errorf(
+					"expected the queue kept=%t, got queued=%t mode=%t prompt=%q",
+					test.wantKept, self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.prompt,
+				)
+			}
+		})
+	}
+}
+
+func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer func() { _ = log.Close() }()
+
+	self := &conversation{
+		assistant: agent.New("", quietProvider{}, nil),
+		screen:    output.New(&bytes.Buffer{}),
+		log:       log,
+		mode:      NewMode(capRead | capWrite),
+	}
+
+	self.start("first")
+	self.toggleCapability(capWrite)
+	self.replaceTurn("second")
+
+	if !self.queuedTurn.isReplacement || !self.queuedTurn.isModeChange || self.queuedTurn.prompt != "second" {
+		t.Fatalf(
+			"expected both a queued prompt and a queued mode change, got queued=%t mode=%t prompt=%q",
+			self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.prompt,
+		)
+	}
+
+	for report := range self.turn.events {
+		self.take(report)
+	}
+	self.finish()
+
+	if self.queuedTurn.isReplacement || self.queuedTurn.isModeChange || self.queuedTurn.prompt != "" {
+		t.Errorf(
+			"expected the whole queue emptied, got queued=%t mode=%t prompt=%q",
+			self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.prompt,
+		)
+	}
+
+	if !self.turn.isRunning {
+		t.Error("expected the queued prompt to have started a turn")
+	}
+
+	for report := range self.turn.events {
+		self.take(report)
+	}
+	self.finish()
+
+	storedSession, err := store.Read(directory, log.ID())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var prompts []string
+	for _, event := range storedSession.Events {
+		if event.Kind == agent.Prompt {
+			prompts = append(prompts, event.Text)
+		}
+	}
+
+	if !slices.Equal(prompts, []string{"first", "second"}) {
+		t.Errorf("expected the queued prompt alone to follow, got %q", prompts)
+	}
+}
+
+func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer func() { _ = log.Close() }()
+
+	self := &conversation{
+		assistant: agent.New("", quietProvider{}, nil),
+		screen:    output.New(&bytes.Buffer{}),
+		log:       log,
+		mode:      NewMode(capRead | capWrite),
+	}
+
+	self.start("first")
+	self.toggleCapability(capWrite)
+
+	for report := range self.turn.events {
+		self.take(report)
+	}
+	self.finish()
+
+	if self.queuedTurn.isModeChange {
+		t.Error("expected the queued mode change to have been taken")
+	}
+
+	if !self.turn.isRunning {
+		t.Error("expected the mode change to have started a turn of its own")
 	}
 }

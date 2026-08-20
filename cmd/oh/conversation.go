@@ -33,11 +33,9 @@ type conversation struct {
 	shell              string             // what the shell tool was named, taken from the tool itself
 	notifyTurnFinished func()             // how to say that the harness is waiting for input
 
-	restart            []string // the arguments to start again with, once the terminal has been given back
-	queuedPrompt       string   // what to ask as soon as an interrupted turn finishes
-	queuedTurn         bool     // whether an interrupted turn has a replacement
-	queuedModeChange   bool     // whether changed capabilities should restart an interrupted turn
-	getOnWithItMessage string   // what an empty double enter sends
+	restart            []string   // the arguments to start again with, once the terminal has been given back
+	queuedTurn         queuedTurn // what an interrupted turn is to be followed by
+	getOnWithItMessage string     // what an empty double enter sends
 
 	turn            turn
 	storedItems     int     // how many provider items have been stored
@@ -200,24 +198,22 @@ func (self *conversation) toggleCapability(whichCaps caps) {
 	self.mode.Toggle(whichCaps)
 
 	if self.turn.isRunning {
-		self.queuedModeChange = true
+		self.queuedTurn.isModeChange = true
 		self.interrupt()
 	}
 }
 
 func (self *conversation) cancelTurn() {
 	if self.turn.isCancelled {
-		self.queuedPrompt = ""
-		self.queuedTurn = false
-		self.queuedModeChange = false
+		self.queuedTurn = queuedTurn{}
 	}
 
 	self.interrupt()
 }
 
 func (self *conversation) replaceTurn(prompt string) {
-	self.queuedPrompt = prompt
-	self.queuedTurn = true
+	self.queuedTurn.prompt = prompt
+	self.queuedTurn.isReplacement = true
 	self.interrupt()
 }
 
@@ -498,18 +494,17 @@ func (self *conversation) finish() {
 	self.turn.isRunning = false
 	self.turn.events = nil
 
-	if !self.turn.isCancelled && !self.queuedTurn && !self.queuedModeChange && !self.terminalFocused && self.notifyTurnFinished != nil {
+	if !self.turn.isCancelled && !self.queuedTurn.isReplacement && !self.queuedTurn.isModeChange &&
+		!self.terminalFocused && self.notifyTurnFinished != nil {
 		self.notifyTurnFinished()
 	}
 
-	if self.queuedTurn {
-		prompt := self.queuedPrompt
-		self.queuedPrompt = ""
-		self.queuedTurn = false
-		self.queuedModeChange = false
+	if self.queuedTurn.isReplacement {
+		prompt := self.queuedTurn.prompt
+		self.queuedTurn = queuedTurn{}
 		self.start(prompt)
-	} else if self.queuedModeChange {
-		self.queuedModeChange = false
+	} else if self.queuedTurn.isModeChange {
+		self.queuedTurn = queuedTurn{}
 		if prompt := self.mode.Inject(); prompt != "" {
 			self.start(prompt)
 		}

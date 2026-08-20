@@ -19,6 +19,12 @@ type turn struct {
 	failure       error           // why the turn failed
 }
 
+type queuedTurn struct {
+	prompt        string // what to ask as soon as an interrupted turn finishes
+	isReplacement bool   // whether an interrupted turn has a replacement
+	isModeChange  bool   // whether changed capabilities should restart an interrupted turn
+}
+
 type turnEvent struct {
 	event agent.Event
 	err   error // why the stream ended
