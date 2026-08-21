@@ -51,7 +51,7 @@ func run() error {
 		return err
 	}
 
-	return resume(chosenSession.ID)
+	return resume(chosenSession.Name)
 }
 
 func sessionsDir() string {
@@ -74,7 +74,7 @@ func loadSessions(directory string) ([]*picker.Session, error) {
 		}
 
 		sessions = append(sessions, &picker.Session{
-			ID:           storedSession.ID,
+			Name:         storedSession.Name,
 			WorkspaceDir: meta.WorkspaceDir,
 			Touched:      storedSession.Touched,
 			Events:       storedSession.Events,

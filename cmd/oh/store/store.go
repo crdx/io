@@ -63,12 +63,12 @@ func Create(directory string, meta Meta) (*Writer, error) {
 }
 
 // Open continues an oh session, and reports session.ErrInUse when another writer holds it.
-func Open(directory, id string) (*Writer, error) {
-	storedSession, err := Read(directory, id)
+func Open(directory, name string) (*Writer, error) {
+	storedSession, err := Read(directory, name)
 	if err != nil {
 		return nil, err
 	}
-	inner, err := session.Open(directory, id)
+	inner, err := session.Open(directory, name)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,10 @@ func (self *Writer) Item(item json.RawMessage) error {
 	return nil
 }
 
-// ID is the session identifier.
+// Name is what the session is called, and the name of its bundle directory.
+func (self *Writer) Name() string { return self.inner.Name() }
+
+// ID is the session's time-ordered identifier, recorded for provenance and read by nothing.
 func (self *Writer) ID() string { return self.inner.ID() }
 
 // SetMeta replaces the meta before the first record is written.
@@ -184,10 +187,10 @@ func (self *Writer) ensureAuxiliaryRecorders() {
 
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
-	bundleDirectory := filepath.Join(self.directory, self.ID())
+	bundleDirectory := filepath.Join(self.directory, self.Name())
 	if self.transcript == nil && self.transcriptEnabled {
 		recorder, err := transcript.Open(filepath.Join(bundleDirectory, transcriptName), transcript.Meta{
-			ID: self.ID(), Started: self.startedAt, Model: self.meta.Model, Effort: self.meta.Effort,
+			Name: self.Name(), Started: self.startedAt, Model: self.meta.Model, Effort: self.meta.Effort,
 			Provider: self.meta.Provider, Workspace: self.meta.WorkspaceDir,
 		})
 		if err != nil {
@@ -199,7 +202,7 @@ func (self *Writer) ensureAuxiliaryRecorders() {
 	}
 	if self.wire == nil && self.wireEnabled {
 		recorder, err := wire.Open(filepath.Join(bundleDirectory, wireName), wire.Meta{
-			ID: self.ID(), Started: self.startedAt, Model: self.meta.Model, Effort: self.meta.Effort,
+			Name: self.Name(), Started: self.startedAt, Model: self.meta.Model, Effort: self.meta.Effort,
 			Provider: self.meta.Provider, Workspace: self.meta.WorkspaceDir,
 		}, self.queueWarning)
 		if err != nil {
@@ -232,6 +235,7 @@ func (self writerObserver) Start(request req.Request) req.ExchangeObserver {
 
 // Session is an oh session read back.
 type Session struct {
+	Name    string
 	ID      string
 	Meta    Meta
 	Started time.Time
@@ -241,8 +245,8 @@ type Session struct {
 }
 
 // Read loads one oh session.
-func Read(directory, id string) (*Session, error) {
-	storedSession, err := session.Read(directory, id)
+func Read(directory, name string) (*Session, error) {
+	storedSession, err := session.Read(directory, name)
 	if err != nil {
 		return nil, err
 	}
@@ -275,6 +279,7 @@ func decode(storedSession *session.Session) (*Session, error) {
 	}
 
 	return &Session{
+		Name:    storedSession.Name,
 		ID:      storedSession.ID,
 		Meta:    meta,
 		Started: storedSession.Started,

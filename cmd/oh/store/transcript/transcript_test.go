@@ -15,7 +15,7 @@ import (
 
 func TestTranscriptPreservesReasoningFormatting(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +37,7 @@ func TestTranscriptPreservesReasoningFormatting(t *testing.T) {
 
 func TestTranscriptStoresOnlyAToolResultPreview(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ func TestTranscriptStoresOnlyAToolResultPreview(t *testing.T) {
 
 func TestTranscriptCapsAToolResultPreviewAtOneKiB(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func TestTranscriptCapsAToolResultPreviewAtOneKiB(t *testing.T) {
 
 func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2), Model: "model"})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +132,7 @@ func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {
 
 func TestTranscriptRetainsTurnFailures(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2)})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: time.Unix(1, 2)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,7 +159,7 @@ func TestTranscriptRetainsTurnFailures(t *testing.T) {
 
 func TestTranscriptRetainsDurableState(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{ID: "session", Started: time.Unix(1, 2)})
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: time.Unix(1, 2)})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -3,6 +3,14 @@
 // Events are the portable transcript and durable state transitions. Items are opaque, append-only
 // provider state: a provider hands them out and takes the same bytes back on resume. Meta belongs
 // to the caller.
+//
+// A session is known by its name, an adjective and an animal drawn from two word lists that give
+// 175,483 pairs. The name is the bundle directory and the only handle anything outside this
+// package needs, and its shape carries the path safety on its own: two lowercase words joined by a
+// hyphen cannot name a parent directory or reach outside the one it sits in. A name is taken as
+// soon as its directory exists, whether or not the journal inside can still be read, so a damaged
+// bundle is never handed out again. Each session also carries a time-ordered identifier, which the
+// head record keeps for provenance and nothing reads.
 package session
 
 import (
@@ -33,12 +41,14 @@ const (
 	Item  Kind = "item"
 )
 
-// Line is one journal record. Head records include the original session ID.
+// Line is one journal record. Head records carry the name the session was given and the identifier
+// generated alongside it.
 type Line struct {
 	Kind Kind      `json:"kind"`
 	Time time.Time `json:"time"`
 
 	ID      string          `json:"id,omitempty"`
+	Name    string          `json:"name,omitempty"`
 	Meta    json.RawMessage `json:"meta,omitempty"`
 	Event   *agent.Event    `json:"event,omitempty"`
 	Payload json.RawMessage `json:"payload,omitempty"`
@@ -50,6 +60,7 @@ type Writer struct {
 	file      *os.File
 	directory string
 	id        string
+	name      string
 	meta      json.RawMessage
 }
 
@@ -59,19 +70,29 @@ func Create(directory string, meta json.RawMessage) (*Writer, error) {
 		return nil, err
 	}
 
-	return &Writer{directory: directory, id: newID(), meta: slices.Clone(meta)}, nil
+	name, err := newName(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Writer{directory: directory, id: newID(), name: name, meta: slices.Clone(meta)}, nil
 }
 
 // ErrInUse reports that another writer holds the session's journal.
 var ErrInUse = errors.New("the session is already open elsewhere")
 
 // Open continues an existing session, holding its journal against other writers until it is closed.
-func Open(directory string, id string) (*Writer, error) {
-	if err := validateID(id); err != nil {
+func Open(directory string, name string) (*Writer, error) {
+	if err := validateName(name); err != nil {
 		return nil, err
 	}
 
-	file, err := os.OpenFile(journalPath(directory, id), os.O_WRONLY|os.O_APPEND, 0o600)
+	head, err := readHead(directory, name)
+	if err != nil {
+		return nil, err
+	}
+
+	file, err := os.OpenFile(journalPath(directory, name), os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +102,7 @@ func Open(directory string, id string) (*Writer, error) {
 		return nil, err
 	}
 
-	return &Writer{file: file, id: id}, nil
+	return &Writer{file: file, directory: directory, id: head.ID, name: name}, nil
 }
 
 func lockJournal(file *os.File) error {
@@ -112,7 +133,10 @@ func (w *Writer) Item(payload json.RawMessage) error {
 	return w.write(Line{Kind: Item, Payload: payload})
 }
 
-// ID is the session's time-ordered identifier.
+// Name is what the session is called, and the name of its bundle directory.
+func (w *Writer) Name() string { return w.name }
+
+// ID is the session's time-ordered identifier, recorded for provenance and read by nothing.
 func (w *Writer) ID() string { return w.id }
 
 // Stored reports whether the lazy writer has made a file.
@@ -141,12 +165,12 @@ func (w *Writer) ensureOpen() error {
 		return nil
 	}
 
-	directory := bundlePath(w.directory, w.id)
+	directory := bundlePath(w.directory, w.name)
 	if err := os.Mkdir(directory, 0o700); err != nil {
 		return err
 	}
 
-	file, err := os.OpenFile(journalPath(w.directory, w.id), os.O_WRONLY|os.O_CREATE|os.O_EXCL|os.O_APPEND, 0o600)
+	file, err := os.OpenFile(journalPath(w.directory, w.name), os.O_WRONLY|os.O_CREATE|os.O_EXCL|os.O_APPEND, 0o600)
 	if err != nil {
 		_ = os.Remove(directory)
 		return err
@@ -160,7 +184,7 @@ func (w *Writer) ensureOpen() error {
 	}
 	w.file = file
 
-	if err := w.record(Line{Kind: Head, ID: w.id, Meta: w.meta}); err != nil {
+	if err := w.record(Line{Kind: Head, ID: w.id, Name: w.name, Meta: w.meta}); err != nil {
 		_ = file.Close()
 		_ = os.Remove(file.Name())
 		_ = os.Remove(directory)
@@ -188,6 +212,7 @@ func (w *Writer) record(line Line) error {
 
 // Session is a stored conversation.
 type Session struct {
+	Name    string
 	ID      string
 	Meta    json.RawMessage
 	Started time.Time
@@ -197,18 +222,30 @@ type Session struct {
 }
 
 // Read loads one stored session.
-func Read(directory string, id string) (*Session, error) {
-	if err := validateID(id); err != nil {
+func Read(directory string, name string) (*Session, error) {
+	storedSession := &Session{Name: name}
+	if err := Records(directory, name, func(line Line) error {
+		storedSession.take(line)
+		return nil
+	}); err != nil {
 		return nil, err
 	}
+	return storedSession, nil
+}
 
-	file, err := os.Open(journalPath(directory, id))
+// Records hands every record of a stored session to visit, in the order they were written. Each one
+// carries the time it was written, which Read has no room for.
+func Records(directory string, name string, visit func(Line) error) error {
+	if err := validateName(name); err != nil {
+		return err
+	}
+
+	file, err := os.Open(journalPath(directory, name))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer func() { _ = file.Close() }()
 
-	storedSession := &Session{ID: id}
 	lines := bufio.NewScanner(file)
 	lines.Buffer(nil, maxLine)
 	sawHead := false
@@ -221,23 +258,25 @@ func Read(directory string, id string) (*Session, error) {
 
 		if !sawHead {
 			if line.Kind != Head {
-				return nil, errors.New("session does not start with a head")
+				return errors.New("session does not start with a head")
 			}
 			sawHead = true
 		} else if line.Kind == Head {
-			return nil, errors.New("session contains more than one head")
+			return errors.New("session contains more than one head")
 		}
 
-		storedSession.take(line)
+		if err := visit(line); err != nil {
+			return err
+		}
 	}
 
 	if err := lines.Err(); err != nil {
-		return nil, err
+		return err
 	}
 	if !sawHead {
-		return nil, errors.New("session has no complete head")
+		return errors.New("session has no complete head")
 	}
-	return storedSession, nil
+	return nil
 }
 
 func (s *Session) take(line Line) {
@@ -248,6 +287,7 @@ func (s *Session) take(line Line) {
 
 	switch line.Kind {
 	case Head:
+		s.ID = line.ID
 		s.Meta = slices.Clone(line.Meta)
 	case Event:
 		if line.Event != nil {
@@ -258,9 +298,38 @@ func (s *Session) take(line Line) {
 	}
 }
 
-// List loads stored sessions, most recently touched first.
-func List(directory string) ([]*Session, error) {
-	entries, err := os.ReadDir(directory)
+// Entry identifies one stored session. Building it costs the head of the journal rather than the
+// whole conversation, so a directory of sessions can be surveyed without loading any of them.
+type Entry struct {
+	Name    string
+	ID      string
+	Started time.Time
+}
+
+// Entries identifies every stored session, oldest first.
+func Entries(directory string) ([]Entry, error) {
+	names, err := storedNames(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	entries := make([]Entry, 0, len(names))
+	for _, name := range names {
+		head, err := readHead(directory, name)
+		if err != nil {
+			continue
+		}
+		entries = append(entries, Entry{Name: name, ID: head.ID, Started: head.Time})
+	}
+
+	slices.SortFunc(entries, func(first, second Entry) int {
+		return first.Started.Compare(second.Started)
+	})
+	return entries, nil
+}
+
+func storedNames(directory string) ([]string, error) {
+	found, err := os.ReadDir(directory)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -268,13 +337,51 @@ func List(directory string) ([]*Session, error) {
 		return nil, err
 	}
 
+	var names []string
+	for _, candidate := range found {
+		if candidate.IsDir() && validateName(candidate.Name()) == nil {
+			names = append(names, candidate.Name())
+		}
+	}
+	return names, nil
+}
+
+func readHead(directory, name string) (Line, error) {
+	file, err := os.Open(journalPath(directory, name))
+	if err != nil {
+		return Line{}, err
+	}
+	defer func() { _ = file.Close() }()
+
+	lines := bufio.NewScanner(file)
+	lines.Buffer(nil, maxLine)
+	if !lines.Scan() {
+		if err := lines.Err(); err != nil {
+			return Line{}, err
+		}
+		return Line{}, errors.New("session has no complete head")
+	}
+
+	var line Line
+	if err := json.Unmarshal(lines.Bytes(), &line); err != nil {
+		return Line{}, err
+	}
+	if line.Kind != Head {
+		return Line{}, errors.New("session does not start with a head")
+	}
+	return line, nil
+}
+
+// List loads stored sessions, most recently touched first.
+func List(directory string) ([]*Session, error) {
+	entries, err := Entries(directory)
+	if err != nil {
+		return nil, err
+	}
+
 	var sessions []*Session
 	for _, entry := range entries {
-		id := entry.Name()
-		if !entry.IsDir() || validateID(id) != nil {
-			continue
-		}
-		if storedSession, err := Read(directory, id); err == nil {
+		if storedSession, err := Read(directory, entry.Name); err == nil {
 			sessions = append(sessions, storedSession)
 		}
 	}
@@ -283,7 +390,7 @@ func List(directory string) ([]*Session, error) {
 		if order := second.Touched.Compare(first.Touched); order != 0 {
 			return order
 		}
-		return strings.Compare(second.ID, first.ID)
+		return strings.Compare(second.Name, first.Name)
 	})
 	return sessions, nil
 }
@@ -293,15 +400,15 @@ const (
 	maxLine     = 16 << 20
 )
 
-func bundlePath(directory, id string) string { return filepath.Join(directory, id) }
+func bundlePath(directory, name string) string { return filepath.Join(directory, name) }
 
-func journalPath(directory, id string) string {
-	return filepath.Join(bundlePath(directory, id), journalName)
+func journalPath(directory, name string) string {
+	return filepath.Join(bundlePath(directory, name), journalName)
 }
 
-func validateID(id string) error {
-	if id == "" || id == "." || id == ".." || filepath.Base(id) != id {
-		return fmt.Errorf("invalid session ID %q", id)
+func validateName(name string) error {
+	if !namePattern.MatchString(name) {
+		return fmt.Errorf("invalid session name %q", name)
 	}
 	return nil
 }

@@ -24,8 +24,8 @@ var safeSyntax = regexp.MustCompile(`^[A-Za-z0-9_+.-]+$`)
 
 // Meta identifies the conversation rendered into a transcript.
 type Meta struct {
-	ID, Model, Effort, Provider, Workspace string
-	Started                                time.Time
+	Name, Model, Effort, Provider, Workspace string
+	Started                                  time.Time
 }
 
 // Recorder appends conversation events as Markdown.
@@ -46,7 +46,7 @@ func Open(path string, meta Meta) (*Recorder, error) {
 		return nil, err
 	}
 	if info.Size() == 0 {
-		_, err = fmt.Fprintf(file, "# Conversation\n\n- **ID:** `%s`\n- **Started:** `%s`\n- **Model:** `%s`\n- **Effort:** `%s`\n- **Provider:** `%s`\n- **Workspace:** `%s`\n\n", meta.ID, meta.Started.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace)
+		_, err = fmt.Fprintf(file, "# Conversation\n\n- **Session:** `%s`\n- **Started:** `%s`\n- **Model:** `%s`\n- **Effort:** `%s`\n- **Provider:** `%s`\n- **Workspace:** `%s`\n\n", meta.Name, meta.Started.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace)
 		if err != nil {
 			_ = file.Close()
 			return nil, err

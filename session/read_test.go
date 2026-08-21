@@ -8,20 +8,20 @@ import (
 
 func TestReadRejectsASessionWithoutAHead(t *testing.T) {
 	directory := t.TempDir()
-	if err := os.Mkdir(filepath.Join(directory, "broken"), 0o700); err != nil {
+	if err := os.Mkdir(filepath.Join(directory, "broken-toad"), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(directory, "broken", "session.jsonl"), nil, 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(directory, "broken-toad", "session.jsonl"), nil, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := Read(directory, "broken"); err == nil {
+	if _, err := Read(directory, "broken-toad"); err == nil {
 		t.Error("expected an empty session to be rejected")
 	}
 }
 
-func TestSessionIDsCannotEscapeTheSessionDirectory(t *testing.T) {
+func TestSessionNamesCannotEscapeTheSessionDirectory(t *testing.T) {
 	if _, err := Read(t.TempDir(), "../somewhere-else"); err == nil {
-		t.Error("expected a path-like session ID to be rejected")
+		t.Error("expected a path-like session name to be rejected")
 	}
 }
 

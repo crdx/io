@@ -22,7 +22,7 @@ func TestTookReportsTheScaleAStartupHappensOn(t *testing.T) {
 
 func TestTheStartupLineUsesTheCompactSummary(t *testing.T) {
 	line := renderStartupBanner(12*time.Millisecond, false, startupInfo{
-		SessionID: "034session",
+		Session: "brave-otter",
 		ContextFiles: startupFilesOf([]contextFile{
 			{name: "SYSTEM.md", body: strings.Repeat("x", 740)},
 			{name: "AGENTS.md", body: strings.Repeat("x", 3*1024)},
@@ -31,7 +31,7 @@ func TestTheStartupLineUsesTheCompactSummary(t *testing.T) {
 		GlobalSkills:  3,
 		ToolBytes:     2273,
 	})
-	want := "startup=12ms session=034session SYSTEM.md=~200t AGENTS.md=~800t skills=2p/3g tools=~600t"
+	want := "startup=12ms session=brave-otter SYSTEM.md=~200t AGENTS.md=~800t skills=2p/3g tools=~600t"
 
 	if plainText := style.Plain(line); plainText != want {
 		t.Errorf("got %q, want %q", plainText, want)

@@ -880,7 +880,7 @@ func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *conve
 func TestStartingAgainNamesTheSessionAndKeepsTheMode(t *testing.T) {
 	self := conversationFixture(t, true, capRead|capWrite|capShell)
 
-	want := []string{"-r", self.log.ID(), "--caps", "rxw"}
+	want := []string{"-r", self.log.Name(), "--caps", "rxw"}
 
 	if got := self.restartArguments(); !slices.Equal(got, want) {
 		t.Errorf("expected %v, got %v", want, got)
@@ -893,7 +893,7 @@ func TestStartingAgainAsksForWhateverWasSwappedMidConversation(t *testing.T) {
 	self.mode.Toggle(capWrite)
 	self.mode.Toggle(capGit)
 
-	want := []string{"-r", self.log.ID(), "--caps", "rxg"}
+	want := []string{"-r", self.log.Name(), "--caps", "rxg"}
 
 	if got := self.restartArguments(); !slices.Equal(got, want) {
 		t.Errorf("expected %v, got %v", want, got)

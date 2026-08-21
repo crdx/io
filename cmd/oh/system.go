@@ -30,7 +30,7 @@ var (
 		# Scope
 
 		- Your workspace is the current directory, {{ .WorkspaceDir }}
-		- Your session ID is {{ .SessionID }}
+		- Your session is named {{ .SessionName }}
 		{{ scopeRules .ExtraPaths .CurrentCaps }}
 
 		# Network
@@ -70,7 +70,7 @@ var (
 
 type harnessTemplateData struct {
 	WorkspaceDir      string
-	SessionID         string
+	SessionName       string
 	TmpDir            string
 	HomeDir           string
 	CurrentCaps       caps
@@ -89,7 +89,7 @@ type contextFile struct {
 func loadContext(
 	root *os.Root,
 	workspaceDir string,
-	sessionID string,
+	sessionName string,
 	tmpDir string,
 	homeDir string,
 	currentCaps caps,
@@ -112,7 +112,7 @@ func loadContext(
 	}
 
 	return mergeContexts(
-		harnessContext(workspaceDir, sessionID, tmpDir, homeDir, currentCaps, extraPaths),
+		harnessContext(workspaceDir, sessionName, tmpDir, homeDir, currentCaps, extraPaths),
 		globalContext(globalFile),
 		projectContext(projectFiles),
 		skill.Context(skills),
@@ -173,10 +173,10 @@ func globalContext(file *contextFile) string {
 	return file.body
 }
 
-func harnessContext(workspaceDir string, sessionID string, tmpDir string, homeDir string, currentCaps caps, extraPaths configuredPaths) string {
+func harnessContext(workspaceDir string, sessionName string, tmpDir string, homeDir string, currentCaps caps, extraPaths configuredPaths) string {
 	data := harnessTemplateData{
 		WorkspaceDir:      workspaceDir,
-		SessionID:         sessionID,
+		SessionName:       sessionName,
 		TmpDir:            tmpDir,
 		HomeDir:           homeDir,
 		CurrentCaps:       currentCaps,

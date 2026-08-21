@@ -30,7 +30,7 @@ func TestSessionsComeFromOhsOwnJournalParsing(t *testing.T) {
 	if len(sessions) != 1 {
 		t.Fatalf("expected one session, got %d", len(sessions))
 	}
-	if sessions[0].ID != writer.ID() || sessions[0].WorkspaceDir != "/home/alice/project" {
+	if sessions[0].Name != writer.Name() || sessions[0].WorkspaceDir != "/home/alice/project" {
 		t.Errorf("unexpected session: %+v", sessions[0])
 	}
 	if sessions[0].FirstPrompt() != "hello" {

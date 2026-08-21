@@ -27,8 +27,8 @@ var bearerPattern = regexp.MustCompile(`(?i)bearer[ \t]+[^\s"']+`)
 
 // Meta identifies the session whose exchanges are recorded.
 type Meta struct {
-	ID, Model, Effort, Provider, Workspace string
-	Started                                time.Time
+	Name, Model, Effort, Provider, Workspace string
+	Started                                  time.Time
 }
 
 // Recorder appends censored logical HTTP exchanges.
@@ -55,7 +55,7 @@ func Open(path string, meta Meta, report func(error)) (*Recorder, error) {
 		return nil, err
 	}
 	if info.Size() == 0 {
-		if _, err := fmt.Fprintf(file, "# HTTP transcript\n# id: %s\n# started: %s\n# model: %s\n# effort: %s\n# provider: %s\n# workspace: %s\n\n", meta.ID, meta.Started.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace); err != nil {
+		if _, err := fmt.Fprintf(file, "# HTTP transcript\n# session: %s\n# started: %s\n# model: %s\n# effort: %s\n# provider: %s\n# workspace: %s\n\n", meta.Name, meta.Started.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace); err != nil {
 			_ = file.Close()
 			return nil, err
 		}

@@ -53,7 +53,7 @@ Usage:
 
 Options:
     -d, --workspace <dir>                  Set working directory and project scope
-    -r, --resume <session>                 Resume the saved session
+    -r, --resume <session>                 Resume the saved session by name
     -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
     -c, --caps <flags>                     Capabilities: rxwgb (read, exec, write, git, bg) [default: rxw]
     -u, --update                           Update the cached model list, then exit
@@ -268,7 +268,7 @@ func run() ([]string, error) {
 	defer func() { _ = log.Close() }()
 	client.ObserveHTTP(log.Observer())
 
-	tmpDir, err := openTmpDir(log.ID())
+	tmpDir, err := openTmpDir(log.Name())
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +287,7 @@ func run() ([]string, error) {
 		context, contextFiles, err = loadContext(
 			root,
 			workspaceDir,
-			log.ID(),
+			log.Name(),
 			tmpDir,
 			homeDir,
 			args.caps,
@@ -344,7 +344,7 @@ func run() ([]string, error) {
 	projectSkills, globalSkills := skill.Counts(availableSkills)
 	startupElapsed := time.Since(startedAt)
 	startup := startupInfo{
-		SessionID:     log.ID(),
+		Session:       log.Name(),
 		ContextFiles:  startupFilesOf(contextFiles),
 		ProjectSkills: projectSkills,
 		GlobalSkills:  globalSkills,
@@ -361,14 +361,14 @@ func run() ([]string, error) {
 	}
 
 	if log.Stored() {
-		fmt.Println(style.Subtle(resumeParams(log.ID())))
+		fmt.Println(style.Subtle(resumeParams(log.Name())))
 	}
 
 	return nil, nil
 }
 
-func resumeParams(id string) string {
-	return fmt.Sprintf("%s -r %s", filepath.Base(os.Args[0]), id)
+func resumeParams(reference string) string {
+	return fmt.Sprintf("%s -r %s", filepath.Base(os.Args[0]), reference)
 }
 
 type providerClient interface {
@@ -491,16 +491,16 @@ func connect(choice modelChoice, effort string, endpoint string) (*connection, e
 	}
 }
 
-func loadSession(id string) (*store.Session, error) {
-	if id == "" {
+func loadSession(name string) (*store.Session, error) {
+	if name == "" {
 		return nil, nil
 	}
 
-	return store.Read(sessionsDir(), id)
+	return store.Read(sessionsDir(), name)
 }
 
-func openTmpDir(id string) (string, error) {
-	tmp := tmpDir(id)
+func openTmpDir(name string) (string, error) {
+	tmp := tmpDir(name)
 
 	if err := os.MkdirAll(tmp, 0o700); err != nil {
 		return "", fmt.Errorf("could not prepare the tmp dir: %w", err)
@@ -524,9 +524,9 @@ func openSession(resumedSession *store.Session, meta store.Meta) (*store.Writer,
 		return store.Create(sessionsDir(), meta)
 	}
 
-	log, err := store.Open(sessionsDir(), resumedSession.ID)
+	log, err := store.Open(sessionsDir(), resumedSession.Name)
 	if errors.Is(err, session.ErrInUse) {
-		return nil, fmt.Errorf("session %s is already open", resumedSession.ID)
+		return nil, fmt.Errorf("session %s is already open", resumedSession.Name)
 	}
 
 	return log, err

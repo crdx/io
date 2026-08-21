@@ -137,11 +137,11 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 	}
 }
 
-func TestTheHarnessDisclosesTheSessionID(t *testing.T) {
-	got := harnessContext("/workspace", "034session", "/tmp/x", "/state/home", capRead, configuredPaths{})
+func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
+	got := harnessContext("/workspace", "brave-otter", "/tmp/x", "/state/home", capRead, configuredPaths{})
 
-	if !strings.Contains(got, "Your session ID is 034session") {
-		t.Errorf("harness context does not contain the session ID: %q", got)
+	if !strings.Contains(got, "Your session is named brave-otter") {
+		t.Errorf("harness context does not contain the session name: %q", got)
 	}
 }
 

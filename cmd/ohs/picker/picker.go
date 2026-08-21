@@ -32,7 +32,7 @@ var ErrCancelled = errors.New("cancelled")
 
 // Session is the part of a stored session shown by the picker.
 type Session struct {
-	ID           string
+	Name         string
 	WorkspaceDir string
 	Touched      time.Time
 	Events       []agent.Event

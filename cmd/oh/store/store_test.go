@@ -47,13 +47,13 @@ func write(t *testing.T, directory string) string {
 		t.Fatal(err)
 	}
 
-	return log.ID()
+	return log.Name()
 }
 
-func appendRaw(t *testing.T, directory string, id string, text string) {
+func appendRaw(t *testing.T, directory string, name string, text string) {
 	t.Helper()
 
-	file, err := os.OpenFile(filepath.Join(directory, id, "session.jsonl"), os.O_WRONLY|os.O_APPEND, 0o600) //nolint:gosec // the path is the test's own
+	file, err := os.OpenFile(filepath.Join(directory, name, "session.jsonl"), os.O_WRONLY|os.O_APPEND, 0o600) //nolint:gosec // the path is the test's own
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,7 +116,7 @@ func TestTheMetaCanIncludeTheGeneratedSessionID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	context := "scratch=" + log.ID()
+	context := "scratch=" + log.Name()
 	if err := log.SetMeta(store.Meta{Context: context}); err != nil {
 		t.Fatal(err)
 	}
@@ -130,7 +130,7 @@ func TestTheMetaCanIncludeTheGeneratedSessionID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	storedSession, err := store.Read(directory, log.ID())
+	storedSession, err := store.Read(directory, log.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,25 +139,22 @@ func TestTheMetaCanIncludeTheGeneratedSessionID(t *testing.T) {
 	}
 }
 
-func TestASessionIsNamedWithATimeOrderedID(t *testing.T) {
+func TestASessionIsNamedAfterAnAdjectiveAndAnAnimal(t *testing.T) {
 	directory := t.TempDir()
 
-	idPattern := regexp.MustCompile(`^[0-9A-Za-z]{22}$`)
+	namePattern := regexp.MustCompile(`^[a-z]+-[a-z]+$`)
 
 	first := write(t, directory)
-
-	time.Sleep(2 * time.Millisecond)
-
 	second := write(t, directory)
 
-	for _, id := range []string{first, second} {
-		if !idPattern.MatchString(id) {
-			t.Errorf("expected %q to be 22 alphanumeric digits", id)
+	for _, name := range []string{first, second} {
+		if !namePattern.MatchString(name) {
+			t.Errorf("expected %q to be two lowercase words joined by a hyphen", name)
 		}
 	}
 
-	if first >= second {
-		t.Errorf("expected %q to sort before %q", first, second)
+	if first == second {
+		t.Errorf("expected two sessions to be named differently, both got %q", first)
 	}
 }
 
@@ -169,7 +166,7 @@ func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if log.ID() == "" {
+	if log.Name() == "" {
 		t.Error("expected the session to be named before it is written")
 	}
 
@@ -211,7 +208,7 @@ func TestTheFirstThingSaidTakesTheHeadWithIt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	storedSession, err := store.Read(directory, log.ID())
+	storedSession, err := store.Read(directory, log.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -299,8 +296,8 @@ func TestListReadsTheNewestFirst(t *testing.T) {
 		t.Fatalf("expected two sessions, got %d", len(sessions))
 	}
 
-	if sessions[0].ID != second || sessions[1].ID != first {
-		t.Errorf("expected the newest first, got %s then %s", sessions[0].ID, sessions[1].ID)
+	if sessions[0].Name != second || sessions[1].Name != first {
+		t.Errorf("expected the newest first, got %s then %s", sessions[0].Name, sessions[1].Name)
 	}
 }
 
@@ -331,8 +328,8 @@ func TestListPutsTheSessionTouchedLastAtTheTop(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if sessions[0].ID != older {
-		t.Errorf("expected the session added to last at the top, got %s", sessions[0].ID)
+	if sessions[0].Name != older {
+		t.Errorf("expected the session added to last at the top, got %s", sessions[0].Name)
 	}
 }
 
@@ -362,7 +359,7 @@ func TestHTTPObservationCanCreateTheBundleBeforeTheFirstEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bundle := filepath.Join(directory, log.ID())
+	bundle := filepath.Join(directory, log.Name())
 	for _, name := range []string{"session.jsonl", "chat.md", "wire.http"} {
 		if _, err := os.Stat(filepath.Join(bundle, name)); err != nil {
 			t.Errorf("expected %s: %v", name, err)
@@ -385,7 +382,7 @@ func TestTheFirstRecordCreatesACompleteBundle(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bundle := filepath.Join(directory, log.ID())
+	bundle := filepath.Join(directory, log.Name())
 	for _, name := range []string{"session.jsonl", "chat.md", "wire.http"} {
 		info, err := os.Stat(filepath.Join(bundle, name))
 		if err != nil {

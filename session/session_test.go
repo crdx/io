@@ -12,7 +12,7 @@ import (
 	"crdx.org/io/session"
 )
 
-func TestTheHeadCarriesTheSessionID(t *testing.T) {
+func TestTheHeadCarriesTheNameAndTheIdentifier(t *testing.T) {
 	directory := t.TempDir()
 
 	writer, err := session.Create(directory, nil)
@@ -28,13 +28,14 @@ func TestTheHeadCarriesTheSessionID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	head, err := os.ReadFile(filepath.Join(directory, writer.ID(), "session.jsonl")) //nolint:gosec // the test's own path
+	head, err := os.ReadFile(filepath.Join(directory, writer.Name(), "session.jsonl")) //nolint:gosec // the test's own path
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var line struct {
 		Kind string `json:"kind"`
+		Name string `json:"name"`
 		ID   string `json:"id"`
 	}
 
@@ -46,8 +47,12 @@ func TestTheHeadCarriesTheSessionID(t *testing.T) {
 		t.Fatalf("expected the first line to be the head, got %q", line.Kind)
 	}
 
+	if line.Name != writer.Name() {
+		t.Errorf("got the name %q in the head, want %q", line.Name, writer.Name())
+	}
+
 	if line.ID != writer.ID() {
-		t.Errorf("got the ID %q in the head, want %q", line.ID, writer.ID())
+		t.Errorf("got the identifier %q in the head, want %q", line.ID, writer.ID())
 	}
 }
 
@@ -73,7 +78,7 @@ func TestJournalCarriesMetaEventsAndItems(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	storedSession, err := session.Read(directory, writer.ID())
+	storedSession, err := session.Read(directory, writer.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +116,7 @@ func TestASessionInUseIsRefusedToASecondWriter(t *testing.T) {
 	writer := storedSession(t, directory)
 	defer func() { _ = writer.Close() }()
 
-	second, err := session.Open(directory, writer.ID())
+	second, err := session.Open(directory, writer.Name())
 	if !errors.Is(err, session.ErrInUse) {
 		_ = second.Close()
 		t.Fatalf("expected the second writer to be refused, got %v", err)
@@ -126,7 +131,7 @@ func TestASessionInUseIsGivenUpOnceItIsClosed(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	second, err := session.Open(directory, writer.ID())
+	second, err := session.Open(directory, writer.Name())
 	if err != nil {
 		t.Fatalf("expected the closed session to be free, got %v", err)
 	}

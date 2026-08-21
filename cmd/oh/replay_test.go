@@ -76,7 +76,7 @@ func writeTranscript(t *testing.T, entries []replayEntry) string {
 	path := filepath.Join(t.TempDir(), "chat.md")
 
 	recorder, err := transcript.Open(path, transcript.Meta{
-		ID:        "000000000000000000000000",
+		Name:      "brave-otter",
 		Model:     "gpt-5.6-sol",
 		Effort:    "high",
 		Provider:  "codex",
@@ -567,7 +567,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 
 	passes["the startup line"] = func() string {
 		return renderStartupBanner(1500*time.Microsecond, false, startupInfo{
-			SessionID:     "000000000000000000000000",
+			Session:       "brave-otter",
 			ProjectSkills: 3,
 			GlobalSkills:  1,
 			ToolBytes:     614,

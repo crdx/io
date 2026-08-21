@@ -58,7 +58,7 @@ func TestPick(t *testing.T) {
 	case err != nil:
 		t.Fatal(err)
 	default:
-		screen.Line(style.Result("chose " + chosenSession.ID + ": " + chosenSession.FirstPrompt()))
+		screen.Line(style.Result("chose " + chosenSession.Name + ": " + chosenSession.FirstPrompt()))
 	}
 
 	screen.End()

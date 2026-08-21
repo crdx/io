@@ -14,7 +14,7 @@ import (
 var startedAt = time.Now()
 
 type startupInfo struct {
-	SessionID     string        `json:"session,omitempty"`
+	Session       string        `json:"session,omitempty"`
 	ContextFiles  []startupFile `json:"context,omitempty"`
 	ProjectSkills int           `json:"project_skills,omitempty"`
 	GlobalSkills  int           `json:"global_skills,omitempty"`
@@ -63,8 +63,8 @@ func renderStartupBanner(elapsed time.Duration, resumed bool, info startupInfo) 
 
 	var line strings.Builder
 	_, _ = line.WriteString(startupDuration(elapsed))
-	if info.SessionID != "" {
-		_, _ = line.WriteString(style.Subtle(" session=") + style.Normal(info.SessionID))
+	if info.Session != "" {
+		_, _ = line.WriteString(style.Subtle(" session=") + style.Normal(info.Session))
 	}
 	for _, file := range info.ContextFiles {
 		_, _ = line.WriteString(style.Subtle(" ") + startupContextFile(file))

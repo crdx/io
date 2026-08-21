@@ -363,7 +363,7 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	if err := log.Close(); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	storedSession, err := store.Read(directory, log.ID())
+	storedSession, err := store.Read(directory, log.Name())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -407,7 +407,7 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 	if err := log.Close(); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	storedSession, err := store.Read(directory, log.ID())
+	storedSession, err := store.Read(directory, log.Name())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -557,7 +557,7 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	}
 	self.finish()
 
-	storedSession, err := store.Read(directory, log.ID())
+	storedSession, err := store.Read(directory, log.Name())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
