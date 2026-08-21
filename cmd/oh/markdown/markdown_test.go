@@ -1,6 +1,7 @@
 package markdown
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -361,5 +362,13 @@ func TestNoBlockOverrunsANarrowTerminal(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func TestAStyleOverAnotherLeavesTextAloneWhereNothingIsPainted(t *testing.T) {
+	paintsNothing := func(format any, args ...any) string { return fmt.Sprint(format) }
+
+	if got := over(paintsNothing, "hello"); got != "hello" {
+		t.Errorf("got %q, want the text left alone where there is no reset to find", got)
 	}
 }

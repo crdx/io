@@ -75,3 +75,33 @@ func TestReasoningIsItalic(t *testing.T) {
 		t.Errorf("expected the reasoning text unchanged, got %q", plain)
 	}
 }
+
+func TestNothingIsPaintedWhereTheScreenIsNotATerminal(t *testing.T) {
+	originalColorEnabled := colorEnabled // decided once, so it outlives any test that changes it
+
+	t.Cleanup(func() {
+		colorEnabled = originalColorEnabled
+		col.InitUnless(!originalColorEnabled)
+	})
+
+	Init(&strings.Builder{}) // anything that is not a file is not a terminal
+
+	if colorEnabled {
+		t.Fatal("expected colour to be off where the screen is not a terminal")
+	}
+
+	for name, paint := range map[string]Style{
+		"failure":   Failure,
+		"subject":   Subject,
+		"reasoning": Reasoning,
+		"user":      User,
+	} {
+		if got := paint("hello"); got != "hello" {
+			t.Errorf("%s painted %q, want it left alone", name, got)
+		}
+	}
+
+	if got := Pending(Read("r")); got != "r" {
+		t.Errorf("a style over another painted %q, want it left alone", got)
+	}
+}
