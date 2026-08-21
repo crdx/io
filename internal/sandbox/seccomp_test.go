@@ -1,6 +1,8 @@
 package sandbox
 
 import (
+	"errors"
+	"os"
 	"testing"
 
 	"golang.org/x/sys/unix"
@@ -63,6 +65,81 @@ func TestTheSyscallFilterAllowsProcessSessions(t *testing.T) {
 		if got := evaluate(filter, target.audit, number, 0); got != actionAllow {
 			t.Errorf("syscall %d: got action %#x, want allow", number, got)
 		}
+	}
+}
+
+const unixSocketsVariable = "IO_SANDBOX_UNIX_SOCKETS"
+
+func TestAnInstalledFilterRefusesTheFamiliesItNames(t *testing.T) {
+	if !insideChildProcess() {
+		runAgainInChildProcess(t, unixSocketsVariable+"=1")
+		return
+	}
+
+	allowUnixSockets := os.Getenv(unixSocketsVariable) != ""
+
+	if err := applySeccomp(allowUnixSockets); err != nil {
+		t.Fatalf("could not install the filter: %v", err)
+	}
+
+	for _, family := range []int{unix.AF_PACKET, unix.AF_NETLINK} {
+		fd, err := unix.Socket(family, unix.SOCK_RAW, 0)
+		if err == nil {
+			_ = unix.Close(fd)
+			t.Errorf("family %d was allowed", family)
+			continue
+		}
+		if !errors.Is(err, unix.EAFNOSUPPORT) {
+			t.Errorf("family %d: got %v, want the filter's refusal", family, err)
+		}
+	}
+
+	for _, family := range []int{unix.AF_INET, unix.AF_UNIX} {
+		fd, err := unix.Socket(family, unix.SOCK_DGRAM, 0)
+		if err != nil {
+			t.Errorf("family %d: got %v, want a socket the sandbox allows", family, err)
+			continue
+		}
+		_ = unix.Close(fd)
+	}
+}
+
+func TestAFilterWithoutUnixSocketIsolationRefusesThemOutright(t *testing.T) {
+	if !insideChildProcess() {
+		runAgainInChildProcess(t)
+		return
+	}
+
+	if err := applySeccomp(false); err != nil {
+		t.Fatalf("could not install the filter: %v", err)
+	}
+
+	fd, err := unix.Socket(unix.AF_UNIX, unix.SOCK_STREAM, 0)
+	if err == nil {
+		_ = unix.Close(fd)
+		t.Fatal("a Unix socket was allowed where landlock could not confine it")
+	}
+	if !errors.Is(err, unix.EAFNOSUPPORT) {
+		t.Errorf("got %v, want the filter's refusal", err)
+	}
+}
+
+func TestTheFilterLeavesNoNewPrivilegesBehindIt(t *testing.T) {
+	if !insideChildProcess() {
+		runAgainInChildProcess(t)
+		return
+	}
+
+	if err := applySeccomp(true); err != nil {
+		t.Fatalf("could not install the filter: %v", err)
+	}
+
+	set, err := unix.PrctlRetInt(unix.PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0)
+	if err != nil {
+		t.Fatalf("could not read no_new_privs: %v", err)
+	}
+	if set != 1 {
+		t.Error("a confined command could still gain privileges through a setuid binary")
 	}
 }
 

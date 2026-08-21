@@ -1,6 +1,13 @@
 package sandbox
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+const grantedVariable = "IO_SANDBOX_GRANTED"
 
 func TestUnixSocketsAreIsolatedWhereLandlockCanEnforceIt(t *testing.T) {
 	old := configuredRuleset(unixSocketsABI - 1)
@@ -27,5 +34,87 @@ func TestUnixSocketsAreIsolatedWhereLandlockCanEnforceIt(t *testing.T) {
 	}
 	if versionedRights(rightsRead, unixSocketsABI, true)&accessResolveUnix != 0 {
 		t.Error("a read-only directory granted Unix socket resolution")
+	}
+}
+
+func TestAFileGrantReachesNothingAroundIt(t *testing.T) {
+	if !insideChildProcess() {
+		directory := t.TempDir()
+		for _, name := range []string{"exact", "sibling"} {
+			path := filepath.Join(directory, name)
+			if err := os.WriteFile(path, []byte(name), 0o600); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		runAgainInChildProcess(t, grantedVariable+"="+filepath.Join(directory, "exact"))
+		return
+	}
+
+	exact := os.Getenv(grantedVariable)
+	directory := filepath.Dir(exact)
+
+	version, err := landlockVersion()
+	if err != nil {
+		t.Skipf("landlock cannot be asked here: %v", err)
+	}
+
+	if err := applyLandlock(grantingCoverage(Policy{Read: []string{exact}}), version); err != nil {
+		t.Fatalf("could not enter the sandbox: %v", err)
+	}
+
+	content, err := os.ReadFile(exact) //nolint:gosec // the path is the one under test
+	if err != nil || string(content) != "exact" {
+		t.Errorf("the granted file got %q and %v", content, err)
+	}
+
+	//nolint:gosec // the path is the one under test
+	if _, err := os.ReadFile(filepath.Join(directory, "sibling")); err == nil {
+		t.Error("a sibling of the granted file was readable")
+	}
+	if _, err := os.ReadDir(directory); err == nil {
+		t.Error("the directory holding the granted file was listable")
+	}
+	//nolint:gosec // the path is the one under test
+	if err := os.WriteFile(exact, []byte("changed"), 0o600); err == nil {
+		t.Error("a file granted for reading was writable")
+	}
+}
+
+func TestAnOptionalPathTheMachineLacksDoesNotStopTheSandbox(t *testing.T) {
+	if !insideChildProcess() {
+		runAgainInChildProcess(t)
+		return
+	}
+
+	version, err := landlockVersion()
+	if err != nil {
+		t.Skipf("landlock cannot be asked here: %v", err)
+	}
+
+	if err := applyLandlock(grantingCoverage(Policy{}), version); err != nil {
+		t.Errorf("a policy naming only what the machine may have was refused: %v", err)
+	}
+}
+
+func TestAPathThatIsNotThereIsNamedWhenItIsGranted(t *testing.T) {
+	if !insideChildProcess() {
+		runAgainInChildProcess(t, grantedVariable+"="+filepath.Join(t.TempDir(), "nowhere"))
+		return
+	}
+
+	absent := os.Getenv(grantedVariable)
+
+	version, err := landlockVersion()
+	if err != nil {
+		t.Skipf("landlock cannot be asked here: %v", err)
+	}
+
+	err = applyLandlock(grantingCoverage(Policy{Read: []string{absent}}), version)
+	if err == nil {
+		t.Fatal("a grant of a path that is not there was accepted")
+	}
+	if !strings.Contains(err.Error(), absent) {
+		t.Errorf("got %v, want the path that could not be granted named", err)
 	}
 }

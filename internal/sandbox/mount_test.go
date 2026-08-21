@@ -1,6 +1,7 @@
 package sandbox
 
 import (
+	"os"
 	"slices"
 	"syscall"
 	"testing"
@@ -53,5 +54,32 @@ func TestAScratchThatIsNotThereIsRefused(t *testing.T) {
 
 	if missingPaths := absent.missingPaths(); len(missingPaths) != 1 || missingPaths[0] != "/scratch" {
 		t.Errorf("expected the scratch to be reported missing, got %v", missingPaths)
+	}
+}
+
+func TestAPolicyWithNoMountsOfItsOwnRearrangesNothing(t *testing.T) {
+	if err := applyMounts(Policy{Read: []string{"/elsewhere"}, Write: []string{"/work"}}); err != nil {
+		t.Errorf("got %v, want a policy with nothing nested to leave the mounts alone", err)
+	}
+}
+
+func TestAPolicyWithNothingNestedStillGetsTheOtherNamespaces(t *testing.T) {
+	attributes := namespaceAttributes(Policy{})
+
+	for name, flag := range map[string]uintptr{
+		"user":    syscall.CLONE_NEWUSER,
+		"network": syscall.CLONE_NEWNET,
+		"pid":     syscall.CLONE_NEWPID,
+	} {
+		if attributes.Cloneflags&flag == 0 {
+			t.Errorf("expected a %s namespace", name)
+		}
+	}
+
+	if len(attributes.UidMappings) != 1 || attributes.UidMappings[0].HostID != os.Getuid() {
+		t.Errorf("got %v, want the caller mapped to root of the namespace", attributes.UidMappings)
+	}
+	if len(attributes.GidMappings) != 1 || attributes.GidMappings[0].HostID != os.Getgid() {
+		t.Errorf("got %v, want the caller's group mapped to root of the namespace", attributes.GidMappings)
 	}
 }
