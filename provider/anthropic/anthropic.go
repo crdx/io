@@ -177,7 +177,7 @@ func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, e
 		self.history = append(self.history, answer)
 	}
 
-	return agent.Reply{Calls: turn.calls(self.toolNames), Usage: turn.usage}, nil
+	return agent.Reply{Calls: turn.calls(self.toolNames)}, nil
 }
 
 func (self *Client) settled() error {

@@ -239,20 +239,15 @@ japanese
 
 Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
 
-## Context usage
-
-> 2001-01-01T00:00:13Z
-
-- **Input tokens:** `48120`
 ## Interrupted
 
-> 2001-01-01T00:00:14Z
+> 2001-01-01T00:00:13Z
 
 The turn was interrupted.
 
 ## Assistant
 
-> 2001-01-01T00:00:15Z
+> 2001-01-01T00:00:14Z
 
 ```
 That is all of the awkward ones.

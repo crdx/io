@@ -17,7 +17,6 @@ import (
 	"crdx.org/io/cmd/oh/spinner"
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store"
-	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/internal/sandbox"
 )
@@ -39,7 +38,6 @@ type conversation struct {
 
 	turn            turn
 	storedItems     int           // how many provider items have been stored
-	contextTokens   int           // the input tokens reported for the last completed turn
 	terminalFocused bool          // whether the interactive terminal has focus
 	transcript      []agent.Event // the conversation as it was drawn, so it can be drawn again
 }
@@ -239,9 +237,6 @@ func (self *conversation) show(input *line.Input) {
 
 	framedRows := append([]string{rule(width, scrollLabel("↑", frame.Above), "")}, frame.Rows...)
 	inputLabel := self.label(input.IsPending(), self.turn.frame, self.turn.isRunning)
-	if usage := contextUsage(self.contextTokens); usage != "" {
-		inputLabel += " " + style.Subtle("─") + " " + usage
-	}
 
 	framedRows = append(framedRows, bannerRule(
 		width,
@@ -342,10 +337,7 @@ func (self *conversation) restore(storedSession *store.Session) {
 	}
 	self.storedItems = len(storedSession.Items)
 
-	for _, event := range storedSession.Events {
-		self.updateContextUsage(event)
-		self.transcript = append(self.transcript, event)
-	}
+	self.transcript = append(self.transcript, storedSession.Events...)
 
 	self.replay()
 }
@@ -428,7 +420,6 @@ func (self *conversation) take(report turnEvent) {
 }
 
 func (self *conversation) recordEvent(event agent.Event) {
-	self.updateContextUsage(event)
 	self.transcript = appendTranscript(self.transcript, event)
 	self.turn.painter.draw(event)
 
@@ -438,12 +429,6 @@ func (self *conversation) recordEvent(event agent.Event) {
 
 	self.writeSessionEvents(self.turn.pendingEvents.Add(event))
 	self.showStorageWarnings()
-}
-
-func (self *conversation) updateContextUsage(event agent.Event) {
-	if event.Kind == agent.ContextUsage && event.Usage != nil {
-		self.contextTokens = event.Usage.InputTokens
-	}
 }
 
 func appendTranscript(transcript []agent.Event, event agent.Event) []agent.Event {

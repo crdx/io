@@ -108,10 +108,6 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		writeField(&output, "Name", event.Name)
 		output.WriteString("**State**\n\n")
 		writeFence(&output, string(event.State), "json")
-	case agent.ContextUsage:
-		if event.Usage != nil {
-			writeField(&output, "Input tokens", fmt.Sprint(event.Usage.InputTokens))
-		}
 	case agent.Interrupted:
 		output.WriteString("The turn was interrupted.\n\n")
 	case agent.Failure:
@@ -162,8 +158,6 @@ func title(kind agent.Kind) string {
 		return "Tool result"
 	case agent.StateEvent:
 		return "State"
-	case agent.ContextUsage:
-		return "Context usage"
 	case agent.Interrupted:
 		return "Interrupted"
 	case agent.Failure:

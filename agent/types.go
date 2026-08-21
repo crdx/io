@@ -53,12 +53,6 @@ type Yield func(Event) bool
 // Reply is a turn once it's over.
 type Reply struct {
 	Calls []ToolCall
-	Usage Usage
-}
-
-// Usage is what a completed provider request consumed.
-type Usage struct {
-	InputTokens int `json:"input_tokens"` // tokens in the context sent to the model
 }
 
 // ToolCall is one call the model made.
@@ -81,17 +75,16 @@ type Kind string
 
 // The kinds of event a conversation is made of.
 const (
-	Prompt       Kind = "prompt"      // what was asked
-	Reasoning    Kind = "reasoning"   // what the model thought on the way to answering
-	Text         Kind = "text"        // what was answered
-	Call         Kind = "call"        // a tool the model asked for
-	Result       Kind = "result"      // what that tool handed back
-	StateEvent   Kind = "state"       // durable state changed by a successful call
-	ContextUsage Kind = "usage"       // how much context a completed turn used
-	Notice       Kind = "notice"      // what the harness said itself, rather than the model
-	Startup      Kind = "startup"     // what the harness had ready when the conversation opened
-	Interrupted  Kind = "interrupted" // where a replacement prompt stopped a turn
-	Failure      Kind = "failure"     // why a turn ended before the model completed it
+	Prompt      Kind = "prompt"      // what was asked
+	Reasoning   Kind = "reasoning"   // what the model thought on the way to answering
+	Text        Kind = "text"        // what was answered
+	Call        Kind = "call"        // a tool the model asked for
+	Result      Kind = "result"      // what that tool handed back
+	StateEvent  Kind = "state"       // durable state changed by a successful call
+	Notice      Kind = "notice"      // what the harness said itself, rather than the model
+	Startup     Kind = "startup"     // what the harness had ready when the conversation opened
+	Interrupted Kind = "interrupted" // where a replacement prompt stopped a turn
+	Failure     Kind = "failure"     // why a turn ended before the model completed it
 )
 
 // Event is a conversation occurrence or durable tool-state transition. The stream of them is the
@@ -114,7 +107,6 @@ type Event struct {
 	Took      time.Duration   `json:"took,omitempty"`
 	Stats     *tool.Stats     `json:"stats,omitempty"`
 	State     json.RawMessage `json:"state,omitempty"` // an opaque durable tool-state transition
-	Usage     *Usage          `json:"usage,omitempty"`
 }
 
 // Agent holds a conversation.

@@ -21,7 +21,6 @@ var ErrTruncated = sse.ErrTruncated
 
 type reply struct {
 	items        []json.RawMessage
-	usage        agent.Usage
 	isSummarised bool // whether a reasoning summary has been reported this turn
 }
 
@@ -87,7 +86,6 @@ type eventPart struct {
 
 type eventResponse struct {
 	Error *eventError `json:"error"`
-	Usage agent.Usage `json:"usage"`
 }
 
 type eventError struct {
@@ -190,9 +188,6 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		}
 
 	case "response.completed", "response.done":
-		if message.Response != nil {
-			self.usage = message.Response.Usage
-		}
 		return true, nil
 
 	case "response.incomplete":

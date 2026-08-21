@@ -46,17 +46,6 @@ func (self *block) argumentsOrEmpty() string {
 type reply struct {
 	blocks     []*block
 	stopReason string
-	usage      agent.Usage
-}
-
-type usage struct {
-	InputTokens   int `json:"input_tokens"`
-	CacheRead     int `json:"cache_read_input_tokens"`
-	CacheCreation int `json:"cache_creation_input_tokens"`
-}
-
-func (self usage) context() int {
-	return self.InputTokens + self.CacheRead + self.CacheCreation
 }
 
 func (self *reply) find(index int) *block {
@@ -156,17 +145,11 @@ type toolUse struct {
 }
 
 type event struct {
-	Type         string          `json:"type"`
-	Index        int             `json:"index"`
-	ContentBlock *startedBlock   `json:"content_block"`
-	Delta        *eventDelta     `json:"delta"`
-	Error        *eventError     `json:"error"`
-	Message      *startedMessage `json:"message"`
-	Usage        *usage          `json:"usage"`
-}
-
-type startedMessage struct {
-	Usage *usage `json:"usage"`
+	Type         string        `json:"type"`
+	Index        int           `json:"index"`
+	ContentBlock *startedBlock `json:"content_block"`
+	Delta        *eventDelta   `json:"delta"`
+	Error        *eventError   `json:"error"`
 }
 
 type startedBlock struct {
@@ -215,11 +198,6 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	}
 
 	switch message.Type {
-	case "message_start":
-		if message.Message != nil {
-			self.recordUsage(message.Message.Usage)
-		}
-
 	case "content_block_start":
 		self.open(message)
 
@@ -234,8 +212,6 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 			self.stopReason = message.Delta.StopReason
 		}
 
-		self.recordUsage(message.Usage)
-
 	case "message_stop":
 		if slices.Contains(cutShort, self.stopReason) {
 			return true, ErrIncomplete
@@ -248,16 +224,6 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	}
 
 	return false, nil
-}
-
-func (self *reply) recordUsage(reported *usage) {
-	if reported == nil {
-		return
-	}
-
-	if context := reported.context(); context > 0 {
-		self.usage = agent.Usage{InputTokens: context}
-	}
 }
 
 func (self *reply) open(message event) {

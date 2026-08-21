@@ -105,9 +105,6 @@ func (self *Agent) Stream(ctx context.Context, prompt string) iter.Seq2[Event, e
 				yield(Event{}, err)
 				return
 			case len(reply.Calls) == 0:
-				if reply.Usage.InputTokens > 0 {
-					yield(Event{Kind: ContextUsage, Usage: &reply.Usage}, nil)
-				}
 				return
 			}
 
