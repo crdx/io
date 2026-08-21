@@ -122,7 +122,10 @@ func openConfiguredMount(path string) (configuredMount, error) {
 	}
 	root, err := os.OpenRoot(filepath.Dir(target))
 	return configuredMount{
-		root: root, target: target, name: filepath.Base(target), isExact: true,
+		root:    root,
+		target:  target,
+		name:    filepath.Base(target),
+		isExact: true,
 	}, err
 }
 

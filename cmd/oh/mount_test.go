@@ -91,7 +91,9 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 	}
 
 	roots, err := mountConfiguredPaths(files, mode, configuredPaths{
-		Read: []string{readDirectory}, Write: []string{writeDirectory}, Exec: []string{execDirectory},
+		Read:  []string{readDirectory},
+		Write: []string{writeDirectory},
+		Exec:  []string{execDirectory},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -148,7 +150,8 @@ func TestConfiguredFilesAreMountedWithoutTheirSiblings(t *testing.T) {
 	}
 
 	roots, err := mountConfiguredPaths(files, mode, configuredPaths{
-		Read: []string{readPath, writePath}, Write: []string{writePath},
+		Read:  []string{readPath, writePath},
+		Write: []string{writePath},
 	})
 	if err != nil {
 		t.Fatal(err)

@@ -84,12 +84,14 @@ func TestTheRegistryFillsInWhatAListingLeftOut(t *testing.T) {
 
 	registered := map[string]agent.Model{
 		"claude-opus-5": {
-			ID: "claude-opus-5", Name: "Claude Opus 5",
+			ID:              "claude-opus-5",
+			Name:            "Claude Opus 5",
 			EffortLevels:    []string{"low", "medium", "high", "xhigh", "max"},
 			MaxOutputTokens: 128_000,
 		},
 		"claude-sonnet-5": {
-			ID: "claude-sonnet-5", Name: "Claude Sonnet 5",
+			ID:           "claude-sonnet-5",
+			Name:         "Claude Sonnet 5",
 			EffortLevels: []string{"low", "high"},
 		},
 	}

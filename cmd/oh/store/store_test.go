@@ -336,14 +336,20 @@ func TestListPutsTheSessionTouchedLastAtTheTop(t *testing.T) {
 func TestHTTPObservationCanCreateTheBundleBeforeTheFirstEvent(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{
-		Model: "model", Effort: "high", Provider: "codex", WorkspaceDir: "/workspace",
+		Model:        "model",
+		Effort:       "high",
+		Provider:     "codex",
+		WorkspaceDir: "/workspace",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	exchange := log.Observer().Start(req.Request{
-		Started: time.Now(), Method: "POST", URL: "https://example.com", Protocol: "HTTP/1.1",
+		Started:  time.Now(),
+		Method:   "POST",
+		URL:      "https://example.com",
+		Protocol: "HTTP/1.1",
 	})
 	if exchange == nil {
 		t.Fatal("expected the HTTP exchange to be recorded")
@@ -370,7 +376,10 @@ func TestHTTPObservationCanCreateTheBundleBeforeTheFirstEvent(t *testing.T) {
 func TestTheFirstRecordCreatesACompleteBundle(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{
-		Model: "model", Effort: "high", Provider: "codex", WorkspaceDir: "/workspace",
+		Model:        "model",
+		Effort:       "high",
+		Provider:     "codex",
+		WorkspaceDir: "/workspace",
 	})
 	if err != nil {
 		t.Fatal(err)

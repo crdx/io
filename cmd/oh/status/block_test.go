@@ -29,13 +29,21 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 		},
 		"capped output": {
 			stats: tool.Stats{
-				Kind: tool.StatsOutput, Lines: 4, Bytes: 1200, TotalBytes: 1200, Truncated: true,
+				Kind:       tool.StatsOutput,
+				Lines:      4,
+				Bytes:      1200,
+				TotalBytes: 1200,
+				Truncated:  true,
 			},
 			want: []string{"4L+ ~300t"},
 		},
 		"resources": {
 			stats: tool.Stats{
-				Kind: tool.StatsResources, CPUTime: 800 * time.Millisecond, PeakMemory: 92 << 20, Lines: 7, Bytes: 1200,
+				Kind:       tool.StatsResources,
+				CPUTime:    800 * time.Millisecond,
+				PeakMemory: 92 << 20,
+				Lines:      7,
+				Bytes:      1200,
 			},
 			want: []string{"7L ~300t 1.4s 0.8s 92M"},
 		},
@@ -65,7 +73,11 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 		},
 		"capped search": {
 			stats: tool.Stats{
-				Kind: tool.StatsSearch, Lines: 100, Bytes: 32_000, TotalBytes: 80_000, Truncated: true,
+				Kind:       tool.StatsSearch,
+				Lines:      100,
+				Bytes:      32_000,
+				TotalBytes: 80_000,
+				Truncated:  true,
 			},
 			want: []string{"100L+ ~8Kt (of ~20Kt)"},
 		},
@@ -103,14 +115,19 @@ func TestStatsUseTheirExpectedStyles(t *testing.T) {
 	}
 
 	search := outcomeText("✓", 0, &tool.Stats{
-		Kind: tool.StatsSearch, Lines: 23, Bytes: 1200, TotalBytes: 2400, Truncated: true,
+		Kind:       tool.StatsSearch,
+		Lines:      23,
+		Bytes:      1200,
+		TotalBytes: 2400,
+		Truncated:  true,
 	})
 	if want := style.Subtle("23L+ ~300t (of ~600t)"); !strings.Contains(search, want) {
 		t.Errorf("search stats got %q, want styled %q", search, want)
 	}
 
 	exec := outcomeText("✓", 0, &tool.Stats{
-		Kind: tool.StatsResources, PeakMemory: 26 << 20,
+		Kind:       tool.StatsResources,
+		PeakMemory: 26 << 20,
 	})
 	wantExec := style.Subtle("0L 0t 0s 0s 26M")
 	if !strings.Contains(exec, wantExec) {
@@ -152,7 +169,9 @@ func rowsFromOutput(output *strings.Builder) []string {
 
 func TestOnlyTheFocusedPartOfArgumentsIsPainted(t *testing.T) {
 	label := Label{
-		Name: "read", Subject: "cmd/oh/draw.go", ReadOnly: true,
+		Name:      "read",
+		Subject:   "cmd/oh/draw.go",
+		ReadOnly:  true,
 		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
 	}
 	want := style.Call("read") + " " + style.Subtle("cmd/oh/") + style.Subject("draw.go")
@@ -182,7 +201,8 @@ func TestAnAccentAndTheFocusedPartOfArgumentsArePainted(t *testing.T) {
 
 func TestArgumentsWithSyntaxAreHighlighted(t *testing.T) {
 	label := Label{
-		Name: "bash", Subject: "echo one && true",
+		Name:      "bash",
+		Subject:   "echo one && true",
 		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
 	}
 	want := style.Change("bash") + " " + markdown.Highlight(label.Subject, "bash")
@@ -226,7 +246,8 @@ func TestElidedBashKeepsHighlightingFromTheCompleteCommand(t *testing.T) {
 		},
 	} {
 		label := Label{
-			Name: "bash", Subject: source,
+			Name:      "bash",
+			Subject:   source,
 			Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
 		}.Elide(len("bash ") + test.argumentRoom)
 		got := label.renderSubject()
@@ -246,7 +267,8 @@ func TestElidedBashKeepsHighlightingFromTheCompleteCommand(t *testing.T) {
 func TestElidedBashCountsWideUnicodeInTerminalCells(t *testing.T) {
 	argumentRoom := 8
 	label := Label{
-		Name: "bash", Subject: "echo 日本語 later",
+		Name:      "bash",
+		Subject:   "echo 日本語 later",
 		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
 	}.Elide(len("bash ") + argumentRoom)
 	got := label.renderSubject()
@@ -265,7 +287,9 @@ func TestElidedBashCountsWideUnicodeInTerminalCells(t *testing.T) {
 
 func TestAPathInTheDetailCanBeFocused(t *testing.T) {
 	label := Label{
-		Name: "grep", Subject: "text", Qualifier: "in cmd/oh/draw.go",
+		Name:      "grep",
+		Subject:   "text",
+		Qualifier: "in cmd/oh/draw.go",
 		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
 	}
 	want := style.Change("grep") + " " + style.Subject("text") + " " +

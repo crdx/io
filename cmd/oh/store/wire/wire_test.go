@@ -53,15 +53,22 @@ func TestRecorderCensorsHeadersJSONFormsSSEAndBearerText(t *testing.T) {
 	}
 
 	exchange := recorder.Start(req.Request{
-		Started: time.Unix(2, 0), Method: http.MethodPost, URL: "http://example.test/",
-		Protocol: "HTTP/1.1", Header: http.Header{
+		Started:  time.Unix(2, 0),
+		Method:   http.MethodPost,
+		URL:      "http://example.test/",
+		Protocol: "HTTP/1.1",
+		Header: http.Header{
 			"Authorization": {"Bearer request-secret"},
 			"Content-Type":  {"application/json"},
-		}, Body: []byte(`{"nested":{"access_token":"json-secret","innocent":"kept"}}`),
+		},
+		Body: []byte(`{"nested":{"access_token":"json-secret","innocent":"kept"}}`),
 	})
 	exchange.Response(req.Response{
-		Received: time.Unix(3, 0), Protocol: "HTTP/1.1", Status: "200 OK", Code: 200,
-		Header: http.Header{"Content-Type": {"text/event-stream"}},
+		Received: time.Unix(3, 0),
+		Protocol: "HTTP/1.1",
+		Status:   "200 OK",
+		Code:     200,
+		Header:   http.Header{"Content-Type": {"text/event-stream"}},
 	})
 	exchange.Body([]byte("data: {\"refresh_token\":\"sse-secret\",\"ok\":true}\n\ndata: Bearer response-secret\n"))
 	exchange.Finish(time.Unix(4, 0), nil, false)

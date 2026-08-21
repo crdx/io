@@ -179,7 +179,9 @@ func exec(
 ) (string, tool.Stats, error) {
 	result, err := processes.Run(ctx, root.Name(), args.Command, policy)
 	stats := tool.Stats{
-		Kind: tool.StatsResources, CPUTime: result.CPUTime, PeakMemory: result.PeakMemory,
+		Kind:       tool.StatsResources,
+		CPUTime:    result.CPUTime,
+		PeakMemory: result.PeakMemory,
 	}
 	if err != nil {
 		return "", stats, err

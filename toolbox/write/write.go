@@ -85,7 +85,9 @@ func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.S
 		}
 	}
 	stats := tool.Stats{
-		Kind: tool.StatsWrite, Lines: lines, Bytes: int64(len(args.Content)),
+		Kind:  tool.StatsWrite,
+		Lines: lines,
+		Bytes: int64(len(args.Content)),
 	}
 	return fmt.Sprintf("wrote %s to %s", util.FormatBytes(len(args.Content), 3), args.Path), stats, nil
 }

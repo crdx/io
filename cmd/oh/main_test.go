@@ -479,7 +479,9 @@ func TestConfiguredPathsReachTheShellPolicy(t *testing.T) {
 	writeDirectory := t.TempDir()
 	execDirectory := t.TempDir()
 	additional := configuredPaths{
-		Read: []string{readDirectory}, Write: []string{writeDirectory}, Exec: []string{execDirectory},
+		Read:  []string{readDirectory},
+		Write: []string{writeDirectory},
+		Exec:  []string{execDirectory},
 	}
 
 	readOnly, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), additional, 0)

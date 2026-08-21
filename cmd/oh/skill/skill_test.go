@@ -156,7 +156,9 @@ func TestASkillIsRecognisedByThePathItLivesAt(t *testing.T) {
 
 func TestPromptDisclosesOnlyTheCatalogueAndEscapesXML(t *testing.T) {
 	got := Context([]Skill{{
-		Name: "one&two", Description: "Use <carefully>.", Location: "/skills/one/SKILL.md",
+		Name:        "one&two",
+		Description: "Use <carefully>.",
+		Location:    "/skills/one/SKILL.md",
 	}})
 
 	for _, want := range []string{

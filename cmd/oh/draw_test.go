@@ -152,12 +152,16 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 		painted string
 	}{
 		"a read of a skill": {
-			tool: "read", path: skillPath,
-			want: "load " + skillPath, painted: style.Skill("golang"),
+			tool:    "read",
+			path:    skillPath,
+			want:    "load " + skillPath,
+			painted: style.Skill("golang"),
 		},
 		"a read of a file": {
-			tool: "read", path: "cmd/oh/draw.go",
-			want: "read cmd/oh/draw.go", painted: style.Subject("draw.go"),
+			tool:    "read",
+			path:    "cmd/oh/draw.go",
+			want:    "read cmd/oh/draw.go",
+			painted: style.Subject("draw.go"),
 		},
 		"another tool": {tool: "grep", path: skillPath, want: "grep " + skillPath},
 	}
@@ -168,7 +172,9 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 			callPainter := &painter{screen: output.New(&screenOutput)}
 
 			callPainter.draw(agent.Event{
-				Kind: agent.Call, ID: "1", Name: test.tool,
+				Kind: agent.Call,
+				ID:   "1",
+				Name: test.tool,
 				Rendering: agent.Rendering{
 					Subject:   test.path,
 					Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: path.Base(test.path)},
@@ -191,7 +197,9 @@ func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
 	callPainter := &painter{screen: output.New(&screenOutput)}
 
 	callPainter.draw(agent.Event{
-		Kind: agent.Call, ID: "1", Name: "read",
+		Kind: agent.Call,
+		ID:   "1",
+		Name: "read",
 		Rendering: agent.Rendering{
 			Subject:   "/skills/golang/SKILL.md",
 			Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
@@ -213,7 +221,10 @@ func TestWhetherACallChangedAnythingComesFromTheToolOfTheMoment(t *testing.T) {
 	callPainter := self.newPainter(false)
 
 	callPainter.draw(agent.Event{
-		Kind: agent.Call, ID: "1", Name: "write", Arguments: `{"path":"one.go"}`,
+		Kind:      agent.Call,
+		ID:        "1",
+		Name:      "write",
+		Arguments: `{"path":"one.go"}`,
 		Rendering: agent.Rendering{ReadOnly: true},
 	})
 	callPainter.close(status.Done)
@@ -232,7 +243,9 @@ func TestACallToAToolThatIsGoneKeepsWhatWasRecorded(t *testing.T) {
 	callPainter := self.newPainter(false)
 
 	callPainter.draw(agent.Event{
-		Kind: agent.Call, ID: "1", Name: "gone",
+		Kind:      agent.Call,
+		ID:        "1",
+		Name:      "gone",
 		Rendering: agent.Rendering{Subject: "one.go", ReadOnly: true},
 	})
 	callPainter.close(status.Done)

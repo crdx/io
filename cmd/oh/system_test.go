@@ -217,7 +217,9 @@ func TestTheSkillCatalogueIsAppendedToTheContext(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 
 	got, _, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", capRead, configuredPaths{}, []skill.Skill{{
-		Name: "pdf", Description: "Work with PDFs.", Location: "/skills/pdf/SKILL.md",
+		Name:        "pdf",
+		Description: "Work with PDFs.",
+		Location:    "/skills/pdf/SKILL.md",
 	}})
 	if err != nil {
 		t.Fatal(err)

@@ -196,8 +196,12 @@ func (self *Writer) ensureAuxiliaryRecorders() {
 	bundleDirectory := filepath.Join(self.directory, self.Name())
 	if self.transcript == nil && self.transcriptEnabled {
 		recorder, err := transcript.Open(filepath.Join(bundleDirectory, transcriptName), transcript.Meta{
-			Name: self.Name(), Started: self.inner.Started(), Model: self.meta.Model, Effort: self.meta.Effort,
-			Provider: self.meta.Provider, Workspace: self.meta.WorkspaceDir,
+			Name:      self.Name(),
+			Started:   self.inner.Started(),
+			Model:     self.meta.Model,
+			Effort:    self.meta.Effort,
+			Provider:  self.meta.Provider,
+			Workspace: self.meta.WorkspaceDir,
 		})
 		if err != nil {
 			self.transcriptEnabled = false
@@ -208,8 +212,12 @@ func (self *Writer) ensureAuxiliaryRecorders() {
 	}
 	if self.wire == nil && self.wireEnabled {
 		recorder, err := wire.Open(filepath.Join(bundleDirectory, wireName), wire.Meta{
-			Name: self.Name(), Started: self.inner.Started(), Model: self.meta.Model, Effort: self.meta.Effort,
-			Provider: self.meta.Provider, Workspace: self.meta.WorkspaceDir,
+			Name:      self.Name(),
+			Started:   self.inner.Started(),
+			Model:     self.meta.Model,
+			Effort:    self.meta.Effort,
+			Provider:  self.meta.Provider,
+			Workspace: self.meta.WorkspaceDir,
 		}, self.queueWarning)
 		if err != nil {
 			self.wireEnabled = false
@@ -329,8 +337,11 @@ func Rebuild(directory, name string) error {
 	}
 
 	recorder, err := transcript.Open(path, transcript.Meta{
-		Name: name, Started: storedSession.Started, Model: storedSession.Meta.Model,
-		Effort: storedSession.Meta.Effort, Provider: storedSession.Meta.Provider,
+		Name:      name,
+		Started:   storedSession.Started,
+		Model:     storedSession.Meta.Model,
+		Effort:    storedSession.Meta.Effort,
+		Provider:  storedSession.Meta.Provider,
 		Workspace: storedSession.Meta.WorkspaceDir,
 	})
 	if err != nil {

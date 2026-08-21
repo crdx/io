@@ -218,7 +218,8 @@ func TestOnlyAnExactlyGrantedFileMayBeExecuted(t *testing.T) {
 	exact := filepath.Join(directory, "exact")
 	sibling := filepath.Join(directory, "sibling")
 	for path, content := range map[string]string{
-		exact: "#!/bin/sh\nprintf exact", sibling: "#!/bin/sh\nprintf sibling",
+		exact:   "#!/bin/sh\nprintf exact",
+		sibling: "#!/bin/sh\nprintf sibling",
 	} {
 		if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 			t.Fatal(err)

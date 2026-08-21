@@ -137,7 +137,8 @@ func TestTranscriptRetainsTurnFailures(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind: agent.Failure, Text: "read: connection reset by peer",
+		Kind: agent.Failure,
+		Text: "read: connection reset by peer",
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -165,7 +166,10 @@ func TestTranscriptRetainsDurableState(t *testing.T) {
 	}
 	state := json.RawMessage(`{"path":"a.txt","sha256":"abc"}`)
 	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind: agent.StateEvent, ID: "call", Name: "file_read", State: state,
+		Kind:  agent.StateEvent,
+		ID:    "call",
+		Name:  "file_read",
+		State: state,
 	}); err != nil {
 		t.Fatal(err)
 	}
