@@ -134,7 +134,7 @@ func (self *Decoder) sequence() (Key, error) {
 	switch next {
 	case '[':
 		return self.parameters()
-	case 'O': // SS3, which a terminal not using the protocol sends for the arrows
+	case 'O':
 		return self.applicationCursor()
 	}
 

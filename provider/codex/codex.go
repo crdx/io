@@ -23,7 +23,7 @@ import (
 // https://platform.openai.com/docs/guides/reasoning
 const (
 	Endpoint = "https://chatgpt.com/backend-api/codex/responses"
-	Summary  = "auto" // defined as the "most detailed summarizer available for a model"
+	Summary  = "auto"
 
 	Originator = "io"
 )

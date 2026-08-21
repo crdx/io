@@ -39,5 +39,5 @@ func main() {
 	)
 
 	answer, _ := assistant.Send(context.Background(), "what is the weather in London?")
-	fmt.Println(answer) // => "London is cloudy, with a chance of meatballs."
+	fmt.Println(answer)
 }

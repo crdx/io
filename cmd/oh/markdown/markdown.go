@@ -19,7 +19,7 @@ import (
 	"crdx.org/io/cmd/oh/width"
 )
 
-const tab = "    " // a tab stop is the terminal's own, and no width here would agree with it
+const tab = "    "
 
 var parser = goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser()
 
@@ -50,7 +50,7 @@ func (self *renderer) blocks(parent ast.Node) {
 	}
 
 	for len(self.rows) > 0 && self.rows[len(self.rows)-1] == "" {
-		self.rows = self.rows[:len(self.rows)-1] // an answer ending on blank rows ended before them
+		self.rows = self.rows[:len(self.rows)-1]
 	}
 }
 
@@ -165,5 +165,5 @@ func margin(cells int, prefix string) (string, int) {
 		return prefix, cells - prefixWidth
 	}
 
-	return "", cells // too narrow for what marks the block, so the block is drawn without it
+	return "", cells
 }

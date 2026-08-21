@@ -81,7 +81,7 @@ func (self *Output) Status() *status.Block {
 	self.separate(false)
 
 	if self.isMidLine {
-		self.newline() // before any line owed, so the owed one is empty rather than the end of this
+		self.newline()
 	}
 
 	self.openPendingLine()
@@ -160,7 +160,7 @@ func (self *Output) measure() {
 }
 
 func (self *Output) newline() {
-	self.emit("\n") // not write: a line owed is owed before this one ends, and paid after
+	self.emit("\n")
 }
 
 func (self *Output) write(text string) {
@@ -180,7 +180,7 @@ func (self *Output) emit(text string) {
 	self.at(fitted)
 }
 
-const apart = 2 // newlines with an empty line between them
+const apart = 2
 
 func (self *Output) separate(answering bool) {
 	if self.isStreaming != answering {

@@ -331,7 +331,7 @@ func TestARepositoryCannotBeClobbered(t *testing.T) {
 	} {
 		output, err := exec(t, root, directory, command)
 		if err != nil && !errors.Is(err, bash.ErrCommandFailed) {
-			t.Fatalf("unexpected error: %v", err) // the refusal itself is a failed command
+			t.Fatalf("unexpected error: %v", err)
 		}
 
 		if !strings.Contains(output, "Read-only file system") {

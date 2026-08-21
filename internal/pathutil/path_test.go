@@ -20,7 +20,7 @@ func TestShortenWritesAPathTheWayTheUserWouldSayIt(t *testing.T) {
 	tests := map[string]string{
 		"/home/alice/proj/io":       "~/proj/io",
 		"/home/alice":               "~",
-		"/home/alice-other/project": "/home/alice-other/project", // a lookalike, not the home
+		"/home/alice-other/project": "/home/alice-other/project",
 		"/etc/hosts":                "/etc/hosts",
 		"proj/io":                   "proj/io",
 		"":                          "",

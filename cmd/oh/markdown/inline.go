@@ -68,7 +68,7 @@ func (self *renderer) renderInlineNode(node ast.Node) string {
 	return self.inline(node)
 }
 
-func (self *renderer) text(node *ast.Text) string { // markdown puts escapes in, so they come out
+func (self *renderer) text(node *ast.Text) string {
 	value := node.Segment.Value(self.source)
 
 	if node.IsRaw() {
@@ -80,7 +80,7 @@ func (self *renderer) text(node *ast.Text) string { // markdown puts escapes in,
 	)))
 }
 
-func lineBreak(node *ast.Text) string { // a line the model chose to break is a line it meant to break
+func lineBreak(node *ast.Text) string {
 	if node.SoftLineBreak() || node.HardLineBreak() {
 		return "\n"
 	}
@@ -111,7 +111,7 @@ func (self *renderer) raw(node *ast.RawHTML) string {
 	return out.String()
 }
 
-func over(paint style.Style, text string) string { // a style inside another is off from its reset on
+func over(paint style.Style, text string) string {
 	stylePrefix := strings.TrimSuffix(paint(""), reset)
 	if stylePrefix == "" {
 		return text

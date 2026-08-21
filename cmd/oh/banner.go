@@ -132,7 +132,7 @@ func offeredCapability(flag string, given bool, paint style.Style, pending bool)
 		paint = style.Withheld
 	}
 
-	if pending { // per flag: each ends in a reset that would end an underline drawn over the lot
+	if pending {
 		return style.Pending(paint(flag))
 	}
 

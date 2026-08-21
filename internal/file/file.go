@@ -146,7 +146,7 @@ func (self *Root) refuseWrite(name string) error {
 
 	resolvedName := filepath.Clean(name)
 
-	for range 255 { // the kernel gives up on a symlink chain long before this
+	for range 255 {
 		parts := strings.Split(resolvedName, string(filepath.Separator))
 		followedSymlink := false
 
@@ -155,7 +155,7 @@ func (self *Root) refuseWrite(name string) error {
 			info, err := self.root.Lstat(prefix)
 			if err != nil {
 				if errors.Is(err, fs.ErrNotExist) {
-					return nil // the rest is to be made, and contains no existing symlink
+					return nil
 				}
 				return err
 			}

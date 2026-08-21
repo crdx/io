@@ -48,8 +48,8 @@ func TestGitMayCommitWithinAWorkspaceItMayNotOtherwiseChange(t *testing.T) {
 		"PATH=" + os.Getenv("PATH"),
 		"HOME=" + home,
 		"TMPDIR=" + home,
-		"GOCOVERDIR=" + home,    // the child is locked out of /tmp, where a coverage run would write
-		"GIT_CONFIG_NOSYSTEM=1", // as the harness sets it, /etc being no part of a policy
+		"GOCOVERDIR=" + home,
+		"GIT_CONFIG_NOSYSTEM=1",
 	}
 
 	if out, err := child.CombinedOutput(); err != nil {

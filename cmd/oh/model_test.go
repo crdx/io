@@ -98,15 +98,15 @@ func listedModels() []modelChoice {
 
 func TestACloserReadingOfAQueryWinsOutright(t *testing.T) {
 	for query, want := range map[string]string{
-		"anthropic/claude-opus-5":  "claude-opus-5",            // named outright, provider and all
-		"claude-opus-5":            "claude-opus-5",            // named outright
-		"claude-opus-4-5":          "claude-opus-4-5",          // named outright, and the opening of another
-		"opus-5":                   "claude-opus-5",            // held whole by one, in order by three
-		"claude-opus-4-5-20251101": "claude-opus-4-5-20251101", // the long way round
-		"sonnet":                   "claude-sonnet-5",          // held whole by one alone
-		"sol":                      "gpt-5.6-sol",              // the tail of a name
-		"gpt":                      "gpt-5.6-sol",              // the head of one
-		"gp56":                     "gpt-5.6-sol",              // letters in order, where nothing better matches
+		"anthropic/claude-opus-5":  "claude-opus-5",
+		"claude-opus-5":            "claude-opus-5",
+		"claude-opus-4-5":          "claude-opus-4-5",
+		"opus-5":                   "claude-opus-5",
+		"claude-opus-4-5-20251101": "claude-opus-4-5-20251101",
+		"sonnet":                   "claude-sonnet-5",
+		"sol":                      "gpt-5.6-sol",
+		"gpt":                      "gpt-5.6-sol",
+		"gp56":                     "gpt-5.6-sol",
 	} {
 		choice, err := matchModel(query, listedModels())
 		if err != nil {

@@ -33,7 +33,7 @@ func (self Policy) nestedPaths() []string {
 // TmpDir is where a policy's scratch space is attached inside the sandbox.
 const TmpDir = "/tmp"
 
-func (self Policy) usesMountNamespace() bool { // rearranging mounts is the only reason to unshare
+func (self Policy) usesMountNamespace() bool {
 	return len(self.nestedPaths()) > 0 || self.TmpDir != ""
 }
 
@@ -65,7 +65,7 @@ func namespaceProbeCommand(ctx context.Context, policy Policy) *exec.Cmd {
 }
 
 func applyMounts(policy Policy) error {
-	if policy.usesMountNamespace() { // a private devpts would otherwise replace the real one
+	if policy.usesMountNamespace() {
 		if err := mountPseudoterminals(); err != nil {
 			return err
 		}
@@ -101,7 +101,7 @@ func mountPseudoterminals() error {
 }
 
 func attach(source string, target string, attributes *unix.MountAttr) error {
-	const clone = unix.OPEN_TREE_CLONE | unix.OPEN_TREE_CLOEXEC // shallow: a mount within is left out
+	const clone = unix.OPEN_TREE_CLONE | unix.OPEN_TREE_CLOEXEC
 
 	fd, err := unix.OpenTree(unix.AT_FDCWD, source, clone)
 	if err != nil {
@@ -126,10 +126,10 @@ func attach(source string, target string, attributes *unix.MountAttr) error {
 
 const lastCapability = 63
 
-func dropCapabilities() error { // the bounding set is what root of a namespace keeps across execve
+func dropCapabilities() error {
 	for capability := range lastCapability + 1 {
 		err := unix.Prctl(unix.PR_CAPBSET_DROP, uintptr(capability), 0, 0, 0)
-		if err != nil && !errors.Is(err, unix.EINVAL) { // a capability this kernel lacks
+		if err != nil && !errors.Is(err, unix.EINVAL) {
 			return fmt.Errorf("could not drop capability %d: %w", capability, err)
 		}
 	}

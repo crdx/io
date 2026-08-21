@@ -93,6 +93,6 @@ func shellMiseDataDir() string {
 	return filepath.Join(home, ".local", "share", "mise")
 }
 
-func tmpDir(id string) string { // one per session, so a resumed one finds what it left
+func tmpDir(id string) string {
 	return stateDir("tmps", id)
 }

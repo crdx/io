@@ -30,9 +30,9 @@ func New(scenario *Scenario) *Endpoint {
 // The kinds of item a conversation holds, named the same way whichever API carried them, so that
 // what a test asks about a conversation does not depend on which provider sent it.
 const (
-	Message    = "message"              // something said, by either side
-	CallMade   = "function_call"        // a call the model made
-	CallOutput = "function_call_output" // what a call returned
+	Message    = "message"
+	CallMade   = "function_call"
+	CallOutput = "function_call_output"
 )
 
 // Request is one request as the endpoint understood it.

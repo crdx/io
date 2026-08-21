@@ -86,7 +86,7 @@ func Describe(args Args) (string, string) {
 		return oneLine(args.Command), spread(args.Command)
 	}
 
-	if hasHereDocument(parsed) { // a body joined onto one line reads as a different command
+	if hasHereDocument(parsed) {
 		return strutil.FirstLine(args.Command), spread(args.Command)
 	}
 
@@ -249,7 +249,7 @@ var denials = []string{
 	"Address family not supported",
 }
 
-var overruns = []string{ // the wording a limit reaches the shell as
+var overruns = []string{
 	"File size limit exceeded",
 	"Cpu time limit exceeded",
 	"Too many open files",

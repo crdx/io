@@ -73,7 +73,7 @@ func requireLandlock(t *testing.T) {
 func run(t *testing.T, directory string, command string, policy sandbox.Policy) sandbox.Result {
 	t.Helper()
 
-	if policy.TmpDir == "" { // a scratch bound over /tmp hides every test directory beneath it
+	if policy.TmpDir == "" {
 		policy.Write = append(policy.Write, directory)
 	}
 
@@ -371,7 +371,7 @@ func TestAReadableFileCannotBeTruncated(t *testing.T) {
 	}
 }
 
-const readOnly = "Read-only file system" // what a refusal by the mount rather than the ruleset says
+const readOnly = "Read-only file system"
 
 func TestAReadPathInsideAWritePathIsNotWritable(t *testing.T) {
 	directory := t.TempDir()
@@ -963,7 +963,7 @@ func TestDisablingTheSetStopsWhatItLeftBehind(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if len(names) > 0 && !strings.Contains(strings.Join(names, " "), "sleep") { // where proc allows it
+	if len(names) > 0 && !strings.Contains(strings.Join(names, " "), "sleep") {
 		t.Errorf("got %v, want what was left behind named", names)
 	}
 

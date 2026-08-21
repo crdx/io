@@ -11,28 +11,28 @@ import (
 )
 
 var base = []grant{
-	{path: "/usr", rights: rightsExec, isOptional: true},                 // where the commands live
-	{path: "/bin", rights: rightsExec, isOptional: true},                 // and where they lived before
-	{path: "/sbin", rights: rightsExec, isOptional: true},                // likewise
-	{path: "/lib", rights: rightsExec, isOptional: true},                 // what they are linked against
-	{path: "/lib64", rights: rightsExec, isOptional: true},               // likewise
-	{path: "/etc/ld.so.cache", rights: rightsRead, isOptional: true},     // where the loader looks first
-	{path: "/etc/ld.so.conf", rights: rightsRead, isOptional: true},      // and what it looks by
-	{path: "/etc/ld.so.conf.d", rights: rightsRead, isOptional: true},    // likewise
-	{path: "/etc/ld.so.preload", rights: rightsRead, isOptional: true},   // and what it loads regardless
-	{path: "/etc/ssl/openssl.cnf", rights: rightsRead, isOptional: true}, // how OpenSSL is configured
-	{path: "/etc/nsswitch.conf", rights: rightsRead, isOptional: true},   // where a name is looked up
-	{path: "/etc/passwd", rights: rightsRead, isOptional: true},          // a uid, and a home directory
-	{path: "/etc/group", rights: rightsRead, isOptional: true},           // a gid
-	{path: "/etc/localtime", rights: rightsRead, isOptional: true},       // what the clock is read in
-	{path: "/etc/os-release", rights: rightsRead, isOptional: true},      // which machine this is
-	{path: "/etc/terminfo", rights: rightsRead, isOptional: true},        // what a terminal understands
-	{path: "/dev/null", rights: rightsWrite, isOptional: true},           // where output is thrown away
-	{path: "/dev/zero", rights: rightsRead, isOptional: true},            // and where padding comes from
-	{path: "/dev/full", rights: rightsWrite, isOptional: true},           // a disk that is always full
-	{path: "/dev/random", rights: rightsRead, isOptional: true},          // entropy
-	{path: "/dev/urandom", rights: rightsRead, isOptional: true},         // and entropy that never waits
-	{path: "/proc/self", rights: rightsRead, isOptional: true},           // what a process knows of itself
+	{path: "/usr", rights: rightsExec, isOptional: true},
+	{path: "/bin", rights: rightsExec, isOptional: true},
+	{path: "/sbin", rights: rightsExec, isOptional: true},
+	{path: "/lib", rights: rightsExec, isOptional: true},
+	{path: "/lib64", rights: rightsExec, isOptional: true},
+	{path: "/etc/ld.so.cache", rights: rightsRead, isOptional: true},
+	{path: "/etc/ld.so.conf", rights: rightsRead, isOptional: true},
+	{path: "/etc/ld.so.conf.d", rights: rightsRead, isOptional: true},
+	{path: "/etc/ld.so.preload", rights: rightsRead, isOptional: true},
+	{path: "/etc/ssl/openssl.cnf", rights: rightsRead, isOptional: true},
+	{path: "/etc/nsswitch.conf", rights: rightsRead, isOptional: true},
+	{path: "/etc/passwd", rights: rightsRead, isOptional: true},
+	{path: "/etc/group", rights: rightsRead, isOptional: true},
+	{path: "/etc/localtime", rights: rightsRead, isOptional: true},
+	{path: "/etc/os-release", rights: rightsRead, isOptional: true},
+	{path: "/etc/terminfo", rights: rightsRead, isOptional: true},
+	{path: "/dev/null", rights: rightsWrite, isOptional: true},
+	{path: "/dev/zero", rights: rightsRead, isOptional: true},
+	{path: "/dev/full", rights: rightsWrite, isOptional: true},
+	{path: "/dev/random", rights: rightsRead, isOptional: true},
+	{path: "/dev/urandom", rights: rightsRead, isOptional: true},
+	{path: "/proc/self", rights: rightsRead, isOptional: true},
 }
 
 // Policy grants paths, environment, resources, and background behavior. Other paths and external

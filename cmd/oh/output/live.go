@@ -121,7 +121,7 @@ func (self *Output) repaint(first int, rows []string, shouldLinkPaths bool) {
 	if back := len(self.liveRegion.rows) - 1 - first; back >= 0 {
 		out.WriteString(moveUp(back))
 	} else if len(self.liveRegion.rows) > 0 {
-		out.WriteString("\r\n") // nothing on screen changed, so the new rows open a row of their own
+		out.WriteString("\r\n")
 	}
 
 	if len(rows) < len(self.liveRegion.rows) {

@@ -379,7 +379,7 @@ func TestAReasonTakesTheRoomTheCallDoesNotWant(t *testing.T) {
 
 	block.Add(callLabel("read", "main.go"))
 
-	reason := strings.Repeat("a", wide/2+10) // more than its share, less than the row has spare
+	reason := strings.Repeat("a", wide/2+10)
 
 	output.Reset()
 	block.MarkWithStats(0, Failed, 0, reason, nil)

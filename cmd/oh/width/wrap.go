@@ -89,7 +89,7 @@ func wrapLine(line string, cells int, base int) []Row {
 			from, after := run(atoms, space)
 
 			if from == begin {
-				from = end // whitespace with nothing before it is indentation, not a break
+				from = end
 			}
 
 			rows = append(rows, row(begin, from, after))
@@ -147,7 +147,7 @@ func reach(atoms []atom, begin int, cells int) (int, int) {
 
 		if takenCells+one.cells > cells {
 			if one.text == " " {
-				space = end // dropping the space that overruns is what makes the row fit
+				space = end
 			}
 
 			break
@@ -161,7 +161,7 @@ func reach(atoms []atom, begin int, cells int) (int, int) {
 	}
 
 	if end == begin {
-		end = advance(atoms, begin) // a character wider than the row still has to go somewhere
+		end = advance(atoms, begin)
 	}
 
 	return end, space

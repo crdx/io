@@ -31,7 +31,7 @@ func layout(buffer *buffer, room int) ([]string, int, int) {
 	}
 
 	if room > 0 && buffer.Cursor() == len(runes) && width.Of(rows[len(rows)-1]) >= room {
-		return append(rows, ""), len(rows), 0 // a cursor past a full row needs a row of its own
+		return append(rows, ""), len(rows), 0
 	}
 
 	cursorRow, cursorColumn := locate(laid, runes, buffer.Cursor(), room)

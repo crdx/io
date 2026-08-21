@@ -89,7 +89,7 @@ func TestASetThatIsNotRunningAnythingStopsCleanly(t *testing.T) {
 }
 
 func TestADisabledSetRunsItsCommandInTheForeground(t *testing.T) {
-	policy := Policy{Background: true, FileSize: -1} // refused before a namespace is asked for
+	policy := Policy{Background: true, FileSize: -1}
 
 	_, err := NewProcesses(false).Run(t.Context(), t.TempDir(), "true", policy)
 

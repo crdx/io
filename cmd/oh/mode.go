@@ -11,14 +11,14 @@ import (
 type caps uint8
 
 const (
-	capRead       caps = 1 << iota // reading, which is granted whatever is asked for
-	capShell                       // running a shell command
-	capWrite                       // changing files in the workspace
-	capGit                         // changing .git
-	capBackground                  // letting a shell command leave processes behind
+	capRead caps = 1 << iota
+	capShell
+	capWrite
+	capGit
+	capBackground
 )
 
-const switchableCaps = capShell | capWrite | capGit | capBackground // everything but reading
+const switchableCaps = capShell | capWrite | capGit | capBackground
 
 var capsMap = []struct {
 	grantedCaps caps
@@ -31,7 +31,7 @@ var capsMap = []struct {
 	{capBackground, "b"},
 }
 
-var capFlags = allCaps().Flags() // as --caps and the rule over the input spell them
+var capFlags = allCaps().Flags()
 
 func allCaps() caps {
 	var allCaps caps

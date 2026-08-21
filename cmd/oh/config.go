@@ -63,7 +63,7 @@ func loadConfiguredSettings(path string) (configuredSettings, error) {
 	if meta.IsDefined("effort") && settings.Effort == "" {
 		return settings, fmt.Errorf("%s: effort is empty, so there is nothing to ask for", shownPath)
 	}
-	settings.GetOnWithItMessage = strings.TrimSpace(settings.GetOnWithItMessage) // as typed input is
+	settings.GetOnWithItMessage = strings.TrimSpace(settings.GetOnWithItMessage)
 	if meta.IsDefined("get_on_with_it_message") && settings.GetOnWithItMessage == "" {
 		return settings, fmt.Errorf("%s: get_on_with_it_message is empty", shownPath)
 	}

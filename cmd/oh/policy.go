@@ -20,9 +20,9 @@ import (
 )
 
 const (
-	shellTimeout   = 5 * time.Minute  // wall clock, which a command spent waiting also spends
-	shellCPUTime   = 60 * time.Second // processor time, which only a busy command spends
-	shellFileSize  = 1024 << 20       // enough for a build artefact, not enough to fill a disk
+	shellTimeout   = 5 * time.Minute
+	shellCPUTime   = 60 * time.Second
+	shellFileSize  = 1024 << 20
 	shellOpenFiles = 4096
 
 	goBuildCacheDir  = "go-build"
@@ -148,7 +148,7 @@ func createSandboxPolicy(
 	writablePolicy := grantWriteAccess(policy, writablePathsForPolicy)
 
 	if !currentCaps.has(capWrite) {
-		writablePolicy = writablePolicy.WithRead(workspaceDir) // read the tree, change only its .git
+		writablePolicy = writablePolicy.WithRead(workspaceDir)
 	}
 
 	if !currentCaps.has(capGit) {
@@ -207,7 +207,7 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
 
 		err = filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
 			if err != nil {
-				return err // missing a branch would grant it write access without knowing what is there
+				return err
 			}
 			if entry.Name() != ".git" {
 				return nil
@@ -226,7 +226,7 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
 		}
 	}
 
-	return bash.ProtectedPolicy(policy.WithRead(readOnlyPaths...)), nil // also covers .git at other writable roots, such as HOME
+	return bash.ProtectedPolicy(policy.WithRead(readOnlyPaths...)), nil
 }
 
 // ErrShellWithheld is a command turned away before it is confined, the shell not being granted.

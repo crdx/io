@@ -13,7 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/width"
 )
 
-const widest = 30 // no one column may claim the table on the strength of one long word
+const widest = 30
 
 func (self *renderer) table(node *east.Table) []string {
 	var head []string
@@ -49,7 +49,7 @@ func (self *renderer) table(node *east.Table) []string {
 
 	for i, one := range body {
 		if i > 0 {
-			rows = append(rows, border(widths, "├", "┼", "┤")) // a cell that wrapped is one row still
+			rows = append(rows, border(widths, "├", "┼", "┤"))
 		}
 
 		rows = append(rows, tableRows(one, node.Alignments, widths, false)...)
@@ -68,7 +68,7 @@ func (self *renderer) cellsOf(row ast.Node) []string {
 	return cells
 }
 
-func (self *renderer) plainTableRows(head []string, body [][]string) []string { // as text, not borders
+func (self *renderer) plainTableRows(head []string, body [][]string) []string {
 	var rows []string
 
 	for _, one := range append([][]string{head}, body...) {

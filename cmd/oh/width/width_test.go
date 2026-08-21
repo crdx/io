@@ -11,8 +11,8 @@ func TestWhatEachKindOfCharacterTakes(t *testing.T) {
 		"ｆｕｌｌ":    8,
 		"a日b":     4,
 		"🙂":       2,
-		"e\u0301": 1, // e with an acute accent hung off it
-		"\u200d":  0, // a joiner, which is drawn as nothing
+		"e\u0301": 1,
+		"\u200d":  0,
 	} {
 		if got := Of(text); got != want {
 			t.Errorf("Of(%q) = %d, want %d", text, got, want)
@@ -40,8 +40,8 @@ func TestCutStopsShortOfACharacterThatWouldNotFit(t *testing.T) {
 		took  int
 	}{
 		{"日本語", 4, "日本", 4},
-		{"日本語", 3, "日", 2}, // the second character would straddle the end
-		{"日本語", 1, "", 0},  // and so would the first
+		{"日本語", 3, "日", 2},
+		{"日本語", 1, "", 0},
 		{"hello", 3, "hel", 3},
 		{"hello", 9, "hello", 5},
 		{"", 4, "", 0},

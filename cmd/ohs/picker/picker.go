@@ -201,7 +201,7 @@ func (self *state) row(index int, width int) string {
 }
 
 func messageCount(messages int) string {
-	return fmt.Sprintf("%d msg", messages) // not %dm, which the column beside it already means
+	return fmt.Sprintf("%d msg", messages)
 }
 
 func mark(sessionChosen bool) string {

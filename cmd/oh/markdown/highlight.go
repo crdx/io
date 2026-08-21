@@ -24,7 +24,7 @@ func Highlight(line string, language string) string {
 	}
 }
 
-func highlight(lines []string, language string) []string { // chroma reads it, the style paints it
+func highlight(lines []string, language string) []string {
 	lexer := lexers.Get(language)
 	if language == "" || lexer == nil {
 		return plainly(lines)
@@ -40,7 +40,7 @@ func highlight(lines []string, language string) []string { // chroma reads it, t
 	for _, token := range iterator.Tokens() {
 		style := tokenStyle(token.Type)
 
-		for i, piece := range strings.Split(token.Value, "\n") { // a style may not span a row
+		for i, piece := range strings.Split(token.Value, "\n") {
 			if i > 0 {
 				rows = append(rows, "")
 			}
@@ -48,14 +48,14 @@ func highlight(lines []string, language string) []string { // chroma reads it, t
 			switch {
 			case piece == "":
 			case strings.TrimSpace(piece) == "":
-				rows[len(rows)-1] += piece // nothing to see in painted whitespace but the escapes
+				rows[len(rows)-1] += piece
 			default:
 				rows[len(rows)-1] += style(piece)
 			}
 		}
 	}
 
-	return rows[:min(len(rows), len(lines))] // the lexer ends on a newline of its own
+	return rows[:min(len(rows), len(lines))]
 }
 
 func bashCommand(line string) string {
@@ -173,13 +173,13 @@ func bashCommandSpans(source string) ([]sourceSpan, error) {
 			spans = append(spans, bashSourceSpan(node.WhilePos, keyword, style.Keyword))
 			spans = append(spans, bashLoopBodySpans(node.DoPos, node.DonePos)...)
 		case *syntax.IfClause:
-			if node.Position.IsValid() { // "if", "elif" or "else" by turn
+			if node.Position.IsValid() {
 				spans = append(spans, bashKeywordSpan(source, node.Position))
 			}
 			if node.ThenPos.IsValid() {
 				spans = append(spans, bashSourceSpan(node.ThenPos, "then", style.Keyword))
 			}
-			if node.FiPos.IsValid() { // repeats down the else-chain, harmlessly
+			if node.FiPos.IsValid() {
 				spans = append(spans, bashSourceSpan(node.FiPos, "fi", style.Keyword))
 			}
 		case *syntax.CaseClause:
@@ -347,7 +347,7 @@ func regexpSpans(source string) []styledSpan {
 				style = regexpOperator
 			}
 		case '^', '$':
-			if !inCharacterClass { // inside one, "^" negates and both are otherwise literal
+			if !inCharacterClass {
 				style = regexpKeyword
 			}
 		case '(', ')':

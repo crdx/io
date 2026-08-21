@@ -380,7 +380,7 @@ func (self *Block) redraw() {
 }
 
 const (
-	failureShare = 2 // of the row, as a floor and not a ceiling
+	failureShare = 2
 	edgeGuard    = 2
 )
 

@@ -148,7 +148,7 @@ func discover(scope string, isGlobal bool, warnings io.Writer) ([]Skill, error) 
 
 		directory := filepath.Join(scope, entry.Name())
 		location := filepath.Join(directory, filename)
-		shownLocation := pathutil.Shorten(location) // warned about, rather than read from
+		shownLocation := pathutil.Shorten(location)
 		data, err := scopeRoot.ReadFile(filepath.Join(entry.Name(), filename))
 		if errors.Is(err, fs.ErrNotExist) {
 			continue

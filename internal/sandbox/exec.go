@@ -28,8 +28,8 @@ const (
 )
 
 const (
-	notice         = "sandbox: " // what a stub that never got as far as the command says first
-	notStarted     = 125         // and the status it leaves, which is one noexec of its own uses
+	notice         = "sandbox: "
+	notStarted     = 125
 	probeSucceeded = "sandbox probe succeeded"
 )
 
@@ -70,7 +70,7 @@ func Init() {
 		os.Exit(notStarted)
 	}
 
-	os.Exit(0) // only a supervisor that reported its own refusal returns successfully
+	os.Exit(0)
 }
 
 func execSandboxed(encodedPolicy string, command string) error {
@@ -210,7 +210,7 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 		result.Code = stub.ProcessState.ExitCode()
 		result.CPUTime = stub.ProcessState.UserTime() + stub.ProcessState.SystemTime()
 		if usage, ok := stub.ProcessState.SysUsage().(*syscall.Rusage); ok && usage.Maxrss > 0 {
-			result.PeakMemory = uint64(usage.Maxrss) * 1024 // Linux reports ru_maxrss in KiB
+			result.PeakMemory = uint64(usage.Maxrss) * 1024
 		}
 	}
 
@@ -220,7 +220,7 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 		)
 	}
 
-	if ctx.Err() != nil { // the caller stopped it, and the timeout has nothing to do with it
+	if ctx.Err() != nil {
 		return result, errors.New("the command was stopped")
 	}
 

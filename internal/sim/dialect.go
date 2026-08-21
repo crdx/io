@@ -10,9 +10,9 @@ import (
 // two are different things: several providers can speak one format, and which of them speak which
 // is no business of something standing in for an endpoint.
 const (
-	Responses   = "responses"   // the OpenAI Responses API
-	Completions = "completions" // the OpenAI Chat Completions API
-	Messages    = "messages"    // the Anthropic Messages API
+	Responses   = "responses"
+	Completions = "completions"
+	Messages    = "messages"
 )
 
 // Dialect is one wire format the endpoint answers in. A scenario says what the model does; a

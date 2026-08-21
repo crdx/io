@@ -11,7 +11,7 @@ import (
 const (
 	offsetNr      = 0
 	offsetArch    = 4
-	offsetArgZero = 16 // the low half of args[0] on a little-endian machine
+	offsetArgZero = 16
 )
 
 const (
