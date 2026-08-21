@@ -16,7 +16,7 @@ func TestSessionsComeFromOhsOwnJournalParsing(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
+	if _, err := writer.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {

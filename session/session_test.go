@@ -20,7 +20,7 @@ func TestTheHeadCarriesTheNameAndTheIdentifier(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := writer.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
+	if _, err := writer.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -64,11 +64,11 @@ func TestJournalCarriesMetaEventsAndItems(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := writer.Event(agent.Event{Kind: agent.Prompt, Text: "will it rain?"}); err != nil {
+	if _, err := writer.Event(agent.Event{Kind: agent.Prompt, Text: "will it rain?"}); err != nil {
 		t.Fatal(err)
 	}
 	state := json.RawMessage(`{"path":"weather.txt","sha256":"abc"}`)
-	if err := writer.Event(agent.Event{Kind: agent.StateEvent, Name: "file_read", State: state}); err != nil {
+	if _, err := writer.Event(agent.Event{Kind: agent.StateEvent, Name: "file_read", State: state}); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Item(json.RawMessage(`{"type":"message"}`)); err != nil {
@@ -104,7 +104,7 @@ func storedSession(t *testing.T, directory string) *session.Writer {
 		t.Fatal(err)
 	}
 
-	if err := writer.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
+	if _, err := writer.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
 		t.Fatal(err)
 	}
 

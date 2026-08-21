@@ -35,7 +35,7 @@ func TestPick(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if err := log.Event(agent.Event{Kind: agent.Prompt, Text: prompt}); err != nil {
+		if _, err := log.Event(agent.Event{Kind: agent.Prompt, Text: prompt}); err != nil {
 			t.Fatal(err)
 		}
 

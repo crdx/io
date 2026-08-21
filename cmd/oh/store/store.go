@@ -35,7 +35,6 @@ type Writer struct {
 	inner     *session.Writer
 	directory string
 	meta      Meta
-	startedAt time.Time
 
 	canonicalMutex    sync.Mutex
 	mutex             sync.Mutex
@@ -57,8 +56,11 @@ func Create(directory string, meta Meta) (*Writer, error) {
 		return nil, err
 	}
 	return &Writer{
-		inner: inner, directory: directory, meta: meta, startedAt: time.Now(),
-		transcriptEnabled: true, wireEnabled: true,
+		inner:             inner,
+		directory:         directory,
+		meta:              meta,
+		transcriptEnabled: true,
+		wireEnabled:       true,
 	}, nil
 }
 
@@ -73,8 +75,11 @@ func Open(directory, name string) (*Writer, error) {
 		return nil, err
 	}
 	writer := &Writer{
-		inner: inner, directory: directory, meta: storedSession.Meta, startedAt: storedSession.Started,
-		transcriptEnabled: true, wireEnabled: true,
+		inner:             inner,
+		directory:         directory,
+		meta:              storedSession.Meta,
+		transcriptEnabled: true,
+		wireEnabled:       true,
 	}
 	writer.ensureAuxiliaryRecorders()
 	return writer, nil
@@ -83,7 +88,7 @@ func Open(directory, name string) (*Writer, error) {
 // Event appends one conversation event.
 func (self *Writer) Event(event agent.Event) error {
 	self.canonicalMutex.Lock()
-	err := self.inner.Event(event)
+	at, err := self.inner.Event(event)
 	self.canonicalMutex.Unlock()
 	if err != nil {
 		return err
@@ -93,7 +98,7 @@ func (self *Writer) Event(event agent.Event) error {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 	if self.transcript != nil {
-		if err := self.transcript.Event(time.Now(), event); err != nil {
+		if err := self.transcript.Event(at, event); err != nil {
 			_ = self.transcript.Close()
 			self.transcript = nil
 			self.transcriptEnabled = false
@@ -190,7 +195,7 @@ func (self *Writer) ensureAuxiliaryRecorders() {
 	bundleDirectory := filepath.Join(self.directory, self.Name())
 	if self.transcript == nil && self.transcriptEnabled {
 		recorder, err := transcript.Open(filepath.Join(bundleDirectory, transcriptName), transcript.Meta{
-			Name: self.Name(), Started: self.startedAt, Model: self.meta.Model, Effort: self.meta.Effort,
+			Name: self.Name(), Started: self.inner.Started(), Model: self.meta.Model, Effort: self.meta.Effort,
 			Provider: self.meta.Provider, Workspace: self.meta.WorkspaceDir,
 		})
 		if err != nil {
@@ -202,7 +207,7 @@ func (self *Writer) ensureAuxiliaryRecorders() {
 	}
 	if self.wire == nil && self.wireEnabled {
 		recorder, err := wire.Open(filepath.Join(bundleDirectory, wireName), wire.Meta{
-			Name: self.Name(), Started: self.startedAt, Model: self.meta.Model, Effort: self.meta.Effort,
+			Name: self.Name(), Started: self.inner.Started(), Model: self.meta.Model, Effort: self.meta.Effort,
 			Provider: self.meta.Provider, Workspace: self.meta.WorkspaceDir,
 		}, self.queueWarning)
 		if err != nil {

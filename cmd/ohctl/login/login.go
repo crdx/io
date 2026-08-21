@@ -33,6 +33,7 @@ type inputOpts struct {
 	Anthropic  bool `docopt:"anthropic"`
 }
 
+// Run stores the credentials.
 func Run() error {
 	options := duckopt.MustBind[inputOpts](usage, "$0")
 

@@ -61,6 +61,7 @@ type Writer struct {
 	directory string
 	id        string
 	name      string
+	started   time.Time
 	meta      json.RawMessage
 }
 
@@ -102,7 +103,7 @@ func Open(directory string, name string) (*Writer, error) {
 		return nil, err
 	}
 
-	return &Writer{file: file, directory: directory, id: head.ID, name: name}, nil
+	return &Writer{file: file, directory: directory, id: head.ID, name: name, started: head.Time}, nil
 }
 
 func lockJournal(file *os.File) error {
@@ -123,14 +124,15 @@ func (w *Writer) SetMeta(meta json.RawMessage) error {
 	return nil
 }
 
-// Event appends one portable conversation event.
-func (w *Writer) Event(event agent.Event) error {
+// Event appends one portable conversation event, and reports the time it was written.
+func (w *Writer) Event(event agent.Event) (time.Time, error) {
 	return w.write(Line{Kind: Event, Event: &event})
 }
 
 // Item appends one opaque provider-state item.
 func (w *Writer) Item(payload json.RawMessage) error {
-	return w.write(Line{Kind: Item, Payload: payload})
+	_, err := w.write(Line{Kind: Item, Payload: payload})
+	return err
 }
 
 // Name is what the session is called, and the name of its bundle directory.
@@ -138,6 +140,9 @@ func (w *Writer) Name() string { return w.name }
 
 // ID is the session's time-ordered identifier, recorded for provenance and read by nothing.
 func (w *Writer) ID() string { return w.id }
+
+// Started is when the head was written down, and zero until the session has been stored.
+func (w *Writer) Started() time.Time { return w.started }
 
 // Stored reports whether the lazy writer has made a file.
 func (w *Writer) Stored() bool { return w.file != nil }
@@ -153,9 +158,9 @@ func (w *Writer) Close() error {
 	return w.file.Close()
 }
 
-func (w *Writer) write(line Line) error {
+func (w *Writer) write(line Line) (time.Time, error) {
 	if err := w.ensureOpen(); err != nil {
-		return err
+		return time.Time{}, err
 	}
 	return w.record(line)
 }
@@ -184,30 +189,32 @@ func (w *Writer) ensureOpen() error {
 	}
 	w.file = file
 
-	if err := w.record(Line{Kind: Head, ID: w.id, Name: w.name, Meta: w.meta}); err != nil {
+	started, err := w.record(Line{Kind: Head, ID: w.id, Name: w.name, Meta: w.meta})
+	if err != nil {
 		_ = file.Close()
 		_ = os.Remove(file.Name())
 		_ = os.Remove(directory)
 		w.file = nil
 		return err
 	}
+	w.started = started
 
 	return nil
 }
 
-func (w *Writer) record(line Line) error {
+func (w *Writer) record(line Line) (time.Time, error) {
 	line.Time = time.Now()
 	encodedLine, err := json.Marshal(line)
 	if err != nil {
-		return err
+		return line.Time, err
 	}
 
 	record := append(encodedLine, '\n')
 	n, err := w.file.Write(record)
 	if err == nil && n != len(record) {
-		return io.ErrShortWrite
+		return line.Time, io.ErrShortWrite
 	}
-	return err
+	return line.Time, err
 }
 
 // Session is a stored conversation.
