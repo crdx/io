@@ -20,6 +20,28 @@ fix:
 test:
     go test -cover ./...
 
+# what every package covers, least covered first
+cov *args:
+    #!/bin/bash
+    set -euo pipefail
+    PROFILE=$(mktemp -t io-cover.XXXXXX)
+    trap 'rm -f "$PROFILE"' EXIT
+    go test ./... -coverpkg=./... -coverprofile="$PROFILE" -count=1 > /dev/null
+    if [[ $# -gt 0 ]]; then
+        go tool cover -func="$PROFILE" | grep -E "$1" | grep -v " 100.0%$"
+        exit
+    fi
+    ./script/coverage "$PROFILE"
+
+# open the coverage of one package in a browser
+covhtml package:
+    #!/bin/bash
+    set -euo pipefail
+    PROFILE=$(mktemp -t io-cover.XXXXXX)
+    trap 'rm -f "$PROFILE"' EXIT
+    go test ./... -coverpkg=./{{ package }}/... -coverprofile="$PROFILE" -count=1 > /dev/null
+    go tool cover -html="$PROFILE"
+
 build:
     go build -trimpath -o dist/oh ./cmd/oh
     go build -trimpath -o dist/ohs ./cmd/ohs

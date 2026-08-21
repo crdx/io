@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""Summarise a Go coverage profile by package, least covered first."""
+
+import collections
+import sys
+
+GREEN, YELLOW, RED, GREY, RESET = '\033[32m', '\033[33m', '\033[31m', '\033[90m', '\033[0m'
+
+def read_blocks(path):
+    blocks = {}
+    with open(path) as profile:
+        for line in profile:
+            if line.startswith('mode:'):
+                continue
+            where, statements, hits = line.rsplit(' ', 2)
+            statements, hits = int(statements), int(hits)
+            blocks[where] = (statements, max(hits, blocks.get(where, (0, 0))[1]))
+    return blocks
+
+def by_package(blocks):
+    packages = collections.defaultdict(lambda: [0, 0])
+    for where, (statements, hits) in blocks.items():
+        path = where.split(':')[0].removeprefix('crdx.org/io/')
+        name = path.rsplit('/', 1)[0] if '/' in path else '.'
+        packages[name][0] += statements
+        if hits:
+            packages[name][1] += statements
+    return packages
+
+def paint(percentage):
+    if percentage >= 80:
+        return GREEN
+    if percentage >= 50:
+        return YELLOW
+    if percentage > 0:
+        return RED
+    return GREY
+
+def main():
+    packages = by_package(read_blocks(sys.argv[1]))
+
+    rows = sorted(
+        (covered / total * 100 if total else 0, total, covered, name)
+        for name, (total, covered) in packages.items()
+    )
+
+    for percentage, total, covered, name in rows:
+        bar = '█' * int(percentage / 10) + '·' * (10 - int(percentage / 10))
+        colour = paint(percentage)
+        print(
+            f'{colour}{name:<34}{RESET}{total:>7}{covered:>7}'
+            f'{colour}{percentage:>7.1f}%  {bar}{RESET}'
+        )
+
+    total = sum(row[1] for row in rows)
+    covered = sum(row[2] for row in rows)
+    percentage = covered / total * 100
+    print(f'{"":<34}{"─" * 21}')
+    print(f'{"TOTAL":<34}{total:>7}{covered:>7}{paint(percentage)}{percentage:>7.1f}%{RESET}')
+
+if __name__ == '__main__':
+    main()
