@@ -45,6 +45,7 @@ covhtml package:
 build:
     go build -trimpath -o dist/oh ./cmd/oh
     go build -trimpath -o dist/ohs ./cmd/ohs
+    go build -trimpath -o dist/ohctl ./cmd/ohctl
 
 check:
     steps fmt vet lint1 lint2 mega test

@@ -1,4 +1,4 @@
-package main
+package login
 
 import (
 	"bufio"
@@ -15,10 +15,10 @@ import (
 	"golang.org/x/term"
 )
 
-const usage = `io login — store provider credentials
+const usage = `ohctl login — store provider credentials
 
 Usage:
-    $0 [codex | opencode-go | anthropic]
+    $0 login [codex | opencode-go | anthropic]
 
 Providers:
     codex         Authorise a ChatGPT subscription with OAuth [default]
@@ -27,12 +27,13 @@ Providers:
 `
 
 type inputOpts struct {
+	Login      bool `docopt:"login"`
 	Codex      bool `docopt:"codex"`
 	OpenCodeGo bool `docopt:"opencode-go"`
 	Anthropic  bool `docopt:"anthropic"`
 }
 
-func main() {
+func Run() error {
 	options := duckopt.MustBind[inputOpts](usage, "$0")
 
 	var path string
@@ -52,11 +53,11 @@ func main() {
 	}
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		return err
 	}
 
 	fmt.Println("Stored credentials in " + path)
+	return nil
 }
 
 func loginOpenCodeGo(input io.Reader, output io.Writer, path string) error {

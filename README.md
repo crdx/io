@@ -24,9 +24,9 @@ go get crdx.org/io
 Implementors glue the auth flow together themselves. The example is a reference, and a way to get started quickly.
 
 ```bash
-go run ./cmd/login codex
-go run ./cmd/login opencode-go
-go run ./cmd/login anthropic
+go run ./cmd/ohctl login codex
+go run ./cmd/ohctl login opencode-go
+go run ./cmd/ohctl login anthropic
 ```
 
 ## Usage
@@ -114,7 +114,7 @@ The simulator deals in wire formats, not providers. A provider speaks one of the
 | `cmd/weather`   | A tool that answers questions about the weather   |
 | `cmd/streaming` | A prompt loop printing each event as it arrives   |
 | `cmd/simple`    | The same loop, with text fragments glued together |
-| `cmd/login`     | The OAuth handshake and credential storage        |
+| `cmd/ohctl`     | The OAuth handshake and credential storage        |
 
 ## Contributions
 
