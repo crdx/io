@@ -22,7 +22,7 @@ func configuredPathTestRoot(t *testing.T, mode *Mode) *file.Root {
 	return file.New(root, refuseWrite(mode))
 }
 
-func TestMissingConfiguredPathsAreWarnedAboutAndSkipped(t *testing.T) {
+func TestMissingConfiguredPathsAreCreatedAndKept(t *testing.T) {
 	existingRead := filepath.Join(t.TempDir(), "read")
 	if err := os.WriteFile(existingRead, []byte("content"), 0o600); err != nil {
 		t.Fatal(err)
@@ -42,7 +42,7 @@ func TestMissingConfiguredPathsAreWarnedAboutAndSkipped(t *testing.T) {
 	missingHome := filepath.Join(t.TempDir(), "missing-home")
 
 	var warnings strings.Builder
-	filtered, err := keepExistingConfiguredPaths(configuredPaths{
+	filtered, err := createMissingConfiguredPaths(configuredPaths{
 		Read:  []string{existingRead, missingRead},
 		Write: []string{existingWrite, missingWrite},
 		Exec:  []string{existingExec, missingExec},
@@ -51,22 +51,56 @@ func TestMissingConfiguredPathsAreWarnedAboutAndSkipped(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Equal(filtered.Read, []string{existingRead}) {
-		t.Errorf("got read paths %v, want only %s", filtered.Read, existingRead)
+	if !slices.Equal(filtered.Read, []string{existingRead, missingRead}) {
+		t.Errorf("got read paths %v, want %v", filtered.Read, []string{existingRead, missingRead})
 	}
-	if !slices.Equal(filtered.Write, []string{existingWrite}) {
-		t.Errorf("got write paths %v, want only %s", filtered.Write, existingWrite)
+	if !slices.Equal(filtered.Write, []string{existingWrite, missingWrite}) {
+		t.Errorf("got write paths %v, want %v", filtered.Write, []string{existingWrite, missingWrite})
 	}
-	if !slices.Equal(filtered.Exec, []string{existingExec}) {
-		t.Errorf("got executable paths %v, want only %s", filtered.Exec, existingExec)
+	if !slices.Equal(filtered.Exec, []string{existingExec, missingExec}) {
+		t.Errorf("got executable paths %v, want %v", filtered.Exec, []string{existingExec, missingExec})
 	}
-	if !slices.Equal(filtered.Home, []string{existingHome}) {
-		t.Errorf("got mapped paths %v, want only %s", filtered.Home, existingHome)
+	if !slices.Equal(filtered.Home, []string{existingHome, missingHome}) {
+		t.Errorf("got mapped paths %v, want %v", filtered.Home, []string{existingHome, missingHome})
 	}
 	for _, path := range []string{missingRead, missingWrite, missingExec, missingHome} {
-		if !strings.Contains(warnings.String(), "warning: could not mount configured path "+path) {
-			t.Errorf("warning does not name missing path %s: %q", path, warnings.String())
+		info, err := os.Stat(path)
+		if err != nil {
+			t.Errorf("missing path %s was not created: %v", path, err)
+			continue
 		}
+		if !info.IsDir() {
+			t.Errorf("missing path %s was not created as a directory", path)
+		}
+	}
+	if warnings.String() != "" {
+		t.Errorf("got warnings %q, want none", warnings.String())
+	}
+}
+
+func TestUncreatableConfiguredPathsAreWarnedAboutAndSkipped(t *testing.T) {
+	if os.Geteuid() == 0 {
+		t.Skip("root ignores directory permissions")
+	}
+
+	parent := filepath.Join(t.TempDir(), "read-only")
+	if err := os.Mkdir(parent, 0o500); err != nil {
+		t.Fatal(err)
+	}
+	uncreatable := filepath.Join(parent, "child")
+
+	var warnings strings.Builder
+	filtered, err := createMissingConfiguredPaths(configuredPaths{
+		Read: []string{uncreatable},
+	}, &warnings)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(filtered.Read) != 0 {
+		t.Errorf("got read paths %v, want none", filtered.Read)
+	}
+	if !strings.Contains(warnings.String(), "warning: could not create configured path "+uncreatable) {
+		t.Errorf("warning does not name uncreatable path %s: %q", uncreatable, warnings.String())
 	}
 }
 

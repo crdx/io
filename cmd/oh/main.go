@@ -213,7 +213,7 @@ func run() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	settings.Sandbox, err = keepExistingConfiguredPaths(settings.Sandbox, os.Stderr)
+	settings.Sandbox, err = createMissingConfiguredPaths(settings.Sandbox, os.Stderr)
 	if err != nil {
 		return nil, err
 	}

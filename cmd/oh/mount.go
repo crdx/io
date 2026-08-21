@@ -21,7 +21,7 @@ type configuredMount struct {
 	isExact bool
 }
 
-func keepExistingConfiguredPaths(paths configuredPaths, warnings io.Writer) (configuredPaths, error) {
+func createMissingConfiguredPaths(paths configuredPaths, warnings io.Writer) (configuredPaths, error) {
 	filtered := configuredPaths{}
 	lists := []struct {
 		source []string
@@ -37,15 +37,16 @@ func keepExistingConfiguredPaths(paths configuredPaths, warnings io.Writer) (con
 		for _, path := range list.source {
 			_, err := os.Stat(path)
 			if errors.Is(err, fs.ErrNotExist) {
-				util.WriteWarningf(
-					warnings,
-					"could not mount configured path %s: %v",
-					pathutil.Shorten(path),
-					err,
-				)
-				continue
-			}
-			if err != nil {
+				if err := os.MkdirAll(path, 0o700); err != nil {
+					util.WriteWarningf(
+						warnings,
+						"could not create configured path %s: %v",
+						pathutil.Shorten(path),
+						err,
+					)
+					continue
+				}
+			} else if err != nil {
 				return configuredPaths{}, fmt.Errorf(
 					"could not mount configured path %s: %w",
 					pathutil.Shorten(path),
