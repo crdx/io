@@ -31,12 +31,11 @@ type entry struct {
 	} `json:"reasoning_options"`
 
 	Limit struct {
-		Context int `json:"context"`
-		Output  int `json:"output"`
+		MaxOutputTokens int `json:"output"`
 	} `json:"limit"`
 }
 
-func (self entry) efforts() []string {
+func (self entry) getEffortLevels() []string {
 	for _, option := range self.ReasoningOptions {
 		if option.Type == "effort" && len(option.Values) > 0 {
 			return slices.Clone(option.Values)
@@ -47,17 +46,16 @@ func (self entry) efforts() []string {
 }
 
 func (self entry) model(name string) agent.Model {
-	identifier := self.ID
-	if identifier == "" {
-		identifier = name
+	id := self.ID
+	if id == "" {
+		id = name
 	}
 
 	return agent.Model{
-		ID:      identifier,
-		Name:    self.Name,
-		Efforts: self.efforts(),
-		Context: self.Limit.Context,
-		Output:  self.Limit.Output,
+		ID:              id,
+		Name:            self.Name,
+		EffortLevels:    self.getEffortLevels(),
+		MaxOutputTokens: self.Limit.MaxOutputTokens,
 	}
 }
 

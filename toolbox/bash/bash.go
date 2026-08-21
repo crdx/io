@@ -24,45 +24,29 @@ type Args struct {
 	Command string `json:"command"`
 }
 
-// New builds a shell that starts in root and is confined anew for each command, what is granted
-// being the caller's to change in between. An error from fresh turns the command away, so a caller
-// that withholds the shell says so there. readOnly answers for display, without building a policy
-// to ask one.
+// New builds a shell that starts in root and is confined anew for each command.
 func New(
 	root *file.Root,
-	readOnly func() bool,
 	fresh func(context.Context) (sandbox.Policy, error),
 	processes *sandbox.Processes,
 ) tool.Tool {
-	return shell{
-		Tool: tool.Syntax(tool.Implement(
-			tool.Definition{
-				Name:        "bash",
-				Description: "run a shell command",
-				Schema: tool.Schema{
-					tool.String("command", "the command line"),
-				},
+	return tool.Syntax(tool.Implement(
+		tool.Definition{
+			Name:        "bash",
+			Description: "run a shell command",
+			Schema: tool.Schema{
+				tool.String("command", "the command line"),
 			},
-			Describe,
-		).Validate(validate).Stats(func(ctx context.Context, args Args) (string, tool.Stats, error) {
-			policy, err := fresh(ctx)
-			if err != nil {
-				return "", tool.Stats{}, err
-			}
-			return exec(ctx, root, policy, args, processes)
-		}), "bash"),
-
-		readOnly: readOnly,
-	}
+		},
+		Describe,
+	).Validate(validate).Stats(func(ctx context.Context, args Args) (string, tool.Stats, error) {
+		policy, err := fresh(ctx)
+		if err != nil {
+			return "", tool.Stats{}, err
+		}
+		return exec(ctx, root, policy, args, processes)
+	}), "bash")
 }
-
-type shell struct {
-	tool.Tool
-
-	readOnly func() bool
-}
-
-func (self shell) ReadOnly() bool { return self.readOnly() }
 
 // ProtectedPolicy makes .git at each writable root read-only. It does not search nested
 // directories.

@@ -332,7 +332,7 @@ func TestAModelListingAnswersEveryProvider(t *testing.T) {
 				t.Fatalf("expected the scenario's model, got %v", models)
 			}
 
-			if len(models[0].Efforts) == 0 {
+			if len(models[0].EffortLevels) == 0 {
 				t.Errorf("expected the model to take an effort level, got %v", models[0])
 			}
 		})

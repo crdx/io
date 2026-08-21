@@ -10,19 +10,19 @@ const (
 	up                    = "\x1b[%dA"
 	right                 = "\x1b[%dC"
 	clearBelow            = "\x1b[J"
-	beginFrame            = "\x1b[?2026h" // draw the whole thing before showing any of it
+	beginFrame            = "\x1b[?2026h"
 	endFrame              = "\x1b[?2026l"
 	hideCursor            = "\x1b[?25l"
 	showCursor            = "\x1b[?25h"
 	clearScreen           = "\x1b[H\x1b[2J"
-	clearScrollback       = "\x1b[3J" // ED2 does not push what it clears into the history, so it goes too
+	clearScrollback       = "\x1b[3J"
 	progressIndeterminate = "\x1b]9;4;3\x1b\\"
 	progressClear         = "\x1b]9;4;0\x1b\\"
 )
 
 // Synchronise holds every intermediate update back until draw has finished.
 func (self *Output) Synchronise(draw func()) {
-	if !self.isTerminal {
+	if !self.isTTY {
 		draw()
 		return
 	}
@@ -63,18 +63,18 @@ func (self *Output) closeFrame() string {
 }
 
 type footer struct {
-	rows         []string
-	cursorRow    int
-	cursorColumn int
-	column       int  // the conversation column above
-	separators   int  // rows between the conversation cursor and the input
-	isStacked    bool // whether the input sits below content
+	rows            []string
+	cursorRow       int
+	cursorColumn    int
+	column          int  // the conversation column above
+	separators      int  // rows between the conversation cursor and the input
+	hasContentAbove bool // whether the input sits below conversation
 }
 
 // Footer draws the input under the conversation, and leaves the cursor sitting in it, which is
 // where someone typing expects to find it.
 func (self *Output) Footer(rows []string, cursorRow int, cursorColumn int) {
-	if !self.isTerminal {
+	if !self.isTTY {
 		return
 	}
 
@@ -93,7 +93,7 @@ func (self *Output) Footer(rows []string, cursorRow int, cursorColumn int) {
 
 // Progress reports whether a turn is running through the terminal progress protocol.
 func (self *Output) Progress(isRunning bool) {
-	if !self.isTerminal {
+	if !self.isTTY {
 		return
 	}
 
@@ -120,7 +120,7 @@ func (self *Output) setProgress(isRunning bool) {
 // Release takes the input away. A kept conversation leaves the cursor on the line below it; an
 // unused one is erased so whatever ran the harness can reuse its line.
 func (self *Output) Release(shouldKeep bool) {
-	if !self.isTerminal {
+	if !self.isTTY {
 		return
 	}
 
@@ -130,7 +130,7 @@ func (self *Output) Release(shouldKeep bool) {
 	self.setProgress(false)
 
 	landing := ""
-	if self.shownFooter.isStacked {
+	if self.shownFooter.hasContentAbove {
 		if shouldKeep {
 			landing = "\r\n"
 		} else {
@@ -149,7 +149,7 @@ func (self *Output) Release(shouldKeep bool) {
 
 // Reset clears the terminal and forgets all drawing state for a full replay.
 func (self *Output) Reset() {
-	if !self.isTerminal {
+	if !self.isTTY {
 		return
 	}
 
@@ -164,12 +164,12 @@ func (self *Output) Reset() {
 	self.hasPendingText = false
 	self.isBlankOwed = false
 	self.trailingNewlines = 0
-	self.isStreaming = false
+	self.lastGroup = AsideGroup
 	self.isWrapping = false
-	self.isStacked = false
+	self.hasPrinted = false
 	self.liveRegion = liveRegion{}
 
-	self.measure()
+	self.measureTerminal()
 
 	self.raw(clearScreen + clearScrollback)
 }
@@ -201,7 +201,7 @@ func (self *Output) eraseInput() string {
 		return ""
 	}
 
-	if !shownFooter.isStacked {
+	if !shownFooter.hasContentAbove {
 		return "\r" + moveUp(shownFooter.cursorRow) + clearBelow
 	}
 
@@ -215,8 +215,8 @@ func (self *Output) drawInput() string {
 
 	self.shownFooter = self.input
 	self.shownFooter.column = self.column
-	self.shownFooter.isStacked = self.isStacked
-	if self.shownFooter.isStacked {
+	self.shownFooter.hasContentAbove = self.hasPrinted
+	if self.shownFooter.hasContentAbove {
 		self.shownFooter.separators = max(0, apart-self.trailingNewlines)
 	}
 
@@ -263,7 +263,7 @@ func (self *Output) Columns() int {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	self.measure()
+	self.measureTerminal()
 
 	return self.columns
 }

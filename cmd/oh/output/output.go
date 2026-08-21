@@ -20,14 +20,14 @@ type Output struct {
 
 	mutex sync.Mutex // guards drawing
 
-	isMidLine        bool // whether the cursor follows text on the current line
-	hasPendingText   bool // whether streamed text has not ended in a newline
-	isBlankOwed      bool // whether an empty line is owed to whatever is written next
-	trailingNewlines int  // how many newlines the last thing written ended with
-	isStreaming      bool // whether an answer is arriving in pieces
-	isStacked        bool // whether anything has been said, and so whether the input has a row to sit under
+	isMidLine        bool  // whether the cursor follows text on the current line
+	hasPendingText   bool  // whether streamed text has not ended in a newline
+	isBlankOwed      bool  // whether an empty line is owed to whatever is written next
+	trailingNewlines int   // how many newlines the last thing written ended with
+	lastGroup        Group // what was written last, so that a change of group opens a blank line
+	hasPrinted       bool  // whether anything has reached the screen yet, latched by emit until Reset
 
-	isTerminal      bool
+	isTTY           bool   // whether the writer is a terminal rather than a file or a pipe
 	linkRoot        string // where relative paths drawn in the scrollback begin, and "" to link nothing
 	isProgressShown bool   // whether a turn is reported as running to the terminal
 
@@ -48,9 +48,9 @@ type Output struct {
 
 // New builds the output over a writer, which is a terminal or is not.
 func New(writer io.Writer) *Output {
-	self := &Output{writer: writer, isTerminal: tty.Is(writer)}
+	self := &Output{writer: writer, isTTY: tty.Is(writer)}
 
-	self.measure()
+	self.measureTerminal()
 
 	return self
 }
@@ -58,10 +58,10 @@ func New(writer io.Writer) *Output {
 // NewTerminalOfSize builds an Output that is drawn as a terminal of the given size.
 func NewTerminalOfSize(writer io.Writer, columns int, lines int) *Output {
 	return &Output{
-		writer:     writer,
-		isTerminal: true,
-		columns:    columns,
-		lines:      lines,
+		writer:  writer,
+		isTTY:   true,
+		columns: columns,
+		lines:   lines,
 	}
 }
 
@@ -73,22 +73,21 @@ func (self *Output) LinkPathsUnder(root string) *Output {
 }
 
 // Status opens a tool-call block. Nothing else may print until it closes.
-func (self *Output) Status() *status.Block {
+func (self *Output) Status() *status.ToolBlock {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
 	self.seal()
-	self.separate(false)
+	self.makeRoomFor(AsideGroup)
 
 	if self.isMidLine {
 		self.newline()
 	}
 
 	self.openPendingLine()
+	self.measureTerminal()
 
-	self.measure()
-
-	return status.New(self.drawRow, self.overlay, self.isTerminal, self.columns)
+	return status.New(self.drawRow, self.overlay, self.isTTY, self.columns)
 }
 
 // Line writes text on a line of its own after any streamed answer.
@@ -97,14 +96,13 @@ func (self *Output) Line(text string) {
 	defer self.mutex.Unlock()
 
 	self.seal()
-	self.separate(false)
+	self.makeRoomFor(AsideGroup)
 
 	if self.isMidLine {
 		self.newline()
 	}
 
 	self.write(text)
-	self.isStreaming = false
 }
 
 // Blank schedules one empty line before the next output. Repeated calls coalesce.
@@ -112,7 +110,7 @@ func (self *Output) Blank() {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	self.isBlankOwed = self.isStacked
+	self.isBlankOwed = self.hasPrinted
 }
 
 // End finishes the turn on a complete line. Repeated calls are inert.
@@ -141,13 +139,12 @@ func (self *Output) drawRow(text string) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	self.separate(false)
+	self.makeRoomFor(AsideGroup)
 
 	self.write(text)
-	self.isStreaming = false
 }
 
-func (self *Output) measure() {
+func (self *Output) measureTerminal() {
 	file, ok := self.writer.(*os.File)
 	if !ok {
 		return
@@ -160,7 +157,7 @@ func (self *Output) measure() {
 }
 
 func (self *Output) newline() {
-	self.emit("\n")
+	self.emit("\n") // not write: a line owed is owed before this one ends, and paid after
 }
 
 func (self *Output) write(text string) {
@@ -173,7 +170,7 @@ func (self *Output) write(text string) {
 }
 
 func (self *Output) emit(text string) {
-	self.isStacked = true
+	self.hasPrinted = true
 	fitted := self.fit(text)
 	self.advance(text)
 	self.count(text)
@@ -182,10 +179,12 @@ func (self *Output) emit(text string) {
 
 const apart = 2
 
-func (self *Output) separate(answering bool) {
-	if self.isStreaming != answering {
-		self.isBlankOwed = self.isStacked
+func (self *Output) makeRoomFor(next Group) {
+	if self.lastGroup != next {
+		self.isBlankOwed = self.hasPrinted
 	}
+
+	self.lastGroup = next
 }
 
 func (self *Output) openPendingLine() {
@@ -236,7 +235,7 @@ func (self *Output) at(text string) {
 }
 
 func (self *Output) linkifyScrollback(text string) string {
-	if !self.isTerminal || self.linkRoot == "" {
+	if !self.isTTY || self.linkRoot == "" {
 		return text
 	}
 

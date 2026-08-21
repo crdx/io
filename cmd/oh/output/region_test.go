@@ -10,13 +10,13 @@ import (
 func screenWithInput() (*Output, *strings.Builder) {
 	screenOutput := &strings.Builder{}
 
-	shownFooter := footer{rows: []string{"> hi"}, cursorColumn: 3, column: 4, separators: apart, isStacked: true}
+	shownFooter := footer{rows: []string{"> hi"}, cursorColumn: 3, column: 4, separators: apart, hasContentAbove: true}
 
 	return &Output{
 		writer:      screenOutput,
-		isTerminal:  true,
+		isTTY:       true,
 		column:      4,
-		isStacked:   true,
+		hasPrinted:  true,
 		input:       shownFooter,
 		shownFooter: shownFooter,
 	}, screenOutput
@@ -24,7 +24,7 @@ func screenWithInput() (*Output, *strings.Builder) {
 
 func TestSynchronisingHoldsNestedFramesBackUntilDrawingFinishes(t *testing.T) {
 	screenOutput := &strings.Builder{}
-	screen := &Output{writer: screenOutput, isTerminal: true}
+	screen := &Output{writer: screenOutput, isTTY: true}
 
 	screen.Synchronise(func() {
 		screen.Footer([]string{"> hi"}, 0, 3)
@@ -59,7 +59,7 @@ func TestAnUnchangedInputIsNotDrawnAgain(t *testing.T) {
 
 func TestProgressReportsAnIndeterminateTurnAndClearsIt(t *testing.T) {
 	screenOutput := &strings.Builder{}
-	screen := &Output{writer: screenOutput, isTerminal: true}
+	screen := &Output{writer: screenOutput, isTTY: true}
 
 	screen.Progress(true)
 	screen.Progress(true)
@@ -115,7 +115,7 @@ func TestReleasingAnUnusedConversationErasesItsLine(t *testing.T) {
 
 func TestReleasingAnUnusedConversationErasesEveryWrappedRow(t *testing.T) {
 	screenOutput := &strings.Builder{}
-	screen := &Output{writer: screenOutput, isTerminal: true, columns: 4}
+	screen := &Output{writer: screenOutput, isTTY: true, columns: 4}
 
 	screen.Line("banner")
 	screen.Footer([]string{">"}, 0, 0)
@@ -130,7 +130,7 @@ func TestReleasingAnUnusedConversationErasesEveryWrappedRow(t *testing.T) {
 func TestTheInputTakesNoRowOfItsOwnUntilSomethingHasBeenSaid(t *testing.T) {
 	screenOutput := &strings.Builder{}
 
-	screen := &Output{writer: screenOutput, isTerminal: true}
+	screen := &Output{writer: screenOutput, isTTY: true}
 
 	screen.Footer([]string{"> hi"}, 0, 3)
 
@@ -155,7 +155,7 @@ func TestTheInputTakesNoRowOfItsOwnUntilSomethingHasBeenSaid(t *testing.T) {
 
 func TestFinishingTheConversationKeepsTheFooterInPlace(t *testing.T) {
 	screenOutput := &strings.Builder{}
-	screen := &Output{writer: screenOutput, isTerminal: true}
+	screen := &Output{writer: screenOutput, isTTY: true}
 	screen.Footer([]string{"> hi"}, 0, 3)
 	screen.Line("thinking")
 	screenOutput.Reset()
@@ -251,7 +251,7 @@ func TestResettingClearsTheScreenWithoutErasingFromAStaleRecord(t *testing.T) {
 		t.Errorf("expected both footers to be forgotten, got %v and %v", screen.shownFooter, screen.input)
 	}
 
-	if screen.column != 0 || screen.openedRows != 0 || screen.isMidLine || screen.hasPendingText || screen.isStreaming || screen.isWrapping {
+	if screen.column != 0 || screen.openedRows != 0 || screen.isMidLine || screen.hasPendingText || screen.hasPrinted || screen.lastGroup != AsideGroup || screen.isWrapping {
 		t.Errorf("expected the screen to be forgotten, got %+v", screen)
 	}
 }

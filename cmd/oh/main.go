@@ -330,21 +330,10 @@ func run() ([]string, error) {
 		notifyTurnFinished: func() { sendTurnFinishedNotification(workspaceDir) },
 		getOnWithItMessage: settings.GetOnWithItMessage,
 
-		label: func(pending bool, frame int, running bool) string {
+		label: func(isPending bool, frame int, isRunning bool) string {
 			currentCaps := mode.Current()
 
-			return banner(
-				model,
-				effort,
-				workspaceDir,
-				tools,
-				currentCaps.has(capShell),
-				currentCaps.has(capGit),
-				currentCaps.has(capBackground),
-				pending,
-				frame,
-				running,
-			)
+			return banner(model, effort, workspaceDir, tools, currentCaps, isPending, frame, isRunning)
 		},
 	}
 

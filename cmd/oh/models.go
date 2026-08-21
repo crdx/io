@@ -124,14 +124,11 @@ func supplement(listed []agent.Model, registered map[string]agent.Model) []agent
 			if model.Name == "" {
 				model.Name = known.Name
 			}
-			if len(model.Efforts) == 0 {
-				model.Efforts = slices.Clone(known.Efforts)
+			if len(model.EffortLevels) == 0 {
+				model.EffortLevels = slices.Clone(known.EffortLevels)
 			}
-			if model.Context == 0 {
-				model.Context = known.Context
-			}
-			if model.Output == 0 {
-				model.Output = known.Output
+			if model.MaxOutputTokens == 0 {
+				model.MaxOutputTokens = known.MaxOutputTokens
 			}
 		}
 
@@ -158,15 +155,15 @@ func choicesFor(providerName string, models []agent.Model) []modelChoice {
 	choices := make([]modelChoice, 0, len(models))
 
 	for _, model := range models {
-		if model.ID == "" || len(model.Efforts) == 0 || model.Output <= 0 {
+		if model.ID == "" || len(model.EffortLevels) == 0 || model.MaxOutputTokens <= 0 {
 			continue
 		}
 
 		choices = append(choices, modelChoice{
 			provider:        providerName,
 			model:           model.ID,
-			effortLevels:    model.Efforts,
-			maxOutputTokens: model.Output,
+			effortLevels:    model.EffortLevels,
+			maxOutputTokens: model.MaxOutputTokens,
 		})
 	}
 
@@ -236,7 +233,7 @@ func updateModels(output io.Writer, endpoint string, path string) error {
 func pickable(models []agent.Model) string {
 	var count int
 	for _, model := range models {
-		if len(model.Efforts) > 0 {
+		if len(model.EffortLevels) > 0 {
 			count++
 		}
 	}

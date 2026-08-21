@@ -235,15 +235,14 @@ func TestTheModelListingFollowsTheEndpointItWasGiven(t *testing.T) {
 	}
 
 	want := agent.Model{
-		ID:      "claude-opus-5",
-		Name:    "Claude Opus 5",
-		Efforts: []string{"low", "high"},
-		Context: 1000,
-		Output:  500,
+		ID:              "claude-opus-5",
+		Name:            "Claude Opus 5",
+		EffortLevels:    []string{"low", "high"},
+		MaxOutputTokens: 500,
 	}
 	if models[0].ID != want.ID || models[0].Name != want.Name ||
-		models[0].Context != want.Context || models[0].Output != want.Output ||
-		!slices.Equal(models[0].Efforts, want.Efforts) {
+		models[0].MaxOutputTokens != want.MaxOutputTokens ||
+		!slices.Equal(models[0].EffortLevels, want.EffortLevels) {
 		t.Errorf("expected %+v, got %+v", want, models[0])
 	}
 }

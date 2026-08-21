@@ -43,7 +43,6 @@ func testRoot(t *testing.T) (*file.Root, string) {
 func fixedShell(root *file.Root, policy func() sandbox.Policy) tool.Tool {
 	return bash.New(
 		root,
-		func() bool { return !policy().Writable() },
 		func(context.Context) (sandbox.Policy, error) { return policy(), nil },
 		sandbox.NewProcesses(false),
 	)
@@ -391,27 +390,15 @@ func TestTheToolIsNeverConcurrent(t *testing.T) {
 	}
 }
 
-func TestTheToolAsksWhetherItChangesAnythingEachTime(t *testing.T) {
+func TestTheToolAlwaysSaysItMayChangeSomething(t *testing.T) {
 	root, directory := testRoot(t)
 
-	readOnly := true
-	shell := bash.New(
-		root,
-		func() bool { return readOnly },
-		func(context.Context) (sandbox.Policy, error) {
-			return sandbox.Policy{Write: []string{directory}}, nil
-		},
-		sandbox.NewProcesses(false),
-	)
-
-	if !shell.ReadOnly() {
-		t.Errorf("a shell whose caller grants nowhere to write changes nothing")
-	}
-
-	readOnly = false
+	shell := fixedShell(root, func() sandbox.Policy {
+		return sandbox.Policy{Write: []string{directory}}
+	})
 
 	if shell.ReadOnly() {
-		t.Errorf("a shell whose caller grants somewhere to write may change something")
+		t.Errorf("a shell may change something whatever the policy of the moment grants")
 	}
 }
 
@@ -493,9 +480,5 @@ func TestThePolicyIsAskedForEveryCommand(t *testing.T) {
 
 	if output := run(); !strings.Contains(output, "denied") {
 		t.Errorf("expected the write to be refused, got %q", output)
-	}
-
-	if !built.ReadOnly() {
-		t.Error("expected the tool to say it changes nothing while the policy grants no write")
 	}
 }

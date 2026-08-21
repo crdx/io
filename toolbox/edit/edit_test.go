@@ -200,19 +200,11 @@ func TestEditingIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
 	}
 }
 
-func TestTheToolChangesNothingWhileTheTreeIsReadOnly(t *testing.T) {
+func TestTheToolSaysItWritesEvenOverAReadOnlyTree(t *testing.T) {
 	writable := false
 	root, _ := switchableRoot(t, &writable)
 
-	built := edit.New(root, file.NewSnapshots())
-
-	if !built.ReadOnly() {
-		t.Error("expected a tool over a read-only tree to change nothing")
-	}
-
-	writable = true
-
-	if built.ReadOnly() {
-		t.Error("expected a tool over a writable tree to say it writes")
+	if edit.New(root, file.NewSnapshots()).ReadOnly() {
+		t.Error("expected an edit tool to say it writes whatever the tree of the moment allows")
 	}
 }

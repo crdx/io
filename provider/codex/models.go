@@ -50,16 +50,16 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 	for _, listed := range payload.Models {
 		if listed.Slug != "" {
 			models = append(models, agent.Model{
-				ID:      listed.Slug,
-				Name:    listed.Title,
-				Efforts: slices.Clone(Efforts),
+				ID:           listed.Slug,
+				Name:         listed.Title,
+				EffortLevels: slices.Clone(Efforts),
 			})
 		}
 	}
 
 	for _, listed := range payload.Data {
 		if listed.ID != "" {
-			models = append(models, agent.Model{ID: listed.ID, Efforts: slices.Clone(Efforts)})
+			models = append(models, agent.Model{ID: listed.ID, EffortLevels: slices.Clone(Efforts)})
 		}
 	}
 

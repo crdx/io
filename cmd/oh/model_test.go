@@ -15,19 +15,19 @@ func useCachedModels(t *testing.T) {
 		Version: cacheVersion,
 		Providers: map[string]cachedModels{
 			codexProvider: {Models: []agent.Model{{
-				ID:      "gpt-5.6-sol",
-				Efforts: []string{"none", "low", "medium", "high", "xhigh", "max"},
-				Output:  128_000,
+				ID:              "gpt-5.6-sol",
+				EffortLevels:    []string{"none", "low", "medium", "high", "xhigh", "max"},
+				MaxOutputTokens: 128_000,
 			}}},
 			opencodeGoProvider: {Models: []agent.Model{{
-				ID:      "deepseek-v4-pro",
-				Efforts: []string{"high", "max"},
-				Output:  384_000,
+				ID:              "deepseek-v4-pro",
+				EffortLevels:    []string{"high", "max"},
+				MaxOutputTokens: 384_000,
 			}}},
 			anthropicProvider: {Models: []agent.Model{{
-				ID:      "claude-opus-5",
-				Efforts: []string{"low", "medium", "high", "xhigh", "max"},
-				Output:  128_000,
+				ID:              "claude-opus-5",
+				EffortLevels:    []string{"low", "medium", "high", "xhigh", "max"},
+				MaxOutputTokens: 128_000,
 			}}},
 		},
 	})

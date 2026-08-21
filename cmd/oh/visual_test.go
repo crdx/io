@@ -124,10 +124,10 @@ func TestVisual(t *testing.T) {
 		screen:    screen,
 		log:       log,
 		mode:      NewMode(capRead | capWrite),
-		label: func(pending bool, frame int, running bool) string {
+		label: func(isPending bool, frame int, isRunning bool) string {
 			return banner(
-				"fake", "medium", "/tmp/somewhere", tools, true, false, false,
-				pending, frame, running,
+				"fake", "medium", "/tmp/somewhere", tools, capRead|capShell|capWrite,
+				isPending, frame, isRunning,
 			)
 		},
 	}

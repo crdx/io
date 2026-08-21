@@ -324,7 +324,7 @@ func streamIntoBuffer(t *testing.T, entries []replayEntry) string {
 	t.Helper()
 
 	rig := newReplayRig(t, replayColumns)
-	rig.chat.turn = turn{isRunning: true, painter: rig.chat.newPicasso(true)}
+	rig.chat.turn = turn{isRunning: true, painter: rig.chat.newPainter(true)}
 	rig.chat.screen.Progress(true)
 
 	for _, entry := range entries {
@@ -560,11 +560,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 			}
 
 			passes[name] = func() string {
-				return banner(
-					"gpt-5.6-sol", "high", workspaceMarker, tools,
-					grantedCaps.has(capShell), grantedCaps.has(capGit), grantedCaps.has(capBackground),
-					false, 2, isRunning,
-				)
+				return banner("gpt-5.6-sol", "high", workspaceMarker, tools, grantedCaps, false, 2, isRunning)
 			}
 		}
 	}

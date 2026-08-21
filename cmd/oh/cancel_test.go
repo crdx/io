@@ -223,8 +223,8 @@ type eventsAfterCancellationProvider struct {
 
 func (eventsAfterCancellationProvider) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
 	for _, call := range []agent.Event{
-		{Kind: agent.Call, ID: "a", Name: "first", Subject: "first"},
-		{Kind: agent.Call, ID: "b", Name: "second", Subject: "second"},
+		{Kind: agent.Call, ID: "a", Name: "first", Rendering: agent.Rendering{Subject: "first"}},
+		{Kind: agent.Call, ID: "b", Name: "second", Rendering: agent.Rendering{Subject: "second"}},
 	} {
 		if !yield(call) {
 			return agent.Reply{}, nil

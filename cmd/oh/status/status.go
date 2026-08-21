@@ -223,8 +223,8 @@ type row struct {
 	stats     *tool.Stats
 }
 
-// Block displays and redraws a group of tool-call rows. Nothing else may print until it closes.
-type Block struct {
+// ToolBlock displays and redraws a group of tool-call rows. Nothing else may print until it closes.
+type ToolBlock struct {
 	print   func(string)
 	overlay func(string, int) // redraws existing rows
 	isLive  bool              // whether rows may be redrawn
@@ -240,8 +240,8 @@ type Block struct {
 }
 
 // New opens an empty block. Non-live blocks ignore redraws.
-func New(print func(string), overlay func(string, int), isLive bool, columns int) *Block {
-	self := &Block{
+func New(print func(string), overlay func(string, int), isLive bool, columns int) *ToolBlock {
+	self := &ToolBlock{
 		print:   print,
 		overlay: overlay,
 		isLive:  isLive,
@@ -257,7 +257,7 @@ func New(print func(string), overlay func(string, int), isLive bool, columns int
 }
 
 // Add puts a call on the block and hands back the row it went on.
-func (self *Block) Add(label Label) int {
+func (self *ToolBlock) Add(label Label) int {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -274,8 +274,13 @@ func (self *Block) Add(label Label) int {
 	return index
 }
 
+// Mark completes a call and removes its spinner. Failure text is flattened to one line.
+func (self *ToolBlock) Mark(index int, state State, took time.Duration, reason string) {
+	self.MarkWithStats(index, state, took, reason, nil)
+}
+
 // MarkWithStats marks a call and includes measurements made by its tool.
-func (self *Block) MarkWithStats(
+func (self *ToolBlock) MarkWithStats(
 	index int,
 	state State,
 	took time.Duration,
@@ -306,13 +311,13 @@ func collapse(text string) string {
 
 // Stop ends the block where it stands, saying nothing more about it. What was drawn is left on the
 // screen for whatever is about to take its place.
-func (self *Block) Stop() {
+func (self *ToolBlock) Stop() {
 	close(self.stop)
 	self.stopWait.Wait()
 }
 
 // Close ends the block, marking anything still running with what became of it.
-func (self *Block) Close(state State) {
+func (self *ToolBlock) Close(state State) {
 	self.Stop()
 
 	self.mutex.Lock()
@@ -330,7 +335,7 @@ func (self *Block) Close(state State) {
 	self.redraw()
 }
 
-func (self *Block) run() {
+func (self *ToolBlock) run() {
 	defer self.stopWait.Done()
 
 	select {
@@ -360,7 +365,7 @@ func (self *Block) run() {
 	}
 }
 
-func (self *Block) redraw() {
+func (self *ToolBlock) redraw() {
 	if !self.isLive || len(self.rows) == 0 {
 		return
 	}
@@ -380,11 +385,11 @@ func (self *Block) redraw() {
 }
 
 const (
-	failureShare = 2
+	failureShare = 2 // of the row, as a floor and not a ceiling
 	edgeGuard    = 2
 )
 
-func (self *Block) line(item row) string {
+func (self *ToolBlock) line(item row) string {
 	outcome := self.outcome(item)
 
 	label := item.label
@@ -421,7 +426,7 @@ func outcomeSpacing(outcome string) int {
 	return 1
 }
 
-func (self *Block) outcome(item row) string {
+func (self *ToolBlock) outcome(item row) string {
 	if item.state == Running {
 		if !self.isRevealed {
 			return ""

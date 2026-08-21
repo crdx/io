@@ -27,6 +27,7 @@ const (
 
 	goBuildCacheDir  = "go-build"
 	goModuleCacheDir = "go-mod"
+	goLangCiLintDir  = "golangci-lint"
 )
 
 func execPaths(workspaceDir string) []string {
@@ -91,6 +92,11 @@ func createSandboxPolicy(
 		return sandbox.Policy{}, fmt.Errorf("could not prepare the shell cache: %w", err)
 	}
 
+	lintCachePath := filepath.Join(".cache", goLangCiLintDir)
+	if err := os.MkdirAll(filepath.Join(tmpDir, lintCachePath), 0o700); err != nil {
+		return sandbox.Policy{}, fmt.Errorf("could not prepare the shell lint cache: %w", err)
+	}
+
 	mappedPaths, err := furnish(homeDir, extraPaths.Home)
 	if err != nil {
 		return sandbox.Policy{}, fmt.Errorf("could not furnish the shell home: %w", err)
@@ -115,6 +121,7 @@ func createSandboxPolicy(
 		SetEnv: map[string]string{
 			"GIT_CONFIG_NOSYSTEM": "1",
 			"GOCACHE":             filepath.Join(cacheDir, goBuildCacheDir),
+			"GOLANGCI_LINT_CACHE": filepath.Join(sandbox.TmpDir, lintCachePath),
 			"GOMODCACHE":          filepath.Join(cacheDir, goModuleCacheDir),
 			"HOME":                homeDir,
 			"MISE_DATA_DIR":       shellMiseDataDir(),
@@ -261,12 +268,7 @@ func confinedShell(
 		return policy, nil
 	}
 
-	readOnly := func() bool {
-		currentCaps := mode.Current()
-		return !currentCaps.has(capShell) || allWritablePaths(workspaceDir, home, extraPaths.Write, currentCaps) == nil
-	}
-
-	return bash.New(files, readOnly, fresh, processes)
+	return bash.New(files, fresh, processes)
 }
 
 func allWritablePaths(workspaceDir, homeDir string, extraPaths []string, currentCaps caps) []string {

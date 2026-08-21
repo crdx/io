@@ -140,15 +140,22 @@ func (self completionsDialect) Play(stream *Stream, _ *Scenario, turn Turn) {
 		stream.Send(turn.ErrorEvent)
 	case turn.Fail != "":
 		stream.Send(completions.Error(turn.Fail))
-	case turn.Incomplete:
-		stream.Send(completions.Finish(completions.OutOfRoom))
-	case len(turn.Calls) > 0:
-		stream.Send(completions.Finish(completions.AskedTools))
 	default:
-		stream.Send(completions.Finish(completions.Stopped))
+		stream.Send(completions.Finish(finishReason(turn)))
 	}
 
 	stream.Send(completions.Done)
+}
+
+func finishReason(turn Turn) string {
+	switch {
+	case turn.Incomplete:
+		return completions.OutOfRoom
+	case len(turn.Calls) > 0:
+		return completions.AskedTools
+	default:
+		return completions.Stopped
+	}
 }
 
 func (self completionsDialect) Exhausted(stream *Stream, message string) {

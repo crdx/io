@@ -6,17 +6,16 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/tool"
 )
 
 func TestTheBannerStartsWithAPermanentActivitySegment(t *testing.T) {
-	idle := banner("gpt-5.6-sol", "high", "/tmp/io", nil, false, false, false, false, 0, false)
+	idle := banner("gpt-5.6-sol", "high", "/tmp/io", nil, capRead, false, 0, false)
 	if want := style.Withheld("✧·"); !strings.HasPrefix(idle, want) {
 		t.Errorf("expected the idle banner to start with %q, got %q", want, idle)
 	}
 
-	running := banner("gpt-5.6-sol", "high", "/tmp/io", nil, false, false, false, false, 1, true)
+	running := banner("gpt-5.6-sol", "high", "/tmp/io", nil, capRead, false, 1, true)
 	if want := style.Spinner("·✦"); !strings.HasPrefix(running, want) {
 		t.Errorf("expected the running banner to start with %q, got %q", want, running)
 	}
@@ -57,12 +56,12 @@ func TestAccessComesFromTheToolsRatherThanTheirNames(t *testing.T) {
 	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
 
 	want := style.Read("r") + style.Withheld("x") + style.Withheld("w") + style.Withheld("g") + style.Withheld("b")
-	if got := modes([]tool.Tool{looker}, false, false, false, false); got != want {
+	if got := modes([]tool.Tool{looker}, capRead, false); got != want {
 		t.Errorf("expected reading alone to be on offer, got %q", got)
 	}
 }
 
-func TestTheShellIsShownSeparatelyFromWriting(t *testing.T) {
+func TestTheReadLetterGoesDarkWithoutAToolThatReads(t *testing.T) {
 	writer := tool.Implement(
 		tool.Definition{
 			Name:        "poke",
@@ -73,25 +72,24 @@ func TestTheShellIsShownSeparatelyFromWriting(t *testing.T) {
 	).Plain(func(context.Context, struct{}) (string, error) { return "", nil })
 
 	want := style.Withheld("r") + style.Exec("x") + style.Write("w") + style.Withheld("g") + style.Withheld("b")
-	if got := modes([]tool.Tool{writer}, true, false, false, false); got != want {
+	if got := modes([]tool.Tool{writer}, capRead|capShell|capWrite, false); got != want {
 		t.Errorf("expected writing and running to be on offer, got %q", got)
 	}
 }
 
-func TestAReadOnlyShellDoesNotOfferWriting(t *testing.T) {
-	processes := sandbox.NewProcesses(false)
-	defer func() { _, _ = processes.Disable() }()
+func TestTheWriteLetterComesFromTheMode(t *testing.T) {
+	looker := tool.ReadOnly(tool.Implement(
+		tool.Definition{
+			Name:        "peek",
+			Description: "",
+			Schema:      tool.Schema{},
+		},
+		func(struct{}) (string, string) { return "", "" },
+	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
 
-	mode := NewMode(capRead | capShell)
-	shell := confinedShell(t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, mode, nil, processes)
-
-	if !shell.ReadOnly() {
-		t.Errorf("expected a shell with no writable path to change nothing")
-	}
-
-	want := style.Read("r") + style.Exec("x") + style.Withheld("w") + style.Withheld("g") + style.Withheld("b")
-	if got := modes([]tool.Tool{shell}, true, false, false, false); got != want {
-		t.Errorf("expected reading and running to be on offer, got %q", got)
+	want := style.Read("r") + style.Exec("x") + style.Write("w") + style.Withheld("g") + style.Withheld("b")
+	if got := modes([]tool.Tool{looker}, capRead|capShell|capWrite, false); got != want {
+		t.Errorf("expected writing to light its letter whatever the tools are, got %q", got)
 	}
 }
 
@@ -106,7 +104,7 @@ func TestTheHistoryLetterComesFromTheMode(t *testing.T) {
 	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
 
 	want := style.Read("r") + style.Withheld("x") + style.Withheld("w") + style.History("g") + style.Withheld("b")
-	if got := modes([]tool.Tool{looker}, false, true, false, false); got != want {
+	if got := modes([]tool.Tool{looker}, capRead|capGit, false); got != want {
 		t.Errorf("expected a commit-only mode to light the history letter alone, got %q", got)
 	}
 }
@@ -123,7 +121,7 @@ func TestTheBackgroundLetterComesFromTheMode(t *testing.T) {
 
 	want := style.Read("r") + style.Withheld("x") + style.Withheld("w") +
 		style.Withheld("g") + style.Background("b")
-	if got := modes([]tool.Tool{looker}, false, false, true, false); got != want {
+	if got := modes([]tool.Tool{looker}, capRead|capBackground, false); got != want {
 		t.Errorf("expected background mode to light its letter, got %q", got)
 	}
 }
@@ -138,7 +136,7 @@ func TestAWaitingPrefixUnderlinesEveryLetter(t *testing.T) {
 		func(struct{}) (string, string) { return "", "" },
 	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
 
-	got := modes([]tool.Tool{looker}, true, false, false, true)
+	got := modes([]tool.Tool{looker}, capRead|capShell, true)
 
 	if underlineCount := strings.Count(got, "\x1b[4m"); underlineCount != len(capFlags) {
 		t.Errorf("expected %d letters underlined, got %d in %q", len(capFlags), underlineCount, got)
@@ -190,5 +188,62 @@ func TestTheLeftLabelIsDroppedFirst(t *testing.T) {
 func TestALabelTooWideForTheScreenIsDropped(t *testing.T) {
 	if ruleText := rule(5, "", "far too long"); strings.Contains(ruleText, "far") {
 		t.Errorf("expected the label to be dropped, got %q", ruleText)
+	}
+}
+
+func modesFor(tools []tool.Tool, grantedCaps caps) string {
+	return modes(tools, grantedCaps, false)
+}
+
+func TestEachCapabilityLightsItsOwnLetterAlone(t *testing.T) {
+	looker := tool.ReadOnly(tool.Implement(
+		tool.Definition{Name: "peek", Description: "", Schema: tool.Schema{}},
+		func(struct{}) (string, string) { return "", "" },
+	).Plain(func(context.Context, struct{}) (string, error) { return "", nil }))
+
+	dark := map[string]string{
+		"r": style.Withheld("r"), "x": style.Withheld("x"), "w": style.Withheld("w"),
+		"g": style.Withheld("g"), "b": style.Withheld("b"),
+	}
+
+	lit := func(letters map[string]string) string {
+		var out strings.Builder
+		for _, flag := range []string{"r", "x", "w", "g", "b"} {
+			if replacement, found := letters[flag]; found {
+				out.WriteString(replacement)
+			} else {
+				out.WriteString(dark[flag])
+			}
+		}
+		return out.String()
+	}
+
+	tests := map[string]struct {
+		grantedCaps caps
+		want        string
+	}{
+		"reading alone": {capRead, lit(map[string]string{"r": style.Read("r")})},
+		"the shell":     {capRead | capShell, lit(map[string]string{"r": style.Read("r"), "x": style.Exec("x")})},
+		"writing":       {capRead | capWrite, lit(map[string]string{"r": style.Read("r"), "w": style.Write("w")})},
+		"history":       {capRead | capGit, lit(map[string]string{"r": style.Read("r"), "g": style.History("g")})},
+		"background": {
+			capRead | capBackground,
+			lit(map[string]string{"r": style.Read("r"), "b": style.Background("b")}),
+		},
+		"the lot": {
+			capRead | capShell | capWrite | capGit | capBackground,
+			lit(map[string]string{
+				"r": style.Read("r"), "x": style.Exec("x"), "w": style.Write("w"),
+				"g": style.History("g"), "b": style.Background("b"),
+			}),
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			if got := modesFor([]tool.Tool{looker}, test.grantedCaps); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
 	}
 }

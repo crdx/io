@@ -40,7 +40,7 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 
 	for _, listed := range payload.Data {
 		if listed.ID != "" {
-			models = append(models, agent.Model{ID: listed.ID, Efforts: slices.Clone(Efforts)})
+			models = append(models, agent.Model{ID: listed.ID, EffortLevels: slices.Clone(Efforts)})
 		}
 	}
 

@@ -247,10 +247,6 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 		t.Errorf("expected the shell to be offered as bash, got %q", shell.Name())
 	}
 
-	if !shell.ReadOnly() {
-		t.Error("expected a shell that cannot run to be read-only")
-	}
-
 	call, err := shell.Parse(`{"command":"echo one"}`)
 	if err != nil {
 		t.Fatal(err)
@@ -565,6 +561,24 @@ func TestGoUsesTheShellCacheAndTheHostModuleCacheAsAProxy(t *testing.T) {
 		if got := policy.SetEnv[name]; got != want {
 			t.Errorf("got %s %q, want %q", name, got, want)
 		}
+	}
+}
+
+func TestTheLinterCacheBelongsToTheSessionRatherThanTheSharedHome(t *testing.T) {
+	tmp := t.TempDir()
+
+	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), tmp, configuredPaths{}, 0)
+	if err != nil {
+		t.Skipf("the sandbox cannot enforce the lint cache policy here: %v", err)
+	}
+
+	want := filepath.Join(sandbox.TmpDir, ".cache", goLangCiLintDir)
+	if got := policy.SetEnv["GOLANGCI_LINT_CACHE"]; got != want {
+		t.Errorf("got GOLANGCI_LINT_CACHE %q, want %q", got, want)
+	}
+
+	if _, err := os.Stat(filepath.Join(tmp, ".cache", goLangCiLintDir)); err != nil {
+		t.Errorf("the lint cache was not prepared in the session tmp dir: %v", err)
 	}
 }
 

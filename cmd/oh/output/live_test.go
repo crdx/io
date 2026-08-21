@@ -13,7 +13,7 @@ import (
 func region() (*Output, *strings.Builder) {
 	screenOutput := &strings.Builder{}
 
-	return &Output{writer: screenOutput, isTerminal: true, columns: 40, lines: 24}, screenOutput
+	return &Output{writer: screenOutput, isTTY: true, columns: 40, lines: 24}, screenOutput
 }
 
 func TestOnlyTheAnswerIsLinked(t *testing.T) {
@@ -113,8 +113,8 @@ func TestADifferenceAboveTheScreenIsReportedRatherThanRepaired(t *testing.T) {
 		t.Fatal("expected the first drawing to be made")
 	}
 
-	if screen.liveRegion.top != len(rows)-4 {
-		t.Fatalf("expected %d rows to have scrolled off, got %d", len(rows)-4, screen.liveRegion.top)
+	if screen.liveRegion.topRowIndex != len(rows)-4 {
+		t.Fatalf("expected %d rows to have scrolled off, got %d", len(rows)-4, screen.liveRegion.topRowIndex)
 	}
 
 	if screen.DrawAnswer([]string{"ONE", "two", "three", "four", "five", "six"}) {
@@ -172,7 +172,7 @@ func TestAFrameThatShrinksKeepsItsPaintedHeightUntilItIsSealed(t *testing.T) {
 		t.Fatal("expected a shorter set of rows to be repaired")
 	}
 
-	if len(screen.liveRegion.rows) != 3 || screen.liveRegion.rows[2] != "" || screen.liveRegion.contentRows != 2 {
+	if len(screen.liveRegion.rows) != 3 || screen.liveRegion.rows[2] != "" || screen.liveRegion.currentContentRowCount != 2 {
 		t.Fatalf("expected two content rows held at three painted rows, got %q", screen.liveRegion.rows)
 	}
 	if got := screenOutput.String(); strings.Contains(got, moveUp(1)) {
@@ -198,8 +198,8 @@ func TestRowsThatScrolledOffDoNotReturnWhenTheRegionShrinks(t *testing.T) {
 	if !screen.DrawAnswer([]string{"one", "two", "three", "four", "five"}) {
 		t.Fatal("expected the visible end of the region to be shortened")
 	}
-	if screen.liveRegion.top != 2 {
-		t.Fatalf("expected the first two rows to remain offscreen, got top row %d", screen.liveRegion.top)
+	if screen.liveRegion.topRowIndex != 2 {
+		t.Fatalf("expected the first two rows to remain offscreen, got top row %d", screen.liveRegion.topRowIndex)
 	}
 	if screen.DrawAnswer([]string{"one", "TWO", "three", "four", "five"}) {
 		t.Error("expected a change to a row that remains offscreen to require a replay")

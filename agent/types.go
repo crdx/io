@@ -35,11 +35,10 @@ type State interface {
 
 // Model is one model a provider offers.
 type Model struct {
-	ID      string   `json:"id"`
-	Name    string   `json:"name,omitempty"`
-	Efforts []string `json:"efforts,omitempty"`
-	Context int      `json:"context,omitempty"`
-	Output  int      `json:"output,omitempty"`
+	ID              string   `json:"id"`
+	Name            string   `json:"name,omitempty"`
+	EffortLevels    []string `json:"efforts,omitempty"`
+	MaxOutputTokens int      `json:"output,omitempty"`
 }
 
 // Lister is a provider that can say which models it offers.
@@ -87,22 +86,31 @@ const (
 	Failure     Kind = "failure"     // why a turn ended before the model completed it
 )
 
-// Event is a conversation occurrence or durable tool-state transition. The stream of them is the
-// resumable session itself, so an event is written down as it stands: one event, one line.
-//
-// Name and Arguments are what a call was; Subject and Qualifier are only how it looked at the time,
-// kept for a display that no longer has the tool to ask. The JSON keys stay render and detail so
-// sessions written before the rename still read.
+// Rendering is how a call looked when it ran. Used if the original tool is unavailable.
+type Rendering struct {
+	Subject   string         `json:"render,omitempty"`
+	Note      string         `json:"detail,omitempty"`
+	Highlight tool.Highlight `json:"highlight,omitzero"`
+	ReadOnly  bool           `json:"read_only,omitempty"`
+}
+
+// Describe takes how a decoded call looks from the call itself, leaving what the call cannot say
+// about itself as it was.
+func (self *Rendering) Describe(call tool.Call) {
+	self.Subject = call.Subject()
+	self.Note = call.Qualifier()
+	self.Highlight = call.Highlight()
+}
+
+// Event is a conversation occurrence or durable tool-state transition.
 type Event struct {
+	Rendering
+
 	Kind      Kind            `json:"kind"`
 	Text      string          `json:"text,omitempty"`
 	ID        string          `json:"id,omitempty"`
 	Name      string          `json:"name,omitempty"` // which tool or state owner
 	Arguments string          `json:"arguments,omitempty"`
-	Subject   string          `json:"render,omitempty"` // how the call was shown when it ran
-	Qualifier string          `json:"detail,omitempty"` // what qualified that, for a display to set apart
-	Highlight tool.Highlight  `json:"highlight,omitzero"`
-	ReadOnly  bool            `json:"read_only,omitempty"`
 	Failed    bool            `json:"failed,omitempty"` // whether a call came back with an error rather than a result
 	Took      time.Duration   `json:"took,omitempty"`
 	Stats     *tool.Stats     `json:"stats,omitempty"`

@@ -10,70 +10,70 @@ import (
 const clearRow = "\x1b[K"
 
 type liveRegion struct {
-	rows        []string // the rows as they were last painted
-	contentRows int      // how many of them are content rather than height-preserving blanks
-	isAnswer    bool     // whether the region holds the answer, and not the thinking before it
-	top         int      // the first row of the region the screen still holds
+	rows                   []string // the rows as they were last painted
+	currentContentRowCount int      // how many of them are content rather than height-preserving blanks
+	group                  Group    // which group the region holds, so sealing it separates correctly
+	topRowIndex            int      // the first row of the region the screen still holds
 }
 
 // DrawAnswer replaces the live region with the answer, and reports whether every changed row
 // remains on screen.
 func (self *Output) DrawAnswer(rows []string) bool {
-	return self.draw(rows, true)
+	return self.draw(rows, AnswerGroup)
 }
 
 // DrawReasoning replaces the live region with the thinking that led to an answer, which runs into
 // whatever is written next rather than standing apart from it.
 func (self *Output) DrawReasoning(rows []string) bool {
-	return self.draw(rows, false)
+	return self.draw(rows, AsideGroup)
 }
 
-func (self *Output) draw(rows []string, isAnswer bool) bool {
+func (self *Output) draw(newRows []string, next Group) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	if len(rows) == 0 {
+	if len(newRows) == 0 {
 		if len(self.liveRegion.rows) == 0 {
 			return true
 		}
 
-		rows = []string{""}
+		newRows = []string{""}
 	}
 
 	if len(self.liveRegion.rows) == 0 {
-		self.liveRegion.isAnswer = isAnswer
+		self.liveRegion.group = next
 	}
 
-	if !self.isTerminal {
-		self.liveRegion.rows = rows
-		self.liveRegion.contentRows = len(rows)
+	if !self.isTTY {
+		self.liveRegion.rows = newRows
+		self.liveRegion.currentContentRowCount = len(newRows)
 		return true
 	}
 
-	self.measure()
+	self.measureTerminal()
 
-	contentRows := len(rows)
-	if len(rows) < len(self.liveRegion.rows) {
-		rows = append(slices.Clone(rows), make([]string, len(self.liveRegion.rows)-len(rows))...)
+	contentRowCount := len(newRows)
+	if len(newRows) < len(self.liveRegion.rows) {
+		newRows = append(slices.Clone(newRows), make([]string, len(self.liveRegion.rows)-len(newRows))...)
 	}
 
-	first := firstDifference(self.liveRegion.rows, rows)
+	firstDifference := getFirstDifference(self.liveRegion.rows, newRows)
 
-	if first == len(rows) && first == len(self.liveRegion.rows) {
-		self.liveRegion.contentRows = contentRows
+	if firstDifference == len(newRows) && firstDifference == len(self.liveRegion.rows) {
+		self.liveRegion.currentContentRowCount = contentRowCount
 		return true
 	}
 
-	if first < self.liveRegion.top {
+	if firstDifference < self.liveRegion.topRowIndex {
 		return false
 	}
 
 	if len(self.liveRegion.rows) == 0 {
-		self.begin(isAnswer)
+		self.begin(next)
 	}
 
-	self.repaint(first, rows, isAnswer)
-	self.liveRegion.contentRows = contentRows
+	self.repaint(firstDifference, newRows, next == AnswerGroup)
+	self.liveRegion.currentContentRowCount = contentRowCount
 
 	return true
 }
@@ -83,20 +83,19 @@ func (self *Output) seal() {
 		return
 	}
 
-	if !self.isTerminal {
-		self.begin(self.liveRegion.isAnswer)
+	if !self.isTTY {
+		self.begin(self.liveRegion.group)
 		self.write(strings.Join(self.liveRegion.rows, "\n"))
-	} else if self.liveRegion.contentRows < len(self.liveRegion.rows) && self.liveRegion.contentRows > self.liveRegion.top {
-		rows := slices.Clone(self.liveRegion.rows[:self.liveRegion.contentRows])
-		self.repaint(len(rows)-1, rows, self.liveRegion.isAnswer)
+	} else if self.liveRegion.currentContentRowCount < len(self.liveRegion.rows) && self.liveRegion.currentContentRowCount > self.liveRegion.topRowIndex {
+		rows := slices.Clone(self.liveRegion.rows[:self.liveRegion.currentContentRowCount])
+		self.repaint(len(rows)-1, rows, self.liveRegion.group == AnswerGroup)
 	}
 
 	self.liveRegion = liveRegion{}
 }
 
-func (self *Output) begin(isAnswer bool) {
-	self.separate(isAnswer)
-	self.isStreaming = isAnswer
+func (self *Output) begin(next Group) {
+	self.makeRoomFor(next)
 
 	if self.isMidLine {
 		self.newline()
@@ -152,7 +151,7 @@ func (self *Output) repaint(first int, rows []string, shouldLinkPaths bool) {
 
 func (self *Output) settle(rows []string) {
 	self.liveRegion.rows = rows
-	self.isStacked = true
+	self.hasPrinted = true
 	self.isMidLine = true
 	self.hasPendingText = false
 	self.trailingNewlines = 0
@@ -163,11 +162,11 @@ func (self *Output) settle(rows []string) {
 	}
 
 	if room := self.lines - len(self.input.rows); self.lines > 0 && len(rows) > room {
-		self.liveRegion.top = max(self.liveRegion.top, len(rows)-room)
+		self.liveRegion.topRowIndex = max(self.liveRegion.topRowIndex, len(rows)-room)
 	}
 }
 
-func firstDifference(before []string, after []string) int {
+func getFirstDifference(before []string, after []string) int {
 	for at := range min(len(before), len(after)) {
 		if before[at] != after[at] {
 			return at

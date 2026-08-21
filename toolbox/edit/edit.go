@@ -21,33 +21,21 @@ type Args struct {
 
 // New builds an edit tool confined to root.
 func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
-	return editor{
-		Tool: tool.FocusPath(tool.Implement(
-			tool.Definition{
-				Name:        "edit",
-				Description: "replace an exact string in a file, which must be read first and appear exactly once",
-				Schema: tool.Schema{
-					tool.String("path", "file"),
-					tool.String("old_text", "exact text to replace, including whitespace"),
-					tool.String("new_text", "replacement text"),
-				},
+	return tool.FocusPath(tool.Implement(
+		tool.Definition{
+			Name:        "edit",
+			Description: "replace an exact string in a file, which must be read first and appear exactly once",
+			Schema: tool.Schema{
+				tool.String("path", "file"),
+				tool.String("old_text", "exact text to replace, including whitespace"),
+				tool.String("new_text", "replacement text"),
 			},
-			Describe,
-		).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
-			return exec(root, snapshots, args)
-		})),
-
-		root: root,
-	}
+		},
+		Describe,
+	).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
+		return exec(root, snapshots, args)
+	}))
 }
-
-type editor struct {
-	tool.Tool
-
-	root *file.Root
-}
-
-func (self editor) ReadOnly() bool { return self.root.RefuseWrite(".") != nil }
 
 // Describe names the file.
 func Describe(args Args) (string, string) {

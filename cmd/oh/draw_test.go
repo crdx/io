@@ -65,8 +65,8 @@ func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
 	testConversation.restore(&store.Session{
 		Events: []agent.Event{
 			{Kind: agent.Prompt, Text: "read them both"},
-			{Kind: agent.Call, ID: "1", Name: "read", Subject: "one.go"},
-			{Kind: agent.Call, ID: "2", Name: "read", Subject: "two.go"},
+			{Kind: agent.Call, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}},
+			{Kind: agent.Call, ID: "2", Name: "read", Rendering: agent.Rendering{Subject: "two.go"}},
 			{Kind: agent.Result, ID: "1", Name: "read", Text: "package one"},
 		},
 	})
@@ -168,8 +168,11 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 			callPainter := &painter{screen: output.New(&screenOutput)}
 
 			callPainter.draw(agent.Event{
-				Kind: agent.Call, ID: "1", Name: test.tool, Subject: test.path,
-				Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: path.Base(test.path)},
+				Kind: agent.Call, ID: "1", Name: test.tool,
+				Rendering: agent.Rendering{
+					Subject:   test.path,
+					Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: path.Base(test.path)},
+				},
 			})
 			callPainter.close(status.Done)
 
@@ -188,13 +191,54 @@ func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
 	callPainter := &painter{screen: output.New(&screenOutput)}
 
 	callPainter.draw(agent.Event{
-		Kind: agent.Call, ID: "1", Name: "read", Subject: "/skills/golang/SKILL.md",
-		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
+		Kind: agent.Call, ID: "1", Name: "read",
+		Rendering: agent.Rendering{
+			Subject:   "/skills/golang/SKILL.md",
+			Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
+		},
 	})
 	callPainter.close(status.Done)
 
 	if strings.Contains(screenOutput.String(), style.Subject("SKILL.md")) {
 		t.Errorf("got %q, want the file left dim", screenOutput.String())
+	}
+}
+
+func TestWhetherACallChangedAnythingComesFromTheToolOfTheMoment(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := &conversation{
+		assistant: agent.New("", quietProvider{}, []tool.Tool{slowTool("write")}),
+		screen:    output.New(&screenOutput),
+	}
+	callPainter := self.newPainter(false)
+
+	callPainter.draw(agent.Event{
+		Kind: agent.Call, ID: "1", Name: "write", Arguments: `{"path":"one.go"}`,
+		Rendering: agent.Rendering{ReadOnly: true},
+	})
+	callPainter.close(status.Done)
+
+	if want := style.Change("write"); !strings.Contains(screenOutput.String(), want) {
+		t.Errorf("got %q, want %q", screenOutput.String(), want)
+	}
+}
+
+func TestACallToAToolThatIsGoneKeepsWhatWasRecorded(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := &conversation{
+		assistant: agent.New("", quietProvider{}, nil),
+		screen:    output.New(&screenOutput),
+	}
+	callPainter := self.newPainter(false)
+
+	callPainter.draw(agent.Event{
+		Kind: agent.Call, ID: "1", Name: "gone",
+		Rendering: agent.Rendering{Subject: "one.go", ReadOnly: true},
+	})
+	callPainter.close(status.Done)
+
+	if want := style.Call("gone"); !strings.Contains(screenOutput.String(), want) {
+		t.Errorf("got %q, want %q", screenOutput.String(), want)
 	}
 }
 
@@ -208,9 +252,9 @@ func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 		log:       testLog(t),
 	}
 
-	call := agent.Event{Kind: agent.Call, ID: "1", Name: "read", Subject: "one.go"}
+	call := agent.Event{Kind: agent.Call, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}}
 
-	self.turn = turn{isRunning: true, painter: self.newPicasso(true)}
+	self.turn = turn{isRunning: true, painter: self.newPainter(true)}
 	self.transcript = appendTranscript(self.transcript, call)
 	self.turn.painter.draw(call)
 
@@ -244,7 +288,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 		screen:    output.New(&live),
 		log:       testLog(t),
 	}
-	livePainter := self.newPicasso(true)
+	livePainter := self.newPainter(true)
 
 	events := []agent.Event{
 		{Kind: agent.Prompt, Text: "**Check** this"},
@@ -252,8 +296,8 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 		{Kind: agent.Reasoning, Text: "at the file. Need care."},
 		{Kind: agent.Text, Text: "The **first** "},
 		{Kind: agent.Text, Text: "answer.\n"},
-		{Kind: agent.Call, ID: "1", Name: "read", Arguments: `{"path":"one.go"}`, Subject: "old"},
-		{Kind: agent.Call, ID: "2", Name: "gone", Subject: "two.go"},
+		{Kind: agent.Call, ID: "1", Name: "read", Arguments: `{"path":"one.go"}`, Rendering: agent.Rendering{Subject: "old"}},
+		{Kind: agent.Call, ID: "2", Name: "gone", Rendering: agent.Rendering{Subject: "two.go"}},
 		{Kind: agent.Result, ID: "1", Name: "read", Took: 2 * time.Second},
 		{Kind: agent.Result, ID: "2", Name: "gone", Failed: true, Took: 3 * time.Second},
 		{Kind: agent.Text, Text: "Done."},
@@ -265,7 +309,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	}
 	self.notifyStopped("Background processes killed (bash → sleep)")
 
-	unansweredCall := agent.Event{Kind: agent.Call, ID: "3", Name: "read", Subject: "left.go"}
+	unansweredCall := agent.Event{Kind: agent.Call, ID: "3", Name: "read", Rendering: agent.Rendering{Subject: "left.go"}}
 	self.transcript = appendTranscript(self.transcript, unansweredCall)
 	livePainter.draw(unansweredCall)
 	livePainter.close(status.Cancelled)
@@ -307,7 +351,7 @@ func TestAThoughtRunsDirectlyIntoAToolCall(t *testing.T) {
 	callPainter := &painter{screen: output.New(&screenOutput)}
 
 	callPainter.draw(agent.Event{Kind: agent.Reasoning, Text: "checking"})
-	callPainter.draw(agent.Event{Kind: agent.Call, ID: "1", Name: "read", Subject: "one.go"})
+	callPainter.draw(agent.Event{Kind: agent.Call, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}})
 	callPainter.close(status.Cancelled)
 
 	plain := style.Plain(screenOutput.String())
@@ -341,7 +385,7 @@ func TestAStoredCallIsShownTheWayItsToolShowsItNow(t *testing.T) {
 		ID:        "1",
 		Name:      "read",
 		Arguments: `{"path":"cmd/oh/one.go"}`,
-		Subject:   "one.go:1-400",
+		Rendering: agent.Rendering{Subject: "one.go:1-400"},
 	}}
 
 	testConversation.replay()
@@ -369,7 +413,7 @@ func TestACallWhoseToolIsGoneKeepsWhatItLookedLike(t *testing.T) {
 		ID:        "1",
 		Name:      "divine",
 		Arguments: `{"path":"one.go"}`,
-		Subject:   "one.go:1-400",
+		Rendering: agent.Rendering{Subject: "one.go:1-400"},
 	}}
 
 	testConversation.replay()
@@ -509,7 +553,7 @@ func TestAShellCallIsDrawnAsAShellPrompt(t *testing.T) {
 	var screenOutput bytes.Buffer
 	callPainter := &painter{screen: output.New(&screenOutput), shell: "bash"}
 
-	callPainter.draw(agent.Event{Kind: agent.Call, ID: "1", Name: "bash", Subject: "echo hello"})
+	callPainter.draw(agent.Event{Kind: agent.Call, ID: "1", Name: "bash", Rendering: agent.Rendering{Subject: "echo hello"}})
 	callPainter.close(status.Done)
 
 	plain := style.Plain(screenOutput.String())
@@ -526,14 +570,14 @@ func TestATurnThatLeftACallUnansweredIsClosedByWhatIsAskedNext(t *testing.T) {
 
 	callPainter := &painter{screen: output.New(&screenOutput)}
 
-	callPainter.draw(agent.Event{Kind: agent.Call, ID: "1", Name: "read", Subject: "one.go"})
+	callPainter.draw(agent.Event{Kind: agent.Call, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}})
 	callPainter.draw(agent.Event{Kind: agent.Prompt, Text: "never mind"})
 
-	if callPainter.block != nil {
+	if callPainter.toolBlock != nil {
 		t.Fatal("expected the block to be closed by the next thing asked")
 	}
 
-	callPainter.draw(agent.Event{Kind: agent.Call, ID: "2", Name: "read", Subject: "two.go"})
+	callPainter.draw(agent.Event{Kind: agent.Call, ID: "2", Name: "read", Rendering: agent.Rendering{Subject: "two.go"}})
 
 	if got := callPainter.rows["2"]; got != 0 {
 		t.Errorf("expected the call to open a block of its own, got row %d", got)
@@ -552,11 +596,11 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 		screen:    output.New(&screenOutput),
 	}
 
-	testConversation.turn = turn{isRunning: true, painter: testConversation.newPicasso(true)}
+	testConversation.turn = turn{isRunning: true, painter: testConversation.newPainter(true)}
 
 	testConversation.transcript = []agent.Event{
 		{Kind: agent.Prompt, Text: "read it"},
-		{Kind: agent.Call, ID: "1", Name: "read", Subject: "one.go"},
+		{Kind: agent.Call, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}},
 	}
 
 	previousPainter := testConversation.turn.painter
@@ -567,13 +611,13 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 		t.Fatal("expected the turn to be given the painter that drew the replay")
 	}
 
-	if testConversation.turn.painter.block == nil {
+	if testConversation.turn.painter.toolBlock == nil {
 		t.Fatal("expected the unanswered call to be on a block that is open again")
 	}
 
 	testConversation.turn.painter.draw(agent.Event{Kind: agent.Result, ID: "1", Name: "read", Took: time.Second})
 
-	if testConversation.turn.painter.block != nil {
+	if testConversation.turn.painter.toolBlock != nil {
 		t.Error("expected the block to close once every call had reported")
 	}
 
@@ -648,17 +692,17 @@ func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 		workspaceDir: workspaceDir,
 	}
 
-	rendered, detail, highlight := testConversation.newPicasso(false).describe(agent.Event{
+	shown := testConversation.newPainter(false).describe(agent.Event{
 		Name:      "read",
 		Arguments: `{"path":"/home/alice/project/cmd/oh/draw.go"}`,
 	})
 
 	wantHighlight := tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"}
-	if highlight != wantHighlight {
-		t.Fatalf("unexpected highlight %#v", highlight)
+	if shown.Highlight != wantHighlight {
+		t.Fatalf("unexpected highlight %#v", shown.Highlight)
 	}
-	if rendered != "cmd/oh/draw.go" || detail != "cmd/oh/draw.go" {
-		t.Errorf("got rendering %q and detail %q, want the workspace prefixes omitted", rendered, detail)
+	if shown.Subject != "cmd/oh/draw.go" || shown.Note != "cmd/oh/draw.go" {
+		t.Errorf("got rendering %q and detail %q, want the workspace prefixes omitted", shown.Subject, shown.Note)
 	}
 }
 
@@ -691,14 +735,16 @@ func TestRecordedCallPathsAreShortenedWithTheSameFunction(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
 	callPainter := &painter{workspaceDir: "/home/alice/project"}
-	subject, qualifier, _ := callPainter.describe(agent.Event{
-		Name:      "removed",
-		Subject:   "/home/alice/project/file.go",
-		Qualifier: "/home/alice/reference/file.go",
+	shown := callPainter.describe(agent.Event{
+		Name: "removed",
+		Rendering: agent.Rendering{
+			Subject: "/home/alice/project/file.go",
+			Note:    "/home/alice/reference/file.go",
+		},
 	})
 
-	if subject != "file.go" || qualifier != "~/reference/file.go" {
-		t.Errorf("got subject %q and qualifier %q, want both path prefixes shortened", subject, qualifier)
+	if shown.Subject != "file.go" || shown.Note != "~/reference/file.go" {
+		t.Errorf("got subject %q and qualifier %q, want both path prefixes shortened", shown.Subject, shown.Note)
 	}
 }
 
@@ -718,17 +764,17 @@ func TestARefusedCallIsDescribedAgainRatherThanFromTheRecord(t *testing.T) {
 		assistant: agent.New("", quietProvider{}, []tool.Tool{refusing}),
 	}
 
-	rendered, detail, highlight := testConversation.newPicasso(false).describe(agent.Event{
+	shown := testConversation.newPainter(false).describe(agent.Event{
 		Name:      "shout",
 		Arguments: `{"message":"oi"}`,
-		Subject:   "",
+		Rendering: agent.Rendering{Subject: ""}, // as a session saved before the call could be described recorded it
 	})
 
-	if detail != "" || highlight != (tool.Highlight{}) {
-		t.Fatalf("unexpected call description %q, %#v", detail, highlight)
+	if shown.Note != "" || shown.Highlight != (tool.Highlight{}) {
+		t.Fatalf("unexpected call description %q, %#v", shown.Note, shown.Highlight)
 	}
-	if rendered != "oi" {
-		t.Errorf("got %q, want the arguments described again from the record", rendered)
+	if shown.Subject != "oi" {
+		t.Errorf("got %q, want the arguments described again from the record", shown.Subject)
 	}
 }
 

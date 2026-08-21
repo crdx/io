@@ -6,7 +6,7 @@ import (
 )
 
 func TestTheConversationWrapsByCellsRatherThanCharacters(t *testing.T) {
-	screen := &Output{writer: &strings.Builder{}, isTerminal: true, columns: 5}
+	screen := &Output{writer: &strings.Builder{}, isTTY: true, columns: 5}
 
 	if got := screen.fit("日本語"); got != "日本\r\n語" {
 		t.Errorf("expected a break after the second character, got %q", got)
@@ -18,7 +18,7 @@ func TestTheConversationWrapsByCellsRatherThanCharacters(t *testing.T) {
 }
 
 func TestAnEscapeSequenceTakesNoRoomOnTheRow(t *testing.T) {
-	screen := &Output{writer: &strings.Builder{}, isTerminal: true, columns: 5}
+	screen := &Output{writer: &strings.Builder{}, isTTY: true, columns: 5}
 
 	if got := screen.fit("\x1b[31mabcde\x1b[0m"); got != "\x1b[31mabcde\x1b[0m" {
 		t.Errorf("expected the colour not to count against the width, got %q", got)
@@ -26,7 +26,7 @@ func TestAnEscapeSequenceTakesNoRoomOnTheRow(t *testing.T) {
 }
 
 func TestACharacterWiderThanTheTerminalStaysWhereItIs(t *testing.T) {
-	screen := &Output{writer: &strings.Builder{}, isTerminal: true, columns: 1}
+	screen := &Output{writer: &strings.Builder{}, isTTY: true, columns: 1}
 
 	if got := screen.fit("日"); got != "日" {
 		t.Errorf("expected no room to be made for it, got %q", got)

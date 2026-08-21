@@ -239,15 +239,19 @@ japanese
 
 Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
 
-## Interrupted
+## usage
 
 > 2001-01-01T00:00:13Z
+
+## Interrupted
+
+> 2001-01-01T00:00:14Z
 
 The turn was interrupted.
 
 ## Assistant
 
-> 2001-01-01T00:00:14Z
+> 2001-01-01T00:00:15Z
 
 ```
 That is all of the awkward ones.

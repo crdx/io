@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"strings"
 
 	"crdx.org/io/cmd/oh/spinner"
@@ -14,21 +15,19 @@ func banner(
 	effort string,
 	directory string,
 	tools []tool.Tool,
-	shell bool,
-	history bool,
-	background bool,
-	pending bool,
+	grantedCaps caps,
+	isPending bool,
 	frame int,
-	running bool,
+	isRunning bool,
 ) string {
 	activity := style.Withheld("✧·")
-	if running {
+	if isRunning {
 		activity = style.Spinner(spinner.Activity.Frame(frame))
 	}
 
 	parts := []string{
 		activity,
-		modes(tools, shell, history, background, pending),
+		modes(tools, grantedCaps, isPending),
 		style.Subtle(pathutil.Abbr(directory)),
 		style.Subtle(model),
 		style.Subtle(short(effort)),
@@ -105,39 +104,26 @@ func ruleTo(width int, label string, paint style.Style) string {
 		style.Rule(strings.Repeat("─", trailingPadding))
 }
 
-func modes(tools []tool.Tool, shell bool, history bool, background bool, pending bool) string {
-	reads, writes := separateTools(tools)
-
-	return offeredCapability(capRead.flag(), reads > 0, style.Read, pending) +
-		offeredCapability(capShell.flag(), shell, style.Exec, pending) +
-		offeredCapability(capWrite.flag(), writes > 0, style.Write, pending) +
-		offeredCapability(capGit.flag(), history, style.History, pending) +
-		offeredCapability(capBackground.flag(), background, style.Background, pending)
+func modes(tools []tool.Tool, grantedCaps caps, isPending bool) string {
+	return offeredCapability(capRead, anyToolReadsOnly(tools), style.Read, isPending) +
+		offeredCapability(capShell, grantedCaps.has(capShell), style.Exec, isPending) +
+		offeredCapability(capWrite, grantedCaps.has(capWrite), style.Write, isPending) +
+		offeredCapability(capGit, grantedCaps.has(capGit), style.History, isPending) +
+		offeredCapability(capBackground, grantedCaps.has(capBackground), style.Background, isPending)
 }
 
-func offeredCapability(flag string, given bool, paint style.Style, pending bool) string {
-	if !given {
+func offeredCapability(whichCap caps, isGranted bool, paint style.Style, isPending bool) string {
+	if !isGranted {
 		paint = style.Withheld
 	}
 
-	if pending {
-		return style.Pending(paint(flag))
+	if isPending {
+		return style.Pending(paint(whichCap.flag()))
 	}
 
-	return paint(flag)
+	return paint(whichCap.flag())
 }
 
-func separateTools(tools []tool.Tool) (int, int) {
-	var reads int
-	var writes int
-
-	for _, offeredTool := range tools {
-		if offeredTool.ReadOnly() {
-			reads++
-		} else {
-			writes++
-		}
-	}
-
-	return reads, writes
+func anyToolReadsOnly(tools []tool.Tool) bool {
+	return slices.ContainsFunc(tools, tool.Tool.ReadOnly)
 }

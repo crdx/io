@@ -99,11 +99,10 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 		}
 
 		models = append(models, agent.Model{
-			ID:      listed.ID,
-			Name:    listed.DisplayName,
-			Efforts: listed.Capabilities.Effort.levels(),
-			Context: listed.MaxInputTokens,
-			Output:  listed.MaxTokens,
+			ID:              listed.ID,
+			Name:            listed.DisplayName,
+			EffortLevels:    listed.Capabilities.Effort.levels(),
+			MaxOutputTokens: listed.MaxTokens,
 		})
 	}
 

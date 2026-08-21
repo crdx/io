@@ -342,16 +342,19 @@ func (self *conversation) restore(storedSession *store.Session) {
 	self.replay()
 }
 
-func (self *conversation) newPicasso(isLive bool) *painter {
+func (self *conversation) newPainter(isLive bool) *painter {
 	return &painter{
-		screen: self.screen, isLive: isLive, tools: self.assistant.Tool, shell: self.shell,
+		screen:       self.screen,
+		isLive:       isLive,
+		tools:        self.assistant.Tool,
+		shell:        self.shell,
 		workspaceDir: self.workspaceDir,
 	}
 }
 
 func (self *conversation) replay() {
 	self.screen.Synchronise(func() {
-		painter := self.newPicasso(self.turn.isRunning)
+		painter := self.newPainter(self.turn.isRunning)
 
 		for _, record := range self.transcript {
 			painter.draw(record)
@@ -390,7 +393,7 @@ func (self *conversation) start(prompt string) {
 		isRunning: true,
 		stop:      stop,
 		events:    make(chan turnEvent),
-		painter:   self.newPicasso(true),
+		painter:   self.newPainter(true),
 	}
 	self.screen.Progress(true)
 
@@ -466,7 +469,7 @@ func (self *conversation) noticePainter() *painter {
 		return self.turn.painter
 	}
 
-	return self.newPicasso(false)
+	return self.newPainter(false)
 }
 
 func (self *conversation) finish() {

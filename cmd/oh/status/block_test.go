@@ -124,10 +124,10 @@ func TestStatsUseTheirExpectedStyles(t *testing.T) {
 	}
 }
 
-func testBlock() (*Block, *strings.Builder) {
+func testBlock() (*ToolBlock, *strings.Builder) {
 	output := &strings.Builder{}
 
-	self := &Block{
+	self := &ToolBlock{
 		print:   func(text string) { output.WriteString(text) },
 		overlay: func(text string, _ int) { output.WriteString(text) },
 		isLive:  true,
@@ -323,7 +323,7 @@ func TestACallWorthWaitingForSaysHowLongItTook(t *testing.T) {
 }
 
 func TestRunningTimerUsesWholeSecondGranularity(t *testing.T) {
-	block := &Block{isRevealed: true}
+	block := &ToolBlock{isRevealed: true}
 	item := row{state: Running, startedAt: time.Now().Add(-5500 * time.Millisecond)}
 
 	if got := style.Plain(block.outcome(item)); got != "✦· 5s" {

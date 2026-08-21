@@ -73,14 +73,12 @@ func cloneState(items []json.RawMessage) []json.RawMessage {
 	return clonedItems
 }
 
-// Note adds something for the model to read before the next thing it is asked, without asking it
-// anything. Nothing is sent by this: it goes out with whatever turn comes next.
+// Note adds something for the model to read before the next thing it is asked.
 func (self *Agent) Note(text string) {
 	self.provider.AddUserMessage(text)
 }
 
-// Stream yields a prompt and every event through its final tool round. Context cancellation stops
-// provider requests but waits for tools already running.
+// Stream yields a prompt and every event through its final tool round.
 func (self *Agent) Stream(ctx context.Context, prompt string) iter.Seq2[Event, error] {
 	return func(yield func(Event, error) bool) {
 		self.provider.AddUserMessage(prompt)
@@ -104,7 +102,9 @@ func (self *Agent) Stream(ctx context.Context, prompt string) iter.Seq2[Event, e
 			case err != nil:
 				yield(Event{}, err)
 				return
-			case len(reply.Calls) == 0:
+			}
+
+			if len(reply.Calls) == 0 {
 				return
 			}
 
@@ -180,17 +180,16 @@ func (self *Agent) runCalls(
 
 		event := Event{
 			Kind:      Call,
-			Name:      rawCall.Name,
-			Arguments: rawCall.Arguments,
 			ID:        rawCall.ID,
-			ReadOnly:  self.readOnly(rawCall),
+			Arguments: rawCall.Arguments,
+			Name:      rawCall.Name,
+			Rendering: Rendering{
+				ReadOnly: self.readOnly(rawCall),
+			},
 		}
 
 		if parsedCall != nil {
-			event.Subject = parsedCall.Subject()
-			event.Qualifier = parsedCall.Qualifier()
-
-			event.Highlight = parsedCall.Highlight()
+			event.Describe(parsedCall)
 		} else {
 			event.Subject = self.describeUnparsedCall(rawCall)
 		}

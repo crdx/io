@@ -530,3 +530,27 @@ func TestANoteGoesAheadOfTheNextPrompt(t *testing.T) {
 		t.Errorf("expected %v, got %v", want, provider.messages)
 	}
 }
+
+func TestHowACallLookedIsWrittenFlatSoOldSessionsStillRead(t *testing.T) {
+	const stored = `{"kind":"call","id":"1","name":"write","arguments":"{}","render":"a","detail":"1 KB","highlight":{"kind":"syntax","value":"bash"},"read_only":true}`
+
+	const written = `{"render":"a","detail":"1 KB","highlight":{"kind":"syntax","value":"bash"},"read_only":true,"kind":"call","id":"1","name":"write","arguments":"{}"}`
+
+	var event agent.Event
+	if err := json.Unmarshal([]byte(stored), &event); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if event.Subject != "a" || event.Note != "1 KB" || !event.ReadOnly {
+		t.Errorf("expected a stored appearance to read back, got %#v", event.Rendering)
+	}
+
+	got, err := json.Marshal(event)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if string(got) != written {
+		t.Errorf("expected the event written as one flat object, got %s", got)
+	}
+}

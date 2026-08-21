@@ -29,8 +29,8 @@ func TestOnlyTheCachedListingDescribesAProvider(t *testing.T) {
 		Version: cacheVersion,
 		Providers: map[string]cachedModels{
 			anthropicProvider: {Models: []agent.Model{
-				{ID: "claude-sonnet-5", Efforts: []string{"low", "high"}, Output: 128_000},
-				{ID: "claude-haiku-4-5", Efforts: []string{"low"}, Output: 64_000},
+				{ID: "claude-sonnet-5", EffortLevels: []string{"low", "high"}, MaxOutputTokens: 128_000},
+				{ID: "claude-haiku-4-5", EffortLevels: []string{"low"}, MaxOutputTokens: 64_000},
 			}},
 		},
 	}
@@ -65,9 +65,9 @@ func TestAnEmptyCacheOffersNothingToSelect(t *testing.T) {
 
 func TestAModelTakingNoEffortLevelCannotBeSelected(t *testing.T) {
 	choices := choicesFor(codexProvider, []agent.Model{
-		{ID: "gpt-5.6-sol", Efforts: []string{"high"}, Output: 128_000},
+		{ID: "gpt-5.6-sol", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
 		{ID: "chatgpt-image-latest"},
-		{ID: "", Efforts: []string{"high"}, Output: 128_000},
+		{ID: "", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
 	})
 
 	if len(choices) != 1 || choices[0].model != "gpt-5.6-sol" {
@@ -77,7 +77,7 @@ func TestAModelTakingNoEffortLevelCannotBeSelected(t *testing.T) {
 
 func TestTheRegistryFillsInWhatAListingLeftOut(t *testing.T) {
 	listed := []agent.Model{
-		{ID: "claude-opus-5", Efforts: []string{"high"}},
+		{ID: "claude-opus-5", EffortLevels: []string{"high"}},
 		{ID: "claude-sonnet-5"},
 		{ID: "unknown-model"},
 	}
@@ -85,27 +85,27 @@ func TestTheRegistryFillsInWhatAListingLeftOut(t *testing.T) {
 	registered := map[string]agent.Model{
 		"claude-opus-5": {
 			ID: "claude-opus-5", Name: "Claude Opus 5",
-			Efforts: []string{"low", "medium", "high", "xhigh", "max"},
-			Context: 1_000_000, Output: 128_000,
+			EffortLevels:    []string{"low", "medium", "high", "xhigh", "max"},
+			MaxOutputTokens: 128_000,
 		},
 		"claude-sonnet-5": {
 			ID: "claude-sonnet-5", Name: "Claude Sonnet 5",
-			Efforts: []string{"low", "high"}, Context: 500_000,
+			EffortLevels: []string{"low", "high"},
 		},
 	}
 
 	supplemented := supplement(listed, registered)
 
-	if supplemented[0].Name != "Claude Opus 5" || supplemented[0].Context != 1_000_000 {
+	if supplemented[0].Name != "Claude Opus 5" || supplemented[0].MaxOutputTokens != 128_000 {
 		t.Errorf("expected the registry to fill in the gaps, got %+v", supplemented[0])
 	}
 
-	if !slices.Equal(supplemented[0].Efforts, []string{"high"}) {
-		t.Errorf("expected what the endpoint said to stand, got %v", supplemented[0].Efforts)
+	if !slices.Equal(supplemented[0].EffortLevels, []string{"high"}) {
+		t.Errorf("expected what the endpoint said to stand, got %v", supplemented[0].EffortLevels)
 	}
 
-	if !slices.Equal(supplemented[1].Efforts, []string{"low", "high"}) {
-		t.Errorf("expected the registry to supply the missing efforts, got %v", supplemented[1].Efforts)
+	if !slices.Equal(supplemented[1].EffortLevels, []string{"low", "high"}) {
+		t.Errorf("expected the registry to supply the missing efforts, got %v", supplemented[1].EffortLevels)
 	}
 
 	if supplemented[2].ID != "unknown-model" || supplemented[2].Name != "" {
@@ -118,7 +118,7 @@ func TestModelSelectionResolvesAgainstTheCachedListing(t *testing.T) {
 		Version: cacheVersion,
 		Providers: map[string]cachedModels{
 			anthropicProvider: {Models: []agent.Model{
-				{ID: "claude-sonnet-5", Efforts: []string{"low", "medium", "high"}, Output: 128_000},
+				{ID: "claude-sonnet-5", EffortLevels: []string{"low", "medium", "high"}, MaxOutputTokens: 128_000},
 			}},
 		},
 	})
@@ -138,8 +138,8 @@ func TestTheOutputCeilingComesFromTheChosenModel(t *testing.T) {
 		Version: cacheVersion,
 		Providers: map[string]cachedModels{
 			anthropicProvider: {Models: []agent.Model{
-				{ID: "claude-opus-5", Efforts: []string{"high"}, Output: 128_000},
-				{ID: "claude-haiku-4-5", Efforts: []string{"high"}, Output: 64_000},
+				{ID: "claude-opus-5", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+				{ID: "claude-haiku-4-5", EffortLevels: []string{"high"}, MaxOutputTokens: 64_000},
 			}},
 		},
 	})
@@ -170,7 +170,7 @@ func TestAnEffortACachedModelDoesNotTakeIsRefused(t *testing.T) {
 		Version: cacheVersion,
 		Providers: map[string]cachedModels{
 			anthropicProvider: {Models: []agent.Model{
-				{ID: "claude-haiku-4-5", Efforts: []string{"low", "medium"}, Output: 64_000},
+				{ID: "claude-haiku-4-5", EffortLevels: []string{"low", "medium"}, MaxOutputTokens: 64_000},
 			}},
 		},
 	})
