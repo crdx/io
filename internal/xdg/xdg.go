@@ -1,5 +1,5 @@
-// Package xdgutil resolves paths in XDG base directories.
-package xdgutil
+// Package xdg resolves paths in XDG base directories.
+package xdg
 
 import (
 	"os"

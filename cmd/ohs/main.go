@@ -11,7 +11,7 @@ import (
 	"crdx.org/duckopt/v2"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/ohs/picker"
-	"crdx.org/io/internal/xdgutil"
+	"crdx.org/io/internal/xdg"
 	"crdx.org/io/session"
 )
 
@@ -55,7 +55,7 @@ func run() error {
 }
 
 func sessionsDir() string {
-	return xdgutil.StatePath("org.crdx", "oh", "sessions")
+	return xdg.StatePath("org.crdx", "oh", "sessions")
 }
 
 func loadSessions(directory string) ([]*picker.Session, error) {

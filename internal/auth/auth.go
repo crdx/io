@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"crdx.org/io/internal/xdgutil"
+	"crdx.org/io/internal/xdg"
 )
 
 // Version is the current credentials format.
@@ -52,7 +52,7 @@ type OpenCodeGoCredentials struct {
 
 // Path is where provider credentials are stored.
 func Path() string {
-	return xdgutil.StatePath("org.crdx", "io", "auth.json")
+	return xdg.StatePath("org.crdx", "io", "auth.json")
 }
 
 // Load reads credentials from path.

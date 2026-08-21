@@ -8,7 +8,7 @@ import (
 
 	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/sandbox"
-	"crdx.org/io/internal/xdgutil"
+	"crdx.org/io/internal/xdg"
 )
 
 const (
@@ -40,11 +40,11 @@ func workspacePathIsShadowed(workspaceDir string) bool {
 }
 
 func stateDir(parts ...string) string {
-	return xdgutil.StatePath(append([]string{namespace, app}, parts...)...)
+	return xdg.StatePath(append([]string{namespace, app}, parts...)...)
 }
 
 func configDir(parts ...string) string {
-	return xdgutil.ConfigPath(append([]string{namespace, app}, parts...)...)
+	return xdg.ConfigPath(append([]string{namespace, app}, parts...)...)
 }
 
 func configPath() string {

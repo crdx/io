@@ -1,10 +1,10 @@
-package xdgutil_test
+package xdg_test
 
 import (
 	"path/filepath"
 	"testing"
 
-	"crdx.org/io/internal/xdgutil"
+	"crdx.org/io/internal/xdg"
 )
 
 func TestStatePathUsesAnAbsoluteXDGStateHome(t *testing.T) {
@@ -12,7 +12,7 @@ func TestStatePathUsesAnAbsoluteXDGStateHome(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", root)
 
 	want := filepath.Join(root, "somewhere", "state")
-	if got := xdgutil.StatePath("somewhere", "state"); got != want {
+	if got := xdg.StatePath("somewhere", "state"); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -23,7 +23,7 @@ func TestStatePathIgnoresARelativeXDGStateHome(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", filepath.Join("inside", "workspace"))
 
 	want := filepath.Join(home, ".local", "state", "somewhere")
-	if got := xdgutil.StatePath("somewhere"); got != want {
+	if got := xdg.StatePath("somewhere"); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -33,7 +33,7 @@ func TestConfigPathUsesAnAbsoluteXDGConfigHome(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", root)
 
 	want := filepath.Join(root, "somewhere", "SYSTEM.md")
-	if got := xdgutil.ConfigPath("somewhere", "SYSTEM.md"); got != want {
+	if got := xdg.ConfigPath("somewhere", "SYSTEM.md"); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -44,7 +44,7 @@ func TestConfigPathIgnoresARelativeXDGConfigHome(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join("inside", "workspace"))
 
 	want := filepath.Join(home, ".config", "somewhere")
-	if got := xdgutil.ConfigPath("somewhere"); got != want {
+	if got := xdg.ConfigPath("somewhere"); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

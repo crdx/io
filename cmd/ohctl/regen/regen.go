@@ -8,7 +8,7 @@ import (
 	"crdx.org/duckopt/v2"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/internal/xdgutil"
+	"crdx.org/io/internal/xdg"
 	"crdx.org/io/session"
 )
 
@@ -73,5 +73,5 @@ func storedNames(directory string) ([]string, error) {
 }
 
 func sessionsDir() string {
-	return xdgutil.StatePath("org.crdx", "oh", "sessions")
+	return xdg.StatePath("org.crdx", "oh", "sessions")
 }
