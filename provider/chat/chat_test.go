@@ -379,9 +379,6 @@ func TestConversationWithStreamingToolCall(t *testing.T) {
 	}
 }
 
-// A call is answered by the round that follows it, and a turn that failed never reaches one.
-// Keeping what the model said is therefore not the same as keeping what it asked for: a call left
-// in the conversation with nothing against it has the turn after it refused.
 func TestATurnThatFailedKeepsWhatItSaidAndNotWhatItAskedFor(t *testing.T) {
 	var bodies []string
 	server := scriptedServer(t, &bodies,

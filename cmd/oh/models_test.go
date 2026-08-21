@@ -232,9 +232,6 @@ func TestUpdatingWithNothingReachableSaysSo(t *testing.T) {
 	}
 }
 
-// TestUpdatingAgainstAStandInEndpointDescribesEveryProvider is the whole point of the simulator
-// serving a listing and a registry: a machine that has never logged in to anything can build a
-// model cache, and -m can then select against it.
 func TestUpdatingAgainstAStandInEndpointDescribesEveryProvider(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 

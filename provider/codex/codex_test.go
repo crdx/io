@@ -240,8 +240,6 @@ func TestAnImageReturnedByAToolIsSentForTheModelToInspect(t *testing.T) {
 	}
 }
 
-// TestNoOutputCeilingIsSent pins a deviation: the public Responses API takes max_output_tokens, and
-// this endpoint refuses any request carrying it. Sending it once made every turn fail.
 func TestNoOutputCeilingIsSent(t *testing.T) {
 	server, bodies := turns(t, events(answer("Hello."), completed))
 

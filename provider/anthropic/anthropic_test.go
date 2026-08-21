@@ -998,9 +998,6 @@ func hangingTurns(t *testing.T, scripted ...string) (*httptest.Server, *[]string
 	return server, &bodies
 }
 
-// A thought the screen showed and the conversation does not hold is a thought the model is never
-// told it had, and the display is then saying something that is not so. A turn cancelled after a
-// thought was sealed and closed is where the two can part.
 func TestACancelledTurnOrphansAThoughtTheScreenAlreadyShowed(t *testing.T) {
 	server, _ := hangingTurns(t, script([]string{
 		messageStart,

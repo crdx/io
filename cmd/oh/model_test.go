@@ -96,10 +96,6 @@ func listedModels() []modelChoice {
 	}
 }
 
-// TestACloserReadingOfAQueryWinsOutright pins the tiers a query is read in. Reading one as letters
-// in order and nothing else made opus-5 ambiguous between the model of that name and three others
-// it merely shares letters with: anthropic/claude-sonnet-5 holds o, p, u, s, -, and 5 in order,
-// spread across the provider name and the model behind it.
 func TestACloserReadingOfAQueryWinsOutright(t *testing.T) {
 	for query, want := range map[string]string{
 		"anthropic/claude-opus-5":  "claude-opus-5",            // named outright, provider and all
@@ -125,8 +121,6 @@ func TestACloserReadingOfAQueryWinsOutright(t *testing.T) {
 	}
 }
 
-// TestAQueryReadTheSameWayBySeveralModelsIsAmbiguous is the other half of the tiers: a tighter
-// reading settles a query, and a tier matching several models settles nothing.
 func TestAQueryReadTheSameWayBySeveralModelsIsAmbiguous(t *testing.T) {
 	_, err := matchModel("claude-opus", listedModels())
 	if err == nil {
@@ -138,10 +132,6 @@ func TestAQueryReadTheSameWayBySeveralModelsIsAmbiguous(t *testing.T) {
 	}
 }
 
-// TestAModelOffersOnlyTheEffortLevelsItTakes pins the levels reaching a selection, because they are
-// a property of the model and not of the provider it sits behind. Handing the provider's whole
-// vocabulary to one model let -m select gpt-5.6-sol@minimal, which resolved cleanly here and was
-// thrown out by the endpoint with a list of what it does take.
 func TestAModelOffersOnlyTheEffortLevelsItTakes(t *testing.T) {
 	useCachedModels(t)
 

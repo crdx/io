@@ -77,8 +77,6 @@ func TestResolveProviderSettingsRequiresAModel(t *testing.T) {
 	}
 }
 
-// Anthropic reads its credentials when a turn asks for a token, the way codex does, so connecting
-// on it succeeds even with nothing stored.
 func TestAnthropicConnectsBeforeItNeedsCredentials(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	client, err := connect(modelChoice{provider: anthropicProvider, model: "claude-opus-5", maxOutputTokens: 128_000}, "high", "")
