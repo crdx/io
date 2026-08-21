@@ -21,7 +21,7 @@ func window(rows []string, cursorRow int) Frame {
 	}
 }
 
-func layout(buffer *buffer, room int) ([]string, int, int) {
+func layout(buffer *Buffer, room int) ([]string, int, int) {
 	runes := buffer.Runes()
 	laid := width.Rows(string(runes), room)
 

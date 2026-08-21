@@ -104,11 +104,11 @@ func (self *Client) ObserveHTTP(observer req.Observer) {
 	}
 }
 
-// AddUserMessage appends a prompt to the conversation.
+// AddUserMessage appends a message to the conversation.
 //
 // https://platform.openai.com/docs/guides/conversation-state
-func (self *Client) AddUserMessage(prompt string) {
-	self.history = append(self.history, encodeItem(userMessage{Role: "user", Content: prompt}))
+func (self *Client) AddUserMessage(text string) {
+	self.history = append(self.history, encodeItem(userMessage{Role: "user", Content: text}))
 }
 
 // AddToolResults appends this turn's tool call results to the conversation.

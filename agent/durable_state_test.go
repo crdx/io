@@ -49,16 +49,16 @@ func TestASuccessfulCallEmitsItsDurableStateBeforeItsResult(t *testing.T) {
 	var state json.RawMessage
 	var stateKey string
 	for _, event := range events {
-		if event.Kind == agent.Result || event.Kind == agent.StateEvent {
+		if event.Kind == agent.ToolCallResult || event.Kind == agent.StateChange {
 			relevant = append(relevant, event.Kind)
 		}
-		if event.Kind == agent.StateEvent {
+		if event.Kind == agent.StateChange {
 			state = event.State
 			stateKey = event.Name
 		}
 	}
 
-	wantKinds := []agent.Kind{agent.StateEvent, agent.Result, agent.StateEvent, agent.Result}
+	wantKinds := []agent.Kind{agent.StateChange, agent.ToolCallResult, agent.StateChange, agent.ToolCallResult}
 	if !reflect.DeepEqual(relevant, wantKinds) {
 		t.Errorf("got event kinds %v, want %v", relevant, wantKinds)
 	}
@@ -84,7 +84,7 @@ func TestAFailedCallDoesNotEmitDurableState(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if event.Kind == agent.StateEvent {
+		if event.Kind == agent.StateChange {
 			t.Error("a failed call emitted durable state")
 		}
 	}
@@ -95,7 +95,7 @@ func TestStateCanBeRestoredIntoANewAgent(t *testing.T) {
 	var restored json.RawMessage
 	assistant := agent.New("", provider, []tool.Tool{statefulTool(&restored)})
 	events := []agent.Event{{
-		Kind:  agent.StateEvent,
+		Kind:  agent.StateChange,
 		Name:  "test_state",
 		State: json.RawMessage(`{"answer":42}`),
 	}}

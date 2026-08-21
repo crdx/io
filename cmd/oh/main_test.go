@@ -98,8 +98,8 @@ func TestASessionMayBeResumedWithAPromptBesideIt(t *testing.T) {
 		t.Error("expected the session to be resumed")
 	}
 
-	if parsedOptions.initialMessage != "carry on" {
-		t.Errorf("expected the prompt beside it, got %q", parsedOptions.initialMessage)
+	if parsedOptions.message != "carry on" {
+		t.Errorf("expected the prompt beside it, got %q", parsedOptions.message)
 	}
 }
 
@@ -118,8 +118,8 @@ func TestTheVersionIsAskedForOnItsOwn(t *testing.T) {
 func TestWhateverIsLeftOverIsTheFirstThingSaid(t *testing.T) {
 	parsedOptions := parseOptions(t, "why", "does", "the", "spinner", "stutter")
 
-	if parsedOptions.initialMessage != "why does the spinner stutter" {
-		t.Errorf("expected the words back as one, got %q", parsedOptions.initialMessage)
+	if parsedOptions.message != "why does the spinner stutter" {
+		t.Errorf("expected the words back as one, got %q", parsedOptions.message)
 	}
 
 	if parsedOptions.workspaceDir != "." {
@@ -134,8 +134,8 @@ func TestTheWorkingDirectoryIsNotTakenFromThePrompt(t *testing.T) {
 		t.Errorf("expected the directory to come from the option, got %q", parsedOptions.workspaceDir)
 	}
 
-	if parsedOptions.initialMessage != "read main.go" {
-		t.Errorf("expected the rest to be the prompt, got %q", parsedOptions.initialMessage)
+	if parsedOptions.message != "read main.go" {
+		t.Errorf("expected the rest to be the prompt, got %q", parsedOptions.message)
 	}
 }
 
@@ -146,8 +146,8 @@ func TestTheDefaultCapabilitiesAreEverythingButTheHistory(t *testing.T) {
 		t.Errorf("expected rxw, got %q", got)
 	}
 
-	if parsedOptions.initialMessage != "" {
-		t.Errorf("expected nothing said, got %q", parsedOptions.initialMessage)
+	if parsedOptions.message != "" {
+		t.Errorf("expected nothing said, got %q", parsedOptions.message)
 	}
 }
 
@@ -574,12 +574,12 @@ func TestTheLinterCacheBelongsToTheSessionRatherThanTheSharedHome(t *testing.T) 
 		t.Skipf("the sandbox cannot enforce the lint cache policy here: %v", err)
 	}
 
-	want := filepath.Join(sandbox.TmpDir, ".cache", goLangCiLintDir)
+	want := filepath.Join(sandbox.TmpDir, ".cache", goLintCacheDir)
 	if got := policy.SetEnv["GOLANGCI_LINT_CACHE"]; got != want {
 		t.Errorf("got GOLANGCI_LINT_CACHE %q, want %q", got, want)
 	}
 
-	if _, err := os.Stat(filepath.Join(tmp, ".cache", goLangCiLintDir)); err != nil {
+	if _, err := os.Stat(filepath.Join(tmp, ".cache", goLintCacheDir)); err != nil {
 		t.Errorf("the lint cache was not prepared in the session tmp dir: %v", err)
 	}
 }
@@ -856,7 +856,7 @@ func TestAResumedConversationMayBeGrantedSomethingElse(t *testing.T) {
 	}
 }
 
-func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *conversation {
+func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *Harness {
 	t.Helper()
 
 	log, err := store.Create(t.TempDir(), store.Meta{Model: "gpt"})
@@ -865,14 +865,14 @@ func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *conve
 	}
 
 	if hasSession {
-		if err := log.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
+		if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "hello"}); err != nil {
 			t.Fatal(err)
 		}
 	}
 
 	t.Cleanup(func() { _ = log.Close() })
 
-	return &conversation{
+	return &Harness{
 		log:          log,
 		workspaceDir: "/tmp/somewhere",
 		mode:         NewMode(currentCaps),

@@ -14,8 +14,8 @@ import (
 	"golang.org/x/term"
 )
 
-// Output serializes terminal drawing.
-type Output struct {
+// Screen serializes terminal drawing.
+type Screen struct {
 	writer io.Writer
 
 	mutex sync.Mutex // guards drawing
@@ -47,8 +47,8 @@ type Output struct {
 }
 
 // New builds the output over a writer, which is a terminal or is not.
-func New(writer io.Writer) *Output {
-	self := &Output{writer: writer, isTTY: tty.Is(writer)}
+func New(writer io.Writer) *Screen {
+	self := &Screen{writer: writer, isTTY: tty.Is(writer)}
 
 	self.measureTerminal()
 
@@ -56,8 +56,8 @@ func New(writer io.Writer) *Output {
 }
 
 // NewTerminalOfSize builds an Output that is drawn as a terminal of the given size.
-func NewTerminalOfSize(writer io.Writer, columns int, lines int) *Output {
-	return &Output{
+func NewTerminalOfSize(writer io.Writer, columns int, lines int) *Screen {
+	return &Screen{
 		writer:  writer,
 		isTTY:   true,
 		columns: columns,
@@ -67,13 +67,13 @@ func NewTerminalOfSize(writer io.Writer, columns int, lines int) *Output {
 
 // LinkPathsUnder marks the paths drawn text names as terminal hyperlinks, resolving the relative
 // ones against root. Nothing is linked until it is given one.
-func (self *Output) LinkPathsUnder(root string) *Output {
+func (self *Screen) LinkPathsUnder(root string) *Screen {
 	self.linkRoot = root
 	return self
 }
 
 // Status opens a tool-call block. Nothing else may print until it closes.
-func (self *Output) Status() *status.ToolBlock {
+func (self *Screen) Status() *status.ToolBlock {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -91,7 +91,7 @@ func (self *Output) Status() *status.ToolBlock {
 }
 
 // Line writes text on a line of its own after any streamed answer.
-func (self *Output) Line(text string) {
+func (self *Screen) Line(text string) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -106,7 +106,7 @@ func (self *Output) Line(text string) {
 }
 
 // Blank schedules one empty line before the next output. Repeated calls coalesce.
-func (self *Output) Blank() {
+func (self *Screen) Blank() {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -114,7 +114,7 @@ func (self *Output) Blank() {
 }
 
 // End finishes the turn on a complete line. Repeated calls are inert.
-func (self *Output) End() {
+func (self *Screen) End() {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -127,7 +127,7 @@ func (self *Output) End() {
 	}
 }
 
-func (self *Output) overlay(text string, column int) {
+func (self *Screen) overlay(text string, column int) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -135,7 +135,7 @@ func (self *Output) overlay(text string, column int) {
 	self.column = column
 }
 
-func (self *Output) drawRow(text string) {
+func (self *Screen) drawRow(text string) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -144,7 +144,7 @@ func (self *Output) drawRow(text string) {
 	self.write(text)
 }
 
-func (self *Output) measureTerminal() {
+func (self *Screen) measureTerminal() {
 	file, ok := self.writer.(*os.File)
 	if !ok {
 		return
@@ -156,11 +156,11 @@ func (self *Output) measureTerminal() {
 	}
 }
 
-func (self *Output) newline() {
+func (self *Screen) newline() {
 	self.emit("\n") // not write: a line owed is owed before this one ends, and paid after
 }
 
-func (self *Output) write(text string) {
+func (self *Screen) write(text string) {
 	if text == "" {
 		return
 	}
@@ -169,7 +169,7 @@ func (self *Output) write(text string) {
 	self.emit(text)
 }
 
-func (self *Output) emit(text string) {
+func (self *Screen) emit(text string) {
 	self.hasPrinted = true
 	fitted := self.fit(text)
 	self.advance(text)
@@ -179,7 +179,7 @@ func (self *Output) emit(text string) {
 
 const apart = 2
 
-func (self *Output) makeRoomFor(next Group) {
+func (self *Screen) makeRoomFor(next Group) {
 	if self.lastGroup != next {
 		self.isBlankOwed = self.hasPrinted
 	}
@@ -187,7 +187,7 @@ func (self *Output) makeRoomFor(next Group) {
 	self.lastGroup = next
 }
 
-func (self *Output) openPendingLine() {
+func (self *Screen) openPendingLine() {
 	if self.hasPendingText {
 		self.hasPendingText = false
 		self.newline()
@@ -202,7 +202,7 @@ func (self *Output) openPendingLine() {
 	}
 }
 
-func (self *Output) advance(text string) {
+func (self *Screen) advance(text string) {
 	if index := strings.LastIndex(text, "\n"); index >= 0 {
 		self.isMidLine = false
 		text = text[index+1:]
@@ -213,7 +213,7 @@ func (self *Output) advance(text string) {
 	}
 }
 
-func (self *Output) count(styledText string) {
+func (self *Screen) count(styledText string) {
 	text := style.Plain(styledText)
 	trailingNewlines := len(text) - len(strings.TrimRight(text, "\n"))
 
@@ -225,7 +225,7 @@ func (self *Output) count(styledText string) {
 	self.trailingNewlines = trailingNewlines
 }
 
-func (self *Output) at(text string) {
+func (self *Screen) at(text string) {
 	if len(self.shownFooter.rows) == 0 {
 		self.raw(text)
 		return
@@ -234,7 +234,7 @@ func (self *Output) at(text string) {
 	self.redraw(text)
 }
 
-func (self *Output) linkifyScrollback(text string) string {
+func (self *Screen) linkifyScrollback(text string) string {
 	if !self.isTTY || self.linkRoot == "" {
 		return text
 	}
@@ -242,7 +242,7 @@ func (self *Output) linkifyScrollback(text string) string {
 	return pathlink.Render(text, self.linkRoot)
 }
 
-func (self *Output) raw(text string) {
+func (self *Screen) raw(text string) {
 	if self.nestedUpdates > 0 {
 		self.synchronisedBytes.WriteString(text)
 		return
@@ -251,6 +251,6 @@ func (self *Output) raw(text string) {
 	self.writeRaw(text)
 }
 
-func (self *Output) writeRaw(text string) {
+func (self *Screen) writeRaw(text string) {
 	_, _ = io.WriteString(self.writer, text)
 }

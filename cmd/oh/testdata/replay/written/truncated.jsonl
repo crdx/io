@@ -1,3 +1,3 @@
-{"event":{"kind":"prompt","text":"show me the loop again"}}
-{"event":{"kind":"reasoning","text":"Writing it out."}}
-{"event":{"kind":"text","text":"Try this.\n\n```ba"}}
+{"event":{"kind":"user_message","text":"show me the loop again"}}
+{"event":{"kind":"model_reasoning","text":"Writing it out."}}
+{"event":{"kind":"model_message","text":"Try this.\n\n```ba"}}

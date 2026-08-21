@@ -1,4 +1,4 @@
-{"event":{"kind":"prompt","text":"show me how to count the go files"}}
-{"event":{"kind":"reasoning","text":"A loop over the listing is the shortest way to say it."}}
-{"event":{"kind":"text","text":"Try this.\n\n```bash\nfor NAME in $(ls *.go); do echo \"$NAME is quite a long line indeed\"; done\n```\n\nThat is all.\n"}}
-{"event":{"kind":"text","text":"And a table, which changes shape as its rows arrive:\n\n| Tool | What it does when it is asked to       |\n|------|----------------------------------------|\n| read | takes a file and hands it back to you  |\n| grep | walks the whole tree looking for a pattern |\n\nThat is the lot.\n"}}
+{"event":{"kind":"user_message","text":"show me how to count the go files"}}
+{"event":{"kind":"model_reasoning","text":"A loop over the listing is the shortest way to say it."}}
+{"event":{"kind":"model_message","text":"Try this.\n\n```bash\nfor NAME in $(ls *.go); do echo \"$NAME is quite a long line indeed\"; done\n```\n\nThat is all.\n"}}
+{"event":{"kind":"model_message","text":"And a table, which changes shape as its rows arrive:\n\n| Tool | What it does when it is asked to       |\n|------|----------------------------------------|\n| read | takes a file and hands it back to you  |\n| grep | walks the whole tree looking for a pattern |\n\nThat is the lot.\n"}}

@@ -16,7 +16,7 @@ import (
 )
 
 func TestEscapeAtRestDoesNotPanic(t *testing.T) {
-	self := &conversation{screen: output.New(&bytes.Buffer{})}
+	self := &Harness{screen: output.New(&bytes.Buffer{})}
 	input := line.NewInput(nil)
 
 	defer func() {
@@ -31,7 +31,7 @@ func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 }
 
 func TestTerminalFocusEventsAreTracked(t *testing.T) {
-	self := &conversation{terminalFocused: true}
+	self := &Harness{terminalFocused: true}
 	input := line.NewInput(nil)
 
 	self.apply(input, nil, key.Key{Code: key.FocusOut})
@@ -46,14 +46,14 @@ func TestTerminalFocusEventsAreTracked(t *testing.T) {
 }
 
 func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
-	self := &conversation{screen: output.New(&bytes.Buffer{})}
+	self := &Harness{screen: output.New(&bytes.Buffer{})}
 	input := line.NewInput(nil)
 
 	keypress := key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
 
 	stopped := false
 
-	self.turn = turn{isRunning: true, stop: func() { stopped = true }}
+	self.turn = Turn{isRunning: true, cancel: func() { stopped = true }}
 
 	if !self.apply(input, nil, keypress) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
@@ -63,7 +63,7 @@ func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 		t.Error("expected the turn to have been cancelled, as escape cancels it")
 	}
 
-	self.turn = turn{}
+	self.turn = Turn{}
 
 	if self.apply(input, nil, keypress) {
 		t.Error("expected ctrl+d at rest to be the way out")
@@ -94,12 +94,12 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 	}
 
 	for report := range self.turn.events {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
-	for _, record := range self.transcript {
-		if record.Kind == agent.Prompt && record.Text == "carry on" {
+	for _, record := range self.events {
+		if record.Kind == agent.UserMessage && record.Text == "carry on" {
 			return
 		}
 	}
@@ -108,7 +108,7 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 }
 
 func TestAcceptedInputCanImmediatelyBeRecalled(t *testing.T) {
-	self := &conversation{turn: turn{isRunning: true, stop: func() {}}}
+	self := &Harness{turn: Turn{isRunning: true, cancel: func() {}}}
 	history := line.NewHistory("", historyLimit)
 	input := line.NewInput(history)
 
@@ -140,7 +140,7 @@ func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.
 	}
 
 	for report := range interruptedEvents {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
@@ -149,20 +149,20 @@ func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.
 	}
 
 	for report := range self.turn.events {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
-	var prompts []string
-	for _, record := range self.transcript {
-		if record.Kind == agent.Prompt {
-			prompts = append(prompts, record.Text)
+	var messages []string
+	for _, record := range self.events {
+		if record.Kind == agent.UserMessage {
+			messages = append(messages, record.Text)
 		}
 	}
 
-	wantPrompts := []string{"first", nowReadOnly}
-	if !slices.Equal(prompts, wantPrompts) {
-		t.Errorf("got prompts %q, want %q", prompts, wantPrompts)
+	wantMessages := []string{"first", nowReadOnly}
+	if !slices.Equal(messages, wantMessages) {
+		t.Errorf("got messages %q, want %q", messages, wantMessages)
 	}
 }
 
@@ -186,7 +186,7 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *
 	}
 
 	for report := range interruptedEvents {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
@@ -195,22 +195,22 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *
 	}
 
 	for report := range self.turn.events {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
-	var prompts []string
+	var messages []string
 	var interrupted bool
-	for _, record := range self.transcript {
-		if record.Kind == agent.Prompt {
-			prompts = append(prompts, record.Text)
+	for _, record := range self.events {
+		if record.Kind == agent.UserMessage {
+			messages = append(messages, record.Text)
 		}
-		interrupted = interrupted || record.Kind == agent.Interrupted
+		interrupted = interrupted || record.Kind == agent.Interruption
 	}
 
-	wantPrompts := []string{"first", defaultGetOnWithItMessage}
-	if !slices.Equal(prompts, wantPrompts) {
-		t.Errorf("got prompts %q, want %q", prompts, wantPrompts)
+	wantMessages := []string{"first", defaultGetOnWithItMessage}
+	if !slices.Equal(messages, wantMessages) {
+		t.Errorf("got messages %q, want %q", messages, wantMessages)
 	}
 	if !interrupted {
 		t.Error("expected the replacement to record an interruption")
@@ -223,8 +223,8 @@ type eventsAfterCancellationProvider struct {
 
 func (eventsAfterCancellationProvider) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
 	for _, call := range []agent.Event{
-		{Kind: agent.Call, ID: "a", Name: "first", Rendering: agent.Rendering{Subject: "first"}},
-		{Kind: agent.Call, ID: "b", Name: "second", Rendering: agent.Rendering{Subject: "second"}},
+		{Kind: agent.ToolCallRequest, ID: "a", Name: "first", Rendering: agent.Rendering{Subject: "first"}},
+		{Kind: agent.ToolCallRequest, ID: "b", Name: "second", Rendering: agent.Rendering{Subject: "second"}},
 	} {
 		if !yield(call) {
 			return agent.Reply{}, nil
@@ -234,8 +234,8 @@ func (eventsAfterCancellationProvider) Send(ctx context.Context, yield agent.Yie
 	<-ctx.Done()
 
 	for _, result := range []agent.Event{
-		{Kind: agent.Result, ID: "a", Name: "first"},
-		{Kind: agent.Result, ID: "b", Name: "second"},
+		{Kind: agent.ToolCallResult, ID: "a", Name: "first"},
+		{Kind: agent.ToolCallResult, ID: "b", Name: "second"},
 	} {
 		if !yield(result) {
 			return agent.Reply{}, nil
@@ -253,11 +253,11 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 	}
 	defer func() { _ = log.Close() }()
 
-	self := &conversation{
-		assistant: agent.New("", eventsAfterCancellationProvider{}, nil),
-		screen:    output.New(&bytes.Buffer{}),
-		log:       log,
-		mode:      NewMode(capRead | capWrite),
+	self := &Harness{
+		agent:  agent.New("", eventsAfterCancellationProvider{}, nil),
+		screen: output.New(&bytes.Buffer{}),
+		log:    log,
+		mode:   NewMode(capRead | capWrite),
 	}
 
 	self.start("first")
@@ -266,22 +266,22 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 	calls := 0
 	for calls < 2 {
 		report := <-events
-		self.take(report)
-		if report.event.Kind == agent.Call {
+		self.takeTurn(report)
+		if report.event.Kind == agent.ToolCallRequest {
 			calls++
 		}
 	}
 
-	self.interrupt()
+	self.interruptTurn()
 
 	for report := range events {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
 	results := 0
-	for _, record := range self.transcript {
-		if record.Kind == agent.Result {
+	for _, record := range self.events {
+		if record.Kind == agent.ToolCallResult {
 			results++
 		}
 	}
@@ -292,8 +292,8 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 }
 
 func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) {
-	self := &conversation{
-		turn: turn{isRunning: true, events: make(chan turnEvent), stop: func() {}},
+	self := &Harness{
+		turn: Turn{isRunning: true, events: make(chan TurnEvent), cancel: func() {}},
 	}
 	history := line.NewHistory("", historyLimit)
 	input := line.NewInput(history)
@@ -312,8 +312,8 @@ func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) 
 	if !self.turn.isCancelled {
 		t.Fatal("expected the active turn to be marked cancelled")
 	}
-	if !self.queuedTurn.isReplacement || self.queuedTurn.prompt != "dfd" {
-		t.Fatalf("expected dfd to exist only as an invisible queued prompt, got queued=%t prompt=%q", self.queuedTurn.isReplacement, self.queuedTurn.prompt)
+	if !self.queuedTurn.isReplacement || self.queuedTurn.nextMessage != "dfd" {
+		t.Fatalf("expected dfd to exist only as an invisible queued prompt, got queued=%t prompt=%q", self.queuedTurn.isReplacement, self.queuedTurn.nextMessage)
 	}
 }
 
@@ -325,11 +325,11 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	}
 
 	var screenOutput bytes.Buffer
-	self := &conversation{
-		assistant: agent.New("", quietProvider{}, nil),
-		screen:    output.New(&screenOutput),
-		log:       log,
-		mode:      NewMode(capRead | capWrite),
+	self := &Harness{
+		agent:  agent.New("", quietProvider{}, nil),
+		screen: output.New(&screenOutput),
+		log:    log,
+		mode:   NewMode(capRead | capWrite),
 	}
 	history := line.NewHistory("", historyLimit)
 	input := line.NewInput(history)
@@ -343,7 +343,7 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	self.apply(input, history, key.Key{Code: key.Enter})
 
 	for report := range interruptedEvents {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
@@ -352,7 +352,7 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	}
 
 	for report := range self.turn.events {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
@@ -370,8 +370,8 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 
 	var sent, interruptionStored bool
 	for _, event := range storedSession.Events {
-		sent = sent || event.Kind == agent.Prompt && event.Text == "follow up"
-		interruptionStored = interruptionStored || event.Kind == agent.Interrupted
+		sent = sent || event.Kind == agent.UserMessage && event.Text == "follow up"
+		interruptionStored = interruptionStored || event.Kind == agent.Interruption
 	}
 
 	if !sent {
@@ -389,18 +389,18 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	self := &conversation{
-		assistant: agent.New("", quietProvider{}, nil),
-		screen:    output.New(&bytes.Buffer{}),
-		log:       log,
-		mode:      NewMode(capRead | capWrite),
+	self := &Harness{
+		agent:  agent.New("", quietProvider{}, nil),
+		screen: output.New(&bytes.Buffer{}),
+		log:    log,
+		mode:   NewMode(capRead | capWrite),
 	}
 
 	self.start("first")
-	self.interrupt()
+	self.interruptTurn()
 
 	for report := range self.turn.events {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
@@ -413,7 +413,7 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 	}
 
 	for _, event := range storedSession.Events {
-		if event.Kind == agent.Interrupted {
+		if event.Kind == agent.Interruption {
 			return
 		}
 	}
@@ -437,7 +437,7 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 	self.apply(input, history, key.Key{Code: key.Escape})
 
 	for report := range interruptedEvents {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
@@ -445,8 +445,8 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 		t.Error("expected the taken-back replacement to leave no turn running")
 	}
 
-	for _, record := range self.transcript {
-		if record.Kind == agent.Prompt && record.Text == "follow up" {
+	for _, record := range self.events {
+		if record.Kind == agent.UserMessage && record.Text == "follow up" {
 			t.Error("expected the taken-back replacement not to be sent")
 		}
 	}
@@ -457,14 +457,14 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 }
 
 func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
-	self := &conversation{screen: output.New(&bytes.Buffer{})}
+	self := &Harness{screen: output.New(&bytes.Buffer{})}
 	input := line.NewInput(nil)
 
 	input.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
 
 	stopped := false
 
-	self.turn = turn{isRunning: true, stop: func() { stopped = true }}
+	self.turn = Turn{isRunning: true, cancel: func() { stopped = true }}
 
 	if !self.apply(input, nil, key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
@@ -490,20 +490,20 @@ func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			self := &conversation{
-				turn: turn{isRunning: true, isCancelled: test.isCancelled, stop: func() {}},
+			self := &Harness{
+				turn: Turn{isRunning: true, isCancelled: test.isCancelled, cancel: func() {}},
 			}
-			self.queuedTurn.prompt = "later"
+			self.queuedTurn.nextMessage = "later"
 			self.queuedTurn.isReplacement = true
 			self.queuedTurn.isModeChange = true
 
 			self.cancelTurn()
 
-			kept := self.queuedTurn.isReplacement && self.queuedTurn.isModeChange && self.queuedTurn.prompt == "later"
+			kept := self.queuedTurn.isReplacement && self.queuedTurn.isModeChange && self.queuedTurn.nextMessage == "later"
 			if kept != test.wantKept {
 				t.Errorf(
 					"expected the queue kept=%t, got queued=%t mode=%t prompt=%q",
-					test.wantKept, self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.prompt,
+					test.wantKept, self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.nextMessage,
 				)
 			}
 		})
@@ -518,33 +518,33 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	}
 	defer func() { _ = log.Close() }()
 
-	self := &conversation{
-		assistant: agent.New("", quietProvider{}, nil),
-		screen:    output.New(&bytes.Buffer{}),
-		log:       log,
-		mode:      NewMode(capRead | capWrite),
+	self := &Harness{
+		agent:  agent.New("", quietProvider{}, nil),
+		screen: output.New(&bytes.Buffer{}),
+		log:    log,
+		mode:   NewMode(capRead | capWrite),
 	}
 
 	self.start("first")
 	self.toggleCapability(capWrite)
 	self.replaceTurn("second")
 
-	if !self.queuedTurn.isReplacement || !self.queuedTurn.isModeChange || self.queuedTurn.prompt != "second" {
+	if !self.queuedTurn.isReplacement || !self.queuedTurn.isModeChange || self.queuedTurn.nextMessage != "second" {
 		t.Fatalf(
 			"expected both a queued prompt and a queued mode change, got queued=%t mode=%t prompt=%q",
-			self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.prompt,
+			self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.nextMessage,
 		)
 	}
 
 	for report := range self.turn.events {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
-	if self.queuedTurn.isReplacement || self.queuedTurn.isModeChange || self.queuedTurn.prompt != "" {
+	if self.queuedTurn.isReplacement || self.queuedTurn.isModeChange || self.queuedTurn.nextMessage != "" {
 		t.Errorf(
 			"expected the whole queue emptied, got queued=%t mode=%t prompt=%q",
-			self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.prompt,
+			self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.nextMessage,
 		)
 	}
 
@@ -553,7 +553,7 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	}
 
 	for report := range self.turn.events {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 
@@ -562,15 +562,15 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var prompts []string
+	var messages []string
 	for _, event := range storedSession.Events {
-		if event.Kind == agent.Prompt {
-			prompts = append(prompts, event.Text)
+		if event.Kind == agent.UserMessage {
+			messages = append(messages, event.Text)
 		}
 	}
 
-	if !slices.Equal(prompts, []string{"first", "second"}) {
-		t.Errorf("expected the queued prompt alone to follow, got %q", prompts)
+	if !slices.Equal(messages, []string{"first", "second"}) {
+		t.Errorf("expected the queued prompt alone to follow, got %q", messages)
 	}
 }
 
@@ -582,18 +582,18 @@ func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
 	}
 	defer func() { _ = log.Close() }()
 
-	self := &conversation{
-		assistant: agent.New("", quietProvider{}, nil),
-		screen:    output.New(&bytes.Buffer{}),
-		log:       log,
-		mode:      NewMode(capRead | capWrite),
+	self := &Harness{
+		agent:  agent.New("", quietProvider{}, nil),
+		screen: output.New(&bytes.Buffer{}),
+		log:    log,
+		mode:   NewMode(capRead | capWrite),
 	}
 
 	self.start("first")
 	self.toggleCapability(capWrite)
 
 	for report := range self.turn.events {
-		self.take(report)
+		self.takeTurn(report)
 	}
 	self.finish()
 

@@ -234,7 +234,7 @@ func TestAWordWiderThanTheInputStillWraps(t *testing.T) {
 }
 
 func TestLeadingWhitespaceKeepsItsRoom(t *testing.T) {
-	frame := (&Input{buffer: &buffer{runes: []rune("    one")}}).Frame(3)
+	frame := (&Input{buffer: &Buffer{runes: []rune("    one")}}).Frame(3)
 	want := []string{"   ", "one"}
 
 	if !slices.Equal(frame.Rows, want) {
@@ -243,7 +243,7 @@ func TestLeadingWhitespaceKeepsItsRoom(t *testing.T) {
 }
 
 func TestAnOverlongWordStartsItsOwnRow(t *testing.T) {
-	frame := (&Input{buffer: &buffer{runes: []rune("one abcdef")}}).Frame(5)
+	frame := (&Input{buffer: &Buffer{runes: []rune("one abcdef")}}).Frame(5)
 	want := []string{"one", "abcde", "f"}
 
 	if !slices.Equal(frame.Rows, want) {
@@ -253,7 +253,7 @@ func TestAnOverlongWordStartsItsOwnRow(t *testing.T) {
 
 func TestTheCursorCrossesAHiddenWrappingSpace(t *testing.T) {
 	for cursor := 3; cursor <= 4; cursor++ {
-		frame := (&Input{buffer: &buffer{runes: []rune("one two"), cursor: cursor}}).Frame(4)
+		frame := (&Input{buffer: &Buffer{runes: []rune("one two"), cursor: cursor}}).Frame(4)
 
 		if frame.Row != 1 || frame.Column != 0 {
 			t.Errorf("at %d expected the next row, got %d,%d", cursor, frame.Row, frame.Column)
@@ -363,7 +363,7 @@ func TestTheStartOfATallLineIsDrawnWhenTheCursorIsThere(t *testing.T) {
 }
 
 func TestACharacterWiderThanTheLineStaysWhereItIs(t *testing.T) {
-	rows, cursorRow, cursorColumn := layout(&buffer{runes: []rune("日"), cursor: 1}, 1)
+	rows, cursorRow, cursorColumn := layout(&Buffer{runes: []rune("日"), cursor: 1}, 1)
 
 	if len(rows) != 2 || rows[0] != "日" {
 		t.Errorf("expected the character on the first row, got %q", rows)

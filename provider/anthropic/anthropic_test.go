@@ -573,7 +573,7 @@ func TestAThoughtIsReportedWholeAndStoredWithItsSeal(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if event.Kind == agent.Reasoning {
+		if event.Kind == agent.ModelReasoning {
 			reasoning = append(reasoning, event.Text)
 		}
 	}
@@ -642,7 +642,7 @@ func TestAnUnfinishedCallIsDroppedWhenTheTurnIsAbandoned(t *testing.T) {
 	client.AddUserMessage("what is the weather?")
 
 	reply, err := client.Send(t.Context(), func(event agent.Event) bool {
-		return event.Kind != agent.Text
+		return event.Kind != agent.ModelMessage
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -962,7 +962,7 @@ func TestACancelledTurnOrphansAThoughtTheScreenAlreadyShowed(t *testing.T) {
 	var shown []string
 
 	for event, err := range assistant.Stream(ctx, "what is the weather?") {
-		if event.Kind == agent.Reasoning {
+		if event.Kind == agent.ModelReasoning {
 			shown = append(shown, event.Text)
 			cancel()
 		}

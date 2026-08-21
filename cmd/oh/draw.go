@@ -18,28 +18,29 @@ import (
 
 const readTool = "read"
 
-type painter struct {
-	screen    *output.Output
-	isLive    bool              // whether drawing is happening as events arrive
+type Painter struct {
+	screen    *output.Screen
 	toolBlock *status.ToolBlock // the open block of tool calls
 	rows      map[string]int    // which row of the block a call is being shown on
 	answer    strings.Builder   // the answer so far, which is rendered again on every delta
 	reasoning strings.Builder   // the reasoning so far, which is rendered again on every delta
-	isStale   bool              // whether streamed prose outgrew what the screen can repair
 
-	tools        func(string) (tool.Tool, bool) // the tools a call may be rendered by
-	shell        string                         // what the shell tool was named, so a call to it is drawn as a prompt
+	isStale   bool // whether streamed prose outgrew what the screen can repair
+	isRunning bool // whether drawing is happening as events arrive
+
+	getTool      func(string) (tool.Tool, bool) // the tools a call may be rendered by
+	shellName    string                         // what the shell tool was named, so a call to it is drawn as a prompt
 	workspaceDir string                         // the prefix omitted from paths inside the workspace
 }
 
-func (self *painter) describe(event agent.Event) agent.Rendering {
+func (self *Painter) describe(event agent.Event) agent.Rendering {
 	shown := event.Rendering
 
 	if calledTool, known := self.calledTool(event.Name); known {
 		shown.ReadOnly = calledTool.ReadOnly()
 
-		if parsedCall, err := calledTool.Parse(event.Arguments); err == nil {
-			shown.Describe(parsedCall)
+		if parsedToolCall, err := calledTool.Parse(event.Arguments); err == nil {
+			shown.Describe(parsedToolCall)
 		} else {
 			shown.Subject = tool.DescribeUnparsedArguments(calledTool, event.Arguments)
 		}
@@ -51,7 +52,7 @@ func (self *painter) describe(event agent.Event) agent.Rendering {
 	return shown
 }
 
-func (self *painter) shortenPathPrefix(value string) string {
+func (self *Painter) shortenPathPrefix(value string) string {
 	if self.workspaceDir != "" {
 		for _, workspaceDir := range []string{self.workspaceDir, pathutil.Shorten(self.workspaceDir)} {
 			rest, hasPrefix := strings.CutPrefix(value, workspaceDir)
@@ -71,52 +72,52 @@ func (self *painter) shortenPathPrefix(value string) string {
 	return pathutil.Shorten(value)
 }
 
-func (self *painter) calledTool(name string) (tool.Tool, bool) {
-	if self.tools == nil {
+func (self *Painter) calledTool(name string) (tool.Tool, bool) {
+	if self.getTool == nil {
 		return nil, false
 	}
 
-	return self.tools(name)
+	return self.getTool(name)
 }
 
-func (self *painter) draw(event agent.Event) {
-	if event.Kind != agent.Reasoning && self.reasoning.Len() > 0 {
+func (self *Painter) drawEvent(event agent.Event) {
+	if event.Kind != agent.ModelReasoning && self.reasoning.Len() > 0 {
 		self.screen.End()
 		self.reasoning.Reset()
-		if event.Kind == agent.Text {
+		if event.Kind == agent.ModelMessage {
 			self.screen.Blank()
 		}
 	}
-	if event.Kind == agent.Reasoning && self.answer.Len() > 0 {
+	if event.Kind == agent.ModelReasoning && self.answer.Len() > 0 {
 		self.screen.End()
 	}
-	if event.Kind != agent.Text {
+	if event.Kind != agent.ModelMessage {
 		self.answer.Reset()
 	}
 
 	switch event.Kind {
-	case agent.Prompt:
+	case agent.UserMessage:
 		self.close(status.Cancelled)
 		self.screen.Blank()
 		self.screen.Line(renderSubmittedMessage(event.Text, self.screen.Columns()))
 		self.screen.End()
 		self.screen.Blank()
 
-	case agent.Reasoning:
+	case agent.ModelReasoning:
 		self.reasoning.WriteString(event.Text)
 		rows := renderReasoning(self.reasoning.String(), self.screen.Columns())
 		if !self.screen.DrawReasoning(rows) {
 			self.isStale = true
 		}
 
-	case agent.Text:
+	case agent.ModelMessage:
 		self.answer.WriteString(event.Text)
 
 		if !self.screen.DrawAnswer(markdown.Render(self.answer.String(), self.screen.Columns())) {
 			self.isStale = true
 		}
 
-	case agent.Call:
+	case agent.ToolCallRequest:
 		if self.toolBlock == nil {
 			self.toolBlock = self.screen.Status()
 			self.rows = map[string]int{}
@@ -124,7 +125,6 @@ func (self *painter) draw(event agent.Event) {
 
 		shown := self.describe(event)
 
-		// TODO(x): rewrite this mess
 		name := event.Name
 		var nameStyle style.Style
 		accent := ""
@@ -138,7 +138,7 @@ func (self *painter) draw(event agent.Event) {
 				shown.Highlight = tool.Highlight{}
 			}
 		}
-		if event.Name == self.shell {
+		if event.Name == self.shellName {
 			name = "$"
 			nameStyle = style.Shell
 		}
@@ -154,10 +154,10 @@ func (self *painter) draw(event agent.Event) {
 			AccentStyle: accentStyle,
 		})
 
-	case agent.Result:
+	case agent.ToolCallResult:
 		self.mark(event)
 
-	case agent.Startup, agent.Notice:
+	case agent.Startup, agent.HarnessMessage:
 		self.close(status.Cancelled)
 		self.screen.Line(self.render(event))
 
@@ -167,7 +167,7 @@ func (self *painter) draw(event agent.Event) {
 	}
 }
 
-func (self *painter) mark(event agent.Event) {
+func (self *Painter) mark(event agent.Event) {
 	if self.toolBlock == nil {
 		return
 	}
@@ -211,7 +211,7 @@ func renderSubmittedMessage(text string, columns int) string {
 	return strings.Join(rows, "\n")
 }
 
-func (self *painter) render(event agent.Event) string {
+func (self *Painter) render(event agent.Event) string {
 	if event.Kind == agent.Startup {
 		return renderStartupEvent(event)
 	}
@@ -243,7 +243,7 @@ func renderReasoning(thought string, columns int) []string {
 	return width.Wrap(style.Reasoning(stripped), columns)
 }
 
-func (self *painter) close(state status.State) {
+func (self *Painter) close(state status.State) {
 	if self.toolBlock != nil {
 		self.toolBlock.Close(state)
 		self.toolBlock = nil
@@ -251,7 +251,7 @@ func (self *painter) close(state status.State) {
 	}
 }
 
-func (self *painter) stop() {
+func (self *Painter) stop() {
 	if self.toolBlock != nil {
 		self.toolBlock.Stop()
 		self.toolBlock = nil

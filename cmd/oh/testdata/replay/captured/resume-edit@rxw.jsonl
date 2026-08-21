@@ -1,6 +1,6 @@
 {"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
-{"event":{"kind":"prompt","text":"have a look at that"}}
-{"event":{"kind":"text","text":"Editing the target without reading it again."}}
-{"event":{"kind":"call","id":"call_1","name":"edit","arguments":"{\"path\":\"target.txt\",\"old_text\":\"one\",\"new_text\":\"two\"}","render":"target.txt","highlight":{"kind":"focus","value":"target.txt"}}}
-{"event":{"kind":"result","text":"file has not been read yet — ensure you read target.txt before editing it","id":"call_1","name":"edit","failed":true,"took":0,"stats":{"kind":"output","lines":1,"bytes":75,"total_bytes":75}}}
-{"event":{"kind":"text","text":"The resumed edit completed."}}
+{"event":{"kind":"user_message","text":"have a look at that"}}
+{"event":{"kind":"model_message","text":"Editing the target without reading it again."}}
+{"event":{"kind":"tool_call_request","id":"call_1","name":"edit","arguments":"{\"path\":\"target.txt\",\"old_text\":\"one\",\"new_text\":\"two\"}","render":"target.txt","highlight":{"kind":"focus","value":"target.txt"}}}
+{"event":{"kind":"tool_call_result","text":"file has not been read yet — ensure you read target.txt before editing it","id":"call_1","name":"edit","failed":true,"took":0,"stats":{"kind":"output","lines":1,"bytes":75,"total_bytes":75}}}
+{"event":{"kind":"model_message","text":"The resumed edit completed."}}

@@ -29,8 +29,8 @@ func TestTheGlobalContextReplacesTheBuiltInOpeningButKeepsTheHarnessState(t *tes
 	if err := os.MkdirAll(configDir(), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	const configuredPrompt = "You are a deliberately custom assistant.\n"
-	if err := os.WriteFile(globalContextPath(), []byte(configuredPrompt), 0o600); err != nil {
+	const configuredGlobalContext = "You are a deliberately custom assistant.\n"
+	if err := os.WriteFile(globalContextPath(), []byte(configuredGlobalContext), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -38,7 +38,7 @@ func TestTheGlobalContextReplacesTheBuiltInOpeningButKeepsTheHarnessState(t *tes
 	if err != nil {
 		t.Fatal(err)
 	}
-	wantFiles := []contextFile{{name: "SYSTEM.md", body: configuredPrompt}}
+	wantFiles := []contextFile{{name: "SYSTEM.md", body: configuredGlobalContext}}
 	if !slices.Equal(contextFiles, wantFiles) {
 		t.Errorf("got context files %v, want %v", contextFiles, wantFiles)
 	}
@@ -85,8 +85,8 @@ func TestContextFilesFollowTheOrderTheyAreConcatenatedIn(t *testing.T) {
 	if err := os.MkdirAll(configDir(), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	const configuredPrompt = "You are a deliberately custom assistant.\n"
-	if err := os.WriteFile(globalContextPath(), []byte(configuredPrompt), 0o600); err != nil {
+	const configuredGlobalContext = "You are a deliberately custom assistant.\n"
+	if err := os.WriteFile(globalContextPath(), []byte(configuredGlobalContext), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	for name, body := range map[string]string{
@@ -103,7 +103,7 @@ func TestContextFilesFollowTheOrderTheyAreConcatenatedIn(t *testing.T) {
 		t.Fatal(err)
 	}
 	wantFiles := []contextFile{
-		{name: "SYSTEM.md", body: configuredPrompt},
+		{name: "SYSTEM.md", body: configuredGlobalContext},
 		{name: "AGENTS.md", body: "Run the broad checks."},
 		{name: "AGENTS.local.md", body: "Never grant more access."},
 	}

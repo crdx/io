@@ -21,36 +21,38 @@ import (
 	"crdx.org/io/internal/sandbox"
 )
 
-type conversation struct {
-	assistant          *agent.Agent
-	screen             *output.Output
-	log                *store.Writer
-	label              func(bool, int, bool) string // what the harness was started with
-	workspaceDir       string
-	mode               *Mode              // what the tools allow
-	processes          *sandbox.Processes // what background commands belong to this conversation
-	shell              string             // what the shell tool was named, taken from the tool itself
-	notifyTurnFinished func()             // how to say that the harness is waiting for input
+type Harness struct {
+	agent        *agent.Agent
+	screen       *output.Screen
+	log          *store.Writer
+	processes    *sandbox.Processes // what background commands belong to this conversation
+	workspaceDir string
+	mode         *Mode
+	shell        string
 
 	restart            []string   // the arguments to start again with, once the terminal has been given back
-	queuedTurn         queuedTurn // what an interrupted turn is to be followed by
+	queuedTurn         QueuedTurn // what an interrupted turn is to be followed by
 	getOnWithItMessage string     // what an empty double enter sends
 
-	turn            turn
-	storedItems     int           // how many provider items have been stored
-	terminalFocused bool          // whether the interactive terminal has focus
-	transcript      []agent.Event // the conversation as it was drawn, so it can be drawn again
+	turn            Turn
+	onTurnFinished  func()
+	flushBoundary   int  // how many provider items have been stored
+	terminalFocused bool // whether the interactive terminal has focus
+
+	events []agent.Event
+
+	label func(bool, int, bool) string // what the harness was started with
 }
 
 const historyLimit = 1000
 
-func (self *conversation) makeIntroductions(initialPrompt string) {
+func (self *Harness) makeIntroductions(initialMessage string) {
 	history := line.NewHistory(historyPath(), historyLimit)
 	input := line.NewInput(history)
 
 	restore, err := tty.Raw(os.Stdin, os.Stdout)
 	if err != nil {
-		self.plainly(history, initialPrompt)
+		self.plainly(history, initialMessage)
 		return
 	}
 
@@ -66,9 +68,9 @@ func (self *conversation) makeIntroductions(initialPrompt string) {
 
 	self.show(input)
 
-	if initialPrompt != "" {
-		history.Add(initialPrompt)
-		self.start(initialPrompt)
+	if initialMessage != "" {
+		history.Add(initialMessage)
+		self.start(initialMessage)
 	}
 
 	for {
@@ -84,7 +86,7 @@ func (self *conversation) makeIntroductions(initialPrompt string) {
 
 		case report, running := <-self.turn.events:
 			if running {
-				self.take(report)
+				self.takeTurn(report)
 			} else {
 				self.finish()
 			}
@@ -97,14 +99,14 @@ func (self *conversation) makeIntroductions(initialPrompt string) {
 			if !self.turn.isRunning {
 				continue
 			}
-			self.turn.frame++
+			self.turn.spinnerFrame++
 		}
 
 		self.show(input)
 	}
 }
 
-func (self *conversation) apply(input *line.Input, history *line.History, keypress key.Key) bool {
+func (self *Harness) apply(input *line.Input, history *line.History, keypress key.Key) bool {
 	switch keypress.Code {
 	case key.FocusIn:
 		self.terminalFocused = true
@@ -168,11 +170,11 @@ func (self *conversation) apply(input *line.Input, history *line.History, keypre
 	return true
 }
 
-func (self *conversation) acceptInput(input *line.Input, history *line.History) {
+func (self *Harness) acceptInput(input *line.Input, history *line.History) {
 	self.submitInput(input, history, strings.TrimSpace(input.Text()))
 }
 
-func (self *conversation) submitInput(input *line.Input, history *line.History, message string) {
+func (self *Harness) submitInput(input *line.Input, history *line.History, message string) {
 	history.Add(message)
 	input.Reset()
 
@@ -187,30 +189,30 @@ func (self *conversation) submitInput(input *line.Input, history *line.History, 
 	}
 }
 
-func (self *conversation) toggleCapability(whichCaps caps) {
+func (self *Harness) toggleCapability(whichCaps caps) {
 	self.mode.Toggle(whichCaps)
 
 	if self.turn.isRunning {
 		self.queuedTurn.isModeChange = true
-		self.interrupt()
+		self.interruptTurn()
 	}
 }
 
-func (self *conversation) cancelTurn() {
+func (self *Harness) cancelTurn() {
 	if self.turn.isCancelled {
-		self.queuedTurn = queuedTurn{}
+		self.queuedTurn = QueuedTurn{}
 	}
 
-	self.interrupt()
+	self.interruptTurn()
 }
 
-func (self *conversation) replaceTurn(prompt string) {
-	self.queuedTurn.prompt = prompt
+func (self *Harness) replaceTurn(message string) {
+	self.queuedTurn.nextMessage = message
 	self.queuedTurn.isReplacement = true
-	self.interrupt()
+	self.interruptTurn()
 }
 
-func (self *conversation) restartArguments() []string {
+func (self *Harness) restartArguments() []string {
 	var arguments []string
 
 	if self.log.Stored() {
@@ -222,24 +224,31 @@ func (self *conversation) restartArguments() []string {
 	return append(arguments, "--caps", self.mode.Current().Flags())
 }
 
-func (self *conversation) interrupt() {
+func (self *Harness) interruptTurn() {
 	if !self.turn.isRunning {
 		return
 	}
 
 	self.turn.isCancelled = true
-	self.turn.stop()
+	self.turn.cancel()
 }
 
-func (self *conversation) show(input *line.Input) {
-	width := self.screen.Columns()
-	frame := input.Frame(width)
+func (self *Harness) show(input *line.Input) {
+	columns := self.screen.Columns()
+	frame := input.Frame(columns)
 
-	framedRows := append([]string{rule(width, scrollLabel("↑", frame.Above), "")}, frame.Rows...)
-	inputLabel := self.label(input.IsPending(), self.turn.frame, self.turn.isRunning)
+	framedRows := append([]string{
+		rule(columns, scrollLabel("↑", frame.Above), ""),
+	}, frame.Rows...)
+
+	inputLabel := self.label(
+		input.IsPending(),
+		self.turn.spinnerFrame,
+		self.turn.isRunning,
+	)
 
 	framedRows = append(framedRows, bannerRule(
-		width,
+		columns,
 		inputLabel,
 		scrollLabel("↓", frame.Below),
 	))
@@ -255,16 +264,16 @@ func scrollLabel(arrow string, rows int) string {
 	return fmt.Sprintf("%s %d", arrow, rows)
 }
 
-func (self *conversation) plainly(history *line.History, initialPrompt string) {
-	if initialPrompt != "" {
-		self.ask(history, initialPrompt)
+func (self *Harness) plainly(history *line.History, initialMessage string) {
+	if initialMessage != "" {
+		self.ask(history, initialMessage)
 	}
 
 	reader := bufio.NewScanner(os.Stdin)
 
 	for reader.Scan() {
-		if typedInput := strings.TrimSpace(reader.Text()); typedInput != "" {
-			self.ask(history, typedInput)
+		if stdin := strings.TrimSpace(reader.Text()); stdin != "" {
+			self.ask(history, stdin)
 		}
 	}
 
@@ -273,12 +282,12 @@ func (self *conversation) plainly(history *line.History, initialPrompt string) {
 	}
 }
 
-func (self *conversation) ask(history *line.History, prompt string) {
-	history.Add(prompt)
-	self.start(prompt)
+func (self *Harness) ask(history *line.History, message string) {
+	history.Add(message)
+	self.start(message)
 
-	for report := range self.turn.events {
-		self.take(report)
+	for event := range self.turn.events {
+		self.takeTurn(event)
 	}
 
 	self.finish()
@@ -326,38 +335,38 @@ func settle(resizeSignals <-chan os.Signal) {
 	}
 }
 
-func (self *conversation) restore(storedSession *store.Session) {
-	if err := self.assistant.RestoreState(storedSession.Events); err != nil {
+func (self *Harness) restore(storedSession *store.Session) {
+	if err := self.agent.RestoreState(storedSession.Events); err != nil {
 		self.notifyFailure("the state could not be restored: " + err.Error())
 		return
 	}
-	if err := self.assistant.Load(storedSession.Items); err != nil {
+	if err := self.agent.Load(storedSession.Items); err != nil {
 		self.notifyFailure("the conversation could not be restored: " + err.Error())
 		return
 	}
-	self.storedItems = len(storedSession.Items)
 
-	self.transcript = append(self.transcript, storedSession.Events...)
+	self.flushBoundary = len(storedSession.Items)
+	self.events = append(self.events, storedSession.Events...)
 
 	self.replay()
 }
 
-func (self *conversation) newPainter(isLive bool) *painter {
-	return &painter{
+func (self *Harness) newPainter(isRunning bool) *Painter {
+	return &Painter{
 		screen:       self.screen,
-		isLive:       isLive,
-		tools:        self.assistant.Tool,
-		shell:        self.shell,
+		isRunning:    isRunning,
+		getTool:      self.agent.Tool,
+		shellName:    self.shell,
 		workspaceDir: self.workspaceDir,
 	}
 }
 
-func (self *conversation) replay() {
+func (self *Harness) replay() {
 	self.screen.Synchronise(func() {
 		painter := self.newPainter(self.turn.isRunning)
 
-		for _, record := range self.transcript {
-			painter.draw(record)
+		for _, event := range self.events {
+			painter.drawEvent(event)
 		}
 
 		if self.turn.isRunning {
@@ -371,7 +380,7 @@ func (self *conversation) replay() {
 	})
 }
 
-func (self *conversation) redraw() {
+func (self *Harness) redraw() {
 	if self.turn.isRunning {
 		self.turn.painter.stop()
 	}
@@ -382,29 +391,31 @@ func (self *conversation) redraw() {
 	})
 }
 
-func (self *conversation) start(prompt string) {
-	if notice := self.mode.Inject(); notice != "" {
-		self.assistant.Note(notice)
+func (self *Harness) start(message string) {
+	if fyi := self.mode.Inject(); fyi != "" {
+		self.agent.FYI(fyi)
 	}
 
-	turnContext, stop := context.WithCancel(context.Background())
+	turnCtx, cancel := context.WithCancel(context.Background())
 
-	self.turn = turn{
+	self.turn = Turn{
 		isRunning: true,
-		stop:      stop,
-		events:    make(chan turnEvent),
+		cancel:    cancel,
+		events:    make(chan TurnEvent),
 		painter:   self.newPainter(true),
 	}
-	self.screen.Progress(true)
 
-	events := self.turn.events
+	self.screen.ReportProgress(true)
 
 	go func() {
-		defer close(events)
-		defer stop()
+		defer close(self.turn.events)
+		defer cancel()
 
-		for event, err := range self.assistant.Stream(turnContext, prompt) {
-			events <- turnEvent{event: event, err: err}
+		for event, err := range self.agent.Stream(turnCtx, message) {
+			self.turn.events <- TurnEvent{
+				event: event,
+				err:   err,
+			}
 
 			if err != nil {
 				return
@@ -413,18 +424,18 @@ func (self *conversation) start(prompt string) {
 	}()
 }
 
-func (self *conversation) take(report turnEvent) {
-	if report.err != nil {
-		self.turn.failure = report.err
+func (self *Harness) takeTurn(turnEvent TurnEvent) {
+	if turnEvent.err != nil {
+		self.turn.err = turnEvent.err
 		return
 	}
 
-	self.recordEvent(report.event)
+	self.recordEvent(turnEvent.event)
 }
 
-func (self *conversation) recordEvent(event agent.Event) {
-	self.transcript = appendTranscript(self.transcript, event)
-	self.turn.painter.draw(event)
+func (self *Harness) recordEvent(event agent.Event) {
+	self.events = appendTranscript(self.events, event)
+	self.turn.painter.drawEvent(event)
 
 	if self.turn.painter.isStale {
 		self.redraw()
@@ -435,7 +446,7 @@ func (self *conversation) recordEvent(event agent.Event) {
 }
 
 func appendTranscript(transcript []agent.Event, event agent.Event) []agent.Event {
-	if (event.Kind == agent.Text || event.Kind == agent.Reasoning) && len(transcript) > 0 {
+	if (event.Kind == agent.ModelMessage || event.Kind == agent.ModelReasoning) && len(transcript) > 0 {
 		if last := &transcript[len(transcript)-1]; last.Kind == event.Kind {
 			last.Text += event.Text
 			return transcript
@@ -445,17 +456,17 @@ func appendTranscript(transcript []agent.Event, event agent.Event) []agent.Event
 	return append(transcript, event)
 }
 
-func (self *conversation) notifyFailure(text string) {
-	self.notify(agent.Event{Kind: agent.Notice, Text: text, Failed: true})
+func (self *Harness) notifyFailure(text string) {
+	self.notify(agent.Event{Kind: agent.HarnessMessage, Text: text, Failed: true})
 }
 
-func (self *conversation) notifyStopped(text string) {
-	self.notify(agent.Event{Kind: agent.Notice, Text: text})
+func (self *Harness) notifyStopped(text string) {
+	self.notify(agent.Event{Kind: agent.HarnessMessage, Text: text})
 }
 
-func (self *conversation) notify(event agent.Event) {
-	self.transcript = append(self.transcript, event)
-	self.noticePainter().draw(event)
+func (self *Harness) notify(event agent.Event) {
+	self.events = append(self.events, event)
+	self.noticePainter().drawEvent(event)
 
 	if self.turn.isRunning {
 		self.flush(&self.turn.pendingEvents)
@@ -464,7 +475,7 @@ func (self *conversation) notify(event agent.Event) {
 	_ = self.log.Event(event)
 }
 
-func (self *conversation) noticePainter() *painter {
+func (self *Harness) noticePainter() *Painter {
 	if self.turn.isRunning {
 		return self.turn.painter
 	}
@@ -472,13 +483,13 @@ func (self *conversation) noticePainter() *painter {
 	return self.newPainter(false)
 }
 
-func (self *conversation) finish() {
-	self.screen.Progress(false)
+func (self *Harness) finish() {
+	self.screen.ReportProgress(false)
 
 	if self.turn.isCancelled {
-		self.recordEvent(agent.Event{Kind: agent.Interrupted})
-	} else if self.turn.failure != nil {
-		self.recordEvent(agent.Event{Kind: agent.Failure, Text: self.turn.failure.Error()})
+		self.recordEvent(agent.Event{Kind: agent.Interruption})
+	} else if self.turn.err != nil {
+		self.recordEvent(agent.Event{Kind: agent.Failure, Text: self.turn.err.Error()})
 	}
 
 	self.flush(&self.turn.pendingEvents)
@@ -491,61 +502,61 @@ func (self *conversation) finish() {
 	self.turn.events = nil
 
 	if !self.turn.isCancelled && !self.queuedTurn.isReplacement && !self.queuedTurn.isModeChange &&
-		!self.terminalFocused && self.notifyTurnFinished != nil {
-		self.notifyTurnFinished()
+		!self.terminalFocused && self.onTurnFinished != nil {
+		self.onTurnFinished()
 	}
 
 	if self.queuedTurn.isReplacement {
-		prompt := self.queuedTurn.prompt
-		self.queuedTurn = queuedTurn{}
-		self.start(prompt)
+		message := self.queuedTurn.nextMessage
+		self.queuedTurn = QueuedTurn{}
+		self.start(message)
 	} else if self.queuedTurn.isModeChange {
-		self.queuedTurn = queuedTurn{}
-		if prompt := self.mode.Inject(); prompt != "" {
-			self.start(prompt)
+		self.queuedTurn = QueuedTurn{}
+		if message := self.mode.Inject(); message != "" {
+			self.start(message)
 		}
 	}
 }
 
-func (self *conversation) flush(pendingEvents *agent.Coalescer) {
+func (self *Harness) flush(pendingEvents *agent.Coalescer) {
 	self.writeSessionEvents(pendingEvents.Flush())
 }
 
-func (self *conversation) writeSessionEvents(events []agent.Event) {
+func (self *Harness) writeSessionEvents(events []agent.Event) {
 	for _, event := range events {
 		self.write(func() error { return self.log.Event(event) })
 	}
 }
 
-func (self *conversation) storeItems() {
-	items, err := self.assistant.Dump()
+func (self *Harness) storeItems() {
+	items, err := self.agent.Dump()
 	if err != nil {
 		self.notifyFailure("the conversation state could not be stored: " + err.Error())
 		return
 	}
 
-	if len(items) < self.storedItems {
+	if len(items) < self.flushBoundary {
 		self.notifyFailure("the provider replaced append-only conversation state")
 		return
 	}
 
-	for _, item := range items[self.storedItems:] {
+	for _, item := range items[self.flushBoundary:] {
 		if err := self.log.Item(item); err != nil {
 			self.notifyFailure("the conversation state could not be stored: " + err.Error())
 			return
 		}
 
-		self.storedItems++
+		self.flushBoundary++
 	}
 }
 
-func (self *conversation) write(record func() error) {
+func (self *Harness) write(record func() error) {
 	if err := record(); err != nil {
 		self.notifyFailure("the conversation could not be stored: " + err.Error())
 	}
 }
 
-func (self *conversation) showStorageWarnings() {
+func (self *Harness) showStorageWarnings() {
 	for _, err := range self.log.TakeWarnings() {
 		self.notifyFailure(err.Error())
 	}

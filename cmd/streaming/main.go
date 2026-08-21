@@ -40,19 +40,19 @@ func main() {
 	}
 }
 
-func answer(assistant *agent.Agent, prompt string) {
-	for event, err := range assistant.Stream(context.Background(), prompt) {
+func answer(assistant *agent.Agent, message string) {
+	for event, err := range assistant.Stream(context.Background(), message) {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "\n"+err.Error())
 			return
 		}
 
 		switch event.Kind {
-		case agent.Text:
+		case agent.ModelMessage:
 			fmt.Print(event.Text)
-		case agent.Call:
+		case agent.ToolCallRequest:
 			fmt.Printf("\n· %s %s\n", event.Name, event.Arguments)
-		case agent.Result:
+		case agent.ToolCallResult:
 			fmt.Printf("← %s\n", event.Text)
 		}
 	}

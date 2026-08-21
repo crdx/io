@@ -115,11 +115,11 @@ func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	}
 }
 
-// AddUserMessage appends a prompt to the conversation.
-func (self *Client) AddUserMessage(prompt string) {
+// AddUserMessage appends a message to the conversation.
+func (self *Client) AddUserMessage(text string) {
 	self.history = append(self.history, encodeItem(message{
 		Role:    "user",
-		Content: []json.RawMessage{encodeItem(textBlock{Type: "text", Text: prompt})},
+		Content: []json.RawMessage{encodeItem(textBlock{Type: "text", Text: text})},
 	}))
 }
 

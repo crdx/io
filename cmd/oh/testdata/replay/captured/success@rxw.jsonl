@@ -1,13 +1,13 @@
 {"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
-{"event":{"kind":"prompt","text":"have a look at that"}}
-{"event":{"kind":"reasoning","text":"Looking for where the prompt is drawn."}}
-{"event":{"kind":"text","text":"I'll have a look at how the editor draws its prompt."}}
-{"event":{"kind":"call","id":"call_2","name":"grep","arguments":"{\"pattern\":\"prompt\",\"glob\":\"*.go\"}","render":"prompt","detail":"*.go","highlight":{"kind":"syntax","value":"regexp"},"read_only":true}}
-{"event":{"kind":"state","id":"call_2","name":"file_read","state":{"files":[{"path":"cmd/oh/line/render.go","sha256":"20a0815670f99c0a9de02e0e66948fb6ee69dc76dcc0a8e4ffa8b81c110be52b"}]}}}
-{"event":{"kind":"result","text":"cmd/oh/line/render.go:4:\treturn \"the prompt\"","id":"call_2","name":"grep","took":0,"stats":{"kind":"output","lines":1,"bytes":44,"total_bytes":44}}}
-{"event":{"kind":"reasoning","text":"The prompt is drawn by the renderer, so that is the file to read."}}
-{"event":{"kind":"text","text":"Found it. Reading the renderer now."}}
-{"event":{"kind":"call","id":"call_4","name":"read","arguments":"{\"path\":\"cmd/oh/line/render.go\"}","render":"cmd/oh/line/render.go","highlight":{"kind":"focus","value":"render.go"},"read_only":true}}
-{"event":{"kind":"state","id":"call_4","name":"file_read","state":{"files":[{"path":"cmd/oh/line/render.go","sha256":"20a0815670f99c0a9de02e0e66948fb6ee69dc76dcc0a8e4ffa8b81c110be52b"}]}}}
-{"event":{"kind":"result","text":"package line\n\nfunc layout() string {\n\treturn \"the prompt\"\n}\n","id":"call_4","name":"read","took":0,"stats":{"kind":"read","lines":5,"bytes":60}}}
-{"event":{"kind":"text","text":"The prompt is drawn by `layout`, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.\n"}}
+{"event":{"kind":"user_message","text":"have a look at that"}}
+{"event":{"kind":"model_reasoning","text":"Looking for where the prompt is drawn."}}
+{"event":{"kind":"model_message","text":"I'll have a look at how the editor draws its prompt."}}
+{"event":{"kind":"tool_call_request","id":"call_2","name":"grep","arguments":"{\"pattern\":\"prompt\",\"glob\":\"*.go\"}","render":"prompt","detail":"*.go","highlight":{"kind":"syntax","value":"regexp"},"read_only":true}}
+{"event":{"kind":"state_change","id":"call_2","name":"file_read","state":{"files":[{"path":"cmd/oh/line/render.go","sha256":"20a0815670f99c0a9de02e0e66948fb6ee69dc76dcc0a8e4ffa8b81c110be52b"}]}}}
+{"event":{"kind":"tool_call_result","text":"cmd/oh/line/render.go:4:\treturn \"the prompt\"","id":"call_2","name":"grep","took":0,"stats":{"kind":"output","lines":1,"bytes":44,"total_bytes":44}}}
+{"event":{"kind":"model_reasoning","text":"The prompt is drawn by the renderer, so that is the file to read."}}
+{"event":{"kind":"model_message","text":"Found it. Reading the renderer now."}}
+{"event":{"kind":"tool_call_request","id":"call_4","name":"read","arguments":"{\"path\":\"cmd/oh/line/render.go\"}","render":"cmd/oh/line/render.go","highlight":{"kind":"focus","value":"render.go"},"read_only":true}}
+{"event":{"kind":"state_change","id":"call_4","name":"file_read","state":{"files":[{"path":"cmd/oh/line/render.go","sha256":"20a0815670f99c0a9de02e0e66948fb6ee69dc76dcc0a8e4ffa8b81c110be52b"}]}}}
+{"event":{"kind":"tool_call_result","text":"package line\n\nfunc layout() string {\n\treturn \"the prompt\"\n}\n","id":"call_4","name":"read","took":0,"stats":{"kind":"read","lines":5,"bytes":60}}}
+{"event":{"kind":"model_message","text":"The prompt is drawn by `layout`, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.\n"}}

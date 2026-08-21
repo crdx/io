@@ -10,10 +10,10 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
-func region() (*Output, *strings.Builder) {
+func region() (*Screen, *strings.Builder) {
 	screenOutput := &strings.Builder{}
 
-	return &Output{writer: screenOutput, isTTY: true, columns: 40, lines: 24}, screenOutput
+	return &Screen{writer: screenOutput, isTTY: true, columns: 40, lines: 24}, screenOutput
 }
 
 func TestOnlyTheAnswerIsLinked(t *testing.T) {

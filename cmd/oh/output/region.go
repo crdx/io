@@ -21,7 +21,7 @@ const (
 )
 
 // Synchronise holds every intermediate update back until draw has finished.
-func (self *Output) Synchronise(draw func()) {
+func (self *Screen) Synchronise(draw func()) {
 	if !self.isTTY {
 		draw()
 		return
@@ -46,7 +46,7 @@ func (self *Output) Synchronise(draw func()) {
 	draw()
 }
 
-func (self *Output) openFrame() string {
+func (self *Screen) openFrame() string {
 	if self.nestedUpdates > 0 {
 		return ""
 	}
@@ -54,7 +54,7 @@ func (self *Output) openFrame() string {
 	return beginFrame + hideCursor
 }
 
-func (self *Output) closeFrame() string {
+func (self *Screen) closeFrame() string {
 	if self.nestedUpdates > 0 {
 		return ""
 	}
@@ -73,7 +73,7 @@ type footer struct {
 
 // Footer draws the input under the conversation, and leaves the cursor sitting in it, which is
 // where someone typing expects to find it.
-func (self *Output) Footer(rows []string, cursorRow int, cursorColumn int) {
+func (self *Screen) Footer(rows []string, cursorRow int, cursorColumn int) {
 	if !self.isTTY {
 		return
 	}
@@ -91,8 +91,8 @@ func (self *Output) Footer(rows []string, cursorRow int, cursorColumn int) {
 	self.redraw("")
 }
 
-// Progress reports whether a turn is running through the terminal progress protocol.
-func (self *Output) Progress(isRunning bool) {
+// ReportProgress reports whether a turn is running through the terminal progress protocol.
+func (self *Screen) ReportProgress(isRunning bool) {
 	if !self.isTTY {
 		return
 	}
@@ -103,7 +103,7 @@ func (self *Output) Progress(isRunning bool) {
 	self.setProgress(isRunning)
 }
 
-func (self *Output) setProgress(isRunning bool) {
+func (self *Screen) setProgress(isRunning bool) {
 	if self.isProgressShown == isRunning {
 		return
 	}
@@ -119,7 +119,7 @@ func (self *Output) setProgress(isRunning bool) {
 
 // Release takes the input away. A kept conversation leaves the cursor on the line below it; an
 // unused one is erased so whatever ran the harness can reuse its line.
-func (self *Output) Release(shouldKeep bool) {
+func (self *Screen) Release(shouldKeep bool) {
 	if !self.isTTY {
 		return
 	}
@@ -148,7 +148,7 @@ func (self *Output) Release(shouldKeep bool) {
 }
 
 // Reset clears the terminal and forgets all drawing state for a full replay.
-func (self *Output) Reset() {
+func (self *Screen) Reset() {
 	if !self.isTTY {
 		return
 	}
@@ -174,7 +174,7 @@ func (self *Output) Reset() {
 	self.raw(clearScreen + clearScrollback)
 }
 
-func (self *Output) redraw(text string) {
+func (self *Screen) redraw(text string) {
 	var out strings.Builder
 
 	out.WriteString(self.openFrame())
@@ -193,7 +193,7 @@ func (self *Output) redraw(text string) {
 	self.raw(out.String())
 }
 
-func (self *Output) eraseInput() string {
+func (self *Screen) eraseInput() string {
 	shownFooter := self.shownFooter
 	self.shownFooter = footer{}
 
@@ -208,7 +208,7 @@ func (self *Output) eraseInput() string {
 	return "\r" + moveUp(shownFooter.cursorRow) + clearBelow + moveUp(shownFooter.separators) + moveRight(shownFooter.column)
 }
 
-func (self *Output) drawInput() string {
+func (self *Screen) drawInput() string {
 	if len(self.input.rows) == 0 {
 		return ""
 	}
@@ -259,7 +259,7 @@ func moveRight(columns int) string {
 }
 
 // Columns is how wide the terminal is, which is what a line is laid out against.
-func (self *Output) Columns() int {
+func (self *Screen) Columns() int {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 

@@ -240,7 +240,7 @@ func readJournal(t *testing.T, path string) []replayEntry {
 }
 
 type replayRig struct {
-	chat         *conversation
+	chat         *Harness
 	written      *strings.Builder
 	workspaceDir string
 }
@@ -248,7 +248,7 @@ type replayRig struct {
 func newReplayRig(t *testing.T, columns int) *replayRig {
 	t.Helper()
 
-	return newRig(t, func(written *strings.Builder, workspaceDir string) *output.Output {
+	return newRig(t, func(written *strings.Builder, workspaceDir string) *output.Screen {
 		return output.NewTerminalOfSize(written, columns, replayLines).LinkPathsUnder(workspaceDir)
 	})
 }
@@ -262,12 +262,12 @@ func newWideRig(t *testing.T) *replayRig {
 func newPlainRig(t *testing.T) *replayRig {
 	t.Helper()
 
-	return newRig(t, func(written *strings.Builder, workspaceDir string) *output.Output {
+	return newRig(t, func(written *strings.Builder, workspaceDir string) *output.Screen {
 		return output.New(written).LinkPathsUnder(workspaceDir)
 	})
 }
 
-func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Output) *replayRig {
+func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Screen) *replayRig {
 	t.Helper()
 
 	workspaceDir := layOutWorkspace(t)
@@ -281,8 +281,8 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Outp
 	return &replayRig{
 		written:      &written,
 		workspaceDir: workspaceDir,
-		chat: &conversation{
-			assistant:    agent.New("", quietProvider{}, toolbox.Rummage(files, file.NewSnapshots())),
+		chat: &Harness{
+			agent:        agent.New("", quietProvider{}, toolbox.Rummage(files, file.NewSnapshots())),
 			screen:       screen,
 			workspaceDir: workspaceDir,
 			shell:        "bash",
@@ -293,7 +293,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Outp
 
 func (self *replayRig) load(entries []replayEntry) {
 	for _, entry := range entries {
-		self.chat.transcript = append(self.chat.transcript, *entry.Event)
+		self.chat.events = append(self.chat.events, *entry.Event)
 	}
 }
 
@@ -324,13 +324,13 @@ func streamIntoBuffer(t *testing.T, entries []replayEntry) string {
 	t.Helper()
 
 	rig := newReplayRig(t, replayColumns)
-	rig.chat.turn = turn{isRunning: true, painter: rig.chat.newPainter(true)}
-	rig.chat.screen.Progress(true)
+	rig.chat.turn = Turn{isRunning: true, painter: rig.chat.newPainter(true)}
+	rig.chat.screen.ReportProgress(true)
 
 	for _, entry := range entries {
 		for _, delta := range splitIntoDeltas(*entry.Event) {
-			rig.chat.transcript = appendTranscript(rig.chat.transcript, delta)
-			rig.chat.turn.painter.draw(delta)
+			rig.chat.events = appendTranscript(rig.chat.events, delta)
+			rig.chat.turn.painter.drawEvent(delta)
 
 			if rig.chat.turn.painter.isStale {
 				rig.chat.redraw()
@@ -340,13 +340,13 @@ func streamIntoBuffer(t *testing.T, entries []replayEntry) string {
 
 	rig.chat.turn.painter.close(status.Done)
 	rig.chat.screen.End()
-	rig.chat.screen.Progress(false)
+	rig.chat.screen.ReportProgress(false)
 
 	return rig.drawn()
 }
 
 func splitIntoDeltas(event agent.Event) []agent.Event {
-	if event.Kind != agent.Text && event.Kind != agent.Reasoning {
+	if event.Kind != agent.ModelMessage && event.Kind != agent.ModelReasoning {
 		return []agent.Event{event}
 	}
 
@@ -420,8 +420,8 @@ func replayThenRelease(t *testing.T, openRig func(*testing.T) *replayRig, entrie
 	t.Helper()
 
 	rig := openRig(t)
-	rig.chat.screen.Progress(true)
-	rig.chat.screen.Progress(true)
+	rig.chat.screen.ReportProgress(true)
+	rig.chat.screen.ReportProgress(true)
 	rig.load(entries)
 	rig.chat.replay()
 	rig.chat.screen.Footer([]string{footerPrompt}, 0, len(footerPrompt))
@@ -456,7 +456,7 @@ const revealAndSomeFrames = 7 * time.Second
 
 func entriesUpToFirstCall(entries []replayEntry) []replayEntry {
 	for at, entry := range entries {
-		if entry.Event != nil && entry.Event.Kind == agent.Call {
+		if entry.Event != nil && entry.Event.Kind == agent.ToolCallRequest {
 			return entries[:at+1]
 		}
 	}

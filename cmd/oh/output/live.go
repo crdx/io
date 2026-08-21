@@ -18,17 +18,17 @@ type liveRegion struct {
 
 // DrawAnswer replaces the live region with the answer, and reports whether every changed row
 // remains on screen.
-func (self *Output) DrawAnswer(rows []string) bool {
+func (self *Screen) DrawAnswer(rows []string) bool {
 	return self.draw(rows, AnswerGroup)
 }
 
 // DrawReasoning replaces the live region with the thinking that led to an answer, which runs into
 // whatever is written next rather than standing apart from it.
-func (self *Output) DrawReasoning(rows []string) bool {
+func (self *Screen) DrawReasoning(rows []string) bool {
 	return self.draw(rows, AsideGroup)
 }
 
-func (self *Output) draw(newRows []string, next Group) bool {
+func (self *Screen) draw(newRows []string, next Group) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -78,7 +78,7 @@ func (self *Output) draw(newRows []string, next Group) bool {
 	return true
 }
 
-func (self *Output) seal() {
+func (self *Screen) seal() {
 	if len(self.liveRegion.rows) == 0 {
 		return
 	}
@@ -94,7 +94,7 @@ func (self *Output) seal() {
 	self.liveRegion = liveRegion{}
 }
 
-func (self *Output) begin(next Group) {
+func (self *Screen) begin(next Group) {
 	self.makeRoomFor(next)
 
 	if self.isMidLine {
@@ -104,7 +104,7 @@ func (self *Output) begin(next Group) {
 	self.openPendingLine()
 }
 
-func (self *Output) repaint(first int, rows []string, shouldLinkPaths bool) {
+func (self *Screen) repaint(first int, rows []string, shouldLinkPaths bool) {
 	var out strings.Builder
 
 	out.WriteString(self.openFrame())
@@ -149,7 +149,7 @@ func (self *Output) repaint(first int, rows []string, shouldLinkPaths bool) {
 	self.raw(out.String())
 }
 
-func (self *Output) settle(rows []string) {
+func (self *Screen) settle(rows []string) {
 	self.liveRegion.rows = rows
 	self.hasPrinted = true
 	self.isMidLine = true

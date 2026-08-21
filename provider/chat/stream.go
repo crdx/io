@@ -174,7 +174,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	}
 	if reasoning != "" {
 		self.reasoning += reasoning
-		if !yield(agent.Event{Kind: agent.Reasoning, Text: reasoning}) {
+		if !yield(agent.Event{Kind: agent.ModelReasoning, Text: reasoning}) {
 			return true, nil
 		}
 	}
@@ -184,7 +184,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	}
 	if said != "" {
 		self.content += said
-		if !yield(agent.Event{Kind: agent.Text, Text: said}) {
+		if !yield(agent.Event{Kind: agent.ModelMessage, Text: said}) {
 			return true, nil
 		}
 	}

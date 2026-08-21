@@ -21,7 +21,7 @@ func stream(events ...agent.Event) iter.Seq2[agent.Event, error] {
 }
 
 func text(content string) agent.Event {
-	return agent.Event{Kind: agent.Text, Text: content}
+	return agent.Event{Kind: agent.ModelMessage, Text: content}
 }
 
 func renderedEvents(events iter.Seq2[agent.Event, error]) ([]string, error) {
@@ -40,12 +40,12 @@ func renderedEvents(events iter.Seq2[agent.Event, error]) ([]string, error) {
 
 func TestCoalesceHoldsTextUntilSomethingElseHappens(t *testing.T) {
 	coalescedEvents := agent.Coalesce(stream(
-		agent.Event{Kind: agent.Reasoning, Text: "Need to "},
-		agent.Event{Kind: agent.Reasoning, Text: "look. "},
+		agent.Event{Kind: agent.ModelReasoning, Text: "Need to "},
+		agent.Event{Kind: agent.ModelReasoning, Text: "look. "},
 		text("Let me "),
 		text("look. "),
-		agent.Event{Kind: agent.Call, Name: "weather"},
-		agent.Event{Kind: agent.Result, Name: "weather", Text: "raining"},
+		agent.Event{Kind: agent.ToolCallRequest, Name: "weather"},
+		agent.Event{Kind: agent.ToolCallResult, Name: "weather", Text: "raining"},
 		text("It is "),
 		text("raining."),
 	))
@@ -56,11 +56,11 @@ func TestCoalesceHoldsTextUntilSomethingElseHappens(t *testing.T) {
 	}
 
 	expectedEvents := []string{
-		fmt.Sprintf("%s:Need to look. ", agent.Reasoning),
-		fmt.Sprintf("%s:Let me look. ", agent.Text),
-		fmt.Sprintf("%s:weather", agent.Call),
-		fmt.Sprintf("%s:weatherraining", agent.Result),
-		fmt.Sprintf("%s:It is raining.", agent.Text),
+		fmt.Sprintf("%s:Need to look. ", agent.ModelReasoning),
+		fmt.Sprintf("%s:Let me look. ", agent.ModelMessage),
+		fmt.Sprintf("%s:weather", agent.ToolCallRequest),
+		fmt.Sprintf("%s:weatherraining", agent.ToolCallResult),
+		fmt.Sprintf("%s:It is raining.", agent.ModelMessage),
 	}
 
 	if !slices.Equal(eventStrings, expectedEvents) {
@@ -82,7 +82,7 @@ func TestCoalesceLetsHeldTextGoBeforeAnError(t *testing.T) {
 		t.Fatalf("expected the failure, got %v", err)
 	}
 
-	if !slices.Equal(eventStrings, []string{fmt.Sprintf("%s:It is raining ", agent.Text)}) {
+	if !slices.Equal(eventStrings, []string{fmt.Sprintf("%s:It is raining ", agent.ModelMessage)}) {
 		t.Errorf("expected what was said to survive the error, got %v", eventStrings)
 	}
 }
@@ -91,7 +91,7 @@ func TestCoalesceStopsWhenTheCallerDoes(t *testing.T) {
 	var readEvents int
 
 	countedStream := func(yield func(agent.Event, error) bool) {
-		callEvent := agent.Event{Kind: agent.Call, Name: "weather"}
+		callEvent := agent.Event{Kind: agent.ToolCallRequest, Name: "weather"}
 
 		for _, event := range []agent.Event{text("It is raining "), callEvent, callEvent} {
 			readEvents++

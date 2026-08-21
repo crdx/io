@@ -49,8 +49,8 @@ func (self *History) Add(line string) {
 	self.save()
 }
 
-func (self *History) recall() *recall {
-	return &recall{lines: self.lines, index: len(self.lines)}
+func (self *History) recall() *Recall {
+	return &Recall{lines: self.lines, index: len(self.lines)}
 }
 
 func (self *History) trim() {
@@ -112,13 +112,17 @@ func unescape(line string) string {
 	return out.String()
 }
 
-type recall struct {
+// Recall is a walk back through the history and forward again, holding on to whatever was being
+// typed when the walk started so that walking all the way forward gives it back.
+type Recall struct {
 	lines        []string
 	index        int
 	pendingInput string
 }
 
-func (self *recall) Walk(current string, direction int) (string, bool) {
+// Walk steps one entry back through the history for a negative direction and one forward for a
+// positive one, reporting whether there was an entry that way to step to.
+func (self *Recall) Walk(current string, direction int) (string, bool) {
 	if direction < 0 {
 		if self.index == 0 {
 			return "", false

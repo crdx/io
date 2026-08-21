@@ -15,7 +15,7 @@ import (
 )
 
 // New builds an agent that talks to a provider with a set of tools on offer.
-func New(prompt string, provider Provider, tools []tool.Tool) *Agent {
+func New(systemPrompt string, provider Provider, tools []tool.Tool) *Agent {
 	definitions := make([]tool.Definition, len(tools))
 	availableTools := make(map[string]tool.Tool, len(tools))
 	stateOwners := map[string]tool.Tool{}
@@ -28,9 +28,9 @@ func New(prompt string, provider Provider, tools []tool.Tool) *Agent {
 		}
 	}
 
-	provider.Configure(prompt, definitions)
+	provider.Configure(systemPrompt, definitions)
 
-	return &Agent{provider: provider, tools: availableTools, stateOwners: stateOwners}
+	return &Agent{provider: provider, tools: availableTools, owners: stateOwners}
 }
 
 // Dump carries out the provider's append-only conversation state.
@@ -73,17 +73,17 @@ func cloneState(items []json.RawMessage) []json.RawMessage {
 	return clonedItems
 }
 
-// Note adds something for the model to read before the next thing it is asked.
-func (self *Agent) Note(text string) {
+// FYI adds something for the model to read before the next thing it is asked.
+func (self *Agent) FYI(text string) {
 	self.provider.AddUserMessage(text)
 }
 
-// Stream yields a prompt and every event through its final tool round.
-func (self *Agent) Stream(ctx context.Context, prompt string) iter.Seq2[Event, error] {
+// Stream yields a message and every event through its final tool round.
+func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Event, error] {
 	return func(yield func(Event, error) bool) {
-		self.provider.AddUserMessage(prompt)
+		self.provider.AddUserMessage(message)
 
-		if !yield(Event{Kind: Prompt, Text: prompt}, nil) {
+		if !yield(Event{Kind: UserMessage, Text: message}, nil) {
 			return
 		}
 
@@ -115,18 +115,18 @@ func (self *Agent) Stream(ctx context.Context, prompt string) iter.Seq2[Event, e
 	}
 }
 
-// Send answers one prompt the whole way through, and returns everything the model said.
-func (self *Agent) Send(ctx context.Context, prompt string) (string, error) {
+// Send answers one message the whole way through, and returns everything the model said.
+func (self *Agent) Send(ctx context.Context, message string) (string, error) {
 	var answer strings.Builder
 	var failure error
 
-	for event, err := range self.Stream(ctx, prompt) {
+	for event, err := range self.Stream(ctx, message) {
 		if err != nil {
 			failure = err
 			break
 		}
 
-		if event.Kind == Text {
+		if event.Kind == ModelMessage {
 			answer.WriteString(event.Text)
 		}
 	}
@@ -154,9 +154,9 @@ func (self *Agent) answer(results []ToolResult) {
 }
 
 type pendingCall struct {
-	rawCall    ToolCall  // the call as received
-	parsedCall tool.Call // the call ready to run
-	failure    string
+	rawToolCall    ToolCall  // the call as received
+	parsedToolCall tool.Call // the call ready to run
+	err            string
 }
 
 func (self *Agent) runCalls(
@@ -171,15 +171,15 @@ func (self *Agent) runCalls(
 	queuedCalls := make([]pendingCall, len(calls))
 
 	for i, rawCall := range calls {
-		parsedCall, failure := self.parseCall(rawCall)
+		parsedToolCall, err := self.parseCall(rawCall)
 		queuedCalls[i] = pendingCall{
-			rawCall:    rawCall,
-			parsedCall: parsedCall,
-			failure:    failure,
+			rawToolCall:    rawCall,
+			parsedToolCall: parsedToolCall,
+			err:            err,
 		}
 
 		event := Event{
-			Kind:      Call,
+			Kind:      ToolCallRequest,
 			ID:        rawCall.ID,
 			Arguments: rawCall.Arguments,
 			Name:      rawCall.Name,
@@ -188,10 +188,10 @@ func (self *Agent) runCalls(
 			},
 		}
 
-		if parsedCall != nil {
-			event.Describe(parsedCall)
+		if parsedToolCall != nil {
+			event.Describe(parsedToolCall)
 		} else {
-			event.Subject = self.describeUnparsedCall(rawCall)
+			event.Subject = self.describeUnparsedToolCall(rawCall)
 		}
 
 		if !yield(event, nil) {
@@ -211,12 +211,12 @@ func (self *Agent) runCalls(
 }
 
 func (self *Agent) batchEnd(queuedCalls []pendingCall, start int) int {
-	if !self.concurrent(queuedCalls[start].rawCall) {
+	if !self.concurrent(queuedCalls[start].rawToolCall) {
 		return start + 1
 	}
 
 	end := start + 1
-	for end < len(queuedCalls) && self.concurrent(queuedCalls[end].rawCall) {
+	for end < len(queuedCalls) && self.concurrent(queuedCalls[end].rawToolCall) {
 		end++
 	}
 
@@ -229,7 +229,7 @@ func (self *Agent) concurrent(call ToolCall) bool {
 	return found && calledTool.Concurrent()
 }
 
-func (self *Agent) describeUnparsedCall(call ToolCall) string {
+func (self *Agent) describeUnparsedToolCall(call ToolCall) string {
 	calledTool, found := self.tools[call.Name]
 	if !found {
 		return strutil.FirstLine(call.Arguments)
@@ -260,19 +260,19 @@ func (self *Agent) runBatch(
 		go func() {
 			startedAt := time.Now()
 
-			executionResult := tool.Result{Output: item.failure}
+			executionResult := tool.Result{Output: item.err}
 			ok := false
-			if item.parsedCall != nil {
-				executionResult, ok = exec(ctx, item.parsedCall)
+			if item.parsedToolCall != nil {
+				executionResult, ok = exec(ctx, item.parsedToolCall)
 			}
 
 			results[i] = ToolResult{
-				ID:     item.rawCall.ID,
+				ID:     item.rawToolCall.ID,
 				Output: executionResult.Output,
 				Image:  executionResult.Image,
 			}
 
-			if item.parsedCall != nil && executionResult.Stats.Kind == "" {
+			if item.parsedToolCall != nil && executionResult.Stats.Kind == "" {
 				executionResult.Stats = tool.OutputStats(executionResult.Output)
 			}
 
@@ -282,9 +282,9 @@ func (self *Agent) runBatch(
 			}
 
 			completion := completedCall{result: Event{
-				Kind:   Result,
-				ID:     item.rawCall.ID,
-				Name:   item.rawCall.Name,
+				Kind:   ToolCallResult,
+				ID:     item.rawToolCall.ID,
+				Name:   item.rawToolCall.Name,
 				Text:   executionResult.Output,
 				Failed: !ok,
 				Took:   time.Since(startedAt),
@@ -292,9 +292,9 @@ func (self *Agent) runBatch(
 			}}
 			if ok && len(executionResult.State) > 0 {
 				completion.state = Event{
-					Kind:  StateEvent,
-					ID:    item.rawCall.ID,
-					Name:  self.tools[item.rawCall.Name].StateKey(),
+					Kind:  StateChange,
+					ID:    item.rawToolCall.ID,
+					Name:  self.tools[item.rawToolCall.Name].StateKey(),
 					State: executionResult.State,
 				}
 			}
@@ -330,7 +330,7 @@ func (self *Agent) runBatch(
 // RestoreState replays durable state transitions owned by the available tools.
 func (self *Agent) RestoreState(events []Event) error {
 	for _, event := range events {
-		if event.Kind != StateEvent {
+		if event.Kind != StateChange {
 			continue
 		}
 		if err := self.restoreState(event); err != nil {
@@ -342,7 +342,7 @@ func (self *Agent) RestoreState(events []Event) error {
 }
 
 func (self *Agent) restoreState(event Event) error {
-	calledTool, known := self.stateOwners[event.Name]
+	calledTool, known := self.owners[event.Name]
 	if !known {
 		return nil
 	}
@@ -365,12 +365,12 @@ func (self *Agent) parseCall(call ToolCall) (tool.Call, string) {
 		return nil, fmt.Sprintf("there is no tool called %q", call.Name)
 	}
 
-	parsedCall, err := calledTool.Parse(call.Arguments)
+	parsedToolCall, err := calledTool.Parse(call.Arguments)
 	if err != nil {
 		return nil, err.Error()
 	}
 
-	return parsedCall, ""
+	return parsedToolCall, ""
 }
 
 func exec(ctx context.Context, call tool.Call) (tool.Result, bool) {

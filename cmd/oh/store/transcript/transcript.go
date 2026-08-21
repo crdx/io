@@ -64,9 +64,9 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 	fmt.Fprintf(&output, "## %s\n\n> %s\n\n", title(event.Kind), at.UTC().Format(time.RFC3339Nano))
 
 	switch event.Kind {
-	case agent.Prompt, agent.Reasoning, agent.Text:
+	case agent.UserMessage, agent.ModelReasoning, agent.ModelMessage:
 		writeFence(&output, event.Text, "")
-	case agent.Call:
+	case agent.ToolCallRequest:
 		writeField(&output, "ID", event.ID)
 		writeField(&output, "Name", event.Name)
 		writeBool(&output, "Read only", event.ReadOnly)
@@ -83,7 +83,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			output.WriteString("**Qualifier**\n\n")
 			writeFence(&output, event.Note, "")
 		}
-	case agent.Result:
+	case agent.ToolCallResult:
 		writeField(&output, "ID", event.ID)
 		writeField(&output, "Name", event.Name)
 		writeBool(&output, "Failed", event.Failed)
@@ -103,12 +103,12 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		if event.Text != "" {
 			writeToolResultPreview(&output, event.Text, highlightSyntax(event.Highlight))
 		}
-	case agent.StateEvent:
+	case agent.StateChange:
 		writeField(&output, "ID", event.ID)
 		writeField(&output, "Name", event.Name)
 		output.WriteString("**State**\n\n")
 		writeFence(&output, string(event.State), "json")
-	case agent.Interrupted:
+	case agent.Interruption:
 		output.WriteString("The turn was interrupted.\n\n")
 	case agent.Failure:
 		writeFence(&output, event.Text, "")
@@ -146,19 +146,23 @@ func (self *Recorder) Close() error {
 
 func title(kind agent.Kind) string {
 	switch kind {
-	case agent.Prompt:
+	case agent.Startup:
+		return "Startup"
+	case agent.UserMessage:
 		return "User"
-	case agent.Reasoning:
+	case agent.HarnessMessage:
+		return "Notice"
+	case agent.ModelReasoning:
 		return "Reasoning"
-	case agent.Text:
+	case agent.ModelMessage:
 		return "Assistant"
-	case agent.Call:
+	case agent.ToolCallRequest:
 		return "Tool call"
-	case agent.Result:
+	case agent.ToolCallResult:
 		return "Tool result"
-	case agent.StateEvent:
+	case agent.StateChange:
 		return "State"
-	case agent.Interrupted:
+	case agent.Interruption:
 		return "Interrupted"
 	case agent.Failure:
 		return "Failure"

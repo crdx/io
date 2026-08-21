@@ -14,7 +14,7 @@ type Coalescer struct {
 
 // Add takes an event and returns the complete events it makes available.
 func (self *Coalescer) Add(event Event) []Event {
-	if event.Kind == Text || event.Kind == Reasoning {
+	if event.Kind == ModelMessage || event.Kind == ModelReasoning {
 		var out []Event
 		if self.kind != "" && self.kind != event.Kind {
 			out = self.Flush()

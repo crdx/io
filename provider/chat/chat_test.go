@@ -344,7 +344,7 @@ func TestConversationWithStreamingToolCall(t *testing.T) {
 	if len(reply.Calls) != 1 || reply.Calls[0] != wantCall {
 		t.Fatalf("got calls %#v", reply.Calls)
 	}
-	if len(events) != 1 || events[0].Kind != agent.Reasoning || events[0].Text != "check" {
+	if len(events) != 1 || events[0].Kind != agent.ModelReasoning || events[0].Text != "check" {
 		t.Fatalf("got events %#v", events)
 	}
 
@@ -356,7 +356,7 @@ func TestConversationWithStreamingToolCall(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	if len(events) != 1 || events[0].Kind != agent.Text || events[0].Text != "done" {
+	if len(events) != 1 || events[0].Kind != agent.ModelMessage || events[0].Text != "done" {
 		t.Fatalf("got events %#v", events)
 	}
 

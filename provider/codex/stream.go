@@ -155,7 +155,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 
 	switch message.Type {
 	case "response.output_text.delta":
-		if !yield(agent.Event{Kind: agent.Text, Text: message.Delta}) {
+		if !yield(agent.Event{Kind: agent.ModelMessage, Text: message.Delta}) {
 			return true, nil
 		}
 
@@ -163,21 +163,21 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		if message.Part != nil && message.Part.Text != "" {
 			self.isSummarised = true
 
-			if !yield(agent.Event{Kind: agent.Reasoning, Text: message.Part.Text}) {
+			if !yield(agent.Event{Kind: agent.ModelReasoning, Text: message.Part.Text}) {
 				return true, nil
 			}
 		}
 
 	case "response.reasoning_text.delta":
 		if message.Delta != "" && !self.isSummarised {
-			if !yield(agent.Event{Kind: agent.Reasoning, Text: message.Delta}) {
+			if !yield(agent.Event{Kind: agent.ModelReasoning, Text: message.Delta}) {
 				return true, nil
 			}
 		}
 
 	case "response.refusal.delta":
 		if message.Delta != "" {
-			if !yield(agent.Event{Kind: agent.Text, Text: message.Delta}) {
+			if !yield(agent.Event{Kind: agent.ModelMessage, Text: message.Delta}) {
 				return true, nil
 			}
 		}

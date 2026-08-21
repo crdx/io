@@ -243,14 +243,23 @@ func processTree(pid int, seenPIDs map[int]bool) string {
 	return formatProcessTree(processName(pid), branches)
 }
 
+const unknownProcessName = "?"
+
 func formatProcessTree(name string, branches []string) string {
-	switch {
-	case name == "":
-		return strings.Join(branches, ", ")
-	case len(branches) == 0:
+	if name == "" {
+		if len(branches) == 0 {
+			return ""
+		}
+		name = unknownProcessName
+	}
+
+	switch len(branches) {
+	case 0:
 		return name
+	case 1:
+		return name + " → " + branches[0]
 	default:
-		return name + " → " + strings.Join(branches, ", ")
+		return name + " → (" + strings.Join(branches, ", ") + ")"
 	}
 }
 

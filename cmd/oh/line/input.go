@@ -26,12 +26,12 @@ const (
 
 // Input edits a line and walks its history.
 type Input struct {
-	buffer         *buffer
+	buffer         *Buffer
 	history        *History
-	recall         *recall
+	recall         *Recall
 	isPasting      bool
 	pasteStart     int              // where the current paste begins in the buffer
-	isPrefixed     bool             // whether ctrl+x went before, so the next key names a mode
+	inChord        bool             // whether ctrl+x went before, so the next key names a mode
 	isEnterPending bool             // whether one enter awaits a second
 	continueAfter  time.Time        // when another double enter may continue
 	currentTime    func() time.Time // supplies the time for the continuation cool-off
@@ -51,9 +51,9 @@ func NewInput(history *History) *Input {
 
 // Reset empties the line and starts the walk through history again.
 func (self *Input) Reset() {
-	self.buffer = &buffer{}
+	self.buffer = &Buffer{}
 	self.isPasting = false
-	self.isPrefixed = false
+	self.inChord = false
 	self.isEnterPending = false
 	self.wasRunning = false
 
@@ -69,7 +69,7 @@ func (self *Input) Text() string {
 
 // IsPending reports whether a mode prefix awaits its command key.
 func (self *Input) IsPending() bool {
-	return self.isPrefixed
+	return self.inChord
 }
 
 // Frame is the visible input rows, cursor position, and clipped row counts.
@@ -114,8 +114,8 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 		self.isEnterPending = false
 	}
 
-	if self.isPrefixed {
-		return self.swap(keypress)
+	if self.inChord {
+		return self.toggleMode(keypress)
 	}
 
 	switch keypress.Code {
@@ -235,20 +235,20 @@ func (self *Input) rune(keypress key.Key, running bool) Action {
 		return Restart
 
 	case 'x':
-		self.isPrefixed = true
+		self.inChord = true
 	}
 
 	return Drawn
 }
 
-func (self *Input) swap(keypress key.Key) Action {
-	self.isPrefixed = false
+func (self *Input) toggleMode(button key.Key) Action {
+	self.inChord = false
 
-	if keypress.Code != key.Rune || keypress.Mod != 0 {
+	if button.Code != key.Rune || button.Mod != 0 {
 		return Drawn
 	}
 
-	switch keypress.Value {
+	switch button.Value {
 	case 'w':
 		return Write
 

@@ -27,7 +27,7 @@ const (
 
 	goBuildCacheDir  = "go-build"
 	goModuleCacheDir = "go-mod"
-	goLangCiLintDir  = "golangci-lint"
+	goLintCacheDir   = "golangci-lint"
 )
 
 func execPaths(workspaceDir string) []string {
@@ -92,7 +92,7 @@ func createSandboxPolicy(
 		return sandbox.Policy{}, fmt.Errorf("could not prepare the shell cache: %w", err)
 	}
 
-	lintCachePath := filepath.Join(".cache", goLangCiLintDir)
+	lintCachePath := filepath.Join(".cache", goLintCacheDir)
 	if err := os.MkdirAll(filepath.Join(tmpDir, lintCachePath), 0o700); err != nil {
 		return sandbox.Policy{}, fmt.Errorf("could not prepare the shell lint cache: %w", err)
 	}

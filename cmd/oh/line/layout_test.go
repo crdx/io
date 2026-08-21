@@ -48,7 +48,7 @@ func TestTheCursorNeverGoesBackwards(t *testing.T) {
 			lastRow, lastColumn := 0, 0
 
 			for cursor := range len(runes) + 1 {
-				_, row, column := layout(&buffer{runes: runes, cursor: cursor}, room)
+				_, row, column := layout(&Buffer{runes: runes, cursor: cursor}, room)
 
 				if row < lastRow || (row == lastRow && column < lastColumn) {
 					t.Fatalf(
@@ -72,7 +72,7 @@ func forEachLayout(t *testing.T, check func(*testing.T, []string, int, int, int)
 		for room := 1; room <= 14; room++ {
 			for length := range len(runes) + 1 {
 				for cursor := range length + 1 {
-					rows, row, column := layout(&buffer{runes: runes[:length], cursor: cursor}, room)
+					rows, row, column := layout(&Buffer{runes: runes[:length], cursor: cursor}, room)
 					check(t, rows, row, column, room)
 
 					if t.Failed() {

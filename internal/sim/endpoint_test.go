@@ -181,7 +181,7 @@ func TestTheReasoningIsReportedWhateverTheApi(t *testing.T) {
 					t.Fatalf("unexpected error: %v", err)
 				}
 
-				if event.Kind == agent.Reasoning {
+				if event.Kind == agent.ModelReasoning {
 					thoughts = append(thoughts, event.Text)
 				}
 			}
@@ -207,7 +207,7 @@ func TestATurnDroppedMidCallDoesNotSpoilTheNext(t *testing.T) {
 					t.Fatalf("unexpected error: %v", err)
 				}
 
-				if event.Kind == agent.Call {
+				if event.Kind == agent.ToolCallRequest {
 					break
 				}
 			}

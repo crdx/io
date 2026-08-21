@@ -23,7 +23,7 @@ type Meta struct {
 	WorkspaceDir string `json:"workspaceDir"`
 	Provider     string `json:"provider"`
 	Effort       string `json:"effort,omitempty"`
-	Context      string `json:"context,omitempty"`
+	SystemPrompt string `json:"system_prompt,omitempty"`
 }
 
 const (
@@ -303,21 +303,21 @@ func decode(storedSession *session.Session) (*Session, error) {
 	}, nil
 }
 
-// FirstPrompt is the first prompt in the session.
-func (s *Session) FirstPrompt() string {
-	for _, event := range s.Events {
-		if event.Kind == agent.Prompt {
+// FirstMessage is the first message the user sent in the session.
+func (self *Session) FirstMessage() string {
+	for _, event := range self.Events {
+		if event.Kind == agent.UserMessage {
 			return event.Text
 		}
 	}
 	return ""
 }
 
-// Messages counts prompts and answers, excluding working events.
-func (s *Session) Messages() int {
+// Messages counts what the user and the model said, excluding working events.
+func (self *Session) Messages() int {
 	count := 0
-	for _, event := range s.Events {
-		if event.Kind == agent.Prompt || event.Kind == agent.Text {
+	for _, event := range self.Events {
+		if event.Kind == agent.UserMessage || event.Kind == agent.ModelMessage {
 			count++
 		}
 	}

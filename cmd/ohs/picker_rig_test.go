@@ -35,7 +35,7 @@ func TestPick(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if _, err := log.Event(agent.Event{Kind: agent.Prompt, Text: prompt}); err != nil {
+		if _, err := log.Event(agent.Event{Kind: agent.UserMessage, Text: prompt}); err != nil {
 			t.Fatal(err)
 		}
 
@@ -58,7 +58,7 @@ func TestPick(t *testing.T) {
 	case err != nil:
 		t.Fatal(err)
 	default:
-		screen.Line(style.Result("chose " + chosenSession.Name + ": " + chosenSession.FirstPrompt()))
+		screen.Line(style.Result("chose " + chosenSession.Name + ": " + chosenSession.FirstMessage()))
 	}
 
 	screen.End()

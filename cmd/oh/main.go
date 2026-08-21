@@ -101,22 +101,22 @@ type InputOpts struct {
 }
 
 type Opts struct {
-	workspaceDir   string
-	initialMessage string // the first prompt
-	session        string // the session to resume, empty to start afresh
-	provider       string // the provider selected with the model, empty to use the configured or saved provider
-	model          string // the explicitly selected model, empty to use the configured or saved model
-	effort         string // the effort paired with an explicitly selected model
-	caps           caps
+	message      string // the first message
+	workspaceDir string
+	session      string // the session to resume, empty to start afresh
+	provider     string // the provider selected with the model, empty to use the configured or saved provider
+	model        string // the explicitly selected model, empty to use the configured or saved model
+	effort       string // the effort paired with an explicitly selected model
+	caps         caps
 }
 
 func (self Opts) resuming() bool { return self.session != "" }
 
 func (opts InputOpts) parse() (Opts, error) {
 	self := Opts{
-		workspaceDir:   opts.WorkspaceDir,
-		initialMessage: strings.Join(opts.Message, " "),
-		session:        opts.Session,
+		workspaceDir: opts.WorkspaceDir,
+		message:      strings.Join(opts.Message, " "),
+		session:      opts.Session,
 	}
 
 	if opts.Model != "" {
@@ -279,12 +279,12 @@ func run() ([]string, error) {
 		}
 	}()
 
-	var context string
+	var systemPrompt string
 	var contextFiles []contextFile
-	if resumedSession != nil && resumedSession.Meta.Context != "" {
-		context = resumedSession.Meta.Context
+	if resumedSession != nil && resumedSession.Meta.SystemPrompt != "" {
+		systemPrompt = resumedSession.Meta.SystemPrompt
 	} else {
-		context, contextFiles, err = loadContext(
+		systemPrompt, contextFiles, err = loadContext(
 			root,
 			workspaceDir,
 			log.Name(),
@@ -300,7 +300,7 @@ func run() ([]string, error) {
 	}
 
 	if resumedSession == nil {
-		meta.Context = context
+		meta.SystemPrompt = systemPrompt
 		if err := log.SetMeta(meta); err != nil {
 			return nil, err
 		}
@@ -319,15 +319,15 @@ func run() ([]string, error) {
 	tools = append(tools, shell)
 	tools = truncate.Tools(tools)
 
-	chat := &conversation{
-		assistant:          agent.New(context, client, tools),
+	chat := &Harness{
+		agent:              agent.New(systemPrompt, client, tools),
 		screen:             output.New(os.Stdout).LinkPathsUnder(workspaceDir),
 		log:                log,
 		workspaceDir:       workspaceDir,
 		mode:               mode,
 		processes:          processes,
 		shell:              shell.Name(),
-		notifyTurnFinished: func() { sendTurnFinishedNotification(workspaceDir) },
+		onTurnFinished:     func() { sendTurnFinishedNotification(workspaceDir) },
 		getOnWithItMessage: settings.GetOnWithItMessage,
 
 		label: func(isPending bool, frame int, isRunning bool) string {
@@ -354,7 +354,7 @@ func run() ([]string, error) {
 		chat.notify(startupEvent(startupElapsed, startup))
 	}
 
-	chat.makeIntroductions(args.initialMessage)
+	chat.makeIntroductions(args.message)
 
 	if chat.restart != nil {
 		return chat.restart, nil

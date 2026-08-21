@@ -256,7 +256,7 @@ func (self *reply) add(message event, yield agent.Yield) bool {
 	case "text_delta":
 		held.text.WriteString(message.Delta.Text)
 
-		return !yield(agent.Event{Kind: agent.Text, Text: message.Delta.Text})
+		return !yield(agent.Event{Kind: agent.ModelMessage, Text: message.Delta.Text})
 
 	case "thinking_delta":
 		held.text.WriteString(message.Delta.Thinking)
@@ -280,7 +280,7 @@ func (self *reply) close(message event, yield agent.Yield) bool {
 	held.isDone = true
 
 	if held.kind == "thinking" && held.text.Len() > 0 {
-		return !yield(agent.Event{Kind: agent.Reasoning, Text: held.text.String()})
+		return !yield(agent.Event{Kind: agent.ModelReasoning, Text: held.text.String()})
 	}
 
 	return false

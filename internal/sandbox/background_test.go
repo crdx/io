@@ -8,9 +8,15 @@ import (
 	"testing"
 )
 
-func TestProcessTreesAreDrawnAsBranches(t *testing.T) {
-	if got := formatProcessTree("a", []string{"b → c", "d"}); got != "a → b → c, d" {
+func TestSiblingBranchesAreBracketedSoTheirDepthIsUnambiguous(t *testing.T) {
+	if got := formatProcessTree("a", []string{"b → c", "d"}); got != "a → (b → c, d)" {
 		t.Errorf("got %q", got)
+	}
+	if got := formatProcessTree("alone", nil); got != "alone" {
+		t.Errorf("got %q, want the name on its own", got)
+	}
+	if got := formatProcessTree("a", []string{"b → c"}); got != "a → b → c" {
+		t.Errorf("got %q, want a lone branch drawn without brackets", got)
 	}
 }
 
@@ -59,12 +65,12 @@ func TestNothingIsNamedForAProcessTheMachineWillNotDescribe(t *testing.T) {
 	}
 }
 
-func TestAProcessTreeIsDrawnWithoutItsBranchesWhereThereAreNone(t *testing.T) {
-	if got := formatProcessTree("alone", nil); got != "alone" {
-		t.Errorf("got %q, want the name on its own", got)
+func TestAProcessWithNoNameKeepsItsBranchesAtTheirOwnDepth(t *testing.T) {
+	if got := formatProcessTree("", []string{"b", "c"}); got != "? → (b, c)" {
+		t.Errorf("got %q, want the branches of a process with no name kept at their own depth", got)
 	}
-	if got := formatProcessTree("", []string{"b", "c"}); got != "b, c" {
-		t.Errorf("got %q, want the branches of a process with no name", got)
+	if got := formatProcessTree("", nil); got != "" {
+		t.Errorf("got %q, want nothing for a process with neither name nor branches", got)
 	}
 }
 

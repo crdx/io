@@ -27,7 +27,7 @@ func write(t *testing.T, directory string) string {
 		WorkspaceDir: "/tmp/somewhere",
 		Provider:     "codex",
 		Effort:       "high",
-		Context:      "You are a coding assistant.",
+		SystemPrompt: "You are a coding assistant.",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -68,11 +68,11 @@ func appendRaw(t *testing.T, directory string, name string, text string) {
 }
 
 var conversation = []agent.Event{
-	{Kind: agent.Prompt, Text: "what is the weather in London?"},
-	{Kind: agent.Text, Text: "Let me look."},
-	{Kind: agent.Call, ID: "1", Name: "weather", Arguments: `{"city":"London"}`, Rendering: agent.Rendering{Subject: "London"}},
-	{Kind: agent.Result, ID: "1", Name: "weather", Text: "raining"},
-	{Kind: agent.Text, Text: "It is raining."},
+	{Kind: agent.UserMessage, Text: "what is the weather in London?"},
+	{Kind: agent.ModelMessage, Text: "Let me look."},
+	{Kind: agent.ToolCallRequest, ID: "1", Name: "weather", Arguments: `{"city":"London"}`, Rendering: agent.Rendering{Subject: "London"}},
+	{Kind: agent.ToolCallResult, ID: "1", Name: "weather", Text: "raining"},
+	{Kind: agent.ModelMessage, Text: "It is raining."},
 }
 
 func TestASessionReadsBackAsItWasWritten(t *testing.T) {
@@ -96,7 +96,7 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 		t.Errorf("expected the harness settings to survive, got %+v", storedSession.Meta)
 	}
 
-	if storedSession.Meta.Context != "You are a coding assistant." {
+	if storedSession.Meta.SystemPrompt != "You are a coding assistant." {
 		t.Errorf("expected the context to survive, got %+v", storedSession.Meta)
 	}
 
@@ -104,26 +104,26 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 		t.Errorf("expected the provider's item to come back verbatim, got %v", storedSession.Items)
 	}
 
-	if want := "what is the weather in London?"; storedSession.FirstPrompt() != want {
-		t.Errorf("expected %q, got %q", want, storedSession.FirstPrompt())
+	if want := "what is the weather in London?"; storedSession.FirstMessage() != want {
+		t.Errorf("expected %q, got %q", want, storedSession.FirstMessage())
 	}
 }
 
 func TestTheMetaCanIncludeTheGeneratedSessionID(t *testing.T) {
 	directory := t.TempDir()
-	log, err := store.Create(directory, store.Meta{Context: "before"})
+	log, err := store.Create(directory, store.Meta{SystemPrompt: "before"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	context := "scratch=" + log.Name()
-	if err := log.SetMeta(store.Meta{Context: context}); err != nil {
+	systemPrompt := "scratch=" + log.Name()
+	if err := log.SetMeta(store.Meta{SystemPrompt: systemPrompt}); err != nil {
 		t.Fatal(err)
 	}
-	if err := log.Event(agent.Event{Kind: agent.Prompt, Text: "store it"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "store it"}); err != nil {
 		t.Fatal(err)
 	}
-	if err := log.SetMeta(store.Meta{Context: "too late"}); err == nil {
+	if err := log.SetMeta(store.Meta{SystemPrompt: "too late"}); err == nil {
 		t.Error("expected a stored meta to be immutable")
 	}
 	if err := log.Close(); err != nil {
@@ -134,8 +134,8 @@ func TestTheMetaCanIncludeTheGeneratedSessionID(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if storedSession.Meta.Context != context {
-		t.Errorf("got context %q, want %q", storedSession.Meta.Context, context)
+	if storedSession.Meta.SystemPrompt != systemPrompt {
+		t.Errorf("got system prompt %q, want %q", storedSession.Meta.SystemPrompt, systemPrompt)
 	}
 }
 
@@ -196,7 +196,7 @@ func TestTheFirstThingSaidTakesTheHeadWithIt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := log.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "hello"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -244,7 +244,7 @@ func TestAnOpenedSessionKeepsWhatWasThereBefore(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := log.Event(agent.Event{Kind: agent.Prompt, Text: "and tomorrow?"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "and tomorrow?"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -315,7 +315,7 @@ func TestListPutsTheSessionTouchedLastAtTheTop(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := log.Event(agent.Event{Kind: agent.Text, Text: "one more thing"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.ModelMessage, Text: "one more thing"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -358,7 +358,7 @@ func TestHTTPObservationCanCreateTheBundleBeforeTheFirstEvent(t *testing.T) {
 		t.Fatalf("expected no recorder warnings, got %v", warnings)
 	}
 
-	if err := log.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "hello"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := log.Close(); err != nil {
@@ -417,7 +417,7 @@ func TestOpeningABundleAppendsToTheMarkdownTranscript(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := log.Event(agent.Event{Kind: agent.Prompt, Text: "resumed text"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "resumed text"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := log.Close(); err != nil {

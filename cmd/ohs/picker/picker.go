@@ -38,21 +38,21 @@ type Session struct {
 	Events       []agent.Event
 }
 
-// FirstPrompt is the first prompt in the session.
-func (self *Session) FirstPrompt() string {
+// FirstMessage is the first message the user sent in the session.
+func (self *Session) FirstMessage() string {
 	for _, event := range self.Events {
-		if event.Kind == agent.Prompt {
+		if event.Kind == agent.UserMessage {
 			return event.Text
 		}
 	}
 	return ""
 }
 
-// Messages counts prompts and answers, excluding working events.
+// Messages counts what the user and the model said, excluding working events.
 func (self *Session) Messages() int {
 	count := 0
 	for _, event := range self.Events {
-		if event.Kind == agent.Prompt || event.Kind == agent.Text {
+		if event.Kind == agent.UserMessage || event.Kind == agent.ModelMessage {
 			count++
 		}
 	}
@@ -213,7 +213,7 @@ func mark(sessionChosen bool) string {
 }
 
 func title(storedSession *Session) string {
-	askedText := storedSession.FirstPrompt()
+	askedText := storedSession.FirstMessage()
 	if askedText == "" {
 		return "(nothing was asked)"
 	}

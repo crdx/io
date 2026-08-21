@@ -4,67 +4,82 @@ import (
 	"unicode"
 )
 
-type buffer struct {
+// Buffer is the text being edited and where the cursor sits in it, counted in runes so that a
+// character wider than a byte still moves the cursor by one.
+type Buffer struct {
 	runes  []rune
 	cursor int
 }
 
-func (self *buffer) String() string {
+func (self *Buffer) String() string {
 	return string(self.runes)
 }
 
-func (self *buffer) Runes() []rune {
+// Runes gives the text as the runes it is stored as.
+func (self *Buffer) Runes() []rune {
 	return self.runes
 }
 
-func (self *buffer) Cursor() int {
+// Cursor gives how many runes lie before the cursor.
+func (self *Buffer) Cursor() int {
 	return self.cursor
 }
 
-func (self *buffer) Len() int {
+// Len gives how many runes the text is, which is not how many bytes it takes.
+func (self *Buffer) Len() int {
 	return len(self.runes)
 }
 
-func (self *buffer) Set(text string) {
+// Set replaces the text, leaving the cursor at the end of it.
+func (self *Buffer) Set(text string) {
 	self.runes = []rune(text)
 	self.cursor = len(self.runes)
 }
 
-func (self *buffer) Insert(text []rune) {
+// Insert puts text in at the cursor, which follows it.
+func (self *Buffer) Insert(text []rune) {
 	rest := append(append([]rune(nil), text...), self.runes[self.cursor:]...)
 	self.runes = append(self.runes[:self.cursor], rest...)
 	self.cursor += len(text)
 }
 
-func (self *buffer) MoveLeft() {
+// MoveLeft steps back one rune, stopping at the start of the text.
+func (self *Buffer) MoveLeft() {
 	if self.cursor > 0 {
 		self.cursor--
 	}
 }
 
-func (self *buffer) MoveRight() {
+// MoveRight steps on one rune, stopping at the end of the text.
+func (self *Buffer) MoveRight() {
 	if self.cursor < len(self.runes) {
 		self.cursor++
 	}
 }
 
-func (self *buffer) MoveHome() {
+// MoveHome goes to the start of the line the cursor is on, not the start of the text.
+func (self *Buffer) MoveHome() {
 	self.cursor = self.lineStart()
 }
 
-func (self *buffer) MoveEnd() {
+// MoveEnd goes to the end of the line the cursor is on, not the end of the text.
+func (self *Buffer) MoveEnd() {
 	self.cursor = self.lineEnd()
 }
 
-func (self *buffer) MoveWordLeft() {
+// MoveWordLeft goes back over any punctuation and then over the word before it.
+func (self *Buffer) MoveWordLeft() {
 	self.cursor = self.wordStart()
 }
 
-func (self *buffer) MoveWordRight() {
+// MoveWordRight goes on over any punctuation and then over the word after it.
+func (self *Buffer) MoveWordRight() {
 	self.cursor = self.wordEnd()
 }
 
-func (self *buffer) MoveUp() bool {
+// MoveUp goes to the line above, keeping the column where that line is long enough to hold it, and
+// reports whether there was a line above to go to.
+func (self *Buffer) MoveUp() bool {
 	start := self.lineStart()
 	if start == 0 {
 		return false
@@ -78,7 +93,9 @@ func (self *buffer) MoveUp() bool {
 	return true
 }
 
-func (self *buffer) MoveDown() bool {
+// MoveDown goes to the line below, keeping the column where that line is long enough to hold it,
+// and reports whether there was a line below to go to.
+func (self *Buffer) MoveDown() bool {
 	end := self.lineEnd()
 	if end == len(self.runes) {
 		return false
@@ -92,23 +109,26 @@ func (self *buffer) MoveDown() bool {
 	return true
 }
 
-func (self *buffer) DeleteBackward() {
+// DeleteBackward takes out the rune before the cursor.
+func (self *Buffer) DeleteBackward() {
 	if self.cursor > 0 {
 		self.remove(self.cursor-1, self.cursor)
 	}
 }
 
-func (self *buffer) DeleteForward() {
+// DeleteForward takes out the rune after the cursor.
+func (self *Buffer) DeleteForward() {
 	if self.cursor < len(self.runes) {
 		self.remove(self.cursor, self.cursor+1)
 	}
 }
 
-func (self *buffer) DeleteWordBackward() {
+// DeleteWordBackward takes out everything from the start of the word behind the cursor.
+func (self *Buffer) DeleteWordBackward() {
 	self.remove(self.wordStart(), self.cursor)
 }
 
-func (self *buffer) remove(start int, end int) {
+func (self *Buffer) remove(start int, end int) {
 	if start >= end {
 		return
 	}
@@ -117,11 +137,11 @@ func (self *buffer) remove(start int, end int) {
 	self.cursor = start
 }
 
-func (self *buffer) lineStart() int {
+func (self *Buffer) lineStart() int {
 	return self.lineStartAt(self.cursor)
 }
 
-func (self *buffer) lineStartAt(position int) int {
+func (self *Buffer) lineStartAt(position int) int {
 	for i := position - 1; i >= 0; i-- {
 		if self.runes[i] == '\n' {
 			return i + 1
@@ -131,11 +151,11 @@ func (self *buffer) lineStartAt(position int) int {
 	return 0
 }
 
-func (self *buffer) lineEnd() int {
+func (self *Buffer) lineEnd() int {
 	return self.lineEndAt(self.cursor)
 }
 
-func (self *buffer) lineEndAt(position int) int {
+func (self *Buffer) lineEndAt(position int) int {
 	for i := position; i < len(self.runes); i++ {
 		if self.runes[i] == '\n' {
 			return i
@@ -145,7 +165,7 @@ func (self *buffer) lineEndAt(position int) int {
 	return len(self.runes)
 }
 
-func (self *buffer) wordStart() int {
+func (self *Buffer) wordStart() int {
 	position := self.cursor
 
 	for position > 0 && !isWord(self.runes[position-1]) {
@@ -159,7 +179,7 @@ func (self *buffer) wordStart() int {
 	return position
 }
 
-func (self *buffer) wordEnd() int {
+func (self *Buffer) wordEnd() int {
 	position := self.cursor
 
 	for position < len(self.runes) && !isWord(self.runes[position]) {

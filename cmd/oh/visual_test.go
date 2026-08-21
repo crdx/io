@@ -41,7 +41,7 @@ func (self *fakeProvider) Send(_ context.Context, yield agent.Yield) (agent.Repl
 		"**Reading the file**\nThe path they gave is the one to start with.",
 		"**Searching for the spinner**\nIt is drawn somewhere near the output layer.",
 	} {
-		if !yield(agent.Event{Kind: agent.Reasoning, Text: thought}) {
+		if !yield(agent.Event{Kind: agent.ModelReasoning, Text: thought}) {
 			return agent.Reply{}, nil
 		}
 
@@ -49,7 +49,7 @@ func (self *fakeProvider) Send(_ context.Context, yield agent.Yield) (agent.Repl
 	}
 
 	for word := range strings.FieldsSeq("let me have a look at that for you") {
-		if !yield(agent.Event{Kind: agent.Text, Text: word + " "}) {
+		if !yield(agent.Event{Kind: agent.ModelMessage, Text: word + " "}) {
 			return agent.Reply{}, nil
 		}
 
@@ -119,11 +119,11 @@ func TestVisual(t *testing.T) {
 
 	defer func() { _ = log.Close() }()
 
-	held := &conversation{
-		assistant: agent.New("", provider, tools),
-		screen:    screen,
-		log:       log,
-		mode:      NewMode(capRead | capWrite),
+	held := &Harness{
+		agent:  agent.New("", provider, tools),
+		screen: screen,
+		log:    log,
+		mode:   NewMode(capRead | capWrite),
 		label: func(isPending bool, frame int, isRunning bool) string {
 			return banner(
 				"fake", "medium", "/tmp/somewhere", tools, capRead|capShell|capWrite,

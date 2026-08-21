@@ -333,11 +333,11 @@ func TestStreamReportsEachTurnAsItHappens(t *testing.T) {
 	}
 
 	expectedEvents := []string{
-		fmt.Sprintf("%s::what is the weather in London?", agent.Prompt),
-		fmt.Sprintf("%s::Let me look. ", agent.Text),
-		fmt.Sprintf("%s:weather:", agent.Call),
-		fmt.Sprintf("%s:weather:raining in London", agent.Result),
-		fmt.Sprintf("%s::It is raining in London.", agent.Text),
+		fmt.Sprintf("%s::what is the weather in London?", agent.UserMessage),
+		fmt.Sprintf("%s::Let me look. ", agent.ModelMessage),
+		fmt.Sprintf("%s:weather:", agent.ToolCallRequest),
+		fmt.Sprintf("%s:weather:raining in London", agent.ToolCallResult),
+		fmt.Sprintf("%s::It is raining in London.", agent.ModelMessage),
 	}
 
 	if !slices.Equal(eventStrings, expectedEvents) {
@@ -359,7 +359,7 @@ func TestStreamStopsWhenTheCallerDoes(t *testing.T) {
 	for event := range assistant.Stream(t.Context(), "what is the weather in London?") {
 		eventCount++
 
-		if event.Kind == agent.Text {
+		if event.Kind == agent.ModelMessage {
 			break
 		}
 	}
@@ -400,11 +400,11 @@ func TestStreamReportsReasoningApartFromTheAnswer(t *testing.T) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		if event.Kind == agent.Reasoning {
+		if event.Kind == agent.ModelReasoning {
 			reasoningSummaries = append(reasoningSummaries, event.Text)
 		}
 
-		if event.Kind == agent.Text {
+		if event.Kind == agent.ModelMessage {
 			answer.WriteString(event.Text)
 		}
 	}
@@ -516,7 +516,7 @@ func TestStreamReportsRawReasoningFromAModelThatDoesNotSummarise(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if event.Kind == agent.Reasoning {
+		if event.Kind == agent.ModelReasoning {
 			reasoning.WriteString(event.Text)
 		}
 	}
@@ -545,7 +545,7 @@ func TestASummarisedThoughtIsNotAlsoReportedRaw(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if event.Kind == agent.Reasoning {
+		if event.Kind == agent.ModelReasoning {
 			reasoning = append(reasoning, event.Text)
 		}
 	}

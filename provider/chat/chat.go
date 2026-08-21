@@ -78,9 +78,9 @@ func (self *Client) ObserveHTTP(observer req.Observer) {
 	self.requests.Observe(observer)
 }
 
-// AddUserMessage appends a prompt to the conversation.
-func (self *Client) AddUserMessage(prompt string) {
-	self.history = append(self.history, encode(message{Role: "user", Content: prompt}))
+// AddUserMessage appends a message to the conversation.
+func (self *Client) AddUserMessage(text string) {
+	self.history = append(self.history, encode(message{Role: "user", Content: text}))
 }
 
 // AddToolResults appends this turn's tool call results to the conversation. A tool message takes

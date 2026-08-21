@@ -34,7 +34,7 @@ func (self *callProvider) Send(_ context.Context, yield agent.Yield) (agent.Repl
 		return agent.Reply{}, nil
 	}
 
-	yield(agent.Event{Kind: agent.Text, Text: "thinking out loud"})
+	yield(agent.Event{Kind: agent.ModelMessage, Text: "thinking out loud"})
 
 	return agent.Reply{Calls: []agent.ToolCall{
 		{ID: "a", Name: "noop", Arguments: `{}`},
@@ -65,8 +65,8 @@ func resultOutputs(provider *callProvider) []string {
 
 func TestStreamAnswersEveryCallOfAnAbandonedTurn(t *testing.T) {
 	tests := map[string]agent.Kind{
-		"dropped while streaming text": agent.Text,
-		"dropped on the first call":    agent.Call,
+		"dropped while streaming text": agent.ModelMessage,
+		"dropped on the first call":    agent.ToolCallRequest,
 	}
 
 	for name, stopOn := range tests {
@@ -102,7 +102,7 @@ func TestStreamAnswersWithWhateverRanBeforeTheTurnWasDropped(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if event.Kind == agent.Result {
+		if event.Kind == agent.ToolCallResult {
 			break
 		}
 	}
@@ -223,7 +223,7 @@ func TestAResultSaysHowLongItsCallTook(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if event.Kind == agent.Result {
+		if event.Kind == agent.ToolCallResult {
 			timedResults++
 
 			if event.Took < slept {
@@ -291,7 +291,7 @@ func singleResult(t *testing.T, calledTool tool.Tool) agent.Event {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if event.Kind == agent.Result {
+		if event.Kind == agent.ToolCallResult {
 			results = append(results, event)
 		}
 	}
@@ -404,19 +404,19 @@ func TestARefusedCallDoesNotReceiveOutputStats(t *testing.T) {
 	}
 }
 
-type unparsedCallProvider struct {
+type unparsedToolCallProvider struct {
 	name      string
 	arguments string
 	sent      int
 }
 
-func (self *unparsedCallProvider) Configure(string, []tool.Definition) {}
-func (self *unparsedCallProvider) AddUserMessage(string)               {}
-func (self *unparsedCallProvider) Dump() []json.RawMessage             { return nil }
-func (self *unparsedCallProvider) Load([]json.RawMessage)              {}
-func (self *unparsedCallProvider) AddToolResults([]agent.ToolResult)   {}
+func (self *unparsedToolCallProvider) Configure(string, []tool.Definition) {}
+func (self *unparsedToolCallProvider) AddUserMessage(string)               {}
+func (self *unparsedToolCallProvider) Dump() []json.RawMessage             { return nil }
+func (self *unparsedToolCallProvider) Load([]json.RawMessage)              {}
+func (self *unparsedToolCallProvider) AddToolResults([]agent.ToolResult)   {}
 
-func (self *unparsedCallProvider) Send(_ context.Context, _ agent.Yield) (agent.Reply, error) {
+func (self *unparsedToolCallProvider) Send(_ context.Context, _ agent.Yield) (agent.Reply, error) {
 	if self.sent++; self.sent > 1 {
 		return agent.Reply{}, nil
 	}
@@ -426,10 +426,10 @@ func (self *unparsedCallProvider) Send(_ context.Context, _ agent.Yield) (agent.
 	}}, nil
 }
 
-func unparsedCallSubject(t *testing.T, tools []tool.Tool, name string, arguments string) string {
+func unparsedToolCallSubject(t *testing.T, tools []tool.Tool, name string, arguments string) string {
 	t.Helper()
 
-	provider := &unparsedCallProvider{name: name, arguments: arguments}
+	provider := &unparsedToolCallProvider{name: name, arguments: arguments}
 	assistant := agent.New("", provider, tools)
 
 	var calls []agent.Event
@@ -439,7 +439,7 @@ func unparsedCallSubject(t *testing.T, tools []tool.Tool, name string, arguments
 			t.Fatal(err)
 		}
 
-		if event.Kind == agent.Call {
+		if event.Kind == agent.ToolCallRequest {
 			calls = append(calls, event)
 		}
 	}
@@ -473,7 +473,7 @@ func refusingTool() tool.Tool {
 }
 
 func TestACallTooMalformedToParseIsStillShownAsItArrived(t *testing.T) {
-	got := unparsedCallSubject(t, []tool.Tool{noop()}, "noop", "{not json\nand more besides")
+	got := unparsedToolCallSubject(t, []tool.Tool{noop()}, "noop", "{not json\nand more besides")
 
 	if got != "{not json" {
 		t.Errorf("expected the arguments as they arrived, cut to one line, got %q", got)
@@ -482,7 +482,7 @@ func TestACallTooMalformedToParseIsStillShownAsItArrived(t *testing.T) {
 
 func TestARefusedCallIsShownAsItsArgumentsInTheOrderTheToolDeclaresThem(t *testing.T) {
 	arguments := `{"target":"you","message":"oi"}`
-	got := unparsedCallSubject(t, []tool.Tool{refusingTool()}, "shout", arguments)
+	got := unparsedToolCallSubject(t, []tool.Tool{refusingTool()}, "shout", arguments)
 
 	if got != "oi you" {
 		t.Errorf("expected the values in schema order, got %q", got)
@@ -491,7 +491,7 @@ func TestARefusedCallIsShownAsItsArgumentsInTheOrderTheToolDeclaresThem(t *testi
 
 func TestARefusedCallWithNothingToShowFallsBackToItsArguments(t *testing.T) {
 	arguments := `{"message":"   "}`
-	got := unparsedCallSubject(t, []tool.Tool{refusingTool()}, "shout", arguments)
+	got := unparsedToolCallSubject(t, []tool.Tool{refusingTool()}, "shout", arguments)
 
 	if got != arguments {
 		t.Errorf("expected the raw arguments, got %q", got)
@@ -514,7 +514,7 @@ func TestANoteGoesAheadOfTheNextPrompt(t *testing.T) {
 	provider := &notingProvider{}
 	self := agent.New("", provider, nil)
 
-	self.Note("something changed")
+	self.FYI("something changed")
 
 	if len(provider.messages) != 1 {
 		t.Fatalf("expected the note to have been added, got %v", provider.messages)

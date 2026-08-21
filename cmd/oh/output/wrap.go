@@ -11,7 +11,7 @@ const (
 	autoWrap   = "\x1b[?7h"
 )
 
-func (self *Output) fit(text string) string {
+func (self *Screen) fit(text string) string {
 	if self.columns <= 0 {
 		self.openedRows += strings.Count(text, "\n")
 		return text

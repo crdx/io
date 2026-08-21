@@ -16,7 +16,7 @@ func TestSessionsComeFromOhsOwnJournalParsing(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := writer.Event(agent.Event{Kind: agent.Prompt, Text: "hello"}); err != nil {
+	if _, err := writer.Event(agent.Event{Kind: agent.UserMessage, Text: "hello"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {
@@ -33,8 +33,8 @@ func TestSessionsComeFromOhsOwnJournalParsing(t *testing.T) {
 	if sessions[0].Name != writer.Name() || sessions[0].WorkspaceDir != "/home/alice/project" {
 		t.Errorf("unexpected session: %+v", sessions[0])
 	}
-	if sessions[0].FirstPrompt() != "hello" {
-		t.Errorf("expected the first prompt, got %q", sessions[0].FirstPrompt())
+	if sessions[0].FirstMessage() != "hello" {
+		t.Errorf("expected the first message, got %q", sessions[0].FirstMessage())
 	}
 }
 
