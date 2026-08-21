@@ -127,10 +127,10 @@ func TestReplayingSaysTheWholeConversationAgain(t *testing.T) {
 		screen:    output.New(&screenOutput),
 	}
 
-	testConversation.transcript = []entry{
-		{event: agent.Event{Kind: agent.Prompt, Text: "what is the weather"}},
-		{event: agent.Event{Kind: agent.Text, Text: "it is raining"}},
-		{notice: "cancelled"},
+	testConversation.transcript = []agent.Event{
+		{Kind: agent.Prompt, Text: "what is the weather"},
+		{Kind: agent.Text, Text: "it is raining"},
+		{Kind: agent.Notice, Text: "cancelled"},
 	}
 
 	testConversation.replay()
@@ -205,8 +205,10 @@ func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	self := &conversation{
 		assistant: agent.New("", quietProvider{}, nil),
 		screen:    output.New(&live),
+		log:       testLog(t),
 	}
-	self.notify(style.Stopped(notice))
+
+	self.notifyStopped(notice)
 	self.screen.End()
 
 	var replayOutput bytes.Buffer
@@ -225,6 +227,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	self := &conversation{
 		assistant: agent.New("", quietProvider{}, tools),
 		screen:    output.New(&live),
+		log:       testLog(t),
 	}
 	livePainter := self.newPicasso(true)
 
@@ -245,7 +248,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 		self.transcript = appendTranscript(self.transcript, event)
 		livePainter.draw(event)
 	}
-	self.notify(style.Stopped("Background processes killed (bash → sleep)"))
+	self.notifyStopped("Background processes killed (bash → sleep)")
 
 	unansweredCall := agent.Event{Kind: agent.Call, ID: "3", Name: "read", Subject: "left.go"}
 	self.transcript = appendTranscript(self.transcript, unansweredCall)
@@ -318,13 +321,13 @@ func TestAStoredCallIsShownTheWayItsToolShowsItNow(t *testing.T) {
 		screen:    output.New(&screenOutput),
 	}
 
-	testConversation.transcript = []entry{{event: agent.Event{
+	testConversation.transcript = []agent.Event{{
 		Kind:      agent.Call,
 		ID:        "1",
 		Name:      "read",
 		Arguments: `{"path":"cmd/oh/one.go"}`,
 		Subject:   "one.go:1-400",
-	}}}
+	}}
 
 	testConversation.replay()
 
@@ -346,13 +349,13 @@ func TestACallWhoseToolIsGoneKeepsWhatItLookedLike(t *testing.T) {
 		screen:    output.New(&screenOutput),
 	}
 
-	testConversation.transcript = []entry{{event: agent.Event{
+	testConversation.transcript = []agent.Event{{
 		Kind:      agent.Call,
 		ID:        "1",
 		Name:      "divine",
 		Arguments: `{"path":"one.go"}`,
 		Subject:   "one.go:1-400",
-	}}}
+	}}
 
 	testConversation.replay()
 
@@ -482,7 +485,7 @@ func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
 		t.Errorf("expected the interruption to stay out of the scrollback, got %q", plain)
 	}
 
-	if strings.Contains(screenOutput.String(), "context canceled") { // the stop is why it failed
+	if strings.Contains(screenOutput.String(), "context canceled") {
 		t.Errorf("expected the stop to be reported as a stop, got %q", screenOutput.String())
 	}
 }
@@ -521,7 +524,7 @@ func TestATurnThatLeftACallUnansweredIsClosedByWhatIsAskedNext(t *testing.T) {
 		t.Errorf("expected the call to open a block of its own, got row %d", got)
 	}
 
-	callPainter.close(status.Cancelled) // the block it opened is this test's to shut
+	callPainter.close(status.Cancelled)
 }
 
 func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
@@ -536,9 +539,9 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 
 	testConversation.turn = turn{isRunning: true, painter: testConversation.newPicasso(true)}
 
-	testConversation.transcript = []entry{
-		{event: agent.Event{Kind: agent.Prompt, Text: "read it"}},
-		{event: agent.Event{Kind: agent.Call, ID: "1", Name: "read", Subject: "one.go"}},
+	testConversation.transcript = []agent.Event{
+		{Kind: agent.Prompt, Text: "read it"},
+		{Kind: agent.Call, ID: "1", Name: "read", Subject: "one.go"},
 	}
 
 	previousPainter := testConversation.turn.painter
@@ -703,7 +706,7 @@ func TestARefusedCallIsDescribedAgainRatherThanFromTheRecord(t *testing.T) {
 	rendered, detail, highlight := testConversation.newPicasso(false).describe(agent.Event{
 		Name:      "shout",
 		Arguments: `{"message":"oi"}`,
-		Subject:   "", // as a session saved before the call could be described recorded it
+		Subject:   "",
 	})
 
 	if detail != "" || highlight != (tool.Highlight{}) {
@@ -712,4 +715,17 @@ func TestARefusedCallIsDescribedAgainRatherThanFromTheRecord(t *testing.T) {
 	if rendered != "oi" {
 		t.Errorf("got %q, want the arguments described again from the record", rendered)
 	}
+}
+
+func testLog(t *testing.T) *store.Writer {
+	t.Helper()
+
+	log, err := store.Create(t.TempDir(), store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() { _ = log.Close() })
+
+	return log
 }

@@ -99,7 +99,7 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 	self.finish()
 
 	for _, record := range self.transcript {
-		if record.event.Kind == agent.Prompt && record.event.Text == "carry on" {
+		if record.Kind == agent.Prompt && record.Text == "carry on" {
 			return
 		}
 	}
@@ -155,8 +155,8 @@ func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.
 
 	var prompts []string
 	for _, record := range self.transcript {
-		if record.event.Kind == agent.Prompt {
-			prompts = append(prompts, record.event.Text)
+		if record.Kind == agent.Prompt {
+			prompts = append(prompts, record.Text)
 		}
 	}
 
@@ -202,10 +202,10 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *
 	var prompts []string
 	var interrupted bool
 	for _, record := range self.transcript {
-		if record.event.Kind == agent.Prompt {
-			prompts = append(prompts, record.event.Text)
+		if record.Kind == agent.Prompt {
+			prompts = append(prompts, record.Text)
 		}
-		interrupted = interrupted || record.event.Kind == agent.Interrupted
+		interrupted = interrupted || record.Kind == agent.Interrupted
 	}
 
 	wantPrompts := []string{"first", defaultGetOnWithItMessage}
@@ -281,7 +281,7 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 
 	results := 0
 	for _, record := range self.transcript {
-		if record.event.Kind == agent.Result {
+		if record.Kind == agent.Result {
 			results++
 		}
 	}
@@ -446,7 +446,7 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 	}
 
 	for _, record := range self.transcript {
-		if record.event.Kind == agent.Prompt && record.event.Text == "follow up" {
+		if record.Kind == agent.Prompt && record.Text == "follow up" {
 			t.Error("expected the taken-back replacement not to be sent")
 		}
 	}

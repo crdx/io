@@ -158,6 +158,10 @@ func (self *painter) draw(event agent.Event) {
 	case agent.Result:
 		self.mark(event)
 
+	case agent.Startup, agent.Notice:
+		self.close(status.Cancelled)
+		self.screen.Line(self.render(event))
+
 	case agent.Failure:
 		self.close(status.Cancelled)
 		self.screen.Line(style.Failure(event.Text))
@@ -186,7 +190,7 @@ func (self *painter) mark(event agent.Event) {
 func renderSubmittedMessage(text string, columns int) string {
 	contentColumns := columns
 	if contentColumns > 1 {
-		contentColumns-- // the left padding belongs to the message too
+		contentColumns--
 	}
 
 	content := markdown.Render(text, contentColumns)
@@ -206,6 +210,22 @@ func renderSubmittedMessage(text string, columns int) string {
 	}
 
 	return strings.Join(rows, "\n")
+}
+
+func (self *painter) render(event agent.Event) string {
+	if event.Kind == agent.Startup {
+		return renderStartupEvent(event)
+	}
+
+	return noticeStyle(event.Failed)(event.Text)
+}
+
+func noticeStyle(failed bool) style.Style {
+	if failed {
+		return style.Failure
+	}
+
+	return style.Stopped
 }
 
 func outcome(failed bool) status.State {

@@ -355,15 +355,14 @@ func run() ([]string, error) {
 	projectSkills, globalSkills := skill.Counts(availableSkills)
 	startupElapsed := time.Since(startedAt)
 	startup := startupInfo{
-		sessionID:     log.ID(),
-		contextFiles:  contextFiles,
-		projectSkills: projectSkills,
-		globalSkills:  globalSkills,
-		toolBytes:     client.toolsSize(tools),
+		SessionID:     log.ID(),
+		ContextFiles:  startupFilesOf(contextFiles),
+		ProjectSkills: projectSkills,
+		GlobalSkills:  globalSkills,
+		ToolBytes:     client.toolsSize(tools),
 	}
 	if resumedSession == nil {
-		banner := renderStartupBanner(startupElapsed, false, startup)
-		chat.notify(style.Subtle("[") + banner + style.Subtle("]"))
+		chat.notify(startupEvent(startupElapsed, startup))
 	}
 
 	chat.makeIntroductions(args.initialMessage)

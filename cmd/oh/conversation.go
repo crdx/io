@@ -26,7 +26,7 @@ type conversation struct {
 	assistant          *agent.Agent
 	screen             *output.Output
 	log                *store.Writer
-	label              func(bool, int, bool) string // what the harness was started with, drawn afresh on the rule
+	label              func(bool, int, bool) string // what the harness was started with
 	workspaceDir       string
 	mode               *Mode              // what the tools allow
 	processes          *sandbox.Processes // what background commands belong to this conversation
@@ -38,15 +38,10 @@ type conversation struct {
 	getOnWithItMessage string     // what an empty double enter sends
 
 	turn            turn
-	storedItems     int     // how many provider items have been stored
-	contextTokens   int     // the input tokens reported for the last completed turn
-	terminalFocused bool    // whether the interactive terminal has focus
-	transcript      []entry // the conversation as it was drawn, so it can be drawn again
-}
-
-type entry struct {
-	event  agent.Event // what the agent said or did
-	notice string      // what the harness said itself, painted as it was said
+	storedItems     int           // how many provider items have been stored
+	contextTokens   int           // the input tokens reported for the last completed turn
+	terminalFocused bool          // whether the interactive terminal has focus
+	transcript      []agent.Event // the conversation as it was drawn, so it can be drawn again
 }
 
 const historyLimit = 1000
@@ -132,7 +127,7 @@ func (self *conversation) apply(input *line.Input, history *line.History, keypre
 		self.cancelTurn()
 
 	case line.Quit:
-		return false // the input only asks to leave where there was no turn to stop first
+		return false
 
 	case line.Restart:
 		if self.turn.isRunning {
@@ -159,7 +154,7 @@ func (self *conversation) apply(input *line.Input, history *line.History, keypre
 			if err == nil {
 				self.toggleCapability(capBackground)
 				if len(names) > 0 {
-					self.notify(style.Stopped("Background processes killed (" + strings.Join(names, ", ") + ")"))
+					self.notifyStopped("Background processes killed (" + strings.Join(names, ", ") + ")")
 				}
 			} else {
 				self.processes.Enable()
@@ -338,18 +333,18 @@ func settle(resizeSignals <-chan os.Signal) {
 
 func (self *conversation) restore(storedSession *store.Session) {
 	if err := self.assistant.RestoreState(storedSession.Events); err != nil {
-		self.notify(style.Failure("the state could not be restored: " + err.Error()))
+		self.notifyFailure("the state could not be restored: " + err.Error())
 		return
 	}
 	if err := self.assistant.Load(storedSession.Items); err != nil {
-		self.notify(style.Failure("the conversation could not be restored: " + err.Error()))
+		self.notifyFailure("the conversation could not be restored: " + err.Error())
 		return
 	}
 	self.storedItems = len(storedSession.Items)
 
 	for _, event := range storedSession.Events {
 		self.updateContextUsage(event)
-		self.transcript = append(self.transcript, entry{event: event})
+		self.transcript = append(self.transcript, event)
 	}
 
 	self.replay()
@@ -367,14 +362,7 @@ func (self *conversation) replay() {
 		painter := self.newPicasso(self.turn.isRunning)
 
 		for _, record := range self.transcript {
-			if record.notice != "" {
-				painter.close(status.Cancelled)
-				self.screen.Line(record.notice)
-
-				continue
-			}
-
-			painter.draw(record.event)
+			painter.draw(record)
 		}
 
 		if self.turn.isRunning {
@@ -458,20 +446,34 @@ func (self *conversation) updateContextUsage(event agent.Event) {
 	}
 }
 
-func appendTranscript(transcript []entry, event agent.Event) []entry {
+func appendTranscript(transcript []agent.Event, event agent.Event) []agent.Event {
 	if (event.Kind == agent.Text || event.Kind == agent.Reasoning) && len(transcript) > 0 {
-		if last := &transcript[len(transcript)-1]; last.event.Kind == event.Kind {
-			last.event.Text += event.Text // streamed prose is one entry, not thousands of deltas
+		if last := &transcript[len(transcript)-1]; last.Kind == event.Kind {
+			last.Text += event.Text
 			return transcript
 		}
 	}
 
-	return append(transcript, entry{event: event})
+	return append(transcript, event)
 }
 
-func (self *conversation) notify(notice string) {
-	self.transcript = append(self.transcript, entry{notice: notice})
-	self.screen.Line(notice)
+func (self *conversation) notifyFailure(text string) {
+	self.notify(agent.Event{Kind: agent.Notice, Text: text, Failed: true})
+}
+
+func (self *conversation) notifyStopped(text string) {
+	self.notify(agent.Event{Kind: agent.Notice, Text: text})
+}
+
+func (self *conversation) notify(event agent.Event) {
+	self.transcript = append(self.transcript, event)
+	self.screen.Line(self.newPicasso(false).render(event))
+
+	if self.turn.isRunning {
+		self.flush(&self.turn.pendingEvents)
+	}
+
+	_ = self.log.Event(event)
 }
 
 func (self *conversation) finish() {
@@ -524,18 +526,18 @@ func (self *conversation) writeSessionEvents(events []agent.Event) {
 func (self *conversation) storeItems() {
 	items, err := self.assistant.Dump()
 	if err != nil {
-		self.notify(style.Failure("the conversation state could not be stored: " + err.Error()))
+		self.notifyFailure("the conversation state could not be stored: " + err.Error())
 		return
 	}
 
 	if len(items) < self.storedItems {
-		self.notify(style.Failure("the provider replaced append-only conversation state"))
+		self.notifyFailure("the provider replaced append-only conversation state")
 		return
 	}
 
 	for _, item := range items[self.storedItems:] {
 		if err := self.log.Item(item); err != nil {
-			self.notify(style.Failure("the conversation state could not be stored: " + err.Error()))
+			self.notifyFailure("the conversation state could not be stored: " + err.Error())
 			return
 		}
 
@@ -545,12 +547,12 @@ func (self *conversation) storeItems() {
 
 func (self *conversation) write(record func() error) {
 	if err := record(); err != nil {
-		self.notify(style.Failure("the conversation could not be stored: " + err.Error()))
+		self.notifyFailure("the conversation could not be stored: " + err.Error())
 	}
 }
 
 func (self *conversation) showStorageWarnings() {
 	for _, err := range self.log.TakeWarnings() {
-		self.notify(style.Failure(err.Error()))
+		self.notifyFailure(err.Error())
 	}
 }

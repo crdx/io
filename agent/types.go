@@ -88,6 +88,8 @@ const (
 	Result       Kind = "result"      // what that tool handed back
 	StateEvent   Kind = "state"       // durable state changed by a successful call
 	ContextUsage Kind = "usage"       // how much context a completed turn used
+	Notice       Kind = "notice"      // what the harness said itself, rather than the model
+	Startup      Kind = "startup"     // what the harness had ready when the conversation opened
 	Interrupted  Kind = "interrupted" // where a replacement prompt stopped a turn
 	Failure      Kind = "failure"     // why a turn ended before the model completed it
 )

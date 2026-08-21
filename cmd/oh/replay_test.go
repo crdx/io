@@ -23,22 +23,21 @@ import (
 )
 
 const (
-	replayColumns = 100 // wide enough for a table to keep its shape
-	narrowColumns = 40  // narrow enough that everything drawn has to wrap
-	tinyColumns   = 12  // narrower than a label, so what is drawn has to be cut to fit
-	noColumns     = 0   // a terminal that never said how wide it is
-	replayLines   = 24  // tall enough for a live region to have somewhere to go
+	replayColumns = 100
+	replayLines   = 24
+	narrowColumns = 40
+	tinyColumns   = 12
+	oneColumn     = 1
+	noColumns     = 0
 
-	workspaceMarker = "/workspace" // what a hyperlink says instead of wherever the replay ran
-
-	lifecycleScenario = "captured/success@rxw.jsonl" // what the screen is drawn around, for the passes about the screen
+	workspaceMarker   = "/workspace"
+	lifecycleScenario = "captured/success@rxw.jsonl"
 )
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
 type replayEntry struct {
-	Event  *agent.Event `json:"event,omitempty"`
-	Notice string       `json:"notice,omitempty"`
+	Event *agent.Event `json:"event,omitempty"`
 }
 
 func TestEveryScenarioDrawsWhatItDrewBefore(t *testing.T) {
@@ -47,12 +46,13 @@ func TestEveryScenarioDrawsWhatItDrewBefore(t *testing.T) {
 			entries := readJournal(t, journal.path)
 
 			compareWithGolden(t, journal.name, ".ansi", map[string]func() string{
-				"wide":     func() string { return replayAtWidth(t, entries, replayColumns) },
-				"narrow":   func() string { return replayAtWidth(t, entries, narrowColumns) },
-				"tiny":     func() string { return replayAtWidth(t, entries, tinyColumns) },
-				"unsized":  func() string { return replayAtWidth(t, entries, noColumns) },
-				"streamed": func() string { return streamIntoBuffer(t, entries) },
-				"plain":    func() string { return replayPlainly(t, entries) },
+				"wide":       func() string { return replayAtWidth(t, entries, replayColumns) },
+				"narrow":     func() string { return replayAtWidth(t, entries, narrowColumns) },
+				"tiny":       func() string { return replayAtWidth(t, entries, tinyColumns) },
+				"unsized":    func() string { return replayAtWidth(t, entries, noColumns) },
+				"one column": func() string { return replayAtWidth(t, entries, oneColumn) },
+				"streamed":   func() string { return streamIntoBuffer(t, entries) },
+				"plain":      func() string { return replayPlainly(t, entries) },
 			})
 		})
 	}
@@ -286,27 +286,20 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Outp
 			screen:       screen,
 			workspaceDir: workspaceDir,
 			shell:        "bash",
+			log:          testLog(t),
 		},
 	}
 }
 
 func (self *replayRig) load(entries []replayEntry) {
 	for _, entry := range entries {
-		if entry.Event != nil {
-			self.chat.transcript = append(self.chat.transcript, conversationEntry(*entry.Event))
-			continue
-		}
-
-		self.chat.transcript = append(self.chat.transcript, noticeEntry(entry.Notice))
+		self.chat.transcript = append(self.chat.transcript, *entry.Event)
 	}
 }
 
 func (self *replayRig) drawn() string {
 	return strings.ReplaceAll(self.written.String(), self.workspaceDir, workspaceMarker)
 }
-
-func conversationEntry(event agent.Event) entry { return entry{event: event} }
-func noticeEntry(notice string) entry           { return entry{notice: notice} }
 
 func replayAtWidth(t *testing.T, entries []replayEntry, columns int) string {
 	t.Helper()
@@ -335,11 +328,6 @@ func streamIntoBuffer(t *testing.T, entries []replayEntry) string {
 	rig.chat.screen.Progress(true)
 
 	for _, entry := range entries {
-		if entry.Event == nil {
-			rig.chat.notify(entry.Notice)
-			continue
-		}
-
 		for _, delta := range splitIntoDeltas(*entry.Event) {
 			rig.chat.transcript = appendTranscript(rig.chat.transcript, delta)
 			rig.chat.turn.painter.draw(delta)
@@ -385,14 +373,14 @@ func deltaSized(text string) iter.Seq[string] {
 	}
 }
 
-const deltaRunes = 4 // about what a token comes to
+const deltaRunes = 4
 
 func replayUnderFooter(t *testing.T, openRig func(*testing.T) *replayRig, entries []replayEntry) string {
 	t.Helper()
 
 	rig := openRig(t)
 
-	for range 2 { // set again unchanged, so the second time says nothing
+	for range 2 {
 		rig.chat.screen.Footer([]string{footerPrompt, "> and a second row"}, 1, 0)
 	}
 
@@ -433,7 +421,7 @@ func replayThenRelease(t *testing.T, openRig func(*testing.T) *replayRig, entrie
 
 	rig := openRig(t)
 	rig.chat.screen.Progress(true)
-	rig.chat.screen.Progress(true) // said twice, reported once
+	rig.chat.screen.Progress(true)
 	rig.load(entries)
 	rig.chat.replay()
 	rig.chat.screen.Footer([]string{footerPrompt}, 0, len(footerPrompt))
@@ -500,7 +488,7 @@ func layOutWorkspace(t *testing.T) string {
 
 	workspaceDir := filepath.Join(t.TempDir(), "workspace")
 
-	t.Setenv("HOME", workspaceDir) // so a path written ~/… names a file that is really there
+	t.Setenv("HOME", workspaceDir)
 
 	if err := os.CopyFS(workspaceDir, os.DirFS(filepath.Join("testdata", "workspace"))); err != nil {
 		t.Fatal(err)
@@ -534,12 +522,6 @@ func visibleEscapes(stream string) string {
 	return out.String()
 }
 
-var knownToDiverge = map[string]string{
-	"written/interrupted": "a notice is drawn straight to the screen instead of through the painter, " +
-		"so a block still open repaints over it and the notice is lost on a live terminal; " +
-		"a journal has no record kind for one either, so a resumed session cannot draw it at all",
-}
-
 func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
 	for _, journal := range everyJournal(t) {
 		t.Run(journal.name, func(t *testing.T) {
@@ -547,18 +529,12 @@ func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
 
 			replayed := visibleScreen(t, replayAtWidth(t, entries, replayColumns), replayColumns)
 			live := visibleScreen(t, streamIntoBuffer(t, entries), replayColumns)
-			agree := slices.Equal(replayed, live)
-			why, isKnownToDiverge := knownToDiverge[journal.name]
 
-			if !agree && !isKnownToDiverge {
+			if !slices.Equal(replayed, live) {
 				t.Errorf(
 					"a live turn and a replay of it left different screens\n--- replayed ---\n%s\n--- live ---\n%s",
 					strings.Join(replayed, "\n"), strings.Join(live, "\n"),
 				)
-			}
-
-			if agree && isKnownToDiverge {
-				t.Errorf("%s agrees now, so take it out of knownToDiverge: %s", journal.name, why)
 			}
 		})
 	}
@@ -595,10 +571,10 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 
 	passes["the startup line"] = func() string {
 		return renderStartupBanner(1500*time.Microsecond, false, startupInfo{
-			sessionID:     "000000000000000000000000",
-			projectSkills: 3,
-			globalSkills:  1,
-			toolBytes:     614,
+			SessionID:     "000000000000000000000000",
+			ProjectSkills: 3,
+			GlobalSkills:  1,
+			ToolBytes:     614,
 		})
 	}
 

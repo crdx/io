@@ -22,14 +22,14 @@ func TestTookReportsTheScaleAStartupHappensOn(t *testing.T) {
 
 func TestTheStartupLineUsesTheCompactSummary(t *testing.T) {
 	line := renderStartupBanner(12*time.Millisecond, false, startupInfo{
-		sessionID: "034session",
-		contextFiles: []contextFile{
+		SessionID: "034session",
+		ContextFiles: startupFilesOf([]contextFile{
 			{name: "SYSTEM.md", body: strings.Repeat("x", 740)},
 			{name: "AGENTS.md", body: strings.Repeat("x", 3*1024)},
-		},
-		projectSkills: 2,
-		globalSkills:  3,
-		toolBytes:     2273,
+		}),
+		ProjectSkills: 2,
+		GlobalSkills:  3,
+		ToolBytes:     2273,
 	})
 	want := "startup=12ms session=034session SYSTEM.md=~200t AGENTS.md=~800t skills=2p/3g tools=~600t"
 
@@ -69,7 +69,7 @@ func TestNoPromptFilesLeaveNoEmptyField(t *testing.T) {
 }
 
 func TestAResumedConversationHasNoStartupLine(t *testing.T) {
-	line := renderStartupBanner(time.Millisecond, true, startupInfo{projectSkills: 2})
+	line := renderStartupBanner(time.Millisecond, true, startupInfo{ProjectSkills: 2})
 
 	if line != "" {
 		t.Errorf("expected no startup line, got %q", line)

@@ -162,9 +162,11 @@ capture: harness
         trap - EXIT
 
         JOURNAL=$(find "$CAPTURE_STATE" -name session.jsonl | head -n 1)
-        jq -c 'select(.kind == "event") |
-               {event: (.event | if .took then .took = 0 else . end)}' "$JOURNAL" \
-            > {{ CAPTURED }}/$NAME@$CAPS.jsonl
+        jq -c --arg blank 000000000000000000000000 'select(.kind == "event") |
+               {event: (.event
+                        | if .took then .took = 0 else . end
+                        | if .state.session then .state.session = $blank else . end)}' \
+           "$JOURNAL" > {{ CAPTURED }}/$NAME@$CAPS.jsonl
 
         echo "captured $NAME@$CAPS ($(wc -l < {{ CAPTURED }}/$NAME@$CAPS.jsonl) events)"
       done

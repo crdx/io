@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/util"
 )
@@ -12,11 +14,46 @@ import (
 var startedAt = time.Now()
 
 type startupInfo struct {
-	sessionID     string
-	contextFiles  []contextFile
-	projectSkills int
-	globalSkills  int
-	toolBytes     int
+	SessionID     string        `json:"session,omitempty"`
+	ContextFiles  []startupFile `json:"context,omitempty"`
+	ProjectSkills int           `json:"project_skills,omitempty"`
+	GlobalSkills  int           `json:"global_skills,omitempty"`
+	ToolBytes     int           `json:"tools,omitempty"`
+}
+
+type startupFile struct {
+	Name  string `json:"name"`
+	Bytes int    `json:"bytes"`
+}
+
+func startupEvent(elapsed time.Duration, info startupInfo) agent.Event {
+	facts, err := json.Marshal(info)
+	if err != nil {
+		return agent.Event{Kind: agent.Startup, Took: elapsed}
+	}
+
+	return agent.Event{Kind: agent.Startup, Took: elapsed, State: facts}
+}
+
+func renderStartupEvent(event agent.Event) string {
+	var info startupInfo
+	if len(event.State) > 0 {
+		if err := json.Unmarshal(event.State, &info); err != nil {
+			return ""
+		}
+	}
+
+	return style.Subtle("[") + renderStartupBanner(event.Took, false, info) + style.Subtle("]")
+}
+
+func startupFilesOf(files []contextFile) []startupFile {
+	kept := make([]startupFile, 0, len(files))
+
+	for _, file := range files {
+		kept = append(kept, startupFile{Name: file.name, Bytes: len(file.body)})
+	}
+
+	return kept
 }
 
 func renderStartupBanner(elapsed time.Duration, resumed bool, info startupInfo) string {
@@ -26,10 +63,10 @@ func renderStartupBanner(elapsed time.Duration, resumed bool, info startupInfo) 
 
 	var line strings.Builder
 	_, _ = line.WriteString(startupDuration(elapsed))
-	if info.sessionID != "" {
-		_, _ = line.WriteString(style.Subtle(" session=") + style.Normal(info.sessionID))
+	if info.SessionID != "" {
+		_, _ = line.WriteString(style.Subtle(" session=") + style.Normal(info.SessionID))
 	}
-	for _, file := range info.contextFiles {
+	for _, file := range info.ContextFiles {
 		_, _ = line.WriteString(style.Subtle(" ") + startupContextFile(file))
 	}
 	_, _ = line.WriteString(style.Subtle(" ") + startupSkills(info))
@@ -44,19 +81,19 @@ func startupDuration(elapsed time.Duration) string {
 	return field.String()
 }
 
-func startupContextFile(file contextFile) string {
+func startupContextFile(file startupFile) string {
 	var field startupLine
-	field.dim(file.name + "=")
-	field.quantity(util.FormatTokenEstimate(len(file.body), 3), false)
+	field.dim(file.Name + "=")
+	field.quantity(util.FormatTokenEstimate(file.Bytes, 3), false)
 	return field.String()
 }
 
 func startupSkills(info startupInfo) string {
 	var field startupLine
 	field.dim("skills=")
-	field.normal(fmt.Sprint(info.projectSkills))
+	field.normal(fmt.Sprint(info.ProjectSkills))
 	field.dim("p/")
-	field.normal(fmt.Sprint(info.globalSkills))
+	field.normal(fmt.Sprint(info.GlobalSkills))
 	field.dim("g")
 	return field.String()
 }
@@ -64,7 +101,7 @@ func startupSkills(info startupInfo) string {
 func startupTools(info startupInfo) string {
 	var field startupLine
 	field.dim("tools=")
-	field.quantity(util.FormatTokenEstimate(info.toolBytes, 2), false)
+	field.quantity(util.FormatTokenEstimate(info.ToolBytes, 2), false)
 	return field.String()
 }
 
