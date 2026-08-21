@@ -274,11 +274,6 @@ func (self *Block) Add(label Label) int {
 	return index
 }
 
-// Mark completes a call and removes its spinner. Failure text is flattened to one line.
-func (self *Block) Mark(index int, state State, took time.Duration, reason string) {
-	self.MarkWithStats(index, state, took, reason, nil)
-}
-
 // MarkWithStats marks a call and includes measurements made by its tool.
 func (self *Block) MarkWithStats(
 	index int,

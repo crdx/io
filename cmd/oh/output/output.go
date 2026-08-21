@@ -20,13 +20,12 @@ type Output struct {
 
 	mutex sync.Mutex // guards drawing
 
-	isMidLine        bool   // whether the cursor follows text on the current line
-	hasPendingText   bool   // whether streamed text has not ended in a newline
-	isBlankOwed      bool   // whether an empty line is owed to whatever is written next
-	trailingNewlines int    // how many newlines the last thing written ended with
-	hoardedNewlines  string // the newlines an answer ended on, kept back in case it goes on
-	isStreaming      bool   // whether an answer is arriving in pieces
-	isStacked        bool   // whether anything has been said, and so whether the input has a row to sit under
+	isMidLine        bool // whether the cursor follows text on the current line
+	hasPendingText   bool // whether streamed text has not ended in a newline
+	isBlankOwed      bool // whether an empty line is owed to whatever is written next
+	trailingNewlines int  // how many newlines the last thing written ended with
+	isStreaming      bool // whether an answer is arriving in pieces
+	isStacked        bool // whether anything has been said, and so whether the input has a row to sit under
 
 	isTerminal      bool
 	linkRoot        string // where relative paths drawn in the scrollback begin, and "" to link nothing
@@ -80,43 +79,6 @@ func (self *Output) Status() *status.Block {
 	self.measure()
 
 	return status.New(self.drawRow, self.overlay, self.isTerminal, self.columns)
-}
-
-// Answer appends one reply delta, separating each run of deltas from other output.
-func (self *Output) Answer(delta string) {
-	if delta == "" {
-		return
-	}
-
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-
-	self.seal()
-
-	if !self.isStreaming {
-		if delta = strings.TrimLeft(delta, "\n"); delta == "" {
-			return
-		}
-	}
-
-	answerText := strings.TrimRight(delta, "\n")
-	trailingNewlines := delta[len(answerText):]
-
-	if answerText == "" {
-		self.hoardedNewlines += trailingNewlines
-		return
-	}
-
-	self.separate(true)
-
-	if self.isMidLine && !self.isStreaming {
-		self.newline()
-	}
-
-	self.write(self.hoardedNewlines + style.Answer(answerText))
-
-	self.hoardedNewlines = trailingNewlines
-	self.isStreaming = true
 }
 
 // Line writes text on a line of its own after any streamed answer.
@@ -213,10 +175,6 @@ const apart = 2 // newlines with an empty line between them
 func (self *Output) separate(answering bool) {
 	if self.isStreaming != answering {
 		self.isBlankOwed = self.isStacked
-	}
-
-	if !answering {
-		self.hoardedNewlines = "" // an answer that ended on blank rows ended before them
 	}
 }
 

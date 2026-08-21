@@ -15,7 +15,7 @@ func TestAFinishedTurnEndsWithANewline(t *testing.T) {
 	screen := output.New(&screenOutput)
 
 	screen.Line("banner")
-	screen.Answer("hello")
+	screen.DrawAnswer([]string{style.Answer("hello")})
 	screen.End()
 
 	if got := screenOutput.String(); !strings.HasSuffix(got, "\n") {
@@ -29,7 +29,7 @@ func TestTheNextThingSaidStartsTheLineTheTurnCameDownTo(t *testing.T) {
 	screen := output.New(&screenOutput)
 
 	screen.Line("banner")
-	screen.Answer("hello")
+	screen.DrawAnswer([]string{style.Answer("hello")})
 	screen.End()
 	screen.Line("> again")
 
@@ -43,7 +43,7 @@ func TestEndingATurnTwiceComesDownOnlyOnce(t *testing.T) {
 
 	screen := output.New(&screenOutput)
 
-	screen.Answer("hello")
+	screen.DrawAnswer([]string{style.Answer("hello")})
 	screen.End()
 	screen.End()
 	screen.Line("> again")
@@ -110,28 +110,6 @@ func TestAskingForTheSameEmptyLineTwiceLeavesOne(t *testing.T) {
 	}
 }
 
-func TestAnAnswerIsSetApartHoweverManyPiecesItArrivesIn(t *testing.T) {
-	var screenOutput bytes.Buffer
-
-	screen := output.New(&screenOutput)
-
-	screen.Line("read main.go")
-
-	for _, delta := range []string{"one ", "two ", "three"} {
-		screen.Answer(delta)
-	}
-
-	screen.Line("read go.mod")
-
-	want := "read main.go\n\n" +
-		style.Answer("one ") + style.Answer("two ") + style.Answer("three") +
-		"\n\nread go.mod"
-
-	if got := screenOutput.String(); got != want {
-		t.Errorf("expected the answer set apart, got %q", got)
-	}
-}
-
 func TestLinesThatAreNotAnswersRunTogether(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -146,49 +124,15 @@ func TestLinesThatAreNotAnswersRunTogether(t *testing.T) {
 	}
 }
 
-func TestAnAnswerEndingInNewlinesIsNotPushedFurtherApart(t *testing.T) {
-	for _, trailingNewlines := range []string{"", "\n", "\n\n", "\n\n\n"} {
-		var screenOutput bytes.Buffer
-
-		screen := output.New(&screenOutput)
-
-		screen.Answer("hello" + trailingNewlines)
-		screen.Line("read main.go")
-
-		if got := screenOutput.String(); !strings.HasSuffix(got, "\n\nread main.go") {
-			t.Errorf("%q: expected one empty line before the row, got %q", trailingNewlines, got)
-		}
-
-		if strings.Contains(screenOutput.String(), "\n\n\n") {
-			t.Errorf("%q: expected no empty line to double up, got %q", trailingNewlines, screenOutput.String())
-		}
-	}
-}
-
-func TestAnAnswerOpeningOnNewlinesIsNotPushedFurtherApart(t *testing.T) {
-	var screenOutput bytes.Buffer
-
-	screen := output.New(&screenOutput)
-
-	screen.Line("read main.go")
-	screen.Answer("\n")
-	screen.Answer("\n\nhello")
-
-	if got := screenOutput.String(); got != "read main.go\n\n"+style.Answer("hello") {
-		t.Errorf("expected the answer where it was going anyway, got %q", got)
-	}
-}
-
 func TestAnAnswerKeepsTheBlankRowsInsideIt(t *testing.T) {
 	var screenOutput bytes.Buffer
 
 	screen := output.New(&screenOutput)
 
-	screen.Answer("one")
-	screen.Answer("\n\n")
-	screen.Answer("two")
+	screen.DrawAnswer([]string{style.Answer("one"), "", style.Answer("two")})
+	screen.End()
 
-	want := style.Answer("one") + "\n\n" + style.Answer("two")
+	want := style.Answer("one") + "\n\n" + style.Answer("two") + "\n"
 
 	if got := screenOutput.String(); got != want {
 		t.Errorf("expected the paragraph break to stay, got %q", got)
