@@ -467,13 +467,21 @@ func (self *conversation) notifyStopped(text string) {
 
 func (self *conversation) notify(event agent.Event) {
 	self.transcript = append(self.transcript, event)
-	self.screen.Line(self.newPicasso(false).render(event))
+	self.noticePainter().draw(event)
 
 	if self.turn.isRunning {
 		self.flush(&self.turn.pendingEvents)
 	}
 
 	_ = self.log.Event(event)
+}
+
+func (self *conversation) noticePainter() *painter {
+	if self.turn.isRunning {
+		return self.turn.painter
+	}
+
+	return self.newPicasso(false)
 }
 
 func (self *conversation) finish() {

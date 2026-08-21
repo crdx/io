@@ -201,22 +201,37 @@ func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
 func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	const notice = "Background processes killed (tmux: server → bash → sleep)"
 
-	var live bytes.Buffer
+	var live strings.Builder
 	self := &conversation{
 		assistant: agent.New("", quietProvider{}, nil),
-		screen:    output.New(&live),
+		screen:    output.NewTerminalOfSize(&live, 80, 24),
 		log:       testLog(t),
 	}
 
+	call := agent.Event{Kind: agent.Call, ID: "1", Name: "read", Subject: "one.go"}
+
+	self.turn = turn{isRunning: true, painter: self.newPicasso(true)}
+	self.transcript = appendTranscript(self.transcript, call)
+	self.turn.painter.draw(call)
+
 	self.notifyStopped(notice)
+
+	self.turn.painter.close(status.Cancelled)
+	self.turn = turn{}
 	self.screen.End()
 
-	var replayOutput bytes.Buffer
-	self.screen = output.New(&replayOutput)
+	var replayOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&replayOutput, 80, 24)
 	self.replay()
 
-	if live.String() != replayOutput.String() {
-		t.Errorf("live notice %q differs from replayed notice %q", live.String(), replayOutput.String())
+	if visibleScreen(t, live.String(), 80) == nil ||
+		strings.Join(visibleScreen(t, live.String(), 80), "\n") !=
+			strings.Join(visibleScreen(t, replayOutput.String(), 80), "\n") {
+		t.Errorf(
+			"a notice said live leaves a different screen from one replayed\nlive:\n%s\nreplayed:\n%s",
+			strings.Join(visibleScreen(t, live.String(), 80), "\n"),
+			strings.Join(visibleScreen(t, replayOutput.String(), 80), "\n"),
+		)
 	}
 }
 
