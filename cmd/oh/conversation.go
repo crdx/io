@@ -499,8 +499,6 @@ func (self *conversation) finish() {
 	self.turn.painter.close(status.Cancelled)
 	self.screen.End()
 
-	self.screen.End()
-
 	self.turn.isRunning = false
 	self.turn.events = nil
 
