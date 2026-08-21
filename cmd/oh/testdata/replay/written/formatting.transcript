@@ -1,0 +1,119 @@
+=== written down ===
+# Conversation
+
+- **ID:** `000000000000000000000000`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+show me every kind of formatting you can draw
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+Laying out one of each.
+```
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+```
+# Everything the renderer knows
+
+A paragraph with **bold**, *italic*, ~~struck through~~, `code`, a [link](https://example.com/one),
+a bare autolink <https://example.com/two>, an image ![a diagram](diagram.png), and some <b>raw
+HTML</b> in the middle of it.
+
+---
+
+## An ordered list
+
+1. the first step
+2. the second step
+3. the third step
+
+## A task list
+
+- [x] a thing already done
+- [ ] a thing still to do
+
+## An indented code block
+
+    plain = "indented four spaces, so it has no language"
+    print(plain)
+
+## An HTML block
+
+<div class="note">
+  <p>held as it stands</p>
+</div>
+
+## A table that leans every way
+
+| left | centre | right | none |
+|:-----|:------:|------:|------|
+| a    |   b    |     c | d    |
+| aa   |   bb   |    cc | dd   |
+
+> a quotation, which the renderer sets in from the edge
+> and which runs to a second line
+
+The end.
+
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+````
+A script with a bit of everything in it:
+
+```bash
+if [[ -d "$DIR" ]]; then
+    echo "there"
+elif [[ -f "$DIR" ]]; then
+    echo "a file"
+else
+    echo "nowhere"
+fi
+
+while read -r NAME; do
+    echo "$NAME" > out.txt 2>&1
+done < list.txt
+
+until [[ -z "$REST" ]]; do
+    REST=""
+done
+
+case "$MODE" in
+    read)  echo reading ;;
+    write) echo writing ;;
+    *)     echo other ;;
+esac
+
+select CHOICE in one two; do break; done
+
+ls -la | grep -v '^d' | wc -l
+```
+
+And a pattern with a unicode class in it:
+
+```regexp
+^\\p{Lu}\\w{2,8}(?:-\\d+)?$
+```
+
+````
+
+

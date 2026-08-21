@@ -14,6 +14,10 @@ ADDRESS   := "localhost:8117"
 ENDPOINT  := "http://" + ADDRESS + "/v1/codex/responses"
 WIDTH     := "100"
 HEIGHT    := "24"
+CAPTURED  := justfile_directory() / "cmd/oh/testdata/replay/captured"
+
+# what the scenarios read, write and search, laid out again for every capture and every replay
+WORKSPACE_FIXTURE := justfile_directory() / "cmd/oh/testdata/workspace"
 
 # build the visual pass: the harness's output layer over a fake model
 build:
@@ -95,6 +99,84 @@ resume-journal:
 # show the current resume target contents
 resume-target-show:
     cat {{ WORKSPACE }}/target.txt
+
+# capture the journal fixtures the golden replay test draws from
+capture: harness
+    #!/bin/bash
+    set -euo pipefail
+
+    declare -A UNDER=(
+        [error]="rxw"
+        [failure]="rxw"
+        [markdown]="rxw"
+        [parallel]="rxw r"
+        [paths]="rxw r"
+        [resume-edit]="rxw r rw"
+        [resume-grep]="rxw"
+        [resume-read]="rxw"
+        [serial]="rxw r rw rx rxwgb"
+        [success]="rxw rxwgb"
+    )
+
+    declare -A ASKED=(
+        [error]=1
+        [failure]=4
+        [markdown]=1
+        [parallel]=1
+        [paths]=1
+        [resume-edit]=1
+        [resume-grep]=1
+        [resume-read]=1
+        [serial]=1
+        [success]=1
+    )
+
+    CAPTURE_STATE={{ justfile_directory() }}/tmp/capture-state
+    CAPTURE_WORKSPACE={{ justfile_directory() }}/tmp/capture-workspace
+    MODEL=codex/gpt-5.6-sol@high
+
+    export OH_ENDPOINT_URL={{ ENDPOINT }}
+    export XDG_STATE_HOME=$CAPTURE_STATE
+
+    mkdir -p {{ CAPTURED }}
+
+    for SCENARIO in internal/sim/scenarios/*.toml; do
+      NAME=$(basename "$SCENARIO" .toml)
+
+      for CAPS in ${UNDER[$NAME]}; do
+        rm -rf "$CAPTURE_STATE" "$CAPTURE_WORKSPACE"
+        mkdir -p "$CAPTURE_STATE"
+        cp -r {{ WORKSPACE_FIXTURE }} "$CAPTURE_WORKSPACE"
+
+        {{ SIM }} --scenario "$SCENARIO" --address {{ ADDRESS }} >/dev/null 2>&1 &
+        SIM_PID=$!
+        trap 'kill $SIM_PID 2>/dev/null || true' EXIT
+        sleep 0.3
+
+        {{ OH }} -u >/dev/null 2>&1
+
+        for _ in $(seq 1 "${ASKED[$NAME]}"); do echo "have a look at that"; done |
+            {{ OH }} -d "$CAPTURE_WORKSPACE" -c "$CAPS" -m "$MODEL" >/dev/null 2>&1
+
+        kill $SIM_PID 2>/dev/null || true
+        trap - EXIT
+
+        JOURNAL=$(find "$CAPTURE_STATE" -name session.jsonl | head -n 1)
+        jq -c 'select(.kind == "event") |
+               {event: (.event | if .took then .took = 0 else . end)}' "$JOURNAL" \
+            > {{ CAPTURED }}/$NAME@$CAPS.jsonl
+
+        echo "captured $NAME@$CAPS ($(wc -l < {{ CAPTURED }}/$NAME@$CAPS.jsonl) events)"
+      done
+    done
+
+    rm -rf "$CAPTURE_STATE" "$CAPTURE_WORKSPACE"
+
+    echo "now write the goldens: just -f rig.just goldens"
+
+# draw every captured journal again and write what it drew to the golden files
+goldens:
+    go test ./cmd/oh/ -update -count=1
 
 # attach to the interactive rig session
 attach:

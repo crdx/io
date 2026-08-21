@@ -1,0 +1,30 @@
+# An answer that names files, so the paths in it can be watched turning into terminal hyperlinks.
+# Some of the names are files that are there and some are not, because only the ones that are get
+# linked, and a name that goes nowhere has to survive being passed over.
+#
+#   go run ./cmd/simulate --scenario internal/sim/scenarios/paths.toml
+#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh -m gpt-5.6-sol@high
+
+model = "gpt-5.6-sol"
+
+strict = true
+loop = false
+
+delay = "600ms"
+pace = "40ms"
+
+[[turn]]
+think = ["Reading the renderer before saying anything about it."]
+say = "Let me read the renderer."
+
+[[turn.call]]
+name = "read"
+arguments = '{"path":"cmd/oh/line/render.go"}'
+
+[[turn]]
+say = """
+The prompt is built in cmd/oh/line/render.go:4:9, and screen.go holds the spinner beside it. \
+There is nothing about it in README.md, and nothing at all in cmd/oh/line/missing.go, which is \
+where I looked first. settings.toml names the workspace and target.txt is the file everything \
+else works on.
+"""

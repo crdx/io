@@ -1,0 +1,37 @@
+=== written down ===
+# Conversation
+
+- **ID:** `000000000000000000000000`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+show me the loop again
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+Writing it out.
+```
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+````
+Try this.
+
+```ba
+````
+
+

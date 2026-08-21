@@ -1,0 +1,261 @@
+=== written down ===
+# Conversation
+
+- **ID:** `000000000000000000000000`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+the awkward shapes
+```
+
+## Tool call
+
+> 2001-01-01T00:00:01Z
+
+- **ID:** `call_1`
+- **Name:** `divine`
+- **Read only:** `true`
+- **Highlight:** `focus 1-400`
+**Arguments**
+
+```json
+{"path": "one.go"}
+```
+
+**Subject**
+
+```
+one.go
+```
+
+**Qualifier**
+
+```
+lines 1-400
+```
+
+## Tool result
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call_1`
+- **Name:** `divine`
+- **Failed:** `false`
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+nothing to say
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Tool call
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call_2`
+- **Name:** `conjure`
+- **Read only:** `true`
+- **Highlight:** `syntax go`
+**Arguments**
+
+```json
+{"source": "x"}
+```
+
+**Subject**
+
+```go
+func Draw(rows []string, columns int) ([]string, error) { return rows, nil }
+```
+
+## Tool result
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `call_2`
+- **Name:** `conjure`
+- **Failed:** `false`
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+ok
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Tool call
+
+> 2001-01-01T00:00:05Z
+
+- **ID:** `call_3`
+- **Name:** `bash`
+- **Read only:** `false`
+- **Highlight:** `syntax bash`
+**Arguments**
+
+```json
+{"command": "for do done esac fi \\"unclosed"}
+```
+
+**Subject**
+
+```bash
+for do done esac fi "unclosed
+```
+
+## Tool result
+
+> 2001-01-01T00:00:06Z
+
+- **ID:** `call_3`
+- **Name:** `bash`
+- **Failed:** `true`
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+syntax error
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Tool call
+
+> 2001-01-01T00:00:07Z
+
+- **ID:** `call_4`
+- **Name:** `summon`
+- **Read only:** `true`
+**Arguments**
+
+```json
+{"what": "nothing"}
+```
+
+**Subject**
+
+```
+nothing
+```
+
+## Tool result
+
+> 2001-01-01T00:00:08Z
+
+- **ID:** `call_4`
+- **Name:** `summon`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"output"}
+```
+
+## Tool call
+
+> 2001-01-01T00:00:09Z
+
+- **ID:** `call_5`
+- **Name:** `summon`
+- **Read only:** `true`
+**Arguments**
+
+```json
+{"what": "plenty"}
+```
+
+**Subject**
+
+```
+plenty
+```
+
+## Tool result
+
+> 2001-01-01T00:00:10Z
+
+- **ID:** `call_5`
+- **Name:** `summon`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"output","lines":900,"bytes":2048,"total_bytes":900000,"truncated":true}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+lots
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Tool call
+
+> 2001-01-01T00:00:11Z
+
+- **ID:** `call_6`
+- **Name:** `summon`
+- **Read only:** `true`
+**Arguments**
+
+```json
+{"what": "japanese"}
+```
+
+**Subject**
+
+```
+japanese
+```
+
+## Tool result
+
+> 2001-01-01T00:00:12Z
+
+- **ID:** `call_6`
+- **Name:** `summon`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"read","lines":1,"bytes":5400,"total_bytes":5400}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Context usage
+
+> 2001-01-01T00:00:13Z
+
+- **Input tokens:** `48120`
+## Interrupted
+
+> 2001-01-01T00:00:14Z
+
+The turn was interrupted.
+
+## Assistant
+
+> 2001-01-01T00:00:15Z
+
+```
+That is all of the awkward ones.
+```
+
+

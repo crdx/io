@@ -1,0 +1,16 @@
+{"event":{"kind":"prompt","text":"do one of everything so I can see what each call says about itself"}}
+{"event":{"kind":"text","text":"One of each, then."}}
+{"event":{"kind":"call","id":"call_1","name":"bash","arguments":"{\"command\":\"COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT\"}","render":"COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT","highlight":{"kind":"syntax","value":"bash"}}}
+{"event":{"kind":"result","text":"","id":"call_1","name":"bash","took":0,"stats":{"kind":"resources","cpu_time":2400000000,"peak_memory":734003200,"lines":3,"bytes":96,"total_bytes":96}}}
+{"event":{"kind":"call","id":"call_2","name":"ls","arguments":"{\"path\":\".\"}","read_only":true}}
+{"event":{"kind":"result","text":"README.md\nscreen.go\n","id":"call_2","name":"ls","took":0,"stats":{"kind":"list","lines":2}}}
+{"event":{"kind":"call","id":"call_3","name":"read","arguments":"{\"path\":\"diagram.png\"}","render":"diagram.png","read_only":true}}
+{"event":{"kind":"result","text":"","id":"call_3","name":"read","took":0,"stats":{"kind":"image","bytes":184320,"estimated_tokens":1580}}}
+{"event":{"kind":"call","id":"call_4","name":"edit","arguments":"{\"path\":\"screen.go\",\"old_text\":\"cursor\",\"new_text\":\"caret\"}","render":"screen.go"}}
+{"event":{"kind":"result","text":"edited screen.go","id":"call_4","name":"edit","took":0,"stats":{"kind":"diff","added":12,"removed":5}}}
+{"event":{"kind":"call","id":"call_5","name":"grep","arguments":"{\"pattern\":\"^func\\\\s+(New|Draw)[A-Z]\\\\w{2,8}\\\\(\",\"glob\":\"*.go\"}","render":"^func\\s+(New|Draw)[A-Z]\\w{2,8}\\(","highlight":{"kind":"syntax","value":"regexp"},"read_only":true}}
+{"event":{"kind":"result","text":"screen.go:3:var spinner\n","id":"call_5","name":"grep","took":0,"stats":{"kind":"search","lines":7,"bytes":240,"total_bytes":9600,"truncated":true}}}
+{"event":{"kind":"call","id":"call_6","name":"read","arguments":"{\"path\":\"README.md\"}","render":"README.md","read_only":true}}
+{"event":{"kind":"result","text":"# The Workspace\n","id":"call_6","name":"read","took":0,"stats":{"kind":"read","lines":3,"bytes":52,"total_bytes":52,"estimated_tokens":13}}}
+{"event":{"kind":"text","text":"Here is a script, and a pattern beside it:\n\n```bash\nfor NAME in $(ls *.go); do\n    COUNT=$(grep -c \"func\" \"$NAME\")\n    echo \"$NAME has $COUNT\"\ndone\n```\n\n```regexp\n^\\s*(func|type)\\s+\\w{3,12}\\(\n```\n"}}
+{"event":{"kind":"text","text":"That is one call of every kind the harness knows how to measure."}}

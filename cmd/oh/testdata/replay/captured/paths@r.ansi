@@ -1,0 +1,126 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m have a look at that                    \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150manything about it.\e[0m\e[0m\r
+\r
+\r\e[KLet me read the renderer.\r
+\r
+read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
+\r
+\r\e[KThe prompt is built in\r
+\r\e[K\e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\r
+\r\e[Kholds the spinner beside it. There is\r
+\r\e[Knothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and\r
+\r\e[Knothing at all in\r
+\r\e[Kcmd/oh/line/missing.go, which is where I\r
+\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the\r
+\r\e[Kworkspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the file\r
+\r\e[Keverything else works on.\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m have a look at that\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[3m\e[38;2;150;152;150mReading the renderer before saying anything about it.\e[0m\e[0m
+
+Let me read the renderer.
+
+read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m
+
+The prompt is built in cmd/oh/line/render.go:4:9, and screen.go holds the spinner beside it. There is nothing about it in README.md, and nothing at all in cmd/oh/line/missing.go, which is where I looked first. settings.toml names the workspace and target.txt is the file everything else works on.
+
+=== streamed ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mRead\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the rend\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer bef\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before sayi\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying a\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anyth\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anything\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anything abou\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anything about it\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anything about it.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KLet\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me read the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me read the rend\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me read the renderer\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me read the renderer.\e[?25h\e[?2026l\r
+\r
+read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prom\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is bu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in cmd/o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in cmd/oh/li\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in cmd/oh/line/r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in cmd/oh/line/rende\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go\e\\cmd/oh/line/render.go\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and sc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and screen\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ hold\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds the sp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds the spinne\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds the spinner be\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds the spinner beside\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds the spinner beside it.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds the spinner beside it. The\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds the spinner beside it. There i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds the spinner beside it. There\r
+\r\e[Kis no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing ab\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in RE\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in README\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/li\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/line/m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/line/missi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/line/missing.g\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/line/missing.go, w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/line/missing.go, which\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/line/missing.go, which is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/line/missing.go, which is wher\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/line/missing.go, which is where I\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Klook\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. se\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. settin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. settings.t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ name\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the wo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the worksp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and targ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and target.t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the fi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the file e\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the file every\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the file everythin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the file everything el\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the file everything else w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the file everything else works\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the file everything else works on.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m have a look\e[0m\r
+\e[48;2;52;53;65m at that    \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mReading the\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mrenderer\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mbefore\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150msaying\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150manything\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mabout it.\e[0m\e[0m\r
+\r
+\r\e[KLet me read\r
+\r\e[Kthe\r
+\r\e[Krenderer.\r
+\r
+read \e[38;2;192;128;80mcmd/…\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
+\r
+\r\e[KThe prompt\r
+\r\e[Kis built in\r
+\r\e[K\e]8;;file:///workspace/cmd/oh/line\e\\cmd/oh/line\e]8;;\e\\/\r
+\r\e[Krender.go:4:\r
+\r\e[K9, and\r
+\r\e[K\e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\\r
+\r\e[Kholds the\r
+\r\e[Kspinner\r
+\r\e[Kbeside it.\r
+\r\e[KThere is\r
+\r\e[Knothing\r
+\r\e[Kabout it in\r
+\r\e[K\e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\,\r
+\r\e[Kand nothing\r
+\r\e[Kat all in\r
+\r\e[K\e]8;;file:///workspace/cmd/oh/line\e\\cmd/oh/line\e]8;;\e\\/\r
+\r\e[Kmissing.go,\r
+\r\e[Kwhich is\r
+\r\e[Kwhere I\r
+\r\e[Klooked\r
+\r\e[Kfirst.\r
+\r\e[Ksettings.tom\r
+\r\e[Kl names the\r
+\r\e[Kworkspace\r
+\r\e[Kand\r
+\r\e[K\e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\\r
+\r\e[Kis the file\r
+\r\e[Keverything\r
+\r\e[Kelse works\r
+\r\e[Kon.\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m have a look at that\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anything about it.\e[0m\e[0m
+
+\r\e[KLet me read the renderer.
+
+read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m
+
+\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds the spinner beside it. There is nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/line/missing.go, which is where I looked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the file everything else works on.
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anything about it.\e[0m\e[0m\r
+\r
+\r\e[KLet me read the renderer.\r
+\r
+read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
+\r
+\r\e[KThe prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds the spinner beside it. There\r
+\r\e[Kis nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/line/missing.go, which is where I\r
+\r\e[Klooked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the file everything else works on.\r
+\e[?25h\e[?2026l

@@ -55,6 +55,16 @@ func New(writer io.Writer) *Output {
 	return self
 }
 
+// NewTerminalOfSize builds an Output that is drawn as a terminal of the given size.
+func NewTerminalOfSize(writer io.Writer, columns int, lines int) *Output {
+	return &Output{
+		writer:     writer,
+		isTerminal: true,
+		columns:    columns,
+		lines:      lines,
+	}
+}
+
 // LinkPathsUnder marks the paths drawn text names as terminal hyperlinks, resolving the relative
 // ones against root. Nothing is linked until it is given one.
 func (self *Output) LinkPathsUnder(root string) *Output {

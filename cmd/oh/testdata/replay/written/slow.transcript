@@ -1,0 +1,99 @@
+=== written down ===
+# Conversation
+
+- **ID:** `000000000000000000000000`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+search everything for the spinner
+```
+
+## Assistant
+
+> 2001-01-01T00:00:01Z
+
+```
+That will take a moment.
+```
+
+## Tool call
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call_1`
+- **Name:** `grep`
+- **Read only:** `true`
+**Arguments**
+
+```json
+{"pattern":"spinner","glob":"*.go"}
+```
+
+## Tool call
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call_2`
+- **Name:** `find`
+- **Read only:** `true`
+**Arguments**
+
+```json
+{"pattern":"**/*.go"}
+```
+
+## Tool result
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `call_1`
+- **Name:** `grep`
+- **Failed:** `false`
+- **Duration:** `9.5s`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":44,"total_bytes":44}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+screen.go:3:var spinner, footer, cursor string
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Tool result
+
+> 2001-01-01T00:00:05Z
+
+- **ID:** `call_2`
+- **Name:** `find`
+- **Failed:** `true`
+- **Duration:** `1m2s`
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+the search went on too long
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Assistant
+
+> 2001-01-01T00:00:06Z
+
+```
+The grep took nine seconds and the find gave up after a minute.
+```
+
+

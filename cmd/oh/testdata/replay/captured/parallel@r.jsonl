@@ -1,0 +1,29 @@
+{"event":{"kind":"prompt","text":"have a look at that"}}
+{"event":{"kind":"reasoning","text":"Taking the four of them together rather than one after another."}}
+{"event":{"kind":"text","text":"Let me get the shape of this first."}}
+{"event":{"kind":"call","id":"call_2","name":"ls","arguments":"{\"path\":\".\"}","highlight":{"kind":"focus","value":""},"read_only":true}}
+{"event":{"kind":"call","id":"call_3","name":"find","arguments":"{\"pattern\":\"**/*.go\"}","render":"**/*.go","highlight":{"kind":"focus","value":""},"read_only":true}}
+{"event":{"kind":"call","id":"call_4","name":"find","arguments":"{\"pattern\":\"**/*.toml\"}","render":"**/*.toml","highlight":{"kind":"focus","value":""},"read_only":true}}
+{"event":{"kind":"call","id":"call_5","name":"grep","arguments":"{\"pattern\":\"package\",\"glob\":\"*.go\"}","render":"package","detail":"*.go","highlight":{"kind":"syntax","value":"regexp"},"read_only":true}}
+{"event":{"kind":"result","text":"README.md\ncmd/\nscreen.go\nsettings.toml\ntarget.txt","id":"call_2","name":"ls","took":0,"stats":{"kind":"output","lines":5,"bytes":49,"total_bytes":49}}}
+{"event":{"kind":"result","text":"settings.toml","id":"call_4","name":"find","took":0,"stats":{"kind":"output","lines":1,"bytes":13,"total_bytes":13}}}
+{"event":{"kind":"result","text":"cmd/oh/line/render.go\nscreen.go","id":"call_3","name":"find","took":0,"stats":{"kind":"output","lines":2,"bytes":31,"total_bytes":31}}}
+{"event":{"kind":"state","id":"call_5","name":"file_read","state":{"files":[{"path":"screen.go","sha256":"dc25e27e64083a7d4689a7c1bc5d325f1ba7d98a9c8adc4bea9a62a6b26e2beb"},{"path":"cmd/oh/line/render.go","sha256":"20a0815670f99c0a9de02e0e66948fb6ee69dc76dcc0a8e4ffa8b81c110be52b"}]}}}
+{"event":{"kind":"result","text":"screen.go:1:package output\ncmd/oh/line/render.go:1:package line","id":"call_5","name":"grep","took":0,"stats":{"kind":"output","lines":2,"bytes":63,"total_bytes":63}}}
+{"event":{"kind":"reasoning","text":"Three searches, all at once."}}
+{"event":{"kind":"text","text":"Now to find where the drawing happens."}}
+{"event":{"kind":"call","id":"call_7","name":"grep","arguments":"{\"pattern\":\"spinner\",\"glob\":\"*.go\"}","render":"spinner","detail":"*.go","highlight":{"kind":"syntax","value":"regexp"},"read_only":true}}
+{"event":{"kind":"call","id":"call_8","name":"grep","arguments":"{\"pattern\":\"footer\",\"glob\":\"*.go\"}","render":"footer","detail":"*.go","highlight":{"kind":"syntax","value":"regexp"},"read_only":true}}
+{"event":{"kind":"call","id":"call_9","name":"grep","arguments":"{\"pattern\":\"cursor\",\"glob\":\"*.go\"}","render":"cursor","detail":"*.go","highlight":{"kind":"syntax","value":"regexp"},"read_only":true}}
+{"event":{"kind":"state","id":"call_9","name":"file_read","state":{"files":[{"path":"screen.go","sha256":"dc25e27e64083a7d4689a7c1bc5d325f1ba7d98a9c8adc4bea9a62a6b26e2beb"}]}}}
+{"event":{"kind":"result","text":"screen.go:3:var spinner, footer, cursor string","id":"call_9","name":"grep","took":0,"stats":{"kind":"output","lines":1,"bytes":46,"total_bytes":46}}}
+{"event":{"kind":"state","id":"call_8","name":"file_read","state":{"files":[{"path":"screen.go","sha256":"dc25e27e64083a7d4689a7c1bc5d325f1ba7d98a9c8adc4bea9a62a6b26e2beb"}]}}}
+{"event":{"kind":"result","text":"screen.go:3:var spinner, footer, cursor string","id":"call_8","name":"grep","took":0,"stats":{"kind":"output","lines":1,"bytes":46,"total_bytes":46}}}
+{"event":{"kind":"state","id":"call_7","name":"file_read","state":{"files":[{"path":"screen.go","sha256":"dc25e27e64083a7d4689a7c1bc5d325f1ba7d98a9c8adc4bea9a62a6b26e2beb"}]}}}
+{"event":{"kind":"result","text":"screen.go:3:var spinner, footer, cursor string","id":"call_7","name":"grep","took":0,"stats":{"kind":"output","lines":1,"bytes":46,"total_bytes":46}}}
+{"event":{"kind":"text","text":"One more pair, and one of them will not be there."}}
+{"event":{"kind":"call","id":"call_10","name":"ls","arguments":"{\"path\":\".\"}","highlight":{"kind":"focus","value":""},"read_only":true}}
+{"event":{"kind":"call","id":"call_11","name":"read","arguments":"{\"path\":\"nowhere/at/all.go\"}","render":"nowhere/at/all.go","highlight":{"kind":"focus","value":"all.go"},"read_only":true}}
+{"event":{"kind":"result","text":"nowhere/at/all.go: no such file or directory","id":"call_11","name":"read","failed":true,"took":0,"stats":{"kind":"output","lines":1,"bytes":44,"total_bytes":44}}}
+{"event":{"kind":"result","text":"README.md\ncmd/\nscreen.go\nsettings.toml\ntarget.txt","id":"call_10","name":"ls","took":0,"stats":{"kind":"output","lines":5,"bytes":49,"total_bytes":49}}}
+{"event":{"kind":"text","text":"That is the lot: four together, then three together, then a pair where only one of them could be answered.\n"}}

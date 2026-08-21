@@ -1,0 +1,365 @@
+=== written down ===
+# Conversation
+
+- **ID:** `000000000000000000000000`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+run each shape of command and load the skill
+```
+
+## Tool call
+
+> 2001-01-01T00:00:01Z
+
+- **ID:** `call_1`
+- **Name:** `bash`
+- **Read only:** `false`
+- **Highlight:** `syntax bash`
+**Arguments**
+
+```json
+{"command": "if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else echo none; fi"}
+```
+
+**Subject**
+
+```bash
+if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else echo none; fi
+```
+
+## Tool result
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call_1`
+- **Name:** `bash`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
+```
+
+## Tool call
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call_2`
+- **Name:** `bash`
+- **Read only:** `false`
+- **Highlight:** `syntax bash`
+**Arguments**
+
+```json
+{"command": "while read -r NAME; do echo \\"$NAME\\" > out.txt 2>&1; done < list.txt"}
+```
+
+**Subject**
+
+```bash
+while read -r NAME; do echo "$NAME" > out.txt 2>&1; done < list.txt
+```
+
+## Tool result
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `call_2`
+- **Name:** `bash`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
+```
+
+## Tool call
+
+> 2001-01-01T00:00:05Z
+
+- **ID:** `call_3`
+- **Name:** `bash`
+- **Read only:** `false`
+- **Highlight:** `syntax bash`
+**Arguments**
+
+```json
+{"command": "until [[ -z \\"$REST\\" ]]; do REST=\\"\\"; done"}
+```
+
+**Subject**
+
+```bash
+until [[ -z "$REST" ]]; do REST=""; done
+```
+
+## Tool result
+
+> 2001-01-01T00:00:06Z
+
+- **ID:** `call_3`
+- **Name:** `bash`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
+```
+
+## Tool call
+
+> 2001-01-01T00:00:07Z
+
+- **ID:** `call_4`
+- **Name:** `bash`
+- **Read only:** `false`
+- **Highlight:** `syntax bash`
+**Arguments**
+
+```json
+{"command": "case \\"$MODE\\" in read) echo r ;; write) echo w ;; *) echo o ;; esac"}
+```
+
+**Subject**
+
+```bash
+case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac
+```
+
+## Tool result
+
+> 2001-01-01T00:00:08Z
+
+- **ID:** `call_4`
+- **Name:** `bash`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
+```
+
+## Tool call
+
+> 2001-01-01T00:00:09Z
+
+- **ID:** `call_5`
+- **Name:** `bash`
+- **Read only:** `false`
+- **Highlight:** `syntax bash`
+**Arguments**
+
+```json
+{"command": "select CHOICE in one two; do break; done"}
+```
+
+**Subject**
+
+```bash
+select CHOICE in one two; do break; done
+```
+
+## Tool result
+
+> 2001-01-01T00:00:10Z
+
+- **ID:** `call_5`
+- **Name:** `bash`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
+```
+
+## Tool call
+
+> 2001-01-01T00:00:11Z
+
+- **ID:** `call_6`
+- **Name:** `bash`
+- **Read only:** `false`
+- **Highlight:** `syntax bash`
+**Arguments**
+
+```json
+{"command": "ls -la | grep -v \\"^d\\" | wc -l"}
+```
+
+**Subject**
+
+```bash
+ls -la | grep -v "^d" | wc -l
+```
+
+## Tool result
+
+> 2001-01-01T00:00:12Z
+
+- **ID:** `call_6`
+- **Name:** `bash`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
+```
+
+## Tool call
+
+> 2001-01-01T00:00:13Z
+
+- **ID:** `call_7`
+- **Name:** `grep`
+- **Read only:** `true`
+- **Highlight:** `syntax regexp`
+**Arguments**
+
+```json
+{"pattern": "^\\\\p{Lu}\\\\w{2,8}(?:-\\\\d+)?$", "glob": "*.go"}
+```
+
+**Subject**
+
+```regexp
+^\\p{Lu}\\w{2,8}(?:-\\d+)?$
+```
+
+## Tool result
+
+> 2001-01-01T00:00:14Z
+
+- **ID:** `call_7`
+- **Name:** `grep`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"search","lines":1,"bytes":24,"total_bytes":24}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+screen.go:3:var spinner
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Tool call
+
+> 2001-01-01T00:00:15Z
+
+- **ID:** `call_8`
+- **Name:** `read`
+- **Read only:** `true`
+- **Highlight:** `focus SKILL.md`
+**Arguments**
+
+```json
+{"path": "skills/tidy/SKILL.md"}
+```
+
+**Subject**
+
+```
+skills/tidy/SKILL.md
+```
+
+## Tool result
+
+> 2001-01-01T00:00:16Z
+
+- **ID:** `call_8`
+- **Name:** `read`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"read","lines":8,"bytes":72,"total_bytes":72}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+# Tidy
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Tool call
+
+> 2001-01-01T00:00:17Z
+
+- **ID:** `call_9`
+- **Name:** `read`
+- **Read only:** `true`
+- **Highlight:** `focus 日本語 🎉`
+**Arguments**
+
+```json
+{"path": "wide.md"}
+```
+
+**Subject**
+
+```
+wide.md
+```
+
+**Qualifier**
+
+```
+日本語 🎉
+```
+
+## Tool result
+
+> 2001-01-01T00:00:18Z
+
+- **ID:** `call_9`
+- **Name:** `read`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"read","lines":3,"bytes":96,"total_bytes":96}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+# 見出し
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Assistant
+
+> 2001-01-01T00:00:19Z
+
+````
+The listing is `日本語のテキストと絵文字 🎉 が混ざった行`, which is wider on screen than it is long.
+
+I left a note in ~/README.md and the skill is at ~/skills/tidy/SKILL.md.
+
+```go
+// count reports how many there were.
+func count() int {
+\tvar total int = 42
+\treturn total
+}
+```
+
+````
+
+

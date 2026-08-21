@@ -1,0 +1,6 @@
+{"event":{"kind":"prompt","text":"have a look at that"}}
+{"event":{"kind":"text","text":"Searching the target before the process restarts."}}
+{"event":{"kind":"call","id":"call_1","name":"grep","arguments":"{\"pattern\":\"one\",\"path\":\"target.txt\"}","render":"one","detail":"target.txt","highlight":{"kind":"syntax","value":"regexp"},"read_only":true}}
+{"event":{"kind":"state","id":"call_1","name":"file_read","state":{"files":[{"path":"target.txt","sha256":"2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"}]}}}
+{"event":{"kind":"result","text":"target.txt:1:one","id":"call_1","name":"grep","took":0,"stats":{"kind":"output","lines":1,"bytes":16,"total_bytes":16}}}
+{"event":{"kind":"text","text":"The matching target is now safely recorded."}}

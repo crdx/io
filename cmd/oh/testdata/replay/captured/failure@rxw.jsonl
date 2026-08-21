@@ -1,0 +1,11 @@
+{"event":{"kind":"prompt","text":"have a look at that"}}
+{"event":{"kind":"reasoning","text":"This one stops halfway."}}
+{"event":{"kind":"failure","text":"the stream ended before the response did"}}
+{"event":{"kind":"prompt","text":"have a look at that"}}
+{"event":{"kind":"text","text":"Let me think about that. "}}
+{"event":{"kind":"failure","text":"the model is overloaded"}}
+{"event":{"kind":"prompt","text":"have a look at that"}}
+{"event":{"kind":"text","text":"I can only get so far before "}}
+{"event":{"kind":"failure","text":"the response was cut short"}}
+{"event":{"kind":"prompt","text":"have a look at that"}}
+{"event":{"kind":"failure","text":"the endpoint is having a moment"}}

@@ -1,0 +1,99 @@
+=== written down ===
+# Conversation
+
+- **ID:** `000000000000000000000000`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+have a look at that
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+This one stops halfway.
+```
+
+## Failure
+
+> 2001-01-01T00:00:02Z
+
+```
+the stream ended before the response did
+```
+
+## User
+
+> 2001-01-01T00:00:03Z
+
+```
+have a look at that
+```
+
+## Assistant
+
+> 2001-01-01T00:00:04Z
+
+```
+Let me think about that. 
+```
+
+## Failure
+
+> 2001-01-01T00:00:05Z
+
+```
+the model is overloaded
+```
+
+## User
+
+> 2001-01-01T00:00:06Z
+
+```
+have a look at that
+```
+
+## Assistant
+
+> 2001-01-01T00:00:07Z
+
+```
+I can only get so far before 
+```
+
+## Failure
+
+> 2001-01-01T00:00:08Z
+
+```
+the response was cut short
+```
+
+## User
+
+> 2001-01-01T00:00:09Z
+
+```
+have a look at that
+```
+
+## Failure
+
+> 2001-01-01T00:00:10Z
+
+```
+the endpoint is having a moment
+```
+
+

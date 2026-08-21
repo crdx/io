@@ -1,0 +1,2 @@
+{"event":{"kind":"prompt","text":"have a look at that"}}
+{"event":{"kind":"failure","text":"{\n  \"type\": \"error\",\n  \"error\": {\n    \"code\": \"overloaded\",\n    \"retry\": true\n  }\n}"}}

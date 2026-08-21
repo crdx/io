@@ -1,0 +1,88 @@
+=== written down ===
+# Conversation
+
+- **ID:** `000000000000000000000000`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+have a look at that
+```
+
+## Assistant
+
+> 2001-01-01T00:00:01Z
+
+```
+Reading the target before the process restarts.
+```
+
+## Tool call
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call_1`
+- **Name:** `read`
+- **Read only:** `true`
+- **Highlight:** `focus target.txt`
+**Arguments**
+
+```json
+{"path":"target.txt"}
+```
+
+**Subject**
+
+```
+target.txt
+```
+
+## State
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call_1`
+- **Name:** `file_read`
+**State**
+
+```json
+{"files":[{"path":"target.txt","sha256":"2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"}]}
+```
+
+## Tool result
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `call_1`
+- **Name:** `read`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"read","lines":1,"bytes":4}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+one
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+The target is now safely recorded.
+```
+
+

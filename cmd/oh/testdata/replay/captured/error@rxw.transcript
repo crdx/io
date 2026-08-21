@@ -1,0 +1,33 @@
+=== written down ===
+# Conversation
+
+- **ID:** `000000000000000000000000`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+have a look at that
+```
+
+## Failure
+
+> 2001-01-01T00:00:01Z
+
+```
+{
+  "type": "error",
+  "error": {
+    "code": "overloaded",
+    "retry": true
+  }
+}
+```
+
+

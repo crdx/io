@@ -1,0 +1,10 @@
+{"event":{"kind":"prompt","text":"read the renderer and tell me what it does"}}
+{"event":{"kind":"reasoning","text":"Reading the renderer before saying anything about it."}}
+{"event":{"kind":"text","text":"Reading it now."}}
+{"event":{"kind":"call","id":"call_1","name":"read","arguments":"{\"path\":\"cmd/oh/line/render.go\"}","render":"cmd/oh/line/render.go","read_only":true}}
+{"notice":"The turn was interrupted."}
+{"event":{"kind":"prompt","text":"never mind, what is in target.txt?"}}
+{"event":{"kind":"call","id":"call_2","name":"read","arguments":"{\"path\":\"target.txt\"}","render":"target.txt","read_only":true}}
+{"event":{"kind":"result","text":"one\n","id":"call_2","name":"read","took":0,"stats":{"kind":"read","lines":1,"bytes":4,"total_bytes":4}}}
+{"event":{"kind":"text","text":"It holds the word `one`, and nothing else."}}
+{"notice":"Background processes killed (sleep)."}

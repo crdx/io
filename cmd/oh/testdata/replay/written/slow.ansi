@@ -1,0 +1,97 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m search everything for the spinner      \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[?7l\r\e[KThat will take a moment.\r
+\r
+grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
+find \e[38;2;192;128;80m**/*.go\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went …\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went …\e[0m\r
+\r
+\r\e[KThe grep took nine seconds and the find\r
+\r\e[Kgave up after a minute.\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m search everything for the spinner\e[0m
+\e[48;2;52;53;65m\e[0m
+That will take a moment.
+
+grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
+find \e[38;2;192;128;80m**/*.go\e[0m
+
+The grep took nine seconds and the find gave up after a minute.
+
+=== streamed ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat wil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat will ta\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat will take a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat will take a mom\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat will take a moment.\e[?25h\e[?2026l\r
+\r
+grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
+find \e[38;2;192;128;80m**/*.go\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went on too long\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went on too long\e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep too\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took ni\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine secon\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up afte\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a minu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a minute.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m search     \e[0m\r
+\e[48;2;52;53;65m everything \e[0m\r
+\e[48;2;52;53;65m for the    \e[0m\r
+\e[48;2;52;53;65m spinner    \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[?7l\r\e[KThat will\r
+\r\e[Ktake a\r
+\r\e[Kmoment.\r
+\r
+grep \e[38;2;150;152;150mspin\e[0m\e[38;2;150;152;150m…\e[0m\r
+find \e[38;2;192;128;80m**/*…\e[0m\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*…\e[0m\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102m…\e[0m\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102m…\e[0m\r
+\r
+\r\e[KThe grep\r
+\r\e[Ktook nine\r
+\r\e[Kseconds and\r
+\r\e[Kthe find\r
+\r\e[Kgave up\r
+\r\e[Kafter a\r
+\r\e[Kminute.\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m search everything for the spinner\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[?7l\r\e[KThat will take a moment.
+
+grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
+find \e[38;2;192;128;80m**/*.go\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went on too long\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went on too long\e[0m
+
+\r\e[KThe grep took nine seconds and the find gave up after a minute.
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[KThat will take a moment.\r
+\r
+grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
+find \e[38;2;192;128;80m**/*.go\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went on too long\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went on too long\e[0m\r
+\r
+\r\e[KThe grep took nine seconds and the find gave up after a minute.\r
+\e[?25h\e[?2026l

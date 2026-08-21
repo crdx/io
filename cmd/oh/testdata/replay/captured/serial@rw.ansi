@@ -1,0 +1,243 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m have a look at that                    \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mWriting the file the rest of this needs.\e[0m\e[0m\r
+\r
+\r\e[KI'll put a file down to work with.\r
+\r
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwas written.\e[0m\e[0m\r
+\r
+\r\e[KNow to read it, add to it, and read it\r
+\r\e[Kback.\r
+\r
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\r
+ls\r
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m\r
+\r
+\r\e[KThe reads went together, the write\r
+\r\e[Kwaited for them and ran on its own, and\r
+\r\e[Kthe read after it waited for the write.\r
+\r\e[KThe last read has four lines, which it\r
+\r\e[Kcould only have if the write had\r
+\r\e[Kfinished first.\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m have a look at that\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[3m\e[38;2;150;152;150mWriting the file the rest of this needs.\e[0m\e[0m
+
+I'll put a file down to work with.
+
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m
+\e[3m\e[38;2;150;152;150mReading, then writing, then reading what was written.\e[0m\e[0m
+
+Now to read it, add to it, and read it back.
+
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m
+ls
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m
+
+The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.
+
+=== streamed ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mWrit\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mWriting\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mWriting the\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mWriting the file\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mWriting the file the\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mWriting the file the res\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mWriting the file the rest of\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mWriting the file the rest of thi\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mWriting the file the rest of this ne\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mWriting the file the rest of this needs.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KI'll\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI'll put\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI'll put a f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI'll put a file\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI'll put a file down\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI'll put a file down to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI'll put a file down to work\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI'll put a file down to work wit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI'll put a file down to work with.\e[?25h\e[?2026l\r
+\r
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m\r
+\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mRead\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading,\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, the\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, then wr\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, then writin\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, t\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then read\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what was\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what was wri\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what was written\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what was written.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KNow\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to read it,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to read it, add\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to read it, add to i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to read it, add to it, a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to read it, add to it, and r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to read it, add to it, and read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to read it, add to it, and read it b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to read it, add to it, and read it back.\e[?25h\e[?2026l\r
+\r
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\r
+ls\r
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads we\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went toget\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the wri\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waite\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited fo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and ran o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and ran on it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and ran on its ow\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and ran on its own, a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and ran on its own, and t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and ran on its own, and the r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and ran on its own, and the read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and ran on its own, and the read afte\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and ran on its own, and the read after it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and ran on its own, and the read after it wai\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe reads went together, the write waited for them and ran on its own, and the read after it waited\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kfor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the writ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. T\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The l\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has fou\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four li\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, whi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it co\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could only\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could only hav\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could only have if\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could only have if the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could only have if the wri\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could only have if the write h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could only have if the write had f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could only have if the write had finis\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could only have if the write had finished\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could only have if the write had finished firs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfor the write. The last read has four lines, which it could only have if the write had finished\r
+\r\e[Kfirst.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m have a look\e[0m\r
+\e[48;2;52;53;65m at that    \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mWriting the\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mfile the\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mrest of this\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mneeds.\e[0m\e[0m\r
+\r
+\r\e[KI'll put a\r
+\r\e[Kfile down to\r
+\r\e[Kwork with.\r
+\r
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;192;128;80mnot…\e[0m\r\e[K\e[38;2;207;173;0m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m\r\e[K\e[38;2;207;173;0m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mReading,\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mthen\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwriting,\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mthen reading\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwhat was\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mwritten.\e[0m\e[0m\r
+\r
+\r\e[KNow to read\r
+\r\e[Kit, add to\r
+\r\e[Kit, and read\r
+\r\e[Kit back.\r
+\r
+read \e[38;2;192;128;80mnote…\e[0m\r
+ls\r
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;192;128;80mnot…\e[0m\r
+read \e[38;2;192;128;80mnote…\e[0m\e[3A\r\e[Kread \e[38;2;192;128;80mnote…\e[0m
+\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;192;128;80mnot…\e[0m
+\r\e[Kread \e[38;2;192;128;80mnote…\e[0m\e[3A\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;192;128;80mnot…\e[0m
+\r\e[Kread \e[38;2;192;128;80mnote…\e[0m\e[3A\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;192;128;80mnote…\e[0m\e[3A\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m\e[3A\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m\r
+\r
+\r\e[KThe reads\r
+\r\e[Kwent\r
+\r\e[Ktogether,\r
+\r\e[Kthe write\r
+\r\e[Kwaited for\r
+\r\e[Kthem and ran\r
+\r\e[Kon its own,\r
+\r\e[Kand the read\r
+\r\e[Kafter it\r
+\r\e[Kwaited for\r
+\r\e[Kthe write.\r
+\r\e[KThe last\r
+\r\e[Kread has\r
+\r\e[Kfour lines,\r
+\r\e[Kwhich it\r
+\r\e[Kcould only\r
+\r\e[Khave if the\r
+\r\e[Kwrite had\r
+\r\e[Kfinished\r
+\r\e[Kfirst.\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m have a look at that\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mWriting the file the rest of this needs.\e[0m\e[0m
+
+\r\e[KI'll put a file down to work with.
+
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what was written.\e[0m\e[0m
+
+\r\e[KNow to read it, add to it, and read it back.
+
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m
+ls
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+
+\r\e[KThe reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mWriting the file the rest of this needs.\e[0m\e[0m\r
+\r
+\r\e[KI'll put a file down to work with.\r
+\r
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what was written.\e[0m\e[0m\r
+\r
+\r\e[KNow to read it, add to it, and read it back.\r
+\r
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\r
+ls\r
+\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~7t\e[0m
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~100t\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L ~8t\e[0m\r
+\r
+\r\e[KThe reads went together, the write waited for them and ran on its own, and the read after it waited\r
+\r\e[Kfor the write. The last read has four lines, which it could only have if the write had finished\r
+\r\e[Kfirst.\r
+\e[?25h\e[?2026l

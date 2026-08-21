@@ -1,0 +1,81 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m have a look at that                    \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[38;2;204;102;102m{\r
+  "type": "error",\r
+  "error": {\r
+    "code": "overloaded",\r
+    "retry": true\r
+  }\r
+}\e[0m\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m have a look at that\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[38;2;204;102;102m{
+  "type": "error",
+  "error": {
+    "code": "overloaded",
+    "retry": true
+  }
+}\e[0m
+
+=== streamed ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[38;2;204;102;102m{\r
+  "type": "error",\r
+  "error": {\r
+    "code": "overloaded",\r
+    "retry": true\r
+  }\r
+}\e[0m\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m have a look\e[0m\r
+\e[48;2;52;53;65m at that    \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[38;2;204;102;102m{\r
+  "type": "e\r
+rror",\r
+  "error": {\r
+    "code": \r
+"overloaded"\r
+,\r
+    "retry":\r
+ true\r
+  }\r
+}\e[0m\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m have a look at that\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[38;2;204;102;102m{
+  "type": "error",
+  "error": {
+    "code": "overloaded",
+    "retry": true
+  }
+}\e[0m
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[38;2;204;102;102m{\r
+  "type": "error",\r
+  "error": {\r
+    "code": "overloaded",\r
+    "retry": true\r
+  }\r
+}\e[0m\r
+\e[?25h\e[?2026l
