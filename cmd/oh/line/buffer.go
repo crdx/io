@@ -122,9 +122,9 @@ func (self *buffer) lineStart() int {
 }
 
 func (self *buffer) lineStartAt(position int) int {
-	for index := position - 1; index >= 0; index-- {
-		if self.runes[index] == '\n' {
-			return index + 1
+	for i := position - 1; i >= 0; i-- {
+		if self.runes[i] == '\n' {
+			return i + 1
 		}
 	}
 
@@ -136,9 +136,9 @@ func (self *buffer) lineEnd() int {
 }
 
 func (self *buffer) lineEndAt(position int) int {
-	for index := position; index < len(self.runes); index++ {
-		if self.runes[index] == '\n' {
-			return index
+	for i := position; i < len(self.runes); i++ {
+		if self.runes[i] == '\n' {
+			return i
 		}
 	}
 

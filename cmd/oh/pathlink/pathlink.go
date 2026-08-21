@@ -70,17 +70,17 @@ func visibleTextOf(text string) visibleText {
 	starts := []int{0}
 	ends := []int{0}
 
-	for index := 0; index < len(text); {
-		if text[index] == '\x1b' {
-			index = escapeEnd(text, index)
-			starts[len(starts)-1] = index
+	for i := 0; i < len(text); {
+		if text[i] == '\x1b' {
+			i = escapeEnd(text, i)
+			starts[len(starts)-1] = i
 			continue
 		}
 
-		plain.WriteByte(text[index])
-		index++
-		starts = append(starts, index)
-		ends = append(ends, index)
+		plain.WriteByte(text[i])
+		i++
+		starts = append(starts, i)
+		ends = append(ends, i)
 	}
 
 	return visibleText{text: plain.String(), starts: starts, ends: ends}
@@ -93,18 +93,18 @@ func escapeEnd(text string, start int) int {
 
 	switch text[start+1] {
 	case '[':
-		for index := start + 2; index < len(text); index++ {
-			if text[index] >= 0x40 && text[index] <= 0x7e {
-				return index + 1
+		for i := start + 2; i < len(text); i++ {
+			if text[i] >= 0x40 && text[i] <= 0x7e {
+				return i + 1
 			}
 		}
 	case ']':
-		for index := start + 2; index < len(text); index++ {
+		for i := start + 2; i < len(text); i++ {
 			switch {
-			case text[index] == '\a':
-				return index + 1
-			case text[index] == '\x1b' && index+1 < len(text) && text[index+1] == '\\':
-				return index + 2
+			case text[i] == '\a':
+				return i + 1
+			case text[i] == '\x1b' && i+1 < len(text) && text[i+1] == '\\':
+				return i + 2
 			}
 		}
 	default:

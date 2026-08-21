@@ -295,9 +295,9 @@ func (self *Input) normalisePasteIndentation() {
 		return
 	}
 
-	for index, line := range lines {
+	for i, line := range lines {
 		leadingSpaces := len(line) - len(strings.TrimLeft(line, " "))
-		lines[index] = line[min(indentation, leadingSpaces):]
+		lines[i] = line[min(indentation, leadingSpaces):]
 	}
 
 	self.buffer.remove(self.pasteStart, end)

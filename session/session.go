@@ -326,15 +326,15 @@ const (
 func encode(id [16]byte) string {
 	out := [idLength]byte{}
 	number := [16]uint32{}
-	for index, value := range id {
-		number[index] = uint32(value)
+	for i, value := range id {
+		number[i] = uint32(value)
 	}
 
 	for position := idLength - 1; position >= 0; position-- {
 		carry := uint32(0)
-		for index, value := range number {
+		for i, value := range number {
 			carry = carry<<8 | value
-			number[index] = carry / base
+			number[i] = carry / base
 			carry %= base
 		}
 		out[position] = digits[carry]

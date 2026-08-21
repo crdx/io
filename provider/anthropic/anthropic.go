@@ -110,8 +110,8 @@ func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	self.tools = describe(tools)
 
 	self.toolNames = make([]string, len(tools))
-	for index, offer := range tools {
-		self.toolNames[index] = offer.Name
+	for i, offer := range tools {
+		self.toolNames[i] = offer.Name
 	}
 }
 

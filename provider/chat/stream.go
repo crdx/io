@@ -54,8 +54,8 @@ func (self *reply) prose() message {
 func (self *reply) calls() []agent.ToolCall {
 	toolCalls := self.orderedToolCalls()
 	calls := make([]agent.ToolCall, len(toolCalls))
-	for index, call := range toolCalls {
-		calls[index] = agent.ToolCall{
+	for i, call := range toolCalls {
+		calls[i] = agent.ToolCall{
 			ID:        call.ID,
 			Name:      call.Function.Name,
 			Arguments: call.Function.Arguments,
@@ -66,8 +66,8 @@ func (self *reply) calls() []agent.ToolCall {
 
 func (self *reply) orderedToolCalls() []toolCall {
 	indexes := make([]int, 0, len(self.tools))
-	for index := range self.tools {
-		indexes = append(indexes, index)
+	for i := range self.tools {
+		indexes = append(indexes, i)
 	}
 	sort.Ints(indexes)
 

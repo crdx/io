@@ -138,8 +138,8 @@ func (self *renderer) item(marker string, node ast.Node) {
 
 	hangingIndent := strings.Repeat(" ", width.Of(marker))
 
-	for index, row := range inner.rows {
-		if index == 0 {
+	for i, row := range inner.rows {
+		if i == 0 {
 			self.rows = append(self.rows, style.Bullet(marker)+row)
 			continue
 		}
@@ -152,8 +152,8 @@ func (self *renderer) lines(node ast.Node) []string {
 	segments := node.Lines()
 	lines := make([]string, 0, segments.Len())
 
-	for index := range segments.Len() {
-		segment := segments.At(index)
+	for i := range segments.Len() {
+		segment := segments.At(i)
 		lines = append(lines, strings.TrimRight(string(segment.Value(self.source)), "\n"))
 	}
 

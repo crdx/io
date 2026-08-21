@@ -55,8 +55,8 @@ func (self completionsDialect) Read(_ *http.Request, raw []byte) (Request, bool)
 
 	var roles []string
 
-	for index, message := range sent.Messages {
-		if message.Role == "system" && index == 0 {
+	for i, message := range sent.Messages {
+		if message.Role == "system" && i == 0 {
 			asked.Instructions = flatten(message.Content)
 
 			continue
@@ -131,8 +131,8 @@ func (self completionsDialect) Play(stream *Stream, _ *Scenario, turn Turn) {
 		stream.Type(completions.Answer, turn.Say)
 	}
 
-	for index, call := range turn.Calls {
-		stream.Send(completions.Call(index, stream.ID("call"), call.Name, call.Arguments))
+	for i, call := range turn.Calls {
+		stream.Send(completions.Call(i, stream.ID("call"), call.Name, call.Arguments))
 	}
 
 	switch {

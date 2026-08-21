@@ -202,9 +202,9 @@ func parse(data []byte) (metadata, error) {
 	}
 
 	end := -1
-	for index := 1; index < len(lines); index++ {
-		if string(bytes.TrimSpace(lines[index])) == "---" {
-			end = index
+	for i := 1; i < len(lines); i++ {
+		if string(bytes.TrimSpace(lines[i])) == "---" {
+			end = i
 			break
 		}
 	}

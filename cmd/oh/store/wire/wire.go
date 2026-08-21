@@ -240,13 +240,13 @@ func censorBody(body []byte, contentType string) []byte {
 	}
 	if strings.Contains(lowerType, "event-stream") {
 		lines := strings.Split(string(body), "\n")
-		for index, line := range lines {
+		for i, line := range lines {
 			if data, found := strings.CutPrefix(line, "data:"); found {
 				space := ""
 				if remaining, found := strings.CutPrefix(data, " "); found {
 					space, data = " ", remaining
 				}
-				lines[index] = "data:" + space + string(censorJSON([]byte(data)))
+				lines[i] = "data:" + space + string(censorJSON([]byte(data)))
 			}
 		}
 		return []byte(censorBearer(strings.Join(lines, "\n")))

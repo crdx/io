@@ -190,19 +190,19 @@ func renderSubmittedMessage(text string, columns int) string {
 	}
 
 	content := markdown.Render(text, contentColumns)
-	for index, row := range content {
-		content[index] = " " + row
+	for i, row := range content {
+		content[i] = " " + row
 	}
 
 	rows := append([]string{""}, content...)
 	rows = append(rows, "")
 
-	for index, row := range rows {
+	for i, row := range rows {
 		if room := columns - style.Width(row); room > 0 {
 			row += strings.Repeat(" ", room)
 		}
 
-		rows[index] = style.User(row)
+		rows[i] = style.User(row)
 	}
 
 	return strings.Join(rows, "\n")

@@ -162,8 +162,8 @@ func (self *state) draw() {
 	out.WriteString(style.Subtle(clip(header, width)))
 	out.WriteString("\r\n\r\n")
 
-	for index := self.offset; index < min(self.offset+rows, len(self.sessions)); index++ {
-		out.WriteString(self.row(index, width))
+	for i := self.offset; i < min(self.offset+rows, len(self.sessions)); i++ {
+		out.WriteString(self.row(i, width))
 		out.WriteString("\r\n")
 	}
 

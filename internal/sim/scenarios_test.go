@@ -25,19 +25,19 @@ func TestEveryScenarioThatShipsCanBeRead(t *testing.T) {
 			continue
 		}
 
-		for index, turn := range scenario.Turns {
+		for i, turn := range scenario.Turns {
 			if turn.ErrorEvent != "" && !json.Valid([]byte(turn.ErrorEvent)) {
-				t.Errorf("%s: turn %d has an invalid error event", path, index+1)
+				t.Errorf("%s: turn %d has an invalid error event", path, i+1)
 			}
 
 			for _, call := range turn.Calls {
 				if call.Name == "" {
-					t.Errorf("%s: turn %d asks for a tool with no name", path, index+1)
+					t.Errorf("%s: turn %d asks for a tool with no name", path, i+1)
 				}
 
 				var arguments map[string]any
 				if err := json.Unmarshal([]byte(call.Arguments), &arguments); err != nil {
-					t.Errorf("%s: turn %d: %s: %v", path, index+1, call.Name, err)
+					t.Errorf("%s: turn %d: %s: %v", path, i+1, call.Name, err)
 				}
 			}
 		}

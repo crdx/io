@@ -46,9 +46,9 @@ func TestEveryLineEndingIsOneEnter(t *testing.T) {
 			continue
 		}
 
-		for index := range want {
-			if got[index] != want[index] {
-				t.Errorf("%s: expected %v, got %v", name, want[index], got[index])
+		for i := range want {
+			if got[i] != want[i] {
+				t.Errorf("%s: expected %v, got %v", name, want[i], got[i])
 			}
 		}
 	}
@@ -86,9 +86,9 @@ func TestASequenceIsNotABareEscape(t *testing.T) {
 		t.Fatalf("expected %d keys, got %v", len(want), got)
 	}
 
-	for index := range want {
-		if got[index] != want[index] {
-			t.Errorf("expected %v, got %v", want[index], got[index])
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("expected %v, got %v", want[i], got[i])
 		}
 	}
 }
@@ -101,9 +101,9 @@ func TestFocusChangesArriveAsKeys(t *testing.T) {
 		t.Fatalf("expected %d focus changes, got %v", len(want), got)
 	}
 
-	for index := range want {
-		if got[index] != want[index] {
-			t.Errorf("expected %v, got %v", want[index], got[index])
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("expected %v, got %v", want[i], got[i])
 		}
 	}
 }

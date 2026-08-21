@@ -21,13 +21,13 @@ func TestWhatEachKindOfCharacterTakes(t *testing.T) {
 }
 
 func TestTheTableIsInOrderAndDoesNotOverlap(t *testing.T) {
-	for index, one := range spans {
+	for i, one := range spans {
 		if one.first > one.last {
-			t.Errorf("span %d runs backwards: %#x to %#x", index, one.first, one.last)
+			t.Errorf("span %d runs backwards: %#x to %#x", i, one.first, one.last)
 		}
 
-		if index > 0 && one.first <= spans[index-1].last {
-			t.Errorf("span %d starts at %#x, inside the one before it", index, one.first)
+		if i > 0 && one.first <= spans[i-1].last {
+			t.Errorf("span %d starts at %#x, inside the one before it", i, one.first)
 		}
 	}
 }

@@ -27,8 +27,8 @@ func TestSessionIDsCannotEscapeTheSessionDirectory(t *testing.T) {
 
 func TestEveryBitOfAnIDSurvivesBeingWritten(t *testing.T) {
 	var least, most [16]byte
-	for index := range most {
-		most[index] = 0xff
+	for i := range most {
+		most[i] = 0xff
 	}
 
 	tests := map[[16]byte]string{

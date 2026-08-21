@@ -59,12 +59,12 @@ func (self *Stream) Send(event string) {
 // Type writes text a word at a time, waiting between words, which is how an answer arrives from a
 // real endpoint and is what a display drawing one has to cope with.
 func (self *Stream) Type(as func(string) string, text string) {
-	for index, word := range strings.SplitAfter(text, " ") {
+	for i, word := range strings.SplitAfter(text, " ") {
 		if word == "" {
 			continue
 		}
 
-		if index > 0 {
+		if i > 0 {
 			time.Sleep(self.pace)
 		}
 

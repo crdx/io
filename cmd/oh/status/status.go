@@ -323,10 +323,10 @@ func (self *Block) Close(state State) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	for index := range self.rows {
-		if self.rows[index].state == Running {
-			self.rows[index].state = state
-			self.rows[index].took = time.Since(self.rows[index].startedAt)
+	for i := range self.rows {
+		if self.rows[i].state == Running {
+			self.rows[i].state = state
+			self.rows[i].took = time.Since(self.rows[i].startedAt)
 		}
 	}
 
@@ -372,8 +372,8 @@ func (self *Block) redraw() {
 
 	lines := make([]string, len(self.rows))
 
-	for index, item := range self.rows {
-		lines[index] = "\r\x1b[K" + self.line(item)
+	for i, item := range self.rows {
+		lines[i] = "\r\x1b[K" + self.line(item)
 	}
 
 	up := ""

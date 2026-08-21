@@ -138,13 +138,13 @@ func stripHyperlinks(text string) string {
 func stripEscapes(text string) string {
 	var plain strings.Builder
 
-	for index := 0; index < len(text); {
-		if text[index] == '\x1b' {
-			index = escapeEnd(text, index)
+	for i := 0; i < len(text); {
+		if text[i] == '\x1b' {
+			i = escapeEnd(text, i)
 			continue
 		}
-		plain.WriteByte(text[index])
-		index++
+		plain.WriteByte(text[i])
+		i++
 	}
 
 	return plain.String()

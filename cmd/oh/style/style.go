@@ -182,15 +182,15 @@ func sgr(value string) string {
 
 	channels := make([]uint64, 3)
 
-	for index := range channels {
-		at := 1 + index*2
+	for i := range channels {
+		at := 1 + i*2
 
 		channelValue, err := strconv.ParseUint(value[at:at+2], 16, 8)
 		if err != nil {
 			return ""
 		}
 
-		channels[index] = channelValue
+		channels[i] = channelValue
 	}
 
 	return fmt.Sprintf("38;2;%d;%d;%d", channels[0], channels[1], channels[2])

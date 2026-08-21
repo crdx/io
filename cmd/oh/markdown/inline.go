@@ -103,8 +103,8 @@ func (self *renderer) words(parent ast.Node) string {
 func (self *renderer) raw(node *ast.RawHTML) string {
 	var out strings.Builder
 
-	for index := range node.Segments.Len() {
-		segment := node.Segments.At(index)
+	for i := range node.Segments.Len() {
+		segment := node.Segments.At(i)
 		out.Write(segment.Value(self.source))
 	}
 

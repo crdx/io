@@ -54,10 +54,10 @@ type options struct {
 func parse(arguments []string) (options, error) {
 	self := options{address: "localhost:8080"}
 
-	for index := 0; index < len(arguments); index++ {
-		argument := arguments[index]
+	for i := 0; i < len(arguments); i++ {
+		argument := arguments[i]
 
-		wants := func() bool { return index+1 < len(arguments) }
+		wants := func() bool { return i+1 < len(arguments) }
 
 		switch argument {
 		case "-s", "--scenario":
@@ -65,16 +65,16 @@ func parse(arguments []string) (options, error) {
 				return self, fmt.Errorf("%s wants a path", argument)
 			}
 
-			index++
-			self.scenario = arguments[index]
+			i++
+			self.scenario = arguments[i]
 
 		case "-a", "--address":
 			if !wants() {
 				return self, fmt.Errorf("%s wants an address", argument)
 			}
 
-			index++
-			self.address = arguments[index]
+			i++
+			self.address = arguments[i]
 
 		case "-h", "--help":
 			return self, errHelp

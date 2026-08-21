@@ -116,8 +116,8 @@ func matchModel(query string, choices []modelChoice) (modelChoice, error) {
 		return matches[0], nil
 	default:
 		names := make([]string, len(matches))
-		for index, choice := range matches {
-			names[index] = choice.provider + "/" + choice.model
+		for i, choice := range matches {
+			names[i] = choice.provider + "/" + choice.model
 		}
 		return modelChoice{}, fmt.Errorf("model %q is ambiguous; matches: %s", query, strings.Join(names, ", "))
 	}

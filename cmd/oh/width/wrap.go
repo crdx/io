@@ -23,8 +23,8 @@ func Wrap(text string, cells int) []string {
 	rows := Rows(text, cells)
 	texts := make([]string, len(rows))
 
-	for index, row := range rows {
-		texts[index] = row.Text
+	for i, row := range rows {
+		texts[i] = row.Text
 	}
 
 	return texts
@@ -39,13 +39,13 @@ func Rows(text string, cells int) []Row {
 
 	start := 0
 
-	for index := 0; index <= len(runes); index++ {
-		if index < len(runes) && runes[index] != '\n' {
+	for i := 0; i <= len(runes); i++ {
+		if i < len(runes) && runes[i] != '\n' {
 			continue
 		}
 
-		rows = append(rows, wrapLine(string(runes[start:index]), cells, start)...)
-		start = index + 1
+		rows = append(rows, wrapLine(string(runes[start:i]), cells, start)...)
+		start = i + 1
 	}
 
 	return rows
@@ -126,8 +126,8 @@ func run(atoms []atom, at int) (int, int) {
 func offsetsOf(atoms []atom) []int {
 	out := make([]int, len(atoms)+1)
 
-	for index, one := range atoms {
-		out[index+1] = out[index] + len([]rune(one.text))
+	for i, one := range atoms {
+		out[i+1] = out[i] + len([]rune(one.text))
 	}
 
 	return out
@@ -196,14 +196,14 @@ func join(atoms []atom, begin int, end int, openStyles []string) string {
 func stylesAt(atoms []atom) []string {
 	openStyles := make([]string, len(atoms)+1)
 
-	for index, one := range atoms {
+	for i, one := range atoms {
 		switch {
 		case !one.isEscape:
-			openStyles[index+1] = openStyles[index]
+			openStyles[i+1] = openStyles[i]
 		case one.text == reset || one.text == "\x1b[m":
-			openStyles[index+1] = ""
+			openStyles[i+1] = ""
 		default:
-			openStyles[index+1] = openStyles[index] + one.text
+			openStyles[i+1] = openStyles[i] + one.text
 		}
 	}
 
@@ -215,9 +215,9 @@ func split(text string) []atom {
 
 	runes := []rune(text)
 
-	for index := 0; index < len(runes); {
-		if runes[index] == '\x1b' {
-			end := index + 1
+	for i := 0; i < len(runes); {
+		if runes[i] == '\x1b' {
+			end := i + 1
 
 			for end < len(runes) && runes[end] != 'm' && runes[end] != 'K' {
 				end++
@@ -227,23 +227,23 @@ func split(text string) []atom {
 				end++
 			}
 
-			atoms = append(atoms, atom{text: string(runes[index:end]), isEscape: true})
-			index = end
+			atoms = append(atoms, atom{text: string(runes[i:end]), isEscape: true})
+			i = end
 
 			continue
 		}
 
-		size := Rune(runes[index])
+		size := Rune(runes[i])
 
 		if size == 0 && len(atoms) > 0 && !atoms[len(atoms)-1].isEscape {
-			atoms[len(atoms)-1].text += string(runes[index])
-			index++
+			atoms[len(atoms)-1].text += string(runes[i])
+			i++
 
 			continue
 		}
 
-		atoms = append(atoms, atom{text: string(runes[index]), cells: size})
-		index++
+		atoms = append(atoms, atom{text: string(runes[i]), cells: size})
+		i++
 	}
 
 	return atoms

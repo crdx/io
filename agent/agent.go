@@ -20,8 +20,8 @@ func New(prompt string, provider Provider, tools []tool.Tool) *Agent {
 	availableTools := make(map[string]tool.Tool, len(tools))
 	stateOwners := map[string]tool.Tool{}
 
-	for index, offeredTool := range tools {
-		definitions[index] = tool.Describe(offeredTool)
+	for i, offeredTool := range tools {
+		definitions[i] = tool.Describe(offeredTool)
 		availableTools[offeredTool.Name()] = offeredTool
 		if stateKey := offeredTool.StateKey(); stateKey != "" {
 			stateOwners[stateKey] = offeredTool
@@ -44,8 +44,8 @@ func (self *Agent) Dump() ([]json.RawMessage, error) {
 	if len(items) < len(self.state) {
 		return nil, ErrStateReplaced
 	}
-	for index := range self.state {
-		if !bytes.Equal(items[index], self.state[index]) {
+	for i := range self.state {
+		if !bytes.Equal(items[i], self.state[i]) {
 			return nil, ErrStateReplaced
 		}
 	}
@@ -67,8 +67,8 @@ func (self *Agent) Load(items []json.RawMessage) error {
 
 func cloneState(items []json.RawMessage) []json.RawMessage {
 	clonedItems := make([]json.RawMessage, len(items))
-	for index, item := range items {
-		clonedItems[index] = bytes.Clone(item)
+	for i, item := range items {
+		clonedItems[i] = bytes.Clone(item)
 	}
 	return clonedItems
 }
@@ -143,8 +143,8 @@ const CancelledOutput = "the call was cancelled"
 func cancelledResults(calls []ToolCall) []ToolResult {
 	results := make([]ToolResult, len(calls))
 
-	for index, call := range calls {
-		results[index] = ToolResult{ID: call.ID, Output: CancelledOutput}
+	for i, call := range calls {
+		results[i] = ToolResult{ID: call.ID, Output: CancelledOutput}
 	}
 
 	return results
@@ -173,9 +173,9 @@ func (self *Agent) runCalls(
 
 	queuedCalls := make([]pendingCall, len(calls))
 
-	for index, rawCall := range calls {
+	for i, rawCall := range calls {
 		parsedCall, failure := self.parseCall(rawCall)
-		queuedCalls[index] = pendingCall{
+		queuedCalls[i] = pendingCall{
 			rawCall:    rawCall,
 			parsedCall: parsedCall,
 			failure:    failure,
@@ -260,7 +260,7 @@ func (self *Agent) runBatch(
 ) bool {
 	done := make(chan completedCall, len(batch))
 
-	for index, item := range batch {
+	for i, item := range batch {
 		go func() {
 			startedAt := time.Now()
 
@@ -270,7 +270,7 @@ func (self *Agent) runBatch(
 				executionResult, ok = exec(ctx, item.parsedCall)
 			}
 
-			results[index] = ToolResult{
+			results[i] = ToolResult{
 				ID:     item.rawCall.ID,
 				Output: executionResult.Output,
 				Image:  executionResult.Image,

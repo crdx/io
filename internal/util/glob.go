@@ -18,8 +18,8 @@ func matchSegments(patternSegments []string, nameSegments []string) bool {
 	}
 
 	if patternSegments[0] == "**" {
-		for index := 0; index <= len(nameSegments); index++ {
-			if matchSegments(patternSegments[1:], nameSegments[index:]) {
+		for i := 0; i <= len(nameSegments); i++ {
+			if matchSegments(patternSegments[1:], nameSegments[i:]) {
 				return true
 			}
 		}

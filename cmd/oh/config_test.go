@@ -37,9 +37,9 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	if len(directories) != len(want) {
 		t.Fatalf("got %#v, want %#v", directories, want)
 	}
-	for index := range want {
-		if directories[index] != want[index] {
-			t.Errorf("directory %d is %q, want %q", index, directories[index], want[index])
+	for i := range want {
+		if directories[i] != want[i] {
+			t.Errorf("directory %d is %q, want %q", i, directories[i], want[i])
 		}
 	}
 }
@@ -151,9 +151,9 @@ func TestConfiguredAccessPathsAreResolved(t *testing.T) {
 		if len(got) != len(want) {
 			t.Fatalf("%s got %#v, want %#v", name, got, want)
 		}
-		for index := range want {
-			if got[index] != want[index] {
-				t.Errorf("%s path %d is %q, want %q", name, index, got[index], want[index])
+		for i := range want {
+			if got[i] != want[i] {
+				t.Errorf("%s path %d is %q, want %q", name, i, got[i], want[i])
 			}
 		}
 	}

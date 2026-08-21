@@ -47,8 +47,8 @@ func (self *renderer) table(node *east.Table) []string {
 	rows = append(rows, tableRows(head, node.Alignments, widths, true)...)
 	rows = append(rows, border(widths, "├", "┼", "┤"))
 
-	for index, one := range body {
-		if index > 0 {
+	for i, one := range body {
+		if i > 0 {
 			rows = append(rows, border(widths, "├", "┼", "┤")) // a cell that wrapped is one row still
 		}
 

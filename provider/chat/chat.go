@@ -249,8 +249,8 @@ type functionSpec struct {
 
 func describe(tools []tool.Definition) []functionTool {
 	described := make([]functionTool, len(tools))
-	for index, definition := range tools {
-		described[index] = functionTool{
+	for i, definition := range tools {
+		described[i] = functionTool{
 			Type: "function",
 			Function: functionSpec{
 				Name:        definition.Name,
@@ -265,8 +265,8 @@ func describe(tools []tool.Definition) []functionTool {
 // ToolsSize is the number of bytes the tools occupy in their provider wire representation.
 func ToolsSize(tools []tool.Tool) int {
 	definitions := make([]tool.Definition, len(tools))
-	for index, offeredTool := range tools {
-		definitions[index] = tool.Describe(offeredTool)
+	for i, offeredTool := range tools {
+		definitions[i] = tool.Describe(offeredTool)
 	}
 
 	encodedTools, _ := json.Marshal(describe(definitions)) //nolint:errchkjson // all fields have safe encoders

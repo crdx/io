@@ -31,8 +31,8 @@ func cacheable(messages []message) []json.RawMessage {
 	}
 
 	encoded := make([]json.RawMessage, len(messages))
-	for index, item := range messages {
-		encoded[index] = encodeItem(item)
+	for i, item := range messages {
+		encoded[i] = encodeItem(item)
 	}
 
 	return encoded

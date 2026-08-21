@@ -28,8 +28,8 @@ func TestPick(t *testing.T) {
 
 	directory := t.TempDir()
 
-	for index, prompt := range prompts {
-		meta := fmt.Appendf(nil, `{"workspaceDir":"/home/alice/proj/%d"}`, index)
+	for i, prompt := range prompts {
+		meta := fmt.Appendf(nil, `{"workspaceDir":"/home/alice/proj/%d"}`, i)
 		log, err := session.Create(directory, meta)
 		if err != nil {
 			t.Fatal(err)

@@ -64,8 +64,8 @@ func fromClaudeCodeName(name string, known []string) string {
 func describe(tools []tool.Definition) []functionTool {
 	offeredTools := make([]functionTool, len(tools))
 
-	for index, offer := range tools {
-		offeredTools[index] = functionTool{
+	for i, offer := range tools {
+		offeredTools[i] = functionTool{
 			Name:        toClaudeCodeName(offer.Name),
 			Description: offer.Description,
 			Schema:      offer.Schema,
@@ -82,8 +82,8 @@ func describe(tools []tool.Definition) []functionTool {
 // ToolsSize is the number of bytes the tools occupy in their provider wire representation.
 func ToolsSize(tools []tool.Tool) int {
 	definitions := make([]tool.Definition, len(tools))
-	for index, offeredTool := range tools {
-		definitions[index] = tool.Describe(offeredTool)
+	for i, offeredTool := range tools {
+		definitions[i] = tool.Describe(offeredTool)
 	}
 
 	encodedTools, _ := json.Marshal(describe(definitions)) //nolint:errchkjson // all fields have safe encoders

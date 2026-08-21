@@ -3,13 +3,13 @@ package width
 import "testing"
 
 func TestTheSpansAreOrderedAndSeparate(t *testing.T) {
-	for index := range spans {
-		if spans[index].first > spans[index].last {
-			t.Errorf("span %d runs backwards: %04X to %04X", index, spans[index].first, spans[index].last)
+	for i := range spans {
+		if spans[i].first > spans[i].last {
+			t.Errorf("span %d runs backwards: %04X to %04X", i, spans[i].first, spans[i].last)
 		}
 
-		if index > 0 && spans[index].first <= spans[index-1].last {
-			t.Errorf("span %d starts at %04X, inside the one before it", index, spans[index].first)
+		if i > 0 && spans[i].first <= spans[i-1].last {
+			t.Errorf("span %d starts at %04X, inside the one before it", i, spans[i].first)
 		}
 	}
 }

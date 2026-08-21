@@ -34,10 +34,10 @@ func Rune(value rune) int {
 func Cut(text string, cells int) (string, int) {
 	takenCells := 0
 
-	for index, value := range text {
+	for i, value := range text {
 		size := Rune(value)
 		if takenCells+size > cells {
-			return text[:index], takenCells
+			return text[:i], takenCells
 		}
 
 		takenCells += size

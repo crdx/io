@@ -80,9 +80,9 @@ func buildFilter(allowUnixSockets bool) ([]unix.SockFilter, error) {
 		load(offsetArgZero),
 	)
 
-	for index, family := range blockedSocketFamilies {
+	for i, family := range blockedSocketFamilies {
 		//nolint:gosec // a fixed handful
-		filter = append(filter, jumpIfEqual(family, uint8(len(blockedSocketFamilies)-index), 0))
+		filter = append(filter, jumpIfEqual(family, uint8(len(blockedSocketFamilies)-i), 0))
 	}
 
 	filter = append(

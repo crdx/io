@@ -40,8 +40,8 @@ func highlight(lines []string, language string) []string { // chroma reads it, t
 	for _, token := range iterator.Tokens() {
 		style := tokenStyle(token.Type)
 
-		for index, piece := range strings.Split(token.Value, "\n") { // a style may not span a row
-			if index > 0 {
+		for i, piece := range strings.Split(token.Value, "\n") { // a style may not span a row
+			if i > 0 {
 				rows = append(rows, "")
 			}
 
@@ -404,8 +404,8 @@ func regexpRepetitionEnd(source string, start int) int {
 func plainly(lines []string) []string {
 	highlightedLines := make([]string, len(lines))
 
-	for index, line := range lines {
-		highlightedLines[index] = style.Block(line)
+	for i, line := range lines {
+		highlightedLines[i] = style.Block(line)
 	}
 
 	return highlightedLines

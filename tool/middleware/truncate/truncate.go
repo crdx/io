@@ -19,8 +19,8 @@ const Limit = 32 * 1024
 func Tools(subjects []tool.Tool) []tool.Tool {
 	wrappedTools := make([]tool.Tool, len(subjects))
 
-	for index, subject := range subjects {
-		wrappedTools[index] = Tool(subject)
+	for i, subject := range subjects {
+		wrappedTools[i] = Tool(subject)
 	}
 
 	return wrappedTools

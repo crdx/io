@@ -368,8 +368,8 @@ func TestConversationWithStreamingToolCall(t *testing.T) {
 	}
 	messages := requests[1].Messages
 	roles := make([]string, len(messages))
-	for index, message := range messages {
-		roles[index] = message.Role
+	for i, message := range messages {
+		roles[i] = message.Role
 	}
 	if want := []string{"system", "user", "assistant", "tool"}; !slices.Equal(roles, want) {
 		t.Errorf("got roles %v", roles)

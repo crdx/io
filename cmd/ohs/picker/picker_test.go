@@ -10,8 +10,8 @@ import (
 func pickerState() *state {
 	sessions := make([]*Session, 3)
 
-	for index := range sessions {
-		sessions[index] = &Session{}
+	for i := range sessions {
+		sessions[i] = &Session{}
 	}
 
 	return &state{sessions: sessions}

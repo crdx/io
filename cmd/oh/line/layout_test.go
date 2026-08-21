@@ -20,13 +20,13 @@ func TestEveryLayoutIsDrawable(t *testing.T) {
 	forEachLayout(t, func(t *testing.T, rows []string, cursorRow int, cursorColumn int, room int) {
 		t.Helper()
 
-		for index, row := range rows {
-			if index > 0 && strings.HasPrefix(row, " ") && strings.TrimSpace(row) != "" {
-				t.Errorf("row %d is led by whitespace a break should have eaten: %q", index, rows)
+		for i, row := range rows {
+			if i > 0 && strings.HasPrefix(row, " ") && strings.TrimSpace(row) != "" {
+				t.Errorf("row %d is led by whitespace a break should have eaten: %q", i, rows)
 			}
 
 			if width.Of(row) > room && len([]rune(strings.TrimRight(row, " "))) > 1 {
-				t.Errorf("row %d overruns %d cells: %q", index, room, rows)
+				t.Errorf("row %d overruns %d cells: %q", i, room, rows)
 			}
 		}
 

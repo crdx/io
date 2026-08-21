@@ -80,12 +80,12 @@ func loadConfiguredSettings(path string) (configuredSettings, error) {
 		{"sandbox.home", &settings.Sandbox.Home},
 	}
 	for _, list := range lists {
-		for index, written := range *list.values {
+		for i, written := range *list.values {
 			resolved, err := resolveConfiguredPath(path, written)
 			if err != nil {
 				return settings, fmt.Errorf("%s: %s: %w", shownPath, list.name, err)
 			}
-			(*list.values)[index] = resolved
+			(*list.values)[i] = resolved
 		}
 	}
 

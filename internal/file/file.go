@@ -150,8 +150,8 @@ func (self *Root) refuseWrite(name string) error {
 		parts := strings.Split(resolvedName, string(filepath.Separator))
 		followedSymlink := false
 
-		for index := range parts {
-			prefix := filepath.Join(parts[:index+1]...)
+		for i := range parts {
+			prefix := filepath.Join(parts[:i+1]...)
 			info, err := self.root.Lstat(prefix)
 			if err != nil {
 				if errors.Is(err, fs.ErrNotExist) {
@@ -168,7 +168,7 @@ func (self *Root) refuseWrite(name string) error {
 				return err
 			}
 
-			remainingPath := strings.Join(parts[index+1:], string(filepath.Separator))
+			remainingPath := strings.Join(parts[i+1:], string(filepath.Separator))
 			resolvedName = filepath.Clean(filepath.Join(filepath.Dir(prefix), target, remainingPath))
 			if err := self.refuse(resolvedName); err != nil {
 				return err

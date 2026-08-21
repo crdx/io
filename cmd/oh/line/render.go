@@ -40,9 +40,9 @@ func layout(buffer *buffer, room int) ([]string, int, int) {
 }
 
 func locate(rows []width.Row, runes []rune, cursor int, room int) (int, int) {
-	for index, row := range rows {
+	for i, row := range rows {
 		if cursor >= row.End && cursor <= row.Next && row.Next > row.End {
-			return min(index+1, len(rows)-1), 0
+			return min(i+1, len(rows)-1), 0
 		}
 
 		if cursor >= row.Begin && cursor <= row.End {
@@ -51,7 +51,7 @@ func locate(rows []width.Row, runes []rune, cursor int, room int) (int, int) {
 				column = min(column, room)
 			}
 
-			return index, column
+			return i, column
 		}
 	}
 

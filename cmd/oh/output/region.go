@@ -223,9 +223,9 @@ func (self *Output) drawInput() string {
 
 	var out strings.Builder
 
-	for index, row := range self.input.rows {
+	for i, row := range self.input.rows {
 		switch {
-		case index > 0:
+		case i > 0:
 			out.WriteString("\r\n")
 		case self.shownFooter.separators > 0:
 			out.WriteString(strings.Repeat("\r\n", self.shownFooter.separators))

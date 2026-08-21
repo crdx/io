@@ -275,8 +275,8 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 
 func TestAThoughtHasMarkdownStripped(t *testing.T) {
 	rows := renderReasoning("## **Checking** `one.go`", 40)
-	for index := range rows {
-		rows[index] = style.Plain(rows[index])
+	for i := range rows {
+		rows[i] = style.Plain(rows[i])
 	}
 
 	if got := strings.Join(rows, "\n"); got != "Checking one.go" {
@@ -300,8 +300,8 @@ func TestAThoughtRunsDirectlyIntoAToolCall(t *testing.T) {
 
 func TestAThoughtWrapsAtWordBoundaries(t *testing.T) {
 	rows := renderReasoning("one two three four", 9)
-	for index := range rows {
-		rows[index] = style.Plain(rows[index])
+	for i := range rows {
+		rows[i] = style.Plain(rows[i])
 	}
 
 	if got := strings.Join(rows, "\n"); got != "one two\nthree\nfour" {
