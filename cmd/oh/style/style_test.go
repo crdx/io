@@ -3,19 +3,19 @@ package style
 import (
 	"strings"
 	"testing"
-
-	"crdx.org/col"
 )
 
-func TestDisabledCapabilitiesAreDimmedOverTheirMutedColour(t *testing.T) {
-	originalColorEnabled := colorEnabled
-	colorEnabled = true
-	col.Enable()
+func enableColor(t *testing.T) {
+	t.Helper()
 
-	t.Cleanup(func() {
-		colorEnabled = originalColorEnabled
-		col.Disable()
-	})
+	previous := colorEnabled
+	apply(true)
+
+	t.Cleanup(func() { apply(previous) })
+}
+
+func TestDisabledCapabilitiesAreDimmedOverTheirMutedColour(t *testing.T) {
+	enableColor(t)
 
 	got := Withheld("w")
 
@@ -29,9 +29,7 @@ func TestDisabledCapabilitiesAreDimmedOverTheirMutedColour(t *testing.T) {
 }
 
 func TestTheShellPromptMatchesACommandName(t *testing.T) {
-	originalColorEnabled := colorEnabled
-	colorEnabled = true
-	t.Cleanup(func() { colorEnabled = originalColorEnabled })
+	enableColor(t)
 
 	if got, want := Shell("$"), Function("$"); got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -39,10 +37,7 @@ func TestTheShellPromptMatchesACommandName(t *testing.T) {
 }
 
 func TestAUserMessageHasABackgroundThatSurvivesInnerStyles(t *testing.T) {
-	originalColorEnabled := colorEnabled
-	colorEnabled = true
-
-	t.Cleanup(func() { colorEnabled = originalColorEnabled })
+	enableColor(t)
 
 	got := User("before " + Code("inside") + " after")
 
@@ -56,14 +51,7 @@ func TestAUserMessageHasABackgroundThatSurvivesInnerStyles(t *testing.T) {
 }
 
 func TestReasoningIsItalic(t *testing.T) {
-	originalColorEnabled := colorEnabled
-	colorEnabled = true
-	col.Enable()
-
-	t.Cleanup(func() {
-		colorEnabled = originalColorEnabled
-		col.Disable()
-	})
+	enableColor(t)
 
 	got := Reasoning("looking %s", "here")
 
@@ -77,14 +65,7 @@ func TestReasoningIsItalic(t *testing.T) {
 }
 
 func TestNothingIsPaintedWhereTheScreenIsNotATerminal(t *testing.T) {
-	originalColorEnabled := colorEnabled // decided once, so it outlives any test that changes it
-
-	t.Cleanup(func() {
-		colorEnabled = originalColorEnabled
-		col.InitUnless(!originalColorEnabled)
-	})
-
-	Init(&strings.Builder{}) // anything that is not a file is not a terminal
+	t.Cleanup(Init(&strings.Builder{})) // anything that is not a file is not a terminal
 
 	if colorEnabled {
 		t.Fatal("expected colour to be off where the screen is not a terminal")
@@ -103,5 +84,25 @@ func TestNothingIsPaintedWhereTheScreenIsNotATerminal(t *testing.T) {
 
 	if got := Pending(Read("r")); got != "r" {
 		t.Errorf("a style over another painted %q, want it left alone", got)
+	}
+}
+
+func TestInitPutsTheDecisionBackWhenItsRestoreIsCalled(t *testing.T) {
+	enableColor(t)
+
+	restore := Init(&strings.Builder{})
+
+	if colorEnabled {
+		t.Fatal("expected colour off while the screen is not a terminal")
+	}
+
+	restore()
+
+	if !colorEnabled {
+		t.Fatal("expected colour back on once the decision was put back")
+	}
+
+	if got := Failure("hello"); got == "hello" {
+		t.Errorf("expected painting to resume, got %q", got)
 	}
 }

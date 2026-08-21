@@ -97,10 +97,24 @@ var (
 var colorEnabled = true
 
 // Init decides whether anything is painted at all.
-func Init(screen any) {
-	colorEnabled = os.Getenv("NO_COLOR") == "" && tty.Is(screen)
+func Init(screen any) func() {
+	previous := colorEnabled
 
-	col.InitUnless(!colorEnabled)
+	apply(os.Getenv("NO_COLOR") == "" && tty.Is(screen))
+
+	return func() {
+		apply(previous)
+	}
+}
+
+func apply(enabled bool) {
+	colorEnabled = enabled
+
+	if enabled {
+		col.Enable()
+	} else {
+		col.Disable()
+	}
 }
 
 // Width is how many cells text takes up once painted.
