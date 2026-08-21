@@ -4,6 +4,7 @@ package store
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"sync"
 	"time"
@@ -313,4 +314,38 @@ func (s *Session) Messages() int {
 		}
 	}
 	return count
+}
+
+// Rebuild writes a session's transcript again from its journal, replacing whatever was there.
+func Rebuild(directory, name string) error {
+	storedSession, err := Read(directory, name)
+	if err != nil {
+		return err
+	}
+
+	path := filepath.Join(directory, name, transcriptName)
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	recorder, err := transcript.Open(path, transcript.Meta{
+		Name: name, Started: storedSession.Started, Model: storedSession.Meta.Model,
+		Effort: storedSession.Meta.Effort, Provider: storedSession.Meta.Provider,
+		Workspace: storedSession.Meta.WorkspaceDir,
+	})
+	if err != nil {
+		return err
+	}
+
+	writeError := session.Records(directory, name, func(line session.Line) error {
+		if line.Kind != session.Event || line.Event == nil {
+			return nil
+		}
+		return recorder.Event(line.Time, *line.Event)
+	})
+
+	if closeError := recorder.Close(); writeError == nil {
+		writeError = closeError
+	}
+	return writeError
 }

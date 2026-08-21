@@ -443,3 +443,110 @@ func TestAnOpenSessionIsRefusedToASecondWriter(t *testing.T) {
 		t.Fatalf("expected the second writer to be refused, got %v", err)
 	}
 }
+
+func TestRebuildWritesTheSameTranscriptAgain(t *testing.T) {
+	directory := t.TempDir()
+	name := write(t, directory)
+	path := filepath.Join(directory, name, "chat.md")
+
+	first, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := store.Rebuild(directory, name); err != nil {
+		t.Fatal(err)
+	}
+
+	second, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(first) != string(second) {
+		t.Errorf("the transcript was written differently the second time:\n%s\n---\n%s", first, second)
+	}
+}
+
+func TestRebuildReplacesATranscriptRatherThanAppendingToIt(t *testing.T) {
+	directory := t.TempDir()
+	name := write(t, directory)
+	path := filepath.Join(directory, name, "chat.md")
+
+	if err := os.WriteFile(path, []byte("whatever an older renderer wrote\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := store.Rebuild(directory, name); err != nil {
+		t.Fatal(err)
+	}
+
+	rebuilt, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if strings.Contains(string(rebuilt), "older renderer") {
+		t.Error("the old transcript survived the rebuild")
+	}
+	if !strings.HasPrefix(string(rebuilt), "# Conversation\n") {
+		t.Errorf("the rebuilt transcript does not start with a header:\n%s", rebuilt)
+	}
+}
+
+func TestRebuildLeavesTheJournalAlone(t *testing.T) {
+	directory := t.TempDir()
+	name := write(t, directory)
+	path := filepath.Join(directory, name, "session.jsonl")
+
+	before, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := store.Rebuild(directory, name); err != nil {
+		t.Fatal(err)
+	}
+
+	after, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(before) != string(after) {
+		t.Error("the journal changed during a rebuild")
+	}
+}
+
+func TestRebuildRefusesASessionThatIsNotThere(t *testing.T) {
+	if err := store.Rebuild(t.TempDir(), "brave-otter"); err == nil {
+		t.Error("expected a rebuild of an unstored session to be refused")
+	}
+}
+
+func TestTheTranscriptQuotesTheTimesTheJournalRecorded(t *testing.T) {
+	directory := t.TempDir()
+	name := write(t, directory)
+
+	var recorded []string
+	err := session.Records(directory, name, func(line session.Line) error {
+		if line.Kind == session.Head || line.Kind == session.Event {
+			recorded = append(recorded, line.Time.UTC().Format(time.RFC3339Nano))
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	written, err := os.ReadFile(filepath.Join(directory, name, "chat.md")) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, at := range recorded {
+		if !strings.Contains(string(written), at) {
+			t.Errorf("the transcript does not quote the journal time %q", at)
+		}
+	}
+}
