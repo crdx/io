@@ -14,6 +14,145 @@ find \e[38;2;192;128;80m**/*.go\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\
 \r\e[KThe grep took nine seconds and the find\r
 \r\e[Kgave up after a minute.\r
 \e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+v\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+y\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+g\e[0m\r
+\e[48;2;52;53;65m \r
+f\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+p\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[?7l\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Kw\r
+\r\e[Ki\r
+\r\e[Kl\r
+\r\e[Kl\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kk\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Km\r
+\r\e[Ko\r
+\r\e[Km\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[K.\r
+\r
+\r
+\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[K\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kg\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kp\r
+\r\e[Kt\r
+\r\e[Ko\r
+\r\e[Ko\r
+\r\e[Kk\r
+\r\e[Kn\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ke\r
+\r\e[Kc\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kf\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Kg\r
+\r\e[Ka\r
+\r\e[Kv\r
+\r\e[Ke\r
+\r\e[Ku\r
+\r\e[Kp\r
+\r\e[Ka\r
+\r\e[Kf\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Km\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Ku\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[K.\r
+\e[?25h\e[?2026l
 === plain ===
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m search everything for the spinner\e[0m

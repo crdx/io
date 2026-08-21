@@ -8,9 +8,13 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
+## startup
 
 > 2001-01-01T00:00:00Z
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 have a look at that
@@ -18,7 +22,7 @@ have a look at that
 
 ## Reasoning
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Looking for where the prompt is drawn.
@@ -26,7 +30,7 @@ Looking for where the prompt is drawn.
 
 ## Assistant
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 I'll have a look at how the editor draws its prompt.
@@ -34,7 +38,7 @@ I'll have a look at how the editor draws its prompt.
 
 ## Tool call
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 - **ID:** `call_2`
 - **Name:** `grep`
@@ -60,7 +64,7 @@ prompt
 
 ## State
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 - **ID:** `call_2`
 - **Name:** `file_read`
@@ -72,7 +76,7 @@ prompt
 
 ## Tool result
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 - **ID:** `call_2`
 - **Name:** `grep`
@@ -93,7 +97,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Reasoning
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 ```
 The prompt is drawn by the renderer, so that is the file to read.
@@ -101,7 +105,7 @@ The prompt is drawn by the renderer, so that is the file to read.
 
 ## Assistant
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 ```
 Found it. Reading the renderer now.
@@ -109,7 +113,7 @@ Found it. Reading the renderer now.
 
 ## Tool call
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:09Z
 
 - **ID:** `call_4`
 - **Name:** `read`
@@ -129,7 +133,7 @@ cmd/oh/line/render.go
 
 ## State
 
-> 2001-01-01T00:00:09Z
+> 2001-01-01T00:00:10Z
 
 - **ID:** `call_4`
 - **Name:** `file_read`
@@ -141,7 +145,7 @@ cmd/oh/line/render.go
 
 ## Tool result
 
-> 2001-01-01T00:00:10Z
+> 2001-01-01T00:00:11Z
 
 - **ID:** `call_4`
 - **Name:** `read`
@@ -164,7 +168,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:11Z
+> 2001-01-01T00:00:12Z
 
 ```
 The prompt is drawn by `layout`, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.

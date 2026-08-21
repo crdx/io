@@ -8,9 +8,13 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
+## startup
 
 > 2001-01-01T00:00:00Z
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 have a look at that
@@ -18,7 +22,7 @@ have a look at that
 
 ## Reasoning
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Writing the file the rest of this needs.
@@ -26,7 +30,7 @@ Writing the file the rest of this needs.
 
 ## Assistant
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 I'll put a file down to work with.
@@ -34,7 +38,7 @@ I'll put a file down to work with.
 
 ## Tool call
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 - **ID:** `call_2`
 - **Name:** `write`
@@ -60,7 +64,7 @@ notes.md
 
 ## Tool result
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 - **ID:** `call_2`
 - **Name:** `write`
@@ -81,7 +85,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Reasoning
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 Reading, then writing, then reading what was written.
@@ -89,7 +93,7 @@ Reading, then writing, then reading what was written.
 
 ## Assistant
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 ```
 Now to read it, add to it, and read it back.
@@ -97,7 +101,7 @@ Now to read it, add to it, and read it back.
 
 ## Tool call
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 - **ID:** `call_4`
 - **Name:** `read`
@@ -117,7 +121,7 @@ notes.md
 
 ## Tool call
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:09Z
 
 - **ID:** `call_5`
 - **Name:** `ls`
@@ -131,7 +135,7 @@ notes.md
 
 ## Tool call
 
-> 2001-01-01T00:00:09Z
+> 2001-01-01T00:00:10Z
 
 - **ID:** `call_6`
 - **Name:** `write`
@@ -157,7 +161,7 @@ notes.md
 
 ## Tool call
 
-> 2001-01-01T00:00:10Z
+> 2001-01-01T00:00:11Z
 
 - **ID:** `call_7`
 - **Name:** `read`
@@ -177,7 +181,7 @@ notes.md
 
 ## Tool result
 
-> 2001-01-01T00:00:11Z
+> 2001-01-01T00:00:12Z
 
 - **ID:** `call_4`
 - **Name:** `read`
@@ -198,7 +202,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Tool result
 
-> 2001-01-01T00:00:12Z
+> 2001-01-01T00:00:13Z
 
 - **ID:** `call_5`
 - **Name:** `ls`
@@ -206,7 +210,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 **Stats**
 
 ```json
-{"kind":"output","lines":5,"bytes":49,"total_bytes":49}
+{"kind":"output","lines":7,"bytes":65,"total_bytes":65}
 ```
 
 **Output preview (first 3 lines, up to 1 KiB)**
@@ -221,7 +225,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Tool result
 
-> 2001-01-01T00:00:13Z
+> 2001-01-01T00:00:14Z
 
 - **ID:** `call_6`
 - **Name:** `write`
@@ -242,7 +246,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Tool result
 
-> 2001-01-01T00:00:14Z
+> 2001-01-01T00:00:15Z
 
 - **ID:** `call_7`
 - **Name:** `read`
@@ -263,7 +267,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:15Z
+> 2001-01-01T00:00:16Z
 
 ```
 The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.

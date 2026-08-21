@@ -51,6 +51,10 @@ Reading it now.
 cmd/oh/line/render.go
 ```
 
+## notice
+
+> 2001-01-01T00:00:04Z
+
 ## User
 
 > 2001-01-01T00:00:05Z
@@ -106,5 +110,13 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 ```
 It holds the word `one`, and nothing else.
 ```
+
+## notice
+
+> 2001-01-01T00:00:09Z
+
+## notice
+
+> 2001-01-01T00:00:10Z
 
 

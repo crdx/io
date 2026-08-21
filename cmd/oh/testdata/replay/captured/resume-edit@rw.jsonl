@@ -1,3 +1,4 @@
+{"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
 {"event":{"kind":"prompt","text":"have a look at that"}}
 {"event":{"kind":"text","text":"Editing the target without reading it again."}}
 {"event":{"kind":"call","id":"call_1","name":"edit","arguments":"{\"path\":\"target.txt\",\"old_text\":\"one\",\"new_text\":\"two\"}","render":"target.txt","highlight":{"kind":"focus","value":"target.txt"}}}

@@ -1,5 +1,8 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m00000000000000000000\r
+0000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m have a look at that                    \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -10,7 +13,186 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[Kread \e[38
 \r
 \r\e[KThe target is now safely recorded.\r
 \e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150m\r
+s\r
+t\r
+a\r
+r\r
+t\r
+u\r
+p\r
+=\e[0m\r
+0\e[38;2;150;152;150m\r
+s\e[0m\e[38;2;150;152;150m\r
+ \r
+s\r
+e\r
+s\r
+s\r
+i\r
+o\r
+n\r
+=\e[0m\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\e[38;2;150;152;150m\r
+ \e[0m\e[38;2;150;152;150m\r
+s\r
+k\r
+i\r
+l\r
+l\r
+s\r
+=\e[0m\r
+0\e[38;2;150;152;150m\r
+p\r
+/\e[0m\r
+0\e[38;2;150;152;150m\r
+g\e[0m\e[38;2;150;152;150m\r
+ \e[0m\e[38;2;150;152;150m\r
+t\r
+o\r
+o\r
+l\r
+s\r
+=\e[0m\e[38;2;150;152;150m\r
+~\e[0m\r
+6\r
+0\r
+0\e[38;2;150;152;150m\r
+t\e[0m\e[38;2;150;152;150m\r
+]\e[0m\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+v\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[?7l\r\e[KR\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Kg\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Kb\r
+\r\e[Ke\r
+\r\e[Kf\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kp\r
+\r\e[Kr\r
+\r\e[Ko\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ks\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Kt\r
+\r\e[Ks\r
+\r\e[K.\r
+\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1t\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1t\e[0m\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Kg\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kw\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kf\r
+\r\e[Ke\r
+\r\e[Kl\r
+\r\e[Ky\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kc\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Kd\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[K.\r
+\e[?25h\e[?2026l
 === plain ===
+\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m
+
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
@@ -21,7 +203,9 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m
 The target is now safely recorded.
 
 === streamed ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -32,7 +216,14 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[Kread \e[38
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe targ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now sa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely rec\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely recorde\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely recorded.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m \r
+session=\e[0m0000\r
+000000000000\r
+00000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mski\r
+lls=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mto\r
+ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m have a look\e[0m\r
 \e[48;2;52;53;65m at that    \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
@@ -51,7 +242,9 @@ read \e[38;2;192;128;80mtarg…\e[0m\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2
 \r\e[Krecorded.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m
+
+\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KReading the target before the process restarts.
@@ -61,7 +254,9 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[Kread \e[38
 \r\e[KThe target is now safely recorded.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

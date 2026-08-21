@@ -1,3 +1,4 @@
+{"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
 {"event":{"kind":"prompt","text":"have a look at that"}}
 {"event":{"kind":"reasoning","text":"Writing the file the rest of this needs."}}
 {"event":{"kind":"text","text":"I'll put a file down to work with."}}
@@ -10,7 +11,7 @@
 {"event":{"kind":"call","id":"call_6","name":"write","arguments":"{\"path\":\"notes.md\",\"content\":\"# Notes\\n\\nOne.\\nTwo.\\nThree.\\nFour.\\n\"}","render":"notes.md","detail":"32B","highlight":{"kind":"focus","value":"notes.md"},"read_only":true}}
 {"event":{"kind":"call","id":"call_7","name":"read","arguments":"{\"path\":\"notes.md\"}","render":"notes.md","highlight":{"kind":"focus","value":"notes.md"},"read_only":true}}
 {"event":{"kind":"result","text":"notes.md: no such file or directory","id":"call_4","name":"read","failed":true,"took":0,"stats":{"kind":"output","lines":1,"bytes":35,"total_bytes":35}}}
-{"event":{"kind":"result","text":"README.md\ncmd/\nscreen.go\nsettings.toml\ntarget.txt","id":"call_5","name":"ls","took":0,"stats":{"kind":"output","lines":5,"bytes":49,"total_bytes":49}}}
+{"event":{"kind":"result","text":"README.md\ncmd/\nscreen.go\nsettings.toml\nskills/\ntarget.txt\nwide.md","id":"call_5","name":"ls","took":0,"stats":{"kind":"output","lines":7,"bytes":65,"total_bytes":65}}}
 {"event":{"kind":"result","text":"the filesystem is read-only","id":"call_6","name":"write","failed":true,"took":0,"stats":{"kind":"output","lines":1,"bytes":27,"total_bytes":27}}}
 {"event":{"kind":"result","text":"notes.md: no such file or directory","id":"call_7","name":"read","failed":true,"took":0,"stats":{"kind":"output","lines":1,"bytes":35,"total_bytes":35}}}
 {"event":{"kind":"text","text":"The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.\n"}}

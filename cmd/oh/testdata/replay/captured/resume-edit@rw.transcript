@@ -8,9 +8,13 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
+## startup
 
 > 2001-01-01T00:00:00Z
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 have a look at that
@@ -18,7 +22,7 @@ have a look at that
 
 ## Assistant
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Editing the target without reading it again.
@@ -26,7 +30,7 @@ Editing the target without reading it again.
 
 ## Tool call
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 - **ID:** `call_1`
 - **Name:** `edit`
@@ -46,7 +50,7 @@ target.txt
 
 ## Tool result
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 - **ID:** `call_1`
 - **Name:** `edit`
@@ -67,7 +71,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 The resumed edit completed.

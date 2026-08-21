@@ -1,0 +1,54 @@
+=== written down ===
+# Conversation
+
+- **ID:** `000000000000000000000000`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+what does the accented file say?
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+Reading the file with the combining marks in its name.
+```
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+```
+The name is written `café` rather than `café`, so the accent is a mark of its own.
+
+A family 👨‍👩‍👧 is one glyph joined from several, and a heart ❤️ asks to be drawn in colour.
+
+Combining marks pile up too: á̂̃̄ is one letter under four of them.
+
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+A styled wide rune has nowhere to go in one column: `日本` in code, **中文** in bold.
+
+And a result that came back with Windows line endings:\r
+one\r
+two\r
+three\r
+
+```
+
+

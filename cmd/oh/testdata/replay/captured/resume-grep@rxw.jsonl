@@ -1,3 +1,4 @@
+{"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
 {"event":{"kind":"prompt","text":"have a look at that"}}
 {"event":{"kind":"text","text":"Searching the target before the process restarts."}}
 {"event":{"kind":"call","id":"call_1","name":"grep","arguments":"{\"pattern\":\"one\",\"path\":\"target.txt\"}","render":"one","detail":"target.txt","highlight":{"kind":"syntax","value":"regexp"},"read_only":true}}

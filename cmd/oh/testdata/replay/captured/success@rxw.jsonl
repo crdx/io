@@ -1,3 +1,4 @@
+{"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
 {"event":{"kind":"prompt","text":"have a look at that"}}
 {"event":{"kind":"reasoning","text":"Looking for where the prompt is drawn."}}
 {"event":{"kind":"text","text":"I'll have a look at how the editor draws its prompt."}}

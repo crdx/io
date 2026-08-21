@@ -1,5 +1,8 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m00000000000000000000\r
+0000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m have a look at that                    \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -41,7 +44,581 @@
 \r\e[K\e[38;2;150;152;150m(https://example.com/notes)\e[0m for the\r
 \r\e[Krest.\r
 \e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150m\r
+s\r
+t\r
+a\r
+r\r
+t\r
+u\r
+p\r
+=\e[0m\r
+0\e[38;2;150;152;150m\r
+s\e[0m\e[38;2;150;152;150m\r
+ \r
+s\r
+e\r
+s\r
+s\r
+i\r
+o\r
+n\r
+=\e[0m\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\e[38;2;150;152;150m\r
+ \e[0m\e[38;2;150;152;150m\r
+s\r
+k\r
+i\r
+l\r
+l\r
+s\r
+=\e[0m\r
+0\e[38;2;150;152;150m\r
+p\r
+/\e[0m\r
+0\e[38;2;150;152;150m\r
+g\e[0m\e[38;2;150;152;150m\r
+ \e[0m\e[38;2;150;152;150m\r
+t\r
+o\r
+o\r
+l\r
+s\r
+=\e[0m\e[38;2;150;152;150m\r
+~\e[0m\r
+6\r
+0\r
+0\e[38;2;150;152;150m\r
+t\e[0m\e[38;2;150;152;150m\r
+]\e[0m\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+v\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mL\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150my\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mg\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mu\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m.\e[0m\e[0m\r
+\r
+\r\e[K\e[1m\e[38;2;207;173;0mW\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0mh\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0ma\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0mt\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0mt\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0mh\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0me\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0mt\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0mo\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0mo\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0ml\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0ms\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0mc\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0mo\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0ms\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0mt\e[0m\e[0m\r
+\r\e[K\r
+\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[K\e[1mr\e[0m\r
+\r\e[K\e[1me\e[0m\r
+\r\e[K\e[1ma\e[0m\r
+\r\e[K\e[1md\e[0m\r
+\r\e[Kt\r
+\r\e[Ko\r
+\r\e[Ko\r
+\r\e[Kl\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[Kc\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kp\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[K\e[38;2;192;128;80mb\e[0m\r
+\r\e[K\e[38;2;192;128;80ma\e[0m\r
+\r\e[K\e[38;2;192;128;80ms\e[0m\r
+\r\e[K\e[38;2;192;128;80mh\e[0m\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[K,\r
+\r\e[Ks\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[K\e[3mo\e[0m\r
+\r\e[K\e[3mr\e[0m\r
+\r\e[K\e[3md\e[0m\r
+\r\e[K\e[3me\e[0m\r
+\r\e[K\e[3mr\e[0m\r
+\r\e[Km\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ks\r
+\r\e[K.\r
+\r\e[KA\r
+\r\e[Kr\r
+\r\e[Ku\r
+\r\e[Kn\r
+\r\e[Kl\r
+\r\e[Ko\r
+\r\e[Ko\r
+\r\e[Kk\r
+\r\e[Ks\r
+\r\e[Kl\r
+\r\e[Ki\r
+\r\e[Kk\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[K:\r
+\r\e[K\r
+\r\e[K\e[38;2;201;166;212mf\e[0m\r
+\r\e[K\e[38;2;201;166;212mu\e[0m\r
+\r\e[K\e[38;2;201;166;212mn\e[0m\r
+\r\e[K\e[38;2;201;166;212mc\e[0m\r
+\r\e[K\e[38;2;129;162;190mm\e[0m\r
+\r\e[K\e[38;2;129;162;190ma\e[0m\r
+\r\e[K\e[38;2;129;162;190mi\e[0m\r
+\r\e[K\e[38;2;129;162;190mn\e[0m\r
+\r\e[K(\r
+\r\e[K)\r
+\r\e[K{\r
+\r\e[K \r
+\r\e[Kf\r
+\r\e[Km\r
+\r\e[Kt\r
+\r\e[K.\e[38;2;129;162;190m\e[0m\r
+\r\e[K\e[38;2;129;162;190mP\e[0m\r
+\r\e[K\e[38;2;129;162;190mr\e[0m\r
+\r\e[K\e[38;2;129;162;190mi\e[0m\r
+\r\e[K\e[38;2;129;162;190mn\e[0m\r
+\r\e[K\e[38;2;129;162;190mt\e[0m\r
+\r\e[K\e[38;2;129;162;190ml\e[0m\r
+\r\e[K\e[38;2;129;162;190mn\e[0m\r
+\r\e[K(\e[38;2;181;189;104m\e[0m\r
+\r\e[K\e[38;2;181;189;104m"\e[0m\r
+\r\e[K\e[38;2;181;189;104mh\e[0m\r
+\r\e[K\e[38;2;181;189;104me\e[0m\r
+\r\e[K\e[38;2;181;189;104ml\e[0m\r
+\r\e[K\e[38;2;181;189;104ml\e[0m\r
+\r\e[K\e[38;2;181;189;104mo\e[0m\r
+\r\e[K\e[38;2;181;189;104m"\e[0m\r
+\r\e[K)\r
+\r\e[K}\r
+\r\e[K\r
+\r\e[K\e[38;2;192;128;80m•\e[0m\r
+\r\e[K\e[38;2;192;128;80m\e[0mr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[Kf\r
+\r\e[Ki\r
+\r\e[Kr\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[K,\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[Kw\r
+\r\e[Ki\r
+\r\e[Kd\r
+\r\e[Ke\r
+\r\e[Kl\r
+\r\e[Ky\r
+\r\e[K\e[38;2;192;128;80m•\e[0m\r
+\r\e[K\e[38;2;192;128;80m\e[0mr\r
+\r\e[Ku\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Kl\r
+\r\e[Ky\r
+\r\e[Kw\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Kc\r
+\r\e[Ko\r
+\r\e[Ku\r
+\r\e[Kl\r
+\r\e[Kd\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Ks\r
+\r\e[Kw\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[Kp\r
+\r\e[Ko\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[K,\r
+\r\e[Kt\r
+\r\e[Ko\r
+\r\e[Ks\r
+\r\e[Kh\r
+\r\e[Ko\r
+\r\e[Kw\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[K\r
+\r\e[KT\r
+\r\e[Ko\r
+\r\e[Ko\r
+\r\e[Kl\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0mW\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Kd\r
+\r\e[Ko\r
+\r\e[Ke\r
+\r\e[Ks\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0mC\r
+\r\e[Ko\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0mt\r
+\r\e[Ka\r
+\r\e[Kk\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kf\r
+\r\e[Ki\r
+\r\e[Kl\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ks\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Kb\r
+\r\e[Ka\r
+\r\e[Kc\r
+\r\e[Kk\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m1\r
+\r\e[Kg\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kp\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0mw\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Kk\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ke\r
+\r\e[Kl\r
+\r\e[Ko\r
+\r\e[Ko\r
+\r\e[Kk\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Kf\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kp\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Kn\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m4\r
+\r\e[Kb\r
+\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Kh\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0mr\r
+\r\e[Ku\r
+\r\e[Kn\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kc\r
+\r\e[Ko\r
+\r\e[Km\r
+\r\e[Km\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Kb\r
+\r\e[Ko\r
+\r\e[Kx\r
+\r\e[Kw\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Kw\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Kk\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m4\r
+\r\e[K0\r
+\r\e[K\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mT\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mm\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mu\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mp\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150m,\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mb\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ml\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mb\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150m.\e[0m\r
+\r\e[K\r
+\r\e[KS\r
+\r\e[Ke\r
+\r\e[Ke\r
+\r\e[K\e[38;2;129;162;190mt\e[0m\r
+\r\e[K\e[38;2;129;162;190mh\e[0m\r
+\r\e[K\e[38;2;129;162;190me\e[0m\r
+\r\e[K\e[38;2;129;162;190mn\e[0m\r
+\r\e[K\e[38;2;129;162;190mo\e[0m\r
+\r\e[K\e[38;2;129;162;190mt\e[0m\r
+\r\e[K\e[38;2;129;162;190me\e[0m\r
+\r\e[K\e[38;2;129;162;190ms\e[0m\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m(\e[0m\r
+\r\e[K\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[38;2;150;152;150mp\e[0m\r
+\r\e[K\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[38;2;150;152;150m:\e[0m\r
+\r\e[K\e[38;2;150;152;150m/\e[0m\r
+\r\e[K\e[38;2;150;152;150m/\e[0m\r
+\r\e[K\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150mx\e[0m\r
+\r\e[K\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[38;2;150;152;150mm\e[0m\r
+\r\e[K\e[38;2;150;152;150mp\e[0m\r
+\r\e[K\e[38;2;150;152;150ml\e[0m\r
+\r\e[K\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150m.\e[0m\r
+\r\e[K\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[38;2;150;152;150mm\e[0m\r
+\r\e[K\e[38;2;150;152;150m/\e[0m\r
+\r\e[K\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[38;2;150;152;150m)\e[0m\r
+\r\e[Kf\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[K.\r
+\e[?25h\e[?2026l
 === plain ===
+\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m
+
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
@@ -68,7 +645,9 @@ bash\e[38;2;150;152;150m | \e[0mruns a command in a sandbox with no network\e[38
 See \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the rest.
 
 === streamed ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -178,7 +757,14 @@ See \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/
 \r\e[KSee\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes]\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](htt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](https:/\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](https://exa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](https://example\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](\e[38;2;129;162;190mhttps://example.com\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](\e[38;2;129;162;190mhttps://example.com/not\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the rest\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the rest.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m \r
+session=\e[0m0000\r
+000000000000\r
+00000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mski\r
+lls=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mto\r
+ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m have a look\e[0m\r
 \e[48;2;52;53;65m at that    \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
@@ -255,7 +841,9 @@ See \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/
 \r\e[Krest.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m
+
+\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mLaying the answer out.\e[0m\e[0m
@@ -281,7 +869,9 @@ See \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/
 \r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the rest.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

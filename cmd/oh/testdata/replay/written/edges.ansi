@@ -12,6 +12,70 @@ summon \e[38;2;192;128;80mjapanese\e[0m\r\e[Ksummon \e[38;2;192;128;80mjapanese\
 \r
 \e[?7l\r\e[KThat is all of the awkward ones.\r
 \e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+p\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m\e[38;2;129;162;190m\e[0m\r\e[K\e[38;2;129;162;190m\e[0m \e[38;2;204;102;102m✗\e[0m\r\e[K\e[38;2;129;162;190m\e[0m \e[38;2;204;102;102m✗\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150mno output\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150mno output\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~500t (of ~225Kt)\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m900L+ ~500t (of ~225Kt)\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1.4Kt\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1.4Kt\e[0m\e[?7l\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Kl\r
+\r\e[Ko\r
+\r\e[Kf\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kw\r
+\r\e[Kk\r
+\r\e[Kw\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Kd\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[K.\r
+\e[?25h\e[?2026l
 === plain ===
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m the awkward shapes\e[0m

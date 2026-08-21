@@ -1,5 +1,8 @@
 === narrow ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m00000000000000000000\r
+0000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m have a look at that                    \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
@@ -23,7 +26,451 @@ read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[
 \r\e[Kmake it sticky: the work belongs in the\r
 \r\e[Koutput layer instead.\r
 \e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150m\r
+s\r
+t\r
+a\r
+r\r
+t\r
+u\r
+p\r
+=\e[0m\r
+0\e[38;2;150;152;150m\r
+s\e[0m\e[38;2;150;152;150m\r
+ \r
+s\r
+e\r
+s\r
+s\r
+i\r
+o\r
+n\r
+=\e[0m\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\e[38;2;150;152;150m\r
+ \e[0m\e[38;2;150;152;150m\r
+s\r
+k\r
+i\r
+l\r
+l\r
+s\r
+=\e[0m\r
+0\e[38;2;150;152;150m\r
+p\r
+/\e[0m\r
+0\e[38;2;150;152;150m\r
+g\e[0m\e[38;2;150;152;150m\r
+ \e[0m\e[38;2;150;152;150m\r
+t\r
+o\r
+o\r
+l\r
+s\r
+=\e[0m\e[38;2;150;152;150m\r
+~\e[0m\r
+6\r
+0\r
+0\e[38;2;150;152;150m\r
+t\e[0m\e[38;2;150;152;150m\r
+]\e[0m\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+v\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mL\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mk\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mg\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mf\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mp\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mm\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mp\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m.\e[0m\e[0m\r
+\r
+\r\e[KI\r
+\r\e[K'\r
+\r\e[Kl\r
+\r\e[Kl\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kv\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Ko\r
+\r\e[Ko\r
+\r\e[Kk\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ko\r
+\r\e[Kw\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Kd\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kw\r
+\r\e[Ks\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Ks\r
+\r\e[Kp\r
+\r\e[Kr\r
+\r\e[Ko\r
+\r\e[Km\r
+\r\e[Kp\r
+\r\e[Kt\r
+\r\e[K.\r
+\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r\e[K\e[3m\e[38;2;150;152;150mT\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mp\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mm\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mp\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mw\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mb\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150my\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m,\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mf\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ml\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m.\e[0m\e[0m\r
+\r
+\r\e[KF\r
+\r\e[Ko\r
+\r\e[Ku\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[K.\r
+\r\e[KR\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kw\r
+\r\e[K.\r
+\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kp\r
+\r\e[Kr\r
+\r\e[Ko\r
+\r\e[Km\r
+\r\e[Kp\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[Kd\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kw\r
+\r\e[Kn\r
+\r\e[Kb\r
+\r\e[Ky\r
+\r\e[K\e[38;2;192;128;80ml\e[0m\r
+\r\e[K\e[38;2;192;128;80ma\e[0m\r
+\r\e[K\e[38;2;192;128;80my\e[0m\r
+\r\e[K\e[38;2;192;128;80mo\e[0m\r
+\r\e[K\e[38;2;192;128;80mu\e[0m\r
+\r\e[K\e[38;2;192;128;80mt\e[0m\r
+\r\e[K,\r
+\r\e[Kw\r
+\r\e[Kh\r
+\r\e[Ki\r
+\r\e[Kc\r
+\r\e[Kh\r
+\r\e[Kw\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kp\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kb\r
+\r\e[Ku\r
+\r\e[Kf\r
+\r\e[Kf\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kg\r
+\r\e[Ka\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Km\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Kw\r
+\r\e[Ki\r
+\r\e[Kd\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kp\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Kt\r
+\r\e[Ks\r
+\r\e[Kw\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kc\r
+\r\e[Ku\r
+\r\e[Kr\r
+\r\e[Ks\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Kl\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[K.\r
+\r\e[KN\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Ke\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[Ks\r
+\r\e[Kc\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Kt\r
+\r\e[Ko\r
+\r\e[Km\r
+\r\e[Ka\r
+\r\e[Kk\r
+\r\e[Ke\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Kc\r
+\r\e[Kk\r
+\r\e[Ky\r
+\r\e[K:\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kw\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Kk\r
+\r\e[Kb\r
+\r\e[Ke\r
+\r\e[Kl\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Ks\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ko\r
+\r\e[Ku\r
+\r\e[Kt\r
+\r\e[Kp\r
+\r\e[Ku\r
+\r\e[Kt\r
+\r\e[Kl\r
+\r\e[Ka\r
+\r\e[Ky\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[K.\r
+\e[?25h\e[?2026l
 === plain ===
+\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m
+
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
@@ -41,7 +488,9 @@ read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 
 === streamed ===
-\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e]9;4;3\e\\\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -61,7 +510,14 @@ read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[
 \r\e[Klayer\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klayer ins\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klayer instead\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klayer instead.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m \r
+session=\e[0m0000\r
+000000000000\r
+00000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mski\r
+lls=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mto\r
+ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m have a look\e[0m\r
 \e[48;2;52;53;65m at that    \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
@@ -116,7 +572,9 @@ read \e[38;2;192;128;80mcmd/…\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150
 \r\e[Kinstead.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m
+
+\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mLooking for where the prompt is drawn.\e[0m\e[0m
@@ -133,7 +591,9 @@ read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r

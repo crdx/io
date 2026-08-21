@@ -1,0 +1,56 @@
+=== written down ===
+# Conversation
+
+- **ID:** `000000000000000000000000`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+draw the awkward markdown
+```
+
+## Assistant
+
+> 2001-01-01T00:00:01Z
+
+```
+A table whose rows do not all reach the end:
+
+| tool | what it does | cost |
+|------|--------------|------|
+| read |
+| grep | walks the tree | 4 |
+| bash | runs a command | 40 | and one cell too many |
+
+A narrow table in a wide terminal:
+
+| a | b |
+|---|---|
+| 1 | 2 |
+
+A bare URL the renderer has to find for itself: https://example.com/plain and one
+in angle brackets <https://example.com/bracketed>, which are not the same thing.
+
+```
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+```
+Entities are resolved in prose — AT&amp;T becomes AT&T — but left alone inside code, where `&amp;` and `&lt;div&gt;` stand as they are written.
+
+```
+
+## notice
+
+> 2001-01-01T00:00:03Z
+
+

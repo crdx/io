@@ -8,9 +8,13 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
+## startup
 
 > 2001-01-01T00:00:00Z
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 have a look at that
@@ -18,7 +22,7 @@ have a look at that
 
 ## Reasoning
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Taking the four of them together rather than one after another.
@@ -26,7 +30,7 @@ Taking the four of them together rather than one after another.
 
 ## Assistant
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 Let me get the shape of this first.
@@ -34,7 +38,7 @@ Let me get the shape of this first.
 
 ## Tool call
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 - **ID:** `call_2`
 - **Name:** `ls`
@@ -48,7 +52,7 @@ Let me get the shape of this first.
 
 ## Tool call
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 - **ID:** `call_3`
 - **Name:** `find`
@@ -68,7 +72,7 @@ Let me get the shape of this first.
 
 ## Tool call
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 - **ID:** `call_4`
 - **Name:** `find`
@@ -88,7 +92,7 @@ Let me get the shape of this first.
 
 ## Tool call
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 - **ID:** `call_5`
 - **Name:** `grep`
@@ -114,7 +118,7 @@ package
 
 ## Tool result
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 - **ID:** `call_2`
 - **Name:** `ls`
@@ -122,7 +126,7 @@ package
 **Stats**
 
 ```json
-{"kind":"output","lines":5,"bytes":49,"total_bytes":49}
+{"kind":"output","lines":7,"bytes":65,"total_bytes":65}
 ```
 
 **Output preview (first 3 lines, up to 1 KiB)**
@@ -131,27 +135,6 @@ package
 README.md
 cmd/
 screen.go
-```
-
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool result
-
-> 2001-01-01T00:00:08Z
-
-- **ID:** `call_4`
-- **Name:** `find`
-- **Failed:** `false`
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":13,"total_bytes":13}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
-
-```
-settings.toml
 ```
 
 Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
@@ -178,9 +161,30 @@ screen.go
 
 Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
 
-## State
+## Tool result
 
 > 2001-01-01T00:00:10Z
+
+- **ID:** `call_4`
+- **Name:** `find`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":13,"total_bytes":13}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+settings.toml
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## State
+
+> 2001-01-01T00:00:11Z
 
 - **ID:** `call_5`
 - **Name:** `file_read`
@@ -192,7 +196,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Tool result
 
-> 2001-01-01T00:00:11Z
+> 2001-01-01T00:00:12Z
 
 - **ID:** `call_5`
 - **Name:** `grep`
@@ -214,7 +218,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Reasoning
 
-> 2001-01-01T00:00:12Z
+> 2001-01-01T00:00:13Z
 
 ```
 Three searches, all at once.
@@ -222,7 +226,7 @@ Three searches, all at once.
 
 ## Assistant
 
-> 2001-01-01T00:00:13Z
+> 2001-01-01T00:00:14Z
 
 ```
 Now to find where the drawing happens.
@@ -230,7 +234,7 @@ Now to find where the drawing happens.
 
 ## Tool call
 
-> 2001-01-01T00:00:14Z
+> 2001-01-01T00:00:15Z
 
 - **ID:** `call_7`
 - **Name:** `grep`
@@ -256,7 +260,7 @@ spinner
 
 ## Tool call
 
-> 2001-01-01T00:00:15Z
+> 2001-01-01T00:00:16Z
 
 - **ID:** `call_8`
 - **Name:** `grep`
@@ -282,7 +286,7 @@ footer
 
 ## Tool call
 
-> 2001-01-01T00:00:16Z
+> 2001-01-01T00:00:17Z
 
 - **ID:** `call_9`
 - **Name:** `grep`
@@ -308,9 +312,9 @@ cursor
 
 ## State
 
-> 2001-01-01T00:00:17Z
+> 2001-01-01T00:00:18Z
 
-- **ID:** `call_9`
+- **ID:** `call_7`
 - **Name:** `file_read`
 **State**
 
@@ -319,43 +323,10 @@ cursor
 ```
 
 ## Tool result
-
-> 2001-01-01T00:00:18Z
-
-- **ID:** `call_9`
-- **Name:** `grep`
-- **Failed:** `false`
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":46,"total_bytes":46}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
-
-```
-screen.go:3:var spinner, footer, cursor string
-```
-
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## State
 
 > 2001-01-01T00:00:19Z
 
-- **ID:** `call_8`
-- **Name:** `file_read`
-**State**
-
-```json
-{"files":[{"path":"screen.go","sha256":"dc25e27e64083a7d4689a7c1bc5d325f1ba7d98a9c8adc4bea9a62a6b26e2beb"}]}
-```
-
-## Tool result
-
-> 2001-01-01T00:00:20Z
-
-- **ID:** `call_8`
+- **ID:** `call_7`
 - **Name:** `grep`
 - **Failed:** `false`
 **Stats**
@@ -374,9 +345,9 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## State
 
-> 2001-01-01T00:00:21Z
+> 2001-01-01T00:00:20Z
 
-- **ID:** `call_7`
+- **ID:** `call_9`
 - **Name:** `file_read`
 **State**
 
@@ -386,9 +357,42 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Tool result
 
+> 2001-01-01T00:00:21Z
+
+- **ID:** `call_9`
+- **Name:** `grep`
+- **Failed:** `false`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":46,"total_bytes":46}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+screen.go:3:var spinner, footer, cursor string
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## State
+
 > 2001-01-01T00:00:22Z
 
-- **ID:** `call_7`
+- **ID:** `call_8`
+- **Name:** `file_read`
+**State**
+
+```json
+{"files":[{"path":"screen.go","sha256":"dc25e27e64083a7d4689a7c1bc5d325f1ba7d98a9c8adc4bea9a62a6b26e2beb"}]}
+```
+
+## Tool result
+
+> 2001-01-01T00:00:23Z
+
+- **ID:** `call_8`
 - **Name:** `grep`
 - **Failed:** `false`
 **Stats**
@@ -407,7 +411,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:23Z
+> 2001-01-01T00:00:24Z
 
 ```
 One more pair, and one of them will not be there.
@@ -415,7 +419,7 @@ One more pair, and one of them will not be there.
 
 ## Tool call
 
-> 2001-01-01T00:00:24Z
+> 2001-01-01T00:00:25Z
 
 - **ID:** `call_10`
 - **Name:** `ls`
@@ -429,7 +433,7 @@ One more pair, and one of them will not be there.
 
 ## Tool call
 
-> 2001-01-01T00:00:25Z
+> 2001-01-01T00:00:26Z
 
 - **ID:** `call_11`
 - **Name:** `read`
@@ -449,7 +453,7 @@ nowhere/at/all.go
 
 ## Tool result
 
-> 2001-01-01T00:00:26Z
+> 2001-01-01T00:00:27Z
 
 - **ID:** `call_11`
 - **Name:** `read`
@@ -470,7 +474,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Tool result
 
-> 2001-01-01T00:00:27Z
+> 2001-01-01T00:00:28Z
 
 - **ID:** `call_10`
 - **Name:** `ls`
@@ -478,7 +482,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 **Stats**
 
 ```json
-{"kind":"output","lines":5,"bytes":49,"total_bytes":49}
+{"kind":"output","lines":7,"bytes":65,"total_bytes":65}
 ```
 
 **Output preview (first 3 lines, up to 1 KiB)**
@@ -493,7 +497,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:28Z
+> 2001-01-01T00:00:29Z
 
 ```
 That is the lot: four together, then three together, then a pair where only one of them could be answered.

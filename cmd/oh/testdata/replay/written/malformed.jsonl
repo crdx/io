@@ -1,0 +1,4 @@
+{"event": {"kind": "prompt", "text": "draw the awkward markdown"}}
+{"event": {"kind": "text", "text": "A table whose rows do not all reach the end:\n\n| tool | what it does | cost |\n|------|--------------|------|\n| read |\n| grep | walks the tree | 4 |\n| bash | runs a command | 40 | and one cell too many |\n\nA narrow table in a wide terminal:\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\nA bare URL the renderer has to find for itself: https://example.com/plain and one\nin angle brackets <https://example.com/bracketed>, which are not the same thing.\n"}}
+{"event": {"kind": "text", "text": "Entities are resolved in prose — AT&amp;T becomes AT&T — but left alone inside code, where `&amp;` and `&lt;div&gt;` stand as they are written.\n"}}
+{"event": {"kind": "notice", "text": "a warning that arrived with a carriage\rreturn in it", "failed": true}}
