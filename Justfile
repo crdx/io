@@ -11,6 +11,9 @@ set positional-arguments
 help:
     just --list --unsorted --list-submodules
 
+dev:
+    watchexec --debounce 500ms just check
+
 fmt:
     go fmt ./...
 
