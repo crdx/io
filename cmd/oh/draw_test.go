@@ -466,7 +466,7 @@ func testConversation(t *testing.T, screenOutput *bytes.Buffer) *Harness {
 		screen:             output.New(screenOutput),
 		log:                log,
 		mode:               caps.NewMode(caps.Read | caps.Write),
-		getOnWithItMessage: defaultGetOnWithItMessage,
+		getOnWithItMessage: builtInConfig(t).GetOnWithItMessage,
 	}
 }
 

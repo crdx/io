@@ -7,8 +7,8 @@ import (
 	"crdx.org/io/cmd/oh/store"
 )
 
-func TestResolveProviderSettingsFallsBackToConfiguration(t *testing.T) {
-	providerName, model, effort, err := resolveProviderSettings("", "", "", configuredSettings{
+func TestResolveProviderChoiceFallsBackToTheConfig(t *testing.T) {
+	providerName, model, effort, err := resolveProviderChoice("", "", "", Config{
 		Provider: opencodeGoProvider,
 		Model:    "configured-model",
 		Effort:   "medium",
@@ -21,17 +21,17 @@ func TestResolveProviderSettingsFallsBackToConfiguration(t *testing.T) {
 	}
 }
 
-func TestResolveProviderSettingsPrefersTheCommandLine(t *testing.T) {
+func TestResolveProviderChoicePrefersTheCommandLine(t *testing.T) {
 	resumed := &store.Session{Meta: store.Meta{
 		Provider: opencodeGoProvider,
 		Model:    "saved-model",
 		Effort:   "low",
 	}}
-	providerName, model, effort, err := resolveProviderSettings(
+	providerName, model, effort, err := resolveProviderChoice(
 		opencodeGoProvider,
 		"requested-model",
 		"high",
-		configuredSettings{
+		Config{
 			Provider: opencodeGoProvider,
 			Model:    "configured-model",
 			Effort:   "medium",
@@ -46,19 +46,19 @@ func TestResolveProviderSettingsPrefersTheCommandLine(t *testing.T) {
 	}
 }
 
-func TestResolveProviderSettingsRefusesToResumeUnderAnotherProvider(t *testing.T) {
+func TestResolveProviderChoiceRefusesToResumeUnderAnotherProvider(t *testing.T) {
 	resumed := &store.Session{Meta: store.Meta{Provider: opencodeGoProvider, Model: "saved-model"}}
 
-	providerName, model, effort, err := resolveProviderSettings(codexProvider, "requested-model", "high", configuredSettings{}, resumed)
+	providerName, model, effort, err := resolveProviderChoice(codexProvider, "requested-model", "high", Config{}, resumed)
 	if err == nil || !strings.Contains(err.Error(), "cannot resume a opencode-go session with codex") {
 		t.Fatalf("got provider %q, model %q, effort %q, and error %v", providerName, model, effort, err)
 	}
 }
 
-func TestResolveProviderSettingsResumesUnderTheRecordedProvider(t *testing.T) {
+func TestResolveProviderChoiceResumesUnderTheRecordedProvider(t *testing.T) {
 	resumed := &store.Session{Meta: store.Meta{Provider: opencodeGoProvider, Model: "saved-model", Effort: "low"}}
 
-	providerName, model, effort, err := resolveProviderSettings("", "", "", configuredSettings{
+	providerName, model, effort, err := resolveProviderChoice("", "", "", Config{
 		Provider: codexProvider,
 		Model:    "configured-model",
 	}, resumed)
@@ -70,8 +70,8 @@ func TestResolveProviderSettingsResumesUnderTheRecordedProvider(t *testing.T) {
 	}
 }
 
-func TestResolveProviderSettingsRequiresAModel(t *testing.T) {
-	providerName, model, effort, err := resolveProviderSettings("", "", "", configuredSettings{}, nil)
+func TestResolveProviderChoiceRequiresAModel(t *testing.T) {
+	providerName, model, effort, err := resolveProviderChoice("", "", "", Config{}, nil)
 	if err == nil || !strings.Contains(err.Error(), "-m provider/model@effort") {
 		t.Fatalf("got provider %q, model %q, effort %q, and error %v", providerName, model, effort, err)
 	}

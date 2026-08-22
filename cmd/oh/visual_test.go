@@ -125,13 +125,16 @@ func TestVisual(t *testing.T) {
 		screen: screen,
 		log:    log,
 		mode:   caps.NewMode(caps.Read | caps.Write),
-		label: func(isPending bool, isRunning bool, frame int) string {
-			return banner(
-				"fake", "medium", "/tmp/somewhere", tools, caps.Read|caps.Shell|caps.Write,
-				isPending, isRunning, frame,
-			)
-		},
 	}
+
+	built, err := configFrom(t, "").layout(
+		availableSegments("/tmp/somewhere", "fake", "medium", held),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	held.layout = built
 
 	held.makeIntroductions("")
 }

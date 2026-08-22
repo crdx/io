@@ -118,3 +118,53 @@ func TestTheBlockFramesTheInputBetweenItsRules(t *testing.T) {
 		t.Errorf("expected the cursor column to be carried over, got %d", cursorColumn)
 	}
 }
+
+func TestACentredLabelSitsInTheMiddleOfTheDashes(t *testing.T) {
+	rule := Ruler{Center: "io"}
+
+	got := style.Plain(rule.render(40))
+	if want := strings.Repeat("─", 18) + " io " + strings.Repeat("─", 18); got != want {
+		t.Errorf("expected %q, got %q", want, got)
+	}
+}
+
+func TestARuleWithALabelAtEveryPlaceIsExactlyAsWideAsTheScreen(t *testing.T) {
+	for _, width := range []int{0, 1, 5, 20, 21, 40, 100} {
+		rule := Ruler{Left: "↑ 12", Center: "io", Right: "gpt ⠶ io"}
+		if got := style.Width(rule.render(width)); got != width {
+			t.Errorf("expected a rule of %d columns, got %d", width, got)
+		}
+	}
+}
+
+func TestTheCentredLabelIsTheFirstToGiveWay(t *testing.T) {
+	rule := Ruler{Left: "↑ 12", Center: "workspace", Right: "gpt ⠶ io"}
+
+	got := style.Plain(rule.render(25))
+	if strings.Contains(got, "workspace") {
+		t.Errorf("expected the centred label to give way, got %q", got)
+	}
+	if !strings.Contains(got, "↑ 12") || !strings.Contains(got, "gpt ⠶ io") {
+		t.Errorf("expected the labels at either end to be kept, got %q", got)
+	}
+}
+
+func TestACentredLabelIsKeptWhenThereIsRoomForItBetweenTheEnds(t *testing.T) {
+	rule := Ruler{Left: "↑ 12", Center: "io", Right: "gpt"}
+
+	got := style.Plain(rule.render(40))
+	for _, want := range []string{"↑ 12", "io", "gpt"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("expected %q to survive, got %q", want, got)
+		}
+	}
+}
+
+func TestACentredLabelFillingTheGapExactlyIsStillDrawn(t *testing.T) {
+	rule := Ruler{Left: "↑ 12", Center: "workspace", Right: "gpt ⠶ io"}
+
+	got := style.Plain(rule.render(30))
+	if want := "─ ↑ 12  workspace  gpt ⠶ io ──"; got != want {
+		t.Errorf("expected %q, got %q", want, got)
+	}
+}

@@ -22,8 +22,8 @@ type configuredMount struct {
 	isExact bool
 }
 
-func createMissingConfiguredPaths(paths configuredPaths, warnings io.Writer) (configuredPaths, error) {
-	filtered := configuredPaths{}
+func createMissingConfiguredPaths(paths pathsConfig, warnings io.Writer) (pathsConfig, error) {
+	filtered := pathsConfig{}
 	lists := []struct {
 		source []string
 		target *[]string
@@ -48,7 +48,7 @@ func createMissingConfiguredPaths(paths configuredPaths, warnings io.Writer) (co
 					continue
 				}
 			} else if err != nil {
-				return configuredPaths{}, fmt.Errorf(
+				return pathsConfig{}, fmt.Errorf(
 					"could not mount configured path %s: %w",
 					pathutil.Shorten(path),
 					err,
@@ -61,7 +61,7 @@ func createMissingConfiguredPaths(paths configuredPaths, warnings io.Writer) (co
 	return filtered, nil
 }
 
-func mountConfiguredPaths(files *file.Root, mode *caps.Mode, extraPaths configuredPaths) ([]*os.Root, error) {
+func mountConfiguredPaths(files *file.Root, mode *caps.Mode, extraPaths pathsConfig) ([]*os.Root, error) {
 	writable := make(map[string]bool, len(extraPaths.Read)+len(extraPaths.Write))
 	for _, path := range extraPaths.Read {
 		writable[path] = false

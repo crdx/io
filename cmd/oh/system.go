@@ -75,7 +75,7 @@ type harnessTemplateData struct {
 	TmpDir            string
 	HomeDir           string
 	CurrentCaps       caps.Set
-	ExtraPaths        configuredPaths
+	ExtraPaths        pathsConfig
 	WorkspaceWritable bool
 	GitWritable       bool
 	BackgroundEnabled bool
@@ -94,7 +94,7 @@ func loadContext(
 	tmpDir string,
 	homeDir string,
 	currentCaps caps.Set,
-	extraPaths configuredPaths,
+	extraPaths pathsConfig,
 	skills []skill.Skill,
 ) (string, []contextFile, error) {
 	globalFile, err := readGlobalContext()
@@ -174,7 +174,7 @@ func globalContext(file *contextFile) string {
 	return file.body
 }
 
-func harnessContext(workspaceDir string, sessionName string, tmpDir string, homeDir string, currentCaps caps.Set, extraPaths configuredPaths) string {
+func harnessContext(workspaceDir string, sessionName string, tmpDir string, homeDir string, currentCaps caps.Set, extraPaths pathsConfig) string {
 	data := harnessTemplateData{
 		WorkspaceDir:      workspaceDir,
 		SessionName:       sessionName,
@@ -195,7 +195,7 @@ func harnessContext(workspaceDir string, sessionName string, tmpDir string, home
 	return strings.TrimSpace(rendered.String())
 }
 
-func scopeRules(extraPaths configuredPaths, currentCaps caps.Set) string {
+func scopeRules(extraPaths pathsConfig, currentCaps caps.Set) string {
 	var lines []string
 
 	if len(extraPaths.Read)+len(extraPaths.Write) > 0 {

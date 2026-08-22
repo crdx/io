@@ -16,35 +16,32 @@ import (
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/output"
-	"crdx.org/io/cmd/oh/spinner"
+	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store"
-	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/internal/sandbox"
 )
 
 type Harness struct {
-	agent        *agent.Agent
-	screen       *output.Screen
-	log          *store.Writer
-	processes    *sandbox.Processes // what background commands belong to this conversation
-	workspaceDir string
-	mode         *caps.Mode
-	shell        string
+	agent     *agent.Agent
+	screen    *output.Screen
+	log       *store.Writer
+	processes *sandbox.Processes
+	events    []agent.Event
+	layout    segment.Layout
+	editor    *edit.Input
+	mode      *caps.Mode
 
-	restart            []string   // the arguments to start again with, once the terminal has been given back
-	queuedTurn         QueuedTurn // what an interrupted turn is to be followed by
-	getOnWithItMessage string     // what an empty double enter sends
-
-	turn            Turn
-	onTurnFinished  func()
-	flushBoundary   int  // how many provider items have been stored
-	terminalFocused bool // whether the interactive terminal has focus
-
-	events []agent.Event
-
-	label func(bool, bool, int) string // what the harness was started with
+	workspaceDir       string
+	shell              string
+	restart            []string
+	getOnWithItMessage string
+	queuedTurn         QueuedTurn
+	turn               Turn
+	onTurnFinished     func()
+	flushBoundary      int
+	terminalFocused    bool
 }
 
 const historyLimit = 1000
@@ -52,6 +49,7 @@ const historyLimit = 1000
 func (self *Harness) makeIntroductions(initialMessage string) {
 	history := edit.NewHistory(historyPath(), historyLimit)
 	editor := edit.NewInput(history)
+	self.editor = editor
 
 	restore, err := tty.Raw(os.Stdin, os.Stdout)
 	if err != nil {
@@ -66,7 +64,7 @@ func (self *Harness) makeIntroductions(initialMessage string) {
 
 	keys := keypresses(os.Stdin)
 	resizeSignals := resizes()
-	frames := time.NewTicker(spinner.Activity.Rate())
+	frames := self.redrawTicker()
 	defer frames.Stop()
 
 	self.show(editor)
@@ -107,6 +105,18 @@ func (self *Harness) makeIntroductions(initialMessage string) {
 
 		self.show(editor)
 	}
+}
+
+func (self *Harness) redrawTicker() *time.Ticker {
+	rate := self.layout.Rate()
+	if rate <= 0 {
+		ticker := time.NewTicker(time.Hour)
+		ticker.Stop()
+
+		return ticker
+	}
+
+	return time.NewTicker(rate)
 }
 
 func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress key.Key) bool {
@@ -241,27 +251,36 @@ func (self *Harness) show(editor *edit.Input) {
 	frame := editor.Frame(columns)
 
 	block := input.Block{
-		Top:   input.Ruler{Left: scrollLabel("↑", frame.Above)},
+		Top: input.Ruler{
+			Left:   self.bar(segment.TopLeft, frame),
+			Center: self.bar(segment.TopCenter, frame),
+			Right:  self.bar(segment.TopRight, frame),
+		},
 		Input: frame,
 		Bottom: input.Ruler{
-			Left: self.label(
-				editor.IsPending(),
-				self.turn.isRunning,
-				self.turn.spinnerFrame,
-			),
-			Right: scrollLabel("↓", frame.Below),
+			Left:   self.bar(segment.BottomLeft, frame),
+			Center: self.bar(segment.BottomCenter, frame),
+			Right:  self.bar(segment.BottomRight, frame),
 		},
 	}
 
 	self.screen.Footer(block.Rows(columns))
 }
 
-func scrollLabel(arrow string, rows int) string {
-	if rows == 0 {
-		return ""
-	}
+func (self *Harness) bar(position segment.Position, frame edit.Frame) string {
+	return bar(self.layout, position, frame)
+}
 
-	return style.Scrolled(fmt.Sprintf("%s %d", arrow, rows))
+func (self *Harness) turnActivity() (bool, int) {
+	return self.turn.isRunning, self.turn.spinnerFrame
+}
+
+func (self *Harness) grantedCaps() caps.Set {
+	return self.mode.Current()
+}
+
+func (self *Harness) isChordPending() bool {
+	return self.editor != nil && self.editor.IsPending()
 }
 
 func (self *Harness) plainly(history *edit.History, initialMessage string) {

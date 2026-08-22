@@ -190,10 +190,10 @@ func TestOffIsNotOfferedToAModelThatCannotStopReasoning(t *testing.T) {
 	}
 }
 
-func TestAnEffortWrittenAsAnAliasInTheConfigurationIsResolved(t *testing.T) {
-	_, _, effort, err := resolveProviderSettings(
+func TestAnEffortWrittenAsAnAliasInTheConfigIsResolved(t *testing.T) {
+	_, _, effort, err := resolveProviderChoice(
 		"", "", "",
-		configuredSettings{Provider: codexProvider, Model: "gpt-5.6-sol", Effort: "off"},
+		Config{Provider: codexProvider, Model: "gpt-5.6-sol", Effort: "off"},
 		nil,
 	)
 	if err != nil {

@@ -181,7 +181,7 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 }
 
 func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
-	system := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", caps.Read, configuredPaths{})
+	system := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", caps.Read, pathsConfig{})
 
 	if want := "The workspace (/workspace) is " + filesystem(false); !strings.Contains(system, want) {
 		t.Errorf("expected the workspace to be reported as %q, got %q", want, system)
@@ -217,7 +217,7 @@ func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
 		"refused": {caps.Read, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", test.currentCaps, configuredPaths{})
+			got := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", test.currentCaps, pathsConfig{})
 
 			if want := "The bash tool is " + shellAccess(test.granted); !strings.Contains(got, want) {
 				t.Errorf("expected %q in %q", want, got)
@@ -242,7 +242,7 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 	processes := sandbox.NewProcesses(false)
 	defer func() { _, _ = processes.Disable() }()
 
-	shell := confinedShell(t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, mode, files, processes)
+	shell := confinedShell(t.TempDir(), t.TempDir(), t.TempDir(), pathsConfig{}, mode, files, processes)
 
 	if shell.Name() != "bash" {
 		t.Errorf("expected the shell to be offered as bash, got %q", shell.Name())
@@ -271,7 +271,7 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 
 	home := t.TempDir()
 	tmp := t.TempDir()
-	if _, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, caps.Read|caps.Shell); err != nil {
+	if _, err := createSandboxPolicy(t.Context(), workspace, home, tmp, pathsConfig{}, caps.Read|caps.Shell); err != nil {
 		t.Skipf("the sandbox cannot enforce a shell policy here: %v", err)
 	}
 
@@ -280,7 +280,7 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 	processes := sandbox.NewProcesses(false)
 	defer func() { _, _ = processes.Disable() }()
 
-	shell := confinedShell(workspace, home, tmp, configuredPaths{}, mode, files, processes)
+	shell := confinedShell(workspace, home, tmp, pathsConfig{}, mode, files, processes)
 	run := func() {
 		call, parseErr := shell.Parse(`{"command":"printf %s \"$MISE_DATA_DIR\""}`)
 		if parseErr != nil {
@@ -317,7 +317,7 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 	home := t.TempDir()
 	tmp := t.TempDir()
 	initialCaps := caps.Read | caps.Write | caps.Shell
-	if _, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, initialCaps); err != nil {
+	if _, err := createSandboxPolicy(t.Context(), workspace, home, tmp, pathsConfig{}, initialCaps); err != nil {
 		t.Skipf("the sandbox cannot enforce a shell policy here: %v", err)
 	}
 
@@ -325,7 +325,7 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
 	processes := sandbox.NewProcesses(false)
 	defer func() { _, _ = processes.Disable() }()
-	shell := confinedShell(workspace, home, tmp, configuredPaths{}, mode, files, processes)
+	shell := confinedShell(workspace, home, tmp, pathsConfig{}, mode, files, processes)
 
 	run := func() error {
 		call, parseErr := shell.Parse(`{"command":"touch .git/proof"}`)
@@ -397,7 +397,7 @@ func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 	miseDataDir := t.TempDir()
 	t.Setenv("MISE_DATA_DIR", miseDataDir)
 
-	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, caps.Write)
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), pathsConfig{}, caps.Write)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a writable policy here: %v", err)
 	}
@@ -432,7 +432,7 @@ func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 }
 
 func TestBackgroundModeReachesTheShellPolicy(t *testing.T) {
-	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, caps.Background)
+	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), pathsConfig{}, caps.Background)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce background mode here: %v", err)
 	}
@@ -446,7 +446,7 @@ func TestTmpIsAlwaysWritable(t *testing.T) {
 	workspace := t.TempDir()
 	home := t.TempDir()
 
-	readOnly, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, 0)
+	readOnly, err := createSandboxPolicy(t.Context(), workspace, home, tmp, pathsConfig{}, 0)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a read-only policy here: %v", err)
 	}
@@ -454,7 +454,7 @@ func TestTmpIsAlwaysWritable(t *testing.T) {
 		t.Errorf("expected writable %s, got %v", sandbox.TmpDir, readOnly.Write)
 	}
 
-	readWrite, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, caps.Write)
+	readWrite, err := createSandboxPolicy(t.Context(), workspace, home, tmp, pathsConfig{}, caps.Write)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a writable policy here: %v", err)
 	}
@@ -479,7 +479,7 @@ func TestConfiguredPathsReachTheShellPolicy(t *testing.T) {
 	readDirectory := t.TempDir()
 	writeDirectory := t.TempDir()
 	execDirectory := t.TempDir()
-	additional := configuredPaths{
+	additional := pathsConfig{
 		Read:  []string{readDirectory},
 		Write: []string{writeDirectory},
 		Exec:  []string{execDirectory},
@@ -538,7 +538,7 @@ func TestGoUsesTheShellCacheAndTheHostModuleCacheAsAProxy(t *testing.T) {
 
 	t.Setenv("GOMODCACHE", hostModules)
 
-	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, 0)
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), pathsConfig{}, 0)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce the Go cache policy here: %v", err)
 	}
@@ -570,7 +570,7 @@ func TestGoUsesTheShellCacheAndTheHostModuleCacheAsAProxy(t *testing.T) {
 func TestTheLinterCacheBelongsToTheSessionRatherThanTheSharedHome(t *testing.T) {
 	tmp := t.TempDir()
 
-	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), tmp, configuredPaths{}, 0)
+	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), tmp, pathsConfig{}, 0)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce the lint cache policy here: %v", err)
 	}
@@ -628,7 +628,7 @@ func TestAReadOnlyShellMayChangeOnlyItsCache(t *testing.T) {
 	home := t.TempDir()
 	cacheDir := filepath.Join(home, ".cache")
 
-	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, 0)
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), pathsConfig{}, 0)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce the shell cache policy here: %v", err)
 	}
@@ -650,7 +650,7 @@ func TestACommitOnlyShellMayChangeTheHistoryAlone(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, caps.Git)
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), pathsConfig{}, caps.Git)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a writable policy here: %v", err)
 	}
@@ -708,7 +708,7 @@ func TestEveryExistingRepositoryIsProtectedFromTheShell(t *testing.T) {
 		}
 	}
 
-	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), pathsConfig{
 		Write: []string{additional},
 	}, caps.Write)
 	if err != nil {
@@ -723,7 +723,7 @@ func TestEveryExistingRepositoryIsProtectedFromTheShell(t *testing.T) {
 }
 
 func TestACommitOnlyShellWithNoRepositoryChangesNothing(t *testing.T) {
-	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, caps.Git)
+	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), pathsConfig{}, caps.Git)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a policy here: %v", err)
 	}
@@ -826,7 +826,7 @@ func TestAMappedPathReachesTheShellPolicy(t *testing.T) {
 		t.TempDir(),
 		t.TempDir(),
 		t.TempDir(),
-		configuredPaths{Home: []string{source}},
+		pathsConfig{Home: []string{source}},
 		caps.Read,
 	)
 	if err != nil {

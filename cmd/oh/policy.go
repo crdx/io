@@ -85,7 +85,7 @@ func createSandboxPolicy(
 	workspaceDir string,
 	homeDir string,
 	tmpDir string,
-	extraPaths configuredPaths,
+	extraPaths pathsConfig,
 	currentCaps caps.Set,
 ) (sandbox.Policy, error) {
 	cacheDir := filepath.Join(homeDir, ".cache")
@@ -246,7 +246,7 @@ func confinedShell(
 	workspaceDir string,
 	home string,
 	tmpDir string,
-	extraPaths configuredPaths,
+	extraPaths pathsConfig,
 	mode *caps.Mode,
 	files *file.Root,
 	processes *sandbox.Processes,

@@ -11,7 +11,7 @@ type Animation interface {
 }
 
 // Activity sends a twinkling star back and forth while work is underway.
-var Activity Animation = newFrames(125*time.Millisecond, "✦·", "·✦", "·✧", "✧·")
+var Activity Animation = Of(125*time.Millisecond, "✦·", "·✦", "·✧", "✧·")
 
 // Frames is an Animation of a fixed run of frames, shown in turn and then again from the start.
 type Frames struct {
@@ -19,7 +19,7 @@ type Frames struct {
 	rate   time.Duration // how long each frame is shown for
 }
 
-func newFrames(rate time.Duration, frames ...string) Frames {
+func Of(rate time.Duration, frames ...string) Frames {
 	return Frames{frames: frames, rate: rate}
 }
 

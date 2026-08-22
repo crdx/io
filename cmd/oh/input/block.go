@@ -13,8 +13,9 @@ const (
 )
 
 type Ruler struct {
-	Left  string
-	Right string
+	Left   string
+	Center string
+	Right  string
 }
 
 type Block struct {
@@ -47,19 +48,32 @@ func (self Ruler) render(width int) string {
 		width -= n
 	}
 
-	return head + ruleTo(width, self.Right)
+	return head + ruleTo(width, self.Center, self.Right)
 }
 
-func ruleTo(width int, label string) string {
+func ruleTo(width int, center string, label string) string {
 	n := getWidth(label, endPad)
 	if n == 0 || n > width {
-		return style.Rule(strings.Repeat("─", max(width, 0)))
+		return span(max(width, 0), center)
 	}
 
-	a := style.Rule(strings.Repeat("─", width-n))
 	b := style.Rule(strings.Repeat("─", endPad))
 
-	return a + " " + label + " " + b
+	return span(width-n, center) + " " + label + " " + b
+}
+
+func span(width int, center string) string {
+	n := getWidth(center, 0)
+	if n == 0 || n > width {
+		return style.Rule(strings.Repeat("─", width))
+	}
+
+	before := (width - n) / 2
+
+	a := style.Rule(strings.Repeat("─", before))
+	b := style.Rule(strings.Repeat("─", width-n-before))
+
+	return a + " " + center + " " + b
 }
 
 func getWidth(str string, edgePadding int) int {

@@ -43,7 +43,7 @@ func TestMissingConfiguredPathsAreCreatedAndKept(t *testing.T) {
 	missingHome := filepath.Join(t.TempDir(), "missing-home")
 
 	var warnings strings.Builder
-	filtered, err := createMissingConfiguredPaths(configuredPaths{
+	filtered, err := createMissingConfiguredPaths(pathsConfig{
 		Read:  []string{existingRead, missingRead},
 		Write: []string{existingWrite, missingWrite},
 		Exec:  []string{existingExec, missingExec},
@@ -91,7 +91,7 @@ func TestUncreatableConfiguredPathsAreWarnedAboutAndSkipped(t *testing.T) {
 	uncreatable := filepath.Join(parent, "child")
 
 	var warnings strings.Builder
-	filtered, err := createMissingConfiguredPaths(configuredPaths{
+	filtered, err := createMissingConfiguredPaths(pathsConfig{
 		Read: []string{uncreatable},
 	}, &warnings)
 	if err != nil {
@@ -125,7 +125,7 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	roots, err := mountConfiguredPaths(files, mode, configuredPaths{
+	roots, err := mountConfiguredPaths(files, mode, pathsConfig{
 		Read:  []string{readDirectory},
 		Write: []string{writeDirectory},
 		Exec:  []string{execDirectory},
@@ -184,7 +184,7 @@ func TestConfiguredFilesAreMountedWithoutTheirSiblings(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	roots, err := mountConfiguredPaths(files, mode, configuredPaths{
+	roots, err := mountConfiguredPaths(files, mode, pathsConfig{
 		Read:  []string{readPath, writePath},
 		Write: []string{writePath},
 	})
@@ -237,7 +237,7 @@ func TestAConfiguredFileSymlinkCannotDisguiseRepositoryMetadata(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	roots, err := mountConfiguredPaths(files, mode, configuredPaths{Write: []string{alias}})
+	roots, err := mountConfiguredPaths(files, mode, pathsConfig{Write: []string{alias}})
 	if err != nil {
 		t.Fatal(err)
 	}

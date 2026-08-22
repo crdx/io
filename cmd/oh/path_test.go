@@ -69,7 +69,7 @@ func TestAnAbsoluteXDGStateHomeIsUsed(t *testing.T) {
 	}
 }
 
-func TestTheConfigurationIsInTheXDGConfigDirectory(t *testing.T) {
+func TestTheConfigIsInTheXDGConfigDirectory(t *testing.T) {
 	root := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", root)
 

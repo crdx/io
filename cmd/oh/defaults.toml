@@ -1,0 +1,34 @@
+provider = "codex"
+model = ""
+effort = ""
+get_on_with_it_message = "yes"
+
+[skill]
+include = []
+exclude = []
+
+[sandbox]
+read = []
+write = []
+exec = []
+home = []
+
+[bar.top]
+left = []
+center = []
+right = [
+    { segment = "scroll", direction = "up" }
+]
+
+[bar.bottom]
+left = [
+    { segment = "activity", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
+    { segment = "modes" },
+    { segment = "workdir" },
+    { segment = "model" },
+    { segment = "think" },
+]
+center = []
+right = [
+    { segment = "scroll", direction = "down" }
+]

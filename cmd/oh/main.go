@@ -210,27 +210,27 @@ func run() ([]string, error) {
 
 	files := file.New(root, caps.RefuseWrite(mode))
 
-	settings, err := loadConfiguredSettings(configPath())
+	config, err := loadConfig(configPath())
 	if err != nil {
 		return nil, err
 	}
-	settings.Sandbox, err = createMissingConfiguredPaths(settings.Sandbox, os.Stderr)
+	config.Sandbox, err = createMissingConfiguredPaths(config.Sandbox, os.Stderr)
 	if err != nil {
 		return nil, err
 	}
-	configuredRoots, err := mountConfiguredPaths(files, mode, settings.Sandbox)
+	configuredRoots, err := mountConfiguredPaths(files, mode, config.Sandbox)
 	if err != nil {
 		return nil, err
 	}
 	defer closeConfiguredRoots(configuredRoots)
 
-	globalSkillDirs := append([]string{configDir("skills")}, settings.Skill.Include...)
+	globalSkillDirs := append([]string{configDir("skills")}, config.Skill.Include...)
 	availableSkills, err := skill.Discover(workspaceDir, globalSkillDirs, os.Stderr)
 	if err != nil {
 		return nil, err
 	}
 
-	availableSkills = skill.ExcludeGlobal(availableSkills, settings.Skill.Exclude)
+	availableSkills = skill.ExcludeGlobal(availableSkills, config.Skill.Exclude)
 
 	skillRoots, err := skill.MountGlobalSkills(files, availableSkills)
 	if err != nil {
@@ -241,7 +241,7 @@ func run() ([]string, error) {
 	processes := sandbox.NewProcesses(args.caps.Has(caps.Background))
 	defer func() { _, _ = processes.Disable() }()
 
-	providerName, model, effort, err := resolveProviderSettings(args.provider, args.model, args.effort, settings, resumedSession)
+	providerName, model, effort, err := resolveProviderChoice(args.provider, args.model, args.effort, config, resumedSession)
 	if err != nil {
 		return nil, err
 	}
@@ -292,7 +292,7 @@ func run() ([]string, error) {
 			tmpDir,
 			homeDir,
 			args.caps,
-			settings.Sandbox,
+			config.Sandbox,
 			availableSkills,
 		)
 		if err != nil {
@@ -315,7 +315,7 @@ func run() ([]string, error) {
 
 	snapshots := file.NewSnapshots()
 	tools := toolbox.Rummage(files, snapshots)
-	shell := confinedShell(workspaceDir, homeDir, tmpDir, settings.Sandbox, mode, files, processes)
+	shell := confinedShell(workspaceDir, homeDir, tmpDir, config.Sandbox, mode, files, processes)
 
 	tools = append(tools, shell)
 	tools = truncate.Tools(tools)
@@ -329,13 +329,16 @@ func run() ([]string, error) {
 		processes:          processes,
 		shell:              shell.Name(),
 		onTurnFinished:     func() { sendTurnFinishedNotification(workspaceDir) },
-		getOnWithItMessage: settings.GetOnWithItMessage,
+		getOnWithItMessage: config.GetOnWithItMessage,
+	}
 
-		label: func(isPending bool, isRunning bool, frame int) string {
-			currentCaps := mode.Current()
+	chat.layout, err = config.layout(availableSegments(workspaceDir, model, effort, chat))
+	if err != nil {
+		return nil, err
+	}
 
-			return banner(model, effort, workspaceDir, tools, currentCaps, isPending, isRunning, frame)
-		},
+	if err := config.unknownKeys(); err != nil {
+		return nil, err
 	}
 
 	if resumedSession != nil {
@@ -384,14 +387,14 @@ type connection struct {
 	toolsSize func([]tool.Tool) int
 }
 
-func resolveProviderSettings(
+func resolveProviderChoice(
 	requestedProvider string,
 	requestedModel string,
 	requestedEffort string,
-	settings configuredSettings,
+	config Config,
 	resumedSession *store.Session,
 ) (string, string, string, error) {
-	providerName := settings.Provider
+	providerName := config.Provider
 	if providerName == "" {
 		providerName = codexProvider
 	}
@@ -410,8 +413,8 @@ func resolveProviderSettings(
 	if sessionProvider != "" && providerName != sessionProvider {
 		return "", "", "", fmt.Errorf("cannot resume a %s session with %s", sessionProvider, providerName)
 	}
-	model := settings.Model
-	effort := settings.Effort
+	model := config.Model
+	effort := config.Effort
 	if effort == "" {
 		effort = defaultEfforts[providerName]
 	}

@@ -216,7 +216,7 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *
 		interrupted = interrupted || record.Kind == agent.Interruption
 	}
 
-	wantMessages := []string{"first", defaultGetOnWithItMessage}
+	wantMessages := []string{"first", builtInConfig(t).GetOnWithItMessage}
 	if !slices.Equal(messages, wantMessages) {
 		t.Errorf("got messages %q, want %q", messages, wantMessages)
 	}

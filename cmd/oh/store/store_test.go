@@ -93,7 +93,7 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 	}
 
 	if storedSession.Meta.Effort != "high" {
-		t.Errorf("expected the harness settings to survive, got %+v", storedSession.Meta)
+		t.Errorf("expected the harness config to survive, got %+v", storedSession.Meta)
 	}
 
 	if storedSession.Meta.SystemPrompt != "You are a coding assistant." {

@@ -16,7 +16,10 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/edit"
+	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/internal/file"
@@ -465,12 +468,6 @@ func entriesUpToFirstCall(entries []replayEntry) []replayEntry {
 	return entries
 }
 
-func openWorkspaceRoot(t *testing.T) *os.Root {
-	t.Helper()
-
-	return openWorkspaceRootAt(t, layOutWorkspace(t))
-}
-
 func openWorkspaceRootAt(t *testing.T, workspaceDir string) *os.Root {
 	t.Helper()
 
@@ -542,7 +539,6 @@ func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
 }
 
 func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
-	workspaceRoot := openWorkspaceRoot(t)
 	passes := map[string]func() string{}
 
 	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwg", "rxwgb", "rgb"} {
@@ -551,9 +547,6 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		files := file.New(workspaceRoot, caps.RefuseWrite(caps.NewMode(grantedCaps)))
-		tools := toolbox.Rummage(files, file.NewSnapshots())
-
 		for _, isRunning := range []bool{false, true} {
 			name := "caps " + flags + " while waiting"
 			if isRunning {
@@ -561,7 +554,18 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 			}
 
 			passes[name] = func() string {
-				return banner("gpt-5.6-sol", "high", workspaceMarker, tools, grantedCaps, false, isRunning, 2)
+				held := &Harness{mode: caps.NewMode(grantedCaps)}
+				held.turn.isRunning = isRunning
+				held.turn.spinnerFrame = 2
+
+				built, err := configFrom(t, "").layout(
+					availableSegments(workspaceMarker, "gpt-5.6-sol", "high", held),
+				)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				return bar(built, segment.BottomLeft, edit.Frame{})
 			}
 		}
 	}
@@ -576,4 +580,59 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	compareWithGolden(t, "banner", ".ansi", passes)
+}
+
+func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
+	frames := map[string]edit.Frame{
+		"one row": {
+			Rows: []string{"> what is the weather"}, Row: 0, Column: 21,
+		},
+		"scrolled both ways": {
+			Rows: []string{"> the third row", "> the fourth row"}, Row: 1, Column: 16,
+			Above: 2, Below: 7,
+		},
+	}
+
+	passes := map[string]func() string{}
+
+	for _, width := range []int{80, 40, 20} {
+		for name, frame := range frames {
+			passes[fmt.Sprintf("%s at %d columns", name, width)] = func() string {
+				held := &Harness{mode: caps.NewMode(caps.All())}
+				held.turn.isRunning = true
+				held.turn.spinnerFrame = 2
+
+				built, err := configFrom(t, "").layout(
+					availableSegments(workspaceMarker, "gpt-5.6-sol", "high", held),
+				)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				held.layout = built
+
+				block := input.Block{
+					Top: input.Ruler{
+						Left:   held.bar(segment.TopLeft, frame),
+						Center: held.bar(segment.TopCenter, frame),
+						Right:  held.bar(segment.TopRight, frame),
+					},
+					Input: frame,
+					Bottom: input.Ruler{
+						Left:   held.bar(segment.BottomLeft, frame),
+						Center: held.bar(segment.BottomCenter, frame),
+						Right:  held.bar(segment.BottomRight, frame),
+					},
+				}
+
+				rows, cursorRow, cursorColumn := block.Rows(width)
+
+				return fmt.Sprintf(
+					"%s\ncursor row %d column %d", strings.Join(rows, "\n"), cursorRow, cursorColumn,
+				)
+			}
+		}
+	}
+
+	compareWithGolden(t, "inputblock", ".ansi", passes)
 }
