@@ -7,6 +7,10 @@ import? 'local.just'
 
 set positional-arguments
 
+LINT_CACHE := env('GOLANGCI_LINT_CACHE', home_directory() / '.cache' / 'golangci-lint')
+
+export GOLANGCI_LINT_CACHE := LINT_CACHE / sha256(justfile_directory())
+
 [private]
 help:
     just --list --unsorted --list-submodules
