@@ -134,6 +134,8 @@ func createSandboxPolicy(
 		FileSize:  shellFileSize,
 		OpenFiles: shellOpenFiles,
 
+		VirtualResolver: true,
+
 		Background: currentCaps.Has(caps.Background),
 	}
 

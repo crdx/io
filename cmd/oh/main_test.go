@@ -429,6 +429,10 @@ func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 	if policy.SetEnv["TMPDIR"] != sandbox.TmpDir {
 		t.Errorf("got TMPDIR %q, want %q", policy.SetEnv["TMPDIR"], sandbox.TmpDir)
 	}
+
+	if !policy.VirtualResolver {
+		t.Error("the shell policy does not virtualise the resolver configuration")
+	}
 }
 
 func TestBackgroundModeReachesTheShellPolicy(t *testing.T) {
