@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
 
+	"crdx.org/hereduck"
 	"crdx.org/io/internal/pathutil"
 
 	"golang.org/x/sys/unix"
@@ -34,7 +36,40 @@ func (self Policy) nestedPaths() []string {
 const TmpDir = "/tmp"
 
 func (self Policy) usesMountNamespace() bool {
-	return len(self.nestedPaths()) > 0 || self.TmpDir != ""
+	return len(self.nestedPaths()) > 0 || self.TmpDir != "" || self.VirtualResolver
+}
+
+type virtualFile struct {
+	path     string
+	contents string
+}
+
+var resolvconfContents = hereduck.D(`
+	# managed by oh
+	nameserver 127.0.0.1
+`)
+
+var hostsContents = hereduck.D(`
+	127.0.0.1 localhost
+	::1 localhost ip6-localhost ip6-loopback
+`)
+
+var nssContents = hereduck.D(`
+	passwd: files
+	group: files
+	shadow: files
+	hosts: files dns
+	networks: files
+	protocols: files
+	services: files
+	ethers: files
+	rpc: files
+`)
+
+var resolverFiles = []virtualFile{
+	{path: "/etc/resolv.conf", contents: resolvconfContents},
+	{path: "/etc/hosts", contents: hostsContents},
+	{path: "/etc/nsswitch.conf", contents: nssContents},
 }
 
 func checkNamespaces(ctx context.Context, policy Policy) error {
@@ -77,11 +112,63 @@ func applyMounts(policy Policy) error {
 		}
 	}
 
+	if policy.VirtualResolver {
+		for _, file := range resolverFiles {
+			if err := mountReadOnlyTextFile(file.path, file.contents); err != nil {
+				return err
+			}
+		}
+	}
+
 	if policy.TmpDir != "" {
 		return attach(policy.TmpDir, TmpDir, nil)
 	}
 
 	return nil
+}
+
+func mountReadOnlyTextFile(path string, contents string) error {
+	target, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		return fmt.Errorf("could not resolve %s: %w", path, err)
+	}
+
+	backing, err := writeTemporaryFile(contents)
+	if err != nil {
+		return fmt.Errorf("could not prepare the contents of %s: %w", path, err)
+	}
+
+	mountErr := attach(backing, target, &unix.MountAttr{Attr_set: unix.MOUNT_ATTR_RDONLY})
+	removeErr := os.Remove(backing)
+
+	if mountErr != nil {
+		return fmt.Errorf("could not put the prepared contents at %s: %w", path, mountErr)
+	}
+	if removeErr != nil {
+		return fmt.Errorf("could not discard the contents prepared for %s: %w", path, removeErr)
+	}
+
+	return nil
+}
+
+func writeTemporaryFile(contents string) (string, error) {
+	file, err := os.CreateTemp("", "sandbox-virtual-file-")
+	if err != nil {
+		return "", err
+	}
+
+	if _, err := file.WriteString(contents); err != nil {
+		_ = file.Close()
+		_ = os.Remove(file.Name())
+		return "", err
+	}
+
+	if err := file.Close(); err != nil {
+		_ = os.Remove(file.Name())
+		return "", err
+	}
+
+	return file.Name(), nil
 }
 
 func mountReadOnly(path string) error {

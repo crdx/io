@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"crdx.org/hereduck"
 	"crdx.org/io/internal/sandbox"
 )
 
@@ -690,6 +691,91 @@ func TestOnlyTheNamedPartsOfEtcAreReachable(t *testing.T) {
 
 	if result := run(t, t.TempDir(), "ls /etc", sandbox.Policy{}); result.Code == 0 {
 		t.Errorf("the whole of /etc was listed: %q", result.Output)
+	}
+}
+
+var virtualResolverFiles = map[string]string{
+	"/etc/resolv.conf": hereduck.D(`
+		# managed by oh
+		nameserver 127.0.0.1
+	`),
+
+	"/etc/hosts": hereduck.D(`
+		127.0.0.1 localhost
+		::1 localhost ip6-localhost ip6-loopback
+	`),
+
+	"/etc/nsswitch.conf": hereduck.D(`
+		passwd: files
+		group: files
+		shadow: files
+		hosts: files dns
+		networks: files
+		protocols: files
+		services: files
+		ethers: files
+		rpc: files
+	`),
+}
+
+func TestVirtualResolverurationReplacesTheHostFiles(t *testing.T) {
+	policy := sandbox.Policy{VirtualResolver: true}
+
+	for path, contents := range virtualResolverFiles {
+		result := run(t, t.TempDir(), "cat "+path, policy)
+		if result.Code != 0 {
+			t.Errorf("%s is unreadable: %q", path, result.Output)
+			continue
+		}
+		if result.Output != contents {
+			t.Errorf("got %s as %q, want %q", path, result.Output, contents)
+		}
+	}
+}
+
+func TestTheHostResolverFilesStayHiddenWithoutTheirPolicy(t *testing.T) {
+	for path := range virtualResolverFiles {
+		if path == "/etc/nsswitch.conf" {
+			continue // the host's copy has always been readable
+		}
+
+		if result := run(t, t.TempDir(), "cat "+path, sandbox.Policy{}); result.Code == 0 {
+			t.Errorf("%s was readable without asking for it: %q", path, result.Output)
+		}
+	}
+}
+
+func TestTheVirtualResolverFilesAreRefusedByTheMountRatherThanLandlock(t *testing.T) {
+	policy := sandbox.Policy{VirtualResolver: true}
+
+	for path := range virtualResolverFiles {
+		result := run(t, t.TempDir(), "printf changed > "+path, policy)
+
+		if !strings.Contains(result.Output, "Read-only file system") {
+			t.Errorf(
+				"%s was refused with %q, want the read-only mount to be the one refusing it",
+				path, strings.TrimSpace(result.Output),
+			)
+		}
+	}
+}
+
+func TestTheVirtualResolverFilesCannotBeChanged(t *testing.T) {
+	policy := sandbox.Policy{VirtualResolver: true}
+
+	for path := range virtualResolverFiles {
+		if result := run(t, t.TempDir(), "printf changed > "+path, policy); result.Code == 0 {
+			t.Errorf("%s was overwritten: %q", path, result.Output)
+		}
+		if result := run(t, t.TempDir(), ": > "+path, policy); result.Code == 0 {
+			t.Errorf("%s was truncated: %q", path, result.Output)
+		}
+	}
+
+	for path, contents := range virtualResolverFiles {
+		if result := run(t, t.TempDir(), "cat "+path, policy); result.Output != contents {
+			t.Errorf("%s now reads %q, want %q", path, result.Output, contents)
+		}
 	}
 }
 

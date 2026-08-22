@@ -37,15 +37,17 @@ var base = []grant{
 
 // Policy grants paths, environment, resources, and background behavior. Other paths and external
 // networks are denied. Read entries inside Write remain read-only, and TmpDir appears at /tmp.
-// Background policies run through Processes.
+// VirtualResolver replaces the host resolver files with a deterministic private-loopback
+// configuration. Background policies run through Processes.
 type Policy struct {
-	Read    []string          `json:"read"`
-	Write   []string          `json:"write"` // paths readable and writable
-	Exec    []string          `json:"exec"`
-	TmpDir  string            `json:"tmpdir"` // a directory to appear at /tmp
-	Env     []string          `json:"env"`
-	SetEnv  map[string]string `json:"set_env"`
-	Timeout time.Duration     `json:"timeout"`
+	Read            []string          `json:"read"`
+	Write           []string          `json:"write"` // paths readable and writable
+	Exec            []string          `json:"exec"`
+	TmpDir          string            `json:"tmpdir"`           // a directory to appear at /tmp
+	VirtualResolver bool              `json:"virtual_resolver"` // synthesise the resolver files
+	Env             []string          `json:"env"`
+	SetEnv          map[string]string `json:"set_env"`
+	Timeout         time.Duration     `json:"timeout"`
 
 	CPUTime    time.Duration `json:"cpu_time"`
 	FileSize   int64         `json:"file_size"` // the largest file it may write, in bytes
@@ -110,12 +112,19 @@ type grant struct {
 func (self Policy) grants() []grant {
 	grants := make([]grant, 0, len(base)+len(self.Read)+len(self.Write)+len(self.Exec)+2)
 	grants = append(grants, base...)
+
 	if self.usesMountNamespace() {
 		grants = append(
 			grants,
 			grant{path: "/dev/ptmx", rights: rightsWrite},
 			grant{path: "/dev/pts", rights: rightsWrite},
 		)
+	}
+
+	if self.VirtualResolver {
+		for _, file := range resolverFiles {
+			grants = append(grants, grant{path: file.path, rights: rightsRead})
+		}
 	}
 
 	for _, path := range self.Read {
