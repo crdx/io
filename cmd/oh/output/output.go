@@ -157,7 +157,7 @@ func (self *Screen) measureTerminal() {
 }
 
 func (self *Screen) newline() {
-	self.emit("\n") // not write: a line owed is owed before this one ends, and paid after
+	self.emit("\n")
 }
 
 func (self *Screen) write(text string) {

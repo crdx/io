@@ -7,6 +7,6 @@ type Group int
 
 // The groups the screen draws. There are two, and the rule does not care how many there are.
 const (
-	AsideGroup  Group = iota // anything set apart on a line of its own
-	AnswerGroup              // prose streamed from the model
+	AsideGroup Group = iota
+	AnswerGroup
 )

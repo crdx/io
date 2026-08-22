@@ -781,7 +781,7 @@ func TestARefusedCallIsDescribedAgainRatherThanFromTheRecord(t *testing.T) {
 	shown := testConversation.newPainter(false).describe(agent.Event{
 		Name:      "shout",
 		Arguments: `{"message":"oi"}`,
-		Rendering: agent.Rendering{Subject: ""}, // as a session saved before the call could be described recorded it
+		Rendering: agent.Rendering{Subject: ""},
 	})
 
 	if shown.Note != "" || shown.Highlight != (tool.Highlight{}) {

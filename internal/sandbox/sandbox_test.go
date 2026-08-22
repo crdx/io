@@ -736,7 +736,7 @@ func TestVirtualResolverurationReplacesTheHostFiles(t *testing.T) {
 func TestTheHostResolverFilesStayHiddenWithoutTheirPolicy(t *testing.T) {
 	for path := range virtualResolverFiles {
 		if path == "/etc/nsswitch.conf" {
-			continue // the host's copy has always been readable
+			continue
 		}
 
 		if result := run(t, t.TempDir(), "cat "+path, sandbox.Policy{}); result.Code == 0 {
