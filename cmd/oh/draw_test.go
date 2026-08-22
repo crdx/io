@@ -565,7 +565,7 @@ func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
 
 func TestAShellCallIsDrawnAsAShellPrompt(t *testing.T) {
 	var screenOutput bytes.Buffer
-	callPainter := &Painter{screen: output.New(&screenOutput), shellName: "bash"}
+	callPainter := &Painter{screen: output.New(&screenOutput)}
 
 	callPainter.drawEvent(agent.Event{Kind: agent.ToolCallRequest, ID: "1", Name: "bash", Rendering: agent.Rendering{Subject: "echo hello"}})
 	callPainter.close(status.Done)

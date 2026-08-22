@@ -289,7 +289,6 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 			agent:        agent.New("", quietProvider{}, toolbox.Rummage(files, file.NewSnapshots())),
 			screen:       screen,
 			workspaceDir: workspaceDir,
-			shell:        "bash",
 			log:          testLog(t),
 		},
 	}

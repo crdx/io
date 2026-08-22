@@ -327,7 +327,6 @@ func run() ([]string, error) {
 		workspaceDir:       workspaceDir,
 		mode:               mode,
 		processes:          processes,
-		shell:              shell.Name(),
 		onTurnFinished:     func() { sendTurnFinishedNotification(workspaceDir) },
 		getOnWithItMessage: config.GetOnWithItMessage,
 	}

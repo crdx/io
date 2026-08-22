@@ -34,7 +34,6 @@ type Harness struct {
 	mode          *caps.Mode
 
 	workspaceDir       string
-	shell              string
 	restart            []string
 	getOnWithItMessage string
 	queuedTurn         QueuedTurn
@@ -375,7 +374,6 @@ func (self *Harness) newPainter(isRunning bool) *Painter {
 		screen:       self.screen,
 		isRunning:    isRunning,
 		getTool:      self.agent.Tool,
-		shellName:    self.shell,
 		workspaceDir: self.workspaceDir,
 	}
 }

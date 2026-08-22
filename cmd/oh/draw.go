@@ -16,7 +16,10 @@ import (
 	"crdx.org/io/cmd/oh/width"
 )
 
-const readTool = "read"
+const (
+	readTool  = "read"
+	shellTool = "bash"
+)
 
 type Painter struct {
 	screen    *output.Screen
@@ -29,7 +32,6 @@ type Painter struct {
 	isRunning bool // whether drawing is happening as events arrive
 
 	getTool      func(string) (tool.Tool, bool) // the tools a call may be rendered by
-	shellName    string                         // what the shell tool was named, so a call to it is drawn as a prompt
 	workspaceDir string                         // the prefix omitted from paths inside the workspace
 }
 
@@ -50,6 +52,36 @@ func (self *Painter) describe(event agent.Event) agent.Rendering {
 	shown.Note = self.shortenPathPrefix(shown.Note)
 
 	return shown
+}
+
+func (self *Painter) label(event agent.Event, shown agent.Rendering) status.Label {
+	label := status.Label{
+		Name:      event.Name,
+		Subject:   shown.Subject,
+		Highlight: shown.Highlight,
+		Qualifier: shown.Note,
+		ReadOnly:  shown.ReadOnly,
+	}
+
+	skillName, isSkillLoad := "", false
+	if event.Name == readTool {
+		skillName, isSkillLoad = skill.NameFromPath(shown.Subject)
+	}
+
+	switch {
+	case event.Name == shellTool:
+		label.Name = "$"
+		label.NameStyle = style.Shell
+
+	case isSkillLoad:
+		label.Name = "load"
+		label.NameStyle = style.Skill
+		label.Accent = skillName
+		label.AccentStyle = style.Skill
+		label.Highlight = tool.Highlight{}
+	}
+
+	return label
 }
 
 func (self *Painter) shortenPathPrefix(value string) string {
@@ -123,36 +155,7 @@ func (self *Painter) drawEvent(event agent.Event) {
 			self.rows = map[string]int{}
 		}
 
-		shown := self.describe(event)
-
-		name := event.Name
-		var nameStyle style.Style
-		accent := ""
-		var accentStyle style.Style
-		if event.Name == readTool {
-			if skillName, isSkill := skill.NameFromPath(shown.Subject); isSkill {
-				name = "load"
-				nameStyle = style.Skill
-				accent = skillName
-				accentStyle = style.Skill
-				shown.Highlight = tool.Highlight{}
-			}
-		}
-		if event.Name == self.shellName {
-			name = "$"
-			nameStyle = style.Shell
-		}
-
-		self.rows[event.ID] = self.toolBlock.Add(status.Label{
-			Name:        name,
-			NameStyle:   nameStyle,
-			Subject:     shown.Subject,
-			Highlight:   shown.Highlight,
-			Qualifier:   shown.Note,
-			ReadOnly:    shown.ReadOnly,
-			Accent:      accent,
-			AccentStyle: accentStyle,
-		})
+		self.rows[event.ID] = self.toolBlock.Add(self.label(event, self.describe(event)))
 
 	case agent.ToolCallResult:
 		self.mark(event)
