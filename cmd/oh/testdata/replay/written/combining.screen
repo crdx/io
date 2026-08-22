@@ -1,0 +1,511 @@
+=== narrow ===
+
+ what does the accented file say?
+
+
+Reading the file with the combining
+marks in its name.
+
+The name is written café rather than
+café, so the accent is a mark of its
+own.
+
+A family 👨‍👩‍👧 is one glyph joined from
+several, and a heart ❤️ asks to be drawn
+in colour.
+
+Combining marks pile up too: á̂̃̄ is on
+letter under four of them.
+A styled wide rune has nowhere to go in
+one column: 日本 in code, 中文 in bold.
+
+And a result that came back with Windows
+line endings:
+one
+two
+three
+=== one column ===
+
+
+w
+
+h
+
+a
+
+t
+
+d
+
+o
+
+e
+
+s
+
+t
+
+h
+
+e
+
+a
+
+c
+
+c
+
+e
+
+n
+
+t
+
+e
+
+d
+
+f
+
+i
+
+l
+
+e
+
+s
+
+a
+
+y
+
+?
+
+
+R
+e
+a
+d
+i
+n
+g
+t
+h
+e
+f
+i
+l
+e
+w
+i
+t
+h
+t
+h
+e
+c
+o
+m
+b
+i
+n
+i
+n
+g
+m
+a
+r
+k
+s
+i
+n
+i
+t
+s
+n
+a
+m
+e
+.
+
+T
+h
+e
+n
+a
+m
+e
+i
+s
+w
+r
+i
+t
+t
+e
+n
+c
+a
+f
+e
+r
+a
+t
+h
+e
+r
+t
+h
+a
+n
+c
+a
+f
+é
+,
+s
+o
+t
+h
+e
+a
+c
+c
+e
+n
+t
+i
+s
+a
+m
+a
+r
+k
+o
+f
+i
+t
+s
+o
+w
+n
+.
+
+A
+f
+a
+m
+i
+l
+y
+👨
+👩
+👧
+
+i
+s
+o
+n
+e
+g
+l
+y
+p
+h
+j
+o
+i
+n
+e
+d
+f
+r
+o
+m
+s
+e
+v
+e
+r
+a
+l
+,
+a
+n
+d
+a
+h
+e
+a
+r
+t
+❤
+a
+s
+k
+s
+t
+o
+b
+e
+d
+r
+a
+w
+n
+i
+n
+c
+o
+l
+o
+u
+r
+.
+
+C
+o
+m
+b
+i
+n
+i
+n
+g
+m
+a
+r
+k
+s
+p
+i
+l
+e
+u
+p
+t
+o
+o
+:
+a
+i
+s
+o
+n
+e
+l
+e
+t
+t
+e
+r
+u
+n
+d
+e
+r
+f
+o
+u
+r
+o
+f
+t
+h
+e
+m
+.
+A
+s
+t
+y
+l
+e
+d
+w
+i
+d
+e
+r
+u
+n
+e
+h
+a
+s
+n
+o
+w
+h
+e
+r
+e
+t
+o
+g
+o
+i
+n
+o
+n
+e
+c
+o
+l
+u
+m
+n
+:
+
+日
+本
+
+i
+n
+c
+o
+d
+e
+,
+
+中
+文
+
+i
+n
+b
+o
+l
+d
+.
+
+A
+n
+d
+a
+r
+e
+s
+u
+l
+t
+t
+h
+a
+t
+c
+a
+m
+e
+b
+a
+c
+k
+w
+i
+t
+h
+W
+i
+n
+d
+o
+w
+s
+l
+i
+n
+e
+e
+n
+d
+i
+n
+g
+s
+:
+o
+n
+e
+t
+w
+o
+t
+h
+r
+e
+e
+=== tiny ===
+
+ what does
+ the
+ accented
+ file say?
+
+
+Reading the
+file with
+the
+combining
+marks in its
+name.
+
+The name is
+written cafe
+rather than
+café, so the
+accent is a
+mark of its
+own.
+
+A family
+👨‍👩‍👧 is
+one glyph
+joined from
+several, and
+a heart ❤️
+asks to be
+drawn in
+colour.
+
+Combining
+marks pile
+up too: á̂̃
+one letter
+under four
+of them.
+A styled
+wide rune
+has nowhere
+to go in one
+column: 日本
+in code,
+中文 in
+bold.
+
+And a result
+that came
+back with
+Windows line
+endings:
+one
+two
+three
+=== wide ===
+
+ what does the accented file say?
+
+
+Reading the file with the combining marks in its name.
+
+The name is written café rather than café, so the accent is a mark of its own.
+
+A family 👨‍👩‍👧 is one glyph joined from several, and a heart ❤️ asks to be drawn in colour.
+
+Combining marks pile up too: á̂̃̄ is one letter under four of them.
+A styled wide rune has nowhere to go in one column: 日本 in code, 中文 in bold.
+
+And a result that came back with Windows line endings:
+one
+two
+three

@@ -1,0 +1,733 @@
+=== narrow ===
+[startup=0s session=00000000000000000000
+0000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+Laying the answer out.
+
+What the tools cost
+
+The read tool is cheap and bash is not,
+so the order matters. A run looks like
+this:
+
+func main() {
+    fmt.Println("hello")
+}
+
+• read first, and read widely
+• run only what the reading could not
+  answer
+  • a nested point, to show the indent
+
+┌──────┬────────────────────────┬──────┐
+│ Tool │ What it does           │ Cost │
+├──────┼────────────────────────┼──────┤
+│ read │ takes a file and hands │    1 │
+│      │ it back                │      │
+├──────┼────────────────────────┼──────┤
+│ grep │ walks the tree looking │    4 │
+│      │ for a pattern          │      │
+├──────┼────────────────────────┼──────┤
+│ bash │ runs a command in a    │   40 │
+│      │ sandbox with no        │      │
+│      │ network                │      │
+└──────┴────────────────────────┴──────┘
+
+│ The costs are made up, and the table
+│ is here to be watched as it draws.
+
+See the notes
+(https://example.com/notes) for the
+rest.
+=== one column ===
+[
+s
+t
+a
+r
+t
+u
+p
+=
+0
+s
+
+s
+e
+s
+s
+i
+o
+n
+=
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+s
+k
+i
+l
+l
+s
+=
+0
+p
+/
+0
+g
+
+t
+o
+o
+l
+s
+=
+~
+6
+0
+0
+t
+]
+
+
+
+h
+
+a
+
+v
+
+e
+
+a
+
+l
+
+o
+
+o
+
+k
+
+a
+
+t
+
+t
+
+h
+
+a
+
+t
+
+
+L
+a
+y
+i
+n
+g
+t
+h
+e
+a
+n
+s
+w
+e
+r
+o
+u
+t
+.
+
+W
+h
+a
+t
+t
+h
+e
+t
+o
+o
+l
+s
+c
+o
+s
+t
+
+T
+h
+e
+r
+e
+a
+d
+t
+o
+o
+l
+i
+s
+c
+h
+e
+a
+p
+a
+n
+d
+b
+a
+s
+h
+i
+s
+n
+o
+t
+,
+s
+o
+t
+h
+e
+o
+r
+d
+e
+r
+m
+a
+t
+t
+e
+r
+s
+.
+A
+r
+u
+n
+l
+o
+o
+k
+s
+l
+i
+k
+e
+t
+h
+i
+s
+:
+
+f
+u
+n
+c
+m
+a
+i
+n
+(
+)
+{
+
+f
+m
+t
+.
+P
+r
+i
+n
+t
+l
+n
+(
+"
+h
+e
+l
+l
+o
+"
+)
+}
+
+•
+r
+e
+a
+d
+f
+i
+r
+s
+t
+,
+a
+n
+d
+r
+e
+a
+d
+w
+i
+d
+e
+l
+y
+•
+r
+u
+n
+o
+n
+l
+y
+w
+h
+a
+t
+t
+h
+e
+r
+e
+a
+d
+i
+n
+g
+c
+o
+u
+l
+d
+n
+o
+t
+a
+n
+s
+w
+e
+r
+a
+n
+e
+s
+t
+e
+d
+p
+o
+i
+n
+t
+,
+t
+o
+s
+h
+o
+w
+t
+h
+e
+i
+n
+d
+e
+n
+t
+
+T
+o
+o
+l
+|
+W
+h
+a
+t
+i
+t
+d
+o
+e
+s
+|
+C
+o
+s
+t
+r
+e
+a
+d
+|
+t
+a
+k
+e
+s
+a
+f
+i
+l
+e
+a
+n
+d
+h
+a
+n
+d
+s
+i
+t
+b
+a
+c
+k
+|
+1
+g
+r
+e
+p
+|
+w
+a
+l
+k
+s
+t
+h
+e
+t
+r
+e
+e
+l
+o
+o
+k
+i
+n
+g
+f
+o
+r
+a
+p
+a
+t
+t
+e
+r
+n
+|
+4
+b
+a
+s
+h
+|
+r
+u
+n
+s
+a
+c
+o
+m
+m
+a
+n
+d
+i
+n
+a
+s
+a
+n
+d
+b
+o
+x
+w
+i
+t
+h
+n
+o
+n
+e
+t
+w
+o
+r
+k
+|
+4
+0
+
+T
+h
+e
+c
+o
+s
+t
+s
+a
+r
+e
+m
+a
+d
+e
+u
+p
+,
+a
+n
+d
+t
+h
+e
+t
+a
+b
+l
+e
+i
+s
+h
+e
+r
+e
+t
+o
+b
+e
+w
+a
+t
+c
+h
+e
+d
+a
+s
+i
+t
+d
+r
+a
+w
+s
+.
+
+S
+e
+e
+t
+h
+e
+n
+o
+t
+e
+s
+(
+h
+t
+t
+p
+s
+:
+/
+/
+e
+x
+a
+m
+p
+l
+e
+.
+c
+o
+m
+/
+n
+o
+t
+e
+s
+)
+f
+o
+r
+t
+h
+e
+r
+e
+s
+t
+.
+=== tiny ===
+[startup=0s
+session=0000
+000000000000
+00000000 ski
+lls=0p/0g to
+ols=~600t]
+
+
+ have a look
+ at that
+
+
+Laying the
+answer out.
+
+What the
+tools cost
+
+The read
+tool is
+cheap and
+bash is not,
+so the order
+matters. A
+run looks
+like this:
+
+func main()
+{
+    fmt.Prin
+fmt.Println(
+"hello")
+}
+
+• read
+  first, and
+  read
+  widely
+• run only
+  what the
+  reading
+  could not
+  answer
+  • a nested
+    point,
+    to show
+    the
+    indent
+
+Tool | What
+it does |
+Cost
+read | takes
+a file and
+hands it
+back | 1
+grep | walks
+the tree
+looking for
+a pattern |
+4
+bash | runs
+a command in
+a sandbox
+with no
+network | 40
+
+│ The costs
+│ are made
+│ up, and
+│ the table
+│ is here to
+│ be watched
+│ as it
+│ draws.
+
+See the
+notes
+(https://exa
+mple.com/not
+es) for the
+rest.
+=== wide ===
+[startup=0s session=000000000000000000000000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+Laying the answer out.
+
+What the tools cost
+
+The read tool is cheap and bash is not, so the order matters. A run looks like this:
+
+func main() {
+    fmt.Println("hello")
+}
+
+• read first, and read widely
+• run only what the reading could not answer
+  • a nested point, to show the indent
+
+┌──────┬─────────────────────────────────────────────┬──────┐
+│ Tool │ What it does                                │ Cost │
+├──────┼─────────────────────────────────────────────┼──────┤
+│ read │ takes a file and hands it back              │    1 │
+├──────┼─────────────────────────────────────────────┼──────┤
+│ grep │ walks the tree looking for a pattern        │    4 │
+├──────┼─────────────────────────────────────────────┼──────┤
+│ bash │ runs a command in a sandbox with no network │   40 │
+└──────┴─────────────────────────────────────────────┴──────┘
+
+│ The costs are made up, and the table is here to be watched as it draws.
+
+See the notes (https://example.com/notes) for the rest.

@@ -1,0 +1,507 @@
+=== narrow ===
+[startup=0s session=00000000000000000000
+0000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+This one stops halfway.
+the stream ended before the response did
+
+
+ have a look at that
+
+
+Let me think about that.
+
+the model is overloaded
+
+
+ have a look at that
+
+
+I can only get so far before
+
+the response was cut short
+
+
+ have a look at that
+
+
+the endpoint is having a moment
+=== one column ===
+[
+s
+t
+a
+r
+t
+u
+p
+=
+0
+s
+
+s
+e
+s
+s
+i
+o
+n
+=
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+s
+k
+i
+l
+l
+s
+=
+0
+p
+/
+0
+g
+
+t
+o
+o
+l
+s
+=
+~
+6
+0
+0
+t
+]
+
+
+
+h
+
+a
+
+v
+
+e
+
+a
+
+l
+
+o
+
+o
+
+k
+
+a
+
+t
+
+t
+
+h
+
+a
+
+t
+
+
+T
+h
+i
+s
+o
+n
+e
+s
+t
+o
+p
+s
+h
+a
+l
+f
+w
+a
+y
+.
+t
+h
+e
+
+s
+t
+r
+e
+a
+m
+
+e
+n
+d
+e
+d
+
+b
+e
+f
+o
+r
+e
+
+t
+h
+e
+
+r
+e
+s
+p
+o
+n
+s
+e
+
+d
+i
+d
+
+
+
+h
+
+a
+
+v
+
+e
+
+a
+
+l
+
+o
+
+o
+
+k
+
+a
+
+t
+
+t
+
+h
+
+a
+
+t
+
+
+L
+e
+t
+m
+e
+t
+h
+i
+n
+k
+a
+b
+o
+u
+t
+t
+h
+a
+t
+.
+
+t
+h
+e
+
+m
+o
+d
+e
+l
+
+i
+s
+
+o
+v
+e
+r
+l
+o
+a
+d
+e
+d
+
+
+
+h
+
+a
+
+v
+
+e
+
+a
+
+l
+
+o
+
+o
+
+k
+
+a
+
+t
+
+t
+
+h
+
+a
+
+t
+
+
+I
+c
+a
+n
+o
+n
+l
+y
+g
+e
+t
+s
+o
+f
+a
+r
+b
+e
+f
+o
+r
+e
+
+t
+h
+e
+
+r
+e
+s
+p
+o
+n
+s
+e
+
+w
+a
+s
+
+c
+u
+t
+
+s
+h
+o
+r
+t
+
+
+
+h
+
+a
+
+v
+
+e
+
+a
+
+l
+
+o
+
+o
+
+k
+
+a
+
+t
+
+t
+
+h
+
+a
+
+t
+
+
+t
+h
+e
+
+e
+n
+d
+p
+o
+i
+n
+t
+
+i
+s
+
+h
+a
+v
+i
+n
+g
+
+a
+
+m
+o
+m
+e
+n
+t
+=== tiny ===
+[startup=0s
+session=0000
+000000000000
+00000000 ski
+lls=0p/0g to
+ols=~600t]
+
+
+ have a look
+ at that
+
+
+This one
+stops
+halfway.
+the stream e
+nded before
+the response
+ did
+
+
+ have a look
+ at that
+
+
+Let me think
+about that.
+
+the model is
+ overloaded
+
+
+ have a look
+ at that
+
+
+I can only
+get so far
+before
+
+the response
+ was cut sho
+rt
+
+
+ have a look
+ at that
+
+
+the endpoint
+ is having a
+ moment
+=== wide ===
+[startup=0s session=000000000000000000000000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+This one stops halfway.
+the stream ended before the response did
+
+
+ have a look at that
+
+
+Let me think about that.
+
+the model is overloaded
+
+
+ have a look at that
+
+
+I can only get so far before
+
+the response was cut short
+
+
+ have a look at that
+
+
+the endpoint is having a moment

@@ -1,0 +1,180 @@
+=== narrow ===
+
+ search everything for the spinner
+
+
+That will take a moment.
+
+grep spinner *.go ✓ 1L ~100t
+find **/*.go ✗ 1m02s the search went …
+
+The grep took nine seconds and the find
+gave up after a minute.
+=== one column ===
+
+
+s
+
+e
+
+a
+
+r
+
+c
+
+h
+
+e
+
+v
+
+e
+
+r
+
+y
+
+t
+
+h
+
+i
+
+n
+
+g
+
+f
+
+o
+
+r
+
+t
+
+h
+
+e
+
+s
+
+p
+
+i
+
+n
+
+n
+
+e
+
+r
+
+
+T
+h
+a
+t
+w
+i
+l
+l
+t
+a
+k
+e
+a
+m
+o
+m
+e
+n
+t
+.
+
+✓
+T
+h
+e
+g
+r
+e
+p
+t
+o
+o
+k
+n
+i
+n
+e
+s
+e
+c
+o
+n
+d
+s
+a
+n
+d
+t
+h
+e
+f
+i
+n
+d
+g
+a
+v
+e
+u
+p
+a
+f
+t
+e
+r
+a
+m
+i
+n
+u
+t
+e
+.
+=== tiny ===
+
+ search
+ everything
+ for the
+ spinner
+
+
+That will
+take a
+moment.
+
+✓ 1L ~100t
+✗ 1m02s …
+
+The grep
+took nine
+seconds and
+the find
+gave up
+after a
+minute.
+=== wide ===
+
+ search everything for the spinner
+
+
+That will take a moment.
+
+grep spinner *.go ✓ 1L ~100t
+find **/*.go ✗ 1m02s the search went on too long
+
+The grep took nine seconds and the find gave up after a minute.

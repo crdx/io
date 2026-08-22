@@ -1,0 +1,530 @@
+=== narrow ===
+[startup=0s session=00000000000000000000
+0000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+Writing the file the rest of this needs.
+
+I'll put a file down to work with.
+
+write notes.md 26B ✓ 5L ~7t
+Reading, then writing, then reading what
+was written.
+
+Now to read it, add to it, and read it
+back.
+
+read notes.md ✓ 5L ~7t
+ls ✓ 8L ~100t
+write notes.md 32B ✓ 6L ~8t
+read notes.md ✓ 6L ~8t
+
+The reads went together, the write
+waited for them and ran on its own, and
+the read after it waited for the write.
+The last read has four lines, which it
+could only have if the write had
+finished first.
+=== one column ===
+[
+s
+t
+a
+r
+t
+u
+p
+=
+0
+s
+
+s
+e
+s
+s
+i
+o
+n
+=
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+s
+k
+i
+l
+l
+s
+=
+0
+p
+/
+0
+g
+
+t
+o
+o
+l
+s
+=
+~
+6
+0
+0
+t
+]
+
+
+
+h
+
+a
+
+v
+
+e
+
+a
+
+l
+
+o
+
+o
+
+k
+
+a
+
+t
+
+t
+
+h
+
+a
+
+t
+
+
+W
+r
+i
+t
+i
+n
+g
+t
+h
+e
+f
+i
+l
+e
+t
+h
+e
+r
+e
+s
+t
+o
+f
+t
+h
+i
+s
+n
+e
+e
+d
+s
+.
+
+I
+'
+l
+l
+p
+u
+t
+a
+f
+i
+l
+e
+d
+o
+w
+n
+t
+o
+w
+o
+r
+k
+w
+i
+t
+h
+.
+
+
+R
+e
+a
+d
+i
+n
+g
+,
+t
+h
+e
+n
+w
+r
+i
+t
+i
+n
+g
+,
+t
+h
+e
+n
+r
+e
+a
+d
+i
+n
+g
+w
+h
+a
+t
+w
+a
+s
+w
+r
+i
+t
+t
+e
+n
+.
+
+N
+o
+w
+t
+o
+r
+e
+a
+d
+i
+t
+,
+a
+d
+d
+t
+o
+i
+t
+,
+a
+n
+d
+r
+e
+a
+d
+i
+t
+b
+a
+c
+k
+.
+
+✓
+✓
+
+T
+h
+e
+r
+e
+a
+d
+s
+w
+e
+n
+t
+t
+o
+g
+e
+t
+h
+e
+r
+,
+t
+h
+e
+w
+r
+i
+t
+e
+w
+a
+i
+t
+e
+d
+f
+o
+r
+t
+h
+e
+m
+a
+n
+d
+r
+a
+n
+o
+n
+i
+t
+s
+o
+w
+n
+,
+a
+n
+d
+t
+h
+e
+r
+e
+a
+d
+a
+f
+t
+e
+r
+i
+t
+w
+a
+i
+t
+e
+d
+f
+o
+r
+t
+h
+e
+w
+r
+i
+t
+e
+.
+T
+h
+e
+l
+a
+s
+t
+r
+e
+a
+d
+h
+a
+s
+f
+o
+u
+r
+l
+i
+n
+e
+s
+,
+w
+h
+i
+c
+h
+i
+t
+c
+o
+u
+l
+d
+o
+n
+l
+y
+h
+a
+v
+e
+i
+f
+t
+h
+e
+w
+r
+i
+t
+e
+h
+a
+d
+f
+i
+n
+i
+s
+h
+e
+d
+f
+i
+r
+s
+t
+.
+=== tiny ===
+[startup=0s
+session=0000
+000000000000
+00000000 ski
+lls=0p/0g to
+ols=~600t]
+
+
+ have a look
+ at that
+
+
+Writing the
+file the
+rest of this
+needs.
+
+I'll put a
+file down to
+work with.
+
+… ✓ 5L ~7t
+Reading,
+then
+writing,
+then reading
+what was
+written.
+
+Now to read
+it, add to
+it, and read
+it back.
+
+… ✓ 5L ~7t
+✓ 8L ~100t
+… ✓ 6L ~8t
+… ✓ 6L ~8t
+
+The reads
+went
+together,
+the write
+waited for
+them and ran
+on its own,
+and the read
+after it
+waited for
+the write.
+The last
+read has
+four lines,
+which it
+could only
+have if the
+write had
+finished
+first.
+=== wide ===
+[startup=0s session=000000000000000000000000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+Writing the file the rest of this needs.
+
+I'll put a file down to work with.
+
+write notes.md 26B ✓ 5L ~7t
+Reading, then writing, then reading what was written.
+
+Now to read it, add to it, and read it back.
+
+read notes.md ✓ 5L ~7t
+ls ✓ 8L ~100t
+write notes.md 32B ✓ 6L ~8t
+read notes.md ✓ 6L ~8t
+
+The reads went together, the write waited for them and ran on its own, and the read after it waited
+for the write. The last read has four lines, which it could only have if the write had finished
+first.

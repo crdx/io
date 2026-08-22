@@ -1,0 +1,445 @@
+=== narrow ===
+
+ read the renderer and tell me what it
+ does
+
+
+Reading the renderer before saying
+anything about it.
+
+Reading it now.
+
+read cmd/oh/line/render.go –
+The turn was interrupted.
+
+
+ never mind, what is in target.txt?
+
+
+read target.txt ✓ 1L ~1t
+
+It holds the word one, and nothing else.
+
+Background processes killed (sleep).
+the conversation could not be stored: no
+ space left on device
+=== one column ===
+
+
+r
+
+e
+
+a
+
+d
+
+t
+
+h
+
+e
+
+r
+
+e
+
+n
+
+d
+
+e
+
+r
+
+e
+
+r
+
+a
+
+n
+
+d
+
+t
+
+e
+
+l
+
+l
+
+m
+
+e
+
+w
+
+h
+
+a
+
+t
+
+i
+
+t
+
+d
+
+o
+
+e
+
+s
+
+
+R
+e
+a
+d
+i
+n
+g
+t
+h
+e
+r
+e
+n
+d
+e
+r
+e
+r
+b
+e
+f
+o
+r
+e
+s
+a
+y
+i
+n
+g
+a
+n
+y
+t
+h
+i
+n
+g
+a
+b
+o
+u
+t
+i
+t
+.
+
+R
+e
+a
+d
+i
+n
+g
+i
+t
+n
+o
+w
+.
+
+–
+T
+h
+e
+
+t
+u
+r
+n
+
+w
+a
+s
+
+i
+n
+t
+e
+r
+r
+u
+p
+t
+e
+d
+.
+
+
+
+n
+
+e
+
+v
+
+e
+
+r
+
+m
+
+i
+
+n
+
+d
+
+,
+
+w
+
+h
+
+a
+
+t
+
+i
+
+s
+
+i
+
+n
+
+t
+
+a
+
+r
+
+g
+
+e
+
+t
+
+.
+
+t
+
+x
+
+t
+
+?
+
+
+I
+t
+h
+o
+l
+d
+s
+t
+h
+e
+w
+o
+r
+d
+o
+n
+e
+,
+a
+n
+d
+n
+o
+t
+h
+i
+n
+g
+e
+l
+s
+e
+.
+
+B
+a
+c
+k
+g
+r
+o
+u
+n
+d
+
+p
+r
+o
+c
+e
+s
+s
+e
+s
+
+k
+i
+l
+l
+e
+d
+
+(
+s
+l
+e
+e
+p
+)
+.
+t
+h
+e
+
+c
+o
+n
+v
+e
+r
+s
+a
+t
+i
+o
+n
+
+c
+o
+u
+l
+d
+
+n
+o
+t
+
+b
+e
+
+s
+t
+o
+r
+e
+d
+:
+
+n
+o
+
+s
+p
+a
+c
+e
+
+l
+e
+f
+t
+
+o
+n
+
+d
+e
+v
+i
+c
+e
+=== tiny ===
+
+ read the
+ renderer
+ and tell me
+ what it
+ does
+
+
+Reading the
+renderer
+before
+saying
+anything
+about it.
+
+Reading it
+now.
+
+read cm… –
+The turn was
+ interrupted
+.
+
+
+ never mind,
+ what is in
+ target.txt?
+
+
+… ✓ 1L ~1t
+
+It holds the
+word one,
+and nothing
+else.
+
+Background p
+rocesses kil
+led (sleep).
+the conversa
+tion could n
+ot be stored
+: no space l
+eft on devic
+e
+=== wide ===
+
+ read the renderer and tell me what it does
+
+
+Reading the renderer before saying anything about it.
+
+Reading it now.
+
+read cmd/oh/line/render.go –
+The turn was interrupted.
+
+
+ never mind, what is in target.txt?
+
+
+read target.txt ✓ 1L ~1t
+
+It holds the word one, and nothing else.
+
+Background processes killed (sleep).
+the conversation could not be stored: no space left on device

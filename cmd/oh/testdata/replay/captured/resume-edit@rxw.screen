@@ -1,0 +1,219 @@
+=== narrow ===
+[startup=0s session=00000000000000000000
+0000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+Editing the target without reading it
+again.
+
+edit target.… ✗ 1L ~100t file has not…
+
+The resumed edit completed.
+=== one column ===
+[
+s
+t
+a
+r
+t
+u
+p
+=
+0
+s
+
+s
+e
+s
+s
+i
+o
+n
+=
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+s
+k
+i
+l
+l
+s
+=
+0
+p
+/
+0
+g
+
+t
+o
+o
+l
+s
+=
+~
+6
+0
+0
+t
+]
+
+
+
+h
+
+a
+
+v
+
+e
+
+a
+
+l
+
+o
+
+o
+
+k
+
+a
+
+t
+
+t
+
+h
+
+a
+
+t
+
+
+E
+d
+i
+t
+i
+n
+g
+t
+h
+e
+t
+a
+r
+g
+e
+t
+w
+i
+t
+h
+o
+u
+t
+r
+e
+a
+d
+i
+n
+g
+i
+t
+a
+g
+a
+i
+n
+.
+
+
+T
+h
+e
+r
+e
+s
+u
+m
+e
+d
+e
+d
+i
+t
+c
+o
+m
+p
+l
+e
+t
+e
+d
+.
+=== tiny ===
+[startup=0s
+session=0000
+000000000000
+00000000 ski
+lls=0p/0g to
+ols=~600t]
+
+
+ have a look
+ at that
+
+
+Editing the
+target
+without
+reading it
+again.
+
+ ✗ 1L ~100t
+
+The resumed
+edit
+completed.
+=== wide ===
+[startup=0s session=000000000000000000000000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+Editing the target without reading it again.
+
+edit target.txt ✗ 1L ~100t file has not been read yet — ensure you read target.txt before editing…
+
+The resumed edit completed.

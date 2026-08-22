@@ -44,6 +44,45 @@ type replayEntry struct {
 	Event *agent.Event `json:"event,omitempty"`
 }
 
+func TestEveryScenarioShowsWhatItShowedBefore(t *testing.T) {
+	for _, journal := range everyJournal(t) {
+		t.Run(journal.name, func(t *testing.T) {
+			entries := readJournal(t, journal.path)
+
+			compareWithGolden(t, journal.name, ".screen", map[string]func() string{
+				"wide":       func() string { return shownAtWidth(t, entries, replayColumns) },
+				"narrow":     func() string { return shownAtWidth(t, entries, narrowColumns) },
+				"tiny":       func() string { return shownAtWidth(t, entries, tinyColumns) },
+				"one column": func() string { return shownAtWidth(t, entries, oneColumn) },
+			})
+		})
+	}
+}
+
+func shownAtWidth(t *testing.T, entries []replayEntry, columns int) string {
+	t.Helper()
+
+	return shown(t, replayAtWidth(t, entries, columns), columns)
+}
+
+func shown(t *testing.T, stream string, columns int) string {
+	t.Helper()
+
+	return strings.Join(visibleScreen(t, stream, columns), "\n")
+}
+
+func shownPasses(t *testing.T, passes map[string]func() string, columns int) map[string]func() string {
+	t.Helper()
+
+	shownAt := map[string]func() string{}
+
+	for name, pass := range passes {
+		shownAt[name] = func() string { return shown(t, pass(), columns) }
+	}
+
+	return shownAt
+}
+
 func TestEveryScenarioDrawsWhatItDrewBefore(t *testing.T) {
 	for _, journal := range everyJournal(t) {
 		t.Run(journal.name, func(t *testing.T) {
@@ -147,14 +186,30 @@ func TestTheScreenAroundAConversationDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	compareWithGolden(t, "lifecycle", ".ansi", passes)
+	compareWithGolden(t, "lifecycle", ".screen", shownPasses(t, onATerminal(passes), replayColumns))
+}
+
+func onATerminal(passes map[string]func() string) map[string]func() string {
+	kept := map[string]func() string{}
+
+	for name, pass := range passes {
+		if !strings.HasSuffix(name, " on a pipe") {
+			kept[name] = pass
+		}
+	}
+
+	return kept
 }
 
 func TestATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
 	entries := readJournal(t, filepath.Join("testdata", "replay", lifecycleScenario))
 
-	compareWithGolden(t, "running", ".ansi", map[string]func() string{
+	passes := map[string]func() string{
 		"a call still running": func() string { return replayWhileRunning(t, entries) },
-	})
+	}
+
+	compareWithGolden(t, "running", ".ansi", passes)
+	compareWithGolden(t, "running", ".screen", shownPasses(t, passes, replayColumns))
 }
 
 type journal struct {
@@ -579,6 +634,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	compareWithGolden(t, "banner", ".ansi", passes)
+	compareWithGolden(t, "banner", ".screen", shownPasses(t, passes, replayColumns))
 }
 
 func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
@@ -593,10 +649,13 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	passes := map[string]func() string{}
+	shownPassesAtWidth := map[string]func() string{}
 
 	for _, width := range []int{80, 40, 20} {
 		for name, frame := range frames {
-			passes[fmt.Sprintf("%s at %d columns", name, width)] = func() string {
+			passName := fmt.Sprintf("%s at %d columns", name, width)
+
+			passes[passName] = func() string {
 				held := &Harness{mode: caps.NewMode(caps.All())}
 				held.currentTurn.isRunning = true
 				held.currentTurn.spinnerFrame = 2
@@ -630,8 +689,15 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 					"%s\ncursor row %d column %d", strings.Join(rows, "\n"), cursorRow, cursorColumn,
 				)
 			}
+
+			shownPassesAtWidth[passName] = func() string {
+				drawn := passes[passName]()
+
+				return shown(t, drawn[:strings.LastIndex(drawn, "\ncursor row ")], width)
+			}
 		}
 	}
 
 	compareWithGolden(t, "inputblock", ".ansi", passes)
+	compareWithGolden(t, "inputblock", ".screen", shownPassesAtWidth)
 }

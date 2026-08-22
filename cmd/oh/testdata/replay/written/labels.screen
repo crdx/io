@@ -1,0 +1,658 @@
+=== narrow ===
+
+ run each shape of command and load the
+ skill
+
+
+$ if [[ -d src ]]; … ✓ 1L ~1t 0s 0s 0M
+$ while read -r NAM… ✓ 1L ~1t 0s 0s 0M
+$ until [[ -z "$RES… ✓ 1L ~1t 0s 0s 0M
+$ case "$MODE" in r… ✓ 1L ~1t 0s 0s 0M
+$ select CHOICE in … ✓ 1L ~1t 0s 0s 0M
+$ ls -la | grep -v … ✓ 1L ~1t 0s 0s 0M
+grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ ✓ 1L ~6t
+load skills/tidy/SKILL.md ✓ 8L ~100t
+read wide.md ✓ 3L ~100t
+
+The listing is 日本語のテキストと絵文字
+🎉 が混ざった行, which is wider on
+screen than it is long.
+
+I left a note in ~/README.md and the
+skill is at ~/skills/tidy/SKILL.md.
+
+// count reports how many there were.
+func count() int {
+    var total int = 42
+    return total
+}
+=== one column ===
+
+
+r
+
+u
+
+n
+
+e
+
+a
+
+c
+
+h
+
+s
+
+h
+
+a
+
+p
+
+e
+
+o
+
+f
+
+c
+
+o
+
+m
+
+m
+
+a
+
+n
+
+d
+
+a
+
+n
+
+d
+
+l
+
+o
+
+a
+
+d
+
+t
+
+h
+
+e
+
+s
+
+k
+
+i
+
+l
+
+l
+
+
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+M
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+M
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+M
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+M
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+M
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+
+✓
+
+1
+L
+
+~
+1
+t
+
+0
+s
+
+0
+s
+
+0
+M
+✓
+
+1
+L
+
+~
+6
+✓
+
+1
+L
+
+~
+6
+
+✓
+
+8
+L
+
+~
+1
+0
+0
+
+✓
+
+8
+L
+
+~
+1
+0
+0
+t
+✓
+
+3
+L
+
+~
+1
+0
+0
+✓
+
+3
+L
+
+~
+1
+0
+0
+T
+h
+e
+l
+i
+s
+t
+i
+n
+g
+i
+s
+
+日
+本
+語
+の
+テ
+キ
+ス
+ト
+と
+絵
+文
+字
+
+🎉
+
+が
+混
+ざ
+っ
+た
+行
+,
+w
+h
+i
+c
+h
+i
+s
+w
+i
+d
+e
+r
+o
+n
+s
+c
+r
+e
+e
+n
+t
+h
+a
+n
+i
+t
+i
+s
+l
+o
+n
+g
+.
+
+I
+l
+e
+f
+t
+a
+n
+o
+t
+e
+i
+n
+~
+/
+R
+E
+A
+D
+M
+E
+.
+m
+d
+a
+n
+d
+t
+h
+e
+s
+k
+i
+l
+l
+i
+s
+a
+t
+~
+/
+s
+k
+i
+l
+l
+s
+/
+t
+i
+d
+y
+/
+S
+K
+I
+L
+L
+.
+m
+d
+.
+
+/
+/
+c
+o
+u
+n
+t
+r
+e
+p
+o
+r
+t
+s
+h
+o
+w
+m
+a
+n
+y
+t
+h
+e
+r
+e
+w
+e
+r
+e
+.
+f
+u
+n
+c
+c
+o
+u
+n
+t
+(
+)
+i
+n
+t
+{
+
+v
+a
+r
+t
+o
+t
+a
+l
+i
+n
+t
+=
+4
+2
+
+r
+e
+t
+u
+r
+n
+t
+o
+t
+a
+l
+}
+=== tiny ===
+
+ run each
+ shape of
+ command and
+ load the
+ skill
+
+
+ ✓ 1L ~1t 0s
+ ✓ 1L ~1t 0s
+ 0s 0M
+ ✓ 1L ~1t 0s
+ ✓ 1L ~1t 0s
+ 0s 0M
+ ✓ 1L ~1t 0s
+ ✓ 1L ~1t 0s
+ 0s 0M
+ ✓ 1L ~1t 0s
+ ✓ 1L ~1t 0s
+ 0s 0M
+ ✓ 1L ~1t 0s
+ ✓ 1L ~1t 0s
+ 0s 0M
+ ✓ 1L ~1t 0s
+ ✓ 1L ~1t 0s
+ 0s 0M
+… ✓ 1L ~6t
+ ✓ 8L ~100t
+✓ 3L ~100t
+
+The listing
+is
+日本語のテキ
+ストと絵文字
+🎉
+が混ざった行
+, which is
+wider on
+screen than
+it is long.
+
+I left a
+note in
+~/README.md
+and the
+skill is at
+~/skills/tid
+y/SKILL.md.
+
+// count
+reports how
+many there
+were.
+func count()
+int {
+    var
+total int =
+42
+    return
+total
+}
+=== wide ===
+
+ run each shape of command and load the skill
+
+
+$ if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else ech… ✓ 1L ~1t 0s 0s 0M
+$ while read -r NAME; do echo "$NAME" > out.txt 2>&1; done < list.txt ✓ 1L ~1t 0s 0s 0M
+$ until [[ -z "$REST" ]]; do REST=""; done ✓ 1L ~1t 0s 0s 0M
+$ case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac ✓ 1L ~1t 0s 0s 0M
+$ select CHOICE in one two; do break; done ✓ 1L ~1t 0s 0s 0M
+$ ls -la | grep -v "^d" | wc -l ✓ 1L ~1t 0s 0s 0M
+grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ *.go ✓ 1L ~6t
+load skills/tidy/SKILL.md ✓ 8L ~100t
+read wide.md ✓ 3L ~100t
+
+The listing is 日本語のテキストと絵文字 🎉 が混ざった行, which is wider on screen than it is long.
+
+I left a note in ~/README.md and the skill is at ~/skills/tidy/SKILL.md.
+
+// count reports how many there were.
+func count() int {
+    var total int = 42
+    return total
+}

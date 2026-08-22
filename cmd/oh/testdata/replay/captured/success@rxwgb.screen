@@ -1,0 +1,550 @@
+=== narrow ===
+[startup=0s session=00000000000000000000
+0000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+Looking for where the prompt is drawn.
+
+I'll have a look at how the editor draws
+its prompt.
+
+grep prompt *.go ✓ 1L ~100t
+The prompt is drawn by the renderer, so
+that is the file to read.
+
+Found it. Reading the renderer now.
+
+read cmd/oh/line/render.go ✓ 5L ~100t
+
+The prompt is drawn by layout, which
+wraps the buffer against the terminal
+width and reports where the cursor
+landed. Nothing there needs changing to
+make it sticky: the work belongs in the
+output layer instead.
+=== one column ===
+[
+s
+t
+a
+r
+t
+u
+p
+=
+0
+s
+
+s
+e
+s
+s
+i
+o
+n
+=
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+s
+k
+i
+l
+l
+s
+=
+0
+p
+/
+0
+g
+
+t
+o
+o
+l
+s
+=
+~
+6
+0
+0
+t
+]
+
+
+
+h
+
+a
+
+v
+
+e
+
+a
+
+l
+
+o
+
+o
+
+k
+
+a
+
+t
+
+t
+
+h
+
+a
+
+t
+
+
+L
+o
+o
+k
+i
+n
+g
+f
+o
+r
+w
+h
+e
+r
+e
+t
+h
+e
+p
+r
+o
+m
+p
+t
+i
+s
+d
+r
+a
+w
+n
+.
+
+I
+'
+l
+l
+h
+a
+v
+e
+a
+l
+o
+o
+k
+a
+t
+h
+o
+w
+t
+h
+e
+e
+d
+i
+t
+o
+r
+d
+r
+a
+w
+s
+i
+t
+s
+p
+r
+o
+m
+p
+t
+.
+
+T
+h
+e
+p
+r
+o
+m
+p
+t
+i
+s
+d
+r
+a
+w
+n
+b
+y
+t
+h
+e
+r
+e
+n
+d
+e
+r
+e
+r
+,
+s
+o
+t
+h
+a
+t
+i
+s
+t
+h
+e
+f
+i
+l
+e
+t
+o
+r
+e
+a
+d
+.
+
+F
+o
+u
+n
+d
+i
+t
+.
+R
+e
+a
+d
+i
+n
+g
+t
+h
+e
+r
+e
+n
+d
+e
+r
+e
+r
+n
+o
+w
+.
+
+T
+h
+e
+p
+r
+o
+m
+p
+t
+i
+s
+d
+r
+a
+w
+n
+b
+y
+l
+a
+y
+o
+u
+t
+,
+w
+h
+i
+c
+h
+w
+r
+a
+p
+s
+t
+h
+e
+b
+u
+f
+f
+e
+r
+a
+g
+a
+i
+n
+s
+t
+t
+h
+e
+t
+e
+r
+m
+i
+n
+a
+l
+w
+i
+d
+t
+h
+a
+n
+d
+r
+e
+p
+o
+r
+t
+s
+w
+h
+e
+r
+e
+t
+h
+e
+c
+u
+r
+s
+o
+r
+l
+a
+n
+d
+e
+d
+.
+N
+o
+t
+h
+i
+n
+g
+t
+h
+e
+r
+e
+n
+e
+e
+d
+s
+c
+h
+a
+n
+g
+i
+n
+g
+t
+o
+m
+a
+k
+e
+i
+t
+s
+t
+i
+c
+k
+y
+:
+t
+h
+e
+w
+o
+r
+k
+b
+e
+l
+o
+n
+g
+s
+i
+n
+t
+h
+e
+o
+u
+t
+p
+u
+t
+l
+a
+y
+e
+r
+i
+n
+s
+t
+e
+a
+d
+.
+=== tiny ===
+[startup=0s
+session=0000
+000000000000
+00000000 ski
+lls=0p/0g to
+ols=~600t]
+
+
+ have a look
+ at that
+
+
+Looking for
+where the
+prompt is
+drawn.
+
+I'll have a
+look at how
+the editor
+draws its
+prompt.
+
+✓ 1L ~100t
+The prompt
+is drawn by
+the
+renderer, so
+that is the
+file to
+read.
+
+Found it.
+Reading the
+renderer
+now.
+
+✓ 5L ~100t
+
+The prompt
+is drawn by
+layout,
+which wraps
+the buffer
+against the
+terminal
+width and
+reports
+where the
+cursor
+landed.
+Nothing
+there needs
+changing to
+make it
+sticky: the
+work belongs
+in the
+output layer
+instead.
+=== wide ===
+[startup=0s session=000000000000000000000000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+Looking for where the prompt is drawn.
+
+I'll have a look at how the editor draws its prompt.
+
+grep prompt *.go ✓ 1L ~100t
+The prompt is drawn by the renderer, so that is the file to read.
+
+Found it. Reading the renderer now.
+
+read cmd/oh/line/render.go ✓ 5L ~100t
+
+The prompt is drawn by layout, which wraps the buffer against the terminal width and reports where
+the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output
+layer instead.

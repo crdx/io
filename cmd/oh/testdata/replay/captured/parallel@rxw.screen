@@ -1,0 +1,503 @@
+=== narrow ===
+[startup=0s session=00000000000000000000
+0000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+Taking the four of them together rather
+than one after another.
+
+Let me get the shape of this first.
+
+ls ✓ 7L ~100t
+find **/*.go ✓ 2L ~8t
+find **/*.toml ✓ 1L ~4t
+grep package *.go ✓ 2L ~100t
+Three searches, all at once.
+
+Now to find where the drawing happens.
+
+grep spinner *.go ✓ 1L ~100t
+grep footer *.go ✓ 1L ~100t
+grep cursor *.go ✓ 1L ~100t
+
+One more pair, and one of them will not
+be there.
+
+ls ✓ 7L ~100t
+read nowhere… ✗ 1L ~100t nowhere/at/a…
+
+That is the lot: four together, then
+three together, then a pair where only
+one of them could be answered.
+=== one column ===
+[
+s
+t
+a
+r
+t
+u
+p
+=
+0
+s
+
+s
+e
+s
+s
+i
+o
+n
+=
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+s
+k
+i
+l
+l
+s
+=
+0
+p
+/
+0
+g
+
+t
+o
+o
+l
+s
+=
+~
+6
+0
+0
+t
+]
+
+
+
+h
+
+a
+
+v
+
+e
+
+a
+
+l
+
+o
+
+o
+
+k
+
+a
+
+t
+
+t
+
+h
+
+a
+
+t
+
+
+T
+a
+k
+i
+n
+g
+t
+h
+e
+f
+o
+u
+r
+o
+f
+t
+h
+e
+m
+t
+o
+g
+e
+t
+h
+e
+r
+r
+a
+t
+h
+e
+r
+t
+h
+a
+n
+o
+n
+e
+a
+f
+t
+e
+r
+a
+n
+o
+t
+h
+e
+r
+.
+
+L
+e
+t
+m
+e
+g
+e
+t
+t
+h
+e
+s
+h
+a
+p
+e
+o
+f
+t
+h
+i
+s
+f
+i
+r
+s
+t
+.
+
+✓
+✓
+✓
+T
+h
+r
+e
+e
+s
+e
+a
+r
+c
+h
+e
+s
+,
+a
+l
+l
+a
+t
+o
+n
+c
+e
+.
+
+N
+o
+w
+t
+o
+f
+i
+n
+d
+w
+h
+e
+r
+e
+t
+h
+e
+d
+r
+a
+w
+i
+n
+g
+h
+a
+p
+p
+e
+n
+s
+.
+
+✓
+✓
+O
+n
+e
+m
+o
+r
+e
+p
+a
+i
+r
+,
+a
+n
+d
+o
+n
+e
+o
+f
+t
+h
+e
+m
+w
+i
+l
+l
+n
+o
+t
+b
+e
+t
+h
+e
+r
+e
+.
+
+✓
+T
+h
+a
+t
+i
+s
+t
+h
+e
+l
+o
+t
+:
+f
+o
+u
+r
+t
+o
+g
+e
+t
+h
+e
+r
+,
+t
+h
+e
+n
+t
+h
+r
+e
+e
+t
+o
+g
+e
+t
+h
+e
+r
+,
+t
+h
+e
+n
+a
+p
+a
+i
+r
+w
+h
+e
+r
+e
+o
+n
+l
+y
+o
+n
+e
+o
+f
+t
+h
+e
+m
+c
+o
+u
+l
+d
+b
+e
+a
+n
+s
+w
+e
+r
+e
+d
+.
+=== tiny ===
+[startup=0s
+session=0000
+000000000000
+00000000 ski
+lls=0p/0g to
+ols=~600t]
+
+
+ have a look
+ at that
+
+
+Taking the
+four of them
+together
+rather than
+one after
+another.
+
+Let me get
+the shape of
+this first.
+
+✓ 7L ~100t
+… ✓ 2L ~8t
+… ✓ 1L ~4t
+✓ 2L ~100t
+Three
+searches,
+all at once.
+
+Now to find
+where the
+drawing
+happens.
+
+✓ 1L ~100t
+✓ 1L ~100t
+✓ 1L ~100t
+
+One more
+pair, and
+one of them
+will not be
+there.
+
+✓ 7L ~100t
+✗ 1L ~100t
+
+That is the
+lot: four
+together,
+then three
+together,
+then a pair
+where only
+one of them
+could be
+answered.
+=== wide ===
+[startup=0s session=000000000000000000000000 skills=0p/0g tools=~600t]
+
+
+ have a look at that
+
+
+Taking the four of them together rather than one after another.
+
+Let me get the shape of this first.
+
+ls ✓ 7L ~100t
+find **/*.go ✓ 2L ~8t
+find **/*.toml ✓ 1L ~4t
+grep package *.go ✓ 2L ~100t
+Three searches, all at once.
+
+Now to find where the drawing happens.
+
+grep spinner *.go ✓ 1L ~100t
+grep footer *.go ✓ 1L ~100t
+grep cursor *.go ✓ 1L ~100t
+
+One more pair, and one of them will not be there.
+
+ls ✓ 7L ~100t
+read nowhere/at/all.go ✗ 1L ~100t nowhere/at/all.go: no such file or directory
+
+That is the lot: four together, then three together, then a pair where only one of them could be
+answered.

@@ -1,0 +1,200 @@
+=== narrow ===
+
+ the awkward shapes
+
+
+divine one.go lines 1-400 ✓
+conjure func Draw(rows []string, co… ✓
+$ for do done esac fi … ✗ syntax error
+summon nothing ✓ no output
+summon plen… ✓ 900L+ ~500t (of ~225Kt)
+summon japanese ✓ 1L ~1.4Kt
+
+That is all of the awkward ones.
+=== one column ===
+
+
+t
+
+h
+
+e
+
+a
+
+w
+
+k
+
+w
+
+a
+
+r
+
+d
+
+s
+
+h
+
+a
+
+p
+
+e
+
+s
+
+
+
+
+✗
+✓
+
+n
+o
+
+o
+u
+t
+p
+u
+✓
+
+n
+o
+
+o
+u
+t
+p
+u
+✓
+
+9
+0
+0
+L
++
+
+~
+5
+0
+0
+t
+
+(
+o
+f
+
+~
+2
+2
+5
+K
+t
+✓
+
+9
+0
+0
+L
++
+
+~
+5
+0
+0
+t
+
+(
+o
+f
+
+~
+2
+2
+5
+K
+t
+✓
+
+1
+L
+
+~
+1
+.
+4
+K
+✓
+
+1
+L
+
+~
+1
+.
+4
+K
+T
+h
+a
+t
+i
+s
+a
+l
+l
+o
+f
+t
+h
+e
+a
+w
+k
+w
+a
+r
+d
+o
+n
+e
+s
+.
+=== tiny ===
+
+ the awkward
+ shapes
+
+
+divine … ✓
+conjure ✓
+$ … ✗ syn…
+✓ no output
+✓ 900L+ ~500
+t (of ~225Kt
+✓ 900L+ ~500
+t (of ~225Kt
+)
+✓ 1L ~1.4Kt
+
+That is all
+of the
+awkward
+ones.
+=== wide ===
+
+ the awkward shapes
+
+
+divine one.go lines 1-400 ✓
+conjure func Draw(rows []string, columns int) ([]string, error) { return rows, nil } ✓
+$ for do done esac fi "unclosed ✗ syntax error
+summon nothing ✓ no output
+summon plenty ✓ 900L+ ~500t (of ~225Kt)
+summon japanese ✓ 1L ~1.4Kt
+
+That is all of the awkward ones.
