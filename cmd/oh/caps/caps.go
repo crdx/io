@@ -1,4 +1,5 @@
-package main
+// Package caps is the set of capabilities the harness grants.
+package caps
 
 import (
 	"fmt"
@@ -8,33 +9,37 @@ import (
 	"crdx.org/io/internal/file"
 )
 
-type caps uint8
+// Set is the set of capabilities granted at one moment, held as one bit each.
+type Set uint8
 
+// The capabilities, from reading, which is always granted, to the four that can be switched.
 const (
-	capRead caps = 1 << iota
-	capShell
-	capWrite
-	capGit
-	capBackground
+	Read Set = 1 << iota
+	Shell
+	Write
+	Git
+	Background
 )
 
-const switchableCaps = capShell | capWrite | capGit | capBackground
+const switchable = Shell | Write | Git | Background
 
 var capsMap = []struct {
-	grantedCaps caps
+	grantedCaps Set
 	flag        string
 }{
-	{capRead, "r"},
-	{capShell, "x"},
-	{capWrite, "w"},
-	{capGit, "g"},
-	{capBackground, "b"},
+	{Read, "r"},
+	{Shell, "x"},
+	{Write, "w"},
+	{Git, "g"},
+	{Background, "b"},
 }
 
-var capFlags = allCaps().Flags()
+// AllFlags is every flag Parse accepts, in the order Flags writes them.
+var AllFlags = All().Flags()
 
-func allCaps() caps {
-	var allCaps caps
+// All is every capability granted at once.
+func All() Set {
+	var allCaps Set
 
 	for _, cap := range capsMap {
 		allCaps |= cap.grantedCaps
@@ -43,12 +48,12 @@ func allCaps() caps {
 	return allCaps
 }
 
-// Flags returns caps in the form Caps reads.
-func (self caps) Flags() string {
+// Flags returns the caps in the form Parse reads.
+func (self Set) Flags() string {
 	var out strings.Builder
 
 	for _, cap := range capsMap {
-		if self.has(cap.grantedCaps) {
+		if self.Has(cap.grantedCaps) {
 			out.WriteString(cap.flag)
 		}
 	}
@@ -56,9 +61,11 @@ func (self caps) Flags() string {
 	return out.String()
 }
 
-func (self caps) has(want caps) bool { return self&want == want }
+// Has says whether every wanted capability is granted.
+func (self Set) Has(want Set) bool { return self&want == want }
 
-func (self caps) flag() string {
+// Flag is the single letter for one capability, and nothing for any other combination.
+func (self Set) Flag() string {
 	for _, cap := range capsMap {
 		if cap.grantedCaps == self {
 			return cap.flag
@@ -68,9 +75,9 @@ func (self caps) flag() string {
 	return ""
 }
 
-// Caps converts flags into real things.
-func Caps(flags string) (caps, error) {
-	grantedCaps := capRead
+// Parse converts flags into real things.
+func Parse(flags string) (Set, error) {
+	grantedCaps := Read
 
 	for _, flag := range flags {
 		knownCap, found := namedCap(string(flag))
@@ -78,7 +85,7 @@ func Caps(flags string) (caps, error) {
 			return 0, fmt.Errorf(
 				"unknown capability flag %q — must be one of %q",
 				string(flag),
-				capFlags,
+				AllFlags,
 			)
 		}
 
@@ -88,7 +95,7 @@ func Caps(flags string) (caps, error) {
 	return grantedCaps, nil
 }
 
-func namedCap(flag string) (caps, bool) {
+func namedCap(flag string) (Set, bool) {
 	for _, knownCap := range capsMap {
 		if knownCap.flag == flag {
 			return knownCap.grantedCaps, true
@@ -98,19 +105,21 @@ func namedCap(flag string) (caps, bool) {
 	return 0, false
 }
 
-func refuseWrite(mode *Mode) func(name string) error {
+// RefuseWrite is the rule the file layer asks before every write, answering from the mode as it
+// stands at that moment rather than as it stood when the conversation opened.
+func RefuseWrite(mode *Mode) func(name string) error {
 	return func(name string) error {
 		currentCaps := mode.Current()
 
 		if file.InGitDir(name) {
-			if currentCaps.has(capGit) {
+			if currentCaps.Has(Git) {
 				return nil
 			}
 
 			return file.ErrGitDir
 		}
 
-		if currentCaps.has(capWrite) {
+		if currentCaps.Has(Write) {
 			return nil
 		}
 
@@ -121,22 +130,22 @@ func refuseWrite(mode *Mode) func(name string) error {
 // Mode tracks current and model-known caps across keypress and turn goroutines.
 type Mode struct {
 	mutex       sync.Mutex
-	currentCaps caps
-	knownCaps   caps // what the model thinks is granted (may be outdated now)
+	currentCaps Set
+	knownCaps   Set // what the model thinks is granted (may be outdated now)
 }
 
 // NewMode opens a conversation.
-func NewMode(currentCaps caps) *Mode {
+func NewMode(currentCaps Set) *Mode {
 	return &Mode{currentCaps: currentCaps, knownCaps: currentCaps}
 }
 
 // NewResumedMode starts with no caps reported to the model.
-func NewResumedMode(currentCaps caps) *Mode {
+func NewResumedMode(currentCaps Set) *Mode {
 	return &Mode{currentCaps: currentCaps}
 }
 
 // Current is what is granted.
-func (self *Mode) Current() caps {
+func (self *Mode) Current() Set {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -144,7 +153,7 @@ func (self *Mode) Current() caps {
 }
 
 // Toggle swaps one capability.
-func (self *Mode) Toggle(whichCaps caps) {
+func (self *Mode) Toggle(whichCaps Set) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
@@ -158,27 +167,27 @@ func (self *Mode) Inject() string {
 
 	changedCaps := self.currentCaps ^ self.knownCaps
 	if self.knownCaps == 0 {
-		changedCaps = switchableCaps
+		changedCaps = switchable
 	}
 
 	self.knownCaps = self.currentCaps
 
 	var clauses []string
 
-	if changedCaps.has(capWrite) {
-		clauses = append(clauses, workspaceIs(self.currentCaps.has(capWrite)))
+	if changedCaps.Has(Write) {
+		clauses = append(clauses, workspaceIs(self.currentCaps.Has(Write)))
 	}
 
-	if changedCaps.has(capShell) {
-		clauses = append(clauses, shellIs(self.currentCaps.has(capShell)))
+	if changedCaps.Has(Shell) {
+		clauses = append(clauses, shellIs(self.currentCaps.Has(Shell)))
 	}
 
-	if changedCaps.has(capGit) {
-		clauses = append(clauses, historyIs(self.currentCaps.has(capGit)))
+	if changedCaps.Has(Git) {
+		clauses = append(clauses, historyIs(self.currentCaps.Has(Git)))
 	}
 
-	if changedCaps.has(capBackground) {
-		clauses = append(clauses, backgroundIs(self.currentCaps.has(capBackground)))
+	if changedCaps.Has(Background) {
+		clauses = append(clauses, backgroundIs(self.currentCaps.Has(Background)))
 	}
 
 	return strings.Join(clauses, " ")

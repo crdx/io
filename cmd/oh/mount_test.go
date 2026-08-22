@@ -8,10 +8,11 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/file"
 )
 
-func configuredPathTestRoot(t *testing.T, mode *Mode) *file.Root {
+func configuredPathTestRoot(t *testing.T, mode *caps.Mode) *file.Root {
 	t.Helper()
 
 	root, err := os.OpenRoot(t.TempDir())
@@ -19,7 +20,7 @@ func configuredPathTestRoot(t *testing.T, mode *Mode) *file.Root {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = root.Close() })
-	return file.New(root, refuseWrite(mode))
+	return file.New(root, caps.RefuseWrite(mode))
 }
 
 func TestMissingConfiguredPathsAreCreatedAndKept(t *testing.T) {
@@ -112,8 +113,8 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 	}
 	defer func() { _ = workspaceRoot.Close() }()
 
-	mode := NewMode(capRead)
-	files := file.New(workspaceRoot, refuseWrite(mode))
+	mode := caps.NewMode(caps.Read)
+	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
 	readDirectory := t.TempDir()
 	writeDirectory := t.TempDir()
 	execDirectory := t.TempDir()
@@ -152,14 +153,14 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 	if err := writeRoot.WriteFile(name, []byte("blocked"), 0o600); !errors.Is(err, file.ErrReadOnly) {
 		t.Errorf("write path without write capability got %v, want read-only", err)
 	}
-	mode.Toggle(capWrite)
+	mode.Toggle(caps.Write)
 	if err := writeRoot.WriteFile(name, []byte("written"), 0o600); err != nil {
 		t.Fatalf("write path with write capability: %v", err)
 	}
 	if err := writeRoot.WriteFile(filepath.Join(".git", "config"), nil, 0o600); !errors.Is(err, file.ErrGitDir) {
 		t.Errorf("repository metadata write got %v, want git refusal", err)
 	}
-	mode.Toggle(capGit)
+	mode.Toggle(caps.Git)
 	if err := writeRoot.WriteFile(filepath.Join(".git", "config"), nil, 0o600); err != nil {
 		t.Errorf("repository metadata write with git capability: %v", err)
 	}
@@ -170,7 +171,7 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 }
 
 func TestConfiguredFilesAreMountedWithoutTheirSiblings(t *testing.T) {
-	mode := NewMode(capRead)
+	mode := caps.NewMode(caps.Read)
 	files := configuredPathTestRoot(t, mode)
 	directory := t.TempDir()
 	readPath := filepath.Join(directory, "reference")
@@ -210,7 +211,7 @@ func TestConfiguredFilesAreMountedWithoutTheirSiblings(t *testing.T) {
 	if err := writeRoot.WriteFile(name, []byte("blocked"), 0o600); !errors.Is(err, file.ErrReadOnly) {
 		t.Errorf("write file without write capability got %v, want read-only", err)
 	}
-	mode.Toggle(capWrite)
+	mode.Toggle(caps.Write)
 	if err := writeRoot.WriteFile(name, []byte("written"), 0o600); err != nil {
 		t.Fatalf("write file with write capability: %v", err)
 	}
@@ -221,7 +222,7 @@ func TestConfiguredFilesAreMountedWithoutTheirSiblings(t *testing.T) {
 }
 
 func TestAConfiguredFileSymlinkCannotDisguiseRepositoryMetadata(t *testing.T) {
-	mode := NewMode(capRead | capWrite)
+	mode := caps.NewMode(caps.Read | caps.Write)
 	files := configuredPathTestRoot(t, mode)
 	repository := t.TempDir()
 	target := filepath.Join(repository, ".git", "config")
@@ -249,7 +250,7 @@ func TestAConfiguredFileSymlinkCannotDisguiseRepositoryMetadata(t *testing.T) {
 	if err := mountedRoot.WriteFile(name, []byte("blocked"), 0o600); !errors.Is(err, file.ErrGitDir) {
 		t.Errorf("repository metadata write got %v, want git refusal", err)
 	}
-	mode.Toggle(capGit)
+	mode.Toggle(caps.Git)
 	if err := mountedRoot.WriteFile(name, []byte("written"), 0o600); err != nil {
 		t.Errorf("repository metadata write with git capability: %v", err)
 	}

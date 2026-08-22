@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/sandbox"
@@ -85,7 +86,7 @@ func createSandboxPolicy(
 	homeDir string,
 	tmpDir string,
 	extraPaths configuredPaths,
-	currentCaps caps,
+	currentCaps caps.Set,
 ) (sandbox.Policy, error) {
 	cacheDir := filepath.Join(homeDir, ".cache")
 	if err := os.MkdirAll(cacheDir, 0o700); err != nil {
@@ -133,7 +134,7 @@ func createSandboxPolicy(
 		FileSize:  shellFileSize,
 		OpenFiles: shellOpenFiles,
 
-		Background: currentCaps.has(capBackground),
+		Background: currentCaps.Has(caps.Background),
 	}
 
 	policy = policy.WithSetEnv("GOPROXY", "off").WithSetEnv("GOSUMDB", "off")
@@ -154,11 +155,11 @@ func createSandboxPolicy(
 
 	writablePolicy := grantWriteAccess(policy, writablePathsForPolicy)
 
-	if !currentCaps.has(capWrite) {
+	if !currentCaps.Has(caps.Write) {
 		writablePolicy = writablePolicy.WithRead(workspaceDir)
 	}
 
-	if !currentCaps.has(capGit) {
+	if !currentCaps.Has(caps.Git) {
 		protectRoots := append([]string{workspaceDir}, extraPaths.Write...)
 		var err error
 		writablePolicy, err = protectedPolicy(writablePolicy, protectRoots)
@@ -246,14 +247,14 @@ func confinedShell(
 	home string,
 	tmpDir string,
 	extraPaths configuredPaths,
-	mode *Mode,
+	mode *caps.Mode,
 	files *file.Root,
 	processes *sandbox.Processes,
 ) tool.Tool {
 	fresh := func(ctx context.Context) (sandbox.Policy, error) {
 		currentCaps := mode.Current()
 
-		if !currentCaps.has(capShell) {
+		if !currentCaps.Has(caps.Shell) {
 			return sandbox.Policy{}, ErrShellWithheld
 		}
 
@@ -271,13 +272,13 @@ func confinedShell(
 	return bash.New(files, fresh, processes)
 }
 
-func allWritablePaths(workspaceDir, homeDir string, extraPaths []string, currentCaps caps) []string {
+func allWritablePaths(workspaceDir, homeDir string, extraPaths []string, currentCaps caps.Set) []string {
 	paths := writablePaths(workspaceDir, homeDir, currentCaps)
 
 	switch {
-	case currentCaps.has(capWrite):
+	case currentCaps.Has(caps.Write):
 		paths = append(paths, extraPaths...)
-	case currentCaps.has(capGit):
+	case currentCaps.Has(caps.Git):
 		for _, directory := range extraPaths {
 			if metadata := filepath.Join(directory, ".git"); pathutil.Exists(metadata) {
 				paths = append(paths, metadata)
@@ -288,11 +289,11 @@ func allWritablePaths(workspaceDir, homeDir string, extraPaths []string, current
 	return paths
 }
 
-func writablePaths(workspaceDir string, homeDir string, currentCaps caps) []string {
+func writablePaths(workspaceDir string, homeDir string, currentCaps caps.Set) []string {
 	switch {
-	case currentCaps.has(capWrite):
+	case currentCaps.Has(caps.Write):
 		return []string{workspaceDir, homeDir}
-	case currentCaps.has(capGit):
+	case currentCaps.Has(caps.Git):
 		if metadata := filepath.Join(workspaceDir, ".git"); pathutil.Exists(metadata) {
 			return []string{metadata, homeDir}
 		}

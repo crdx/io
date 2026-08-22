@@ -1,4 +1,4 @@
-package main
+package caps
 
 import (
 	"errors"
@@ -37,10 +37,10 @@ func TestEveryClauseSaysSomethingAndSaysItBothWays(t *testing.T) {
 	}
 }
 
-func writable() caps { return capRead | capWrite }
+func writable() Set { return Read | Write }
 
 func TestAFreshConversationSaysNothingAboutTheModeItOpenedIn(t *testing.T) {
-	for _, initialCaps := range []caps{capRead, capRead | capWrite, capRead | capGit, capRead | capWrite | capGit} {
+	for _, initialCaps := range []Set{Read, Read | Write, Read | Git, Read | Write | Git} {
 		if got := NewMode(initialCaps).Inject(); got != "" {
 			t.Errorf("expected nothing to be announced, got %q", got)
 		}
@@ -49,7 +49,7 @@ func TestAFreshConversationSaysNothingAboutTheModeItOpenedIn(t *testing.T) {
 
 func TestASwappedModeIsAnnouncedOnceAndOnlyOnce(t *testing.T) {
 	self := NewMode(writable())
-	self.Toggle(capWrite)
+	self.Toggle(Write)
 
 	if got := self.Inject(); got != nowReadOnly {
 		t.Errorf("expected %q, got %q", nowReadOnly, got)
@@ -59,7 +59,7 @@ func TestASwappedModeIsAnnouncedOnceAndOnlyOnce(t *testing.T) {
 		t.Errorf("expected nothing the second time, got %q", got)
 	}
 
-	self.Toggle(capWrite)
+	self.Toggle(Write)
 
 	if got := self.Inject(); got != nowReadWrite {
 		t.Errorf("expected %q, got %q", nowReadWrite, got)
@@ -68,13 +68,13 @@ func TestASwappedModeIsAnnouncedOnceAndOnlyOnce(t *testing.T) {
 
 func TestBackgroundModeIsAnnouncedOnItsOwn(t *testing.T) {
 	self := NewMode(writable())
-	self.Toggle(capBackground)
+	self.Toggle(Background)
 
 	if got := self.Inject(); got != backgroundOn {
 		t.Errorf("expected %q, got %q", backgroundOn, got)
 	}
 
-	self.Toggle(capBackground)
+	self.Toggle(Background)
 	if got := self.Inject(); got != backgroundKilled {
 		t.Errorf("expected %q, got %q", backgroundKilled, got)
 	}
@@ -82,13 +82,13 @@ func TestBackgroundModeIsAnnouncedOnItsOwn(t *testing.T) {
 
 func TestOpeningTheHistoryIsAnnouncedOnItsOwn(t *testing.T) {
 	self := NewMode(writable())
-	self.Toggle(capGit)
+	self.Toggle(Git)
 
 	if got := self.Inject(); got != gitWritable {
 		t.Errorf("expected %q, got %q", gitWritable, got)
 	}
 
-	self.Toggle(capGit)
+	self.Toggle(Git)
 
 	if got := self.Inject(); got != gitReadOnly {
 		t.Errorf("expected %q, got %q", gitReadOnly, got)
@@ -98,8 +98,8 @@ func TestOpeningTheHistoryIsAnnouncedOnItsOwn(t *testing.T) {
 func TestBothSwapsBetweenTurnsAreAnnouncedTogether(t *testing.T) {
 	self := NewMode(writable())
 
-	self.Toggle(capWrite)
-	self.Toggle(capGit)
+	self.Toggle(Write)
+	self.Toggle(Git)
 
 	if got := self.Inject(); got != nowReadOnly+" "+gitWritable {
 		t.Errorf("expected both clauses, got %q", got)
@@ -109,8 +109,8 @@ func TestBothSwapsBetweenTurnsAreAnnouncedTogether(t *testing.T) {
 func TestAModeSwappedTwiceIsNotAnnounced(t *testing.T) {
 	self := NewMode(writable())
 
-	self.Toggle(capWrite)
-	self.Toggle(capWrite)
+	self.Toggle(Write)
+	self.Toggle(Write)
 
 	if got := self.Inject(); got != "" {
 		t.Errorf("expected nothing to be announced, got %q", got)
@@ -128,14 +128,14 @@ func TestAResumedConversationAlwaysSaysWhatTheModeAllows(t *testing.T) {
 }
 
 func TestSwitchingTheShellIsAnnounced(t *testing.T) {
-	self := NewMode(capRead | capShell)
-	self.Toggle(capShell)
+	self := NewMode(Read | Shell)
+	self.Toggle(Shell)
 
 	if got := self.Inject(); got != shellWithheld {
 		t.Errorf("expected %q, got %q", shellWithheld, got)
 	}
 
-	self.Toggle(capShell)
+	self.Toggle(Shell)
 
 	if got := self.Inject(); got != shellGranted {
 		t.Errorf("expected %q, got %q", shellGranted, got)
@@ -145,30 +145,30 @@ func TestSwitchingTheShellIsAnnounced(t *testing.T) {
 func TestTheModeSaysWhatTheWorkspaceAllows(t *testing.T) {
 	self := NewMode(writable())
 
-	if currentCaps := self.Current(); !currentCaps.has(capWrite) || currentCaps.has(capGit) {
+	if currentCaps := self.Current(); !currentCaps.Has(Write) || currentCaps.Has(Git) {
 		t.Error("expected a mode opened writable to say so")
 	}
 
-	self.Toggle(capWrite)
-	self.Toggle(capGit)
+	self.Toggle(Write)
+	self.Toggle(Git)
 
-	if currentCaps := self.Current(); currentCaps.has(capWrite) || !currentCaps.has(capGit) {
+	if currentCaps := self.Current(); currentCaps.Has(Write) || !currentCaps.Has(Git) {
 		t.Error("expected a commit-only mode to say so")
 	}
 }
 
 func TestTheRuleAnswersForBothHalvesOfTheMode(t *testing.T) {
 	for name, want := range map[string]struct {
-		currentCaps caps
+		currentCaps Set
 		workspace   error
 		history     error
 	}{
-		"nothing":     {capRead, file.ErrReadOnly, file.ErrGitDir},
-		"the lot":     {capRead | capWrite | capGit, nil, nil},
-		"the tree":    {capRead | capWrite, nil, file.ErrGitDir},
-		"commit only": {capRead | capGit, file.ErrReadOnly, nil},
+		"nothing":     {Read, file.ErrReadOnly, file.ErrGitDir},
+		"the lot":     {Read | Write | Git, nil, nil},
+		"the tree":    {Read | Write, nil, file.ErrGitDir},
+		"commit only": {Read | Git, file.ErrReadOnly, nil},
 	} {
-		refuse := refuseWrite(NewMode(want.currentCaps))
+		refuse := RefuseWrite(NewMode(want.currentCaps))
 
 		if got := refuse("main.go"); !errors.Is(got, want.workspace) {
 			t.Errorf("%s: writing a file got %v, want %v", name, got, want.workspace)
@@ -191,13 +191,13 @@ func TestTheModeIsSafeToSwapWhileItIsBeingRead(t *testing.T) {
 		go func() {
 			defer waiting.Done()
 
-			self.Toggle(capWrite)
+			self.Toggle(Write)
 		}()
 
 		go func() {
 			defer waiting.Done()
 
-			self.Toggle(capGit)
+			self.Toggle(Git)
 		}()
 
 		go func() {
@@ -209,7 +209,7 @@ func TestTheModeIsSafeToSwapWhileItIsBeingRead(t *testing.T) {
 
 	waiting.Wait()
 
-	if currentCaps := self.Current(); !currentCaps.has(capWrite) || currentCaps.has(capGit) {
+	if currentCaps := self.Current(); !currentCaps.Has(Write) || currentCaps.Has(Git) {
 		t.Error("expected an even number of swaps to leave the mode where it started")
 	}
 }

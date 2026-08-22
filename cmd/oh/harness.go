@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/line"
 	"crdx.org/io/cmd/oh/output"
@@ -27,7 +28,7 @@ type Harness struct {
 	log          *store.Writer
 	processes    *sandbox.Processes // what background commands belong to this conversation
 	workspaceDir string
-	mode         *Mode
+	mode         *caps.Mode
 	shell        string
 
 	restart            []string   // the arguments to start again with, once the terminal has been given back
@@ -41,7 +42,7 @@ type Harness struct {
 
 	events []agent.Event
 
-	label func(bool, int, bool) string // what the harness was started with
+	label func(bool, bool, int) string // what the harness was started with
 }
 
 const historyLimit = 1000
@@ -140,19 +141,19 @@ func (self *Harness) apply(input *line.Input, history *line.History, keypress ke
 		return false
 
 	case line.Write:
-		self.toggleCapability(capWrite)
+		self.toggleCapability(caps.Write)
 
 	case line.Shell:
-		self.toggleCapability(capShell)
+		self.toggleCapability(caps.Shell)
 
 	case line.Git:
-		self.toggleCapability(capGit)
+		self.toggleCapability(caps.Git)
 
 	case line.Background:
-		if self.mode.Current().has(capBackground) {
+		if self.mode.Current().Has(caps.Background) {
 			names, err := self.processes.Disable()
 			if err == nil {
-				self.toggleCapability(capBackground)
+				self.toggleCapability(caps.Background)
 				if len(names) > 0 {
 					self.notifyStopped("Background processes killed (" + strings.Join(names, ", ") + ")")
 				}
@@ -161,7 +162,7 @@ func (self *Harness) apply(input *line.Input, history *line.History, keypress ke
 			}
 		} else {
 			self.processes.Enable()
-			self.toggleCapability(capBackground)
+			self.toggleCapability(caps.Background)
 		}
 
 	case line.Drawn:
@@ -189,7 +190,7 @@ func (self *Harness) submitInput(input *line.Input, history *line.History, messa
 	}
 }
 
-func (self *Harness) toggleCapability(whichCaps caps) {
+func (self *Harness) toggleCapability(whichCaps caps.Set) {
 	self.mode.Toggle(whichCaps)
 
 	if self.turn.isRunning {
@@ -243,8 +244,8 @@ func (self *Harness) show(input *line.Input) {
 
 	inputLabel := self.label(
 		input.IsPending(),
-		self.turn.spinnerFrame,
 		self.turn.isRunning,
+		self.turn.spinnerFrame,
 	)
 
 	framedRows = append(framedRows, bannerRule(

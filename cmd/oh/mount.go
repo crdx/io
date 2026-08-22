@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"slices"
 
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/util"
@@ -60,7 +61,7 @@ func createMissingConfiguredPaths(paths configuredPaths, warnings io.Writer) (co
 	return filtered, nil
 }
 
-func mountConfiguredPaths(files *file.Root, mode *Mode, extraPaths configuredPaths) ([]*os.Root, error) {
+func mountConfiguredPaths(files *file.Root, mode *caps.Mode, extraPaths configuredPaths) ([]*os.Root, error) {
 	writable := make(map[string]bool, len(extraPaths.Read)+len(extraPaths.Write))
 	for _, path := range extraPaths.Read {
 		writable[path] = false
@@ -85,7 +86,7 @@ func mountConfiguredPaths(files *file.Root, mode *Mode, extraPaths configuredPat
 
 		newRefusal := func(string) error { return file.ErrReadOnly }
 		if writable[path] {
-			currentRefusal := refuseWrite(mode)
+			currentRefusal := caps.RefuseWrite(mode)
 			newRefusal = func(name string) error {
 				if mount.isExact {
 					return currentRefusal(mount.target)

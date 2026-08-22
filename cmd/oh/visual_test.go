@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/tool"
@@ -123,11 +124,11 @@ func TestVisual(t *testing.T) {
 		agent:  agent.New("", provider, tools),
 		screen: screen,
 		log:    log,
-		mode:   NewMode(capRead | capWrite),
-		label: func(isPending bool, frame int, isRunning bool) string {
+		mode:   caps.NewMode(caps.Read | caps.Write),
+		label: func(isPending bool, isRunning bool, frame int) string {
 			return banner(
-				"fake", "medium", "/tmp/somewhere", tools, capRead|capShell|capWrite,
-				isPending, frame, isRunning,
+				"fake", "medium", "/tmp/somewhere", tools, caps.Read|caps.Shell|caps.Write,
+				isPending, isRunning, frame,
 			)
 		},
 	}

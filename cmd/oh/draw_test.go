@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store"
@@ -464,7 +465,7 @@ func testConversation(t *testing.T, screenOutput *bytes.Buffer) *Harness {
 		agent:              agent.New("", backend, nil),
 		screen:             output.New(screenOutput),
 		log:                log,
-		mode:               NewMode(capRead | capWrite),
+		mode:               caps.NewMode(caps.Read | caps.Write),
 		getOnWithItMessage: defaultGetOnWithItMessage,
 	}
 }

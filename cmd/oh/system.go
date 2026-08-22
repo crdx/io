@@ -10,6 +10,7 @@ import (
 	"text/template"
 
 	"crdx.org/hereduck"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/skill"
 )
 
@@ -73,7 +74,7 @@ type harnessTemplateData struct {
 	SessionName       string
 	TmpDir            string
 	HomeDir           string
-	CurrentCaps       caps
+	CurrentCaps       caps.Set
 	ExtraPaths        configuredPaths
 	WorkspaceWritable bool
 	GitWritable       bool
@@ -92,7 +93,7 @@ func loadContext(
 	sessionName string,
 	tmpDir string,
 	homeDir string,
-	currentCaps caps,
+	currentCaps caps.Set,
 	extraPaths configuredPaths,
 	skills []skill.Skill,
 ) (string, []contextFile, error) {
@@ -173,7 +174,7 @@ func globalContext(file *contextFile) string {
 	return file.body
 }
 
-func harnessContext(workspaceDir string, sessionName string, tmpDir string, homeDir string, currentCaps caps, extraPaths configuredPaths) string {
+func harnessContext(workspaceDir string, sessionName string, tmpDir string, homeDir string, currentCaps caps.Set, extraPaths configuredPaths) string {
 	data := harnessTemplateData{
 		WorkspaceDir:      workspaceDir,
 		SessionName:       sessionName,
@@ -181,10 +182,10 @@ func harnessContext(workspaceDir string, sessionName string, tmpDir string, home
 		HomeDir:           homeDir,
 		CurrentCaps:       currentCaps,
 		ExtraPaths:        extraPaths,
-		WorkspaceWritable: currentCaps.has(capWrite),
-		GitWritable:       currentCaps.has(capGit),
-		BackgroundEnabled: currentCaps.has(capBackground),
-		ShellGranted:      currentCaps.has(capShell),
+		WorkspaceWritable: currentCaps.Has(caps.Write),
+		GitWritable:       currentCaps.Has(caps.Git),
+		BackgroundEnabled: currentCaps.Has(caps.Background),
+		ShellGranted:      currentCaps.Has(caps.Shell),
 	}
 
 	var rendered strings.Builder
@@ -194,7 +195,7 @@ func harnessContext(workspaceDir string, sessionName string, tmpDir string, home
 	return strings.TrimSpace(rendered.String())
 }
 
-func scopeRules(extraPaths configuredPaths, currentCaps caps) string {
+func scopeRules(extraPaths configuredPaths, currentCaps caps.Set) string {
 	var lines []string
 
 	if len(extraPaths.Read)+len(extraPaths.Write) > 0 {
@@ -208,7 +209,7 @@ func scopeRules(extraPaths configuredPaths, currentCaps caps) string {
 	}
 	for _, path := range extraPaths.Write {
 		lines = append(lines, "- The configured path "+path+" is "+
-			filesystem(currentCaps.has(capWrite))+" and follows the workspace write state.")
+			filesystem(currentCaps.Has(caps.Write))+" and follows the workspace write state.")
 	}
 	for _, path := range extraPaths.Exec {
 		lines = append(lines, "- The shell may execute files at or under "+path+".")

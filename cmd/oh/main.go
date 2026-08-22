@@ -22,6 +22,7 @@ import (
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/store"
@@ -107,7 +108,7 @@ type Opts struct {
 	provider     string // the provider selected with the model, empty to use the configured or saved provider
 	model        string // the explicitly selected model, empty to use the configured or saved model
 	effort       string // the effort paired with an explicitly selected model
-	caps         caps
+	caps         caps.Set
 }
 
 func (self Opts) resuming() bool { return self.session != "" }
@@ -129,7 +130,7 @@ func (opts InputOpts) parse() (Opts, error) {
 		self.effort = effort
 	}
 
-	grantedCaps, err := Caps(opts.Caps)
+	grantedCaps, err := caps.Parse(opts.Caps)
 	if err != nil {
 		return self, err
 	}
@@ -201,13 +202,13 @@ func run() ([]string, error) {
 		return nil, fmt.Errorf("could not prepare the shell home: %w", err)
 	}
 
-	mode := NewMode(args.caps)
+	mode := caps.NewMode(args.caps)
 
 	if resumedSession != nil {
-		mode = NewResumedMode(args.caps)
+		mode = caps.NewResumedMode(args.caps)
 	}
 
-	files := file.New(root, refuseWrite(mode))
+	files := file.New(root, caps.RefuseWrite(mode))
 
 	settings, err := loadConfiguredSettings(configPath())
 	if err != nil {
@@ -237,7 +238,7 @@ func run() ([]string, error) {
 	}
 	defer skill.Close(skillRoots)
 
-	processes := sandbox.NewProcesses(args.caps.has(capBackground))
+	processes := sandbox.NewProcesses(args.caps.Has(caps.Background))
 	defer func() { _, _ = processes.Disable() }()
 
 	providerName, model, effort, err := resolveProviderSettings(args.provider, args.model, args.effort, settings, resumedSession)
@@ -330,10 +331,10 @@ func run() ([]string, error) {
 		onTurnFinished:     func() { sendTurnFinishedNotification(workspaceDir) },
 		getOnWithItMessage: settings.GetOnWithItMessage,
 
-		label: func(isPending bool, frame int, isRunning bool) string {
+		label: func(isPending bool, isRunning bool, frame int) string {
 			currentCaps := mode.Current()
 
-			return banner(model, effort, workspaceDir, tools, currentCaps, isPending, frame, isRunning)
+			return banner(model, effort, workspaceDir, tools, currentCaps, isPending, isRunning, frame)
 		},
 	}
 

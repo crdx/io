@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store/transcript"
@@ -272,7 +273,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 
 	workspaceDir := layOutWorkspace(t)
 
-	files := file.New(openWorkspaceRootAt(t, workspaceDir), refuseWrite(NewMode(allCaps())))
+	files := file.New(openWorkspaceRootAt(t, workspaceDir), caps.RefuseWrite(caps.NewMode(caps.All())))
 
 	var written strings.Builder
 
@@ -545,12 +546,12 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{}
 
 	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwg", "rxwgb", "rgb"} {
-		grantedCaps, err := Caps(flags)
+		grantedCaps, err := caps.Parse(flags)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		files := file.New(workspaceRoot, refuseWrite(NewMode(grantedCaps)))
+		files := file.New(workspaceRoot, caps.RefuseWrite(caps.NewMode(grantedCaps)))
 		tools := toolbox.Rummage(files, file.NewSnapshots())
 
 		for _, isRunning := range []bool{false, true} {
@@ -560,7 +561,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 			}
 
 			passes[name] = func() string {
-				return banner("gpt-5.6-sol", "high", workspaceMarker, tools, grantedCaps, false, 2, isRunning)
+				return banner("gpt-5.6-sol", "high", workspaceMarker, tools, grantedCaps, false, isRunning, 2)
 			}
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/skill"
 )
 
@@ -34,7 +35,7 @@ func TestTheGlobalContextReplacesTheBuiltInOpeningButKeepsTheHarnessState(t *tes
 		t.Fatal(err)
 	}
 
-	got, contextFiles, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", capRead, configuredPaths{}, nil)
+	got, contextFiles, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", caps.Read, configuredPaths{}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +67,7 @@ func TestAMissingGlobalContextUsesTheBuiltInOpening(t *testing.T) {
 	root, workspace := systemRoot(t)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 
-	got, _, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", capRead, configuredPaths{}, nil)
+	got, _, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", caps.Read, configuredPaths{}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +99,7 @@ func TestContextFilesFollowTheOrderTheyAreConcatenatedIn(t *testing.T) {
 		}
 	}
 
-	got, contextFiles, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", capRead, configuredPaths{}, nil)
+	got, contextFiles, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", caps.Read, configuredPaths{}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +125,7 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 		Write: []string{"/output"},
 		Exec:  []string{"/commands"},
 	}
-	got := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", capRead|capWrite, paths)
+	got := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", caps.Read|caps.Write, paths)
 
 	for _, want := range []string{
 		"configured path /reference is read-only",
@@ -138,7 +139,7 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 }
 
 func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
-	got := harnessContext("/workspace", "brave-otter", "/tmp/x", "/state/home", capRead, configuredPaths{})
+	got := harnessContext("/workspace", "brave-otter", "/tmp/x", "/state/home", caps.Read, configuredPaths{})
 
 	if !strings.Contains(got, "Your session is named brave-otter") {
 		t.Errorf("harness context does not contain the session name: %q", got)
@@ -146,7 +147,7 @@ func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
 }
 
 func TestTheHarnessDisclosesPrivateLoopbackNetworking(t *testing.T) {
-	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", capRead, configuredPaths{})
+	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, configuredPaths{})
 
 	for _, want := range []string{
 		"private loopback interface",
@@ -163,7 +164,7 @@ func TestTheScratchMappingIsWrittenInFull(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
 	scratch := "/home/alice/.local/state/org.crdx/oh/tmps/0d3f"
-	got := harnessContext("/workspace", "session-id", scratch, "/home/alice/.local/state/org.crdx/oh/home", capRead, configuredPaths{})
+	got := harnessContext("/workspace", "session-id", scratch, "/home/alice/.local/state/org.crdx/oh/home", caps.Read, configuredPaths{})
 
 	for _, want := range []string{
 		"/tmp maps to " + scratch + " on the user's machine",
@@ -176,7 +177,7 @@ func TestTheScratchMappingIsWrittenInFull(t *testing.T) {
 }
 
 func TestTheHarnessDisclosesTheShellHome(t *testing.T) {
-	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", capRead, configuredPaths{})
+	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, configuredPaths{})
 
 	for _, want := range []string{
 		"HOME is /state/home",
@@ -197,7 +198,7 @@ func TestTheHarnessNeverAbbreviatesAPathToATilde(t *testing.T) {
 		"session-id",
 		filepath.Join(home, ".local", "state", "org.crdx", "oh", "tmps", "0d3f"),
 		filepath.Join(home, ".local", "state", "org.crdx", "oh", "home"),
-		capRead|capWrite|capShell,
+		caps.Read|caps.Write|caps.Shell,
 		configuredPaths{
 			Read:  []string{filepath.Join(home, "reference")},
 			Write: []string{filepath.Join(home, "output")},
@@ -216,7 +217,7 @@ func TestTheSkillCatalogueIsAppendedToTheContext(t *testing.T) {
 	root, workspace := systemRoot(t)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 
-	got, _, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", capRead, configuredPaths{}, []skill.Skill{{
+	got, _, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", caps.Read, configuredPaths{}, []skill.Skill{{
 		Name:        "pdf",
 		Description: "Work with PDFs.",
 		Location:    "/skills/pdf/SKILL.md",

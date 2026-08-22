@@ -11,6 +11,7 @@ import (
 
 	"crdx.org/duckopt/v2"
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
@@ -48,15 +49,15 @@ func parseOptions(t *testing.T, arguments ...string) Opts {
 	return settledOptions
 }
 
-var everyCap = []caps{
+var everyCap = []caps.Set{
 	0,
-	capWrite,
-	capGit,
-	capWrite | capGit,
-	capBackground,
-	capWrite | capBackground,
-	capGit | capBackground,
-	capWrite | capGit | capBackground,
+	caps.Write,
+	caps.Git,
+	caps.Write | caps.Git,
+	caps.Background,
+	caps.Write | caps.Background,
+	caps.Git | caps.Background,
+	caps.Write | caps.Git | caps.Background,
 }
 
 func TestEveryOptionIsRead(t *testing.T) {
@@ -64,7 +65,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 
 	parsedOptions := parseOptions(t, "-c", "r", "-d", "somewhere", "-m", "deepseek@hi")
 
-	if parsedOptions.caps != capRead {
+	if parsedOptions.caps != caps.Read {
 		t.Errorf("expected reading alone, got %s", parsedOptions.caps.Flags())
 	}
 
@@ -153,23 +154,23 @@ func TestTheDefaultCapabilitiesAreEverythingButTheHistory(t *testing.T) {
 
 func TestCapabilitiesAreReadAsTheLettersTheyAreSpelledWith(t *testing.T) {
 	for _, capString := range []string{"rwxgb", "bgxwr", "wxgb"} {
-		currentCaps, err := Caps(capString)
+		currentCaps, err := caps.Parse(capString)
 		if err != nil {
 			t.Fatalf("%s: unexpected error: %v", capString, err)
 		}
 
-		if got := currentCaps.Flags(); got != capFlags {
-			t.Errorf("%s: expected it written back as %s, got %q", capString, capFlags, got)
+		if got := currentCaps.Flags(); got != caps.AllFlags {
+			t.Errorf("%s: expected it written back as %s, got %q", capString, caps.AllFlags, got)
 		}
 	}
 
-	if _, err := Caps("rwz"); err == nil {
+	if _, err := caps.Parse("rwz"); err == nil {
 		t.Error("expected a letter naming no capability to be refused")
 	}
 }
 
 func TestReadingIsAlwaysGranted(t *testing.T) {
-	grantedCaps, err := Caps("")
+	grantedCaps, err := caps.Parse("")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -180,7 +181,7 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 }
 
 func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
-	system := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", capRead, configuredPaths{})
+	system := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", caps.Read, configuredPaths{})
 
 	if want := "The workspace (/workspace) is " + filesystem(false); !strings.Contains(system, want) {
 		t.Errorf("expected the workspace to be reported as %q, got %q", want, system)
@@ -209,11 +210,11 @@ func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
 
 func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
 	for name, test := range map[string]struct {
-		currentCaps caps
+		currentCaps caps.Set
 		granted     bool
 	}{
-		"granted": {capRead | capShell, true},
-		"refused": {capRead, false},
+		"granted": {caps.Read | caps.Shell, true},
+		"refused": {caps.Read, false},
 	} {
 		t.Run(name, func(t *testing.T) {
 			got := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", test.currentCaps, configuredPaths{})
@@ -237,7 +238,7 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 	defer func() { _ = workspaceRoot.Close() }()
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
-	mode := NewMode(capRead)
+	mode := caps.NewMode(caps.Read)
 	processes := sandbox.NewProcesses(false)
 	defer func() { _, _ = processes.Disable() }()
 
@@ -270,12 +271,12 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 
 	home := t.TempDir()
 	tmp := t.TempDir()
-	if _, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, capRead|capShell); err != nil {
+	if _, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, caps.Read|caps.Shell); err != nil {
 		t.Skipf("the sandbox cannot enforce a shell policy here: %v", err)
 	}
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
-	mode := NewMode(capRead | capShell)
+	mode := caps.NewMode(caps.Read | caps.Shell)
 	processes := sandbox.NewProcesses(false)
 	defer func() { _, _ = processes.Disable() }()
 
@@ -296,7 +297,7 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 	}
 
 	run()
-	mode.Toggle(capWrite)
+	mode.Toggle(caps.Write)
 	run()
 }
 
@@ -315,13 +316,13 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 
 	home := t.TempDir()
 	tmp := t.TempDir()
-	initialCaps := capRead | capWrite | capShell
+	initialCaps := caps.Read | caps.Write | caps.Shell
 	if _, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, initialCaps); err != nil {
 		t.Skipf("the sandbox cannot enforce a shell policy here: %v", err)
 	}
 
-	mode := NewMode(initialCaps)
-	files := file.New(workspaceRoot, refuseWrite(mode))
+	mode := caps.NewMode(initialCaps)
+	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
 	processes := sandbox.NewProcesses(false)
 	defer func() { _, _ = processes.Disable() }()
 	shell := confinedShell(workspace, home, tmp, configuredPaths{}, mode, files, processes)
@@ -339,7 +340,7 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 		t.Fatal("expected repository metadata to remain read-only before git was granted")
 	}
 
-	mode.Toggle(capGit)
+	mode.Toggle(caps.Git)
 	if err := run(); err != nil {
 		t.Fatalf("repository metadata remained read-only after git was granted: %v", err)
 	}
@@ -396,7 +397,7 @@ func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 	miseDataDir := t.TempDir()
 	t.Setenv("MISE_DATA_DIR", miseDataDir)
 
-	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capWrite)
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, caps.Write)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a writable policy here: %v", err)
 	}
@@ -431,7 +432,7 @@ func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 }
 
 func TestBackgroundModeReachesTheShellPolicy(t *testing.T) {
-	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, capBackground)
+	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, caps.Background)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce background mode here: %v", err)
 	}
@@ -453,7 +454,7 @@ func TestTmpIsAlwaysWritable(t *testing.T) {
 		t.Errorf("expected writable %s, got %v", sandbox.TmpDir, readOnly.Write)
 	}
 
-	readWrite, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, capWrite)
+	readWrite, err := createSandboxPolicy(t.Context(), workspace, home, tmp, configuredPaths{}, caps.Write)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a writable policy here: %v", err)
 	}
@@ -500,7 +501,7 @@ func TestConfiguredPathsReachTheShellPolicy(t *testing.T) {
 		t.Errorf("configured write path is writable without write capability: %v", readOnly.Write)
 	}
 
-	readWrite, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), additional, capWrite)
+	readWrite, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), additional, caps.Write)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce the configured writable policy here: %v", err)
 	}
@@ -604,19 +605,19 @@ func TestNoPolicyGrantsMoreThanItsCapsAskFor(t *testing.T) {
 	for _, currentCaps := range everyCap {
 		granted := writablePaths(workspace, home, currentCaps)
 
-		if !currentCaps.has(capWrite) && slices.Contains(granted, workspace) {
+		if !currentCaps.Has(caps.Write) && slices.Contains(granted, workspace) {
 			t.Errorf("%s: the tree is writable without w, got %v", currentCaps.Flags(), granted)
 		}
 
-		if !currentCaps.has(capWrite) && !currentCaps.has(capGit) && len(granted) > 0 {
+		if !currentCaps.Has(caps.Write) && !currentCaps.Has(caps.Git) && len(granted) > 0 {
 			t.Errorf("%s: something is writable without w or g, got %v", currentCaps.Flags(), granted)
 		}
 
-		if !currentCaps.has(capGit) && slices.Contains(granted, metadata) {
+		if !currentCaps.Has(caps.Git) && slices.Contains(granted, metadata) {
 			t.Errorf("%s: the metadata is writable without g, got %v", currentCaps.Flags(), granted)
 		}
 
-		if currentCaps.has(capWrite) && !slices.Contains(granted, workspace) {
+		if currentCaps.Has(caps.Write) && !slices.Contains(granted, workspace) {
 			t.Errorf("%s: the tree is not writable with w, got %v", currentCaps.Flags(), granted)
 		}
 	}
@@ -649,7 +650,7 @@ func TestACommitOnlyShellMayChangeTheHistoryAlone(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, capGit)
+	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{}, caps.Git)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a writable policy here: %v", err)
 	}
@@ -709,7 +710,7 @@ func TestEveryExistingRepositoryIsProtectedFromTheShell(t *testing.T) {
 
 	policy, err := createSandboxPolicy(t.Context(), workspace, home, t.TempDir(), configuredPaths{
 		Write: []string{additional},
-	}, capWrite)
+	}, caps.Write)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a writable policy here: %v", err)
 	}
@@ -722,7 +723,7 @@ func TestEveryExistingRepositoryIsProtectedFromTheShell(t *testing.T) {
 }
 
 func TestACommitOnlyShellWithNoRepositoryChangesNothing(t *testing.T) {
-	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, capGit)
+	policy, err := createSandboxPolicy(t.Context(), t.TempDir(), t.TempDir(), t.TempDir(), configuredPaths{}, caps.Git)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a policy here: %v", err)
 	}
@@ -826,7 +827,7 @@ func TestAMappedPathReachesTheShellPolicy(t *testing.T) {
 		t.TempDir(),
 		t.TempDir(),
 		configuredPaths{Home: []string{source}},
-		capRead,
+		caps.Read,
 	)
 	if err != nil {
 		t.Skipf("the sandbox cannot enforce a policy here: %v", err)
@@ -851,12 +852,12 @@ func TestAResumedConversationMayBeGrantedSomethingElse(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	if settledOptions.caps.has(capWrite) {
+	if settledOptions.caps.Has(caps.Write) {
 		t.Error("expected writing to be held back")
 	}
 }
 
-func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *Harness {
+func conversationFixture(t *testing.T, hasSession bool, currentCaps caps.Set) *Harness {
 	t.Helper()
 
 	log, err := store.Create(t.TempDir(), store.Meta{Model: "gpt"})
@@ -875,12 +876,12 @@ func conversationFixture(t *testing.T, hasSession bool, currentCaps caps) *Harne
 	return &Harness{
 		log:          log,
 		workspaceDir: "/tmp/somewhere",
-		mode:         NewMode(currentCaps),
+		mode:         caps.NewMode(currentCaps),
 	}
 }
 
 func TestStartingAgainNamesTheSessionAndKeepsTheMode(t *testing.T) {
-	self := conversationFixture(t, true, capRead|capWrite|capShell)
+	self := conversationFixture(t, true, caps.Read|caps.Write|caps.Shell)
 
 	want := []string{"-r", self.log.Name(), "--caps", "rxw"}
 
@@ -890,10 +891,10 @@ func TestStartingAgainNamesTheSessionAndKeepsTheMode(t *testing.T) {
 }
 
 func TestStartingAgainAsksForWhateverWasSwappedMidConversation(t *testing.T) {
-	self := conversationFixture(t, true, capRead|capWrite|capShell)
+	self := conversationFixture(t, true, caps.Read|caps.Write|caps.Shell)
 
-	self.mode.Toggle(capWrite)
-	self.mode.Toggle(capGit)
+	self.mode.Toggle(caps.Write)
+	self.mode.Toggle(caps.Git)
 
 	want := []string{"-r", self.log.Name(), "--caps", "rxg"}
 
@@ -903,7 +904,7 @@ func TestStartingAgainAsksForWhateverWasSwappedMidConversation(t *testing.T) {
 }
 
 func TestStartingAgainWithNothingStoredKeepsTheWorkspace(t *testing.T) {
-	self := conversationFixture(t, false, capRead|capWrite|capShell)
+	self := conversationFixture(t, false, caps.Read|caps.Write|caps.Shell)
 
 	want := []string{"--workspace", "/tmp/somewhere", "--caps", "rxw"}
 

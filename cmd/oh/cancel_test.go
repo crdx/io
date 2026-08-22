@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/line"
 	"crdx.org/io/cmd/oh/output"
@@ -160,10 +161,17 @@ func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.
 		}
 	}
 
-	wantMessages := []string{"first", nowReadOnly}
+	wantMessages := []string{"first", workspaceNowReadOnly()}
 	if !slices.Equal(messages, wantMessages) {
 		t.Errorf("got messages %q, want %q", messages, wantMessages)
 	}
+}
+
+func workspaceNowReadOnly() string {
+	withdrawn := caps.NewMode(caps.Read | caps.Write)
+	withdrawn.Toggle(caps.Write)
+
+	return withdrawn.Inject()
 }
 
 func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *testing.T) {
@@ -257,7 +265,7 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 		agent:  agent.New("", eventsAfterCancellationProvider{}, nil),
 		screen: output.New(&bytes.Buffer{}),
 		log:    log,
-		mode:   NewMode(capRead | capWrite),
+		mode:   caps.NewMode(caps.Read | caps.Write),
 	}
 
 	self.start("first")
@@ -329,7 +337,7 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 		agent:  agent.New("", quietProvider{}, nil),
 		screen: output.New(&screenOutput),
 		log:    log,
-		mode:   NewMode(capRead | capWrite),
+		mode:   caps.NewMode(caps.Read | caps.Write),
 	}
 	history := line.NewHistory("", historyLimit)
 	input := line.NewInput(history)
@@ -393,7 +401,7 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 		agent:  agent.New("", quietProvider{}, nil),
 		screen: output.New(&bytes.Buffer{}),
 		log:    log,
-		mode:   NewMode(capRead | capWrite),
+		mode:   caps.NewMode(caps.Read | caps.Write),
 	}
 
 	self.start("first")
@@ -522,11 +530,11 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 		agent:  agent.New("", quietProvider{}, nil),
 		screen: output.New(&bytes.Buffer{}),
 		log:    log,
-		mode:   NewMode(capRead | capWrite),
+		mode:   caps.NewMode(caps.Read | caps.Write),
 	}
 
 	self.start("first")
-	self.toggleCapability(capWrite)
+	self.toggleCapability(caps.Write)
 	self.replaceTurn("second")
 
 	if !self.queuedTurn.isReplacement || !self.queuedTurn.isModeChange || self.queuedTurn.nextMessage != "second" {
@@ -586,11 +594,11 @@ func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
 		agent:  agent.New("", quietProvider{}, nil),
 		screen: output.New(&bytes.Buffer{}),
 		log:    log,
-		mode:   NewMode(capRead | capWrite),
+		mode:   caps.NewMode(caps.Read | caps.Write),
 	}
 
 	self.start("first")
-	self.toggleCapability(capWrite)
+	self.toggleCapability(caps.Write)
 
 	for report := range self.turn.events {
 		self.takeTurn(report)

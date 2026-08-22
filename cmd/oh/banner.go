@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strings"
 
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/spinner"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/pathutil"
@@ -15,14 +16,14 @@ func banner(
 	effort string,
 	directory string,
 	tools []tool.Tool,
-	grantedCaps caps,
+	grantedCaps caps.Set,
 	isPending bool,
-	frame int,
 	isRunning bool,
+	frameIndex int,
 ) string {
 	activity := style.Withheld("✧·")
 	if isRunning {
-		activity = style.Spinner(spinner.Activity.Frame(frame))
+		activity = style.Spinner(spinner.Activity.Frame(frameIndex))
 	}
 
 	parts := []string{
@@ -104,24 +105,24 @@ func ruleTo(width int, label string, paint style.Style) string {
 		style.Rule(strings.Repeat("─", trailingPadding))
 }
 
-func modes(tools []tool.Tool, grantedCaps caps, isPending bool) string {
-	return offeredCapability(capRead, anyToolReadsOnly(tools), style.Read, isPending) +
-		offeredCapability(capShell, grantedCaps.has(capShell), style.Exec, isPending) +
-		offeredCapability(capWrite, grantedCaps.has(capWrite), style.Write, isPending) +
-		offeredCapability(capGit, grantedCaps.has(capGit), style.History, isPending) +
-		offeredCapability(capBackground, grantedCaps.has(capBackground), style.Background, isPending)
+func modes(tools []tool.Tool, grantedCaps caps.Set, isPending bool) string {
+	return offeredCapability(caps.Read, anyToolReadsOnly(tools), style.Read, isPending) +
+		offeredCapability(caps.Shell, grantedCaps.Has(caps.Shell), style.Exec, isPending) +
+		offeredCapability(caps.Write, grantedCaps.Has(caps.Write), style.Write, isPending) +
+		offeredCapability(caps.Git, grantedCaps.Has(caps.Git), style.History, isPending) +
+		offeredCapability(caps.Background, grantedCaps.Has(caps.Background), style.Background, isPending)
 }
 
-func offeredCapability(whichCap caps, isGranted bool, paint style.Style, isPending bool) string {
+func offeredCapability(whichCap caps.Set, isGranted bool, paint style.Style, isPending bool) string {
 	if !isGranted {
 		paint = style.Withheld
 	}
 
 	if isPending {
-		return style.Pending(paint(whichCap.flag()))
+		return style.Pending(paint(whichCap.Flag()))
 	}
 
-	return paint(whichCap.flag())
+	return paint(whichCap.Flag())
 }
 
 func anyToolReadsOnly(tools []tool.Tool) bool {
