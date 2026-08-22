@@ -9,7 +9,6 @@ import (
 	"crdx.org/io/cmd/oh/segment/model"
 	"crdx.org/io/cmd/oh/segment/modes"
 	"crdx.org/io/cmd/oh/segment/scroll"
-	"crdx.org/io/cmd/oh/segment/think"
 	"crdx.org/io/cmd/oh/segment/workdir"
 	"crdx.org/io/cmd/oh/style"
 )
@@ -19,22 +18,20 @@ const (
 	modesSegment    = "modes"
 	workdirSegment  = "workdir"
 	modelSegment    = "model"
-	thinkSegment    = "think"
 	scrollSegment   = "scroll"
 )
 
 func availableSegments(
 	workspaceDir string,
 	modelName string,
-	effort string,
+	modelEffort string,
 	harness *Harness,
 ) segment.Set {
 	return segment.Set{
 		activitySegment: activity.New(harness.turnActivity),
 		modesSegment:    modes.New(harness.grantedCaps, harness.isChordPending),
 		workdirSegment:  workdir.New(workspaceDir),
-		modelSegment:    model.New(modelName),
-		thinkSegment:    think.New(effort),
+		modelSegment:    model.New(modelName, modelEffort),
 		scrollSegment:   scroll.New,
 	}
 }

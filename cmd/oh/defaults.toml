@@ -26,7 +26,6 @@ left = [
     { segment = "modes" },
     { segment = "workdir" },
     { segment = "model" },
-    { segment = "think" },
 ]
 center = []
 right = [

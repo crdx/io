@@ -5,16 +5,30 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
+const separator = " ─ "
+
 type state struct {
-	shown string
+	name   string
+	effort string
 }
 
-func New(name string) segment.Factory {
+func New(name string, effort string) segment.Factory {
 	return func(segment.Unmarshall) (segment.Instance, error) {
-		return state{shown: name}, nil
+		return state{name: name, effort: short(effort)}, nil
+	}
+}
+
+func short(level string) string {
+	switch level {
+	case "minimal":
+		return "min"
+	case "medium":
+		return "med"
+	default:
+		return level
 	}
 }
 
 func (self state) Render(segment.Context) string {
-	return style.Subtle(self.shown)
+	return style.Subtle(self.name + separator + self.effort)
 }
