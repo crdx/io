@@ -33,17 +33,22 @@ const (
 
 // Writer coordinates the canonical journal and auxiliary bundle recorders.
 type Writer struct {
-	inner     *session.Writer
-	directory string
-	meta      Meta
+	innerWriter *session.Writer
+	writerMutex sync.Mutex
 
-	canonicalMutex    sync.Mutex
-	mutex             sync.Mutex
-	transcript        *transcript.Recorder
-	wire              *wire.Recorder
-	transcriptEnabled bool
-	wireEnabled       bool
-	warnings          []error
+	eventBuffer []agent.Event
+	directory   string
+	meta        Meta
+
+	recorderMutex sync.Mutex
+
+	transcriptLoggingEnabled bool
+	transcriptRecorder       *transcript.Recorder
+
+	wireRecordingEnabled bool
+	wireRecorder         *wire.Recorder
+
+	warnings []error
 }
 
 // Create starts an oh session.
@@ -52,16 +57,16 @@ func Create(directory string, meta Meta) (*Writer, error) {
 	if err != nil {
 		return nil, err
 	}
-	inner, err := session.Create(directory, jsonStr)
+	innerWriter, err := session.Create(directory, jsonStr)
 	if err != nil {
 		return nil, err
 	}
 	return &Writer{
-		inner:             inner,
-		directory:         directory,
-		meta:              meta,
-		transcriptEnabled: true,
-		wireEnabled:       true,
+		innerWriter:              innerWriter,
+		directory:                directory,
+		meta:                     meta,
+		transcriptLoggingEnabled: true,
+		wireRecordingEnabled:     true,
 	}, nil
 }
 
@@ -71,61 +76,49 @@ func Open(directory, name string) (*Writer, error) {
 	if err != nil {
 		return nil, err
 	}
-	inner, err := session.Open(directory, name)
+	innerWriter, err := session.Open(directory, name)
 	if err != nil {
 		return nil, err
 	}
 	writer := &Writer{
-		inner:             inner,
-		directory:         directory,
-		meta:              storedSession.Meta,
-		transcriptEnabled: true,
-		wireEnabled:       true,
+		innerWriter:              innerWriter,
+		directory:                directory,
+		meta:                     storedSession.Meta,
+		transcriptLoggingEnabled: true,
+		wireRecordingEnabled:     true,
 	}
-	writer.ensureAuxiliaryRecorders()
+	writer.startRecorders()
 	return writer, nil
 }
 
 // Event appends one conversation event.
 func (self *Writer) Event(event agent.Event) error {
-	self.canonicalMutex.Lock()
-	at, err := self.inner.Event(event)
-	self.canonicalMutex.Unlock()
-	if err != nil {
-		return err
-	}
-	self.ensureAuxiliaryRecorders()
-
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-	if self.transcript != nil {
-		if err := self.transcript.Event(at, event); err != nil {
-			_ = self.transcript.Close()
-			self.transcript = nil
-			self.transcriptEnabled = false
-			self.warnings = append(self.warnings, fmt.Errorf("chat.md recording disabled: %w", err))
+	for _, releasedEvent := range self.release(event) {
+		if err := self.appendEvent(releasedEvent); err != nil {
+			return err
 		}
 	}
+
 	return nil
 }
 
 // Item appends one provider-state item.
 func (self *Writer) Item(item json.RawMessage) error {
-	self.canonicalMutex.Lock()
-	err := self.inner.Item(item)
-	self.canonicalMutex.Unlock()
+	self.writerMutex.Lock()
+	err := self.innerWriter.Item(item)
+	self.writerMutex.Unlock()
 	if err != nil {
 		return err
 	}
-	self.ensureAuxiliaryRecorders()
+	self.startRecorders()
 	return nil
 }
 
 // Name is what the session is called, and the name of its bundle directory.
-func (self *Writer) Name() string { return self.inner.Name() }
+func (self *Writer) Name() string { return self.innerWriter.Name() }
 
 // ID is the session's time-ordered identifier, recorded for provenance and read by nothing.
-func (self *Writer) ID() string { return self.inner.ID() }
+func (self *Writer) ID() string { return self.innerWriter.ID() }
 
 // SetMeta replaces the meta before the first record is written.
 func (self *Writer) SetMeta(meta Meta) error {
@@ -133,9 +126,9 @@ func (self *Writer) SetMeta(meta Meta) error {
 	if err != nil {
 		return err
 	}
-	self.canonicalMutex.Lock()
-	defer self.canonicalMutex.Unlock()
-	if err := self.inner.SetMeta(jsonStr); err != nil {
+	self.writerMutex.Lock()
+	defer self.writerMutex.Unlock()
+	if err := self.innerWriter.SetMeta(jsonStr); err != nil {
 		return err
 	}
 	self.meta = meta
@@ -144,9 +137,9 @@ func (self *Writer) SetMeta(meta Meta) error {
 
 // Stored reports whether anything was written.
 func (self *Writer) Stored() bool {
-	self.canonicalMutex.Lock()
-	defer self.canonicalMutex.Unlock()
-	return self.inner.Stored()
+	self.writerMutex.Lock()
+	defer self.writerMutex.Unlock()
+	return self.innerWriter.Stored()
 }
 
 // Observer returns the session's logical HTTP exchange observer.
@@ -154,8 +147,8 @@ func (self *Writer) Observer() req.Observer { return writerObserver{writer: self
 
 // TakeWarnings drains auxiliary recorder failures.
 func (self *Writer) TakeWarnings() []error {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
+	self.recorderMutex.Lock()
+	defer self.recorderMutex.Unlock()
 	warnings := self.warnings
 	self.warnings = nil
 	return warnings
@@ -163,15 +156,15 @@ func (self *Writer) TakeWarnings() []error {
 
 // Close closes a stored session.
 func (self *Writer) Close() error {
-	self.canonicalMutex.Lock()
-	canonicalError := self.inner.Close()
-	self.canonicalMutex.Unlock()
-	self.mutex.Lock()
-	transcriptRecorder := self.transcript
-	wireRecorder := self.wire
-	self.transcript = nil
-	self.wire = nil
-	self.mutex.Unlock()
+	self.writerMutex.Lock()
+	canonicalError := self.innerWriter.Close()
+	self.writerMutex.Unlock()
+	self.recorderMutex.Lock()
+	transcriptRecorder := self.transcriptRecorder
+	wireRecorder := self.wireRecorder
+	self.transcriptRecorder = nil
+	self.wireRecorder = nil
+	self.recorderMutex.Unlock()
 	if transcriptRecorder != nil {
 		if err := transcriptRecorder.Close(); err != nil {
 			self.queueWarning(fmt.Errorf("chat.md recording disabled: %w", err))
@@ -183,64 +176,102 @@ func (self *Writer) Close() error {
 	return canonicalError
 }
 
-func (self *Writer) ensureAuxiliaryRecorders() {
-	self.canonicalMutex.Lock()
-	err := self.inner.EnsureStored()
-	self.canonicalMutex.Unlock()
+func (self *Writer) release(event agent.Event) []agent.Event {
+	self.writerMutex.Lock()
+	defer self.writerMutex.Unlock()
+
+	if !self.innerWriter.Stored() && event.Kind != agent.UserMessage {
+		self.eventBuffer = append(self.eventBuffer, event)
+		return nil
+	}
+
+	released := append(self.eventBuffer, event)
+	self.eventBuffer = nil
+
+	return released
+}
+
+func (self *Writer) appendEvent(event agent.Event) error {
+	self.writerMutex.Lock()
+	at, err := self.innerWriter.Event(event)
+	self.writerMutex.Unlock()
+	if err != nil {
+		return err
+	}
+	self.startRecorders()
+
+	self.recorderMutex.Lock()
+	defer self.recorderMutex.Unlock()
+	if self.transcriptRecorder != nil {
+		if err := self.transcriptRecorder.Event(at, event); err != nil {
+			_ = self.transcriptRecorder.Close()
+			self.transcriptRecorder = nil
+			self.transcriptLoggingEnabled = false
+			self.warnings = append(self.warnings, fmt.Errorf("chat.md recording disabled: %w", err))
+		}
+	}
+	return nil
+}
+
+func (self *Writer) startRecorders() {
+	self.writerMutex.Lock()
+	err := self.innerWriter.EnsureStored()
+	started := self.innerWriter.Started()
+	self.writerMutex.Unlock()
 	if err != nil {
 		return
 	}
 
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
+	self.recorderMutex.Lock()
+	defer self.recorderMutex.Unlock()
 	bundleDirectory := filepath.Join(self.directory, self.Name())
-	if self.transcript == nil && self.transcriptEnabled {
+	if self.transcriptRecorder == nil && self.transcriptLoggingEnabled {
 		recorder, err := transcript.Open(filepath.Join(bundleDirectory, transcriptName), transcript.Meta{
 			Name:      self.Name(),
-			Started:   self.inner.Started(),
+			Started:   started,
 			Model:     self.meta.Model,
 			Effort:    self.meta.Effort,
 			Provider:  self.meta.Provider,
 			Workspace: self.meta.WorkspaceDir,
 		})
 		if err != nil {
-			self.transcriptEnabled = false
+			self.transcriptLoggingEnabled = false
 			self.warnings = append(self.warnings, fmt.Errorf("chat.md recording disabled: %w", err))
 		} else {
-			self.transcript = recorder
+			self.transcriptRecorder = recorder
 		}
 	}
-	if self.wire == nil && self.wireEnabled {
+	if self.wireRecorder == nil && self.wireRecordingEnabled {
 		recorder, err := wire.Open(filepath.Join(bundleDirectory, wireName), wire.Meta{
 			Name:      self.Name(),
-			Started:   self.inner.Started(),
+			Started:   started,
 			Model:     self.meta.Model,
 			Effort:    self.meta.Effort,
 			Provider:  self.meta.Provider,
 			Workspace: self.meta.WorkspaceDir,
 		}, self.queueWarning)
 		if err != nil {
-			self.wireEnabled = false
+			self.wireRecordingEnabled = false
 			self.warnings = append(self.warnings, fmt.Errorf("wire.http recording disabled: %w", err))
 		} else {
-			self.wire = recorder
+			self.wireRecorder = recorder
 		}
 	}
 }
 
 func (self *Writer) queueWarning(err error) {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
+	self.recorderMutex.Lock()
+	defer self.recorderMutex.Unlock()
 	self.warnings = append(self.warnings, err)
 }
 
 type writerObserver struct{ writer *Writer }
 
 func (self writerObserver) Start(request req.Request) req.ExchangeObserver {
-	self.writer.ensureAuxiliaryRecorders()
-	self.writer.mutex.Lock()
-	recorder := self.writer.wire
-	self.writer.mutex.Unlock()
+	self.writer.startRecorders()
+	self.writer.recorderMutex.Lock()
+	recorder := self.writer.wireRecorder
+	self.writer.recorderMutex.Unlock()
 	if recorder == nil {
 		return nil
 	}

@@ -45,8 +45,8 @@ type readOnly struct {
 func (self readOnly) ReadOnly() bool { return true }
 
 // State makes a tool the owner of named durable state.
-func State(inner Tool, name string, restore Restorer) Tool {
-	return stateTool{Tool: inner, name: name, restore: restore}
+func State(tool Tool, name string, restore Restorer) Tool {
+	return stateTool{Tool: tool, name: name, restore: restore}
 }
 
 type stateTool struct {
@@ -130,8 +130,8 @@ type Highlight struct {
 }
 
 // Syntax highlights a call rendering as the named language, replacing any inner highlighter.
-func Syntax(inner Tool, language string) Tool {
-	return syntaxTool{Tool: inner, language: language}
+func Syntax(tool Tool, language string) Tool {
+	return syntaxTool{Tool: tool, language: language}
 }
 
 type syntaxTool struct {
@@ -164,13 +164,13 @@ type highlightedCall struct {
 func (self highlightedCall) Highlight() Highlight { return self.highlight }
 
 // Focus sets one part of a call rendering apart, replacing any inner highlighter.
-func Focus(inner Tool, pick func(Call) string) Tool {
-	return focusedTool{Tool: inner, pick: pick}
+func Focus(tool Tool, pick func(Call) string) Tool {
+	return focusedTool{Tool: tool, pick: pick}
 }
 
 // FocusPath sets apart the last component of a path rendering.
-func FocusPath(inner Tool) Tool {
-	return Focus(inner, func(call Call) string {
+func FocusPath(tool Tool) Tool {
+	return Focus(tool, func(call Call) string {
 		subject := call.Subject()
 		if subject == "" {
 			return ""

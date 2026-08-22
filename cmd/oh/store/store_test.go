@@ -188,6 +188,80 @@ func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 	}
 }
 
+func TestWhatHappensBeforeTheFirstMessageDoesNotWriteTheSession(t *testing.T) {
+	directory := t.TempDir()
+
+	log, err := store.Create(directory, store.Meta{Model: "gpt-5.6-sol"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := log.Event(agent.Event{Kind: agent.Startup, Took: time.Millisecond}); err != nil {
+		t.Fatal(err)
+	}
+
+	if log.Stored() {
+		t.Error("expected a startup notice on its own to leave nothing behind")
+	}
+
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	entries, err := os.ReadDir(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(entries) != 0 {
+		t.Errorf("expected nothing to have been written, got %v", entries)
+	}
+}
+
+func TestWhatWasHeldBackIsWrittenInFrontOfTheFirstMessage(t *testing.T) {
+	directory := t.TempDir()
+
+	log, err := store.Create(directory, store.Meta{Model: "gpt-5.6-sol"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	held := []agent.Event{
+		{Kind: agent.Startup, Took: time.Millisecond},
+		{Kind: agent.HarnessMessage, Text: "the workspace is now read-write"},
+	}
+
+	for _, event := range held {
+		if err := log.Event(event); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "hello"}); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := store.Read(directory, log.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []agent.Kind{agent.Startup, agent.HarnessMessage, agent.UserMessage}
+
+	got := make([]agent.Kind, 0, len(storedSession.Events))
+	for _, event := range storedSession.Events {
+		got = append(got, event.Kind)
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("expected %v, got %v", want, got)
+	}
+}
+
 func TestTheFirstThingSaidTakesTheHeadWithIt(t *testing.T) {
 	directory := t.TempDir()
 
