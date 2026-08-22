@@ -18,7 +18,7 @@ func TestActivityIsTwoCellsWide(t *testing.T) {
 }
 
 func TestActivityMovesAtATwinklingPace(t *testing.T) {
-	if rate := spinner.Activity.Rate(); rate != 125*time.Millisecond {
-		t.Errorf("got rate %s, want 125ms", rate)
+	if interval := spinner.Activity.RefreshInterval(); interval != 125*time.Millisecond {
+		t.Errorf("got interval %s, want 125ms", interval)
 	}
 }

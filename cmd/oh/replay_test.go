@@ -328,21 +328,21 @@ func streamIntoBuffer(t *testing.T, entries []replayEntry) string {
 	t.Helper()
 
 	rig := newReplayRig(t, replayColumns)
-	rig.chat.turn = Turn{isRunning: true, painter: rig.chat.newPainter(true)}
+	rig.chat.currentTurn = Turn{isRunning: true, painter: rig.chat.newPainter(true)}
 	rig.chat.screen.ReportProgress(true)
 
 	for _, entry := range entries {
 		for _, delta := range splitIntoDeltas(*entry.Event) {
 			rig.chat.events = appendTranscript(rig.chat.events, delta)
-			rig.chat.turn.painter.drawEvent(delta)
+			rig.chat.currentTurn.painter.drawEvent(delta)
 
-			if rig.chat.turn.painter.isStale {
+			if rig.chat.currentTurn.painter.isStale {
 				rig.chat.redraw()
 			}
 		}
 	}
 
-	rig.chat.turn.painter.close(status.Done)
+	rig.chat.currentTurn.painter.close(status.Done)
 	rig.chat.screen.End()
 	rig.chat.screen.ReportProgress(false)
 
@@ -400,13 +400,13 @@ func replayThenRedraw(t *testing.T, openRig func(*testing.T) *replayRig, entries
 	t.Helper()
 
 	rig := openRig(t)
-	rig.chat.turn.isRunning = isRunning
+	rig.chat.currentTurn.isRunning = isRunning
 	rig.load(entriesWhile(entries, isRunning))
 	rig.chat.replay()
 	rig.chat.redraw()
 
 	if isRunning {
-		rig.chat.turn.painter.close(status.Cancelled)
+		rig.chat.currentTurn.painter.close(status.Cancelled)
 	}
 
 	return rig.drawn()
@@ -441,7 +441,7 @@ func replayWhileRunning(t *testing.T, entries []replayEntry) string {
 
 	synctest.Test(t, func(t *testing.T) {
 		rig := newReplayRig(t, replayColumns)
-		rig.chat.turn.isRunning = true
+		rig.chat.currentTurn.isRunning = true
 		rig.load(entriesUpToFirstCall(entries))
 		rig.chat.replay()
 
@@ -450,7 +450,7 @@ func replayWhileRunning(t *testing.T, entries []replayEntry) string {
 
 		drawn = rig.drawn()
 
-		rig.chat.turn.painter.close(status.Cancelled)
+		rig.chat.currentTurn.painter.close(status.Cancelled)
 	})
 
 	return drawn
@@ -555,8 +555,8 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 
 			passes[name] = func() string {
 				held := &Harness{mode: caps.NewMode(grantedCaps)}
-				held.turn.isRunning = isRunning
-				held.turn.spinnerFrame = 2
+				held.currentTurn.isRunning = isRunning
+				held.currentTurn.spinnerFrame = 2
 
 				built, err := configFrom(t, "").layout(
 					availableSegments(workspaceMarker, "gpt-5.6-sol", "high", held),
@@ -599,8 +599,8 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 		for name, frame := range frames {
 			passes[fmt.Sprintf("%s at %d columns", name, width)] = func() string {
 				held := &Harness{mode: caps.NewMode(caps.All())}
-				held.turn.isRunning = true
-				held.turn.spinnerFrame = 2
+				held.currentTurn.isRunning = true
+				held.currentTurn.spinnerFrame = 2
 
 				built, err := configFrom(t, "").layout(
 					availableSegments(workspaceMarker, "gpt-5.6-sol", "high", held),
@@ -609,7 +609,7 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				held.layout = built
+				held.segmentLayout = built
 
 				block := input.Block{
 					Top: input.Ruler{

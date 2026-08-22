@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/segment"
+	"crdx.org/io/cmd/oh/style"
 )
 
 type saying struct {
@@ -17,8 +18,8 @@ func (self saying) Render(segment.Context) string {
 }
 
 func offering(text string) segment.Factory {
-	return func(unmarshall segment.Unmarshall) (segment.Instance, error) {
-		if err := unmarshall(&struct{}{}); err != nil {
+	return func(options segment.Options) (segment.Segment, error) {
+		if err := options.Read(&struct{}{}); err != nil {
 			return nil, err
 		}
 
@@ -26,7 +27,9 @@ func offering(text string) segment.Factory {
 	}
 }
 
-func nothing(any) error {
+type noOptions struct{}
+
+func (noOptions) Read(any) error {
 	return nil
 }
 
@@ -45,22 +48,22 @@ func TestEveryPositionIsListedExactlyOnce(t *testing.T) {
 }
 
 func TestASegmentOnOfferIsBuilt(t *testing.T) {
-	set := segment.Set{"model": offering("gpt")}
+	set := segment.Registry{"model": offering("gpt")}
 
-	built, err := set.Build("model", segment.BottomLeft, nothing)
+	built, err := set.Build("model", segment.BottomLeft, noOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if got := built.Render(segment.Context{}); got != "gpt" {
+	if got := style.Plain(built.Render(segment.Context{})); got != "gpt" {
 		t.Errorf("expected the built segment to draw itself, got %q", got)
 	}
 }
 
 func TestASegmentThatIsNotOfferedSaysWhereAndWhatInstead(t *testing.T) {
-	set := segment.Set{"model": offering("gpt"), "scroll": offering("↑ 3")}
+	set := segment.Registry{"model": offering("gpt"), "scroll": offering("↑ 3")}
 
-	_, err := set.Build("weather", segment.BottomCenter, nothing)
+	_, err := set.Build("weather", segment.BottomCenter, noOptions{})
 	if err == nil {
 		t.Fatal("expected an unknown segment to be refused")
 	}
@@ -73,11 +76,11 @@ func TestASegmentThatIsNotOfferedSaysWhereAndWhatInstead(t *testing.T) {
 }
 
 func TestASegmentRefusingItsOptionsSaysWhereTheyWereWritten(t *testing.T) {
-	refuses := func(segment.Unmarshall) (segment.Instance, error) {
+	refuses := func(segment.Options) (segment.Segment, error) {
 		return nil, errors.New("no shouting")
 	}
 
-	_, err := segment.Set{"model": refuses}.Build("model", segment.TopRight, nothing)
+	_, err := segment.Registry{"model": refuses}.Build("model", segment.TopRight, noOptions{})
 	if err == nil {
 		t.Fatal("expected the refusal to be reported")
 	}
@@ -90,9 +93,9 @@ func TestASegmentRefusingItsOptionsSaysWhereTheyWereWritten(t *testing.T) {
 }
 
 func TestTheNamesOnOfferAreListedInOrder(t *testing.T) {
-	set := segment.Set{"model": offering(""), "scroll": offering(""), "modes": offering("")}
+	set := segment.Registry{"model": offering(""), "scroll": offering(""), "modes": offering("")}
 
-	got := strings.Join(set.Names(), ",")
+	got := strings.Join(set.Available(), ",")
 	if want := "model,modes,scroll"; got != want {
 		t.Errorf("expected %q, got %q", want, got)
 	}

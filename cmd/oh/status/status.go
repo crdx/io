@@ -349,7 +349,7 @@ func (self *ToolBlock) run() {
 	self.redraw()
 	self.mutex.Unlock()
 
-	ticker := time.NewTicker(spinner.Activity.Rate())
+	ticker := time.NewTicker(spinner.Activity.RefreshInterval())
 	defer ticker.Stop()
 
 	for {

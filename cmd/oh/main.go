@@ -332,7 +332,7 @@ func run() ([]string, error) {
 		getOnWithItMessage: config.GetOnWithItMessage,
 	}
 
-	chat.layout, err = config.layout(availableSegments(workspaceDir, model, effort, chat))
+	chat.segmentLayout, err = config.layout(availableSegments(workspaceDir, model, effort, chat))
 	if err != nil {
 		return nil, err
 	}
@@ -358,7 +358,7 @@ func run() ([]string, error) {
 		chat.notify(startupEvent(startupElapsed, startup))
 	}
 
-	chat.makeIntroductions(args.message)
+	chat.begin(args.message)
 
 	if chat.restart != nil {
 		return chat.restart, nil

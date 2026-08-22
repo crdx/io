@@ -17,12 +17,12 @@ type state struct {
 	up    bool
 }
 
-func New(unmarshall segment.Unmarshall) (segment.Instance, error) {
+func New(options segment.Options) (segment.Segment, error) {
 	var args struct {
 		Direction string `toml:"direction"`
 	}
 
-	if err := unmarshall(&args); err != nil {
+	if err := options.Read(&args); err != nil {
 		return nil, err
 	}
 
@@ -37,9 +37,9 @@ func New(unmarshall segment.Unmarshall) (segment.Instance, error) {
 }
 
 func (self state) Render(context segment.Context) string {
-	rows := context.Below
+	rows := context.HiddenLinesBelow
 	if self.up {
-		rows = context.Above
+		rows = context.HiddenLinesAbove
 	}
 
 	if rows == 0 {

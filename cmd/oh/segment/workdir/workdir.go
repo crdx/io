@@ -11,7 +11,7 @@ type state struct {
 }
 
 func New(path string) segment.Factory {
-	return func(segment.Unmarshall) (segment.Instance, error) {
+	return func(segment.Options) (segment.Segment, error) {
 		return state{value: pathutil.Abbr(path)}, nil
 	}
 }

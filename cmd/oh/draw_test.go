@@ -268,14 +268,14 @@ func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 
 	call := agent.Event{Kind: agent.ToolCallRequest, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}}
 
-	self.turn = Turn{isRunning: true, painter: self.newPainter(true)}
+	self.currentTurn = Turn{isRunning: true, painter: self.newPainter(true)}
 	self.events = appendTranscript(self.events, call)
-	self.turn.painter.drawEvent(call)
+	self.currentTurn.painter.drawEvent(call)
 
 	self.notifyStopped(notice)
 
-	self.turn.painter.close(status.Cancelled)
-	self.turn = Turn{}
+	self.currentTurn.painter.close(status.Cancelled)
+	self.currentTurn = Turn{}
 	self.screen.End()
 
 	var replayOutput strings.Builder
@@ -473,7 +473,7 @@ func testConversation(t *testing.T, screenOutput *bytes.Buffer) *Harness {
 func completeTurn(self *Harness) {
 	self.start("are you there")
 
-	for report := range self.turn.events {
+	for report := range self.currentTurn.events {
 		self.takeTurn(report)
 	}
 
@@ -524,10 +524,10 @@ func TestAnInterruptedTurnDoesNotSendADesktopNotification(t *testing.T) {
 	self.onTurnFinished = func() { notifications++ }
 
 	self.start("are you there")
-	self.turn.isCancelled = true
-	self.turn.cancel()
+	self.currentTurn.isCancelled = true
+	self.currentTurn.cancel()
 
-	for report := range self.turn.events {
+	for report := range self.currentTurn.events {
 		self.takeTurn(report)
 	}
 
@@ -544,10 +544,10 @@ func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
 	self := testConversation(t, &screenOutput)
 
 	self.start("are you there")
-	self.turn.isCancelled = true
-	self.turn.cancel()
+	self.currentTurn.isCancelled = true
+	self.currentTurn.cancel()
 
-	for report := range self.turn.events {
+	for report := range self.currentTurn.events {
 		self.takeTurn(report)
 	}
 
@@ -610,28 +610,28 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 		screen: output.New(&screenOutput),
 	}
 
-	testConversation.turn = Turn{isRunning: true, painter: testConversation.newPainter(true)}
+	testConversation.currentTurn = Turn{isRunning: true, painter: testConversation.newPainter(true)}
 
 	testConversation.events = []agent.Event{
 		{Kind: agent.UserMessage, Text: "read it"},
 		{Kind: agent.ToolCallRequest, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}},
 	}
 
-	previousPainter := testConversation.turn.painter
+	previousPainter := testConversation.currentTurn.painter
 
 	testConversation.redraw()
 
-	if testConversation.turn.painter == previousPainter {
+	if testConversation.currentTurn.painter == previousPainter {
 		t.Fatal("expected the turn to be given the painter that drew the replay")
 	}
 
-	if testConversation.turn.painter.toolBlock == nil {
+	if testConversation.currentTurn.painter.toolBlock == nil {
 		t.Fatal("expected the unanswered call to be on a block that is open again")
 	}
 
-	testConversation.turn.painter.drawEvent(agent.Event{Kind: agent.ToolCallResult, ID: "1", Name: "read", Took: time.Second})
+	testConversation.currentTurn.painter.drawEvent(agent.Event{Kind: agent.ToolCallResult, ID: "1", Name: "read", Took: time.Second})
 
-	if testConversation.turn.painter.toolBlock != nil {
+	if testConversation.currentTurn.painter.toolBlock != nil {
 		t.Error("expected the block to close once every call had reported")
 	}
 

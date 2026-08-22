@@ -187,8 +187,8 @@ func TestAPathMappedIntoTheShellHomeMustComeFromTheHomeDirectory(t *testing.T) {
 func TestAConfigSayingNothingAboutTheBarTakesTheBuiltInLayout(t *testing.T) {
 	layout := layoutFrom(t, "")
 
-	if got := len(layout[segment.BottomLeft]); got != 5 {
-		t.Errorf("expected five segments along the bottom, got %d", got)
+	if got := len(layout[segment.BottomLeft]); got != 4 {
+		t.Errorf("expected four segments along the bottom, got %d", got)
 	}
 	if got := len(layout[segment.TopRight]); got != 1 {
 		t.Errorf("expected one segment at the top right, got %d", got)
@@ -198,7 +198,7 @@ func TestAConfigSayingNothingAboutTheBarTakesTheBuiltInLayout(t *testing.T) {
 func TestWhatAConfigDoesNotMentionKeepsItsDefault(t *testing.T) {
 	layout := layoutFrom(t, `
 		[bar.bottom]
-		left = [{ segment = "model" }, { segment = "think" }]
+		left = [{ segment = "workdir" }, { segment = "modes" }]
 	`)
 
 	if got := len(layout[segment.BottomLeft]); got != 2 {
@@ -255,7 +255,7 @@ func TestAPlacementGivenOptionsItsSegmentRefusesIsRefused(t *testing.T) {
 func TestAPlacementSettingWhatItsSegmentDoesNotReadIsRefused(t *testing.T) {
 	config := configFrom(t, `
 		[bar.top]
-		center = [{ segment = "model", loudly = true }]
+		center = [{ segment = "workdir", loudly = true }]
 	`)
 
 	if _, err := config.layout(testSegments()); err != nil {
@@ -286,7 +286,7 @@ func TestTheBuiltInDefaultsSetEverySettingThereIs(t *testing.T) {
 	}
 }
 
-func testSegments() segment.Set {
+func testSegments() segment.Registry {
 	held := &Harness{mode: caps.NewMode(caps.Read)}
 
 	return availableSegments("/tmp/somewhere", "gpt-5.6-sol", "high", held)

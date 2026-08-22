@@ -134,7 +134,7 @@ func TestVisual(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	held.layout = built
+	held.segmentLayout = built
 
-	held.makeIntroductions("")
+	held.begin("")
 }

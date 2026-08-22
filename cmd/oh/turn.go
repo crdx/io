@@ -20,9 +20,9 @@ type Turn struct {
 }
 
 type QueuedTurn struct {
-	nextMessage   string // what to ask as soon as an interrupted turn finishes
-	isReplacement bool   // whether an interrupted turn has a replacement
-	isModeChange  bool   // whether changed capabilities should restart an interrupted turn
+	nextMessage   string
+	isReplacement bool
+	isModeChange  bool
 }
 
 type TurnEvent struct {

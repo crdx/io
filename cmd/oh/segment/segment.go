@@ -2,6 +2,7 @@ package segment
 
 import (
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 	"time"
@@ -18,7 +19,14 @@ const (
 	BottomRight
 )
 
-var Positions = []Position{TopLeft, TopCenter, TopRight, BottomLeft, BottomCenter, BottomRight}
+var Positions = []Position{
+	TopLeft,
+	TopCenter,
+	TopRight,
+	BottomLeft,
+	BottomCenter,
+	BottomRight,
+}
 
 var positionNames = map[Position]string{
 	TopLeft:      "top.left",
@@ -34,65 +42,63 @@ func (self Position) String() string {
 }
 
 type Context struct {
-	Above int
-	Below int
+	HiddenLinesAbove int
+	HiddenLinesBelow int
 }
 
-type Instance interface {
+type Segment interface {
 	Render(Context) string
 }
 
+type Options interface {
+	Read(into any) error
+}
+
 type (
-	Unmarshall func(any) error
-	Factory    func(Unmarshall) (Instance, error)
-	Set        map[string]Factory
-	Layout     map[Position][]Instance
+	Factory  func(Options) (Segment, error)
+	Registry map[string]Factory
+	Layout   map[Position][]Segment
 )
 
-func (self Set) Build(name string, position Position, options Unmarshall) (Instance, error) {
-	factory, ok := self[name]
+func (self Registry) Build(name string, position Position, options Options) (Segment, error) {
+	buildSegment, ok := self[name]
 	if !ok {
 		return nil, fmt.Errorf(
 			"%s: there is no segment called %q, only: %s",
-			position, name, strings.Join(self.Names(), ", "),
+			position,
+			name,
+			strings.Join(self.Available(), ", "),
 		)
 	}
 
-	built, err := factory(options)
+	segment, err := buildSegment(options)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s: %w", position, name, err)
 	}
 
-	return built, nil
+	return segment, nil
 }
 
-func (self Set) Names() []string {
-	names := make([]string, 0, len(self))
-	for name := range self {
-		names = append(names, name)
-	}
-
-	slices.Sort(names)
-
-	return names
+func (self Registry) Available() []string {
+	return slices.Sorted(maps.Keys(self))
 }
 
 type Ticker interface {
-	Rate() time.Duration
+	RefreshInterval() time.Duration
 }
 
-func (self Layout) Rate() time.Duration {
+func (self Layout) RefreshInterval() time.Duration {
 	var fastest time.Duration
 
-	for _, position := range Positions {
-		for _, placed := range self[position] {
-			ticker, ok := placed.(Ticker)
+	for _, instances := range self {
+		for _, instance := range instances {
+			ticker, ok := instance.(Ticker)
 			if !ok {
 				continue
 			}
 
-			if rate := ticker.Rate(); rate > 0 && (fastest == 0 || rate < fastest) {
-				fastest = rate
+			if interval := ticker.RefreshInterval(); interval > 0 && (fastest == 0 || interval < fastest) {
+				fastest = interval
 			}
 		}
 	}

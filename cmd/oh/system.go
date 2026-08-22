@@ -20,8 +20,8 @@ const (
 )
 
 var (
-	projectContextNames = []string{"AGENTS.md", "AGENTS.local.md"}
-	harnessTemplate     = template.Must(template.New("harness").Funcs(template.FuncMap{
+	projectContextNames    = []string{"AGENTS.md", "AGENTS.local.md"}
+	harnessContextTemplate = template.Must(template.New("harness").Funcs(template.FuncMap{
 		"background":   background,
 		"filesystem":   filesystem,
 		"filepathJoin": filepath.Join,
@@ -69,7 +69,7 @@ var (
 	`)))
 )
 
-type harnessTemplateData struct {
+type harnessContextTemplateData struct {
 	WorkspaceDir      string
 	SessionName       string
 	TmpDir            string
@@ -175,7 +175,7 @@ func globalContext(file *contextFile) string {
 }
 
 func harnessContext(workspaceDir string, sessionName string, tmpDir string, homeDir string, currentCaps caps.Set, extraPaths pathsConfig) string {
-	data := harnessTemplateData{
+	data := harnessContextTemplateData{
 		WorkspaceDir:      workspaceDir,
 		SessionName:       sessionName,
 		TmpDir:            tmpDir,
@@ -189,7 +189,7 @@ func harnessContext(workspaceDir string, sessionName string, tmpDir string, home
 	}
 
 	var rendered strings.Builder
-	if err := harnessTemplate.Execute(&rendered, data); err != nil {
+	if err := harnessContextTemplate.Execute(&rendered, data); err != nil {
 		panic(err)
 	}
 	return strings.TrimSpace(rendered.String())

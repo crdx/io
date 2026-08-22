@@ -66,7 +66,7 @@ func (self barConfig) entries() map[segment.Position][]toml.Primitive {
 	}
 }
 
-func (self Config) layout(set segment.Set) (segment.Layout, error) {
+func (self Config) layout(registry segment.Registry) (segment.Layout, error) {
 	layout := segment.Layout{}
 
 	for position, entries := range self.Bar.entries() {
@@ -81,9 +81,9 @@ func (self Config) layout(set segment.Set) (segment.Layout, error) {
 				return nil, fmt.Errorf("%s: %w", position, err)
 			}
 
-			read := func(into any) error { return meta.PrimitiveDecode(entry, into) }
+			options := segmentOptions{meta: meta, entry: entry}
 
-			built, err := set.Build(named.Segment, position, read)
+			built, err := registry.Build(named.Segment, position, options)
 			if err != nil {
 				return nil, err
 			}
@@ -93,6 +93,15 @@ func (self Config) layout(set segment.Set) (segment.Layout, error) {
 	}
 
 	return layout, nil
+}
+
+type segmentOptions struct {
+	meta  *toml.MetaData
+	entry toml.Primitive
+}
+
+func (self segmentOptions) Read(into any) error {
+	return self.meta.PrimitiveDecode(self.entry, into)
 }
 
 func (self Config) metaFor(position segment.Position) *toml.MetaData {

@@ -13,7 +13,7 @@ type state struct {
 }
 
 func New(name string, effort string) segment.Factory {
-	return func(segment.Unmarshall) (segment.Instance, error) {
+	return func(segment.Options) (segment.Segment, error) {
 		return state{name: name, effort: short(effort)}, nil
 	}
 }

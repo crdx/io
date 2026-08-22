@@ -10,6 +10,8 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
+var _ segment.Ticker = state{}
+
 type state struct {
 	turn      func() (isRunning bool, frameIndex int)
 	animation spinner.Animation
@@ -17,14 +19,14 @@ type state struct {
 }
 
 func New(turn func() (isRunning bool, frameIndex int)) segment.Factory {
-	return func(unmarshall segment.Unmarshall) (segment.Instance, error) {
+	return func(options segment.Options) (segment.Segment, error) {
 		var args struct {
 			Idle   string        `toml:"idle"`
 			Frames []string      `toml:"frames"`
 			Rate   time.Duration `toml:"rate"`
 		}
 
-		if err := unmarshall(&args); err != nil {
+		if err := options.Read(&args); err != nil {
 			return nil, err
 		}
 
@@ -54,8 +56,8 @@ func New(turn func() (isRunning bool, frameIndex int)) segment.Factory {
 	}
 }
 
-func (self state) Rate() time.Duration {
-	return self.animation.Rate()
+func (self state) RefreshInterval() time.Duration {
+	return self.animation.RefreshInterval()
 }
 
 func (self state) Render(segment.Context) string {

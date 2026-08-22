@@ -12,7 +12,7 @@ type state struct {
 }
 
 func New(getGrantedCaps func() caps.Set, isChordPending func() bool) segment.Factory {
-	return func(segment.Unmarshall) (segment.Instance, error) {
+	return func(segment.Options) (segment.Segment, error) {
 		return state{
 			getGrantedCaps: getGrantedCaps,
 			isChordPending: isChordPending,

@@ -26,8 +26,8 @@ func availableSegments(
 	modelName string,
 	modelEffort string,
 	harness *Harness,
-) segment.Set {
-	return segment.Set{
+) segment.Registry {
+	return segment.Registry{
 		activitySegment: activity.New(harness.turnActivity),
 		modesSegment:    modes.New(harness.grantedCaps, harness.isChordPending),
 		workdirSegment:  workdir.New(workspaceDir),
@@ -39,10 +39,13 @@ func availableSegments(
 func bar(layout segment.Layout, position segment.Position, frame edit.Frame) string {
 	drawn := make([]string, 0, len(layout[position]))
 
-	context := segment.Context{Above: frame.Above, Below: frame.Below}
+	context := segment.Context{
+		HiddenLinesAbove: frame.Above,
+		HiddenLinesBelow: frame.Below,
+	}
 
-	for _, placed := range layout[position] {
-		if text := placed.Render(context); style.Width(text) > 0 {
+	for _, instance := range layout[position] {
+		if text := instance.Render(context); style.Width(text) > 0 {
 			drawn = append(drawn, text)
 		}
 	}
