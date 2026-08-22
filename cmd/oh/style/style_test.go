@@ -65,7 +65,7 @@ func TestReasoningIsItalic(t *testing.T) {
 }
 
 func TestNothingIsPaintedWhereTheScreenIsNotATerminal(t *testing.T) {
-	t.Cleanup(Init(&strings.Builder{})) // anything that is not a file is not a terminal
+	t.Cleanup(Init(&strings.Builder{}))
 
 	if colorEnabled {
 		t.Fatal("expected colour to be off where the screen is not a terminal")

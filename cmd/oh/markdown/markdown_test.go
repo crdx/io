@@ -181,6 +181,19 @@ func TestCodeIsHighlightedWhereTheLanguageIsKnown(t *testing.T) {
 	}
 }
 
+func TestADiffIsPaintedByWhatEachLineDoes(t *testing.T) {
+	for line, want := range map[string]style.Style{
+		"@@ -1,2 +1,2 @@": style.Hunk,
+		"-gone":           style.Deleted,
+		"+here":           style.Inserted,
+		" kept":           style.Block,
+	} {
+		if got := Highlight(line, "diff"); got != want(line) {
+			t.Errorf("%q: got %q, want %q", line, got, want(line))
+		}
+	}
+}
+
 func TestBashCommandNamesAndFirstParametersAreHighlighted(t *testing.T) {
 	for name, test := range map[string]struct {
 		source string

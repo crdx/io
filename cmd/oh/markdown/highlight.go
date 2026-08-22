@@ -425,8 +425,23 @@ func tokenStyle(token chroma.TokenType) style.Style {
 		return style.Operator
 	case chroma.Punctuation:
 		return style.Punctuation
-	case chroma.Text, chroma.Error, chroma.Other, chroma.Generic:
+	case chroma.Generic:
+		return generic(token)
+	case chroma.Text, chroma.Error, chroma.Other:
 		return style.Block
+	}
+
+	return style.Block
+}
+
+func generic(token chroma.TokenType) style.Style {
+	switch token {
+	case chroma.GenericInserted:
+		return style.Inserted
+	case chroma.GenericDeleted:
+		return style.Deleted
+	case chroma.GenericHeading, chroma.GenericSubheading:
+		return style.Hunk
 	}
 
 	return style.Block
