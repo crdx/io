@@ -1,4 +1,4 @@
-package line
+package edit
 
 import (
 	"path/filepath"

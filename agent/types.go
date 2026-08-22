@@ -89,7 +89,7 @@ const (
 // Subject and Note lie along the call's line, left to right, after the name of the tool that the
 // event carries rather than this struct:
 //
-//	read cmd/oh/line/render.go in the workspace
+//	read cmd/oh/edit/render.go in the workspace
 //	└┬─┘ └─────────┬─────────┘ └──────┬───────┘
 //	 │             │                  └─ Note, what qualifies the subject
 //	 │             └─ Subject, what the call is about

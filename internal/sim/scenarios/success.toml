@@ -31,7 +31,7 @@ say = "Found it. Reading the renderer now."
 
 [[turn.call]]
 name = "read"
-arguments = '{"path":"cmd/oh/line/render.go"}'
+arguments = '{"path":"cmd/oh/edit/render.go"}'
 
 [[turn]]
 say = """

@@ -1,4 +1,4 @@
-package line
+package edit
 
 import (
 	"crdx.org/io/cmd/oh/width"

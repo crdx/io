@@ -1,4 +1,7 @@
-package line
+// Package edit is the line being typed: the buffer under it, the history behind it, what each
+// keypress amounts to, and how the text lays out at a given width. It draws none of it, and hands
+// out a Frame for line to draw.
+package edit
 
 import (
 	"strings"

@@ -12,8 +12,8 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/key"
-	"crdx.org/io/cmd/oh/line"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/spinner"
 	"crdx.org/io/cmd/oh/status"
@@ -48,8 +48,8 @@ type Harness struct {
 const historyLimit = 1000
 
 func (self *Harness) makeIntroductions(initialMessage string) {
-	history := line.NewHistory(historyPath(), historyLimit)
-	input := line.NewInput(history)
+	history := edit.NewHistory(historyPath(), historyLimit)
+	input := edit.NewInput(history)
 
 	restore, err := tty.Raw(os.Stdin, os.Stdout)
 	if err != nil {
@@ -107,7 +107,7 @@ func (self *Harness) makeIntroductions(initialMessage string) {
 	}
 }
 
-func (self *Harness) apply(input *line.Input, history *line.History, keypress key.Key) bool {
+func (self *Harness) apply(input *edit.Input, history *edit.History, keypress key.Key) bool {
 	switch keypress.Code {
 	case key.FocusIn:
 		self.terminalFocused = true
@@ -118,19 +118,19 @@ func (self *Harness) apply(input *line.Input, history *line.History, keypress ke
 	}
 
 	switch input.Apply(keypress, self.turn.isRunning) {
-	case line.Accept:
+	case edit.Accept:
 		self.acceptInput(input, history)
 
-	case line.Continue:
+	case edit.Continue:
 		self.submitInput(input, history, self.getOnWithItMessage)
 
-	case line.Cancel:
+	case edit.Cancel:
 		self.cancelTurn()
 
-	case line.Quit:
+	case edit.Quit:
 		return false
 
-	case line.Restart:
+	case edit.Restart:
 		if self.turn.isRunning {
 			break
 		}
@@ -140,16 +140,16 @@ func (self *Harness) apply(input *line.Input, history *line.History, keypress ke
 
 		return false
 
-	case line.Write:
+	case edit.Write:
 		self.toggleCapability(caps.Write)
 
-	case line.Shell:
+	case edit.Shell:
 		self.toggleCapability(caps.Shell)
 
-	case line.Git:
+	case edit.Git:
 		self.toggleCapability(caps.Git)
 
-	case line.Background:
+	case edit.Background:
 		if self.mode.Current().Has(caps.Background) {
 			names, err := self.processes.Disable()
 			if err == nil {
@@ -165,17 +165,17 @@ func (self *Harness) apply(input *line.Input, history *line.History, keypress ke
 			self.toggleCapability(caps.Background)
 		}
 
-	case line.Drawn:
+	case edit.Drawn:
 	}
 
 	return true
 }
 
-func (self *Harness) acceptInput(input *line.Input, history *line.History) {
+func (self *Harness) acceptInput(input *edit.Input, history *edit.History) {
 	self.submitInput(input, history, strings.TrimSpace(input.Text()))
 }
 
-func (self *Harness) submitInput(input *line.Input, history *line.History, message string) {
+func (self *Harness) submitInput(input *edit.Input, history *edit.History, message string) {
 	history.Add(message)
 	input.Reset()
 
@@ -234,7 +234,7 @@ func (self *Harness) interruptTurn() {
 	self.turn.cancel()
 }
 
-func (self *Harness) show(input *line.Input) {
+func (self *Harness) show(input *edit.Input) {
 	columns := self.screen.Columns()
 	frame := input.Frame(columns)
 
@@ -265,7 +265,7 @@ func scrollLabel(arrow string, rows int) string {
 	return fmt.Sprintf("%s %d", arrow, rows)
 }
 
-func (self *Harness) plainly(history *line.History, initialMessage string) {
+func (self *Harness) plainly(history *edit.History, initialMessage string) {
 	if initialMessage != "" {
 		self.ask(history, initialMessage)
 	}
@@ -283,7 +283,7 @@ func (self *Harness) plainly(history *line.History, initialMessage string) {
 	}
 }
 
-func (self *Harness) ask(history *line.History, message string) {
+func (self *Harness) ask(history *edit.History, message string) {
 	history.Add(message)
 	self.start(message)
 

@@ -9,8 +9,8 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/key"
-	"crdx.org/io/cmd/oh/line"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
@@ -18,7 +18,7 @@ import (
 
 func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 	self := &Harness{screen: output.New(&bytes.Buffer{})}
-	input := line.NewInput(nil)
+	input := edit.NewInput(nil)
 
 	defer func() {
 		if panicValue := recover(); panicValue != nil {
@@ -33,7 +33,7 @@ func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 
 func TestTerminalFocusEventsAreTracked(t *testing.T) {
 	self := &Harness{terminalFocused: true}
-	input := line.NewInput(nil)
+	input := edit.NewInput(nil)
 
 	self.apply(input, nil, key.Key{Code: key.FocusOut})
 	if self.terminalFocused {
@@ -48,7 +48,7 @@ func TestTerminalFocusEventsAreTracked(t *testing.T) {
 
 func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 	self := &Harness{screen: output.New(&bytes.Buffer{})}
-	input := line.NewInput(nil)
+	input := edit.NewInput(nil)
 
 	keypress := key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
 
@@ -81,8 +81,8 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	self.getOnWithItMessage = "carry on"
-	history := line.NewHistory("", historyLimit)
-	input := line.NewInput(history)
+	history := edit.NewHistory("", historyLimit)
+	input := edit.NewInput(history)
 
 	self.apply(input, history, key.Key{Code: key.Enter})
 	if self.turn.isRunning {
@@ -110,8 +110,8 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 
 func TestAcceptedInputCanImmediatelyBeRecalled(t *testing.T) {
 	self := &Harness{turn: Turn{isRunning: true, cancel: func() {}}}
-	history := line.NewHistory("", historyLimit)
-	input := line.NewInput(history)
+	history := edit.NewHistory("", historyLimit)
+	input := edit.NewInput(history)
 
 	for _, value := range "latest" {
 		self.apply(input, history, key.Key{Code: key.Rune, Value: value})
@@ -127,8 +127,8 @@ func TestAcceptedInputCanImmediatelyBeRecalled(t *testing.T) {
 func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
-	history := line.NewHistory("", historyLimit)
-	input := line.NewInput(history)
+	history := edit.NewHistory("", historyLimit)
+	input := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.turn.events
@@ -177,8 +177,8 @@ func workspaceNowReadOnly() string {
 func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
-	history := line.NewHistory("", historyLimit)
-	input := line.NewInput(history)
+	history := edit.NewHistory("", historyLimit)
+	input := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.turn.events
@@ -303,8 +303,8 @@ func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) 
 	self := &Harness{
 		turn: Turn{isRunning: true, events: make(chan TurnEvent), cancel: func() {}},
 	}
-	history := line.NewHistory("", historyLimit)
-	input := line.NewInput(history)
+	history := edit.NewHistory("", historyLimit)
+	input := edit.NewInput(history)
 
 	for _, value := range "dfd" {
 		self.apply(input, history, key.Key{Code: key.Rune, Value: value})
@@ -339,8 +339,8 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 		log:    log,
 		mode:   caps.NewMode(caps.Read | caps.Write),
 	}
-	history := line.NewHistory("", historyLimit)
-	input := line.NewInput(history)
+	history := edit.NewHistory("", historyLimit)
+	input := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.turn.events
@@ -432,8 +432,8 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
-	history := line.NewHistory("", historyLimit)
-	input := line.NewInput(history)
+	history := edit.NewHistory("", historyLimit)
+	input := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.turn.events
@@ -466,7 +466,7 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 
 func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
 	self := &Harness{screen: output.New(&bytes.Buffer{})}
-	input := line.NewInput(nil)
+	input := edit.NewInput(nil)
 
 	input.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
 

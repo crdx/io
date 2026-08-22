@@ -19,12 +19,12 @@ say = "Let me read the renderer."
 
 [[turn.call]]
 name = "read"
-arguments = '{"path":"cmd/oh/line/render.go"}'
+arguments = '{"path":"cmd/oh/edit/render.go"}'
 
 [[turn]]
 say = """
-The prompt is built in cmd/oh/line/render.go:4:9, and screen.go holds the spinner beside it. \
-There is nothing about it in README.md, and nothing at all in cmd/oh/line/missing.go, which is \
+The prompt is built in cmd/oh/edit/render.go:4:9, and screen.go holds the spinner beside it. \
+There is nothing about it in README.md, and nothing at all in cmd/oh/edit/missing.go, which is \
 where I looked first. settings.toml names the workspace and target.txt is the file everything \
 else works on.
 """
