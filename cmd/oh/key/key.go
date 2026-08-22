@@ -82,10 +82,6 @@ func (self *Decoder) Next() (Key, error) {
 	}
 
 	if first == escapeByte {
-		if self.reader.Buffered() == 0 {
-			return Key{Code: Escape}, nil
-		}
-
 		return self.sequence()
 	}
 

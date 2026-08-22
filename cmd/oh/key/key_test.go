@@ -70,10 +70,12 @@ func TestControlCharactersStillCarryTheirModifier(t *testing.T) {
 	}
 }
 
-func TestABareEscapeIsAnEscape(t *testing.T) {
-	got := decode(t, "\x1b")
+func TestAnEscapeOpensASequenceAndTheKeyboardProtocolReportsTheKey(t *testing.T) {
+	if got := decode(t, "\x1b"); len(got) != 0 {
+		t.Errorf("expected a lone escape to report nothing, got %v", got)
+	}
 
-	if len(got) != 1 || got[0] != (Key{Code: Escape}) {
+	if got := decode(t, "\x1b[27u"); len(got) != 1 || got[0] != (Key{Code: Escape}) {
 		t.Errorf("expected an escape, got %v", got)
 	}
 }
