@@ -101,13 +101,7 @@ func matchModel(query string, choices []modelChoice) (modelChoice, error) {
 		return modelChoice{}, errors.New("no models are known: run with -u to fetch the model list")
 	}
 
-	var matches []modelChoice
-
-	for _, matching := range matchTiers {
-		if matches = matchingModels(query, choices, matching); len(matches) > 0 {
-			break
-		}
-	}
+	matches := rankedModels(query, choices)
 
 	switch len(matches) {
 	case 0:
@@ -121,6 +115,16 @@ func matchModel(query string, choices []modelChoice) (modelChoice, error) {
 		}
 		return modelChoice{}, fmt.Errorf("model %q is ambiguous; matches: %s", query, strings.Join(names, ", "))
 	}
+}
+
+func rankedModels(query string, choices []modelChoice) []modelChoice {
+	for _, matching := range matchTiers {
+		if matches := matchingModels(query, choices, matching); len(matches) > 0 {
+			return matches
+		}
+	}
+
+	return nil
 }
 
 func matchingModels(

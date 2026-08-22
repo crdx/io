@@ -69,6 +69,11 @@ Environment:
 `
 
 func main() {
+	if kind, word, wanted := completionRequest(os.Args[1:]); wanted {
+		writeCompletions(os.Stdout, kind, word)
+		return
+	}
+
 	sandbox.Init()
 
 	style.Init(os.Stdout)

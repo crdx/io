@@ -1,0 +1,160 @@
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"os"
+	"path/filepath"
+	"slices"
+	"testing"
+)
+
+func writeStoredSession(t *testing.T, directory string, name string, started string) {
+	t.Helper()
+
+	if err := os.MkdirAll(filepath.Join(directory, name), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	head := fmt.Sprintf(`{"kind":"head","time":%q,"id":%q,"name":%q}`+"\n", started, name, name)
+	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), []byte(head), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCompletionRequestReadsTheKindAndWord(t *testing.T) {
+	kind, word, wanted := completionRequest([]string{"--complete", "model", "gpt"})
+	if !wanted || kind != "model" || word != "gpt" {
+		t.Errorf("got %q %q %v", kind, word, wanted)
+	}
+
+	kind, word, wanted = completionRequest([]string{"--complete", "option"})
+	if !wanted || kind != "option" || word != "" {
+		t.Errorf("got %q %q %v", kind, word, wanted)
+	}
+
+	if _, _, wanted := completionRequest([]string{"--complete"}); wanted {
+		t.Error("expected a bare --complete to ask for nothing")
+	}
+
+	if _, _, wanted := completionRequest([]string{"-r", "perky-jaguar"}); wanted {
+		t.Error("expected ordinary arguments to ask for nothing")
+	}
+}
+
+func TestOptionCompletionsComeFromTheUsage(t *testing.T) {
+	options := usageOptions(usage)
+
+	for _, wanted := range []string{"-r", "--resume", "-m", "--model", "-h", "--help"} {
+		if !slices.Contains(options, wanted) {
+			t.Errorf("expected %q among %v", wanted, options)
+		}
+	}
+
+	for _, unwanted := range []string{"-", "--complete", "Options:"} {
+		if slices.Contains(options, unwanted) {
+			t.Errorf("did not expect %q among %v", unwanted, options)
+		}
+	}
+}
+
+func TestNothingTypedOffersTheLongOptions(t *testing.T) {
+	options := []string{"--caps", "--help", "-c", "-h"}
+
+	if got := optionCompletions("", options); !slices.Equal(got, []string{"--caps", "--help"}) {
+		t.Errorf("got %v", got)
+	}
+
+	if got := optionCompletions("-", options); !slices.Equal(got, options) {
+		t.Errorf("got %v", got)
+	}
+
+	if got := optionCompletions("-c", options); !slices.Equal(got, []string{"-c"}) {
+		t.Errorf("got %v", got)
+	}
+}
+
+func TestModelCompletionsAreWholeSelections(t *testing.T) {
+	choices := []modelChoice{
+		{provider: "openai", model: "gpt-5", effortLevels: []string{"low", "high"}},
+		{provider: "anthropic", model: "claude-sonnet-5", effortLevels: []string{"none", "high"}},
+	}
+
+	selections := modelCompletions("sonnet", choices)
+	if len(selections) != 2 || selections[0] != "anthropic/claude-sonnet-5@none" {
+		t.Errorf("got %v", selections)
+	}
+
+	selections = modelCompletions("gpt-5@h", choices)
+	if len(selections) != 1 || selections[0] != "openai/gpt-5@high" {
+		t.Errorf("got %v", selections)
+	}
+
+	if selections := modelCompletions("", choices); len(selections) != 4 {
+		t.Errorf("expected every selection, got %v", selections)
+	}
+}
+
+func TestEffortCompletionsAreBareLevels(t *testing.T) {
+	choices := []modelChoice{
+		{provider: "openai", model: "gpt-5", effortLevels: []string{"low", "high"}},
+		{provider: "anthropic", model: "claude-sonnet-5", effortLevels: []string{"none", "high"}},
+	}
+
+	if efforts := effortCompletions("sonnet@", choices); !slices.Equal(efforts, []string{"none", "high"}) {
+		t.Errorf("got %v", efforts)
+	}
+
+	if efforts := effortCompletions("sonnet@h", choices); !slices.Equal(efforts, []string{"high"}) {
+		t.Errorf("got %v", efforts)
+	}
+
+	if efforts := effortCompletions("sonnet@of", choices); !slices.Equal(efforts, []string{"none"}) {
+		t.Errorf("got %v", efforts)
+	}
+
+	if efforts := effortCompletions("zzz@", choices); len(efforts) != 0 {
+		t.Errorf("expected no efforts for an unmatched model, got %v", efforts)
+	}
+}
+
+func TestCapabilityCompletionsGrowOneAtATime(t *testing.T) {
+	sets := capsCompletions()
+	if sets[0] != "r" || sets[len(sets)-1] != "rxwgb" {
+		t.Errorf("got %v", sets)
+	}
+}
+
+func TestWritingCompletionsLinesThemUp(t *testing.T) {
+	var out bytes.Buffer
+	writeCompletions(&out, completeCaps, "rxw")
+
+	if out.String() != "rxw\nrxwg\nrxwgb\n" {
+		t.Errorf("got %q", out.String())
+	}
+
+	out.Reset()
+	writeCompletions(&out, "nonsense", "")
+	if out.Len() != 0 {
+		t.Errorf("got %q", out.String())
+	}
+}
+
+func TestSessionCompletionsNameTheNewestFirst(t *testing.T) {
+	directory := t.TempDir()
+	writeStoredSession(t, directory, "older-badger", "2024-01-01T00:00:00Z")
+	writeStoredSession(t, directory, "newer-jaguar", "2025-01-01T00:00:00Z")
+
+	names := sessionNames(directory)
+	if !slices.Equal(names, []string{"newer-jaguar", "older-badger"}) {
+		t.Errorf("got %v", names)
+	}
+
+	if names := withPrefix("old", names); !slices.Equal(names, []string{"older-badger"}) {
+		t.Errorf("got %v", names)
+	}
+
+	if names := sessionNames(filepath.Join(directory, "missing")); len(names) > 0 {
+		t.Errorf("expected no names for a missing directory, got %v", names)
+	}
+}
