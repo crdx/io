@@ -48,63 +48,6 @@ func short(effort string) string {
 	}
 }
 
-const (
-	leadingPadding  = 1
-	trailingPadding = 2
-)
-
-func rule(width int, left string, right string) string {
-	return styledRule(width, left, style.Scrolled, right, style.Subtle)
-}
-
-func bannerRule(width int, banner string, scrolled string) string {
-	if labelWidth(banner, leadingPadding)+labelWidth(scrolled, trailingPadding) > width {
-		scrolled = ""
-	}
-
-	return styledRule(width, banner, nil, scrolled, style.Scrolled)
-}
-
-func styledRule(
-	width int,
-	left string,
-	leftStyle style.Style,
-	right string,
-	rightStyle style.Style,
-) string {
-	head := ""
-
-	if cells := labelWidth(left, leadingPadding); cells > 0 && cells+labelWidth(right, trailingPadding) <= width {
-		if leftStyle != nil {
-			left = leftStyle(left)
-		}
-
-		head = style.Rule(strings.Repeat("─", leadingPadding)) + " " + left + " "
-		width -= cells
-	}
-
-	return head + ruleTo(width, right, rightStyle)
-}
-
-func labelWidth(label string, edgePadding int) int {
-	if label == "" {
-		return 0
-	}
-
-	return style.Width(label) + edgePadding + 2
-}
-
-func ruleTo(width int, label string, paint style.Style) string {
-	cells := labelWidth(label, trailingPadding)
-	if cells == 0 || cells > width {
-		return style.Rule(strings.Repeat("─", max(width, 0)))
-	}
-
-	return style.Rule(strings.Repeat("─", width-cells)) +
-		" " + paint(label) + " " +
-		style.Rule(strings.Repeat("─", trailingPadding))
-}
-
 func modes(tools []tool.Tool, grantedCaps caps.Set, isPending bool) string {
 	return offeredCapability(caps.Read, anyToolReadsOnly(tools), style.Read, isPending) +
 		offeredCapability(caps.Shell, grantedCaps.Has(caps.Shell), style.Exec, isPending) +

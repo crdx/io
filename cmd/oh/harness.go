@@ -13,11 +13,13 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/edit"
+	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/spinner"
 	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/internal/sandbox"
 )
@@ -49,7 +51,7 @@ const historyLimit = 1000
 
 func (self *Harness) makeIntroductions(initialMessage string) {
 	history := edit.NewHistory(historyPath(), historyLimit)
-	input := edit.NewInput(history)
+	editor := edit.NewInput(history)
 
 	restore, err := tty.Raw(os.Stdin, os.Stdout)
 	if err != nil {
@@ -67,7 +69,7 @@ func (self *Harness) makeIntroductions(initialMessage string) {
 	frames := time.NewTicker(spinner.Activity.Rate())
 	defer frames.Stop()
 
-	self.show(input)
+	self.show(editor)
 
 	if initialMessage != "" {
 		history.Add(initialMessage)
@@ -81,7 +83,7 @@ func (self *Harness) makeIntroductions(initialMessage string) {
 				return
 			}
 
-			if !self.apply(input, history, keypress) {
+			if !self.apply(editor, history, keypress) {
 				return
 			}
 
@@ -103,11 +105,11 @@ func (self *Harness) makeIntroductions(initialMessage string) {
 			self.turn.spinnerFrame++
 		}
 
-		self.show(input)
+		self.show(editor)
 	}
 }
 
-func (self *Harness) apply(input *edit.Input, history *edit.History, keypress key.Key) bool {
+func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress key.Key) bool {
 	switch keypress.Code {
 	case key.FocusIn:
 		self.terminalFocused = true
@@ -117,12 +119,12 @@ func (self *Harness) apply(input *edit.Input, history *edit.History, keypress ke
 		return true
 	}
 
-	switch input.Apply(keypress, self.turn.isRunning) {
+	switch editor.Apply(keypress, self.turn.isRunning) {
 	case edit.Accept:
-		self.acceptInput(input, history)
+		self.acceptInput(editor, history)
 
 	case edit.Continue:
-		self.submitInput(input, history, self.getOnWithItMessage)
+		self.submitInput(editor, history, self.getOnWithItMessage)
 
 	case edit.Cancel:
 		self.cancelTurn()
@@ -171,13 +173,13 @@ func (self *Harness) apply(input *edit.Input, history *edit.History, keypress ke
 	return true
 }
 
-func (self *Harness) acceptInput(input *edit.Input, history *edit.History) {
-	self.submitInput(input, history, strings.TrimSpace(input.Text()))
+func (self *Harness) acceptInput(editor *edit.Input, history *edit.History) {
+	self.submitInput(editor, history, strings.TrimSpace(editor.Text()))
 }
 
-func (self *Harness) submitInput(input *edit.Input, history *edit.History, message string) {
+func (self *Harness) submitInput(editor *edit.Input, history *edit.History, message string) {
 	history.Add(message)
-	input.Reset()
+	editor.Reset()
 
 	if message == "" {
 		return
@@ -234,27 +236,24 @@ func (self *Harness) interruptTurn() {
 	self.turn.cancel()
 }
 
-func (self *Harness) show(input *edit.Input) {
+func (self *Harness) show(editor *edit.Input) {
 	columns := self.screen.Columns()
-	frame := input.Frame(columns)
+	frame := editor.Frame(columns)
 
-	framedRows := append([]string{
-		rule(columns, scrollLabel("↑", frame.Above), ""),
-	}, frame.Rows...)
+	block := input.Block{
+		Top:   input.Ruler{Left: scrollLabel("↑", frame.Above)},
+		Input: frame,
+		Bottom: input.Ruler{
+			Left: self.label(
+				editor.IsPending(),
+				self.turn.isRunning,
+				self.turn.spinnerFrame,
+			),
+			Right: scrollLabel("↓", frame.Below),
+		},
+	}
 
-	inputLabel := self.label(
-		input.IsPending(),
-		self.turn.isRunning,
-		self.turn.spinnerFrame,
-	)
-
-	framedRows = append(framedRows, bannerRule(
-		columns,
-		inputLabel,
-		scrollLabel("↓", frame.Below),
-	))
-
-	self.screen.Footer(framedRows, frame.Row+1, frame.Column)
+	self.screen.Footer(block.Rows(columns))
 }
 
 func scrollLabel(arrow string, rows int) string {
@@ -262,7 +261,7 @@ func scrollLabel(arrow string, rows int) string {
 		return ""
 	}
 
-	return fmt.Sprintf("%s %d", arrow, rows)
+	return style.Scrolled(fmt.Sprintf("%s %d", arrow, rows))
 }
 
 func (self *Harness) plainly(history *edit.History, initialMessage string) {

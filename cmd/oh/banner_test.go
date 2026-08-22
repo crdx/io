@@ -26,26 +26,6 @@ func TestTheBannerStartsWithAPermanentActivitySegment(t *testing.T) {
 	}
 }
 
-func TestTheBannerSitsAtTheLeftOfTheBottomRule(t *testing.T) {
-	got := style.Plain(bannerRule(40, "⠶ ─ io ─ gpt", "↓ 2"))
-	if !strings.HasPrefix(got, "─ ⠶ ─ io ─ gpt ") {
-		t.Errorf("expected the banner at the left, got %q", got)
-	}
-	if !strings.HasSuffix(got, " ↓ 2 ──") {
-		t.Errorf("expected the scroll marker at the right, got %q", got)
-	}
-}
-
-func TestTheBottomRuleKeepsTheBannerBeforeItsScrollMarker(t *testing.T) {
-	got := style.Plain(bannerRule(20, "⠶ ─ io ─ gpt", "↓ 200"))
-	if !strings.Contains(got, "⠶ ─ io ─ gpt") {
-		t.Errorf("expected the banner to survive, got %q", got)
-	}
-	if strings.Contains(got, "200") {
-		t.Errorf("expected the scroll marker to give way, got %q", got)
-	}
-}
-
 func TestAccessComesFromTheToolsRatherThanTheirNames(t *testing.T) {
 	looker := tool.ReadOnly(tool.Implement(
 		tool.Definition{
@@ -145,50 +125,6 @@ func TestAWaitingPrefixUnderlinesEveryLetter(t *testing.T) {
 
 	if style.Width(got) != len(caps.AllFlags) {
 		t.Errorf("expected the underline to cost no cells, got %d", style.Width(got))
-	}
-}
-
-func TestTheRuleIsExactlyAsWideAsTheScreen(t *testing.T) {
-	for _, width := range []int{0, 1, 40, 100} {
-		for _, label := range []string{"", "gpt ⠶ 6 tools ⠶ io", strings.Repeat("wide", 40)} {
-			if got := style.Width(rule(width, "", label)); got != width {
-				t.Errorf("expected a rule of %d columns, got %d", width, got)
-			}
-		}
-	}
-}
-
-func TestTheLabelSitsAtTheRightHandEndOfTheRule(t *testing.T) {
-	ruleText := rule(20, "", "here")
-
-	if want := " " + style.Subtle("here") + " " + style.Rule("──"); !strings.HasSuffix(ruleText, want) {
-		t.Errorf("expected %q to end in %q", ruleText, want)
-	}
-}
-
-func TestARuleWithBothLabelsIsExactlyAsWideAsTheScreen(t *testing.T) {
-	for _, width := range []int{0, 1, 20, 40, 100} {
-		if got := style.Width(rule(width, "↑ 12", "gpt ⠶ io")); got != width {
-			t.Errorf("expected a rule of %d columns, got %d", width, got)
-		}
-	}
-}
-
-func TestTheLeftLabelIsDroppedFirst(t *testing.T) {
-	ruleText := rule(18, "↑ 12", "gpt ⠶ io")
-
-	if strings.Contains(ruleText, "12") {
-		t.Errorf("expected the left label to be dropped, got %q", ruleText)
-	}
-
-	if !strings.Contains(ruleText, "gpt ⠶ io") {
-		t.Errorf("expected the right label to be kept, got %q", ruleText)
-	}
-}
-
-func TestALabelTooWideForTheScreenIsDropped(t *testing.T) {
-	if ruleText := rule(5, "", "far too long"); strings.Contains(ruleText, "far") {
-		t.Errorf("expected the label to be dropped, got %q", ruleText)
 	}
 }
 

@@ -18,7 +18,7 @@ import (
 
 func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 	self := &Harness{screen: output.New(&bytes.Buffer{})}
-	input := edit.NewInput(nil)
+	editor := edit.NewInput(nil)
 
 	defer func() {
 		if panicValue := recover(); panicValue != nil {
@@ -26,21 +26,21 @@ func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 		}
 	}()
 
-	if !self.apply(input, nil, key.Key{Code: key.Escape}) {
+	if !self.apply(editor, nil, key.Key{Code: key.Escape}) {
 		t.Error("expected escape at rest to leave the conversation open")
 	}
 }
 
 func TestTerminalFocusEventsAreTracked(t *testing.T) {
 	self := &Harness{terminalFocused: true}
-	input := edit.NewInput(nil)
+	editor := edit.NewInput(nil)
 
-	self.apply(input, nil, key.Key{Code: key.FocusOut})
+	self.apply(editor, nil, key.Key{Code: key.FocusOut})
 	if self.terminalFocused {
 		t.Error("expected focus-out to mark the terminal unfocused")
 	}
 
-	self.apply(input, nil, key.Key{Code: key.FocusIn})
+	self.apply(editor, nil, key.Key{Code: key.FocusIn})
 	if !self.terminalFocused {
 		t.Error("expected focus-in to mark the terminal focused")
 	}
@@ -48,7 +48,7 @@ func TestTerminalFocusEventsAreTracked(t *testing.T) {
 
 func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 	self := &Harness{screen: output.New(&bytes.Buffer{})}
-	input := edit.NewInput(nil)
+	editor := edit.NewInput(nil)
 
 	keypress := key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
 
@@ -56,7 +56,7 @@ func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 
 	self.turn = Turn{isRunning: true, cancel: func() { stopped = true }}
 
-	if !self.apply(input, nil, keypress) {
+	if !self.apply(editor, nil, keypress) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
 	}
 
@@ -66,13 +66,13 @@ func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 
 	self.turn = Turn{}
 
-	if self.apply(input, nil, keypress) {
+	if self.apply(editor, nil, keypress) {
 		t.Error("expected ctrl+d at rest to be the way out")
 	}
 
-	input.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
+	editor.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
 
-	if !self.apply(input, nil, keypress) {
+	if !self.apply(editor, nil, keypress) {
 		t.Error("expected ctrl+d on a line with something on it to leave the harness running")
 	}
 }
@@ -82,14 +82,14 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 	self := testConversation(t, &screenOutput)
 	self.getOnWithItMessage = "carry on"
 	history := edit.NewHistory("", historyLimit)
-	input := edit.NewInput(history)
+	editor := edit.NewInput(history)
 
-	self.apply(input, history, key.Key{Code: key.Enter})
+	self.apply(editor, history, key.Key{Code: key.Enter})
 	if self.turn.isRunning {
 		t.Error("expected the first return to do nothing")
 	}
 
-	self.apply(input, history, key.Key{Code: key.Enter})
+	self.apply(editor, history, key.Key{Code: key.Enter})
 	if !self.turn.isRunning {
 		t.Fatal("expected the second return to start a turn")
 	}
@@ -111,16 +111,16 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 func TestAcceptedInputCanImmediatelyBeRecalled(t *testing.T) {
 	self := &Harness{turn: Turn{isRunning: true, cancel: func() {}}}
 	history := edit.NewHistory("", historyLimit)
-	input := edit.NewInput(history)
+	editor := edit.NewInput(history)
 
 	for _, value := range "latest" {
-		self.apply(input, history, key.Key{Code: key.Rune, Value: value})
+		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
 	}
-	self.apply(input, history, key.Key{Code: key.Enter})
-	self.apply(input, history, key.Key{Code: key.Up})
+	self.apply(editor, history, key.Key{Code: key.Enter})
+	self.apply(editor, history, key.Key{Code: key.Up})
 
-	if input.Text() != "latest" {
-		t.Errorf("expected the latest input to be recalled, got %q", input.Text())
+	if editor.Text() != "latest" {
+		t.Errorf("expected the latest input to be recalled, got %q", editor.Text())
 	}
 }
 
@@ -128,13 +128,13 @@ func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	history := edit.NewHistory("", historyLimit)
-	input := edit.NewInput(history)
+	editor := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.turn.events
 
-	self.apply(input, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
-	self.apply(input, history, key.Key{Code: key.Rune, Value: 'w'})
+	self.apply(editor, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
+	self.apply(editor, history, key.Key{Code: key.Rune, Value: 'w'})
 
 	if !self.turn.isCancelled {
 		t.Fatal("expected the capability change to interrupt the turn")
@@ -178,17 +178,17 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	history := edit.NewHistory("", historyLimit)
-	input := edit.NewInput(history)
+	editor := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.turn.events
 
-	self.apply(input, history, key.Key{Code: key.Enter})
+	self.apply(editor, history, key.Key{Code: key.Enter})
 	if self.turn.isCancelled {
 		t.Error("expected the first return to leave the turn running")
 	}
 
-	self.apply(input, history, key.Key{Code: key.Enter})
+	self.apply(editor, history, key.Key{Code: key.Enter})
 	if !self.turn.isCancelled {
 		t.Error("expected the second return to cancel the turn")
 	}
@@ -304,15 +304,15 @@ func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) 
 		turn: Turn{isRunning: true, events: make(chan TurnEvent), cancel: func() {}},
 	}
 	history := edit.NewHistory("", historyLimit)
-	input := edit.NewInput(history)
+	editor := edit.NewInput(history)
 
 	for _, value := range "dfd" {
-		self.apply(input, history, key.Key{Code: key.Rune, Value: value})
+		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
 	}
-	self.apply(input, history, key.Key{Code: key.Enter})
+	self.apply(editor, history, key.Key{Code: key.Enter})
 
-	if input.Text() != "" {
-		t.Fatalf("expected accepted editor input to disappear, got %q", input.Text())
+	if editor.Text() != "" {
+		t.Fatalf("expected accepted editor input to disappear, got %q", editor.Text())
 	}
 	if !self.turn.isRunning {
 		t.Fatal("expected cancelled turn to remain running until its event channel closes")
@@ -340,15 +340,15 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 		mode:   caps.NewMode(caps.Read | caps.Write),
 	}
 	history := edit.NewHistory("", historyLimit)
-	input := edit.NewInput(history)
+	editor := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.turn.events
 
 	for _, value := range "follow up" {
-		self.apply(input, history, key.Key{Code: key.Rune, Value: value})
+		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
 	}
-	self.apply(input, history, key.Key{Code: key.Enter})
+	self.apply(editor, history, key.Key{Code: key.Enter})
 
 	for report := range interruptedEvents {
 		self.takeTurn(report)
@@ -433,16 +433,16 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	history := edit.NewHistory("", historyLimit)
-	input := edit.NewInput(history)
+	editor := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.turn.events
 
 	for _, value := range "follow up" {
-		self.apply(input, history, key.Key{Code: key.Rune, Value: value})
+		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
 	}
-	self.apply(input, history, key.Key{Code: key.Enter})
-	self.apply(input, history, key.Key{Code: key.Escape})
+	self.apply(editor, history, key.Key{Code: key.Enter})
+	self.apply(editor, history, key.Key{Code: key.Escape})
 
 	for report := range interruptedEvents {
 		self.takeTurn(report)
@@ -466,15 +466,15 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 
 func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
 	self := &Harness{screen: output.New(&bytes.Buffer{})}
-	input := edit.NewInput(nil)
+	editor := edit.NewInput(nil)
 
-	input.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
+	editor.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
 
 	stopped := false
 
 	self.turn = Turn{isRunning: true, cancel: func() { stopped = true }}
 
-	if !self.apply(input, nil, key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}) {
+	if !self.apply(editor, nil, key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
 	}
 
@@ -482,8 +482,8 @@ func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
 		t.Error("expected the turn to have been cancelled")
 	}
 
-	if input.Text() != "a" {
-		t.Errorf("expected what was typed to be left alone, got %q", input.Text())
+	if editor.Text() != "a" {
+		t.Errorf("expected what was typed to be left alone, got %q", editor.Text())
 	}
 }
 
