@@ -39,6 +39,7 @@ linters:
     - predeclared
     - protogetter
     - recvcheck
+    - revive
     - tagalign
     - tagliatelle
     - testpackage
@@ -54,9 +55,6 @@ linters:
         linters:
           - gosmopolitan
   settings:
-    revive:
-      rules:
-        - name: exported
     staticcheck:
       checks:
         - all
