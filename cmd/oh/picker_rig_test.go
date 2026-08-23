@@ -10,8 +10,8 @@ import (
 	"crdx.org/io/session"
 
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/cmd/ohs/picker"
 )
 
 var prompts = []string{

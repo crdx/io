@@ -14,24 +14,29 @@ exec = []
 home = []
 
 [bar.top]
-left = []
-center = []
+left = [
+    { segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
+    { segment = "turn-elapsed" },
+]
+center = [
+    { segment = "context-usage" },
+]
 right = [
+    { segment = "working-directory" },
+    { segment = "git-branch" },
     { segment = "scroll-overflow", direction = "up" }
 ]
 
 [bar.bottom]
 left = [
-    { segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
     { segment = "mode-toggle" },
-    { segment = "working-directory" },
-    { segment = "active-model" },
-    { segment = "context-usage" },
 ]
 center = [
-    { segment = "turn-elapsed" },
+    { segment = "active-model" },
 ]
 right = [
+    { segment = "turn-count" },
+    { segment = "last-tps" },
     { segment = "current-session" },
     { segment = "current-time", format = "15:04" },
     { segment = "scroll-overflow", direction = "down" }

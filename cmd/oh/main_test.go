@@ -124,6 +124,14 @@ func TestTheModelListIsAskedForOnItsOwn(t *testing.T) {
 	}
 }
 
+func TestTheSessionPickerIsAskedForOnItsOwn(t *testing.T) {
+	for _, argument := range []string{"--sessions", "-s"} {
+		if !bind(t, argument).Sessions {
+			t.Errorf("expected the session picker to be asked for by %s", argument)
+		}
+	}
+}
+
 func TestWhateverIsLeftOverIsTheFirstThingSaid(t *testing.T) {
 	parsedOptions := parseOptions(t, "why", "does", "the", "spinner", "stutter")
 

@@ -55,6 +55,7 @@ Usage:
 Options:
     -d, --workspace <dir>                  Set working directory and project scope
     -r, --resume <session>                 Resume the saved session by name
+    -s, --sessions                         Choose a saved session to resume
     -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
     -c, --caps <flags>                     Capabilities: rxwgb (read, exec, write, git, bg) [default: rxw]
     -l, --list                             List the available models, then exit
@@ -101,6 +102,7 @@ type InputOpts struct {
 	Message      []string `docopt:"<prompt>"`
 	WorkspaceDir string   `docopt:"--workspace"`
 	Session      string   `docopt:"--resume"`
+	Sessions     bool     `docopt:"--sessions"`
 	Model        string   `docopt:"--model"`
 	Caps         string   `docopt:"--caps"`
 	List         bool     `docopt:"--list"`
@@ -169,6 +171,18 @@ func run() ([]string, error) {
 
 	if inputArgs.Update {
 		return nil, updateModels(os.Stdout, os.Getenv(endpointVariable), modelCachePath())
+	}
+
+	if inputArgs.Sessions {
+		sessionName, err := chooseStoredSession(sessionsDir(), os.Stdin, os.Stdout)
+		if err != nil {
+			return nil, err
+		}
+		if sessionName == "" {
+			return nil, nil
+		}
+
+		return []string{"-r", sessionName}, nil
 	}
 
 	args, err := inputArgs.parse()

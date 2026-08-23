@@ -2,14 +2,13 @@ package main
 
 import (
 	"encoding/json"
-	"path/filepath"
 	"testing"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/session"
 )
 
-func TestSessionsComeFromOhsOwnJournalParsing(t *testing.T) {
+func TestSessionsComeFromJournalParsing(t *testing.T) {
 	directory := t.TempDir()
 	meta := json.RawMessage(`{"workspaceDir":"/home/alice/project","model":"gpt"}`)
 	writer, err := session.Create(directory, meta)
@@ -38,12 +37,8 @@ func TestSessionsComeFromOhsOwnJournalParsing(t *testing.T) {
 	}
 }
 
-func TestSessionsUseOhsStateDirectory(t *testing.T) {
-	root := t.TempDir()
-	t.Setenv("XDG_STATE_HOME", root)
-
-	want := filepath.Join(root, "org.crdx", "oh", "sessions")
-	if got := sessionsDir(); got != want {
-		t.Errorf("got %q, want %q", got, want)
+func TestChoosingWithoutStoredSessionsFails(t *testing.T) {
+	if _, err := chooseStoredSession(t.TempDir(), nil, nil); err == nil {
+		t.Error("expected an empty session list to fail")
 	}
 }
