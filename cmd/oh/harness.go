@@ -12,12 +12,12 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
-	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/internal/sandbox"
@@ -391,7 +391,7 @@ func (self *Harness) replay() {
 			return
 		}
 
-		painter.close(status.Cancelled)
+		painter.close(dynamic.Cancelled)
 
 		self.screen.End()
 	})
@@ -512,7 +512,7 @@ func (self *Harness) finish() {
 	self.flush(&self.currentTurn.pendingEvents)
 	self.storeItems()
 	self.showStorageWarnings()
-	self.currentTurn.painter.close(status.Cancelled)
+	self.currentTurn.painter.close(dynamic.Cancelled)
 	self.screen.End()
 
 	self.currentTurn.isRunning = false

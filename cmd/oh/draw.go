@@ -8,10 +8,10 @@ import (
 	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/tool"
 
+	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/skill"
-	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 )
@@ -23,10 +23,10 @@ const (
 
 type Painter struct {
 	screen    *output.Screen
-	toolBlock *status.ToolBlock // the open block of tool calls
-	rows      map[string]int    // which row of the block a call is being shown on
-	answer    strings.Builder   // the answer so far, which is rendered again on every delta
-	reasoning strings.Builder   // the reasoning so far, which is rendered again on every delta
+	toolBlock *dynamic.Block  // the open block of tool calls
+	rows      map[string]int  // which row of the block a call is being shown on
+	answer    strings.Builder // the answer so far, which is rendered again on every delta
+	reasoning strings.Builder // the reasoning so far, which is rendered again on every delta
 
 	isStale   bool // whether streamed prose outgrew what the screen can repair
 	isRunning bool // whether drawing is happening as events arrive
@@ -54,8 +54,8 @@ func (self *Painter) describe(event agent.Event) agent.Rendering {
 	return shown
 }
 
-func (self *Painter) label(event agent.Event, shown agent.Rendering) status.Label {
-	label := status.Label{
+func (self *Painter) label(event agent.Event, shown agent.Rendering) dynamic.Label {
+	label := dynamic.Label{
 		Name:      event.Name,
 		Subject:   shown.Subject,
 		Highlight: shown.Highlight,
@@ -129,7 +129,7 @@ func (self *Painter) drawEvent(event agent.Event) {
 
 	switch event.Kind {
 	case agent.UserMessage:
-		self.close(status.Cancelled)
+		self.close(dynamic.Cancelled)
 		self.screen.Blank()
 		self.screen.Line(renderSubmittedMessage(event.Text, self.screen.Columns()))
 		self.screen.End()
@@ -151,7 +151,8 @@ func (self *Painter) drawEvent(event agent.Event) {
 
 	case agent.ToolCallRequest:
 		if self.toolBlock == nil {
-			self.toolBlock = self.screen.Status()
+			self.toolBlock = dynamic.NewBlock(self.screen.Refresh)
+			self.screen.Open(self.toolBlock)
 			self.rows = map[string]int{}
 		}
 
@@ -161,11 +162,10 @@ func (self *Painter) drawEvent(event agent.Event) {
 		self.mark(event)
 
 	case agent.Startup, agent.HarnessMessage:
-		self.close(status.Cancelled)
 		self.screen.Line(self.render(event))
 
 	case agent.Failure:
-		self.close(status.Cancelled)
+		self.close(dynamic.Cancelled)
 		self.screen.Line(style.Failure(event.Text))
 	}
 }
@@ -185,7 +185,7 @@ func (self *Painter) mark(event agent.Event) {
 	self.toolBlock.MarkWithStats(index, outcome(event.Failed), event.Took, event.Text, event.Stats)
 
 	if len(self.rows) == 0 {
-		self.close(status.Done)
+		self.close(dynamic.Done)
 	}
 }
 
@@ -230,12 +230,12 @@ func noticeStyle(failed bool) style.Style {
 	return style.Stopped
 }
 
-func outcome(failed bool) status.State {
+func outcome(failed bool) dynamic.State {
 	if failed {
-		return status.Failed
+		return dynamic.Failed
 	}
 
-	return status.Done
+	return dynamic.Done
 }
 
 func renderReasoning(thought string, columns int) []string {
@@ -246,11 +246,13 @@ func renderReasoning(thought string, columns int) []string {
 	return width.Wrap(style.Reasoning(stripped), columns)
 }
 
-func (self *Painter) close(state status.State) {
+func (self *Painter) close(state dynamic.State) {
 	if self.toolBlock != nil {
 		self.toolBlock.Close(state)
 		self.toolBlock = nil
 		self.rows = nil
+
+		self.screen.Seal()
 	}
 }
 
@@ -259,5 +261,7 @@ func (self *Painter) stop() {
 		self.toolBlock.Stop()
 		self.toolBlock = nil
 		self.rows = nil
+
+		self.screen.Seal()
 	}
 }

@@ -1,7 +1,6 @@
-package status
+package dynamic
 
 import (
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -141,30 +140,12 @@ func TestStatsUseTheirExpectedStyles(t *testing.T) {
 	}
 }
 
-func testBlock() (*ToolBlock, *strings.Builder) {
-	output := &strings.Builder{}
-
-	self := &ToolBlock{
-		print:   func(text string) { output.WriteString(text) },
-		overlay: func(text string, _ int) { output.WriteString(text) },
-		isLive:  true,
-		columns: wide,
-		stop:    make(chan struct{}),
-	}
-
-	return self, output
+func testBlock() *Block {
+	return &Block{refresh: func() {}, stop: make(chan struct{})}
 }
 
 func callLabel(name string, subject string) Label {
 	return Label{Name: name, Subject: subject, ReadOnly: true}
-}
-
-var rise = regexp.MustCompile(`^\x1b\[\d+A`)
-
-func rowsFromOutput(output *strings.Builder) []string {
-	text := rise.ReplaceAllString(output.String(), "")
-
-	return strings.Split(strings.ReplaceAll(text, "\r\x1b[K", ""), "\n")
 }
 
 func TestOnlyTheFocusedPartOfArgumentsIsPainted(t *testing.T) {
@@ -301,53 +282,51 @@ func TestAPathInTheDetailCanBeFocused(t *testing.T) {
 }
 
 func TestARowSaysNothingOfACallUntilItHasBeenGoingAWhile(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("read", "main.go"))
 
-	if got := output.String(); got != style.Call("read")+" "+style.Subject("main.go") {
+	if got := block.Rows(wide)[0]; got != style.Call("read")+" "+style.Subject("main.go") {
 		t.Errorf("expected the call and nothing else, got %q", got)
 	}
 }
 
 func TestARowIsColouredByWhetherItsCallWrites(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(Label{Name: "write", Subject: "main.go"})
 
-	if got := output.String(); got != style.Change("write")+" "+style.Subject("main.go") {
+	if got := block.Rows(wide)[0]; got != style.Change("write")+" "+style.Subject("main.go") {
 		t.Errorf("expected a call that writes to be painted as one, got %q", got)
 	}
 }
 
 func TestAQuickCallIsMarkedWithoutATime(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("read", "main.go"))
 
-	output.Reset()
 	block.MarkWithStats(0, Done, 500*time.Millisecond, "", nil)
 
-	if got := rowsFromOutput(output)[0]; !strings.Contains(got, "✓") || strings.Contains(got, "s") {
+	if got := block.Rows(wide)[0]; !strings.Contains(got, "✓") || strings.Contains(got, "s") {
 		t.Errorf("expected a mark and no time, got %q", got)
 	}
 }
 
 func TestACallWorthWaitingForSaysHowLongItTook(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("read", "main.go"))
 
-	output.Reset()
 	block.MarkWithStats(0, Done, 5*time.Second, "", nil)
 
-	if got := rowsFromOutput(output)[0]; !strings.Contains(got, style.Spinner("5s")) {
+	if got := block.Rows(wide)[0]; !strings.Contains(got, style.Spinner("5s")) {
 		t.Errorf("expected the time it took, got %q", got)
 	}
 }
 
 func TestRunningTimerUsesWholeSecondGranularity(t *testing.T) {
-	block := &ToolBlock{isRevealed: true}
+	block := &Block{isRevealed: true}
 	item := row{state: Running, startedAt: time.Now().Add(-5500 * time.Millisecond)}
 
 	if got := style.Plain(block.outcome(item)); got != "✦· 5s" {
@@ -356,16 +335,15 @@ func TestRunningTimerUsesWholeSecondGranularity(t *testing.T) {
 }
 
 func TestACallThatFailedIsMarkedApartFromOneThatDidNot(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("read", "main.go"))
 	block.Add(callLabel("read", "nowhere.go"))
 
 	block.MarkWithStats(0, Done, 0, "", nil)
-	output.Reset()
 	block.MarkWithStats(1, Failed, 0, "", nil)
 
-	rows := rowsFromOutput(output)
+	rows := block.Rows(wide)
 
 	if !strings.Contains(rows[0], "✓") || !strings.Contains(rows[1], "✗") {
 		t.Errorf("expected a tick and a cross, got %q", rows)
@@ -373,55 +351,51 @@ func TestACallThatFailedIsMarkedApartFromOneThatDidNot(t *testing.T) {
 }
 
 func TestACallThatFailedSaysWhy(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("write", "main.go"))
 
-	output.Reset()
 	block.MarkWithStats(0, Failed, 0, "permission denied", nil)
 
-	if got := rowsFromOutput(output)[0]; !strings.Contains(got, style.Failure("permission denied")) {
+	if got := block.Rows(wide)[0]; !strings.Contains(got, style.Failure("permission denied")) {
 		t.Errorf("expected the reason in the colour of a failure, got %q", got)
 	}
 }
 
 func TestAReasonIsPutOnTheOneRow(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("bash", "make"))
 
-	output.Reset()
 	block.MarkWithStats(0, Failed, 0, "no rule to make target\n\tstop.\r", nil)
 
-	if got := rowsFromOutput(output)[0]; strings.ContainsAny(got, "\n\r\t") {
+	if got := block.Rows(wide)[0]; strings.ContainsAny(got, "\n\r\t") {
 		t.Errorf("expected one row, got %q", got)
 	}
 }
 
 func TestAReasonTakesTheRoomTheCallDoesNotWant(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("read", "main.go"))
 
 	reason := strings.Repeat("a", wide/2+10)
 
-	output.Reset()
 	block.MarkWithStats(0, Failed, 0, reason, nil)
 
-	if got := rowsFromOutput(output)[0]; !strings.Contains(got, reason) {
+	if got := block.Rows(wide)[0]; !strings.Contains(got, reason) {
 		t.Errorf("expected the whole reason, got %q", got)
 	}
 }
 
 func TestALongReasonLeavesTheCallItIsAbout(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("write", "main.go"))
 
-	output.Reset()
 	block.MarkWithStats(0, Failed, 0, strings.Repeat("wordy ", wide), nil)
 
-	row := rowsFromOutput(output)[0]
+	row := block.Rows(wide)[0]
 
 	if style.Width(row) > wide {
 		t.Errorf("expected the row to fit in %d columns, got %d in %q", wide, style.Width(row), row)
@@ -433,29 +407,27 @@ func TestALongReasonLeavesTheCallItIsAbout(t *testing.T) {
 }
 
 func TestAReasonIsKeptOnlyForAFailure(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("read", "main.go"))
 
-	output.Reset()
 	block.MarkWithStats(0, Done, 0, "read 40 lines", nil)
 
-	if got := rowsFromOutput(output)[0]; strings.Contains(got, "read 40 lines") {
+	if got := block.Rows(wide)[0]; strings.Contains(got, "read 40 lines") {
 		t.Errorf("expected nothing beside the mark, got %q", got)
 	}
 }
 
 func TestClosingTheBlockMarksWhateverWasStillRunning(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("read", "main.go"))
 	block.Add(callLabel("grep", "spinner"))
 	block.MarkWithStats(0, Done, 0, "", nil)
 
-	output.Reset()
 	block.Close(Cancelled)
 
-	rows := rowsFromOutput(output)
+	rows := block.Rows(wide)
 
 	if !strings.Contains(rows[0], "✓") {
 		t.Errorf("expected the call that finished to keep its tick, got %q", rows[0])
@@ -467,28 +439,26 @@ func TestClosingTheBlockMarksWhateverWasStillRunning(t *testing.T) {
 }
 
 func TestARowIsMarkedOnlyOnce(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("read", "main.go"))
 	block.MarkWithStats(0, Failed, 0, "", nil)
 
-	output.Reset()
 	block.MarkWithStats(0, Done, 0, "", nil)
 
-	if got := output.String(); got != "" {
-		t.Errorf("expected nothing to be written again, got %q", got)
+	if got := block.Rows(wide)[0]; !strings.Contains(got, "✗") {
+		t.Errorf("expected the first mark to stand, got %q", got)
 	}
 }
 
 func TestALabelIsCutToLeaveRoomForTheOutcome(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("grep", strings.Repeat("x", wide)))
 
-	output.Reset()
 	block.MarkWithStats(0, Done, 3*time.Second, "", nil)
 
-	for _, row := range rowsFromOutput(output) {
+	for _, row := range block.Rows(wide) {
 		if style.Width(row) > wide {
 			t.Errorf("expected the row to fit %d columns, got %d in %q", wide, style.Width(row), row)
 		}
@@ -496,14 +466,13 @@ func TestALabelIsCutToLeaveRoomForTheOutcome(t *testing.T) {
 }
 
 func TestALabelTakesTheRoomATimeWouldHaveTakenWhereNoTimeIsShown(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("bash", strings.Repeat("x", wide)))
 
-	output.Reset()
 	block.MarkWithStats(0, Done, time.Millisecond, "", nil)
 
-	for _, row := range rowsFromOutput(output) {
+	for _, row := range block.Rows(wide) {
 		if style.Width(row) != wide-edgeGuard {
 			t.Errorf(
 				"expected the row to leave its %d-column edge guard, got width %d in %q",
@@ -514,14 +483,13 @@ func TestALabelTakesTheRoomATimeWouldHaveTakenWhereNoTimeIsShown(t *testing.T) {
 }
 
 func TestALabelGivesRoomBackWhenTheTimeAppears(t *testing.T) {
-	block, output := testBlock()
+	block := testBlock()
 
 	block.Add(callLabel("bash", strings.Repeat("x", wide)))
 
-	output.Reset()
 	block.MarkWithStats(0, Done, 3*time.Second, "", nil)
 
-	for _, row := range rowsFromOutput(output) {
+	for _, row := range block.Rows(wide) {
 		if style.Width(row) != wide-edgeGuard {
 			t.Errorf(
 				"expected the row to leave its %d-column edge guard, got width %d in %q",
@@ -532,19 +500,18 @@ func TestALabelGivesRoomBackWhenTheTimeAppears(t *testing.T) {
 }
 
 func TestACompletedOutcomeIsKeptBackFromTheTerminalEdge(t *testing.T) {
-	block, output := testBlock()
-	block.columns = 67
+	block := testBlock()
+	const narrow = 67
 
 	block.Add(callLabel("grep", "RESOLVE_UNIX|resolve_unix|unix.*socket|Landlock|landlock"))
 
-	output.Reset()
 	block.MarkWithStats(0, Done, 7420*time.Millisecond, "", nil)
 
-	row := rowsFromOutput(output)[0]
+	row := block.Rows(narrow)[0]
 	if got := style.Plain(row); !strings.HasSuffix(got, "✓ 7.4s") {
 		t.Errorf("expected the complete outcome at the end, got %q", got)
 	}
-	if got := style.Width(row); got > block.columns-edgeGuard {
+	if got := style.Width(row); got > narrow-edgeGuard {
 		t.Errorf("expected %d guarded columns at the edge, got width %d in %q", edgeGuard, got, row)
 	}
 }
@@ -567,5 +534,44 @@ func TestFormatDuration(t *testing.T) {
 		if len(want) > durationWidth {
 			t.Errorf("expected %q to fit the column of %d", want, durationWidth)
 		}
+	}
+}
+
+func TestARowTooNarrowForWhatACallMeasuredKeepsItsLabelAndItsMark(t *testing.T) {
+	const tiny = 12
+
+	block := testBlock()
+
+	index := block.Add(callLabel("bash", "if [[ -f one ]]; then echo one; fi"))
+	block.MarkWithStats(index, Done, time.Second, "", &tool.Stats{
+		Kind:       tool.StatsOutput,
+		Lines:      900,
+		Bytes:      2000,
+		TotalBytes: 225000,
+		Truncated:  true,
+	})
+
+	row := block.Rows(tiny)[index]
+
+	if got := style.Width(row); got > tiny {
+		t.Errorf("expected the row to fit %d columns, got %d in %q", tiny, got, row)
+	}
+
+	plain := style.Plain(row)
+	if !strings.HasPrefix(plain, "bash") || !strings.HasSuffix(plain, "✓") {
+		t.Errorf("expected the call and its mark, got %q", plain)
+	}
+}
+
+func TestARowWideEnoughKeepsEverythingACallMeasured(t *testing.T) {
+	block := testBlock()
+
+	index := block.Add(callLabel("bash", "echo one"))
+	block.MarkWithStats(index, Done, time.Second, "", &tool.Stats{
+		Kind: tool.StatsOutput, Lines: 1, Bytes: 4, TotalBytes: 4,
+	})
+
+	if plain := style.Plain(block.Rows(wide)[index]); !strings.HasSuffix(plain, "✓ 1L ~1t") {
+		t.Errorf("expected everything the call measured, got %q", plain)
 	}
 }

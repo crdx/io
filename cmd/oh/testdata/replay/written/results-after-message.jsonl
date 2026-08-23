@@ -1,0 +1,9 @@
+{"event": {"kind": "user_message", "text": "look at both of those and tell me what changed"}}
+{"event": {"kind": "model_message", "text": "Taking them together."}}
+{"event": {"kind": "tool_call_request", "id": "call_1", "name": "read", "arguments": "{\"path\":\"screen.go\"}", "render": "screen.go", "read_only": true}}
+{"event": {"kind": "tool_call_request", "id": "call_2", "name": "grep", "arguments": "{\"pattern\":\"spinner\",\"glob\":\"*.go\"}", "render": "spinner", "detail": "*.go", "read_only": true}}
+{"event": {"kind": "harness_message", "text": "Background processes killed (sleep)."}}
+{"event": {"kind": "tool_call_result", "text": "package output\n", "id": "call_1", "name": "read", "took": 0, "stats": {"kind": "read", "lines": 3, "bytes": 40, "total_bytes": 40}}}
+{"event": {"kind": "harness_message", "text": "the conversation could not be stored: no space left on device", "failed": true}}
+{"event": {"kind": "tool_call_result", "text": "screen.go:3:var spinner, footer, cursor string\n", "id": "call_2", "name": "grep", "took": 0, "stats": {"kind": "output", "lines": 1, "bytes": 44, "total_bytes": 44}}}
+{"event": {"kind": "model_message", "text": "Both still mention the spinner."}}

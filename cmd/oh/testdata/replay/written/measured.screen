@@ -153,6 +153,11 @@ n
 
 
 
+
+
+
+
+
 H
 e
 r
@@ -359,11 +364,11 @@ e
 One of each,
 then.
 
- ✓ 3L ~100t
+$ COUNT… ✓
 ls ✓ 2L
 … ✓ ~1.6Kt
 … ✓ +12 −5
-✓ 7L+ ~100t
+grep ^f… ✓
 ✓ 3L ~100t
 
 Here is a

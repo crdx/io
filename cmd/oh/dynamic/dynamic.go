@@ -1,5 +1,4 @@
-// Package status draws the rows a set of tool calls is shown on while they run.
-package status
+package dynamic
 
 import (
 	"fmt"
@@ -23,10 +22,8 @@ const (
 	bytesPerMegabyte = 1 << 20
 )
 
-// State is a call.
 type State int
 
-// What a row can say about a call: it is running, it finished, it failed, or it never got anywhere.
 const (
 	Running State = iota
 	Done
@@ -34,21 +31,18 @@ const (
 	Cancelled
 )
 
-// Label is what a row says: the name of a call, its subject, and whatever qualifies that.
 type Label struct {
 	Name            string
 	Subject         string
 	Highlight       tool.Highlight
 	Qualifier       string
-	ReadOnly        bool        // whether the call changes nothing, which decides the colour its name is in
-	NameStyle       style.Style // an explicit style for a tool with its own prompt
-	Accent          string      // another part of the subject set apart from the rest
-	AccentStyle     style.Style // how the accent is painted
-	renderedSubject string      // syntax-highlighted subject retained from the complete source
+	ReadOnly        bool
+	NameStyle       style.Style
+	Accent          string
+	AccentStyle     style.Style
+	renderedSubject string
 }
 
-// Elide cuts a label to the room it has, so the row stays on the line it was printed on. What
-// qualifies the subject is the first to go, being the least of it.
 func (self Label) Elide(room int) Label {
 	self.renderedSubject = ""
 	self.Name = elide(self.Name, room)
@@ -223,12 +217,10 @@ type row struct {
 	stats     *tool.Stats
 }
 
-// ToolBlock displays and redraws a group of tool-call rows. Nothing else may print until it closes.
-type ToolBlock struct {
-	print   func(string)
-	overlay func(string, int) // redraws existing rows
-	isLive  bool              // whether rows may be redrawn
-	columns int
+// Block is a group of tool-call rows. It says what its rows look like and asks to be drawn again
+// when they change; where it sits on the screen is not its business.
+type Block struct {
+	refresh func() // asks the screen to draw the live sequence again
 
 	mutex      sync.Mutex // guards the changing rows
 	rows       []row
@@ -239,13 +231,10 @@ type ToolBlock struct {
 	stopWait sync.WaitGroup // waits for the ticker to end
 }
 
-// New opens an empty block. Non-live blocks ignore redraws.
-func New(print func(string), overlay func(string, int), isLive bool, columns int) *ToolBlock {
-	self := &ToolBlock{
-		print:   print,
-		overlay: overlay,
-		isLive:  isLive,
-		columns: columns,
+// NewBlock opens an empty block, which asks refresh to draw it whenever its rows change.
+func NewBlock(refresh func()) *Block {
+	self := &Block{
+		refresh: refresh,
 		stop:    make(chan struct{}),
 	}
 
@@ -257,52 +246,57 @@ func New(print func(string), overlay func(string, int), isLive bool, columns int
 }
 
 // Add puts a call on the block and hands back the row it went on.
-func (self *ToolBlock) Add(label Label) int {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
+func (self *Block) Add(label Label) int {
+	index := 0
 
-	self.rows = append(self.rows, row{label: label, startedAt: time.Now()})
-
-	index := len(self.rows) - 1
-
-	if index > 0 {
-		self.print("\n")
-	}
-
-	self.print(self.line(self.rows[index]))
+	self.change(func() {
+		self.rows = append(self.rows, row{label: label, startedAt: time.Now()})
+		index = len(self.rows) - 1
+	})
 
 	return index
 }
 
+// Rows is what the block looks like at the given width.
+func (self *Block) Rows(columns int) []string {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	rows := make([]string, len(self.rows))
+
+	for at, item := range self.rows {
+		rows[at] = self.line(item, columns)
+	}
+
+	return rows
+}
+
 // Mark completes a call and removes its spinner. Failure text is flattened to one line.
-func (self *ToolBlock) Mark(index int, state State, took time.Duration, reason string) {
+func (self *Block) Mark(index int, state State, took time.Duration, reason string) {
 	self.MarkWithStats(index, state, took, reason, nil)
 }
 
 // MarkWithStats marks a call and includes measurements made by its tool.
-func (self *ToolBlock) MarkWithStats(
+func (self *Block) MarkWithStats(
 	index int,
 	state State,
 	took time.Duration,
 	reason string,
 	stats *tool.Stats,
 ) {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
+	self.change(func() {
+		if index < 0 || index >= len(self.rows) || self.rows[index].state != Running {
+			return
+		}
 
-	if index < 0 || index >= len(self.rows) || self.rows[index].state != Running {
-		return
-	}
+		self.rows[index].state = state
+		self.rows[index].took = took
+		self.rows[index].stats = stats
 
-	self.rows[index].state = state
-	self.rows[index].took = took
-	self.rows[index].stats = stats
-
-	if state == Failed {
-		self.rows[index].failure = collapse(reason)
-	}
-
-	self.redraw()
+		if state == Failed {
+			self.rows[index].failure = collapse(reason)
+		}
+	})
 }
 
 func collapse(text string) string {
@@ -311,31 +305,36 @@ func collapse(text string) string {
 
 // Stop ends the block where it stands, saying nothing more about it. What was drawn is left on the
 // screen for whatever is about to take its place.
-func (self *ToolBlock) Stop() {
+func (self *Block) Stop() {
 	close(self.stop)
 	self.stopWait.Wait()
 }
 
 // Close ends the block, marking anything still running with what became of it.
-func (self *ToolBlock) Close(state State) {
+func (self *Block) Close(state State) {
 	self.Stop()
 
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-
-	for i := range self.rows {
-		if self.rows[i].state == Running {
-			self.rows[i].state = state
-			self.rows[i].took = time.Since(self.rows[i].startedAt)
+	self.change(func() {
+		for i := range self.rows {
+			if self.rows[i].state == Running {
+				self.rows[i].state = state
+				self.rows[i].took = time.Since(self.rows[i].startedAt)
+			}
 		}
-	}
 
-	self.isRevealed = false
-
-	self.redraw()
+		self.isRevealed = false
+	})
 }
 
-func (self *ToolBlock) run() {
+func (self *Block) change(mutate func()) {
+	self.mutex.Lock()
+	mutate()
+	self.mutex.Unlock()
+
+	self.refresh()
+}
+
+func (self *Block) run() {
 	defer self.stopWait.Done()
 
 	select {
@@ -344,10 +343,7 @@ func (self *ToolBlock) run() {
 	case <-time.After(reveal):
 	}
 
-	self.mutex.Lock()
-	self.isRevealed = true
-	self.redraw()
-	self.mutex.Unlock()
+	self.change(func() { self.isRevealed = true })
 
 	ticker := time.NewTicker(spinner.Activity.RefreshInterval())
 	defer ticker.Stop()
@@ -357,31 +353,9 @@ func (self *ToolBlock) run() {
 		case <-self.stop:
 			return
 		case <-ticker.C:
-			self.mutex.Lock()
-			self.frame++
-			self.redraw()
-			self.mutex.Unlock()
+			self.change(func() { self.frame++ })
 		}
 	}
-}
-
-func (self *ToolBlock) redraw() {
-	if !self.isLive || len(self.rows) == 0 {
-		return
-	}
-
-	lines := make([]string, len(self.rows))
-
-	for i, item := range self.rows {
-		lines[i] = "\r\x1b[K" + self.line(item)
-	}
-
-	up := ""
-	if len(self.rows) > 1 {
-		up = fmt.Sprintf("\x1b[%dA", len(self.rows)-1)
-	}
-
-	self.overlay(up+strings.Join(lines, "\n"), style.Width(lines[len(lines)-1]))
 }
 
 const (
@@ -389,14 +363,14 @@ const (
 	edgeGuard    = 2
 )
 
-func (self *ToolBlock) line(item row) string {
-	outcome := self.outcome(item)
+func (self *Block) line(item row, columns int) string {
+	outcome := self.fittedOutcome(item, columns)
 
 	label := item.label
 	failure := item.failure
 
-	if self.columns > 0 {
-		room := self.columns - edgeGuard - style.Width(outcome) - outcomeSpacing(outcome)
+	if columns > 0 {
+		room := columns - edgeGuard - style.Width(outcome) - outcomeSpacing(outcome)
 
 		if failure != "" {
 			spare := max(room-label.width()-1, room/failureShare)
@@ -426,17 +400,39 @@ func outcomeSpacing(outcome string) int {
 	return 1
 }
 
-func (self *ToolBlock) outcome(item row) string {
-	if item.state == Running {
-		if !self.isRevealed {
-			return ""
-		}
+func (self *Block) fittedOutcome(item row, columns int) string {
+	outcome := self.outcome(item)
 
-		elapsed := time.Since(item.startedAt).Truncate(time.Second)
-		return outcomeText(style.Spinner(spinner.Activity.Frame(self.frame)), elapsed, nil)
+	if columns <= 0 || style.Width(outcome)+edgeGuard <= columns {
+		return outcome
 	}
 
-	return outcomeText(glyph(item.state), item.took, item.stats)
+	if mark := self.mark(item); style.Width(mark)+edgeGuard <= columns {
+		return mark
+	}
+
+	return ""
+}
+
+func (self *Block) outcome(item row) string {
+	if item.state == Running {
+		elapsed := time.Since(item.startedAt).Truncate(time.Second)
+		return outcomeText(self.mark(item), elapsed, nil)
+	}
+
+	return outcomeText(self.mark(item), item.took, item.stats)
+}
+
+func (self *Block) mark(item row) string {
+	if item.state != Running {
+		return glyph(item.state)
+	}
+
+	if !self.isRevealed {
+		return ""
+	}
+
+	return style.Spinner(spinner.Activity.Frame(self.frame))
 }
 
 func outcomeText(mark string, took time.Duration, stats *tool.Stats) string {

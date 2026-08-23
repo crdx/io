@@ -1,14 +1,14 @@
-package status_test
+package dynamic_test
 
 import (
 	"testing"
 
-	"crdx.org/io/cmd/oh/status"
+	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/style"
 )
 
-func label() status.Label {
-	return status.Label{Name: "grep", Subject: "hello", Qualifier: "in internal"}
+func label() dynamic.Label {
+	return dynamic.Label{Name: "grep", Subject: "hello", Qualifier: "in internal"}
 }
 
 func check(t *testing.T, room int, name string, subject string, qualifier string) {
@@ -47,7 +47,7 @@ func TestTheNameIsTheLastToGo(t *testing.T) {
 }
 
 func TestALabelWithNothingQualifyingItIsUnaffected(t *testing.T) {
-	elidedLabel := status.Label{Name: "ls", Subject: "internal"}.Elide(80)
+	elidedLabel := dynamic.Label{Name: "ls", Subject: "internal"}.Elide(80)
 
 	if elidedLabel.Name != "ls" || elidedLabel.Subject != "internal" || elidedLabel.Qualifier != "" {
 		t.Errorf("expected the label to stand, got %q %q %q", elidedLabel.Name, elidedLabel.Subject, elidedLabel.Qualifier)
@@ -55,7 +55,7 @@ func TestALabelWithNothingQualifyingItIsUnaffected(t *testing.T) {
 }
 
 func TestALabelIsCutToTheCellsItHasRatherThanTheCharacters(t *testing.T) {
-	elidedLabel := status.Label{Name: "read", Subject: "日本語です"}.Elide(11)
+	elidedLabel := dynamic.Label{Name: "read", Subject: "日本語です"}.Elide(11)
 
 	if elidedLabel.Name != "read" {
 		t.Errorf("expected the name to survive, got %q", elidedLabel.Name)

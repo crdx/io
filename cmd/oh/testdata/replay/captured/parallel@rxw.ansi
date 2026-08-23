@@ -11,48 +11,32 @@
 \r
 \r\e[KLet me get the shape of this first.\r
 \r
-ls\r
-find \e[38;2;192;128;80m**/*.go\e[0m\r
-find \e[38;2;192;128;80m**/*.toml\e[0m\r
-grep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\r
+\r\e[Kls\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[1A\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[2A\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m\r
 \r
 \r\e[KNow to find where the drawing happens.\r
 \r
-grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
-grep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m\r
-grep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
 \r
 \r\e[KOne more pair, and one of them will not\r
 \r\e[Kbe there.\r
 \r
-ls\r
-read \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[1A\r\e[Kls
-\r\e[Kread \e[38;2;192;128;80mnowhere…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/a…\e[0m\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kread \e[38;2;192;128;80mnowhere…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/a…\e[0m\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
+\r\e[Kls\r
+\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\r\e[Kread \e[38;2;192;128;80mnowhere…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/a…\e[0m\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
 \r\e[Kread \e[38;2;192;128;80mnowhere…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/a…\e[0m\r
 \r
 \r\e[KThat is the lot: four together, then\r
@@ -247,25 +231,11 @@ t\e[0m\r
 \r\e[Kt\r
 \r\e[K.\r
 \r
-\r
-\r
-\r
-\e[3A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[K
-\r\e[K
-\r\e[K\e[3A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[K
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[K\e[3A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[K\e[3A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\e[3A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\r\e[K\e[3m\e[38;2;150;152;150mT\e[0m\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\e[3m\e[38;2;150;152;150mT\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
@@ -323,17 +293,11 @@ t\e[0m\r
 \r\e[Ks\r
 \r\e[K.\r
 \r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\r
 \r
-\r
-\e[2A\r\e[K
-\r\e[K
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[K
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r\e[KO\r
+\r\e[KO\r
 \r\e[Kn\r
 \r\e[Ke\r
 \r\e[Km\r
@@ -373,11 +337,10 @@ t\e[0m\r
 \r\e[Ke\r
 \r\e[K.\r
 \r
+\r\e[K\r
+\r\e[K\r
 \r
-\e[1A\r\e[K
-\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r\e[KT\r
+\r\e[KT\r
 \r\e[Kh\r
 \r\e[Ka\r
 \r\e[Kt\r
@@ -475,22 +438,22 @@ t\e[0m\r
 
 Let me get the shape of this first.
 
-ls
-find \e[38;2;192;128;80m**/*.go\e[0m
-find \e[38;2;192;128;80m**/*.toml\e[0m
-grep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m
+ls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
+find \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
+find \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
+grep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m
 \e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m
 
 Now to find where the drawing happens.
 
-grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
-grep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m
-grep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m
+grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+grep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+grep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
 
 One more pair, and one of them will not be there.
 
-ls
-read \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m
+ls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
+read \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m
 
 That is the lot: four together, then three together, then a pair where only one of them could be answered.
 
@@ -505,48 +468,32 @@ That is the lot: four together, then three together, then a pair where only one 
 \r
 \e[?2026h\e[?25l\r\e[KLet\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me g\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me get t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me get the s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me get the shape\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me get the shape of\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me get the shape of this\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me get the shape of this fir\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me get the shape of this first.\e[?25h\e[?2026l\r
 \r
-ls\r
-find \e[38;2;192;128;80m**/*.go\e[0m\r
-find \e[38;2;192;128;80m**/*.toml\e[0m\r
-grep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\r
+\e[?2026h\e[?25l\r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThre\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree se\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree search\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches,\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches, all\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at o\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KNow\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find wher\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the dr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawing ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawing happen\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawing happens.\e[?25h\e[?2026l\r
 \r
-grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
-grep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m\r
-grep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KOne\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pai\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not be t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not be there\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not be there.\e[?25h\e[?2026l\r
 \r
-ls\r
-read \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[1A\r\e[Kls
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\r
+\e[?2026h\e[?25l\r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
+\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: fou\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four togeth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then thr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three toget\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair whe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them coul\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be ans\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be\r
 \r\e[Kanswere\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kanswered.\e[?25h\e[?2026l\r
@@ -575,25 +522,16 @@ ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;
 \r\e[Kthe shape of\r
 \r\e[Kthis first.\r
 \r
-ls\r
-find \e[38;2;192;128;80m**/*…\e[0m\r
-find \e[38;2;192;128;80m**/*…\e[0m\r
-grep \e[38;2;150;152;150mpack\e[0m\e[38;2;150;152;150m…\e[0m\e[3A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*…\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*…\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpack\e[0m\e[38;2;150;152;150m…\e[0m\e[3A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*…\e[0m
-\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpack\e[0m\e[38;2;150;152;150m…\e[0m\e[3A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpack\e[0m\e[38;2;150;152;150m…\e[0m\e[3A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\e[3A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\r
+\r\e[Kls\r
+\r\e[Kfind \e[38;2;192;128;80m**/*…\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*…\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpack\e[0m\e[38;2;150;152;150m…\e[0m\e[3A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*…\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*…\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpack\e[0m\e[38;2;150;152;150m…\e[0m\e[1A\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpack\e[0m\e[38;2;150;152;150m…\e[0m\e[2A\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m\r
+\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpack\e[0m\e[38;2;150;152;150m…\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThree\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150msearches,\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mall at once.\e[0m\e[0m\r
@@ -603,16 +541,11 @@ grep \e[38;2;150;152;150mpack\e[0m\e[38;2;150;152;150m…\e[0m\e[3A\r\e[K\e[38;2
 \r\e[Kdrawing\r
 \r\e[Khappens.\r
 \r
-grep \e[38;2;150;152;150mspin\e[0m\e[38;2;150;152;150m…\e[0m\r
-grep \e[38;2;150;152;150mfoot\e[0m\e[38;2;150;152;150m…\e[0m\r
-grep \e[38;2;150;152;150mcurs\e[0m\e[38;2;150;152;150m…\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspin\e[0m\e[38;2;150;152;150m…\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfoot\e[0m\e[38;2;150;152;150m…\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspin\e[0m\e[38;2;150;152;150m…\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kgrep \e[38;2;150;152;150mspin\e[0m\e[38;2;150;152;150m…\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mfoot\e[0m\e[38;2;150;152;150m…\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mcurs\e[0m\e[38;2;150;152;150m…\e[0m\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
 \r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
 \r
 \r\e[KOne more\r
@@ -621,10 +554,8 @@ grep \e[38;2;150;152;150mcurs\e[0m\e[38;2;150;152;150m…\e[0m\e[2A\r\e[Kgrep \e
 \r\e[Kwill not be\r
 \r\e[Kthere.\r
 \r
-ls\r
-read \e[38;2;192;128;80mnowh…\e[0m\e[1A\r\e[Kls
-\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
+\r\e[Kls\r
+\r\e[Kread \e[38;2;192;128;80mnowh…\e[0m\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[1A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
 \r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
 \r
 \r\e[KThat is the\r
@@ -648,47 +579,31 @@ read \e[38;2;192;128;80mnowh…\e[0m\e[1A\r\e[Kls
 
 \r\e[KLet me get the shape of this first.
 
-ls
-find \e[38;2;192;128;80m**/*.go\e[0m
-find \e[38;2;192;128;80m**/*.toml\e[0m
-grep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m
+\r\e[Kls\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[1A\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[2A\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m
 \r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m
 
 \r\e[KNow to find where the drawing happens.
 
-grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
-grep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m
-grep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
 
 \r\e[KOne more pair, and one of them will not be there.
 
-ls
-read \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[1A\r\e[Kls
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
+\r\e[Kls\r
+\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
 \r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m
 
 \r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be answered.
@@ -704,47 +619,31 @@ read \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[1A\r\e
 \r
 \r\e[KLet me get the shape of this first.\r
 \r
-ls\r
-find \e[38;2;192;128;80m**/*.go\e[0m\r
-find \e[38;2;192;128;80m**/*.toml\e[0m\r
-grep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\r
+\r\e[Kls\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[1A\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[2A\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~8t\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~4t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L ~100t\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m\r
 \r
 \r\e[KNow to find where the drawing happens.\r
 \r
-grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
-grep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m\r
-grep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[1A\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
 \r
 \r\e[KOne more pair, and one of them will not be there.\r
 \r
-ls\r
-read \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[1A\r\e[Kls
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
+\r\e[Kls\r
+\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
 \r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\r
 \r
 \r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be\r

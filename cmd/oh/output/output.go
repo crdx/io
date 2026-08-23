@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"crdx.org/io/cmd/oh/pathlink"
-	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 
@@ -44,6 +43,7 @@ type Screen struct {
 	shownFooter footer // what is on the screen
 
 	liveRegion liveRegion // the rows being repainted in place
+	blocks     []Block    // the blocks the live region is made of, in the order they opened
 }
 
 // New builds the output over a writer, which is a terminal or is not.
@@ -72,28 +72,18 @@ func (self *Screen) LinkPathsUnder(root string) *Screen {
 	return self
 }
 
-// Status opens a tool-call block. Nothing else may print until it closes.
-func (self *Screen) Status() *status.ToolBlock {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-
-	self.seal()
-	self.makeRoomFor(AsideGroup)
-
-	if self.isMidLine {
-		self.newline()
-	}
-
-	self.openPendingLine()
-	self.measureTerminal()
-
-	return status.New(self.drawRow, self.overlay, self.isTTY, self.columns)
-}
-
-// Line writes text on a line of its own after any streamed answer.
+// Line writes text on a line of its own after any streamed answer. Where blocks are open, the text
+// joins the sequence as a block of its own rather than disturbing them.
 func (self *Screen) Line(text string) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
+
+	if len(self.blocks) > 0 {
+		self.blocks = append(self.blocks, textBlock{text: text})
+		self.refresh()
+
+		return
+	}
 
 	self.seal()
 	self.makeRoomFor(AsideGroup)
@@ -125,14 +115,6 @@ func (self *Screen) End() {
 		self.isMidLine = false
 		self.hasPendingText = false
 	}
-}
-
-func (self *Screen) overlay(text string, column int) {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-
-	self.at(text)
-	self.column = column
 }
 
 func (self *Screen) drawRow(text string) {

@@ -1,0 +1,277 @@
+=== narrow ===
+
+ look at both of those and tell me what
+ changed
+
+
+Taking them together.
+
+read screen.go ✓ 3L ~100t
+grep spinner *.go ✓ 1L ~100t
+
+Background processes killed (sleep).
+
+the conversation could not be stored: no
+space left on device
+
+Both still mention the spinner.
+=== one column ===
+
+
+l
+
+o
+
+o
+
+k
+
+a
+
+t
+
+b
+
+o
+
+t
+
+h
+
+o
+
+f
+
+t
+
+h
+
+o
+
+s
+
+e
+
+a
+
+n
+
+d
+
+t
+
+e
+
+l
+
+l
+
+m
+
+e
+
+w
+
+h
+
+a
+
+t
+
+c
+
+h
+
+a
+
+n
+
+g
+
+e
+
+d
+
+
+T
+a
+k
+i
+n
+g
+t
+h
+e
+m
+t
+o
+g
+e
+t
+h
+e
+r
+.
+
+
+
+
+B
+a
+c
+k
+g
+r
+o
+u
+n
+d
+p
+r
+o
+c
+e
+s
+s
+e
+s
+k
+i
+l
+l
+e
+d
+(
+s
+l
+e
+e
+p
+)
+.
+
+t
+h
+e
+c
+o
+n
+v
+e
+r
+s
+a
+t
+i
+o
+n
+c
+o
+u
+l
+d
+n
+o
+t
+b
+e
+s
+t
+o
+r
+e
+d
+:
+n
+o
+s
+p
+a
+c
+e
+l
+e
+f
+t
+o
+n
+d
+e
+v
+i
+c
+e
+
+B
+o
+t
+h
+s
+t
+i
+l
+l
+m
+e
+n
+t
+i
+o
+n
+t
+h
+e
+s
+p
+i
+n
+n
+e
+r
+.
+=== tiny ===
+
+ look at
+ both of
+ those and
+ tell me
+ what
+ changed
+
+
+Taking them
+together.
+
+✓ 3L ~100t
+✓ 1L ~100t
+
+Background
+processes
+killed
+(sleep).
+
+the
+conversation
+could not be
+stored: no
+space left
+on device
+
+Both still
+mention the
+spinner.
+=== wide ===
+
+ look at both of those and tell me what changed
+
+
+Taking them together.
+
+read screen.go ✓ 3L ~100t
+grep spinner *.go ✓ 1L ~100t
+
+Background processes killed (sleep).
+
+the conversation could not be stored: no space left on device
+
+Both still mention the spinner.

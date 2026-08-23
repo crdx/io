@@ -7,14 +7,15 @@ import (
 	"errors"
 	"path"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/output"
-	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/pathutil"
@@ -117,7 +118,7 @@ func blocksStillRunning(t *testing.T) int {
 		stacks = make([]byte, 2*len(stacks))
 	}
 
-	return strings.Count(string(stacks), "status.(*Block).run(")
+	return strings.Count(string(stacks), "dynamic.(*Block).run(")
 }
 
 func TestReplayingSaysTheWholeConversationAgain(t *testing.T) {
@@ -181,7 +182,7 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 					Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: path.Base(test.path)},
 				},
 			})
-			callPainter.close(status.Done)
+			callPainter.close(dynamic.Done)
 
 			if plain := style.Plain(screenOutput.String()); !strings.Contains(plain, test.want) {
 				t.Errorf("got %q, want %q", plain, test.want)
@@ -206,7 +207,7 @@ func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
 			Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
 		},
 	})
-	callPainter.close(status.Done)
+	callPainter.close(dynamic.Done)
 
 	if strings.Contains(screenOutput.String(), style.Subject("SKILL.md")) {
 		t.Errorf("got %q, want the file left dim", screenOutput.String())
@@ -228,7 +229,7 @@ func TestWhetherACallChangedAnythingComesFromTheToolOfTheMoment(t *testing.T) {
 		Arguments: `{"path":"one.go"}`,
 		Rendering: agent.Rendering{ReadOnly: true},
 	})
-	callPainter.close(status.Done)
+	callPainter.close(dynamic.Done)
 
 	if want := style.Change("write"); !strings.Contains(screenOutput.String(), want) {
 		t.Errorf("got %q, want %q", screenOutput.String(), want)
@@ -249,7 +250,7 @@ func TestACallToAToolThatIsGoneKeepsWhatWasRecorded(t *testing.T) {
 		Name:      "gone",
 		Rendering: agent.Rendering{Subject: "one.go", ReadOnly: true},
 	})
-	callPainter.close(status.Done)
+	callPainter.close(dynamic.Done)
 
 	if want := style.Call("gone"); !strings.Contains(screenOutput.String(), want) {
 		t.Errorf("got %q, want %q", screenOutput.String(), want)
@@ -274,7 +275,7 @@ func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 
 	self.notifyStopped(notice)
 
-	self.currentTurn.painter.close(status.Cancelled)
+	self.currentTurn.painter.close(dynamic.Cancelled)
 	self.currentTurn = Turn{}
 	self.screen.End()
 
@@ -326,7 +327,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	unansweredCall := agent.Event{Kind: agent.ToolCallRequest, ID: "3", Name: "read", Rendering: agent.Rendering{Subject: "left.go"}}
 	self.events = appendTranscript(self.events, unansweredCall)
 	livePainter.drawEvent(unansweredCall)
-	livePainter.close(status.Cancelled)
+	livePainter.close(dynamic.Cancelled)
 	self.screen.End()
 
 	var replayOutput bytes.Buffer
@@ -366,7 +367,7 @@ func TestAThoughtRunsDirectlyIntoAToolCall(t *testing.T) {
 
 	callPainter.drawEvent(agent.Event{Kind: agent.ModelReasoning, Text: "checking"})
 	callPainter.drawEvent(agent.Event{Kind: agent.ToolCallRequest, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}})
-	callPainter.close(status.Cancelled)
+	callPainter.close(dynamic.Cancelled)
 
 	plain := style.Plain(screenOutput.String())
 	if !strings.Contains(plain, "checking\nread one.go") {
@@ -568,7 +569,7 @@ func TestAShellCallIsDrawnAsAShellPrompt(t *testing.T) {
 	callPainter := &Painter{screen: output.New(&screenOutput)}
 
 	callPainter.drawEvent(agent.Event{Kind: agent.ToolCallRequest, ID: "1", Name: "bash", Rendering: agent.Rendering{Subject: "echo hello"}})
-	callPainter.close(status.Done)
+	callPainter.close(dynamic.Done)
 
 	plain := style.Plain(screenOutput.String())
 	if !strings.Contains(plain, "$ echo hello") {
@@ -597,7 +598,7 @@ func TestATurnThatLeftACallUnansweredIsClosedByWhatIsAskedNext(t *testing.T) {
 		t.Errorf("expected the call to open a block of its own, got row %d", got)
 	}
 
-	callPainter.close(status.Cancelled)
+	callPainter.close(dynamic.Cancelled)
 }
 
 func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
@@ -803,4 +804,36 @@ func testLog(t *testing.T) *store.Writer {
 	t.Cleanup(func() { _ = log.Close() })
 
 	return log
+}
+
+func TestAnAsideStandsBetweenTheCallsItArrivedAmong(t *testing.T) {
+	var screenOutput bytes.Buffer
+	painter := &Painter{screen: output.NewTerminalOfSize(&screenOutput, 80, 24), isRunning: true}
+
+	painter.drawEvent(agent.Event{
+		Kind:      agent.ToolCallRequest,
+		ID:        "1",
+		Name:      "read",
+		Rendering: agent.Rendering{Subject: "one.txt"},
+	})
+	painter.drawEvent(agent.Event{Kind: agent.HarnessMessage, Text: "something happened"})
+
+	if painter.toolBlock == nil {
+		t.Fatal("expected the block to stay open under the aside")
+	}
+
+	painter.drawEvent(agent.Event{Kind: agent.ToolCallResult, ID: "1", Took: time.Second})
+
+	rows := visibleScreen(t, screenOutput.String(), 80)
+	rows = slices.DeleteFunc(rows, func(row string) bool { return strings.TrimSpace(row) == "" })
+
+	if len(rows) != 2 {
+		t.Fatalf("expected the call and the aside on rows of their own, got %q", rows)
+	}
+	if !strings.Contains(rows[0], "one.txt") || !strings.Contains(rows[0], "✓") {
+		t.Errorf("expected the call to keep its result above the aside, got %q", rows[0])
+	}
+	if !strings.Contains(rows[1], "something happened") {
+		t.Errorf("expected the aside under the call, got %q", rows[1])
+	}
 }

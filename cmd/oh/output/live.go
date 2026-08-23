@@ -32,6 +32,14 @@ func (self *Screen) draw(newRows []string, next Group) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
+	if len(self.blocks) > 0 {
+		self.seal()
+	}
+
+	return self.paint(newRows, next)
+}
+
+func (self *Screen) paint(newRows []string, next Group) bool {
 	if len(newRows) == 0 {
 		if len(self.liveRegion.rows) == 0 {
 			return true
@@ -79,6 +87,8 @@ func (self *Screen) draw(newRows []string, next Group) bool {
 }
 
 func (self *Screen) seal() {
+	self.blocks = nil
+
 	if len(self.liveRegion.rows) == 0 {
 		return
 	}

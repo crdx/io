@@ -16,11 +16,11 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
-	"crdx.org/io/cmd/oh/status"
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/toolbox"
@@ -396,7 +396,7 @@ func streamIntoBuffer(t *testing.T, entries []replayEntry) string {
 		}
 	}
 
-	rig.chat.currentTurn.painter.close(status.Done)
+	rig.chat.currentTurn.painter.close(dynamic.Done)
 	rig.chat.screen.End()
 	rig.chat.screen.ReportProgress(false)
 
@@ -460,7 +460,7 @@ func replayThenRedraw(t *testing.T, openRig func(*testing.T) *replayRig, entries
 	rig.chat.redraw()
 
 	if isRunning {
-		rig.chat.currentTurn.painter.close(status.Cancelled)
+		rig.chat.currentTurn.painter.close(dynamic.Cancelled)
 	}
 
 	return rig.drawn()
@@ -504,7 +504,7 @@ func replayWhileRunning(t *testing.T, entries []replayEntry) string {
 
 		drawn = rig.drawn()
 
-		rig.chat.currentTurn.painter.close(status.Cancelled)
+		rig.chat.currentTurn.painter.close(dynamic.Cancelled)
 	})
 
 	return drawn

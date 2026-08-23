@@ -158,6 +158,7 @@ func (self *Screen) Reset() {
 
 	self.shownFooter = footer{}
 	self.input = footer{}
+	self.blocks = nil
 	self.column = 0
 	self.openedRows = 0
 	self.isMidLine = false

@@ -9,7 +9,7 @@
 \e[?7l\r\e[KEditing the target without reading it\r
 \r\e[Kagain.\r
 \r
-\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;192;128;80mtarget.…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not…\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;192;128;80mtarget.…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not…\e[0m\r
+\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;192;128;80mtarget.…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not…\e[0m\r
 \r
 \r\e[KThe resumed edit completed.\r
 \e[?25h\e[?2026l
@@ -157,7 +157,8 @@ t\e[0m\r
 \r\e[Kn\r
 \r\e[K.\r
 \r
-\e[38;2;207;173;0m\e[0m\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;207;173;0m\e[0m\r
+\r
 \r\e[KT\r
 \r\e[Kh\r
 \r\e[Ke\r
@@ -191,7 +192,7 @@ t\e[0m\r
 \e[48;2;52;53;65m\e[0m
 Editing the target without reading it again.
 
-\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m
+\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not been read yet — ensure you read target.txt before editing it\e[0m
 
 The resumed edit completed.
 
@@ -204,7 +205,7 @@ The resumed edit completed.
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KEdit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEditing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEditing the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEditing the targ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEditing the target w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEditing the target witho\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEditing the target without r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEditing the target without readi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEditing the target without reading i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEditing the target without reading it ag\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEditing the target without reading it again.\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not been read yet — ensure you read target.txt before editing…\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not been read yet — ensure you read target.txt before editing…\e[0m\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not been read yet — ensure you read target.txt before editing…\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit com\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit complet\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit completed.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -227,7 +228,7 @@ ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;
 \r\e[Kreading it\r
 \r\e[Kagain.\r
 \r
-\e[38;2;207;173;0medit\e[0m \e[38;2;192;128;80mtarg…\e[0m\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;192;128;80mtarg…\e[0m\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
 \r
 \r\e[KThe resumed\r
 \r\e[Kedit\r
@@ -241,7 +242,7 @@ ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KEditing the target without reading it again.
 
-\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not been read yet — ensure you read target.txt before editing it\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not been read yet — ensure you read target.txt before editing it\e[0m
+\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not been read yet — ensure you read target.txt before editing it\e[0m
 
 \r\e[KThe resumed edit completed.
 \e[?25h\e[?2026l
@@ -254,7 +255,7 @@ ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;
 \r
 \e[?7l\r\e[KEditing the target without reading it again.\r
 \r
-\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not been read yet — ensure you read target.txt before editing…\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not been read yet — ensure you read target.txt before editing…\e[0m\r
+\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mfile has not been read yet — ensure you read target.txt before editing…\e[0m\r
 \r
 \r\e[KThe resumed edit completed.\r
 \e[?25h\e[?2026l
