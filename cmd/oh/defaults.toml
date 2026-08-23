@@ -17,13 +17,14 @@ home = []
 left = [
     { segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
     { segment = "turn-elapsed" },
+    { segment = "last-tps" },
+    { segment = "turn-count" },
 ]
 center = [
     { segment = "context-usage" },
 ]
 right = [
     { segment = "working-directory", type = "full" },
-    { segment = "git-branch" },
     { segment = "scroll-overflow", direction = "up" }
 ]
 
@@ -35,9 +36,6 @@ center = [
     { segment = "active-model" },
 ]
 right = [
-    { segment = "turn-count" },
-    { segment = "last-tps" },
     { segment = "current-session" },
-    { segment = "current-time", format = "15:04" },
     { segment = "scroll-overflow", direction = "down" }
 ]

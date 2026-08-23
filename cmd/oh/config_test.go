@@ -188,31 +188,6 @@ func TestTheBuiltInBarLayoutCanBeBuilt(t *testing.T) {
 	layoutFrom(t, "")
 }
 
-func TestTheBuiltInBarPlacesEveryAvailableSegment(t *testing.T) {
-	config := configFrom(t, "")
-	placed := map[string]bool{}
-
-	for position, entries := range config.Bar.entries() {
-		for _, entry := range entries {
-			var named struct {
-				Segment string `toml:"segment"`
-			}
-
-			if err := config.metaFor(position).PrimitiveDecode(entry, &named); err != nil {
-				t.Fatal(err)
-			}
-
-			placed[named.Segment] = true
-		}
-	}
-
-	for _, name := range testSegments().Available() {
-		if !placed[name] {
-			t.Errorf("expected the built-in bar to place %q", name)
-		}
-	}
-}
-
 func TestWhatAConfigDoesNotMentionKeepsItsDefault(t *testing.T) {
 	defaults := layoutFrom(t, "")
 	layout := layoutFrom(t, `
