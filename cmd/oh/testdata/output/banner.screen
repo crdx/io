@@ -1,34 +1,38 @@
 === caps  while running ===
-·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps  while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps r while running ===
-·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps r while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rgb while running ===
-·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rgb while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rw while running ===
-·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rw while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rx while running ===
-·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rx while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rxw while running ===
-·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rxw while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rxwg while running ===
-·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rxwg while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rxwgb while running ===
-·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+·✧ ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
 === caps rxwgb while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high
+✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+=== context usage high ===
+✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ 91% 182Kt/200Kt
+=== context usage low ===
+✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ 3% 5Kt/200Kt
 === the startup line ===
 startup=2ms session=brave-otter skills=3p/1g tools=~200t

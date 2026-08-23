@@ -629,6 +629,31 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 		}
 	}
 
+	for name, inputTokens := range map[string]int{
+		"context usage low":  5000,
+		"context usage high": 182_000,
+	} {
+		passes[name] = func() string {
+			held := &Harness{
+				mode:                caps.NewMode(caps.All()),
+				contextWindowTokens: 200_000,
+				events: []agent.Event{{
+					Kind:  agent.ModelMessageEvent,
+					Usage: &agent.Usage{InputTokens: inputTokens},
+				}},
+			}
+
+			built, err := configFrom(t, "").layout(
+				availableSegments(workspaceMarker, "gpt-5.6-sol", "high", held),
+			)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return bar(built, segment.BottomLeft, edit.Frame{})
+		}
+	}
+
 	passes["the startup line"] = func() string {
 		return renderStartupBanner(1500*time.Microsecond, false, startupInfo{
 			Session:       "brave-otter",

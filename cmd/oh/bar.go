@@ -6,6 +6,7 @@ import (
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/activity"
+	"crdx.org/io/cmd/oh/segment/contextusage"
 	"crdx.org/io/cmd/oh/segment/model"
 	"crdx.org/io/cmd/oh/segment/modes"
 	"crdx.org/io/cmd/oh/segment/scroll"
@@ -15,6 +16,7 @@ import (
 
 const (
 	activitySegment = "activity"
+	contextSegment  = "context"
 	modesSegment    = "modes"
 	workdirSegment  = "workdir"
 	modelSegment    = "model"
@@ -29,6 +31,7 @@ func availableSegments(
 ) segment.Registry {
 	return segment.Registry{
 		activitySegment: activity.New(harness.turnActivity),
+		contextSegment:  contextusage.New(harness.contextUsage),
 		modesSegment:    modes.New(harness.grantedCaps, harness.isChordPending),
 		workdirSegment:  workdir.New(workspaceDir),
 		modelSegment:    model.New(modelName, modelEffort),
