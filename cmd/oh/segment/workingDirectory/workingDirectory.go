@@ -1,18 +1,40 @@
 package workingDirectory
 
 import (
+	"fmt"
+
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/pathutil"
 )
+
+const full = "full"
 
 type state struct {
 	value string
 }
 
 func New(path string) segment.Factory {
-	return func(segment.Options) (segment.Segment, error) {
-		return state{value: pathutil.Abbr(path)}, nil
+	return func(options segment.Options) (segment.Segment, error) {
+		var args struct {
+			Type string `toml:"type"`
+		}
+
+		if err := options.Read(&args); err != nil {
+			return nil, err
+		}
+
+		value := path
+
+		switch args.Type {
+		case "":
+			value = pathutil.Abbr(path)
+		case full:
+		default:
+			return nil, fmt.Errorf("type is %q, and wants to be omitted or %q", args.Type, full)
+		}
+
+		return state{value: value}, nil
 	}
 }
 
