@@ -5,22 +5,22 @@ import (
 
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/segment"
-	"crdx.org/io/cmd/oh/segment/activity"
-	"crdx.org/io/cmd/oh/segment/contextusage"
-	"crdx.org/io/cmd/oh/segment/model"
-	"crdx.org/io/cmd/oh/segment/modes"
-	"crdx.org/io/cmd/oh/segment/scroll"
-	"crdx.org/io/cmd/oh/segment/workdir"
+	"crdx.org/io/cmd/oh/segment/activeModel"
+	"crdx.org/io/cmd/oh/segment/activitySpinner"
+	"crdx.org/io/cmd/oh/segment/contextUsage"
+	"crdx.org/io/cmd/oh/segment/modeToggle"
+	"crdx.org/io/cmd/oh/segment/scrollOverflow"
+	"crdx.org/io/cmd/oh/segment/workingDirectory"
 	"crdx.org/io/cmd/oh/style"
 )
 
 const (
-	activitySegment = "activity"
-	contextSegment  = "context"
-	modesSegment    = "modes"
-	workdirSegment  = "workdir"
-	modelSegment    = "model"
-	scrollSegment   = "scroll"
+	activitySpinnerSegment  = "activity-spinner"
+	contextUsageSegment     = "context-usage"
+	modeToggleSegment       = "mode-toggle"
+	workingDirectorySegment = "working-directory"
+	activeModelSegment      = "active-model"
+	scrollOverflowSegment   = "scroll-overflow"
 )
 
 func availableSegments(
@@ -30,12 +30,12 @@ func availableSegments(
 	harness *Harness,
 ) segment.Registry {
 	return segment.Registry{
-		activitySegment: activity.New(harness.turnActivity),
-		contextSegment:  contextusage.New(harness.contextUsage),
-		modesSegment:    modes.New(harness.grantedCaps, harness.isChordPending),
-		workdirSegment:  workdir.New(workspaceDir),
-		modelSegment:    model.New(modelName, modelEffort),
-		scrollSegment:   scroll.New,
+		activitySpinnerSegment:  activitySpinner.New(harness.turnActivity),
+		contextUsageSegment:     contextUsage.New(harness.contextUsage),
+		modeToggleSegment:       modeToggle.New(harness.grantedCaps, harness.isChordPending),
+		workingDirectorySegment: workingDirectory.New(workspaceDir),
+		activeModelSegment:      activeModel.New(modelName, modelEffort),
+		scrollOverflowSegment:   scrollOverflow.New,
 	}
 }
 

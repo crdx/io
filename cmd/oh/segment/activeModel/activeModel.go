@@ -1,4 +1,4 @@
-package model
+package activeModel
 
 import (
 	"crdx.org/io/cmd/oh/segment"

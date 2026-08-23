@@ -1,10 +1,10 @@
-package contextusage_test
+package contextUsage_test
 
 import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/segment"
-	"crdx.org/io/cmd/oh/segment/contextusage"
+	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/style"
 )
 
@@ -15,7 +15,7 @@ func (noOptions) Read(any) error { return nil }
 func render(t *testing.T, usedTokens int, totalTokens int) string {
 	t.Helper()
 
-	built, err := contextusage.New(func() (int, int) {
+	built, err := contextUsage.New(func() (int, int) {
 		return usedTokens, totalTokens
 	})(noOptions{})
 	if err != nil {
@@ -27,7 +27,7 @@ func render(t *testing.T, usedTokens int, totalTokens int) string {
 
 func TestContextUsageIsDerivedWhenRendered(t *testing.T) {
 	usedTokens := 32_000
-	built, err := contextusage.New(func() (int, int) {
+	built, err := contextUsage.New(func() (int, int) {
 		return usedTokens, 274_000
 	})(noOptions{})
 	if err != nil {

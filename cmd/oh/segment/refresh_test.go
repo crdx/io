@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"crdx.org/io/cmd/oh/segment"
-	"crdx.org/io/cmd/oh/segment/activity"
+	"crdx.org/io/cmd/oh/segment/activitySpinner"
 	"github.com/BurntSushi/toml"
 )
 
@@ -19,7 +19,7 @@ func (self tomlOptions) Read(into any) error {
 func TestTheActivitySegmentDrivesTheRedrawTicker(t *testing.T) {
 	options := tomlOptions("idle = \"·\"\nframes = [\"*\"]\nrate = \"125ms\"\n")
 
-	built, err := activity.New(func() (bool, int) { return true, 0 })(options)
+	built, err := activitySpinner.New(func() (bool, int) { return true, 0 })(options)
 	if err != nil {
 		t.Fatal(err)
 	}

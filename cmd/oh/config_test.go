@@ -198,7 +198,7 @@ func TestAConfigSayingNothingAboutTheBarTakesTheBuiltInLayout(t *testing.T) {
 func TestWhatAConfigDoesNotMentionKeepsItsDefault(t *testing.T) {
 	layout := layoutFrom(t, `
 		[bar.bottom]
-		left = [{ segment = "workdir" }, { segment = "modes" }]
+		left = [{ segment = "working-directory" }, { segment = "mode-toggle" }]
 	`)
 
 	if got := len(layout[segment.BottomLeft]); got != 2 {
@@ -239,7 +239,7 @@ func TestAPlacementNamingASegmentThatIsNotOfferedSaysWhereAndWhatInstead(t *test
 func TestAPlacementGivenOptionsItsSegmentRefusesIsRefused(t *testing.T) {
 	_, err := brokenLayout(t, `
 		[bar.top]
-		center = [{ segment = "scroll", direction = "sideways" }]
+		center = [{ segment = "scroll-overflow", direction = "sideways" }]
 	`)
 	if err == nil {
 		t.Fatal("expected a bad direction to be refused")
@@ -255,7 +255,7 @@ func TestAPlacementGivenOptionsItsSegmentRefusesIsRefused(t *testing.T) {
 func TestAPlacementSettingWhatItsSegmentDoesNotReadIsRefused(t *testing.T) {
 	config := configFrom(t, `
 		[bar.top]
-		center = [{ segment = "workdir", loudly = true }]
+		center = [{ segment = "working-directory", loudly = true }]
 	`)
 
 	if _, err := config.layout(testSegments()); err != nil {

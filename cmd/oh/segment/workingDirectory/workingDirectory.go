@@ -1,4 +1,4 @@
-package workdir
+package workingDirectory
 
 import (
 	"crdx.org/io/cmd/oh/segment"

@@ -1,4 +1,4 @@
-package modes
+package modeToggle
 
 import (
 	"crdx.org/io/cmd/oh/caps"

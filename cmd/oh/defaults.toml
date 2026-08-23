@@ -17,18 +17,18 @@ home = []
 left = []
 center = []
 right = [
-    { segment = "scroll", direction = "up" }
+    { segment = "scroll-overflow", direction = "up" }
 ]
 
 [bar.bottom]
 left = [
-    { segment = "activity", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
-    { segment = "modes" },
-    { segment = "workdir" },
-    { segment = "model" },
-    { segment = "context" },
+    { segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
+    { segment = "mode-toggle" },
+    { segment = "working-directory" },
+    { segment = "active-model" },
+    { segment = "context-usage" },
 ]
 center = []
 right = [
-    { segment = "scroll", direction = "down" }
+    { segment = "scroll-overflow", direction = "down" }
 ]
