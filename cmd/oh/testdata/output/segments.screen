@@ -1,0 +1,28 @@
+=== active-model / medium effort ===
+gpt-5.6-sol ─ med
+=== activity-spinner / idle ===
+✧·
+=== activity-spinner / running first frame ===
+✦·
+=== activity-spinner / running second frame ===
+·✦
+=== context-usage / known ===
+91% 182Kt/200Kt
+=== context-usage / unknown ===
+?% ?/?
+=== current-session ===
+brave-otter
+=== mode-toggle / all granted ===
+rxwgb
+=== mode-toggle / pending chord ===
+rxwgb
+=== mode-toggle / read only ===
+rxwgb
+=== scroll-overflow / down ===
+↓ 7
+=== scroll-overflow / empty ===
+
+=== scroll-overflow / up ===
+↑ 3
+=== working-directory ===
+project

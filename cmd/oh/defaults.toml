@@ -30,5 +30,6 @@ left = [
 ]
 center = []
 right = [
+    { segment = "current-session" },
     { segment = "scroll-overflow", direction = "down" }
 ]

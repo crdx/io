@@ -343,7 +343,7 @@ func run() ([]string, error) {
 		getOnWithItMessage:  config.GetOnWithItMessage,
 	}
 
-	chat.segmentLayout, err = config.layout(availableSegments(workspaceDir, model, effort, chat))
+	chat.segmentLayout, err = config.layout(availableSegments(workspaceDir, log.Name(), model, effort, chat))
 	if err != nil {
 		return nil, err
 	}

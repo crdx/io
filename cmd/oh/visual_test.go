@@ -140,7 +140,7 @@ func TestVisual(t *testing.T) {
 	}
 
 	built, err := configFrom(t, "").layout(
-		availableSegments("/tmp/somewhere", "fake", "medium", held),
+		availableSegments("/tmp/somewhere", log.Name(), "fake", "medium", held),
 	)
 	if err != nil {
 		t.Fatal(err)

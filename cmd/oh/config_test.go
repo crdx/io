@@ -184,18 +184,37 @@ func TestAPathMappedIntoTheShellHomeMustComeFromTheHomeDirectory(t *testing.T) {
 	}
 }
 
-func TestAConfigSayingNothingAboutTheBarTakesTheBuiltInLayout(t *testing.T) {
-	layout := layoutFrom(t, "")
+func TestTheBuiltInBarLayoutCanBeBuilt(t *testing.T) {
+	layoutFrom(t, "")
+}
 
-	if got := len(layout[segment.BottomLeft]); got != 5 {
-		t.Errorf("expected five segments along the bottom, got %d", got)
+func TestTheBuiltInBarPlacesEveryAvailableSegment(t *testing.T) {
+	config := configFrom(t, "")
+	placed := map[string]bool{}
+
+	for position, entries := range config.Bar.entries() {
+		for _, entry := range entries {
+			var named struct {
+				Segment string `toml:"segment"`
+			}
+
+			if err := config.metaFor(position).PrimitiveDecode(entry, &named); err != nil {
+				t.Fatal(err)
+			}
+
+			placed[named.Segment] = true
+		}
 	}
-	if got := len(layout[segment.TopRight]); got != 1 {
-		t.Errorf("expected one segment at the top right, got %d", got)
+
+	for _, name := range testSegments().Available() {
+		if !placed[name] {
+			t.Errorf("expected the built-in bar to place %q", name)
+		}
 	}
 }
 
 func TestWhatAConfigDoesNotMentionKeepsItsDefault(t *testing.T) {
+	defaults := layoutFrom(t, "")
 	layout := layoutFrom(t, `
 		[bar.bottom]
 		left = [{ segment = "working-directory" }, { segment = "mode-toggle" }]
@@ -204,11 +223,15 @@ func TestWhatAConfigDoesNotMentionKeepsItsDefault(t *testing.T) {
 	if got := len(layout[segment.BottomLeft]); got != 2 {
 		t.Errorf("expected what the file said, got %d segments", got)
 	}
-	if got := len(layout[segment.TopRight]); got != 1 {
-		t.Errorf("expected the default kept at the top right, got %d segments", got)
-	}
-	if got := len(layout[segment.BottomRight]); got != 1 {
-		t.Errorf("expected the default kept at the bottom right, got %d segments", got)
+
+	for _, position := range segment.Positions {
+		if position == segment.BottomLeft {
+			continue
+		}
+
+		if got, want := len(layout[position]), len(defaults[position]); got != want {
+			t.Errorf("expected the default at %s to have %d segments, got %d", position, want, got)
+		}
 	}
 }
 
@@ -289,7 +312,7 @@ func TestTheBuiltInDefaultsSetEverySettingThereIs(t *testing.T) {
 func testSegments() segment.Registry {
 	held := &Harness{mode: caps.NewMode(caps.Read)}
 
-	return availableSegments("/tmp/somewhere", "gpt-5.6-sol", "high", held)
+	return availableSegments("/tmp/somewhere", "brave-otter", "gpt-5.6-sol", "high", held)
 }
 
 func configFrom(t *testing.T, body string) Config {

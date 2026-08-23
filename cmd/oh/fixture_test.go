@@ -27,6 +27,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"inputblock": {".ansi", ".screen"},
 		"lifecycle":  {".ansi", ".screen"},
 		"running":    {".ansi", ".screen"},
+		"segments":   {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}

@@ -71,13 +71,13 @@ func shown(t *testing.T, stream string, columns int) string {
 	return strings.Join(visibleScreen(t, stream, columns), "\n")
 }
 
-func shownPasses(t *testing.T, passes map[string]func() string, columns int) map[string]func() string {
+func shownPasses(t *testing.T, passes map[string]func() string) map[string]func() string {
 	t.Helper()
 
 	shownAt := map[string]func() string{}
 
 	for name, pass := range passes {
-		shownAt[name] = func() string { return shown(t, pass(), columns) }
+		shownAt[name] = func() string { return shown(t, pass(), replayColumns) }
 	}
 
 	return shownAt
@@ -186,7 +186,7 @@ func TestTheScreenAroundAConversationDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	compareWithGolden(t, "lifecycle", ".ansi", passes)
-	compareWithGolden(t, "lifecycle", ".screen", shownPasses(t, onATerminal(passes), replayColumns))
+	compareWithGolden(t, "lifecycle", ".screen", shownPasses(t, onATerminal(passes)))
 }
 
 func onATerminal(passes map[string]func() string) map[string]func() string {
@@ -210,7 +210,7 @@ func TestATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	compareWithGolden(t, "running", ".ansi", passes)
-	compareWithGolden(t, "running", ".screen", shownPasses(t, passes, replayColumns))
+	compareWithGolden(t, "running", ".screen", shownPasses(t, passes))
 }
 
 func drawDiscardedReasoning(t *testing.T) string {
@@ -617,12 +617,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 				held.currentTurn.isRunning = isRunning
 				held.currentTurn.spinnerFrame = 2
 
-				built, err := configFrom(t, "").layout(
-					availableSegments(workspaceMarker, "gpt-5.6-sol", "high", held),
-				)
-				if err != nil {
-					t.Fatal(err)
-				}
+				built := goldenBarLayout(t, held)
 
 				return bar(built, segment.BottomLeft, edit.Frame{})
 			}
@@ -643,12 +638,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 				}},
 			}
 
-			built, err := configFrom(t, "").layout(
-				availableSegments(workspaceMarker, "gpt-5.6-sol", "high", held),
-			)
-			if err != nil {
-				t.Fatal(err)
-			}
+			built := goldenBarLayout(t, held)
 
 			return bar(built, segment.BottomLeft, edit.Frame{})
 		}
@@ -664,7 +654,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	compareWithGolden(t, "banner", ".ansi", passes)
-	compareWithGolden(t, "banner", ".screen", shownPasses(t, passes, replayColumns))
+	compareWithGolden(t, "banner", ".screen", shownPasses(t, passes))
 }
 
 func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
@@ -690,12 +680,7 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 				held.currentTurn.isRunning = true
 				held.currentTurn.spinnerFrame = 2
 
-				built, err := configFrom(t, "").layout(
-					availableSegments(workspaceMarker, "gpt-5.6-sol", "high", held),
-				)
-				if err != nil {
-					t.Fatal(err)
-				}
+				built := goldenBarLayout(t, held)
 
 				held.segmentLayout = built
 

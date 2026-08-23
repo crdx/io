@@ -1,0 +1,28 @@
+=== active-model / medium effort ===
+\e[38;2;150;152;150mgpt-5.6-sol ─ med\e[0m
+=== activity-spinner / idle ===
+\e[2m\e[38;2;150;152;150m✧·\e[0m\e[0m
+=== activity-spinner / running first frame ===
+\e[38;2;192;128;80m✦·\e[0m
+=== activity-spinner / running second frame ===
+\e[38;2;192;128;80m·✦\e[0m
+=== context-usage / known ===
+\e[38;2;150;152;150m91% 182Kt/200Kt\e[0m
+=== context-usage / unknown ===
+\e[38;2;150;152;150m?% ?/?\e[0m
+=== current-session ===
+\e[38;2;150;152;150mbrave-otter\e[0m
+=== mode-toggle / all granted ===
+\e[38;2;76;154;44mr\e[0m\e[38;2;204;102;102mx\e[0m\e[38;2;207;173;0mw\e[0m\e[38;2;201;166;212mg\e[0m\e[38;2;138;190;183mb\e[0m
+=== mode-toggle / pending chord ===
+\e[4m\e[38;2;76;154;44mr\e[0m\e[0m\e[4m\e[2m\e[38;2;150;152;150mx\e[0m\e[0m\e[0m\e[4m\e[2m\e[38;2;150;152;150mw\e[0m\e[0m\e[0m\e[4m\e[2m\e[38;2;150;152;150mg\e[0m\e[0m\e[0m\e[4m\e[2m\e[38;2;150;152;150mb\e[0m\e[0m\e[0m
+=== mode-toggle / read only ===
+\e[38;2;76;154;44mr\e[0m\e[2m\e[38;2;150;152;150mx\e[0m\e[0m\e[2m\e[38;2;150;152;150mw\e[0m\e[0m\e[2m\e[38;2;150;152;150mg\e[0m\e[0m\e[2m\e[38;2;150;152;150mb\e[0m\e[0m
+=== scroll-overflow / down ===
+\e[38;2;150;152;150m↓ 7\e[0m
+=== scroll-overflow / empty ===
+
+=== scroll-overflow / up ===
+\e[38;2;150;152;150m↑ 3\e[0m
+=== working-directory ===
+\e[38;2;150;152;150mproject\e[0m
