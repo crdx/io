@@ -84,10 +84,11 @@ func TestTheRegistryFillsInWhatAListingLeftOut(t *testing.T) {
 
 	registered := map[string]agent.Model{
 		"claude-opus-5": {
-			ID:              "claude-opus-5",
-			Name:            "Claude Opus 5",
-			EffortLevels:    []string{"low", "medium", "high", "xhigh", "max"},
-			MaxOutputTokens: 128_000,
+			ID:                  "claude-opus-5",
+			Name:                "Claude Opus 5",
+			EffortLevels:        []string{"low", "medium", "high", "xhigh", "max"},
+			ContextWindowTokens: 274_000,
+			MaxOutputTokens:     128_000,
 		},
 		"claude-sonnet-5": {
 			ID:           "claude-sonnet-5",
@@ -98,7 +99,8 @@ func TestTheRegistryFillsInWhatAListingLeftOut(t *testing.T) {
 
 	supplemented := supplement(listed, registered)
 
-	if supplemented[0].Name != "Claude Opus 5" || supplemented[0].MaxOutputTokens != 128_000 {
+	if supplemented[0].Name != "Claude Opus 5" || supplemented[0].ContextWindowTokens != 274_000 ||
+		supplemented[0].MaxOutputTokens != 128_000 {
 		t.Errorf("expected the registry to fill in the gaps, got %+v", supplemented[0])
 	}
 

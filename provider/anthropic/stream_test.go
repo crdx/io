@@ -8,7 +8,7 @@ import (
 )
 
 func TestASealedThoughtWithoutABlockStopIsNativeStateButNotCompletedPortableReasoning(t *testing.T) {
-	var turn reply
+	var reply reply
 	var outputs []agent.Output
 	yield := func(output agent.Output) bool {
 		outputs = append(outputs, output)
@@ -21,7 +21,7 @@ func TestASealedThoughtWithoutABlockStopIsNativeStateButNotCompletedPortableReas
 		`{"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"seal-1"}}`,
 	}
 	for _, payload := range payloads {
-		if done, err := turn.step(payload, yield); err != nil || done {
+		if done, err := reply.step(payload, yield); err != nil || done {
 			t.Fatalf("step returned done %t and error %v", done, err)
 		}
 	}
@@ -31,7 +31,7 @@ func TestASealedThoughtWithoutABlockStopIsNativeStateButNotCompletedPortableReas
 		t.Errorf("unexpected portable outputs: %+v", outputs)
 	}
 
-	nativeState := string(turn.prose())
+	nativeState := string(reply.prose())
 	if !strings.Contains(nativeState, `"thinking":"Signed but not stopped."`) ||
 		!strings.Contains(nativeState, `"signature":"seal-1"`) {
 		t.Errorf("sealed native state is incomplete: %s", nativeState)

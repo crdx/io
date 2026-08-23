@@ -147,16 +147,16 @@ func encodeItem(item any) json.RawMessage {
 //
 // https://platform.openai.com/docs/api-reference/responses-streaming
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
-	turn, err := self.post(ctx, yield)
+	reply, err := self.post(ctx, yield)
 	if err != nil {
-		self.history = append(self.history, turn.prose()...)
+		self.history = append(self.history, reply.prose()...)
 
 		return agent.Reply{}, err
 	}
 
-	self.history = append(self.history, turn.items...)
+	self.history = append(self.history, reply.items...)
 
-	return agent.Reply{Calls: turn.calls()}, nil
+	return agent.Reply{Calls: reply.calls(), Usage: reply.usage}, nil
 }
 
 func (self *Client) post(ctx context.Context, yield agent.Yield) (reply, error) {

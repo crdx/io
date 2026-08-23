@@ -50,6 +50,17 @@ type reply struct {
 	blocks          []*block
 	stopReason      string
 	stopExplanation string
+	usage           agent.Usage
+}
+
+type usage struct {
+	InputTokens   int `json:"input_tokens"`
+	CacheRead     int `json:"cache_read_input_tokens"`
+	CacheCreation int `json:"cache_creation_input_tokens"`
+}
+
+func (self usage) contextTokens() int {
+	return self.InputTokens + self.CacheRead + self.CacheCreation
 }
 
 func (self *reply) find(index int) *block {
@@ -146,11 +157,17 @@ type toolUse struct {
 }
 
 type event struct {
-	Type         string        `json:"type"`
-	Index        int           `json:"index"`
-	ContentBlock *startedBlock `json:"content_block"`
-	Delta        *eventDelta   `json:"delta"`
-	Error        *eventError   `json:"error"`
+	Type         string          `json:"type"`
+	Index        int             `json:"index"`
+	ContentBlock *startedBlock   `json:"content_block"`
+	Delta        *eventDelta     `json:"delta"`
+	Error        *eventError     `json:"error"`
+	Message      *startedMessage `json:"message"`
+	Usage        *usage          `json:"usage"`
+}
+
+type startedMessage struct {
+	Usage *usage `json:"usage"`
 }
 
 type startedBlock struct {
@@ -188,40 +205,46 @@ func (self *event) failure(payload string) error {
 }
 
 func readReply(body io.Reader, yield agent.Yield) (reply, error) {
-	var turn reply
+	var reply reply
 
 	err := sse.Read(body, func(payload string) (bool, error) {
-		return turn.step(payload, yield)
+		return reply.step(payload, yield)
 	})
 
-	return turn, err
+	return reply, err
 }
 
 func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
-	var message event
-	if json.Unmarshal([]byte(payload), &message) != nil {
+	var event event
+	if json.Unmarshal([]byte(payload), &event) != nil {
 		return true, fmt.Errorf("the endpoint sent something unreadable: %s", payload)
 	}
 
-	switch message.Type {
+	switch event.Type {
+	case "message_start":
+		if event.Message != nil {
+			self.recordUsage(event.Message.Usage)
+		}
+
 	case "content_block_start":
-		self.open(message)
+		self.open(event)
 
 	case "content_block_delta":
-		return self.add(message, yield), nil
+		return self.add(event, yield), nil
 
 	case "content_block_stop":
-		return self.close(message, yield), nil
+		return self.close(event, yield), nil
 
 	case "message_delta":
-		if message.Delta != nil {
-			if message.Delta.StopReason != "" {
-				self.stopReason = message.Delta.StopReason
+		if event.Delta != nil {
+			if event.Delta.StopReason != "" {
+				self.stopReason = event.Delta.StopReason
 			}
-			if message.Delta.StopDetails != nil {
-				self.stopExplanation = message.Delta.StopDetails.Explanation
+			if event.Delta.StopDetails != nil {
+				self.stopExplanation = event.Delta.StopDetails.Explanation
 			}
 		}
+		self.recordUsage(event.Usage)
 
 	case "message_stop":
 		switch {
@@ -236,23 +259,33 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		}
 
 	case "error":
-		return true, message.failure(payload)
+		return true, event.failure(payload)
 	}
 
 	return false, nil
 }
 
-func (self *reply) open(message event) {
-	if message.ContentBlock == nil {
+func (self *reply) recordUsage(usage *usage) {
+	if usage == nil {
+		return
+	}
+
+	if inputTokens := usage.contextTokens(); inputTokens > 0 {
+		self.usage = agent.Usage{InputTokens: inputTokens}
+	}
+}
+
+func (self *reply) open(event event) {
+	if event.ContentBlock == nil {
 		return
 	}
 
 	opened := &block{
-		kind:  message.ContentBlock.Type,
-		index: message.Index,
-		id:    message.ContentBlock.ID,
-		name:  message.ContentBlock.Name,
-		data:  message.ContentBlock.Data,
+		kind:  event.ContentBlock.Type,
+		index: event.Index,
+		id:    event.ContentBlock.ID,
+		name:  event.ContentBlock.Name,
+		data:  event.ContentBlock.Data,
 	}
 
 	if opened.kind == "redacted_thinking" {
@@ -262,46 +295,52 @@ func (self *reply) open(message event) {
 	self.blocks = append(self.blocks, opened)
 }
 
-func (self *reply) add(message event, yield agent.Yield) bool {
-	held := self.find(message.Index)
-	if held == nil || message.Delta == nil {
+func (self *reply) add(event event, yield agent.Yield) bool {
+	held := self.find(event.Index)
+	if held == nil || event.Delta == nil {
 		return false
 	}
 
-	switch message.Delta.Type {
+	switch event.Delta.Type {
 	case "text_delta":
-		held.text.WriteString(message.Delta.Text)
+		held.text.WriteString(event.Delta.Text)
 
-		return !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: message.Delta.Text})
+		return !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: event.Delta.Text})
 
 	case "thinking_delta":
-		held.text.WriteString(message.Delta.Thinking)
+		held.text.WriteString(event.Delta.Thinking)
 
-		return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: message.Delta.Thinking})
+		return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: event.Delta.Thinking})
 
 	case "signature_delta":
-		held.signature.WriteString(message.Delta.Signature)
+		held.signature.WriteString(event.Delta.Signature)
 
 	case "input_json_delta":
-		held.arguments.WriteString(message.Delta.PartialJSON)
+		held.arguments.WriteString(event.Delta.PartialJSON)
 	}
 
 	return false
 }
 
-func (self *reply) close(message event, yield agent.Yield) bool {
-	held := self.find(message.Index)
+func (self *reply) close(event event, yield agent.Yield) bool {
+	held := self.find(event.Index)
 	if held == nil {
 		return false
 	}
 
 	held.isDone = true
 
+	var reportedUsage *agent.Usage
+	if self.usage.InputTokens > 0 {
+		usage := self.usage
+		reportedUsage = &usage
+	}
+
 	switch {
 	case held.kind == "text" && held.text.Len() > 0:
-		return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true})
+		return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true, Usage: reportedUsage})
 	case held.kind == "thinking" && held.text.Len() > 0 && held.signature.Len() > 0:
-		return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true})
+		return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true, Usage: reportedUsage})
 	default:
 		return false
 	}

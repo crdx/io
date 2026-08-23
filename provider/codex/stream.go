@@ -22,6 +22,7 @@ var ErrTruncated = sse.ErrTruncated
 
 type reply struct {
 	items            []json.RawMessage
+	usage            agent.Usage
 	summary          strings.Builder
 	isSummarised     bool
 	isRawReasoning   bool
@@ -90,6 +91,7 @@ type eventPart struct {
 
 type eventResponse struct {
 	Error *eventError `json:"error"`
+	Usage agent.Usage `json:"usage"`
 }
 
 type eventError struct {
@@ -122,29 +124,32 @@ func prettyJSON(payload string) string {
 }
 
 func readReply(body io.Reader, yield agent.Yield) (reply, error) {
-	var turn reply
+	var reply reply
 
 	err := sse.Read(body, func(payload string) (bool, error) {
-		return turn.step(payload, yield)
+		return reply.step(payload, yield)
 	})
 
-	return turn, err
+	return reply, err
 }
 
 func parseEvent(payload string) (event, bool) {
-	var message event
-	if json.Unmarshal([]byte(payload), &message) == nil {
-		return message, true
+	var zeroEvent event
+	var event event
+	if json.Unmarshal([]byte(payload), &event) == nil {
+		return event, true
 	}
 
 	var envelope struct {
 		Type string `json:"type"`
 	}
 	if json.Unmarshal([]byte(payload), &envelope) != nil {
-		return event{}, false
+		return zeroEvent, false
 	}
 
-	return event{Type: envelope.Type}, true
+	event = zeroEvent
+	event.Type = envelope.Type
+	return event, true
 }
 
 func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
@@ -153,38 +158,38 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		return true, nil
 	}
 
-	message, readable := parseEvent(payload)
+	event, readable := parseEvent(payload)
 	if !readable {
 		return false, nil
 	}
 
-	switch message.Type {
+	switch event.Type {
 	case "response.output_text.delta", "response.refusal.delta":
-		return self.addMessageText(message.Delta, yield), nil
+		return self.addMessageText(event.Delta, yield), nil
 
 	case "response.output_text.done":
 		return self.completeMessage(yield), nil
 
 	case "response.reasoning_summary_text.delta":
-		if message.Delta != "" {
+		if event.Delta != "" {
 			self.isSummarised = true
-			self.summary.WriteString(message.Delta)
+			self.summary.WriteString(event.Delta)
 
-			if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: message.Delta}) {
+			if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: event.Delta}) {
 				return true, nil
 			}
 		}
 
 	case "response.reasoning_summary_part.done":
-		if message.Part != nil && message.Part.Text != "" {
+		if event.Part != nil && event.Part.Text != "" {
 			self.isSummarised = true
 			streamed := self.summary.String()
 			if streamed == "" {
-				self.summary.WriteString(message.Part.Text)
-				if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: message.Part.Text}) {
+				self.summary.WriteString(event.Part.Text)
+				if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: event.Part.Text}) {
 					return true, nil
 				}
-			} else if suffix, found := strings.CutPrefix(message.Part.Text, streamed); found && suffix != "" {
+			} else if suffix, found := strings.CutPrefix(event.Part.Text, streamed); found && suffix != "" {
 				self.summary.WriteString(suffix)
 				if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: suffix}) {
 					return true, nil
@@ -192,15 +197,15 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 			}
 
 			self.summary.Reset()
-			if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true}) {
+			if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true, AwaitUsage: true}) {
 				return true, nil
 			}
 		}
 
 	case "response.reasoning_text.delta":
-		if message.Delta != "" && !self.isSummarised {
+		if event.Delta != "" && !self.isSummarised {
 			self.isRawReasoning = true
-			if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: message.Delta}) {
+			if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: event.Delta}) {
 				return true, nil
 			}
 		}
@@ -209,9 +214,9 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		return self.completeRawReasoning(yield), nil
 
 	case "response.output_item.done":
-		if len(message.Item) > 0 {
-			self.items = append(self.items, message.Item)
-			item := decodeItem(message.Item)
+		if len(event.Item) > 0 {
+			self.items = append(self.items, event.Item)
+			item := decodeItem(event.Item)
 			switch item.Type {
 			case "reasoning":
 				if self.completeRawReasoning(yield) {
@@ -225,6 +230,9 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		}
 
 	case "response.completed", "response.done":
+		if event.Response != nil {
+			self.usage = event.Response.Usage
+		}
 		self.completeOpenOutput(yield)
 		return true, nil
 
@@ -232,7 +240,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		return true, ErrIncomplete
 
 	case "response.failed", "error":
-		return true, message.failure(payload)
+		return true, event.failure(payload)
 	}
 
 	return false, nil
@@ -257,7 +265,7 @@ func (self *reply) completeRawReasoning(yield agent.Yield) bool {
 	}
 
 	self.isRawReasoning = false
-	return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true})
+	return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true, AwaitUsage: true})
 }
 
 func (self *reply) completeMessage(yield agent.Yield) bool {
@@ -266,7 +274,7 @@ func (self *reply) completeMessage(yield agent.Yield) bool {
 	}
 
 	self.isMessageStarted = false
-	return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true})
+	return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true, AwaitUsage: true})
 }
 
 func (self *reply) completeOpenOutput(yield agent.Yield) {

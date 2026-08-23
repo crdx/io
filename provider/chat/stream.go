@@ -24,6 +24,7 @@ type reply struct {
 	content         string
 	reasoning       string
 	tools           map[int]*toolCall
+	usage           agent.Usage
 	stopReason      string
 	isReasoningOpen bool
 	isContentOpen   bool
@@ -83,6 +84,11 @@ func (self *reply) orderedToolCalls() []toolCall {
 type chunk struct {
 	Choices []choice    `json:"choices"`
 	Error   *chunkError `json:"error"`
+	Usage   *usage      `json:"usage"`
+}
+
+type usage struct {
+	PromptTokens int `json:"prompt_tokens"`
 }
 
 type choice struct {
@@ -127,22 +133,23 @@ type chunkError struct {
 }
 
 func readReply(body io.Reader, yield agent.Yield) (reply, error) {
-	answer := reply{tools: make(map[int]*toolCall)}
+	reply := reply{tools: make(map[int]*toolCall)}
 	err := sse.Read(body, func(payload string) (bool, error) {
-		return answer.step(payload, yield)
+		return reply.step(payload, yield)
 	})
-	return answer, err
+	return reply, err
 }
 
 var cutShort = []string{"length", "content_filter"}
 
 func parseChunk(payload string) (chunk, error) {
-	var message chunk
-	if err := json.Unmarshal([]byte(payload), &message); err != nil {
-		return chunk{}, fmt.Errorf("the endpoint sent something unreadable: %s", payload)
+	var zeroChunk chunk
+	var chunk chunk
+	if err := json.Unmarshal([]byte(payload), &chunk); err != nil {
+		return zeroChunk, fmt.Errorf("the endpoint sent something unreadable: %s", payload)
 	}
 
-	return message, nil
+	return chunk, nil
 }
 
 func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
@@ -158,22 +165,25 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		return true, nil
 	}
 
-	message, err := parseChunk(payload)
+	chunk, err := parseChunk(payload)
 	if err != nil {
 		return true, err
 	}
-	if message.Error != nil {
-		return true, errors.New(message.Error.Message)
+	if chunk.Error != nil {
+		return true, errors.New(chunk.Error.Message)
 	}
-	if len(message.Choices) == 0 {
+	if chunk.Usage != nil && chunk.Usage.PromptTokens > 0 {
+		self.usage = agent.Usage{InputTokens: chunk.Usage.PromptTokens}
+	}
+	if len(chunk.Choices) == 0 {
 		return false, nil
 	}
 
-	if reason := message.Choices[0].FinishReason; reason != "" {
+	if reason := chunk.Choices[0].FinishReason; reason != "" {
 		self.stopReason = reason
 	}
 
-	delta := message.Choices[0].Delta
+	delta := chunk.Choices[0].Delta
 	reasoning := delta.ReasoningContent
 	if reasoning == "" {
 		reasoning = delta.Reasoning
@@ -230,7 +240,7 @@ func (self *reply) completeReasoning(yield agent.Yield) bool {
 	}
 
 	self.isReasoningOpen = false
-	return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true})
+	return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true, Usage: self.reportedUsage()})
 }
 
 func (self *reply) completeContent(yield agent.Yield) bool {
@@ -239,5 +249,14 @@ func (self *reply) completeContent(yield agent.Yield) bool {
 	}
 
 	self.isContentOpen = false
-	return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true})
+	return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true, Usage: self.reportedUsage()})
+}
+
+func (self *reply) reportedUsage() *agent.Usage {
+	if self.usage.InputTokens <= 0 {
+		return nil
+	}
+
+	usage := self.usage
+	return &usage
 }

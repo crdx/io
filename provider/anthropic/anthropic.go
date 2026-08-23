@@ -164,20 +164,23 @@ func encodeItem(item any) json.RawMessage {
 //
 // reference/streaming.md
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
-	turn, err := self.post(ctx, yield)
+	reply, err := self.post(ctx, yield)
 	if err != nil {
-		if said := turn.prose(); said != nil {
+		if said := reply.prose(); said != nil {
 			self.history = append(self.history, said)
 		}
 
 		return agent.Reply{}, err
 	}
 
-	if answer := turn.message(); answer != nil {
+	if answer := reply.message(); answer != nil {
 		self.history = append(self.history, answer)
 	}
 
-	return agent.Reply{Calls: turn.calls(self.toolNames)}, nil
+	return agent.Reply{
+		Calls: reply.calls(self.toolNames),
+		Usage: reply.usage,
+	}, nil
 }
 
 func (self *Client) settled() error {

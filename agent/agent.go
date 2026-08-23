@@ -79,49 +79,81 @@ func (self *Agent) FYI(text string) {
 }
 
 type proseStream struct {
-	kind Kind
-	text strings.Builder
+	kind             Kind
+	text             strings.Builder
+	pending          *Event
+	hasReportedUsage bool
 }
 
-func (self *proseStream) add(output Output) (Update, bool) {
+func (self *proseStream) add(output Output) []Update {
 	if output.Done {
 		if self.kind != output.Kind || self.text.Len() == 0 {
-			self.reset()
-			return Update{}, false
+			self.resetText()
+			return nil
 		}
 
 		event := Event{Kind: self.kind, Text: self.text.String()}
-		self.reset()
-		return Update{Event: &event}, true
+		if output.Usage != nil && !self.hasReportedUsage {
+			event.Usage = output.Usage
+			self.hasReportedUsage = true
+		}
+		self.resetText()
+		if !output.AwaitUsage {
+			return append(self.takePending(), Update{Event: &event})
+		}
+
+		self.pending = &event
+		return nil
 	}
 
 	if output.Text == "" {
-		return Update{}, false
+		return nil
 	}
 
+	updates := self.takePending()
+
 	if self.kind != "" && self.kind != output.Kind {
-		self.reset()
+		self.resetText()
 	}
 
 	self.kind = output.Kind
 	self.text.WriteString(output.Text)
 	delta := Delta{Kind: output.Kind, Text: output.Text}
 
-	return Update{Delta: &delta}, true
+	return append(updates, Update{Delta: &delta})
 }
 
-func (self *proseStream) partialMessage() (Update, bool) {
-	if self.kind != ModelMessageEvent || self.text.Len() == 0 {
-		self.reset()
-		return Update{}, false
+func (self *proseStream) finish(usage Usage) []Update {
+	if self.pending != nil && usage.InputTokens > 0 && !self.hasReportedUsage {
+		self.pending.Usage = &usage
+		self.hasReportedUsage = true
 	}
 
-	event := Event{Kind: self.kind, Text: self.text.String()}
-	self.reset()
-	return Update{Event: &event}, true
+	return self.takePending()
 }
 
-func (self *proseStream) reset() {
+func (self *proseStream) interrupted() []Update {
+	updates := self.takePending()
+	if self.kind == ModelMessageEvent && self.text.Len() > 0 {
+		event := Event{Kind: self.kind, Text: self.text.String()}
+		updates = append(updates, Update{Event: &event})
+	}
+	self.resetText()
+
+	return updates
+}
+
+func (self *proseStream) takePending() []Update {
+	if self.pending == nil {
+		return nil
+	}
+
+	update := Update{Event: self.pending}
+	self.pending = nil
+	return []Update{update}
+}
+
+func (self *proseStream) resetText() {
 	self.kind = ""
 	self.text.Reset()
 }
@@ -137,6 +169,15 @@ func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update,
 
 			return yield(update, err)
 		}
+		yieldUpdates := func(updates []Update) bool {
+			for _, update := range updates {
+				if !yield(update, nil) {
+					return false
+				}
+			}
+
+			return true
+		}
 
 		self.provider.AddUserMessage(message)
 
@@ -149,10 +190,7 @@ func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update,
 			var prose proseStream
 
 			reply, err := self.provider.Send(ctx, func(output Output) bool {
-				update, available := prose.add(output)
-				if available {
-					listening = yield(update, nil)
-				}
+				listening = yieldUpdates(prose.add(output))
 				return listening
 			})
 
@@ -161,20 +199,26 @@ func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update,
 				self.answer(cancelledResults(reply.Calls))
 				return
 			case err != nil:
-				if update, available := prose.partialMessage(); available && !yield(update, nil) {
+				if !yieldUpdates(prose.interrupted()) {
 					return
 				}
 				yield(Update{}, err)
 				return
-			default:
-				prose.reset()
-			}
-
-			if len(reply.Calls) == 0 {
+			case len(reply.Calls) == 0:
+				yieldUpdates(prose.finish(reply.Usage))
 				return
 			}
 
-			if !self.runCalls(ctx, reply.Calls, yieldEvent) {
+			if !yieldUpdates(prose.finish(Usage{})) {
+				self.answer(cancelledResults(reply.Calls))
+				return
+			}
+
+			usage := reply.Usage
+			if prose.hasReportedUsage {
+				usage = Usage{}
+			}
+			if !self.runCalls(ctx, reply.Calls, usage, yieldEvent) {
 				return
 			}
 		}
@@ -229,6 +273,7 @@ type pendingCall struct {
 func (self *Agent) runCalls(
 	ctx context.Context,
 	calls []ToolCall,
+	usage Usage,
 	yield func(Event, error) bool,
 ) bool {
 	results := cancelledResults(calls)
@@ -253,6 +298,9 @@ func (self *Agent) runCalls(
 			FallbackRendering: FallbackRendering{
 				ReadOnly: self.readOnly(rawCall),
 			},
+		}
+		if i == len(calls)-1 && usage.InputTokens > 0 {
+			event.Usage = &usage
 		}
 
 		if parsedToolCall != nil {

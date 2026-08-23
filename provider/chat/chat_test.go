@@ -347,6 +347,40 @@ func TestATurnThatProducedNothingIsNotStored(t *testing.T) {
 	}
 }
 
+func TestAStreamingRequestAsksForAndReportsUsage(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(
+		t,
+		&bodies,
+		`{"choices":[{"delta":{"content":"hello"}}]}`,
+		`{"choices":[{"delta":{},"finish_reason":"stop"}]}`,
+		`{"choices":[],"usage":{"prompt_tokens":5000}}`,
+		"[DONE]",
+	)
+
+	client := newClient(t, server.URL)
+	client.AddUserMessage("hello")
+
+	var outputs []agent.Output
+	reply, err := client.Send(t.Context(), func(output agent.Output) bool {
+		outputs = append(outputs, output)
+		return true
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.Contains(bodies[0], `"stream_options":{"include_usage":true}`) {
+		t.Errorf("usage was not requested: %s", bodies[0])
+	}
+	if reply.Usage.InputTokens != 5000 {
+		t.Errorf("got usage %d, want 5000", reply.Usage.InputTokens)
+	}
+	if len(outputs) == 0 || outputs[len(outputs)-1].Usage == nil || outputs[len(outputs)-1].Usage.InputTokens != 5000 {
+		t.Errorf("final output did not carry usage: %#v", outputs)
+	}
+}
+
 func TestConversationWithStreamingToolCall(t *testing.T) {
 	type sentMessage struct {
 		Role    string  `json:"role"`

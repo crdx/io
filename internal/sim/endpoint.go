@@ -42,6 +42,7 @@ type Request struct {
 	Model        string
 	Instructions string
 	Streaming    bool
+	IncludeUsage bool
 	Stored       bool
 	Turn         int
 	Input        []Entry

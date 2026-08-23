@@ -48,6 +48,13 @@ const callID = "c1"
 
 const completed = `{"type":"response.completed"}`
 
+func completedWithUsage(inputTokens int) string {
+	return fmt.Sprintf(
+		`{"type":"response.completed","response":{"usage":{"input_tokens":%d}}}`,
+		inputTokens,
+	)
+}
+
 func turns(t *testing.T, scripted ...string) (*httptest.Server, *[]string) {
 	t.Helper()
 
@@ -406,6 +413,32 @@ func TestStreamReportsEachTurnAsItHappens(t *testing.T) {
 
 	if !slices.Equal(eventStrings, expectedEvents) {
 		t.Errorf("expected %v, got %v", expectedEvents, eventStrings)
+	}
+}
+
+func TestStreamAttachesEachRequestsContextUsageToItsFinalEvent(t *testing.T) {
+	server, _ := turns(
+		t,
+		events(call("weather", `{"city":"London"}`), completedWithUsage(12_000)),
+		events(answer("It is raining."), completedWithUsage(27_400)),
+	)
+
+	var callCount int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &callCount)})
+
+	var usages []agent.Usage
+	for update, err := range assistant.Stream(t.Context(), "what is the weather?") {
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if update.Event != nil && update.Event.Usage != nil {
+			usages = append(usages, *update.Event.Usage)
+		}
+	}
+
+	want := []agent.Usage{{InputTokens: 12_000}, {InputTokens: 27_400}}
+	if !slices.Equal(usages, want) {
+		t.Errorf("got usage %v, want %v", usages, want)
 	}
 }
 

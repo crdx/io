@@ -31,7 +31,8 @@ type entry struct {
 	} `json:"reasoning_options"`
 
 	Limit struct {
-		MaxOutputTokens int `json:"output"`
+		ContextWindowTokens int `json:"context"`
+		MaxOutputTokens     int `json:"output"`
 	} `json:"limit"`
 }
 
@@ -52,10 +53,11 @@ func (self entry) model(name string) agent.Model {
 	}
 
 	return agent.Model{
-		ID:              id,
-		Name:            self.Name,
-		EffortLevels:    self.getEffortLevels(),
-		MaxOutputTokens: self.Limit.MaxOutputTokens,
+		ID:                  id,
+		Name:                self.Name,
+		EffortLevels:        self.getEffortLevels(),
+		ContextWindowTokens: self.Limit.ContextWindowTokens,
+		MaxOutputTokens:     self.Limit.MaxOutputTokens,
 	}
 }
 

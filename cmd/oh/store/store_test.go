@@ -72,7 +72,7 @@ var conversation = []agent.Event{
 	{Kind: agent.ModelMessageEvent, Text: "Let me look."},
 	{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "weather", Arguments: `{"city":"London"}`, FallbackRendering: agent.FallbackRendering{Subject: "London"}},
 	{Kind: agent.ToolCallResultEvent, ID: "1", Name: "weather", Text: "raining"},
-	{Kind: agent.ModelMessageEvent, Text: "It is raining."},
+	{Kind: agent.ModelMessageEvent, Text: "It is raining.", Usage: &agent.Usage{InputTokens: 5000}},
 }
 
 func TestASessionReadsBackAsItWasWritten(t *testing.T) {

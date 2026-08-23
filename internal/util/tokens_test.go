@@ -6,6 +6,20 @@ import (
 	"crdx.org/io/internal/util"
 )
 
+func TestFormatTokenCountRendersMeasuredCountsWithoutAnEstimateMarker(t *testing.T) {
+	for tokens, want := range map[int64]string{
+		0:       "0t",
+		999:     "999t",
+		1000:    "1Kt",
+		12_345:  "12.3Kt",
+		200_000: "200Kt",
+	} {
+		if got := util.FormatTokenCount(tokens, 3); got != want {
+			t.Errorf("FormatTokenCount(%d, 3) = %q, want %q", tokens, got, want)
+		}
+	}
+}
+
 func TestFormatTokenEstimateUsesFourBytesPerToken(t *testing.T) {
 	for bytes, want := range map[int64]string{
 		-1:   "0t",

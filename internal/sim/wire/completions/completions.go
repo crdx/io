@@ -38,6 +38,14 @@ func Call(index int, id string, name string, arguments string) string {
 	))
 }
 
+// Usage reports the context consumed by a completed request.
+func Usage(promptTokens int) string {
+	return fmt.Sprintf(
+		`{"object":"chat.completion.chunk","choices":[],"usage":{"prompt_tokens":%d}}`,
+		promptTokens,
+	)
+}
+
 // Finish ends a turn, saying why the model stopped.
 func Finish(reason string) string {
 	return fmt.Sprintf(

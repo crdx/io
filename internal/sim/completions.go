@@ -19,8 +19,11 @@ func (self completionsDialect) Path() string {
 }
 
 type completionsBody struct {
-	Model    string `json:"model"`
-	Stream   bool   `json:"stream"`
+	Model         string `json:"model"`
+	Stream        bool   `json:"stream"`
+	StreamOptions struct {
+		IncludeUsage bool `json:"include_usage"`
+	} `json:"stream_options"`
 	Messages []struct {
 		Role       string `json:"role"`
 		Content    any    `json:"content"`
@@ -48,9 +51,10 @@ func (self completionsDialect) Read(_ *http.Request, raw []byte) (Request, bool)
 	}
 
 	asked := Request{
-		API:       self.Name(),
-		Model:     sent.Model,
-		Streaming: sent.Stream,
+		API:          self.Name(),
+		Model:        sent.Model,
+		Streaming:    sent.Stream,
+		IncludeUsage: sent.StreamOptions.IncludeUsage,
 	}
 
 	var roles []string
@@ -105,6 +109,8 @@ func (self completionsDialect) Check(scenario *Scenario, asked Request) string {
 	switch {
 	case !asked.Streaming:
 		return "only streaming responses are supported"
+	case !asked.IncludeUsage:
+		return "stream usage was not requested"
 	case asked.Instructions == "":
 		return "the request carried no instructions"
 	case asked.Model != scenario.Model:
@@ -142,6 +148,7 @@ func (self completionsDialect) Play(stream *Stream, _ *Scenario, turn Turn) {
 		stream.Send(completions.Error(turn.Fail))
 	default:
 		stream.Send(completions.Finish(finishReason(turn)))
+		stream.Send(completions.Usage(freshTokens + cachedTokens))
 	}
 
 	stream.Send(completions.Done)
@@ -161,5 +168,6 @@ func finishReason(turn Turn) string {
 func (self completionsDialect) Exhausted(stream *Stream, message string) {
 	stream.Send(completions.Answer(message))
 	stream.Send(completions.Finish(completions.Stopped))
+	stream.Send(completions.Usage(freshTokens + cachedTokens))
 	stream.Send(completions.Done)
 }

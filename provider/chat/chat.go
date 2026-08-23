@@ -127,20 +127,20 @@ func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, e
 	}
 	defer func() { _ = stream.Close() }()
 
-	answer, err := readReply(stream, yield)
+	reply, err := readReply(stream, yield)
 	if err != nil {
-		if answer.hasSpoken() {
-			self.history = append(self.history, encode(answer.prose()))
+		if reply.hasSpoken() {
+			self.history = append(self.history, encode(reply.prose()))
 		}
 
 		return agent.Reply{}, err
 	}
 
-	if !answer.isEmpty() {
-		self.history = append(self.history, encode(answer.message()))
+	if !reply.isEmpty() {
+		self.history = append(self.history, encode(reply.message()))
 	}
 
-	return agent.Reply{Calls: answer.calls()}, nil
+	return agent.Reply{Calls: reply.calls(), Usage: reply.usage}, nil
 }
 
 func (self *Client) settled() error {
@@ -175,6 +175,7 @@ func (self *Client) requestBody() request {
 		Model:           self.Model,
 		Messages:        messages,
 		Stream:          true,
+		StreamOptions:   streamOptions{IncludeUsage: true},
 		Tools:           self.tools,
 		ReasoningEffort: self.Effort,
 		MaxOutputTokens: self.MaxOutputTokens,
@@ -205,12 +206,17 @@ type request struct {
 	Model             string            `json:"model"`
 	Messages          []json.RawMessage `json:"messages"`
 	Stream            bool              `json:"stream"`
+	StreamOptions     streamOptions     `json:"stream_options"`
 	Tools             []functionTool    `json:"tools,omitempty"`
 	ToolChoice        string            `json:"tool_choice,omitempty"`         // omitempty: "" is not a choice the endpoint takes
 	ParallelToolCalls *bool             `json:"parallel_tool_calls,omitempty"` // a pointer, because false asks for something and the endpoint defaults to true
 	ReasoningEffort   string            `json:"reasoning_effort,omitempty"`
 
 	MaxOutputTokens int `json:"max_completion_tokens"`
+}
+
+type streamOptions struct {
+	IncludeUsage bool `json:"include_usage"`
 }
 
 type message struct {

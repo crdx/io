@@ -81,6 +81,19 @@ func stop(reason string) string {
 	return fmt.Sprintf(`{"type":"message_delta","delta":{"stop_reason":%q},"usage":{}}`, reason)
 }
 
+func startWithUsage(fresh int, cacheRead int, cacheCreation int) string {
+	return fmt.Sprintf(`{"type":"message_start","message":{"id":"msg_1","role":"assistant",`+
+		`"content":[],"usage":{"input_tokens":%d,"cache_read_input_tokens":%d,`+
+		`"cache_creation_input_tokens":%d,"output_tokens":1}}}`, fresh, cacheRead, cacheCreation)
+}
+
+func stopWithUsage(reason string, fresh int, cacheRead int, cacheCreation int) string {
+	return fmt.Sprintf(`{"type":"message_delta","delta":{"stop_reason":%q},`+
+		`"usage":{"input_tokens":%d,"cache_read_input_tokens":%d,`+
+		`"cache_creation_input_tokens":%d,"output_tokens":510}}`,
+		reason, fresh, cacheRead, cacheCreation)
+}
+
 func answer(text string) []string {
 	return []string{
 		messageStart, textStart(0), textDelta(0, text), blockStop(0),
@@ -276,12 +289,14 @@ func TestTheModelListingFollowsTheEndpointItWasGiven(t *testing.T) {
 	}
 
 	want := agent.Model{
-		ID:              "claude-opus-5",
-		Name:            "Claude Opus 5",
-		EffortLevels:    []string{"low", "high"},
-		MaxOutputTokens: 500,
+		ID:                  "claude-opus-5",
+		Name:                "Claude Opus 5",
+		EffortLevels:        []string{"low", "high"},
+		ContextWindowTokens: 1000,
+		MaxOutputTokens:     500,
 	}
 	if models[0].ID != want.ID || models[0].Name != want.Name ||
+		models[0].ContextWindowTokens != want.ContextWindowTokens ||
 		models[0].MaxOutputTokens != want.MaxOutputTokens ||
 		!slices.Equal(models[0].EffortLevels, want.EffortLevels) {
 		t.Errorf("expected %+v, got %+v", want, models[0])
@@ -854,6 +869,46 @@ func sendOneTurn(t *testing.T, url string, prompt string) (agent.Reply, error) {
 	client.AddUserMessage(prompt)
 
 	return client.Send(t.Context(), func(agent.Output) bool { return true })
+}
+
+func TestUsageCountsEverythingTheTurnReadAndNotOnlyWhatWasReadAfresh(t *testing.T) {
+	server, _ := turns(
+		t,
+		script(
+			[]string{startWithUsage(120, 4000, 880)},
+			[]string{textStart(0), textDelta(0, "Hello."), blockStop(0)},
+			[]string{stopWithUsage("end_turn", 120, 4000, 880), messageStop},
+		),
+	)
+
+	reply, err := sendOneTurn(t, server.URL, "hello")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if reply.Usage.InputTokens != 5000 {
+		t.Errorf("expected the cached tokens to be counted too, got %d", reply.Usage.InputTokens)
+	}
+}
+
+func TestAnAccountOfOnlyWhatWasWrittenLeavesTheContextCountStanding(t *testing.T) {
+	server, _ := turns(
+		t,
+		script(
+			[]string{startWithUsage(1200, 300, 0)},
+			[]string{textStart(0), textDelta(0, "Hello."), blockStop(0)},
+			[]string{stop("end_turn"), messageStop},
+		),
+	)
+
+	reply, err := sendOneTurn(t, server.URL, "hello")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if reply.Usage.InputTokens != 1500 {
+		t.Errorf("expected what the turn opened with to stand, got %d", reply.Usage.InputTokens)
+	}
 }
 
 func TestASealedThoughtHoldingNoTextIsStillSentBackAsItArrived(t *testing.T) {

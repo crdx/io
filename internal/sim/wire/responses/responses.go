@@ -11,7 +11,12 @@ import (
 const Done = "[DONE]"
 
 // CompletedResponse ends a turn that went to plan.
-const CompletedResponse = `{"type":"response.completed"}`
+func CompletedResponse(inputTokens int) string {
+	return fmt.Sprintf(
+		`{"type":"response.completed","response":{"usage":{"input_tokens":%d}}}`,
+		inputTokens,
+	)
+}
 
 // IncompleteResponse ends a turn the endpoint cut short.
 const IncompleteResponse = `{"type":"response.incomplete"}`

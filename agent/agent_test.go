@@ -607,6 +607,7 @@ func TestHowACallLookedIsWrittenFlatSoOldSessionsStillRead(t *testing.T) {
 
 type outputProvider struct {
 	outputs []agent.Output
+	reply   agent.Reply
 	err     error
 }
 
@@ -620,7 +621,36 @@ func (self *outputProvider) Send(_ context.Context, yield agent.Yield) (agent.Re
 		}
 	}
 
-	return agent.Reply{}, self.err
+	return self.reply, self.err
+}
+
+func TestStreamAttachesUsageToOneExistingResponseEvent(t *testing.T) {
+	usage := agent.Usage{InputTokens: 5000}
+	provider := &outputProvider{
+		outputs: []agent.Output{
+			{Kind: agent.ModelReasoningEvent, Text: "thought"},
+			{Kind: agent.ModelReasoningEvent, Done: true, Usage: &usage},
+			{Kind: agent.ModelMessageEvent, Text: "answer"},
+			{Kind: agent.ModelMessageEvent, Done: true, Usage: &usage},
+		},
+		reply: agent.Reply{Usage: usage},
+	}
+	assistant := agent.New("", provider, nil)
+
+	var reported []agent.Event
+	for update, err := range assistant.Stream(t.Context(), "go") {
+		if err != nil {
+			t.Fatal(err)
+		}
+		if update.Event != nil && update.Event.Usage != nil {
+			reported = append(reported, *update.Event)
+		}
+	}
+
+	if len(reported) != 1 || reported[0].Kind != agent.ModelReasoningEvent ||
+		reported[0].Usage.InputTokens != 5000 {
+		t.Errorf("got usage on %+v", reported)
+	}
 }
 
 func TestStreamSeparatesCompletedProseBlocksFromDeltas(t *testing.T) {

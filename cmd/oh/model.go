@@ -8,10 +8,11 @@ import (
 )
 
 type modelChoice struct {
-	provider        string
-	model           string
-	effortLevels    []string
-	maxOutputTokens int
+	provider            string
+	model               string
+	effortLevels        []string
+	contextWindowTokens int
+	maxOutputTokens     int
 }
 
 func chosenModel(providerName string, model string) (modelChoice, error) {

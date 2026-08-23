@@ -326,14 +326,15 @@ func run() ([]string, error) {
 	tools = truncate.Tools(tools)
 
 	chat := &Harness{
-		agent:              agent.New(systemPrompt, client, tools),
-		screen:             output.New(os.Stdout).LinkPathsUnder(workspaceDir),
-		log:                log,
-		workspaceDir:       workspaceDir,
-		mode:               mode,
-		processes:          processes,
-		onTurnFinished:     func() { sendTurnFinishedNotification(workspaceDir) },
-		getOnWithItMessage: config.GetOnWithItMessage,
+		agent:               agent.New(systemPrompt, client, tools),
+		screen:              output.New(os.Stdout).LinkPathsUnder(workspaceDir),
+		log:                 log,
+		workspaceDir:        workspaceDir,
+		contextWindowTokens: choice.contextWindowTokens,
+		mode:                mode,
+		processes:           processes,
+		onTurnFinished:      func() { sendTurnFinishedNotification(workspaceDir) },
+		getOnWithItMessage:  config.GetOnWithItMessage,
 	}
 
 	chat.segmentLayout, err = config.layout(availableSegments(workspaceDir, model, effort, chat))

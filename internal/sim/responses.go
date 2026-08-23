@@ -152,7 +152,7 @@ func (self *responsesDialect) Play(stream *Stream, _ *Scenario, turn Turn) {
 	case turn.Incomplete:
 		stream.Send(responses.IncompleteResponse)
 	default:
-		stream.Send(responses.CompletedResponse)
+		stream.Send(responses.CompletedResponse(freshTokens + cachedTokens))
 	}
 
 	stream.Send(responses.Done)
@@ -161,7 +161,7 @@ func (self *responsesDialect) Play(stream *Stream, _ *Scenario, turn Turn) {
 func (self *responsesDialect) Exhausted(stream *Stream, message string) {
 	stream.Send(responses.Answer(message))
 	stream.Send(responses.Message(message))
-	stream.Send(responses.CompletedResponse)
+	stream.Send(responses.CompletedResponse(freshTokens + cachedTokens))
 	stream.Send(responses.Done)
 }
 

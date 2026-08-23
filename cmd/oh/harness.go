@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"slices"
 	"strings"
 	"syscall"
 	"time"
@@ -42,14 +43,15 @@ type Harness struct {
 	editor        *edit.Input
 	mode          *caps.Mode
 
-	workspaceDir       string
-	restart            []string
-	getOnWithItMessage string
-	queuedTurn         QueuedTurn
-	currentTurn        Turn
-	onTurnFinished     func()
-	flushBoundary      int
-	terminalFocused    bool
+	workspaceDir        string
+	contextWindowTokens int
+	restart             []string
+	getOnWithItMessage  string
+	queuedTurn          QueuedTurn
+	currentTurn         Turn
+	onTurnFinished      func()
+	flushBoundary       int
+	terminalFocused     bool
 }
 
 const historyLimit = 1000
@@ -281,6 +283,20 @@ func (self *Harness) bar(position segment.Position, frame edit.Frame) string {
 
 func (self *Harness) turnActivity() (bool, int) {
 	return self.currentTurn.isRunning, self.currentTurn.spinnerFrame
+}
+
+func (self *Harness) contextUsage() (int, int) {
+	return contextUsageAt(self.events, self.contextWindowTokens)
+}
+
+func contextUsageAt(events []agent.Event, contextWindowTokens int) (int, int) {
+	for _, event := range slices.Backward(events) {
+		if event.Usage != nil && event.Usage.InputTokens > 0 {
+			return event.Usage.InputTokens, contextWindowTokens
+		}
+	}
+
+	return 0, contextWindowTokens
 }
 
 func (self *Harness) grantedCaps() caps.Set {

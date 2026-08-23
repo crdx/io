@@ -187,8 +187,8 @@ func TestAPathMappedIntoTheShellHomeMustComeFromTheHomeDirectory(t *testing.T) {
 func TestAConfigSayingNothingAboutTheBarTakesTheBuiltInLayout(t *testing.T) {
 	layout := layoutFrom(t, "")
 
-	if got := len(layout[segment.BottomLeft]); got != 4 {
-		t.Errorf("expected four segments along the bottom, got %d", got)
+	if got := len(layout[segment.BottomLeft]); got != 5 {
+		t.Errorf("expected five segments along the bottom, got %d", got)
 	}
 	if got := len(layout[segment.TopRight]); got != 1 {
 		t.Errorf("expected one segment at the top right, got %d", got)

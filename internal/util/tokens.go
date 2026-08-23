@@ -1,6 +1,21 @@
 package util
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
+
+func FormatTokenCount[Count count](tokens Count, precision int) string {
+	if tokens <= 0 {
+		return "0t"
+	}
+
+	if tokens < 1000 {
+		return fmt.Sprintf("%dt", tokens)
+	}
+
+	return formatScaledUnit(float64(tokens)/1000, precision, "", "Kt")
+}
 
 // FormatTokenEstimate estimates tokens from a UTF-8 byte count and renders the result compactly.
 func FormatTokenEstimate[Count count](bytes Count, precision int) string {

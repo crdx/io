@@ -36,10 +36,11 @@ type State interface {
 
 // Model is one model a provider offers.
 type Model struct {
-	ID              string   `json:"id"`
-	Name            string   `json:"name,omitempty"`
-	EffortLevels    []string `json:"efforts,omitempty"`
-	MaxOutputTokens int      `json:"output,omitempty"`
+	ID                  string   `json:"id"`
+	Name                string   `json:"name,omitempty"`
+	EffortLevels        []string `json:"efforts,omitempty"`
+	ContextWindowTokens int      `json:"context,omitempty"`
+	MaxOutputTokens     int      `json:"output,omitempty"`
 }
 
 // Lister is a provider that can say which models it offers.
@@ -49,9 +50,11 @@ type Lister interface {
 
 // Output is one provider prose fragment or completion boundary.
 type Output struct {
-	Kind Kind
-	Text string
-	Done bool
+	Kind       Kind
+	Text       string
+	Done       bool
+	AwaitUsage bool
+	Usage      *Usage
 }
 
 // Yield is handed each piece of provider output as it arrives, and returns false to end the turn.
@@ -72,6 +75,12 @@ type Update struct {
 // Reply is a turn once it's over.
 type Reply struct {
 	Calls []ToolCall
+	Usage Usage
+}
+
+// Usage is what a completed provider request consumed.
+type Usage struct {
+	InputTokens int `json:"input_tokens"` // tokens in the context sent to the model
 }
 
 // ToolCall is one call the model made.
@@ -147,6 +156,7 @@ type Event struct {
 	Took      time.Duration   `json:"took,omitempty"`
 	Stats     *tool.Stats     `json:"stats,omitempty"`
 	State     json.RawMessage `json:"state,omitempty"` // an opaque durable tool-state transition
+	Usage     *Usage          `json:"usage,omitempty"` // the request usage reported with this response event
 }
 
 // Agent holds a conversation.

@@ -127,6 +127,9 @@ func supplement(listed []agent.Model, registered map[string]agent.Model) []agent
 			if len(model.EffortLevels) == 0 {
 				model.EffortLevels = slices.Clone(known.EffortLevels)
 			}
+			if model.ContextWindowTokens == 0 {
+				model.ContextWindowTokens = known.ContextWindowTokens
+			}
 			if model.MaxOutputTokens == 0 {
 				model.MaxOutputTokens = known.MaxOutputTokens
 			}
@@ -160,10 +163,11 @@ func choicesFor(providerName string, models []agent.Model) []modelChoice {
 		}
 
 		choices = append(choices, modelChoice{
-			provider:        providerName,
-			model:           model.ID,
-			effortLevels:    model.EffortLevels,
-			maxOutputTokens: model.MaxOutputTokens,
+			provider:            providerName,
+			model:               model.ID,
+			effortLevels:        model.EffortLevels,
+			contextWindowTokens: model.ContextWindowTokens,
+			maxOutputTokens:     model.MaxOutputTokens,
 		})
 	}
 
