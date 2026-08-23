@@ -1,38 +1,38 @@
 === caps  while running ===
-·✧ ─ 9s ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+·✧ ─ 9s ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps  while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+✧· ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps r while running ===
-·✧ ─ 9s ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+·✧ ─ 9s ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps r while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+✧· ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rgb while running ===
-·✧ ─ 9s ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+·✧ ─ 9s ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rgb while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+✧· ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rw while running ===
-·✧ ─ 9s ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+·✧ ─ 9s ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rw while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+✧· ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rx while running ===
-·✧ ─ 9s ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+·✧ ─ 9s ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rx while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+✧· ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rxw while running ===
-·✧ ─ 9s ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+·✧ ─ 9s ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rxw while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+✧· ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rxwg while running ===
-·✧ ─ 9s ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+·✧ ─ 9s ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rxwg while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+✧· ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rxwgb while running ===
-·✧ ─ 9s ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+·✧ ─ 9s ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === caps rxwgb while waiting ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ ?% ?/?
+✧· ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === context usage high ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ 91% 182Kt/200Kt
+✧· ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ 91% 182Kt/200Kt
 === context usage low ===
-✧· ─ rxwgb ─ workspace ─ gpt-5.6-sol ─ high ─ 3% 5Kt/200Kt
+✧· ─ rxwgb ─ workspace ─ high gpt-5.6-sol ─ 3% 5Kt/200Kt
 === the startup line ===
 startup=2ms session=brave-otter skills=3p/1g tools=~200t
