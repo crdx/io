@@ -77,6 +77,8 @@ func (self *Harness) begin(message string) {
 	ticker := self.getTicker()
 	defer ticker.Stop()
 
+	idle := idleRefresh{interval: self.segmentLayout.IdleRefreshInterval()}
+
 	self.show(editor)
 
 	if message != "" {
@@ -107,14 +109,30 @@ func (self *Harness) begin(message string) {
 			self.redraw()
 
 		case <-ticker.C:
-			if !self.currentTurn.isRunning {
+			if self.currentTurn.isRunning {
+				self.currentTurn.spinnerFrame++
+			} else if !idle.isDue() {
 				continue
 			}
-			self.currentTurn.spinnerFrame++
 		}
 
 		self.show(editor)
 	}
+}
+
+type idleRefresh struct {
+	interval time.Duration
+	drawnAt  time.Time
+}
+
+func (self *idleRefresh) isDue() bool {
+	if self.interval <= 0 || time.Since(self.drawnAt) < self.interval {
+		return false
+	}
+
+	self.drawnAt = time.Now()
+
+	return true
 }
 
 func (self *Harness) getTicker() *time.Ticker {

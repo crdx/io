@@ -257,6 +257,16 @@ func everyJournal(t *testing.T) []journal {
 	return journals
 }
 
+func drawnOnAStoppedClock(t *testing.T, draw func(t *testing.T) string) string {
+	t.Helper()
+
+	var drawn string
+
+	synctest.Test(t, func(t *testing.T) { drawn = draw(t) })
+
+	return drawn
+}
+
 func compareWithGolden(t *testing.T, name string, suffix string, passes map[string]func() string) {
 	t.Helper()
 
@@ -613,13 +623,17 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 			}
 
 			passes[name] = func() string {
-				held := &Harness{mode: caps.NewMode(grantedCaps)}
-				held.currentTurn.isRunning = isRunning
-				held.currentTurn.spinnerFrame = 2
+				return drawnOnAStoppedClock(t, func(t *testing.T) string {
+					t.Helper()
 
-				built := goldenBarLayout(t, held)
+					held := &Harness{mode: caps.NewMode(grantedCaps)}
+					held.currentTurn.isRunning = isRunning
+					held.currentTurn.spinnerFrame = 2
 
-				return bar(built, segment.BottomLeft, edit.Frame{})
+					built := goldenBarLayout(t, held)
+
+					return bar(built, segment.BottomLeft, edit.Frame{})
+				})
 			}
 		}
 	}
@@ -676,33 +690,38 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 			passName := fmt.Sprintf("%s at %d columns", name, width)
 
 			passes[passName] = func() string {
-				held := &Harness{mode: caps.NewMode(caps.All())}
-				held.currentTurn.isRunning = true
-				held.currentTurn.spinnerFrame = 2
+				return drawnOnAStoppedClock(t, func(t *testing.T) string {
+					t.Helper()
 
-				built := goldenBarLayout(t, held)
+					held := &Harness{mode: caps.NewMode(caps.All())}
+					held.currentTurn.isRunning = true
+					held.currentTurn.spinnerFrame = 2
 
-				held.segmentLayout = built
+					built := goldenBarLayout(t, held)
 
-				block := input.Block{
-					Top: input.Ruler{
-						Left:   held.bar(segment.TopLeft, frame),
-						Center: held.bar(segment.TopCenter, frame),
-						Right:  held.bar(segment.TopRight, frame),
-					},
-					Input: frame,
-					Bottom: input.Ruler{
-						Left:   held.bar(segment.BottomLeft, frame),
-						Center: held.bar(segment.BottomCenter, frame),
-						Right:  held.bar(segment.BottomRight, frame),
-					},
-				}
+					held.segmentLayout = built
 
-				rows, cursorRow, cursorColumn := block.Rows(width)
+					block := input.Block{
+						Top: input.Ruler{
+							Left:   held.bar(segment.TopLeft, frame),
+							Center: held.bar(segment.TopCenter, frame),
+							Right:  held.bar(segment.TopRight, frame),
+						},
+						Input: frame,
+						Bottom: input.Ruler{
+							Left:   held.bar(segment.BottomLeft, frame),
+							Center: held.bar(segment.BottomCenter, frame),
+							Right:  held.bar(segment.BottomRight, frame),
+						},
+					}
 
-				return fmt.Sprintf(
-					"%s\ncursor row %d column %d", strings.Join(rows, "\n"), cursorRow, cursorColumn,
-				)
+					rows, cursorRow, cursorColumn := block.Rows(width)
+
+					return fmt.Sprintf(
+						"%s\ncursor row %d column %d",
+						strings.Join(rows, "\n"), cursorRow, cursorColumn,
+					)
+				})
 			}
 
 			shownPassesAtWidth[passName] = func() string {

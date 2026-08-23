@@ -28,8 +28,11 @@ left = [
     { segment = "active-model" },
     { segment = "context-usage" },
 ]
-center = []
+center = [
+
+]
 right = [
     { segment = "current-session" },
+    { segment = "current-time", format = "15:04" },
     { segment = "scroll-overflow", direction = "down" }
 ]

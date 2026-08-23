@@ -12,6 +12,10 @@
 \e[38;2;150;152;150m?% ?/?\e[0m
 === current-session ===
 \e[38;2;150;152;150mbrave-otter\e[0m
+=== current-time / custom format ===
+\e[38;2;150;152;150m14:32:09\e[0m
+=== current-time / default format ===
+\e[38;2;150;152;150m14:32\e[0m
 === mode-toggle / all granted ===
 \e[38;2;76;154;44mr\e[0m\e[38;2;204;102;102mx\e[0m\e[38;2;207;173;0mw\e[0m\e[38;2;201;166;212mg\e[0m\e[38;2;138;190;183mb\e[0m
 === mode-toggle / pending chord ===

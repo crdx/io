@@ -87,6 +87,11 @@ type Ticker interface {
 	RefreshInterval() time.Duration
 }
 
+type Persister interface {
+	Ticker
+	Persistent() bool
+}
+
 func (self Layout) RefreshInterval() time.Duration {
 	var fastest time.Duration
 
@@ -98,6 +103,25 @@ func (self Layout) RefreshInterval() time.Duration {
 			}
 
 			if interval := ticker.RefreshInterval(); interval > 0 && (fastest == 0 || interval < fastest) {
+				fastest = interval
+			}
+		}
+	}
+
+	return fastest
+}
+
+func (self Layout) IdleRefreshInterval() time.Duration {
+	var fastest time.Duration
+
+	for _, instances := range self {
+		for _, instance := range instances {
+			persister, ok := instance.(Persister)
+			if !ok || !persister.Persistent() {
+				continue
+			}
+
+			if interval := persister.RefreshInterval(); interval > 0 && (fastest == 0 || interval < fastest) {
 				fastest = interval
 			}
 		}

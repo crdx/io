@@ -2,6 +2,7 @@ package main
 
 import (
 	"strings"
+	"time"
 
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/segment"
@@ -9,7 +10,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/segment/currentSession"
-
+	"crdx.org/io/cmd/oh/segment/currentTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
 
@@ -25,6 +26,7 @@ const (
 	activeModelSegment      = "active-model"
 	scrollOverflowSegment   = "scroll-overflow"
 	currentSessionSegment   = "current-session"
+	currentTimeSegment      = "current-time"
 )
 
 func availableSegments(
@@ -42,6 +44,7 @@ func availableSegments(
 		activeModelSegment:      activeModel.New(modelName, modelEffort),
 		scrollOverflowSegment:   scrollOverflow.New,
 		currentSessionSegment:   currentSession.New(currentSessionName),
+		currentTimeSegment:      currentTime.New(time.Now),
 	}
 }
 

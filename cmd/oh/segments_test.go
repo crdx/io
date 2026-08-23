@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"time"
 
 	"github.com/BurntSushi/toml"
 
@@ -11,7 +12,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/segment/currentSession"
-
+	"crdx.org/io/cmd/oh/segment/currentTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
 
@@ -63,7 +64,7 @@ func goldenBarLayout(t *testing.T, harness *Harness) segment.Layout {
 		center = []
 		right = [
 			{ segment = "current-session" },
-
+			{ segment = "current-time", format = "15:04" },
 			{ segment = "scroll-overflow", direction = "down" },
 		]
 	`)
@@ -79,6 +80,7 @@ func goldenBarLayout(t *testing.T, harness *Harness) segment.Layout {
 }
 
 func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
+	at := time.Date(2026, time.August, 23, 14, 32, 9, 0, time.UTC)
 	spinnerOptions := `
 		idle = "✧·"
 		frames = ["✦·", "·✦"]
@@ -125,6 +127,18 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"current-session": goldenSegmentPass(
 			t,
 			currentSession.New("brave-otter"),
+			"",
+			segment.Context{},
+		),
+		"current-time / custom format": goldenSegmentPass(
+			t,
+			currentTime.New(func() time.Time { return at }),
+			`format = "15:04:05"`,
+			segment.Context{},
+		),
+		"current-time / default format": goldenSegmentPass(
+			t,
+			currentTime.New(func() time.Time { return at }),
 			"",
 			segment.Context{},
 		),
