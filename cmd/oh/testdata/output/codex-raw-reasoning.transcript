@@ -1,0 +1,49 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+reason without a summary
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+Raw reasoning.
+```
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+```
+Done.
+```
+
+## User
+
+> 2001-01-01T00:00:03Z
+
+```
+continue after the first response
+```
+
+## Assistant
+
+> 2001-01-01T00:00:04Z
+
+```
+Resumed.
+```
+

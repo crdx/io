@@ -19,7 +19,10 @@ var ErrIncomplete = errors.New("the response was cut short")
 // went quiet mid-turn rather than the model reaching an end.
 var ErrTruncated = sse.ErrTruncated
 
-const emptyArguments = "{}"
+const (
+	emptyArguments = "{}"
+	refusalReason  = "refusal"
+)
 
 var cutShort = []string{"max_tokens", "model_context_window_exceeded"}
 
@@ -44,8 +47,9 @@ func (self *block) argumentsOrEmpty() string {
 }
 
 type reply struct {
-	blocks     []*block
-	stopReason string
+	blocks          []*block
+	stopReason      string
+	stopExplanation string
 }
 
 func (self *reply) find(index int) *block {
@@ -80,15 +84,12 @@ func (self *reply) assemble(shouldIncludeCalls bool) json.RawMessage {
 			blocks = append(blocks, encodeItem(redactedBlock{Type: "redacted_thinking", Data: held.data}))
 
 		case "thinking":
-			switch {
-			case held.signature.Len() > 0:
+			if held.signature.Len() > 0 {
 				blocks = append(blocks, encodeItem(thinkingBlock{
 					Type:      "thinking",
 					Thinking:  held.text.String(),
 					Signature: held.signature.String(),
 				}))
-			case held.text.Len() > 0:
-				blocks = append(blocks, encodeItem(textBlock{Type: "text", Text: held.text.String()}))
 			}
 
 		case "tool_use":
@@ -160,12 +161,17 @@ type startedBlock struct {
 }
 
 type eventDelta struct {
-	Type        string `json:"type"`
-	Text        string `json:"text"`
-	Thinking    string `json:"thinking"`
-	Signature   string `json:"signature"`
-	PartialJSON string `json:"partial_json"`
-	StopReason  string `json:"stop_reason"`
+	Type        string       `json:"type"`
+	Text        string       `json:"text"`
+	Thinking    string       `json:"thinking"`
+	Signature   string       `json:"signature"`
+	PartialJSON string       `json:"partial_json"`
+	StopReason  string       `json:"stop_reason"`
+	StopDetails *stopDetails `json:"stop_details"`
+}
+
+type stopDetails struct {
+	Explanation string `json:"explanation"`
 }
 
 type eventError struct {
@@ -208,16 +214,26 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		return self.close(message, yield), nil
 
 	case "message_delta":
-		if message.Delta != nil && message.Delta.StopReason != "" {
-			self.stopReason = message.Delta.StopReason
+		if message.Delta != nil {
+			if message.Delta.StopReason != "" {
+				self.stopReason = message.Delta.StopReason
+			}
+			if message.Delta.StopDetails != nil {
+				self.stopExplanation = message.Delta.StopDetails.Explanation
+			}
 		}
 
 	case "message_stop":
-		if slices.Contains(cutShort, self.stopReason) {
+		switch {
+		case slices.Contains(cutShort, self.stopReason):
 			return true, ErrIncomplete
+		case self.stopReason == refusalReason && self.stopExplanation != "":
+			return true, errors.New(self.stopExplanation)
+		case self.stopReason == refusalReason:
+			return true, errors.New("the model refused the request")
+		default:
+			return true, nil
 		}
-
-		return true, nil
 
 	case "error":
 		return true, message.failure(payload)
@@ -256,10 +272,12 @@ func (self *reply) add(message event, yield agent.Yield) bool {
 	case "text_delta":
 		held.text.WriteString(message.Delta.Text)
 
-		return !yield(agent.Event{Kind: agent.ModelMessage, Text: message.Delta.Text})
+		return !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: message.Delta.Text})
 
 	case "thinking_delta":
 		held.text.WriteString(message.Delta.Thinking)
+
+		return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: message.Delta.Thinking})
 
 	case "signature_delta":
 		held.signature.WriteString(message.Delta.Signature)
@@ -279,9 +297,12 @@ func (self *reply) close(message event, yield agent.Yield) bool {
 
 	held.isDone = true
 
-	if held.kind == "thinking" && held.text.Len() > 0 {
-		return !yield(agent.Event{Kind: agent.ModelReasoning, Text: held.text.String()})
+	switch {
+	case held.kind == "text" && held.text.Len() > 0:
+		return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true})
+	case held.kind == "thinking" && held.text.Len() > 0 && held.signature.Len() > 0:
+		return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true})
+	default:
+		return false
 	}
-
-	return false
 }

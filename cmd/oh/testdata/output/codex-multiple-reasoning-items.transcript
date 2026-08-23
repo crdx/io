@@ -1,0 +1,57 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+reason in two separate items
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+First item.
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:02Z
+
+```
+Second item.
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Done.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+continue after the first response
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Resumed.
+```
+

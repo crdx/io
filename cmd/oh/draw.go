@@ -23,11 +23,12 @@ const (
 )
 
 type Painter struct {
-	screen    *output.Screen
-	toolBlock *dynamic.Block  // the open block of tool calls
-	rows      map[string]int  // which row of the block a call is being shown on
-	answer    strings.Builder // the answer so far, which is rendered again on every delta
-	reasoning strings.Builder // the reasoning so far, which is rendered again on every delta
+	screen       *output.Screen
+	toolBlock    *dynamic.Block  // the open block of tool calls
+	rows         map[string]int  // which row of the block a call is being shown on
+	answer       strings.Builder // the answer so far, which is rendered again on every delta
+	reasoning    strings.Builder // the reasoning so far, which is rendered again on every delta
+	previousKind agent.Kind      // the last completed event, which determines block separation
 
 	isStale   bool // whether streamed prose outgrew what the screen can repair
 	isRunning bool // whether drawing is happening as events arrive
@@ -36,8 +37,8 @@ type Painter struct {
 	workspaceDir string                         // the prefix omitted from paths inside the workspace
 }
 
-func (self *Painter) describe(event agent.Event) agent.Rendering {
-	shown := event.Rendering
+func (self *Painter) describe(event agent.Event) agent.FallbackRendering {
+	shown := event.FallbackRendering
 
 	if calledTool, known := self.calledTool(event.Name); known {
 		shown.ReadOnly = calledTool.ReadOnly()
@@ -55,7 +56,7 @@ func (self *Painter) describe(event agent.Event) agent.Rendering {
 	return shown
 }
 
-func (self *Painter) label(event agent.Event, shown agent.Rendering) call.Label {
+func (self *Painter) label(event agent.Event, shown agent.FallbackRendering) call.Label {
 	label := call.Label{
 		Name:      event.Name,
 		Subject:   shown.Subject,
@@ -113,44 +114,74 @@ func (self *Painter) calledTool(name string) (tool.Tool, bool) {
 	return self.getTool(name)
 }
 
-func (self *Painter) drawEvent(event agent.Event) {
-	if event.Kind != agent.ModelReasoning && self.reasoning.Len() > 0 {
-		self.screen.End()
-		self.reasoning.Reset()
-		if event.Kind == agent.ModelMessage {
+func (self *Painter) drawDelta(delta agent.Delta) {
+	switch delta.Kind {
+	case agent.ModelReasoningEvent:
+		if self.reasoning.Len() == 0 && self.previousKind == agent.ModelReasoningEvent {
+			self.screen.End()
+		}
+		self.reasoning.WriteString(delta.Text)
+		if !self.screen.DrawReasoning(renderReasoning(self.reasoning.String(), self.screen.Columns())) {
+			self.isStale = true
+		}
+
+	case agent.ModelMessageEvent:
+		self.discardProvisionalReasoning()
+		if self.answer.Len() == 0 && self.previousKind == agent.ModelMessageEvent {
 			self.screen.Blank()
 		}
+		self.answer.WriteString(delta.Text)
+		if !self.screen.DrawAnswer(markdown.Render(self.answer.String(), self.screen.Columns())) {
+			self.isStale = true
+		}
 	}
-	if event.Kind == agent.ModelReasoning && self.answer.Len() > 0 {
+}
+
+func (self *Painter) drawEvent(event agent.Event) {
+	switch {
+	case event.Kind == agent.ModelReasoningEvent && self.previousKind == agent.ModelReasoningEvent && self.reasoning.Len() == 0:
 		self.screen.End()
+	case event.Kind == agent.ModelMessageEvent && self.previousKind == agent.ModelMessageEvent && self.answer.Len() == 0:
+		self.screen.Blank()
 	}
-	if event.Kind != agent.ModelMessage {
+	self.previousKind = event.Kind
+
+	if event.Kind != agent.ModelReasoningEvent && event.Kind != agent.ModelMessageEvent {
+		self.discardProvisionalReasoning()
 		self.answer.Reset()
 	}
 
 	switch event.Kind {
-	case agent.UserMessage:
+	case agent.UserMessageEvent:
+		self.discardProvisionalReasoning()
+		self.answer.Reset()
 		self.close(dynamic.Cancelled)
 		self.screen.Blank()
 		self.screen.Line(renderSubmittedMessage(event.Text, self.screen.Columns()))
 		self.screen.End()
 		self.screen.Blank()
 
-	case agent.ModelReasoning:
+	case agent.ModelReasoningEvent:
+		self.answer.Reset()
+		self.reasoning.Reset()
 		self.reasoning.WriteString(event.Text)
-		rows := renderReasoning(self.reasoning.String(), self.screen.Columns())
-		if !self.screen.DrawReasoning(rows) {
+		if !self.screen.DrawReasoning(renderReasoning(self.reasoning.String(), self.screen.Columns())) {
 			self.isStale = true
 		}
+		self.screen.Seal()
+		self.reasoning.Reset()
 
-	case agent.ModelMessage:
+	case agent.ModelMessageEvent:
+		self.discardProvisionalReasoning()
+		self.answer.Reset()
 		self.answer.WriteString(event.Text)
-
 		if !self.screen.DrawAnswer(markdown.Render(self.answer.String(), self.screen.Columns())) {
 			self.isStale = true
 		}
+		self.screen.Seal()
+		self.answer.Reset()
 
-	case agent.ToolCallRequest:
+	case agent.ToolCallRequestEvent:
 		if self.toolBlock == nil {
 			self.toolBlock = dynamic.NewBlock(self.screen.Refresh)
 			self.screen.Open(self.toolBlock)
@@ -159,16 +190,35 @@ func (self *Painter) drawEvent(event agent.Event) {
 
 		self.rows[event.ID] = self.toolBlock.Add(self.label(event, self.describe(event)))
 
-	case agent.ToolCallResult:
+	case agent.ToolCallResultEvent:
 		self.mark(event)
 
-	case agent.Startup, agent.HarnessMessage:
+	case agent.StartupEvent, agent.HarnessMessageEvent:
 		self.screen.Line(self.render(event))
 
-	case agent.Failure:
+	case agent.FailureEvent:
 		self.close(dynamic.Cancelled)
 		self.screen.Line(style.Failure(event.Text))
 	}
+}
+
+func (self *Painter) provisionalDelta() agent.Delta {
+	if self.reasoning.Len() > 0 {
+		return agent.Delta{Kind: agent.ModelReasoningEvent, Text: self.reasoning.String()}
+	}
+
+	return agent.Delta{Kind: agent.ModelMessageEvent, Text: self.answer.String()}
+}
+
+func (self *Painter) discardProvisionalReasoning() {
+	if self.reasoning.Len() == 0 {
+		return
+	}
+
+	if !self.screen.DiscardLive() {
+		self.isStale = true
+	}
+	self.reasoning.Reset()
 }
 
 func (self *Painter) mark(event agent.Event) {
@@ -222,7 +272,7 @@ func renderSubmittedMessage(text string, columns int) string {
 }
 
 func (self *Painter) render(event agent.Event) string {
-	if event.Kind == agent.Startup {
+	if event.Kind == agent.StartupEvent {
 		return renderStartupEvent(event)
 	}
 
@@ -254,6 +304,8 @@ func renderReasoning(thought string, columns int) []string {
 }
 
 func (self *Painter) close(state dynamic.RowState) {
+	self.discardProvisionalReasoning()
+
 	if self.toolBlock != nil {
 		self.toolBlock.Close(state)
 		self.toolBlock = nil

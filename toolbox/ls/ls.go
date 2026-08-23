@@ -17,7 +17,7 @@ type Args struct {
 
 // New builds the ls tool confined to root. A directory is marked with a trailing slash.
 func New(root *file.Root) tool.Tool {
-	return tool.ReadOnly(tool.Concurrent(tool.FocusPath(tool.Implement(
+	return tool.Implement(
 		tool.Definition{
 			Name:        "ls",
 			Description: "list a directory",
@@ -26,9 +26,13 @@ func New(root *file.Root) tool.Tool {
 			},
 		},
 		Describe,
-	).Plain(func(_ context.Context, args Args) (string, error) {
-		return exec(root, args)
-	}))))
+	).
+		FocusPath().
+		IsEmbarrassinglyParallel().
+		ChangesNothing().
+		Plain(func(_ context.Context, args Args) (string, error) {
+			return exec(root, args)
+		})
 }
 
 // Describe names the path, the working directory going without saying.

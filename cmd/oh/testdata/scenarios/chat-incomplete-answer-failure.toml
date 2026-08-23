@@ -1,0 +1,22 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "think, answer, then fail"
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"reasoning_content":"complete thought"}}]}''',
+    '''{"choices":[{"delta":{"content":"partial answer"}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"length"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "continue after the failure"
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

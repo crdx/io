@@ -78,20 +78,81 @@ func (self *Agent) FYI(text string) {
 	self.provider.AddUserMessage(text)
 }
 
-// Stream yields a message and every event through its final tool round.
-func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Event, error] {
-	return func(yield func(Event, error) bool) {
+type proseStream struct {
+	kind Kind
+	text strings.Builder
+}
+
+func (self *proseStream) add(output Output) (Update, bool) {
+	if output.Done {
+		if self.kind != output.Kind || self.text.Len() == 0 {
+			self.reset()
+			return Update{}, false
+		}
+
+		event := Event{Kind: self.kind, Text: self.text.String()}
+		self.reset()
+		return Update{Event: &event}, true
+	}
+
+	if output.Text == "" {
+		return Update{}, false
+	}
+
+	if self.kind != "" && self.kind != output.Kind {
+		self.reset()
+	}
+
+	self.kind = output.Kind
+	self.text.WriteString(output.Text)
+	delta := Delta{Kind: output.Kind, Text: output.Text}
+
+	return Update{Delta: &delta}, true
+}
+
+func (self *proseStream) partialMessage() (Update, bool) {
+	if self.kind != ModelMessageEvent || self.text.Len() == 0 {
+		self.reset()
+		return Update{}, false
+	}
+
+	event := Event{Kind: self.kind, Text: self.text.String()}
+	self.reset()
+	return Update{Event: &event}, true
+}
+
+func (self *proseStream) reset() {
+	self.kind = ""
+	self.text.Reset()
+}
+
+// Stream yields a message and every update through its final tool round.
+func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update, error] {
+	return func(yield func(Update, error) bool) {
+		yieldEvent := func(event Event, err error) bool {
+			update := Update{}
+			if err == nil {
+				update.Event = &event
+			}
+
+			return yield(update, err)
+		}
+
 		self.provider.AddUserMessage(message)
 
-		if !yield(Event{Kind: UserMessage, Text: message}, nil) {
+		if !yieldEvent(Event{Kind: UserMessageEvent, Text: message}, nil) {
 			return
 		}
 
 		for {
 			listening := true
+			var prose proseStream
 
-			reply, err := self.provider.Send(ctx, func(event Event) bool {
-				listening = yield(event, nil)
+			reply, err := self.provider.Send(ctx, func(output Output) bool {
+				update, available := prose.add(output)
+				if available {
+					listening = yield(update, nil)
+				}
 				return listening
 			})
 
@@ -100,15 +161,20 @@ func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Event, 
 				self.answer(cancelledResults(reply.Calls))
 				return
 			case err != nil:
-				yield(Event{}, err)
+				if update, available := prose.partialMessage(); available && !yield(update, nil) {
+					return
+				}
+				yield(Update{}, err)
 				return
+			default:
+				prose.reset()
 			}
 
 			if len(reply.Calls) == 0 {
 				return
 			}
 
-			if !self.runCalls(ctx, reply.Calls, yield) {
+			if !self.runCalls(ctx, reply.Calls, yieldEvent) {
 				return
 			}
 		}
@@ -120,14 +186,14 @@ func (self *Agent) Send(ctx context.Context, message string) (string, error) {
 	var answer strings.Builder
 	var failure error
 
-	for event, err := range self.Stream(ctx, message) {
+	for update, err := range self.Stream(ctx, message) {
 		if err != nil {
 			failure = err
 			break
 		}
 
-		if event.Kind == ModelMessage {
-			answer.WriteString(event.Text)
+		if update.Event != nil && update.Event.Kind == ModelMessageEvent {
+			answer.WriteString(update.Event.Text)
 		}
 	}
 
@@ -137,26 +203,27 @@ func (self *Agent) Send(ctx context.Context, message string) (string, error) {
 // CancelledOutput is what a call that never ran hands back.
 const CancelledOutput = "the call was cancelled"
 
-func cancelledResults(calls []ToolCall) []ToolResult {
-	results := make([]ToolResult, len(calls))
+func cancelledResults(calls []ToolCall) []ToolCallResult {
+	results := make([]ToolCallResult, len(calls))
 
 	for i, call := range calls {
-		results[i] = ToolResult{ID: call.ID, Output: CancelledOutput}
+		results[i] = ToolCallResult{ID: call.ID, Output: CancelledOutput}
 	}
 
 	return results
 }
 
-func (self *Agent) answer(results []ToolResult) {
+func (self *Agent) answer(results []ToolCallResult) {
 	if len(results) > 0 {
 		self.provider.AddToolResults(results)
 	}
 }
 
 type pendingCall struct {
-	rawToolCall    ToolCall  // the call as received
-	parsedToolCall tool.Call // the call ready to run
-	err            string
+	rawToolCall    ToolCall
+	parsedToolCall tool.ToolCall
+
+	err string
 }
 
 func (self *Agent) runCalls(
@@ -179,11 +246,11 @@ func (self *Agent) runCalls(
 		}
 
 		event := Event{
-			Kind:      ToolCallRequest,
+			Kind:      ToolCallRequestEvent,
 			ID:        rawCall.ID,
 			Arguments: rawCall.Arguments,
 			Name:      rawCall.Name,
-			Rendering: Rendering{
+			FallbackRendering: FallbackRendering{
 				ReadOnly: self.readOnly(rawCall),
 			},
 		}
@@ -244,29 +311,29 @@ func (self *Agent) readOnly(call ToolCall) bool {
 	return found && calledTool.ReadOnly()
 }
 
-type completedCall struct {
+type completedToolCall struct {
 	result Event
 	state  Event
 }
 
 func (self *Agent) runBatch(
 	ctx context.Context,
-	batch []pendingCall, results []ToolResult,
+	batch []pendingCall, results []ToolCallResult,
 	yield func(Event, error) bool,
 ) bool {
-	done := make(chan completedCall, len(batch))
+	done := make(chan completedToolCall, len(batch))
 
 	for i, item := range batch {
 		go func() {
 			startedAt := time.Now()
 
-			executionResult := tool.Result{Output: item.err}
+			executionResult := tool.ToolCallResult{Output: item.err}
 			ok := false
 			if item.parsedToolCall != nil {
 				executionResult, ok = exec(ctx, item.parsedToolCall)
 			}
 
-			results[i] = ToolResult{
+			results[i] = ToolCallResult{
 				ID:     item.rawToolCall.ID,
 				Output: executionResult.Output,
 				Image:  executionResult.Image,
@@ -281,8 +348,8 @@ func (self *Agent) runBatch(
 				stats = &executionResult.Stats
 			}
 
-			completion := completedCall{result: Event{
-				Kind:   ToolCallResult,
+			completion := completedToolCall{result: Event{
+				Kind:   ToolCallResultEvent,
 				ID:     item.rawToolCall.ID,
 				Name:   item.rawToolCall.Name,
 				Text:   executionResult.Output,
@@ -292,7 +359,7 @@ func (self *Agent) runBatch(
 			}}
 			if ok && len(executionResult.State) > 0 {
 				completion.state = Event{
-					Kind:  StateChange,
+					Kind:  StateChangeEvent,
 					ID:    item.rawToolCall.ID,
 					Name:  self.tools[item.rawToolCall.Name].StateKey(),
 					State: executionResult.State,
@@ -330,7 +397,7 @@ func (self *Agent) runBatch(
 // RestoreState replays durable state transitions owned by the available tools.
 func (self *Agent) RestoreState(events []Event) error {
 	for _, event := range events {
-		if event.Kind != StateChange {
+		if event.Kind != StateChangeEvent {
 			continue
 		}
 		if err := self.restoreState(event); err != nil {
@@ -359,7 +426,7 @@ func (self *Agent) Tool(name string) (tool.Tool, bool) {
 	return found, known
 }
 
-func (self *Agent) parseCall(call ToolCall) (tool.Call, string) {
+func (self *Agent) parseCall(call ToolCall) (tool.ToolCall, string) {
 	calledTool, found := self.tools[call.Name]
 	if !found {
 		return nil, fmt.Sprintf("there is no tool called %q", call.Name)
@@ -373,7 +440,7 @@ func (self *Agent) parseCall(call ToolCall) (tool.Call, string) {
 	return parsedToolCall, ""
 }
 
-func exec(ctx context.Context, call tool.Call) (tool.Result, bool) {
+func exec(ctx context.Context, call tool.ToolCall) (tool.ToolCallResult, bool) {
 	result, err := call.Exec(ctx)
 
 	switch {

@@ -28,7 +28,7 @@ func TestWhatWasAskedIsRenderedIntoTheConversation(t *testing.T) {
 		var screenOutput bytes.Buffer
 
 		painter := &Painter{screen: output.New(&screenOutput), isRunning: isLive}
-		painter.drawEvent(agent.Event{Kind: agent.UserMessage, Text: "**weather**\n\n- today"})
+		painter.drawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "**weather**\n\n- today"})
 
 		plain := style.Plain(screenOutput.String())
 		if !strings.Contains(plain, " weather\n \n • today") {
@@ -66,10 +66,10 @@ func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
 
 	testConversation.restore(&store.Session{
 		Events: []agent.Event{
-			{Kind: agent.UserMessage, Text: "read them both"},
-			{Kind: agent.ToolCallRequest, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}},
-			{Kind: agent.ToolCallRequest, ID: "2", Name: "read", Rendering: agent.Rendering{Subject: "two.go"}},
-			{Kind: agent.ToolCallResult, ID: "1", Name: "read", Text: "package one"},
+			{Kind: agent.UserMessageEvent, Text: "read them both"},
+			{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}},
+			{Kind: agent.ToolCallRequestEvent, ID: "2", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "two.go"}},
+			{Kind: agent.ToolCallResultEvent, ID: "1", Name: "read", Text: "package one"},
 		},
 	})
 
@@ -80,14 +80,13 @@ func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
 
 func TestRestoringAConversationRestoresStateBeforeReturning(t *testing.T) {
 	var restored string
-	definedTool := tool.Implement(
+	statefulTool := tool.Implement(
 		tool.Definition{Name: "stateful", Description: "", Schema: tool.Schema{}},
 		func(struct{}) (string, string) { return "", "" },
-	).Plain(func(context.Context, struct{}) (string, error) { return "", nil })
-	statefulTool := tool.State(definedTool, "test_state", func(state json.RawMessage) error {
+	).State("test_state", func(state json.RawMessage) error {
 		restored = string(state)
 		return nil
-	})
+	}).Plain(func(context.Context, struct{}) (string, error) { return "", nil })
 
 	var screenOutput bytes.Buffer
 	self := &Harness{
@@ -95,7 +94,7 @@ func TestRestoringAConversationRestoresStateBeforeReturning(t *testing.T) {
 		screen: output.New(&screenOutput),
 	}
 	self.restore(&store.Session{Events: []agent.Event{{
-		Kind:  agent.StateChange,
+		Kind:  agent.StateChangeEvent,
 		Name:  "test_state",
 		State: json.RawMessage(`{"answer":42}`),
 	}}})
@@ -130,9 +129,9 @@ func TestReplayingSaysTheWholeConversationAgain(t *testing.T) {
 	}
 
 	testConversation.events = []agent.Event{
-		{Kind: agent.UserMessage, Text: "what is the weather"},
-		{Kind: agent.ModelMessage, Text: "it is raining"},
-		{Kind: agent.HarnessMessage, Text: "cancelled"},
+		{Kind: agent.UserMessageEvent, Text: "what is the weather"},
+		{Kind: agent.ModelMessageEvent, Text: "it is raining"},
+		{Kind: agent.HarnessMessageEvent, Text: "cancelled"},
 	}
 
 	testConversation.replay()
@@ -174,10 +173,10 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 			callPainter := &Painter{screen: output.New(&screenOutput)}
 
 			callPainter.drawEvent(agent.Event{
-				Kind: agent.ToolCallRequest,
+				Kind: agent.ToolCallRequestEvent,
 				ID:   "1",
 				Name: test.tool,
-				Rendering: agent.Rendering{
+				FallbackRendering: agent.FallbackRendering{
 					Subject:   test.path,
 					Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: path.Base(test.path)},
 				},
@@ -199,10 +198,10 @@ func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
 	callPainter := &Painter{screen: output.New(&screenOutput)}
 
 	callPainter.drawEvent(agent.Event{
-		Kind: agent.ToolCallRequest,
+		Kind: agent.ToolCallRequestEvent,
 		ID:   "1",
 		Name: "read",
-		Rendering: agent.Rendering{
+		FallbackRendering: agent.FallbackRendering{
 			Subject:   "/skills/golang/SKILL.md",
 			Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
 		},
@@ -223,11 +222,11 @@ func TestWhetherACallChangedAnythingComesFromTheToolOfTheMoment(t *testing.T) {
 	callPainter := self.newPainter(false)
 
 	callPainter.drawEvent(agent.Event{
-		Kind:      agent.ToolCallRequest,
-		ID:        "1",
-		Name:      "write",
-		Arguments: `{"path":"one.go"}`,
-		Rendering: agent.Rendering{ReadOnly: true},
+		Kind:              agent.ToolCallRequestEvent,
+		ID:                "1",
+		Name:              "write",
+		Arguments:         `{"path":"one.go"}`,
+		FallbackRendering: agent.FallbackRendering{ReadOnly: true},
 	})
 	callPainter.close(dynamic.Done)
 
@@ -245,10 +244,10 @@ func TestACallToAToolThatIsGoneKeepsWhatWasRecorded(t *testing.T) {
 	callPainter := self.newPainter(false)
 
 	callPainter.drawEvent(agent.Event{
-		Kind:      agent.ToolCallRequest,
-		ID:        "1",
-		Name:      "gone",
-		Rendering: agent.Rendering{Subject: "one.go", ReadOnly: true},
+		Kind:              agent.ToolCallRequestEvent,
+		ID:                "1",
+		Name:              "gone",
+		FallbackRendering: agent.FallbackRendering{Subject: "one.go", ReadOnly: true},
 	})
 	callPainter.close(dynamic.Done)
 
@@ -267,10 +266,10 @@ func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 		log:    testLog(t),
 	}
 
-	call := agent.Event{Kind: agent.ToolCallRequest, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}}
+	call := agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}}
 
 	self.currentTurn = Turn{isRunning: true, painter: self.newPainter(true)}
-	self.events = appendTranscript(self.events, call)
+	self.events = append(self.events, call)
 	self.currentTurn.painter.drawEvent(call)
 
 	self.notifyStopped(notice)
@@ -306,26 +305,24 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	livePainter := self.newPainter(true)
 
 	events := []agent.Event{
-		{Kind: agent.UserMessage, Text: "**Check** this"},
-		{Kind: agent.ModelReasoning, Text: "**Reading**\nLooking "},
-		{Kind: agent.ModelReasoning, Text: "at the file. Need care."},
-		{Kind: agent.ModelMessage, Text: "The **first** "},
-		{Kind: agent.ModelMessage, Text: "answer.\n"},
-		{Kind: agent.ToolCallRequest, ID: "1", Name: "read", Arguments: `{"path":"one.go"}`, Rendering: agent.Rendering{Subject: "old"}},
-		{Kind: agent.ToolCallRequest, ID: "2", Name: "gone", Rendering: agent.Rendering{Subject: "two.go"}},
-		{Kind: agent.ToolCallResult, ID: "1", Name: "read", Took: 2 * time.Second},
-		{Kind: agent.ToolCallResult, ID: "2", Name: "gone", Failed: true, Took: 3 * time.Second},
-		{Kind: agent.ModelMessage, Text: "Done."},
+		{Kind: agent.UserMessageEvent, Text: "**Check** this"},
+		{Kind: agent.ModelReasoningEvent, Text: "**Reading**\nLooking at the file. Need care."},
+		{Kind: agent.ModelMessageEvent, Text: "The **first** answer.\n"},
+		{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", Arguments: `{"path":"one.go"}`, FallbackRendering: agent.FallbackRendering{Subject: "old"}},
+		{Kind: agent.ToolCallRequestEvent, ID: "2", Name: "gone", FallbackRendering: agent.FallbackRendering{Subject: "two.go"}},
+		{Kind: agent.ToolCallResultEvent, ID: "1", Name: "read", Took: 2 * time.Second},
+		{Kind: agent.ToolCallResultEvent, ID: "2", Name: "gone", Failed: true, Took: 3 * time.Second},
+		{Kind: agent.ModelMessageEvent, Text: "Done."},
 	}
 
 	for _, event := range events {
-		self.events = appendTranscript(self.events, event)
+		self.events = append(self.events, event)
 		livePainter.drawEvent(event)
 	}
 	self.notifyStopped("Background processes killed (bash → sleep)")
 
-	unansweredCall := agent.Event{Kind: agent.ToolCallRequest, ID: "3", Name: "read", Rendering: agent.Rendering{Subject: "left.go"}}
-	self.events = appendTranscript(self.events, unansweredCall)
+	unansweredCall := agent.Event{Kind: agent.ToolCallRequestEvent, ID: "3", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "left.go"}}
+	self.events = append(self.events, unansweredCall)
 	livePainter.drawEvent(unansweredCall)
 	livePainter.close(dynamic.Cancelled)
 	self.screen.End()
@@ -365,8 +362,8 @@ func TestAThoughtRunsDirectlyIntoAToolCall(t *testing.T) {
 	var screenOutput bytes.Buffer
 	callPainter := &Painter{screen: output.New(&screenOutput)}
 
-	callPainter.drawEvent(agent.Event{Kind: agent.ModelReasoning, Text: "checking"})
-	callPainter.drawEvent(agent.Event{Kind: agent.ToolCallRequest, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}})
+	callPainter.drawEvent(agent.Event{Kind: agent.ModelReasoningEvent, Text: "checking"})
+	callPainter.drawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}})
 	callPainter.close(dynamic.Cancelled)
 
 	plain := style.Plain(screenOutput.String())
@@ -389,18 +386,20 @@ func TestAThoughtWrapsAtWordBoundaries(t *testing.T) {
 func TestAStoredCallIsShownTheWayItsToolShowsItNow(t *testing.T) {
 	var screenOutput bytes.Buffer
 
-	current := truncate.Tool(tool.Focus(slowTool("read"), func(tool.Call) string { return "one.go" }))
+	current := truncate.Tool(buildSlowTool(
+		slowToolBuilder("read").Focuses(func(tool.ToolCall) string { return "one.go" }),
+	))
 	testConversation := &Harness{
 		agent:  agent.New("", quietProvider{}, []tool.Tool{current}),
 		screen: output.New(&screenOutput),
 	}
 
 	testConversation.events = []agent.Event{{
-		Kind:      agent.ToolCallRequest,
-		ID:        "1",
-		Name:      "read",
-		Arguments: `{"path":"cmd/oh/one.go"}`,
-		Rendering: agent.Rendering{Subject: "one.go:1-400"},
+		Kind:              agent.ToolCallRequestEvent,
+		ID:                "1",
+		Name:              "read",
+		Arguments:         `{"path":"cmd/oh/one.go"}`,
+		FallbackRendering: agent.FallbackRendering{Subject: "one.go:1-400"},
 	}}
 
 	testConversation.replay()
@@ -424,11 +423,11 @@ func TestACallWhoseToolIsGoneKeepsWhatItLookedLike(t *testing.T) {
 	}
 
 	testConversation.events = []agent.Event{{
-		Kind:      agent.ToolCallRequest,
-		ID:        "1",
-		Name:      "divine",
-		Arguments: `{"path":"one.go"}`,
-		Rendering: agent.Rendering{Subject: "one.go:1-400"},
+		Kind:              agent.ToolCallRequestEvent,
+		ID:                "1",
+		Name:              "divine",
+		Arguments:         `{"path":"one.go"}`,
+		FallbackRendering: agent.FallbackRendering{Subject: "one.go:1-400"},
 	}}
 
 	testConversation.replay()
@@ -440,11 +439,11 @@ func TestACallWhoseToolIsGoneKeepsWhatItLookedLike(t *testing.T) {
 
 type quietProvider struct{}
 
-func (quietProvider) Configure(string, []tool.Definition) {}
-func (quietProvider) AddUserMessage(string)               {}
-func (quietProvider) AddToolResults([]agent.ToolResult)   {}
-func (quietProvider) Dump() []json.RawMessage             { return nil }
-func (quietProvider) Load([]json.RawMessage)              {}
+func (quietProvider) Configure(string, []tool.Definition)   {}
+func (quietProvider) AddUserMessage(string)                 {}
+func (quietProvider) AddToolResults([]agent.ToolCallResult) {}
+func (quietProvider) Dump() []json.RawMessage               { return nil }
+func (quietProvider) Load([]json.RawMessage)                {}
 
 func (quietProvider) Send(context.Context, agent.Yield) (agent.Reply, error) {
 	return agent.Reply{}, nil
@@ -568,7 +567,7 @@ func TestAShellCallIsDrawnAsAShellPrompt(t *testing.T) {
 	var screenOutput bytes.Buffer
 	callPainter := &Painter{screen: output.New(&screenOutput)}
 
-	callPainter.drawEvent(agent.Event{Kind: agent.ToolCallRequest, ID: "1", Name: "bash", Rendering: agent.Rendering{Subject: "echo hello"}})
+	callPainter.drawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "bash", FallbackRendering: agent.FallbackRendering{Subject: "echo hello"}})
 	callPainter.close(dynamic.Done)
 
 	plain := style.Plain(screenOutput.String())
@@ -585,14 +584,14 @@ func TestATurnThatLeftACallUnansweredIsClosedByWhatIsAskedNext(t *testing.T) {
 
 	callPainter := &Painter{screen: output.New(&screenOutput)}
 
-	callPainter.drawEvent(agent.Event{Kind: agent.ToolCallRequest, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}})
-	callPainter.drawEvent(agent.Event{Kind: agent.UserMessage, Text: "never mind"})
+	callPainter.drawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}})
+	callPainter.drawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "never mind"})
 
 	if callPainter.toolBlock != nil {
 		t.Fatal("expected the block to be closed by the next thing asked")
 	}
 
-	callPainter.drawEvent(agent.Event{Kind: agent.ToolCallRequest, ID: "2", Name: "read", Rendering: agent.Rendering{Subject: "two.go"}})
+	callPainter.drawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "2", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "two.go"}})
 
 	if got := callPainter.rows["2"]; got != 0 {
 		t.Errorf("expected the call to open a block of its own, got row %d", got)
@@ -614,8 +613,8 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 	testConversation.currentTurn = Turn{isRunning: true, painter: testConversation.newPainter(true)}
 
 	testConversation.events = []agent.Event{
-		{Kind: agent.UserMessage, Text: "read it"},
-		{Kind: agent.ToolCallRequest, ID: "1", Name: "read", Rendering: agent.Rendering{Subject: "one.go"}},
+		{Kind: agent.UserMessageEvent, Text: "read it"},
+		{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}},
 	}
 
 	previousPainter := testConversation.currentTurn.painter
@@ -630,7 +629,7 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 		t.Fatal("expected the unanswered call to be on a block that is open again")
 	}
 
-	testConversation.currentTurn.painter.drawEvent(agent.Event{Kind: agent.ToolCallResult, ID: "1", Name: "read", Took: time.Second})
+	testConversation.currentTurn.painter.drawEvent(agent.Event{Kind: agent.ToolCallResultEvent, ID: "1", Name: "read", Took: time.Second})
 
 	if testConversation.currentTurn.painter.toolBlock != nil {
 		t.Error("expected the block to close once every call had reported")
@@ -638,6 +637,27 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 
 	if got := blocksStillRunning(t); got > blocksBefore {
 		t.Errorf("expected nothing left redrawing, got %d blocks where there were %d", got, blocksBefore)
+	}
+}
+
+func TestARedrawDuringProvisionalReasoningRestoresTheOpenBlock(t *testing.T) {
+	var screenOutput bytes.Buffer
+	testConversation := &Harness{
+		agent:  agent.New("", quietProvider{}, nil),
+		screen: output.New(&screenOutput),
+		events: []agent.Event{{Kind: agent.UserMessageEvent, Text: "think"}},
+	}
+	testConversation.currentTurn = Turn{isRunning: true, painter: testConversation.newPainter(true)}
+	testConversation.currentTurn.painter.drawDelta(agent.Delta{
+		Kind: agent.ModelReasoningEvent,
+		Text: "provisional thought",
+	})
+
+	testConversation.redraw()
+
+	got := testConversation.currentTurn.painter.provisionalDelta()
+	if got.Kind != agent.ModelReasoningEvent || got.Text != "provisional thought" {
+		t.Errorf("got provisional delta %+v", got)
 	}
 }
 
@@ -649,15 +669,15 @@ func TestAnAnswerStreamedIsTheSameAsTheAnswerReplayed(t *testing.T) {
 	livePainter := &Painter{screen: output.New(&live), isRunning: true}
 
 	for _, delta := range deltas(answer, 10) {
-		livePainter.drawEvent(agent.Event{Kind: agent.ModelMessage, Text: delta})
+		livePainter.drawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: delta})
 	}
-
+	livePainter.drawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: answer})
 	livePainter.screen.End()
 
 	var replayOutput bytes.Buffer
 
 	replayPainter := &Painter{screen: output.New(&replayOutput)}
-	replayPainter.drawEvent(agent.Event{Kind: agent.ModelMessage, Text: answer})
+	replayPainter.drawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: answer})
 	replayPainter.screen.End()
 
 	plain := style.Plain(live.String())
@@ -694,14 +714,14 @@ func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 
 	t.Setenv("HOME", "/home/alice")
 
-	current := tool.FocusPath(tool.Implement(
+	current := tool.Implement(
 		tool.Definition{
 			Name:        "read",
 			Description: "",
 			Schema:      tool.Schema{tool.String("path", "file")},
 		},
 		func(args fakeArgs) (string, string) { return args.Path, pathutil.Shorten(args.Path) },
-	).Plain(func(context.Context, fakeArgs) (string, error) { return "", nil }))
+	).FocusPath().Plain(func(context.Context, fakeArgs) (string, error) { return "", nil })
 	testConversation := &Harness{
 		agent:        agent.New("", quietProvider{}, []tool.Tool{current}),
 		workspaceDir: workspaceDir,
@@ -752,7 +772,7 @@ func TestRecordedCallPathsAreShortenedWithTheSameFunction(t *testing.T) {
 	callPainter := &Painter{workspaceDir: "/home/alice/project"}
 	shown := callPainter.describe(agent.Event{
 		Name: "removed",
-		Rendering: agent.Rendering{
+		FallbackRendering: agent.FallbackRendering{
 			Subject: "/home/alice/project/file.go",
 			Note:    "/home/alice/reference/file.go",
 		},
@@ -780,9 +800,9 @@ func TestARefusedCallIsDescribedAgainRatherThanFromTheRecord(t *testing.T) {
 	}
 
 	shown := testConversation.newPainter(false).describe(agent.Event{
-		Name:      "shout",
-		Arguments: `{"message":"oi"}`,
-		Rendering: agent.Rendering{Subject: ""},
+		Name:              "shout",
+		Arguments:         `{"message":"oi"}`,
+		FallbackRendering: agent.FallbackRendering{Subject: ""},
 	})
 
 	if shown.Note != "" || shown.Highlight != (tool.Highlight{}) {
@@ -811,18 +831,18 @@ func TestAnAsideStandsBetweenTheCallsItArrivedAmong(t *testing.T) {
 	painter := &Painter{screen: output.NewTerminalOfSize(&screenOutput, 80, 24), isRunning: true}
 
 	painter.drawEvent(agent.Event{
-		Kind:      agent.ToolCallRequest,
-		ID:        "1",
-		Name:      "read",
-		Rendering: agent.Rendering{Subject: "one.txt"},
+		Kind:              agent.ToolCallRequestEvent,
+		ID:                "1",
+		Name:              "read",
+		FallbackRendering: agent.FallbackRendering{Subject: "one.txt"},
 	})
-	painter.drawEvent(agent.Event{Kind: agent.HarnessMessage, Text: "something happened"})
+	painter.drawEvent(agent.Event{Kind: agent.HarnessMessageEvent, Text: "something happened"})
 
 	if painter.toolBlock == nil {
 		t.Fatal("expected the block to stay open under the aside")
 	}
 
-	painter.drawEvent(agent.Event{Kind: agent.ToolCallResult, ID: "1", Took: time.Second})
+	painter.drawEvent(agent.Event{Kind: agent.ToolCallResultEvent, ID: "1", Took: time.Second})
 
 	rows := visibleScreen(t, screenOutput.String(), 80)
 	rows = slices.DeleteFunc(rows, func(row string) bool { return strings.TrimSpace(row) == "" })
@@ -835,5 +855,101 @@ func TestAnAsideStandsBetweenTheCallsItArrivedAmong(t *testing.T) {
 	}
 	if !strings.Contains(rows[1], "something happened") {
 		t.Errorf("expected the aside under the call, got %q", rows[1])
+	}
+}
+
+func TestCompletedReasoningBlocksRemainSeparateInTheJournal(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var screenOutput bytes.Buffer
+	self := &Harness{
+		screen: output.New(&screenOutput),
+		log:    log,
+	}
+	self.currentTurn = Turn{isRunning: true, painter: self.newPainter(true)}
+
+	userMessage := agent.Event{Kind: agent.UserMessageEvent, Text: "think twice"}
+	self.takeTurn(TurnEvent{update: agent.Update{Event: &userMessage}})
+	firstDelta := agent.Delta{Kind: agent.ModelReasoningEvent, Text: "**First "}
+	self.takeTurn(TurnEvent{update: agent.Update{Delta: &firstDelta}})
+	firstBlock := agent.Event{Kind: agent.ModelReasoningEvent, Text: "**First block**"}
+	self.takeTurn(TurnEvent{update: agent.Update{Event: &firstBlock}})
+	secondDelta := agent.Delta{Kind: agent.ModelReasoningEvent, Text: "**Second block**"}
+	self.takeTurn(TurnEvent{update: agent.Update{Delta: &secondDelta}})
+	secondBlock := agent.Event{Kind: agent.ModelReasoningEvent, Text: "**Second block**"}
+	self.takeTurn(TurnEvent{update: agent.Update{Event: &secondBlock}})
+
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+	storedSession, err := store.Read(directory, log.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var reasoning []string
+	for _, event := range storedSession.Events {
+		if event.Kind == agent.ModelReasoningEvent {
+			reasoning = append(reasoning, event.Text)
+		}
+	}
+	want := []string{"**First block**", "**Second block**"}
+	if !slices.Equal(reasoning, want) {
+		t.Errorf("got reasoning blocks %q, want %q", reasoning, want)
+	}
+
+	plain := style.Plain(screenOutput.String())
+	if !strings.Contains(plain, "First block\nSecond block") {
+		t.Errorf("expected separate reasoning lines, got %q", plain)
+	}
+}
+
+func TestIncompleteReasoningIsErasedBeforeAFailure(t *testing.T) {
+	var screenOutput bytes.Buffer
+	painter := &Painter{screen: output.New(&screenOutput), isRunning: true}
+
+	painter.drawDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: "half a thought"})
+	painter.drawEvent(agent.Event{Kind: agent.FailureEvent, Text: "stream failed"})
+	painter.screen.End()
+
+	plain := style.Plain(screenOutput.String())
+	if strings.Contains(plain, "half a thought") {
+		t.Errorf("incomplete reasoning reached scrollback: %q", plain)
+	}
+	if !strings.Contains(plain, "stream failed") {
+		t.Errorf("expected the failure, got %q", plain)
+	}
+}
+
+func TestDiscardedReasoningLeavesTheSameScreenAsReplay(t *testing.T) {
+	var liveOutput bytes.Buffer
+	self := &Harness{
+		screen: output.NewTerminalOfSize(&liveOutput, 80, 24),
+		log:    testLog(t),
+	}
+	self.currentTurn = Turn{isRunning: true, painter: self.newPainter(true)}
+
+	completeThought := agent.Event{Kind: agent.ModelReasoningEvent, Text: "complete thought"}
+	self.takeTurn(TurnEvent{update: agent.Update{Event: &completeThought}})
+	incompleteThought := agent.Delta{Kind: agent.ModelReasoningEvent, Text: "incomplete thought"}
+	self.takeTurn(TurnEvent{update: agent.Update{Delta: &incompleteThought}})
+	failure := agent.Event{Kind: agent.FailureEvent, Text: "stream failed"}
+	self.takeTurn(TurnEvent{update: agent.Update{Event: &failure}})
+	self.screen.End()
+
+	var replayOutput bytes.Buffer
+	replayPainter := &Painter{screen: output.NewTerminalOfSize(&replayOutput, 80, 24)}
+	replayPainter.drawEvent(completeThought)
+	replayPainter.drawEvent(failure)
+	replayPainter.screen.End()
+
+	live := visibleScreen(t, liveOutput.String(), 80)
+	replayed := visibleScreen(t, replayOutput.String(), 80)
+	if !slices.Equal(live, replayed) {
+		t.Errorf("discarded reasoning changed the settled screen\nlive:\n%s\nreplayed:\n%s", strings.Join(live, "\n"), strings.Join(replayed, "\n"))
 	}
 }

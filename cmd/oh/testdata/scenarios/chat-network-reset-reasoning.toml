@@ -1,0 +1,22 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "high"
+
+[first]
+prompt = "lose the network during reasoning"
+
+[[first.response]]
+reset-after-wire-event = 1
+event = [
+    '''{"choices":[{"delta":{"reasoning_content":"Provisional thought."}}]}''',
+]
+
+[resume]
+prompt = "continue after the network interruption"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

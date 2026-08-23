@@ -14,10 +14,10 @@ ADDRESS   := "localhost:8117"
 ENDPOINT  := "http://" + ADDRESS + "/v1/codex/responses"
 WIDTH     := "100"
 HEIGHT    := "24"
-CAPTURED  := justfile_directory() / "cmd/oh/testdata/replay/captured"
+TEST_INPUTS := justfile_directory() / "cmd/oh/testdata/input"
 
 # what the scenarios read, write and search, laid out again for every capture and every replay
-WORKSPACE_FIXTURE := justfile_directory() / "cmd/oh/testdata/workspace"
+WORKSPACE_FIXTURE := justfile_directory() / "cmd/oh/testdata/input/workspace"
 
 # build the visual pass: the harness's output layer over a fake model
 build:
@@ -138,7 +138,7 @@ capture: harness
     export OH_ENDPOINT_URL={{ ENDPOINT }}
     export XDG_STATE_HOME=$CAPTURE_STATE
 
-    mkdir -p {{ CAPTURED }}
+    mkdir -p {{ TEST_INPUTS }}
 
     for SCENARIO in internal/sim/scenarios/*.toml; do
       NAME=$(basename "$SCENARIO" .toml)
@@ -166,9 +166,9 @@ capture: harness
                {event: (.event
                         | if .took then .took = 0 else . end
                         | if .state.session then .state.session = $blank else . end)}' \
-           "$JOURNAL" > {{ CAPTURED }}/$NAME@$CAPS.jsonl
+           "$JOURNAL" > {{ TEST_INPUTS }}/$NAME@$CAPS.jsonl
 
-        echo "captured $NAME@$CAPS ($(wc -l < {{ CAPTURED }}/$NAME@$CAPS.jsonl) events)"
+        echo "captured $NAME@$CAPS ($(wc -l < {{ TEST_INPUTS }}/$NAME@$CAPS.jsonl) events)"
       done
     done
 

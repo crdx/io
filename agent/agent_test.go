@@ -17,13 +17,13 @@ import (
 
 type callProvider struct {
 	sent    int
-	results []agent.ToolResult
+	results []agent.ToolCallResult
 }
 
 func (self *callProvider) Configure(string, []tool.Definition) {}
 func (self *callProvider) AddUserMessage(string)               {}
 
-func (self *callProvider) AddToolResults(results []agent.ToolResult) {
+func (self *callProvider) AddToolResults(results []agent.ToolCallResult) {
 	self.results = append(self.results, results...)
 }
 
@@ -34,7 +34,8 @@ func (self *callProvider) Send(_ context.Context, yield agent.Yield) (agent.Repl
 		return agent.Reply{}, nil
 	}
 
-	yield(agent.Event{Kind: agent.ModelMessage, Text: "thinking out loud"})
+	yield(agent.Output{Kind: agent.ModelMessageEvent, Text: "thinking out loud"})
+	yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true})
 
 	return agent.Reply{Calls: []agent.ToolCall{
 		{ID: "a", Name: "noop", Arguments: `{}`},
@@ -43,14 +44,16 @@ func (self *callProvider) Send(_ context.Context, yield agent.Yield) (agent.Repl
 }
 
 func noop() tool.Tool {
-	return tool.Concurrent(tool.Implement(
+	return tool.Implement(
 		tool.Definition{
 			Name:        "noop",
 			Description: "",
 			Schema:      tool.Schema{},
 		},
 		func(struct{}) (string, string) { return "", "" },
-	).Plain(func(context.Context, struct{}) (string, error) { return "done", nil }))
+	).IsEmbarrassinglyParallel().Plain(func(context.Context, struct{}) (string, error) {
+		return "done", nil
+	})
 }
 
 func resultOutputs(provider *callProvider) []string {
@@ -65,8 +68,8 @@ func resultOutputs(provider *callProvider) []string {
 
 func TestStreamAnswersEveryCallOfAnAbandonedTurn(t *testing.T) {
 	tests := map[string]agent.Kind{
-		"dropped while streaming text": agent.ModelMessage,
-		"dropped on the first call":    agent.ToolCallRequest,
+		"dropped while streaming text": agent.ModelMessageEvent,
+		"dropped on the first call":    agent.ToolCallRequestEvent,
 	}
 
 	for name, stopOn := range tests {
@@ -74,12 +77,16 @@ func TestStreamAnswersEveryCallOfAnAbandonedTurn(t *testing.T) {
 			provider := &callProvider{}
 			assistant := agent.New("", provider, []tool.Tool{noop()})
 
-			for event, err := range assistant.Stream(t.Context(), "go") {
+			for update, err := range assistant.Stream(t.Context(), "go") {
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				if event.Kind == stopOn {
+				if update.Event == nil {
+					continue
+				}
+
+				if update.Event.Kind == stopOn {
 					break
 				}
 			}
@@ -97,12 +104,16 @@ func TestStreamAnswersWithWhateverRanBeforeTheTurnWasDropped(t *testing.T) {
 	provider := &callProvider{}
 	assistant := agent.New("", provider, []tool.Tool{noop()})
 
-	for event, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go") {
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if event.Kind == agent.ToolCallResult {
+		if update.Event == nil {
+			continue
+		}
+
+		if update.Event.Kind == agent.ToolCallResultEvent {
 			break
 		}
 	}
@@ -127,14 +138,14 @@ func TestStreamRunsEveryCallOfAReplyAtOnce(t *testing.T) {
 
 	var concurrentCalls atomic.Int32
 
-	barrierTool := tool.Concurrent(tool.Implement(
+	barrierTool := tool.Implement(
 		tool.Definition{
 			Name:        "noop",
 			Description: "",
 			Schema:      tool.Schema{},
 		},
 		func(struct{}) (string, string) { return "", "" },
-	).Plain(func(context.Context, struct{}) (string, error) {
+	).IsEmbarrassinglyParallel().Plain(func(context.Context, struct{}) (string, error) {
 		arrivalBarrier.Done()
 
 		select {
@@ -144,7 +155,7 @@ func TestStreamRunsEveryCallOfAReplyAtOnce(t *testing.T) {
 		}
 
 		return "done", nil
-	}))
+	})
 
 	provider := &callProvider{}
 
@@ -202,32 +213,36 @@ func TestStreamLeavesACallThatIsNotConcurrentOnItsOwn(t *testing.T) {
 func TestAResultSaysHowLongItsCallTook(t *testing.T) {
 	const slept = 50 * time.Millisecond
 
-	slow := tool.Concurrent(tool.Implement(
+	slow := tool.Implement(
 		tool.Definition{
 			Name:        "noop",
 			Description: "",
 			Schema:      tool.Schema{},
 		},
 		func(struct{}) (string, string) { return "", "" },
-	).Plain(func(context.Context, struct{}) (string, error) {
+	).IsEmbarrassinglyParallel().Plain(func(context.Context, struct{}) (string, error) {
 		time.Sleep(slept)
 		return "done", nil
-	}))
+	})
 
 	assistant := agent.New("", &callProvider{}, []tool.Tool{slow})
 
 	timedResults := 0
 
-	for event, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go") {
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if event.Kind == agent.ToolCallResult {
+		if update.Event == nil {
+			continue
+		}
+
+		if update.Event.Kind == agent.ToolCallResultEvent {
 			timedResults++
 
-			if event.Took < slept {
-				t.Errorf("expected the call to have taken at least %s, got %s", slept, event.Took)
+			if update.Event.Took < slept {
+				t.Errorf("expected the call to have taken at least %s, got %s", slept, update.Event.Took)
 			}
 		}
 	}
@@ -256,7 +271,7 @@ func TestStreamAnswersEveryCallOfAFinishedTurn(t *testing.T) {
 type oneCallProvider struct {
 	call    agent.ToolCall
 	sent    int
-	results []agent.ToolResult
+	results []agent.ToolCallResult
 }
 
 func (self *oneCallProvider) Configure(string, []tool.Definition) {}
@@ -264,7 +279,7 @@ func (self *oneCallProvider) AddUserMessage(string)               {}
 func (self *oneCallProvider) Dump() []json.RawMessage             { return nil }
 func (self *oneCallProvider) Load([]json.RawMessage)              {}
 
-func (self *oneCallProvider) AddToolResults(results []agent.ToolResult) {
+func (self *oneCallProvider) AddToolResults(results []agent.ToolCallResult) {
 	self.results = append(self.results, results...)
 }
 
@@ -287,12 +302,16 @@ func singleResult(t *testing.T, calledTool tool.Tool) agent.Event {
 	assistant := agent.New("", provider, []tool.Tool{calledTool})
 
 	var results []agent.Event
-	for event, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go") {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if event.Kind == agent.ToolCallResult {
-			results = append(results, event)
+
+		if update.Event == nil {
+			continue
+		}
+		if update.Event.Kind == agent.ToolCallResultEvent {
+			results = append(results, *update.Event)
 		}
 	}
 
@@ -325,6 +344,33 @@ func TestACallThatFailedWithSomethingToSaySaysItAndIsMarkedFailed(t *testing.T) 
 	if !strings.Contains(result.Text, "permission denied") {
 		t.Errorf("expected what the command printed, got %q", result.Text)
 	}
+}
+
+func TestAReadOnlyCallStoresReadOnlyFallbackRendering(t *testing.T) {
+	calledTool := tool.Implement(
+		tool.Definition{Name: "inspect", Description: "", Schema: tool.Schema{}},
+		func(struct{}) (string, string) { return "target", "" },
+	).ChangesNothing().Plain(func(context.Context, struct{}) (string, error) {
+		return "done", nil
+	})
+	provider := &oneCallProvider{
+		call: agent.ToolCall{ID: "a", Name: calledTool.Name(), Arguments: `{}`},
+	}
+	assistant := agent.New("", provider, []tool.Tool{calledTool})
+
+	for update, err := range assistant.Stream(t.Context(), "go") {
+		if err != nil {
+			t.Fatal(err)
+		}
+		if update.Event != nil && update.Event.Kind == agent.ToolCallRequestEvent {
+			if !update.Event.ReadOnly {
+				t.Error("read-only call did not store read-only fallback rendering")
+			}
+			return
+		}
+	}
+
+	t.Fatal("expected a tool call request")
 }
 
 func plainOutputTool(output string, executionError error) tool.Tool {
@@ -410,11 +456,11 @@ type unparsedToolCallProvider struct {
 	sent      int
 }
 
-func (self *unparsedToolCallProvider) Configure(string, []tool.Definition) {}
-func (self *unparsedToolCallProvider) AddUserMessage(string)               {}
-func (self *unparsedToolCallProvider) Dump() []json.RawMessage             { return nil }
-func (self *unparsedToolCallProvider) Load([]json.RawMessage)              {}
-func (self *unparsedToolCallProvider) AddToolResults([]agent.ToolResult)   {}
+func (self *unparsedToolCallProvider) Configure(string, []tool.Definition)   {}
+func (self *unparsedToolCallProvider) AddUserMessage(string)                 {}
+func (self *unparsedToolCallProvider) Dump() []json.RawMessage               { return nil }
+func (self *unparsedToolCallProvider) Load([]json.RawMessage)                {}
+func (self *unparsedToolCallProvider) AddToolResults([]agent.ToolCallResult) {}
 
 func (self *unparsedToolCallProvider) Send(_ context.Context, _ agent.Yield) (agent.Reply, error) {
 	if self.sent++; self.sent > 1 {
@@ -434,13 +480,17 @@ func unparsedToolCallSubject(t *testing.T, tools []tool.Tool, name string, argum
 
 	var calls []agent.Event
 
-	for event, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go") {
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if event.Kind == agent.ToolCallRequest {
-			calls = append(calls, event)
+		if update.Event == nil {
+			continue
+		}
+
+		if update.Event.Kind == agent.ToolCallRequestEvent {
+			calls = append(calls, *update.Event)
 		}
 	}
 
@@ -502,9 +552,9 @@ type notingProvider struct {
 	messages []string
 }
 
-func (self *notingProvider) Configure(string, []tool.Definition) {}
-func (self *notingProvider) AddUserMessage(text string)          { self.messages = append(self.messages, text) }
-func (self *notingProvider) AddToolResults([]agent.ToolResult)   {}
+func (self *notingProvider) Configure(string, []tool.Definition)   {}
+func (self *notingProvider) AddUserMessage(text string)            { self.messages = append(self.messages, text) }
+func (self *notingProvider) AddToolResults([]agent.ToolCallResult) {}
 
 func (self *notingProvider) Send(context.Context, agent.Yield) (agent.Reply, error) {
 	return agent.Reply{}, nil
@@ -542,7 +592,7 @@ func TestHowACallLookedIsWrittenFlatSoOldSessionsStillRead(t *testing.T) {
 	}
 
 	if event.Subject != "a" || event.Note != "1 KB" || !event.ReadOnly {
-		t.Errorf("expected a stored appearance to read back, got %#v", event.Rendering)
+		t.Errorf("expected a stored appearance to read back, got %#v", event.FallbackRendering)
 	}
 
 	got, err := json.Marshal(event)
@@ -552,5 +602,139 @@ func TestHowACallLookedIsWrittenFlatSoOldSessionsStillRead(t *testing.T) {
 
 	if string(got) != written {
 		t.Errorf("expected the event written as one flat object, got %s", got)
+	}
+}
+
+type outputProvider struct {
+	outputs []agent.Output
+	err     error
+}
+
+func (*outputProvider) Configure(string, []tool.Definition)   {}
+func (*outputProvider) AddUserMessage(string)                 {}
+func (*outputProvider) AddToolResults([]agent.ToolCallResult) {}
+func (self *outputProvider) Send(_ context.Context, yield agent.Yield) (agent.Reply, error) {
+	for _, output := range self.outputs {
+		if !yield(output) {
+			return agent.Reply{}, nil
+		}
+	}
+
+	return agent.Reply{}, self.err
+}
+
+func TestStreamSeparatesCompletedProseBlocksFromDeltas(t *testing.T) {
+	provider := &outputProvider{outputs: []agent.Output{
+		{Kind: agent.ModelReasoningEvent, Text: "first "},
+		{Kind: agent.ModelReasoningEvent, Text: "thought"},
+		{Kind: agent.ModelReasoningEvent, Done: true},
+		{Kind: agent.ModelReasoningEvent, Text: "second thought"},
+		{Kind: agent.ModelReasoningEvent, Done: true},
+		{Kind: agent.ModelMessageEvent, Text: "answer"},
+		{Kind: agent.ModelMessageEvent, Done: true},
+	}}
+	assistant := agent.New("", provider, nil)
+
+	var got []string
+	for update, err := range assistant.Stream(t.Context(), "go") {
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		switch {
+		case update.Delta != nil:
+			got = append(got, "delta:"+string(update.Delta.Kind)+":"+update.Delta.Text)
+		case update.Event != nil:
+			got = append(got, "event:"+string(update.Event.Kind)+":"+update.Event.Text)
+		}
+	}
+
+	want := []string{
+		"event:user_message:go",
+		"delta:model_reasoning:first ",
+		"delta:model_reasoning:thought",
+		"event:model_reasoning:first thought",
+		"delta:model_reasoning:second thought",
+		"event:model_reasoning:second thought",
+		"delta:model_message:answer",
+		"event:model_message:answer",
+	}
+	if !slices.Equal(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestStreamDiscardsIncompleteReasoning(t *testing.T) {
+	failure := errors.New("stream failed")
+	provider := &outputProvider{
+		outputs: []agent.Output{{Kind: agent.ModelReasoningEvent, Text: "half a thought"}},
+		err:     failure,
+	}
+	assistant := agent.New("", provider, nil)
+
+	var completedReasoning bool
+	for update, err := range assistant.Stream(t.Context(), "go") {
+		if err != nil {
+			if !errors.Is(err, failure) {
+				t.Fatalf("got %v, want %v", err, failure)
+			}
+			continue
+		}
+		completedReasoning = completedReasoning || update.Event != nil && update.Event.Kind == agent.ModelReasoningEvent
+	}
+
+	if completedReasoning {
+		t.Error("incomplete reasoning became a durable event")
+	}
+}
+
+func TestStreamDropsIncompleteProseWhenItsKindChanges(t *testing.T) {
+	provider := &outputProvider{outputs: []agent.Output{
+		{Kind: agent.ModelReasoningEvent, Text: "unfinished thought"},
+		{Kind: agent.ModelMessageEvent, Text: "answer"},
+		{Kind: agent.ModelMessageEvent, Done: true},
+	}}
+	assistant := agent.New("", provider, nil)
+
+	var completed []agent.Event
+	for update, err := range assistant.Stream(t.Context(), "go") {
+		if err != nil {
+			t.Fatal(err)
+		}
+		if update.Event != nil && (update.Event.Kind == agent.ModelReasoningEvent || update.Event.Kind == agent.ModelMessageEvent) {
+			completed = append(completed, *update.Event)
+		}
+	}
+
+	if len(completed) != 1 || completed[0].Kind != agent.ModelMessageEvent || completed[0].Text != "answer" {
+		t.Errorf("got completed prose %+v", completed)
+	}
+}
+
+func TestStreamPreservesAnIncompleteAnswerBeforeTheFailure(t *testing.T) {
+	failure := errors.New("stream failed")
+	provider := &outputProvider{
+		outputs: []agent.Output{{Kind: agent.ModelMessageEvent, Text: "half an answer"}},
+		err:     failure,
+	}
+	assistant := agent.New("", provider, nil)
+
+	var answer string
+	var reportedFailure error
+	for update, err := range assistant.Stream(t.Context(), "go") {
+		if err != nil {
+			reportedFailure = err
+			continue
+		}
+		if update.Event != nil && update.Event.Kind == agent.ModelMessageEvent {
+			answer = update.Event.Text
+		}
+	}
+
+	if answer != "half an answer" {
+		t.Errorf("got answer %q", answer)
+	}
+	if !errors.Is(reportedFailure, failure) {
+		t.Errorf("got failure %v, want %v", reportedFailure, failure)
 	}
 }

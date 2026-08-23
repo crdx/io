@@ -1,0 +1,22 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[first]
+prompt = "refuse this request"
+
+[[first.response]]
+event = [
+    '''{"type":"response.refusal.delta","delta":"I cannot help with that."}''',
+    '''{"type":"response.completed"}''',
+]
+
+[resume]
+prompt = "continue after the first response"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Resumed."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}''',
+    '''{"type":"response.completed"}''',
+]

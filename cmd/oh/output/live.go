@@ -28,6 +28,28 @@ func (self *Screen) DrawReasoning(rows []string) bool {
 	return self.draw(rows, AsideGroup)
 }
 
+// DiscardLive erases the unsealed live region without leaving it in scrollback.
+func (self *Screen) DiscardLive() bool {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	self.blocks = nil
+	if len(self.liveRegion.rows) == 0 {
+		return true
+	}
+	if self.liveRegion.topRowIndex > 0 {
+		return false
+	}
+	if self.isTTY {
+		self.repaint(0, []string{""}, false)
+		self.liveRegion = liveRegion{}
+		return false
+	}
+	self.liveRegion = liveRegion{}
+
+	return true
+}
+
 func (self *Screen) draw(newRows []string, next Group) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()

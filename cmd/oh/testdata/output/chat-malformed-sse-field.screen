@@ -1,0 +1,11 @@
+
+ send fields without SSE data
+
+
+the stream ended before the response did
+
+
+ continue after the transport failure
+
+
+Resumed.

@@ -19,7 +19,7 @@ type Args struct {
 
 // New builds the find tool confined to root.
 func New(root *file.Root) tool.Tool {
-	definedTool := tool.Implement(
+	return tool.Implement(
 		tool.Definition{
 			Name:        "find",
 			Description: "find files",
@@ -27,16 +27,18 @@ func New(root *file.Root) tool.Tool {
 				tool.String("pattern", "glob"),
 				tool.String(
 					"path",
-					"directory, defaults to working directory",
+					"directory (default: cwd)",
 				).Optional(),
 			},
 		},
 		Describe,
-	).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
-		return exec(root, args)
-	})
-
-	return tool.ReadOnly(tool.Concurrent(tool.Focus(definedTool, util.SearchPath)))
+	).
+		Focuses(util.SearchPath).
+		IsEmbarrassinglyParallel().
+		ChangesNothing().
+		Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
+			return exec(root, args)
+		})
 }
 
 // Describe reports the search's subject and qualifier.

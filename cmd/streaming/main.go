@@ -41,19 +41,33 @@ func main() {
 }
 
 func answer(assistant *agent.Agent, message string) {
-	for event, err := range assistant.Stream(context.Background(), message) {
+	isStreamingMessage := false
+
+	for update, err := range assistant.Stream(context.Background(), message) {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "\n"+err.Error())
 			return
 		}
 
-		switch event.Kind {
-		case agent.ModelMessage:
-			fmt.Print(event.Text)
-		case agent.ToolCallRequest:
-			fmt.Printf("\n· %s %s\n", event.Name, event.Arguments)
-		case agent.ToolCallResult:
-			fmt.Printf("← %s\n", event.Text)
+		switch {
+		case update.Delta != nil:
+			if update.Delta.Kind == agent.ModelMessageEvent {
+				isStreamingMessage = true
+				fmt.Print(update.Delta.Text)
+			}
+
+		case update.Event != nil:
+			switch update.Event.Kind {
+			case agent.ModelMessageEvent:
+				if !isStreamingMessage {
+					fmt.Print(update.Event.Text)
+				}
+				isStreamingMessage = false
+			case agent.ToolCallRequestEvent:
+				fmt.Printf("\n· %s %s\n", update.Event.Name, update.Event.Arguments)
+			case agent.ToolCallResultEvent:
+				fmt.Printf("← %s\n", update.Event.Text)
+			}
 		}
 	}
 

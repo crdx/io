@@ -31,9 +31,21 @@ const (
 	wireName       = "wire.http"
 )
 
+type canonicalWriter interface {
+	Event(agent.Event) (time.Time, error)
+	Item(json.RawMessage) error
+	Name() string
+	ID() string
+	Started() time.Time
+	Stored() bool
+	EnsureStored() error
+	SetMeta(json.RawMessage) error
+	Close() error
+}
+
 // Writer coordinates the canonical journal and auxiliary bundle recorders.
 type Writer struct {
-	innerWriter *session.Writer
+	innerWriter canonicalWriter
 	writerMutex sync.Mutex
 
 	eventBuffer []agent.Event
@@ -180,7 +192,7 @@ func (self *Writer) release(event agent.Event) []agent.Event {
 	self.writerMutex.Lock()
 	defer self.writerMutex.Unlock()
 
-	if !self.innerWriter.Stored() && event.Kind != agent.UserMessage {
+	if !self.innerWriter.Stored() && event.Kind != agent.UserMessageEvent {
 		self.eventBuffer = append(self.eventBuffer, event)
 		return nil
 	}
@@ -337,7 +349,7 @@ func decode(storedSession *session.Session) (*Session, error) {
 // FirstMessage is the first message the user sent in the session.
 func (self *Session) FirstMessage() string {
 	for _, event := range self.Events {
-		if event.Kind == agent.UserMessage {
+		if event.Kind == agent.UserMessageEvent {
 			return event.Text
 		}
 	}
@@ -348,7 +360,7 @@ func (self *Session) FirstMessage() string {
 func (self *Session) Messages() int {
 	count := 0
 	for _, event := range self.Events {
-		if event.Kind == agent.UserMessage || event.Kind == agent.ModelMessage {
+		if event.Kind == agent.UserMessageEvent || event.Kind == agent.ModelMessageEvent {
 			count++
 		}
 	}

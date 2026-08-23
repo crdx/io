@@ -1,0 +1,22 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "reset the connection during an answer"
+
+[[first.response]]
+reset-after-wire-event = 1
+event = [
+    '''{"choices":[{"delta":{"content":"Partial answer."}}]}''',
+]
+
+[resume]
+prompt = "continue after the transport failure"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

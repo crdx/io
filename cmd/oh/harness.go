@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
@@ -23,11 +24,19 @@ import (
 	"crdx.org/io/internal/sandbox"
 )
 
+type SessionLogger interface {
+	Stored() bool
+	Name() string
+	Event(agent.Event) error
+	Item(json.RawMessage) error
+	TakeWarnings() []error
+}
+
 type Harness struct {
 	agent         *agent.Agent
 	events        []agent.Event
 	screen        *output.Screen
-	log           *store.Writer
+	log           SessionLogger
 	processes     *sandbox.Processes
 	segmentLayout segment.Layout
 	editor        *edit.Input
@@ -398,13 +407,18 @@ func (self *Harness) replay() {
 }
 
 func (self *Harness) redraw() {
+	var provisional agent.Delta
 	if self.currentTurn.isRunning {
+		provisional = self.currentTurn.painter.provisionalDelta()
 		self.currentTurn.painter.stop()
 	}
 
 	self.screen.Synchronise(func() {
 		self.screen.Reset()
 		self.replay()
+		if provisional.Text != "" {
+			self.currentTurn.painter.drawDelta(provisional)
+		}
 	})
 }
 
@@ -428,10 +442,10 @@ func (self *Harness) start(message string) {
 		defer close(self.currentTurn.events)
 		defer cancel()
 
-		for event, err := range self.agent.Stream(turnCtx, message) {
+		for update, err := range self.agent.Stream(turnCtx, message) {
 			self.currentTurn.events <- TurnEvent{
-				event: event,
-				err:   err,
+				update: update,
+				err:    err,
 			}
 
 			if err != nil {
@@ -447,47 +461,42 @@ func (self *Harness) takeTurn(turnEvent TurnEvent) {
 		return
 	}
 
-	self.recordEvent(turnEvent.event)
+	if turnEvent.update.Delta != nil {
+		self.currentTurn.painter.drawDelta(*turnEvent.update.Delta)
+		if self.currentTurn.painter.isStale {
+			self.redraw()
+		}
+		return
+	}
+
+	if turnEvent.update.Event != nil {
+		self.recordEvent(*turnEvent.update.Event)
+	}
 }
 
 func (self *Harness) recordEvent(event agent.Event) {
-	self.events = appendTranscript(self.events, event)
+	self.events = append(self.events, event)
 	self.currentTurn.painter.drawEvent(event)
 
 	if self.currentTurn.painter.isStale {
 		self.redraw()
 	}
 
-	self.writeSessionEvents(self.currentTurn.pendingEvents.Add(event))
+	self.write(func() error { return self.log.Event(event) })
 	self.showStorageWarnings()
 }
 
-func appendTranscript(transcript []agent.Event, event agent.Event) []agent.Event {
-	if (event.Kind == agent.ModelMessage || event.Kind == agent.ModelReasoning) && len(transcript) > 0 {
-		if last := &transcript[len(transcript)-1]; last.Kind == event.Kind {
-			last.Text += event.Text
-			return transcript
-		}
-	}
-
-	return append(transcript, event)
-}
-
 func (self *Harness) notifyFailure(text string) {
-	self.notify(agent.Event{Kind: agent.HarnessMessage, Text: text, Failed: true})
+	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text, Failed: true})
 }
 
 func (self *Harness) notifyStopped(text string) {
-	self.notify(agent.Event{Kind: agent.HarnessMessage, Text: text})
+	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text})
 }
 
 func (self *Harness) notify(event agent.Event) {
 	self.events = append(self.events, event)
 	self.noticePainter().drawEvent(event)
-
-	if self.currentTurn.isRunning {
-		self.flush(&self.currentTurn.pendingEvents)
-	}
 
 	_ = self.log.Event(event)
 }
@@ -504,15 +513,17 @@ func (self *Harness) finish() {
 	self.screen.ReportProgress(false)
 
 	if self.currentTurn.isCancelled {
-		self.recordEvent(agent.Event{Kind: agent.Interruption})
+		self.recordEvent(agent.Event{Kind: agent.InterruptionEvent})
 	} else if self.currentTurn.err != nil {
-		self.recordEvent(agent.Event{Kind: agent.Failure, Text: self.currentTurn.err.Error()})
+		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: self.currentTurn.err.Error()})
 	}
 
-	self.flush(&self.currentTurn.pendingEvents)
 	self.storeItems()
 	self.showStorageWarnings()
 	self.currentTurn.painter.close(dynamic.Cancelled)
+	if self.currentTurn.painter.isStale {
+		self.redraw()
+	}
 	self.screen.End()
 
 	self.currentTurn.isRunning = false
@@ -532,16 +543,6 @@ func (self *Harness) finish() {
 		if message := self.mode.Inject(); message != "" {
 			self.start(message)
 		}
-	}
-}
-
-func (self *Harness) flush(pendingEvents *agent.Coalescer) {
-	self.writeSessionEvents(pendingEvents.Flush())
-}
-
-func (self *Harness) writeSessionEvents(events []agent.Event) {
-	for _, event := range events {
-		self.write(func() error { return self.log.Event(event) })
 	}
 }
 

@@ -68,11 +68,11 @@ func appendRaw(t *testing.T, directory string, name string, text string) {
 }
 
 var conversation = []agent.Event{
-	{Kind: agent.UserMessage, Text: "what is the weather in London?"},
-	{Kind: agent.ModelMessage, Text: "Let me look."},
-	{Kind: agent.ToolCallRequest, ID: "1", Name: "weather", Arguments: `{"city":"London"}`, Rendering: agent.Rendering{Subject: "London"}},
-	{Kind: agent.ToolCallResult, ID: "1", Name: "weather", Text: "raining"},
-	{Kind: agent.ModelMessage, Text: "It is raining."},
+	{Kind: agent.UserMessageEvent, Text: "what is the weather in London?"},
+	{Kind: agent.ModelMessageEvent, Text: "Let me look."},
+	{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "weather", Arguments: `{"city":"London"}`, FallbackRendering: agent.FallbackRendering{Subject: "London"}},
+	{Kind: agent.ToolCallResultEvent, ID: "1", Name: "weather", Text: "raining"},
+	{Kind: agent.ModelMessageEvent, Text: "It is raining."},
 }
 
 func TestASessionReadsBackAsItWasWritten(t *testing.T) {
@@ -120,7 +120,7 @@ func TestTheMetaCanIncludeTheGeneratedSessionID(t *testing.T) {
 	if err := log.SetMeta(store.Meta{SystemPrompt: systemPrompt}); err != nil {
 		t.Fatal(err)
 	}
-	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "store it"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "store it"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := log.SetMeta(store.Meta{SystemPrompt: "too late"}); err == nil {
@@ -196,7 +196,7 @@ func TestWhatHappensBeforeTheFirstMessageDoesNotWriteTheSession(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := log.Event(agent.Event{Kind: agent.Startup, Took: time.Millisecond}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.StartupEvent, Took: time.Millisecond}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -227,8 +227,8 @@ func TestWhatWasHeldBackIsWrittenInFrontOfTheFirstMessage(t *testing.T) {
 	}
 
 	held := []agent.Event{
-		{Kind: agent.Startup, Took: time.Millisecond},
-		{Kind: agent.HarnessMessage, Text: "the workspace is now read-write"},
+		{Kind: agent.StartupEvent, Took: time.Millisecond},
+		{Kind: agent.HarnessMessageEvent, Text: "the workspace is now read-write"},
 	}
 
 	for _, event := range held {
@@ -237,7 +237,7 @@ func TestWhatWasHeldBackIsWrittenInFrontOfTheFirstMessage(t *testing.T) {
 		}
 	}
 
-	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "hello"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "hello"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -250,7 +250,7 @@ func TestWhatWasHeldBackIsWrittenInFrontOfTheFirstMessage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want := []agent.Kind{agent.Startup, agent.HarnessMessage, agent.UserMessage}
+	want := []agent.Kind{agent.StartupEvent, agent.HarnessMessageEvent, agent.UserMessageEvent}
 
 	got := make([]agent.Kind, 0, len(storedSession.Events))
 	for _, event := range storedSession.Events {
@@ -270,7 +270,7 @@ func TestTheFirstThingSaidTakesTheHeadWithIt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "hello"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "hello"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -318,7 +318,7 @@ func TestAnOpenedSessionKeepsWhatWasThereBefore(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "and tomorrow?"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "and tomorrow?"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -389,7 +389,7 @@ func TestListPutsTheSessionTouchedLastAtTheTop(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := log.Event(agent.Event{Kind: agent.ModelMessage, Text: "one more thing"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.ModelMessageEvent, Text: "one more thing"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -432,7 +432,7 @@ func TestHTTPObservationCanCreateTheBundleBeforeTheFirstEvent(t *testing.T) {
 		t.Fatalf("expected no recorder warnings, got %v", warnings)
 	}
 
-	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "hello"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "hello"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := log.Close(); err != nil {
@@ -491,7 +491,7 @@ func TestOpeningABundleAppendsToTheMarkdownTranscript(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "resumed text"}); err != nil {
+	if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "resumed text"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := log.Close(); err != nil {

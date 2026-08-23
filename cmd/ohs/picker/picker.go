@@ -41,7 +41,7 @@ type Session struct {
 // FirstMessage is the first message the user sent in the session.
 func (self *Session) FirstMessage() string {
 	for _, event := range self.Events {
-		if event.Kind == agent.UserMessage {
+		if event.Kind == agent.UserMessageEvent {
 			return event.Text
 		}
 	}
@@ -52,7 +52,7 @@ func (self *Session) FirstMessage() string {
 func (self *Session) Messages() int {
 	count := 0
 	for _, event := range self.Events {
-		if event.Kind == agent.UserMessage || event.Kind == agent.ModelMessage {
+		if event.Kind == agent.UserMessageEvent || event.Kind == agent.ModelMessageEvent {
 			count++
 		}
 	}

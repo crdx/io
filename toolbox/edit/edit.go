@@ -21,7 +21,7 @@ type Args struct {
 
 // New builds an edit tool confined to root.
 func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
-	return tool.FocusPath(tool.Implement(
+	return tool.Implement(
 		tool.Definition{
 			Name:        "edit",
 			Description: "replace an exact string in a file, which must be read first and appear exactly once",
@@ -32,9 +32,9 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 			},
 		},
 		Describe,
-	).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
+	).FocusPath().Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
 		return exec(root, snapshots, args)
-	}))
+	})
 }
 
 // Describe names the file.

@@ -1,0 +1,49 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+complete reasoning and then send an error
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+Completed thought.
+```
+
+## Failure
+
+> 2001-01-01T00:00:02Z
+
+```
+provider overloaded
+```
+
+## User
+
+> 2001-01-01T00:00:03Z
+
+```
+continue after the transport failure
+```
+
+## Assistant
+
+> 2001-01-01T00:00:04Z
+
+```
+Resumed.
+```
+

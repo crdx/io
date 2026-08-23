@@ -114,7 +114,7 @@ func (self *Client) AddUserMessage(text string) {
 // AddToolResults appends this turn's tool call results to the conversation.
 //
 // https://platform.openai.com/docs/guides/function-calling
-func (self *Client) AddToolResults(results []agent.ToolResult) {
+func (self *Client) AddToolResults(results []agent.ToolCallResult) {
 	for _, result := range results {
 		self.history = append(self.history, encodeItem(toolOutput{
 			Type:   "function_call_output",
@@ -266,7 +266,7 @@ type inputContent struct {
 
 const imageDetail = "high"
 
-func encodeToolOutput(result agent.ToolResult) any {
+func encodeToolOutput(result agent.ToolCallResult) any {
 	if result.Image.MediaType == "" || len(result.Image.Data) == 0 {
 		return result.Output
 	}

@@ -12,6 +12,10 @@ import (
 	"crdx.org/io/cmd/oh/width"
 )
 
+// —————————————————————————————————————————————————————————————————————————————————————————————————
+// mega:allow-file comment-inlines
+// —————————————————————————————————————————————————————————————————————————————————————————————————
+
 // Style renders text as one kind of line, and formats nothing when given no arguments, so a delta
 // with a percent sign in it is safe to hand one.
 type Style func(format any, args ...any) string

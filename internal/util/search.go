@@ -37,7 +37,7 @@ func DescribeSearch(pattern string, path string, globPattern string) (string, st
 }
 
 // SearchPath returns the final component of the path in a described search call.
-func SearchPath(call tool.Call) string {
+func SearchPath(call tool.ToolCall) string {
 	qualifier := strings.TrimSpace(call.Qualifier())
 	if qualifier == "" {
 		return ""

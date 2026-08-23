@@ -1,0 +1,21 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "wait beyond the request deadline"
+timeout = "50ms"
+
+[[first.response]]
+line = [": waiting", ""]
+wait-for-cancellation = true
+
+[resume]
+prompt = "continue after the timeout"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

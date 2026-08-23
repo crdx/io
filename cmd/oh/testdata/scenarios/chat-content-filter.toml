@@ -1,0 +1,23 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "filter the response after starting it"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Partial filtered answer."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"content_filter"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "continue after the first response"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

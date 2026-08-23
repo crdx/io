@@ -1,0 +1,27 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[first]
+prompt = "reason in two separate items"
+
+[[first.response]]
+event = [
+    '''{"type":"response.reasoning_summary_part.done","part":{"type":"summary_text","text":"First item."}}''',
+    '''{"type":"response.output_item.done","item":{"id":"reasoning-1","type":"reasoning","content":[],"encrypted_content":"sealed-1","summary":[{"type":"summary_text","text":"First item."}]}}''',
+    '''{"type":"response.reasoning_summary_part.done","part":{"type":"summary_text","text":"Second item."}}''',
+    '''{"type":"response.output_item.done","item":{"id":"reasoning-2","type":"reasoning","content":[],"encrypted_content":"sealed-2","summary":[{"type":"summary_text","text":"Second item."}]}}''',
+    '''{"type":"response.output_text.delta","delta":"Done."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Done."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[resume]
+prompt = "continue after the first response"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Resumed."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}''',
+    '''{"type":"response.completed"}''',
+]

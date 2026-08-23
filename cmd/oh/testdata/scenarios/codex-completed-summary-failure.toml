@@ -1,0 +1,23 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[first]
+prompt = "complete a summary, then fail"
+
+[[first.response]]
+event = [
+    '''{"type":"response.reasoning_summary_text.delta","delta":"Completed summary."}''',
+    '''{"type":"response.reasoning_summary_part.done","part":{"type":"summary_text","text":"Completed summary."}}''',
+    '''{"type":"response.failed","response":{"error":{"message":"model failed after reasoning"}}}''',
+]
+
+[resume]
+prompt = "continue after the first response"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Resumed."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}''',
+    '''{"type":"response.completed"}''',
+]

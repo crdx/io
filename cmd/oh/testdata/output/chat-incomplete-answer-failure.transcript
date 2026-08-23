@@ -1,0 +1,57 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+think, answer, then fail
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+complete thought
+```
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+```
+partial answer
+```
+
+## Failure
+
+> 2001-01-01T00:00:03Z
+
+```
+the response was cut short
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+continue after the failure
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Resumed.
+```
+

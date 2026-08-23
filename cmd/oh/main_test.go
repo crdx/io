@@ -870,7 +870,7 @@ func conversationFixture(t *testing.T, hasSession bool, currentCaps caps.Set) *H
 	}
 
 	if hasSession {
-		if err := log.Event(agent.Event{Kind: agent.UserMessage, Text: "hello"}); err != nil {
+		if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "hello"}); err != nil {
 			t.Fatal(err)
 		}
 	}

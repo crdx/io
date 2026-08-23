@@ -22,7 +22,7 @@ type Args struct {
 
 // New builds a write tool confined to root.
 func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
-	return tool.FocusPath(tool.Implement(
+	return tool.Implement(
 		tool.Definition{
 			Name:        "write",
 			Description: "write a file, creating it or overwriting it (read it first)",
@@ -32,9 +32,9 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 			},
 		},
 		Describe,
-	).Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
+	).FocusPath().Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
 		return exec(root, snapshots, args)
-	}))
+	})
 }
 
 // Describe names the file, saying how much is being written rather than what.

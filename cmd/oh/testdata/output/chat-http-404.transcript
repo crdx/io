@@ -1,0 +1,41 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+receive HTTP 404
+```
+
+## Failure
+
+> 2001-01-01T00:00:01Z
+
+```
+request failed with status 404: 
+```
+
+## User
+
+> 2001-01-01T00:00:02Z
+
+```
+continue after the missing endpoint
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Resumed.
+```
+

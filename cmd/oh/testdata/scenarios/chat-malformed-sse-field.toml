@@ -1,0 +1,19 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "send fields without SSE data"
+
+[[first.response]]
+line = ["event: message", "wat: unreadable", ""]
+
+[resume]
+prompt = "continue after the transport failure"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

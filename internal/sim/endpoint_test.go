@@ -176,13 +176,17 @@ func TestTheReasoningIsReportedWhateverTheApi(t *testing.T) {
 
 			var thoughts []string
 
-			for event, err := range assistant.Stream(t.Context(), "what is the weather in London?") {
+			for update, err := range assistant.Stream(t.Context(), "what is the weather in London?") {
 				if err != nil {
 					t.Fatalf("unexpected error: %v", err)
 				}
 
-				if event.Kind == agent.ModelReasoning {
-					thoughts = append(thoughts, event.Text)
+				if update.Event == nil {
+					continue
+				}
+
+				if update.Event.Kind == agent.ModelReasoningEvent {
+					thoughts = append(thoughts, update.Event.Text)
 				}
 			}
 
@@ -202,12 +206,16 @@ func TestATurnDroppedMidCallDoesNotSpoilTheNext(t *testing.T) {
 
 			assistant := newAgent(t, provider, address, []tool.Tool{weather(&callCount)})
 
-			for event, err := range assistant.Stream(t.Context(), "what is the weather in London?") {
+			for update, err := range assistant.Stream(t.Context(), "what is the weather in London?") {
 				if err != nil {
 					t.Fatalf("unexpected error: %v", err)
 				}
 
-				if event.Kind == agent.ToolCallRequest {
+				if update.Event == nil {
+					continue
+				}
+
+				if update.Event.Kind == agent.ToolCallRequestEvent {
 					break
 				}
 			}

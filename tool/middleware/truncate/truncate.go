@@ -26,30 +26,30 @@ func Tools(subjects []tool.Tool) []tool.Tool {
 	return wrappedTools
 }
 
-// Tool wraps one tool so its output is capped.
-func Tool(subject tool.Tool) tool.Tool {
-	return capped{Tool: subject}
+// Tool wraps one tool so its output is truncated.
+func Tool(inner tool.Tool) tool.Tool {
+	return truncatedTool{Tool: inner}
 }
 
-type capped struct {
+type truncatedTool struct {
 	tool.Tool
 }
 
-func (self capped) Parse(arguments string) (tool.Call, error) {
+func (self truncatedTool) Parse(arguments string) (tool.ToolCall, error) {
 	call, err := self.Tool.Parse(arguments)
 	if err != nil {
 		return nil, err
 	}
 
-	return cappedCall{Call: call}, nil
+	return truncatedToolCall{ToolCall: call}, nil
 }
 
-type cappedCall struct {
-	tool.Call
+type truncatedToolCall struct {
+	tool.ToolCall
 }
 
-func (self cappedCall) Exec(ctx context.Context) (tool.Result, error) {
-	result, err := self.Call.Exec(ctx)
+func (self truncatedToolCall) Exec(ctx context.Context) (tool.ToolCallResult, error) {
+	result, err := self.ToolCall.Exec(ctx)
 	cappedOutput, returnedBytes, totalBytes := outputWithSizes(result.Output)
 	result.Output = cappedOutput
 

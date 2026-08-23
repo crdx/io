@@ -64,9 +64,9 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 	fmt.Fprintf(&output, "## %s\n\n> %s\n\n", title(event.Kind), at.UTC().Format(time.RFC3339Nano))
 
 	switch event.Kind {
-	case agent.UserMessage, agent.ModelReasoning, agent.ModelMessage:
+	case agent.UserMessageEvent, agent.ModelReasoningEvent, agent.ModelMessageEvent:
 		writeFence(&output, event.Text, "")
-	case agent.ToolCallRequest:
+	case agent.ToolCallRequestEvent:
 		writeField(&output, "ID", event.ID)
 		writeField(&output, "Name", event.Name)
 		writeBool(&output, "Read only", event.ReadOnly)
@@ -83,7 +83,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			output.WriteString("**Qualifier**\n\n")
 			writeFence(&output, event.Note, "")
 		}
-	case agent.ToolCallResult:
+	case agent.ToolCallResultEvent:
 		writeField(&output, "ID", event.ID)
 		writeField(&output, "Name", event.Name)
 		writeBool(&output, "Failed", event.Failed)
@@ -103,14 +103,14 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		if event.Text != "" {
 			writeToolResultPreview(&output, event.Text, highlightSyntax(event.Highlight))
 		}
-	case agent.StateChange:
+	case agent.StateChangeEvent:
 		writeField(&output, "ID", event.ID)
 		writeField(&output, "Name", event.Name)
 		output.WriteString("**State**\n\n")
 		writeFence(&output, string(event.State), "json")
-	case agent.Interruption:
+	case agent.InterruptionEvent:
 		output.WriteString("The turn was interrupted.\n\n")
-	case agent.Failure:
+	case agent.FailureEvent:
 		writeFence(&output, event.Text, "")
 	}
 
@@ -146,25 +146,25 @@ func (self *Recorder) Close() error {
 
 func title(kind agent.Kind) string {
 	switch kind {
-	case agent.Startup:
+	case agent.StartupEvent:
 		return "Startup"
-	case agent.UserMessage:
+	case agent.UserMessageEvent:
 		return "User"
-	case agent.HarnessMessage:
+	case agent.HarnessMessageEvent:
 		return "Notice"
-	case agent.ModelReasoning:
+	case agent.ModelReasoningEvent:
 		return "Reasoning"
-	case agent.ModelMessage:
+	case agent.ModelMessageEvent:
 		return "Assistant"
-	case agent.ToolCallRequest:
+	case agent.ToolCallRequestEvent:
 		return "Tool call"
-	case agent.ToolCallResult:
+	case agent.ToolCallResultEvent:
 		return "Tool result"
-	case agent.StateChange:
+	case agent.StateChangeEvent:
 		return "State"
-	case agent.Interruption:
+	case agent.InterruptionEvent:
 		return "Interrupted"
-	case agent.Failure:
+	case agent.FailureEvent:
 		return "Failure"
 	default:
 		return string(kind)

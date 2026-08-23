@@ -14,10 +14,10 @@ func window(rows []string, cursorRow int) Frame {
 	start := min(max(cursorRow-maxRows+1, 0), len(rows)-maxRows)
 
 	return Frame{
-		Rows:  rows[start : start+maxRows],
-		Row:   cursorRow - start,
-		Above: start,
-		Below: len(rows) - start - maxRows,
+		Rows:             rows[start : start+maxRows],
+		Row:              cursorRow - start,
+		HiddenLinesAbove: start,
+		HiddenLinesBelow: len(rows) - start - maxRows,
 	}
 }
 

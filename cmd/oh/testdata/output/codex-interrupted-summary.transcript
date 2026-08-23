@@ -1,0 +1,39 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+interrupt an unfinished summary
+```
+
+## Interrupted
+
+> 2001-01-01T00:00:01Z
+
+The turn was interrupted.
+
+## User
+
+> 2001-01-01T00:00:02Z
+
+```
+continue after the first response
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Resumed.
+```
+

@@ -224,3 +224,19 @@ func TestAFrameWithNoRowsErasesWhatWasDrawn(t *testing.T) {
 		t.Errorf("expected the old row to be cleared, got %q", screenOutput.String())
 	}
 }
+
+func TestDiscardingLiveReasoningLeavesNoScrollback(t *testing.T) {
+	var screenOutput strings.Builder
+	screen := New(&screenOutput)
+
+	screen.DrawReasoning([]string{"half a thought"})
+	if !screen.DiscardLive() {
+		t.Fatal("expected the live region to remain erasable")
+	}
+	screen.Seal()
+	screen.End()
+
+	if screenOutput.String() != "" {
+		t.Errorf("discarded reasoning reached scrollback: %q", screenOutput.String())
+	}
+}

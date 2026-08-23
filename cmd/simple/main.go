@@ -41,19 +41,22 @@ func main() {
 }
 
 func answer(assistant *agent.Agent, message string) {
-	for event, err := range agent.Coalesce(assistant.Stream(context.Background(), message)) {
+	for update, err := range assistant.Stream(context.Background(), message) {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "\n"+err.Error())
 			return
 		}
+		if update.Event == nil {
+			continue
+		}
 
-		switch event.Kind {
-		case agent.ModelMessage:
-			fmt.Print(event.Text)
-		case agent.ToolCallRequest:
-			fmt.Printf("\n· %s %s\n", event.Name, event.Arguments)
-		case agent.ToolCallResult:
-			fmt.Printf("← %s\n", event.Text)
+		switch update.Event.Kind {
+		case agent.ModelMessageEvent:
+			fmt.Print(update.Event.Text)
+		case agent.ToolCallRequestEvent:
+			fmt.Printf("\n· %s %s\n", update.Event.Name, update.Event.Arguments)
+		case agent.ToolCallResultEvent:
+			fmt.Printf("← %s\n", update.Event.Text)
 		}
 	}
 

@@ -1,0 +1,21 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "receive a Chat Completions error envelope"
+
+[[first.response]]
+event = [
+    '''{"error":{"type":"service_unavailable_error","code":"server_is_overloaded","message":"model overloaded"}}''',
+]
+
+[resume]
+prompt = "continue after the endpoint error"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

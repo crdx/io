@@ -1,0 +1,39 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+think until interrupted
+```
+
+## Interrupted
+
+> 2001-01-01T00:00:01Z
+
+The turn was interrupted.
+
+## User
+
+> 2001-01-01T00:00:02Z
+
+```
+continue after the interruption
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Resumed.
+```
+

@@ -1,0 +1,21 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[first]
+prompt = "receive a top-level Responses API error"
+
+[[first.response]]
+event = [
+    '''{"type":"error","error":{"type":"service_unavailable_error","code":"server_is_overloaded","message":"model overloaded"}}''',
+]
+
+[resume]
+prompt = "continue after the endpoint error"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Resumed."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}''',
+    '''{"type":"response.completed"}''',
+]

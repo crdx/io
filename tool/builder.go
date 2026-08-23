@@ -4,17 +4,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path"
 	"strings"
 )
 
-// Builder binds typed describing and validation to a tool definition.
 type Builder[T any] struct {
 	definition Definition
 	describe   Describer[T]
 	validate   Validator[T]
+
+	parallel  bool
+	readOnly  bool
+	stateName string
+	restore   Restorer
+	highlight func(call ToolCall) Highlight
 }
 
-// Implement binds typed describing to a tool definition.
 func Implement[T any](definition Definition, describe Describer[T]) Builder[T] {
 	return Builder[T]{
 		definition: definition,
@@ -28,67 +33,117 @@ func (self Builder[T]) Validate(validate Validator[T]) Builder[T] {
 	return self
 }
 
-// Run builds a tool whose calls return one complete result.
-func (self Builder[T]) Run(exec ResultExecutor[T]) Tool {
-	return self.build(func(args T) Call {
-		call := self.call(args)
-		call.exec = func(ctx context.Context) (Result, error) {
-			return exec(ctx, args)
+// IsEmbarrassinglyParallel marks a tool as safe to run alongside others.
+func (self Builder[T]) IsEmbarrassinglyParallel() Builder[T] {
+	self.parallel = true
+	return self
+}
+
+// ChangesNothing marks a tool as changing nothing.
+func (self Builder[T]) ChangesNothing() Builder[T] {
+	self.readOnly = true
+	return self
+}
+
+// State makes a tool the owner of named durable state.
+func (self Builder[T]) State(name string, restore Restorer) Builder[T] {
+	self.stateName = name
+	self.restore = restore
+
+	return self
+}
+
+// Syntax highlights a call rendering as the named language, replacing any highlighter set before.
+func (self Builder[T]) Syntax(language string) Builder[T] {
+	self.highlight = func(ToolCall) Highlight {
+		return Highlight{Kind: HighlightSyntax, Value: language}
+	}
+
+	return self
+}
+
+// Focuses sets one part of a call rendering apart, replacing any highlighter set before.
+func (self Builder[T]) Focuses(pick func(ToolCall) string) Builder[T] {
+	self.highlight = func(call ToolCall) Highlight {
+		return Highlight{Kind: HighlightFocus, Value: pick(call)}
+	}
+
+	return self
+}
+
+// FocusPath sets apart the last component of a path rendering.
+func (self Builder[T]) FocusPath() Builder[T] {
+	return self.Focuses(func(call ToolCall) string {
+		subject := call.Subject()
+		if subject == "" {
+			return ""
 		}
-		return call
+
+		return path.Base(subject)
 	})
 }
 
+// Run builds a tool whose calls return one complete result.
+func (self Builder[T]) Run(execute ResultExecutor[T]) Tool {
+	return self.build(execute)
+}
+
 // Plain builds a tool whose calls return text.
-func (self Builder[T]) Plain(exec Executor[T]) Tool {
-	return self.Run(func(ctx context.Context, args T) (Result, error) {
-		output, err := exec(ctx, args)
-		return Result{Output: output}, err
+func (self Builder[T]) Plain(execute Executor[T]) Tool {
+	return self.Run(func(ctx context.Context, args T) (ToolCallResult, error) {
+		output, err := execute(ctx, args)
+		return ToolCallResult{Output: output}, err
 	})
 }
 
 // Stats builds a tool whose calls return text and stats.
-func (self Builder[T]) Stats(exec StatsExecutor[T]) Tool {
-	return self.Run(func(ctx context.Context, args T) (Result, error) {
-		output, stats, err := exec(ctx, args)
-		return Result{Output: output, Stats: stats}, err
+func (self Builder[T]) Stats(execute StatsExecutor[T]) Tool {
+	return self.Run(func(ctx context.Context, args T) (ToolCallResult, error) {
+		output, stats, err := execute(ctx, args)
+		return ToolCallResult{Output: output, Stats: stats}, err
 	})
 }
 
 // StatsWithImage builds a tool with stats whose calls may also return an image.
-func (self Builder[T]) StatsWithImage(exec StatsWithImageExecutor[T]) Tool {
-	return self.Run(func(ctx context.Context, args T) (Result, error) {
-		output, image, stats, err := exec(ctx, args)
-		return Result{Output: output, Image: image, Stats: stats}, err
+func (self Builder[T]) StatsWithImage(execute StatsWithImageExecutor[T]) Tool {
+	return self.Run(func(ctx context.Context, args T) (ToolCallResult, error) {
+		output, image, stats, err := execute(ctx, args)
+		return ToolCallResult{Output: output, Image: image, Stats: stats}, err
 	})
 }
 
-func (self Builder[T]) build(call func(args T) Call) Tool {
-	return funcTool{
+func (self Builder[T]) build(exec ResultExecutor[T]) Tool {
+	return _tool{
 		name:        self.definition.Name,
 		description: self.definition.Description,
 		schema:      self.definition.Schema,
-		parse: func(arguments string) (Call, error) {
+		parallel:    self.parallel,
+		readOnly:    self.readOnly,
+		stateName:   self.stateName,
+		restore:     self.restore,
+		highlight:   self.highlight,
+		parse: func(arguments string) (_call, error) {
 			var args T
 			if text := strings.TrimSpace(arguments); text != "" {
 				if err := json.Unmarshal([]byte(text), &args); err != nil {
-					return nil, fmt.Errorf("could not parse the arguments: %w", err)
+					return _call{}, fmt.Errorf("could not parse the arguments: %w", err)
 				}
 			}
 
 			if self.validate != nil {
 				if err := self.validate(args); err != nil {
-					return nil, err
+					return _call{}, err
 				}
 			}
 
-			return call(args), nil
+			subject, qualifier := self.describe(args)
+			return _call{
+				subject:   subject,
+				qualifier: qualifier,
+				exec: func(ctx context.Context) (ToolCallResult, error) {
+					return exec(ctx, args)
+				},
+			}, nil
 		},
-	}
-}
-
-func (self Builder[T]) call(args T) funcCall {
-	return funcCall{
-		describe: func() (string, string) { return self.describe(args) },
 	}
 }

@@ -35,7 +35,7 @@ const (
 	noColumns     = 0
 
 	workspaceMarker   = "/workspace"
-	lifecycleScenario = "captured/success@rxw.jsonl"
+	lifecycleScenario = "success@rxw.jsonl"
 )
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
@@ -157,7 +157,7 @@ func writeTranscript(t *testing.T, entries []replayEntry) string {
 var transcriptTime = time.Date(2001, time.January, 1, 0, 0, 0, 0, time.UTC)
 
 func TestTheScreenAroundAConversationDrawsWhatItDrewBefore(t *testing.T) {
-	entries := readJournal(t, filepath.Join("testdata", "replay", lifecycleScenario))
+	entries := readJournal(t, filepath.Join("testdata", "input", lifecycleScenario))
 
 	passes := map[string]func() string{}
 
@@ -202,14 +202,32 @@ func onATerminal(passes map[string]func() string) map[string]func() string {
 }
 
 func TestATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
-	entries := readJournal(t, filepath.Join("testdata", "replay", lifecycleScenario))
+	entries := readJournal(t, filepath.Join("testdata", "input", lifecycleScenario))
 
 	passes := map[string]func() string{
 		"a call still running": func() string { return replayWhileRunning(t, entries) },
+		"discarded reasoning":  func() string { return drawDiscardedReasoning(t) },
 	}
 
 	compareWithGolden(t, "running", ".ansi", passes)
 	compareWithGolden(t, "running", ".screen", shownPasses(t, passes, replayColumns))
+}
+
+func drawDiscardedReasoning(t *testing.T) string {
+	t.Helper()
+
+	rig := newReplayRig(t, replayColumns)
+	rig.chat.currentTurn = Turn{isRunning: true, painter: rig.chat.newPainter(true)}
+
+	completeThought := agent.Event{Kind: agent.ModelReasoningEvent, Text: "complete thought"}
+	rig.chat.takeTurn(TurnEvent{update: agent.Update{Event: &completeThought}})
+	incompleteThought := agent.Delta{Kind: agent.ModelReasoningEvent, Text: "incomplete thought"}
+	rig.chat.takeTurn(TurnEvent{update: agent.Update{Delta: &incompleteThought}})
+	failure := agent.Event{Kind: agent.FailureEvent, Text: "stream failed"}
+	rig.chat.takeTurn(TurnEvent{update: agent.Update{Event: &failure}})
+	rig.chat.screen.End()
+
+	return strings.TrimSuffix(rig.drawn(), "\r\n")
 }
 
 type journal struct {
@@ -220,7 +238,7 @@ type journal struct {
 func everyJournal(t *testing.T) []journal {
 	t.Helper()
 
-	paths, err := filepath.Glob(filepath.Join("testdata", "replay", "*", "*.jsonl"))
+	paths, err := filepath.Glob(filepath.Join("testdata", "input", "*.jsonl"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -232,10 +250,8 @@ func everyJournal(t *testing.T) []journal {
 	journals := make([]journal, 0, len(paths))
 
 	for _, path := range paths {
-		where := filepath.Base(filepath.Dir(path))
-		what := strings.TrimSuffix(filepath.Base(path), ".jsonl")
-
-		journals = append(journals, journal{name: where + "/" + what, path: path})
+		name := strings.TrimSuffix(filepath.Base(path), ".jsonl")
+		journals = append(journals, journal{name: name, path: path})
 	}
 
 	return journals
@@ -250,7 +266,7 @@ func compareWithGolden(t *testing.T, name string, suffix string, passes map[stri
 		fmt.Fprintf(&drawn, "=== %s ===\n%s\n", pass, visibleEscapes(passes[pass]()))
 	}
 
-	goldenPath := filepath.Join("testdata", "replay", name+suffix)
+	goldenPath := filepath.Join("testdata", "output", name+suffix)
 
 	if *updateGoldens {
 		if err := os.WriteFile(goldenPath, []byte(drawn.String()), 0o600); err != nil {
@@ -386,13 +402,18 @@ func streamIntoBuffer(t *testing.T, entries []replayEntry) string {
 	rig.chat.screen.ReportProgress(true)
 
 	for _, entry := range entries {
-		for _, delta := range splitIntoDeltas(*entry.Event) {
-			rig.chat.events = appendTranscript(rig.chat.events, delta)
-			rig.chat.currentTurn.painter.drawEvent(delta)
-
-			if rig.chat.currentTurn.painter.isStale {
-				rig.chat.redraw()
+		event := *entry.Event
+		if event.Kind == agent.ModelMessageEvent || event.Kind == agent.ModelReasoningEvent {
+			for piece := range deltaSized(event.Text) {
+				rig.chat.currentTurn.painter.drawDelta(agent.Delta{Kind: event.Kind, Text: piece})
 			}
+		}
+
+		rig.chat.events = append(rig.chat.events, event)
+		rig.chat.currentTurn.painter.drawEvent(event)
+
+		if rig.chat.currentTurn.painter.isStale {
+			rig.chat.redraw()
 		}
 	}
 
@@ -401,22 +422,6 @@ func streamIntoBuffer(t *testing.T, entries []replayEntry) string {
 	rig.chat.screen.ReportProgress(false)
 
 	return rig.drawn()
-}
-
-func splitIntoDeltas(event agent.Event) []agent.Event {
-	if event.Kind != agent.ModelMessage && event.Kind != agent.ModelReasoning {
-		return []agent.Event{event}
-	}
-
-	var deltas []agent.Event
-
-	for piece := range deltaSized(event.Text) {
-		delta := event
-		delta.Text = piece
-		deltas = append(deltas, delta)
-	}
-
-	return deltas
 }
 
 func deltaSized(text string) iter.Seq[string] {
@@ -514,7 +519,7 @@ const revealAndSomeFrames = 7 * time.Second
 
 func entriesUpToFirstCall(entries []replayEntry) []replayEntry {
 	for at, entry := range entries {
-		if entry.Event != nil && entry.Event.Kind == agent.ToolCallRequest {
+		if entry.Event != nil && entry.Event.Kind == agent.ToolCallRequestEvent {
 			return entries[:at+1]
 		}
 	}
@@ -542,7 +547,7 @@ func layOutWorkspace(t *testing.T) string {
 
 	t.Setenv("HOME", workspaceDir)
 
-	if err := os.CopyFS(workspaceDir, os.DirFS(filepath.Join("testdata", "workspace"))); err != nil {
+	if err := os.CopyFS(workspaceDir, os.DirFS(filepath.Join("testdata", "input", "workspace"))); err != nil {
 		t.Fatal(err)
 	}
 
@@ -644,7 +649,7 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 		},
 		"scrolled both ways": {
 			Rows: []string{"> the third row", "> the fourth row"}, Row: 1, Column: 16,
-			Above: 2, Below: 7,
+			HiddenLinesAbove: 2, HiddenLinesBelow: 7,
 		},
 	}
 

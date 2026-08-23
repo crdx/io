@@ -10,6 +10,10 @@ import (
 	"crdx.org/io/cmd/oh/key"
 )
 
+// —————————————————————————————————————————————————————————————————————————————————————————————————
+// mega:allow-file comment-inlines
+// —————————————————————————————————————————————————————————————————————————————————————————————————
+
 // Action is what a keypress amounted to, for whoever is driving the input.
 type Action int
 
@@ -77,11 +81,11 @@ func (self *Input) IsPending() bool {
 
 // Frame is the visible input rows, cursor position, and clipped row counts.
 type Frame struct {
-	Rows   []string
-	Row    int
-	Column int
-	Above  int // the rows out of sight above
-	Below  int // the rows out of sight below
+	Rows             []string
+	Row              int
+	Column           int
+	HiddenLinesAbove int // the rows out of sight above
+	HiddenLinesBelow int // the rows out of sight below
 }
 
 // Frame lays out the current input at width.

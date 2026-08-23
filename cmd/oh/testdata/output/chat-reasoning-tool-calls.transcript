@@ -1,0 +1,155 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+reason, then call two tools in fragments
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+Use both tools.
+```
+
+## Tool call
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call-1`
+- **Name:** `alpha`
+- **Read only:** `false`
+**Arguments**
+
+```json
+{"x":1}
+```
+
+**Subject**
+
+```
+alpha
+```
+
+## Tool call
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call-2`
+- **Name:** `beta`
+- **Read only:** `false`
+**Arguments**
+
+```json
+{"y":2}
+```
+
+**Subject**
+
+```
+beta
+```
+
+## State
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `call-1`
+- **Name:** `alpha-count`
+**State**
+
+```json
+1
+```
+
+## Tool result
+
+> 2001-01-01T00:00:05Z
+
+- **ID:** `call-1`
+- **Name:** `alpha`
+- **Failed:** `false`
+- **Duration:** `0s`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":12,"total_bytes":12}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+alpha result
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## State
+
+> 2001-01-01T00:00:06Z
+
+- **ID:** `call-2`
+- **Name:** `beta-count`
+**State**
+
+```json
+1
+```
+
+## Tool result
+
+> 2001-01-01T00:00:07Z
+
+- **ID:** `call-2`
+- **Name:** `beta`
+- **Failed:** `false`
+- **Duration:** `0s`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":11,"total_bytes":11}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+beta result
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Assistant
+
+> 2001-01-01T00:00:08Z
+
+```
+Tools done.
+```
+
+## User
+
+> 2001-01-01T00:00:09Z
+
+```
+continue after both tool results
+```
+
+## Assistant
+
+> 2001-01-01T00:00:10Z
+
+```
+Resumed.
+```
+

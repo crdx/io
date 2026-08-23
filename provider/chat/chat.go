@@ -86,7 +86,7 @@ func (self *Client) AddUserMessage(text string) {
 // AddToolResults appends this turn's tool call results to the conversation. A tool message takes
 // only a string, so any images a round returned follow it in a user message of their own, which is
 // the only place this API accepts one.
-func (self *Client) AddToolResults(results []agent.ToolResult) {
+func (self *Client) AddToolResults(results []agent.ToolCallResult) {
 	var images []contentPart
 
 	for _, result := range results {
@@ -277,7 +277,7 @@ const attachmentNotice = "Attached image(s) from tool result:"
 
 const emptyOutputNotice = "(no tool output)"
 
-func toolResultText(result agent.ToolResult) string {
+func toolResultText(result agent.ToolCallResult) string {
 	switch {
 	case result.Output != "":
 		return result.Output
@@ -288,7 +288,7 @@ func toolResultText(result agent.ToolResult) string {
 	}
 }
 
-func imagePart(result agent.ToolResult) (contentPart, bool) {
+func imagePart(result agent.ToolCallResult) (contentPart, bool) {
 	if result.Image.MediaType == "" || len(result.Image.Data) == 0 {
 		return contentPart{}, false
 	}

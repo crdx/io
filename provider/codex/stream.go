@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"strings"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/sse"
@@ -20,8 +21,11 @@ var ErrIncomplete = errors.New("the response was cut short")
 var ErrTruncated = sse.ErrTruncated
 
 type reply struct {
-	items        []json.RawMessage
-	isSummarised bool // whether a reasoning summary has been reported this turn
+	items            []json.RawMessage
+	summary          strings.Builder
+	isSummarised     bool
+	isRawReasoning   bool
+	isMessageStarted bool
 }
 
 func (self *reply) calls() []agent.ToolCall {
@@ -145,6 +149,7 @@ func parseEvent(payload string) (event, bool) {
 
 func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	if payload == donePayload {
+		self.completeOpenOutput(yield)
 		return true, nil
 	}
 
@@ -154,40 +159,73 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	}
 
 	switch message.Type {
-	case "response.output_text.delta":
-		if !yield(agent.Event{Kind: agent.ModelMessage, Text: message.Delta}) {
-			return true, nil
+	case "response.output_text.delta", "response.refusal.delta":
+		return self.addMessageText(message.Delta, yield), nil
+
+	case "response.output_text.done":
+		return self.completeMessage(yield), nil
+
+	case "response.reasoning_summary_text.delta":
+		if message.Delta != "" {
+			self.isSummarised = true
+			self.summary.WriteString(message.Delta)
+
+			if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: message.Delta}) {
+				return true, nil
+			}
 		}
 
 	case "response.reasoning_summary_part.done":
 		if message.Part != nil && message.Part.Text != "" {
 			self.isSummarised = true
+			streamed := self.summary.String()
+			if streamed == "" {
+				self.summary.WriteString(message.Part.Text)
+				if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: message.Part.Text}) {
+					return true, nil
+				}
+			} else if suffix, found := strings.CutPrefix(message.Part.Text, streamed); found && suffix != "" {
+				self.summary.WriteString(suffix)
+				if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: suffix}) {
+					return true, nil
+				}
+			}
 
-			if !yield(agent.Event{Kind: agent.ModelReasoning, Text: message.Part.Text}) {
+			self.summary.Reset()
+			if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true}) {
 				return true, nil
 			}
 		}
 
 	case "response.reasoning_text.delta":
 		if message.Delta != "" && !self.isSummarised {
-			if !yield(agent.Event{Kind: agent.ModelReasoning, Text: message.Delta}) {
+			self.isRawReasoning = true
+			if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: message.Delta}) {
 				return true, nil
 			}
 		}
 
-	case "response.refusal.delta":
-		if message.Delta != "" {
-			if !yield(agent.Event{Kind: agent.ModelMessage, Text: message.Delta}) {
-				return true, nil
-			}
-		}
+	case "response.reasoning_text.done":
+		return self.completeRawReasoning(yield), nil
 
 	case "response.output_item.done":
 		if len(message.Item) > 0 {
 			self.items = append(self.items, message.Item)
+			item := decodeItem(message.Item)
+			switch item.Type {
+			case "reasoning":
+				if self.completeRawReasoning(yield) {
+					return true, nil
+				}
+			case "message":
+				if self.completeMessage(yield) {
+					return true, nil
+				}
+			}
 		}
 
 	case "response.completed", "response.done":
+		self.completeOpenOutput(yield)
 		return true, nil
 
 	case "response.incomplete":
@@ -198,4 +236,42 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (self *reply) addMessageText(text string, yield agent.Yield) bool {
+	if text == "" {
+		return false
+	}
+
+	if self.completeRawReasoning(yield) {
+		return true
+	}
+
+	self.isMessageStarted = true
+	return !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: text})
+}
+
+func (self *reply) completeRawReasoning(yield agent.Yield) bool {
+	if !self.isRawReasoning {
+		return false
+	}
+
+	self.isRawReasoning = false
+	return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true})
+}
+
+func (self *reply) completeMessage(yield agent.Yield) bool {
+	if !self.isMessageStarted {
+		return false
+	}
+
+	self.isMessageStarted = false
+	return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true})
+}
+
+func (self *reply) completeOpenOutput(yield agent.Yield) {
+	if self.completeRawReasoning(yield) {
+		return
+	}
+	self.completeMessage(yield)
 }

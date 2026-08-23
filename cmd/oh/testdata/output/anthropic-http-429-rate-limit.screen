@@ -1,0 +1,11 @@
+
+ receive a structured rate-limit response
+
+
+rate limit exceeded
+
+
+ continue after the rate limit
+
+
+Resumed.

@@ -30,7 +30,7 @@ func New(
 	fresh func(context.Context) (sandbox.Policy, error),
 	processes *sandbox.Processes,
 ) tool.Tool {
-	return tool.Syntax(tool.Implement(
+	return tool.Implement(
 		tool.Definition{
 			Name:        "bash",
 			Description: "run a shell command",
@@ -39,13 +39,16 @@ func New(
 			},
 		},
 		Describe,
-	).Validate(validate).Stats(func(ctx context.Context, args Args) (string, tool.Stats, error) {
-		policy, err := fresh(ctx)
-		if err != nil {
-			return "", tool.Stats{}, err
-		}
-		return exec(ctx, root, policy, args, processes)
-	}), "bash")
+	).
+		Validate(validate).
+		Syntax("bash").
+		Stats(func(ctx context.Context, args Args) (string, tool.Stats, error) {
+			policy, err := fresh(ctx)
+			if err != nil {
+				return "", tool.Stats{}, err
+			}
+			return exec(ctx, root, policy, args, processes)
+		})
 }
 
 // ProtectedPolicy makes .git at each writable root read-only. It does not search nested

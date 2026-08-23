@@ -202,6 +202,47 @@ func TestASettingLeftOutIsRefusedRatherThanSubstituted(t *testing.T) {
 	}
 }
 
+func TestDumpAndLoadOwnTheirHistorySlices(t *testing.T) {
+	client, err := anthropic.New(anthropic.Static("token"), "claude-opus-5", "high", 128_000)
+	if err != nil {
+		t.Fatal(err)
+	}
+	loaded := []json.RawMessage{json.RawMessage(`{"role":"user","content":"original"}`)}
+	client.Load(loaded)
+	loaded[0] = json.RawMessage(`{"role":"user","content":"changed"}`)
+
+	dumped := client.Dump()
+	if got := string(dumped[0]); !strings.Contains(got, "original") {
+		t.Fatalf("loaded history changed through its caller: %s", got)
+	}
+
+	dumped[0] = json.RawMessage(`{"role":"user","content":"changed"}`)
+	if got := string(client.Dump()[0]); !strings.Contains(got, "original") {
+		t.Errorf("dumped history changed through its recipient: %s", got)
+	}
+}
+
+func TestPartialImagesAreNotSent(t *testing.T) {
+	tests := map[string]tool.Image{
+		"media type only": {MediaType: "image/png"},
+		"data only":       {Data: []byte{1, 2, 3}},
+	}
+
+	for name, image := range tests {
+		t.Run(name, func(t *testing.T) {
+			client, err := anthropic.New(anthropic.Static("token"), "claude-opus-5", "high", 128_000)
+			if err != nil {
+				t.Fatal(err)
+			}
+			client.AddToolResults([]agent.ToolCallResult{{ID: "toolu_1", Output: "text", Image: image}})
+
+			if got := string(client.Dump()[0]); strings.Contains(got, `"type":"image"`) {
+				t.Errorf("partial image was sent: %s", got)
+			}
+		})
+	}
+}
+
 func TestTheModelListingFollowsTheEndpointItWasGiven(t *testing.T) {
 	var asked string
 
@@ -568,16 +609,24 @@ func TestAThoughtIsReportedWholeAndStoredWithItsSeal(t *testing.T) {
 
 	assistant := newAgent(t, server.URL, nil)
 
+	var reasoningDeltas strings.Builder
 	var reasoning []string
-	for event, err := range assistant.Stream(t.Context(), "what is the weather?") {
+	for update, err := range assistant.Stream(t.Context(), "what is the weather?") {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if event.Kind == agent.ModelReasoning {
-			reasoning = append(reasoning, event.Text)
+
+		if update.Delta != nil && update.Delta.Kind == agent.ModelReasoningEvent {
+			reasoningDeltas.WriteString(update.Delta.Text)
+		}
+		if update.Event != nil && update.Event.Kind == agent.ModelReasoningEvent {
+			reasoning = append(reasoning, update.Event.Text)
 		}
 	}
 
+	if reasoningDeltas.String() != "Checking the sky." {
+		t.Errorf("expected the thought to stream, got %q", reasoningDeltas.String())
+	}
 	if len(reasoning) != 1 || reasoning[0] != "Checking the sky." {
 		t.Errorf("expected one whole thought, got %v", reasoning)
 	}
@@ -592,7 +641,7 @@ func TestAThoughtIsReportedWholeAndStoredWithItsSeal(t *testing.T) {
 	}
 }
 
-func TestAnUnsealedThoughtIsKeptAsPlainText(t *testing.T) {
+func TestAnUnsealedThoughtIsDropped(t *testing.T) {
 	server, bodies := turns(
 		t,
 		script(
@@ -621,8 +670,8 @@ func TestAnUnsealedThoughtIsKeptAsPlainText(t *testing.T) {
 		t.Errorf("expected an unsealed thought not to be sent back as one, got %s", (*bodies)[1])
 	}
 
-	if !strings.Contains((*bodies)[1], `"text":"Half a thought."`) {
-		t.Errorf("expected the thought to be kept as text, got %s", (*bodies)[1])
+	if strings.Contains((*bodies)[1], "Half a thought.") {
+		t.Errorf("expected the unsealed thought to be dropped, got %s", (*bodies)[1])
 	}
 }
 
@@ -641,8 +690,8 @@ func TestAnUnfinishedCallIsDroppedWhenTheTurnIsAbandoned(t *testing.T) {
 	client.Configure("", []tool.Definition{{Name: "weather", Description: "weather"}})
 	client.AddUserMessage("what is the weather?")
 
-	reply, err := client.Send(t.Context(), func(event agent.Event) bool {
-		return event.Kind != agent.ModelMessage
+	reply, err := client.Send(t.Context(), func(event agent.Output) bool {
+		return event.Kind != agent.ModelMessageEvent
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -749,10 +798,10 @@ func TestAdjacentMessagesSharingARoleAreJoinedOnTheWayOut(t *testing.T) {
 	server, bodies := turns(t, script(answer("Right.")))
 
 	client := newClient(t, server.URL)
-	client.AddToolResults([]agent.ToolResult{{ID: "toolu_1", Output: "raining"}})
+	client.AddToolResults([]agent.ToolCallResult{{ID: "toolu_1", Output: "raining"}})
 	client.AddUserMessage("and now?")
 
-	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -804,7 +853,7 @@ func sendOneTurn(t *testing.T, url string, prompt string) (agent.Reply, error) {
 	client := newClient(t, url)
 	client.AddUserMessage(prompt)
 
-	return client.Send(t.Context(), func(agent.Event) bool { return true })
+	return client.Send(t.Context(), func(agent.Output) bool { return true })
 }
 
 func TestASealedThoughtHoldingNoTextIsStillSentBackAsItArrived(t *testing.T) {
@@ -821,13 +870,13 @@ func TestASealedThoughtHoldingNoTextIsStillSentBackAsItArrived(t *testing.T) {
 	client := newClient(t, server.URL)
 	client.AddUserMessage("what is the weather?")
 
-	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	client.AddUserMessage("and now?")
 
-	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -897,6 +946,25 @@ func TestSendShowsTheEndpointsOwnFailure(t *testing.T) {
 	}
 }
 
+func TestSendReportsARefusalExplanation(t *testing.T) {
+	const explanation = "This request was blocked as reasoning extraction."
+	server, _ := turns(
+		t,
+		events(
+			messageStart,
+			`{"type":"message_delta","delta":{"stop_reason":"refusal","stop_details":{`+
+				`"type":"refusal","category":"reasoning_extraction","explanation":"`+explanation+`"}}}`,
+			messageStop,
+		),
+	)
+
+	assistant := newAgent(t, server.URL, nil)
+
+	if _, err := assistant.Send(t.Context(), "show your reasoning"); err == nil || err.Error() != explanation {
+		t.Errorf("expected the refusal explanation, got %v", err)
+	}
+}
+
 func TestSendRefusesATruncatedStream(t *testing.T) {
 	server, _ := turns(t, events(messageStart, textStart(0), textDelta(0, "It is raining ")))
 
@@ -961,14 +1029,18 @@ func TestACancelledTurnOrphansAThoughtTheScreenAlreadyShowed(t *testing.T) {
 
 	var shown []string
 
-	for event, err := range assistant.Stream(ctx, "what is the weather?") {
-		if event.Kind == agent.ModelReasoning {
-			shown = append(shown, event.Text)
-			cancel()
-		}
-
+	for update, err := range assistant.Stream(ctx, "what is the weather?") {
 		if err != nil {
 			break
+		}
+
+		if update.Event == nil {
+			continue
+		}
+
+		if update.Event.Kind == agent.ModelReasoningEvent {
+			shown = append(shown, update.Event.Text)
+			cancel()
 		}
 	}
 

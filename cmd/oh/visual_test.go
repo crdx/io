@@ -27,11 +27,11 @@ type fakeProvider struct {
 	items []json.RawMessage // the stored provider state
 }
 
-func (self *fakeProvider) Configure(string, []tool.Definition) {}
-func (self *fakeProvider) AddUserMessage(string)               {}
-func (self *fakeProvider) AddToolResults([]agent.ToolResult)   {}
-func (self *fakeProvider) Dump() []json.RawMessage             { return self.items }
-func (self *fakeProvider) Load(items []json.RawMessage)        { self.items = items }
+func (self *fakeProvider) Configure(string, []tool.Definition)   {}
+func (self *fakeProvider) AddUserMessage(string)                 {}
+func (self *fakeProvider) AddToolResults([]agent.ToolCallResult) {}
+func (self *fakeProvider) Dump() []json.RawMessage               { return self.items }
+func (self *fakeProvider) Load(items []json.RawMessage)          { self.items = items }
 
 func (self *fakeProvider) Send(_ context.Context, yield agent.Yield) (agent.Reply, error) {
 	self.turn++
@@ -42,7 +42,8 @@ func (self *fakeProvider) Send(_ context.Context, yield agent.Yield) (agent.Repl
 		"**Reading the file**\nThe path they gave is the one to start with.",
 		"**Searching for the spinner**\nIt is drawn somewhere near the output layer.",
 	} {
-		if !yield(agent.Event{Kind: agent.ModelReasoning, Text: thought}) {
+		if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: thought}) ||
+			!yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true}) {
 			return agent.Reply{}, nil
 		}
 
@@ -50,11 +51,14 @@ func (self *fakeProvider) Send(_ context.Context, yield agent.Yield) (agent.Repl
 	}
 
 	for word := range strings.FieldsSeq("let me have a look at that for you") {
-		if !yield(agent.Event{Kind: agent.ModelMessage, Text: word + " "}) {
+		if !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: word + " "}) {
 			return agent.Reply{}, nil
 		}
 
 		time.Sleep(wordEvery)
+	}
+	if !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true}) {
+		return agent.Reply{}, nil
 	}
 
 	if self.turn > 1 {
@@ -72,7 +76,7 @@ type fakeArgs struct {
 	Path string `json:"path"`
 }
 
-func slowTool(name string) tool.Tool {
+func slowToolBuilder(name string) tool.Builder[fakeArgs] {
 	return tool.Implement(
 		tool.Definition{
 			Name:        name,
@@ -80,14 +84,22 @@ func slowTool(name string) tool.Tool {
 			Schema:      tool.Schema{tool.String("path", "file")},
 		},
 		func(args fakeArgs) (string, string) { return args.Path, "" },
-	).Plain(func(context.Context, fakeArgs) (string, error) {
+	)
+}
+
+func buildSlowTool(builder tool.Builder[fakeArgs]) tool.Tool {
+	return builder.Plain(func(context.Context, fakeArgs) (string, error) {
 		time.Sleep(toolTakes)
 		return "one\ntwo\nthree", nil
 	})
 }
 
+func slowTool(name string) tool.Tool {
+	return buildSlowTool(slowToolBuilder(name))
+}
+
 func slowReadTool(name string) tool.Tool {
-	return tool.ReadOnly(tool.Concurrent(slowTool(name)))
+	return buildSlowTool(slowToolBuilder(name).IsEmbarrassinglyParallel().ChangesNothing())
 }
 
 func failingTool(name string) tool.Tool {

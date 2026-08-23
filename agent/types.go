@@ -9,11 +9,15 @@ import (
 	"crdx.org/io/tool"
 )
 
+// —————————————————————————————————————————————————————————————————————————————————————————————————
+// mega:allow-file comment-inlines
+// —————————————————————————————————————————————————————————————————————————————————————————————————
+
 // Provider is a backend a conversation is held with.
 type Provider interface {
 	Configure(systemPrompt string, tools []tool.Definition)
 	AddUserMessage(text string)
-	AddToolResults(toolResults []ToolResult)
+	AddToolResults(toolResults []ToolCallResult)
 	Send(ctx context.Context, yield Yield) (Reply, error)
 }
 
@@ -43,8 +47,27 @@ type Lister interface {
 	Models(context.Context) ([]Model, error)
 }
 
-// Yield is handed each piece of a turn as it arrives, and returns false to end the turn.
-type Yield func(Event) bool
+// Output is one provider prose fragment or completion boundary.
+type Output struct {
+	Kind Kind
+	Text string
+	Done bool
+}
+
+// Yield is handed each piece of provider output as it arrives, and returns false to end the turn.
+type Yield func(Output) bool
+
+// Delta is provisional model prose arriving during a live stream.
+type Delta struct {
+	Kind Kind
+	Text string
+}
+
+// Update is one live-stream delivery. Exactly one of Delta and Event is set.
+type Update struct {
+	Delta *Delta
+	Event *Event
+}
 
 // Reply is a turn once it's over.
 type Reply struct {
@@ -58,8 +81,8 @@ type ToolCall struct {
 	Arguments string
 }
 
-// ToolResult is what one call handed back.
-type ToolResult struct {
+// ToolCallResult is what one call handed back.
+type ToolCallResult struct {
 	ID     string
 	Output string
 	Image  tool.Image
@@ -71,20 +94,20 @@ type Kind string
 
 // The kinds of event a conversation is made of.
 const (
-	Startup         Kind = "startup"           // what the harness had ready when the conversation opened
-	UserMessage     Kind = "user_message"      // what was asked
-	HarnessMessage  Kind = "harness_message"   // what the harness said itself, rather than the model
-	ModelReasoning  Kind = "model_reasoning"   // what the model thought on the way to answering
-	ModelMessage    Kind = "model_message"     // what the model answered
-	ToolCallRequest Kind = "tool_call_request" // a tool the model asked for
-	ToolCallResult  Kind = "tool_call_result"  // what that tool handed back
-	StateChange     Kind = "state_change"      // durable state changed by a successful call
-	Interruption    Kind = "interruption"      // where a replacement message stopped a turn
-	Failure         Kind = "failure"           // why a turn ended before the model completed it
+	StartupEvent         Kind = "startup"           // what the harness had ready when the conversation opened
+	UserMessageEvent     Kind = "user_message"      // what was asked
+	HarnessMessageEvent  Kind = "harness_message"   // what the harness said itself, rather than the model
+	ModelReasoningEvent  Kind = "model_reasoning"   // what the model thought on the way to answering
+	ModelMessageEvent    Kind = "model_message"     // what the model answered
+	ToolCallRequestEvent Kind = "tool_call_request" // a tool the model asked for
+	ToolCallResultEvent  Kind = "tool_call_result"  // what that tool handed back
+	StateChangeEvent     Kind = "state_change"      // durable state changed by a successful call
+	InterruptionEvent    Kind = "interruption"      // where a replacement message stopped a turn
+	FailureEvent         Kind = "failure"           // why a turn ended before the model completed it
 )
 
-// Rendering is a stored version of how a tool call rendered when it ran. Used if the original tool
-// is unavailable.
+// FallbackRendering is a stored version of how a tool call rendered when it ran. Used if the
+// original tool is unavailable.
 //
 // Subject and Note lie along the call's line, left to right, after the name of the tool that the
 // event carries rather than this struct:
@@ -97,7 +120,7 @@ const (
 //
 // The other two say how that line is drawn rather than what it says: Highlight accents a substring,
 // and ReadOnly colours the name.
-type Rendering struct {
+type FallbackRendering struct {
 	Subject   string         `json:"render,omitempty"`
 	Note      string         `json:"detail,omitempty"`
 	Highlight tool.Highlight `json:"highlight,omitzero"`
@@ -105,7 +128,7 @@ type Rendering struct {
 }
 
 // Describe takes how a decoded call looks from the call itself.
-func (self *Rendering) Describe(toolCall tool.Call) {
+func (self *FallbackRendering) Describe(toolCall tool.ToolCall) {
 	self.Subject = toolCall.Subject()
 	self.Note = toolCall.Qualifier()
 	self.Highlight = toolCall.Highlight()
@@ -113,7 +136,7 @@ func (self *Rendering) Describe(toolCall tool.Call) {
 
 // Event is a conversation occurrence or durable tool-state transition.
 type Event struct {
-	Rendering
+	FallbackRendering
 
 	Kind      Kind            `json:"kind"`
 	Text      string          `json:"text,omitempty"`

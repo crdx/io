@@ -2,6 +2,7 @@ package codex_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -159,6 +160,47 @@ func TestAuthRefusesWhateverNewWould(t *testing.T) {
 	}
 }
 
+func TestDumpAndLoadOwnTheirHistorySlices(t *testing.T) {
+	client, err := codex.New(codex.Static("token", "account"), "gpt-5.6-sol", "high")
+	if err != nil {
+		t.Fatal(err)
+	}
+	loaded := []json.RawMessage{json.RawMessage(`{"role":"user","content":"original"}`)}
+	client.Load(loaded)
+	loaded[0] = json.RawMessage(`{"role":"user","content":"changed"}`)
+
+	dumped := client.Dump()
+	if got := string(dumped[0]); !strings.Contains(got, "original") {
+		t.Fatalf("loaded history changed through its caller: %s", got)
+	}
+
+	dumped[0] = json.RawMessage(`{"role":"user","content":"changed"}`)
+	if got := string(client.Dump()[0]); !strings.Contains(got, "original") {
+		t.Errorf("dumped history changed through its recipient: %s", got)
+	}
+}
+
+func TestPartialImagesAreNotSent(t *testing.T) {
+	tests := map[string]tool.Image{
+		"media type only": {MediaType: "image/png"},
+		"data only":       {Data: []byte{1, 2, 3}},
+	}
+
+	for name, image := range tests {
+		t.Run(name, func(t *testing.T) {
+			client, err := codex.New(codex.Static("token", "account"), "gpt-5.6-sol", "high")
+			if err != nil {
+				t.Fatal(err)
+			}
+			client.AddToolResults([]agent.ToolCallResult{{ID: "call-1", Output: "text", Image: image}})
+
+			if got := string(client.Dump()[0]); strings.Contains(got, "input_image") {
+				t.Errorf("partial image was sent: %s", got)
+			}
+		})
+	}
+}
+
 func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
 	server, bodies := turns(
 		t,
@@ -184,6 +226,23 @@ func TestSendRunsToolsUntilTheModelStops(t *testing.T) {
 
 	if len(*bodies) != 2 {
 		t.Fatalf("expected two requests, got %d", len(*bodies))
+	}
+
+	var promptCacheKey string
+	for i, body := range *bodies {
+		var request struct {
+			PromptCacheKey string `json:"prompt_cache_key"`
+		}
+		if err := json.Unmarshal([]byte(body), &request); err != nil {
+			t.Fatal(err)
+		}
+		if request.PromptCacheKey == "" {
+			t.Errorf("request %d has no prompt cache key", i+1)
+		}
+		if promptCacheKey != "" && request.PromptCacheKey != promptCacheKey {
+			t.Errorf("prompt cache key changed from %q to %q", promptCacheKey, request.PromptCacheKey)
+		}
+		promptCacheKey = request.PromptCacheKey
 	}
 
 	if !strings.Contains((*bodies)[1], "function_call_output") {
@@ -324,20 +383,25 @@ func TestStreamReportsEachTurnAsItHappens(t *testing.T) {
 
 	var eventStrings []string
 
-	for event, err := range assistant.Stream(t.Context(), "what is the weather in London?") {
+	for update, err := range assistant.Stream(t.Context(), "what is the weather in London?") {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
+		if update.Event == nil {
+			continue
+		}
+
+		event := update.Event
 		eventStrings = append(eventStrings, fmt.Sprintf("%s:%s:%s", event.Kind, event.Name, event.Text))
 	}
 
 	expectedEvents := []string{
-		fmt.Sprintf("%s::what is the weather in London?", agent.UserMessage),
-		fmt.Sprintf("%s::Let me look. ", agent.ModelMessage),
-		fmt.Sprintf("%s:weather:", agent.ToolCallRequest),
-		fmt.Sprintf("%s:weather:raining in London", agent.ToolCallResult),
-		fmt.Sprintf("%s::It is raining in London.", agent.ModelMessage),
+		fmt.Sprintf("%s::what is the weather in London?", agent.UserMessageEvent),
+		fmt.Sprintf("%s::Let me look. ", agent.ModelMessageEvent),
+		fmt.Sprintf("%s:weather:", agent.ToolCallRequestEvent),
+		fmt.Sprintf("%s:weather:raining in London", agent.ToolCallResultEvent),
+		fmt.Sprintf("%s::It is raining in London.", agent.ModelMessageEvent),
 	}
 
 	if !slices.Equal(eventStrings, expectedEvents) {
@@ -356,10 +420,10 @@ func TestStreamStopsWhenTheCallerDoes(t *testing.T) {
 
 	var eventCount int
 
-	for event := range assistant.Stream(t.Context(), "what is the weather in London?") {
+	for update := range assistant.Stream(t.Context(), "what is the weather in London?") {
 		eventCount++
 
-		if event.Kind == agent.ModelMessage {
+		if update.Delta != nil && update.Delta.Kind == agent.ModelMessageEvent {
 			break
 		}
 	}
@@ -381,10 +445,12 @@ func TestStreamReportsReasoningApartFromTheAnswer(t *testing.T) {
 	server, bodies := turns(
 		t,
 		events(
-			`{"type":"response.reasoning_summary_text.delta","delta":"Chec"}`,
-			`{"type":"response.reasoning_summary_text.delta","delta":"king."}`,
+			`{"type":"response.reasoning_summary_text.delta","delta":"**Adjusting Network Width and Formatting Logic**"}`,
 			`{"type":"response.reasoning_summary_part.done",`+
-				`"part":{"type":"summary_text","text":"Checking the sky."}}`,
+				`"part":{"type":"summary_text","text":"**Adjusting Network Width and Formatting Logic**"}}`,
+			`{"type":"response.reasoning_summary_text.delta","delta":"**Copying and Preparing Network Source Code**"}`,
+			`{"type":"response.reasoning_summary_part.done",`+
+				`"part":{"type":"summary_text","text":"**Copying and Preparing Network Source Code**"}}`,
 			answer("It is raining."),
 			completed,
 		),
@@ -392,25 +458,35 @@ func TestStreamReportsReasoningApartFromTheAnswer(t *testing.T) {
 
 	assistant := newAgent(t, server.URL, nil)
 
+	var reasoningDeltas strings.Builder
 	var reasoningSummaries []string
 	var answer strings.Builder
 
-	for event, err := range assistant.Stream(t.Context(), "what is the weather?") {
+	for update, err := range assistant.Stream(t.Context(), "what is the weather?") {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		if event.Kind == agent.ModelReasoning {
-			reasoningSummaries = append(reasoningSummaries, event.Text)
+		if update.Delta != nil && update.Delta.Kind == agent.ModelReasoningEvent {
+			reasoningDeltas.WriteString(update.Delta.Text)
 		}
-
-		if event.Kind == agent.ModelMessage {
-			answer.WriteString(event.Text)
+		if update.Event != nil && update.Event.Kind == agent.ModelReasoningEvent {
+			reasoningSummaries = append(reasoningSummaries, update.Event.Text)
+		}
+		if update.Event != nil && update.Event.Kind == agent.ModelMessageEvent {
+			answer.WriteString(update.Event.Text)
 		}
 	}
 
-	if want := []string{"Checking the sky."}; !slices.Equal(reasoningSummaries, want) {
-		t.Errorf("expected %v, got %v", want, reasoningSummaries)
+	if reasoningDeltas.String() != "**Adjusting Network Width and Formatting Logic****Copying and Preparing Network Source Code**" {
+		t.Errorf("expected both summaries to stream, got %q", reasoningDeltas.String())
+	}
+	wantSummaries := []string{
+		"**Adjusting Network Width and Formatting Logic**",
+		"**Copying and Preparing Network Source Code**",
+	}
+	if !slices.Equal(reasoningSummaries, wantSummaries) {
+		t.Errorf("expected %v, got %v", wantSummaries, reasoningSummaries)
 	}
 
 	if want := "It is raining."; answer.String() != want {
@@ -512,12 +588,16 @@ func TestStreamReportsRawReasoningFromAModelThatDoesNotSummarise(t *testing.T) {
 	assistant := newAgent(t, server.URL, nil)
 
 	var reasoning strings.Builder
-	for event, err := range assistant.Stream(t.Context(), "what is the weather?") {
+	for update, err := range assistant.Stream(t.Context(), "what is the weather?") {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if event.Kind == agent.ModelReasoning {
-			reasoning.WriteString(event.Text)
+
+		if update.Event == nil {
+			continue
+		}
+		if update.Event.Kind == agent.ModelReasoningEvent {
+			reasoning.WriteString(update.Event.Text)
 		}
 	}
 
@@ -541,12 +621,16 @@ func TestASummarisedThoughtIsNotAlsoReportedRaw(t *testing.T) {
 	assistant := newAgent(t, server.URL, nil)
 
 	var reasoning []string
-	for event, err := range assistant.Stream(t.Context(), "what is the weather?") {
+	for update, err := range assistant.Stream(t.Context(), "what is the weather?") {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if event.Kind == agent.ModelReasoning {
-			reasoning = append(reasoning, event.Text)
+
+		if update.Event == nil {
+			continue
+		}
+		if update.Event.Kind == agent.ModelReasoningEvent {
+			reasoning = append(reasoning, update.Event.Text)
 		}
 	}
 

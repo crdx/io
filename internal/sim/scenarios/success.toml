@@ -1,19 +1,9 @@
-# A coding session that goes to plan: it searches, reads, and says what it found.
-#
-#   go run ./cmd/simulate --scenario internal/sim/scenarios/success.toml
-#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh -m gpt-5.6-sol@high
-#
-# Every new session starts at the first turn and takes the next one with each request it makes.
-
 model = "gpt-5.6-sol"
 
-# Hold the conversation to the rules the real endpoint holds it to.
 strict = true
 
-# Start the flow again when it runs out, rather than saying there is no more.
 loop = false
 
-# How long the model thinks before a turn, and how long each word of it takes to arrive.
 delay = "600ms"
 pace = "40ms"
 

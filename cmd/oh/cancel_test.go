@@ -100,7 +100,7 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 	self.finish()
 
 	for _, record := range self.events {
-		if record.Kind == agent.UserMessage && record.Text == "carry on" {
+		if record.Kind == agent.UserMessageEvent && record.Text == "carry on" {
 			return
 		}
 	}
@@ -156,7 +156,7 @@ func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.
 
 	var messages []string
 	for _, record := range self.events {
-		if record.Kind == agent.UserMessage {
+		if record.Kind == agent.UserMessageEvent {
 			messages = append(messages, record.Text)
 		}
 	}
@@ -210,10 +210,10 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *
 	var messages []string
 	var interrupted bool
 	for _, record := range self.events {
-		if record.Kind == agent.UserMessage {
+		if record.Kind == agent.UserMessageEvent {
 			messages = append(messages, record.Text)
 		}
-		interrupted = interrupted || record.Kind == agent.Interruption
+		interrupted = interrupted || record.Kind == agent.InterruptionEvent
 	}
 
 	wantMessages := []string{"first", builtInConfig(t).GetOnWithItMessage}
@@ -225,27 +225,46 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *
 	}
 }
 
+type reasoningThenAnswerProvider struct {
+	quietProvider
+
+	sends int
+}
+
+func (self *reasoningThenAnswerProvider) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
+	self.sends++
+	if self.sends == 1 {
+		if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: "provisional thought"}) {
+			return agent.Reply{}, nil
+		}
+		<-ctx.Done()
+		return agent.Reply{}, ctx.Err()
+	}
+
+	if !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: "replacement answer"}) ||
+		!yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true}) {
+		return agent.Reply{}, nil
+	}
+	return agent.Reply{}, nil
+}
+
 type eventsAfterCancellationProvider struct {
 	quietProvider
 }
 
 func (eventsAfterCancellationProvider) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
-	for _, call := range []agent.Event{
-		{Kind: agent.ToolCallRequest, ID: "a", Name: "first", Rendering: agent.Rendering{Subject: "first"}},
-		{Kind: agent.ToolCallRequest, ID: "b", Name: "second", Rendering: agent.Rendering{Subject: "second"}},
-	} {
-		if !yield(call) {
+	for _, thought := range []string{"first", "second"} {
+		if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: thought}) ||
+			!yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true}) {
 			return agent.Reply{}, nil
 		}
 	}
 
 	<-ctx.Done()
 
-	for _, result := range []agent.Event{
-		{Kind: agent.ToolCallResult, ID: "a", Name: "first"},
-		{Kind: agent.ToolCallResult, ID: "b", Name: "second"},
-	} {
-		if !yield(result) {
+	for _, message := range []string{"first", "second"} {
+		if !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: message}) ||
+			!yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true}) {
 			return agent.Reply{}, nil
 		}
 	}
@@ -271,12 +290,12 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 	self.start("first")
 	events := self.currentTurn.events
 
-	calls := 0
-	for calls < 2 {
+	thoughts := 0
+	for thoughts < 2 {
 		report := <-events
 		self.takeTurn(report)
-		if report.event.Kind == agent.ToolCallRequest {
-			calls++
+		if report.update.Event != nil && report.update.Event.Kind == agent.ModelReasoningEvent {
+			thoughts++
 		}
 	}
 
@@ -287,15 +306,15 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 	}
 	self.finish()
 
-	results := 0
+	messages := 0
 	for _, record := range self.events {
-		if record.Kind == agent.ToolCallResult {
-			results++
+		if record.Kind == agent.ModelMessageEvent {
+			messages++
 		}
 	}
 
-	if results != 2 {
-		t.Errorf("expected both completed results to be rendered, got %d", results)
+	if messages != 2 {
+		t.Errorf("expected both completed messages to be rendered, got %d", messages)
 	}
 }
 
@@ -322,6 +341,93 @@ func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) 
 	}
 	if !self.queuedTurn.isReplacement || self.queuedTurn.nextMessage != "dfd" {
 		t.Fatalf("expected dfd to exist only as an invisible queued prompt, got queued=%t prompt=%q", self.queuedTurn.isReplacement, self.queuedTurn.nextMessage)
+	}
+}
+
+func TestTheLatestOfTwoRapidReplacementsWins(t *testing.T) {
+	cancellations := 0
+	self := &Harness{
+		currentTurn: Turn{
+			isRunning: true,
+			cancel: func() {
+				cancellations++
+			},
+		},
+	}
+	history := edit.NewHistory("", historyLimit)
+	editor := edit.NewInput(history)
+
+	for _, replacement := range []string{"first replacement", "second replacement"} {
+		for _, value := range replacement {
+			self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
+		}
+		self.apply(editor, history, key.Key{Code: key.Enter})
+	}
+
+	if self.queuedTurn.nextMessage != "second replacement" || !self.queuedTurn.isReplacement {
+		t.Errorf("unexpected queued turn: %+v", self.queuedTurn)
+	}
+	if cancellations != 2 {
+		t.Errorf("cancelled %d times, want 2", cancellations)
+	}
+}
+
+func TestReplacementInputCancelsProvisionalReasoningAndStartsTheNextTurn(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = log.Close() }()
+
+	provider := &reasoningThenAnswerProvider{}
+	self := &Harness{
+		agent:  agent.New("", provider, nil),
+		screen: output.New(&bytes.Buffer{}),
+		log:    log,
+		mode:   caps.NewMode(caps.Read | caps.Write),
+	}
+	history := edit.NewHistory("", historyLimit)
+	editor := edit.NewInput(history)
+
+	self.start("first")
+	interruptedEvents := self.currentTurn.events
+	for {
+		report := <-interruptedEvents
+		self.takeTurn(report)
+		if report.update.Delta != nil && report.update.Delta.Kind == agent.ModelReasoningEvent {
+			break
+		}
+	}
+	for _, value := range "replacement" {
+		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
+	}
+	self.apply(editor, history, key.Key{Code: key.Enter})
+
+	for report := range interruptedEvents {
+		self.takeTurn(report)
+	}
+	self.finish()
+	for report := range self.currentTurn.events {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	var messages []string
+	var reasoningEvents int
+	for _, event := range self.events {
+		if event.Kind == agent.UserMessageEvent || event.Kind == agent.ModelMessageEvent {
+			messages = append(messages, event.Text)
+		}
+		if event.Kind == agent.ModelReasoningEvent {
+			reasoningEvents++
+		}
+	}
+	if !slices.Equal(messages, []string{"first", "replacement", "replacement answer"}) {
+		t.Errorf("got messages %q", messages)
+	}
+	if reasoningEvents != 0 {
+		t.Errorf("stored %d provisional reasoning events", reasoningEvents)
 	}
 }
 
@@ -378,8 +484,8 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 
 	var sent, interruptionStored bool
 	for _, event := range storedSession.Events {
-		sent = sent || event.Kind == agent.UserMessage && event.Text == "follow up"
-		interruptionStored = interruptionStored || event.Kind == agent.Interruption
+		sent = sent || event.Kind == agent.UserMessageEvent && event.Text == "follow up"
+		interruptionStored = interruptionStored || event.Kind == agent.InterruptionEvent
 	}
 
 	if !sent {
@@ -421,7 +527,7 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 	}
 
 	for _, event := range storedSession.Events {
-		if event.Kind == agent.Interruption {
+		if event.Kind == agent.InterruptionEvent {
 			return
 		}
 	}
@@ -454,7 +560,7 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 	}
 
 	for _, record := range self.events {
-		if record.Kind == agent.UserMessage && record.Text == "follow up" {
+		if record.Kind == agent.UserMessageEvent && record.Text == "follow up" {
 			t.Error("expected the taken-back replacement not to be sent")
 		}
 	}
@@ -572,7 +678,7 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 
 	var messages []string
 	for _, event := range storedSession.Events {
-		if event.Kind == agent.UserMessage {
+		if event.Kind == agent.UserMessageEvent {
 			messages = append(messages, event.Text)
 		}
 	}

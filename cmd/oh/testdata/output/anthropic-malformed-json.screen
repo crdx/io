@@ -1,0 +1,11 @@
+
+ send malformed JSON
+
+
+the endpoint sent something unreadable: this is not JSON
+
+
+ continue after the transport failure
+
+
+Resumed.

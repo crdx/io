@@ -1,0 +1,24 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "interrupt reasoning before the answer"
+is-cancelled = true
+cancel-after-reasoning-delta = 1
+
+[[first.response]]
+wait-for-cancellation = true
+event = [
+    '''{"choices":[{"delta":{"reasoning_content":"Unfinished thought."}}]}''',
+]
+
+[resume]
+prompt = "continue after the first response"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

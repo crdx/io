@@ -15,7 +15,7 @@ type Args struct {
 	Size int `json:"size"`
 }
 
-func newTool(t *testing.T) tool.Tool {
+func newToolBuilder(t *testing.T) tool.Builder[Args] {
 	t.Helper()
 
 	return tool.Implement(
@@ -25,7 +25,11 @@ func newTool(t *testing.T) tool.Tool {
 			Schema:      tool.Schema{tool.Integer("size", "how many lines to generate")},
 		},
 		func(args Args) (string, string) { return "generate", "" },
-	).Plain(func(_ context.Context, args Args) (string, error) {
+	)
+}
+
+func buildTool(builder tool.Builder[Args]) tool.Tool {
+	return builder.Plain(func(_ context.Context, args Args) (string, error) {
 		return strings.Repeat("a line of text\n", args.Size), nil
 	})
 }
@@ -173,7 +177,7 @@ func TestOutputTooBigIsCutAndSaved(t *testing.T) {
 }
 
 func TestAWrappedToolKeepsItsSyntaxHighlighting(t *testing.T) {
-	subject := tool.Syntax(newTool(t), "bash")
+	subject := buildTool(newToolBuilder(t).Syntax("bash"))
 	call, err := truncate.Tool(subject).Parse(`{"size":2}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -186,7 +190,7 @@ func TestAWrappedToolKeepsItsSyntaxHighlighting(t *testing.T) {
 }
 
 func TestAWrappedToolKeepsItsFocusedRendering(t *testing.T) {
-	subject := tool.Focus(newTool(t), func(tool.Call) string { return "generate" })
+	subject := buildTool(newToolBuilder(t).Focuses(func(tool.ToolCall) string { return "generate" }))
 	call, err := truncate.Tool(subject).Parse(`{"size":2}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -199,7 +203,7 @@ func TestAWrappedToolKeepsItsFocusedRendering(t *testing.T) {
 }
 
 func TestAWrappedToolIsCapped(t *testing.T) {
-	subject := truncate.Tool(newTool(t))
+	subject := truncate.Tool(buildTool(newToolBuilder(t)))
 
 	if subject.Name() != "generate" {
 		t.Errorf("expected the name to survive, got %q", subject.Name())
@@ -217,7 +221,7 @@ func TestAWrappedToolIsCapped(t *testing.T) {
 }
 
 func TestAnUnwrappedToolIsNotCapped(t *testing.T) {
-	output := exec(t, newTool(t), `{"size":4000}`)
+	output := exec(t, buildTool(newToolBuilder(t)), `{"size":4000}`)
 
 	if strings.Contains(output, "truncated at") {
 		t.Error("expected an unwrapped tool to hand back everything")
@@ -225,7 +229,10 @@ func TestAnUnwrappedToolIsNotCapped(t *testing.T) {
 }
 
 func TestToolsWrapsEveryTool(t *testing.T) {
-	wrappedTools := truncate.Tools([]tool.Tool{newTool(t), newTool(t)})
+	wrappedTools := truncate.Tools([]tool.Tool{
+		buildTool(newToolBuilder(t)),
+		buildTool(newToolBuilder(t)),
+	})
 
 	if len(wrappedTools) != 2 {
 		t.Fatalf("expected both tools back, got %d", len(wrappedTools))

@@ -96,3 +96,78 @@ func TestRecorderCensorsHeadersJSONFormsSSEAndBearerText(t *testing.T) {
 		t.Errorf("expected a completed exchange marker, got:\n%s", transcript)
 	}
 }
+
+func TestRecorderCensorsIdentityMetadataWithoutCensoringProtocolIDs(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "wire.http")
+	recorder, err := wire.Open(path, wire.Meta{}, func(err error) {
+		t.Errorf("unexpected recorder failure: %v", err)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	exchange := recorder.Start(req.Request{
+		Started:  time.Unix(2, 0),
+		Method:   http.MethodPost,
+		URL:      "https://example.test/",
+		Protocol: "HTTP/1.1",
+		Header: http.Header{
+			"Anthropic-Organization-Id": {"organisation-secret"},
+			"Anthropic-Workspace-Id":    {"workspace-secret"},
+			"Request-Id":                {"request-secret"},
+			"Traceresponse":             {"trace-secret"},
+			"Cf-Ray":                    {"ray-secret"},
+			"Content-Type":              {"application/json"},
+		},
+		Body: []byte(`{"account":{"email_address":"person@example.test","uuid":"account-secret"},"organization":{"name":"Private Organisation","uuid":"organisation-body-secret"},"token_uuid":"token-secret","request_id":"request-body-secret","safety_identifier":"safety-secret","id":"message-id","call_id":"call-id","innocent":"kept"}`),
+	})
+	exchange.Response(req.Response{
+		Received: time.Unix(3, 0),
+		Protocol: "HTTP/1.1",
+		Status:   "200 OK",
+		Code:     200,
+		Header: http.Header{
+			"Content-Type":              {"text/event-stream"},
+			"Anthropic-Organization-Id": {"response-organisation-secret"},
+			"X-Request-Id":              {"response-request-secret"},
+		},
+	})
+	exchange.Body([]byte("data: {\"workspace_id\":\"response-workspace-secret\",\"uuid\":\"response-uuid-secret\",\"id\":\"response-id\",\"call_id\":\"response-call-id\",\"ok\":true}\n\n"))
+	exchange.Finish(time.Unix(4, 0), nil, false)
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	transcript := string(stored)
+	for _, secret := range []string{
+		"organisation-secret",
+		"workspace-secret",
+		"request-secret",
+		"trace-secret",
+		"ray-secret",
+		"person@example.test",
+		"account-secret",
+		"Private Organisation",
+		"organisation-body-secret",
+		"token-secret",
+		"request-body-secret",
+		"safety-secret",
+		"response-organisation-secret",
+		"response-request-secret",
+		"response-workspace-secret",
+		"response-uuid-secret",
+	} {
+		if strings.Contains(transcript, secret) {
+			t.Errorf("identity value %q survived censorship:\n%s", secret, transcript)
+		}
+	}
+	for _, kept := range []string{"message-id", "call-id", "response-id", "response-call-id", `"innocent":"kept"`, `"ok":true`} {
+		if !strings.Contains(transcript, kept) {
+			t.Errorf("expected protocol value %q to survive:\n%s", kept, transcript)
+		}
+	}
+}

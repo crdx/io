@@ -1,9 +1,7 @@
-# [comment-inlines]
-# include = [
-#     ".",
-# ]
+relax = ["comment-inlines"]
 
 [comment-lines]
-include = [
-    ".",
-]
+include = ["."]
+
+[comment-inlines]
+include = ["."]

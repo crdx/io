@@ -30,7 +30,11 @@ var matchPathPattern = regexp.MustCompile(`^(.+):[0-9]+:`)
 
 // New builds the grep tool confined to root. A match is reported as path:line:text.
 func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
-	definedTool := tool.Implement(
+	restoreReadState := func(payload json.RawMessage) error {
+		return snapshots.RestoreReadState(root, payload)
+	}
+
+	return tool.Implement(
 		tool.Definition{
 			Name:        "grep",
 			Description: "search file contents",
@@ -41,19 +45,20 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 			},
 		},
 		Describe,
-	).Run(func(ctx context.Context, args Args) (tool.Result, error) {
-		output, stats, err := run(ctx, root, args)
-		return tool.Result{
-			Output: output,
-			Stats:  stats,
-			State:  readStateForMatches(root, args, output),
-		}, err
-	})
-	definedTool = tool.State(definedTool, file.FileReadState, func(payload json.RawMessage) error {
-		return snapshots.RestoreReadState(root, payload)
-	})
-
-	return tool.ReadOnly(tool.Concurrent(tool.Syntax(tool.Focus(definedTool, util.SearchPath), "regexp")))
+	).
+		State(file.FileReadState, restoreReadState).
+		Focuses(util.SearchPath).
+		Syntax("regexp").
+		IsEmbarrassinglyParallel().
+		ChangesNothing().
+		Run(func(ctx context.Context, args Args) (tool.ToolCallResult, error) {
+			output, stats, err := run(ctx, root, args)
+			return tool.ToolCallResult{
+				Output: output,
+				Stats:  stats,
+				State:  readStateForMatches(root, args, output),
+			}, err
+		})
 }
 
 // Describe reports the search's subject and qualifier.

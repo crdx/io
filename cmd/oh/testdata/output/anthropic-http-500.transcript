@@ -1,0 +1,41 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+receive HTTP 500
+```
+
+## Failure
+
+> 2001-01-01T00:00:01Z
+
+```
+request failed with status 500: 
+```
+
+## User
+
+> 2001-01-01T00:00:02Z
+
+```
+continue after the transport failure
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Resumed.
+```
+

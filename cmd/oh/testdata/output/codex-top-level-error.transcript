@@ -1,0 +1,41 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+receive a top-level Responses API error
+```
+
+## Failure
+
+> 2001-01-01T00:00:01Z
+
+```
+model overloaded
+```
+
+## User
+
+> 2001-01-01T00:00:02Z
+
+```
+continue after the endpoint error
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Resumed.
+```
+

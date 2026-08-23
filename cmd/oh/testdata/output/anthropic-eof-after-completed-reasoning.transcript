@@ -1,0 +1,49 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+close after a completed thought
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+Completed thought.
+```
+
+## Failure
+
+> 2001-01-01T00:00:02Z
+
+```
+the stream ended before the response did
+```
+
+## User
+
+> 2001-01-01T00:00:03Z
+
+```
+continue after the transport failure
+```
+
+## Assistant
+
+> 2001-01-01T00:00:04Z
+
+```
+Resumed.
+```
+

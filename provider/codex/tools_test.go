@@ -9,14 +9,14 @@ import (
 
 type sizedTool struct{}
 
-func (sizedTool) Name() string                    { return "read" }
-func (sizedTool) Description() string             { return "read a file" }
-func (sizedTool) Schema() tool.Schema             { return tool.Schema{} }
-func (sizedTool) Concurrent() bool                { return true }
-func (sizedTool) ReadOnly() bool                  { return true }
-func (sizedTool) StateKey() string                { return "" }
-func (sizedTool) Parse(string) (tool.Call, error) { return nil, nil }
-func (sizedTool) Restore(json.RawMessage) error   { return nil }
+func (sizedTool) Name() string                        { return "read" }
+func (sizedTool) Description() string                 { return "read a file" }
+func (sizedTool) Schema() tool.Schema                 { return tool.Schema{} }
+func (sizedTool) Concurrent() bool                    { return true }
+func (sizedTool) ReadOnly() bool                      { return true }
+func (sizedTool) StateKey() string                    { return "" }
+func (sizedTool) Parse(string) (tool.ToolCall, error) { return nil, nil }
+func (sizedTool) Restore(json.RawMessage) error       { return nil }
 
 func TestToolsSizeMeasuresTheWireDefinitions(t *testing.T) {
 	const wire = `[{"type":"function","name":"read","description":"read a file","strict":false,"parameters":{"type":"object","properties":{},"additionalProperties":false}}]`

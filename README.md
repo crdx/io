@@ -54,24 +54,28 @@ fmt.Println(answer) // => "It's probably raining."
 
 `Send` blocks until the turn is over. Cancelling the context ends the request the turn is waiting on.
 
-`Stream` is the same turn, but an event at a time.
+`Stream` is the same turn as transient prose deltas and completed events. Deltas are suitable for live rendering; only events belong in durable history.
 
 ```go
-for event, err := range assistant.Stream(ctx, "what is the weather in London?") {
-    if err != nil { return err }
+for update, err := range assistant.Stream(ctx, "what is the weather in London?") {
+    if err != nil {
+        return err
+    }
 
-    switch event.Kind {
-    case agent.Text:
-        fmt.Print(event.Text)
-    case agent.Call:
-        fmt.Println("agent.Call", event.Name, event.Arguments)
-    case agent.Result:
-        fmt.Println("agent.Result", event.Text)
+    switch {
+    case update.Delta != nil:
+        if update.Delta.Kind == agent.ModelMessageEvent {
+            fmt.Print(update.Delta.Text)
+        }
+    case update.Event != nil && update.Event.Kind == agent.ToolCallRequestEvent:
+        fmt.Println("call", update.Event.Name, update.Event.Arguments)
+    case update.Event != nil && update.Event.Kind == agent.ToolCallResultEvent:
+        fmt.Println("result", update.Event.Text)
     }
 }
 ```
 
-`Send` is `Stream` with the text fragments glued back together, which `agent.Coalesce` does on its own.
+`Send` collects the completed `ModelMessageEvent` blocks and returns their text.
 
 ## Implementations
 

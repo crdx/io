@@ -1,0 +1,22 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "send malformed data after an answer fragment"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Partial answer."}}]}''',
+    '''this is not JSON''',
+]
+
+[resume]
+prompt = "continue after the first response"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

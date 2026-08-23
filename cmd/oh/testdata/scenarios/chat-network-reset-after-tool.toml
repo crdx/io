@@ -1,0 +1,35 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "high"
+
+[[tool]]
+name = "work"
+outputs = ["tool result"]
+state-key = "work-count"
+
+[first]
+prompt = "complete a tool round, then lose the network"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"reasoning_content":"Use the tool."}}]}''',
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","type":"function","function":{"name":"work","arguments":"{}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[first.response]]
+reset-after-wire-event = 1
+event = [
+    '''{"choices":[{"delta":{"reasoning_content":"Provisional post-tool thought."}}]}''',
+]
+
+[resume]
+prompt = "continue after the network interruption"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

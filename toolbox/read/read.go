@@ -32,7 +32,11 @@ type Args struct {
 
 // New builds the read tool confined to root.
 func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
-	definedTool := tool.Implement(
+	restoreReadState := func(payload json.RawMessage) error {
+		return snapshots.RestoreReadState(root, payload)
+	}
+
+	return tool.Implement(
 		tool.Definition{
 			Name:        "read",
 			Description: "read a text or image file",
@@ -43,14 +47,14 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 			},
 		},
 		Describe,
-	).Run(func(_ context.Context, args Args) (tool.Result, error) {
-		return exec(root, args)
-	})
-	definedTool = tool.State(definedTool, file.FileReadState, func(payload json.RawMessage) error {
-		return snapshots.RestoreReadState(root, payload)
-	})
-
-	return tool.ReadOnly(tool.Concurrent(tool.FocusPath(definedTool)))
+	).
+		State(file.FileReadState, restoreReadState).
+		FocusPath().
+		IsEmbarrassinglyParallel().
+		ChangesNothing().
+		Run(func(_ context.Context, args Args) (tool.ToolCallResult, error) {
+			return exec(root, args)
+		})
 }
 
 // Describe reports a read's subject and qualifier: the path, and the lines it asks for.
@@ -71,33 +75,33 @@ func span(offset int, limit int) string {
 	}
 }
 
-func exec(root *file.Root, args Args) (tool.Result, error) {
+func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 	if args.Path == "" {
-		return tool.Result{}, errors.New("path is required")
+		return tool.ToolCallResult{}, errors.New("path is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return tool.Result{}, err
+		return tool.ToolCallResult{}, err
 	}
 
 	data, err := root.ReadFile(name)
 	if err != nil {
 		if pathError, ok := errors.AsType[*fs.PathError](err); ok {
-			return tool.Result{}, fmt.Errorf("%s: %w", args.Path, pathError.Err)
+			return tool.ToolCallResult{}, fmt.Errorf("%s: %w", args.Path, pathError.Err)
 		}
 
-		return tool.Result{}, err
+		return tool.ToolCallResult{}, err
 	}
 
 	stats := tool.Stats{Kind: tool.StatsRead, Bytes: int64(len(data))}
 	mediaType := http.DetectContentType(data)
 	if isSupportedImage(mediaType) {
 		if args.Offset > 0 || args.Limit > 0 {
-			return tool.Result{Stats: stats}, errors.New("line ranges are not supported for images")
+			return tool.ToolCallResult{Stats: stats}, errors.New("line ranges are not supported for images")
 		}
 		if len(data) > maxImageBytes {
-			return tool.Result{Stats: stats}, fmt.Errorf("image is larger than the %d-byte limit", maxImageBytes)
+			return tool.ToolCallResult{Stats: stats}, fmt.Errorf("image is larger than the %d-byte limit", maxImageBytes)
 		}
 
 		stats.Kind = tool.StatsImage
@@ -126,7 +130,7 @@ func exec(root *file.Root, args Args) (tool.Result, error) {
 		return successfulResult(args.Path, data, "", tool.Image{}, stats), nil
 	}
 	if start >= len(lines) {
-		return tool.Result{Stats: stats}, fmt.Errorf(
+		return tool.ToolCallResult{Stats: stats}, fmt.Errorf(
 			"offset %d is past the end of the file (%d lines)", args.Offset, len(lines),
 		)
 	}
@@ -148,10 +152,10 @@ func successfulResult(
 	output string,
 	image tool.Image,
 	stats tool.Stats,
-) tool.Result {
+) tool.ToolCallResult {
 	state := file.EncodeReadState(file.NewReadSnapshot(path, data))
 
-	return tool.Result{
+	return tool.ToolCallResult{
 		State:  state,
 		Output: output,
 		Image:  image,

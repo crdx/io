@@ -1,0 +1,732 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m draw the awkward markdown              \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[?7l\r\e[KA table whose rows do not all reach the\r
+\r\e[Kend:\r
+\r\e[K\r
+\r\e[K\e[38;2;150;152;150m┌──────┬────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mtool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mwhat it does\e[0m   \e[38;2;150;152;150m│\e[0m \e[1mcost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m                \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree \e[38;2;150;152;150m│\e[0m 4    \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command \e[38;2;150;152;150m│\e[0m 40   \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\r
+\r\e[K\r
+\r\e[KA narrow table in a wide terminal:\r
+\r\e[K\r
+\r\e[K\e[38;2;150;152;150m┌───┬───┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1ma\e[0m \e[38;2;150;152;150m│\e[0m \e[1mb\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├───┼───┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m 1 \e[38;2;150;152;150m│\e[0m 2 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\r
+\r\e[K\r
+\r\e[KA bare URL the renderer has to find for\r
+\r\e[Kitself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and\r
+\r\e[Kone\r
+\r\e[Kin angle brackets\r
+\r\e[K\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are\r
+\r\e[Knot the same thing.\r
+\r
+\r\e[KEntities are resolved in prose — AT&T\r
+\r\e[Kbecomes AT&T — but left alone inside\r
+\r\e[Kcode, where \e[38;2;192;128;80m&amp;\e[0m and \e[38;2;192;128;80m&lt;div&gt;\e[0m stand\r
+\r\e[Kas they are written.\r
+\r
+\e[38;2;204;102;102ma warning that arrived with a carriage\rreturn in it\e[0m\r
+\e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+m\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[?7l\r\e[KA\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kb\r
+\r\e[Kl\r
+\r\e[Ke\r
+\r\e[Kw\r
+\r\e[Kh\r
+\r\e[Ko\r
+\r\e[Ks\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ko\r
+\r\e[Kw\r
+\r\e[Ks\r
+\r\e[Kd\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Kl\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kc\r
+\r\e[Kh\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[K:\r
+\r\e[K\r
+\r\e[Kt\r
+\r\e[Ko\r
+\r\e[Ko\r
+\r\e[Kl\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0mw\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Kd\r
+\r\e[Ko\r
+\r\e[Ke\r
+\r\e[Ks\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0mc\r
+\r\e[Ko\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m\r
+\r\e[Kg\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kp\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0mw\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Kk\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ke\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m4\r
+\r\e[Kb\r
+\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Kh\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0mr\r
+\r\e[Ku\r
+\r\e[Kn\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kc\r
+\r\e[Ko\r
+\r\e[Km\r
+\r\e[Km\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m4\r
+\r\e[K0\r
+\r\e[K\r
+\r\e[KA\r
+\r\e[Kn\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Kr\r
+\r\e[Ko\r
+\r\e[Kw\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kb\r
+\r\e[Kl\r
+\r\e[Ke\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Ka\r
+\r\e[Kw\r
+\r\e[Ki\r
+\r\e[Kd\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Km\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[K:\r
+\r\e[K\r
+\r\e[Ka\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0mb\r
+\r\e[K1\e[38;2;150;152;150m\e[0m\r
+\r\e[K\e[38;2;150;152;150m|\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m2\r
+\r\e[K\r
+\r\e[KA\r
+\r\e[Kb\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[KU\r
+\r\e[KR\r
+\r\e[KL\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Ko\r
+\r\e[Kf\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Kf\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Ks\r
+\r\e[Ke\r
+\r\e[Kl\r
+\r\e[Kf\r
+\r\e[K:\r
+\r\e[K\e[38;2;129;162;190mh\e[0m\r
+\r\e[K\e[38;2;129;162;190mt\e[0m\r
+\r\e[K\e[38;2;129;162;190mt\e[0m\r
+\r\e[K\e[38;2;129;162;190mp\e[0m\r
+\r\e[K\e[38;2;129;162;190ms\e[0m\r
+\r\e[K\e[38;2;129;162;190m:\e[0m\r
+\r\e[K\e[38;2;129;162;190m/\e[0m\r
+\r\e[K\e[38;2;129;162;190m/\e[0m\r
+\r\e[K\e[38;2;129;162;190me\e[0m\r
+\r\e[K\e[38;2;129;162;190mx\e[0m\r
+\r\e[K\e[38;2;129;162;190ma\e[0m\r
+\r\e[K\e[38;2;129;162;190mm\e[0m\r
+\r\e[K\e[38;2;129;162;190mp\e[0m\r
+\r\e[K\e[38;2;129;162;190ml\e[0m\r
+\r\e[K\e[38;2;129;162;190me\e[0m\r
+\r\e[K\e[38;2;129;162;190m.\e[0m\r
+\r\e[K\e[38;2;129;162;190mc\e[0m\r
+\r\e[K\e[38;2;129;162;190mo\e[0m\r
+\r\e[K\e[38;2;129;162;190mm\e[0m\r
+\r\e[K\e[38;2;129;162;190m/\e[0m\r
+\r\e[K\e[38;2;129;162;190mp\e[0m\r
+\r\e[K\e[38;2;129;162;190ml\e[0m\r
+\r\e[K\e[38;2;129;162;190ma\e[0m\r
+\r\e[K\e[38;2;129;162;190mi\e[0m\r
+\r\e[K\e[38;2;129;162;190mn\e[0m\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Ke\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Kl\r
+\r\e[Ke\r
+\r\e[Kb\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kc\r
+\r\e[Kk\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Ks\r
+\r\e[K\e[38;2;129;162;190mh\e[0m\r
+\r\e[K\e[38;2;129;162;190mt\e[0m\r
+\r\e[K\e[38;2;129;162;190mt\e[0m\r
+\r\e[K\e[38;2;129;162;190mp\e[0m\r
+\r\e[K\e[38;2;129;162;190ms\e[0m\r
+\r\e[K\e[38;2;129;162;190m:\e[0m\r
+\r\e[K\e[38;2;129;162;190m/\e[0m\r
+\r\e[K\e[38;2;129;162;190m/\e[0m\r
+\r\e[K\e[38;2;129;162;190me\e[0m\r
+\r\e[K\e[38;2;129;162;190mx\e[0m\r
+\r\e[K\e[38;2;129;162;190ma\e[0m\r
+\r\e[K\e[38;2;129;162;190mm\e[0m\r
+\r\e[K\e[38;2;129;162;190mp\e[0m\r
+\r\e[K\e[38;2;129;162;190ml\e[0m\r
+\r\e[K\e[38;2;129;162;190me\e[0m\r
+\r\e[K\e[38;2;129;162;190m.\e[0m\r
+\r\e[K\e[38;2;129;162;190mc\e[0m\r
+\r\e[K\e[38;2;129;162;190mo\e[0m\r
+\r\e[K\e[38;2;129;162;190mm\e[0m\r
+\r\e[K\e[38;2;129;162;190m/\e[0m\r
+\r\e[K\e[38;2;129;162;190mb\e[0m\r
+\r\e[K\e[38;2;129;162;190mr\e[0m\r
+\r\e[K\e[38;2;129;162;190ma\e[0m\r
+\r\e[K\e[38;2;129;162;190mc\e[0m\r
+\r\e[K\e[38;2;129;162;190mk\e[0m\r
+\r\e[K\e[38;2;129;162;190me\e[0m\r
+\r\e[K\e[38;2;129;162;190mt\e[0m\r
+\r\e[K\e[38;2;129;162;190me\e[0m\r
+\r\e[K\e[38;2;129;162;190md\e[0m\r
+\r\e[K,\r
+\r\e[Kw\r
+\r\e[Kh\r
+\r\e[Ki\r
+\r\e[Kc\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Km\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[K.\r
+\r
+\r\e[KE\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ko\r
+\r\e[Kl\r
+\r\e[Kv\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kp\r
+\r\e[Kr\r
+\r\e[Ko\r
+\r\e[Ks\r
+\r\e[Ke\r
+\r\e[K—\r
+\r\e[KA\r
+\r\e[KT\r
+\r\e[K&\r
+\r\e[KT\r
+\r\e[Kb\r
+\r\e[Ke\r
+\r\e[Kc\r
+\r\e[Ko\r
+\r\e[Km\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[KA\r
+\r\e[KT\r
+\r\e[K&\r
+\r\e[KT\r
+\r\e[K—\r
+\r\e[Kb\r
+\r\e[Ku\r
+\r\e[Kt\r
+\r\e[Kl\r
+\r\e[Ke\r
+\r\e[Kf\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Ke\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Ks\r
+\r\e[Ki\r
+\r\e[Kd\r
+\r\e[Ke\r
+\r\e[Kc\r
+\r\e[Ko\r
+\r\e[Kd\r
+\r\e[Ke\r
+\r\e[K,\r
+\r\e[Kw\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[K\e[38;2;192;128;80m&\e[0m\r
+\r\e[K\e[38;2;192;128;80ma\e[0m\r
+\r\e[K\e[38;2;192;128;80mm\e[0m\r
+\r\e[K\e[38;2;192;128;80mp\e[0m\r
+\r\e[K\e[38;2;192;128;80m;\e[0m\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[K\e[38;2;192;128;80m&\e[0m\r
+\r\e[K\e[38;2;192;128;80ml\e[0m\r
+\r\e[K\e[38;2;192;128;80mt\e[0m\r
+\r\e[K\e[38;2;192;128;80m;\e[0m\r
+\r\e[K\e[38;2;192;128;80md\e[0m\r
+\r\e[K\e[38;2;192;128;80mi\e[0m\r
+\r\e[K\e[38;2;192;128;80mv\e[0m\r
+\r\e[K\e[38;2;192;128;80m&\e[0m\r
+\r\e[K\e[38;2;192;128;80mg\e[0m\r
+\r\e[K\e[38;2;192;128;80mt\e[0m\r
+\r\e[K\e[38;2;192;128;80m;\e[0m\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ky\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kw\r
+\r\e[Kr\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[K.\r
+\r
+\e[38;2;204;102;102ma\r
+ \r
+w\r
+a\r
+r\r
+n\r
+i\r
+n\r
+g\r
+ \r
+t\r
+h\r
+a\r
+t\r
+ \r
+a\r
+r\r
+r\r
+i\r
+v\r
+e\r
+d\r
+ \r
+w\r
+i\r
+t\r
+h\r
+ \r
+a\r
+ \r
+c\r
+a\r
+r\r
+r\r
+i\r
+a\r
+g\r
+e\rr\r
+e\r
+t\r
+u\r
+r\r
+n\r
+ \r
+i\r
+n\r
+ \r
+i\r
+t\e[0m\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m draw the awkward markdown\e[0m
+\e[48;2;52;53;65m\e[0m
+A table whose rows do not all reach the end:
+
+tool\e[38;2;150;152;150m | \e[0mwhat it does\e[38;2;150;152;150m | \e[0mcost
+read\e[38;2;150;152;150m | \e[0m\e[38;2;150;152;150m | \e[0m
+grep\e[38;2;150;152;150m | \e[0mwalks the tree\e[38;2;150;152;150m | \e[0m4
+bash\e[38;2;150;152;150m | \e[0mruns a command\e[38;2;150;152;150m | \e[0m40
+
+A narrow table in a wide terminal:
+
+a\e[38;2;150;152;150m | \e[0mb
+1\e[38;2;150;152;150m | \e[0m2
+
+A bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and one
+in angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same thing.
+
+Entities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and \e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.
+
+\e[38;2;204;102;102ma warning that arrived with a carriage\rreturn in it\e[0m
+
+=== streamed ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m draw the awkward markdown                                                                          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KA ta\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA table\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA table whos\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA table whose ro\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA table whose rows d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA table whose rows do no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA table whose rows do not al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA table whose rows do not all re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA table whose rows do not all reach\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA table whose rows do not all reach the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA table whose rows do not all reach the end:\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[K|\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| tool\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| tool | w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| tool | what\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| tool | what it d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| tool | what it does\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| tool | what it does | co\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| tool | what it does | cost |\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K|--\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K|------\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K|------|---\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K|------|-------\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K|------|-----------\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K|------|--------------|\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mtool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mwhat it does\e[0m \e[38;2;150;152;150m│\e[0m \e[1mcost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m re   \e[38;2;150;152;150m│\e[0m              \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m              \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m├──────┼──────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m g    \e[38;2;150;152;150m│\e[0m              \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m              \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m wa           \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks        \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the    \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[6A\r\e[K\e[38;2;150;152;150m┌──────┬────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mtool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mwhat it does\e[0m   \e[38;2;150;152;150m│\e[0m \e[1mcost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m                \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree \e[38;2;150;152;150m│\e[0m 4    \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m                \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bas  \e[38;2;150;152;150m│\e[0m                \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m                \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs           \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a c       \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a comma   \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command \e[38;2;150;152;150m│\e[0m 40   \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[KA\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA nar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA narrow\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA narrow tabl\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA narrow table in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA narrow table in a w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA narrow table in a wide\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA narrow table in a wide term\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA narrow table in a wide terminal\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA narrow table in a wide terminal:\r
+\r\e[K\r
+\r\e[K|\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| a |\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| a | b |\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K|--\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m┌───┬───┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1ma\e[0m \e[38;2;150;152;150m│\e[0m \e[1mb\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├───┼───┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m   \e[38;2;150;152;150m│\e[0m   \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m 1 \e[38;2;150;152;150m│\e[0m   \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m 1 \e[38;2;150;152;150m│\e[0m 2 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[KA\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the ren\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the rendere\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to fin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find fo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: ht\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https://ex\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https://exampl\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.co\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/pl\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and one\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kin a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle bra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle bracket\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://e\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://examp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.com/b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.com/brack\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.com/bracketed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the sam\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same thing.\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KEnti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are res\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolve\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in pro\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T be\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T become\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but lef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone insi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, whe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `&amp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `<\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\r
+\r\e[K`<div&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m sta\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are writt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\e[?25h\e[?2026l\r
+\r
+\e[38;2;204;102;102ma warning that arrived with a carriage\rreturn in it\e[0m\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m draw the   \e[0m\r
+\e[48;2;52;53;65m awkward    \e[0m\r
+\e[48;2;52;53;65m markdown   \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[?7l\r\e[KA table\r
+\r\e[Kwhose rows\r
+\r\e[Kdo not all\r
+\r\e[Kreach the\r
+\r\e[Kend:\r
+\r\e[K\r
+\r\e[Ktool\e[38;2;150;152;150m | \e[0mwhat\r
+\r\e[Kit does\e[38;2;150;152;150m |\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0mcost\r
+\r\e[Kread\e[38;2;150;152;150m | \e[0m\e[38;2;150;152;150m | \e[0m\r
+\r\e[Kgrep\e[38;2;150;152;150m | \e[0mwalks\r
+\r\e[Kthe tree\e[38;2;150;152;150m | \e[0m4\r
+\r\e[Kbash\e[38;2;150;152;150m | \e[0mruns\r
+\r\e[Ka command\e[38;2;150;152;150m |\e[0m\r
+\r\e[K\e[38;2;150;152;150m\e[0m40\r
+\r\e[K\r
+\r\e[KA narrow\r
+\r\e[Ktable in a\r
+\r\e[Kwide\r
+\r\e[Kterminal:\r
+\r\e[K\r
+\r\e[K\e[38;2;150;152;150m┌───┬───┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1ma\e[0m \e[38;2;150;152;150m│\e[0m \e[1mb\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├───┼───┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m 1 \e[38;2;150;152;150m│\e[0m 2 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\r
+\r\e[K\r
+\r\e[KA bare URL\r
+\r\e[Kthe renderer\r
+\r\e[Khas to find\r
+\r\e[Kfor itself:\r
+\r\e[K\e[38;2;129;162;190mhttps://exam\e[0m\r
+\r\e[K\e[38;2;129;162;190mple.com/plai\e[0m\r
+\r\e[K\e[38;2;129;162;190mn\e[0m and one\r
+\r\e[Kin angle\r
+\r\e[Kbrackets\r
+\r\e[K\e[38;2;129;162;190mhttps://exam\e[0m\r
+\r\e[K\e[38;2;129;162;190mple.com/brac\e[0m\r
+\r\e[K\e[38;2;129;162;190mketed\e[0m, which\r
+\r\e[Kare not the\r
+\r\e[Ksame thing.\r
+\r
+\r\e[KEntities are\r
+\r\e[Kresolved in\r
+\r\e[Kprose — AT&T\r
+\r\e[Kbecomes AT&T\r
+\r\e[K— but left\r
+\r\e[Kalone inside\r
+\r\e[Kcode, where\r
+\r\e[K\e[38;2;192;128;80m&amp;\e[0m and\r
+\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m\r
+\r\e[Kstand as\r
+\r\e[Kthey are\r
+\r\e[Kwritten.\r
+\r
+\e[38;2;204;102;102ma warning th\r
+at arrived w\r
+ith a carria\r
+ge\rreturn in it\e[0m\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m draw the awkward markdown\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[?7l\r\e[KA table whose rows do not all reach the end:\r
+\r\e[K\r
+\r\e[Ktool\e[38;2;150;152;150m | \e[0mwhat it does\e[38;2;150;152;150m | \e[0mcost\r
+\r\e[Kread\e[38;2;150;152;150m | \e[0m\e[38;2;150;152;150m | \e[0m\r
+\r\e[Kgrep\e[38;2;150;152;150m | \e[0mwalks the tree\e[38;2;150;152;150m | \e[0m4\r
+\r\e[Kbash\e[38;2;150;152;150m | \e[0mruns a command\e[38;2;150;152;150m | \e[0m40\r
+\r\e[K\r
+\r\e[KA narrow table in a wide terminal:\r
+\r\e[K\r
+\r\e[Ka\e[38;2;150;152;150m | \e[0mb\r
+\r\e[K1\e[38;2;150;152;150m | \e[0m2\r
+\r\e[K\r
+\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and one
+in angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same thing.
+
+\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and \e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.
+
+\e[38;2;204;102;102ma warning that arrived with a carriage\rreturn in it\e[0m
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m draw the awkward markdown                                                                          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[KA table whose rows do not all reach the end:\r
+\r\e[K\r
+\r\e[K\e[38;2;150;152;150m┌──────┬────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mtool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mwhat it does\e[0m   \e[38;2;150;152;150m│\e[0m \e[1mcost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m                \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree \e[38;2;150;152;150m│\e[0m 4    \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command \e[38;2;150;152;150m│\e[0m 40   \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\r
+\r\e[K\r
+\r\e[KA narrow table in a wide terminal:\r
+\r\e[K\r
+\r\e[K\e[38;2;150;152;150m┌───┬───┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1ma\e[0m \e[38;2;150;152;150m│\e[0m \e[1mb\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├───┼───┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m 1 \e[38;2;150;152;150m│\e[0m 2 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\r
+\r\e[K\r
+\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and one\r
+\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same thing.\r
+\r
+\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\r
+\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\r
+\r
+\e[38;2;204;102;102ma warning that arrived with a carriage\rreturn in it\e[0m\r
+\e[?25h\e[?2026l

@@ -127,7 +127,7 @@ func (self *Client) AddUserMessage(text string) {
 // round goes into a single message, which is the shape the endpoint expects them in.
 //
 // reference/tool-use.md
-func (self *Client) AddToolResults(results []agent.ToolResult) {
+func (self *Client) AddToolResults(results []agent.ToolCallResult) {
 	blocks := make([]json.RawMessage, 0, len(results))
 
 	for _, result := range results {
@@ -310,7 +310,7 @@ type imageSource struct {
 
 const attachmentNotice = "(see attached image)"
 
-func encodeToolOutput(result agent.ToolResult) any {
+func encodeToolOutput(result agent.ToolCallResult) any {
 	if result.Image.MediaType == "" || len(result.Image.Data) == 0 {
 		return result.Output
 	}

@@ -1,0 +1,8 @@
+{"kind":"head","meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"user_message","text":"receive HTTP 404"}}
+{"kind":"event","event":{"kind":"failure","text":"request failed with status 404: "}}
+{"kind":"item","payload":{"role":"user","content":"receive HTTP 404"}}
+{"kind":"event","event":{"kind":"user_message","text":"continue after the missing endpoint"}}
+{"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
+{"kind":"item","payload":{"role":"user","content":"continue after the missing endpoint"}}
+{"kind":"item","payload":{"role":"assistant","content":"Resumed."}}

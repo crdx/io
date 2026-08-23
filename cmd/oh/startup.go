@@ -29,10 +29,10 @@ type startupFile struct {
 func startupEvent(elapsed time.Duration, info startupInfo) agent.Event {
 	facts, err := json.Marshal(info)
 	if err != nil {
-		return agent.Event{Kind: agent.Startup, Took: elapsed}
+		return agent.Event{Kind: agent.StartupEvent, Took: elapsed}
 	}
 
-	return agent.Event{Kind: agent.Startup, Took: elapsed, State: facts}
+	return agent.Event{Kind: agent.StartupEvent, Took: elapsed, State: facts}
 }
 
 func renderStartupEvent(event agent.Event) string {

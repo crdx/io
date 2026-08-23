@@ -89,19 +89,54 @@ func TestASettingLeftOutIsRefusedRatherThanSubstituted(t *testing.T) {
 	}
 }
 
+func TestDumpAndLoadOwnTheirHistorySlices(t *testing.T) {
+	client := newClient(t, "http://somewhere")
+	loaded := []json.RawMessage{json.RawMessage(`{"role":"user","content":"original"}`)}
+	client.Load(loaded)
+	loaded[0] = json.RawMessage(`{"role":"user","content":"changed"}`)
+
+	dumped := client.Dump()
+	if got := string(dumped[0]); !strings.Contains(got, "original") {
+		t.Fatalf("loaded history changed through its caller: %s", got)
+	}
+
+	dumped[0] = json.RawMessage(`{"role":"user","content":"changed"}`)
+	if got := string(client.Dump()[0]); !strings.Contains(got, "original") {
+		t.Errorf("dumped history changed through its recipient: %s", got)
+	}
+}
+
+func TestPartialImagesAreNotSent(t *testing.T) {
+	tests := map[string]tool.Image{
+		"media type only": {MediaType: "image/png"},
+		"data only":       {Data: []byte{1, 2, 3}},
+	}
+
+	for name, image := range tests {
+		t.Run(name, func(t *testing.T) {
+			client := newClient(t, "http://somewhere")
+			client.AddToolResults([]agent.ToolCallResult{{ID: "call-1", Output: "text", Image: image}})
+
+			if got := client.Dump(); len(got) != 1 {
+				t.Errorf("partial image produced an attachment message: %s", got)
+			}
+		})
+	}
+}
+
 func TestAnImageReturnedByAToolFollowsItInAMessageOfItsOwn(t *testing.T) {
 	var bodies []string
 	server := scriptedServer(t, &bodies,
 		`{"choices":[{"delta":{"content":"seen"}}]}`, "[DONE]")
 
 	client := newClient(t, server.URL)
-	client.AddToolResults([]agent.ToolResult{{
+	client.AddToolResults([]agent.ToolCallResult{{
 		ID:     "call-1",
 		Output: "picture.png",
 		Image:  tool.Image{MediaType: "image/png", Data: []byte{1, 2, 3}},
 	}})
 
-	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
 		t.Fatal(err)
 	}
 
@@ -130,6 +165,9 @@ func TestAnImageReturnedByAToolFollowsItInAMessageOfItsOwn(t *testing.T) {
 	if !strings.Contains(bodies[0], `"image_url":{"url":"data:image/png;base64,AQID"}`) {
 		t.Errorf("expected the image to be carried as an image part, got %s", bodies[0])
 	}
+	if !strings.Contains(bodies[0], `"text":"Attached image(s) from tool result:"`) {
+		t.Errorf("expected the attachment to explain the image, got %s", bodies[0])
+	}
 }
 
 func TestATurnCutShortAgainstTheTokenLimitIsReported(t *testing.T) {
@@ -142,7 +180,7 @@ func TestATurnCutShortAgainstTheTokenLimitIsReported(t *testing.T) {
 	client := newClient(t, server.URL)
 	client.AddUserMessage("what is the weather?")
 
-	_, err := client.Send(t.Context(), func(agent.Event) bool { return true })
+	_, err := client.Send(t.Context(), func(agent.Output) bool { return true })
 	if !errors.Is(err, chat.ErrIncomplete) {
 		t.Fatalf("expected an incomplete response to be reported, got %v", err)
 	}
@@ -158,9 +196,23 @@ func TestAMalformedChunkIsReportedRatherThanIgnored(t *testing.T) {
 	client := newClient(t, server.URL)
 	client.AddUserMessage("hello")
 
-	_, err := client.Send(t.Context(), func(agent.Event) bool { return true })
+	_, err := client.Send(t.Context(), func(agent.Output) bool { return true })
 	if err == nil || !strings.Contains(err.Error(), "unreadable") {
 		t.Fatalf("expected the malformed frame to be reported, got %v", err)
+	}
+}
+
+func TestATopLevelErrorEnvelopeIsReported(t *testing.T) {
+	var bodies []string
+	server := scriptedServer(t, &bodies,
+		`{"error":{"type":"service_unavailable_error","code":"server_is_overloaded","message":"model overloaded"}}`)
+
+	client := newClient(t, server.URL)
+	client.AddUserMessage("hello")
+
+	_, err := client.Send(t.Context(), func(agent.Output) bool { return true })
+	if err == nil || err.Error() != "model overloaded" {
+		t.Fatalf("expected the endpoint error, got %v", err)
 	}
 }
 
@@ -175,8 +227,10 @@ func TestAChunkCarryingNothingWeReadIsIgnored(t *testing.T) {
 	client.AddUserMessage("hello")
 
 	var seen []string
-	if _, err := client.Send(t.Context(), func(event agent.Event) bool {
-		seen = append(seen, event.Text)
+	if _, err := client.Send(t.Context(), func(event agent.Output) bool {
+		if !event.Done {
+			seen = append(seen, event.Text)
+		}
 
 		return true
 	}); err != nil {
@@ -196,7 +250,7 @@ func TestHowCallsAreMadeIsStatedWhenThereAreToolsToCall(t *testing.T) {
 	client.Configure("", []tool.Definition{{Name: "weather", Description: "report the weather"}})
 	client.AddUserMessage("hello")
 
-	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
 		t.Fatal(err)
 	}
 
@@ -214,7 +268,7 @@ func TestHowCallsAreMadeIsLeftUnsaidWhenThereAreNoTools(t *testing.T) {
 	client := newClient(t, server.URL)
 	client.AddUserMessage("hello")
 
-	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
 		t.Fatal(err)
 	}
 
@@ -236,8 +290,10 @@ func TestARefusalIsReadAsWhatTheModelSaid(t *testing.T) {
 	client.AddUserMessage("do something forbidden")
 
 	var seen []string
-	if _, err := client.Send(t.Context(), func(event agent.Event) bool {
-		seen = append(seen, event.Text)
+	if _, err := client.Send(t.Context(), func(event agent.Output) bool {
+		if !event.Done {
+			seen = append(seen, event.Text)
+		}
 
 		return true
 	}); err != nil {
@@ -264,7 +320,7 @@ func TestAnAnswerAFilterTookAwayIsReportedAsCutShort(t *testing.T) {
 	client := newClient(t, server.URL)
 	client.AddUserMessage("hello")
 
-	_, err := client.Send(t.Context(), func(agent.Event) bool { return true })
+	_, err := client.Send(t.Context(), func(agent.Output) bool { return true })
 	if !errors.Is(err, chat.ErrIncomplete) {
 		t.Errorf("expected a filtered answer to be reported as cut short, got %v", err)
 	}
@@ -277,7 +333,7 @@ func TestATurnThatProducedNothingIsNotStored(t *testing.T) {
 	client := newClient(t, server.URL)
 	client.AddUserMessage("hello")
 
-	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
 		t.Fatal(err)
 	}
 
@@ -332,8 +388,8 @@ func TestConversationWithStreamingToolCall(t *testing.T) {
 	client.Configure("be useful", []tool.Definition{{Name: "read", Description: "read a file"}})
 	client.AddUserMessage("hello")
 
-	var events []agent.Event
-	reply, err := client.Send(t.Context(), func(event agent.Event) bool {
+	var events []agent.Output
+	reply, err := client.Send(t.Context(), func(event agent.Output) bool {
 		events = append(events, event)
 		return true
 	})
@@ -344,19 +400,21 @@ func TestConversationWithStreamingToolCall(t *testing.T) {
 	if len(reply.Calls) != 1 || reply.Calls[0] != wantCall {
 		t.Fatalf("got calls %#v", reply.Calls)
 	}
-	if len(events) != 1 || events[0].Kind != agent.ModelReasoning || events[0].Text != "check" {
+	if len(events) != 2 || events[0].Kind != agent.ModelReasoningEvent || events[0].Text != "check" ||
+		events[1].Kind != agent.ModelReasoningEvent || !events[1].Done {
 		t.Fatalf("got events %#v", events)
 	}
 
-	client.AddToolResults([]agent.ToolResult{{ID: "call-1", Output: "contents"}})
+	client.AddToolResults([]agent.ToolCallResult{{ID: "call-1", Output: "contents"}})
 	events = nil
-	if _, err := client.Send(t.Context(), func(event agent.Event) bool {
+	if _, err := client.Send(t.Context(), func(event agent.Output) bool {
 		events = append(events, event)
 		return true
 	}); err != nil {
 		t.Fatal(err)
 	}
-	if len(events) != 1 || events[0].Kind != agent.ModelMessage || events[0].Text != "done" {
+	if len(events) != 2 || events[0].Kind != agent.ModelMessageEvent || events[0].Text != "done" ||
+		events[1].Kind != agent.ModelMessageEvent || !events[1].Done {
 		t.Fatalf("got events %#v", events)
 	}
 
@@ -390,7 +448,7 @@ func TestATurnThatFailedKeepsWhatItSaidAndNotWhatItAskedFor(t *testing.T) {
 	client := newClient(t, server.URL)
 	client.AddUserMessage("what is the weather?")
 
-	if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); !errors.Is(err, chat.ErrTruncated) {
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); !errors.Is(err, chat.ErrTruncated) {
 		t.Fatalf("expected a truncated stream to be refused, got %v", err)
 	}
 

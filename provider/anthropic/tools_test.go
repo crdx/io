@@ -118,7 +118,7 @@ func TestEveryEffortLevelTheModelTakesIsOffered(t *testing.T) {
 			client.Effort = effort
 			client.AddUserMessage("hello")
 
-			if _, err := client.Send(t.Context(), func(agent.Event) bool { return true }); err != nil {
+			if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
 

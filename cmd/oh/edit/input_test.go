@@ -284,12 +284,12 @@ func TestWhatIsOutOfSightIsCountedAtBothEdges(t *testing.T) {
 
 	frame := self.Frame(80)
 
-	if frame.Above == 0 || frame.Below == 0 {
+	if frame.HiddenLinesAbove == 0 || frame.HiddenLinesBelow == 0 {
 		t.Errorf("expected rows out of sight both ways, got %d above and %d below",
-			frame.Above, frame.Below)
+			frame.HiddenLinesAbove, frame.HiddenLinesBelow)
 	}
 
-	if total := frame.Above + len(frame.Rows) + frame.Below; total != maxRows*3 {
+	if total := frame.HiddenLinesAbove + len(frame.Rows) + frame.HiddenLinesBelow; total != maxRows*3 {
 		t.Errorf("expected the counts and the rows drawn to be the whole line, got %d", total)
 	}
 }
@@ -297,9 +297,9 @@ func TestWhatIsOutOfSightIsCountedAtBothEdges(t *testing.T) {
 func TestNothingIsOutOfSightWhereTheLineFits(t *testing.T) {
 	frame := lines(maxRows).Frame(80)
 
-	if frame.Above != 0 || frame.Below != 0 {
+	if frame.HiddenLinesAbove != 0 || frame.HiddenLinesBelow != 0 {
 		t.Errorf("expected nothing out of sight, got %d above and %d below",
-			frame.Above, frame.Below)
+			frame.HiddenLinesAbove, frame.HiddenLinesBelow)
 	}
 }
 

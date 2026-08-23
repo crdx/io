@@ -1,0 +1,11 @@
+{"kind":"head","meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"user_message","text":"think, answer, then fail"}}
+{"kind":"event","event":{"kind":"model_reasoning","text":"complete thought"}}
+{"kind":"event","event":{"kind":"model_message","text":"partial answer"}}
+{"kind":"event","event":{"kind":"failure","text":"the response was cut short"}}
+{"kind":"item","payload":{"role":"user","content":"think, answer, then fail"}}
+{"kind":"item","payload":{"role":"assistant","content":"partial answer","reasoning_content":"complete thought"}}
+{"kind":"event","event":{"kind":"user_message","text":"continue after the failure"}}
+{"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
+{"kind":"item","payload":{"role":"user","content":"continue after the failure"}}
+{"kind":"item","payload":{"role":"assistant","content":"Resumed."}}

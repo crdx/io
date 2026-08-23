@@ -1,0 +1,9 @@
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m interrupt while forming a tool call                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[?25h\e[?2026l\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m continue without the incomplete call                                                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KResumed.\e[?25h\e[?2026l\r

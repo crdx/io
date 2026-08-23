@@ -314,15 +314,31 @@ func isSensitiveName(name string) bool {
 		"openaiaccountid",
 		"xopenaiaccountid",
 		"chatgptaccountid",
+		"account",
+		"organization",
+		"email",
+		"emailaddress",
+		"uuid",
+		"safetyidentifier",
+		"requestid",
+		"traceresponse",
+		"traceparent",
+		"tracestate",
+		"cfray",
 		"accesstoken",
 		"refreshtoken",
 		"idtoken",
+		"tokenuuid",
 		"clientsecret",
 		"token",
 		"password":
 		return true
 	}
-	return strings.Contains(normalised, "credential")
+	return strings.Contains(normalised, "credential") ||
+		strings.HasSuffix(normalised, "accountid") ||
+		strings.HasSuffix(normalised, "organizationid") ||
+		strings.HasSuffix(normalised, "workspaceid") ||
+		strings.HasSuffix(normalised, "requestid")
 }
 
 func censorBearer(value string) string {

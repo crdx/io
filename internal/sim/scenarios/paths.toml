@@ -1,10 +1,3 @@
-# An answer that names files, so the paths in it can be watched turning into terminal hyperlinks.
-# Some of the names are files that are there and some are not, because only the ones that are get
-# linked, and a name that goes nowhere has to survive being passed over.
-#
-#   go run ./cmd/simulate --scenario internal/sim/scenarios/paths.toml
-#   OH_ENDPOINT_URL=http://localhost:8080 go run ./cmd/oh -m gpt-5.6-sol@high
-
 model = "gpt-5.6-sol"
 
 strict = true

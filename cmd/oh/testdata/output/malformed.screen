@@ -1,0 +1,626 @@
+=== narrow ===
+
+ draw the awkward markdown
+
+
+A table whose rows do not all reach the
+end:
+
+┌──────┬────────────────┬──────┐
+│ tool │ what it does   │ cost │
+├──────┼────────────────┼──────┤
+│ read │                │      │
+├──────┼────────────────┼──────┤
+│ grep │ walks the tree │ 4    │
+├──────┼────────────────┼──────┤
+│ bash │ runs a command │ 40   │
+└──────┴────────────────┴──────┘
+
+A narrow table in a wide terminal:
+
+┌───┬───┐
+│ a │ b │
+├───┼───┤
+│ 1 │ 2 │
+└───┴───┘
+
+A bare URL the renderer has to find for
+itself: https://example.com/plain and
+one
+in angle brackets
+https://example.com/bracketed, which are
+not the same thing.
+
+Entities are resolved in prose — AT&T
+becomes AT&T — but left alone inside
+code, where &amp; and &lt;div&gt; stand
+as they are written.
+
+return in itat arrived with a carriage
+=== one column ===
+
+
+d
+
+r
+
+a
+
+w
+
+t
+
+h
+
+e
+
+a
+
+w
+
+k
+
+w
+
+a
+
+r
+
+d
+
+m
+
+a
+
+r
+
+k
+
+d
+
+o
+
+w
+
+n
+
+
+A
+t
+a
+b
+l
+e
+w
+h
+o
+s
+e
+r
+o
+w
+s
+d
+o
+n
+o
+t
+a
+l
+l
+r
+e
+a
+c
+h
+t
+h
+e
+e
+n
+d
+:
+
+t
+o
+o
+l
+|
+w
+h
+a
+t
+i
+t
+d
+o
+e
+s
+|
+c
+o
+s
+t
+r
+e
+a
+d
+|
+
+|
+
+g
+r
+e
+p
+|
+w
+a
+l
+k
+s
+t
+h
+e
+t
+r
+e
+e
+|
+4
+b
+a
+s
+h
+|
+r
+u
+n
+s
+a
+c
+o
+m
+m
+a
+n
+d
+|
+4
+0
+
+A
+n
+a
+r
+r
+o
+w
+t
+a
+b
+l
+e
+i
+n
+a
+w
+i
+d
+e
+t
+e
+r
+m
+i
+n
+a
+l
+:
+
+a
+|
+b
+1
+|
+2
+
+A
+b
+a
+r
+e
+U
+R
+L
+t
+h
+e
+r
+e
+n
+d
+e
+r
+e
+r
+h
+a
+s
+t
+o
+f
+i
+n
+d
+f
+o
+r
+i
+t
+s
+e
+l
+f
+:
+h
+t
+t
+p
+s
+:
+/
+/
+e
+x
+a
+m
+p
+l
+e
+.
+c
+o
+m
+/
+p
+l
+a
+i
+n
+a
+n
+d
+o
+n
+e
+i
+n
+a
+n
+g
+l
+e
+b
+r
+a
+c
+k
+e
+t
+s
+h
+t
+t
+p
+s
+:
+/
+/
+e
+x
+a
+m
+p
+l
+e
+.
+c
+o
+m
+/
+b
+r
+a
+c
+k
+e
+t
+e
+d
+,
+w
+h
+i
+c
+h
+a
+r
+e
+n
+o
+t
+t
+h
+e
+s
+a
+m
+e
+t
+h
+i
+n
+g
+.
+
+E
+n
+t
+i
+t
+i
+e
+s
+a
+r
+e
+r
+e
+s
+o
+l
+v
+e
+d
+i
+n
+p
+r
+o
+s
+e
+—
+A
+T
+&
+T
+b
+e
+c
+o
+m
+e
+s
+A
+T
+&
+T
+—
+b
+u
+t
+l
+e
+f
+t
+a
+l
+o
+n
+e
+i
+n
+s
+i
+d
+e
+c
+o
+d
+e
+,
+w
+h
+e
+r
+e
+&
+a
+m
+p
+;
+a
+n
+d
+&
+l
+t
+;
+d
+i
+v
+&
+g
+t
+;
+s
+t
+a
+n
+d
+a
+s
+t
+h
+e
+y
+a
+r
+e
+w
+r
+i
+t
+t
+e
+n
+.
+
+a
+
+w
+a
+r
+n
+i
+n
+g
+
+t
+h
+a
+t
+
+a
+r
+r
+i
+v
+e
+d
+
+w
+i
+t
+h
+
+a
+
+c
+a
+r
+r
+i
+a
+g
+r
+e
+t
+u
+r
+n
+
+i
+n
+
+i
+t
+=== tiny ===
+
+ draw the
+ awkward
+ markdown
+
+
+A table
+whose rows
+do not all
+reach the
+end:
+
+tool | what
+it does |
+cost
+read |  |
+grep | walks
+the tree | 4
+bash | runs
+a command |
+40
+
+A narrow
+table in a
+wide
+terminal:
+
+┌───┬───┐
+│ a │ b │
+├───┼───┤
+│ 1 │ 2 │
+└───┴───┘
+
+A bare URL
+the renderer
+has to find
+for itself:
+https://exam
+ple.com/plai
+n and one
+in angle
+brackets
+https://exam
+ple.com/brac
+keted, which
+are not the
+same thing.
+
+Entities are
+resolved in
+prose — AT&T
+becomes AT&T
+— but left
+alone inside
+code, where
+&amp; and
+&lt;div&gt;
+stand as
+they are
+written.
+
+a warning th
+at arrived w
+ith a carria
+return in it
+=== wide ===
+
+ draw the awkward markdown
+
+
+A table whose rows do not all reach the end:
+
+┌──────┬────────────────┬──────┐
+│ tool │ what it does   │ cost │
+├──────┼────────────────┼──────┤
+│ read │                │      │
+├──────┼────────────────┼──────┤
+│ grep │ walks the tree │ 4    │
+├──────┼────────────────┼──────┤
+│ bash │ runs a command │ 40   │
+└──────┴────────────────┴──────┘
+
+A narrow table in a wide terminal:
+
+┌───┬───┐
+│ a │ b │
+├───┼───┤
+│ 1 │ 2 │
+└───┴───┘
+
+A bare URL the renderer has to find for itself: https://example.com/plain and one
+in angle brackets https://example.com/bracketed, which are not the same thing.
+
+Entities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where &amp; and
+&lt;div&gt; stand as they are written.
+
+return in itat arrived with a carriage

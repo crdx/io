@@ -19,7 +19,7 @@ func TestTranscriptPreservesReasoningFormatting(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.ModelReasoning, Text: "First. Second?\nThird!"}); err != nil {
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.ModelReasoningEvent, Text: "First. Second?\nThird!"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := recorder.Close(); err != nil {
@@ -42,7 +42,7 @@ func TestTranscriptStoresOnlyAToolResultPreview(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind: agent.ToolCallResult,
+		Kind: agent.ToolCallResultEvent,
 		ID:   "call-1",
 		Name: "read",
 		Text: "first\nsecond\nthird\nsecret fourth\nfifth",
@@ -76,7 +76,7 @@ func TestTranscriptCapsAToolResultPreviewAtOneKiB(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind: agent.ToolCallResult,
+		Kind: agent.ToolCallResultEvent,
 		ID:   "call-1",
 		Name: "read",
 		Text: strings.Repeat("é", 600),
@@ -110,7 +110,7 @@ func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {
 		t.Fatal(err)
 	}
 	content := "before\n````\nafter"
-	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.ModelMessage, Text: content}); err != nil {
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.ModelMessageEvent, Text: content}); err != nil {
 		t.Fatal(err)
 	}
 	if err := recorder.Close(); err != nil {
@@ -137,7 +137,7 @@ func TestTranscriptRetainsTurnFailures(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind: agent.Failure,
+		Kind: agent.FailureEvent,
 		Text: "read: connection reset by peer",
 	}); err != nil {
 		t.Fatal(err)
@@ -166,7 +166,7 @@ func TestTranscriptRetainsDurableState(t *testing.T) {
 	}
 	state := json.RawMessage(`{"path":"a.txt","sha256":"abc"}`)
 	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind:  agent.StateChange,
+		Kind:  agent.StateChangeEvent,
 		ID:    "call",
 		Name:  "file_read",
 		State: state,

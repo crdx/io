@@ -21,10 +21,12 @@ var ErrTruncated = sse.ErrTruncated
 var ErrIncomplete = errors.New("the response was cut short")
 
 type reply struct {
-	content    string
-	reasoning  string
-	tools      map[int]*toolCall
-	stopReason string
+	content         string
+	reasoning       string
+	tools           map[int]*toolCall
+	stopReason      string
+	isReasoningOpen bool
+	isContentOpen   bool
 }
 
 func (self *reply) isEmpty() bool {
@@ -149,6 +151,10 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 			return true, ErrIncomplete
 		}
 
+		if self.completeReasoning(yield) || self.completeContent(yield) {
+			return true, nil
+		}
+
 		return true, nil
 	}
 
@@ -174,7 +180,8 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	}
 	if reasoning != "" {
 		self.reasoning += reasoning
-		if !yield(agent.Event{Kind: agent.ModelReasoning, Text: reasoning}) {
+		self.isReasoningOpen = true
+		if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: reasoning}) {
 			return true, nil
 		}
 	}
@@ -183,10 +190,19 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		said = delta.Refusal
 	}
 	if said != "" {
-		self.content += said
-		if !yield(agent.Event{Kind: agent.ModelMessage, Text: said}) {
+		if self.completeReasoning(yield) {
 			return true, nil
 		}
+
+		self.content += said
+		self.isContentOpen = true
+		if !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: said}) {
+			return true, nil
+		}
+	}
+
+	if len(delta.ToolCalls) > 0 && self.completeReasoning(yield) {
+		return true, nil
 	}
 
 	for _, fragment := range delta.ToolCalls {
@@ -206,4 +222,22 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (self *reply) completeReasoning(yield agent.Yield) bool {
+	if !self.isReasoningOpen {
+		return false
+	}
+
+	self.isReasoningOpen = false
+	return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true})
+}
+
+func (self *reply) completeContent(yield agent.Yield) bool {
+	if !self.isContentOpen {
+		return false
+	}
+
+	self.isContentOpen = false
+	return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true})
 }

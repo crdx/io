@@ -40,8 +40,8 @@ func bar(layout segment.Layout, position segment.Position, frame edit.Frame) str
 	drawn := make([]string, 0, len(layout[position]))
 
 	context := segment.Context{
-		HiddenLinesAbove: frame.Above,
-		HiddenLinesBelow: frame.Below,
+		HiddenLinesAbove: frame.HiddenLinesAbove,
+		HiddenLinesBelow: frame.HiddenLinesBelow,
 	}
 
 	for _, instance := range layout[position] {

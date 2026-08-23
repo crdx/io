@@ -1,0 +1,57 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `high`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+lose the network during answer prose
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+Completed thought.
+```
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+```
+Partial answer.
+```
+
+## Failure
+
+> 2001-01-01T00:00:03Z
+
+```
+unexpected EOF
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+continue after the network interruption
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Resumed.
+```
+

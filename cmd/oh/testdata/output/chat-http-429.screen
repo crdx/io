@@ -1,0 +1,11 @@
+
+ receive HTTP 429
+
+
+request failed with status 429:
+
+
+ continue after the transport failure
+
+
+Resumed.

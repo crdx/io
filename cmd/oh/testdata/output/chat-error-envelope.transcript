@@ -1,0 +1,41 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+receive a Chat Completions error envelope
+```
+
+## Failure
+
+> 2001-01-01T00:00:01Z
+
+```
+model overloaded
+```
+
+## User
+
+> 2001-01-01T00:00:02Z
+
+```
+continue after the endpoint error
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Resumed.
+```
+

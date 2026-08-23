@@ -1,0 +1,49 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+reset the connection during an answer
+```
+
+## Assistant
+
+> 2001-01-01T00:00:01Z
+
+```
+Partial answer.
+```
+
+## Failure
+
+> 2001-01-01T00:00:02Z
+
+```
+unexpected EOF
+```
+
+## User
+
+> 2001-01-01T00:00:03Z
+
+```
+continue after the transport failure
+```
+
+## Assistant
+
+> 2001-01-01T00:00:04Z
+
+```
+Resumed.
+```
+

@@ -1,0 +1,36 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[[tool]]
+name = "work"
+outputs = ["unused"]
+state-key = "work-count"
+
+[first]
+prompt = "start a tool call, then wait beyond the request deadline"
+timeout = "50ms"
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_item.added","item":{"id":"reasoning-1","type":"reasoning","content":[],"encrypted_content":"initial-sealed","summary":[]}}''',
+    '''{"type":"response.reasoning_summary_part.added","part":{"type":"summary_text","text":""}}''',
+    '''{"type":"response.reasoning_summary_text.delta","delta":"Prepare the tool call."}''',
+    '''{"type":"response.reasoning_summary_text.done","text":"Prepare the tool call."}''',
+    '''{"type":"response.reasoning_summary_part.done","part":{"type":"summary_text","text":"Prepare the tool call."}}''',
+    '''{"type":"response.output_item.done","item":{"id":"reasoning-1","type":"reasoning","content":[],"encrypted_content":"sealed","summary":[{"type":"summary_text","text":"Prepare the tool call."}]}}''',
+    '''{"type":"response.output_item.added","item":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":""}}''',
+    '''{"type":"response.function_call_arguments.delta","item_id":"call-item-1","delta":"{\"value\":"}''',
+]
+wait-for-cancellation = true
+
+[resume]
+prompt = "continue after the transport timeout"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Resumed."}''',
+    '''{"type":"response.output_text.done","text":"Resumed."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}''',
+    '''{"type":"response.completed"}''',
+]

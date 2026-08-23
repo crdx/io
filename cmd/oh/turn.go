@@ -15,8 +15,7 @@ type Turn struct {
 	spinnerFrame int
 	painter      *Painter
 
-	events        chan TurnEvent
-	pendingEvents agent.Coalescer
+	events chan TurnEvent
 }
 
 type QueuedTurn struct {
@@ -26,6 +25,6 @@ type QueuedTurn struct {
 }
 
 type TurnEvent struct {
-	event agent.Event
-	err   error
+	update agent.Update
+	err    error
 }

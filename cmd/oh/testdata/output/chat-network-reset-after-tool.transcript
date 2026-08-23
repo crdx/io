@@ -1,0 +1,102 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `high`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+complete a tool round, then lose the network
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:01Z
+
+```
+Use the tool.
+```
+
+## Tool call
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call-1`
+- **Name:** `work`
+- **Read only:** `false`
+**Arguments**
+
+```json
+{}
+```
+
+**Subject**
+
+```
+work
+```
+
+## State
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call-1`
+- **Name:** `work-count`
+**State**
+
+```json
+1
+```
+
+## Tool result
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `call-1`
+- **Name:** `work`
+- **Failed:** `false`
+- **Duration:** `0s`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":11,"total_bytes":11}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+tool result
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Failure
+
+> 2001-01-01T00:00:05Z
+
+```
+unexpected EOF
+```
+
+## User
+
+> 2001-01-01T00:00:06Z
+
+```
+continue after the network interruption
+```
+
+## Assistant
+
+> 2001-01-01T00:00:07Z
+
+```
+Resumed.
+```
+

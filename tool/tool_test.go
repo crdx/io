@@ -38,7 +38,7 @@ func TestOutputStats(t *testing.T) {
 	}
 }
 
-func newTool(t *testing.T, ran *bool) tool.Tool {
+func newToolBuilder(t *testing.T) tool.Builder[Params] {
 	t.Helper()
 
 	return tool.Implement(
@@ -48,7 +48,13 @@ func newTool(t *testing.T, ran *bool) tool.Tool {
 			Schema:      tool.Schema{tool.String("city", "the city to look up")},
 		},
 		func(args Params) (string, string) { return args.City, "" },
-	).Plain(func(_ context.Context, args Params) (string, error) {
+	)
+}
+
+func newTool(t *testing.T, ran *bool) tool.Tool {
+	t.Helper()
+
+	return newToolBuilder(t).Plain(func(_ context.Context, args Params) (string, error) {
 		*ran = true
 		return "raining in " + args.City, nil
 	})
@@ -84,11 +90,40 @@ func TestParseBindsTheArgumentsToTheCall(t *testing.T) {
 	}
 }
 
+func TestParseDescribesTheCallOnce(t *testing.T) {
+	descriptions := 0
+	definedTool := tool.Implement(
+		tool.Definition{Name: "weather"},
+		func(args Params) (string, string) {
+			descriptions++
+			return args.City, "today"
+		},
+	).Plain(func(_ context.Context, _ Params) (string, error) {
+		return "", nil
+	})
+
+	call, err := definedTool.Parse(`{"city":"London"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if subject := call.Subject(); subject != "London" {
+		t.Errorf("got subject %q, want London", subject)
+	}
+	if qualifier := call.Qualifier(); qualifier != "today" {
+		t.Errorf("got qualifier %q, want today", qualifier)
+	}
+	if descriptions != 1 {
+		t.Errorf("described call %d times, want 1", descriptions)
+	}
+}
+
 func TestAnOuterHighlighterReplacesAnInnerOne(t *testing.T) {
-	var ran bool
-	subject := tool.Syntax(tool.Focus(newTool(t, &ran), func(tool.Call) string {
-		return "London"
-	}), "bash")
+	subject := newToolBuilder(t).
+		Focuses(func(tool.ToolCall) string { return "London" }).
+		Syntax("bash").
+		Plain(func(_ context.Context, args Params) (string, error) {
+			return "raining in " + args.City, nil
+		})
 
 	call, err := subject.Parse(`{"city":"London"}`)
 	if err != nil {
@@ -128,6 +163,31 @@ func TestParseTakesAbsentArgumentsAsEmpty(t *testing.T) {
 
 	if subject := call.Subject(); subject != "" {
 		t.Errorf("expected nothing rendered, got %q", subject)
+	}
+}
+
+func TestValidationRunsForAbsentArguments(t *testing.T) {
+	validationError := errors.New("city is required")
+	validated := false
+	subject := newToolBuilder(t).Validate(func(args Params) error {
+		validated = true
+		if args.City != "" {
+			t.Errorf("expected empty arguments, got %#v", args)
+		}
+		return validationError
+	}).Plain(func(context.Context, Params) (string, error) {
+		return "", nil
+	})
+
+	call, err := subject.Parse("")
+	if !errors.Is(err, validationError) {
+		t.Fatalf("expected validation error, got %v", err)
+	}
+	if !validated {
+		t.Error("empty arguments bypassed validation")
+	}
+	if call != nil {
+		t.Error("validation failure produced a call")
 	}
 }
 
