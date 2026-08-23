@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/segment/currentSession"
 	"crdx.org/io/cmd/oh/segment/currentTime"
+	"crdx.org/io/cmd/oh/segment/gitBranch"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
 	"crdx.org/io/cmd/oh/segment/turnElapsed"
@@ -58,6 +59,7 @@ func goldenBarLayout(t *testing.T, harness *Harness) segment.Layout {
 			{ segment = "turn-elapsed" },
 			{ segment = "mode-toggle" },
 			{ segment = "working-directory" },
+			{ segment = "git-branch" },
 			{ segment = "active-model" },
 			{ segment = "context-usage" },
 		]
@@ -121,6 +123,12 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"context-usage / unknown": goldenSegmentPass(
 			t,
 			contextUsage.New(func() (int, int) { return 0, 0 }),
+			"",
+			segment.Context{},
+		),
+		"git-branch / outside a repository": goldenSegmentPass(
+			t,
+			gitBranch.New(workspaceMarker),
 			"",
 			segment.Context{},
 		),
