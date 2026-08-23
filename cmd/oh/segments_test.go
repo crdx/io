@@ -14,8 +14,10 @@ import (
 	"crdx.org/io/cmd/oh/segment/currentSession"
 	"crdx.org/io/cmd/oh/segment/currentTime"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
+	"crdx.org/io/cmd/oh/segment/lastTps"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
+	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnElapsed"
 	"crdx.org/io/cmd/oh/segment/workingDirectory"
 )
@@ -65,6 +67,8 @@ func goldenBarLayout(t *testing.T, harness *Harness) segment.Layout {
 		]
 		center = []
 		right = [
+			{ segment = "turn-count" },
+			{ segment = "last-tps" },
 			{ segment = "current-session" },
 			{ segment = "current-time", format = "15:04" },
 			{ segment = "scroll-overflow", direction = "down" },
@@ -129,6 +133,36 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"git-branch / outside a repository": goldenSegmentPass(
 			t,
 			gitBranch.New(workspaceMarker),
+			"",
+			segment.Context{},
+		),
+		"last-tps / a fast turn": goldenSegmentPass(
+			t,
+			lastTps.New(func() (float64, bool) { return 42.4, true }),
+			"",
+			segment.Context{},
+		),
+		"last-tps / a slow turn": goldenSegmentPass(
+			t,
+			lastTps.New(func() (float64, bool) { return 4.25, true }),
+			"",
+			segment.Context{},
+		),
+		"last-tps / nothing yet": goldenSegmentPass(
+			t,
+			lastTps.New(func() (float64, bool) { return 0, false }),
+			"",
+			segment.Context{},
+		),
+		"turn-count / nothing asked yet": goldenSegmentPass(
+			t,
+			turnCount.New(func() int { return 0 }),
+			"",
+			segment.Context{},
+		),
+		"turn-count / third turn": goldenSegmentPass(
+			t,
+			turnCount.New(func() int { return 3 }),
 			"",
 			segment.Context{},
 		),

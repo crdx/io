@@ -18,6 +18,12 @@ brave-otter
 14:32
 === git-branch / outside a repository ===
 
+=== last-tps / a fast turn ===
+~42t/s
+=== last-tps / a slow turn ===
+~4.2t/s
+=== last-tps / nothing yet ===
+
 === mode-toggle / all granted ===
 rxwgb
 === mode-toggle / pending chord ===
@@ -30,6 +36,10 @@ rxwgb
 
 === scroll-overflow / up ===
 ↑ 3
+=== turn-count / nothing asked yet ===
+
+=== turn-count / third turn ===
+#3
 === turn-elapsed / idle ===
 
 === turn-elapsed / running ===

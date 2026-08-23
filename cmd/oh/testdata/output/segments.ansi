@@ -18,6 +18,12 @@
 \e[38;2;150;152;150m14:32\e[0m
 === git-branch / outside a repository ===
 \e[38;2;150;152;150m\e[0m
+=== last-tps / a fast turn ===
+\e[38;2;150;152;150m~42t/s\e[0m
+=== last-tps / a slow turn ===
+\e[38;2;150;152;150m~4.2t/s\e[0m
+=== last-tps / nothing yet ===
+
 === mode-toggle / all granted ===
 \e[38;2;76;154;44mr\e[0m\e[38;2;204;102;102mx\e[0m\e[38;2;207;173;0mw\e[0m\e[38;2;201;166;212mg\e[0m\e[38;2;138;190;183mb\e[0m
 === mode-toggle / pending chord ===
@@ -30,6 +36,10 @@
 
 === scroll-overflow / up ===
 \e[38;2;150;152;150m↑ 3\e[0m
+=== turn-count / nothing asked yet ===
+
+=== turn-count / third turn ===
+\e[38;2;150;152;150m#3\e[0m
 === turn-elapsed / idle ===
 
 === turn-elapsed / running ===

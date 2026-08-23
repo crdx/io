@@ -12,8 +12,10 @@ import (
 	"crdx.org/io/cmd/oh/segment/currentSession"
 	"crdx.org/io/cmd/oh/segment/currentTime"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
+	"crdx.org/io/cmd/oh/segment/lastTps"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
+	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnElapsed"
 	"crdx.org/io/cmd/oh/segment/workingDirectory"
 	"crdx.org/io/cmd/oh/style"
@@ -29,6 +31,8 @@ const (
 	currentSessionSegment   = "current-session"
 	currentTimeSegment      = "current-time"
 	turnElapsedSegment      = "turn-elapsed"
+	turnCountSegment        = "turn-count"
+	lastTpsSegment          = "last-tps"
 	gitBranchSegment        = "git-branch"
 )
 
@@ -49,6 +53,8 @@ func availableSegments(
 		currentSessionSegment:   currentSession.New(currentSessionName),
 		currentTimeSegment:      currentTime.New(time.Now),
 		turnElapsedSegment:      turnElapsed.New(harness.turnElapsed),
+		turnCountSegment:        turnCount.New(harness.turnCount),
+		lastTpsSegment:          lastTps.New(harness.lastTurnTokenRate),
 		gitBranchSegment:        gitBranch.New(workspaceDir),
 	}
 }

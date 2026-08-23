@@ -17,12 +17,16 @@ func FormatTokenCount[Count count](tokens Count, precision int) string {
 	return formatScaledUnit(float64(tokens)/1000, precision, "", "Kt")
 }
 
-// FormatTokenEstimate estimates tokens from a UTF-8 byte count and renders the result compactly.
-func FormatTokenEstimate[Count count](bytes Count, precision int) string {
+// EstimateTokenCount estimates how many tokens a UTF-8 byte count is worth.
+func EstimateTokenCount[Count count](bytes Count) int64 {
 	const bytesPerToken = 4
 
-	tokens := int64(math.Ceil(float64(bytes) / bytesPerToken))
-	return FormatEstimatedTokenCount(tokens, precision)
+	return int64(math.Ceil(float64(bytes) / bytesPerToken))
+}
+
+// FormatTokenEstimate estimates tokens from a UTF-8 byte count and renders the result compactly.
+func FormatTokenEstimate[Count count](bytes Count, precision int) string {
+	return FormatEstimatedTokenCount(EstimateTokenCount(bytes), precision)
 }
 
 // FormatEstimatedTokenCount renders an estimate compactly. A handful of tokens is said exactly,
