@@ -19,9 +19,9 @@ Usage:
     simulate --help
 
 Options:
-    -s, --scenario <path>       The scenario
-    -a, --address <address>     Where to listen [default: localhost:8080]
-    -h, --help                  Show this help
+    -s, --scenario <path>      The scenario
+    -a, --address <address>    Where to listen [default: localhost:8080]
+    -h, --help                 Show this help
 
 One scenario is played through whichever API a request arrives in, so the address printed for a
 provider is what OH_ENDPOINT_URL wants for a conversation with that provider. The model listing and
