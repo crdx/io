@@ -57,6 +57,7 @@ Options:
     -r, --resume <session>                 Resume the saved session by name
     -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
     -c, --caps <flags>                     Capabilities: rxwgb (read, exec, write, git, bg) [default: rxw]
+    -l, --list                             List the available models, then exit
     -u, --update                           Update the cached model list, then exit
     -V, --version                          Show the version
     -h, --help                             Show this help
@@ -102,6 +103,7 @@ type InputOpts struct {
 	Session      string   `docopt:"--resume"`
 	Model        string   `docopt:"--model"`
 	Caps         string   `docopt:"--caps"`
+	List         bool     `docopt:"--list"`
 	Update       bool     `docopt:"--update"`
 	Version      bool     `docopt:"--version"`
 }
@@ -159,6 +161,10 @@ func run() ([]string, error) {
 	if inputArgs.Version {
 		fmt.Println(version())
 		return nil, nil
+	}
+
+	if inputArgs.List {
+		return nil, listModels(os.Stdout, modelCachePath())
 	}
 
 	if inputArgs.Update {

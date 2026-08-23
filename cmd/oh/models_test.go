@@ -63,6 +63,32 @@ func TestAnEmptyCacheOffersNothingToSelect(t *testing.T) {
 	}
 }
 
+func TestListingModelsPrintsEverySelectableQualifiedName(t *testing.T) {
+	useCachedModels(t)
+
+	var output bytes.Buffer
+	if err := listModels(&output, modelCachePath()); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	want := strings.Join([]string{
+		"codex/gpt-5.6-sol",
+		"opencode-go/deepseek-v4-pro",
+		"anthropic/claude-opus-5",
+	}, "\n") + "\n"
+	if output.String() != want {
+		t.Errorf("got %q, want %q", output.String(), want)
+	}
+}
+
+func TestListingModelsWithoutACacheSaysHowToFetchThem(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	if err := listModels(&bytes.Buffer{}, modelCachePath()); err == nil || !strings.Contains(err.Error(), "-u") {
+		t.Errorf("expected the empty listing to say how to fetch models, got %v", err)
+	}
+}
+
 func TestAModelTakingNoEffortLevelCannotBeSelected(t *testing.T) {
 	choices := choicesFor(codexProvider, []agent.Model{
 		{ID: "gpt-5.6-sol", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},

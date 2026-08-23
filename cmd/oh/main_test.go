@@ -116,6 +116,14 @@ func TestTheVersionIsAskedForOnItsOwn(t *testing.T) {
 	}
 }
 
+func TestTheModelListIsAskedForOnItsOwn(t *testing.T) {
+	for _, argument := range []string{"--list", "-l"} {
+		if !bind(t, argument).List {
+			t.Errorf("expected the model list to be asked for by %s", argument)
+		}
+	}
+}
+
 func TestWhateverIsLeftOverIsTheFirstThingSaid(t *testing.T) {
 	parsedOptions := parseOptions(t, "why", "does", "the", "spinner", "stutter")
 

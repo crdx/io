@@ -186,6 +186,21 @@ func availableModelChoices(cache modelCache) []modelChoice {
 	return available
 }
 
+func listModels(output io.Writer, path string) error {
+	choices := availableModelChoices(loadModelCache(path))
+	if len(choices) == 0 {
+		return errors.New("no models are known: run with -u to fetch the model list")
+	}
+
+	for _, choice := range choices {
+		if _, err := fmt.Fprintf(output, "%s/%s\n", choice.provider, choice.model); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func updateModels(output io.Writer, endpoint string, path string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), updateTimeout)
 	defer cancel()

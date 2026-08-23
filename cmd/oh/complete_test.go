@@ -45,7 +45,7 @@ func TestCompletionRequestReadsTheKindAndWord(t *testing.T) {
 func TestOptionCompletionsComeFromTheUsage(t *testing.T) {
 	options := usageOptions(usage)
 
-	for _, wanted := range []string{"-r", "--resume", "-m", "--model", "-h", "--help"} {
+	for _, wanted := range []string{"-r", "--resume", "-m", "--model", "-l", "--list", "-h", "--help"} {
 		if !slices.Contains(options, wanted) {
 			t.Errorf("expected %q among %v", wanted, options)
 		}
