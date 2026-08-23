@@ -35,7 +35,7 @@ Editing the target without reading it again.
 - **ID:** `call_1`
 - **Name:** `edit`
 - **Read only:** `false`
-- **Highlight:** `focus target.txt`
+- **Emphasis:** `focus target.txt`
 **Arguments**
 
 ```json

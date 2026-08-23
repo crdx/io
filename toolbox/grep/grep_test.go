@@ -227,9 +227,9 @@ func TestCallHighlightsItsPatternAsRegexpSyntax(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "regexp"}
-	if call.Highlight() != want {
-		t.Errorf("expected regexp highlighting, got %T", call)
+	want := tool.Emphasis{Kind: tool.EmphasisSyntax, Value: "regexp"}
+	if call.Emphasis() != want {
+		t.Errorf("expected regexp emphasis, got %T", call)
 	}
 }
 

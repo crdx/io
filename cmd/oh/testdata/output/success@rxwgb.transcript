@@ -43,7 +43,7 @@ I'll have a look at how the editor draws its prompt.
 - **ID:** `call_2`
 - **Name:** `grep`
 - **Read only:** `true`
-- **Highlight:** `syntax regexp`
+- **Emphasis:** `syntax regexp`
 **Arguments**
 
 ```json
@@ -118,7 +118,7 @@ Found it. Reading the renderer now.
 - **ID:** `call_4`
 - **Name:** `read`
 - **Read only:** `true`
-- **Highlight:** `focus render.go`
+- **Emphasis:** `focus render.go`
 **Arguments**
 
 ```json

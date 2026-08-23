@@ -22,7 +22,7 @@ const (
 type Label struct {
 	Name            string
 	Subject         string
-	Highlight       tool.Highlight
+	Emphasis        tool.Emphasis
 	Qualifier       string
 	ReadOnly        bool
 	NameStyle       style.Style
@@ -38,10 +38,11 @@ func (self Label) Elide(room int) dynamic.Label {
 
 	if room > 0 {
 		completeSubject := self.Subject
+		emphasisSource := self.getSource()
 		self.Subject = width.Elide(self.Subject, room)
-		if self.Highlight.Kind == tool.HighlightSyntax && self.Subject != completeSubject {
-			prefix := strings.TrimSuffix(self.Subject, width.Ellipsis)
-			self.renderedSubject = markdown.HighlightPrefix(completeSubject, prefix, self.Highlight.Value, true)
+		if self.Emphasis.Kind == tool.EmphasisSyntax && self.Subject != completeSubject {
+			subject := strings.TrimSuffix(self.Subject, width.Ellipsis)
+			self.renderedSubject = markdown.Highlight(emphasisSource, subject, self.Emphasis.Value, true)
 		}
 		room -= width.Of(self.Subject) + 1
 	} else {
@@ -86,12 +87,20 @@ func (self Label) Width() int {
 	return total
 }
 
+func (self Label) getSource() string {
+	if self.Emphasis.Source != "" {
+		return self.Emphasis.Source
+	}
+
+	return self.Subject
+}
+
 func (self Label) renderSubject() string {
 	if self.renderedSubject != "" {
 		return self.renderedSubject
 	}
-	if self.Highlight.Kind == tool.HighlightSyntax {
-		return markdown.Highlight(self.Subject, self.Highlight.Value)
+	if self.Emphasis.Kind == tool.EmphasisSyntax {
+		return markdown.Highlight(self.getSource(), self.Subject, self.Emphasis.Value, false)
 	}
 
 	type span struct {
@@ -113,7 +122,9 @@ func (self Label) renderSubject() string {
 		return style.Subject(self.Subject)
 	}
 
-	sort.Slice(spans, func(i int, j int) bool { return spans[i].start < spans[j].start })
+	sort.Slice(spans, func(i int, j int) bool {
+		return spans[i].start < spans[j].start
+	})
 
 	var out strings.Builder
 	at := 0
@@ -133,8 +144,8 @@ func (self Label) renderSubject() string {
 }
 
 func (self Label) focus() string {
-	if self.Highlight.Kind == tool.HighlightFocus {
-		return self.Highlight.Value
+	if self.Emphasis.Kind == tool.EmphasisFocus {
+		return self.Emphasis.Value
 	}
 
 	return ""

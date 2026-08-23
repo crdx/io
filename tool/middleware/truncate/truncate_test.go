@@ -183,9 +183,9 @@ func TestAWrappedToolKeepsItsSyntaxHighlighting(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"}
-	if call.Highlight() != want {
-		t.Errorf("expected the highlighting to survive, got %T", call)
+	want := tool.Emphasis{Kind: tool.EmphasisSyntax, Value: "bash"}
+	if call.Emphasis() != want {
+		t.Errorf("expected the emphasis to survive, got %T", call)
 	}
 }
 
@@ -196,8 +196,8 @@ func TestAWrappedToolKeepsItsFocusedRendering(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	want := tool.Highlight{Kind: tool.HighlightFocus, Value: "generate"}
-	if call.Highlight() != want {
+	want := tool.Emphasis{Kind: tool.EmphasisFocus, Value: "generate"}
+	if call.Emphasis() != want {
 		t.Errorf("expected the focus to survive, got %T", call)
 	}
 }

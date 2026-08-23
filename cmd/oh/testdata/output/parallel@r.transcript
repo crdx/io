@@ -43,7 +43,7 @@ Let me get the shape of this first.
 - **ID:** `call_2`
 - **Name:** `ls`
 - **Read only:** `true`
-- **Highlight:** `focus `
+- **Emphasis:** `focus `
 **Arguments**
 
 ```json
@@ -57,7 +57,7 @@ Let me get the shape of this first.
 - **ID:** `call_3`
 - **Name:** `find`
 - **Read only:** `true`
-- **Highlight:** `focus `
+- **Emphasis:** `focus `
 **Arguments**
 
 ```json
@@ -77,7 +77,7 @@ Let me get the shape of this first.
 - **ID:** `call_4`
 - **Name:** `find`
 - **Read only:** `true`
-- **Highlight:** `focus `
+- **Emphasis:** `focus `
 **Arguments**
 
 ```json
@@ -97,7 +97,7 @@ Let me get the shape of this first.
 - **ID:** `call_5`
 - **Name:** `grep`
 - **Read only:** `true`
-- **Highlight:** `syntax regexp`
+- **Emphasis:** `syntax regexp`
 **Arguments**
 
 ```json
@@ -239,7 +239,7 @@ Now to find where the drawing happens.
 - **ID:** `call_7`
 - **Name:** `grep`
 - **Read only:** `true`
-- **Highlight:** `syntax regexp`
+- **Emphasis:** `syntax regexp`
 **Arguments**
 
 ```json
@@ -265,7 +265,7 @@ spinner
 - **ID:** `call_8`
 - **Name:** `grep`
 - **Read only:** `true`
-- **Highlight:** `syntax regexp`
+- **Emphasis:** `syntax regexp`
 **Arguments**
 
 ```json
@@ -291,7 +291,7 @@ footer
 - **ID:** `call_9`
 - **Name:** `grep`
 - **Read only:** `true`
-- **Highlight:** `syntax regexp`
+- **Emphasis:** `syntax regexp`
 **Arguments**
 
 ```json
@@ -424,7 +424,7 @@ One more pair, and one of them will not be there.
 - **ID:** `call_10`
 - **Name:** `ls`
 - **Read only:** `true`
-- **Highlight:** `focus `
+- **Emphasis:** `focus `
 **Arguments**
 
 ```json
@@ -438,7 +438,7 @@ One more pair, and one of them will not be there.
 - **ID:** `call_11`
 - **Name:** `read`
 - **Read only:** `true`
-- **Highlight:** `focus all.go`
+- **Emphasis:** `focus all.go`
 **Arguments**
 
 ```json

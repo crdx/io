@@ -43,7 +43,7 @@ I'll put a file down to work with.
 - **ID:** `call_2`
 - **Name:** `write`
 - **Read only:** `true`
-- **Highlight:** `focus notes.md`
+- **Emphasis:** `focus notes.md`
 **Arguments**
 
 ```json
@@ -106,7 +106,7 @@ Now to read it, add to it, and read it back.
 - **ID:** `call_4`
 - **Name:** `read`
 - **Read only:** `true`
-- **Highlight:** `focus notes.md`
+- **Emphasis:** `focus notes.md`
 **Arguments**
 
 ```json
@@ -126,7 +126,7 @@ notes.md
 - **ID:** `call_5`
 - **Name:** `ls`
 - **Read only:** `true`
-- **Highlight:** `focus `
+- **Emphasis:** `focus `
 **Arguments**
 
 ```json
@@ -140,7 +140,7 @@ notes.md
 - **ID:** `call_6`
 - **Name:** `write`
 - **Read only:** `true`
-- **Highlight:** `focus notes.md`
+- **Emphasis:** `focus notes.md`
 **Arguments**
 
 ```json
@@ -166,7 +166,7 @@ notes.md
 - **ID:** `call_7`
 - **Name:** `read`
 - **Read only:** `true`
-- **Highlight:** `focus notes.md`
+- **Emphasis:** `focus notes.md`
 **Arguments**
 
 ```json

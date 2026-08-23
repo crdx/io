@@ -43,7 +43,7 @@ Let me read the renderer.
 - **ID:** `call_2`
 - **Name:** `read`
 - **Read only:** `true`
-- **Highlight:** `focus render.go`
+- **Emphasis:** `focus render.go`
 **Arguments**
 
 ```json

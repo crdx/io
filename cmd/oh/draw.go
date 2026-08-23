@@ -52,6 +52,7 @@ func (self *Painter) describe(event agent.Event) agent.FallbackRendering {
 
 	shown.Subject = self.shortenPathPrefix(shown.Subject)
 	shown.Note = self.shortenPathPrefix(shown.Note)
+	shown.Emphasis.Source = self.shortenPathPrefix(shown.Emphasis.Source)
 
 	return shown
 }
@@ -60,7 +61,7 @@ func (self *Painter) label(event agent.Event, shown agent.FallbackRendering) cal
 	label := call.Label{
 		Name:      event.Name,
 		Subject:   shown.Subject,
-		Highlight: shown.Highlight,
+		Emphasis:  shown.Emphasis,
 		Qualifier: shown.Note,
 		ReadOnly:  shown.ReadOnly,
 	}
@@ -80,7 +81,7 @@ func (self *Painter) label(event agent.Event, shown agent.FallbackRendering) cal
 		label.NameStyle = style.Skill
 		label.Accent = skillName
 		label.AccentStyle = style.Skill
-		label.Highlight = tool.Highlight{}
+		label.Emphasis = tool.Emphasis{}
 	}
 
 	return label

@@ -23,7 +23,7 @@ the awkward shapes
 - **ID:** `call_1`
 - **Name:** `divine`
 - **Read only:** `true`
-- **Highlight:** `focus 1-400`
+- **Emphasis:** `focus 1-400`
 **Arguments**
 
 ```json
@@ -64,7 +64,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_2`
 - **Name:** `conjure`
 - **Read only:** `true`
-- **Highlight:** `syntax go`
+- **Emphasis:** `syntax go`
 **Arguments**
 
 ```json
@@ -99,7 +99,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_3`
 - **Name:** `bash`
 - **Read only:** `false`
-- **Highlight:** `syntax bash`
+- **Emphasis:** `syntax bash`
 **Arguments**
 
 ```json

@@ -188,7 +188,7 @@ func TestADiffIsPaintedByWhatEachLineDoes(t *testing.T) {
 		"+here":           style.Inserted,
 		" kept":           style.Block,
 	} {
-		if got := Highlight(line, "diff"); got != want(line) {
+		if got := Emphasise(line, "diff"); got != want(line) {
 			t.Errorf("%q: got %q, want %q", line, got, want(line))
 		}
 	}
@@ -247,15 +247,27 @@ func TestBashCommandNamesAndFirstParametersAreHighlighted(t *testing.T) {
 			style.Function("true"),
 		},
 	} {
-		if got := Highlight(test.source, "bash"); got != test.want {
+		if got := Emphasise(test.source, "bash"); got != test.want {
 			t.Errorf("%s: got %q, want %q", name, got, test.want)
 		}
 	}
 }
 
+func TestBashHereDocumentOpeningLinesAreHighlightedFromTheCompleteCommand(t *testing.T) {
+	prefix := "cd /tmp/io && python3 - <<'PY'"
+	source := prefix + "\nprint('hello')\nPY"
+	want := style.Function("cd") + style.Block(" ") + style.Function("/tmp/io") + style.Block(" ") +
+		style.Operator("&&") + style.Block(" ") + style.Function("python3") + style.Block(" ") +
+		style.Function("-") + style.Block(" ") + style.Operator("<<") + style.Block("'PY'")
+
+	if got := Highlight(source, prefix, "bash", false); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestMalformedBashFallsBackToOnePlainRun(t *testing.T) {
 	source := "if true; then"
-	if got, want := Highlight(source, "bash"), style.Block(source); got != want {
+	if got, want := Emphasise(source, "bash"), style.Block(source); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -266,13 +278,13 @@ func TestBashAssignmentsAndRedirectionsAreHighlighted(t *testing.T) {
 		style.Operator(";") + style.Block(" ") + style.Function(":") + style.Block(" ") + style.Operator(">") +
 		style.Block(`"$PATCH"`)
 
-	if got := Highlight(source, "bash"); got != want {
+	if got := Emphasise(source, "bash"); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
 	prefix := `PATCH=/tmp/cha`
 	wantPrefix := style.Block("PATCH") + style.Operator("=") + style.Block("/tmp/cha") + style.Block("…")
-	if got := HighlightPrefix(source, prefix, "bash", true); got != wantPrefix {
+	if got := Highlight(source, prefix, "bash", true); got != wantPrefix {
 		t.Errorf("elided: got %q, want %q", got, wantPrefix)
 	}
 }
@@ -281,7 +293,7 @@ func TestNestedBashSpansDoNotSliceBackwards(t *testing.T) {
 	source := `RESULT=$(printf one)`
 	want := style.Block("RESULT") + style.Operator("=") + style.Block("$(printf one)")
 
-	if got := Highlight(source, "bash"); got != want {
+	if got := Emphasise(source, "bash"); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -293,7 +305,7 @@ func TestBashForLoopKeywordsAreHighlighted(t *testing.T) {
 		style.Block(" ") + style.Function("true") + style.Operator(";") + style.Block(" ") +
 		style.Keyword("done")
 
-	if got := Highlight(source, "bash"); got != want {
+	if got := Emphasise(source, "bash"); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -310,7 +322,7 @@ func TestBashCompoundKeywordsAreHighlighted(t *testing.T) {
 		"elif":  {"if true; then echo one; elif false; then echo two; fi", []string{"if", "then", "elif", "fi"}},
 		"case":  {"case one in one) echo one;; esac", []string{"case", "in", "esac"}},
 	} {
-		got := Highlight(test.source, "bash")
+		got := Emphasise(test.source, "bash")
 
 		for _, keyword := range test.keywords {
 			if !strings.Contains(got, style.Keyword(keyword)) {
@@ -321,7 +333,7 @@ func TestBashCompoundKeywordsAreHighlighted(t *testing.T) {
 }
 
 func TestACaseItemTerminatorIsAnOperator(t *testing.T) {
-	got := Highlight("case one in one) echo one;; esac", "bash")
+	got := Emphasise("case one in one) echo one;; esac", "bash")
 
 	if !strings.Contains(got, style.Operator(";;")) {
 		t.Errorf("expected the terminator painted as an operator, got %q", got)
@@ -336,7 +348,7 @@ func TestRegexpSyntaxIsHighlighted(t *testing.T) {
 		style.Block("0") + style.Operator("-") + style.Block("9") +
 		style.Block("]") + style.Operator("{2,4}") + style.Keyword("$")
 
-	if got := Highlight(source, "regexp"); got != want {
+	if got := Emphasise(source, "regexp"); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -346,7 +358,7 @@ func TestARegexpCharacterClassHoldsNoAnchors(t *testing.T) {
 	want := style.Block("[") + style.Block("^0") +
 		style.Operator("-") + style.Block("9") + style.Block("]")
 
-	if got := Highlight(source, "regexp"); got != want {
+	if got := Emphasise(source, "regexp"); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -356,7 +368,7 @@ func TestElidedRegexpKeepsTheStyleOfAPartialEscape(t *testing.T) {
 	prefix := `foo\p{G`
 	want := style.Block("foo") + style.Keyword(`\p{G`) + style.Keyword("…")
 
-	if got := HighlightPrefix(source, prefix, "regexp", true); got != want {
+	if got := Highlight(source, prefix, "regexp", true); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

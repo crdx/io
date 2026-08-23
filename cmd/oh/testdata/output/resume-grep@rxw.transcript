@@ -35,7 +35,7 @@ Searching the target before the process restarts.
 - **ID:** `call_1`
 - **Name:** `grep`
 - **Read only:** `true`
-- **Highlight:** `syntax regexp`
+- **Emphasis:** `syntax regexp`
 **Arguments**
 
 ```json

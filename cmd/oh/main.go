@@ -176,6 +176,10 @@ func run() ([]string, error) {
 		return nil, err
 	}
 
+	if err := refuseOutdatedSessions(sessionsDir()); err != nil {
+		return nil, err
+	}
+
 	resumedSession, err := loadSession(args.session)
 	if err != nil {
 		return nil, err

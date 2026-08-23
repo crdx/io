@@ -12,19 +12,12 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
-// Highlight paints one line of source in the named language.
-func Highlight(line string, language string) string {
-	switch language {
-	case "bash":
-		return bashCommand(line)
-	case "regexp":
-		return highlightRegexpPrefix(line, line, false)
-	default:
-		return highlight([]string{line}, language)[0]
-	}
+// Emphasise paints one line of source in the named language.
+func Emphasise(line string, language string) string {
+	return Highlight(line, line, language, false)
 }
 
-func highlight(lines []string, language string) []string {
+func emphasise(lines []string, language string) []string {
 	lexer := lexers.Get(language)
 	if language == "" || lexer == nil {
 		return plainly(lines)
@@ -58,22 +51,18 @@ func highlight(lines []string, language string) []string {
 	return rows[:min(len(rows), len(lines))]
 }
 
-func bashCommand(line string) string {
-	return highlightBashPrefix(line, line, false)
-}
-
-// HighlightPrefix highlights a prefix using the complete source syntax tree.
-func HighlightPrefix(source string, prefix string, language string, elided bool) string {
+// Highlight highlights a prefix using the complete source syntax tree.
+func Highlight(source string, target string, language string, elided bool) string {
 	switch language {
 	case "bash":
-		return highlightBashPrefix(source, prefix, elided)
+		return highlightBash(source, target, elided)
 	case "regexp":
-		return highlightRegexpPrefix(source, prefix, elided)
+		return highlightRegExp(source, target, elided)
 	default:
 		if elided {
-			prefix += "…"
+			target += "…"
 		}
-		return Highlight(prefix, language)
+		return emphasise([]string{target}, language)[0]
 	}
 }
 
@@ -83,16 +72,16 @@ type sourceSpan struct {
 	style style.Style
 }
 
-func highlightBashPrefix(source string, retainedPrefix string, elided bool) string {
+func highlightBash(source string, target string, wasElided bool) string {
 	spans, err := bashCommandSpans(source)
 	if err != nil {
-		if elided {
-			retainedPrefix += "…"
+		if wasElided {
+			target += "…"
 		}
-		return style.Block(retainedPrefix)
+		return style.Block(target)
 	}
 
-	boundary := len(retainedPrefix)
+	boundary := len(target)
 	var output strings.Builder
 	position := 0
 
@@ -105,19 +94,19 @@ func highlightBashPrefix(source string, retainedPrefix string, elided bool) stri
 		}
 
 		if position < span.start {
-			output.WriteString(style.Block(retainedPrefix[position:span.start]))
+			output.WriteString(style.Block(target[position:span.start]))
 		}
 
 		end := min(span.end, boundary)
-		output.WriteString(span.style(retainedPrefix[max(position, span.start):end]))
+		output.WriteString(span.style(target[max(position, span.start):end]))
 		position = end
 	}
 
 	if position < boundary {
-		output.WriteString(style.Block(retainedPrefix[position:]))
+		output.WriteString(style.Block(target[position:]))
 	}
 
-	if elided {
+	if wasElided {
 		style := style.Block
 		for _, span := range spans {
 			if span.start <= boundary && boundary < span.end {
@@ -297,7 +286,7 @@ func (self regexpStyle) paint() style.Style {
 	}
 }
 
-func highlightRegexpPrefix(source string, retainedPrefix string, elided bool) string {
+func highlightRegExp(source string, retainedPrefix string, elided bool) string {
 	spans := regexpSpans(source)
 	boundary := len(retainedPrefix)
 	var output strings.Builder

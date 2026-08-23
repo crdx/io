@@ -60,13 +60,13 @@ func (self *renderer) block(node ast.Node) {
 		self.appendWrapped(over(col.Bold, style.Heading(self.inline(node))))
 
 	case *ast.FencedCodeBlock:
-		self.code(highlight(self.lines(node), string(node.Language(self.source))))
+		self.code(emphasise(self.lines(node), string(node.Language(self.source))))
 
 	case *ast.CodeBlock:
-		self.code(highlight(self.lines(node), ""))
+		self.code(emphasise(self.lines(node), ""))
 
 	case *ast.HTMLBlock:
-		self.code(highlight(self.lines(node), ""))
+		self.code(emphasise(self.lines(node), ""))
 
 	case *ast.ThematicBreak:
 		self.rows = append(self.rows, style.Border(strings.Repeat("─", max(self.columns, 0))))

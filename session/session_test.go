@@ -140,3 +140,67 @@ func TestASessionInUseIsGivenUpOnceItIsClosed(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestAJournalSaysWhichFormatItWasWrittenIn(t *testing.T) {
+	directory := t.TempDir()
+
+	writer, err := session.Create(directory, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.EnsureStored(); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	entries, err := session.Entries(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 {
+		t.Fatalf("expected one stored session, got %d", len(entries))
+	}
+	if entries[0].Format != session.Format {
+		t.Errorf("expected format %d, got %d", session.Format, entries[0].Format)
+	}
+
+	outdated, err := session.Outdated(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(outdated) != 0 {
+		t.Errorf("expected a session just written to be current, got %v", outdated)
+	}
+}
+
+func TestAJournalWithoutAVersionCountsAsTheFirstFormat(t *testing.T) {
+	directory := t.TempDir()
+	name := "brave-otter"
+
+	if err := os.MkdirAll(filepath.Join(directory, name), 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	head := `{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter"}` + "\n"
+	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), []byte(head), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	entries, err := session.Entries(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if entries[0].Format != 1 {
+		t.Errorf("expected an unnumbered journal to count as the first format, got %d", entries[0].Format)
+	}
+
+	outdated, err := session.Outdated(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(outdated) != 1 || outdated[0] != name {
+		t.Errorf("expected the old journal to be named as outdated, got %v", outdated)
+	}
+}

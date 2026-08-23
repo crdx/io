@@ -13,11 +13,12 @@ type Builder[T any] struct {
 	describe   Describer[T]
 	validate   Validator[T]
 
-	parallel  bool
-	readOnly  bool
-	stateName string
-	restore   Restorer
-	highlight func(call ToolCall) Highlight
+	parallel       bool
+	readOnly       bool
+	stateName      string
+	restore        Restorer
+	emphasis       func(call ToolCall) Emphasis
+	emphasisSource func(args T, subject string) string
 }
 
 func Implement[T any](definition Definition, describe Describer[T]) Builder[T] {
@@ -53,20 +54,29 @@ func (self Builder[T]) State(name string, restore Restorer) Builder[T] {
 	return self
 }
 
-// Syntax highlights a call rendering as the named language, replacing any highlighter set before.
+// Syntax highlights a call rendering as the named language, replacing any emphasis set before.
 func (self Builder[T]) Syntax(language string) Builder[T] {
-	self.highlight = func(ToolCall) Highlight {
-		return Highlight{Kind: HighlightSyntax, Value: language}
+	self.emphasis = func(ToolCall) Emphasis {
+		return Emphasis{Kind: EmphasisSyntax, Value: language}
 	}
+	self.emphasisSource = nil
 
 	return self
 }
 
-// Focuses sets one part of a call rendering apart, replacing any highlighter set before.
+// SyntaxFrom highlights a call rendering by parsing source selected from its decoded arguments.
+func (self Builder[T]) SyntaxFrom(language string, source func(args T, subject string) string) Builder[T] {
+	self = self.Syntax(language)
+	self.emphasisSource = source
+	return self
+}
+
+// Focuses sets one part of a call rendering apart, replacing any emphasis set before.
 func (self Builder[T]) Focuses(pick func(ToolCall) string) Builder[T] {
-	self.highlight = func(call ToolCall) Highlight {
-		return Highlight{Kind: HighlightFocus, Value: pick(call)}
+	self.emphasis = func(call ToolCall) Emphasis {
+		return Emphasis{Kind: EmphasisFocus, Value: pick(call)}
 	}
+	self.emphasisSource = nil
 
 	return self
 }
@@ -121,7 +131,7 @@ func (self Builder[T]) build(exec ResultExecutor[T]) Tool {
 		readOnly:    self.readOnly,
 		stateName:   self.stateName,
 		restore:     self.restore,
-		highlight:   self.highlight,
+		emphasis:    self.emphasis,
 		parse: func(arguments string) (_call, error) {
 			var args T
 			if text := strings.TrimSpace(arguments); text != "" {
@@ -137,9 +147,14 @@ func (self Builder[T]) build(exec ResultExecutor[T]) Tool {
 			}
 
 			subject, qualifier := self.describe(args)
+			emphasisSource := ""
+			if self.emphasisSource != nil {
+				emphasisSource = self.emphasisSource(args, subject)
+			}
 			return _call{
-				subject:   subject,
-				qualifier: qualifier,
+				subject:        subject,
+				qualifier:      qualifier,
+				emphasisSource: emphasisSource,
 				exec: func(ctx context.Context) (ToolCallResult, error) {
 					return exec(ctx, args)
 				},

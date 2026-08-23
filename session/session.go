@@ -31,6 +31,11 @@ import (
 	"crdx.org/io/agent"
 )
 
+// Format is the journal format this build writes. A journal written before formats were numbered
+// carries no version at all, and counts as format 1. Bump this whenever a stored shape changes,
+// and add the step that migrates a journal over the bump to cmd/ohctl/migrate.
+const Format = 2
+
 // Kind is what one journal line holds.
 type Kind string
 
@@ -46,6 +51,8 @@ const (
 type Line struct {
 	Kind Kind      `json:"kind"`
 	Time time.Time `json:"time"`
+
+	Version int `json:"version,omitempty"` // the format of the journal, on the head record alone
 
 	ID      string          `json:"id,omitempty"`
 	Name    string          `json:"name,omitempty"`
@@ -189,7 +196,7 @@ func (w *Writer) ensureOpen() error {
 	}
 	w.file = file
 
-	started, err := w.record(Line{Kind: Head, ID: w.id, Name: w.name, Meta: w.meta})
+	started, err := w.record(Line{Kind: Head, Version: Format, ID: w.id, Name: w.name, Meta: w.meta})
 	if err != nil {
 		_ = file.Close()
 		_ = os.Remove(file.Name())
@@ -311,6 +318,7 @@ type Entry struct {
 	Name    string
 	ID      string
 	Started time.Time
+	Format  int
 }
 
 // Entries identifies every stored session, oldest first.
@@ -326,13 +334,42 @@ func Entries(directory string) ([]Entry, error) {
 		if err != nil {
 			continue
 		}
-		entries = append(entries, Entry{Name: name, ID: head.ID, Started: head.Time})
+		entries = append(entries, Entry{
+			Name:    name,
+			ID:      head.ID,
+			Started: head.Time,
+			Format:  formatOf(head),
+		})
 	}
 
 	slices.SortFunc(entries, func(first, second Entry) int {
 		return first.Started.Compare(second.Started)
 	})
 	return entries, nil
+}
+
+func formatOf(head Line) int {
+	if head.Version == 0 {
+		return 1
+	}
+
+	return head.Version
+}
+
+func Outdated(directory string) ([]string, error) {
+	entries, err := Entries(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	var outdated []string
+	for _, entry := range entries {
+		if entry.Format < Format {
+			outdated = append(outdated, entry.Name)
+		}
+	}
+
+	return outdated, nil
 }
 
 func storedNames(directory string) ([]string, error) {

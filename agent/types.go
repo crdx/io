@@ -127,20 +127,20 @@ const (
 //	 │             └─ Subject, what the call is about
 //	 └─ Event.Name, which this struct does not hold
 //
-// The other two say how that line is drawn rather than what it says: Highlight accents a substring,
+// The other two say how that line is drawn rather than what it says: Emphasis accents a substring,
 // and ReadOnly colours the name.
 type FallbackRendering struct {
-	Subject   string         `json:"render,omitempty"`
-	Note      string         `json:"detail,omitempty"`
-	Highlight tool.Highlight `json:"highlight,omitzero"`
-	ReadOnly  bool           `json:"read_only,omitempty"`
+	Subject  string        `json:"render,omitempty"`
+	Note     string        `json:"detail,omitempty"`
+	Emphasis tool.Emphasis `json:"emphasis,omitzero"`
+	ReadOnly bool          `json:"read_only,omitempty"`
 }
 
 // Describe takes how a decoded call looks from the call itself.
 func (self *FallbackRendering) Describe(toolCall tool.ToolCall) {
 	self.Subject = toolCall.Subject()
 	self.Note = toolCall.Qualifier()
-	self.Highlight = toolCall.Highlight()
+	self.Emphasis = toolCall.Emphasis()
 }
 
 // Event is a conversation occurrence or durable tool-state transition.

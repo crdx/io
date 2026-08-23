@@ -41,7 +41,7 @@ func New(
 		Describe,
 	).
 		Validate(validate).
-		Syntax("bash").
+		SyntaxFrom("bash", emphasisSource).
 		Stats(func(ctx context.Context, args Args) (string, tool.Stats, error) {
 			policy, err := fresh(ctx)
 			if err != nil {
@@ -78,6 +78,15 @@ func Describe(args Args) (string, string) {
 	}
 
 	return format(parsed), spread(args.Command)
+}
+
+func emphasisSource(args Args, subject string) string {
+	source := strings.TrimSpace(args.Command)
+	if strings.ContainsAny(source, "\r\n") && strings.HasPrefix(source, subject) {
+		return source
+	}
+
+	return ""
 }
 
 func hasHereDocument(parsed *syntax.File) bool {

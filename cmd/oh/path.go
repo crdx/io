@@ -9,6 +9,7 @@ import (
 	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/xdg"
+	"crdx.org/io/session"
 )
 
 const (
@@ -95,4 +96,28 @@ func shellMiseDataDir() string {
 
 func tmpDir(name string) string {
 	return stateDir("tmps", name)
+}
+
+func refuseOutdatedSessions(directory string) error {
+	outdated, err := session.Outdated(directory)
+	if err != nil {
+		return err
+	}
+
+	if len(outdated) == 0 {
+		return nil
+	}
+
+	subject := fmt.Sprintf("%d stored sessions are", len(outdated))
+	object := "them"
+
+	if len(outdated) == 1 {
+		subject = outdated[0] + " is"
+		object = "it"
+	}
+
+	return fmt.Errorf(
+		"%s written in an older journal format: run `ohctl migrate` to bring %s up to format %d",
+		subject, object, session.Format,
+	)
 }

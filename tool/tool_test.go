@@ -117,7 +117,7 @@ func TestParseDescribesTheCallOnce(t *testing.T) {
 	}
 }
 
-func TestAnOuterHighlighterReplacesAnInnerOne(t *testing.T) {
+func TestAnOuterEmphasisReplacesAnInnerOne(t *testing.T) {
 	subject := newToolBuilder(t).
 		Focuses(func(tool.ToolCall) string { return "London" }).
 		Syntax("bash").
@@ -130,9 +130,25 @@ func TestAnOuterHighlighterReplacesAnInnerOne(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"}
-	if got := call.Highlight(); got != want {
+	want := tool.Emphasis{Kind: tool.EmphasisSyntax, Value: "bash"}
+	if got := call.Emphasis(); got != want {
 		t.Errorf("got %#v, want %#v", got, want)
+	}
+}
+
+func TestSyntaxCanUseDecodedArgumentsAsItsSource(t *testing.T) {
+	subject := newToolBuilder(t).
+		SyntaxFrom("bash", func(args Params, subject string) string {
+			return args.City + "\n" + subject
+		}).
+		Plain(func(_ context.Context, _ Params) (string, error) { return "", nil })
+
+	call, err := subject.Parse(`{"city":"London"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got, want := call.Emphasis().Source, "London\nLondon"; got != want {
+		t.Errorf("got source %q, want %q", got, want)
 	}
 }
 

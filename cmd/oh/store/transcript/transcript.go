@@ -70,14 +70,14 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		writeField(&output, "ID", event.ID)
 		writeField(&output, "Name", event.Name)
 		writeBool(&output, "Read only", event.ReadOnly)
-		writeField(&output, "Highlight", describeHighlight(event.Highlight))
+		writeField(&output, "Emphasis", describeEmphasis(event.Emphasis))
 		if event.Arguments != "" {
 			output.WriteString("**Arguments**\n\n")
 			writeFence(&output, event.Arguments, "json")
 		}
 		if event.Subject != "" {
 			output.WriteString("**Subject**\n\n")
-			writeFence(&output, event.Subject, highlightSyntax(event.Highlight))
+			writeFence(&output, event.Subject, emphasisLanguage(event.Emphasis))
 		}
 		if event.Note != "" {
 			output.WriteString("**Qualifier**\n\n")
@@ -91,7 +91,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			writeField(&output, "Duration", event.Took.String())
 		}
 		writeField(&output, "Qualifier", event.Note)
-		writeField(&output, "Highlight", describeHighlight(event.Highlight))
+		writeField(&output, "Emphasis", describeEmphasis(event.Emphasis))
 		if event.Stats != nil {
 			stats, err := json.Marshal(event.Stats)
 			if err != nil {
@@ -101,7 +101,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			writeFence(&output, string(stats), "json")
 		}
 		if event.Text != "" {
-			writeToolResultPreview(&output, event.Text, highlightSyntax(event.Highlight))
+			writeToolResultPreview(&output, event.Text, emphasisLanguage(event.Emphasis))
 		}
 	case agent.StateChangeEvent:
 		writeField(&output, "ID", event.ID)
@@ -118,17 +118,17 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 	return err
 }
 
-func describeHighlight(highlight tool.Highlight) string {
-	if highlight.Kind == "" {
+func describeEmphasis(emphasis tool.Emphasis) string {
+	if emphasis.Kind == "" {
 		return ""
 	}
 
-	return string(highlight.Kind) + " " + highlight.Value
+	return string(emphasis.Kind) + " " + emphasis.Value
 }
 
-func highlightSyntax(highlight tool.Highlight) string {
-	if highlight.Kind == tool.HighlightSyntax {
-		return highlight.Value
+func emphasisLanguage(emphasis tool.Emphasis) string {
+	if emphasis.Kind == tool.EmphasisSyntax {
+		return emphasis.Value
 	}
 
 	return ""

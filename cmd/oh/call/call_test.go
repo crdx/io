@@ -161,10 +161,10 @@ func TestStatsUseTheirExpectedStyles(t *testing.T) {
 
 func TestOnlyTheFocusedPartOfArgumentsIsPainted(t *testing.T) {
 	label := Label{
-		Name:      "read",
-		Subject:   "cmd/oh/draw.go",
-		ReadOnly:  true,
-		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
+		Name:     "read",
+		Subject:  "cmd/oh/draw.go",
+		ReadOnly: true,
+		Emphasis: tool.Emphasis{Kind: tool.EmphasisFocus, Value: "draw.go"},
 	}
 	want := style.Call("read") + " " + style.Subtle("cmd/oh/") + style.Subject("draw.go")
 
@@ -178,7 +178,7 @@ func TestAnAccentAndTheFocusedPartOfArgumentsArePainted(t *testing.T) {
 		Name:        "skill",
 		NameStyle:   style.Skill,
 		Subject:     "/skills/guard-basics/SKILL.md",
-		Highlight:   tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
+		Emphasis:    tool.Emphasis{Kind: tool.EmphasisFocus, Value: "SKILL.md"},
 		Accent:      "guard-basics",
 		AccentStyle: style.Skill,
 	}
@@ -193,18 +193,36 @@ func TestAnAccentAndTheFocusedPartOfArgumentsArePainted(t *testing.T) {
 
 func TestArgumentsWithSyntaxAreHighlighted(t *testing.T) {
 	label := Label{
-		Name:      "bash",
-		Subject:   "echo one && true",
-		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
+		Name:     "bash",
+		Subject:  "echo one && true",
+		Emphasis: tool.Emphasis{Kind: tool.EmphasisSyntax, Value: "bash"},
 	}
-	want := style.Change("bash") + " " + markdown.Highlight(label.Subject, "bash")
+	want := style.Change("bash") + " " + markdown.Emphasise(label.Subject, "bash")
 
 	if got := label.Render(); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
 
-func TestElidedBashKeepsHighlightingFromTheCompleteCommand(t *testing.T) {
+func TestSyntaxCanBeHighlightedFromSourceBeyondTheDisplayedSubject(t *testing.T) {
+	label := Label{
+		Name:    "bash",
+		Subject: "cat <<'EOF'",
+		Emphasis: tool.Emphasis{
+			Kind:   tool.EmphasisSyntax,
+			Value:  "bash",
+			Source: "cat <<'EOF'\nhello\nEOF",
+		},
+	}
+	want := style.Change("bash") + " " + style.Function("cat") + style.Block(" ") +
+		style.Operator("<<") + style.Block("'EOF'")
+
+	if got := label.Render(); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestElidedBashKeepsItsEmphasisFromTheCompleteCommand(t *testing.T) {
 	source := "go list ordinary"
 	for name, test := range map[string]struct {
 		argumentRoom int
@@ -238,9 +256,9 @@ func TestElidedBashKeepsHighlightingFromTheCompleteCommand(t *testing.T) {
 		},
 	} {
 		label := Label{
-			Name:      "bash",
-			Subject:   source,
-			Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
+			Name:     "bash",
+			Subject:  source,
+			Emphasis: tool.Emphasis{Kind: tool.EmphasisSyntax, Value: "bash"},
 		}
 		got := elided(t, label, len("bash ")+test.argumentRoom).renderSubject()
 
@@ -259,9 +277,9 @@ func TestElidedBashKeepsHighlightingFromTheCompleteCommand(t *testing.T) {
 func TestElidedBashCountsWideUnicodeInTerminalCells(t *testing.T) {
 	argumentRoom := 8
 	label := Label{
-		Name:      "bash",
-		Subject:   "echo 日本語 later",
-		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
+		Name:     "bash",
+		Subject:  "echo 日本語 later",
+		Emphasis: tool.Emphasis{Kind: tool.EmphasisSyntax, Value: "bash"},
 	}
 	got := elided(t, label, len("bash ")+argumentRoom).renderSubject()
 	want := style.Function("echo") + style.Block(" ") + style.Function("日") + style.Function(width.Ellipsis)
@@ -282,7 +300,7 @@ func TestAPathInTheDetailCanBeFocused(t *testing.T) {
 		Name:      "grep",
 		Subject:   "text",
 		Qualifier: "in cmd/oh/draw.go",
-		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
+		Emphasis:  tool.Emphasis{Kind: tool.EmphasisFocus, Value: "draw.go"},
 	}
 	want := style.Change("grep") + " " + style.Subject("text") + " " +
 		style.Qualifier("in cmd/oh/") + style.Subject("draw.go")

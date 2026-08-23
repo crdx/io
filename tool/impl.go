@@ -15,7 +15,7 @@ type _tool struct {
 	readOnly  bool
 	stateName string
 	restore   Restorer
-	highlight func(call ToolCall) Highlight
+	emphasis  func(call ToolCall) Emphasis
 }
 
 func (self _tool) Name() string        { return self.name }
@@ -38,22 +38,24 @@ func (self _tool) Parse(arguments string) (ToolCall, error) {
 	if err != nil {
 		return nil, err
 	}
-	if self.highlight != nil {
-		call.highlight = self.highlight(call)
+	if self.emphasis != nil {
+		call.emphasis = self.emphasis(call)
+		call.emphasis.Source = call.emphasisSource
 	}
 
 	return call, nil
 }
 
 type _call struct {
-	subject   string
-	qualifier string
-	highlight Highlight
-	exec      func(ctx context.Context) (ToolCallResult, error)
+	subject        string
+	qualifier      string
+	emphasis       Emphasis
+	emphasisSource string
+	exec           func(ctx context.Context) (ToolCallResult, error)
 }
 
-func (self _call) Subject() string      { return self.subject }
-func (self _call) Qualifier() string    { return self.qualifier }
-func (self _call) Highlight() Highlight { return self.highlight }
+func (self _call) Subject() string    { return self.subject }
+func (self _call) Qualifier() string  { return self.qualifier }
+func (self _call) Emphasis() Emphasis { return self.emphasis }
 
 func (self _call) Exec(ctx context.Context) (ToolCallResult, error) { return self.exec(ctx) }

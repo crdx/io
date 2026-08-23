@@ -6,6 +6,7 @@ import (
 
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/ohctl/login"
+	"crdx.org/io/cmd/ohctl/migrate"
 	"crdx.org/io/cmd/ohctl/regen"
 )
 
@@ -14,10 +15,12 @@ const usage = `ohctl — oh control
 Usage:
     ohctl login [codex | opencode-go | anthropic]
     ohctl regen [<session>...]
+    ohctl migrate [options] [<session>...]
 
 Commands:
-    login    Store provider credentials
-    regen    Write stored transcripts again from their journals
+    login      Store provider credentials
+    regen      Write stored transcripts again from their journals
+    migrate    Bring stored sessions up to the current journal format
 `
 
 func main() {
@@ -34,6 +37,8 @@ func main() {
 		err = login.Run()
 	case "regen":
 		err = regen.Run()
+	case "migrate":
+		err = migrate.Run()
 	default:
 		fmt.Print(usage)
 		os.Exit(2)

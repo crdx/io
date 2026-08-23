@@ -31,7 +31,7 @@ One of each, then.
 - **ID:** `call_1`
 - **Name:** `bash`
 - **Read only:** `false`
-- **Highlight:** `syntax bash`
+- **Emphasis:** `syntax bash`
 **Arguments**
 
 ```json
@@ -171,7 +171,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_5`
 - **Name:** `grep`
 - **Read only:** `true`
-- **Highlight:** `syntax regexp`
+- **Emphasis:** `syntax regexp`
 **Arguments**
 
 ```json

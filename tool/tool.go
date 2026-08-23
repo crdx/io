@@ -26,7 +26,7 @@ type Tool interface {
 type ToolCall interface {
 	Subject() string
 	Qualifier() string
-	Highlight() Highlight
+	Emphasis() Emphasis
 	Exec(ctx context.Context) (ToolCallResult, error)
 }
 
@@ -76,19 +76,21 @@ func OutputStats(output string) Stats {
 	}
 }
 
-// HighlightKind identifies how a display should highlight a call's rendering.
-type HighlightKind string
+// EmphasisKind identifies how a display should set a call's rendering apart.
+type EmphasisKind string
 
-// The ways a call rendering may be highlighted.
+// The ways a call rendering may be set apart.
 const (
-	HighlightSyntax HighlightKind = "syntax"
-	HighlightFocus  HighlightKind = "focus"
+	EmphasisSyntax EmphasisKind = "syntax"
+	EmphasisFocus  EmphasisKind = "focus"
 )
 
-// Highlight describes how a display should highlight a call's rendering.
-type Highlight struct {
-	Kind  HighlightKind `json:"kind"`
-	Value string        `json:"value"`
+// Emphasis describes how a display should set a call's rendering apart. Source is transient
+// complete syntax from which a shorter displayed subject may be emphasised.
+type Emphasis struct {
+	Kind   EmphasisKind `json:"kind"`
+	Value  string       `json:"value"`
+	Source string       `json:"-"`
 }
 
 // Describer reports a call's subject and qualifier from decoded arguments.

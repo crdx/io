@@ -234,8 +234,8 @@ func TestAReadFocusesTheFileName(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	want := tool.Highlight{Kind: tool.HighlightFocus, Value: "notes.txt"}
-	if call.Highlight() != want {
+	want := tool.Emphasis{Kind: tool.EmphasisFocus, Value: "notes.txt"}
+	if call.Emphasis() != want {
 		t.Errorf("expected the file name to be focused, got %T", call)
 	}
 }

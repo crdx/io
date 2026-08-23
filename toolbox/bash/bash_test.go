@@ -207,9 +207,9 @@ func TestACommandRenderingIsMarkedAsBash(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	want := tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"}
-	if call.Highlight() != want {
-		t.Errorf("expected bash highlighting, got %T", call)
+	want := tool.Emphasis{Kind: tool.EmphasisSyntax, Value: "bash"}
+	if call.Emphasis() != want {
+		t.Errorf("expected bash emphasis, got %T", call)
 	}
 }
 
@@ -260,6 +260,20 @@ func TestAHereDocumentIsShownByItsOpeningLineAlone(t *testing.T) {
 	}
 	if qualifier != "3L" {
 		t.Errorf("got %q, want the original line count", qualifier)
+	}
+}
+
+func TestAHereDocumentKeepsItsCompleteEmphasisSource(t *testing.T) {
+	root, _ := testRoot(t)
+	call, err := fixedShell(root, func() sandbox.Policy { return sandbox.Policy{} }).Parse(
+		`{"command":"cat <<EOF\none\nEOF"}`,
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if got, want := call.Emphasis().Source, "cat <<EOF\none\nEOF"; got != want {
+		t.Errorf("got source %q, want %q", got, want)
 	}
 }
 

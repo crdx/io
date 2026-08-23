@@ -582,9 +582,9 @@ func TestANoteGoesAheadOfTheNextPrompt(t *testing.T) {
 }
 
 func TestHowACallLookedIsWrittenFlatSoOldSessionsStillRead(t *testing.T) {
-	const stored = `{"kind":"call","id":"1","name":"write","arguments":"{}","render":"a","detail":"1 KB","highlight":{"kind":"syntax","value":"bash"},"read_only":true}`
+	const stored = `{"kind":"call","id":"1","name":"write","arguments":"{}","render":"a","detail":"1 KB","emphasis":{"kind":"syntax","value":"bash"},"read_only":true}`
 
-	const written = `{"render":"a","detail":"1 KB","highlight":{"kind":"syntax","value":"bash"},"read_only":true,"kind":"call","id":"1","name":"write","arguments":"{}"}`
+	const written = `{"render":"a","detail":"1 KB","emphasis":{"kind":"syntax","value":"bash"},"read_only":true,"kind":"call","id":"1","name":"write","arguments":"{}"}`
 
 	var event agent.Event
 	if err := json.Unmarshal([]byte(stored), &event); err != nil {

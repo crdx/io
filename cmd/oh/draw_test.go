@@ -177,8 +177,8 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 				ID:   "1",
 				Name: test.tool,
 				FallbackRendering: agent.FallbackRendering{
-					Subject:   test.path,
-					Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: path.Base(test.path)},
+					Subject:  test.path,
+					Emphasis: tool.Emphasis{Kind: tool.EmphasisFocus, Value: path.Base(test.path)},
 				},
 			})
 			callPainter.close(dynamic.Done)
@@ -202,8 +202,8 @@ func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
 		ID:   "1",
 		Name: "read",
 		FallbackRendering: agent.FallbackRendering{
-			Subject:   "/skills/golang/SKILL.md",
-			Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
+			Subject:  "/skills/golang/SKILL.md",
+			Emphasis: tool.Emphasis{Kind: tool.EmphasisFocus, Value: "SKILL.md"},
 		},
 	})
 	callPainter.close(dynamic.Done)
@@ -709,6 +709,32 @@ func deltas(text string, count int) []string {
 	return pieces
 }
 
+func TestCallEmphasisSourceIsDerivedFromRecordedArguments(t *testing.T) {
+	current := tool.Implement(
+		tool.Definition{
+			Name:        "bash",
+			Description: "",
+			Schema:      tool.Schema{tool.String("path", "command")},
+		},
+		func(args fakeArgs) (string, string) {
+			subject, _, _ := strings.Cut(args.Path, "\n")
+			return subject, ""
+		},
+	).SyntaxFrom("bash", func(args fakeArgs, _ string) string {
+		return args.Path
+	}).Plain(func(context.Context, fakeArgs) (string, error) { return "", nil })
+	conversation := &Harness{agent: agent.New("", quietProvider{}, []tool.Tool{current})}
+
+	fallback := conversation.newPainter(false).describe(agent.Event{
+		Name:      "bash",
+		Arguments: `{"path":"cat <<EOF\none\nEOF"}`,
+	})
+
+	if got, want := fallback.Emphasis.Source, "cat <<EOF\none\nEOF"; got != want {
+		t.Errorf("got source %q, want %q", got, want)
+	}
+}
+
 func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 	const workspaceDir = "/home/alice/project"
 
@@ -727,17 +753,17 @@ func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 		workspaceDir: workspaceDir,
 	}
 
-	shown := testConversation.newPainter(false).describe(agent.Event{
+	fallback := testConversation.newPainter(false).describe(agent.Event{
 		Name:      "read",
 		Arguments: `{"path":"/home/alice/project/cmd/oh/draw.go"}`,
 	})
 
-	wantHighlight := tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"}
-	if shown.Highlight != wantHighlight {
-		t.Fatalf("unexpected highlight %#v", shown.Highlight)
+	wantEmphasis := tool.Emphasis{Kind: tool.EmphasisFocus, Value: "draw.go"}
+	if fallback.Emphasis != wantEmphasis {
+		t.Fatalf("unexpected emphasis %#v", fallback.Emphasis)
 	}
-	if shown.Subject != "cmd/oh/draw.go" || shown.Note != "cmd/oh/draw.go" {
-		t.Errorf("got rendering %q and detail %q, want the workspace prefixes omitted", shown.Subject, shown.Note)
+	if fallback.Subject != "cmd/oh/draw.go" || fallback.Note != "cmd/oh/draw.go" {
+		t.Errorf("got rendering %q and detail %q, want the workspace prefixes omitted", fallback.Subject, fallback.Note)
 	}
 }
 
@@ -770,7 +796,7 @@ func TestRecordedCallPathsAreShortenedWithTheSameFunction(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
 	callPainter := &Painter{workspaceDir: "/home/alice/project"}
-	shown := callPainter.describe(agent.Event{
+	fallback := callPainter.describe(agent.Event{
 		Name: "removed",
 		FallbackRendering: agent.FallbackRendering{
 			Subject: "/home/alice/project/file.go",
@@ -778,8 +804,8 @@ func TestRecordedCallPathsAreShortenedWithTheSameFunction(t *testing.T) {
 		},
 	})
 
-	if shown.Subject != "file.go" || shown.Note != "~/reference/file.go" {
-		t.Errorf("got subject %q and qualifier %q, want both path prefixes shortened", shown.Subject, shown.Note)
+	if fallback.Subject != "file.go" || fallback.Note != "~/reference/file.go" {
+		t.Errorf("got subject %q and qualifier %q, want both path prefixes shortened", fallback.Subject, fallback.Note)
 	}
 }
 
@@ -799,17 +825,17 @@ func TestARefusedCallIsDescribedAgainRatherThanFromTheRecord(t *testing.T) {
 		agent: agent.New("", quietProvider{}, []tool.Tool{refusing}),
 	}
 
-	shown := testConversation.newPainter(false).describe(agent.Event{
+	fallback := testConversation.newPainter(false).describe(agent.Event{
 		Name:              "shout",
 		Arguments:         `{"message":"oi"}`,
 		FallbackRendering: agent.FallbackRendering{Subject: ""},
 	})
 
-	if shown.Note != "" || shown.Highlight != (tool.Highlight{}) {
-		t.Fatalf("unexpected call description %q, %#v", shown.Note, shown.Highlight)
+	if fallback.Note != "" || fallback.Emphasis != (tool.Emphasis{}) {
+		t.Fatalf("unexpected call description %q, %#v", fallback.Note, fallback.Emphasis)
 	}
-	if shown.Subject != "oi" {
-		t.Errorf("got %q, want the arguments described again from the record", shown.Subject)
+	if fallback.Subject != "oi" {
+		t.Errorf("got %q, want the arguments described again from the record", fallback.Subject)
 	}
 }
 
