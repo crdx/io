@@ -8,6 +8,7 @@ import (
 	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/tool"
 
+	"crdx.org/io/cmd/oh/call"
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
@@ -54,8 +55,8 @@ func (self *Painter) describe(event agent.Event) agent.Rendering {
 	return shown
 }
 
-func (self *Painter) label(event agent.Event, shown agent.Rendering) dynamic.Label {
-	label := dynamic.Label{
+func (self *Painter) label(event agent.Event, shown agent.Rendering) call.Label {
+	label := call.Label{
 		Name:      event.Name,
 		Subject:   shown.Subject,
 		Highlight: shown.Highlight,
@@ -182,7 +183,13 @@ func (self *Painter) mark(event agent.Event) {
 
 	delete(self.rows, event.ID)
 
-	self.toolBlock.MarkWithStats(index, outcome(event.Failed), event.Took, event.Text, event.Stats)
+	self.toolBlock.FinaliseRow(
+		index,
+		getState(event.Failed),
+		event.Took,
+		event.Text,
+		call.Measurements(event.Took, event.Stats),
+	)
 
 	if len(self.rows) == 0 {
 		self.close(dynamic.Done)
@@ -230,7 +237,7 @@ func noticeStyle(failed bool) style.Style {
 	return style.Stopped
 }
 
-func outcome(failed bool) dynamic.State {
+func getState(failed bool) dynamic.RowState {
 	if failed {
 		return dynamic.Failed
 	}
@@ -246,7 +253,7 @@ func renderReasoning(thought string, columns int) []string {
 	return width.Wrap(style.Reasoning(stripped), columns)
 }
 
-func (self *Painter) close(state dynamic.State) {
+func (self *Painter) close(state dynamic.RowState) {
 	if self.toolBlock != nil {
 		self.toolBlock.Close(state)
 		self.toolBlock = nil

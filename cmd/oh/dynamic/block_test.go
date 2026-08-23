@@ -5,320 +5,58 @@ import (
 	"testing"
 	"time"
 
-	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/internal/util"
-	"crdx.org/io/tool"
+	"crdx.org/io/cmd/oh/width"
 )
 
 const wide = 100
-
-func TestStatsAreShownAfterCalls(t *testing.T) {
-	for name, test := range map[string]struct {
-		stats tool.Stats
-		want  []string
-	}{
-		"output": {
-			stats: tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 1200, TotalBytes: 1200},
-			want:  []string{"4L ~300t"},
-		},
-		"empty output": {
-			stats: tool.Stats{Kind: tool.StatsOutput},
-			want:  []string{"no output"},
-		},
-		"capped output": {
-			stats: tool.Stats{
-				Kind:       tool.StatsOutput,
-				Lines:      4,
-				Bytes:      1200,
-				TotalBytes: 1200,
-				Truncated:  true,
-			},
-			want: []string{"4L+ ~300t"},
-		},
-		"resources": {
-			stats: tool.Stats{
-				Kind:       tool.StatsResources,
-				CPUTime:    800 * time.Millisecond,
-				PeakMemory: 92 << 20,
-				Lines:      7,
-				Bytes:      1200,
-			},
-			want: []string{"7L ~300t 1.4s 0.8s 92M"},
-		},
-		"read": {
-			stats: tool.Stats{Kind: tool.StatsRead, Lines: 42, Bytes: 1200},
-			want:  []string{"42L ~300t"},
-		},
-		"list": {
-			stats: tool.Stats{Kind: tool.StatsList, Lines: 42},
-			want:  []string{"42L"},
-		},
-		"image": {
-			stats: tool.Stats{Kind: tool.StatsImage, Bytes: 80_943, EstimatedTokens: 1536},
-			want:  []string{"~1.5Kt"},
-		},
-		"write": {
-			stats: tool.Stats{Kind: tool.StatsWrite, Lines: 3, Bytes: 17},
-			want:  []string{"3L ~5t"},
-		},
-		"diff": {
-			stats: tool.Stats{Kind: tool.StatsDiff, Added: 3, Removed: 2},
-			want:  []string{"+3 −2"},
-		},
-		"search": {
-			stats: tool.Stats{Kind: tool.StatsSearch, Lines: 17, Bytes: 1200},
-			want:  []string{"17L ~300t"},
-		},
-		"capped search": {
-			stats: tool.Stats{
-				Kind:       tool.StatsSearch,
-				Lines:      100,
-				Bytes:      32_000,
-				TotalBytes: 80_000,
-				Truncated:  true,
-			},
-			want: []string{"100L+ ~8Kt (of ~20Kt)"},
-		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			got := style.Plain(outcomeText("✓", 1400*time.Millisecond, &test.stats))
-			for _, want := range test.want {
-				if !strings.Contains(got, want) {
-					t.Errorf("got %q, want %q", got, want)
-				}
-			}
-		})
-	}
-}
-
-func TestStatsUseTheirExpectedStyles(t *testing.T) {
-	output := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 951})
-	if want := style.Subtle("4L ~200t"); !strings.Contains(output, want) {
-		t.Errorf("output stats got %q, want styled %q", output, want)
-	}
-
-	emptyOutput := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsOutput})
-	if want := style.Subtle("no output"); !strings.Contains(emptyOutput, want) {
-		t.Errorf("empty output stats got %q, want styled %q", emptyOutput, want)
-	}
-
-	read := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsRead, Lines: 45, Bytes: 951})
-	if want := style.Subtle("45L ~200t"); !strings.Contains(read, want) {
-		t.Errorf("read stats got %q, want styled %q", read, want)
-	}
-
-	write := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsWrite, Lines: 12, Bytes: 1200})
-	if want := style.Subtle("12L ~300t"); !strings.Contains(write, want) {
-		t.Errorf("write stats got %q, want styled %q", write, want)
-	}
-
-	search := outcomeText("✓", 0, &tool.Stats{
-		Kind:       tool.StatsSearch,
-		Lines:      23,
-		Bytes:      1200,
-		TotalBytes: 2400,
-		Truncated:  true,
-	})
-	if want := style.Subtle("23L+ ~300t (of ~600t)"); !strings.Contains(search, want) {
-		t.Errorf("search stats got %q, want styled %q", search, want)
-	}
-
-	exec := outcomeText("✓", 0, &tool.Stats{
-		Kind:       tool.StatsResources,
-		PeakMemory: 26 << 20,
-	})
-	wantExec := style.Subtle("0L 0t 0s 0s 26M")
-	if !strings.Contains(exec, wantExec) {
-		t.Errorf("exec stats got %q, want styled %q", exec, wantExec)
-	}
-
-	edit := outcomeText("✓", 0, &tool.Stats{Kind: tool.StatsDiff, Added: 2, Removed: 1})
-	wantEdit := style.Success("+2") + style.Subtle(" ") + style.Failure("−1")
-	if !strings.Contains(edit, wantEdit) {
-		t.Errorf("edit stats got %q, want styled %q", edit, wantEdit)
-	}
-}
 
 func testBlock() *Block {
 	return &Block{refresh: func() {}, stop: make(chan struct{})}
 }
 
-func callLabel(name string, subject string) Label {
-	return Label{Name: name, Subject: subject, ReadOnly: true}
+type textLabel struct {
+	text string
 }
 
-func TestOnlyTheFocusedPartOfArgumentsIsPainted(t *testing.T) {
-	label := Label{
-		Name:      "read",
-		Subject:   "cmd/oh/draw.go",
-		ReadOnly:  true,
-		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
-	}
-	want := style.Call("read") + " " + style.Subtle("cmd/oh/") + style.Subject("draw.go")
+func (self textLabel) Elide(room int) Label { return textLabel{text: width.Elide(self.text, room)} }
 
-	if got := label.render(); got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+func (self textLabel) Render() string { return self.text }
+
+func (self textLabel) Width() int { return width.Of(self.text) }
+
+func rowLabel(name string, subject string) Label {
+	return textLabel{text: name + " " + subject}
 }
 
-func TestAnAccentAndTheFocusedPartOfArgumentsArePainted(t *testing.T) {
-	label := Label{
-		Name:        "skill",
-		NameStyle:   style.Skill,
-		Subject:     "/skills/guard-basics/SKILL.md",
-		Highlight:   tool.Highlight{Kind: tool.HighlightFocus, Value: "SKILL.md"},
-		Accent:      "guard-basics",
-		AccentStyle: style.Skill,
-	}
-	want := style.Skill("skill") + " " +
-		style.Subtle("/skills/") + style.Skill("guard-basics") +
-		style.Subtle("/") + style.Subject("SKILL.md")
-
-	if got := label.render(); got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
-}
-
-func TestArgumentsWithSyntaxAreHighlighted(t *testing.T) {
-	label := Label{
-		Name:      "bash",
-		Subject:   "echo one && true",
-		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
-	}
-	want := style.Change("bash") + " " + markdown.Highlight(label.Subject, "bash")
-
-	if got := label.render(); got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
-}
-
-func TestElidedBashKeepsHighlightingFromTheCompleteCommand(t *testing.T) {
-	source := "go list ordinary"
-	for name, test := range map[string]struct {
-		argumentRoom int
-		plain        string
-		want         string
-	}{
-		"inside executable": {
-			2,
-			"g…",
-			style.Function("g") + style.Function(ellipsis),
-		},
-		"at parameter start": {
-			4,
-			"go …",
-			style.Function("go") + style.Block(" ") + style.Function(ellipsis),
-		},
-		"inside parameter": {
-			6,
-			"go li…",
-			style.Function("go") + style.Block(" ") + style.Function("li") + style.Function(ellipsis),
-		},
-		"at parameter end": {
-			8,
-			"go list…",
-			style.Function("go") + style.Block(" ") + style.Function("list") + style.Block(ellipsis),
-		},
-		"inside later argument": {
-			12,
-			"go list ord…",
-			style.Function("go") + style.Block(" ") + style.Function("list") + style.Block(" ord") + style.Block(ellipsis),
-		},
-	} {
-		label := Label{
-			Name:      "bash",
-			Subject:   source,
-			Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
-		}.Elide(len("bash ") + test.argumentRoom)
-		got := label.renderSubject()
-
-		if got != test.want {
-			t.Errorf("%s: got %q, want %q", name, got, test.want)
-		}
-		if plain := style.Plain(got); plain != test.plain {
-			t.Errorf("%s: got plain text %q, want %q", name, plain, test.plain)
-		}
-		if cells := style.Width(got); cells > test.argumentRoom {
-			t.Errorf("%s: used %d cells, want at most %d", name, cells, test.argumentRoom)
-		}
-	}
-}
-
-func TestElidedBashCountsWideUnicodeInTerminalCells(t *testing.T) {
-	argumentRoom := 8
-	label := Label{
-		Name:      "bash",
-		Subject:   "echo 日本語 later",
-		Highlight: tool.Highlight{Kind: tool.HighlightSyntax, Value: "bash"},
-	}.Elide(len("bash ") + argumentRoom)
-	got := label.renderSubject()
-	want := style.Function("echo") + style.Block(" ") + style.Function("日") + style.Function(ellipsis)
-
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
-	if plain := style.Plain(got); plain != "echo 日…" {
-		t.Errorf("got plain text %q, want %q", plain, "echo 日…")
-	}
-	if cells := style.Width(got); cells > argumentRoom {
-		t.Errorf("used %d cells, want at most %d", cells, argumentRoom)
-	}
-}
-
-func TestAPathInTheDetailCanBeFocused(t *testing.T) {
-	label := Label{
-		Name:      "grep",
-		Subject:   "text",
-		Qualifier: "in cmd/oh/draw.go",
-		Highlight: tool.Highlight{Kind: tool.HighlightFocus, Value: "draw.go"},
-	}
-	want := style.Change("grep") + " " + style.Subject("text") + " " +
-		style.Qualifier("in cmd/oh/") + style.Subject("draw.go")
-
-	if got := label.render(); got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
-}
-
-func TestARowSaysNothingOfACallUntilItHasBeenGoingAWhile(t *testing.T) {
+func TestARowSaysNothingOfItsProgressUntilItHasBeenGoingAWhile(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("read", "main.go"))
+	block.Add(rowLabel("read", "main.go"))
 
-	if got := block.Rows(wide)[0]; got != style.Call("read")+" "+style.Subject("main.go") {
-		t.Errorf("expected the call and nothing else, got %q", got)
+	if got := block.Rows(wide)[0]; got != "read main.go" {
+		t.Errorf("expected the label and nothing else, got %q", got)
 	}
 }
 
-func TestARowIsColouredByWhetherItsCallWrites(t *testing.T) {
+func TestAQuickRowIsMarkedWithoutATime(t *testing.T) {
 	block := testBlock()
 
-	block.Add(Label{Name: "write", Subject: "main.go"})
+	block.Add(rowLabel("read", "main.go"))
 
-	if got := block.Rows(wide)[0]; got != style.Change("write")+" "+style.Subject("main.go") {
-		t.Errorf("expected a call that writes to be painted as one, got %q", got)
-	}
-}
-
-func TestAQuickCallIsMarkedWithoutATime(t *testing.T) {
-	block := testBlock()
-
-	block.Add(callLabel("read", "main.go"))
-
-	block.MarkWithStats(0, Done, 500*time.Millisecond, "", nil)
+	block.FinaliseRow(0, Done, 500*time.Millisecond, "", "")
 
 	if got := block.Rows(wide)[0]; !strings.Contains(got, "✓") || strings.Contains(got, "s") {
 		t.Errorf("expected a mark and no time, got %q", got)
 	}
 }
 
-func TestACallWorthWaitingForSaysHowLongItTook(t *testing.T) {
+func TestARowWorthWaitingForSaysHowLongItTook(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("read", "main.go"))
+	block.Add(rowLabel("read", "main.go"))
 
-	block.MarkWithStats(0, Done, 5*time.Second, "", nil)
+	block.FinaliseRow(0, Done, 5*time.Second, "", "")
 
 	if got := block.Rows(wide)[0]; !strings.Contains(got, style.Spinner("5s")) {
 		t.Errorf("expected the time it took, got %q", got)
@@ -326,22 +64,22 @@ func TestACallWorthWaitingForSaysHowLongItTook(t *testing.T) {
 }
 
 func TestRunningTimerUsesWholeSecondGranularity(t *testing.T) {
-	block := &Block{isRevealed: true}
+	block := &Block{isSlow: true}
 	item := row{state: Running, startedAt: time.Now().Add(-5500 * time.Millisecond)}
 
-	if got := style.Plain(block.outcome(item)); got != "✦· 5s" {
+	if got := style.Plain(block.getResult(item)); got != "✦· 5s" {
 		t.Errorf("expected a whole-second timer, got %q", got)
 	}
 }
 
-func TestACallThatFailedIsMarkedApartFromOneThatDidNot(t *testing.T) {
+func TestARowThatFailedIsMarkedApartFromOneThatDidNot(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("read", "main.go"))
-	block.Add(callLabel("read", "nowhere.go"))
+	block.Add(rowLabel("read", "main.go"))
+	block.Add(rowLabel("read", "nowhere.go"))
 
-	block.MarkWithStats(0, Done, 0, "", nil)
-	block.MarkWithStats(1, Failed, 0, "", nil)
+	block.FinaliseRow(0, Done, 0, "", "")
+	block.FinaliseRow(1, Failed, 0, "", "")
 
 	rows := block.Rows(wide)
 
@@ -350,12 +88,12 @@ func TestACallThatFailedIsMarkedApartFromOneThatDidNot(t *testing.T) {
 	}
 }
 
-func TestACallThatFailedSaysWhy(t *testing.T) {
+func TestARowThatFailedSaysWhy(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("write", "main.go"))
+	block.Add(rowLabel("write", "main.go"))
 
-	block.MarkWithStats(0, Failed, 0, "permission denied", nil)
+	block.FinaliseRow(0, Failed, 0, "permission denied", "")
 
 	if got := block.Rows(wide)[0]; !strings.Contains(got, style.Failure("permission denied")) {
 		t.Errorf("expected the reason in the colour of a failure, got %q", got)
@@ -365,35 +103,35 @@ func TestACallThatFailedSaysWhy(t *testing.T) {
 func TestAReasonIsPutOnTheOneRow(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("bash", "make"))
+	block.Add(rowLabel("bash", "make"))
 
-	block.MarkWithStats(0, Failed, 0, "no rule to make target\n\tstop.\r", nil)
+	block.FinaliseRow(0, Failed, 0, "no rule to make target\n\tstop.\r", "")
 
 	if got := block.Rows(wide)[0]; strings.ContainsAny(got, "\n\r\t") {
 		t.Errorf("expected one row, got %q", got)
 	}
 }
 
-func TestAReasonTakesTheRoomTheCallDoesNotWant(t *testing.T) {
+func TestAReasonTakesTheRoomTheLabelDoesNotWant(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("read", "main.go"))
+	block.Add(rowLabel("read", "main.go"))
 
 	reason := strings.Repeat("a", wide/2+10)
 
-	block.MarkWithStats(0, Failed, 0, reason, nil)
+	block.FinaliseRow(0, Failed, 0, reason, "")
 
 	if got := block.Rows(wide)[0]; !strings.Contains(got, reason) {
 		t.Errorf("expected the whole reason, got %q", got)
 	}
 }
 
-func TestALongReasonLeavesTheCallItIsAbout(t *testing.T) {
+func TestALongReasonLeavesTheLabelItIsAbout(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("write", "main.go"))
+	block.Add(rowLabel("write", "main.go"))
 
-	block.MarkWithStats(0, Failed, 0, strings.Repeat("wordy ", wide), nil)
+	block.FinaliseRow(0, Failed, 0, strings.Repeat("wordy ", wide), "")
 
 	row := block.Rows(wide)[0]
 
@@ -409,9 +147,9 @@ func TestALongReasonLeavesTheCallItIsAbout(t *testing.T) {
 func TestAReasonIsKeptOnlyForAFailure(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("read", "main.go"))
+	block.Add(rowLabel("read", "main.go"))
 
-	block.MarkWithStats(0, Done, 0, "read 40 lines", nil)
+	block.FinaliseRow(0, Done, 0, "read 40 lines", "")
 
 	if got := block.Rows(wide)[0]; strings.Contains(got, "read 40 lines") {
 		t.Errorf("expected nothing beside the mark, got %q", got)
@@ -421,9 +159,9 @@ func TestAReasonIsKeptOnlyForAFailure(t *testing.T) {
 func TestClosingTheBlockMarksWhateverWasStillRunning(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("read", "main.go"))
-	block.Add(callLabel("grep", "spinner"))
-	block.MarkWithStats(0, Done, 0, "", nil)
+	block.Add(rowLabel("read", "main.go"))
+	block.Add(rowLabel("grep", "spinner"))
+	block.FinaliseRow(0, Done, 0, "", "")
 
 	block.Close(Cancelled)
 
@@ -441,10 +179,10 @@ func TestClosingTheBlockMarksWhateverWasStillRunning(t *testing.T) {
 func TestARowIsMarkedOnlyOnce(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("read", "main.go"))
-	block.MarkWithStats(0, Failed, 0, "", nil)
+	block.Add(rowLabel("read", "main.go"))
+	block.FinaliseRow(0, Failed, 0, "", "")
 
-	block.MarkWithStats(0, Done, 0, "", nil)
+	block.FinaliseRow(0, Done, 0, "", "")
 
 	if got := block.Rows(wide)[0]; !strings.Contains(got, "✗") {
 		t.Errorf("expected the first mark to stand, got %q", got)
@@ -454,9 +192,9 @@ func TestARowIsMarkedOnlyOnce(t *testing.T) {
 func TestALabelIsCutToLeaveRoomForTheOutcome(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("grep", strings.Repeat("x", wide)))
+	block.Add(rowLabel("grep", strings.Repeat("x", wide)))
 
-	block.MarkWithStats(0, Done, 3*time.Second, "", nil)
+	block.FinaliseRow(0, Done, 3*time.Second, "", "")
 
 	for _, row := range block.Rows(wide) {
 		if style.Width(row) > wide {
@@ -468,9 +206,9 @@ func TestALabelIsCutToLeaveRoomForTheOutcome(t *testing.T) {
 func TestALabelTakesTheRoomATimeWouldHaveTakenWhereNoTimeIsShown(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("bash", strings.Repeat("x", wide)))
+	block.Add(rowLabel("bash", strings.Repeat("x", wide)))
 
-	block.MarkWithStats(0, Done, time.Millisecond, "", nil)
+	block.FinaliseRow(0, Done, time.Millisecond, "", "")
 
 	for _, row := range block.Rows(wide) {
 		if style.Width(row) != wide-edgeGuard {
@@ -485,9 +223,9 @@ func TestALabelTakesTheRoomATimeWouldHaveTakenWhereNoTimeIsShown(t *testing.T) {
 func TestALabelGivesRoomBackWhenTheTimeAppears(t *testing.T) {
 	block := testBlock()
 
-	block.Add(callLabel("bash", strings.Repeat("x", wide)))
+	block.Add(rowLabel("bash", strings.Repeat("x", wide)))
 
-	block.MarkWithStats(0, Done, 3*time.Second, "", nil)
+	block.FinaliseRow(0, Done, 3*time.Second, "", "")
 
 	for _, row := range block.Rows(wide) {
 		if style.Width(row) != wide-edgeGuard {
@@ -503,9 +241,9 @@ func TestACompletedOutcomeIsKeptBackFromTheTerminalEdge(t *testing.T) {
 	block := testBlock()
 	const narrow = 67
 
-	block.Add(callLabel("grep", "RESOLVE_UNIX|resolve_unix|unix.*socket|Landlock|landlock"))
+	block.Add(rowLabel("grep", "RESOLVE_UNIX|resolve_unix|unix.*socket|Landlock|landlock"))
 
-	block.MarkWithStats(0, Done, 7420*time.Millisecond, "", nil)
+	block.FinaliseRow(0, Done, 7420*time.Millisecond, "", "")
 
 	row := block.Rows(narrow)[0]
 	if got := style.Plain(row); !strings.HasSuffix(got, "✓ 7.4s") {
@@ -516,40 +254,13 @@ func TestACompletedOutcomeIsKeptBackFromTheTerminalEdge(t *testing.T) {
 	}
 }
 
-func TestFormatDuration(t *testing.T) {
-	for want, took := range map[string]time.Duration{
-		"0.0s":   0,
-		"0.9s":   999 * time.Millisecond,
-		"1.2s":   1200 * time.Millisecond,
-		"59.9s":  59*time.Second + 999*time.Millisecond,
-		"1m00s":  time.Minute,
-		"12m34s": 12*time.Minute + 34*time.Second,
-		"1h40m":  100 * time.Minute,
-		"4d04h":  100 * time.Hour,
-	} {
-		if got := util.FormatDuration(took); got != want {
-			t.Errorf("expected %q, got %q", want, got)
-		}
-
-		if len(want) > durationWidth {
-			t.Errorf("expected %q to fit the column of %d", want, durationWidth)
-		}
-	}
-}
-
-func TestARowTooNarrowForWhatACallMeasuredKeepsItsLabelAndItsMark(t *testing.T) {
+func TestARowTooNarrowForWhatItMeasuredKeepsItsLabelAndItsMark(t *testing.T) {
 	const tiny = 12
 
 	block := testBlock()
 
-	index := block.Add(callLabel("bash", "if [[ -f one ]]; then echo one; fi"))
-	block.MarkWithStats(index, Done, time.Second, "", &tool.Stats{
-		Kind:       tool.StatsOutput,
-		Lines:      900,
-		Bytes:      2000,
-		TotalBytes: 225000,
-		Truncated:  true,
-	})
+	index := block.Add(rowLabel("bash", "if [[ -f one ]]; then echo one; fi"))
+	block.FinaliseRow(index, Done, time.Second, "", "900L+ ~500t (of ~225Kt)")
 
 	row := block.Rows(tiny)[index]
 
@@ -563,13 +274,11 @@ func TestARowTooNarrowForWhatACallMeasuredKeepsItsLabelAndItsMark(t *testing.T) 
 	}
 }
 
-func TestARowWideEnoughKeepsEverythingACallMeasured(t *testing.T) {
+func TestARowWideEnoughKeepsEverythingItMeasured(t *testing.T) {
 	block := testBlock()
 
-	index := block.Add(callLabel("bash", "echo one"))
-	block.MarkWithStats(index, Done, time.Second, "", &tool.Stats{
-		Kind: tool.StatsOutput, Lines: 1, Bytes: 4, TotalBytes: 4,
-	})
+	index := block.Add(rowLabel("bash", "echo one"))
+	block.FinaliseRow(index, Done, time.Second, "", "1L ~1t")
 
 	if plain := style.Plain(block.Rows(wide)[index]); !strings.HasSuffix(plain, "✓ 1L ~1t") {
 		t.Errorf("expected everything the call measured, got %q", plain)

@@ -248,3 +248,25 @@ func split(text string) []atom {
 
 	return atoms
 }
+
+// Ellipsis marks where text was cut.
+const Ellipsis = "…"
+
+// Elide cuts text to the cells it has, marking what it dropped with an ellipsis.
+func Elide(text string, cells int) string {
+	if cells <= 0 {
+		return ""
+	}
+
+	if Of(text) <= cells {
+		return text
+	}
+
+	if cells == 1 {
+		return Ellipsis
+	}
+
+	kept, _ := Cut(text, cells-1)
+
+	return kept + Ellipsis
+}
