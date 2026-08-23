@@ -15,7 +15,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/currentTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
-
+	"crdx.org/io/cmd/oh/segment/turnElapsed"
 	"crdx.org/io/cmd/oh/segment/workingDirectory"
 )
 
@@ -55,7 +55,7 @@ func goldenBarLayout(t *testing.T, harness *Harness) segment.Layout {
 		[bar.bottom]
 		left = [
 			{ segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
-
+			{ segment = "turn-elapsed" },
 			{ segment = "mode-toggle" },
 			{ segment = "working-directory" },
 			{ segment = "active-model" },
@@ -177,6 +177,18 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			scrollOverflow.New,
 			`direction = "up"`,
 			segment.Context{HiddenLinesAbove: 3},
+		),
+		"turn-elapsed / idle": goldenSegmentPass(
+			t,
+			turnElapsed.New(func() (bool, time.Duration) { return false, 69 * time.Second }),
+			"",
+			segment.Context{},
+		),
+		"turn-elapsed / running": goldenSegmentPass(
+			t,
+			turnElapsed.New(func() (bool, time.Duration) { return true, 69 * time.Second }),
+			"",
+			segment.Context{},
 		),
 		"working-directory": goldenSegmentPass(
 			t,

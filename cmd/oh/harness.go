@@ -303,6 +303,14 @@ func (self *Harness) turnActivity() (bool, int) {
 	return self.currentTurn.isRunning, self.currentTurn.spinnerFrame
 }
 
+func (self *Harness) turnElapsed() (bool, time.Duration) {
+	if !self.currentTurn.isRunning || self.currentTurn.startedAt.IsZero() {
+		return false, 0
+	}
+
+	return true, time.Since(self.currentTurn.startedAt)
+}
+
 func (self *Harness) contextUsage() (int, int) {
 	return contextUsageAt(self.events, self.contextWindowTokens)
 }
@@ -468,6 +476,7 @@ func (self *Harness) start(message string) {
 		cancel:    cancel,
 		events:    make(chan TurnEvent),
 		painter:   self.newPainter(true),
+		startedAt: time.Now(),
 	}
 
 	self.screen.ReportProgress(true)

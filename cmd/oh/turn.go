@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"crdx.org/io/agent"
 )
@@ -14,6 +15,7 @@ type Turn struct {
 
 	spinnerFrame int
 	painter      *Painter
+	startedAt    time.Time
 
 	events chan TurnEvent
 }

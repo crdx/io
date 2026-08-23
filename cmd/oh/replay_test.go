@@ -34,6 +34,8 @@ const (
 	oneColumn     = 1
 	noColumns     = 0
 
+	turnSoFar = 9 * time.Second
+
 	workspaceMarker   = "/workspace"
 	lifecycleScenario = "success@rxw.jsonl"
 )
@@ -629,6 +631,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 					held := &Harness{mode: caps.NewMode(grantedCaps)}
 					held.currentTurn.isRunning = isRunning
 					held.currentTurn.spinnerFrame = 2
+					held.currentTurn.startedAt = time.Now().Add(-turnSoFar)
 
 					built := goldenBarLayout(t, held)
 
@@ -696,6 +699,7 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 					held := &Harness{mode: caps.NewMode(caps.All())}
 					held.currentTurn.isRunning = true
 					held.currentTurn.spinnerFrame = 2
+					held.currentTurn.startedAt = time.Now().Add(-turnSoFar)
 
 					built := goldenBarLayout(t, held)
 

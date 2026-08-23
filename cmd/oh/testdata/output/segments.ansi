@@ -28,5 +28,9 @@
 
 === scroll-overflow / up ===
 \e[38;2;150;152;150m↑ 3\e[0m
+=== turn-elapsed / idle ===
+
+=== turn-elapsed / running ===
+\e[38;2;150;152;150m1m09s\e[0m
 === working-directory ===
 \e[38;2;150;152;150mproject\e[0m

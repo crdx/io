@@ -13,7 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/currentTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
-
+	"crdx.org/io/cmd/oh/segment/turnElapsed"
 	"crdx.org/io/cmd/oh/segment/workingDirectory"
 	"crdx.org/io/cmd/oh/style"
 )
@@ -27,6 +27,7 @@ const (
 	scrollOverflowSegment   = "scroll-overflow"
 	currentSessionSegment   = "current-session"
 	currentTimeSegment      = "current-time"
+	turnElapsedSegment      = "turn-elapsed"
 )
 
 func availableSegments(
@@ -45,6 +46,7 @@ func availableSegments(
 		scrollOverflowSegment:   scrollOverflow.New,
 		currentSessionSegment:   currentSession.New(currentSessionName),
 		currentTimeSegment:      currentTime.New(time.Now),
+		turnElapsedSegment:      turnElapsed.New(harness.turnElapsed),
 	}
 }
 

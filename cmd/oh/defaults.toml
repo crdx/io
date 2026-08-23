@@ -29,7 +29,7 @@ left = [
     { segment = "context-usage" },
 ]
 center = [
-
+    { segment = "turn-elapsed" },
 ]
 right = [
     { segment = "current-session" },
