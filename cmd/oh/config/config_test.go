@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"os"
@@ -8,8 +8,9 @@ import (
 
 	"github.com/BurntSushi/toml"
 
-	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/segment"
+	"crdx.org/io/cmd/oh/segment/scrollOverflow"
+	"crdx.org/io/cmd/oh/segment/workingDirectory"
 )
 
 func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testing.T) {
@@ -23,7 +24,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 		t.Fatal(err)
 	}
 
-	config, err := loadConfig(path)
+	config, err := Load(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +51,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 }
 
 func TestAMissingConfigFileIsAllowed(t *testing.T) {
-	config, err := loadConfig(filepath.Join(t.TempDir(), "missing.toml"))
+	config, err := Load(filepath.Join(t.TempDir(), "missing.toml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +70,7 @@ func TestConfiguredSkillDirectoriesRejectsAnEmptyDirectory(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := loadConfig(path); err == nil {
+	if _, err := Load(path); err == nil {
 		t.Error("expected an empty skill directory to be rejected")
 	}
 }
@@ -81,7 +82,7 @@ func TestConfiguredSkillExclusionsResolveToAbsoluteDirectories(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	config, err := loadConfig(path)
+	config, err := Load(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +98,7 @@ func TestConfiguredSkillExclusionsRejectAnEmptyDirectory(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := loadConfig(path); err == nil {
+	if _, err := Load(path); err == nil {
 		t.Error("expected an empty skill directory to be rejected")
 	}
 }
@@ -114,7 +115,7 @@ func TestConfiguredStringsCannotBeEmpty(t *testing.T) {
 			if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 				t.Fatal(err)
 			}
-			if _, err := loadConfig(path); err == nil {
+			if _, err := Load(path); err == nil {
 				t.Errorf("expected empty %s to be rejected", name)
 			}
 		})
@@ -127,7 +128,7 @@ func TestTheConfiguredGetOnWithItMessageIsTrimmed(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	config, err := loadConfig(path)
+	config, err := Load(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,7 +148,7 @@ func TestConfiguredAccessPathsAreResolved(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	config, err := loadConfig(path)
+	config, err := Load(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,7 +176,7 @@ func TestAPathMappedIntoTheShellHomeMustComeFromTheHomeDirectory(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err := loadConfig(path)
+	_, err := Load(path)
 	if err == nil {
 		t.Fatal("expected an error")
 	}
@@ -256,11 +257,11 @@ func TestAPlacementSettingWhatItsSegmentDoesNotReadIsRefused(t *testing.T) {
 		center = [{ segment = "working-directory", loudly = true }]
 	`)
 
-	if _, err := config.layout(testSegments()); err != nil {
+	if _, err := config.BuildLayout(testSegments()); err != nil {
 		t.Fatal(err)
 	}
 
-	err := config.unknownKeys()
+	err := config.ValidateConsumed()
 	if err == nil {
 		t.Fatal("expected a setting nothing reads to be refused")
 	}
@@ -284,17 +285,38 @@ func TestTheBuiltInDefaultsSetEverySettingThereIs(t *testing.T) {
 	}
 }
 
-func testSegments() segment.Registry {
-	held := &Harness{mode: caps.NewMode(caps.Read)}
+type inertSegment struct{}
 
-	return availableSegments("/tmp/somewhere", "brave-otter", "gpt-5.6-sol", "high", held)
+func (inertSegment) Render(segment.Context) string {
+	return ""
+}
+
+func inertFactory(segment.Options) (segment.Segment, error) {
+	return inertSegment{}, nil
+}
+
+func testSegments() segment.Registry {
+	return segment.Registry{
+		"activity-spinner":  inertFactory,
+		"context-usage":     inertFactory,
+		"mode-toggle":       inertFactory,
+		"working-directory": workingDirectory.New("/tmp/somewhere"),
+		"active-model":      inertFactory,
+		"scroll-overflow":   scrollOverflow.New,
+		"current-session":   inertFactory,
+		"current-time":      inertFactory,
+		"turn-elapsed":      inertFactory,
+		"turn-count":        inertFactory,
+		"last-tps":          inertFactory,
+		"git-branch":        inertFactory,
+	}
 }
 
 func configFrom(t *testing.T, body string) Config {
 	t.Helper()
 
 	if body == "" {
-		config, err := loadConfig("")
+		config, err := Load("")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -307,7 +329,7 @@ func configFrom(t *testing.T, body string) Config {
 		t.Fatal(err)
 	}
 
-	config, err := loadConfig(path)
+	config, err := Load(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -328,7 +350,7 @@ func undent(body string) string {
 func layoutFrom(t *testing.T, body string) segment.Layout {
 	t.Helper()
 
-	layout, err := configFrom(t, body).layout(testSegments())
+	layout, err := configFrom(t, body).BuildLayout(testSegments())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -339,16 +361,5 @@ func layoutFrom(t *testing.T, body string) segment.Layout {
 func brokenLayout(t *testing.T, body string) (segment.Layout, error) {
 	t.Helper()
 
-	return configFrom(t, body).layout(testSegments())
-}
-
-func builtInConfig(t *testing.T) Config {
-	t.Helper()
-
-	config, err := loadConfig("")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return config
+	return configFrom(t, body).BuildLayout(testSegments())
 }

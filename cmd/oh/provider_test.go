@@ -4,13 +4,14 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/model"
 
 	"crdx.org/io/cmd/oh/store"
 )
 
 func TestResolveProviderChoiceFallsBackToTheConfig(t *testing.T) {
-	providerName, model, effort, err := resolveProviderChoice("", "", "", Config{
+	providerName, model, effort, err := resolveProviderChoice("", "", "", config.Config{
 		Provider: opencodeGoProvider,
 		Model:    "configured-model",
 		Effort:   "medium",
@@ -33,7 +34,7 @@ func TestResolveProviderChoicePrefersTheCommandLine(t *testing.T) {
 		opencodeGoProvider,
 		"requested-model",
 		"high",
-		Config{
+		config.Config{
 			Provider: opencodeGoProvider,
 			Model:    "configured-model",
 			Effort:   "medium",
@@ -51,7 +52,7 @@ func TestResolveProviderChoicePrefersTheCommandLine(t *testing.T) {
 func TestResolveProviderChoiceRefusesToResumeUnderAnotherProvider(t *testing.T) {
 	resumed := &store.Session{Meta: store.Meta{Provider: opencodeGoProvider, Model: "saved-model"}}
 
-	providerName, model, effort, err := resolveProviderChoice(codexProvider, "requested-model", "high", Config{}, resumed)
+	providerName, model, effort, err := resolveProviderChoice(codexProvider, "requested-model", "high", config.Config{}, resumed)
 	if err == nil || !strings.Contains(err.Error(), "cannot resume a opencode-go session with codex") {
 		t.Fatalf("got provider %q, model %q, effort %q, and error %v", providerName, model, effort, err)
 	}
@@ -60,7 +61,7 @@ func TestResolveProviderChoiceRefusesToResumeUnderAnotherProvider(t *testing.T) 
 func TestResolveProviderChoiceResumesUnderTheRecordedProvider(t *testing.T) {
 	resumed := &store.Session{Meta: store.Meta{Provider: opencodeGoProvider, Model: "saved-model", Effort: "low"}}
 
-	providerName, model, effort, err := resolveProviderChoice("", "", "", Config{
+	providerName, model, effort, err := resolveProviderChoice("", "", "", config.Config{
 		Provider: codexProvider,
 		Model:    "configured-model",
 	}, resumed)
@@ -73,7 +74,7 @@ func TestResolveProviderChoiceResumesUnderTheRecordedProvider(t *testing.T) {
 }
 
 func TestResolveProviderChoiceRequiresAModel(t *testing.T) {
-	providerName, model, effort, err := resolveProviderChoice("", "", "", Config{}, nil)
+	providerName, model, effort, err := resolveProviderChoice("", "", "", config.Config{}, nil)
 	if err == nil || !strings.Contains(err.Error(), "-m provider/model@effort") {
 		t.Fatalf("got provider %q, model %q, effort %q, and error %v", providerName, model, effort, err)
 	}

@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	_ "embed"
@@ -12,6 +12,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 
+	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/internal/util/pathutil"
@@ -31,7 +32,7 @@ type Config struct {
 		Exclude []string `toml:"exclude"`
 	} `toml:"skill"`
 	Sandbox pathsConfig `toml:"sandbox"`
-	Bar     barConfig   `toml:"bar"`
+	Bar     Bar         `toml:"bar"`
 
 	fallback *toml.MetaData
 	user     *toml.MetaData
@@ -40,18 +41,18 @@ type Config struct {
 
 type pathsConfig = shell.Paths
 
-type barConfig struct {
-	Top    ruleConfig `toml:"top"`
-	Bottom ruleConfig `toml:"bottom"`
+type Bar struct {
+	Top    Rule `toml:"top"`
+	Bottom Rule `toml:"bottom"`
 }
 
-type ruleConfig struct {
+type Rule struct {
 	Left   []toml.Primitive `toml:"left"`
 	Center []toml.Primitive `toml:"center"`
 	Right  []toml.Primitive `toml:"right"`
 }
 
-func (self barConfig) entries() map[segment.Position][]toml.Primitive {
+func (self Bar) entries() map[segment.Position][]toml.Primitive {
 	return map[segment.Position][]toml.Primitive{
 		segment.TopLeft:      self.Top.Left,
 		segment.TopCenter:    self.Top.Center,
@@ -62,7 +63,7 @@ func (self barConfig) entries() map[segment.Position][]toml.Primitive {
 	}
 }
 
-func (self Config) layout(registry segment.Registry) (segment.Layout, error) {
+func (self Config) BuildLayout(registry segment.Registry) (segment.Layout, error) {
 	layout := segment.Layout{}
 
 	for position, entries := range self.Bar.entries() {
@@ -100,17 +101,7 @@ func (self segmentOptions) Read(into any) error {
 	return self.meta.PrimitiveDecode(self.entry, into)
 }
 
-func (self Config) metaFor(position segment.Position) *toml.MetaData {
-	side, end, _ := strings.Cut(position.String(), ".")
-
-	if self.user != nil && self.user.IsDefined("bar", side, end) {
-		return self.user
-	}
-
-	return self.fallback
-}
-
-func (self Config) unknownKeys() error {
+func (self Config) ValidateConsumed() error {
 	if self.user == nil {
 		return nil
 	}
@@ -130,7 +121,17 @@ func (self Config) unknownKeys() error {
 	return fmt.Errorf("%s: nothing is done with: %s", self.filePath, strings.Join(named, ", "))
 }
 
-func loadConfig(path string) (Config, error) {
+func (self Config) metaFor(position segment.Position) *toml.MetaData {
+	side, end, _ := strings.Cut(position.String(), ".")
+
+	if self.user != nil && self.user.IsDefined("bar", side, end) {
+		return self.user
+	}
+
+	return self.fallback
+}
+
+func Load(path string) (Config, error) {
 	var config Config
 
 	defaults, err := toml.Decode(defaultsTOML, &config)
@@ -157,6 +158,7 @@ func loadConfig(path string) (Config, error) {
 
 	config.user = &meta
 
+	providerNames := model.ProviderNames()
 	if meta.IsDefined("provider") && !slices.Contains(providerNames, config.Provider) {
 		return config, fmt.Errorf(
 			"%s: provider must be one of: %s", displayPath, strings.Join(providerNames, ", "),

@@ -139,7 +139,7 @@ func TestVisual(t *testing.T) {
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 
-	built, err := configFrom(t, "").layout(
+	built, err := configFrom(t, "").BuildLayout(
 		availableSegments("/tmp/somewhere", log.Name(), "fake", "medium", held),
 	)
 	if err != nil {

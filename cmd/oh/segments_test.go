@@ -75,7 +75,7 @@ func goldenBarLayout(t *testing.T, harness *Harness) segment.Layout {
 		]
 	`)
 
-	layout, err := config.layout(
+	layout, err := config.BuildLayout(
 		availableSegments(workspaceMarker, "brave-otter", "gpt-5.6-sol", "high", harness),
 	)
 	if err != nil {

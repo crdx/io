@@ -24,6 +24,7 @@ import (
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
+	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
@@ -200,27 +201,27 @@ func run() ([]string, error) {
 	}
 	defer func() { _ = homeRoot.Close() }()
 
-	config, err := loadConfig(configPath())
+	settings, err := config.Load(configPath())
 	if err != nil {
 		return nil, err
 	}
-	config.Sandbox, err = shell.PreparePaths(config.Sandbox, os.Stderr)
+	settings.Sandbox, err = shell.PreparePaths(settings.Sandbox, os.Stderr)
 	if err != nil {
 		return nil, err
 	}
-	configuredRoots, err := shell.MountPaths(files, mode, config.Sandbox)
+	configuredRoots, err := shell.MountPaths(files, mode, settings.Sandbox)
 	if err != nil {
 		return nil, err
 	}
 	defer shell.CloseRoots(configuredRoots)
 
-	globalSkillDirs := append([]string{configDir("skills")}, config.Skill.Include...)
+	globalSkillDirs := append([]string{configDir("skills")}, settings.Skill.Include...)
 	availableSkills, err := skill.Discover(workspaceDir, globalSkillDirs, os.Stderr)
 	if err != nil {
 		return nil, err
 	}
 
-	availableSkills = skill.ExcludeGlobal(availableSkills, config.Skill.Exclude)
+	availableSkills = skill.ExcludeGlobal(availableSkills, settings.Skill.Exclude)
 
 	skillRoots, err := skill.MountGlobalSkills(files, availableSkills)
 	if err != nil {
@@ -231,7 +232,7 @@ func run() ([]string, error) {
 	processes := sandbox.NewProcesses(args.Caps.Has(caps.Background))
 	defer func() { _, _ = processes.Disable() }()
 
-	providerName, modelName, effort, err := resolveProviderChoice(args.Provider, args.Model, args.Effort, config, resumedSession)
+	providerName, modelName, effort, err := resolveProviderChoice(args.Provider, args.Model, args.Effort, settings, resumedSession)
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +284,7 @@ func run() ([]string, error) {
 			TmpDir:       tmpDir,
 			HomeDir:      homeDir,
 			CurrentCaps:  args.Caps,
-			ExtraPaths:   config.Sandbox,
+			ExtraPaths:   settings.Sandbox,
 			Skills:       availableSkills,
 		})
 		if err != nil {
@@ -306,7 +307,7 @@ func run() ([]string, error) {
 
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
-	shellTool := shell.New(workspaceDir, homeDir, tmpDir, config.Sandbox, mode, files, processes)
+	shellTool := shell.New(workspaceDir, homeDir, tmpDir, settings.Sandbox, mode, files, processes)
 
 	toolboxTools = append(toolboxTools, shellTool)
 	if notify.IsAvailable() {
@@ -334,15 +335,15 @@ func run() ([]string, error) {
 		mode:               mode,
 		processes:          processes,
 		onTurnFinished:     func() { sendTurnFinishedNotification(workspaceDir) },
-		getOnWithItMessage: config.GetOnWithItMessage,
+		getOnWithItMessage: settings.GetOnWithItMessage,
 	}
 
-	chat.segmentLayout, err = config.layout(availableSegments(workspaceDir, log.Name(), modelName, effort, chat))
+	chat.segmentLayout, err = settings.BuildLayout(availableSegments(workspaceDir, log.Name(), modelName, effort, chat))
 	if err != nil {
 		return nil, err
 	}
 
-	if err := config.unknownKeys(); err != nil {
+	if err := settings.ValidateConsumed(); err != nil {
 		return nil, err
 	}
 
@@ -437,10 +438,10 @@ func resolveProviderChoice(
 	requestedProvider string,
 	requestedModel string,
 	requestedEffort string,
-	config Config,
+	settings config.Config,
 	resumedSession *store.Session,
 ) (string, string, string, error) {
-	providerName := config.Provider
+	providerName := settings.Provider
 	if providerName == "" {
 		providerName = codexProvider
 	}
@@ -459,8 +460,8 @@ func resolveProviderChoice(
 	if sessionProvider != "" && providerName != sessionProvider {
 		return "", "", "", fmt.Errorf("cannot resume a %s session with %s", sessionProvider, providerName)
 	}
-	modelName := config.Model
-	effort := config.Effort
+	modelName := settings.Model
+	effort := settings.Effort
 	if effort == "" {
 		effort = defaultEfforts[providerName]
 	}

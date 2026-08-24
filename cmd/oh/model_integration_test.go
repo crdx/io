@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/internal/sim"
 )
@@ -12,7 +13,7 @@ import (
 func TestAnEffortWrittenAsAnAliasInTheConfigIsResolved(t *testing.T) {
 	_, _, effort, err := resolveProviderChoice(
 		"", "", "",
-		Config{Provider: codexProvider, Model: "gpt-5.6-sol", Effort: "off"},
+		config.Config{Provider: codexProvider, Model: "gpt-5.6-sol", Effort: "off"},
 		nil,
 	)
 	if err != nil {
