@@ -80,6 +80,9 @@ oh *args:
 ohm *args:
     go run ./cmd/oh -crx "$@"
 
+ohctl *args:
+    go run ./cmd/ohctl "$@"
+
 [private]
 mega:
     mega
