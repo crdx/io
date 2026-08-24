@@ -3,6 +3,7 @@ package markdown
 import (
 	"sort"
 	"strings"
+	"sync"
 	"unicode/utf8"
 
 	"github.com/alecthomas/chroma/v2"
@@ -17,8 +18,27 @@ func Emphasise(line string, language string) string {
 	return Highlight(line, line, language, false)
 }
 
-func emphasise(lines []string, language string) []string {
+var lexerCache = struct {
+	sync.Mutex
+
+	entries map[string]chroma.Lexer
+}{entries: map[string]chroma.Lexer{}}
+
+func lexerFor(language string) chroma.Lexer {
+	lexerCache.Lock()
+	defer lexerCache.Unlock()
+
+	if lexer, ok := lexerCache.entries[language]; ok {
+		return lexer
+	}
+
 	lexer := lexers.Get(language)
+	lexerCache.entries[language] = lexer
+	return lexer
+}
+
+func emphasise(lines []string, language string) []string {
+	lexer := lexerFor(language)
 	if language == "" || lexer == nil {
 		return plainly(lines)
 	}
