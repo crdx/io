@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"os"
@@ -13,7 +13,8 @@ import (
 func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	configHome := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", configHome)
-	configDirectory := filepath.Join(configHome, namespace, app)
+	configDirectory := filepath.Join(configHome, "org.crdx", "oh")
+	configPath := filepath.Join(configDirectory, "config.toml")
 	sessionDirectory := filepath.Join(t.TempDir(), "sessions", "brave-otter")
 	if err := os.MkdirAll(sessionDirectory, 0o700); err != nil {
 		t.Fatal(err)
@@ -26,6 +27,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	var actions []string
 	commands := newCommands(commandEnvironment{
 		configDirectory: configDirectory,
+		configPath:      configPath,
 		session: commandSession{
 			name:      "brave-otter",
 			id:        "session-id",
@@ -46,7 +48,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	})
 
 	tests := map[string]string{
-		"/conf":               "edit:" + configPath(),
+		"/conf":               "edit:" + configPath,
 		"/browse config-dir":  "open:" + configDirectory,
 		"/browse session-dir": "open:" + sessionDirectory,
 		"/copy session-name":  "copy:brave-otter",
@@ -63,7 +65,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 			if !found {
 				t.Fatal("expected command to be found")
 			}
-			if err := invocation.Command.Run(commandContext{}, invocation.Arguments); err != nil {
+			if err := invocation.Command.Run(nil, invocation.Arguments); err != nil {
 				t.Fatal(err)
 			}
 			if !slices.Equal(actions, []string{wantAction}) {
@@ -93,7 +95,7 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 				t.Fatal("expected command to be found")
 			}
 
-			err := invocation.Command.Run(commandContext{}, invocation.Arguments)
+			err := invocation.Command.Run(nil, invocation.Arguments)
 			if err == nil || !strings.Contains(err.Error(), "usage: ") {
 				t.Errorf("got error %v", err)
 			}
@@ -140,7 +142,7 @@ func TestCommandsReportSessionTargetsThatDoNotExistYet(t *testing.T) {
 				t.Fatal("expected command to be found")
 			}
 
-			err := invocation.Command.Run(commandContext{}, invocation.Arguments)
+			err := invocation.Command.Run(nil, invocation.Arguments)
 			if err == nil || !strings.Contains(err.Error(), want) {
 				t.Errorf("got error %v, want %q", err, want)
 			}

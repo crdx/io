@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"errors"
@@ -13,7 +13,6 @@ import (
 
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/slash"
-	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/terminal"
 )
 
@@ -22,8 +21,23 @@ const (
 	sessionTranscriptName = "chat.md"
 )
 
+type Options struct {
+	ConfigDirectory string
+	ConfigPath      string
+	Editor          string
+	Output          io.Writer
+	Session         Session
+}
+
+type Session struct {
+	Name      string
+	ID        string
+	Directory string
+}
+
 type commandEnvironment struct {
 	configDirectory string
+	configPath      string
 	session         commandSession
 	openEditor      func(string) error
 	openTarget      func(string) error
@@ -41,22 +55,21 @@ type commandTarget struct {
 	prepare func() error
 }
 
-func getCommands(log *store.Writer, writer io.Writer, editorName string) slash.CommandSet {
-	sessionDirectory := filepath.Join(sessionsDir(), log.Name())
-
+func New(options Options) slash.CommandSet {
 	return newCommands(commandEnvironment{
-		configDirectory: configDir(),
+		configDirectory: options.ConfigDirectory,
+		configPath:      options.ConfigPath,
 		session: commandSession{
-			name:      log.Name(),
-			id:        log.ID(),
-			directory: sessionDirectory,
+			name:      options.Session.Name,
+			id:        options.Session.ID,
+			directory: options.Session.Directory,
 		},
 		openEditor: func(path string) error {
-			return editor.Open(editorName, path)
+			return editor.Open(options.Editor, path)
 		},
 		openTarget: openDesktopTarget,
 		copyText: func(text string) error {
-			return terminal.Copy(writer, text)
+			return terminal.Copy(options.Output, text)
 		},
 	})
 }
@@ -77,7 +90,7 @@ func newCommands(environment commandEnvironment) slash.CommandSet {
 			},
 			environment.openTarget,
 		),
-		noArgumentCommand("/conf", "usage: /conf", configPath(), environment.openEditor),
+		noArgumentCommand("/conf", "usage: /conf", environment.configPath, environment.openEditor),
 		targetCommand(
 			"/copy",
 			"usage: /copy {session-name|session-id|session-dir}",

@@ -24,6 +24,7 @@ import (
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
+	"crdx.org/io/cmd/oh/commands"
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/model"
@@ -326,9 +327,18 @@ func run() (string, error) {
 		screen:   output.New(os.Stdout).LinkPathsUnder(workspaceDir),
 		terminal: terminal.New(os.Stdout),
 		metrics:  metrics.New(choice.ContextWindowTokens),
-
+		commands: commands.New(commands.Options{
+			ConfigDirectory: configDir(),
+			ConfigPath:      configPath(),
+			Editor:          settings.Editor,
+			Output:          os.Stdout,
+			Session: commands.Session{
+				Name:      log.Name(),
+				ID:        log.ID(),
+				Directory: filepath.Join(sessionsDir(), log.Name()),
+			},
+		}),
 		recorder:           recordSession(log),
-		commands:           getCommands(log, os.Stdout, settings.Editor),
 		workspaceDir:       workspaceDir,
 		mode:               mode,
 		processes:          processes,
