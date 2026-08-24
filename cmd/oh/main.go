@@ -32,6 +32,7 @@ import (
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
+	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
@@ -322,23 +323,32 @@ func run() (string, error) {
 		return "", err
 	}
 
+	systemCommands, err := commands.New(commands.Options{
+		ConfigDir:  configDir(),
+		StateDir:   stateDir(),
+		ConfigFile: configFile(),
+		Editor:     settings.Editor,
+		Output:     os.Stdout,
+		Session: commands.Session{
+			Name:      log.Name(),
+			ID:        log.ID(),
+			Directory: filepath.Join(sessionsDir(), log.Name()),
+		},
+	}, nil)
+	if err != nil {
+		return "", err
+	}
+	commandRegistry, err := slash.NewRegistry(systemCommands)
+	if err != nil {
+		return "", err
+	}
+
 	chat := &Harness{
-		agent:    agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
-		screen:   output.New(os.Stdout).LinkPathsUnder(workspaceDir),
-		terminal: terminal.New(os.Stdout),
-		metrics:  metrics.New(choice.ContextWindowTokens),
-		commands: commands.New(commands.Options{
-			ConfigDir:  configDir(),
-			StateDir:   stateDir(),
-			ConfigFile: configFile(),
-			Editor:     settings.Editor,
-			Output:     os.Stdout,
-			Session: commands.Session{
-				Name:      log.Name(),
-				ID:        log.ID(),
-				Directory: filepath.Join(sessionsDir(), log.Name()),
-			},
-		}),
+		agent:              agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
+		screen:             output.New(os.Stdout).LinkPathsUnder(workspaceDir),
+		terminal:           terminal.New(os.Stdout),
+		metrics:            metrics.New(choice.ContextWindowTokens),
+		commands:           commandRegistry,
 		recorder:           recordSession(log),
 		workspaceDir:       workspaceDir,
 		mode:               mode,

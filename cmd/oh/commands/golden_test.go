@@ -13,7 +13,7 @@ import (
 )
 
 func TestCompletionMatchesGolden(t *testing.T) {
-	commands := newCommands(commandEnvironment{})
+	commands := newCommandRegistry(t, commandEnvironment{})
 	var output strings.Builder
 
 	for _, test := range []struct {
@@ -70,7 +70,7 @@ func (self *helpContext) Notice(text string) {
 func (self *helpContext) Success(string) {}
 
 func TestHelpMatchesGolden(t *testing.T) {
-	commands := newCommands(commandEnvironment{})
+	commands := newCommandRegistry(t, commandEnvironment{})
 	invocation, found := commands.Find("/help")
 	if !found {
 		t.Fatal("expected /help to be registered")

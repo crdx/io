@@ -22,6 +22,26 @@ func (self *commandTestContext) Success(text string) {
 	self.success = text
 }
 
+func newCommandRegistry(t *testing.T, environment commandEnvironment) slash.Registry {
+	t.Helper()
+
+	set, err := buildCommands(environment, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return commandRegistry(t, set)
+}
+
+func commandRegistry(t *testing.T, set slash.Set) slash.Registry {
+	t.Helper()
+
+	registry, err := slash.NewRegistry(set)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return registry
+}
+
 func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	configHome := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", configHome)
@@ -38,7 +58,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		}
 	}
 	var actions []string
-	commands := newCommands(commandEnvironment{
+	commands := newCommandRegistry(t, commandEnvironment{
 		configDir:  configDirectory,
 		configPath: configPath,
 		stateDir:   stateDirectory,
@@ -103,7 +123,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 }
 
 func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
-	commands := newCommands(commandEnvironment{})
+	commands := newCommandRegistry(t, commandEnvironment{})
 
 	for _, input := range []string{
 		"/conf extra",
@@ -118,15 +138,21 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 			}
 
 			err := invocation.Command.Run(nil, invocation.Arguments)
-			if err == nil || !strings.Contains(err.Error(), "Usage: ") {
+			if err == nil {
+				t.Fatal("expected usage error")
+			}
+			if !slash.IsUsageError(err) {
 				t.Errorf("got error %v", err)
+			}
+			if message := slash.FormatError(invocation, err); !strings.HasPrefix(message, "Usage: ") {
+				t.Errorf("got formatted error %q", message)
 			}
 		})
 	}
 }
 
 func TestTargetCommandsExposeTheirArgumentsForCompletion(t *testing.T) {
-	commands := newCommands(commandEnvironment{})
+	commands := newCommandRegistry(t, commandEnvironment{})
 
 	for prefix, want := range map[string]string{
 		"/open c":         "/open config-dir",
@@ -144,7 +170,7 @@ func TestTargetCommandsExposeTheirArgumentsForCompletion(t *testing.T) {
 func TestCommandsReportSessionTargetsThatDoNotExistYet(t *testing.T) {
 	sessionDirectory := filepath.Join(t.TempDir(), "missing-session")
 	actionRan := false
-	commands := newCommands(commandEnvironment{
+	commands := newCommandRegistry(t, commandEnvironment{
 		session: commandSession{directory: sessionDirectory},
 		openTarget: func(string) error {
 			actionRan = true
@@ -176,19 +202,23 @@ func TestCommandsReportSessionTargetsThatDoNotExistYet(t *testing.T) {
 }
 
 func TestBrowseIsNotACommandAnymore(t *testing.T) {
-	if _, found := newCommands(commandEnvironment{}).Find("/browse session-dir"); found {
+	if _, found := newCommandRegistry(t, commandEnvironment{}).Find("/browse session-dir"); found {
 		t.Error("expected /browse to have been folded into /open")
 	}
 }
 
 func TestConfReportsAnUnconfiguredEditor(t *testing.T) {
-	commands := New(Options{ConfigFile: filepath.Join(t.TempDir(), "config.toml")})
+	set, err := New(Options{ConfigFile: filepath.Join(t.TempDir(), "config.toml")}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	commands := commandRegistry(t, set)
 	invocation, found := commands.Find("/conf")
 	if !found {
 		t.Fatal("expected /conf to be registered")
 	}
 
-	err := invocation.Command.Run(nil, invocation.Arguments)
+	err = invocation.Command.Run(nil, invocation.Arguments)
 	if err == nil || !strings.Contains(err.Error(), "set editor in config.toml") {
 		t.Errorf("got error %v", err)
 	}

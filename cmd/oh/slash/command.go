@@ -5,37 +5,36 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"unicode"
 
 	"crdx.org/io/agent"
 )
 
-type UsageError struct {
-	usage string
+type usageError struct{}
+
+func (usageError) Error() string {
+	return "invalid command usage"
 }
 
-func (self UsageError) Error() string {
-	return self.usage
-}
-
-func Usage(text string) error {
-	return UsageError{usage: text}
+func Usage() error {
+	return usageError{}
 }
 
 func IsUsageError(err error) bool {
-	var usageError UsageError
-	return errors.As(err, &usageError)
+	var target usageError
+	return errors.As(err, &target)
 }
 
-func FormatError(commandName string, err error) string {
+func FormatError(invocation Invocation, err error) string {
 	if IsUsageError(err) {
-		return err.Error()
+		return "Usage: " + invocation.Usage
 	}
 
 	message := []rune(err.Error())
 	if len(message) > 0 {
 		message[0] = []rune(strings.ToUpper(string(message[0])))[0]
 	}
-	return commandName + ": " + string(message)
+	return invocation.Name + ": " + string(message)
 }
 
 type Context interface {
@@ -56,73 +55,134 @@ func (self Command) WithArguments(arguments ...string) Command {
 	return self
 }
 
-func (self Command) Usage() string {
+func (self Command) usage(prefix string) string {
+	name := prefix + self.Name
 	if len(self.arguments) == 0 {
-		return self.Name
+		return name
 	}
 
 	arguments := append([]string(nil), self.arguments...)
 	slices.Sort(arguments)
-	return self.Name + " {" + strings.Join(arguments, "|") + "}"
+	return name + " {" + strings.Join(arguments, "|") + "}"
 }
 
 type Invocation struct {
+	Name      string
+	Usage     string
 	Command   *Command
 	Arguments []string
 }
 
-type CommandSet map[string]*Command
-
-func New(commands ...Command) CommandSet {
-	set := CommandSet{}
-
-	for i := range commands {
-		command := &commands[i]
-		name := strings.TrimPrefix(command.Name, "/")
-		if name == "" || !strings.HasPrefix(command.Name, "/") || strings.ContainsAny(name, " \t\r\n/") {
-			panic(fmt.Sprintf("invalid slash command name %q", command.Name))
-		}
-		if command.Run == nil {
-			panic(fmt.Sprintf("slash command %q has no handler", command.Name))
-		}
-		if _, exists := set[command.Name]; exists {
-			panic(fmt.Sprintf("slash command %q is already registered", command.Name))
-		}
-		set[command.Name] = command
-	}
-
-	return set
+type Set struct {
+	prefix   string
+	commands map[string]*Command
 }
 
-func (self CommandSet) Usages() []string {
-	usages := make([]string, 0, len(self))
-	for _, command := range self {
-		usages = append(usages, command.Usage())
+func NewSet(prefix string, commands ...Command) (Set, error) {
+	if err := validatePrefix(prefix); err != nil {
+		return Set{}, err
+	}
+
+	set := Set{prefix: prefix, commands: make(map[string]*Command, len(commands))}
+	for i := range commands {
+		command := &commands[i]
+		if command.Name == "" || strings.ContainsRune(command.Name, '/') || strings.ContainsFunc(command.Name, unicode.IsSpace) {
+			return Set{}, fmt.Errorf("invalid command name %q", command.Name)
+		}
+		if command.Run == nil {
+			return Set{}, fmt.Errorf("command %q has no handler", prefix+command.Name)
+		}
+		if _, exists := set.commands[command.Name]; exists {
+			return Set{}, fmt.Errorf("command %q is already registered", prefix+command.Name)
+		}
+		set.commands[command.Name] = command
+	}
+
+	return set, nil
+}
+
+func (self Set) Usages() []string {
+	usages := make([]string, 0, len(self.commands))
+	for _, command := range self.commands {
+		usages = append(usages, command.usage(self.prefix))
 	}
 	slices.Sort(usages)
 	return usages
 }
 
-func CommandName(message string) (string, bool) {
-	fields := strings.Fields(message)
-	if len(fields) == 0 || !strings.HasPrefix(fields[0], "/") {
-		return "", false
-	}
-	return fields[0], true
+type Registry struct {
+	sets []Set
 }
 
-func (self CommandSet) Find(message string) (Invocation, bool) {
+func NewRegistry(sets ...Set) (Registry, error) {
+	prefixes := make(map[string]struct{}, len(sets))
+	for _, set := range sets {
+		if err := validatePrefix(set.prefix); err != nil {
+			return Registry{}, err
+		}
+		if _, exists := prefixes[set.prefix]; exists {
+			return Registry{}, fmt.Errorf("command prefix %q is already registered", set.prefix)
+		}
+		prefixes[set.prefix] = struct{}{}
+	}
+
+	registered := append([]Set(nil), sets...)
+	slices.SortStableFunc(registered, func(left, right Set) int {
+		return len(right.prefix) - len(left.prefix)
+	})
+	return Registry{sets: registered}, nil
+}
+
+func validatePrefix(prefix string) error {
+	if prefix == "" || strings.ContainsFunc(prefix, unicode.IsSpace) {
+		return fmt.Errorf("invalid command prefix %q", prefix)
+	}
+	return nil
+}
+
+func (self Registry) Find(message string) (Invocation, bool) {
 	fields := strings.Fields(message)
 	if len(fields) == 0 {
 		return Invocation{}, false
 	}
 
-	command, found := self[fields[0]]
+	set, found := self.getSet(fields[0])
 	if !found {
 		return Invocation{}, false
 	}
 
-	return Invocation{Command: command, Arguments: fields[1:]}, true
+	bareName := strings.TrimPrefix(fields[0], set.prefix)
+	command, found := set.commands[bareName]
+	if !found {
+		return Invocation{}, false
+	}
+
+	return Invocation{
+		Name:      set.prefix + command.Name,
+		Usage:     command.usage(set.prefix),
+		Command:   command,
+		Arguments: fields[1:],
+	}, true
+}
+
+func (self Registry) CommandName(message string) (string, bool) {
+	fields := strings.Fields(message)
+	if len(fields) == 0 {
+		return "", false
+	}
+	if _, found := self.getSet(fields[0]); !found {
+		return "", false
+	}
+	return fields[0], true
+}
+
+func (self Registry) getSet(name string) (Set, bool) {
+	for _, set := range self.sets {
+		if strings.HasPrefix(name, set.prefix) {
+			return set, true
+		}
+	}
+	return Set{}, false
 }
 
 type Completion struct {
@@ -131,14 +191,14 @@ type Completion struct {
 	index   int
 }
 
-func (self *Completion) Next(commands CommandSet, prefix string) (string, bool) {
+func (self *Completion) Next(registry Registry, prefix string) (string, bool) {
 	if prefix == self.current && len(self.matches) > 0 {
 		self.index = (self.index + 1) % len(self.matches)
 		self.current = self.matches[self.index]
 		return self.current, true
 	}
 
-	self.matches = commands.completions(prefix)
+	self.matches = registry.completions(prefix)
 	self.index = 0
 	if len(self.matches) == 0 {
 		self.current = ""
@@ -155,20 +215,30 @@ func (self *Completion) Reset() {
 	self.index = 0
 }
 
-func (self CommandSet) completions(prefix string) []string {
-	if !strings.HasPrefix(prefix, "/") || strings.ContainsAny(prefix, "\t\r\n") {
+func (self Registry) completions(prefix string) []string {
+	if strings.ContainsAny(prefix, "\t\r\n") {
 		return nil
 	}
 
 	name, argumentPrefix, hasArgument := strings.Cut(prefix, " ")
+	set, found := self.getSet(name)
+	if !found {
+		return nil
+	}
+
+	bareName := strings.TrimPrefix(name, set.prefix)
 	if !hasArgument {
-		return matchingPrefixes(name, self.commandNames())
+		matches := matchingPrefixes(bareName, set.commandNames())
+		for i := range matches {
+			matches[i] = set.prefix + matches[i]
+		}
+		return matches
 	}
 	if strings.Contains(argumentPrefix, " ") {
 		return nil
 	}
 
-	command, found := self[name]
+	command, found := set.commands[bareName]
 	if !found {
 		return nil
 	}
@@ -180,9 +250,9 @@ func (self CommandSet) completions(prefix string) []string {
 	return arguments
 }
 
-func (self CommandSet) commandNames() []string {
-	names := make([]string, 0, len(self))
-	for name := range self {
+func (self Set) commandNames() []string {
+	names := make([]string, 0, len(self.commands))
+	for name := range self.commands {
 		names = append(names, name)
 	}
 	return names

@@ -16,8 +16,8 @@ import (
 
 func TestSlashCommandRunsImmediately(t *testing.T) {
 	ran := false
-	fixtureCommands := slash.New(slash.Command{
-		Name: "/fixture",
+	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
+		Name: "fixture",
 		Run: func(_ slash.Context, arguments []string) error {
 			if !slices.Equal(arguments, []string{"one", "two"}) {
 				t.Errorf("got arguments %v", arguments)
@@ -38,8 +38,8 @@ func TestSlashCommandRunsImmediately(t *testing.T) {
 }
 
 func TestSlashCommandCanAddANotice(t *testing.T) {
-	fixtureCommands := slash.New(slash.Command{
-		Name: "/fixture",
+	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
+		Name: "fixture",
 		Run: func(context slash.Context, _ []string) error {
 			context.Notice("fixture notice")
 			return nil
@@ -63,7 +63,7 @@ func TestSlashCommandCanAddANotice(t *testing.T) {
 func TestUnknownSlashCommandShowsAnErrorAndKeepsTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.commands = slash.New()
+	self.commands = fixtureCommandRegistry(t)
 	editor := edit.NewInput(nil)
 	for _, value := range "/unknown" {
 		editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
@@ -85,10 +85,10 @@ func TestUnknownSlashCommandShowsAnErrorAndKeepsTheInput(t *testing.T) {
 
 func TestTabCompletesAUniqueSlashCommand(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
-	self.commands = slash.New(
-		slash.Command{Name: "/conf", Run: slashTestHandler},
-		slash.Command{Name: "/copy", Run: slashTestHandler},
-		slash.Command{Name: "/open", Run: slashTestHandler},
+	self.commands = fixtureCommandRegistry(t,
+		slash.Command{Name: "conf", Run: slashTestHandler},
+		slash.Command{Name: "copy", Run: slashTestHandler},
+		slash.Command{Name: "open", Run: slashTestHandler},
 	)
 	editor := edit.NewInput(nil)
 	for _, value := range "/op" {
@@ -104,6 +104,20 @@ func TestTabCompletesAUniqueSlashCommand(t *testing.T) {
 
 func slashTestHandler(slash.Context, []string) error {
 	return nil
+}
+
+func fixtureCommandRegistry(t *testing.T, commands ...slash.Command) slash.Registry {
+	t.Helper()
+
+	set, err := slash.NewSet("/", commands...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	registry, err := slash.NewRegistry(set)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return registry
 }
 
 func slashCommandFixture(t *testing.T, currentCaps caps.Set) *Harness {
@@ -123,8 +137,8 @@ func slashCommandFixture(t *testing.T, currentCaps caps.Set) *Harness {
 
 func TestConsecutiveTabsCycleCommandArguments(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
-	self.commands = slash.New(
-		slash.Command{Name: "/copy", Run: slashTestHandler}.WithArguments("session-name", "session-id", "session-dir"),
+	self.commands = fixtureCommandRegistry(t,
+		slash.Command{Name: "copy", Run: slashTestHandler}.WithArguments("session-name", "session-id", "session-dir"),
 	)
 	editor := edit.NewInput(nil)
 	for _, value := range "/copy " {
@@ -143,8 +157,8 @@ func TestConsecutiveTabsCycleCommandArguments(t *testing.T) {
 }
 
 func TestSlashCommandCanAddASuccessMessage(t *testing.T) {
-	fixtureCommands := slash.New(slash.Command{
-		Name: "/fixture",
+	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
+		Name: "fixture",
 		Run: func(context slash.Context, _ []string) error {
 			context.Success("Copied to clipboard.")
 			return nil
@@ -165,17 +179,17 @@ func TestSlashCommandCanAddASuccessMessage(t *testing.T) {
 func TestUsageErrorIsNotPrefixedWithTheCommandName(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.commands = slash.New(slash.Command{
-		Name: "/copy",
+	self.commands = fixtureCommandRegistry(t, slash.Command{
+		Name: "copy",
 		Run: func(slash.Context, []string) error {
-			return slash.Usage("Usage: /copy {session-name|session-id|session-dir}")
+			return slash.Usage()
 		},
-	})
+	}.WithArguments("session-name", "session-id", "session-dir"))
 
 	if got := self.handleSlashCommand("/copy"); got != handledCommand {
 		t.Fatalf("got slash input result %d", got)
 	}
-	want := "Usage: /copy {session-name|session-id|session-dir}"
+	want := "Usage: /copy {session-dir|session-id|session-name}"
 	if len(self.events) != 1 || self.events[0].Text != want {
 		t.Errorf("got events %+v, want %q", self.events, want)
 	}

@@ -51,7 +51,7 @@ type Harness struct {
 	workspaceDir       string
 	getOnWithItMessage string
 
-	commands   slash.CommandSet
+	commands   slash.Registry
 	completion slash.Completion
 
 	queuedTurn  turn.Queue
@@ -182,12 +182,12 @@ func (self *Harness) handleSlashCommand(message string) slashInput {
 	invocation, found := self.commands.Find(message)
 	if found {
 		if err := invocation.Command.Run(commandContext{harness: self}, invocation.Arguments); err != nil {
-			self.notifyFailure(slash.FormatError(invocation.Command.Name, err))
+			self.notifyFailure(slash.FormatError(invocation, err))
 		}
 		return handledCommand
 	}
 
-	name, isCommand := slash.CommandName(message)
+	name, isCommand := self.commands.CommandName(message)
 	if !isCommand {
 		return ordinaryInput
 	}

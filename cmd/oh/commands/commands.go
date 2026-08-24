@@ -61,8 +61,8 @@ type commandTarget struct {
 	prepare      func() error
 }
 
-func New(options Options) slash.CommandSet {
-	return newCommands(commandEnvironment{
+func New(options Options, snippetUsages []string) (slash.Set, error) {
+	return buildCommands(commandEnvironment{
 		configDir:  options.ConfigDir,
 		configPath: options.ConfigFile,
 		stateDir:   options.StateDir,
@@ -78,16 +78,15 @@ func New(options Options) slash.CommandSet {
 		copyText: func(text string) error {
 			return terminal.Copy(options.Output, text)
 		},
-	})
+	}, snippetUsages)
 }
 
-func newCommands(environment commandEnvironment) slash.CommandSet {
-	var commands slash.CommandSet
-	commands = slash.New(
-		noArgumentCommand("/conf", "Usage: /conf", environment.configPath, environment.openEditor),
+func buildCommands(environment commandEnvironment, snippetUsages []string) (slash.Set, error) {
+	var set slash.Set
+	commands := []slash.Command{
+		noArgumentCommand("conf", environment.configPath, environment.openEditor),
 		targetCommand(
-			"/copy",
-			"Usage: /copy {session-name|session-id|session-dir}",
+			"copy",
 			map[string]commandTarget{
 				"session-name": copyTarget(environment.session.name),
 				"session-id":   copyTarget(environment.session.id),
@@ -95,10 +94,9 @@ func newCommands(environment commandEnvironment) slash.CommandSet {
 			},
 			environment.copyText,
 		),
-		helpCommand(func() string { return helpText(commands.Usages()) }),
+		helpCommand(func() string { return helpText(set.Usages(), snippetUsages) }),
 		targetCommand(
-			"/open",
-			"Usage: /open {config-dir|state-dir|session-dir|session-log|session-chat}",
+			"open",
 			map[string]commandTarget{
 				"config-dir": {
 					value: environment.configDir,
@@ -119,16 +117,19 @@ func newCommands(environment commandEnvironment) slash.CommandSet {
 			},
 			environment.openTarget,
 		),
-	)
-	return commands
+	}
+
+	var err error
+	set, err = slash.NewSet("/", commands...)
+	return set, err
 }
 
 func helpCommand(getHelp func() string) slash.Command {
 	return slash.Command{
-		Name: "/help",
+		Name: "help",
 		Run: func(context slash.Context, arguments []string) error {
 			if len(arguments) != 0 {
-				return slash.Usage("Usage: /help")
+				return slash.Usage()
 			}
 
 			context.Notice(getHelp())
@@ -137,9 +138,13 @@ func helpCommand(getHelp func() string) slash.Command {
 	}
 }
 
-func helpText(usages []string) string {
-	visibleUsages := slices.DeleteFunc(usages, func(usage string) bool { return usage == "/help" })
-	return "Commands:\n  " + strings.Join(visibleUsages, "\n  ")
+func helpText(commandUsages, snippetUsages []string) string {
+	visibleCommandUsages := slices.DeleteFunc(commandUsages, func(usage string) bool { return usage == "/help" })
+	sections := []string{"Commands:\n  " + strings.Join(visibleCommandUsages, "\n  ")}
+	if len(snippetUsages) > 0 {
+		sections = append(sections, "Snippets:\n  "+strings.Join(snippetUsages, "\n  "))
+	}
+	return strings.Join(sections, "\n\n")
 }
 
 func copyTarget(value string) commandTarget {
@@ -163,12 +168,12 @@ func existingTarget(description string, path string) commandTarget {
 	}
 }
 
-func noArgumentCommand(name string, usage string, value string, action func(string) error) slash.Command {
+func noArgumentCommand(name string, value string, action func(string) error) slash.Command {
 	return slash.Command{
 		Name: name,
 		Run: func(_ slash.Context, arguments []string) error {
 			if len(arguments) != 0 {
-				return slash.Usage(usage)
+				return slash.Usage()
 			}
 
 			return action(value)
@@ -176,17 +181,17 @@ func noArgumentCommand(name string, usage string, value string, action func(stri
 	}
 }
 
-func targetCommand(name string, usage string, targets map[string]commandTarget, action func(string) error) slash.Command {
+func targetCommand(name string, targets map[string]commandTarget, action func(string) error) slash.Command {
 	command := slash.Command{
 		Name: name,
 		Run: func(context slash.Context, arguments []string) error {
 			if len(arguments) != 1 {
-				return slash.Usage(usage)
+				return slash.Usage()
 			}
 
 			target, found := targets[arguments[0]]
 			if !found {
-				return slash.Usage(usage)
+				return slash.Usage()
 			}
 
 			if target.prepare != nil {
