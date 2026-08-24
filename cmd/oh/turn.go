@@ -20,12 +20,6 @@ type Turn struct {
 	events chan TurnEvent
 }
 
-type QueuedTurn struct {
-	nextMessage   string
-	isReplacement bool
-	isModeChange  bool
-}
-
 type TurnEvent struct {
 	update agent.Update
 	err    error

@@ -23,6 +23,7 @@ import (
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/tty"
+	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/internal/sandbox"
 )
 
@@ -49,7 +50,7 @@ type Harness struct {
 	getOnWithItMessage string
 	terminalFocused    bool
 
-	queuedTurn     QueuedTurn
+	queuedTurn     turn.Queue
 	currentTurn    Turn
 	onTurnFinished func()
 }
@@ -239,22 +240,21 @@ func (self *Harness) toggleCapability(whichCaps caps.Set) {
 	self.terminal.SetMode(self.mode.Current())
 
 	if self.currentTurn.isRunning {
-		self.queuedTurn.isModeChange = true
+		self.queuedTurn.MarkModeChange()
 		self.interruptTurn()
 	}
 }
 
 func (self *Harness) cancelTurn() {
 	if self.currentTurn.isCancelled {
-		self.queuedTurn = QueuedTurn{}
+		self.queuedTurn.Clear()
 	}
 
 	self.interruptTurn()
 }
 
 func (self *Harness) replaceTurn(message string) {
-	self.queuedTurn.nextMessage = message
-	self.queuedTurn.isReplacement = true
+	self.queuedTurn.Replace(message)
 	self.interruptTurn()
 }
 
@@ -575,7 +575,7 @@ func (self *Harness) finish() {
 		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: self.currentTurn.err.Error()})
 	}
 
-	self.storeItems()
+	self.storeProviderState()
 	self.showStorageWarnings()
 	self.currentTurn.painter.close(dynamic.Cancelled)
 	if self.currentTurn.painter.isStale {
@@ -588,33 +588,35 @@ func (self *Harness) finish() {
 	self.currentTurn.isRunning = false
 	self.currentTurn.events = nil
 
-	if !self.currentTurn.isCancelled && !self.queuedTurn.isReplacement && !self.queuedTurn.isModeChange &&
-		!self.terminalFocused && self.onTurnFinished != nil {
+	if !self.currentTurn.isCancelled && self.queuedTurn.Empty() && !self.terminalFocused && self.onTurnFinished != nil {
 		self.onTurnFinished()
 	}
 
-	if self.queuedTurn.isReplacement {
-		message := self.queuedTurn.nextMessage
-		self.queuedTurn = QueuedTurn{}
+	queued, message := self.queuedTurn.Take()
+	switch queued {
+	case turn.Replacement:
 		self.start(message)
-	} else if self.queuedTurn.isModeChange {
-		self.queuedTurn = QueuedTurn{}
+	case turn.ModeChange:
 		if message := self.mode.Inject(); message != "" {
 			self.start(message)
 		}
+	case turn.None:
 	}
 }
 
-func (self *Harness) storeItems() {
+func (self *Harness) storeProviderState() bool {
 	items, err := self.agent.Dump()
 	if err != nil {
 		self.notifyFailure("the conversation state could not be stored: " + err.Error())
-		return
+		return false
 	}
 
 	if err := self.recorder.StoreItems(items); err != nil {
 		self.notifyFailure(err.Error())
+		return false
 	}
+
+	return true
 }
 
 func (self *Harness) showStorageWarnings() {

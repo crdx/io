@@ -112,7 +112,9 @@ func TestProviderItemWriteFailureWarnsAndLeavesCanonicalJournalReadable(t *testi
 		itemFailure:   errors.New("item write failed"),
 	}
 	testHarness := newStorageFaultHarness(log, agent.New("", provider, nil))
-	testHarness.storeItems()
+	if testHarness.storeProviderState() {
+		t.Error("expected the provider state write to fail")
+	}
 
 	storedSession, err := store.Read(directory, innerLog.Name())
 	if err != nil {

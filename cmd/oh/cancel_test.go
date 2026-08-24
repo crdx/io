@@ -339,8 +339,9 @@ func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) 
 	if !self.currentTurn.isCancelled {
 		t.Fatal("expected the active turn to be marked cancelled")
 	}
-	if !self.queuedTurn.isReplacement || self.queuedTurn.nextMessage != "dfd" {
-		t.Fatalf("expected dfd to exist only as an invisible queued prompt, got queued=%t prompt=%q", self.queuedTurn.isReplacement, self.queuedTurn.nextMessage)
+	pending := self.queuedTurn.Peek()
+	if !pending.Replacement || pending.Message != "dfd" {
+		t.Fatalf("expected dfd to exist only as an invisible queued prompt, got queued=%t prompt=%q", pending.Replacement, pending.Message)
 	}
 }
 
@@ -364,8 +365,9 @@ func TestTheLatestOfTwoRapidReplacementsWins(t *testing.T) {
 		self.apply(editor, history, key.Key{Code: key.Enter})
 	}
 
-	if self.queuedTurn.nextMessage != "second replacement" || !self.queuedTurn.isReplacement {
-		t.Errorf("unexpected queued turn: %+v", self.queuedTurn)
+	pending := self.queuedTurn.Peek()
+	if pending.Message != "second replacement" || !pending.Replacement {
+		t.Errorf("unexpected queued turn: %+v", pending)
 	}
 	if cancellations != 2 {
 		t.Errorf("cancelled %d times, want 2", cancellations)
@@ -607,17 +609,17 @@ func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
 			self := &Harness{
 				currentTurn: Turn{isRunning: true, isCancelled: test.isCancelled, cancel: func() {}},
 			}
-			self.queuedTurn.nextMessage = "later"
-			self.queuedTurn.isReplacement = true
-			self.queuedTurn.isModeChange = true
+			self.queuedTurn.Replace("later")
+			self.queuedTurn.MarkModeChange()
 
 			self.cancelTurn()
 
-			kept := self.queuedTurn.isReplacement && self.queuedTurn.isModeChange && self.queuedTurn.nextMessage == "later"
+			pending := self.queuedTurn.Peek()
+			kept := pending.Replacement && pending.ModeChange && pending.Message == "later"
 			if kept != test.wantKept {
 				t.Errorf(
 					"expected the queue kept=%t, got queued=%t mode=%t prompt=%q",
-					test.wantKept, self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.nextMessage,
+					test.wantKept, pending.Replacement, pending.ModeChange, pending.Message,
 				)
 			}
 		})
@@ -643,10 +645,11 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	self.toggleCapability(caps.Write)
 	self.replaceTurn("second")
 
-	if !self.queuedTurn.isReplacement || !self.queuedTurn.isModeChange || self.queuedTurn.nextMessage != "second" {
+	pending := self.queuedTurn.Peek()
+	if !pending.Replacement || !pending.ModeChange || pending.Message != "second" {
 		t.Fatalf(
 			"expected both a queued prompt and a queued mode change, got queued=%t mode=%t prompt=%q",
-			self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.nextMessage,
+			pending.Replacement, pending.ModeChange, pending.Message,
 		)
 	}
 
@@ -655,11 +658,8 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	}
 	self.finish()
 
-	if self.queuedTurn.isReplacement || self.queuedTurn.isModeChange || self.queuedTurn.nextMessage != "" {
-		t.Errorf(
-			"expected the whole queue emptied, got queued=%t mode=%t prompt=%q",
-			self.queuedTurn.isReplacement, self.queuedTurn.isModeChange, self.queuedTurn.nextMessage,
-		)
+	if !self.queuedTurn.Empty() {
+		t.Errorf("expected the whole queue emptied, got %+v", self.queuedTurn.Peek())
 	}
 
 	if !self.currentTurn.isRunning {
@@ -711,7 +711,7 @@ func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
 	}
 	self.finish()
 
-	if self.queuedTurn.isModeChange {
+	if !self.queuedTurn.Empty() {
 		t.Error("expected the queued mode change to have been taken")
 	}
 
