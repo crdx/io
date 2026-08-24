@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/output"
@@ -60,7 +61,10 @@ func newStorageFaultHarness(log SessionLogger, assistant *agent.Agent) *Harness 
 		screen:   output.New(&bytes.Buffer{}),
 		recorder: recordSession(log),
 	}
-	testHarness.currentTurn = Turn{painter: testHarness.newPainter(false)}
+	testHarness.currentTurn = Turn{
+		painter: testHarness.newPainter(false),
+		Stream:  testTimedTurnStream(false, time.Now(), time.Time{}),
+	}
 	return testHarness
 }
 

@@ -14,6 +14,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/turn"
 )
 
 func TestEscapeAtRestDoesNotPanic(t *testing.T) {
@@ -39,13 +40,13 @@ func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 
 	stopped := false
 
-	self.currentTurn = Turn{isRunning: true, cancel: func() { stopped = true }}
+	self.currentTurn = Turn{Stream: testTurnStream(nil, func() { stopped = true }, turn.State{Running: true})}
 
 	if !self.apply(editor, nil, keypress) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
 	}
 
-	if !stopped || !self.currentTurn.isCancelled {
+	if !stopped || !self.currentTurn.Cancelled() {
 		t.Error("expected the turn to have been cancelled, as escape cancels it")
 	}
 
@@ -70,16 +71,16 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 	editor := edit.NewInput(history)
 
 	self.apply(editor, history, key.Key{Code: key.Enter})
-	if self.currentTurn.isRunning {
+	if self.currentTurn.Running() {
 		t.Error("expected the first return to do nothing")
 	}
 
 	self.apply(editor, history, key.Key{Code: key.Enter})
-	if !self.currentTurn.isRunning {
+	if !self.currentTurn.Running() {
 		t.Fatal("expected the second return to start a turn")
 	}
 
-	for report := range self.currentTurn.events {
+	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
 	}
 	self.finish()
@@ -94,7 +95,7 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 }
 
 func TestAcceptedInputCanImmediatelyBeRecalled(t *testing.T) {
-	self := &Harness{currentTurn: Turn{isRunning: true, cancel: func() {}}}
+	self := &Harness{currentTurn: Turn{Stream: testTurnStream(nil, func() {}, turn.State{Running: true})}}
 	history := edit.NewHistory("", historyLimit)
 	editor := edit.NewInput(history)
 
@@ -116,12 +117,12 @@ func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.
 	editor := edit.NewInput(history)
 
 	self.start("first")
-	interruptedEvents := self.currentTurn.events
+	interruptedEvents := self.currentTurn.Events()
 
 	self.apply(editor, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
 	self.apply(editor, history, key.Key{Code: key.Rune, Value: 'w'})
 
-	if !self.currentTurn.isCancelled {
+	if !self.currentTurn.Cancelled() {
 		t.Fatal("expected the capability change to interrupt the turn")
 	}
 
@@ -130,11 +131,11 @@ func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.
 	}
 	self.finish()
 
-	if !self.currentTurn.isRunning {
+	if !self.currentTurn.Running() {
 		t.Fatal("expected the capability change to start a replacement turn")
 	}
 
-	for report := range self.currentTurn.events {
+	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
 	}
 	self.finish()
@@ -166,15 +167,15 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *
 	editor := edit.NewInput(history)
 
 	self.start("first")
-	interruptedEvents := self.currentTurn.events
+	interruptedEvents := self.currentTurn.Events()
 
 	self.apply(editor, history, key.Key{Code: key.Enter})
-	if self.currentTurn.isCancelled {
+	if self.currentTurn.Cancelled() {
 		t.Error("expected the first return to leave the turn running")
 	}
 
 	self.apply(editor, history, key.Key{Code: key.Enter})
-	if !self.currentTurn.isCancelled {
+	if !self.currentTurn.Cancelled() {
 		t.Error("expected the second return to cancel the turn")
 	}
 
@@ -183,11 +184,11 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *
 	}
 	self.finish()
 
-	if !self.currentTurn.isRunning {
+	if !self.currentTurn.Running() {
 		t.Fatal("expected a continuation to start after the interrupted turn")
 	}
 
-	for report := range self.currentTurn.events {
+	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
 	}
 	self.finish()
@@ -273,13 +274,13 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 	}
 
 	self.start("first")
-	events := self.currentTurn.events
+	events := self.currentTurn.Events()
 
 	thoughts := 0
 	for thoughts < 2 {
 		report := <-events
 		self.takeTurn(report)
-		if report.update.Event != nil && report.update.Event.Kind == agent.ModelReasoningEvent {
+		if report.Update.Event != nil && report.Update.Event.Kind == agent.ModelReasoningEvent {
 			thoughts++
 		}
 	}
@@ -305,7 +306,7 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 
 func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) {
 	self := &Harness{
-		currentTurn: Turn{isRunning: true, events: make(chan TurnEvent), cancel: func() {}},
+		currentTurn: Turn{Stream: testTurnStream(make(chan TurnEvent), func() {}, turn.State{Running: true})},
 	}
 	history := edit.NewHistory("", historyLimit)
 	editor := edit.NewInput(history)
@@ -318,10 +319,10 @@ func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) 
 	if editor.Text() != "" {
 		t.Fatalf("expected accepted editor input to disappear, got %q", editor.Text())
 	}
-	if !self.currentTurn.isRunning {
+	if !self.currentTurn.Running() {
 		t.Fatal("expected cancelled turn to remain running until its event channel closes")
 	}
-	if !self.currentTurn.isCancelled {
+	if !self.currentTurn.Cancelled() {
 		t.Fatal("expected the active turn to be marked cancelled")
 	}
 	pending := self.queuedTurn.Peek()
@@ -334,10 +335,7 @@ func TestTheLatestOfTwoRapidReplacementsWins(t *testing.T) {
 	cancellations := 0
 	self := &Harness{
 		currentTurn: Turn{
-			isRunning: true,
-			cancel: func() {
-				cancellations++
-			},
+			Stream: testTurnStream(nil, func() { cancellations++ }, turn.State{Running: true}),
 		},
 	}
 	history := edit.NewHistory("", historyLimit)
@@ -378,11 +376,11 @@ func TestReplacementInputCancelsProvisionalReasoningAndStartsTheNextTurn(t *test
 	editor := edit.NewInput(history)
 
 	self.start("first")
-	interruptedEvents := self.currentTurn.events
+	interruptedEvents := self.currentTurn.Events()
 	for {
 		report := <-interruptedEvents
 		self.takeTurn(report)
-		if report.update.Delta != nil && report.update.Delta.Kind == agent.ModelReasoningEvent {
+		if report.Update.Delta != nil && report.Update.Delta.Kind == agent.ModelReasoningEvent {
 			break
 		}
 	}
@@ -395,7 +393,7 @@ func TestReplacementInputCancelsProvisionalReasoningAndStartsTheNextTurn(t *test
 		self.takeTurn(report)
 	}
 	self.finish()
-	for report := range self.currentTurn.events {
+	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
 	}
 	self.finish()
@@ -436,7 +434,7 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	editor := edit.NewInput(history)
 
 	self.start("first")
-	interruptedEvents := self.currentTurn.events
+	interruptedEvents := self.currentTurn.Events()
 
 	for _, value := range "follow up" {
 		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
@@ -448,11 +446,11 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	}
 	self.finish()
 
-	if !self.currentTurn.isRunning {
+	if !self.currentTurn.Running() {
 		t.Fatal("expected the accepted input to start another turn")
 	}
 
-	for report := range self.currentTurn.events {
+	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
 	}
 	self.finish()
@@ -500,7 +498,7 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 	self.start("first")
 	self.interruptTurn()
 
-	for report := range self.currentTurn.events {
+	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
 	}
 	self.finish()
@@ -529,7 +527,7 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 	editor := edit.NewInput(history)
 
 	self.start("first")
-	interruptedEvents := self.currentTurn.events
+	interruptedEvents := self.currentTurn.Events()
 
 	for _, value := range "follow up" {
 		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
@@ -542,7 +540,7 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 	}
 	self.finish()
 
-	if self.currentTurn.isRunning {
+	if self.currentTurn.Running() {
 		t.Error("expected the taken-back replacement to leave no turn running")
 	}
 
@@ -565,13 +563,13 @@ func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
 
 	stopped := false
 
-	self.currentTurn = Turn{isRunning: true, cancel: func() { stopped = true }}
+	self.currentTurn = Turn{Stream: testTurnStream(nil, func() { stopped = true }, turn.State{Running: true})}
 
 	if !self.apply(editor, nil, key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
 	}
 
-	if !stopped || !self.currentTurn.isCancelled {
+	if !stopped || !self.currentTurn.Cancelled() {
 		t.Error("expected the turn to have been cancelled")
 	}
 
@@ -592,7 +590,7 @@ func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			self := &Harness{
-				currentTurn: Turn{isRunning: true, isCancelled: test.isCancelled, cancel: func() {}},
+				currentTurn: Turn{Stream: testTurnStream(nil, func() {}, turn.State{Running: true, Cancelled: test.isCancelled})},
 			}
 			self.queuedTurn.Replace("later")
 			self.queuedTurn.MarkModeChange()
@@ -638,7 +636,7 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 		)
 	}
 
-	for report := range self.currentTurn.events {
+	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
 	}
 	self.finish()
@@ -647,11 +645,11 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 		t.Errorf("expected the whole queue emptied, got %+v", self.queuedTurn.Peek())
 	}
 
-	if !self.currentTurn.isRunning {
+	if !self.currentTurn.Running() {
 		t.Error("expected the queued prompt to have started a turn")
 	}
 
-	for report := range self.currentTurn.events {
+	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
 	}
 	self.finish()
@@ -691,7 +689,7 @@ func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
 	self.start("first")
 	self.toggleCap(caps.Write)
 
-	for report := range self.currentTurn.events {
+	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
 	}
 	self.finish()
@@ -700,7 +698,7 @@ func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
 		t.Error("expected the queued mode change to have been taken")
 	}
 
-	if !self.currentTurn.isRunning {
+	if !self.currentTurn.Running() {
 		t.Error("expected the mode change to have started a turn of its own")
 	}
 }

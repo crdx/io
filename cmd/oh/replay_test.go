@@ -221,14 +221,14 @@ func drawDiscardedReasoning(t *testing.T) string {
 	t.Helper()
 
 	rig := newReplayRig(t, replayColumns)
-	rig.chat.currentTurn = Turn{isRunning: true, painter: rig.chat.newPainter(true)}
+	rig.chat.currentTurn = Turn{Stream: testRunningTurnStream(), painter: rig.chat.newPainter(true)}
 
 	completeThought := agent.Event{Kind: agent.ModelReasoningEvent, Text: "complete thought"}
-	rig.chat.takeTurn(TurnEvent{update: agent.Update{Event: &completeThought}})
+	rig.chat.takeTurn(TurnEvent{Update: agent.Update{Event: &completeThought}})
 	incompleteThought := agent.Delta{Kind: agent.ModelReasoningEvent, Text: "incomplete thought"}
-	rig.chat.takeTurn(TurnEvent{update: agent.Update{Delta: &incompleteThought}})
+	rig.chat.takeTurn(TurnEvent{Update: agent.Update{Delta: &incompleteThought}})
 	failure := agent.Event{Kind: agent.FailureEvent, Text: "stream failed"}
-	rig.chat.takeTurn(TurnEvent{update: agent.Update{Event: &failure}})
+	rig.chat.takeTurn(TurnEvent{Update: agent.Update{Event: &failure}})
 	rig.chat.screen.End()
 
 	return strings.TrimSuffix(rig.drawn(), "\r\n")
@@ -412,26 +412,26 @@ func streamIntoBuffer(t *testing.T, entries []replayEntry) string {
 	t.Helper()
 
 	rig := newReplayRig(t, replayColumns)
-	rig.chat.currentTurn = Turn{isRunning: true, painter: rig.chat.newPainter(true)}
+	rig.chat.currentTurn = Turn{Stream: testRunningTurnStream(), painter: rig.chat.newPainter(true)}
 	rig.chat.screen.ReportProgress(true)
 
 	for _, entry := range entries {
 		event := *entry.Event
 		if event.Kind == agent.ModelMessageEvent || event.Kind == agent.ModelReasoningEvent {
 			for piece := range deltaSized(event.Text) {
-				rig.chat.currentTurn.painter.drawDelta(agent.Delta{Kind: event.Kind, Text: piece})
+				rig.chat.currentTurn.painter.DrawDelta(agent.Delta{Kind: event.Kind, Text: piece})
 			}
 		}
 
 		rig.chat.events = append(rig.chat.events, event)
-		rig.chat.currentTurn.painter.drawEvent(event)
+		rig.chat.currentTurn.painter.DrawEvent(event)
 
-		if rig.chat.currentTurn.painter.isStale {
+		if rig.chat.currentTurn.painter.Stale() {
 			rig.chat.redraw()
 		}
 	}
 
-	rig.chat.currentTurn.painter.close(dynamic.Done)
+	rig.chat.currentTurn.painter.Close(dynamic.Done)
 	rig.chat.screen.End()
 	rig.chat.screen.ReportProgress(false)
 
@@ -473,13 +473,13 @@ func replayThenRedraw(t *testing.T, openRig func(*testing.T) *replayRig, entries
 	t.Helper()
 
 	rig := openRig(t)
-	rig.chat.currentTurn.isRunning = isRunning
+	rig.chat.currentTurn.Stream = testTurnStreamForRunning(isRunning)
 	rig.load(entriesWhile(entries, isRunning))
 	rig.chat.replay()
 	rig.chat.redraw()
 
 	if isRunning {
-		rig.chat.currentTurn.painter.close(dynamic.Cancelled)
+		rig.chat.currentTurn.painter.Close(dynamic.Cancelled)
 	}
 
 	return rig.drawn()
@@ -514,7 +514,7 @@ func replayWhileRunning(t *testing.T, entries []replayEntry) string {
 
 	synctest.Test(t, func(t *testing.T) {
 		rig := newReplayRig(t, replayColumns)
-		rig.chat.currentTurn.isRunning = true
+		rig.chat.currentTurn.Stream = testRunningTurnStream()
 		rig.load(entriesUpToFirstCall(entries))
 		rig.chat.replay()
 
@@ -523,7 +523,7 @@ func replayWhileRunning(t *testing.T, entries []replayEntry) string {
 
 		drawn = rig.drawn()
 
-		rig.chat.currentTurn.painter.close(dynamic.Cancelled)
+		rig.chat.currentTurn.painter.Close(dynamic.Cancelled)
 	})
 
 	return drawn
@@ -631,10 +631,8 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 					t.Helper()
 
 					held := &Harness{mode: caps.NewMode(grantedCaps)}
-					held.currentTurn.isRunning = isRunning
+					held.currentTurn.Stream = testTimedTurnStream(isRunning, time.Now().Add(-turnSoFar), time.Now())
 					held.currentTurn.spinnerFrame = 2
-					held.currentTurn.startedAt = time.Now().Add(-turnSoFar)
-					held.currentTurn.finishedAt = time.Now()
 
 					built := goldenBarLayout(t, held)
 
@@ -705,9 +703,8 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 					t.Helper()
 
 					held := &Harness{mode: caps.NewMode(caps.All())}
-					held.currentTurn.isRunning = true
+					held.currentTurn.Stream = testTimedTurnStream(true, time.Now().Add(-turnSoFar), time.Time{})
 					held.currentTurn.spinnerFrame = 2
-					held.currentTurn.startedAt = time.Now().Add(-turnSoFar)
 
 					built := goldenBarLayout(t, held)
 

@@ -1,27 +1,15 @@
 package main
 
 import (
-	"context"
-	"time"
-
-	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/painter"
+	"crdx.org/io/cmd/oh/turn"
 )
 
 type Turn struct {
-	isRunning   bool
-	isCancelled bool
-	cancel      context.CancelFunc
-	err         error
+	*turn.Stream
 
 	spinnerFrame int
-	painter      *Painter
-	startedAt    time.Time
-	finishedAt   time.Time
-
-	events chan TurnEvent
+	painter      *painter.Painter
 }
 
-type TurnEvent struct {
-	update agent.Update
-	err    error
-}
+type TurnEvent = turn.Event

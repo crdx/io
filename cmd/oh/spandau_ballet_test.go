@@ -346,7 +346,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		screen:   output.NewTerminalOfSize(&firstScreenOutput, replayColumns, replayLines),
 		recorder: recordSession(log),
 	}
-	firstHarness.currentTurn = Turn{isRunning: true, painter: firstHarness.newPainter(true)}
+	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
 	runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
 
 	sessionName := log.Name()
@@ -383,7 +383,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		recorder: resumedRecorder,
 		events:   slices.Clone(storedSession.Events),
 	}
-	resumedHarness.currentTurn = Turn{isRunning: true}
+	resumedHarness.currentTurn = Turn{Stream: testRunningTurnStream()}
 	resumedHarness.replay()
 	requireSameVisibleScreen(
 		t,
@@ -500,7 +500,7 @@ func runSessionGoldenTurn(
 		streamContext, cancel = context.WithTimeout(t.Context(), timeout)
 	}
 	defer cancel()
-	testHarness.currentTurn.cancel = cancel
+	testHarness.currentTurn.Stream = testRunningTurnStreamWithCancel(cancel)
 	editor := edit.NewInput(nil)
 	interruptWithEscape := func() {
 		if !testHarness.apply(editor, nil, key.Key{Code: key.Escape}) {
@@ -520,7 +520,7 @@ func runSessionGoldenTurn(
 	reasoningEvents := 0
 	messageDeltas := 0
 	for update, streamError := range testHarness.agent.Stream(streamContext, turn.Prompt) {
-		testHarness.takeTurn(TurnEvent{update: update, err: streamError})
+		testHarness.takeTurn(TurnEvent{Update: update, Err: streamError})
 		if update.Delta != nil {
 			switch update.Delta.Kind {
 			case agent.ModelReasoningEvent:
@@ -542,7 +542,7 @@ func runSessionGoldenTurn(
 			}
 		}
 	}
-	testHarness.currentTurn.isCancelled = turn.IsCancelled
+	testHarness.currentTurn.SetCancelled(turn.IsCancelled)
 	testHarness.finish()
 }
 

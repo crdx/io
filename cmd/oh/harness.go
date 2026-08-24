@@ -2,13 +2,10 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"os"
-	"os/signal"
 	"slices"
 	"strings"
-	"syscall"
 	"time"
 
 	"crdx.org/io/agent"
@@ -16,9 +13,11 @@ import (
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/input"
+	"crdx.org/io/cmd/oh/interaction"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/painter"
 	"crdx.org/io/cmd/oh/recording"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/slash"
@@ -82,13 +81,6 @@ func (self *Harness) begin(message string) {
 
 	defer func() { self.screen.Release(self.recorder.Stored()) }()
 
-	keys := keypresses(os.Stdin)
-	resizeSignals := resizes()
-	ticker := self.getTicker()
-	defer ticker.Stop()
-
-	idle := idleRefresh{interval: self.segmentLayout.IdleRefreshInterval()}
-
 	self.show(editor)
 
 	if message != "" {
@@ -98,65 +90,19 @@ func (self *Harness) begin(message string) {
 		}
 	}
 
-	for {
-		select {
-		case keypress, open := <-keys:
-			if !open {
-				return
-			}
-
-			if !self.apply(editor, history, keypress) {
-				return
-			}
-
-		case report, running := <-self.currentTurn.events:
-			if running {
-				self.takeTurn(report)
-			} else {
-				self.finish()
-			}
-
-		case <-resizeSignals:
-			settle(resizeSignals)
-			self.redraw()
-
-		case <-ticker.C:
-			if self.currentTurn.isRunning {
-				self.currentTurn.spinnerFrame++
-			} else if !idle.isDue() {
-				continue
-			}
-		}
-
-		self.show(editor)
-	}
-}
-
-type idleRefresh struct {
-	interval time.Duration
-	drawnAt  time.Time
-}
-
-func (self *idleRefresh) isDue() bool {
-	if self.interval <= 0 || time.Since(self.drawnAt) < self.interval {
-		return false
-	}
-
-	self.drawnAt = time.Now()
-
-	return true
-}
-
-func (self *Harness) getTicker() *time.Ticker {
-	interval := self.segmentLayout.RefreshInterval()
-	if interval <= 0 {
-		ticker := time.NewTicker(time.Hour)
-		ticker.Stop()
-
-		return ticker
-	}
-
-	return time.NewTicker(interval)
+	interaction.Run(os.Stdin, self.segmentLayout.RefreshInterval(), self.segmentLayout.IdleRefreshInterval(), interaction.Handler{
+		Events: func() <-chan turn.Event { return self.currentTurn.Events() },
+		Key:    func(keypress key.Key) bool { return self.apply(editor, history, keypress) },
+		Turn:   self.takeTurn,
+		TurnFinished: func() bool {
+			self.finish()
+			return true
+		},
+		Resize:  self.redraw,
+		Running: func() bool { return self.currentTurn.Running() },
+		Tick:    func() { self.currentTurn.spinnerFrame++ },
+		Draw:    func() { self.show(editor) },
+	})
 }
 
 func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress key.Key) bool {
@@ -167,7 +113,7 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 		return true
 	}
 
-	action := editor.Apply(keypress, self.currentTurn.isRunning)
+	action := editor.Apply(keypress, self.currentTurn.Running())
 	if action != edit.Complete {
 		self.completion.Reset()
 	}
@@ -259,7 +205,7 @@ func (self commandContext) Emit(event agent.Event) {
 }
 
 func (self commandContext) Send(message string) {
-	if self.harness.currentTurn.isRunning {
+	if self.harness.currentTurn.Running() {
 		self.harness.replaceTurn(message)
 	} else {
 		self.harness.start(message)
@@ -293,7 +239,7 @@ func (self *Harness) submitInput(editor *edit.Input, history *edit.History, mess
 		return
 	}
 
-	if self.currentTurn.isRunning {
+	if self.currentTurn.Running() {
 		self.replaceTurn(message)
 	} else {
 		self.start(message)
@@ -310,7 +256,7 @@ func (self *Harness) toggleCap(whichCaps caps.Set) {
 		self.showModeChange(whichCaps)
 	}
 
-	if self.currentTurn.isRunning {
+	if self.currentTurn.Running() {
 		self.queuedTurn.MarkModeChange()
 		self.interruptTurn()
 	}
@@ -332,7 +278,7 @@ func (self *Harness) showModeChange(whichCaps caps.Set) {
 	self.events = append(self.events, event)
 	eventIndex := len(self.events) - 1
 	self.pendingModeChanges = append(self.pendingModeChanges, eventIndex)
-	self.noticePainter().drawEvent(event)
+	self.noticePainter().DrawEvent(event)
 }
 
 func (self *Harness) takeBackModeChange(i int, whichCaps caps.Set) {
@@ -378,7 +324,7 @@ func (self *Harness) recordModeEvent(event agent.Event) {
 }
 
 func (self *Harness) cancelTurn() {
-	if self.currentTurn.isCancelled {
+	if self.currentTurn.Cancelled() {
 		self.queuedTurn.Clear()
 	}
 
@@ -391,12 +337,7 @@ func (self *Harness) replaceTurn(message string) {
 }
 
 func (self *Harness) interruptTurn() {
-	if !self.currentTurn.isRunning {
-		return
-	}
-
-	self.currentTurn.isCancelled = true
-	self.currentTurn.cancel()
+	self.currentTurn.Interrupt()
 }
 
 func (self *Harness) show(editor *edit.Input) {
@@ -425,22 +366,15 @@ func (self *Harness) bar(position segment.Position, frame edit.Frame) string {
 }
 
 func (self *Harness) turnActivity() (bool, int) {
-	return self.currentTurn.isRunning, self.currentTurn.spinnerFrame
+	return self.currentTurn.Running(), self.currentTurn.spinnerFrame
 }
 
 func (self *Harness) isTurnRunning() bool {
-	return self.currentTurn.isRunning
+	return self.currentTurn.Running()
 }
 
 func (self *Harness) turnElapsed() (bool, time.Duration, bool) {
-	if self.currentTurn.startedAt.IsZero() {
-		return false, 0, false
-	}
-	if self.currentTurn.isRunning {
-		return true, time.Since(self.currentTurn.startedAt), true
-	}
-
-	return false, self.currentTurn.finishedAt.Sub(self.currentTurn.startedAt), true
+	return self.currentTurn.Elapsed()
 }
 
 func (self *Harness) turnCount() int {
@@ -494,53 +428,11 @@ func (self *Harness) ask(history *edit.History, message string) {
 	history.Add(message)
 	self.start(message)
 
-	for event := range self.currentTurn.events {
+	for event := range self.currentTurn.Events() {
 		self.takeTurn(event)
 	}
 
 	self.finish()
-}
-
-func keypresses(terminal *os.File) <-chan key.Key {
-	keys := make(chan key.Key)
-
-	go func() {
-		defer close(keys)
-
-		decoder := key.NewDecoder(bufio.NewReader(terminal))
-
-		for {
-			keypress, err := decoder.Next()
-			if err != nil {
-				return
-			}
-
-			keys <- keypress
-		}
-	}()
-
-	return keys
-}
-
-func resizes() <-chan os.Signal {
-	resizeSignals := make(chan os.Signal, 1)
-	signal.Notify(resizeSignals, syscall.SIGWINCH)
-
-	return resizeSignals
-}
-
-const settling = 100 * time.Millisecond
-
-func settle(resizeSignals <-chan os.Signal) {
-	time.Sleep(settling)
-
-	for {
-		select {
-		case <-resizeSignals:
-		default:
-			return
-		}
-	}
 }
 
 func (self *Harness) restore(storedSession *store.Session) {
@@ -564,29 +456,29 @@ func (self *Harness) restore(storedSession *store.Session) {
 	self.replay()
 }
 
-func (self *Harness) newPainter(isRunning bool) *Painter {
-	return &Painter{
-		screen:       self.screen,
-		isRunning:    isRunning,
-		getTool:      self.agent.Tool,
-		workspaceDir: self.workspaceDir,
+func (self *Harness) newPainter(isRunning bool) *painter.Painter {
+	return &painter.Painter{
+		Screen:       self.screen,
+		IsRunning:    isRunning,
+		GetTool:      self.agent.Tool,
+		WorkspaceDir: self.workspaceDir,
 	}
 }
 
 func (self *Harness) replay() {
 	self.screen.Synchronise(func() {
-		painter := self.newPainter(self.currentTurn.isRunning)
+		painter := self.newPainter(self.currentTurn.Running())
 
 		for _, event := range self.events {
-			painter.drawEvent(event)
+			painter.DrawEvent(event)
 		}
 
-		if self.currentTurn.isRunning {
+		if self.currentTurn.Running() {
 			self.currentTurn.painter = painter
 			return
 		}
 
-		painter.close(dynamic.Cancelled)
+		painter.Close(dynamic.Cancelled)
 
 		self.screen.End()
 	})
@@ -594,18 +486,18 @@ func (self *Harness) replay() {
 
 func (self *Harness) redraw() {
 	var provisional agent.Delta
-	var previousPainter *Painter
-	if self.currentTurn.isRunning {
+	var previousPainter *painter.Painter
+	if self.currentTurn.Running() {
 		previousPainter = self.currentTurn.painter
-		provisional = previousPainter.provisionalDelta()
-		previousPainter.stop()
+		provisional = previousPainter.ProvisionalDelta()
+		previousPainter.Stop()
 	}
 
 	self.screen.Synchronise(func() {
 		self.screen.Reset()
 		self.replay()
 		if provisional.Text != "" {
-			self.currentTurn.painter.drawRestoredDelta(provisional, previousPainter.answerRenderer)
+			self.currentTurn.painter.DrawRestoredDelta(provisional, previousPainter)
 		}
 	})
 }
@@ -618,52 +510,30 @@ func (self *Harness) start(message string) {
 		self.agent.FYI(fyi)
 	}
 
-	turnCtx, cancel := context.WithCancel(context.Background())
-
 	self.currentTurn = Turn{
-		isRunning: true,
-		cancel:    cancel,
-		events:    make(chan TurnEvent),
-		painter:   self.newPainter(true),
-		startedAt: time.Now(),
+		painter: self.newPainter(true),
+		Stream:  turn.Start(self.agent, message),
 	}
 
 	self.screen.ReportProgress(true)
-
-	go func() {
-		defer close(self.currentTurn.events)
-		defer cancel()
-
-		for update, err := range self.agent.Stream(turnCtx, message) {
-			self.currentTurn.events <- TurnEvent{
-				update: update,
-				err:    err,
-			}
-
-			if err != nil {
-				return
-			}
-		}
-	}()
 }
 
 func (self *Harness) takeTurn(turnEvent TurnEvent) {
-	if turnEvent.err != nil {
-		self.currentTurn.err = turnEvent.err
+	if !self.currentTurn.Observe(turnEvent) {
 		return
 	}
 
-	if turnEvent.update.Delta != nil {
-		self.metrics.RecordDelta(*turnEvent.update.Delta)
-		self.currentTurn.painter.drawDelta(*turnEvent.update.Delta)
-		if self.currentTurn.painter.isStale {
+	if turnEvent.Update.Delta != nil {
+		self.metrics.RecordDelta(*turnEvent.Update.Delta)
+		self.currentTurn.painter.DrawDelta(*turnEvent.Update.Delta)
+		if self.currentTurn.painter.Stale() {
 			self.redraw()
 		}
 		return
 	}
 
-	if turnEvent.update.Event != nil {
-		self.recordEvent(*turnEvent.update.Event)
+	if turnEvent.Update.Event != nil {
+		self.recordEvent(*turnEvent.Update.Event)
 	}
 }
 
@@ -671,9 +541,9 @@ func (self *Harness) recordEvent(event agent.Event) {
 	self.metrics.Record(event)
 
 	self.events = append(self.events, event)
-	self.currentTurn.painter.drawEvent(event)
+	self.currentTurn.painter.DrawEvent(event)
 
-	if self.currentTurn.painter.isStale {
+	if self.currentTurn.painter.Stale() {
 		self.redraw()
 	}
 
@@ -693,13 +563,13 @@ func (self *Harness) notifyStopped(text string) {
 
 func (self *Harness) notify(event agent.Event) {
 	self.events = append(self.events, event)
-	self.noticePainter().drawEvent(event)
+	self.noticePainter().DrawEvent(event)
 
 	_ = self.recorder.Event(event)
 }
 
-func (self *Harness) noticePainter() *Painter {
-	if self.currentTurn.isRunning {
+func (self *Harness) noticePainter() *painter.Painter {
+	if self.currentTurn.Running() {
 		return self.currentTurn.painter
 	}
 
@@ -707,13 +577,13 @@ func (self *Harness) noticePainter() *Painter {
 }
 
 func (self *Harness) finish() {
-	self.currentTurn.finishedAt = time.Now()
+	self.currentTurn.MarkFinished(time.Now())
 	self.screen.ReportProgress(false)
 
-	if self.currentTurn.isCancelled {
+	if self.currentTurn.Cancelled() {
 		self.recordEvent(agent.Event{Kind: agent.InterruptionEvent})
-	} else if self.currentTurn.err != nil {
-		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: self.currentTurn.err.Error()})
+	} else if self.currentTurn.Error() != nil {
+		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: self.currentTurn.Error().Error()})
 	}
 
 	if self.storeProviderState() {
@@ -722,16 +592,15 @@ func (self *Harness) finish() {
 		}
 	}
 	self.showStorageWarnings()
-	self.currentTurn.painter.close(dynamic.Cancelled)
-	if self.currentTurn.painter.isStale {
+	self.currentTurn.painter.Close(dynamic.Cancelled)
+	if self.currentTurn.painter.Stale() {
 		self.redraw()
 	}
 	self.screen.End()
 
 	self.metrics.FinishTurn()
 
-	self.currentTurn.isRunning = false
-	self.currentTurn.events = nil
+	self.currentTurn.Finish()
 
 	queued, message := self.queuedTurn.Take()
 	switch queued {
