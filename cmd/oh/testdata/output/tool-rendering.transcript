@@ -1,0 +1,120 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+run a multiline command and notify me when it finishes
+```
+
+## Tool call
+
+> 2001-01-01T00:00:01Z
+
+- **ID:** `call_1`
+- **Name:** `bash`
+- **Read only:** `false`
+**Arguments**
+
+```json
+{"command":"for NAME in alpha beta; do\\n  echo \\"$NAME\\"\\ndone"}
+```
+
+**Subject**
+
+```
+stale shell rendering
+```
+
+**Qualifier**
+
+```
+stale qualifier
+```
+
+## Tool result
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call_1`
+- **Name:** `bash`
+- **Status:** `success`
+**Stats**
+
+```json
+{"kind":"resources","lines":2,"bytes":11,"total_bytes":11}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+alpha
+beta
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Tool call
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call_2`
+- **Name:** `notify`
+- **Read only:** `false`
+**Arguments**
+
+```json
+{"title":"command finished","message":"alpha and beta were printed","icon":"success"}
+```
+
+**Subject**
+
+```
+stale notification title
+```
+
+**Qualifier**
+
+```
+stale notification message
+```
+
+## Tool result
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `call_2`
+- **Name:** `notify`
+- **Status:** `success`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":17,"total_bytes":17}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+notified the user
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+done.
+```
+
+

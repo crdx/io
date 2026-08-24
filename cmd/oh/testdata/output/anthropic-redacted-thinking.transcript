@@ -1,0 +1,41 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+think privately, then answer
+```
+
+## Assistant
+
+> 2001-01-01T00:00:01Z
+
+```
+First answer.
+```
+
+## User
+
+> 2001-01-01T00:00:02Z
+
+```
+answer again using the retained context
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Second answer.
+```
+

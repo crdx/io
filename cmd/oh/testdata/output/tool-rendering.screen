@@ -1,0 +1,135 @@
+=== narrow ===
+
+ run a multiline command and notify me
+ when it finishes
+
+
+$ for NAME in alpha… ✓ 2L ~3t 0s 0s 0M
+notify command finished alph… ✓ 1L ~5t
+
+done.
+=== one column ===
+
+
+r
+
+u
+
+n
+
+a
+
+m
+
+u
+
+l
+
+t
+
+i
+
+l
+
+i
+
+n
+
+e
+
+c
+
+o
+
+m
+
+m
+
+a
+
+n
+
+d
+
+a
+
+n
+
+d
+
+n
+
+o
+
+t
+
+i
+
+f
+
+y
+
+m
+
+e
+
+w
+
+h
+
+e
+
+n
+
+i
+
+t
+
+f
+
+i
+
+n
+
+i
+
+s
+
+h
+
+e
+
+s
+
+
+
+
+
+d
+o
+n
+e
+.
+=== tiny ===
+
+ run a
+ multiline
+ command and
+ notify me
+ when it
+ finishes
+
+
+$ for N… ✓
+… ✓ 1L ~5t
+
+done.
+=== wide ===
+
+ run a multiline command and notify me when it finishes
+
+
+$ for NAME in alpha beta; do echo "$NAME"; done 3L ✓ 2L ~3t 0s 0s 0M
+notify command finished alpha and beta were printed ✓ 1L ~5t
+
+done.

@@ -373,7 +373,7 @@ total
 
 
 $ if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else ech… ✓ 1L ~1t 0s 0s 0M
-$ while read -r NAME; do echo "$NAME" > out.txt 2>&1; done < list.txt ✓ 1L ~1t 0s 0s 0M
+$ while read -r NAME; do echo "$NAME" >out.txt 2>&1; done <list.txt ✓ 1L ~1t 0s 0s 0M
 $ until [[ -z "$REST" ]]; do REST=""; done ✓ 1L ~1t 0s 0s 0M
 $ case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac ✓ 1L ~1t 0s 0s 0M
 $ select CHOICE in one two; do break; done ✓ 1L ~1t 0s 0s 0M

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -25,7 +26,10 @@ import (
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/toolbox"
+	"crdx.org/io/toolbox/bash"
+	"crdx.org/io/toolbox/notify"
 )
 
 const (
@@ -362,6 +366,19 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 	workspaceDir := layOutWorkspace(t)
 
 	files := file.New(openWorkspaceRootAt(t, workspaceDir), caps.RefuseWrite(caps.NewMode(caps.All())))
+	processes := sandbox.NewProcesses(false)
+	t.Cleanup(func() { _, _ = processes.Disable() })
+
+	tools := toolbox.Rummage(files, file.NewSnapshots())
+	tools = append(
+		tools,
+		bash.New(
+			files,
+			func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
+			processes,
+		),
+		notify.New(),
+	)
 
 	var written strings.Builder
 
@@ -371,7 +388,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 		written:      &written,
 		workspaceDir: workspaceDir,
 		chat: &Harness{
-			agent:        agent.New("", quietProvider{}, toolbox.Rummage(files, file.NewSnapshots())),
+			agent:        agent.New("", quietProvider{}, tools),
 			screen:       screen,
 			workspaceDir: workspaceDir,
 			recorder:     recordSession(testLog(t)),
