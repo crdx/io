@@ -12,11 +12,14 @@ import (
 )
 
 var intentionalUpstreamRenderingDifferences = map[string]string{
-	"ascii/subgraph_complex_mixed.txt":        "subgraph border includes the external-node offset",
-	"ascii/subgraph_mixed_nodes.txt":          "subgraph border includes the external-node offset",
-	"ascii/subgraph_mixed_nodes_td.txt":       "subgraph border includes the external-node offset",
-	"ascii/subgraph_nested_with_external.txt": "subgraph border includes the external-node offset",
-	"ascii/subgraph_node_outside_lr.txt":      "subgraph border includes the external-node offset",
+	"ascii/subgraph_complex_mixed.txt":                  "subgraph border includes the external-node offset",
+	"ascii/subgraph_mixed_nodes.txt":                    "subgraph border includes the external-node offset",
+	"ascii/subgraph_mixed_nodes_td.txt":                 "subgraph border includes the external-node offset",
+	"ascii/subgraph_nested_with_external.txt":           "subgraph border includes the external-node offset",
+	"ascii/subgraph_node_outside_lr.txt":                "subgraph border includes the external-node offset",
+	"multibyte/accented_latin_node_and_edge_labels.txt": "edge labels use terminal cells rather than UTF-8 bytes",
+	"multibyte/cyrillic_node_and_edge_labels.txt":       "edge labels use terminal cells rather than UTF-8 bytes",
+	"multibyte/greek_node_and_edge_labels.txt":          "edge labels use terminal cells rather than UTF-8 bytes",
 }
 
 func TestUpstreamRenderingFixtures(t *testing.T) {

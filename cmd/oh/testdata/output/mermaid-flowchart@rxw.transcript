@@ -37,12 +37,12 @@ Mapping the request path.
 
 ```mermaid
 graph TD
-request[Receive] --> validate[Validate]
-validate --> accept[Accept]
-validate --> reject[Reject]
-subgraph audit [Audit trail]
-accept --> recorded[Record success]
-reject --> failed[Record failure]
+request[👩‍🚀 Receive] --> validate[❤️ Validate]
+validate --> accept[1️⃣ Accept]
+validate --> reject[🏳️‍🌈 Reject]
+subgraph audit [🗂️ Audit trail]
+accept --> recorded[📝 Record success]
+reject --> failed[⚠️ Record failure]
 end
 ```
 

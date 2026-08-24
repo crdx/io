@@ -11,12 +11,13 @@ Mapping the request path.
 Request processing
 
 graph TD
-request[Receive] --> validate[Validate]
-validate --> accept[Accept]
-validate --> reject[Reject]
-subgraph audit [Audit trail]
-accept --> recorded[Record success]
-reject --> failed[Record failure]
+request[👩‍🚀 Receive] --> validate[❤️
+Validate]
+validate --> accept[1️⃣ Accept]
+validate --> reject[🏳️‍🌈 Reject]
+subgraph audit [🗂️ Audit trail]
+accept --> recorded[📝 Record success]
+reject --> failed[⚠️ Record failure]
 end
 === one column ===
 [
@@ -185,6 +186,9 @@ e
 s
 t
 [
+👩
+🚀
+
 R
 e
 c
@@ -205,6 +209,7 @@ a
 t
 e
 [
+❤
 V
 a
 l
@@ -232,6 +237,7 @@ e
 p
 t
 [
+1
 A
 c
 c
@@ -257,6 +263,9 @@ e
 c
 t
 [
+🏳
+🌈
+
 R
 e
 j
@@ -278,6 +287,8 @@ d
 i
 t
 [
+🗂
+
 A
 u
 d
@@ -307,6 +318,8 @@ d
 e
 d
 [
+📝
+
 R
 e
 c
@@ -337,6 +350,7 @@ l
 e
 d
 [
+⚠
 R
 e
 c
@@ -376,25 +390,27 @@ Request
 processing
 
 graph TD
-request[Rece
-ive] -->
-validate[Val
-idate]
+request[👩‍🚀
+Receive] -->
+validate[❤️
+Validate]
 validate -->
-accept[Accep
-t]
+accept[1️⃣
+Accept]
 validate -->
-reject[Rejec
-t]
+reject[🏳️‍🌈
+Reject]
 subgraph
-audit [Audit
-trail]
+audit [🗂️
+Audit trail]
 accept -->
-recorded[Rec
-ord success]
+recorded[📝
+Record
+success]
 reject -->
-failed[Recor
-d failure]
+failed[⚠️
+Record
+failure]
 end
 === wide ===
 [startup=0s session=000000000000000000000000 skills=0p/0g tools=~600t]
@@ -407,44 +423,44 @@ Mapping the request path.
 
 Request processing
 
-  ┌────────────────┐
-  │                │
-  │    Receive     │
-  │                │
-  └────────┬───────┘
-           │
-           │
-           │
-           │
-           ▼
-  ┌────────────────┐
-  │                │
-  │    Validate    ├──────────────┐
-  │                │              │
-  └────────┬───────┘              │
-           │                      │
-           │                      │
-           │                      │
-           │                      │
-           ▼                      ▼
-  ┌────────────────┐     ┌────────────────┐
-  │                │     │                │
-  │     Accept     │     │     Reject     │
-  │                │     │                │
-  └────────┬───────┘     └────────┬───────┘
-           │                      │
-           │                      │
-           │                      │
-           │                      │
-           │                      │
-┌──────────┼──────────────────────┼─────────┐
-│          │     Audit trail      │         │
-│          │                      │         │
-│          ▼                      ▼         │
-│ ┌────────────────┐     ┌────────────────┐ │
-│ │                │     │                │ │
-│ │ Record success │     │ Record failure │ │
-│ │                │     │                │ │
-│ └────────────────┘     └────────────────┘ │
-│                                           │
-└───────────────────────────────────────────┘
+  ┌───────────────────┐
+  │                   │
+  │     👩‍🚀 Receive    │
+  │                   │
+  └─────────┬─────────┘
+            │
+            │
+            │
+            │
+            ▼
+  ┌───────────────────┐
+  │                   │
+  │    ❤️ Validate    ├───────────────┐
+  │                   │               │
+  └─────────┬─────────┘               │
+            │                         │
+            │                         │
+            │                         │
+            │                         │
+            ▼                         ▼
+  ┌───────────────────┐     ┌───────────────────┐
+  │                   │     │                   │
+  │     1️⃣ Accept     │     │     🏳️‍🌈 Reject     │
+  │                   │     │                   │
+  └─────────┬─────────┘     └─────────┬─────────┘
+            │                         │
+            │                         │
+            │                         │
+            │                         │
+            │                         │
+┌───────────┼─────────────────────────┼───────────┐
+│           │     🗂️ Audit trail      │           │
+│           │                         │           │
+│           ▼                         ▼           │
+│ ┌───────────────────┐     ┌───────────────────┐ │
+│ │                   │     │                   │ │
+│ │ 📝 Record success │     │ ⚠️ Record failure │ │
+│ │                   │     │                   │ │
+│ └───────────────────┘     └───────────────────┘ │
+│                                                 │
+└─────────────────────────────────────────────────┘

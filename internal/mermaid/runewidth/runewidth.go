@@ -12,3 +12,8 @@ func StringWidth(text string) int {
 func RuneWidth(character rune) int {
 	return width.Of(string(character))
 }
+
+// Cells expands text into terminal cells without splitting grapheme clusters.
+func Cells(text string) []string {
+	return width.Cells(text)
+}

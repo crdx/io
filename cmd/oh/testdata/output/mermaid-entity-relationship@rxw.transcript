@@ -37,15 +37,15 @@ Sketching the data model.
 
 ```mermaid
 erDiagram
-CUSTOMER {
+CUSTOMER[👩‍🚀 Customer] {
 int id PK
 string name
 }
-ORDER {
+ORDER[❤️ Order] {
 int id PK
 int customer_id FK
 }
-CUSTOMER ||--o{ ORDER : places
+CUSTOMER ||--o{ ORDER : 1️⃣ places
 ```
 
 ````

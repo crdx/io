@@ -44,16 +44,10 @@ func (g *graph) drawEdge(e *edge) (*drawing, *drawing, *drawing, *drawing, *draw
 }
 
 func (d *drawing) drawText(start drawingCoord, text string) {
-	textWidth := runewidth.StringWidth(text)
-	d.increaseSize(start.x+textWidth, start.y)
-	textX := start.x
-	for _, r := range text {
-		runeWidth := Max(runewidth.RuneWidth(r), 1)
-		(*d)[textX][start.y] = string(r)
-		for offset := 1; offset < runeWidth; offset++ {
-			(*d)[textX+offset][start.y] = ""
-		}
-		textX += runeWidth
+	cells := runewidth.Cells(text)
+	d.increaseSize(start.x+len(cells), start.y)
+	for i, cell := range cells {
+		(*d)[start.x+i][start.y] = cell
 	}
 }
 
@@ -144,13 +138,12 @@ func drawBox(n *node, g graph) *drawing {
 		textY := contentTop + lineIdx*(graphLabelLineGap+1)
 		textWidth := runewidth.StringWidth(line)
 		textX := from.x + w/2 - CeilDiv(textWidth, 2) + 1
-		for _, r := range line {
-			runeWidth := Max(runewidth.RuneWidth(r), 1)
-			boxDrawing[textX][textY] = wrapTextInColor(string(r), n.styleClass.styles["color"], g.styleType)
-			for offset := 1; offset < runeWidth; offset++ {
-				boxDrawing[textX+offset][textY] = ""
+		for _, cell := range runewidth.Cells(line) {
+			if cell != "" {
+				cell = wrapTextInColor(cell, n.styleClass.styles["color"], g.styleType)
 			}
-			textX += runeWidth
+			boxDrawing[textX][textY] = cell
+			textX++
 		}
 	}
 
@@ -210,15 +203,11 @@ func drawSubgraphLabel(sg *subgraph) (*drawing, drawingCoord) {
 	for lineIdx, line := range sg.label.lines {
 		labelY := from.y + 1 + lineIdx*(graphLabelLineGap+1)
 		labelX := max(from.x+width/2-runewidth.StringWidth(line)/2, from.x+1)
-		for _, char := range line {
-			runeWidth := Max(runewidth.RuneWidth(char), 1)
+		for _, cell := range runewidth.Cells(line) {
 			if labelX < to.x {
-				labelDrawing[labelX][labelY] = string(char)
+				labelDrawing[labelX][labelY] = cell
 			}
-			for offset := 1; offset < runeWidth && labelX+offset < to.x; offset++ {
-				labelDrawing[labelX+offset][labelY] = ""
-			}
-			labelX += runeWidth
+			labelX++
 		}
 	}
 
@@ -290,6 +279,9 @@ func mergeJunctions(c1, c2 string) string {
 func (g *graph) mergeDrawings(baseDrawing *drawing, mergeCoord drawingCoord, drawings ...*drawing) *drawing {
 	maxX, maxY := getDrawingSize(baseDrawing)
 	for _, d := range drawings {
+		if d == nil {
+			continue
+		}
 		dX, dY := getDrawingSize(d)
 		maxX = Max(maxX, dX+mergeCoord.x)
 		maxY = Max(maxY, dY+mergeCoord.y)
@@ -306,6 +298,9 @@ func (g *graph) mergeDrawings(baseDrawing *drawing, mergeCoord drawingCoord, dra
 	}
 
 	for _, d := range drawings {
+		if d == nil {
+			continue
+		}
 		for x := range len(*d) {
 			for y := range len((*d)[0]) {
 				c := (*d)[x][y]

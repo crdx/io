@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"crdx.org/io/internal/mermaid/diagram"
+	"crdx.org/io/internal/mermaid/runewidth"
 )
 
 func TestSupportedFlowchartFeatures(t *testing.T) {
@@ -170,6 +171,47 @@ func TestSupportedEntityRelationshipFeatures(t *testing.T) {
 		for _, want := range test.want {
 			if !strings.Contains(output, want) {
 				t.Errorf("%s: expected %q in %q", name, want, output)
+			}
+		}
+	}
+}
+
+func TestEmojiGraphemesKeepDiagramBordersAligned(t *testing.T) {
+	for name, test := range map[string]struct {
+		source    string
+		rowCount  int
+		graphemes []string
+	}{
+		"flowchart": {
+			source:    "graph LR\nA[👩‍🚀 Pilot] -->|1️⃣ launch| B[❤️ Ready]",
+			rowCount:  5,
+			graphemes: []string{"👩‍🚀", "1️⃣", "❤️"},
+		},
+		"sequence": {
+			source:    "sequenceDiagram\nparticipant A as 👩‍🚀 Pilot\nparticipant B as 🤖 AI\nA->>B: ❤️ 1️⃣ launch",
+			rowCount:  3,
+			graphemes: []string{"👩‍🚀", "🤖", "❤️", "1️⃣"},
+		},
+		"entity relationship": {
+			source:    "erDiagram\nA[👩‍🚀 Pilot] {\nstring state\n}\nB[🤖 AI] {\nstring state\n}\nA ||--|| B : ❤️ 1️⃣ link",
+			rowCount:  5,
+			graphemes: []string{"👩‍🚀", "🤖", "❤️", "1️⃣"},
+		},
+	} {
+		output, err := Render(test.source)
+		if err != nil {
+			t.Fatalf("%s: %v", name, err)
+		}
+		for _, grapheme := range test.graphemes {
+			if !strings.Contains(output, grapheme) {
+				t.Errorf("%s: output lost grapheme %q:\n%s", name, grapheme, output)
+			}
+		}
+		rows := strings.Split(output, "\n")
+		wantWidth := runewidth.StringWidth(rows[0])
+		for i, row := range rows[:min(test.rowCount, len(rows))] {
+			if gotWidth := runewidth.StringWidth(row); gotWidth != wantWidth {
+				t.Errorf("%s: row %d has width %d, want %d:\n%s", name, i, gotWidth, wantWidth, output)
 			}
 		}
 	}

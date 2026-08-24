@@ -4,6 +4,8 @@ import (
 	"container/heap"
 	"fmt"
 	"slices"
+
+	"crdx.org/io/internal/mermaid/runewidth"
 )
 
 type priorityQueueItem struct {
@@ -117,6 +119,9 @@ func (g *graph) drawArrow(e *edge) (*drawing, *drawing, *drawing, *drawing, *dra
 	}
 	dLabel := g.drawArrowLabel(e)
 	dPath, linesDrawn, lineDirs := g.drawPath(e.path)
+	if len(linesDrawn) == 0 {
+		return dPath, nil, nil, g.drawCorners(e.path), dLabel
+	}
 	dBoxStart := g.drawBoxStart(e.path, linesDrawn[0])
 	dArrowHead := g.drawArrowHead(linesDrawn[len(linesDrawn)-1], lineDirs[len(lineDirs)-1])
 	if e.isBidirectional && len(linesDrawn) > 0 {
@@ -298,8 +303,7 @@ func (g *graph) drawCorners(path []gridCoord) *drawing {
 
 func (g *graph) drawArrowLabel(e *edge) *drawing {
 	d := copyCanvas(g.drawing)
-	lenLabel := len(e.text)
-	if lenLabel == 0 {
+	if e.text == "" {
 		return d
 	}
 
@@ -360,6 +364,6 @@ func (d *drawing) drawTextOnLine(line []drawingCoord, label string) {
 	}
 	middleX := minX + (maxX-minX)/2
 	middleY := minY + (maxY-minY)/2
-	startLabelCoord := drawingCoord{x: middleX - len(label)/2, y: middleY}
+	startLabelCoord := drawingCoord{x: middleX - runewidth.StringWidth(label)/2, y: middleY}
 	d.drawText(startLabelCoord, label)
 }

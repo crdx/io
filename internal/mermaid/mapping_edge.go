@@ -1,5 +1,7 @@
 package mermaid
 
+import "crdx.org/io/internal/mermaid/runewidth"
+
 type edge struct {
 	from            *node
 	to              *node
@@ -80,7 +82,7 @@ func (g *graph) parallelDirections(e *edge, duplicateIndex int) (direction, dire
 }
 
 func (g *graph) determineLabelLine(e *edge) {
-	lenLabel := len(e.text)
+	lenLabel := runewidth.StringWidth(e.text)
 	if lenLabel == 0 {
 		return
 	}

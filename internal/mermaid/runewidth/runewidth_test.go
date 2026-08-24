@@ -9,4 +9,7 @@ func TestWidthsUseTerminalCells(t *testing.T) {
 	if got := RuneWidth('界'); got != 2 {
 		t.Errorf("got rune width %d, want 2", got)
 	}
+	if got := Cells("👩‍🚀"); len(got) != 2 || got[0] != "👩‍🚀" || got[1] != "" {
+		t.Errorf("got cells %#v, want one two-cell grapheme", got)
+	}
 }

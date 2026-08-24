@@ -56,8 +56,8 @@ func TestEntityRelationshipDetectionAndParserEdgeCases(t *testing.T) {
 
 func TestEntityRelationshipCanvasAndRoutingEdgeCases(t *testing.T) {
 	canvas := &canvas{}
-	canvas.set(-1, 0, 'x')
-	canvas.set(0, -1, 'x')
+	canvas.set(-1, 0, "x")
+	canvas.set(0, -1, "x")
 	canvas.stamp(0, 0, []string{"資料", "x"})
 	if !strings.Contains(canvas.string(), "資料") {
 		t.Fatal("wide stamp was not rendered")
@@ -110,11 +110,11 @@ func TestEntityRelationshipCanvasAndRoutingEdgeCases(t *testing.T) {
 	_, _ = labelStart(overlay, 0, 10, 3, 0)
 	_ = vCrossings(overlay, 0, 10, 0)
 
-	canvas.set(0, 0, 'X')
+	canvas.set(0, 0, "X")
 	overlay.solid[[2]int{99, 99}] = 0
 	composite(canvas, overlay, unicodeGlyphs)
 	setAttachTee(canvas, endpoint{x: 0, y: 0, s: sideT}, unicodeGlyphs)
-	canvas.set(1, 1, unicodeGlyphs.teeD)
+	canvas.set(1, 1, string(unicodeGlyphs.teeD))
 	setAttachTee(canvas, endpoint{x: 1, y: 1, s: sideT}, unicodeGlyphs)
 
 	for _, value := range []int{-2, 0, 2} {

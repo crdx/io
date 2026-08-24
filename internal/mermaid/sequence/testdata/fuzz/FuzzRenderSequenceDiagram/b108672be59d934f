@@ -1,0 +1,2 @@
+go test fuzz v1
+string("sequenCeDiAgrAm\n0-x0:\xff")

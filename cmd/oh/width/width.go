@@ -2,17 +2,19 @@ package width
 
 import (
 	"slices"
+	"strings"
 	"unicode"
+
+	"github.com/rivo/uniseg"
 )
 
 // Of is how many cells text takes up.
 func Of(text string) int {
 	cells := 0
-
-	for _, value := range text {
-		cells += Rune(value)
+	graphemes := uniseg.NewGraphemes(text)
+	for graphemes.Next() {
+		cells += graphemeWidth(graphemes.Str(), graphemes.Width())
 	}
-
 	return cells
 }
 
@@ -31,17 +33,40 @@ func Rune(value rune) int {
 // Cut returns the longest prefix that fits and its cell width.
 func Cut(text string, cells int) (string, int) {
 	takenCells := 0
-
-	for i, value := range text {
-		size := Rune(value)
+	graphemes := uniseg.NewGraphemes(text)
+	for graphemes.Next() {
+		size := graphemeWidth(graphemes.Str(), graphemes.Width())
 		if takenCells+size > cells {
-			return text[:i], takenCells
+			start, _ := graphemes.Positions()
+			return text[:start], takenCells
 		}
-
 		takenCells += size
 	}
-
 	return text, takenCells
+}
+
+// Cells expands text into terminal cells without splitting grapheme clusters.
+func Cells(text string) []string {
+	var cells []string
+	graphemes := uniseg.NewGraphemes(text)
+	for graphemes.Next() {
+		graphemeCells := graphemeWidth(graphemes.Str(), graphemes.Width())
+		if graphemeCells == 0 {
+			continue
+		}
+		cells = append(cells, graphemes.Str())
+		for range graphemeCells - 1 {
+			cells = append(cells, "")
+		}
+	}
+	return cells
+}
+
+func graphemeWidth(grapheme string, measuredWidth int) int {
+	if strings.ContainsRune(grapheme, '\u20e3') {
+		return 2
+	}
+	return measuredWidth
 }
 
 func isWide(value rune) bool {

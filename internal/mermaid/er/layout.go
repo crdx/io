@@ -8,7 +8,7 @@ import (
 )
 
 type canvas struct {
-	rows [][]rune
+	rows [][]string
 }
 
 func (c *canvas) ensure(x, y int) {
@@ -16,35 +16,29 @@ func (c *canvas) ensure(x, y int) {
 		c.rows = append(c.rows, nil)
 	}
 	for len(c.rows[y]) <= x {
-		c.rows[y] = append(c.rows[y], ' ')
+		c.rows[y] = append(c.rows[y], " ")
 	}
 }
 
-func (c *canvas) set(x, y int, r rune) {
+func (c *canvas) set(x, y int, cell string) {
 	if x < 0 || y < 0 {
 		return
 	}
 	c.ensure(x, y)
-	c.rows[y][x] = r
+	c.rows[y][x] = cell
 }
 
-func (c *canvas) at(x, y int) rune {
+func (c *canvas) at(x, y int) string {
 	if y < 0 || y >= len(c.rows) || x < 0 || x >= len(c.rows[y]) {
-		return ' '
+		return " "
 	}
 	return c.rows[y][x]
 }
 
 func (c *canvas) stamp(x0, y0 int, block []string) {
 	for dy, line := range block {
-		x := x0
-		for _, r := range line {
-			c.set(x, y0+dy, r)
-			w := runewidth.RuneWidth(r)
-			if w == 2 {
-				c.set(x+1, y0+dy, 0)
-			}
-			x += w
+		for x, cell := range runewidth.Cells(line) {
+			c.set(x0+x, y0+dy, cell)
 		}
 	}
 }
@@ -52,13 +46,7 @@ func (c *canvas) stamp(x0, y0 int, block []string) {
 func (c *canvas) string() string {
 	var b strings.Builder
 	for _, row := range c.rows {
-		line := make([]rune, 0, len(row))
-		for _, r := range row {
-			if r != 0 {
-				line = append(line, r)
-			}
-		}
-		b.WriteString(strings.TrimRight(string(line), " "))
+		b.WriteString(strings.TrimRight(strings.Join(row, ""), " "))
 		b.WriteByte('\n')
 	}
 	return b.String()
@@ -199,14 +187,14 @@ const (
 type overlay struct {
 	solid map[[2]int]uint8
 	dash  map[[2]int]uint8
-	label map[[2]int]rune
-	token map[[2]int]rune
+	label map[[2]int]string
+	token map[[2]int]string
 }
 
 func newOverlay() *overlay {
 	return &overlay{
 		solid: map[[2]int]uint8{}, dash: map[[2]int]uint8{},
-		label: map[[2]int]rune{}, token: map[[2]int]rune{},
+		label: map[[2]int]string{}, token: map[[2]int]string{},
 	}
 }
 
@@ -345,10 +333,10 @@ func setAttachTee(c *canvas, ep endpoint, g glyphs) {
 	if ep.s == sideT {
 		tee, opposite = g.teeU, g.teeD
 	}
-	if c.at(ep.x, ep.y) == opposite {
+	if c.at(ep.x, ep.y) == string(opposite) {
 		tee = g.cross
 	}
-	c.set(ep.x, ep.y, tee)
+	c.set(ep.x, ep.y, string(tee))
 }
 
 func sidesFor(a, b *placedEntity) (side, side) {
@@ -434,14 +422,14 @@ func (p routePlan) decorate(o *overlay) {
 
 func putToken(o *overlay, ep endpoint, targetX, y int) {
 	if ep.x < targetX {
-		for i, r := range []rune(leftToken(ep.card)) {
-			o.token[[2]int{ep.x + 1 + i, y}] = r
+		for i, cell := range runewidth.Cells(leftToken(ep.card)) {
+			o.token[[2]int{ep.x + 1 + i, y}] = cell
 		}
 		return
 	}
-	tok := []rune(rightToken(ep.card))
-	for i, r := range tok {
-		o.token[[2]int{ep.x - len(tok) + i, y}] = r
+	tokenCells := runewidth.Cells(rightToken(ep.card))
+	for i, cell := range tokenCells {
+		o.token[[2]int{ep.x - len(tokenCells) + i, y}] = cell
 	}
 }
 
@@ -502,19 +490,15 @@ func vCrossings(o *overlay, x0, x1, y int) int {
 	return n
 }
 
-func writeLabel(o *overlay, s string, x, y, limit int) {
-	for _, c := range s {
-		w := runewidth.RuneWidth(c)
-		if limit >= 0 && x+w-1 > limit {
+func writeLabel(o *overlay, label string, x, y, limit int) {
+	for _, cell := range runewidth.Cells(label) {
+		if limit >= 0 && x > limit {
 			return
 		}
-		if c != ' ' || o.bits(x, y)&(dN|dS) == 0 {
-			o.label[[2]int{x, y}] = c
-			if w == 2 {
-				o.label[[2]int{x + 1, y}] = 0
-			}
+		if cell != " " || o.bits(x, y)&(dN|dS) == 0 {
+			o.label[[2]int{x, y}] = cell
 		}
-		x += w
+		x++
 	}
 }
 
@@ -530,10 +514,10 @@ func composite(c *canvas, o *overlay, g glyphs) {
 		if bits == 0 {
 			return
 		}
-		if c.at(x, y) != ' ' {
+		if c.at(x, y) != " " {
 			return
 		}
-		c.set(x, y, glyphFor(bits, o.solid[p] != 0, g))
+		c.set(x, y, string(glyphFor(bits, o.solid[p] != 0, g)))
 	}
 	for p := range o.solid {
 		mark(p[0], p[1])

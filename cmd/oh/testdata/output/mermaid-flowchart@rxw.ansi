@@ -11,12 +11,13 @@
 \r\e[K\e[1m\e[38;2;207;173;0mRequest processing\e[0m\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;150;152;150mgraph TD\e[0m\r
-\r\e[K\e[38;2;150;152;150mrequest[Receive] --> validate[Validate]\e[0m\r
-\r\e[K\e[38;2;150;152;150mvalidate --> accept[Accept]\e[0m\r
-\r\e[K\e[38;2;150;152;150mvalidate --> reject[Reject]\e[0m\r
-\r\e[K\e[38;2;150;152;150msubgraph audit [Audit trail]\e[0m\r
-\r\e[K\e[38;2;150;152;150maccept --> recorded[Record success]\e[0m\r
-\r\e[K\e[38;2;150;152;150mreject --> failed[Record failure]\e[0m\r
+\r\e[K\e[38;2;150;152;150mrequest[👩‍🚀 Receive] --> validate[❤️\e[0m\r
+\r\e[K\e[38;2;150;152;150mValidate]\e[0m\r
+\r\e[K\e[38;2;150;152;150mvalidate --> accept[1️⃣ Accept]\e[0m\r
+\r\e[K\e[38;2;150;152;150mvalidate --> reject[🏳️‍🌈 Reject]\e[0m\r
+\r\e[K\e[38;2;150;152;150msubgraph audit [🗂️ Audit trail]\e[0m\r
+\r\e[K\e[38;2;150;152;150maccept --> recorded[📝 Record success]\e[0m\r
+\r\e[K\e[38;2;150;152;150mreject --> failed[⚠️ Record failure]\e[0m\r
 \r\e[K\e[38;2;150;152;150mend\e[0m\r
 \e[?25h\e[?2026l
 === one column ===
@@ -186,6 +187,9 @@ w\e[0m\r
 \r\e[K\e[38;2;150;152;150ms\e[0m\r
 \r\e[K\e[38;2;150;152;150mt\e[0m\r
 \r\e[K\e[38;2;150;152;150m[\e[0m\r
+\r\e[K\e[38;2;150;152;150m👩‍\e[0m\r
+\r\e[K\e[38;2;150;152;150m🚀\e[0m\r
+\r\e[K\e[38;2;150;152;150m \e[0m\r
 \r\e[K\e[38;2;150;152;150mR\e[0m\r
 \r\e[K\e[38;2;150;152;150me\e[0m\r
 \r\e[K\e[38;2;150;152;150mc\e[0m\r
@@ -206,6 +210,7 @@ w\e[0m\r
 \r\e[K\e[38;2;150;152;150mt\e[0m\r
 \r\e[K\e[38;2;150;152;150me\e[0m\r
 \r\e[K\e[38;2;150;152;150m[\e[0m\r
+\r\e[K\e[38;2;150;152;150m❤️\e[0m\r
 \r\e[K\e[38;2;150;152;150mV\e[0m\r
 \r\e[K\e[38;2;150;152;150ma\e[0m\r
 \r\e[K\e[38;2;150;152;150ml\e[0m\r
@@ -233,6 +238,7 @@ w\e[0m\r
 \r\e[K\e[38;2;150;152;150mp\e[0m\r
 \r\e[K\e[38;2;150;152;150mt\e[0m\r
 \r\e[K\e[38;2;150;152;150m[\e[0m\r
+\r\e[K\e[38;2;150;152;150m1️⃣\e[0m\r
 \r\e[K\e[38;2;150;152;150mA\e[0m\r
 \r\e[K\e[38;2;150;152;150mc\e[0m\r
 \r\e[K\e[38;2;150;152;150mc\e[0m\r
@@ -258,6 +264,9 @@ w\e[0m\r
 \r\e[K\e[38;2;150;152;150mc\e[0m\r
 \r\e[K\e[38;2;150;152;150mt\e[0m\r
 \r\e[K\e[38;2;150;152;150m[\e[0m\r
+\r\e[K\e[38;2;150;152;150m🏳️‍\e[0m\r
+\r\e[K\e[38;2;150;152;150m🌈\e[0m\r
+\r\e[K\e[38;2;150;152;150m \e[0m\r
 \r\e[K\e[38;2;150;152;150mR\e[0m\r
 \r\e[K\e[38;2;150;152;150me\e[0m\r
 \r\e[K\e[38;2;150;152;150mj\e[0m\r
@@ -279,6 +288,8 @@ w\e[0m\r
 \r\e[K\e[38;2;150;152;150mi\e[0m\r
 \r\e[K\e[38;2;150;152;150mt\e[0m\r
 \r\e[K\e[38;2;150;152;150m[\e[0m\r
+\r\e[K\e[38;2;150;152;150m🗂️\e[0m\r
+\r\e[K\e[38;2;150;152;150m \e[0m\r
 \r\e[K\e[38;2;150;152;150mA\e[0m\r
 \r\e[K\e[38;2;150;152;150mu\e[0m\r
 \r\e[K\e[38;2;150;152;150md\e[0m\r
@@ -308,6 +319,8 @@ w\e[0m\r
 \r\e[K\e[38;2;150;152;150me\e[0m\r
 \r\e[K\e[38;2;150;152;150md\e[0m\r
 \r\e[K\e[38;2;150;152;150m[\e[0m\r
+\r\e[K\e[38;2;150;152;150m📝\e[0m\r
+\r\e[K\e[38;2;150;152;150m \e[0m\r
 \r\e[K\e[38;2;150;152;150mR\e[0m\r
 \r\e[K\e[38;2;150;152;150me\e[0m\r
 \r\e[K\e[38;2;150;152;150mc\e[0m\r
@@ -338,6 +351,7 @@ w\e[0m\r
 \r\e[K\e[38;2;150;152;150me\e[0m\r
 \r\e[K\e[38;2;150;152;150md\e[0m\r
 \r\e[K\e[38;2;150;152;150m[\e[0m\r
+\r\e[K\e[38;2;150;152;150m⚠️\e[0m\r
 \r\e[K\e[38;2;150;152;150mR\e[0m\r
 \r\e[K\e[38;2;150;152;150me\e[0m\r
 \r\e[K\e[38;2;150;152;150mc\e[0m\r
@@ -367,12 +381,12 @@ w\e[0m\r
 \e[1m\e[38;2;207;173;0mRequest processing\e[0m\e[0m
 
 \e[38;2;150;152;150mgraph TD\e[0m
-\e[38;2;150;152;150mrequest[Receive] --> validate[Validate]\e[0m
-\e[38;2;150;152;150mvalidate --> accept[Accept]\e[0m
-\e[38;2;150;152;150mvalidate --> reject[Reject]\e[0m
-\e[38;2;150;152;150msubgraph audit [Audit trail]\e[0m
-\e[38;2;150;152;150maccept --> recorded[Record success]\e[0m
-\e[38;2;150;152;150mreject --> failed[Record failure]\e[0m
+\e[38;2;150;152;150mrequest[👩‍🚀 Receive] --> validate[❤️ Validate]\e[0m
+\e[38;2;150;152;150mvalidate --> accept[1️⃣ Accept]\e[0m
+\e[38;2;150;152;150mvalidate --> reject[🏳️‍🌈 Reject]\e[0m
+\e[38;2;150;152;150msubgraph audit [🗂️ Audit trail]\e[0m
+\e[38;2;150;152;150maccept --> recorded[📝 Record success]\e[0m
+\e[38;2;150;152;150mreject --> failed[⚠️ Record failure]\e[0m
 \e[38;2;150;152;150mend\e[0m
 
 === streamed ===
@@ -394,77 +408,93 @@ w\e[0m\r
 \r\e[K│        │\r
 \r\e[K│ reques │\r
 \r\e[K│        │\r
-\r\e[K└────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K┌─────────┐\r
-\r\e[K│         │\r
-\r\e[K│ Receive │\r
-\r\e[K│         │\r
-\r\e[K└────┬────┘\r
-\r\e[K     │     \r
-\r\e[K     │     \r
-\r\e[K     │     \r
-\r\e[K     │     \r
-\r\e[K     ▼     \r
-\r\e[K┌─────────┐\r
-\r\e[K│         │\r
-\r\e[K│    v    │\r
-\r\e[K│         │\r
-\r\e[K└─────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K│  valid  │\r
-\r\e[K│         │\r
-\r\e[K└─────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[14A\r\e[K┌──────────┐     ┌────┐\r
-\r\e[K│          │     │    │\r
-\r\e[K│ Receive  │     │ va │\r
-\r\e[K│          │     │    │\r
-\r\e[K└─────┬────┘     └────┘\r
-\r\e[K      │                \r
-\r\e[K      │                \r
-\r\e[K      │                \r
-\r\e[K      │                \r
-\r\e[K      ▼                \r
-\r\e[K┌──────────┐           \r
-\r\e[K│          │           \r
-\r\e[K│ Validate │           \r
-\r\e[K│          │           \r
-\r\e[K└──────────┘           \e[?25h\e[?2026l\e[?2026h\e[?25l\e[14A\r\e[K┌──────────┐     ┌────────┐\r
-\r\e[K│          │     │        │\r
-\r\e[K│ Receive  │     │ valida │\r
-\r\e[K│          │     │        │\r
-\r\e[K└─────┬────┘     └────────┘\r
-\r\e[K      │                    \r
-\r\e[K      │                    \r
-\r\e[K      │                    \r
-\r\e[K      │                    \r
-\r\e[K      ▼                    \r
-\r\e[K┌──────────┐               \r
-\r\e[K│          │               \r
-\r\e[K│ Validate │               \r
-\r\e[K│          │               \r
-\r\e[K└──────────┘               \e[?25h\e[?2026l\e[?2026h\e[?25l\e[14A\r\e[K┌──────────┐\r
-\r\e[K│          │\r
-\r\e[K│ Receive  │\r
-\r\e[K│          │\r
-\r\e[K└─────┬────┘\r
-\r\e[K      │     \r
-\r\e[K      │     \r
-\r\e[K      │     \r
-\r\e[K      │     \r
-\r\e[K      ▼     \r
-\r\e[K┌──────────┐\r
-\r\e[K│          │\r
-\r\e[K│ Validate │\r
-\r\e[K│          │\r
-\r\e[K└─────┬────┘\r
-\r\e[K      │     \r
-\r\e[K      │     \r
-\r\e[K      │     \r
-\r\e[K      │     \r
-\r\e[K      ▼     \r
-\r\e[K┌──────────┐\r
-\r\e[K│          │\r
-\r\e[K│    a     │\r
-\r\e[K│          │\r
-\r\e[K└──────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K│  accep   │\r
-\r\e[K│          │\r
-\r\e[K└──────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r\e[K└────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K┌────────────┐\r
+\r\e[K│            │\r
+\r\e[K│ 👩‍🚀 Receive │\r
+\r\e[K│            │\r
+\r\e[K└──────┬─────┘\r
+\r\e[K       │      \r
+\r\e[K       │      \r
+\r\e[K       │      \r
+\r\e[K       │      \r
+\r\e[K       ▼      \r
+\r\e[K┌────────────┐\r
+\r\e[K│            │\r
+\r\e[K│     v      │\r
+\r\e[K│            │\r
+\r\e[K└────────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K│   valid    │\r
+\r\e[K│            │\r
+\r\e[K└────────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[14A\r\e[K┌─────────────┐\r
+\r\e[K│             │\r
+\r\e[K│  👩‍🚀 Receive │\r
+\r\e[K│             │\r
+\r\e[K└──────┬──────┘\r
+\r\e[K       │       \r
+\r\e[K       │       \r
+\r\e[K       │       \r
+\r\e[K       │       \r
+\r\e[K       ▼       \r
+\r\e[K┌─────────────┐\r
+\r\e[K│             │\r
+\r\e[K│ ❤️ Validate │\r
+\r\e[K│             │\r
+\r\e[K└─────────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[14A\r\e[K┌─────────────┐     ┌─────┐\r
+\r\e[K│             │     │     │\r
+\r\e[K│  👩‍🚀 Receive │     │ val │\r
+\r\e[K│             │     │     │\r
+\r\e[K└──────┬──────┘     └─────┘\r
+\r\e[K       │                   \r
+\r\e[K       │                   \r
+\r\e[K       │                   \r
+\r\e[K       │                   \r
+\r\e[K       ▼                   \r
+\r\e[K┌─────────────┐            \r
+\r\e[K│             │            \r
+\r\e[K│ ❤️ Validate │            \r
+\r\e[K│             │            \r
+\r\e[K└─────────────┘            \e[?25h\e[?2026l\e[?2026h\e[?25l\e[14A\r\e[K┌─────────────┐     ┌─────────┐\r
+\r\e[K│             │     │         │\r
+\r\e[K│  👩‍🚀 Receive │     │ validat │\r
+\r\e[K│             │     │         │\r
+\r\e[K└──────┬──────┘     └─────────┘\r
+\r\e[K       │                       \r
+\r\e[K       │                       \r
+\r\e[K       │                       \r
+\r\e[K       │                       \r
+\r\e[K       ▼                       \r
+\r\e[K┌─────────────┐                \r
+\r\e[K│             │                \r
+\r\e[K│ ❤️ Validate │                \r
+\r\e[K│             │                \r
+\r\e[K└─────────────┘                \e[?25h\e[?2026l\e[?2026h\e[?25l\e[14A\r\e[K┌─────────────┐\r
+\r\e[K│             │\r
+\r\e[K│  👩‍🚀 Receive │\r
+\r\e[K│             │\r
+\r\e[K└──────┬──────┘\r
+\r\e[K       │       \r
+\r\e[K       │       \r
+\r\e[K       │       \r
+\r\e[K       │       \r
+\r\e[K       ▼       \r
+\r\e[K┌─────────────┐\r
+\r\e[K│             │\r
+\r\e[K│ ❤️ Validate │\r
+\r\e[K│             │\r
+\r\e[K└──────┬──────┘\r
+\r\e[K       │       \r
+\r\e[K       │       \r
+\r\e[K       │       \r
+\r\e[K       │       \r
+\r\e[K       ▼       \r
+\r\e[K┌─────────────┐\r
+\r\e[K│             │\r
+\r\e[K│      ac     │\r
+\r\e[K│             │\r
+\r\e[K└─────────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K│    accept   │\r
+\r\e[K│             │\r
+\r\e[K└─────────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K│  1️⃣ Accept  │\r
+\r\e[K│             │\r
+\r\e[K└─────────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m show the request flow                                                                              \e[0m\r
@@ -474,47 +504,47 @@ w\e[0m\r
 \r
 \r\e[K\e[1m\e[38;2;207;173;0mRequest processing\e[0m\e[0m\r
 \r\e[K\r
-\r\e[K  ┌────────────────┐                         \r
-\r\e[K  │                │                         \r
-\r\e[K  │    Receive     │                         \r
-\r\e[K  │                │                         \r
-\r\e[K  └────────┬───────┘                         \r
-\r\e[K           │                                 \r
-\r\e[K           │                                 \r
-\r\e[K           │                                 \r
-\r\e[K           │                                 \r
-\r\e[K           ▼                                 \r
-\r\e[K  ┌────────────────┐                         \r
-\r\e[K  │                │                         \r
-\r\e[K  │    Validate    ├──────────────┐          \r
-\r\e[K  │                │              │          \r
-\r\e[K  └────────┬───────┘              │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           ▼                      ▼          \r
-\r\e[K  ┌────────────────┐     ┌────────────────┐  \r
-\r\e[K  │                │     │                │  \r
-\r\e[K  │     Accept     │     │     Reject     │  \r
-\r\e[K  │                │     │                │  \r
-\r\e[K  └────────┬───────┘     └────────┬───────┘  \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K┌──────────┼──────────────────────┼─────────┐\r
-\r\e[K│          │     Audit trail      │         │\r
-\r\e[K│          │                      │         │\r
-\r\e[K│          ▼                      ▼         │\r
-\r\e[K│ ┌────────────────┐     ┌────────────────┐ │\r
-\r\e[K│ │                │     │                │ │\r
-\r\e[K│ │ Record success │     │ Record failure │ │\r
-\r\e[K│ │                │     │                │ │\r
-\r\e[K│ └────────────────┘     └────────────────┘ │\r
-\r\e[K│                                           │\r
-\r\e[K└───────────────────────────────────────────┘\e[?25h\e[?2026l\r
+\r\e[K  ┌───────────────────┐                            \r
+\r\e[K  │                   │                            \r
+\r\e[K  │     👩‍🚀 Receive    │                            \r
+\r\e[K  │                   │                            \r
+\r\e[K  └─────────┬─────────┘                            \r
+\r\e[K            │                                      \r
+\r\e[K            │                                      \r
+\r\e[K            │                                      \r
+\r\e[K            │                                      \r
+\r\e[K            ▼                                      \r
+\r\e[K  ┌───────────────────┐                            \r
+\r\e[K  │                   │                            \r
+\r\e[K  │    ❤️ Validate    ├───────────────┐            \r
+\r\e[K  │                   │               │            \r
+\r\e[K  └─────────┬─────────┘               │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            ▼                         ▼            \r
+\r\e[K  ┌───────────────────┐     ┌───────────────────┐  \r
+\r\e[K  │                   │     │                   │  \r
+\r\e[K  │     1️⃣ Accept     │     │     🏳️‍🌈 Reject     │  \r
+\r\e[K  │                   │     │                   │  \r
+\r\e[K  └─────────┬─────────┘     └─────────┬─────────┘  \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K┌───────────┼─────────────────────────┼───────────┐\r
+\r\e[K│           │     🗂️ Audit trail      │           │\r
+\r\e[K│           │                         │           │\r
+\r\e[K│           ▼                         ▼           │\r
+\r\e[K│ ┌───────────────────┐     ┌───────────────────┐ │\r
+\r\e[K│ │                   │     │                   │ │\r
+\r\e[K│ │ 📝 Record success │     │ ⚠️ Record failure │ │\r
+\r\e[K│ │                   │     │                   │ │\r
+\r\e[K│ └───────────────────┘     └───────────────────┘ │\r
+\r\e[K│                                                 │\r
+\r\e[K└─────────────────────────────────────────────────┘\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
 \e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m \r
@@ -538,25 +568,27 @@ ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;
 \r\e[K\e[1m\e[38;2;207;173;0mprocessing\e[0m\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;150;152;150mgraph TD\e[0m\r
-\r\e[K\e[38;2;150;152;150mrequest[Rece\e[0m\r
-\r\e[K\e[38;2;150;152;150mive] -->\e[0m\r
-\r\e[K\e[38;2;150;152;150mvalidate[Val\e[0m\r
-\r\e[K\e[38;2;150;152;150midate]\e[0m\r
+\r\e[K\e[38;2;150;152;150mrequest[👩‍🚀\e[0m\r
+\r\e[K\e[38;2;150;152;150mReceive] -->\e[0m\r
+\r\e[K\e[38;2;150;152;150mvalidate[❤️\e[0m\r
+\r\e[K\e[38;2;150;152;150mValidate]\e[0m\r
 \r\e[K\e[38;2;150;152;150mvalidate -->\e[0m\r
-\r\e[K\e[38;2;150;152;150maccept[Accep\e[0m\r
-\r\e[K\e[38;2;150;152;150mt]\e[0m\r
+\r\e[K\e[38;2;150;152;150maccept[1️⃣\e[0m\r
+\r\e[K\e[38;2;150;152;150mAccept]\e[0m\r
 \r\e[K\e[38;2;150;152;150mvalidate -->\e[0m\r
-\r\e[K\e[38;2;150;152;150mreject[Rejec\e[0m\r
-\r\e[K\e[38;2;150;152;150mt]\e[0m\r
+\r\e[K\e[38;2;150;152;150mreject[🏳️‍🌈\e[0m\r
+\r\e[K\e[38;2;150;152;150mReject]\e[0m\r
 \r\e[K\e[38;2;150;152;150msubgraph\e[0m\r
-\r\e[K\e[38;2;150;152;150maudit [Audit\e[0m\r
-\r\e[K\e[38;2;150;152;150mtrail]\e[0m\r
+\r\e[K\e[38;2;150;152;150maudit [🗂️\e[0m\r
+\r\e[K\e[38;2;150;152;150mAudit trail]\e[0m\r
 \r\e[K\e[38;2;150;152;150maccept -->\e[0m\r
-\r\e[K\e[38;2;150;152;150mrecorded[Rec\e[0m\r
-\r\e[K\e[38;2;150;152;150mord success]\e[0m\r
+\r\e[K\e[38;2;150;152;150mrecorded[📝\e[0m\r
+\r\e[K\e[38;2;150;152;150mRecord\e[0m\r
+\r\e[K\e[38;2;150;152;150msuccess]\e[0m\r
 \r\e[K\e[38;2;150;152;150mreject -->\e[0m\r
-\r\e[K\e[38;2;150;152;150mfailed[Recor\e[0m\r
-\r\e[K\e[38;2;150;152;150md failure]\e[0m\r
+\r\e[K\e[38;2;150;152;150mfailed[⚠️\e[0m\r
+\r\e[K\e[38;2;150;152;150mRecord\e[0m\r
+\r\e[K\e[38;2;150;152;150mfailure]\e[0m\r
 \r\e[K\e[38;2;150;152;150mend\e[0m\r
 \e[?25h\e[?2026l
 === unsized ===
@@ -570,12 +602,12 @@ ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;
 \r\e[K\e[1m\e[38;2;207;173;0mRequest processing\e[0m\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;150;152;150mgraph TD\e[0m\r
-\r\e[K\e[38;2;150;152;150mrequest[Receive] --> validate[Validate]\e[0m\r
-\r\e[K\e[38;2;150;152;150mvalidate --> accept[Accept]\e[0m\r
-\r\e[K\e[38;2;150;152;150mvalidate --> reject[Reject]\e[0m\r
-\r\e[K\e[38;2;150;152;150msubgraph audit [Audit trail]\e[0m\r
-\r\e[K\e[38;2;150;152;150maccept --> recorded[Record success]\e[0m\r
-\r\e[K\e[38;2;150;152;150mreject --> failed[Record failure]\e[0m\r
+\r\e[K\e[38;2;150;152;150mrequest[👩‍🚀 Receive] --> validate[❤️ Validate]\e[0m\r
+\r\e[K\e[38;2;150;152;150mvalidate --> accept[1️⃣ Accept]\e[0m\r
+\r\e[K\e[38;2;150;152;150mvalidate --> reject[🏳️‍🌈 Reject]\e[0m\r
+\r\e[K\e[38;2;150;152;150msubgraph audit [🗂️ Audit trail]\e[0m\r
+\r\e[K\e[38;2;150;152;150maccept --> recorded[📝 Record success]\e[0m\r
+\r\e[K\e[38;2;150;152;150mreject --> failed[⚠️ Record failure]\e[0m\r
 \r\e[K\e[38;2;150;152;150mend\e[0m
 \e[?25h\e[?2026l
 === wide ===
@@ -589,45 +621,45 @@ ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;
 \r
 \r\e[K\e[1m\e[38;2;207;173;0mRequest processing\e[0m\e[0m\r
 \r\e[K\r
-\r\e[K  ┌────────────────┐                         \r
-\r\e[K  │                │                         \r
-\r\e[K  │    Receive     │                         \r
-\r\e[K  │                │                         \r
-\r\e[K  └────────┬───────┘                         \r
-\r\e[K           │                                 \r
-\r\e[K           │                                 \r
-\r\e[K           │                                 \r
-\r\e[K           │                                 \r
-\r\e[K           ▼                                 \r
-\r\e[K  ┌────────────────┐                         \r
-\r\e[K  │                │                         \r
-\r\e[K  │    Validate    ├──────────────┐          \r
-\r\e[K  │                │              │          \r
-\r\e[K  └────────┬───────┘              │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           ▼                      ▼          \r
-\r\e[K  ┌────────────────┐     ┌────────────────┐  \r
-\r\e[K  │                │     │                │  \r
-\r\e[K  │     Accept     │     │     Reject     │  \r
-\r\e[K  │                │     │                │  \r
-\r\e[K  └────────┬───────┘     └────────┬───────┘  \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K           │                      │          \r
-\r\e[K┌──────────┼──────────────────────┼─────────┐\r
-\r\e[K│          │     Audit trail      │         │\r
-\r\e[K│          │                      │         │\r
-\r\e[K│          ▼                      ▼         │\r
-\r\e[K│ ┌────────────────┐     ┌────────────────┐ │\r
-\r\e[K│ │                │     │                │ │\r
-\r\e[K│ │ Record success │     │ Record failure │ │\r
-\r\e[K│ │                │     │                │ │\r
-\r\e[K│ └────────────────┘     └────────────────┘ │\r
-\r\e[K│                                           │\r
-\r\e[K└───────────────────────────────────────────┘\r
+\r\e[K  ┌───────────────────┐                            \r
+\r\e[K  │                   │                            \r
+\r\e[K  │     👩‍🚀 Receive    │                            \r
+\r\e[K  │                   │                            \r
+\r\e[K  └─────────┬─────────┘                            \r
+\r\e[K            │                                      \r
+\r\e[K            │                                      \r
+\r\e[K            │                                      \r
+\r\e[K            │                                      \r
+\r\e[K            ▼                                      \r
+\r\e[K  ┌───────────────────┐                            \r
+\r\e[K  │                   │                            \r
+\r\e[K  │    ❤️ Validate    ├───────────────┐            \r
+\r\e[K  │                   │               │            \r
+\r\e[K  └─────────┬─────────┘               │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            ▼                         ▼            \r
+\r\e[K  ┌───────────────────┐     ┌───────────────────┐  \r
+\r\e[K  │                   │     │                   │  \r
+\r\e[K  │     1️⃣ Accept     │     │     🏳️‍🌈 Reject     │  \r
+\r\e[K  │                   │     │                   │  \r
+\r\e[K  └─────────┬─────────┘     └─────────┬─────────┘  \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K            │                         │            \r
+\r\e[K┌───────────┼─────────────────────────┼───────────┐\r
+\r\e[K│           │     🗂️ Audit trail      │           │\r
+\r\e[K│           │                         │           │\r
+\r\e[K│           ▼                         ▼           │\r
+\r\e[K│ ┌───────────────────┐     ┌───────────────────┐ │\r
+\r\e[K│ │                   │     │                   │ │\r
+\r\e[K│ │ 📝 Record success │     │ ⚠️ Record failure │ │\r
+\r\e[K│ │                   │     │                   │ │\r
+\r\e[K│ └───────────────────┘     └───────────────────┘ │\r
+\r\e[K│                                                 │\r
+\r\e[K└─────────────────────────────────────────────────┘\r
 \e[?25h\e[?2026l

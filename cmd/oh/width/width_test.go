@@ -1,6 +1,9 @@
 package width
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestWhatEachKindOfCharacterTakes(t *testing.T) {
 	for text, want := range map[string]int{
@@ -13,10 +16,24 @@ func TestWhatEachKindOfCharacterTakes(t *testing.T) {
 		"🙂":       2,
 		"e\u0301": 1,
 		"\u200d":  0,
+		"❤️":      2,
+		"1️⃣":     2,
+		"🇬🇧":      2,
+		"👩‍🚀":     2,
+		"🏳️‍🌈":    2,
+		"👨‍👩‍👧‍👦": 2,
 	} {
 		if got := Of(text); got != want {
 			t.Errorf("Of(%q) = %d, want %d", text, got, want)
 		}
+	}
+}
+
+func TestCellsKeepGraphemeClustersTogether(t *testing.T) {
+	got := Cells("a👩‍🚀❤️1️⃣b")
+	want := []string{"a", "👩‍🚀", "", "❤️", "", "1️⃣", "", "b"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %#v, want %#v", got, want)
 	}
 }
 
@@ -45,6 +62,9 @@ func TestCutStopsShortOfACharacterThatWouldNotFit(t *testing.T) {
 		{"hello", 3, "hel", 3},
 		{"hello", 9, "hello", 5},
 		{"", 4, "", 0},
+		{"👩‍🚀x", 2, "👩‍🚀", 2},
+		{"🏳️‍🌈x", 2, "🏳️‍🌈", 2},
+		{"👨‍👩‍👧‍👦x", 2, "👨‍👩‍👧‍👦", 2},
 	} {
 		got, took := Cut(test.text, test.cells)
 

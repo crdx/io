@@ -37,12 +37,12 @@ Tracing the interaction.
 
 ```mermaid
 sequenceDiagram
-participant U as User
-participant A as App
-U->>A: Open
-Note right of A: Ready
-loop Retry
-A-->>U: Update
+participant U as 👩‍🚀 User
+participant A as ❤️ App
+U->>A: 1️⃣ Open
+Note right of A: 🏳️‍🌈 Ready
+loop 🔁 Retry
+A-->>U: 📡 Update
 end
 ```
 

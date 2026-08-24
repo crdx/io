@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 
 	"crdx.org/io/internal/mermaid/diagram"
 )
@@ -261,6 +262,10 @@ func hasSequenceKeyword(line string) bool {
 }
 
 func Parse(input string) (*SequenceDiagram, error) {
+	if !utf8.ValidString(input) {
+		return nil, fmt.Errorf("input is not valid UTF-8")
+	}
+
 	input = strings.TrimSpace(input)
 	if input == "" {
 		return nil, fmt.Errorf("empty input")

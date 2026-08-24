@@ -1,4 +1,4 @@
 {"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
 {"event":{"kind":"user_message","text":"show the customer data model"}}
 {"event":{"kind":"model_reasoning","text":"Sketching the data model."}}
-{"event":{"kind":"model_message","text":"# Customer orders\n\n```mermaid\nerDiagram\nCUSTOMER {\nint id PK\nstring name\n}\nORDER {\nint id PK\nint customer_id FK\n}\nCUSTOMER ||--o{ ORDER : places\n```\n"}}
+{"event":{"kind":"model_message","text":"# Customer orders\n\n```mermaid\nerDiagram\nCUSTOMER[👩‍🚀 Customer] {\nint id PK\nstring name\n}\nORDER[❤️ Order] {\nint id PK\nint customer_id FK\n}\nCUSTOMER ||--o{ ORDER : 1️⃣ places\n```\n"}}

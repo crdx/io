@@ -233,16 +233,16 @@ func noteLeftGutter(events []Event, layout *diagramLayout) int {
 	return gutter
 }
 
-func noteRunes(note *Note) []rune {
+func noteCells(note *Note) []string {
 	text := note.Text
 	for _, br := range []string{"<br/>", "<br />", "<br>"} {
 		text = strings.ReplaceAll(text, br, " ")
 	}
-	return []rune(text)
+	return runewidth.Cells(text)
 }
 
 func noteBoxColumns(note *Note, layout *diagramLayout) (int, int) {
-	boxW := len(noteRunes(note)) + 4
+	boxW := len(noteCells(note)) + 4
 	centers := layout.participantCenters
 	first := centers[note.Participants[0].Index]
 	last := centers[note.Participants[len(note.Participants)-1].Index]
@@ -269,40 +269,40 @@ func noteBoxColumns(note *Note, layout *diagramLayout) (int, int) {
 }
 
 func renderNote(note *Note, layout *diagramLayout, chars BoxChars) []string {
-	runes := noteRunes(note)
+	cells := noteCells(note)
 	left, right := noteBoxColumns(note, layout)
 	if left < 0 {
 		left = 0
 	}
 
-	border := func(l, r rune) string {
-		line := padRunes(buildLifeline(layout, chars), right+1)
-		line[left] = l
-		for c := left + 1; c < right; c++ {
-			line[c] = chars.Horizontal
+	border := func(leftBorder, rightBorder rune) string {
+		line := padCells(buildLifeline(layout, chars), right+1)
+		line[left] = string(leftBorder)
+		for column := left + 1; column < right; column++ {
+			line[column] = string(chars.Horizontal)
 		}
-		line[right] = r
-		return strings.TrimRight(string(line), " ")
+		line[right] = string(rightBorder)
+		return cellsToString(line)
 	}
 
-	mid := padRunes(buildLifeline(layout, chars), right+1)
-	for c := left; c <= right; c++ {
-		mid[c] = ' '
+	middle := padCells(buildLifeline(layout, chars), right+1)
+	for column := left; column <= right; column++ {
+		middle[column] = " "
 	}
-	mid[left] = chars.Vertical
-	mid[right] = chars.Vertical
+	middle[left] = string(chars.Vertical)
+	middle[right] = string(chars.Vertical)
 	inner := right - left - 1
-	col := left + 1 + (inner-len(runes))/2
-	for _, ch := range runes {
-		if col > left && col < right {
-			mid[col] = ch
+	column := left + 1 + (inner-len(cells))/2
+	for _, cell := range cells {
+		if column > left && column < right {
+			middle[column] = cell
 		}
-		col++
+		column++
 	}
 
 	return []string{
 		border(chars.TopLeft, chars.TopRight),
-		strings.TrimRight(string(mid), " "),
+		cellsToString(middle),
 		border(chars.BottomLeft, chars.BottomRight),
 	}
 }
@@ -345,9 +345,9 @@ func wrapFragment(frag *Fragment, inner []Event, layout *diagramLayout, chars Bo
 		leftCol = 0
 	}
 
-	for _, l := range body {
-		if w := len([]rune(l)) + 1; w > rightCol {
-			rightCol = w
+	for _, line := range body {
+		if lineWidth := runewidth.StringWidth(line) + 1; lineWidth > rightCol {
+			rightCol = lineWidth
 		}
 	}
 
@@ -357,7 +357,7 @@ func wrapFragment(frag *Fragment, inner []Event, layout *diagramLayout, chars Bo
 	}
 
 	widen := func(text string) {
-		if end := leftCol + frameLabelInset + len([]rune("["+text+"]")) + 1; end > rightCol {
+		if end := leftCol + frameLabelInset + runewidth.StringWidth("["+text+"]") + 1; end > rightCol {
 			rightCol = end
 		}
 	}
@@ -405,22 +405,22 @@ func splitSections(inner []Event) ([][]Event, []string) {
 }
 
 func fragmentDivider(layout *diagramLayout, chars BoxChars, leftCol, rightCol int, label string) string {
-	line := padRunes(buildLifeline(layout, chars), rightCol+1)
-	line[leftCol] = chars.TeeRight
-	for c := leftCol + 1; c < rightCol; c++ {
-		line[c] = chars.DottedLine
+	line := padCells(buildLifeline(layout, chars), rightCol+1)
+	line[leftCol] = string(chars.TeeRight)
+	for column := leftCol + 1; column < rightCol; column++ {
+		line[column] = string(chars.DottedLine)
 	}
-	line[rightCol] = chars.TeeLeft
+	line[rightCol] = string(chars.TeeLeft)
 	if label != "" {
-		col := leftCol + frameLabelInset
-		for _, r := range "[" + label + "]" {
-			if col < rightCol {
-				line[col] = r
-				col++
+		column := leftCol + frameLabelInset
+		for _, cell := range runewidth.Cells("[" + label + "]") {
+			if column < rightCol {
+				line[column] = cell
+				column++
 			}
 		}
 	}
-	return strings.TrimRight(string(line), " ")
+	return cellsToString(line)
 }
 
 func involvedParticipants(events []Event, layout *diagramLayout) (int, int) {
@@ -446,43 +446,47 @@ func involvedParticipants(events []Event, layout *diagramLayout) (int, int) {
 }
 
 func fragmentBorder(layout *diagramLayout, chars BoxChars, leftCol, rightCol int, label string, top bool) string {
-	line := padRunes(buildLifeline(layout, chars), rightCol+1)
+	line := padCells(buildLifeline(layout, chars), rightCol+1)
 
 	leftCorner, rightCorner := chars.BottomLeft, chars.BottomRight
 	if top {
 		leftCorner, rightCorner = chars.TopLeft, chars.TopRight
 	}
-	line[leftCol] = leftCorner
-	for c := leftCol + 1; c < rightCol; c++ {
-		line[c] = chars.Horizontal
+	line[leftCol] = string(leftCorner)
+	for column := leftCol + 1; column < rightCol; column++ {
+		line[column] = string(chars.Horizontal)
 	}
-	line[rightCol] = rightCorner
+	line[rightCol] = string(rightCorner)
 
 	if label != "" {
-		col := leftCol + frameLabelInset
-		for _, r := range "[" + label + "]" {
-			if col < rightCol {
-				line[col] = r
-				col++
+		column := leftCol + frameLabelInset
+		for _, cell := range runewidth.Cells("[" + label + "]") {
+			if column < rightCol {
+				line[column] = cell
+				column++
 			}
 		}
 	}
-	return strings.TrimRight(string(line), " ")
+	return cellsToString(line)
 }
 
 func overlayFrameSides(line string, chars BoxChars, leftCol, rightCol int) string {
-	r := padRunes(line, rightCol+1)
-	r[leftCol] = chars.Vertical
-	r[rightCol] = chars.Vertical
-	return strings.TrimRight(string(r), " ")
+	cells := padCells(line, rightCol+1)
+	cells[leftCol] = string(chars.Vertical)
+	cells[rightCol] = string(chars.Vertical)
+	return cellsToString(cells)
 }
 
-func padRunes(s string, width int) []rune {
-	r := []rune(s)
-	for len(r) < width {
-		r = append(r, ' ')
+func padCells(text string, cellCount int) []string {
+	cells := runewidth.Cells(text)
+	for len(cells) < cellCount {
+		cells = append(cells, " ")
 	}
-	return r
+	return cells
+}
+
+func cellsToString(cells []string) string {
+	return strings.TrimRight(strings.Join(cells, ""), " ")
 }
 
 func buildLine(participants []*Participant, layout *diagramLayout, draw func(int) string) string {
@@ -491,7 +495,7 @@ func buildLine(participants []*Participant, layout *diagramLayout, draw func(int
 		boxWidth := layout.participantWidths[i] + boxBorderWidth
 		left := layout.participantCenters[i] - boxWidth/2
 
-		needed := left - len([]rune(sb.String()))
+		needed := left - runewidth.StringWidth(sb.String())
 		if needed > 0 {
 			sb.WriteString(strings.Repeat(" ", needed))
 		}
@@ -501,16 +505,16 @@ func buildLine(participants []*Participant, layout *diagramLayout, draw func(int
 }
 
 func buildLifeline(layout *diagramLayout, chars BoxChars) string {
-	line := make([]rune, layout.totalWidth+1)
+	line := make([]string, layout.totalWidth+1)
 	for i := range line {
-		line[i] = ' '
+		line[i] = " "
 	}
-	for _, c := range layout.participantCenters {
-		if c < len(line) {
-			line[c] = chars.Vertical
+	for _, column := range layout.participantCenters {
+		if column < len(line) {
+			line[column] = string(chars.Vertical)
 		}
 	}
-	return strings.TrimRight(string(line), " ")
+	return cellsToString(line)
 }
 
 func renderMessage(msg *Message, layout *diagramLayout, chars BoxChars) []string {
@@ -526,64 +530,56 @@ func renderMessage(msg *Message, layout *diagramLayout, chars BoxChars) []string
 		start := min(from, to) + labelLeftMargin
 		labelWidth := runewidth.StringWidth(label)
 		w := max(layout.totalWidth, start+labelWidth) + labelBufferSpace
-		line := []rune(buildLifeline(layout, chars))
-		if len(line) < w {
-			padding := make([]rune, w-len(line))
-			for k := range padding {
-				padding[k] = ' '
-			}
-			line = append(line, padding...)
-		}
-
-		col := start
-		for _, r := range label {
-			if col < len(line) {
-				line[col] = r
-				col++
+		line := padCells(buildLifeline(layout, chars), w)
+		column := start
+		for _, cell := range runewidth.Cells(label) {
+			if column < len(line) {
+				line[column] = cell
+				column++
 			}
 		}
-		lines = append(lines, strings.TrimRight(string(line), " "))
+		lines = append(lines, cellsToString(line))
 	}
 
-	line := []rune(buildLifeline(layout, chars))
+	line := runewidth.Cells(buildLifeline(layout, chars))
 	style := chars.SolidLine
 	if msg.ArrowType.isDotted() {
 		style = chars.DottedLine
 	}
 
 	if from < to {
-		line[from] = chars.TeeRight
+		line[from] = string(chars.TeeRight)
 		for i := from + 1; i < to; i++ {
-			line[i] = style
+			line[i] = string(style)
 		}
 		if head, ok := msg.ArrowType.head(chars, true); ok {
-			line[to-1] = head
+			line[to-1] = string(head)
 		}
 		if msg.ArrowType.isBidirectional() {
-			line[from+1] = chars.ArrowLeft
+			line[from+1] = string(chars.ArrowLeft)
 		}
-		line[to] = chars.Vertical
+		line[to] = string(chars.Vertical)
 	} else {
-		line[to] = chars.Vertical
-		line[to+1] = style
+		line[to] = string(chars.Vertical)
+		line[to+1] = string(style)
 		if head, ok := msg.ArrowType.head(chars, false); ok {
-			line[to+1] = head
+			line[to+1] = string(head)
 		}
 		for i := to + 2; i < from; i++ {
-			line[i] = style
+			line[i] = string(style)
 		}
 		if msg.ArrowType.isBidirectional() {
-			line[from-1] = chars.ArrowRight
+			line[from-1] = string(chars.ArrowRight)
 		}
-		line[from] = chars.TeeLeft
+		line[from] = string(chars.TeeLeft)
 	}
 	if msg.CentralFrom {
-		line[from] = chars.Circle
+		line[from] = string(chars.Circle)
 	}
 	if msg.CentralTo {
-		line[to] = chars.Circle
+		line[to] = string(chars.Circle)
 	}
-	lines = append(lines, strings.TrimRight(string(line), " "))
+	lines = append(lines, cellsToString(line))
 	return lines
 }
 
@@ -592,17 +588,8 @@ func renderSelfMessage(msg *Message, layout *diagramLayout, chars BoxChars) []st
 	center := layout.participantCenters[msg.From.Index]
 	width := layout.selfMessageWidth
 
-	ensureWidth := func(l string) []rune {
-		target := layout.totalWidth + width + 1
-		r := []rune(l)
-		if len(r) < target {
-			pad := make([]rune, target-len(r))
-			for i := range pad {
-				pad[i] = ' '
-			}
-			r = append(r, pad...)
-		}
-		return r
+	ensureWidth := func(line string) []string {
+		return padCells(line, layout.totalWidth+width+1)
 	}
 
 	label := msg.Label
@@ -615,21 +602,17 @@ func renderSelfMessage(msg *Message, layout *diagramLayout, chars BoxChars) []st
 		start := center + labelLeftMargin
 		labelWidth := runewidth.StringWidth(label)
 		needed := start + labelWidth + labelBufferSpace
-		if len(line) < needed {
-			pad := make([]rune, needed-len(line))
-			for i := range pad {
-				pad[i] = ' '
-			}
-			line = append(line, pad...)
+		for len(line) < needed {
+			line = append(line, " ")
 		}
-		col := start
-		for _, c := range label {
-			if col < len(line) {
-				line[col] = c
-				col++
+		column := start
+		for _, cell := range runewidth.Cells(label) {
+			if column < len(line) {
+				line[column] = cell
+				column++
 			}
 		}
-		lines = append(lines, strings.TrimRight(string(line), " "))
+		lines = append(lines, cellsToString(line))
 	}
 
 	style := chars.Horizontal
@@ -638,34 +621,34 @@ func renderSelfMessage(msg *Message, layout *diagramLayout, chars BoxChars) []st
 	}
 
 	l1 := ensureWidth(buildLifeline(layout, chars))
-	l1[center] = chars.TeeRight
+	l1[center] = string(chars.TeeRight)
 	if msg.CentralFrom {
-		l1[center] = chars.Circle
+		l1[center] = string(chars.Circle)
 	}
 	for i := 1; i < width; i++ {
-		l1[center+i] = style
+		l1[center+i] = string(style)
 	}
-	l1[center+width-1] = chars.SelfTopRight
-	lines = append(lines, strings.TrimRight(string(l1), " "))
+	l1[center+width-1] = string(chars.SelfTopRight)
+	lines = append(lines, cellsToString(l1))
 
 	l2 := ensureWidth(buildLifeline(layout, chars))
-	l2[center+width-1] = chars.Vertical
-	lines = append(lines, strings.TrimRight(string(l2), " "))
+	l2[center+width-1] = string(chars.Vertical)
+	lines = append(lines, cellsToString(l2))
 
 	l3 := ensureWidth(buildLifeline(layout, chars))
-	l3[center] = chars.Vertical
+	l3[center] = string(chars.Vertical)
 	if msg.CentralTo {
-		l3[center] = chars.Circle
+		l3[center] = string(chars.Circle)
 	}
-	l3[center+1] = style
+	l3[center+1] = string(style)
 	if head, ok := msg.ArrowType.head(chars, false); ok {
-		l3[center+1] = head
+		l3[center+1] = string(head)
 	}
 	for i := 2; i < width-1; i++ {
-		l3[center+i] = style
+		l3[center+i] = string(style)
 	}
-	l3[center+width-1] = chars.SelfBottom
-	lines = append(lines, strings.TrimRight(string(l3), " "))
+	l3[center+width-1] = string(chars.SelfBottom)
+	lines = append(lines, cellsToString(l3))
 
 	return lines
 }

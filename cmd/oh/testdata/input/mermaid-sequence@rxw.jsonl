@@ -1,4 +1,4 @@
 {"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
 {"event":{"kind":"user_message","text":"show the retry interaction"}}
 {"event":{"kind":"model_reasoning","text":"Tracing the interaction."}}
-{"event":{"kind":"model_message","text":"# Application retry\n\n```mermaid\nsequenceDiagram\nparticipant U as User\nparticipant A as App\nU->>A: Open\nNote right of A: Ready\nloop Retry\nA-->>U: Update\nend\n```\n"}}
+{"event":{"kind":"model_message","text":"# Application retry\n\n```mermaid\nsequenceDiagram\nparticipant U as 👩‍🚀 User\nparticipant A as ❤️ App\nU->>A: 1️⃣ Open\nNote right of A: 🏳️‍🌈 Ready\nloop 🔁 Retry\nA-->>U: 📡 Update\nend\n```\n"}}
