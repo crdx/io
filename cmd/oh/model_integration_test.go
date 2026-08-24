@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"crdx.org/io/cmd/oh/models"
+	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/internal/sim"
 )
 
@@ -37,13 +37,13 @@ func TestUpdatingAgainstAStandInEndpointDescribesEveryProvider(t *testing.T) {
 	}
 
 	var output bytes.Buffer
-	if err := models.Update(&output, address, modelCachePath(), listProviderModels); err != nil {
+	if err := model.Update(&output, address, modelCachePath(), listProviderModels); err != nil {
 		t.Fatalf("unexpected error: %v, output %q", err, output.String())
 	}
 
-	choices := models.Choices(modelCachePath())
+	choices := model.Choices(modelCachePath())
 	for _, providerName := range providerNames {
-		var matches []models.Choice
+		var matches []model.Choice
 		for _, choice := range choices {
 			if choice.Provider == providerName {
 				matches = append(matches, choice)

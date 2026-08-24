@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"crdx.org/io/cmd/oh/caps"
-	"crdx.org/io/cmd/oh/models"
+	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/session"
 )
 
@@ -75,9 +75,9 @@ func completions(kind string, word string, sources Sources) []string {
 	case completeOption:
 		return optionCompletions(word, usageOptions(usage))
 	case completeModel:
-		return modelCompletions(word, models.Choices(sources.ModelCachePath))
+		return modelCompletions(word, model.Choices(sources.ModelCachePath))
 	case completeEffort:
-		return effortCompletions(word, models.Choices(sources.ModelCachePath))
+		return effortCompletions(word, model.Choices(sources.ModelCachePath))
 	case completeSession:
 		return withPrefix(word, sessionNames(sources.SessionsDir))
 	case completeCaps:
@@ -127,15 +127,15 @@ func usageOptions(text string) []string {
 	return options
 }
 
-func modelCompletions(word string, choices []models.Choice) []string {
+func modelCompletions(word string, choices []model.Choice) []string {
 	modelQuery, effortQuery, qualified := strings.Cut(word, "@")
 
 	var selections []string
 
-	for _, choice := range models.RankedChoices(modelQuery, choices) {
+	for _, choice := range model.RankedChoices(modelQuery, choices) {
 		efforts := choice.EffortLevels
 		if qualified {
-			efforts = models.EffortsMatching(effortQuery, choice.EffortLevels)
+			efforts = model.EffortsMatching(effortQuery, choice.EffortLevels)
 		}
 
 		for _, effort := range efforts {
@@ -146,13 +146,13 @@ func modelCompletions(word string, choices []models.Choice) []string {
 	return selections
 }
 
-func effortCompletions(word string, choices []models.Choice) []string {
+func effortCompletions(word string, choices []model.Choice) []string {
 	modelQuery, effortQuery, _ := strings.Cut(word, "@")
 
 	var efforts []string
 
-	for _, choice := range models.RankedChoices(modelQuery, choices) {
-		for _, effort := range models.EffortsMatching(effortQuery, choice.EffortLevels) {
+	for _, choice := range model.RankedChoices(modelQuery, choices) {
+		for _, effort := range model.EffortsMatching(effortQuery, choice.EffortLevels) {
 			if !slices.Contains(efforts, effort) {
 				efforts = append(efforts, effort)
 			}

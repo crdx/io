@@ -8,7 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	"crdx.org/io/cmd/oh/models"
+	"crdx.org/io/cmd/oh/model"
 )
 
 func writeStoredSession(t *testing.T, directory string, name string, started string) {
@@ -77,7 +77,7 @@ func TestNothingTypedOffersTheLongOptions(t *testing.T) {
 }
 
 func TestModelCompletionsAreWholeSelections(t *testing.T) {
-	choices := []models.Choice{
+	choices := []model.Choice{
 		{Provider: "openai", Model: "gpt-5", EffortLevels: []string{"low", "high"}},
 		{Provider: "anthropic", Model: "claude-sonnet-5", EffortLevels: []string{"none", "high"}},
 	}
@@ -98,7 +98,7 @@ func TestModelCompletionsAreWholeSelections(t *testing.T) {
 }
 
 func TestEffortCompletionsAreBareLevels(t *testing.T) {
-	choices := []models.Choice{
+	choices := []model.Choice{
 		{Provider: "openai", Model: "gpt-5", EffortLevels: []string{"low", "high"}},
 		{Provider: "anthropic", Model: "claude-sonnet-5", EffortLevels: []string{"none", "high"}},
 	}

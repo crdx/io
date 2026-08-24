@@ -25,7 +25,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
 	"crdx.org/io/cmd/oh/metrics"
-	"crdx.org/io/cmd/oh/models"
+	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/shell"
@@ -39,9 +39,9 @@ import (
 const (
 	endpointVariable = "OH_ENDPOINT_URL"
 
-	codexProvider      = models.CodexProvider
-	opencodeGoProvider = models.OpencodeGoProvider
-	anthropicProvider  = models.AnthropicProvider
+	codexProvider      = model.CodexProvider
+	opencodeGoProvider = model.OpencodeGoProvider
+	anthropicProvider  = model.AnthropicProvider
 	opencodeGoEndpoint = "https://opencode.ai/zen/go/v1/chat/completions"
 
 	standInToken = "stand-in"
@@ -117,11 +117,11 @@ func run() ([]string, error) {
 	}
 
 	if inputArgs.List {
-		return nil, models.List(os.Stdout, modelCachePath())
+		return nil, model.List(os.Stdout, modelCachePath())
 	}
 
 	if inputArgs.Update {
-		return nil, models.Update(os.Stdout, os.Getenv(endpointVariable), modelCachePath(), listProviderModels)
+		return nil, model.Update(os.Stdout, os.Getenv(endpointVariable), modelCachePath(), listProviderModels)
 	}
 
 	if inputArgs.Sessions {
@@ -231,11 +231,11 @@ func run() ([]string, error) {
 	processes := sandbox.NewProcesses(args.Caps.Has(caps.Background))
 	defer func() { _, _ = processes.Disable() }()
 
-	providerName, model, effort, err := resolveProviderChoice(args.Provider, args.Model, args.Effort, config, resumedSession)
+	providerName, modelName, effort, err := resolveProviderChoice(args.Provider, args.Model, args.Effort, config, resumedSession)
 	if err != nil {
 		return nil, err
 	}
-	choice, err := models.Chosen(modelCachePath(), providerName, model)
+	choice, err := model.Chosen(modelCachePath(), providerName, modelName)
 	if err != nil {
 		return nil, err
 	}
@@ -246,7 +246,7 @@ func run() ([]string, error) {
 	}
 
 	meta := store.Meta{
-		Model:        model,
+		Model:        modelName,
 		WorkspaceDir: workspaceDir,
 		Provider:     providerName,
 		Effort:       effort,
@@ -337,7 +337,7 @@ func run() ([]string, error) {
 		getOnWithItMessage: config.GetOnWithItMessage,
 	}
 
-	chat.segmentLayout, err = config.layout(availableSegments(workspaceDir, log.Name(), model, effort, chat))
+	chat.segmentLayout, err = config.layout(availableSegments(workspaceDir, log.Name(), modelName, effort, chat))
 	if err != nil {
 		return nil, err
 	}
@@ -459,31 +459,31 @@ func resolveProviderChoice(
 	if sessionProvider != "" && providerName != sessionProvider {
 		return "", "", "", fmt.Errorf("cannot resume a %s session with %s", sessionProvider, providerName)
 	}
-	model := config.Model
+	modelName := config.Model
 	effort := config.Effort
 	if effort == "" {
 		effort = defaultEfforts[providerName]
 	}
 	if resumedSession != nil {
 		if resumedSession.Meta.Model != "" {
-			model = resumedSession.Meta.Model
+			modelName = resumedSession.Meta.Model
 		}
 		if resumedSession.Meta.Effort != "" {
 			effort = resumedSession.Meta.Effort
 		}
 	}
 	if requestedModel != "" {
-		model = requestedModel
+		modelName = requestedModel
 		effort = requestedEffort
 	}
-	if model == "" {
+	if modelName == "" {
 		return "", "", "", errors.New("no model selected: use -m provider/model@effort or configure model")
 	}
 
-	return providerName, model, models.ResolveEffort(effort), nil
+	return providerName, modelName, model.ResolveEffort(effort), nil
 }
 
-func connect(choice models.Choice, effort string, endpoint string) (*connection, error) {
+func connect(choice model.Choice, effort string, endpoint string) (*connection, error) {
 	switch choice.Provider {
 	case codexProvider:
 		tokens := codex.StoredCredentials()
@@ -542,7 +542,7 @@ func connect(choice models.Choice, effort string, endpoint string) (*connection,
 }
 
 func listProviderModels(ctx context.Context, providerName string, endpoint string) ([]agent.Model, error) {
-	client, err := connect(models.Choice{Provider: providerName}, "", endpoint)
+	client, err := connect(model.Choice{Provider: providerName}, "", endpoint)
 	if err != nil {
 		return nil, err
 	}

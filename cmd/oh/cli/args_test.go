@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/caps"
-	"crdx.org/io/cmd/oh/models"
+	"crdx.org/io/cmd/oh/model"
 )
 
 func modelCachePath() string {
@@ -65,7 +65,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 		t.Errorf("expected the directory, got %q", parsedOptions.WorkspaceDir)
 	}
 
-	if parsedOptions.Provider != models.OpencodeGoProvider || parsedOptions.Model != "deepseek-v4-pro" || parsedOptions.Effort != "high" {
+	if parsedOptions.Provider != model.OpencodeGoProvider || parsedOptions.Model != "deepseek-v4-pro" || parsedOptions.Effort != "high" {
 		t.Errorf("expected opencode-go/deepseek-v4-pro@high, got %s/%s@%s", parsedOptions.Provider, parsedOptions.Model, parsedOptions.Effort)
 	}
 

@@ -7,7 +7,7 @@ import (
 
 	"crdx.org/duckopt/v2"
 	"crdx.org/io/cmd/oh/caps"
-	"crdx.org/io/cmd/oh/models"
+	"crdx.org/io/cmd/oh/model"
 )
 
 const defaultCapFlags = "rxw"
@@ -83,7 +83,7 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 	}
 
 	if self.Model != "" {
-		providerName, model, effort, err := models.ParseSelection(modelCachePath, self.Model)
+		providerName, model, effort, err := model.ParseSelection(modelCachePath, self.Model)
 		if err != nil {
 			return options, err
 		}
