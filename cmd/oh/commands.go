@@ -4,9 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/slash"
@@ -60,7 +63,8 @@ func getCommands(log *store.Writer, writer io.Writer, editorName string) slash.C
 
 func newCommands(environment commandEnvironment) slash.CommandSet {
 	return slash.New(
-		slash.Command{Name: "/browse", Run: targetCommand(
+		targetCommand(
+			"/browse",
 			"usage: /browse {config-dir|session-dir}",
 			map[string]commandTarget{
 				"config-dir": {
@@ -69,12 +73,13 @@ func newCommands(environment commandEnvironment) slash.CommandSet {
 						return os.MkdirAll(environment.configDirectory, 0o700)
 					},
 				},
-				"session-dir": {value: environment.session.directory},
+				"session-dir": existingTarget("session directory", environment.session.directory),
 			},
 			environment.openTarget,
-		)},
-		slash.Command{Name: "/conf", Run: noArgumentCommand("usage: /conf", configPath(), environment.openEditor)},
-		slash.Command{Name: "/copy", Run: targetCommand(
+		),
+		noArgumentCommand("/conf", "usage: /conf", configPath(), environment.openEditor),
+		targetCommand(
+			"/copy",
 			"usage: /copy {session-name|session-id|session-dir}",
 			map[string]commandTarget{
 				"session-name": {value: environment.session.name},
@@ -82,47 +87,79 @@ func newCommands(environment commandEnvironment) slash.CommandSet {
 				"session-dir":  {value: environment.session.directory},
 			},
 			environment.copyText,
-		)},
-		slash.Command{Name: "/open", Run: targetCommand(
+		),
+		targetCommand(
+			"/open",
 			"usage: /open {session-log|session-chat}",
 			map[string]commandTarget{
-				"session-log":  {value: filepath.Join(environment.session.directory, sessionJournalName)},
-				"session-chat": {value: filepath.Join(environment.session.directory, sessionTranscriptName)},
+				"session-log": existingTarget(
+					"session log",
+					filepath.Join(environment.session.directory, sessionJournalName),
+				),
+				"session-chat": existingTarget(
+					"session chat",
+					filepath.Join(environment.session.directory, sessionTranscriptName),
+				),
 			},
 			environment.openTarget,
-		)},
+		),
 	)
 }
 
-func noArgumentCommand(usage string, value string, action func(string) error) func(slash.Context, []string) error {
-	return func(_ slash.Context, arguments []string) error {
-		if len(arguments) != 0 {
-			return errors.New(usage)
-		}
-
-		return action(value)
+func existingTarget(description string, path string) commandTarget {
+	return commandTarget{
+		value: path,
+		prepare: func() error {
+			_, err := os.Stat(path)
+			switch {
+			case errors.Is(err, fs.ErrNotExist):
+				return fmt.Errorf("%s does not exist yet", description)
+			case err != nil:
+				return fmt.Errorf("could not inspect %s: %w", description, err)
+			default:
+				return nil
+			}
+		},
 	}
 }
 
-func targetCommand(usage string, targets map[string]commandTarget, action func(string) error) func(slash.Context, []string) error {
-	return func(_ slash.Context, arguments []string) error {
-		if len(arguments) != 1 {
-			return errors.New(usage)
-		}
-
-		target, found := targets[arguments[0]]
-		if !found {
-			return errors.New(usage)
-		}
-
-		if target.prepare != nil {
-			if err := target.prepare(); err != nil {
-				return err
+func noArgumentCommand(name string, usage string, value string, action func(string) error) slash.Command {
+	return slash.Command{
+		Name: name,
+		Run: func(_ slash.Context, arguments []string) error {
+			if len(arguments) != 0 {
+				return errors.New(usage)
 			}
-		}
 
-		return action(target.value)
+			return action(value)
+		},
 	}
+}
+
+func targetCommand(name string, usage string, targets map[string]commandTarget, action func(string) error) slash.Command {
+	command := slash.Command{
+		Name: name,
+		Run: func(_ slash.Context, arguments []string) error {
+			if len(arguments) != 1 {
+				return errors.New(usage)
+			}
+
+			target, found := targets[arguments[0]]
+			if !found {
+				return errors.New(usage)
+			}
+
+			if target.prepare != nil {
+				if err := target.prepare(); err != nil {
+					return err
+				}
+			}
+
+			return action(target.value)
+		},
+	}
+
+	return command.WithArguments(slices.Sorted(maps.Keys(targets))...)
 }
 
 func openDesktopTarget(path string) error {

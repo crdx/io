@@ -2,6 +2,7 @@ package slash
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"crdx.org/io/agent"
@@ -14,8 +15,14 @@ type Context interface {
 }
 
 type Command struct {
-	Name string
-	Run  func(Context, []string) error
+	Name      string
+	Run       func(Context, []string) error
+	arguments []string
+}
+
+func (self Command) WithArguments(arguments ...string) Command {
+	self.arguments = append([]string(nil), arguments...)
+	return self
 }
 
 type Invocation struct {
@@ -60,21 +67,76 @@ func (self CommandSet) Find(message string) (Invocation, bool) {
 	return Invocation{Command: command, Arguments: fields[1:]}, true
 }
 
-func (self CommandSet) Complete(prefix string) (string, bool) {
-	if !strings.HasPrefix(prefix, "/") || strings.ContainsAny(prefix, " \t\r\n") {
+type Completion struct {
+	matches []string
+	current string
+	index   int
+}
+
+func (self *Completion) Next(commands CommandSet, prefix string) (string, bool) {
+	if prefix == self.current && len(self.matches) > 0 {
+		self.index = (self.index + 1) % len(self.matches)
+		self.current = self.matches[self.index]
+		return self.current, true
+	}
+
+	self.matches = commands.completions(prefix)
+	self.index = 0
+	if len(self.matches) == 0 {
+		self.current = ""
 		return "", false
 	}
 
-	match := ""
-	for name := range self {
-		if !strings.HasPrefix(name, prefix) {
-			continue
-		}
-		if match != "" {
-			return "", false
-		}
-		match = name
+	self.current = self.matches[0]
+	return self.current, true
+}
+
+func (self *Completion) Reset() {
+	self.matches = nil
+	self.current = ""
+	self.index = 0
+}
+
+func (self CommandSet) completions(prefix string) []string {
+	if !strings.HasPrefix(prefix, "/") || strings.ContainsAny(prefix, "\t\r\n") {
+		return nil
 	}
 
-	return match, match != ""
+	name, argumentPrefix, hasArgument := strings.Cut(prefix, " ")
+	if !hasArgument {
+		return matchingPrefixes(name, self.commandNames())
+	}
+	if strings.Contains(argumentPrefix, " ") {
+		return nil
+	}
+
+	command, found := self[name]
+	if !found {
+		return nil
+	}
+
+	arguments := matchingPrefixes(argumentPrefix, command.arguments)
+	for i := range arguments {
+		arguments[i] = name + " " + arguments[i]
+	}
+	return arguments
+}
+
+func (self CommandSet) commandNames() []string {
+	names := make([]string, 0, len(self))
+	for name := range self {
+		names = append(names, name)
+	}
+	return names
+}
+
+func matchingPrefixes(prefix string, candidates []string) []string {
+	var matches []string
+	for _, candidate := range candidates {
+		if strings.HasPrefix(candidate, prefix) {
+			matches = append(matches, candidate)
+		}
+	}
+	slices.Sort(matches)
+	return matches
 }

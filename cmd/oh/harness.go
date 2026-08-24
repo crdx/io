@@ -52,7 +52,8 @@ type Harness struct {
 	workspaceDir       string
 	getOnWithItMessage string
 
-	commands slash.CommandSet
+	commands   slash.CommandSet
+	completion slash.Completion
 
 	queuedTurn  turn.Queue
 	currentTurn Turn
@@ -166,7 +167,12 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 		return true
 	}
 
-	switch editor.Apply(keypress, self.currentTurn.isRunning) {
+	action := editor.Apply(keypress, self.currentTurn.isRunning)
+	if action != edit.Complete {
+		self.completion.Reset()
+	}
+
+	switch action {
 	case edit.Accept:
 		self.acceptInput(editor, history)
 
@@ -180,7 +186,7 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 		return false
 
 	case edit.Complete:
-		if completion, found := self.commands.Complete(editor.Text()); found {
+		if completion, found := self.completion.Next(self.commands, editor.Text()); found {
 			editor.SetText(completion)
 		}
 

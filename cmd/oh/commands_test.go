@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"crdx.org/io/cmd/oh/slash"
 )
 
 func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
@@ -13,6 +15,14 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", configHome)
 	configDirectory := filepath.Join(configHome, namespace, app)
 	sessionDirectory := filepath.Join(t.TempDir(), "sessions", "brave-otter")
+	if err := os.MkdirAll(sessionDirectory, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{sessionJournalName, sessionTranscriptName} {
+		if err := os.WriteFile(filepath.Join(sessionDirectory, name), nil, 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
 	var actions []string
 	commands := newCommands(commandEnvironment{
 		configDirectory: configDirectory,
@@ -86,6 +96,56 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 			err := invocation.Command.Run(commandContext{}, invocation.Arguments)
 			if err == nil || !strings.Contains(err.Error(), "usage: ") {
 				t.Errorf("got error %v", err)
+			}
+		})
+	}
+}
+
+func TestTargetCommandsExposeTheirArgumentsForCompletion(t *testing.T) {
+	commands := newCommands(commandEnvironment{})
+
+	for prefix, want := range map[string]string{
+		"/browse c":       "/browse config-dir",
+		"/copy session-n": "/copy session-name",
+		"/open session-l": "/open session-log",
+	} {
+		var state slash.Completion
+		completion, found := state.Next(commands, prefix)
+		if !found || completion != want {
+			t.Errorf("Complete(%q) got %q and %t, want %q", prefix, completion, found, want)
+		}
+	}
+}
+
+func TestCommandsReportSessionTargetsThatDoNotExistYet(t *testing.T) {
+	sessionDirectory := filepath.Join(t.TempDir(), "missing-session")
+	actionRan := false
+	commands := newCommands(commandEnvironment{
+		session: commandSession{directory: sessionDirectory},
+		openTarget: func(string) error {
+			actionRan = true
+			return nil
+		},
+	})
+
+	for input, want := range map[string]string{
+		"/browse session-dir": "session directory does not exist yet",
+		"/open session-log":   "session log does not exist yet",
+		"/open session-chat":  "session chat does not exist yet",
+	} {
+		t.Run(input, func(t *testing.T) {
+			actionRan = false
+			invocation, found := commands.Find(input)
+			if !found {
+				t.Fatal("expected command to be found")
+			}
+
+			err := invocation.Command.Run(commandContext{}, invocation.Arguments)
+			if err == nil || !strings.Contains(err.Error(), want) {
+				t.Errorf("got error %v, want %q", err, want)
+			}
+			if actionRan {
+				t.Error("action ran for a missing session target")
 			}
 		})
 	}

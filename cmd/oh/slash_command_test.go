@@ -106,3 +106,24 @@ func slashCommandFixture(t *testing.T, currentCaps caps.Set) *Harness {
 		mode:     caps.NewMode(currentCaps),
 	}
 }
+
+func TestConsecutiveTabsCycleCommandArguments(t *testing.T) {
+	self := slashCommandFixture(t, caps.Read)
+	self.commands = slash.New(
+		slash.Command{Name: "/copy", Run: slashTestHandler}.WithArguments("session-name", "session-id", "session-dir"),
+	)
+	editor := edit.NewInput(nil)
+	for _, value := range "/copy " {
+		editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
+	}
+
+	self.apply(editor, nil, key.Key{Code: key.Rune, Value: '\t'})
+	if got := editor.Text(); got != "/copy session-dir" {
+		t.Errorf("got first completion %q", got)
+	}
+
+	self.apply(editor, nil, key.Key{Code: key.Rune, Value: '\t'})
+	if got := editor.Text(); got != "/copy session-id" {
+		t.Errorf("got second completion %q", got)
+	}
+}
