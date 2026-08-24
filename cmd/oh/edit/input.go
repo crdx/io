@@ -25,6 +25,7 @@ const (
 	Shell                    // ctrl+x x: swap whether shell commands may run at all
 	Git                      // ctrl+x g: swap whether a repository's own history may be changed
 	Background               // ctrl+x b: swap whether commands may leave processes behind
+	Complete                 // tab: complete a slash command when exactly one name matches
 )
 
 // Input edits a line and walks its history.
@@ -68,6 +69,11 @@ func (self *Input) Reset() {
 // Text is what has been typed so far.
 func (self *Input) Text() string {
 	return self.buffer.String()
+}
+
+// SetText replaces the input and puts the cursor at its end.
+func (self *Input) SetText(text string) {
+	self.buffer.Set(text)
 }
 
 // IsPrefixPending reports whether the mode prefix awaits its command key.
@@ -220,6 +226,9 @@ func (self *Input) insert(value rune) {
 
 func (self *Input) rune(keypress key.Key, running bool) Action {
 	if !keypress.Mod.Has(key.Ctrl) {
+		if keypress.Value == '\t' {
+			return Complete
+		}
 		self.insert(keypress.Value)
 		return Drawn
 	}

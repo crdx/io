@@ -460,3 +460,14 @@ func TestControlDAtRestLeavesOnlyFromAnEmptyLine(t *testing.T) {
 		t.Errorf("expected the line to be untouched, got %q", self.Text())
 	}
 }
+
+func TestTabRequestsCompletionWithoutChangingTheInput(t *testing.T) {
+	self := inputFromKeys(t, "/co")
+
+	if got := self.Apply(key.Key{Code: key.Rune, Value: '\t'}, false); got != Complete {
+		t.Errorf("got action %v", got)
+	}
+	if got := self.Text(); got != "/co" {
+		t.Errorf("got text %q", got)
+	}
+}
