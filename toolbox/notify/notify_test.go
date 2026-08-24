@@ -14,9 +14,10 @@ import (
 	"crdx.org/io/toolbox/notify"
 )
 
-func TestAvailabilityFollowsNotifySendOnPath(t *testing.T) {
+func TestAvailabilityFollowsTheNotificationCommandOnPath(t *testing.T) {
 	bin := t.TempDir()
 	t.Setenv("PATH", bin)
+	t.Setenv("KITTY_WINDOW_ID", "")
 	if notify.IsAvailable() {
 		t.Error("expected notify to be unavailable")
 	}
@@ -27,6 +28,19 @@ func TestAvailabilityFollowsNotifySendOnPath(t *testing.T) {
 	}
 	if !notify.IsAvailable() {
 		t.Error("expected notify to be available")
+	}
+
+	t.Setenv("KITTY_WINDOW_ID", "1")
+	if notify.IsAvailable() {
+		t.Error("expected notify to be unavailable inside Kitty without the kitten")
+	}
+
+	//nolint:gosec // an executable test fixture
+	if err := os.WriteFile(filepath.Join(bin, "kitten"), nil, 0o700); err != nil {
+		t.Fatalf("could not write fake kitten: %v", err)
+	}
+	if !notify.IsAvailable() {
+		t.Error("expected notify to be available inside Kitty with the kitten")
 	}
 }
 
@@ -39,6 +53,7 @@ func TestNotificationMapsEveryIconForNotifySend(t *testing.T) {
 		t.Fatalf("could not write fake notify-send: %v", err)
 	}
 	t.Setenv("PATH", bin)
+	t.Setenv("KITTY_WINDOW_ID", "")
 	t.Setenv("NOTIFY_CAPTURE", capturePath)
 
 	icons := map[string]string{
@@ -75,8 +90,8 @@ func TestNotificationMapsEveryIconForNotifySend(t *testing.T) {
 			}
 			got := strings.Split(strings.TrimSuffix(string(captured), "\n"), "\n")
 			want := []string{
-				"--app-name=oh",
 				"--icon=" + desktopIcon,
+				"--app-name=oh",
 				"Build",
 				"The build is finished",
 			}
@@ -84,6 +99,49 @@ func TestNotificationMapsEveryIconForNotifySend(t *testing.T) {
 				t.Errorf("got arguments %q, want %q", got, want)
 			}
 		})
+	}
+}
+
+func TestNotificationUsesKittysNotificationKittenInsideKitty(t *testing.T) {
+	bin := t.TempDir()
+	capturePath := filepath.Join(t.TempDir(), "arguments")
+	fixture := "#!/bin/bash\nset -euo pipefail\nprintf '%s\\n' \"$@\" > \"$NOTIFY_CAPTURE\"\n"
+	//nolint:gosec // an executable test fixture
+	if err := os.WriteFile(filepath.Join(bin, "kitten"), []byte(fixture), 0o700); err != nil {
+		t.Fatalf("could not write fake kitten: %v", err)
+	}
+	t.Setenv("PATH", bin)
+	t.Setenv("KITTY_WINDOW_ID", "1")
+	t.Setenv("NOTIFY_CAPTURE", capturePath)
+
+	call, err := notify.New().Parse(`{"title":"Build","message":"The build is finished","icon":"error"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	result, err := call.Exec(t.Context())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Output != "notified the user" {
+		t.Errorf("got output %q, want notification confirmation", result.Output)
+	}
+
+	//nolint:gosec // the path is a test fixture below t.TempDir
+	captured, err := os.ReadFile(capturePath)
+	if err != nil {
+		t.Fatalf("could not read captured arguments: %v", err)
+	}
+	got := strings.Split(strings.TrimSuffix(string(captured), "\n"), "\n")
+	want := []string{
+		"notify",
+		"--icon=dialog-error",
+		"--app-name=oh",
+		"Build",
+		"The build is finished",
+	}
+	if !slices.Equal(got, want) {
+		t.Errorf("got arguments %q, want %q", got, want)
 	}
 }
 
@@ -112,6 +170,7 @@ func TestNotificationIconIsConstrained(t *testing.T) {
 
 func TestNotificationReportsNotifySendFailure(t *testing.T) {
 	t.Setenv("PATH", t.TempDir())
+	t.Setenv("KITTY_WINDOW_ID", "")
 
 	call, err := notify.New().Parse(`{"title":"Greeting","message":"hello","icon":"info"}`)
 	if err != nil {
@@ -132,6 +191,7 @@ func TestCancelledNotificationStopsNotifySend(t *testing.T) {
 		t.Fatalf("could not write fake notify-send: %v", err)
 	}
 	t.Setenv("PATH", bin)
+	t.Setenv("KITTY_WINDOW_ID", "")
 
 	call, err := notify.New().Parse(`{"title":"Greeting","message":"hello","icon":"info"}`)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -24,10 +25,35 @@ var desktopIconNames = map[string]string{
 	"progress": "process-working",
 }
 
-// IsAvailable reports whether notify-send can be executed.
+// IsAvailable reports whether a notification can be shown: with Kitty's notification kitten when
+// running inside Kitty, and with notify-send elsewhere.
 func IsAvailable() bool {
+	if isKitty() {
+		_, err := exec.LookPath("kitten")
+		return err == nil
+	}
+
 	_, err := exec.LookPath("notify-send")
 	return err == nil
+}
+
+// Command builds the command that shows a desktop notification, preferring Kitty's notification
+// kitten when running inside Kitty so that clicking the notification focuses the terminal. The
+// second result reports whether the command writes a Kitty escape code to the terminal rather than
+// talking directly to the notification service, in which case its standard output must be the
+// terminal.
+func Command(ctx context.Context, title, message, icon string) (*exec.Cmd, bool) {
+	if isKitty() {
+		//nolint:gosec // the executable and options are fixed, and the arguments are inert
+		return exec.CommandContext(ctx, "kitten", "notify", "--icon="+icon, "--app-name="+applicationName, title, message), true
+	}
+
+	//nolint:gosec // the executable and options are fixed, and the arguments are inert
+	return exec.CommandContext(ctx, "notify-send", "--icon="+icon, "--app-name="+applicationName, title, message), false
+}
+
+func isKitty() bool {
+	return os.Getenv("KITTY_WINDOW_ID") != ""
 }
 
 // Args is what a desktop notification takes.
@@ -75,15 +101,10 @@ func validate(args Args) error {
 }
 
 func run(ctx context.Context, args Args) (string, error) {
-	//nolint:gosec // the executable and options are fixed, and the tool arguments are inert
-	command := exec.CommandContext(
-		ctx,
-		"notify-send",
-		"--app-name="+applicationName,
-		"--icon="+desktopIconNames[args.Icon],
-		args.Title,
-		args.Message,
-	)
+	command, writesToTerminal := Command(ctx, args.Title, args.Message, desktopIconNames[args.Icon])
+	if writesToTerminal {
+		command.Stdout = os.Stdout
+	}
 
 	if err := command.Run(); err != nil {
 		if ctx.Err() != nil {
