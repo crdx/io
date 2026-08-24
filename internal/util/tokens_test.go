@@ -8,11 +8,13 @@ import (
 
 func TestFormatTokenCountRendersMeasuredCountsWithoutAnEstimateMarker(t *testing.T) {
 	for tokens, want := range map[int64]string{
-		0:       "0t",
-		999:     "999t",
-		1000:    "1Kt",
-		12_345:  "12.3Kt",
-		200_000: "200Kt",
+		0:         "0t",
+		999:       "999t",
+		1000:      "1Kt",
+		12_345:    "12.3Kt",
+		200_000:   "200Kt",
+		1_000_000: "1Mt",
+		1_234_567: "1.23Mt",
 	} {
 		if got := util.FormatTokenCount(tokens, 3); got != want {
 			t.Errorf("FormatTokenCount(%d, 3) = %q, want %q", tokens, got, want)
@@ -39,16 +41,18 @@ func TestFormatTokenEstimateUsesFourBytesPerToken(t *testing.T) {
 
 func TestFormatEstimatedTokenCountRoundsSubKiloValuesToNearestHundred(t *testing.T) {
 	for tokens, want := range map[int64]string{
-		0:    "0t",
-		1:    "~1t",
-		9:    "~9t",
-		10:   "~100t",
-		49:   "~100t",
-		50:   "~100t",
-		949:  "~900t",
-		950:  "~1Kt",
-		999:  "~1Kt",
-		1000: "~1Kt",
+		0:         "0t",
+		1:         "~1t",
+		9:         "~9t",
+		10:        "~100t",
+		49:        "~100t",
+		50:        "~100t",
+		949:       "~900t",
+		950:       "~1Kt",
+		999:       "~1Kt",
+		1000:      "~1Kt",
+		1_000_000: "~1Mt",
+		1_234_567: "~1.23Mt",
 	} {
 		if got := util.FormatEstimatedTokenCount(tokens, 3); got != want {
 			t.Errorf("FormatEstimatedTokenCount(%d, 3) = %q, want %q", tokens, got, want)

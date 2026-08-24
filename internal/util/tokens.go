@@ -5,16 +5,29 @@ import (
 	"math"
 )
 
+const (
+	thousandTokens = 1000
+	millionTokens  = 1_000_000
+)
+
 func FormatTokenCount[Count count](tokens Count, precision int) string {
 	if tokens <= 0 {
 		return "0t"
 	}
 
-	if tokens < 1000 {
+	if tokens < thousandTokens {
 		return fmt.Sprintf("%dt", tokens)
 	}
 
-	return formatScaledUnit(float64(tokens)/1000, precision, "", "Kt")
+	return formatLargeTokenCount(float64(tokens), precision, "")
+}
+
+func formatLargeTokenCount(tokens float64, precision int, prefix string) string {
+	if tokens >= millionTokens {
+		return formatScaledUnit(tokens/millionTokens, precision, prefix, "Mt")
+	}
+
+	return formatScaledUnit(tokens/thousandTokens, precision, prefix, "Kt")
 }
 
 // EstimateTokenCount estimates how many tokens a UTF-8 byte count is worth.
@@ -42,15 +55,15 @@ func FormatEstimatedTokenCount[Count count](tokens Count, precision int) string 
 		return formatScaledUnit(n, precision, "~", "t")
 	}
 
-	if n < 1000 {
+	if n < thousandTokens {
 		n = max(math.Round(n/100)*100, 100)
 	}
 
-	if n < 1000 {
+	if n < thousandTokens {
 		return formatScaledUnit(n, precision, "~", "t")
 	}
 
-	return formatScaledUnit(n/1000, precision, "~", "Kt")
+	return formatLargeTokenCount(n, precision, "~")
 }
 
 // EstimateImageTokenCount estimates the 32-pixel patches used to encode an image.

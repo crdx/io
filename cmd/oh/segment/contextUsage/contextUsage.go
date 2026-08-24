@@ -8,8 +8,6 @@ import (
 	"crdx.org/io/internal/util"
 )
 
-const oneMillionTokenContextWindow = 1_000_000
-
 type state struct {
 	usage func() (usedTokens int, totalTokens int)
 }
@@ -33,9 +31,7 @@ func (self state) Render(segment.Context) string {
 	if usedTokens > 0 {
 		used = util.FormatTokenCount(usedTokens, 3)
 	}
-	if totalTokens == oneMillionTokenContextWindow {
-		total = "1Mt"
-	} else if totalTokens > 0 {
+	if totalTokens > 0 {
 		total = util.FormatTokenCount(totalTokens, 3)
 	}
 	if usedTokens > 0 && totalTokens > 0 {
