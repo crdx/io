@@ -52,11 +52,6 @@ var providerNames = []string{codexProvider, opencodeGoProvider, anthropicProvide
 
 var completableToolNames = []string{"read", "ls", "find", "grep", "write", "edit", "bash", "notify"}
 
-var defaultEfforts = map[string]string{
-	codexProvider:     "high",
-	anthropicProvider: "high",
-}
-
 func main() {
 	if cli.WriteCompletions(os.Stdout, os.Args[1:], cli.Sources{
 		ModelCachePath: modelCachePath(),
@@ -205,6 +200,10 @@ func run() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	configuredModels, err := model.ParseRoundRobin(modelCachePath(), settings.Model.RoundRobin)
+	if err != nil {
+		return nil, err
+	}
 	settings.Sandbox, err = shell.PreparePaths(settings.Sandbox, os.Stderr)
 	if err != nil {
 		return nil, err
@@ -232,7 +231,14 @@ func run() ([]string, error) {
 	processes := sandbox.NewProcesses(args.Caps.Has(caps.Background))
 	defer func() { _, _ = processes.Disable() }()
 
-	providerName, modelName, effort, err := resolveProviderChoice(args.Provider, args.Model, args.Effort, settings, resumedSession)
+	providerName, modelName, effort, err := resolveProviderChoice(
+		args.Provider,
+		args.Model,
+		args.Effort,
+		configuredModels,
+		modelRoundRobinPath(),
+		resumedSession,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -332,6 +338,7 @@ func run() ([]string, error) {
 		recorder:           recordSession(log),
 		workspaceDir:       workspaceDir,
 		enabledToolNames:   args.Tools,
+		restartModel:       (model.Selection{Provider: providerName, Model: modelName, Effort: effort}).String(),
 		mode:               mode,
 		processes:          processes,
 		onTurnFinished:     func() { sendTurnFinishedNotification(workspaceDir) },
@@ -438,50 +445,30 @@ func resolveProviderChoice(
 	requestedProvider string,
 	requestedModel string,
 	requestedEffort string,
-	settings config.Config,
+	configuredModels []model.Selection,
+	roundRobinPath string,
 	resumedSession *store.Session,
 ) (string, string, string, error) {
-	providerName := settings.Provider
-	if providerName == "" {
-		providerName = codexProvider
-	}
-
-	sessionProvider := ""
 	if resumedSession != nil {
-		sessionProvider = resumedSession.Meta.Provider
-	}
-	if sessionProvider != "" {
-		providerName = sessionProvider
-	}
-	if requestedProvider != "" {
-		providerName = requestedProvider
-	}
-
-	if sessionProvider != "" && providerName != sessionProvider {
-		return "", "", "", fmt.Errorf("cannot resume a %s session with %s", sessionProvider, providerName)
-	}
-	modelName := settings.Model
-	effort := settings.Effort
-	if effort == "" {
-		effort = defaultEfforts[providerName]
-	}
-	if resumedSession != nil {
-		if resumedSession.Meta.Model != "" {
-			modelName = resumedSession.Meta.Model
+		sessionProvider := resumedSession.Meta.Provider
+		if requestedProvider != "" && requestedProvider != sessionProvider {
+			return "", "", "", fmt.Errorf("cannot resume a %s session with %s", sessionProvider, requestedProvider)
 		}
-		if resumedSession.Meta.Effort != "" {
-			effort = resumedSession.Meta.Effort
+		if requestedModel == "" {
+			return sessionProvider, resumedSession.Meta.Model, resumedSession.Meta.Effort, nil
 		}
 	}
+
 	if requestedModel != "" {
-		modelName = requestedModel
-		effort = requestedEffort
-	}
-	if modelName == "" {
-		return "", "", "", errors.New("no model selected: use -m provider/model@effort or configure model")
+		return requestedProvider, requestedModel, requestedEffort, nil
 	}
 
-	return providerName, modelName, model.ResolveEffort(effort), nil
+	selected, err := model.ReserveRoundRobin(roundRobinPath, configuredModels)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	return selected.Provider, selected.Model, selected.Effort, nil
 }
 
 func connect(choice model.Choice, effort string, endpoint string) (*connection, error) {

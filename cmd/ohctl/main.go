@@ -20,7 +20,7 @@ Usage:
 Commands:
     login      Store provider credentials
     regen      Write stored transcripts again from their journals
-    migrate    Bring stored sessions up to the current journal format
+    migrate    Bring configuration and stored sessions up to their current formats
 `
 
 func main() {

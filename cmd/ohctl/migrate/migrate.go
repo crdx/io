@@ -10,13 +10,14 @@ import (
 
 	"crdx.org/duckopt/v2"
 
+	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/xdg"
 	"crdx.org/io/session"
 )
 
-const usage = `ohctl migrate — bring stored sessions up to the current journal format
+const usage = `ohctl migrate — bring configuration and stored sessions up to their current formats
 
 Usage:
     $0 migrate [options] [<session>...]
@@ -24,10 +25,11 @@ Usage:
 Options:
     -n, --dry-run    Say what would be migrated without writing anything
 
-Sessions are named on the command line, or every outdated stored session is done when none is.
+The configuration is always considered. Sessions are named on the command line, or every outdated
+stored session is done when none is.
 
-The bundle is copied aside before anything is written, and the transcript is written again from the
-journal it was migrated into.
+The configuration file and each session bundle are copied aside before anything is written. A
+session transcript is written again from the journal it was migrated into.
 `
 
 const maxLine = 64 * 1024 * 1024
@@ -41,6 +43,22 @@ type inputOpts struct {
 // Run migrates each named session, or every session written in an older format.
 func Run() error {
 	inputArgs := duckopt.MustBind[inputOpts](usage, "$0")
+
+	path := configPath()
+	configFrom, hasConfig, err := MigrateConfig(ConfigOptions{Path: path, DryRun: inputArgs.DryRun})
+	if err != nil {
+		return fmt.Errorf("config: %w", err)
+	}
+	if hasConfig && configFrom < config.Format {
+		if !inputArgs.DryRun {
+			fmt.Println(style.Subtle("copy kept in ") + configBackupPath(path))
+		}
+		fmt.Printf(
+			"%s config %s\n",
+			style.Subtle(verb(inputArgs.DryRun)),
+			style.Subtle(fmt.Sprintf("%d → %d", configFrom, config.Format)),
+		)
+	}
 
 	directory := sessionsDir()
 
@@ -330,6 +348,10 @@ func canonical(line map[string]json.RawMessage) ([]byte, error) {
 	}
 
 	return json.Marshal(record)
+}
+
+func configPath() string {
+	return xdg.ConfigPath("org.crdx", "oh", "config.toml")
 }
 
 func sessionsDir() string {

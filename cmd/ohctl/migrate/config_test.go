@@ -1,0 +1,223 @@
+package migrate_test
+
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/BurntSushi/toml"
+
+	"crdx.org/io/cmd/oh/config"
+	"crdx.org/io/cmd/ohctl/migrate"
+)
+
+func configFile(t *testing.T, body string) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	return path
+}
+
+func TestTheFirstConfigMigrationBuildsARoundRobinSelection(t *testing.T) {
+	original := `# provider = "anthropic"
+# model = "claude-opus-5"
+# effort = "medium"
+
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[skill]
+include = ["skills"]
+`
+	path := configFile(t, original)
+
+	from, isPresent, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isPresent || from != config.InitialFormat {
+		t.Errorf("got present %t from format %d", isPresent, from)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	written := string(body)
+	for _, preserved := range []string{
+		`# provider = "anthropic"`,
+		`# model = "claude-opus-5"`,
+		`# effort = "medium"`,
+		`include = ["skills"]`,
+	} {
+		if !strings.Contains(written, preserved) {
+			t.Errorf("migration dropped %q from:\n%s", preserved, written)
+		}
+	}
+
+	var decoded struct {
+		Version int `toml:"version"`
+		Model   struct {
+			RoundRobin []string `toml:"round_robin"`
+		} `toml:"model"`
+	}
+	metadata, err := toml.Decode(written, &decoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if decoded.Version != config.Format {
+		t.Errorf("got version %d, want %d", decoded.Version, config.Format)
+	}
+	if len(decoded.Model.RoundRobin) != 1 || decoded.Model.RoundRobin[0] != "codex/gpt-5.6-sol@medium" {
+		t.Errorf("got round robin %#v", decoded.Model.RoundRobin)
+	}
+	for _, key := range []string{"provider", "effort"} {
+		if metadata.IsDefined(key) {
+			t.Errorf("legacy key %s survived", key)
+		}
+	}
+
+	backup, err := os.ReadFile(path + ".pre-v2") //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(backup) != original {
+		t.Errorf("backup changed:\n%s", backup)
+	}
+}
+
+func TestTheFirstConfigMigrationNumbersTheInterimRoundRobinFormat(t *testing.T) {
+	path := configFile(t, "[model]\nround_robin = [\"anthropic/claude-opus-5@high\"]\n")
+
+	if _, _, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path}); err != nil {
+		t.Fatal(err)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	written := string(body)
+	if strings.Count(written, "[model]") != 1 || !strings.Contains(written, "version = 2") {
+		t.Errorf("unexpected migrated config:\n%s", written)
+	}
+}
+
+func TestTheFirstNumberedConfigFormatMigratesOnce(t *testing.T) {
+	path := configFile(t, "version = 1\nmodel = \"gpt\"\neffort = \"high\"\n")
+
+	if _, _, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path}); err != nil {
+		t.Fatal(err)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(string(body), "version =") != 1 || !strings.Contains(string(body), "version = 2") {
+		t.Errorf("unexpected migrated config:\n%s", body)
+	}
+}
+
+func TestConfigMigrationUsesTheLegacyDefaultSelectionParts(t *testing.T) {
+	path := configFile(t, "model = \"gpt-5.6-sol\"\n")
+
+	if _, _, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path}); err != nil {
+		t.Fatal(err)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(body), `round_robin = ["codex/gpt-5.6-sol@high"]`) {
+		t.Errorf("legacy defaults were not carried forward:\n%s", body)
+	}
+}
+
+func TestCurrentConfigIsLeftAlone(t *testing.T) {
+	original := "version = 2\n[model]\nround_robin = [\"codex/gpt@high\"]\n"
+	path := configFile(t, original)
+
+	from, isPresent, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isPresent || from != config.Format {
+		t.Errorf("got present %t from format %d", isPresent, from)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(body) != original {
+		t.Errorf("current config changed:\n%s", body)
+	}
+	if _, err := os.Stat(path + ".pre-v2"); !os.IsNotExist(err) {
+		t.Errorf("current config kept an unexpected copy: %v", err)
+	}
+}
+
+func TestConfigMigrationDryRunWritesNothing(t *testing.T) {
+	original := "provider = \"codex\"\nmodel = \"gpt\"\neffort = \"high\"\n"
+	path := configFile(t, original)
+
+	from, isPresent, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path, DryRun: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isPresent || from != config.InitialFormat {
+		t.Errorf("got present %t from format %d", isPresent, from)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(body) != original {
+		t.Errorf("dry run changed the config:\n%s", body)
+	}
+	if _, err := os.Stat(path + ".pre-v2"); !os.IsNotExist(err) {
+		t.Errorf("dry run kept a copy: %v", err)
+	}
+}
+
+func TestConfigFromANewerBuildIsRefused(t *testing.T) {
+	path := configFile(t, "version = 99\n")
+
+	_, _, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path})
+	if err == nil || !strings.Contains(err.Error(), "newer oh") {
+		t.Fatalf("expected a newer-format error, got %v", err)
+	}
+}
+
+func TestConfigMigrationDoesNotOverwriteItsCopy(t *testing.T) {
+	path := configFile(t, "model = \"gpt\"\n")
+	if err := os.WriteFile(path+".pre-v2", []byte("held"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, _, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path})
+	if err == nil || !strings.Contains(err.Error(), "move it aside") {
+		t.Fatalf("expected the existing copy to stop migration, got %v", err)
+	}
+}
+
+func TestAMissingConfigNeedsNoMigration(t *testing.T) {
+	from, isPresent, err := migrate.MigrateConfig(migrate.ConfigOptions{
+		Path: filepath.Join(t.TempDir(), "missing.toml"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if isPresent || from != config.Format {
+		t.Errorf("got present %t from format %d", isPresent, from)
+	}
+}

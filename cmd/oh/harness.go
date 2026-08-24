@@ -51,6 +51,7 @@ type Harness struct {
 	workspaceDir       string
 	enabledToolNames   []string
 	restart            []string
+	restartModel       string
 	getOnWithItMessage string
 	terminalFocused    bool
 
@@ -339,6 +340,9 @@ func (self *Harness) restartArguments() []string {
 		arguments = append(arguments, "-r", self.recorder.Name())
 	} else {
 		arguments = append(arguments, "--workspace", self.workspaceDir)
+		if self.restartModel != "" {
+			arguments = append(arguments, "--model", self.restartModel)
+		}
 	}
 
 	arguments = append(arguments, "--caps", self.mode.Current().Flags())

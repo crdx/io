@@ -12,9 +12,9 @@ import (
 
 	"github.com/BurntSushi/toml"
 
-	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/shell"
+
 	"crdx.org/io/internal/util/pathutil"
 )
 
@@ -22,9 +22,8 @@ import (
 var defaultsTOML string
 
 type Config struct {
-	Provider           string `toml:"provider"`
-	Model              string `toml:"model"`
-	Effort             string `toml:"effort"`
+	Version            int    `toml:"version"`
+	Model              Model  `toml:"model"`
 	GetOnWithItMessage string `toml:"get_on_with_it_message"`
 
 	Skill struct {
@@ -37,6 +36,10 @@ type Config struct {
 	fallback *toml.MetaData
 	user     *toml.MetaData
 	filePath string
+}
+
+type Model struct {
+	RoundRobin []string `toml:"round_robin"`
 }
 
 type pathsConfig = shell.Paths
@@ -131,6 +134,19 @@ func (self Config) metaFor(position segment.Position) *toml.MetaData {
 	return self.fallback
 }
 
+func readConfigVersion(path string) (int, error) {
+	var header struct {
+		Version int `toml:"version"`
+	}
+
+	_, err := toml.DecodeFile(path, &header)
+	if err == nil && header.Version == 0 {
+		header.Version = InitialFormat
+	}
+
+	return header.Version, err
+}
+
 func Load(path string) (Config, error) {
 	var config Config
 
@@ -148,27 +164,34 @@ func Load(path string) (Config, error) {
 	displayPath := pathutil.Shorten(path)
 	config.filePath = displayPath
 
-	meta, err := toml.DecodeFile(path, &config)
+	version, err := readConfigVersion(path)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return config, nil
 	case err != nil:
 		return config, fmt.Errorf("%s: %w", displayPath, err)
+	case version < Format:
+		return config, fmt.Errorf("%s: config format %d needs migrating: run ohctl migrate", displayPath, version)
+	case version > Format:
+		return config, fmt.Errorf("%s: config format %d was written by a newer oh", displayPath, version)
+	}
+
+	meta, err := toml.DecodeFile(path, &config)
+	if err != nil {
+		return config, fmt.Errorf("%s: %w", displayPath, err)
 	}
 
 	config.user = &meta
 
-	providerNames := model.ProviderNames()
-	if meta.IsDefined("provider") && !slices.Contains(providerNames, config.Provider) {
-		return config, fmt.Errorf(
-			"%s: provider must be one of: %s", displayPath, strings.Join(providerNames, ", "),
-		)
-	}
-	if meta.IsDefined("model") && config.Model == "" {
-		return config, fmt.Errorf("%s: model is empty, so there is nothing to ask", displayPath)
-	}
-	if meta.IsDefined("effort") && config.Effort == "" {
-		return config, fmt.Errorf("%s: effort is empty, so there is nothing to ask for", displayPath)
+	if meta.IsDefined("model", "round_robin") {
+		if len(config.Model.RoundRobin) == 0 {
+			return config, fmt.Errorf("%s: model.round_robin is empty, so there is nothing to ask", displayPath)
+		}
+		for _, selection := range config.Model.RoundRobin {
+			if strings.TrimSpace(selection) == "" {
+				return config, fmt.Errorf("%s: model.round_robin contains an empty selection", displayPath)
+			}
+		}
 	}
 	config.GetOnWithItMessage = strings.TrimSpace(config.GetOnWithItMessage)
 	if meta.IsDefined("get_on_with_it_message") && config.GetOnWithItMessage == "" {

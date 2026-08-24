@@ -64,6 +64,10 @@ func modelCachePath() string {
 	return stateDir("models.json")
 }
 
+func modelRoundRobinPath() string {
+	return stateDir("model-round-robin.json")
+}
+
 func historyPath() string {
 	return stateDir("history")
 }

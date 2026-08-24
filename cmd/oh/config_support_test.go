@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,25 +14,26 @@ func configFrom(t *testing.T, body string) config.Config {
 	t.Helper()
 
 	if body == "" {
-		settings, err := config.Load("")
+		config, err := config.Load("")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		return settings
+		return config
 	}
 
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(path, []byte(undentConfig(body)), 0o600); err != nil {
+	version := fmt.Sprintf("version = %d\n", config.Format)
+	if err := os.WriteFile(path, []byte(version+undentConfig(body)), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
-	settings, err := config.Load(path)
+	config, err := config.Load(path)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	return settings
+	return config
 }
 
 func undentConfig(body string) string {
@@ -47,10 +49,10 @@ func undentConfig(body string) string {
 func builtInConfig(t *testing.T) config.Config {
 	t.Helper()
 
-	settings, err := config.Load("")
+	config, err := config.Load("")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	return settings
+	return config
 }

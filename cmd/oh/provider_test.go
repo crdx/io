@@ -1,21 +1,25 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
-	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/model"
 
 	"crdx.org/io/cmd/oh/store"
 )
 
 func TestResolveProviderChoiceFallsBackToTheConfig(t *testing.T) {
-	providerName, model, effort, err := resolveProviderChoice("", "", "", config.Config{
+	configured := []model.Selection{{
 		Provider: opencodeGoProvider,
 		Model:    "configured-model",
 		Effort:   "medium",
-	}, nil)
+	}}
+	providerName, model, effort, err := resolveProviderChoice(
+		"", "", "", configured, filepath.Join(t.TempDir(), "round-robin.json"), nil,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,11 +38,8 @@ func TestResolveProviderChoicePrefersTheCommandLine(t *testing.T) {
 		opencodeGoProvider,
 		"requested-model",
 		"high",
-		config.Config{
-			Provider: opencodeGoProvider,
-			Model:    "configured-model",
-			Effort:   "medium",
-		},
+		[]model.Selection{{Provider: codexProvider, Model: "configured-model", Effort: "medium"}},
+		"",
 		resumed,
 	)
 	if err != nil {
@@ -52,7 +53,9 @@ func TestResolveProviderChoicePrefersTheCommandLine(t *testing.T) {
 func TestResolveProviderChoiceRefusesToResumeUnderAnotherProvider(t *testing.T) {
 	resumed := &store.Session{Meta: store.Meta{Provider: opencodeGoProvider, Model: "saved-model"}}
 
-	providerName, model, effort, err := resolveProviderChoice(codexProvider, "requested-model", "high", config.Config{}, resumed)
+	providerName, model, effort, err := resolveProviderChoice(
+		codexProvider, "requested-model", "high", nil, "", resumed,
+	)
 	if err == nil || !strings.Contains(err.Error(), "cannot resume a opencode-go session with codex") {
 		t.Fatalf("got provider %q, model %q, effort %q, and error %v", providerName, model, effort, err)
 	}
@@ -61,10 +64,12 @@ func TestResolveProviderChoiceRefusesToResumeUnderAnotherProvider(t *testing.T) 
 func TestResolveProviderChoiceResumesUnderTheRecordedProvider(t *testing.T) {
 	resumed := &store.Session{Meta: store.Meta{Provider: opencodeGoProvider, Model: "saved-model", Effort: "low"}}
 
-	providerName, model, effort, err := resolveProviderChoice("", "", "", config.Config{
-		Provider: codexProvider,
-		Model:    "configured-model",
-	}, resumed)
+	providerName, model, effort, err := resolveProviderChoice(
+		"", "", "",
+		[]model.Selection{{Provider: codexProvider, Model: "configured-model", Effort: "medium"}},
+		"",
+		resumed,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,9 +79,40 @@ func TestResolveProviderChoiceResumesUnderTheRecordedProvider(t *testing.T) {
 }
 
 func TestResolveProviderChoiceRequiresAModel(t *testing.T) {
-	providerName, model, effort, err := resolveProviderChoice("", "", "", config.Config{}, nil)
+	providerName, model, effort, err := resolveProviderChoice("", "", "", nil, "", nil)
 	if err == nil || !strings.Contains(err.Error(), "-m provider/model@effort") {
 		t.Fatalf("got provider %q, model %q, effort %q, and error %v", providerName, model, effort, err)
+	}
+}
+
+func TestAnExplicitModelDoesNotAdvanceTheConfiguredRotation(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "round-robin.json")
+	providerName, model, effort, err := resolveProviderChoice(
+		codexProvider, "requested", "high", testModelSelections(), path, nil,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if providerName != codexProvider || model != "requested" || effort != "high" {
+		t.Errorf("got %s/%s@%s", providerName, model, effort)
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Errorf("expected no cursor state, got %v", err)
+	}
+}
+
+func TestAResumedModelDoesNotAdvanceTheConfiguredRotation(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "round-robin.json")
+	resumed := &store.Session{Meta: store.Meta{Provider: codexProvider, Model: "saved", Effort: "high"}}
+	providerName, model, effort, err := resolveProviderChoice("", "", "", testModelSelections(), path, resumed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if providerName != codexProvider || model != "saved" || effort != "high" {
+		t.Errorf("got %s/%s@%s", providerName, model, effort)
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Errorf("expected no cursor state, got %v", err)
 	}
 }
 

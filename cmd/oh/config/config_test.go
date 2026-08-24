@@ -1,8 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -19,8 +21,8 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	absolute := filepath.Join(t.TempDir(), "skills")
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	contents := "provider = \"opencode-go\"\nmodel = \"configured-model\"\neffort = \"low\"\nget_on_with_it_message = \"carry on\"\n[skill]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
-	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+	contents := "get_on_with_it_message = \"carry on\"\n[model]\nround_robin = [\"opencode/deepseek@hi\"]\n[skill]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
+	if err := writeConfigFile(path, contents); err != nil {
 		t.Fatal(err)
 	}
 
@@ -28,8 +30,8 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	if err != nil {
 		t.Fatal(err)
 	}
-	if config.Provider != "opencode-go" || config.Model != "configured-model" || config.Effort != "low" {
-		t.Errorf("got provider %q, model %q, and effort %q", config.Provider, config.Model, config.Effort)
+	if !slices.Equal(config.Model.RoundRobin, []string{"opencode/deepseek@hi"}) {
+		t.Errorf("got model rotation %#v", config.Model.RoundRobin)
 	}
 	if config.GetOnWithItMessage != "carry on" {
 		t.Errorf("got get-on-with-it message %q", config.GetOnWithItMessage)
@@ -62,11 +64,39 @@ func TestAMissingConfigFileIsAllowed(t *testing.T) {
 	if config.GetOnWithItMessage != "yes" {
 		t.Errorf("got default get-on-with-it message %q", config.GetOnWithItMessage)
 	}
+	if config.Version != Format {
+		t.Errorf("got config format %d, want %d", config.Version, Format)
+	}
+}
+
+func TestAnUnversionedConfigNeedsMigrating(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte("model = \"gpt\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil || !strings.Contains(err.Error(), "ohctl migrate") {
+		t.Fatalf("expected migration instructions, got %v", err)
+	}
+}
+
+func TestAConfigFromANewerOhIsRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	body := fmt.Sprintf("version = %d\n", Format+1)
+	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil || !strings.Contains(err.Error(), "newer oh") {
+		t.Fatalf("expected the newer format to be refused, got %v", err)
+	}
 }
 
 func TestConfiguredSkillDirectoriesRejectsAnEmptyDirectory(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(path, []byte("[skill]\ninclude = [\"\"]\n"), 0o600); err != nil {
+	if err := writeConfigFile(path, "[skill]\ninclude = [\"\"]\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -78,7 +108,7 @@ func TestConfiguredSkillDirectoriesRejectsAnEmptyDirectory(t *testing.T) {
 func TestConfiguredSkillExclusionsResolveToAbsoluteDirectories(t *testing.T) {
 	configDir := t.TempDir()
 	path := filepath.Join(configDir, "config.toml")
-	if err := os.WriteFile(path, []byte("[skill]\nexclude = [\"skills/pi\"]\n"), 0o600); err != nil {
+	if err := writeConfigFile(path, "[skill]\nexclude = [\"skills/pi\"]\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -94,7 +124,7 @@ func TestConfiguredSkillExclusionsResolveToAbsoluteDirectories(t *testing.T) {
 
 func TestConfiguredSkillExclusionsRejectAnEmptyDirectory(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(path, []byte("[skill]\nexclude = [\"\"]\n"), 0o600); err != nil {
+	if err := writeConfigFile(path, "[skill]\nexclude = [\"\"]\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -105,14 +135,15 @@ func TestConfiguredSkillExclusionsRejectAnEmptyDirectory(t *testing.T) {
 
 func TestConfiguredStringsCannotBeEmpty(t *testing.T) {
 	for name, contents := range map[string]string{
-		"model":                             "model = \"\"\n",
-		"effort":                            "effort = \"\"\n",
+		"model round robin":                 "[model]\nround_robin = []\n",
+		"model selection":                   "[model]\nround_robin = [\"\"]\n",
+		"model selection whitespace":        "[model]\nround_robin = [\"  \"]\n",
 		"get_on_with_it_message":            "get_on_with_it_message = \"\"\n",
 		"get_on_with_it_message whitespace": "get_on_with_it_message = \"  \"\n",
 	} {
 		t.Run(name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "config.toml")
-			if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+			if err := writeConfigFile(path, contents); err != nil {
 				t.Fatal(err)
 			}
 			if _, err := Load(path); err == nil {
@@ -124,7 +155,7 @@ func TestConfiguredStringsCannotBeEmpty(t *testing.T) {
 
 func TestTheConfiguredGetOnWithItMessageIsTrimmed(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(path, []byte("get_on_with_it_message = \"  carry on  \"\n"), 0o600); err != nil {
+	if err := writeConfigFile(path, "get_on_with_it_message = \"  carry on  \"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -144,7 +175,7 @@ func TestConfiguredAccessPathsAreResolved(t *testing.T) {
 	t.Setenv("HOME", home)
 	contents := "[sandbox]\nread = [\"~/reference\"]\nwrite = [\"output\"]\nexec = [\"/opt/tools\"]\n" +
 		"home = [\"~/.gitconfig\"]\n"
-	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+	if err := writeConfigFile(path, contents); err != nil {
 		t.Fatal(err)
 	}
 
@@ -172,7 +203,7 @@ func TestConfiguredAccessPathsAreResolved(t *testing.T) {
 func TestAPathMappedIntoTheShellHomeMustComeFromTheHomeDirectory(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
 	t.Setenv("HOME", t.TempDir())
-	if err := os.WriteFile(path, []byte("[sandbox]\nhome = [\"/etc/gitconfig\"]\n"), 0o600); err != nil {
+	if err := writeConfigFile(path, "[sandbox]\nhome = [\"/etc/gitconfig\"]\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -277,7 +308,7 @@ func TestTheBuiltInDefaultsSetEverySettingThereIs(t *testing.T) {
 	}
 
 	for _, key := range []string{
-		"provider", "model", "effort", "get_on_with_it_message", "skill", "sandbox", "bar",
+		"version", "model", "get_on_with_it_message", "skill", "sandbox", "bar",
 	} {
 		if _, ok := written[key]; !ok {
 			t.Errorf("expected the defaults to say what %q is", key)
@@ -312,6 +343,12 @@ func testSegments() segment.Registry {
 	}
 }
 
+func writeConfigFile(path string, body string) error {
+	version := fmt.Sprintf("version = %d\n", Format)
+
+	return os.WriteFile(path, []byte(version+body), 0o600)
+}
+
 func configFrom(t *testing.T, body string) Config {
 	t.Helper()
 
@@ -325,7 +362,7 @@ func configFrom(t *testing.T, body string) Config {
 	}
 
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(path, []byte(undent(body)), 0o600); err != nil {
+	if err := writeConfigFile(path, undent(body)); err != nil {
 		t.Fatal(err)
 	}
 

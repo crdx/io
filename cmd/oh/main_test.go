@@ -172,6 +172,7 @@ func conversationFixture(t *testing.T, hasSession bool, currentCaps caps.Set) *H
 	return &Harness{
 		recorder:     recordSession(log),
 		workspaceDir: "/tmp/somewhere",
+		restartModel: "codex/gpt@high",
 		mode:         caps.NewMode(currentCaps),
 	}
 }
@@ -318,7 +319,9 @@ func TestStartingAgainAsksForWhateverWasSwappedMidConversation(t *testing.T) {
 func TestStartingAgainWithNothingStoredKeepsTheWorkspace(t *testing.T) {
 	self := conversationFixture(t, false, caps.Read|caps.Write|caps.Shell)
 
-	want := []string{"--workspace", "/tmp/somewhere", "--caps", "rxw"}
+	want := []string{
+		"--workspace", "/tmp/somewhere", "--model", "codex/gpt@high", "--caps", "rxw",
+	}
 
 	if got := self.restartArguments(); !slices.Equal(got, want) {
 		t.Errorf("expected %v, got %v", want, got)

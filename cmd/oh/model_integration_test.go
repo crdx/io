@@ -5,22 +5,18 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/internal/sim"
 )
 
 func TestAnEffortWrittenAsAnAliasInTheConfigIsResolved(t *testing.T) {
-	_, _, effort, err := resolveProviderChoice(
-		"", "", "",
-		config.Config{Provider: codexProvider, Model: "gpt-5.6-sol", Effort: "off"},
-		nil,
-	)
+	modelCachePath := useRoundRobinModelCache(t)
+	selections, err := model.ParseRoundRobin(modelCachePath, []string{"sol@off"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if effort != "none" {
+	if effort := selections[0].Effort; effort != "none" {
 		t.Errorf("expected the level rather than the word that asked for it, got %q", effort)
 	}
 }

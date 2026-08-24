@@ -1,7 +1,8 @@
-provider = "codex"
-model = ""
-effort = ""
+version = 2
 get_on_with_it_message = "yes"
+
+[model]
+round_robin = []
 
 [skill]
 include = []
