@@ -49,9 +49,6 @@ type Harness struct {
 	metrics            metrics.Tracker
 
 	workspaceDir       string
-	enabledToolNames   []string
-	restart            []string
-	restartModel       string
 	getOnWithItMessage string
 	terminalFocused    bool
 
@@ -181,16 +178,6 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 		self.cancelTurn()
 
 	case edit.Quit:
-		return false
-
-	case edit.Restart:
-		if self.currentTurn.isRunning {
-			break
-		}
-
-		self.screen.Reset()
-		self.restart = self.restartArguments()
-
 		return false
 
 	case edit.Write:
@@ -331,26 +318,6 @@ func (self *Harness) cancelTurn() {
 func (self *Harness) replaceTurn(message string) {
 	self.queuedTurn.Replace(message)
 	self.interruptTurn()
-}
-
-func (self *Harness) restartArguments() []string {
-	var arguments []string
-
-	if self.recorder.Stored() {
-		arguments = append(arguments, "-r", self.recorder.Name())
-	} else {
-		arguments = append(arguments, "--workspace", self.workspaceDir)
-		if self.restartModel != "" {
-			arguments = append(arguments, "--model", self.restartModel)
-		}
-	}
-
-	arguments = append(arguments, "--caps", self.mode.Current().Flags())
-	for _, name := range self.enabledToolNames {
-		arguments = append(arguments, "--tool", name)
-	}
-
-	return arguments
 }
 
 func (self *Harness) interruptTurn() {

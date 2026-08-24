@@ -460,11 +460,3 @@ func TestControlDAtRestLeavesOnlyFromAnEmptyLine(t *testing.T) {
 		t.Errorf("expected the line to be untouched, got %q", self.Text())
 	}
 }
-
-func TestControlRAsksForTheHarnessToStartAgain(t *testing.T) {
-	keypress := key.Key{Code: key.Rune, Value: 'r', Mod: key.Ctrl}
-
-	if got := inputFromKeys(t, "hello").Apply(keypress, false); got != Restart {
-		t.Errorf("expected a restart, got %v", got)
-	}
-}

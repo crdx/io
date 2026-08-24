@@ -153,30 +153,6 @@ func TestAResumedConversationCannotBeAskedForAnotherMode(t *testing.T) {
 	}
 }
 
-func conversationFixture(t *testing.T, hasSession bool, currentCaps caps.Set) *Harness {
-	t.Helper()
-
-	log, err := store.Create(t.TempDir(), store.Meta{Model: "gpt"})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if hasSession {
-		if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "hello"}); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	t.Cleanup(func() { _ = log.Close() })
-
-	return &Harness{
-		recorder:     recordSession(log),
-		workspaceDir: "/tmp/somewhere",
-		restartModel: "codex/gpt@high",
-		mode:         caps.NewMode(currentCaps),
-	}
-}
-
 func modeFixture(t *testing.T) (*Harness, string) {
 	t.Helper()
 
@@ -290,51 +266,6 @@ func TestAModeChangeSaysItselfInTheScrollback(t *testing.T) {
 
 	if !strings.Contains(screenOutput.String(), "The .git directory is now read-write.") {
 		t.Errorf("expected the change to be said, got %q", screenOutput.String())
-	}
-}
-
-func TestStartingAgainNamesTheSessionAndKeepsTheMode(t *testing.T) {
-	self := conversationFixture(t, true, caps.Read|caps.Write|caps.Shell)
-
-	want := []string{"-r", self.recorder.Name(), "--caps", "rxw"}
-
-	if got := self.restartArguments(); !slices.Equal(got, want) {
-		t.Errorf("expected %v, got %v", want, got)
-	}
-}
-
-func TestStartingAgainAsksForWhateverWasSwappedMidConversation(t *testing.T) {
-	self := conversationFixture(t, true, caps.Read|caps.Write|caps.Shell)
-
-	self.mode.Toggle(caps.Write)
-	self.mode.Toggle(caps.Git)
-
-	want := []string{"-r", self.recorder.Name(), "--caps", "rxg"}
-
-	if got := self.restartArguments(); !slices.Equal(got, want) {
-		t.Errorf("expected %v, got %v", want, got)
-	}
-}
-
-func TestStartingAgainWithNothingStoredKeepsTheWorkspace(t *testing.T) {
-	self := conversationFixture(t, false, caps.Read|caps.Write|caps.Shell)
-
-	want := []string{
-		"--workspace", "/tmp/somewhere", "--model", "codex/gpt@high", "--caps", "rxw",
-	}
-
-	if got := self.restartArguments(); !slices.Equal(got, want) {
-		t.Errorf("expected %v, got %v", want, got)
-	}
-}
-
-func TestStartingAgainKeepsTheEnabledTools(t *testing.T) {
-	self := conversationFixture(t, true, caps.Read)
-	self.enabledToolNames = []string{"read", "grep"}
-
-	want := []string{"-r", self.recorder.Name(), "--caps", "r", "--tool", "read", "--tool", "grep"}
-	if got := self.restartArguments(); !slices.Equal(got, want) {
-		t.Errorf("expected %v, got %v", want, got)
 	}
 }
 

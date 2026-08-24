@@ -25,7 +25,6 @@ const (
 	Shell                    // ctrl+x x: swap whether shell commands may run at all
 	Git                      // ctrl+x g: swap whether a repository's own history may be changed
 	Background               // ctrl+x b: swap whether commands may leave processes behind
-	Restart                  // ctrl+r: start the harness again, carrying the conversation over
 )
 
 // Input edits a line and walks its history.
@@ -234,9 +233,6 @@ func (self *Input) rune(keypress key.Key, running bool) Action {
 		if self.buffer.Len() == 0 {
 			return Quit
 		}
-
-	case 'r':
-		return Restart
 
 	case 'x':
 		self.inChord = true

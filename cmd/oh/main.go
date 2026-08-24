@@ -65,20 +65,20 @@ func main() {
 
 	style.Init(os.Stdout)
 
-	args, err := run()
+	chosenSession, err := run()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	if args != nil {
+	if chosenSession != "" {
 		self, err := os.Executable()
 		if err == nil {
 			//nolint:gosec // the binary is this one, and the arguments are ours
-			err = syscall.Exec(self, append([]string{self}, args...), os.Environ())
+			err = syscall.Exec(self, []string{self, "-r", chosenSession}, os.Environ())
 		}
 
-		fmt.Fprintln(os.Stderr, "could not restart:", err)
+		fmt.Fprintln(os.Stderr, "could not open the session:", err)
 		os.Exit(1)
 	}
 }
@@ -104,46 +104,38 @@ func openingCaps(args cli.Options, resumedSession *store.Session) (caps.Set, err
 	return lastCaps, nil
 }
 
-func run() ([]string, error) {
+func run() (string, error) {
 	inputArgs := cli.Bind()
 
 	if inputArgs.Version {
 		fmt.Println(version())
-		return nil, nil
+		return "", nil
 	}
 
 	if inputArgs.List {
-		return nil, model.List(os.Stdout, modelCachePath())
+		return "", model.List(os.Stdout, modelCachePath())
 	}
 
 	if inputArgs.Update {
-		return nil, model.Update(os.Stdout, os.Getenv(endpointVariable), modelCachePath(), listProviderModels)
+		return "", model.Update(os.Stdout, os.Getenv(endpointVariable), modelCachePath(), listProviderModels)
 	}
 
 	if inputArgs.Sessions {
-		sessionName, err := chooseStoredSession(sessionsDir(), os.Stdin, os.Stdout)
-		if err != nil {
-			return nil, err
-		}
-		if sessionName == "" {
-			return nil, nil
-		}
-
-		return []string{"-r", sessionName}, nil
+		return chooseStoredSession(sessionsDir(), os.Stdin, os.Stdout)
 	}
 
 	args, err := inputArgs.Parse(modelCachePath())
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if err := refuseOutdatedSessions(sessionsDir()); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	resumedSession, err := loadSession(args.Session)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	if resumedSession != nil {
 		args.WorkspaceDir = resumedSession.Meta.WorkspaceDir
@@ -151,36 +143,36 @@ func run() ([]string, error) {
 
 	args.Caps, err = openingCaps(args, resumedSession)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	root, err := os.OpenRoot(args.WorkspaceDir)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	defer func() { _ = root.Close() }()
 
 	workspaceDir, err := filepath.Abs(root.Name())
 	if err != nil {
-		return nil, fmt.Errorf("could not resolve the workspace path: %w", err)
+		return "", fmt.Errorf("could not resolve the workspace path: %w", err)
 	}
 	if err := ensureWorkspaceIsNotShadowed(workspaceDir); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	homeDir := shellHomeDir()
 	if homeDir == "" {
-		return nil, errors.New("could not find a home for shell configuration")
+		return "", errors.New("could not find a home for shell configuration")
 	}
 
 	homeDir, err = filepath.Abs(homeDir)
 	if err != nil {
-		return nil, fmt.Errorf("could not resolve the shell home path: %w", err)
+		return "", fmt.Errorf("could not resolve the shell home path: %w", err)
 	}
 
 	if err := os.MkdirAll(homeDir, 0o700); err != nil {
-		return nil, fmt.Errorf("could not prepare the shell home: %w", err)
+		return "", fmt.Errorf("could not prepare the shell home: %w", err)
 	}
 
 	mode := caps.NewMode(args.Caps)
@@ -192,39 +184,39 @@ func run() ([]string, error) {
 	files := file.New(root, caps.RefuseWrite(mode))
 	homeRoot, err := mountHomeDir(files, homeDir, mode)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer func() { _ = homeRoot.Close() }()
 
 	settings, err := config.Load(configPath())
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	configuredModels, err := model.ParseRoundRobin(modelCachePath(), settings.Model.RoundRobin)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	settings.Sandbox, err = shell.PreparePaths(settings.Sandbox, os.Stderr)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	configuredRoots, err := shell.MountPaths(files, mode, settings.Sandbox)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer shell.CloseRoots(configuredRoots)
 
 	globalSkillDirs := append([]string{configDir("skills")}, settings.Skill.Include...)
 	availableSkills, err := skill.Discover(workspaceDir, globalSkillDirs, os.Stderr)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	availableSkills = skill.ExcludeGlobal(availableSkills, settings.Skill.Exclude)
 
 	skillRoots, err := skill.MountGlobalSkills(files, availableSkills)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer skill.Close(skillRoots)
 
@@ -240,16 +232,16 @@ func run() ([]string, error) {
 		resumedSession,
 	)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	choice, err := model.Chosen(modelCachePath(), providerName, modelName)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	client, err := connect(choice, effort, os.Getenv(endpointVariable))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	meta := store.Meta{
@@ -261,14 +253,14 @@ func run() ([]string, error) {
 
 	log, err := openSession(resumedSession, meta)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer func() { _ = log.Close() }()
 	client.ObserveHTTP(log.Observer())
 
 	tmpDir, err := openTmpDir(log.Name())
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	defer func() {
@@ -294,20 +286,20 @@ func run() ([]string, error) {
 			Skills:       availableSkills,
 		})
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 
 	if resumedSession == nil {
 		meta.SystemPrompt = systemPrompt
 		if err := log.SetMeta(meta); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 
 	tmpRoot, err := mountTmpDir(files, tmpDir)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer func() { _ = tmpRoot.Close() }()
 
@@ -326,7 +318,7 @@ func run() ([]string, error) {
 	}
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	chat := &Harness{
@@ -337,8 +329,6 @@ func run() ([]string, error) {
 
 		recorder:           recordSession(log),
 		workspaceDir:       workspaceDir,
-		enabledToolNames:   args.Tools,
-		restartModel:       (model.Selection{Provider: providerName, Model: modelName, Effort: effort}).String(),
 		mode:               mode,
 		processes:          processes,
 		onTurnFinished:     func() { sendTurnFinishedNotification(workspaceDir) },
@@ -347,11 +337,11 @@ func run() ([]string, error) {
 
 	chat.segmentLayout, err = settings.BuildLayout(availableSegments(workspaceDir, log.Name(), modelName, effort, chat))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if err := settings.ValidateConsumed(); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if resumedSession != nil {
@@ -373,15 +363,11 @@ func run() ([]string, error) {
 
 	chat.begin(args.Message)
 
-	if chat.restart != nil {
-		return chat.restart, nil
-	}
-
 	if log.Stored() {
 		fmt.Println(style.Subtle(resumeParams(log.Name())))
 	}
 
-	return nil, nil
+	return "", nil
 }
 
 func reduceTools(availableTools []tool.Tool, enabledToolNames []string) ([]tool.Tool, error) {
