@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/skill"
+	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 )
@@ -274,7 +275,7 @@ func renderSubmittedMessage(text string, columns int) string {
 
 func (self *Painter) render(event agent.Event) string {
 	if event.Kind == agent.StartupEvent {
-		return renderStartupEvent(event)
+		return startup.RenderEvent(event)
 	}
 
 	return noticeStyle(event.Failed)(event.Text)

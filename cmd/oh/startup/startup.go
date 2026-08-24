@@ -1,4 +1,4 @@
-package main
+package startup
 
 import (
 	"encoding/json"
@@ -14,20 +14,25 @@ import (
 
 var startedAt = time.Now()
 
-type startupInfo struct {
-	Session       string        `json:"session,omitempty"`
-	ContextFiles  []startupFile `json:"context,omitempty"`
-	ProjectSkills int           `json:"project_skills,omitempty"`
-	GlobalSkills  int           `json:"global_skills,omitempty"`
-	ToolBytes     int           `json:"tools,omitempty"`
+func Elapsed() time.Duration {
+	return time.Since(startedAt)
 }
 
-type startupFile struct {
+type Info struct {
+	Session       string `json:"session,omitempty"`
+	ContextFiles  []File `json:"context,omitempty"`
+	ProjectSkills int    `json:"project_skills,omitempty"`
+	GlobalSkills  int    `json:"global_skills,omitempty"`
+	ToolBytes     int    `json:"tools,omitempty"`
+}
+
+type File struct {
 	Name  string `json:"name"`
 	Bytes int    `json:"bytes"`
 }
 
-func startupEvent(elapsed time.Duration, info startupInfo) agent.Event {
+// NewEvent records startup facts for live display and later replay.
+func NewEvent(elapsed time.Duration, info Info) agent.Event {
 	facts, err := json.Marshal(info)
 	if err != nil {
 		return agent.Event{Kind: agent.StartupEvent, Took: elapsed}
@@ -36,28 +41,31 @@ func startupEvent(elapsed time.Duration, info startupInfo) agent.Event {
 	return agent.Event{Kind: agent.StartupEvent, Took: elapsed, State: facts}
 }
 
-func renderStartupEvent(event agent.Event) string {
-	var info startupInfo
+// RenderEvent renders a recorded startup event.
+func RenderEvent(event agent.Event) string {
+	var info Info
 	if len(event.State) > 0 {
 		if err := json.Unmarshal(event.State, &info); err != nil {
 			return ""
 		}
 	}
 
-	return style.Subtle("[") + renderStartupBanner(event.Took, false, info) + style.Subtle("]")
+	return style.Subtle("[") + RenderBanner(event.Took, false, info) + style.Subtle("]")
 }
 
-func startupFilesOf(files []prompt.File) []startupFile {
-	kept := make([]startupFile, 0, len(files))
+// FilesOf reduces prompt context files to the facts shown at startup.
+func FilesOf(files []prompt.File) []File {
+	kept := make([]File, 0, len(files))
 
 	for _, file := range files {
-		kept = append(kept, startupFile{Name: file.Name, Bytes: len(file.Body)})
+		kept = append(kept, File{Name: file.Name, Bytes: len(file.Body)})
 	}
 
 	return kept
 }
 
-func renderStartupBanner(elapsed time.Duration, resumed bool, info startupInfo) string {
+// RenderBanner renders the compact startup summary shown outside event replay.
+func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
 	if resumed {
 		return ""
 	}
@@ -82,14 +90,14 @@ func startupDuration(elapsed time.Duration) string {
 	return field.String()
 }
 
-func startupContextFile(file startupFile) string {
+func startupContextFile(file File) string {
 	var field startupLine
 	field.dim(file.Name + "=")
 	field.quantity(util.FormatTokenEstimate(file.Bytes, 3), false)
 	return field.String()
 }
 
-func startupSkills(info startupInfo) string {
+func startupSkills(info Info) string {
 	var field startupLine
 	field.dim("skills=")
 	field.normal(fmt.Sprint(info.ProjectSkills))
@@ -99,7 +107,7 @@ func startupSkills(info startupInfo) string {
 	return field.String()
 }
 
-func startupTools(info startupInfo) string {
+func startupTools(info Info) string {
 	var field startupLine
 	field.dim("tools=")
 	field.quantity(util.FormatTokenEstimate(info.ToolBytes, 2), false)

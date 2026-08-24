@@ -1,13 +1,39 @@
-package main
+package startup
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 	"time"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/style"
 )
+
+func TestAStartupEventKeepsItsFactsForReplay(t *testing.T) {
+	info := Info{
+		Session:       "brave-otter",
+		ContextFiles:  []File{{Name: "SYSTEM.md", Bytes: 740}},
+		ProjectSkills: 2,
+		GlobalSkills:  3,
+		ToolBytes:     2273,
+	}
+
+	event := NewEvent(12*time.Millisecond, info)
+	got := style.Plain(RenderEvent(event))
+	want := "[startup=12ms session=brave-otter SYSTEM.md=~200t skills=2p/3g tools=~600t]"
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestMalformedStartupFactsRenderNothing(t *testing.T) {
+	event := agent.Event{Kind: agent.StartupEvent, State: json.RawMessage("{")}
+	if got := RenderEvent(event); got != "" {
+		t.Errorf("got %q, want nothing", got)
+	}
+}
 
 func TestTookReportsTheScaleAStartupHappensOn(t *testing.T) {
 	for elapsed, want := range map[time.Duration]string{
@@ -22,9 +48,9 @@ func TestTookReportsTheScaleAStartupHappensOn(t *testing.T) {
 }
 
 func TestTheStartupLineUsesTheCompactSummary(t *testing.T) {
-	line := renderStartupBanner(12*time.Millisecond, false, startupInfo{
+	line := RenderBanner(12*time.Millisecond, false, Info{
 		Session: "brave-otter",
-		ContextFiles: startupFilesOf([]prompt.File{
+		ContextFiles: FilesOf([]prompt.File{
 			{Name: "SYSTEM.md", Body: strings.Repeat("x", 740)},
 			{Name: "AGENTS.md", Body: strings.Repeat("x", 3*1024)},
 		}),
@@ -61,7 +87,7 @@ func TestStartupQuantitiesPutOnlyTheirNumbersInTheNormalForeground(t *testing.T)
 }
 
 func TestNoPromptFilesLeaveNoEmptyField(t *testing.T) {
-	line := style.Plain(renderStartupBanner(time.Millisecond, false, startupInfo{}))
+	line := style.Plain(RenderBanner(time.Millisecond, false, Info{}))
 	want := "startup=1ms skills=0p/0g tools=0t"
 
 	if line != want {
@@ -70,7 +96,7 @@ func TestNoPromptFilesLeaveNoEmptyField(t *testing.T) {
 }
 
 func TestAResumedConversationHasNoStartupLine(t *testing.T) {
-	line := renderStartupBanner(time.Millisecond, true, startupInfo{ProjectSkills: 2})
+	line := RenderBanner(time.Millisecond, true, Info{ProjectSkills: 2})
 
 	if line != "" {
 		t.Errorf("expected no startup line, got %q", line)

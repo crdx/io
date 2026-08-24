@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
-	"time"
 
 	"crdx.org/duckopt/v2"
 	"crdx.org/io/agent"
@@ -29,6 +28,7 @@ import (
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
+	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/terminal"
@@ -384,16 +384,16 @@ func run() ([]string, error) {
 	}
 
 	projectSkills, globalSkills := skill.Counts(availableSkills)
-	startupElapsed := time.Since(startedAt)
-	startup := startupInfo{
+	startupElapsed := startup.Elapsed()
+	startupInfo := startup.Info{
 		Session:       log.Name(),
-		ContextFiles:  startupFilesOf(contextFiles),
+		ContextFiles:  startup.FilesOf(contextFiles),
 		ProjectSkills: projectSkills,
 		GlobalSkills:  globalSkills,
 		ToolBytes:     client.toolsSize(tools),
 	}
 	if resumedSession == nil {
-		chat.notify(startupEvent(startupElapsed, startup))
+		chat.notify(startup.NewEvent(startupElapsed, startupInfo))
 	}
 
 	chat.begin(args.message)

@@ -21,6 +21,7 @@ import (
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
+	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/toolbox"
@@ -662,8 +663,12 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	passes["the startup line"] = func() string {
-		return renderStartupBanner(1500*time.Microsecond, false, startupInfo{
-			Session:       "brave-otter",
+		return startup.RenderBanner(1500*time.Microsecond, false, startup.Info{
+			Session: "brave-otter",
+			ContextFiles: []startup.File{
+				{Name: "SYSTEM.md", Bytes: 740},
+				{Name: "AGENTS.md", Bytes: 3 * 1024},
+			},
 			ProjectSkills: 3,
 			GlobalSkills:  1,
 			ToolBytes:     614,
