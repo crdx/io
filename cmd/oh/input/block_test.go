@@ -128,6 +128,16 @@ func TestACentredLabelSitsInTheMiddleOfTheDashes(t *testing.T) {
 	}
 }
 
+func TestACentredLabelIsPositionedRelativeToTheRuleEdges(t *testing.T) {
+	rule := Ruler{Left: "L", Center: "io", Right: "right side"}
+
+	got := style.Plain(rule.render(40))
+	beforeCenter, _, _ := strings.Cut(got, " io ")
+	if want := (40 - len(" io ")) / 2; style.Width(beforeCenter) != want {
+		t.Errorf("expected the centred label to start at column %d, got %q", want, got)
+	}
+}
+
 func TestARuleWithALabelAtEveryPlaceIsExactlyAsWideAsTheScreen(t *testing.T) {
 	for _, width := range []int{0, 1, 5, 20, 21, 40, 100} {
 		rule := Ruler{Left: "↑ 12", Center: "io", Right: "gpt ⠶ io"}
@@ -160,11 +170,11 @@ func TestACentredLabelIsKeptWhenThereIsRoomForItBetweenTheEnds(t *testing.T) {
 	}
 }
 
-func TestACentredLabelFillingTheGapExactlyIsStillDrawn(t *testing.T) {
+func TestACentredLabelGivesWayRatherThanMovingOffCentre(t *testing.T) {
 	rule := Ruler{Left: "↑ 12", Center: "workspace", Right: "gpt ⠶ io"}
 
 	got := style.Plain(rule.render(30))
-	if want := "─ ↑ 12  workspace  gpt ⠶ io ──"; got != want {
-		t.Errorf("expected %q, got %q", want, got)
+	if strings.Contains(got, "workspace") {
+		t.Errorf("expected the centred label to give way, got %q", got)
 	}
 }

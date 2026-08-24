@@ -40,40 +40,39 @@ func (self Block) Rows(width int) ([]string, int, int) {
 }
 
 func (self Ruler) render(width int) string {
+	leftWidth := getWidth(self.Left, startPad)
+	rightWidth := getWidth(self.Right, endPad)
+
 	head := ""
-	n := getWidth(self.Left, startPad)
-
-	if n > 0 && n+getWidth(self.Right, endPad) <= width {
+	if leftWidth == 0 || leftWidth+rightWidth > width {
+		leftWidth = 0
+	} else {
 		head = style.Rule(strings.Repeat("─", startPad)) + " " + self.Left + " "
-		width -= n
 	}
 
-	return head + ruleTo(width, self.Center, self.Right)
+	tail := ""
+	if rightWidth == 0 || leftWidth+rightWidth > width {
+		rightWidth = 0
+	} else {
+		tail = " " + self.Right + " " + style.Rule(strings.Repeat("─", endPad))
+	}
+
+	middleWidth := max(width-leftWidth-rightWidth, 0)
+
+	return head + renderCentredSpan(middleWidth, self.Center, leftWidth, width) + tail
 }
 
-func ruleTo(width int, center string, label string) string {
-	n := getWidth(label, endPad)
-	if n == 0 || n > width {
-		return span(max(width, 0), center)
+func renderCentredSpan(availableWidth int, center string, startColumn int, ruleWidth int) string {
+	centerWidth := getWidth(center, 0)
+	beforeWidth := (ruleWidth-centerWidth)/2 - startColumn
+	if centerWidth == 0 || beforeWidth < 0 || beforeWidth+centerWidth > availableWidth {
+		return style.Rule(strings.Repeat("─", availableWidth))
 	}
 
-	b := style.Rule(strings.Repeat("─", endPad))
+	before := style.Rule(strings.Repeat("─", beforeWidth))
+	after := style.Rule(strings.Repeat("─", availableWidth-centerWidth-beforeWidth))
 
-	return span(width-n, center) + " " + label + " " + b
-}
-
-func span(width int, center string) string {
-	n := getWidth(center, 0)
-	if n == 0 || n > width {
-		return style.Rule(strings.Repeat("─", width))
-	}
-
-	before := (width - n) / 2
-
-	a := style.Rule(strings.Repeat("─", before))
-	b := style.Rule(strings.Repeat("─", width-n-before))
-
-	return a + " " + center + " " + b
+	return before + " " + center + " " + after
 }
 
 func getWidth(str string, edgePadding int) int {
