@@ -444,12 +444,20 @@ func failingTool() tool.Tool {
 func TestACallThatFailedWithSomethingToSaySaysItAndIsMarkedFailed(t *testing.T) {
 	result := singleResult(t, failingTool())
 
-	if !result.Failed {
+	if result.Status != agent.ErrorStatus {
 		t.Error("expected the call to be marked as having failed")
 	}
 
 	if !strings.Contains(result.Text, "permission denied") {
 		t.Errorf("expected what the command printed, got %q", result.Text)
+	}
+}
+
+func TestASuccessfulCallIsMarkedSuccessful(t *testing.T) {
+	result := singleResult(t, plainOutputTool("done", nil))
+
+	if result.Status != agent.SuccessStatus {
+		t.Errorf("got status %q", result.Status)
 	}
 }
 
@@ -526,7 +534,7 @@ func TestAFailedExecutedCallReceivesOutputStats(t *testing.T) {
 	const output = "permission denied\nexit status 1"
 	result := singleResult(t, plainOutputTool(output, errors.New("failed")))
 
-	if !result.Failed {
+	if result.Status != agent.ErrorStatus {
 		t.Error("expected the call to be marked as having failed")
 	}
 	requireStats(t, result, tool.OutputStats(output))
@@ -549,7 +557,7 @@ func TestAnEmptySpecialisedMeasurementFallsBackToOutputStats(t *testing.T) {
 func TestARefusedCallDoesNotReceiveOutputStats(t *testing.T) {
 	result := singleResult(t, refusingTool())
 
-	if !result.Failed {
+	if result.Status != agent.ErrorStatus {
 		t.Error("expected the call to be marked as having failed")
 	}
 	if result.Stats != nil {

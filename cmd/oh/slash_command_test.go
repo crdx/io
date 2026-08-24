@@ -77,8 +77,8 @@ func TestUnknownSlashCommandShowsAnErrorAndKeepsTheInput(t *testing.T) {
 	if len(self.events) != 1 {
 		t.Fatalf("got events %v", self.events)
 	}
-	want := "command not found: /unknown; press alt+enter to send anyway"
-	if self.events[0].Text != want || !self.events[0].Failed {
+	want := "Command not found: /unknown; press alt+enter to send anyway"
+	if self.events[0].Text != want || self.events[0].Status != agent.ErrorStatus {
 		t.Errorf("got event %+v, want failed %q", self.events[0], want)
 	}
 }
@@ -139,5 +139,44 @@ func TestConsecutiveTabsCycleCommandArguments(t *testing.T) {
 	self.apply(editor, nil, key.Key{Code: key.Rune, Value: '\t'})
 	if got := editor.Text(); got != "/copy session-id" {
 		t.Errorf("got second completion %q", got)
+	}
+}
+
+func TestSlashCommandCanAddASuccessMessage(t *testing.T) {
+	fixtureCommands := slash.New(slash.Command{
+		Name: "/fixture",
+		Run: func(context slash.Context, _ []string) error {
+			context.Success("Copied to clipboard.")
+			return nil
+		},
+	})
+
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.New(&bytes.Buffer{})
+	self.commands = fixtureCommands
+	if got := self.handleSlashCommand("/fixture"); got != handledCommand {
+		t.Fatalf("got slash input result %d", got)
+	}
+	if len(self.events) != 1 || self.events[0].Status != agent.SuccessStatus {
+		t.Errorf("got events %+v", self.events)
+	}
+}
+
+func TestUsageErrorIsNotPrefixedWithTheCommandName(t *testing.T) {
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.New(&bytes.Buffer{})
+	self.commands = slash.New(slash.Command{
+		Name: "/copy",
+		Run: func(slash.Context, []string) error {
+			return slash.Usage("Usage: /copy {session-name|session-id|session-dir}")
+		},
+	})
+
+	if got := self.handleSlashCommand("/copy"); got != handledCommand {
+		t.Fatalf("got slash input result %d", got)
+	}
+	want := "Usage: /copy {session-name|session-id|session-dir}"
+	if len(self.events) != 1 || self.events[0].Text != want {
+		t.Errorf("got events %+v, want %q", self.events, want)
 	}
 }

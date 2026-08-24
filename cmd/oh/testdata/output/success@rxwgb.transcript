@@ -80,7 +80,7 @@ prompt
 
 - **ID:** `call_2`
 - **Name:** `grep`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -149,7 +149,7 @@ cmd/oh/line/render.go
 
 - **ID:** `call_4`
 - **Name:** `read`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json

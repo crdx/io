@@ -67,6 +67,7 @@ func (self *helpContext) Send(string)      {}
 func (self *helpContext) Notice(text string) {
 	self.notice = text
 }
+func (self *helpContext) Success(string) {}
 
 func TestHelpMatchesGolden(t *testing.T) {
 	commands := newCommands(commandEnvironment{})

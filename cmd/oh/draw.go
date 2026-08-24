@@ -217,7 +217,7 @@ func (self *Painter) drawEvent(event agent.Event) {
 	case caps.ModeChange:
 		if notice, said := caps.ModeNotice(event); said {
 			self.close(dynamic.Cancelled)
-			self.screen.Line(noticeStyle(false)(notice))
+			self.screen.Line(noticeStyle(agent.WarningStatus)(notice))
 		}
 
 	case agent.FailureEvent:
@@ -259,7 +259,7 @@ func (self *Painter) mark(event agent.Event) {
 
 	self.toolBlock.FinaliseRow(
 		index,
-		getState(event.Failed),
+		getState(event.Status),
 		event.Took,
 		event.Text,
 		call.Measurements(event.Took, event.Stats),
@@ -300,19 +300,26 @@ func (self *Painter) render(event agent.Event) string {
 		return startup.RenderEvent(event)
 	}
 
-	return noticeStyle(event.Failed)(event.Text)
+	return noticeStyle(event.Status)(event.Text)
 }
 
-func noticeStyle(failed bool) style.Style {
-	if failed {
+func noticeStyle(severity agent.Status) style.Style {
+	switch severity {
+	case agent.InfoStatus:
+		return style.Information
+	case agent.SuccessStatus:
+		return style.Success
+	case agent.ErrorStatus:
 		return style.Failure
+	case agent.WarningStatus, "":
+		return style.Stopped
+	default:
+		return style.Normal
 	}
-
-	return style.Stopped
 }
 
-func getState(failed bool) dynamic.RowState {
-	if failed {
+func getState(status agent.Status) dynamic.RowState {
+	if status == agent.ErrorStatus {
 		return dynamic.Failed
 	}
 

@@ -23,6 +23,33 @@ var steps = map[int]step{
 	2: {finalise: addSessionMeta},
 	3: {migrateJournal: addTurnCompletions},
 	4: {migrateJournal: addLastMode},
+	5: {migrateLine: addEventStatus},
+}
+
+func addEventStatus(line map[string]json.RawMessage) error {
+	return with(line, func(event map[string]json.RawMessage) error {
+		var status agent.Status
+		switch string(event["kind"]) {
+		case `"harness_message"`:
+			status = agent.WarningStatus
+		case `"tool_call_result"`:
+			status = agent.SuccessStatus
+		default:
+			return nil
+		}
+		if string(event["failed"]) == "true" {
+			status = agent.ErrorStatus
+		}
+
+		encodedStatus, err := json.Marshal(status)
+		if err != nil {
+			return err
+		}
+
+		delete(event, "failed")
+		event["status"] = encodedStatus
+		return nil
+	})
 }
 
 func addSessionMeta(directory, name string) error {
@@ -236,7 +263,7 @@ func markMigratedTurnCompletion(lines []map[string]json.RawMessage, start, end i
 		}
 
 		event, hasEvent, err := eventOf(lines[index])
-		if err == nil && hasEvent && event.Kind == agent.HarnessMessageEvent && event.Failed &&
+		if err == nil && hasEvent && event.Kind == agent.HarnessMessageEvent && legacyEventFailed(lines[index]) &&
 			strings.Contains(event.Text, "conversation state could not be stored") {
 			hasProviderStateFailure = true
 		}
@@ -245,6 +272,14 @@ func markMigratedTurnCompletion(lines []map[string]json.RawMessage, start, end i
 	if lastItem >= 0 && !hasProviderStateFailure {
 		completionAfter[lastItem] = true
 	}
+}
+
+func legacyEventFailed(line map[string]json.RawMessage) bool {
+	var event map[string]json.RawMessage
+	if json.Unmarshal(line["event"], &event) != nil {
+		return false
+	}
+	return string(event["failed"]) == "true"
 }
 
 func eventOf(line map[string]json.RawMessage) (agent.Event, bool, error) {

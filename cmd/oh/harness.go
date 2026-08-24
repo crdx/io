@@ -236,7 +236,7 @@ func (self *Harness) handleSlashCommand(message string) slashInput {
 	invocation, found := self.commands.Find(message)
 	if found {
 		if err := invocation.Command.Run(commandContext{harness: self}, invocation.Arguments); err != nil {
-			self.notifyFailure(fmt.Sprintf("%s: %v", invocation.Command.Name, err))
+			self.notifyFailure(slash.FormatError(invocation.Command.Name, err))
 		}
 		return handledCommand
 	}
@@ -246,7 +246,7 @@ func (self *Harness) handleSlashCommand(message string) slashInput {
 		return ordinaryInput
 	}
 
-	self.notifyFailure(fmt.Sprintf("command not found: %s; press alt+enter to send anyway", name))
+	self.notifyFailure(fmt.Sprintf("Command not found: %s; press alt+enter to send anyway", name))
 	return unknownCommand
 }
 
@@ -267,7 +267,11 @@ func (self commandContext) Send(message string) {
 }
 
 func (self commandContext) Notice(message string) {
-	self.Emit(agent.Event{Kind: agent.HarnessMessageEvent, Text: message})
+	self.Emit(agent.Event{Kind: agent.HarnessMessageEvent, Text: message, Status: agent.InfoStatus})
+}
+
+func (self commandContext) Success(message string) {
+	self.Emit(agent.Event{Kind: agent.HarnessMessageEvent, Text: message, Status: agent.SuccessStatus})
 }
 
 func (self *Harness) acceptInput(editor *edit.Input, history *edit.History) {
@@ -368,7 +372,7 @@ func (self *Harness) settleMode() {
 
 func (self *Harness) recordModeEvent(event agent.Event) {
 	if err := self.recorder.Event(event); err != nil {
-		self.notifyFailure("the conversation could not be stored: " + err.Error())
+		self.notifyFailure("The conversation could not be stored: " + err.Error())
 	}
 	self.showStorageWarnings()
 }
@@ -543,11 +547,11 @@ func (self *Harness) restore(storedSession *store.Session) {
 	self.settledCaps, _ = caps.LastRecordedMode(storedSession.Events)
 
 	if err := self.agent.RestoreState(storedSession.Events); err != nil {
-		self.notifyFailure("the state could not be restored: " + err.Error())
+		self.notifyFailure("The state could not be restored: " + err.Error())
 		return
 	}
 	if err := self.agent.Load(storedSession.Items); err != nil {
-		self.notifyFailure("the conversation could not be restored: " + err.Error())
+		self.notifyFailure("The conversation could not be restored: " + err.Error())
 		return
 	}
 
@@ -674,17 +678,17 @@ func (self *Harness) recordEvent(event agent.Event) {
 	}
 
 	if err := self.recorder.Event(event); err != nil {
-		self.notifyFailure("the conversation could not be stored: " + err.Error())
+		self.notifyFailure("The conversation could not be stored: " + err.Error())
 	}
 	self.showStorageWarnings()
 }
 
 func (self *Harness) notifyFailure(text string) {
-	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text, Failed: true})
+	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text, Status: agent.ErrorStatus})
 }
 
 func (self *Harness) notifyStopped(text string) {
-	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text})
+	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text, Status: agent.WarningStatus})
 }
 
 func (self *Harness) notify(event agent.Event) {
@@ -714,7 +718,7 @@ func (self *Harness) finish() {
 
 	if self.storeProviderState() {
 		if err := self.recorder.CompleteTurn(); err != nil {
-			self.notifyFailure("the turn completion could not be stored: " + err.Error())
+			self.notifyFailure("The turn completion could not be stored: " + err.Error())
 		}
 	}
 	self.showStorageWarnings()
@@ -744,7 +748,7 @@ func (self *Harness) finish() {
 func (self *Harness) storeProviderState() bool {
 	items, err := self.agent.Dump()
 	if err != nil {
-		self.notifyFailure("the conversation state could not be stored: " + err.Error())
+		self.notifyFailure("The conversation state could not be stored: " + err.Error())
 		return false
 	}
 

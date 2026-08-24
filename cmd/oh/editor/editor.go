@@ -35,6 +35,6 @@ func buildCommand(configured string, path string) (*exec.Cmd, error) {
 
 func reportExit(command *exec.Cmd, errors io.Writer) {
 	if err := command.Wait(); err != nil {
-		_, _ = fmt.Fprintf(errors, "editor exited: %v\n", err)
+		_, _ = fmt.Fprintf(errors, "Editor exited: %v\n", err)
 	}
 }

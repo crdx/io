@@ -139,6 +139,7 @@ func TestProviderItemWriteFailureWarnsAndLeavesCanonicalJournalReadable(t *testi
 	}
 	if len(storedSession.Events) != 2 ||
 		storedSession.Events[1].Kind != agent.HarnessMessageEvent ||
+		storedSession.Events[1].Status != agent.ErrorStatus ||
 		!strings.Contains(storedSession.Events[1].Text, "item write failed") {
 		t.Errorf("unexpected canonical events: %+v", storedSession.Events)
 	}

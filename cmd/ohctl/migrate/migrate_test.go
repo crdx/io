@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/ohctl/migrate"
@@ -379,5 +380,48 @@ func TestTheTranscriptIsWrittenAgainFromTheCarriedJournal(t *testing.T) {
 
 	if !strings.Contains(string(written), "Emphasis") {
 		t.Errorf("expected the transcript to say what the migrated journal says, got %s", written)
+	}
+}
+
+func TestFormatFiveMigrationAddsEventStatuses(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":5,"id":"one","name":"brave-otter"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"harness_message","text":"stopped"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"harness_message","text":"broken","failed":true}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"tool_call_result","text":"failed","failed":true}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:04Z","event":{"kind":"tool_call_result","text":"done"}}`,
+	)
+
+	from, err := migrate.Session(options(directory), name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if from != 5 {
+		t.Errorf("migrated from format %d, want 5", from)
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := storedSession.Events[0].Status; got != agent.WarningStatus {
+		t.Errorf("got ordinary harness status %q", got)
+	}
+	if got := storedSession.Events[1].Status; got != agent.ErrorStatus {
+		t.Errorf("got failed harness status %q", got)
+	}
+	if got := storedSession.Events[2].Status; got != agent.ErrorStatus {
+		t.Errorf("got failed tool status %q", got)
+	}
+	if got := storedSession.Events[3].Status; got != agent.SuccessStatus {
+		t.Errorf("got successful tool status %q", got)
+	}
+	for index, line := range journalLines(t, directory, name) {
+		var event map[string]json.RawMessage
+		if index > 0 && json.Unmarshal(line["event"], &event) == nil {
+			if _, hasFailed := event["failed"]; hasFailed {
+				t.Errorf("line %d kept the legacy failed field: %s", index+1, line["event"])
+			}
+		}
 	}
 }

@@ -2,10 +2,10 @@
 {"event": {"kind": "model_reasoning", "text": "Reading the renderer before saying anything about it."}}
 {"event": {"kind": "model_message", "text": "Reading it now."}}
 {"event": {"kind": "tool_call_request", "id": "call_1", "name": "read", "arguments": "{\"path\":\"cmd/oh/line/render.go\"}", "render": "cmd/oh/line/render.go", "read_only": true}}
-{"event": {"kind": "harness_message", "text": "The turn was interrupted."}}
+{"event": {"kind": "harness_message", "status": "warning", "text": "The turn was interrupted."}}
 {"event": {"kind": "user_message", "text": "never mind, what is in target.txt?"}}
 {"event": {"kind": "tool_call_request", "id": "call_2", "name": "read", "arguments": "{\"path\":\"target.txt\"}", "render": "target.txt", "read_only": true}}
-{"event": {"kind": "tool_call_result", "text": "one\n", "id": "call_2", "name": "read", "took": 0, "stats": {"kind": "read", "lines": 1, "bytes": 4, "total_bytes": 4}}}
+{"event": {"kind": "tool_call_result", "status": "success", "text": "one\n", "id": "call_2", "name": "read", "took": 0, "stats": {"kind": "read", "lines": 1, "bytes": 4, "total_bytes": 4}}}
 {"event": {"kind": "model_message", "text": "It holds the word `one`, and nothing else."}}
-{"event": {"kind": "harness_message", "text": "Background processes killed (sleep)."}}
-{"event": {"kind": "harness_message", "text": "the conversation could not be stored: no space left on device", "failed": true}}
+{"event": {"kind": "harness_message", "status": "warning", "text": "Background processes killed (sleep)."}}
+{"event": {"kind": "harness_message", "text": "the conversation could not be stored: no space left on device", "status": "error"}}

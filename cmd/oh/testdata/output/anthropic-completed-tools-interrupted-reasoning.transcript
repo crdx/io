@@ -60,7 +60,7 @@ work
 
 - **ID:** `toolu_1`
 - **Name:** `work`
-- **Failed:** `false`
+- **Status:** `success`
 - **Duration:** `0s`
 **Stats**
 
@@ -121,7 +121,7 @@ work
 
 - **ID:** `toolu_2`
 - **Name:** `work`
-- **Failed:** `false`
+- **Status:** `success`
 - **Duration:** `0s`
 **Stats**
 
@@ -196,7 +196,7 @@ work
 
 - **ID:** `toolu_3`
 - **Name:** `work`
-- **Failed:** `false`
+- **Status:** `success`
 - **Duration:** `0s`
 **Stats**
 

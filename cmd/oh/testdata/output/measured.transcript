@@ -50,7 +50,7 @@ COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT
 
 - **ID:** `call_1`
 - **Name:** `bash`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -76,7 +76,7 @@ COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT
 
 - **ID:** `call_2`
 - **Name:** `ls`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -117,7 +117,7 @@ diagram.png
 
 - **ID:** `call_3`
 - **Name:** `read`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -149,7 +149,7 @@ screen.go
 
 - **ID:** `call_4`
 - **Name:** `edit`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -190,7 +190,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_5`
 - **Name:** `grep`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -230,7 +230,7 @@ README.md
 
 - **ID:** `call_6`
 - **Name:** `read`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json

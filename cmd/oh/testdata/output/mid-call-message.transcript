@@ -88,7 +88,7 @@ target.txt
 
 - **ID:** `call_2`
 - **Name:** `read`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json

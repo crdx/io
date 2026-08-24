@@ -56,8 +56,9 @@ type commandSession struct {
 }
 
 type commandTarget struct {
-	value   string
-	prepare func() error
+	value        string
+	confirmation string
+	prepare      func() error
 }
 
 func New(options Options) slash.CommandSet {
@@ -83,21 +84,21 @@ func New(options Options) slash.CommandSet {
 func newCommands(environment commandEnvironment) slash.CommandSet {
 	var commands slash.CommandSet
 	commands = slash.New(
-		noArgumentCommand("/conf", "usage: /conf", environment.configPath, environment.openEditor),
+		noArgumentCommand("/conf", "Usage: /conf", environment.configPath, environment.openEditor),
 		targetCommand(
 			"/copy",
-			"usage: /copy {session-name|session-id|session-dir}",
+			"Usage: /copy {session-name|session-id|session-dir}",
 			map[string]commandTarget{
-				"session-name": {value: environment.session.name},
-				"session-id":   {value: environment.session.id},
-				"session-dir":  {value: environment.session.directory},
+				"session-name": copyTarget(environment.session.name),
+				"session-id":   copyTarget(environment.session.id),
+				"session-dir":  copyTarget(environment.session.directory),
 			},
 			environment.copyText,
 		),
 		helpCommand(func() string { return helpText(commands.Usages()) }),
 		targetCommand(
 			"/open",
-			"usage: /open {config-dir|state-dir|session-dir|session-log|session-chat}",
+			"Usage: /open {config-dir|state-dir|session-dir|session-log|session-chat}",
 			map[string]commandTarget{
 				"config-dir": {
 					value: environment.configDir,
@@ -106,13 +107,13 @@ func newCommands(environment commandEnvironment) slash.CommandSet {
 					},
 				},
 				"state-dir":   {value: environment.stateDir},
-				"session-dir": existingTarget("session directory", environment.session.directory),
+				"session-dir": existingTarget("Session directory", environment.session.directory),
 				"session-log": existingTarget(
-					"session log",
+					"Session log",
 					filepath.Join(environment.session.directory, sessionJournalName),
 				),
 				"session-chat": existingTarget(
-					"session chat",
+					"Session chat",
 					filepath.Join(environment.session.directory, sessionTranscriptName),
 				),
 			},
@@ -127,7 +128,7 @@ func helpCommand(getHelp func() string) slash.Command {
 		Name: "/help",
 		Run: func(context slash.Context, arguments []string) error {
 			if len(arguments) != 0 {
-				return errors.New("usage: /help")
+				return slash.Usage("Usage: /help")
 			}
 
 			context.Notice(getHelp())
@@ -139,6 +140,10 @@ func helpCommand(getHelp func() string) slash.Command {
 func helpText(usages []string) string {
 	visibleUsages := slices.DeleteFunc(usages, func(usage string) bool { return usage == "/help" })
 	return "Commands:\n  " + strings.Join(visibleUsages, "\n  ")
+}
+
+func copyTarget(value string) commandTarget {
+	return commandTarget{value: value, confirmation: "Copied to clipboard."}
 }
 
 func existingTarget(description string, path string) commandTarget {
@@ -163,7 +168,7 @@ func noArgumentCommand(name string, usage string, value string, action func(stri
 		Name: name,
 		Run: func(_ slash.Context, arguments []string) error {
 			if len(arguments) != 0 {
-				return errors.New(usage)
+				return slash.Usage(usage)
 			}
 
 			return action(value)
@@ -174,14 +179,14 @@ func noArgumentCommand(name string, usage string, value string, action func(stri
 func targetCommand(name string, usage string, targets map[string]commandTarget, action func(string) error) slash.Command {
 	command := slash.Command{
 		Name: name,
-		Run: func(_ slash.Context, arguments []string) error {
+		Run: func(context slash.Context, arguments []string) error {
 			if len(arguments) != 1 {
-				return errors.New(usage)
+				return slash.Usage(usage)
 			}
 
 			target, found := targets[arguments[0]]
 			if !found {
-				return errors.New(usage)
+				return slash.Usage(usage)
 			}
 
 			if target.prepare != nil {
@@ -190,7 +195,13 @@ func targetCommand(name string, usage string, targets map[string]commandTarget, 
 				}
 			}
 
-			return action(target.value)
+			if err := action(target.value); err != nil {
+				return err
+			}
+			if target.confirmation != "" {
+				context.Success(target.confirmation)
+			}
+			return nil
 		},
 	}
 

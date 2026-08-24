@@ -4,5 +4,5 @@
 {"event": {"kind": "interruption"}}
 {"event": {"kind": "user_message", "text": "never mind, what is in target.txt?"}}
 {"event": {"kind": "tool_call_request", "id": "call_2", "name": "read", "arguments": "{\"path\":\"target.txt\"}", "render": "target.txt", "read_only": true}}
-{"event": {"kind": "tool_call_result", "text": "one\n", "id": "call_2", "name": "read", "took": 0, "stats": {"kind": "read", "lines": 1, "bytes": 4, "total_bytes": 4}}}
+{"event": {"kind": "tool_call_result", "status": "success", "text": "one\n", "id": "call_2", "name": "read", "took": 0, "stats": {"kind": "read", "lines": 1, "bytes": 4, "total_bytes": 4}}}
 {"event": {"kind": "model_message", "text": "It holds the word `one`, and nothing else."}}

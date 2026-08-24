@@ -10,6 +10,7 @@ read screen.go ✓ 3L ~100t
 grep spinner *.go ✓ 1L ~100t
 
 Background processes killed (sleep).
+Copied to clipboard.
 the conversation could not be stored: no
 space left on device
 
@@ -148,6 +149,24 @@ e
 p
 )
 .
+C
+o
+p
+i
+e
+d
+t
+o
+c
+l
+i
+p
+b
+o
+a
+r
+d
+.
 t
 h
 e
@@ -247,6 +266,8 @@ Background
 processes
 killed
 (sleep).
+Copied to
+clipboard.
 the
 conversation
 could not be
@@ -268,6 +289,7 @@ read screen.go ✓ 3L ~100t
 grep spinner *.go ✓ 1L ~100t
 
 Background processes killed (sleep).
+Copied to clipboard.
 the conversation could not be stored: no space left on device
 
 Both still mention the spinner.

@@ -44,34 +44,35 @@ var (
 
 // The mapping of kind of line to colour.
 var (
-	Reasoning  Style = decorate(col.Italic, Grey) // what the model thought on the way to it
-	Answer     Style = Normal                     // the model's reply
-	Call       Style = Normal                     // the name of a call that changes nothing
-	Change     Style = hex(gold)                  // the name of a call that may change something
-	Success    Style = hex(lime)                  // the mark against a call that finished
-	Cancelled  Style = Grey                       // the name of a call stopped before it got anywhere
-	Stopped    Style = hex(gold)                  // what the harness says of a turn it was told to stop
-	Failure    Style = hex(red)                   // what went wrong
-	Subject    Style = hex(copper)                // the subject of a call
-	Qualifier  Style = Grey                       // what qualifies the subject
-	Result     Style = Grey                       // what a call handed back
-	Spinner    Style = hex(copper)                // the spinner
-	Prompt     Style = hex(copper)                // the harness prompting the user for text
-	Rule       Style = Grey                       // the line drawn over the input
-	Subtle     Style = Grey                       // text a step back from the subject
-	Peripheral Style = decorate(col.Italic, Grey) // less relevant information outside the current focus
-	Read       Style = hex(lime)                  // reading is on offer
-	Write      Style = hex(gold)                  // writing is on offer
-	Exec       Style = hex(red)                   // running a command is on offer
-	Shell      Style = hex(steel)                 // a shell prompt, matching the command name
-	Skill      Style = hex(mauve)                 // a skill being read
-	History    Style = hex(mauve)                 // changing a repository's own history is on offer
-	Pending    Style = col.Underline              // waiting on the keypress that follows a prefix
-	Scrolled   Style = Grey                       // how much of the input is out of sight
-	Withheld   Style = Faint                      // that access is not on offer
-	Chosen     Style = hex(copper)                // the row the cursor is on in a list
-	Typed      Style = Normal                     // what was typed, when a stored conversation is replayed
-	User       Style = background("#343541")      // a submitted message, set apart from the model's reply
+	Reasoning   Style = decorate(col.Italic, Grey) // what the model thought on the way to an answer
+	Answer      Style = Normal                     // the reply the model gives after it has thought
+	Call        Style = Normal                     // the name of a call that changes nothing at all
+	Change      Style = hex(gold)                  // the name of a call that could change something
+	Success     Style = hex(lime)                  // the mark set against a call that has completed
+	Information Style = hex(steel)                 // what the harness says when passing information
+	Cancelled   Style = Grey                       // the name of a call stopped before it got going
+	Stopped     Style = hex(gold)                  // what the harness says of a turn it had to stop
+	Failure     Style = hex(red)                   // what went wrong, wherever the failure happened
+	Subject     Style = hex(copper)                // the subject of a call, whatever it operates on
+	Qualifier   Style = Grey                       // what qualifies the subject and narrows it down
+	Result      Style = Grey                       // the output a call handed back when it finished
+	Spinner     Style = hex(copper)                // the spinner that turns while a call is running
+	Prompt      Style = hex(copper)                // the harness prompting the user to enter a line
+	Rule        Style = Grey                       // the line drawn across the top of the input box
+	Subtle      Style = Grey                       // text held one small step back from the subject
+	Peripheral  Style = decorate(col.Italic, Grey) // less relevant detail outside the current focus
+	Read        Style = hex(lime)                  // reading is on offer, and waiting to be granted
+	Write       Style = hex(gold)                  // writing is on offer, and waiting to be granted
+	Exec        Style = hex(red)                   // running a command is on offer, if you grant it
+	Shell       Style = hex(steel)                 // a shell prompt, tinted to match a command name
+	Skill       Style = hex(mauve)                 // a skill being read ahead of the work it guides
+	History     Style = hex(mauve)                 // rewriting the repository's history is on offer
+	Pending     Style = col.Underline              // waiting for the keypress that follows a prefix
+	Scrolled    Style = Grey                       // how much of the input is scrolled out of sight
+	Withheld    Style = Faint                      // a note that this access is not on offer at all
+	Chosen      Style = hex(copper)                // the row the cursor is resting on within a list
+	Typed       Style = Normal                     // what the user typed when a session is replayed
+	User        Style = background("#343541")      // a submitted message, kept apart from the reply
 )
 
 // Background marks permission to leave processes behind.

@@ -19,7 +19,7 @@ import (
 	"crdx.org/io/internal/format"
 )
 
-const Format = 5
+const Format = 6
 
 type Kind string
 

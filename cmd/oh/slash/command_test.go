@@ -1,6 +1,7 @@
 package slash_test
 
 import (
+	"errors"
 	"slices"
 	"testing"
 
@@ -133,5 +134,21 @@ func TestCommandNameRecognisesSlashInput(t *testing.T) {
 		if name, found := slash.CommandName(input); found {
 			t.Errorf("CommandName(%q) unexpectedly got %q", input, name)
 		}
+	}
+}
+
+func TestUsageErrorIsRecognised(t *testing.T) {
+	err := slash.Usage("Usage: /copy")
+	if !slash.IsUsageError(err) || err.Error() != "Usage: /copy" {
+		t.Errorf("got %T %q", err, err)
+	}
+}
+
+func TestCommandErrorsAreFormattedForHarnessMessages(t *testing.T) {
+	if got := slash.FormatError("/copy", slash.Usage("Usage: /copy")); got != "Usage: /copy" {
+		t.Errorf("got usage error %q", got)
+	}
+	if got := slash.FormatError("/conf", errors.New("editor is not configured")); got != "/conf: Editor is not configured" {
+		t.Errorf("got operational error %q", got)
 	}
 }

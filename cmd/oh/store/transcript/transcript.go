@@ -86,7 +86,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 	case agent.ToolCallResultEvent:
 		writeField(&output, "ID", event.ID)
 		writeField(&output, "Name", event.Name)
-		writeBool(&output, "Failed", event.Failed)
+		writeField(&output, "Status", string(event.Status))
 		if event.Took != 0 {
 			writeField(&output, "Duration", event.Took.String())
 		}

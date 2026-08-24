@@ -56,7 +56,7 @@ That will take a moment.
 
 - **ID:** `call_1`
 - **Name:** `grep`
-- **Failed:** `false`
+- **Status:** `success`
 - **Duration:** `9.5s`
 **Stats**
 
@@ -78,7 +78,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_2`
 - **Name:** `find`
-- **Failed:** `true`
+- **Status:** `error`
 - **Duration:** `1m2s`
 **Output preview (first 3 lines, up to 1 KiB)**
 

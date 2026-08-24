@@ -72,7 +72,7 @@ target.txt
 
 - **ID:** `call_1`
 - **Name:** `grep`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json

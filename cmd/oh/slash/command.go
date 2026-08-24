@@ -1,6 +1,7 @@
 package slash
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -8,10 +9,40 @@ import (
 	"crdx.org/io/agent"
 )
 
+type UsageError struct {
+	usage string
+}
+
+func (self UsageError) Error() string {
+	return self.usage
+}
+
+func Usage(text string) error {
+	return UsageError{usage: text}
+}
+
+func IsUsageError(err error) bool {
+	var usageError UsageError
+	return errors.As(err, &usageError)
+}
+
+func FormatError(commandName string, err error) string {
+	if IsUsageError(err) {
+		return err.Error()
+	}
+
+	message := []rune(err.Error())
+	if len(message) > 0 {
+		message[0] = []rune(strings.ToUpper(string(message[0])))[0]
+	}
+	return commandName + ": " + string(message)
+}
+
 type Context interface {
 	Emit(agent.Event)
 	Send(string)
 	Notice(string)
+	Success(string)
 }
 
 type Command struct {

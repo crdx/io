@@ -48,7 +48,7 @@ lines 1-400
 
 - **ID:** `call_1`
 - **Name:** `divine`
-- **Failed:** `false`
+- **Status:** `success`
 **Output preview (first 3 lines, up to 1 KiB)**
 
 ```
@@ -83,7 +83,7 @@ func Draw(rows []string, columns int) ([]string, error) { return rows, nil }
 
 - **ID:** `call_2`
 - **Name:** `conjure`
-- **Failed:** `false`
+- **Status:** `success`
 **Output preview (first 3 lines, up to 1 KiB)**
 
 ```
@@ -118,7 +118,7 @@ for do done esac fi "unclosed
 
 - **ID:** `call_3`
 - **Name:** `bash`
-- **Failed:** `true`
+- **Status:** `error`
 **Output preview (first 3 lines, up to 1 KiB)**
 
 ```
@@ -152,7 +152,7 @@ nothing
 
 - **ID:** `call_4`
 - **Name:** `summon`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -184,7 +184,7 @@ plenty
 
 - **ID:** `call_5`
 - **Name:** `summon`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -224,7 +224,7 @@ japanese
 
 - **ID:** `call_6`
 - **Name:** `summon`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json

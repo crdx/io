@@ -72,13 +72,17 @@ spinner
 
 > 2001-01-01T00:00:04Z
 
-## Tool result
+## Notice
 
 > 2001-01-01T00:00:05Z
 
+## Tool result
+
+> 2001-01-01T00:00:06Z
+
 - **ID:** `call_1`
 - **Name:** `read`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -95,15 +99,15 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Notice
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 ## Tool result
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 - **ID:** `call_2`
 - **Name:** `grep`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -120,7 +124,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:09Z
 
 ```
 Both still mention the spinner.

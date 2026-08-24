@@ -410,12 +410,17 @@ func (self *Agent) runBatch(
 				stats = &executionResult.Stats
 			}
 
+			status := ErrorStatus
+			if ok {
+				status = SuccessStatus
+			}
+
 			completion := completedToolCall{result: Event{
 				Kind:   ToolCallResultEvent,
 				ID:     item.rawToolCall.ID,
 				Name:   item.rawToolCall.Name,
 				Text:   executionResult.Output,
-				Failed: !ok,
+				Status: status,
 				Took:   time.Since(startedAt),
 				Stats:  stats,
 			}}

@@ -79,7 +79,7 @@ beta
 
 - **ID:** `call-1`
 - **Name:** `alpha`
-- **Failed:** `false`
+- **Status:** `success`
 - **Duration:** `0s`
 **Stats**
 
@@ -113,7 +113,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call-2`
 - **Name:** `beta`
-- **Failed:** `false`
+- **Status:** `success`
 - **Duration:** `0s`
 **Stats**
 

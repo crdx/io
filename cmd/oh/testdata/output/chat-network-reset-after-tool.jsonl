@@ -1,9 +1,9 @@
-{"kind":"head","version":5,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"high","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":6,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"high","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"complete a tool round, then lose the network"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Use the tool."}}
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"call-1","name":"work","arguments":"{}"}}
 {"kind":"event","event":{"kind":"state_change","id":"call-1","name":"work-count","state":1}}
-{"kind":"event","event":{"kind":"tool_call_result","text":"tool result","id":"call-1","name":"work","stats":{"kind":"output","lines":1,"bytes":11,"total_bytes":11}}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"tool result","id":"call-1","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":11,"total_bytes":11}}}
 {"kind":"event","event":{"kind":"failure","text":"unexpected EOF"}}
 {"kind":"item","payload":{"role":"user","content":"complete a tool round, then lose the network"}}
 {"kind":"item","payload":{"role":"assistant","content":"","reasoning_content":"Use the tool.","tool_calls":[{"id":"call-1","type":"function","function":{"name":"work","arguments":"{}"}}]}}

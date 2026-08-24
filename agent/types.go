@@ -143,6 +143,16 @@ func (self *FallbackRendering) Describe(toolCall tool.ToolCall) {
 	self.Emphasis = toolCall.Emphasis()
 }
 
+// Status is the outcome or presentation category of an event.
+type Status string
+
+const (
+	InfoStatus    Status = "info"
+	SuccessStatus Status = "success"
+	WarningStatus Status = "warning"
+	ErrorStatus   Status = "error"
+)
+
 // Event is a conversation occurrence or durable tool-state transition.
 type Event struct {
 	FallbackRendering
@@ -152,7 +162,7 @@ type Event struct {
 	ID        string          `json:"id,omitempty"`
 	Name      string          `json:"name,omitempty"` // which tool or state owner
 	Arguments string          `json:"arguments,omitempty"`
-	Failed    bool            `json:"failed,omitempty"` // whether a call came back with an error rather than a result
+	Status    Status          `json:"status,omitempty"`
 	Took      time.Duration   `json:"took,omitempty"`
 	Stats     *tool.Stats     `json:"stats,omitempty"`
 	State     json.RawMessage `json:"state,omitempty"` // an opaque durable tool-state transition

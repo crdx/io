@@ -335,7 +335,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 		{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", Arguments: `{"path":"one.go"}`, FallbackRendering: agent.FallbackRendering{Subject: "old"}},
 		{Kind: agent.ToolCallRequestEvent, ID: "2", Name: "gone", FallbackRendering: agent.FallbackRendering{Subject: "two.go"}},
 		{Kind: agent.ToolCallResultEvent, ID: "1", Name: "read", Took: 2 * time.Second},
-		{Kind: agent.ToolCallResultEvent, ID: "2", Name: "gone", Failed: true, Took: 3 * time.Second},
+		{Kind: agent.ToolCallResultEvent, ID: "2", Name: "gone", Status: agent.ErrorStatus, Took: 3 * time.Second},
 		{Kind: agent.ModelMessageEvent, Text: "Done."},
 	}
 
@@ -1010,5 +1010,13 @@ func TestDiscardedReasoningLeavesTheSameScreenAsReplay(t *testing.T) {
 	replayed := visibleScreen(t, replayOutput.String(), 80)
 	if !slices.Equal(live, replayed) {
 		t.Errorf("discarded reasoning changed the settled screen\nlive:\n%s\nreplayed:\n%s", strings.Join(live, "\n"), strings.Join(replayed, "\n"))
+	}
+}
+
+func TestSuccessfulHarnessMessageUsesTheSuccessStyle(t *testing.T) {
+	got := noticeStyle(agent.SuccessStatus)("Copied to clipboard.")
+	want := style.Success("Copied to clipboard.")
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }

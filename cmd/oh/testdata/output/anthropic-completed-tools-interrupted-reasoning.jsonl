@@ -1,13 +1,13 @@
-{"kind":"head","version":5,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":6,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"complete two tool rounds, then keep thinking"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Plan first."}}
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"toolu_1","name":"work","arguments":"{}"}}
 {"kind":"event","event":{"kind":"state_change","id":"toolu_1","name":"work-count","state":1}}
-{"kind":"event","event":{"kind":"tool_call_result","text":"first result","id":"toolu_1","name":"work","stats":{"kind":"output","lines":1,"bytes":12,"total_bytes":12}}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"first result","id":"toolu_1","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":12,"total_bytes":12}}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Plan second."}}
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"toolu_2","name":"work","arguments":"{}"}}
 {"kind":"event","event":{"kind":"state_change","id":"toolu_2","name":"work-count","state":2}}
-{"kind":"event","event":{"kind":"tool_call_result","text":"second result","id":"toolu_2","name":"work","stats":{"kind":"output","lines":1,"bytes":13,"total_bytes":13}}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"second result","id":"toolu_2","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":13,"total_bytes":13}}}
 {"kind":"event","event":{"kind":"interruption"}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"complete two tool rounds, then keep thinking"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"thinking","thinking":"Plan first.","signature":"seal-1"},{"type":"tool_use","id":"toolu_1","name":"work","input":{}}]}}
@@ -19,7 +19,7 @@
 {"kind":"event","event":{"kind":"model_reasoning","text":"Check restored state."}}
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"toolu_3","name":"work","arguments":"{}"}}
 {"kind":"event","event":{"kind":"state_change","id":"toolu_3","name":"work-count","state":3}}
-{"kind":"event","event":{"kind":"tool_call_result","text":"resumed result","id":"toolu_3","name":"work","stats":{"kind":"output","lines":1,"bytes":14,"total_bytes":14}}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"resumed result","id":"toolu_3","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":14,"total_bytes":14}}}
 {"kind":"event","event":{"kind":"model_message","text":"Recovered."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"continue from the last valid tool result"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"thinking","thinking":"Check restored state.","signature":"seal-3"},{"type":"tool_use","id":"toolu_3","name":"work","input":{}}]}}

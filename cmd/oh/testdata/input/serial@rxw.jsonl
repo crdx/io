@@ -3,17 +3,17 @@
 {"event":{"kind":"model_reasoning","text":"Writing the file the rest of this needs."}}
 {"event":{"kind":"model_message","text":"I'll put a file down to work with."}}
 {"event":{"kind":"tool_call_request","id":"call_2","name":"write","arguments":"{\"path\":\"notes.md\",\"content\":\"# Notes\\n\\nOne.\\nTwo.\\nThree.\\n\"}","render":"notes.md","detail":"26B","emphasis":{"kind":"focus","value":"notes.md"}}}
-{"event":{"kind":"tool_call_result","text":"wrote 26B to notes.md","id":"call_2","name":"write","took":0,"stats":{"kind":"write","lines":5,"bytes":26}}}
+{"event":{"kind":"tool_call_result","status":"success","text":"wrote 26B to notes.md","id":"call_2","name":"write","took":0,"stats":{"kind":"write","lines":5,"bytes":26}}}
 {"event":{"kind":"model_reasoning","text":"Reading, then writing, then reading what was written."}}
 {"event":{"kind":"model_message","text":"Now to read it, add to it, and read it back."}}
 {"event":{"kind":"tool_call_request","id":"call_4","name":"read","arguments":"{\"path\":\"notes.md\"}","render":"notes.md","emphasis":{"kind":"focus","value":"notes.md"},"read_only":true}}
 {"event":{"kind":"tool_call_request","id":"call_5","name":"ls","arguments":"{\"path\":\".\"}","emphasis":{"kind":"focus","value":""},"read_only":true}}
 {"event":{"kind":"tool_call_request","id":"call_6","name":"write","arguments":"{\"path\":\"notes.md\",\"content\":\"# Notes\\n\\nOne.\\nTwo.\\nThree.\\nFour.\\n\"}","render":"notes.md","detail":"32B","emphasis":{"kind":"focus","value":"notes.md"}}}
 {"event":{"kind":"tool_call_request","id":"call_7","name":"read","arguments":"{\"path\":\"notes.md\"}","render":"notes.md","emphasis":{"kind":"focus","value":"notes.md"},"read_only":true}}
-{"event":{"kind":"tool_call_result","text":"README.md\ncmd/\nnotes.md\nscreen.go\nsettings.toml\nskills/\ntarget.txt\nwide.md","id":"call_5","name":"ls","took":0,"stats":{"kind":"output","lines":8,"bytes":74,"total_bytes":74}}}
+{"event":{"kind":"tool_call_result","status":"success","text":"README.md\ncmd/\nnotes.md\nscreen.go\nsettings.toml\nskills/\ntarget.txt\nwide.md","id":"call_5","name":"ls","took":0,"stats":{"kind":"output","lines":8,"bytes":74,"total_bytes":74}}}
 {"event":{"kind":"state_change","id":"call_4","name":"file_read","state":{"files":[{"path":"notes.md","sha256":"112259ce4bfd558379d6e9cff39cfd4dc7a013e8ed0ba9068f0d304e9816b400"}]}}}
-{"event":{"kind":"tool_call_result","text":"# Notes\n\nOne.\nTwo.\nThree.\n","id":"call_4","name":"read","took":0,"stats":{"kind":"read","lines":5,"bytes":26}}}
-{"event":{"kind":"tool_call_result","text":"wrote 32B to notes.md","id":"call_6","name":"write","took":0,"stats":{"kind":"write","lines":6,"bytes":32}}}
+{"event":{"kind":"tool_call_result","status":"success","text":"# Notes\n\nOne.\nTwo.\nThree.\n","id":"call_4","name":"read","took":0,"stats":{"kind":"read","lines":5,"bytes":26}}}
+{"event":{"kind":"tool_call_result","status":"success","text":"wrote 32B to notes.md","id":"call_6","name":"write","took":0,"stats":{"kind":"write","lines":6,"bytes":32}}}
 {"event":{"kind":"state_change","id":"call_7","name":"file_read","state":{"files":[{"path":"notes.md","sha256":"88b89465d4e017872f58fd8cc3533dd7a6641b947c3f7ae29299ecfb9825f51e"}]}}}
-{"event":{"kind":"tool_call_result","text":"# Notes\n\nOne.\nTwo.\nThree.\nFour.\n","id":"call_7","name":"read","took":0,"stats":{"kind":"read","lines":6,"bytes":32}}}
+{"event":{"kind":"tool_call_result","status":"success","text":"# Notes\n\nOne.\nTwo.\nThree.\nFour.\n","id":"call_7","name":"read","took":0,"stats":{"kind":"read","lines":6,"bytes":32}}}
 {"event":{"kind":"model_message","text":"The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.\n"}}

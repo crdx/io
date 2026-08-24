@@ -42,7 +42,7 @@ if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else echo n
 
 - **ID:** `call_1`
 - **Name:** `bash`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -75,7 +75,7 @@ while read -r NAME; do echo "$NAME" > out.txt 2>&1; done < list.txt
 
 - **ID:** `call_2`
 - **Name:** `bash`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -108,7 +108,7 @@ until [[ -z "$REST" ]]; do REST=""; done
 
 - **ID:** `call_3`
 - **Name:** `bash`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -141,7 +141,7 @@ case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac
 
 - **ID:** `call_4`
 - **Name:** `bash`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -174,7 +174,7 @@ select CHOICE in one two; do break; done
 
 - **ID:** `call_5`
 - **Name:** `bash`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -207,7 +207,7 @@ ls -la | grep -v "^d" | wc -l
 
 - **ID:** `call_6`
 - **Name:** `bash`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -240,7 +240,7 @@ ls -la | grep -v "^d" | wc -l
 
 - **ID:** `call_7`
 - **Name:** `grep`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -281,7 +281,7 @@ skills/tidy/SKILL.md
 
 - **ID:** `call_8`
 - **Name:** `read`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -328,7 +328,7 @@ wide.md
 
 - **ID:** `call_9`
 - **Name:** `read`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json

@@ -122,7 +122,7 @@ package
 
 - **ID:** `call_2`
 - **Name:** `ls`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -145,7 +145,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_3`
 - **Name:** `find`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -167,7 +167,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_4`
 - **Name:** `find`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -200,7 +200,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_5`
 - **Name:** `grep`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -328,7 +328,7 @@ cursor
 
 - **ID:** `call_7`
 - **Name:** `grep`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -361,7 +361,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_9`
 - **Name:** `grep`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -394,7 +394,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_8`
 - **Name:** `grep`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -457,7 +457,7 @@ nowhere/at/all.go
 
 - **ID:** `call_11`
 - **Name:** `read`
-- **Failed:** `true`
+- **Status:** `error`
 **Stats**
 
 ```json
@@ -478,7 +478,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_10`
 - **Name:** `ls`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json

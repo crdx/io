@@ -4,5 +4,5 @@
 {"event":{"kind":"model_message","text":"Let me read the renderer."}}
 {"event":{"kind":"tool_call_request","id":"call_2","name":"read","arguments":"{\"path\":\"cmd/oh/line/render.go\"}","render":"cmd/oh/line/render.go","emphasis":{"kind":"focus","value":"render.go"},"read_only":true}}
 {"event":{"kind":"state_change","id":"call_2","name":"file_read","state":{"files":[{"path":"cmd/oh/line/render.go","sha256":"20a0815670f99c0a9de02e0e66948fb6ee69dc76dcc0a8e4ffa8b81c110be52b"}]}}}
-{"event":{"kind":"tool_call_result","text":"package line\n\nfunc layout() string {\n\treturn \"the prompt\"\n}\n","id":"call_2","name":"read","took":0,"stats":{"kind":"read","lines":5,"bytes":60}}}
+{"event":{"kind":"tool_call_result","status":"success","text":"package line\n\nfunc layout() string {\n\treturn \"the prompt\"\n}\n","id":"call_2","name":"read","took":0,"stats":{"kind":"read","lines":5,"bytes":60}}}
 {"event":{"kind":"model_message","text":"The prompt is built in cmd/oh/line/render.go:4:9, and screen.go holds the spinner beside it. There is nothing about it in README.md, and nothing at all in cmd/oh/line/missing.go, which is where I looked first. settings.toml names the workspace and target.txt is the file everything else works on.\n"}}

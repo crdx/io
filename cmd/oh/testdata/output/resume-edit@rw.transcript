@@ -54,7 +54,7 @@ target.txt
 
 - **ID:** `call_1`
 - **Name:** `edit`
-- **Failed:** `true`
+- **Status:** `error`
 **Stats**
 
 ```json

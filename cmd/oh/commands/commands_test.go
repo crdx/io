@@ -7,8 +7,20 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/slash"
 )
+
+type commandTestContext struct {
+	success string
+}
+
+func (self *commandTestContext) Emit(agent.Event) {}
+func (self *commandTestContext) Send(string)      {}
+func (self *commandTestContext) Notice(string)    {}
+func (self *commandTestContext) Success(text string) {
+	self.success = text
+}
 
 func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	configHome := t.TempDir()
@@ -68,11 +80,19 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 			if !found {
 				t.Fatal("expected command to be found")
 			}
-			if err := invocation.Command.Run(nil, invocation.Arguments); err != nil {
+			context := &commandTestContext{}
+			if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
 				t.Fatal(err)
 			}
 			if !slices.Equal(actions, []string{wantAction}) {
 				t.Errorf("got actions %v, want %q", actions, wantAction)
+			}
+			wantSuccess := ""
+			if strings.HasPrefix(input, "/copy ") {
+				wantSuccess = "Copied to clipboard."
+			}
+			if context.success != wantSuccess {
+				t.Errorf("got success %q, want %q", context.success, wantSuccess)
 			}
 		})
 	}
@@ -98,7 +118,7 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 			}
 
 			err := invocation.Command.Run(nil, invocation.Arguments)
-			if err == nil || !strings.Contains(err.Error(), "usage: ") {
+			if err == nil || !strings.Contains(err.Error(), "Usage: ") {
 				t.Errorf("got error %v", err)
 			}
 		})
@@ -133,9 +153,9 @@ func TestCommandsReportSessionTargetsThatDoNotExistYet(t *testing.T) {
 	})
 
 	for input, want := range map[string]string{
-		"/open session-dir":  "session directory does not exist yet",
-		"/open session-log":  "session log does not exist yet",
-		"/open session-chat": "session chat does not exist yet",
+		"/open session-dir":  "Session directory does not exist yet",
+		"/open session-log":  "Session log does not exist yet",
+		"/open session-chat": "Session chat does not exist yet",
 	} {
 		t.Run(input, func(t *testing.T) {
 			actionRan = false

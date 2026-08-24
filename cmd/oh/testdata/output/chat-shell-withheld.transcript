@@ -41,7 +41,7 @@ echo forbidden
 
 - **ID:** `call-1`
 - **Name:** `bash`
-- **Failed:** `true`
+- **Status:** `error`
 - **Duration:** `0s`
 **Stats**
 

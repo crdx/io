@@ -68,7 +68,7 @@ notes.md
 
 - **ID:** `call_2`
 - **Name:** `write`
-- **Failed:** `true`
+- **Status:** `error`
 **Stats**
 
 ```json
@@ -185,7 +185,7 @@ notes.md
 
 - **ID:** `call_4`
 - **Name:** `read`
-- **Failed:** `true`
+- **Status:** `error`
 **Stats**
 
 ```json
@@ -206,7 +206,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_5`
 - **Name:** `ls`
-- **Failed:** `false`
+- **Status:** `success`
 **Stats**
 
 ```json
@@ -229,7 +229,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_6`
 - **Name:** `write`
-- **Failed:** `true`
+- **Status:** `error`
 **Stats**
 
 ```json
@@ -250,7 +250,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_7`
 - **Name:** `read`
-- **Failed:** `true`
+- **Status:** `error`
 **Stats**
 
 ```json
