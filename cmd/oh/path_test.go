@@ -74,7 +74,7 @@ func TestTheConfigIsInTheXDGConfigDirectory(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", root)
 
 	want := filepath.Join(root, namespace, app, "config.toml")
-	if got := configPath(); got != want {
+	if got := configFile(); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

@@ -189,7 +189,7 @@ func run() (string, error) {
 	}
 	defer func() { _ = homeRoot.Close() }()
 
-	settings, err := config.Load(configPath())
+	settings, err := config.Load(configFile())
 	if err != nil {
 		return "", err
 	}
@@ -328,10 +328,11 @@ func run() (string, error) {
 		terminal: terminal.New(os.Stdout),
 		metrics:  metrics.New(choice.ContextWindowTokens),
 		commands: commands.New(commands.Options{
-			ConfigDirectory: configDir(),
-			ConfigPath:      configPath(),
-			Editor:          settings.Editor,
-			Output:          os.Stdout,
+			ConfigDir:  configDir(),
+			StateDir:   stateDir(),
+			ConfigFile: configFile(),
+			Editor:     settings.Editor,
+			Output:     os.Stdout,
 			Session: commands.Session{
 				Name:      log.Name(),
 				ID:        log.ID(),

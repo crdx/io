@@ -48,7 +48,7 @@ func configDir(parts ...string) string {
 	return xdg.ConfigPath(append([]string{namespace, app}, parts...)...)
 }
 
-func configPath() string {
+func configFile() string {
 	return configDir("config.toml")
 }
 

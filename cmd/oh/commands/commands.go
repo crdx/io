@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/slash"
@@ -22,11 +23,13 @@ const (
 )
 
 type Options struct {
-	ConfigDirectory string
-	ConfigPath      string
-	Editor          string
-	Output          io.Writer
-	Session         Session
+	ConfigDir  string
+	ConfigFile string
+	StateDir   string
+	Session    Session
+
+	Editor string
+	Output io.Writer
 }
 
 type Session struct {
@@ -36,12 +39,14 @@ type Session struct {
 }
 
 type commandEnvironment struct {
-	configDirectory string
-	configPath      string
-	session         commandSession
-	openEditor      func(string) error
-	openTarget      func(string) error
-	copyText        func(string) error
+	configDir  string
+	configPath string
+	stateDir   string
+	session    commandSession
+
+	openEditor func(string) error
+	openTarget func(string) error
+	copyText   func(string) error
 }
 
 type commandSession struct {
@@ -57,8 +62,9 @@ type commandTarget struct {
 
 func New(options Options) slash.CommandSet {
 	return newCommands(commandEnvironment{
-		configDirectory: options.ConfigDirectory,
-		configPath:      options.ConfigPath,
+		configDir:  options.ConfigDir,
+		configPath: options.ConfigFile,
+		stateDir:   options.StateDir,
 		session: commandSession{
 			name:      options.Session.Name,
 			id:        options.Session.ID,
@@ -75,21 +81,8 @@ func New(options Options) slash.CommandSet {
 }
 
 func newCommands(environment commandEnvironment) slash.CommandSet {
-	return slash.New(
-		targetCommand(
-			"/browse",
-			"usage: /browse {config-dir|session-dir}",
-			map[string]commandTarget{
-				"config-dir": {
-					value: environment.configDirectory,
-					prepare: func() error {
-						return os.MkdirAll(environment.configDirectory, 0o700)
-					},
-				},
-				"session-dir": existingTarget("session directory", environment.session.directory),
-			},
-			environment.openTarget,
-		),
+	var commands slash.CommandSet
+	commands = slash.New(
 		noArgumentCommand("/conf", "usage: /conf", environment.configPath, environment.openEditor),
 		targetCommand(
 			"/copy",
@@ -101,10 +94,19 @@ func newCommands(environment commandEnvironment) slash.CommandSet {
 			},
 			environment.copyText,
 		),
+		helpCommand(func() string { return helpText(commands.Usages()) }),
 		targetCommand(
 			"/open",
-			"usage: /open {session-log|session-chat}",
+			"usage: /open {config-dir|state-dir|session-dir|session-log|session-chat}",
 			map[string]commandTarget{
+				"config-dir": {
+					value: environment.configDir,
+					prepare: func() error {
+						return os.MkdirAll(environment.configDir, 0o700)
+					},
+				},
+				"state-dir":   {value: environment.stateDir},
+				"session-dir": existingTarget("session directory", environment.session.directory),
 				"session-log": existingTarget(
 					"session log",
 					filepath.Join(environment.session.directory, sessionJournalName),
@@ -117,6 +119,26 @@ func newCommands(environment commandEnvironment) slash.CommandSet {
 			environment.openTarget,
 		),
 	)
+	return commands
+}
+
+func helpCommand(getHelp func() string) slash.Command {
+	return slash.Command{
+		Name: "/help",
+		Run: func(context slash.Context, arguments []string) error {
+			if len(arguments) != 0 {
+				return errors.New("usage: /help")
+			}
+
+			context.Notice(getHelp())
+			return nil
+		},
+	}
+}
+
+func helpText(usages []string) string {
+	visibleUsages := slices.DeleteFunc(usages, func(usage string) bool { return usage == "/help" })
+	return "Commands:\n  " + strings.Join(visibleUsages, "\n  ")
 }
 
 func existingTarget(description string, path string) commandTarget {

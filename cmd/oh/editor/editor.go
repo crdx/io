@@ -3,6 +3,7 @@ package editor
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -13,11 +14,12 @@ func Open(configured string, path string) error {
 	if err != nil {
 		return err
 	}
+	command.Stderr = os.Stderr
 	if err := command.Start(); err != nil {
 		return fmt.Errorf("could not start editor: %w", err)
 	}
 
-	go func() { _ = command.Wait() }()
+	go reportExit(command, os.Stderr)
 
 	return nil
 }
@@ -25,11 +27,14 @@ func Open(configured string, path string) error {
 func buildCommand(configured string, path string) (*exec.Cmd, error) {
 	name := strings.TrimSpace(configured)
 	if name == "" {
-		name = strings.TrimSpace(os.Getenv("VISUAL"))
-	}
-	if name == "" {
-		return nil, errors.New("no editor is configured and VISUAL is not set")
+		return nil, errors.New("editor is not configured: set editor in config.toml")
 	}
 
 	return exec.Command(name, path), nil //nolint:gosec // the user deliberately configures the editor
+}
+
+func reportExit(command *exec.Cmd, errors io.Writer) {
+	if err := command.Wait(); err != nil {
+		_, _ = fmt.Fprintf(errors, "editor exited: %v\n", err)
+	}
 }

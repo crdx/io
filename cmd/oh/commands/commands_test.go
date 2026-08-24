@@ -15,6 +15,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", configHome)
 	configDirectory := filepath.Join(configHome, "org.crdx", "oh")
 	configPath := filepath.Join(configDirectory, "config.toml")
+	stateDirectory := filepath.Join(t.TempDir(), "state")
 	sessionDirectory := filepath.Join(t.TempDir(), "sessions", "brave-otter")
 	if err := os.MkdirAll(sessionDirectory, 0o700); err != nil {
 		t.Fatal(err)
@@ -26,8 +27,9 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	}
 	var actions []string
 	commands := newCommands(commandEnvironment{
-		configDirectory: configDirectory,
-		configPath:      configPath,
+		configDir:  configDirectory,
+		configPath: configPath,
+		stateDir:   stateDirectory,
 		session: commandSession{
 			name:      "brave-otter",
 			id:        "session-id",
@@ -48,14 +50,15 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	})
 
 	tests := map[string]string{
-		"/conf":               "edit:" + configPath,
-		"/browse config-dir":  "open:" + configDirectory,
-		"/browse session-dir": "open:" + sessionDirectory,
-		"/copy session-name":  "copy:brave-otter",
-		"/copy session-id":    "copy:session-id",
-		"/copy session-dir":   "copy:" + sessionDirectory,
-		"/open session-log":   "open:" + filepath.Join(sessionDirectory, sessionJournalName),
-		"/open session-chat":  "open:" + filepath.Join(sessionDirectory, sessionTranscriptName),
+		"/conf":              "edit:" + configPath,
+		"/open config-dir":   "open:" + configDirectory,
+		"/open state-dir":    "open:" + stateDirectory,
+		"/open session-dir":  "open:" + sessionDirectory,
+		"/copy session-name": "copy:brave-otter",
+		"/copy session-id":   "copy:session-id",
+		"/copy session-dir":  "copy:" + sessionDirectory,
+		"/open session-log":  "open:" + filepath.Join(sessionDirectory, sessionJournalName),
+		"/open session-chat": "open:" + filepath.Join(sessionDirectory, sessionTranscriptName),
 	}
 
 	for input, wantAction := range tests {
@@ -84,8 +87,7 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 
 	for _, input := range []string{
 		"/conf extra",
-		"/browse",
-		"/browse elsewhere",
+		"/help extra",
 		"/copy session-name extra",
 		"/open unknown",
 	} {
@@ -107,7 +109,7 @@ func TestTargetCommandsExposeTheirArgumentsForCompletion(t *testing.T) {
 	commands := newCommands(commandEnvironment{})
 
 	for prefix, want := range map[string]string{
-		"/browse c":       "/browse config-dir",
+		"/open c":         "/open config-dir",
 		"/copy session-n": "/copy session-name",
 		"/open session-l": "/open session-log",
 	} {
@@ -131,9 +133,9 @@ func TestCommandsReportSessionTargetsThatDoNotExistYet(t *testing.T) {
 	})
 
 	for input, want := range map[string]string{
-		"/browse session-dir": "session directory does not exist yet",
-		"/open session-log":   "session log does not exist yet",
-		"/open session-chat":  "session chat does not exist yet",
+		"/open session-dir":  "session directory does not exist yet",
+		"/open session-log":  "session log does not exist yet",
+		"/open session-chat": "session chat does not exist yet",
 	} {
 		t.Run(input, func(t *testing.T) {
 			actionRan = false
@@ -150,5 +152,24 @@ func TestCommandsReportSessionTargetsThatDoNotExistYet(t *testing.T) {
 				t.Error("action ran for a missing session target")
 			}
 		})
+	}
+}
+
+func TestBrowseIsNotACommandAnymore(t *testing.T) {
+	if _, found := newCommands(commandEnvironment{}).Find("/browse session-dir"); found {
+		t.Error("expected /browse to have been folded into /open")
+	}
+}
+
+func TestConfReportsAnUnconfiguredEditor(t *testing.T) {
+	commands := New(Options{ConfigFile: filepath.Join(t.TempDir(), "config.toml")})
+	invocation, found := commands.Find("/conf")
+	if !found {
+		t.Fatal("expected /conf to be registered")
+	}
+
+	err := invocation.Command.Run(nil, invocation.Arguments)
+	if err == nil || !strings.Contains(err.Error(), "set editor in config.toml") {
+		t.Errorf("got error %v", err)
 	}
 }

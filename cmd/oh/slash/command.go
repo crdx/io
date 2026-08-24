@@ -25,6 +25,16 @@ func (self Command) WithArguments(arguments ...string) Command {
 	return self
 }
 
+func (self Command) Usage() string {
+	if len(self.arguments) == 0 {
+		return self.Name
+	}
+
+	arguments := append([]string(nil), self.arguments...)
+	slices.Sort(arguments)
+	return self.Name + " {" + strings.Join(arguments, "|") + "}"
+}
+
 type Invocation struct {
 	Command   *Command
 	Arguments []string
@@ -51,6 +61,15 @@ func New(commands ...Command) CommandSet {
 	}
 
 	return set
+}
+
+func (self CommandSet) Usages() []string {
+	usages := make([]string, 0, len(self))
+	for _, command := range self {
+		usages = append(usages, command.Usage())
+	}
+	slices.Sort(usages)
+	return usages
 }
 
 func CommandName(message string) (string, bool) {
