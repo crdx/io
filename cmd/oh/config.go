@@ -13,6 +13,7 @@ import (
 	"github.com/BurntSushi/toml"
 
 	"crdx.org/io/cmd/oh/segment"
+	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/internal/pathutil"
 )
 
@@ -37,12 +38,7 @@ type Config struct {
 	filePath string
 }
 
-type pathsConfig struct {
-	Read  []string `toml:"read"`
-	Write []string `toml:"write"`
-	Exec  []string `toml:"exec"`
-	Home  []string `toml:"home"`
-}
+type pathsConfig = shell.Paths
 
 type barConfig struct {
 	Top    ruleConfig `toml:"top"`
@@ -199,7 +195,7 @@ func loadConfig(path string) (Config, error) {
 	}
 
 	for _, mapped := range config.Sandbox.Home {
-		if _, below := homeRelativePath(mapped); !below {
+		if _, below := shell.HomeRelativePath(mapped); !below {
 			return config, fmt.Errorf(
 				"%s: sandbox.home: %s is not below the home directory, so it has nowhere to land",
 				displayPath, mapped,

@@ -1,4 +1,4 @@
-package main
+package shell
 
 import (
 	"errors"
@@ -43,7 +43,7 @@ func TestMissingConfiguredPathsAreCreatedAndKept(t *testing.T) {
 	missingHome := filepath.Join(t.TempDir(), "missing-home")
 
 	var warnings strings.Builder
-	filtered, err := createMissingConfiguredPaths(pathsConfig{
+	filtered, err := PreparePaths(Paths{
 		Read:  []string{existingRead, missingRead},
 		Write: []string{existingWrite, missingWrite},
 		Exec:  []string{existingExec, missingExec},
@@ -91,7 +91,7 @@ func TestUncreatableConfiguredPathsAreWarnedAboutAndSkipped(t *testing.T) {
 	uncreatable := filepath.Join(parent, "child")
 
 	var warnings strings.Builder
-	filtered, err := createMissingConfiguredPaths(pathsConfig{
+	filtered, err := PreparePaths(Paths{
 		Read: []string{uncreatable},
 	}, &warnings)
 	if err != nil {
@@ -125,7 +125,7 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	roots, err := mountConfiguredPaths(files, mode, pathsConfig{
+	roots, err := MountPaths(files, mode, Paths{
 		Read:  []string{readDirectory},
 		Write: []string{writeDirectory},
 		Exec:  []string{execDirectory},
@@ -133,7 +133,7 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer closeConfiguredRoots(roots)
+	defer CloseRoots(roots)
 
 	readRoot, name, err := files.Resolve(filepath.Join(readDirectory, "reference"))
 	if err != nil {
@@ -184,14 +184,14 @@ func TestConfiguredFilesAreMountedWithoutTheirSiblings(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	roots, err := mountConfiguredPaths(files, mode, pathsConfig{
+	roots, err := MountPaths(files, mode, Paths{
 		Read:  []string{readPath, writePath},
 		Write: []string{writePath},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer closeConfiguredRoots(roots)
+	defer CloseRoots(roots)
 
 	readRoot, name, err := files.Resolve(readPath)
 	if err != nil {
@@ -237,11 +237,11 @@ func TestAConfiguredFileSymlinkCannotDisguiseRepositoryMetadata(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	roots, err := mountConfiguredPaths(files, mode, pathsConfig{Write: []string{alias}})
+	roots, err := MountPaths(files, mode, Paths{Write: []string{alias}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer closeConfiguredRoots(roots)
+	defer CloseRoots(roots)
 
 	mountedRoot, name, err := files.Resolve(alias)
 	if err != nil {

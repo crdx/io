@@ -1,4 +1,4 @@
-package main
+package shell
 
 import (
 	"context"
@@ -56,7 +56,7 @@ func furnish(homeDir string, sources []string) ([]string, error) {
 	granted := make([]string, 0, len(sources))
 
 	for _, source := range sources {
-		relative, below := homeRelativePath(source)
+		relative, below := HomeRelativePath(source)
 		if !below {
 			continue
 		}
@@ -80,13 +80,35 @@ func furnish(homeDir string, sources []string) ([]string, error) {
 	return granted, nil
 }
 
-func createSandboxPolicy(
+type supportProbe func(context.Context, sandbox.Policy) error
+
+func createPolicy(
 	ctx context.Context,
 	workspaceDir string,
 	homeDir string,
 	tmpDir string,
-	extraPaths pathsConfig,
+	extraPaths Paths,
 	currentCaps caps.Set,
+) (sandbox.Policy, error) {
+	return createPolicyWithSupportProbe(
+		ctx,
+		workspaceDir,
+		homeDir,
+		tmpDir,
+		extraPaths,
+		currentCaps,
+		sandbox.Supported,
+	)
+}
+
+func createPolicyWithSupportProbe(
+	ctx context.Context,
+	workspaceDir string,
+	homeDir string,
+	tmpDir string,
+	extraPaths Paths,
+	currentCaps caps.Set,
+	supported supportProbe,
 ) (sandbox.Policy, error) {
 	cacheDir := filepath.Join(homeDir, ".cache")
 	if err := os.MkdirAll(cacheDir, 0o700); err != nil {
@@ -125,7 +147,7 @@ func createSandboxPolicy(
 			"GOLANGCI_LINT_CACHE": filepath.Join(sandbox.TmpDir, lintCachePath),
 			"GOMODCACHE":          filepath.Join(cacheDir, goModuleCacheDir),
 			"HOME":                homeDir,
-			"MISE_DATA_DIR":       shellMiseDataDir(),
+			"MISE_DATA_DIR":       miseDataDir(),
 			"TMPDIR":              sandbox.TmpDir,
 		},
 
@@ -152,7 +174,7 @@ func createSandboxPolicy(
 
 	writablePathsForPolicy := allWritablePaths(workspaceDir, homeDir, extraPaths.Write, currentCaps)
 	if len(writablePathsForPolicy) == 0 {
-		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir)
+		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir, supported)
 	}
 
 	writablePolicy := grantWriteAccess(policy, writablePathsForPolicy)
@@ -171,8 +193,8 @@ func createSandboxPolicy(
 	}
 
 	writablePolicy = writablePolicy.WithWrite(sandbox.TmpDir)
-	if sandbox.Supported(ctx, writablePolicy) != nil {
-		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir)
+	if supported(ctx, writablePolicy) != nil {
+		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir, supported)
 	}
 
 	return writablePolicy, nil
@@ -186,11 +208,12 @@ func readOnlySandboxPolicy(
 	ctx context.Context,
 	policy sandbox.Policy,
 	workspaceDir string,
-	home string,
+	homeDir string,
+	supported supportProbe,
 ) (sandbox.Policy, error) {
-	policy = policy.WithRead(workspaceDir, home).WithWrite(sandbox.TmpDir)
+	policy = policy.WithRead(workspaceDir, homeDir).WithWrite(sandbox.TmpDir)
 
-	return policy, sandbox.Supported(ctx, policy)
+	return policy, supported(ctx, policy)
 }
 
 func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, error) {
@@ -239,16 +262,18 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
 	return bash.ProtectedPolicy(policy.WithRead(readOnlyPaths...)), nil
 }
 
-// ErrShellWithheld is a command turned away before it is confined, the shell not being granted.
-var ErrShellWithheld = errors.New(
+// ErrWithheld is a command turned away before it is confined, the shell not being granted.
+var ErrWithheld = errors.New(
 	"shell access is not granted; the user can grant it with ctrl+x x",
 )
 
-func confinedShell(
+// New constructs the bash tool with a fresh policy derived from the current capabilities for every
+// call.
+func New(
 	workspaceDir string,
-	home string,
+	homeDir string,
 	tmpDir string,
-	extraPaths pathsConfig,
+	extraPaths Paths,
 	mode *caps.Mode,
 	files *file.Root,
 	processes *sandbox.Processes,
@@ -257,10 +282,10 @@ func confinedShell(
 		currentCaps := mode.Current()
 
 		if !currentCaps.Has(caps.Shell) {
-			return sandbox.Policy{}, ErrShellWithheld
+			return sandbox.Policy{}, ErrWithheld
 		}
 
-		policy, err := createSandboxPolicy(ctx, workspaceDir, home, tmpDir, extraPaths, currentCaps)
+		policy, err := createPolicy(ctx, workspaceDir, homeDir, tmpDir, extraPaths, currentCaps)
 		if err != nil {
 			if ctx.Err() != nil {
 				return policy, ctx.Err()

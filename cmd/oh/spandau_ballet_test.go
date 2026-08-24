@@ -22,10 +22,14 @@ import (
 	"github.com/BurntSushi/toml"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/output"
+	shelltool "crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/store"
+	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/chat"
 	"crdx.org/io/provider/codex"
@@ -57,9 +61,10 @@ type sessionGoldenTurn struct {
 }
 
 type sessionGoldenTool struct {
-	Name     string   `toml:"name"`
-	Outputs  []string `toml:"outputs"`
-	StateKey string   `toml:"state-key"`
+	Name          string   `toml:"name"`
+	Outputs       []string `toml:"outputs"`
+	StateKey      string   `toml:"state-key"`
+	ShellWithheld bool     `toml:"shell-withheld"`
 }
 
 type sessionGoldenScenario struct {
@@ -187,6 +192,11 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 
 	tools := make([]tool.Tool, 0, len(specifications))
 	for _, specification := range specifications {
+		if specification.ShellWithheld {
+			tools = append(tools, newSessionGoldenWithheldShell(t))
+			continue
+		}
+
 		callCount := 0
 		builder := tool.Implement[struct{}](
 			tool.Definition{Name: specification.Name, Description: "A deterministic scenario tool."},
@@ -212,6 +222,24 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 		}))
 	}
 	return tools
+}
+
+func newSessionGoldenWithheldShell(t *testing.T) tool.Tool {
+	t.Helper()
+
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = workspaceRoot.Close() })
+
+	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
+	mode := caps.NewMode(caps.Read)
+	processes := sandbox.NewProcesses(false)
+	t.Cleanup(func() { _, _ = processes.Disable() })
+
+	return shelltool.New(workspace, t.TempDir(), t.TempDir(), shelltool.Paths{}, mode, files, processes)
 }
 
 func serveSessionGoldenResponse(

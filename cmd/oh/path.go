@@ -76,32 +76,6 @@ func shellHomeDir() string {
 	return stateDir("home")
 }
 
-func homeRelativePath(path string) (string, bool) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", false
-	}
-
-	return pathutil.RelativeTo(home, path)
-}
-
-func shellMiseDataDir() string {
-	if dataDir := os.Getenv("MISE_DATA_DIR"); dataDir != "" {
-		return dataDir
-	}
-
-	if dataHome := os.Getenv("XDG_DATA_HOME"); filepath.IsAbs(dataHome) {
-		return filepath.Join(dataHome, "mise")
-	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return ""
-	}
-
-	return filepath.Join(home, ".local", "share", "mise")
-}
-
 func tmpDir(name string) string {
 	return stateDir("tmps", name)
 }

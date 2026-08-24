@@ -1,0 +1,692 @@
+package shell
+
+import (
+	"context"
+	"errors"
+	"net/url"
+	"os"
+	"path/filepath"
+	"slices"
+	"testing"
+
+	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/sandbox"
+)
+
+func TestMain(testingMain *testing.M) {
+	sandbox.Init()
+	os.Exit(testingMain.Run())
+}
+
+var everyCap = []caps.Set{
+	0,
+	caps.Write,
+	caps.Git,
+	caps.Write | caps.Git,
+	caps.Background,
+	caps.Write | caps.Background,
+	caps.Git | caps.Background,
+	caps.Write | caps.Git | caps.Background,
+}
+
+func createTestPolicy(
+	t *testing.T,
+	workspaceDir string,
+	homeDir string,
+	tmpDir string,
+	extraPaths Paths,
+	currentCaps caps.Set,
+) (sandbox.Policy, error) {
+	t.Helper()
+
+	return createPolicyWithSupportProbe(
+		t.Context(),
+		workspaceDir,
+		homeDir,
+		tmpDir,
+		extraPaths,
+		currentCaps,
+		func(context.Context, sandbox.Policy) error { return nil },
+	)
+}
+
+func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
+	workspaceRoot, err := os.OpenRoot(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
+	mode := caps.NewMode(caps.Read)
+	processes := sandbox.NewProcesses(false)
+	defer func() { _, _ = processes.Disable() }()
+
+	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), Paths{}, mode, files, processes)
+
+	if shell.Name() != "bash" {
+		t.Errorf("expected the shell to be offered as bash, got %q", shell.Name())
+	}
+
+	call, err := shell.Parse(`{"command":"echo one"}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := call.Exec(t.Context()); !errors.Is(err, ErrWithheld) {
+		t.Errorf("expected the command to be turned away, got %v", err)
+	}
+}
+
+func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	miseDataDir := t.TempDir()
+	t.Setenv("MISE_DATA_DIR", miseDataDir)
+
+	home := t.TempDir()
+	tmp := t.TempDir()
+	if _, err := createPolicy(t.Context(), workspace, home, tmp, Paths{}, caps.Read|caps.Shell); err != nil {
+		t.Skipf("the sandbox cannot enforce a shell policy here: %v", err)
+	}
+
+	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
+	mode := caps.NewMode(caps.Read | caps.Shell)
+	processes := sandbox.NewProcesses(false)
+	defer func() { _, _ = processes.Disable() }()
+
+	shell := New(workspace, home, tmp, Paths{}, mode, files, processes)
+	run := func() {
+		call, parseErr := shell.Parse(`{"command":"printf %s \"$MISE_DATA_DIR\""}`)
+		if parseErr != nil {
+			t.Fatal(parseErr)
+		}
+
+		result, execErr := call.Exec(t.Context())
+		if execErr != nil {
+			t.Fatal(execErr)
+		}
+		if result.Output != miseDataDir {
+			t.Errorf("got %q, want %q", result.Output, miseDataDir)
+		}
+	}
+
+	run()
+	mode.Toggle(caps.Write)
+	run()
+}
+
+func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
+	workspace := t.TempDir()
+	metadata := filepath.Join(workspace, ".git")
+	if err := os.Mkdir(metadata, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	home := t.TempDir()
+	tmp := t.TempDir()
+	initialCaps := caps.Read | caps.Write | caps.Shell
+	if _, err := createPolicy(t.Context(), workspace, home, tmp, Paths{}, initialCaps); err != nil {
+		t.Skipf("the sandbox cannot enforce a shell policy here: %v", err)
+	}
+
+	mode := caps.NewMode(initialCaps)
+	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	processes := sandbox.NewProcesses(false)
+	defer func() { _, _ = processes.Disable() }()
+	shell := New(workspace, home, tmp, Paths{}, mode, files, processes)
+
+	run := func() error {
+		call, parseErr := shell.Parse(`{"command":"touch .git/proof"}`)
+		if parseErr != nil {
+			t.Fatal(parseErr)
+		}
+		_, execErr := call.Exec(t.Context())
+		return execErr
+	}
+
+	if err := run(); err == nil {
+		t.Fatal("expected repository metadata to remain read-only before git was granted")
+	}
+
+	mode.Toggle(caps.Git)
+	if err := run(); err != nil {
+		t.Fatalf("repository metadata remained read-only after git was granted: %v", err)
+	}
+}
+
+func TestGrantingWriteAccessRemovesExactReadOnlyMounts(t *testing.T) {
+	workspace := "/workspace"
+	home := "/home"
+	readOnlyFile := "/workspace/reference"
+	policy := grantWriteAccess(sandbox.Policy{
+		Read: []string{workspace, home, readOnlyFile},
+	}, []string{workspace, home})
+
+	for _, writableRoot := range []string{workspace, home} {
+		if slices.Contains(policy.Read, writableRoot) {
+			t.Errorf("writable root %s is also mounted read-only: %#v", writableRoot, policy)
+		}
+		if !slices.Contains(policy.Write, writableRoot) {
+			t.Errorf("writable root %s was not granted write access: %#v", writableRoot, policy)
+		}
+	}
+	if !slices.Contains(policy.Read, readOnlyFile) {
+		t.Errorf("nested read-only file lost its protection: %#v", policy)
+	}
+}
+
+func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
+	workspace := t.TempDir()
+	home := t.TempDir()
+	miseDataDir := t.TempDir()
+	t.Setenv("MISE_DATA_DIR", miseDataDir)
+
+	policy, err := createTestPolicy(t, workspace, home, t.TempDir(), Paths{}, caps.Write)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce a writable policy here: %v", err)
+	}
+
+	if !policy.Writable() {
+		t.Fatal("the policy unexpectedly fell back to read-only")
+	}
+
+	for _, path := range []string{workspace, home} {
+		if !slices.Contains(policy.Write, path) {
+			t.Errorf("expected %s to be writable, got %v", path, policy.Write)
+		}
+	}
+
+	for _, path := range []string{workspace, home} {
+		if !slices.Contains(policy.Exec, path) {
+			t.Errorf("expected artefacts in %s to be executable, got %v", path, policy.Exec)
+		}
+	}
+
+	if policy.SetEnv["HOME"] != home {
+		t.Errorf("got HOME %q, want %q", policy.SetEnv["HOME"], home)
+	}
+
+	if policy.SetEnv["MISE_DATA_DIR"] != miseDataDir {
+		t.Errorf("got MISE_DATA_DIR %q, want %q", policy.SetEnv["MISE_DATA_DIR"], miseDataDir)
+	}
+
+	if policy.SetEnv["TMPDIR"] != sandbox.TmpDir {
+		t.Errorf("got TMPDIR %q, want %q", policy.SetEnv["TMPDIR"], sandbox.TmpDir)
+	}
+
+	if !policy.VirtualResolver {
+		t.Error("the shell policy does not virtualise the resolver configuration")
+	}
+}
+
+func TestBackgroundModeReachesTheShellPolicy(t *testing.T) {
+	policy, err := createTestPolicy(t, t.TempDir(), t.TempDir(), t.TempDir(), Paths{}, caps.Background)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce background mode here: %v", err)
+	}
+	if !policy.Background {
+		t.Error("background mode did not reach the shell policy")
+	}
+}
+
+func TestAnUnsupportedWritablePolicyFallsBackToReadOnly(t *testing.T) {
+	workspace := t.TempDir()
+	homeDir := t.TempDir()
+	var probes int
+
+	policy, err := createPolicyWithSupportProbe(
+		t.Context(),
+		workspace,
+		homeDir,
+		t.TempDir(),
+		Paths{},
+		caps.Write,
+		func(_ context.Context, policy sandbox.Policy) error {
+			probes++
+			if slices.Contains(policy.Write, workspace) {
+				return errors.New("writable policy unsupported")
+			}
+			return nil
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if probes != 2 {
+		t.Errorf("probed %d policies, want writable then read-only", probes)
+	}
+	if slices.Contains(policy.Write, workspace) || slices.Contains(policy.Write, homeDir) {
+		t.Errorf("fallback remained writable: %v", policy.Write)
+	}
+}
+
+func TestAnUnsupportedReadOnlyPolicyIsRejected(t *testing.T) {
+	unsupported := errors.New("read-only policy unsupported")
+
+	_, err := createPolicyWithSupportProbe(
+		t.Context(),
+		t.TempDir(),
+		t.TempDir(),
+		t.TempDir(),
+		Paths{},
+		0,
+		func(context.Context, sandbox.Policy) error { return unsupported },
+	)
+	if !errors.Is(err, unsupported) {
+		t.Errorf("got %v, want %v", err, unsupported)
+	}
+}
+
+func TestTmpIsAlwaysWritable(t *testing.T) {
+	tmp := t.TempDir()
+	workspace := t.TempDir()
+	home := t.TempDir()
+
+	readOnly, err := createTestPolicy(t, workspace, home, tmp, Paths{}, 0)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce a read-only policy here: %v", err)
+	}
+	if !slices.Contains(readOnly.Write, sandbox.TmpDir) {
+		t.Errorf("expected writable %s, got %v", sandbox.TmpDir, readOnly.Write)
+	}
+
+	readWrite, err := createTestPolicy(t, workspace, home, tmp, Paths{}, caps.Write)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce a writable policy here: %v", err)
+	}
+	if !readWrite.Writable() {
+		t.Fatal("the policy unexpectedly fell back to read-only")
+	}
+	if !slices.Contains(readWrite.Write, sandbox.TmpDir) {
+		t.Errorf("expected writable %s, got %v", sandbox.TmpDir, readWrite.Write)
+	}
+
+	if readWrite.TmpDir != tmp {
+		t.Errorf("got tmp dir %q, want %q", readWrite.TmpDir, tmp)
+	}
+	if !slices.Contains(readWrite.Exec, sandbox.TmpDir) {
+		t.Errorf("expected artefacts in %s to be executable, got %v", sandbox.TmpDir, readWrite.Exec)
+	}
+}
+
+func TestConfiguredPathsReachTheShellPolicy(t *testing.T) {
+	workspace := t.TempDir()
+	home := t.TempDir()
+	readDirectory := t.TempDir()
+	writeDirectory := t.TempDir()
+	execDirectory := t.TempDir()
+	additional := Paths{
+		Read:  []string{readDirectory},
+		Write: []string{writeDirectory},
+		Exec:  []string{execDirectory},
+	}
+
+	readOnly, err := createTestPolicy(t, workspace, home, t.TempDir(), additional, 0)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce the configured policy here: %v", err)
+	}
+	for _, path := range []string{readDirectory, writeDirectory} {
+		if !slices.Contains(readOnly.Read, path) {
+			t.Errorf("expected %s to be readable, got %v", path, readOnly.Read)
+		}
+	}
+	if !slices.Contains(readOnly.Exec, execDirectory) {
+		t.Errorf("expected %s to be executable, got %v", execDirectory, readOnly.Exec)
+	}
+	if slices.Contains(readOnly.Write, writeDirectory) {
+		t.Errorf("configured write path is writable without write capability: %v", readOnly.Write)
+	}
+
+	readWrite, err := createTestPolicy(t, workspace, home, t.TempDir(), additional, caps.Write)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce the configured writable policy here: %v", err)
+	}
+	if !readWrite.Writable() {
+		t.Fatal("the policy unexpectedly fell back to read-only")
+	}
+	if !slices.Contains(readWrite.Write, writeDirectory) {
+		t.Errorf("expected %s to be writable, got %v", writeDirectory, readWrite.Write)
+	}
+	if slices.Contains(readWrite.Read, writeDirectory) {
+		t.Errorf("configured write path remained read-only inside its write grant: %v", readWrite.Read)
+	}
+}
+
+func TestCommandsOnThePathMayBeExecuted(t *testing.T) {
+	workspace := t.TempDir()
+	installDir := t.TempDir()
+	t.Setenv("PATH", installDir)
+
+	if paths := execPaths(workspace); !slices.Contains(paths, installDir) {
+		t.Errorf("got %v, want it to include %s", paths, installDir)
+	}
+}
+
+func TestGoUsesTheShellCacheAndTheHostModuleCacheAsAProxy(t *testing.T) {
+	workspace := t.TempDir()
+	home := t.TempDir()
+	hostModules := filepath.Join(t.TempDir(), "pkg", "mod")
+	proxyDir := filepath.Join(hostModules, "cache", "download")
+
+	if err := os.MkdirAll(proxyDir, 0o700); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	t.Setenv("GOMODCACHE", hostModules)
+
+	policy, err := createTestPolicy(t, workspace, home, t.TempDir(), Paths{}, 0)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce the Go cache policy here: %v", err)
+	}
+
+	cacheDir := filepath.Join(home, ".cache")
+	if slices.Contains(policy.Write, home) {
+		t.Errorf("the Go caches made the shell home writable: %v", policy.Write)
+	}
+	if !slices.Contains(policy.Write, cacheDir) {
+		t.Errorf("the shell cache is not writable: %v", policy.Write)
+	}
+	if !slices.Contains(policy.Read, proxyDir) {
+		t.Errorf("got readable paths %v, want %s", policy.Read, proxyDir)
+	}
+
+	wantEnvironment := map[string]string{
+		"GOCACHE":    filepath.Join(cacheDir, goBuildCacheDir),
+		"GOMODCACHE": filepath.Join(cacheDir, goModuleCacheDir),
+		"GOPROXY":    (&url.URL{Scheme: "file", Path: proxyDir}).String(),
+		"GOSUMDB":    "off",
+	}
+	for name, want := range wantEnvironment {
+		if got := policy.SetEnv[name]; got != want {
+			t.Errorf("got %s %q, want %q", name, got, want)
+		}
+	}
+}
+
+func TestTheLinterCacheBelongsToTheSessionRatherThanTheSharedHome(t *testing.T) {
+	tmp := t.TempDir()
+
+	policy, err := createTestPolicy(t, t.TempDir(), t.TempDir(), tmp, Paths{}, 0)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce the lint cache policy here: %v", err)
+	}
+
+	want := filepath.Join(sandbox.TmpDir, ".cache", goLintCacheDir)
+	if got := policy.SetEnv["GOLANGCI_LINT_CACHE"]; got != want {
+		t.Errorf("got GOLANGCI_LINT_CACHE %q, want %q", got, want)
+	}
+
+	if _, err := os.Stat(filepath.Join(tmp, ".cache", goLintCacheDir)); err != nil {
+		t.Errorf("the lint cache was not prepared in the session tmp dir: %v", err)
+	}
+}
+
+func TestAMalformedGoModuleCacheIsRejected(t *testing.T) {
+	t.Setenv("GOMODCACHE", "modules")
+
+	if _, err := goModuleCache(); err == nil {
+		t.Error("expected a relative Go module cache to be rejected")
+	}
+}
+
+func TestNoPolicyGrantsMoreThanItsCapsAskFor(t *testing.T) {
+	workspace := t.TempDir()
+	home := t.TempDir()
+	metadata := filepath.Join(workspace, ".git")
+
+	if err := os.MkdirAll(metadata, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, currentCaps := range everyCap {
+		granted := writablePaths(workspace, home, currentCaps)
+
+		if !currentCaps.Has(caps.Write) && slices.Contains(granted, workspace) {
+			t.Errorf("%s: the tree is writable without w, got %v", currentCaps.Flags(), granted)
+		}
+
+		if !currentCaps.Has(caps.Write) && !currentCaps.Has(caps.Git) && len(granted) > 0 {
+			t.Errorf("%s: something is writable without w or g, got %v", currentCaps.Flags(), granted)
+		}
+
+		if !currentCaps.Has(caps.Git) && slices.Contains(granted, metadata) {
+			t.Errorf("%s: the metadata is writable without g, got %v", currentCaps.Flags(), granted)
+		}
+
+		if currentCaps.Has(caps.Write) && !slices.Contains(granted, workspace) {
+			t.Errorf("%s: the tree is not writable with w, got %v", currentCaps.Flags(), granted)
+		}
+	}
+}
+
+func TestAReadOnlyShellMayChangeOnlyItsCache(t *testing.T) {
+	workspace := t.TempDir()
+	home := t.TempDir()
+	cacheDir := filepath.Join(home, ".cache")
+
+	policy, err := createTestPolicy(t, workspace, home, t.TempDir(), Paths{}, 0)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce the shell cache policy here: %v", err)
+	}
+
+	if !slices.Equal(policy.Write, []string{cacheDir, sandbox.TmpDir}) {
+		t.Errorf("got writable paths %v, want only the shell cache and scratch", policy.Write)
+	}
+	if !slices.Contains(policy.Read, home) {
+		t.Errorf("got readable paths %v, want the shell home", policy.Read)
+	}
+}
+
+func TestACommitOnlyShellMayChangeTheHistoryAlone(t *testing.T) {
+	workspace := t.TempDir()
+	home := t.TempDir()
+	metadata := filepath.Join(workspace, ".git")
+
+	if err := os.MkdirAll(metadata, 0o700); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	policy, err := createTestPolicy(t, workspace, home, t.TempDir(), Paths{}, caps.Git)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce a writable policy here: %v", err)
+	}
+
+	if !slices.Contains(policy.Write, metadata) {
+		t.Errorf("expected the metadata to be writable, got %v", policy.Write)
+	}
+
+	if slices.Contains(policy.Write, workspace) {
+		t.Errorf("expected the tree itself to be read-only, got %v", policy.Write)
+	}
+
+	if !slices.Contains(policy.Read, workspace) {
+		t.Errorf("expected the tree to be readable, got %v", policy.Read)
+	}
+}
+
+func TestAnExactMetadataWritePathIsProtectedFromTheShell(t *testing.T) {
+	repository := t.TempDir()
+	target := filepath.Join(repository, ".git", "config")
+	if err := os.Mkdir(filepath.Dir(target), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(target, []byte("original"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	alias := filepath.Join(t.TempDir(), "shared")
+	if err := os.Symlink(target, alias); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, path := range []string{target, alias} {
+		policy, err := protectedPolicy(sandbox.Policy{Write: []string{path}}, []string{path})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !slices.Contains(policy.Read, path) {
+			t.Errorf("expected %s to be protected, got %v", path, policy.Read)
+		}
+	}
+}
+
+func TestEveryExistingRepositoryIsProtectedFromTheShell(t *testing.T) {
+	workspace := t.TempDir()
+	home := t.TempDir()
+	additional := t.TempDir()
+	metadataPaths := []string{
+		filepath.Join(workspace, ".git"),
+		filepath.Join(workspace, "nested", ".git"),
+		filepath.Join(additional, "nested", ".git"),
+	}
+	for _, metadata := range metadataPaths {
+		if err := os.MkdirAll(metadata, 0o700); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	policy, err := createTestPolicy(t, workspace, home, t.TempDir(), Paths{
+		Write: []string{additional},
+	}, caps.Write)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce a writable policy here: %v", err)
+	}
+
+	for _, metadata := range metadataPaths {
+		if !slices.Contains(policy.Read, metadata) {
+			t.Errorf("expected %s to be protected, got %v", metadata, policy.Read)
+		}
+	}
+}
+
+func TestACommitOnlyShellWithNoRepositoryMayChangeOnlyItsCache(t *testing.T) {
+	workspace := t.TempDir()
+	homeDir := t.TempDir()
+	cacheDir := filepath.Join(homeDir, ".cache")
+
+	policy, err := createTestPolicy(t, workspace, homeDir, t.TempDir(), Paths{}, caps.Git)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !slices.Equal(policy.Write, []string{cacheDir, sandbox.TmpDir}) {
+		t.Errorf("got writable paths %v, want only the shell cache and scratch", policy.Write)
+	}
+}
+
+func userHomeFile(t *testing.T, relative string, content string) string {
+	t.Helper()
+
+	t.Setenv("HOME", t.TempDir())
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(home, relative)
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	return path
+}
+
+func TestAMappedPathIsReadableAtTheSamePlaceInTheShellHome(t *testing.T) {
+	source := userHomeFile(t, filepath.Join(".config", "git", "ignore"), "*.tmp\n")
+	shellHome := t.TempDir()
+
+	granted, err := furnish(shellHome, []string{source})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(granted, []string{source}) {
+		t.Errorf("got granted paths %v, want %v", granted, []string{source})
+	}
+
+	link := filepath.Join(shellHome, ".config", "git", "ignore")
+	content, err := os.ReadFile(link) //nolint:gosec // a link this test made
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != "*.tmp\n" {
+		t.Errorf("got %q through %s, want %q", content, link, "*.tmp\n")
+	}
+}
+
+func TestNothingMappedLeavesTheShellHomeAlone(t *testing.T) {
+	shellHome := t.TempDir()
+
+	granted, err := furnish(shellHome, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(granted) > 0 {
+		t.Errorf("granted %v while nothing was mapped", granted)
+	}
+
+	entries, err := os.ReadDir(shellHome)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) > 0 {
+		t.Errorf("the shell home gained %d entries", len(entries))
+	}
+}
+
+func TestAStaleLinkInTheShellHomeIsReplaced(t *testing.T) {
+	source := userHomeFile(t, ".gitconfig", "[user]\n")
+	shellHome := t.TempDir()
+
+	link := filepath.Join(shellHome, ".gitconfig")
+	if err := os.Symlink(filepath.Join(t.TempDir(), "gone"), link); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := furnish(shellHome, []string{source}); err != nil {
+		t.Fatal(err)
+	}
+
+	target, err := os.Readlink(link)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if target != source {
+		t.Errorf("the stale link still points at %q, want %q", target, source)
+	}
+}
+
+func TestAMappedPathReachesTheShellPolicy(t *testing.T) {
+	source := userHomeFile(t, ".gitconfig", "[user]\n")
+
+	policy, err := createTestPolicy(
+		t,
+		t.TempDir(),
+		t.TempDir(),
+		t.TempDir(),
+		Paths{Home: []string{source}},
+		caps.Read,
+	)
+	if err != nil {
+		t.Fatalf("the sandbox cannot enforce a policy here: %v", err)
+	}
+
+	if !slices.Contains(policy.Read, source) {
+		t.Errorf("expected %s to be readable, got %v", source, policy.Read)
+	}
+}

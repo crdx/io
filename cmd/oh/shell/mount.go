@@ -1,4 +1,4 @@
-package main
+package shell
 
 import (
 	"errors"
@@ -22,8 +22,9 @@ type configuredMount struct {
 	isExact bool
 }
 
-func createMissingConfiguredPaths(paths pathsConfig, warnings io.Writer) (pathsConfig, error) {
-	filtered := pathsConfig{}
+// PreparePaths creates configured paths that do not yet exist and omits any that cannot be created.
+func PreparePaths(paths Paths, warnings io.Writer) (Paths, error) {
+	filtered := Paths{}
 	lists := []struct {
 		source []string
 		target *[]string
@@ -48,7 +49,7 @@ func createMissingConfiguredPaths(paths pathsConfig, warnings io.Writer) (pathsC
 					continue
 				}
 			} else if err != nil {
-				return pathsConfig{}, fmt.Errorf(
+				return Paths{}, fmt.Errorf(
 					"could not mount configured path %s: %w",
 					pathutil.Shorten(path),
 					err,
@@ -61,7 +62,8 @@ func createMissingConfiguredPaths(paths pathsConfig, warnings io.Writer) (pathsC
 	return filtered, nil
 }
 
-func mountConfiguredPaths(files *file.Root, mode *caps.Mode, extraPaths pathsConfig) ([]*os.Root, error) {
+// MountPaths exposes configured read and write paths through the file tools.
+func MountPaths(files *file.Root, mode *caps.Mode, extraPaths Paths) ([]*os.Root, error) {
 	writable := make(map[string]bool, len(extraPaths.Read)+len(extraPaths.Write))
 	for _, path := range extraPaths.Read {
 		writable[path] = false
@@ -80,7 +82,7 @@ func mountConfiguredPaths(files *file.Root, mode *caps.Mode, extraPaths pathsCon
 	for _, path := range paths {
 		mount, err := openConfiguredMount(path)
 		if err != nil {
-			closeConfiguredRoots(opened)
+			CloseRoots(opened)
 			return nil, fmt.Errorf("could not mount configured path %s: %w", pathutil.Shorten(path), err)
 		}
 
@@ -131,7 +133,8 @@ func openConfiguredMount(path string) (configuredMount, error) {
 	}, err
 }
 
-func closeConfiguredRoots(roots []*os.Root) {
+// CloseRoots closes roots opened by MountPaths.
+func CloseRoots(roots []*os.Root) {
 	for _, root := range roots {
 		_ = root.Close()
 	}

@@ -26,6 +26,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/models"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
@@ -246,15 +247,15 @@ func run() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	config.Sandbox, err = createMissingConfiguredPaths(config.Sandbox, os.Stderr)
+	config.Sandbox, err = shell.PreparePaths(config.Sandbox, os.Stderr)
 	if err != nil {
 		return nil, err
 	}
-	configuredRoots, err := mountConfiguredPaths(files, mode, config.Sandbox)
+	configuredRoots, err := shell.MountPaths(files, mode, config.Sandbox)
 	if err != nil {
 		return nil, err
 	}
-	defer closeConfiguredRoots(configuredRoots)
+	defer shell.CloseRoots(configuredRoots)
 
 	globalSkillDirs := append([]string{configDir("skills")}, config.Skill.Include...)
 	availableSkills, err := skill.Discover(workspaceDir, globalSkillDirs, os.Stderr)
@@ -347,9 +348,9 @@ func run() ([]string, error) {
 
 	snapshots := file.NewSnapshots()
 	tools := toolbox.Rummage(files, snapshots)
-	shell := confinedShell(workspaceDir, homeDir, tmpDir, config.Sandbox, mode, files, processes)
+	commandShell := shell.New(workspaceDir, homeDir, tmpDir, config.Sandbox, mode, files, processes)
 
-	tools = append(tools, shell)
+	tools = append(tools, commandShell)
 	tools = truncate.Tools(tools)
 
 	chat := &Harness{

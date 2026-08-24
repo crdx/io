@@ -1,0 +1,83 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+run a command while shell access is withheld
+```
+
+## Tool call
+
+> 2001-01-01T00:00:01Z
+
+- **ID:** `call-1`
+- **Name:** `bash`
+- **Read only:** `false`
+- **Emphasis:** `syntax bash`
+**Arguments**
+
+```json
+{"command":"echo forbidden"}
+```
+
+**Subject**
+
+```bash
+echo forbidden
+```
+
+## Tool result
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call-1`
+- **Name:** `bash`
+- **Failed:** `true`
+- **Duration:** `0s`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":64,"total_bytes":64}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+shell access is not granted; the user can grant it with ctrl+x x
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Shell access is unavailable.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+continue after the refused command
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Resumed after the refusal.
+```
+
