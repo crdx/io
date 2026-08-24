@@ -23,7 +23,7 @@ center = [
     { segment = "context-usage" },
 ]
 right = [
-    { segment = "working-directory", type = "full" },
+    { segment = "working-directory", type = "short" },
     { segment = "scroll-overflow", direction = "up" }
 ]
 

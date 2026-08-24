@@ -7,13 +7,6 @@ import (
 	"crdx.org/io/internal/pathutil"
 )
 
-func TestAbbrReturnsTheLastPathElement(t *testing.T) {
-	path := filepath.Join("somewhere", "inside", "file.go")
-	if got := pathutil.Abbr(path); got != "file.go" {
-		t.Errorf("got %q, want file.go", got)
-	}
-}
-
 func TestShortenWritesAPathTheWayTheUserWouldSayIt(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 

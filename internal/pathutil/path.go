@@ -9,11 +9,6 @@ import (
 
 const separator = string(os.PathSeparator)
 
-// Abbr returns the final element of path.
-func Abbr(path string) string {
-	return filepath.Base(path)
-}
-
 // Shorten ensures a path is as compact as it can be.
 func Shorten(path string) string {
 	home, err := os.UserHomeDir()
