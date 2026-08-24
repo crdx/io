@@ -168,6 +168,87 @@ func TestStreamRunsEveryCallOfAReplyAtOnce(t *testing.T) {
 	}
 }
 
+type batchProvider struct {
+	calls   int
+	sent    int
+	results []agent.ToolCallResult
+}
+
+func (self *batchProvider) Configure(string, []tool.Definition) {}
+func (self *batchProvider) AddUserMessage(string)               {}
+
+func (self *batchProvider) AddToolResults(results []agent.ToolCallResult) {
+	self.results = append(self.results, results...)
+}
+
+func (self *batchProvider) Send(_ context.Context, _ agent.Yield) (agent.Reply, error) {
+	if self.sent++; self.sent > 1 {
+		return agent.Reply{}, nil
+	}
+
+	calls := make([]agent.ToolCall, self.calls)
+	for i := range calls {
+		calls[i] = agent.ToolCall{ID: string(rune('a' + i)), Name: "noop", Arguments: `{}`}
+	}
+
+	return agent.Reply{Calls: calls}, nil
+}
+
+func TestStreamCapsConcurrentCalls(t *testing.T) {
+	const concurrencyLimit = 16
+
+	started := make(chan struct{}, concurrencyLimit+1)
+	release := make(chan struct{})
+	var releaseOnce sync.Once
+	releaseCalls := func() {
+		releaseOnce.Do(func() { close(release) })
+	}
+	t.Cleanup(releaseCalls)
+
+	barrierTool := tool.Implement(
+		tool.Definition{
+			Name:        "noop",
+			Description: "",
+			Schema:      tool.Schema{},
+		},
+		func(struct{}) (string, string) { return "", "" },
+	).IsEmbarrassinglyParallel().Plain(func(context.Context, struct{}) (string, error) {
+		started <- struct{}{}
+		<-release
+		return "done", nil
+	})
+
+	provider := &batchProvider{calls: concurrencyLimit + 1}
+	done := make(chan error, 1)
+	go func() {
+		_, err := agent.New("", provider, []tool.Tool{barrierTool}).Send(t.Context(), "go")
+		done <- err
+	}()
+
+	for range concurrencyLimit {
+		select {
+		case <-started:
+		case <-time.After(time.Second):
+			t.Fatal("timed out waiting for calls to start")
+		}
+	}
+
+	select {
+	case <-started:
+		t.Fatal("more calls than the concurrency limit started")
+	case <-time.After(20 * time.Millisecond):
+	}
+
+	releaseCalls()
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+
+	if got := len(provider.results); got != concurrencyLimit+1 {
+		t.Errorf("got %d results, want %d", got, concurrencyLimit+1)
+	}
+}
+
 func TestStreamLeavesACallThatIsNotConcurrentOnItsOwn(t *testing.T) {
 	var mutex sync.Mutex
 

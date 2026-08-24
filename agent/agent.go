@@ -373,15 +373,20 @@ type completedToolCall struct {
 	state  Event
 }
 
+const maxConcurrentToolCalls = 16
+
 func (self *Agent) runBatch(
 	ctx context.Context,
 	batch []pendingCall, results []ToolCallResult,
 	yield func(Event, error) bool,
 ) bool {
 	done := make(chan completedToolCall, len(batch))
+	availableSlots := make(chan struct{}, maxConcurrentToolCalls)
 
 	for i, item := range batch {
+		availableSlots <- struct{}{}
 		go func() {
+			defer func() { <-availableSlots }()
 			startedAt := time.Now()
 
 			executionResult := tool.ToolCallResult{Output: item.err}
