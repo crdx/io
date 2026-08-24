@@ -24,12 +24,13 @@ const (
 )
 
 type Painter struct {
-	screen       *output.Screen
-	toolBlock    *dynamic.Block  // the open block of tool calls
-	rows         map[string]int  // which row of the block a call is being shown on
-	answer       strings.Builder // the answer so far, which is rendered again on every delta
-	reasoning    strings.Builder // the reasoning so far, which is rendered again on every delta
-	previousKind agent.Kind      // the last completed event, which determines block separation
+	screen         *output.Screen
+	toolBlock      *dynamic.Block          // the open block of tool calls
+	rows           map[string]int          // which row of the block a call is being shown on
+	answer         strings.Builder         // the answer so far, which is rendered again on every delta
+	answerRenderer markdown.StreamRenderer // the live answer's rendering state
+	reasoning      strings.Builder         // the reasoning so far, which is rendered again on every delta
+	previousKind   agent.Kind              // the last completed event, which determines block separation
 
 	isStale   bool // whether streamed prose outgrew what the screen can repair
 	isRunning bool // whether drawing is happening as events arrive
@@ -117,6 +118,15 @@ func (self *Painter) calledTool(name string) (tool.Tool, bool) {
 }
 
 func (self *Painter) drawDelta(delta agent.Delta) {
+	self.drawDeltaWithAnswerRendererReset(delta, true)
+}
+
+func (self *Painter) drawRestoredDelta(delta agent.Delta, answerRenderer markdown.StreamRenderer) {
+	self.answerRenderer = answerRenderer
+	self.drawDeltaWithAnswerRendererReset(delta, false)
+}
+
+func (self *Painter) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldResetAnswerRenderer bool) {
 	switch delta.Kind {
 	case agent.ModelReasoningEvent:
 		if self.reasoning.Len() == 0 && self.previousKind == agent.ModelReasoningEvent {
@@ -129,11 +139,16 @@ func (self *Painter) drawDelta(delta agent.Delta) {
 
 	case agent.ModelMessageEvent:
 		self.discardProvisionalReasoning()
-		if self.answer.Len() == 0 && self.previousKind == agent.ModelMessageEvent {
-			self.screen.Blank()
+		if self.answer.Len() == 0 {
+			if shouldResetAnswerRenderer {
+				self.answerRenderer.Reset()
+			}
+			if self.previousKind == agent.ModelMessageEvent {
+				self.screen.Blank()
+			}
 		}
 		self.answer.WriteString(delta.Text)
-		if !self.screen.DrawAnswer(markdown.Render(self.answer.String(), self.screen.Columns())) {
+		if !self.screen.DrawAnswer(self.answerRenderer.Render(self.answer.String(), self.screen.Columns())) {
 			self.isStale = true
 		}
 	}

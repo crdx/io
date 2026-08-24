@@ -1,0 +1,328 @@
+=== narrow ===
+[startup=0s session=00000000000000000000
+0000 skills=0p/0g tools=~600t]
+
+
+ show the customer data model
+
+
+Sketching the data model.
+
+Customer orders
+
+erDiagram
+CUSTOMER {
+int id PK
+string name
+}
+ORDER {
+int id PK
+int customer_id FK
+}
+CUSTOMER ||--o{ ORDER : places
+=== one column ===
+[
+s
+t
+a
+r
+t
+u
+p
+=
+0
+s
+
+s
+e
+s
+s
+i
+o
+n
+=
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+s
+k
+i
+l
+l
+s
+=
+0
+p
+/
+0
+g
+
+t
+o
+o
+l
+s
+=
+~
+6
+0
+0
+t
+]
+
+
+
+s
+
+h
+
+o
+
+w
+
+t
+
+h
+
+e
+
+c
+
+u
+
+s
+
+t
+
+o
+
+m
+
+e
+
+r
+
+d
+
+a
+
+t
+
+a
+
+m
+
+o
+
+d
+
+e
+
+l
+
+
+S
+k
+e
+t
+c
+h
+i
+n
+g
+t
+h
+e
+d
+a
+t
+a
+m
+o
+d
+e
+l
+.
+
+C
+u
+s
+t
+o
+m
+e
+r
+o
+r
+d
+e
+r
+s
+
+e
+r
+D
+i
+a
+g
+r
+a
+m
+C
+U
+S
+T
+O
+M
+E
+R
+{
+i
+n
+t
+i
+d
+P
+K
+s
+t
+r
+i
+n
+g
+n
+a
+m
+e
+}
+O
+R
+D
+E
+R
+{
+i
+n
+t
+i
+d
+P
+K
+i
+n
+t
+c
+u
+s
+t
+o
+m
+e
+r
+_
+i
+d
+F
+K
+}
+C
+U
+S
+T
+O
+M
+E
+R
+|
+|
+-
+-
+o
+{
+O
+R
+D
+E
+R
+:
+p
+l
+a
+c
+e
+s
+=== tiny ===
+[startup=0s
+session=0000
+000000000000
+00000000 ski
+lls=0p/0g to
+ols=~600t]
+
+
+ show the
+ customer
+ data model
+
+
+Sketching
+the data
+model.
+
+Customer
+orders
+
+erDiagram
+CUSTOMER {
+int id PK
+string name
+}
+ORDER {
+int id PK
+int
+customer_id
+FK
+}
+CUSTOMER
+||--o{ ORDER
+: places
+=== wide ===
+[startup=0s session=000000000000000000000000 skills=0p/0g tools=~600t]
+
+
+ show the customer data model
+
+
+Sketching the data model.
+
+Customer orders
+
+┌────────────────────┐            ┌────────────────────────┐
+│      CUSTOMER      │            │         ORDER          │
+├────────┬──────┬────┤            ├─────┬─────────────┬────┤
+│ int    │ id   │ PK │            │ int │ id          │ PK │
+│ string │ name │    │            │ int │ customer_id │ FK │
+└────────┴┬─────┴────┘            └─────┴─────┬───────┴────┘
+          └||────────────places─────────────o{┘

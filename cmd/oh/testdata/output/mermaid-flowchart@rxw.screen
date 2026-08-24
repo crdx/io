@@ -1,0 +1,450 @@
+=== narrow ===
+[startup=0s session=00000000000000000000
+0000 skills=0p/0g tools=~600t]
+
+
+ show the request flow
+
+
+Mapping the request path.
+
+Request processing
+
+graph TD
+request[Receive] --> validate[Validate]
+validate --> accept[Accept]
+validate --> reject[Reject]
+subgraph audit [Audit trail]
+accept --> recorded[Record success]
+reject --> failed[Record failure]
+end
+=== one column ===
+[
+s
+t
+a
+r
+t
+u
+p
+=
+0
+s
+
+s
+e
+s
+s
+i
+o
+n
+=
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+s
+k
+i
+l
+l
+s
+=
+0
+p
+/
+0
+g
+
+t
+o
+o
+l
+s
+=
+~
+6
+0
+0
+t
+]
+
+
+
+s
+
+h
+
+o
+
+w
+
+t
+
+h
+
+e
+
+r
+
+e
+
+q
+
+u
+
+e
+
+s
+
+t
+
+f
+
+l
+
+o
+
+w
+
+
+M
+a
+p
+p
+i
+n
+g
+t
+h
+e
+r
+e
+q
+u
+e
+s
+t
+p
+a
+t
+h
+.
+
+R
+e
+q
+u
+e
+s
+t
+p
+r
+o
+c
+e
+s
+s
+i
+n
+g
+
+g
+r
+a
+p
+h
+T
+D
+r
+e
+q
+u
+e
+s
+t
+[
+R
+e
+c
+e
+i
+v
+e
+]
+-
+-
+>
+v
+a
+l
+i
+d
+a
+t
+e
+[
+V
+a
+l
+i
+d
+a
+t
+e
+]
+v
+a
+l
+i
+d
+a
+t
+e
+-
+-
+>
+a
+c
+c
+e
+p
+t
+[
+A
+c
+c
+e
+p
+t
+]
+v
+a
+l
+i
+d
+a
+t
+e
+-
+-
+>
+r
+e
+j
+e
+c
+t
+[
+R
+e
+j
+e
+c
+t
+]
+s
+u
+b
+g
+r
+a
+p
+h
+a
+u
+d
+i
+t
+[
+A
+u
+d
+i
+t
+t
+r
+a
+i
+l
+]
+a
+c
+c
+e
+p
+t
+-
+-
+>
+r
+e
+c
+o
+r
+d
+e
+d
+[
+R
+e
+c
+o
+r
+d
+s
+u
+c
+c
+e
+s
+s
+]
+r
+e
+j
+e
+c
+t
+-
+-
+>
+f
+a
+i
+l
+e
+d
+[
+R
+e
+c
+o
+r
+d
+f
+a
+i
+l
+u
+r
+e
+]
+e
+n
+d
+=== tiny ===
+[startup=0s
+session=0000
+000000000000
+00000000 ski
+lls=0p/0g to
+ols=~600t]
+
+
+ show the
+ request
+ flow
+
+
+Mapping the
+request
+path.
+
+Request
+processing
+
+graph TD
+request[Rece
+ive] -->
+validate[Val
+idate]
+validate -->
+accept[Accep
+t]
+validate -->
+reject[Rejec
+t]
+subgraph
+audit [Audit
+trail]
+accept -->
+recorded[Rec
+ord success]
+reject -->
+failed[Recor
+d failure]
+end
+=== wide ===
+[startup=0s session=000000000000000000000000 skills=0p/0g tools=~600t]
+
+
+ show the request flow
+
+
+Mapping the request path.
+
+Request processing
+
+  ┌────────────────┐
+  │                │
+  │    Receive     │
+  │                │
+  └────────┬───────┘
+           │
+           │
+           │
+           │
+           ▼
+  ┌────────────────┐
+  │                │
+  │    Validate    ├──────────────┐
+  │                │              │
+  └────────┬───────┘              │
+           │                      │
+           │                      │
+           │                      │
+           │                      │
+           ▼                      ▼
+  ┌────────────────┐     ┌────────────────┐
+  │                │     │                │
+  │     Accept     │     │     Reject     │
+  │                │     │                │
+  └────────┬───────┘     └────────┬───────┘
+           │                      │
+           │                      │
+           │                      │
+           │                      │
+           │                      │
+┌──────────┼──────────────────────┼─────────┐
+│          │     Audit trail      │         │
+│          │                      │         │
+│          ▼                      ▼         │
+│ ┌────────────────┐     ┌────────────────┐ │
+│ │                │     │                │ │
+│ │ Record success │     │ Record failure │ │
+│ │                │     │                │ │
+│ └────────────────┘     └────────────────┘ │
+│                                           │
+└───────────────────────────────────────────┘

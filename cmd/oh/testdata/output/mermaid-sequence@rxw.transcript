@@ -1,0 +1,51 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## Startup
+
+> 2001-01-01T00:00:00Z
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+show the retry interaction
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:02Z
+
+```
+Tracing the interaction.
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+````
+# Application retry
+
+```mermaid
+sequenceDiagram
+participant U as User
+participant A as App
+U->>A: Open
+Note right of A: Ready
+loop Retry
+A-->>U: Update
+end
+```
+
+````
+
+

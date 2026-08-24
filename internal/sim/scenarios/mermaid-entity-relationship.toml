@@ -1,0 +1,26 @@
+model = "gpt-5.6-sol"
+
+strict = true
+loop = false
+
+delay = "600ms"
+pace = "40ms"
+
+[[turn]]
+think = ["Sketching the data model."]
+say = """
+# Customer orders
+
+```mermaid
+erDiagram
+CUSTOMER {
+int id PK
+string name
+}
+ORDER {
+int id PK
+int customer_id FK
+}
+CUSTOMER ||--o{ ORDER : places
+```
+"""

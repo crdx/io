@@ -1,0 +1,53 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## Startup
+
+> 2001-01-01T00:00:00Z
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+show the customer data model
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:02Z
+
+```
+Sketching the data model.
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+````
+# Customer orders
+
+```mermaid
+erDiagram
+CUSTOMER {
+int id PK
+string name
+}
+ORDER {
+int id PK
+int customer_id FK
+}
+CUSTOMER ||--o{ ORDER : places
+```
+
+````
+
+

@@ -685,6 +685,63 @@ func TestARedrawDuringProvisionalReasoningRestoresTheOpenBlock(t *testing.T) {
 	}
 }
 
+func TestAStreamingMermaidDiagramKeepsItsLastValidRendering(t *testing.T) {
+	const columns = 100
+	var screenOutput bytes.Buffer
+	painter := &Painter{screen: output.NewTerminalOfSize(&screenOutput, columns, 24), isRunning: true}
+
+	painter.drawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "```mermaid\ngraph LR\nA --> B"})
+	valid := strings.Join(visibleScreen(t, screenOutput.String(), columns), "\n")
+	if !strings.Contains(valid, "►") || strings.Contains(valid, "graph LR") {
+		t.Fatalf("expected the first valid prefix to render, got %q", valid)
+	}
+
+	painter.drawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "\nB -->"})
+	invalid := strings.Join(visibleScreen(t, screenOutput.String(), columns), "\n")
+	if invalid != valid {
+		t.Errorf("invalid prefix replaced the last valid diagram\nvalid:\n%s\ninvalid:\n%s", valid, invalid)
+	}
+
+	painter.drawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: " C"})
+	nextValid := strings.Join(visibleScreen(t, screenOutput.String(), columns), "\n")
+	if !strings.Contains(nextValid, "C") || strings.Contains(nextValid, "graph LR") {
+		t.Errorf("expected the next valid prefix to replace the cached diagram, got %q", nextValid)
+	}
+}
+
+func TestARedrawKeepsTheLastValidStreamingMermaidDiagram(t *testing.T) {
+	const columns = 100
+	var screenOutput bytes.Buffer
+	testConversation := &Harness{screen: output.NewTerminalOfSize(&screenOutput, columns, 24)}
+	testConversation.currentTurn = Turn{isRunning: true, painter: testConversation.newPainter(true)}
+
+	testConversation.currentTurn.painter.drawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "```mermaid\ngraph LR\nA --> B"})
+	valid := strings.Join(visibleScreen(t, screenOutput.String(), columns), "\n")
+	testConversation.currentTurn.painter.drawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "\nB -->"})
+	testConversation.redraw()
+
+	redrawn := strings.Join(visibleScreen(t, screenOutput.String(), columns), "\n")
+	if redrawn != valid {
+		t.Errorf("redraw replaced the last valid diagram\nvalid:\n%s\nredrawn:\n%s", valid, redrawn)
+	}
+}
+
+func TestACompletedInvalidMermaidDiagramFallsBackToSource(t *testing.T) {
+	const columns = 100
+	const invalid = "```mermaid\ngraph LR\nA --> B\nB -->\n```"
+	var screenOutput bytes.Buffer
+	painter := &Painter{screen: output.NewTerminalOfSize(&screenOutput, columns, 24), isRunning: true}
+
+	painter.drawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "```mermaid\ngraph LR\nA --> B"})
+	painter.drawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "\nB -->"})
+	painter.drawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: invalid})
+
+	completed := strings.Join(visibleScreen(t, screenOutput.String(), columns), "\n")
+	if !strings.Contains(completed, "graph LR") || !strings.Contains(completed, "B -->") {
+		t.Errorf("expected completed invalid Mermaid to fall back to source, got %q", completed)
+	}
+}
+
 func TestAnAnswerStreamedIsTheSameAsTheAnswerReplayed(t *testing.T) {
 	const answer = "# Findings\n\nThe **first** thing is `read`.\n\n- one\n- two\n"
 

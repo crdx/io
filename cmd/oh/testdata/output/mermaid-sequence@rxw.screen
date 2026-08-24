@@ -1,0 +1,354 @@
+=== narrow ===
+[startup=0s session=00000000000000000000
+0000 skills=0p/0g tools=~600t]
+
+
+ show the retry interaction
+
+
+Tracing the interaction.
+
+Application retry
+
+┌──────┐     ┌─────┐
+│ User │     │ App │
+└───┬──┘     └──┬──┘
+    │           │
+    │ Open      │
+    ├──────────►│
+    │           │
+    │           │ ┌───────┐
+    │           │ │ Ready │
+    │           │ └───────┘
+  ┌─[loop Retry]──┐
+  │ │           │ │
+  │ │ Update    │ │
+  │ │◄┈┈┈┈┈┈┈┈┈┈┤ │
+  │ │           │ │
+  └───────────────┘
+    │           │
+=== one column ===
+[
+s
+t
+a
+r
+t
+u
+p
+=
+0
+s
+
+s
+e
+s
+s
+i
+o
+n
+=
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+s
+k
+i
+l
+l
+s
+=
+0
+p
+/
+0
+g
+
+t
+o
+o
+l
+s
+=
+~
+6
+0
+0
+t
+]
+
+
+
+s
+
+h
+
+o
+
+w
+
+t
+
+h
+
+e
+
+r
+
+e
+
+t
+
+r
+
+y
+
+i
+
+n
+
+t
+
+e
+
+r
+
+a
+
+c
+
+t
+
+i
+
+o
+
+n
+
+
+T
+r
+a
+c
+i
+n
+g
+t
+h
+e
+i
+n
+t
+e
+r
+a
+c
+t
+i
+o
+n
+.
+
+A
+p
+p
+l
+i
+c
+a
+t
+i
+o
+n
+r
+e
+t
+r
+y
+
+s
+e
+q
+u
+e
+n
+c
+e
+D
+i
+a
+g
+r
+a
+m
+p
+a
+r
+t
+i
+c
+i
+p
+a
+n
+t
+U
+a
+s
+U
+s
+e
+r
+p
+a
+r
+t
+i
+c
+i
+p
+a
+n
+t
+A
+a
+s
+A
+p
+p
+U
+-
+>
+>
+A
+:
+O
+p
+e
+n
+N
+o
+t
+e
+r
+i
+g
+h
+t
+o
+f
+A
+:
+R
+e
+a
+d
+y
+l
+o
+o
+p
+R
+e
+t
+r
+y
+A
+-
+-
+>
+>
+U
+:
+U
+p
+d
+a
+t
+e
+e
+n
+d
+=== tiny ===
+[startup=0s
+session=0000
+000000000000
+00000000 ski
+lls=0p/0g to
+ols=~600t]
+
+
+ show the
+ retry
+ interaction
+
+
+Tracing the
+interaction.
+
+Application
+retry
+
+sequenceDiag
+ram
+participant
+U as User
+participant
+A as App
+U->>A: Open
+Note right
+of A: Ready
+loop Retry
+A-->>U:
+Update
+end
+=== wide ===
+[startup=0s session=000000000000000000000000 skills=0p/0g tools=~600t]
+
+
+ show the retry interaction
+
+
+Tracing the interaction.
+
+Application retry
+
+┌──────┐     ┌─────┐
+│ User │     │ App │
+└───┬──┘     └──┬──┘
+    │           │
+    │ Open      │
+    ├──────────►│
+    │           │
+    │           │ ┌───────┐
+    │           │ │ Ready │
+    │           │ └───────┘
+  ┌─[loop Retry]──┐
+  │ │           │ │
+  │ │ Update    │ │
+  │ │◄┈┈┈┈┈┈┈┈┈┈┤ │
+  │ │           │ │
+  └───────────────┘
+    │           │

@@ -456,16 +456,18 @@ func (self *Harness) replay() {
 
 func (self *Harness) redraw() {
 	var provisional agent.Delta
+	var previousPainter *Painter
 	if self.currentTurn.isRunning {
-		provisional = self.currentTurn.painter.provisionalDelta()
-		self.currentTurn.painter.stop()
+		previousPainter = self.currentTurn.painter
+		provisional = previousPainter.provisionalDelta()
+		previousPainter.stop()
 	}
 
 	self.screen.Synchronise(func() {
 		self.screen.Reset()
 		self.replay()
 		if provisional.Text != "" {
-			self.currentTurn.painter.drawDelta(provisional)
+			self.currentTurn.painter.drawRestoredDelta(provisional, previousPainter.answerRenderer)
 		}
 	})
 }

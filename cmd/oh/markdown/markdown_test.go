@@ -164,6 +164,157 @@ func TestATableHeadingIsDrawnAsMarkdownRatherThanShown(t *testing.T) {
 	}
 }
 
+func TestAMermaidFenceIsSafeWhileItStreams(t *testing.T) {
+	source := "```mermaid\ngraph LR\nA[Start] --> B[Done]\n```"
+	for length := range len(source) + 1 {
+		for _, row := range Render(source[:length], columns) {
+			if got := style.Width(row); got > columns {
+				t.Fatalf("a prefix of %d gave a row of %d cells: %q", length, got, row)
+			}
+		}
+	}
+}
+
+func TestAStreamingMermaidRendererRetainsOnlyDiagramsThatStillFit(t *testing.T) {
+	stream := &StreamRenderer{}
+	invalid := "```mermaid\ngraph LR\nA -->"
+	if got := style.Plain(strings.Join(stream.Render(invalid, columns), "\n")); !strings.Contains(got, "graph LR") {
+		t.Fatalf("expected source before the first valid rendering, got %q", got)
+	}
+
+	valid := "```mermaid\ngraph LR\nA --> B"
+	validRendering := style.Plain(strings.Join(stream.Render(valid, columns), "\n"))
+	if strings.Contains(validRendering, "graph LR") {
+		t.Fatalf("expected a rendered diagram, got %q", validRendering)
+	}
+
+	cached := style.Plain(strings.Join(stream.Render(valid+"\nB -->", columns), "\n"))
+	if cached != validRendering {
+		t.Errorf("got cached rendering %q, want %q", cached, validRendering)
+	}
+
+	narrow := style.Plain(strings.Join(stream.Render(valid+"\nB -->", 5), "\n"))
+	if !strings.Contains(narrow, "graph") {
+		t.Errorf("expected source when the cached diagram no longer fits, got %q", narrow)
+	}
+
+	stream.Reset()
+	reset := style.Plain(strings.Join(stream.Render(valid+"\nB -->", columns), "\n"))
+	if !strings.Contains(reset, "graph LR") {
+		t.Errorf("expected Reset to forget the cached diagram, got %q", reset)
+	}
+}
+
+func TestAMermaidDiagramUsesTheNormalTerminalForeground(t *testing.T) {
+	source := "```mermaid\ngraph LR\nA --> B\n```"
+	got := strings.Join(Render(source, columns), "\n")
+	if got != style.Plain(got) {
+		t.Errorf("expected no colour styling around Mermaid output, got %q", got)
+	}
+}
+
+func TestAMermaidFenceIsDrawnAsADiagram(t *testing.T) {
+	source := "```mermaid\ngraph LR\nA[Start] --> B[Done]\n```"
+	got := style.Plain(strings.Join(Render(source, columns), "\n"))
+
+	for _, want := range []string{"Start", "Done", "┌", "►"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("expected the diagram to contain %q, got %q", want, got)
+		}
+	}
+
+	if strings.Contains(got, "graph LR") || strings.Contains(got, "-->") {
+		t.Errorf("expected the Mermaid source to be drawn rather than shown, got %q", got)
+	}
+}
+
+func TestMermaidDiagramsRenderOrFallBackAtNarrowWidths(t *testing.T) {
+	for name, test := range map[string]struct {
+		source             string
+		wideMarker         string
+		narrowSourceMarker string
+		shouldRenderNarrow bool
+	}{
+		"branching flowchart": {
+			source:             "graph TD\nrequest[Receive] --> validate[Validate]\nvalidate --> accept[Accept]\nvalidate --> reject[Reject]\nsubgraph audit [Audit trail]\naccept --> recorded[Record success]\nreject --> failed[Record failure]\nend",
+			wideMarker:         "Record success",
+			narrowSourceMarker: "graph TD",
+		},
+		"sequence with note and fragment": {
+			source:             "sequenceDiagram\nparticipant U as User\nparticipant A as App\nU->>A: Open\nNote right of A: Ready\nloop Retry\nA-->>U: Update\nend",
+			wideMarker:         "Ready",
+			narrowSourceMarker: "sequenceDiagram",
+			shouldRenderNarrow: true,
+		},
+		"entity relationship attributes": {
+			source:             "erDiagram\nCUSTOMER {\nint id PK\nstring name\n}\nORDER {\nint id PK\nint customer_id FK\n}\nCUSTOMER ||--o{ ORDER : places",
+			wideMarker:         "customer_id",
+			narrowSourceMarker: "erDiagram",
+		},
+	} {
+		markdown := "```mermaid\n" + test.source + "\n```"
+		wide := style.Plain(strings.Join(Render(markdown, 100), "\n"))
+		if !strings.Contains(wide, test.wideMarker) || strings.Contains(wide, test.narrowSourceMarker) {
+			t.Errorf("%s: expected a rendered wide diagram, got %q", name, wide)
+		}
+
+		narrow := style.Plain(strings.Join(Render(markdown, 40), "\n"))
+		isRendered := !strings.Contains(narrow, test.narrowSourceMarker)
+		if isRendered != test.shouldRenderNarrow {
+			t.Errorf("%s: narrow rendered=%v, want %v; got %q", name, isRendered, test.shouldRenderNarrow, narrow)
+		}
+
+		tiny := style.Plain(strings.Join(Render(markdown, 12), "\n"))
+		if !strings.Contains(strings.ReplaceAll(tiny, "\n", ""), test.narrowSourceMarker) {
+			t.Errorf("%s: expected source fallback at 12 columns, got %q", name, tiny)
+		}
+	}
+}
+
+func TestAMermaidFenceFallsBackToSourceWhenItCannotBeDrawn(t *testing.T) {
+	for name, test := range map[string]struct {
+		source  string
+		want    string
+		columns int
+	}{
+		"malformed":          {"```mermaid\ngraph SIDEWAYS\nA --> B\n```", "A --> B", columns},
+		"unsupported syntax": {"```mermaid\ngraph LR\nA -.-> B\n```", "A -.-> B", columns},
+		"resource limit":     {"```mermaid\ngraph LR\nA[" + strings.Repeat("x", 300) + "]\n```", "graph LR", columns},
+		"too wide":           {"```mermaid\ngraph LR\nAlpha --> Bravo --> Charlie\n```", "Alpha -->", 12},
+	} {
+		got := style.Plain(strings.Join(Render(test.source, test.columns), "\n"))
+		if !strings.Contains(got, test.want) {
+			t.Errorf("%s: expected %q to survive, got %q", name, test.want, got)
+		}
+	}
+}
+
+func FuzzMermaidFenceStreaming(fuzzer *testing.F) {
+	for _, source := range []string{
+		"graph LR\nA --> B",
+		"sequenceDiagram\nA->>B: hello",
+		"graph LR\nA -.-> B",
+		"\xff\xfe",
+	} {
+		fuzzer.Add(source, uint8(columns))
+	}
+
+	fuzzer.Fuzz(func(t *testing.T, source string, fuzzedColumns uint8) {
+		if len(source) > 128 {
+			return
+		}
+		markdown := "```mermaid\n" + source + "\n```"
+		availableColumns := int(fuzzedColumns) + 2
+		for length := range len(markdown) + 1 {
+			for _, row := range Render(markdown[:length], availableColumns) {
+				if got := style.Width(row); got > availableColumns {
+					t.Fatalf("a prefix of %d gave a row of %d cells: %q", length, got, row)
+				}
+			}
+		}
+	})
+}
+
 func TestCodeIsHighlightedWhereTheLanguageIsKnown(t *testing.T) {
 	known := Render("```go\nfunc main() {}\n```", columns)
 	unknown := Render("```nosuchlanguage\nfunc main() {}\n```", columns)

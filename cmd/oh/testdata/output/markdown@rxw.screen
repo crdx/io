@@ -37,6 +37,12 @@ func main() {
 │      │ network                │      │
 └──────┴────────────────────────┴──────┘
 
+┌──────┐     ┌──────┐
+│      │     │      │
+│ read ├────►│ bash │
+│      │     │      │
+└──────┘     └──────┘
+
 │ The costs are made up, and the table
 │ is here to be watched as it draws.
 
@@ -508,6 +514,37 @@ k
 4
 0
 
+g
+r
+a
+p
+h
+L
+R
+r
+e
+a
+d
+[
+r
+e
+a
+d
+]
+-
+-
+>
+b
+a
+s
+h
+[
+b
+a
+s
+h
+]
+
 T
 h
 e
@@ -682,6 +719,11 @@ a sandbox
 with no
 network | 40
 
+graph LR
+read[read]
+-->
+bash[bash]
+
 │ The costs
 │ are made
 │ up, and
@@ -727,6 +769,12 @@ func main() {
 ├──────┼─────────────────────────────────────────────┼──────┤
 │ bash │ runs a command in a sandbox with no network │   40 │
 └──────┴─────────────────────────────────────────────┴──────┘
+
+┌──────┐     ┌──────┐
+│      │     │      │
+│ read ├────►│ bash │
+│      │     │      │
+└──────┘     └──────┘
 
 │ The costs are made up, and the table is here to be watched as it draws.
 

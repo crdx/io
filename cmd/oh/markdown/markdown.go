@@ -14,6 +14,7 @@ import (
 
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/internal/mermaid"
 )
 
 const tab = "    "
@@ -22,19 +23,41 @@ var parser = goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser()
 
 // Render lays markdown out as the rows to draw, styled and wrapped to the given columns.
 func Render(markdown string, columns int) []string {
+	return render(markdown, columns, nil)
+}
+
+// StreamRenderer retains successful Mermaid diagrams while incomplete Markdown continues arriving.
+type StreamRenderer struct {
+	mermaidRows map[int][]string
+}
+
+// Render lays out the current prefix of a Markdown stream.
+func (self *StreamRenderer) Render(markdown string, columns int) []string {
+	return render(markdown, columns, self)
+}
+
+// Reset forgets rendering state from the previous stream.
+func (self *StreamRenderer) Reset() {
+	clear(self.mermaidRows)
+}
+
+func render(markdown string, columns int, stream *StreamRenderer) []string {
 	source := []byte(strings.ReplaceAll(markdown, "\t", tab))
 
-	renderer := &renderer{source: source, columns: columns}
+	mermaidBlock := 0
+	renderer := &renderer{source: source, columns: columns, mermaidBlock: &mermaidBlock, stream: stream}
 	renderer.blocks(parser.Parse(text.NewReader(source)))
 
 	return renderer.rows
 }
 
 type renderer struct {
-	source  []byte // the markdown being drawn, which every node is a position in
-	columns int
-	isTight bool     // whether its blocks stand apart, which those of a tight list do not
-	rows    []string // what has been drawn so far
+	source       []byte // the markdown being drawn, which every node is a position in
+	columns      int
+	mermaidBlock *int
+	isTight      bool     // whether its blocks stand apart, which those of a tight list do not
+	rows         []string // what has been drawn so far
+	stream       *StreamRenderer
 }
 
 func (self *renderer) blocks(parent ast.Node) {
@@ -57,7 +80,16 @@ func (self *renderer) block(node ast.Node) {
 		self.appendWrapped(over(col.Bold, style.Heading(self.inline(node))))
 
 	case *ast.FencedCodeBlock:
-		self.code(emphasise(self.lines(node), string(node.Language(self.source))))
+		language := string(node.Language(self.source))
+		lines := self.lines(node)
+		if language == "mermaid" {
+			block := *self.mermaidBlock
+			*self.mermaidBlock++
+			if self.mermaid(lines, block) {
+				return
+			}
+		}
+		self.code(emphasise(lines, language))
 
 	case *ast.CodeBlock:
 		self.code(emphasise(self.lines(node), ""))
@@ -97,10 +129,46 @@ func (self *renderer) code(lines []string) {
 	}
 }
 
+func (self *renderer) mermaid(lines []string, block int) bool {
+	diagram, err := mermaid.Render(strings.Join(lines, "\n"))
+	if err == nil && diagram != "" {
+		rows := strings.Split(diagram, "\n")
+		if rowsFit(rows, self.columns) {
+			self.rows = append(self.rows, rows...)
+			if self.stream != nil {
+				if self.stream.mermaidRows == nil {
+					self.stream.mermaidRows = map[int][]string{}
+				}
+				self.stream.mermaidRows[block] = rows
+			}
+			return true
+		}
+	}
+
+	if self.stream == nil {
+		return false
+	}
+	cachedRows, hasCachedRows := self.stream.mermaidRows[block]
+	if !hasCachedRows || !rowsFit(cachedRows, self.columns) {
+		return false
+	}
+	self.rows = append(self.rows, cachedRows...)
+	return true
+}
+
+func rowsFit(rows []string, columns int) bool {
+	for _, row := range rows {
+		if width.Of(row) > columns {
+			return false
+		}
+	}
+	return true
+}
+
 func (self *renderer) quote(node ast.Node) {
 	lead, room := margin(self.columns, "│ ")
 
-	inner := &renderer{source: self.source, columns: room}
+	inner := &renderer{source: self.source, columns: room, mermaidBlock: self.mermaidBlock, stream: self.stream}
 	inner.blocks(node)
 
 	for _, row := range inner.rows {
@@ -130,7 +198,7 @@ func (self *renderer) item(marker string, node ast.Node) {
 		return
 	}
 
-	inner := &renderer{source: self.source, columns: room, isTight: true}
+	inner := &renderer{source: self.source, columns: room, mermaidBlock: self.mermaidBlock, isTight: true, stream: self.stream}
 	inner.blocks(node)
 
 	hangingIndent := strings.Repeat(" ", width.Of(marker))

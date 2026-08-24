@@ -24,13 +24,14 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		".transcript",
 	})
 	for name, extensions := range map[string][]string{
-		"banner":     {".ansi", ".screen"},
-		"completion": {".txt"},
-		"context":    {".prompt"},
-		"inputblock": {".ansi", ".screen"},
-		"lifecycle":  {".ansi", ".screen"},
-		"running":    {".ansi", ".screen"},
-		"segments":   {".ansi", ".screen"},
+		"banner":            {".ansi", ".screen"},
+		"completion":        {".txt"},
+		"context":           {".prompt"},
+		"inputblock":        {".ansi", ".screen"},
+		"lifecycle":         {".ansi", ".screen"},
+		"mermaid-streaming": {".screen"},
+		"running":           {".ansi", ".screen"},
+		"segments":          {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}

@@ -29,6 +29,11 @@ func main() {
 | grep | walks the tree looking for a pattern           |     4 |
 | bash | runs a command in a sandbox with no network    |    40 |
 
+```mermaid
+graph LR
+read[read] --> bash[bash]
+```
+
 > The costs are made up, and the table is here to be watched as it draws.
 
 See [the notes](https://example.com/notes) for the rest.
