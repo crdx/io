@@ -46,6 +46,7 @@ type Harness struct {
 	metrics       metrics.Tracker
 
 	workspaceDir       string
+	enabledToolNames   []string
 	restart            []string
 	getOnWithItMessage string
 	terminalFocused    bool
@@ -267,7 +268,12 @@ func (self *Harness) restartArguments() []string {
 		arguments = append(arguments, "--workspace", self.workspaceDir)
 	}
 
-	return append(arguments, "--caps", self.mode.Current().Flags())
+	arguments = append(arguments, "--caps", self.mode.Current().Flags())
+	for _, name := range self.enabledToolNames {
+		arguments = append(arguments, "--tool", name)
+	}
+
+	return arguments
 }
 
 func (self *Harness) interruptTurn() {

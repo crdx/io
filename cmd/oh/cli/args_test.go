@@ -3,6 +3,7 @@ package cli
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"crdx.org/io/cmd/oh/caps"
@@ -54,7 +55,7 @@ func useCachedModels(t *testing.T) {
 func TestEveryOptionIsRead(t *testing.T) {
 	useCachedModels(t)
 
-	parsedOptions := parseOptions(t, "-c", "r", "-d", "somewhere", "-m", "deepseek@hi")
+	parsedOptions := parseOptions(t, "-c", "r", "-d", "somewhere", "-m", "deepseek@hi", "-t", "read", "--tool", "grep")
 
 	if parsedOptions.Caps != caps.Read {
 		t.Errorf("expected reading alone, got %s", parsedOptions.Caps.Flags())
@@ -66,6 +67,10 @@ func TestEveryOptionIsRead(t *testing.T) {
 
 	if parsedOptions.Provider != models.OpencodeGoProvider || parsedOptions.Model != "deepseek-v4-pro" || parsedOptions.Effort != "high" {
 		t.Errorf("expected opencode-go/deepseek-v4-pro@high, got %s/%s@%s", parsedOptions.Provider, parsedOptions.Model, parsedOptions.Effort)
+	}
+
+	if !slices.Equal(parsedOptions.Tools, []string{"read", "grep"}) {
+		t.Errorf("expected read and grep, got %v", parsedOptions.Tools)
 	}
 
 	id := "0347juX1xcrL9W0QKJe0cs"
@@ -152,6 +157,10 @@ func TestTheDefaultCapabilitiesAreEverythingButTheHistory(t *testing.T) {
 
 	if parsedOptions.Message != "" {
 		t.Errorf("expected nothing said, got %q", parsedOptions.Message)
+	}
+
+	if len(parsedOptions.Tools) != 0 {
+		t.Errorf("expected every tool by default, got %v", parsedOptions.Tools)
 	}
 }
 

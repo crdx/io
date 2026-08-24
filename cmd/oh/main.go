@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"crdx.org/io/agent"
@@ -48,6 +49,8 @@ const (
 
 var providerNames = []string{codexProvider, opencodeGoProvider, anthropicProvider}
 
+var completableToolNames = []string{"read", "ls", "find", "grep", "write", "edit", "bash", "notify"}
+
 var defaultEfforts = map[string]string{
 	codexProvider:     "high",
 	anthropicProvider: "high",
@@ -57,6 +60,7 @@ func main() {
 	if cli.WriteCompletions(os.Stdout, os.Args[1:], cli.Sources{
 		ModelCachePath: modelCachePath(),
 		SessionsDir:    sessionsDir(),
+		ToolNames:      completableToolNames,
 	}) {
 		return
 	}
@@ -283,15 +287,24 @@ func run() ([]string, error) {
 		toolboxTools = append(toolboxTools, notify.New())
 	}
 	toolboxTools = truncate.Tools(toolboxTools)
+	enabledTools := toolboxTools
+	if len(args.Tools) > 0 {
+		enabledTools, err = reduceTools(toolboxTools, args.Tools)
+	}
+
+	if err != nil {
+		return nil, err
+	}
 
 	chat := &Harness{
-		agent:    agent.New(systemPrompt, client, toolboxTools),
+		agent:    agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
 		screen:   output.New(os.Stdout).LinkPathsUnder(workspaceDir),
 		terminal: terminal.New(os.Stdout),
 		metrics:  metrics.New(choice.ContextWindowTokens),
 
 		recorder:           recordSession(log),
 		workspaceDir:       workspaceDir,
+		enabledToolNames:   args.Tools,
 		mode:               mode,
 		processes:          processes,
 		onTurnFinished:     func() { sendTurnFinishedNotification(workspaceDir) },
@@ -318,7 +331,7 @@ func run() ([]string, error) {
 		ContextFiles:  startup.FilesOf(contextFiles),
 		ProjectSkills: projectSkills,
 		GlobalSkills:  globalSkills,
-		ToolBytes:     client.toolsSize(toolboxTools),
+		ToolBytes:     client.toolsSize(enabledTools),
 	}
 	if resumedSession == nil {
 		chat.notify(startup.NewEvent(startupElapsed, startupInfo))
@@ -335,6 +348,47 @@ func run() ([]string, error) {
 	}
 
 	return nil, nil
+}
+
+func reduceTools(availableTools []tool.Tool, enabledToolNames []string) ([]tool.Tool, error) {
+	if len(enabledToolNames) == 0 {
+		return availableTools, nil
+	}
+
+	availableNames := indexToolsByName(availableTools)
+	enabledNames := make(map[string]struct{}, len(enabledToolNames))
+	var unavailable []string
+	for _, name := range enabledToolNames {
+		if _, isEnabled := enabledNames[name]; isEnabled {
+			continue
+		}
+
+		enabledNames[name] = struct{}{}
+		if _, isAvailable := availableNames[name]; !isAvailable {
+			unavailable = append(unavailable, name)
+		}
+	}
+	if len(unavailable) > 0 {
+		return nil, fmt.Errorf("tools not available: %s", strings.Join(unavailable, ", "))
+	}
+
+	tools := make([]tool.Tool, 0, len(enabledNames))
+	for _, availableTool := range availableTools {
+		if _, isEnabled := enabledNames[availableTool.Name()]; isEnabled {
+			tools = append(tools, availableTool)
+		}
+	}
+
+	return tools, nil
+}
+
+func indexToolsByName(tools []tool.Tool) map[string]tool.Tool {
+	indexedTools := make(map[string]tool.Tool, len(tools))
+	for _, availableTool := range tools {
+		indexedTools[availableTool.Name()] = availableTool
+	}
+
+	return indexedTools
 }
 
 func resumeParams(reference string) string {

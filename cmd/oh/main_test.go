@@ -11,6 +11,7 @@ import (
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/tool"
 )
 
 func TestMain(testingMain *testing.M) {
@@ -128,5 +129,41 @@ func TestStartingAgainWithNothingStoredKeepsTheWorkspace(t *testing.T) {
 
 	if got := self.restartArguments(); !slices.Equal(got, want) {
 		t.Errorf("expected %v, got %v", want, got)
+	}
+}
+
+func TestStartingAgainKeepsTheEnabledTools(t *testing.T) {
+	self := conversationFixture(t, true, caps.Read)
+	self.enabledToolNames = []string{"read", "grep"}
+
+	want := []string{"-r", self.recorder.Name(), "--caps", "r", "--tool", "read", "--tool", "grep"}
+	if got := self.restartArguments(); !slices.Equal(got, want) {
+		t.Errorf("expected %v, got %v", want, got)
+	}
+}
+
+func TestOnlyNamedToolsAreEnabled(t *testing.T) {
+	availableTools := []tool.Tool{slowTool("read"), slowTool("grep"), slowTool("write")}
+
+	allTools, err := reduceTools(availableTools, nil)
+	if err != nil || len(allTools) != len(availableTools) {
+		t.Fatalf("expected every tool by default, got %v, %v", allTools, err)
+	}
+
+	enabledTools, err := reduceTools(availableTools, []string{"write", "read", "read"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	names := make([]string, 0, len(enabledTools))
+	for _, enabledTool := range enabledTools {
+		names = append(names, enabledTool.Name())
+	}
+	if !slices.Equal(names, []string{"read", "write"}) {
+		t.Errorf("expected read and write in canonical order, got %v", names)
+	}
+
+	if _, err := reduceTools(availableTools, []string{"gone"}); err == nil {
+		t.Error("expected an unavailable tool to be rejected")
 	}
 }

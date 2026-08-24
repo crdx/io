@@ -5,6 +5,7 @@
 --model
 --resume
 --sessions
+--tool
 --update
 --version
 --workspace
@@ -18,6 +19,15 @@ high
 rxw
 rxwg
 rxwgb
+=== tools ===
+read
+ls
+find
+grep
+write
+edit
+bash
+notify
 === sessions ===
 newer-jaguar
 older-badger

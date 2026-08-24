@@ -15,21 +15,31 @@ import (
 
 // New builds an agent that talks to a provider with a set of tools on offer.
 func New(systemPrompt string, provider Provider, tools []tool.Tool) *Agent {
-	definitions := make([]tool.Definition, len(tools))
+	return NewWithEnabledTools(systemPrompt, provider, tools, tools)
+}
+
+// NewWithEnabledTools builds an agent that knows every tool but only offers and executes
+// enabledTools.
+func NewWithEnabledTools(systemPrompt string, provider Provider, tools []tool.Tool, enabledTools []tool.Tool) *Agent {
+	definitions := make([]tool.Definition, len(enabledTools))
+	enabledNames := make(map[string]struct{}, len(enabledTools))
+	for i, enabledTool := range enabledTools {
+		definitions[i] = tool.Describe(enabledTool)
+		enabledNames[enabledTool.Name()] = struct{}{}
+	}
+
 	availableTools := make(map[string]tool.Tool, len(tools))
 	stateOwners := map[string]tool.Tool{}
-
-	for i, offeredTool := range tools {
-		definitions[i] = tool.Describe(offeredTool)
-		availableTools[offeredTool.Name()] = offeredTool
-		if stateKey := offeredTool.StateKey(); stateKey != "" {
-			stateOwners[stateKey] = offeredTool
+	for _, availableTool := range tools {
+		availableTools[availableTool.Name()] = availableTool
+		if stateKey := availableTool.StateKey(); stateKey != "" {
+			stateOwners[stateKey] = availableTool
 		}
 	}
 
 	provider.Configure(systemPrompt, definitions)
 
-	return &Agent{provider: provider, tools: availableTools, owners: stateOwners}
+	return &Agent{provider: provider, registeredTools: availableTools, enabledToolNames: enabledNames, owners: stateOwners}
 }
 
 // Dump carries out the provider's append-only conversation state.
@@ -338,13 +348,13 @@ func (self *Agent) batchEnd(queuedCalls []pendingCall, start int) int {
 }
 
 func (self *Agent) concurrent(call ToolCall) bool {
-	calledTool, found := self.tools[call.Name]
+	calledTool, found := self.registeredTools[call.Name]
 
 	return found && calledTool.Concurrent()
 }
 
 func (self *Agent) describeUnparsedToolCall(call ToolCall) string {
-	calledTool, found := self.tools[call.Name]
+	calledTool, found := self.registeredTools[call.Name]
 	if !found {
 		return strutil.FirstLine(call.Arguments)
 	}
@@ -353,7 +363,7 @@ func (self *Agent) describeUnparsedToolCall(call ToolCall) string {
 }
 
 func (self *Agent) readOnly(call ToolCall) bool {
-	calledTool, found := self.tools[call.Name]
+	calledTool, found := self.registeredTools[call.Name]
 
 	return found && calledTool.ReadOnly()
 }
@@ -408,7 +418,7 @@ func (self *Agent) runBatch(
 				completion.state = Event{
 					Kind:  StateChangeEvent,
 					ID:    item.rawToolCall.ID,
-					Name:  self.tools[item.rawToolCall.Name].StateKey(),
+					Name:  self.registeredTools[item.rawToolCall.Name].StateKey(),
 					State: executionResult.State,
 				}
 			}
@@ -467,15 +477,16 @@ func (self *Agent) restoreState(event Event) error {
 	return nil
 }
 
-// Tool is the tool of that name, and whether there is one.
+// Tool is the known tool of that name, whether or not it is enabled.
 func (self *Agent) Tool(name string) (tool.Tool, bool) {
-	found, known := self.tools[name]
+	found, known := self.registeredTools[name]
 	return found, known
 }
 
 func (self *Agent) parseCall(call ToolCall) (tool.ToolCall, string) {
-	calledTool, found := self.tools[call.Name]
-	if !found {
+	calledTool, isRegistered := self.registeredTools[call.Name]
+	_, isEnabled := self.enabledToolNames[call.Name]
+	if !isRegistered || !isEnabled {
 		return nil, fmt.Sprintf("there is no tool called %q", call.Name)
 	}
 

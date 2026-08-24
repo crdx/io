@@ -161,8 +161,9 @@ type Event struct {
 
 // Agent holds a conversation.
 type Agent struct {
-	provider Provider
-	tools    map[string]tool.Tool
-	owners   map[string]tool.Tool
-	state    []json.RawMessage
+	provider         Provider
+	registeredTools  map[string]tool.Tool
+	enabledToolNames map[string]struct{}
+	owners           map[string]tool.Tool
+	state            []json.RawMessage
 }

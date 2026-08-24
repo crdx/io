@@ -23,7 +23,7 @@ func TestCompletionProtocolMatchesTheGolden(t *testing.T) {
 	directory := t.TempDir()
 	writeStoredSession(t, directory, "older-badger", "2024-01-01T00:00:00Z")
 	writeStoredSession(t, directory, "newer-jaguar", "2025-01-01T00:00:00Z")
-	sources := cli.Sources{ModelCachePath: cachePath, SessionsDir: directory}
+	sources := cli.Sources{ModelCachePath: cachePath, SessionsDir: directory, ToolNames: completableToolNames}
 
 	requests := []struct {
 		name string
@@ -33,6 +33,7 @@ func TestCompletionProtocolMatchesTheGolden(t *testing.T) {
 		{name: "models", args: []string{"--complete", "model", "sonnet"}},
 		{name: "efforts", args: []string{"--complete", "effort", "sonnet@"}},
 		{name: "capabilities", args: []string{"--complete", "caps", "rxw"}},
+		{name: "tools", args: []string{"--complete", "tool", ""}},
 		{name: "sessions", args: []string{"--complete", "session", ""}},
 	}
 

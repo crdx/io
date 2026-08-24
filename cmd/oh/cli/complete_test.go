@@ -47,7 +47,7 @@ func TestCompletionRequestReadsTheKindAndWord(t *testing.T) {
 func TestOptionCompletionsComeFromTheUsage(t *testing.T) {
 	options := usageOptions(usage)
 
-	for _, wanted := range []string{"-r", "--resume", "-s", "--sessions", "-m", "--model", "-l", "--list", "-h", "--help"} {
+	for _, wanted := range []string{"-r", "--resume", "-s", "--sessions", "-m", "--model", "-t", "--tool", "-l", "--list", "-h", "--help"} {
 		if !slices.Contains(options, wanted) {
 			t.Errorf("expected %q among %v", wanted, options)
 		}
@@ -124,6 +124,13 @@ func TestCapabilityCompletionsGrowOneAtATime(t *testing.T) {
 	sets := capsCompletions()
 	if sets[0] != "r" || sets[len(sets)-1] != "rxwgb" {
 		t.Errorf("got %v", sets)
+	}
+}
+
+func TestToolCompletionsComeFromTheRuntime(t *testing.T) {
+	got, isWanted := Complete([]string{"--complete", completeTool, "g"}, Sources{ToolNames: []string{"read", "grep"}})
+	if !isWanted || !slices.Equal(got, []string{"grep"}) {
+		t.Errorf("got %v, wanted %v", got, isWanted)
 	}
 }
 

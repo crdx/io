@@ -209,3 +209,21 @@ func TestStateCanBeRestoredIntoANewAgent(t *testing.T) {
 		t.Errorf("got restored state %s", restored)
 	}
 }
+
+func TestStateCanBeRestoredIntoADisabledTool(t *testing.T) {
+	var restored json.RawMessage
+	knownTool := statefulTool(&restored)
+	assistant := agent.NewWithEnabledTools("", &callProvider{}, []tool.Tool{knownTool}, nil)
+	events := []agent.Event{{
+		Kind:  agent.StateChangeEvent,
+		Name:  "test_state",
+		State: json.RawMessage(`{"answer":42}`),
+	}}
+
+	if err := assistant.RestoreState(events); err != nil {
+		t.Fatal(err)
+	}
+	if string(restored) != `{"answer":42}` {
+		t.Errorf("got restored state %s", restored)
+	}
+}

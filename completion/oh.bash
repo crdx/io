@@ -21,6 +21,7 @@ function _oh {
             ;;
         -r | --resume) KIND=session ;;
         -c | --caps) KIND=caps ;;
+        -t | --tool) KIND=tool ;;
         -m | --model)
             if [[ $WORD == *@* && $COMP_WORDBREAKS == *@* ]]; then
                 KIND=effort

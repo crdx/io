@@ -12,7 +12,7 @@ import (
 const usage = `oh — coding harness
 
 Usage:
-    $0 [options] [<prompt>...]
+    $0 [options] [-t <tool>]... [<prompt>...]
 
 Options:
     -d, --workspace <dir>                  Set working directory and project scope
@@ -20,6 +20,7 @@ Options:
     -s, --sessions                         Choose a saved session to resume
     -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
     -c, --caps <flags>                     Capabilities: rxwgb (read, exec, write, git, bg) [default: rxw]
+    -t, --tool <tool>                      Enable a tool; may be repeated (all by default)
     -l, --list                             List the available models, then exit
     -u, --update                           Update the cached model list, then exit
     -V, --version                          Show the version
@@ -40,6 +41,7 @@ type Input struct {
 	Sessions     bool     `docopt:"--sessions"`
 	Model        string   `docopt:"--model"`
 	Caps         string   `docopt:"--caps"`
+	Tools        []string `docopt:"--tool"`
 	List         bool     `docopt:"--list"`
 	Update       bool     `docopt:"--update"`
 	Version      bool     `docopt:"--version"`
@@ -54,6 +56,7 @@ type Options struct {
 	Model        string
 	Effort       string
 	Caps         caps.Set
+	Tools        []string
 }
 
 // Bind reads and validates the process command line.
@@ -72,6 +75,7 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 		WorkspaceDir: self.WorkspaceDir,
 		Message:      strings.Join(self.Message, " "),
 		Session:      self.Session,
+		Tools:        self.Tools,
 	}
 
 	if self.Model != "" {

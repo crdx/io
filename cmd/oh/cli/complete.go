@@ -19,6 +19,7 @@ const (
 	completeEffort  = "effort"
 	completeSession = "session"
 	completeCaps    = "caps"
+	completeTool    = "tool"
 )
 
 func completionRequest(args []string) (string, string, bool) {
@@ -43,6 +44,7 @@ func completionRequest(args []string) (string, string, bool) {
 type Sources struct {
 	ModelCachePath string
 	SessionsDir    string
+	ToolNames      []string
 }
 
 // Complete returns completions when args contain an internal completion request.
@@ -80,6 +82,8 @@ func completions(kind string, word string, sources Sources) []string {
 		return withPrefix(word, sessionNames(sources.SessionsDir))
 	case completeCaps:
 		return withPrefix(word, capsCompletions())
+	case completeTool:
+		return withPrefix(word, sources.ToolNames)
 	default:
 		return nil
 	}

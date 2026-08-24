@@ -269,15 +269,18 @@ func TestStreamAnswersEveryCallOfAFinishedTurn(t *testing.T) {
 }
 
 type oneCallProvider struct {
-	call    agent.ToolCall
-	sent    int
-	results []agent.ToolCallResult
+	call        agent.ToolCall
+	sent        int
+	definitions []tool.Definition
+	results     []agent.ToolCallResult
 }
 
-func (self *oneCallProvider) Configure(string, []tool.Definition) {}
-func (self *oneCallProvider) AddUserMessage(string)               {}
-func (self *oneCallProvider) Dump() []json.RawMessage             { return nil }
-func (self *oneCallProvider) Load([]json.RawMessage)              {}
+func (self *oneCallProvider) Configure(_ string, definitions []tool.Definition) {
+	self.definitions = definitions
+}
+func (self *oneCallProvider) AddUserMessage(string)   {}
+func (self *oneCallProvider) Dump() []json.RawMessage { return nil }
+func (self *oneCallProvider) Load([]json.RawMessage)  {}
 
 func (self *oneCallProvider) AddToolResults(results []agent.ToolCallResult) {
 	self.results = append(self.results, results...)
@@ -293,6 +296,29 @@ func (self *oneCallProvider) Send(_ context.Context, _ agent.Yield) (agent.Reply
 		call = agent.ToolCall{ID: "a", Name: "failing", Arguments: `{}`}
 	}
 	return agent.Reply{Calls: []agent.ToolCall{call}}, nil
+}
+
+func TestOnlyEnabledToolsAreOfferedAndCallable(t *testing.T) {
+	enabledTool := noop()
+	disabledTool := failingTool()
+	provider := &oneCallProvider{call: agent.ToolCall{ID: "a", Name: disabledTool.Name(), Arguments: `{}`}}
+	assistant := agent.NewWithEnabledTools("", provider, []tool.Tool{enabledTool, disabledTool}, []tool.Tool{enabledTool})
+
+	if len(provider.definitions) != 1 || provider.definitions[0].Name != enabledTool.Name() {
+		t.Fatalf("expected only %s to be offered, got %v", enabledTool.Name(), provider.definitions)
+	}
+	if _, isKnown := assistant.Tool(disabledTool.Name()); !isKnown {
+		t.Fatalf("expected %s to remain known", disabledTool.Name())
+	}
+
+	for _, err := range assistant.Stream(t.Context(), "go") {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(provider.results) != 1 || !strings.Contains(provider.results[0].Output, "there is no tool called") {
+		t.Errorf("expected the disabled call to be refused, got %v", provider.results)
+	}
 }
 
 func singleResult(t *testing.T, calledTool tool.Tool) agent.Event {
