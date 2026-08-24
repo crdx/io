@@ -133,10 +133,10 @@ func TestVisual(t *testing.T) {
 	defer func() { _ = log.Close() }()
 
 	held := &Harness{
-		agent:  agent.New("", provider, tools),
-		screen: screen,
-		log:    log,
-		mode:   caps.NewMode(caps.Read | caps.Write),
+		agent:    agent.New("", provider, tools),
+		screen:   screen,
+		recorder: recordSession(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 
 	built, err := configFrom(t, "").layout(

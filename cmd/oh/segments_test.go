@@ -124,6 +124,12 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			"",
 			segment.Context{},
 		),
+		"context-usage / one million": goldenSegmentPass(
+			t,
+			contextUsage.New(func() (int, int) { return 500_000, 1_000_000 }),
+			"",
+			segment.Context{},
+		),
 		"context-usage / unknown": goldenSegmentPass(
 			t,
 			contextUsage.New(func() (int, int) { return 0, 0 }),

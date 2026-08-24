@@ -60,8 +60,9 @@ func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
 	var screenOutput bytes.Buffer
 
 	testConversation := &Harness{
-		agent:  agent.New("", quietProvider{}, nil),
-		screen: output.New(&screenOutput),
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.New(&screenOutput),
+		recorder: recordSession(testLog(t)),
 	}
 
 	testConversation.restore(&store.Session{
@@ -81,8 +82,9 @@ func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
 func TestRestoringAConversationClearsTheTerminalBeforeReplaying(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := &Harness{
-		agent:  agent.New("", quietProvider{}, nil),
-		screen: output.NewTerminalOfSize(&screenOutput, 80, 24),
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.NewTerminalOfSize(&screenOutput, 80, 24),
+		recorder: recordSession(testLog(t)),
 	}
 
 	self.restore(&store.Session{Events: []agent.Event{{
@@ -111,8 +113,9 @@ func TestRestoringAConversationRestoresStateBeforeReturning(t *testing.T) {
 
 	var screenOutput bytes.Buffer
 	self := &Harness{
-		agent:  agent.New("", quietProvider{}, []tool.Tool{statefulTool}),
-		screen: output.New(&screenOutput),
+		agent:    agent.New("", quietProvider{}, []tool.Tool{statefulTool}),
+		screen:   output.New(&screenOutput),
+		recorder: recordSession(testLog(t)),
 	}
 	self.restore(&store.Session{Events: []agent.Event{{
 		Kind:  agent.StateChangeEvent,
@@ -282,9 +285,9 @@ func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 
 	var live strings.Builder
 	self := &Harness{
-		agent:  agent.New("", quietProvider{}, nil),
-		screen: output.NewTerminalOfSize(&live, 80, 24),
-		log:    testLog(t),
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.NewTerminalOfSize(&live, 80, 24),
+		recorder: recordSession(testLog(t)),
 	}
 
 	call := agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}}
@@ -319,9 +322,9 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 
 	var live bytes.Buffer
 	self := &Harness{
-		agent:  agent.New("", quietProvider{}, tools),
-		screen: output.New(&live),
-		log:    testLog(t),
+		agent:    agent.New("", quietProvider{}, tools),
+		screen:   output.New(&live),
+		recorder: recordSession(testLog(t)),
 	}
 	livePainter := self.newPainter(true)
 
@@ -485,7 +488,7 @@ func testConversation(t *testing.T, screenOutput *bytes.Buffer) *Harness {
 	return &Harness{
 		agent:              agent.New("", backend, nil),
 		screen:             output.New(screenOutput),
-		log:                log,
+		recorder:           recordSession(log),
 		mode:               caps.NewMode(caps.Read | caps.Write),
 		getOnWithItMessage: builtInConfig(t).GetOnWithItMessage,
 	}
@@ -914,8 +917,8 @@ func TestCompletedReasoningBlocksRemainSeparateInTheJournal(t *testing.T) {
 
 	var screenOutput bytes.Buffer
 	self := &Harness{
-		screen: output.New(&screenOutput),
-		log:    log,
+		screen:   output.New(&screenOutput),
+		recorder: recordSession(log),
 	}
 	self.currentTurn = Turn{isRunning: true, painter: self.newPainter(true)}
 
@@ -975,8 +978,8 @@ func TestIncompleteReasoningIsErasedBeforeAFailure(t *testing.T) {
 func TestDiscardedReasoningLeavesTheSameScreenAsReplay(t *testing.T) {
 	var liveOutput bytes.Buffer
 	self := &Harness{
-		screen: output.NewTerminalOfSize(&liveOutput, 80, 24),
-		log:    testLog(t),
+		screen:   output.NewTerminalOfSize(&liveOutput, 80, 24),
+		recorder: recordSession(testLog(t)),
 	}
 	self.currentTurn = Turn{isRunning: true, painter: self.newPainter(true)}
 

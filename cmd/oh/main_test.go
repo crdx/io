@@ -58,7 +58,7 @@ func conversationFixture(t *testing.T, hasSession bool, currentCaps caps.Set) *H
 	t.Cleanup(func() { _ = log.Close() })
 
 	return &Harness{
-		log:          log,
+		recorder:     recordSession(log),
 		workspaceDir: "/tmp/somewhere",
 		mode:         caps.NewMode(currentCaps),
 	}
@@ -67,7 +67,7 @@ func conversationFixture(t *testing.T, hasSession bool, currentCaps caps.Set) *H
 func TestStartingAgainNamesTheSessionAndKeepsTheMode(t *testing.T) {
 	self := conversationFixture(t, true, caps.Read|caps.Write|caps.Shell)
 
-	want := []string{"-r", self.log.Name(), "--caps", "rxw"}
+	want := []string{"-r", self.recorder.Name(), "--caps", "rxw"}
 
 	if got := self.restartArguments(); !slices.Equal(got, want) {
 		t.Errorf("expected %v, got %v", want, got)
@@ -80,7 +80,7 @@ func TestStartingAgainAsksForWhateverWasSwappedMidConversation(t *testing.T) {
 	self.mode.Toggle(caps.Write)
 	self.mode.Toggle(caps.Git)
 
-	want := []string{"-r", self.log.Name(), "--caps", "rxg"}
+	want := []string{"-r", self.recorder.Name(), "--caps", "rxg"}
 
 	if got := self.restartArguments(); !slices.Equal(got, want) {
 		t.Errorf("expected %v, got %v", want, got)

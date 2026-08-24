@@ -8,6 +8,8 @@
 \e[38;2;192;128;80m·✦\e[0m
 === context-usage / known ===
 \e[38;2;150;152;150m91% 182Kt/200Kt\e[0m
+=== context-usage / one million ===
+\e[38;2;150;152;150m50% 500Kt/1Mt\e[0m
 === context-usage / unknown ===
 \e[38;2;150;152;150m?% ?/?\e[0m
 === current-session ===

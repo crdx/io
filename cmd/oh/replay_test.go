@@ -373,7 +373,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 			agent:        agent.New("", quietProvider{}, toolbox.Rummage(files, file.NewSnapshots())),
 			screen:       screen,
 			workspaceDir: workspaceDir,
-			log:          testLog(t),
+			recorder:     recordSession(testLog(t)),
 		},
 	}
 }

@@ -279,7 +279,7 @@ func run() ([]string, error) {
 		screen:   output.New(os.Stdout).LinkPathsUnder(workspaceDir),
 		terminal: terminal.New(os.Stdout),
 
-		log: log,
+		recorder: recordSession(log),
 
 		workspaceDir:        workspaceDir,
 		contextWindowTokens: choice.ContextWindowTokens,

@@ -8,6 +8,8 @@ medium gpt-5.6-sol
 ·✦
 === context-usage / known ===
 91% 182Kt/200Kt
+=== context-usage / one million ===
+50% 500Kt/1Mt
 === context-usage / unknown ===
 ?% ?/?
 === current-session ===

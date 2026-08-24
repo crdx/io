@@ -342,9 +342,9 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	)
 	var firstScreenOutput bytes.Buffer
 	firstHarness := &Harness{
-		agent:  firstAssistant,
-		screen: output.NewTerminalOfSize(&firstScreenOutput, replayColumns, replayLines),
-		log:    log,
+		agent:    firstAssistant,
+		screen:   output.NewTerminalOfSize(&firstScreenOutput, replayColumns, replayLines),
+		recorder: recordSession(log),
 	}
 	firstHarness.currentTurn = Turn{isRunning: true, painter: firstHarness.newPainter(true)}
 	runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
@@ -375,12 +375,13 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		t.Fatal(err)
 	}
 	var screenOutput bytes.Buffer
+	resumedRecorder := recordSession(log)
+	resumedRecorder.Resume(len(storedSession.Items))
 	resumedHarness := &Harness{
-		agent:         resumedAssistant,
-		screen:        output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines),
-		log:           log,
-		events:        slices.Clone(storedSession.Events),
-		flushBoundary: len(storedSession.Items),
+		agent:    resumedAssistant,
+		screen:   output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines),
+		recorder: resumedRecorder,
+		events:   slices.Clone(storedSession.Events),
 	}
 	resumedHarness.currentTurn = Turn{isRunning: true}
 	resumedHarness.replay()

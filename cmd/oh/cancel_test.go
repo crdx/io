@@ -281,10 +281,10 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 	defer func() { _ = log.Close() }()
 
 	self := &Harness{
-		agent:  agent.New("", eventsAfterCancellationProvider{}, nil),
-		screen: output.New(&bytes.Buffer{}),
-		log:    log,
-		mode:   caps.NewMode(caps.Read | caps.Write),
+		agent:    agent.New("", eventsAfterCancellationProvider{}, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: recordSession(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 
 	self.start("first")
@@ -382,10 +382,10 @@ func TestReplacementInputCancelsProvisionalReasoningAndStartsTheNextTurn(t *test
 
 	provider := &reasoningThenAnswerProvider{}
 	self := &Harness{
-		agent:  agent.New("", provider, nil),
-		screen: output.New(&bytes.Buffer{}),
-		log:    log,
-		mode:   caps.NewMode(caps.Read | caps.Write),
+		agent:    agent.New("", provider, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: recordSession(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 	history := edit.NewHistory("", historyLimit)
 	editor := edit.NewInput(history)
@@ -440,10 +440,10 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 
 	var screenOutput bytes.Buffer
 	self := &Harness{
-		agent:  agent.New("", quietProvider{}, nil),
-		screen: output.New(&screenOutput),
-		log:    log,
-		mode:   caps.NewMode(caps.Read | caps.Write),
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.New(&screenOutput),
+		recorder: recordSession(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 	history := edit.NewHistory("", historyLimit)
 	editor := edit.NewInput(history)
@@ -504,10 +504,10 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 	}
 
 	self := &Harness{
-		agent:  agent.New("", quietProvider{}, nil),
-		screen: output.New(&bytes.Buffer{}),
-		log:    log,
-		mode:   caps.NewMode(caps.Read | caps.Write),
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: recordSession(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 
 	self.start("first")
@@ -633,10 +633,10 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	defer func() { _ = log.Close() }()
 
 	self := &Harness{
-		agent:  agent.New("", quietProvider{}, nil),
-		screen: output.New(&bytes.Buffer{}),
-		log:    log,
-		mode:   caps.NewMode(caps.Read | caps.Write),
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: recordSession(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 
 	self.start("first")
@@ -697,10 +697,10 @@ func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
 	defer func() { _ = log.Close() }()
 
 	self := &Harness{
-		agent:  agent.New("", quietProvider{}, nil),
-		screen: output.New(&bytes.Buffer{}),
-		log:    log,
-		mode:   caps.NewMode(caps.Read | caps.Write),
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: recordSession(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 
 	self.start("first")

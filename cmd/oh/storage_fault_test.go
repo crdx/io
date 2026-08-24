@@ -46,9 +46,9 @@ func (self *faultingConversationLog) TakeWarnings() []error {
 
 func newStorageFaultHarness(log SessionLogger, assistant *agent.Agent) *Harness {
 	testHarness := &Harness{
-		agent:  assistant,
-		screen: output.New(&bytes.Buffer{}),
-		log:    log,
+		agent:    assistant,
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: recordSession(log),
 	}
 	testHarness.currentTurn = Turn{painter: testHarness.newPainter(false)}
 	return testHarness

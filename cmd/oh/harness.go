@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
@@ -19,6 +18,7 @@ import (
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/recording"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/terminal"
@@ -27,19 +27,17 @@ import (
 	"crdx.org/io/internal/util"
 )
 
-type SessionLogger interface {
-	Stored() bool
-	Name() string
-	Event(agent.Event) error
-	Item(json.RawMessage) error
-	TakeWarnings() []error
+type SessionLogger = recording.Session
+
+func recordSession(session SessionLogger) *recording.Recorder {
+	return recording.New(session)
 }
 
 type Harness struct {
 	agent         *agent.Agent
 	events        []agent.Event
 	screen        *output.Screen
-	log           SessionLogger
+	recorder      *recording.Recorder
 	processes     *sandbox.Processes
 	segmentLayout segment.Layout
 	editor        *edit.Input
@@ -55,7 +53,6 @@ type Harness struct {
 	queuedTurn          QueuedTurn
 	currentTurn         Turn
 	onTurnFinished      func()
-	flushBoundary       int
 	terminalFocused     bool
 }
 
@@ -79,7 +76,7 @@ func (self *Harness) begin(message string) {
 	restoreTerminal := self.terminal.Begin(self.mode.Current())
 	defer restoreTerminal()
 
-	defer func() { self.screen.Release(self.log.Stored()) }()
+	defer func() { self.screen.Release(self.recorder.Stored()) }()
 
 	keys := keypresses(os.Stdin)
 	resizeSignals := resizes()
@@ -266,8 +263,8 @@ func (self *Harness) replaceTurn(message string) {
 func (self *Harness) restartArguments() []string {
 	var arguments []string
 
-	if self.log.Stored() {
-		arguments = append(arguments, "-r", self.log.Name())
+	if self.recorder.Stored() {
+		arguments = append(arguments, "-r", self.recorder.Name())
 	} else {
 		arguments = append(arguments, "--workspace", self.workspaceDir)
 	}
@@ -432,7 +429,7 @@ func (self *Harness) restore(storedSession *store.Session) {
 		return
 	}
 
-	self.flushBoundary = len(storedSession.Items)
+	self.recorder.Resume(len(storedSession.Items))
 	self.events = append(self.events, storedSession.Events...)
 
 	for _, event := range storedSession.Events {
@@ -552,7 +549,9 @@ func (self *Harness) recordEvent(event agent.Event) {
 		self.redraw()
 	}
 
-	self.write(func() error { return self.log.Event(event) })
+	if err := self.recorder.Event(event); err != nil {
+		self.notifyFailure("the conversation could not be stored: " + err.Error())
+	}
 	self.showStorageWarnings()
 }
 
@@ -586,7 +585,7 @@ func (self *Harness) notify(event agent.Event) {
 	self.events = append(self.events, event)
 	self.noticePainter().drawEvent(event)
 
-	_ = self.log.Event(event)
+	_ = self.recorder.Event(event)
 }
 
 func (self *Harness) noticePainter() *Painter {
@@ -643,29 +642,13 @@ func (self *Harness) storeItems() {
 		return
 	}
 
-	if len(items) < self.flushBoundary {
-		self.notifyFailure("the provider replaced append-only conversation state")
-		return
-	}
-
-	for _, item := range items[self.flushBoundary:] {
-		if err := self.log.Item(item); err != nil {
-			self.notifyFailure("the conversation state could not be stored: " + err.Error())
-			return
-		}
-
-		self.flushBoundary++
-	}
-}
-
-func (self *Harness) write(record func() error) {
-	if err := record(); err != nil {
-		self.notifyFailure("the conversation could not be stored: " + err.Error())
+	if err := self.recorder.StoreItems(items); err != nil {
+		self.notifyFailure(err.Error())
 	}
 }
 
 func (self *Harness) showStorageWarnings() {
-	for _, err := range self.log.TakeWarnings() {
+	for _, err := range self.recorder.TakeWarnings() {
 		self.notifyFailure(err.Error())
 	}
 }

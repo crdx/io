@@ -46,10 +46,11 @@ func TestContextUsageShowsEveryKnownPart(t *testing.T) {
 		totalTokens int
 		want        string
 	}{
-		"neither":    {want: "?% ?/?"},
-		"total only": {totalTokens: 200_000, want: "?% ?/200Kt"},
-		"used only":  {usedTokens: 5000, want: "?% 5Kt/?"},
-		"both":       {usedTokens: 5000, totalTokens: 200_000, want: "3% 5Kt/200Kt"},
+		"neither":             {want: "?% ?/?"},
+		"total only":          {totalTokens: 200_000, want: "?% ?/200Kt"},
+		"one million context": {usedTokens: 500_000, totalTokens: 1_000_000, want: "50% 500Kt/1Mt"},
+		"used only":           {usedTokens: 5000, want: "?% 5Kt/?"},
+		"both":                {usedTokens: 5000, totalTokens: 200_000, want: "3% 5Kt/200Kt"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			if got := render(t, test.usedTokens, test.totalTokens); got != test.want {
