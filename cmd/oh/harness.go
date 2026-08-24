@@ -21,6 +21,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/store"
+	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/util"
@@ -43,6 +44,7 @@ type Harness struct {
 	segmentLayout segment.Layout
 	editor        *edit.Input
 	mode          *caps.Mode
+	terminal      terminal.Terminal
 
 	workspaceDir        string
 	contextWindowTokens int
@@ -73,6 +75,10 @@ func (self *Harness) begin(message string) {
 	self.terminalFocused = true
 
 	defer restoreTTY()
+
+	restoreTerminal := self.terminal.Begin(self.mode.Current())
+	defer restoreTerminal()
+
 	defer func() { self.screen.Release(self.log.Stored()) }()
 
 	keys := keypresses(os.Stdin)
@@ -235,6 +241,7 @@ func (self *Harness) submitInput(editor *edit.Input, history *edit.History, mess
 
 func (self *Harness) toggleCapability(whichCaps caps.Set) {
 	self.mode.Toggle(whichCaps)
+	self.terminal.SetMode(self.mode.Current())
 
 	if self.currentTurn.isRunning {
 		self.queuedTurn.isModeChange = true

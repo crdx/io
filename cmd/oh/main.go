@@ -29,6 +29,7 @@ import (
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/terminal"
 )
 
 const (
@@ -352,9 +353,12 @@ func run() ([]string, error) {
 	tools = truncate.Tools(tools)
 
 	chat := &Harness{
-		agent:               agent.New(systemPrompt, client, tools),
-		screen:              output.New(os.Stdout).LinkPathsUnder(workspaceDir),
-		log:                 log,
+		agent:    agent.New(systemPrompt, client, tools),
+		screen:   output.New(os.Stdout).LinkPathsUnder(workspaceDir),
+		terminal: terminal.New(os.Stdout),
+
+		log: log,
+
 		workspaceDir:        workspaceDir,
 		contextWindowTokens: choice.ContextWindowTokens,
 		mode:                mode,
