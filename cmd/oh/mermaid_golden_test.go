@@ -31,7 +31,7 @@ func TestMermaidStreamingDrawsWhatItDrewBefore(t *testing.T) {
 func mermaidStreamingScreen(t *testing.T, deltas ...string) string {
 	t.Helper()
 	var screenOutput bytes.Buffer
-	painter := &Painter{Screen: output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines), IsRunning: true}
+	painter := newTestPainter(output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines), true)
 	for _, delta := range deltas {
 		painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: delta})
 	}
@@ -53,7 +53,7 @@ func completedInvalidMermaidScreen(t *testing.T) string {
 	t.Helper()
 	const invalid = "```mermaid\ngraph LR\nA --> B\nB -->\n```"
 	var screenOutput bytes.Buffer
-	painter := &Painter{Screen: output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines), IsRunning: true}
+	painter := newTestPainter(output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines), true)
 	painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "```mermaid\ngraph LR\nA --> B"})
 	painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "\nB -->"})
 	painter.DrawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: invalid})

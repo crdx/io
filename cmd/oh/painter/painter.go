@@ -1,11 +1,9 @@
 package painter
 
 import (
-	"path/filepath"
 	"strings"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/tool"
 
 	"crdx.org/io/cmd/oh/call"
@@ -13,72 +11,29 @@ import (
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
-	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 )
 
-const (
-	readTool  = "read"
-	shellTool = "bash"
-)
-
-// Painter renders conversation events and live deltas onto a terminal screen.
 type Painter struct {
-	Screen         *output.Screen
-	toolBlock      *dynamic.Block          // the open block of tool calls
-	rows           map[string]int          // which row of the block a call is being shown on
-	answer         strings.Builder         // the answer so far, which is rendered again on every delta
-	answerRenderer markdown.StreamRenderer // the live answer's rendering state
-	reasoning      strings.Builder         // the reasoning so far, which is rendered again on every delta
-	previousKind   agent.Kind              // the last completed event, which determines block separation
+	screen         *output.Screen
+	toolBlock      *dynamic.Block
+	rows           map[string]int
+	answer         strings.Builder
+	answerRenderer markdown.StreamRenderer
+	reasoning      strings.Builder
+	previousKind   agent.Kind
 
-	isStale   bool // whether streamed prose outgrew what the screen can repair
-	IsRunning bool // whether drawing is happening as events arrive
+	isStale   bool
+	isRunning bool
 
-	GetTool      func(string) (tool.Tool, bool) // the tools a call may be rendered by
-	WorkspaceDir string                         // the prefix omitted from paths inside the workspace
+	getTool      func(string) (tool.Tool, bool)
+	workspaceDir string
 }
 
-func (self *Painter) Describe(event agent.Event) agent.FallbackRendering {
-	shown := event.FallbackRendering
-
-	if calledTool, known := self.calledTool(event.Name); known {
-		shown.ReadOnly = calledTool.ReadOnly()
-
-		if parsedToolCall, err := calledTool.Parse(event.Arguments); err == nil {
-			shown.Describe(parsedToolCall)
-		} else {
-			shown.Subject = tool.DescribeUnparsedArguments(calledTool, event.Arguments)
-		}
-	}
-
-	shown.Subject = self.ShortenPathPrefix(shown.Subject)
-	shown.Note = self.ShortenPathPrefix(shown.Note)
-	shown.Emphasis.Source = self.ShortenPathPrefix(shown.Emphasis.Source)
-
-	return shown
-}
-
-func (self *Painter) ShortenPathPrefix(value string) string {
-	if self.WorkspaceDir != "" {
-		for _, workspaceDir := range []string{self.WorkspaceDir, pathutil.Shorten(self.WorkspaceDir)} {
-			rest, hasPrefix := strings.CutPrefix(value, workspaceDir)
-			switch {
-			case !hasPrefix:
-				continue
-			case rest == "":
-				return ""
-			case strings.HasPrefix(rest, string(filepath.Separator)):
-				return strings.TrimPrefix(rest, string(filepath.Separator))
-			case strings.HasPrefix(rest, " "):
-				return strings.TrimPrefix(rest, " ")
-			}
-		}
-	}
-
-	return pathutil.Shorten(value)
+func New(screen *output.Screen, isRunning bool, getTool func(string) (tool.Tool, bool), workspaceDir string) *Painter {
+	return &Painter{screen: screen, isRunning: isRunning, getTool: getTool, workspaceDir: workspaceDir}
 }
 
 func (self *Painter) DrawDelta(delta agent.Delta) {
@@ -93,9 +48,9 @@ func (self *Painter) DrawRestoredDelta(delta agent.Delta, previous *Painter) {
 func (self *Painter) DrawEvent(event agent.Event) {
 	switch {
 	case event.Kind == agent.ModelReasoningEvent && self.previousKind == agent.ModelReasoningEvent && self.reasoning.Len() == 0:
-		self.Screen.End()
+		self.screen.End()
 	case event.Kind == agent.ModelMessageEvent && self.previousKind == agent.ModelMessageEvent && self.answer.Len() == 0:
-		self.Screen.Blank()
+		self.screen.Blank()
 	}
 	self.previousKind = event.Kind
 
@@ -109,55 +64,55 @@ func (self *Painter) DrawEvent(event agent.Event) {
 		self.discardProvisionalReasoning()
 		self.answer.Reset()
 		self.Close(dynamic.Cancelled)
-		self.Screen.Blank()
-		self.Screen.Line(RenderSubmittedMessage(event.Text, self.Screen.Columns()))
-		self.Screen.End()
-		self.Screen.Blank()
+		self.screen.Blank()
+		self.screen.Line(RenderSubmittedMessage(event.Text, self.screen.Columns()))
+		self.screen.End()
+		self.screen.Blank()
 
 	case agent.ModelReasoningEvent:
 		self.answer.Reset()
 		self.reasoning.Reset()
 		self.reasoning.WriteString(event.Text)
-		if !self.Screen.DrawReasoning(RenderReasoning(self.reasoning.String(), self.Screen.Columns())) {
+		if !self.screen.DrawReasoning(RenderReasoning(self.reasoning.String(), self.screen.Columns())) {
 			self.isStale = true
 		}
-		self.Screen.Seal()
+		self.screen.Seal()
 		self.reasoning.Reset()
 
 	case agent.ModelMessageEvent:
 		self.discardProvisionalReasoning()
 		self.answer.Reset()
 		self.answer.WriteString(event.Text)
-		if !self.Screen.DrawAnswer(markdown.Render(self.answer.String(), self.Screen.Columns())) {
+		if !self.screen.DrawAnswer(markdown.Render(self.answer.String(), self.screen.Columns())) {
 			self.isStale = true
 		}
-		self.Screen.Seal()
+		self.screen.Seal()
 		self.answer.Reset()
 
 	case agent.ToolCallRequestEvent:
 		if self.toolBlock == nil {
-			self.toolBlock = dynamic.NewBlock(self.Screen.Refresh)
-			self.Screen.Open(self.toolBlock)
+			self.toolBlock = dynamic.NewBlock(self.screen.Refresh)
+			self.screen.Open(self.toolBlock)
 			self.rows = map[string]int{}
 		}
 
-		self.rows[event.ID] = self.toolBlock.Add(self.label(event, self.Describe(event)))
+		self.rows[event.ID] = self.toolBlock.Add(call.LabelFor(event, self.getTool, self.workspaceDir))
 
 	case agent.ToolCallResultEvent:
 		self.mark(event)
 
 	case agent.StartupEvent, agent.HarnessMessageEvent:
-		self.Screen.Line(self.render(event))
+		self.screen.Line(self.render(event))
 
 	case caps.ModeChange:
 		if notice, said := caps.ModeNotice(event); said {
 			self.Close(dynamic.Cancelled)
-			self.Screen.Line(NoticeStyle(agent.WarningStatus)(notice))
+			self.screen.Line(NoticeStyle(agent.WarningStatus)(notice))
 		}
 
 	case agent.FailureEvent:
 		self.Close(dynamic.Cancelled)
-		self.Screen.Line(style.Failure(event.Text))
+		self.screen.Line(style.Failure(event.Text))
 	}
 }
 
@@ -225,9 +180,7 @@ func RenderReasoning(thought string, columns int) []string {
 	return width.Wrap(style.Reasoning(stripped), columns)
 }
 
-func (self *Painter) Stale() bool                   { return self.isStale }
-func (self *Painter) HasOpenTools() bool            { return self.toolBlock != nil }
-func (self *Painter) ToolRow(id string) (int, bool) { row, found := self.rows[id]; return row, found }
+func (self *Painter) Stale() bool { return self.isStale }
 
 func (self *Painter) Close(state dynamic.RowState) {
 	self.discardProvisionalReasoning()
@@ -237,8 +190,12 @@ func (self *Painter) Close(state dynamic.RowState) {
 		self.toolBlock = nil
 		self.rows = nil
 
-		self.Screen.Seal()
+		self.screen.Seal()
 	}
+}
+
+func (self *Painter) End() {
+	self.screen.End()
 }
 
 func (self *Painter) Stop() {
@@ -247,56 +204,18 @@ func (self *Painter) Stop() {
 		self.toolBlock = nil
 		self.rows = nil
 
-		self.Screen.Seal()
+		self.screen.Seal()
 	}
-}
-
-func (self *Painter) label(event agent.Event, shown agent.FallbackRendering) call.Label {
-	label := call.Label{
-		Name:      event.Name,
-		Subject:   shown.Subject,
-		Emphasis:  shown.Emphasis,
-		Qualifier: shown.Note,
-		ReadOnly:  shown.ReadOnly,
-	}
-
-	skillName, isSkillLoad := "", false
-	if event.Name == readTool {
-		skillName, isSkillLoad = skill.NameFromPath(shown.Subject)
-	}
-
-	switch {
-	case event.Name == shellTool:
-		label.Name = "$"
-		label.NameStyle = style.Shell
-
-	case isSkillLoad:
-		label.Name = "load"
-		label.NameStyle = style.Skill
-		label.Accent = skillName
-		label.AccentStyle = style.Skill
-		label.Emphasis = tool.Emphasis{}
-	}
-
-	return label
-}
-
-func (self *Painter) calledTool(name string) (tool.Tool, bool) {
-	if self.GetTool == nil {
-		return nil, false
-	}
-
-	return self.GetTool(name)
 }
 
 func (self *Painter) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldResetAnswerRenderer bool) {
 	switch delta.Kind {
 	case agent.ModelReasoningEvent:
 		if self.reasoning.Len() == 0 && self.previousKind == agent.ModelReasoningEvent {
-			self.Screen.End()
+			self.screen.End()
 		}
 		self.reasoning.WriteString(delta.Text)
-		if !self.Screen.DrawReasoning(RenderReasoning(self.reasoning.String(), self.Screen.Columns())) {
+		if !self.screen.DrawReasoning(RenderReasoning(self.reasoning.String(), self.screen.Columns())) {
 			self.isStale = true
 		}
 
@@ -307,11 +226,11 @@ func (self *Painter) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldR
 				self.answerRenderer.Reset()
 			}
 			if self.previousKind == agent.ModelMessageEvent {
-				self.Screen.Blank()
+				self.screen.Blank()
 			}
 		}
 		self.answer.WriteString(delta.Text)
-		if !self.Screen.DrawAnswer(self.answerRenderer.Render(self.answer.String(), self.Screen.Columns())) {
+		if !self.screen.DrawAnswer(self.answerRenderer.Render(self.answer.String(), self.screen.Columns())) {
 			self.isStale = true
 		}
 	}
@@ -322,7 +241,7 @@ func (self *Painter) discardProvisionalReasoning() {
 		return
 	}
 
-	if !self.Screen.DiscardLive() {
+	if !self.screen.DiscardLive() {
 		self.isStale = true
 	}
 	self.reasoning.Reset()

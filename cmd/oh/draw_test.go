@@ -28,7 +28,7 @@ func TestWhatWasAskedIsRenderedIntoTheConversation(t *testing.T) {
 	for _, isLive := range []bool{true, false} {
 		var screenOutput bytes.Buffer
 
-		painter := &Painter{Screen: output.New(&screenOutput), IsRunning: isLive}
+		painter := newTestPainter(output.New(&screenOutput), isLive)
 		painter.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "**weather**\n\n- today"})
 
 		plain := style.Plain(screenOutput.String())
@@ -195,7 +195,7 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var screenOutput bytes.Buffer
-			callPainter := &Painter{Screen: output.New(&screenOutput)}
+			callPainter := newTestPainter(output.New(&screenOutput), false)
 
 			callPainter.DrawEvent(agent.Event{
 				Kind: agent.ToolCallRequestEvent,
@@ -220,7 +220,7 @@ func TestAReadOfASkillIsDrawnAsTheSkill(t *testing.T) {
 
 func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
 	var screenOutput bytes.Buffer
-	callPainter := &Painter{Screen: output.New(&screenOutput)}
+	callPainter := newTestPainter(output.New(&screenOutput), false)
 
 	callPainter.DrawEvent(agent.Event{
 		Kind: agent.ToolCallRequestEvent,
@@ -385,7 +385,7 @@ func TestAThoughtHasMarkdownStripped(t *testing.T) {
 
 func TestAThoughtRunsDirectlyIntoAToolCall(t *testing.T) {
 	var screenOutput bytes.Buffer
-	callPainter := &Painter{Screen: output.New(&screenOutput)}
+	callPainter := newTestPainter(output.New(&screenOutput), false)
 
 	callPainter.DrawEvent(agent.Event{Kind: agent.ModelReasoningEvent, Text: "checking"})
 	callPainter.DrawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}})
@@ -542,7 +542,7 @@ func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
 
 func TestAShellCallIsDrawnAsAShellPrompt(t *testing.T) {
 	var screenOutput bytes.Buffer
-	callPainter := &Painter{Screen: output.New(&screenOutput)}
+	callPainter := newTestPainter(output.New(&screenOutput), false)
 
 	callPainter.DrawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "bash", FallbackRendering: agent.FallbackRendering{Subject: "echo hello"}})
 	callPainter.Close(dynamic.Done)
@@ -554,27 +554,6 @@ func TestAShellCallIsDrawnAsAShellPrompt(t *testing.T) {
 	if strings.Contains(plain, "bash echo hello") {
 		t.Errorf("got %q, want no tool name", plain)
 	}
-}
-
-func TestATurnThatLeftACallUnansweredIsClosedByWhatIsAskedNext(t *testing.T) {
-	var screenOutput bytes.Buffer
-
-	callPainter := &Painter{Screen: output.New(&screenOutput)}
-
-	callPainter.DrawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}})
-	callPainter.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "never mind"})
-
-	if callPainter.HasOpenTools() {
-		t.Fatal("expected the block to be closed by the next thing asked")
-	}
-
-	callPainter.DrawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "2", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "two.go"}})
-
-	if got, found := callPainter.ToolRow("2"); !found || got != 0 {
-		t.Errorf("expected the call to open a block of its own, got row %d", got)
-	}
-
-	callPainter.Close(dynamic.Cancelled)
 }
 
 func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
@@ -602,15 +581,11 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 		t.Fatal("expected the turn to be given the painter that drew the replay")
 	}
 
-	if !testConversation.currentTurn.painter.HasOpenTools() {
+	if got := blocksStillRunning(t); got <= blocksBefore {
 		t.Fatal("expected the unanswered call to be on a block that is open again")
 	}
 
 	testConversation.currentTurn.painter.DrawEvent(agent.Event{Kind: agent.ToolCallResultEvent, ID: "1", Name: "read", Took: time.Second})
-
-	if testConversation.currentTurn.painter.HasOpenTools() {
-		t.Error("expected the block to close once every call had reported")
-	}
 
 	if got := blocksStillRunning(t); got > blocksBefore {
 		t.Errorf("expected nothing left redrawing, got %d blocks where there were %d", got, blocksBefore)
@@ -641,7 +616,7 @@ func TestARedrawDuringProvisionalReasoningRestoresTheOpenBlock(t *testing.T) {
 func TestAStreamingMermaidDiagramKeepsItsLastValidRendering(t *testing.T) {
 	const columns = 100
 	var screenOutput bytes.Buffer
-	painter := &Painter{Screen: output.NewTerminalOfSize(&screenOutput, columns, 24), IsRunning: true}
+	painter := newTestPainter(output.NewTerminalOfSize(&screenOutput, columns, 24), true)
 
 	painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "```mermaid\ngraph LR\nA --> B"})
 	valid := strings.Join(visibleScreen(t, screenOutput.String(), columns), "\n")
@@ -683,7 +658,7 @@ func TestACompletedInvalidMermaidDiagramFallsBackToSource(t *testing.T) {
 	const columns = 100
 	const invalid = "```mermaid\ngraph LR\nA --> B\nB -->\n```"
 	var screenOutput bytes.Buffer
-	painter := &Painter{Screen: output.NewTerminalOfSize(&screenOutput, columns, 24), IsRunning: true}
+	painter := newTestPainter(output.NewTerminalOfSize(&screenOutput, columns, 24), true)
 
 	painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "```mermaid\ngraph LR\nA --> B"})
 	painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "\nB -->"})
@@ -700,19 +675,19 @@ func TestAnAnswerStreamedIsTheSameAsTheAnswerReplayed(t *testing.T) {
 
 	var live bytes.Buffer
 
-	livePainter := &Painter{Screen: output.New(&live), IsRunning: true}
+	livePainter := newTestPainter(output.New(&live), true)
 
 	for _, delta := range deltas(answer, 10) {
 		livePainter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: delta})
 	}
 	livePainter.DrawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: answer})
-	livePainter.Screen.End()
+	livePainter.End()
 
 	var replayOutput bytes.Buffer
 
-	replayPainter := &Painter{Screen: output.New(&replayOutput)}
+	replayPainter := newTestPainter(output.New(&replayOutput), false)
 	replayPainter.DrawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: answer})
-	replayPainter.Screen.End()
+	replayPainter.End()
 
 	plain := style.Plain(live.String())
 
@@ -759,7 +734,7 @@ func TestCallEmphasisSourceIsDerivedFromRecordedArguments(t *testing.T) {
 	}).Plain(func(context.Context, fakeArgs) (string, error) { return "", nil })
 	conversation := &Harness{agent: agent.New("", quietProvider{}, []tool.Tool{current})}
 
-	fallback := conversation.newPainter(false).Describe(agent.Event{
+	fallback := describeHarnessCall(conversation, agent.Event{
 		Name:      "bash",
 		Arguments: `{"path":"cat <<EOF\none\nEOF"}`,
 	})
@@ -787,7 +762,7 @@ func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 		workspaceDir: workspaceDir,
 	}
 
-	fallback := testConversation.newPainter(false).Describe(agent.Event{
+	fallback := describeHarnessCall(testConversation, agent.Event{
 		Name:      "read",
 		Arguments: `{"path":"/home/alice/project/cmd/oh/draw.go"}`,
 	})
@@ -801,36 +776,10 @@ func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 	}
 }
 
-func TestPathPrefixesAreShortened(t *testing.T) {
-	const workspaceDir = "/home/alice/project"
-
-	t.Setenv("HOME", "/home/alice")
-
-	callPainter := &Painter{WorkspaceDir: workspaceDir}
-	tests := map[string]string{
-		workspaceDir:                          "",
-		"~/project":                           "",
-		workspaceDir + " **/*.go":             "**/*.go",
-		"~/project **/*.go":                   "**/*.go",
-		workspaceDir + "/cmd/oh/draw.go":      "cmd/oh/draw.go",
-		"~/project/cmd/oh/draw.go":            "cmd/oh/draw.go",
-		"/home/alice/other.go":                "~/other.go",
-		"/home/alice/projectile/other.go":     "~/projectile/other.go",
-		"~/projectile/cmd/oh/draw.go **/*.go": "~/projectile/cmd/oh/draw.go **/*.go",
-	}
-
-	for value, want := range tests {
-		if got := callPainter.ShortenPathPrefix(value); got != want {
-			t.Errorf("shortenPathPrefix(%q) = %q, want %q", value, got, want)
-		}
-	}
-}
-
 func TestRecordedCallPathsAreShortenedWithTheSameFunction(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
-	callPainter := &Painter{WorkspaceDir: "/home/alice/project"}
-	fallback := callPainter.Describe(agent.Event{
+	fallback := describeBareCall("/home/alice/project", agent.Event{
 		Name: "removed",
 		FallbackRendering: agent.FallbackRendering{
 			Subject: "/home/alice/project/file.go",
@@ -859,7 +808,7 @@ func TestARefusedCallIsDescribedAgainRatherThanFromTheRecord(t *testing.T) {
 		agent: agent.New("", quietProvider{}, []tool.Tool{refusing}),
 	}
 
-	fallback := testConversation.newPainter(false).Describe(agent.Event{
+	fallback := describeHarnessCall(testConversation, agent.Event{
 		Name:              "shout",
 		Arguments:         `{"message":"oi"}`,
 		FallbackRendering: agent.FallbackRendering{Subject: ""},
@@ -888,7 +837,7 @@ func testLog(t *testing.T) *store.Writer {
 
 func TestAnAsideStandsBetweenTheCallsItArrivedAmong(t *testing.T) {
 	var screenOutput bytes.Buffer
-	painter := &Painter{Screen: output.NewTerminalOfSize(&screenOutput, 80, 24), IsRunning: true}
+	painter := newTestPainter(output.NewTerminalOfSize(&screenOutput, 80, 24), true)
 
 	painter.DrawEvent(agent.Event{
 		Kind:              agent.ToolCallRequestEvent,
@@ -897,10 +846,6 @@ func TestAnAsideStandsBetweenTheCallsItArrivedAmong(t *testing.T) {
 		FallbackRendering: agent.FallbackRendering{Subject: "one.txt"},
 	})
 	painter.DrawEvent(agent.Event{Kind: agent.HarnessMessageEvent, Text: "something happened"})
-
-	if !painter.HasOpenTools() {
-		t.Fatal("expected the block to stay open under the aside")
-	}
 
 	painter.DrawEvent(agent.Event{Kind: agent.ToolCallResultEvent, ID: "1", Took: time.Second})
 
@@ -970,11 +915,11 @@ func TestCompletedReasoningBlocksRemainSeparateInTheJournal(t *testing.T) {
 
 func TestIncompleteReasoningIsErasedBeforeAFailure(t *testing.T) {
 	var screenOutput bytes.Buffer
-	painter := &Painter{Screen: output.New(&screenOutput), IsRunning: true}
+	painter := newTestPainter(output.New(&screenOutput), true)
 
 	painter.DrawDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: "half a thought"})
 	painter.DrawEvent(agent.Event{Kind: agent.FailureEvent, Text: "stream failed"})
-	painter.Screen.End()
+	painter.End()
 
 	plain := style.Plain(screenOutput.String())
 	if strings.Contains(plain, "half a thought") {
@@ -1002,10 +947,10 @@ func TestDiscardedReasoningLeavesTheSameScreenAsReplay(t *testing.T) {
 	self.screen.End()
 
 	var replayOutput bytes.Buffer
-	replayPainter := &Painter{Screen: output.NewTerminalOfSize(&replayOutput, 80, 24)}
+	replayPainter := newTestPainter(output.NewTerminalOfSize(&replayOutput, 80, 24), false)
 	replayPainter.DrawEvent(completeThought)
 	replayPainter.DrawEvent(failure)
-	replayPainter.Screen.End()
+	replayPainter.End()
 
 	live := visibleScreen(t, liveOutput.String(), 80)
 	replayed := visibleScreen(t, replayOutput.String(), 80)

@@ -457,12 +457,7 @@ func (self *Harness) restore(storedSession *store.Session) {
 }
 
 func (self *Harness) newPainter(isRunning bool) *painter.Painter {
-	return &painter.Painter{
-		Screen:       self.screen,
-		IsRunning:    isRunning,
-		GetTool:      self.agent.Tool,
-		WorkspaceDir: self.workspaceDir,
-	}
+	return painter.New(self.screen, isRunning, self.agent.Tool, self.workspaceDir)
 }
 
 func (self *Harness) replay() {

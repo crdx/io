@@ -2,6 +2,8 @@ package model
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -77,6 +79,21 @@ func TestListingModelsPrintsEverySelectableQualifiedName(t *testing.T) {
 	}, "\n") + "\n"
 	if output.String() != want {
 		t.Errorf("got %q, want %q", output.String(), want)
+	}
+}
+
+type failingWriter struct{}
+
+func (failingWriter) Write([]byte) (int, error) {
+	return 0, errors.New("writer failed")
+}
+
+func TestListingModelsReturnsWriterFailures(t *testing.T) {
+	useCachedModels(t)
+
+	err := List(failingWriter{}, modelCachePath())
+	if err == nil || !strings.Contains(err.Error(), "writer failed") {
+		t.Errorf("got %v", err)
 	}
 }
 
@@ -229,6 +246,29 @@ func TestACacheInAnotherFormatIsIgnored(t *testing.T) {
 	}
 }
 
+func TestSavingModelsReturnsStateDirectoryFailures(t *testing.T) {
+	parent := filepath.Join(t.TempDir(), "not-a-directory")
+	if err := os.WriteFile(parent, []byte("content"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	err := saveModelCache(filepath.Join(parent, "models.json"), modelCache{})
+	if err == nil || !strings.Contains(err.Error(), "create state directory") {
+		t.Errorf("got %v", err)
+	}
+}
+
+func TestSavingModelsReturnsCacheWriteFailures(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "models.json")
+	if err := os.Mkdir(path, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := saveModelCache(path, modelCache{}); err == nil {
+		t.Error("expected writing over a directory to fail")
+	}
+}
+
 const deadAddress = "http://127.0.0.1:1"
 
 func serveRegistry(t *testing.T, body string) string {
@@ -291,6 +331,43 @@ func TestAStandInEndpointKeepsAModelCacheOfItsOwn(t *testing.T) {
 
 	if standIn := modelCachePath(); standIn == real {
 		t.Errorf("expected a cache of its own, got %q for both", standIn)
+	}
+}
+
+func TestProviderDescriptionCoversEveryEndpointAndRegistryCombination(t *testing.T) {
+	listed := []agent.Model{{ID: "known", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000}}
+	registered := map[string]agent.Model{"known": {ID: "known", Name: "Known"}}
+	listingFailure := errors.New("listing failed")
+
+	tests := map[string]struct {
+		listed     []agent.Model
+		listingErr error
+		registered map[string]agent.Model
+		wantSource string
+		wantWhy    string
+		wantModels int
+	}{
+		"endpoint only":         {listed: listed, wantSource: sourceEndpoint, wantModels: 1},
+		"endpoint and registry": {listed: listed, registered: registered, wantSource: sourceBoth, wantModels: 1},
+		"registry only":         {registered: registered, wantSource: sourceRegistry, wantWhy: "the endpoint lists no models", wantModels: 1},
+		"neither":               {listingErr: listingFailure, wantWhy: listingFailure.Error()},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			models, source, why := describeProviderModels(
+				t.Context(),
+				codexProvider,
+				"",
+				test.registered,
+				func(context.Context, string, string) ([]agent.Model, error) {
+					return test.listed, test.listingErr
+				},
+			)
+			if len(models) != test.wantModels || source != test.wantSource || why != test.wantWhy {
+				t.Errorf("got models=%v source=%q why=%q", models, source, why)
+			}
+		})
 	}
 }
 
