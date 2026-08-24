@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/req"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/chat"
 	"crdx.org/io/provider/codex"
@@ -33,6 +34,7 @@ import (
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/slash"
+	"crdx.org/io/cmd/oh/snippets"
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
@@ -190,9 +192,14 @@ func run() (string, error) {
 	}
 	defer func() { _ = homeRoot.Close() }()
 
-	settings, err := config.Load(configFile())
+	configPath := configFile()
+	settings, err := config.Load(configPath)
 	if err != nil {
 		return "", err
+	}
+	snippetCommands, err := snippets.New(settings.Snippets)
+	if err != nil {
+		return "", fmt.Errorf("%s: snippets: %w", pathutil.Shorten(configPath), err)
 	}
 	configuredModels, err := model.ParseRoundRobin(modelCachePath(), settings.Model.RoundRobin)
 	if err != nil {
@@ -208,13 +215,13 @@ func run() (string, error) {
 	}
 	defer shell.CloseRoots(configuredRoots)
 
-	globalSkillDirs := append([]string{configDir("skills")}, settings.Skill.Include...)
+	globalSkillDirs := append([]string{configDir("skills")}, settings.Skills.Include...)
 	availableSkills, err := skill.Discover(workspaceDir, globalSkillDirs, os.Stderr)
 	if err != nil {
 		return "", err
 	}
 
-	availableSkills = skill.ExcludeGlobal(availableSkills, settings.Skill.Exclude)
+	availableSkills = skill.ExcludeGlobal(availableSkills, settings.Skills.Exclude)
 
 	skillRoots, err := skill.MountGlobalSkills(files, availableSkills)
 	if err != nil {
@@ -326,7 +333,7 @@ func run() (string, error) {
 	systemCommands, err := commands.New(commands.Options{
 		ConfigDir:  configDir(),
 		StateDir:   stateDir(),
-		ConfigFile: configFile(),
+		ConfigFile: configPath,
 		Editor:     settings.Editor,
 		Output:     os.Stdout,
 		Session: commands.Session{
@@ -334,11 +341,11 @@ func run() (string, error) {
 			ID:        log.ID(),
 			Directory: filepath.Join(sessionsDir(), log.Name()),
 		},
-	}, nil)
+	}, snippetCommands.Usages())
 	if err != nil {
 		return "", err
 	}
-	commandRegistry, err := slash.NewRegistry(systemCommands)
+	commandRegistry, err := slash.NewRegistry(systemCommands, snippetCommands)
 	if err != nil {
 		return "", err
 	}
@@ -376,6 +383,7 @@ func run() (string, error) {
 		ContextFiles:  startup.FilesOf(contextFiles),
 		ProjectSkills: projectSkills,
 		GlobalSkills:  globalSkills,
+		Snippets:      len(settings.Snippets),
 		ToolBytes:     client.toolsSize(enabledTools),
 	}
 	if resumedSession == nil {

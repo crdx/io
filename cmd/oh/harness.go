@@ -172,17 +172,25 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 
 type slashInput int
 
+const sendAnywayHint = "; press alt+enter to send anyway"
+
 const (
 	ordinaryInput slashInput = iota
 	handledCommand
-	unknownCommand
+	rejectedCommand
 )
 
 func (self *Harness) handleSlashCommand(message string) slashInput {
 	invocation, found := self.commands.Find(message)
 	if found {
 		if err := invocation.Command.Run(commandContext{harness: self}, invocation.Arguments); err != nil {
-			self.notifyFailure(slash.FormatError(invocation, err))
+			message := slash.FormatError(invocation, err)
+			if slash.IsUsageError(err) {
+				message += sendAnywayHint
+				self.notifyFailure(message)
+				return rejectedCommand
+			}
+			self.notifyFailure(message)
 		}
 		return handledCommand
 	}
@@ -192,8 +200,8 @@ func (self *Harness) handleSlashCommand(message string) slashInput {
 		return ordinaryInput
 	}
 
-	self.notifyFailure(fmt.Sprintf("Command not found: %s; press alt+enter to send anyway", name))
-	return unknownCommand
+	self.notifyFailure(fmt.Sprintf("Command not found: %s%s", name, sendAnywayHint))
+	return rejectedCommand
 }
 
 type commandContext struct {
@@ -398,25 +406,12 @@ func (self *Harness) isPrefixPending() bool {
 }
 
 func (self *Harness) plainly(history *edit.History, initialMessage string) {
-	if initialMessage != "" {
-		if self.handleSlashCommand(initialMessage) == ordinaryInput {
-			self.ask(history, initialMessage)
-		} else {
-			history.Add(initialMessage)
-		}
-	}
+	self.acceptPlainInput(history, initialMessage)
 
 	reader := bufio.NewScanner(os.Stdin)
 
 	for reader.Scan() {
-		stdin := strings.TrimSpace(reader.Text())
-		if self.handleSlashCommand(stdin) == ordinaryInput {
-			if stdin != "" {
-				self.ask(history, stdin)
-			}
-		} else {
-			history.Add(stdin)
-		}
+		self.acceptPlainInput(history, strings.TrimSpace(reader.Text()))
 	}
 
 	if err := reader.Err(); err != nil {
@@ -424,14 +419,31 @@ func (self *Harness) plainly(history *edit.History, initialMessage string) {
 	}
 }
 
+func (self *Harness) acceptPlainInput(history *edit.History, message string) {
+	if message == "" {
+		return
+	}
+	if self.handleSlashCommand(message) == ordinaryInput {
+		self.ask(history, message)
+		return
+	}
+
+	history.Add(message)
+	if self.currentTurn.Running() {
+		self.waitForCurrentTurn()
+	}
+}
+
 func (self *Harness) ask(history *edit.History, message string) {
 	history.Add(message)
 	self.start(message)
+	self.waitForCurrentTurn()
+}
 
+func (self *Harness) waitForCurrentTurn() {
 	for event := range self.currentTurn.Events() {
 		self.takeTurn(event)
 	}
-
 	self.finish()
 }
 

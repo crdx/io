@@ -18,6 +18,7 @@ import (
 )
 
 const (
+	systemCommandPrefix   = "/"
 	sessionJournalName    = "session.jsonl"
 	sessionTranscriptName = "chat.md"
 )
@@ -28,7 +29,7 @@ type Options struct {
 	StateDir   string
 	Session    Session
 
-	Editor string
+	Editor editor.Command
 	Output io.Writer
 }
 
@@ -61,7 +62,7 @@ type commandTarget struct {
 	prepare      func() error
 }
 
-func New(options Options, snippetUsages []string) (slash.Set, error) {
+func New(options Options, snippetUsages []string) (slash.CommandSet, error) {
 	return buildCommands(commandEnvironment{
 		configDir:  options.ConfigDir,
 		configPath: options.ConfigFile,
@@ -81,8 +82,12 @@ func New(options Options, snippetUsages []string) (slash.Set, error) {
 	}, snippetUsages)
 }
 
-func buildCommands(environment commandEnvironment, snippetUsages []string) (slash.Set, error) {
-	var set slash.Set
+func buildCommands(environment commandEnvironment, snippetUsages []string) (slash.CommandSet, error) {
+	var set slash.CommandSet
+	var help slash.Command
+	help = helpCommand(func() string {
+		return helpText(set.Usages(), systemCommandPrefix+help.Name, snippetUsages)
+	})
 	commands := []slash.Command{
 		noArgumentCommand("conf", environment.configPath, environment.openEditor),
 		targetCommand(
@@ -94,7 +99,7 @@ func buildCommands(environment commandEnvironment, snippetUsages []string) (slas
 			},
 			environment.copyText,
 		),
-		helpCommand(func() string { return helpText(set.Usages(), snippetUsages) }),
+		help,
 		targetCommand(
 			"open",
 			map[string]commandTarget{
@@ -120,7 +125,7 @@ func buildCommands(environment commandEnvironment, snippetUsages []string) (slas
 	}
 
 	var err error
-	set, err = slash.NewSet("/", commands...)
+	set, err = slash.NewCommandSet(systemCommandPrefix, commands...)
 	return set, err
 }
 
@@ -138,8 +143,8 @@ func helpCommand(getHelp func() string) slash.Command {
 	}
 }
 
-func helpText(commandUsages, snippetUsages []string) string {
-	visibleCommandUsages := slices.DeleteFunc(commandUsages, func(usage string) bool { return usage == "/help" })
+func helpText(commandUsages []string, hiddenCommandUsage string, snippetUsages []string) string {
+	visibleCommandUsages := slices.DeleteFunc(commandUsages, func(usage string) bool { return usage == hiddenCommandUsage })
 	sections := []string{"Commands:\n  " + strings.Join(visibleCommandUsages, "\n  ")}
 	if len(snippetUsages) > 0 {
 		sections = append(sections, "Snippets:\n  "+strings.Join(snippetUsages, "\n  "))

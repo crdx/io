@@ -23,6 +23,7 @@ type Info struct {
 	ContextFiles  []File `json:"context,omitempty"`
 	ProjectSkills int    `json:"project_skills,omitempty"`
 	GlobalSkills  int    `json:"global_skills,omitempty"`
+	Snippets      int    `json:"snippets,omitempty"`
 	ToolBytes     int    `json:"tools,omitempty"`
 }
 
@@ -79,6 +80,9 @@ func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
 		_, _ = line.WriteString(style.Subtle(" ") + startupContextFile(file))
 	}
 	_, _ = line.WriteString(style.Subtle(" ") + startupSkills(info))
+	if info.Snippets > 0 {
+		_, _ = line.WriteString(style.Subtle(" ") + startupSnippets(info))
+	}
 	_, _ = line.WriteString(style.Subtle(" ") + startupTools(info))
 	return line.String()
 }
@@ -104,6 +108,13 @@ func startupSkills(info Info) string {
 	field.dim("p/")
 	field.normal(fmt.Sprint(info.GlobalSkills))
 	field.dim("g")
+	return field.String()
+}
+
+func startupSnippets(info Info) string {
+	var field startupLine
+	field.dim("snippets=")
+	field.normal(fmt.Sprint(info.Snippets))
 	return field.String()
 }
 

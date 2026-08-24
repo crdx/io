@@ -672,6 +672,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 			},
 			ProjectSkills: 3,
 			GlobalSkills:  1,
+			Snippets:      2,
 			ToolBytes:     614,
 		})
 	}

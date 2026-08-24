@@ -9,17 +9,17 @@ import (
 )
 
 func TestConfiguredEditorIsUsed(t *testing.T) {
-	command, err := buildCommand("configured-editor", "/tmp/config.toml")
+	command, err := buildCommand(Command{"configured-editor", "--wait"}, "/tmp/config.toml")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Equal(command.Args, []string{"configured-editor", "/tmp/config.toml"}) {
+	if !slices.Equal(command.Args, []string{"configured-editor", "--wait", "/tmp/config.toml"}) {
 		t.Errorf("got arguments %v", command.Args)
 	}
 }
 
 func TestAnEditorMustBeConfigured(t *testing.T) {
-	_, err := buildCommand(" ", "/tmp/config.toml")
+	_, err := buildCommand(Command{" "}, "/tmp/config.toml")
 	if err == nil || !strings.Contains(err.Error(), "set editor in config.toml") {
 		t.Errorf("got %v", err)
 	}
@@ -28,7 +28,7 @@ func TestAnEditorMustBeConfigured(t *testing.T) {
 func TestOpenReportsAnEditorThatCannotStart(t *testing.T) {
 	t.Setenv("PATH", t.TempDir())
 
-	err := Open("missing-editor", "/tmp/config.toml")
+	err := Open(Command{"missing-editor"}, "/tmp/config.toml")
 	if err == nil || !strings.Contains(err.Error(), "could not start editor") {
 		t.Errorf("got %v", err)
 	}

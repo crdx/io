@@ -17,12 +17,13 @@ func TestAStartupEventKeepsItsFactsForReplay(t *testing.T) {
 		ContextFiles:  []File{{Name: "SYSTEM.md", Bytes: 740}},
 		ProjectSkills: 2,
 		GlobalSkills:  3,
+		Snippets:      4,
 		ToolBytes:     2273,
 	}
 
 	event := NewEvent(12*time.Millisecond, info)
 	got := style.Plain(RenderEvent(event))
-	want := "[startup=12ms session=brave-otter SYSTEM.md=~200t skills=2p/3g tools=~600t]"
+	want := "[startup=12ms session=brave-otter SYSTEM.md=~200t skills=2p/3g snippets=4 tools=~600t]"
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
@@ -56,9 +57,10 @@ func TestTheStartupLineUsesTheCompactSummary(t *testing.T) {
 		}),
 		ProjectSkills: 2,
 		GlobalSkills:  3,
+		Snippets:      4,
 		ToolBytes:     2273,
 	})
-	want := "startup=12ms session=brave-otter SYSTEM.md=~200t AGENTS.md=~800t skills=2p/3g tools=~600t"
+	want := "startup=12ms session=brave-otter SYSTEM.md=~200t AGENTS.md=~800t skills=2p/3g snippets=4 tools=~600t"
 
 	if plainText := style.Plain(line); plainText != want {
 		t.Errorf("got %q, want %q", plainText, want)

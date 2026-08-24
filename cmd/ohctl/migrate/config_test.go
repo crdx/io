@@ -32,7 +32,7 @@ provider = "codex"
 model = "gpt-5.6-sol"
 effort = "medium"
 
-[skill]
+[skills]
 include = ["skills"]
 `
 	path := configFile(t, original)

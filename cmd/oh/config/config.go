@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 
+	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/shell"
 
@@ -23,17 +25,14 @@ import (
 var defaultsTOML string
 
 type Config struct {
-	Version            int    `toml:"version"`
-	Editor             string `toml:"editor"`
-	Model              Model  `toml:"model"`
-	GetOnWithItMessage string `toml:"get_on_with_it_message"`
-
-	Skill struct {
-		Include []string `toml:"include"`
-		Exclude []string `toml:"exclude"`
-	} `toml:"skill"`
-	Sandbox pathsConfig `toml:"sandbox"`
-	Bar     Bar         `toml:"bar"`
+	Version            int               `toml:"version"`
+	Editor             editor.Command    `toml:"editor"`
+	Model              Model             `toml:"model"`
+	GetOnWithItMessage string            `toml:"get_on_with_it_message"`
+	Snippets           map[string]string `toml:"snippets"`
+	Skills             SkillPaths        `toml:"skills"`
+	Sandbox            pathsConfig       `toml:"sandbox"`
+	Bar                Bar               `toml:"bar"`
 
 	fallback *toml.MetaData
 	user     *toml.MetaData
@@ -42,6 +41,11 @@ type Config struct {
 
 type Model struct {
 	RoundRobin []string `toml:"round_robin"`
+}
+
+type SkillPaths struct {
+	Include []string `toml:"include"`
+	Exclude []string `toml:"exclude"`
 }
 
 type pathsConfig = shell.Paths
@@ -201,18 +205,24 @@ func Load(path string) (Config, error) {
 			}
 		}
 	}
-	config.Editor = strings.TrimSpace(config.Editor)
 	config.GetOnWithItMessage = strings.TrimSpace(config.GetOnWithItMessage)
 	if meta.IsDefined("get_on_with_it_message") && config.GetOnWithItMessage == "" {
 		return config, fmt.Errorf("%s: get_on_with_it_message is empty", displayPath)
+	}
+	for _, name := range slices.Sorted(maps.Keys(config.Snippets)) {
+		prompt := strings.TrimSpace(config.Snippets[name])
+		if prompt == "" {
+			return config, fmt.Errorf("%s: snippets.%s is empty", displayPath, name)
+		}
+		config.Snippets[name] = prompt
 	}
 
 	lists := []struct {
 		name   string
 		values *[]string
 	}{
-		{"skill.include", &config.Skill.Include},
-		{"skill.exclude", &config.Skill.Exclude},
+		{"skills.include", &config.Skills.Include},
+		{"skills.exclude", &config.Skills.Exclude},
 		{"sandbox.read", &config.Sandbox.Read},
 		{"sandbox.write", &config.Sandbox.Write},
 		{"sandbox.exec", &config.Sandbox.Exec},

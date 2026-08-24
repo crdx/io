@@ -1,12 +1,14 @@
 version = 2
 
-editor = ""
+editor = []
 get_on_with_it_message = "yes"
+
+[snippets]
 
 [model]
 round_robin = []
 
-[skill]
+[skills]
 include = []
 exclude = []
 

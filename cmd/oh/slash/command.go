@@ -45,9 +45,10 @@ type Context interface {
 }
 
 type Command struct {
-	Name      string
-	Run       func(Context, []string) error
-	arguments []string
+	Name          string
+	Run           func(Context, []string) error
+	arguments     []string
+	argumentUsage string
 }
 
 func (self Command) WithArguments(arguments ...string) Command {
@@ -55,8 +56,16 @@ func (self Command) WithArguments(arguments ...string) Command {
 	return self
 }
 
+func (self Command) WithRequiredArguments(usage string) Command {
+	self.argumentUsage = usage
+	return self
+}
+
 func (self Command) usage(prefix string) string {
 	name := prefix + self.Name
+	if self.argumentUsage != "" {
+		return name + " " + self.argumentUsage
+	}
 	if len(self.arguments) == 0 {
 		return name
 	}
@@ -73,27 +82,30 @@ type Invocation struct {
 	Arguments []string
 }
 
-type Set struct {
+type CommandSet struct {
 	prefix   string
 	commands map[string]*Command
 }
 
-func NewSet(prefix string, commands ...Command) (Set, error) {
+func NewCommandSet(prefix string, commands ...Command) (CommandSet, error) {
 	if err := validatePrefix(prefix); err != nil {
-		return Set{}, err
+		return CommandSet{}, err
 	}
 
-	set := Set{prefix: prefix, commands: make(map[string]*Command, len(commands))}
+	set := CommandSet{prefix: prefix, commands: make(map[string]*Command, len(commands))}
 	for i := range commands {
 		command := &commands[i]
 		if command.Name == "" || strings.ContainsRune(command.Name, '/') || strings.ContainsFunc(command.Name, unicode.IsSpace) {
-			return Set{}, fmt.Errorf("invalid command name %q", command.Name)
+			return CommandSet{}, fmt.Errorf("invalid command name %q", command.Name)
 		}
 		if command.Run == nil {
-			return Set{}, fmt.Errorf("command %q has no handler", prefix+command.Name)
+			return CommandSet{}, fmt.Errorf("command %q has no handler", prefix+command.Name)
+		}
+		if command.argumentUsage != "" && len(command.arguments) > 0 {
+			return CommandSet{}, fmt.Errorf("command %q has conflicting argument metadata", prefix+command.Name)
 		}
 		if _, exists := set.commands[command.Name]; exists {
-			return Set{}, fmt.Errorf("command %q is already registered", prefix+command.Name)
+			return CommandSet{}, fmt.Errorf("command %q is already registered", prefix+command.Name)
 		}
 		set.commands[command.Name] = command
 	}
@@ -101,7 +113,7 @@ func NewSet(prefix string, commands ...Command) (Set, error) {
 	return set, nil
 }
 
-func (self Set) Usages() []string {
+func (self CommandSet) Usages() []string {
 	usages := make([]string, 0, len(self.commands))
 	for _, command := range self.commands {
 		usages = append(usages, command.usage(self.prefix))
@@ -111,10 +123,10 @@ func (self Set) Usages() []string {
 }
 
 type Registry struct {
-	sets []Set
+	sets []CommandSet
 }
 
-func NewRegistry(sets ...Set) (Registry, error) {
+func NewRegistry(sets ...CommandSet) (Registry, error) {
 	prefixes := make(map[string]struct{}, len(sets))
 	for _, set := range sets {
 		if err := validatePrefix(set.prefix); err != nil {
@@ -126,8 +138,8 @@ func NewRegistry(sets ...Set) (Registry, error) {
 		prefixes[set.prefix] = struct{}{}
 	}
 
-	registered := append([]Set(nil), sets...)
-	slices.SortStableFunc(registered, func(left, right Set) int {
+	registered := append([]CommandSet(nil), sets...)
+	slices.SortStableFunc(registered, func(left, right CommandSet) int {
 		return len(right.prefix) - len(left.prefix)
 	})
 	return Registry{sets: registered}, nil
@@ -176,13 +188,13 @@ func (self Registry) CommandName(message string) (string, bool) {
 	return fields[0], true
 }
 
-func (self Registry) getSet(name string) (Set, bool) {
+func (self Registry) getSet(name string) (CommandSet, bool) {
 	for _, set := range self.sets {
 		if strings.HasPrefix(name, set.prefix) {
 			return set, true
 		}
 	}
-	return Set{}, false
+	return CommandSet{}, false
 }
 
 type Completion struct {
@@ -250,7 +262,7 @@ func (self Registry) completions(prefix string) []string {
 	return arguments
 }
 
-func (self Set) commandNames() []string {
+func (self CommandSet) commandNames() []string {
 	names := make([]string, 0, len(self.commands))
 	for name := range self.commands {
 		names = append(names, name)

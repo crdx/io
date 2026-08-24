@@ -41,11 +41,17 @@ func TestSetRejectsInvalidDefinitions(t *testing.T) {
 		"prefixed name":   {prefix: "/", command: slash.Command{Name: "/open", Run: commandHandler}},
 		"spaced name":     {prefix: "/", command: slash.Command{Name: "open file", Run: commandHandler}},
 		"missing handler": {prefix: "/", command: slash.Command{Name: "open"}},
+		"conflicting argument metadata": {
+			prefix: "/",
+			command: slash.Command{Name: "open", Run: commandHandler}.
+				WithArguments("config").
+				WithRequiredArguments("<args>"),
+		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			if _, err := slash.NewSet(test.prefix, test.command); err == nil {
+			if _, err := slash.NewCommandSet(test.prefix, test.command); err == nil {
 				t.Error("expected invalid definition to return an error")
 			}
 		})
@@ -53,7 +59,7 @@ func TestSetRejectsInvalidDefinitions(t *testing.T) {
 }
 
 func TestSetRejectsDuplicateNames(t *testing.T) {
-	if _, err := slash.NewSet(
+	if _, err := slash.NewCommandSet(
 		"/",
 		slash.Command{Name: "open", Run: commandHandler},
 		slash.Command{Name: "open", Run: commandHandler},
@@ -101,6 +107,7 @@ func TestCompletionCyclesThroughNamesWithinTheLongestPrefix(t *testing.T) {
 
 func TestCompletionCyclesThroughMatchingArguments(t *testing.T) {
 	registry := mustRegistry(t, mustSet(t, "/",
+		slash.Command{Name: "ask", Run: commandHandler}.WithRequiredArguments("<args>"),
 		slash.Command{Name: "browse", Run: commandHandler}.WithArguments("config-dir", "session-dir"),
 		slash.Command{Name: "conf", Run: commandHandler},
 		slash.Command{Name: "copy", Run: commandHandler}.WithArguments("session-name", "session-id", "session-dir"),
@@ -121,6 +128,7 @@ func TestCompletionCyclesThroughMatchingArguments(t *testing.T) {
 	assertCompletionCycle(t, registry, "/browse c", []string{"/browse config-dir"})
 
 	for _, prefix := range []string{
+		"/ask ",
 		"/conf ",
 		"/open session-log extra",
 		"/missing anything",
@@ -173,10 +181,11 @@ func TestCommandNameRecognisesRegisteredPrefixes(t *testing.T) {
 
 func TestUsagesComeFromSetMetadata(t *testing.T) {
 	set := mustSet(t, "//",
+		slash.Command{Name: "add", Run: commandHandler}.WithRequiredArguments("<args>"),
 		slash.Command{Name: "review", Run: commandHandler},
 		slash.Command{Name: "test", Run: commandHandler}.WithArguments("quick", "all"),
 	)
-	want := []string{"//review", "//test {all|quick}"}
+	want := []string{"//add <args>", "//review", "//test {all|quick}"}
 	if got := set.Usages(); !slices.Equal(got, want) {
 		t.Errorf("got usages %v, want %v", got, want)
 	}
@@ -200,17 +209,17 @@ func TestCommandErrorsAreFormattedForHarnessMessages(t *testing.T) {
 	}
 }
 
-func mustSet(t *testing.T, prefix string, commands ...slash.Command) slash.Set {
+func mustSet(t *testing.T, prefix string, commands ...slash.Command) slash.CommandSet {
 	t.Helper()
 
-	set, err := slash.NewSet(prefix, commands...)
+	set, err := slash.NewCommandSet(prefix, commands...)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return set
 }
 
-func mustRegistry(t *testing.T, sets ...slash.Set) slash.Registry {
+func mustRegistry(t *testing.T, sets ...slash.CommandSet) slash.Registry {
 	t.Helper()
 
 	registry, err := slash.NewRegistry(sets...)

@@ -2,3 +2,7 @@ Commands:
   /conf
   /copy {session-dir|session-id|session-name}
   /open {config-dir|session-chat|session-dir|session-log|state-dir}
+
+Snippets:
+  //add <args>
+  //ask <args>

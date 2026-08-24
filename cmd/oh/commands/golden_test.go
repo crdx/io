@@ -13,7 +13,7 @@ import (
 )
 
 func TestCompletionMatchesGolden(t *testing.T) {
-	commands := newCommandRegistry(t, commandEnvironment{})
+	commands := newCommandRegistryWithSnippets(t, commandEnvironment{}, fixtureSnippets())
 	var output strings.Builder
 
 	for _, test := range []struct {
@@ -24,6 +24,8 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		{prefix: "/c", steps: 2},
 		{prefix: "/copy ", steps: 3},
 		{prefix: "/open ", steps: 5},
+		{prefix: "//", steps: 2},
+		{prefix: "//a", steps: 3},
 	} {
 		state := slash.Completion{}
 		current := test.prefix
@@ -56,6 +58,13 @@ func TestCompletionMatchesGolden(t *testing.T) {
 	}
 }
 
+func fixtureSnippets() map[string]string {
+	return map[string]string{
+		"add": "Add {{.Arg}}",
+		"ask": "Ask {{.Arg}}",
+	}
+}
+
 var updateGoldens = flag.Bool("update", false, "write command output back to the golden files")
 
 type helpContext struct {
@@ -70,7 +79,7 @@ func (self *helpContext) Notice(text string) {
 func (self *helpContext) Success(string) {}
 
 func TestHelpMatchesGolden(t *testing.T) {
-	commands := newCommandRegistry(t, commandEnvironment{})
+	commands := newCommandRegistryWithSnippets(t, commandEnvironment{}, fixtureSnippets())
 	invocation, found := commands.Find("/help")
 	if !found {
 		t.Fatal("expected /help to be registered")

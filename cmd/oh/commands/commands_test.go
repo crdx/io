@@ -9,6 +9,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/slash"
+	"crdx.org/io/cmd/oh/snippets"
 )
 
 type commandTestContext struct {
@@ -32,10 +33,28 @@ func newCommandRegistry(t *testing.T, environment commandEnvironment) slash.Regi
 	return commandRegistry(t, set)
 }
 
-func commandRegistry(t *testing.T, set slash.Set) slash.Registry {
+func newCommandRegistryWithSnippets(
+	t *testing.T,
+	environment commandEnvironment,
+	configuredSnippets map[string]string,
+) slash.Registry {
 	t.Helper()
 
-	registry, err := slash.NewRegistry(set)
+	snippetSet, err := snippets.New(configuredSnippets)
+	if err != nil {
+		t.Fatal(err)
+	}
+	systemSet, err := buildCommands(environment, snippetSet.Usages())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return commandRegistry(t, systemSet, snippetSet)
+}
+
+func commandRegistry(t *testing.T, sets ...slash.CommandSet) slash.Registry {
+	t.Helper()
+
+	registry, err := slash.NewRegistry(sets...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -198,6 +217,13 @@ func TestCommandsReportSessionTargetsThatDoNotExistYet(t *testing.T) {
 				t.Error("action ran for a missing session target")
 			}
 		})
+	}
+}
+
+func TestHelpOmitsTheSnippetSectionWhenNoneAreConfigured(t *testing.T) {
+	got := helpText([]string{"/conf", "/help"}, "/help", nil)
+	if strings.Contains(got, "Snippets:") || strings.Contains(got, "/help") {
+		t.Errorf("got help %q", got)
 	}
 }
 

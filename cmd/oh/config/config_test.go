@@ -21,7 +21,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	absolute := filepath.Join(t.TempDir(), "skills")
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	contents := "editor = \"  subl  \"\nget_on_with_it_message = \"carry on\"\n[model]\nround_robin = [\"opencode/deepseek@hi\"]\n[skill]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
+	contents := "editor = \"  subl  \"\nget_on_with_it_message = \"carry on\"\n[model]\nround_robin = [\"opencode/deepseek@hi\"]\n[skills]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
 	if err := writeConfigFile(path, contents); err != nil {
 		t.Fatal(err)
 	}
@@ -33,13 +33,13 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	if !slices.Equal(config.Model.RoundRobin, []string{"opencode/deepseek@hi"}) {
 		t.Errorf("got model rotation %#v", config.Model.RoundRobin)
 	}
-	if config.Editor != "subl" {
+	if !slices.Equal(config.Editor, []string{"subl"}) {
 		t.Errorf("got editor %q", config.Editor)
 	}
 	if config.GetOnWithItMessage != "carry on" {
 		t.Errorf("got get-on-with-it message %q", config.GetOnWithItMessage)
 	}
-	directories := config.Skill.Include
+	directories := config.Skills.Include
 	want := []string{
 		absolute,
 		filepath.Join(configDir, "shared", "skills"),
@@ -55,16 +55,31 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	}
 }
 
+func TestConfiguredEditorAcceptsArguments(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "editor = [\"subl\", \"--wait\"]\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(config.Editor, []string{"subl", "--wait"}) {
+		t.Errorf("got editor %q", config.Editor)
+	}
+}
+
 func TestAMissingConfigFileIsAllowed(t *testing.T) {
 	config, err := Load(filepath.Join(t.TempDir(), "missing.toml"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(config.Skill.Include) != 0 || len(config.Sandbox.Read) != 0 ||
+	if len(config.Skills.Include) != 0 || len(config.Sandbox.Read) != 0 ||
 		len(config.Sandbox.Write) != 0 || len(config.Sandbox.Exec) != 0 {
 		t.Errorf("got %#v, want no configured paths", config)
 	}
-	if config.Editor != "" {
+	if len(config.Editor) != 0 {
 		t.Errorf("got default editor %q", config.Editor)
 	}
 	if config.GetOnWithItMessage != "yes" {
@@ -118,7 +133,7 @@ func TestAConfigFromANewerOhIsRefusedBeforeItsShapeIsRead(t *testing.T) {
 
 func TestConfiguredSkillDirectoriesRejectsAnEmptyDirectory(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[skill]\ninclude = [\"\"]\n"); err != nil {
+	if err := writeConfigFile(path, "[skills]\ninclude = [\"\"]\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -127,10 +142,25 @@ func TestConfiguredSkillDirectoriesRejectsAnEmptyDirectory(t *testing.T) {
 	}
 }
 
+func TestTheSingularSkillTableIsNotAccepted(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[skill]\ninclude = [\"skills\"]\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := config.ValidateConsumed(); err == nil || !strings.Contains(err.Error(), "skill.include") {
+		t.Errorf("expected singular skill table error, got %v", err)
+	}
+}
+
 func TestConfiguredSkillExclusionsResolveToAbsoluteDirectories(t *testing.T) {
 	configDir := t.TempDir()
 	path := filepath.Join(configDir, "config.toml")
-	if err := writeConfigFile(path, "[skill]\nexclude = [\"skills/pi\"]\n"); err != nil {
+	if err := writeConfigFile(path, "[skills]\nexclude = [\"skills/pi\"]\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -139,14 +169,14 @@ func TestConfiguredSkillExclusionsResolveToAbsoluteDirectories(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := filepath.Join(configDir, "skills", "pi")
-	if len(config.Skill.Exclude) != 1 || config.Skill.Exclude[0] != want {
-		t.Errorf("got exclusions %#v, want [%s]", config.Skill.Exclude, want)
+	if len(config.Skills.Exclude) != 1 || config.Skills.Exclude[0] != want {
+		t.Errorf("got exclusions %#v, want [%s]", config.Skills.Exclude, want)
 	}
 }
 
 func TestConfiguredSkillExclusionsRejectAnEmptyDirectory(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[skill]\nexclude = [\"\"]\n"); err != nil {
+	if err := writeConfigFile(path, "[skills]\nexclude = [\"\"]\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -187,6 +217,57 @@ func TestTheConfiguredGetOnWithItMessageIsTrimmed(t *testing.T) {
 	}
 	if config.GetOnWithItMessage != "carry on" {
 		t.Errorf("got get-on-with-it message %q", config.GetOnWithItMessage)
+	}
+}
+
+func TestConfiguredSnippetPromptsAreTrimmed(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[snippets]\nreview = \"  Review this.  \"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.Snippets["review"] != "Review this." {
+		t.Errorf("got snippet prompt %q", config.Snippets["review"])
+	}
+}
+
+func TestConfiguredSnippetsAreLoaded(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	contents := "[snippets]\nadd = \"Override: {{ .Arg }}\"\nreview = \"Review this.\"\n"
+	if err := writeConfigFile(path, contents); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(config.Snippets) != 2 {
+		t.Errorf("got snippets %#v", config.Snippets)
+	}
+	for name, want := range map[string]string{
+		"add":    "Override: {{ .Arg }}",
+		"review": "Review this.",
+	} {
+		if config.Snippets[name] != want {
+			t.Errorf("got snippet %s %q, want %q", name, config.Snippets[name], want)
+		}
+	}
+}
+
+func TestConfiguredSnippetPromptsCannotBeEmpty(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[snippets]\nreview = \"  \"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil || !strings.Contains(err.Error(), "snippets.review") {
+		t.Errorf("expected snippets.review error, got %v", err)
 	}
 }
 
@@ -330,7 +411,7 @@ func TestTheBuiltInDefaultsSetEverySettingThereIs(t *testing.T) {
 	}
 
 	for _, key := range []string{
-		"version", "model", "get_on_with_it_message", "skill", "sandbox", "bar",
+		"version", "model", "get_on_with_it_message", "snippets", "skills", "sandbox", "bar",
 	} {
 		if _, ok := written[key]; !ok {
 			t.Errorf("expected the defaults to say what %q is", key)
