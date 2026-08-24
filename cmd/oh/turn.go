@@ -13,10 +13,9 @@ type Turn struct {
 	cancel      context.CancelFunc
 	err         error
 
-	spinnerFrame  int
-	painter       *Painter
-	startedAt     time.Time
-	streamedBytes int
+	spinnerFrame int
+	painter      *Painter
+	startedAt    time.Time
 
 	events chan TurnEvent
 }

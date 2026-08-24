@@ -19,6 +19,7 @@ import (
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/input"
+	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/startup"
@@ -648,13 +649,14 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	} {
 		passes[name] = func() string {
 			held := &Harness{
-				mode:                caps.NewMode(caps.All()),
-				contextWindowTokens: 200_000,
+				mode:    caps.NewMode(caps.All()),
+				metrics: metrics.New(200_000),
 				events: []agent.Event{{
 					Kind:  agent.ModelMessageEvent,
 					Usage: &agent.Usage{InputTokens: inputTokens},
 				}},
 			}
+			held.metrics.Restore(held.events)
 
 			built := goldenBarLayout(t, held)
 

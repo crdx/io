@@ -23,6 +23,7 @@ import (
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
+	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/models"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/prompt"
@@ -282,15 +283,14 @@ func run() ([]string, error) {
 		agent:    agent.New(systemPrompt, client, toolboxTools),
 		screen:   output.New(os.Stdout).LinkPathsUnder(workspaceDir),
 		terminal: terminal.New(os.Stdout),
+		metrics:  metrics.New(choice.ContextWindowTokens),
 
-		recorder: recordSession(log),
-
-		workspaceDir:        workspaceDir,
-		contextWindowTokens: choice.ContextWindowTokens,
-		mode:                mode,
-		processes:           processes,
-		onTurnFinished:      func() { sendTurnFinishedNotification(workspaceDir) },
-		getOnWithItMessage:  config.GetOnWithItMessage,
+		recorder:           recordSession(log),
+		workspaceDir:       workspaceDir,
+		mode:               mode,
+		processes:          processes,
+		onTurnFinished:     func() { sendTurnFinishedNotification(workspaceDir) },
+		getOnWithItMessage: config.GetOnWithItMessage,
 	}
 
 	chat.segmentLayout, err = config.layout(availableSegments(workspaceDir, log.Name(), model, effort, chat))

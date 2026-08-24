@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"slices"
 	"strings"
 	"syscall"
 	"time"
@@ -17,6 +16,7 @@ import (
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/key"
+	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/recording"
 	"crdx.org/io/cmd/oh/segment"
@@ -24,7 +24,6 @@ import (
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/internal/sandbox"
-	"crdx.org/io/internal/util"
 )
 
 type SessionLogger = recording.Session
@@ -43,17 +42,16 @@ type Harness struct {
 	editor        *edit.Input
 	mode          *caps.Mode
 	terminal      terminal.Terminal
+	metrics       metrics.Tracker
 
-	workspaceDir        string
-	contextWindowTokens int
-	turnsTaken          int
-	lastTurnRate        float64
-	restart             []string
-	getOnWithItMessage  string
-	queuedTurn          QueuedTurn
-	currentTurn         Turn
-	onTurnFinished      func()
-	terminalFocused     bool
+	workspaceDir       string
+	restart            []string
+	getOnWithItMessage string
+	terminalFocused    bool
+
+	queuedTurn     QueuedTurn
+	currentTurn    Turn
+	onTurnFinished func()
 }
 
 const historyLimit = 1000
@@ -319,25 +317,15 @@ func (self *Harness) turnElapsed() (bool, time.Duration) {
 }
 
 func (self *Harness) turnCount() int {
-	return self.turnsTaken
+	return self.metrics.TurnCount()
 }
 
 func (self *Harness) lastTurnTokenRate() (float64, bool) {
-	return self.lastTurnRate, self.lastTurnRate > 0
+	return self.metrics.LastTurnTokenRate()
 }
 
 func (self *Harness) contextUsage() (int, int) {
-	return contextUsageAt(self.events, self.contextWindowTokens)
-}
-
-func contextUsageAt(events []agent.Event, contextWindowTokens int) (int, int) {
-	for _, event := range slices.Backward(events) {
-		if event.Usage != nil && event.Usage.InputTokens > 0 {
-			return event.Usage.InputTokens, contextWindowTokens
-		}
-	}
-
-	return 0, contextWindowTokens
+	return self.metrics.ContextUsage()
 }
 
 func (self *Harness) grantedCaps() caps.Set {
@@ -432,11 +420,7 @@ func (self *Harness) restore(storedSession *store.Session) {
 	self.recorder.Resume(len(storedSession.Items))
 	self.events = append(self.events, storedSession.Events...)
 
-	for _, event := range storedSession.Events {
-		if event.Kind == agent.UserMessageEvent {
-			self.turnsTaken++
-		}
-	}
+	self.metrics.Restore(storedSession.Events)
 
 	self.screen.Reset()
 	self.replay()
@@ -487,6 +471,8 @@ func (self *Harness) redraw() {
 }
 
 func (self *Harness) start(message string) {
+	self.metrics.BeginTurn()
+
 	if fyi := self.mode.Inject(); fyi != "" {
 		self.agent.FYI(fyi)
 	}
@@ -540,7 +526,7 @@ func (self *Harness) takeTurn(turnEvent TurnEvent) {
 }
 
 func (self *Harness) recordEvent(event agent.Event) {
-	self.countTowardsTheBar(event)
+	self.metrics.Record(event)
 
 	self.events = append(self.events, event)
 	self.currentTurn.painter.drawEvent(event)
@@ -553,24 +539,6 @@ func (self *Harness) recordEvent(event agent.Event) {
 		self.notifyFailure("the conversation could not be stored: " + err.Error())
 	}
 	self.showStorageWarnings()
-}
-
-func (self *Harness) countTowardsTheBar(event agent.Event) {
-	switch event.Kind {
-	case agent.UserMessageEvent:
-		self.turnsTaken++
-	case agent.ModelMessageEvent, agent.ModelReasoningEvent:
-		self.currentTurn.streamedBytes += len(event.Text)
-	}
-}
-
-func (self *Harness) recordTokenRate() {
-	took := time.Since(self.currentTurn.startedAt).Seconds()
-	if self.currentTurn.streamedBytes == 0 || took <= 0 {
-		return
-	}
-
-	self.lastTurnRate = float64(util.EstimateTokenCount(self.currentTurn.streamedBytes)) / took
 }
 
 func (self *Harness) notifyFailure(text string) {
@@ -613,7 +581,7 @@ func (self *Harness) finish() {
 	}
 	self.screen.End()
 
-	self.recordTokenRate()
+	self.metrics.FinishTurn(self.currentTurn.startedAt)
 
 	self.currentTurn.isRunning = false
 	self.currentTurn.events = nil
