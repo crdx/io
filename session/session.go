@@ -34,7 +34,7 @@ import (
 // Format is the journal format this build writes. A journal written before formats were numbered
 // carries no version at all, and counts as format 1. Bump this whenever a stored shape changes,
 // and add the step that migrates a journal over the bump to cmd/ohctl/migrate.
-const Format = 2
+const Format = 3
 
 // Kind is what one journal line holds.
 type Kind string
@@ -64,16 +64,18 @@ type Line struct {
 // Writer appends records to a session. The file is made by the first record, so an unused session
 // leaves nothing behind.
 type Writer struct {
-	file      *os.File
-	directory string
-	id        string
-	name      string
-	started   time.Time
-	meta      json.RawMessage
+	file        *os.File
+	directory   string
+	id          string
+	name        string
+	started     time.Time
+	journalMeta json.RawMessage
+	listingData json.RawMessage
+	listingMeta Meta
 }
 
-// Create starts a session in directory with caller-owned meta.
-func Create(directory string, meta json.RawMessage) (*Writer, error) {
+// Create starts a session in directory with caller-owned journal metadata and listing data.
+func Create(directory string, journalMeta json.RawMessage, listingData json.RawMessage) (*Writer, error) {
 	if err := os.MkdirAll(directory, 0o700); err != nil {
 		return nil, err
 	}
@@ -83,7 +85,13 @@ func Create(directory string, meta json.RawMessage) (*Writer, error) {
 		return nil, err
 	}
 
-	return &Writer{directory: directory, id: newID(), name: name, meta: slices.Clone(meta)}, nil
+	return &Writer{
+		directory:   directory,
+		id:          newID(),
+		name:        name,
+		journalMeta: slices.Clone(journalMeta),
+		listingData: slices.Clone(listingData),
+	}, nil
 }
 
 // ErrInUse reports that another writer holds the session's journal.
@@ -100,6 +108,11 @@ func Open(directory string, name string) (*Writer, error) {
 		return nil, err
 	}
 
+	listingMeta, err := ReadMeta(directory, name)
+	if err != nil {
+		return nil, err
+	}
+
 	file, err := os.OpenFile(journalPath(directory, name), os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
 		return nil, err
@@ -110,7 +123,15 @@ func Open(directory string, name string) (*Writer, error) {
 		return nil, err
 	}
 
-	return &Writer{file: file, directory: directory, id: head.ID, name: name, started: head.Time}, nil
+	return &Writer{
+		file:        file,
+		directory:   directory,
+		id:          head.ID,
+		name:        name,
+		started:     head.Time,
+		journalMeta: slices.Clone(head.Meta),
+		listingMeta: *listingMeta,
+	}, nil
 }
 
 func lockJournal(file *os.File) error {
@@ -121,25 +142,38 @@ func lockJournal(file *os.File) error {
 	return err
 }
 
-// SetMeta replaces the caller-owned meta before the first record is written.
-func (w *Writer) SetMeta(meta json.RawMessage) error {
+// SetMeta replaces the caller-owned journal metadata and listing data before the first record is
+// written.
+func (w *Writer) SetMeta(journalMeta json.RawMessage, listingData json.RawMessage) error {
 	if w.file != nil {
 		return errors.New("cannot change meta after the session has been stored")
 	}
 
-	w.meta = slices.Clone(meta)
+	w.journalMeta = slices.Clone(journalMeta)
+	w.listingData = slices.Clone(listingData)
 	return nil
 }
 
 // Event appends one portable conversation event, and reports the time it was written.
 func (w *Writer) Event(event agent.Event) (time.Time, error) {
-	return w.write(Line{Kind: Event, Event: &event})
+	writtenAt, err := w.write(Line{Kind: Event, Event: &event})
+	if err != nil {
+		return writtenAt, err
+	}
+
+	w.listingMeta.takeEvent(event, writtenAt)
+	return writtenAt, writeMeta(w.directory, w.listingMeta)
 }
 
 // Item appends one opaque provider-state item.
 func (w *Writer) Item(payload json.RawMessage) error {
-	_, err := w.write(Line{Kind: Item, Payload: payload})
-	return err
+	writtenAt, err := w.write(Line{Kind: Item, Payload: payload})
+	if err != nil {
+		return err
+	}
+
+	w.listingMeta.Touched = writtenAt
+	return writeMeta(w.directory, w.listingMeta)
 }
 
 // Name is what the session is called, and the name of its bundle directory.
@@ -147,6 +181,9 @@ func (w *Writer) Name() string { return w.name }
 
 // ID is the session's time-ordered identifier, recorded for provenance and read by nothing.
 func (w *Writer) ID() string { return w.id }
+
+// JournalMeta is the caller-owned metadata stored in the journal head.
+func (w *Writer) JournalMeta() json.RawMessage { return slices.Clone(w.journalMeta) }
 
 // Started is when the head was written down, and zero until the session has been stored.
 func (w *Writer) Started() time.Time { return w.started }
@@ -196,7 +233,7 @@ func (w *Writer) ensureOpen() error {
 	}
 	w.file = file
 
-	started, err := w.record(Line{Kind: Head, Version: Format, ID: w.id, Name: w.name, Meta: w.meta})
+	started, err := w.record(Line{Kind: Head, Version: Format, ID: w.id, Name: w.name, Meta: w.journalMeta})
 	if err != nil {
 		_ = file.Close()
 		_ = os.Remove(file.Name())
@@ -205,6 +242,19 @@ func (w *Writer) ensureOpen() error {
 		return err
 	}
 	w.started = started
+	w.listingMeta = Meta{
+		Name:    w.name,
+		Data:    slices.Clone(w.listingData),
+		Started: started,
+		Touched: started,
+	}
+	if err := writeMeta(w.directory, w.listingMeta); err != nil {
+		_ = file.Close()
+		_ = os.Remove(file.Name())
+		_ = os.Remove(directory)
+		w.file = nil
+		return err
+	}
 
 	return nil
 }
@@ -302,14 +352,131 @@ func (s *Session) take(line Line) {
 	switch line.Kind {
 	case Head:
 		s.ID = line.ID
-		s.Meta = slices.Clone(line.Meta)
+		s.Meta = line.Meta
 	case Event:
 		if line.Event != nil {
 			s.Events = append(s.Events, *line.Event)
 		}
 	case Item:
-		s.Items = append(s.Items, slices.Clone(line.Payload))
+		s.Items = append(s.Items, line.Payload)
 	}
+}
+
+// Meta is the compact part of a stored session needed to list conversations.
+type Meta struct {
+	Name     string          `json:"name"`
+	Data     json.RawMessage `json:"data,omitempty"`
+	Started  time.Time       `json:"started"`
+	Touched  time.Time       `json:"touched"`
+	Title    string          `json:"title,omitempty"`
+	Messages int             `json:"messages"`
+}
+
+func (s *Meta) takeEvent(event agent.Event, writtenAt time.Time) {
+	s.Touched = writtenAt
+	if event.Kind != agent.UserMessageEvent && event.Kind != agent.ModelMessageEvent {
+		return
+	}
+
+	s.Messages++
+	if s.Title == "" && event.Kind == agent.UserMessageEvent {
+		s.Title = event.Text
+	}
+}
+
+// ReadMeta loads the compact listing data for one stored session.
+func ReadMeta(directory string, name string) (*Meta, error) {
+	if err := validateName(name); err != nil {
+		return nil, err
+	}
+
+	encoded, err := os.ReadFile(metaPath(directory, name))
+	if err != nil {
+		return nil, err
+	}
+
+	var meta Meta
+	if err := json.Unmarshal(encoded, &meta); err != nil {
+		return nil, err
+	}
+	if meta.Name != name {
+		return nil, errors.New("session metadata names another session")
+	}
+	return &meta, nil
+}
+
+// ListMeta loads compact listing data for every stored session, most recently touched first.
+func ListMeta(directory string) ([]*Meta, error) {
+	names, err := storedNames(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	metadata := make([]*Meta, 0, len(names))
+	for _, name := range names {
+		meta, err := ReadMeta(directory, name)
+		if err != nil {
+			return nil, fmt.Errorf("could not read session %s metadata: %w", name, err)
+		}
+		metadata = append(metadata, meta)
+	}
+
+	slices.SortFunc(metadata, func(first, second *Meta) int {
+		if order := second.Touched.Compare(first.Touched); order != 0 {
+			return order
+		}
+		return strings.Compare(second.Name, first.Name)
+	})
+	return metadata, nil
+}
+
+// RebuildMeta derives listing metadata from a journal and caller-owned data.
+func RebuildMeta(directory string, name string, listingData json.RawMessage) error {
+	storedSession, err := Read(directory, name)
+	if err != nil {
+		return err
+	}
+
+	meta := Meta{
+		Name:    storedSession.Name,
+		Data:    slices.Clone(listingData),
+		Started: storedSession.Started,
+		Touched: storedSession.Touched,
+	}
+	for _, event := range storedSession.Events {
+		meta.takeEvent(event, storedSession.Touched)
+	}
+
+	return writeMeta(directory, meta)
+}
+
+func writeMeta(directory string, meta Meta) error {
+	encoded, err := json.Marshal(meta)
+	if err != nil {
+		return err
+	}
+
+	bundle := bundlePath(directory, meta.Name)
+	file, err := os.CreateTemp(bundle, "meta-*.json")
+	if err != nil {
+		return err
+	}
+	temporaryPath := file.Name()
+	defer func() {
+		_ = file.Close()
+		_ = os.Remove(temporaryPath)
+	}()
+
+	if _, err := file.Write(encoded); err != nil {
+		return err
+	}
+	if err := file.Close(); err != nil {
+		return err
+	}
+	if err := os.Chmod(temporaryPath, 0o600); err != nil {
+		return err
+	}
+	return os.Rename(temporaryPath, metaPath(directory, meta.Name))
 }
 
 // Entry identifies one stored session. Building it costs the head of the journal rather than the
@@ -441,6 +608,7 @@ func List(directory string) ([]*Session, error) {
 
 const (
 	journalName = "session.jsonl"
+	metaName    = "meta.json"
 	maxLine     = 16 << 20
 )
 
@@ -448,6 +616,10 @@ func bundlePath(directory, name string) string { return filepath.Join(directory,
 
 func journalPath(directory, name string) string {
 	return filepath.Join(bundlePath(directory, name), journalName)
+}
+
+func metaPath(directory, name string) string {
+	return filepath.Join(bundlePath(directory, name), metaName)
 }
 
 func validateName(name string) error {

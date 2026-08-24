@@ -4,12 +4,22 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
+	"crdx.org/io/cmd/oh/store"
 )
 
-type step func(line map[string]json.RawMessage) error
+type step struct {
+	migrateLine func(line map[string]json.RawMessage) error
+	finalise    func(directory, name string) error
+}
 
 var steps = map[int]step{
-	1: emphasisReplacesHighlight,
+	1: {migrateLine: emphasisReplacesHighlight},
+	2: {finalise: addSessionMeta},
+}
+
+func addSessionMeta(directory, name string) error {
+	return store.RebuildMeta(directory, name)
 }
 
 func emphasisReplacesHighlight(line map[string]json.RawMessage) error {

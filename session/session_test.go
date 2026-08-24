@@ -15,7 +15,7 @@ import (
 func TestTheHeadCarriesTheNameAndTheIdentifier(t *testing.T) {
 	directory := t.TempDir()
 
-	writer, err := session.Create(directory, nil)
+	writer, err := session.Create(directory, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,10 +56,160 @@ func TestTheHeadCarriesTheNameAndTheIdentifier(t *testing.T) {
 	}
 }
 
+func TestMetaCarriesOnlyListingData(t *testing.T) {
+	directory := t.TempDir()
+	canonicalMeta := json.RawMessage(`{"workspaceDir":"/workspace","systemPrompt":"very large"}`)
+	listingData := json.RawMessage(`{"workspaceDir":"/workspace"}`)
+	writer, err := session.Create(directory, canonicalMeta, listingData)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "first question"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := writer.Event(agent.Event{Kind: agent.StateChangeEvent, Name: "file_read"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := writer.Event(agent.Event{Kind: agent.ModelMessageEvent, Text: "first answer"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Item(json.RawMessage(`{"large":"provider state"}`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	meta, err := session.ReadMeta(directory, writer.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(meta.Data) != string(listingData) {
+		t.Errorf("got meta data %s, want %s", meta.Data, listingData)
+	}
+	if meta.Title != "first question" || meta.Messages != 2 {
+		t.Errorf("unexpected metadata: %+v", meta)
+	}
+	if meta.Started.IsZero() || meta.Touched.Before(meta.Started) {
+		t.Errorf("unexpected metadata times: %+v", meta)
+	}
+
+	encoded, err := os.ReadFile(filepath.Join(directory, writer.Name(), "meta.json")) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(encoded), "systemPrompt") || strings.Contains(string(encoded), "provider state") {
+		t.Errorf("meta contains journal-only data: %s", encoded)
+	}
+	if !strings.Contains(string(encoded), `"data":{"workspaceDir":"/workspace"}`) || strings.Contains(string(encoded), `"meta":`) {
+		t.Errorf("meta does not use the caller-owned data field: %s", encoded)
+	}
+	if !strings.Contains(string(encoded), `"title":"first question"`) || strings.Contains(string(encoded), "firstMessage") {
+		t.Errorf("meta does not use the durable title field: %s", encoded)
+	}
+}
+
+func TestAResumedSessionContinuesItsMeta(t *testing.T) {
+	directory := t.TempDir()
+	journalMeta := json.RawMessage(`{"model":"some-model"}`)
+	writer, err := session.Create(directory, journalMeta, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "first"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	resumed, err := session.Open(directory, writer.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	openedMeta := resumed.JournalMeta()
+	if string(openedMeta) != string(journalMeta) {
+		t.Errorf("got opened journal meta %s, want %s", openedMeta, journalMeta)
+	}
+	openedMeta[0] = '!'
+	if got := resumed.JournalMeta(); string(got) != string(journalMeta) {
+		t.Errorf("opened journal meta changed through its recipient: %s", got)
+	}
+	if _, err := resumed.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "second"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := resumed.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	meta, err := session.ReadMeta(directory, writer.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if meta.Title != "first" || meta.Messages != 2 {
+		t.Errorf("unexpected resumed metadata: %+v", meta)
+	}
+}
+
+func TestMetadataAreNewestFirst(t *testing.T) {
+	directory := t.TempDir()
+	first, err := session.Create(directory, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := first.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "first"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := first.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	second, err := session.Create(directory, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := second.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "second"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := second.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	metadata, err := session.ListMeta(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(metadata) != 2 || metadata[0].Name != second.Name() || metadata[1].Name != first.Name() {
+		t.Errorf("unexpected metadata order: %+v", metadata)
+	}
+}
+
+func TestMetadataReportMissingMetadata(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := session.Create(directory, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.EnsureStored(); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(filepath.Join(directory, writer.Name(), "meta.json")); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := session.ListMeta(directory); err == nil {
+		t.Error("expected the missing metadata to be reported")
+	}
+}
+
 func TestJournalCarriesMetaEventsAndItems(t *testing.T) {
 	directory := t.TempDir()
 	meta := json.RawMessage(`{"world":"weather"}`)
-	writer, err := session.Create(directory, meta)
+	writer, err := session.Create(directory, meta, meta)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +249,7 @@ func TestJournalCarriesMetaEventsAndItems(t *testing.T) {
 func storedSession(t *testing.T, directory string) *session.Writer {
 	t.Helper()
 
-	writer, err := session.Create(directory, nil)
+	writer, err := session.Create(directory, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,7 +294,7 @@ func TestASessionInUseIsGivenUpOnceItIsClosed(t *testing.T) {
 func TestAJournalSaysWhichFormatItWasWrittenIn(t *testing.T) {
 	directory := t.TempDir()
 
-	writer, err := session.Create(directory, nil)
+	writer, err := session.Create(directory, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -407,6 +407,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 
 	return map[string]string{
 		".jsonl":          canonicalSessionJournal(t, directory, sessionName),
+		".meta.json":      canonicalSessionMeta(t, directory, sessionName),
 		".ansi":           ansi,
 		".screen":         settledScreen,
 		".transcript":     canonicalSessionTranscript(string(transcript), sessionName),
@@ -516,6 +517,37 @@ func runSessionGoldenTurn(
 	testHarness.finish()
 }
 
+func canonicalSessionMeta(t *testing.T, directory string, name string) string {
+	t.Helper()
+
+	encoded, err := os.ReadFile(filepath.Join(directory, name, "meta.json")) //nolint:gosec // the test's temporary bundle
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var meta map[string]json.RawMessage
+	if err := json.Unmarshal(encoded, &meta); err != nil {
+		t.Fatal(err)
+	}
+	canonicalName, err := json.Marshal("brave-otter")
+	if err != nil {
+		t.Fatal(err)
+	}
+	canonicalTime, err := json.Marshal(transcriptTime)
+	if err != nil {
+		t.Fatal(err)
+	}
+	meta["name"] = canonicalName
+	meta["started"] = canonicalTime
+	meta["touched"] = canonicalTime
+
+	canonical, err := json.Marshal(meta)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(append(canonical, '\n'))
+}
+
 func canonicalSessionJournal(t *testing.T, directory string, name string) string {
 	t.Helper()
 
@@ -530,11 +562,13 @@ func canonicalSessionJournal(t *testing.T, directory string, name string) string
 
 		record := struct {
 			Kind    session.Kind    `json:"kind"`
+			Version int             `json:"version,omitempty"`
 			Meta    json.RawMessage `json:"meta,omitempty"`
 			Event   *agent.Event    `json:"event,omitempty"`
 			Payload json.RawMessage `json:"payload,omitempty"`
 		}{
 			Kind:    line.Kind,
+			Version: line.Version,
 			Meta:    line.Meta,
 			Event:   event,
 			Payload: line.Payload,

@@ -13,6 +13,9 @@ import (
 func chooseStoredSession(directory string, terminal *os.File, screen io.Writer) (string, error) {
 	sessions, err := loadSessions(directory)
 	if err != nil {
+		if migrationError := refuseOutdatedSessions(directory); migrationError != nil {
+			return "", migrationError
+		}
 		return "", err
 	}
 	if len(sessions) == 0 {
@@ -31,25 +34,26 @@ func chooseStoredSession(directory string, terminal *os.File, screen io.Writer) 
 }
 
 func loadSessions(directory string) ([]*picker.Session, error) {
-	storedSessions, err := session.List(directory)
+	metadata, err := session.ListMeta(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	sessions := make([]*picker.Session, 0, len(storedSessions))
-	for _, storedSession := range storedSessions {
-		var meta struct {
+	sessions := make([]*picker.Session, 0, len(metadata))
+	for _, storedMeta := range metadata {
+		var data struct {
 			WorkspaceDir string `json:"workspaceDir"`
 		}
-		if len(storedSession.Meta) > 0 && json.Unmarshal(storedSession.Meta, &meta) != nil {
+		if len(storedMeta.Data) > 0 && json.Unmarshal(storedMeta.Data, &data) != nil {
 			continue
 		}
 
 		sessions = append(sessions, &picker.Session{
-			Name:         storedSession.Name,
-			WorkspaceDir: meta.WorkspaceDir,
-			Touched:      storedSession.Touched,
-			Events:       storedSession.Events,
+			Name:         storedMeta.Name,
+			WorkspaceDir: data.WorkspaceDir,
+			Touched:      storedMeta.Touched,
+			Title:        storedMeta.Title,
+			MessageCount: storedMeta.Messages,
 		})
 	}
 

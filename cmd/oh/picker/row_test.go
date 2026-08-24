@@ -20,7 +20,7 @@ func TestAnUntitledSessionDoesNotPutAnEscapeSequenceThroughTheClipper(t *testing
 		t.Errorf("expected an unpainted title, got %q", got)
 	}
 
-	if style.Width(got) != len("(nothing was asked)") {
+	if style.Width(got) != len("(untitled)") {
 		t.Errorf("expected the placeholder title, got %q", got)
 	}
 }

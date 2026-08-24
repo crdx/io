@@ -30,7 +30,7 @@ func TestPick(t *testing.T) {
 
 	for i, prompt := range prompts {
 		meta := fmt.Appendf(nil, `{"workspaceDir":"/home/alice/proj/%d"}`, i)
-		log, err := session.Create(directory, meta)
+		log, err := session.Create(directory, meta, meta)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -58,7 +58,7 @@ func TestPick(t *testing.T) {
 	case err != nil:
 		t.Fatal(err)
 	default:
-		screen.Line(style.Result("chose " + chosenSession.Name + ": " + chosenSession.FirstMessage()))
+		screen.Line(style.Result("chose " + chosenSession.Name + ": " + chosenSession.Title))
 	}
 
 	screen.End()

@@ -2,6 +2,7 @@ package migrate_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -64,8 +65,10 @@ func journalLines(t *testing.T, directory string, name string) []map[string]json
 
 func TestAJournalWithoutAVersionIsMigratedFromTheFirstFormat(t *testing.T) {
 	directory, name := storedJournal(t,
-		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter"}`,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter","meta":{"workspaceDir":"/workspace"}}`,
 		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"tool_call_request","name":"read","highlight":{"kind":"focus","value":"draw.go"}}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"user_message","text":"first question"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"model_message","text":"first answer"}}`,
 	)
 
 	from, err := migrate.Session(options(directory), name)
@@ -79,8 +82,8 @@ func TestAJournalWithoutAVersionIsMigratedFromTheFirstFormat(t *testing.T) {
 
 	lines := journalLines(t, directory, name)
 
-	if got := string(lines[0]["version"]); got != "2" {
-		t.Errorf("expected the head to say format 2, got %q", got)
+	if got := string(lines[0]["version"]); got != fmt.Sprint(session.Format) {
+		t.Errorf("expected the head to say format %d, got %q", session.Format, got)
 	}
 
 	event := string(lines[1]["event"])
@@ -90,10 +93,21 @@ func TestAJournalWithoutAVersionIsMigratedFromTheFirstFormat(t *testing.T) {
 	if !strings.Contains(event, `"value":"draw.go"`) {
 		t.Errorf("expected what the field said to survive the rename, got %s", event)
 	}
+
+	meta, err := session.ReadMeta(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if meta.Name != name || meta.Title != "first question" || meta.Messages != 2 {
+		t.Errorf("unexpected migrated metadata: %+v", meta)
+	}
+	if string(meta.Data) != `{"workspaceDir":"/workspace"}` {
+		t.Errorf("unexpected migrated data: %s", meta.Data)
+	}
 }
 
 func TestAJournalAlreadyCurrentIsLeftAlone(t *testing.T) {
-	head := `{"kind":"head","time":"2026-08-01T00:00:00Z","version":2,"id":"one","name":"brave-otter"}`
+	head := fmt.Sprintf(`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":"one","name":"brave-otter"}`, session.Format)
 	directory, name := storedJournal(t, head)
 
 	from, err := migrate.Session(options(directory), name)
@@ -126,6 +140,9 @@ func TestADryRunWritesNothing(t *testing.T) {
 	}
 	if !strings.Contains(string(lines[1]["event"]), "highlight") {
 		t.Error("expected a dry run to leave the event as it found it")
+	}
+	if _, err := session.ReadMeta(directory, name); err == nil {
+		t.Error("expected a dry run not to create metadata")
 	}
 }
 

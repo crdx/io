@@ -144,28 +144,33 @@ func Session(options Options, name string) (int, error) {
 	directory := options.Directory
 	journalPath := filepath.Join(directory, name, "session.jsonl")
 
-	lines, from, err := readJournal(journalPath)
+	lines, fromFormat, err := readJournal(journalPath)
 	if err != nil {
 		return 0, err
 	}
 
-	if from > session.Format {
-		return from, fmt.Errorf("format %d was written by a newer oh than this one", from)
+	if fromFormat > session.Format {
+		return fromFormat, fmt.Errorf("format %d was written by a newer oh than this one", fromFormat)
 	}
 
-	if from == session.Format {
-		return from, nil
+	if fromFormat == session.Format {
+		return fromFormat, nil
 	}
 
-	for format := from; format < session.Format; format++ {
-		migrateLine, ok := steps[format]
+	appliedSteps := make([]step, 0, session.Format-fromFormat)
+	for format := fromFormat; format < session.Format; format++ {
+		migrationStep, ok := steps[format]
 		if !ok {
-			return from, fmt.Errorf("nothing knows how to migrate format %d", format)
+			return fromFormat, fmt.Errorf("nothing knows how to migrate format %d", format)
 		}
+		appliedSteps = append(appliedSteps, migrationStep)
 
+		if migrationStep.migrateLine == nil {
+			continue
+		}
 		for index, line := range lines {
-			if err := migrateLine(line); err != nil {
-				return from, fmt.Errorf("line %d: format %d: %w", index+1, format, err)
+			if err := migrationStep.migrateLine(line); err != nil {
+				return fromFormat, fmt.Errorf("line %d: format %d: %w", index+1, format, err)
 			}
 		}
 	}
@@ -173,22 +178,31 @@ func Session(options Options, name string) (int, error) {
 	lines[0]["version"] = json.RawMessage(fmt.Sprint(session.Format))
 
 	if options.DryRun {
-		return from, nil
+		return fromFormat, nil
 	}
 
 	if err := keepCopy(filepath.Join(directory, name), filepath.Join(options.BackupDir, name)); err != nil {
-		return from, err
+		return fromFormat, err
 	}
 
 	if err := writeJournal(journalPath, lines); err != nil {
-		return from, err
+		return fromFormat, err
+	}
+
+	for index, migrationStep := range appliedSteps {
+		if migrationStep.finalise == nil {
+			continue
+		}
+		if err := migrationStep.finalise(directory, name); err != nil {
+			return fromFormat, fmt.Errorf("the journal was migrated but format %d could not be finalised: %w", fromFormat+index, err)
+		}
 	}
 
 	if err := store.Rebuild(directory, name); err != nil {
-		return from, fmt.Errorf("the journal was migrated but its transcript was not: %w", err)
+		return fromFormat, fmt.Errorf("the journal was migrated but its transcript was not: %w", err)
 	}
 
-	return from, nil
+	return fromFormat, nil
 }
 
 func keepCopy(bundlePath string, copyPath string) error {

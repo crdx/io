@@ -26,6 +26,22 @@ type Meta struct {
 	SystemPrompt string `json:"system_prompt,omitempty"`
 }
 
+type listingData struct {
+	WorkspaceDir string `json:"workspaceDir"`
+}
+
+func encodeMeta(meta Meta) (json.RawMessage, json.RawMessage, error) {
+	journalMeta, err := json.Marshal(meta)
+	if err != nil {
+		return nil, nil, err
+	}
+	data, err := json.Marshal(listingData{WorkspaceDir: meta.WorkspaceDir})
+	if err != nil {
+		return nil, nil, err
+	}
+	return journalMeta, data, nil
+}
+
 const (
 	transcriptName = "chat.md"
 	wireName       = "wire.http"
@@ -36,10 +52,11 @@ type canonicalWriter interface {
 	Item(json.RawMessage) error
 	Name() string
 	ID() string
+	JournalMeta() json.RawMessage
 	Started() time.Time
 	Stored() bool
 	EnsureStored() error
-	SetMeta(json.RawMessage) error
+	SetMeta(json.RawMessage, json.RawMessage) error
 	Close() error
 }
 
@@ -65,11 +82,11 @@ type Writer struct {
 
 // Create starts an oh session.
 func Create(directory string, meta Meta) (*Writer, error) {
-	jsonStr, err := json.Marshal(meta)
+	journalMeta, data, err := encodeMeta(meta)
 	if err != nil {
 		return nil, err
 	}
-	innerWriter, err := session.Create(directory, jsonStr)
+	innerWriter, err := session.Create(directory, journalMeta, data)
 	if err != nil {
 		return nil, err
 	}
@@ -84,18 +101,23 @@ func Create(directory string, meta Meta) (*Writer, error) {
 
 // Open continues an oh session, and reports session.ErrInUse when another writer holds it.
 func Open(directory, name string) (*Writer, error) {
-	storedSession, err := Read(directory, name)
-	if err != nil {
-		return nil, err
-	}
 	innerWriter, err := session.Open(directory, name)
 	if err != nil {
 		return nil, err
 	}
+
+	var meta Meta
+	if encodedMeta := innerWriter.JournalMeta(); len(encodedMeta) > 0 {
+		if err := json.Unmarshal(encodedMeta, &meta); err != nil {
+			_ = innerWriter.Close()
+			return nil, err
+		}
+	}
+
 	writer := &Writer{
 		innerWriter:              innerWriter,
 		directory:                directory,
-		meta:                     storedSession.Meta,
+		meta:                     meta,
 		transcriptLoggingEnabled: true,
 		wireRecordingEnabled:     true,
 	}
@@ -134,13 +156,13 @@ func (self *Writer) ID() string { return self.innerWriter.ID() }
 
 // SetMeta replaces the meta before the first record is written.
 func (self *Writer) SetMeta(meta Meta) error {
-	jsonStr, err := json.Marshal(meta)
+	journalMeta, data, err := encodeMeta(meta)
 	if err != nil {
 		return err
 	}
 	self.writerMutex.Lock()
 	defer self.writerMutex.Unlock()
-	if err := self.innerWriter.SetMeta(jsonStr); err != nil {
+	if err := self.innerWriter.SetMeta(journalMeta, data); err != nil {
 		return err
 	}
 	self.meta = meta
@@ -365,6 +387,19 @@ func (self *Session) Messages() int {
 		}
 	}
 	return count
+}
+
+// RebuildMeta writes a session's compact listing data again from its journal.
+func RebuildMeta(directory, name string) error {
+	storedSession, err := Read(directory, name)
+	if err != nil {
+		return err
+	}
+	_, data, err := encodeMeta(storedSession.Meta)
+	if err != nil {
+		return err
+	}
+	return session.RebuildMeta(directory, name, data)
 }
 
 // Rebuild writes a session's transcript again from its journal, replacing whatever was there.

@@ -125,7 +125,7 @@ func TestRunningOutOfNamesIsReportedRatherThanFudged(t *testing.T) {
 
 	storeSession(t, directory)
 
-	if _, err := Create(directory, nil); err == nil {
+	if _, err := Create(directory, nil, nil); err == nil {
 		t.Error("expected an exhausted word list to be reported")
 	}
 }
@@ -230,7 +230,7 @@ func TestAnAbsentDirectoryHoldsNoSessions(t *testing.T) {
 func storeSession(t *testing.T, directory string) *Writer {
 	t.Helper()
 
-	writer, err := Create(directory, nil)
+	writer, err := Create(directory, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

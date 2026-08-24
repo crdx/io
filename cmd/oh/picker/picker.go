@@ -13,7 +13,6 @@ import (
 
 	"golang.org/x/term"
 
-	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
@@ -35,29 +34,12 @@ type Session struct {
 	Name         string
 	WorkspaceDir string
 	Touched      time.Time
-	Events       []agent.Event
-}
-
-// FirstMessage is the first message the user sent in the session.
-func (self *Session) FirstMessage() string {
-	for _, event := range self.Events {
-		if event.Kind == agent.UserMessageEvent {
-			return event.Text
-		}
-	}
-	return ""
+	Title        string
+	MessageCount int
 }
 
 // Messages counts what the user and the model said, excluding working events.
-func (self *Session) Messages() int {
-	count := 0
-	for _, event := range self.Events {
-		if event.Kind == agent.UserMessageEvent || event.Kind == agent.ModelMessageEvent {
-			count++
-		}
-	}
-	return count
-}
+func (self *Session) Messages() int { return self.MessageCount }
 
 // Choose shows the sessions newest first and returns the chosen one. Abandoning the choice is
 // ErrCancelled, so a session comes back whenever the error does not.
@@ -213,12 +195,11 @@ func mark(sessionChosen bool) string {
 }
 
 func title(storedSession *Session) string {
-	askedText := storedSession.FirstMessage()
-	if askedText == "" {
-		return "(nothing was asked)"
+	if storedSession.Title == "" {
+		return "(untitled)"
 	}
 
-	return strings.ReplaceAll(askedText, "\n", " ")
+	return strings.ReplaceAll(storedSession.Title, "\n", " ")
 }
 
 func ago(when time.Time) string {

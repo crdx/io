@@ -18,6 +18,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 	claimFixtureOutputs(t, expected, "generated scenario", "testdata/scenarios", ".toml", []string{
 		".ansi",
 		".jsonl",
+		".meta.json",
 		".requests.jsonl",
 		".screen",
 		".transcript",

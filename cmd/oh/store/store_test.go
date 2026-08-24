@@ -107,6 +107,17 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 	if want := "what is the weather in London?"; storedSession.FirstMessage() != want {
 		t.Errorf("expected %q, got %q", want, storedSession.FirstMessage())
 	}
+
+	meta, err := session.ReadMeta(directory, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(meta.Data) != `{"workspaceDir":"/tmp/somewhere"}` {
+		t.Errorf("unexpected meta data: %s", meta.Data)
+	}
+	if meta.Title != "what is the weather in London?" || meta.Messages != 3 {
+		t.Errorf("unexpected metadata: %+v", meta)
+	}
 }
 
 func TestTheMetaCanIncludeTheGeneratedSessionID(t *testing.T) {
@@ -440,7 +451,7 @@ func TestHTTPObservationCanCreateTheBundleBeforeTheFirstEvent(t *testing.T) {
 	}
 
 	bundle := filepath.Join(directory, log.Name())
-	for _, name := range []string{"session.jsonl", "chat.md", "wire.http"} {
+	for _, name := range []string{"session.jsonl", "meta.json", "chat.md", "wire.http"} {
 		if _, err := os.Stat(filepath.Join(bundle, name)); err != nil {
 			t.Errorf("expected %s: %v", name, err)
 		}
@@ -466,7 +477,7 @@ func TestTheFirstRecordCreatesACompleteBundle(t *testing.T) {
 	}
 
 	bundle := filepath.Join(directory, log.Name())
-	for _, name := range []string{"session.jsonl", "chat.md", "wire.http"} {
+	for _, name := range []string{"session.jsonl", "meta.json", "chat.md", "wire.http"} {
 		info, err := os.Stat(filepath.Join(bundle, name))
 		if err != nil {
 			t.Errorf("expected %s: %v", name, err)
