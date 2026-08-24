@@ -164,6 +164,11 @@ func run() ([]string, error) {
 	}
 
 	files := file.New(root, caps.RefuseWrite(mode))
+	homeRoot, err := mountHomeDir(files, homeDir, mode)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = homeRoot.Close() }()
 
 	config, err := loadConfig(configPath())
 	if err != nil {
@@ -486,6 +491,16 @@ func openTmpDir(name string) (string, error) {
 	}
 
 	return tmp, nil
+}
+
+func mountHomeDir(files *file.Root, homeDir string, mode *caps.Mode) (*os.Root, error) {
+	homeRoot, err := os.OpenRoot(homeDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not open the shell home: %w", err)
+	}
+
+	files.Mount(homeDir, file.New(homeRoot, caps.RefuseWrite(mode)))
+	return homeRoot, nil
 }
 
 func mountTmpDir(files *file.Root, tmpDir string) (*os.Root, error) {

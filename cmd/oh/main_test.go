@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 
@@ -15,6 +16,39 @@ import (
 func TestMain(testingMain *testing.M) {
 	sandbox.Init()
 	os.Exit(testingMain.Run())
+}
+
+func TestHomeMountIsReadableByFileTools(t *testing.T) {
+	workspaceRoot, err := os.OpenRoot(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
+	home := t.TempDir()
+	path := filepath.Join(home, "reference")
+	if err := os.WriteFile(path, []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	homeRoot, err := mountHomeDir(files, home, caps.NewMode(caps.Read))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = homeRoot.Close() }()
+
+	resolvedRoot, name, err := files.Resolve(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := resolvedRoot.ReadFile(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(data) != "hello" {
+		t.Errorf("got %q, want hello", data)
+	}
 }
 
 func TestTmpMountIsWritableWithoutAShell(t *testing.T) {

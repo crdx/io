@@ -211,9 +211,9 @@ func scopeRules(extraPaths shell.Paths, currentCaps caps.Set) string {
 	var lines []string
 
 	if len(extraPaths.Read)+len(extraPaths.Write) > 0 {
-		lines = append(lines, "- Tools that accept a path can access the workspace, /tmp, and the configured paths listed here.")
+		lines = append(lines, "- Tools that accept a path can access the workspace, private home, /tmp, and the configured paths listed here.")
 	} else {
-		lines = append(lines, "- Tools that accept a path can only access the workspace and /tmp.")
+		lines = append(lines, "- Tools that accept a path can only access the workspace, private home, and /tmp.")
 	}
 
 	for _, path := range extraPaths.Read {

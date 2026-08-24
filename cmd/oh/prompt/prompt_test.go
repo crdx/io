@@ -203,6 +203,7 @@ func TestTheHarnessDisclosesTheShellHome(t *testing.T) {
 	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
 
 	for _, want := range []string{
+		"path can only access the workspace, private home, and /tmp",
 		"HOME is /state/home",
 		"A ~ in the shell means that directory",
 	} {

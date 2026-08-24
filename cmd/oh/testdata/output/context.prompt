@@ -2,7 +2,7 @@
 
 - Your workspace is the current directory, /workspace
 - Your session is named brave-otter
-- Tools that accept a path can access the workspace, /tmp, and the configured paths listed here.
+- Tools that accept a path can access the workspace, private home, /tmp, and the configured paths listed here.
 - The configured path /reference is read-only.
 - The configured path /output is read-write and follows the workspace write state.
 - The shell may execute files at or under /commands.
