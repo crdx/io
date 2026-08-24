@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/internal/pathutil"
+	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/tool"
 
 	"crdx.org/io/cmd/oh/call"

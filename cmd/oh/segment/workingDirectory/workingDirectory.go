@@ -6,7 +6,7 @@ import (
 
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/internal/pathutil"
+	"crdx.org/io/internal/util/pathutil"
 )
 
 const (

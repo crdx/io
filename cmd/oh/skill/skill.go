@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	"crdx.org/io/internal/file"
-	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/util/pathutil"
 	"gopkg.in/yaml.v3"
 )
 

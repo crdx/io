@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"crdx.org/io/internal/strutil"
+	"crdx.org/io/internal/util/strutil"
 )
 
 func TestLinesDoesNotAddALineAfterATrailingNewline(t *testing.T) {

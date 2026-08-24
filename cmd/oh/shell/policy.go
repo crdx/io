@@ -14,8 +14,8 @@ import (
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/file"
-	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/tool"
 	"crdx.org/io/toolbox/bash"
 )

@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/internal/xdg"
 	"crdx.org/io/session"
 )

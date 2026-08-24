@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"crdx.org/io/internal/strutil"
+	"crdx.org/io/internal/util/strutil"
 )
 
 // DataType is the JSON Schema type of one value.

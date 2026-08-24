@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"crdx.org/io/internal/strutil"
+	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
 )
 

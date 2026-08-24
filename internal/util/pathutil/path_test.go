@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"crdx.org/io/internal/pathutil"
+	"crdx.org/io/internal/util/pathutil"
 )
 
 func TestShortenWritesAPathTheWayTheUserWouldSayIt(t *testing.T) {

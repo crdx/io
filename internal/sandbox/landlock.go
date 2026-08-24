@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"unsafe"
 
-	"crdx.org/io/internal/pathutil"
+	"crdx.org/io/internal/util/pathutil"
 
 	"golang.org/x/sys/unix"
 )

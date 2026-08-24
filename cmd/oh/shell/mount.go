@@ -11,8 +11,8 @@ import (
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/file"
-	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/util/pathutil"
 )
 
 type configuredMount struct {

@@ -16,8 +16,8 @@ import (
 
 	"crdx.org/io/internal/file"
 
-	"crdx.org/io/internal/strutil"
 	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
 )
 

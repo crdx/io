@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"crdx.org/io/internal/pathutil"
+	"crdx.org/io/internal/util/pathutil"
 )
 
 // Paths are the additional host paths made available to shell and file tools.

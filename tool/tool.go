@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"crdx.org/io/internal/strutil"
+	"crdx.org/io/internal/util/strutil"
 )
 
 // Tool is one operation the model can call.

@@ -14,7 +14,7 @@ import (
 
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/shell"
-	"crdx.org/io/internal/pathutil"
+	"crdx.org/io/internal/util/pathutil"
 )
 
 //go:embed defaults.toml

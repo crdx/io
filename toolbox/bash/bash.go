@@ -12,9 +12,9 @@ import (
 	"mvdan.cc/sh/v3/syntax"
 
 	"crdx.org/io/internal/file"
-	"crdx.org/io/internal/pathutil"
 	"crdx.org/io/internal/sandbox"
-	"crdx.org/io/internal/strutil"
+	"crdx.org/io/internal/util/pathutil"
+	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
 )
 

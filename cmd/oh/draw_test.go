@@ -18,7 +18,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/internal/pathutil"
+	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
 )

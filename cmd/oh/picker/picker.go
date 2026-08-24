@@ -15,7 +15,7 @@ import (
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/width"
-	"crdx.org/io/internal/pathutil"
+	"crdx.org/io/internal/util/pathutil"
 )
 
 const (

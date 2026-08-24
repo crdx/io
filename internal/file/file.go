@@ -9,7 +9,7 @@ import (
 	"strings"
 	"syscall"
 
-	"crdx.org/io/internal/pathutil"
+	"crdx.org/io/internal/util/pathutil"
 )
 
 // ErrReadOnly is what a call that would change something gets while writing is withheld.

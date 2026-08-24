@@ -5,7 +5,7 @@ import (
 	"slices"
 	"time"
 
-	"crdx.org/io/internal/pathutil"
+	"crdx.org/io/internal/util/pathutil"
 )
 
 var base = []grant{
