@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/util"
 )
@@ -46,11 +47,11 @@ func renderStartupEvent(event agent.Event) string {
 	return style.Subtle("[") + renderStartupBanner(event.Took, false, info) + style.Subtle("]")
 }
 
-func startupFilesOf(files []contextFile) []startupFile {
+func startupFilesOf(files []prompt.File) []startupFile {
 	kept := make([]startupFile, 0, len(files))
 
 	for _, file := range files {
-		kept = append(kept, startupFile{Name: file.name, Bytes: len(file.body)})
+		kept = append(kept, startupFile{Name: file.Name, Bytes: len(file.Body)})
 	}
 
 	return kept

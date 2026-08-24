@@ -1,4 +1,4 @@
-package main
+package prompt
 
 import (
 	"errors"
@@ -11,6 +11,7 @@ import (
 
 	"crdx.org/hereduck"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
 )
 
@@ -75,52 +76,65 @@ type harnessContextTemplateData struct {
 	TmpDir            string
 	HomeDir           string
 	CurrentCaps       caps.Set
-	ExtraPaths        pathsConfig
+	ExtraPaths        shell.Paths
 	WorkspaceWritable bool
 	GitWritable       bool
 	BackgroundEnabled bool
 	ShellGranted      bool
 }
 
-type contextFile struct {
-	name string
-	body string
+// File is one context file incorporated into the system prompt.
+type File struct {
+	Name string
+	Body string
 }
 
-func loadContext(
-	root *os.Root,
-	workspaceDir string,
-	sessionName string,
-	tmpDir string,
-	homeDir string,
-	currentCaps caps.Set,
-	extraPaths pathsConfig,
-	skills []skill.Skill,
-) (string, []contextFile, error) {
-	globalFile, err := readGlobalContext()
+// Config describes the runtime state and context sources incorporated into a system prompt.
+type Config struct {
+	GlobalPath   string
+	Root         *os.Root
+	WorkspaceDir string
+	SessionName  string
+	TmpDir       string
+	HomeDir      string
+	CurrentCaps  caps.Set
+	ExtraPaths   shell.Paths
+	Skills       []skill.Skill
+}
+
+// Load reads the configured context sources and assembles the complete system prompt.
+func Load(config Config) (string, []File, error) {
+	globalFile, err := readGlobalContext(config.GlobalPath)
 	if err != nil {
 		return "", nil, err
 	}
 
-	projectFiles, err := readProjectContext(root)
+	projectFiles, err := readProjectContext(config.Root)
 	if err != nil {
 		return "", nil, err
 	}
 
 	files := projectFiles
 	if globalFile != nil {
-		files = append([]contextFile{*globalFile}, projectFiles...)
+		files = append([]File{*globalFile}, projectFiles...)
 	}
 
 	return mergeContexts(
-		harnessContext(workspaceDir, sessionName, tmpDir, homeDir, currentCaps, extraPaths),
+		harnessContext(
+			config.WorkspaceDir,
+			config.SessionName,
+			config.TmpDir,
+			config.HomeDir,
+			config.CurrentCaps,
+			config.ExtraPaths,
+		),
 		globalContext(globalFile),
 		projectContext(projectFiles),
-		skill.Context(skills),
+		skill.Context(config.Skills),
 	), files, nil
 }
 
-func readContextFile(name string, read func() ([]byte, error)) (*contextFile, error) {
+func readContextFile(name string, read func() ([]byte, error)) (*File, error) {
 	data, err := read()
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
@@ -133,12 +147,10 @@ func readContextFile(name string, read func() ([]byte, error)) (*contextFile, er
 		return nil, nil
 	}
 
-	return &contextFile{name: name, body: string(data)}, nil
+	return &File{Name: name, Body: string(data)}, nil
 }
 
-func readGlobalContext() (*contextFile, error) {
-	path := globalContextPath()
-
+func readGlobalContext(path string) (*File, error) {
 	file, err := readContextFile(globalContextName, func() ([]byte, error) {
 		return os.ReadFile(path) //nolint:gosec // this is the one documented config path
 	})
@@ -149,8 +161,8 @@ func readGlobalContext() (*contextFile, error) {
 	return file, nil
 }
 
-func readProjectContext(root *os.Root) ([]contextFile, error) {
-	var files []contextFile
+func readProjectContext(root *os.Root) ([]File, error) {
+	var files []File
 
 	for _, name := range projectContextNames {
 		file, err := readContextFile(name, func() ([]byte, error) { return root.ReadFile(name) })
@@ -166,15 +178,15 @@ func readProjectContext(root *os.Root) ([]contextFile, error) {
 	return files, nil
 }
 
-func globalContext(file *contextFile) string {
+func globalContext(file *File) string {
 	if file == nil {
 		return defaultGlobalContext
 	}
 
-	return file.body
+	return file.Body
 }
 
-func harnessContext(workspaceDir string, sessionName string, tmpDir string, homeDir string, currentCaps caps.Set, extraPaths pathsConfig) string {
+func harnessContext(workspaceDir string, sessionName string, tmpDir string, homeDir string, currentCaps caps.Set, extraPaths shell.Paths) string {
 	data := harnessContextTemplateData{
 		WorkspaceDir:      workspaceDir,
 		SessionName:       sessionName,
@@ -195,7 +207,7 @@ func harnessContext(workspaceDir string, sessionName string, tmpDir string, home
 	return strings.TrimSpace(rendered.String())
 }
 
-func scopeRules(extraPaths pathsConfig, currentCaps caps.Set) string {
+func scopeRules(extraPaths shell.Paths, currentCaps caps.Set) string {
 	var lines []string
 
 	if len(extraPaths.Read)+len(extraPaths.Write) > 0 {
@@ -218,14 +230,14 @@ func scopeRules(extraPaths pathsConfig, currentCaps caps.Set) string {
 	return strings.Join(lines, "\n")
 }
 
-func projectContext(files []contextFile) string {
+func projectContext(files []File) string {
 	if len(files) == 0 {
 		return ""
 	}
 
 	sections := make([]string, 0, len(files))
 	for _, file := range files {
-		sections = append(sections, "## "+file.name+"\n\n"+strings.TrimSpace(file.body))
+		sections = append(sections, "## "+file.Name+"\n\n"+strings.TrimSpace(file.Body))
 	}
 
 	return "# Project Context\n\n" + strings.Join(sections, "\n\n")

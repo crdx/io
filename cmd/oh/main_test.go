@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strings"
 	"testing"
 
 	"crdx.org/duckopt/v2"
@@ -196,56 +195,6 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 
 	if got := grantedCaps.Flags(); got != "r" {
 		t.Errorf("expected r, got %q", got)
-	}
-}
-
-func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
-	system := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", caps.Read, pathsConfig{})
-
-	if want := "The workspace (/workspace) is " + filesystem(false); !strings.Contains(system, want) {
-		t.Errorf("expected the workspace to be reported as %q, got %q", want, system)
-	}
-
-	if want := "The .git directory within it (/workspace/.git) is " + filesystem(false); !strings.Contains(system, want) {
-		t.Errorf("expected the history to be reported as %q, got %q", want, system)
-	}
-
-	if !strings.Contains(system, "always "+filesystem(true)) {
-		t.Errorf("expected the scratch to be writable whatever the workspace is, got %q", system)
-	}
-
-	if !strings.Contains(system, "/tmp maps to /state/tmps/session on the user's machine") {
-		t.Errorf("expected the scratch backing directory to be reported, got %q", system)
-	}
-
-	if !strings.Contains(system, "/tmp/result.png → /state/tmps/session/result.png") {
-		t.Errorf("expected an example translated scratch path, got %q", system)
-	}
-
-	if strings.Contains(system, "including /tmp") {
-		t.Errorf("the workspace mode still claims to include /tmp: %q", system)
-	}
-}
-
-func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
-	for name, test := range map[string]struct {
-		currentCaps caps.Set
-		granted     bool
-	}{
-		"granted": {caps.Read | caps.Shell, true},
-		"refused": {caps.Read, false},
-	} {
-		t.Run(name, func(t *testing.T) {
-			got := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", test.currentCaps, pathsConfig{})
-
-			if want := "The bash tool is " + shellAccess(test.granted); !strings.Contains(got, want) {
-				t.Errorf("expected %q in %q", want, got)
-			}
-
-			if unwanted := "The bash tool is " + shellAccess(!test.granted); strings.Contains(got, unwanted) {
-				t.Errorf("expected no %q in %q", unwanted, got)
-			}
-		})
 	}
 }
 

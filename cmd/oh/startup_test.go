@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/style"
 )
 
@@ -23,9 +24,9 @@ func TestTookReportsTheScaleAStartupHappensOn(t *testing.T) {
 func TestTheStartupLineUsesTheCompactSummary(t *testing.T) {
 	line := renderStartupBanner(12*time.Millisecond, false, startupInfo{
 		Session: "brave-otter",
-		ContextFiles: startupFilesOf([]contextFile{
-			{name: "SYSTEM.md", body: strings.Repeat("x", 740)},
-			{name: "AGENTS.md", body: strings.Repeat("x", 3*1024)},
+		ContextFiles: startupFilesOf([]prompt.File{
+			{Name: "SYSTEM.md", Body: strings.Repeat("x", 740)},
+			{Name: "AGENTS.md", Body: strings.Repeat("x", 3*1024)},
 		}),
 		ProjectSkills: 2,
 		GlobalSkills:  3,

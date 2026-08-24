@@ -1,4 +1,4 @@
-package main
+package prompt
 
 import (
 	"os"
@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
 )
 
@@ -23,6 +24,28 @@ func systemRoot(t *testing.T) (*os.Root, string) {
 	return root, workspace
 }
 
+func configDir() string {
+	return filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "org.crdx", "oh")
+}
+
+func globalContextPath() string {
+	return filepath.Join(configDir(), globalContextName)
+}
+
+func loadTestContext(root *os.Root, workspaceDir string, skills []skill.Skill) (string, []File, error) {
+	return Load(Config{
+		GlobalPath:   globalContextPath(),
+		Root:         root,
+		WorkspaceDir: workspaceDir,
+		SessionName:  "session-id",
+		TmpDir:       "/state/tmps/session",
+		HomeDir:      "/state/home",
+		CurrentCaps:  caps.Read,
+		ExtraPaths:   shell.Paths{},
+		Skills:       skills,
+	})
+}
+
 func TestTheGlobalContextReplacesTheBuiltInOpeningButKeepsTheHarnessState(t *testing.T) {
 	root, workspace := systemRoot(t)
 	config := t.TempDir()
@@ -35,13 +58,13 @@ func TestTheGlobalContextReplacesTheBuiltInOpeningButKeepsTheHarnessState(t *tes
 		t.Fatal(err)
 	}
 
-	got, contextFiles, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", caps.Read, pathsConfig{}, nil)
+	got, contextFiles, err := loadTestContext(root, workspace, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	wantFiles := []contextFile{{name: "SYSTEM.md", body: configuredGlobalContext}}
-	if !slices.Equal(contextFiles, wantFiles) {
-		t.Errorf("got context files %v, want %v", contextFiles, wantFiles)
+	wantcontextFiles := []File{{Name: "SYSTEM.md", Body: configuredGlobalContext}}
+	if !slices.Equal(contextFiles, wantcontextFiles) {
+		t.Errorf("got context files %v, want %v", contextFiles, wantcontextFiles)
 	}
 	if !strings.Contains(got, "You are a deliberately custom assistant.") {
 		t.Errorf("custom opening is missing: %q", got)
@@ -67,7 +90,7 @@ func TestAMissingGlobalContextUsesTheBuiltInOpening(t *testing.T) {
 	root, workspace := systemRoot(t)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 
-	got, _, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", caps.Read, pathsConfig{}, nil)
+	got, _, err := loadTestContext(root, workspace, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +102,7 @@ func TestAMissingGlobalContextUsesTheBuiltInOpening(t *testing.T) {
 	}
 }
 
-func TestContextFilesFollowTheOrderTheyAreConcatenatedIn(t *testing.T) {
+func TestContextcontextFilesFollowTheOrderTheyAreConcatenatedIn(t *testing.T) {
 	root, workspace := systemRoot(t)
 	config := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", config)
@@ -99,17 +122,17 @@ func TestContextFilesFollowTheOrderTheyAreConcatenatedIn(t *testing.T) {
 		}
 	}
 
-	got, contextFiles, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", caps.Read, pathsConfig{}, nil)
+	got, contextFiles, err := loadTestContext(root, workspace, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	wantFiles := []contextFile{
-		{name: "SYSTEM.md", body: configuredGlobalContext},
-		{name: "AGENTS.md", body: "Run the broad checks."},
-		{name: "AGENTS.local.md", body: "Never grant more access."},
+	wantcontextFiles := []File{
+		{Name: "SYSTEM.md", Body: configuredGlobalContext},
+		{Name: "AGENTS.md", Body: "Run the broad checks."},
+		{Name: "AGENTS.local.md", Body: "Never grant more access."},
 	}
-	if !slices.Equal(contextFiles, wantFiles) {
-		t.Errorf("got context files %v, want %v", contextFiles, wantFiles)
+	if !slices.Equal(contextFiles, wantcontextFiles) {
+		t.Errorf("got context files %v, want %v", contextFiles, wantcontextFiles)
 	}
 	system := strings.Index(got, "You are a deliberately custom assistant.")
 	agents := strings.Index(got, "Run the broad checks.")
@@ -120,7 +143,7 @@ func TestContextFilesFollowTheOrderTheyAreConcatenatedIn(t *testing.T) {
 }
 
 func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
-	paths := pathsConfig{
+	paths := shell.Paths{
 		Read:  []string{"/reference"},
 		Write: []string{"/output"},
 		Exec:  []string{"/commands"},
@@ -139,7 +162,7 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 }
 
 func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
-	got := harnessContext("/workspace", "brave-otter", "/tmp/x", "/state/home", caps.Read, pathsConfig{})
+	got := harnessContext("/workspace", "brave-otter", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
 
 	if !strings.Contains(got, "Your session is named brave-otter") {
 		t.Errorf("harness context does not contain the session name: %q", got)
@@ -147,7 +170,7 @@ func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
 }
 
 func TestTheHarnessDisclosesPrivateLoopbackNetworking(t *testing.T) {
-	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, pathsConfig{})
+	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
 
 	for _, want := range []string{
 		"private loopback interface",
@@ -164,7 +187,7 @@ func TestTheScratchMappingIsWrittenInFull(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
 	scratch := "/home/alice/.local/state/org.crdx/oh/tmps/0d3f"
-	got := harnessContext("/workspace", "session-id", scratch, "/home/alice/.local/state/org.crdx/oh/home", caps.Read, pathsConfig{})
+	got := harnessContext("/workspace", "session-id", scratch, "/home/alice/.local/state/org.crdx/oh/home", caps.Read, shell.Paths{})
 
 	for _, want := range []string{
 		"/tmp maps to " + scratch + " on the user's machine",
@@ -177,7 +200,7 @@ func TestTheScratchMappingIsWrittenInFull(t *testing.T) {
 }
 
 func TestTheHarnessDisclosesTheShellHome(t *testing.T) {
-	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, pathsConfig{})
+	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
 
 	for _, want := range []string{
 		"HOME is /state/home",
@@ -199,7 +222,7 @@ func TestTheHarnessNeverAbbreviatesAPathToATilde(t *testing.T) {
 		filepath.Join(home, ".local", "state", "org.crdx", "oh", "tmps", "0d3f"),
 		filepath.Join(home, ".local", "state", "org.crdx", "oh", "home"),
 		caps.Read|caps.Write|caps.Shell,
-		pathsConfig{
+		shell.Paths{
 			Read:  []string{filepath.Join(home, "reference")},
 			Write: []string{filepath.Join(home, "output")},
 			Exec:  []string{filepath.Join(home, "commands")},
@@ -217,7 +240,7 @@ func TestTheSkillCatalogueIsAppendedToTheContext(t *testing.T) {
 	root, workspace := systemRoot(t)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 
-	got, _, err := loadContext(root, workspace, "session-id", "/state/tmps/session", "/state/home", caps.Read, pathsConfig{}, []skill.Skill{{
+	got, _, err := loadTestContext(root, workspace, []skill.Skill{{
 		Name:        "pdf",
 		Description: "Work with PDFs.",
 		Location:    "/skills/pdf/SKILL.md",
@@ -229,5 +252,55 @@ func TestTheSkillCatalogueIsAppendedToTheContext(t *testing.T) {
 		if !strings.Contains(got, want) {
 			t.Errorf("system prompt does not contain %q: %q", want, got)
 		}
+	}
+}
+
+func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
+	system := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", caps.Read, shell.Paths{})
+
+	if want := "The workspace (/workspace) is " + filesystem(false); !strings.Contains(system, want) {
+		t.Errorf("expected the workspace to be reported as %q, got %q", want, system)
+	}
+
+	if want := "The .git directory within it (/workspace/.git) is " + filesystem(false); !strings.Contains(system, want) {
+		t.Errorf("expected the history to be reported as %q, got %q", want, system)
+	}
+
+	if !strings.Contains(system, "always "+filesystem(true)) {
+		t.Errorf("expected the scratch to be writable whatever the workspace is, got %q", system)
+	}
+
+	if !strings.Contains(system, "/tmp maps to /state/tmps/session on the user's machine") {
+		t.Errorf("expected the scratch backing directory to be reported, got %q", system)
+	}
+
+	if !strings.Contains(system, "/tmp/result.png → /state/tmps/session/result.png") {
+		t.Errorf("expected an example translated scratch path, got %q", system)
+	}
+
+	if strings.Contains(system, "including /tmp") {
+		t.Errorf("the workspace mode still claims to include /tmp: %q", system)
+	}
+}
+
+func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
+	for name, test := range map[string]struct {
+		currentCaps caps.Set
+		granted     bool
+	}{
+		"granted": {caps.Read | caps.Shell, true},
+		"refused": {caps.Read, false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", test.currentCaps, shell.Paths{})
+
+			if want := "The bash tool is " + shellAccess(test.granted); !strings.Contains(got, want) {
+				t.Errorf("expected %q in %q", want, got)
+			}
+
+			if unwanted := "The bash tool is " + shellAccess(!test.granted); strings.Contains(got, unwanted) {
+				t.Errorf("expected no %q in %q", unwanted, got)
+			}
+		})
 	}
 }

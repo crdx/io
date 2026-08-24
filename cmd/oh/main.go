@@ -26,6 +26,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/models"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/store"
@@ -314,20 +315,21 @@ func run() ([]string, error) {
 	}()
 
 	var systemPrompt string
-	var contextFiles []contextFile
+	var contextFiles []prompt.File
 	if resumedSession != nil && resumedSession.Meta.SystemPrompt != "" {
 		systemPrompt = resumedSession.Meta.SystemPrompt
 	} else {
-		systemPrompt, contextFiles, err = loadContext(
-			root,
-			workspaceDir,
-			log.Name(),
-			tmpDir,
-			homeDir,
-			args.caps,
-			config.Sandbox,
-			availableSkills,
-		)
+		systemPrompt, contextFiles, err = prompt.Load(prompt.Config{
+			GlobalPath:   globalContextPath(),
+			Root:         root,
+			WorkspaceDir: workspaceDir,
+			SessionName:  log.Name(),
+			TmpDir:       tmpDir,
+			HomeDir:      homeDir,
+			CurrentCaps:  args.caps,
+			ExtraPaths:   config.Sandbox,
+			Skills:       availableSkills,
+		})
 		if err != nil {
 			return nil, err
 		}
