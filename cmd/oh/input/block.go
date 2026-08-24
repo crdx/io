@@ -7,10 +7,7 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
-const (
-	startPad = 1
-	endPad   = 2
-)
+const edgePad = 2
 
 type Ruler struct {
 	Left   string
@@ -28,7 +25,7 @@ func (self Block) Rows(width int) ([]string, int, int) {
 	rows := make([]string, 0, len(self.Input.Rows)+3)
 
 	bottom := self.Bottom
-	if getWidth(bottom.Left, startPad)+getWidth(bottom.Right, endPad) > width {
+	if getWidth(bottom.Left, edgePad)+getWidth(bottom.Right, edgePad) > width {
 		bottom.Right = ""
 	}
 
@@ -40,21 +37,21 @@ func (self Block) Rows(width int) ([]string, int, int) {
 }
 
 func (self Ruler) render(width int) string {
-	leftWidth := getWidth(self.Left, startPad)
-	rightWidth := getWidth(self.Right, endPad)
+	leftWidth := getWidth(self.Left, edgePad)
+	rightWidth := getWidth(self.Right, edgePad)
 
 	head := ""
 	if leftWidth == 0 || leftWidth+rightWidth > width {
 		leftWidth = 0
 	} else {
-		head = style.Rule(strings.Repeat("─", startPad)) + " " + self.Left + " "
+		head = style.Rule(strings.Repeat("─", edgePad)) + " " + self.Left + " "
 	}
 
 	tail := ""
 	if rightWidth == 0 || leftWidth+rightWidth > width {
 		rightWidth = 0
 	} else {
-		tail = " " + self.Right + " " + style.Rule(strings.Repeat("─", endPad))
+		tail = " " + self.Right + " " + style.Rule(strings.Repeat("─", edgePad))
 	}
 
 	middleWidth := max(width-leftWidth-rightWidth, 0)

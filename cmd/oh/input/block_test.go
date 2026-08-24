@@ -61,7 +61,7 @@ func TestTheBottomRuleCarriesALabelAtEitherEnd(t *testing.T) {
 	block := Block{Bottom: Ruler{Left: "⠶ ─ io ─ gpt", Right: "↓ 2"}}
 
 	got := style.Plain(bottomRuleOf(block, 40))
-	if !strings.HasPrefix(got, "─ ⠶ ─ io ─ gpt ") {
+	if !strings.HasPrefix(got, "── ⠶ ─ io ─ gpt ") {
 		t.Errorf("expected the label at the left, got %q", got)
 	}
 	if !strings.HasSuffix(got, " ↓ 2 ──") {
