@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"slices"
 	"testing"
+
+	"crdx.org/io/cmd/oh/models"
 )
 
 func writeStoredSession(t *testing.T, directory string, name string, started string) {
@@ -75,9 +77,9 @@ func TestNothingTypedOffersTheLongOptions(t *testing.T) {
 }
 
 func TestModelCompletionsAreWholeSelections(t *testing.T) {
-	choices := []modelChoice{
-		{provider: "openai", model: "gpt-5", effortLevels: []string{"low", "high"}},
-		{provider: "anthropic", model: "claude-sonnet-5", effortLevels: []string{"none", "high"}},
+	choices := []models.Choice{
+		{Provider: "openai", Model: "gpt-5", EffortLevels: []string{"low", "high"}},
+		{Provider: "anthropic", Model: "claude-sonnet-5", EffortLevels: []string{"none", "high"}},
 	}
 
 	selections := modelCompletions("sonnet", choices)
@@ -96,9 +98,9 @@ func TestModelCompletionsAreWholeSelections(t *testing.T) {
 }
 
 func TestEffortCompletionsAreBareLevels(t *testing.T) {
-	choices := []modelChoice{
-		{provider: "openai", model: "gpt-5", effortLevels: []string{"low", "high"}},
-		{provider: "anthropic", model: "claude-sonnet-5", effortLevels: []string{"none", "high"}},
+	choices := []models.Choice{
+		{Provider: "openai", Model: "gpt-5", EffortLevels: []string{"low", "high"}},
+		{Provider: "anthropic", Model: "claude-sonnet-5", EffortLevels: []string{"none", "high"}},
 	}
 
 	if efforts := effortCompletions("sonnet@", choices); !slices.Equal(efforts, []string{"none", "high"}) {

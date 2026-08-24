@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/models"
 	"crdx.org/io/session"
 )
 
@@ -49,9 +50,9 @@ func completions(kind string, word string) []string {
 	case completeOption:
 		return optionCompletions(word, usageOptions(usage))
 	case completeModel:
-		return modelCompletions(word, modelChoices())
+		return modelCompletions(word, models.Choices(modelCachePath()))
 	case completeEffort:
-		return effortCompletions(word, modelChoices())
+		return effortCompletions(word, models.Choices(modelCachePath()))
 	case completeSession:
 		return withPrefix(word, sessionNames(sessionsDir()))
 	case completeCaps:
@@ -99,32 +100,32 @@ func usageOptions(text string) []string {
 	return options
 }
 
-func modelCompletions(word string, choices []modelChoice) []string {
+func modelCompletions(word string, choices []models.Choice) []string {
 	modelQuery, effortQuery, qualified := strings.Cut(word, "@")
 
 	var selections []string
 
-	for _, choice := range rankedModels(modelQuery, choices) {
-		efforts := choice.effortLevels
+	for _, choice := range models.RankedChoices(modelQuery, choices) {
+		efforts := choice.EffortLevels
 		if qualified {
-			efforts = effortsMatching(effortQuery, choice.effortLevels)
+			efforts = models.EffortsMatching(effortQuery, choice.EffortLevels)
 		}
 
 		for _, effort := range efforts {
-			selections = append(selections, choice.provider+"/"+choice.model+"@"+effort)
+			selections = append(selections, choice.Provider+"/"+choice.Model+"@"+effort)
 		}
 	}
 
 	return selections
 }
 
-func effortCompletions(word string, choices []modelChoice) []string {
+func effortCompletions(word string, choices []models.Choice) []string {
 	modelQuery, effortQuery, _ := strings.Cut(word, "@")
 
 	var efforts []string
 
-	for _, choice := range rankedModels(modelQuery, choices) {
-		for _, effort := range effortsMatching(effortQuery, choice.effortLevels) {
+	for _, choice := range models.RankedChoices(modelQuery, choices) {
+		for _, effort := range models.EffortsMatching(effortQuery, choice.EffortLevels) {
 			if !slices.Contains(efforts, effort) {
 				efforts = append(efforts, effort)
 			}

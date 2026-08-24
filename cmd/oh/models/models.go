@@ -1,4 +1,5 @@
-package main
+// Package models manages the models available to the oh command.
+package models
 
 import (
 	"context"
@@ -18,14 +19,25 @@ import (
 	"crdx.org/io/internal/modelsdev"
 )
 
-const cacheVersion = 1
+const (
+	cacheVersion  = 1
+	updateTimeout = 90 * time.Second
+)
 
-const updateTimeout = 90 * time.Second
+const (
+	CodexProvider      = "codex"
+	OpencodeGoProvider = "opencode-go"
+	AnthropicProvider  = "anthropic"
+)
 
 var registryNames = map[string]string{
-	codexProvider:      "openai",
-	opencodeGoProvider: "opencode-go",
-	anthropicProvider:  "anthropic",
+	CodexProvider:      "openai",
+	OpencodeGoProvider: "opencode-go",
+	AnthropicProvider:  "anthropic",
+}
+
+func ProviderNames() []string {
+	return []string{CodexProvider, OpencodeGoProvider, AnthropicProvider}
 }
 
 type modelCache struct {
@@ -44,14 +56,6 @@ const (
 	sourceRegistry = "models.dev"
 	sourceBoth     = "endpoint+models.dev"
 )
-
-func modelCachePath() string {
-	if os.Getenv(endpointVariable) != "" {
-		return stateDir("models.sim.json")
-	}
-
-	return stateDir("models.json")
-}
 
 func registryAddress(endpoint string) string {
 	if endpoint == "" {
@@ -154,30 +158,30 @@ func fromRegistry(registered map[string]agent.Model) []agent.Model {
 	return models
 }
 
-func choicesFor(providerName string, models []agent.Model) []modelChoice {
-	choices := make([]modelChoice, 0, len(models))
+func choicesFor(providerName string, models []agent.Model) []Choice {
+	choices := make([]Choice, 0, len(models))
 
 	for _, model := range models {
 		if model.ID == "" || len(model.EffortLevels) == 0 || model.MaxOutputTokens <= 0 {
 			continue
 		}
 
-		choices = append(choices, modelChoice{
-			provider:            providerName,
-			model:               model.ID,
-			effortLevels:        model.EffortLevels,
-			contextWindowTokens: model.ContextWindowTokens,
-			maxOutputTokens:     model.MaxOutputTokens,
+		choices = append(choices, Choice{
+			Provider:            providerName,
+			Model:               model.ID,
+			EffortLevels:        model.EffortLevels,
+			ContextWindowTokens: model.ContextWindowTokens,
+			MaxOutputTokens:     model.MaxOutputTokens,
 		})
 	}
 
 	return choices
 }
 
-func availableModelChoices(cache modelCache) []modelChoice {
-	var available []modelChoice
+func availableModelChoices(cache modelCache) []Choice {
+	var available []Choice
 
-	for _, providerName := range providerNames {
+	for _, providerName := range ProviderNames() {
 		if listing, found := cache.Providers[providerName]; found {
 			available = append(available, choicesFor(providerName, listing.Models)...)
 		}
@@ -186,14 +190,14 @@ func availableModelChoices(cache modelCache) []modelChoice {
 	return available
 }
 
-func listModels(output io.Writer, path string) error {
+func List(output io.Writer, path string) error {
 	choices := availableModelChoices(loadModelCache(path))
 	if len(choices) == 0 {
 		return errors.New("no models are known: run with -u to fetch the model list")
 	}
 
 	for _, choice := range choices {
-		if _, err := fmt.Fprintf(output, "%s/%s\n", choice.provider, choice.model); err != nil {
+		if _, err := fmt.Fprintf(output, "%s/%s\n", choice.Provider, choice.Model); err != nil {
 			return err
 		}
 	}
@@ -201,7 +205,9 @@ func listModels(output io.Writer, path string) error {
 	return nil
 }
 
-func updateModels(output io.Writer, endpoint string, path string) error {
+type ProviderLister func(context.Context, string, string) ([]agent.Model, error)
+
+func Update(output io.Writer, endpoint string, path string, listProviderModels ProviderLister) error {
 	ctx, cancel := context.WithTimeout(context.Background(), updateTimeout)
 	defer cancel()
 
@@ -215,10 +221,10 @@ func updateModels(output io.Writer, endpoint string, path string) error {
 
 	var described int
 
-	for _, providerName := range providerNames {
+	for _, providerName := range ProviderNames() {
 		registered := registry.Provider(registryNames[providerName])
 
-		models, source, why := describeProviderModels(ctx, providerName, endpoint, registered)
+		models, source, why := describeProviderModels(ctx, providerName, endpoint, registered, listProviderModels)
 		if len(models) == 0 {
 			_, _ = fmt.Fprintf(output, "%-12s nothing to record: %s\n", providerName, why)
 
@@ -265,6 +271,7 @@ func describeProviderModels(
 	providerName string,
 	endpoint string,
 	registered map[string]agent.Model,
+	listProviderModels ProviderLister,
 ) ([]agent.Model, string, string) {
 	listed, err := listProviderModels(ctx, providerName, endpoint)
 
@@ -286,18 +293,4 @@ func describeProviderModels(
 	}
 
 	return nil, "", why
-}
-
-func listProviderModels(ctx context.Context, providerName string, endpoint string) ([]agent.Model, error) {
-	client, err := connect(modelChoice{provider: providerName}, "", endpoint)
-	if err != nil {
-		return nil, err
-	}
-
-	lister, canList := client.providerClient.(agent.Lister)
-	if !canList {
-		return nil, nil
-	}
-
-	return lister.Models(ctx)
 }

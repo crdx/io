@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/models"
+
 	"crdx.org/io/cmd/oh/store"
 )
 
@@ -79,7 +81,7 @@ func TestResolveProviderChoiceRequiresAModel(t *testing.T) {
 
 func TestAnthropicConnectsBeforeItNeedsCredentials(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
-	client, err := connect(modelChoice{provider: anthropicProvider, model: "claude-opus-5", maxOutputTokens: 128_000}, "high", "")
+	client, err := connect(models.Choice{Provider: anthropicProvider, Model: "claude-opus-5", MaxOutputTokens: 128_000}, "high", "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -93,25 +95,25 @@ func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		choice   modelChoice
+		choice   models.Choice
 		endpoint string
 		want     string
 	}{
 		{
 			"codex",
-			modelChoice{provider: codexProvider},
+			models.Choice{Provider: codexProvider},
 			"",
 			"codex: Model is empty",
 		},
 		{
 			"opencode-go",
-			modelChoice{provider: opencodeGoProvider, model: "deepseek-v4-pro"},
+			models.Choice{Provider: opencodeGoProvider, Model: "deepseek-v4-pro"},
 			"http://somewhere",
 			"chat: MaxOutputTokens is 0",
 		},
 		{
 			"anthropic",
-			modelChoice{provider: anthropicProvider, maxOutputTokens: 128_000},
+			models.Choice{Provider: anthropicProvider, MaxOutputTokens: 128_000},
 			"",
 			"anthropic: Model is empty",
 		},
@@ -134,7 +136,7 @@ func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
 
 func TestOpenCodeRequiresLogin(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
-	_, err := connect(modelChoice{provider: opencodeGoProvider, model: "deepseek-v4-pro", maxOutputTokens: 128_000}, "high", "")
+	_, err := connect(models.Choice{Provider: opencodeGoProvider, Model: "deepseek-v4-pro", MaxOutputTokens: 128_000}, "high", "")
 	if err == nil || !strings.Contains(err.Error(), "login command with opencode-go") {
 		t.Fatalf("got error %v", err)
 	}

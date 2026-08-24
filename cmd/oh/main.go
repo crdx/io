@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -23,6 +24,7 @@ import (
 	"crdx.org/io/toolbox"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/models"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/store"
@@ -32,9 +34,9 @@ import (
 const (
 	endpointVariable = "OH_ENDPOINT_URL"
 
-	codexProvider      = "codex"
-	opencodeGoProvider = "opencode-go"
-	anthropicProvider  = "anthropic"
+	codexProvider      = models.CodexProvider
+	opencodeGoProvider = models.OpencodeGoProvider
+	anthropicProvider  = models.AnthropicProvider
 	opencodeGoEndpoint = "https://opencode.ai/zen/go/v1/chat/completions"
 
 	standInToken = "stand-in"
@@ -130,7 +132,7 @@ func (opts InputOpts) parse() (Opts, error) {
 	}
 
 	if opts.Model != "" {
-		provider, model, effort, err := parseModelSelection(opts.Model)
+		provider, model, effort, err := models.ParseSelection(modelCachePath(), opts.Model)
 		if err != nil {
 			return self, err
 		}
@@ -166,11 +168,11 @@ func run() ([]string, error) {
 	}
 
 	if inputArgs.List {
-		return nil, listModels(os.Stdout, modelCachePath())
+		return nil, models.List(os.Stdout, modelCachePath())
 	}
 
 	if inputArgs.Update {
-		return nil, updateModels(os.Stdout, os.Getenv(endpointVariable), modelCachePath())
+		return nil, models.Update(os.Stdout, os.Getenv(endpointVariable), modelCachePath(), listProviderModels)
 	}
 
 	if inputArgs.Sessions {
@@ -274,7 +276,7 @@ func run() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	choice, err := chosenModel(providerName, model)
+	choice, err := models.Chosen(modelCachePath(), providerName, model)
 	if err != nil {
 		return nil, err
 	}
@@ -354,7 +356,7 @@ func run() ([]string, error) {
 		screen:              output.New(os.Stdout).LinkPathsUnder(workspaceDir),
 		log:                 log,
 		workspaceDir:        workspaceDir,
-		contextWindowTokens: choice.contextWindowTokens,
+		contextWindowTokens: choice.ContextWindowTokens,
 		mode:                mode,
 		processes:           processes,
 		onTurnFinished:      func() { sendTurnFinishedNotification(workspaceDir) },
@@ -463,11 +465,11 @@ func resolveProviderChoice(
 		return "", "", "", errors.New("no model selected: use -m provider/model@effort or configure model")
 	}
 
-	return providerName, model, resolveEffort(effort), nil
+	return providerName, model, models.ResolveEffort(effort), nil
 }
 
-func connect(choice modelChoice, effort string, endpoint string) (*connection, error) {
-	switch choice.provider {
+func connect(choice models.Choice, effort string, endpoint string) (*connection, error) {
+	switch choice.Provider {
 	case codexProvider:
 		tokens := codex.StoredCredentials()
 		address := codex.Endpoint
@@ -477,7 +479,7 @@ func connect(choice modelChoice, effort string, endpoint string) (*connection, e
 			address = endpoint
 		}
 
-		client, err := codex.New(tokens, choice.model, effort)
+		client, err := codex.New(tokens, choice.Model, effort)
 		if err != nil {
 			return nil, err
 		}
@@ -495,7 +497,7 @@ func connect(choice modelChoice, effort string, endpoint string) (*connection, e
 				return nil, err
 			}
 		}
-		client, err := chat.New(endpoint, token, choice.model, effort, choice.maxOutputTokens)
+		client, err := chat.New(endpoint, token, choice.Model, effort, choice.MaxOutputTokens)
 		if err != nil {
 			return nil, err
 		}
@@ -511,7 +513,7 @@ func connect(choice modelChoice, effort string, endpoint string) (*connection, e
 			address = endpoint
 		}
 
-		client, err := anthropic.New(tokens, choice.model, effort, choice.maxOutputTokens)
+		client, err := anthropic.New(tokens, choice.Model, effort, choice.MaxOutputTokens)
 		if err != nil {
 			return nil, err
 		}
@@ -520,8 +522,22 @@ func connect(choice modelChoice, effort string, endpoint string) (*connection, e
 		return &connection{providerClient: client, toolsSize: anthropic.ToolsSize}, nil
 
 	default:
-		return nil, fmt.Errorf("unknown provider %q", choice.provider)
+		return nil, fmt.Errorf("unknown provider %q", choice.Provider)
 	}
+}
+
+func listProviderModels(ctx context.Context, providerName string, endpoint string) ([]agent.Model, error) {
+	client, err := connect(models.Choice{Provider: providerName}, "", endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	lister, canList := client.providerClient.(agent.Lister)
+	if !canList {
+		return nil, nil
+	}
+
+	return lister.Models(ctx)
 }
 
 func loadSession(name string) (*store.Session, error) {

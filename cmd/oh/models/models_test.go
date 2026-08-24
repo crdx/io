@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"bytes"
@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/internal/sim"
 )
 
 func writeModelCache(t *testing.T, cache modelCache) {
@@ -39,10 +38,10 @@ func TestOnlyTheCachedListingDescribesAProvider(t *testing.T) {
 
 	var models []string
 	for _, choice := range available {
-		if choice.provider != anthropicProvider {
-			t.Errorf("expected nothing from %s, got %s", choice.provider, choice.model)
+		if choice.Provider != anthropicProvider {
+			t.Errorf("expected nothing from %s, got %s", choice.Provider, choice.Model)
 		}
-		models = append(models, choice.model)
+		models = append(models, choice.Model)
 	}
 
 	want := []string{"claude-sonnet-5", "claude-haiku-4-5"}
@@ -67,7 +66,7 @@ func TestListingModelsPrintsEverySelectableQualifiedName(t *testing.T) {
 	useCachedModels(t)
 
 	var output bytes.Buffer
-	if err := listModels(&output, modelCachePath()); err != nil {
+	if err := List(&output, modelCachePath()); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -84,7 +83,7 @@ func TestListingModelsPrintsEverySelectableQualifiedName(t *testing.T) {
 func TestListingModelsWithoutACacheSaysHowToFetchThem(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
-	if err := listModels(&bytes.Buffer{}, modelCachePath()); err == nil || !strings.Contains(err.Error(), "-u") {
+	if err := List(&bytes.Buffer{}, modelCachePath()); err == nil || !strings.Contains(err.Error(), "-u") {
 		t.Errorf("expected the empty listing to say how to fetch models, got %v", err)
 	}
 }
@@ -96,7 +95,7 @@ func TestAModelTakingNoEffortLevelCannotBeSelected(t *testing.T) {
 		{ID: "", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
 	})
 
-	if len(choices) != 1 || choices[0].model != "gpt-5.6-sol" {
+	if len(choices) != 1 || choices[0].Model != "gpt-5.6-sol" {
 		t.Errorf("expected only what can be asked to think, got %v", choices)
 	}
 }
@@ -180,8 +179,8 @@ func TestTheOutputCeilingComesFromTheChosenModel(t *testing.T) {
 			t.Fatalf("%s: %v", model, err)
 		}
 
-		if choice.maxOutputTokens != want {
-			t.Errorf("expected %s to allow %d, got %d", model, want, choice.maxOutputTokens)
+		if choice.MaxOutputTokens != want {
+			t.Errorf("expected %s to allow %d, got %d", model, want, choice.MaxOutputTokens)
 		}
 	}
 }
@@ -257,42 +256,8 @@ func TestUpdatingWithNothingReachableSaysSo(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	var output bytes.Buffer
-	if err := updateModels(&output, deadAddress, modelCachePath()); err == nil {
+	if err := updateModelsWithoutProviderListings(&output, deadAddress, modelCachePath()); err == nil {
 		t.Fatalf("expected the update to fail, got output %q", output.String())
-	}
-}
-
-func TestUpdatingAgainstAStandInEndpointDescribesEveryProvider(t *testing.T) {
-	t.Setenv("XDG_STATE_HOME", t.TempDir())
-
-	endpoint := sim.New(&sim.Scenario{Model: "fake", Turns: []sim.Turn{{Say: "Hello."}}})
-	server := httptest.NewServer(endpoint)
-
-	t.Cleanup(server.Close)
-
-	address := endpoint.Addresses(server.URL)[sim.Messages]
-	if address == "" {
-		t.Fatal("expected the Messages API to be served")
-	}
-
-	var output bytes.Buffer
-	if err := updateModels(&output, address, modelCachePath()); err != nil {
-		t.Fatalf("unexpected error: %v, output %q", err, output.String())
-	}
-
-	cache := loadModelCache(modelCachePath())
-
-	for _, providerName := range providerNames {
-		choices := choicesFor(providerName, cache.Providers[providerName].Models)
-		if len(choices) != 1 || choices[0].model != "fake" {
-			t.Errorf("expected %s to offer the scenario's model, got %v", providerName, choices)
-
-			continue
-		}
-
-		if choices[0].maxOutputTokens <= 0 {
-			t.Errorf("expected %s to know what the model may write, got %v", providerName, choices[0])
-		}
 	}
 }
 
@@ -344,7 +309,7 @@ func TestAProviderThatListsNothingIsDescribedByTheRegistryAlone(t *testing.T) {
 	}`)
 
 	var output bytes.Buffer
-	if err := updateModels(&output, endpoint, modelCachePath()); err != nil {
+	if err := updateModelsWithoutProviderListings(&output, endpoint, modelCachePath()); err != nil {
 		t.Fatalf("unexpected error: %v, output %q", err, output.String())
 	}
 
@@ -358,11 +323,11 @@ func TestAProviderThatListsNothingIsDescribedByTheRegistryAlone(t *testing.T) {
 	}
 
 	choices := choicesFor(codexProvider, cached.Models)
-	if len(choices) != 1 || choices[0].model != "gpt-5.6-sol" {
+	if len(choices) != 1 || choices[0].Model != "gpt-5.6-sol" {
 		t.Fatalf("expected only the one that reasons to be selectable, got %v", choices)
 	}
 
-	if !slices.Equal(choices[0].effortLevels, []string{"low", "high", "max"}) {
-		t.Errorf("expected the registry's effort levels, got %v", choices[0].effortLevels)
+	if !slices.Equal(choices[0].EffortLevels, []string{"low", "high", "max"}) {
+		t.Errorf("expected the registry's effort levels, got %v", choices[0].EffortLevels)
 	}
 }

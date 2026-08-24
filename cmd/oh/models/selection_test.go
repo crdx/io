@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"slices"
@@ -86,13 +86,13 @@ func TestAnthropicOffersEveryEffortLevelTheModelTakes(t *testing.T) {
 	}
 }
 
-func listedModels() []modelChoice {
-	return []modelChoice{
-		{provider: anthropicProvider, model: "claude-opus-4-5"},
-		{provider: anthropicProvider, model: "claude-opus-4-5-20251101"},
-		{provider: anthropicProvider, model: "claude-opus-5"},
-		{provider: anthropicProvider, model: "claude-sonnet-5"},
-		{provider: codexProvider, model: "gpt-5.6-sol"},
+func listedModels() []Choice {
+	return []Choice{
+		{Provider: anthropicProvider, Model: "claude-opus-4-5"},
+		{Provider: anthropicProvider, Model: "claude-opus-4-5-20251101"},
+		{Provider: anthropicProvider, Model: "claude-opus-5"},
+		{Provider: anthropicProvider, Model: "claude-sonnet-5"},
+		{Provider: codexProvider, Model: "gpt-5.6-sol"},
 	}
 }
 
@@ -115,8 +115,8 @@ func TestACloserReadingOfAQueryWinsOutright(t *testing.T) {
 			continue
 		}
 
-		if choice.model != want {
-			t.Errorf("expected %s to find %s, got %s", query, want, choice.model)
+		if choice.Model != want {
+			t.Errorf("expected %s to find %s, got %s", query, want, choice.Model)
 		}
 	}
 }
@@ -141,16 +141,16 @@ func TestAModelOffersOnlyTheEffortLevelsItTakes(t *testing.T) {
 		"claude-opus-5":   {"low", "medium", "high", "xhigh", "max"},
 	}
 
-	for _, choice := range modelChoices() {
-		want, known := wanted[choice.model]
+	for _, choice := range Choices(modelCachePath()) {
+		want, known := wanted[choice.Model]
 		if !known {
-			t.Errorf("no effort levels pinned for %s", choice.model)
+			t.Errorf("no effort levels pinned for %s", choice.Model)
 
 			continue
 		}
 
-		if !slices.Equal(choice.effortLevels, want) {
-			t.Errorf("expected %s to take %v, got %v", choice.model, want, choice.effortLevels)
+		if !slices.Equal(choice.EffortLevels, want) {
+			t.Errorf("expected %s to take %v, got %v", choice.Model, want, choice.EffortLevels)
 		}
 	}
 }
@@ -190,25 +190,10 @@ func TestOffIsNotOfferedToAModelThatCannotStopReasoning(t *testing.T) {
 	}
 }
 
-func TestAnEffortWrittenAsAnAliasInTheConfigIsResolved(t *testing.T) {
-	_, _, effort, err := resolveProviderChoice(
-		"", "", "",
-		Config{Provider: codexProvider, Model: "gpt-5.6-sol", Effort: "off"},
-		nil,
-	)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if effort != "none" {
-		t.Errorf("expected the level rather than the word that asked for it, got %q", effort)
-	}
-}
-
 func TestAmbiguousModelSelectionShowsEveryMatch(t *testing.T) {
-	choices := []modelChoice{
-		{provider: opencodeGoProvider, model: "deepseek-v4", effortLevels: []string{"high"}},
-		{provider: opencodeGoProvider, model: "deepseek-v4-pro", effortLevels: []string{"high"}},
+	choices := []Choice{
+		{Provider: opencodeGoProvider, Model: "deepseek-v4", EffortLevels: []string{"high"}},
+		{Provider: opencodeGoProvider, Model: "deepseek-v4-pro", EffortLevels: []string{"high"}},
 	}
 
 	_, err := matchModel("deepseek", choices)
@@ -223,16 +208,16 @@ func TestAmbiguousModelSelectionShowsEveryMatch(t *testing.T) {
 }
 
 func TestExactModelSelectionWinsOverFuzzyMatches(t *testing.T) {
-	choices := []modelChoice{
-		{provider: opencodeGoProvider, model: "deepseek-v4", effortLevels: []string{"high"}},
-		{provider: opencodeGoProvider, model: "deepseek-v4-pro", effortLevels: []string{"high"}},
+	choices := []Choice{
+		{Provider: opencodeGoProvider, Model: "deepseek-v4", EffortLevels: []string{"high"}},
+		{Provider: opencodeGoProvider, Model: "deepseek-v4-pro", EffortLevels: []string{"high"}},
 	}
 
 	choice, err := matchModel("deepseek-v4", choices)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if choice.model != "deepseek-v4" {
-		t.Errorf("got model %q", choice.model)
+	if choice.Model != "deepseek-v4" {
+		t.Errorf("got model %q", choice.Model)
 	}
 }

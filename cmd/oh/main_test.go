@@ -60,6 +60,22 @@ var everyCap = []caps.Set{
 	caps.Write | caps.Git | caps.Background,
 }
 
+func useCachedModels(t *testing.T) {
+	t.Helper()
+
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	path := modelCachePath()
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	data := []byte(`{"version":1,"providers":{"opencode-go":{"models":[{"id":"deepseek-v4-pro","efforts":["high","max"],"output":384000}]}}}`)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestEveryOptionIsRead(t *testing.T) {
 	useCachedModels(t)
 

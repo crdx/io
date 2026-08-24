@@ -56,6 +56,14 @@ func globalContextPath() string {
 	return configDir("SYSTEM.md")
 }
 
+func modelCachePath() string {
+	if os.Getenv(endpointVariable) != "" {
+		return stateDir("models.sim.json")
+	}
+
+	return stateDir("models.json")
+}
+
 func historyPath() string {
 	return stateDir("history")
 }
