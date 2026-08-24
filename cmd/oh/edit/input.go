@@ -16,23 +16,24 @@ type Action int
 
 // What a keypress can amount to.
 const (
-	Drawn      Action = iota // the line changed, and wants drawing again
-	Accept                   // the line is finished
-	Continue                 // double enter on an empty line: send the get-on-with-it message
-	Cancel                   // escape, or ctrl+d while a turn runs: stop whatever is running
-	Quit                     // ctrl+d on an empty line with nothing running
-	Write                    // ctrl+x w: swap whether files in the workspace may be changed
-	Shell                    // ctrl+x x: swap whether shell commands may run at all
-	Git                      // ctrl+x g: swap whether a repository's own history may be changed
-	Background               // ctrl+x b: swap whether commands may leave processes behind
-	Complete                 // tab: complete a slash command when exactly one name matches
+	Draw             Action = iota // the line changed, and wants drawing again
+	Accept                         // the line is finished
+	Continue                       // double enter on an empty line: send the get-on-with-it message
+	Cancel                         // escape, or ctrl+d while a turn runs: stop whatever is running
+	Quit                           // ctrl+d on an empty line with nothing running
+	ToggleWrite                    // ctrl+x w: swap whether files in the workspace may be changed
+	ToggleShell                    // ctrl+x x: swap whether shell commands may run at all
+	ToggleGit                      // ctrl+x g: swap whether a repository's own history may be changed
+	ToggleBackground               // ctrl+x b: swap whether commands may leave processes behind
+	Complete                       // tab: complete a slash command when exactly one name matches
 )
 
 // Input edits a line and walks its history.
 type Input struct {
-	buffer          *Buffer
-	history         *History
-	recall          *Recall
+	buffer  *Buffer
+	history *History
+	recall  *Recall
+
 	isPasting       bool
 	pasteStart      int              // where the current paste begins in the buffer
 	isPrefixPending bool             // whether ctrl+x went before, so the next key names a mode
@@ -110,13 +111,13 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 	if keypress.Code == key.Rune && keypress.Mod.Has(key.Ctrl) &&
 		(keypress.Value == 'c' || keypress.Value == 'u') {
 		self.Reset()
-		return Drawn
+		return Draw
 	}
 
 	if self.isPasting {
 		self.isEnterPending = false
 		self.paste(keypress)
-		return Drawn
+		return Draw
 	}
 
 	if keypress.Code != key.Enter || keypress.Mod.Has(key.Shift) {
@@ -182,7 +183,7 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 		return self.rune(keypress, running)
 	}
 
-	return Drawn
+	return Draw
 }
 
 const continueCoolOff = time.Second
@@ -190,7 +191,7 @@ const continueCoolOff = time.Second
 func (self *Input) enter(keypress key.Key) Action {
 	if keypress.Mod.Has(key.Shift) {
 		self.buffer.Insert([]rune{'\n'})
-		return Drawn
+		return Draw
 	}
 
 	if strings.TrimSpace(self.buffer.String()) != "" {
@@ -200,7 +201,7 @@ func (self *Input) enter(keypress key.Key) Action {
 	now := self.currentTime()
 	if now.Before(self.continueAfter) {
 		self.continueAfter = now.Add(continueCoolOff)
-		return Drawn
+		return Draw
 	}
 
 	if self.isEnterPending {
@@ -210,7 +211,7 @@ func (self *Input) enter(keypress key.Key) Action {
 	}
 
 	self.isEnterPending = true
-	return Drawn
+	return Draw
 }
 
 const tabStop = 4
@@ -230,7 +231,7 @@ func (self *Input) rune(keypress key.Key, running bool) Action {
 			return Complete
 		}
 		self.insert(keypress.Value)
-		return Drawn
+		return Draw
 	}
 
 	switch keypress.Value {
@@ -247,31 +248,31 @@ func (self *Input) rune(keypress key.Key, running bool) Action {
 		self.isPrefixPending = true
 	}
 
-	return Drawn
+	return Draw
 }
 
 func (self *Input) toggleMode(button key.Key) Action {
 	self.isPrefixPending = false
 
 	if button.Code != key.Rune || button.Mod != 0 {
-		return Drawn
+		return Draw
 	}
 
 	switch button.Value {
 	case 'w':
-		return Write
+		return ToggleWrite
 
 	case 'x':
-		return Shell
+		return ToggleShell
 
 	case 'g':
-		return Git
+		return ToggleGit
 
 	case 'b':
-		return Background
+		return ToggleBackground
 	}
 
-	return Drawn
+	return Draw
 }
 
 func (self *Input) paste(keypress key.Key) {

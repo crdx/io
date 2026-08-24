@@ -328,11 +328,11 @@ func run() (string, error) {
 		metrics:  metrics.New(choice.ContextWindowTokens),
 
 		recorder:           recordSession(log),
+		commands:           getCommands(log, os.Stdout, settings.Editor),
 		workspaceDir:       workspaceDir,
 		mode:               mode,
 		processes:          processes,
 		getOnWithItMessage: settings.GetOnWithItMessage,
-		commands:           commandsFor(log, os.Stdout, settings.Editor),
 	}
 
 	chat.segmentLayout, err = settings.BuildLayout(availableSegments(workspaceDir, log.Name(), modelName, effort, chat))

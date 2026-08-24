@@ -38,7 +38,7 @@ type commandTarget struct {
 	prepare func() error
 }
 
-func commandsFor(log *store.Writer, writer io.Writer, editorName string) slash.CommandSet {
+func getCommands(log *store.Writer, writer io.Writer, editorName string) slash.CommandSet {
 	sessionDirectory := filepath.Join(sessionsDir(), log.Name())
 
 	return newCommands(commandEnvironment{

@@ -184,16 +184,16 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 			editor.SetText(completion)
 		}
 
-	case edit.Write:
+	case edit.ToggleWrite:
 		self.toggleCap(caps.Write)
 
-	case edit.Shell:
+	case edit.ToggleShell:
 		self.toggleCap(caps.Shell)
 
-	case edit.Git:
+	case edit.ToggleGit:
 		self.toggleCap(caps.Git)
 
-	case edit.Background:
+	case edit.ToggleBackground:
 		if self.mode.Current().Has(caps.Background) {
 			names, err := self.processes.Disable()
 			if err == nil {
@@ -209,7 +209,7 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 			self.toggleCap(caps.Background)
 		}
 
-	case edit.Drawn:
+	case edit.Draw:
 	}
 
 	return true

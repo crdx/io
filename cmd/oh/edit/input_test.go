@@ -94,7 +94,7 @@ func TestReturnOutsideAPasteFinishesTheLine(t *testing.T) {
 func TestTwoReturnsOnAnEmptyIdleLineAskToContinue(t *testing.T) {
 	self := NewInput(nil)
 
-	if got := self.Apply(key.Key{Code: key.Enter}, false); got != Drawn {
+	if got := self.Apply(key.Key{Code: key.Enter}, false); got != Draw {
 		t.Errorf("expected the first return to do nothing, got %v", got)
 	}
 
@@ -119,7 +119,7 @@ func TestTwoReturnsOnAnEmptyRunningLineAskToContinue(t *testing.T) {
 	for name, inputText := range map[string]string{"empty": "", "whitespace": " "} {
 		self := inputFromKeys(t, inputText)
 
-		if got := self.Apply(key.Key{Code: key.Enter}, true); got != Drawn {
+		if got := self.Apply(key.Key{Code: key.Enter}, true); got != Draw {
 			t.Errorf("%s: expected the first return to leave the turn running, got %v", name, got)
 		}
 
@@ -142,13 +142,13 @@ func TestDoubleReturnHasACoolOffBeforeItCanContinueAgain(t *testing.T) {
 	self.Reset()
 	for range 2 {
 		now = now.Add(continueCoolOff * 9 / 10)
-		if got := self.Apply(key.Key{Code: key.Enter}, true); got != Drawn {
+		if got := self.Apply(key.Key{Code: key.Enter}, true); got != Draw {
 			t.Errorf("expected a held return to extend the cool-off, got %v", got)
 		}
 	}
 
 	now = now.Add(continueCoolOff)
-	if got := self.Apply(key.Key{Code: key.Enter}, true); got != Drawn {
+	if got := self.Apply(key.Key{Code: key.Enter}, true); got != Draw {
 		t.Errorf("expected the first return after the cool-off to do nothing, got %v", got)
 	}
 	if got := self.Apply(key.Key{Code: key.Enter}, true); got != Continue {
@@ -161,7 +161,7 @@ func TestReturnsMustBeConsecutiveToContinueAnEmptyRunningTurn(t *testing.T) {
 	self.Apply(key.Key{Code: key.Enter}, true)
 	self.Apply(key.Key{Code: key.Left}, true)
 
-	if got := self.Apply(key.Key{Code: key.Enter}, true); got != Drawn {
+	if got := self.Apply(key.Key{Code: key.Enter}, true); got != Draw {
 		t.Errorf("expected an intervening key to clear the first return, got %v", got)
 	}
 }
@@ -170,7 +170,7 @@ func TestPendingReturnDoesNotSurviveATurnStateChange(t *testing.T) {
 	self := NewInput(nil)
 	self.Apply(key.Key{Code: key.Enter}, true)
 
-	if got := self.Apply(key.Key{Code: key.Enter}, false); got != Drawn {
+	if got := self.Apply(key.Key{Code: key.Enter}, false); got != Draw {
 		t.Errorf("expected the first idle return to do nothing, got %v", got)
 	}
 }
@@ -387,12 +387,12 @@ func TestControlCAndControlUAlwaysClearTheInput(t *testing.T) {
 }
 
 func TestThePrefixAndALetterAskForOneSwap(t *testing.T) {
-	for letter, want := range map[rune]Action{'w': Write, 'g': Git, 'b': Background} {
+	for letter, want := range map[rune]Action{'w': ToggleWrite, 'g': ToggleGit, 'b': ToggleBackground} {
 		self := NewInput(nil)
 
 		self.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
 
-		if got := self.Apply(key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl}, false); got != Drawn {
+		if got := self.Apply(key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl}, false); got != Draw {
 			t.Errorf("ctrl+x: expected the prefix to swap nothing on its own, got %v", got)
 		}
 
@@ -411,7 +411,7 @@ func TestALetterNamingNoModeIsSwallowed(t *testing.T) {
 
 	self.Apply(key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl}, false)
 
-	if got := self.Apply(key.Key{Code: key.Rune, Value: 'q'}, false); got != Drawn {
+	if got := self.Apply(key.Key{Code: key.Rune, Value: 'q'}, false); got != Draw {
 		t.Errorf("expected nothing to be asked for, got %v", got)
 	}
 
