@@ -158,6 +158,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 I'll have a look at how the editor draws its prompt.
 
 grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m
+
 \e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m
 
 \e[48;2;52;53;65m\e[0m

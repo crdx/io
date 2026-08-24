@@ -42,8 +42,8 @@ type Screen struct {
 	input       footer // what the input should look like
 	shownFooter footer // what is on the screen
 
-	liveRegion liveRegion // the rows being repainted in place
-	blocks     []Block    // the blocks the live region is made of, in the order they opened
+	liveRegion liveRegion     // the rows being repainted in place
+	blocks     []groupedBlock // the blocks the live region is made of, in the order they opened
 }
 
 // New builds the output over a writer, which is a terminal or is not.
@@ -79,14 +79,14 @@ func (self *Screen) Line(text string) {
 	defer self.mutex.Unlock()
 
 	if len(self.blocks) > 0 {
-		self.blocks = append(self.blocks, textBlock{text: text})
+		self.blocks = append(self.blocks, groupedBlock{Block: textBlock{text: text}, group: NoticeGroup})
 		self.refresh()
 
 		return
 	}
 
 	self.seal()
-	self.makeRoomFor(AsideGroup)
+	self.makeRoomFor(NoticeGroup)
 
 	if self.isMidLine {
 		self.newline()
@@ -121,7 +121,7 @@ func (self *Screen) drawRow(text string) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	self.makeRoomFor(AsideGroup)
+	self.makeRoomFor(NoticeGroup)
 
 	self.write(text)
 }

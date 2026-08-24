@@ -110,7 +110,7 @@ func TestAskingForTheSameEmptyLineTwiceLeavesOne(t *testing.T) {
 	}
 }
 
-func TestLinesThatAreNotAnswersRunTogether(t *testing.T) {
+func TestNoticesRunTogether(t *testing.T) {
 	var screenOutput bytes.Buffer
 
 	screen := output.New(&screenOutput)
@@ -136,5 +136,75 @@ func TestAnAnswerKeepsTheBlankRowsInsideIt(t *testing.T) {
 
 	if got := screenOutput.String(); got != want {
 		t.Errorf("expected the paragraph break to stay, got %q", got)
+	}
+}
+
+func TestOutputRunsTogetherExactlyWhenItsGroupMatches(t *testing.T) {
+	type kind struct {
+		name string
+		draw func(*output.Screen, string)
+	}
+
+	kinds := []kind{
+		{
+			name: "work",
+			draw: func(screen *output.Screen, text string) {
+				screen.DrawReasoning([]string{text})
+				screen.Seal()
+			},
+		},
+		{
+			name: "notice",
+			draw: func(screen *output.Screen, text string) {
+				screen.Line(text)
+			},
+		},
+		{
+			name: "answer",
+			draw: func(screen *output.Screen, text string) {
+				screen.DrawAnswer([]string{text})
+				screen.Seal()
+			},
+		},
+	}
+
+	for _, first := range kinds {
+		for _, second := range kinds {
+			t.Run(first.name+"-then-"+second.name, func(t *testing.T) {
+				var screenOutput bytes.Buffer
+				screen := output.New(&screenOutput)
+
+				first.draw(screen, "one")
+				second.draw(screen, "two")
+
+				separator := "\n\n"
+				if first.name == second.name {
+					separator = "\n"
+				}
+				if got, want := screenOutput.String(), "one"+separator+"two"; got != want {
+					t.Errorf("got %q, want %q", got, want)
+				}
+			})
+		}
+	}
+}
+
+type fixedBlock string
+
+func (self fixedBlock) Rows(_ int) []string {
+	return []string{string(self)}
+}
+
+func TestNoticesInsideLiveWorkFollowTheSameGroupingRule(t *testing.T) {
+	var screenOutput bytes.Buffer
+	screen := output.New(&screenOutput)
+
+	screen.Open(fixedBlock("work"))
+	screen.Line("notice one")
+	screen.Line("notice two")
+	screen.Seal()
+
+	if got, want := screenOutput.String(), "work\n\nnotice one\nnotice two"; got != want {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }

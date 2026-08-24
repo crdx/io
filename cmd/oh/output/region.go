@@ -165,7 +165,7 @@ func (self *Screen) Reset() {
 	self.hasPendingText = false
 	self.isBlankOwed = false
 	self.trailingNewlines = 0
-	self.lastGroup = AsideGroup
+	self.lastGroup = NoticeGroup
 	self.isWrapping = false
 	self.hasPrinted = false
 	self.liveRegion = liveRegion{}

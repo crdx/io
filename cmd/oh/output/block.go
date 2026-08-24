@@ -12,14 +12,20 @@ type Block interface {
 	Rows(columns int) []string
 }
 
-// Open puts a block at the end of the live sequence, under whatever is already open.
+type groupedBlock struct {
+	Block
+
+	group Group
+}
+
+// Open puts a work block at the end of the live sequence, under whatever is already open.
 func (self *Screen) Open(block Block) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
 	if len(self.blocks) == 0 {
 		self.seal()
-		self.makeRoomFor(AsideGroup)
+		self.makeRoomFor(WorkGroup)
 
 		if self.isMidLine {
 			self.newline()
@@ -29,7 +35,7 @@ func (self *Screen) Open(block Block) {
 		self.measureTerminal()
 	}
 
-	self.blocks = append(self.blocks, block)
+	self.blocks = append(self.blocks, groupedBlock{Block: block, group: WorkGroup})
 
 	self.refresh()
 }
@@ -55,17 +61,22 @@ func (self *Screen) refresh() {
 		return
 	}
 
+	rows, firstGroup, lastGroup := renderGroupedBlocks(self.blocks, self.columns)
+	self.paintGroups(rows, firstGroup, lastGroup)
+}
+
+func renderGroupedBlocks(blocks []groupedBlock, columns int) ([]string, Group, Group) {
 	var rows []string
 
-	for at, block := range self.blocks {
-		if at > 0 {
+	for i, grouped := range blocks {
+		if i > 0 && blocks[i-1].group != grouped.group {
 			rows = append(rows, "")
 		}
 
-		rows = append(rows, block.Rows(self.columns)...)
+		rows = append(rows, grouped.Rows(columns)...)
 	}
 
-	self.paint(rows, AsideGroup)
+	return rows, blocks[0].group, blocks[len(blocks)-1].group
 }
 
 type textBlock struct {

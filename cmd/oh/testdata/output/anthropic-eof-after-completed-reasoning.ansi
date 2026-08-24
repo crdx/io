@@ -3,6 +3,7 @@
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mCompleted thought.\e[0m\e[0m\r
+\r
 \e[38;2;204;102;102mthe stream ended before the response did\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

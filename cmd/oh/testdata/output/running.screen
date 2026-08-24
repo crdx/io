@@ -12,4 +12,5 @@ I'll have a look at how the editor draws its prompt.
 grep prompt *.go ✦· 7s
 === discarded reasoning ===
 complete thought
+
 stream failed

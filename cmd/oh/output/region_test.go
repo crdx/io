@@ -251,7 +251,7 @@ func TestResettingClearsTheScreenWithoutErasingFromAStaleRecord(t *testing.T) {
 		t.Errorf("expected both footers to be forgotten, got %v and %v", screen.shownFooter, screen.input)
 	}
 
-	if screen.column != 0 || screen.openedRows != 0 || screen.isMidLine || screen.hasPendingText || screen.hasPrinted || screen.lastGroup != AsideGroup || screen.isWrapping {
+	if screen.column != 0 || screen.openedRows != 0 || screen.isMidLine || screen.hasPendingText || screen.hasPrinted || screen.lastGroup != NoticeGroup || screen.isWrapping {
 		t.Errorf("expected the screen to be forgotten, got %+v", screen)
 	}
 }
