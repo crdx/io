@@ -18,7 +18,6 @@ left = [
     { segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
     { segment = "turn-elapsed" },
     { segment = "last-tps" },
-    { segment = "turn-count" },
 ]
 center = [
     { segment = "context-usage" },
