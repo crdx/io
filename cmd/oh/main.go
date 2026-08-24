@@ -19,6 +19,7 @@ import (
 	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
+	"crdx.org/io/toolbox/notify"
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
@@ -268,14 +269,17 @@ func run() ([]string, error) {
 	defer func() { _ = tmpRoot.Close() }()
 
 	snapshots := file.NewSnapshots()
-	tools := toolbox.Rummage(files, snapshots)
-	commandShell := shell.New(workspaceDir, homeDir, tmpDir, config.Sandbox, mode, files, processes)
+	toolboxTools := toolbox.Rummage(files, snapshots)
+	shellTool := shell.New(workspaceDir, homeDir, tmpDir, config.Sandbox, mode, files, processes)
 
-	tools = append(tools, commandShell)
-	tools = truncate.Tools(tools)
+	toolboxTools = append(toolboxTools, shellTool)
+	if notify.IsAvailable() {
+		toolboxTools = append(toolboxTools, notify.New())
+	}
+	toolboxTools = truncate.Tools(toolboxTools)
 
 	chat := &Harness{
-		agent:    agent.New(systemPrompt, client, tools),
+		agent:    agent.New(systemPrompt, client, toolboxTools),
 		screen:   output.New(os.Stdout).LinkPathsUnder(workspaceDir),
 		terminal: terminal.New(os.Stdout),
 
@@ -309,7 +313,7 @@ func run() ([]string, error) {
 		ContextFiles:  startup.FilesOf(contextFiles),
 		ProjectSkills: projectSkills,
 		GlobalSkills:  globalSkills,
-		ToolBytes:     client.toolsSize(tools),
+		ToolBytes:     client.toolsSize(toolboxTools),
 	}
 	if resumedSession == nil {
 		chat.notify(startup.NewEvent(startupElapsed, startupInfo))

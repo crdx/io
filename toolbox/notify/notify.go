@@ -1,0 +1,97 @@
+package notify
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"os/exec"
+	"strings"
+
+	"crdx.org/io/tool"
+)
+
+const (
+	applicationName = "oh"
+	iconChoices     = "success, info, warning, error, question, progress"
+)
+
+var desktopIconNames = map[string]string{
+	"success":  "emblem-default",
+	"info":     "dialog-information",
+	"warning":  "dialog-warning",
+	"error":    "dialog-error",
+	"question": "dialog-question",
+	"progress": "process-working",
+}
+
+// IsAvailable reports whether notify-send can be executed.
+func IsAvailable() bool {
+	_, err := exec.LookPath("notify-send")
+	return err == nil
+}
+
+// Args is what a desktop notification takes.
+type Args struct {
+	Title   string `json:"title"`
+	Message string `json:"message"`
+	Icon    string `json:"icon"`
+}
+
+// New builds a tool that alerts the user with a desktop notification.
+func New() tool.Tool {
+	return tool.Implement(
+		tool.Definition{
+			Name:        "notify",
+			Description: "send a desktop notification to alert the user",
+			Schema: tool.Schema{
+				tool.String("title", "notification title"),
+				tool.String("message", "notification text"),
+				tool.String("icon", "notification icon: one of "+iconChoices),
+			},
+		},
+		Describe,
+	).
+		Validate(validate).
+		Plain(run)
+}
+
+// Describe reports the notification title and text.
+func Describe(args Args) (string, string) {
+	return args.Title, args.Message
+}
+
+func validate(args Args) error {
+	if strings.TrimSpace(args.Title) == "" {
+		return errors.New("title is required")
+	}
+	if strings.TrimSpace(args.Message) == "" {
+		return errors.New("message is required")
+	}
+	if _, isKnown := desktopIconNames[args.Icon]; !isKnown {
+		return fmt.Errorf("icon must be one of: %s", iconChoices)
+	}
+
+	return nil
+}
+
+func run(ctx context.Context, args Args) (string, error) {
+	//nolint:gosec // the executable and options are fixed, and the tool arguments are inert
+	command := exec.CommandContext(
+		ctx,
+		"notify-send",
+		"--app-name="+applicationName,
+		"--icon="+desktopIconNames[args.Icon],
+		args.Title,
+		args.Message,
+	)
+
+	if err := command.Run(); err != nil {
+		if ctx.Err() != nil {
+			return "", ctx.Err()
+		}
+
+		return "", fmt.Errorf("could not notify the user: %w", err)
+	}
+
+	return "notified the user", nil
+}

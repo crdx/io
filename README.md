@@ -6,7 +6,7 @@
 
 - `agent`: conversation loop, with streaming, batching, and cancellation
 - `tool`: tools, schemas, middleware, and concurrency
-- `toolbox`: implementation of read/ls/find/grep/write/edit/bash
+- `toolbox`: implementation of standard tools, plus extras
 - `session`: session saving and resumption, as an append-only journal
 - `provider/codex`: the Responses API, the OpenAI way
 - `provider/chat`: the OpenAI-compatible Chat Completions API
