@@ -1,4 +1,3 @@
-// Package xdg resolves paths in XDG base directories.
 package xdg
 
 import (

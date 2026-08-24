@@ -1,4 +1,3 @@
-// Package toolbox implements the file and bash tools.
 package toolbox
 
 import (

@@ -1,4 +1,3 @@
-// Package agent runs a conversation between a model and a set of tools.
 package agent
 
 import (

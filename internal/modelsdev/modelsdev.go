@@ -1,4 +1,3 @@
-// Package modelsdev reads the models.dev registry, which describes models across many providers.
 package modelsdev
 
 import (

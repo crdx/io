@@ -1,5 +1,3 @@
-// Package anthropic is a provider speaking the Messages API, authorised by a Claude subscription
-// rather than by an API key.
 package anthropic
 
 import (

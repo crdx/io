@@ -1,16 +1,3 @@
-// Package session stores an agent conversation as an append-only JSON-lines journal.
-//
-// Events are the portable transcript and durable state transitions. Items are opaque, append-only
-// provider state: a provider hands them out and takes the same bytes back on resume. Meta belongs
-// to the caller.
-//
-// A session is known by its name, an adjective and an animal drawn from two word lists that give
-// 175,483 pairs. The name is the bundle directory and the only handle anything outside this
-// package needs, and its shape carries the path safety on its own: two lowercase words joined by a
-// hyphen cannot name a parent directory or reach outside the one it sits in. A name is taken as
-// soon as its directory exists, whether or not the journal inside can still be read, so a damaged
-// bundle is never handed out again. Each session also carries a time-ordered identifier, which the
-// head record keeps for provenance and nothing reads.
 package session
 
 import (

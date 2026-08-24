@@ -1,4 +1,3 @@
-// Package wire records censored logical HTTP exchanges.
 package wire
 
 import (

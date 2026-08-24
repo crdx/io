@@ -1,4 +1,3 @@
-// Package shell prepares the confined command tool and its configured paths.
 package shell
 
 import (

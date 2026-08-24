@@ -1,4 +1,3 @@
-// Package pathlink marks paths that name existing files and directories as terminal hyperlinks.
 package pathlink
 
 import (

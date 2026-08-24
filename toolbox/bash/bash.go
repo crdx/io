@@ -1,4 +1,3 @@
-// Package bash runs shell commands under caller-supplied sandbox policies.
 package bash
 
 import (

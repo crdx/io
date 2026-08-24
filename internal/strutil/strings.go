@@ -1,4 +1,3 @@
-// Package strutil provides small string helpers.
 package strutil
 
 import "strings"

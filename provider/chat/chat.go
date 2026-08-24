@@ -1,5 +1,3 @@
-// Package chat is a provider speaking the OpenAI Chat Completions API, against any endpoint that
-// claims to serve it.
 package chat
 
 import (

@@ -1,4 +1,3 @@
-// Package pathutil provides small filesystem path helpers.
 package pathutil
 
 import (

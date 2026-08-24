@@ -1,4 +1,3 @@
-// Package spinner defines the animation used while work is underway.
 package spinner
 
 import "time"

@@ -1,4 +1,3 @@
-// Package caps is the set of capabilities the harness grants.
 package caps
 
 import (

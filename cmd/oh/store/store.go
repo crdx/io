@@ -1,4 +1,3 @@
-// Package store adds oh's metadata and auxiliary recorders to the core session journal.
 package store
 
 import (

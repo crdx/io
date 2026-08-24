@@ -1,5 +1,3 @@
-// Package picker chooses one stored session from a list, on the alternate screen so the
-// conversation that follows starts on a clean scrollback.
 package picker
 
 import (

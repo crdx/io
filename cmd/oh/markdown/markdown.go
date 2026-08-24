@@ -1,6 +1,3 @@
-// Package markdown lays the model's prose out for a terminal. It is a function of the text and the
-// width and nothing else: partial prose is the whole of what it says so far, so text arriving in
-// pieces is parsed again from the start on every piece rather than resumed.
 package markdown
 
 import (

@@ -1,4 +1,3 @@
-// Package regen writes stored transcripts again from the journals they were rendered from.
 package regen
 
 import (

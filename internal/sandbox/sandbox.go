@@ -1,5 +1,3 @@
-// Package sandbox confines a child process to granted paths and a private loopback network. Path
-// metadata remains visible, and descriptors inherited before confinement remain usable.
 package sandbox
 
 import (

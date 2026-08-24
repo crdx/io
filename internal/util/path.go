@@ -1,4 +1,3 @@
-// Package util provides small helpers shared across io.
 package util
 
 import "crdx.org/io/internal/file"

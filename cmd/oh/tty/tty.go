@@ -1,5 +1,3 @@
-// Package tty is the terminal as the harness needs it: whether something is one, and putting one
-// into raw mode with the keyboard protocol on.
 package tty
 
 import (

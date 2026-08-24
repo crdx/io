@@ -1,4 +1,3 @@
-// Package terminal manages the terminal facilities used by an interactive oh session.
 package terminal
 
 import (

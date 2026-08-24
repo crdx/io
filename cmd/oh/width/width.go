@@ -1,5 +1,3 @@
-// Package width approximates terminal cell widths. Its table covers common East Asian, Hangul, and
-// emoji ranges and must be updated as Unicode grows.
 package width
 
 import (

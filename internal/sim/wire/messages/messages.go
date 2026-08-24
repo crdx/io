@@ -1,6 +1,3 @@
-// Package messages builds the shapes the Messages API sends, so that everything standing in for the
-// endpoint agrees on what it says by construction, rather than by copies of it staying in step.
-// https://platform.claude.com/docs/en/api/messages-streaming
 package messages
 
 import (

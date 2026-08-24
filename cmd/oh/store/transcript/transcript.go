@@ -1,4 +1,3 @@
-// Package transcript renders a durable Markdown conversation transcript.
 package transcript
 
 import (

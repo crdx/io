@@ -1,4 +1,3 @@
-// Package file confines file tools to a root and applies a caller-supplied write policy.
 package file
 
 import (

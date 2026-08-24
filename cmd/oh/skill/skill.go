@@ -1,4 +1,3 @@
-// Package skill discovers agent skills and makes them available.
 package skill
 
 import (

@@ -1,5 +1,3 @@
-// Package sse reads JSON payloads from server-sent event streams. It joins data lines without
-// newlines and ignores event, id, and retry fields.
 package sse
 
 import (

@@ -1,4 +1,3 @@
-// Package models manages the models available to the oh command.
 package models
 
 import (

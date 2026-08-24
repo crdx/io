@@ -1,5 +1,3 @@
-// Package codex is a provider speaking the Responses API, as the ChatGPT backend serves it rather
-// than as the public API does.
 package codex
 
 import (

@@ -1,4 +1,3 @@
-// Package auth stores credentials shared by provider implementations.
 package auth
 
 import (

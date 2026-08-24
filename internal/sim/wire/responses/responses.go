@@ -1,6 +1,3 @@
-// Package responses builds the shapes the Responses API sends, so that everything standing in for
-// the endpoint agrees on what it says by construction, rather than by copies of it staying in
-// step. https://platform.openai.com/docs/api-reference/responses-streaming
 package responses
 
 import (
