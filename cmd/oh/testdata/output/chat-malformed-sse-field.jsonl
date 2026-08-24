@@ -1,4 +1,4 @@
-{"kind":"head","version":4,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":5,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"send fields without SSE data"}}
 {"kind":"event","event":{"kind":"failure","text":"the stream ended before the response did"}}
 {"kind":"item","payload":{"role":"user","content":"send fields without SSE data"}}

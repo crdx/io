@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/ohctl/migrate"
 	"crdx.org/io/session"
@@ -183,6 +184,60 @@ func TestFormatThreeMigrationDoesNotCompleteAPartialProviderStateWrite(t *testin
 	}
 	if storedSession.TurnCompletions != 0 || storedSession.CanResume() {
 		t.Errorf("partial state write became resumable: %+v", storedSession)
+	}
+}
+
+func TestFormatFourMigrationRecoversTheLastKnownMode(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":4,"id":"one","name":"brave-otter","meta":{"system_prompt":"# State\n\n- The workspace (/workspace) is read-only\n- The .git directory within it (/workspace/.git) is read-only\n- Background processes are killed when their shell command ends\n- The bash tool is granted"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:01Z","payload":{"role":"user","content":"The workspace is now read-write."}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"mode_change","text":"rxw"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:03Z","payload":{"role":"user","content":[{"type":"text","text":"The workspace is now read-only."}]}}`,
+	)
+
+	from, err := migrate.Session(options(directory), name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if from != 4 {
+		t.Errorf("migrated from format %d, want 4", from)
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var modeEvents int
+	for _, event := range storedSession.Events {
+		if event.Kind == caps.ModeChange {
+			modeEvents++
+		}
+	}
+	if modeEvents != 1 {
+		t.Errorf("kept %d mode events, want one authoritative event", modeEvents)
+	}
+	if currentCaps, recorded := caps.LastRecordedMode(storedSession.Events); !recorded || currentCaps != caps.Read|caps.Shell {
+		t.Errorf("recovered %s and %t, want rx", currentCaps.Flags(), recorded)
+	}
+}
+
+func TestFormatFourMigrationPreservesARealModeChange(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":4,"id":"one","name":"brave-otter","meta":{"system_prompt":"# State\n\n- The workspace (/workspace) is read-only\n- The .git directory within it (/workspace/.git) is read-only\n- Background processes are killed when their shell command ends\n- The bash tool is granted"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxw"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"mode_change","name":"g","text":"rxg"}}`,
+	)
+
+	if _, err := migrate.Session(options(directory), name); err != nil {
+		t.Fatal(err)
+	}
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if currentCaps, recorded := caps.LastRecordedMode(storedSession.Events); !recorded || currentCaps != caps.Read|caps.Shell|caps.Git {
+		t.Errorf("recovered %s and %t, want rxg", currentCaps.Flags(), recorded)
 	}
 }
 

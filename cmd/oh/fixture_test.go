@@ -30,6 +30,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"inputblock":        {".ansi", ".screen"},
 		"lifecycle":         {".ansi", ".screen"},
 		"mermaid-streaming": {".screen"},
+		"resume-mode":       {".ansi"},
 		"running":           {".ansi", ".screen"},
 		"segments":          {".ansi", ".screen"},
 	} {

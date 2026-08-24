@@ -154,6 +154,9 @@ func TestTheDefaultCapabilitiesAreEverythingButTheHistory(t *testing.T) {
 	if got := parsedOptions.Caps.Flags(); got != "rxw" {
 		t.Errorf("expected rxw, got %q", got)
 	}
+	if parsedOptions.WereCapsChosen {
+		t.Error("expected the default capabilities to count as unchosen")
+	}
 
 	if parsedOptions.Message != "" {
 		t.Errorf("expected nothing said, got %q", parsedOptions.Message)
@@ -199,7 +202,7 @@ func TestAWorkspaceCannotBeGivenWhenResuming(t *testing.T) {
 	}
 }
 
-func TestAResumedConversationMayBeGrantedSomethingElse(t *testing.T) {
+func TestAModeNamedOnTheCommandLineCountsAsChosen(t *testing.T) {
 	opts := Input{Session: "one", Caps: "rx"}
 	settledOptions, err := opts.Parse(modelCachePath())
 	if err != nil {
@@ -208,5 +211,8 @@ func TestAResumedConversationMayBeGrantedSomethingElse(t *testing.T) {
 
 	if settledOptions.Caps.Has(caps.Write) {
 		t.Error("expected writing to be held back")
+	}
+	if !settledOptions.WereCapsChosen {
+		t.Error("expected the named capabilities to count as chosen")
 	}
 }

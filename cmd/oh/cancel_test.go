@@ -642,7 +642,7 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	}
 
 	self.start("first")
-	self.toggleCapability(caps.Write)
+	self.toggleCap(caps.Write)
 	self.replaceTurn("second")
 
 	pending := self.queuedTurn.Peek()
@@ -704,7 +704,7 @@ func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
 	}
 
 	self.start("first")
-	self.toggleCapability(caps.Write)
+	self.toggleCap(caps.Write)
 
 	for report := range self.currentTurn.events {
 		self.takeTurn(report)

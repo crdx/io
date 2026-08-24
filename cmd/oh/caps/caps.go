@@ -20,8 +20,6 @@ const (
 	Background
 )
 
-const switchable = Shell | Write | Git | Background
-
 var capsMap = []struct {
 	grantedCaps Set
 	flag        string
@@ -166,27 +164,28 @@ func (self *Mode) Inject() string {
 
 	changedCaps := self.currentCaps ^ self.knownCaps
 	if self.knownCaps == 0 {
-		changedCaps = switchable
+		changedCaps = All()
 	}
 
 	self.knownCaps = self.currentCaps
 
+	return lexicalDiff(changedCaps, self.currentCaps)
+}
+
+func lexicalDiff(changedCaps Set, currentCaps Set) string {
 	var clauses []string
 
 	if changedCaps.Has(Write) {
-		clauses = append(clauses, workspaceIs(self.currentCaps.Has(Write)))
+		clauses = append(clauses, workspaceIs(currentCaps.Has(Write)))
 	}
-
 	if changedCaps.Has(Shell) {
-		clauses = append(clauses, shellIs(self.currentCaps.Has(Shell)))
+		clauses = append(clauses, shellIs(currentCaps.Has(Shell)))
 	}
-
 	if changedCaps.Has(Git) {
-		clauses = append(clauses, historyIs(self.currentCaps.Has(Git)))
+		clauses = append(clauses, historyIs(currentCaps.Has(Git)))
 	}
-
 	if changedCaps.Has(Background) {
-		clauses = append(clauses, backgroundIs(self.currentCaps.Has(Background)))
+		clauses = append(clauses, backgroundIs(currentCaps.Has(Background)))
 	}
 
 	return strings.Join(clauses, " ")

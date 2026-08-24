@@ -10,6 +10,7 @@ import (
 	"unicode/utf8"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/strutil"
 	"crdx.org/io/tool"
 )
@@ -107,6 +108,13 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		writeField(&output, "Name", event.Name)
 		output.WriteString("**State**\n\n")
 		writeFence(&output, string(event.State), "json")
+	case caps.ModeChange:
+		writeField(&output, "Swapped", event.Name)
+		writeField(&output, "Caps", event.Text)
+
+		if notice, said := caps.ModeNotice(event); said {
+			writeFence(&output, notice, "")
+		}
 	case agent.InterruptionEvent:
 		output.WriteString("The turn was interrupted.\n\n")
 	case agent.FailureEvent:
@@ -161,6 +169,8 @@ func title(kind agent.Kind) string {
 		return "Tool result"
 	case agent.StateChangeEvent:
 		return "State"
+	case caps.ModeChange:
+		return "Mode"
 	case agent.InterruptionEvent:
 		return "Interrupted"
 	case agent.FailureEvent:

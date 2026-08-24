@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"crdx.org/duckopt/v2"
@@ -9,7 +10,9 @@ import (
 	"crdx.org/io/cmd/oh/models"
 )
 
-const usage = `oh — coding harness
+const defaultCapFlags = "rxw"
+
+var usage = fmt.Sprintf(`oh — coding harness
 
 Usage:
     $0 [options] [-t <tool>]... [<prompt>...]
@@ -19,7 +22,7 @@ Options:
     -r, --resume <session>                 Resume the saved session by name
     -s, --sessions                         Choose a saved session to resume
     -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
-    -c, --caps <flags>                     Capabilities: rxwgb (read, exec, write, git, bg) [default: rxw]
+    -c, --caps <flags>                     Capabilities: rxwgb (read, exec, write, git, bg) (default: %s)
     -t, --tool <tool>                      Enable a tool; may be repeated (all by default)
     -l, --list                             List the available models, then exit
     -u, --update                           Update the cached model list, then exit
@@ -27,11 +30,11 @@ Options:
     -h, --help                             Show this help
 
 Model selection takes the closest reading of what you name: the whole name first, then an opening,
-then a fragment, so -m sol@hi is enough. An effort of off asks for none, where the model takes it.
+then a fragment, so -m sol@hi is enough.
 
 Environment:
     OH_ENDPOINT_URL     Talk to somewhere other than the provider's default endpoint
-`
+`, defaultCapFlags)
 
 // Input is the command line as accepted by duckopt.
 type Input struct {
@@ -49,14 +52,15 @@ type Input struct {
 
 // Options are the validated options needed to start or resume a conversation.
 type Options struct {
-	Message      string
-	WorkspaceDir string
-	Session      string
-	Provider     string
-	Model        string
-	Effort       string
-	Caps         caps.Set
-	Tools        []string
+	Message        string
+	WorkspaceDir   string
+	Session        string
+	Provider       string
+	Model          string
+	Effort         string
+	Caps           caps.Set
+	WereCapsChosen bool
+	Tools          []string
 }
 
 // Bind reads and validates the process command line.
@@ -88,11 +92,17 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 		options.Effort = effort
 	}
 
-	grantedCaps, err := caps.Parse(self.Caps)
+	capFlags := self.Caps
+	if capFlags == "" {
+		capFlags = defaultCapFlags
+	}
+
+	grantedCaps, err := caps.Parse(capFlags)
 	if err != nil {
 		return options, err
 	}
 	options.Caps = grantedCaps
+	options.WereCapsChosen = self.Caps != ""
 
 	if options.Resuming() && options.WorkspaceDir != "" {
 		return options, errors.New("a resumed conversation takes its directory from the session")

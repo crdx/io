@@ -21,7 +21,7 @@ import (
 // Format is the journal format this build writes. A journal written before formats were numbered
 // carries no version at all, and counts as format 1. Bump this whenever a stored shape changes,
 // and add the step that migrates a journal over the bump to cmd/ohctl/migrate.
-const Format = 4
+const Format = 5
 
 // Kind is what one journal line holds.
 type Kind string

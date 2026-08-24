@@ -63,7 +63,7 @@ func (self state) RefreshInterval() time.Duration {
 func (self state) Render(segment.Context) string {
 	isRunning, frameIndex := self.turn()
 	if !isRunning {
-		return style.Faint(self.idle)
+		return style.Grey(self.idle)
 	}
 
 	return style.Spinner(self.animation.Frame(frameIndex))

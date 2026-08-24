@@ -87,6 +87,27 @@ func main() {
 	}
 }
 
+func openingCaps(args cli.Options, resumedSession *store.Session) (caps.Set, error) {
+	if resumedSession == nil {
+		return args.Caps, nil
+	}
+
+	lastCaps, found := caps.LastRecordedMode(resumedSession.Events)
+	if !found {
+		return args.Caps, nil
+	}
+
+	if args.WereCapsChosen && args.Caps != lastCaps {
+		return 0, fmt.Errorf(
+			"a resumed conversation opens in the mode it was left in, which was %s rather than %s",
+			lastCaps.Flags(),
+			args.Caps.Flags(),
+		)
+	}
+
+	return lastCaps, nil
+}
+
 func run() ([]string, error) {
 	inputArgs := cli.Bind()
 
@@ -130,6 +151,11 @@ func run() ([]string, error) {
 	}
 	if resumedSession != nil {
 		args.WorkspaceDir = resumedSession.Meta.WorkspaceDir
+	}
+
+	args.Caps, err = openingCaps(args, resumedSession)
+	if err != nil {
+		return nil, err
 	}
 
 	root, err := os.OpenRoot(args.WorkspaceDir)

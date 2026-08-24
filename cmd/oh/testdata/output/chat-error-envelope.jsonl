@@ -1,4 +1,4 @@
-{"kind":"head","version":4,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":5,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"receive a Chat Completions error envelope"}}
 {"kind":"event","event":{"kind":"failure","text":"model overloaded"}}
 {"kind":"item","payload":{"role":"user","content":"receive a Chat Completions error envelope"}}

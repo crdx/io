@@ -9,6 +9,7 @@ import (
 	"crdx.org/io/tool"
 
 	"crdx.org/io/cmd/oh/call"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
@@ -212,6 +213,12 @@ func (self *Painter) drawEvent(event agent.Event) {
 
 	case agent.StartupEvent, agent.HarnessMessageEvent:
 		self.screen.Line(self.render(event))
+
+	case caps.ModeChange:
+		if notice, said := caps.ModeNotice(event); said {
+			self.close(dynamic.Cancelled)
+			self.screen.Line(noticeStyle(false)(notice))
+		}
 
 	case agent.FailureEvent:
 		self.close(dynamic.Cancelled)

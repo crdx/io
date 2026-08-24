@@ -1,4 +1,4 @@
-{"kind":"head","version":4,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":5,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"reset the connection during an answer"}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
 {"kind":"event","event":{"kind":"failure","text":"unexpected EOF"}}

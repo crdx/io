@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/session"
 )
@@ -21,10 +22,156 @@ var steps = map[int]step{
 	1: {migrateLine: emphasisReplacesHighlight},
 	2: {finalise: addSessionMeta},
 	3: {migrateJournal: addTurnCompletions},
+	4: {migrateJournal: addLastMode},
 }
 
 func addSessionMeta(directory, name string) error {
 	return store.RebuildMeta(directory, name)
+}
+
+func addLastMode(lines []map[string]json.RawMessage) ([]map[string]json.RawMessage, error) {
+	currentCaps, err := initialMode(lines[0])
+	if err != nil {
+		return nil, err
+	}
+
+	migrated := make([]map[string]json.RawMessage, 0, len(lines)+1)
+	lastTime := lines[0]["time"]
+
+	for index, line := range lines {
+		if at, ok := line["time"]; ok {
+			lastTime = at
+		}
+
+		event, hasEvent, err := eventOf(line)
+		if err != nil {
+			return nil, fmt.Errorf("line %d: %w", index+1, err)
+		}
+		if hasEvent && event.Kind == caps.ModeChange {
+			if event.Name == "" {
+				continue
+			}
+
+			currentCaps, err = caps.Parse(event.Text)
+			if err != nil {
+				return nil, fmt.Errorf("line %d: the mode could not be read: %w", index+1, err)
+			}
+		}
+
+		texts, err := providerUserTexts(line)
+		if err != nil {
+			return nil, fmt.Errorf("line %d: %w", index+1, err)
+		}
+		for _, text := range texts {
+			currentCaps = modeAfterNotice(currentCaps, text)
+		}
+
+		migrated = append(migrated, line)
+	}
+
+	encodedEvent, err := json.Marshal(caps.ModeEvent(currentCaps))
+	if err != nil {
+		return nil, err
+	}
+	migrated = append(migrated, map[string]json.RawMessage{
+		"kind":  json.RawMessage(`"event"`),
+		"time":  lastTime,
+		"event": encodedEvent,
+	})
+
+	return migrated, nil
+}
+
+func initialMode(head map[string]json.RawMessage) (caps.Set, error) {
+	var meta store.Meta
+	if raw, ok := head["meta"]; ok {
+		if err := json.Unmarshal(raw, &meta); err != nil {
+			return 0, fmt.Errorf("the session metadata could not be read: %w", err)
+		}
+	}
+
+	currentCaps := caps.Read
+	for line := range strings.SplitSeq(meta.SystemPrompt, "\n") {
+		line = strings.TrimSpace(line)
+		switch {
+		case strings.HasPrefix(line, "- The workspace (") && strings.HasSuffix(line, " is read-write"):
+			currentCaps |= caps.Write
+		case strings.HasPrefix(line, "- The .git directory within it (") && strings.HasSuffix(line, " is read-write"):
+			currentCaps |= caps.Git
+		case line == "- Background processes are allowed to outlive shell commands":
+			currentCaps |= caps.Background
+		case line == "- The bash tool is granted":
+			currentCaps |= caps.Shell
+		}
+	}
+
+	return currentCaps, nil
+}
+
+func providerUserTexts(line map[string]json.RawMessage) ([]string, error) {
+	if string(line["kind"]) != `"item"` {
+		return nil, nil
+	}
+
+	var message struct {
+		Role    string          `json:"role"`
+		Content json.RawMessage `json:"content"`
+	}
+	if err := json.Unmarshal(line["payload"], &message); err != nil {
+		return nil, fmt.Errorf("the provider item could not be read: %w", err)
+	}
+	if message.Role != "user" {
+		return nil, nil
+	}
+
+	var text string
+	if json.Unmarshal(message.Content, &text) == nil {
+		return []string{text}, nil
+	}
+
+	var blocks []struct {
+		Type string `json:"type"`
+		Text string `json:"text"`
+	}
+	if err := json.Unmarshal(message.Content, &blocks); err != nil {
+		return nil, fmt.Errorf("the user content could not be read: %w", err)
+	}
+
+	var texts []string
+	for _, block := range blocks {
+		if block.Type == "text" {
+			texts = append(texts, block.Text)
+		}
+	}
+	return texts, nil
+}
+
+func modeAfterNotice(currentCaps caps.Set, text string) caps.Set {
+	if strings.Contains(text, "The workspace is now read-write.") {
+		currentCaps |= caps.Write
+	}
+	if strings.Contains(text, "The workspace is now read-only.") {
+		currentCaps &^= caps.Write
+	}
+	if strings.Contains(text, "The bash tool can now run shell commands.") {
+		currentCaps |= caps.Shell
+	}
+	if strings.Contains(text, "The bash tool is now refused, and will turn away every command until it is granted again.") {
+		currentCaps &^= caps.Shell
+	}
+	if strings.Contains(text, "The .git directory is now read-write.") {
+		currentCaps |= caps.Git
+	}
+	if strings.Contains(text, "The .git directory is now read-only.") {
+		currentCaps &^= caps.Git
+	}
+	if strings.Contains(text, "Background processes can now outlive shell commands.") {
+		currentCaps |= caps.Background
+	}
+	if strings.Contains(text, "Background processes have been killed and new ones will no longer outlive shell commands.") {
+		currentCaps &^= caps.Background
+	}
+	return currentCaps
 }
 
 func emphasisReplacesHighlight(line map[string]json.RawMessage) error {
