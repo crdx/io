@@ -92,6 +92,21 @@ func TestLoadRejectsUnsupportedVersion(t *testing.T) {
 	}
 }
 
+func TestCredentialsFromANewerOhAreRefusedBeforeTheirShapeIsRead(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "auth.json")
+	if err := os.WriteFile(path, []byte(`{"version":2,"codex":"a-string-now"}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := auth.Load(path)
+	if !errors.Is(err, auth.ErrUnsupportedVersion) {
+		t.Fatalf("expected the format to be named ahead of the shape, got %v", err)
+	}
+	if strings.Contains(err.Error(), "cannot unmarshal") {
+		t.Errorf("expected the decoder complaint to be replaced by the format, got %v", err)
+	}
+}
+
 func TestSavingReplacesCredentialsInAnOlderFormat(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "auth.json")
 	flat := `{"access":"old","refresh":"refresh-me","account_id":"account","expires_at":1}`

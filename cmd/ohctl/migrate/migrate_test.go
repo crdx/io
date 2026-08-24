@@ -273,7 +273,7 @@ func TestAJournalFromANewerBuildIsRefused(t *testing.T) {
 		t.Fatal("expected a journal from the future to be refused")
 	}
 
-	if !strings.Contains(err.Error(), "newer oh") {
+	if !strings.Contains(err.Error(), "upgrade oh") {
 		t.Errorf("expected the error to say where it came from, got %v", err)
 	}
 }

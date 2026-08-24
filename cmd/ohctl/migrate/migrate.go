@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/internal/format"
 	"crdx.org/io/internal/xdg"
 	"crdx.org/io/session"
 )
@@ -167,8 +168,8 @@ func Session(options Options, name string) (int, error) {
 		return 0, err
 	}
 
-	if fromFormat > session.Format {
-		return fromFormat, fmt.Errorf("format %d was written by a newer oh than this one", fromFormat)
+	if err := format.Check(fromFormat, session.Format); err != nil {
+		return fromFormat, fmt.Errorf("%w: upgrade oh", err)
 	}
 
 	if fromFormat == session.Format {

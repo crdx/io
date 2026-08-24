@@ -129,7 +129,7 @@ func run() (string, error) {
 		return "", err
 	}
 
-	if err := refuseOutdatedSessions(sessionsDir()); err != nil {
+	if err := refuseUnreadableSessions(sessionsDir()); err != nil {
 		return "", err
 	}
 

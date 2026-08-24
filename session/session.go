@@ -16,17 +16,13 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/format"
 )
 
-// Format is the journal format this build writes. A journal written before formats were numbered
-// carries no version at all, and counts as format 1. Bump this whenever a stored shape changes,
-// and add the step that migrates a journal over the bump to cmd/ohctl/migrate.
 const Format = 5
 
-// Kind is what one journal line holds.
 type Kind string
 
-// The kinds of line in a journal.
 const (
 	Head           Kind = "head"
 	Event          Kind = "event"
@@ -34,8 +30,6 @@ const (
 	TurnCompletion Kind = "turn_completion"
 )
 
-// Line is one journal record. Head records carry the name the session was given and the identifier
-// generated alongside it.
 type Line struct {
 	Kind Kind      `json:"kind"`
 	Time time.Time `json:"time"`
@@ -49,8 +43,6 @@ type Line struct {
 	Payload json.RawMessage `json:"payload,omitempty"`
 }
 
-// Writer appends records to a session. The file is made by the first record, so an unused session
-// leaves nothing behind.
 type Writer struct {
 	file        *os.File
 	directory   string
@@ -62,7 +54,6 @@ type Writer struct {
 	listingMeta Meta
 }
 
-// Create starts a session in directory with caller-owned journal metadata and listing data.
 func Create(directory string, journalMeta json.RawMessage, listingData json.RawMessage) (*Writer, error) {
 	if err := os.MkdirAll(directory, 0o700); err != nil {
 		return nil, err
@@ -82,10 +73,8 @@ func Create(directory string, journalMeta json.RawMessage, listingData json.RawM
 	}, nil
 }
 
-// ErrInUse reports that another writer holds the session's journal.
 var ErrInUse = errors.New("the session is already open elsewhere")
 
-// Open continues an existing session, holding its journal against other writers until it is closed.
 func Open(directory string, name string) (*Writer, error) {
 	if err := validateName(name); err != nil {
 		return nil, err
@@ -130,8 +119,6 @@ func lockJournal(file *os.File) error {
 	return err
 }
 
-// SetMeta replaces the caller-owned journal metadata and listing data before the first record is
-// written.
 func (w *Writer) SetMeta(journalMeta json.RawMessage, listingData json.RawMessage) error {
 	if w.file != nil {
 		return errors.New("cannot change meta after the session has been stored")
@@ -142,7 +129,6 @@ func (w *Writer) SetMeta(journalMeta json.RawMessage, listingData json.RawMessag
 	return nil
 }
 
-// Event appends one portable conversation event, and reports the time it was written.
 func (w *Writer) Event(event agent.Event) (time.Time, error) {
 	writtenAt, err := w.write(Line{Kind: Event, Event: &event})
 	if err != nil {
@@ -153,7 +139,6 @@ func (w *Writer) Event(event agent.Event) (time.Time, error) {
 	return writtenAt, writeMeta(w.directory, w.listingMeta)
 }
 
-// Item appends one opaque provider-state item.
 func (w *Writer) Item(payload json.RawMessage) error {
 	writtenAt, err := w.write(Line{Kind: Item, Payload: payload})
 	if err != nil {
@@ -164,7 +149,6 @@ func (w *Writer) Item(payload json.RawMessage) error {
 	return writeMeta(w.directory, w.listingMeta)
 }
 
-// CompleteTurn records that every event and provider-state item in a user turn is durable.
 func (w *Writer) CompleteTurn() error {
 	writtenAt, err := w.write(Line{Kind: TurnCompletion})
 	if err != nil {
@@ -175,25 +159,13 @@ func (w *Writer) CompleteTurn() error {
 	return writeMeta(w.directory, w.listingMeta)
 }
 
-// Name is what the session is called, and the name of its bundle directory.
-func (w *Writer) Name() string { return w.name }
-
-// ID is the session's time-ordered identifier, recorded for provenance and read by nothing.
-func (w *Writer) ID() string { return w.id }
-
-// JournalMeta is the caller-owned metadata stored in the journal head.
+func (w *Writer) Name() string                 { return w.name }
+func (w *Writer) ID() string                   { return w.id }
 func (w *Writer) JournalMeta() json.RawMessage { return slices.Clone(w.journalMeta) }
+func (w *Writer) Started() time.Time           { return w.started }
+func (w *Writer) Stored() bool                 { return w.file != nil }
+func (w *Writer) EnsureStored() error          { return w.ensureOpen() }
 
-// Started is when the head was written down, and zero until the session has been stored.
-func (w *Writer) Started() time.Time { return w.started }
-
-// Stored reports whether the lazy writer has made a file.
-func (w *Writer) Stored() bool { return w.file != nil }
-
-// EnsureStored creates the journal and writes its head without adding an event or item.
-func (w *Writer) EnsureStored() error { return w.ensureOpen() }
-
-// Close closes a session that has been stored.
 func (w *Writer) Close() error {
 	if w.file == nil {
 		return nil
@@ -273,7 +245,6 @@ func (w *Writer) record(line Line) (time.Time, error) {
 	return line.Time, err
 }
 
-// Session is a stored conversation.
 type Session struct {
 	Name            string
 	ID              string
@@ -323,6 +294,9 @@ func Records(directory string, name string, visit func(Line) error) error {
 		if !sawHead {
 			if line.Kind != Head {
 				return errors.New("session does not start with a head")
+			}
+			if err := format.Check(formatOf(line), Format); err != nil {
+				return fmt.Errorf("session %s: journal %w", name, err)
 			}
 			sawHead = true
 		} else if line.Kind == Head {
@@ -525,20 +499,31 @@ func formatOf(head Line) int {
 	return head.Version
 }
 
+// Outdated names the stored sessions written in an older journal format than this build writes.
 func Outdated(directory string) ([]string, error) {
+	return namesInFormat(directory, func(stored int) bool { return stored < Format })
+}
+
+// Ahead names the stored sessions written in a newer journal format than this build reads. No
+// migration brings one of those back: only a newer build can read it.
+func Ahead(directory string) ([]string, error) {
+	return namesInFormat(directory, func(stored int) bool { return stored > Format })
+}
+
+func namesInFormat(directory string, wanted func(stored int) bool) ([]string, error) {
 	entries, err := Entries(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	var outdated []string
+	var names []string
 	for _, entry := range entries {
-		if entry.Format < Format {
-			outdated = append(outdated, entry.Name)
+		if wanted(entry.Format) {
+			names = append(names, entry.Name)
 		}
 	}
 
-	return outdated, nil
+	return names, nil
 }
 
 func storedNames(directory string) ([]string, error) {

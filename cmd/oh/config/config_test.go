@@ -89,8 +89,24 @@ func TestAConfigFromANewerOhIsRefused(t *testing.T) {
 	}
 
 	_, err := Load(path)
-	if err == nil || !strings.Contains(err.Error(), "newer oh") {
+	if err == nil || !strings.Contains(err.Error(), "upgrade oh") {
 		t.Fatalf("expected the newer format to be refused, got %v", err)
+	}
+}
+
+func TestAConfigFromANewerOhIsRefusedBeforeItsShapeIsRead(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	body := fmt.Sprintf("version = %d\nmodel = \"gpt\"\n", Format+1)
+	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil || !strings.Contains(err.Error(), "upgrade oh") {
+		t.Fatalf("expected the newer format to be refused, got %v", err)
+	}
+	if strings.Contains(err.Error(), "incompatible types") {
+		t.Errorf("expected the decoder complaint to be replaced by the format, got %v", err)
 	}
 }
 

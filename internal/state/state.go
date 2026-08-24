@@ -8,9 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
+
+	"crdx.org/io/internal/format"
 )
 
-func Update[State any](path string, update func(*State) error) error {
+func Update[State any](path string, supportedFormat int, update func(*State) error) error {
 	lock, err := lock(path)
 	if err != nil {
 		return err
@@ -21,7 +23,7 @@ func Update[State any](path string, update func(*State) error) error {
 	}()
 
 	var state State
-	if err := read(path, &state); err != nil {
+	if err := read(path, supportedFormat, &state); err != nil {
 		return err
 	}
 	if err := update(&state); err != nil {
@@ -48,7 +50,7 @@ func lock(path string) (*os.File, error) {
 	return file, nil
 }
 
-func read(path string, state any) error {
+func read(path string, supportedFormat int, state any) error {
 	data, err := os.ReadFile(path) //nolint:gosec // the path is ours
 	if errors.Is(err, fs.ErrNotExist) {
 		return nil
@@ -56,6 +58,15 @@ func read(path string, state any) error {
 	if err != nil {
 		return fmt.Errorf("read state: %w", err)
 	}
+
+	storedFormat, err := format.ReadJSON(data)
+	if err != nil {
+		return fmt.Errorf("read state: %w", err)
+	}
+	if err := format.Check(storedFormat, supportedFormat); err != nil {
+		return fmt.Errorf("read state %s: %w", path, err)
+	}
+
 	if err := json.Unmarshal(data, state); err != nil {
 		return fmt.Errorf("read state: %w", err)
 	}

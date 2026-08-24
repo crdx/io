@@ -13,7 +13,7 @@ import (
 func chooseStoredSession(directory string, terminal *os.File, screen io.Writer) (string, error) {
 	sessions, err := loadSessions(directory)
 	if err != nil {
-		if migrationError := refuseOutdatedSessions(directory); migrationError != nil {
+		if migrationError := refuseUnreadableSessions(directory); migrationError != nil {
 			return "", migrationError
 		}
 		return "", err

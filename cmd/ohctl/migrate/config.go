@@ -12,6 +12,7 @@ import (
 	"github.com/BurntSushi/toml"
 
 	"crdx.org/io/cmd/oh/config"
+	"crdx.org/io/internal/format"
 )
 
 type ConfigOptions struct {
@@ -32,8 +33,8 @@ func MigrateConfig(options ConfigOptions) (int, bool, error) {
 	if err != nil {
 		return 0, true, err
 	}
-	if fromFormat > config.Format {
-		return fromFormat, true, fmt.Errorf("format %d was written by a newer oh than this one", fromFormat)
+	if err := format.Check(fromFormat, config.Format); err != nil {
+		return fromFormat, true, fmt.Errorf("%w: upgrade oh", err)
 	}
 	if fromFormat == config.Format {
 		return fromFormat, true, nil

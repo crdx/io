@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"crdx.org/io/internal/format"
 	"crdx.org/io/internal/xdg"
 )
 
@@ -65,12 +66,17 @@ func Load(path string) (*Credentials, error) {
 		return nil, fmt.Errorf("read credentials: %w", err)
 	}
 
+	storedVersion, err := format.ReadJSON(data)
+	if err != nil {
+		return nil, fmt.Errorf("parse credentials %s: %w", path, err)
+	}
+	if storedVersion != Version {
+		return nil, fmt.Errorf("%s: format %d: %w", path, storedVersion, ErrUnsupportedVersion)
+	}
+
 	var credentials Credentials
 	if err := json.Unmarshal(data, &credentials); err != nil {
 		return nil, fmt.Errorf("parse credentials %s: %w", path, err)
-	}
-	if credentials.Version != Version {
-		return nil, fmt.Errorf("%s: %w", path, ErrUnsupportedVersion)
 	}
 
 	return &credentials, nil

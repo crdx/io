@@ -193,7 +193,7 @@ func TestConfigFromANewerBuildIsRefused(t *testing.T) {
 	path := configFile(t, "version = 99\n")
 
 	_, _, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path})
-	if err == nil || !strings.Contains(err.Error(), "newer oh") {
+	if err == nil || !strings.Contains(err.Error(), "upgrade oh") {
 		t.Fatalf("expected a newer-format error, got %v", err)
 	}
 }

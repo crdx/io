@@ -3,6 +3,7 @@ package session_test
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -350,6 +351,43 @@ func TestAJournalSaysWhichFormatItWasWrittenIn(t *testing.T) {
 	}
 	if len(outdated) != 0 {
 		t.Errorf("expected a session just written to be current, got %v", outdated)
+	}
+}
+
+func TestAJournalFromANewerOhIsNamedAndNotReplayed(t *testing.T) {
+	directory := t.TempDir()
+	name := "brave-otter"
+
+	if err := os.MkdirAll(filepath.Join(directory, name), 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	head := fmt.Sprintf(
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":"one","name":"brave-otter"}`,
+		session.Format+1,
+	) + "\n"
+	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), []byte(head), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	ahead, err := session.Ahead(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ahead) != 1 || ahead[0] != name {
+		t.Errorf("expected the newer journal to be named as ahead, got %v", ahead)
+	}
+
+	outdated, err := session.Outdated(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(outdated) != 0 {
+		t.Errorf("expected a newer journal not to count as outdated, got %v", outdated)
+	}
+
+	if _, err := session.Read(directory, name); err == nil || !strings.Contains(err.Error(), "newer build") {
+		t.Errorf("expected reading a newer journal to say where it came from, got %v", err)
 	}
 }
 

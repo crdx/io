@@ -34,13 +34,13 @@ func ReserveRoundRobin(path string, selections []Selection) (Selection, error) {
 	}
 
 	var selected Selection
-	err := state.Update(path, func(state *roundRobinState) error {
-		if state.Version != 0 && state.Version != roundRobinStateVersion {
-			return fmt.Errorf("model round-robin state has version %d, expected %d", state.Version, roundRobinStateVersion)
+	err := state.Update(path, roundRobinStateVersion, func(stored *roundRobinState) error {
+		if stored.Version != 0 && stored.Version != roundRobinStateVersion {
+			return fmt.Errorf("model round-robin state has version %d, expected %d", stored.Version, roundRobinStateVersion)
 		}
 
-		selected = roundrobin.Next(selections, state.Last)
-		*state = roundRobinState{Version: roundRobinStateVersion, Last: selected}
+		selected = roundrobin.Next(selections, stored.Last)
+		*stored = roundRobinState{Version: roundRobinStateVersion, Last: selected}
 
 		return nil
 	})

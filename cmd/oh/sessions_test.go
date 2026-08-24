@@ -119,6 +119,34 @@ func TestLoadingACompletedSessionSucceeds(t *testing.T) {
 	}
 }
 
+func TestChoosingASessionFromANewerOhAdvisesAnUpgrade(t *testing.T) {
+	directory := t.TempDir()
+	name := "able-dolphin"
+
+	if err := os.MkdirAll(filepath.Join(directory, name), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	head := fmt.Sprintf(
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":%q,"name":%q}`+"\n",
+		session.Format+1, name, name,
+	)
+	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), []byte(head), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := chooseStoredSession(directory, nil, nil)
+	if err == nil {
+		t.Fatal("expected the newer session to be refused")
+	}
+	if !strings.Contains(err.Error(), "upgrade oh") {
+		t.Errorf("expected an upgrade to be advised, got %v", err)
+	}
+	if strings.Contains(err.Error(), "ohctl migrate") {
+		t.Errorf("expected migration not to be advised for a newer format, got %v", err)
+	}
+}
+
 func TestChoosingAnOutdatedSessionAdvisesMigration(t *testing.T) {
 	directory := t.TempDir()
 	writeStoredSession(t, directory, "able-dolphin", "2026-08-01T00:00:00Z")

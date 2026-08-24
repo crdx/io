@@ -2,20 +2,40 @@ package state
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 )
 
+const testFormat = 1
+
 type testState struct {
-	Count int `json:"count"`
+	Version int `json:"version"`
+	Count   int `json:"count"`
+}
+
+func TestAStateFileFromANewerOhIsRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "state.json")
+	if err := os.WriteFile(path, []byte(`{"version":99,"count":"not a number now"}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	err := Update(path, testFormat, func(state *testState) error {
+		t.Error("expected a newer state file not to be handed on")
+		return nil
+	})
+	if err == nil || !strings.Contains(err.Error(), "newer build") {
+		t.Fatalf("expected the newer format to be named, got %v", err)
+	}
 }
 
 func TestUpdateCarriesStateForward(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "state.json")
 
 	for range 3 {
-		if err := Update(path, func(state *testState) error {
+		if err := Update(path, testFormat, func(state *testState) error {
 			state.Count++
 			return nil
 		}); err != nil {
@@ -23,7 +43,7 @@ func TestUpdateCarriesStateForward(t *testing.T) {
 		}
 	}
 
-	if err := Update(path, func(state *testState) error {
+	if err := Update(path, testFormat, func(state *testState) error {
 		if state.Count != 3 {
 			t.Errorf("got count %d, want 3", state.Count)
 		}
@@ -40,7 +60,7 @@ func TestConcurrentUpdatesShareTheLock(t *testing.T) {
 	var wait sync.WaitGroup
 	for range updates {
 		wait.Go(func() {
-			if err := Update(path, func(state *testState) error {
+			if err := Update(path, testFormat, func(state *testState) error {
 				state.Count++
 				return nil
 			}); err != nil {
@@ -50,7 +70,7 @@ func TestConcurrentUpdatesShareTheLock(t *testing.T) {
 	}
 	wait.Wait()
 
-	if err := Update(path, func(state *testState) error {
+	if err := Update(path, testFormat, func(state *testState) error {
 		if state.Count != updates {
 			t.Errorf("got count %d, want %d", state.Count, updates)
 		}
@@ -62,7 +82,7 @@ func TestConcurrentUpdatesShareTheLock(t *testing.T) {
 
 func TestFailedUpdateDoesNotReplaceState(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "state.json")
-	if err := Update(path, func(state *testState) error {
+	if err := Update(path, testFormat, func(state *testState) error {
 		state.Count = 4
 		return nil
 	}); err != nil {
@@ -70,14 +90,14 @@ func TestFailedUpdateDoesNotReplaceState(t *testing.T) {
 	}
 
 	failure := errors.New("stop")
-	if err := Update(path, func(state *testState) error {
+	if err := Update(path, testFormat, func(state *testState) error {
 		state.Count = 99
 		return failure
 	}); !errors.Is(err, failure) {
 		t.Fatalf("got %v, want %v", err, failure)
 	}
 
-	if err := Update(path, func(state *testState) error {
+	if err := Update(path, testFormat, func(state *testState) error {
 		if state.Count != 4 {
 			t.Errorf("got count %d, want 4", state.Count)
 		}

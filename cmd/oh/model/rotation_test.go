@@ -103,3 +103,21 @@ func TestRoundRobinSelectionsValidateEntriesThatAreNotFirst(t *testing.T) {
 		t.Fatalf("expected the invalid selection to be named, got %v", err)
 	}
 }
+
+func TestRoundRobinStateFromANewerOhIsRefusedBeforeItsShapeIsRead(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "rotation.json")
+	stored := `{"version":99,"last":"codex/gpt@high"}`
+	if err := os.WriteFile(path, []byte(stored), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	selections := []Selection{
+		{Provider: "codex", Model: "gpt", Effort: "high"},
+		{Provider: "anthropic", Model: "opus", Effort: "high"},
+	}
+
+	_, err := ReserveRoundRobin(path, selections)
+	if err == nil || !strings.Contains(err.Error(), "newer build") {
+		t.Fatalf("expected the newer state to be named as one, got %v", err)
+	}
+}

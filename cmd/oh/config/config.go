@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/shell"
 
+	"crdx.org/io/internal/format"
 	"crdx.org/io/internal/util/pathutil"
 )
 
@@ -135,16 +136,20 @@ func (self Config) metaFor(position segment.Position) *toml.MetaData {
 }
 
 func readConfigVersion(path string) (int, error) {
-	var header struct {
-		Version int `toml:"version"`
+	data, err := os.ReadFile(path) //nolint:gosec // the path is the configured one
+	if err != nil {
+		return 0, err
 	}
 
-	_, err := toml.DecodeFile(path, &header)
-	if err == nil && header.Version == 0 {
-		header.Version = InitialFormat
+	version, err := format.ReadTOML(data)
+	if err != nil {
+		return 0, err
+	}
+	if version == 0 {
+		version = InitialFormat
 	}
 
-	return header.Version, err
+	return version, nil
 }
 
 func Load(path string) (Config, error) {
@@ -172,8 +177,10 @@ func Load(path string) (Config, error) {
 		return config, fmt.Errorf("%s: %w", displayPath, err)
 	case version < Format:
 		return config, fmt.Errorf("%s: config format %d needs migrating: run ohctl migrate", displayPath, version)
-	case version > Format:
-		return config, fmt.Errorf("%s: config format %d was written by a newer oh", displayPath, version)
+	}
+
+	if err := format.Check(version, Format); err != nil {
+		return config, fmt.Errorf("%s: config %w: upgrade oh", displayPath, err)
 	}
 
 	meta, err := toml.DecodeFile(path, &config)
