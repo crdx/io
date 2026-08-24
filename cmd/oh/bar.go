@@ -46,7 +46,7 @@ func availableSegments(
 	return segment.Registry{
 		activitySpinnerSegment:  activitySpinner.New(harness.turnActivity),
 		contextUsageSegment:     contextUsage.New(harness.contextUsage),
-		modeToggleSegment:       modeToggle.New(harness.grantedCaps, harness.isChordPending),
+		modeToggleSegment:       modeToggle.New(harness.grantedCaps, harness.isPrefixPending),
 		workingDirectorySegment: workingDirectory.New(workspaceDir),
 		activeModelSegment:      activeModel.New(modelName, modelEffort),
 		scrollOverflowSegment:   scrollOverflow.New,

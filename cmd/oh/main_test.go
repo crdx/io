@@ -126,7 +126,7 @@ func TestAResumedConversationDrawsItsRecordedMode(t *testing.T) {
 	}
 
 	resumedHarness := &Harness{mode: caps.NewResumedMode(restoredCaps)}
-	modeSegment, err := modeToggle.New(resumedHarness.grantedCaps, resumedHarness.isChordPending)(nil)
+	modeSegment, err := modeToggle.New(resumedHarness.grantedCaps, resumedHarness.isPrefixPending)(nil)
 	if err != nil {
 		t.Fatal(err)
 	}

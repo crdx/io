@@ -7,36 +7,36 @@ import (
 )
 
 type state struct {
-	getGrantedCaps func() caps.Set
-	isChordPending func() bool
+	getGrantedCaps  func() caps.Set
+	isPrefixPending func() bool
 }
 
-func New(getGrantedCaps func() caps.Set, isChordPending func() bool) segment.Factory {
+func New(getGrantedCaps func() caps.Set, isPrefixPending func() bool) segment.Factory {
 	return func(segment.Options) (segment.Segment, error) {
 		return state{
-			getGrantedCaps: getGrantedCaps,
-			isChordPending: isChordPending,
+			getGrantedCaps:  getGrantedCaps,
+			isPrefixPending: isPrefixPending,
 		}, nil
 	}
 }
 
 func (self state) Render(segment.Context) string {
 	grantedCaps := self.getGrantedCaps()
-	isChordPending := self.isChordPending()
+	isPrefixPending := self.isPrefixPending()
 
-	return self.letter(caps.Read, true, style.Read, isChordPending) +
-		self.letter(caps.Shell, grantedCaps.Has(caps.Shell), style.Exec, isChordPending) +
-		self.letter(caps.Write, grantedCaps.Has(caps.Write), style.Write, isChordPending) +
-		self.letter(caps.Git, grantedCaps.Has(caps.Git), style.History, isChordPending) +
-		self.letter(caps.Background, grantedCaps.Has(caps.Background), style.Background, isChordPending)
+	return self.letter(caps.Read, true, style.Read, isPrefixPending) +
+		self.letter(caps.Shell, grantedCaps.Has(caps.Shell), style.Exec, isPrefixPending) +
+		self.letter(caps.Write, grantedCaps.Has(caps.Write), style.Write, isPrefixPending) +
+		self.letter(caps.Git, grantedCaps.Has(caps.Git), style.History, isPrefixPending) +
+		self.letter(caps.Background, grantedCaps.Has(caps.Background), style.Background, isPrefixPending)
 }
 
-func (self state) letter(caps caps.Set, isGranted bool, paint style.Style, isChordPending bool) string {
+func (self state) letter(caps caps.Set, isGranted bool, paint style.Style, isPrefixPending bool) string {
 	if !isGranted {
 		paint = style.Withheld
 	}
 
-	if isChordPending {
+	if isPrefixPending {
 		return style.Pending(paint(caps.Flag()))
 	}
 

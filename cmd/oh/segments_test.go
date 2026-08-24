@@ -208,7 +208,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			"",
 			segment.Context{},
 		),
-		"mode-toggle / pending chord": goldenSegmentPass(
+		"mode-toggle / pending prefix": goldenSegmentPass(
 			t,
 			modeToggle.New(func() caps.Set { return caps.Read }, func() bool { return true }),
 			"",

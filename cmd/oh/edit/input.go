@@ -29,16 +29,16 @@ const (
 
 // Input edits a line and walks its history.
 type Input struct {
-	buffer         *Buffer
-	history        *History
-	recall         *Recall
-	isPasting      bool
-	pasteStart     int              // where the current paste begins in the buffer
-	inChord        bool             // whether ctrl+x went before, so the next key names a mode
-	isEnterPending bool             // whether one enter awaits a second
-	continueAfter  time.Time        // when another double enter may continue
-	currentTime    func() time.Time // supplies the time for the continuation cool-off
-	wasRunning     bool             // whether a turn ran when the previous key was applied
+	buffer          *Buffer
+	history         *History
+	recall          *Recall
+	isPasting       bool
+	pasteStart      int              // where the current paste begins in the buffer
+	isPrefixPending bool             // whether ctrl+x went before, so the next key names a mode
+	isEnterPending  bool             // whether one enter awaits a second
+	continueAfter   time.Time        // when another double enter may continue
+	currentTime     func() time.Time // supplies the time for the continuation cool-off
+	wasRunning      bool             // whether a turn ran when the previous key was applied
 }
 
 // NewInput builds an empty line.
@@ -56,7 +56,7 @@ func NewInput(history *History) *Input {
 func (self *Input) Reset() {
 	self.buffer = &Buffer{}
 	self.isPasting = false
-	self.inChord = false
+	self.isPrefixPending = false
 	self.isEnterPending = false
 	self.wasRunning = false
 
@@ -70,9 +70,9 @@ func (self *Input) Text() string {
 	return self.buffer.String()
 }
 
-// IsPending reports whether a mode prefix awaits its command key.
-func (self *Input) IsPending() bool {
-	return self.inChord
+// IsPrefixPending reports whether the mode prefix awaits its command key.
+func (self *Input) IsPrefixPending() bool {
+	return self.isPrefixPending
 }
 
 // Frame is the visible input rows, cursor position, and clipped row counts.
@@ -117,7 +117,7 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 		self.isEnterPending = false
 	}
 
-	if self.inChord {
+	if self.isPrefixPending {
 		return self.toggleMode(keypress)
 	}
 
@@ -235,14 +235,14 @@ func (self *Input) rune(keypress key.Key, running bool) Action {
 		}
 
 	case 'x':
-		self.inChord = true
+		self.isPrefixPending = true
 	}
 
 	return Drawn
 }
 
 func (self *Input) toggleMode(button key.Key) Action {
-	self.inChord = false
+	self.isPrefixPending = false
 
 	if button.Code != key.Rune || button.Mod != 0 {
 		return Drawn

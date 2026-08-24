@@ -389,8 +389,8 @@ func (self *Harness) grantedCaps() caps.Set {
 	return self.mode.Current()
 }
 
-func (self *Harness) isChordPending() bool {
-	return self.editor != nil && self.editor.IsPending()
+func (self *Harness) isPrefixPending() bool {
+	return self.editor != nil && self.editor.IsPrefixPending()
 }
 
 func (self *Harness) plainly(history *edit.History, initialMessage string) {
