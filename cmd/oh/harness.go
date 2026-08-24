@@ -314,12 +314,19 @@ func (self *Harness) turnActivity() (bool, int) {
 	return self.currentTurn.isRunning, self.currentTurn.spinnerFrame
 }
 
-func (self *Harness) turnElapsed() (bool, time.Duration) {
-	if !self.currentTurn.isRunning || self.currentTurn.startedAt.IsZero() {
-		return false, 0
+func (self *Harness) isTurnRunning() bool {
+	return self.currentTurn.isRunning
+}
+
+func (self *Harness) turnElapsed() (bool, time.Duration, bool) {
+	if self.currentTurn.startedAt.IsZero() {
+		return false, 0, false
+	}
+	if self.currentTurn.isRunning {
+		return true, time.Since(self.currentTurn.startedAt), true
 	}
 
-	return true, time.Since(self.currentTurn.startedAt)
+	return false, self.currentTurn.finishedAt.Sub(self.currentTurn.startedAt), true
 }
 
 func (self *Harness) turnCount() int {
@@ -574,6 +581,7 @@ func (self *Harness) noticePainter() *Painter {
 }
 
 func (self *Harness) finish() {
+	self.currentTurn.finishedAt = time.Now()
 	self.screen.ReportProgress(false)
 
 	if self.currentTurn.isCancelled {

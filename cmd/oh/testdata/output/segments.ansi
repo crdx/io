@@ -21,11 +21,15 @@
 === git-branch / outside a repository ===
 \e[38;2;150;152;150m\e[0m
 === last-tps / a fast turn ===
-\e[38;2;150;152;150m~42t/s\e[0m
+~42t/s
 === last-tps / a slow turn ===
-\e[38;2;150;152;150m~4.2t/s\e[0m
-=== last-tps / nothing yet ===
-
+~4.2t/s
+=== last-tps / running turn ===
+\e[3m\e[38;2;150;152;150m~42t/s\e[0m\e[0m
+=== last-tps / unknown while idle ===
+\e[3m\e[38;2;150;152;150m?t/s\e[0m\e[0m
+=== last-tps / unknown while running ===
+\e[3m\e[38;2;150;152;150m?t/s\e[0m\e[0m
 === mode-toggle / all granted ===
 \e[38;2;76;154;44mr\e[0m\e[38;2;204;102;102mx\e[0m\e[38;2;207;173;0mw\e[0m\e[38;2;201;166;212mg\e[0m\e[38;2;138;190;183mb\e[0m
 === mode-toggle / pending chord ===
@@ -42,9 +46,11 @@
 
 === turn-count / third turn ===
 \e[38;2;150;152;150m#3\e[0m
-=== turn-elapsed / idle ===
-
+=== turn-elapsed / completed ===
+\e[3m\e[38;2;150;152;150m1m09s\e[0m\e[0m
 === turn-elapsed / running ===
-\e[38;2;150;152;150m1m09s\e[0m
+1m09s
+=== turn-elapsed / unknown ===
+\e[3m\e[38;2;150;152;150m?s\e[0m\e[0m
 === working-directory ===
 \e[38;2;150;152;150mproject\e[0m

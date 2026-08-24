@@ -16,6 +16,7 @@ type Turn struct {
 	spinnerFrame int
 	painter      *Painter
 	startedAt    time.Time
+	finishedAt   time.Time
 
 	events chan TurnEvent
 }

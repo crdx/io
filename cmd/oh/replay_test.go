@@ -634,6 +634,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 					held.currentTurn.isRunning = isRunning
 					held.currentTurn.spinnerFrame = 2
 					held.currentTurn.startedAt = time.Now().Add(-turnSoFar)
+					held.currentTurn.finishedAt = time.Now()
 
 					built := goldenBarLayout(t, held)
 

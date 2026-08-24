@@ -144,19 +144,31 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"last-tps / a fast turn": goldenSegmentPass(
 			t,
-			lastTps.New(func() (float64, bool) { return 42.4, true }),
+			lastTps.New(func() (float64, bool) { return 42.4, true }, func() bool { return false }),
 			"",
 			segment.Context{},
 		),
 		"last-tps / a slow turn": goldenSegmentPass(
 			t,
-			lastTps.New(func() (float64, bool) { return 4.25, true }),
+			lastTps.New(func() (float64, bool) { return 4.25, true }, func() bool { return false }),
 			"",
 			segment.Context{},
 		),
-		"last-tps / nothing yet": goldenSegmentPass(
+		"last-tps / running turn": goldenSegmentPass(
 			t,
-			lastTps.New(func() (float64, bool) { return 0, false }),
+			lastTps.New(func() (float64, bool) { return 42.4, true }, func() bool { return true }),
+			"",
+			segment.Context{},
+		),
+		"last-tps / unknown while idle": goldenSegmentPass(
+			t,
+			lastTps.New(func() (float64, bool) { return 0, false }, func() bool { return false }),
+			"",
+			segment.Context{},
+		),
+		"last-tps / unknown while running": goldenSegmentPass(
+			t,
+			lastTps.New(func() (float64, bool) { return 0, false }, func() bool { return true }),
 			"",
 			segment.Context{},
 		),
@@ -226,15 +238,21 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			`direction = "up"`,
 			segment.Context{HiddenLinesAbove: 3},
 		),
-		"turn-elapsed / idle": goldenSegmentPass(
+		"turn-elapsed / completed": goldenSegmentPass(
 			t,
-			turnElapsed.New(func() (bool, time.Duration) { return false, 69 * time.Second }),
+			turnElapsed.New(func() (bool, time.Duration, bool) { return false, 69 * time.Second, true }),
 			"",
 			segment.Context{},
 		),
 		"turn-elapsed / running": goldenSegmentPass(
 			t,
-			turnElapsed.New(func() (bool, time.Duration) { return true, 69 * time.Second }),
+			turnElapsed.New(func() (bool, time.Duration, bool) { return true, 69 * time.Second, true }),
+			"",
+			segment.Context{},
+		),
+		"turn-elapsed / unknown": goldenSegmentPass(
+			t,
+			turnElapsed.New(func() (bool, time.Duration, bool) { return false, 0, false }),
 			"",
 			segment.Context{},
 		),

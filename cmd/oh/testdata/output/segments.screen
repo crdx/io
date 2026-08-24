@@ -24,8 +24,12 @@ brave-otter
 ~42t/s
 === last-tps / a slow turn ===
 ~4.2t/s
-=== last-tps / nothing yet ===
-
+=== last-tps / running turn ===
+~42t/s
+=== last-tps / unknown while idle ===
+?t/s
+=== last-tps / unknown while running ===
+?t/s
 === mode-toggle / all granted ===
 rxwgb
 === mode-toggle / pending chord ===
@@ -42,9 +46,11 @@ rxwgb
 
 === turn-count / third turn ===
 #3
-=== turn-elapsed / idle ===
-
+=== turn-elapsed / completed ===
+1m09s
 === turn-elapsed / running ===
 1m09s
+=== turn-elapsed / unknown ===
+?s
 === working-directory ===
 project

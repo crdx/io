@@ -54,7 +54,7 @@ func availableSegments(
 		currentTimeSegment:      currentTime.New(time.Now),
 		turnElapsedSegment:      turnElapsed.New(harness.turnElapsed),
 		turnCountSegment:        turnCount.New(harness.turnCount),
-		lastTpsSegment:          lastTps.New(harness.lastTurnTokenRate),
+		lastTpsSegment:          lastTps.New(harness.lastTurnTokenRate, harness.isTurnRunning),
 		gitBranchSegment:        gitBranch.New(workspaceDir),
 	}
 }
