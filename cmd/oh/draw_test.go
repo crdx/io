@@ -78,6 +78,27 @@ func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
 	}
 }
 
+func TestRestoringAConversationClearsTheTerminalBeforeReplaying(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := &Harness{
+		agent:  agent.New("", quietProvider{}, nil),
+		screen: output.NewTerminalOfSize(&screenOutput, 80, 24),
+	}
+
+	self.restore(&store.Session{Events: []agent.Event{{
+		Kind: agent.UserMessageEvent,
+		Text: "restored conversation",
+	}}})
+
+	const clearTerminal = "\x1b[H\x1b[2J\x1b[3J"
+	if !strings.HasPrefix(screenOutput.String(), clearTerminal) {
+		t.Errorf("expected the terminal to be cleared before replay, got %q", screenOutput.String())
+	}
+	if !strings.Contains(style.Plain(screenOutput.String()), "restored conversation") {
+		t.Errorf("expected the conversation to be replayed after clearing, got %q", screenOutput.String())
+	}
+}
+
 func TestRestoringAConversationRestoresStateBeforeReturning(t *testing.T) {
 	var restored string
 	statefulTool := tool.Implement(

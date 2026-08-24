@@ -441,6 +441,7 @@ func (self *Harness) restore(storedSession *store.Session) {
 		}
 	}
 
+	self.screen.Reset()
 	self.replay()
 }
 
