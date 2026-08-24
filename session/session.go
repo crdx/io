@@ -21,16 +21,17 @@ import (
 // Format is the journal format this build writes. A journal written before formats were numbered
 // carries no version at all, and counts as format 1. Bump this whenever a stored shape changes,
 // and add the step that migrates a journal over the bump to cmd/ohctl/migrate.
-const Format = 3
+const Format = 4
 
 // Kind is what one journal line holds.
 type Kind string
 
 // The kinds of line in a journal.
 const (
-	Head  Kind = "head"
-	Event Kind = "event"
-	Item  Kind = "item"
+	Head           Kind = "head"
+	Event          Kind = "event"
+	Item           Kind = "item"
+	TurnCompletion Kind = "turn_completion"
 )
 
 // Line is one journal record. Head records carry the name the session was given and the identifier
@@ -163,6 +164,17 @@ func (w *Writer) Item(payload json.RawMessage) error {
 	return writeMeta(w.directory, w.listingMeta)
 }
 
+// CompleteTurn records that every event and provider-state item in a user turn is durable.
+func (w *Writer) CompleteTurn() error {
+	writtenAt, err := w.write(Line{Kind: TurnCompletion})
+	if err != nil {
+		return err
+	}
+
+	w.listingMeta.Touched = writtenAt
+	return writeMeta(w.directory, w.listingMeta)
+}
+
 // Name is what the session is called, and the name of its bundle directory.
 func (w *Writer) Name() string { return w.name }
 
@@ -263,13 +275,14 @@ func (w *Writer) record(line Line) (time.Time, error) {
 
 // Session is a stored conversation.
 type Session struct {
-	Name    string
-	ID      string
-	Meta    json.RawMessage
-	Started time.Time
-	Touched time.Time
-	Events  []agent.Event
-	Items   []json.RawMessage
+	Name            string
+	ID              string
+	Meta            json.RawMessage
+	Started         time.Time
+	Touched         time.Time
+	Events          []agent.Event
+	Items           []json.RawMessage
+	TurnCompletions int
 }
 
 // Read loads one stored session.
@@ -346,6 +359,8 @@ func (s *Session) take(line Line) {
 		}
 	case Item:
 		s.Items = append(s.Items, line.Payload)
+	case TurnCompletion:
+		s.TurnCompletions++
 	}
 }
 

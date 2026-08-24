@@ -47,8 +47,17 @@ const (
 )
 
 type canonicalWriter interface {
+	canonicalAppender
+	canonicalSession
+}
+
+type canonicalAppender interface {
 	Event(agent.Event) (time.Time, error)
 	Item(json.RawMessage) error
+	CompleteTurn() error
+}
+
+type canonicalSession interface {
 	Name() string
 	ID() string
 	JournalMeta() json.RawMessage
@@ -145,6 +154,13 @@ func (self *Writer) Item(item json.RawMessage) error {
 	}
 	self.startRecorders()
 	return nil
+}
+
+// CompleteTurn records that the current turn's events and provider state are durable.
+func (self *Writer) CompleteTurn() error {
+	self.writerMutex.Lock()
+	defer self.writerMutex.Unlock()
+	return self.innerWriter.CompleteTurn()
 }
 
 // Name is what the session is called, and the name of its bundle directory.
@@ -313,13 +329,14 @@ func (self writerObserver) Start(request req.Request) req.ExchangeObserver {
 
 // Session is an oh session read back.
 type Session struct {
-	Name    string
-	ID      string
-	Meta    Meta
-	Started time.Time
-	Touched time.Time
-	Events  []agent.Event
-	Items   []json.RawMessage
+	Name            string
+	ID              string
+	Meta            Meta
+	Started         time.Time
+	Touched         time.Time
+	Events          []agent.Event
+	Items           []json.RawMessage
+	TurnCompletions int
 }
 
 // Read loads one oh session.
@@ -357,13 +374,14 @@ func decode(storedSession *session.Session) (*Session, error) {
 	}
 
 	return &Session{
-		Name:    storedSession.Name,
-		ID:      storedSession.ID,
-		Meta:    meta,
-		Started: storedSession.Started,
-		Touched: storedSession.Touched,
-		Events:  storedSession.Events,
-		Items:   storedSession.Items,
+		Name:            storedSession.Name,
+		ID:              storedSession.ID,
+		Meta:            meta,
+		Started:         storedSession.Started,
+		Touched:         storedSession.Touched,
+		Events:          storedSession.Events,
+		Items:           storedSession.Items,
+		TurnCompletions: storedSession.TurnCompletions,
 	}, nil
 }
 
@@ -386,6 +404,17 @@ func (self *Session) Messages() int {
 		}
 	}
 	return count
+}
+
+// CanResume reports whether every stored user turn reached its durable completion record.
+func (self *Session) CanResume() bool {
+	userTurns := 0
+	for _, event := range self.Events {
+		if event.Kind == agent.UserMessageEvent {
+			userTurns++
+		}
+	}
+	return userTurns == self.TurnCompletions
 }
 
 // RebuildMeta writes a session's compact listing data again from its journal.

@@ -14,6 +14,7 @@ type Session interface {
 	Name() string
 	Event(agent.Event) error
 	Item(json.RawMessage) error
+	CompleteTurn() error
 	TakeWarnings() []error
 }
 
@@ -62,6 +63,11 @@ func (self *Recorder) StoreItems(items []json.RawMessage) error {
 	}
 
 	return nil
+}
+
+// CompleteTurn records that every event and provider-state item in the turn is durable.
+func (self *Recorder) CompleteTurn() error {
+	return self.session.CompleteTurn()
 }
 
 // TakeWarnings returns and clears auxiliary recorder warnings.

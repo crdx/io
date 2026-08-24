@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/ohctl/migrate"
 	"crdx.org/io/session"
 )
@@ -121,6 +122,67 @@ func TestAJournalAlreadyCurrentIsLeftAlone(t *testing.T) {
 
 	if got := string(journalLines(t, directory, name)[0]["id"]); got != `"one"` {
 		t.Errorf("expected the journal untouched, got %s", got)
+	}
+}
+
+func TestFormatThreeMigrationMarksOnlyTurnsWithDurableProviderState(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":3,"id":"one","name":"brave-otter"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"user_message","text":"complete"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"model_message","text":"done"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:03Z","payload":{"role":"assistant"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:04Z","event":{"kind":"user_message","text":"crashed"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:05Z","event":{"kind":"model_message","text":"looks done but was not flushed"}}`,
+	)
+
+	from, err := migrate.Session(options(directory), name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if from != 3 {
+		t.Errorf("migrated from format %d, want 3", from)
+	}
+
+	lines := journalLines(t, directory, name)
+	completionCount := 0
+	for _, line := range lines {
+		if string(line["kind"]) == `"turn_completion"` {
+			completionCount++
+		}
+	}
+	if completionCount != 1 {
+		t.Errorf("wrote %d completion records, want 1", completionCount)
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if storedSession.TurnCompletions != 1 {
+		t.Errorf("migrated %d completed turns, want 1", storedSession.TurnCompletions)
+	}
+	if storedSession.CanResume() {
+		t.Error("expected the migrated crashed turn to remain unsafe")
+	}
+}
+
+func TestFormatThreeMigrationDoesNotCompleteAPartialProviderStateWrite(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":3,"id":"one","name":"brave-otter"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"user_message","text":"crashed"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:02Z","payload":{"type":"partial"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"harness_message","text":"the conversation state could not be stored: disk full","failed":true}}`,
+	)
+
+	if _, err := migrate.Session(options(directory), name); err != nil {
+		t.Fatal(err)
+	}
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if storedSession.TurnCompletions != 0 || storedSession.CanResume() {
+		t.Errorf("partial state write became resumable: %+v", storedSession)
 	}
 }
 

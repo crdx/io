@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/session"
 )
 
@@ -57,6 +58,64 @@ func TestSessionsComeFromJournalParsing(t *testing.T) {
 func TestChoosingWithoutStoredSessionsFails(t *testing.T) {
 	if _, err := chooseStoredSession(t.TempDir(), nil, nil); err == nil {
 		t.Error("expected an empty session list to fail")
+	}
+}
+
+func TestLoadingACrashedSessionIsRefusedWithoutChangingItsJournal(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	writer, err := store.Create(sessionsDir(), store.Meta{WorkspaceDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Event(agent.Event{Kind: agent.ModelMessageEvent, Text: "looks complete"}); err != nil {
+		t.Fatal(err)
+	}
+	name := writer.Name()
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(sessionsDir(), name, "session.jsonl")
+	before, err := os.ReadFile(path) //nolint:gosec // the test's own session
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := loadSession(name); err == nil || !strings.Contains(err.Error(), "did not finish every turn") {
+		t.Fatalf("expected the crashed session to be refused, got %v", err)
+	}
+	match, err := os.ReadFile(path) //nolint:gosec // the test's own session
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(match) != string(before) {
+		t.Error("refusing the crashed session changed its journal")
+	}
+}
+
+func TestLoadingACompletedSessionSucceeds(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	writer, err := store.Create(sessionsDir(), store.Meta{WorkspaceDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Item(json.RawMessage(`{"role":"user"}`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.CompleteTurn(); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := loadSession(writer.Name()); err != nil {
+		t.Fatalf("expected the completed session to load: %v", err)
 	}
 }
 

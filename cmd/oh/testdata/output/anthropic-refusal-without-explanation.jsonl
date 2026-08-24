@@ -1,8 +1,10 @@
-{"kind":"head","version":3,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":4,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"refuse without an explanation"}}
 {"kind":"event","event":{"kind":"failure","text":"the model refused the request"}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"refuse without an explanation"}]}}
+{"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the transport failure"}}
 {"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"continue after the transport failure"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Resumed."}]}}
+{"kind":"turn_completion"}

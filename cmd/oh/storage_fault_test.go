@@ -15,11 +15,13 @@ import (
 type faultingConversationLog struct {
 	SessionLogger
 
-	failedKind     agent.Kind
-	itemFailure    error
-	warnings       []error
-	eventAttempts  int
-	failedAttempts int
+	failedKind         agent.Kind
+	itemFailure        error
+	completionFailure  error
+	warnings           []error
+	eventAttempts      int
+	failedAttempts     int
+	completionAttempts int
 }
 
 func (self *faultingConversationLog) Event(event agent.Event) error {
@@ -36,6 +38,14 @@ func (self *faultingConversationLog) Item(item json.RawMessage) error {
 		return self.itemFailure
 	}
 	return self.SessionLogger.Item(item)
+}
+
+func (self *faultingConversationLog) CompleteTurn() error {
+	self.completionAttempts++
+	if self.completionFailure != nil {
+		return self.completionFailure
+	}
+	return self.SessionLogger.CompleteTurn()
 }
 
 func (self *faultingConversationLog) TakeWarnings() []error {
@@ -112,9 +122,7 @@ func TestProviderItemWriteFailureWarnsAndLeavesCanonicalJournalReadable(t *testi
 		itemFailure:   errors.New("item write failed"),
 	}
 	testHarness := newStorageFaultHarness(log, agent.New("", provider, nil))
-	if testHarness.storeProviderState() {
-		t.Error("expected the provider state write to fail")
-	}
+	testHarness.finish()
 
 	storedSession, err := store.Read(directory, innerLog.Name())
 	if err != nil {
@@ -123,10 +131,58 @@ func TestProviderItemWriteFailureWarnsAndLeavesCanonicalJournalReadable(t *testi
 	if len(storedSession.Items) != 0 {
 		t.Errorf("stored failed provider items: %s", storedSession.Items)
 	}
+	if storedSession.TurnCompletions != 0 {
+		t.Errorf("completed %d turns after the provider state failed", storedSession.TurnCompletions)
+	}
+	if log.completionAttempts != 0 {
+		t.Errorf("attempted %d completion writes after the provider state failed", log.completionAttempts)
+	}
 	if len(storedSession.Events) != 2 ||
 		storedSession.Events[1].Kind != agent.HarnessMessageEvent ||
 		!strings.Contains(storedSession.Events[1].Text, "item write failed") {
 		t.Errorf("unexpected canonical events: %+v", storedSession.Events)
+	}
+}
+
+func TestTurnCompletionIsStoredOnlyAfterProviderStateSucceeds(t *testing.T) {
+	for name, completionFailure := range map[string]error{
+		"success":                  nil,
+		"completion write failure": errors.New("completion write failed"),
+	} {
+		t.Run(name, func(t *testing.T) {
+			directory := t.TempDir()
+			innerLog, err := store.Create(directory, store.Meta{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = innerLog.Close() }()
+			if err := innerLog.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "start"}); err != nil {
+				t.Fatal(err)
+			}
+
+			provider := &fakeProvider{items: []json.RawMessage{json.RawMessage(`{"type":"message"}`)}}
+			log := &faultingConversationLog{SessionLogger: innerLog, completionFailure: completionFailure}
+			testHarness := newStorageFaultHarness(log, agent.New("", provider, nil))
+			testHarness.finish()
+
+			storedSession, err := store.Read(directory, innerLog.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(storedSession.Items) != 1 {
+				t.Fatalf("stored %d provider items, want 1", len(storedSession.Items))
+			}
+			wantTurnCompletions := 1
+			if completionFailure != nil {
+				wantTurnCompletions = 0
+			}
+			if storedSession.TurnCompletions != wantTurnCompletions {
+				t.Errorf("completed %d turns, want %d", storedSession.TurnCompletions, wantTurnCompletions)
+			}
+			if log.completionAttempts != 1 {
+				t.Errorf("attempted %d completion writes, want 1", log.completionAttempts)
+			}
+		})
 	}
 }
 

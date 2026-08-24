@@ -1,9 +1,11 @@
-{"kind":"head","version":3,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"high","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":4,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"high","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"lose the network during reasoning"}}
 {"kind":"event","event":{"kind":"failure","text":"unexpected EOF"}}
 {"kind":"item","payload":{"role":"user","content":"lose the network during reasoning"}}
 {"kind":"item","payload":{"role":"assistant","content":"","reasoning_content":"Provisional thought."}}
+{"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the network interruption"}}
 {"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
 {"kind":"item","payload":{"role":"user","content":"continue after the network interruption"}}
 {"kind":"item","payload":{"role":"assistant","content":"Resumed."}}
+{"kind":"turn_completion"}

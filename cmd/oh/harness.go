@@ -590,7 +590,11 @@ func (self *Harness) finish() {
 		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: self.currentTurn.err.Error()})
 	}
 
-	self.storeProviderState()
+	if self.storeProviderState() {
+		if err := self.recorder.CompleteTurn(); err != nil {
+			self.notifyFailure("the turn completion could not be stored: " + err.Error())
+		}
+	}
 	self.showStorageWarnings()
 	self.currentTurn.painter.close(dynamic.Cancelled)
 	if self.currentTurn.painter.isStale {

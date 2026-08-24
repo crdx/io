@@ -11,12 +11,13 @@ import (
 )
 
 type testSession struct {
-	name        string
-	stored      bool
-	items       []string
-	failAt      int
-	warnings    []error
-	eventWrites []agent.Event
+	name            string
+	stored          bool
+	items           []string
+	failAt          int
+	warnings        []error
+	eventWrites     []agent.Event
+	turnCompletions int
 }
 
 func (self *testSession) Stored() bool { return self.stored }
@@ -32,6 +33,11 @@ func (self *testSession) Item(item json.RawMessage) error {
 		return errors.New("item failed")
 	}
 	self.items = append(self.items, string(item))
+	return nil
+}
+
+func (self *testSession) CompleteTurn() error {
+	self.turnCompletions++
 	return nil
 }
 

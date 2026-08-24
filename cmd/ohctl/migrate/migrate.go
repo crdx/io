@@ -165,12 +165,17 @@ func Session(options Options, name string) (int, error) {
 		}
 		appliedSteps = append(appliedSteps, migrationStep)
 
-		if migrationStep.migrateLine == nil {
-			continue
+		if migrationStep.migrateLine != nil {
+			for index, line := range lines {
+				if err := migrationStep.migrateLine(line); err != nil {
+					return fromFormat, fmt.Errorf("line %d: format %d: %w", index+1, format, err)
+				}
+			}
 		}
-		for index, line := range lines {
-			if err := migrationStep.migrateLine(line); err != nil {
-				return fromFormat, fmt.Errorf("line %d: format %d: %w", index+1, format, err)
+		if migrationStep.migrateJournal != nil {
+			lines, err = migrationStep.migrateJournal(lines)
+			if err != nil {
+				return fromFormat, fmt.Errorf("format %d: %w", format, err)
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-{"kind":"head","version":3,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":4,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"complete two tool rounds, then keep thinking"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Plan first."}}
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"toolu_1","name":"work","arguments":"{}"}}
@@ -14,6 +14,7 @@
 {"kind":"item","payload":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_1","content":"first result"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"thinking","thinking":"Plan second.","signature":"seal-2"},{"type":"tool_use","id":"toolu_2","name":"work","input":{}}]}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_2","content":"second result"}]}}
+{"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue from the last valid tool result"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Check restored state."}}
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"toolu_3","name":"work","arguments":"{}"}}
@@ -24,3 +25,4 @@
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"thinking","thinking":"Check restored state.","signature":"seal-3"},{"type":"tool_use","id":"toolu_3","name":"work","input":{}}]}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_3","content":"resumed result"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Recovered."}]}}
+{"kind":"turn_completion"}

@@ -534,7 +534,14 @@ func loadSession(name string) (*store.Session, error) {
 		return nil, nil
 	}
 
-	return store.Read(sessionsDir(), name)
+	storedSession, err := store.Read(sessionsDir(), name)
+	if err != nil {
+		return nil, err
+	}
+	if !storedSession.CanResume() {
+		return nil, fmt.Errorf("session %s did not finish every turn and cannot be resumed safely (yet)", name)
+	}
+	return storedSession, nil
 }
 
 func openTmpDir(name string) (string, error) {
