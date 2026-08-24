@@ -471,3 +471,11 @@ func TestTabRequestsCompletionWithoutChangingTheInput(t *testing.T) {
 		t.Errorf("got text %q", got)
 	}
 }
+
+func TestAltReturnForceAcceptsNonEmptyInput(t *testing.T) {
+	self := inputFromKeys(t, "/unknown")
+
+	if got := self.Apply(key.Key{Code: key.Enter, Mod: key.Alt}, false); got != ForceAccept {
+		t.Errorf("got action %v", got)
+	}
+}

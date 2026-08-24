@@ -117,3 +117,21 @@ func assertCompletionCycle(t *testing.T, commands slash.CommandSet, prefix strin
 		current = completed
 	}
 }
+
+func TestCommandNameRecognisesSlashInput(t *testing.T) {
+	for input, want := range map[string]string{
+		"/unknown":       "/unknown",
+		" /unknown arg ": "/unknown",
+	} {
+		name, found := slash.CommandName(input)
+		if !found || name != want {
+			t.Errorf("CommandName(%q) got %q and %t", input, name, found)
+		}
+	}
+
+	for _, input := range []string{"", "hello", "not/a/command"} {
+		if name, found := slash.CommandName(input); found {
+			t.Errorf("CommandName(%q) unexpectedly got %q", input, name)
+		}
+	}
+}

@@ -18,6 +18,7 @@ type Action int
 const (
 	Draw             Action = iota // the line changed, and wants drawing again
 	Accept                         // the line is finished
+	ForceAccept                    // alt+enter: send the line without interpreting a command
 	Continue                       // double enter on an empty line: send the get-on-with-it message
 	Cancel                         // escape, or ctrl+d while a turn runs: stop whatever is running
 	Quit                           // ctrl+d on an empty line with nothing running
@@ -195,6 +196,9 @@ func (self *Input) enter(keypress key.Key) Action {
 	}
 
 	if strings.TrimSpace(self.buffer.String()) != "" {
+		if keypress.Mod.Has(key.Alt) {
+			return ForceAccept
+		}
 		return Accept
 	}
 

@@ -53,6 +53,14 @@ func New(commands ...Command) CommandSet {
 	return set
 }
 
+func CommandName(message string) (string, bool) {
+	fields := strings.Fields(message)
+	if len(fields) == 0 || !strings.HasPrefix(fields[0], "/") {
+		return "", false
+	}
+	return fields[0], true
+}
+
 func (self CommandSet) Find(message string) (Invocation, bool) {
 	fields := strings.Fields(message)
 	if len(fields) == 0 {

@@ -93,7 +93,7 @@ func (self *Harness) begin(message string) {
 
 	if message != "" {
 		history.Add(message)
-		if !self.requestSlashCommand(message) {
+		if self.handleSlashCommand(message) == ordinaryInput {
 			self.start(message)
 		}
 	}
@@ -176,6 +176,9 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 	case edit.Accept:
 		self.acceptInput(editor, history)
 
+	case edit.ForceAccept:
+		self.submitInput(editor, history, strings.TrimSpace(editor.Text()))
+
 	case edit.Continue:
 		self.submitInput(editor, history, self.getOnWithItMessage)
 
@@ -221,17 +224,30 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 	return true
 }
 
-func (self *Harness) requestSlashCommand(message string) bool {
+type slashInput int
+
+const (
+	ordinaryInput slashInput = iota
+	handledCommand
+	unknownCommand
+)
+
+func (self *Harness) handleSlashCommand(message string) slashInput {
 	invocation, found := self.commands.Find(message)
-	if !found {
-		return false
+	if found {
+		if err := invocation.Command.Run(commandContext{harness: self}, invocation.Arguments); err != nil {
+			self.notifyFailure(fmt.Sprintf("%s: %v", invocation.Command.Name, err))
+		}
+		return handledCommand
 	}
 
-	if err := invocation.Command.Run(commandContext{harness: self}, invocation.Arguments); err != nil {
-		self.notifyFailure(fmt.Sprintf("%s: %v", invocation.Command.Name, err))
+	name, isCommand := slash.CommandName(message)
+	if !isCommand {
+		return ordinaryInput
 	}
 
-	return true
+	self.notifyFailure(fmt.Sprintf("command not found: %s; press alt+enter to send anyway", name))
+	return unknownCommand
 }
 
 type commandContext struct {
@@ -256,13 +272,13 @@ func (self commandContext) Notice(message string) {
 
 func (self *Harness) acceptInput(editor *edit.Input, history *edit.History) {
 	message := strings.TrimSpace(editor.Text())
-	if self.requestSlashCommand(message) {
+	switch self.handleSlashCommand(message) {
+	case handledCommand:
 		history.Add(message)
 		editor.Reset()
-		return
+	case ordinaryInput:
+		self.submitInput(editor, history, message)
 	}
-
-	self.submitInput(editor, history, message)
 }
 
 func (self *Harness) submitInput(editor *edit.Input, history *edit.History, message string) {
@@ -445,10 +461,10 @@ func (self *Harness) isPrefixPending() bool {
 
 func (self *Harness) plainly(history *edit.History, initialMessage string) {
 	if initialMessage != "" {
-		if self.requestSlashCommand(initialMessage) {
-			history.Add(initialMessage)
-		} else {
+		if self.handleSlashCommand(initialMessage) == ordinaryInput {
 			self.ask(history, initialMessage)
+		} else {
+			history.Add(initialMessage)
 		}
 	}
 
@@ -456,10 +472,12 @@ func (self *Harness) plainly(history *edit.History, initialMessage string) {
 
 	for reader.Scan() {
 		stdin := strings.TrimSpace(reader.Text())
-		if self.requestSlashCommand(stdin) {
+		if self.handleSlashCommand(stdin) == ordinaryInput {
+			if stdin != "" {
+				self.ask(history, stdin)
+			}
+		} else {
 			history.Add(stdin)
-		} else if stdin != "" {
-			self.ask(history, stdin)
 		}
 	}
 

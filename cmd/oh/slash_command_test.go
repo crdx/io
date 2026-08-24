@@ -29,8 +29,8 @@ func TestSlashCommandRunsImmediately(t *testing.T) {
 
 	self := slashCommandFixture(t, caps.Read|caps.Shell)
 	self.commands = fixtureCommands
-	if !self.requestSlashCommand("/fixture one two") {
-		t.Fatal("expected the fixture command to be recognised")
+	if got := self.handleSlashCommand("/fixture one two"); got != handledCommand {
+		t.Fatalf("got slash input result %d", got)
 	}
 	if !ran {
 		t.Error("expected the command to run immediately")
@@ -49,8 +49,8 @@ func TestSlashCommandCanAddANotice(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
 	self.commands = fixtureCommands
-	if !self.requestSlashCommand("/fixture") {
-		t.Fatal("expected the fixture command to be recognised")
+	if got := self.handleSlashCommand("/fixture"); got != handledCommand {
+		t.Fatalf("got slash input result %d", got)
 	}
 	if len(self.events) != 1 {
 		t.Fatalf("got events %v", self.events)
@@ -60,12 +60,26 @@ func TestSlashCommandCanAddANotice(t *testing.T) {
 	}
 }
 
-func TestUnknownSlashCommandIsNotClaimed(t *testing.T) {
+func TestUnknownSlashCommandShowsAnErrorAndKeepsTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.New(&bytes.Buffer{})
 	self.commands = slash.New()
+	editor := edit.NewInput(nil)
+	for _, value := range "/unknown" {
+		editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
+	}
 
-	if self.requestSlashCommand("/unknown") {
-		t.Error("expected an unknown command not to be claimed")
+	self.acceptInput(editor, nil)
+
+	if got := editor.Text(); got != "/unknown" {
+		t.Errorf("got input %q", got)
+	}
+	if len(self.events) != 1 {
+		t.Fatalf("got events %v", self.events)
+	}
+	want := "command not found: /unknown; press alt+enter to send anyway"
+	if self.events[0].Text != want || !self.events[0].Failed {
+		t.Errorf("got event %+v, want failed %q", self.events[0], want)
 	}
 }
 
