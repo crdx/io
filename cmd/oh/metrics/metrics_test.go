@@ -56,12 +56,13 @@ func TestTrackerMeasuresTheLatestTurnTokenRate(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		tracker := New(0)
 		tracker.BeginTurn()
-		startedAt := time.Now()
-		tracker.Record(agent.Event{Kind: agent.ModelReasoningEvent, Text: strings.Repeat("x", 200)})
-		tracker.Record(agent.Event{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 200)})
-
-		time.Sleep(10 * time.Second)
-		tracker.FinishTurn(startedAt)
+		tracker.RecordDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: strings.Repeat("x", 200)})
+		time.Sleep(5 * time.Second)
+		tracker.Record(agent.Event{Kind: agent.ModelReasoningEvent})
+		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 200)})
+		time.Sleep(5 * time.Second)
+		tracker.Record(agent.Event{Kind: agent.ModelMessageEvent})
+		tracker.FinishTurn()
 
 		tokensPerSecond, known := tracker.LastTurnTokenRate()
 		if !known || tokensPerSecond != 10 {
@@ -70,18 +71,41 @@ func TestTrackerMeasuresTheLatestTurnTokenRate(t *testing.T) {
 	})
 }
 
+func TestTrackerExcludesToolExecutionFromTheTokenRate(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		tracker := New(0)
+		tracker.BeginTurn()
+		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 200)})
+		time.Sleep(5 * time.Second)
+		tracker.Record(agent.Event{Kind: agent.ModelMessageEvent})
+
+		tracker.Record(agent.Event{Kind: agent.ToolCallRequestEvent})
+		time.Sleep(30 * time.Second)
+		tracker.Record(agent.Event{Kind: agent.ToolCallResultEvent})
+
+		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 200)})
+		time.Sleep(5 * time.Second)
+		tracker.Record(agent.Event{Kind: agent.ModelMessageEvent})
+		tracker.FinishTurn()
+
+		if tokensPerSecond, _ := tracker.LastTurnTokenRate(); tokensPerSecond != 10 {
+			t.Errorf("expected tool execution not to affect the rate, got %v", tokensPerSecond)
+		}
+	})
+}
+
 func TestSilentTurnKeepsThePreviousTokenRate(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		tracker := New(0)
 		tracker.BeginTurn()
-		firstStartedAt := time.Now()
-		tracker.Record(agent.Event{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 400)})
+		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 400)})
 		time.Sleep(10 * time.Second)
-		tracker.FinishTurn(firstStartedAt)
+		tracker.Record(agent.Event{Kind: agent.ModelMessageEvent})
+		tracker.FinishTurn()
 
 		tracker.BeginTurn()
 		time.Sleep(time.Second)
-		tracker.FinishTurn(time.Now().Add(-time.Second))
+		tracker.FinishTurn()
 
 		if tokensPerSecond, _ := tracker.LastTurnTokenRate(); tokensPerSecond != 10 {
 			t.Errorf("expected a silent turn to leave the rate alone, got %v", tokensPerSecond)

@@ -10,11 +10,13 @@ import (
 
 // Tracker records turn count, context usage, and the latest token rate.
 type Tracker struct {
-	contextWindowTokens int
-	inputTokens         int
-	turnsTaken          int
-	streamedBytes       int
-	lastTurnRate        float64
+	contextWindowTokens  int
+	inputTokens          int
+	turnsTaken           int
+	streamedBytes        int
+	streamStartedAt      time.Time
+	activeStreamDuration time.Duration
+	lastTurnRate         float64
 }
 
 // New constructs a tracker for a model context window.
@@ -22,9 +24,19 @@ func New(contextWindowTokens int) Tracker {
 	return Tracker{contextWindowTokens: contextWindowTokens}
 }
 
-// BeginTurn clears byte accounting for a newly started turn.
+// BeginTurn clears stream accounting for a newly started turn.
 func (self *Tracker) BeginTurn() {
 	self.streamedBytes = 0
+	self.streamStartedAt = time.Time{}
+	self.activeStreamDuration = 0
+}
+
+// RecordDelta incorporates provisional model prose into the displayed metrics.
+func (self *Tracker) RecordDelta(delta agent.Delta) {
+	if self.streamStartedAt.IsZero() {
+		self.streamStartedAt = time.Now()
+	}
+	self.streamedBytes += len(delta.Text)
 }
 
 // Record incorporates one conversation event into the displayed metrics.
@@ -33,7 +45,7 @@ func (self *Tracker) Record(event agent.Event) {
 		self.turnsTaken++
 	}
 	if event.Kind == agent.ModelMessageEvent || event.Kind == agent.ModelReasoningEvent {
-		self.streamedBytes += len(event.Text)
+		self.finishActiveStream()
 	}
 	if event.Usage != nil && event.Usage.InputTokens > 0 {
 		self.inputTokens = event.Usage.InputTokens
@@ -57,8 +69,9 @@ func (self *Tracker) Restore(events []agent.Event) {
 }
 
 // FinishTurn records the token rate of a turn that produced model text.
-func (self *Tracker) FinishTurn(startedAt time.Time) {
-	elapsed := time.Since(startedAt).Seconds()
+func (self *Tracker) FinishTurn() {
+	self.finishActiveStream()
+	elapsed := self.activeStreamDuration.Seconds()
 	if self.streamedBytes == 0 || elapsed <= 0 {
 		return
 	}
@@ -79,4 +92,13 @@ func (self *Tracker) LastTurnTokenRate() (float64, bool) {
 // ContextUsage returns the latest reported input tokens and the model context window.
 func (self *Tracker) ContextUsage() (int, int) {
 	return self.inputTokens, self.contextWindowTokens
+}
+
+func (self *Tracker) finishActiveStream() {
+	if self.streamStartedAt.IsZero() {
+		return
+	}
+
+	self.activeStreamDuration += time.Since(self.streamStartedAt)
+	self.streamStartedAt = time.Time{}
 }

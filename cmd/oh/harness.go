@@ -515,6 +515,7 @@ func (self *Harness) takeTurn(turnEvent TurnEvent) {
 	}
 
 	if turnEvent.update.Delta != nil {
+		self.metrics.RecordDelta(*turnEvent.update.Delta)
 		self.currentTurn.painter.drawDelta(*turnEvent.update.Delta)
 		if self.currentTurn.painter.isStale {
 			self.redraw()
@@ -583,7 +584,7 @@ func (self *Harness) finish() {
 	}
 	self.screen.End()
 
-	self.metrics.FinishTurn(self.currentTurn.startedAt)
+	self.metrics.FinishTurn()
 
 	self.currentTurn.isRunning = false
 	self.currentTurn.events = nil
