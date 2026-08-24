@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"syscall"
 
@@ -614,4 +615,13 @@ func openSession(resumedSession *store.Session, meta store.Meta) (*store.Writer,
 	}
 
 	return log, err
+}
+
+func version() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok || info.Main.Version == "" {
+		return "unknown"
+	}
+
+	return info.Main.Version
 }

@@ -58,6 +58,15 @@ type Harness struct {
 	currentTurn Turn
 }
 
+type Turn struct {
+	*turn.Stream
+
+	spinnerFrame int
+	painter      *painter.Picasso
+}
+
+type TurnEvent = turn.Event
+
 const historyLimit = 1000
 
 func (self *Harness) begin(message string) {
@@ -468,7 +477,7 @@ func (self *Harness) restore(storedSession *store.Session) {
 	self.replay()
 }
 
-func (self *Harness) newPainter(isRunning bool) *painter.Painter {
+func (self *Harness) newPainter(isRunning bool) *painter.Picasso {
 	return painter.New(self.screen, isRunning, self.agent.Tool, self.workspaceDir)
 }
 
@@ -492,19 +501,19 @@ func (self *Harness) replay() {
 }
 
 func (self *Harness) redraw() {
-	var provisional agent.Delta
-	var previousPainter *painter.Painter
+	var provisionalPainter agent.Delta
+	var previousPainter *painter.Picasso
 	if self.currentTurn.Running() {
 		previousPainter = self.currentTurn.painter
-		provisional = previousPainter.ProvisionalDelta()
+		provisionalPainter = previousPainter.ProvisionalDelta()
 		previousPainter.Stop()
 	}
 
 	self.screen.Synchronise(func() {
 		self.screen.Reset()
 		self.replay()
-		if provisional.Text != "" {
-			self.currentTurn.painter.DrawRestoredDelta(provisional, previousPainter)
+		if provisionalPainter.Text != "" {
+			self.currentTurn.painter.DrawRestoredDelta(provisionalPainter, previousPainter)
 		}
 	})
 }
@@ -575,7 +584,7 @@ func (self *Harness) notify(event agent.Event) {
 	_ = self.recorder.Event(event)
 }
 
-func (self *Harness) noticePainter() *painter.Painter {
+func (self *Harness) noticePainter() *painter.Picasso {
 	if self.currentTurn.Running() {
 		return self.currentTurn.painter
 	}

@@ -16,7 +16,7 @@ import (
 	"crdx.org/io/cmd/oh/width"
 )
 
-type Painter struct {
+type Picasso struct {
 	screen         *output.Screen
 	toolBlock      *dynamic.Block
 	rows           map[string]int
@@ -32,20 +32,20 @@ type Painter struct {
 	workspaceDir string
 }
 
-func New(screen *output.Screen, isRunning bool, getTool func(string) (tool.Tool, bool), workspaceDir string) *Painter {
-	return &Painter{screen: screen, isRunning: isRunning, getTool: getTool, workspaceDir: workspaceDir}
+func New(screen *output.Screen, isRunning bool, getTool func(string) (tool.Tool, bool), workspaceDir string) *Picasso {
+	return &Picasso{screen: screen, isRunning: isRunning, getTool: getTool, workspaceDir: workspaceDir}
 }
 
-func (self *Painter) DrawDelta(delta agent.Delta) {
+func (self *Picasso) DrawDelta(delta agent.Delta) {
 	self.drawDeltaWithAnswerRendererReset(delta, true)
 }
 
-func (self *Painter) DrawRestoredDelta(delta agent.Delta, previous *Painter) {
+func (self *Picasso) DrawRestoredDelta(delta agent.Delta, previous *Picasso) {
 	self.answerRenderer = previous.answerRenderer
 	self.drawDeltaWithAnswerRendererReset(delta, false)
 }
 
-func (self *Painter) DrawEvent(event agent.Event) {
+func (self *Picasso) DrawEvent(event agent.Event) {
 	switch {
 	case event.Kind == agent.ModelReasoningEvent && self.previousKind == agent.ModelReasoningEvent && self.reasoning.Len() == 0:
 		self.screen.End()
@@ -116,7 +116,7 @@ func (self *Painter) DrawEvent(event agent.Event) {
 	}
 }
 
-func (self *Painter) ProvisionalDelta() agent.Delta {
+func (self *Picasso) ProvisionalDelta() agent.Delta {
 	if self.reasoning.Len() > 0 {
 		return agent.Delta{Kind: agent.ModelReasoningEvent, Text: self.reasoning.String()}
 	}
@@ -180,9 +180,9 @@ func RenderReasoning(thought string, columns int) []string {
 	return width.Wrap(style.Reasoning(stripped), columns)
 }
 
-func (self *Painter) Stale() bool { return self.isStale }
+func (self *Picasso) Stale() bool { return self.isStale }
 
-func (self *Painter) Close(state dynamic.RowState) {
+func (self *Picasso) Close(state dynamic.RowState) {
 	self.discardProvisionalReasoning()
 
 	if self.toolBlock != nil {
@@ -194,11 +194,11 @@ func (self *Painter) Close(state dynamic.RowState) {
 	}
 }
 
-func (self *Painter) End() {
+func (self *Picasso) End() {
 	self.screen.End()
 }
 
-func (self *Painter) Stop() {
+func (self *Picasso) Stop() {
 	if self.toolBlock != nil {
 		self.toolBlock.Stop()
 		self.toolBlock = nil
@@ -208,7 +208,7 @@ func (self *Painter) Stop() {
 	}
 }
 
-func (self *Painter) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldResetAnswerRenderer bool) {
+func (self *Picasso) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldResetAnswerRenderer bool) {
 	switch delta.Kind {
 	case agent.ModelReasoningEvent:
 		if self.reasoning.Len() == 0 && self.previousKind == agent.ModelReasoningEvent {
@@ -236,7 +236,7 @@ func (self *Painter) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldR
 	}
 }
 
-func (self *Painter) discardProvisionalReasoning() {
+func (self *Picasso) discardProvisionalReasoning() {
 	if self.reasoning.Len() == 0 {
 		return
 	}
@@ -247,7 +247,7 @@ func (self *Painter) discardProvisionalReasoning() {
 	self.reasoning.Reset()
 }
 
-func (self *Painter) mark(event agent.Event) {
+func (self *Picasso) mark(event agent.Event) {
 	if self.toolBlock == nil {
 		return
 	}
@@ -272,7 +272,7 @@ func (self *Painter) mark(event agent.Event) {
 	}
 }
 
-func (self *Painter) render(event agent.Event) string {
+func (self *Picasso) render(event agent.Event) string {
 	if event.Kind == agent.StartupEvent {
 		return startup.RenderEvent(event)
 	}
