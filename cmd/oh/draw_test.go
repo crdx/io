@@ -514,54 +514,6 @@ func TestATurnThatFinishedByItselfIsNotCalledCancelled(t *testing.T) {
 	}
 }
 
-func TestACompletedTurnSendsADesktopNotification(t *testing.T) {
-	var screenOutput bytes.Buffer
-	self := testConversation(t, &screenOutput)
-	notifications := 0
-	self.onTurnFinished = func() { notifications++ }
-
-	completeTurn(self)
-
-	if notifications != 1 {
-		t.Errorf("got %d notifications, want one", notifications)
-	}
-}
-
-func TestACompletedTurnDoesNotNotifyWhileTheTerminalIsFocused(t *testing.T) {
-	var screenOutput bytes.Buffer
-	self := testConversation(t, &screenOutput)
-	self.terminalFocused = true
-	notifications := 0
-	self.onTurnFinished = func() { notifications++ }
-
-	completeTurn(self)
-
-	if notifications != 0 {
-		t.Errorf("got %d notifications, want none", notifications)
-	}
-}
-
-func TestAnInterruptedTurnDoesNotSendADesktopNotification(t *testing.T) {
-	var screenOutput bytes.Buffer
-	self := testConversation(t, &screenOutput)
-	notifications := 0
-	self.onTurnFinished = func() { notifications++ }
-
-	self.start("are you there")
-	self.currentTurn.isCancelled = true
-	self.currentTurn.cancel()
-
-	for report := range self.currentTurn.events {
-		self.takeTurn(report)
-	}
-
-	self.finish()
-
-	if notifications != 0 {
-		t.Errorf("got %d notifications, want none", notifications)
-	}
-}
-
 func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
 	var screenOutput bytes.Buffer
 

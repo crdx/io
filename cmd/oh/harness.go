@@ -21,6 +21,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/recording"
 	"crdx.org/io/cmd/oh/segment"
+	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/tty"
@@ -50,11 +51,11 @@ type Harness struct {
 
 	workspaceDir       string
 	getOnWithItMessage string
-	terminalFocused    bool
 
-	queuedTurn     turn.Queue
-	currentTurn    Turn
-	onTurnFinished func()
+	commands slash.CommandSet
+
+	queuedTurn  turn.Queue
+	currentTurn Turn
 }
 
 const historyLimit = 1000
@@ -72,8 +73,6 @@ func (self *Harness) begin(message string) {
 		self.plainly(history, message)
 		return
 	}
-
-	self.terminalFocused = true
 
 	defer restoreTTY()
 
@@ -93,7 +92,9 @@ func (self *Harness) begin(message string) {
 
 	if message != "" {
 		history.Add(message)
-		self.start(message)
+		if !self.requestSlashCommand(message) {
+			self.start(message)
+		}
 	}
 
 	for {
@@ -160,10 +161,8 @@ func (self *Harness) getTicker() *time.Ticker {
 func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress key.Key) bool {
 	switch keypress.Code {
 	case key.FocusIn:
-		self.terminalFocused = true
 		return true
 	case key.FocusOut:
-		self.terminalFocused = false
 		return true
 	}
 
@@ -179,6 +178,11 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 
 	case edit.Quit:
 		return false
+
+	case edit.Complete:
+		if completion, found := self.commands.Complete(editor.Text()); found {
+			editor.SetText(completion)
+		}
 
 	case edit.Write:
 		self.toggleCap(caps.Write)
@@ -211,8 +215,48 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 	return true
 }
 
+func (self *Harness) requestSlashCommand(message string) bool {
+	invocation, found := self.commands.Find(message)
+	if !found {
+		return false
+	}
+
+	if err := invocation.Command.Run(commandContext{harness: self}, invocation.Arguments); err != nil {
+		self.notifyFailure(fmt.Sprintf("%s: %v", invocation.Command.Name, err))
+	}
+
+	return true
+}
+
+type commandContext struct {
+	harness *Harness
+}
+
+func (self commandContext) Emit(event agent.Event) {
+	self.harness.notify(event)
+}
+
+func (self commandContext) Send(message string) {
+	if self.harness.currentTurn.isRunning {
+		self.harness.replaceTurn(message)
+	} else {
+		self.harness.start(message)
+	}
+}
+
+func (self commandContext) Notice(message string) {
+	self.Emit(agent.Event{Kind: agent.HarnessMessageEvent, Text: message})
+}
+
 func (self *Harness) acceptInput(editor *edit.Input, history *edit.History) {
-	self.submitInput(editor, history, strings.TrimSpace(editor.Text()))
+	message := strings.TrimSpace(editor.Text())
+	if self.requestSlashCommand(message) {
+		history.Add(message)
+		editor.Reset()
+		return
+	}
+
+	self.submitInput(editor, history, message)
 }
 
 func (self *Harness) submitInput(editor *edit.Input, history *edit.History, message string) {
@@ -395,13 +439,20 @@ func (self *Harness) isPrefixPending() bool {
 
 func (self *Harness) plainly(history *edit.History, initialMessage string) {
 	if initialMessage != "" {
-		self.ask(history, initialMessage)
+		if self.requestSlashCommand(initialMessage) {
+			history.Add(initialMessage)
+		} else {
+			self.ask(history, initialMessage)
+		}
 	}
 
 	reader := bufio.NewScanner(os.Stdin)
 
 	for reader.Scan() {
-		if stdin := strings.TrimSpace(reader.Text()); stdin != "" {
+		stdin := strings.TrimSpace(reader.Text())
+		if self.requestSlashCommand(stdin) {
+			history.Add(stdin)
+		} else if stdin != "" {
 			self.ask(history, stdin)
 		}
 	}
@@ -653,10 +704,6 @@ func (self *Harness) finish() {
 
 	self.currentTurn.isRunning = false
 	self.currentTurn.events = nil
-
-	if !self.currentTurn.isCancelled && self.queuedTurn.Empty() && !self.terminalFocused && self.onTurnFinished != nil {
-		self.onTurnFinished()
-	}
 
 	queued, message := self.queuedTurn.Take()
 	switch queued {

@@ -331,8 +331,8 @@ func run() (string, error) {
 		workspaceDir:       workspaceDir,
 		mode:               mode,
 		processes:          processes,
-		onTurnFinished:     func() { sendTurnFinishedNotification(workspaceDir) },
 		getOnWithItMessage: settings.GetOnWithItMessage,
+		commands:           commandsFor(log, os.Stdout, settings.Editor),
 	}
 
 	chat.segmentLayout, err = settings.BuildLayout(availableSegments(workspaceDir, log.Name(), modelName, effort, chat))
