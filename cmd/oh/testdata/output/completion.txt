@@ -1,0 +1,23 @@
+=== options ===
+--caps
+--help
+--list
+--model
+--resume
+--sessions
+--update
+--version
+--workspace
+=== models ===
+anthropic/claude-sonnet-5@none
+anthropic/claude-sonnet-5@high
+=== efforts ===
+none
+high
+=== capabilities ===
+rxw
+rxwg
+rxwgb
+=== sessions ===
+newer-jaguar
+older-badger

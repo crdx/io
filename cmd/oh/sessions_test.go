@@ -2,12 +2,28 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/session"
 )
+
+func writeStoredSession(t *testing.T, directory string, name string, started string) {
+	t.Helper()
+
+	if err := os.MkdirAll(filepath.Join(directory, name), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	head := fmt.Sprintf(`{"kind":"head","time":%q,"id":%q,"name":%q}`+"\n", started, name, name)
+	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), []byte(head), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
 
 func TestSessionsComeFromJournalParsing(t *testing.T) {
 	directory := t.TempDir()

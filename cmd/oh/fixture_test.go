@@ -25,6 +25,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 	})
 	for name, extensions := range map[string][]string{
 		"banner":     {".ansi", ".screen"},
+		"completion": {".txt"},
 		"context":    {".prompt"},
 		"inputblock": {".ansi", ".screen"},
 		"lifecycle":  {".ansi", ".screen"},

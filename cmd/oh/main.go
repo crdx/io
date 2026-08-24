@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"syscall"
 
-	"crdx.org/duckopt/v2"
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/req"
@@ -23,6 +21,7 @@ import (
 	"crdx.org/io/toolbox"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/cli"
 	"crdx.org/io/cmd/oh/models"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/prompt"
@@ -52,32 +51,11 @@ var defaultEfforts = map[string]string{
 	anthropicProvider: "high",
 }
 
-const usage = `oh — coding harness
-
-Usage:
-    $0 [options] [<prompt>...]
-
-Options:
-    -d, --workspace <dir>                  Set working directory and project scope
-    -r, --resume <session>                 Resume the saved session by name
-    -s, --sessions                         Choose a saved session to resume
-    -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
-    -c, --caps <flags>                     Capabilities: rxwgb (read, exec, write, git, bg) [default: rxw]
-    -l, --list                             List the available models, then exit
-    -u, --update                           Update the cached model list, then exit
-    -V, --version                          Show the version
-    -h, --help                             Show this help
-
-Model selection takes the closest reading of what you name: the whole name first, then an opening,
-then a fragment, so -m sol@hi is enough. An effort of off asks for none, where the model takes it.
-
-Environment:
-    OH_ENDPOINT_URL     Talk to somewhere other than the provider's default endpoint
-`
-
 func main() {
-	if kind, word, wanted := completionRequest(os.Args[1:]); wanted {
-		writeCompletions(os.Stdout, kind, word)
+	if cli.WriteCompletions(os.Stdout, os.Args[1:], cli.Sources{
+		ModelCachePath: modelCachePath(),
+		SessionsDir:    sessionsDir(),
+	}) {
 		return
 	}
 
@@ -103,67 +81,8 @@ func main() {
 	}
 }
 
-type InputOpts struct {
-	Message      []string `docopt:"<prompt>"`
-	WorkspaceDir string   `docopt:"--workspace"`
-	Session      string   `docopt:"--resume"`
-	Sessions     bool     `docopt:"--sessions"`
-	Model        string   `docopt:"--model"`
-	Caps         string   `docopt:"--caps"`
-	List         bool     `docopt:"--list"`
-	Update       bool     `docopt:"--update"`
-	Version      bool     `docopt:"--version"`
-}
-
-type Opts struct {
-	message      string // the first message
-	workspaceDir string
-	session      string // the session to resume, empty to start afresh
-	provider     string // the provider selected with the model, empty to use the configured or saved provider
-	model        string // the explicitly selected model, empty to use the configured or saved model
-	effort       string // the effort paired with an explicitly selected model
-	caps         caps.Set
-}
-
-func (self Opts) resuming() bool { return self.session != "" }
-
-func (opts InputOpts) parse() (Opts, error) {
-	self := Opts{
-		workspaceDir: opts.WorkspaceDir,
-		message:      strings.Join(opts.Message, " "),
-		session:      opts.Session,
-	}
-
-	if opts.Model != "" {
-		provider, model, effort, err := models.ParseSelection(modelCachePath(), opts.Model)
-		if err != nil {
-			return self, err
-		}
-		self.provider = provider
-		self.model = model
-		self.effort = effort
-	}
-
-	grantedCaps, err := caps.Parse(opts.Caps)
-	if err != nil {
-		return self, err
-	}
-
-	self.caps = grantedCaps
-
-	if self.resuming() && self.workspaceDir != "" {
-		return self, errors.New("a resumed conversation takes its directory from the session")
-	}
-
-	if self.workspaceDir == "" {
-		self.workspaceDir = "."
-	}
-
-	return self, nil
-}
-
 func run() ([]string, error) {
-	inputArgs := duckopt.MustBind[InputOpts](usage, "$0")
+	inputArgs := cli.Bind()
 
 	if inputArgs.Version {
 		fmt.Println(version())
@@ -190,7 +109,7 @@ func run() ([]string, error) {
 		return []string{"-r", sessionName}, nil
 	}
 
-	args, err := inputArgs.parse()
+	args, err := inputArgs.Parse(modelCachePath())
 	if err != nil {
 		return nil, err
 	}
@@ -199,15 +118,15 @@ func run() ([]string, error) {
 		return nil, err
 	}
 
-	resumedSession, err := loadSession(args.session)
+	resumedSession, err := loadSession(args.Session)
 	if err != nil {
 		return nil, err
 	}
 	if resumedSession != nil {
-		args.workspaceDir = resumedSession.Meta.WorkspaceDir
+		args.WorkspaceDir = resumedSession.Meta.WorkspaceDir
 	}
 
-	root, err := os.OpenRoot(args.workspaceDir)
+	root, err := os.OpenRoot(args.WorkspaceDir)
 	if err != nil {
 		return nil, err
 	}
@@ -236,10 +155,10 @@ func run() ([]string, error) {
 		return nil, fmt.Errorf("could not prepare the shell home: %w", err)
 	}
 
-	mode := caps.NewMode(args.caps)
+	mode := caps.NewMode(args.Caps)
 
 	if resumedSession != nil {
-		mode = caps.NewResumedMode(args.caps)
+		mode = caps.NewResumedMode(args.Caps)
 	}
 
 	files := file.New(root, caps.RefuseWrite(mode))
@@ -272,10 +191,10 @@ func run() ([]string, error) {
 	}
 	defer skill.Close(skillRoots)
 
-	processes := sandbox.NewProcesses(args.caps.Has(caps.Background))
+	processes := sandbox.NewProcesses(args.Caps.Has(caps.Background))
 	defer func() { _, _ = processes.Disable() }()
 
-	providerName, model, effort, err := resolveProviderChoice(args.provider, args.model, args.effort, config, resumedSession)
+	providerName, model, effort, err := resolveProviderChoice(args.Provider, args.Model, args.Effort, config, resumedSession)
 	if err != nil {
 		return nil, err
 	}
@@ -326,7 +245,7 @@ func run() ([]string, error) {
 			SessionName:  log.Name(),
 			TmpDir:       tmpDir,
 			HomeDir:      homeDir,
-			CurrentCaps:  args.caps,
+			CurrentCaps:  args.Caps,
 			ExtraPaths:   config.Sandbox,
 			Skills:       availableSkills,
 		})
@@ -396,7 +315,7 @@ func run() ([]string, error) {
 		chat.notify(startup.NewEvent(startupElapsed, startupInfo))
 	}
 
-	chat.begin(args.message)
+	chat.begin(args.Message)
 
 	if chat.restart != nil {
 		return chat.restart, nil

@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"bytes"
@@ -129,14 +129,14 @@ func TestCapabilityCompletionsGrowOneAtATime(t *testing.T) {
 
 func TestWritingCompletionsLinesThemUp(t *testing.T) {
 	var out bytes.Buffer
-	writeCompletions(&out, completeCaps, "rxw")
+	WriteCompletions(&out, []string{"--complete", completeCaps, "rxw"}, Sources{})
 
 	if out.String() != "rxw\nrxwg\nrxwgb\n" {
 		t.Errorf("got %q", out.String())
 	}
 
 	out.Reset()
-	writeCompletions(&out, "nonsense", "")
+	WriteCompletions(&out, []string{"--complete", "nonsense", ""}, Sources{})
 	if out.Len() != 0 {
 		t.Errorf("got %q", out.String())
 	}

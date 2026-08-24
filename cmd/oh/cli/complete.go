@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"fmt"
@@ -39,22 +39,45 @@ func completionRequest(args []string) (string, string, bool) {
 	return rest[0], word, true
 }
 
-func writeCompletions(out io.Writer, kind string, word string) {
-	for _, completion := range completions(kind, word) {
-		_, _ = fmt.Fprintln(out, completion)
-	}
+// Sources names the cached data used to produce completions.
+type Sources struct {
+	ModelCachePath string
+	SessionsDir    string
 }
 
-func completions(kind string, word string) []string {
+// Complete returns completions when args contain an internal completion request.
+func Complete(args []string, sources Sources) ([]string, bool) {
+	kind, word, wanted := completionRequest(args)
+	if !wanted {
+		return nil, false
+	}
+
+	return completions(kind, word, sources), true
+}
+
+// WriteCompletions writes an internal completion request and reports whether it was handled.
+func WriteCompletions(out io.Writer, args []string, sources Sources) bool {
+	completed, wanted := Complete(args, sources)
+	if !wanted {
+		return false
+	}
+
+	for _, completion := range completed {
+		_, _ = fmt.Fprintln(out, completion)
+	}
+	return true
+}
+
+func completions(kind string, word string, sources Sources) []string {
 	switch kind {
 	case completeOption:
 		return optionCompletions(word, usageOptions(usage))
 	case completeModel:
-		return modelCompletions(word, models.Choices(modelCachePath()))
+		return modelCompletions(word, models.Choices(sources.ModelCachePath))
 	case completeEffort:
-		return effortCompletions(word, models.Choices(modelCachePath()))
+		return effortCompletions(word, models.Choices(sources.ModelCachePath))
 	case completeSession:
-		return withPrefix(word, sessionNames(sessionsDir()))
+		return withPrefix(word, sessionNames(sources.SessionsDir))
 	case completeCaps:
 		return withPrefix(word, capsCompletions())
 	default:
