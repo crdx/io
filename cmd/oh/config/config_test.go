@@ -21,7 +21,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	absolute := filepath.Join(t.TempDir(), "skills")
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	contents := "get_on_with_it_message = \"carry on\"\n[model]\nround_robin = [\"opencode/deepseek@hi\"]\n[skill]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
+	contents := "editor = \"  subl  \"\nget_on_with_it_message = \"carry on\"\n[model]\nround_robin = [\"opencode/deepseek@hi\"]\n[skill]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
 	if err := writeConfigFile(path, contents); err != nil {
 		t.Fatal(err)
 	}
@@ -32,6 +32,9 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	}
 	if !slices.Equal(config.Model.RoundRobin, []string{"opencode/deepseek@hi"}) {
 		t.Errorf("got model rotation %#v", config.Model.RoundRobin)
+	}
+	if config.Editor != "subl" {
+		t.Errorf("got editor %q", config.Editor)
 	}
 	if config.GetOnWithItMessage != "carry on" {
 		t.Errorf("got get-on-with-it message %q", config.GetOnWithItMessage)
@@ -60,6 +63,9 @@ func TestAMissingConfigFileIsAllowed(t *testing.T) {
 	if len(config.Skill.Include) != 0 || len(config.Sandbox.Read) != 0 ||
 		len(config.Sandbox.Write) != 0 || len(config.Sandbox.Exec) != 0 {
 		t.Errorf("got %#v, want no configured paths", config)
+	}
+	if config.Editor != "" {
+		t.Errorf("got default editor %q", config.Editor)
 	}
 	if config.GetOnWithItMessage != "yes" {
 		t.Errorf("got default get-on-with-it message %q", config.GetOnWithItMessage)

@@ -24,6 +24,7 @@ var defaultsTOML string
 
 type Config struct {
 	Version            int    `toml:"version"`
+	Editor             string `toml:"editor"`
 	Model              Model  `toml:"model"`
 	GetOnWithItMessage string `toml:"get_on_with_it_message"`
 
@@ -200,6 +201,7 @@ func Load(path string) (Config, error) {
 			}
 		}
 	}
+	config.Editor = strings.TrimSpace(config.Editor)
 	config.GetOnWithItMessage = strings.TrimSpace(config.GetOnWithItMessage)
 	if meta.IsDefined("get_on_with_it_message") && config.GetOnWithItMessage == "" {
 		return config, fmt.Errorf("%s: get_on_with_it_message is empty", displayPath)

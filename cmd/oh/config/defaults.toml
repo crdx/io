@@ -1,4 +1,6 @@
 version = 2
+
+editor = ""
 get_on_with_it_message = "yes"
 
 [model]
