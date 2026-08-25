@@ -1,9 +1,10 @@
 package config
 
 const (
-	InitialFormat      = 1
-	RoundRobinFormat   = 2
-	SegmentNamesFormat = 3
+	InitialFormat       = 1
+	RoundRobinFormat    = 2
+	SegmentNamesFormat  = 3
+	EditorCommandFormat = 4
 
-	Format = SegmentNamesFormat
+	Format = EditorCommandFormat
 )

@@ -26,17 +26,21 @@ var defaultsTOML string
 
 type Config struct {
 	Version            int               `toml:"version"`
-	Editor             editor.Command    `toml:"editor"`
+	Editor             Editor            `toml:"editor"`
 	Model              Model             `toml:"model"`
 	GetOnWithItMessage string            `toml:"get_on_with_it_message"`
 	Snippets           map[string]string `toml:"snippets"`
 	Skills             SkillPaths        `toml:"skills"`
-	Sandbox            pathsConfig       `toml:"sandbox"`
+	Sandbox            sandbox           `toml:"sandbox"`
 	Bar                Bar               `toml:"bar"`
 
 	fallback *toml.MetaData
 	user     *toml.MetaData
 	filePath string
+}
+
+type Editor struct {
+	Command editor.Command `toml:"command"`
 }
 
 type Model struct {
@@ -48,7 +52,7 @@ type SkillPaths struct {
 	Exclude []string `toml:"exclude"`
 }
 
-type pathsConfig = shell.Paths
+type sandbox = shell.Paths
 
 type Bar struct {
 	Top    Rule `toml:"top"`

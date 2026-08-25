@@ -1,7 +1,9 @@
-version = 3
+version = 4
 
-editor = []
 get_on_with_it_message = "yes"
+
+[editor]
+command = []
 
 [snippets]
 

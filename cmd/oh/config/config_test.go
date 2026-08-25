@@ -21,7 +21,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	absolute := filepath.Join(t.TempDir(), "skills")
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	contents := "editor = \"  subl  \"\nget_on_with_it_message = \"carry on\"\n[model]\nround_robin = [\"opencode/deepseek@hi\"]\n[skills]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
+	contents := "get_on_with_it_message = \"carry on\"\n[model]\nround_robin = [\"opencode/deepseek@hi\"]\n[editor]\ncommand = \"  subl  \"\n[skills]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
 	if err := writeConfigFile(path, contents); err != nil {
 		t.Fatal(err)
 	}
@@ -33,8 +33,8 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	if !slices.Equal(config.Model.RoundRobin, []string{"opencode/deepseek@hi"}) {
 		t.Errorf("got model rotation %#v", config.Model.RoundRobin)
 	}
-	if !slices.Equal(config.Editor, []string{"subl"}) {
-		t.Errorf("got editor %q", config.Editor)
+	if !slices.Equal(config.Editor.Command, []string{"subl"}) {
+		t.Errorf("got editor %q", config.Editor.Command)
 	}
 	if config.GetOnWithItMessage != "carry on" {
 		t.Errorf("got get-on-with-it message %q", config.GetOnWithItMessage)
@@ -57,7 +57,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 
 func TestConfiguredEditorAcceptsArguments(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "editor = [\"subl\", \"--wait\"]\n"); err != nil {
+	if err := writeConfigFile(path, "[editor]\ncommand = [\"subl\", \"--wait\"]\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -65,8 +65,8 @@ func TestConfiguredEditorAcceptsArguments(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Equal(config.Editor, []string{"subl", "--wait"}) {
-		t.Errorf("got editor %q", config.Editor)
+	if !slices.Equal(config.Editor.Command, []string{"subl", "--wait"}) {
+		t.Errorf("got editor %q", config.Editor.Command)
 	}
 }
 
@@ -79,8 +79,8 @@ func TestAMissingConfigFileIsAllowed(t *testing.T) {
 		len(config.Sandbox.Write) != 0 || len(config.Sandbox.Exec) != 0 {
 		t.Errorf("got %#v, want no configured paths", config)
 	}
-	if len(config.Editor) != 0 {
-		t.Errorf("got default editor %q", config.Editor)
+	if len(config.Editor.Command) != 0 {
+		t.Errorf("got default editor %q", config.Editor.Command)
 	}
 	if config.GetOnWithItMessage != "yes" {
 		t.Errorf("got default get-on-with-it message %q", config.GetOnWithItMessage)
@@ -411,7 +411,7 @@ func TestTheBuiltInDefaultsSetEverySettingThereIs(t *testing.T) {
 	}
 
 	for _, key := range []string{
-		"version", "model", "get_on_with_it_message", "snippets", "skills", "sandbox", "bar",
+		"version", "editor", "model", "get_on_with_it_message", "snippets", "skills", "sandbox", "bar",
 	} {
 		if _, ok := written[key]; !ok {
 			t.Errorf("expected the defaults to say what %q is", key)

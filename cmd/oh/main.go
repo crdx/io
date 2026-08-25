@@ -367,7 +367,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		ConfigDir:  location.GetConfigDir(),
 		StateDir:   location.GetStateDir(),
 		ConfigFile: configPath,
-		Editor:     settings.Editor,
+		Editor:     settings.Editor.Command,
 		Output:     os.Stdout,
 		Session: commands.Session{
 			Name:      log.Name(),

@@ -71,8 +71,74 @@ func MigrateConfig(options ConfigOptions) (int, bool, error) {
 type configStep func(data []byte) ([]byte, error)
 
 var configSteps = map[int]configStep{
-	config.InitialFormat:    migrateConfigFromVersionOne,
-	config.RoundRobinFormat: migrateConfigFromVersionTwo,
+	config.InitialFormat:      migrateConfigFromVersionOne,
+	config.RoundRobinFormat:   migrateConfigFromVersionTwo,
+	config.SegmentNamesFormat: migrateConfigFromVersionThree,
+}
+
+func migrateConfigFromVersionThree(data []byte) ([]byte, error) {
+	_, document, err := readConfigDocument(data)
+	if err != nil {
+		return nil, err
+	}
+
+	migrated := data
+	if _, hasEditor := document["editor"]; hasEditor {
+		migrated = rewriteEditorCommand(migrated)
+	}
+
+	return rewriteConfigVersion(migrated, config.EditorCommandFormat), nil
+}
+
+func rewriteEditorCommand(data []byte) []byte {
+	text := string(data)
+	hasFinalNewline := strings.HasSuffix(text, "\n")
+	lines := strings.Split(strings.TrimSuffix(text, "\n"), "\n")
+
+	tableStart := len(lines)
+	editorAt := -1
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "[") {
+			tableStart = i
+			break
+		}
+
+		if editorAt < 0 {
+			if key, hasKey := configLineKey(line); hasKey && key == "editor" {
+				editorAt = i
+			}
+		}
+	}
+
+	if editorAt < 0 {
+		return data
+	}
+
+	commandLine := editorCommandLine(lines[editorAt])
+
+	migrated := append([]string(nil), lines[:editorAt]...)
+	migrated = append(migrated, lines[editorAt+1:tableStart]...)
+	migrated = appendWithoutTrailingBlank(migrated, "", "[editor]", commandLine)
+	if tableStart < len(lines) {
+		migrated = append(migrated, "")
+		migrated = append(migrated, lines[tableStart:]...)
+	}
+
+	joined := strings.Join(migrated, "\n")
+	if hasFinalNewline {
+		joined += "\n"
+	}
+
+	return []byte(joined)
+}
+
+func editorCommandLine(line string) string {
+	at := strings.Index(line, "=")
+	key := line[:at]
+	gap := key[len(strings.TrimRight(key, " \t")):]
+
+	return "command" + gap + line[at:]
 }
 
 func migrateConfigFromVersionTwo(data []byte) ([]byte, error) {
