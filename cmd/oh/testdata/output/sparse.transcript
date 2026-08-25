@@ -1,0 +1,91 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+run the thing that takes no arguments
+```
+
+## Notice
+
+> 2001-01-01T00:00:01Z
+
+- **Status:** `info`
+
+```
+The web search and fetch tools are now refused.
+```
+
+## Tool call
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call_1`
+- **Name:** `status`
+- **Read only:** `true`
+
+## Tool result
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call_1`
+- **Name:** `status`
+- **Status:** `success`
+
+## Notice
+
+> 2001-01-01T00:00:04Z
+
+- **Status:** `warning`
+
+```
+Background processes killed (sleep).
+```
+
+## Tool call
+
+> 2001-01-01T00:00:05Z
+
+- **ID:** `call_2`
+- **Name:** `notify`
+- **Read only:** `false`
+
+**Arguments**
+
+```json
+{"title":"done","message":"nothing to report","icon":"info"}
+```
+
+**Subject**
+
+```
+done
+```
+
+## Tool result
+
+> 2001-01-01T00:00:06Z
+
+- **ID:** `call_2`
+- **Name:** `notify`
+- **Status:** `info`
+
+## Assistant
+
+> 2001-01-01T00:00:07Z
+
+```
+Nothing came back.
+```
+
+

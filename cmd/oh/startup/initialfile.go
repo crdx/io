@@ -12,7 +12,7 @@ const messageIntroduction = "The following files have been made available in thi
 func PrepareInitialFiles(sourcePaths []string, scratchDirectory string) (string, error) {
 	destinationPaths := make([]string, 0, len(sourcePaths))
 	for _, sourcePath := range sourcePaths {
-		content, err := os.ReadFile(sourcePath) //nolint:gosec // the path names a file selected by --init
+		content, err := os.ReadFile(sourcePath) //nolint:gosec // the path names a file selected by --add
 		if err != nil {
 			return "", fmt.Errorf("could not read the initial file: %w", err)
 		}

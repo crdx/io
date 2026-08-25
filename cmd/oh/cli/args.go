@@ -15,7 +15,7 @@ const defaultCapFlags = "rx"
 var usage = fmt.Sprintf(`oh — coding harness
 
 Usage:
-    $0 [options] [-t <tool>]... [-i <file>]... [<prompt>...]
+    $0 [options] [-t <tool>]... [--add <file>]... [<prompt>...]
 
 Options:
     -d, --workspace <dir>                  Set working directory and project scope
@@ -25,7 +25,7 @@ Options:
     -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
     -c, --caps <flags>                     Capabilities: rxwbgs (read, exec, write, bg, git, web) (default: %s)
     -t, --tool <tool>                      Enable a tool; may be repeated (all by default)
-    -i, --init <file>                      Copy a file into the agent scratch directory; may be repeated
+    --add <file>                           Add a file to the agent scratch directory; may be repeated
     -l, --list                             List the available models, then exit
     -u, --update                           Update the cached model list, then exit
     -v, --version                          Show version
@@ -48,7 +48,7 @@ type Input struct {
 	Model         string   `docopt:"--model"`
 	Caps          string   `docopt:"--caps"`
 	Tools         []string `docopt:"--tool"`
-	InitialFiles  []string `docopt:"--init"`
+	AddedFiles    []string `docopt:"--add"`
 	List          bool     `docopt:"--list"`
 	Update        bool     `docopt:"--update"`
 	Version       bool     `docopt:"--version"`
@@ -66,7 +66,7 @@ type Options struct {
 	Caps           caps.Set
 	WereCapsChosen bool
 	Tools          []string
-	InitialFiles   []string
+	AddedFiles     []string
 }
 
 // Bind reads and validates the process command line.
@@ -92,7 +92,7 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 		Session:       self.Session,
 		SourceSession: self.SourceSession,
 		Tools:         self.Tools,
-		InitialFiles:  self.InitialFiles,
+		AddedFiles:    self.AddedFiles,
 	}
 
 	if self.Model != "" {
@@ -126,8 +126,8 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 	if options.StartingFromSession() && options.WorkspaceDir != "" {
 		return options, errors.New("a conversation started from a session takes its directory from that session")
 	}
-	if options.Resuming() && len(options.InitialFiles) > 0 {
-		return options, errors.New("a resumed conversation cannot be initialised from files")
+	if options.Resuming() && len(options.AddedFiles) > 0 {
+		return options, errors.New("files cannot be added to a resumed conversation")
 	}
 
 	if options.WorkspaceDir == "" {

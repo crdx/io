@@ -1,8 +1,8 @@
 === options ===
+--add
 --caps
 --from
 --help
---init
 --list
 --model
 --resume

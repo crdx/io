@@ -1,0 +1,270 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m run the thing that takes no arguments  \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[38;2;129;162;190mThe web search and fetch tools are now r\r
+efused.\e[0m\r
+\r
+\e[?7l\r\e[Kstatus\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\r
+\r
+\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
+\r
+\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r
+\r\e[KNothing came back.\r
+\e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+u\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+g\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+g\e[0m\r
+\e[48;2;52;53;65m \r
+u\e[0m\r
+\e[48;2;52;53;65m \r
+m\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[38;2;129;162;190mT\r
+h\r
+e\r
+ \r
+w\r
+e\r
+b\r
+ \r
+s\r
+e\r
+a\r
+r\r
+c\r
+h\r
+ \r
+a\r
+n\r
+d\r
+ \r
+f\r
+e\r
+t\r
+c\r
+h\r
+ \r
+t\r
+o\r
+o\r
+l\r
+s\r
+ \r
+a\r
+r\r
+e\r
+ \r
+n\r
+o\r
+w\r
+ \r
+r\r
+e\r
+f\r
+u\r
+s\r
+e\r
+d\r
+.\e[0m\r
+\r
+\e[?7l\r\e[K\r
+\r
+\e[38;2;207;173;0mB\r
+a\r
+c\r
+k\r
+g\r
+r\r
+o\r
+u\r
+n\r
+d\r
+ \r
+p\r
+r\r
+o\r
+c\r
+e\r
+s\r
+s\r
+e\r
+s\r
+ \r
+k\r
+i\r
+l\r
+l\r
+e\r
+d\r
+ \r
+(\r
+s\r
+l\r
+e\r
+e\r
+p\r
+)\r
+.\e[0m\r
+\r
+\r\e[K\e[38;2;207;173;0m\e[0m\r
+\r
+\r\e[KN\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Kc\r
+\r\e[Ka\r
+\r\e[Km\r
+\r\e[Ke\r
+\r\e[Kb\r
+\r\e[Ka\r
+\r\e[Kc\r
+\r\e[Kk\r
+\r\e[K.\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m run the thing that takes no arguments\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m
+
+status \e[38;2;76;154;44m✓\e[0m
+
+\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m
+
+\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m
+
+Nothing came back.
+
+=== streamed ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[Kstatus\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
+\r
+\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KNoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came bac\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came back.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m run the    \e[0m\r
+\e[48;2;52;53;65m thing that \e[0m\r
+\e[48;2;52;53;65m takes no   \e[0m\r
+\e[48;2;52;53;65m arguments  \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[38;2;129;162;190mThe web sear\r
+ch and fetch\r
+ tools are n\r
+ow refused.\e[0m\r
+\r
+\e[?7l\r\e[Kstatus\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\r
+\r
+\e[38;2;207;173;0mBackground p\r
+rocesses kil\r
+led (sleep).\e[0m\r
+\r
+\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdo…\e[0m\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r
+\r\e[KNothing came\r
+\r\e[Kback.\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m run the thing that takes no arguments\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m
+
+\e[?7l\r\e[Kstatus\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m
+
+\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m
+
+\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m
+
+\r\e[KNothing came back.
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\r
+\e[?7l\r\e[Kstatus\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\r
+\r
+\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
+\r
+\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r
+\r\e[KNothing came back.\r
+\e[?25h\e[?2026l

@@ -62,8 +62,8 @@ func TestEveryOptionIsRead(t *testing.T) {
 		"-m", "deepseek@hi",
 		"-t", "read",
 		"--tool", "grep",
-		"-i", "/context/brief.md",
-		"--init", "/context/notes.txt",
+		"--add", "/context/brief.md",
+		"--add", "/context/notes.txt",
 		"Use", "the", "brief.",
 	)
 
@@ -82,9 +82,9 @@ func TestEveryOptionIsRead(t *testing.T) {
 	if !slices.Equal(parsedOptions.Tools, []string{"read", "grep"}) {
 		t.Errorf("expected read and grep, got %v", parsedOptions.Tools)
 	}
-	wantInitialFiles := []string{"/context/brief.md", "/context/notes.txt"}
-	if !slices.Equal(parsedOptions.InitialFiles, wantInitialFiles) {
-		t.Errorf("got initial files %q, want %q", parsedOptions.InitialFiles, wantInitialFiles)
+	wantAddedFiles := []string{"/context/brief.md", "/context/notes.txt"}
+	if !slices.Equal(parsedOptions.AddedFiles, wantAddedFiles) {
+		t.Errorf("got added files %q, want %q", parsedOptions.AddedFiles, wantAddedFiles)
 	}
 	if parsedOptions.Message != "Use the brief." {
 		t.Errorf("expected the caller's opening message, got %q", parsedOptions.Message)

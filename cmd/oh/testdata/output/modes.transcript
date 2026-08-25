@@ -1,0 +1,86 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+what am i allowed to do here?
+```
+
+## Mode
+
+> 2001-01-01T00:00:01Z
+
+- **Caps:** `rx`
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+```
+Reading and running commands, but not writing.
+```
+
+## Mode
+
+> 2001-01-01T00:00:03Z
+
+- **Swapped:** `w`
+- **Caps:** `rxw`
+
+```
+The workspace is now read-write.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+now write it down
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Writing it down.
+```
+
+## Mode
+
+> 2001-01-01T00:00:06Z
+
+- **Swapped:** `x`
+- **Caps:** `rw`
+
+```
+The bash tool is now refused, and will turn away every command until it is granted again.
+```
+
+## Mode
+
+> 2001-01-01T00:00:07Z
+
+- **Swapped:** `?`
+- **Caps:** `rw`
+
+## Assistant
+
+> 2001-01-01T00:00:08Z
+
+```
+Done.
+```
+
+

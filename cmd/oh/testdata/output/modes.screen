@@ -1,0 +1,339 @@
+=== narrow ===
+
+ what am i allowed to do here?
+
+
+Reading and running commands, but not
+writing.
+
+The workspace is now read-write.
+
+
+ now write it down
+
+
+Writing it down.
+
+The bash tool is now refused, and will t
+urn away every command until it is grant
+ed again.
+
+Done.
+=== one column ===
+
+
+w
+
+h
+
+a
+
+t
+
+a
+
+m
+
+i
+
+a
+
+l
+
+l
+
+o
+
+w
+
+e
+
+d
+
+t
+
+o
+
+d
+
+o
+
+h
+
+e
+
+r
+
+e
+
+?
+
+
+R
+e
+a
+d
+i
+n
+g
+a
+n
+d
+r
+u
+n
+n
+i
+n
+g
+c
+o
+m
+m
+a
+n
+d
+s
+,
+b
+u
+t
+n
+o
+t
+w
+r
+i
+t
+i
+n
+g
+.
+
+T
+h
+e
+
+w
+o
+r
+k
+s
+p
+a
+c
+e
+
+i
+s
+
+n
+o
+w
+
+r
+e
+a
+d
+-
+w
+r
+i
+t
+e
+.
+
+
+
+n
+
+o
+
+w
+
+w
+
+r
+
+i
+
+t
+
+e
+
+i
+
+t
+
+d
+
+o
+
+w
+
+n
+
+
+W
+r
+i
+t
+i
+n
+g
+i
+t
+d
+o
+w
+n
+.
+
+T
+h
+e
+
+b
+a
+s
+h
+
+t
+o
+o
+l
+
+i
+s
+
+n
+o
+w
+
+r
+e
+f
+u
+s
+e
+d
+,
+
+a
+n
+d
+
+w
+i
+l
+l
+
+t
+u
+r
+n
+
+a
+w
+a
+y
+
+e
+v
+e
+r
+y
+
+c
+o
+m
+m
+a
+n
+d
+
+u
+n
+t
+i
+l
+
+i
+t
+
+i
+s
+
+g
+r
+a
+n
+t
+e
+d
+
+a
+g
+a
+i
+n
+.
+
+D
+o
+n
+e
+.
+=== tiny ===
+
+ what am i
+ allowed to
+ do here?
+
+
+Reading and
+running
+commands,
+but not
+writing.
+
+The workspac
+e is now rea
+d-write.
+
+
+ now write
+ it down
+
+
+Writing it
+down.
+
+The bash too
+l is now ref
+used, and wi
+ll turn away
+ every comma
+nd until it
+is granted a
+gain.
+
+Done.
+=== wide ===
+
+ what am i allowed to do here?
+
+
+Reading and running commands, but not writing.
+
+The workspace is now read-write.
+
+
+ now write it down
+
+
+Writing it down.
+
+The bash tool is now refused, and will turn away every command until it is granted again.
+
+Done.

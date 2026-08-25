@@ -1,0 +1,223 @@
+=== narrow ===
+
+ run the thing that takes no arguments
+
+
+The web search and fetch tools are now r
+efused.
+
+status ✓
+
+Background processes killed (sleep).
+
+notify done nothing to report ✓
+
+Nothing came back.
+=== one column ===
+
+
+r
+
+u
+
+n
+
+t
+
+h
+
+e
+
+t
+
+h
+
+i
+
+n
+
+g
+
+t
+
+h
+
+a
+
+t
+
+t
+
+a
+
+k
+
+e
+
+s
+
+n
+
+o
+
+a
+
+r
+
+g
+
+u
+
+m
+
+e
+
+n
+
+t
+
+s
+
+
+T
+h
+e
+
+w
+e
+b
+
+s
+e
+a
+r
+c
+h
+
+a
+n
+d
+
+f
+e
+t
+c
+h
+
+t
+o
+o
+l
+s
+
+a
+r
+e
+
+n
+o
+w
+
+r
+e
+f
+u
+s
+e
+d
+.
+
+
+
+B
+a
+c
+k
+g
+r
+o
+u
+n
+d
+
+p
+r
+o
+c
+e
+s
+s
+e
+s
+
+k
+i
+l
+l
+e
+d
+
+(
+s
+l
+e
+e
+p
+)
+.
+
+
+
+N
+o
+t
+h
+i
+n
+g
+c
+a
+m
+e
+b
+a
+c
+k
+.
+=== tiny ===
+
+ run the
+ thing that
+ takes no
+ arguments
+
+
+The web sear
+ch and fetch
+ tools are n
+ow refused.
+
+status ✓
+
+Background p
+rocesses kil
+led (sleep).
+
+notify … ✓
+
+Nothing came
+back.
+=== wide ===
+
+ run the thing that takes no arguments
+
+
+The web search and fetch tools are now refused.
+
+status ✓
+
+Background processes killed (sleep).
+
+notify done nothing to report ✓
+
+Nothing came back.

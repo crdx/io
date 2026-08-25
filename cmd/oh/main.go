@@ -145,7 +145,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	if forkSource != nil {
 		args.WorkspaceDir = forkSource.WorkspaceDir
-		args.InitialFiles = append([]string{forkSource.InitialFilePath}, args.InitialFiles...)
+		args.AddedFiles = append([]string{forkSource.InitialFilePath}, args.AddedFiles...)
 		args.Message = forkSource.InitialUserMessage
 	}
 
@@ -298,8 +298,8 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		}
 	}()
 
-	if len(args.InitialFiles) > 0 {
-		initialFilesMessage, err := startup.PrepareInitialFiles(args.InitialFiles, tmpDir)
+	if len(args.AddedFiles) > 0 {
+		initialFilesMessage, err := startup.PrepareInitialFiles(args.AddedFiles, tmpDir)
 		if err != nil {
 			return "", err
 		}
