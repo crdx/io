@@ -172,17 +172,11 @@ func (self *Client) requestBody() request {
 }
 
 func (self *Client) headers(token Token) http.Header {
-	header := http.Header{}
+	return requestHeaders(token, self.session)
+}
 
-	header.Set("Authorization", "Bearer "+token.Access)
-	header.Set("Chatgpt-Account-Id", token.AccountID)
-	header.Set("Originator", Originator)
-	header.Set("Openai-Beta", "responses=experimental")
-	header.Set("Accept", "text/event-stream")
-	header.Set("Session_id", self.session)
-	header.Set("User-Agent", fmt.Sprintf("io (%s; %s)", runtime.GOOS, runtime.GOARCH))
-
-	return header
+func userAgent() string {
+	return fmt.Sprintf("io (%s; %s)", runtime.GOOS, runtime.GOARCH)
 }
 
 type request struct {
