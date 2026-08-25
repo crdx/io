@@ -39,8 +39,9 @@
 === caps rxwbgs while waiting ===
 ✧· ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% ?/?
 === context usage high ===
-✧· ─ ?s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ 91% 182Kt/200Kt
+✧· ─ ?s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ 91% 182K/200K
 === context usage low ===
-✧· ─ ?s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ 3% 5Kt/200Kt
+✧· ─ ?s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ 3% 5K/200K
 === the startup line ===
-startup=2ms session=brave-otter SYSTEM.md=~200t AGENTS.md=~800t skills=3p/1g snippets=2 tools=~200t
+New session brave-otter started in 2ms with 4 skills and 2 snippets.
+Context: SYSTEM.md ~200t AGENTS.md ~800t tools ~200t

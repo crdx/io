@@ -1,4 +1,4 @@
-package subscriptionUsage
+package subUsage
 
 import (
 	"context"
@@ -21,6 +21,7 @@ var (
 const (
 	defaultRate      = 5 * time.Minute
 	redrawInterval   = 15 * time.Second
+	spinnerDelay     = 250 * time.Millisecond
 	firstFailureWait = time.Minute
 	firstEmptyWait   = redrawInterval
 	backoffFactor    = 2
@@ -45,13 +46,15 @@ type state struct {
 	rate     time.Duration
 	now      func() time.Time
 
-	mutex        sync.Mutex
-	windows      []agent.UsageWindow
-	fetchedAt    time.Time
-	retryAt      time.Time
-	waited       time.Duration
-	status       usageStatus
-	shouldRedraw bool
+	mutex             sync.Mutex
+	windows           []agent.UsageWindow
+	fetchedAt         time.Time
+	retryAt           time.Time
+	fetchStartedAt    time.Time
+	waited            time.Duration
+	status            usageStatus
+	statusBeforeFetch usageStatus
+	shouldRedraw      bool
 }
 
 // New builds the factory over whichever provider holds the conversation. A provider that cannot
@@ -82,7 +85,12 @@ func New(reporter agent.UsageReporter, now func() time.Time) segment.Factory {
 			args.Rate = defaultRate
 		}
 
-		return &state{reporter: reporter, rate: args.Rate, now: now}, nil
+		return &state{
+			reporter: reporter,
+			rate:     args.Rate,
+			now:      now,
+			status:   usagePending,
+		}, nil
 	}
 }
 
@@ -114,7 +122,7 @@ func (self *state) Render(segment.Context) string {
 
 	self.mutex.Lock()
 	shouldFetch := self.noteFetchStarting()
-	windows, fetchedAt, status := self.windows, self.fetchedAt, self.status
+	windows, fetchedAt, status := self.windows, self.fetchedAt, self.getVisibleStatus()
 	self.shouldRedraw = false
 	self.mutex.Unlock()
 
@@ -125,6 +133,14 @@ func (self *state) Render(segment.Context) string {
 	return self.draw(windows, fetchedAt, status)
 }
 
+func (self *state) getVisibleStatus() usageStatus {
+	if self.status == usageFetching && self.now().Sub(self.fetchStartedAt) < spinnerDelay {
+		return self.statusBeforeFetch
+	}
+
+	return self.status
+}
+
 func (self *state) noteFetchStarting() bool {
 	now := self.now()
 
@@ -132,6 +148,8 @@ func (self *state) noteFetchStarting() bool {
 		return false
 	}
 
+	self.fetchStartedAt = now
+	self.statusBeforeFetch = self.status
 	self.status = usageFetching
 
 	return true

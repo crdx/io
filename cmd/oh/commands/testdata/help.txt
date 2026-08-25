@@ -1,9 +1,9 @@
 Commands:
   /conf
   /copy {session-dir|session-id|session-name}
+  /fork [model[@effort]]
   /new [model[@effort]]
   /open {config-dir|session-chat|session-dir|session-log|state-dir}
-  /pass [model[@effort]]
 
 Snippets:
   //add <args>

@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -9,18 +8,6 @@ const (
 	thousandTokens = 1000
 	millionTokens  = 1_000_000
 )
-
-func FormatTokenCount[Count count](tokens Count, precision int) string {
-	if tokens <= 0 {
-		return "0t"
-	}
-
-	if tokens < thousandTokens {
-		return fmt.Sprintf("%dt", tokens)
-	}
-
-	return formatLargeTokenCount(float64(tokens), precision, "")
-}
 
 func formatLargeTokenCount(tokens float64, precision int, prefix string) string {
 	if tokens >= millionTokens {

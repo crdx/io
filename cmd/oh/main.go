@@ -139,14 +139,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	passedSession, err := sessions.GetPassedSession(sessionsDir, args.PassedSession, args.Message)
+	forkSource, err := sessions.GetForkSource(sessionsDir, args.SourceSession, args.Message)
 	if err != nil {
 		return "", err
 	}
-	if passedSession != nil {
-		args.WorkspaceDir = passedSession.WorkspaceDir
-		args.InitialFiles = append([]string{passedSession.InitialFilePath}, args.InitialFiles...)
-		args.Message = passedSession.InitialUserMessage
+	if forkSource != nil {
+		args.WorkspaceDir = forkSource.WorkspaceDir
+		args.InitialFiles = append([]string{forkSource.InitialFilePath}, args.InitialFiles...)
+		args.Message = forkSource.InitialUserMessage
 	}
 
 	resumedSession, err := sessions.LoadForResume(sessionsDir, args.Session)
@@ -377,13 +377,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		StartSession: func(start commands.SessionStart) error {
 			var transition cycle.Transition
 			var err error
-			if start.ShouldPassConversation {
-				transition, err = passedSessionTransition(
+			if start.SourceSessionName != "" {
+				transition, err = forkedSessionTransition(
 					workspaceDir,
 					start.ModelGlob,
 					selection.Effort,
 					model.Choices(modelCachePath),
-					sessionInfo.Name,
+					start.SourceSessionName,
 				)
 			} else {
 				transition, err = newSessionTransition(

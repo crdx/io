@@ -1,4 +1,4 @@
-version = 2
+version = 3
 
 editor = []
 get_on_with_it_message = "yes"
@@ -41,6 +41,6 @@ center = [
 ]
 right = [
     { segment = "subscription-usage" },
-    { segment = "current-session" },
+    { segment = "session-name" },
     { segment = "scroll-overflow", direction = "down" }
 ]

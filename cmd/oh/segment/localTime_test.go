@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"crdx.org/io/cmd/oh/segment"
-	"crdx.org/io/cmd/oh/segment/currentTime"
+	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/style"
 )
 
@@ -14,7 +14,7 @@ func stoppedClock(t *testing.T, options segment.Options) segment.Segment {
 
 	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
 
-	built, err := currentTime.New(func() time.Time { return at })(options)
+	built, err := localTime.New(func() time.Time { return at })(options)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -12,17 +12,17 @@ import (
 )
 
 const (
-	passedSessionPrompt   = "Read chat.md first, then continue." //nolint:gosec // an opening prompt, not a credential
+	forkSourcePrompt      = "Read chat.md first, then continue."
 	sessionTranscriptName = "chat.md"
 )
 
-type PassedSession struct {
+type ForkSource struct {
 	WorkspaceDir       string
 	InitialFilePath    string
 	InitialUserMessage string
 }
 
-func GetPassedSession(directory string, name string, userMessage string) (*PassedSession, error) {
+func GetForkSource(directory string, name string, userMessage string) (*ForkSource, error) {
 	if name == "" {
 		return nil, nil
 	}
@@ -32,12 +32,12 @@ func GetPassedSession(directory string, name string, userMessage string) (*Passe
 		return nil, err
 	}
 
-	initialUserMessage := passedSessionPrompt
+	initialUserMessage := forkSourcePrompt
 	if userMessage != "" {
 		initialUserMessage += "\n\n" + userMessage
 	}
 
-	return &PassedSession{
+	return &ForkSource{
 		WorkspaceDir:       storedSession.Meta.WorkspaceDir,
 		InitialFilePath:    filepath.Join(directory, storedSession.Name, sessionTranscriptName),
 		InitialUserMessage: initialUserMessage,

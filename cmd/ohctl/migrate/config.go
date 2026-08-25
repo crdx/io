@@ -1,11 +1,13 @@
 package migrate
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -69,7 +71,27 @@ func MigrateConfig(options ConfigOptions) (int, bool, error) {
 type configStep func(data []byte) ([]byte, error)
 
 var configSteps = map[int]configStep{
-	config.InitialFormat: migrateConfigFromVersionOne,
+	config.InitialFormat:    migrateConfigFromVersionOne,
+	config.RoundRobinFormat: migrateConfigFromVersionTwo,
+}
+
+func migrateConfigFromVersionTwo(data []byte) ([]byte, error) {
+	if _, _, err := readConfigDocument(data); err != nil {
+		return nil, err
+	}
+
+	renamed := renameConfigSegment(data, "current-session", "session-name")
+	renamed = renameConfigSegment(renamed, "current-time", "local-time")
+
+	return rewriteConfigVersion(renamed, config.SegmentNamesFormat), nil
+}
+
+func renameConfigSegment(data []byte, oldName string, newName string) []byte {
+	pattern := regexp.MustCompile(`\bsegment\s*=\s*["']` + regexp.QuoteMeta(oldName) + `["']`)
+
+	return pattern.ReplaceAllFunc(data, func(match []byte) []byte {
+		return bytes.Replace(match, []byte(oldName), []byte(newName), 1)
+	})
 }
 
 func readConfigDocument(data []byte) (int, map[string]any, error) {
@@ -202,6 +224,37 @@ func rewriteVersionOneConfig(data []byte, removed map[string]bool, selection str
 	migrated := append(root, lines[tableStart:]...)
 
 	return []byte(strings.Join(migrated, "\n") + "\n")
+}
+
+func rewriteConfigVersion(data []byte, version int) []byte {
+	text := string(data)
+	hasFinalNewline := strings.HasSuffix(text, "\n")
+	lines := strings.Split(strings.TrimSuffix(text, "\n"), "\n")
+
+	for i, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "[") {
+			break
+		}
+
+		key, hasKey := configLineKey(line)
+		if !hasKey || key != "version" {
+			continue
+		}
+
+		indentation := line[:len(line)-len(strings.TrimLeft(line, " \t"))]
+		lines[i] = fmt.Sprintf("%sversion = %d", indentation, version)
+		if _, comment, hasComment := strings.Cut(line, "#"); hasComment {
+			lines[i] += " #" + comment
+		}
+		break
+	}
+
+	migrated := strings.Join(lines, "\n")
+	if hasFinalNewline {
+		migrated += "\n"
+	}
+
+	return []byte(migrated)
 }
 
 func configLineKey(line string) (string, bool) {

@@ -1,4 +1,4 @@
-package currentTime
+package localTime
 
 import (
 	"time"

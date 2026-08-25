@@ -19,7 +19,7 @@ function _oh {
             compopt -o filenames
             return
             ;;
-        -r | --resume | --pass) KIND=session ;;
+        -r | --resume | --from) KIND=session ;;
         -c | --caps) KIND=caps ;;
         -t | --tool) KIND=tool ;;
         -m | --model)

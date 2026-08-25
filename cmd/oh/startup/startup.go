@@ -51,7 +51,7 @@ func RenderEvent(event agent.Event) string {
 		}
 	}
 
-	return style.Subtle("[") + RenderBanner(event.Took, false, info) + style.Subtle("]")
+	return RenderBanner(event.Took, false, info)
 }
 
 // FilesOf reduces prompt context files to the facts shown at startup.
@@ -65,62 +65,65 @@ func FilesOf(files []prompt.File) []File {
 	return kept
 }
 
-// RenderBanner renders the compact startup summary shown outside event replay.
+// RenderBanner renders the startup summary as a sentence, with the context line below it.
 func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
 	if resumed {
 		return ""
 	}
 
 	var line strings.Builder
-	_, _ = line.WriteString(startupDuration(elapsed))
+
+	_, _ = line.WriteString(style.Subtle("New session"))
 	if info.Session != "" {
-		_, _ = line.WriteString(style.Subtle(" session=") + style.Normal(info.Session))
+		_, _ = line.WriteString(style.Subtle(" ") + style.Normal(info.Session))
 	}
-	for _, file := range info.ContextFiles {
-		_, _ = line.WriteString(style.Subtle(" ") + startupContextFile(file))
+	_, _ = line.WriteString(style.Subtle(" started in ") + startupDuration(elapsed))
+	_, _ = line.WriteString(style.Subtle(" with "))
+	_, _ = line.WriteString(style.Normal(fmt.Sprint(info.ProjectSkills + info.GlobalSkills)))
+	_, _ = line.WriteString(style.Subtle(" skills and "))
+	_, _ = line.WriteString(style.Normal(fmt.Sprint(info.Snippets)))
+	_, _ = line.WriteString(style.Subtle(" snippets."))
+
+	if context := startupContext(info); context != "" {
+		_, _ = line.WriteString("\n")
+		_, _ = line.WriteString(context)
 	}
-	_, _ = line.WriteString(style.Subtle(" ") + startupSkills(info))
-	if info.Snippets > 0 {
-		_, _ = line.WriteString(style.Subtle(" ") + startupSnippets(info))
-	}
-	_, _ = line.WriteString(style.Subtle(" ") + startupTools(info))
+
 	return line.String()
 }
 
 func startupDuration(elapsed time.Duration) string {
 	var field startupLine
-	field.dim("startup=")
 	field.quantity(timeTaken(elapsed), false)
 	return field.String()
 }
 
+func startupContext(info Info) string {
+	if len(info.ContextFiles) == 0 && info.ToolBytes == 0 {
+		return ""
+	}
+
+	var line strings.Builder
+	_, _ = line.WriteString(style.Subtle("Context:"))
+	for _, file := range info.ContextFiles {
+		_, _ = line.WriteString(style.Subtle(" ") + startupContextFile(file))
+	}
+	if info.ToolBytes > 0 {
+		_, _ = line.WriteString(style.Subtle(" tools ") + startupTools(info))
+	}
+	return line.String()
+}
+
 func startupContextFile(file File) string {
 	var field startupLine
-	field.dim(file.Name + "=")
+	field.dim(file.Name)
+	field.dim(" ")
 	field.quantity(util.FormatTokenEstimate(file.Bytes, 3), false)
-	return field.String()
-}
-
-func startupSkills(info Info) string {
-	var field startupLine
-	field.dim("skills=")
-	field.normal(fmt.Sprint(info.ProjectSkills))
-	field.dim("p/")
-	field.normal(fmt.Sprint(info.GlobalSkills))
-	field.dim("g")
-	return field.String()
-}
-
-func startupSnippets(info Info) string {
-	var field startupLine
-	field.dim("snippets=")
-	field.normal(fmt.Sprint(info.Snippets))
 	return field.String()
 }
 
 func startupTools(info Info) string {
 	var field startupLine
-	field.dim("tools=")
 	field.quantity(util.FormatTokenEstimate(info.ToolBytes, 2), false)
 	return field.String()
 }

@@ -7,17 +7,11 @@ medium gpt-5.6-sol
 === activity-spinner / running second frame ===
 ·✦
 === context-usage / known ===
-91% 182Kt/200Kt
+91% 182K/200K
 === context-usage / one million ===
-50% 500Kt/1Mt
+50% 500K/1M
 === context-usage / unknown ===
 ?% ?/?
-=== current-session ===
-brave-otter
-=== current-time / custom format ===
-14:32:09
-=== current-time / default format ===
-14:32
 === git-branch / outside a repository ===
 
 === last-tps / a fast turn ===
@@ -30,6 +24,10 @@ brave-otter
 ?t/s
 === last-tps / unknown while running ===
 ?t/s
+=== local-time / custom format ===
+14:32:09
+=== local-time / default format ===
+14:32
 === mode-toggle / all granted ===
 rxw bgs
 === mode-toggle / pending prefix ===
@@ -44,6 +42,8 @@ rxw bgs
 
 === scroll-overflow / up ===
 ↑ 3
+=== session-name ===
+brave-otter
 === subscription-usage / not applicable ===
 usage n/a
 === turn-count / nothing asked yet ===

@@ -105,14 +105,14 @@ func TestModelSelectionRequiresModelAndEffort(t *testing.T) {
 	}
 }
 
-func TestASessionMayBePassedIntoANewConversation(t *testing.T) {
-	parsedOptions := parseOptions(t, "--pass", "chosen-lobster", "carry", "on")
+func TestANewConversationMayStartFromASession(t *testing.T) {
+	parsedOptions := parseOptions(t, "--from", "chosen-lobster", "carry", "on")
 
-	if !parsedOptions.Passing() || parsedOptions.PassedSession != "chosen-lobster" {
-		t.Errorf("expected the passed session, got %q", parsedOptions.PassedSession)
+	if !parsedOptions.StartingFromSession() || parsedOptions.SourceSession != "chosen-lobster" {
+		t.Errorf("expected the source session, got %q", parsedOptions.SourceSession)
 	}
 	if parsedOptions.Resuming() {
-		t.Error("expected passing not to count as resuming")
+		t.Error("expected starting from a session not to count as resuming")
 	}
 	if parsedOptions.Message != "carry on" {
 		t.Errorf("expected the prompt beside it, got %q", parsedOptions.Message)
@@ -132,7 +132,7 @@ func TestASessionMayBeResumedWithAPromptBesideIt(t *testing.T) {
 }
 
 func TestTheVersionIsAskedForOnItsOwn(t *testing.T) {
-	for _, argument := range []string{"--version", "-V"} {
+	for _, argument := range []string{"--version", "-v"} {
 		if !bind(t, argument).Version {
 			t.Errorf("expected the version to be asked for by %s", argument)
 		}
@@ -229,7 +229,7 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 func TestAWorkspaceCannotBeGivenWhenContinuingAStoredSession(t *testing.T) {
 	for name, input := range map[string]Input{
 		"resume": {Session: "one", WorkspaceDir: "somewhere"},
-		"pass":   {PassedSession: "one", WorkspaceDir: "somewhere"},
+		"from":   {SourceSession: "one", WorkspaceDir: "somewhere"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			if _, err := input.Parse(modelCachePath()); err == nil {
@@ -239,8 +239,8 @@ func TestAWorkspaceCannotBeGivenWhenContinuingAStoredSession(t *testing.T) {
 	}
 }
 
-func TestASessionCannotBeResumedAndPassedTogether(t *testing.T) {
-	input := Input{Session: "one", PassedSession: "another"}
+func TestASessionCannotBeResumedAndUsedAsTheSourceTogether(t *testing.T) {
+	input := Input{Session: "one", SourceSession: "another"}
 	if _, err := input.Parse(modelCachePath()); err == nil {
 		t.Error("expected an error")
 	}

@@ -1,6 +1,7 @@
 === narrow ===
-[startup=0s session=00000000000000000000
-0000 skills=0p/0g tools=~600t]
+New session 000000000000000000000000 sta
+rted in 0s with 0 skills and 0 snippets.
+Context: tools ~600t
 
 
  show the customer data model
@@ -21,17 +22,9 @@ int customer_id FK
 }
 CUSTOMER ||--o{ ORDER : 1️⃣ places
 === one column ===
-[
-s
-t
-a
-r
-t
-u
-p
-=
-0
-s
+N
+e
+w
 
 s
 e
@@ -40,7 +33,7 @@ s
 i
 o
 n
-=
+
 0
 0
 0
@@ -64,6 +57,27 @@ n
 0
 0
 0
+0
+
+s
+t
+a
+r
+t
+e
+d
+
+i
+n
+
+0
+s
+
+w
+i
+t
+h
+
 0
 
 s
@@ -72,25 +86,42 @@ i
 l
 l
 s
-=
+
+a
+n
+d
+
 0
+
+s
+n
+i
 p
-/
-0
-g
+p
+e
+t
+s
+.
+C
+o
+n
+t
+e
+x
+t
+:
 
 t
 o
 o
 l
 s
-=
+
 ~
 6
 0
 0
 t
-]
 
 
 
@@ -296,12 +327,15 @@ c
 e
 s
 === tiny ===
-[startup=0s
-session=0000
+New session
 000000000000
-00000000 ski
-lls=0p/0g to
-ols=~600t]
+000000000000
+ started in
+0s with 0 sk
+ills and 0 s
+nippets.
+Context: too
+ls ~600t
 
 
  show the
@@ -334,7 +368,8 @@ CUSTOMER
 ||--o{ ORDER
 : 1️⃣ places
 === wide ===
-[startup=0s session=000000000000000000000000 skills=0p/0g tools=~600t]
+New session 000000000000000000000000 started in 0s with 0 skills and 0 snippets.
+Context: tools ~600t
 
 
  show the customer data model

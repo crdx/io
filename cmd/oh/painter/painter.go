@@ -105,9 +105,9 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		self.screen.Line(self.render(event))
 
 	case caps.ModeChange:
-		if notice, said := caps.ModeNotice(event); said {
+		if notice, said := renderModeNotice(event); said {
 			self.Close(dynamic.Cancelled)
-			self.screen.Line(NoticeStyle(agent.WarningStatus)(notice))
+			self.screen.Line(notice)
 		}
 
 	case agent.FailureEvent:

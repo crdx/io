@@ -82,7 +82,7 @@ func TestLoadingACrashedSessionIsRefusedWithoutChangingItsJournal(t *testing.T) 
 	}
 }
 
-func TestGettingASessionToPassPreparesTheNewConversation(t *testing.T) {
+func TestGettingAForkSourcePreparesTheNewConversation(t *testing.T) {
 	directory := t.TempDir()
 	workspaceDirectory := t.TempDir()
 	writer, err := store.Create(directory, store.Meta{WorkspaceDir: workspaceDirectory})
@@ -95,28 +95,28 @@ func TestGettingASessionToPassPreparesTheNewConversation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	passedSession, err := GetPassedSession(directory, writer.Name(), "focus on tests")
+	forkSource, err := GetForkSource(directory, writer.Name(), "focus on tests")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if passedSession.WorkspaceDir != workspaceDirectory {
-		t.Errorf("got workspace %q, want %q", passedSession.WorkspaceDir, workspaceDirectory)
+	if forkSource.WorkspaceDir != workspaceDirectory {
+		t.Errorf("got workspace %q, want %q", forkSource.WorkspaceDir, workspaceDirectory)
 	}
 	wantInitialFilePath := filepath.Join(directory, writer.Name(), "chat.md")
-	if passedSession.InitialFilePath != wantInitialFilePath {
-		t.Errorf("got initial file %q, want %q", passedSession.InitialFilePath, wantInitialFilePath)
+	if forkSource.InitialFilePath != wantInitialFilePath {
+		t.Errorf("got initial file %q, want %q", forkSource.InitialFilePath, wantInitialFilePath)
 	}
-	wantMessage := passedSessionPrompt + "\n\nfocus on tests"
-	if passedSession.InitialUserMessage != wantMessage {
-		t.Errorf("got message %q, want %q", passedSession.InitialUserMessage, wantMessage)
+	wantMessage := forkSourcePrompt + "\n\nfocus on tests"
+	if forkSource.InitialUserMessage != wantMessage {
+		t.Errorf("got message %q, want %q", forkSource.InitialUserMessage, wantMessage)
 	}
 
-	passedSession, err = GetPassedSession(directory, writer.Name(), "")
+	forkSource, err = GetForkSource(directory, writer.Name(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if passedSession.InitialUserMessage != passedSessionPrompt {
-		t.Errorf("got default message %q, want %q", passedSession.InitialUserMessage, passedSessionPrompt)
+	if forkSource.InitialUserMessage != forkSourcePrompt {
+		t.Errorf("got default message %q, want %q", forkSource.InitialUserMessage, forkSourcePrompt)
 	}
 }
 

@@ -1,4 +1,4 @@
-package currentSession
+package sessionName
 
 import (
 	"crdx.org/io/cmd/oh/segment"

@@ -1,4 +1,4 @@
-package subscriptionUsage
+package subUsage
 
 import (
 	"context"
@@ -194,7 +194,7 @@ func TestAFreshSnapshotIsNotFetchedAgain(t *testing.T) {
 	}
 }
 
-func TestRefreshingASnapshotKeepsTheFiguresBesideTheSpinner(t *testing.T) {
+func TestRefreshingASnapshotDelaysTheSpinnerAndKeepsTheFigures(t *testing.T) {
 	reporter := &scriptedReporter{windows: []agent.UsageWindow{{
 		Duration: 5 * time.Hour,
 		Percent:  40,
@@ -205,10 +205,18 @@ func TestRefreshingASnapshotKeepsTheFiguresBesideTheSpinner(t *testing.T) {
 
 	fetchNow(t, built)
 	clock.set(testNow.Add(defaultRate))
+	if !built.noteFetchStarting() {
+		t.Fatal("refresh did not start")
+	}
 
+	if got := style.Plain(built.Render(segment.Context{})); got != "5h 40%" {
+		t.Errorf("short refresh = %q", got)
+	}
+
+	clock.set(clock.read().Add(spinnerDelay))
 	want := "5h 40% " + built.spinnerFrame()
 	if got := style.Plain(built.Render(segment.Context{})); got != want {
-		t.Errorf("got %q, want %q", got, want)
+		t.Errorf("long refresh = %q, want %q", got, want)
 	}
 }
 
@@ -225,7 +233,7 @@ func TestOnlyScopedWindowsSayUsageIsUnavailable(t *testing.T) {
 	}
 }
 
-func TestAnActiveFetchShowsASpinnerAndRefreshesQuickly(t *testing.T) {
+func TestAnActiveFetchOnlyShowsASpinnerAfterTheDelay(t *testing.T) {
 	clock := &testClock{now: testNow}
 	built := buildState(t, &scriptedReporter{}, clock)
 
@@ -233,9 +241,15 @@ func TestAnActiveFetchShowsASpinnerAndRefreshesQuickly(t *testing.T) {
 		t.Fatal("initial fetch did not start")
 	}
 
+	clock.set(testNow.Add(spinnerDelay - time.Nanosecond))
+	if got := style.Plain(built.Render(segment.Context{})); got != "usage pending" {
+		t.Errorf("short fetch = %q", got)
+	}
+
+	clock.set(testNow.Add(spinnerDelay))
 	want := "usage " + built.spinnerFrame()
 	if got := style.Plain(built.Render(segment.Context{})); got != want {
-		t.Errorf("got %q, want %q", got, want)
+		t.Errorf("long fetch = %q, want %q", got, want)
 	}
 
 	if got := built.IdleRefreshInterval(); got != 125*time.Millisecond {
@@ -259,6 +273,26 @@ func TestAnEmptyReportShowsPendingStatus(t *testing.T) {
 
 	if got := built.IdleRefreshInterval(); got != redrawInterval {
 		t.Errorf("pending idle refresh interval = %s", got)
+	}
+}
+
+func TestAFastPendingRetryNeverShowsTheSpinner(t *testing.T) {
+	clock := &testClock{now: testNow}
+	built := buildState(t, &scriptedReporter{}, clock)
+
+	fetchNow(t, built)
+	clock.set(testNow.Add(firstEmptyWait))
+	if !built.noteFetchStarting() {
+		t.Fatal("retry did not start")
+	}
+
+	if got := style.Plain(built.Render(segment.Context{})); got != "usage pending" {
+		t.Errorf("retry start = %q", got)
+	}
+
+	built.fetch()
+	if got := style.Plain(built.Render(segment.Context{})); got != "usage pending" {
+		t.Errorf("retry completion = %q", got)
 	}
 }
 
@@ -375,6 +409,25 @@ func TestAFailedFetchShowsRetryingStatus(t *testing.T) {
 	fetchNow(t, built)
 
 	if got := style.Plain(built.Render(segment.Context{})); got != "usage retrying" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestAFailedRefreshKeepsTheLastSnapshot(t *testing.T) {
+	reporter := &scriptedReporter{windows: []agent.UsageWindow{{
+		Duration: 5 * time.Hour,
+		Percent:  40,
+		ResetsAt: testNow.Add(150 * time.Minute),
+	}}}
+	clock := &testClock{now: testNow}
+	built := buildState(t, reporter, clock)
+
+	fetchNow(t, built)
+	reporter.err = errors.New("the endpoint is sulking")
+	clock.set(testNow.Add(defaultRate))
+	fetchNow(t, built)
+
+	if got := style.Plain(built.Render(segment.Context{})); got != "5h 40% retrying" {
 		t.Errorf("got %q", got)
 	}
 }

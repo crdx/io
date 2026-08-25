@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/segment"
-	"crdx.org/io/cmd/oh/segment/currentSession"
+	"crdx.org/io/cmd/oh/segment/sessionName"
 	"crdx.org/io/cmd/oh/style"
 )
 
 func TestTheSessionSegmentNamesTheSession(t *testing.T) {
-	built, err := currentSession.New("brave-otter")(tomlOptions(""))
+	built, err := sessionName.New("brave-otter")(tomlOptions(""))
 	if err != nil {
 		t.Fatal(err)
 	}

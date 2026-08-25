@@ -10,13 +10,13 @@ import (
 	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
-	"crdx.org/io/cmd/oh/segment/currentSession"
-	"crdx.org/io/cmd/oh/segment/currentTime"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
 	"crdx.org/io/cmd/oh/segment/lastTps"
+	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
-	"crdx.org/io/cmd/oh/segment/subscriptionUsage"
+	"crdx.org/io/cmd/oh/segment/sessionName"
+	"crdx.org/io/cmd/oh/segment/subUsage"
 	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnElapsed"
 	"crdx.org/io/cmd/oh/segment/workingDirectory"
@@ -24,19 +24,19 @@ import (
 )
 
 const (
-	activitySpinnerSegment   = "activity-spinner"
-	contextUsageSegment      = "context-usage"
-	modeToggleSegment        = "mode-toggle"
-	workingDirectorySegment  = "working-directory"
-	activeModelSegment       = "active-model"
-	scrollOverflowSegment    = "scroll-overflow"
-	currentSessionSegment    = "current-session"
-	currentTimeSegment       = "current-time"
-	turnElapsedSegment       = "turn-elapsed"
-	turnCountSegment         = "turn-count"
-	lastTpsSegment           = "last-tps"
-	gitBranchSegment         = "git-branch"
-	subscriptionUsageSegment = "subscription-usage"
+	activitySpinnerSegment  = "activity-spinner"
+	contextUsageSegment     = "context-usage"
+	modeToggleSegment       = "mode-toggle"
+	workingDirectorySegment = "working-directory"
+	activeModelSegment      = "active-model"
+	scrollOverflowSegment   = "scroll-overflow"
+	sessionNameSegment      = "session-name"
+	localTimeSegment        = "local-time"
+	turnElapsedSegment      = "turn-elapsed"
+	turnCountSegment        = "turn-count"
+	lastTpsSegment          = "last-tps"
+	gitBranchSegment        = "git-branch"
+	subUsageSegment         = "subscription-usage"
 )
 
 type Options struct {
@@ -61,19 +61,19 @@ type Sources struct {
 
 func NewRegistry(options Options) segment.Registry {
 	return segment.Registry{
-		activitySpinnerSegment:   activitySpinner.New(options.Sources.GetTurnActivity),
-		contextUsageSegment:      contextUsage.New(options.Sources.GetContextUsage),
-		modeToggleSegment:        modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
-		workingDirectorySegment:  workingDirectory.New(options.WorkspaceDir),
-		activeModelSegment:       activeModel.New(options.ModelName, options.ModelEffort),
-		scrollOverflowSegment:    scrollOverflow.New,
-		currentSessionSegment:    currentSession.New(options.CurrentSessionName),
-		currentTimeSegment:       currentTime.New(time.Now),
-		turnElapsedSegment:       turnElapsed.New(options.Sources.GetTurnElapsed),
-		turnCountSegment:         turnCount.New(options.Sources.GetTurnCount),
-		lastTpsSegment:           lastTps.New(options.Sources.GetLastTurnTokenRate, options.Sources.IsTurnRunning),
-		gitBranchSegment:         gitBranch.New(options.WorkspaceDir),
-		subscriptionUsageSegment: subscriptionUsage.New(options.UsageReporter, time.Now),
+		activitySpinnerSegment:  activitySpinner.New(options.Sources.GetTurnActivity),
+		contextUsageSegment:     contextUsage.New(options.Sources.GetContextUsage),
+		modeToggleSegment:       modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
+		workingDirectorySegment: workingDirectory.New(options.WorkspaceDir),
+		activeModelSegment:      activeModel.New(options.ModelName, options.ModelEffort),
+		scrollOverflowSegment:   scrollOverflow.New,
+		sessionNameSegment:      sessionName.New(options.CurrentSessionName),
+		localTimeSegment:        localTime.New(time.Now),
+		turnElapsedSegment:      turnElapsed.New(options.Sources.GetTurnElapsed),
+		turnCountSegment:        turnCount.New(options.Sources.GetTurnCount),
+		lastTpsSegment:          lastTps.New(options.Sources.GetLastTurnTokenRate, options.Sources.IsTurnRunning),
+		gitBranchSegment:        gitBranch.New(options.WorkspaceDir),
+		subUsageSegment:         subUsage.New(options.UsageReporter, time.Now),
 	}
 }
 

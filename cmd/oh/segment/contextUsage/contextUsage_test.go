@@ -35,7 +35,7 @@ func TestContextUsageIsDerivedWhenRendered(t *testing.T) {
 	}
 
 	usedTokens = 64_000
-	if got := style.Plain(built.Render(segment.Context{})); got != "23% 64Kt/274Kt" {
+	if got := style.Plain(built.Render(segment.Context{})); got != "23% 64K/274K" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -47,10 +47,29 @@ func TestContextUsageShowsEveryKnownPart(t *testing.T) {
 		want        string
 	}{
 		"neither":             {want: "?% ?/?"},
-		"total only":          {totalTokens: 200_000, want: "?% ?/200Kt"},
-		"one million context": {usedTokens: 500_000, totalTokens: 1_000_000, want: "50% 500Kt/1Mt"},
-		"used only":           {usedTokens: 5000, want: "?% 5Kt/?"},
-		"both":                {usedTokens: 5000, totalTokens: 200_000, want: "3% 5Kt/200Kt"},
+		"total only":          {totalTokens: 200_000, want: "?% ?/200K"},
+		"one million context": {usedTokens: 500_000, totalTokens: 1_000_000, want: "50% 500K/1M"},
+		"used only":           {usedTokens: 5000, want: "?% 5K/?"},
+		"both":                {usedTokens: 5000, totalTokens: 200_000, want: "3% 5K/200K"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := render(t, test.usedTokens, test.totalTokens); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestContextUsageIsNoFinerThanWholeThousands(t *testing.T) {
+	for name, test := range map[string]struct {
+		usedTokens  int
+		totalTokens int
+		want        string
+	}{
+		"a handful of tokens still counts": {usedTokens: 400, totalTokens: 200_000, want: "0% 1K/200K"},
+		"thousands are rounded":            {usedTokens: 92_501, totalTokens: 200_000, want: "46% 93K/200K"},
+		"a window over a million":          {usedTokens: 92_000, totalTokens: 1_048_576, want: "9% 92K/1M"},
+		"millions are rounded":             {usedTokens: 1_600_000, totalTokens: 2_000_000, want: "80% 2M/2M"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			if got := render(t, test.usedTokens, test.totalTokens); got != test.want {
@@ -61,10 +80,10 @@ func TestContextUsageShowsEveryKnownPart(t *testing.T) {
 }
 
 func TestContextUsageRoundsAndCapsItsPercentage(t *testing.T) {
-	if got := render(t, 5000, 200_000); got != "3% 5Kt/200Kt" {
+	if got := render(t, 5000, 200_000); got != "3% 5K/200K" {
 		t.Errorf("got %q", got)
 	}
-	if got := render(t, 250_000, 200_000); got != "100% 250Kt/200Kt" {
+	if got := render(t, 250_000, 200_000); got != "100% 250K/200K" {
 		t.Errorf("got %q", got)
 	}
 }

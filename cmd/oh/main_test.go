@@ -54,13 +54,13 @@ import (
 	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
-	"crdx.org/io/cmd/oh/segment/currentSession"
-	"crdx.org/io/cmd/oh/segment/currentTime"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
 	"crdx.org/io/cmd/oh/segment/lastTps"
+	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
-	"crdx.org/io/cmd/oh/segment/subscriptionUsage"
+	"crdx.org/io/cmd/oh/segment/sessionName"
+	"crdx.org/io/cmd/oh/segment/subUsage"
 	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnElapsed"
 	"crdx.org/io/cmd/oh/segment/workingDirectory"
@@ -2085,6 +2085,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"inputblock":        {".ansi", ".screen"},
 		"lifecycle":         {".ansi", ".screen"},
 		"mermaid-streaming": {".screen"},
+		"mode-takeback":     {".ansi", ".screen"},
 		"new-session":       {".txt"},
 		"resume-mode":       {".ansi"},
 		"running":           {".ansi", ".screen"},
@@ -2396,13 +2397,13 @@ func TestACapabilitySwappedBackIsTakenBackRatherThanWrittenDown(t *testing.T) {
 	self, directory := modeFixture(t)
 
 	self.toggleCap(caps.Git)
-	if len(self.events) != 1 {
-		t.Fatalf("expected the change to be shown, got %v", self.events)
+	if len(self.pendingModeChanges) != 1 {
+		t.Fatalf("expected the change to be shown, got %v", self.pendingModeChanges)
 	}
 
 	self.toggleCap(caps.Git)
-	if len(self.events) != 0 {
-		t.Errorf("expected the change to be taken back, got %v", self.events)
+	if len(self.pendingModeChanges) != 0 {
+		t.Errorf("expected the change to be taken back, got %v", self.pendingModeChanges)
 	}
 
 	self.settleMode()
@@ -2417,13 +2418,13 @@ func TestACapabilitySwappedBackLeavesTheOtherChangesSayingWhatTheySaid(t *testin
 	self.toggleCap(caps.Git)
 	self.toggleCap(caps.Write)
 
-	shown, said := caps.ModeNotice(self.events[1])
+	shown, said := caps.ModeNotice(self.pendingModeChanges[1])
 	if !said {
 		t.Fatal("expected the second change to say something")
 	}
 
 	self.toggleCap(caps.Git)
-	if again, _ := caps.ModeNotice(self.events[0]); again != shown {
+	if again, _ := caps.ModeNotice(self.pendingModeChanges[0]); again != shown {
 		t.Errorf("expected %q, got %q", shown, again)
 	}
 
@@ -2440,10 +2441,52 @@ func TestAModeChangeSaysItselfInTheScrollback(t *testing.T) {
 	self, _ := modeFixture(t)
 	self.screen = output.New(&screenOutput)
 	self.toggleCap(caps.Git)
+	self.settleMode()
 
 	if !strings.Contains(screenOutput.String(), "The .git directory is now read-write.") {
 		t.Errorf("expected the change to be said, got %q", screenOutput.String())
 	}
+}
+
+func TestTakingBackAModeChangeDrawsWhatItDrewBefore(t *testing.T) {
+	completeInteraction := func() string {
+		stream := modeTakebackStream(t, 2)
+		if strings.Contains(stream, "\x1b[H\x1b[2J") {
+			t.Error("taking the mode change back cleared the screen")
+		}
+		return stream
+	}
+
+	compareWithGolden(t, "mode-takeback", ".ansi", map[string]func() string{
+		"complete interaction": completeInteraction,
+	})
+	compareWithGolden(t, "mode-takeback", ".screen", shownPasses(t, map[string]func() string{
+		"1 before either chord":  func() string { return modeTakebackStream(t, 0) },
+		"2 after ctrl+x s":       func() string { return modeTakebackStream(t, 1) },
+		"3 after ctrl+x s twice": func() string { return modeTakebackStream(t, 2) },
+	}))
+}
+
+func modeTakebackStream(t *testing.T, toggleCount int) string {
+	t.Helper()
+
+	self, _ := modeFixture(t)
+	var screenOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+
+	history := edit.NewHistory("", historyLimit)
+	editor := edit.NewInput(history)
+	self.editor = editor
+
+	self.screen.Line("conversation remains in scrollback")
+	self.show(editor)
+
+	for range toggleCount {
+		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
+		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: 's'})
+	}
+
+	return screenOutput.String()
 }
 
 func TestMermaidStreamingDrawsWhatItDrewBefore(t *testing.T) {
@@ -2592,8 +2635,8 @@ func TestWhatNewSessionMakesOfAModelGlob(t *testing.T) {
 	})
 }
 
-func TestPassedSessionNamesTheSourceOnANewSessionTransition(t *testing.T) {
-	transition, err := passedSessionTransition(
+func TestForkedSessionNamesTheSourceOnANewSessionTransition(t *testing.T) {
+	transition, err := forkedSessionTransition(
 		"/workspace",
 		"opus-5@max",
 		"medium",
@@ -2609,7 +2652,7 @@ func TestPassedSessionNamesTheSourceOnANewSessionTransition(t *testing.T) {
 		"/workspace",
 		"-m",
 		"anthropic/claude-opus-5@max",
-		passedSessionOption,
+		sourceSessionOption,
 		"able-dolphin",
 	}
 	if !slices.Equal(transition.Arguments, want) {
@@ -3935,8 +3978,8 @@ func goldenBarLayout(t *testing.T, harness *App) segment.Layout {
 		right = [
 			{ segment = "turn-count" },
 			{ segment = "last-tps" },
-			{ segment = "current-session" },
-			{ segment = "current-time", format = "15:04" },
+			{ segment = "session-name" },
+			{ segment = "local-time", format = "15:04" },
 			{ segment = "scroll-overflow", direction = "down" },
 		]
 	`)
@@ -4050,21 +4093,21 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			"",
 			segment.Context{},
 		),
-		"current-session": goldenSegmentPass(
+		"session-name": goldenSegmentPass(
 			t,
-			currentSession.New("brave-otter"),
+			sessionName.New("brave-otter"),
 			"",
 			segment.Context{},
 		),
-		"current-time / custom format": goldenSegmentPass(
+		"local-time / custom format": goldenSegmentPass(
 			t,
-			currentTime.New(func() time.Time { return at }),
+			localTime.New(func() time.Time { return at }),
 			`format = "15:04:05"`,
 			segment.Context{},
 		),
-		"current-time / default format": goldenSegmentPass(
+		"local-time / default format": goldenSegmentPass(
 			t,
-			currentTime.New(func() time.Time { return at }),
+			localTime.New(func() time.Time { return at }),
 			"",
 			segment.Context{},
 		),
@@ -4112,7 +4155,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"subscription-usage / not applicable": goldenSegmentPass(
 			t,
-			subscriptionUsage.New(nil, func() time.Time { return at }),
+			subUsage.New(nil, func() time.Time { return at }),
 			"",
 			segment.Context{},
 		),

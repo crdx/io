@@ -8,10 +8,7 @@ import (
 	"crdx.org/io/cmd/oh/tty"
 )
 
-const (
-	readOnlyMarker = "⚫"
-	writableMarker = "🟡"
-)
+const writableMarker = "🟡"
 
 const eraseDisplay = "\x1b[H\x1b[2J\x1b[3J"
 
@@ -54,8 +51,8 @@ func (self *Terminal) SetMode(mode caps.Set) {
 
 func titleText(mode caps.Set, workspaceName string) string {
 	if mode.Has(caps.Write) {
-		return writableMarker + " " + workspaceName
+		return workspaceName + " " + writableMarker
 	} else {
-		return readOnlyMarker + " " + workspaceName
+		return workspaceName
 	}
 }

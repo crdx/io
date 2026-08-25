@@ -41,8 +41,8 @@ type Session struct {
 }
 
 type SessionStart struct {
-	ModelGlob              string
-	ShouldPassConversation bool
+	ModelGlob         string
+	SourceSessionName string
 }
 
 type commandEnvironment struct {
@@ -133,10 +133,10 @@ func buildCommands(environment commandEnvironment, snippetUsages []string) (slas
 			},
 			environment.openTarget,
 		),
-		sessionCommand("pass", func(modelGlob string) error {
+		sessionCommand("fork", func(modelGlob string) error {
 			return environment.startSession(SessionStart{
-				ModelGlob:              modelGlob,
-				ShouldPassConversation: true,
+				ModelGlob:         modelGlob,
+				SourceSessionName: environment.session.name,
 			})
 		}),
 	}
@@ -178,7 +178,7 @@ func sessionCommand(name string, startSession func(string) error) slash.Command 
 func helpText(commandUsages []string, hiddenCommandUsage string, snippetUsages []string) string {
 	visibleCommandUsages := slices.DeleteFunc(commandUsages, func(usage string) bool { return usage == hiddenCommandUsage })
 	for i, usage := range visibleCommandUsages {
-		if usage == "/new" || usage == "/pass" {
+		if usage == "/new" || usage == "/fork" {
 			visibleCommandUsages[i] += " [model[@effort]]"
 		}
 	}

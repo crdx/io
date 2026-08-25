@@ -5,7 +5,7 @@ import (
 	"crdx.org/io/cmd/oh/model"
 )
 
-const passedSessionOption = "--pass"
+const sourceSessionOption = "--from"
 
 func newSessionTransition(workspaceDir string, modelGlob string, currentEffort string, choices []model.Choice) (cycle.Transition, error) {
 	arguments := []string{"-d", workspaceDir}
@@ -23,12 +23,12 @@ func newSessionTransition(workspaceDir string, modelGlob string, currentEffort s
 	return cycle.Transition{Kind: cycle.NewSession, Arguments: arguments}, nil
 }
 
-func passedSessionTransition(
+func forkedSessionTransition(
 	workspaceDir string,
 	modelGlob string,
 	currentEffort string,
 	choices []model.Choice,
-	passedSessionName string,
+	sourceSessionName string,
 ) (cycle.Transition, error) {
 	transition, err := newSessionTransition(workspaceDir, modelGlob, currentEffort, choices)
 	if err != nil {
@@ -36,8 +36,8 @@ func passedSessionTransition(
 	}
 	transition.Arguments = append(
 		transition.Arguments,
-		passedSessionOption,
-		passedSessionName,
+		sourceSessionOption,
+		sourceSessionName,
 	)
 	return transition, nil
 }

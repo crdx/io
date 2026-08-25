@@ -7,17 +7,11 @@
 === activity-spinner / running second frame ===
 \e[38;2;192;128;80m·✦\e[0m
 === context-usage / known ===
-\e[38;2;150;152;150m91% 182Kt/200Kt\e[0m
+91\e[38;2;150;152;150m% \e[0m182\e[38;2;150;152;150mK/\e[0m200\e[38;2;150;152;150mK\e[0m
 === context-usage / one million ===
-\e[38;2;150;152;150m50% 500Kt/1Mt\e[0m
+50\e[38;2;150;152;150m% \e[0m500\e[38;2;150;152;150mK/\e[0m1\e[38;2;150;152;150mM\e[0m
 === context-usage / unknown ===
-\e[38;2;150;152;150m?% ?/?\e[0m
-=== current-session ===
-\e[38;2;150;152;150mbrave-otter\e[0m
-=== current-time / custom format ===
-\e[38;2;150;152;150m14:32:09\e[0m
-=== current-time / default format ===
-\e[38;2;150;152;150m14:32\e[0m
+?\e[38;2;150;152;150m% \e[0m?\e[38;2;150;152;150m/\e[0m?
 === git-branch / outside a repository ===
 \e[38;2;150;152;150m\e[0m
 === last-tps / a fast turn ===
@@ -30,6 +24,10 @@
 \e[3m\e[38;2;150;152;150m?t/s\e[0m\e[0m
 === last-tps / unknown while running ===
 \e[3m\e[38;2;150;152;150m?t/s\e[0m\e[0m
+=== local-time / custom format ===
+\e[38;2;150;152;150m14:32:09\e[0m
+=== local-time / default format ===
+\e[38;2;150;152;150m14:32\e[0m
 === mode-toggle / all granted ===
 \e[38;2;76;154;44mr\e[0m\e[38;2;204;102;102mx\e[0m\e[38;2;207;173;0mw\e[0m \e[38;2;138;190;183mb\e[0m\e[38;2;201;166;212mg\e[0m\e[38;2;129;162;190ms\e[0m
 === mode-toggle / pending prefix ===
@@ -44,6 +42,8 @@
 
 === scroll-overflow / up ===
 \e[38;2;150;152;150m↑ 3\e[0m
+=== session-name ===
+\e[38;2;150;152;150mbrave-otter\e[0m
 === subscription-usage / not applicable ===
 \e[2m\e[38;2;150;152;150musage n/a\e[0m\e[0m
 === turn-count / nothing asked yet ===

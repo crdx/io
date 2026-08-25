@@ -1,8 +1,9 @@
 package config
 
 const (
-	InitialFormat    = 1
-	RoundRobinFormat = 2
+	InitialFormat      = 1
+	RoundRobinFormat   = 2
+	SegmentNamesFormat = 3
 
-	Format = RoundRobinFormat
+	Format = SegmentNamesFormat
 )

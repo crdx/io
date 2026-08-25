@@ -20,7 +20,7 @@ Usage:
 Options:
     -d, --workspace <dir>                  Set working directory and project scope
     -r, --resume <session>                 Resume the saved session by name
-    --pass <session>                       Pass a saved session into a new conversation
+    --from <session>                       Start a new conversation from a saved session
     -s, --sessions                         Choose a saved session to resume
     -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
     -c, --caps <flags>                     Capabilities: rxwbgs (read, exec, write, bg, git, web) (default: %s)
@@ -28,7 +28,7 @@ Options:
     -i, --init <file>                      Copy a file into the agent scratch directory; may be repeated
     -l, --list                             List the available models, then exit
     -u, --update                           Update the cached model list, then exit
-    -V, --version                          Show the version
+    -v, --version                          Show version
     -h, --help                             Show this help
 
 Model selection takes the closest reading of what you name: the whole name first, then an opening,
@@ -43,7 +43,7 @@ type Input struct {
 	Message       []string `docopt:"<prompt>"`
 	WorkspaceDir  string   `docopt:"--workspace"`
 	Session       string   `docopt:"--resume"`
-	PassedSession string   `docopt:"--pass"`
+	SourceSession string   `docopt:"--from"`
 	Sessions      bool     `docopt:"--sessions"`
 	Model         string   `docopt:"--model"`
 	Caps          string   `docopt:"--caps"`
@@ -59,7 +59,7 @@ type Options struct {
 	Message        string
 	WorkspaceDir   string
 	Session        string
-	PassedSession  string
+	SourceSession  string
 	Provider       string
 	Model          string
 	Effort         string
@@ -79,9 +79,9 @@ func (self Options) Resuming() bool {
 	return self.Session != ""
 }
 
-// Passing reports whether the options name a stored session to pass into a new conversation.
-func (self Options) Passing() bool {
-	return self.PassedSession != ""
+// StartingFromSession reports whether a stored session supplies the new conversation's context.
+func (self Options) StartingFromSession() bool {
+	return self.SourceSession != ""
 }
 
 // Parse validates an input command line and resolves its requested model selection.
@@ -90,7 +90,7 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 		WorkspaceDir:  self.WorkspaceDir,
 		Message:       strings.Join(self.Message, " "),
 		Session:       self.Session,
-		PassedSession: self.PassedSession,
+		SourceSession: self.SourceSession,
 		Tools:         self.Tools,
 		InitialFiles:  self.InitialFiles,
 	}
@@ -117,14 +117,14 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 	options.Caps = grantedCaps
 	options.WereCapsChosen = self.Caps != ""
 
-	if options.Resuming() && options.Passing() {
-		return options, errors.New("a conversation cannot be resumed and passed at the same time")
+	if options.Resuming() && options.StartingFromSession() {
+		return options, errors.New("a conversation cannot be resumed while another session supplies its context")
 	}
 	if options.Resuming() && options.WorkspaceDir != "" {
 		return options, errors.New("a resumed conversation takes its directory from the session")
 	}
-	if options.Passing() && options.WorkspaceDir != "" {
-		return options, errors.New("a passed conversation takes its directory from the session")
+	if options.StartingFromSession() && options.WorkspaceDir != "" {
+		return options, errors.New("a conversation started from a session takes its directory from that session")
 	}
 	if options.Resuming() && len(options.InitialFiles) > 0 {
 		return options, errors.New("a resumed conversation cannot be initialised from files")

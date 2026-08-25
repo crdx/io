@@ -101,11 +101,11 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 			return nil
 		},
 		startSession: func(start SessionStart) error {
-			kind := "new"
-			if start.ShouldPassConversation {
-				kind = "pass"
+			action := "new:" + start.ModelGlob
+			if start.SourceSessionName != "" {
+				action = "fork:" + start.SourceSessionName + ":" + start.ModelGlob
 			}
-			actions = append(actions, kind+":"+start.ModelGlob)
+			actions = append(actions, action)
 			return nil
 		},
 	})
@@ -114,8 +114,8 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		"/conf":              "edit:" + configPath,
 		"/new":               "new:",
 		"/new sonnet":        "new:sonnet",
-		"/pass":              "pass:",
-		"/pass sonnet":       "pass:sonnet",
+		"/fork":              "fork:brave-otter:",
+		"/fork sonnet":       "fork:brave-otter:sonnet",
 		"/open config-dir":   "open:" + configDirectory,
 		"/open state-dir":    "open:" + stateDirectory,
 		"/open session-dir":  "open:" + sessionDirectory,
@@ -162,7 +162,7 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 		"/conf extra",
 		"/help extra",
 		"/new one two",
-		"/pass one two",
+		"/fork one two",
 		"/copy session-name extra",
 		"/open unknown",
 	} {

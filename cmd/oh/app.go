@@ -44,7 +44,9 @@ type App struct {
 	editor             *edit.Input
 	mode               *caps.Mode
 	settledCaps        caps.Set
-	pendingModeChanges []int
+	pendingModeChanges []agent.Event
+	modeNotices        *painter.ModeNotices
+	modeNoticeBlock    *output.BlockHandle
 	terminal           terminal.Terminal
 	metrics            metrics.Tracker
 
@@ -273,8 +275,8 @@ func (self *App) toggleCap(whichCaps caps.Set) {
 }
 
 func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
-	for _, index := range self.pendingModeChanges {
-		if self.events[index].Name == whichCaps.Flag() {
+	for index, event := range self.pendingModeChanges {
+		if event.Name == whichCaps.Flag() {
 			return index, true
 		}
 	}
@@ -284,30 +286,55 @@ func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
 
 func (self *App) showModeChange(whichCaps caps.Set) {
 	event := caps.ModeToggleEvent(whichCaps, self.mode.Current())
+	self.pendingModeChanges = append(self.pendingModeChanges, event)
 
-	self.events = append(self.events, event)
-	eventIndex := len(self.events) - 1
-	self.pendingModeChanges = append(self.pendingModeChanges, eventIndex)
-	self.noticePainter().DrawEvent(event)
-}
-
-func (self *App) takeBackModeChange(i int, whichCaps caps.Set) {
-	self.events = slices.Delete(self.events, i, i+1)
-
-	pendingModeChanges := make([]int, 0, len(self.pendingModeChanges)-1)
-
-	for _, other := range self.pendingModeChanges {
-		if other < i {
-			pendingModeChanges = append(pendingModeChanges, other)
-		} else if other > i {
-			self.events[other-1] = caps.ModeWithout(self.events[other-1], whichCaps)
-			pendingModeChanges = append(pendingModeChanges, other-1)
-		}
+	if self.currentTurn.Running() {
+		self.noticePainter().DrawEvent(event)
+		return
 	}
 
-	self.pendingModeChanges = pendingModeChanges
+	self.refreshPendingModeNotices()
+}
 
-	self.redraw()
+func (self *App) takeBackModeChange(index int, whichCaps caps.Set) {
+	self.pendingModeChanges = slices.Delete(self.pendingModeChanges, index, index+1)
+
+	for other := index; other < len(self.pendingModeChanges); other++ {
+		self.pendingModeChanges[other] = caps.ModeWithout(self.pendingModeChanges[other], whichCaps)
+	}
+
+	if self.currentTurn.Running() {
+		self.redraw()
+		return
+	}
+
+	self.refreshPendingModeNotices()
+}
+
+func (self *App) refreshPendingModeNotices() {
+	if len(self.pendingModeChanges) == 0 {
+		handle := self.modeNoticeBlock
+		self.modeNotices = nil
+		self.modeNoticeBlock = nil
+
+		if handle != nil && !self.screen.DiscardBlock(handle) {
+			self.redraw()
+		}
+		return
+	}
+
+	if self.modeNotices == nil {
+		self.modeNotices = painter.NewModeNotices(self.pendingModeChanges)
+		self.modeNoticeBlock = self.screen.OpenNotice(self.modeNotices)
+		return
+	}
+
+	self.modeNotices.ReplaceEvents(self.pendingModeChanges)
+	if !self.screen.RefreshBlock(self.modeNoticeBlock) {
+		self.modeNotices = nil
+		self.modeNoticeBlock = nil
+		self.redraw()
+	}
 }
 
 func (self *App) settleMode() {
@@ -318,11 +345,17 @@ func (self *App) settleMode() {
 		return
 	}
 
-	for _, index := range self.pendingModeChanges {
-		self.recordModeEvent(self.events[index])
+	for _, event := range self.pendingModeChanges {
+		self.events = append(self.events, event)
+		self.recordModeEvent(event)
 	}
 
+	if self.modeNoticeBlock != nil {
+		self.screen.SealBlock(self.modeNoticeBlock)
+	}
 	self.pendingModeChanges = nil
+	self.modeNotices = nil
+	self.modeNoticeBlock = nil
 	self.settledCaps = self.mode.Current()
 }
 
@@ -506,12 +539,14 @@ func (self *App) replay() {
 
 		if self.currentTurn.Running() {
 			self.currentTurn.painter = painter
+			self.refreshPendingModeNotices()
 			return
 		}
 
 		painter.Close(dynamic.Cancelled)
 
 		self.screen.End()
+		self.refreshPendingModeNotices()
 	})
 }
 
@@ -525,6 +560,8 @@ func (self *App) redraw() {
 	}
 
 	self.screen.Synchronise(func() {
+		self.modeNotices = nil
+		self.modeNoticeBlock = nil
 		self.screen.Reset()
 		self.replay()
 		if provisionalPainter.Text != "" {
