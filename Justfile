@@ -99,7 +99,7 @@ lint1:
 lint2:
     #!/bin/bash
     set -euo pipefail
-    OUTPUT="$(fd -tf -g '*.go' | xargs gopls check 2>&1)"
+    OUTPUT="$(fd -tf -g '*.go' | xargs gopls check -severity=hint 2>&1)"
     STATUS=$?
     if [[ $STATUS -ne 0 || -n "$OUTPUT" ]]; then
         echo "$OUTPUT"
