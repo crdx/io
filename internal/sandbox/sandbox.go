@@ -18,6 +18,7 @@ var base = []grant{
 	{path: "/etc/ld.so.conf", rights: rightsRead, isOptional: true},
 	{path: "/etc/ld.so.conf.d", rights: rightsRead, isOptional: true},
 	{path: "/etc/ld.so.preload", rights: rightsRead, isOptional: true},
+	{path: "/etc/fonts", rights: rightsRead, isOptional: true},
 	{path: "/etc/ssl/openssl.cnf", rights: rightsRead, isOptional: true},
 	{path: "/etc/nsswitch.conf", rights: rightsRead, isOptional: true},
 	{path: "/etc/passwd", rights: rightsRead, isOptional: true},

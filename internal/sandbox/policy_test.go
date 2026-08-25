@@ -53,6 +53,16 @@ func TestEveryPolicyGrantsWhatACommandNeedsToStart(t *testing.T) {
 	}
 }
 
+func TestEveryPolicyCanReadSystemFontConfiguration(t *testing.T) {
+	rights, granted := rightsFor(Policy{}.grants(), "/etc/fonts")
+	if !granted {
+		t.Fatal("system font configuration was not granted")
+	}
+	if rights != rightsRead {
+		t.Errorf("system font configuration got rights %#x, want %#x", rights, rightsRead)
+	}
+}
+
 func TestWhatAPolicyNamesIsGrantedWithTheRightsItAsked(t *testing.T) {
 	grants := Policy{
 		Read:  []string{"/named-read"},
