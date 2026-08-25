@@ -39,10 +39,11 @@ type Lister interface {
 }
 
 type UsageWindow struct {
-	Duration time.Duration `json:"duration"`
-	Percent  float64       `json:"percent"`
-	ResetsAt time.Time     `json:"resets_at"`
-	Scope    string        `json:"scope,omitempty"`
+	Duration  time.Duration `json:"duration"`
+	Percent   float64       `json:"percent"`
+	ResetsAt  time.Time     `json:"resets_at"`
+	Scope     string        `json:"scope,omitempty"`
+	IsLimited bool          `json:"limited,omitempty"`
 }
 
 type UsageReporter interface {

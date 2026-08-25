@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/internal/req"
 )
 
 const (
@@ -51,7 +50,7 @@ func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 		Limits []usageLimit `json:"limits"`
 	}
 
-	if err := req.New(listTimeout).Get(ctx, address, self.headers(token), &payload); err != nil {
+	if err := self.observedRequests().Get(ctx, address, self.headers(token), &payload); err != nil {
 		return nil, err
 	}
 

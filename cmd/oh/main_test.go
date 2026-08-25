@@ -76,6 +76,7 @@ import (
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/oh/workspace"
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/req"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sim"
 	"crdx.org/io/internal/util/pathutil"
@@ -4152,9 +4153,105 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"subscription-usage / not applicable": goldenSegmentPass(
 			t,
-			subUsage.New(nil, func() time.Time { return at }),
+			subUsage.New(nil, "", "", func() time.Time { return at }),
 			"",
 			segment.Context{},
+		),
+		"subscription-usage / even burn": goldenUsagePass(t, at, "gpt-5.6-sol", usageReport{
+			windows: []agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 40, ResetsAt: at.Add(150 * time.Minute)},
+				{Duration: 7 * 24 * time.Hour, Percent: 12, ResetsAt: at.Add(6 * 24 * time.Hour)},
+			},
+		}),
+		"subscription-usage / ahead of pace": goldenUsagePass(t, at, "gpt-5.6-sol", usageReport{
+			windows: []agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 28, ResetsAt: at.Add(4 * time.Hour)},
+			},
+		}),
+		"subscription-usage / near the limit": goldenUsagePass(t, at, "gpt-5.6-sol", usageReport{
+			windows: []agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 95, ResetsAt: at.Add(4 * time.Hour)},
+			},
+		}),
+		"subscription-usage / spent": goldenUsagePass(t, at, "gpt-5.6-sol", usageReport{
+			windows: []agent.UsageWindow{
+				{
+					Duration:  5 * time.Hour,
+					Percent:   100,
+					ResetsAt:  at.Add(time.Hour),
+					IsLimited: true,
+				},
+			},
+		}),
+		"subscription-usage / window already elapsed": goldenUsagePass(t, at, "gpt-5.6-sol", usageReport{
+			windows: []agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 68, ResetsAt: at.Add(-time.Minute)},
+			},
+		}),
+		"subscription-usage / no reset reported": goldenUsagePass(t, at, "gpt-5.6-sol", usageReport{
+			windows: []agent.UsageWindow{
+				{Duration: 7 * 24 * time.Hour, Percent: 6},
+			},
+		}),
+		"subscription-usage / weekly plan window": goldenUsagePass(t, at, "gpt-5.6-sol", usageReport{
+			windows: []agent.UsageWindow{
+				{Duration: 7 * 24 * time.Hour, Percent: 6, ResetsAt: at.Add(6 * 24 * time.Hour)},
+			},
+		}),
+		"subscription-usage / metered model in use": goldenUsagePass(
+			t,
+			at,
+			"gpt-5.3-codex-spark",
+			usageReport{windows: meteredWindows(at)},
+		),
+		"subscription-usage / metered model not in use": goldenUsagePass(
+			t,
+			at,
+			"gpt-5.6-sol",
+			usageReport{windows: meteredWindows(at)},
+		),
+		"subscription-usage / only other models metered": goldenUsagePass(
+			t,
+			at,
+			"claude-sonnet-4-6",
+			usageReport{windows: []agent.UsageWindow{
+				{
+					Duration: 7 * 24 * time.Hour,
+					Percent:  3,
+					ResetsAt: at.Add(6 * 24 * time.Hour),
+					Scope:    "opus",
+				},
+			}},
+		),
+		"subscription-usage / three windows": goldenUsagePass(t, at, "kimi-k3", usageReport{
+			windows: []agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 39, ResetsAt: at.Add(4 * time.Hour)},
+				{Duration: 7 * 24 * time.Hour, Percent: 15, ResetsAt: at.Add(6 * 24 * time.Hour)},
+				{Duration: 30 * 24 * time.Hour, Percent: 13, ResetsAt: at.Add(20 * 24 * time.Hour)},
+			},
+		}),
+		"subscription-usage / refused": goldenUsagePass(t, at, "gpt-5.6-sol", usageReport{
+			err: &req.StatusError{Code: 401, Message: "the key is not yours"},
+		}),
+		"subscription-usage / unreachable": goldenUsagePass(t, at, "gpt-5.6-sol", usageReport{
+			err: errors.New("the endpoint is sulking"),
+		}),
+		"subscription-usage / nothing reported yet": goldenUsagePass(
+			t,
+			at,
+			"gpt-5.6-sol",
+			usageReport{},
+		),
+		"subscription-usage / refreshing keeps the figures": goldenUsagePass(
+			t,
+			at,
+			"gpt-5.6-sol",
+			usageReport{
+				windows: []agent.UsageWindow{
+					{Duration: 5 * time.Hour, Percent: 40, ResetsAt: at.Add(150 * time.Minute)},
+				},
+				thenErr: &req.StatusError{Code: 429, Message: "slow down"},
+			},
 		),
 		"turn-elapsed / completed": goldenSegmentPass(
 			t,
@@ -5865,4 +5962,100 @@ func shownHelpDuringReasoningFrames(t *testing.T) string {
 		fmt.Fprintf(&shown, "--- frame %d ---\n%s\n", index+1, strings.Join(visibleScreen(t, frame, replayColumns), "\n"))
 	}
 	return strings.TrimSuffix(shown.String(), "\n")
+}
+
+type usageReport struct {
+	windows []agent.UsageWindow
+	err     error
+	thenErr error
+}
+
+type scriptedUsageReporter struct {
+	report   usageReport
+	answered atomic.Int64
+}
+
+func (self *scriptedUsageReporter) IsAvailable() bool {
+	return true
+}
+
+func (self *scriptedUsageReporter) UsageWindows(context.Context) ([]agent.UsageWindow, error) {
+	defer self.answered.Add(1)
+
+	if self.answered.Load() > 0 && self.report.thenErr != nil {
+		return nil, self.report.thenErr
+	}
+
+	return self.report.windows, self.report.err
+}
+
+func meteredWindows(at time.Time) []agent.UsageWindow {
+	return []agent.UsageWindow{
+		{Duration: 7 * 24 * time.Hour, Percent: 6, ResetsAt: at.Add(6 * 24 * time.Hour)},
+		{
+			Duration: 5 * time.Hour,
+			Percent:  4,
+			ResetsAt: at.Add(4 * time.Hour),
+			Scope:    "gpt-5.3-codex-spark",
+		},
+		{
+			Duration: 7 * 24 * time.Hour,
+			Percent:  2,
+			ResetsAt: at.Add(6 * 24 * time.Hour),
+			Scope:    "gpt-5.3-codex-spark",
+		},
+	}
+}
+
+func goldenUsagePass(
+	t *testing.T, at time.Time, modelName string, report usageReport,
+) func() string {
+	t.Helper()
+
+	var now atomic.Int64
+	now.Store(at.UnixNano())
+
+	reporter := &scriptedUsageReporter{report: report}
+	readClock := func() time.Time { return time.Unix(0, now.Load()).UTC() }
+
+	built, err := subUsage.New(reporter, "", modelName, readClock)(goldenSegmentOptions(""))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return func() string {
+		drawn := settleUsage(t, built, reporter, 1)
+
+		if report.thenErr == nil {
+			return drawn
+		}
+
+		now.Store(at.Add(time.Hour).UnixNano())
+
+		return settleUsage(t, built, reporter, 2)
+	}
+}
+
+func settleUsage(
+	t *testing.T, built segment.Segment, reporter *scriptedUsageReporter, answers int64,
+) string {
+	t.Helper()
+
+	deadline := time.Now().Add(5 * time.Second)
+	drawn := built.Render(segment.Context{})
+
+	for {
+		if time.Now().After(deadline) {
+			t.Fatalf("the usage segment never settled, last drew %q", drawn)
+		}
+
+		time.Sleep(time.Millisecond)
+
+		redrawn := built.Render(segment.Context{})
+		if reporter.answered.Load() >= answers && redrawn == drawn {
+			return redrawn
+		}
+
+		drawn = redrawn
+	}
 }

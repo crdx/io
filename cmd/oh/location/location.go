@@ -31,6 +31,14 @@ func GetModelCachePath(isSimulation bool) string {
 	return GetStateDir("models.json")
 }
 
+func GetUsageCachePath(provider string, isSimulation bool) string {
+	if isSimulation {
+		return ""
+	}
+
+	return GetStateDir("usage", provider+".json")
+}
+
 func GetModelRoundRobinPath() string {
 	return GetStateDir("model-round-robin.json")
 }

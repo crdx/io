@@ -432,6 +432,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		ModelName:          selection.Model,
 		ModelEffort:        selection.Effort,
 		UsageReporter:      usageReporter,
+		UsageCachePath:     location.GetUsageCachePath(selection.Provider, endpointURL != ""),
 		Sources:            chat.getBarSources(),
 	}))
 	if err != nil {

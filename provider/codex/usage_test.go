@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"testing"
 	"time"
 
@@ -44,26 +45,47 @@ func rateLimitedTurn(t *testing.T, header map[string]string) *httptest.Server {
 	return server
 }
 
-func TestUsageWindowsCarryWhatTheLastTurnReported(t *testing.T) {
-	server := rateLimitedTurn(t, map[string]string{
-		"X-Codex-Primary-Used-Percent":        "37.5",
-		"X-Codex-Primary-Window-Minutes":      "300",
-		"X-Codex-Primary-Resets-In-Seconds":   "3600",
-		"X-Codex-Secondary-Used-Percent":      "12",
-		"X-Codex-Secondary-Window-Minutes":    "10080",
-		"X-Codex-Secondary-Resets-In-Seconds": "86400",
-	})
+const (
+	weekResets  = 1788277246
+	sparkResets = 1787705193
+)
 
+func at(seconds int64) time.Time {
+	return time.Unix(seconds, 0).UTC()
+}
+
+func theAccountsOwnHeaders() map[string]string {
+	return map[string]string{
+		"X-Codex-Plan-Type":                          "prolite",
+		"X-Codex-Active-Limit":                       "premium",
+		"X-Codex-Credits-Balance":                    "0",
+		"X-Codex-Primary-Used-Percent":               "6",
+		"X-Codex-Primary-Window-Minutes":             "10080",
+		"X-Codex-Primary-Reset-At":                   "1788277246",
+		"X-Codex-Primary-Reset-After-Seconds":        "590060",
+		"X-Codex-Secondary-Used-Percent":             "0",
+		"X-Codex-Secondary-Window-Minutes":           "0",
+		"X-Codex-Secondary-Reset-At":                 "",
+		"X-Codex-Secondary-Reset-After-Seconds":      "0",
+		"X-Codex-Bengalfox-Limit-Name":               "GPT-5.3-Codex-Spark",
+		"X-Codex-Bengalfox-Primary-Used-Percent":     "4",
+		"X-Codex-Bengalfox-Primary-Window-Minutes":   "300",
+		"X-Codex-Bengalfox-Primary-Reset-At":         "1787705193",
+		"X-Codex-Bengalfox-Secondary-Used-Percent":   "2",
+		"X-Codex-Bengalfox-Secondary-Window-Minutes": "10080",
+		"X-Codex-Bengalfox-Secondary-Reset-At":       "1788291993",
+	}
+}
+
+func reportedWindows(t *testing.T, header map[string]string) []agent.UsageWindow {
+	t.Helper()
+
+	server := rateLimitedTurn(t, header)
 	client := newUsageClient(t, server.URL)
 	client.AddUserMessage("hello")
 
-	before := time.Now()
 	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
 		t.Fatal(err)
-	}
-
-	if !client.IsAvailable() {
-		t.Fatal("expected usage reporting after a turn supplied rate-limit headers")
 	}
 
 	windows, err := client.UsageWindows(t.Context())
@@ -71,22 +93,199 @@ func TestUsageWindowsCarryWhatTheLastTurnReported(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(windows) != 2 {
-		t.Fatalf("expected two windows, got %v", windows)
+	return windows
+}
+
+func TestEveryShapeOfRateLimitHeaderIsReadTheSameWay(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		header map[string]string
+		want   []agent.UsageWindow
+	}{
+		{
+			name:   "the account's own response",
+			header: theAccountsOwnHeaders(),
+			want: []agent.UsageWindow{
+				{Duration: 7 * 24 * time.Hour, Percent: 6, ResetsAt: at(weekResets)},
+				{
+					Duration: 5 * time.Hour,
+					Percent:  4,
+					ResetsAt: at(sparkResets),
+					Scope:    "gpt-5.3-codex-spark",
+				},
+				{
+					Duration: 7 * 24 * time.Hour,
+					Percent:  2,
+					ResetsAt: at(1788291993),
+					Scope:    "gpt-5.3-codex-spark",
+				},
+			},
+		},
+		{
+			name: "a plan whose primary window is the short one",
+			header: map[string]string{
+				"X-Codex-Primary-Used-Percent":     "37.5",
+				"X-Codex-Primary-Window-Minutes":   "300",
+				"X-Codex-Primary-Reset-At":         "1788277246",
+				"X-Codex-Secondary-Used-Percent":   "12",
+				"X-Codex-Secondary-Window-Minutes": "10080",
+				"X-Codex-Secondary-Reset-At":       "1788291993",
+			},
+			want: []agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 37.5, ResetsAt: at(weekResets)},
+				{Duration: 7 * 24 * time.Hour, Percent: 12, ResetsAt: at(1788291993)},
+			},
+		},
+		{
+			name: "a bucket that names no model",
+			header: map[string]string{
+				"X-Codex-Primary-Used-Percent":           "6",
+				"X-Codex-Primary-Window-Minutes":         "10080",
+				"X-Codex-Someday-Primary-Used-Percent":   "8",
+				"X-Codex-Someday-Primary-Window-Minutes": "300",
+			},
+			want: []agent.UsageWindow{
+				{Duration: 7 * 24 * time.Hour, Percent: 6},
+				{Duration: 5 * time.Hour, Percent: 8, Scope: "someday"},
+			},
+		},
+		{
+			name: "buckets are read in a settled order whatever their name",
+			header: map[string]string{
+				"X-Codex-Primary-Used-Percent":            "6",
+				"X-Codex-Primary-Window-Minutes":          "10080",
+				"X-Codex-Zebra-Primary-Used-Percent":      "1",
+				"X-Codex-Zebra-Primary-Window-Minutes":    "300",
+				"X-Codex-Aardvark-Primary-Used-Percent":   "2",
+				"X-Codex-Aardvark-Primary-Window-Minutes": "300",
+			},
+			want: []agent.UsageWindow{
+				{Duration: 7 * 24 * time.Hour, Percent: 6},
+				{Duration: 5 * time.Hour, Percent: 2, Scope: "aardvark"},
+				{Duration: 5 * time.Hour, Percent: 1, Scope: "zebra"},
+			},
+		},
+		{
+			name: "a window the server zeroed",
+			header: map[string]string{
+				"X-Codex-Primary-Used-Percent":     "6",
+				"X-Codex-Primary-Window-Minutes":   "300",
+				"X-Codex-Primary-Reset-At":         "1788277246",
+				"X-Codex-Secondary-Used-Percent":   "0",
+				"X-Codex-Secondary-Window-Minutes": "0",
+			},
+			want: []agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 6, ResetsAt: at(weekResets)},
+			},
+		},
+		{
+			name: "a window carrying no duration",
+			header: map[string]string{
+				"X-Codex-Primary-Used-Percent": "6",
+				"X-Codex-Primary-Reset-At":     "1788277246",
+			},
+			want: nil,
+		},
+		{
+			name: "a bucket carrying no percentage",
+			header: map[string]string{
+				"X-Codex-Primary-Used-Percent":           "6",
+				"X-Codex-Primary-Window-Minutes":         "300",
+				"X-Codex-Someday-Primary-Window-Minutes": "300",
+				"X-Codex-Someday-Limit-Name":             "Some Model",
+			},
+			want: []agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 6},
+			},
+		},
+		{
+			name: "figures the server garbled",
+			header: map[string]string{
+				"X-Codex-Primary-Used-Percent":   "six",
+				"X-Codex-Primary-Window-Minutes": "later",
+				"X-Codex-Primary-Reset-At":       "soon",
+			},
+			want: nil,
+		},
+		{
+			name: "a reset the server garbled",
+			header: map[string]string{
+				"X-Codex-Primary-Used-Percent":        "6",
+				"X-Codex-Primary-Window-Minutes":      "300",
+				"X-Codex-Primary-Reset-At":            "soon",
+				"X-Codex-Primary-Reset-After-Seconds": "later",
+			},
+			want: []agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 6},
+			},
+		},
+		{
+			name: "a negative window",
+			header: map[string]string{
+				"X-Codex-Primary-Used-Percent":   "6",
+				"X-Codex-Primary-Window-Minutes": "-300",
+			},
+			want: nil,
+		},
+		{
+			name: "a bucket seen only in its secondary window",
+			header: map[string]string{
+				"X-Codex-Primary-Used-Percent":             "6",
+				"X-Codex-Primary-Window-Minutes":           "300",
+				"X-Codex-Someday-Secondary-Used-Percent":   "8",
+				"X-Codex-Someday-Secondary-Window-Minutes": "300",
+			},
+			want: []agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 6},
+			},
+		},
+		{
+			name: "a limit name the server padded",
+			header: map[string]string{
+				"X-Codex-Someday-Primary-Used-Percent":   "8",
+				"X-Codex-Someday-Primary-Window-Minutes": "300",
+				"X-Codex-Someday-Limit-Name":             "  GPT-5.3-Codex-Spark  ",
+			},
+			want: []agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 8, Scope: "gpt-5.3-codex-spark"},
+			},
+		},
+		{
+			name: "a window in minutes of its own",
+			header: map[string]string{
+				"X-Codex-Primary-Used-Percent":   "6",
+				"X-Codex-Primary-Window-Minutes": "90",
+			},
+			want: []agent.UsageWindow{
+				{Duration: 90 * time.Minute, Percent: 6},
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := reportedWindows(t, test.header)
+
+			if !slices.Equal(got, test.want) {
+				t.Errorf("got %+v, want %+v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestARelativeResetIsReadWhereNoAbsoluteOneArrived(t *testing.T) {
+	before := time.Now()
+	windows := reportedWindows(t, map[string]string{
+		"X-Codex-Primary-Used-Percent":        "6",
+		"X-Codex-Primary-Window-Minutes":      "300",
+		"X-Codex-Primary-Reset-After-Seconds": "3600",
+	})
+
+	if len(windows) != 1 {
+		t.Fatalf("expected the one window, got %+v", windows)
 	}
 
-	if windows[0].Duration != 5*time.Hour || windows[0].Percent != 37.5 {
-		t.Errorf("unexpected primary window: %+v", windows[0])
-	}
-
-	if windows[1].Duration != 7*24*time.Hour || windows[1].Percent != 12 {
-		t.Errorf("unexpected secondary window: %+v", windows[1])
-	}
-
-	resetLow := before.Add(time.Hour)
-	resetHigh := time.Now().Add(time.Hour)
-	if windows[0].ResetsAt.Before(resetLow) || windows[0].ResetsAt.After(resetHigh) {
-		t.Errorf("expected the primary reset about an hour out, got %s", windows[0].ResetsAt)
+	if windows[0].ResetsAt.Before(before.Add(time.Hour)) ||
+		windows[0].ResetsAt.After(time.Now().Add(time.Hour)) {
+		t.Errorf("expected a reset about an hour out, got %s", windows[0].ResetsAt)
 	}
 }
 

@@ -44,8 +44,38 @@ rxw bgs
 ↑ 3
 === session-name ===
 brave-otter
+=== subscription-usage / ahead of pace ===
+5h 28% ▲
+=== subscription-usage / even burn ===
+5h 40% 7d 12%
+=== subscription-usage / metered model in use ===
+7d 6% ⚡ 5h 4% 7d 2%
+=== subscription-usage / metered model not in use ===
+7d 6%
+=== subscription-usage / near the limit ===
+5h 95% ▲
+=== subscription-usage / no reset reported ===
+7d 6%
 === subscription-usage / not applicable ===
 usage n/a
+=== subscription-usage / nothing reported yet ===
+usage pending
+=== subscription-usage / only other models metered ===
+usage unavailable
+=== subscription-usage / refreshing keeps the figures ===
+5h 40% 429
+=== subscription-usage / refused ===
+usage 401
+=== subscription-usage / spent ===
+5h 100% ✖
+=== subscription-usage / three windows ===
+5h 39% ▲ 7d 15% ▲ 30d 13%
+=== subscription-usage / unreachable ===
+usage failed
+=== subscription-usage / weekly plan window ===
+7d 6%
+=== subscription-usage / window already elapsed ===
+5h stale
 === turn-count / nothing asked yet ===
 
 === turn-count / third turn ===

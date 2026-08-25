@@ -54,8 +54,8 @@ func TestTheUsageReportFollowsTheEndpointItWasGiven(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if observer.requests != 0 {
-		t.Errorf("expected usage polling to stay out of the conversation wire record, observed %d requests", observer.requests)
+	if observer.requests != 1 {
+		t.Errorf("expected the usage poll recorded on the wire, observed %d requests", observer.requests)
 	}
 
 	if asked != "/api/oauth/usage" {

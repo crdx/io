@@ -4,13 +4,9 @@ import (
 	"context"
 	"slices"
 	"strings"
-	"time"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/internal/req"
 )
-
-const listTimeout = 30 * time.Second
 
 const completionsSuffix = "/chat/completions"
 
@@ -32,7 +28,7 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 		} `json:"data"`
 	}
 
-	if err := self.listRequests().Get(ctx, address, self.headers(), &payload); err != nil {
+	if err := self.observedRequests().Get(ctx, address, self.headers(), &payload); err != nil {
 		return nil, err
 	}
 
@@ -54,13 +50,4 @@ func modelsAddress(turnAddress string) (string, bool) {
 	}
 
 	return prefix + modelsSuffix, true
-}
-
-func (self *Client) listRequests() *req.Client {
-	client := req.New(listTimeout)
-	if self.observer != nil {
-		client.Observe(self.observer)
-	}
-
-	return client
 }

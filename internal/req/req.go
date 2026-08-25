@@ -203,6 +203,18 @@ func (self *observedBody) finish(err error, incomplete bool) {
 	self.observer.Finish(time.Now(), err, incomplete)
 }
 
+// StatusError is what an endpoint refused a request with. It carries the status code alongside
+// whatever the endpoint said, so a caller can tell a refused key from a sulking server without
+// reading the code back out of a sentence.
+type StatusError struct {
+	Code    int
+	Message string
+}
+
+func (self *StatusError) Error() string {
+	return self.Message
+}
+
 func refusal(response *http.Response) error {
 	body, _ := io.ReadAll(io.LimitReader(response.Body, bodyLimit))
 
@@ -214,15 +226,22 @@ func refusal(response *http.Response) error {
 		Detail string `json:"detail"`
 	}
 
+	refused := &StatusError{
+		Code:    response.StatusCode,
+		Message: fmt.Sprintf("request failed with status %d: %s", response.StatusCode, body),
+	}
+
 	if json.Unmarshal(body, &payload) != nil {
-		return fmt.Errorf("request failed with status %d: %s", response.StatusCode, body)
+		return refused
 	}
 
 	for _, said := range []string{payload.Error.Message, payload.Detail} {
 		if said != "" {
-			return errors.New(said)
+			refused.Message = said
+
+			break
 		}
 	}
 
-	return fmt.Errorf("request failed with status %d: %s", response.StatusCode, body)
+	return refused
 }

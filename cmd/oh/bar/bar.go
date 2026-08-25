@@ -45,6 +45,7 @@ type Options struct {
 	ModelName          string
 	ModelEffort        string
 	UsageReporter      agent.UsageReporter
+	UsageCachePath     string
 	Sources            Sources
 }
 
@@ -73,7 +74,7 @@ func NewRegistry(options Options) segment.Registry {
 		turnCountSegment:        turnCount.New(options.Sources.GetTurnCount),
 		lastTpsSegment:          lastTps.New(options.Sources.GetLastTurnTokenRate, options.Sources.IsTurnRunning),
 		gitBranchSegment:        gitBranch.New(options.WorkspaceDir),
-		subUsageSegment:         subUsage.New(options.UsageReporter, time.Now),
+		subUsageSegment:         subUsage.New(options.UsageReporter, options.UsageCachePath, options.ModelName, time.Now),
 	}
 }
 

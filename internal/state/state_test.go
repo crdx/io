@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 	"testing"
 )
 
@@ -104,5 +105,68 @@ func TestFailedUpdateDoesNotReplaceState(t *testing.T) {
 		return nil
 	}); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestTryUpdateStandsAsideForWhoeverHoldsTheState(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "state.json")
+
+	if err := Update(path, testFormat, func(state *testState) error {
+		*state = testState{Version: testFormat, Count: 7}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	held, err := lock(path, syscall.LOCK_EX)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer release(held)
+
+	claimed, err := TryUpdate(path, testFormat, func(*testState) error {
+		t.Error("expected held state not to be handed on")
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if claimed {
+		t.Error("expected the held state to be left alone")
+	}
+
+	var state testState
+	if err := Read(path, testFormat, &state); err != nil {
+		t.Fatal(err)
+	}
+
+	if state.Count != 7 {
+		t.Errorf("expected what was written to stand, got %+v", state)
+	}
+}
+
+func TestTryUpdateTakesFreeState(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "state.json")
+
+	claimed, err := TryUpdate(path, testFormat, func(state *testState) error {
+		*state = testState{Version: testFormat, Count: 3}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !claimed {
+		t.Fatal("expected free state to be taken")
+	}
+
+	var state testState
+	if err := Read(path, testFormat, &state); err != nil {
+		t.Fatal(err)
+	}
+
+	if state.Count != 3 {
+		t.Errorf("got %+v", state)
 	}
 }

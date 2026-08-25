@@ -29,7 +29,10 @@ const (
 
 var Efforts = []string{"low", "medium", "high", "xhigh", "max"}
 
-const turnTimeout = 60 * time.Minute
+const (
+	turnTimeout  = 60 * time.Minute
+	asideTimeout = 30 * time.Second
+)
 
 type Client struct {
 	URL             string
@@ -138,6 +141,15 @@ func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, e
 		Calls: reply.calls(self.toolNames),
 		Usage: reply.usage,
 	}, nil
+}
+
+func (self *Client) observedRequests() *req.Client {
+	client := req.New(asideTimeout)
+	if self.observer != nil {
+		client.Observe(self.observer)
+	}
+
+	return client
 }
 
 func (self *Client) settled() error {

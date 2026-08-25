@@ -2,7 +2,9 @@ package subUsage
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -11,6 +13,8 @@ import (
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/spinner"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/usage"
+	"crdx.org/io/internal/req"
 )
 
 var (
@@ -30,7 +34,17 @@ const (
 	overPacePercent  = 10
 	overPaceRatio    = 1.5
 	nearLimit        = 90
+	scopeMark        = "⚡"
+	limitedMark      = "✖"
+	failureLabel     = "failed"
 )
+
+type snapshot struct {
+	windows   []agent.UsageWindow
+	fetchedAt time.Time
+	status    usageStatus
+	failure   string
+}
 
 type usageStatus int
 
@@ -42,9 +56,10 @@ const (
 )
 
 type state struct {
-	reporter agent.UsageReporter
-	rate     time.Duration
-	now      func() time.Time
+	reporter  agent.UsageReporter
+	modelName string
+	rate      time.Duration
+	now       func() time.Time
 
 	mutex             sync.Mutex
 	windows           []agent.UsageWindow
@@ -52,22 +67,13 @@ type state struct {
 	retryAt           time.Time
 	fetchStartedAt    time.Time
 	waited            time.Duration
+	failure           string
 	status            usageStatus
 	statusBeforeFetch usageStatus
 	shouldRedraw      bool
 }
 
-// New builds the factory over whichever provider holds the conversation. A provider that cannot
-// report subscription usage hands a nil or unavailable reporter, and the segment says n/a rather
-// than refusing the layout, so one layout serves every provider. A reporter may also answer with
-// nothing to say rather than an error, since codex has no address to poll and knows nothing until
-// its first turn answers, and the first ask arrives at startup long before that. An empty answer
-// is not a snapshot, so a short backoff holds the next ask rather than the whole rate period,
-// which would leave the line blank for minutes after a startup that asked too early. That backoff
-// doubles each time the answer disappoints, up to the rate, so a reporter that will shortly have
-// something to say is heard almost at once while one that never will is left alone: anthropic's
-// usage address is undocumented and unbudgeted, and answers a caller that leans on it with 429s.
-func New(reporter agent.UsageReporter, now func() time.Time) segment.Factory {
+func New(reporter agent.UsageReporter, cachePath string, modelName string, now func() time.Time) segment.Factory {
 	return func(options segment.Options) (segment.Segment, error) {
 		var args struct {
 			Rate time.Duration `toml:"rate"`
@@ -86,10 +92,11 @@ func New(reporter agent.UsageReporter, now func() time.Time) segment.Factory {
 		}
 
 		return &state{
-			reporter: reporter,
-			rate:     args.Rate,
-			now:      now,
-			status:   usagePending,
+			reporter:  usage.Shared(reporter, cachePath, args.Rate, now),
+			modelName: strings.ToLower(modelName),
+			rate:      args.Rate,
+			now:       now,
+			status:    usagePending,
 		}, nil
 	}
 }
@@ -113,8 +120,6 @@ func (self *state) Persistent() bool {
 	return true
 }
 
-// Render paints the last snapshot and never waits on the network: a stale snapshot starts a fetch
-// in the background, and what is already held is what this redraw shows.
 func (self *state) Render(segment.Context) string {
 	if self.reporter == nil || !self.reporter.IsAvailable() {
 		return style.Withheld("usage n/a")
@@ -122,7 +127,12 @@ func (self *state) Render(segment.Context) string {
 
 	self.mutex.Lock()
 	shouldFetch := self.noteFetchStarting()
-	windows, fetchedAt, status := self.windows, self.fetchedAt, self.getVisibleStatus()
+	current := snapshot{
+		windows:   self.windows,
+		fetchedAt: self.fetchedAt,
+		status:    self.getVisibleStatus(),
+		failure:   self.failure,
+	}
 	self.shouldRedraw = false
 	self.mutex.Unlock()
 
@@ -130,7 +140,7 @@ func (self *state) Render(segment.Context) string {
 		go self.fetch()
 	}
 
-	return self.draw(windows, fetchedAt, status)
+	return self.draw(current)
 }
 
 func (self *state) getVisibleStatus() usageStatus {
@@ -165,6 +175,7 @@ func (self *state) fetch() {
 
 	if err != nil {
 		self.status = usageRetrying
+		self.failure = failureReason(err)
 		self.waitLonger(firstFailureWait)
 
 		return
@@ -178,6 +189,7 @@ func (self *state) fetch() {
 	}
 
 	self.status = usageReady
+	self.failure = ""
 	self.windows = windows
 	self.fetchedAt = self.now()
 	self.retryAt = time.Time{}
@@ -189,26 +201,37 @@ func (self *state) waitLonger(first time.Duration) {
 	self.retryAt = self.now().Add(self.waited)
 }
 
-func (self *state) draw(windows []agent.UsageWindow, fetchedAt time.Time, status usageStatus) string {
-	var parts []string
+func (self *state) draw(current snapshot) string {
+	var parts, scoped []string
 
-	for _, window := range windows {
-		if window.Scope != "" {
+	for _, window := range current.windows {
+		if !self.governsThisSession(window) {
 			continue
 		}
 
-		parts = append(parts, drawWindow(window, fetchedAt, self.now()))
+		text := drawWindow(window, current.fetchedAt, self.now())
+
+		if window.Scope == "" {
+			parts = append(parts, text)
+		} else {
+			scoped = append(scoped, text)
+		}
+	}
+
+	if len(scoped) > 0 {
+		parts = append(parts, style.Subtle(scopeMark))
+		parts = append(parts, scoped...)
 	}
 
 	usage := strings.Join(parts, " ")
 
-	switch status {
+	switch current.status {
 	case usageFetching:
 		return appendUsageStatus(usage, "usage", style.Spinner(self.spinnerFrame()))
 	case usagePending:
 		return appendUsageStatus(usage, "usage", style.Subtle("pending"))
 	case usageRetrying:
-		return appendUsageStatus(usage, "usage", style.Subtle("retrying"))
+		return appendUsageStatus(usage, "usage", style.Failure(current.failure))
 	default:
 		if usage == "" {
 			return style.Withheld("usage unavailable")
@@ -216,6 +239,10 @@ func (self *state) draw(windows []agent.UsageWindow, fetchedAt time.Time, status
 
 		return usage
 	}
+}
+
+func (self *state) governsThisSession(window agent.UsageWindow) bool {
+	return window.Scope == "" || strings.Contains(self.modelName, window.Scope)
 }
 
 func (self *state) spinnerFrame() string {
@@ -235,15 +262,22 @@ func appendUsageStatus(usage string, emptyLabel string, status string) string {
 
 func drawWindow(window agent.UsageWindow, fetchedAt time.Time, now time.Time) string {
 	label := durationLabel(window.Duration)
+	actual := int(window.Percent + 0.5)
+	text := fmt.Sprintf("%s %d%%", label, actual)
+
+	if window.IsLimited {
+		return style.Failure(text + " " + limitedMark)
+	}
+
+	if window.ResetsAt.IsZero() {
+		return style.Subtle(text)
+	}
 
 	if !window.ResetsAt.After(now) {
 		return style.Faint(label + " stale")
 	}
 
-	actual := int(window.Percent + 0.5)
 	expected := expectedPercent(window, fetchedAt)
-
-	text := fmt.Sprintf("%s %d%%", label, actual)
 
 	switch classifyPace(actual, expected) {
 	case paceAhead:
@@ -297,4 +331,12 @@ func durationLabel(duration time.Duration) string {
 	default:
 		return fmt.Sprintf("%dm", duration/time.Minute)
 	}
+}
+
+func failureReason(err error) string {
+	if refused, ok := errors.AsType[*req.StatusError](err); ok {
+		return strconv.Itoa(refused.Code)
+	}
+
+	return failureLabel
 }

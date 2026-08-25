@@ -27,7 +27,10 @@ const (
 
 var Efforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
-const turnTimeout = 60 * time.Minute
+const (
+	turnTimeout  = 60 * time.Minute
+	asideTimeout = 30 * time.Second
+)
 
 type Client struct {
 	URL    string
@@ -119,6 +122,15 @@ func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, e
 	self.history = append(self.history, reply.items...)
 
 	return agent.Reply{Calls: reply.calls(), Usage: reply.usage}, nil
+}
+
+func (self *Client) observedRequests() *req.Client {
+	client := req.New(asideTimeout)
+	if self.observer != nil {
+		client.Observe(self.observer)
+	}
+
+	return client
 }
 
 func (self *Client) post(ctx context.Context, yield agent.Yield) (reply, error) {

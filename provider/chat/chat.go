@@ -16,10 +16,14 @@ import (
 
 var Efforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
-const turnTimeout = 60 * time.Minute
+const (
+	turnTimeout  = 60 * time.Minute
+	asideTimeout = 30 * time.Second
+)
 
 type Client struct {
 	URL             string
+	UsageURL        string
 	Token           string
 	Model           string
 	Effort          string
@@ -119,6 +123,15 @@ func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, e
 	}
 
 	return agent.Reply{Calls: reply.calls(), Usage: reply.usage}, nil
+}
+
+func (self *Client) observedRequests() *req.Client {
+	client := req.New(asideTimeout)
+	if self.observer != nil {
+		client.Observe(self.observer)
+	}
+
+	return client
 }
 
 func (self *Client) settled() error {

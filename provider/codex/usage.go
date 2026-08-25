@@ -5,19 +5,28 @@ import (
 	"net/http"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"crdx.org/io/agent"
 )
 
 const (
-	primaryUsedHeader     = "X-Codex-Primary-Used-Percent"
-	primaryWindowHeader   = "X-Codex-Primary-Window-Minutes"
-	primaryResetHeader    = "X-Codex-Primary-Resets-In-Seconds"
-	secondaryUsedHeader   = "X-Codex-Secondary-Used-Percent"
-	secondaryWindowHeader = "X-Codex-Secondary-Window-Minutes"
-	secondaryResetHeader  = "X-Codex-Secondary-Resets-In-Seconds"
+	headerPrefix     = "X-Codex"
+	usedSuffix       = "-Used-Percent"
+	windowSuffix     = "-Window-Minutes"
+	resetAtSuffix    = "-Reset-At"
+	resetAfterSuffix = "-Reset-After-Seconds"
+	limitNameSuffix  = "-Limit-Name"
+
+	primaryPart   = "-Primary"
+	secondaryPart = "-Secondary"
 )
+
+type limitBucket struct {
+	prefix string
+	scope  string
+}
 
 func (self *Client) IsAvailable() bool {
 	self.usageMutex.Lock()
@@ -36,12 +45,11 @@ func (self *Client) UsageWindows(context.Context) ([]agent.UsageWindow, error) {
 func (self *Client) recordUsageWindows(header http.Header, now time.Time) {
 	var windows []agent.UsageWindow
 
-	for _, names := range [][3]string{
-		{primaryUsedHeader, primaryWindowHeader, primaryResetHeader},
-		{secondaryUsedHeader, secondaryWindowHeader, secondaryResetHeader},
-	} {
-		if window, ok := usageWindow(header, names[0], names[1], names[2], now); ok {
-			windows = append(windows, window)
+	for _, bucket := range limitBuckets(header) {
+		for _, part := range []string{primaryPart, secondaryPart} {
+			if window, ok := usageWindow(header, bucket, part, now); ok {
+				windows = append(windows, window)
+			}
 		}
 	}
 
@@ -55,27 +63,65 @@ func (self *Client) recordUsageWindows(header http.Header, now time.Time) {
 	self.usageWindows = windows
 }
 
+func limitBuckets(header http.Header) []limitBucket {
+	buckets := []limitBucket{{prefix: headerPrefix}}
+
+	var named []string
+
+	for name := range header {
+		prefix, found := strings.CutSuffix(http.CanonicalHeaderKey(name), primaryPart+usedSuffix)
+		if found && strings.HasPrefix(prefix, headerPrefix+"-") {
+			named = append(named, prefix)
+		}
+	}
+
+	slices.Sort(named)
+
+	for _, prefix := range named {
+		buckets = append(buckets, limitBucket{prefix: prefix, scope: scopeName(header, prefix)})
+	}
+
+	return buckets
+}
+
+func scopeName(header http.Header, prefix string) string {
+	if name := strings.TrimSpace(header.Get(prefix + limitNameSuffix)); name != "" {
+		return strings.ToLower(name)
+	}
+
+	return strings.ToLower(strings.TrimPrefix(prefix, headerPrefix+"-"))
+}
+
 func usageWindow(
-	header http.Header, usedName string, windowName string, resetName string, now time.Time,
+	header http.Header, bucket limitBucket, part string, now time.Time,
 ) (agent.UsageWindow, bool) {
-	used, err := strconv.ParseFloat(header.Get(usedName), 64)
+	used, err := strconv.ParseFloat(header.Get(bucket.prefix+part+usedSuffix), 64)
 	if err != nil {
 		return agent.UsageWindow{}, false
 	}
 
-	minutes, err := strconv.Atoi(header.Get(windowName))
+	minutes, err := strconv.Atoi(header.Get(bucket.prefix + part + windowSuffix))
 	if err != nil || minutes <= 0 {
 		return agent.UsageWindow{}, false
 	}
 
-	window := agent.UsageWindow{
+	return agent.UsageWindow{
 		Duration: time.Duration(minutes) * time.Minute,
 		Percent:  used,
+		ResetsAt: resetTime(header, bucket.prefix+part, now),
+		Scope:    bucket.scope,
+	}, true
+}
+
+func resetTime(header http.Header, prefix string, now time.Time) time.Time {
+	if at, err := strconv.ParseInt(header.Get(prefix+resetAtSuffix), 10, 64); err == nil && at > 0 {
+		return time.Unix(at, 0).UTC()
 	}
 
-	if seconds, err := strconv.Atoi(header.Get(resetName)); err == nil && seconds > 0 {
-		window.ResetsAt = now.Add(time.Duration(seconds) * time.Second)
+	seconds, err := strconv.Atoi(header.Get(prefix + resetAfterSuffix))
+	if err != nil || seconds <= 0 {
+		return time.Time{}
 	}
 
-	return window, true
+	return now.Add(time.Duration(seconds) * time.Second)
 }

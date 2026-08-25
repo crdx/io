@@ -12,16 +12,40 @@ import (
 	"crdx.org/io/internal/format"
 )
 
+// Update reads the state, hands it to update, and writes back what update leaves behind. It waits
+// for whoever else holds the state before doing any of that.
 func Update[State any](path string, supportedFormat int, update func(*State) error) error {
-	lock, err := lock(path)
+	lock, err := lock(path, syscall.LOCK_EX)
 	if err != nil {
 		return err
 	}
-	defer func() {
-		_ = syscall.Flock(int(lock.Fd()), syscall.LOCK_UN)
-		_ = lock.Close()
-	}()
+	defer release(lock)
 
+	return updateHeld(path, supportedFormat, update)
+}
+
+// TryUpdate is Update for a caller with something better to do than wait. It reports whether the
+// state was held by somebody else, in which case nothing was read, updated, or written, and the
+// caller is expected to carry on with whatever Read last gave it.
+func TryUpdate[State any](path string, supportedFormat int, update func(*State) error) (bool, error) {
+	lock, err := lock(path, syscall.LOCK_EX|syscall.LOCK_NB)
+	if errors.Is(err, syscall.EWOULDBLOCK) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	defer release(lock)
+
+	return true, updateHeld(path, supportedFormat, update)
+}
+
+// Read reads the state as it stands. A write lands whole, so no lock is needed to read one.
+func Read[State any](path string, supportedFormat int, state *State) error {
+	return read(path, supportedFormat, state)
+}
+
+func updateHeld[State any](path string, supportedFormat int, update func(*State) error) error {
 	var state State
 	if err := read(path, supportedFormat, &state); err != nil {
 		return err
@@ -33,7 +57,12 @@ func Update[State any](path string, supportedFormat int, update func(*State) err
 	return write(path, state)
 }
 
-func lock(path string) (*os.File, error) {
+func release(lock *os.File) {
+	_ = syscall.Flock(int(lock.Fd()), syscall.LOCK_UN)
+	_ = lock.Close()
+}
+
+func lock(path string, how int) (*os.File, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return nil, fmt.Errorf("create state directory: %w", err)
 	}
@@ -42,8 +71,13 @@ func lock(path string) (*os.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open state lock: %w", err)
 	}
-	if err := syscall.Flock(int(file.Fd()), syscall.LOCK_EX); err != nil {
+	if err := syscall.Flock(int(file.Fd()), how); err != nil {
 		_ = file.Close()
+
+		if errors.Is(err, syscall.EWOULDBLOCK) {
+			return nil, err
+		}
+
 		return nil, fmt.Errorf("lock state: %w", err)
 	}
 

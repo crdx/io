@@ -27,6 +27,10 @@ fix:
 test:
     go test -cover ./...
 
+# write what the tests drew back to the golden files
+golden:
+    go test ./cmd/oh -update
+
 # what every package covers, least covered first
 cov *args:
     #!/bin/bash

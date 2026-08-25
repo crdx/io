@@ -11,6 +11,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/internal/req"
 )
 
 type noOptions struct{}
@@ -70,7 +71,15 @@ func build(t *testing.T, reporter agent.UsageReporter) segment.Segment {
 func buildOnClock(t *testing.T, reporter agent.UsageReporter, clock *testClock) segment.Segment {
 	t.Helper()
 
-	built, err := New(reporter, clock.read)(noOptions{})
+	return buildOnModel(t, reporter, "", clock)
+}
+
+func buildOnModel(
+	t *testing.T, reporter agent.UsageReporter, modelName string, clock *testClock,
+) segment.Segment {
+	t.Helper()
+
+	built, err := New(reporter, "", modelName, clock.read)(noOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,18 +158,51 @@ func TestAWindowOverPaceIsMarked(t *testing.T) {
 	}
 }
 
-func TestAScopedWindowStaysOutOfTheLine(t *testing.T) {
-	built := build(t, &scriptedReporter{windows: []agent.UsageWindow{
+func TestScopedWindowsFollowTheirOwnMark(t *testing.T) {
+	built := buildOnModel(t, &scriptedReporter{windows: []agent.UsageWindow{
 		{Duration: 5 * time.Hour, Percent: 40, ResetsAt: testNow.Add(150 * time.Minute)},
+		{
+			Duration: 5 * time.Hour,
+			Percent:  8,
+			ResetsAt: testNow.Add(150 * time.Minute),
+			Scope:    "gpt-5.3-codex-spark",
+		},
 		{
 			Duration: 7 * 24 * time.Hour,
 			Percent:  3,
 			ResetsAt: testNow.Add(6 * 24 * time.Hour),
-			Scope:    "opus",
+			Scope:    "gpt-5.3-codex-spark",
 		},
-	}})
+	}}, "gpt-5.3-codex-spark", &testClock{now: testNow})
+
+	if got := renderSettled(t, built); got != "5h 40% ⚡ 5h 8% 7d 3%" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestAWindowMeteringAnotherModelIsNotDrawn(t *testing.T) {
+	built := buildOnModel(t, &scriptedReporter{windows: []agent.UsageWindow{
+		{Duration: 5 * time.Hour, Percent: 40, ResetsAt: testNow.Add(150 * time.Minute)},
+		{
+			Duration: 5 * time.Hour,
+			Percent:  8,
+			ResetsAt: testNow.Add(150 * time.Minute),
+			Scope:    "gpt-5.3-codex-spark",
+		},
+	}}, "gpt-5.6-sol", &testClock{now: testNow})
 
 	if got := renderSettled(t, built); got != "5h 40%" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestAWindowWithoutAResetShowsItsFigureAnyway(t *testing.T) {
+	built := build(t, &scriptedReporter{windows: []agent.UsageWindow{{
+		Duration: 7 * 24 * time.Hour,
+		Percent:  6,
+	}}})
+
+	if got := renderSettled(t, built); got != "7d 6%" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -220,13 +262,26 @@ func TestRefreshingASnapshotDelaysTheSpinnerAndKeepsTheFigures(t *testing.T) {
 	}
 }
 
-func TestOnlyScopedWindowsSayUsageIsUnavailable(t *testing.T) {
-	built := build(t, &scriptedReporter{windows: []agent.UsageWindow{{
+func TestScopedWindowsAloneStillDrawTheLine(t *testing.T) {
+	built := buildOnModel(t, &scriptedReporter{windows: []agent.UsageWindow{{
 		Duration: 7 * 24 * time.Hour,
 		Percent:  3,
 		ResetsAt: testNow.Add(6 * 24 * time.Hour),
 		Scope:    "opus",
-	}}})
+	}}}, "claude-opus-4-6", &testClock{now: testNow})
+
+	if got := renderSettled(t, built); got != "⚡ 7d 3%" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestASnapshotMeteringOnlyOtherModelsSaysSo(t *testing.T) {
+	built := buildOnModel(t, &scriptedReporter{windows: []agent.UsageWindow{{
+		Duration: 7 * 24 * time.Hour,
+		Percent:  3,
+		ResetsAt: testNow.Add(6 * 24 * time.Hour),
+		Scope:    "opus",
+	}}}, "claude-sonnet-4-6", &testClock{now: testNow})
 
 	if got := renderSettled(t, built); got != "usage unavailable" {
 		t.Errorf("got %q", got)
@@ -402,13 +457,13 @@ func assertFetchStarts(t *testing.T, built *state, clock *testClock, now time.Ti
 	}
 }
 
-func TestAFailedFetchShowsRetryingStatus(t *testing.T) {
+func TestAFailedFetchShowsThatItFailed(t *testing.T) {
 	clock := &testClock{now: testNow}
 	built := buildState(t, &scriptedReporter{err: errors.New("the endpoint is sulking")}, clock)
 
 	fetchNow(t, built)
 
-	if got := style.Plain(built.Render(segment.Context{})); got != "usage retrying" {
+	if got := style.Plain(built.Render(segment.Context{})); got != "usage failed" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -427,7 +482,216 @@ func TestAFailedRefreshKeepsTheLastSnapshot(t *testing.T) {
 	clock.set(testNow.Add(defaultRate))
 	fetchNow(t, built)
 
-	if got := style.Plain(built.Render(segment.Context{})); got != "5h 40% retrying" {
+	if got := style.Plain(built.Render(segment.Context{})); got != "5h 40% failed" {
 		t.Errorf("got %q", got)
 	}
+}
+
+func TestARefusedFetchShowsTheStatusCode(t *testing.T) {
+	clock := &testClock{now: testNow}
+	refusal := &req.StatusError{Code: 401, Message: "the key is not yours"}
+	built := buildState(t, &scriptedReporter{err: refusal}, clock)
+
+	fetchNow(t, built)
+
+	if got := style.Plain(built.Render(segment.Context{})); got != "usage 401" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestASpentWindowIsMarked(t *testing.T) {
+	built := build(t, &scriptedReporter{windows: []agent.UsageWindow{{
+		Duration:  5 * time.Hour,
+		Percent:   100,
+		ResetsAt:  testNow.Add(time.Hour),
+		IsLimited: true,
+	}}})
+
+	if got := renderSettled(t, built); got != "5h 100% ✖" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestAWindowIsMarkedByHowItsBurnComparesWithItsPace(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		percent  float64
+		elapsed  time.Duration
+		duration time.Duration
+		want     string
+	}{
+		{name: "barely started", percent: 9, elapsed: 0, duration: 5 * time.Hour, want: "5h 9%"},
+		{
+			name:     "spent in step with the window",
+			percent:  50,
+			elapsed:  150 * time.Minute,
+			duration: 5 * time.Hour,
+			want:     "5h 50%",
+		},
+		{
+			name:     "a shade ahead",
+			percent:  28,
+			elapsed:  time.Hour,
+			duration: 5 * time.Hour,
+			want:     "5h 28% ▲",
+		},
+		{
+			name:     "half as much again as the pace",
+			percent:  30,
+			elapsed:  time.Hour,
+			duration: 5 * time.Hour,
+			want:     "5h 30% ▲",
+		},
+		{
+			name:     "near the limit however it got there",
+			percent:  90,
+			elapsed:  4 * time.Hour,
+			duration: 5 * time.Hour,
+			want:     "5h 90% ▲",
+		},
+		{
+			name:     "rounded to the nearest whole",
+			percent:  39.6,
+			elapsed:  4 * time.Hour,
+			duration: 5 * time.Hour,
+			want:     "5h 40%",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			built := build(t, &scriptedReporter{windows: []agent.UsageWindow{{
+				Duration: test.duration,
+				Percent:  test.percent,
+				ResetsAt: testNow.Add(test.duration - test.elapsed),
+			}}})
+
+			if got := renderSettled(t, built); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestAWindowIsLabelledByHowLongItRuns(t *testing.T) {
+	for _, test := range []struct {
+		duration time.Duration
+		want     string
+	}{
+		{duration: 90 * time.Minute, want: "90m"},
+		{duration: 5 * time.Hour, want: "5h"},
+		{duration: 7 * 24 * time.Hour, want: "7d"},
+		{duration: 30 * 24 * time.Hour, want: "30d"},
+		{duration: 36 * time.Hour, want: "36h"},
+	} {
+		t.Run(test.want, func(t *testing.T) {
+			if got := durationLabel(test.duration); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestAScopeIsMatchedAgainstTheModelHoweverItIsWritten(t *testing.T) {
+	for _, test := range []struct {
+		name      string
+		modelName string
+		scope     string
+		want      bool
+	}{
+		{name: "the model the bucket names", modelName: "gpt-5.3-codex-spark", scope: "gpt-5.3-codex-spark", want: true},
+		{name: "a family within the model name", modelName: "claude-opus-4-6", scope: "opus", want: true},
+		{name: "a model of another family", modelName: "claude-sonnet-4-6", scope: "opus"},
+		{name: "a model written in capitals", modelName: "GPT-5.3-Codex-Spark", scope: "gpt-5.3-codex-spark", want: true},
+		{name: "no model at all", modelName: "", scope: "opus"},
+		{name: "a window governing everything", modelName: "anything", scope: "", want: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			built := buildOnModel(t, &scriptedReporter{}, test.modelName, &testClock{now: testNow})
+
+			internal, ok := built.(*state)
+			if !ok {
+				t.Fatalf("built %T, want *state", built)
+			}
+
+			if got := internal.governsThisSession(agent.UsageWindow{Scope: test.scope}); got != test.want {
+				t.Errorf("got %t, want %t", got, test.want)
+			}
+		})
+	}
+}
+
+func TestTheSegmentIsPersistentAndTicksWhileIdle(t *testing.T) {
+	built := build(t, &scriptedReporter{})
+
+	persister, ok := built.(segment.Persister)
+	if !ok {
+		t.Fatal("expected the segment to say whether it persists")
+	}
+
+	if !persister.Persistent() {
+		t.Error("expected the usage segment to persist")
+	}
+
+	if got := persister.RefreshInterval(); got != 125*time.Millisecond {
+		t.Errorf("refresh interval = %s", got)
+	}
+
+	ticker, ok := built.(segment.IdleTicker)
+	if !ok {
+		t.Fatal("expected the segment to tick while idle")
+	}
+
+	if got := ticker.IdleRefreshInterval(); got != redrawInterval {
+		t.Errorf("idle refresh interval = %s", got)
+	}
+}
+
+func TestAnOptionTheLayoutGotWrongIsRefused(t *testing.T) {
+	if _, err := New(nil, "", "", testNowRead)(rateOptions{rate: -time.Second}); err == nil {
+		t.Error("expected a rate shorter than nothing to be refused")
+	}
+}
+
+type rateOptions struct {
+	rate time.Duration
+}
+
+func (self rateOptions) Read(into any) error {
+	args, ok := into.(*struct {
+		Rate time.Duration `toml:"rate"`
+	})
+	if !ok {
+		return nil
+	}
+
+	args.Rate = self.rate
+
+	return nil
+}
+
+func testNowRead() time.Time {
+	return testNow
+}
+
+func TestAWindowNotYetStartedIsMeasuredFromNothingSpent(t *testing.T) {
+	built := build(t, &scriptedReporter{windows: []agent.UsageWindow{{
+		Duration: 5 * time.Hour,
+		Percent:  20,
+		ResetsAt: testNow.Add(10 * time.Hour),
+	}}})
+
+	if got := renderSettled(t, built); got != "5h 20% ▲" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestAnUnreadableOptionIsHandedBack(t *testing.T) {
+	if _, err := New(nil, "", "", testNowRead)(refusedOptions{}); err == nil {
+		t.Error("expected the unreadable option handed back")
+	}
+}
+
+type refusedOptions struct{}
+
+func (refusedOptions) Read(any) error {
+	return errors.New("the layout wrote something else")
 }

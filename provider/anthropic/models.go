@@ -4,10 +4,8 @@ import (
 	"context"
 	"strconv"
 	"strings"
-	"time"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/internal/req"
 )
 
 const (
@@ -15,8 +13,6 @@ const (
 	modelsSuffix   = "/models"
 	modelsPageSize = "1000"
 )
-
-const listTimeout = 30 * time.Second
 
 var adaptiveThinkingSince = generation{major: 4, minor: 6}
 
@@ -133,7 +129,7 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 	}
 
 	address += "?limit=" + modelsPageSize
-	if err := self.listRequests().Get(ctx, address, self.headers(token), &payload); err != nil {
+	if err := self.observedRequests().Get(ctx, address, self.headers(token), &payload); err != nil {
 		return nil, err
 	}
 
@@ -163,13 +159,4 @@ func modelsAddress(turnAddress string) (string, bool) {
 	}
 
 	return prefix + modelsSuffix, true
-}
-
-func (self *Client) listRequests() *req.Client {
-	client := req.New(listTimeout)
-	if self.observer != nil {
-		client.Observe(self.observer)
-	}
-
-	return client
 }

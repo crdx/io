@@ -6,13 +6,11 @@ import (
 	"crdx.org/io/cmd/oh/model"
 )
 
-const opencodeGoEndpoint = "https://opencode.ai/zen/go/v1/chat/completions"
-
 func connectOpencodeGo(choice model.Choice, effort string, endpoint string) (*Connection, error) {
 	token := standInToken
 
 	if endpoint == "" {
-		endpoint = opencodeGoEndpoint
+		endpoint = chat.GoEndpoint
 
 		var err error
 		if token, err = chat.StoredKey(); err != nil {
@@ -23,6 +21,10 @@ func connectOpencodeGo(choice model.Choice, effort string, endpoint string) (*Co
 	client, err := chat.New(endpoint, token, choice.Model, effort, choice.MaxOutputTokens)
 	if err != nil {
 		return nil, err
+	}
+
+	if endpoint == chat.GoEndpoint {
+		client.UsageURL = chat.GoUsageEndpoint
 	}
 
 	return &Connection{Client: client, ToolsSize: chat.ToolsSize}, nil
