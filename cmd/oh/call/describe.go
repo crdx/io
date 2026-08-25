@@ -8,8 +8,10 @@ import (
 )
 
 const (
-	readTool  = "read"
-	shellTool = "bash"
+	readTool      = "read"
+	shellTool     = "bash"
+	webSearchTool = "web_search"
+	webFetchTool  = "web_fetch"
 )
 
 type ToolLookup func(string) (tool.Tool, bool)
@@ -48,6 +50,12 @@ func LabelFor(event agent.Event, getTool ToolLookup, workspaceDir string) Label 
 	case event.Name == shellTool:
 		label.Name = "$"
 		label.NameStyle = style.Shell
+	case event.Name == webSearchTool:
+		label.Name = "search"
+		label.NameStyle = style.Network
+	case event.Name == webFetchTool:
+		label.Name = "fetch"
+		label.NameStyle = style.Network
 	case isSkillLoad:
 		label.Name = "load"
 		label.NameStyle = style.Skill

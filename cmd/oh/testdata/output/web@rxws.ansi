@@ -13,8 +13,8 @@
 \r\e[KLet me search, then read the\r
 \r\e[Kannouncement.\r
 \r
-\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m\r\e[Kweb_search \e[38;2;192;128;80mlatest Go relea…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
-\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150m…\e[0m\r\e[Kweb_fetch \e[38;2;192;128;80mhttps://go.dev/b…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\r
+\r\e[K\e[38;2;204;102;102msearch\e[0m \e[38;2;192;128;80mlatest Go release\e[0m\r\e[K\e[38;2;204;102;102msearch\e[0m \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmark…\e[0m\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;192;128;80mhttps://go.dev/blog/…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\r
 \r
 \r\e[KGo \e[1m1.26\e[0m is current. The announcement\r
 \r\e[Kcalls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m,\r
@@ -29,7 +29,7 @@
 \e[38;2;129;162;190mThe web search and fetch tools are now r\r
 efused.\e[0m\r
 \r
-\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mt…\e[0m\r\e[Kweb_fetch \e[38;2;192;128;80mhttps:…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not…\e[0m\r
+\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;192;128;80mhttps://go…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not…\e[0m\r
 \r
 \r\e[KThe web tools are refused, so I cannot\r
 \r\e[Kread the notes until you grant access\r
@@ -314,8 +314,8 @@ t\e[0m\r
 \r\e[Kt\r
 \r\e[K.\r
 \r
-\r\e[K\r
-\r\e[K\r
+\r\e[K\e[38;2;204;102;102m\e[0m\r
+\r\e[K\e[38;2;204;102;102m\e[0m\r
 \r
 \r\e[KG\r
 \r\e[Ko\r
@@ -555,7 +555,7 @@ e\r
 d\r
 .\e[0m\r
 \r
-\r\e[K\r
+\r\e[K\e[38;2;204;102;102m\e[0m\r
 \r
 \r\e[KT\r
 \r\e[Kh\r
@@ -636,8 +636,8 @@ d\r
 
 Let me search, then read the announcement.
 
-web_search \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-web_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m
+\e[38;2;204;102;102msearch\e[0m \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m
 
 Go \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in \e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.
 
@@ -646,7 +646,7 @@ Go \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;19
 \e[48;2;52;53;65m\e[0m
 \e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m
 
-web_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl+x s\e[0m
+\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl+x s\e[0m
 
 The web tools are refused, so I cannot read the notes until you grant access again.
 
@@ -661,8 +661,8 @@ The web tools are refused, so I cannot read the notes until you grant access aga
 \r
 \e[?2026h\e[?25l\r\e[KLet\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me searc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read the ann\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read the announc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read the announcemen\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read the announcement.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102msearch\e[0m \e[38;2;192;128;80mlatest Go release\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102msearch\e[0m \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KGo *\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo **1.2\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is curre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The anno\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announce\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement cal\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out itera\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `con\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `contain\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `container/h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, fl\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run repo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reportin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K`go\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K`go tes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a sm\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smalle\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller alloca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation hea\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.\e[?25h\e[?2026l\r
@@ -673,7 +673,7 @@ The web tools are refused, so I cannot read the notes until you grant access aga
 \r
 \e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
 \r
-\e[?2026h\e[?25l\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with …\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl…\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tool\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools ar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refuse\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cann\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the note\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes un\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you gran\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant ac\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant access\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant access aga\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant access again.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -708,8 +708,8 @@ ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;
 \r\e[Kannouncement\r
 \r\e[K.\r
 \r
-\r\e[Kweb_search\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
-\r\e[Kweb_fetch\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\r
+\r\e[K\e[38;2;204;102;102msearch\e[0m \e[38;2;192;128;80mla…\e[0m\r\e[K\e[38;2;204;102;102m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;192;128;80mhtt…\e[0m\r\e[K\e[38;2;204;102;102m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\r
 \r
 \r\e[KGo \e[1m1.26\e[0m is\r
 \r\e[Kcurrent. The\r
@@ -737,7 +737,7 @@ ch and fetch\r
  tools are n\r
 ow refused.\e[0m\r
 \r
-\r\e[Kweb_fetch\r\e[Kwe… \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb…\e[0m\r
+\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;192;128;80mhtt…\e[0m\r\e[K\e[38;2;204;102;102mfe…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb…\e[0m\r
 \r
 \r\e[KThe web\r
 \r\e[Ktools are\r
@@ -759,8 +759,8 @@ ow refused.\e[0m\r
 
 \r\e[KLet me search, then read the announcement.
 
-\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
-\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m
+\r\e[K\e[38;2;204;102;102msearch\e[0m \e[38;2;192;128;80mlatest Go release\e[0m\r\e[K\e[38;2;204;102;102msearch\e[0m \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m
 
 \r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in \e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.
 
@@ -769,7 +769,7 @@ ow refused.\e[0m\r
 \e[48;2;52;53;65m\e[0m
 \e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m
 
-\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl+x s\e[0m
+\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl+x s\e[0m
 
 \r\e[KThe web tools are refused, so I cannot read the notes until you grant access again.
 \e[?25h\e[?2026l
@@ -784,8 +784,8 @@ ow refused.\e[0m\r
 \r
 \r\e[KLet me search, then read the announcement.\r
 \r
-\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
-\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\r
+\r\e[K\e[38;2;204;102;102msearch\e[0m \e[38;2;192;128;80mlatest Go release\e[0m\r\e[K\e[38;2;204;102;102msearch\e[0m \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\r
 \r
 \r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in\r
 \r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.\r
@@ -796,7 +796,7 @@ ow refused.\e[0m\r
 \r
 \e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
 \r
-\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with …\e[0m\r
+\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl…\e[0m\r
 \r
 \r\e[KThe web tools are refused, so I cannot read the notes until you grant access again.\r
 \e[?25h\e[?2026l

@@ -2,7 +2,7 @@
  read a page while web access is withheld
 
 
-web_fetch https://example.com/news markdown ✗ 1L ~100t web access is not granted; the user can gr…
+fetch https://example.com/news markdown ✗ 1L ~100t web access is not granted; the user can grant …
 
 Web access is unavailable.
 

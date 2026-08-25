@@ -13,8 +13,8 @@ announcement the search cites.
 Let me search, then read the
 announcement.
 
-web_search latest Go relea… ✓ 1L ~100t
-web_fetch https://go.dev/b… ✓ 8L ~100t
+search latest Go release ✓ 1L ~100t
+fetch https://go.dev/blog/… ✓ 8L ~100t
 
 Go 1.26 is current. The announcement
 calls out iterators in container/heap,
@@ -29,7 +29,7 @@ smaller allocation header.
 The web search and fetch tools are now r
 efused.
 
-web_fetch https:… ✗ web access is not…
+fetch https://go… ✗ web access is not…
 
 The web tools are refused, so I cannot
 read the notes until you grant access
@@ -655,8 +655,8 @@ read the
 announcement
 .
 
-✓ 1L ~100t
-✓ 8L ~100t
+ ✓ 1L ~100t
+ ✓ 8L ~100t
 
 Go 1.26 is
 current. The
@@ -684,7 +684,7 @@ ch and fetch
  tools are n
 ow refused.
 
-we… ✗ web…
+fe… ✗ web…
 
 The web
 tools are
@@ -706,8 +706,8 @@ Searching first, then reading the announcement the search cites.
 
 Let me search, then read the announcement.
 
-web_search latest Go release ✓ 1L ~100t
-web_fetch https://go.dev/blog/go1.26 markdown ✓ 8L ~100t
+search latest Go release ✓ 1L ~100t
+fetch https://go.dev/blog/go1.26 markdown ✓ 8L ~100t
 
 Go 1.26 is current. The announcement calls out iterators in container/heap, flaky-run reporting in
 go test, and a smaller allocation header.
@@ -718,6 +718,6 @@ go test, and a smaller allocation header.
 
 The web search and fetch tools are now refused.
 
-web_fetch https://go.dev/doc/go1.26 text ✗ web access is not granted; the user can grant it with …
+fetch https://go.dev/doc/go1.26 text ✗ web access is not granted; the user can grant it with ctrl…
 
 The web tools are refused, so I cannot read the notes until you grant access again.

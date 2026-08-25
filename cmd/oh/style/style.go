@@ -81,6 +81,9 @@ var Background Style = hex(teal)
 // Web marks permission to reach the internet through the web tools.
 var Web Style = hex(steel)
 
+// Network marks the name of a call that leaves the machine, which no other call does.
+var Network Style = hex(red)
+
 // The markdown of an answer.
 var (
 	Heading Style = hex(gold)   // a heading, which is drawn in bold as well
