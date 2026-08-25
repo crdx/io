@@ -60,6 +60,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/lastTps"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
+	"crdx.org/io/cmd/oh/segment/subscriptionUsage"
 	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnElapsed"
 	"crdx.org/io/cmd/oh/segment/workingDirectory"
@@ -2591,6 +2592,31 @@ func TestWhatNewSessionMakesOfAModelGlob(t *testing.T) {
 	})
 }
 
+func TestPassedSessionNamesTheSourceOnANewSessionTransition(t *testing.T) {
+	transition, err := passedSessionTransition(
+		"/workspace",
+		"opus-5@max",
+		"medium",
+		newSessionFixtureChoices(),
+		"able-dolphin",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []string{
+		"-d",
+		"/workspace",
+		"-m",
+		"anthropic/claude-opus-5@max",
+		passedSessionOption,
+		"able-dolphin",
+	}
+	if !slices.Equal(transition.Arguments, want) {
+		t.Errorf("got arguments %q, want %q", transition.Arguments, want)
+	}
+}
+
 func newSessionFixtureChoices() []model.Choice {
 	return []model.Choice{
 		{Provider: "anthropic", Model: "claude-opus-4-5", EffortLevels: []string{"low", "high"}},
@@ -4083,6 +4109,12 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			scrollOverflow.New,
 			`direction = "up"`,
 			segment.Context{HiddenLinesAbove: 3},
+		),
+		"subscription-usage / not applicable": goldenSegmentPass(
+			t,
+			subscriptionUsage.New(nil, func() time.Time { return at }),
+			"",
+			segment.Context{},
 		),
 		"turn-elapsed / completed": goldenSegmentPass(
 			t,

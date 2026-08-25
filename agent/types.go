@@ -46,6 +46,7 @@ type UsageWindow struct {
 }
 
 type UsageReporter interface {
+	IsAvailable() bool
 	UsageWindows(context.Context) ([]UsageWindow, error)
 }
 

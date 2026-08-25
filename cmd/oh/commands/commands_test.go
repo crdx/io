@@ -100,8 +100,12 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 			actions = append(actions, "copy:"+text)
 			return nil
 		},
-		startNewSession: func(modelGlob string) error {
-			actions = append(actions, "new:"+modelGlob)
+		startSession: func(start SessionStart) error {
+			kind := "new"
+			if start.ShouldPassConversation {
+				kind = "pass"
+			}
+			actions = append(actions, kind+":"+start.ModelGlob)
 			return nil
 		},
 	})
@@ -110,6 +114,8 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		"/conf":              "edit:" + configPath,
 		"/new":               "new:",
 		"/new sonnet":        "new:sonnet",
+		"/pass":              "pass:",
+		"/pass sonnet":       "pass:sonnet",
 		"/open config-dir":   "open:" + configDirectory,
 		"/open state-dir":    "open:" + stateDirectory,
 		"/open session-dir":  "open:" + sessionDirectory,
@@ -156,6 +162,7 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 		"/conf extra",
 		"/help extra",
 		"/new one two",
+		"/pass one two",
 		"/copy session-name extra",
 		"/open unknown",
 	} {
@@ -181,7 +188,7 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 
 func TestAModelThatCannotBeResolvedLeavesTheCommandToBeCorrected(t *testing.T) {
 	commands := newCommandRegistry(t, commandEnvironment{
-		startNewSession: func(string) error {
+		startSession: func(SessionStart) error {
 			return errors.New(`model "opus" is ambiguous`)
 		},
 	})

@@ -1,4 +1,4 @@
-/ -> /conf -> /copy -> /help -> /new -> /open
+/ -> /conf -> /copy -> /help -> /new -> /open -> /pass
 /c -> /conf -> /copy
 /copy  -> /copy session-dir -> /copy session-id -> /copy session-name
 /open  -> /open config-dir -> /open session-chat -> /open session-dir -> /open session-log -> /open state-dir

@@ -58,12 +58,18 @@ func Load(directory string) ([]*picker.Session, error) {
 			continue
 		}
 
+		isRunning, err := session.IsInUse(directory, storedMeta.Name)
+		if err != nil {
+			return nil, err
+		}
+
 		sessions = append(sessions, &picker.Session{
 			Name:         storedMeta.Name,
 			WorkspaceDir: data.WorkspaceDir,
 			Touched:      storedMeta.Touched,
 			Title:        storedMeta.Title,
 			MessageCount: storedMeta.Messages,
+			IsRunning:    isRunning,
 		})
 	}
 

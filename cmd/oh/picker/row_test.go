@@ -13,6 +13,17 @@ func TestClipReturnsNothingWhenThereAreNoColumns(t *testing.T) {
 	}
 }
 
+func TestARunningSessionHasAYellowMarker(t *testing.T) {
+	self := &state{sessions: []*Session{{IsRunning: true}, {}}}
+
+	if got := self.row(0, 80); !strings.Contains(got, "🟡") {
+		t.Errorf("expected the running marker, got %q", got)
+	}
+	if got := self.row(1, 80); strings.Contains(got, "🟡") {
+		t.Errorf("expected no running marker, got %q", got)
+	}
+}
+
 func TestAnUntitledSessionDoesNotPutAnEscapeSequenceThroughTheClipper(t *testing.T) {
 	got := title(&Session{})
 

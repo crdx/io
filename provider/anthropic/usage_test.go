@@ -42,6 +42,10 @@ func TestTheUsageReportFollowsTheEndpointItWasGiven(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	client := newClient(t, server.URL+"/v1/messages")
+	if !client.IsAvailable() {
+		t.Fatal("expected the recognised endpoint to support usage reporting")
+	}
+
 	observer := &countingObserver{}
 	client.ObserveHTTP(observer)
 
@@ -120,6 +124,10 @@ func TestAMalformedUsageLimitIsDroppedRatherThanGuessedAt(t *testing.T) {
 
 func TestAUsageReportIsNotAttemptedAgainstAnUnrecognisedEndpoint(t *testing.T) {
 	client := newClient(t, "http://127.0.0.1:1/somewhere/else")
+
+	if client.IsAvailable() {
+		t.Fatal("expected the unrecognised endpoint not to support usage reporting")
+	}
 
 	windows, err := client.UsageWindows(t.Context())
 	if err != nil || windows != nil {

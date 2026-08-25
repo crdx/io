@@ -92,6 +92,10 @@ type Persister interface {
 	Persistent() bool
 }
 
+type IdleTicker interface {
+	IdleRefreshInterval() time.Duration
+}
+
 func (self Layout) RefreshInterval() time.Duration {
 	var fastest time.Duration
 
@@ -121,7 +125,12 @@ func (self Layout) IdleRefreshInterval() time.Duration {
 				continue
 			}
 
-			if interval := persister.RefreshInterval(); interval > 0 && (fastest == 0 || interval < fastest) {
+			interval := persister.RefreshInterval()
+			if idleTicker, ok := instance.(IdleTicker); ok {
+				interval = idleTicker.IdleRefreshInterval()
+			}
+
+			if interval > 0 && (fastest == 0 || interval < fastest) {
 				fastest = interval
 			}
 		}

@@ -62,6 +62,10 @@ func TestUsageWindowsCarryWhatTheLastTurnReported(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if !client.IsAvailable() {
+		t.Fatal("expected usage reporting after a turn supplied rate-limit headers")
+	}
+
 	windows, err := client.UsageWindows(t.Context())
 	if err != nil {
 		t.Fatal(err)
@@ -83,6 +87,20 @@ func TestUsageWindowsCarryWhatTheLastTurnReported(t *testing.T) {
 	resetHigh := time.Now().Add(time.Hour)
 	if windows[0].ResetsAt.Before(resetLow) || windows[0].ResetsAt.After(resetHigh) {
 		t.Errorf("expected the primary reset about an hour out, got %s", windows[0].ResetsAt)
+	}
+}
+
+func TestAResponseWithoutUsageHeadersKeepsReportingUnavailable(t *testing.T) {
+	server := rateLimitedTurn(t, nil)
+	client := newUsageClient(t, server.URL)
+	client.AddUserMessage("hello")
+
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
+		t.Fatal(err)
+	}
+
+	if client.IsAvailable() {
+		t.Fatal("expected usage reporting to remain unavailable without rate-limit headers")
 	}
 }
 
@@ -119,6 +137,10 @@ func TestAResponseWithoutUsageHeadersLeavesTheLastSnapshotStanding(t *testing.T)
 
 func TestThereAreNoUsageWindowsBeforeTheFirstTurn(t *testing.T) {
 	client := newUsageClient(t, "http://127.0.0.1:1/nowhere")
+
+	if client.IsAvailable() {
+		t.Fatal("expected usage reporting to be unavailable before a turn supplies rate-limit headers")
+	}
 
 	windows, err := client.UsageWindows(t.Context())
 	if err != nil || windows != nil {

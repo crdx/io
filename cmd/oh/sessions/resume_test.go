@@ -82,6 +82,61 @@ func TestLoadingACrashedSessionIsRefusedWithoutChangingItsJournal(t *testing.T) 
 	}
 }
 
+func TestGettingASessionToPassPreparesTheNewConversation(t *testing.T) {
+	directory := t.TempDir()
+	workspaceDirectory := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: workspaceDirectory})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = writer.Close() }()
+
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+
+	passedSession, err := GetPassedSession(directory, writer.Name(), "focus on tests")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if passedSession.WorkspaceDir != workspaceDirectory {
+		t.Errorf("got workspace %q, want %q", passedSession.WorkspaceDir, workspaceDirectory)
+	}
+	wantInitialFilePath := filepath.Join(directory, writer.Name(), "chat.md")
+	if passedSession.InitialFilePath != wantInitialFilePath {
+		t.Errorf("got initial file %q, want %q", passedSession.InitialFilePath, wantInitialFilePath)
+	}
+	wantMessage := passedSessionPrompt + "\n\nfocus on tests"
+	if passedSession.InitialUserMessage != wantMessage {
+		t.Errorf("got message %q, want %q", passedSession.InitialUserMessage, wantMessage)
+	}
+
+	passedSession, err = GetPassedSession(directory, writer.Name(), "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if passedSession.InitialUserMessage != passedSessionPrompt {
+		t.Errorf("got default message %q, want %q", passedSession.InitialUserMessage, passedSessionPrompt)
+	}
+}
+
+func TestLoadingARunningSessionReportsThatItIsRunning(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = writer.Close() }()
+
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := LoadForResume(directory, writer.Name()); err == nil || !strings.Contains(err.Error(), "is running") {
+		t.Fatalf("expected the running session to be identified, got %v", err)
+	}
+}
+
 func TestLoadingACompletedSessionSucceeds(t *testing.T) {
 	directory := t.TempDir()
 	writer, err := store.Create(directory, store.Meta{WorkspaceDir: t.TempDir()})
@@ -113,7 +168,7 @@ func TestNamingNoSessionResumesNothing(t *testing.T) {
 	}
 }
 
-func TestASessionAlreadyOpenIsRefused(t *testing.T) {
+func TestARunningSessionIsRefused(t *testing.T) {
 	directory := t.TempDir()
 	writer, err := store.Create(directory, store.Meta{WorkspaceDir: t.TempDir()})
 	if err != nil {
@@ -127,8 +182,8 @@ func TestASessionAlreadyOpenIsRefused(t *testing.T) {
 	}
 
 	resumedSession := &store.Session{Name: writer.Name()}
-	if _, err := OpenWriter(directory, resumedSession, store.Meta{}); err == nil || !strings.Contains(err.Error(), "is already open") {
-		t.Fatalf("expected the open session to be refused, got %v", err)
+	if _, err := OpenWriter(directory, resumedSession, store.Meta{}); err == nil || !strings.Contains(err.Error(), "is running") {
+		t.Fatalf("expected the running session to be refused, got %v", err)
 	}
 
 	if err := writer.Close(); err != nil {

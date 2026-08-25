@@ -86,6 +86,27 @@ func Create(directory string, journalMeta json.RawMessage, listingData json.RawM
 
 var ErrInUse = errors.New("the session is already open elsewhere")
 
+// IsInUse reports whether another process holds the session's journal lock.
+func IsInUse(directory string, name string) (bool, error) {
+	if err := validateName(name); err != nil {
+		return false, err
+	}
+
+	file, err := os.Open(journalPath(directory, name))
+	if err != nil {
+		return false, err
+	}
+	defer func() { _ = file.Close() }()
+
+	if err := lockJournal(file); errors.Is(err, ErrInUse) {
+		return true, nil
+	} else if err != nil {
+		return false, err
+	}
+
+	return false, nil
+}
+
 func Open(directory string, name string) (*Writer, error) {
 	if err := validateName(name); err != nil {
 		return nil, err

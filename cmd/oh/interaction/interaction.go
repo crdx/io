@@ -24,16 +24,16 @@ type Handler struct {
 	Draw         func()
 }
 
-func Run(terminal *os.File, refreshInterval time.Duration, idleInterval time.Duration, handler Handler) {
+func Run(terminal *os.File, refreshInterval time.Duration, getIdleInterval func() time.Duration, handler Handler) {
 	resizeSignals := resizes()
 	defer signal.Stop(resizeSignals)
 	ticker := newTicker(refreshInterval)
 	defer ticker.Stop()
-	run(keypresses(terminal), resizeSignals, ticker.C, idleInterval, handler)
+	run(keypresses(terminal), resizeSignals, ticker.C, getIdleInterval, handler)
 }
 
-func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, ticks <-chan time.Time, idleInterval time.Duration, handler Handler) {
-	idle := idleRefresh{interval: idleInterval}
+func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, ticks <-chan time.Time, getIdleInterval func() time.Duration, handler Handler) {
+	idle := idleRefresh{getInterval: getIdleInterval}
 	for {
 		select {
 		case keypress, open := <-keys:
@@ -61,12 +61,13 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, ticks <-chan time.
 }
 
 type idleRefresh struct {
-	interval time.Duration
-	drawnAt  time.Time
+	getInterval func() time.Duration
+	drawnAt     time.Time
 }
 
 func (self *idleRefresh) isDue() bool {
-	if self.interval <= 0 || time.Since(self.drawnAt) < self.interval {
+	interval := self.getInterval()
+	if interval <= 0 || time.Since(self.drawnAt) < interval {
 		return false
 	}
 	self.drawnAt = time.Now()

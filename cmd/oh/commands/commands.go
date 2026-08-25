@@ -29,9 +29,9 @@ type Options struct {
 	StateDir   string
 	Session    Session
 
-	Editor          editor.Command
-	Output          io.Writer
-	StartNewSession func(string) error
+	Editor       editor.Command
+	Output       io.Writer
+	StartSession func(SessionStart) error
 }
 
 type Session struct {
@@ -40,16 +40,21 @@ type Session struct {
 	Directory string
 }
 
+type SessionStart struct {
+	ModelGlob              string
+	ShouldPassConversation bool
+}
+
 type commandEnvironment struct {
 	configDir  string
 	configPath string
 	stateDir   string
 	session    commandSession
 
-	openEditor      func(string) error
-	openTarget      func(string) error
-	copyText        func(string) error
-	startNewSession func(string) error
+	openEditor   func(string) error
+	openTarget   func(string) error
+	copyText     func(string) error
+	startSession func(SessionStart) error
 }
 
 type commandSession struct {
@@ -81,7 +86,7 @@ func New(options Options, snippetUsages []string) (slash.CommandSet, error) {
 		copyText: func(text string) error {
 			return terminal.Copy(options.Output, text)
 		},
-		startNewSession: options.StartNewSession,
+		startSession: options.StartSession,
 	}, snippetUsages)
 }
 
@@ -103,7 +108,9 @@ func buildCommands(environment commandEnvironment, snippetUsages []string) (slas
 			environment.copyText,
 		),
 		help,
-		newSessionCommand(environment.startNewSession),
+		sessionCommand("new", func(modelGlob string) error {
+			return environment.startSession(SessionStart{ModelGlob: modelGlob})
+		}),
 		targetCommand(
 			"open",
 			map[string]commandTarget{
@@ -126,6 +133,12 @@ func buildCommands(environment commandEnvironment, snippetUsages []string) (slas
 			},
 			environment.openTarget,
 		),
+		sessionCommand("pass", func(modelGlob string) error {
+			return environment.startSession(SessionStart{
+				ModelGlob:              modelGlob,
+				ShouldPassConversation: true,
+			})
+		}),
 	}
 
 	var err error
@@ -147,17 +160,17 @@ func helpCommand(getHelp func() string) slash.Command {
 	}
 }
 
-func newSessionCommand(startNewSession func(string) error) slash.Command {
+func sessionCommand(name string, startSession func(string) error) slash.Command {
 	return slash.Command{
-		Name: "new",
+		Name: name,
 		Run: func(_ slash.Context, arguments []string) error {
 			if len(arguments) > 1 {
 				return slash.Usage()
 			}
 			if len(arguments) == 0 {
-				return startNewSession("")
+				return startSession("")
 			}
-			return startNewSession(arguments[0])
+			return startSession(arguments[0])
 		},
 	}
 }
@@ -165,7 +178,7 @@ func newSessionCommand(startNewSession func(string) error) slash.Command {
 func helpText(commandUsages []string, hiddenCommandUsage string, snippetUsages []string) string {
 	visibleCommandUsages := slices.DeleteFunc(commandUsages, func(usage string) bool { return usage == hiddenCommandUsage })
 	for i, usage := range visibleCommandUsages {
-		if usage == "/new" {
+		if usage == "/new" || usage == "/pass" {
 			visibleCommandUsages[i] += " [model[@effort]]"
 		}
 	}

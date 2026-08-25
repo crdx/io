@@ -30,6 +30,12 @@ type usageLimit struct {
 	} `json:"scope"`
 }
 
+func (self *Client) IsAvailable() bool {
+	_, isAvailable := usageAddress(self.URL)
+
+	return isAvailable
+}
+
 func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, error) {
 	address, reportable := usageAddress(self.URL)
 	if !reportable {

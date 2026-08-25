@@ -15,15 +15,17 @@ const defaultCapFlags = "rx"
 var usage = fmt.Sprintf(`oh — coding harness
 
 Usage:
-    $0 [options] [-t <tool>]... [<prompt>...]
+    $0 [options] [-t <tool>]... [-i <file>]... [<prompt>...]
 
 Options:
     -d, --workspace <dir>                  Set working directory and project scope
     -r, --resume <session>                 Resume the saved session by name
+    --pass <session>                       Pass a saved session into a new conversation
     -s, --sessions                         Choose a saved session to resume
     -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
     -c, --caps <flags>                     Capabilities: rxwbgs (read, exec, write, bg, git, web) (default: %s)
     -t, --tool <tool>                      Enable a tool; may be repeated (all by default)
+    -i, --init <file>                      Copy a file into the agent scratch directory; may be repeated
     -l, --list                             List the available models, then exit
     -u, --update                           Update the cached model list, then exit
     -V, --version                          Show the version
@@ -38,16 +40,18 @@ Environment:
 
 // Input is the command line as accepted by duckopt.
 type Input struct {
-	Message      []string `docopt:"<prompt>"`
-	WorkspaceDir string   `docopt:"--workspace"`
-	Session      string   `docopt:"--resume"`
-	Sessions     bool     `docopt:"--sessions"`
-	Model        string   `docopt:"--model"`
-	Caps         string   `docopt:"--caps"`
-	Tools        []string `docopt:"--tool"`
-	List         bool     `docopt:"--list"`
-	Update       bool     `docopt:"--update"`
-	Version      bool     `docopt:"--version"`
+	Message       []string `docopt:"<prompt>"`
+	WorkspaceDir  string   `docopt:"--workspace"`
+	Session       string   `docopt:"--resume"`
+	PassedSession string   `docopt:"--pass"`
+	Sessions      bool     `docopt:"--sessions"`
+	Model         string   `docopt:"--model"`
+	Caps          string   `docopt:"--caps"`
+	Tools         []string `docopt:"--tool"`
+	InitialFiles  []string `docopt:"--init"`
+	List          bool     `docopt:"--list"`
+	Update        bool     `docopt:"--update"`
+	Version       bool     `docopt:"--version"`
 }
 
 // Options are the validated options needed to start or resume a conversation.
@@ -55,12 +59,14 @@ type Options struct {
 	Message        string
 	WorkspaceDir   string
 	Session        string
+	PassedSession  string
 	Provider       string
 	Model          string
 	Effort         string
 	Caps           caps.Set
 	WereCapsChosen bool
 	Tools          []string
+	InitialFiles   []string
 }
 
 // Bind reads and validates the process command line.
@@ -68,18 +74,25 @@ func Bind() *Input {
 	return duckopt.MustBind[Input](usage, "$0")
 }
 
-// Resuming reports whether the options name a stored session.
+// Resuming reports whether the options name a stored session to continue.
 func (self Options) Resuming() bool {
 	return self.Session != ""
+}
+
+// Passing reports whether the options name a stored session to pass into a new conversation.
+func (self Options) Passing() bool {
+	return self.PassedSession != ""
 }
 
 // Parse validates an input command line and resolves its requested model selection.
 func (self Input) Parse(modelCachePath string) (Options, error) {
 	options := Options{
-		WorkspaceDir: self.WorkspaceDir,
-		Message:      strings.Join(self.Message, " "),
-		Session:      self.Session,
-		Tools:        self.Tools,
+		WorkspaceDir:  self.WorkspaceDir,
+		Message:       strings.Join(self.Message, " "),
+		Session:       self.Session,
+		PassedSession: self.PassedSession,
+		Tools:         self.Tools,
+		InitialFiles:  self.InitialFiles,
 	}
 
 	if self.Model != "" {
@@ -104,8 +117,17 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 	options.Caps = grantedCaps
 	options.WereCapsChosen = self.Caps != ""
 
+	if options.Resuming() && options.Passing() {
+		return options, errors.New("a conversation cannot be resumed and passed at the same time")
+	}
 	if options.Resuming() && options.WorkspaceDir != "" {
 		return options, errors.New("a resumed conversation takes its directory from the session")
+	}
+	if options.Passing() && options.WorkspaceDir != "" {
+		return options, errors.New("a passed conversation takes its directory from the session")
+	}
+	if options.Resuming() && len(options.InitialFiles) > 0 {
+		return options, errors.New("a resumed conversation cannot be initialised from files")
 	}
 
 	if options.WorkspaceDir == "" {

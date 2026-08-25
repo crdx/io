@@ -303,6 +303,25 @@ func TestASessionInUseIsRefusedToASecondWriter(t *testing.T) {
 	}
 }
 
+func TestASessionReportsWhetherItIsInUse(t *testing.T) {
+	directory := t.TempDir()
+	writer := storedSession(t, directory)
+
+	isInUse, err := session.IsInUse(directory, writer.Name())
+	if err != nil || !isInUse {
+		t.Fatalf("expected the open session to be in use, got %t and %v", isInUse, err)
+	}
+
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	isInUse, err = session.IsInUse(directory, writer.Name())
+	if err != nil || isInUse {
+		t.Errorf("expected the closed session to be free, got %t and %v", isInUse, err)
+	}
+}
+
 func TestASessionInUseIsGivenUpOnceItIsClosed(t *testing.T) {
 	directory := t.TempDir()
 	writer := storedSession(t, directory)

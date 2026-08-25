@@ -55,7 +55,17 @@ func useCachedModels(t *testing.T) {
 func TestEveryOptionIsRead(t *testing.T) {
 	useCachedModels(t)
 
-	parsedOptions := parseOptions(t, "-c", "r", "-d", "somewhere", "-m", "deepseek@hi", "-t", "read", "--tool", "grep")
+	parsedOptions := parseOptions(
+		t,
+		"-c", "r",
+		"-d", "somewhere",
+		"-m", "deepseek@hi",
+		"-t", "read",
+		"--tool", "grep",
+		"-i", "/context/brief.md",
+		"--init", "/context/notes.txt",
+		"Use", "the", "brief.",
+	)
 
 	if parsedOptions.Caps != caps.Read {
 		t.Errorf("expected reading alone, got %s", parsedOptions.Caps.Flags())
@@ -72,6 +82,13 @@ func TestEveryOptionIsRead(t *testing.T) {
 	if !slices.Equal(parsedOptions.Tools, []string{"read", "grep"}) {
 		t.Errorf("expected read and grep, got %v", parsedOptions.Tools)
 	}
+	wantInitialFiles := []string{"/context/brief.md", "/context/notes.txt"}
+	if !slices.Equal(parsedOptions.InitialFiles, wantInitialFiles) {
+		t.Errorf("got initial files %q, want %q", parsedOptions.InitialFiles, wantInitialFiles)
+	}
+	if parsedOptions.Message != "Use the brief." {
+		t.Errorf("expected the caller's opening message, got %q", parsedOptions.Message)
+	}
 
 	id := "0347juX1xcrL9W0QKJe0cs"
 
@@ -85,6 +102,20 @@ func TestModelSelectionRequiresModelAndEffort(t *testing.T) {
 		if _, err := (Input{Model: selection}).Parse(modelCachePath()); err == nil {
 			t.Errorf("expected %q to be rejected", selection)
 		}
+	}
+}
+
+func TestASessionMayBePassedIntoANewConversation(t *testing.T) {
+	parsedOptions := parseOptions(t, "--pass", "chosen-lobster", "carry", "on")
+
+	if !parsedOptions.Passing() || parsedOptions.PassedSession != "chosen-lobster" {
+		t.Errorf("expected the passed session, got %q", parsedOptions.PassedSession)
+	}
+	if parsedOptions.Resuming() {
+		t.Error("expected passing not to count as resuming")
+	}
+	if parsedOptions.Message != "carry on" {
+		t.Errorf("expected the prompt beside it, got %q", parsedOptions.Message)
 	}
 }
 
@@ -195,9 +226,22 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 	}
 }
 
-func TestAWorkspaceCannotBeGivenWhenResuming(t *testing.T) {
-	opts := Input{Session: "one", WorkspaceDir: "somewhere"}
-	if _, err := opts.Parse(modelCachePath()); err == nil {
+func TestAWorkspaceCannotBeGivenWhenContinuingAStoredSession(t *testing.T) {
+	for name, input := range map[string]Input{
+		"resume": {Session: "one", WorkspaceDir: "somewhere"},
+		"pass":   {PassedSession: "one", WorkspaceDir: "somewhere"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := input.Parse(modelCachePath()); err == nil {
+				t.Error("expected an error")
+			}
+		})
+	}
+}
+
+func TestASessionCannotBeResumedAndPassedTogether(t *testing.T) {
+	input := Input{Session: "one", PassedSession: "another"}
+	if _, err := input.Parse(modelCachePath()); err == nil {
 		t.Error("expected an error")
 	}
 }

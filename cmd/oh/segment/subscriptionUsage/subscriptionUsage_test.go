@@ -3,6 +3,7 @@ package subscriptionUsage
 import (
 	"context"
 	"errors"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -22,10 +23,28 @@ type scriptedReporter struct {
 	asked   atomic.Int64
 }
 
+func (self *scriptedReporter) IsAvailable() bool {
+	return true
+}
+
 func (self *scriptedReporter) UsageWindows(context.Context) ([]agent.UsageWindow, error) {
 	self.asked.Add(1)
 
 	return self.windows, self.err
+}
+
+type unavailableReporter struct {
+	asked atomic.Int64
+}
+
+func (self *unavailableReporter) IsAvailable() bool {
+	return false
+}
+
+func (self *unavailableReporter) UsageWindows(context.Context) ([]agent.UsageWindow, error) {
+	self.asked.Add(1)
+
+	return nil, nil
 }
 
 var testNow = time.Date(2026, 1, 2, 12, 0, 0, 0, time.UTC)
@@ -65,7 +84,8 @@ func renderSettled(t *testing.T, built segment.Segment) string {
 	deadline := time.Now().Add(2 * time.Second)
 
 	for {
-		if text := style.Plain(built.Render(segment.Context{})); text != "" {
+		text := style.Plain(built.Render(segment.Context{}))
+		if text == "usage unavailable" || !strings.HasPrefix(text, "usage ") {
 			return text
 		}
 
@@ -77,11 +97,24 @@ func renderSettled(t *testing.T, built segment.Segment) string {
 	}
 }
 
-func TestANilReporterRendersNothing(t *testing.T) {
+func TestANilReporterSaysUsageIsNotApplicable(t *testing.T) {
 	built := build(t, nil)
 
-	if got := built.Render(segment.Context{}); got != "" {
-		t.Errorf("expected nothing, got %q", got)
+	if got := style.Plain(built.Render(segment.Context{})); got != "usage n/a" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestAnUnavailableReporterIsNotAskedForUsage(t *testing.T) {
+	reporter := &unavailableReporter{}
+	built := build(t, reporter)
+
+	if got := style.Plain(built.Render(segment.Context{})); got != "usage n/a" {
+		t.Errorf("got %q", got)
+	}
+
+	if asked := reporter.asked.Load(); asked != 0 {
+		t.Errorf("unavailable reporter was asked %d times", asked)
 	}
 }
 
@@ -132,14 +165,14 @@ func TestAScopedWindowStaysOutOfTheLine(t *testing.T) {
 	}
 }
 
-func TestAnExpiredWindowReadsAsIdle(t *testing.T) {
+func TestAnExpiredWindowReadsAsStale(t *testing.T) {
 	built := build(t, &scriptedReporter{windows: []agent.UsageWindow{{
 		Duration: 5 * time.Hour,
 		Percent:  68,
 		ResetsAt: testNow.Add(-time.Minute),
 	}}})
 
-	if got := renderSettled(t, built); got != "5h idle" {
+	if got := renderSettled(t, built); got != "5h stale" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -158,6 +191,74 @@ func TestAFreshSnapshotIsNotFetchedAgain(t *testing.T) {
 
 	if asked := reporter.asked.Load(); asked != 1 {
 		t.Errorf("expected one fetch, got %d", asked)
+	}
+}
+
+func TestRefreshingASnapshotKeepsTheFiguresBesideTheSpinner(t *testing.T) {
+	reporter := &scriptedReporter{windows: []agent.UsageWindow{{
+		Duration: 5 * time.Hour,
+		Percent:  40,
+		ResetsAt: testNow.Add(150 * time.Minute),
+	}}}
+	clock := &testClock{now: testNow}
+	built := buildState(t, reporter, clock)
+
+	fetchNow(t, built)
+	clock.set(testNow.Add(defaultRate))
+
+	want := "5h 40% " + built.spinnerFrame()
+	if got := style.Plain(built.Render(segment.Context{})); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestOnlyScopedWindowsSayUsageIsUnavailable(t *testing.T) {
+	built := build(t, &scriptedReporter{windows: []agent.UsageWindow{{
+		Duration: 7 * 24 * time.Hour,
+		Percent:  3,
+		ResetsAt: testNow.Add(6 * 24 * time.Hour),
+		Scope:    "opus",
+	}}})
+
+	if got := renderSettled(t, built); got != "usage unavailable" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestAnActiveFetchShowsASpinnerAndRefreshesQuickly(t *testing.T) {
+	clock := &testClock{now: testNow}
+	built := buildState(t, &scriptedReporter{}, clock)
+
+	if !built.noteFetchStarting() {
+		t.Fatal("initial fetch did not start")
+	}
+
+	want := "usage " + built.spinnerFrame()
+	if got := style.Plain(built.Render(segment.Context{})); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
+	if got := built.IdleRefreshInterval(); got != 125*time.Millisecond {
+		t.Errorf("active idle refresh interval = %s", got)
+	}
+}
+
+func TestAnEmptyReportShowsPendingStatus(t *testing.T) {
+	clock := &testClock{now: testNow}
+	built := buildState(t, &scriptedReporter{}, clock)
+
+	fetchNow(t, built)
+
+	if got := built.IdleRefreshInterval(); got != 125*time.Millisecond {
+		t.Errorf("unpainted completion idle refresh interval = %s", got)
+	}
+
+	if got := style.Plain(built.Render(segment.Context{})); got != "usage pending" {
+		t.Errorf("got %q", got)
+	}
+
+	if got := built.IdleRefreshInterval(); got != redrawInterval {
+		t.Errorf("pending idle refresh interval = %s", got)
 	}
 }
 
@@ -267,13 +368,13 @@ func assertFetchStarts(t *testing.T, built *state, clock *testClock, now time.Ti
 	}
 }
 
-func TestAFailedFetchLeavesTheLineBlank(t *testing.T) {
+func TestAFailedFetchShowsRetryingStatus(t *testing.T) {
 	clock := &testClock{now: testNow}
 	built := buildState(t, &scriptedReporter{err: errors.New("the endpoint is sulking")}, clock)
 
 	fetchNow(t, built)
 
-	if got := built.Render(segment.Context{}); got != "" {
-		t.Errorf("expected nothing after the failure, got %q", got)
+	if got := style.Plain(built.Render(segment.Context{})); got != "usage retrying" {
+		t.Errorf("got %q", got)
 	}
 }

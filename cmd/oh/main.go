@@ -139,6 +139,16 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
+	passedSession, err := sessions.GetPassedSession(sessionsDir, args.PassedSession, args.Message)
+	if err != nil {
+		return "", err
+	}
+	if passedSession != nil {
+		args.WorkspaceDir = passedSession.WorkspaceDir
+		args.InitialFiles = append([]string{passedSession.InitialFilePath}, args.InitialFiles...)
+		args.Message = passedSession.InitialUserMessage
+	}
+
 	resumedSession, err := sessions.LoadForResume(sessionsDir, args.Session)
 	if err != nil {
 		return "", err
@@ -284,9 +294,21 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	defer func() {
 		if !log.Stored() {
-			_ = os.Remove(tmpDir)
+			_ = os.RemoveAll(tmpDir)
 		}
 	}()
+
+	if len(args.InitialFiles) > 0 {
+		initialFilesMessage, err := startup.PrepareInitialFiles(args.InitialFiles, tmpDir)
+		if err != nil {
+			return "", err
+		}
+		if args.Message == "" {
+			args.Message = initialFilesMessage
+		} else {
+			args.Message = initialFilesMessage + "\n\n" + args.Message
+		}
+	}
 
 	var systemPrompt string
 	var contextFiles []prompt.File
@@ -352,13 +374,25 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			ID:        log.ID(),
 			Directory: filepath.Join(sessionsDir, log.Name()),
 		},
-		StartNewSession: func(modelGlob string) error {
-			transition, err := newSessionTransition(
-				workspaceDir,
-				modelGlob,
-				selection.Effort,
-				model.Choices(modelCachePath),
-			)
+		StartSession: func(start commands.SessionStart) error {
+			var transition cycle.Transition
+			var err error
+			if start.ShouldPassConversation {
+				transition, err = passedSessionTransition(
+					workspaceDir,
+					start.ModelGlob,
+					selection.Effort,
+					model.Choices(modelCachePath),
+					sessionInfo.Name,
+				)
+			} else {
+				transition, err = newSessionTransition(
+					workspaceDir,
+					start.ModelGlob,
+					selection.Effort,
+					model.Choices(modelCachePath),
+				)
+			}
 			if err != nil {
 				return err
 			}

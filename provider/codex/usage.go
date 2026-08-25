@@ -19,6 +19,13 @@ const (
 	secondaryResetHeader  = "X-Codex-Secondary-Resets-In-Seconds"
 )
 
+func (self *Client) IsAvailable() bool {
+	self.usageMutex.Lock()
+	defer self.usageMutex.Unlock()
+
+	return self.usageWindows != nil
+}
+
 func (self *Client) UsageWindows(context.Context) ([]agent.UsageWindow, error) {
 	self.usageMutex.Lock()
 	defer self.usageMutex.Unlock()

@@ -34,6 +34,7 @@ type Session struct {
 	Touched      time.Time
 	Title        string
 	MessageCount int
+	IsRunning    bool
 }
 
 // Messages counts what the user and the model said, excluding working events.
@@ -163,8 +164,9 @@ func (self *state) row(index int, width int) string {
 	storedSession := self.sessions[index]
 
 	line := fmt.Sprintf(
-		"%s  %-12s  %7s  %s  %s",
+		"%s %s %-12s  %7s  %s  %s",
 		mark(index == self.cursor),
+		runningMark(storedSession.IsRunning),
 		ago(storedSession.Touched),
 		messageCount(storedSession.Messages()),
 		pathutil.Shorten(storedSession.WorkspaceDir),
@@ -190,6 +192,14 @@ func mark(sessionChosen bool) string {
 	}
 
 	return " "
+}
+
+func runningMark(isRunning bool) string {
+	if isRunning {
+		return "🟡"
+	}
+
+	return "  "
 }
 
 func title(storedSession *Session) string {

@@ -11,9 +11,50 @@ import (
 	"crdx.org/io/cmd/oh/store"
 )
 
+const (
+	passedSessionPrompt   = "Read chat.md first, then continue." //nolint:gosec // an opening prompt, not a credential
+	sessionTranscriptName = "chat.md"
+)
+
+type PassedSession struct {
+	WorkspaceDir       string
+	InitialFilePath    string
+	InitialUserMessage string
+}
+
+func GetPassedSession(directory string, name string, userMessage string) (*PassedSession, error) {
+	if name == "" {
+		return nil, nil
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		return nil, err
+	}
+
+	initialUserMessage := passedSessionPrompt
+	if userMessage != "" {
+		initialUserMessage += "\n\n" + userMessage
+	}
+
+	return &PassedSession{
+		WorkspaceDir:       storedSession.Meta.WorkspaceDir,
+		InitialFilePath:    filepath.Join(directory, storedSession.Name, sessionTranscriptName),
+		InitialUserMessage: initialUserMessage,
+	}, nil
+}
+
 func LoadForResume(directory string, name string) (*store.Session, error) {
 	if name == "" {
 		return nil, nil
+	}
+
+	isRunning, err := session.IsInUse(directory, name)
+	if err != nil {
+		return nil, err
+	}
+	if isRunning {
+		return nil, fmt.Errorf("session %s is running", name)
 	}
 
 	storedSession, err := store.Read(directory, name)
@@ -34,7 +75,7 @@ func OpenWriter(directory string, resumedSession *store.Session, meta store.Meta
 
 	log, err := store.Open(directory, resumedSession.Name)
 	if errors.Is(err, session.ErrInUse) {
-		return nil, fmt.Errorf("session %s is already open", resumedSession.Name)
+		return nil, fmt.Errorf("session %s is running", resumedSession.Name)
 	}
 
 	return log, err

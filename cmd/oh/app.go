@@ -103,7 +103,7 @@ func (self *App) begin(message string) cycle.Transition {
 		return self.transition
 	}
 
-	interaction.Run(os.Stdin, self.segmentLayout.RefreshInterval(), self.segmentLayout.IdleRefreshInterval(), interaction.Handler{
+	interaction.Run(os.Stdin, self.segmentLayout.RefreshInterval(), self.segmentLayout.IdleRefreshInterval, interaction.Handler{
 		Events: func() <-chan turn.Event { return self.currentTurn.Events() },
 		Key:    func(keypress key.Key) bool { return self.handleKeypressAndShowInput(editor, history, keypress) },
 		Turn:   self.takeTurn,

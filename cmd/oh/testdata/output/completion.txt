@@ -1,8 +1,10 @@
 === options ===
 --caps
 --help
+--init
 --list
 --model
+--pass
 --resume
 --sessions
 --tool
