@@ -2628,36 +2628,12 @@ func TestAnEffortWrittenAsAnAliasInTheConfigIsResolved(t *testing.T) {
 	}
 }
 
-func TestWhatNewSessionMakesOfAModelGlob(t *testing.T) {
+func TestWhatSessionTransitionsMakeOfAModelGlob(t *testing.T) {
 	compareWithGolden(t, "new-session", ".txt", map[string]func() string{
-		"model globs":     func() string { return resolveNewSessionGlobs(t) },
-		"effort fallback": resolveNearestEfforts,
+		"effort fallback":         resolveNearestEfforts,
+		"fork model globs":        func() string { return resolveForkedSessionGlobs(t) },
+		"new session model globs": func() string { return resolveNewSessionGlobs(t) },
 	})
-}
-
-func TestForkedSessionNamesTheSourceOnANewSessionTransition(t *testing.T) {
-	transition, err := forkedSessionTransition(
-		"/workspace",
-		"opus-5@max",
-		"medium",
-		newSessionFixtureChoices(),
-		"able-dolphin",
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	want := []string{
-		"-d",
-		"/workspace",
-		"-m",
-		"anthropic/claude-opus-5@max",
-		sourceSessionOption,
-		"able-dolphin",
-	}
-	if !slices.Equal(transition.Arguments, want) {
-		t.Errorf("got arguments %q, want %q", transition.Arguments, want)
-	}
 }
 
 func newSessionFixtureChoices() []model.Choice {
@@ -2667,6 +2643,26 @@ func newSessionFixtureChoices() []model.Choice {
 		{Provider: "anthropic", Model: "claude-sonnet-4-5", EffortLevels: []string{"medium"}},
 		{Provider: "codex", Model: "gpt-5.6-sol", EffortLevels: []string{"none", "high"}},
 	}
+}
+
+func resolveForkedSessionGlobs(t *testing.T) string {
+	t.Helper()
+
+	choices := newSessionFixtureChoices()
+	var written strings.Builder
+
+	for _, glob := range []string{"", "opus-5", "opus-5@max", "nope"} {
+		transition, err := forkedSessionTransition(glob, "medium", choices, "able-dolphin")
+		if err != nil {
+			fmt.Fprintf(&written, "%-28q error: %v\n", glob, err)
+
+			continue
+		}
+
+		fmt.Fprintf(&written, "%-28q %s %s\n", glob, transitionKindName(transition.Kind), strings.Join(transition.Arguments, " "))
+	}
+
+	return written.String()
 }
 
 func resolveNewSessionGlobs(t *testing.T) string {

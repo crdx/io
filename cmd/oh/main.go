@@ -379,7 +379,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			var err error
 			if start.SourceSessionName != "" {
 				transition, err = forkedSessionTransition(
-					workspaceDir,
 					start.ModelGlob,
 					selection.Effort,
 					model.Choices(modelCachePath),

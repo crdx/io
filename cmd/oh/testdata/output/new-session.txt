@@ -24,7 +24,13 @@
 "max"          of {xhigh,max}          -> "max"
 "unrecognised" of {xhigh,max}          -> "xhigh"
 
-=== model globs ===
+=== fork model globs ===
+""                           new --from able-dolphin
+"opus-5"                     new -m anthropic/claude-opus-5@medium --from able-dolphin
+"opus-5@max"                 new -m anthropic/claude-opus-5@max --from able-dolphin
+"nope"                       error: model "nope" does not match any known model
+
+=== new session model globs ===
 ""                           new -d /workspace
 "opus"                       error: model "opus" is ambiguous; matches: anthropic/claude-opus-4-5, anthropic/claude-opus-5
 "OPUS"                       error: model "OPUS" is ambiguous; matches: anthropic/claude-opus-4-5, anthropic/claude-opus-5

@@ -8,9 +8,34 @@ import (
 const sourceSessionOption = "--from"
 
 func newSessionTransition(workspaceDir string, modelGlob string, currentEffort string, choices []model.Choice) (cycle.Transition, error) {
-	arguments := []string{"-d", workspaceDir}
+	transition, err := selectedModelTransition(modelGlob, currentEffort, choices)
+	if err != nil {
+		return cycle.Transition{}, err
+	}
+
+	transition.Arguments = append([]string{"-d", workspaceDir}, transition.Arguments...)
+	return transition, nil
+}
+
+func forkedSessionTransition(
+	modelGlob string,
+	currentEffort string,
+	choices []model.Choice,
+	sourceSessionName string,
+) (cycle.Transition, error) {
+	transition, err := selectedModelTransition(modelGlob, currentEffort, choices)
+	if err != nil {
+		return cycle.Transition{}, err
+	}
+
+	transition.Arguments = append(transition.Arguments, sourceSessionOption, sourceSessionName)
+	return transition, nil
+}
+
+func selectedModelTransition(modelGlob string, currentEffort string, choices []model.Choice) (cycle.Transition, error) {
+	transition := cycle.Transition{Kind: cycle.NewSession}
 	if modelGlob == "" {
-		return cycle.Transition{Kind: cycle.NewSession, Arguments: arguments}, nil
+		return transition, nil
 	}
 
 	selection, err := model.ResolveQuery(modelGlob, currentEffort, choices)
@@ -18,26 +43,6 @@ func newSessionTransition(workspaceDir string, modelGlob string, currentEffort s
 		return cycle.Transition{}, err
 	}
 
-	arguments = append(arguments, "-m", selection.String())
-
-	return cycle.Transition{Kind: cycle.NewSession, Arguments: arguments}, nil
-}
-
-func forkedSessionTransition(
-	workspaceDir string,
-	modelGlob string,
-	currentEffort string,
-	choices []model.Choice,
-	sourceSessionName string,
-) (cycle.Transition, error) {
-	transition, err := newSessionTransition(workspaceDir, modelGlob, currentEffort, choices)
-	if err != nil {
-		return cycle.Transition{}, err
-	}
-	transition.Arguments = append(
-		transition.Arguments,
-		sourceSessionOption,
-		sourceSessionName,
-	)
+	transition.Arguments = []string{"-m", selection.String()}
 	return transition, nil
 }
