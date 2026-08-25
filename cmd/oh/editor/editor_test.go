@@ -9,7 +9,7 @@ import (
 )
 
 func TestConfiguredEditorIsUsed(t *testing.T) {
-	command, err := buildCommand(Command{"configured-editor", "--wait"}, "/tmp/config.toml")
+	command, err := buildCommand(Command{"configured-editor", "--wait"}, []string{"/tmp/config.toml"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -18,8 +18,18 @@ func TestConfiguredEditorIsUsed(t *testing.T) {
 	}
 }
 
+func TestEveryPathIsPassedToTheEditor(t *testing.T) {
+	command, err := buildCommand(Command{"configured-editor"}, []string{"/tmp/skills", "/tmp/more-skills"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(command.Args, []string{"configured-editor", "/tmp/skills", "/tmp/more-skills"}) {
+		t.Errorf("got arguments %v", command.Args)
+	}
+}
+
 func TestAnEditorMustBeConfigured(t *testing.T) {
-	_, err := buildCommand(Command{" "}, "/tmp/config.toml")
+	_, err := buildCommand(Command{" "}, []string{"/tmp/config.toml"})
 	if err == nil || !strings.Contains(err.Error(), "set editor in config.toml") {
 		t.Errorf("got %v", err)
 	}

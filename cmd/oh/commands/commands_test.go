@@ -68,7 +68,20 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", configHome)
 	configDirectory := filepath.Join(configHome, "org.crdx", "oh")
 	configPath := filepath.Join(configDirectory, "config.toml")
-	stateDirectory := filepath.Join(t.TempDir(), "state")
+	systemPromptPath := filepath.Join(configDirectory, "SYSTEM.md")
+	workspaceDirectory := filepath.Join(t.TempDir(), "workspace")
+	scratchDirectory := filepath.Join(t.TempDir(), "scratch")
+	homeDirectory := filepath.Join(t.TempDir(), "home")
+	skillDirectories := []string{
+		filepath.Join(configDirectory, "skills"),
+		filepath.Join(t.TempDir(), "shared-skills"),
+		filepath.Join(t.TempDir(), "skills-that-were-moved"),
+	}
+	for _, directory := range skillDirectories[:2] {
+		if err := os.MkdirAll(directory, 0o700); err != nil {
+			t.Fatal(err)
+		}
+	}
 	sessionDirectory := filepath.Join(t.TempDir(), "sessions", "brave-otter")
 	if err := os.MkdirAll(sessionDirectory, 0o700); err != nil {
 		t.Fatal(err)
@@ -80,25 +93,29 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	}
 	var actions []string
 	commands := newCommandRegistry(t, commandEnvironment{
-		configDir:  configDirectory,
-		configPath: configPath,
-		stateDir:   stateDirectory,
+		configDir:        configDirectory,
+		configPath:       configPath,
+		systemPromptPath: systemPromptPath,
+		workspaceDir:     workspaceDirectory,
+		scratchDir:       scratchDirectory,
+		homeDir:          homeDirectory,
+		skillDirs:        skillDirectories,
 		session: commandSession{
 			name:        "brave-otter",
 			id:          "session-id",
 			directory:   sessionDirectory,
 			isPersisted: func() bool { return true },
 		},
-		openEditor: func(path string) error {
-			actions = append(actions, "edit:"+path)
+		openEditor: func(paths []string) error {
+			actions = append(actions, "edit:"+strings.Join(paths, ","))
 			return nil
 		},
-		openTarget: func(path string) error {
-			actions = append(actions, "open:"+path)
+		openTarget: func(paths []string) error {
+			actions = append(actions, "open:"+strings.Join(paths, ","))
 			return nil
 		},
-		copyText: func(text string) error {
-			actions = append(actions, "copy:"+text)
+		copyText: func(values []string) error {
+			actions = append(actions, "copy:"+strings.Join(values, ","))
 			return nil
 		},
 		startSession: func(start SessionStart) error {
@@ -112,19 +129,25 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	})
 
 	tests := map[string]string{
-		"/conf":              "edit:" + configPath,
-		"/new":               "new:",
-		"/new sonnet":        "new:sonnet",
-		"/fork":              "fork:brave-otter:",
-		"/fork sonnet":       "fork:brave-otter:sonnet",
-		"/open config-dir":   "open:" + configDirectory,
-		"/open state-dir":    "open:" + stateDirectory,
-		"/open session-dir":  "open:" + sessionDirectory,
-		"/copy session-name": "copy:brave-otter",
-		"/copy session-id":   "copy:session-id",
-		"/copy session-dir":  "copy:" + sessionDirectory,
-		"/open session-log":  "open:" + filepath.Join(sessionDirectory, sessionJournalName),
-		"/open session-chat": "open:" + filepath.Join(sessionDirectory, sessionTranscriptName),
+		"/edit config-file":   "edit:" + configPath,
+		"/edit system-prompt": "edit:" + systemPromptPath,
+		"/edit workspace-dir": "edit:" + workspaceDirectory,
+		"/edit skills-dir":    "edit:" + strings.Join(skillDirectories[:2], ","),
+		"/open skills-dir":    "open:" + strings.Join(skillDirectories[:2], ","),
+		"/new":                "new:",
+		"/new sonnet":         "new:sonnet",
+		"/fork":               "fork:brave-otter:",
+		"/fork sonnet":        "fork:brave-otter:sonnet",
+		"/open config-dir":    "open:" + configDirectory,
+		"/open workspace-dir": "open:" + workspaceDirectory,
+		"/open scratch-dir":   "open:" + scratchDirectory,
+		"/open home-dir":      "open:" + homeDirectory,
+		"/open session-dir":   "open:" + sessionDirectory,
+		"/copy session-name":  "copy:brave-otter",
+		"/copy session-id":    "copy:session-id",
+		"/copy session-dir":   "copy:" + sessionDirectory,
+		"/open session-log":   "open:" + filepath.Join(sessionDirectory, sessionJournalName),
+		"/open session-chat":  "open:" + filepath.Join(sessionDirectory, sessionTranscriptName),
 	}
 
 	for input, wantAction := range tests {
@@ -198,7 +221,8 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 	})
 
 	for _, input := range []string{
-		"/conf extra",
+		"/edit config-file extra",
+		"/edit unknown",
 		"/help extra",
 		"/new one two",
 		"/fork one two",
@@ -250,6 +274,9 @@ func TestTargetCommandsExposeTheirArgumentsForCompletion(t *testing.T) {
 		"/open c":         "/open config-dir",
 		"/copy session-n": "/copy session-name",
 		"/open session-l": "/open session-log",
+		"/open w":         "/open workspace-dir",
+		"/open scr":       "/open scratch-dir",
+		"/edit sy":        "/edit system-prompt",
 	} {
 		var state slash.Completion
 		completion, found := state.Next(commands, prefix)
@@ -259,18 +286,20 @@ func TestTargetCommandsExposeTheirArgumentsForCompletion(t *testing.T) {
 	}
 }
 
-func TestCommandsReportSessionTargetsThatDoNotExistYet(t *testing.T) {
+func TestCommandsReportTargetsThatDoNotExistYet(t *testing.T) {
 	sessionDirectory := filepath.Join(t.TempDir(), "missing-session")
 	actionRan := false
 	commands := newCommandRegistry(t, commandEnvironment{
-		session: commandSession{directory: sessionDirectory},
-		openTarget: func(string) error {
+		session:   commandSession{directory: sessionDirectory},
+		skillDirs: []string{filepath.Join(t.TempDir(), "missing-skills")},
+		openTarget: func([]string) error {
 			actionRan = true
 			return nil
 		},
 	})
 
 	for input, want := range map[string]string{
+		"/open skills-dir":   "Skills directory does not exist yet",
 		"/open session-dir":  "Session directory does not exist yet",
 		"/open session-log":  "Session log does not exist yet",
 		"/open session-chat": "Session chat does not exist yet",
@@ -287,14 +316,14 @@ func TestCommandsReportSessionTargetsThatDoNotExistYet(t *testing.T) {
 				t.Errorf("got error %v, want %q", err, want)
 			}
 			if actionRan {
-				t.Error("action ran for a missing session target")
+				t.Error("action ran for a missing target")
 			}
 		})
 	}
 }
 
 func TestHelpOmitsTheSnippetSectionWhenNoneAreConfigured(t *testing.T) {
-	got := helpText([]string{"/conf", "/help"}, "/help", nil)
+	got := helpText([]string{"/edit", "/help"}, "/help", nil)
 	if strings.Contains(got, "Snippets:") || strings.Contains(got, "/help") {
 		t.Errorf("got help %q", got)
 	}
@@ -306,15 +335,19 @@ func TestBrowseIsNotACommandAnymore(t *testing.T) {
 	}
 }
 
-func TestConfReportsAnUnconfiguredEditor(t *testing.T) {
-	set, err := New(Options{ConfigFile: filepath.Join(t.TempDir(), "config.toml")}, nil)
+func TestEditReportsAnUnconfiguredEditor(t *testing.T) {
+	configDirectory := t.TempDir()
+	set, err := New(Options{
+		ConfigDir:  configDirectory,
+		ConfigFile: filepath.Join(configDirectory, "config.toml"),
+	}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	commands := commandRegistry(t, set)
-	invocation, found := commands.Find("/conf")
+	invocation, found := commands.Find("/edit config-file")
 	if !found {
-		t.Fatal("expected /conf to be registered")
+		t.Fatal("expected /edit to be registered")
 	}
 
 	err = invocation.Command.Run(nil, invocation.Arguments)

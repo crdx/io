@@ -21,9 +21,10 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		steps  int
 	}{
 		{prefix: "/", steps: 6},
-		{prefix: "/c", steps: 2},
+		{prefix: "/c", steps: 1},
 		{prefix: "/copy ", steps: 3},
-		{prefix: "/open ", steps: 5},
+		{prefix: "/edit ", steps: 3},
+		{prefix: "/open ", steps: 10},
 		{prefix: "//", steps: 2},
 		{prefix: "//a", steps: 3},
 	} {

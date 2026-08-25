@@ -35,8 +35,8 @@ func (self *Command) UnmarshalTOML(value any) error {
 	}
 }
 
-func Open(configured Command, path string) error {
-	command, err := buildCommand(configured, path)
+func Open(configured Command, paths ...string) error {
+	command, err := buildCommand(configured, paths)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func Open(configured Command, path string) error {
 	return nil
 }
 
-func buildCommand(configured Command, path string) (*exec.Cmd, error) {
+func buildCommand(configured Command, paths []string) (*exec.Cmd, error) {
 	if len(configured) == 0 {
 		return nil, errors.New("editor is not configured: set editor in config.toml")
 	}
@@ -60,7 +60,7 @@ func buildCommand(configured Command, path string) (*exec.Cmd, error) {
 	}
 
 	arguments := append([]string(nil), configured[1:]...)
-	arguments = append(arguments, path)
+	arguments = append(arguments, paths...)
 	return exec.Command(name, arguments...), nil //nolint:gosec // the user deliberately configures the editor
 }
 

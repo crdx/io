@@ -24,10 +24,14 @@ const (
 )
 
 type Options struct {
-	ConfigDir  string
-	ConfigFile string
-	StateDir   string
-	Session    Session
+	ConfigDir        string
+	ConfigFile       string
+	SystemPromptFile string
+	SkillDirs        []string
+	WorkspaceDir     string
+	ScratchDir       string
+	HomeDir          string
+	Session          Session
 
 	Editor       editor.Command
 	Output       io.Writer
@@ -47,14 +51,18 @@ type SessionStart struct {
 }
 
 type commandEnvironment struct {
-	configDir  string
-	configPath string
-	stateDir   string
-	session    commandSession
+	configDir        string
+	configPath       string
+	systemPromptPath string
+	skillDirs        []string
+	workspaceDir     string
+	scratchDir       string
+	homeDir          string
+	session          commandSession
 
-	openEditor   func(string) error
-	openTarget   func(string) error
-	copyText     func(string) error
+	openEditor   func([]string) error
+	openTarget   func([]string) error
+	copyText     func([]string) error
 	startSession func(SessionStart) error
 }
 
@@ -66,28 +74,31 @@ type commandSession struct {
 }
 
 type commandTarget struct {
-	value        string
-	confirmation string
-	prepare      func() error
+	resolveValues func() ([]string, error)
+	confirmation  string
 }
 
 func New(options Options, snippetUsages []string) (slash.CommandSet, error) {
 	return buildCommands(commandEnvironment{
-		configDir:  options.ConfigDir,
-		configPath: options.ConfigFile,
-		stateDir:   options.StateDir,
+		configDir:        options.ConfigDir,
+		configPath:       options.ConfigFile,
+		systemPromptPath: options.SystemPromptFile,
+		skillDirs:        options.SkillDirs,
+		workspaceDir:     options.WorkspaceDir,
+		scratchDir:       options.ScratchDir,
+		homeDir:          options.HomeDir,
 		session: commandSession{
 			name:        options.Session.Name,
 			id:          options.Session.ID,
 			directory:   options.Session.Directory,
 			isPersisted: options.Session.IsPersisted,
 		},
-		openEditor: func(path string) error {
-			return editor.Open(options.Editor, path)
+		openEditor: func(paths []string) error {
+			return editor.Open(options.Editor, paths...)
 		},
-		openTarget: openDesktopTarget,
-		copyText: func(text string) error {
-			return terminal.Copy(options.Output, text)
+		openTarget: openDesktopTargets,
+		copyText: func(values []string) error {
+			return terminal.Copy(options.Output, strings.Join(values, "\n"))
 		},
 		startSession: options.StartSession,
 	}, snippetUsages)
@@ -99,8 +110,8 @@ func buildCommands(environment commandEnvironment, snippetUsages []string) (slas
 	help = helpCommand(func() string {
 		return helpText(set.Usages(), systemCommandPrefix+help.Name, snippetUsages)
 	})
+	targets := locationTargets(environment)
 	commands := []slash.Command{
-		noArgumentCommand("conf", environment.configPath, environment.openEditor),
 		targetCommand(
 			"copy",
 			map[string]commandTarget{
@@ -110,32 +121,12 @@ func buildCommands(environment commandEnvironment, snippetUsages []string) (slas
 			},
 			environment.copyText,
 		),
+		targetCommand("edit", targets, environment.openEditor),
 		help,
 		sessionCommand("new", func(modelGlob string) error {
 			return environment.startSession(SessionStart{ModelGlob: modelGlob})
 		}),
-		targetCommand(
-			"open",
-			map[string]commandTarget{
-				"config-dir": {
-					value: environment.configDir,
-					prepare: func() error {
-						return os.MkdirAll(environment.configDir, 0o700)
-					},
-				},
-				"state-dir":   {value: environment.stateDir},
-				"session-dir": existingTarget("Session directory", environment.session.directory),
-				"session-log": existingTarget(
-					"Session log",
-					filepath.Join(environment.session.directory, sessionJournalName),
-				),
-				"session-chat": existingTarget(
-					"Session chat",
-					filepath.Join(environment.session.directory, sessionTranscriptName),
-				),
-			},
-			environment.openTarget,
-		),
+		targetCommand("open", targets, environment.openTarget),
 	}
 	commands = append(commands, commandsRequiringPersistedSession(
 		environment.session.isPersisted,
@@ -150,6 +141,31 @@ func buildCommands(environment commandEnvironment, snippetUsages []string) (slas
 	var err error
 	set, err = slash.NewCommandSet(systemCommandPrefix, commands...)
 	return set, err
+}
+
+func locationTargets(environment commandEnvironment) map[string]commandTarget {
+	prepareConfigDir := func() error {
+		return os.MkdirAll(environment.configDir, 0o700)
+	}
+
+	return map[string]commandTarget{
+		"config-dir":    preparedTarget(prepareConfigDir, environment.configDir),
+		"config-file":   preparedTarget(prepareConfigDir, environment.configPath),
+		"system-prompt": preparedTarget(prepareConfigDir, environment.systemPromptPath),
+		"skills-dir":    existingTarget("Skills directory", environment.skillDirs...),
+		"workspace-dir": staticTarget(environment.workspaceDir),
+		"scratch-dir":   staticTarget(environment.scratchDir),
+		"home-dir":      staticTarget(environment.homeDir),
+		"session-dir":   existingTarget("Session directory", environment.session.directory),
+		"session-log": existingTarget(
+			"Session log",
+			filepath.Join(environment.session.directory, sessionJournalName),
+		),
+		"session-chat": existingTarget(
+			"Session chat",
+			filepath.Join(environment.session.directory, sessionTranscriptName),
+		),
+	}
 }
 
 func helpCommand(getHelp func() string) slash.Command {
@@ -209,40 +225,51 @@ func helpText(commandUsages []string, hiddenCommandUsage string, snippetUsages [
 }
 
 func copyTarget(value string) commandTarget {
-	return commandTarget{value: value, confirmation: "Copied to clipboard."}
+	target := staticTarget(value)
+	target.confirmation = "Copied to clipboard."
+	return target
 }
 
-func existingTarget(description string, path string) commandTarget {
+func staticTarget(values ...string) commandTarget {
 	return commandTarget{
-		value: path,
-		prepare: func() error {
-			_, err := os.Stat(path)
-			switch {
-			case errors.Is(err, fs.ErrNotExist):
-				return fmt.Errorf("%s does not exist yet", description)
-			case err != nil:
-				return fmt.Errorf("could not inspect %s: %w", description, err)
-			default:
-				return nil
+		resolveValues: func() ([]string, error) { return values, nil },
+	}
+}
+
+func preparedTarget(prepare func() error, values ...string) commandTarget {
+	return commandTarget{
+		resolveValues: func() ([]string, error) {
+			if err := prepare(); err != nil {
+				return nil, err
 			}
+			return values, nil
 		},
 	}
 }
 
-func noArgumentCommand(name string, value string, action func(string) error) slash.Command {
-	return slash.Command{
-		Name: name,
-		Run: func(_ slash.Context, arguments []string) error {
-			if len(arguments) != 0 {
-				return slash.Usage()
+func existingTarget(description string, paths ...string) commandTarget {
+	return commandTarget{
+		resolveValues: func() ([]string, error) {
+			var present []string
+			for _, path := range paths {
+				switch _, err := os.Stat(path); {
+				case errors.Is(err, fs.ErrNotExist):
+					continue
+				case err != nil:
+					return nil, fmt.Errorf("could not inspect %s: %w", description, err)
+				default:
+					present = append(present, path)
+				}
 			}
-
-			return action(value)
+			if len(present) == 0 {
+				return nil, fmt.Errorf("%s does not exist yet", description)
+			}
+			return present, nil
 		},
 	}
 }
 
-func targetCommand(name string, targets map[string]commandTarget, action func(string) error) slash.Command {
+func targetCommand(name string, targets map[string]commandTarget, action func([]string) error) slash.Command {
 	command := slash.Command{
 		Name: name,
 		Run: func(context slash.Context, arguments []string) error {
@@ -255,13 +282,12 @@ func targetCommand(name string, targets map[string]commandTarget, action func(st
 				return slash.Usage()
 			}
 
-			if target.prepare != nil {
-				if err := target.prepare(); err != nil {
-					return err
-				}
+			values, err := target.resolveValues()
+			if err != nil {
+				return err
 			}
 
-			if err := action(target.value); err != nil {
+			if err := action(values); err != nil {
 				return err
 			}
 			if target.confirmation != "" {
@@ -274,13 +300,15 @@ func targetCommand(name string, targets map[string]commandTarget, action func(st
 	return command.WithArguments(slices.Sorted(maps.Keys(targets))...)
 }
 
-func openDesktopTarget(path string) error {
-	command := exec.Command("xdg-open", path) //nolint:gosec // the fixed opener receives a path selected by the command
-	if err := command.Start(); err != nil {
-		return fmt.Errorf("could not open %s: %w", path, err)
-	}
+func openDesktopTargets(paths []string) error {
+	for _, path := range paths {
+		command := exec.Command("xdg-open", path) //nolint:gosec // the fixed opener receives a path selected by the command
+		if err := command.Start(); err != nil {
+			return fmt.Errorf("could not open %s: %w", path, err)
+		}
 
-	go func() { _ = command.Wait() }()
+		go func() { _ = command.Wait() }()
+	}
 
 	return nil
 }

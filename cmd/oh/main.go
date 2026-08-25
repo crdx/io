@@ -364,11 +364,15 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	var chat *App
 	systemCommands, err := commands.New(commands.Options{
-		ConfigDir:  location.GetConfigDir(),
-		StateDir:   location.GetStateDir(),
-		ConfigFile: configPath,
-		Editor:     settings.Editor.Command,
-		Output:     os.Stdout,
+		ConfigDir:        location.GetConfigDir(),
+		ConfigFile:       configPath,
+		SystemPromptFile: location.GetGlobalContextPath(),
+		SkillDirs:        globalSkillDirs,
+		WorkspaceDir:     workspaceDir,
+		ScratchDir:       tmpDir,
+		HomeDir:          homeDir,
+		Editor:           settings.Editor.Command,
+		Output:           os.Stdout,
 		Session: commands.Session{
 			Name:        log.Name(),
 			ID:          log.ID(),
