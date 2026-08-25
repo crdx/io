@@ -77,6 +77,10 @@ func (self *Input) SetText(text string) {
 	self.buffer.Set(text)
 }
 
+func (self *Input) IsPasting() bool {
+	return self.isPasting
+}
+
 func (self *Input) IsPrefixPending() bool {
 	return self.isPrefixPending
 }

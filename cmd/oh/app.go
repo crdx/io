@@ -384,6 +384,10 @@ func (self *App) interruptTurn() {
 }
 
 func (self *App) show(editor *edit.Input) {
+	if editor.IsPasting() {
+		return
+	}
+
 	columns := self.screen.Columns()
 	frame := editor.Frame(columns)
 

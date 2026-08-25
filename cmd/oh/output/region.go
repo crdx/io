@@ -39,7 +39,10 @@ func (self *Screen) Synchronise(draw func()) {
 		if self.nestedUpdates == 0 {
 			text := self.synchronisedBytes.String()
 			self.synchronisedBytes.Reset()
-			self.writeRaw(beginFrame + hideCursor + text + showCursor + endFrame)
+
+			if text != "" {
+				self.writeRaw(beginFrame + hideCursor + text + showCursor + endFrame)
+			}
 		}
 	}()
 

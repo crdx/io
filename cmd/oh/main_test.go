@@ -2087,6 +2087,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"mermaid-streaming": {".screen"},
 		"mode-takeback":     {".ansi", ".screen"},
 		"new-session":       {".txt"},
+		"paste":             {".ansi", ".screen"},
 		"resume-mode":       {".ansi"},
 		"running":           {".ansi", ".screen"},
 		"segments":          {".ansi", ".screen"},
@@ -5715,6 +5716,100 @@ func (self *frameRecordingWriter) Write(value []byte) (int, error) {
 	_, _ = self.stream.Write(value)
 	self.frames = append(self.frames, self.stream.String())
 	return len(value), nil
+}
+
+func TestAPasteIsDrawnOnlyWhenItHasFinished(t *testing.T) {
+	writer := &frameRecordingWriter{}
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.NewTerminalOfSize(writer, replayColumns, replayLines)
+
+	history := edit.NewHistory("", historyLimit)
+	editor := edit.NewInput(history)
+	self.show(editor)
+	framesBeforePaste := len(writer.frames)
+
+	self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.PasteStart})
+	for _, value := range "pasted text" {
+		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: value})
+	}
+
+	if drawn := len(writer.frames) - framesBeforePaste; drawn != 0 {
+		t.Errorf("the input was drawn %d times while the paste arrived, want 0", drawn)
+	}
+
+	self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.PasteEnd})
+
+	visible := strings.Join(visibleScreen(t, writer.stream.String(), replayColumns), "\n")
+	if !strings.Contains(visible, "pasted text") {
+		t.Errorf("the finished paste was not drawn:\n%s", visible)
+	}
+}
+
+type pasteStage int
+
+const (
+	pasteNotStarted pasteStage = iota
+	pasteArriving
+	pasteFinished
+)
+
+func TestAPasteDrawsWhatItDrewBefore(t *testing.T) {
+	passes := map[string]func() string{
+		"1 before the paste": func() string {
+			return pasteStream(t, "pasted text", pasteNotStarted)
+		},
+		"2 while the paste arrives": func() string {
+			return pasteStream(t, "pasted text", pasteArriving)
+		},
+		"3 after the paste": func() string {
+			return pasteStream(t, "pasted text", pasteFinished)
+		},
+		"4 a paste of many lines": func() string {
+			return pasteStream(t, "first line\nsecond line\nthird line", pasteFinished)
+		},
+		"5 an indented paste": func() string {
+			return pasteStream(t, "    if isReady {\n        begin()\n    }", pasteFinished)
+		},
+		"6 a paste wider than the screen": func() string {
+			return pasteStream(t, strings.Repeat("wide ", 40), pasteFinished)
+		},
+	}
+
+	compareWithGolden(t, "paste", ".ansi", passes)
+	compareWithGolden(t, "paste", ".screen", shownPasses(t, passes))
+}
+
+func pasteStream(t *testing.T, text string, stage pasteStage) string {
+	t.Helper()
+
+	self := slashCommandFixture(t, caps.Read)
+	var screenOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+
+	history := edit.NewHistory("", historyLimit)
+	editor := edit.NewInput(history)
+
+	self.screen.Line("conversation remains in scrollback")
+	self.show(editor)
+
+	if stage == pasteNotStarted {
+		return screenOutput.String()
+	}
+
+	self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.PasteStart})
+	for _, value := range text {
+		if value == '\n' {
+			self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Enter})
+			continue
+		}
+		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: value})
+	}
+
+	if stage == pasteFinished {
+		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.PasteEnd})
+	}
+
+	return screenOutput.String()
 }
 
 func TestHelpDuringReasoningIsDrawnInOneFrame(t *testing.T) {
