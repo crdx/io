@@ -16,7 +16,6 @@ import (
 	"crdx.org/io/cmd/oh/store/wire"
 )
 
-// Meta is the conversation-specific configuration needed to resume a session.
 type Meta struct {
 	Model        string `json:"model"`
 	WorkspaceDir string `json:"workspaceDir"`
@@ -62,13 +61,12 @@ type canonicalSession interface {
 	ID() string
 	JournalMeta() json.RawMessage
 	Started() time.Time
-	Stored() bool
-	EnsureStored() error
+	IsPersisted() bool
+	EnsurePersisted() error
 	SetMeta(json.RawMessage, json.RawMessage) error
 	Close() error
 }
 
-// Writer coordinates the canonical journal and auxiliary bundle recorders.
 type Writer struct {
 	innerWriter canonicalWriter
 	writerMutex sync.Mutex
@@ -88,7 +86,6 @@ type Writer struct {
 	warnings []error
 }
 
-// Create starts an oh session.
 func Create(directory string, meta Meta) (*Writer, error) {
 	journalMeta, data, err := encodeMeta(meta)
 	if err != nil {
@@ -107,7 +104,6 @@ func Create(directory string, meta Meta) (*Writer, error) {
 	}, nil
 }
 
-// Open continues an oh session, and reports session.ErrInUse when another writer holds it.
 func Open(directory, name string) (*Writer, error) {
 	innerWriter, err := session.Open(directory, name)
 	if err != nil {
@@ -133,7 +129,6 @@ func Open(directory, name string) (*Writer, error) {
 	return writer, nil
 }
 
-// Event appends one conversation event.
 func (self *Writer) Event(event agent.Event) error {
 	for _, releasedEvent := range self.release(event) {
 		if err := self.appendEvent(releasedEvent); err != nil {
@@ -144,7 +139,6 @@ func (self *Writer) Event(event agent.Event) error {
 	return nil
 }
 
-// Item appends one provider-state item.
 func (self *Writer) Item(item json.RawMessage) error {
 	self.writerMutex.Lock()
 	err := self.innerWriter.Item(item)
@@ -156,20 +150,16 @@ func (self *Writer) Item(item json.RawMessage) error {
 	return nil
 }
 
-// CompleteTurn records that the current turn's events and provider state are durable.
 func (self *Writer) CompleteTurn() error {
 	self.writerMutex.Lock()
 	defer self.writerMutex.Unlock()
 	return self.innerWriter.CompleteTurn()
 }
 
-// Name is what the session is called, and the name of its bundle directory.
 func (self *Writer) Name() string { return self.innerWriter.Name() }
 
-// ID is the session's time-ordered identifier, recorded for provenance and read by nothing.
 func (self *Writer) ID() string { return self.innerWriter.ID() }
 
-// SetMeta replaces the meta before the first record is written.
 func (self *Writer) SetMeta(meta Meta) error {
 	journalMeta, data, err := encodeMeta(meta)
 	if err != nil {
@@ -184,17 +174,14 @@ func (self *Writer) SetMeta(meta Meta) error {
 	return nil
 }
 
-// Stored reports whether anything was written.
-func (self *Writer) Stored() bool {
+func (self *Writer) IsPersisted() bool {
 	self.writerMutex.Lock()
 	defer self.writerMutex.Unlock()
-	return self.innerWriter.Stored()
+	return self.innerWriter.IsPersisted()
 }
 
-// Observer returns the session's logical HTTP exchange observer.
 func (self *Writer) Observer() req.Observer { return writerObserver{writer: self} }
 
-// TakeWarnings drains auxiliary recorder failures.
 func (self *Writer) TakeWarnings() []error {
 	self.recorderMutex.Lock()
 	defer self.recorderMutex.Unlock()
@@ -203,7 +190,6 @@ func (self *Writer) TakeWarnings() []error {
 	return warnings
 }
 
-// Close closes a stored session.
 func (self *Writer) Close() error {
 	self.writerMutex.Lock()
 	canonicalError := self.innerWriter.Close()
@@ -229,7 +215,7 @@ func (self *Writer) release(event agent.Event) []agent.Event {
 	self.writerMutex.Lock()
 	defer self.writerMutex.Unlock()
 
-	if !self.innerWriter.Stored() && event.Kind != agent.UserMessageEvent {
+	if !self.innerWriter.IsPersisted() && event.Kind != agent.UserMessageEvent {
 		self.eventBuffer = append(self.eventBuffer, event)
 		return nil
 	}
@@ -264,7 +250,7 @@ func (self *Writer) appendEvent(event agent.Event) error {
 
 func (self *Writer) startRecorders() {
 	self.writerMutex.Lock()
-	err := self.innerWriter.EnsureStored()
+	err := self.innerWriter.EnsurePersisted()
 	started := self.innerWriter.Started()
 	self.writerMutex.Unlock()
 	if err != nil {
@@ -327,7 +313,6 @@ func (self writerObserver) Start(request req.Request) req.ExchangeObserver {
 	return recorder.Start(request)
 }
 
-// Session is an oh session read back.
 type Session struct {
 	Name            string
 	ID              string
@@ -339,7 +324,6 @@ type Session struct {
 	TurnCompletions int
 }
 
-// Read loads one oh session.
 func Read(directory, name string) (*Session, error) {
 	storedSession, err := session.Read(directory, name)
 	if err != nil {
@@ -348,7 +332,6 @@ func Read(directory, name string) (*Session, error) {
 	return decode(storedSession)
 }
 
-// List loads oh sessions, most recently touched first.
 func List(directory string) ([]*Session, error) {
 	storedSessions, err := session.List(directory)
 	if err != nil {
@@ -385,7 +368,6 @@ func decode(storedSession *session.Session) (*Session, error) {
 	}, nil
 }
 
-// FirstMessage is the first message the user sent in the session.
 func (self *Session) FirstMessage() string {
 	for _, event := range self.Events {
 		if event.Kind == agent.UserMessageEvent {
@@ -395,7 +377,6 @@ func (self *Session) FirstMessage() string {
 	return ""
 }
 
-// Messages counts what the user and the model said, excluding working events.
 func (self *Session) Messages() int {
 	count := 0
 	for _, event := range self.Events {
@@ -406,7 +387,6 @@ func (self *Session) Messages() int {
 	return count
 }
 
-// CanResume reports whether every stored user turn reached its durable completion record.
 func (self *Session) CanResume() bool {
 	userTurns := 0
 	for _, event := range self.Events {
@@ -417,7 +397,6 @@ func (self *Session) CanResume() bool {
 	return userTurns == self.TurnCompletions
 }
 
-// RebuildMeta writes a session's compact listing data again from its journal.
 func RebuildMeta(directory, name string) error {
 	storedSession, err := Read(directory, name)
 	if err != nil {
@@ -430,7 +409,6 @@ func RebuildMeta(directory, name string) error {
 	return session.RebuildMeta(directory, name, data)
 }
 
-// StaleMeta names the stored sessions whose listing metadata this build cannot read.
 func StaleMeta(directory string) ([]string, error) {
 	entries, err := session.Entries(directory)
 	if err != nil {
@@ -447,8 +425,6 @@ func StaleMeta(directory string) ([]string, error) {
 	return stale, nil
 }
 
-// RebuildStaleMeta writes the listing metadata this build cannot read again from the journals,
-// which hold everything the metadata carries.
 func RebuildStaleMeta(directory string) (int, error) {
 	stale, err := StaleMeta(directory)
 	if err != nil {
@@ -464,7 +440,6 @@ func RebuildStaleMeta(directory string) (int, error) {
 	return len(stale), nil
 }
 
-// Rebuild writes a session's transcript again from its journal, replacing whatever was there.
 func Rebuild(directory, name string) error {
 	storedSession, err := Read(directory, name)
 	if err != nil {

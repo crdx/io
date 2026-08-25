@@ -221,7 +221,7 @@ func TestMetadataReportMissingMetadata(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.EnsureStored(); err != nil {
+	if err := writer.EnsurePersisted(); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {
@@ -347,7 +347,7 @@ func TestAJournalSaysWhichFormatItWasWrittenIn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.EnsureStored(); err != nil {
+	if err := writer.EnsurePersisted(); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {
@@ -447,7 +447,7 @@ func TestMetadataIsStampedWithItsFormat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.EnsureStored(); err != nil {
+	if err := writer.EnsurePersisted(); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {
@@ -469,7 +469,7 @@ func TestMetadataInAnotherFormatIsNamedAsSuch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.EnsureStored(); err != nil {
+	if err := writer.EnsurePersisted(); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {

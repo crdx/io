@@ -12,7 +12,7 @@ import (
 
 type testSession struct {
 	name            string
-	stored          bool
+	isPersisted     bool
 	items           []string
 	failAt          int
 	warnings        []error
@@ -20,8 +20,8 @@ type testSession struct {
 	turnCompletions int
 }
 
-func (self *testSession) Stored() bool { return self.stored }
-func (self *testSession) Name() string { return self.name }
+func (self *testSession) IsPersisted() bool { return self.isPersisted }
+func (self *testSession) Name() string      { return self.name }
 
 func (self *testSession) Event(event agent.Event) error {
 	self.eventWrites = append(self.eventWrites, event)
@@ -80,11 +80,11 @@ func TestRecorderRejectsReplacedProviderHistory(t *testing.T) {
 
 func TestRecorderForwardsSessionIdentityEventsAndWarnings(t *testing.T) {
 	warning := errors.New("transcript disabled")
-	session := &testSession{name: "brave-otter", stored: true, failAt: -1, warnings: []error{warning}}
+	session := &testSession{name: "brave-otter", isPersisted: true, failAt: -1, warnings: []error{warning}}
 	recorder := New(session)
 	event := agent.Event{Kind: agent.UserMessageEvent, Text: "hello"}
 
-	if !recorder.Stored() || recorder.Name() != "brave-otter" {
+	if !recorder.IsPersisted() || recorder.Name() != "brave-otter" {
 		t.Errorf("lost session identity")
 	}
 	if err := recorder.Event(event); err != nil {

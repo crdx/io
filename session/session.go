@@ -195,8 +195,8 @@ func (w *Writer) Name() string                 { return w.name }
 func (w *Writer) ID() string                   { return w.id }
 func (w *Writer) JournalMeta() json.RawMessage { return slices.Clone(w.journalMeta) }
 func (w *Writer) Started() time.Time           { return w.started }
-func (w *Writer) Stored() bool                 { return w.file != nil }
-func (w *Writer) EnsureStored() error          { return w.ensureOpen() }
+func (w *Writer) IsPersisted() bool            { return w.file != nil }
+func (w *Writer) EnsurePersisted() error       { return w.ensureOpen() }
 
 func (w *Writer) Close() error {
 	if w.file == nil {

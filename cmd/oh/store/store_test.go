@@ -181,7 +181,7 @@ func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 		t.Error("expected the session to be named before it is written")
 	}
 
-	if log.Stored() {
+	if log.IsPersisted() {
 		t.Error("expected nothing to carry on from before anything is said")
 	}
 
@@ -211,7 +211,7 @@ func TestWhatHappensBeforeTheFirstMessageDoesNotWriteTheSession(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if log.Stored() {
+	if log.IsPersisted() {
 		t.Error("expected a startup notice on its own to leave nothing behind")
 	}
 
@@ -285,7 +285,7 @@ func TestTheFirstThingSaidTakesTheHeadWithIt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !log.Stored() {
+	if !log.IsPersisted() {
 		t.Error("expected something to carry on from once something has been said")
 	}
 

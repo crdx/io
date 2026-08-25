@@ -35,9 +35,10 @@ type Options struct {
 }
 
 type Session struct {
-	Name      string
-	ID        string
-	Directory string
+	Name        string
+	ID          string
+	Directory   string
+	IsPersisted func() bool
 }
 
 type SessionStart struct {
@@ -58,9 +59,10 @@ type commandEnvironment struct {
 }
 
 type commandSession struct {
-	name      string
-	id        string
-	directory string
+	name        string
+	id          string
+	directory   string
+	isPersisted func() bool
 }
 
 type commandTarget struct {
@@ -75,9 +77,10 @@ func New(options Options, snippetUsages []string) (slash.CommandSet, error) {
 		configPath: options.ConfigFile,
 		stateDir:   options.StateDir,
 		session: commandSession{
-			name:      options.Session.Name,
-			id:        options.Session.ID,
-			directory: options.Session.Directory,
+			name:        options.Session.Name,
+			id:          options.Session.ID,
+			directory:   options.Session.Directory,
+			isPersisted: options.Session.IsPersisted,
 		},
 		openEditor: func(path string) error {
 			return editor.Open(options.Editor, path)
@@ -133,13 +136,16 @@ func buildCommands(environment commandEnvironment, snippetUsages []string) (slas
 			},
 			environment.openTarget,
 		),
+	}
+	commands = append(commands, commandsRequiringPersistedSession(
+		environment.session.isPersisted,
 		sessionCommand("fork", func(modelGlob string) error {
 			return environment.startSession(SessionStart{
 				ModelGlob:         modelGlob,
 				SourceSessionName: environment.session.name,
 			})
 		}),
-	}
+	)...)
 
 	var err error
 	set, err = slash.NewCommandSet(systemCommandPrefix, commands...)
@@ -173,6 +179,19 @@ func sessionCommand(name string, startSession func(string) error) slash.Command 
 			return startSession(arguments[0])
 		},
 	}
+}
+
+func commandsRequiringPersistedSession(isSessionPersisted func() bool, commands ...slash.Command) []slash.Command {
+	for i := range commands {
+		run := commands[i].Run
+		commands[i].Run = func(context slash.Context, arguments []string) error {
+			if !isSessionPersisted() {
+				return errors.New("session does not exist yet")
+			}
+			return run(context, arguments)
+		}
+	}
+	return commands
 }
 
 func helpText(commandUsages []string, hiddenCommandUsage string, snippetUsages []string) string {

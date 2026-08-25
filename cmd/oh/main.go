@@ -293,7 +293,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	defer func() {
-		if !log.Stored() {
+		if !log.IsPersisted() {
 			_ = os.RemoveAll(tmpDir)
 		}
 	}()
@@ -370,9 +370,10 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		Editor:     settings.Editor.Command,
 		Output:     os.Stdout,
 		Session: commands.Session{
-			Name:      log.Name(),
-			ID:        log.ID(),
-			Directory: filepath.Join(sessionsDir, log.Name()),
+			Name:        log.Name(),
+			ID:          log.ID(),
+			Directory:   filepath.Join(sessionsDir, log.Name()),
+			IsPersisted: log.IsPersisted,
 		},
 		StartSession: func(start commands.SessionStart) error {
 			var transition cycle.Transition
@@ -462,7 +463,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	stopReason = transition.StopReason()
 	hooks.EmitSessionStopping(ctx, cycle.SessionStopping{Session: sessionInfo, Reason: stopReason})
 
-	if log.Stored() && transition.Kind == cycle.Quit {
+	if log.IsPersisted() && transition.Kind == cycle.Quit {
 		fmt.Println(style.Subtle(sessions.ResumeCommand(os.Args[0], log.Name())))
 	}
 

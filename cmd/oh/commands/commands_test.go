@@ -84,9 +84,10 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		configPath: configPath,
 		stateDir:   stateDirectory,
 		session: commandSession{
-			name:      "brave-otter",
-			id:        "session-id",
-			directory: sessionDirectory,
+			name:        "brave-otter",
+			id:          "session-id",
+			directory:   sessionDirectory,
+			isPersisted: func() bool { return true },
 		},
 		openEditor: func(path string) error {
 			actions = append(actions, "edit:"+path)
@@ -155,8 +156,46 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	}
 }
 
+func TestForkRequiresAPersistedSession(t *testing.T) {
+	isPersisted := false
+	startRan := false
+	commands := newCommandRegistry(t, commandEnvironment{
+		session: commandSession{
+			name:        "brave-otter",
+			isPersisted: func() bool { return isPersisted },
+		},
+		startSession: func(SessionStart) error {
+			startRan = true
+			return nil
+		},
+	})
+
+	result, failure := dispatch.Handle(commands, dispatch.Actions{}, "/fork")
+	if result != dispatch.Rejected {
+		t.Fatalf("expected the command to be refused, got result %d", result)
+	}
+	want := "/fork: Session does not exist yet (alt+enter sends as message)"
+	if failure != want {
+		t.Errorf("got %q, want %q", failure, want)
+	}
+	if startRan {
+		t.Error("fork started before the session was stored")
+	}
+
+	isPersisted = true
+	result, failure = dispatch.Handle(commands, dispatch.Actions{}, "/fork")
+	if result != dispatch.Handled || failure != "" {
+		t.Errorf("stored session got result %d and failure %q", result, failure)
+	}
+	if !startRan {
+		t.Error("fork did not start after the session was stored")
+	}
+}
+
 func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
-	commands := newCommandRegistry(t, commandEnvironment{})
+	commands := newCommandRegistry(t, commandEnvironment{
+		session: commandSession{isPersisted: func() bool { return true }},
+	})
 
 	for _, input := range []string{
 		"/conf extra",
