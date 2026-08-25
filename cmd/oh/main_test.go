@@ -3141,6 +3141,12 @@ func TestATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{
 		"a call still running": func() string { return replayWhileRunning(t, entries) },
 		"discarded reasoning":  func() string { return drawDiscardedReasoning(t) },
+		"unknown command during answer": func() string {
+			return drawUnknownCommandDuringStream(t, agent.ModelMessageEvent)
+		},
+		"unknown command during reasoning": func() string {
+			return drawUnknownCommandDuringStream(t, agent.ModelReasoningEvent)
+		},
 	}
 
 	compareWithGolden(t, "running", ".ansi", passes)
@@ -3165,6 +3171,30 @@ func drawDiscardedReasoning(t *testing.T) string {
 	rig.chat.screen.End()
 
 	return strings.TrimSuffix(rig.drawn(), "\r\n")
+}
+
+func drawUnknownCommandDuringStream(t *testing.T, kind agent.Kind) string {
+	t.Helper()
+
+	writer := &frameRecordingWriter{}
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.NewTerminalOfSize(writer, replayColumns, replayLines)
+	self.commands = fixtureCommandRegistry(t)
+	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+
+	history := edit.NewHistory("", historyLimit)
+	editor := edit.NewInput(history)
+	self.editor = editor
+	editor.SetText("/unknown")
+	self.show(editor)
+	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: kind, Text: "still working"})
+	framesBeforeCommand := len(writer.frames)
+
+	self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Enter})
+
+	frames := writer.frames[framesBeforeCommand:]
+	self.currentTurn.painter.Close(dynamic.Cancelled)
+	return strings.Join(frames, "")
 }
 
 type journal struct {
@@ -4441,6 +4471,37 @@ func TestUnknownSlashCommandShowsAnErrorAndKeepsTheInput(t *testing.T) {
 	want := "Command not found: /unknown (alt+enter sends as message)"
 	if self.events[0].Text != want || self.events[0].Status != agent.ErrorStatus {
 		t.Errorf("got event %+v, want failed %q", self.events[0], want)
+	}
+}
+
+func TestUnknownSlashCommandDoesNotInterruptARunningTurn(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.New(&screenOutput)
+	self.commands = fixtureCommandRegistry(t)
+	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: "still working"})
+	editor := edit.NewInput(nil)
+	for _, value := range "/unknown" {
+		editor.Apply(key.Key{Code: key.Rune, Value: value}, true)
+	}
+
+	self.acceptInput(editor, nil)
+
+	if self.currentTurn.Cancelled() {
+		t.Error("expected the running turn not to be interrupted")
+	}
+	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: " on it"})
+	self.currentTurn.painter.DrawEvent(agent.Event{Kind: agent.ModelReasoningEvent, Text: "still working on it"})
+	self.screen.End()
+	plainOutput := style.Plain(screenOutput.String())
+	errorIndex := strings.Index(plainOutput, "Command not found: /unknown")
+	reasoningIndex := strings.Index(plainOutput, "still working on it")
+	if errorIndex < 0 || reasoningIndex < 0 || errorIndex > reasoningIndex {
+		t.Errorf("expected the error before the preserved running output, got %q", plainOutput)
+	}
+	if strings.Count(plainOutput, "still working") != 1 {
+		t.Errorf("expected the completed reasoning once, got %q", plainOutput)
 	}
 }
 
