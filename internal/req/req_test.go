@@ -17,7 +17,8 @@ func refusingServer(t *testing.T, status int, body string) string {
 		func(writer http.ResponseWriter, _ *http.Request) {
 			writer.WriteHeader(status)
 			_, _ = writer.Write([]byte(body))
-		}))
+		},
+	))
 
 	t.Cleanup(server.Close)
 
@@ -27,7 +28,7 @@ func refusingServer(t *testing.T, status int, body string) string {
 func TestFailureCarriesTheEndpointsOwnMessage(t *testing.T) {
 	url := refusingServer(t, http.StatusTooManyRequests, `{"error":{"message":"slow down"}}`)
 
-	_, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)
+	_, _, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)
 	if err == nil {
 		t.Fatal("expected the refusal to be reported")
 	}
@@ -40,7 +41,7 @@ func TestFailureCarriesTheEndpointsOwnMessage(t *testing.T) {
 func TestFailureFallsBackToTheStatus(t *testing.T) {
 	url := refusingServer(t, http.StatusBadGateway, "the gateway is unwell")
 
-	_, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)
+	_, _, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)
 	if err == nil {
 		t.Fatal("expected the refusal to be reported")
 	}
@@ -64,7 +65,8 @@ func TestFormPostsAndDecodes(t *testing.T) {
 
 			writer.Header().Set("Content-Type", "application/json")
 			_, _ = writer.Write([]byte(`{"access_token":"new"}`))
-		}))
+		},
+	))
 
 	t.Cleanup(server.Close)
 

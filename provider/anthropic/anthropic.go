@@ -15,46 +15,27 @@ import (
 	"crdx.org/io/tool"
 )
 
-// reference/messages-create.md
-// reference/models.md
 const (
 	Endpoint = "https://api.anthropic.com/v1/messages"
 
-	// Version is the API revision every request declares.
 	Version = "2023-06-01"
 
-	// Beta is what the endpoint is asked to enable. A token authorised against a subscription is
-	// only honoured when the request presents itself as Claude Code, which is what the first two
-	// features here say. Interleaved thinking is not among them because a model taking adaptive
-	// thinking already has it, and naming it there is redundant.
 	Beta = "claude-code-20250219,oauth-2025-04-20,fine-grained-tool-streaming-2025-05-14"
 
-	// UserAgent is who the endpoint is told is asking.
 	UserAgent = "claude-cli/2.1.75"
 
-	// Identity is what a subscription token requires the system prompt to open with, before
-	// anything a caller has to say.
 	Identity = "You are Claude Code, Anthropic's official CLI for Claude."
 )
 
-// Efforts are how hard the model may be asked to work, least to most. Effort shapes the rendered
-// prompt, so changing it mid-conversation drops the cached prefix the turns before it built.
-//
-// reference/effort.md
 var Efforts = []string{"low", "medium", "high", "xhigh", "max"}
 
 const turnTimeout = 60 * time.Minute
 
-// Client speaks the Messages API: one request per turn, answered as a stream of content blocks.
-// What a client holds is what it sends: the model and the effort are asked of New, which refuses
-// to build a client missing either, and nothing is substituted later.
-//
-// reference/streaming.md
 type Client struct {
 	URL             string
 	Model           string
 	Effort          string
-	MaxOutputTokens int // the ceiling on thinking and answer together
+	MaxOutputTokens int
 
 	tokens       TokenSource
 	instructions string
@@ -65,10 +46,6 @@ type Client struct {
 	observer     req.Observer
 }
 
-// New builds a client asking the given model at the given effort, authorising every request with
-// the given source. None of the three has a default: which model to ask, how hard, and how much it
-// may write are the caller's to decide and this package's to carry out. The ceiling belongs to the
-// model rather than to this package, and the listing Models returns reports it.
 func New(tokens TokenSource, model string, effort string, maxOutputTokens int) (*Client, error) {
 	client := &Client{
 		URL:             Endpoint,
@@ -86,12 +63,10 @@ func New(tokens TokenSource, model string, effort string, maxOutputTokens int) (
 	return client, nil
 }
 
-// Auth is a client on the credentials the login command stored.
 func Auth(model string, effort string, maxOutputTokens int) (*Client, error) {
 	return New(StoredCredentials(), model, effort, maxOutputTokens)
 }
 
-// ObserveHTTP attaches an observer to session requests and credential refreshes.
 func (self *Client) ObserveHTTP(observer req.Observer) {
 	self.observer = observer
 	self.requests.Observe(observer)
@@ -100,9 +75,6 @@ func (self *Client) ObserveHTTP(observer req.Observer) {
 	}
 }
 
-// Configure takes what every request in the session carries.
-//
-// reference/tool-use.md
 func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	self.instructions = instructions
 	self.tools = describe(tools)
@@ -113,7 +85,6 @@ func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	}
 }
 
-// AddUserMessage appends a message to the conversation.
 func (self *Client) AddUserMessage(text string) {
 	self.history = append(self.history, encodeItem(message{
 		Role:    "user",
@@ -121,10 +92,6 @@ func (self *Client) AddUserMessage(text string) {
 	}))
 }
 
-// AddToolResults appends this turn's tool call results to the conversation. Every result of one
-// round goes into a single message, which is the shape the endpoint expects them in.
-//
-// reference/tool-use.md
 func (self *Client) AddToolResults(results []agent.ToolCallResult) {
 	blocks := make([]json.RawMessage, 0, len(results))
 
@@ -139,28 +106,20 @@ func (self *Client) AddToolResults(results []agent.ToolCallResult) {
 	self.history = append(self.history, encodeItem(message{Role: "user", Content: blocks}))
 }
 
-// Dump hands over the conversation so far, one message per entry, in the order the endpoint expects
-// them back. New state is appended and earlier items are never replaced.
 func (self *Client) Dump() []json.RawMessage {
 	return slices.Clone(self.history)
 }
 
-// Load takes a conversation back, replacing whatever this client held.
 func (self *Client) Load(items []json.RawMessage) {
 	self.history = slices.Clone(items)
 }
 
 func encodeItem(item any) json.RawMessage {
-	encodedItem, _ := json.Marshal(item) //nolint:errchkjson // every field has a safe encoder
+	encodedItem, _ := json.Marshal(item) //nolint:errchkjson // the wire items are plain structs
 
 	return encodedItem
 }
 
-// Send posts the conversation so far and reads the response. A turn that fails part-way keeps what
-// the model said and thought before it failed, because that much was already reported to whoever
-// was watching, and a conversation missing it disagrees with what they saw.
-//
-// reference/streaming.md
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
 	reply, err := self.post(ctx, yield)
 	if err != nil {
@@ -215,7 +174,7 @@ func (self *Client) post(ctx context.Context, yield agent.Yield) (reply, error) 
 		return reply{}, err
 	}
 
-	stream, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers(token))
+	stream, _, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers(token))
 	if err != nil {
 		return reply{}, err
 	}
@@ -263,7 +222,7 @@ func (self *Client) headers(token string) http.Header {
 
 type request struct {
 	Model           string            `json:"model"`
-	MaxOutputTokens int               `json:"max_tokens"` // what the model may write, which this API calls max_tokens
+	MaxOutputTokens int               `json:"max_tokens"`
 	Stream          bool              `json:"stream"`
 	System          []textBlock       `json:"system,omitempty"`
 	Tools           []functionTool    `json:"tools,omitempty"`

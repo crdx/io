@@ -14,21 +14,16 @@ import (
 	"crdx.org/io/tool"
 )
 
-// Efforts are how hard the model may be asked to work, least to most. An OpenAI-compatible endpoint
-// takes these as reasoning_effort, and what any one model behind it honours is its own business.
-//
-// reference/chat-completions.md
 var Efforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
 const turnTimeout = 60 * time.Minute
 
-// Client speaks the Chat Completions API: one request per turn, answered as a stream of chunks.
 type Client struct {
 	URL             string
 	Token           string
 	Model           string
 	Effort          string
-	MaxOutputTokens int // the ceiling on reasoning and answer together
+	MaxOutputTokens int
 
 	instructions string
 	tools        []functionTool
@@ -37,10 +32,6 @@ type Client struct {
 	observer     req.Observer
 }
 
-// New builds a client for an OpenAI-compatible Chat Completions endpoint, asking the given model at
-// the given effort. Nothing here has a default: which model to ask, how hard, and how much it may
-// write are the caller's to decide and this package's to carry out, so a client is refused rather
-// than built where any of them is missing.
 func New(
 	url string,
 	token string,
@@ -64,26 +55,20 @@ func New(
 	return client, nil
 }
 
-// Configure takes what every request in the session carries.
 func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	self.instructions = instructions
 	self.tools = describe(tools)
 }
 
-// ObserveHTTP attaches an observer to session requests.
 func (self *Client) ObserveHTTP(observer req.Observer) {
 	self.observer = observer
 	self.requests.Observe(observer)
 }
 
-// AddUserMessage appends a message to the conversation.
 func (self *Client) AddUserMessage(text string) {
 	self.history = append(self.history, encode(message{Role: "user", Content: text}))
 }
 
-// AddToolResults appends this turn's tool call results to the conversation. A tool message takes
-// only a string, so any images a round returned follow it in a user message of their own, which is
-// the only place this API accepts one.
 func (self *Client) AddToolResults(results []agent.ToolCallResult) {
 	var images []contentPart
 
@@ -105,21 +90,16 @@ func (self *Client) AddToolResults(results []agent.ToolCallResult) {
 	}
 }
 
-// Dump hands over the conversation so far, one message per entry.
 func (self *Client) Dump() []json.RawMessage {
 	return slices.Clone(self.history)
 }
 
-// Load takes a conversation back, replacing whatever this client held.
 func (self *Client) Load(messages []json.RawMessage) {
 	self.history = slices.Clone(messages)
 }
 
-// Send posts the conversation so far and reads the response. A turn that fails part-way keeps what
-// the model said and thought before it failed, because that much was already reported to whoever
-// was watching, and a conversation missing it disagrees with what they saw.
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
-	stream, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers())
+	stream, _, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers())
 	if err != nil {
 		return agent.Reply{}, err
 	}
@@ -196,7 +176,7 @@ func (self *Client) headers() http.Header {
 }
 
 func encode(value any) json.RawMessage {
-	encoded, _ := json.Marshal(value) //nolint:errchkjson // wire structs have safe encoders
+	encoded, _ := json.Marshal(value) //nolint:errchkjson // the wire values are plain structs
 	return encoded
 }
 
@@ -206,8 +186,8 @@ type request struct {
 	Stream            bool              `json:"stream"`
 	StreamOptions     streamOptions     `json:"stream_options"`
 	Tools             []functionTool    `json:"tools,omitempty"`
-	ToolChoice        string            `json:"tool_choice,omitempty"`         // omitempty: "" is not a choice the endpoint takes
-	ParallelToolCalls *bool             `json:"parallel_tool_calls,omitempty"` // a pointer, because false asks for something and the endpoint defaults to true
+	ToolChoice        string            `json:"tool_choice,omitempty"`
+	ParallelToolCalls *bool             `json:"parallel_tool_calls,omitempty"`
 	ReasoningEffort   string            `json:"reasoning_effort,omitempty"`
 
 	MaxOutputTokens int `json:"max_completion_tokens"`
@@ -266,7 +246,6 @@ func describe(tools []tool.Definition) []functionTool {
 	return described
 }
 
-// ToolsSize is the number of bytes the tools occupy in their provider wire representation.
 func ToolsSize(tools []tool.Tool) int {
 	definitions := make([]tool.Definition, len(tools))
 	for i, offeredTool := range tools {

@@ -15,36 +15,30 @@ import (
 
 const bodyLimit = 64 * 1024
 
-// Client is an endpoint spoken to under a timeout, since the default client waits forever.
-//
-// A header handed to it is copied rather than adopted: a request sets fields of its own on top of
-// what it was given, and a caller reusing one header across requests would otherwise collect them.
 type Client struct {
 	http     *http.Client
 	observer Observer
 }
 
-// New builds a client that gives up on a request after the given wait.
 func New(timeout time.Duration) *Client {
 	return &Client{http: &http.Client{Timeout: timeout}}
 }
 
-// Observe attaches a logical exchange observer.
 func (self *Client) Observe(observer Observer) {
 	self.observer = observer
 }
 
-// Stream posts a JSON body and hands back the response, which is the caller's to close.
-func (self *Client) Stream(ctx context.Context, address string, body any, header http.Header) (io.ReadCloser, error) {
+func (self *Client) Stream(
+	ctx context.Context, address string, body any, header http.Header,
+) (io.ReadCloser, http.Header, error) {
 	return self.postJSON(ctx, address, body, header)
 }
 
-// JSON posts a JSON body and reads the JSON answer into target.
 func (self *Client) JSON(ctx context.Context, address string, body any, target any) error {
 	header := http.Header{}
 	header.Set("Accept", "application/json")
 
-	responseBody, err := self.postJSON(ctx, address, body, header)
+	responseBody, _, err := self.postJSON(ctx, address, body, header)
 	if err != nil {
 		return err
 	}
@@ -57,7 +51,6 @@ func (self *Client) JSON(ctx context.Context, address string, body any, target a
 	return nil
 }
 
-// Get fetches an address and reads the JSON answer into target.
 func (self *Client) Get(ctx context.Context, address string, header http.Header, target any) error {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, address, nil)
 	if err != nil {
@@ -70,7 +63,7 @@ func (self *Client) Get(ctx context.Context, address string, header http.Header,
 
 	request.Header.Set("Accept", "application/json")
 
-	body, err := self.do(request, nil)
+	body, _, err := self.do(request, nil)
 	if err != nil {
 		return err
 	}
@@ -83,7 +76,6 @@ func (self *Client) Get(ctx context.Context, address string, header http.Header,
 	return nil
 }
 
-// Form posts a form and reads the JSON answer into target.
 func (self *Client) Form(ctx context.Context, address string, form url.Values, target any) error {
 	encodedBody := form.Encode()
 	request, err := http.NewRequestWithContext(
@@ -95,7 +87,7 @@ func (self *Client) Form(ctx context.Context, address string, form url.Values, t
 
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	body, err := self.do(request, []byte(encodedBody))
+	body, _, err := self.do(request, []byte(encodedBody))
 	if err != nil {
 		return err
 	}
@@ -110,15 +102,15 @@ func (self *Client) Form(ctx context.Context, address string, form url.Values, t
 
 func (self *Client) postJSON(
 	ctx context.Context, address string, body any, header http.Header,
-) (io.ReadCloser, error) {
+) (io.ReadCloser, http.Header, error) {
 	encodedBody, err := json.Marshal(body)
 	if err != nil {
-		return nil, fmt.Errorf("encode request: %w", err)
+		return nil, nil, fmt.Errorf("encode request: %w", err)
 	}
 
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, address, bytes.NewReader(encodedBody))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if header != nil {
@@ -130,7 +122,7 @@ func (self *Client) postJSON(
 	return self.do(request, encodedBody)
 }
 
-func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser, error) {
+func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser, http.Header, error) {
 	var exchange ExchangeObserver
 	if self.observer != nil {
 		exchange = self.observer.Start(Request{
@@ -148,7 +140,7 @@ func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser
 		if exchange != nil {
 			exchange.Finish(time.Now(), err, false)
 		}
-		return nil, err
+		return nil, nil, err
 	}
 
 	if exchange != nil {
@@ -168,10 +160,10 @@ func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser
 	if response.StatusCode != http.StatusOK {
 		defer func() { _ = response.Body.Close() }()
 
-		return nil, refusal(response)
+		return nil, nil, refusal(response)
 	}
 
-	return response.Body, nil
+	return response.Body, response.Header, nil
 }
 
 type observedBody struct {
@@ -219,7 +211,7 @@ func refusal(response *http.Response) error {
 			Message string `json:"message"`
 		} `json:"error"`
 
-		Detail string `json:"detail"` // what went wrong, said flatly
+		Detail string `json:"detail"`
 	}
 
 	if json.Unmarshal(body, &payload) != nil {

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"runtime"
 	"slices"
+	"sync"
 	"time"
 
 	"crdx.org/io/agent"
@@ -17,8 +18,6 @@ import (
 	"crdx.org/io/tool"
 )
 
-// https://platform.openai.com/docs/api-reference/responses/create
-// https://platform.openai.com/docs/guides/reasoning
 const (
 	Endpoint = "https://chatgpt.com/backend-api/codex/responses"
 	Summary  = "auto"
@@ -26,19 +25,10 @@ const (
 	Originator = "io"
 )
 
-// Efforts are how hard the model may be asked to work, least to most. Not every reasoning model
-// takes every one of them.
-//
-// reference/responses-create.md
 var Efforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
 const turnTimeout = 60 * time.Minute
 
-// Client speaks the Responses API: one request per turn, answered as a stream of events.
-//
-// https://platform.openai.com/docs/api-reference/responses/create
-// https://platform.openai.com/docs/api-reference/responses-streaming
-// https://platform.openai.com/docs/guides/conversation-state
 type Client struct {
 	URL    string
 	Model  string
@@ -50,19 +40,12 @@ type Client struct {
 	session      string
 	history      []json.RawMessage
 	requests     *req.Client
-	observer     req.Observer // what watches every exchange, where one is attached
+	observer     req.Observer
+
+	usageMutex   sync.Mutex
+	usageWindows []agent.UsageWindow
 }
 
-// New builds a client asking the given model at the given effort, authorising every request with
-// the given source. Neither has a default: which model to ask and how hard are the caller's to
-// decide and this package's to carry out, so a client is refused rather than built where either is
-// missing.
-//
-// There is no ceiling to give it. How much a turn may write is one of the things this endpoint
-// keeps to itself, so a caller holding a figure for it has nowhere here to put it and is not asked
-// for one.
-//
-// https://platform.openai.com/docs/guides/prompt-caching
 func New(tokens TokenSource, model string, effort string) (*Client, error) {
 	client := &Client{
 		URL:      Endpoint,
@@ -80,20 +63,15 @@ func New(tokens TokenSource, model string, effort string) (*Client, error) {
 	return client, nil
 }
 
-// Auth is a client on the credentials the login command stored.
 func Auth(model string, effort string) (*Client, error) {
 	return New(StoredCredentials(), model, effort)
 }
 
-// Configure takes what every request in the session carries.
-//
-// https://platform.openai.com/docs/guides/function-calling
 func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	self.instructions = instructions
 	self.tools = describe(tools)
 }
 
-// ObserveHTTP attaches an observer to session requests and credential refreshes.
 func (self *Client) ObserveHTTP(observer req.Observer) {
 	self.observer = observer
 	self.requests.Observe(observer)
@@ -102,16 +80,10 @@ func (self *Client) ObserveHTTP(observer req.Observer) {
 	}
 }
 
-// AddUserMessage appends a message to the conversation.
-//
-// https://platform.openai.com/docs/guides/conversation-state
 func (self *Client) AddUserMessage(text string) {
 	self.history = append(self.history, encodeItem(userMessage{Role: "user", Content: text}))
 }
 
-// AddToolResults appends this turn's tool call results to the conversation.
-//
-// https://platform.openai.com/docs/guides/function-calling
 func (self *Client) AddToolResults(results []agent.ToolCallResult) {
 	for _, result := range results {
 		self.history = append(self.history, encodeItem(toolOutput{
@@ -122,28 +94,20 @@ func (self *Client) AddToolResults(results []agent.ToolCallResult) {
 	}
 }
 
-// Dump hands over the conversation so far, one item per entry, in the order the endpoint expects
-// them back. New state is appended and earlier items are never replaced.
-//
-// https://platform.openai.com/docs/guides/conversation-state
 func (self *Client) Dump() []json.RawMessage {
 	return slices.Clone(self.history)
 }
 
-// Load takes a conversation back, replacing whatever this client held.
 func (self *Client) Load(items []json.RawMessage) {
 	self.history = slices.Clone(items)
 }
 
 func encodeItem(item any) json.RawMessage {
-	encodedItem, _ := json.Marshal(item) //nolint:errchkjson // a struct of strings cannot fail
+	encodedItem, _ := json.Marshal(item) //nolint:errchkjson // the wire items are plain structs
 
 	return encodedItem
 }
 
-// Send posts the conversation so far and reads the response.
-//
-// https://platform.openai.com/docs/api-reference/responses-streaming
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
 	reply, err := self.post(ctx, yield)
 	if err != nil {
@@ -163,11 +127,13 @@ func (self *Client) post(ctx context.Context, yield agent.Yield) (reply, error) 
 		return reply{}, err
 	}
 
-	stream, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers(token))
+	stream, responseHeader, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers(token))
 	if err != nil {
 		return reply{}, err
 	}
 	defer func() { _ = stream.Close() }()
+
+	self.recordUsageWindows(responseHeader, time.Now())
 
 	return readReply(stream, yield)
 }

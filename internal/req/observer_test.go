@@ -28,6 +28,7 @@ func (self observer) Start(request req.Request) req.ExchangeObserver {
 
 func (self *observedExchange) Response(response req.Response) { self.response = response }
 func (self *observedExchange) Body(body []byte)               { self.body = append(self.body, body...) }
+
 func (self *observedExchange) Finish(_ time.Time, err error, incomplete bool) {
 	self.isFinished, self.err, self.incomplete = true, err, incomplete
 }
@@ -41,7 +42,7 @@ func TestObserverSeesTheBytesConsumedByTheCaller(t *testing.T) {
 	exchange := &observedExchange{}
 	client := req.New(time.Second)
 	client.Observe(observer{exchange: exchange})
-	body, err := client.Stream(t.Context(), server.URL, map[string]string{"secret": "no"}, http.Header{"X-Test": {"value"}})
+	body, _, err := client.Stream(t.Context(), server.URL, map[string]string{"secret": "no"}, http.Header{"X-Test": {"value"}})
 	if err != nil {
 		t.Fatal(err)
 	}
