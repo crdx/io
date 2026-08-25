@@ -19,7 +19,8 @@ const (
 	searchInstructions = "Search the web for current, reliable information. Answer directly and cite sources with Markdown links."
 )
 
-// SearchClient asks the ChatGPT Codex backend to search the web without changing a conversation.
+const SearchEffort = "medium"
+
 type SearchClient struct {
 	URL   string
 	Model string
@@ -29,7 +30,6 @@ type SearchClient struct {
 	requests *req.Client
 }
 
-// NewSearch builds an isolated web-search client authorised by tokens.
 func NewSearch(tokens TokenSource, model string) (*SearchClient, error) {
 	client := &SearchClient{
 		URL:      Endpoint,
@@ -46,7 +46,6 @@ func NewSearch(tokens TokenSource, model string) (*SearchClient, error) {
 	return client, nil
 }
 
-// ObserveHTTP attaches an observer to search requests and credential refreshes.
 func (self *SearchClient) ObserveHTTP(observer req.Observer) {
 	self.requests.Observe(observer)
 	if source, ok := self.tokens.(observedTokenSource); ok {
@@ -54,7 +53,6 @@ func (self *SearchClient) ObserveHTTP(observer req.Observer) {
 	}
 }
 
-// Search asks the backend for a cited answer to query.
 func (self *SearchClient) Search(ctx context.Context, query string) (string, error) {
 	token, err := self.tokens.Token()
 	if err != nil {
@@ -67,6 +65,7 @@ func (self *SearchClient) Search(ctx context.Context, query string) (string, err
 		Input:        []userMessage{{Role: "user", Content: query}},
 		Store:        false,
 		Stream:       true,
+		Reasoning:    reasoning{Effort: SearchEffort, Summary: Summary},
 		Tools: []searchTool{{
 			Type:              "web_search",
 			SearchContextSize: "high",
@@ -86,6 +85,7 @@ type searchRequest struct {
 	Input        []userMessage `json:"input"`
 	Store        bool          `json:"store"`
 	Stream       bool          `json:"stream"`
+	Reasoning    reasoning     `json:"reasoning"`
 	Tools        []searchTool  `json:"tools"`
 }
 

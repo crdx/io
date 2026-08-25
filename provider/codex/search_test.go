@@ -58,9 +58,12 @@ func TestSearchUsesTheCodexBackendAndAuthHeaders(t *testing.T) {
 			Role    string `json:"role"`
 			Content string `json:"content"`
 		} `json:"input"`
-		Store  bool `json:"store"`
-		Stream bool `json:"stream"`
-		Tools  []struct {
+		Store     bool `json:"store"`
+		Stream    bool `json:"stream"`
+		Reasoning struct {
+			Effort string `json:"effort"`
+		} `json:"reasoning"`
+		Tools []struct {
 			Type              string `json:"type"`
 			SearchContextSize string `json:"search_context_size"`
 		} `json:"tools"`
@@ -76,6 +79,9 @@ func TestSearchUsesTheCodexBackendAndAuthHeaders(t *testing.T) {
 	}
 	if body.Instructions == "" {
 		t.Error("search request has no instructions")
+	}
+	if body.Reasoning.Effort != codex.SearchEffort {
+		t.Errorf("expected the effort to be stated as %q, got %q", codex.SearchEffort, body.Reasoning.Effort)
 	}
 	if len(body.Tools) != 1 || body.Tools[0].Type != "web_search" || body.Tools[0].SearchContextSize != "high" {
 		t.Errorf("unexpected search tools: %#v", body.Tools)

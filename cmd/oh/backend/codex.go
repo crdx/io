@@ -6,7 +6,7 @@ import (
 	"crdx.org/io/cmd/oh/model"
 )
 
-const webSearchModel = "gpt-5.4-mini"
+const webSearchModel = "gpt-5.6-terra"
 
 func connectCodex(choice model.Choice, effort string, endpoint string) (*Connection, error) {
 	tokens, address := codexCredentials(endpoint)
