@@ -1,7 +1,7 @@
 / -> /copy -> /edit -> /fork -> /help -> /new -> /open
 /c -> /copy
-/copy  -> /copy session-dir -> /copy session-id -> /copy session-name
-/edit  -> /edit config-dir -> /edit config-file -> /edit home-dir
-/open  -> /open config-dir -> /open config-file -> /open home-dir -> /open scratch-dir -> /open session-chat -> /open session-dir -> /open session-log -> /open skills-dir -> /open system-prompt -> /open workspace-dir
+/copy  -> /copy agents-file -> /copy config-dir -> /copy config-file
+/edit  -> /edit agents-file -> /edit config-dir -> /edit config-file
+/open  -> /open agents-file -> /open config-dir -> /open config-file -> /open home-dir -> /open scratch-dir -> /open session-chat -> /open session-dir -> /open session-log -> /open skills-dir -> /open system-prompt-file -> /open workspace-dir
 // -> //add -> //ask
 //a -> //add -> //ask -> //add

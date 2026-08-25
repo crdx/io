@@ -41,12 +41,6 @@ func TestSetRejectsInvalidDefinitions(t *testing.T) {
 		"prefixed name":   {prefix: "/", command: slash.Command{Name: "/open", Run: commandHandler}},
 		"spaced name":     {prefix: "/", command: slash.Command{Name: "open file", Run: commandHandler}},
 		"missing handler": {prefix: "/", command: slash.Command{Name: "open"}},
-		"conflicting argument metadata": {
-			prefix: "/",
-			command: slash.Command{Name: "open", Run: commandHandler}.
-				WithArguments("config").
-				WithRequiredArguments("<args>"),
-		},
 	}
 
 	for name, test := range tests {
@@ -107,7 +101,7 @@ func TestCompletionCyclesThroughNamesWithinTheLongestPrefix(t *testing.T) {
 
 func TestCompletionCyclesThroughMatchingArguments(t *testing.T) {
 	registry := mustRegistry(t, mustSet(t, "/",
-		slash.Command{Name: "ask", Run: commandHandler}.WithRequiredArguments("<args>"),
+		slash.Command{Name: "ask", Run: commandHandler}.WithArgumentUsage("<args>"),
 		slash.Command{Name: "browse", Run: commandHandler}.WithArguments("config-dir", "session-dir"),
 		slash.Command{Name: "conf", Run: commandHandler},
 		slash.Command{Name: "copy", Run: commandHandler}.WithArguments("session-name", "session-id", "session-dir"),
@@ -181,7 +175,7 @@ func TestCommandNameRecognisesRegisteredPrefixes(t *testing.T) {
 
 func TestUsagesComeFromSetMetadata(t *testing.T) {
 	set := mustSet(t, "//",
-		slash.Command{Name: "add", Run: commandHandler}.WithRequiredArguments("<args>"),
+		slash.Command{Name: "add", Run: commandHandler}.WithArgumentUsage("<args>"),
 		slash.Command{Name: "review", Run: commandHandler},
 		slash.Command{Name: "test", Run: commandHandler}.WithArguments("quick", "all"),
 	)
@@ -189,6 +183,21 @@ func TestUsagesComeFromSetMetadata(t *testing.T) {
 	if got := set.Usages(); !slices.Equal(got, want) {
 		t.Errorf("got usages %v, want %v", got, want)
 	}
+}
+
+func TestArgumentUsageSummarisesArgumentsThatStillComplete(t *testing.T) {
+	command := slash.Command{Name: "open", Run: commandHandler}.
+		WithArguments("config-dir", "session-dir").
+		WithArgumentUsage("<target>")
+	set := mustSet(t, "/", command)
+	registry := mustRegistry(t, set)
+
+	want := []string{"/open <target>"}
+	if got := set.Usages(); !slices.Equal(got, want) {
+		t.Errorf("got usages %v, want %v", got, want)
+	}
+
+	assertCompletionCycle(t, registry, "/open s", []string{"/open session-dir", "/open session-dir"})
 }
 
 func TestUsageErrorIsRecognised(t *testing.T) {

@@ -115,6 +115,28 @@ func TestReturnAcceptsInputDuringARunningTurn(t *testing.T) {
 	}
 }
 
+func TestRepeatedReturnsCoolOffSoOneLineIsAcceptedOnce(t *testing.T) {
+	now := time.Time{}
+	self := inputFromKeys(t, "/unknown")
+	self.currentTime = func() time.Time { return now }
+
+	if got := self.Apply(key.Key{Code: key.Enter}, false); got != Accept {
+		t.Fatalf("expected the first return to accept the input, got %v", got)
+	}
+
+	for range 2 {
+		now = now.Add(acceptCoolOff * 9 / 10)
+		if got := self.Apply(key.Key{Code: key.Enter}, false); got != Draw {
+			t.Errorf("expected a repeated return to extend the cool-off, got %v", got)
+		}
+	}
+
+	now = now.Add(acceptCoolOff)
+	if got := self.Apply(key.Key{Code: key.Enter}, false); got != Accept {
+		t.Errorf("expected return to accept the input after the cool-off, got %v", got)
+	}
+}
+
 func TestTwoReturnsOnAnEmptyRunningLineAskToContinue(t *testing.T) {
 	for name, inputText := range map[string]string{"empty": "", "whitespace": " "} {
 		self := inputFromKeys(t, inputText)

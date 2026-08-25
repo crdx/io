@@ -12,7 +12,9 @@ import (
 	"slices"
 	"strings"
 
+	"crdx.org/io/cmd/oh/column"
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/terminal"
 )
@@ -21,6 +23,10 @@ const (
 	systemCommandPrefix   = "/"
 	sessionJournalName    = "session.jsonl"
 	sessionTranscriptName = "chat.md"
+
+	targetPlaceholder = "<target>"
+	helpIndent        = "  "
+	helpWidth         = 78
 )
 
 type Options struct {
@@ -75,7 +81,6 @@ type commandSession struct {
 
 type commandTarget struct {
 	resolveValues func() ([]string, error)
-	confirmation  string
 }
 
 func New(options Options, snippetUsages []string) (slash.CommandSet, error) {
@@ -105,28 +110,22 @@ func New(options Options, snippetUsages []string) (slash.CommandSet, error) {
 }
 
 func buildCommands(environment commandEnvironment, snippetUsages []string) (slash.CommandSet, error) {
+	targets := locationTargets(environment)
+	targetNames := slices.Sorted(maps.Keys(targets))
+
 	var set slash.CommandSet
 	var help slash.Command
 	help = helpCommand(func() string {
-		return helpText(set.Usages(), systemCommandPrefix+help.Name, snippetUsages)
+		return helpText(set.Usages(), systemCommandPrefix+help.Name, snippetUsages, targetNames)
 	})
-	targets := locationTargets(environment)
 	commands := []slash.Command{
-		targetCommand(
-			"copy",
-			map[string]commandTarget{
-				"session-name": copyTarget(environment.session.name),
-				"session-id":   copyTarget(environment.session.id),
-				"session-dir":  copyTarget(environment.session.directory),
-			},
-			environment.copyText,
-		),
-		targetCommand("edit", targets, environment.openEditor),
-		help,
+		targetCommand("copy", copyTargets(environment, targets), targetNames, environment.copyText, copyConfirmation),
+		targetCommand("edit", targets, targetNames, environment.openEditor, nil),
+		targetCommand("open", targets, targetNames, environment.openTarget, nil),
 		sessionCommand("new", func(modelGlob string) error {
 			return environment.startSession(SessionStart{ModelGlob: modelGlob})
 		}),
-		targetCommand("open", targets, environment.openTarget),
+		help,
 	}
 	commands = append(commands, commandsRequiringPersistedSession(
 		environment.session.isPersisted,
@@ -143,20 +142,46 @@ func buildCommands(environment commandEnvironment, snippetUsages []string) (slas
 	return set, err
 }
 
+func summariseTargets(argumentNames []string, targetNames []string) string {
+	var others []string
+	for _, argument := range argumentNames {
+		if !slices.Contains(targetNames, argument) {
+			others = append(others, argument)
+		}
+	}
+
+	if len(argumentNames)-len(others) < len(targetNames) {
+		return "{" + strings.Join(argumentNames, "|") + "}"
+	}
+	if len(others) == 0 {
+		return targetPlaceholder
+	}
+
+	return "{" + strings.Join(append(others, targetPlaceholder), "|") + "}"
+}
+
+func copyTargets(environment commandEnvironment, targets map[string]commandTarget) map[string]commandTarget {
+	copied := maps.Clone(targets)
+	copied["session-name"] = staticTarget(environment.session.name)
+	copied["session-id"] = staticTarget(environment.session.id)
+	return copied
+}
+
 func locationTargets(environment commandEnvironment) map[string]commandTarget {
 	prepareConfigDir := func() error {
 		return os.MkdirAll(environment.configDir, 0o700)
 	}
 
 	return map[string]commandTarget{
-		"config-dir":    preparedTarget(prepareConfigDir, environment.configDir),
-		"config-file":   preparedTarget(prepareConfigDir, environment.configPath),
-		"system-prompt": preparedTarget(prepareConfigDir, environment.systemPromptPath),
-		"skills-dir":    existingTarget("Skills directory", environment.skillDirs...),
-		"workspace-dir": staticTarget(environment.workspaceDir),
-		"scratch-dir":   staticTarget(environment.scratchDir),
-		"home-dir":      staticTarget(environment.homeDir),
-		"session-dir":   existingTarget("Session directory", environment.session.directory),
+		"agents-file":        existingTarget("Project context", prompt.ProjectContextPaths(environment.workspaceDir)...),
+		"config-dir":         preparedTarget(prepareConfigDir, environment.configDir),
+		"config-file":        preparedTarget(prepareConfigDir, environment.configPath),
+		"system-prompt-file": preparedTarget(prepareConfigDir, environment.systemPromptPath),
+		"skills-dir":         existingTarget("Skills directory", environment.skillDirs...),
+		"workspace-dir":      staticTarget(environment.workspaceDir),
+		"scratch-dir":        staticTarget(environment.scratchDir),
+		"home-dir":           staticTarget(environment.homeDir),
+		"session-dir":        existingTarget("Session directory", environment.session.directory),
 		"session-log": existingTarget(
 			"Session log",
 			filepath.Join(environment.session.directory, sessionJournalName),
@@ -210,24 +235,24 @@ func commandsRequiringPersistedSession(isSessionPersisted func() bool, commands 
 	return commands
 }
 
-func helpText(commandUsages []string, hiddenCommandUsage string, snippetUsages []string) string {
+func helpText(commandUsages []string, hiddenCommandUsage string, snippetUsages []string, targetNames []string) string {
 	visibleCommandUsages := slices.DeleteFunc(commandUsages, func(usage string) bool { return usage == hiddenCommandUsage })
+	usesTargets := false
 	for i, usage := range visibleCommandUsages {
 		if usage == "/new" || usage == "/fork" {
 			visibleCommandUsages[i] += " [model[@effort]]"
 		}
+		usesTargets = usesTargets || strings.Contains(usage, targetPlaceholder)
 	}
 	sections := []string{"Commands:\n  " + strings.Join(visibleCommandUsages, "\n  ")}
+	if usesTargets {
+		targetRows := column.Rows(targetNames, helpWidth-len(helpIndent))
+		sections = append(sections, "Targets:\n"+helpIndent+strings.Join(targetRows, "\n"+helpIndent))
+	}
 	if len(snippetUsages) > 0 {
 		sections = append(sections, "Snippets:\n  "+strings.Join(snippetUsages, "\n  "))
 	}
 	return strings.Join(sections, "\n\n")
-}
-
-func copyTarget(value string) commandTarget {
-	target := staticTarget(value)
-	target.confirmation = "Copied to clipboard."
-	return target
 }
 
 func staticTarget(values ...string) commandTarget {
@@ -269,7 +294,21 @@ func existingTarget(description string, paths ...string) commandTarget {
 	}
 }
 
-func targetCommand(name string, targets map[string]commandTarget, action func([]string) error) slash.Command {
+func copyConfirmation(targetName string, values []string) string {
+	return fmt.Sprintf(
+		"Copied %s to clipboard: %s",
+		strings.ReplaceAll(targetName, "-", " "),
+		strings.Join(values, ", "),
+	)
+}
+
+func targetCommand(
+	name string,
+	targets map[string]commandTarget,
+	targetNames []string,
+	action func([]string) error,
+	confirm func(targetName string, values []string) string,
+) slash.Command {
 	command := slash.Command{
 		Name: name,
 		Run: func(context slash.Context, arguments []string) error {
@@ -290,14 +329,17 @@ func targetCommand(name string, targets map[string]commandTarget, action func([]
 			if err := action(values); err != nil {
 				return err
 			}
-			if target.confirmation != "" {
-				context.Success(target.confirmation)
+			if confirm != nil {
+				context.Success(confirm(arguments[0], values))
 			}
 			return nil
 		},
 	}
 
-	return command.WithArguments(slices.Sorted(maps.Keys(targets))...)
+	argumentNames := slices.Sorted(maps.Keys(targets))
+	return command.
+		WithArguments(argumentNames...).
+		WithArgumentUsage(summariseTargets(argumentNames, targetNames))
 }
 
 func openDesktopTargets(paths []string) error {

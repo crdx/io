@@ -1,9 +1,15 @@
 Commands:
-  /copy {session-dir|session-id|session-name}
-  /edit {config-dir|config-file|home-dir|scratch-dir|session-chat|session-dir|session-log|skills-dir|system-prompt|workspace-dir}
-  /fork [model[@effort]]
+  /copy {session-id|session-name|<target>}
+  /edit <target>
+  /open <target>
   /new [model[@effort]]
-  /open {config-dir|config-file|home-dir|scratch-dir|session-chat|session-dir|session-log|skills-dir|system-prompt|workspace-dir}
+  /fork [model[@effort]]
+
+Targets:
+  agents-file         config-dir          config-file
+  home-dir            scratch-dir         session-chat
+  session-dir         session-log         skills-dir
+  system-prompt-file  workspace-dir
 
 Snippets:
   //add <args>

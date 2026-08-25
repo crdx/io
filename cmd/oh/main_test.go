@@ -4451,7 +4451,7 @@ func TestSlashCommandCanAddANotice(t *testing.T) {
 	}
 }
 
-func TestUnknownSlashCommandShowsAnErrorAndKeepsTheInput(t *testing.T) {
+func TestUnknownSlashCommandShowsOneErrorWhileReturnRepeatsAndKeepsTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
 	self.commands = fixtureCommandRegistry(t)
@@ -4460,13 +4460,15 @@ func TestUnknownSlashCommandShowsAnErrorAndKeepsTheInput(t *testing.T) {
 		editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
 	}
 
-	self.acceptInput(editor, nil)
+	for range 100 {
+		self.apply(editor, nil, key.Key{Code: key.Enter})
+	}
 
 	if got := editor.Text(); got != "/unknown" {
 		t.Errorf("got input %q", got)
 	}
 	if len(self.events) != 1 {
-		t.Fatalf("got events %v", self.events)
+		t.Fatalf("got %d repeated errors, want one: %v", len(self.events), self.events)
 	}
 	want := "Command not found: /unknown (alt+enter sends as message)"
 	if self.events[0].Text != want || self.events[0].Status != agent.ErrorStatus {

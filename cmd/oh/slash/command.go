@@ -56,7 +56,7 @@ func (self Command) WithArguments(arguments ...string) Command {
 	return self
 }
 
-func (self Command) WithRequiredArguments(usage string) Command {
+func (self Command) WithArgumentUsage(usage string) Command {
 	self.argumentUsage = usage
 	return self
 }
@@ -85,6 +85,7 @@ type Invocation struct {
 type CommandSet struct {
 	prefix   string
 	commands map[string]*Command
+	order    []string
 }
 
 func NewCommandSet(prefix string, commands ...Command) (CommandSet, error) {
@@ -92,7 +93,11 @@ func NewCommandSet(prefix string, commands ...Command) (CommandSet, error) {
 		return CommandSet{}, err
 	}
 
-	set := CommandSet{prefix: prefix, commands: make(map[string]*Command, len(commands))}
+	set := CommandSet{
+		prefix:   prefix,
+		commands: make(map[string]*Command, len(commands)),
+		order:    make([]string, 0, len(commands)),
+	}
 	for i := range commands {
 		command := &commands[i]
 		if command.Name == "" || strings.ContainsRune(command.Name, '/') || strings.ContainsFunc(command.Name, unicode.IsSpace) {
@@ -101,24 +106,23 @@ func NewCommandSet(prefix string, commands ...Command) (CommandSet, error) {
 		if command.Run == nil {
 			return CommandSet{}, fmt.Errorf("command %q has no handler", prefix+command.Name)
 		}
-		if command.argumentUsage != "" && len(command.arguments) > 0 {
-			return CommandSet{}, fmt.Errorf("command %q has conflicting argument metadata", prefix+command.Name)
-		}
 		if _, exists := set.commands[command.Name]; exists {
 			return CommandSet{}, fmt.Errorf("command %q is already registered", prefix+command.Name)
 		}
 		set.commands[command.Name] = command
+		set.order = append(set.order, command.Name)
 	}
 
 	return set, nil
 }
 
+// Usages are in the order the commands were registered, which is the order they are meant to be
+// read in rather than the order they happen to sort in.
 func (self CommandSet) Usages() []string {
-	usages := make([]string, 0, len(self.commands))
-	for _, command := range self.commands {
-		usages = append(usages, command.usage(self.prefix))
+	usages := make([]string, 0, len(self.order))
+	for _, name := range self.order {
+		usages = append(usages, self.commands[name].usage(self.prefix))
 	}
-	slices.Sort(usages)
 	return usages
 }
 

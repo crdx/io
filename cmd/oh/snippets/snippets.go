@@ -62,7 +62,7 @@ func New(configured map[string]string) (slash.CommandSet, error) {
 			},
 		}
 		if !allowsNoArguments {
-			command = command.WithRequiredArguments(argumentUsage)
+			command = command.WithArgumentUsage(argumentUsage)
 		}
 		commands = append(commands, command)
 	}

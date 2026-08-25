@@ -70,6 +70,13 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	configPath := filepath.Join(configDirectory, "config.toml")
 	systemPromptPath := filepath.Join(configDirectory, "SYSTEM.md")
 	workspaceDirectory := filepath.Join(t.TempDir(), "workspace")
+	if err := os.MkdirAll(workspaceDirectory, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	projectContextPath := filepath.Join(workspaceDirectory, "AGENTS.md")
+	if err := os.WriteFile(projectContextPath, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
 	scratchDirectory := filepath.Join(t.TempDir(), "scratch")
 	homeDirectory := filepath.Join(t.TempDir(), "home")
 	skillDirectories := []string{
@@ -129,25 +136,40 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	})
 
 	tests := map[string]string{
-		"/edit config-file":   "edit:" + configPath,
-		"/edit system-prompt": "edit:" + systemPromptPath,
-		"/edit workspace-dir": "edit:" + workspaceDirectory,
-		"/edit skills-dir":    "edit:" + strings.Join(skillDirectories[:2], ","),
-		"/open skills-dir":    "open:" + strings.Join(skillDirectories[:2], ","),
-		"/new":                "new:",
-		"/new sonnet":         "new:sonnet",
-		"/fork":               "fork:brave-otter:",
-		"/fork sonnet":        "fork:brave-otter:sonnet",
-		"/open config-dir":    "open:" + configDirectory,
-		"/open workspace-dir": "open:" + workspaceDirectory,
-		"/open scratch-dir":   "open:" + scratchDirectory,
-		"/open home-dir":      "open:" + homeDirectory,
-		"/open session-dir":   "open:" + sessionDirectory,
-		"/copy session-name":  "copy:brave-otter",
-		"/copy session-id":    "copy:session-id",
-		"/copy session-dir":   "copy:" + sessionDirectory,
-		"/open session-log":   "open:" + filepath.Join(sessionDirectory, sessionJournalName),
-		"/open session-chat":  "open:" + filepath.Join(sessionDirectory, sessionTranscriptName),
+		"/edit config-file":        "edit:" + configPath,
+		"/edit system-prompt-file": "edit:" + systemPromptPath,
+		"/edit workspace-dir":      "edit:" + workspaceDirectory,
+		"/edit skills-dir":         "edit:" + strings.Join(skillDirectories[:2], ","),
+		"/open skills-dir":         "open:" + strings.Join(skillDirectories[:2], ","),
+		"/new":                     "new:",
+		"/new sonnet":              "new:sonnet",
+		"/fork":                    "fork:brave-otter:",
+		"/fork sonnet":             "fork:brave-otter:sonnet",
+		"/open config-dir":         "open:" + configDirectory,
+		"/open workspace-dir":      "open:" + workspaceDirectory,
+		"/open scratch-dir":        "open:" + scratchDirectory,
+		"/open home-dir":           "open:" + homeDirectory,
+		"/open session-dir":        "open:" + sessionDirectory,
+		"/copy session-name":       "copy:brave-otter",
+		"/copy session-id":         "copy:session-id",
+		"/copy session-dir":        "copy:" + sessionDirectory,
+		"/copy config-file":        "copy:" + configPath,
+		"/copy skills-dir":         "copy:" + strings.Join(skillDirectories[:2], ","),
+		"/open session-log":        "open:" + filepath.Join(sessionDirectory, sessionJournalName),
+		"/open session-chat":       "open:" + filepath.Join(sessionDirectory, sessionTranscriptName),
+		"/edit agents-file":        "edit:" + projectContextPath,
+		"/open agents-file":        "open:" + projectContextPath,
+		"/copy agents-file":        "copy:" + projectContextPath,
+	}
+
+	wantConfirmations := map[string]string{
+		"/copy session-name": "Copied session name to clipboard: brave-otter",
+		"/copy session-id":   "Copied session id to clipboard: session-id",
+		"/copy session-dir":  "Copied session dir to clipboard: " + sessionDirectory,
+		"/copy config-file":  "Copied config file to clipboard: " + configPath,
+		"/copy skills-dir": "Copied skills dir to clipboard: " +
+			strings.Join(skillDirectories[:2], ", "),
+		"/copy agents-file": "Copied agents file to clipboard: " + projectContextPath,
 	}
 
 	for input, wantAction := range tests {
@@ -164,10 +186,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 			if !slices.Equal(actions, []string{wantAction}) {
 				t.Errorf("got actions %v, want %q", actions, wantAction)
 			}
-			wantSuccess := ""
-			if strings.HasPrefix(input, "/copy ") {
-				wantSuccess = "Copied to clipboard."
-			}
+			wantSuccess := wantConfirmations[input]
 			if context.success != wantSuccess {
 				t.Errorf("got success %q, want %q", context.success, wantSuccess)
 			}
@@ -276,7 +295,7 @@ func TestTargetCommandsExposeTheirArgumentsForCompletion(t *testing.T) {
 		"/open session-l": "/open session-log",
 		"/open w":         "/open workspace-dir",
 		"/open scr":       "/open scratch-dir",
-		"/edit sy":        "/edit system-prompt",
+		"/edit sy":        "/edit system-prompt-file",
 	} {
 		var state slash.Completion
 		completion, found := state.Next(commands, prefix)
@@ -323,7 +342,7 @@ func TestCommandsReportTargetsThatDoNotExistYet(t *testing.T) {
 }
 
 func TestHelpOmitsTheSnippetSectionWhenNoneAreConfigured(t *testing.T) {
-	got := helpText([]string{"/edit", "/help"}, "/help", nil)
+	got := helpText([]string{"/edit", "/help"}, "/help", nil, nil)
 	if strings.Contains(got, "Snippets:") || strings.Contains(got, "/help") {
 		t.Errorf("got help %q", got)
 	}

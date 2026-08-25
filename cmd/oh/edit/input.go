@@ -40,8 +40,9 @@ type Input struct {
 	pasteStart      int              // where the current paste begins in the buffer
 	isPrefixPending bool             // whether ctrl+x went before, so the next key names a mode
 	isEnterPending  bool             // whether one enter awaits a second
+	acceptAfter     time.Time        // when another return may accept the line
 	continueAfter   time.Time        // when another double enter may continue
-	currentTime     func() time.Time // supplies the time for the continuation cool-off
+	currentTime     func() time.Time // supplies the time for the enter cool-offs
 	wasRunning      bool             // whether a turn ran when the previous key was applied
 }
 
@@ -62,6 +63,7 @@ func (self *Input) Reset() {
 	self.isPasting = false
 	self.isPrefixPending = false
 	self.isEnterPending = false
+	self.acceptAfter = time.Time{}
 	self.wasRunning = false
 
 	if self.history != nil {
@@ -186,7 +188,10 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 	return Draw
 }
 
-const continueCoolOff = time.Second
+const (
+	acceptCoolOff   = 250 * time.Millisecond
+	continueCoolOff = time.Second
+)
 
 func (self *Input) enter(keypress key.Key) Action {
 	if keypress.Mod.Has(key.Shift) {
@@ -195,10 +200,18 @@ func (self *Input) enter(keypress key.Key) Action {
 	}
 
 	if strings.TrimSpace(self.buffer.String()) != "" {
-		if keypress.Mod.Has(key.Alt) {
+		now := self.currentTime()
+		isCoolingOff := now.Before(self.acceptAfter)
+		self.acceptAfter = now.Add(acceptCoolOff)
+
+		switch {
+		case isCoolingOff:
+			return Draw
+		case keypress.Mod.Has(key.Alt):
 			return ForceAccept
+		default:
+			return Accept
 		}
-		return Accept
 	}
 
 	now := self.currentTime()

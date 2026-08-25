@@ -86,13 +86,19 @@ type harnessContextTemplateData struct {
 	WebGranted        bool
 }
 
-// File is one context file incorporated into the system prompt.
+func ProjectContextPaths(workspaceDir string) []string {
+	paths := make([]string, 0, len(projectContextNames))
+	for _, name := range projectContextNames {
+		paths = append(paths, filepath.Join(workspaceDir, name))
+	}
+	return paths
+}
+
 type File struct {
 	Name string
 	Body string
 }
 
-// Config describes the runtime state and context sources incorporated into a system prompt.
 type Config struct {
 	GlobalPath   string
 	Root         *os.Root
@@ -105,7 +111,6 @@ type Config struct {
 	Skills       []skill.Skill
 }
 
-// Load reads the configured context sources and assembles the complete system prompt.
 func Load(config Config) (string, []File, error) {
 	globalFile, err := readGlobalContext(config.GlobalPath)
 	if err != nil {
