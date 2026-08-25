@@ -15,14 +15,16 @@ import (
 var _ segment.Persister = &state{}
 
 const (
-	defaultRate     = 5 * time.Minute
-	failureBackoff  = time.Minute
-	redrawInterval  = 15 * time.Second
-	dayLength       = 24 * time.Hour
-	percentCeiling  = 100
-	overPacePercent = 10
-	overPaceRatio   = 1.5
-	nearLimit       = 90
+	defaultRate      = 5 * time.Minute
+	redrawInterval   = 15 * time.Second
+	firstFailureWait = time.Minute
+	firstEmptyWait   = redrawInterval
+	backoffFactor    = 2
+	dayLength        = 24 * time.Hour
+	percentCeiling   = 100
+	overPacePercent  = 10
+	overPaceRatio    = 1.5
+	nearLimit        = 90
 )
 
 type state struct {
@@ -34,12 +36,10 @@ type state struct {
 	windows   []agent.UsageWindow
 	fetchedAt time.Time
 	retryAt   time.Time
+	waited    time.Duration
 	fetching  bool
 }
 
-// New builds the factory over whichever provider holds the conversation. A provider that cannot
-// report subscription usage hands a nil reporter, and the segment stays blank rather than refusing
-// the layout, so one layout serves every provider.
 func New(reporter agent.UsageReporter, now func() time.Time) segment.Factory {
 	return func(options segment.Options) (segment.Segment, error) {
 		var args struct {
@@ -70,8 +70,6 @@ func (self *state) Persistent() bool {
 	return true
 }
 
-// Render paints the last snapshot and never waits on the network: a stale snapshot starts a fetch
-// in the background, and what is already held is what this redraw shows.
 func (self *state) Render(segment.Context) string {
 	if self.reporter == nil {
 		return ""
@@ -110,7 +108,13 @@ func (self *state) fetch() {
 	self.fetching = false
 
 	if err != nil {
-		self.retryAt = self.now().Add(failureBackoff)
+		self.waitLonger(firstFailureWait)
+
+		return
+	}
+
+	if len(windows) == 0 {
+		self.waitLonger(firstEmptyWait)
 
 		return
 	}
@@ -118,6 +122,12 @@ func (self *state) fetch() {
 	self.windows = windows
 	self.fetchedAt = self.now()
 	self.retryAt = time.Time{}
+	self.waited = 0
+}
+
+func (self *state) waitLonger(first time.Duration) {
+	self.waited = min(max(self.waited*backoffFactor, first), self.rate)
+	self.retryAt = self.now().Add(self.waited)
 }
 
 func (self *state) draw(windows []agent.UsageWindow, fetchedAt time.Time) string {

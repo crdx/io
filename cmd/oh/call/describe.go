@@ -46,17 +46,12 @@ func LabelFor(event agent.Event, getTool ToolLookup, workspaceDir string) Label 
 		skillName, isSkillLoad = skill.NameFromPath(shown.Subject)
 	}
 
-	switch {
-	case event.Name == shellTool:
-		label.Name = "$"
-		label.NameStyle = style.Shell
-	case event.Name == webSearchTool:
-		label.Name = "search"
-		label.NameStyle = style.Network
-	case event.Name == webFetchTool:
-		label.Name = "fetch"
-		label.NameStyle = style.Network
-	case isSkillLoad:
+	if toolLabel, known := toolLabels[event.Name]; known {
+		label.Name = toolLabel.name
+		label.NameStyle = toolLabel.style
+	}
+
+	if isSkillLoad {
 		label.Name = "load"
 		label.NameStyle = style.Skill
 		label.Accent = skillName
@@ -64,4 +59,13 @@ func LabelFor(event agent.Event, getTool ToolLookup, workspaceDir string) Label 
 		label.Emphasis = tool.Emphasis{}
 	}
 	return label
+}
+
+var toolLabels = map[string]struct {
+	name  string
+	style style.Style
+}{
+	shellTool:     {"$", style.Shell},
+	webSearchTool: {"search", style.Network},
+	webFetchTool:  {"fetch", style.Network},
 }

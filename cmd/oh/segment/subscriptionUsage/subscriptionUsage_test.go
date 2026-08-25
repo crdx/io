@@ -1,4 +1,4 @@
-package subscriptionUsage_test
+package subscriptionUsage
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/segment"
-	"crdx.org/io/cmd/oh/segment/subscriptionUsage"
 	"crdx.org/io/cmd/oh/style"
 )
 
@@ -31,10 +30,28 @@ func (self *scriptedReporter) UsageWindows(context.Context) ([]agent.UsageWindow
 
 var testNow = time.Date(2026, 1, 2, 12, 0, 0, 0, time.UTC)
 
+type testClock struct {
+	now time.Time
+}
+
+func (self *testClock) read() time.Time {
+	return self.now
+}
+
+func (self *testClock) set(now time.Time) {
+	self.now = now
+}
+
 func build(t *testing.T, reporter agent.UsageReporter) segment.Segment {
 	t.Helper()
 
-	built, err := subscriptionUsage.New(reporter, func() time.Time { return testNow })(noOptions{})
+	return buildOnClock(t, reporter, &testClock{now: testNow})
+}
+
+func buildOnClock(t *testing.T, reporter agent.UsageReporter, clock *testClock) segment.Segment {
+	t.Helper()
+
+	built, err := New(reporter, clock.read)(noOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,14 +161,117 @@ func TestAFreshSnapshotIsNotFetchedAgain(t *testing.T) {
 	}
 }
 
-func TestAFailedFetchLeavesTheLineBlank(t *testing.T) {
-	built := build(t, &scriptedReporter{err: errors.New("the endpoint is sulking")})
+func TestEmptyReportsBackOffToTheConfiguredRate(t *testing.T) {
+	reporter := &scriptedReporter{}
+	clock := &testClock{now: testNow}
+	built := buildState(t, reporter, clock)
 
-	if got := built.Render(segment.Context{}); got != "" {
-		t.Errorf("expected nothing, got %q", got)
+	fetchNow(t, built)
+
+	waits := []time.Duration{
+		15 * time.Second,
+		30 * time.Second,
+		time.Minute,
+		2 * time.Minute,
+		4 * time.Minute,
+		5 * time.Minute,
+		5 * time.Minute,
 	}
 
-	time.Sleep(10 * time.Millisecond)
+	for _, wait := range waits {
+		retryAt := clock.read().Add(wait)
+		assertFetchStarts(t, built, clock, retryAt.Add(-time.Nanosecond), false)
+		assertFetchStarts(t, built, clock, retryAt, true)
+		built.fetch()
+	}
+}
+
+func TestFailuresBackOffToTheConfiguredRate(t *testing.T) {
+	reporter := &scriptedReporter{err: errors.New("the endpoint is sulking")}
+	clock := &testClock{now: testNow}
+	built := buildState(t, reporter, clock)
+
+	fetchNow(t, built)
+
+	waits := []time.Duration{
+		time.Minute,
+		2 * time.Minute,
+		4 * time.Minute,
+		5 * time.Minute,
+		5 * time.Minute,
+	}
+
+	for _, wait := range waits {
+		retryAt := clock.read().Add(wait)
+		assertFetchStarts(t, built, clock, retryAt.Add(-time.Nanosecond), false)
+		assertFetchStarts(t, built, clock, retryAt, true)
+		built.fetch()
+	}
+}
+
+func TestASuccessResetsTheEmptyReportBackoff(t *testing.T) {
+	reporter := &scriptedReporter{}
+	clock := &testClock{now: testNow}
+	built := buildState(t, reporter, clock)
+
+	fetchNow(t, built)
+
+	firstRetryAt := testNow.Add(firstEmptyWait)
+	reporter.windows = []agent.UsageWindow{{
+		Duration: 5 * time.Hour,
+		Percent:  40,
+		ResetsAt: testNow.Add(150 * time.Minute),
+	}}
+	assertFetchStarts(t, built, clock, firstRetryAt, true)
+	built.fetch()
+
+	reporter.windows = nil
+	afterSnapshot := firstRetryAt.Add(defaultRate)
+	assertFetchStarts(t, built, clock, afterSnapshot, true)
+	built.fetch()
+
+	retryAt := afterSnapshot.Add(firstEmptyWait)
+	assertFetchStarts(t, built, clock, retryAt.Add(-time.Nanosecond), false)
+	assertFetchStarts(t, built, clock, retryAt, true)
+}
+
+func buildState(t *testing.T, reporter agent.UsageReporter, clock *testClock) *state {
+	t.Helper()
+
+	built := buildOnClock(t, reporter, clock)
+	internal, ok := built.(*state)
+	if !ok {
+		t.Fatalf("built %T, want *state", built)
+	}
+
+	return internal
+}
+
+func fetchNow(t *testing.T, built *state) {
+	t.Helper()
+
+	if !built.noteFetchStarting() {
+		t.Fatal("initial fetch did not start")
+	}
+
+	built.fetch()
+}
+
+func assertFetchStarts(t *testing.T, built *state, clock *testClock, now time.Time, want bool) {
+	t.Helper()
+
+	clock.set(now)
+
+	if got := built.noteFetchStarting(); got != want {
+		t.Errorf("at %s fetch start = %t, want %t", now.Sub(testNow), got, want)
+	}
+}
+
+func TestAFailedFetchLeavesTheLineBlank(t *testing.T) {
+	clock := &testClock{now: testNow}
+	built := buildState(t, &scriptedReporter{err: errors.New("the endpoint is sulking")}, clock)
+
+	fetchNow(t, built)
 
 	if got := built.Render(segment.Context{}); got != "" {
 		t.Errorf("expected nothing after the failure, got %q", got)

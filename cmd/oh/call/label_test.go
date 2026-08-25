@@ -3,6 +3,7 @@ package call_test
 import (
 	"testing"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/call"
 	"crdx.org/io/cmd/oh/style"
 )
@@ -67,5 +68,44 @@ func TestALabelIsCutToTheCellsItHasRatherThanTheCharacters(t *testing.T) {
 
 	if got := style.Width(elidedLabel.Name + " " + elidedLabel.Subject); got != 10 {
 		t.Errorf("expected the label to measure 10 cells, got %d", got)
+	}
+}
+
+func TestCallNamesAreDrawnFromTheTable(t *testing.T) {
+	for name, test := range map[string]struct {
+		eventName string
+		want      call.Label
+	}{
+		"shell":      {eventName: "bash", want: call.Label{Name: "$", NameStyle: style.Shell}},
+		"web search": {eventName: "web_search", want: call.Label{Name: "search", NameStyle: style.Network}},
+		"web fetch":  {eventName: "web_fetch", want: call.Label{Name: "fetch", NameStyle: style.Network}},
+		"ordinary":   {eventName: "grep", want: call.Label{Name: "grep"}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			label := call.LabelFor(agent.Event{Name: test.eventName}, nil, "")
+
+			if got, want := label.Render(), test.want.Render(); got != want {
+				t.Errorf("got %q, want %q", got, want)
+			}
+		})
+	}
+}
+
+func TestASkillReadIsDrawnAsALoad(t *testing.T) {
+	label := call.LabelFor(agent.Event{
+		Name:              "read",
+		FallbackRendering: agent.FallbackRendering{Subject: "/skills/guard-basics/SKILL.md"},
+	}, nil, "")
+
+	want := call.Label{
+		Name:        "load",
+		Subject:     "/skills/guard-basics/SKILL.md",
+		NameStyle:   style.Skill,
+		Accent:      "guard-basics",
+		AccentStyle: style.Skill,
+	}
+
+	if got := label.Render(); got != want.Render() {
+		t.Errorf("got %q, want %q", got, want.Render())
 	}
 }
