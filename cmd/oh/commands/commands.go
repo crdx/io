@@ -45,10 +45,11 @@ type Options struct {
 }
 
 type Session struct {
-	Name        string
-	ID          string
-	Directory   string
-	IsPersisted func() bool
+	Name           string
+	ID             string
+	Directory      string
+	IsPersisted    func() bool
+	GetLastMessage func() (string, bool)
 }
 
 type SessionStart struct {
@@ -73,10 +74,11 @@ type commandEnvironment struct {
 }
 
 type commandSession struct {
-	name        string
-	id          string
-	directory   string
-	isPersisted func() bool
+	name           string
+	id             string
+	directory      string
+	isPersisted    func() bool
+	getLastMessage func() (string, bool)
 }
 
 type commandTarget struct {
@@ -93,10 +95,11 @@ func New(options Options, snippetUsages []string) (slash.CommandSet, error) {
 		scratchDir:       options.ScratchDir,
 		homeDir:          options.HomeDir,
 		session: commandSession{
-			name:        options.Session.Name,
-			id:          options.Session.ID,
-			directory:   options.Session.Directory,
-			isPersisted: options.Session.IsPersisted,
+			name:           options.Session.Name,
+			id:             options.Session.ID,
+			directory:      options.Session.Directory,
+			isPersisted:    options.Session.IsPersisted,
+			getLastMessage: options.Session.GetLastMessage,
 		},
 		openEditor: func(paths []string) error {
 			return editor.Open(options.Editor, paths...)
@@ -162,6 +165,11 @@ func summariseTargets(argumentNames []string, targetNames []string) string {
 
 func copyTargets(environment commandEnvironment, targets map[string]commandTarget) map[string]commandTarget {
 	copied := maps.Clone(targets)
+	copied["last-message"] = lastMessageTarget(environment.session.getLastMessage)
+	copied["session-chat"] = textFileTarget(
+		"Session chat",
+		filepath.Join(environment.session.directory, sessionTranscriptName),
+	)
 	copied["session-name"] = staticTarget(environment.session.name)
 	copied["session-id"] = staticTarget(environment.session.id)
 	return copied
@@ -182,11 +190,11 @@ func locationTargets(environment commandEnvironment) map[string]commandTarget {
 		"scratch-dir":        staticTarget(environment.scratchDir),
 		"home-dir":           staticTarget(environment.homeDir),
 		"session-dir":        existingTarget("Session directory", environment.session.directory),
-		"session-log": existingTarget(
+		"session-log-file": existingTarget(
 			"Session log",
 			filepath.Join(environment.session.directory, sessionJournalName),
 		),
-		"session-chat": existingTarget(
+		"session-chat-file": existingTarget(
 			"Session chat",
 			filepath.Join(environment.session.directory, sessionTranscriptName),
 		),
@@ -294,12 +302,40 @@ func existingTarget(description string, paths ...string) commandTarget {
 	}
 }
 
+func textFileTarget(description string, path string) commandTarget {
+	return commandTarget{
+		resolveValues: func() ([]string, error) {
+			contents, err := os.ReadFile(path) //nolint:gosec // the path is selected by the command
+			if errors.Is(err, fs.ErrNotExist) {
+				return nil, fmt.Errorf("%s does not exist yet", description)
+			}
+			if err != nil {
+				return nil, fmt.Errorf("could not read %s: %w", description, err)
+			}
+			return []string{string(contents)}, nil
+		},
+	}
+}
+
+func lastMessageTarget(getLastMessage func() (string, bool)) commandTarget {
+	return commandTarget{
+		resolveValues: func() ([]string, error) {
+			if getLastMessage != nil {
+				if message, found := getLastMessage(); found {
+					return []string{message}, nil
+				}
+			}
+			return nil, errors.New("no model message has been received yet")
+		},
+	}
+}
+
 func copyConfirmation(targetName string, values []string) string {
-	return fmt.Sprintf(
-		"Copied %s to clipboard: %s",
-		strings.ReplaceAll(targetName, "-", " "),
-		strings.Join(values, ", "),
-	)
+	description := strings.ReplaceAll(targetName, "-", " ")
+	if targetName == "last-message" || targetName == "session-chat" {
+		return fmt.Sprintf("Copied %s to clipboard", description)
+	}
+	return fmt.Sprintf("Copied %s to clipboard: %s", description, strings.Join(values, ", "))
 }
 
 func targetCommand(

@@ -516,6 +516,15 @@ func (self *App) waitForCurrentTurn() {
 	self.finish()
 }
 
+func (self *App) getLastMessage() (string, bool) {
+	for _, event := range slices.Backward(self.events) {
+		if event.Kind == agent.ModelMessageEvent {
+			return event.Text, true
+		}
+	}
+	return "", false
+}
+
 func (self *App) restore(storedSession *store.Session) {
 	self.settledCaps, _ = caps.LastRecordedMode(storedSession.Events)
 

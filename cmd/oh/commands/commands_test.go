@@ -93,10 +93,12 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	if err := os.MkdirAll(sessionDirectory, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{sessionJournalName, sessionTranscriptName} {
-		if err := os.WriteFile(filepath.Join(sessionDirectory, name), nil, 0o600); err != nil {
-			t.Fatal(err)
-		}
+	if err := os.WriteFile(filepath.Join(sessionDirectory, sessionJournalName), nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	chatContents := "# Chat\n\nA useful answer.\n"
+	if err := os.WriteFile(filepath.Join(sessionDirectory, sessionTranscriptName), []byte(chatContents), 0o600); err != nil {
+		t.Fatal(err)
 	}
 	var actions []string
 	commands := newCommandRegistry(t, commandEnvironment{
@@ -108,10 +110,11 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		homeDir:          homeDirectory,
 		skillDirs:        skillDirectories,
 		session: commandSession{
-			name:        "brave-otter",
-			id:          "session-id",
-			directory:   sessionDirectory,
-			isPersisted: func() bool { return true },
+			name:           "brave-otter",
+			id:             "session-id",
+			directory:      sessionDirectory,
+			isPersisted:    func() bool { return true },
+			getLastMessage: func() (string, bool) { return "The latest answer.", true },
 		},
 		openEditor: func(paths []string) error {
 			actions = append(actions, "edit:"+strings.Join(paths, ","))
@@ -150,19 +153,25 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		"/open scratch-dir":        "open:" + scratchDirectory,
 		"/open home-dir":           "open:" + homeDirectory,
 		"/open session-dir":        "open:" + sessionDirectory,
+		"/copy last-message":       "copy:The latest answer.",
+		"/copy session-chat":       "copy:" + chatContents,
 		"/copy session-name":       "copy:brave-otter",
 		"/copy session-id":         "copy:session-id",
 		"/copy session-dir":        "copy:" + sessionDirectory,
 		"/copy config-file":        "copy:" + configPath,
 		"/copy skills-dir":         "copy:" + strings.Join(skillDirectories[:2], ","),
-		"/open session-log":        "open:" + filepath.Join(sessionDirectory, sessionJournalName),
-		"/open session-chat":       "open:" + filepath.Join(sessionDirectory, sessionTranscriptName),
+		"/open session-log-file":   "open:" + filepath.Join(sessionDirectory, sessionJournalName),
+		"/edit session-log-file":   "edit:" + filepath.Join(sessionDirectory, sessionJournalName),
+		"/open session-chat-file":  "open:" + filepath.Join(sessionDirectory, sessionTranscriptName),
+		"/edit session-chat-file":  "edit:" + filepath.Join(sessionDirectory, sessionTranscriptName),
 		"/edit agents-file":        "edit:" + projectContextPath,
 		"/open agents-file":        "open:" + projectContextPath,
 		"/copy agents-file":        "copy:" + projectContextPath,
 	}
 
 	wantConfirmations := map[string]string{
+		"/copy last-message": "Copied last message to clipboard",
+		"/copy session-chat": "Copied session chat to clipboard",
 		"/copy session-name": "Copied session name to clipboard: brave-otter",
 		"/copy session-id":   "Copied session id to clipboard: session-id",
 		"/copy session-dir":  "Copied session dir to clipboard: " + sessionDirectory,
@@ -246,6 +255,10 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 		"/new one two",
 		"/fork one two",
 		"/copy session-name extra",
+		"/open session-chat",
+		"/edit session-chat",
+		"/open session-log",
+		"/edit session-log",
 		"/open unknown",
 	} {
 		t.Run(input, func(t *testing.T) {
@@ -291,8 +304,10 @@ func TestTargetCommandsExposeTheirArgumentsForCompletion(t *testing.T) {
 
 	for prefix, want := range map[string]string{
 		"/open c":         "/open config-dir",
+		"/copy l":         "/copy last-message",
 		"/copy session-n": "/copy session-name",
-		"/open session-l": "/open session-log",
+		"/open session-c": "/open session-chat-file",
+		"/open session-l": "/open session-log-file",
 		"/open w":         "/open workspace-dir",
 		"/open scr":       "/open scratch-dir",
 		"/edit sy":        "/edit system-prompt-file",
@@ -318,10 +333,12 @@ func TestCommandsReportTargetsThatDoNotExistYet(t *testing.T) {
 	})
 
 	for input, want := range map[string]string{
-		"/open skills-dir":   "Skills directory does not exist yet",
-		"/open session-dir":  "Session directory does not exist yet",
-		"/open session-log":  "Session log does not exist yet",
-		"/open session-chat": "Session chat does not exist yet",
+		"/open skills-dir":        "Skills directory does not exist yet",
+		"/open session-dir":       "Session directory does not exist yet",
+		"/open session-log-file":  "Session log does not exist yet",
+		"/open session-chat-file": "Session chat does not exist yet",
+		"/copy session-chat":      "Session chat does not exist yet",
+		"/copy last-message":      "no model message has been received yet",
 	} {
 		t.Run(input, func(t *testing.T) {
 			actionRan = false

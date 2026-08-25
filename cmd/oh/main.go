@@ -374,10 +374,11 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		Editor:           settings.Editor.Command,
 		Output:           os.Stdout,
 		Session: commands.Session{
-			Name:        log.Name(),
-			ID:          log.ID(),
-			Directory:   filepath.Join(sessionsDir, log.Name()),
-			IsPersisted: log.IsPersisted,
+			Name:           log.Name(),
+			ID:             log.ID(),
+			Directory:      filepath.Join(sessionsDir, log.Name()),
+			IsPersisted:    log.IsPersisted,
+			GetLastMessage: func() (string, bool) { return chat.getLastMessage() },
 		},
 		StartSession: func(start commands.SessionStart) error {
 			var transition cycle.Transition

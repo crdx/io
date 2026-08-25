@@ -1,5 +1,5 @@
 Commands:
-  /copy {session-id|session-name|<target>}
+  /copy {last-message|session-chat|session-id|session-name|<target>}
   /edit <target>
   /open <target>
   /new [model[@effort]]
@@ -7,8 +7,8 @@ Commands:
 
 Targets:
   agents-file         config-dir          config-file
-  home-dir            scratch-dir         session-chat
-  session-dir         session-log         skills-dir
+  home-dir            scratch-dir         session-chat-file
+  session-dir         session-log-file    skills-dir
   system-prompt-file  workspace-dir
 
 Snippets:

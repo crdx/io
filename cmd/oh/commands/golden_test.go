@@ -23,6 +23,7 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		{prefix: "/", steps: 6},
 		{prefix: "/c", steps: 1},
 		{prefix: "/copy ", steps: 3},
+		{prefix: "/copy l", steps: 1},
 		{prefix: "/edit ", steps: 3},
 		{prefix: "/open ", steps: 11},
 		{prefix: "//", steps: 2},

@@ -1247,6 +1247,28 @@ func TestRestoringAConversationRestoresStateBeforeReturning(t *testing.T) {
 	}
 }
 
+func TestLastMessageIsTheMostRecentModelMessage(t *testing.T) {
+	self := &App{events: []agent.Event{
+		{Kind: agent.ModelMessageEvent, Text: "first answer"},
+		{Kind: agent.UserMessageEvent, Text: "follow up"},
+		{Kind: agent.ModelMessageEvent, Text: "latest answer"},
+		{Kind: agent.HarnessMessageEvent, Text: "saved"},
+	}}
+
+	message, found := self.getLastMessage()
+	if !found || message != "latest answer" {
+		t.Errorf("got %q and %t", message, found)
+	}
+}
+
+func TestLastMessageIsUnavailableBeforeAModelMessage(t *testing.T) {
+	self := &App{events: []agent.Event{{Kind: agent.UserMessageEvent, Text: "hello"}}}
+
+	if message, found := self.getLastMessage(); found || message != "" {
+		t.Errorf("got %q and %t", message, found)
+	}
+}
+
 func TestReplayingSaysTheWholeConversationAgain(t *testing.T) {
 	var screenOutput bytes.Buffer
 
