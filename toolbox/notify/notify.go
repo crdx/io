@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"crdx.org/io/internal/stop"
 	"crdx.org/io/tool"
 )
 
@@ -108,7 +109,7 @@ func run(ctx context.Context, args Args) (string, error) {
 
 	if err := command.Run(); err != nil {
 		if ctx.Err() != nil {
-			return "", ctx.Err()
+			return "", stop.Error(ctx, "the notification")
 		}
 
 		return "", fmt.Errorf("could not notify the user: %w", err)

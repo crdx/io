@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"crdx.org/io/internal/stop"
 	"crdx.org/io/toolbox/notify"
 )
 
@@ -198,13 +199,16 @@ func TestCancelledNotificationStopsNotifySend(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	ctx, cancel := context.WithCancel(t.Context())
-	time.AfterFunc(100*time.Millisecond, cancel)
+	ctx, cancel := context.WithCancelCause(t.Context())
+	time.AfterFunc(100*time.Millisecond, func() { cancel(stop.Because("the user sent another message")) })
 
 	startedAt := time.Now()
 	_, err = call.Exec(ctx)
 	if !errors.Is(err, context.Canceled) {
 		t.Errorf("expected context cancellation, got %v", err)
+	}
+	if want := "the notification was stopped because the user sent another message"; err.Error() != want {
+		t.Errorf("got %q, want %q", err.Error(), want)
 	}
 	if took := time.Since(startedAt); took > 2*time.Second {
 		t.Errorf("expected notify-send to stop promptly, took %s", took)

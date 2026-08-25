@@ -1,0 +1,111 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+read both of those files
+```
+
+## Tool call
+
+> 2001-01-01T00:00:01Z
+
+- **ID:** `call_1`
+- **Name:** `read`
+- **Read only:** `true`
+
+**Arguments**
+
+```json
+{"path":"one.txt"}
+```
+
+**Subject**
+
+```
+one.txt
+```
+
+## Tool call
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call_2`
+- **Name:** `read`
+- **Read only:** `true`
+
+**Arguments**
+
+```json
+{"path":"two.txt"}
+```
+
+**Subject**
+
+```
+two.txt
+```
+
+## Tool result
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call_1`
+- **Name:** `read`
+- **Status:** `success`
+
+**Stats**
+
+```json
+{"kind":"read","lines":1,"bytes":4,"total_bytes":4}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+one
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Tool result
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `call_2`
+- **Name:** `read`
+- **Status:** `error`
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+the call was cancelled because the user pressed escape
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Interrupted
+
+> 2001-01-01T00:00:05Z
+
+The turn was interrupted.
+
+## User
+
+> 2001-01-01T00:00:06Z
+
+```
+one was all I needed
+```
+
+

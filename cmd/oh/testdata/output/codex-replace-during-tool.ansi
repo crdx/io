@@ -1,0 +1,17 @@
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m send another message while the tool is working                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e[38;2;207;173;0mwork\e[0m \e[38;2;192;128;80mwork\e[0m\r\e[K\e[38;2;207;173;0mwork\e[0m \e[38;2;192;128;80mwork\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mthe call was stopped after 3s because the user sent another message\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m stop that and read the file instead                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\r\e[KReading it instead.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m why did you stop the first one                                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KYou sent another message while it was running.\e[?25h\e[?2026l\r

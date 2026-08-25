@@ -1,0 +1,20 @@
+{"kind":"head","version":7,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"high","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"user_message","text":"send another message while the tool is working"}}
+{"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"call-1","name":"work","arguments":"{}"}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"the call was stopped after 3s because the user sent another message","id":"call-1","name":"work","status":"error","stats":{"kind":"output","lines":1,"bytes":67,"total_bytes":67}}}
+{"kind":"event","event":{"kind":"interruption"}}
+{"kind":"item","payload":{"role":"user","content":"send another message while the tool is working"}}
+{"kind":"item","payload":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":"{}"}}
+{"kind":"item","payload":{"type":"function_call_output","call_id":"call-1","output":"the call was stopped after 3s because the user sent another message"}}
+{"kind":"turn_completion"}
+{"kind":"event","event":{"kind":"user_message","text":"stop that and read the file instead"}}
+{"kind":"event","event":{"kind":"model_message","text":"Reading it instead."}}
+{"kind":"item","payload":{"role":"user","content":"The previous turn was stopped before it finished because the user sent another message."}}
+{"kind":"item","payload":{"role":"user","content":"stop that and read the file instead"}}
+{"kind":"item","payload":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Reading it instead."}]}}
+{"kind":"turn_completion"}
+{"kind":"event","event":{"kind":"user_message","text":"why did you stop the first one"}}
+{"kind":"event","event":{"kind":"model_message","text":"You sent another message while it was running."}}
+{"kind":"item","payload":{"role":"user","content":"why did you stop the first one"}}
+{"kind":"item","payload":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"You sent another message while it was running."}]}}
+{"kind":"turn_completion"}

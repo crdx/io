@@ -30,6 +30,7 @@ import (
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/stop"
 )
 
 type SessionLogger = record.Session
@@ -208,7 +209,7 @@ func (self *App) isTransitionRequested() bool {
 func (self *App) requestTransition(transition cycle.Transition) error {
 	self.transition = transition
 	if self.currentTurn.Running() {
-		self.interruptTurn()
+		self.interruptTurn(transitionReason)
 	}
 	return nil
 }
@@ -270,7 +271,7 @@ func (self *App) toggleCap(whichCaps caps.Set) {
 
 	if self.currentTurn.Running() {
 		self.queuedTurn.MarkModeChange()
-		self.interruptTurn()
+		self.interruptTurn(modeReason)
 	}
 }
 
@@ -366,21 +367,28 @@ func (self *App) recordModeEvent(event agent.Event) {
 	self.showStorageWarnings()
 }
 
+const (
+	escapeReason     = "the user pressed escape"
+	replacedReason   = "the user sent another message"
+	modeReason       = "the user changed what the harness is allowed to do"
+	transitionReason = "the session is being closed"
+)
+
 func (self *App) cancelTurn() {
 	if self.currentTurn.Cancelled() {
 		self.queuedTurn.Clear()
 	}
 
-	self.interruptTurn()
+	self.interruptTurn(escapeReason)
 }
 
 func (self *App) replaceTurn(message string) {
 	self.queuedTurn.Replace(message)
-	self.interruptTurn()
+	self.interruptTurn(replacedReason)
 }
 
-func (self *App) interruptTurn() {
-	self.currentTurn.Interrupt()
+func (self *App) interruptTurn(reason string) {
+	self.currentTurn.Interrupt(stop.Because(reason))
 }
 
 func (self *App) show(editor *edit.Input) {
@@ -578,8 +586,12 @@ func (self *App) start(message string) {
 	self.settleMode()
 	self.metrics.BeginTurn()
 
-	if fyi := self.mode.Inject(); fyi != "" {
-		self.agent.FYI(fyi)
+	notes := slices.DeleteFunc(
+		[]string{self.interruptionNote(), self.mode.Inject()},
+		func(note string) bool { return note == "" },
+	)
+	if len(notes) > 0 {
+		self.agent.FYI(strings.Join(notes, " "))
 	}
 
 	self.currentTurn = Turn{
@@ -588,6 +600,19 @@ func (self *App) start(message string) {
 	}
 
 	self.screen.ReportProgress(true)
+}
+
+func (self *App) interruptionNote() string {
+	if !self.currentTurn.Cancelled() {
+		return ""
+	}
+
+	note := "The previous turn was stopped before it finished"
+	if reason := self.currentTurn.Reason(); reason != nil {
+		note += " because " + reason.Error()
+	}
+
+	return note + "."
 }
 
 func (self *App) takeTurn(turnEvent TurnEvent) {

@@ -1,0 +1,40 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "high"
+
+[[tool]]
+name = "work"
+blocks = true
+stopped-output = "the call was stopped after 3s because the user sent another message"
+
+[first]
+prompt = "send another message while the tool is working"
+replace-after-tool-request = "stop that and read the file instead"
+is-cancelled = true
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_item.added","item":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":""}}''',
+    '''{"type":"response.function_call_arguments.done","item_id":"call-item-1","arguments":"{}"}''',
+    '''{"type":"response.output_item.done","item":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":"{}"}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Reading it instead."}''',
+    '''{"type":"response.output_text.done","text":"Reading it instead."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Reading it instead."}]}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]
+
+[resume]
+prompt = "why did you stop the first one"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"You sent another message while it was running."}''',
+    '''{"type":"response.output_text.done","text":"You sent another message while it was running."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"You sent another message while it was running."}]}}''',
+    '''{"type":"response.completed"}''',
+]

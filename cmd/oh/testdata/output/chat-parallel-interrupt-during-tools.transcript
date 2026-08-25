@@ -1,0 +1,138 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+call two tools and interrupt while the second is working
+```
+
+## Tool call
+
+> 2001-01-01T00:00:01Z
+
+- **ID:** `call-1`
+- **Name:** `alpha`
+- **Read only:** `false`
+
+**Arguments**
+
+```json
+{}
+```
+
+**Subject**
+
+```
+alpha
+```
+
+## Tool call
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call-2`
+- **Name:** `beta`
+- **Read only:** `false`
+
+**Arguments**
+
+```json
+{}
+```
+
+**Subject**
+
+```
+beta
+```
+
+## State
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call-1`
+- **Name:** `alpha-count`
+
+**State**
+
+```json
+1
+```
+
+## Tool result
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `call-1`
+- **Name:** `alpha`
+- **Status:** `success`
+- **Duration:** `0s`
+
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":12,"total_bytes":12}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+alpha result
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Tool result
+
+> 2001-01-01T00:00:05Z
+
+- **ID:** `call-2`
+- **Name:** `beta`
+- **Status:** `error`
+- **Duration:** `0s`
+
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":20,"total_bytes":20}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+the tool was stopped
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Interrupted
+
+> 2001-01-01T00:00:06Z
+
+The turn was interrupted.
+
+## User
+
+> 2001-01-01T00:00:07Z
+
+```
+what happened to the second one
+```
+
+## Assistant
+
+> 2001-01-01T00:00:08Z
+
+```
+It never finished.
+```
+

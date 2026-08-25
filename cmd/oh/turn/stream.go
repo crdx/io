@@ -16,23 +16,24 @@ type State struct {
 	Running    bool
 	Cancelled  bool
 	Err        error
+	Reason     error
 	StartedAt  time.Time
 	FinishedAt time.Time
 }
 
 type Stream struct {
 	events chan Event
-	cancel context.CancelFunc
+	cancel context.CancelCauseFunc
 	state  State
 }
 
 func Start(assistant *agent.Agent, message string) *Stream {
-	streamContext, cancel := context.WithCancel(context.Background())
+	streamContext, cancel := context.WithCancelCause(context.Background())
 	stream := Adopt(make(chan Event), cancel, State{Running: true, StartedAt: time.Now()})
 
 	go func() {
 		defer close(stream.events)
-		defer cancel()
+		defer cancel(nil)
 		for update, err := range assistant.Stream(streamContext, message) {
 			stream.events <- Event{Update: update, Err: err}
 			if err != nil {
@@ -43,7 +44,7 @@ func Start(assistant *agent.Agent, message string) *Stream {
 	return stream
 }
 
-func Adopt(events chan Event, cancel context.CancelFunc, state State) *Stream {
+func Adopt(events chan Event, cancel context.CancelCauseFunc, state State) *Stream {
 	return &Stream{events: events, cancel: cancel, state: state}
 }
 
@@ -74,13 +75,21 @@ func (self *Stream) Elapsed() (bool, time.Duration, bool) {
 	return false, self.state.FinishedAt.Sub(self.state.StartedAt), true
 }
 
-func (self *Stream) Interrupt() bool {
+func (self *Stream) Interrupt(reason error) bool {
 	if !self.Running() {
 		return false
 	}
 	self.state.Cancelled = true
-	self.cancel()
+	self.state.Reason = reason
+	self.cancel(reason)
 	return true
+}
+
+func (self *Stream) Reason() error {
+	if self == nil {
+		return nil
+	}
+	return self.state.Reason
 }
 
 func (self *Stream) Observe(event Event) bool {

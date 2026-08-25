@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/stop"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 )
@@ -119,7 +120,7 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.Stats, e
 	waitErr := command.Wait()
 
 	if ctx.Err() != nil {
-		return "", tool.Stats{}, ctx.Err()
+		return "", tool.Stats{}, stop.Error(ctx, "the search")
 	}
 	if readErr != nil {
 		return "", tool.Stats{}, fmt.Errorf("could not read ripgrep output: %w", readErr)

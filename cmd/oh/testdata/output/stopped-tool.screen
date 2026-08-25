@@ -1,0 +1,190 @@
+=== narrow ===
+
+ build it and tell me what broke
+
+
+Building now.
+
+$ just… ✗ 3L ~100t 0s 11s 40M compili…
+
+
+ leave it, the build is broken anyway
+
+
+Left alone.
+=== one column ===
+
+
+b
+
+u
+
+i
+
+l
+
+d
+
+i
+
+t
+
+a
+
+n
+
+d
+
+t
+
+e
+
+l
+
+l
+
+m
+
+e
+
+w
+
+h
+
+a
+
+t
+
+b
+
+r
+
+o
+
+k
+
+e
+
+
+B
+u
+i
+l
+d
+i
+n
+g
+n
+o
+w
+.
+
+
+
+
+
+l
+
+e
+
+a
+
+v
+
+e
+
+i
+
+t
+
+,
+
+t
+
+h
+
+e
+
+b
+
+u
+
+i
+
+l
+
+d
+
+i
+
+s
+
+b
+
+r
+
+o
+
+k
+
+e
+
+n
+
+a
+
+n
+
+y
+
+w
+
+a
+
+y
+
+
+L
+e
+f
+t
+a
+l
+o
+n
+e
+.
+=== tiny ===
+
+ build it
+ and tell me
+ what broke
+
+
+Building
+now.
+
+$ … ✗ com…
+
+
+ leave it,
+ the build
+ is broken
+ anyway
+
+
+Left alone.
+=== wide ===
+
+ build it and tell me what broke
+
+
+Building now.
+
+$ just build ✗ 3L ~100t 0s 11s 40M compiling agent compiling toolbox note: the command was stoppe…
+
+
+ leave it, the build is broken anyway
+
+
+Left alone.

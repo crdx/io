@@ -1,0 +1,113 @@
+=== narrow ===
+
+ read both of those files
+
+
+read one.txt ✓ 1L ~1t
+read two.txt ✗ the call was cancelled…
+
+
+ one was all I needed
+=== one column ===
+
+
+r
+
+e
+
+a
+
+d
+
+b
+
+o
+
+t
+
+h
+
+o
+
+f
+
+t
+
+h
+
+o
+
+s
+
+e
+
+f
+
+i
+
+l
+
+e
+
+s
+
+
+
+
+
+
+
+o
+
+n
+
+e
+
+w
+
+a
+
+s
+
+a
+
+l
+
+l
+
+I
+
+n
+
+e
+
+e
+
+d
+
+e
+
+d
+=== tiny ===
+
+ read both
+ of those
+ files
+
+
+… ✓ 1L ~1t
+re… ✗ the…
+
+
+ one was all
+ I needed
+=== wide ===
+
+ read both of those files
+
+
+read one.txt ✓ 1L ~1t
+read two.txt ✗ the call was cancelled because the user pressed escape
+
+
+ one was all I needed

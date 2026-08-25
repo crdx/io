@@ -1,0 +1,12 @@
+
+ call two tools and interrupt while the second is working
+
+
+alpha alpha ✓ 1L ~3t
+beta beta ✗ 1L ~5t the tool was stopped
+
+
+ what happened to the second one
+
+
+It never finished.

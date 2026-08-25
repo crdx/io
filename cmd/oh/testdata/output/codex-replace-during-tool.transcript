@@ -1,0 +1,98 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+send another message while the tool is working
+```
+
+## Tool call
+
+> 2001-01-01T00:00:01Z
+
+- **ID:** `call-1`
+- **Name:** `work`
+- **Read only:** `false`
+
+**Arguments**
+
+```json
+{}
+```
+
+**Subject**
+
+```
+work
+```
+
+## Tool result
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call-1`
+- **Name:** `work`
+- **Status:** `error`
+- **Duration:** `0s`
+
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":67,"total_bytes":67}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+the call was stopped after 3s because the user sent another message
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Interrupted
+
+> 2001-01-01T00:00:03Z
+
+The turn was interrupted.
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+stop that and read the file instead
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Reading it instead.
+```
+
+## User
+
+> 2001-01-01T00:00:06Z
+
+```
+why did you stop the first one
+```
+
+## Assistant
+
+> 2001-01-01T00:00:07Z
+
+```
+You sent another message while it was running.
+```
+

@@ -13,6 +13,9 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"crdx.org/io/internal/stop"
+	"crdx.org/io/internal/util"
 )
 
 const (
@@ -179,6 +182,8 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 
 	var output bytes.Buffer
 
+	startedAt := time.Now()
+
 	stub := exec.CommandContext(ctx, executable)
 	stub.Dir = directory
 	stub.Stdout = &output
@@ -214,14 +219,8 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 		}
 	}
 
-	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-		return result, fmt.Errorf(
-			"the command did not finish within %s", policy.Timeout,
-		)
-	}
-
 	if ctx.Err() != nil {
-		return result, errors.New("the command was stopped")
+		return stoppedResult(ctx, policy, result, startedAt)
 	}
 
 	var exitError *exec.ExitError
@@ -251,4 +250,16 @@ func validate(ctx context.Context, policy Policy) error {
 	}
 
 	return Supported(ctx, policy)
+}
+
+func stoppedResult(ctx context.Context, policy Policy, result Result, startedAt time.Time) (Result, error) {
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return result, fmt.Errorf("the command did not finish within %s", policy.Timeout)
+	}
+
+	return result, fmt.Errorf(
+		"the command was stopped after %s%s",
+		util.CompactDuration(time.Since(startedAt).Round(100*time.Millisecond)),
+		stop.Phrase(ctx),
+	)
 }

@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 	"unicode"
 
 	"golang.org/x/sys/unix"
@@ -381,6 +382,8 @@ func (self *Processes) Run(
 		return Run(ctx, directory, command, policy)
 	}
 
+	startedAt := time.Now()
+
 	if err := stub.Start(); err != nil {
 		self.mutex.Unlock()
 		_ = outputWrite.Close()
@@ -438,7 +441,7 @@ func (self *Processes) Run(
 		<-process.doneSignal
 		<-outputDone
 		result := Result{Output: output.String()}
-		return stoppedResult(ctx, policy, result)
+		return stoppedResult(ctx, policy, result, startedAt)
 	}
 
 	select {
@@ -454,7 +457,7 @@ func (self *Processes) Run(
 		<-outputDone
 		result := got.Result
 		result.Output = output.String()
-		return stoppedResult(ctx, policy, result)
+		return stoppedResult(ctx, policy, result, startedAt)
 	}
 
 	result := got.Result
@@ -471,11 +474,4 @@ func (self *Processes) Run(
 	}
 
 	return result, nil
-}
-
-func stoppedResult(ctx context.Context, policy Policy, result Result) (Result, error) {
-	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-		return result, fmt.Errorf("the command did not finish within %s", policy.Timeout)
-	}
-	return result, errors.New("the command was stopped")
 }

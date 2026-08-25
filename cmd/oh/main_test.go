@@ -79,6 +79,7 @@ import (
 	"crdx.org/io/internal/req"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sim"
+	"crdx.org/io/internal/stop"
 	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/chat"
@@ -115,7 +116,7 @@ func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 
 	stopped := false
 
-	self.currentTurn = Turn{Stream: testTurnStream(nil, func() { stopped = true }, turn.State{Running: true})}
+	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) { stopped = true }, turn.State{Running: true})}
 
 	if !self.apply(editor, nil, keypress) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
@@ -170,7 +171,7 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 }
 
 func TestAcceptedInputCanImmediatelyBeRecalled(t *testing.T) {
-	self := &App{currentTurn: Turn{Stream: testTurnStream(nil, func() {}, turn.State{Running: true})}}
+	self := &App{currentTurn: Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true})}}
 	history := edit.NewHistory("", historyLimit)
 	editor := edit.NewInput(history)
 
@@ -360,7 +361,7 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 		}
 	}
 
-	self.interruptTurn()
+	self.interruptTurn(escapeReason)
 
 	for report := range events {
 		self.takeTurn(report)
@@ -381,7 +382,7 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 
 func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) {
 	self := &App{
-		currentTurn: Turn{Stream: testTurnStream(make(chan TurnEvent), func() {}, turn.State{Running: true})},
+		currentTurn: Turn{Stream: testTurnStream(make(chan TurnEvent), func(error) {}, turn.State{Running: true})},
 	}
 	history := edit.NewHistory("", historyLimit)
 	editor := edit.NewInput(history)
@@ -410,7 +411,7 @@ func TestTheLatestOfTwoRapidReplacementsWins(t *testing.T) {
 	cancellations := 0
 	self := &App{
 		currentTurn: Turn{
-			Stream: testTurnStream(nil, func() { cancellations++ }, turn.State{Running: true}),
+			Stream: testTurnStream(nil, func(error) { cancellations++ }, turn.State{Running: true}),
 		},
 	}
 	history := edit.NewHistory("", historyLimit)
@@ -571,7 +572,7 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 	}
 
 	self.start("first")
-	self.interruptTurn()
+	self.interruptTurn(escapeReason)
 
 	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
@@ -638,7 +639,7 @@ func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
 
 	stopped := false
 
-	self.currentTurn = Turn{Stream: testTurnStream(nil, func() { stopped = true }, turn.State{Running: true})}
+	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) { stopped = true }, turn.State{Running: true})}
 
 	if !self.apply(editor, nil, key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
@@ -665,7 +666,7 @@ func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			self := &App{
-				currentTurn: Turn{Stream: testTurnStream(nil, func() {}, turn.State{Running: true, Cancelled: test.isCancelled})},
+				currentTurn: Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true, Cancelled: test.isCancelled})},
 			}
 			self.queuedTurn.Replace("later")
 			self.queuedTurn.MarkModeChange()
@@ -1623,7 +1624,7 @@ func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
 
 	self.start("are you there")
 	self.currentTurn.SetCancelled(true)
-	self.currentTurn.Interrupt()
+	self.currentTurn.Interrupt(stop.Because(escapeReason))
 
 	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
@@ -4518,7 +4519,7 @@ func TestSnippetKeepsItsInvocationInHistoryAndQueuesItsRenderedPrompt(t *testing
 	self.commands = fixtureSnippetRegistry(t, map[string]string{
 		"add": "Add the following:\n\n{{ .Arg }}",
 	})
-	self.currentTurn = Turn{Stream: testTurnStream(nil, func() {}, turn.State{Running: true})}
+	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true})}
 
 	historyPath := filepath.Join(t.TempDir(), "history")
 	history := edit.NewHistory(historyPath, historyLimit)
@@ -4864,6 +4865,9 @@ type sessionGoldenTurn struct {
 	CancelAfterReasoningDelta int                     `toml:"cancel-after-reasoning-delta"`
 	CancelAfterReasoningEvent int                     `toml:"cancel-after-reasoning-event"`
 	CancelAfterMessageDelta   int                     `toml:"cancel-after-message-delta"`
+	CancelAfterToolRequest    int                     `toml:"cancel-after-tool-request"`
+	ReplaceAfterToolRequest   string                  `toml:"replace-after-tool-request"`
+	ToggleAfterToolRequest    string                  `toml:"toggle-after-tool-request"`
 }
 
 type sessionGoldenTool struct {
@@ -4873,6 +4877,8 @@ type sessionGoldenTool struct {
 	ShellWithheld bool     `toml:"shell-withheld"`
 	WebWithheld   bool     `toml:"web-withheld"`
 	WebAnswer     string   `toml:"web-answer"`
+	Blocks        bool     `toml:"blocks"`
+	StoppedOutput string   `toml:"stopped-output"`
 }
 
 type sessionGoldenScenario struct {
@@ -5012,6 +5018,11 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 			continue
 		}
 
+		if specification.Blocks {
+			tools = append(tools, newSessionGoldenBlockingTool(specification))
+			continue
+		}
+
 		callCount := 0
 		builder := tool.Implement(
 			tool.Definition{Name: specification.Name, Description: "A deterministic scenario tool."},
@@ -5037,6 +5048,18 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 		}))
 	}
 	return tools
+}
+
+var errSessionGoldenToolStopped = errors.New("the tool was stopped")
+
+func newSessionGoldenBlockingTool(specification sessionGoldenTool) tool.Tool {
+	return tool.Implement(
+		tool.Definition{Name: specification.Name, Description: "A scenario tool that blocks."},
+		func(struct{}) (string, string) { return specification.Name, "" },
+	).Run(func(ctx context.Context, _ struct{}) (tool.ToolCallResult, error) {
+		<-ctx.Done()
+		return tool.ToolCallResult{Output: specification.StoppedOutput}, errSessionGoldenToolStopped
+	})
 }
 
 type sessionGoldenSearcher struct {
@@ -5169,6 +5192,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		screen:   output.NewTerminalOfSize(&firstScreenOutput, replayColumns, replayLines),
 		recorder: record.New(log),
 	}
+	settleSessionGoldenMode(firstHarness)
 	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
 	runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
 
@@ -5206,6 +5230,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		recorder: resumedRecorder,
 		events:   slices.Clone(storedSession.Events),
 	}
+	settleSessionGoldenMode(resumedHarness)
 	resumedHarness.currentTurn = Turn{Stream: testRunningTurnStream()}
 	resumedHarness.replay()
 	requireSameVisibleScreen(
@@ -5303,6 +5328,13 @@ func requireSameVisibleScreen(t *testing.T, description string, firstOutput stri
 	}
 }
 
+func settleSessionGoldenMode(testHarness *App) {
+	mode := caps.NewMode(caps.All())
+	_ = mode.Inject()
+	testHarness.mode = mode
+	testHarness.settledCaps = mode.Current()
+}
+
 func runSessionGoldenTurn(
 	t *testing.T,
 	testHarness *App,
@@ -5312,17 +5344,19 @@ func runSessionGoldenTurn(
 	t.Helper()
 
 	var streamContext context.Context
-	var cancel context.CancelFunc
+	var cancel context.CancelCauseFunc
 	if turn.Timeout == "" {
-		streamContext, cancel = context.WithCancel(t.Context())
+		streamContext, cancel = context.WithCancelCause(t.Context())
 	} else {
 		timeout, err := time.ParseDuration(turn.Timeout)
 		if err != nil {
 			t.Fatal(err)
 		}
-		streamContext, cancel = context.WithTimeout(t.Context(), timeout)
+		timed, stopTimer := context.WithTimeout(t.Context(), timeout)
+		defer stopTimer()
+		streamContext, cancel = context.WithCancelCause(timed)
 	}
-	defer cancel()
+	defer cancel(nil)
 	testHarness.currentTurn.Stream = testRunningTurnStreamWithCancel(cancel)
 	editor := edit.NewInput(nil)
 	interruptWithEscape := func() {
@@ -5334,7 +5368,7 @@ func runSessionGoldenTurn(
 	go func() {
 		select {
 		case <-cancelSignals:
-			cancel()
+			cancel(nil)
 		case <-streamContext.Done():
 		}
 	}()
@@ -5342,6 +5376,7 @@ func runSessionGoldenTurn(
 	reasoningDeltas := 0
 	reasoningEvents := 0
 	messageDeltas := 0
+	toolRequests := 0
 	for update, streamError := range testHarness.agent.Stream(streamContext, turn.Prompt) {
 		testHarness.takeTurn(TurnEvent{Update: update, Err: streamError})
 		if update.Delta != nil {
@@ -5364,9 +5399,32 @@ func runSessionGoldenTurn(
 				interruptWithEscape()
 			}
 		}
+		if update.Event != nil && update.Event.Kind == agent.ToolCallRequestEvent {
+			toolRequests++
+			if toolRequests == turn.CancelAfterToolRequest {
+				interruptWithEscape()
+			}
+			if toolRequests == 1 && turn.ReplaceAfterToolRequest != "" {
+				testHarness.replaceTurn(turn.ReplaceAfterToolRequest)
+			}
+			if toolRequests == 1 && turn.ToggleAfterToolRequest != "" {
+				toggled, err := caps.Parse(turn.ToggleAfterToolRequest)
+				if err != nil {
+					t.Fatal(err)
+				}
+				testHarness.toggleCap(toggled)
+			}
+		}
 	}
 	testHarness.currentTurn.SetCancelled(turn.IsCancelled)
 	testHarness.finish()
+
+	for testHarness.currentTurn.Running() {
+		for event := range testHarness.currentTurn.Events() {
+			testHarness.takeTurn(event)
+		}
+		testHarness.finish()
+	}
 }
 
 func canonicalSessionMeta(t *testing.T, directory string, name string) string {
@@ -5696,16 +5754,16 @@ func testTimedTurnStream(isRunning bool, startedAt time.Time, finishedAt time.Ti
 	return testTurnStream(nil, nil, turn.State{Running: isRunning, StartedAt: startedAt, FinishedAt: finishedAt})
 }
 
-func testRunningTurnStreamWithCancel(cancel context.CancelFunc) *turn.Stream {
+func testRunningTurnStreamWithCancel(cancel context.CancelCauseFunc) *turn.Stream {
 	return testTurnStream(nil, cancel, turn.State{Running: true})
 }
 
-func testTurnStream(events chan TurnEvent, cancel context.CancelFunc, state turn.State) *turn.Stream {
+func testTurnStream(events chan TurnEvent, cancel context.CancelCauseFunc, state turn.State) *turn.Stream {
 	if events == nil {
 		events = make(chan TurnEvent)
 	}
 	if cancel == nil {
-		cancel = func() {}
+		cancel = func(error) {}
 	}
 	if state.StartedAt.IsZero() {
 		state.StartedAt = time.Now()
@@ -6126,5 +6184,58 @@ func settleUsage(
 		}
 
 		drawn = redrawn
+	}
+}
+
+func TestEveryWayOfStoppingATurnSaysWhy(t *testing.T) {
+	tests := map[string]struct {
+		stopTurn func(*App)
+		want     string
+	}{
+		"escape": {
+			stopTurn: func(self *App) { self.cancelTurn() },
+			want:     "the user pressed escape",
+		},
+		"another message": {
+			stopTurn: func(self *App) { self.replaceTurn("do this instead") },
+			want:     "the user sent another message",
+		},
+		"a capability change": {
+			stopTurn: func(self *App) { self.toggleCap(caps.Git) },
+			want:     "the user changed what the harness is allowed to do",
+		},
+		"leaving the session": {
+			stopTurn: func(self *App) {
+				if err := self.requestTransition(cycle.Transition{Kind: cycle.NewSession}); err != nil {
+					t.Fatal(err)
+				}
+			},
+			want: "the session is being closed",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			var cause error
+
+			self := &App{
+				screen:   output.New(&bytes.Buffer{}),
+				mode:     caps.NewMode(caps.Read),
+				recorder: record.New(testLog(t)),
+			}
+			self.currentTurn = Turn{
+				Stream:  testTurnStream(nil, func(err error) { cause = err }, turn.State{Running: true}),
+				painter: self.newPainter(true),
+			}
+
+			test.stopTurn(self)
+
+			ctx, cancel := context.WithCancelCause(t.Context())
+			cancel(cause)
+
+			if got := stop.Sentence(ctx); got != test.want {
+				t.Errorf("got %q, want the turn stopped because %q", got, test.want)
+			}
+		})
 	}
 }

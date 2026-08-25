@@ -2,9 +2,11 @@ package bash_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -12,6 +14,7 @@ import (
 
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/stop"
 	"crdx.org/io/tool"
 	"crdx.org/io/toolbox/bash"
 )
@@ -413,6 +416,67 @@ func TestTheToolAlwaysSaysItMayChangeSomething(t *testing.T) {
 
 	if shell.ReadOnly() {
 		t.Errorf("a shell may change something whatever the policy of the moment grants")
+	}
+}
+
+func TestAStoppedCommandKeepsWhatItPrintedAndSaysWhyItEnded(t *testing.T) {
+	root, directory := testRoot(t)
+
+	policy := sandbox.Policy{Write: []string{directory}, Env: []string{"PATH"}}
+	if err := sandbox.Supported(t.Context(), bash.ProtectedPolicy(policy)); err != nil {
+		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	}
+
+	tests := map[string]struct {
+		command string
+		want    *regexp.Regexp
+	}{
+		"a command that printed something": {
+			command: "echo working; sleep 60",
+			want: regexp.MustCompile(
+				`^working\nnote: the command was stopped after [0-9.]+s ` +
+					`because the user pressed escape\.$`,
+			),
+		},
+		"a command that printed nothing": {
+			command: "sleep 60",
+			want:    regexp.MustCompile(`^$`),
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			ctx, cancel := context.WithCancelCause(t.Context())
+			defer cancel(nil)
+
+			arguments, err := json.Marshal(bash.Args{Command: test.command})
+			if err != nil {
+				t.Fatal(err)
+			}
+			call, err := fixedShell(root, func() sandbox.Policy { return policy }).Parse(string(arguments))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			time.AfterFunc(300*time.Millisecond, func() {
+				cancel(stop.Because("the user pressed escape"))
+			})
+
+			result, err := call.Exec(ctx)
+
+			if err == nil || !strings.HasPrefix(err.Error(), "the command was stopped after ") {
+				t.Errorf("got error %v, want a stop that says how long it ran", err)
+			}
+			if !test.want.MatchString(result.Output) {
+				t.Errorf("got output %q, want %s", result.Output, test.want)
+			}
+			if result.Stats.Kind != tool.StatsResources {
+				t.Errorf("got stats %+v, want a stopped command to still report what it used", result.Stats)
+			}
+			if result.Stats.Bytes != int64(len(result.Output)) {
+				t.Errorf("got %d bytes measured, want %d", result.Stats.Bytes, len(result.Output))
+			}
+		})
 	}
 }
 

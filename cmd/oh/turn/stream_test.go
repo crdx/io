@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/stop"
 	"crdx.org/io/tool"
 )
 
@@ -54,8 +55,11 @@ func TestInterruptReachesProvider(t *testing.T) {
 		}}
 		stream := Start(agent.New("", provider, nil), "begin")
 		synctest.Wait()
-		if !stream.Interrupt() || !stream.Cancelled() {
+		if !stream.Interrupt(stop.Because("the user pressed escape")) || !stream.Cancelled() {
 			t.Fatal("stream was not interrupted")
+		}
+		if stream.Reason() == nil || stream.Reason().Error() != "the user pressed escape" {
+			t.Errorf("got reason %v, want the one it was interrupted with", stream.Reason())
 		}
 		for event := range stream.Events() {
 			stream.Observe(event)
@@ -69,7 +73,7 @@ func TestInterruptReachesProvider(t *testing.T) {
 func TestObserveAndExternalState(t *testing.T) {
 	terminalError := errors.New("failed")
 	startedAt := time.Now().Add(-time.Second)
-	stream := Adopt(nil, func() {}, State{Running: true, StartedAt: startedAt})
+	stream := Adopt(nil, func(error) {}, State{Running: true, StartedAt: startedAt})
 	if stream.Observe(Event{Err: terminalError}) || !errors.Is(stream.Error(), terminalError) {
 		t.Error("error was not retained")
 	}

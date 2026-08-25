@@ -195,13 +195,10 @@ func exec(
 		PeakMemory: result.PeakMemory,
 	}
 	if err != nil {
-		return "", stats, err
+		return measured(unfinished(result.Output, err), &stats), stats, err
 	}
 
-	reportText := report(result, policy)
-	stats.Lines = int64(len(strutil.Lines(reportText)))
-	stats.Bytes = int64(len(reportText))
-	stats.TotalBytes = stats.Bytes
+	reportText := measured(report(result, policy), &stats)
 
 	if result.Code != 0 {
 		return reportText, stats, ErrCommandFailed
@@ -212,6 +209,22 @@ func exec(
 
 // ErrCommandFailed marks a nonzero command exit; output is still returned.
 var ErrCommandFailed = errors.New("the command failed")
+
+func measured(reportText string, stats *tool.Stats) string {
+	stats.Lines = int64(len(strutil.Lines(reportText)))
+	stats.Bytes = int64(len(reportText))
+	stats.TotalBytes = stats.Bytes
+
+	return reportText
+}
+
+func unfinished(output string, err error) string {
+	if strings.TrimSpace(output) == "" {
+		return ""
+	}
+
+	return strings.TrimRight(output, "\n") + "\nnote: " + err.Error() + "."
+}
 
 func report(result sandbox.Result, policy sandbox.Policy) string {
 	output := result.Output

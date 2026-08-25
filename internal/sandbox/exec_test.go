@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"crdx.org/io/internal/stop"
 )
 
 func TestOnlyTheNamedEnvironmentIsPassedOn(t *testing.T) {
@@ -132,7 +134,7 @@ func TestACommandStoppedByItsTimeoutSaysSo(t *testing.T) {
 	defer cancel()
 	<-ctx.Done()
 
-	result, err := stoppedResult(ctx, Policy{Timeout: time.Second}, Result{Output: "partial"})
+	result, err := stoppedResult(ctx, Policy{Timeout: time.Second}, Result{Output: "partial"}, time.Now())
 
 	if err == nil || !strings.Contains(err.Error(), "did not finish within 1s") {
 		t.Errorf("got %v, want a complaint about the timeout", err)
@@ -146,9 +148,27 @@ func TestACommandStoppedByItsCallerDoesNotBlameTheTimeout(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
 
-	_, err := stoppedResult(ctx, Policy{Timeout: time.Hour}, Result{})
+	_, err := stoppedResult(ctx, Policy{Timeout: time.Hour}, Result{}, time.Now())
 
-	if err == nil || err.Error() != "the command was stopped" {
+	if err == nil || !strings.HasPrefix(err.Error(), "the command was stopped after ") {
 		t.Errorf("got %v, want a plain stop", err)
+	}
+	if strings.Contains(err.Error(), "because") {
+		t.Errorf("got %v, want no reason where none was given", err)
+	}
+}
+
+func TestACommandStoppedForAReasonRepeatsIt(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	cancel(stop.Because("the user pressed escape"))
+
+	result, err := stoppedResult(ctx, Policy{}, Result{Output: "partial"}, time.Now().Add(-12*time.Second))
+
+	want := "the command was stopped after 12s because the user pressed escape"
+	if err == nil || err.Error() != want {
+		t.Errorf("got %v, want %q", err, want)
+	}
+	if result.Output != "partial" {
+		t.Errorf("got %q, want what the command managed to write", result.Output)
 	}
 }

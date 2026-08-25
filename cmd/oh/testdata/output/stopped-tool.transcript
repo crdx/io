@@ -1,0 +1,93 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+build it and tell me what broke
+```
+
+## Assistant
+
+> 2001-01-01T00:00:01Z
+
+```
+Building now.
+```
+
+## Tool call
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call_1`
+- **Name:** `bash`
+- **Read only:** `false`
+
+**Arguments**
+
+```json
+{"command":"just build"}
+```
+
+**Subject**
+
+```
+just build
+```
+
+## Tool result
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call_1`
+- **Name:** `bash`
+- **Status:** `error`
+
+**Stats**
+
+```json
+{"kind":"resources","cpu_time":11000000000,"peak_memory":41943040,"lines":3,"bytes":96,"total_bytes":96}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+compiling agent
+compiling toolbox
+note: the command was stopped after 12s because the user sent a new message.
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Interrupted
+
+> 2001-01-01T00:00:04Z
+
+The turn was interrupted.
+
+## User
+
+> 2001-01-01T00:00:05Z
+
+```
+leave it, the build is broken anyway
+```
+
+## Assistant
+
+> 2001-01-01T00:00:06Z
+
+```
+Left alone.
+```
+
+

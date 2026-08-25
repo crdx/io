@@ -9,17 +9,15 @@ import (
 	"strings"
 	"time"
 
+	"crdx.org/io/internal/stop"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
 )
 
-// New builds an agent that talks to a provider with a set of tools on offer.
 func New(systemPrompt string, provider Provider, tools []tool.Tool) *Agent {
 	return NewWithEnabledTools(systemPrompt, provider, tools, tools)
 }
 
-// NewWithEnabledTools builds an agent that knows every tool but only offers and executes
-// enabledTools.
 func NewWithEnabledTools(systemPrompt string, provider Provider, tools []tool.Tool, enabledTools []tool.Tool) *Agent {
 	definitions := make([]tool.Definition, len(enabledTools))
 	enabledNames := make(map[string]struct{}, len(enabledTools))
@@ -42,7 +40,6 @@ func NewWithEnabledTools(systemPrompt string, provider Provider, tools []tool.To
 	return &Agent{provider: provider, registeredTools: availableTools, enabledToolNames: enabledNames, owners: stateOwners}
 }
 
-// Dump carries out the provider's append-only conversation state.
 func (self *Agent) Dump() ([]json.RawMessage, error) {
 	state, ok := self.provider.(State)
 	if !ok {
@@ -63,7 +60,6 @@ func (self *Agent) Dump() ([]json.RawMessage, error) {
 	return cloneState(items), nil
 }
 
-// Load replaces the provider's conversation state with items carried in earlier.
 func (self *Agent) Load(items []json.RawMessage) error {
 	state, ok := self.provider.(State)
 	if !ok {
@@ -82,7 +78,6 @@ func cloneState(items []json.RawMessage) []json.RawMessage {
 	return clonedItems
 }
 
-// FYI adds something for the model to read before the next thing it is asked.
 func (self *Agent) FYI(text string) {
 	self.provider.AddUserMessage(text)
 }
@@ -167,7 +162,6 @@ func (self *proseStream) resetText() {
 	self.text.Reset()
 }
 
-// Stream yields a message and every update through its final tool round.
 func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update, error] {
 	return func(yield func(Update, error) bool) {
 		yieldEvent := func(event Event, err error) bool {
@@ -205,7 +199,7 @@ func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update,
 
 			switch {
 			case !listening:
-				self.answer(cancelledResults(reply.Calls))
+				self.answer(cancelledResults(ctx, reply.Calls))
 				return
 			case err != nil:
 				if !yieldUpdates(prose.interrupted()) {
@@ -219,7 +213,7 @@ func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update,
 			}
 
 			if !yieldUpdates(prose.finish(Usage{})) {
-				self.answer(cancelledResults(reply.Calls))
+				self.answer(cancelledResults(ctx, reply.Calls))
 				return
 			}
 
@@ -234,7 +228,6 @@ func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update,
 	}
 }
 
-// Send answers one message the whole way through, and returns everything the model said.
 func (self *Agent) Send(ctx context.Context, message string) (string, error) {
 	var answer strings.Builder
 	var failure error
@@ -253,14 +246,14 @@ func (self *Agent) Send(ctx context.Context, message string) (string, error) {
 	return answer.String(), failure
 }
 
-// CancelledOutput is what a call that never ran hands back.
 const CancelledOutput = "the call was cancelled"
 
-func cancelledResults(calls []ToolCall) []ToolCallResult {
+func cancelledResults(ctx context.Context, calls []ToolCall) []ToolCallResult {
 	results := make([]ToolCallResult, len(calls))
+	output := CancelledOutput + stop.Phrase(ctx)
 
 	for i, call := range calls {
-		results[i] = ToolCallResult{ID: call.ID, Output: CancelledOutput}
+		results[i] = ToolCallResult{ID: call.ID, Output: output}
 	}
 
 	return results
@@ -285,7 +278,7 @@ func (self *Agent) runCalls(
 	usage Usage,
 	yield func(Event, error) bool,
 ) bool {
-	results := cancelledResults(calls)
+	results := cancelledResults(ctx, calls)
 
 	defer func() { self.answer(results) }()
 
@@ -461,7 +454,6 @@ func (self *Agent) runBatch(
 	return listening
 }
 
-// RestoreState replays durable state transitions owned by the available tools.
 func (self *Agent) RestoreState(events []Event) error {
 	for _, event := range events {
 		if event.Kind != StateChangeEvent {
@@ -487,7 +479,6 @@ func (self *Agent) restoreState(event Event) error {
 	return nil
 }
 
-// Tool is the known tool of that name, whether or not it is enabled.
 func (self *Agent) Tool(name string) (tool.Tool, bool) {
 	found, known := self.registeredTools[name]
 	return found, known

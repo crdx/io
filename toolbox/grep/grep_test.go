@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/stop"
 	"crdx.org/io/tool"
 	"crdx.org/io/toolbox/grep"
 )
@@ -207,13 +208,16 @@ func TestACancelledContextStopsTheSearch(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	ctx, cancel := context.WithCancel(t.Context())
-	time.AfterFunc(100*time.Millisecond, cancel)
+	ctx, cancel := context.WithCancelCause(t.Context())
+	time.AfterFunc(100*time.Millisecond, func() { cancel(stop.Because("the user pressed escape")) })
 
 	startedAt := time.Now()
 	_, err = call.Exec(ctx)
 	if !errors.Is(err, context.Canceled) {
 		t.Errorf("expected context cancellation, got %v", err)
+	}
+	if want := "the search was stopped because the user pressed escape"; err.Error() != want {
+		t.Errorf("got %q, want %q", err.Error(), want)
 	}
 	if took := time.Since(startedAt); took > 2*time.Second {
 		t.Errorf("expected the search to stop promptly, took %s", took)
