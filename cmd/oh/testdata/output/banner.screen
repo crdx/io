@@ -43,5 +43,4 @@
 === context usage low ===
 ✧· ─ ?s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ 3% 5K/200K
 === the startup line ===
-New session brave-otter started in 2ms with 4 skills and 2 snippets.
-Context: SYSTEM.md ~200t AGENTS.md ~800t tools ~200t
+Session brave-otter started in 2ms with 4 skills and 2 snippets.

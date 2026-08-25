@@ -1,7 +1,6 @@
 === narrow ===
-New session 000000000000000000000000 sta
-rted in 0s with 0 skills and 0 snippets.
-Context: tools ~600t
+Session 000000000000000000000000 started
+ in 0s with 0 skills and 0 snippets.
 
 
  have a look at that
@@ -27,11 +26,7 @@ landed. Nothing there needs changing to
 make it sticky: the work belongs in the
 output layer instead.
 === one column ===
-N
-e
-w
-
-s
+S
 e
 s
 s
@@ -107,26 +102,6 @@ e
 t
 s
 .
-C
-o
-n
-t
-e
-x
-t
-:
-
-t
-o
-o
-l
-s
-
-~
-6
-0
-0
-t
 
 
 
@@ -501,15 +476,13 @@ a
 d
 .
 === tiny ===
-New session
+Session 0000
 000000000000
-000000000000
- started in
-0s with 0 sk
-ills and 0 s
-nippets.
-Context: too
-ls ~600t
+00000000 sta
+rted in 0s w
+ith 0 skills
+ and 0 snipp
+ets.
 
 
  have a look
@@ -565,8 +538,7 @@ in the
 output layer
 instead.
 === wide ===
-New session 000000000000000000000000 started in 0s with 0 skills and 0 snippets.
-Context: tools ~600t
+Session 000000000000000000000000 started in 0s with 0 skills and 0 snippets.
 
 
  have a look at that

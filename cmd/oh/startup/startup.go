@@ -9,7 +9,6 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/internal/util"
 )
 
 var startedAt = time.Now()
@@ -65,7 +64,7 @@ func FilesOf(files []prompt.File) []File {
 	return kept
 }
 
-// RenderBanner renders the startup summary as a sentence, with the context line below it.
+// RenderBanner renders the startup summary as a sentence.
 func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
 	if resumed {
 		return ""
@@ -73,7 +72,7 @@ func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
 
 	var line strings.Builder
 
-	_, _ = line.WriteString(style.Subtle("New session"))
+	_, _ = line.WriteString(style.Subtle("Session"))
 	if info.Session != "" {
 		_, _ = line.WriteString(style.Subtle(" ") + style.Normal(info.Session))
 	}
@@ -84,47 +83,12 @@ func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
 	_, _ = line.WriteString(style.Normal(fmt.Sprint(info.Snippets)))
 	_, _ = line.WriteString(style.Subtle(" snippets."))
 
-	if context := startupContext(info); context != "" {
-		_, _ = line.WriteString("\n")
-		_, _ = line.WriteString(context)
-	}
-
 	return line.String()
 }
 
 func startupDuration(elapsed time.Duration) string {
 	var field startupLine
 	field.quantity(timeTaken(elapsed), false)
-	return field.String()
-}
-
-func startupContext(info Info) string {
-	if len(info.ContextFiles) == 0 && info.ToolBytes == 0 {
-		return ""
-	}
-
-	var line strings.Builder
-	_, _ = line.WriteString(style.Subtle("Context:"))
-	for _, file := range info.ContextFiles {
-		_, _ = line.WriteString(style.Subtle(" ") + startupContextFile(file))
-	}
-	if info.ToolBytes > 0 {
-		_, _ = line.WriteString(style.Subtle(" tools ") + startupTools(info))
-	}
-	return line.String()
-}
-
-func startupContextFile(file File) string {
-	var field startupLine
-	field.dim(file.Name)
-	field.dim(" ")
-	field.quantity(util.FormatTokenEstimate(file.Bytes, 3), false)
-	return field.String()
-}
-
-func startupTools(info Info) string {
-	var field startupLine
-	field.quantity(util.FormatTokenEstimate(info.ToolBytes, 2), false)
 	return field.String()
 }
 
