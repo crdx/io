@@ -1,0 +1,37 @@
+=== effort fallback ===
+"none"         of {low,high}           -> "low"
+"low"          of {low,high}           -> "low"
+"medium"       of {low,high}           -> "high"
+"high"         of {low,high}           -> "high"
+"max"          of {low,high}           -> "high"
+"unrecognised" of {low,high}           -> "low"
+"none"         of {medium}             -> "medium"
+"low"          of {medium}             -> "medium"
+"medium"       of {medium}             -> "medium"
+"high"         of {medium}             -> "medium"
+"max"          of {medium}             -> "medium"
+"unrecognised" of {medium}             -> "medium"
+"none"         of {none,minimal}       -> "none"
+"low"          of {none,minimal}       -> "minimal"
+"medium"       of {none,minimal}       -> "minimal"
+"high"         of {none,minimal}       -> "minimal"
+"max"          of {none,minimal}       -> "minimal"
+"unrecognised" of {none,minimal}       -> "none"
+"none"         of {xhigh,max}          -> "xhigh"
+"low"          of {xhigh,max}          -> "xhigh"
+"medium"       of {xhigh,max}          -> "xhigh"
+"high"         of {xhigh,max}          -> "xhigh"
+"max"          of {xhigh,max}          -> "max"
+"unrecognised" of {xhigh,max}          -> "xhigh"
+
+=== model globs ===
+""                           new -d /workspace
+"opus"                       new -d /workspace -m anthropic/claude-opus-4-5@high
+"OPUS"                       new -d /workspace -m anthropic/claude-opus-4-5@high
+"anthropic/claude-opus-4-5"  new -d /workspace -m anthropic/claude-opus-4-5@high
+"sonnet"                     new -d /workspace -m anthropic/claude-sonnet-4-5@medium
+"gpt"                        new -d /workspace -m codex/gpt-5.6-sol@high
+"opus@high"                  error: model "opus@high" does not match any known model
+"nope"                       error: model "nope" does not match any known model
+"nonsense"                   error: model "nonsense" does not match any known model
+

@@ -20,7 +20,7 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		prefix string
 		steps  int
 	}{
-		{prefix: "/", steps: 4},
+		{prefix: "/", steps: 5},
 		{prefix: "/c", steps: 2},
 		{prefix: "/copy ", steps: 3},
 		{prefix: "/open ", steps: 5},

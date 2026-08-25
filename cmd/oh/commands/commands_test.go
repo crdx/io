@@ -98,10 +98,16 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 			actions = append(actions, "copy:"+text)
 			return nil
 		},
+		startNewSession: func(modelGlob string) error {
+			actions = append(actions, "new:"+modelGlob)
+			return nil
+		},
 	})
 
 	tests := map[string]string{
 		"/conf":              "edit:" + configPath,
+		"/new":               "new:",
+		"/new sonnet":        "new:sonnet",
 		"/open config-dir":   "open:" + configDirectory,
 		"/open state-dir":    "open:" + stateDirectory,
 		"/open session-dir":  "open:" + sessionDirectory,
@@ -147,6 +153,7 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 	for _, input := range []string{
 		"/conf extra",
 		"/help extra",
+		"/new one two",
 		"/copy session-name extra",
 		"/open unknown",
 	} {

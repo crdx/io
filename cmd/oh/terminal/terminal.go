@@ -2,8 +2,14 @@ package terminal
 
 import (
 	"io"
+	"path/filepath"
 
 	"crdx.org/io/cmd/oh/caps"
+)
+
+const (
+	readOnlyMarker = "⚫"
+	writableMarker = "🟡"
 )
 
 type terminalTitler interface {
@@ -13,13 +19,15 @@ type terminalTitler interface {
 
 // Terminal holds the terminal facilities used by the harness.
 type Terminal struct {
-	title terminalTitler
+	title         terminalTitler
+	workspaceName string
 }
 
 // New builds the terminal facilities over writer.
-func New(writer io.Writer) Terminal {
+func New(writer io.Writer, workspaceDir string) Terminal {
 	return Terminal{
-		title: newTitle(writer),
+		title:         newTitle(writer),
+		workspaceName: filepath.Base(workspaceDir),
 	}
 }
 
@@ -29,20 +37,20 @@ func (self *Terminal) Begin(mode caps.Set) func() {
 		return func() {}
 	}
 
-	return self.title.Begin(titleText(mode))
+	return self.title.Begin(titleText(mode, self.workspaceName))
 }
 
 // SetMode updates terminal facilities that report the current capability mode.
 func (self *Terminal) SetMode(mode caps.Set) {
 	if self.title != nil {
-		self.title.Set(titleText(mode))
+		self.title.Set(titleText(mode, self.workspaceName))
 	}
 }
 
-func titleText(mode caps.Set) string {
+func titleText(mode caps.Set, workspaceName string) string {
 	if mode.Has(caps.Write) {
-		return "[w]"
+		return writableMarker + " " + workspaceName
 	} else {
-		return "[r]"
+		return readOnlyMarker + " " + workspaceName
 	}
 }

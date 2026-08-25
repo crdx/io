@@ -207,6 +207,20 @@ func TestAmbiguousModelSelectionShowsEveryMatch(t *testing.T) {
 	}
 }
 
+func TestAQueryScatteredThroughANameIsReadOnlyWhenGuessingIsAllowed(t *testing.T) {
+	if matches := RankedChoices("gp56", listedModels()); len(matches) != 1 {
+		t.Errorf("expected a loose reading to find the model, got %v", matches)
+	}
+
+	if matches := RankedChoicesWithoutGuessing("gp56", listedModels()); matches != nil {
+		t.Errorf("expected the scattered query to name nothing, got %v", matches)
+	}
+
+	if matches := RankedChoicesWithoutGuessing("sonnet", listedModels()); len(matches) != 1 {
+		t.Errorf("expected a query held within a name to still be read, got %v", matches)
+	}
+}
+
 func TestExactModelSelectionWinsOverFuzzyMatches(t *testing.T) {
 	choices := []Choice{
 		{Provider: opencodeGoProvider, Model: "deepseek-v4", EffortLevels: []string{"high"}},

@@ -90,12 +90,15 @@ func ResolveEffort(name string) string {
 	return name
 }
 
-var matchTiers = []func(candidate string, query string) bool{
+type matcher func(candidate string, query string) bool
+
+var certainMatchTiers = []matcher{
 	func(candidate string, query string) bool { return candidate == query },
 	strings.HasPrefix,
 	strings.Contains,
-	holdsInOrder,
 }
+
+var matchTiers = slices.Concat(certainMatchTiers, []matcher{holdsInOrder})
 
 func matchModel(query string, choices []Choice) (Choice, error) {
 	if len(choices) == 0 {
@@ -119,7 +122,15 @@ func matchModel(query string, choices []Choice) (Choice, error) {
 }
 
 func RankedChoices(query string, choices []Choice) []Choice {
-	for _, matching := range matchTiers {
+	return rankedChoices(query, choices, matchTiers)
+}
+
+func RankedChoicesWithoutGuessing(query string, choices []Choice) []Choice {
+	return rankedChoices(query, choices, certainMatchTiers)
+}
+
+func rankedChoices(query string, choices []Choice, tiers []matcher) []Choice {
+	for _, matching := range tiers {
 		if matches := matchingModels(query, choices, matching); len(matches) > 0 {
 			return matches
 		}
@@ -128,11 +139,7 @@ func RankedChoices(query string, choices []Choice) []Choice {
 	return nil
 }
 
-func matchingModels(
-	query string,
-	choices []Choice,
-	matching func(candidate string, query string) bool,
-) []Choice {
+func matchingModels(query string, choices []Choice, matching matcher) []Choice {
 	query = strings.ToLower(query)
 
 	var matches []Choice

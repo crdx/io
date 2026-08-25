@@ -9,16 +9,20 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/cycle"
+	"crdx.org/io/cmd/oh/dispatch"
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/interaction"
 	"crdx.org/io/cmd/oh/key"
+	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/painter"
-	"crdx.org/io/cmd/oh/recording"
+	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/store"
@@ -28,17 +32,13 @@ import (
 	"crdx.org/io/internal/sandbox"
 )
 
-type SessionLogger = recording.Session
+type SessionLogger = record.Session
 
-func recordSession(session SessionLogger) *recording.Recorder {
-	return recording.New(session)
-}
-
-type Harness struct {
+type App struct {
 	agent              *agent.Agent
 	events             []agent.Event
 	screen             *output.Screen
-	recorder           *recording.Recorder
+	recorder           *record.Recorder
 	processes          *sandbox.Processes
 	segmentLayout      segment.Layout
 	editor             *edit.Input
@@ -54,6 +54,7 @@ type Harness struct {
 	commands   slash.Registry
 	completion slash.Completion
 
+	transition  cycle.Transition
 	queuedTurn  turn.Queue
 	currentTurn Turn
 }
@@ -69,18 +70,18 @@ type TurnEvent = turn.Event
 
 const historyLimit = 1000
 
-func (self *Harness) begin(message string) {
+func (self *App) begin(message string) cycle.Transition {
 	self.settleMode()
 	defer self.settleMode()
 
-	history := edit.NewHistory(historyPath(), historyLimit)
+	history := edit.NewHistory(location.GetHistoryPath(), historyLimit)
 	editor := edit.NewInput(history)
 	self.editor = editor
 
 	restoreTTY, err := tty.Raw(os.Stdin, os.Stdout)
 	if err != nil {
 		self.plainly(history, message)
-		return
+		return self.transition
 	}
 
 	defer restoreTTY()
@@ -94,27 +95,43 @@ func (self *Harness) begin(message string) {
 
 	if message != "" {
 		history.Add(message)
-		if self.handleSlashCommand(message) == ordinaryInput {
+		if self.handleCommand(message) == dispatch.Ordinary {
 			self.start(message)
 		}
+	}
+	if self.isTransitionRequested() {
+		return self.transition
 	}
 
 	interaction.Run(os.Stdin, self.segmentLayout.RefreshInterval(), self.segmentLayout.IdleRefreshInterval(), interaction.Handler{
 		Events: func() <-chan turn.Event { return self.currentTurn.Events() },
-		Key:    func(keypress key.Key) bool { return self.apply(editor, history, keypress) },
+		Key:    func(keypress key.Key) bool { return self.handleKeypressAndShowInput(editor, history, keypress) },
 		Turn:   self.takeTurn,
 		TurnFinished: func() bool {
 			self.finish()
-			return true
+			return !self.isTransitionRequested()
 		},
 		Resize:  self.redraw,
 		Running: func() bool { return self.currentTurn.Running() },
 		Tick:    func() { self.currentTurn.spinnerFrame++ },
 		Draw:    func() { self.show(editor) },
 	})
+
+	return self.transition
 }
 
-func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress key.Key) bool {
+func (self *App) handleKeypressAndShowInput(editor *edit.Input, history *edit.History, keypress key.Key) bool {
+	shouldContinue := true
+	self.screen.Synchronise(func() {
+		shouldContinue = self.apply(editor, history, keypress)
+		if shouldContinue {
+			self.show(editor)
+		}
+	})
+	return shouldContinue
+}
+
+func (self *App) apply(editor *edit.Input, history *edit.History, keypress key.Key) bool {
 	switch keypress.Code {
 	case key.FocusIn:
 		return true
@@ -176,79 +193,52 @@ func (self *Harness) apply(editor *edit.Input, history *edit.History, keypress k
 	case edit.Draw:
 	}
 
-	return true
+	return !self.isTransitionRequested() || self.currentTurn.Running()
 }
 
-type slashInput int
+func (self *App) isTransitionRequested() bool {
+	return self.transition.Kind != cycle.Quit
+}
 
-const sendAnywayHint = "; press alt+enter to send anyway"
-
-const (
-	ordinaryInput slashInput = iota
-	handledCommand
-	rejectedCommand
-)
-
-func (self *Harness) handleSlashCommand(message string) slashInput {
-	invocation, found := self.commands.Find(message)
-	if found {
-		if err := invocation.Command.Run(commandContext{harness: self}, invocation.Arguments); err != nil {
-			message := slash.FormatError(invocation, err)
-			if slash.IsUsageError(err) {
-				message += sendAnywayHint
-				self.notifyFailure(message)
-				return rejectedCommand
-			}
-			self.notifyFailure(message)
-		}
-		return handledCommand
+func (self *App) requestTransition(transition cycle.Transition) error {
+	self.transition = transition
+	if self.currentTurn.Running() {
+		self.interruptTurn()
 	}
+	return nil
+}
 
-	name, isCommand := self.commands.CommandName(message)
-	if !isCommand {
-		return ordinaryInput
+func (self *App) handleCommand(message string) dispatch.Result {
+	result, failure := dispatch.Handle(self.commands, dispatch.Actions{
+		EmitEvent:  self.notify,
+		SendPrompt: self.sendCommandPrompt,
+	}, message)
+	if failure != "" {
+		self.notifyFailure(failure)
 	}
-
-	self.notifyFailure(fmt.Sprintf("Command not found: %s%s", name, sendAnywayHint))
-	return rejectedCommand
+	return result
 }
 
-type commandContext struct {
-	harness *Harness
-}
-
-func (self commandContext) Emit(event agent.Event) {
-	self.harness.notify(event)
-}
-
-func (self commandContext) Send(message string) {
-	if self.harness.currentTurn.Running() {
-		self.harness.replaceTurn(message)
-	} else {
-		self.harness.start(message)
+func (self *App) sendCommandPrompt(message string) {
+	if self.currentTurn.Running() {
+		self.replaceTurn(message)
+		return
 	}
+	self.start(message)
 }
 
-func (self commandContext) Notice(message string) {
-	self.Emit(agent.Event{Kind: agent.HarnessMessageEvent, Text: message, Status: agent.InfoStatus})
-}
-
-func (self commandContext) Success(message string) {
-	self.Emit(agent.Event{Kind: agent.HarnessMessageEvent, Text: message, Status: agent.SuccessStatus})
-}
-
-func (self *Harness) acceptInput(editor *edit.Input, history *edit.History) {
+func (self *App) acceptInput(editor *edit.Input, history *edit.History) {
 	message := strings.TrimSpace(editor.Text())
-	switch self.handleSlashCommand(message) {
-	case handledCommand:
+	switch self.handleCommand(message) {
+	case dispatch.Handled:
 		history.Add(message)
 		editor.Reset()
-	case ordinaryInput:
+	case dispatch.Ordinary:
 		self.submitInput(editor, history, message)
 	}
 }
 
-func (self *Harness) submitInput(editor *edit.Input, history *edit.History, message string) {
+func (self *App) submitInput(editor *edit.Input, history *edit.History, message string) {
 	history.Add(message)
 	editor.Reset()
 
@@ -263,7 +253,7 @@ func (self *Harness) submitInput(editor *edit.Input, history *edit.History, mess
 	}
 }
 
-func (self *Harness) toggleCap(whichCaps caps.Set) {
+func (self *App) toggleCap(whichCaps caps.Set) {
 	self.mode.Toggle(whichCaps)
 	self.terminal.SetMode(self.mode.Current())
 
@@ -279,7 +269,7 @@ func (self *Harness) toggleCap(whichCaps caps.Set) {
 	}
 }
 
-func (self *Harness) pendingModeChange(whichCaps caps.Set) (int, bool) {
+func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
 	for _, index := range self.pendingModeChanges {
 		if self.events[index].Name == whichCaps.Flag() {
 			return index, true
@@ -289,7 +279,7 @@ func (self *Harness) pendingModeChange(whichCaps caps.Set) (int, bool) {
 	return 0, false
 }
 
-func (self *Harness) showModeChange(whichCaps caps.Set) {
+func (self *App) showModeChange(whichCaps caps.Set) {
 	event := caps.ModeToggleEvent(whichCaps, self.mode.Current())
 
 	self.events = append(self.events, event)
@@ -298,7 +288,7 @@ func (self *Harness) showModeChange(whichCaps caps.Set) {
 	self.noticePainter().DrawEvent(event)
 }
 
-func (self *Harness) takeBackModeChange(i int, whichCaps caps.Set) {
+func (self *App) takeBackModeChange(i int, whichCaps caps.Set) {
 	self.events = slices.Delete(self.events, i, i+1)
 
 	pendingModeChanges := make([]int, 0, len(self.pendingModeChanges)-1)
@@ -317,7 +307,7 @@ func (self *Harness) takeBackModeChange(i int, whichCaps caps.Set) {
 	self.redraw()
 }
 
-func (self *Harness) settleMode() {
+func (self *App) settleMode() {
 	if self.settledCaps == 0 {
 		self.settledCaps = self.mode.Current()
 		self.recordModeEvent(caps.ModeEvent(self.settledCaps))
@@ -333,14 +323,14 @@ func (self *Harness) settleMode() {
 	self.settledCaps = self.mode.Current()
 }
 
-func (self *Harness) recordModeEvent(event agent.Event) {
+func (self *App) recordModeEvent(event agent.Event) {
 	if err := self.recorder.Event(event); err != nil {
 		self.notifyFailure("The conversation could not be stored: " + err.Error())
 	}
 	self.showStorageWarnings()
 }
 
-func (self *Harness) cancelTurn() {
+func (self *App) cancelTurn() {
 	if self.currentTurn.Cancelled() {
 		self.queuedTurn.Clear()
 	}
@@ -348,16 +338,16 @@ func (self *Harness) cancelTurn() {
 	self.interruptTurn()
 }
 
-func (self *Harness) replaceTurn(message string) {
+func (self *App) replaceTurn(message string) {
 	self.queuedTurn.Replace(message)
 	self.interruptTurn()
 }
 
-func (self *Harness) interruptTurn() {
+func (self *App) interruptTurn() {
 	self.currentTurn.Interrupt()
 }
 
-func (self *Harness) show(editor *edit.Input) {
+func (self *App) show(editor *edit.Input) {
 	columns := self.screen.Columns()
 	frame := editor.Frame(columns)
 
@@ -378,49 +368,71 @@ func (self *Harness) show(editor *edit.Input) {
 	self.screen.Footer(block.Rows(columns))
 }
 
-func (self *Harness) bar(position segment.Position, frame edit.Frame) string {
-	return bar(self.segmentLayout, position, frame)
+func (self *App) bar(position segment.Position, frame edit.Frame) string {
+	return bar.Render(self.segmentLayout, position, segment.Context{
+		HiddenLinesAbove: frame.HiddenLinesAbove,
+		HiddenLinesBelow: frame.HiddenLinesBelow,
+	})
 }
 
-func (self *Harness) turnActivity() (bool, int) {
+func (self *App) getBarSources() bar.Sources {
+	return bar.Sources{
+		GetTurnActivity:      self.turnActivity,
+		GetContextUsage:      self.contextUsage,
+		GetGrantedCaps:       self.grantedCaps,
+		IsPrefixPending:      self.isPrefixPending,
+		GetTurnElapsed:       self.turnElapsed,
+		GetTurnCount:         self.turnCount,
+		GetLastTurnTokenRate: self.lastTurnTokenRate,
+		IsTurnRunning:        self.isTurnRunning,
+	}
+}
+
+func (self *App) turnActivity() (bool, int) {
 	return self.currentTurn.Running(), self.currentTurn.spinnerFrame
 }
 
-func (self *Harness) isTurnRunning() bool {
+func (self *App) isTurnRunning() bool {
 	return self.currentTurn.Running()
 }
 
-func (self *Harness) turnElapsed() (bool, time.Duration, bool) {
+func (self *App) turnElapsed() (bool, time.Duration, bool) {
 	return self.currentTurn.Elapsed()
 }
 
-func (self *Harness) turnCount() int {
+func (self *App) turnCount() int {
 	return self.metrics.TurnCount()
 }
 
-func (self *Harness) lastTurnTokenRate() (float64, bool) {
+func (self *App) lastTurnTokenRate() (float64, bool) {
 	return self.metrics.LastTurnTokenRate()
 }
 
-func (self *Harness) contextUsage() (int, int) {
+func (self *App) contextUsage() (int, int) {
 	return self.metrics.ContextUsage()
 }
 
-func (self *Harness) grantedCaps() caps.Set {
+func (self *App) grantedCaps() caps.Set {
 	return self.mode.Current()
 }
 
-func (self *Harness) isPrefixPending() bool {
+func (self *App) isPrefixPending() bool {
 	return self.editor != nil && self.editor.IsPrefixPending()
 }
 
-func (self *Harness) plainly(history *edit.History, initialMessage string) {
+func (self *App) plainly(history *edit.History, initialMessage string) {
 	self.acceptPlainInput(history, initialMessage)
+	if self.isTransitionRequested() {
+		return
+	}
 
 	reader := bufio.NewScanner(os.Stdin)
 
 	for reader.Scan() {
 		self.acceptPlainInput(history, strings.TrimSpace(reader.Text()))
+		if self.isTransitionRequested() {
+			return
+		}
 	}
 
 	if err := reader.Err(); err != nil {
@@ -428,11 +440,11 @@ func (self *Harness) plainly(history *edit.History, initialMessage string) {
 	}
 }
 
-func (self *Harness) acceptPlainInput(history *edit.History, message string) {
+func (self *App) acceptPlainInput(history *edit.History, message string) {
 	if message == "" {
 		return
 	}
-	if self.handleSlashCommand(message) == ordinaryInput {
+	if self.handleCommand(message) == dispatch.Ordinary {
 		self.ask(history, message)
 		return
 	}
@@ -443,20 +455,20 @@ func (self *Harness) acceptPlainInput(history *edit.History, message string) {
 	}
 }
 
-func (self *Harness) ask(history *edit.History, message string) {
+func (self *App) ask(history *edit.History, message string) {
 	history.Add(message)
 	self.start(message)
 	self.waitForCurrentTurn()
 }
 
-func (self *Harness) waitForCurrentTurn() {
+func (self *App) waitForCurrentTurn() {
 	for event := range self.currentTurn.Events() {
 		self.takeTurn(event)
 	}
 	self.finish()
 }
 
-func (self *Harness) restore(storedSession *store.Session) {
+func (self *App) restore(storedSession *store.Session) {
 	self.settledCaps, _ = caps.LastRecordedMode(storedSession.Events)
 
 	if err := self.agent.RestoreState(storedSession.Events); err != nil {
@@ -477,11 +489,11 @@ func (self *Harness) restore(storedSession *store.Session) {
 	self.replay()
 }
 
-func (self *Harness) newPainter(isRunning bool) *painter.Picasso {
+func (self *App) newPainter(isRunning bool) *painter.Picasso {
 	return painter.New(self.screen, isRunning, self.agent.Tool, self.workspaceDir)
 }
 
-func (self *Harness) replay() {
+func (self *App) replay() {
 	self.screen.Synchronise(func() {
 		painter := self.newPainter(self.currentTurn.Running())
 
@@ -500,7 +512,7 @@ func (self *Harness) replay() {
 	})
 }
 
-func (self *Harness) redraw() {
+func (self *App) redraw() {
 	var provisionalPainter agent.Delta
 	var previousPainter *painter.Picasso
 	if self.currentTurn.Running() {
@@ -518,7 +530,7 @@ func (self *Harness) redraw() {
 	})
 }
 
-func (self *Harness) start(message string) {
+func (self *App) start(message string) {
 	self.settleMode()
 	self.metrics.BeginTurn()
 
@@ -534,7 +546,7 @@ func (self *Harness) start(message string) {
 	self.screen.ReportProgress(true)
 }
 
-func (self *Harness) takeTurn(turnEvent TurnEvent) {
+func (self *App) takeTurn(turnEvent TurnEvent) {
 	if !self.currentTurn.Observe(turnEvent) {
 		return
 	}
@@ -553,7 +565,7 @@ func (self *Harness) takeTurn(turnEvent TurnEvent) {
 	}
 }
 
-func (self *Harness) recordEvent(event agent.Event) {
+func (self *App) recordEvent(event agent.Event) {
 	self.metrics.Record(event)
 
 	self.events = append(self.events, event)
@@ -569,22 +581,22 @@ func (self *Harness) recordEvent(event agent.Event) {
 	self.showStorageWarnings()
 }
 
-func (self *Harness) notifyFailure(text string) {
+func (self *App) notifyFailure(text string) {
 	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text, Status: agent.ErrorStatus})
 }
 
-func (self *Harness) notifyStopped(text string) {
+func (self *App) notifyStopped(text string) {
 	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text, Status: agent.WarningStatus})
 }
 
-func (self *Harness) notify(event agent.Event) {
+func (self *App) notify(event agent.Event) {
 	self.events = append(self.events, event)
 	self.noticePainter().DrawEvent(event)
 
 	_ = self.recorder.Event(event)
 }
 
-func (self *Harness) noticePainter() *painter.Picasso {
+func (self *App) noticePainter() *painter.Picasso {
 	if self.currentTurn.Running() {
 		return self.currentTurn.painter
 	}
@@ -592,7 +604,7 @@ func (self *Harness) noticePainter() *painter.Picasso {
 	return self.newPainter(false)
 }
 
-func (self *Harness) finish() {
+func (self *App) finish() {
 	self.currentTurn.MarkFinished(time.Now())
 	self.screen.ReportProgress(false)
 
@@ -630,7 +642,7 @@ func (self *Harness) finish() {
 	}
 }
 
-func (self *Harness) storeProviderState() bool {
+func (self *App) storeProviderState() bool {
 	items, err := self.agent.Dump()
 	if err != nil {
 		self.notifyFailure("The conversation state could not be stored: " + err.Error())
@@ -645,7 +657,7 @@ func (self *Harness) storeProviderState() bool {
 	return true
 }
 
-func (self *Harness) showStorageWarnings() {
+func (self *App) showStorageWarnings() {
 	for _, err := range self.recorder.TakeWarnings() {
 		self.notifyFailure(err.Error())
 	}

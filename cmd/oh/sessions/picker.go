@@ -1,4 +1,4 @@
-package main
+package sessions
 
 import (
 	"encoding/json"
@@ -10,10 +10,10 @@ import (
 	"crdx.org/io/session"
 )
 
-func chooseStoredSession(directory string, terminal *os.File, screen io.Writer) (string, error) {
-	sessions, err := loadSessions(directory)
+func Choose(directory string, terminal *os.File, screen io.Writer) (string, error) {
+	sessions, err := Load(directory)
 	if err != nil {
-		if migrationError := refuseUnreadableSessions(directory); migrationError != nil {
+		if migrationError := ValidateFormats(directory); migrationError != nil {
 			return "", migrationError
 		}
 		return "", err
@@ -33,7 +33,7 @@ func chooseStoredSession(directory string, terminal *os.File, screen io.Writer) 
 	return chosenSession.Name, nil
 }
 
-func loadSessions(directory string) ([]*picker.Session, error) {
+func Load(directory string) ([]*picker.Session, error) {
 	metadata, err := session.ListMeta(directory)
 	if err != nil {
 		return nil, err

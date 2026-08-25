@@ -40,6 +40,7 @@ center = [
     { segment = "active-model" },
 ]
 right = [
+    { segment = "subscription-usage" },
     { segment = "current-session" },
     { segment = "scroll-overflow", direction = "down" }
 ]

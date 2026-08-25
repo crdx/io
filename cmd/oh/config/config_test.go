@@ -431,18 +431,19 @@ func inertFactory(segment.Options) (segment.Segment, error) {
 
 func testSegments() segment.Registry {
 	return segment.Registry{
-		"activity-spinner":  inertFactory,
-		"context-usage":     inertFactory,
-		"mode-toggle":       inertFactory,
-		"working-directory": workingDirectory.New("/tmp/somewhere"),
-		"active-model":      inertFactory,
-		"scroll-overflow":   scrollOverflow.New,
-		"current-session":   inertFactory,
-		"current-time":      inertFactory,
-		"turn-elapsed":      inertFactory,
-		"turn-count":        inertFactory,
-		"last-tps":          inertFactory,
-		"git-branch":        inertFactory,
+		"activity-spinner":   inertFactory,
+		"context-usage":      inertFactory,
+		"mode-toggle":        inertFactory,
+		"working-directory":  workingDirectory.New("/tmp/somewhere"),
+		"active-model":       inertFactory,
+		"scroll-overflow":    scrollOverflow.New,
+		"current-session":    inertFactory,
+		"current-time":       inertFactory,
+		"turn-elapsed":       inertFactory,
+		"turn-count":         inertFactory,
+		"last-tps":           inertFactory,
+		"git-branch":         inertFactory,
+		"subscription-usage": inertFactory,
 	}
 }
 

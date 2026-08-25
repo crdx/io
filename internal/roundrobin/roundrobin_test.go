@@ -29,7 +29,7 @@ func TestNextReturnsTheOnlyEntry(t *testing.T) {
 }
 
 func TestNextReturnsZeroForNoEntries(t *testing.T) {
-	if got := Next[string](nil, "last"); got != "" {
+	if got := Next(nil, "last"); got != "" {
 		t.Errorf("got %q, want the zero value", got)
 	}
 }

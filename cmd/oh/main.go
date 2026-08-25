@@ -7,31 +7,30 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
-	"strings"
 	"syscall"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/file"
-	"crdx.org/io/internal/req"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/util/pathutil"
-	"crdx.org/io/provider/anthropic"
-	"crdx.org/io/provider/chat"
-	"crdx.org/io/provider/codex"
-	"crdx.org/io/session"
-	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/notify"
 
+	"crdx.org/io/cmd/oh/backend"
+	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
 	"crdx.org/io/cmd/oh/commands"
 	"crdx.org/io/cmd/oh/config"
+	"crdx.org/io/cmd/oh/cycle"
+	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/prompt"
+	"crdx.org/io/cmd/oh/record"
+	"crdx.org/io/cmd/oh/sessions"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/slash"
@@ -40,27 +39,16 @@ import (
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/terminal"
+	"crdx.org/io/cmd/oh/toolset"
+	"crdx.org/io/cmd/oh/workspace"
 )
-
-const (
-	endpointVariable = "OH_ENDPOINT_URL"
-
-	codexProvider      = model.CodexProvider
-	opencodeGoProvider = model.OpencodeGoProvider
-	anthropicProvider  = model.AnthropicProvider
-	opencodeGoEndpoint = "https://opencode.ai/zen/go/v1/chat/completions"
-
-	standInToken = "stand-in"
-)
-
-var providerNames = []string{codexProvider, opencodeGoProvider, anthropicProvider}
 
 var completableToolNames = []string{"read", "ls", "find", "grep", "write", "edit", "bash", "notify"}
 
 func main() {
 	if cli.WriteCompletions(os.Stdout, os.Args[1:], cli.Sources{
-		ModelCachePath: modelCachePath(),
-		SessionsDir:    sessionsDir(),
+		ModelCachePath: location.GetModelCachePath(os.Getenv(backend.EndpointVariable) != ""),
+		SessionsDir:    location.GetSessionsDir(),
 		ToolNames:      completableToolNames,
 	}) {
 		return
@@ -70,47 +58,45 @@ func main() {
 
 	style.Init(os.Stdout)
 
-	chosenSession, err := run()
+	hooks := cycle.NewHooks(func(err error) { fmt.Fprintln(os.Stderr, "session hook:", err) })
+	transition := cycle.Transition{}
+	chosenSession, err := run(hooks, &transition)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
 	if chosenSession != "" {
-		self, err := os.Executable()
-		if err == nil {
-			//nolint:gosec // the binary is this one, and the arguments are ours
-			err = syscall.Exec(self, []string{self, "-r", chosenSession}, os.Environ())
+		transition = cycle.Transition{Kind: cycle.ResumeSession, Arguments: []string{"-r", chosenSession}}
+	}
+	if transition.Kind == cycle.Quit {
+		return
+	}
+
+	self, err := os.Executable()
+	if err == nil {
+		err = syscall.Exec(self, append([]string{self}, transition.Arguments...), os.Environ()) //nolint:gosec // re-executing the binary itself with its own arguments
+	}
+
+	fmt.Fprintln(os.Stderr, "could not open the session:", err)
+	os.Exit(1)
+}
+
+func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, error) {
+	ctx := context.Background()
+	var sessionInfo cycle.Session
+	hasStarted := false
+	stopReason := cycle.StoppedByFailure
+	defer func() {
+		if hasStarted {
+			hooks.EmitSessionStopped(ctx, cycle.SessionStopped{Session: sessionInfo, Reason: stopReason})
 		}
+	}()
 
-		fmt.Fprintln(os.Stderr, "could not open the session:", err)
-		os.Exit(1)
-	}
-}
-
-func openingCaps(args cli.Options, resumedSession *store.Session) (caps.Set, error) {
-	if resumedSession == nil {
-		return args.Caps, nil
-	}
-
-	lastCaps, found := caps.LastRecordedMode(resumedSession.Events)
-	if !found {
-		return args.Caps, nil
-	}
-
-	if args.WereCapsChosen && args.Caps != lastCaps {
-		return 0, fmt.Errorf(
-			"a resumed conversation opens in the mode it was left in, which was %s rather than %s",
-			lastCaps.Flags(),
-			args.Caps.Flags(),
-		)
-	}
-
-	return lastCaps, nil
-}
-
-func run() (string, error) {
 	inputArgs := cli.Bind()
+	endpointURL := os.Getenv(backend.EndpointVariable)
+	modelCachePath := location.GetModelCachePath(endpointURL != "")
+	sessionsDir := location.GetSessionsDir()
 
 	if inputArgs.Version {
 		fmt.Println(version())
@@ -118,27 +104,27 @@ func run() (string, error) {
 	}
 
 	if inputArgs.List {
-		return "", model.List(os.Stdout, modelCachePath())
+		return "", model.List(os.Stdout, modelCachePath)
 	}
 
 	if inputArgs.Update {
-		return "", model.Update(os.Stdout, os.Getenv(endpointVariable), modelCachePath(), listProviderModels)
+		return "", model.Update(os.Stdout, endpointURL, modelCachePath, backend.ListModels)
 	}
 
 	if inputArgs.Sessions {
-		return chooseStoredSession(sessionsDir(), os.Stdin, os.Stdout)
+		return sessions.Choose(sessionsDir, os.Stdin, os.Stdout)
 	}
 
-	args, err := inputArgs.Parse(modelCachePath())
+	args, err := inputArgs.Parse(modelCachePath)
 	if err != nil {
 		return "", err
 	}
 
-	if err := refuseUnreadableSessions(sessionsDir()); err != nil {
+	if err := sessions.ValidateFormats(sessionsDir); err != nil {
 		return "", err
 	}
 
-	resumedSession, err := loadSession(args.Session)
+	resumedSession, err := sessions.LoadForResume(sessionsDir, args.Session)
 	if err != nil {
 		return "", err
 	}
@@ -146,7 +132,7 @@ func run() (string, error) {
 		args.WorkspaceDir = resumedSession.Meta.WorkspaceDir
 	}
 
-	args.Caps, err = openingCaps(args, resumedSession)
+	args.Caps, err = sessions.OpeningCaps(args.Caps, args.WereCapsChosen, resumedSession)
 	if err != nil {
 		return "", err
 	}
@@ -162,11 +148,11 @@ func run() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("could not resolve the workspace path: %w", err)
 	}
-	if err := ensureWorkspaceIsNotShadowed(workspaceDir); err != nil {
+	if err := workspace.Validate(workspaceDir); err != nil {
 		return "", err
 	}
 
-	homeDir := shellHomeDir()
+	homeDir := location.GetShellHomeDir()
 	if homeDir == "" {
 		return "", errors.New("could not find a home for shell configuration")
 	}
@@ -193,7 +179,7 @@ func run() (string, error) {
 	}
 	defer func() { _ = homeRoot.Close() }()
 
-	configPath := configFile()
+	configPath := location.GetConfigFile()
 	settings, err := config.Load(configPath)
 	if err != nil {
 		return "", err
@@ -202,7 +188,7 @@ func run() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("%s: snippets: %w", pathutil.Shorten(configPath), err)
 	}
-	configuredModels, err := model.ParseRoundRobin(modelCachePath(), settings.Model.RoundRobin)
+	configuredModels, err := model.ParseRoundRobin(modelCachePath, settings.Model.RoundRobin)
 	if err != nil {
 		return "", err
 	}
@@ -216,7 +202,7 @@ func run() (string, error) {
 	}
 	defer shell.CloseRoots(configuredRoots)
 
-	globalSkillDirs := append([]string{configDir("skills")}, settings.Skills.Include...)
+	globalSkillDirs := append([]string{location.GetConfigDir("skills")}, settings.Skills.Include...)
 	availableSkills, err := skill.Discover(workspaceDir, globalSkillDirs, os.Stderr)
 	if err != nil {
 		return "", err
@@ -233,39 +219,47 @@ func run() (string, error) {
 	processes := sandbox.NewProcesses(args.Caps.Has(caps.Background))
 	defer func() { _, _ = processes.Disable() }()
 
-	providerName, modelName, effort, err := resolveProviderChoice(
-		args.Provider,
-		args.Model,
-		args.Effort,
+	selection, err := backend.Resolve(
+		model.Selection{Provider: args.Provider, Model: args.Model, Effort: args.Effort},
+		resumedSelection(resumedSession),
 		configuredModels,
-		modelRoundRobinPath(),
-		resumedSession,
+		location.GetModelRoundRobinPath(),
 	)
 	if err != nil {
 		return "", err
 	}
-	choice, err := model.Chosen(modelCachePath(), providerName, modelName)
+	choice, err := model.Chosen(modelCachePath, selection.Provider, selection.Model)
 	if err != nil {
 		return "", err
 	}
 
-	client, err := connect(choice, effort, os.Getenv(endpointVariable))
+	client, err := backend.Connect(choice, selection.Effort, endpointURL)
 	if err != nil {
 		return "", err
 	}
 
 	meta := store.Meta{
-		Model:        modelName,
+		Model:        selection.Model,
 		WorkspaceDir: workspaceDir,
-		Provider:     providerName,
-		Effort:       effort,
+		Provider:     selection.Provider,
+		Effort:       selection.Effort,
 	}
 
-	log, err := openSession(resumedSession, meta)
+	log, err := sessions.OpenWriter(sessionsDir, resumedSession, meta)
 	if err != nil {
 		return "", err
 	}
+	sessionInfo = cycle.Session{
+		Name:         log.Name(),
+		ID:           log.ID(),
+		Directory:    filepath.Join(sessionsDir, log.Name()),
+		WorkspaceDir: workspaceDir,
+		Provider:     selection.Provider,
+		Model:        selection.Model,
+		Effort:       selection.Effort,
+	}
 	defer func() { _ = log.Close() }()
+	hooks.EmitSessionStarting(ctx, cycle.SessionStarting{Session: sessionInfo})
 	client.ObserveHTTP(log.Observer())
 
 	tmpDir, err := openTmpDir(log.Name())
@@ -285,7 +279,7 @@ func run() (string, error) {
 		systemPrompt = resumedSession.Meta.SystemPrompt
 	} else {
 		systemPrompt, contextFiles, err = prompt.Load(prompt.Config{
-			GlobalPath:   globalContextPath(),
+			GlobalPath:   location.GetGlobalContextPath(),
 			Root:         root,
 			WorkspaceDir: workspaceDir,
 			SessionName:  log.Name(),
@@ -322,25 +316,35 @@ func run() (string, error) {
 		toolboxTools = append(toolboxTools, notify.New())
 	}
 	toolboxTools = truncate.Tools(toolboxTools)
-	enabledTools := toolboxTools
-	if len(args.Tools) > 0 {
-		enabledTools, err = reduceTools(toolboxTools, args.Tools)
-	}
 
+	enabledTools, err := toolset.Reduce(toolboxTools, args.Tools)
 	if err != nil {
 		return "", err
 	}
 
+	var chat *App
 	systemCommands, err := commands.New(commands.Options{
-		ConfigDir:  configDir(),
-		StateDir:   stateDir(),
+		ConfigDir:  location.GetConfigDir(),
+		StateDir:   location.GetStateDir(),
 		ConfigFile: configPath,
 		Editor:     settings.Editor,
 		Output:     os.Stdout,
 		Session: commands.Session{
 			Name:      log.Name(),
 			ID:        log.ID(),
-			Directory: filepath.Join(sessionsDir(), log.Name()),
+			Directory: filepath.Join(sessionsDir, log.Name()),
+		},
+		StartNewSession: func(modelGlob string) error {
+			transition, err := newSessionTransition(
+				workspaceDir,
+				modelGlob,
+				selection.Effort,
+				model.Choices(modelCachePath),
+			)
+			if err != nil {
+				return err
+			}
+			return chat.requestTransition(transition)
 		},
 	}, snippetCommands.Usages())
 	if err != nil {
@@ -351,20 +355,29 @@ func run() (string, error) {
 		return "", err
 	}
 
-	chat := &Harness{
+	chat = &App{
 		agent:              agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
 		screen:             output.New(os.Stdout).LinkPathsUnder(workspaceDir),
-		terminal:           terminal.New(os.Stdout),
+		terminal:           terminal.New(os.Stdout, workspaceDir),
 		metrics:            metrics.New(choice.ContextWindowTokens),
 		commands:           commandRegistry,
-		recorder:           recordSession(log),
+		recorder:           record.New(log),
 		workspaceDir:       workspaceDir,
 		mode:               mode,
 		processes:          processes,
 		getOnWithItMessage: settings.GetOnWithItMessage,
 	}
 
-	chat.segmentLayout, err = settings.BuildLayout(availableSegments(workspaceDir, log.Name(), modelName, effort, chat))
+	usageReporter, _ := client.Client.(agent.UsageReporter)
+
+	chat.segmentLayout, err = settings.BuildLayout(bar.NewRegistry(bar.Options{
+		WorkspaceDir:       workspaceDir,
+		CurrentSessionName: log.Name(),
+		ModelName:          selection.Model,
+		ModelEffort:        selection.Effort,
+		UsageReporter:      usageReporter,
+		Sources:            chat.getBarSources(),
+	}))
 	if err != nil {
 		return "", err
 	}
@@ -385,197 +398,40 @@ func run() (string, error) {
 		ProjectSkills: projectSkills,
 		GlobalSkills:  globalSkills,
 		Snippets:      len(settings.Snippets),
-		ToolBytes:     client.toolsSize(enabledTools),
+		ToolBytes:     client.ToolsSize(enabledTools),
 	}
 	if resumedSession == nil {
 		chat.notify(startup.NewEvent(startupElapsed, startupInfo))
 	}
 
-	chat.begin(args.Message)
+	hasStarted = true
+	hooks.EmitSessionStarted(ctx, cycle.SessionStarted{Session: sessionInfo})
+	transition := chat.begin(args.Message)
+	*requestedTransition = transition
+	stopReason = transition.StopReason()
+	hooks.EmitSessionStopping(ctx, cycle.SessionStopping{Session: sessionInfo, Reason: stopReason})
 
-	if log.Stored() {
-		fmt.Println(style.Subtle(resumeParams(log.Name())))
+	if log.Stored() && transition.Kind == cycle.Quit {
+		fmt.Println(style.Subtle(sessions.ResumeCommand(os.Args[0], log.Name())))
 	}
 
 	return "", nil
 }
 
-func reduceTools(availableTools []tool.Tool, enabledToolNames []string) ([]tool.Tool, error) {
-	if len(enabledToolNames) == 0 {
-		return availableTools, nil
+func resumedSelection(resumedSession *store.Session) model.Selection {
+	if resumedSession == nil {
+		return model.Selection{}
 	}
 
-	availableNames := indexToolsByName(availableTools)
-	enabledNames := make(map[string]struct{}, len(enabledToolNames))
-	var unavailable []string
-	for _, name := range enabledToolNames {
-		if _, isEnabled := enabledNames[name]; isEnabled {
-			continue
-		}
-
-		enabledNames[name] = struct{}{}
-		if _, isAvailable := availableNames[name]; !isAvailable {
-			unavailable = append(unavailable, name)
-		}
+	return model.Selection{
+		Provider: resumedSession.Meta.Provider,
+		Model:    resumedSession.Meta.Model,
+		Effort:   resumedSession.Meta.Effort,
 	}
-	if len(unavailable) > 0 {
-		return nil, fmt.Errorf("tools not available: %s", strings.Join(unavailable, ", "))
-	}
-
-	tools := make([]tool.Tool, 0, len(enabledNames))
-	for _, availableTool := range availableTools {
-		if _, isEnabled := enabledNames[availableTool.Name()]; isEnabled {
-			tools = append(tools, availableTool)
-		}
-	}
-
-	return tools, nil
-}
-
-func indexToolsByName(tools []tool.Tool) map[string]tool.Tool {
-	indexedTools := make(map[string]tool.Tool, len(tools))
-	for _, availableTool := range tools {
-		indexedTools[availableTool.Name()] = availableTool
-	}
-
-	return indexedTools
-}
-
-func resumeParams(reference string) string {
-	return fmt.Sprintf("%s -r %s", filepath.Base(os.Args[0]), reference)
-}
-
-type providerClient interface {
-	agent.Provider
-	agent.State
-	ObserveHTTP(req.Observer)
-}
-
-type connection struct {
-	providerClient
-
-	toolsSize func([]tool.Tool) int
-}
-
-func resolveProviderChoice(
-	requestedProvider string,
-	requestedModel string,
-	requestedEffort string,
-	configuredModels []model.Selection,
-	roundRobinPath string,
-	resumedSession *store.Session,
-) (string, string, string, error) {
-	if resumedSession != nil {
-		sessionProvider := resumedSession.Meta.Provider
-		if requestedProvider != "" && requestedProvider != sessionProvider {
-			return "", "", "", fmt.Errorf("cannot resume a %s session with %s", sessionProvider, requestedProvider)
-		}
-		if requestedModel == "" {
-			return sessionProvider, resumedSession.Meta.Model, resumedSession.Meta.Effort, nil
-		}
-	}
-
-	if requestedModel != "" {
-		return requestedProvider, requestedModel, requestedEffort, nil
-	}
-
-	selected, err := model.ReserveRoundRobin(roundRobinPath, configuredModels)
-	if err != nil {
-		return "", "", "", err
-	}
-
-	return selected.Provider, selected.Model, selected.Effort, nil
-}
-
-func connect(choice model.Choice, effort string, endpoint string) (*connection, error) {
-	switch choice.Provider {
-	case codexProvider:
-		tokens := codex.StoredCredentials()
-		address := codex.Endpoint
-
-		if endpoint != "" {
-			tokens = codex.Static(standInToken, standInToken)
-			address = endpoint
-		}
-
-		client, err := codex.New(tokens, choice.Model, effort)
-		if err != nil {
-			return nil, err
-		}
-		client.URL = address
-
-		return &connection{providerClient: client, toolsSize: codex.ToolsSize}, nil
-
-	case opencodeGoProvider:
-		token := standInToken
-		if endpoint == "" {
-			endpoint = opencodeGoEndpoint
-
-			var err error
-			if token, err = chat.StoredKey(); err != nil {
-				return nil, err
-			}
-		}
-		client, err := chat.New(endpoint, token, choice.Model, effort, choice.MaxOutputTokens)
-		if err != nil {
-			return nil, err
-		}
-
-		return &connection{providerClient: client, toolsSize: chat.ToolsSize}, nil
-
-	case anthropicProvider:
-		tokens := anthropic.StoredCredentials()
-		address := anthropic.Endpoint
-
-		if endpoint != "" {
-			tokens = anthropic.Static(standInToken)
-			address = endpoint
-		}
-
-		client, err := anthropic.New(tokens, choice.Model, effort, choice.MaxOutputTokens)
-		if err != nil {
-			return nil, err
-		}
-		client.URL = address
-
-		return &connection{providerClient: client, toolsSize: anthropic.ToolsSize}, nil
-
-	default:
-		return nil, fmt.Errorf("unknown provider %q", choice.Provider)
-	}
-}
-
-func listProviderModels(ctx context.Context, providerName string, endpoint string) ([]agent.Model, error) {
-	client, err := connect(model.Choice{Provider: providerName}, "", endpoint)
-	if err != nil {
-		return nil, err
-	}
-
-	lister, canList := client.providerClient.(agent.Lister)
-	if !canList {
-		return nil, nil
-	}
-
-	return lister.Models(ctx)
-}
-
-func loadSession(name string) (*store.Session, error) {
-	if name == "" {
-		return nil, nil
-	}
-
-	storedSession, err := store.Read(sessionsDir(), name)
-	if err != nil {
-		return nil, err
-	}
-	if !storedSession.CanResume() {
-		return nil, fmt.Errorf("session %s did not finish every turn and cannot be resumed safely (yet)", name)
-	}
-	return storedSession, nil
 }
 
 func openTmpDir(name string) (string, error) {
-	tmp := tmpDir(name)
+	tmp := location.GetTmpDir(name)
 
 	if err := os.MkdirAll(tmp, 0o700); err != nil {
 		return "", fmt.Errorf("could not prepare the tmp dir: %w", err)
@@ -602,19 +458,6 @@ func mountTmpDir(files *file.Root, tmpDir string) (*os.Root, error) {
 
 	files.Mount(sandbox.TmpDir, file.New(tmpRoot, func(string) error { return nil }))
 	return tmpRoot, nil
-}
-
-func openSession(resumedSession *store.Session, meta store.Meta) (*store.Writer, error) {
-	if resumedSession == nil {
-		return store.Create(sessionsDir(), meta)
-	}
-
-	log, err := store.Open(sessionsDir(), resumedSession.Name)
-	if errors.Is(err, session.ErrInUse) {
-		return nil, fmt.Errorf("session %s is already open", resumedSession.Name)
-	}
-
-	return log, err
 }
 
 func version() string {

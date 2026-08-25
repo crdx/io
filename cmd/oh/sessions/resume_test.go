@@ -1,0 +1,143 @@
+package sessions
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"crdx.org/io/agent"
+
+	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/store"
+)
+
+func TestAResumedConversationOpensInTheModeItWasLeftIn(t *testing.T) {
+	leftCaps := caps.Read | caps.Git
+	assumedCaps := caps.Read | caps.Write
+	resumedSession := &store.Session{Events: []agent.Event{caps.ModeEvent(leftCaps)}}
+
+	got, err := OpeningCaps(assumedCaps, false, resumedSession)
+	if err != nil || got != leftCaps {
+		t.Errorf("expected %s, got %s and %v", leftCaps.Flags(), got.Flags(), err)
+	}
+
+	got, err = OpeningCaps(assumedCaps, false, &store.Session{})
+	if err != nil || got != assumedCaps {
+		t.Errorf("expected a silent session to leave %s alone, got %s and %v", assumedCaps.Flags(), got.Flags(), err)
+	}
+
+	got, err = OpeningCaps(assumedCaps, false, nil)
+	if err != nil || got != assumedCaps {
+		t.Errorf("expected a fresh conversation to keep %s, got %s and %v", assumedCaps.Flags(), got.Flags(), err)
+	}
+}
+
+func TestAResumedConversationCannotBeAskedForAnotherMode(t *testing.T) {
+	leftCaps := caps.Read | caps.Git
+	resumedSession := &store.Session{Events: []agent.Event{caps.ModeEvent(leftCaps)}}
+
+	if _, err := OpeningCaps(caps.Read|caps.Shell, true, resumedSession); err == nil {
+		t.Error("expected another mode to be refused")
+	}
+
+	got, err := OpeningCaps(leftCaps, true, resumedSession)
+	if err != nil || got != leftCaps {
+		t.Errorf("expected the mode it was left in to be allowed, got %s and %v", got.Flags(), err)
+	}
+}
+
+func TestLoadingACrashedSessionIsRefusedWithoutChangingItsJournal(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Event(agent.Event{Kind: agent.ModelMessageEvent, Text: "looks complete"}); err != nil {
+		t.Fatal(err)
+	}
+	name := writer.Name()
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(directory, name, "session.jsonl")
+	before, err := os.ReadFile(path) //nolint:gosec // the test's own session
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadForResume(directory, name); err == nil || !strings.Contains(err.Error(), "did not finish every turn") {
+		t.Fatalf("expected the crashed session to be refused, got %v", err)
+	}
+	match, err := os.ReadFile(path) //nolint:gosec // the test's own session
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(match) != string(before) {
+		t.Error("refusing the crashed session changed its journal")
+	}
+}
+
+func TestLoadingACompletedSessionSucceeds(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Item(json.RawMessage(`{"role":"user"}`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.CompleteTurn(); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := LoadForResume(directory, writer.Name()); err != nil {
+		t.Fatalf("expected the completed session to load: %v", err)
+	}
+}
+
+func TestNamingNoSessionResumesNothing(t *testing.T) {
+	resumedSession, err := LoadForResume(t.TempDir(), "")
+	if err != nil || resumedSession != nil {
+		t.Errorf("expected nothing to resume, got %v and %v", resumedSession, err)
+	}
+}
+
+func TestASessionAlreadyOpenIsRefused(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Item(json.RawMessage(`{"role":"user"}`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.CompleteTurn(); err != nil {
+		t.Fatal(err)
+	}
+
+	resumedSession := &store.Session{Name: writer.Name()}
+	if _, err := OpenWriter(directory, resumedSession, store.Meta{}); err == nil || !strings.Contains(err.Error(), "is already open") {
+		t.Fatalf("expected the open session to be refused, got %v", err)
+	}
+
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestResumeCommandNamesTheBinaryAndSession(t *testing.T) {
+	if got := ResumeCommand("/usr/local/bin/oh", "able-dolphin"); got != "oh -r able-dolphin" {
+		t.Errorf("got %q", got)
+	}
+}

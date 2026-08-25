@@ -29,8 +29,9 @@ type Options struct {
 	StateDir   string
 	Session    Session
 
-	Editor editor.Command
-	Output io.Writer
+	Editor          editor.Command
+	Output          io.Writer
+	StartNewSession func(string) error
 }
 
 type Session struct {
@@ -45,9 +46,10 @@ type commandEnvironment struct {
 	stateDir   string
 	session    commandSession
 
-	openEditor func(string) error
-	openTarget func(string) error
-	copyText   func(string) error
+	openEditor      func(string) error
+	openTarget      func(string) error
+	copyText        func(string) error
+	startNewSession func(string) error
 }
 
 type commandSession struct {
@@ -79,6 +81,7 @@ func New(options Options, snippetUsages []string) (slash.CommandSet, error) {
 		copyText: func(text string) error {
 			return terminal.Copy(options.Output, text)
 		},
+		startNewSession: options.StartNewSession,
 	}, snippetUsages)
 }
 
@@ -100,6 +103,7 @@ func buildCommands(environment commandEnvironment, snippetUsages []string) (slas
 			environment.copyText,
 		),
 		help,
+		newSessionCommand(environment.startNewSession),
 		targetCommand(
 			"open",
 			map[string]commandTarget{
@@ -143,8 +147,28 @@ func helpCommand(getHelp func() string) slash.Command {
 	}
 }
 
+func newSessionCommand(startNewSession func(string) error) slash.Command {
+	return slash.Command{
+		Name: "new",
+		Run: func(_ slash.Context, arguments []string) error {
+			if len(arguments) > 1 {
+				return slash.Usage()
+			}
+			if len(arguments) == 0 {
+				return startNewSession("")
+			}
+			return startNewSession(arguments[0])
+		},
+	}
+}
+
 func helpText(commandUsages []string, hiddenCommandUsage string, snippetUsages []string) string {
 	visibleCommandUsages := slices.DeleteFunc(commandUsages, func(usage string) bool { return usage == hiddenCommandUsage })
+	for i, usage := range visibleCommandUsages {
+		if usage == "/new" {
+			visibleCommandUsages[i] += " [model-glob]"
+		}
+	}
 	sections := []string{"Commands:\n  " + strings.Join(visibleCommandUsages, "\n  ")}
 	if len(snippetUsages) > 0 {
 		sections = append(sections, "Snippets:\n  "+strings.Join(snippetUsages, "\n  "))

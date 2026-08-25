@@ -13,11 +13,11 @@ func interactiveTitle(writer *strings.Builder) *title {
 
 func TestTerminalBeginsUpdatesAndRestoresItsTitle(t *testing.T) {
 	output := &strings.Builder{}
-	managedTerminal := Terminal{title: interactiveTitle(output)}
+	managedTerminal := Terminal{title: interactiveTitle(output), workspaceName: "project"}
 
 	restore := managedTerminal.Begin(caps.Read | caps.Write)
 	managedTerminal.SetMode(caps.Read)
-	if got, want := output.String(), pushTitle+"\x1b]2;[w]\x1b\\\x1b]2;[r]\x1b\\"; got != want {
+	if got, want := output.String(), pushTitle+"\x1b]2;🟡 project\x1b\\\x1b]2;⚫ project\x1b\\"; got != want {
 		t.Errorf("got title sequence %q, want %q", got, want)
 	}
 
@@ -41,7 +41,7 @@ func TestTitleCannotContainTerminalControlCharacters(t *testing.T) {
 
 func TestTerminalDoesNotWriteItsTitleToRedirectedOutput(t *testing.T) {
 	output := &strings.Builder{}
-	managedTerminal := New(output)
+	managedTerminal := New(output, "/work/project")
 
 	restore := managedTerminal.Begin(caps.Read | caps.Write)
 	managedTerminal.SetMode(caps.Read | caps.Write | caps.Git)

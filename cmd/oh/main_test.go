@@ -18,7 +18,6 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -31,20 +30,26 @@ import (
 	"github.com/BurntSushi/toml"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/backend"
+	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/call"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
 	"crdx.org/io/cmd/oh/config"
+	"crdx.org/io/cmd/oh/cycle"
+	"crdx.org/io/cmd/oh/dispatch"
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/key"
+	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/painter"
 	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/prompt"
+	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
@@ -58,6 +63,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnElapsed"
 	"crdx.org/io/cmd/oh/segment/workingDirectory"
+	"crdx.org/io/cmd/oh/sessions"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/slash"
@@ -67,6 +73,7 @@ import (
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/turn"
+	"crdx.org/io/cmd/oh/workspace"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sim"
@@ -83,7 +90,7 @@ import (
 )
 
 func TestEscapeAtRestDoesNotPanic(t *testing.T) {
-	self := &Harness{screen: output.New(&bytes.Buffer{})}
+	self := &App{screen: output.New(&bytes.Buffer{})}
 	editor := edit.NewInput(nil)
 
 	defer func() {
@@ -98,7 +105,7 @@ func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 }
 
 func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
-	self := &Harness{screen: output.New(&bytes.Buffer{})}
+	self := &App{screen: output.New(&bytes.Buffer{})}
 	editor := edit.NewInput(nil)
 
 	keypress := key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
@@ -160,7 +167,7 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
 }
 
 func TestAcceptedInputCanImmediatelyBeRecalled(t *testing.T) {
-	self := &Harness{currentTurn: Turn{Stream: testTurnStream(nil, func() {}, turn.State{Running: true})}}
+	self := &App{currentTurn: Turn{Stream: testTurnStream(nil, func() {}, turn.State{Running: true})}}
 	history := edit.NewHistory("", historyLimit)
 	editor := edit.NewInput(history)
 
@@ -331,10 +338,10 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 	}
 	defer func() { _ = log.Close() }()
 
-	self := &Harness{
+	self := &App{
 		agent:    agent.New("", eventsAfterCancellationProvider{}, nil),
 		screen:   output.New(&bytes.Buffer{}),
-		recorder: recordSession(log),
+		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 
@@ -370,7 +377,7 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 }
 
 func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) {
-	self := &Harness{
+	self := &App{
 		currentTurn: Turn{Stream: testTurnStream(make(chan TurnEvent), func() {}, turn.State{Running: true})},
 	}
 	history := edit.NewHistory("", historyLimit)
@@ -398,7 +405,7 @@ func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) 
 
 func TestTheLatestOfTwoRapidReplacementsWins(t *testing.T) {
 	cancellations := 0
-	self := &Harness{
+	self := &App{
 		currentTurn: Turn{
 			Stream: testTurnStream(nil, func() { cancellations++ }, turn.State{Running: true}),
 		},
@@ -431,10 +438,10 @@ func TestReplacementInputCancelsProvisionalReasoningAndStartsTheNextTurn(t *test
 	defer func() { _ = log.Close() }()
 
 	provider := &reasoningThenAnswerProvider{}
-	self := &Harness{
+	self := &App{
 		agent:    agent.New("", provider, nil),
 		screen:   output.New(&bytes.Buffer{}),
-		recorder: recordSession(log),
+		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 	history := edit.NewHistory("", historyLimit)
@@ -489,10 +496,10 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	}
 
 	var screenOutput bytes.Buffer
-	self := &Harness{
+	self := &App{
 		agent:    agent.New("", quietProvider{}, nil),
 		screen:   output.New(&screenOutput),
-		recorder: recordSession(log),
+		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 	history := edit.NewHistory("", historyLimit)
@@ -553,10 +560,10 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	self := &Harness{
+	self := &App{
 		agent:    agent.New("", quietProvider{}, nil),
 		screen:   output.New(&bytes.Buffer{}),
-		recorder: recordSession(log),
+		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 
@@ -621,7 +628,7 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 }
 
 func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
-	self := &Harness{screen: output.New(&bytes.Buffer{})}
+	self := &App{screen: output.New(&bytes.Buffer{})}
 	editor := edit.NewInput(nil)
 
 	editor.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
@@ -654,7 +661,7 @@ func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			self := &Harness{
+			self := &App{
 				currentTurn: Turn{Stream: testTurnStream(nil, func() {}, turn.State{Running: true, Cancelled: test.isCancelled})},
 			}
 			self.queuedTurn.Replace("later")
@@ -682,10 +689,10 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	}
 	defer func() { _ = log.Close() }()
 
-	self := &Harness{
+	self := &App{
 		agent:    agent.New("", quietProvider{}, nil),
 		screen:   output.New(&bytes.Buffer{}),
-		recorder: recordSession(log),
+		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 
@@ -744,10 +751,10 @@ func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
 	}
 	defer func() { _ = log.Close() }()
 
-	self := &Harness{
+	self := &App{
 		agent:    agent.New("", quietProvider{}, nil),
 		screen:   output.New(&bytes.Buffer{}),
-		recorder: recordSession(log),
+		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 
@@ -784,7 +791,7 @@ func TestSanitisedWireCapturesContainNoCredentialsOrHostPaths(t *testing.T) {
 
 	for _, path := range paths {
 		t.Run(strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)), func(t *testing.T) {
-			capture, err := os.Open(path) //nolint:gosec // fixed testdata path
+			capture, err := os.Open(path) //nolint:gosec // the path comes from a testdata glob
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -912,7 +919,7 @@ func TestSanitisedWireCaptureLifecyclesAreCoveredByScenarios(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, path := range capturePaths {
-		capture, err := os.Open(path) //nolint:gosec // fixed testdata path
+		capture, err := os.Open(path) //nolint:gosec // the path comes from a testdata glob
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1029,12 +1036,12 @@ func addWireLifecycleFeatures(features map[string]struct{}, provider string, pay
 
 func TestCompletionProtocolMatchesTheGolden(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
-	cachePath := modelCachePath()
-	if err := os.MkdirAll(filepath.Dir(cachePath), 0o700); err != nil {
+	cachePath := location.GetModelCachePath(os.Getenv(backend.EndpointVariable) != "")
+	if err := os.MkdirAll(filepath.Dir(cachePath), 0o700); err != nil { //nolint:gosec // the path is the test's own state directory
 		t.Fatal(err)
 	}
 	cache := []byte(`{"version":1,"providers":{"codex":{"models":[{"id":"gpt-5","efforts":["low","high"],"output":128000}]},"anthropic":{"models":[{"id":"claude-sonnet-5","efforts":["none","high"],"output":128000}]}}}`)
-	if err := os.WriteFile(cachePath, cache, 0o600); err != nil {
+	if err := os.WriteFile(cachePath, cache, 0o600); err != nil { //nolint:gosec // the path is the test's own state directory
 		t.Fatal(err)
 	}
 
@@ -1163,36 +1170,36 @@ func TestASubmittedMessageHasBackgroundRowsAboveAndBelowIt(t *testing.T) {
 }
 
 func TestReplayingACallThatWasNeverAnsweredLeavesNothingRunning(t *testing.T) {
-	blocksBefore := blocksStillRunning(t)
+	synctest.Test(t, func(t *testing.T) {
+		var screenOutput bytes.Buffer
 
-	var screenOutput bytes.Buffer
+		testConversation := &App{
+			agent:    agent.New("", quietProvider{}, nil),
+			screen:   output.New(&screenOutput),
+			recorder: record.New(testLog(t)),
+		}
 
-	testConversation := &Harness{
-		agent:    agent.New("", quietProvider{}, nil),
-		screen:   output.New(&screenOutput),
-		recorder: recordSession(testLog(t)),
-	}
+		testConversation.restore(&store.Session{
+			Events: []agent.Event{
+				{Kind: agent.UserMessageEvent, Text: "read them both"},
+				{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}},
+				{Kind: agent.ToolCallRequestEvent, ID: "2", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "two.go"}},
+				{Kind: agent.ToolCallResultEvent, ID: "1", Name: "read", Text: "package one"},
+			},
+		})
 
-	testConversation.restore(&store.Session{
-		Events: []agent.Event{
-			{Kind: agent.UserMessageEvent, Text: "read them both"},
-			{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}},
-			{Kind: agent.ToolCallRequestEvent, ID: "2", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "two.go"}},
-			{Kind: agent.ToolCallResultEvent, ID: "1", Name: "read", Text: "package one"},
-		},
+		if plain := style.Plain(screenOutput.String()); !strings.Contains(plain, "read two.go –") {
+			t.Errorf("expected the unanswered call to be closed on replay, got %q", plain)
+		}
 	})
-
-	if got := blocksStillRunning(t); got > blocksBefore {
-		t.Errorf("expected the block to have been closed, got %d redrawing where there were %d", got, blocksBefore)
-	}
 }
 
 func TestRestoringAConversationClearsTheTerminalBeforeReplaying(t *testing.T) {
 	var screenOutput bytes.Buffer
-	self := &Harness{
+	self := &App{
 		agent:    agent.New("", quietProvider{}, nil),
 		screen:   output.NewTerminalOfSize(&screenOutput, 80, 24),
-		recorder: recordSession(testLog(t)),
+		recorder: record.New(testLog(t)),
 	}
 
 	self.restore(&store.Session{Events: []agent.Event{{
@@ -1220,10 +1227,10 @@ func TestRestoringAConversationRestoresStateBeforeReturning(t *testing.T) {
 	}).Plain(func(context.Context, struct{}) (string, error) { return "", nil })
 
 	var screenOutput bytes.Buffer
-	self := &Harness{
+	self := &App{
 		agent:    agent.New("", quietProvider{}, []tool.Tool{statefulTool}),
 		screen:   output.New(&screenOutput),
-		recorder: recordSession(testLog(t)),
+		recorder: record.New(testLog(t)),
 	}
 	self.restore(&store.Session{Events: []agent.Event{{
 		Kind:  agent.StateChangeEvent,
@@ -1236,26 +1243,10 @@ func TestRestoringAConversationRestoresStateBeforeReturning(t *testing.T) {
 	}
 }
 
-func blocksStillRunning(t *testing.T) int {
-	t.Helper()
-
-	stacks := make([]byte, 1<<16)
-	for {
-		if wrote := runtime.Stack(stacks, true); wrote < len(stacks) {
-			stacks = stacks[:wrote]
-			break
-		}
-
-		stacks = make([]byte, 2*len(stacks))
-	}
-
-	return strings.Count(string(stacks), "dynamic.(*Block).run(")
-}
-
 func TestReplayingSaysTheWholeConversationAgain(t *testing.T) {
 	var screenOutput bytes.Buffer
 
-	testConversation := &Harness{
+	testConversation := &App{
 		agent:  agent.New("", quietProvider{}, nil),
 		screen: output.New(&screenOutput),
 	}
@@ -1347,7 +1338,7 @@ func TestTheFileASkillIsKeptInIsNotStoodOut(t *testing.T) {
 
 func TestWhetherACallChangedAnythingComesFromTheToolOfTheMoment(t *testing.T) {
 	var screenOutput bytes.Buffer
-	self := &Harness{
+	self := &App{
 		agent:  agent.New("", quietProvider{}, []tool.Tool{slowTool("write")}),
 		screen: output.New(&screenOutput),
 	}
@@ -1369,7 +1360,7 @@ func TestWhetherACallChangedAnythingComesFromTheToolOfTheMoment(t *testing.T) {
 
 func TestACallToAToolThatIsGoneKeepsWhatWasRecorded(t *testing.T) {
 	var screenOutput bytes.Buffer
-	self := &Harness{
+	self := &App{
 		agent:  agent.New("", quietProvider{}, nil),
 		screen: output.New(&screenOutput),
 	}
@@ -1392,10 +1383,10 @@ func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	const notice = "Background processes killed (tmux: server → bash → sleep)"
 
 	var live strings.Builder
-	self := &Harness{
+	self := &App{
 		agent:    agent.New("", quietProvider{}, nil),
 		screen:   output.NewTerminalOfSize(&live, 80, 24),
-		recorder: recordSession(testLog(t)),
+		recorder: record.New(testLog(t)),
 	}
 
 	call := agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}}
@@ -1429,10 +1420,10 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	tools := []tool.Tool{slowTool("read")}
 
 	var live bytes.Buffer
-	self := &Harness{
+	self := &App{
 		agent:    agent.New("", quietProvider{}, tools),
 		screen:   output.New(&live),
-		recorder: recordSession(testLog(t)),
+		recorder: record.New(testLog(t)),
 	}
 	livePainter := self.newPainter(true)
 
@@ -1521,7 +1512,7 @@ func TestAStoredCallIsShownTheWayItsToolShowsItNow(t *testing.T) {
 	current := truncate.Tool(buildSlowTool(
 		slowToolBuilder("read").Focuses(func(tool.ToolCall) string { return "one.go" }),
 	))
-	testConversation := &Harness{
+	testConversation := &App{
 		agent:  agent.New("", quietProvider{}, []tool.Tool{current}),
 		screen: output.New(&screenOutput),
 	}
@@ -1549,7 +1540,7 @@ func TestAStoredCallIsShownTheWayItsToolShowsItNow(t *testing.T) {
 func TestACallWhoseToolIsGoneKeepsWhatItLookedLike(t *testing.T) {
 	var screenOutput bytes.Buffer
 
-	testConversation := &Harness{
+	testConversation := &App{
 		agent:  agent.New("", quietProvider{}, nil),
 		screen: output.New(&screenOutput),
 	}
@@ -1581,7 +1572,7 @@ func (quietProvider) Send(context.Context, agent.Yield) (agent.Reply, error) {
 	return agent.Reply{}, nil
 }
 
-func testConversation(t *testing.T, screenOutput *bytes.Buffer) *Harness {
+func testConversation(t *testing.T, screenOutput *bytes.Buffer) *App {
 	t.Helper()
 
 	log, err := store.Create(t.TempDir(), store.Meta{})
@@ -1593,16 +1584,16 @@ func testConversation(t *testing.T, screenOutput *bytes.Buffer) *Harness {
 
 	backend := quietProvider{}
 
-	return &Harness{
+	return &App{
 		agent:              agent.New("", backend, nil),
 		screen:             output.New(screenOutput),
-		recorder:           recordSession(log),
+		recorder:           record.New(log),
 		mode:               caps.NewMode(caps.Read | caps.Write),
 		getOnWithItMessage: builtInConfig(t).GetOnWithItMessage,
 	}
 }
 
-func completeTurn(self *Harness) {
+func completeTurn(self *App) {
 	self.start("are you there")
 
 	for report := range self.currentTurn.Events() {
@@ -1664,44 +1655,40 @@ func TestAShellCallIsDrawnAsAShellPrompt(t *testing.T) {
 }
 
 func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
-	blocksBefore := blocksStillRunning(t)
+	synctest.Test(t, func(t *testing.T) {
+		var screenOutput bytes.Buffer
 
-	var screenOutput bytes.Buffer
+		testConversation := &App{
+			agent:  agent.New("", quietProvider{}, nil),
+			screen: output.New(&screenOutput),
+		}
 
-	testConversation := &Harness{
-		agent:  agent.New("", quietProvider{}, nil),
-		screen: output.New(&screenOutput),
-	}
+		testConversation.currentTurn = Turn{Stream: testRunningTurnStream(), painter: testConversation.newPainter(true)}
 
-	testConversation.currentTurn = Turn{Stream: testRunningTurnStream(), painter: testConversation.newPainter(true)}
+		testConversation.events = []agent.Event{
+			{Kind: agent.UserMessageEvent, Text: "read it"},
+			{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}},
+		}
 
-	testConversation.events = []agent.Event{
-		{Kind: agent.UserMessageEvent, Text: "read it"},
-		{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}},
-	}
+		previousPainter := testConversation.currentTurn.painter
 
-	previousPainter := testConversation.currentTurn.painter
+		testConversation.redraw()
 
-	testConversation.redraw()
+		if testConversation.currentTurn.painter == previousPainter {
+			t.Fatal("expected the turn to be given the painter that drew the replay")
+		}
 
-	if testConversation.currentTurn.painter == previousPainter {
-		t.Fatal("expected the turn to be given the painter that drew the replay")
-	}
+		testConversation.currentTurn.painter.DrawEvent(agent.Event{Kind: agent.ToolCallResultEvent, ID: "1", Name: "read", Took: time.Second})
 
-	if got := blocksStillRunning(t); got <= blocksBefore {
-		t.Fatal("expected the unanswered call to be on a block that is open again")
-	}
-
-	testConversation.currentTurn.painter.DrawEvent(agent.Event{Kind: agent.ToolCallResultEvent, ID: "1", Name: "read", Took: time.Second})
-
-	if got := blocksStillRunning(t); got > blocksBefore {
-		t.Errorf("expected nothing left redrawing, got %d blocks where there were %d", got, blocksBefore)
-	}
+		if plain := style.Plain(screenOutput.String()); !strings.Contains(plain, "read one.go ✓") {
+			t.Errorf("expected the replayed call to be answered on the block that was handed over, got %q", plain)
+		}
+	})
 }
 
 func TestARedrawDuringProvisionalReasoningRestoresTheOpenBlock(t *testing.T) {
 	var screenOutput bytes.Buffer
-	testConversation := &Harness{
+	testConversation := &App{
 		agent:  agent.New("", quietProvider{}, nil),
 		screen: output.New(&screenOutput),
 		events: []agent.Event{{Kind: agent.UserMessageEvent, Text: "think"}},
@@ -1747,7 +1734,7 @@ func TestAStreamingMermaidDiagramKeepsItsLastValidRendering(t *testing.T) {
 func TestARedrawKeepsTheLastValidStreamingMermaidDiagram(t *testing.T) {
 	const columns = 100
 	var screenOutput bytes.Buffer
-	testConversation := &Harness{screen: output.NewTerminalOfSize(&screenOutput, columns, 24)}
+	testConversation := &App{screen: output.NewTerminalOfSize(&screenOutput, columns, 24)}
 	testConversation.currentTurn = Turn{Stream: testRunningTurnStream(), painter: testConversation.newPainter(true)}
 
 	testConversation.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "```mermaid\ngraph LR\nA --> B"})
@@ -1839,7 +1826,7 @@ func TestCallEmphasisSourceIsDerivedFromRecordedArguments(t *testing.T) {
 	).SyntaxFrom("bash", func(args fakeArgs, _ string) string {
 		return args.Path
 	}).Plain(func(context.Context, fakeArgs) (string, error) { return "", nil })
-	conversation := &Harness{agent: agent.New("", quietProvider{}, []tool.Tool{current})}
+	conversation := &App{agent: agent.New("", quietProvider{}, []tool.Tool{current})}
 
 	fallback := describeHarnessCall(conversation, agent.Event{
 		Name:      "bash",
@@ -1864,7 +1851,7 @@ func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 		},
 		func(args fakeArgs) (string, string) { return args.Path, pathutil.Shorten(args.Path) },
 	).FocusPath().Plain(func(context.Context, fakeArgs) (string, error) { return "", nil })
-	testConversation := &Harness{
+	testConversation := &App{
 		agent:        agent.New("", quietProvider{}, []tool.Tool{current}),
 		workspaceDir: workspaceDir,
 	}
@@ -1911,7 +1898,7 @@ func TestARefusedCallIsDescribedAgainRatherThanFromTheRecord(t *testing.T) {
 		return errors.New("not in the mood")
 	}).Plain(func(context.Context, struct{}) (string, error) { return "", nil })
 
-	testConversation := &Harness{
+	testConversation := &App{
 		agent: agent.New("", quietProvider{}, []tool.Tool{refusing}),
 	}
 
@@ -1978,9 +1965,9 @@ func TestCompletedReasoningBlocksRemainSeparateInTheJournal(t *testing.T) {
 	}
 
 	var screenOutput bytes.Buffer
-	self := &Harness{
+	self := &App{
 		screen:   output.New(&screenOutput),
-		recorder: recordSession(log),
+		recorder: record.New(log),
 	}
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 
@@ -2039,9 +2026,9 @@ func TestIncompleteReasoningIsErasedBeforeAFailure(t *testing.T) {
 
 func TestDiscardedReasoningLeavesTheSameScreenAsReplay(t *testing.T) {
 	var liveOutput bytes.Buffer
-	self := &Harness{
+	self := &App{
 		screen:   output.NewTerminalOfSize(&liveOutput, 80, 24),
-		recorder: recordSession(testLog(t)),
+		recorder: record.New(testLog(t)),
 	}
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 
@@ -2096,6 +2083,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"inputblock":        {".ansi", ".screen"},
 		"lifecycle":         {".ansi", ".screen"},
 		"mermaid-streaming": {".screen"},
+		"new-session":       {".txt"},
 		"resume-mode":       {".ansi"},
 		"running":           {".ansi", ".screen"},
 		"segments":          {".ansi", ".screen"},
@@ -2221,7 +2209,7 @@ func TestTestdataContainsNoPersonalOrSecretMaterial(t *testing.T) {
 		if entry.IsDir() {
 			return nil
 		}
-		contents, err := os.ReadFile(path) //nolint:gosec // fixed testdata tree
+		contents, err := os.ReadFile(path) //nolint:gosec // the path comes from walking testdata
 		if err != nil {
 			return err
 		}
@@ -2299,22 +2287,6 @@ func TestTmpMountIsWritableWithoutAShell(t *testing.T) {
 	}
 }
 
-func TestAResumedConversationOpensInTheModeItWasLeftIn(t *testing.T) {
-	leftCaps := caps.Read | caps.Git
-	resumedSession := &store.Session{Events: []agent.Event{caps.ModeEvent(leftCaps)}}
-	assumed := cli.Options{Session: "one", Caps: caps.Read | caps.Write}
-
-	got, err := openingCaps(assumed, resumedSession)
-	if err != nil || got != leftCaps {
-		t.Errorf("expected %s, got %s and %v", leftCaps.Flags(), got.Flags(), err)
-	}
-
-	got, err = openingCaps(assumed, &store.Session{})
-	if err != nil || got != assumed.Caps {
-		t.Errorf("expected a silent session to leave %s alone, got %s and %v", assumed.Caps.Flags(), got.Flags(), err)
-	}
-}
-
 func TestAResumedConversationDrawsItsRecordedMode(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{Model: "gpt"})
@@ -2337,12 +2309,12 @@ func TestAResumedConversationDrawsItsRecordedMode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	restoredCaps, err := openingCaps(cli.Options{Caps: caps.Read | caps.Shell | caps.Write}, storedSession)
+	restoredCaps, err := sessions.OpeningCaps(caps.Read|caps.Shell|caps.Write, false, storedSession)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	resumedHarness := &Harness{mode: caps.NewResumedMode(restoredCaps)}
+	resumedHarness := &App{mode: caps.NewResumedMode(restoredCaps)}
 	modeSegment, err := modeToggle.New(resumedHarness.grantedCaps, resumedHarness.isPrefixPending)(nil)
 	if err != nil {
 		t.Fatal(err)
@@ -2356,21 +2328,7 @@ func TestAResumedConversationDrawsItsRecordedMode(t *testing.T) {
 	compareWithGolden(t, "resume-mode", ".ansi", passes)
 }
 
-func TestAResumedConversationCannotBeAskedForAnotherMode(t *testing.T) {
-	leftCaps := caps.Read | caps.Git
-	resumedSession := &store.Session{Events: []agent.Event{caps.ModeEvent(leftCaps)}}
-
-	if _, err := openingCaps(cli.Options{Session: "one", Caps: caps.Read | caps.Shell, WereCapsChosen: true}, resumedSession); err == nil {
-		t.Error("expected another mode to be refused")
-	}
-
-	got, err := openingCaps(cli.Options{Session: "one", Caps: leftCaps, WereCapsChosen: true}, resumedSession)
-	if err != nil || got != leftCaps {
-		t.Errorf("expected the mode it was left in to be allowed, got %s and %v", got.Flags(), err)
-	}
-}
-
-func modeFixture(t *testing.T) (*Harness, string) {
+func modeFixture(t *testing.T) (*App, string) {
 	t.Helper()
 
 	currentCaps := caps.Read | caps.Write | caps.Shell
@@ -2386,9 +2344,9 @@ func modeFixture(t *testing.T) (*Harness, string) {
 		t.Fatal(err)
 	}
 
-	self := &Harness{
+	self := &App{
 		agent:    agent.New("", quietProvider{}, nil),
-		recorder: recordSession(log),
+		recorder: record.New(log),
 		screen:   output.New(&bytes.Buffer{}),
 		mode:     caps.NewMode(currentCaps),
 	}
@@ -2397,7 +2355,7 @@ func modeFixture(t *testing.T) (*Harness, string) {
 	return self, directory
 }
 
-func recordedModes(t *testing.T, self *Harness, directory string) []agent.Event {
+func recordedModes(t *testing.T, self *App, directory string) []agent.Event {
 	t.Helper()
 
 	storedSession, err := store.Read(directory, self.recorder.Name())
@@ -2486,32 +2444,6 @@ func TestAModeChangeSaysItselfInTheScrollback(t *testing.T) {
 	}
 }
 
-func TestOnlyNamedToolsAreEnabled(t *testing.T) {
-	availableTools := []tool.Tool{slowTool("read"), slowTool("grep"), slowTool("write")}
-
-	allTools, err := reduceTools(availableTools, nil)
-	if err != nil || len(allTools) != len(availableTools) {
-		t.Fatalf("expected every tool by default, got %v, %v", allTools, err)
-	}
-
-	enabledTools, err := reduceTools(availableTools, []string{"write", "read", "read"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	names := make([]string, 0, len(enabledTools))
-	for _, enabledTool := range enabledTools {
-		names = append(names, enabledTool.Name())
-	}
-	if !slices.Equal(names, []string{"read", "write"}) {
-		t.Errorf("expected read and write in canonical order, got %v", names)
-	}
-
-	if _, err := reduceTools(availableTools, []string{"gone"}); err == nil {
-		t.Error("expected an unavailable tool to be rejected")
-	}
-}
-
 func TestMermaidStreamingDrawsWhatItDrewBefore(t *testing.T) {
 	compareWithGolden(t, "mermaid-streaming", ".screen", map[string]func() string{
 		"1 first valid prefix": func() string {
@@ -2545,7 +2477,7 @@ func mermaidStreamingScreen(t *testing.T, deltas ...string) string {
 func mermaidStreamingRedrawnScreen(t *testing.T) string {
 	t.Helper()
 	var screenOutput bytes.Buffer
-	testConversation := &Harness{screen: output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)}
+	testConversation := &App{screen: output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)}
 	testConversation.currentTurn = Turn{Stream: testRunningTurnStream(), painter: testConversation.newPainter(true)}
 	testConversation.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "```mermaid\ngraph LR\nA --> B"})
 	testConversation.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "\nB -->"})
@@ -2568,7 +2500,7 @@ func buildTestBinary(t *testing.T) string {
 	t.Helper()
 
 	binary := filepath.Join(t.TempDir(), "oh")
-	command := exec.CommandContext(t.Context(), "go", "build", "-o", binary, ".") //nolint:gosec // fixed Go tool and test output path
+	command := exec.CommandContext(t.Context(), "go", "build", "-o", binary, ".") //nolint:gosec // building the binary under test
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("build oh: %v\n%s", err, output)
 	}
@@ -2578,7 +2510,7 @@ func buildTestBinary(t *testing.T) string {
 func runTestBinary(t *testing.T, binary string, environment []string, arguments ...string) string {
 	t.Helper()
 
-	command := exec.CommandContext(t.Context(), binary, arguments...) //nolint:gosec // binary was built by this test
+	command := exec.CommandContext(t.Context(), binary, arguments...) //nolint:gosec // running the binary under test
 	command.Env = environment
 	output, err := command.CombinedOutput()
 	if err != nil {
@@ -2590,7 +2522,8 @@ func runTestBinary(t *testing.T, binary string, environment []string, arguments 
 func testBinaryEnvironment(t *testing.T, stateDirectory string) []string {
 	t.Helper()
 
-	return append(os.Environ(),
+	return append(
+		os.Environ(),
 		"HOME="+t.TempDir(),
 		"XDG_CONFIG_HOME="+t.TempDir(),
 		"XDG_STATE_HOME="+stateDirectory,
@@ -2600,7 +2533,7 @@ func testBinaryEnvironment(t *testing.T, stateDirectory string) []string {
 func TestModelListDispatchRunsThroughTheBinary(t *testing.T) {
 	binary := buildTestBinary(t)
 	stateDirectory := t.TempDir()
-	cachePath := filepath.Join(stateDirectory, namespace, app, "models.json")
+	cachePath := filepath.Join(stateDirectory, "org.crdx", "oh", "models.json")
 	if err := os.MkdirAll(filepath.Dir(cachePath), 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -2623,7 +2556,7 @@ func TestModelUpdateDispatchRunsThroughTheBinary(t *testing.T) {
 
 	address := endpoint.Addresses(server.URL)[sim.Messages]
 	stateDirectory := t.TempDir()
-	environment := append(testBinaryEnvironment(t, stateDirectory), endpointVariable+"="+address)
+	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
 
 	updated := runTestBinary(t, binary, environment, "-u")
 	if !strings.Contains(updated, "Stored model list") {
@@ -2631,7 +2564,7 @@ func TestModelUpdateDispatchRunsThroughTheBinary(t *testing.T) {
 	}
 
 	listed := runTestBinary(t, binary, environment, "-l")
-	for _, providerName := range providerNames {
+	for _, providerName := range model.ProviderNames() {
 		if !strings.Contains(listed, providerName+"/fake") {
 			t.Errorf("listing omitted %s: %q", providerName, listed)
 		}
@@ -2650,62 +2583,94 @@ func TestAnEffortWrittenAsAnAliasInTheConfigIsResolved(t *testing.T) {
 	}
 }
 
-func TestUpdatingAgainstAStandInEndpointDescribesEveryProvider(t *testing.T) {
-	t.Setenv("XDG_STATE_HOME", t.TempDir())
+func TestWhatNewSessionMakesOfAModelGlob(t *testing.T) {
+	compareWithGolden(t, "new-session", ".txt", map[string]func() string{
+		"model globs":     func() string { return resolveNewSessionGlobs(t) },
+		"effort fallback": resolveNearestEfforts,
+	})
+}
 
-	endpoint := sim.New(&sim.Scenario{Model: "fake", Turns: []sim.Turn{{Say: "Hello."}}})
-	server := httptest.NewServer(endpoint)
-	t.Cleanup(server.Close)
-
-	address := endpoint.Addresses(server.URL)[sim.Messages]
-	if address == "" {
-		t.Fatal("expected the Messages API to be served")
+func newSessionFixtureChoices() []model.Choice {
+	return []model.Choice{
+		{Provider: "anthropic", Model: "claude-opus-4-5", EffortLevels: []string{"low", "high"}},
+		{Provider: "anthropic", Model: "claude-sonnet-4-5", EffortLevels: []string{"medium"}},
+		{Provider: "codex", Model: "gpt-5.6-sol", EffortLevels: []string{"none", "high"}},
 	}
+}
 
-	var output bytes.Buffer
-	if err := model.Update(&output, address, modelCachePath(), listProviderModels); err != nil {
-		t.Fatalf("unexpected error: %v, output %q", err, output.String())
-	}
+func resolveNewSessionGlobs(t *testing.T) string {
+	t.Helper()
 
-	choices := model.Choices(modelCachePath())
-	for _, providerName := range providerNames {
-		var matches []model.Choice
-		for _, choice := range choices {
-			if choice.Provider == providerName {
-				matches = append(matches, choice)
-			}
-		}
+	choices := newSessionFixtureChoices()
+	var written strings.Builder
 
-		if len(matches) != 1 || matches[0].Model != "fake" {
-			t.Errorf("expected %s to offer the scenario's model, got %v", providerName, matches)
+	for _, glob := range []string{
+		"",
+		"opus",
+		"OPUS",
+		"anthropic/claude-opus-4-5",
+		"sonnet",
+		"gpt",
+		"opus@high",
+		"nope",
+		"nonsense",
+	} {
+		transition, err := newSessionTransition("/workspace", glob, "medium", choices)
+		if err != nil {
+			fmt.Fprintf(&written, "%-28q error: %v\n", glob, err)
 
 			continue
 		}
 
-		if matches[0].MaxOutputTokens <= 0 {
-			t.Errorf("expected %s to know what the model may write, got %v", providerName, matches[0])
-		}
+		fmt.Fprintf(&written, "%-28q %s %s\n", glob, transitionKindName(transition.Kind), strings.Join(transition.Arguments, " "))
 	}
+
+	return written.String()
 }
 
-func testModelSelections() []model.Selection {
-	return []model.Selection{
-		{Provider: opencodeGoProvider, Model: "deepseek-v4-pro", Effort: "high"},
-		{Provider: anthropicProvider, Model: "claude-opus-5", Effort: "max"},
+func transitionKindName(kind cycle.TransitionKind) string {
+	switch kind {
+	case cycle.Quit:
+		return "quit"
+	case cycle.NewSession:
+		return "new"
+	case cycle.ResumeSession:
+		return "resume"
+	case cycle.Restart:
+		return "restart"
 	}
+
+	return "unknown"
+}
+
+func resolveNearestEfforts() string {
+	var written strings.Builder
+
+	for _, available := range [][]string{
+		{"low", "high"},
+		{"medium"},
+		{"none", "minimal"},
+		{"xhigh", "max"},
+	} {
+		for _, current := range []string{"none", "low", "medium", "high", "max", "unrecognised"} {
+			fmt.Fprintf(&written, "%-14q of %-20s -> %q\n", current, "{"+strings.Join(available, ",")+"}", nearestEffort(current, available))
+		}
+	}
+
+	return written.String()
 }
 
 func useRoundRobinModelCache(t *testing.T) string {
 	t.Helper()
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
-	path := modelCachePath()
-	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+	path := location.GetModelCachePath(os.Getenv(backend.EndpointVariable) != "")
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil { //nolint:gosec // the path is the test's own state directory
 		t.Fatal(err)
 	}
 
 	data := []byte(`{"version":1,"providers":{"codex":{"models":[{"id":"gpt-5.6-sol","efforts":["none","high"],"output":128000}]},"opencode-go":{"models":[{"id":"deepseek-v4-pro","efforts":["high","max"],"output":128000}]},"anthropic":{"models":[{"id":"claude-opus-5","efforts":["high","max"],"output":128000}]}}}`)
-	if err := os.WriteFile(path, data, 0o600); err != nil {
+	if err := os.WriteFile(path, data, 0o600); err != nil { //nolint:gosec // the path is the test's own state directory
 		t.Fatal(err)
 	}
 
@@ -2718,7 +2683,7 @@ func newTestPainter(screen *output.Screen, isRunning bool) *Painter {
 	return painter.New(screen, isRunning, nil, "")
 }
 
-func describeHarnessCall(harness *Harness, event agent.Event) agent.FallbackRendering {
+func describeHarnessCall(harness *App, event agent.Event) agent.FallbackRendering {
 	return call.Describe(event, harness.agent.Tool, harness.workspaceDir)
 }
 
@@ -2728,26 +2693,26 @@ func describeBareCall(workspaceDir string, event agent.Event) agent.FallbackRend
 
 func TestTmpWouldShadowAWorkspace(t *testing.T) {
 	for _, workspaceDir := range []string{sandbox.TmpDir, filepath.Join(sandbox.TmpDir, "project")} {
-		if !workspacePathIsShadowed(workspaceDir) {
+		if !workspace.IsShadowed(workspaceDir) {
 			t.Errorf("expected %q to be shadowed", workspaceDir)
 		}
 	}
 
 	for _, workspaceDir := range []string{"/", "/tmp-project"} {
-		if workspacePathIsShadowed(workspaceDir) {
+		if workspace.IsShadowed(workspaceDir) {
 			t.Errorf("did not expect %q to be shadowed", workspaceDir)
 		}
 	}
 }
 
 func TestAWorkspaceUnderTmpIsRefused(t *testing.T) {
-	if err := ensureWorkspaceIsNotShadowed(t.TempDir()); !errors.Is(err, errWorkspaceShadowed) {
+	if err := workspace.Validate(t.TempDir()); !errors.Is(err, workspace.ErrShadowed) {
 		t.Errorf("got %v, want the workspace shadowing error", err)
 	}
 }
 
 func TestAWorkspaceOutsideTmpIsAccepted(t *testing.T) {
-	if err := ensureWorkspaceIsNotShadowed("/"); err != nil {
+	if err := workspace.Validate("/"); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
@@ -2758,7 +2723,7 @@ func TestAWorkspaceNamedThroughTmpIsRefused(t *testing.T) {
 		t.Fatalf("could not create workspace alias: %v", err)
 	}
 
-	if err := ensureWorkspaceIsNotShadowed(alias); !errors.Is(err, errWorkspaceShadowed) {
+	if err := workspace.Validate(alias); !errors.Is(err, workspace.ErrShadowed) {
 		t.Errorf("got %v, want the workspace shadowing error", err)
 	}
 }
@@ -2766,7 +2731,7 @@ func TestAWorkspaceNamedThroughTmpIsRefused(t *testing.T) {
 func TestARelativeXDGStateHomeIsIgnored(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", filepath.Join("inside", "workspace"))
 
-	got := sessionsDir()
+	got := location.GetSessionsDir()
 	if !filepath.IsAbs(got) {
 		t.Fatalf("got relative state path %q", got)
 	}
@@ -2779,8 +2744,8 @@ func TestAnAbsoluteXDGStateHomeIsUsed(t *testing.T) {
 	root := t.TempDir()
 	t.Setenv("XDG_STATE_HOME", root)
 
-	want := filepath.Join(root, namespace, app, "sessions")
-	if got := sessionsDir(); got != want {
+	want := filepath.Join(root, "org.crdx", "oh", "sessions")
+	if got := location.GetSessionsDir(); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -2789,8 +2754,8 @@ func TestTheConfigIsInTheXDGConfigDirectory(t *testing.T) {
 	root := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", root)
 
-	want := filepath.Join(root, namespace, app, "config.toml")
-	if got := configFile(); got != want {
+	want := filepath.Join(root, "org.crdx", "oh", "config.toml")
+	if got := location.GetConfigFile(); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -2799,8 +2764,8 @@ func TestTheGlobalContextIsInTheXDGConfigDirectory(t *testing.T) {
 	root := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", root)
 
-	want := filepath.Join(root, namespace, app, "SYSTEM.md")
-	if got := globalContextPath(); got != want {
+	want := filepath.Join(root, "org.crdx", "oh", "SYSTEM.md")
+	if got := location.GetGlobalContextPath(); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -2835,7 +2800,7 @@ func TestPick(t *testing.T) {
 		}
 	}
 
-	sessions, err := loadSessions(directory)
+	sessions, err := sessions.Load(directory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2915,174 +2880,6 @@ func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 	}
 	if got != string(want) {
 		t.Errorf("system prompt differs from %s\n--- got ---\n%s\n--- want ---\n%s", goldenPath, got, want)
-	}
-}
-
-func TestResolveProviderChoiceFallsBackToTheConfig(t *testing.T) {
-	configured := []model.Selection{{
-		Provider: opencodeGoProvider,
-		Model:    "configured-model",
-		Effort:   "medium",
-	}}
-	providerName, model, effort, err := resolveProviderChoice(
-		"", "", "", configured, filepath.Join(t.TempDir(), "round-robin.json"), nil,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if providerName != opencodeGoProvider || model != "configured-model" || effort != "medium" {
-		t.Errorf("got provider %q, model %q, and effort %q", providerName, model, effort)
-	}
-}
-
-func TestResolveProviderChoicePrefersTheCommandLine(t *testing.T) {
-	resumed := &store.Session{Meta: store.Meta{
-		Provider: opencodeGoProvider,
-		Model:    "saved-model",
-		Effort:   "low",
-	}}
-	providerName, model, effort, err := resolveProviderChoice(
-		opencodeGoProvider,
-		"requested-model",
-		"high",
-		[]model.Selection{{Provider: codexProvider, Model: "configured-model", Effort: "medium"}},
-		"",
-		resumed,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if providerName != opencodeGoProvider || model != "requested-model" || effort != "high" {
-		t.Errorf("got provider %q, model %q, and effort %q", providerName, model, effort)
-	}
-}
-
-func TestResolveProviderChoiceRefusesToResumeUnderAnotherProvider(t *testing.T) {
-	resumed := &store.Session{Meta: store.Meta{Provider: opencodeGoProvider, Model: "saved-model"}}
-
-	providerName, model, effort, err := resolveProviderChoice(
-		codexProvider, "requested-model", "high", nil, "", resumed,
-	)
-	if err == nil || !strings.Contains(err.Error(), "cannot resume a opencode-go session with codex") {
-		t.Fatalf("got provider %q, model %q, effort %q, and error %v", providerName, model, effort, err)
-	}
-}
-
-func TestResolveProviderChoiceResumesUnderTheRecordedProvider(t *testing.T) {
-	resumed := &store.Session{Meta: store.Meta{Provider: opencodeGoProvider, Model: "saved-model", Effort: "low"}}
-
-	providerName, model, effort, err := resolveProviderChoice(
-		"", "", "",
-		[]model.Selection{{Provider: codexProvider, Model: "configured-model", Effort: "medium"}},
-		"",
-		resumed,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if providerName != opencodeGoProvider || model != "saved-model" || effort != "low" {
-		t.Errorf("got provider %q, model %q, and effort %q", providerName, model, effort)
-	}
-}
-
-func TestResolveProviderChoiceRequiresAModel(t *testing.T) {
-	providerName, model, effort, err := resolveProviderChoice("", "", "", nil, "", nil)
-	if err == nil || !strings.Contains(err.Error(), "-m provider/model@effort") {
-		t.Fatalf("got provider %q, model %q, effort %q, and error %v", providerName, model, effort, err)
-	}
-}
-
-func TestAnExplicitModelDoesNotAdvanceTheConfiguredRotation(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "round-robin.json")
-	providerName, model, effort, err := resolveProviderChoice(
-		codexProvider, "requested", "high", testModelSelections(), path, nil,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if providerName != codexProvider || model != "requested" || effort != "high" {
-		t.Errorf("got %s/%s@%s", providerName, model, effort)
-	}
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		t.Errorf("expected no cursor state, got %v", err)
-	}
-}
-
-func TestAResumedModelDoesNotAdvanceTheConfiguredRotation(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "round-robin.json")
-	resumed := &store.Session{Meta: store.Meta{Provider: codexProvider, Model: "saved", Effort: "high"}}
-	providerName, model, effort, err := resolveProviderChoice("", "", "", testModelSelections(), path, resumed)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if providerName != codexProvider || model != "saved" || effort != "high" {
-		t.Errorf("got %s/%s@%s", providerName, model, effort)
-	}
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		t.Errorf("expected no cursor state, got %v", err)
-	}
-}
-
-func TestAnthropicConnectsBeforeItNeedsCredentials(t *testing.T) {
-	t.Setenv("XDG_STATE_HOME", t.TempDir())
-	client, err := connect(model.Choice{Provider: anthropicProvider, Model: "claude-opus-5", MaxOutputTokens: 128_000}, "high", "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if client == nil {
-		t.Fatal("expected a connection")
-	}
-}
-
-func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
-	t.Setenv("XDG_STATE_HOME", t.TempDir())
-
-	tests := []struct {
-		name     string
-		choice   model.Choice
-		endpoint string
-		want     string
-	}{
-		{
-			"codex",
-			model.Choice{Provider: codexProvider},
-			"",
-			"codex: Model is empty",
-		},
-		{
-			"opencode-go",
-			model.Choice{Provider: opencodeGoProvider, Model: "deepseek-v4-pro"},
-			"http://somewhere",
-			"chat: MaxOutputTokens is 0",
-		},
-		{
-			"anthropic",
-			model.Choice{Provider: anthropicProvider, MaxOutputTokens: 128_000},
-			"",
-			"anthropic: Model is empty",
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			client, err := connect(test.choice, "high", test.endpoint)
-
-			if err == nil || !strings.Contains(err.Error(), test.want) {
-				t.Fatalf("expected %q, got %v", test.want, err)
-			}
-
-			if client != nil {
-				t.Errorf("expected no connection to be handed back, got %+v", client)
-			}
-		})
-	}
-}
-
-func TestOpenCodeRequiresLogin(t *testing.T) {
-	t.Setenv("XDG_STATE_HOME", t.TempDir())
-	_, err := connect(model.Choice{Provider: opencodeGoProvider, Model: "deepseek-v4-pro", MaxOutputTokens: 128_000}, "high", "")
-	if err == nil || !strings.Contains(err.Error(), "login command with opencode-go") {
-		t.Fatalf("got error %v", err)
 	}
 }
 
@@ -3207,8 +3004,7 @@ func writeTranscript(t *testing.T, entries []replayEntry) string {
 		t.Fatal(err)
 	}
 
-	//nolint:gosec // the path names a file this test just wrote in its own temporary directory
-	written, err := os.ReadFile(path)
+	written, err := os.ReadFile(path) //nolint:gosec // the path is the test's own transcript file
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -3272,7 +3068,10 @@ func TestATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
 	}
 
 	compareWithGolden(t, "running", ".ansi", passes)
-	compareWithGolden(t, "running", ".screen", shownPasses(t, passes))
+
+	screenPasses := shownPasses(t, passes)
+	screenPasses["help during reasoning"] = func() string { return shownHelpDuringReasoningFrames(t) }
+	compareWithGolden(t, "running", ".screen", screenPasses)
 }
 
 func drawDiscardedReasoning(t *testing.T) string {
@@ -3348,8 +3147,7 @@ func compareWithGolden(t *testing.T, name string, suffix string, passes map[stri
 		return
 	}
 
-	//nolint:gosec // the path names a golden beside the journal it belongs to
-	want, err := os.ReadFile(goldenPath)
+	want, err := os.ReadFile(goldenPath) //nolint:gosec // fixed testdata path
 	if err != nil {
 		t.Fatalf("%v: write the goldens with `just -f rig.just goldens`", err)
 	}
@@ -3366,14 +3164,12 @@ func compareWithGolden(t *testing.T, name string, suffix string, passes map[stri
 func readJournal(t *testing.T, path string) []replayEntry {
 	t.Helper()
 
-	//nolint:gosec // the path names a journal in testdata
-	contents, err := os.ReadFile(path)
+	contents, err := os.ReadFile(path) //nolint:gosec // the path is the test's own journal
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var entries []replayEntry
-
 	for number, line := range strings.Split(strings.TrimSpace(string(contents)), "\n") {
 		var entry replayEntry
 		if err := json.Unmarshal([]byte(line), &entry); err != nil {
@@ -3387,7 +3183,7 @@ func readJournal(t *testing.T, path string) []replayEntry {
 }
 
 type replayRig struct {
-	chat         *Harness
+	chat         *App
 	written      *strings.Builder
 	workspaceDir string
 }
@@ -3441,11 +3237,11 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 	return &replayRig{
 		written:      &written,
 		workspaceDir: workspaceDir,
-		chat: &Harness{
+		chat: &App{
 			agent:        agent.New("", quietProvider{}, tools),
 			screen:       screen,
 			workspaceDir: workspaceDir,
-			recorder:     recordSession(testLog(t)),
+			recorder:     record.New(testLog(t)),
 		},
 	}
 }
@@ -3701,13 +3497,13 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 				return drawnOnAStoppedClock(t, func(t *testing.T) string {
 					t.Helper()
 
-					held := &Harness{mode: caps.NewMode(grantedCaps)}
+					held := &App{mode: caps.NewMode(grantedCaps)}
 					held.currentTurn.Stream = testTimedTurnStream(isRunning, time.Now().Add(-turnSoFar), time.Now())
 					held.currentTurn.spinnerFrame = 2
 
 					built := goldenBarLayout(t, held)
 
-					return bar(built, segment.BottomLeft, edit.Frame{})
+					return renderBar(built, segment.BottomLeft, edit.Frame{})
 				})
 			}
 		}
@@ -3718,7 +3514,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 		"context usage high": 182_000,
 	} {
 		passes[name] = func() string {
-			held := &Harness{
+			held := &App{
 				mode:    caps.NewMode(caps.All()),
 				metrics: metrics.New(200_000),
 				events: []agent.Event{{
@@ -3730,7 +3526,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 
 			built := goldenBarLayout(t, held)
 
-			return bar(built, segment.BottomLeft, edit.Frame{})
+			return renderBar(built, segment.BottomLeft, edit.Frame{})
 		}
 	}
 
@@ -3774,7 +3570,7 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 				return drawnOnAStoppedClock(t, func(t *testing.T) string {
 					t.Helper()
 
-					held := &Harness{mode: caps.NewMode(caps.All())}
+					held := &App{mode: caps.NewMode(caps.All())}
 					held.currentTurn.Stream = testTimedTurnStream(true, time.Now().Add(-turnSoFar), time.Time{})
 					held.currentTurn.spinnerFrame = 2
 
@@ -4057,7 +3853,30 @@ func goldenSegmentPass(
 	return func() string { return built.Render(context) }
 }
 
-func goldenBarLayout(t *testing.T, harness *Harness) segment.Layout {
+func availableSegments(
+	workspaceDir string,
+	currentSessionName string,
+	modelName string,
+	modelEffort string,
+	harness *App,
+) segment.Registry {
+	return bar.NewRegistry(bar.Options{
+		WorkspaceDir:       workspaceDir,
+		CurrentSessionName: currentSessionName,
+		ModelName:          modelName,
+		ModelEffort:        modelEffort,
+		Sources:            harness.getBarSources(),
+	})
+}
+
+func renderBar(layout segment.Layout, position segment.Position, frame edit.Frame) string {
+	return bar.Render(layout, position, segment.Context{
+		HiddenLinesAbove: frame.HiddenLinesAbove,
+		HiddenLinesBelow: frame.HiddenLinesBelow,
+	})
+}
+
+func goldenBarLayout(t *testing.T, harness *App) segment.Layout {
 	t.Helper()
 
 	config := configFrom(t, `
@@ -4306,7 +4125,7 @@ func TestSessionsComeFromJournalParsing(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sessions, err := loadSessions(directory)
+	sessions, err := sessions.Load(directory)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -4322,66 +4141,8 @@ func TestSessionsComeFromJournalParsing(t *testing.T) {
 }
 
 func TestChoosingWithoutStoredSessionsFails(t *testing.T) {
-	if _, err := chooseStoredSession(t.TempDir(), nil, nil); err == nil {
+	if _, err := sessions.Choose(t.TempDir(), nil, nil); err == nil {
 		t.Error("expected an empty session list to fail")
-	}
-}
-
-func TestLoadingACrashedSessionIsRefusedWithoutChangingItsJournal(t *testing.T) {
-	t.Setenv("XDG_STATE_HOME", t.TempDir())
-	writer, err := store.Create(sessionsDir(), store.Meta{WorkspaceDir: t.TempDir()})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := writer.Event(agent.Event{Kind: agent.ModelMessageEvent, Text: "looks complete"}); err != nil {
-		t.Fatal(err)
-	}
-	name := writer.Name()
-	if err := writer.Close(); err != nil {
-		t.Fatal(err)
-	}
-
-	path := filepath.Join(sessionsDir(), name, "session.jsonl")
-	before, err := os.ReadFile(path) //nolint:gosec // the test's own session
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := loadSession(name); err == nil || !strings.Contains(err.Error(), "did not finish every turn") {
-		t.Fatalf("expected the crashed session to be refused, got %v", err)
-	}
-	match, err := os.ReadFile(path) //nolint:gosec // the test's own session
-	if err != nil {
-		t.Fatal(err)
-	}
-	if string(match) != string(before) {
-		t.Error("refusing the crashed session changed its journal")
-	}
-}
-
-func TestLoadingACompletedSessionSucceeds(t *testing.T) {
-	t.Setenv("XDG_STATE_HOME", t.TempDir())
-	writer, err := store.Create(sessionsDir(), store.Meta{WorkspaceDir: t.TempDir()})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := writer.Item(json.RawMessage(`{"role":"user"}`)); err != nil {
-		t.Fatal(err)
-	}
-	if err := writer.CompleteTurn(); err != nil {
-		t.Fatal(err)
-	}
-	if err := writer.Close(); err != nil {
-		t.Fatal(err)
-	}
-
-	if _, err := loadSession(writer.Name()); err != nil {
-		t.Fatalf("expected the completed session to load: %v", err)
 	}
 }
 
@@ -4401,7 +4162,7 @@ func TestChoosingASessionFromANewerOhAdvisesAnUpgrade(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err := chooseStoredSession(directory, nil, nil)
+	_, err := sessions.Choose(directory, nil, nil)
 	if err == nil {
 		t.Fatal("expected the newer session to be refused")
 	}
@@ -4417,7 +4178,7 @@ func TestChoosingAnOutdatedSessionAdvisesMigration(t *testing.T) {
 	directory := t.TempDir()
 	writeStoredSession(t, directory, "able-dolphin", "2026-08-01T00:00:00Z")
 
-	_, err := chooseStoredSession(directory, nil, nil)
+	_, err := sessions.Choose(directory, nil, nil)
 	if err == nil {
 		t.Fatal("expected the outdated session to be refused")
 	}
@@ -4444,7 +4205,7 @@ func TestSlashCommandRunsImmediately(t *testing.T) {
 
 	self := slashCommandFixture(t, caps.Read|caps.Shell)
 	self.commands = fixtureCommands
-	if got := self.handleSlashCommand("/fixture one two"); got != handledCommand {
+	if got := self.handleCommand("/fixture one two"); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
 	if !ran {
@@ -4464,7 +4225,7 @@ func TestSlashCommandCanAddANotice(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
 	self.commands = fixtureCommands
-	if got := self.handleSlashCommand("/fixture"); got != handledCommand {
+	if got := self.handleCommand("/fixture"); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
 	if len(self.events) != 1 {
@@ -4517,7 +4278,7 @@ func TestSnippetKeepsItsInvocationInHistoryAndQueuesItsRenderedPrompt(t *testing
 	if !pending.Replacement || pending.Message != "Add the following:\n\nreview this" {
 		t.Errorf("got queued turn %+v", pending)
 	}
-	body, err := os.ReadFile(historyPath) //nolint:gosec // the test's own path
+	body, err := os.ReadFile(historyPath) //nolint:gosec // the path is the test's own history file
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -4571,7 +4332,7 @@ func TestPlainSnippetInputWaitsForTheRenderedPrompt(t *testing.T) {
 	if !slices.Equal(userMessages, []string{"Question: why / why now"}) {
 		t.Errorf("got user messages %q", userMessages)
 	}
-	body, err := os.ReadFile(historyPath) //nolint:gosec // the test's own path
+	body, err := os.ReadFile(historyPath) //nolint:gosec // the path is the test's own history file
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -4587,7 +4348,7 @@ func TestSnippetTemplateErrorsAreReportedByTheHarness(t *testing.T) {
 		"review": "{{index .Args 2}}",
 	})
 
-	if got := self.handleSlashCommand("//review only-one"); got != handledCommand {
+	if got := self.handleCommand("//review only-one"); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
 	if len(self.events) != 1 || !strings.HasPrefix(self.events[0].Text, "//review: Could not render template:") {
@@ -4652,7 +4413,8 @@ func TestTabCompletionKeepsCommandNamespacesSeparate(t *testing.T) {
 
 func TestTabCompletesAUniqueSlashCommand(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
-	self.commands = fixtureCommandRegistry(t,
+	self.commands = fixtureCommandRegistry(
+		t,
 		slash.Command{Name: "conf", Run: slashTestHandler},
 		slash.Command{Name: "copy", Run: slashTestHandler},
 		slash.Command{Name: "open", Run: slashTestHandler},
@@ -4707,7 +4469,7 @@ func fixtureRegistry(t *testing.T, sets ...slash.CommandSet) slash.Registry {
 	return registry
 }
 
-func slashCommandFixture(t *testing.T, currentCaps caps.Set) *Harness {
+func slashCommandFixture(t *testing.T, currentCaps caps.Set) *App {
 	t.Helper()
 
 	log, err := store.Create(t.TempDir(), store.Meta{Model: "gpt"})
@@ -4716,15 +4478,16 @@ func slashCommandFixture(t *testing.T, currentCaps caps.Set) *Harness {
 	}
 	t.Cleanup(func() { _ = log.Close() })
 
-	return &Harness{
-		recorder: recordSession(log),
+	return &App{
+		recorder: record.New(log),
 		mode:     caps.NewMode(currentCaps),
 	}
 }
 
 func TestConsecutiveTabsCycleCommandArguments(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
-	self.commands = fixtureCommandRegistry(t,
+	self.commands = fixtureCommandRegistry(
+		t,
 		slash.Command{Name: "copy", Run: slashTestHandler}.WithArguments("session-name", "session-id", "session-dir"),
 	)
 	editor := edit.NewInput(nil)
@@ -4743,6 +4506,20 @@ func TestConsecutiveTabsCycleCommandArguments(t *testing.T) {
 	}
 }
 
+func TestARequestedTransitionStopsTheApp(t *testing.T) {
+	self := slashCommandFixture(t, caps.Read)
+	transition := cycle.Transition{Kind: cycle.NewSession, Arguments: []string{"-d", "/workspace"}}
+	if err := self.requestTransition(transition); err != nil {
+		t.Fatal(err)
+	}
+	if self.apply(edit.NewInput(nil), nil, key.Key{}) {
+		t.Error("expected the app to stop")
+	}
+	if !slices.Equal(self.transition.Arguments, transition.Arguments) {
+		t.Errorf("got transition %+v", self.transition)
+	}
+}
+
 func TestSlashCommandCanAddASuccessMessage(t *testing.T) {
 	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
 		Name: "fixture",
@@ -4755,7 +4532,7 @@ func TestSlashCommandCanAddASuccessMessage(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
 	self.commands = fixtureCommands
-	if got := self.handleSlashCommand("/fixture"); got != handledCommand {
+	if got := self.handleCommand("/fixture"); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
 	if len(self.events) != 1 || self.events[0].Status != agent.SuccessStatus {
@@ -4773,7 +4550,7 @@ func TestUsageErrorIsNotPrefixedWithTheCommandName(t *testing.T) {
 		},
 	}.WithArguments("session-name", "session-id", "session-dir"))
 
-	if got := self.handleSlashCommand("/copy"); got != rejectedCommand {
+	if got := self.handleCommand("/copy"); got != dispatch.Rejected {
 		t.Fatalf("got slash input result %d", got)
 	}
 	want := "Usage: /copy {session-dir|session-id|session-name}; press alt+enter to send anyway"
@@ -4943,7 +4720,7 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 		}
 
 		callCount := 0
-		builder := tool.Implement[struct{}](
+		builder := tool.Implement(
 			tool.Definition{Name: specification.Name, Description: "A deterministic scenario tool."},
 			func(struct{}) (string, string) { return specification.Name, "" },
 		)
@@ -5086,10 +4863,10 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		newSessionGoldenTools(t, scenario.Tools),
 	)
 	var firstScreenOutput bytes.Buffer
-	firstHarness := &Harness{
+	firstHarness := &App{
 		agent:    firstAssistant,
 		screen:   output.NewTerminalOfSize(&firstScreenOutput, replayColumns, replayLines),
-		recorder: recordSession(log),
+		recorder: record.New(log),
 	}
 	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
 	runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
@@ -5120,9 +4897,9 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		t.Fatal(err)
 	}
 	var screenOutput bytes.Buffer
-	resumedRecorder := recordSession(log)
+	resumedRecorder := record.New(log)
 	resumedRecorder.Resume(len(storedSession.Items))
-	resumedHarness := &Harness{
+	resumedHarness := &App{
 		agent:    resumedAssistant,
 		screen:   output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines),
 		recorder: resumedRecorder,
@@ -5146,7 +4923,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	}
 
 	transcriptPath := filepath.Join(directory, sessionName, "chat.md")
-	transcript, err := os.ReadFile(transcriptPath) //nolint:gosec // the test's temporary bundle
+	transcript, err := os.ReadFile(transcriptPath) //nolint:gosec // the path is the test's own session directory
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -5156,7 +4933,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		t.Fatal(err)
 	}
 	var replayOutput bytes.Buffer
-	replayHarness := &Harness{
+	replayHarness := &App{
 		agent:  resumedAssistant,
 		screen: output.NewTerminalOfSize(&replayOutput, replayColumns, replayLines),
 		events: storedSession.Events,
@@ -5227,7 +5004,7 @@ func requireSameVisibleScreen(t *testing.T, description string, firstOutput stri
 
 func runSessionGoldenTurn(
 	t *testing.T,
-	testHarness *Harness,
+	testHarness *App,
 	turn sessionGoldenTurn,
 	cancelSignals <-chan struct{},
 ) {
@@ -5294,7 +5071,7 @@ func runSessionGoldenTurn(
 func canonicalSessionMeta(t *testing.T, directory string, name string) string {
 	t.Helper()
 
-	encoded, err := os.ReadFile(filepath.Join(directory, name, "meta.json")) //nolint:gosec // the test's temporary bundle
+	encoded, err := os.ReadFile(filepath.Join(directory, name, "meta.json")) //nolint:gosec // the path is the test's own session directory
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -5427,11 +5204,11 @@ func (self *faultingConversationLog) TakeWarnings() []error {
 	return warnings
 }
 
-func newStorageFaultHarness(log SessionLogger, assistant *agent.Agent) *Harness {
-	testHarness := &Harness{
+func newStorageFaultHarness(log SessionLogger, assistant *agent.Agent) *App {
+	testHarness := &App{
 		agent:    assistant,
 		screen:   output.New(&bytes.Buffer{}),
-		recorder: recordSession(log),
+		recorder: record.New(log),
 	}
 	testHarness.currentTurn = Turn{
 		painter: testHarness.newPainter(false),
@@ -5637,7 +5414,7 @@ func testTurnStream(events chan TurnEvent, cancel context.CancelFunc, state turn
 
 func TestTurnElapsedKeepsTheCompletedTurnDuration(t *testing.T) {
 	startedAt := time.Date(2026, time.August, 24, 12, 0, 0, 0, time.UTC)
-	harness := Harness{currentTurn: Turn{
+	harness := App{currentTurn: Turn{
 		Stream: testTimedTurnStream(false, startedAt, startedAt.Add(69*time.Second)),
 	}}
 
@@ -5648,7 +5425,7 @@ func TestTurnElapsedKeepsTheCompletedTurnDuration(t *testing.T) {
 }
 
 func TestTurnElapsedIsUnknownBeforeTheFirstTurn(t *testing.T) {
-	isRunning, took, known := (&Harness{}).turnElapsed()
+	isRunning, took, known := (&App{}).turnElapsed()
 	if isRunning || known || took != 0 {
 		t.Errorf("got running=%v, took=%s, known=%v", isRunning, took, known)
 	}
@@ -5668,7 +5445,7 @@ const (
 
 type fakeProvider struct {
 	turn  int
-	items []json.RawMessage // the stored provider state
+	items []json.RawMessage
 }
 
 func (self *fakeProvider) Configure(string, []tool.Definition)   {}
@@ -5776,10 +5553,10 @@ func TestVisual(t *testing.T) {
 
 	defer func() { _ = log.Close() }()
 
-	held := &Harness{
+	held := &App{
 		agent:    agent.New("", provider, tools),
 		screen:   screen,
-		recorder: recordSession(log),
+		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 
@@ -5793,4 +5570,70 @@ func TestVisual(t *testing.T) {
 	held.segmentLayout = built
 
 	held.begin("")
+}
+
+type frameRecordingWriter struct {
+	stream strings.Builder
+	frames []string
+}
+
+func (self *frameRecordingWriter) Write(value []byte) (int, error) {
+	_, _ = self.stream.Write(value)
+	self.frames = append(self.frames, self.stream.String())
+	return len(value), nil
+}
+
+func TestHelpDuringReasoningIsDrawnInOneFrame(t *testing.T) {
+	frames := helpDuringReasoningFrames(t)
+	if len(frames) != 1 {
+		t.Fatalf("help was drawn across %d frames, want 1", len(frames))
+	}
+
+	visible := strings.Join(visibleScreen(t, frames[0], replayColumns), "\n")
+	if !strings.Contains(visible, "Commands:\n  /conf\n  /copy") {
+		t.Errorf("help did not settle in its frame:\n%s", visible)
+	}
+	if strings.Contains(visible, "/help") {
+		t.Errorf("accepted input remained in the settled frame:\n%s", visible)
+	}
+}
+
+func helpDuringReasoningFrames(t *testing.T) []string {
+	t.Helper()
+
+	writer := &frameRecordingWriter{}
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.NewTerminalOfSize(writer, replayColumns, replayLines)
+	self.commands = fixtureCommandRegistry(t, slash.Command{
+		Name: "help",
+		Run: func(context slash.Context, _ []string) error {
+			context.Notice("Commands:\n  /conf\n  /copy")
+			return nil
+		},
+	})
+	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+
+	history := edit.NewHistory("", historyLimit)
+	editor := edit.NewInput(history)
+	self.editor = editor
+	editor.SetText("/help")
+	self.show(editor)
+	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: "thinking about it"})
+	framesBeforeHelp := len(writer.frames)
+
+	self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Enter})
+
+	frames := slices.Clone(writer.frames[framesBeforeHelp:])
+	self.currentTurn.painter.Close(dynamic.Cancelled)
+	return frames
+}
+
+func shownHelpDuringReasoningFrames(t *testing.T) string {
+	t.Helper()
+
+	var shown strings.Builder
+	for index, frame := range helpDuringReasoningFrames(t) {
+		fmt.Fprintf(&shown, "--- frame %d ---\n%s\n", index+1, strings.Join(visibleScreen(t, frame, replayColumns), "\n"))
+	}
+	return strings.TrimSuffix(shown.String(), "\n")
 }

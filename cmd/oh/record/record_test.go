@@ -1,4 +1,4 @@
-package recording
+package record
 
 import (
 	"encoding/json"
