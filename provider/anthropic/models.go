@@ -2,6 +2,7 @@ package anthropic
 
 import (
 	"context"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +17,57 @@ const (
 )
 
 const listTimeout = 30 * time.Second
+
+var adaptiveThinkingSince = generation{major: 4, minor: 6}
+
+func SupportsAdaptiveThinking(id string) bool {
+	found, isVersioned := generationOf(id)
+
+	return !isVersioned || !found.precedes(adaptiveThinkingSince)
+}
+
+type generation struct {
+	major int
+	minor int
+}
+
+func (self generation) precedes(other generation) bool {
+	if self.major != other.major {
+		return self.major < other.major
+	}
+
+	return self.minor < other.minor
+}
+
+const datedSnapshotLength = len("20060102")
+
+func generationOf(id string) (generation, bool) {
+	var numbers []int
+
+	for segment := range strings.SplitSeq(id, "-") {
+		if len(segment) == datedSnapshotLength {
+			continue
+		}
+
+		number, err := strconv.Atoi(segment)
+		if err != nil {
+			continue
+		}
+
+		if numbers = append(numbers, number); len(numbers) == 2 {
+			break
+		}
+	}
+
+	switch len(numbers) {
+	case 0:
+		return generation{}, false
+	case 1:
+		return generation{major: numbers[0]}, true
+	default:
+		return generation{major: numbers[0], minor: numbers[1]}, true
+	}
+}
 
 type supported struct {
 	Supported bool `json:"supported"`
@@ -65,12 +117,6 @@ type listedModel struct {
 	} `json:"capabilities"`
 }
 
-// Models lists what the endpoint offers, newest first, which is the order it answers in. A model
-// reporting no effort capability is recorded as taking none rather than as taking all of them:
-// assuming the full range would offer a level the model may refuse, and a caller with a better
-// informed source of its own is free to fill the gap in.
-//
-// reference/models.md
 func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 	address, listable := modelsAddress(self.URL)
 	if !listable {

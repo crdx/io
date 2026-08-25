@@ -3,21 +3,17 @@ package modelsdev
 import (
 	"context"
 	"slices"
+	"strings"
 	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/req"
 )
 
-// Endpoint is the whole registry, served as one document.
-//
-// https://models.dev
 const Endpoint = "https://models.dev/api.json"
 
 const fetchTimeout = 60 * time.Second
 
-// Registry is what the registry knows, by provider name and then by model name. The names are
-// models.dev's own, which is why Provider takes the one to look under rather than assuming ours.
 type Registry map[string]map[string]agent.Model
 
 type entry struct {
@@ -60,9 +56,17 @@ func (self entry) model(name string) agent.Model {
 	}
 }
 
-// Fetch reads the registry from address, or from the real one when that is empty. It is several
-// megabytes describing every provider it knows, so it is read once and looked up per provider
-// rather than fetched per provider.
+func hasDatedVersionSuffix(id string) bool {
+	separator := strings.LastIndexByte(id, '-')
+	if separator == -1 {
+		return false
+	}
+
+	_, err := time.Parse("20060102", id[separator+1:])
+
+	return err == nil
+}
+
 func Fetch(ctx context.Context, address string, observer req.Observer) (Registry, error) {
 	requests := req.New(fetchTimeout)
 	if observer != nil {
@@ -86,7 +90,12 @@ func Fetch(ctx context.Context, address string, observer req.Observer) (Registry
 	for providerName, described := range payload {
 		models := make(map[string]agent.Model, len(described.Models))
 		for modelName, described := range described.Models {
-			models[modelName] = described.model(modelName)
+			model := described.model(modelName)
+			if hasDatedVersionSuffix(model.ID) {
+				continue
+			}
+
+			models[modelName] = model
 		}
 
 		registry[providerName] = models
@@ -95,7 +104,6 @@ func Fetch(ctx context.Context, address string, observer req.Observer) (Registry
 	return registry, nil
 }
 
-// Provider is what the registry holds for one provider, and nothing when it holds none.
 func (self Registry) Provider(name string) map[string]agent.Model {
 	return self[name]
 }
