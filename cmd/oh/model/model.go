@@ -16,6 +16,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/modelsdev"
+	"crdx.org/io/provider/anthropic"
 )
 
 const (
@@ -157,11 +158,23 @@ func fromRegistry(registered map[string]agent.Model) []agent.Model {
 	return models
 }
 
+func isDrivable(providerName string, id string) bool {
+	if providerName == AnthropicProvider {
+		return anthropic.SupportsAdaptiveThinking(id)
+	}
+
+	return true
+}
+
 func choicesFor(providerName string, models []agent.Model) []Choice {
 	choices := make([]Choice, 0, len(models))
 
 	for _, model := range models {
 		if model.ID == "" || len(model.EffortLevels) == 0 || model.MaxOutputTokens <= 0 {
+			continue
+		}
+
+		if !isDrivable(providerName, model.ID) {
 			continue
 		}
 

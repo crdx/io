@@ -174,6 +174,9 @@ func (self *App) apply(editor *edit.Input, history *edit.History, keypress key.K
 	case edit.ToggleGit:
 		self.toggleCap(caps.Git)
 
+	case edit.ToggleWeb:
+		self.toggleCap(caps.Web)
+
 	case edit.ToggleBackground:
 		if self.mode.Current().Has(caps.Background) {
 			names, err := self.processes.Disable()

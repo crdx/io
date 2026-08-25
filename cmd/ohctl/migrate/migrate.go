@@ -63,6 +63,10 @@ func Run() error {
 
 	directory := sessionsDir()
 
+	if err := sweepListingMeta(directory, inputArgs.DryRun); err != nil {
+		return err
+	}
+
 	names := inputArgs.Sessions
 	if len(names) == 0 {
 		var err error
@@ -97,7 +101,7 @@ func Run() error {
 			continue
 		}
 
-		if from == session.Format {
+		if from == session.JournalFormat {
 			fmt.Println(style.Subtle("already current ") + name)
 			continue
 		}
@@ -108,7 +112,7 @@ func Run() error {
 			"%s %s %s\n",
 			style.Subtle(verb(options.DryRun)),
 			name,
-			style.Subtle(fmt.Sprintf("%d → %d", from, session.Format)),
+			style.Subtle(fmt.Sprintf("%d → %d", from, session.JournalFormat)),
 		)
 	}
 
@@ -117,6 +121,29 @@ func Run() error {
 	}
 
 	fmt.Println(style.Subtle(fmt.Sprintf("%d of %d %s", migrated, len(names), summaryVerb(options.DryRun))))
+
+	return nil
+}
+
+func sweepListingMeta(directory string, dryRun bool) error {
+	if dryRun {
+		stale, err := store.StaleMeta(directory)
+		if err != nil {
+			return err
+		}
+		if len(stale) > 0 {
+			fmt.Printf("%s listing metadata of %d\n", style.Subtle("would rebuild"), len(stale))
+		}
+		return nil
+	}
+
+	rebuilt, err := store.RebuildStaleMeta(directory)
+	if err != nil {
+		return err
+	}
+	if rebuilt > 0 {
+		fmt.Printf("%s listing metadata of %d\n", style.Subtle("rebuilt"), rebuilt)
+	}
 
 	return nil
 }
@@ -132,7 +159,7 @@ func sayNothingToDo(directory string) error {
 		return nil
 	}
 
-	fmt.Println(style.Subtle(fmt.Sprintf("all %d stored sessions are at format %d", len(entries), session.Format)))
+	fmt.Println(style.Subtle(fmt.Sprintf("all %d stored sessions are at format %d", len(entries), session.JournalFormat)))
 
 	return nil
 }
@@ -168,16 +195,16 @@ func Session(options Options, name string) (int, error) {
 		return 0, err
 	}
 
-	if err := format.Check(fromFormat, session.Format); err != nil {
+	if err := format.Check(fromFormat, session.JournalFormat); err != nil {
 		return fromFormat, fmt.Errorf("%w: upgrade oh", err)
 	}
 
-	if fromFormat == session.Format {
+	if fromFormat == session.JournalFormat {
 		return fromFormat, nil
 	}
 
-	appliedSteps := make([]step, 0, session.Format-fromFormat)
-	for format := fromFormat; format < session.Format; format++ {
+	appliedSteps := make([]step, 0, session.JournalFormat-fromFormat)
+	for format := fromFormat; format < session.JournalFormat; format++ {
 		migrationStep, ok := steps[format]
 		if !ok {
 			return fromFormat, fmt.Errorf("nothing knows how to migrate format %d", format)
@@ -199,7 +226,7 @@ func Session(options Options, name string) (int, error) {
 		}
 	}
 
-	lines[0]["version"] = json.RawMessage(fmt.Sprint(session.Format))
+	lines[0]["version"] = json.RawMessage(fmt.Sprint(session.JournalFormat))
 
 	if options.DryRun {
 		return fromFormat, nil
@@ -242,7 +269,7 @@ func keepCopy(bundlePath string, copyPath string) error {
 }
 
 func backupDir(directory string) string {
-	return fmt.Sprintf("%s_pre_v%d", directory, session.Format)
+	return fmt.Sprintf("%s_pre_v%d", directory, session.JournalFormat)
 }
 
 func readJournal(path string) ([]map[string]json.RawMessage, int, error) {

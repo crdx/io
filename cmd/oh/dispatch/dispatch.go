@@ -9,7 +9,7 @@ import (
 
 type Result int
 
-const sendAnywayHint = "; press alt+enter to send anyway"
+const sendAsMessageHint = " (alt+enter sends as message)"
 
 const (
 	Ordinary Result = iota
@@ -26,11 +26,7 @@ func Handle(registry slash.Registry, actions Actions, message string) (Result, s
 	invocation, found := registry.Find(message)
 	if found {
 		if err := invocation.Command.Run(actions, invocation.Arguments); err != nil {
-			failure := slash.FormatError(invocation, err)
-			if slash.IsUsageError(err) {
-				return Rejected, failure + sendAnywayHint
-			}
-			return Handled, failure
+			return Rejected, slash.FormatError(invocation, err) + sendAsMessageHint
 		}
 		return Handled, ""
 	}
@@ -40,7 +36,7 @@ func Handle(registry slash.Registry, actions Actions, message string) (Result, s
 		return Ordinary, ""
 	}
 
-	return Rejected, fmt.Sprintf("Command not found: %s%s", name, sendAnywayHint)
+	return Rejected, fmt.Sprintf("Command not found: %s%s", name, sendAsMessageHint)
 }
 
 func (self Actions) Emit(event agent.Event) {

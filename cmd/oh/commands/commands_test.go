@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"slices"
@@ -8,6 +9,7 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/dispatch"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/snippets"
 )
@@ -174,6 +176,24 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 				t.Errorf("got formatted error %q", message)
 			}
 		})
+	}
+}
+
+func TestAModelThatCannotBeResolvedLeavesTheCommandToBeCorrected(t *testing.T) {
+	commands := newCommandRegistry(t, commandEnvironment{
+		startNewSession: func(string) error {
+			return errors.New(`model "opus" is ambiguous`)
+		},
+	})
+
+	result, failure := dispatch.Handle(commands, dispatch.Actions{}, "/new opus")
+	if result != dispatch.Rejected {
+		t.Fatalf("expected the command to be refused, got result %d", result)
+	}
+
+	want := `/new: Model "opus" is ambiguous (alt+enter sends as message)`
+	if failure != want {
+		t.Errorf("got %q, want %q", failure, want)
 	}
 }
 

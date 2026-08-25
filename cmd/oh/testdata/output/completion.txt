@@ -17,8 +17,9 @@ none
 high
 === capabilities ===
 rxw
-rxwg
-rxwgb
+rxwb
+rxwbg
+rxwbgs
 === tools ===
 read
 ls
@@ -28,6 +29,8 @@ write
 edit
 bash
 notify
+web_search
+web_fetch
 === sessions ===
 newer-jaguar
 older-badger

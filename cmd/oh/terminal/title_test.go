@@ -51,3 +51,13 @@ func TestTerminalDoesNotWriteItsTitleToRedirectedOutput(t *testing.T) {
 		t.Errorf("expected no title sequence, got %q", output.String())
 	}
 }
+
+func TestScrollbackIsNotResetOnRedirectedOutput(t *testing.T) {
+	output := &strings.Builder{}
+
+	ResetScrollback(output)
+
+	if output.Len() != 0 {
+		t.Errorf("expected no erase sequence, got %q", output.String())
+	}
+}

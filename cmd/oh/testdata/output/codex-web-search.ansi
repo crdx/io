@@ -1,0 +1,13 @@
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m search the web, then answer                                                                        \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r
+\r\e[KGo 1.26 is the current release.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m continue after the search                                                                          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KResumed after the search.\e[?25h\e[?2026l\r

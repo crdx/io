@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -341,8 +342,8 @@ func TestAJournalSaysWhichFormatItWasWrittenIn(t *testing.T) {
 	if len(entries) != 1 {
 		t.Fatalf("expected one stored session, got %d", len(entries))
 	}
-	if entries[0].Format != session.Format {
-		t.Errorf("expected format %d, got %d", session.Format, entries[0].Format)
+	if entries[0].Format != session.JournalFormat {
+		t.Errorf("expected format %d, got %d", session.JournalFormat, entries[0].Format)
 	}
 
 	outdated, err := session.Outdated(directory)
@@ -364,7 +365,7 @@ func TestAJournalFromANewerOhIsNamedAndNotReplayed(t *testing.T) {
 
 	head := fmt.Sprintf(
 		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":"one","name":"brave-otter"}`,
-		session.Format+1,
+		session.JournalFormat+1,
 	) + "\n"
 	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), []byte(head), 0o600); err != nil {
 		t.Fatal(err)
@@ -418,5 +419,64 @@ func TestAJournalWithoutAVersionCountsAsTheFirstFormat(t *testing.T) {
 	}
 	if len(outdated) != 1 || outdated[0] != name {
 		t.Errorf("expected the old journal to be named as outdated, got %v", outdated)
+	}
+}
+
+func TestMetadataIsStampedWithItsFormat(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := session.Create(directory, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.EnsureStored(); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	meta, err := session.ReadMeta(directory, writer.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if meta.Version != session.MetaFormat {
+		t.Errorf("expected metadata stamped %d, got %d", session.MetaFormat, meta.Version)
+	}
+}
+
+func TestMetadataInAnotherFormatIsNamedAsSuch(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := session.Create(directory, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.EnsureStored(); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(directory, writer.Name(), "meta.json")
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(stored, &fields); err != nil {
+		t.Fatal(err)
+	}
+	fields["version"] = json.RawMessage(strconv.Itoa(session.MetaFormat + 1))
+	ahead, err := json.Marshal(fields)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, ahead, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := session.ReadMeta(directory, writer.Name()); !errors.Is(err, session.ErrMetaOutOfDate) {
+		t.Errorf("expected metadata in another format to be named as such, got %v", err)
 	}
 }

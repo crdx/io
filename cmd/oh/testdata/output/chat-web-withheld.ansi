@@ -1,0 +1,13 @@
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m read a page while web access is withheld                                                           \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://example.com/news\e[0m \e[38;2;150;152;150mmarkdown\e[0m\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://example.com/news\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L ~100t\e[0m \e[38;2;204;102;102mweb access is not granted; the user can gr…\e[0m\r
+\r
+\r\e[KWeb access is unavailable.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m continue after the refused fetch                                                                   \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KResumed after the refusal.\e[?25h\e[?2026l\r

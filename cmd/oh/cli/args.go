@@ -10,7 +10,7 @@ import (
 	"crdx.org/io/cmd/oh/model"
 )
 
-const defaultCapFlags = "rxw"
+const defaultCapFlags = "rx"
 
 var usage = fmt.Sprintf(`oh — coding harness
 
@@ -22,7 +22,7 @@ Options:
     -r, --resume <session>                 Resume the saved session by name
     -s, --sessions                         Choose a saved session to resume
     -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
-    -c, --caps <flags>                     Capabilities: rxwgb (read, exec, write, git, bg) (default: %s)
+    -c, --caps <flags>                     Capabilities: rxwbgs (read, exec, write, bg, git, web) (default: %s)
     -t, --tool <tool>                      Enable a tool; may be repeated (all by default)
     -l, --list                             List the available models, then exit
     -u, --update                           Update the cached model list, then exit

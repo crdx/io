@@ -6,6 +6,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/req"
+	"crdx.org/io/provider/codex"
 	"crdx.org/io/tool"
 
 	"crdx.org/io/cmd/oh/model"
@@ -25,9 +26,33 @@ type Connection struct {
 	Client
 
 	ToolsSize func([]tool.Tool) int
+
+	Search *codex.SearchClient
+}
+
+// ObserveHTTP watches the conversation and the searches made beside it alike.
+func (self *Connection) ObserveHTTP(observer req.Observer) {
+	self.Client.ObserveHTTP(observer)
+	self.Search.ObserveHTTP(observer)
 }
 
 func Connect(choice model.Choice, effort string, endpoint string) (*Connection, error) {
+	connection, err := connectProvider(choice, effort, endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	if connection.Search == nil {
+		tokens, address := codexCredentials(endpoint)
+		if connection.Search, err = newSearchClient(tokens, address); err != nil {
+			return nil, err
+		}
+	}
+
+	return connection, nil
+}
+
+func connectProvider(choice model.Choice, effort string, endpoint string) (*Connection, error) {
 	switch choice.Provider {
 	case model.CodexProvider:
 		return connectCodex(choice, effort, endpoint)

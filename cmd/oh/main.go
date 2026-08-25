@@ -16,6 +16,7 @@ import (
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/notify"
+	"crdx.org/io/toolbox/web"
 
 	"crdx.org/io/cmd/oh/backend"
 	"crdx.org/io/cmd/oh/bar"
@@ -43,7 +44,18 @@ import (
 	"crdx.org/io/cmd/oh/workspace"
 )
 
-var completableToolNames = []string{"read", "ls", "find", "grep", "write", "edit", "bash", "notify"}
+var completableToolNames = []string{
+	"read",
+	"ls",
+	"find",
+	"grep",
+	"write",
+	"edit",
+	"bash",
+	"notify",
+	"web_search",
+	"web_fetch",
+}
 
 func main() {
 	if cli.WriteCompletions(os.Stdout, os.Args[1:], cli.Sources{
@@ -73,9 +85,12 @@ func main() {
 		return
 	}
 
+	terminal.ResetScrollback(os.Stdout)
+
 	self, err := os.Executable()
 	if err == nil {
-		err = syscall.Exec(self, append([]string{self}, transition.Arguments...), os.Environ()) //nolint:gosec // re-executing the binary itself with its own arguments
+		arguments := append([]string{self}, transition.Arguments...)
+		err = syscall.Exec(self, arguments, os.Environ()) //nolint:gosec // re-executing the binary itself
 	}
 
 	fmt.Fprintln(os.Stderr, "could not open the session:", err)
@@ -315,6 +330,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if notify.IsAvailable() {
 		toolboxTools = append(toolboxTools, notify.New())
 	}
+	toolboxTools = append(toolboxTools, web.New(func() bool {
+		return mode.Current().Has(caps.Web)
+	}, client.Search)...)
 	toolboxTools = truncate.Tools(toolboxTools)
 
 	enabledTools, err := toolset.Reduce(toolboxTools, args.Tools)

@@ -148,11 +148,11 @@ func TestTheWorkingDirectoryIsNotTakenFromThePrompt(t *testing.T) {
 	}
 }
 
-func TestTheDefaultCapabilitiesAreEverythingButTheHistory(t *testing.T) {
+func TestTheDefaultCapabilitiesAreReadingAndTheShell(t *testing.T) {
 	parsedOptions := parseOptions(t)
 
-	if got := parsedOptions.Caps.Flags(); got != "rxw" {
-		t.Errorf("expected rxw, got %q", got)
+	if got := parsedOptions.Caps.Flags(); got != "rx" {
+		t.Errorf("expected rx, got %q", got)
 	}
 	if parsedOptions.WereCapsChosen {
 		t.Error("expected the default capabilities to count as unchosen")
@@ -168,7 +168,7 @@ func TestTheDefaultCapabilitiesAreEverythingButTheHistory(t *testing.T) {
 }
 
 func TestCapabilitiesAreReadAsTheLettersTheyAreSpelledWith(t *testing.T) {
-	for _, capString := range []string{"rwxgb", "bgxwr", "wxgb"} {
+	for _, capString := range []string{"rwxgbs", "sbgxwr", "wxgbs"} {
 		currentCaps, err := caps.Parse(capString)
 		if err != nil {
 			t.Fatalf("%s: unexpected error: %v", capString, err)

@@ -31,7 +31,7 @@ func TestOnlyTheCachedListingDescribesAProvider(t *testing.T) {
 		Providers: map[string]cachedModels{
 			anthropicProvider: {Models: []agent.Model{
 				{ID: "claude-sonnet-5", EffortLevels: []string{"low", "high"}, MaxOutputTokens: 128_000},
-				{ID: "claude-haiku-4-5", EffortLevels: []string{"low"}, MaxOutputTokens: 64_000},
+				{ID: "claude-sonnet-4-6", EffortLevels: []string{"low"}, MaxOutputTokens: 64_000},
 			}},
 		},
 	}
@@ -46,9 +46,30 @@ func TestOnlyTheCachedListingDescribesAProvider(t *testing.T) {
 		models = append(models, choice.Model)
 	}
 
-	want := []string{"claude-sonnet-5", "claude-haiku-4-5"}
+	want := []string{"claude-sonnet-5", "claude-sonnet-4-6"}
 	if !slices.Equal(models, want) {
 		t.Errorf("expected the cached listing alone, got %v", models)
+	}
+}
+
+func TestAModelTheClientCannotTalkToIsNeverOffered(t *testing.T) {
+	cache := modelCache{
+		Version: cacheVersion,
+		Providers: map[string]cachedModels{
+			anthropicProvider: {Models: []agent.Model{
+				{ID: "claude-opus-5", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+				{ID: "claude-opus-4-5", EffortLevels: []string{"high"}, MaxOutputTokens: 64_000},
+			}},
+		},
+	}
+
+	var models []string
+	for _, choice := range availableModelChoices(cache) {
+		models = append(models, choice.Model)
+	}
+
+	if want := []string{"claude-opus-5"}; !slices.Equal(models, want) {
+		t.Errorf("expected the model without adaptive thinking to be left out, got %v", models)
 	}
 }
 
@@ -185,12 +206,12 @@ func TestTheOutputCeilingComesFromTheChosenModel(t *testing.T) {
 		Providers: map[string]cachedModels{
 			anthropicProvider: {Models: []agent.Model{
 				{ID: "claude-opus-5", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
-				{ID: "claude-haiku-4-5", EffortLevels: []string{"high"}, MaxOutputTokens: 64_000},
+				{ID: "claude-sonnet-4-6", EffortLevels: []string{"high"}, MaxOutputTokens: 64_000},
 			}},
 		},
 	})
 
-	for model, want := range map[string]int{"claude-opus-5": 128_000, "claude-haiku-4-5": 64_000} {
+	for model, want := range map[string]int{"claude-opus-5": 128_000, "claude-sonnet-4-6": 64_000} {
 		choice, err := chosenModel(anthropicProvider, model)
 		if err != nil {
 			t.Fatalf("%s: %v", model, err)
@@ -211,17 +232,26 @@ func TestAModelNothingIsKnownAboutIsRefusedWithSomethingToDoAboutIt(t *testing.T
 	}
 }
 
+func TestAModelTheClientCannotTalkToIsRefusedWithTheReasonRatherThanAnUpdate(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	_, err := chosenModel(anthropicProvider, "claude-opus-4-5")
+	if err == nil || !strings.Contains(err.Error(), "not supported") {
+		t.Errorf("expected the refusal to say the model cannot be spoken to, got %v", err)
+	}
+}
+
 func TestAnEffortACachedModelDoesNotTakeIsRefused(t *testing.T) {
 	writeModelCache(t, modelCache{
 		Version: cacheVersion,
 		Providers: map[string]cachedModels{
 			anthropicProvider: {Models: []agent.Model{
-				{ID: "claude-haiku-4-5", EffortLevels: []string{"low", "medium"}, MaxOutputTokens: 64_000},
+				{ID: "claude-sonnet-5", EffortLevels: []string{"low", "medium"}, MaxOutputTokens: 64_000},
 			}},
 		},
 	})
 
-	if _, _, _, err := parseModelSelection("haiku@max"); err == nil {
+	if _, _, _, err := parseModelSelection("sonnet@max"); err == nil {
 		t.Error("expected an effort the model does not take to be refused")
 	}
 }

@@ -1,0 +1,40 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[[tool]]
+name = "web_search"
+web-answer = "Go 1.26 is the current release, per [the Go blog](https://go.dev/blog)."
+
+[first]
+prompt = "search the web, then answer"
+
+[[first.response]]
+event = [
+    '''{"type":"response.created","response":{"status":"in_progress"}}''',
+    '''{"type":"response.output_item.added","item":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"web_search","arguments":""}}''',
+    '''{"type":"response.function_call_arguments.delta","item_id":"call-item-1","delta":"{\"query\":\"latest Go release\"}"}''',
+    '''{"type":"response.function_call_arguments.done","item_id":"call-item-1","arguments":"{\"query\":\"latest Go release\"}"}''',
+    '''{"type":"response.output_item.done","item":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"web_search","arguments":"{\"query\":\"latest Go release\"}"}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_item.added","item":{"id":"message-1","type":"message","role":"assistant","content":[]}}''',
+    '''{"type":"response.output_text.delta","delta":"Go 1.26 is the current release."}''',
+    '''{"type":"response.output_text.done","text":"Go 1.26 is the current release."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Go 1.26 is the current release."}]}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]
+
+[resume]
+prompt = "continue after the search"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Resumed after the search."}''',
+    '''{"type":"response.output_text.done","text":"Resumed after the search."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed after the search."}]}}''',
+    '''{"type":"response.completed"}''',
+]

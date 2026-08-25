@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/tty"
 )
 
 const (
@@ -12,18 +13,24 @@ const (
 	writableMarker = "🟡"
 )
 
+const eraseDisplay = "\x1b[H\x1b[2J\x1b[3J"
+
+func ResetScrollback(writer io.Writer) {
+	if tty.Is(writer) {
+		_, _ = io.WriteString(writer, eraseDisplay)
+	}
+}
+
 type terminalTitler interface {
 	Begin(string) func()
 	Set(string)
 }
 
-// Terminal holds the terminal facilities used by the harness.
 type Terminal struct {
 	title         terminalTitler
 	workspaceName string
 }
 
-// New builds the terminal facilities over writer.
 func New(writer io.Writer, workspaceDir string) Terminal {
 	return Terminal{
 		title:         newTitle(writer),
@@ -31,7 +38,6 @@ func New(writer io.Writer, workspaceDir string) Terminal {
 	}
 }
 
-// Begin starts the terminal facilities and returns their restore function.
 func (self *Terminal) Begin(mode caps.Set) func() {
 	if self.title == nil {
 		return func() {}
@@ -40,7 +46,6 @@ func (self *Terminal) Begin(mode caps.Set) func() {
 	return self.title.Begin(titleText(mode, self.workspaceName))
 }
 
-// SetMode updates terminal facilities that report the current capability mode.
 func (self *Terminal) SetMode(mode caps.Set) {
 	if self.title != nil {
 		self.title.Set(titleText(mode, self.workspaceName))

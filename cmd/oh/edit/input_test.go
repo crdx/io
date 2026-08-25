@@ -387,7 +387,7 @@ func TestControlCAndControlUAlwaysClearTheInput(t *testing.T) {
 }
 
 func TestThePrefixAndALetterAskForOneSwap(t *testing.T) {
-	for letter, want := range map[rune]Action{'w': ToggleWrite, 'g': ToggleGit, 'b': ToggleBackground} {
+	for letter, want := range map[rune]Action{'w': ToggleWrite, 'g': ToggleGit, 'b': ToggleBackground, 's': ToggleWeb} {
 		self := NewInput(nil)
 
 		self.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)

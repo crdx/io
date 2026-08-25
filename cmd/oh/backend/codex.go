@@ -6,14 +6,10 @@ import (
 	"crdx.org/io/cmd/oh/model"
 )
 
-func connectCodex(choice model.Choice, effort string, endpoint string) (*Connection, error) {
-	tokens := codex.StoredCredentials()
-	address := codex.Endpoint
+const webSearchModel = "gpt-5.4-mini"
 
-	if endpoint != "" {
-		tokens = codex.Static(standInToken, standInToken)
-		address = endpoint
-	}
+func connectCodex(choice model.Choice, effort string, endpoint string) (*Connection, error) {
+	tokens, address := codexCredentials(endpoint)
 
 	client, err := codex.New(tokens, choice.Model, effort)
 	if err != nil {
@@ -21,5 +17,28 @@ func connectCodex(choice model.Choice, effort string, endpoint string) (*Connect
 	}
 	client.URL = address
 
-	return &Connection{Client: client, ToolsSize: codex.ToolsSize}, nil
+	search, err := newSearchClient(tokens, address)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Connection{Client: client, ToolsSize: codex.ToolsSize, Search: search}, nil
+}
+
+func codexCredentials(endpoint string) (codex.TokenSource, string) {
+	if endpoint != "" {
+		return codex.Static(standInToken, standInToken), endpoint
+	}
+
+	return codex.StoredCredentials(), codex.Endpoint
+}
+
+func newSearchClient(tokens codex.TokenSource, address string) (*codex.SearchClient, error) {
+	search, err := codex.NewSearch(tokens, webSearchModel)
+	if err != nil {
+		return nil, err
+	}
+	search.URL = address
+
+	return search, nil
 }

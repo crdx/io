@@ -1,7 +1,7 @@
 Commands:
   /conf
   /copy {session-dir|session-id|session-name}
-  /new [model-glob]
+  /new [model[@effort]]
   /open {config-dir|session-chat|session-dir|session-log|state-dir}
 
 Snippets:

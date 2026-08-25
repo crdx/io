@@ -1,0 +1,14 @@
+{"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
+{"event":{"kind":"user_message","text":"what is the current go release, and what does the blog say about it?"}}
+{"event":{"kind":"model_reasoning","text":"Searching first, then reading the announcement the search cites."}}
+{"event":{"kind":"model_message","text":"Let me search, then read the announcement."}}
+{"event":{"kind":"tool_call_request","id":"call_2","name":"web_search","arguments":"{\"query\":\"latest Go release\"}","render":"latest Go release","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"success","text":"Go 1.26 is the current release, announced on [the Go blog](https://go.dev/blog/go1.26).","id":"call_2","name":"web_search","took":0,"stats":{"kind":"output","lines":1,"bytes":86,"total_bytes":86}}}
+{"event":{"kind":"tool_call_request","id":"call_3","name":"web_fetch","arguments":"{\"url\":\"https://go.dev/blog/go1.26\",\"type\":\"markdown\"}","render":"https://go.dev/blog/go1.26","detail":"markdown","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"success","text":"# Go 1.26 is released\n\nThe **container/heap** package now takes an iterator, and `go test` reports\nflaky runs.\n\n- generics: inference across type parameters\n- runtime: a smaller allocation header\n\nSee [the release notes](https://go.dev/doc/go1.26).","id":"call_3","name":"web_fetch","took":0,"stats":{"kind":"output","lines":8,"bytes":253,"total_bytes":253}}}
+{"event":{"kind":"model_message","text":"Go **1.26** is current. The announcement calls out iterators in `container/heap`, flaky-run reporting in `go test`, and a smaller allocation header."}}
+{"event":{"kind":"user_message","text":"now read the release notes as plain text"}}
+{"event":{"kind":"harness_message","status":"info","text":"The web search and fetch tools are now refused."}}
+{"event":{"kind":"tool_call_request","id":"call_4","name":"web_fetch","arguments":"{\"url\":\"https://go.dev/doc/go1.26\",\"type\":\"text\"}","render":"https://go.dev/doc/go1.26","detail":"text","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"error","text":"web access is not granted; the user can grant it with ctrl+x s","id":"call_4","name":"web_fetch","took":0}}
+{"event":{"kind":"model_message","text":"The web tools are refused, so I cannot read the notes until you grant access again."}}

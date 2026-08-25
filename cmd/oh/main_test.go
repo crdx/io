@@ -87,6 +87,7 @@ import (
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/bash"
 	"crdx.org/io/toolbox/notify"
+	"crdx.org/io/toolbox/web"
 )
 
 func TestEscapeAtRestDoesNotPanic(t *testing.T) {
@@ -2593,6 +2594,7 @@ func TestWhatNewSessionMakesOfAModelGlob(t *testing.T) {
 func newSessionFixtureChoices() []model.Choice {
 	return []model.Choice{
 		{Provider: "anthropic", Model: "claude-opus-4-5", EffortLevels: []string{"low", "high"}},
+		{Provider: "anthropic", Model: "claude-opus-5", EffortLevels: []string{"medium", "max"}},
 		{Provider: "anthropic", Model: "claude-sonnet-4-5", EffortLevels: []string{"medium"}},
 		{Provider: "codex", Model: "gpt-5.6-sol", EffortLevels: []string{"none", "high"}},
 	}
@@ -2608,10 +2610,17 @@ func resolveNewSessionGlobs(t *testing.T) string {
 		"",
 		"opus",
 		"OPUS",
+		"opus-5",
 		"anthropic/claude-opus-4-5",
 		"sonnet",
 		"gpt",
-		"opus@high",
+		"opus-5@high",
+		"opus-4-5@high",
+		"opus-4-5@hi",
+		"gpt@off",
+		"sonnet@nope",
+		"opus-5@",
+		"@high",
 		"nope",
 		"nonsense",
 	} {
@@ -2653,7 +2662,7 @@ func resolveNearestEfforts() string {
 		{"xhigh", "max"},
 	} {
 		for _, current := range []string{"none", "low", "medium", "high", "max", "unrecognised"} {
-			fmt.Fprintf(&written, "%-14q of %-20s -> %q\n", current, "{"+strings.Join(available, ",")+"}", nearestEffort(current, available))
+			fmt.Fprintf(&written, "%-14q of %-20s -> %q\n", current, "{"+strings.Join(available, ",")+"}", model.NearestEffort(current, available))
 		}
 	}
 
@@ -3229,6 +3238,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 		),
 		notify.New(),
 	)
+	tools = append(tools, web.New(func() bool { return true }, sessionGoldenSearcher{})...)
 
 	var written strings.Builder
 
@@ -3481,7 +3491,7 @@ func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
 func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{}
 
-	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwg", "rxwgb", "rgb"} {
+	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwb", "rxwbg", "rxwbgs", "rgb", "rs"} {
 		grantedCaps, err := caps.Parse(flags)
 		if err != nil {
 			t.Fatal(err)
@@ -4050,6 +4060,12 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			"",
 			segment.Context{},
 		),
+		"mode-toggle / web only": goldenSegmentPass(
+			t,
+			modeToggle.New(func() caps.Set { return caps.Read | caps.Web }, func() bool { return false }),
+			"",
+			segment.Context{},
+		),
 		"scroll-overflow / down": goldenSegmentPass(
 			t,
 			scrollOverflow.New,
@@ -4156,7 +4172,7 @@ func TestChoosingASessionFromANewerOhAdvisesAnUpgrade(t *testing.T) {
 
 	head := fmt.Sprintf(
 		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":%q,"name":%q}`+"\n",
-		session.Format+1, name, name,
+		session.JournalFormat+1, name, name,
 	)
 	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), []byte(head), 0o600); err != nil {
 		t.Fatal(err)
@@ -4253,7 +4269,7 @@ func TestUnknownSlashCommandShowsAnErrorAndKeepsTheInput(t *testing.T) {
 	if len(self.events) != 1 {
 		t.Fatalf("got events %v", self.events)
 	}
-	want := "Command not found: /unknown; press alt+enter to send anyway"
+	want := "Command not found: /unknown (alt+enter sends as message)"
 	if self.events[0].Text != want || self.events[0].Status != agent.ErrorStatus {
 		t.Errorf("got event %+v, want failed %q", self.events[0], want)
 	}
@@ -4307,7 +4323,7 @@ func TestSnippetWithoutArgumentsShowsUsageAndKeepsTheInput(t *testing.T) {
 	if editor.Text() != "//add" {
 		t.Errorf("got editor text %q", editor.Text())
 	}
-	if len(self.events) != 1 || self.events[0].Text != "Usage: //add <args>; press alt+enter to send anyway" {
+	if len(self.events) != 1 || self.events[0].Text != "Usage: //add <args> (alt+enter sends as message)" {
 		t.Errorf("got events %+v", self.events)
 	}
 }
@@ -4341,18 +4357,21 @@ func TestPlainSnippetInputWaitsForTheRenderedPrompt(t *testing.T) {
 	}
 }
 
-func TestSnippetTemplateErrorsAreReportedByTheHarness(t *testing.T) {
+func TestSnippetTemplateErrorsAreReportedAndKeepTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
 	self.commands = fixtureSnippetRegistry(t, map[string]string{
 		"review": "{{index .Args 2}}",
 	})
 
-	if got := self.handleCommand("//review only-one"); got != dispatch.Handled {
+	if got := self.handleCommand("//review only-one"); got != dispatch.Rejected {
 		t.Fatalf("got slash input result %d", got)
 	}
 	if len(self.events) != 1 || !strings.HasPrefix(self.events[0].Text, "//review: Could not render template:") {
 		t.Errorf("got events %+v", self.events)
+	}
+	if !strings.HasSuffix(self.events[0].Text, " (alt+enter sends as message)") {
+		t.Errorf("expected the way out to be offered, got %q", self.events[0].Text)
 	}
 }
 
@@ -4370,7 +4389,7 @@ func TestUnknownSnippetShowsAnErrorAndKeepsTheInput(t *testing.T) {
 	if got := editor.Text(); got != "//unknown" {
 		t.Errorf("got input %q", got)
 	}
-	want := "Command not found: //unknown; press alt+enter to send anyway"
+	want := "Command not found: //unknown (alt+enter sends as message)"
 	if len(self.events) != 1 || self.events[0].Text != want || self.events[0].Status != agent.ErrorStatus {
 		t.Errorf("got events %+v, want failed %q", self.events, want)
 	}
@@ -4553,7 +4572,34 @@ func TestUsageErrorIsNotPrefixedWithTheCommandName(t *testing.T) {
 	if got := self.handleCommand("/copy"); got != dispatch.Rejected {
 		t.Fatalf("got slash input result %d", got)
 	}
-	want := "Usage: /copy {session-dir|session-id|session-name}; press alt+enter to send anyway"
+	want := "Usage: /copy {session-dir|session-id|session-name} (alt+enter sends as message)"
+	if len(self.events) != 1 || self.events[0].Text != want {
+		t.Errorf("got events %+v, want %q", self.events, want)
+	}
+}
+
+func TestARefusedCommandKeepsWhatWasTypedAndSaysWhy(t *testing.T) {
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.New(&bytes.Buffer{})
+	self.commands = fixtureCommandRegistry(t, slash.Command{
+		Name: "new",
+		Run: func(slash.Context, []string) error {
+			return errors.New(`model "opus" is ambiguous`)
+		},
+	})
+
+	editor := edit.NewInput(nil)
+	for _, value := range "/new opus" {
+		editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
+	}
+
+	self.acceptInput(editor, edit.NewHistory("", historyLimit))
+
+	if got := editor.Text(); got != "/new opus" {
+		t.Errorf("expected the refused command to survive, got %q", got)
+	}
+
+	want := `/new: Model "opus" is ambiguous (alt+enter sends as message)`
 	if len(self.events) != 1 || self.events[0].Text != want {
 		t.Errorf("got events %+v, want %q", self.events, want)
 	}
@@ -4587,6 +4633,8 @@ type sessionGoldenTool struct {
 	Outputs       []string `toml:"outputs"`
 	StateKey      string   `toml:"state-key"`
 	ShellWithheld bool     `toml:"shell-withheld"`
+	WebWithheld   bool     `toml:"web-withheld"`
+	WebAnswer     string   `toml:"web-answer"`
 }
 
 type sessionGoldenScenario struct {
@@ -4719,6 +4767,13 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 			continue
 		}
 
+		if specification.WebWithheld || specification.WebAnswer != "" {
+			isGranted := specification.WebAnswer != ""
+			searcher := sessionGoldenSearcher{answer: specification.WebAnswer}
+			tools = append(tools, web.New(func() bool { return isGranted }, searcher)...)
+			continue
+		}
+
 		callCount := 0
 		builder := tool.Implement(
 			tool.Definition{Name: specification.Name, Description: "A deterministic scenario tool."},
@@ -4744,6 +4799,14 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 		}))
 	}
 	return tools
+}
+
+type sessionGoldenSearcher struct {
+	answer string
+}
+
+func (self sessionGoldenSearcher) Search(context.Context, string) (string, error) {
+	return self.answer, nil
 }
 
 func newSessionGoldenWithheldShell(t *testing.T) tool.Tool {

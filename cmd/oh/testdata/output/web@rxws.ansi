@@ -1,0 +1,802 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m00000000000000000000\r
+0000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m what is the current go release, and    \e[0m\r
+\e[48;2;52;53;65m what does the blog say about it?       \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mannouncement the search cites.\e[0m\e[0m\r
+\r
+\r\e[KLet me search, then read the\r
+\r\e[Kannouncement.\r
+\r
+\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m\r\e[Kweb_search \e[38;2;192;128;80mlatest Go relea…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150m…\e[0m\r\e[Kweb_fetch \e[38;2;192;128;80mhttps://go.dev/b…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\r
+\r
+\r\e[KGo \e[1m1.26\e[0m is current. The announcement\r
+\r\e[Kcalls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m,\r
+\r\e[Kflaky-run reporting in \e[38;2;192;128;80mgo test\e[0m, and a\r
+\r\e[Ksmaller allocation header.\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m now read the release notes as plain    \e[0m\r
+\e[48;2;52;53;65m text                                   \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[38;2;129;162;190mThe web search and fetch tools are now r\r
+efused.\e[0m\r
+\r
+\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mt…\e[0m\r\e[Kweb_fetch \e[38;2;192;128;80mhttps:…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not…\e[0m\r
+\r
+\r\e[KThe web tools are refused, so I cannot\r
+\r\e[Kread the notes until you grant access\r
+\r\e[Kagain.\r
+\e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150m\r
+s\r
+t\r
+a\r
+r\r
+t\r
+u\r
+p\r
+=\e[0m\r
+0\e[38;2;150;152;150m\r
+s\e[0m\e[38;2;150;152;150m\r
+ \r
+s\r
+e\r
+s\r
+s\r
+i\r
+o\r
+n\r
+=\e[0m\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\r
+0\e[38;2;150;152;150m\r
+ \e[0m\e[38;2;150;152;150m\r
+s\r
+k\r
+i\r
+l\r
+l\r
+s\r
+=\e[0m\r
+0\e[38;2;150;152;150m\r
+p\r
+/\e[0m\r
+0\e[38;2;150;152;150m\r
+g\e[0m\e[38;2;150;152;150m\r
+ \e[0m\e[38;2;150;152;150m\r
+t\r
+o\r
+o\r
+l\r
+s\r
+=\e[0m\e[38;2;150;152;150m\r
+~\e[0m\r
+6\r
+0\r
+0\e[38;2;150;152;150m\r
+t\e[0m\e[38;2;150;152;150m\r
+]\e[0m\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+u\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+g\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+,\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+b\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+g\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+y\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+b\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+u\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+?\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mS\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mg\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mf\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m,\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150md\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mg\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mo\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mu\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mm\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ma\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mr\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mh\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mc\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mi\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mt\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150me\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150ms\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150m.\e[0m\e[0m\r
+\r
+\r\e[KL\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Km\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Kc\r
+\r\e[Kh\r
+\r\e[K,\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Ku\r
+\r\e[Kn\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[Km\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[K.\r
+\r
+\r\e[K\r
+\r\e[K\r
+\r
+\r\e[KG\r
+\r\e[Ko\r
+\r\e[K\e[1m1\e[0m\r
+\r\e[K\e[1m.\e[0m\r
+\r\e[K\e[1m2\e[0m\r
+\r\e[K\e[1m6\e[0m\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[Kc\r
+\r\e[Ku\r
+\r\e[Kr\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[K.\r
+\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Ku\r
+\r\e[Kn\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[Km\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[Kc\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Kl\r
+\r\e[Ks\r
+\r\e[Ko\r
+\r\e[Ku\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Ks\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[K\e[38;2;192;128;80mc\e[0m\r
+\r\e[K\e[38;2;192;128;80mo\e[0m\r
+\r\e[K\e[38;2;192;128;80mn\e[0m\r
+\r\e[K\e[38;2;192;128;80mt\e[0m\r
+\r\e[K\e[38;2;192;128;80ma\e[0m\r
+\r\e[K\e[38;2;192;128;80mi\e[0m\r
+\r\e[K\e[38;2;192;128;80mn\e[0m\r
+\r\e[K\e[38;2;192;128;80me\e[0m\r
+\r\e[K\e[38;2;192;128;80mr\e[0m\r
+\r\e[K\e[38;2;192;128;80m/\e[0m\r
+\r\e[K\e[38;2;192;128;80mh\e[0m\r
+\r\e[K\e[38;2;192;128;80me\e[0m\r
+\r\e[K\e[38;2;192;128;80ma\e[0m\r
+\r\e[K\e[38;2;192;128;80mp\e[0m\r
+\r\e[K,\r
+\r\e[Kf\r
+\r\e[Kl\r
+\r\e[Ka\r
+\r\e[Kk\r
+\r\e[Ky\r
+\r\e[K-\r
+\r\e[Kr\r
+\r\e[Ku\r
+\r\e[Kn\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kp\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[K\e[38;2;192;128;80mg\e[0m\r
+\r\e[K\e[38;2;192;128;80mo\e[0m\r
+\r\e[K\e[38;2;192;128;80mt\e[0m\r
+\r\e[K\e[38;2;192;128;80me\e[0m\r
+\r\e[K\e[38;2;192;128;80ms\e[0m\r
+\r\e[K\e[38;2;192;128;80mt\e[0m\r
+\r\e[K,\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Km\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Kl\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Kl\r
+\r\e[Ko\r
+\r\e[Kc\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[K.\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+p\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+x\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[38;2;129;162;190mT\r
+h\r
+e\r
+ \r
+w\r
+e\r
+b\r
+ \r
+s\r
+e\r
+a\r
+r\r
+c\r
+h\r
+ \r
+a\r
+n\r
+d\r
+ \r
+f\r
+e\r
+t\r
+c\r
+h\r
+ \r
+t\r
+o\r
+o\r
+l\r
+s\r
+ \r
+a\r
+r\r
+e\r
+ \r
+n\r
+o\r
+w\r
+ \r
+r\r
+e\r
+f\r
+u\r
+s\r
+e\r
+d\r
+.\e[0m\r
+\r
+\r\e[K\r
+\r
+\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kw\r
+\r\e[Ke\r
+\r\e[Kb\r
+\r\e[Kt\r
+\r\e[Ko\r
+\r\e[Ko\r
+\r\e[Kl\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kf\r
+\r\e[Ku\r
+\r\e[Ks\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[K,\r
+\r\e[Ks\r
+\r\e[Ko\r
+\r\e[KI\r
+\r\e[Kc\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ku\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Kl\r
+\r\e[Ky\r
+\r\e[Ko\r
+\r\e[Ku\r
+\r\e[Kg\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kc\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kg\r
+\r\e[Ka\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[K.\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m what is the current go release, and what does the blog say about it?\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[3m\e[38;2;150;152;150mSearching first, then reading the announcement the search cites.\e[0m\e[0m
+
+Let me search, then read the announcement.
+
+web_search \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+web_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m
+
+Go \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in \e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m now read the release notes as plain text\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m
+
+web_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl+x s\e[0m
+
+The web tools are refused, so I cannot read the notes until you grant access again.
+
+=== streamed ===
+\e]9;4;3\e\\\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mSear\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearchin\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching fi\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first,\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, the\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then re\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then readin\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading th\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the an\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the announ\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the announceme\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the announcement t\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the announcement the s\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the announcement the searc\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the announcement the search ci\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the announcement the search cites.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KLet\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me searc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read the ann\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read the announc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read the announcemen\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me search, then read the announcement.\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KGo *\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo **1.2\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is curre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The anno\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announce\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement cal\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out itera\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `con\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `contain\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in `container/h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, fl\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run repo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reportin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K`go\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K`go tes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a sm\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smalle\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller alloca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation hea\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with …\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tool\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools ar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refuse\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cann\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the note\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes un\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you gran\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant ac\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant access\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant access aga\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant access again.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m \r
+session=\e[0m0000\r
+000000000000\r
+00000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mski\r
+lls=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mto\r
+ols=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m what is the\e[0m\r
+\e[48;2;52;53;65m current go \e[0m\r
+\e[48;2;52;53;65m release,   \e[0m\r
+\e[48;2;52;53;65m and what   \e[0m\r
+\e[48;2;52;53;65m does the   \e[0m\r
+\e[48;2;52;53;65m blog say   \e[0m\r
+\e[48;2;52;53;65m about it?  \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mSearching\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mfirst, then\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mreading the\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mannouncement\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mthe search\e[0m\r
+\r\e[K\e[3m\e[38;2;150;152;150mcites.\e[0m\e[0m\r
+\r
+\r\e[KLet me\r
+\r\e[Ksearch, then\r
+\r\e[Kread the\r
+\r\e[Kannouncement\r
+\r\e[K.\r
+\r
+\r\e[Kweb_search\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kweb_fetch\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\r
+\r
+\r\e[KGo \e[1m1.26\e[0m is\r
+\r\e[Kcurrent. The\r
+\r\e[Kannouncement\r
+\r\e[Kcalls out\r
+\r\e[Kiterators in\r
+\r\e[K\e[38;2;192;128;80mcontainer/he\e[0m\r
+\r\e[K\e[38;2;192;128;80map\e[0m,\r
+\r\e[Kflaky-run\r
+\r\e[Kreporting in\r
+\r\e[K\e[38;2;192;128;80mgo test\e[0m, and\r
+\r\e[Ka smaller\r
+\r\e[Kallocation\r
+\r\e[Kheader.\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m now read   \e[0m\r
+\e[48;2;52;53;65m the release\e[0m\r
+\e[48;2;52;53;65m notes as   \e[0m\r
+\e[48;2;52;53;65m plain text \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[38;2;129;162;190mThe web sear\r
+ch and fetch\r
+ tools are n\r
+ow refused.\e[0m\r
+\r
+\r\e[Kweb_fetch\r\e[Kwe… \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb…\e[0m\r
+\r
+\r\e[KThe web\r
+\r\e[Ktools are\r
+\r\e[Krefused, so\r
+\r\e[KI cannot\r
+\r\e[Kread the\r
+\r\e[Knotes until\r
+\r\e[Kyou grant\r
+\r\e[Kaccess\r
+\r\e[Kagain.\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m what is the current go release, and what does the blog say about it?\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the announcement the search cites.\e[0m\e[0m
+
+\r\e[KLet me search, then read the announcement.
+
+\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m
+
+\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in \e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m now read the release notes as plain text\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m
+
+\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl+x s\e[0m
+
+\r\e[KThe web tools are refused, so I cannot read the notes until you grant access again.
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[38;2;150;152;150m[\e[0m\e[38;2;150;152;150mstartup=\e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m session=\e[0m000000000000000000000000\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mskills=\e[0m0\e[38;2;150;152;150mp/\e[0m0\e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mtools=\e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m]\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mSearching first, then reading the announcement the search cites.\e[0m\e[0m\r
+\r
+\r\e[KLet me search, then read the announcement.\r
+\r
+\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m\r\e[Kweb_search \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L ~100t\e[0m\r
+\r
+\r\e[KGo \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in\r
+\r\e[K\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\r
+\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\r\e[Kweb_fetch \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with …\e[0m\r
+\r
+\r\e[KThe web tools are refused, so I cannot read the notes until you grant access again.\r
+\e[?25h\e[?2026l

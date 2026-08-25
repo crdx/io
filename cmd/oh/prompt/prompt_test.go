@@ -169,6 +169,18 @@ func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
 	}
 }
 
+func TestTheHarnessDisclosesWebAccess(t *testing.T) {
+	withheld := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
+	if !strings.Contains(withheld, "web search and fetch tools are refused") {
+		t.Errorf("harness context does not disclose withheld web access: %q", withheld)
+	}
+
+	granted := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read|caps.Web, shell.Paths{})
+	if !strings.Contains(granted, "web search and fetch tools are granted external network access") {
+		t.Errorf("harness context does not disclose granted web access: %q", granted)
+	}
+}
+
 func TestTheHarnessDisclosesPrivateLoopbackNetworking(t *testing.T) {
 	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
 

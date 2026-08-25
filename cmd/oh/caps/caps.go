@@ -8,16 +8,15 @@ import (
 	"crdx.org/io/internal/file"
 )
 
-// Set is the set of capabilities granted at one moment, held as one bit each.
 type Set uint8
 
-// The capabilities, from reading, which is always granted, to the four that can be switched.
 const (
 	Read Set = 1 << iota
 	Shell
 	Write
 	Git
 	Background
+	Web
 )
 
 var capsMap = []struct {
@@ -27,14 +26,13 @@ var capsMap = []struct {
 	{Read, "r"},
 	{Shell, "x"},
 	{Write, "w"},
-	{Git, "g"},
 	{Background, "b"},
+	{Git, "g"},
+	{Web, "s"},
 }
 
-// AllFlags is every flag Parse accepts, in the order Flags writes them.
 var AllFlags = All().Flags()
 
-// All is every capability granted at once.
 func All() Set {
 	var allCaps Set
 
@@ -45,7 +43,6 @@ func All() Set {
 	return allCaps
 }
 
-// Flags returns the caps in the form Parse reads.
 func (self Set) Flags() string {
 	var out strings.Builder
 
@@ -58,10 +55,8 @@ func (self Set) Flags() string {
 	return out.String()
 }
 
-// Has says whether every wanted capability is granted.
 func (self Set) Has(want Set) bool { return self&want == want }
 
-// Flag is the single letter for one capability, and nothing for any other combination.
 func (self Set) Flag() string {
 	for _, cap := range capsMap {
 		if cap.grantedCaps == self {
@@ -72,7 +67,6 @@ func (self Set) Flag() string {
 	return ""
 }
 
-// Parse converts flags into real things.
 func Parse(flags string) (Set, error) {
 	grantedCaps := Read
 
@@ -102,8 +96,6 @@ func namedCap(flag string) (Set, bool) {
 	return 0, false
 }
 
-// RefuseWrite is the rule the file layer asks before every write, answering from the mode as it
-// stands at that moment rather than as it stood when the conversation opened.
 func RefuseWrite(mode *Mode) func(name string) error {
 	return func(name string) error {
 		currentCaps := mode.Current()
@@ -124,24 +116,20 @@ func RefuseWrite(mode *Mode) func(name string) error {
 	}
 }
 
-// Mode tracks current and model-known caps across keypress and turn goroutines.
 type Mode struct {
 	mutex       sync.Mutex
 	currentCaps Set
-	knownCaps   Set // what the model thinks is granted (may be outdated now)
+	knownCaps   Set
 }
 
-// NewMode opens a conversation.
 func NewMode(currentCaps Set) *Mode {
 	return &Mode{currentCaps: currentCaps, knownCaps: currentCaps}
 }
 
-// NewResumedMode starts with no caps reported to the model.
 func NewResumedMode(currentCaps Set) *Mode {
 	return &Mode{currentCaps: currentCaps}
 }
 
-// Current is what is granted.
 func (self *Mode) Current() Set {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -149,7 +137,6 @@ func (self *Mode) Current() Set {
 	return self.currentCaps
 }
 
-// Toggle swaps one capability.
 func (self *Mode) Toggle(whichCaps Set) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -157,7 +144,6 @@ func (self *Mode) Toggle(whichCaps Set) {
 	self.currentCaps ^= whichCaps
 }
 
-// Inject is what to tell the model about its changed environment before the next message.
 func (self *Mode) Inject() string {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -186,6 +172,9 @@ func lexicalDiff(changedCaps Set, currentCaps Set) string {
 	}
 	if changedCaps.Has(Background) {
 		clauses = append(clauses, backgroundIs(currentCaps.Has(Background)))
+	}
+	if changedCaps.Has(Web) {
+		clauses = append(clauses, webIs(currentCaps.Has(Web)))
 	}
 
 	return strings.Join(clauses, " ")
@@ -221,4 +210,12 @@ func backgroundIs(enabled bool) string {
 	}
 
 	return "Background processes have been killed and new ones will no longer outlive shell commands."
+}
+
+func webIs(granted bool) string {
+	if granted {
+		return "The web search and fetch tools can now access the internet."
+	}
+
+	return "The web search and fetch tools are now refused."
 }

@@ -19,7 +19,18 @@ import (
 	"crdx.org/io/internal/format"
 )
 
-const Format = 6
+// JournalFormat is the shape of the journal holding a stored conversation. The journal is canon, so
+// one in an earlier format is migrated to this one rather than written again, and one in a later
+// format is refused rather than read wrongly.
+const JournalFormat = 6
+
+// MetaFormat is the shape of the listing metadata stored beside a journal. The journal is canon and
+// the metadata is derived from it, so metadata in another format is written again, never migrated.
+const MetaFormat = 1
+
+// ErrMetaOutOfDate is listing metadata this build does not write. Whoever owns the data it carries
+// is free to build it again from the journal.
+var ErrMetaOutOfDate = errors.New("listing metadata is in another format")
 
 type Kind string
 
@@ -204,7 +215,7 @@ func (w *Writer) ensureOpen() error {
 	}
 	w.file = file
 
-	started, err := w.record(Line{Kind: Head, Version: Format, ID: w.id, Name: w.name, Meta: w.journalMeta})
+	started, err := w.record(Line{Kind: Head, Version: JournalFormat, ID: w.id, Name: w.name, Meta: w.journalMeta})
 	if err != nil {
 		_ = file.Close()
 		_ = os.Remove(file.Name())
@@ -295,7 +306,7 @@ func Records(directory string, name string, visit func(Line) error) error {
 			if line.Kind != Head {
 				return errors.New("session does not start with a head")
 			}
-			if err := format.Check(formatOf(line), Format); err != nil {
+			if err := format.Check(formatOf(line), JournalFormat); err != nil {
 				return fmt.Errorf("session %s: journal %w", name, err)
 			}
 			sawHead = true
@@ -340,6 +351,7 @@ func (s *Session) take(line Line) {
 
 // Meta is the compact part of a stored session needed to list conversations.
 type Meta struct {
+	Version  int             `json:"version"`
 	Name     string          `json:"name"`
 	Data     json.RawMessage `json:"data,omitempty"`
 	Started  time.Time       `json:"started"`
@@ -369,6 +381,16 @@ func ReadMeta(directory string, name string) (*Meta, error) {
 	encoded, err := os.ReadFile(metaPath(directory, name))
 	if err != nil {
 		return nil, err
+	}
+
+	storedFormat, err := format.ReadJSON(encoded)
+	if err != nil {
+		return nil, err
+	}
+	if storedFormat != MetaFormat {
+		return nil, fmt.Errorf(
+			"%w (format %d, not %d)", ErrMetaOutOfDate, storedFormat, MetaFormat,
+		)
 	}
 
 	var meta Meta
@@ -427,6 +449,8 @@ func RebuildMeta(directory string, name string, listingData json.RawMessage) err
 }
 
 func writeMeta(directory string, meta Meta) error {
+	meta.Version = MetaFormat
+
 	encoded, err := json.Marshal(meta)
 	if err != nil {
 		return err
@@ -473,7 +497,7 @@ func Entries(directory string) ([]Entry, error) {
 
 	entries := make([]Entry, 0, len(names))
 	for _, name := range names {
-		head, err := readHead(directory, name)
+		head, err := readHeadSummary(directory, name)
 		if err != nil {
 			continue
 		}
@@ -501,13 +525,13 @@ func formatOf(head Line) int {
 
 // Outdated names the stored sessions written in an older journal format than this build writes.
 func Outdated(directory string) ([]string, error) {
-	return namesInFormat(directory, func(stored int) bool { return stored < Format })
+	return namesInFormat(directory, func(stored int) bool { return stored < JournalFormat })
 }
 
 // Ahead names the stored sessions written in a newer journal format than this build reads. No
 // migration brings one of those back: only a newer build can read it.
 func Ahead(directory string) ([]string, error) {
-	return namesInFormat(directory, func(stored int) bool { return stored > Format })
+	return namesInFormat(directory, func(stored int) bool { return stored > JournalFormat })
 }
 
 func namesInFormat(directory string, wanted func(stored int) bool) ([]string, error) {
@@ -542,6 +566,49 @@ func storedNames(directory string) ([]string, error) {
 		}
 	}
 	return names, nil
+}
+
+func readHeadSummary(directory, name string) (Line, error) {
+	file, err := os.Open(journalPath(directory, name))
+	if err != nil {
+		return Line{}, err
+	}
+	defer func() { _ = file.Close() }()
+
+	decoder := json.NewDecoder(bufio.NewReaderSize(file, 8192))
+	if _, err := decoder.Token(); err != nil {
+		return Line{}, err
+	}
+
+	var head Line
+	for decoder.More() {
+		fieldToken, err := decoder.Token()
+		if err != nil {
+			return Line{}, err
+		}
+		field, _ := fieldToken.(string)
+
+		var target any
+		switch field {
+		case "kind":
+			target = &head.Kind
+		case "time":
+			target = &head.Time
+		case "version":
+			target = &head.Version
+		case "id":
+			target = &head.ID
+		case "name":
+			target = &head.Name
+		default:
+			return head, nil
+		}
+		if err := decoder.Decode(target); err != nil {
+			return Line{}, err
+		}
+	}
+
+	return head, nil
 }
 
 func readHead(directory, name string) (Line, error) {

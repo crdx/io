@@ -101,10 +101,16 @@ func Discover(project string, globalDirectories []string, warnings io.Writer) ([
 		}
 
 		directory = filepath.Clean(directory)
-		if _, seen := seenDirectories[directory]; seen {
+
+		identity := directory
+		if resolved, err := filepath.EvalSymlinks(directory); err == nil {
+			identity = resolved
+		}
+
+		if _, seen := seenDirectories[identity]; seen {
 			continue
 		}
-		seenDirectories[directory] = struct{}{}
+		seenDirectories[identity] = struct{}{}
 
 		globalSkills, err := discover(directory, true, warnings)
 		if err != nil {

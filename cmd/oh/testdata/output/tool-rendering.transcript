@@ -109,9 +109,101 @@ notified the user
 
 Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
 
-## Assistant
+## Tool call
 
 > 2001-01-01T00:00:05Z
+
+- **ID:** `call_3`
+- **Name:** `web_search`
+- **Read only:** `false`
+**Arguments**
+
+```json
+{"query":"how to quote a shell variable"}
+```
+
+**Subject**
+
+```
+stale search rendering
+```
+
+**Qualifier**
+
+```
+stale search qualifier
+```
+
+## Tool result
+
+> 2001-01-01T00:00:06Z
+
+- **ID:** `call_3`
+- **Name:** `web_search`
+- **Status:** `success`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":63,"total_bytes":63}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+Quote it as "$NAME", per [the bash manual](https://gnu.org/bash).
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Tool call
+
+> 2001-01-01T00:00:07Z
+
+- **ID:** `call_4`
+- **Name:** `web_fetch`
+- **Read only:** `false`
+**Arguments**
+
+```json
+{"url":"https://gnu.org/bash","type":"clean_html"}
+```
+
+**Subject**
+
+```
+stale fetch rendering
+```
+
+**Qualifier**
+
+```
+stale fetch qualifier
+```
+
+## Tool result
+
+> 2001-01-01T00:00:08Z
+
+- **ID:** `call_4`
+- **Name:** `web_fetch`
+- **Status:** `success`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":16,"total_bytes":16}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+<p>Quote it.</p>
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Assistant
+
+> 2001-01-01T00:00:09Z
 
 ```
 done.

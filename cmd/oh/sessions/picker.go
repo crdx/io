@@ -3,15 +3,25 @@ package sessions
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 
 	"crdx.org/io/cmd/oh/picker"
+	"crdx.org/io/cmd/oh/store"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/session"
 )
 
 func Choose(directory string, terminal *os.File, screen io.Writer) (string, error) {
 	sessions, err := Load(directory)
+	if errors.Is(err, session.ErrMetaOutOfDate) {
+		_, _ = fmt.Fprintln(screen, style.Subtle("writing the session listing again from the journals"))
+		if _, err := store.RebuildStaleMeta(directory); err != nil {
+			return "", err
+		}
+		sessions, err = Load(directory)
+	}
 	if err != nil {
 		if migrationError := ValidateFormats(directory); migrationError != nil {
 			return "", migrationError

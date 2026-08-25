@@ -303,6 +303,27 @@ func TestTheModelListingFollowsTheEndpointItWasGiven(t *testing.T) {
 	}
 }
 
+func TestWhichModelsAreTakenToThinkAdaptively(t *testing.T) {
+	for id, want := range map[string]bool{
+		"claude-opus-5":              true,
+		"claude-fable-5":             true,
+		"claude-opus-4-8":            true,
+		"claude-opus-4-6":            true,
+		"claude-sonnet-4-6":          true,
+		"claude-mythos-preview":      true,
+		"claude-opus-4-5":            false,
+		"claude-opus-4-5-20251101":   false,
+		"claude-sonnet-4-5-20250929": false,
+		"claude-haiku-4-5":           false,
+		"claude-3-7-sonnet-20250219": false,
+		"claude-3-5-haiku-20241022":  false,
+	} {
+		if got := anthropic.SupportsAdaptiveThinking(id); got != want {
+			t.Errorf("expected %s to be %v, got %v", id, want, got)
+		}
+	}
+}
+
 func TestAModelListingIsNotAttemptedAgainstAnUnrecognisedEndpoint(t *testing.T) {
 	client := newClient(t, "http://127.0.0.1:1/somewhere/else")
 

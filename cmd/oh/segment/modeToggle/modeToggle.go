@@ -6,6 +6,8 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
+const gap = " "
+
 type state struct {
 	getGrantedCaps  func() caps.Set
 	isPrefixPending func() bool
@@ -27,8 +29,10 @@ func (self state) Render(segment.Context) string {
 	return self.letter(caps.Read, true, style.Read, isPrefixPending) +
 		self.letter(caps.Shell, grantedCaps.Has(caps.Shell), style.Exec, isPrefixPending) +
 		self.letter(caps.Write, grantedCaps.Has(caps.Write), style.Write, isPrefixPending) +
+		gap +
+		self.letter(caps.Background, grantedCaps.Has(caps.Background), style.Background, isPrefixPending) +
 		self.letter(caps.Git, grantedCaps.Has(caps.Git), style.History, isPrefixPending) +
-		self.letter(caps.Background, grantedCaps.Has(caps.Background), style.Background, isPrefixPending)
+		self.letter(caps.Web, grantedCaps.Has(caps.Web), style.Web, isPrefixPending)
 }
 
 func (self state) letter(caps caps.Set, isGranted bool, paint style.Style, isPrefixPending bool) string {

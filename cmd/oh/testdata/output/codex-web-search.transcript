@@ -1,0 +1,82 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+search the web, then answer
+```
+
+## Tool call
+
+> 2001-01-01T00:00:01Z
+
+- **ID:** `call-1`
+- **Name:** `web_search`
+- **Read only:** `true`
+**Arguments**
+
+```json
+{"query":"latest Go release"}
+```
+
+**Subject**
+
+```
+latest Go release
+```
+
+## Tool result
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call-1`
+- **Name:** `web_search`
+- **Status:** `success`
+- **Duration:** `0s`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":71,"total_bytes":71}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+Go 1.26 is the current release, per [the Go blog](https://go.dev/blog).
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Go 1.26 is the current release.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+continue after the search
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Resumed after the search.
+```
+

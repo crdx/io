@@ -18,6 +18,8 @@ var (
 	backgroundKilled = backgroundIs(false)
 	shellGranted     = shellIs(true)
 	shellWithheld    = shellIs(false)
+	webGranted       = webIs(true)
+	webWithheld      = webIs(false)
 )
 
 func TestEveryClauseSaysSomethingAndSaysItBothWays(t *testing.T) {
@@ -26,6 +28,7 @@ func TestEveryClauseSaysSomethingAndSaysItBothWays(t *testing.T) {
 		"history":    {gitReadOnly, gitWritable},
 		"background": {backgroundKilled, backgroundOn},
 		"shell":      {shellWithheld, shellGranted},
+		"web":        {webWithheld, webGranted},
 	} {
 		if clauses[0] == "" || clauses[1] == "" {
 			t.Errorf("%s: expected a clause either way, got %q and %q", name, clauses[0], clauses[1])
@@ -120,10 +123,25 @@ func TestAModeSwappedTwiceIsNotAnnounced(t *testing.T) {
 func TestAResumedConversationAlwaysSaysWhatTheModeAllows(t *testing.T) {
 	got := NewResumedMode(writable()).Inject()
 
-	for _, clause := range []string{nowReadWrite, gitReadOnly, backgroundKilled, shellWithheld} {
+	for _, clause := range []string{nowReadWrite, gitReadOnly, backgroundKilled, shellWithheld, webWithheld} {
 		if !strings.Contains(got, clause) {
 			t.Errorf("expected %q in %q", clause, got)
 		}
+	}
+}
+
+func TestSwitchingTheWebToolsIsAnnounced(t *testing.T) {
+	self := NewMode(Read)
+	self.Toggle(Web)
+
+	if got := self.Inject(); got != webGranted {
+		t.Errorf("expected %q, got %q", webGranted, got)
+	}
+
+	self.Toggle(Web)
+
+	if got := self.Inject(); got != webWithheld {
+		t.Errorf("expected %q, got %q", webWithheld, got)
 	}
 }
 

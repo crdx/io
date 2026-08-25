@@ -1,0 +1,15 @@
+{"kind":"head","version":6,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"user_message","text":"search the web, then answer"}}
+{"kind":"event","event":{"render":"latest Go release","read_only":true,"kind":"tool_call_request","id":"call-1","name":"web_search","arguments":"{\"query\":\"latest Go release\"}"}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"Go 1.26 is the current release, per [the Go blog](https://go.dev/blog).","id":"call-1","name":"web_search","status":"success","stats":{"kind":"output","lines":1,"bytes":71,"total_bytes":71}}}
+{"kind":"event","event":{"kind":"model_message","text":"Go 1.26 is the current release."}}
+{"kind":"item","payload":{"role":"user","content":"search the web, then answer"}}
+{"kind":"item","payload":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"web_search","arguments":"{\"query\":\"latest Go release\"}"}}
+{"kind":"item","payload":{"type":"function_call_output","call_id":"call-1","output":"Go 1.26 is the current release, per [the Go blog](https://go.dev/blog)."}}
+{"kind":"item","payload":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Go 1.26 is the current release."}]}}
+{"kind":"turn_completion"}
+{"kind":"event","event":{"kind":"user_message","text":"continue after the search"}}
+{"kind":"event","event":{"kind":"model_message","text":"Resumed after the search."}}
+{"kind":"item","payload":{"role":"user","content":"continue after the search"}}
+{"kind":"item","payload":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed after the search."}]}}
+{"kind":"turn_completion"}

@@ -31,11 +31,13 @@ brave-otter
 === last-tps / unknown while running ===
 ?t/s
 === mode-toggle / all granted ===
-rxwgb
+rxw bgs
 === mode-toggle / pending prefix ===
-rxwgb
+rxw bgs
 === mode-toggle / read only ===
-rxwgb
+rxw bgs
+=== mode-toggle / web only ===
+rxw bgs
 === scroll-overflow / down ===
 ↓ 7
 === scroll-overflow / empty ===

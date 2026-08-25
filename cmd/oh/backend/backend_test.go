@@ -186,6 +186,36 @@ func TestAnthropicConnectsBeforeItNeedsCredentials(t *testing.T) {
 	}
 }
 
+func TestEveryConnectionCarriesAWebSearchClient(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	endpoint := sim.New(&sim.Scenario{Model: "fake", Turns: []sim.Turn{{Say: "Hello."}}})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Messages]
+
+	for _, providerName := range []string{codexProvider, opencodeGoProvider, anthropicProvider} {
+		client, err := Connect(
+			model.Choice{Provider: providerName, Model: "fake", MaxOutputTokens: 128_000},
+			"high",
+			address,
+		)
+		if err != nil {
+			t.Fatalf("%s: unexpected error: %v", providerName, err)
+		}
+		if client.Search == nil {
+			t.Fatalf("%s: connection carries no search client", providerName)
+		}
+		if client.Search.URL != address {
+			t.Errorf("%s: search asks %q, want %q", providerName, client.Search.URL, address)
+		}
+		if client.Search.Model != webSearchModel {
+			t.Errorf("%s: search asks %q, want %q", providerName, client.Search.Model, webSearchModel)
+		}
+	}
+}
+
 func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 

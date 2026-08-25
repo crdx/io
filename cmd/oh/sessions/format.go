@@ -7,22 +7,25 @@ import (
 )
 
 func ValidateFormats(directory string) error {
-	ahead, err := session.Ahead(directory)
+	entries, err := session.Entries(directory)
 	if err != nil {
 		return err
+	}
+	var ahead, outdated []string
+	for _, entry := range entries {
+		if entry.Format > session.JournalFormat {
+			ahead = append(ahead, entry.Name)
+		} else if entry.Format < session.JournalFormat {
+			outdated = append(outdated, entry.Name)
+		}
 	}
 
 	if len(ahead) > 0 {
 		subject, _ := nameSessions(ahead)
 		return fmt.Errorf(
 			"%s written in a newer journal format than this oh reads (format %d): upgrade oh",
-			subject, session.Format,
+			subject, session.JournalFormat,
 		)
-	}
-
-	outdated, err := session.Outdated(directory)
-	if err != nil {
-		return err
 	}
 
 	if len(outdated) == 0 {
@@ -33,7 +36,7 @@ func ValidateFormats(directory string) error {
 
 	return fmt.Errorf(
 		"%s written in an older journal format: run `ohctl migrate` to bring %s up to format %d",
-		subject, object, session.Format,
+		subject, object, session.JournalFormat,
 	)
 }
 

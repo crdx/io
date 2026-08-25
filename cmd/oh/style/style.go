@@ -78,6 +78,9 @@ var (
 // Background marks permission to leave processes behind.
 var Background Style = hex(teal)
 
+// Web marks permission to reach the internet through the web tools.
+var Web Style = hex(steel)
+
 // The markdown of an answer.
 var (
 	Heading Style = hex(gold)   // a heading, which is drawn in bold as well

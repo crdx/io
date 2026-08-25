@@ -1,0 +1,89 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+read a page while web access is withheld
+```
+
+## Tool call
+
+> 2001-01-01T00:00:01Z
+
+- **ID:** `call-1`
+- **Name:** `web_fetch`
+- **Read only:** `true`
+- **Emphasis:** `focus https://example.com/news`
+**Arguments**
+
+```json
+{"url":"https://example.com/news","type":"markdown"}
+```
+
+**Subject**
+
+```
+https://example.com/news
+```
+
+**Qualifier**
+
+```
+markdown
+```
+
+## Tool result
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call-1`
+- **Name:** `web_fetch`
+- **Status:** `error`
+- **Duration:** `0s`
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":62,"total_bytes":62}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+web access is not granted; the user can grant it with ctrl+x s
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Web access is unavailable.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+continue after the refused fetch
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Resumed after the refusal.
+```
+

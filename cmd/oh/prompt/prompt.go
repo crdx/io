@@ -28,6 +28,7 @@ var (
 		"filepathJoin": filepath.Join,
 		"scopeRules":   scopeRules,
 		"shellAccess":  shellAccess,
+		"webAccess":    webAccess,
 	}).Parse(hereduck.D(`
 		# Scope
 
@@ -40,7 +41,8 @@ var (
 		- Networking is limited to the sandbox's private loopback interface
 		- Processes in the same sandbox can communicate over 127.0.0.1 and ::1
 		- The host's loopback interface and external networks are unreachable
-		- Anything that requires external networking must be asked of the user
+		- The web search and fetch tools are {{ webAccess .WebGranted }}
+		- Anything else that requires external networking must be asked of the user
 
 		# /tmp
 
@@ -81,6 +83,7 @@ type harnessContextTemplateData struct {
 	GitWritable       bool
 	BackgroundEnabled bool
 	ShellGranted      bool
+	WebGranted        bool
 }
 
 // File is one context file incorporated into the system prompt.
@@ -198,6 +201,7 @@ func harnessContext(workspaceDir string, sessionName string, tmpDir string, home
 		GitWritable:       currentCaps.Has(caps.Git),
 		BackgroundEnabled: currentCaps.Has(caps.Background),
 		ShellGranted:      currentCaps.Has(caps.Shell),
+		WebGranted:        currentCaps.Has(caps.Web),
 	}
 
 	var rendered strings.Builder
@@ -264,6 +268,14 @@ func filesystem(writable bool) string {
 func shellAccess(granted bool) string {
 	if granted {
 		return "granted"
+	}
+
+	return "refused"
+}
+
+func webAccess(granted bool) string {
+	if granted {
+		return "granted external network access"
 	}
 
 	return "refused"

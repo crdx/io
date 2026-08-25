@@ -22,6 +22,13 @@ func Chosen(path string, providerName string, model string) (Choice, error) {
 		}
 	}
 
+	if !isDrivable(providerName, model) {
+		return Choice{}, fmt.Errorf(
+			"%s/%s is not supported: it takes a request shape this build does not speak",
+			providerName, model,
+		)
+	}
+
 	return Choice{}, fmt.Errorf(
 		"nothing is known about %s/%s: run with -u to update the model list", providerName, model,
 	)
@@ -42,20 +49,74 @@ func ParseSelection(path string, selection string) (string, string, string, erro
 		return "", "", "", err
 	}
 
-	levels := EffortsMatching(effortQuery, choice.EffortLevels)
+	effort, err := matchEffort(effortQuery, choice)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	return choice.Provider, choice.Model, effort, nil
+}
+
+func ResolveQuery(query string, currentEffort string, choices []Choice) (Selection, error) {
+	modelQuery, effortQuery, hasEffort := strings.Cut(query, "@")
+	if modelQuery == "" || (hasEffort && effortQuery == "") {
+		return Selection{}, fmt.Errorf("model must be written as model or model@effort, got %q", query)
+	}
+
+	choice, err := onlyMatch(modelQuery, RankedChoicesWithoutGuessing(modelQuery, choices))
+	if err != nil {
+		return Selection{}, err
+	}
+
+	effort := NearestEffort(currentEffort, choice.EffortLevels)
+
+	if hasEffort {
+		if effort, err = matchEffort(effortQuery, choice); err != nil {
+			return Selection{}, err
+		}
+	} else if effort == "" {
+		return Selection{}, fmt.Errorf("model %s has no recognised effort levels", choice.Model)
+	}
+
+	return Selection{Provider: choice.Provider, Model: choice.Model, Effort: effort}, nil
+}
+
+var effortOrder = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
+
+func NearestEffort(current string, available []string) string {
+	currentIndex := slices.Index(effortOrder, current)
+
+	for distance := range effortOrder {
+		higherIndex := currentIndex + distance
+		if higherIndex >= 0 && higherIndex < len(effortOrder) && slices.Contains(available, effortOrder[higherIndex]) {
+			return effortOrder[higherIndex]
+		}
+
+		lowerIndex := currentIndex - distance
+		if distance > 0 && lowerIndex >= 0 && slices.Contains(available, effortOrder[lowerIndex]) {
+			return effortOrder[lowerIndex]
+		}
+	}
+
+	return ""
+}
+
+func matchEffort(query string, choice Choice) (string, error) {
+	levels := EffortsMatching(query, choice.EffortLevels)
+
 	switch len(levels) {
 	case 0:
-		return "", "", "", fmt.Errorf("effort %q does not match any of: %s", effortQuery, strings.Join(choice.EffortLevels, ", "))
+		return "", fmt.Errorf("effort %q does not match any of: %s", query, strings.Join(choice.EffortLevels, ", "))
 	case 1:
-		return choice.Provider, choice.Model, levels[0], nil
+		return levels[0], nil
 	default:
-		return "", "", "", fmt.Errorf("effort %q is ambiguous; matches: %s", effortQuery, strings.Join(levels, ", "))
+		return "", fmt.Errorf("effort %q is ambiguous; matches: %s", query, strings.Join(levels, ", "))
 	}
 }
 
 var effortAliases = []struct {
-	name  string // what a caller may type
-	level string // the level it means
+	name  string
+	level string
 }{
 	{name: "off", level: "none"},
 }
@@ -105,8 +166,10 @@ func matchModel(query string, choices []Choice) (Choice, error) {
 		return Choice{}, errors.New("no models are known: run with -u to fetch the model list")
 	}
 
-	matches := RankedChoices(query, choices)
+	return onlyMatch(query, RankedChoices(query, choices))
+}
 
+func onlyMatch(query string, matches []Choice) (Choice, error) {
 	switch len(matches) {
 	case 0:
 		return Choice{}, fmt.Errorf("model %q does not match any known model", query)

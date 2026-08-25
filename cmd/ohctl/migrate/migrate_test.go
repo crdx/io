@@ -85,8 +85,8 @@ func TestAJournalWithoutAVersionIsMigratedFromTheFirstFormat(t *testing.T) {
 
 	lines := journalLines(t, directory, name)
 
-	if got := string(lines[0]["version"]); got != fmt.Sprint(session.Format) {
-		t.Errorf("expected the head to say format %d, got %q", session.Format, got)
+	if got := string(lines[0]["version"]); got != fmt.Sprint(session.JournalFormat) {
+		t.Errorf("expected the head to say format %d, got %q", session.JournalFormat, got)
 	}
 
 	event := string(lines[1]["event"])
@@ -110,7 +110,7 @@ func TestAJournalWithoutAVersionIsMigratedFromTheFirstFormat(t *testing.T) {
 }
 
 func TestAJournalAlreadyCurrentIsLeftAlone(t *testing.T) {
-	head := fmt.Sprintf(`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":"one","name":"brave-otter"}`, session.Format)
+	head := fmt.Sprintf(`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":"one","name":"brave-otter"}`, session.JournalFormat)
 	directory, name := storedJournal(t, head)
 
 	from, err := migrate.Session(options(directory), name)
@@ -118,7 +118,7 @@ func TestAJournalAlreadyCurrentIsLeftAlone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if from != session.Format {
+	if from != session.JournalFormat {
 		t.Errorf("expected the current format, got %d", from)
 	}
 

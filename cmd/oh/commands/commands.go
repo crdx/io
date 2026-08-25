@@ -166,7 +166,7 @@ func helpText(commandUsages []string, hiddenCommandUsage string, snippetUsages [
 	visibleCommandUsages := slices.DeleteFunc(commandUsages, func(usage string) bool { return usage == hiddenCommandUsage })
 	for i, usage := range visibleCommandUsages {
 		if usage == "/new" {
-			visibleCommandUsages[i] += " [model-glob]"
+			visibleCommandUsages[i] += " [model[@effort]]"
 		}
 	}
 	sections := []string{"Commands:\n  " + strings.Join(visibleCommandUsages, "\n  ")}

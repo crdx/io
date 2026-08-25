@@ -430,6 +430,40 @@ func RebuildMeta(directory, name string) error {
 	return session.RebuildMeta(directory, name, data)
 }
 
+// StaleMeta names the stored sessions whose listing metadata this build cannot read.
+func StaleMeta(directory string) ([]string, error) {
+	entries, err := session.Entries(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	var stale []string
+	for _, entry := range entries {
+		if _, err := session.ReadMeta(directory, entry.Name); err != nil {
+			stale = append(stale, entry.Name)
+		}
+	}
+
+	return stale, nil
+}
+
+// RebuildStaleMeta writes the listing metadata this build cannot read again from the journals,
+// which hold everything the metadata carries.
+func RebuildStaleMeta(directory string) (int, error) {
+	stale, err := StaleMeta(directory)
+	if err != nil {
+		return 0, err
+	}
+
+	for at, name := range stale {
+		if err := RebuildMeta(directory, name); err != nil {
+			return at, fmt.Errorf("could not rebuild the listing metadata of %s: %w", name, err)
+		}
+	}
+
+	return len(stale), nil
+}
+
 // Rebuild writes a session's transcript again from its journal, replacing whatever was there.
 func Rebuild(directory, name string) error {
 	storedSession, err := Read(directory, name)

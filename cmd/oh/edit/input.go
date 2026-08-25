@@ -26,6 +26,7 @@ const (
 	ToggleShell                    // ctrl+x x: swap whether shell commands may run at all
 	ToggleGit                      // ctrl+x g: swap whether a repository's own history may be changed
 	ToggleBackground               // ctrl+x b: swap whether commands may leave processes behind
+	ToggleWeb                      // ctrl+x s: swap whether the web tools may reach the internet
 	Complete                       // tab: complete a slash command when exactly one name matches
 )
 
@@ -68,22 +69,18 @@ func (self *Input) Reset() {
 	}
 }
 
-// Text is what has been typed so far.
 func (self *Input) Text() string {
 	return self.buffer.String()
 }
 
-// SetText replaces the input and puts the cursor at its end.
 func (self *Input) SetText(text string) {
 	self.buffer.Set(text)
 }
 
-// IsPrefixPending reports whether the mode prefix awaits its command key.
 func (self *Input) IsPrefixPending() bool {
 	return self.isPrefixPending
 }
 
-// Frame is the visible input rows, cursor position, and clipped row counts.
 type Frame struct {
 	Rows             []string
 	Row              int
@@ -92,7 +89,6 @@ type Frame struct {
 	HiddenLinesBelow int // the rows out of sight below
 }
 
-// Frame lays out the current input at width.
 func (self *Input) Frame(width int) Frame {
 	rows, cursorRow, cursorColumn := layout(self.buffer, width)
 
@@ -102,7 +98,6 @@ func (self *Input) Frame(width int) Frame {
 	return framedRows
 }
 
-// Apply handles one keypress.
 func (self *Input) Apply(keypress key.Key, running bool) Action {
 	if self.wasRunning != running {
 		self.isEnterPending = false
@@ -274,6 +269,9 @@ func (self *Input) toggleMode(button key.Key) Action {
 
 	case 'b':
 		return ToggleBackground
+
+	case 's':
+		return ToggleWeb
 	}
 
 	return Draw

@@ -1,0 +1,35 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[[tool]]
+name = "web_fetch"
+web-withheld = true
+
+[first]
+prompt = "read a page while web access is withheld"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":null,"reasoning_content":""}}]}''',
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","type":"function","function":{"name":"web_fetch","arguments":"{\"url\":\"https://example.com/news\",\"type\":\"markdown\"}"}}]}}]}''',
+    '''{"choices":[{"delta":{"content":"","reasoning_content":""},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Web access is unavailable."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "continue after the refused fetch"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Resumed after the refusal."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
