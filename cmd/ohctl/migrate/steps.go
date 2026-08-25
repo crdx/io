@@ -24,6 +24,7 @@ var steps = map[int]step{
 	3: {migrateJournal: addTurnCompletions},
 	4: {migrateJournal: addLastMode},
 	5: {migrateLine: addEventStatus},
+	6: {},
 }
 
 func addEventStatus(line map[string]json.RawMessage) error {

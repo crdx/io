@@ -1,4 +1,4 @@
-{"kind":"head","version":6,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":7,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"search the web, then answer"}}
 {"kind":"event","event":{"render":"latest Go release","read_only":true,"kind":"tool_call_request","id":"call-1","name":"web_search","arguments":"{\"query\":\"latest Go release\"}"}}
 {"kind":"event","event":{"kind":"tool_call_result","text":"Go 1.26 is the current release, per [the Go blog](https://go.dev/blog).","id":"call-1","name":"web_search","status":"success","stats":{"kind":"output","lines":1,"bytes":71,"total_bytes":71}}}

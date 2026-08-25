@@ -22,7 +22,7 @@ import (
 // JournalFormat is the shape of the journal holding a stored conversation. The journal is canon, so
 // one in an earlier format is migrated to this one rather than written again, and one in a later
 // format is refused rather than read wrongly.
-const JournalFormat = 6
+const JournalFormat = 7
 
 // MetaFormat is the shape of the listing metadata stored beside a journal. The journal is canon and
 // the metadata is derived from it, so metadata in another format is written again, never migrated.

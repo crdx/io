@@ -1,4 +1,4 @@
-{"kind":"head","version":6,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":7,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"receive HTTP 403"}}
 {"kind":"event","event":{"kind":"failure","text":"request failed with status 403: "}}
 {"kind":"item","payload":{"role":"user","content":"receive HTTP 403"}}
