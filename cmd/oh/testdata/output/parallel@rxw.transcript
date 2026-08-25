@@ -44,6 +44,7 @@ Let me get the shape of this first.
 - **Name:** `ls`
 - **Read only:** `true`
 - **Emphasis:** `focus `
+
 **Arguments**
 
 ```json
@@ -58,6 +59,7 @@ Let me get the shape of this first.
 - **Name:** `find`
 - **Read only:** `true`
 - **Emphasis:** `focus `
+
 **Arguments**
 
 ```json
@@ -78,6 +80,7 @@ Let me get the shape of this first.
 - **Name:** `find`
 - **Read only:** `true`
 - **Emphasis:** `focus `
+
 **Arguments**
 
 ```json
@@ -98,6 +101,7 @@ Let me get the shape of this first.
 - **Name:** `grep`
 - **Read only:** `true`
 - **Emphasis:** `syntax regexp`
+
 **Arguments**
 
 ```json
@@ -123,6 +127,7 @@ package
 - **ID:** `call_2`
 - **Name:** `ls`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -146,6 +151,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_4`
 - **Name:** `find`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -167,6 +173,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_3`
 - **Name:** `find`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -188,6 +195,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_5`
 - **Name:** `file_read`
+
 **State**
 
 ```json
@@ -201,6 +209,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_5`
 - **Name:** `grep`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -240,6 +249,7 @@ Now to find where the drawing happens.
 - **Name:** `grep`
 - **Read only:** `true`
 - **Emphasis:** `syntax regexp`
+
 **Arguments**
 
 ```json
@@ -266,6 +276,7 @@ spinner
 - **Name:** `grep`
 - **Read only:** `true`
 - **Emphasis:** `syntax regexp`
+
 **Arguments**
 
 ```json
@@ -292,6 +303,7 @@ footer
 - **Name:** `grep`
 - **Read only:** `true`
 - **Emphasis:** `syntax regexp`
+
 **Arguments**
 
 ```json
@@ -316,6 +328,7 @@ cursor
 
 - **ID:** `call_9`
 - **Name:** `file_read`
+
 **State**
 
 ```json
@@ -329,6 +342,7 @@ cursor
 - **ID:** `call_9`
 - **Name:** `grep`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -349,6 +363,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_8`
 - **Name:** `file_read`
+
 **State**
 
 ```json
@@ -362,6 +377,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_8`
 - **Name:** `grep`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -382,6 +398,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_7`
 - **Name:** `file_read`
+
 **State**
 
 ```json
@@ -395,6 +412,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_7`
 - **Name:** `grep`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -425,6 +443,7 @@ One more pair, and one of them will not be there.
 - **Name:** `ls`
 - **Read only:** `true`
 - **Emphasis:** `focus `
+
 **Arguments**
 
 ```json
@@ -439,6 +458,7 @@ One more pair, and one of them will not be there.
 - **Name:** `read`
 - **Read only:** `true`
 - **Emphasis:** `focus all.go`
+
 **Arguments**
 
 ```json
@@ -458,6 +478,7 @@ nowhere/at/all.go
 - **ID:** `call_11`
 - **Name:** `read`
 - **Status:** `error`
+
 **Stats**
 
 ```json
@@ -479,6 +500,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_10`
 - **Name:** `ls`
 - **Status:** `success`
+
 **Stats**
 
 ```json

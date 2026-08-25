@@ -36,6 +36,7 @@ Searching the target before the process restarts.
 - **Name:** `grep`
 - **Read only:** `true`
 - **Emphasis:** `syntax regexp`
+
 **Arguments**
 
 ```json
@@ -60,6 +61,7 @@ target.txt
 
 - **ID:** `call_1`
 - **Name:** `file_read`
+
 **State**
 
 ```json
@@ -73,6 +75,7 @@ target.txt
 - **ID:** `call_1`
 - **Name:** `grep`
 - **Status:** `success`
+
 **Stats**
 
 ```json

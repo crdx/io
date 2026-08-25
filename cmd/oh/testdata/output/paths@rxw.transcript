@@ -44,6 +44,7 @@ Let me read the renderer.
 - **Name:** `read`
 - **Read only:** `true`
 - **Emphasis:** `focus render.go`
+
 **Arguments**
 
 ```json
@@ -62,6 +63,7 @@ cmd/oh/line/render.go
 
 - **ID:** `call_2`
 - **Name:** `file_read`
+
 **State**
 
 ```json
@@ -75,6 +77,7 @@ cmd/oh/line/render.go
 - **ID:** `call_2`
 - **Name:** `read`
 - **Status:** `success`
+
 **Stats**
 
 ```json

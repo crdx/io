@@ -23,6 +23,7 @@ run a multiline command and notify me when it finishes
 - **ID:** `call_1`
 - **Name:** `bash`
 - **Read only:** `false`
+
 **Arguments**
 
 ```json
@@ -48,6 +49,7 @@ stale qualifier
 - **ID:** `call_1`
 - **Name:** `bash`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -70,6 +72,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_2`
 - **Name:** `notify`
 - **Read only:** `false`
+
 **Arguments**
 
 ```json
@@ -95,6 +98,7 @@ stale notification message
 - **ID:** `call_2`
 - **Name:** `notify`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -116,6 +120,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_3`
 - **Name:** `web_search`
 - **Read only:** `false`
+
 **Arguments**
 
 ```json
@@ -141,6 +146,7 @@ stale search qualifier
 - **ID:** `call_3`
 - **Name:** `web_search`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -162,6 +168,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_4`
 - **Name:** `web_fetch`
 - **Read only:** `false`
+
 **Arguments**
 
 ```json
@@ -187,6 +194,7 @@ stale fetch qualifier
 - **ID:** `call_4`
 - **Name:** `web_fetch`
 - **Status:** `success`
+
 **Stats**
 
 ```json

@@ -32,6 +32,7 @@ One of each, then.
 - **Name:** `bash`
 - **Read only:** `false`
 - **Emphasis:** `syntax bash`
+
 **Arguments**
 
 ```json
@@ -51,6 +52,7 @@ COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT
 - **ID:** `call_1`
 - **Name:** `bash`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -64,6 +66,7 @@ COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT
 - **ID:** `call_2`
 - **Name:** `ls`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -77,6 +80,7 @@ COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT
 - **ID:** `call_2`
 - **Name:** `ls`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -99,6 +103,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_3`
 - **Name:** `read`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -118,6 +123,7 @@ diagram.png
 - **ID:** `call_3`
 - **Name:** `read`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -131,6 +137,7 @@ diagram.png
 - **ID:** `call_4`
 - **Name:** `edit`
 - **Read only:** `false`
+
 **Arguments**
 
 ```json
@@ -150,6 +157,7 @@ screen.go
 - **ID:** `call_4`
 - **Name:** `edit`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -172,6 +180,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **Name:** `grep`
 - **Read only:** `true`
 - **Emphasis:** `syntax regexp`
+
 **Arguments**
 
 ```json
@@ -191,6 +200,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_5`
 - **Name:** `grep`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -212,6 +222,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_6`
 - **Name:** `read`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -231,6 +242,7 @@ README.md
 - **ID:** `call_6`
 - **Name:** `read`
 - **Status:** `success`
+
 **Stats**
 
 ```json

@@ -43,6 +43,7 @@ Let me search, then read the announcement.
 - **ID:** `call_2`
 - **Name:** `web_search`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -62,6 +63,7 @@ latest Go release
 - **ID:** `call_2`
 - **Name:** `web_search`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -83,6 +85,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_3`
 - **Name:** `web_fetch`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -108,6 +111,7 @@ markdown
 - **ID:** `call_3`
 - **Name:** `web_fetch`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -144,6 +148,12 @@ now read the release notes as plain text
 
 > 2001-01-01T00:00:10Z
 
+- **Status:** `info`
+
+```
+The web search and fetch tools are now refused.
+```
+
 ## Tool call
 
 > 2001-01-01T00:00:11Z
@@ -151,6 +161,7 @@ now read the release notes as plain text
 - **ID:** `call_4`
 - **Name:** `web_fetch`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -176,6 +187,7 @@ text
 - **ID:** `call_4`
 - **Name:** `web_fetch`
 - **Status:** `error`
+
 **Output preview (first 3 lines, up to 1 KiB)**
 
 ```

@@ -24,6 +24,7 @@ run each shape of command and load the skill
 - **Name:** `bash`
 - **Read only:** `false`
 - **Emphasis:** `syntax bash`
+
 **Arguments**
 
 ```json
@@ -43,6 +44,7 @@ if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else echo n
 - **ID:** `call_1`
 - **Name:** `bash`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -57,6 +59,7 @@ if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else echo n
 - **Name:** `bash`
 - **Read only:** `false`
 - **Emphasis:** `syntax bash`
+
 **Arguments**
 
 ```json
@@ -76,6 +79,7 @@ while read -r NAME; do echo "$NAME" > out.txt 2>&1; done < list.txt
 - **ID:** `call_2`
 - **Name:** `bash`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -90,6 +94,7 @@ while read -r NAME; do echo "$NAME" > out.txt 2>&1; done < list.txt
 - **Name:** `bash`
 - **Read only:** `false`
 - **Emphasis:** `syntax bash`
+
 **Arguments**
 
 ```json
@@ -109,6 +114,7 @@ until [[ -z "$REST" ]]; do REST=""; done
 - **ID:** `call_3`
 - **Name:** `bash`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -123,6 +129,7 @@ until [[ -z "$REST" ]]; do REST=""; done
 - **Name:** `bash`
 - **Read only:** `false`
 - **Emphasis:** `syntax bash`
+
 **Arguments**
 
 ```json
@@ -142,6 +149,7 @@ case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac
 - **ID:** `call_4`
 - **Name:** `bash`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -156,6 +164,7 @@ case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac
 - **Name:** `bash`
 - **Read only:** `false`
 - **Emphasis:** `syntax bash`
+
 **Arguments**
 
 ```json
@@ -175,6 +184,7 @@ select CHOICE in one two; do break; done
 - **ID:** `call_5`
 - **Name:** `bash`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -189,6 +199,7 @@ select CHOICE in one two; do break; done
 - **Name:** `bash`
 - **Read only:** `false`
 - **Emphasis:** `syntax bash`
+
 **Arguments**
 
 ```json
@@ -208,6 +219,7 @@ ls -la | grep -v "^d" | wc -l
 - **ID:** `call_6`
 - **Name:** `bash`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -222,6 +234,7 @@ ls -la | grep -v "^d" | wc -l
 - **Name:** `grep`
 - **Read only:** `true`
 - **Emphasis:** `syntax regexp`
+
 **Arguments**
 
 ```json
@@ -241,6 +254,7 @@ ls -la | grep -v "^d" | wc -l
 - **ID:** `call_7`
 - **Name:** `grep`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -263,6 +277,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **Name:** `read`
 - **Read only:** `true`
 - **Emphasis:** `focus SKILL.md`
+
 **Arguments**
 
 ```json
@@ -282,6 +297,7 @@ skills/tidy/SKILL.md
 - **ID:** `call_8`
 - **Name:** `read`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -304,6 +320,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **Name:** `read`
 - **Read only:** `true`
 - **Emphasis:** `focus 日本語 🎉`
+
 **Arguments**
 
 ```json
@@ -329,6 +346,7 @@ wide.md
 - **ID:** `call_9`
 - **Name:** `read`
 - **Status:** `success`
+
 **Stats**
 
 ```json

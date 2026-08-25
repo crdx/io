@@ -36,6 +36,7 @@ Reading the target before the process restarts.
 - **Name:** `read`
 - **Read only:** `true`
 - **Emphasis:** `focus target.txt`
+
 **Arguments**
 
 ```json
@@ -54,6 +55,7 @@ target.txt
 
 - **ID:** `call_1`
 - **Name:** `file_read`
+
 **State**
 
 ```json
@@ -67,6 +69,7 @@ target.txt
 - **ID:** `call_1`
 - **Name:** `read`
 - **Status:** `success`
+
 **Stats**
 
 ```json

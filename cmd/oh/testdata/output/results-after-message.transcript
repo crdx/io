@@ -31,6 +31,7 @@ Taking them together.
 - **ID:** `call_1`
 - **Name:** `read`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -50,6 +51,7 @@ screen.go
 - **ID:** `call_2`
 - **Name:** `grep`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -72,9 +74,21 @@ spinner
 
 > 2001-01-01T00:00:04Z
 
+- **Status:** `warning`
+
+```
+Background processes killed (sleep).
+```
+
 ## Notice
 
 > 2001-01-01T00:00:05Z
+
+- **Status:** `success`
+
+```
+Copied to clipboard.
+```
 
 ## Tool result
 
@@ -83,6 +97,7 @@ spinner
 - **ID:** `call_1`
 - **Name:** `read`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -101,6 +116,12 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 > 2001-01-01T00:00:07Z
 
+- **Status:** `error`
+
+```
+the conversation could not be stored: no space left on device
+```
+
 ## Tool result
 
 > 2001-01-01T00:00:08Z
@@ -108,6 +129,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_2`
 - **Name:** `grep`
 - **Status:** `success`
+
 **Stats**
 
 ```json

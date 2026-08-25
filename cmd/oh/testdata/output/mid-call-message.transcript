@@ -39,6 +39,7 @@ Reading it now.
 - **ID:** `call_1`
 - **Name:** `read`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -55,6 +56,12 @@ cmd/oh/line/render.go
 
 > 2001-01-01T00:00:04Z
 
+- **Status:** `warning`
+
+```
+The turn was interrupted.
+```
+
 ## User
 
 > 2001-01-01T00:00:05Z
@@ -70,6 +77,7 @@ never mind, what is in target.txt?
 - **ID:** `call_2`
 - **Name:** `read`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -89,6 +97,7 @@ target.txt
 - **ID:** `call_2`
 - **Name:** `read`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -115,8 +124,20 @@ It holds the word `one`, and nothing else.
 
 > 2001-01-01T00:00:09Z
 
+- **Status:** `warning`
+
+```
+Background processes killed (sleep).
+```
+
 ## Notice
 
 > 2001-01-01T00:00:10Z
+
+- **Status:** `error`
+
+```
+the conversation could not be stored: no space left on device
+```
 
 

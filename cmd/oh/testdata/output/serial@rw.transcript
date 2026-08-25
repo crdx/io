@@ -44,6 +44,7 @@ I'll put a file down to work with.
 - **Name:** `write`
 - **Read only:** `false`
 - **Emphasis:** `focus notes.md`
+
 **Arguments**
 
 ```json
@@ -69,6 +70,7 @@ notes.md
 - **ID:** `call_2`
 - **Name:** `write`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -107,6 +109,7 @@ Now to read it, add to it, and read it back.
 - **Name:** `read`
 - **Read only:** `true`
 - **Emphasis:** `focus notes.md`
+
 **Arguments**
 
 ```json
@@ -127,6 +130,7 @@ notes.md
 - **Name:** `ls`
 - **Read only:** `true`
 - **Emphasis:** `focus `
+
 **Arguments**
 
 ```json
@@ -141,6 +145,7 @@ notes.md
 - **Name:** `write`
 - **Read only:** `false`
 - **Emphasis:** `focus notes.md`
+
 **Arguments**
 
 ```json
@@ -167,6 +172,7 @@ notes.md
 - **Name:** `read`
 - **Read only:** `true`
 - **Emphasis:** `focus notes.md`
+
 **Arguments**
 
 ```json
@@ -186,6 +192,7 @@ notes.md
 - **ID:** `call_5`
 - **Name:** `ls`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -208,6 +215,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_4`
 - **Name:** `file_read`
+
 **State**
 
 ```json
@@ -221,6 +229,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_4`
 - **Name:** `read`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -244,6 +253,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_6`
 - **Name:** `write`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -264,6 +274,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_7`
 - **Name:** `file_read`
+
 **State**
 
 ```json
@@ -277,6 +288,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_7`
 - **Name:** `read`
 - **Status:** `success`
+
 **Stats**
 
 ```json

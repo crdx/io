@@ -30,6 +30,7 @@ Use both tools.
 - **ID:** `call-1`
 - **Name:** `alpha`
 - **Read only:** `false`
+
 **Arguments**
 
 ```json
@@ -49,6 +50,7 @@ alpha
 - **ID:** `call-2`
 - **Name:** `beta`
 - **Read only:** `false`
+
 **Arguments**
 
 ```json
@@ -67,6 +69,7 @@ beta
 
 - **ID:** `call-1`
 - **Name:** `alpha-count`
+
 **State**
 
 ```json
@@ -81,6 +84,7 @@ beta
 - **Name:** `alpha`
 - **Status:** `success`
 - **Duration:** `0s`
+
 **Stats**
 
 ```json
@@ -101,6 +105,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call-2`
 - **Name:** `beta-count`
+
 **State**
 
 ```json
@@ -115,6 +120,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **Name:** `beta`
 - **Status:** `success`
 - **Duration:** `0s`
+
 **Stats**
 
 ```json

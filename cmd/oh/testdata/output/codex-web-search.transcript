@@ -22,6 +22,7 @@ search the web, then answer
 - **ID:** `call-1`
 - **Name:** `web_search`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -42,6 +43,7 @@ latest Go release
 - **Name:** `web_search`
 - **Status:** `success`
 - **Duration:** `0s`
+
 **Stats**
 
 ```json

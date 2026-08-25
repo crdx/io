@@ -36,6 +36,7 @@ Editing the target without reading it again.
 - **Name:** `edit`
 - **Read only:** `true`
 - **Emphasis:** `focus target.txt`
+
 **Arguments**
 
 ```json
@@ -55,6 +56,7 @@ target.txt
 - **ID:** `call_1`
 - **Name:** `edit`
 - **Status:** `error`
+
 **Stats**
 
 ```json

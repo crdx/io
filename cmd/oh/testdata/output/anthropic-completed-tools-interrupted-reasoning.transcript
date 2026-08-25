@@ -30,6 +30,7 @@ Plan first.
 - **ID:** `toolu_1`
 - **Name:** `work`
 - **Read only:** `false`
+
 **Arguments**
 
 ```json
@@ -48,6 +49,7 @@ work
 
 - **ID:** `toolu_1`
 - **Name:** `work-count`
+
 **State**
 
 ```json
@@ -62,6 +64,7 @@ work
 - **Name:** `work`
 - **Status:** `success`
 - **Duration:** `0s`
+
 **Stats**
 
 ```json
@@ -91,6 +94,7 @@ Plan second.
 - **ID:** `toolu_2`
 - **Name:** `work`
 - **Read only:** `false`
+
 **Arguments**
 
 ```json
@@ -109,6 +113,7 @@ work
 
 - **ID:** `toolu_2`
 - **Name:** `work-count`
+
 **State**
 
 ```json
@@ -123,6 +128,7 @@ work
 - **Name:** `work`
 - **Status:** `success`
 - **Duration:** `0s`
+
 **Stats**
 
 ```json
@@ -166,6 +172,7 @@ Check restored state.
 - **ID:** `toolu_3`
 - **Name:** `work`
 - **Read only:** `false`
+
 **Arguments**
 
 ```json
@@ -184,6 +191,7 @@ work
 
 - **ID:** `toolu_3`
 - **Name:** `work-count`
+
 **State**
 
 ```json
@@ -198,6 +206,7 @@ work
 - **Name:** `work`
 - **Status:** `success`
 - **Duration:** `0s`
+
 **Stats**
 
 ```json

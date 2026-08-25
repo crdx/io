@@ -10,6 +10,7 @@ import (
 	"unicode/utf8"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/store/transcript"
 )
 
@@ -183,6 +184,71 @@ func TestTranscriptRetainsDurableState(t *testing.T) {
 	}
 	transcript := string(stored)
 	for _, want := range []string{"## State", "`call`", "`file_read`", string(state)} {
+		if !strings.Contains(transcript, want) {
+			t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)
+		}
+	}
+}
+
+func TestTranscriptRecordsWhatANoticeSaid(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: time.Unix(1, 2)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{
+		Kind:   agent.HarnessMessageEvent,
+		Status: agent.ErrorStatus,
+		Text:   "the conversation could not be stored: no space left on device",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	transcript := string(stored)
+	for _, want := range []string{"## Notice", "`error`", "no space left on device"} {
+		if !strings.Contains(transcript, want) {
+			t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)
+		}
+	}
+}
+
+func TestTranscriptHoldsAFieldRunApartFromWhatFollowsIt(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: time.Unix(1, 2)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{
+		Kind:      agent.ToolCallRequestEvent,
+		ID:        "call",
+		Name:      "bash",
+		Arguments: `{}`,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(5, 6), agent.Event{Kind: caps.ModeChange, Text: "rx"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(7, 8), agent.Event{Kind: agent.UserMessageEvent, Text: "hi"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	transcript := string(stored)
+	for _, want := range []string{"- **Read only:** `false`\n\n**Arguments**", "- **Caps:** `rx`\n\n## User\n"} {
 		if !strings.Contains(transcript, want) {
 			t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)
 		}

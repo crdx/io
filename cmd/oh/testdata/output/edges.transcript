@@ -24,6 +24,7 @@ the awkward shapes
 - **Name:** `divine`
 - **Read only:** `true`
 - **Emphasis:** `focus 1-400`
+
 **Arguments**
 
 ```json
@@ -49,6 +50,7 @@ lines 1-400
 - **ID:** `call_1`
 - **Name:** `divine`
 - **Status:** `success`
+
 **Output preview (first 3 lines, up to 1 KiB)**
 
 ```
@@ -65,6 +67,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **Name:** `conjure`
 - **Read only:** `true`
 - **Emphasis:** `syntax go`
+
 **Arguments**
 
 ```json
@@ -84,6 +87,7 @@ func Draw(rows []string, columns int) ([]string, error) { return rows, nil }
 - **ID:** `call_2`
 - **Name:** `conjure`
 - **Status:** `success`
+
 **Output preview (first 3 lines, up to 1 KiB)**
 
 ```
@@ -100,6 +104,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **Name:** `bash`
 - **Read only:** `false`
 - **Emphasis:** `syntax bash`
+
 **Arguments**
 
 ```json
@@ -119,6 +124,7 @@ for do done esac fi "unclosed
 - **ID:** `call_3`
 - **Name:** `bash`
 - **Status:** `error`
+
 **Output preview (first 3 lines, up to 1 KiB)**
 
 ```
@@ -134,6 +140,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_4`
 - **Name:** `summon`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -153,6 +160,7 @@ nothing
 - **ID:** `call_4`
 - **Name:** `summon`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -166,6 +174,7 @@ nothing
 - **ID:** `call_5`
 - **Name:** `summon`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -185,6 +194,7 @@ plenty
 - **ID:** `call_5`
 - **Name:** `summon`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -206,6 +216,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **ID:** `call_6`
 - **Name:** `summon`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -225,6 +236,7 @@ japanese
 - **ID:** `call_6`
 - **Name:** `summon`
 - **Status:** `success`
+
 **Stats**
 
 ```json

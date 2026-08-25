@@ -31,6 +31,7 @@ That will take a moment.
 - **ID:** `call_1`
 - **Name:** `grep`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -44,6 +45,7 @@ That will take a moment.
 - **ID:** `call_2`
 - **Name:** `find`
 - **Read only:** `true`
+
 **Arguments**
 
 ```json
@@ -58,6 +60,7 @@ That will take a moment.
 - **Name:** `grep`
 - **Status:** `success`
 - **Duration:** `9.5s`
+
 **Stats**
 
 ```json
@@ -80,6 +83,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **Name:** `find`
 - **Status:** `error`
 - **Duration:** `1m2s`
+
 **Output preview (first 3 lines, up to 1 KiB)**
 
 ```

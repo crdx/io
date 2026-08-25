@@ -44,6 +44,7 @@ I'll have a look at how the editor draws its prompt.
 - **Name:** `grep`
 - **Read only:** `true`
 - **Emphasis:** `syntax regexp`
+
 **Arguments**
 
 ```json
@@ -68,6 +69,7 @@ prompt
 
 - **ID:** `call_2`
 - **Name:** `file_read`
+
 **State**
 
 ```json
@@ -81,6 +83,7 @@ prompt
 - **ID:** `call_2`
 - **Name:** `grep`
 - **Status:** `success`
+
 **Stats**
 
 ```json
@@ -119,6 +122,7 @@ Found it. Reading the renderer now.
 - **Name:** `read`
 - **Read only:** `true`
 - **Emphasis:** `focus render.go`
+
 **Arguments**
 
 ```json
@@ -137,6 +141,7 @@ cmd/oh/line/render.go
 
 - **ID:** `call_4`
 - **Name:** `file_read`
+
 **State**
 
 ```json
@@ -150,6 +155,7 @@ cmd/oh/line/render.go
 - **ID:** `call_4`
 - **Name:** `read`
 - **Status:** `success`
+
 **Stats**
 
 ```json

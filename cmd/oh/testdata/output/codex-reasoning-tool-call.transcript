@@ -30,6 +30,7 @@ Use the tool.
 - **ID:** `call-1`
 - **Name:** `work`
 - **Read only:** `false`
+
 **Arguments**
 
 ```json
@@ -48,6 +49,7 @@ work
 
 - **ID:** `call-1`
 - **Name:** `work-count`
+
 **State**
 
 ```json
@@ -62,6 +64,7 @@ work
 - **Name:** `work`
 - **Status:** `success`
 - **Duration:** `0s`
+
 **Stats**
 
 ```json

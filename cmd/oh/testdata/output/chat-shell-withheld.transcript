@@ -23,6 +23,7 @@ run a command while shell access is withheld
 - **Name:** `bash`
 - **Read only:** `false`
 - **Emphasis:** `syntax bash`
+
 **Arguments**
 
 ```json
@@ -43,6 +44,7 @@ echo forbidden
 - **Name:** `bash`
 - **Status:** `error`
 - **Duration:** `0s`
+
 **Stats**
 
 ```json
