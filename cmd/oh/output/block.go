@@ -12,20 +12,40 @@ type Block interface {
 	Rows(columns int) []string
 }
 
+// BlockHandle is a position-independent handle to a block.
+type BlockHandle byte
+
 type groupedBlock struct {
 	Block
 
-	group Group
+	group  Group
+	handle *BlockHandle
 }
 
 // Open puts a work block at the end of the live sequence, under whatever is already open.
 func (self *Screen) Open(block Block) {
+	self.open(block, WorkGroup, nil)
+}
+
+// OpenNotice opens a notice block that its owner may refresh or discard while it remains live.
+func (self *Screen) OpenNotice(block Block) *BlockHandle {
+	handle := new(BlockHandle)
+	self.open(block, NoticeGroup, handle)
+
+	return handle
+}
+
+func (self *Screen) open(block Block, group Group, handle *BlockHandle) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
 	if len(self.blocks) == 0 {
 		self.seal()
-		self.makeRoomFor(WorkGroup)
+		self.liveRegion.origin = self.drawingState()
+		self.liveRegion.hasOrigin = true
+		openedRows := self.openedRows
+
+		self.makeRoomFor(group)
 
 		if self.isMidLine {
 			self.newline()
@@ -33,11 +53,54 @@ func (self *Screen) Open(block Block) {
 
 		self.openPendingLine()
 		self.measureTerminal()
+		self.liveRegion.originRowOffset = self.openedRows - openedRows
 	}
 
-	self.blocks = append(self.blocks, groupedBlock{Block: block, group: WorkGroup})
+	self.blocks = append(self.blocks, groupedBlock{Block: block, group: group, handle: handle})
 
 	self.refresh()
+}
+
+// RefreshBlock refreshes a block if nothing has since sealed or joined its live region.
+func (self *Screen) RefreshBlock(handle *BlockHandle) bool {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	if len(self.blocks) != 1 || self.blocks[0].handle != handle {
+		return false
+	}
+
+	self.refresh()
+
+	return true
+}
+
+// DiscardBlock retracts a block if nothing has since sealed or joined its live region.
+func (self *Screen) DiscardBlock(handle *BlockHandle) bool {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	if len(self.blocks) != 1 || self.blocks[0].handle != handle {
+		return false
+	}
+
+	self.blocks = nil
+
+	return self.discardBlock()
+}
+
+// SealBlock seals a block if nothing has since sealed or joined its live region.
+func (self *Screen) SealBlock(handle *BlockHandle) bool {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	if len(self.blocks) != 1 || self.blocks[0].handle != handle {
+		return false
+	}
+
+	self.seal()
+
+	return true
 }
 
 // Seal ends the live sequence, leaving what it last drew behind as scrollback.

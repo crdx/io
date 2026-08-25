@@ -9,26 +9,36 @@ import (
 
 const clearRow = "\x1b[K"
 
-type liveRegion struct {
-	rows                   []string // the rows as they were last painted
-	currentContentRowCount int      // how many of them are content rather than height-preserving blanks
-	firstGroup             Group    // the group at the start of the region
-	lastGroup              Group    // the group at the end of the region
-	topRowIndex            int      // the first row of the region the screen still holds
+type drawingState struct {
+	column           int
+	openedRows       int
+	isMidLine        bool
+	hasPendingText   bool
+	isBlankOwed      bool
+	trailingNewlines int
+	lastGroup        Group
+	hasPrinted       bool
 }
 
-// DrawAnswer replaces the live region with the answer, and reports whether every changed row
-// remains on screen.
+type liveRegion struct {
+	rows                   []string
+	currentContentRowCount int
+	firstGroup             Group
+	lastGroup              Group
+	topRowIndex            int
+	origin                 drawingState
+	originRowOffset        int
+	hasOrigin              bool
+}
+
 func (self *Screen) DrawAnswer(rows []string) bool {
 	return self.draw(rows, AnswerGroup)
 }
 
-// DrawReasoning replaces the live region with the thinking that led to an answer.
 func (self *Screen) DrawReasoning(rows []string) bool {
 	return self.draw(rows, WorkGroup)
 }
 
-// DiscardLive erases the unsealed live region without leaving it in scrollback.
 func (self *Screen) DiscardLive() bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -48,6 +58,68 @@ func (self *Screen) DiscardLive() bool {
 	self.liveRegion = liveRegion{}
 
 	return true
+}
+
+func (self *Screen) discardBlock() bool {
+	if len(self.liveRegion.rows) == 0 {
+		return true
+	}
+	if self.liveRegion.topRowIndex > 0 {
+		return false
+	}
+	if !self.isTTY {
+		self.restoreDrawingState(self.liveRegion.origin)
+		self.liveRegion = liveRegion{}
+		return true
+	}
+
+	var out strings.Builder
+
+	out.WriteString(self.openFrame())
+	if !self.isWrapping {
+		self.isWrapping = true
+		out.WriteString(noAutoWrap)
+	}
+	out.WriteString(self.eraseInput())
+	out.WriteString(moveUp(len(self.liveRegion.rows) - 1))
+	out.WriteString("\r")
+	out.WriteString(clearBelow)
+	out.WriteString(moveUp(self.liveRegion.originRowOffset))
+	out.WriteString("\r")
+	out.WriteString(moveRight(self.liveRegion.origin.column))
+
+	self.restoreDrawingState(self.liveRegion.origin)
+	self.liveRegion = liveRegion{}
+
+	out.WriteString(self.drawInput())
+	out.WriteString(self.closeFrame())
+	self.raw(out.String())
+
+	return true
+}
+
+func (self *Screen) drawingState() drawingState {
+	return drawingState{
+		column:           self.column,
+		openedRows:       self.openedRows,
+		isMidLine:        self.isMidLine,
+		hasPendingText:   self.hasPendingText,
+		isBlankOwed:      self.isBlankOwed,
+		trailingNewlines: self.trailingNewlines,
+		lastGroup:        self.lastGroup,
+		hasPrinted:       self.hasPrinted,
+	}
+}
+
+func (self *Screen) restoreDrawingState(state drawingState) {
+	self.column = state.column
+	self.openedRows = state.openedRows
+	self.isMidLine = state.isMidLine
+	self.hasPendingText = state.hasPendingText
+	self.isBlankOwed = state.isBlankOwed
+	self.trailingNewlines = state.trailingNewlines
+	self.lastGroup = state.lastGroup
+	self.hasPrinted = state.hasPrinted
 }
 
 func (self *Screen) draw(newRows []string, next Group) bool {
@@ -76,6 +148,10 @@ func (self *Screen) paintGroups(newRows []string, firstGroup Group, lastGroup Gr
 
 	if len(self.liveRegion.rows) == 0 {
 		self.liveRegion.firstGroup = firstGroup
+		if !self.liveRegion.hasOrigin {
+			self.liveRegion.origin = self.drawingState()
+			self.liveRegion.hasOrigin = true
+		}
 	}
 	self.liveRegion.lastGroup = lastGroup
 
@@ -104,7 +180,9 @@ func (self *Screen) paintGroups(newRows []string, firstGroup Group, lastGroup Gr
 	}
 
 	if len(self.liveRegion.rows) == 0 {
+		openedRows := self.openedRows
 		self.begin(firstGroup)
+		self.liveRegion.originRowOffset += self.openedRows - openedRows
 	}
 
 	self.repaint(firstDifference, newRows, firstGroup == AnswerGroup && lastGroup == AnswerGroup)
