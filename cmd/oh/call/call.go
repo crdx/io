@@ -246,7 +246,7 @@ func listStatsText(stats *tool.Stats) string {
 }
 
 func imageStatsText(stats *tool.Stats) string {
-	return style.Subtle(util.FormatEstimatedTokenCount(stats.EstimatedTokens, 2))
+	return style.Subtle(util.FormatEstimatedTokenCount(stats.EstimatedTokens))
 }
 
 func writeStatsText(stats *tool.Stats) string {
@@ -267,9 +267,9 @@ func searchStatsText(stats *tool.Stats) string {
 }
 
 func tokenEstimate(stats *tool.Stats) string {
-	returned := util.FormatTokenEstimate(stats.Bytes, 2)
+	returned := util.FormatTokenEstimate(stats.Bytes)
 	if stats.TotalBytes > stats.Bytes {
-		return returned + " (of " + util.FormatTokenEstimate(stats.TotalBytes, 2) + ")"
+		return returned + " (of " + util.FormatTokenEstimate(stats.TotalBytes) + ")"
 	}
 	return returned
 }

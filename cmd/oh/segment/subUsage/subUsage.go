@@ -270,7 +270,7 @@ func drawWindow(window agent.UsageWindow, fetchedAt time.Time, now time.Time) st
 	}
 
 	if window.ResetsAt.IsZero() {
-		return style.Subtle(text)
+		return style.Quantity(text)
 	}
 
 	if !window.ResetsAt.After(now) {
@@ -285,7 +285,7 @@ func drawWindow(window agent.UsageWindow, fetchedAt time.Time, now time.Time) st
 	case paceCritical:
 		return style.Failure(text + " ▲")
 	default:
-		return style.Subtle(text)
+		return style.Quantity(text)
 	}
 }
 

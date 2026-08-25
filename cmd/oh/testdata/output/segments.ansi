@@ -11,19 +11,19 @@
 === context-usage / one million ===
 50\e[38;2;150;152;150m% \e[0m500\e[38;2;150;152;150mK/\e[0m1\e[38;2;150;152;150mM\e[0m
 === context-usage / unknown ===
-?\e[38;2;150;152;150m% \e[0m?\e[38;2;150;152;150m/\e[0m?
+?\e[38;2;150;152;150m% \e[0m0\e[38;2;150;152;150mK/\e[0m?
 === git-branch / outside a repository ===
 \e[38;2;150;152;150m\e[0m
 === last-tps / a fast turn ===
-~42t/s
+\e[38;2;150;152;150m~\e[0m42\e[38;2;150;152;150mtps\e[0m
 === last-tps / a slow turn ===
-~4.2t/s
+\e[38;2;150;152;150m~\e[0m4.2\e[38;2;150;152;150mtps\e[0m
 === last-tps / running turn ===
-\e[3m\e[38;2;150;152;150m~42t/s\e[0m\e[0m
+\e[3m\e[38;2;150;152;150m~42tps\e[0m\e[0m
 === last-tps / unknown while idle ===
-\e[3m\e[38;2;150;152;150m?t/s\e[0m\e[0m
+?\e[38;2;150;152;150mtps\e[0m
 === last-tps / unknown while running ===
-\e[3m\e[38;2;150;152;150m?t/s\e[0m\e[0m
+\e[3m\e[38;2;150;152;150m?tps\e[0m\e[0m
 === local-time / custom format ===
 \e[38;2;150;152;150m14:32:09\e[0m
 === local-time / default format ===
@@ -47,15 +47,15 @@
 === subscription-usage / ahead of pace ===
 \e[38;2;207;173;0m5h 28% ▲\e[0m
 === subscription-usage / even burn ===
-\e[38;2;150;152;150m5h 40%\e[0m \e[38;2;150;152;150m7d 12%\e[0m
+5\e[38;2;150;152;150mh \e[0m40\e[38;2;150;152;150m%\e[0m 7\e[38;2;150;152;150md \e[0m12\e[38;2;150;152;150m%\e[0m
 === subscription-usage / metered model in use ===
-\e[38;2;150;152;150m7d 6%\e[0m \e[38;2;150;152;150m⚡\e[0m \e[38;2;150;152;150m5h 4%\e[0m \e[38;2;150;152;150m7d 2%\e[0m
+7\e[38;2;150;152;150md \e[0m6\e[38;2;150;152;150m%\e[0m \e[38;2;150;152;150m⚡\e[0m 5\e[38;2;150;152;150mh \e[0m4\e[38;2;150;152;150m%\e[0m 7\e[38;2;150;152;150md \e[0m2\e[38;2;150;152;150m%\e[0m
 === subscription-usage / metered model not in use ===
-\e[38;2;150;152;150m7d 6%\e[0m
+7\e[38;2;150;152;150md \e[0m6\e[38;2;150;152;150m%\e[0m
 === subscription-usage / near the limit ===
 \e[38;2;204;102;102m5h 95% ▲\e[0m
 === subscription-usage / no reset reported ===
-\e[38;2;150;152;150m7d 6%\e[0m
+7\e[38;2;150;152;150md \e[0m6\e[38;2;150;152;150m%\e[0m
 === subscription-usage / not applicable ===
 \e[2m\e[38;2;150;152;150musage n/a\e[0m\e[0m
 === subscription-usage / nothing reported yet ===
@@ -63,17 +63,17 @@ usage \e[38;2;150;152;150mpending\e[0m
 === subscription-usage / only other models metered ===
 \e[2m\e[38;2;150;152;150musage unavailable\e[0m\e[0m
 === subscription-usage / refreshing keeps the figures ===
-\e[38;2;150;152;150m5h 40%\e[0m \e[38;2;204;102;102m429\e[0m
+5\e[38;2;150;152;150mh \e[0m40\e[38;2;150;152;150m%\e[0m \e[38;2;204;102;102m429\e[0m
 === subscription-usage / refused ===
 usage \e[38;2;204;102;102m401\e[0m
 === subscription-usage / spent ===
 \e[38;2;204;102;102m5h 100% ✖\e[0m
 === subscription-usage / three windows ===
-\e[38;2;204;102;102m5h 39% ▲\e[0m \e[38;2;207;173;0m7d 15% ▲\e[0m \e[38;2;150;152;150m30d 13%\e[0m
+\e[38;2;204;102;102m5h 39% ▲\e[0m \e[38;2;207;173;0m7d 15% ▲\e[0m 30\e[38;2;150;152;150md \e[0m13\e[38;2;150;152;150m%\e[0m
 === subscription-usage / unreachable ===
 usage \e[38;2;204;102;102mfailed\e[0m
 === subscription-usage / weekly plan window ===
-\e[38;2;150;152;150m7d 6%\e[0m
+7\e[38;2;150;152;150md \e[0m6\e[38;2;150;152;150m%\e[0m
 === subscription-usage / window already elapsed ===
 \e[2m\e[38;2;150;152;150m5h stale\e[0m\e[0m
 === turn-count / nothing asked yet ===
@@ -87,4 +87,6 @@ usage \e[38;2;204;102;102mfailed\e[0m
 === turn-elapsed / unknown ===
 \e[3m\e[38;2;150;152;150m?s\e[0m\e[0m
 === working-directory ===
-\e[38;2;150;152;150mproject\e[0m
+project
+=== working-directory / full ===
+\e[38;2;150;152;150m/workspace/\e[0mproject

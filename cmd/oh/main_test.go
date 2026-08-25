@@ -4307,6 +4307,12 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			"",
 			segment.Context{},
 		),
+		"working-directory / full": goldenSegmentPass(
+			t,
+			workingDirectory.New("/workspace/project"),
+			`type = "full"`,
+			segment.Context{},
+		),
 	}
 
 	compareWithGolden(t, "segments", ".ansi", passes)

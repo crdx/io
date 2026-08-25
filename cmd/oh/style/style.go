@@ -163,6 +163,32 @@ func Plain(text string) string {
 	return out.String()
 }
 
+func Quantity(text string) string {
+	var out strings.Builder
+
+	for start := 0; start < len(text); {
+		end := start + 1
+		for end < len(text) && isNumeric(text[end]) == isNumeric(text[start]) {
+			end++
+		}
+
+		run := text[start:end]
+		if isNumeric(text[start]) {
+			out.WriteString(Normal(run))
+		} else {
+			out.WriteString(Subtle(run))
+		}
+
+		start = end
+	}
+
+	return out.String()
+}
+
+func isNumeric(character byte) bool {
+	return character >= '0' && character <= '9' || character == '.' || character == '?'
+}
+
 func decorate(decoration Style, inner Style) Style {
 	return func(format any, args ...any) string {
 		return decoration(inner(format, args...))

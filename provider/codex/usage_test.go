@@ -122,6 +122,39 @@ func TestEveryShapeOfRateLimitHeaderIsReadTheSameWay(t *testing.T) {
 			},
 		},
 		{
+			name: "the active model repeated in the root headers",
+			header: map[string]string{
+				"X-Codex-Active-Limit":                       "codex_bengalfox",
+				"X-Codex-Primary-Used-Percent":               "4",
+				"X-Codex-Primary-Window-Minutes":             "300",
+				"X-Codex-Primary-Reset-At":                   "1787705193",
+				"X-Codex-Secondary-Used-Percent":             "2",
+				"X-Codex-Secondary-Window-Minutes":           "10080",
+				"X-Codex-Secondary-Reset-At":                 "1788291993",
+				"X-Codex-Bengalfox-Limit-Name":               "GPT-5.3-Codex-Spark",
+				"X-Codex-Bengalfox-Primary-Used-Percent":     "4",
+				"X-Codex-Bengalfox-Primary-Window-Minutes":   "300",
+				"X-Codex-Bengalfox-Primary-Reset-At":         "1787705193",
+				"X-Codex-Bengalfox-Secondary-Used-Percent":   "2",
+				"X-Codex-Bengalfox-Secondary-Window-Minutes": "10080",
+				"X-Codex-Bengalfox-Secondary-Reset-At":       "1788291993",
+			},
+			want: []agent.UsageWindow{
+				{
+					Duration: 5 * time.Hour,
+					Percent:  4,
+					ResetsAt: at(sparkResets),
+					Scope:    "gpt-5.3-codex-spark",
+				},
+				{
+					Duration: 7 * 24 * time.Hour,
+					Percent:  2,
+					ResetsAt: at(1788291993),
+					Scope:    "gpt-5.3-codex-spark",
+				},
+			},
+		},
+		{
 			name: "a plan whose primary window is the short one",
 			header: map[string]string{
 				"X-Codex-Primary-Used-Percent":     "37.5",

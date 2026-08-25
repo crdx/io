@@ -2,7 +2,9 @@ package workingDirectory
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
+	"strings"
 
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
@@ -13,6 +15,8 @@ const (
 	full  = "full"
 	base  = "base"
 	short = "short"
+
+	separator = string(os.PathSeparator)
 )
 
 type state struct {
@@ -51,6 +55,23 @@ func New(path string) segment.Factory {
 	}
 }
 
+// Render holds the basename forward, since that is the name the user calls the directory by, and
+// leaves whatever leads up to it a step behind.
 func (self state) Render(segment.Context) string {
-	return style.Subtle(self.value)
+	leading, name := splitLeadingPath(self.value)
+
+	if leading == "" {
+		return style.Normal(name)
+	}
+
+	return style.Subtle(leading) + style.Normal(name)
+}
+
+func splitLeadingPath(path string) (string, string) {
+	at := strings.LastIndex(path, separator)
+	if at < 0 || at == len(path)-len(separator) {
+		return "", path
+	}
+
+	return path[:at+len(separator)], path[at+len(separator):]
 }

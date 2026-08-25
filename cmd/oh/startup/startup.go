@@ -102,7 +102,7 @@ func startupContextTokens(info Info) string {
 	}
 
 	var field startupLine
-	field.quantity(util.FormatTokenEstimate(bytes, 3), false)
+	field.quantity(util.FormatTokenEstimate(bytes), false)
 	return field.String()
 }
 

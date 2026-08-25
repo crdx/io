@@ -12,12 +12,14 @@ import (
 )
 
 const (
-	headerPrefix     = "X-Codex"
-	usedSuffix       = "-Used-Percent"
-	windowSuffix     = "-Window-Minutes"
-	resetAtSuffix    = "-Reset-At"
-	resetAfterSuffix = "-Reset-After-Seconds"
-	limitNameSuffix  = "-Limit-Name"
+	headerPrefix         = "X-Codex"
+	activeLimitHeader    = headerPrefix + "-Active-Limit"
+	activeLimitNamespace = "codex_"
+	usedSuffix           = "-Used-Percent"
+	windowSuffix         = "-Window-Minutes"
+	resetAtSuffix        = "-Reset-At"
+	resetAfterSuffix     = "-Reset-After-Seconds"
+	limitNameSuffix      = "-Limit-Name"
 
 	primaryPart   = "-Primary"
 	secondaryPart = "-Secondary"
@@ -64,8 +66,6 @@ func (self *Client) recordUsageWindows(header http.Header, now time.Time) {
 }
 
 func limitBuckets(header http.Header) []limitBucket {
-	buckets := []limitBucket{{prefix: headerPrefix}}
-
 	var named []string
 
 	for name := range header {
@@ -77,11 +77,28 @@ func limitBuckets(header http.Header) []limitBucket {
 
 	slices.Sort(named)
 
+	var buckets []limitBucket
+
+	if !activeLimitNamesBucket(header, named) {
+		buckets = append(buckets, limitBucket{prefix: headerPrefix})
+	}
+
 	for _, prefix := range named {
 		buckets = append(buckets, limitBucket{prefix: prefix, scope: scopeName(header, prefix)})
 	}
 
 	return buckets
+}
+
+func activeLimitNamesBucket(header http.Header, prefixes []string) bool {
+	activeLimit := strings.ToLower(strings.TrimSpace(header.Get(activeLimitHeader)))
+	activeLimit = strings.TrimPrefix(activeLimit, activeLimitNamespace)
+
+	return slices.ContainsFunc(prefixes, func(prefix string) bool {
+		bucketName := strings.TrimPrefix(prefix, headerPrefix+"-")
+
+		return strings.EqualFold(activeLimit, bucketName)
+	})
 }
 
 func scopeName(header http.Header, prefix string) string {

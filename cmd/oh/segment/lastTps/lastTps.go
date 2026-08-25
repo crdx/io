@@ -26,18 +26,18 @@ func New(
 func (self state) Render(segment.Context) string {
 	tokensPerSecond, known := self.rate()
 
-	if !known {
-		return style.Peripheral("?t/s")
+	text := "?tps"
+	if known {
+		format := "~%.0ftps"
+		if tokensPerSecond < threshold {
+			format = "~%.1ftps"
+		}
+		text = fmt.Sprintf(format, tokensPerSecond)
 	}
 
-	format := "~%.0ft/s"
-	if tokensPerSecond < threshold {
-		format = "~%.1ft/s"
-	}
-	text := fmt.Sprintf(format, tokensPerSecond)
 	if self.isTurnRunning() {
 		return style.Peripheral(text)
 	}
 
-	return style.Normal(text)
+	return style.Quantity(text)
 }

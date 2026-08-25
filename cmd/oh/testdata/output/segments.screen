@@ -11,19 +11,19 @@ medium gpt-5.6-sol
 === context-usage / one million ===
 50% 500K/1M
 === context-usage / unknown ===
-?% ?/?
+?% 0K/?
 === git-branch / outside a repository ===
 
 === last-tps / a fast turn ===
-~42t/s
+~42tps
 === last-tps / a slow turn ===
-~4.2t/s
+~4.2tps
 === last-tps / running turn ===
-~42t/s
+~42tps
 === last-tps / unknown while idle ===
-?t/s
+?tps
 === last-tps / unknown while running ===
-?t/s
+?tps
 === local-time / custom format ===
 14:32:09
 === local-time / default format ===
@@ -88,3 +88,5 @@ usage failed
 ?s
 === working-directory ===
 project
+=== working-directory / full ===
+/workspace/project

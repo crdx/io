@@ -46,8 +46,8 @@ func TestContextUsageShowsEveryKnownPart(t *testing.T) {
 		totalTokens int
 		want        string
 	}{
-		"neither":             {want: "?% ?/?"},
-		"total only":          {totalTokens: 200_000, want: "?% ?/200K"},
+		"neither":             {want: "?% 0K/?"},
+		"total only":          {totalTokens: 200_000, want: "0% 0K/200K"},
 		"one million context": {usedTokens: 500_000, totalTokens: 1_000_000, want: "50% 500K/1M"},
 		"used only":           {usedTokens: 5000, want: "?% 5K/?"},
 		"both":                {usedTokens: 5000, totalTokens: 200_000, want: "3% 5K/200K"},
@@ -60,7 +60,7 @@ func TestContextUsageShowsEveryKnownPart(t *testing.T) {
 	}
 }
 
-func TestContextUsageIsNoFinerThanWholeThousands(t *testing.T) {
+func TestContextUsageIsWrittenToTwoSignificantDigits(t *testing.T) {
 	for name, test := range map[string]struct {
 		usedTokens  int
 		totalTokens int
@@ -69,7 +69,7 @@ func TestContextUsageIsNoFinerThanWholeThousands(t *testing.T) {
 		"a handful of tokens still counts": {usedTokens: 400, totalTokens: 200_000, want: "0% 1K/200K"},
 		"thousands are rounded":            {usedTokens: 92_501, totalTokens: 200_000, want: "46% 93K/200K"},
 		"a window over a million":          {usedTokens: 92_000, totalTokens: 1_048_576, want: "9% 92K/1M"},
-		"millions are rounded":             {usedTokens: 1_600_000, totalTokens: 2_000_000, want: "80% 2M/2M"},
+		"millions keep a decimal":          {usedTokens: 1_600_000, totalTokens: 2_000_000, want: "80% 1.6M/2M"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			if got := render(t, test.usedTokens, test.totalTokens); got != test.want {

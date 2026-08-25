@@ -15,10 +15,10 @@ func TestFormatTokenEstimateUsesFourBytesPerToken(t *testing.T) {
 		5:    "~2t",
 		740:  "~200t",
 		4000: "~1Kt",
-		5000: "~1.25Kt",
+		5000: "~1.2Kt",
 	} {
-		if got := util.FormatTokenEstimate(bytes, 3); got != want {
-			t.Errorf("FormatTokenEstimate(%d, 3) = %q, want %q", bytes, got, want)
+		if got := util.FormatTokenEstimate(bytes); got != want {
+			t.Errorf("FormatTokenEstimate(%d) = %q, want %q", bytes, got, want)
 		}
 	}
 }
@@ -36,20 +36,38 @@ func TestFormatEstimatedTokenCountRoundsSubKiloValuesToNearestHundred(t *testing
 		999:       "~1Kt",
 		1000:      "~1Kt",
 		1_000_000: "~1Mt",
-		1_234_567: "~1.23Mt",
+		1_234_567: "~1.2Mt",
 	} {
-		if got := util.FormatEstimatedTokenCount(tokens, 3); got != want {
-			t.Errorf("FormatEstimatedTokenCount(%d, 3) = %q, want %q", tokens, got, want)
+		if got := util.FormatEstimatedTokenCount(tokens); got != want {
+			t.Errorf("FormatEstimatedTokenCount(%d) = %q, want %q", tokens, got, want)
 		}
 	}
 }
 
-func TestFormatTokenEstimateHonoursPrecision(t *testing.T) {
-	if got := util.FormatTokenEstimate(4996, 2); got != "~1.2Kt" {
+func TestFormatTokenEstimateIsWrittenToTwoSignificantDigits(t *testing.T) {
+	if got := util.FormatTokenEstimate(4996); got != "~1.2Kt" {
 		t.Errorf("got %q, want ~1.2Kt", got)
 	}
-	if got := util.FormatTokenEstimate(400_000, 2); got != "~100Kt" {
+	if got := util.FormatTokenEstimate(400_000); got != "~100Kt" {
 		t.Errorf("got %q, want ~100Kt without scientific notation", got)
+	}
+}
+
+func TestFormatTokenCountDropsTheUnitAndSaysNothingUsedAsNothing(t *testing.T) {
+	for tokens, want := range map[int64]string{
+		-1:        "0K",
+		0:         "0K",
+		400:       "1K",
+		5000:      "5K",
+		64_000:    "64K",
+		92_501:    "93K",
+		274_000:   "274K",
+		1_048_576: "1M",
+		1_600_000: "1.6M",
+	} {
+		if got := util.FormatTokenCount(tokens); got != want {
+			t.Errorf("FormatTokenCount(%d) = %q, want %q", tokens, got, want)
+		}
 	}
 }
 
