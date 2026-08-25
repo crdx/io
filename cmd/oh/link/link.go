@@ -1,4 +1,4 @@
-package pathlink
+package link
 
 import (
 	"net/url"

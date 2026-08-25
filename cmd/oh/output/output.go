@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"crdx.org/io/cmd/oh/pathlink"
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 
@@ -221,7 +221,7 @@ func (self *Screen) linkifyScrollback(text string) string {
 		return text
 	}
 
-	return pathlink.Render(text, self.linkRoot)
+	return link.Render(text, self.linkRoot)
 }
 
 func (self *Screen) raw(text string) {
