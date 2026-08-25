@@ -1,6 +1,7 @@
 === narrow ===
 Session 000000000000000000000000 started
- in 0s with 0 skills and 0 snippets.
+ in 0s with 0 skills, 0 snippets, and ~6
+00t of context.
 
 
  have a look at that
@@ -93,10 +94,7 @@ i
 l
 l
 s
-
-a
-n
-d
+,
 
 0
 
@@ -108,6 +106,28 @@ p
 e
 t
 s
+,
+
+a
+n
+d
+
+~
+6
+0
+0
+t
+
+o
+f
+
+c
+o
+n
+t
+e
+x
+t
 .
 
 
@@ -428,8 +448,9 @@ Session 0000
 00000000 sta
 rted in 0s w
 ith 0 skills
- and 0 snipp
-ets.
+, 0 snippets
+, and ~600t
+of context.
 
 
  have a look
@@ -484,7 +505,7 @@ one of them
 could be
 answered.
 === wide ===
-Session 000000000000000000000000 started in 0s with 0 skills and 0 snippets.
+Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~600t of context.
 
 
  have a look at that

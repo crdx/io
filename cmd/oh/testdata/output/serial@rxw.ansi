@@ -1,6 +1,7 @@
 === narrow ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started\r
- in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills and \e[0m0\e[38;2;150;152;150m snippets.\e[0m\r
+ in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m6\r
+00\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m have a look at that                    \e[0m\r
@@ -96,10 +97,7 @@ i\r
 l\r
 l\r
 s\r
- \r
-a\r
-n\r
-d\r
+,\r
  \e[0m\r
 0\e[38;2;150;152;150m\r
  \r
@@ -111,6 +109,28 @@ p\r
 e\r
 t\r
 s\r
+,\r
+ \r
+a\r
+n\r
+d\r
+ \e[0m\e[38;2;150;152;150m\r
+~\e[0m\r
+6\r
+0\r
+0\e[38;2;150;152;150m\r
+t\e[0m\e[38;2;150;152;150m\r
+ \r
+o\r
+f\r
+ \r
+c\r
+o\r
+n\r
+t\r
+e\r
+x\r
+t\r
 .\e[0m\r
 \r
 \e[48;2;52;53;65m \e[0m\r
@@ -461,7 +481,7 @@ t\e[0m\r
 \r\e[K.\r
 \e[?25h\e[?2026l
 === plain ===
-\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills and \e[0m0\e[38;2;150;152;150m snippets.\e[0m
+\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -483,7 +503,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44
 The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.
 
 === streamed ===
-\e]9;4;3\e\\\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills and \e[0m0\e[38;2;150;152;150m snippets.\e[0m\r
+\e]9;4;3\e\\\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -519,8 +539,9 @@ The reads went together, the write waited for them and ran on its own, and the r
 00000000\e[38;2;150;152;150m sta\r
 rted in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m w\r
 ith \e[0m0\e[38;2;150;152;150m skills\r
- and \e[0m0\e[38;2;150;152;150m snipp\r
-ets.\e[0m\r
+, \e[0m0\e[38;2;150;152;150m snippets\r
+, and \e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m \r
+of context.\e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m have a look\e[0m\r
@@ -582,7 +603,7 @@ ets.\e[0m\r
 \r\e[Kfirst.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills and \e[0m0\e[38;2;150;152;150m snippets.\e[0m
+\e[?2026h\e[?25l\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -610,7 +631,7 @@ ets.\e[0m\r
 \r\e[KThe reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills and \e[0m0\e[38;2;150;152;150m snippets.\e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m600\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r

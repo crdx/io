@@ -9,6 +9,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/internal/util"
 )
 
 var startedAt = time.Now()
@@ -79,9 +80,11 @@ func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
 	_, _ = line.WriteString(style.Subtle(" started in ") + startupDuration(elapsed))
 	_, _ = line.WriteString(style.Subtle(" with "))
 	_, _ = line.WriteString(style.Normal(fmt.Sprint(info.ProjectSkills + info.GlobalSkills)))
-	_, _ = line.WriteString(style.Subtle(" skills and "))
+	_, _ = line.WriteString(style.Subtle(" skills, "))
 	_, _ = line.WriteString(style.Normal(fmt.Sprint(info.Snippets)))
-	_, _ = line.WriteString(style.Subtle(" snippets."))
+	_, _ = line.WriteString(style.Subtle(" snippets, and "))
+	_, _ = line.WriteString(startupContextTokens(info))
+	_, _ = line.WriteString(style.Subtle(" of context."))
 
 	return line.String()
 }
@@ -89,6 +92,17 @@ func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
 func startupDuration(elapsed time.Duration) string {
 	var field startupLine
 	field.quantity(timeTaken(elapsed), false)
+	return field.String()
+}
+
+func startupContextTokens(info Info) string {
+	bytes := info.ToolBytes
+	for _, file := range info.ContextFiles {
+		bytes += file.Bytes
+	}
+
+	var field startupLine
+	field.quantity(util.FormatTokenEstimate(bytes, 3), false)
 	return field.String()
 }
 

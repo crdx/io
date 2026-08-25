@@ -21,7 +21,7 @@ func TestAStartupEventKeepsItsFactsForReplay(t *testing.T) {
 
 	event := NewEvent(12*time.Millisecond, info)
 	got := style.Plain(RenderEvent(event))
-	want := "Session brave-otter started in 12ms with 5 skills and 4 snippets."
+	want := "Session brave-otter started in 12ms with 5 skills, 4 snippets, and ~800t of context."
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
@@ -69,7 +69,7 @@ func TestStartupQuantitiesPutOnlyTheirNumbersInTheNormalForeground(t *testing.T)
 
 func TestAnEmptyStartupSaysTheSentenceAlone(t *testing.T) {
 	line := style.Plain(RenderBanner(time.Millisecond, false, Info{}))
-	want := "Session started in 1ms with 0 skills and 0 snippets."
+	want := "Session started in 1ms with 0 skills, 0 snippets, and 0t of context."
 
 	if line != want {
 		t.Errorf("got %q, want %q", line, want)
