@@ -4538,8 +4538,8 @@ func TestUnknownSlashCommandDoesNotInterruptARunningTurn(t *testing.T) {
 
 func TestSnippetKeepsItsInvocationInHistoryAndQueuesItsRenderedPrompt(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
-	self.commands = fixtureSnippetRegistry(t, map[string]string{
-		"add": "Add the following:\n\n{{ .Arg }}",
+	self.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
+		"add": {Prompt: "Add the following:\n\n{{ .Arg }}", Arguments: snippets.ArgumentsRequired},
 	})
 	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true})}
 
@@ -4570,8 +4570,8 @@ func TestSnippetKeepsItsInvocationInHistoryAndQueuesItsRenderedPrompt(t *testing
 func TestSnippetWithoutArgumentsShowsUsageAndKeepsTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.commands = fixtureSnippetRegistry(t, map[string]string{
-		"add": "Add the following:\n\n{{ .Arg }}",
+	self.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
+		"add": {Prompt: "Add the following:\n\n{{ .Arg }}", Arguments: snippets.ArgumentsRequired},
 	})
 	history := edit.NewHistory("", historyLimit)
 	editor := edit.NewInput(history)
@@ -4592,8 +4592,8 @@ func TestSnippetWithoutArgumentsShowsUsageAndKeepsTheInput(t *testing.T) {
 func TestPlainSnippetInputWaitsForTheRenderedPrompt(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
-	self.commands = fixtureSnippetRegistry(t, map[string]string{
-		"ask": "Question: {{index .Args 0}} / {{.Arg}}",
+	self.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
+		"ask": {Prompt: "Question: {{index .Args 0}} / {{.Arg}}", Arguments: snippets.ArgumentsRequired},
 	})
 
 	historyPath := filepath.Join(t.TempDir(), "history")
@@ -4621,8 +4621,8 @@ func TestPlainSnippetInputWaitsForTheRenderedPrompt(t *testing.T) {
 func TestSnippetTemplateErrorsAreReportedAndKeepTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.commands = fixtureSnippetRegistry(t, map[string]string{
-		"review": "{{index .Args 2}}",
+	self.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
+		"review": {Prompt: "{{index .Args 2}}", Arguments: snippets.ArgumentsRequired},
 	})
 
 	if got := self.handleCommand("//review only-one"); got != dispatch.Rejected {
@@ -4665,9 +4665,9 @@ func TestTabCompletionKeepsCommandNamespacesSeparate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	snippetSet, err := snippets.New(map[string]string{
-		"test":   "Run tests.",
-		"review": "Review changes.",
+	snippetSet, err := snippets.New(map[string]snippets.Definition{
+		"test":   {Prompt: "Run tests.", Arguments: snippets.ArgumentsNone},
+		"review": {Prompt: "Review changes.", Arguments: snippets.ArgumentsNone},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -4725,7 +4725,7 @@ func fixtureCommandRegistry(t *testing.T, commands ...slash.Command) slash.Regis
 	return fixtureRegistry(t, set)
 }
 
-func fixtureSnippetRegistry(t *testing.T, configured map[string]string) slash.Registry {
+func fixtureSnippetRegistry(t *testing.T, configured map[string]snippets.Definition) slash.Registry {
 	t.Helper()
 
 	systemSet, err := slash.NewCommandSet("/")

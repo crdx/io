@@ -10,10 +10,11 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/slash"
+	"crdx.org/io/cmd/oh/snippets"
 )
 
 func TestCompletionMatchesGolden(t *testing.T) {
-	commands := newCommandRegistryWithSnippets(t, commandEnvironment{}, fixtureSnippets())
+	commands := newCommandRegistryWithSnippets(t, fixtureEnvironment(t), fixtureSnippets())
 	var output strings.Builder
 
 	for _, test := range []struct {
@@ -24,9 +25,12 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		{prefix: "/c", steps: 1},
 		{prefix: "/copy ", steps: 3},
 		{prefix: "/copy l", steps: 1},
+		{prefix: "/copy sn", steps: 1},
 		{prefix: "/edit ", steps: 3},
-		{prefix: "/open ", steps: 11},
-		{prefix: "//", steps: 2},
+		{prefix: "/edit sn", steps: 1},
+		{prefix: "/open ", steps: 12},
+		{prefix: "/open sn", steps: 1},
+		{prefix: "//", steps: 3},
 		{prefix: "//a", steps: 3},
 	} {
 		state := slash.Completion{}
@@ -60,10 +64,30 @@ func TestCompletionMatchesGolden(t *testing.T) {
 	}
 }
 
-func fixtureSnippets() map[string]string {
-	return map[string]string{
-		"add": "Add {{.Arg}}",
-		"ask": "Ask {{.Arg}}",
+func fixtureEnvironment(t *testing.T) commandEnvironment {
+	t.Helper()
+	configDirectory := t.TempDir()
+	if err := os.Mkdir(filepath.Join(configDirectory, "snippets"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	return commandEnvironment{configDir: configDirectory}
+}
+
+func fixtureSnippets() map[string]snippets.Definition {
+	return map[string]snippets.Definition{
+		"add": {
+			Prompt:      "Add {{.Arg}}",
+			Description: "Add a task, then continue.",
+			Arguments:   snippets.ArgumentsRequired,
+		},
+		"ask": {
+			Prompt:      "Ask {{.Arg}}",
+			Description: "Answer without making changes.",
+			Arguments:   snippets.ArgumentsRequired,
+		},
+		"note": {
+			Prompt: "Note this.",
+		},
 	}
 }
 
@@ -81,7 +105,7 @@ func (self *helpContext) Notice(text string) {
 func (self *helpContext) Success(string) {}
 
 func TestHelpMatchesGolden(t *testing.T) {
-	commands := newCommandRegistryWithSnippets(t, commandEnvironment{}, fixtureSnippets())
+	commands := newCommandRegistryWithSnippets(t, fixtureEnvironment(t), fixtureSnippets())
 	invocation, found := commands.Find("/help")
 	if !found {
 		t.Fatal("expected /help to be registered")

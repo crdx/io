@@ -16,6 +16,7 @@ import (
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/shell"
+	"crdx.org/io/cmd/oh/snippets"
 
 	"crdx.org/io/internal/format"
 	"crdx.org/io/internal/util/pathutil"
@@ -25,14 +26,14 @@ import (
 var defaultsTOML string
 
 type Config struct {
-	Version            int               `toml:"version"`
-	Editor             Editor            `toml:"editor"`
-	Model              Model             `toml:"model"`
-	GetOnWithItMessage string            `toml:"get_on_with_it_message"`
-	Snippets           map[string]string `toml:"snippets"`
-	Skills             SkillPaths        `toml:"skills"`
-	Sandbox            sandbox           `toml:"sandbox"`
-	Bar                Bar               `toml:"bar"`
+	Version            int                            `toml:"version"`
+	Editor             Editor                         `toml:"editor"`
+	Model              Model                          `toml:"model"`
+	GetOnWithItMessage string                         `toml:"get_on_with_it_message"`
+	Snippets           map[string]snippets.Definition `toml:"snippets"`
+	Skills             SkillPaths                     `toml:"skills"`
+	Sandbox            sandbox                        `toml:"sandbox"`
+	Bar                Bar                            `toml:"bar"`
 
 	fallback *toml.MetaData
 	user     *toml.MetaData
@@ -214,11 +215,18 @@ func Load(path string) (Config, error) {
 		return config, fmt.Errorf("%s: get_on_with_it_message is empty", displayPath)
 	}
 	for _, name := range slices.Sorted(maps.Keys(config.Snippets)) {
-		prompt := strings.TrimSpace(config.Snippets[name])
-		if prompt == "" {
-			return config, fmt.Errorf("%s: snippets.%s is empty", displayPath, name)
+		definition := config.Snippets[name]
+		if definition.File != "" {
+			resolvedPath, err := resolveConfigPath(path, definition.File)
+			if err != nil {
+				return config, fmt.Errorf("%s: snippets.%s.file: %w", displayPath, name, err)
+			}
+			definition, err = definition.LoadFile(resolvedPath)
+			if err != nil {
+				return config, fmt.Errorf("%s: snippets.%s: %w", displayPath, name, err)
+			}
 		}
-		config.Snippets[name] = prompt
+		config.Snippets[name] = definition
 	}
 
 	lists := []struct {

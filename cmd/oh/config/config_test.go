@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
 	"crdx.org/io/cmd/oh/segment/workingDirectory"
+	"crdx.org/io/cmd/oh/snippets"
 )
 
 func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testing.T) {
@@ -220,9 +221,9 @@ func TestTheConfiguredGetOnWithItMessageIsTrimmed(t *testing.T) {
 	}
 }
 
-func TestConfiguredSnippetPromptsAreTrimmed(t *testing.T) {
+func TestAStringSnippetIsItsPrompt(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[snippets]\nreview = \"  Review this.  \"\n"); err != nil {
+	if err := writeConfigFile(path, "[snippets]\ngold = \"  Consider the goldens.  \"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -230,14 +231,38 @@ func TestConfiguredSnippetPromptsAreTrimmed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if config.Snippets["review"] != "Review this." {
-		t.Errorf("got snippet prompt %q", config.Snippets["review"])
+	definition := config.Snippets["gold"]
+	if definition.Prompt != "Consider the goldens." || definition.File != "" ||
+		definition.Description != "" || definition.Arguments != "" {
+		t.Errorf("got snippet %#v", definition)
 	}
 }
 
-func TestConfiguredSnippetsAreLoaded(t *testing.T) {
+func TestAnEmptyStringSnippetIsRejected(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	contents := "[snippets]\nadd = \"Override: {{ .Arg }}\"\nreview = \"Review this.\"\n"
+	if err := writeConfigFile(path, "[snippets]\ngold = \"  \"\n"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(path); err == nil || !strings.Contains(err.Error(), "snippets.gold") {
+		t.Errorf("got error %v", err)
+	}
+}
+
+func TestANonStringNonTableSnippetIsRejected(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[snippets]\ngold = 5\n"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(path); err == nil || !strings.Contains(err.Error(), "not a prompt or a table") {
+		t.Errorf("got error %v", err)
+	}
+}
+
+func TestRichConfiguredSnippetsAreLoaded(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	contents := `[snippets]
+review = { prompt = "  Review {{ .Arg }}.  ", description = "  Review changes.  ", arguments = "optional" }
+`
 	if err := writeConfigFile(path, contents); err != nil {
 		t.Fatal(err)
 	}
@@ -246,22 +271,96 @@ func TestConfiguredSnippetsAreLoaded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(config.Snippets) != 2 {
-		t.Errorf("got snippets %#v", config.Snippets)
+	definition := config.Snippets["review"]
+	if definition.Prompt != "Review {{ .Arg }}." || definition.Description != "Review changes." ||
+		definition.Arguments != snippets.ArgumentsOptional {
+		t.Errorf("got snippet %#v", definition)
 	}
-	for name, want := range map[string]string{
-		"add":    "Override: {{ .Arg }}",
-		"review": "Review this.",
+}
+
+func TestSnippetDescriptionAndArgumentsAreOptional(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[snippets]\nreview = { prompt = \"Review {{ .Arg }}.\" }\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	definition := config.Snippets["review"]
+	if definition.Description != "" || definition.Arguments != "" {
+		t.Errorf("got snippet %#v", definition)
+	}
+}
+
+func TestSnippetPromptFilesAreRelativeToTheConfig(t *testing.T) {
+	configDirectory := t.TempDir()
+	promptDirectory := filepath.Join(configDirectory, "snippets")
+	if err := os.Mkdir(promptDirectory, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	promptPath := filepath.Join(promptDirectory, "review.md")
+	if err := os.WriteFile(promptPath, []byte("  Review {{ .Arg }}.  \n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	configPath := filepath.Join(configDirectory, "config.toml")
+	contents := `[snippets]
+review = { file = "snippets/review.md", description = "Review changes.", arguments = "required" }
+`
+	if err := writeConfigFile(configPath, contents); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	definition := config.Snippets["review"]
+	if definition.Prompt != "Review {{ .Arg }}." || definition.File != promptPath {
+		t.Errorf("got snippet %#v", definition)
+	}
+}
+
+func TestAMissingSnippetPromptFileIsRejected(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	contents := `[snippets]
+review = { file = "missing.md", description = "Review changes.", arguments = "required" }
+`
+	if err := writeConfigFile(path, contents); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(path); err == nil || !strings.Contains(err.Error(), "snippets.review") {
+		t.Errorf("got error %v", err)
+	}
+}
+
+func TestRichSnippetDefinitionsAreValidated(t *testing.T) {
+	for name, definition := range map[string]string{
+		"both sources":          `{ prompt = "Prompt", file = "prompt.md", description = "Description", arguments = "none" }`,
+		"missing source":        `{ description = "Description", arguments = "none" }`,
+		"multiline description": "{ prompt = \"Prompt\", description = \"\"\"\nfirst\nsecond\n\"\"\", arguments = \"none\" }",
+		"invalid arguments":     `{ prompt = "Prompt", description = "Description", arguments = "sometimes" }`,
+		"unknown field":         `{ prompt = "Prompt", description = "Description", arguments = "none", extra = "x" }`,
 	} {
-		if config.Snippets[name] != want {
-			t.Errorf("got snippet %s %q, want %q", name, config.Snippets[name], want)
-		}
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "config.toml")
+			if err := writeConfigFile(path, "[snippets]\nreview = "+definition+"\n"); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := Load(path); err == nil || !strings.Contains(err.Error(), "snippets.review") {
+				t.Errorf("got error %v", err)
+			}
+		})
 	}
 }
 
 func TestConfiguredSnippetPromptsCannotBeEmpty(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[snippets]\nreview = \"  \"\n"); err != nil {
+	contents := `[snippets]
+review = { prompt = "  ", description = "Review changes.", arguments = "none" }
+`
+	if err := writeConfigFile(path, contents); err != nil {
 		t.Fatal(err)
 	}
 

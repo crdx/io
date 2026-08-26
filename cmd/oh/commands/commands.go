@@ -17,6 +17,7 @@ import (
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/terminal"
+	"crdx.org/io/cmd/oh/width"
 )
 
 const (
@@ -85,7 +86,7 @@ type commandTarget struct {
 	resolveValues func() ([]string, error)
 }
 
-func New(options Options, snippetUsages []string) (slash.CommandSet, error) {
+func New(options Options, snippetHelp []slash.HelpEntry) (slash.CommandSet, error) {
 	return buildCommands(commandEnvironment{
 		configDir:        options.ConfigDir,
 		configPath:       options.ConfigFile,
@@ -109,17 +110,17 @@ func New(options Options, snippetUsages []string) (slash.CommandSet, error) {
 			return terminal.Copy(options.Output, strings.Join(values, "\n"))
 		},
 		startSession: options.StartSession,
-	}, snippetUsages)
+	}, snippetHelp)
 }
 
-func buildCommands(environment commandEnvironment, snippetUsages []string) (slash.CommandSet, error) {
+func buildCommands(environment commandEnvironment, snippetHelp []slash.HelpEntry) (slash.CommandSet, error) {
 	targets := locationTargets(environment)
 	targetNames := slices.Sorted(maps.Keys(targets))
 
 	var set slash.CommandSet
 	var help slash.Command
 	help = helpCommand(func() string {
-		return helpText(set.Usages(), systemCommandPrefix+help.Name, snippetUsages, targetNames)
+		return helpText(set.Usages(), systemCommandPrefix+help.Name, snippetHelp, targetNames)
 	})
 	commands := []slash.Command{
 		targetCommand("copy", copyTargets(environment, targets), targetNames, environment.copyText, copyConfirmation),
@@ -180,7 +181,7 @@ func locationTargets(environment commandEnvironment) map[string]commandTarget {
 		return os.MkdirAll(environment.configDir, 0o700)
 	}
 
-	return map[string]commandTarget{
+	targets := map[string]commandTarget{
 		"agents-file":        existingTarget("Project context", prompt.ProjectContextPaths(environment.workspaceDir)...),
 		"config-dir":         preparedTarget(prepareConfigDir, environment.configDir),
 		"config-file":        preparedTarget(prepareConfigDir, environment.configPath),
@@ -199,6 +200,12 @@ func locationTargets(environment commandEnvironment) map[string]commandTarget {
 			filepath.Join(environment.session.directory, sessionTranscriptName),
 		),
 	}
+
+	snippetsDirectory := filepath.Join(environment.configDir, "snippets")
+	if info, err := os.Stat(snippetsDirectory); err == nil && info.IsDir() {
+		targets["snippets-dir"] = staticTarget(snippetsDirectory)
+	}
+	return targets
 }
 
 func helpCommand(getHelp func() string) slash.Command {
@@ -243,7 +250,12 @@ func commandsRequiringPersistedSession(isSessionPersisted func() bool, commands 
 	return commands
 }
 
-func helpText(commandUsages []string, hiddenCommandUsage string, snippetUsages []string, targetNames []string) string {
+func helpText(
+	commandUsages []string,
+	hiddenCommandUsage string,
+	snippetHelp []slash.HelpEntry,
+	targetNames []string,
+) string {
 	visibleCommandUsages := slices.DeleteFunc(commandUsages, func(usage string) bool { return usage == hiddenCommandUsage })
 	usesTargets := false
 	for i, usage := range visibleCommandUsages {
@@ -257,10 +269,35 @@ func helpText(commandUsages []string, hiddenCommandUsage string, snippetUsages [
 		targetRows := column.Rows(targetNames, helpWidth-len(helpIndent))
 		sections = append(sections, "Targets:\n"+helpIndent+strings.Join(targetRows, "\n"+helpIndent))
 	}
-	if len(snippetUsages) > 0 {
-		sections = append(sections, "Snippets:\n  "+strings.Join(snippetUsages, "\n  "))
+	if len(snippetHelp) > 0 {
+		sections = append(sections, "Snippets:\n"+strings.Join(formatSnippetHelp(snippetHelp), "\n"))
 	}
 	return strings.Join(sections, "\n\n")
+}
+
+func formatSnippetHelp(entries []slash.HelpEntry) []string {
+	usageWidth := 0
+	for _, entry := range entries {
+		usageWidth = max(usageWidth, width.Of(entry.Usage))
+	}
+
+	var lines []string
+	for _, entry := range entries {
+		if entry.Description == "" {
+			lines = append(lines, helpIndent+entry.Usage)
+			continue
+		}
+
+		padding := strings.Repeat(" ", usageWidth-width.Of(entry.Usage))
+		prefix := helpIndent + entry.Usage + padding + helpIndent
+		descriptionLines := width.Wrap(entry.Description, helpWidth-width.Of(prefix))
+		lines = append(lines, prefix+descriptionLines[0])
+		continuation := strings.Repeat(" ", width.Of(prefix))
+		for _, line := range descriptionLines[1:] {
+			lines = append(lines, continuation+line)
+		}
+	}
+	return lines
 }
 
 func staticTarget(values ...string) commandTarget {

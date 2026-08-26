@@ -71,9 +71,14 @@ func MigrateConfig(options ConfigOptions) (int, bool, error) {
 type configStep func(data []byte) ([]byte, error)
 
 var configSteps = map[int]configStep{
-	config.InitialFormat:      migrateConfigFromVersionOne,
-	config.RoundRobinFormat:   migrateConfigFromVersionTwo,
-	config.SegmentNamesFormat: migrateConfigFromVersionThree,
+	config.InitialFormat:       migrateConfigFromVersionOne,
+	config.RoundRobinFormat:    migrateConfigFromVersionTwo,
+	config.SegmentNamesFormat:  migrateConfigFromVersionThree,
+	config.EditorCommandFormat: migrateConfigFromVersionFour,
+}
+
+func migrateConfigFromVersionFour(data []byte) ([]byte, error) {
+	return rewriteConfigVersion(data, config.SnippetDefinitionFormat), nil
 }
 
 func migrateConfigFromVersionThree(data []byte) ([]byte, error) {

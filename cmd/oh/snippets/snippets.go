@@ -14,8 +14,11 @@ import (
 )
 
 const (
-	defaultFunctionName = "default"
-	argumentUsage       = "<args>"
+	defaultFunctionName   = "default"
+	requiredArgumentUsage = "<args>"
+	optionalArgumentUsage = "[args]"
+	argumentFieldName     = "Arg"
+	argumentsFieldName    = "Args"
 )
 
 type templateData struct {
@@ -23,10 +26,11 @@ type templateData struct {
 	Args []string
 }
 
-func New(configured map[string]string) (slash.CommandSet, error) {
+func New(configured map[string]Definition) (slash.CommandSet, error) {
 	commands := make([]slash.Command, 0, len(configured))
 	for _, name := range slices.Sorted(maps.Keys(configured)) {
-		prompt := strings.TrimSpace(configured[name])
+		definition := configured[name]
+		prompt := strings.TrimSpace(definition.Prompt)
 		if prompt == "" {
 			return slash.CommandSet{}, fmt.Errorf("%s: prompt is empty", name)
 		}
@@ -38,12 +42,26 @@ func New(configured map[string]string) (slash.CommandSet, error) {
 			return slash.CommandSet{}, fmt.Errorf("%s: %w", name, err)
 		}
 
-		allowsNoArguments := templateUsesFunction(promptTemplate, defaultFunctionName)
+		argumentPolicy := definition.Arguments
+		if argumentPolicy == "" {
+			argumentPolicy = inferArgumentPolicyFromTemplate(promptTemplate.Tree)
+		}
+		if argumentPolicy != ArgumentsRequired && argumentPolicy != ArgumentsOptional && argumentPolicy != ArgumentsNone {
+			return slash.CommandSet{}, fmt.Errorf("%s: invalid argument policy %q", name, argumentPolicy)
+		}
 		command := slash.Command{
-			Name: name,
+			Name:        name,
+			Description: definition.Description,
 			Run: func(context slash.Context, arguments []string) error {
-				if len(arguments) == 0 && !allowsNoArguments {
-					return slash.Usage()
+				switch argumentPolicy {
+				case ArgumentsRequired:
+					if len(arguments) == 0 {
+						return slash.Usage()
+					}
+				case ArgumentsNone:
+					if len(arguments) != 0 {
+						return slash.Usage()
+					}
 				}
 
 				var rendered strings.Builder
@@ -61,13 +79,83 @@ func New(configured map[string]string) (slash.CommandSet, error) {
 				return nil
 			},
 		}
-		if !allowsNoArguments {
-			command = command.WithArgumentUsage(argumentUsage)
+		switch argumentPolicy {
+		case ArgumentsRequired:
+			command = command.WithArgumentUsage(requiredArgumentUsage)
+		case ArgumentsOptional:
+			command = command.WithArgumentUsage(optionalArgumentUsage)
 		}
 		commands = append(commands, command)
 	}
 
 	return slash.NewCommandSet("//", commands...)
+}
+
+func inferArgumentPolicyFromTemplate(tree *parse.Tree) ArgumentPolicy {
+	referencesArguments := false
+	usesDefault := false
+	walkTemplate(tree.Root, func(node parse.Node) {
+		switch typed := node.(type) {
+		case *parse.FieldNode:
+			referencesArguments = referencesArguments || isArgumentField(typed.Ident)
+		case *parse.IdentifierNode:
+			usesDefault = usesDefault || typed.Ident == defaultFunctionName
+		}
+	})
+
+	switch {
+	case !referencesArguments:
+		return ArgumentsNone
+	case usesDefault:
+		return ArgumentsOptional
+	default:
+		return ArgumentsRequired
+	}
+}
+
+func isArgumentField(identifiers []string) bool {
+	return len(identifiers) > 0 &&
+		(identifiers[0] == argumentFieldName || identifiers[0] == argumentsFieldName)
+}
+
+func walkTemplate(node parse.Node, visit func(parse.Node)) {
+	if node == nil || reflect.ValueOf(node).IsNil() {
+		return
+	}
+	visit(node)
+
+	switch typed := node.(type) {
+	case *parse.ListNode:
+		for _, child := range typed.Nodes {
+			walkTemplate(child, visit)
+		}
+	case *parse.ActionNode:
+		walkTemplate(typed.Pipe, visit)
+	case *parse.PipeNode:
+		for _, command := range typed.Cmds {
+			walkTemplate(command, visit)
+		}
+	case *parse.CommandNode:
+		for _, argument := range typed.Args {
+			walkTemplate(argument, visit)
+		}
+	case *parse.IfNode:
+		walkBranch(typed.BranchNode, visit)
+	case *parse.RangeNode:
+		walkBranch(typed.BranchNode, visit)
+	case *parse.WithNode:
+		walkBranch(typed.BranchNode, visit)
+	case *parse.TemplateNode:
+		walkTemplate(typed.Pipe, visit)
+	case *parse.ChainNode:
+		walkTemplate(typed.Node, visit)
+	}
+}
+
+func walkBranch(branch parse.BranchNode, visit func(parse.Node)) {
+	walkTemplate(branch.Pipe, visit)
+	walkTemplate(branch.List, visit)
+	walkTemplate(branch.ElseList, visit)
 }
 
 func defaultValue(fallback, value any) any {
@@ -101,53 +189,4 @@ func isEmpty(value any) bool {
 	default:
 		return false
 	}
-}
-
-func templateUsesFunction(promptTemplate *template.Template, name string) bool {
-	return slices.ContainsFunc(promptTemplate.Templates(), func(associated *template.Template) bool {
-		return associated.Tree != nil && nodeUsesFunction(associated.Root, name)
-	})
-}
-
-func nodeUsesFunction(node parse.Node, name string) bool {
-	if node == nil || reflect.ValueOf(node).IsNil() {
-		return false
-	}
-
-	switch typed := node.(type) {
-	case *parse.IdentifierNode:
-		return typed.Ident == name
-	case *parse.ListNode:
-		return slices.ContainsFunc(typed.Nodes, func(child parse.Node) bool {
-			return nodeUsesFunction(child, name)
-		})
-	case *parse.ActionNode:
-		return nodeUsesFunction(typed.Pipe, name)
-	case *parse.PipeNode:
-		return slices.ContainsFunc(typed.Cmds, func(command *parse.CommandNode) bool {
-			return nodeUsesFunction(command, name)
-		})
-	case *parse.CommandNode:
-		return slices.ContainsFunc(typed.Args, func(argument parse.Node) bool {
-			return nodeUsesFunction(argument, name)
-		})
-	case *parse.ChainNode:
-		return nodeUsesFunction(typed.Node, name)
-	case *parse.IfNode:
-		return branchUsesFunction(&typed.BranchNode, name)
-	case *parse.RangeNode:
-		return branchUsesFunction(&typed.BranchNode, name)
-	case *parse.WithNode:
-		return branchUsesFunction(&typed.BranchNode, name)
-	case *parse.TemplateNode:
-		return nodeUsesFunction(typed.Pipe, name)
-	default:
-		return false
-	}
-}
-
-func branchUsesFunction(branch *parse.BranchNode, name string) bool {
-	return nodeUsesFunction(branch.Pipe, name) ||
-		nodeUsesFunction(branch.List, name) ||
-		nodeUsesFunction(branch.ElseList, name)
 }

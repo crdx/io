@@ -29,7 +29,7 @@ test:
 
 # write what the tests drew back to the golden files
 golden:
-    go test ./cmd/oh -update
+    go test ./cmd/oh ./cmd/oh/commands -update
 
 # what every package covers, least covered first
 cov *args:

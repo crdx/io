@@ -46,6 +46,7 @@ type Context interface {
 
 type Command struct {
 	Name          string
+	Description   string
 	Run           func(Context, []string) error
 	arguments     []string
 	argumentUsage string
@@ -124,6 +125,23 @@ func (self CommandSet) Usages() []string {
 		usages = append(usages, self.commands[name].usage(self.prefix))
 	}
 	return usages
+}
+
+type HelpEntry struct {
+	Usage       string
+	Description string
+}
+
+func (self CommandSet) GetHelpEntries() []HelpEntry {
+	entries := make([]HelpEntry, 0, len(self.order))
+	for _, name := range self.order {
+		command := self.commands[name]
+		entries = append(entries, HelpEntry{
+			Usage:       command.usage(self.prefix),
+			Description: command.Description,
+		})
+	}
+	return entries
 }
 
 type Registry struct {

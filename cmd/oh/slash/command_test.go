@@ -175,13 +175,21 @@ func TestCommandNameRecognisesRegisteredPrefixes(t *testing.T) {
 
 func TestUsagesComeFromSetMetadata(t *testing.T) {
 	set := mustSet(t, "//",
-		slash.Command{Name: "add", Run: commandHandler}.WithArgumentUsage("<args>"),
+		slash.Command{Name: "add", Description: "Add a task.", Run: commandHandler}.WithArgumentUsage("<args>"),
 		slash.Command{Name: "review", Run: commandHandler},
 		slash.Command{Name: "test", Run: commandHandler}.WithArguments("quick", "all"),
 	)
 	want := []string{"//add <args>", "//review", "//test {all|quick}"}
 	if got := set.Usages(); !slices.Equal(got, want) {
 		t.Errorf("got usages %v, want %v", got, want)
+	}
+	wantHelp := []slash.HelpEntry{
+		{Usage: "//add <args>", Description: "Add a task."},
+		{Usage: "//review"},
+		{Usage: "//test {all|quick}"},
+	}
+	if got := set.GetHelpEntries(); !slices.Equal(got, wantHelp) {
+		t.Errorf("got help entries %#v, want %#v", got, wantHelp)
 	}
 }
 

@@ -9,8 +9,9 @@ Targets:
   agents-file         config-dir          config-file
   home-dir            scratch-dir         session-chat-file
   session-dir         session-log-file    skills-dir
-  system-prompt-file  workspace-dir
+  snippets-dir        system-prompt-file  workspace-dir
 
 Snippets:
-  //add <args>
-  //ask <args>
+  //add <args>  Add a task, then continue.
+  //ask <args>  Answer without making changes.
+  //note

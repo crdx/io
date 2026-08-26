@@ -22,7 +22,12 @@ func (self *snippetContext) Notice(string)  {}
 func (self *snippetContext) Success(string) {}
 
 func TestSnippetSendsItsConfiguredPrompt(t *testing.T) {
-	invocation := getInvocation(t, map[string]string{"review": "  Review the changes.  "}, "//review now")
+	invocation := getInvocation(t, map[string]snippets.Definition{
+		"review": {
+			Prompt:    "  Review the changes.  ",
+			Arguments: snippets.ArgumentsRequired,
+		},
+	}, "//review now")
 
 	context := &snippetContext{}
 	if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
@@ -34,8 +39,11 @@ func TestSnippetSendsItsConfiguredPrompt(t *testing.T) {
 }
 
 func TestSnippetRendersArgumentsWithGoTemplates(t *testing.T) {
-	configured := map[string]string{
-		"add": `{{- range $i, $argument := .Args }}{{if $i}}, {{end}}{{ $argument | printf "%q" }}{{end}}: {{.Arg}}`,
+	configured := map[string]snippets.Definition{
+		"add": {
+			Prompt:    `{{- range $i, $argument := .Args }}{{if $i}}, {{end}}{{ $argument | printf "%q" }}{{end}}: {{.Arg}}`,
+			Arguments: snippets.ArgumentsRequired,
+		},
 	}
 	invocation := getInvocation(t, configured, "//add first second")
 
@@ -48,8 +56,13 @@ func TestSnippetRendersArgumentsWithGoTemplates(t *testing.T) {
 	}
 }
 
-func TestSnippetArgumentsAreRequiredWithoutADefault(t *testing.T) {
-	invocation := getInvocation(t, map[string]string{"review": "Review: {{.Arg}}"}, "//review")
+func TestSnippetRequiredArgumentsAreEnforced(t *testing.T) {
+	invocation := getInvocation(t, map[string]snippets.Definition{
+		"review": {
+			Prompt:    "Review: {{.Arg}}",
+			Arguments: snippets.ArgumentsRequired,
+		},
+	}, "//review")
 
 	err := invocation.Command.Run(&snippetContext{}, invocation.Arguments)
 	if !slash.IsUsageError(err) {
@@ -60,9 +73,12 @@ func TestSnippetArgumentsAreRequiredWithoutADefault(t *testing.T) {
 	}
 }
 
-func TestSnippetDefaultAllowsMissingArguments(t *testing.T) {
-	configured := map[string]string{
-		"review": `{{define "value"}}{{ . | default "the current changes" }}{{end}}Review {{template "value" .Arg}}.`,
+func TestOptionalSnippetCanUseADefaultForMissingArguments(t *testing.T) {
+	configured := map[string]snippets.Definition{
+		"review": {
+			Prompt:    `{{define "value"}}{{ . | default "the current changes" }}{{end}}Review {{template "value" .Arg}}.`,
+			Arguments: snippets.ArgumentsOptional,
+		},
 	}
 	invocation := getInvocation(t, configured, "//review")
 
@@ -77,23 +93,29 @@ func TestSnippetDefaultAllowsMissingArguments(t *testing.T) {
 
 func TestSnippetTemplateErrorsAreReported(t *testing.T) {
 	tests := map[string]struct {
-		configured map[string]string
+		configured map[string]snippets.Definition
 		input      string
 		want       string
 	}{
 		"parse": {
-			configured: map[string]string{"review": "{{"},
-			want:       "review",
+			configured: map[string]snippets.Definition{
+				"review": {Prompt: "{{", Arguments: snippets.ArgumentsRequired},
+			},
+			want: "review",
 		},
 		"execute": {
-			configured: map[string]string{"review": "{{index .Args 2}}"},
-			input:      "//review only-one",
-			want:       "could not render template",
+			configured: map[string]snippets.Definition{
+				"review": {Prompt: "{{index .Args 2}}", Arguments: snippets.ArgumentsRequired},
+			},
+			input: "//review only-one",
+			want:  "could not render template",
 		},
 		"empty result": {
-			configured: map[string]string{"review": `{{default "" .Arg}}`},
-			input:      "//review",
-			want:       "empty prompt",
+			configured: map[string]snippets.Definition{
+				"review": {Prompt: `{{default "" .Arg}}`, Arguments: snippets.ArgumentsOptional},
+			},
+			input: "//review",
+			want:  "empty prompt",
 		},
 	}
 
@@ -130,13 +152,15 @@ func TestSnippetTemplateErrorsAreReported(t *testing.T) {
 }
 
 func TestSnippetDefinitionsAreValidated(t *testing.T) {
-	for name, configured := range map[string]map[string]string{
-		"empty name":        {"": "Prompt"},
-		"spaced name":       {"code review": "Prompt"},
-		"slash in name":     {"review/code": "Prompt"},
-		"prefixed name":     {"//review": "Prompt"},
-		"empty prompt":      {"review": ""},
-		"whitespace prompt": {"review": "  \t  "},
+	valid := snippets.Definition{Prompt: "Prompt", Arguments: snippets.ArgumentsNone}
+	for name, configured := range map[string]map[string]snippets.Definition{
+		"empty name":        {"": valid},
+		"spaced name":       {"code review": valid},
+		"slash in name":     {"review/code": valid},
+		"prefixed name":     {"//review": valid},
+		"empty prompt":      {"review": {Arguments: snippets.ArgumentsNone}},
+		"whitespace prompt": {"review": {Prompt: "  \t  ", Arguments: snippets.ArgumentsNone}},
+		"invalid arguments": {"review": {Prompt: "Prompt", Arguments: "sometimes"}},
 	} {
 		t.Run(name, func(t *testing.T) {
 			if _, err := snippets.New(configured); err == nil {
@@ -147,17 +171,118 @@ func TestSnippetDefinitionsAreValidated(t *testing.T) {
 }
 
 func TestSnippetUsagesAreDeterministic(t *testing.T) {
-	set, err := snippets.New(map[string]string{
-		"test":     "Run tests.",
-		"review":   "Review changes.",
-		"optional": `{{.Arg | default "Use the current context."}}`,
+	set, err := snippets.New(map[string]snippets.Definition{
+		"test":     {Prompt: "Run tests.", Arguments: snippets.ArgumentsNone},
+		"review":   {Prompt: "Review changes.", Arguments: snippets.ArgumentsRequired},
+		"optional": {Prompt: `{{.Arg | default "Use the current context."}}`, Arguments: snippets.ArgumentsOptional},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"//optional", "//review <args>", "//test <args>"}
+	want := []string{"//optional [args]", "//review <args>", "//test"}
 	if got := set.Usages(); !slices.Equal(got, want) {
 		t.Errorf("got usages %v, want %v", got, want)
+	}
+}
+
+func TestExplicitArgumentPoliciesControlUsageAndValidation(t *testing.T) {
+	configured := map[string]snippets.Definition{
+		"none": {
+			Prompt:      "Use the current context.",
+			Description: "Use no arguments.",
+			Arguments:   snippets.ArgumentsNone,
+		},
+		"optional": {
+			Prompt:      `Review {{.Arg | default "the current changes"}}.`,
+			Description: "Review a scope.",
+			Arguments:   snippets.ArgumentsOptional,
+		},
+		"required": {
+			Prompt:      "Review {{.Arg}}.",
+			Description: "Review the named scope.",
+			Arguments:   snippets.ArgumentsRequired,
+		},
+	}
+	set, err := snippets.New(configured)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantUsages := []string{"//none", "//optional [args]", "//required <args>"}
+	if got := set.Usages(); !slices.Equal(got, wantUsages) {
+		t.Errorf("got usages %v, want %v", got, wantUsages)
+	}
+	entries := set.GetHelpEntries()
+	if len(entries) != 3 || entries[1].Description != "Review a scope." {
+		t.Errorf("got help entries %#v", entries)
+	}
+
+	registry, err := slash.NewRegistry(set)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, input := range []string{"//none unexpected", "//required"} {
+		invocation, found := registry.Find(input)
+		if !found {
+			t.Fatalf("expected %q to be registered", input)
+		}
+		if err := invocation.Command.Run(&snippetContext{}, invocation.Arguments); !slash.IsUsageError(err) {
+			t.Errorf("%s got error %v, want usage error", input, err)
+		}
+	}
+	for _, input := range []string{"//none", "//optional"} {
+		invocation, found := registry.Find(input)
+		if !found {
+			t.Fatalf("expected %q to be registered", input)
+		}
+		if err := invocation.Command.Run(&snippetContext{}, invocation.Arguments); err != nil {
+			t.Errorf("%s got error %v", input, err)
+		}
+	}
+}
+
+func TestAnUnsetArgumentPolicyIsReadFromTheTemplate(t *testing.T) {
+	for name, want := range map[string]string{
+		"Review the current changes.":              "//review",
+		`Review {{.Arg | default "the current"}}.`: "//review [args]",
+		`Review {{default "the current" .Arg}}.`:   "//review [args]",
+		"Review {{.Arg}}.":                         "//review <args>",
+		"Review {{index .Args 0}}.":                "//review <args>",
+		"{{if .Args}}Review {{.Arg}}.{{end}}":      "//review <args>",
+		"{{range .Args}}Review {{.}}.{{end}}":      "//review <args>",
+		"Review {{.Arg}} {{/* a comment */}}.":     "//review <args>",
+	} {
+		t.Run(name, func(t *testing.T) {
+			set, err := snippets.New(map[string]snippets.Definition{"review": {Prompt: name}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := set.Usages(); !slices.Equal(got, []string{want}) {
+				t.Errorf("got usages %v, want [%s]", got, want)
+			}
+		})
+	}
+}
+
+func TestAnInferredPolicyIsEnforced(t *testing.T) {
+	set, err := snippets.New(map[string]snippets.Definition{
+		"none":     {Prompt: "Review the current changes."},
+		"required": {Prompt: "Review {{.Arg}}."},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	registry, err := slash.NewRegistry(set)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, input := range []string{"//none the tests", "//required"} {
+		invocation, found := registry.Find(input)
+		if !found {
+			t.Fatalf("expected %q to be registered", input)
+		}
+		if err := invocation.Command.Run(&snippetContext{}, invocation.Arguments); !slash.IsUsageError(err) {
+			t.Errorf("%s got error %v, want usage error", input, err)
+		}
 	}
 }
 
@@ -179,7 +304,7 @@ func TestAnEmptySnippetSetStillOwnsItsPrefix(t *testing.T) {
 	}
 }
 
-func getInvocation(t *testing.T, configured map[string]string, input string) slash.Invocation {
+func getInvocation(t *testing.T, configured map[string]snippets.Definition, input string) slash.Invocation {
 	t.Helper()
 
 	set, err := snippets.New(configured)

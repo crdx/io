@@ -38,7 +38,7 @@ func newCommandRegistry(t *testing.T, environment commandEnvironment) slash.Regi
 func newCommandRegistryWithSnippets(
 	t *testing.T,
 	environment commandEnvironment,
-	configuredSnippets map[string]string,
+	configuredSnippets map[string]snippets.Definition,
 ) slash.Registry {
 	t.Helper()
 
@@ -46,7 +46,7 @@ func newCommandRegistryWithSnippets(
 	if err != nil {
 		t.Fatal(err)
 	}
-	systemSet, err := buildCommands(environment, snippetSet.Usages())
+	systemSet, err := buildCommands(environment, snippetSet.GetHelpEntries())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,6 +88,10 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		if err := os.MkdirAll(directory, 0o700); err != nil {
 			t.Fatal(err)
 		}
+	}
+	snippetsDirectory := filepath.Join(configDirectory, "snippets")
+	if err := os.Mkdir(snippetsDirectory, 0o700); err != nil {
+		t.Fatal(err)
 	}
 	sessionDirectory := filepath.Join(t.TempDir(), "sessions", "brave-otter")
 	if err := os.MkdirAll(sessionDirectory, 0o700); err != nil {
@@ -143,7 +147,9 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		"/edit system-prompt-file": "edit:" + systemPromptPath,
 		"/edit workspace-dir":      "edit:" + workspaceDirectory,
 		"/edit skills-dir":         "edit:" + strings.Join(skillDirectories[:2], ","),
+		"/edit snippets-dir":       "edit:" + snippetsDirectory,
 		"/open skills-dir":         "open:" + strings.Join(skillDirectories[:2], ","),
+		"/open snippets-dir":       "open:" + snippetsDirectory,
 		"/new":                     "new:",
 		"/new sonnet":              "new:sonnet",
 		"/fork":                    "fork:brave-otter:",
@@ -160,6 +166,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		"/copy session-dir":        "copy:" + sessionDirectory,
 		"/copy config-file":        "copy:" + configPath,
 		"/copy skills-dir":         "copy:" + strings.Join(skillDirectories[:2], ","),
+		"/copy snippets-dir":       "copy:" + snippetsDirectory,
 		"/open session-log-file":   "open:" + filepath.Join(sessionDirectory, sessionJournalName),
 		"/edit session-log-file":   "edit:" + filepath.Join(sessionDirectory, sessionJournalName),
 		"/open session-chat-file":  "open:" + filepath.Join(sessionDirectory, sessionTranscriptName),
@@ -178,7 +185,8 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		"/copy config-file":  "Copied config file to clipboard: " + configPath,
 		"/copy skills-dir": "Copied skills dir to clipboard: " +
 			strings.Join(skillDirectories[:2], ", "),
-		"/copy agents-file": "Copied agents file to clipboard: " + projectContextPath,
+		"/copy snippets-dir": "Copied snippets dir to clipboard: " + snippetsDirectory,
+		"/copy agents-file":  "Copied agents file to clipboard: " + projectContextPath,
 	}
 
 	for input, wantAction := range tests {
@@ -204,6 +212,19 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 
 	if _, err := os.Stat(configDirectory); err != nil {
 		t.Errorf("config directory was not prepared: %v", err)
+	}
+}
+
+func TestSnippetsDirectoryTargetRequiresAnExistingDirectory(t *testing.T) {
+	configDirectory := t.TempDir()
+	if _, exists := locationTargets(commandEnvironment{configDir: configDirectory})["snippets-dir"]; exists {
+		t.Error("found snippets-dir before the directory existed")
+	}
+	if err := os.Mkdir(filepath.Join(configDirectory, "snippets"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if _, exists := locationTargets(commandEnvironment{configDir: configDirectory})["snippets-dir"]; !exists {
+		t.Error("snippets-dir was absent after the directory was created")
 	}
 }
 
