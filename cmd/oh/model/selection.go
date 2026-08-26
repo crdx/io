@@ -213,14 +213,17 @@ func rankedChoices(query string, choices []Choice, tiers []matcher) []Choice {
 
 func matchingModels(query string, choices []Choice, matching matcher) []Choice {
 	query = strings.ToLower(query)
+	namesProvider := strings.Contains(query, "/")
 
 	var matches []Choice
 
 	for _, choice := range choices {
-		model := strings.ToLower(choice.Model)
-		qualified := strings.ToLower(choice.Provider + "/" + choice.Model)
+		candidate := strings.ToLower(choice.Model)
+		if namesProvider {
+			candidate = strings.ToLower(choice.Provider + "/" + choice.Model)
+		}
 
-		if matching(model, query) || matching(qualified, query) {
+		if matching(candidate, query) {
 			matches = append(matches, choice)
 		}
 	}

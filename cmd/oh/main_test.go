@@ -1079,6 +1079,7 @@ func TestCompletionProtocolMatchesTheGolden(t *testing.T) {
 	}{
 		{name: "options", args: []string{"--complete", "option", ""}},
 		{name: "models", args: []string{"--complete", "model", "sonnet"}},
+		{name: "models of a provider", args: []string{"--complete", "model", "anthropic/"}},
 		{name: "efforts", args: []string{"--complete", "effort", "sonnet@"}},
 		{name: "capabilities", args: []string{"--complete", "caps", "rxw"}},
 		{name: "tools", args: []string{"--complete", "tool", ""}},
@@ -2713,10 +2714,15 @@ func resolveCommandLineSelections(t *testing.T) string {
 
 	for _, selection := range []string{
 		"opus-5",
+		"opus5",
 		"sonnet",
+		"sonnet5",
 		"sol",
 		"deepseek",
 		"anthropic/claude-opus-5",
+		"opencode/deepseek",
+		"anthropic",
+		"codex",
 		"opus-5@max",
 		"sol@off",
 		"sonnet@hi",

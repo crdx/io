@@ -148,6 +148,38 @@ func TestACloserReadingOfAQueryWinsOutright(t *testing.T) {
 	}
 }
 
+func TestABareQueryBorrowsNoLettersFromTheProviderName(t *testing.T) {
+	choices := []Choice{
+		{Provider: anthropicProvider, Model: "claude-opus-5"},
+		{Provider: anthropicProvider, Model: "claude-sonnet-5"},
+	}
+
+	choice, err := matchModel("opus5", choices)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if choice.Model != "claude-opus-5" {
+		t.Errorf("got %s", choice.Model)
+	}
+}
+
+func TestAQualifiedQueryIsStillReadLoosely(t *testing.T) {
+	choices := []Choice{
+		{Provider: opencodeGoProvider, Model: "deepseek-v4-pro"},
+		{Provider: anthropicProvider, Model: "claude-opus-5"},
+	}
+
+	choice, err := matchModel("opencode/deepseek", choices)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if choice.Model != "deepseek-v4-pro" {
+		t.Errorf("got %s", choice.Model)
+	}
+}
+
 func TestAQueryReadTheSameWayBySeveralModelsIsAmbiguous(t *testing.T) {
 	_, err := matchModel("claude-opus", listedModels())
 	if err == nil {

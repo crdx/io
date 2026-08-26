@@ -1,9 +1,14 @@
 === command line selections ===
 "opus-5"                     anthropic/claude-opus-5@medium
+"opus5"                      anthropic/claude-opus-5@medium
 "sonnet"                     anthropic/claude-sonnet-5@high
+"sonnet5"                    anthropic/claude-sonnet-5@high
 "sol"                        codex/gpt-5.6-sol@high
 "deepseek"                   opencode-go/deepseek-v4-pro@medium
 "anthropic/claude-opus-5"    anthropic/claude-opus-5@medium
+"opencode/deepseek"          opencode-go/deepseek-v4-pro@medium
+"anthropic"                  error: model "anthropic" does not match any known model
+"codex"                      error: model "codex" does not match any known model
 "opus-5@max"                 anthropic/claude-opus-5@max
 "sol@off"                    codex/gpt-5.6-sol@none
 "sonnet@hi"                  anthropic/claude-sonnet-5@high
@@ -12,7 +17,7 @@
 "@high"                      error: model must be written as provider/model or provider/model@effort, got "@high"
 "sol@none@high"              error: effort "none@high" does not match any of: none, high
 "claude"                     error: model "claude" is ambiguous; matches: anthropic/claude-opus-5, anthropic/claude-sonnet-5
-"nope"                       error: model "nope" is ambiguous; matches: opencode-go/deepseek-v4-pro, anthropic/claude-opus-5, anthropic/claude-sonnet-5
+"nope"                       error: model "nope" does not match any known model
 
 === effort fallback ===
 "none"         of {low,high}           -> "low"
