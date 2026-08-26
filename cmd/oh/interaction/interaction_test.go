@@ -13,7 +13,7 @@ import (
 func TestABarWithNothingIdlingIsNeverRedrawnBetweenTurns(t *testing.T) {
 	idle := idleRefresh{getInterval: func() time.Duration { return 0 }}
 
-	if idle.isDue() {
+	if idle.isDue(time.Now()) {
 		t.Error("expected a still bar to be left alone")
 	}
 }
@@ -22,22 +22,34 @@ func TestAnIdlingBarIsRedrawnAtItsOwnPaceNotTheTickers(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		idle := idleRefresh{getInterval: func() time.Duration { return time.Second }}
 
-		if !idle.isDue() {
+		if !idle.isDue(time.Now()) {
 			t.Fatal("expected the first idle tick to draw")
 		}
 
 		time.Sleep(125 * time.Millisecond)
 
-		if idle.isDue() {
+		if idle.isDue(time.Now()) {
 			t.Error("expected a tick sooner than the interval to be passed over")
 		}
 
 		time.Sleep(time.Second)
 
-		if !idle.isDue() {
+		if !idle.isDue(time.Now()) {
 			t.Error("expected the tick after the interval to draw")
 		}
 	})
+}
+
+func TestAnIdlingBarKeepingTheTickersPaceIsRedrawnOnEveryTick(t *testing.T) {
+	idle := idleRefresh{getInterval: func() time.Duration { return time.Second }}
+	tick := time.Now()
+
+	for count := range 5 {
+		if !idle.isDue(tick) {
+			t.Fatalf("expected tick %d to draw", count)
+		}
+		tick = tick.Add(time.Second)
+	}
 }
 
 func TestAnIdlingBarCanChangeItsRedrawPace(t *testing.T) {
@@ -45,14 +57,14 @@ func TestAnIdlingBarCanChangeItsRedrawPace(t *testing.T) {
 		interval := time.Second
 		idle := idleRefresh{getInterval: func() time.Duration { return interval }}
 
-		if !idle.isDue() {
+		if !idle.isDue(time.Now()) {
 			t.Fatal("expected the first idle tick to draw")
 		}
 
 		time.Sleep(125 * time.Millisecond)
 		interval = 100 * time.Millisecond
 
-		if !idle.isDue() {
+		if !idle.isDue(time.Now()) {
 			t.Error("expected the newly shortened interval to take effect")
 		}
 	})

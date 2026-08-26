@@ -61,10 +61,10 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, ticks <-chan time.
 		case <-beats:
 			handler.Beat()
 			continue
-		case <-ticks:
+		case tick := <-ticks:
 			if handler.Running() {
 				handler.Tick()
-			} else if !idle.isDue() {
+			} else if !idle.isDue(tick) {
 				continue
 			}
 		}
@@ -77,12 +77,12 @@ type idleRefresh struct {
 	drawnAt     time.Time
 }
 
-func (self *idleRefresh) isDue() bool {
+func (self *idleRefresh) isDue(at time.Time) bool {
 	interval := self.getInterval()
-	if interval <= 0 || time.Since(self.drawnAt) < interval {
+	if interval <= 0 || at.Sub(self.drawnAt) < interval {
 		return false
 	}
-	self.drawnAt = time.Now()
+	self.drawnAt = at
 	return true
 }
 
