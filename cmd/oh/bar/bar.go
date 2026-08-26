@@ -11,7 +11,6 @@ import (
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
-	"crdx.org/io/cmd/oh/segment/lastTps"
 	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
@@ -34,7 +33,6 @@ const (
 	localTimeSegment        = "local-time"
 	turnElapsedSegment      = "turn-elapsed"
 	turnCountSegment        = "turn-count"
-	lastTpsSegment          = "last-tps"
 	gitBranchSegment        = "git-branch"
 	subUsageSegment         = "subscription-usage"
 )
@@ -50,14 +48,12 @@ type Options struct {
 }
 
 type Sources struct {
-	GetTurnActivity      func() (bool, int)
-	GetContextUsage      func() (int, int)
-	GetGrantedCaps       func() caps.Set
-	IsPrefixPending      func() bool
-	GetTurnElapsed       func() (bool, time.Duration, bool)
-	GetTurnCount         func() int
-	GetLastTurnTokenRate func() (float64, bool)
-	IsTurnRunning        func() bool
+	GetTurnActivity func() (bool, int)
+	GetContextUsage func() (int, int)
+	GetGrantedCaps  func() caps.Set
+	IsPrefixPending func() bool
+	GetTurnElapsed  func() (bool, time.Duration, bool)
+	GetTurnCount    func() int
 }
 
 func NewRegistry(options Options) segment.Registry {
@@ -72,7 +68,6 @@ func NewRegistry(options Options) segment.Registry {
 		localTimeSegment:        localTime.New(time.Now),
 		turnElapsedSegment:      turnElapsed.New(options.Sources.GetTurnElapsed),
 		turnCountSegment:        turnCount.New(options.Sources.GetTurnCount),
-		lastTpsSegment:          lastTps.New(options.Sources.GetLastTurnTokenRate, options.Sources.IsTurnRunning),
 		gitBranchSegment:        gitBranch.New(options.WorkspaceDir),
 		subUsageSegment:         subUsage.New(options.UsageReporter, options.UsageCachePath, options.ModelName, time.Now),
 	}

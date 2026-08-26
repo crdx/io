@@ -540,7 +540,6 @@ func testSegments() segment.Registry {
 		"local-time":         inertFactory,
 		"turn-elapsed":       inertFactory,
 		"turn-count":         inertFactory,
-		"last-tps":           inertFactory,
 		"git-branch":         inertFactory,
 		"subscription-usage": inertFactory,
 	}

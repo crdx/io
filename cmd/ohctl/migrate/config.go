@@ -71,10 +71,21 @@ func MigrateConfig(options ConfigOptions) (int, bool, error) {
 type configStep func(data []byte) ([]byte, error)
 
 var configSteps = map[int]configStep{
-	config.InitialFormat:       migrateConfigFromVersionOne,
-	config.RoundRobinFormat:    migrateConfigFromVersionTwo,
-	config.SegmentNamesFormat:  migrateConfigFromVersionThree,
-	config.EditorCommandFormat: migrateConfigFromVersionFour,
+	config.InitialFormat:           migrateConfigFromVersionOne,
+	config.RoundRobinFormat:        migrateConfigFromVersionTwo,
+	config.SegmentNamesFormat:      migrateConfigFromVersionThree,
+	config.EditorCommandFormat:     migrateConfigFromVersionFour,
+	config.SnippetDefinitionFormat: migrateConfigFromVersionFive,
+}
+
+func migrateConfigFromVersionFive(data []byte) ([]byte, error) {
+	if _, _, err := readConfigDocument(data); err != nil {
+		return nil, err
+	}
+
+	migrated := removeConfigSegment(data, "last-tps")
+
+	return rewriteConfigVersion(migrated, config.RetiredTpsFormat), nil
 }
 
 func migrateConfigFromVersionFour(data []byte) ([]byte, error) {
@@ -163,6 +174,21 @@ func renameConfigSegment(data []byte, oldName string, newName string) []byte {
 	return pattern.ReplaceAllFunc(data, func(match []byte) []byte {
 		return bytes.Replace(match, []byte(oldName), []byte(newName), 1)
 	})
+}
+
+func removeConfigSegment(data []byte, name string) []byte {
+	quotedName := regexp.QuoteMeta(name)
+	table := `\{[\t ]*segment[\t ]*=[\t ]*(?:"` + quotedName + `"|'` + quotedName + `')[\t ]*\}`
+
+	wholeLine := regexp.MustCompile(`(?m)^[\t ]*` + table + `[\t ]*,?[\t ]*(?:#[^\r\n]*)?\r?\n`)
+	migrated := wholeLine.ReplaceAll(data, nil)
+	followedByComma := regexp.MustCompile(table + `[\t ]*,[\t ]*`)
+	migrated = followedByComma.ReplaceAll(migrated, nil)
+	precededByComma := regexp.MustCompile(`,[\t ]*` + table)
+	migrated = precededByComma.ReplaceAll(migrated, nil)
+	standalone := regexp.MustCompile(table)
+
+	return standalone.ReplaceAll(migrated, nil)
 }
 
 func readConfigDocument(data []byte) (int, map[string]any, error) {

@@ -471,23 +471,17 @@ func (self *App) bar(position segment.Position, frame edit.Frame) string {
 
 func (self *App) getBarSources() bar.Sources {
 	return bar.Sources{
-		GetTurnActivity:      self.turnActivity,
-		GetContextUsage:      self.contextUsage,
-		GetGrantedCaps:       self.grantedCaps,
-		IsPrefixPending:      self.isPrefixPending,
-		GetTurnElapsed:       self.turnElapsed,
-		GetTurnCount:         self.turnCount,
-		GetLastTurnTokenRate: self.lastTurnTokenRate,
-		IsTurnRunning:        self.isTurnRunning,
+		GetTurnActivity: self.turnActivity,
+		GetContextUsage: self.contextUsage,
+		GetGrantedCaps:  self.grantedCaps,
+		IsPrefixPending: self.isPrefixPending,
+		GetTurnElapsed:  self.turnElapsed,
+		GetTurnCount:    self.turnCount,
 	}
 }
 
 func (self *App) turnActivity() (bool, int) {
 	return self.currentTurn.Running(), self.currentTurn.spinnerFrame
-}
-
-func (self *App) isTurnRunning() bool {
-	return self.currentTurn.Running()
 }
 
 func (self *App) turnElapsed() (bool, time.Duration, bool) {
@@ -496,10 +490,6 @@ func (self *App) turnElapsed() (bool, time.Duration, bool) {
 
 func (self *App) turnCount() int {
 	return self.metrics.TurnCount()
-}
-
-func (self *App) lastTurnTokenRate() (float64, bool) {
-	return self.metrics.LastTurnTokenRate()
 }
 
 func (self *App) contextUsage() (int, int) {
@@ -683,7 +673,6 @@ func (self *App) takeTurn(turnEvent TurnEvent) {
 	}
 
 	if turnEvent.Update.Delta != nil {
-		self.metrics.RecordDelta(*turnEvent.Update.Delta)
 		self.currentTurn.painter.DrawDelta(*turnEvent.Update.Delta)
 		if self.currentTurn.painter.Stale() {
 			self.redraw()
@@ -760,8 +749,6 @@ func (self *App) finish() {
 		self.redraw()
 	}
 	self.screen.End()
-
-	self.metrics.FinishTurn()
 
 	self.currentTurn.Finish()
 

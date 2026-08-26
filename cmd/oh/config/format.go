@@ -6,6 +6,7 @@ const (
 	SegmentNamesFormat      = 3
 	EditorCommandFormat     = 4
 	SnippetDefinitionFormat = 5
+	RetiredTpsFormat        = 6
 
-	Format = SnippetDefinitionFormat
+	Format = RetiredTpsFormat
 )

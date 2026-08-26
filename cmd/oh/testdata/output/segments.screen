@@ -14,16 +14,6 @@ medium gpt-5.6-sol
 ?% 0K/?
 === git-branch / outside a repository ===
 
-=== last-tps / a fast turn ===
-~42tps
-=== last-tps / a slow turn ===
-~4.2tps
-=== last-tps / running turn ===
-~42tps
-=== last-tps / unknown while idle ===
-?tps
-=== last-tps / unknown while running ===
-?tps
 === local-time / custom format ===
 14:32:09
 === local-time / default format ===

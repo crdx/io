@@ -55,7 +55,6 @@ import (
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
-	"crdx.org/io/cmd/oh/segment/lastTps"
 	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
@@ -4338,7 +4337,6 @@ func goldenBarLayout(t *testing.T, harness *App) segment.Layout {
 		center = []
 		right = [
 			{ segment = "turn-count" },
-			{ segment = "last-tps" },
 			{ segment = "session-name" },
 			{ segment = "local-time", format = "15:04" },
 			{ segment = "scroll-overflow", direction = "down" },
@@ -4409,36 +4407,6 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"git-branch / outside a repository": goldenSegmentPass(
 			t,
 			gitBranch.New(workspaceMarker),
-			"",
-			segment.Context{},
-		),
-		"last-tps / a fast turn": goldenSegmentPass(
-			t,
-			lastTps.New(func() (float64, bool) { return 42.4, true }, func() bool { return false }),
-			"",
-			segment.Context{},
-		),
-		"last-tps / a slow turn": goldenSegmentPass(
-			t,
-			lastTps.New(func() (float64, bool) { return 4.25, true }, func() bool { return false }),
-			"",
-			segment.Context{},
-		),
-		"last-tps / running turn": goldenSegmentPass(
-			t,
-			lastTps.New(func() (float64, bool) { return 42.4, true }, func() bool { return true }),
-			"",
-			segment.Context{},
-		),
-		"last-tps / unknown while idle": goldenSegmentPass(
-			t,
-			lastTps.New(func() (float64, bool) { return 0, false }, func() bool { return false }),
-			"",
-			segment.Context{},
-		),
-		"last-tps / unknown while running": goldenSegmentPass(
-			t,
-			lastTps.New(func() (float64, bool) { return 0, false }, func() bool { return true }),
 			"",
 			segment.Context{},
 		),

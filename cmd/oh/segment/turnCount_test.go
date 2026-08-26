@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/segment"
-	"crdx.org/io/cmd/oh/segment/lastTps"
 	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/style"
 )
@@ -27,21 +26,5 @@ func TestTheTurnCountSegmentCountsFromTheFirstTurn(t *testing.T) {
 
 	if got := drawn(t, turnCount.New(func() int { return 0 })); got != "" {
 		t.Errorf("expected a session with nothing asked of it to say nothing, got %q", got)
-	}
-}
-
-func TestTheLastTurnSegmentSaysHowFastItCameBack(t *testing.T) {
-	if got := drawn(t, lastTps.New(func() (float64, bool) { return 42.4, true }, func() bool { return false })); got != "~42tps" {
-		t.Errorf("expected a whole rate above ten, got %q", got)
-	}
-
-	if got := drawn(t, lastTps.New(func() (float64, bool) { return 4.25, true }, func() bool { return false })); got != "~4.2tps" {
-		t.Errorf("expected a tenth of a token below ten, got %q", got)
-	}
-}
-
-func TestTheLastTurnSegmentShowsAnUnknownRateBeforeTheFirstTurnIsOver(t *testing.T) {
-	if got := drawn(t, lastTps.New(func() (float64, bool) { return 0, false }, func() bool { return false })); got != "?tps" {
-		t.Errorf("expected an unknown rate before there is anything to say, got %q", got)
 	}
 }

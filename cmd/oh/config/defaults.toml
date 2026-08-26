@@ -1,4 +1,4 @@
-version = 5
+version = 6
 
 get_on_with_it_message = "yes"
 
@@ -24,7 +24,6 @@ home = []
 left = [
     { segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
     { segment = "turn-elapsed" },
-    { segment = "last-tps" },
 ]
 center = [
     { segment = "context-usage" },
