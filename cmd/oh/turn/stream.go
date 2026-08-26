@@ -72,7 +72,7 @@ func (self *Stream) Elapsed() (bool, time.Duration, bool) {
 	if self.state.FinishedAt.IsZero() {
 		return self.state.Running, time.Since(self.state.StartedAt), true
 	}
-	return false, self.state.FinishedAt.Sub(self.state.StartedAt), true
+	return false, time.Since(self.state.FinishedAt), true
 }
 
 func (self *Stream) Interrupt(reason error) bool {

@@ -1,4 +1,4 @@
-version = 6
+version = 7
 
 get_on_with_it_message = "yes"
 
@@ -23,13 +23,13 @@ home = []
 [bar.top]
 left = [
     { segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
-    { segment = "turn-elapsed" },
+    { segment = "turn-timer" },
 ]
 center = [
     { segment = "context-usage" },
 ]
 right = [
-    { segment = "working-directory", type = "short" },
+    { segment = "workspace-dir", type = "short" },
     { segment = "scroll-overflow", direction = "up" }
 ]
 

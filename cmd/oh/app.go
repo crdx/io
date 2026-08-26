@@ -85,6 +85,7 @@ type App struct {
 	transition  cycle.Transition
 	queuedTurn  turn.Queue
 	currentTurn Turn
+	startedAt   time.Time
 }
 
 type Turn struct {
@@ -478,7 +479,7 @@ func (self *App) getBarSources() bar.Sources {
 		GetContextUsage: self.contextUsage,
 		GetGrantedCaps:  self.grantedCaps,
 		IsPrefixPending: self.isPrefixPending,
-		GetTurnElapsed:  self.turnElapsed,
+		GetTimeElapsed:  self.timeElapsed,
 		GetTurnCount:    self.turnCount,
 	}
 }
@@ -487,8 +488,12 @@ func (self *App) turnActivity() (bool, int) {
 	return self.currentTurn.Running(), self.currentTurn.spinnerFrame
 }
 
-func (self *App) turnElapsed() (bool, time.Duration, bool) {
-	return self.currentTurn.Elapsed()
+func (self *App) timeElapsed() time.Duration {
+	if _, elapsed, known := self.currentTurn.Elapsed(); known {
+		return elapsed
+	}
+
+	return time.Since(self.startedAt)
 }
 
 func (self *App) turnCount() int {

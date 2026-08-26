@@ -61,7 +61,6 @@ var (
 	Prompt      Style = hex(copper)                // the harness prompting the user to enter a line
 	Rule        Style = Grey                       // the line drawn across the top of the input box
 	Subtle      Style = Grey                       // text held one small step back from the subject
-	Peripheral  Style = decorate(col.Italic, Grey) // less relevant detail outside the current focus
 	Read        Style = hex(lime)                  // reading is on offer, and waiting to be granted
 	Write       Style = hex(gold)                  // writing is on offer, and waiting to be granted
 	Exec        Style = hex(red)                   // running a command is on offer, if you grant it

@@ -61,8 +61,8 @@ import (
 	"crdx.org/io/cmd/oh/segment/sessionName"
 	"crdx.org/io/cmd/oh/segment/subUsage"
 	"crdx.org/io/cmd/oh/segment/turnCount"
-	"crdx.org/io/cmd/oh/segment/turnElapsed"
-	"crdx.org/io/cmd/oh/segment/workingDirectory"
+	"crdx.org/io/cmd/oh/segment/turnTimer"
+	"crdx.org/io/cmd/oh/segment/workspaceDir"
 	"crdx.org/io/cmd/oh/sessions"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
@@ -3277,7 +3277,9 @@ const (
 	oneColumn     = 1
 	noColumns     = 0
 
-	turnSoFar = 9 * time.Second
+	turnSoFar    = 9 * time.Second
+	idleSoFar    = 4 * time.Second
+	sessionSoFar = 2 * time.Minute
 
 	workspaceMarker   = "/workspace"
 	lifecycleScenario = "success@rxw.jsonl"
@@ -3945,7 +3947,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 					t.Helper()
 
 					held := &App{mode: caps.NewMode(grantedCaps)}
-					held.currentTurn.Stream = testTimedTurnStream(isRunning, time.Now().Add(-turnSoFar), time.Now())
+					held.currentTurn.Stream = testTimedTurnStream(isRunning, time.Now().Add(-turnSoFar), time.Now().Add(-idleSoFar))
 					held.currentTurn.spinnerFrame = 2
 
 					built := goldenBarLayout(t, held)
@@ -3961,19 +3963,24 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 		"context usage high": 182_000,
 	} {
 		passes[name] = func() string {
-			held := &App{
-				mode:    caps.NewMode(caps.All()),
-				metrics: metrics.New(200_000),
-				events: []agent.Event{{
-					Kind:  agent.ModelMessageEvent,
-					Usage: &agent.Usage{InputTokens: inputTokens},
-				}},
-			}
-			held.metrics.Restore(held.events, 0)
+			return drawnOnAStoppedClock(t, func(t *testing.T) string {
+				t.Helper()
 
-			built := goldenBarLayout(t, held)
+				held := &App{
+					mode:      caps.NewMode(caps.All()),
+					metrics:   metrics.New(200_000),
+					startedAt: time.Now().Add(-sessionSoFar),
+					events: []agent.Event{{
+						Kind:  agent.ModelMessageEvent,
+						Usage: &agent.Usage{InputTokens: inputTokens},
+					}},
+				}
+				held.metrics.Restore(held.events, 0)
 
-			return renderBar(built, segment.BottomLeft, edit.Frame{})
+				built := goldenBarLayout(t, held)
+
+				return renderBar(built, segment.BottomLeft, edit.Frame{})
+			})
 		}
 	}
 
@@ -4365,9 +4372,9 @@ func goldenBarLayout(t *testing.T, harness *App) segment.Layout {
 		[bar.bottom]
 		left = [
 			{ segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
-			{ segment = "turn-elapsed" },
+			{ segment = "turn-timer" },
 			{ segment = "mode-toggle" },
-			{ segment = "working-directory" },
+			{ segment = "workspace-dir" },
 			{ segment = "git-branch" },
 			{ segment = "active-model" },
 			{ segment = "context-usage" },
@@ -4622,33 +4629,27 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 				thenErr: &req.StatusError{Code: 429, Message: "slow down"},
 			},
 		),
-		"turn-elapsed / completed": goldenSegmentPass(
+		"turn-timer / minutes and seconds": goldenSegmentPass(
 			t,
-			turnElapsed.New(func() (bool, time.Duration, bool) { return false, 69 * time.Second, true }),
+			turnTimer.New(func() time.Duration { return 69 * time.Second }),
 			"",
 			segment.Context{},
 		),
-		"turn-elapsed / running": goldenSegmentPass(
+		"turn-timer / seconds": goldenSegmentPass(
 			t,
-			turnElapsed.New(func() (bool, time.Duration, bool) { return true, 69 * time.Second, true }),
+			turnTimer.New(func() time.Duration { return 3 * time.Second }),
 			"",
 			segment.Context{},
 		),
-		"turn-elapsed / unknown": goldenSegmentPass(
+		"workspace-dir": goldenSegmentPass(
 			t,
-			turnElapsed.New(func() (bool, time.Duration, bool) { return false, 0, false }),
+			workspaceDir.New("/workspace/project"),
 			"",
 			segment.Context{},
 		),
-		"working-directory": goldenSegmentPass(
+		"workspace-dir / full": goldenSegmentPass(
 			t,
-			workingDirectory.New("/workspace/project"),
-			"",
-			segment.Context{},
-		),
-		"working-directory / full": goldenSegmentPass(
-			t,
-			workingDirectory.New("/workspace/project"),
+			workspaceDir.New("/workspace/project"),
 			`type = "full"`,
 			segment.Context{},
 		),
@@ -6134,22 +6135,22 @@ func testTurnStream(events chan TurnEvent, cancel context.CancelCauseFunc, state
 	return turn.Adopt(events, cancel, state)
 }
 
-func TestTurnElapsedKeepsTheCompletedTurnDuration(t *testing.T) {
-	startedAt := time.Date(2026, time.August, 24, 12, 0, 0, 0, time.UTC)
+func TestTheTimerCountsUpFromTheCompletedTurn(t *testing.T) {
+	finishedAt := time.Now().Add(-69 * time.Second)
 	harness := App{currentTurn: Turn{
-		Stream: testTimedTurnStream(false, startedAt, startedAt.Add(69*time.Second)),
+		Stream: testTimedTurnStream(false, finishedAt.Add(-time.Minute), finishedAt),
 	}}
 
-	isRunning, took, known := harness.turnElapsed()
-	if isRunning || !known || took != 69*time.Second {
-		t.Errorf("got running=%v, took=%s, known=%v", isRunning, took, known)
+	if got := harness.timeElapsed().Round(time.Second); got != 69*time.Second {
+		t.Errorf("got %s, want the time since the turn finished", got)
 	}
 }
 
-func TestTurnElapsedIsUnknownBeforeTheFirstTurn(t *testing.T) {
-	isRunning, took, known := (&App{}).turnElapsed()
-	if isRunning || known || took != 0 {
-		t.Errorf("got running=%v, took=%s, known=%v", isRunning, took, known)
+func TestTheTimerCountsUpFromTheSessionBeforeTheFirstTurn(t *testing.T) {
+	harness := App{startedAt: time.Now().Add(-30 * time.Second)}
+
+	if got := harness.timeElapsed().Round(time.Second); got != 30*time.Second {
+		t.Errorf("got %s, want the time since the session began", got)
 	}
 }
 

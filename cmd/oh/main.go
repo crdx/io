@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime/debug"
 	"syscall"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/file"
@@ -426,6 +427,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		mode:               mode,
 		processes:          processes,
 		getOnWithItMessage: settings.GetOnWithItMessage,
+		startedAt:          time.Now(),
 	}
 
 	usageReporter, _ := client.Client.(agent.UsageReporter)

@@ -7,6 +7,7 @@ const (
 	EditorCommandFormat     = 4
 	SnippetDefinitionFormat = 5
 	RetiredTpsFormat        = 6
+	TurnTimerFormat         = 7
 
-	Format = RetiredTpsFormat
+	Format = TurnTimerFormat
 )

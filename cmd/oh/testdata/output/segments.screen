@@ -70,13 +70,11 @@ usage failed
 
 === turn-count / third turn ===
 #3
-=== turn-elapsed / completed ===
+=== turn-timer / minutes and seconds ===
 1m09s
-=== turn-elapsed / running ===
-1m09s
-=== turn-elapsed / unknown ===
-?s
-=== working-directory ===
+=== turn-timer / seconds ===
+3s
+=== workspace-dir ===
 project
-=== working-directory / full ===
+=== workspace-dir / full ===
 /workspace/project

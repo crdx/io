@@ -1,44 +1,44 @@
 === caps  while running ===
 ·✧ ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps  while waiting ===
-✧· ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+✧· ─ 4s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps r while running ===
 ·✧ ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps r while waiting ===
-✧· ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+✧· ─ 4s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rgb while running ===
 ·✧ ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rgb while waiting ===
-✧· ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+✧· ─ 4s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rs while running ===
 ·✧ ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rs while waiting ===
-✧· ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+✧· ─ 4s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rw while running ===
 ·✧ ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rw while waiting ===
-✧· ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+✧· ─ 4s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rx while running ===
 ·✧ ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rx while waiting ===
-✧· ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+✧· ─ 4s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rxw while running ===
 ·✧ ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rxw while waiting ===
-✧· ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+✧· ─ 4s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rxwb while running ===
 ·✧ ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rxwb while waiting ===
-✧· ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+✧· ─ 4s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rxwbg while running ===
 ·✧ ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rxwbg while waiting ===
-✧· ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+✧· ─ 4s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rxwbgs while running ===
 ·✧ ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === caps rxwbgs while waiting ===
-✧· ─ 9s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+✧· ─ 4s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
 === context usage high ===
-✧· ─ ?s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ 91% 182K/200K
+✧· ─ 2m00s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ 91% 182K/200K
 === context usage low ===
-✧· ─ ?s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ 3% 5K/200K
+✧· ─ 2m00s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ 3% 5K/200K

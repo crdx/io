@@ -39,7 +39,7 @@ func TestStreamLifecycle(t *testing.T) {
 	finishedAt := time.Now()
 	stream.MarkFinished(finishedAt)
 	if running, _, known := stream.Elapsed(); running || !known {
-		t.Error("finished duration was not retained")
+		t.Error("timing was lost when the turn finished")
 	}
 	stream.Finish()
 	if stream.Running() || stream.Events() != nil {
@@ -84,6 +84,26 @@ func TestObserveAndExternalState(t *testing.T) {
 	if !stream.Cancelled() {
 		t.Error("external cancellation was lost")
 	}
+}
+
+func TestElapsedCountsUpFromEachSwapPoint(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		startedAt := time.Now()
+		stream := Adopt(make(chan Event), func(error) {}, State{Running: true, StartedAt: startedAt})
+
+		time.Sleep(30 * time.Second)
+		if running, elapsed, known := stream.Elapsed(); !running || !known || elapsed != 30*time.Second {
+			t.Errorf("got running=%v, elapsed=%s, known=%v while running", running, elapsed, known)
+		}
+
+		stream.MarkFinished(time.Now())
+		stream.Finish()
+
+		time.Sleep(5 * time.Second)
+		if running, elapsed, known := stream.Elapsed(); running || !known || elapsed != 5*time.Second {
+			t.Errorf("got running=%v, elapsed=%s, known=%v after finishing", running, elapsed, known)
+		}
+	})
 }
 
 func TestAbsentStreamIsIdle(t *testing.T) {

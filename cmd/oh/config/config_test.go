@@ -12,7 +12,7 @@ import (
 
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
-	"crdx.org/io/cmd/oh/segment/workingDirectory"
+	"crdx.org/io/cmd/oh/segment/workspaceDir"
 	"crdx.org/io/cmd/oh/snippets"
 )
 
@@ -426,7 +426,7 @@ func TestWhatAConfigDoesNotMentionKeepsItsDefault(t *testing.T) {
 	defaults := layoutFrom(t, "")
 	layout := layoutFrom(t, `
 		[bar.bottom]
-		left = [{ segment = "working-directory" }, { segment = "mode-toggle" }]
+		left = [{ segment = "workspace-dir" }, { segment = "mode-toggle" }]
 	`)
 
 	if got := len(layout[segment.BottomLeft]); got != 2 {
@@ -487,7 +487,7 @@ func TestAPlacementGivenOptionsItsSegmentRefusesIsRefused(t *testing.T) {
 func TestAPlacementSettingWhatItsSegmentDoesNotReadIsRefused(t *testing.T) {
 	config := configFrom(t, `
 		[bar.top]
-		center = [{ segment = "working-directory", loudly = true }]
+		center = [{ segment = "workspace-dir", loudly = true }]
 	`)
 
 	if _, err := config.BuildLayout(testSegments()); err != nil {
@@ -533,12 +533,12 @@ func testSegments() segment.Registry {
 		"activity-spinner":   inertFactory,
 		"context-usage":      inertFactory,
 		"mode-toggle":        inertFactory,
-		"working-directory":  workingDirectory.New("/tmp/somewhere"),
+		"workspace-dir":      workspaceDir.New("/tmp/somewhere"),
 		"active-model":       inertFactory,
 		"scroll-overflow":    scrollOverflow.New,
 		"session-name":       inertFactory,
 		"local-time":         inertFactory,
-		"turn-elapsed":       inertFactory,
+		"turn-timer":         inertFactory,
 		"turn-count":         inertFactory,
 		"git-branch":         inertFactory,
 		"subscription-usage": inertFactory,

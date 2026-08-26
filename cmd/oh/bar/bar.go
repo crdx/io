@@ -17,24 +17,24 @@ import (
 	"crdx.org/io/cmd/oh/segment/sessionName"
 	"crdx.org/io/cmd/oh/segment/subUsage"
 	"crdx.org/io/cmd/oh/segment/turnCount"
-	"crdx.org/io/cmd/oh/segment/turnElapsed"
-	"crdx.org/io/cmd/oh/segment/workingDirectory"
+	"crdx.org/io/cmd/oh/segment/turnTimer"
+	"crdx.org/io/cmd/oh/segment/workspaceDir"
 	"crdx.org/io/cmd/oh/style"
 )
 
 const (
-	activitySpinnerSegment  = "activity-spinner"
-	contextUsageSegment     = "context-usage"
-	modeToggleSegment       = "mode-toggle"
-	workingDirectorySegment = "working-directory"
-	activeModelSegment      = "active-model"
-	scrollOverflowSegment   = "scroll-overflow"
-	sessionNameSegment      = "session-name"
-	localTimeSegment        = "local-time"
-	turnElapsedSegment      = "turn-elapsed"
-	turnCountSegment        = "turn-count"
-	gitBranchSegment        = "git-branch"
-	subUsageSegment         = "subscription-usage"
+	activitySpinnerSegment = "activity-spinner"
+	contextUsageSegment    = "context-usage"
+	modeToggleSegment      = "mode-toggle"
+	workspaceDirSegment    = "workspace-dir"
+	activeModelSegment     = "active-model"
+	scrollOverflowSegment  = "scroll-overflow"
+	sessionNameSegment     = "session-name"
+	localTimeSegment       = "local-time"
+	turnTimerSegment       = "turn-timer"
+	turnCountSegment       = "turn-count"
+	gitBranchSegment       = "git-branch"
+	subUsageSegment        = "subscription-usage"
 )
 
 type Options struct {
@@ -52,24 +52,24 @@ type Sources struct {
 	GetContextUsage func() (int, int)
 	GetGrantedCaps  func() caps.Set
 	IsPrefixPending func() bool
-	GetTurnElapsed  func() (bool, time.Duration, bool)
+	GetTimeElapsed  func() time.Duration
 	GetTurnCount    func() int
 }
 
 func NewRegistry(options Options) segment.Registry {
 	return segment.Registry{
-		activitySpinnerSegment:  activitySpinner.New(options.Sources.GetTurnActivity),
-		contextUsageSegment:     contextUsage.New(options.Sources.GetContextUsage),
-		modeToggleSegment:       modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
-		workingDirectorySegment: workingDirectory.New(options.WorkspaceDir),
-		activeModelSegment:      activeModel.New(options.ModelName, options.ModelEffort),
-		scrollOverflowSegment:   scrollOverflow.New,
-		sessionNameSegment:      sessionName.New(options.CurrentSessionName),
-		localTimeSegment:        localTime.New(time.Now),
-		turnElapsedSegment:      turnElapsed.New(options.Sources.GetTurnElapsed),
-		turnCountSegment:        turnCount.New(options.Sources.GetTurnCount),
-		gitBranchSegment:        gitBranch.New(options.WorkspaceDir),
-		subUsageSegment:         subUsage.New(options.UsageReporter, options.UsageCachePath, options.ModelName, time.Now),
+		activitySpinnerSegment: activitySpinner.New(options.Sources.GetTurnActivity),
+		contextUsageSegment:    contextUsage.New(options.Sources.GetContextUsage),
+		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
+		workspaceDirSegment:    workspaceDir.New(options.WorkspaceDir),
+		activeModelSegment:     activeModel.New(options.ModelName, options.ModelEffort),
+		scrollOverflowSegment:  scrollOverflow.New,
+		sessionNameSegment:     sessionName.New(options.CurrentSessionName),
+		localTimeSegment:       localTime.New(time.Now),
+		turnTimerSegment:       turnTimer.New(options.Sources.GetTimeElapsed),
+		turnCountSegment:       turnCount.New(options.Sources.GetTurnCount),
+		gitBranchSegment:       gitBranch.New(options.WorkspaceDir),
+		subUsageSegment:        subUsage.New(options.UsageReporter, options.UsageCachePath, options.ModelName, time.Now),
 	}
 }
 

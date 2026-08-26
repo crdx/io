@@ -332,13 +332,51 @@ right = [{ segment = "working-directory" }, { segment = "last-tps" }]
 		t.Fatal(err)
 	}
 	written := string(body)
-	for _, expected := range []string{currentVersionLine(), "activity-spinner", "context-usage", "working-directory"} {
+	for _, expected := range []string{currentVersionLine(), "activity-spinner", "context-usage", "workspace-dir"} {
 		if !strings.Contains(written, expected) {
 			t.Errorf("migration omitted %q from:\n%s", expected, written)
 		}
 	}
 	if strings.Contains(written, "last-tps") || strings.Contains(written, "obsolete") {
 		t.Errorf("migration kept the TPS segment:\n%s", written)
+	}
+	if _, err := config.Load(path); err != nil {
+		t.Fatalf("migrated config cannot be loaded: %v", err)
+	}
+}
+
+func TestTheSixthConfigFormatRenamesTheBarSegments(t *testing.T) {
+	original := `version = 6
+[bar.bottom]
+left = [
+    { segment = "turn-elapsed" },
+    { segment='working-directory' },
+]
+`
+	path := configFile(t, original)
+
+	from, isPresent, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isPresent || from != config.RetiredTpsFormat {
+		t.Errorf("got present %t from format %d", isPresent, from)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	written := string(body)
+	for _, expected := range []string{currentVersionLine(), `segment = "turn-timer"`, `segment='workspace-dir'`} {
+		if !strings.Contains(written, expected) {
+			t.Errorf("migration omitted %q from:\n%s", expected, written)
+		}
+	}
+	for _, legacy := range []string{"turn-elapsed", "working-directory"} {
+		if strings.Contains(written, legacy) {
+			t.Errorf("migration kept %q in:\n%s", legacy, written)
+		}
 	}
 	if _, err := config.Load(path); err != nil {
 		t.Fatalf("migrated config cannot be loaded: %v", err)

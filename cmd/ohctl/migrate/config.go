@@ -76,6 +76,18 @@ var configSteps = map[int]configStep{
 	config.SegmentNamesFormat:      migrateConfigFromVersionThree,
 	config.EditorCommandFormat:     migrateConfigFromVersionFour,
 	config.SnippetDefinitionFormat: migrateConfigFromVersionFive,
+	config.RetiredTpsFormat:        migrateConfigFromVersionSix,
+}
+
+func migrateConfigFromVersionSix(data []byte) ([]byte, error) {
+	if _, _, err := readConfigDocument(data); err != nil {
+		return nil, err
+	}
+
+	migrated := renameConfigSegment(data, "turn-elapsed", "turn-timer")
+	migrated = renameConfigSegment(migrated, "working-directory", "workspace-dir")
+
+	return rewriteConfigVersion(migrated, config.TurnTimerFormat), nil
 }
 
 func migrateConfigFromVersionFive(data []byte) ([]byte, error) {
