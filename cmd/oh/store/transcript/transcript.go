@@ -120,13 +120,21 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			output.fence(notice, "")
 		}
 	case agent.InterruptionEvent:
-		output.paragraph("The turn was interrupted.")
+		output.paragraph(interruptionSentence(event.Text))
 	case agent.FailureEvent:
 		output.fence(event.Text, "")
 	}
 
 	_, err := self.file.WriteString(output.String())
 	return err
+}
+
+func interruptionSentence(reason string) string {
+	if reason == "" {
+		return "The turn was interrupted."
+	}
+
+	return "The turn was interrupted because " + reason + "."
 }
 
 func describeEmphasis(emphasis tool.Emphasis) string {

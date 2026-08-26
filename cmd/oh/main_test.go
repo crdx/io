@@ -557,6 +557,22 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	}
 }
 
+func TestTheStopKeyNamesItselfAsTheInterruptionReason(t *testing.T) {
+	for name, test := range map[string]struct {
+		keypress key.Key
+		want     string
+	}{
+		"escape": {keypress: key.Key{Code: key.Escape}, want: escapeReason},
+		"ctrl+d": {keypress: key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}, want: ctrlDReason},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := stopKeyReason(test.keypress); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
 func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{})
@@ -589,6 +605,9 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 
 	for _, event := range storedSession.Events {
 		if event.Kind == agent.InterruptionEvent {
+			if event.Text != escapeReason {
+				t.Errorf("got reason %q, want the one the turn was stopped with", event.Text)
+			}
 			return
 		}
 	}
@@ -671,7 +690,7 @@ func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
 			self.queuedTurn.Replace("later")
 			self.queuedTurn.MarkModeChange()
 
-			self.cancelTurn()
+			self.cancelTurn(escapeReason)
 
 			pending := self.queuedTurn.Peek()
 			kept := pending.Replacement && pending.ModeChange && pending.Message == "later"
@@ -4885,6 +4904,7 @@ type sessionGoldenTurn struct {
 	Responses                 []sessionGoldenResponse `toml:"response"`
 	Timeout                   string                  `toml:"timeout"`
 	IsCancelled               bool                    `toml:"is-cancelled"`
+	CancelWithCtrlD           bool                    `toml:"cancel-with-ctrl-d"`
 	CancelAfterReasoningDelta int                     `toml:"cancel-after-reasoning-delta"`
 	CancelAfterReasoningEvent int                     `toml:"cancel-after-reasoning-event"`
 	CancelAfterMessageDelta   int                     `toml:"cancel-after-message-delta"`
@@ -5382,9 +5402,13 @@ func runSessionGoldenTurn(
 	defer cancel(nil)
 	testHarness.currentTurn.Stream = testRunningTurnStreamWithCancel(cancel)
 	editor := edit.NewInput(nil)
-	interruptWithEscape := func() {
-		if !testHarness.apply(editor, nil, key.Key{Code: key.Escape}) {
-			t.Fatal("escape closed the harness")
+	stopKey := key.Key{Code: key.Escape}
+	if turn.CancelWithCtrlD {
+		stopKey = key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
+	}
+	interruptWithStopKey := func() {
+		if !testHarness.apply(editor, nil, stopKey) {
+			t.Fatal("the stop key closed the harness")
 		}
 	}
 
@@ -5407,25 +5431,25 @@ func runSessionGoldenTurn(
 			case agent.ModelReasoningEvent:
 				reasoningDeltas++
 				if reasoningDeltas == turn.CancelAfterReasoningDelta {
-					interruptWithEscape()
+					interruptWithStopKey()
 				}
 			case agent.ModelMessageEvent:
 				messageDeltas++
 				if messageDeltas == turn.CancelAfterMessageDelta {
-					interruptWithEscape()
+					interruptWithStopKey()
 				}
 			}
 		}
 		if update.Event != nil && update.Event.Kind == agent.ModelReasoningEvent {
 			reasoningEvents++
 			if reasoningEvents == turn.CancelAfterReasoningEvent {
-				interruptWithEscape()
+				interruptWithStopKey()
 			}
 		}
 		if update.Event != nil && update.Event.Kind == agent.ToolCallRequestEvent {
 			toolRequests++
 			if toolRequests == turn.CancelAfterToolRequest {
-				interruptWithEscape()
+				interruptWithStopKey()
 			}
 			if toolRequests == 1 && turn.ReplaceAfterToolRequest != "" {
 				testHarness.replaceTurn(turn.ReplaceAfterToolRequest)
@@ -5439,7 +5463,9 @@ func runSessionGoldenTurn(
 			}
 		}
 	}
-	testHarness.currentTurn.SetCancelled(turn.IsCancelled)
+	if turn.IsCancelled && !testHarness.currentTurn.Cancelled() {
+		testHarness.interruptTurn(stopKeyReason(stopKey))
+	}
 	testHarness.finish()
 
 	for testHarness.currentTurn.Running() {
@@ -6268,7 +6294,7 @@ func TestEveryWayOfStoppingATurnSaysWhy(t *testing.T) {
 		want     string
 	}{
 		"escape": {
-			stopTurn: func(self *App) { self.cancelTurn() },
+			stopTurn: func(self *App) { self.cancelTurn(escapeReason) },
 			want:     "the user pressed escape",
 		},
 		"another message": {

@@ -12,7 +12,7 @@
 > 2001-01-01T00:00:00Z
 
 ```
-interrupt the answer
+interrupt the answer with ctrl+d
 ```
 
 ## Assistant
@@ -27,7 +27,7 @@ Partial answer.
 
 > 2001-01-01T00:00:02Z
 
-The turn was interrupted.
+The turn was interrupted because the user pressed ctrl+d.
 
 ## User
 

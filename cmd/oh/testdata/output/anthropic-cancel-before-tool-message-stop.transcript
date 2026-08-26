@@ -19,7 +19,7 @@ interrupt after a complete but uncommitted tool call
 
 > 2001-01-01T00:00:01Z
 
-The turn was interrupted.
+The turn was interrupted because the user pressed escape.
 
 ## User
 

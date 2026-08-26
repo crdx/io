@@ -118,7 +118,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 > 2001-01-01T00:00:06Z
 
-The turn was interrupted.
+The turn was interrupted because the user pressed escape.
 
 ## User
 

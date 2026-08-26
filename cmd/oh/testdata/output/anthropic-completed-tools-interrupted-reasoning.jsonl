@@ -8,7 +8,7 @@
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"toolu_2","name":"work","arguments":"{}"}}
 {"kind":"event","event":{"kind":"state_change","id":"toolu_2","name":"work-count","state":2}}
 {"kind":"event","event":{"kind":"tool_call_result","text":"second result","id":"toolu_2","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":13,"total_bytes":13}}}
-{"kind":"event","event":{"kind":"interruption"}}
+{"kind":"event","event":{"kind":"interruption","text":"the user pressed escape"}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"complete two tool rounds, then keep thinking"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"thinking","thinking":"Plan first.","signature":"seal-1"},{"type":"tool_use","id":"toolu_1","name":"work","input":{}}]}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_1","content":"first result"}]}}

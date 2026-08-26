@@ -62,7 +62,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 > 2001-01-01T00:00:03Z
 
-The turn was interrupted.
+The turn was interrupted because the user changed what the harness is allowed to do.
 
 ## Mode
 

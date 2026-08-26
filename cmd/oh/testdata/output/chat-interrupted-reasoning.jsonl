@@ -1,6 +1,6 @@
 {"kind":"head","version":7,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"interrupt reasoning before the answer"}}
-{"kind":"event","event":{"kind":"interruption"}}
+{"kind":"event","event":{"kind":"interruption","text":"the user pressed escape"}}
 {"kind":"item","payload":{"role":"user","content":"interrupt reasoning before the answer"}}
 {"kind":"item","payload":{"role":"assistant","content":"","reasoning_content":"Unfinished thought."}}
 {"kind":"turn_completion"}

@@ -158,7 +158,7 @@ func (self *App) apply(editor *edit.Input, history *edit.History, keypress key.K
 		self.submitInput(editor, history, self.getOnWithItMessage)
 
 	case edit.Cancel:
-		self.cancelTurn()
+		self.cancelTurn(stopKeyReason(keypress))
 
 	case edit.Quit:
 		return false
@@ -369,17 +369,26 @@ func (self *App) recordModeEvent(event agent.Event) {
 
 const (
 	escapeReason     = "the user pressed escape"
+	ctrlDReason      = "the user pressed ctrl+d"
 	replacedReason   = "the user sent another message"
 	modeReason       = "the user changed what the harness is allowed to do"
 	transitionReason = "the session is being closed"
 )
 
-func (self *App) cancelTurn() {
+func stopKeyReason(keypress key.Key) string {
+	if keypress.Code == key.Escape {
+		return escapeReason
+	}
+
+	return ctrlDReason
+}
+
+func (self *App) cancelTurn(reason string) {
 	if self.currentTurn.Cancelled() {
 		self.queuedTurn.Clear()
 	}
 
-	self.interruptTurn(escapeReason)
+	self.interruptTurn(reason)
 }
 
 func (self *App) replaceTurn(message string) {
@@ -617,11 +626,19 @@ func (self *App) interruptionNote() string {
 	}
 
 	note := "The previous turn was stopped before it finished"
-	if reason := self.currentTurn.Reason(); reason != nil {
-		note += " because " + reason.Error()
+	if reason := self.interruptionReason(); reason != "" {
+		note += " because " + reason
 	}
 
 	return note + "."
+}
+
+func (self *App) interruptionReason() string {
+	if reason := self.currentTurn.Reason(); reason != nil {
+		return reason.Error()
+	}
+
+	return ""
 }
 
 func (self *App) takeTurn(turnEvent TurnEvent) {
@@ -687,7 +704,7 @@ func (self *App) finish() {
 	self.screen.ReportProgress(false)
 
 	if self.currentTurn.Cancelled() {
-		self.recordEvent(agent.Event{Kind: agent.InterruptionEvent})
+		self.recordEvent(agent.Event{Kind: agent.InterruptionEvent, Text: self.interruptionReason()})
 	} else if self.currentTurn.Error() != nil {
 		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: self.currentTurn.Error().Error()})
 	}

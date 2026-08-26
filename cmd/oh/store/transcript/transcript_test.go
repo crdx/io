@@ -159,6 +159,50 @@ func TestTranscriptRetainsTurnFailures(t *testing.T) {
 	}
 }
 
+func TestTranscriptNamesWhyATurnWasInterrupted(t *testing.T) {
+	for name, test := range map[string]struct {
+		reason string
+		want   string
+	}{
+		"with a reason": {
+			reason: "the user pressed escape",
+			want:   "The turn was interrupted because the user pressed escape.",
+		},
+		"without a reason": {
+			reason: "",
+			want:   "The turn was interrupted.",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "transcript.md")
+			recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: time.Unix(1, 2)})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := recorder.Event(time.Unix(3, 4), agent.Event{
+				Kind: agent.InterruptionEvent,
+				Text: test.reason,
+			}); err != nil {
+				t.Fatal(err)
+			}
+			if err := recorder.Close(); err != nil {
+				t.Fatal(err)
+			}
+
+			stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+			if err != nil {
+				t.Fatal(err)
+			}
+			transcript := string(stored)
+			for _, want := range []string{"## Interrupted", test.want} {
+				if !strings.Contains(transcript, want) {
+					t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)
+				}
+			}
+		})
+	}
+}
+
 func TestTranscriptRetainsDurableState(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
 	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: time.Unix(1, 2)})
