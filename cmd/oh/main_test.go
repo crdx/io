@@ -58,6 +58,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
+	"crdx.org/io/cmd/oh/segment/sessionEmoji"
 	"crdx.org/io/cmd/oh/segment/sessionName"
 	"crdx.org/io/cmd/oh/segment/subUsage"
 	"crdx.org/io/cmd/oh/segment/turnCount"
@@ -4472,6 +4473,18 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"session-name": goldenSegmentPass(
 			t,
 			sessionName.New("brave-otter"),
+			"",
+			segment.Context{},
+		),
+		"session-emoji": goldenSegmentPass(
+			t,
+			sessionEmoji.New("brave-otter"),
+			"",
+			segment.Context{},
+		),
+		"session-emoji / unknown animal": goldenSegmentPass(
+			t,
+			sessionEmoji.New("brave-tester"),
 			"",
 			segment.Context{},
 		),

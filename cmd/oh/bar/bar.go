@@ -14,6 +14,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
+	"crdx.org/io/cmd/oh/segment/sessionEmoji"
 	"crdx.org/io/cmd/oh/segment/sessionName"
 	"crdx.org/io/cmd/oh/segment/subUsage"
 	"crdx.org/io/cmd/oh/segment/turnCount"
@@ -30,6 +31,7 @@ const (
 	activeModelSegment     = "active-model"
 	scrollOverflowSegment  = "scroll-overflow"
 	sessionNameSegment     = "session-name"
+	sessionEmojiSegment    = "session-emoji"
 	localTimeSegment       = "local-time"
 	turnTimerSegment       = "turn-timer"
 	turnCountSegment       = "turn-count"
@@ -65,6 +67,7 @@ func NewRegistry(options Options) segment.Registry {
 		activeModelSegment:     activeModel.New(options.ModelName, options.ModelEffort),
 		scrollOverflowSegment:  scrollOverflow.New,
 		sessionNameSegment:     sessionName.New(options.CurrentSessionName),
+		sessionEmojiSegment:    sessionEmoji.New(options.CurrentSessionName),
 		localTimeSegment:       localTime.New(time.Now),
 		turnTimerSegment:       turnTimer.New(options.Sources.GetTimeElapsed),
 		turnCountSegment:       turnCount.New(options.Sources.GetTurnCount),

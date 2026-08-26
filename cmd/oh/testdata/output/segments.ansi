@@ -32,6 +32,10 @@
 
 === scroll-overflow / up ===
 \e[38;2;150;152;150m↑ 3\e[0m
+=== session-emoji ===
+🦦
+=== session-emoji / unknown animal ===
+
 === session-name ===
 \e[38;2;150;152;150mbrave-otter\e[0m
 === subscription-usage / ahead of pace ===
