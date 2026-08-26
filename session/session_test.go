@@ -135,8 +135,60 @@ func TestTurnCompletionIsReadBackSeparatelyFromEventsAndItems(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if storedSession.TurnCompletions != 1 || len(storedSession.Events) != 1 || len(storedSession.Items) != 1 {
+	if storedSession.TurnCompletions != 1 || len(storedSession.Events) != 1 || len(storedSession.Items) != 1 || storedSession.HasIncompleteTurn {
 		t.Errorf("unexpected stored session: %+v", storedSession)
+	}
+}
+
+func TestSeveralMessagesCanShareOneCompletedTurn(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := session.Create(directory, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, message := range []string{"mode changed", "continue"} {
+		if _, err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: message}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.CompleteTurn(); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := session.Read(directory, writer.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if storedSession.HasIncompleteTurn {
+		t.Error("completed turn containing two messages was read as incomplete")
+	}
+}
+
+func TestAUserMessageAfterAnExtraCompletionIsStillIncomplete(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := session.Create(directory, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.CompleteTurn(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "unfinished"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := session.Read(directory, writer.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !storedSession.HasIncompleteTurn {
+		t.Error("unfinished message was masked by an earlier completion")
 	}
 }
 

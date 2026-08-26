@@ -1,0 +1,33 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[first]
+prompt = "change two capabilities while the answer is streaming"
+toggle-after-message-delta = "wg"
+is-cancelled = true
+
+[[first.response]]
+wait-for-cancellation = true
+event = [
+    '''{"type":"response.output_text.delta","delta":"Partial answer."}''',
+]
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"The workspace and history are read-only now."}''',
+    '''{"type":"response.output_text.done","text":"The workspace and history are read-only now."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"The workspace and history are read-only now."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[resume]
+prompt = "continue"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Continued."}''',
+    '''{"type":"response.output_text.done","text":"Continued."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"Continued."}]}}''',
+    '''{"type":"response.completed"}''',
+]

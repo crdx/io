@@ -7,7 +7,7 @@
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_1","name":"work","input":{}}]}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_1","content":"the call was stopped after 4s because the user changed what the harness is allowed to do"}]}}
 {"kind":"turn_completion"}
-{"kind":"event","event":{"kind":"mode_change","text":"xbgs"}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxbgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"The workspace is now read-only."}}
 {"kind":"event","event":{"kind":"model_message","text":"Noted, the workspace is read-only now."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"The previous turn was stopped before it finished because the user changed what the harness is allowed to do."}]}}

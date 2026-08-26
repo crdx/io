@@ -1,0 +1,55 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxbgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+The workspace is now read-only.
+```
+
+## User
+
+> 2001-01-01T00:00:02Z
+
+```
+continue with the new mode
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+The workspace is read-only.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+continue
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Continued.
+```
+

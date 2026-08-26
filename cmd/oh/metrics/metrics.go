@@ -26,6 +26,7 @@ func New(contextWindowTokens int) Tracker {
 
 // BeginTurn clears stream accounting for a newly started turn.
 func (self *Tracker) BeginTurn() {
+	self.turnsTaken++
 	self.streamedBytes = 0
 	self.streamStartedAt = time.Time{}
 	self.activeStreamDuration = 0
@@ -41,9 +42,6 @@ func (self *Tracker) RecordDelta(delta agent.Delta) {
 
 // Record incorporates one conversation event into the displayed metrics.
 func (self *Tracker) Record(event agent.Event) {
-	if event.Kind == agent.UserMessageEvent {
-		self.turnsTaken++
-	}
 	if event.Kind == agent.ModelMessageEvent || event.Kind == agent.ModelReasoningEvent {
 		self.finishActiveStream()
 	}
@@ -53,15 +51,12 @@ func (self *Tracker) Record(event agent.Event) {
 }
 
 // Restore rebuilds durable metrics from stored conversation events.
-func (self *Tracker) Restore(events []agent.Event) {
+func (self *Tracker) Restore(events []agent.Event, completedTurns int) {
 	self.inputTokens = 0
-	self.turnsTaken = 0
+	self.turnsTaken = completedTurns
 	self.streamedBytes = 0
 
 	for _, event := range events {
-		if event.Kind == agent.UserMessageEvent {
-			self.turnsTaken++
-		}
 		if event.Usage != nil && event.Usage.InputTokens > 0 {
 			self.inputTokens = event.Usage.InputTokens
 		}

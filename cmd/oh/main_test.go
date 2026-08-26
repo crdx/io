@@ -767,11 +767,23 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	}
 }
 
-func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
+func TestPendingInputCanTakeBackAnyMessage(t *testing.T) {
+	var pending pendingInput
+	pending.add(agent.Event{Kind: agent.UserMessageEvent, Text: "first"}, agent.Event{})
+	pending.add(agent.Event{Kind: agent.HarnessMessageEvent, Text: "second"}, agent.Event{})
+
+	pending.takeBack(0)
+
+	if !slices.Equal(pending.texts(), []string{"second"}) || pending.items[0].message.Kind != agent.HarnessMessageEvent {
+		t.Errorf("got %+v", pending.items)
+	}
+}
+
+func TestAQueuedModeChangeCanBeTakenBackBeforeItStarts(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{})
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Fatal(err)
 	}
 	defer func() { _ = log.Close() }()
 
@@ -784,6 +796,51 @@ func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
 
 	self.start("first")
 	self.toggleCap(caps.Write)
+	self.toggleCap(caps.Write)
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	if self.currentTurn.Running() {
+		t.Error("a taken-back mode change started another turn")
+	}
+	if !self.queuedTurn.Empty() || len(self.pending.items) != 0 {
+		t.Errorf("taken-back mode change remained queued: %+v %v", self.queuedTurn.Peek(), self.pending.items)
+	}
+
+	storedSession, err := store.Read(directory, log.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !storedSession.CanResume() {
+		t.Error("taking back the queued mode change left the session unsafe")
+	}
+}
+
+func TestAQueuedModeChangeStartsWithItsDisplayedMessage(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer func() { _ = log.Close() }()
+
+	var screenOutput bytes.Buffer
+	self := &App{
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.New(&screenOutput),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
+	}
+
+	self.start("first")
+	self.toggleCap(caps.Write)
+
+	if strings.Contains(screenOutput.String(), workspaceNowReadOnly()) {
+		t.Errorf("expected the mode notice after the interrupted turn finishes, got %q", screenOutput.String())
+	}
 
 	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
@@ -795,7 +852,35 @@ func TestAQueuedModeChangeAloneInjectsItsNotice(t *testing.T) {
 	}
 
 	if !self.currentTurn.Running() {
-		t.Error("expected the mode change to have started a turn of its own")
+		t.Fatal("expected the mode change to have started a turn of its own")
+	}
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	modeMessage := workspaceNowReadOnly()
+	if count := strings.Count(screenOutput.String(), modeMessage); count != 1 {
+		t.Errorf("expected the mode message once, got %d in %q", count, screenOutput.String())
+	}
+
+	storedSession, err := store.Read(directory, log.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !storedSession.CanResume() {
+		t.Error("expected the completed mode-message turn to be resumable")
+	}
+
+	var messages []string
+	for _, event := range storedSession.Events {
+		if event.Kind == agent.UserMessageEvent {
+			messages = append(messages, event.Text)
+		}
+	}
+	if !slices.Equal(messages, []string{"first", modeMessage}) {
+		t.Errorf("got user messages %q", messages)
 	}
 }
 
@@ -1607,6 +1692,21 @@ func TestACallWhoseToolIsGoneKeepsWhatItLookedLike(t *testing.T) {
 	}
 }
 
+type messageCaptureProvider struct {
+	messages []string
+}
+
+func (self *messageCaptureProvider) Configure(string, []tool.Definition) {}
+func (self *messageCaptureProvider) AddUserMessage(message string) {
+	self.messages = append(self.messages, message)
+}
+func (self *messageCaptureProvider) AddToolResults([]agent.ToolCallResult) {}
+func (self *messageCaptureProvider) Dump() []json.RawMessage               { return nil }
+func (self *messageCaptureProvider) Load([]json.RawMessage)                {}
+func (self *messageCaptureProvider) Send(context.Context, agent.Yield) (agent.Reply, error) {
+	return agent.Reply{}, nil
+}
+
 type quietProvider struct{}
 
 func (quietProvider) Configure(string, []tool.Definition)   {}
@@ -2124,19 +2224,20 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		".transcript",
 	})
 	for name, extensions := range map[string][]string{
-		"banner":            {".ansi", ".screen"},
-		"clearing":          {".ansi", ".screen"},
-		"completion":        {".txt"},
-		"context":           {".prompt"},
-		"inputblock":        {".ansi", ".screen"},
-		"lifecycle":         {".ansi", ".screen"},
-		"mermaid-streaming": {".screen"},
-		"mode-takeback":     {".ansi", ".screen"},
-		"new-session":       {".txt"},
-		"paste":             {".ansi", ".screen"},
-		"resume-mode":       {".ansi"},
-		"running":           {".ansi", ".screen"},
-		"segments":          {".ansi", ".screen"},
+		"banner":                {".ansi", ".screen"},
+		"clearing":              {".ansi", ".screen"},
+		"completion":            {".txt"},
+		"context":               {".prompt"},
+		"inputblock":            {".ansi", ".screen"},
+		"lifecycle":             {".ansi", ".screen"},
+		"mermaid-streaming":     {".screen"},
+		"mode-takeback":         {".ansi", ".screen"},
+		"new-session":           {".txt"},
+		"pending-mode-messages": {".ansi", ".screen"},
+		"paste":                 {".ansi", ".screen"},
+		"resume-mode":           {".ansi"},
+		"running":               {".ansi", ".screen"},
+		"segments":              {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}
@@ -2444,13 +2545,16 @@ func TestACapabilitySwappedBackIsTakenBackRatherThanWrittenDown(t *testing.T) {
 	self, directory := modeFixture(t)
 
 	self.toggleCap(caps.Git)
-	if len(self.pendingModeChanges) != 1 {
-		t.Fatalf("expected the change to be shown, got %v", self.pendingModeChanges)
+	if len(self.pending.items) != 1 {
+		t.Fatalf("expected the change to be shown, got %v", self.pending.items)
+	}
+	if recorded := recordedModes(t, self, directory); len(recorded) != 1 {
+		t.Errorf("pending mode change was written down: %v", recorded)
 	}
 
 	self.toggleCap(caps.Git)
-	if len(self.pendingModeChanges) != 0 {
-		t.Errorf("expected the change to be taken back, got %v", self.pendingModeChanges)
+	if len(self.pending.items) != 0 {
+		t.Errorf("expected the change to be taken back, got %v", self.pending.items)
 	}
 
 	self.settleMode()
@@ -2465,13 +2569,13 @@ func TestACapabilitySwappedBackLeavesTheOtherChangesSayingWhatTheySaid(t *testin
 	self.toggleCap(caps.Git)
 	self.toggleCap(caps.Write)
 
-	shown, said := caps.ModeNotice(self.pendingModeChanges[1])
-	if !said {
+	shown := self.pending.items[1].message.Text
+	if shown == "" {
 		t.Fatal("expected the second change to say something")
 	}
 
 	self.toggleCap(caps.Git)
-	if again, _ := caps.ModeNotice(self.pendingModeChanges[0]); again != shown {
+	if again := self.pending.items[0].message.Text; again != shown {
 		t.Errorf("expected %q, got %q", shown, again)
 	}
 
@@ -2479,6 +2583,51 @@ func TestACapabilitySwappedBackLeavesTheOtherChangesSayingWhatTheySaid(t *testin
 	want := caps.Read | caps.Shell
 	if got, _ := caps.LastRecordedMode(recordedModes(t, self, directory)); got != want {
 		t.Errorf("expected %s, got %s", want.Flags(), got.Flags())
+	}
+}
+
+func TestAnIdleModeMessageJoinsTheNextTurn(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = log.Close() }()
+
+	provider := &messageCaptureProvider{}
+	var screenOutput bytes.Buffer
+	self := &App{
+		agent:    agent.New("", provider, nil),
+		screen:   output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
+	}
+	self.settleMode()
+
+	self.toggleCap(caps.Write)
+	modeMessage := workspaceNowReadOnly()
+	if !strings.Contains(screenOutput.String(), modeMessage) {
+		t.Errorf("pending mode message was not displayed: %q", screenOutput.String())
+	}
+	if len(provider.messages) != 0 || self.currentTurn.Running() {
+		t.Errorf("pending mode message started a turn: messages=%q running=%t", provider.messages, self.currentTurn.Running())
+	}
+
+	self.start("next")
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	if !slices.Equal(provider.messages, []string{modeMessage, "next"}) {
+		t.Errorf("provider received %q", provider.messages)
+	}
+	storedSession, err := store.Read(directory, log.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !storedSession.CanResume() {
+		t.Error("combined mode-message turn was not resumable")
 	}
 }
 
@@ -2493,6 +2642,52 @@ func TestAModeChangeSaysItselfInTheScrollback(t *testing.T) {
 	if !strings.Contains(screenOutput.String(), "The .git directory is now read-write.") {
 		t.Errorf("expected the change to be said, got %q", screenOutput.String())
 	}
+}
+
+func TestPendingModeMessagesAreSeparatedFromStartupAndEachOther(t *testing.T) {
+	requireSameVisibleScreen(
+		t,
+		"pending messages differ from independently submitted messages",
+		pendingModeMessagesStream(t, 2),
+		submittedModeMessagesStream(),
+	)
+
+	compareWithGolden(t, "pending-mode-messages", ".ansi", map[string]func() string{
+		"complete interaction": func() string { return pendingModeMessagesStream(t, 2) },
+	})
+	compareWithGolden(t, "pending-mode-messages", ".screen", shownPasses(t, map[string]func() string{
+		"1 startup":                    func() string { return pendingModeMessagesStream(t, 0) },
+		"2 workspace mode message":     func() string { return pendingModeMessagesStream(t, 1) },
+		"3 workspace and git messages": func() string { return pendingModeMessagesStream(t, 2) },
+	}))
+}
+
+func pendingModeMessagesStream(t *testing.T, toggleCount int) string {
+	t.Helper()
+
+	self, _ := modeFixture(t)
+	var screenOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	self.screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "brave-otter"}))
+
+	if toggleCount > 0 {
+		self.toggleCap(caps.Write)
+	}
+	if toggleCount > 1 {
+		self.toggleCap(caps.Git)
+	}
+
+	return screenOutput.String()
+}
+
+func submittedModeMessagesStream() string {
+	var screenOutput strings.Builder
+	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "brave-otter"}))
+	picasso := painter.New(screen, false, nil, "")
+	picasso.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: workspaceNowReadOnly()})
+	picasso.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "The .git directory is now read-write."})
+	return screenOutput.String()
 }
 
 func TestTakingBackAModeChangeDrawsWhatItDrewBefore(t *testing.T) {
@@ -3754,7 +3949,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 					Usage: &agent.Usage{InputTokens: inputTokens},
 				}},
 			}
-			held.metrics.Restore(held.events)
+			held.metrics.Restore(held.events, 0)
 
 			built := goldenBarLayout(t, held)
 
@@ -5005,6 +5200,7 @@ type sessionGoldenTurn struct {
 	CancelAfterMessageDelta   int                     `toml:"cancel-after-message-delta"`
 	CancelAfterToolRequest    int                     `toml:"cancel-after-tool-request"`
 	ReplaceAfterToolRequest   string                  `toml:"replace-after-tool-request"`
+	ToggleAfterMessageDelta   string                  `toml:"toggle-after-message-delta"`
 	ToggleAfterToolRequest    string                  `toml:"toggle-after-tool-request"`
 }
 
@@ -5020,14 +5216,15 @@ type sessionGoldenTool struct {
 }
 
 type sessionGoldenScenario struct {
-	Name            string              `toml:"-"`
-	Provider        string              `toml:"provider"`
-	Model           string              `toml:"model"`
-	Effort          string              `toml:"effort"`
-	FirstTokenError string              `toml:"first-token-error"`
-	Tools           []sessionGoldenTool `toml:"tool"`
-	FirstTurn       sessionGoldenTurn   `toml:"first"`
-	ResumeTurn      sessionGoldenTurn   `toml:"resume"`
+	Name              string              `toml:"-"`
+	Provider          string              `toml:"provider"`
+	Model             string              `toml:"model"`
+	Effort            string              `toml:"effort"`
+	FirstTokenError   string              `toml:"first-token-error"`
+	ToggleBeforeFirst string              `toml:"toggle-before-first"`
+	Tools             []sessionGoldenTool `toml:"tool"`
+	FirstTurn         sessionGoldenTurn   `toml:"first"`
+	ResumeTurn        sessionGoldenTurn   `toml:"resume"`
 }
 
 func TestScenariosProduceCanonicalOutputs(t *testing.T) {
@@ -5331,6 +5528,11 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		recorder: record.New(log),
 	}
 	settleSessionGoldenMode(firstHarness)
+	if scenario.ToggleBeforeFirst != "" {
+		toggleSessionGoldenCaps(t, firstHarness, scenario.ToggleBeforeFirst)
+		firstHarness.settleMode()
+		firstAssistant.FYI(firstHarness.mode.Inject())
+	}
 	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
 	runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
 
@@ -5473,6 +5675,18 @@ func settleSessionGoldenMode(testHarness *App) {
 	testHarness.settledCaps = mode.Current()
 }
 
+func toggleSessionGoldenCaps(t *testing.T, testHarness *App, flags string) {
+	t.Helper()
+
+	for _, flag := range flags {
+		toggledCaps, err := caps.Parse(string(flag))
+		if err != nil {
+			t.Fatal(err)
+		}
+		testHarness.toggleCap(toggledCaps &^ caps.Read)
+	}
+}
+
 func runSessionGoldenTurn(
 	t *testing.T,
 	testHarness *App,
@@ -5533,6 +5747,9 @@ func runSessionGoldenTurn(
 				if messageDeltas == turn.CancelAfterMessageDelta {
 					interruptWithStopKey()
 				}
+				if messageDeltas == 1 && turn.ToggleAfterMessageDelta != "" {
+					toggleSessionGoldenCaps(t, testHarness, turn.ToggleAfterMessageDelta)
+				}
 			}
 		}
 		if update.Event != nil && update.Event.Kind == agent.ModelReasoningEvent {
@@ -5550,11 +5767,7 @@ func runSessionGoldenTurn(
 				testHarness.replaceTurn(turn.ReplaceAfterToolRequest)
 			}
 			if toolRequests == 1 && turn.ToggleAfterToolRequest != "" {
-				toggled, err := caps.Parse(turn.ToggleAfterToolRequest)
-				if err != nil {
-					t.Fatal(err)
-				}
-				testHarness.toggleCap(toggled)
+				toggleSessionGoldenCaps(t, testHarness, turn.ToggleAfterToolRequest)
 			}
 		}
 	}

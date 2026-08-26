@@ -1,0 +1,75 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+change two capabilities while the answer is streaming
+```
+
+## Assistant
+
+> 2001-01-01T00:00:01Z
+
+```
+Partial answer.
+```
+
+## Interrupted
+
+> 2001-01-01T00:00:02Z
+
+The turn was interrupted because the user changed what the harness is allowed to do.
+
+## Mode
+
+> 2001-01-01T00:00:03Z
+
+- **Caps:** `rxbgs`
+
+## Mode
+
+> 2001-01-01T00:00:04Z
+
+- **Caps:** `rxbs`
+
+## User
+
+> 2001-01-01T00:00:05Z
+
+```
+The workspace is now read-only. The .git directory is now read-only.
+```
+
+## Assistant
+
+> 2001-01-01T00:00:06Z
+
+```
+The workspace and history are read-only now.
+```
+
+## User
+
+> 2001-01-01T00:00:07Z
+
+```
+continue
+```
+
+## Assistant
+
+> 2001-01-01T00:00:08Z
+
+```
+Continued.
+```
+

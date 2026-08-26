@@ -314,14 +314,15 @@ func (self writerObserver) Start(request req.Request) req.ExchangeObserver {
 }
 
 type Session struct {
-	Name            string
-	ID              string
-	Meta            Meta
-	Started         time.Time
-	Touched         time.Time
-	Events          []agent.Event
-	Items           []json.RawMessage
-	TurnCompletions int
+	Name              string
+	ID                string
+	Meta              Meta
+	Started           time.Time
+	Touched           time.Time
+	Events            []agent.Event
+	Items             []json.RawMessage
+	TurnCompletions   int
+	HasIncompleteTurn bool
 }
 
 func Read(directory, name string) (*Session, error) {
@@ -357,14 +358,15 @@ func decode(storedSession *session.Session) (*Session, error) {
 	}
 
 	return &Session{
-		Name:            storedSession.Name,
-		ID:              storedSession.ID,
-		Meta:            meta,
-		Started:         storedSession.Started,
-		Touched:         storedSession.Touched,
-		Events:          storedSession.Events,
-		Items:           storedSession.Items,
-		TurnCompletions: storedSession.TurnCompletions,
+		Name:              storedSession.Name,
+		ID:                storedSession.ID,
+		Meta:              meta,
+		Started:           storedSession.Started,
+		Touched:           storedSession.Touched,
+		Events:            storedSession.Events,
+		Items:             storedSession.Items,
+		TurnCompletions:   storedSession.TurnCompletions,
+		HasIncompleteTurn: storedSession.HasIncompleteTurn,
 	}, nil
 }
 
@@ -388,13 +390,7 @@ func (self *Session) Messages() int {
 }
 
 func (self *Session) CanResume() bool {
-	userTurns := 0
-	for _, event := range self.Events {
-		if event.Kind == agent.UserMessageEvent {
-			userTurns++
-		}
-	}
-	return userTurns == self.TurnCompletions
+	return !self.HasIncompleteTurn
 }
 
 func RebuildMeta(directory, name string) error {

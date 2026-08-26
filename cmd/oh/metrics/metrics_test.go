@@ -11,7 +11,7 @@ import (
 
 func contextUsageAt(events []agent.Event, contextWindowTokens int) (int, int) {
 	tracker := New(contextWindowTokens)
-	tracker.Restore(events)
+	tracker.Restore(events, 0)
 	return tracker.ContextUsage()
 }
 
@@ -40,15 +40,23 @@ func TestContextUsageIsUnknownBeforeTheFirstReport(t *testing.T) {
 	}
 }
 
-func TestTrackerCountsEveryUserTurn(t *testing.T) {
+func TestTrackerCountsEveryStartedTurn(t *testing.T) {
 	tracker := New(0)
 	for range 3 {
-		tracker.Record(agent.Event{Kind: agent.UserMessageEvent, Text: "go on then"})
-		tracker.Record(agent.Event{Kind: agent.ModelMessageEvent, Text: "right you are"})
+		tracker.BeginTurn()
 	}
 
 	if got := tracker.TurnCount(); got != 3 {
 		t.Errorf("expected three turns, got %d", got)
+	}
+}
+
+func TestTrackerRestoresCompletedTurnsIndependentlyOfMessages(t *testing.T) {
+	tracker := New(0)
+	tracker.Restore([]agent.Event{{Kind: agent.UserMessageEvent}, {Kind: agent.UserMessageEvent}}, 1)
+
+	if got := tracker.TurnCount(); got != 1 {
+		t.Errorf("expected one turn, got %d", got)
 	}
 }
 

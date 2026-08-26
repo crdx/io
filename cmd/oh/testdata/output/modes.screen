@@ -6,7 +6,9 @@
 Reading and running commands, but not
 writing.
 
-The workspace is now read-write.
+
+ The workspace is now read-write.
+
 
 
  now write it down
@@ -14,9 +16,11 @@ The workspace is now read-write.
 
 Writing it down.
 
-The bash tool is now refused, and will t
-urn away every command until it is grant
-ed again.
+
+ The bash tool is now refused, and will
+ turn away every command until it is
+ granted again.
+
 
 Done.
 === one column ===
@@ -110,38 +114,64 @@ n
 g
 .
 
+
+
 T
+
 h
+
 e
 
 w
+
 o
+
 r
+
 k
+
 s
+
 p
+
 a
+
 c
+
 e
 
 i
+
 s
 
 n
+
 o
+
 w
 
 r
+
 e
+
 a
+
 d
+
 -
+
 w
+
 r
+
 i
+
 t
+
 e
+
 .
+
 
 
 
@@ -189,95 +219,154 @@ w
 n
 .
 
+
+
 T
+
 h
+
 e
 
 b
+
 a
+
 s
+
 h
 
 t
+
 o
+
 o
+
 l
 
 i
+
 s
 
 n
+
 o
+
 w
 
 r
+
 e
+
 f
+
 u
+
 s
+
 e
+
 d
+
 ,
 
 a
+
 n
+
 d
 
 w
+
 i
+
 l
+
 l
 
 t
+
 u
+
 r
+
 n
 
 a
+
 w
+
 a
+
 y
 
 e
+
 v
+
 e
+
 r
+
 y
 
 c
+
 o
+
 m
+
 m
+
 a
+
 n
+
 d
 
 u
+
 n
+
 t
+
 i
+
 l
 
 i
+
 t
 
 i
+
 s
 
 g
+
 r
+
 a
+
 n
+
 t
+
 e
+
 d
 
 a
+
 g
+
 a
+
 i
+
 n
+
 .
+
 
 D
 o
@@ -297,9 +386,12 @@ commands,
 but not
 writing.
 
-The workspac
-e is now rea
-d-write.
+
+ The
+ workspace
+ is now
+ read-write.
+
 
 
  now write
@@ -309,14 +401,18 @@ d-write.
 Writing it
 down.
 
-The bash too
-l is now ref
-used, and wi
-ll turn away
- every comma
-nd until it
-is granted a
-gain.
+
+ The bash
+ tool is now
+ refused,
+ and will
+ turn away
+ every
+ command
+ until it is
+ granted
+ again.
+
 
 Done.
 === wide ===
@@ -326,7 +422,9 @@ Done.
 
 Reading and running commands, but not writing.
 
-The workspace is now read-write.
+
+ The workspace is now read-write.
+
 
 
  now write it down
@@ -334,6 +432,8 @@ The workspace is now read-write.
 
 Writing it down.
 
-The bash tool is now refused, and will turn away every command until it is granted again.
+
+ The bash tool is now refused, and will turn away every command until it is granted again.
+
 
 Done.

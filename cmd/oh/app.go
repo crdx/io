@@ -35,21 +35,46 @@ import (
 
 type SessionLogger = record.Session
 
+type pendingMessage struct {
+	message agent.Event
+	state   agent.Event
+}
+
+type pendingInput struct {
+	items    []pendingMessage
+	renderer *painter.PendingMessages
+	block    *output.BlockHandle
+}
+
+func (self *pendingInput) add(message agent.Event, state agent.Event) {
+	self.items = append(self.items, pendingMessage{message: message, state: state})
+}
+
+func (self *pendingInput) takeBack(index int) {
+	self.items = slices.Delete(self.items, index, index+1)
+}
+
+func (self *pendingInput) texts() []string {
+	texts := make([]string, len(self.items))
+	for i, item := range self.items {
+		texts[i] = item.message.Text
+	}
+	return texts
+}
+
 type App struct {
-	agent              *agent.Agent
-	events             []agent.Event
-	screen             *output.Screen
-	recorder           *record.Recorder
-	processes          *sandbox.Processes
-	segmentLayout      segment.Layout
-	editor             *edit.Input
-	mode               *caps.Mode
-	settledCaps        caps.Set
-	pendingModeChanges []agent.Event
-	modeNotices        *painter.ModeNotices
-	modeNoticeBlock    *output.BlockHandle
-	terminal           terminal.Terminal
-	metrics            metrics.Tracker
+	agent         *agent.Agent
+	events        []agent.Event
+	screen        *output.Screen
+	recorder      *record.Recorder
+	processes     *sandbox.Processes
+	segmentLayout segment.Layout
+	editor        *edit.Input
+	mode          *caps.Mode
+	settledCaps   caps.Set
+	pending       pendingInput
+	terminal      terminal.Terminal
+	metrics       metrics.Tracker
 
 	workspaceDir       string
 	getOnWithItMessage string
@@ -277,8 +302,8 @@ func (self *App) toggleCap(whichCaps caps.Set) {
 }
 
 func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
-	for index, event := range self.pendingModeChanges {
-		if event.Name == whichCaps.Flag() {
+	for index, item := range self.pending.items {
+		if item.state.Name == whichCaps.Flag() {
 			return index, true
 		}
 	}
@@ -288,21 +313,22 @@ func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
 
 func (self *App) showModeChange(whichCaps caps.Set) {
 	event := caps.ModeToggleEvent(whichCaps, self.mode.Current())
-	self.pendingModeChanges = append(self.pendingModeChanges, event)
+	text, _ := caps.ModeNotice(event)
+	message := agent.Event{Kind: agent.UserMessageEvent, Text: text}
+	self.pending.add(message, event)
 
-	if self.currentTurn.Running() {
-		self.noticePainter().DrawEvent(event)
-		return
+	if !self.currentTurn.Running() {
+		self.refreshPendingMessages()
 	}
-
-	self.refreshPendingModeNotices()
 }
 
 func (self *App) takeBackModeChange(index int, whichCaps caps.Set) {
-	self.pendingModeChanges = slices.Delete(self.pendingModeChanges, index, index+1)
+	self.pending.takeBack(index)
 
-	for other := index; other < len(self.pendingModeChanges); other++ {
-		self.pendingModeChanges[other] = caps.ModeWithout(self.pendingModeChanges[other], whichCaps)
+	for other := index; other < len(self.pending.items); other++ {
+		item := &self.pending.items[other]
+		item.state = caps.ModeWithout(item.state, whichCaps)
+		item.message.Text, _ = caps.ModeNotice(item.state)
 	}
 
 	if self.currentTurn.Running() {
@@ -310,14 +336,14 @@ func (self *App) takeBackModeChange(index int, whichCaps caps.Set) {
 		return
 	}
 
-	self.refreshPendingModeNotices()
+	self.refreshPendingMessages()
 }
 
-func (self *App) refreshPendingModeNotices() {
-	if len(self.pendingModeChanges) == 0 {
-		handle := self.modeNoticeBlock
-		self.modeNotices = nil
-		self.modeNoticeBlock = nil
+func (self *App) refreshPendingMessages() {
+	if len(self.pending.items) == 0 {
+		handle := self.pending.block
+		self.pending.renderer = nil
+		self.pending.block = nil
 
 		if handle != nil && !self.screen.DiscardBlock(handle) {
 			self.redraw()
@@ -325,16 +351,18 @@ func (self *App) refreshPendingModeNotices() {
 		return
 	}
 
-	if self.modeNotices == nil {
-		self.modeNotices = painter.NewModeNotices(self.pendingModeChanges)
-		self.modeNoticeBlock = self.screen.OpenNotice(self.modeNotices)
+	messages := self.pending.texts()
+	if self.pending.renderer == nil {
+		self.pending.renderer = painter.NewPendingMessages(messages)
+		self.screen.Blank()
+		self.pending.block = self.screen.OpenNotice(self.pending.renderer)
 		return
 	}
 
-	self.modeNotices.ReplaceEvents(self.pendingModeChanges)
-	if !self.screen.RefreshBlock(self.modeNoticeBlock) {
-		self.modeNotices = nil
-		self.modeNoticeBlock = nil
+	self.pending.renderer.Replace(messages)
+	if !self.screen.RefreshBlock(self.pending.block) {
+		self.pending.renderer = nil
+		self.pending.block = nil
 		self.redraw()
 	}
 }
@@ -347,25 +375,33 @@ func (self *App) settleMode() {
 		return
 	}
 
-	for _, event := range self.pendingModeChanges {
-		self.events = append(self.events, event)
-		self.recordModeEvent(event)
-	}
-
-	if self.modeNoticeBlock != nil {
-		self.screen.SealBlock(self.modeNoticeBlock)
-	}
-	self.pendingModeChanges = nil
-	self.modeNotices = nil
-	self.modeNoticeBlock = nil
+	self.settlePendingInput()
 	self.settledCaps = self.mode.Current()
 }
 
-func (self *App) recordModeEvent(event agent.Event) {
-	if err := self.recorder.Event(event); err != nil {
-		self.notifyFailure("The conversation could not be stored: " + err.Error())
+func (self *App) settlePendingInput() {
+	wasShown := self.pending.block != nil
+	for _, item := range self.pending.items {
+		if item.state.Kind != "" {
+			item.state.Name = ""
+			self.events = append(self.events, item.state)
+			self.storeEvent(item.state)
+		}
+		if wasShown {
+			self.metrics.Record(item.message)
+			self.events = append(self.events, item.message)
+			self.storeEvent(item.message)
+		}
 	}
-	self.showStorageWarnings()
+
+	if self.pending.block != nil {
+		self.screen.SealBlock(self.pending.block)
+	}
+	self.pending = pendingInput{}
+}
+
+func (self *App) recordModeEvent(event agent.Event) {
+	self.storeEvent(event)
 }
 
 const (
@@ -550,7 +586,7 @@ func (self *App) restore(storedSession *store.Session) {
 	self.recorder.Resume(len(storedSession.Items))
 	self.events = append(self.events, storedSession.Events...)
 
-	self.metrics.Restore(storedSession.Events)
+	self.metrics.Restore(storedSession.Events, storedSession.TurnCompletions)
 
 	self.screen.Reset()
 	self.replay()
@@ -570,14 +606,13 @@ func (self *App) replay() {
 
 		if self.currentTurn.Running() {
 			self.currentTurn.painter = painter
-			self.refreshPendingModeNotices()
 			return
 		}
 
 		painter.Close(dynamic.Cancelled)
 
 		self.screen.End()
-		self.refreshPendingModeNotices()
+		self.refreshPendingMessages()
 	})
 }
 
@@ -591,8 +626,8 @@ func (self *App) redraw() {
 	}
 
 	self.screen.Sync(func() {
-		self.modeNotices = nil
-		self.modeNoticeBlock = nil
+		self.pending.renderer = nil
+		self.pending.block = nil
 		self.screen.Reset()
 		self.replay()
 		if provisionalPainter.Text != "" {
@@ -671,6 +706,10 @@ func (self *App) recordEvent(event agent.Event) {
 		self.redraw()
 	}
 
+	self.storeEvent(event)
+}
+
+func (self *App) storeEvent(event agent.Event) {
 	if err := self.recorder.Event(event); err != nil {
 		self.notifyFailure("The conversation could not be stored: " + err.Error())
 	}

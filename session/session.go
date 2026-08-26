@@ -281,14 +281,15 @@ func (w *Writer) record(line Line) (time.Time, error) {
 }
 
 type Session struct {
-	Name            string
-	ID              string
-	Meta            json.RawMessage
-	Started         time.Time
-	Touched         time.Time
-	Events          []agent.Event
-	Items           []json.RawMessage
-	TurnCompletions int
+	Name              string
+	ID                string
+	Meta              json.RawMessage
+	Started           time.Time
+	Touched           time.Time
+	Events            []agent.Event
+	Items             []json.RawMessage
+	TurnCompletions   int
+	HasIncompleteTurn bool
 }
 
 func Read(directory string, name string) (*Session, error) {
@@ -362,11 +363,15 @@ func (s *Session) take(line Line) {
 	case Event:
 		if line.Event != nil {
 			s.Events = append(s.Events, *line.Event)
+			if line.Event.Kind == agent.UserMessageEvent {
+				s.HasIncompleteTurn = true
+			}
 		}
 	case Item:
 		s.Items = append(s.Items, line.Payload)
 	case TurnCompletion:
 		s.TurnCompletions++
+		s.HasIncompleteTurn = false
 	}
 }
 

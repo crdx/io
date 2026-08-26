@@ -6,7 +6,10 @@ conversation remains in scrollback
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === 2 after ctrl+x s ===
 conversation remains in scrollback
-The web search and fetch tools can now access the internet.
+
+
+ The web search and fetch tools can now access the internet.
+
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 

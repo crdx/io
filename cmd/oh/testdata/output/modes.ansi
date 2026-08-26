@@ -6,7 +6,9 @@
 \e[?7l\r\e[KReading and running commands, but not\r
 \r\e[Kwriting.\r
 \r
-\e[38;2;207;173;0mThe workspace is now read-write.\e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m The workspace is now read-write.       \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m now write it down                      \e[0m\r
@@ -14,9 +16,11 @@
 \r
 \r\e[KWriting it down.\r
 \r
-\e[38;2;207;173;0mThe bash tool is now refused, and will t\r
-urn away every command until it is grant\r
-ed again.\e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m The bash tool is now refused, and will \e[0m\r
+\e[48;2;52;53;65m turn away every command until it is    \e[0m\r
+\e[48;2;52;53;65m granted again.                         \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
 \r
 \r\e[KDone.\r
 \e[?25h\e[?2026l
@@ -111,38 +115,64 @@ e\e[0m\r
 \r\e[Kg\r
 \r\e[K.\r
 \r
-\e[38;2;207;173;0mT\r
-h\r
-e\r
- \r
-w\r
-o\r
-r\r
-k\r
-s\r
-p\r
-a\r
-c\r
-e\r
- \r
-i\r
-s\r
- \r
-n\r
-o\r
-w\r
- \r
-r\r
-e\r
-a\r
-d\r
--\r
-w\r
-r\r
-i\r
-t\r
-e\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+T\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+p\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+-\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
 .\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
 \r
 \e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m \r
@@ -190,95 +220,154 @@ n\e[0m\r
 \r\e[Kn\r
 \r\e[K.\r
 \r
-\e[38;2;207;173;0mT\r
-h\r
-e\r
- \r
-b\r
-a\r
-s\r
-h\r
- \r
-t\r
-o\r
-o\r
-l\r
- \r
-i\r
-s\r
- \r
-n\r
-o\r
-w\r
- \r
-r\r
-e\r
-f\r
-u\r
-s\r
-e\r
-d\r
-,\r
- \r
-a\r
-n\r
-d\r
- \r
-w\r
-i\r
-l\r
-l\r
- \r
-t\r
-u\r
-r\r
-n\r
- \r
-a\r
-w\r
-a\r
-y\r
- \r
-e\r
-v\r
-e\r
-r\r
-y\r
- \r
-c\r
-o\r
-m\r
-m\r
-a\r
-n\r
-d\r
- \r
-u\r
-n\r
-t\r
-i\r
-l\r
- \r
-i\r
-t\r
- \r
-i\r
-s\r
- \r
-g\r
-r\r
-a\r
-n\r
-t\r
-e\r
-d\r
- \r
-a\r
-g\r
-a\r
-i\r
-n\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+T\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+b\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+f\e[0m\r
+\e[48;2;52;53;65m \r
+u\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+,\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+u\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+y\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+v\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+y\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+m\e[0m\r
+\e[48;2;52;53;65m \r
+m\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+u\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+g\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+g\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
 .\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
 \r
 \r\e[KD\r
 \r\e[Ko\r
@@ -292,15 +381,17 @@ n\r
 \e[48;2;52;53;65m\e[0m
 Reading and running commands, but not writing.
 
-\e[38;2;207;173;0mThe workspace is now read-write.\e[0m
-
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m The workspace is now read-write.\e[0m
+\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m now write it down\e[0m
 \e[48;2;52;53;65m\e[0m
 Writing it down.
 
-\e[38;2;207;173;0mThe bash tool is now refused, and will turn away every command until it is granted again.\e[0m
-
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m The bash tool is now refused, and will turn away every command until it is granted again.\e[0m
+\e[48;2;52;53;65m\e[0m
 Done.
 
 === streamed ===
@@ -310,7 +401,9 @@ Done.
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KRead\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and runn\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running comm\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands, bu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands, but no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands, but not wr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands, but not writin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands, but not writing.\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe workspace is now read-write.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m The workspace is now read-write.                                                                   \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now write it down                                                                                  \e[0m\r
@@ -318,7 +411,9 @@ Done.
 \r
 \e[?2026h\e[?25l\r\e[KWrit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KWriting\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KWriting it d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KWriting it down.\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe bash tool is now refused, and will turn away every command until it is granted again.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m The bash tool is now refused, and will turn away every command until it is granted again.          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KDone\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KDone.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -335,9 +430,12 @@ Done.
 \r\e[Kbut not\r
 \r\e[Kwriting.\r
 \r
-\e[38;2;207;173;0mThe workspac\r
-e is now rea\r
-d-write.\e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m The        \e[0m\r
+\e[48;2;52;53;65m workspace  \e[0m\r
+\e[48;2;52;53;65m is now     \e[0m\r
+\e[48;2;52;53;65m read-write.\e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m now write  \e[0m\r
@@ -347,14 +445,18 @@ d-write.\e[0m\r
 \r\e[KWriting it\r
 \r\e[Kdown.\r
 \r
-\e[38;2;207;173;0mThe bash too\r
-l is now ref\r
-used, and wi\r
-ll turn away\r
- every comma\r
-nd until it \r
-is granted a\r
-gain.\e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m The bash   \e[0m\r
+\e[48;2;52;53;65m tool is now\e[0m\r
+\e[48;2;52;53;65m refused,   \e[0m\r
+\e[48;2;52;53;65m and will   \e[0m\r
+\e[48;2;52;53;65m turn away  \e[0m\r
+\e[48;2;52;53;65m every      \e[0m\r
+\e[48;2;52;53;65m command    \e[0m\r
+\e[48;2;52;53;65m until it is\e[0m\r
+\e[48;2;52;53;65m granted    \e[0m\r
+\e[48;2;52;53;65m again.     \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
 \r
 \r\e[KDone.\r
 \e[?25h\e[?2026l
@@ -364,15 +466,17 @@ gain.\e[0m\r
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KReading and running commands, but not writing.
 
-\e[38;2;207;173;0mThe workspace is now read-write.\e[0m
-
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m The workspace is now read-write.\e[0m
+\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m now write it down\e[0m
 \e[48;2;52;53;65m\e[0m
 \r\e[KWriting it down.
 
-\e[38;2;207;173;0mThe bash tool is now refused, and will turn away every command until it is granted again.\e[0m
-
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m The bash tool is now refused, and will turn away every command until it is granted again.\e[0m
+\e[48;2;52;53;65m\e[0m
 \r\e[KDone.
 \e[?25h\e[?2026l
 === wide ===
@@ -382,7 +486,9 @@ gain.\e[0m\r
 \r
 \e[?7l\r\e[KReading and running commands, but not writing.\r
 \r
-\e[38;2;207;173;0mThe workspace is now read-write.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m The workspace is now read-write.                                                                   \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m now write it down                                                                                  \e[0m\r
@@ -390,7 +496,9 @@ gain.\e[0m\r
 \r
 \r\e[KWriting it down.\r
 \r
-\e[38;2;207;173;0mThe bash tool is now refused, and will turn away every command until it is granted again.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m The bash tool is now refused, and will turn away every command until it is granted again.          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \r\e[KDone.\r
 \e[?25h\e[?2026l
