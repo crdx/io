@@ -5679,11 +5679,11 @@ func toggleSessionGoldenCaps(t *testing.T, testHarness *App, flags string) {
 	t.Helper()
 
 	for _, flag := range flags {
-		toggledCaps, err := caps.Parse(string(flag))
-		if err != nil {
-			t.Fatal(err)
+		toggledCaps, known := caps.Named(string(flag))
+		if !known {
+			t.Fatalf("unknown capability flag %q", string(flag))
 		}
-		testHarness.toggleCap(toggledCaps &^ caps.Read)
+		testHarness.toggleCap(toggledCaps)
 	}
 }
 

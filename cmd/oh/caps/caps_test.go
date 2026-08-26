@@ -160,6 +160,36 @@ func TestSwitchingTheShellIsAnnounced(t *testing.T) {
 	}
 }
 
+func TestAFlagNamesOneCapabilityWhileParsingItReadsAWholeMode(t *testing.T) {
+	for flag := range strings.SplitSeq(AllFlags, "") {
+		namedCaps, known := Named(flag)
+		if !known {
+			t.Fatalf("%s: expected the flag to name a capability", flag)
+		}
+
+		if got := namedCaps.Flag(); got != flag {
+			t.Errorf("%s: expected the capability to name the flag back, got %q", flag, got)
+		}
+
+		if namedCaps != Read && namedCaps.Has(Read) {
+			t.Errorf("%s: expected the flag to name one capability alone, got %q", flag, namedCaps.Flags())
+		}
+
+		parsedCaps, err := Parse(flag)
+		if err != nil {
+			t.Fatalf("%s: unexpected error: %v", flag, err)
+		}
+
+		if !parsedCaps.Has(Read) {
+			t.Errorf("%s: expected a parsed mode to allow reading, got %q", flag, parsedCaps.Flags())
+		}
+	}
+
+	if _, known := Named("z"); known {
+		t.Error("expected an unknown flag to name nothing")
+	}
+}
+
 func TestTheModeSaysWhatTheWorkspaceAllows(t *testing.T) {
 	self := NewMode(writable())
 

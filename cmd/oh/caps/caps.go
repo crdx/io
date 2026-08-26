@@ -67,11 +67,21 @@ func (self Set) Flag() string {
 	return ""
 }
 
+func Named(flag string) (Set, bool) {
+	for _, knownCap := range capsMap {
+		if knownCap.flag == flag {
+			return knownCap.grantedCaps, true
+		}
+	}
+
+	return 0, false
+}
+
 func Parse(flags string) (Set, error) {
 	grantedCaps := Read
 
 	for _, flag := range flags {
-		knownCap, found := namedCap(string(flag))
+		knownCap, found := Named(string(flag))
 		if !found {
 			return 0, fmt.Errorf(
 				"unknown capability flag %q — must be one of %q",
@@ -84,16 +94,6 @@ func Parse(flags string) (Set, error) {
 	}
 
 	return grantedCaps, nil
-}
-
-func namedCap(flag string) (Set, bool) {
-	for _, knownCap := range capsMap {
-		if knownCap.flag == flag {
-			return knownCap.grantedCaps, true
-		}
-	}
-
-	return 0, false
 }
 
 func RefuseWrite(mode *Mode) func(name string) error {
