@@ -1,6 +1,7 @@
 package migrate_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,6 +12,14 @@ import (
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/ohctl/migrate"
 )
+
+func currentVersionLine() string {
+	return fmt.Sprintf("version = %d", config.Format)
+}
+
+func backupPath(path string) string {
+	return fmt.Sprintf("%s.pre-v%d", path, config.Format)
+}
 
 func configFile(t *testing.T, body string) string {
 	t.Helper()
@@ -83,7 +92,7 @@ include = ["skills"]
 		}
 	}
 
-	backup, err := os.ReadFile(path + ".pre-v6") //nolint:gosec // the test's own path
+	backup, err := os.ReadFile(backupPath(path))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +113,7 @@ func TestAnUnnumberedRoundRobinConfigMigratesThroughEveryFormat(t *testing.T) {
 		t.Fatal(err)
 	}
 	written := string(body)
-	if strings.Count(written, "[model]") != 1 || !strings.Contains(written, "version = 6") {
+	if strings.Count(written, "[model]") != 1 || !strings.Contains(written, currentVersionLine()) {
 		t.Errorf("unexpected migrated config:\n%s", written)
 	}
 }
@@ -120,7 +129,7 @@ func TestTheFirstNumberedConfigMigratesThroughEveryFormat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Count(string(body), "version =") != 1 || !strings.Contains(string(body), "version = 6") {
+	if strings.Count(string(body), "version =") != 1 || !strings.Contains(string(body), currentVersionLine()) {
 		t.Errorf("unexpected migrated config:\n%s", body)
 	}
 }
@@ -167,7 +176,7 @@ left = [
 	}
 	written := string(body)
 	for _, expected := range []string{
-		"version = 6 # the round-robin format",
+		currentVersionLine() + " # the round-robin format",
 		`label = "current-session"`,
 		`segment = "session-name"`,
 		`segment='local-time'`,
@@ -182,7 +191,7 @@ left = [
 		}
 	}
 
-	backup, err := os.ReadFile(path + ".pre-v6") //nolint:gosec // the test's own path
+	backup, err := os.ReadFile(backupPath(path))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -214,7 +223,7 @@ round_robin = ["codex/gpt@high"]
 	}
 	written := string(body)
 	for _, expected := range []string{
-		"version = 6",
+		currentVersionLine(),
 		"[editor]",
 		`command = ["subl", "--wait"] # the editor`,
 		`round_robin = ["codex/gpt@high"]`,
@@ -227,7 +236,7 @@ round_robin = ["codex/gpt@high"]
 		t.Errorf("migration kept the top-level editor key in:\n%s", written)
 	}
 
-	backup, err := os.ReadFile(path + ".pre-v6") //nolint:gosec // the test's own path
+	backup, err := os.ReadFile(backupPath(path))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -268,7 +277,7 @@ review = "Review {{ .Arg }}"
 		t.Fatal(err)
 	}
 	written := string(body)
-	if !strings.Contains(written, "version = 6") ||
+	if !strings.Contains(written, currentVersionLine()) ||
 		!strings.Contains(written, `review = "Review {{ .Arg }}"`) {
 		t.Errorf("got config:\n%s", written)
 	}
@@ -293,7 +302,7 @@ ask = { prompt = "Ask {{ .Arg }}", description = "Ask a question", arguments = "
 		t.Fatal(err)
 	}
 	written := string(body)
-	if !strings.Contains(written, "version = 6") || !strings.Contains(written, `ask = { prompt =`) {
+	if !strings.Contains(written, currentVersionLine()) || !strings.Contains(written, `ask = { prompt =`) {
 		t.Errorf("unexpected migrated config:\n%s", written)
 	}
 }
@@ -323,7 +332,7 @@ right = [{ segment = "working-directory" }, { segment = "last-tps" }]
 		t.Fatal(err)
 	}
 	written := string(body)
-	for _, expected := range []string{"version = 6", "activity-spinner", "context-usage", "working-directory"} {
+	for _, expected := range []string{currentVersionLine(), "activity-spinner", "context-usage", "working-directory"} {
 		if !strings.Contains(written, expected) {
 			t.Errorf("migration omitted %q from:\n%s", expected, written)
 		}
@@ -337,7 +346,7 @@ right = [{ segment = "working-directory" }, { segment = "last-tps" }]
 }
 
 func TestCurrentConfigIsLeftAlone(t *testing.T) {
-	original := "version = 6\n[model]\nround_robin = [\"codex/gpt@high\"]\n"
+	original := currentVersionLine() + "\n[model]\nround_robin = [\"codex/gpt@high\"]\n"
 	path := configFile(t, original)
 
 	from, isPresent, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path})
@@ -355,7 +364,7 @@ func TestCurrentConfigIsLeftAlone(t *testing.T) {
 	if string(body) != original {
 		t.Errorf("current config changed:\n%s", body)
 	}
-	if _, err := os.Stat(path + ".pre-v6"); !os.IsNotExist(err) {
+	if _, err := os.Stat(backupPath(path)); !os.IsNotExist(err) {
 		t.Errorf("current config kept an unexpected copy: %v", err)
 	}
 }
@@ -379,7 +388,7 @@ func TestConfigMigrationDryRunWritesNothing(t *testing.T) {
 	if string(body) != original {
 		t.Errorf("dry run changed the config:\n%s", body)
 	}
-	if _, err := os.Stat(path + ".pre-v6"); !os.IsNotExist(err) {
+	if _, err := os.Stat(backupPath(path)); !os.IsNotExist(err) {
 		t.Errorf("dry run kept a copy: %v", err)
 	}
 }
@@ -395,7 +404,7 @@ func TestConfigFromANewerBuildIsRefused(t *testing.T) {
 
 func TestConfigMigrationDoesNotOverwriteItsCopy(t *testing.T) {
 	path := configFile(t, "model = \"gpt\"\n")
-	if err := os.WriteFile(path+".pre-v6", []byte("held"), 0o600); err != nil {
+	if err := os.WriteFile(backupPath(path), []byte("held"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
