@@ -303,6 +303,25 @@ func TestASessionInUseIsRefusedToASecondWriter(t *testing.T) {
 	}
 }
 
+func TestAMissingSessionIsNamedRatherThanItsPath(t *testing.T) {
+	directory := t.TempDir()
+
+	reads := map[string]func() error{
+		"IsInUse": func() error { _, err := session.IsInUse(directory, "able-dolphin"); return err },
+		"Open":    func() error { _, err := session.Open(directory, "able-dolphin"); return err },
+		"Read":    func() error { _, err := session.Read(directory, "able-dolphin"); return err },
+	}
+
+	for name, read := range reads {
+		err := read()
+		if !errors.Is(err, session.ErrNotFound) {
+			t.Errorf("%s: expected the session to be reported missing, got %v", name, err)
+		} else if got := err.Error(); got != `no session named "able-dolphin"` {
+			t.Errorf("%s: got %q", name, got)
+		}
+	}
+}
+
 func TestASessionReportsWhetherItIsInUse(t *testing.T) {
 	directory := t.TempDir()
 	writer := storedSession(t, directory)

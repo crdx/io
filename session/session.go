@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
@@ -19,17 +20,10 @@ import (
 	"crdx.org/io/internal/format"
 )
 
-// JournalFormat is the shape of the journal holding a stored conversation. The journal is canon, so
-// one in an earlier format is migrated to this one rather than written again, and one in a later
-// format is refused rather than read wrongly.
 const JournalFormat = 7
 
-// MetaFormat is the shape of the listing metadata stored beside a journal. The journal is canon and
-// the metadata is derived from it, so metadata in another format is written again, never migrated.
 const MetaFormat = 1
 
-// ErrMetaOutOfDate is listing metadata this build does not write. Whoever owns the data it carries
-// is free to build it again from the journal.
 var ErrMetaOutOfDate = errors.New("listing metadata is in another format")
 
 type Kind string
@@ -45,7 +39,7 @@ type Line struct {
 	Kind Kind      `json:"kind"`
 	Time time.Time `json:"time"`
 
-	Version int `json:"version,omitempty"` // the format of the journal, on the head record alone
+	Version int `json:"version,omitempty"`
 
 	ID      string          `json:"id,omitempty"`
 	Name    string          `json:"name,omitempty"`
@@ -86,13 +80,22 @@ func Create(directory string, journalMeta json.RawMessage, listingData json.RawM
 
 var ErrInUse = errors.New("the session is already open elsewhere")
 
-// IsInUse reports whether another process holds the session's journal lock.
+var ErrNotFound = errors.New("no session named")
+
+func openJournal(directory string, name string, flag int) (*os.File, error) {
+	file, err := os.OpenFile(journalPath(directory, name), flag, 0o600)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, fmt.Errorf("%w %q", ErrNotFound, name)
+	}
+	return file, err
+}
+
 func IsInUse(directory string, name string) (bool, error) {
 	if err := validateName(name); err != nil {
 		return false, err
 	}
 
-	file, err := os.Open(journalPath(directory, name))
+	file, err := openJournal(directory, name, os.O_RDONLY)
 	if err != nil {
 		return false, err
 	}
@@ -122,7 +125,7 @@ func Open(directory string, name string) (*Writer, error) {
 		return nil, err
 	}
 
-	file, err := os.OpenFile(journalPath(directory, name), os.O_WRONLY|os.O_APPEND, 0o600)
+	file, err := openJournal(directory, name, os.O_WRONLY|os.O_APPEND)
 	if err != nil {
 		return nil, err
 	}
@@ -288,7 +291,6 @@ type Session struct {
 	TurnCompletions int
 }
 
-// Read loads one stored session.
 func Read(directory string, name string) (*Session, error) {
 	storedSession := &Session{Name: name}
 	if err := Records(directory, name, func(line Line) error {
@@ -300,14 +302,12 @@ func Read(directory string, name string) (*Session, error) {
 	return storedSession, nil
 }
 
-// Records hands every record of a stored session to visit, in the order they were written. Each one
-// carries the time it was written, which Read has no room for.
 func Records(directory string, name string, visit func(Line) error) error {
 	if err := validateName(name); err != nil {
 		return err
 	}
 
-	file, err := os.Open(journalPath(directory, name))
+	file, err := openJournal(directory, name, os.O_RDONLY)
 	if err != nil {
 		return err
 	}
@@ -370,7 +370,6 @@ func (s *Session) take(line Line) {
 	}
 }
 
-// Meta is the compact part of a stored session needed to list conversations.
 type Meta struct {
 	Version  int             `json:"version"`
 	Name     string          `json:"name"`
@@ -393,7 +392,6 @@ func (s *Meta) takeEvent(event agent.Event, writtenAt time.Time) {
 	}
 }
 
-// ReadMeta loads the compact listing data for one stored session.
 func ReadMeta(directory string, name string) (*Meta, error) {
 	if err := validateName(name); err != nil {
 		return nil, err
@@ -424,7 +422,6 @@ func ReadMeta(directory string, name string) (*Meta, error) {
 	return &meta, nil
 }
 
-// ListMeta loads compact listing data for every stored session, most recently touched first.
 func ListMeta(directory string) ([]*Meta, error) {
 	names, err := storedNames(directory)
 	if err != nil {
@@ -449,7 +446,6 @@ func ListMeta(directory string) ([]*Meta, error) {
 	return metadata, nil
 }
 
-// RebuildMeta derives listing metadata from a journal and caller-owned data.
 func RebuildMeta(directory string, name string, listingData json.RawMessage) error {
 	storedSession, err := Read(directory, name)
 	if err != nil {
@@ -500,8 +496,6 @@ func writeMeta(directory string, meta Meta) error {
 	return os.Rename(temporaryPath, metaPath(directory, meta.Name))
 }
 
-// Entry identifies one stored session. Building it costs the head of the journal rather than the
-// whole conversation, so a directory of sessions can be surveyed without loading any of them.
 type Entry struct {
 	Name    string
 	ID      string
@@ -509,7 +503,6 @@ type Entry struct {
 	Format  int
 }
 
-// Entries identifies every stored session, oldest first.
 func Entries(directory string) ([]Entry, error) {
 	names, err := storedNames(directory)
 	if err != nil {
@@ -544,13 +537,10 @@ func formatOf(head Line) int {
 	return head.Version
 }
 
-// Outdated names the stored sessions written in an older journal format than this build writes.
 func Outdated(directory string) ([]string, error) {
 	return namesInFormat(directory, func(stored int) bool { return stored < JournalFormat })
 }
 
-// Ahead names the stored sessions written in a newer journal format than this build reads. No
-// migration brings one of those back: only a newer build can read it.
 func Ahead(directory string) ([]string, error) {
 	return namesInFormat(directory, func(stored int) bool { return stored > JournalFormat })
 }
@@ -590,7 +580,7 @@ func storedNames(directory string) ([]string, error) {
 }
 
 func readHeadSummary(directory, name string) (Line, error) {
-	file, err := os.Open(journalPath(directory, name))
+	file, err := openJournal(directory, name, os.O_RDONLY)
 	if err != nil {
 		return Line{}, err
 	}
@@ -633,7 +623,7 @@ func readHeadSummary(directory, name string) (Line, error) {
 }
 
 func readHead(directory, name string) (Line, error) {
-	file, err := os.Open(journalPath(directory, name))
+	file, err := openJournal(directory, name, os.O_RDONLY)
 	if err != nil {
 		return Line{}, err
 	}
@@ -658,7 +648,6 @@ func readHead(directory, name string) (Line, error) {
 	return line, nil
 }
 
-// List loads stored sessions, most recently touched first.
 func List(directory string) ([]*Session, error) {
 	entries, err := Entries(directory)
 	if err != nil {
