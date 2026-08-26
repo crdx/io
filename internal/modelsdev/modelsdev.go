@@ -27,8 +27,17 @@ type entry struct {
 
 	Limit struct {
 		ContextWindowTokens int `json:"context"`
+		MaxInputTokens      int `json:"input"`
 		MaxOutputTokens     int `json:"output"`
 	} `json:"limit"`
+}
+
+func (self entry) getContextWindowTokens() int {
+	if self.Limit.MaxInputTokens > 0 {
+		return self.Limit.MaxInputTokens
+	}
+
+	return self.Limit.ContextWindowTokens
 }
 
 func (self entry) getEffortLevels() []string {
@@ -51,7 +60,7 @@ func (self entry) model(name string) agent.Model {
 		ID:                  id,
 		Name:                self.Name,
 		EffortLevels:        self.getEffortLevels(),
-		ContextWindowTokens: self.Limit.ContextWindowTokens,
+		ContextWindowTokens: self.getContextWindowTokens(),
 		MaxOutputTokens:     self.Limit.MaxOutputTokens,
 	}
 }

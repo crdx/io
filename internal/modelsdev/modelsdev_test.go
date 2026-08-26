@@ -42,3 +42,32 @@ func TestFetchOmitsModelsWithDatedVersionSuffixes(t *testing.T) {
 		t.Errorf("expected dated models from every provider to be omitted, got %v", registry.Provider("openai"))
 	}
 }
+
+func TestFetchTakesTheContextWindowFromTheInputShareOfTheBudget(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{
+			"openai": {"models": {
+				"split-budget": {"limit": {"context": 1050000, "input": 922000, "output": 128000}},
+				"whole-budget": {"limit": {"context": 400000, "output": 128000}}
+			}}
+		}`))
+	}))
+	defer server.Close()
+
+	registry, err := Fetch(t.Context(), server.URL, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	openai := registry.Provider("openai")
+	if got := openai["split-budget"].ContextWindowTokens; got != 922_000 {
+		t.Errorf("got %d, want the input share 922000", got)
+	}
+	if got := openai["whole-budget"].ContextWindowTokens; got != 400_000 {
+		t.Errorf("got %d, want the whole budget 400000", got)
+	}
+	if got := openai["split-budget"].MaxOutputTokens; got != 128_000 {
+		t.Errorf("got %d, want the output limit 128000", got)
+	}
+}
