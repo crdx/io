@@ -4399,6 +4399,8 @@ func goldenBarLayout(t *testing.T, harness *App) segment.Layout {
 }
 
 func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
+	t.Setenv("HOME", "/home/tester")
+
 	at := time.Date(2026, time.August, 23, 14, 32, 9, 0, time.UTC)
 	spinnerOptions := `
 		idle = "✧·"
@@ -4651,6 +4653,18 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			t,
 			workspaceDir.New("/workspace/project"),
 			`type = "full"`,
+			segment.Context{},
+		),
+		"workspace-dir / short below home": goldenSegmentPass(
+			t,
+			workspaceDir.New("/home/tester/proj/project"),
+			`type = "short"`,
+			segment.Context{},
+		),
+		"workspace-dir / short outside home": goldenSegmentPass(
+			t,
+			workspaceDir.New("/workspace/project"),
+			`type = "short"`,
 			segment.Context{},
 		),
 	}

@@ -78,3 +78,7 @@ usage \e[38;2;204;102;102mfailed\e[0m
 project
 === workspace-dir / full ===
 \e[38;2;150;152;150m/workspace/\e[0mproject
+=== workspace-dir / short below home ===
+\e[38;2;150;152;150m~/proj/\e[0mproject
+=== workspace-dir / short outside home ===
+\e[38;2;150;152;150m/workspace/\e[0mproject

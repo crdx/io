@@ -78,3 +78,7 @@ usage failed
 project
 === workspace-dir / full ===
 /workspace/project
+=== workspace-dir / short below home ===
+~/proj/project
+=== workspace-dir / short outside home ===
+/workspace/project
