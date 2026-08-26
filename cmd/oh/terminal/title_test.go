@@ -17,7 +17,7 @@ func TestTerminalBeginsUpdatesAndRestoresItsTitle(t *testing.T) {
 
 	restore := managedTerminal.Begin(caps.Read | caps.Write)
 	managedTerminal.SetMode(caps.Read)
-	if got, want := output.String(), pushTitle+"\x1b]2;project 🟡\x1b\\\x1b]2;project\x1b\\"; got != want {
+	if got, want := output.String(), pushTitle+"\x1b]2;project ✱\x1b\\\x1b]2;project\x1b\\"; got != want {
 		t.Errorf("got title sequence %q, want %q", got, want)
 	}
 

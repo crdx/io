@@ -8,7 +8,7 @@ import (
 	"crdx.org/io/cmd/oh/tty"
 )
 
-const writableMarker = "🟡"
+const writableMarker = "✱"
 
 const eraseDisplay = "\x1b[H\x1b[2J\x1b[3J"
 
