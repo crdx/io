@@ -11,23 +11,17 @@
 \r
 \r\e[KI'll put a file down to work with.\r
 \r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mwas written.\e[0m\e[0m\r
 \r
 \r\e[KNow to read it, add to it, and read it\r
 \r\e[Kback.\r
 \r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\r
-\r\e[Kls\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[2A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L\e[0m\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L\e[0m\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[1A\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
 \r
 \r\e[KThe reads went together, the write\r
 \r\e[Kwaited for them and ran on its own, and\r
@@ -557,7 +551,7 @@ of context.\e[0m\r
 \r\e[Kfile down to\r
 \r\e[Kwork with.\r
 \r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;192;128;80mnot…\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mReading,\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mthen\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mwriting,\e[0m\r
@@ -570,16 +564,10 @@ of context.\e[0m\r
 \r\e[Kit, and read\r
 \r\e[Kit back.\r
 \r
-\r\e[Kread \e[38;2;192;128;80mnote…\e[0m\r
-\r\e[Kls\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;192;128;80mnot…\e[0m\r
-\r\e[Kread \e[38;2;192;128;80mnote…\e[0m\e[2A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L\e[0m\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;192;128;80mnot…\e[0m\r
-\r\e[Kread \e[38;2;192;128;80mnote…\e[0m\e[3A\r\e[Kread \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[Kread \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L\e[0m\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;192;128;80mnot…\e[0m\r
-\r\e[Kread \e[38;2;192;128;80mnote…\e[0m\e[1A\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
-\r\e[Kread \e[38;2;192;128;80mnote…\e[0m\r\e[Kread \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
+\r\e[Kread \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
 \r
 \r\e[KThe reads\r
 \r\e[Kwent\r
@@ -612,21 +600,15 @@ of context.\e[0m\r
 
 \r\e[KI'll put a file down to work with.
 
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
 \r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what was written.\e[0m\e[0m
 
 \r\e[KNow to read it, add to it, and read it back.
 
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\r
-\r\e[Kls\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[2A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L\e[0m\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L\e[0m\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[1A\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m
 
 \r\e[KThe reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.
 \e[?25h\e[?2026l
@@ -641,21 +623,15 @@ of context.\e[0m\r
 \r
 \r\e[KI'll put a file down to work with.\r
 \r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m26B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mReading, then writing, then reading what was written.\e[0m\e[0m\r
 \r
 \r\e[KNow to read it, add to it, and read it back.\r
 \r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\r
-\r\e[Kls\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[2A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L\e[0m\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[3A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L\e[0m\r
-\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\e[1A\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
+\r\e[K\e[38;2;207;173;0mwrite\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;150;152;150m32B\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m6L\e[0m\r
 \r
 \r\e[KThe reads went together, the write waited for them and ran on its own, and the read after it waited\r
 \r\e[Kfor the write. The last read has four lines, which it could only have if the write had finished\r

@@ -10,7 +10,7 @@
 \e[?7l\r\e[KSearching the target before the process\r
 \r\e[Krestarts.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe matching target is now safely\r
 \r\e[Krecorded.\r
@@ -275,7 +275,7 @@ of context.\e[0m\r
 \r\e[Kprocess\r
 \r\e[Krestarts.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150m…\e[0m\r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe matching\r
 \r\e[Ktarget is\r
@@ -290,7 +290,7 @@ of context.\e[0m\r
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KSearching the target before the process restarts.
 
-\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 \r\e[KThe matching target is now safely recorded.
 \e[?25h\e[?2026l
@@ -303,7 +303,7 @@ of context.\e[0m\r
 \r
 \e[?7l\r\e[KSearching the target before the process restarts.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe matching target is now safely recorded.\r
 \e[?25h\e[?2026l

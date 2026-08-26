@@ -12,13 +12,13 @@
 \r\e[KI'll have a look at how the editor draws\r
 \r\e[Kits prompt.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mthat is the file to read.\e[0m\e[0m\r
 \r
 \r\e[KFound it. Reading the renderer now.\r
 \r
-\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which\r
 \r\e[Kwraps the buffer against the terminal\r
@@ -564,7 +564,7 @@ of context.\e[0m\r
 \r\e[Kdraws its\r
 \r\e[Kprompt.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mprom\e[0m\e[38;2;150;152;150m…\e[0m\r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThe prompt\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mis drawn by\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mthe\e[0m\r
@@ -578,7 +578,7 @@ of context.\e[0m\r
 \r\e[Krenderer\r
 \r\e[Know.\r
 \r
-\r\e[Kread \e[38;2;192;128;80mcmd/…\e[0m\r\e[Kread \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[Kread \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt\r
 \r\e[Kis drawn by\r
@@ -612,12 +612,12 @@ of context.\e[0m\r
 
 \r\e[KI'll have a look at how the editor draws its prompt.
 
-\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 \r\e[K\e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m
 
 \r\e[KFound it. Reading the renderer now.
 
-\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
+\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
 
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 \e[?25h\e[?2026l
@@ -632,12 +632,12 @@ of context.\e[0m\r
 \r
 \r\e[KI'll have a look at how the editor draws its prompt.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m\r
 \r
 \r\e[KFound it. Reading the renderer now.\r
 \r
-\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where\r
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r

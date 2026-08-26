@@ -203,6 +203,7 @@ func (self *Screen) paintGroups(newRows []string, firstGroup Group, lastGroup Gr
 }
 
 func (self *Screen) seal() {
+	self.flushLiveRegion()
 	self.blocks = nil
 
 	if len(self.liveRegion.rows) == 0 {

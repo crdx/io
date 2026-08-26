@@ -42,8 +42,9 @@ type Screen struct {
 	input       footer // what the input should look like
 	shownFooter footer // what is on the screen
 
-	liveRegion liveRegion     // the rows being repainted in place
-	blocks     []groupedBlock // the blocks the live region is made of, in the order they opened
+	liveRegion  liveRegion     // the rows being repainted in place
+	isLiveDirty bool           // whether a deferred refresh is owed
+	blocks      []groupedBlock // the blocks the live region is made of, in the order they opened
 }
 
 // New builds the output over a writer, which is a terminal or is not.

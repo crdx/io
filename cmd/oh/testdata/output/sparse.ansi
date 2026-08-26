@@ -6,11 +6,11 @@
 \e[38;2;129;162;190mThe web search and fetch tools are now r\r
 efused.\e[0m\r
 \r
-\e[?7l\r\e[Kstatus\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\r
+\e[?7l\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\r
 \r
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r
-\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KNothing came back.\r
 \e[?25h\e[?2026l
@@ -228,13 +228,13 @@ ch and fetch\r
  tools are n\r
 ow refused.\e[0m\r
 \r
-\e[?7l\r\e[Kstatus\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\r
+\e[?7l\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\r
 \r
 \e[38;2;207;173;0mBackground p\r
 rocesses kil\r
 led (sleep).\e[0m\r
 \r
-\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdo…\e[0m\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KNothing came\r
 \r\e[Kback.\r
@@ -245,11 +245,11 @@ led (sleep).\e[0m\r
 \e[48;2;52;53;65m\e[0m
 \e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m
 
-\e[?7l\r\e[Kstatus\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m
+\e[?7l\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m
 
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m
 
-\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m
+\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m
 
 \r\e[KNothing came back.
 \e[?25h\e[?2026l
@@ -260,11 +260,11 @@ led (sleep).\e[0m\r
 \r
 \e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
 \r
-\e[?7l\r\e[Kstatus\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\r
+\e[?7l\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\r
 \r
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r
-\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KNothing came back.\r
 \e[?25h\e[?2026l

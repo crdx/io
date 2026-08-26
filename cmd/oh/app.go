@@ -125,7 +125,7 @@ func (self *App) begin(message string) cycle.Transition {
 
 func (self *App) handleKeypressAndShowInput(editor *edit.Input, history *edit.History, keypress key.Key) bool {
 	shouldContinue := true
-	self.screen.Synchronise(func() {
+	self.screen.Sync(func() {
 		shouldContinue = self.apply(editor, history, keypress)
 		if shouldContinue {
 			self.show(editor)
@@ -551,7 +551,7 @@ func (self *App) newPainter(isRunning bool) *painter.Picasso {
 }
 
 func (self *App) replay() {
-	self.screen.Synchronise(func() {
+	self.screen.Sync(func() {
 		painter := self.newPainter(self.currentTurn.Running())
 
 		for _, event := range self.events {
@@ -580,7 +580,7 @@ func (self *App) redraw() {
 		previousPainter.Stop()
 	}
 
-	self.screen.Synchronise(func() {
+	self.screen.Sync(func() {
 		self.modeNotices = nil
 		self.modeNoticeBlock = nil
 		self.screen.Reset()

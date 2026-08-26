@@ -124,6 +124,27 @@ func (self *Screen) refresh() {
 		return
 	}
 
+	if self.nestedUpdates > 0 {
+		self.isLiveDirty = true
+		return
+	}
+
+	self.paintBlocks()
+}
+
+func (self *Screen) flushLiveRegion() {
+	if !self.isLiveDirty {
+		return
+	}
+
+	self.isLiveDirty = false
+
+	if len(self.blocks) > 0 {
+		self.paintBlocks()
+	}
+}
+
+func (self *Screen) paintBlocks() {
 	rows, firstGroup, lastGroup := renderGroupedBlocks(self.blocks, self.columns)
 	self.paintGroups(rows, firstGroup, lastGroup)
 }

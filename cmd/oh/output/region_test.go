@@ -26,9 +26,9 @@ func TestSynchronisingHoldsNestedFramesBackUntilDrawingFinishes(t *testing.T) {
 	screenOutput := &strings.Builder{}
 	screen := &Screen{writer: screenOutput, isTTY: true}
 
-	screen.Synchronise(func() {
+	screen.Sync(func() {
 		screen.Footer([]string{"> hi"}, 0, 3)
-		screen.Synchronise(func() {
+		screen.Sync(func() {
 			screen.Line("thinking")
 		})
 

@@ -10,7 +10,7 @@
 \e[?7l\r\e[KEditing the target without reading it\r
 \r\e[Kagain.\r
 \r
-\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem i…\e[0m\r
+\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem i…\e[0m\r
 \r
 \r\e[KThe resumed edit completed.\r
 \e[?25h\e[?2026l
@@ -256,7 +256,7 @@ of context.\e[0m\r
 \r\e[Kreading it\r
 \r\e[Kagain.\r
 \r
-\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;192;128;80mtarg…\e[0m\r\e[K\e[38;2;207;173;0me…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mt…\e[0m\r
+\r\e[K\e[38;2;207;173;0me…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mt…\e[0m\r
 \r
 \r\e[KThe resumed\r
 \r\e[Kedit\r
@@ -270,7 +270,7 @@ of context.\e[0m\r
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KEditing the target without reading it again.
 
-\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem is read-only\e[0m
+\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem is read-only\e[0m
 
 \r\e[KThe resumed edit completed.
 \e[?25h\e[?2026l
@@ -283,7 +283,7 @@ of context.\e[0m\r
 \r
 \e[?7l\r\e[KEditing the target without reading it again.\r
 \r
-\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem is read-only\e[0m\r
+\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem is read-only\e[0m\r
 \r
 \r\e[KThe resumed edit completed.\r
 \e[?25h\e[?2026l

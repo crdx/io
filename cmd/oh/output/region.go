@@ -20,8 +20,8 @@ const (
 	progressClear         = "\x1b]9;4;0\x1b\\"
 )
 
-// Synchronise holds every intermediate update back until draw has finished.
-func (self *Screen) Synchronise(draw func()) {
+// Sync holds every intermediate update back until draw has finished.
+func (self *Screen) Sync(draw func()) {
 	if !self.isTTY {
 		draw()
 		return
@@ -34,6 +34,10 @@ func (self *Screen) Synchronise(draw func()) {
 	defer func() {
 		self.mutex.Lock()
 		defer self.mutex.Unlock()
+
+		if self.nestedUpdates == 1 {
+			self.flushLiveRegion()
+		}
 
 		self.nestedUpdates--
 		if self.nestedUpdates == 0 {
@@ -172,6 +176,7 @@ func (self *Screen) Reset() {
 	self.isWrapping = false
 	self.hasPrinted = false
 	self.liveRegion = liveRegion{}
+	self.isLiveDirty = false
 
 	self.measureTerminal()
 
