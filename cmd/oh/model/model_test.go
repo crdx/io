@@ -180,6 +180,70 @@ func TestTheRegistryFillsInWhatAListingLeftOut(t *testing.T) {
 	}
 }
 
+func TestOnlyTheLatestIterationOfEachCurrentModelIsRetained(t *testing.T) {
+	tests := []struct {
+		name    string
+		current []string
+		want    []string
+	}{
+		{
+			"codex",
+			[]string{
+				"gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-5-pro", "gpt-5.1", "gpt-5.2",
+				"gpt-5.2-chat-latest", "gpt-5.2-pro", "gpt-5.3-codex", "gpt-5.3-codex-spark",
+				"gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-5.4-pro", "gpt-5.5", "gpt-5.5-pro",
+				"gpt-5.6", "gpt-5.6-luna", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-realtime-2.1",
+				"o1", "o1-pro", "o3", "o3-mini", "o3-pro", "o4-mini",
+			},
+			[]string{
+				"gpt-5.2-chat-latest", "gpt-5.3-codex", "gpt-5.3-codex-spark", "gpt-5.4-mini",
+				"gpt-5.4-nano", "gpt-5.5-pro", "gpt-5.6", "gpt-5.6-luna", "gpt-5.6-sol",
+				"gpt-5.6-terra", "gpt-realtime-2.1", "o3", "o3-pro", "o4-mini",
+			},
+		},
+		{
+			"opencode-go",
+			[]string{
+				"deepseek-v4-flash", "deepseek-v4-flash-vision-exp", "deepseek-v4-pro", "glm-5.2",
+				"glm-5.3", "gpt-5.6-luna", "grok-4.5", "grok-4.6", "hy3", "kimi-k3",
+				"muse-spark-1.2-contributor", "ox-alpha-free",
+			},
+			[]string{
+				"deepseek-v4-flash", "deepseek-v4-flash-vision-exp", "deepseek-v4-pro", "glm-5.3",
+				"gpt-5.6-luna", "grok-4.6", "hy3", "kimi-k3", "muse-spark-1.2-contributor",
+				"ox-alpha-free",
+			},
+		},
+		{
+			"anthropic",
+			[]string{
+				"claude-fable-5", "claude-opus-4-6", "claude-opus-4-7", "claude-opus-4-8",
+				"claude-opus-5", "claude-sonnet-4-6", "claude-sonnet-5",
+			},
+			[]string{"claude-fable-5", "claude-opus-5", "claude-sonnet-5"},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			models := make([]agent.Model, len(test.current))
+			for i, modelID := range test.current {
+				models[i].ID = modelID
+			}
+
+			retained := latestModelIterations(models)
+			got := make([]string, len(retained))
+			for i, model := range retained {
+				got[i] = model.ID
+			}
+
+			if !slices.Equal(got, test.want) {
+				t.Errorf("got %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
 func TestModelSelectionResolvesAgainstTheCachedListing(t *testing.T) {
 	writeModelCache(t, modelCache{
 		Version: cacheVersion,
@@ -406,6 +470,11 @@ func TestAProviderThatListsNothingIsDescribedByTheRegistryAlone(t *testing.T) {
 
 	endpoint := serveRegistry(t, `{
 		"openai": {"models": {
+			"gpt-5.5-sol": {
+				"id": "gpt-5.5-sol", "name": "GPT-5.5 Sol", "reasoning": true,
+				"reasoning_options": [{"type": "effort", "values": ["low", "high"]}],
+				"limit": {"context": 300000, "output": 64000}
+			},
 			"gpt-5.6-sol": {
 				"id": "gpt-5.6-sol", "name": "GPT-5.6 Sol", "reasoning": true,
 				"reasoning_options": [{"type": "effort", "values": ["low", "high", "max"]}],

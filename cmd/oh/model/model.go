@@ -9,8 +9,10 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -158,6 +160,56 @@ func fromRegistry(registered map[string]agent.Model) []agent.Model {
 	return models
 }
 
+var modelIterationPattern = regexp.MustCompile(`[0-9]+(?:[.-][0-9]+)*`)
+
+type modelFamily struct {
+	Prefix string
+	Suffix string
+}
+
+func getModelIteration(id string) (modelFamily, []int, bool) {
+	location := modelIterationPattern.FindStringIndex(id)
+	if location == nil {
+		return modelFamily{}, nil, false
+	}
+
+	family := modelFamily{
+		Prefix: strings.TrimRight(id[:location[0]], "-."),
+		Suffix: strings.TrimLeft(id[location[1]:], "-."),
+	}
+
+	parts := strings.FieldsFunc(id[location[0]:location[1]], func(character rune) bool {
+		return character == '.' || character == '-'
+	})
+	iteration := make([]int, len(parts))
+	for i, part := range parts {
+		iteration[i], _ = strconv.Atoi(part)
+	}
+
+	return family, iteration, true
+}
+
+func latestModelIterations(models []agent.Model) []agent.Model {
+	latest := make(map[modelFamily][]int)
+	for _, model := range models {
+		family, iteration, hasIteration := getModelIteration(model.ID)
+		known, hasKnown := latest[family]
+		if hasIteration && (!hasKnown || slices.Compare(iteration, known) > 0) {
+			latest[family] = iteration
+		}
+	}
+
+	retained := make([]agent.Model, 0, len(latest))
+	for _, model := range models {
+		family, iteration, hasIteration := getModelIteration(model.ID)
+		if !hasIteration || slices.Equal(iteration, latest[family]) {
+			retained = append(retained, model)
+		}
+	}
+
+	return retained
+}
+
 func isDrivable(providerName string, id string) bool {
 	if providerName == AnthropicProvider {
 		return anthropic.SupportsAdaptiveThinking(id)
@@ -237,6 +289,7 @@ func Update(output io.Writer, endpoint string, path string, listProviderModels P
 		registered := registry.Provider(registryNames[providerName])
 
 		models, source, why := describeProviderModels(ctx, providerName, endpoint, registered, listProviderModels)
+		models = latestModelIterations(models)
 		if len(models) == 0 {
 			_, _ = fmt.Fprintf(output, "%-12s nothing to record: %s\n", providerName, why)
 
