@@ -18,13 +18,13 @@ Usage:
     $0 [options] [-t <tool>]... [--add <file>]... [<prompt>...]
 
 Options:
-    -d, --workspace <dir>                  Set working directory and project scope
+    -d, --workspace <dir>                  Set working directory
     -r, --resume <session>                 Resume the saved session by name
-    --from <session>                       Start a new conversation from a saved session
-    -s, --sessions                         Choose a saved session to resume
-    -m, --model <provider/model@effort>    Select the provider, model, and reasoning effort
-    -c, --caps <flags>                     Capabilities: rxwbgs (read, exec, write, bg, git, web) (default: %s)
-    -t, --tool <tool>                      Enable a tool; may be repeated (all by default)
+    --from <session>                       Fork from a saved session
+    -s, --sessions                         Interactive session manager
+    -m, --model <provider/model@effort>    Set the provider, model, and reasoning effort
+    -c, --caps <flags>                     Capabilities: rxw bgs (read, exec, write, bg, git, web) (default: %s)
+    -t, --tool <tool>                      Override tool selection; may be repeated (all by default)
     --add <file>                           Add a file to the agent scratch directory; may be repeated
     -l, --list                             List the available models, then exit
     -u, --update                           Update the cached model list, then exit
