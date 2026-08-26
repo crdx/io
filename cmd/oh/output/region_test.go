@@ -70,6 +70,31 @@ func TestProgressReportsAnIndeterminateTurnAndClearsIt(t *testing.T) {
 	}
 }
 
+func TestProgressIsAnnouncedAgainWhileATurnRuns(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := &Screen{writer: screenOutput, isTTY: true}
+
+	screen.ReportProgress(true)
+	screenOutput.Reset()
+
+	screen.RefreshProgress()
+
+	if got, want := screenOutput.String(), progressIndeterminate; got != want {
+		t.Errorf("got progress refresh %q, want %q", got, want)
+	}
+}
+
+func TestProgressIsNotAnnouncedAgainBetweenTurns(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := &Screen{writer: screenOutput, isTTY: true}
+
+	screen.RefreshProgress()
+
+	if got := screenOutput.String(); got != "" {
+		t.Errorf("expected an idle screen to report nothing, got %q", got)
+	}
+}
+
 func TestProgressIsNotWrittenToRedirectedOutput(t *testing.T) {
 	screenOutput := &strings.Builder{}
 	screen := New(screenOutput)

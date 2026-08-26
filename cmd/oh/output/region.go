@@ -110,8 +110,21 @@ func (self *Screen) ReportProgress(isRunning bool) {
 	self.setProgress(isRunning)
 }
 
+func (self *Screen) RefreshProgress() {
+	if !self.isTTY {
+		return
+	}
+
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	if self.isProgressReported {
+		self.raw(progressIndeterminate)
+	}
+}
+
 func (self *Screen) setProgress(isRunning bool) {
-	if self.isProgressShown == isRunning {
+	if self.isProgressReported == isRunning {
 		return
 	}
 
@@ -121,7 +134,7 @@ func (self *Screen) setProgress(isRunning bool) {
 	}
 
 	self.raw(sequence)
-	self.isProgressShown = isRunning
+	self.isProgressReported = isRunning
 }
 
 // Release takes the input away. A kept conversation leaves the cursor on the line below it; an

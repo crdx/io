@@ -63,7 +63,7 @@ func TestRunStopsAndTicks(t *testing.T) {
 		keys := make(chan key.Key, 1)
 		keys <- key.Key{Code: key.Escape}
 		handled := false
-		run(keys, make(chan os.Signal), make(chan time.Time), func() time.Duration { return 0 }, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Key: func(key.Key) bool { handled = true; return false }})
+		run(keys, make(chan os.Signal), make(chan time.Time), nil, func() time.Duration { return 0 }, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Key: func(key.Key) bool { handled = true; return false }})
 		if !handled {
 			t.Error("key not handled")
 		}
@@ -72,7 +72,7 @@ func TestRunStopsAndTicks(t *testing.T) {
 		turnEvents := make(chan turn.Event)
 		close(turnEvents)
 		finished := false
-		run(make(chan key.Key), make(chan os.Signal), make(chan time.Time), func() time.Duration { return 0 }, Handler{
+		run(make(chan key.Key), make(chan os.Signal), make(chan time.Time), nil, func() time.Duration { return 0 }, Handler{
 			Events: func() <-chan turn.Event { return turnEvents },
 			TurnFinished: func() bool {
 				finished = true
@@ -88,9 +88,24 @@ func TestRunStopsAndTicks(t *testing.T) {
 		ticks := make(chan time.Time, 1)
 		ticks <- time.Now()
 		ticked, drawn := false, false
-		run(keys, make(chan os.Signal), ticks, func() time.Duration { return 0 }, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Running: func() bool { return true }, Tick: func() { ticked = true; close(keys) }, Draw: func() { drawn = true }})
+		run(keys, make(chan os.Signal), ticks, nil, func() time.Duration { return 0 }, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Running: func() bool { return true }, Tick: func() { ticked = true; close(keys) }, Draw: func() { drawn = true }})
 		if !ticked || !drawn {
 			t.Errorf("ticked=%t drawn=%t", ticked, drawn)
+		}
+	})
+	t.Run("heartbeat", func(t *testing.T) {
+		keys := make(chan key.Key)
+		heartbeats := make(chan time.Time, 1)
+		heartbeats <- time.Now()
+		beaten, drawn := false, false
+		run(keys, make(chan os.Signal), make(chan time.Time), heartbeats, func() time.Duration { return 0 }, Handler{
+			Events: func() <-chan turn.Event { return make(chan turn.Event) },
+			Beat:   func() { beaten = true; close(keys) },
+			Key:    func(key.Key) bool { return false },
+			Draw:   func() { drawn = true },
+		})
+		if !beaten || drawn {
+			t.Errorf("beaten=%t drawn=%t", beaten, drawn)
 		}
 	})
 }

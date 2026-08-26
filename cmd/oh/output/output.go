@@ -26,9 +26,9 @@ type Screen struct {
 	lastGroup        Group // what was written last, so that a change of group opens a blank line
 	hasPrinted       bool  // whether anything has reached the screen yet, latched by emit until Reset
 
-	isTTY           bool   // whether the writer is a terminal rather than a file or a pipe
-	linkRoot        string // where relative paths drawn in the scrollback begin, and "" to link nothing
-	isProgressShown bool   // whether a turn is reported as running to the terminal
+	isTTY              bool   // whether the writer is a terminal rather than a file or a pipe
+	linkRoot           string // where relative paths drawn in the scrollback begin, and "" to link nothing
+	isProgressReported bool   // whether the terminal has been told a turn is running
 
 	columns    int // the terminal width
 	lines      int // the terminal height

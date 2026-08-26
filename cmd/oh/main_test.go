@@ -3213,6 +3213,9 @@ func TestTheScreenAroundAConversationDrawsWhatItDrewBefore(t *testing.T) {
 		passes["resized mid-turn"+screen.name] = func() string {
 			return replayThenRedraw(t, screen.open, entries, true)
 		}
+		passes["progress refreshed mid-turn"+screen.name] = func() string {
+			return replayThenRefreshProgress(t, screen.open, entries)
+		}
 		passes["released and kept"+screen.name] = func() string {
 			return replayThenRelease(t, screen.open, entries, true)
 		}
@@ -3579,6 +3582,19 @@ func replayThenRelease(t *testing.T, openRig func(*testing.T) *replayRig, entrie
 	rig.chat.replay()
 	rig.chat.screen.Footer([]string{footerPrompt}, 0, len(footerPrompt))
 	rig.chat.screen.Release(shouldKeep)
+
+	return rig.drawn()
+}
+
+func replayThenRefreshProgress(t *testing.T, openRig func(*testing.T) *replayRig, entries []replayEntry) string {
+	t.Helper()
+
+	rig := openRig(t)
+	rig.chat.screen.ReportProgress(true)
+	rig.load(entries)
+	rig.chat.replay()
+	rig.chat.screen.Footer([]string{footerPrompt}, 0, len(footerPrompt))
+	rig.chat.screen.RefreshProgress()
 
 	return rig.drawn()
 }

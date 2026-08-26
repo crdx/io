@@ -11,7 +11,10 @@ import (
 	"crdx.org/io/cmd/oh/turn"
 )
 
-const settling = 100 * time.Millisecond
+const (
+	settling  = 100 * time.Millisecond
+	heartRate = 15 * time.Second
+)
 
 type Handler struct {
 	Events       func() <-chan turn.Event
@@ -21,18 +24,24 @@ type Handler struct {
 	Resize       func()
 	Running      func() bool
 	Tick         func()
+	Beat         func()
 	Draw         func()
 }
 
 func Run(terminal *os.File, refreshInterval time.Duration, getIdleInterval func() time.Duration, handler Handler) {
 	resizeSignals := resizes()
 	defer signal.Stop(resizeSignals)
-	ticker := newTicker(refreshInterval)
+
+	ticker := newOptionalTicker(refreshInterval)
 	defer ticker.Stop()
-	run(keypresses(terminal), resizeSignals, ticker.C, getIdleInterval, handler)
+
+	beater := time.NewTicker(heartRate)
+	defer beater.Stop()
+
+	run(keypresses(terminal), resizeSignals, ticker.C, beater.C, getIdleInterval, handler)
 }
 
-func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, ticks <-chan time.Time, getIdleInterval func() time.Duration, handler Handler) {
+func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, ticks <-chan time.Time, beats <-chan time.Time, getIdleInterval func() time.Duration, handler Handler) {
 	idle := idleRefresh{getInterval: getIdleInterval}
 	for {
 		select {
@@ -49,6 +58,9 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, ticks <-chan time.
 		case <-resizeSignals:
 			settle(resizeSignals)
 			handler.Resize()
+		case <-beats:
+			handler.Beat()
+			continue
 		case <-ticks:
 			if handler.Running() {
 				handler.Tick()
@@ -74,7 +86,7 @@ func (self *idleRefresh) isDue() bool {
 	return true
 }
 
-func newTicker(interval time.Duration) *time.Ticker {
+func newOptionalTicker(interval time.Duration) *time.Ticker {
 	if interval <= 0 {
 		ticker := time.NewTicker(time.Hour)
 		ticker.Stop()

@@ -117,6 +117,7 @@ func (self *App) begin(message string) cycle.Transition {
 		Resize:  self.redraw,
 		Running: func() bool { return self.currentTurn.Running() },
 		Tick:    func() { self.currentTurn.spinnerFrame++ },
+		Beat:    self.screen.RefreshProgress,
 		Draw:    func() { self.show(editor) },
 	})
 
