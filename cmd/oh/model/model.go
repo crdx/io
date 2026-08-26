@@ -250,8 +250,8 @@ func Update(output io.Writer, endpoint string, path string, listProviderModels P
 		}
 		described++
 
-		_, _ = fmt.Fprintf(output, "%-12s %3d models  %-19s %-14s %s\n",
-			providerName, len(models), source, pickable(models), why)
+		_, _ = fmt.Fprintf(output, "%-12s %3d models  %-19s %s\n",
+			providerName, len(models), source, pickable(models))
 	}
 
 	if described == 0 {

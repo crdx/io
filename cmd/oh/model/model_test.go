@@ -429,6 +429,11 @@ func TestAProviderThatListsNothingIsDescribedByTheRegistryAlone(t *testing.T) {
 		t.Fatalf("expected both models to be recorded, got %v", cached.Models)
 	}
 
+	wantRow := "codex          2 models  models.dev          1 selectable\n"
+	if !strings.Contains(output.String(), wantRow) {
+		t.Errorf("expected the successful row not to carry the listing failure, got %q", output.String())
+	}
+
 	choices := choicesFor(codexProvider, cached.Models)
 	if len(choices) != 1 || choices[0].Model != "gpt-5.6-sol" {
 		t.Fatalf("expected only the one that reasons to be selectable, got %v", choices)
