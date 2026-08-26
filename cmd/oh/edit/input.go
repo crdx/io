@@ -39,7 +39,8 @@ type Input struct {
 	isPasting       bool
 	pasteStart      int              // where the current paste begins in the buffer
 	isPrefixPending bool             // whether ctrl+x went before, so the next key names a mode
-	isEnterPending  bool             // whether one enter awaits a second
+	isEnterPending  bool             // whether one enter awaits a second before sending
+	isClearPending  bool             // whether one ctrl+c awaits a second before wiping
 	acceptAfter     time.Time        // when another return may accept the line
 	continueAfter   time.Time        // when another double enter may continue
 	currentTime     func() time.Time // supplies the time for the enter cool-offs
@@ -63,6 +64,7 @@ func (self *Input) Reset() {
 	self.isPasting = false
 	self.isPrefixPending = false
 	self.isEnterPending = false
+	self.isClearPending = false
 	self.acceptAfter = time.Time{}
 	self.wasRunning = false
 
@@ -110,11 +112,25 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 	}
 	self.wasRunning = running
 
-	if keypress.Code == key.Rune && keypress.Mod.Has(key.Ctrl) &&
-		(keypress.Value == 'c' || keypress.Value == 'u') {
-		self.Reset()
-		return Draw
+	if keypress.Code == key.Rune && keypress.Mod.Has(key.Ctrl) {
+		switch keypress.Value {
+		case 'u':
+			self.Reset()
+			return Draw
+
+		case 'c':
+			if self.buffer.Len() > 0 && !self.isClearPending {
+				self.isClearPending = true
+				return Draw
+			}
+
+			self.Reset()
+
+			return Draw
+		}
 	}
+
+	self.isClearPending = false
 
 	if self.isPasting {
 		self.isEnterPending = false

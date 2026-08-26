@@ -396,15 +396,62 @@ func TestACharacterWiderThanTheLineStaysWhereItIs(t *testing.T) {
 	}
 }
 
-func TestControlCAndControlUAlwaysClearTheInput(t *testing.T) {
-	for _, value := range []rune{'c', 'u'} {
-		self := inputFromKeys(t, "hello")
-		self.Apply(key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl}, false)
-		self.Apply(key.Key{Code: key.Rune, Value: value, Mod: key.Ctrl}, false)
+var controlC = key.Key{Code: key.Rune, Value: 'c', Mod: key.Ctrl}
 
-		if self.Text() != "" || self.IsPrefixPending() {
-			t.Errorf("ctrl+%c left input %q with pending=%v", value, self.Text(), self.IsPrefixPending())
-		}
+func TestControlUAlwaysClearsTheInput(t *testing.T) {
+	self := inputFromKeys(t, "hello")
+	self.Apply(key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl}, false)
+	self.Apply(key.Key{Code: key.Rune, Value: 'u', Mod: key.Ctrl}, false)
+
+	if self.Text() != "" || self.IsPrefixPending() {
+		t.Errorf("ctrl+u left input %q with pending=%v", self.Text(), self.IsPrefixPending())
+	}
+}
+
+func TestOneControlCLeavesAWrittenLineAlone(t *testing.T) {
+	self := inputFromKeys(t, "hello")
+
+	if got := self.Apply(controlC, false); got != Draw {
+		t.Errorf("expected the first ctrl+c to draw, got %v", got)
+	}
+
+	if self.Text() != "hello" {
+		t.Errorf("expected the first ctrl+c to keep the line, got %q", self.Text())
+	}
+}
+
+func TestTwoControlCsClearTheInput(t *testing.T) {
+	self := inputFromKeys(t, "hello")
+	self.Apply(key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl}, false)
+	self.Apply(controlC, false)
+	self.Apply(controlC, false)
+
+	if self.Text() != "" || self.IsPrefixPending() {
+		t.Errorf("ctrl+c twice left input %q with pending=%v", self.Text(), self.IsPrefixPending())
+	}
+}
+
+func TestAKeyBetweenTwoControlCsKeepsTheLine(t *testing.T) {
+	self := inputFromKeys(t, "hello")
+	self.Apply(controlC, false)
+	self.Apply(key.Key{Code: key.Rune, Value: '!'}, false)
+	self.Apply(controlC, false)
+
+	if self.Text() != "hello!" {
+		t.Errorf("expected the disarmed ctrl+c to keep the line, got %q", self.Text())
+	}
+}
+
+func TestControlCOnAnEmptyLineClearsAtOnce(t *testing.T) {
+	self := NewInput(nil)
+	self.Apply(key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl}, false)
+
+	if got := self.Apply(controlC, false); got != Draw {
+		t.Errorf("expected ctrl+c on an empty line to draw, got %v", got)
+	}
+
+	if self.IsPrefixPending() {
+		t.Error("expected ctrl+c on an empty line to drop the pending prefix")
 	}
 }
 

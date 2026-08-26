@@ -2104,6 +2104,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 	})
 	for name, extensions := range map[string][]string{
 		"banner":            {".ansi", ".screen"},
+		"clearing":          {".ansi", ".screen"},
 		"completion":        {".txt"},
 		"context":           {".prompt"},
 		"inputblock":        {".ansi", ".screen"},
@@ -6053,6 +6054,58 @@ func pasteStream(t *testing.T, text string, stage pasteStage) string {
 
 	if stage == pasteFinished {
 		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.PasteEnd})
+	}
+
+	return screenOutput.String()
+}
+
+func TestControlCDrawsWhatItDrewBefore(t *testing.T) {
+	written := "a line worth keeping"
+	controlC := key.Key{Code: key.Rune, Value: 'c', Mod: key.Ctrl}
+	controlU := key.Key{Code: key.Rune, Value: 'u', Mod: key.Ctrl}
+	bang := key.Key{Code: key.Rune, Value: '!'}
+
+	passes := map[string]func() string{
+		"1 a written line": func() string {
+			return clearingStream(t, written)
+		},
+		"2 after one ctrl+c": func() string {
+			return clearingStream(t, written, controlC)
+		},
+		"3 after two ctrl+cs": func() string {
+			return clearingStream(t, written, controlC, controlC)
+		},
+		"4 a key between two ctrl+cs": func() string {
+			return clearingStream(t, written, controlC, bang, controlC)
+		},
+		"5 after one ctrl+u": func() string {
+			return clearingStream(t, written, controlU)
+		},
+	}
+
+	compareWithGolden(t, "clearing", ".ansi", passes)
+	compareWithGolden(t, "clearing", ".screen", shownPasses(t, passes))
+}
+
+func clearingStream(t *testing.T, written string, keypresses ...key.Key) string {
+	t.Helper()
+
+	self := slashCommandFixture(t, caps.Read)
+	var screenOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+
+	history := edit.NewHistory("", historyLimit)
+	editor := edit.NewInput(history)
+
+	self.screen.Line("conversation remains in scrollback")
+	self.show(editor)
+
+	for _, value := range written {
+		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: value})
+	}
+
+	for _, keypress := range keypresses {
+		self.handleKeypressAndShowInput(editor, history, keypress)
 	}
 
 	return screenOutput.String()
