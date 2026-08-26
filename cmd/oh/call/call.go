@@ -223,11 +223,11 @@ func outputStatsText(stats *tool.Stats) string {
 	if stats.Truncated {
 		truncationMarker = "+"
 	}
-	return subtleStats(fmt.Sprintf("%dL%s", stats.Lines, truncationMarker), tokenEstimate(stats))
+	return style.Subtle.Join(fmt.Sprintf("%dL%s", stats.Lines, truncationMarker), tokenEstimate(stats))
 }
 
 func resourcesStatsText(took time.Duration, stats *tool.Stats) string {
-	return subtleStats(
+	return style.Subtle.Join(
 		fmt.Sprint(stats.Lines)+"L",
 		tokenEstimate(stats),
 		util.CompactDuration(took),
@@ -237,7 +237,7 @@ func resourcesStatsText(took time.Duration, stats *tool.Stats) string {
 }
 
 func readStatsText(stats *tool.Stats) string {
-	return subtleStats(fmt.Sprint(stats.Lines)+"L", tokenEstimate(stats))
+	return style.Subtle.Join(fmt.Sprint(stats.Lines)+"L", tokenEstimate(stats))
 }
 
 func listStatsText(stats *tool.Stats) string {
@@ -249,7 +249,7 @@ func imageStatsText(stats *tool.Stats) string {
 }
 
 func writeStatsText(stats *tool.Stats) string {
-	return subtleStats(fmt.Sprint(stats.Lines)+"L", tokenEstimate(stats))
+	return style.Subtle.Join(fmt.Sprint(stats.Lines)+"L", tokenEstimate(stats))
 }
 
 func diffStatsText(stats *tool.Stats) string {
@@ -262,17 +262,7 @@ func searchStatsText(stats *tool.Stats) string {
 	if stats.Truncated {
 		capMarker = "+"
 	}
-	return subtleStats(fmt.Sprintf("%dL%s", stats.Lines, capMarker), tokenEstimate(stats))
-}
-
-func subtleStats(parts ...string) string {
-	kept := parts[:0]
-	for _, part := range parts {
-		if part != "" {
-			kept = append(kept, part)
-		}
-	}
-	return style.Subtle(strings.Join(kept, " "))
+	return style.Subtle.Join(fmt.Sprintf("%dL%s", stats.Lines, capMarker), tokenEstimate(stats))
 }
 
 func tokenEstimate(stats *tool.Stats) string {

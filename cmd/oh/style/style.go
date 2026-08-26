@@ -10,6 +10,7 @@ import (
 
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/internal/util"
 )
 
 // —————————————————————————————————————————————————————————————————————————————————————————————————
@@ -135,6 +136,15 @@ func apply(enabled bool) {
 	} else {
 		col.Disable()
 	}
+}
+
+func (self Style) Join(parts ...string) string {
+	joined := util.JoinNonEmpty(parts...)
+	if joined == "" {
+		return ""
+	}
+
+	return self(joined)
 }
 
 // Width is how many cells text takes up once painted.

@@ -106,3 +106,19 @@ func TestInitPutsTheDecisionBackWhenItsRestoreIsCalled(t *testing.T) {
 		t.Errorf("expected painting to resume, got %q", got)
 	}
 }
+
+func TestJoinDropsEmptyPartsAndSpacesTheRest(t *testing.T) {
+	enableColor(t)
+
+	if got, want := Subtle.Join("4L", "", "~2k"), Subtle("4L ~2k"); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestJoinPaintsNothingWhenEveryPartIsEmpty(t *testing.T) {
+	enableColor(t)
+
+	if got := Subtle.Join("", ""); got != "" {
+		t.Errorf("got %q, want an empty string", got)
+	}
+}
