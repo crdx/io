@@ -12,23 +12,23 @@ than one after another.
 
 Let me get the shape of this first.
 
-ls ✓ 7L ~100t
-find **/*.go ✓ 2L ~8t
-find **/*.toml ✓ 1L ~4t
-grep package *.go ✓ 2L ~100t
+ls ✓ 7L
+find **/*.go ✓ 2L
+find **/*.toml ✓ 1L
+grep package *.go ✓ 2L
 Three searches, all at once.
 
 Now to find where the drawing happens.
 
-grep spinner *.go ✓ 1L ~100t
-grep footer *.go ✓ 1L ~100t
-grep cursor *.go ✓ 1L ~100t
+grep spinner *.go ✓ 1L
+grep footer *.go ✓ 1L
+grep cursor *.go ✓ 1L
 
 One more pair, and one of them will not
 be there.
 
-ls ✓ 7L ~100t
-read nowhere… ✗ 1L ~100t nowhere/at/a…
+ls ✓ 7L
+read nowhere/at… ✗ 1L nowhere/at/all.…
 
 That is the lot: four together, then
 three together, then a pair where only
@@ -468,10 +468,10 @@ Let me get
 the shape of
 this first.
 
-✓ 7L ~100t
-… ✓ 2L ~8t
-… ✓ 1L ~4t
-✓ 2L ~100t
+ls ✓ 7L
+find ✓ 2L
+find ✓ 1L
+grep ✓ 2L
 Three
 searches,
 all at once.
@@ -481,9 +481,9 @@ where the
 drawing
 happens.
 
-✓ 1L ~100t
-✓ 1L ~100t
-✓ 1L ~100t
+grep ✓ 1L
+grep ✓ 1L
+grep ✓ 1L
 
 One more
 pair, and
@@ -491,8 +491,8 @@ one of them
 will not be
 there.
 
-✓ 7L ~100t
-✗ 1L ~100t
+ls ✓ 7L
+r… ✗ 1L n…
 
 That is the
 lot: four
@@ -515,22 +515,22 @@ Taking the four of them together rather than one after another.
 
 Let me get the shape of this first.
 
-ls ✓ 7L ~100t
-find **/*.go ✓ 2L ~8t
-find **/*.toml ✓ 1L ~4t
-grep package *.go ✓ 2L ~100t
+ls ✓ 7L
+find **/*.go ✓ 2L
+find **/*.toml ✓ 1L
+grep package *.go ✓ 2L
 Three searches, all at once.
 
 Now to find where the drawing happens.
 
-grep spinner *.go ✓ 1L ~100t
-grep footer *.go ✓ 1L ~100t
-grep cursor *.go ✓ 1L ~100t
+grep spinner *.go ✓ 1L
+grep footer *.go ✓ 1L
+grep cursor *.go ✓ 1L
 
 One more pair, and one of them will not be there.
 
-ls ✓ 7L ~100t
-read nowhere/at/all.go ✗ 1L ~100t nowhere/at/all.go: no such file or directory
+ls ✓ 7L
+read nowhere/at/all.go ✗ 1L nowhere/at/all.go: no such file or directory
 
 That is the lot: four together, then three together, then a pair where only one of them could be
 answered.

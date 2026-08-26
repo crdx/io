@@ -6,12 +6,12 @@
 
 One of each, then.
 
-$ COUNT=0; fo… ✓ 3L ~100t 0s 2.4s 700M
+$ COUNT=0; for NAME… ✓ 3L 0s 2.4s 700M
 ls ✓ 2L
 read diagram.png ✓ ~1.6Kt
 edit screen.go ✓ +12 −5
-grep ^func\\s+… ✓ 7L+ ~100t (of ~2.4Kt)
-read README.md ✓ 3L ~100t
+grep ^func\\s+(New|D… ✓ 7L+ (of ~2.4Kt)
+read README.md ✓ 3L
 
 Here is a script, and a pattern beside
 it:
@@ -369,7 +369,7 @@ ls ✓ 2L
 … ✓ ~1.6Kt
 … ✓ +12 −5
 grep ^f… ✓
-✓ 3L ~100t
+read ✓ 3L
 
 Here is a
 script, and
@@ -405,12 +405,12 @@ measure.
 
 One of each, then.
 
-$ COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT ✓ 3L ~100t 0s 2.4s 700M
+$ COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT ✓ 3L 0s 2.4s 700M
 ls ✓ 2L
 read diagram.png ✓ ~1.6Kt
 edit screen.go ✓ +12 −5
-grep ^func\\s+(New|Draw)[A-Z]\\w{2,8}\\( *.go ✓ 7L+ ~100t (of ~2.4Kt)
-read README.md ✓ 3L ~100t
+grep ^func\\s+(New|Draw)[A-Z]\\w{2,8}\\( *.go ✓ 7L+ (of ~2.4Kt)
+read README.md ✓ 3L
 
 Here is a script, and a pattern beside it:
 

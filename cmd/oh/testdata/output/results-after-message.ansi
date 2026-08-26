@@ -10,13 +10,13 @@
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[4A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L ~100t\e[0m\r
+\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[4A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
 \r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no\e[0m\r
-\r\e[K\e[38;2;204;102;102mspace left on device\e[0m\e[5A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;204;102;102mspace left on device\e[0m\e[5A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
@@ -263,8 +263,8 @@ d\e[0m\r
 \e[48;2;52;53;65m\e[0m
 Taking them together.
 
-read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L ~100t\e[0m
-grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m
+grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m
 \e[38;2;76;154;44mCopied to clipboard.\e[0m
@@ -283,12 +283,12 @@ Both still mention the spinner.
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L ~100t\e[0m\r
+\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
@@ -317,7 +317,7 @@ Both still mention the spinner.
 \r\e[K\e[38;2;207;173;0mkilled\e[0m\r
 \r\e[K\e[38;2;207;173;0m(sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to\e[0m\r
-\r\e[K\e[38;2;76;154;44mclipboard.\e[0m\e[8A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L ~100t\e[0m\r
+\r\e[K\e[38;2;76;154;44mclipboard.\e[0m\e[8A\r\e[Kread \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mspin\e[0m\e[38;2;150;152;150m…\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground\e[0m\r
@@ -331,7 +331,7 @@ Both still mention the spinner.
 \r\e[K\e[38;2;204;102;102mcould not be\e[0m\r
 \r\e[K\e[38;2;204;102;102mstored: no\e[0m\r
 \r\e[K\e[38;2;204;102;102mspace left\e[0m\r
-\r\e[K\e[38;2;204;102;102mon device\e[0m\e[13A\r\e[K\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;204;102;102mon device\e[0m\e[13A\r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground\e[0m\r
 \r\e[K\e[38;2;207;173;0mprocesses\e[0m\r
@@ -360,12 +360,12 @@ Both still mention the spinner.
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[4A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L ~100t\e[0m\r
+\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[4A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[4A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[4A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
@@ -384,12 +384,12 @@ Both still mention the spinner.
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[4A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L ~100t\e[0m\r
+\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[4A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[4A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[4A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r

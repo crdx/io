@@ -10,7 +10,7 @@ Session 000000000000000000000000 started
 Searching the target before the process
 restarts.
 
-grep one target.txt ✓ 1L ~4t
+grep one target.txt ✓ 1L
 
 The matching target is now safely
 recorded.
@@ -248,7 +248,7 @@ before the
 process
 restarts.
 
-… ✓ 1L ~4t
+grep ✓ 1L
 
 The matching
 target is
@@ -263,6 +263,6 @@ Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~6
 
 Searching the target before the process restarts.
 
-grep one target.txt ✓ 1L ~4t
+grep one target.txt ✓ 1L
 
 The matching target is now safely recorded.

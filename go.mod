@@ -18,7 +18,6 @@ require (
 )
 
 require (
-	github.com/dlclark/regexp2/v2 v2.5.1 // indirect
+	github.com/dlclark/regexp2/v2 v2.2.1 // indirect
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815 // indirect
-	github.com/tiktoken-go/tokenizer v0.8.1 // indirect
 )

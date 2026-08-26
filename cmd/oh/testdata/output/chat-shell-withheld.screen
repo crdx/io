@@ -2,7 +2,7 @@
  run a command while shell access is withheld
 
 
-$ echo forbidden ✗ 1L ~100t shell access is not granted; the user can grant it with ctrl+x x
+$ echo forbidden ✗ 1L shell access is not granted; the user can grant it with ctrl+x x
 
 Shell access is unavailable.
 

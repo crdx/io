@@ -3,15 +3,15 @@
 
 
 Plan first.
-work work ✓ 1L ~3t
+work work ✓ 1L
 Plan second.
-work work ✓ 1L ~4t
+work work ✓ 1L
 
 
  continue from the last valid tool result
 
 
 Check restored state.
-work work ✓ 1L ~4t
+work work ✓ 1L
 
 Recovered.

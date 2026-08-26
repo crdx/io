@@ -9,12 +9,12 @@
 \r
 \r\e[KI'll have a look at how the editor draws its prompt.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m\r
 \r
 \r\e[KFound it. Reading the renderer now.\r
 \r
-\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
+\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where\r
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r
@@ -32,12 +32,12 @@
 
 I'll have a look at how the editor draws its prompt.
 
-grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 \e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m
 
 Found it. Reading the renderer now.
 
-read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m
+read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
 
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 
@@ -52,12 +52,12 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r
 \r\e[KI'll have a look at how the editor draws its prompt.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m\r
 \r
 \r\e[KFound it. Reading the renderer now.\r
 \r
-\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
+\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where\r
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r
@@ -74,12 +74,12 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 
 I'll have a look at how the editor draws its prompt.
 
-grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 \e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m
 
 Found it. Reading the renderer now.
 
-read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m
+read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
 
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 
@@ -94,12 +94,12 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r
 \r\e[KI'll have a look at how the editor draws its prompt.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m\r
 \r
 \r\e[KFound it. Reading the renderer now.\r
 \r
-\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
+\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where\r
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r
@@ -114,12 +114,12 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r
 \r\e[KI'll have a look at how the editor draws its prompt.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m\r
 \r
 \r\e[KFound it. Reading the renderer now.\r
 \r
-\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
+\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where\r
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r
@@ -179,12 +179,12 @@ grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;1
 
 I'll have a look at how the editor draws its prompt.
 
-grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 \e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m
 
 Found it. Reading the renderer now.
 
-read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m
+read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
 
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 
@@ -197,12 +197,12 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 
 I'll have a look at how the editor draws its prompt.
 
-grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 \e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m
 
 Found it. Reading the renderer now.
 
-read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m
+read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
 
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 
@@ -245,10 +245,10 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 > and a second row\r\r\e[1A\e[J\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\r
 \r
 > ask something else\r
-> and a second row\r\r\e[1A\e[J\e[2A\e[16C\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m\r
+> and a second row\r\r\e[1A\e[J\e[2A\e[16C\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 > ask something else\r
-> and a second row\r\r\e[1A\e[J\e[2A\e[27C\r
+> and a second row\r\r\e[1A\e[J\e[2A\e[21C\r
 \r
 > ask something else\r
 > and a second row\r\r\e[1A\e[J\e[1A\r\e[K\e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m\r
@@ -270,10 +270,10 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 > and a second row\r\r\e[1A\e[J\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\r
 \r
 > ask something else\r
-> and a second row\r\r\e[1A\e[J\e[2A\e[26C\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
+> and a second row\r\r\e[1A\e[J\e[2A\e[26C\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
 \r
 > ask something else\r
-> and a second row\r\r\e[1A\e[J\e[2A\e[37C\r
+> and a second row\r\r\e[1A\e[J\e[2A\e[31C\r
 \r
 > ask something else\r
 > and a second row\r\r\e[1A\e[J\e[1A\r
@@ -297,12 +297,12 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 
 I'll have a look at how the editor draws its prompt.
 
-grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~100t\e[0m
+grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 \e[3m\e[38;2;150;152;150mThe prompt is drawn by the renderer, so that is the file to read.\e[0m\e[0m
 
 Found it. Reading the renderer now.
 
-read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m
+read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
 
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 

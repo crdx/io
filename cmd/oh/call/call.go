@@ -223,22 +223,21 @@ func outputStatsText(stats *tool.Stats) string {
 	if stats.Truncated {
 		truncationMarker = "+"
 	}
-	return style.Subtle(fmt.Sprintf("%dL%s %s", stats.Lines, truncationMarker, tokenEstimate(stats)))
+	return subtleStats(fmt.Sprintf("%dL%s", stats.Lines, truncationMarker), tokenEstimate(stats))
 }
 
 func resourcesStatsText(took time.Duration, stats *tool.Stats) string {
-	return style.Subtle(fmt.Sprintf(
-		"%dL %s %s %s %dM",
-		stats.Lines,
+	return subtleStats(
+		fmt.Sprint(stats.Lines)+"L",
 		tokenEstimate(stats),
 		util.CompactDuration(took),
 		util.CompactDuration(stats.CPUTime),
-		stats.PeakMemory/bytesPerMegabyte,
-	))
+		fmt.Sprint(stats.PeakMemory/bytesPerMegabyte)+"M",
+	)
 }
 
 func readStatsText(stats *tool.Stats) string {
-	return style.Subtle(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
+	return subtleStats(fmt.Sprint(stats.Lines)+"L", tokenEstimate(stats))
 }
 
 func listStatsText(stats *tool.Stats) string {
@@ -250,7 +249,7 @@ func imageStatsText(stats *tool.Stats) string {
 }
 
 func writeStatsText(stats *tool.Stats) string {
-	return style.Subtle(fmt.Sprint(stats.Lines) + "L " + tokenEstimate(stats))
+	return subtleStats(fmt.Sprint(stats.Lines)+"L", tokenEstimate(stats))
 }
 
 func diffStatsText(stats *tool.Stats) string {
@@ -263,13 +262,33 @@ func searchStatsText(stats *tool.Stats) string {
 	if stats.Truncated {
 		capMarker = "+"
 	}
-	return style.Subtle(fmt.Sprintf("%dL%s %s", stats.Lines, capMarker, tokenEstimate(stats)))
+	return subtleStats(fmt.Sprintf("%dL%s", stats.Lines, capMarker), tokenEstimate(stats))
+}
+
+func subtleStats(parts ...string) string {
+	kept := parts[:0]
+	for _, part := range parts {
+		if part != "" {
+			kept = append(kept, part)
+		}
+	}
+	return style.Subtle(strings.Join(kept, " "))
 }
 
 func tokenEstimate(stats *tool.Stats) string {
-	returned := util.FormatTokenEstimate(stats.Bytes)
-	if stats.TotalBytes > stats.Bytes {
-		return returned + " (of " + util.FormatTokenEstimate(stats.TotalBytes) + ")"
+	const maximumHiddenTokenEstimate = 100
+
+	returnedTokens := util.EstimateTokenCount(stats.Bytes)
+	if returnedTokens > maximumHiddenTokenEstimate {
+		returned := util.FormatEstimatedTokenCount(returnedTokens)
+		if stats.TotalBytes > stats.Bytes {
+			return returned + " (of " + util.FormatTokenEstimate(stats.TotalBytes) + ")"
+		}
+		return returned
 	}
-	return returned
+
+	if stats.TotalBytes > stats.Bytes && util.EstimateTokenCount(stats.TotalBytes) > maximumHiddenTokenEstimate {
+		return "(of " + util.FormatTokenEstimate(stats.TotalBytes) + ")"
+	}
+	return ""
 }

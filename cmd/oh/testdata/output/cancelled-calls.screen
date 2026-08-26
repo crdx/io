@@ -3,7 +3,7 @@
  read both of those files
 
 
-read one.txt ✓ 1L ~1t
+read one.txt ✓ 1L
 read two.txt ✗ the call was cancelled…
 
 
@@ -95,7 +95,7 @@ d
  files
 
 
-… ✓ 1L ~1t
+read ✓ 1L
 re… ✗ the…
 
 
@@ -106,7 +106,7 @@ re… ✗ the…
  read both of those files
 
 
-read one.txt ✓ 1L ~1t
+read one.txt ✓ 1L
 read two.txt ✗ the call was cancelled because the user pressed escape
 
 

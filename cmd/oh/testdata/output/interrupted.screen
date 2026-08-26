@@ -12,7 +12,7 @@ read cmd/oh/line/render.go –
  never mind, what is in target.txt?
 
 
-read target.txt ✓ 1L ~1t
+read target.txt ✓ 1L
 
 It holds the word one, and nothing else.
 === one column ===
@@ -219,7 +219,7 @@ read cm… –
  target.txt?
 
 
-… ✓ 1L ~1t
+read ✓ 1L
 
 It holds the
 word one,
@@ -238,6 +238,6 @@ read cmd/oh/line/render.go –
  never mind, what is in target.txt?
 
 
-read target.txt ✓ 1L ~1t
+read target.txt ✓ 1L
 
 It holds the word one, and nothing else.

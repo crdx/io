@@ -10,7 +10,7 @@ Session 000000000000000000000000 started
 Reading the target before the process
 restarts.
 
-read target.txt ✓ 1L ~1t
+read target.txt ✓ 1L
 
 The target is now safely recorded.
 === one column ===
@@ -237,7 +237,7 @@ before the
 process
 restarts.
 
-… ✓ 1L ~1t
+read ✓ 1L
 
 The target
 is now
@@ -252,6 +252,6 @@ Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~6
 
 Reading the target before the process restarts.
 
-read target.txt ✓ 1L ~1t
+read target.txt ✓ 1L
 
 The target is now safely recorded.

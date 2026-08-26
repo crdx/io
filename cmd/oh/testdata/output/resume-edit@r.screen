@@ -10,7 +10,7 @@ Session 000000000000000000000000 started
 Editing the target without reading it
 again.
 
-edit target.t… ✗ 1L ~7t the filesyste…
+edit target.txt ✗ 1L the filesystem i…
 
 The resumed edit completed.
 === one column ===
@@ -229,7 +229,7 @@ without
 reading it
 again.
 
- ✗ 1L ~7t
+e… ✗ 1L t…
 
 The resumed
 edit
@@ -243,6 +243,6 @@ Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~6
 
 Editing the target without reading it again.
 
-edit target.txt ✗ 1L ~7t the filesystem is read-only
+edit target.txt ✗ 1L the filesystem is read-only
 
 The resumed edit completed.

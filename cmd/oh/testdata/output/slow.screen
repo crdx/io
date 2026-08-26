@@ -5,7 +5,7 @@
 
 That will take a moment.
 
-grep spinner *.go ✓ 1L ~100t
+grep spinner *.go ✓ 1L
 find **/*.go ✗ 1m02s the search went …
 
 The grep took nine seconds and the find
@@ -159,7 +159,7 @@ That will
 take a
 moment.
 
-✓ 1L ~100t
+grep ✓ 1L
 ✗ 1m02s …
 
 The grep
@@ -176,7 +176,7 @@ minute.
 
 That will take a moment.
 
-grep spinner *.go ✓ 1L ~100t
+grep spinner *.go ✓ 1L
 find **/*.go ✗ 1m02s the search went on too long
 
 The grep took nine seconds and the find gave up after a minute.

@@ -77,9 +77,13 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 			stats: tool.Stats{Kind: tool.StatsImage, Bytes: 80_943, EstimatedTokens: 1536},
 			want:  []string{"~1.5Kt"},
 		},
-		"write": {
-			stats: tool.Stats{Kind: tool.StatsWrite, Lines: 3, Bytes: 17},
-			want:  []string{"3L ~5t"},
+		"small estimate hidden": {
+			stats: tool.Stats{Kind: tool.StatsWrite, Lines: 3, Bytes: 400},
+			want:  []string{"3L"},
+		},
+		"estimate above threshold shown": {
+			stats: tool.Stats{Kind: tool.StatsWrite, Lines: 3, Bytes: 401},
+			want:  []string{"3L ~100t"},
 		},
 		"diff": {
 			stats: tool.Stats{Kind: tool.StatsDiff, Added: 3, Removed: 2},
@@ -88,6 +92,16 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 		"search": {
 			stats: tool.Stats{Kind: tool.StatsSearch, Lines: 17, Bytes: 1200},
 			want:  []string{"17L ~300t"},
+		},
+		"small capped output with a large total": {
+			stats: tool.Stats{
+				Kind:       tool.StatsSearch,
+				Lines:      2,
+				Bytes:      400,
+				TotalBytes: 1200,
+				Truncated:  true,
+			},
+			want: []string{"2L+ (of ~300t)"},
 		},
 		"capped search": {
 			stats: tool.Stats{
@@ -147,7 +161,7 @@ func TestStatsUseTheirExpectedStyles(t *testing.T) {
 		Kind:       tool.StatsResources,
 		PeakMemory: 26 << 20,
 	})
-	wantExec := style.Subtle("0L 0t 0s 0s 26M")
+	wantExec := style.Subtle("0L 0s 0s 26M")
 	if !strings.Contains(exec, wantExec) {
 		t.Errorf("exec stats got %q, want styled %q", exec, wantExec)
 	}

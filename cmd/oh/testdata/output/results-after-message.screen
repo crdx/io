@@ -6,8 +6,8 @@
 
 Taking them together.
 
-read screen.go ✓ 3L ~100t
-grep spinner *.go ✓ 1L ~100t
+read screen.go ✓ 3L
+grep spinner *.go ✓ 1L
 
 Background processes killed (sleep).
 Copied to clipboard.
@@ -259,8 +259,8 @@ r
 Taking them
 together.
 
-✓ 3L ~100t
-✓ 1L ~100t
+read ✓ 3L
+grep ✓ 1L
 
 Background
 processes
@@ -285,8 +285,8 @@ spinner.
 
 Taking them together.
 
-read screen.go ✓ 3L ~100t
-grep spinner *.go ✓ 1L ~100t
+read screen.go ✓ 3L
+grep spinner *.go ✓ 1L
 
 Background processes killed (sleep).
 Copied to clipboard.

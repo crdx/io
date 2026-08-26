@@ -11,17 +11,17 @@ Writing the file the rest of this needs.
 
 I'll put a file down to work with.
 
-write notes.md 26B ✓ 5L ~7t
+write notes.md 26B ✓ 5L
 Reading, then writing, then reading what
 was written.
 
 Now to read it, add to it, and read it
 back.
 
-read notes.md ✓ 5L ~7t
-ls ✓ 8L ~100t
-write notes.md 32B ✓ 6L ~8t
-read notes.md ✓ 6L ~8t
+read notes.md ✓ 5L
+ls ✓ 8L
+write notes.md 32B ✓ 6L
+read notes.md ✓ 6L
 
 The reads went together, the write
 waited for them and ran on its own, and
@@ -496,7 +496,7 @@ I'll put a
 file down to
 work with.
 
-… ✓ 5L ~7t
+write ✓ 5L
 Reading,
 then
 writing,
@@ -509,10 +509,10 @@ it, add to
 it, and read
 it back.
 
-… ✓ 5L ~7t
-✓ 8L ~100t
-… ✓ 6L ~8t
-… ✓ 6L ~8t
+read ✓ 5L
+ls ✓ 8L
+write ✓ 6L
+read ✓ 6L
 
 The reads
 went
@@ -545,15 +545,15 @@ Writing the file the rest of this needs.
 
 I'll put a file down to work with.
 
-write notes.md 26B ✓ 5L ~7t
+write notes.md 26B ✓ 5L
 Reading, then writing, then reading what was written.
 
 Now to read it, add to it, and read it back.
 
-read notes.md ✓ 5L ~7t
-ls ✓ 8L ~100t
-write notes.md 32B ✓ 6L ~8t
-read notes.md ✓ 6L ~8t
+read notes.md ✓ 5L
+ls ✓ 8L
+write notes.md 32B ✓ 6L
+read notes.md ✓ 6L
 
 The reads went together, the write waited for them and ran on its own, and the read after it waited
 for the write. The last read has four lines, which it could only have if the write had finished

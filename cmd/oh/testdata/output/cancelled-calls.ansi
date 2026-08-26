@@ -4,7 +4,7 @@
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1t\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe call was cancelled…\e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -97,7 +97,7 @@ d\e[0m\r
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m read both of those files\e[0m
 \e[48;2;52;53;65m\e[0m
-read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1t\e[0m
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe call was cancelled because the user pressed escape\e[0m
 
 \e[48;2;52;53;65m\e[0m
@@ -110,7 +110,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;204;102;10
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1t\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe call was cancelled because the user pressed escape\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -125,7 +125,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;204;102;10
 \e[48;2;52;53;65m            \e[0m\r
 \r
 \e[?7l\r\e[Kread \e[38;2;192;128;80mone.…\e[0m\r
-\r\e[Kread \e[38;2;192;128;80mtwo.…\e[0m\e[1A\r\e[K… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1t\e[0m\r
+\r\e[Kread \e[38;2;192;128;80mtwo.…\e[0m\e[1A\r\e[Kread \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kread \e[38;2;192;128;80mtwo.…\e[0m\r\e[Kre… \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe…\e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
@@ -138,7 +138,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;204;102;10
 \e[48;2;52;53;65m read both of those files\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1t\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe call was cancelled because the user pressed escape\e[0m
 
 \e[48;2;52;53;65m\e[0m
@@ -151,7 +151,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;204;102;10
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m\r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L ~1t\e[0m\r
+\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[1A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe call was cancelled because the user pressed escape\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

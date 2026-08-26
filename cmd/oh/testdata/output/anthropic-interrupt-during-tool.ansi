@@ -2,7 +2,7 @@
 \e[48;2;52;53;65m interrupt while the tool is working                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?7l\r\e[K\e[38;2;207;173;0mwork\e[0m \e[38;2;192;128;80mwork\e[0m\r\e[K\e[38;2;207;173;0mwork\e[0m \e[38;2;192;128;80mwork\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m2L ~100t\e[0m \e[38;2;204;102;102mcompiling agent note: the command was stopped after 12s because the user pre…\e[0m\e[?25h\e[?2026l\r
+\e[?7l\r\e[K\e[38;2;207;173;0mwork\e[0m \e[38;2;192;128;80mwork\e[0m\r\e[K\e[38;2;207;173;0mwork\e[0m \e[38;2;192;128;80mwork\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m2L\e[0m \e[38;2;204;102;102mcompiling agent note: the command was stopped after 12s because the user pressed e…\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what did it manage to do                                                                           \e[0m\r

@@ -4,10 +4,10 @@
  when it finishes
 
 
-$ for NAME in alpha… ✓ 2L ~3t 0s 0s 0M
-notify command finished alph… ✓ 1L ~5t
-search how to quote a shel… ✓ 1L ~100t
-fetch https://gnu.org/bash c… ✓ 1L ~4t
+$ for NAME in alpha bet… ✓ 2L 0s 0s 0M
+notify command finished alpha an… ✓ 1L
+search how to quote a shell vari… ✓ 1L
+fetch https://gnu.org/bash clean… ✓ 1L
 
 done.
 === one column ===
@@ -125,9 +125,9 @@ e
 
 
 $ for N… ✓
-… ✓ 1L ~5t
- ✓ 1L ~100t
-… ✓ 1L ~4t
+noti… ✓ 1L
+sear… ✓ 1L
+fetch ✓ 1L
 
 done.
 === wide ===
@@ -135,9 +135,9 @@ done.
  run a multiline command and notify me when it finishes
 
 
-$ for NAME in alpha beta; do echo "$NAME"; done 3L ✓ 2L ~3t 0s 0s 0M
-notify command finished alpha and beta were printed ✓ 1L ~5t
-search how to quote a shell variable ✓ 1L ~100t
-fetch https://gnu.org/bash clean_html ✓ 1L ~4t
+$ for NAME in alpha beta; do echo "$NAME"; done 3L ✓ 2L 0s 0s 0M
+notify command finished alpha and beta were printed ✓ 1L
+search how to quote a shell variable ✓ 1L
+fetch https://gnu.org/bash clean_html ✓ 1L
 
 done.

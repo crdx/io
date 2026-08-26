@@ -17,7 +17,7 @@ The turn was interrupted.
  never mind, what is in target.txt?
 
 
-read target.txt ✓ 1L ~1t
+read target.txt ✓ 1L
 
 It holds the word one, and nothing else.
 
@@ -406,7 +406,7 @@ interrupted.
  target.txt?
 
 
-… ✓ 1L ~1t
+read ✓ 1L
 
 It holds the
 word one,
@@ -439,7 +439,7 @@ The turn was interrupted.
  never mind, what is in target.txt?
 
 
-read target.txt ✓ 1L ~1t
+read target.txt ✓ 1L
 
 It holds the word one, and nothing else.
 

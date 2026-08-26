@@ -4,15 +4,15 @@
  skill
 
 
-$ if [[ -d src ]]; … ✓ 1L ~1t 0s 0s 0M
-$ while read -r NAM… ✓ 1L ~1t 0s 0s 0M
-$ until [[ -z "$RES… ✓ 1L ~1t 0s 0s 0M
-$ case "$MODE" in r… ✓ 1L ~1t 0s 0s 0M
-$ select CHOICE in … ✓ 1L ~1t 0s 0s 0M
-$ ls -la | grep -v … ✓ 1L ~1t 0s 0s 0M
-grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ ✓ 1L ~6t
-load skills/tidy/SKILL.md ✓ 8L ~100t
-read wide.md ✓ 3L ~100t
+$ if [[ -d src ]]; then… ✓ 1L 0s 0s 0M
+$ while read -r NAME; d… ✓ 1L 0s 0s 0M
+$ until [[ -z "$REST" ]… ✓ 1L 0s 0s 0M
+$ case "$MODE" in read)… ✓ 1L 0s 0s 0M
+$ select CHOICE in one … ✓ 1L 0s 0s 0M
+$ ls -la | grep -v "^d"… ✓ 1L 0s 0s 0M
+grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ *.… ✓ 1L
+load skills/tidy/SKILL.md ✓ 8L
+read wide.md ✓ 3L
 
 The listing is 日本語のテキストと絵文字
 🎉 が混ざった行, which is wider on
@@ -332,9 +332,9 @@ $ until… ✓
 $ case … ✓
 $ selec… ✓
 $ ls -l… ✓
-… ✓ 1L ~6t
- ✓ 8L ~100t
-✓ 3L ~100t
+grep ✓ 1L
+load ✓ 8L
+read ✓ 3L
 
 The listing
 is
@@ -372,15 +372,15 @@ total
  run each shape of command and load the skill
 
 
-$ if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else ech… ✓ 1L ~1t 0s 0s 0M
-$ while read -r NAME; do echo "$NAME" >out.txt 2>&1; done <list.txt ✓ 1L ~1t 0s 0s 0M
-$ until [[ -z "$REST" ]]; do REST=""; done ✓ 1L ~1t 0s 0s 0M
-$ case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac ✓ 1L ~1t 0s 0s 0M
-$ select CHOICE in one two; do break; done ✓ 1L ~1t 0s 0s 0M
-$ ls -la | grep -v "^d" | wc -l ✓ 1L ~1t 0s 0s 0M
-grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ *.go ✓ 1L ~6t
-load skills/tidy/SKILL.md ✓ 8L ~100t
-read wide.md ✓ 3L ~100t
+$ if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else echo no… ✓ 1L 0s 0s 0M
+$ while read -r NAME; do echo "$NAME" >out.txt 2>&1; done <list.txt ✓ 1L 0s 0s 0M
+$ until [[ -z "$REST" ]]; do REST=""; done ✓ 1L 0s 0s 0M
+$ case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac ✓ 1L 0s 0s 0M
+$ select CHOICE in one two; do break; done ✓ 1L 0s 0s 0M
+$ ls -la | grep -v "^d" | wc -l ✓ 1L 0s 0s 0M
+grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ *.go ✓ 1L
+load skills/tidy/SKILL.md ✓ 8L
+read wide.md ✓ 3L
 
 The listing is 日本語のテキストと絵文字 🎉 が混ざった行, which is wider on screen than it is long.
 

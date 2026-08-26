@@ -11,17 +11,17 @@ Writing the file the rest of this needs.
 
 I'll put a file down to work with.
 
-write notes.md ✗ 1L ~7t the filesyste…
+write notes.md … ✗ 1L the filesystem …
 Reading, then writing, then reading what
 was written.
 
 Now to read it, add to it, and read it
 back.
 
-read notes.md ✗ 1L ~9t notes.md: no s…
-ls ✓ 7L ~100t
-write notes.md ✗ 1L ~7t the filesyste…
-read notes.md ✗ 1L ~9t notes.md: no s…
+read notes.md ✗ 1L notes.md: no such …
+ls ✓ 7L
+write notes.md … ✗ 1L the filesystem …
+read notes.md ✗ 1L notes.md: no such …
 
 The reads went together, the write
 waited for them and ran on its own, and
@@ -496,7 +496,7 @@ I'll put a
 file down to
 work with.
 
- ✗ 1L ~7t
+w… ✗ 1L t…
 Reading,
 then
 writing,
@@ -509,10 +509,10 @@ it, add to
 it, and read
 it back.
 
-✗ 1L ~9t
-✓ 7L ~100t
- ✗ 1L ~7t
-✗ 1L ~9t
+r… ✗ 1L n…
+ls ✓ 7L
+w… ✗ 1L t…
+r… ✗ 1L n…
 
 The reads
 went
@@ -545,15 +545,15 @@ Writing the file the rest of this needs.
 
 I'll put a file down to work with.
 
-write notes.md 26B ✗ 1L ~7t the filesystem is read-only
+write notes.md 26B ✗ 1L the filesystem is read-only
 Reading, then writing, then reading what was written.
 
 Now to read it, add to it, and read it back.
 
-read notes.md ✗ 1L ~9t notes.md: no such file or directory
-ls ✓ 7L ~100t
-write notes.md 32B ✗ 1L ~7t the filesystem is read-only
-read notes.md ✗ 1L ~9t notes.md: no such file or directory
+read notes.md ✗ 1L notes.md: no such file or directory
+ls ✓ 7L
+write notes.md 32B ✗ 1L the filesystem is read-only
+read notes.md ✗ 1L notes.md: no such file or directory
 
 The reads went together, the write waited for them and ran on its own, and the read after it waited
 for the write. The last read has four lines, which it could only have if the write had finished
