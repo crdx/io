@@ -39,9 +39,11 @@ func Choices(path string) []Choice {
 }
 
 func ParseSelection(path string, selection string) (string, string, string, error) {
-	modelQuery, effortQuery, found := strings.Cut(selection, "@")
-	if !found || modelQuery == "" || effortQuery == "" || strings.Contains(effortQuery, "@") {
-		return "", "", "", fmt.Errorf("model must be written as provider/model@effort, got %q", selection)
+	modelQuery, effortQuery, hasEffort := strings.Cut(selection, "@")
+	if modelQuery == "" || (hasEffort && effortQuery == "") {
+		return "", "", "", fmt.Errorf(
+			"model must be written as provider/model or provider/model@effort, got %q", selection,
+		)
 	}
 
 	choice, err := matchModel(modelQuery, Choices(path))
@@ -49,9 +51,14 @@ func ParseSelection(path string, selection string) (string, string, string, erro
 		return "", "", "", err
 	}
 
-	effort, err := matchEffort(effortQuery, choice)
-	if err != nil {
-		return "", "", "", err
+	effort := NearestEffort(defaultEffort, choice.EffortLevels)
+
+	if hasEffort {
+		if effort, err = matchEffort(effortQuery, choice); err != nil {
+			return "", "", "", err
+		}
+	} else if effort == "" {
+		return "", "", "", fmt.Errorf("model %s has no recognised effort levels", choice.Model)
 	}
 
 	return choice.Provider, choice.Model, effort, nil
@@ -82,6 +89,8 @@ func ResolveQuery(query string, currentEffort string, choices []Choice) (Selecti
 }
 
 var effortOrder = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
+
+const defaultEffort = "medium"
 
 func NearestEffort(current string, available []string) string {
 	currentIndex := slices.Index(effortOrder, current)

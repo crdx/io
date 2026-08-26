@@ -6,6 +6,7 @@ BIN       := "/tmp/io-rig.test"
 OH        := "/tmp/io-rig.oh"
 SIM       := "/tmp/io-rig.sim"
 SCENARIO  := "internal/sim/scenarios/success.toml"
+MODEL     := "codex/gpt-5.6-sol@high"
 WORKSPACE := "tmp/workspace"
 STATE     := justfile_directory() / "tmp/rig-state"
 SESSIONS  := STATE / "org.crdx/oh/sessions"
@@ -46,8 +47,9 @@ live scenario=SCENARIO workspace=WORKSPACE opening="" caps="rxw": harness down
         {{ SIM }} --scenario {{ scenario }} --address {{ ADDRESS }}
     tmux set-option -t {{ SESSION }} remain-on-exit on
     sleep 0.3
+    OH_ENDPOINT_URL={{ ENDPOINT }} {{ OH }} -u >/dev/null
     tmux split-window -t {{ SESSION }} -v -e OH_ENDPOINT_URL={{ ENDPOINT }} \
-        {{ OH }} --workspace {{ workspace }} --caps {{ caps }} {{ opening }}
+        {{ OH }} --workspace {{ workspace }} --caps {{ caps }} -m {{ MODEL }} {{ opening }}
     tmux select-pane -t {{ SESSION }}.{bottom}
 
 # start an isolated session whose read snapshot can be resumed
@@ -59,9 +61,10 @@ resume-up scenario="internal/sim/scenarios/resume-read.toml": harness down
         {{ SIM }} --scenario {{ scenario }} --address {{ ADDRESS }}
     tmux set-option -t {{ SESSION }} remain-on-exit on
     sleep 0.3
+    OH_ENDPOINT_URL={{ ENDPOINT }} XDG_STATE_HOME={{ STATE }} {{ OH }} -u >/dev/null
     tmux split-window -t {{ SESSION }} -v \
         -e OH_ENDPOINT_URL={{ ENDPOINT }} -e XDG_STATE_HOME={{ STATE }} \
-        {{ OH }} --workspace {{ WORKSPACE }} --caps rw
+        {{ OH }} --workspace {{ WORKSPACE }} --caps rw -m {{ MODEL }}
     tmux select-pane -t {{ SESSION }}.{bottom}
 
 # restart the fake endpoint and resume the isolated session
@@ -131,7 +134,6 @@ capture: harness
 
     CAPTURE_STATE={{ justfile_directory() }}/tmp/capture-state
     CAPTURE_WORKSPACE={{ justfile_directory() }}/tmp/capture-workspace
-    MODEL=codex/gpt-5.6-sol@high
 
     export OH_ENDPOINT_URL={{ ENDPOINT }}
     export XDG_STATE_HOME=$CAPTURE_STATE
@@ -154,7 +156,7 @@ capture: harness
         {{ OH }} -u >/dev/null 2>&1
 
         for _ in $(seq 1 "${ASKED[$NAME]}"); do echo "have a look at that"; done |
-            {{ OH }} -d "$CAPTURE_WORKSPACE" -c "$CAPS" -m "$MODEL" >/dev/null 2>&1
+            {{ OH }} -d "$CAPTURE_WORKSPACE" -c "$CAPS" -m {{ MODEL }} >/dev/null 2>&1
 
         kill $SIM_PID 2>/dev/null || true
         trap - EXIT

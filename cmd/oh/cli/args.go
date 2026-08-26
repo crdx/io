@@ -31,9 +31,6 @@ Options:
     -v, --version                          Show version
     -h, --help                             Show this help
 
-Model selection takes the closest reading of what you name: the whole name first, then an opening,
-then a fragment, so -m sol@hi is enough.
-
 Environment:
     OH_ENDPOINT_URL     Talk to somewhere other than the provider's default endpoint
 `, defaultCapFlags)

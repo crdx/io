@@ -2675,10 +2675,69 @@ func TestAnEffortWrittenAsAnAliasInTheConfigIsResolved(t *testing.T) {
 
 func TestWhatSessionTransitionsMakeOfAModelGlob(t *testing.T) {
 	compareWithGolden(t, "new-session", ".txt", map[string]func() string{
+		"command line selections": func() string { return resolveCommandLineSelections(t) },
 		"effort fallback":         resolveNearestEfforts,
 		"fork model globs":        func() string { return resolveForkedSessionGlobs(t) },
 		"new session model globs": func() string { return resolveNewSessionGlobs(t) },
 	})
+}
+
+func useCommandLineModelCache(t *testing.T) string {
+	t.Helper()
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	path := location.GetModelCachePath(os.Getenv(backend.EndpointVariable) != "")
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil { //nolint:gosec // the path is the test's own state directory
+		t.Fatal(err)
+	}
+
+	data := []byte(`{"version":1,"providers":{` +
+		`"codex":{"models":[{"id":"gpt-5.6-sol","efforts":["none","high"],"output":128000}]},` +
+		`"opencode-go":{"models":[{"id":"deepseek-v4-pro","efforts":["medium"],"output":128000}]},` +
+		`"anthropic":{"models":[` +
+		`{"id":"claude-opus-5","efforts":["medium","max"],"output":128000},` +
+		`{"id":"claude-sonnet-5","efforts":["low","high"],"output":128000}` +
+		`]}}}`)
+	if err := os.WriteFile(path, data, 0o600); err != nil { //nolint:gosec // the path is the test's own state directory
+		t.Fatal(err)
+	}
+
+	return path
+}
+
+func resolveCommandLineSelections(t *testing.T) string {
+	t.Helper()
+
+	path := useCommandLineModelCache(t)
+	var written strings.Builder
+
+	for _, selection := range []string{
+		"opus-5",
+		"sonnet",
+		"sol",
+		"deepseek",
+		"anthropic/claude-opus-5",
+		"opus-5@max",
+		"sol@off",
+		"sonnet@hi",
+		"opus-5@high",
+		"opus-5@",
+		"@high",
+		"sol@none@high",
+		"claude",
+		"nope",
+	} {
+		providerName, chosen, effort, err := model.ParseSelection(path, selection)
+		if err != nil {
+			fmt.Fprintf(&written, "%-28q error: %v\n", selection, err)
+
+			continue
+		}
+
+		fmt.Fprintf(&written, "%-28q %s/%s@%s\n", selection, providerName, chosen, effort)
+	}
+
+	return written.String()
 }
 
 func newSessionFixtureChoices() []model.Choice {

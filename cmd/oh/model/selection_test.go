@@ -86,6 +86,33 @@ func TestAnthropicOffersEveryEffortLevelTheModelTakes(t *testing.T) {
 	}
 }
 
+func TestASelectionWithoutAnEffortSettlesNearestMedium(t *testing.T) {
+	useCachedModels(t)
+
+	for selection, want := range map[string]string{
+		"anthropic/claude-opus-5": "medium",
+		"deepseek":                "high",
+		"sol":                     "medium",
+	} {
+		_, _, effort, err := parseModelSelection(selection)
+		if err != nil {
+			t.Errorf("%s: %v", selection, err)
+			continue
+		}
+		if effort != want {
+			t.Errorf("expected %s to select %s, got %s", selection, want, effort)
+		}
+	}
+}
+
+func TestASelectionWithAnEmptyEffortIsRefused(t *testing.T) {
+	useCachedModels(t)
+
+	if _, _, _, err := parseModelSelection("sol@"); err == nil {
+		t.Error("expected a selection naming no effort after @ to be refused")
+	}
+}
+
 func listedModels() []Choice {
 	return []Choice{
 		{Provider: anthropicProvider, Model: "claude-opus-4-5"},
