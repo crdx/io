@@ -74,6 +74,7 @@ import (
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/turn"
+	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/cmd/oh/workspace"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/req"
@@ -3843,7 +3844,7 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 
 type screen struct {
 	t           *testing.T
-	rows        [][]rune
+	rows        [][]string
 	row, column int
 	columns     int
 	isWrapping  bool
@@ -3871,13 +3872,15 @@ func (self *screen) play(stream string) {
 			self.column = 0
 			at++
 		default:
-			size := 1
-			for size < len(stream)-at && stream[at+size]&0xc0 == 0x80 {
-				size++
+			end := at + 1
+			for end < len(stream) && stream[end] != '\x1b' && stream[end] != '\r' && stream[end] != '\n' {
+				end++
 			}
 
-			self.put([]rune(stream[at : at+size])[0])
-			at += size
+			for grapheme, cells := range width.Graphemes(stream[at:end]) {
+				self.put(grapheme, cells)
+			}
+			at = end
 		}
 	}
 }
@@ -3971,7 +3974,7 @@ func (self *screen) eraseInRow(mode int) {
 		}
 	case 1:
 		for at := range min(self.column+1, len(row)) {
-			row[at] = ' '
+			row[at] = " "
 		}
 	case 2:
 		self.rows[self.row] = nil
@@ -3993,8 +3996,18 @@ func (self *screen) erase(mode int) {
 	}
 }
 
-func (self *screen) put(value rune) {
-	if self.column >= self.columns {
+func (self *screen) put(grapheme string, cells int) {
+	if cells == 0 {
+		for len(self.rows) <= self.row {
+			self.rows = append(self.rows, nil)
+		}
+		if self.column > 0 {
+			self.rows[self.row][self.column-1] += grapheme
+		}
+		return
+	}
+
+	if self.column+cells > self.columns && self.column > 0 {
 		if !self.isWrapping {
 			return
 		}
@@ -4007,21 +4020,25 @@ func (self *screen) put(value rune) {
 		self.rows = append(self.rows, nil)
 	}
 
+	drawnCells := min(cells, self.columns-self.column)
 	row := self.rows[self.row]
-	for len(row) <= self.column {
-		row = append(row, ' ')
+	for len(row) < self.column+drawnCells {
+		row = append(row, " ")
 	}
 
-	row[self.column] = value
+	row[self.column] = grapheme
+	for i := 1; i < drawnCells; i++ {
+		row[self.column+i] = ""
+	}
 	self.rows[self.row] = row
-	self.column++
+	self.column = min(self.column+cells, self.columns)
 }
 
 func (self *screen) text() []string {
 	lines := make([]string, 0, len(self.rows))
 
 	for _, row := range self.rows {
-		lines = append(lines, strings.TrimRight(string(row), " "))
+		lines = append(lines, strings.TrimRight(strings.Join(row, ""), " "))
 	}
 
 	for len(lines) > 0 && lines[len(lines)-1] == "" {

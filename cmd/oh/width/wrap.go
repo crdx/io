@@ -233,17 +233,15 @@ func split(text string) []atom {
 			continue
 		}
 
-		size := Rune(runes[i])
-
-		if size == 0 && len(atoms) > 0 && !atoms[len(atoms)-1].isEscape {
-			atoms[len(atoms)-1].text += string(runes[i])
-			i++
-
-			continue
+		end := i + 1
+		for end < len(runes) && runes[end] != '\x1b' {
+			end++
 		}
 
-		atoms = append(atoms, atom{text: string(runes[i]), cells: size})
-		i++
+		for grapheme, cells := range Graphemes(string(runes[i:end])) {
+			atoms = append(atoms, atom{text: grapheme, cells: cells})
+		}
+		i = end
 	}
 
 	return atoms

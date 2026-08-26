@@ -19,52 +19,62 @@ func (self *Screen) fit(text string) string {
 
 	var out strings.Builder
 
-	escaped := false
 	last := rune(0)
+	runes := []rune(text)
 
-	for _, value := range text {
-		switch {
-		case escaped:
-			escaped = value != 'm' && value != 'K'
+	for i := 0; i < len(runes); {
+		switch runes[i] {
+		case '\x1b':
+			end := i + 1
+			for end < len(runes) && runes[end] != 'm' && runes[end] != 'K' {
+				end++
+			}
+			if end < len(runes) {
+				end++
+			}
 
-			out.WriteRune(value)
+			out.WriteString(string(runes[i:end]))
+			i = end
 
-			continue
-
-		case value == '\x1b':
-			escaped = true
-
-			out.WriteRune(value)
-
-			continue
-
-		case value == '\n':
+		case '\n':
 			if last != '\r' {
 				out.WriteRune('\r')
 			}
 
+			out.WriteRune(runes[i])
 			self.column = 0
 			self.openedRows++
+			last = runes[i]
+			i++
 
-		case value == '\r':
+		case '\r':
+			out.WriteRune(runes[i])
 			self.column = 0
+			last = runes[i]
+			i++
 
 		default:
-			cells := width.Rune(value)
-
-			if self.column+cells > self.columns && self.column > 0 {
-				out.WriteString("\r\n")
-
-				self.column = 0
-				self.openedRows++
+			end := i + 1
+			for end < len(runes) && runes[end] != '\x1b' && runes[end] != '\n' && runes[end] != '\r' {
+				end++
 			}
 
-			self.column = min(self.column+cells, self.columns)
+			for grapheme, cells := range width.Graphemes(string(runes[i:end])) {
+				if self.column+cells > self.columns && self.column > 0 {
+					out.WriteString("\r\n")
+
+					self.column = 0
+					self.openedRows++
+				}
+
+				self.column = min(self.column+cells, self.columns)
+				out.WriteString(grapheme)
+				for _, value := range grapheme {
+					last = value
+				}
+			}
+			i = end
 		}
-
-		out.WriteRune(value)
-
-		last = value
 	}
 
 	return out.String()

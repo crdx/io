@@ -17,6 +17,26 @@ func TestTheConversationWrapsByCellsRatherThanCharacters(t *testing.T) {
 	}
 }
 
+func TestTextPresentationEmojiDoesNotCreateAPhantomRow(t *testing.T) {
+	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 8}
+
+	if got := screen.fit(" test 🖊 \n"); got != " test 🖊 \r\n" {
+		t.Errorf("expected the message to remain on one row, got %q", got)
+	}
+
+	if screen.openedRows != 1 {
+		t.Errorf("expected one opened row, got %d", screen.openedRows)
+	}
+}
+
+func TestJoinedEmojiAreMeasuredAsOneGrapheme(t *testing.T) {
+	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 3}
+
+	if got := screen.fit("👨‍👩‍👧x"); got != "👨‍👩‍👧x" {
+		t.Errorf("expected the joined emoji to remain on one row, got %q", got)
+	}
+}
+
 func TestAnEscapeSequenceTakesNoRoomOnTheRow(t *testing.T) {
 	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 5}
 

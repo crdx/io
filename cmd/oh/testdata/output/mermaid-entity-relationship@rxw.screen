@@ -225,8 +225,7 @@ M
 E
 R
 [
-👩
-🚀
+👩‍🚀
 
 C
 u
@@ -262,7 +261,8 @@ D
 E
 R
 [
-❤
+❤️
+
 O
 r
 d
@@ -314,7 +314,8 @@ D
 E
 R
 :
-1
+1️⃣
+
 p
 l
 a
@@ -345,9 +346,8 @@ Customer
 orders
 
 erDiagram
-CUSTOMER[👩‍
-🚀 Customer]
-{
+CUSTOMER[👩‍🚀
+Customer] {
 int id PK
 string name
 }

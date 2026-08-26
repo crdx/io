@@ -1,6 +1,6 @@
 === narrow ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
-\e[48;2;52;53;65m what does the accented file say?       \e[0m\r
+\e[48;2;52;53;65m what does the accented file say? 🖊     \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with the combining\e[0m\r
@@ -82,6 +82,8 @@ a\e[0m\r
 y\e[0m\r
 \e[48;2;52;53;65m \r
 ?\e[0m\r
+\e[48;2;52;53;65m \r
+🖊\e[0m\r
 \e[48;2;52;53;65m \e[0m\r
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mR\e[0m\r
@@ -200,9 +202,7 @@ y\e[0m\r
 \r\e[Ki\r
 \r\e[Kl\r
 \r\e[Ky\r
-\r\e[K👨‍\r
-\r\e[K👩‍\r
-\r\e[K👧\r
+\r\e[K👨‍👩‍👧\r
 \r\e[K \r
 \r\e[Ki\r
 \r\e[Ks\r
@@ -242,6 +242,7 @@ y\e[0m\r
 \r\e[Kr\r
 \r\e[Kt\r
 \r\e[K❤️\r
+\r\e[K \r
 \r\e[Ka\r
 \r\e[Ks\r
 \r\e[Kk\r
@@ -441,7 +442,7 @@ y\e[0m\r
 \e[?25h\e[?2026l
 === plain ===
 \e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m what does the accented file say?\e[0m
+\e[48;2;52;53;65m what does the accented file say? 🖊\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[3m\e[38;2;150;152;150mReading the file with the combining marks in its name.\e[0m\e[0m
 
@@ -460,7 +461,7 @@ three
 
 === streamed ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m what does the accented file say?                                                                   \e[0m\r
+\e[48;2;52;53;65m what does the accented file say? 🖊                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mRead\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the file\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the file wit\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with th\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with the co\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with the combin\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with the combining\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with the combining mark\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with the combining marks in\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with the combining marks in its\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with the combining marks in its nam\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with the combining marks in its name.\e[0m\e[0m\e[?25h\e[?2026l\r
@@ -483,7 +484,7 @@ three
 \e[48;2;52;53;65m what does  \e[0m\r
 \e[48;2;52;53;65m the        \e[0m\r
 \e[48;2;52;53;65m accented   \e[0m\r
-\e[48;2;52;53;65m file say?  \e[0m\r
+\e[48;2;52;53;65m file say? 🖊\e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mReading the\e[0m\r
@@ -501,9 +502,8 @@ three
 \r\e[Kmark of its\r
 \r\e[Kown.\r
 \r\e[K\r
-\r\e[KA family\r
-\r\e[K👨‍👩‍👧 is\r
-\r\e[Kone glyph\r
+\r\e[KA family 👨‍👩‍👧\r
+\r\e[Kis one glyph\r
 \r\e[Kjoined from\r
 \r\e[Kseveral, and\r
 \r\e[Ka heart ❤️\r
@@ -538,7 +538,7 @@ three
 \e[?25h\e[?2026l
 === unsized ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m what does the accented file say?\e[0m
+\e[48;2;52;53;65m what does the accented file say? 🖊\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with the combining marks in its name.\e[0m\e[0m
 
@@ -557,7 +557,7 @@ three
 \e[?25h\e[?2026l
 === wide ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m what does the accented file say?                                                                   \e[0m\r
+\e[48;2;52;53;65m what does the accented file say? 🖊                                                                 \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mReading the file with the combining marks in its name.\e[0m\e[0m\r

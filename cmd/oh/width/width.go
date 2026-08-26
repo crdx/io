@@ -1,36 +1,32 @@
 package width
 
 import (
-	"slices"
+	"iter"
 	"strings"
-	"unicode"
 
 	"github.com/rivo/uniseg"
 )
 
-// Of is how many cells text takes up.
+func Graphemes(text string) iter.Seq2[string, int] {
+	return func(yield func(string, int) bool) {
+		graphemes := uniseg.NewGraphemes(text)
+		for graphemes.Next() {
+			grapheme := graphemes.Str()
+			if !yield(grapheme, graphemeWidth(grapheme, graphemes.Width())) {
+				return
+			}
+		}
+	}
+}
+
 func Of(text string) int {
 	cells := 0
-	graphemes := uniseg.NewGraphemes(text)
-	for graphemes.Next() {
-		cells += graphemeWidth(graphemes.Str(), graphemes.Width())
+	for _, graphemeCells := range Graphemes(text) {
+		cells += graphemeCells
 	}
 	return cells
 }
 
-// Rune is how many cells one character takes up.
-func Rune(value rune) int {
-	switch {
-	case unicode.In(value, unicode.Mn, unicode.Me, unicode.Cf, unicode.Cc):
-		return 0
-	case isWide(value):
-		return 2
-	}
-
-	return 1
-}
-
-// Cut returns the longest prefix that fits and its cell width.
 func Cut(text string, cells int) (string, int) {
 	takenCells := 0
 	graphemes := uniseg.NewGraphemes(text)
@@ -45,7 +41,6 @@ func Cut(text string, cells int) (string, int) {
 	return text, takenCells
 }
 
-// Cells expands text into terminal cells without splitting grapheme clusters.
 func Cells(text string) []string {
 	var cells []string
 	graphemes := uniseg.NewGraphemes(text)
@@ -67,23 +62,4 @@ func graphemeWidth(grapheme string, measuredWidth int) int {
 		return 2
 	}
 	return measuredWidth
-}
-
-func isWide(value rune) bool {
-	if value < spans[0].first {
-		return false
-	}
-
-	index, found := slices.BinarySearchFunc(spans, value, func(one span, want rune) int {
-		switch {
-		case want < one.first:
-			return 1
-		case want > one.last:
-			return -1
-		}
-
-		return 0
-	})
-
-	return found && index < len(spans)
 }

@@ -37,18 +37,6 @@ func TestCellsKeepGraphemeClustersTogether(t *testing.T) {
 	}
 }
 
-func TestTheTableIsInOrderAndDoesNotOverlap(t *testing.T) {
-	for i, one := range spans {
-		if one.first > one.last {
-			t.Errorf("span %d runs backwards: %#x to %#x", i, one.first, one.last)
-		}
-
-		if i > 0 && one.first <= spans[i-1].last {
-			t.Errorf("span %d starts at %#x, inside the one before it", i, one.first)
-		}
-	}
-}
-
 func TestCutStopsShortOfACharacterThatWouldNotFit(t *testing.T) {
 	for _, test := range []struct {
 		text  string
