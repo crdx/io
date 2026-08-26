@@ -3426,8 +3426,22 @@ func TestTheScreenAroundAConversationDrawsWhatItDrewBefore(t *testing.T) {
 		}
 	}
 
-	compareWithGolden(t, "lifecycle", ".ansi", passes)
 	compareWithGolden(t, "lifecycle", ".screen", shownPasses(t, onATerminal(passes)))
+
+	passes["editing cursor lifecycle"] = drawEditingCursorLifecycle
+	compareWithGolden(t, "lifecycle", ".ansi", passes)
+}
+
+func drawEditingCursorLifecycle() string {
+	var drawn strings.Builder
+	screen := output.NewTerminalOfSize(&drawn, replayColumns, replayLines)
+
+	restore := screen.BeginEditing()
+	screen.Footer([]string{footerPrompt}, 0, len(footerPrompt))
+	screen.Release(false)
+	restore()
+
+	return drawn.String()
 }
 
 func onATerminal(passes map[string]func() string) map[string]func() string {

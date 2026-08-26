@@ -14,11 +14,23 @@ const (
 	endFrame              = "\x1b[?2026l"
 	hideCursor            = "\x1b[?25l"
 	showCursor            = "\x1b[?25h"
+	barCursor             = "\x1b[5 q"
+	defaultCursor         = "\x1b[0 q"
 	clearScreen           = "\x1b[H\x1b[2J"
 	clearScrollback       = "\x1b[3J"
 	progressIndeterminate = "\x1b]9;4;3\x1b\\"
 	progressClear         = "\x1b]9;4;0\x1b\\"
 )
+
+// BeginEditing uses a bar cursor until its returned restore function is called.
+func (self *Screen) BeginEditing() func() {
+	if !self.isTTY {
+		return func() {}
+	}
+
+	self.writeRaw(barCursor)
+	return func() { self.writeRaw(defaultCursor) }
+}
 
 // Sync holds every intermediate update back until draw has finished.
 func (self *Screen) Sync(draw func()) {

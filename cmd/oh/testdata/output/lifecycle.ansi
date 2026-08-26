@@ -1,3 +1,5 @@
+=== editing cursor lifecycle ===
+\e[5 q\e[?2026h\e[?25l\e[?7l\r> ask something else\r\e[20C\e[?25h\e[?2026l\r\e[J\e[?7h\e[?25h\e[0 q
 === progress refreshed mid-turn ===
 \e]9;4;3\e\\\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
 \r

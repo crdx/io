@@ -117,6 +117,9 @@ func (self *App) begin(message string) cycle.Transition {
 	restoreTerminal := self.terminal.Begin(self.mode.Current())
 	defer restoreTerminal()
 
+	restoreCursor := self.screen.BeginEditing()
+	defer restoreCursor()
+
 	defer func() { self.screen.Release(self.recorder.IsPersisted()) }()
 
 	self.show(editor)
