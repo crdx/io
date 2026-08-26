@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"crdx.org/io/agent"
 )
@@ -548,5 +549,124 @@ func TestAProviderThatListsNothingIsDescribedByTheRegistryAlone(t *testing.T) {
 
 	if !slices.Equal(choices[0].EffortLevels, []string{"low", "high", "max"}) {
 		t.Errorf("expected the registry's effort levels, got %v", choices[0].EffortLevels)
+	}
+}
+
+const oneCodexModel = `{
+	"openai": {"models": {
+		"gpt-5.6-sol": {
+			"id": "gpt-5.6-sol", "name": "GPT-5.6 Sol", "reasoning": true,
+			"reasoning_options": [{"type": "effort", "values": ["low", "high"]}],
+			"limit": {"context": 400000, "output": 128000}
+		}
+	}}
+}`
+
+func writeCheckedModelCache(t *testing.T, checked time.Time) {
+	t.Helper()
+
+	if err := saveModelCache(modelCachePath(), modelCache{
+		Checked: checked,
+		Providers: map[string]cachedModels{
+			codexProvider: {Fetched: checked, Source: sourceRegistry, Models: []agent.Model{
+				{ID: "stale-model", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+			}},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestACacheCheckedWithinTheWeekIsLeftAlone(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	writeCheckedModelCache(t, time.Now().Add(-6*24*time.Hour))
+
+	var output bytes.Buffer
+	if err := ensureModelsWithoutProviderListings(&output, deadAddress, modelCachePath()); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if output.Len() != 0 {
+		t.Errorf("expected a current cache to be left alone, got %q", output.String())
+	}
+
+	cached := loadModelCache(modelCachePath()).Providers[codexProvider]
+	if len(cached.Models) != 1 || cached.Models[0].ID != "stale-model" {
+		t.Errorf("expected the cached models to stand, got %v", cached.Models)
+	}
+}
+
+func TestACacheOlderThanAWeekIsRefreshed(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	writeCheckedModelCache(t, time.Now().Add(-8*24*time.Hour))
+
+	var output bytes.Buffer
+	endpoint := serveRegistry(t, oneCodexModel)
+	if err := ensureModelsWithoutProviderListings(&output, endpoint, modelCachePath()); err != nil {
+		t.Fatalf("unexpected error: %v, output %q", err, output.String())
+	}
+
+	if output.String() != refreshMessage+"\n" {
+		t.Errorf("expected the refresh to say so and nothing more, got %q", output.String())
+	}
+
+	cached := loadModelCache(modelCachePath()).Providers[codexProvider]
+	if len(cached.Models) != 1 || cached.Models[0].ID != "gpt-5.6-sol" {
+		t.Errorf("expected the refreshed models, got %v", cached.Models)
+	}
+
+	if !isCacheCurrent(loadModelCache(modelCachePath()), time.Now()) {
+		t.Error("expected the refresh to be stamped")
+	}
+}
+
+func TestNothingCachedIsFetchedRatherThanAskedFor(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	var output bytes.Buffer
+	endpoint := serveRegistry(t, oneCodexModel)
+	if err := ensureModelsWithoutProviderListings(&output, endpoint, modelCachePath()); err != nil {
+		t.Fatalf("unexpected error: %v, output %q", err, output.String())
+	}
+
+	choices := availableModelChoices(loadModelCache(modelCachePath()))
+	if len(choices) != 1 || choices[0].Model != "gpt-5.6-sol" {
+		t.Errorf("expected an empty cache to be filled, got %v", choices)
+	}
+}
+
+func TestARefreshThatFailsKeepsWhatIsCachedAndWaitsBeforeAskingAgain(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	writeCheckedModelCache(t, time.Now().Add(-8*24*time.Hour))
+
+	var output bytes.Buffer
+	if err := ensureModelsWithoutProviderListings(&output, deadAddress, modelCachePath()); err != nil {
+		t.Fatalf("expected a failed refresh to be forgiven, got %v", err)
+	}
+
+	if !strings.Contains(output.String(), "model list not refreshed") {
+		t.Errorf("expected the failure to be reported, got %q", output.String())
+	}
+
+	if !strings.Contains(output.String(), "nothing to record") {
+		t.Errorf("expected a failure to show what each provider said, got %q", output.String())
+	}
+
+	cached := loadModelCache(modelCachePath()).Providers[codexProvider]
+	if len(cached.Models) != 1 || cached.Models[0].ID != "stale-model" {
+		t.Errorf("expected the cached models to survive, got %v", cached.Models)
+	}
+
+	if !isCacheCurrent(loadModelCache(modelCachePath()), time.Now()) {
+		t.Error("expected the attempt to be stamped so the next start does not wait again")
+	}
+}
+
+func TestNothingCachedAndNothingReachableIsAnError(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	var output bytes.Buffer
+	if err := ensureModelsWithoutProviderListings(&output, deadAddress, modelCachePath()); err == nil {
+		t.Fatalf("expected an empty cache with nothing reachable to fail, got %q", output.String())
 	}
 }

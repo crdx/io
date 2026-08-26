@@ -1148,7 +1148,7 @@ func TestCompletionProtocolMatchesTheGolden(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(cachePath), 0o700); err != nil { //nolint:gosec // the path is the test's own state directory
 		t.Fatal(err)
 	}
-	cache := []byte(`{"version":1,"providers":{"codex":{"models":[{"id":"gpt-5","efforts":["low","high"],"output":128000}]},"anthropic":{"models":[{"id":"claude-sonnet-5","efforts":["none","high"],"output":128000}]}}}`)
+	cache := checkedModelCache(`{"codex":{"models":[{"id":"gpt-5","efforts":["low","high"],"output":128000}]},"anthropic":{"models":[{"id":"claude-sonnet-5","efforts":["none","high"],"output":128000}]}}`)
 	if err := os.WriteFile(cachePath, cache, 0o600); err != nil { //nolint:gosec // the path is the test's own state directory
 		t.Fatal(err)
 	}
@@ -2783,6 +2783,12 @@ func completedInvalidMermaidScreen(t *testing.T) string {
 	return shown(t, screenOutput.String(), replayColumns)
 }
 
+func checkedModelCache(providers string) []byte {
+	return fmt.Appendf(nil,
+		`{"version":2,"checked":%q,"providers":%s}`, time.Now().Format(time.RFC3339), providers,
+	)
+}
+
 func buildTestBinary(t *testing.T) string {
 	t.Helper()
 
@@ -2824,7 +2830,7 @@ func TestModelListDispatchRunsThroughTheBinary(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(cachePath), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	cache := []byte(`{"version":1,"providers":{"codex":{"models":[{"id":"gpt-cli","efforts":["high"],"output":128000}]}}}`)
+	cache := checkedModelCache(`{"codex":{"models":[{"id":"gpt-cli","efforts":["high"],"output":128000}]}}`)
 	if err := os.WriteFile(cachePath, cache, 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -2888,13 +2894,13 @@ func useCommandLineModelCache(t *testing.T) string {
 		t.Fatal(err)
 	}
 
-	data := []byte(`{"version":1,"providers":{` +
+	data := checkedModelCache(`{` +
 		`"codex":{"models":[{"id":"gpt-5.6-sol","efforts":["none","high"],"output":128000}]},` +
 		`"opencode-go":{"models":[{"id":"deepseek-v4-pro","efforts":["medium"],"output":128000}]},` +
 		`"anthropic":{"models":[` +
 		`{"id":"claude-opus-5","efforts":["medium","max"],"output":128000},` +
 		`{"id":"claude-sonnet-5","efforts":["low","high"],"output":128000}` +
-		`]}}}`)
+		`]}}`)
 	if err := os.WriteFile(path, data, 0o600); err != nil { //nolint:gosec // the path is the test's own state directory
 		t.Fatal(err)
 	}
@@ -3049,7 +3055,7 @@ func useRoundRobinModelCache(t *testing.T) string {
 		t.Fatal(err)
 	}
 
-	data := []byte(`{"version":1,"providers":{"codex":{"models":[{"id":"gpt-5.6-sol","efforts":["none","high"],"output":128000}]},"opencode-go":{"models":[{"id":"deepseek-v4-pro","efforts":["high","max"],"output":128000}]},"anthropic":{"models":[{"id":"claude-opus-5","efforts":["high","max"],"output":128000}]}}}`)
+	data := checkedModelCache(`{"codex":{"models":[{"id":"gpt-5.6-sol","efforts":["none","high"],"output":128000}]},"opencode-go":{"models":[{"id":"deepseek-v4-pro","efforts":["high","max"],"output":128000}]},"anthropic":{"models":[{"id":"claude-opus-5","efforts":["high","max"],"output":128000}]}}`)
 	if err := os.WriteFile(path, data, 0o600); err != nil { //nolint:gosec // the path is the test's own state directory
 		t.Fatal(err)
 	}

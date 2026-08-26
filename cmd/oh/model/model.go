@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -23,9 +24,13 @@ import (
 	"crdx.org/io/provider/codex"
 )
 
+const refreshMessage = "Refreshing the model list..."
+
 const (
-	cacheVersion  = 1
-	updateTimeout = 90 * time.Second
+	cacheVersion    = 2
+	updateTimeout   = 90 * time.Second
+	refreshTimeout  = 20 * time.Second
+	maximumCacheAge = 7 * 24 * time.Hour
 )
 
 const (
@@ -46,6 +51,7 @@ func ProviderNames() []string {
 
 type modelCache struct {
 	Version   int                     `json:"version"`
+	Checked   time.Time               `json:"checked"`
 	Providers map[string]cachedModels `json:"providers"`
 }
 
@@ -289,10 +295,59 @@ func List(output io.Writer, path string) error {
 
 type ProviderLister func(context.Context, string, string) ([]agent.Model, error)
 
+func Ensure(output io.Writer, endpoint string, path string, listProviderModels ProviderLister) error {
+	cache := loadModelCache(path)
+	if isCacheCurrent(cache, time.Now()) {
+		return nil
+	}
+
+	_, _ = fmt.Fprintln(output, refreshMessage)
+
+	ctx, cancel := context.WithTimeout(context.Background(), refreshTimeout)
+	defer cancel()
+
+	var reported bytes.Buffer
+
+	err := updateModels(ctx, &reported, endpoint, path, listProviderModels)
+	if err == nil {
+		return nil
+	}
+
+	_, _ = io.Copy(output, &reported)
+
+	if len(cache.Providers) == 0 {
+		return err
+	}
+
+	_, _ = fmt.Fprintf(output, "model list not refreshed: %s\n", err)
+
+	cache.Checked = time.Now()
+
+	return saveModelCache(path, cache)
+}
+
+func isCacheCurrent(cache modelCache, now time.Time) bool {
+	if len(cache.Providers) == 0 || cache.Checked.IsZero() {
+		return false
+	}
+
+	return now.Sub(cache.Checked) < maximumCacheAge
+}
+
 func Update(output io.Writer, endpoint string, path string, listProviderModels ProviderLister) error {
 	ctx, cancel := context.WithTimeout(context.Background(), updateTimeout)
 	defer cancel()
 
+	return updateModels(ctx, output, endpoint, path, listProviderModels)
+}
+
+func updateModels(
+	ctx context.Context,
+	output io.Writer,
+	endpoint string,
+	path string,
+	listProviderModels ProviderLister,
+) error {
 	registry, err := modelsdev.Fetch(ctx, registryAddress(endpoint), nil)
 	if err != nil {
 		_, _ = fmt.Fprintf(output, "models.dev: %s\n", err)
@@ -329,6 +384,8 @@ func Update(output io.Writer, endpoint string, path string, listProviderModels P
 	if described == 0 {
 		return errors.New("no provider could be described")
 	}
+
+	cache.Checked = time.Now()
 
 	if err := saveModelCache(path, cache); err != nil {
 		return err

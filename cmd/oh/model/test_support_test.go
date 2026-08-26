@@ -37,3 +37,9 @@ func updateModelsWithoutProviderListings(output io.Writer, endpoint string, path
 		return nil, nil
 	})
 }
+
+func ensureModelsWithoutProviderListings(output io.Writer, endpoint string, path string) error {
+	return Ensure(output, endpoint, path, func(context.Context, string, string) ([]agent.Model, error) {
+		return nil, nil
+	})
+}

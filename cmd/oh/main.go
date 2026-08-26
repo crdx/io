@@ -130,6 +130,10 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return sessions.Choose(sessionsDir, os.Stdin, os.Stdout)
 	}
 
+	if err := model.Ensure(os.Stdout, endpointURL, modelCachePath, backend.ListModels); err != nil {
+		return "", err
+	}
+
 	args, err := inputArgs.Parse(modelCachePath)
 	if err != nil {
 		return "", err
