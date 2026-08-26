@@ -25,6 +25,97 @@ var steps = map[int]step{
 	4: {migrateJournal: addLastMode},
 	5: {migrateLine: addEventStatus},
 	6: {},
+	7: {migrateJournal: promptBytesReplaceContextFiles},
+}
+
+func promptBytesReplaceContextFiles(lines []map[string]json.RawMessage) ([]map[string]json.RawMessage, error) {
+	promptBytes, err := systemPromptBytes(lines[0])
+	if err != nil {
+		return nil, err
+	}
+
+	for index, line := range lines {
+		err := with(line, func(event map[string]json.RawMessage) error {
+			if string(event["kind"]) != `"`+string(agent.StartupEvent)+`"` {
+				return nil
+			}
+
+			return restateStartupContext(event, promptBytes)
+		})
+		if err != nil {
+			return nil, fmt.Errorf("line %d: %w", index+1, err)
+		}
+	}
+
+	return lines, nil
+}
+
+func restateStartupContext(event map[string]json.RawMessage, promptBytes int) error {
+	raw, ok := event["state"]
+	if !ok {
+		return nil
+	}
+
+	var state map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &state); err != nil {
+		return fmt.Errorf("the startup facts could not be read: %w", err)
+	}
+
+	if promptBytes == 0 {
+		recorded, err := contextFileBytes(state)
+		if err != nil {
+			return err
+		}
+		promptBytes = recorded
+	}
+
+	delete(state, "context")
+	if promptBytes > 0 {
+		state["prompt"] = json.RawMessage(fmt.Sprint(promptBytes))
+	}
+
+	restated, err := json.Marshal(state)
+	if err != nil {
+		return err
+	}
+	event["state"] = restated
+
+	return nil
+}
+
+func contextFileBytes(state map[string]json.RawMessage) (int, error) {
+	raw, ok := state["context"]
+	if !ok {
+		return 0, nil
+	}
+
+	var files []struct {
+		Bytes int `json:"bytes"`
+	}
+	if err := json.Unmarshal(raw, &files); err != nil {
+		return 0, fmt.Errorf("the startup context files could not be read: %w", err)
+	}
+
+	total := 0
+	for _, file := range files {
+		total += file.Bytes
+	}
+
+	return total, nil
+}
+
+func systemPromptBytes(head map[string]json.RawMessage) (int, error) {
+	raw, ok := head["meta"]
+	if !ok {
+		return 0, nil
+	}
+
+	var meta store.Meta
+	if err := json.Unmarshal(raw, &meta); err != nil {
+		return 0, fmt.Errorf("the session metadata could not be read: %w", err)
+	}
+
+	return len(meta.SystemPrompt), nil
 }
 
 func addEventStatus(line map[string]json.RawMessage) error {

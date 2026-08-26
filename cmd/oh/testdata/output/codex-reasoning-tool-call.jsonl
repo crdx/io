@@ -1,4 +1,4 @@
-{"kind":"head","version":7,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":8,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"reason, call a tool, then answer"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Use the tool."}}
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"call-1","name":"work","arguments":"{}"}}

@@ -3757,11 +3757,8 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 
 	passes["the startup line"] = func() string {
 		return startup.RenderBanner(1500*time.Microsecond, false, startup.Info{
-			Session: "brave-otter",
-			ContextFiles: []startup.File{
-				{Name: "SYSTEM.md", Bytes: 740},
-				{Name: "AGENTS.md", Bytes: 3 * 1024},
-			},
+			Session:       "brave-otter",
+			PromptBytes:   740 + 3*1024,
 			ProjectSkills: 3,
 			GlobalSkills:  1,
 			Snippets:      2,

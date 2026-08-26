@@ -1,4 +1,4 @@
-{"kind":"head","version":7,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":8,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"receive HTTP 401"}}
 {"kind":"event","event":{"kind":"failure","text":"request failed with status 401: "}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"receive HTTP 401"}]}}

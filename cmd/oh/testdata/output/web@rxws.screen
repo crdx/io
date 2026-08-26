@@ -1,6 +1,6 @@
 === narrow ===
 Session 000000000000000000000000 started
- in 0s with 0 skills, 0 snippets, and ~6
+ in 0s with 0 skills, 0 snippets, and ~8
 00t of context.
 
 
@@ -115,7 +115,7 @@ n
 d
 
 ~
-6
+8
 0
 0
 t
@@ -657,7 +657,7 @@ Session 0000
 rted in 0s w
 ith 0 skills
 , 0 snippets
-, and ~600t
+, and ~800t
 of context.
 
 
@@ -724,7 +724,7 @@ you grant
 access
 again.
 === wide ===
-Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~600t of context.
+Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~800t of context.
 
 
  what is the current go release, and what does the blog say about it?

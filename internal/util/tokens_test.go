@@ -6,16 +6,16 @@ import (
 	"crdx.org/io/internal/util"
 )
 
-func TestFormatTokenEstimateUsesFourBytesPerToken(t *testing.T) {
+func TestFormatTokenEstimateUsesTheMeasuredByteRate(t *testing.T) {
 	for bytes, want := range map[int64]string{
 		-1:   "0t",
 		0:    "0t",
 		1:    "~1t",
-		4:    "~1t",
-		5:    "~2t",
-		740:  "~200t",
-		4000: "~1Kt",
-		5000: "~1.2Kt",
+		2:    "~1t",
+		3:    "~2t",
+		740:  "~300t",
+		4000: "~1.4Kt",
+		5000: "~1.8Kt",
 	} {
 		if got := util.FormatTokenEstimate(bytes); got != want {
 			t.Errorf("FormatTokenEstimate(%d) = %q, want %q", bytes, got, want)
@@ -45,11 +45,11 @@ func TestFormatEstimatedTokenCountRoundsSubKiloValuesToNearestHundred(t *testing
 }
 
 func TestFormatTokenEstimateIsWrittenToTwoSignificantDigits(t *testing.T) {
-	if got := util.FormatTokenEstimate(4996); got != "~1.2Kt" {
-		t.Errorf("got %q, want ~1.2Kt", got)
+	if got := util.FormatTokenEstimate(4996); got != "~1.8Kt" {
+		t.Errorf("got %q, want ~1.8Kt", got)
 	}
-	if got := util.FormatTokenEstimate(400_000); got != "~100Kt" {
-		t.Errorf("got %q, want ~100Kt without scientific notation", got)
+	if got := util.FormatTokenEstimate(400_000); got != "~143Kt" {
+		t.Errorf("got %q, want ~143Kt without scientific notation", got)
 	}
 }
 

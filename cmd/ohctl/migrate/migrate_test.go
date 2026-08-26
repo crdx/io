@@ -425,3 +425,64 @@ func TestFormatFiveMigrationAddsEventStatuses(t *testing.T) {
 		}
 	}
 }
+
+func TestFormatSevenMigrationCountsTheWholeSystemPrompt(t *testing.T) {
+	systemPrompt := strings.Repeat("x", 3000)
+	directory, name := storedJournal(t,
+		fmt.Sprintf(
+			`{"kind":"head","time":"2026-08-01T00:00:00Z","version":7,"id":"one","name":"brave-otter","meta":{"system_prompt":%q}}`,
+			systemPrompt,
+		),
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"startup","state":{"session":"brave-otter","context":[{"name":"SYSTEM.md","bytes":740}],"tools":614}}}`,
+	)
+
+	from, err := migrate.Session(options(directory), name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if from != 7 {
+		t.Errorf("migrated from format %d, want 7", from)
+	}
+
+	state := startupState(t, journalLines(t, directory, name)[1])
+	if _, hasFiles := state["context"]; hasFiles {
+		t.Errorf("the startup facts kept the context files: %s", state)
+	}
+	if got := string(state["prompt"]); got != fmt.Sprint(len(systemPrompt)) {
+		t.Errorf("got prompt bytes %s, want %d", got, len(systemPrompt))
+	}
+	if got := string(state["tools"]); got != "614" {
+		t.Errorf("got tool bytes %s, want 614", got)
+	}
+}
+
+func TestFormatSevenMigrationFallsBackToTheContextFilesItHas(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":7,"id":"one","name":"brave-otter"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"startup","state":{"context":[{"name":"SYSTEM.md","bytes":740},{"name":"AGENTS.md","bytes":260}]}}}`,
+	)
+
+	if _, err := migrate.Session(options(directory), name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := string(startupState(t, journalLines(t, directory, name)[1])["prompt"]); got != "1000" {
+		t.Errorf("got prompt bytes %s, want the 1000 the files came to", got)
+	}
+}
+
+func startupState(t *testing.T, line map[string]json.RawMessage) map[string]json.RawMessage {
+	t.Helper()
+
+	var event map[string]json.RawMessage
+	if err := json.Unmarshal(line["event"], &event); err != nil {
+		t.Fatal(err)
+	}
+
+	var state map[string]json.RawMessage
+	if err := json.Unmarshal(event["state"], &state); err != nil {
+		t.Fatal(err)
+	}
+
+	return state
+}

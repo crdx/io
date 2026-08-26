@@ -56,10 +56,10 @@ func TestTrackerMeasuresTheLatestTurnTokenRate(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		tracker := New(0)
 		tracker.BeginTurn()
-		tracker.RecordDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: strings.Repeat("x", 200)})
+		tracker.RecordDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: strings.Repeat("x", 140)})
 		time.Sleep(5 * time.Second)
 		tracker.Record(agent.Event{Kind: agent.ModelReasoningEvent})
-		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 200)})
+		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 140)})
 		time.Sleep(5 * time.Second)
 		tracker.Record(agent.Event{Kind: agent.ModelMessageEvent})
 		tracker.FinishTurn()
@@ -75,7 +75,7 @@ func TestTrackerExcludesToolExecutionFromTheTokenRate(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		tracker := New(0)
 		tracker.BeginTurn()
-		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 200)})
+		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 140)})
 		time.Sleep(5 * time.Second)
 		tracker.Record(agent.Event{Kind: agent.ModelMessageEvent})
 
@@ -83,7 +83,7 @@ func TestTrackerExcludesToolExecutionFromTheTokenRate(t *testing.T) {
 		time.Sleep(30 * time.Second)
 		tracker.Record(agent.Event{Kind: agent.ToolCallResultEvent})
 
-		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 200)})
+		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 140)})
 		time.Sleep(5 * time.Second)
 		tracker.Record(agent.Event{Kind: agent.ModelMessageEvent})
 		tracker.FinishTurn()
@@ -98,7 +98,7 @@ func TestSilentTurnKeepsThePreviousTokenRate(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		tracker := New(0)
 		tracker.BeginTurn()
-		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 400)})
+		tracker.RecordDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: strings.Repeat("x", 280)})
 		time.Sleep(10 * time.Second)
 		tracker.Record(agent.Event{Kind: agent.ModelMessageEvent})
 		tracker.FinishTurn()

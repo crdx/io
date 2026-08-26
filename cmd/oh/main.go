@@ -311,11 +311,10 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	var systemPrompt string
-	var contextFiles []prompt.File
 	if resumedSession != nil && resumedSession.Meta.SystemPrompt != "" {
 		systemPrompt = resumedSession.Meta.SystemPrompt
 	} else {
-		systemPrompt, contextFiles, err = prompt.Load(prompt.Config{
+		systemPrompt, _, err = prompt.Load(prompt.Config{
 			GlobalPath:   location.GetGlobalContextPath(),
 			Root:         root,
 			WorkspaceDir: workspaceDir,
@@ -452,7 +451,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	startupElapsed := startup.Elapsed()
 	startupInfo := startup.Info{
 		Session:       log.Name(),
-		ContextFiles:  startup.FilesOf(contextFiles),
+		PromptBytes:   len(systemPrompt),
 		ProjectSkills: projectSkills,
 		GlobalSkills:  globalSkills,
 		Snippets:      len(settings.Snippets),

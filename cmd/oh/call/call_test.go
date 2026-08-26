@@ -39,7 +39,7 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 	}{
 		"output": {
 			stats: tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 1200, TotalBytes: 1200},
-			want:  []string{"4L ~300t"},
+			want:  []string{"4L ~400t"},
 		},
 		"empty output": {
 			stats: tool.Stats{Kind: tool.StatsOutput},
@@ -53,7 +53,7 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 				TotalBytes: 1200,
 				Truncated:  true,
 			},
-			want: []string{"4L+ ~300t"},
+			want: []string{"4L+ ~400t"},
 		},
 		"resources": {
 			stats: tool.Stats{
@@ -63,11 +63,11 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 				Lines:      7,
 				Bytes:      1200,
 			},
-			want: []string{"7L ~300t 1.4s 0.8s 92M"},
+			want: []string{"7L ~400t 1.4s 0.8s 92M"},
 		},
 		"read": {
 			stats: tool.Stats{Kind: tool.StatsRead, Lines: 42, Bytes: 1200},
-			want:  []string{"42L ~300t"},
+			want:  []string{"42L ~400t"},
 		},
 		"list": {
 			stats: tool.Stats{Kind: tool.StatsList, Lines: 42},
@@ -78,11 +78,11 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 			want:  []string{"~1.5Kt"},
 		},
 		"small estimate hidden": {
-			stats: tool.Stats{Kind: tool.StatsWrite, Lines: 3, Bytes: 400},
+			stats: tool.Stats{Kind: tool.StatsWrite, Lines: 3, Bytes: 280},
 			want:  []string{"3L"},
 		},
 		"estimate above threshold shown": {
-			stats: tool.Stats{Kind: tool.StatsWrite, Lines: 3, Bytes: 401},
+			stats: tool.Stats{Kind: tool.StatsWrite, Lines: 3, Bytes: 281},
 			want:  []string{"3L ~100t"},
 		},
 		"diff": {
@@ -91,17 +91,17 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 		},
 		"search": {
 			stats: tool.Stats{Kind: tool.StatsSearch, Lines: 17, Bytes: 1200},
-			want:  []string{"17L ~300t"},
+			want:  []string{"17L ~400t"},
 		},
 		"small capped output with a large total": {
 			stats: tool.Stats{
 				Kind:       tool.StatsSearch,
 				Lines:      2,
-				Bytes:      400,
+				Bytes:      280,
 				TotalBytes: 1200,
 				Truncated:  true,
 			},
-			want: []string{"2L+ (of ~300t)"},
+			want: []string{"2L+ (of ~400t)"},
 		},
 		"capped search": {
 			stats: tool.Stats{
@@ -111,7 +111,7 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 				TotalBytes: 80_000,
 				Truncated:  true,
 			},
-			want: []string{"100L+ ~8Kt (of ~20Kt)"},
+			want: []string{"100L+ ~11Kt (of ~29Kt)"},
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -127,7 +127,7 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 
 func TestStatsUseTheirExpectedStyles(t *testing.T) {
 	output := measured(0, &tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 951})
-	if want := style.Subtle("4L ~200t"); !strings.Contains(output, want) {
+	if want := style.Subtle("4L ~300t"); !strings.Contains(output, want) {
 		t.Errorf("output stats got %q, want styled %q", output, want)
 	}
 
@@ -137,12 +137,12 @@ func TestStatsUseTheirExpectedStyles(t *testing.T) {
 	}
 
 	read := measured(0, &tool.Stats{Kind: tool.StatsRead, Lines: 45, Bytes: 951})
-	if want := style.Subtle("45L ~200t"); !strings.Contains(read, want) {
+	if want := style.Subtle("45L ~300t"); !strings.Contains(read, want) {
 		t.Errorf("read stats got %q, want styled %q", read, want)
 	}
 
 	write := measured(0, &tool.Stats{Kind: tool.StatsWrite, Lines: 12, Bytes: 1200})
-	if want := style.Subtle("12L ~300t"); !strings.Contains(write, want) {
+	if want := style.Subtle("12L ~400t"); !strings.Contains(write, want) {
 		t.Errorf("write stats got %q, want styled %q", write, want)
 	}
 
@@ -153,7 +153,7 @@ func TestStatsUseTheirExpectedStyles(t *testing.T) {
 		TotalBytes: 2400,
 		Truncated:  true,
 	})
-	if want := style.Subtle("23L+ ~300t (of ~600t)"); !strings.Contains(search, want) {
+	if want := style.Subtle("23L+ ~400t (of ~900t)"); !strings.Contains(search, want) {
 		t.Errorf("search stats got %q, want styled %q", search, want)
 	}
 

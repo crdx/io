@@ -20,7 +20,7 @@ import (
 	"crdx.org/io/internal/format"
 )
 
-const JournalFormat = 7
+const JournalFormat = 8
 
 const MetaFormat = 1
 

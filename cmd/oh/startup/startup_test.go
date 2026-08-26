@@ -12,16 +12,16 @@ import (
 func TestAStartupEventKeepsItsFactsForReplay(t *testing.T) {
 	info := Info{
 		Session:       "brave-otter",
-		ContextFiles:  []File{{Name: "SYSTEM.md", Bytes: 740}},
+		PromptBytes:   32_697,
 		ProjectSkills: 2,
 		GlobalSkills:  3,
 		Snippets:      4,
-		ToolBytes:     2273,
+		ToolBytes:     3373,
 	}
 
 	event := NewEvent(12*time.Millisecond, info)
 	got := style.Plain(RenderEvent(event))
-	want := "Session brave-otter started in 12ms with 5 skills, 4 snippets, and ~800t of context."
+	want := "Session brave-otter started in 12ms with 5 skills, 4 snippets, and ~13Kt of context."
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}

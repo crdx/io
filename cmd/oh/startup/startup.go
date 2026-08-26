@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/util"
 )
@@ -20,16 +19,11 @@ func Elapsed() time.Duration {
 
 type Info struct {
 	Session       string `json:"session,omitempty"`
-	ContextFiles  []File `json:"context,omitempty"`
+	PromptBytes   int    `json:"prompt,omitempty"`
 	ProjectSkills int    `json:"project_skills,omitempty"`
 	GlobalSkills  int    `json:"global_skills,omitempty"`
 	Snippets      int    `json:"snippets,omitempty"`
 	ToolBytes     int    `json:"tools,omitempty"`
-}
-
-type File struct {
-	Name  string `json:"name"`
-	Bytes int    `json:"bytes"`
 }
 
 // NewEvent records startup facts for live display and later replay.
@@ -52,17 +46,6 @@ func RenderEvent(event agent.Event) string {
 	}
 
 	return RenderBanner(event.Took, false, info)
-}
-
-// FilesOf reduces prompt context files to the facts shown at startup.
-func FilesOf(files []prompt.File) []File {
-	kept := make([]File, 0, len(files))
-
-	for _, file := range files {
-		kept = append(kept, File{Name: file.Name, Bytes: len(file.Body)})
-	}
-
-	return kept
 }
 
 // RenderBanner renders the startup summary as a sentence.
@@ -96,10 +79,7 @@ func startupDuration(elapsed time.Duration) string {
 }
 
 func startupContextTokens(info Info) string {
-	bytes := info.ToolBytes
-	for _, file := range info.ContextFiles {
-		bytes += file.Bytes
-	}
+	bytes := info.PromptBytes + info.ToolBytes
 
 	var field startupLine
 	field.quantity(util.FormatTokenEstimate(bytes), false)
