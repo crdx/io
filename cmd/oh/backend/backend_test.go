@@ -58,6 +58,46 @@ func TestUpdatingAgainstAStandInEndpointDescribesEveryProvider(t *testing.T) {
 	}
 }
 
+func TestEveryProviderListsModelsWithoutAConversationModel(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	endpoint := sim.New(&sim.Scenario{Model: "fake"})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	addresses := endpoint.Addresses(server.URL)
+	tests := []struct {
+		providerName string
+		format       string
+	}{
+		{codexProvider, sim.Responses},
+		{opencodeGoProvider, sim.Completions},
+		{anthropicProvider, sim.Messages},
+	}
+
+	for _, test := range tests {
+		t.Run(test.providerName, func(t *testing.T) {
+			models, err := ListModels(t.Context(), test.providerName, addresses[test.format])
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if len(models) != 1 || models[0].ID != "fake" {
+				t.Errorf("got %v", models)
+			}
+		})
+	}
+}
+
+func TestSubscriptionCodexDoesNotTrustTheUndocumentedModelListing(t *testing.T) {
+	models, err := ListModels(t.Context(), codexProvider, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(models) != 0 {
+		t.Errorf("got %v", models)
+	}
+}
+
 func testModelSelections() []model.Selection {
 	return []model.Selection{
 		{Provider: opencodeGoProvider, Model: "deepseek-v4-pro", Effort: "high"},

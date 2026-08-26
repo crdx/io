@@ -129,12 +129,28 @@ func TestListingModelsWithoutACacheSaysHowToFetchThem(t *testing.T) {
 func TestAModelTakingNoEffortLevelCannotBeSelected(t *testing.T) {
 	choices := choicesFor(codexProvider, []agent.Model{
 		{ID: "gpt-5.6-sol", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+		{ID: "gpt-realtime-2.1", EffortLevels: []string{"high"}, MaxOutputTokens: 16_000},
 		{ID: "chatgpt-image-latest"},
 		{ID: "", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
 	})
 
 	if len(choices) != 1 || choices[0].Model != "gpt-5.6-sol" {
 		t.Errorf("expected only what can be asked to think, got %v", choices)
+	}
+}
+
+func TestOpenCodeGoOnlyOffersModelsForItsWireProtocol(t *testing.T) {
+	models := []agent.Model{
+		{ID: "minimax-m3", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+		{ID: "qwen3.8-max", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+		{ID: "muse-spark-1.2-contributor", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+		{ID: "ox-alpha-free", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+		{ID: "mimo-v2-omni", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+	}
+
+	choices := choicesFor(opencodeGoProvider, models)
+	if len(choices) != 2 || choices[0].Model != "ox-alpha-free" || choices[1].Model != "mimo-v2-omni" {
+		t.Errorf("got %v", choices)
 	}
 }
 
@@ -465,6 +481,28 @@ func TestProviderDescriptionCoversEveryEndpointAndRegistryCombination(t *testing
 	}
 }
 
+func TestEndpointListingExcludesRegistryModelsTheProviderCannotUse(t *testing.T) {
+	listed := []agent.Model{{ID: "gpt-5.6-sol", EffortLevels: []string{"high"}}}
+	registered := map[string]agent.Model{
+		"gpt-5.6-sol":      {ID: "gpt-5.6-sol", MaxOutputTokens: 128_000},
+		"gpt-realtime-2.1": {ID: "gpt-realtime-2.1", MaxOutputTokens: 16_000},
+	}
+
+	models, source, _ := describeProviderModels(
+		t.Context(),
+		codexProvider,
+		"",
+		registered,
+		func(context.Context, string, string) ([]agent.Model, error) {
+			return listed, nil
+		},
+	)
+
+	if source != sourceBoth || len(models) != 1 || models[0].ID != "gpt-5.6-sol" {
+		t.Errorf("got models=%v source=%q", models, source)
+	}
+}
+
 func TestAProviderThatListsNothingIsDescribedByTheRegistryAlone(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
@@ -494,11 +532,11 @@ func TestAProviderThatListsNothingIsDescribedByTheRegistryAlone(t *testing.T) {
 		t.Errorf("expected the registry to stand in, got source %q", cached.Source)
 	}
 
-	if len(cached.Models) != 2 {
-		t.Fatalf("expected both models to be recorded, got %v", cached.Models)
+	if len(cached.Models) != 1 {
+		t.Fatalf("expected only the compatible latest model to be recorded, got %v", cached.Models)
 	}
 
-	wantRow := "codex          2 models  models.dev          1 selectable\n"
+	wantRow := "codex          1 models  models.dev          1 selectable\n"
 	if !strings.Contains(output.String(), wantRow) {
 		t.Errorf("expected the successful row not to carry the listing failure, got %q", output.String())
 	}

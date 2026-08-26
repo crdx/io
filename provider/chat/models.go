@@ -12,6 +12,20 @@ const completionsSuffix = "/chat/completions"
 
 const modelsSuffix = "/models"
 
+// SupportsCompletions reports whether a model ID names a model for the Chat Completions API.
+func SupportsCompletions(id string) bool {
+	switch {
+	case strings.HasPrefix(id, "grok-"),
+		strings.HasPrefix(id, "minimax-"),
+		strings.HasPrefix(id, "qwen"),
+		strings.HasSuffix(id, "-contributor"),
+		strings.HasSuffix(id, "-luna"):
+		return false
+	default:
+		return true
+	}
+}
+
 // Models lists what the endpoint offers. The listing carries model names alone, so every one of
 // them is offered the whole effort range and the endpoint decides what it honours.
 //

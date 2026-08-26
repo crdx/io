@@ -19,6 +19,8 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/modelsdev"
 	"crdx.org/io/provider/anthropic"
+	"crdx.org/io/provider/chat"
+	"crdx.org/io/provider/codex"
 )
 
 const (
@@ -211,11 +213,27 @@ func latestModelIterations(models []agent.Model) []agent.Model {
 }
 
 func isDrivable(providerName string, id string) bool {
-	if providerName == AnthropicProvider {
+	switch providerName {
+	case AnthropicProvider:
 		return anthropic.SupportsAdaptiveThinking(id)
+	case CodexProvider:
+		return codex.SupportsResponses(id)
+	case OpencodeGoProvider:
+		return chat.SupportsCompletions(id)
+	default:
+		return true
+	}
+}
+
+func drivableModels(providerName string, models []agent.Model) []agent.Model {
+	retained := make([]agent.Model, 0, len(models))
+	for _, model := range models {
+		if isDrivable(providerName, model.ID) {
+			retained = append(retained, model)
+		}
 	}
 
-	return true
+	return retained
 }
 
 func choicesFor(providerName string, models []agent.Model) []Choice {
@@ -290,6 +308,7 @@ func Update(output io.Writer, endpoint string, path string, listProviderModels P
 
 		models, source, why := describeProviderModels(ctx, providerName, endpoint, registered, listProviderModels)
 		models = latestModelIterations(models)
+		models = drivableModels(providerName, models)
 		if len(models) == 0 {
 			_, _ = fmt.Fprintf(output, "%-12s nothing to record: %s\n", providerName, why)
 

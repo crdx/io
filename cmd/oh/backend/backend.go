@@ -14,7 +14,12 @@ import (
 
 const EndpointVariable = "OH_ENDPOINT_URL"
 
-const standInToken = "stand-in"
+const (
+	standInToken           = "stand-in"
+	listingModel           = "listing"
+	listingEffort          = "high"
+	listingMaxOutputTokens = 1
+)
 
 type Client interface {
 	agent.Provider
@@ -66,7 +71,16 @@ func connectProvider(choice model.Choice, effort string, endpoint string) (*Conn
 }
 
 func ListModels(ctx context.Context, providerName string, endpoint string) ([]agent.Model, error) {
-	client, err := Connect(model.Choice{Provider: providerName}, "", endpoint)
+	if providerName == model.CodexProvider && endpoint == "" {
+		return nil, nil
+	}
+
+	choice := model.Choice{
+		Provider:        providerName,
+		Model:           listingModel,
+		MaxOutputTokens: listingMaxOutputTokens,
+	}
+	client, err := connectProvider(choice, listingEffort, endpoint)
 	if err != nil {
 		return nil, err
 	}

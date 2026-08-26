@@ -12,6 +12,18 @@ const responsesSuffix = "/codex/responses"
 
 const modelsSuffix = "/models"
 
+// SupportsResponses reports whether a model ID names a model for the Responses API.
+func SupportsResponses(id string) bool {
+	for segment := range strings.SplitSeq(id, "-") {
+		switch segment {
+		case "audio", "embedding", "image", "moderation", "realtime", "transcribe", "tts":
+			return false
+		}
+	}
+
+	return true
+}
+
 // Models lists what the endpoint offers. This listing is undocumented: it is what the ChatGPT web
 // client asks for its own model picker, and a subscription token is not promised to be honoured
 // for it. A caller that gets nothing back is expected to carry on with what it already knew.
