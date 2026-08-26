@@ -1,0 +1,1793 @@
+{
+  "adjectives": [
+    "able",
+    "above",
+    "active",
+    "actual",
+    "adept",
+    "adored",
+    "aged",
+    "agile",
+    "airy",
+    "alert",
+    "alien",
+    "alive",
+    "amber",
+    "ample",
+    "amused",
+    "ancient",
+    "angled",
+    "antique",
+    "arcane",
+    "arched",
+    "ardent",
+    "artful",
+    "asleep",
+    "autumn",
+    "avid",
+    "awake",
+    "aware",
+    "azure",
+    "balmy",
+    "bare",
+    "bashful",
+    "basic",
+    "beige",
+    "bendy",
+    "best",
+    "better",
+    "black",
+    "blank",
+    "blessed",
+    "blithe",
+    "blue",
+    "bold",
+    "bonny",
+    "bookish",
+    "bouncy",
+    "brainy",
+    "brass",
+    "brave",
+    "brief",
+    "bright",
+    "brisk",
+    "broad",
+    "bronze",
+    "brown",
+    "bubbly",
+    "bulky",
+    "bumpy",
+    "buoyant",
+    "burly",
+    "busy",
+    "buttery",
+    "calm",
+    "candid",
+    "canny",
+    "careful",
+    "casual",
+    "charmed",
+    "cheery",
+    "chewy",
+    "chief",
+    "chosen",
+    "chrome",
+    "chunky",
+    "civil",
+    "classic",
+    "clean",
+    "clear",
+    "clever",
+    "cloudy",
+    "coastal",
+    "cobalt",
+    "comic",
+    "common",
+    "cool",
+    "copper",
+    "coral",
+    "cosmic",
+    "cosy",
+    "courtly",
+    "crafty",
+    "creamy",
+    "crimson",
+    "crisp",
+    "cryptic",
+    "crystal",
+    "cuddly",
+    "curly",
+    "curved",
+    "cute",
+    "daft",
+    "daily",
+    "dainty",
+    "dandy",
+    "dapper",
+    "daring",
+    "dark",
+    "dashing",
+    "dazzling",
+    "dear",
+    "decent",
+    "deep",
+    "defiant",
+    "deft",
+    "dense",
+    "devout",
+    "dewy",
+    "direct",
+    "discreet",
+    "distant",
+    "divine",
+    "downy",
+    "dreamy",
+    "dressy",
+    "dried",
+    "dry",
+    "dual",
+    "dulcet",
+    "dusky",
+    "dusty",
+    "eager",
+    "early",
+    "earnest",
+    "earthy",
+    "eastern",
+    "easy",
+    "ebony",
+    "echoing",
+    "edgy",
+    "eerie",
+    "elated",
+    "elder",
+    "electric",
+    "elegant",
+    "elfin",
+    "elite",
+    "eminent",
+    "empty",
+    "endless",
+    "epic",
+    "equal",
+    "eternal",
+    "exact",
+    "exotic",
+    "expert",
+    "extra",
+    "fabled",
+    "fair",
+    "faithful",
+    "famed",
+    "fancy",
+    "fast",
+    "fated",
+    "feisty",
+    "fervent",
+    "festive",
+    "fiery",
+    "final",
+    "fine",
+    "firm",
+    "first",
+    "fitting",
+    "flat",
+    "fleet",
+    "fleeting",
+    "flinty",
+    "floral",
+    "fluent",
+    "fluffy",
+    "fluid",
+    "focused",
+    "foggy",
+    "fond",
+    "forceful",
+    "formal",
+    "forward",
+    "fragrant",
+    "frank",
+    "free",
+    "fresh",
+    "friendly",
+    "frilly",
+    "frisky",
+    "frosty",
+    "frozen",
+    "frugal",
+    "fuzzy",
+    "gallant",
+    "gentle",
+    "genuine",
+    "giant",
+    "giddy",
+    "gifted",
+    "gilded",
+    "ginger",
+    "glad",
+    "glassy",
+    "gleaming",
+    "glossy",
+    "glowing",
+    "golden",
+    "good",
+    "gracious",
+    "grand",
+    "granite",
+    "grassy",
+    "gravel",
+    "great",
+    "green",
+    "gritty",
+    "guarded",
+    "gusty",
+    "halcyon",
+    "handy",
+    "happy",
+    "hardy",
+    "hazel",
+    "hazy",
+    "hearty",
+    "heavy",
+    "helpful",
+    "heroic",
+    "hidden",
+    "high",
+    "honest",
+    "hopeful",
+    "huge",
+    "humble",
+    "husky",
+    "icy",
+    "ideal",
+    "immense",
+    "indigo",
+    "inner",
+    "iron",
+    "ivory",
+    "jade",
+    "jaunty",
+    "jazzy",
+    "jolly",
+    "jovial",
+    "joyful",
+    "jumbo",
+    "keen",
+    "kind",
+    "kindly",
+    "lacy",
+    "laden",
+    "large",
+    "last",
+    "late",
+    "lavish",
+    "lawful",
+    "leafy",
+    "lean",
+    "learned",
+    "legal",
+    "lemon",
+    "lengthy",
+    "level",
+    "light",
+    "likely",
+    "lilac",
+    "limber",
+    "lime",
+    "linen",
+    "little",
+    "lively",
+    "loamy",
+    "lofty",
+    "lone",
+    "long",
+    "loud",
+    "loyal",
+    "lucid",
+    "lucky",
+    "lunar",
+    "lush",
+    "lyric",
+    "magenta",
+    "magic",
+    "main",
+    "major",
+    "mannered",
+    "marble",
+    "marine",
+    "mauve",
+    "mellow",
+    "merry",
+    "mighty",
+    "mild",
+    "milky",
+    "mindful",
+    "minor",
+    "mint",
+    "minty",
+    "misty",
+    "modern",
+    "modest",
+    "molten",
+    "moonlit",
+    "moral",
+    "mossy",
+    "mottled",
+    "mute",
+    "mystic",
+    "native",
+    "natty",
+    "neat",
+    "new",
+    "nice",
+    "nifty",
+    "nimble",
+    "noble",
+    "normal",
+    "northern",
+    "novel",
+    "nutty",
+    "oaken",
+    "obliging",
+    "oblong",
+    "ochre",
+    "odd",
+    "oiled",
+    "olden",
+    "olive",
+    "opal",
+    "open",
+    "opulent",
+    "orange",
+    "orderly",
+    "ornate",
+    "outer",
+    "oval",
+    "pale",
+    "palm",
+    "paper",
+    "pastel",
+    "patient",
+    "peachy",
+    "pearly",
+    "peppy",
+    "perfect",
+    "perky",
+    "petite",
+    "pewter",
+    "pink",
+    "placid",
+    "plain",
+    "playful",
+    "pleasant",
+    "pliant",
+    "plucky",
+    "plum",
+    "plump",
+    "plush",
+    "poised",
+    "polar",
+    "polished",
+    "polite",
+    "poplar",
+    "potent",
+    "prairie",
+    "precise",
+    "pretty",
+    "primal",
+    "prime",
+    "pristine",
+    "private",
+    "prompt",
+    "proper",
+    "proud",
+    "prudent",
+    "public",
+    "punchy",
+    "pure",
+    "purple",
+    "quaint",
+    "quick",
+    "quiet",
+    "quirky",
+    "radiant",
+    "rainy",
+    "rapid",
+    "rare",
+    "ready",
+    "real",
+    "rebel",
+    "recent",
+    "regal",
+    "remote",
+    "rich",
+    "right",
+    "ripe",
+    "rippling",
+    "roasted",
+    "robust",
+    "rocky",
+    "rogue",
+    "rosy",
+    "round",
+    "rowdy",
+    "royal",
+    "rugged",
+    "rural",
+    "rustic",
+    "rusty",
+    "sable",
+    "sacred",
+    "sage",
+    "salty",
+    "sandy",
+    "sane",
+    "sassy",
+    "satin",
+    "scarlet",
+    "scenic",
+    "seaside",
+    "second",
+    "secret",
+    "sedate",
+    "serene",
+    "sharp",
+    "sheer",
+    "shiny",
+    "short",
+    "showy",
+    "shrewd",
+    "shy",
+    "silent",
+    "silken",
+    "silver",
+    "simple",
+    "single",
+    "sleek",
+    "slender",
+    "slim",
+    "sly",
+    "small",
+    "smart",
+    "smoky",
+    "smooth",
+    "snappy",
+    "snowy",
+    "snug",
+    "soaring",
+    "sober",
+    "social",
+    "soft",
+    "solar",
+    "solemn",
+    "solid",
+    "sonic",
+    "sound",
+    "southern",
+    "spare",
+    "special",
+    "speckled",
+    "spicy",
+    "spiky",
+    "spiral",
+    "splendid",
+    "spotless",
+    "spotted",
+    "spry",
+    "square",
+    "stable",
+    "staid",
+    "stalwart",
+    "starry",
+    "static",
+    "steady",
+    "steely",
+    "steep",
+    "stellar",
+    "stern",
+    "still",
+    "stoic",
+    "stout",
+    "straight",
+    "strict",
+    "striking",
+    "strong",
+    "sturdy",
+    "subtle",
+    "sudden",
+    "sugary",
+    "sunlit",
+    "sunny",
+    "super",
+    "supple",
+    "sure",
+    "svelte",
+    "swanky",
+    "sweet",
+    "swift",
+    "tacit",
+    "tall",
+    "tame",
+    "tangy",
+    "tawny",
+    "teal",
+    "tender",
+    "terse",
+    "thankful",
+    "thick",
+    "thin",
+    "thorough",
+    "thrifty",
+    "tidal",
+    "tidy",
+    "tiny",
+    "tipsy",
+    "toasty",
+    "topaz",
+    "tranquil",
+    "trim",
+    "tropical",
+    "true",
+    "trusty",
+    "twilight",
+    "twin",
+    "twisty",
+    "ultra",
+    "umber",
+    "upbeat",
+    "upper",
+    "upright",
+    "urban",
+    "usual",
+    "vaulted",
+    "velvet",
+    "verdant",
+    "vernal",
+    "vibrant",
+    "vintage",
+    "violet",
+    "virtual",
+    "vital",
+    "vivid",
+    "vocal",
+    "wakeful",
+    "warm",
+    "wary",
+    "watchful",
+    "western",
+    "white",
+    "whole",
+    "wide",
+    "wiggly",
+    "wild",
+    "willing",
+    "windy",
+    "winged",
+    "wintry",
+    "wiry",
+    "wise",
+    "wispy",
+    "witty",
+    "wobbly",
+    "wondrous",
+    "wooden",
+    "woolly",
+    "worldly",
+    "worthy",
+    "woven",
+    "yearly",
+    "yellow",
+    "young",
+    "youthful",
+    "zany",
+    "zealous",
+    "zesty",
+    "zippy"
+  ],
+  "animals": [
+    {
+      "name": "adder",
+      "emoji": "🐍"
+    },
+    {
+      "name": "alpaca",
+      "emoji": "🦙"
+    },
+    {
+      "name": "anchovy",
+      "emoji": "🐟"
+    },
+    {
+      "name": "ant",
+      "emoji": "🐜"
+    },
+    {
+      "name": "anteater",
+      "emoji": "🦥"
+    },
+    {
+      "name": "antelope",
+      "emoji": "🦌"
+    },
+    {
+      "name": "ape",
+      "emoji": "🦍"
+    },
+    {
+      "name": "aphid",
+      "emoji": "🐛"
+    },
+    {
+      "name": "asp",
+      "emoji": "🐍"
+    },
+    {
+      "name": "baboon",
+      "emoji": "🐒"
+    },
+    {
+      "name": "badger",
+      "emoji": "🦡"
+    },
+    {
+      "name": "barnacle",
+      "emoji": "🐚"
+    },
+    {
+      "name": "bass",
+      "emoji": "🐟"
+    },
+    {
+      "name": "bat",
+      "emoji": "🦇"
+    },
+    {
+      "name": "beagle",
+      "emoji": "🐕"
+    },
+    {
+      "name": "bear",
+      "emoji": "🐻"
+    },
+    {
+      "name": "beaver",
+      "emoji": "🦫"
+    },
+    {
+      "name": "bee",
+      "emoji": "🐝"
+    },
+    {
+      "name": "beetle",
+      "emoji": "🪲"
+    },
+    {
+      "name": "bighorn",
+      "emoji": "🐏"
+    },
+    {
+      "name": "bison",
+      "emoji": "🦬"
+    },
+    {
+      "name": "boa",
+      "emoji": "🐍"
+    },
+    {
+      "name": "boar",
+      "emoji": "🐗"
+    },
+    {
+      "name": "bobcat",
+      "emoji": "🐆"
+    },
+    {
+      "name": "bonobo",
+      "emoji": "🦍"
+    },
+    {
+      "name": "budgie",
+      "emoji": "🦜"
+    },
+    {
+      "name": "buffalo",
+      "emoji": "🐃"
+    },
+    {
+      "name": "bulldog",
+      "emoji": "🐕"
+    },
+    {
+      "name": "bullfrog",
+      "emoji": "🐸"
+    },
+    {
+      "name": "bushbaby",
+      "emoji": "🐒"
+    },
+    {
+      "name": "buzzard",
+      "emoji": "🦅"
+    },
+    {
+      "name": "camel",
+      "emoji": "🐫"
+    },
+    {
+      "name": "canary",
+      "emoji": "🐦"
+    },
+    {
+      "name": "capybara",
+      "emoji": "🦫"
+    },
+    {
+      "name": "cardinal",
+      "emoji": "🐦"
+    },
+    {
+      "name": "caribou",
+      "emoji": "🦌"
+    },
+    {
+      "name": "carp",
+      "emoji": "🐟"
+    },
+    {
+      "name": "cat",
+      "emoji": "🐈"
+    },
+    {
+      "name": "catfish",
+      "emoji": "🐟"
+    },
+    {
+      "name": "cheetah",
+      "emoji": "🐆"
+    },
+    {
+      "name": "chicken",
+      "emoji": "🐔"
+    },
+    {
+      "name": "chimp",
+      "emoji": "🐒"
+    },
+    {
+      "name": "chipmunk",
+      "emoji": "🐿️"
+    },
+    {
+      "name": "cicada",
+      "emoji": "🦗"
+    },
+    {
+      "name": "clam",
+      "emoji": "🐚"
+    },
+    {
+      "name": "cobra",
+      "emoji": "🐍"
+    },
+    {
+      "name": "cockatoo",
+      "emoji": "🦜"
+    },
+    {
+      "name": "cod",
+      "emoji": "🐟"
+    },
+    {
+      "name": "collie",
+      "emoji": "🐕"
+    },
+    {
+      "name": "colt",
+      "emoji": "🐴"
+    },
+    {
+      "name": "condor",
+      "emoji": "🦅"
+    },
+    {
+      "name": "coot",
+      "emoji": "🐦"
+    },
+    {
+      "name": "cougar",
+      "emoji": "🐆"
+    },
+    {
+      "name": "cow",
+      "emoji": "🐄"
+    },
+    {
+      "name": "coyote",
+      "emoji": "🐺"
+    },
+    {
+      "name": "crab",
+      "emoji": "🦀"
+    },
+    {
+      "name": "crane",
+      "emoji": "🐦"
+    },
+    {
+      "name": "crayfish",
+      "emoji": "🦞"
+    },
+    {
+      "name": "cricket",
+      "emoji": "🦗"
+    },
+    {
+      "name": "crow",
+      "emoji": "🐦‍⬛"
+    },
+    {
+      "name": "cuckoo",
+      "emoji": "🐦"
+    },
+    {
+      "name": "deer",
+      "emoji": "🦌"
+    },
+    {
+      "name": "dingo",
+      "emoji": "🐕"
+    },
+    {
+      "name": "dodo",
+      "emoji": "🦤"
+    },
+    {
+      "name": "dog",
+      "emoji": "🐕"
+    },
+    {
+      "name": "dolphin",
+      "emoji": "🐬"
+    },
+    {
+      "name": "donkey",
+      "emoji": "🫏"
+    },
+    {
+      "name": "dormouse",
+      "emoji": "🐁"
+    },
+    {
+      "name": "dove",
+      "emoji": "🕊️"
+    },
+    {
+      "name": "drake",
+      "emoji": "🦆"
+    },
+    {
+      "name": "duck",
+      "emoji": "🦆"
+    },
+    {
+      "name": "eagle",
+      "emoji": "🦅"
+    },
+    {
+      "name": "earwig",
+      "emoji": "🐛"
+    },
+    {
+      "name": "eel",
+      "emoji": "🐟"
+    },
+    {
+      "name": "egret",
+      "emoji": "🐦"
+    },
+    {
+      "name": "elephant",
+      "emoji": "🐘"
+    },
+    {
+      "name": "elk",
+      "emoji": "🦌"
+    },
+    {
+      "name": "emu",
+      "emoji": "🐦"
+    },
+    {
+      "name": "falcon",
+      "emoji": "🦅"
+    },
+    {
+      "name": "fawn",
+      "emoji": "🦌"
+    },
+    {
+      "name": "ferret",
+      "emoji": "🦦"
+    },
+    {
+      "name": "finch",
+      "emoji": "🐦"
+    },
+    {
+      "name": "firefly",
+      "emoji": "🪰"
+    },
+    {
+      "name": "flamingo",
+      "emoji": "🦩"
+    },
+    {
+      "name": "flea",
+      "emoji": "🐛"
+    },
+    {
+      "name": "flounder",
+      "emoji": "🐟"
+    },
+    {
+      "name": "foal",
+      "emoji": "🐴"
+    },
+    {
+      "name": "fox",
+      "emoji": "🦊"
+    },
+    {
+      "name": "frog",
+      "emoji": "🐸"
+    },
+    {
+      "name": "gazelle",
+      "emoji": "🦌"
+    },
+    {
+      "name": "gecko",
+      "emoji": "🦎"
+    },
+    {
+      "name": "gerbil",
+      "emoji": "🐹"
+    },
+    {
+      "name": "gibbon",
+      "emoji": "🐒"
+    },
+    {
+      "name": "giraffe",
+      "emoji": "🦒"
+    },
+    {
+      "name": "glowworm",
+      "emoji": "🪱"
+    },
+    {
+      "name": "gnat",
+      "emoji": "🦟"
+    },
+    {
+      "name": "gnu",
+      "emoji": "🐃"
+    },
+    {
+      "name": "goat",
+      "emoji": "🐐"
+    },
+    {
+      "name": "goldfish",
+      "emoji": "🐠"
+    },
+    {
+      "name": "goose",
+      "emoji": "🪿"
+    },
+    {
+      "name": "gopher",
+      "emoji": "🐁"
+    },
+    {
+      "name": "gorilla",
+      "emoji": "🦍"
+    },
+    {
+      "name": "grouse",
+      "emoji": "🐦"
+    },
+    {
+      "name": "gull",
+      "emoji": "🐦"
+    },
+    {
+      "name": "guppy",
+      "emoji": "🐠"
+    },
+    {
+      "name": "haddock",
+      "emoji": "🐟"
+    },
+    {
+      "name": "hake",
+      "emoji": "🐟"
+    },
+    {
+      "name": "halibut",
+      "emoji": "🐟"
+    },
+    {
+      "name": "hamster",
+      "emoji": "🐹"
+    },
+    {
+      "name": "hare",
+      "emoji": "🐇"
+    },
+    {
+      "name": "harrier",
+      "emoji": "🦅"
+    },
+    {
+      "name": "hawk",
+      "emoji": "🦅"
+    },
+    {
+      "name": "hedgehog",
+      "emoji": "🦔"
+    },
+    {
+      "name": "heron",
+      "emoji": "🐦"
+    },
+    {
+      "name": "herring",
+      "emoji": "🐟"
+    },
+    {
+      "name": "hippo",
+      "emoji": "🦛"
+    },
+    {
+      "name": "hog",
+      "emoji": "🐖"
+    },
+    {
+      "name": "hornbill",
+      "emoji": "🐦"
+    },
+    {
+      "name": "hornet",
+      "emoji": "🐝"
+    },
+    {
+      "name": "horse",
+      "emoji": "🐎"
+    },
+    {
+      "name": "hound",
+      "emoji": "🐕"
+    },
+    {
+      "name": "husky",
+      "emoji": "🐕"
+    },
+    {
+      "name": "hyena",
+      "emoji": "🐺"
+    },
+    {
+      "name": "ibex",
+      "emoji": "🐐"
+    },
+    {
+      "name": "ibis",
+      "emoji": "🐦"
+    },
+    {
+      "name": "iguana",
+      "emoji": "🦎"
+    },
+    {
+      "name": "impala",
+      "emoji": "🦌"
+    },
+    {
+      "name": "jackal",
+      "emoji": "🐺"
+    },
+    {
+      "name": "jackdaw",
+      "emoji": "🐦‍⬛"
+    },
+    {
+      "name": "jaguar",
+      "emoji": "🐆"
+    },
+    {
+      "name": "jay",
+      "emoji": "🐦"
+    },
+    {
+      "name": "kangaroo",
+      "emoji": "🦘"
+    },
+    {
+      "name": "kestrel",
+      "emoji": "🦅"
+    },
+    {
+      "name": "kite",
+      "emoji": "🦅"
+    },
+    {
+      "name": "kitten",
+      "emoji": "🐱"
+    },
+    {
+      "name": "kiwi",
+      "emoji": "🐦"
+    },
+    {
+      "name": "koala",
+      "emoji": "🐨"
+    },
+    {
+      "name": "koi",
+      "emoji": "🐠"
+    },
+    {
+      "name": "krill",
+      "emoji": "🦐"
+    },
+    {
+      "name": "ladybird",
+      "emoji": "🐞"
+    },
+    {
+      "name": "lamb",
+      "emoji": "🐑"
+    },
+    {
+      "name": "lark",
+      "emoji": "🐦"
+    },
+    {
+      "name": "lemming",
+      "emoji": "🐁"
+    },
+    {
+      "name": "lemur",
+      "emoji": "🐒"
+    },
+    {
+      "name": "leopard",
+      "emoji": "🐆"
+    },
+    {
+      "name": "limpet",
+      "emoji": "🐚"
+    },
+    {
+      "name": "lion",
+      "emoji": "🦁"
+    },
+    {
+      "name": "lizard",
+      "emoji": "🦎"
+    },
+    {
+      "name": "llama",
+      "emoji": "🦙"
+    },
+    {
+      "name": "lobster",
+      "emoji": "🦞"
+    },
+    {
+      "name": "locust",
+      "emoji": "🦗"
+    },
+    {
+      "name": "loon",
+      "emoji": "🐦"
+    },
+    {
+      "name": "loris",
+      "emoji": "🐒"
+    },
+    {
+      "name": "lynx",
+      "emoji": "🐆"
+    },
+    {
+      "name": "macaw",
+      "emoji": "🦜"
+    },
+    {
+      "name": "mackerel",
+      "emoji": "🐟"
+    },
+    {
+      "name": "magpie",
+      "emoji": "🐦‍⬛"
+    },
+    {
+      "name": "mallard",
+      "emoji": "🦆"
+    },
+    {
+      "name": "mamba",
+      "emoji": "🐍"
+    },
+    {
+      "name": "mammoth",
+      "emoji": "🦣"
+    },
+    {
+      "name": "manatee",
+      "emoji": "🐋"
+    },
+    {
+      "name": "mandrill",
+      "emoji": "🐒"
+    },
+    {
+      "name": "mantis",
+      "emoji": "🦗"
+    },
+    {
+      "name": "marlin",
+      "emoji": "🐟"
+    },
+    {
+      "name": "marmot",
+      "emoji": "🐁"
+    },
+    {
+      "name": "marten",
+      "emoji": "🦦"
+    },
+    {
+      "name": "mayfly",
+      "emoji": "🪰"
+    },
+    {
+      "name": "meerkat",
+      "emoji": "🦡"
+    },
+    {
+      "name": "merlin",
+      "emoji": "🦅"
+    },
+    {
+      "name": "mink",
+      "emoji": "🦦"
+    },
+    {
+      "name": "minnow",
+      "emoji": "🐟"
+    },
+    {
+      "name": "mite",
+      "emoji": "🐛"
+    },
+    {
+      "name": "mole",
+      "emoji": "🐁"
+    },
+    {
+      "name": "mongoose",
+      "emoji": "🦡"
+    },
+    {
+      "name": "monkey",
+      "emoji": "🐒"
+    },
+    {
+      "name": "moose",
+      "emoji": "🦌"
+    },
+    {
+      "name": "moth",
+      "emoji": "🦋"
+    },
+    {
+      "name": "mouse",
+      "emoji": "🐁"
+    },
+    {
+      "name": "mule",
+      "emoji": "🫏"
+    },
+    {
+      "name": "mullet",
+      "emoji": "🐟"
+    },
+    {
+      "name": "muskox",
+      "emoji": "🐂"
+    },
+    {
+      "name": "muskrat",
+      "emoji": "🐀"
+    },
+    {
+      "name": "mussel",
+      "emoji": "🐚"
+    },
+    {
+      "name": "narwhal",
+      "emoji": "🐋"
+    },
+    {
+      "name": "newt",
+      "emoji": "🦎"
+    },
+    {
+      "name": "ocelot",
+      "emoji": "🐆"
+    },
+    {
+      "name": "octopus",
+      "emoji": "🐙"
+    },
+    {
+      "name": "okapi",
+      "emoji": "🦒"
+    },
+    {
+      "name": "orca",
+      "emoji": "🐋"
+    },
+    {
+      "name": "oriole",
+      "emoji": "🐦"
+    },
+    {
+      "name": "oryx",
+      "emoji": "🦌"
+    },
+    {
+      "name": "osprey",
+      "emoji": "🦅"
+    },
+    {
+      "name": "ostrich",
+      "emoji": "🐦"
+    },
+    {
+      "name": "otter",
+      "emoji": "🦦"
+    },
+    {
+      "name": "owl",
+      "emoji": "🦉"
+    },
+    {
+      "name": "oyster",
+      "emoji": "🦪"
+    },
+    {
+      "name": "panda",
+      "emoji": "🐼"
+    },
+    {
+      "name": "pangolin",
+      "emoji": "🦔"
+    },
+    {
+      "name": "panther",
+      "emoji": "🐆"
+    },
+    {
+      "name": "parrot",
+      "emoji": "🦜"
+    },
+    {
+      "name": "peacock",
+      "emoji": "🦚"
+    },
+    {
+      "name": "pelican",
+      "emoji": "🐦"
+    },
+    {
+      "name": "penguin",
+      "emoji": "🐧"
+    },
+    {
+      "name": "perch",
+      "emoji": "🐟"
+    },
+    {
+      "name": "pheasant",
+      "emoji": "🐦"
+    },
+    {
+      "name": "pig",
+      "emoji": "🐖"
+    },
+    {
+      "name": "pigeon",
+      "emoji": "🕊️"
+    },
+    {
+      "name": "pika",
+      "emoji": "🐁"
+    },
+    {
+      "name": "pike",
+      "emoji": "🐟"
+    },
+    {
+      "name": "piranha",
+      "emoji": "🐟"
+    },
+    {
+      "name": "platypus",
+      "emoji": "🦆"
+    },
+    {
+      "name": "plover",
+      "emoji": "🐦"
+    },
+    {
+      "name": "polecat",
+      "emoji": "🦡"
+    },
+    {
+      "name": "pony",
+      "emoji": "🐴"
+    },
+    {
+      "name": "poodle",
+      "emoji": "🐩"
+    },
+    {
+      "name": "porpoise",
+      "emoji": "🐬"
+    },
+    {
+      "name": "possum",
+      "emoji": "🦘"
+    },
+    {
+      "name": "prawn",
+      "emoji": "🦐"
+    },
+    {
+      "name": "puffin",
+      "emoji": "🐦"
+    },
+    {
+      "name": "pug",
+      "emoji": "🐕"
+    },
+    {
+      "name": "puma",
+      "emoji": "🐆"
+    },
+    {
+      "name": "python",
+      "emoji": "🐍"
+    },
+    {
+      "name": "quail",
+      "emoji": "🐦"
+    },
+    {
+      "name": "quokka",
+      "emoji": "🦘"
+    },
+    {
+      "name": "rabbit",
+      "emoji": "🐇"
+    },
+    {
+      "name": "raccoon",
+      "emoji": "🦝"
+    },
+    {
+      "name": "ram",
+      "emoji": "🐏"
+    },
+    {
+      "name": "rat",
+      "emoji": "🐀"
+    },
+    {
+      "name": "raven",
+      "emoji": "🐦‍⬛"
+    },
+    {
+      "name": "ray",
+      "emoji": "🐟"
+    },
+    {
+      "name": "reindeer",
+      "emoji": "🦌"
+    },
+    {
+      "name": "rhino",
+      "emoji": "🦏"
+    },
+    {
+      "name": "robin",
+      "emoji": "🐦"
+    },
+    {
+      "name": "rook",
+      "emoji": "🐦‍⬛"
+    },
+    {
+      "name": "rooster",
+      "emoji": "🐓"
+    },
+    {
+      "name": "salmon",
+      "emoji": "🐟"
+    },
+    {
+      "name": "sardine",
+      "emoji": "🐟"
+    },
+    {
+      "name": "scallop",
+      "emoji": "🐚"
+    },
+    {
+      "name": "scorpion",
+      "emoji": "🦂"
+    },
+    {
+      "name": "seahorse",
+      "emoji": "🐠"
+    },
+    {
+      "name": "seal",
+      "emoji": "🦭"
+    },
+    {
+      "name": "shark",
+      "emoji": "🦈"
+    },
+    {
+      "name": "sheep",
+      "emoji": "🐑"
+    },
+    {
+      "name": "shrew",
+      "emoji": "🐁"
+    },
+    {
+      "name": "shrimp",
+      "emoji": "🦐"
+    },
+    {
+      "name": "skink",
+      "emoji": "🦎"
+    },
+    {
+      "name": "skunk",
+      "emoji": "🦨"
+    },
+    {
+      "name": "sloth",
+      "emoji": "🦥"
+    },
+    {
+      "name": "slug",
+      "emoji": "🐌"
+    },
+    {
+      "name": "snail",
+      "emoji": "🐌"
+    },
+    {
+      "name": "snake",
+      "emoji": "🐍"
+    },
+    {
+      "name": "snapper",
+      "emoji": "🐟"
+    },
+    {
+      "name": "snipe",
+      "emoji": "🐦"
+    },
+    {
+      "name": "spaniel",
+      "emoji": "🐕"
+    },
+    {
+      "name": "sparrow",
+      "emoji": "🐦"
+    },
+    {
+      "name": "spider",
+      "emoji": "🕷️"
+    },
+    {
+      "name": "sponge",
+      "emoji": "🧽"
+    },
+    {
+      "name": "squid",
+      "emoji": "🦑"
+    },
+    {
+      "name": "squirrel",
+      "emoji": "🐿️"
+    },
+    {
+      "name": "starfish",
+      "emoji": "⭐"
+    },
+    {
+      "name": "starling",
+      "emoji": "🐦"
+    },
+    {
+      "name": "stingray",
+      "emoji": "🐟"
+    },
+    {
+      "name": "stoat",
+      "emoji": "🦡"
+    },
+    {
+      "name": "stork",
+      "emoji": "🐦"
+    },
+    {
+      "name": "sturgeon",
+      "emoji": "🐟"
+    },
+    {
+      "name": "sunfish",
+      "emoji": "🐟"
+    },
+    {
+      "name": "swallow",
+      "emoji": "🐦"
+    },
+    {
+      "name": "swan",
+      "emoji": "🦢"
+    },
+    {
+      "name": "tadpole",
+      "emoji": "🐸"
+    },
+    {
+      "name": "tapir",
+      "emoji": "🐖"
+    },
+    {
+      "name": "tern",
+      "emoji": "🐦"
+    },
+    {
+      "name": "terrier",
+      "emoji": "🐕"
+    },
+    {
+      "name": "thrush",
+      "emoji": "🐦"
+    },
+    {
+      "name": "tiger",
+      "emoji": "🐅"
+    },
+    {
+      "name": "toad",
+      "emoji": "🐸"
+    },
+    {
+      "name": "tortoise",
+      "emoji": "🐢"
+    },
+    {
+      "name": "toucan",
+      "emoji": "🐦"
+    },
+    {
+      "name": "trout",
+      "emoji": "🐟"
+    },
+    {
+      "name": "tuna",
+      "emoji": "🐟"
+    },
+    {
+      "name": "turkey",
+      "emoji": "🦃"
+    },
+    {
+      "name": "turtle",
+      "emoji": "🐢"
+    },
+    {
+      "name": "urchin",
+      "emoji": "🐚"
+    },
+    {
+      "name": "viper",
+      "emoji": "🐍"
+    },
+    {
+      "name": "vole",
+      "emoji": "🐁"
+    },
+    {
+      "name": "vulture",
+      "emoji": "🦅"
+    },
+    {
+      "name": "wallaby",
+      "emoji": "🦘"
+    },
+    {
+      "name": "walrus",
+      "emoji": "🦭"
+    },
+    {
+      "name": "warbler",
+      "emoji": "🐦"
+    },
+    {
+      "name": "warthog",
+      "emoji": "🐗"
+    },
+    {
+      "name": "wasp",
+      "emoji": "🐝"
+    },
+    {
+      "name": "weasel",
+      "emoji": "🦡"
+    },
+    {
+      "name": "weevil",
+      "emoji": "🪲"
+    },
+    {
+      "name": "whale",
+      "emoji": "🐋"
+    },
+    {
+      "name": "whippet",
+      "emoji": "🐕"
+    },
+    {
+      "name": "wildcat",
+      "emoji": "🐈"
+    },
+    {
+      "name": "wolf",
+      "emoji": "🐺"
+    },
+    {
+      "name": "wombat",
+      "emoji": "🐨"
+    },
+    {
+      "name": "worm",
+      "emoji": "🪱"
+    },
+    {
+      "name": "wren",
+      "emoji": "🐦"
+    },
+    {
+      "name": "yak",
+      "emoji": "🐃"
+    },
+    {
+      "name": "zebra",
+      "emoji": "🦓"
+    }
+  ]
+}

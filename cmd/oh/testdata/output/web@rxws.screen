@@ -1,7 +1,7 @@
 === narrow ===
-Session 000000000000000000000000 started
- in 0s with 0 skills, 0 snippets, and ~8
-00t of context.
+Agent 000000000000000000000000 ready in
+0s with 0 skills, 0 snippets, and ~800t
+of context.
 
 
  what is the current go release, and
@@ -36,46 +36,42 @@ The web tools are refused, so I cannot
 read the notes until you grant access
 again.
 === one column ===
-S
+A
+g
 e
-s
-s
-i
-o
 n
-
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-s
 t
-a
+
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
 r
-t
 e
+a
 d
+y
 
 i
 n
@@ -651,14 +647,14 @@ i
 n
 .
 === tiny ===
-Session 0000
+Agent 000000
 000000000000
-00000000 sta
-rted in 0s w
-ith 0 skills
-, 0 snippets
-, and ~800t
-of context.
+000000 ready
+ in 0s with
+0 skills, 0
+snippets, an
+d ~800t of c
+ontext.
 
 
  what is the
@@ -724,7 +720,7 @@ you grant
 access
 again.
 === wide ===
-Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~800t of context.
+Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
 
 
  what is the current go release, and what does the blog say about it?

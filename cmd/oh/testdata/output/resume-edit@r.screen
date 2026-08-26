@@ -1,7 +1,7 @@
 === narrow ===
-Session 000000000000000000000000 started
- in 0s with 0 skills, 0 snippets, and ~8
-00t of context.
+Agent 000000000000000000000000 ready in
+0s with 0 skills, 0 snippets, and ~800t
+of context.
 
 
  have a look at that
@@ -14,46 +14,42 @@ edit target.txt ✗ 1L the filesystem i…
 
 The resumed edit completed.
 === one column ===
-S
+A
+g
 e
-s
-s
-i
-o
 n
-
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-s
 t
-a
+
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
 r
-t
 e
+a
 d
+y
 
 i
 n
@@ -209,14 +205,14 @@ e
 d
 .
 === tiny ===
-Session 0000
+Agent 000000
 000000000000
-00000000 sta
-rted in 0s w
-ith 0 skills
-, 0 snippets
-, and ~800t
-of context.
+000000 ready
+ in 0s with
+0 skills, 0
+snippets, an
+d ~800t of c
+ontext.
 
 
  have a look
@@ -235,7 +231,7 @@ The resumed
 edit
 completed.
 === wide ===
-Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~800t of context.
+Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
 
 
  have a look at that

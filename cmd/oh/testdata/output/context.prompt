@@ -7,6 +7,10 @@
 - The configured path /output is read-write and follows the workspace write state.
 - The shell may execute files at or under /commands.
 
+# Personality
+
+- Adopt the personality of the animal in your session name, and use its emoji liberally
+
 # Network
 
 - Networking is limited to the sandbox's private loopback interface

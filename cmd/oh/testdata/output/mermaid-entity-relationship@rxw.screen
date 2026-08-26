@@ -1,7 +1,7 @@
 === narrow ===
-Session 000000000000000000000000 started
- in 0s with 0 skills, 0 snippets, and ~8
-00t of context.
+Agent 000000000000000000000000 ready in
+0s with 0 skills, 0 snippets, and ~800t
+of context.
 
 
  show the customer data model
@@ -22,46 +22,42 @@ int customer_id FK
 }
 CUSTOMER ||--o{ ORDER : 1️⃣ places
 === one column ===
-S
+A
+g
 e
-s
-s
-i
-o
 n
-
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-0
-
-s
 t
-a
+
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
 r
-t
 e
+a
 d
+y
 
 i
 n
@@ -323,14 +319,14 @@ c
 e
 s
 === tiny ===
-Session 0000
+Agent 000000
 000000000000
-00000000 sta
-rted in 0s w
-ith 0 skills
-, 0 snippets
-, and ~800t
-of context.
+000000 ready
+ in 0s with
+0 skills, 0
+snippets, an
+d ~800t of c
+ontext.
 
 
  show the
@@ -362,7 +358,7 @@ CUSTOMER
 ||--o{ ORDER
 : 1️⃣ places
 === wide ===
-Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~800t of context.
+Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
 
 
  show the customer data model

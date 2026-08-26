@@ -2237,6 +2237,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"resume-mode":           {".ansi"},
 		"running":               {".ansi", ".screen"},
 		"segments":              {".ansi", ".screen"},
+		"startup":               {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}
@@ -3956,7 +3957,12 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 		}
 	}
 
-	passes["the startup line"] = func() string {
+	compareWithGolden(t, "banner", ".ansi", passes)
+	compareWithGolden(t, "banner", ".screen", shownPasses(t, passes))
+}
+
+func TestTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
+	line := func() string {
 		return startup.RenderBanner(1500*time.Microsecond, false, startup.Info{
 			Session:       "brave-otter",
 			PromptBytes:   740 + 3*1024,
@@ -3967,8 +3973,20 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 		})
 	}
 
-	compareWithGolden(t, "banner", ".ansi", passes)
-	compareWithGolden(t, "banner", ".screen", shownPasses(t, passes))
+	compareWithGolden(t, "startup", ".ansi", map[string]func() string{
+		"styled": line,
+	})
+
+	passes := map[string]func() string{}
+	for name, columns := range map[string]int{
+		"wide":       replayColumns,
+		"narrow":     narrowColumns,
+		"tiny":       tinyColumns,
+		"one column": oneColumn,
+	} {
+		passes[name] = func() string { return shown(t, line(), columns) }
+	}
+	compareWithGolden(t, "startup", ".screen", passes)
 }
 
 func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {

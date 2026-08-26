@@ -169,6 +169,14 @@ func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
 	}
 }
 
+func TestTheHarnessGivesTheSessionItsAnimalPersonality(t *testing.T) {
+	got := harnessContext("/workspace", "brave-otter", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
+
+	if !strings.Contains(got, "Adopt the personality of the animal in your session name") {
+		t.Errorf("harness context does not give the session its animal personality: %q", got)
+	}
+}
+
 func TestTheHarnessDisclosesWebAccess(t *testing.T) {
 	withheld := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
 	if !strings.Contains(withheld, "web search and fetch tools are refused") {

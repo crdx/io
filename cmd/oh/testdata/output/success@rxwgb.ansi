@@ -1,7 +1,7 @@
 === narrow ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started\r
- in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m8\r
-00\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m\r
+0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m \r
+of context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m have a look at that                    \e[0m\r
@@ -28,13 +28,11 @@
 \r\e[Koutput layer instead.\r
 \e[?25h\e[?2026l
 === one column ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mS\r
+\e[?2026h\e[?25l\e[38;2;150;152;150mA\r
+g\r
 e\r
-s\r
-s\r
-i\r
-o\r
-n\e[0m\e[38;2;150;152;150m\r
+n\r
+t\e[0m\e[38;2;150;152;150m\r
  \e[0m\r
 0\r
 0\r
@@ -61,13 +59,11 @@ n\e[0m\e[38;2;150;152;150m\r
 0\r
 0\e[38;2;150;152;150m\r
  \r
-s\r
-t\r
-a\r
 r\r
-t\r
 e\r
+a\r
 d\r
+y\r
  \r
 i\r
 n\r
@@ -498,7 +494,7 @@ t\e[0m\r
 \r\e[K.\r
 \e[?25h\e[?2026l
 === plain ===
-\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -517,7 +513,7 @@ read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[3
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 
 === streamed ===
-\e]9;4;3\e\\\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -539,14 +535,14 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r\e[Klayer\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klayer ins\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klayer instead\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Klayer instead.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m0000\r
+\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000\r
 000000000000\r
-00000000\e[38;2;150;152;150m sta\r
-rted in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m w\r
-ith \e[0m0\e[38;2;150;152;150m skills\r
-, \e[0m0\e[38;2;150;152;150m snippets\r
-, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m \r
-of context.\e[0m\r
+000000\e[38;2;150;152;150m ready\r
+ in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m\r
+0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m \r
+snippets, an\r
+d \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of c\r
+ontext.\e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m have a look\e[0m\r
@@ -603,7 +599,7 @@ of context.\e[0m\r
 \r\e[Kinstead.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -622,7 +618,7 @@ of context.\e[0m\r
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mSession\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m started in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r

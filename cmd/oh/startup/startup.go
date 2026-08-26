@@ -9,6 +9,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/util"
+	"crdx.org/io/session"
 )
 
 var startedAt = time.Now()
@@ -56,11 +57,14 @@ func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
 
 	var line strings.Builder
 
-	_, _ = line.WriteString(style.Subtle("Session"))
+	_, _ = line.WriteString(style.Subtle("Agent"))
 	if info.Session != "" {
 		_, _ = line.WriteString(style.Subtle(" ") + style.Normal(info.Session))
+		if emoji := session.Emoji(info.Session); emoji != "" {
+			_, _ = line.WriteString(style.Subtle(" ") + style.Normal(emoji))
+		}
 	}
-	_, _ = line.WriteString(style.Subtle(" started in ") + startupDuration(elapsed))
+	_, _ = line.WriteString(style.Subtle(" ready in ") + startupDuration(elapsed))
 	_, _ = line.WriteString(style.Subtle(" with "))
 	_, _ = line.WriteString(style.Normal(fmt.Sprint(info.ProjectSkills + info.GlobalSkills)))
 	_, _ = line.WriteString(style.Subtle(" skills, "))

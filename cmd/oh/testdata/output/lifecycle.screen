@@ -1,5 +1,5 @@
 === progress refreshed mid-turn ===
-Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~800t of context.
+Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
 
 
  have a look at that
@@ -22,7 +22,7 @@ layer instead.
 
 > ask something else
 === released and kept ===
-Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~800t of context.
+Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
 
 
  have a look at that
@@ -43,9 +43,9 @@ The prompt is drawn by layout, which wraps the buffer against the terminal width
 the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output
 layer instead.
 === released and unused ===
-Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~800t of context.
+Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
 === resized ===
-Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~800t of context.
+Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
 
 
  have a look at that
@@ -66,7 +66,7 @@ The prompt is drawn by layout, which wraps the buffer against the terminal width
 the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output
 layer instead.
 === resized mid-turn ===
-Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~800t of context.
+Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
 
 
  have a look at that
@@ -78,7 +78,7 @@ I'll have a look at how the editor draws its prompt.
 
 grep prompt *.go –
 === under a footer ===
-Session 000000000000000000000000 started in 0s with 0 skills, 0 snippets, and ~800t of context.
+Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
 
 
  have a look at that
