@@ -2,6 +2,7 @@ package migrate_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -261,6 +262,30 @@ func TestADryRunWritesNothing(t *testing.T) {
 	}
 	if _, err := session.ReadMeta(directory, name); err == nil {
 		t.Error("expected a dry run not to create metadata")
+	}
+}
+
+func TestAnInUseJournalIsNotMigrated(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter"}`,
+	)
+
+	heldLock, err := session.AcquireLock(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = heldLock.Release() }()
+
+	if _, err := migrate.Session(options(directory), name); !errors.Is(err, session.ErrInUse) {
+		t.Fatalf("expected an in-use session to be refused, got %v", err)
+	}
+
+	lines := journalLines(t, directory, name)
+	if _, numbered := lines[0]["version"]; numbered {
+		t.Error("expected the in-use journal to be left untouched")
+	}
+	if _, err := os.Stat(options(directory).BackupDir); !os.IsNotExist(err) {
+		t.Error("expected no backup of the in-use journal")
 	}
 }
 

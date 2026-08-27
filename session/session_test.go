@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"testing"
 
 	"crdx.org/io/agent"
@@ -390,6 +391,64 @@ func TestASessionReportsWhetherItIsInUse(t *testing.T) {
 	isInUse, err = session.IsInUse(directory, writer.Name())
 	if err != nil || isInUse {
 		t.Errorf("expected the closed session to be free, got %t and %v", isInUse, err)
+	}
+}
+
+func TestAcquiringABundleLockRefusesALockedJournal(t *testing.T) {
+	directory := t.TempDir()
+	writer := storedSession(t, directory)
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	journalPath := filepath.Join(directory, writer.Name(), "session.jsonl")
+	journal, err := os.Open(journalPath) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = journal.Close() }()
+
+	if err := syscall.Flock(int(journal.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
+		t.Fatal(err)
+	}
+
+	heldLock, err := session.AcquireLock(directory, writer.Name())
+	if !errors.Is(err, session.ErrInUse) {
+		if heldLock != nil {
+			_ = heldLock.Release()
+		}
+		t.Fatalf("expected the journal lock to be honoured, got %v", err)
+	}
+}
+
+func TestReplacingAnOpenJournalDoesNotVoidItsLock(t *testing.T) {
+	directory := t.TempDir()
+	writer := storedSession(t, directory)
+
+	journalPath := filepath.Join(directory, writer.Name(), "session.jsonl")
+	journal, err := os.ReadFile(journalPath) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	replacementPath := filepath.Join(directory, writer.Name(), "replacement.jsonl")
+	if err := os.WriteFile(replacementPath, journal, 0o600); err != nil { //nolint:gosec // the test's own path
+		t.Fatal(err)
+	}
+	if err := os.Rename(replacementPath, journalPath); err != nil {
+		t.Fatal(err)
+	}
+
+	second, err := session.Open(directory, writer.Name())
+	if !errors.Is(err, session.ErrInUse) {
+		if second != nil {
+			_ = second.Close()
+		}
+		t.Fatalf("expected the bundle lock to survive replacing the journal, got %v", err)
+	}
+
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
 	}
 }
 

@@ -50,6 +50,7 @@ type Line struct {
 
 type Writer struct {
 	file        *os.File
+	lock        *Lock
 	directory   string
 	id          string
 	name        string
@@ -82,6 +83,19 @@ var ErrInUse = errors.New("the session is already open elsewhere")
 
 var ErrNotFound = errors.New("no session named")
 
+type Lock struct {
+	sessionDir  *os.File
+	journalFile *os.File
+}
+
+func openSessionDir(directory string, name string) (*os.File, error) {
+	sessionDir, err := os.Open(sessionDir(directory, name))
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, fmt.Errorf("%w %q", ErrNotFound, name)
+	}
+	return sessionDir, err
+}
+
 func openJournal(directory string, name string, flag int) (*os.File, error) {
 	file, err := os.OpenFile(journalPath(directory, name), flag, 0o600)
 	if errors.Is(err, fs.ErrNotExist) {
@@ -90,53 +104,75 @@ func openJournal(directory string, name string, flag int) (*os.File, error) {
 	return file, err
 }
 
-func IsInUse(directory string, name string) (bool, error) {
+func AcquireLock(directory string, name string) (*Lock, error) {
+	return acquireLock(directory, name, os.O_RDONLY)
+}
+
+func acquireLock(directory string, name string, journalFlag int) (*Lock, error) {
 	if err := validateName(name); err != nil {
-		return false, err
+		return nil, err
 	}
 
-	file, err := openJournal(directory, name, os.O_RDONLY)
+	sessionDir, err := openSessionDir(directory, name)
+	if err != nil {
+		return nil, err
+	}
+	if err := lockFile(sessionDir); err != nil {
+		_ = sessionDir.Close()
+		return nil, err
+	}
+
+	journal, err := openJournal(directory, name, journalFlag)
+	if err != nil {
+		_ = sessionDir.Close()
+		return nil, err
+	}
+	if err := lockFile(journal); err != nil {
+		_ = journal.Close()
+		_ = sessionDir.Close()
+		return nil, err
+	}
+
+	return &Lock{sessionDir: sessionDir, journalFile: journal}, nil
+}
+
+func (self *Lock) Release() error {
+	return errors.Join(self.journalFile.Close(), self.sessionDir.Close())
+}
+
+func IsInUse(directory string, name string) (bool, error) {
+	heldLock, err := AcquireLock(directory, name)
+	if errors.Is(err, ErrInUse) {
+		return true, nil
+	}
 	if err != nil {
 		return false, err
 	}
-	defer func() { _ = file.Close() }()
 
-	if err := lockJournal(file); errors.Is(err, ErrInUse) {
-		return true, nil
-	} else if err != nil {
-		return false, err
-	}
-
-	return false, nil
+	return false, heldLock.Release()
 }
 
 func Open(directory string, name string) (*Writer, error) {
-	if err := validateName(name); err != nil {
+	heldLock, err := acquireLock(directory, name, os.O_WRONLY|os.O_APPEND)
+	if err != nil {
 		return nil, err
 	}
 
 	head, err := readHead(directory, name)
 	if err != nil {
+		_ = heldLock.Release()
 		return nil, err
 	}
 
 	listingMeta, err := ReadMeta(directory, name)
 	if err != nil {
-		return nil, err
-	}
-
-	file, err := openJournal(directory, name, os.O_WRONLY|os.O_APPEND)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := lockJournal(file); err != nil {
-		_ = file.Close()
+		_ = heldLock.Release()
 		return nil, err
 	}
 
 	return &Writer{
-		file:        file,
+		file:        heldLock.journalFile,
+		lock:        heldLock,
 		directory:   directory,
 		id:          head.ID,
 		name:        name,
@@ -146,7 +182,7 @@ func Open(directory string, name string) (*Writer, error) {
 	}, nil
 }
 
-func lockJournal(file *os.File) error {
+func lockFile(file *os.File) error {
 	err := syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
 	if errors.Is(err, syscall.EWOULDBLOCK) {
 		return ErrInUse
@@ -205,7 +241,11 @@ func (w *Writer) Close() error {
 	if w.file == nil {
 		return nil
 	}
-	return w.file.Close()
+	if w.lock == nil {
+		return w.file.Close()
+	}
+
+	return w.lock.Release()
 }
 
 func (w *Writer) write(line Line) (time.Time, error) {
@@ -220,31 +260,46 @@ func (w *Writer) ensureOpen() error {
 		return nil
 	}
 
-	directory := bundlePath(w.directory, w.name)
+	directory := sessionDir(w.directory, w.name)
 	if err := os.Mkdir(directory, 0o700); err != nil {
+		return err
+	}
+
+	sessionDir, err := openSessionDir(w.directory, w.name)
+	if err != nil {
+		_ = os.Remove(directory)
+		return err
+	}
+	if err := lockFile(sessionDir); err != nil {
+		_ = sessionDir.Close()
+		_ = os.Remove(directory)
 		return err
 	}
 
 	file, err := os.OpenFile(journalPath(w.directory, w.name), os.O_WRONLY|os.O_CREATE|os.O_EXCL|os.O_APPEND, 0o600)
 	if err != nil {
+		_ = sessionDir.Close()
 		_ = os.Remove(directory)
 		return err
 	}
 
-	if err := lockJournal(file); err != nil {
+	if err := lockFile(file); err != nil {
 		_ = file.Close()
+		_ = sessionDir.Close()
 		_ = os.Remove(file.Name())
 		_ = os.Remove(directory)
 		return err
 	}
 	w.file = file
+	w.lock = &Lock{sessionDir: sessionDir, journalFile: file}
 
 	started, err := w.record(Line{Kind: Head, Version: JournalFormat, ID: w.id, Name: w.name, Meta: w.journalMeta})
 	if err != nil {
-		_ = file.Close()
+		_ = w.lock.Release()
 		_ = os.Remove(file.Name())
 		_ = os.Remove(directory)
 		w.file = nil
+		w.lock = nil
 		return err
 	}
 	w.started = started
@@ -255,10 +310,11 @@ func (w *Writer) ensureOpen() error {
 		Touched: started,
 	}
 	if err := writeMeta(w.directory, w.listingMeta); err != nil {
-		_ = file.Close()
+		_ = w.lock.Release()
 		_ = os.Remove(file.Name())
 		_ = os.Remove(directory)
 		w.file = nil
+		w.lock = nil
 		return err
 	}
 
@@ -478,8 +534,8 @@ func writeMeta(directory string, meta Meta) error {
 		return err
 	}
 
-	bundle := bundlePath(directory, meta.Name)
-	file, err := os.CreateTemp(bundle, "meta-*.json")
+	sessionDir := sessionDir(directory, meta.Name)
+	file, err := os.CreateTemp(sessionDir, "meta-*.json")
 	if err != nil {
 		return err
 	}
@@ -681,14 +737,16 @@ const (
 	maxLine     = 16 << 20
 )
 
-func bundlePath(directory, name string) string { return filepath.Join(directory, name) }
+func sessionDir(directory, name string) string {
+	return filepath.Join(directory, name)
+}
 
 func journalPath(directory, name string) string {
-	return filepath.Join(bundlePath(directory, name), journalName)
+	return filepath.Join(sessionDir(directory, name), journalName)
 }
 
 func metaPath(directory, name string) string {
-	return filepath.Join(bundlePath(directory, name), metaName)
+	return filepath.Join(sessionDir(directory, name), metaName)
 }
 
 func validateName(name string) error {

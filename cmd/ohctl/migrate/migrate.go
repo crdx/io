@@ -94,6 +94,10 @@ func Run() error {
 
 	for _, name := range names {
 		from, err := Session(options, name)
+		if errors.Is(err, session.ErrInUse) {
+			fmt.Printf("%s %s %s\n", style.Subtle("skipped"), name, style.Subtle("in use"))
+			continue
+		}
 		if err != nil {
 			failures++
 			fmt.Fprintln(os.Stderr, style.Failure(name+": "+err.Error()))
@@ -189,6 +193,14 @@ type Options struct {
 func Session(options Options, name string) (int, error) {
 	directory := options.Directory
 	journalPath := filepath.Join(directory, name, "session.jsonl")
+
+	if !options.DryRun {
+		heldLock, err := session.AcquireLock(directory, name)
+		if err != nil {
+			return 0, err
+		}
+		defer func() { _ = heldLock.Release() }()
+	}
 
 	lines, fromFormat, err := readJournal(journalPath)
 	if err != nil {
