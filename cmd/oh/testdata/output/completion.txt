@@ -1,12 +1,9 @@
 === options ===
---add
 --caps
---from
 --help
 --list
 --model
 --resume
---sessions
 --tool
 --update
 --version

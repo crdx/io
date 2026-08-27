@@ -127,7 +127,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", model.Update(os.Stdout, endpointURL, modelCachePath, backend.ListModels)
 	}
 
-	if inputArgs.Sessions {
+	if inputArgs.IsSessionPicker {
 		return sessions.Choose(sessionsDir, os.Stdin, os.Stdout)
 	}
 

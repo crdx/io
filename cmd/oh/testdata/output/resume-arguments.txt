@@ -1,0 +1,4 @@
+"-r"                         picker=true  session=""
+"--resume"                   picker=true  session=""
+"-r chosen-lobster"          picker=false session="chosen-lobster"
+"--resume chosen-lobster"    picker=false session="chosen-lobster"

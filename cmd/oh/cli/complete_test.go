@@ -47,13 +47,13 @@ func TestCompletionRequestReadsTheKindAndWord(t *testing.T) {
 func TestOptionCompletionsComeFromTheUsage(t *testing.T) {
 	options := usageOptions(usage)
 
-	for _, wanted := range []string{"-r", "--resume", "--from", "-s", "--sessions", "-m", "--model", "-t", "--tool", "-l", "--list", "-h", "--help"} {
+	for _, wanted := range []string{"-r", "--resume", "-m", "--model", "-t", "--tool", "-l", "--list", "-h", "--help"} {
 		if !slices.Contains(options, wanted) {
 			t.Errorf("expected %q among %v", wanted, options)
 		}
 	}
 
-	for _, unwanted := range []string{"-", "--complete", "Options:"} {
+	for _, unwanted := range []string{"-", "-s", "--add", "--complete", "--from", "--sessions", "Options:"} {
 		if slices.Contains(options, unwanted) {
 			t.Errorf("did not expect %q among %v", unwanted, options)
 		}

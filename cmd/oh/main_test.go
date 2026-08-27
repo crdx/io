@@ -1201,6 +1201,47 @@ func TestCompletionProtocolMatchesTheGolden(t *testing.T) {
 	}
 }
 
+func TestResumeArgumentsMatchTheGolden(t *testing.T) {
+	originalArgs := os.Args
+	t.Cleanup(func() { os.Args = originalArgs })
+
+	cases := [][]string{
+		{"-r"},
+		{"--resume"},
+		{"-r", "chosen-lobster"},
+		{"--resume", "chosen-lobster"},
+	}
+
+	var output strings.Builder
+	for _, arguments := range cases {
+		os.Args = append([]string{"oh"}, arguments...)
+		input := cli.Bind()
+		fmt.Fprintf(
+			&output,
+			"%-28q picker=%-5t session=%q\n",
+			strings.Join(arguments, " "),
+			input.IsSessionPicker,
+			input.Session,
+		)
+	}
+
+	goldenPath := filepath.Join("testdata", "output", "resume-arguments.txt")
+	if *updateGoldens {
+		if err := os.WriteFile(goldenPath, []byte(output.String()), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		return
+	}
+
+	want, err := os.ReadFile(goldenPath) //nolint:gosec // fixed testdata path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if output.String() != string(want) {
+		t.Errorf("resume arguments differ from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, output.String(), want)
+	}
+}
+
 func configFrom(t *testing.T, body string) config.Config {
 	t.Helper()
 
@@ -2235,6 +2276,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"new-session":           {".txt"},
 		"pending-mode-messages": {".ansi", ".screen"},
 		"paste":                 {".ansi", ".screen"},
+		"resume-arguments":      {".txt"},
 		"resume-mode":           {".ansi"},
 		"running":               {".ansi", ".screen"},
 		"schedule":              {".ansi", ".screen"},

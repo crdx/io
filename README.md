@@ -81,11 +81,11 @@ for update, err := range assistant.Stream(ctx, "what is the weather in London?")
 
 ### oh
 
-A coding harness. Pass `-s` to choose and resume a stored session.
+A coding harness. Pass `-r` without a name to choose and resume a stored session.
 
 ```bash
 go run ./cmd/oh
-go run ./cmd/oh -s
+go run ./cmd/oh -r
 ```
 
 ### simulate

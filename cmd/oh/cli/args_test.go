@@ -1,7 +1,10 @@
 package cli
 
 import (
+	"errors"
+	"flag"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"testing"
@@ -9,6 +12,45 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/model"
 )
+
+const helpProcessVariable = "OH_TEST_HELP_PROCESS"
+
+var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
+
+func TestUsageMatchesTheGolden(t *testing.T) {
+	if os.Getenv(helpProcessVariable) != "" {
+		os.Args = []string{"oh", "--help"}
+		Bind()
+		return
+	}
+
+	command := exec.Command(os.Args[0], "-test.run=^TestUsageMatchesTheGolden$") //nolint:gosec // rerun this test binary as its help subprocess
+	command.Env = append(os.Environ(), helpProcessVariable+"=1")
+	output, err := command.CombinedOutput()
+	var exitError *exec.ExitError
+	if !errors.As(err, &exitError) || exitError.ExitCode() != 2 {
+		t.Fatalf("help process returned %v", err)
+	}
+
+	goldenPath := filepath.Join("testdata", "usage.txt")
+	if *updateGoldens {
+		if err := os.MkdirAll(filepath.Dir(goldenPath), 0o700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(goldenPath, output, 0o600); err != nil { //nolint:gosec // fixed testdata path
+			t.Fatal(err)
+		}
+		return
+	}
+
+	want, err := os.ReadFile(goldenPath) //nolint:gosec // fixed testdata path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(output) != string(want) {
+		t.Errorf("usage differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, output, want)
+	}
+}
 
 func modelCachePath() string {
 	return filepath.Join(os.Getenv("XDG_STATE_HOME"), "models.json")
@@ -62,8 +104,6 @@ func TestEveryOptionIsRead(t *testing.T) {
 		"-m", "deepseek@hi",
 		"-t", "read",
 		"--tool", "grep",
-		"--add", "/context/brief.md",
-		"--add", "/context/notes.txt",
 		"Use", "the", "brief.",
 	)
 
@@ -82,10 +122,6 @@ func TestEveryOptionIsRead(t *testing.T) {
 	if !slices.Equal(parsedOptions.Tools, []string{"read", "grep"}) {
 		t.Errorf("expected read and grep, got %v", parsedOptions.Tools)
 	}
-	wantAddedFiles := []string{"/context/brief.md", "/context/notes.txt"}
-	if !slices.Equal(parsedOptions.AddedFiles, wantAddedFiles) {
-		t.Errorf("got added files %q, want %q", parsedOptions.AddedFiles, wantAddedFiles)
-	}
 	if parsedOptions.Message != "Use the brief." {
 		t.Errorf("expected the caller's opening message, got %q", parsedOptions.Message)
 	}
@@ -99,7 +135,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 
 func TestModelSelectionRequiresModelAndEffort(t *testing.T) {
 	for _, selection := range []string{"model", "model@", "@high", "model@high@extra"} {
-		if _, err := (Input{Model: selection}).Parse(modelCachePath()); err == nil {
+		if _, err := (Input{inputFlags: inputFlags{Model: selection}}).Parse(modelCachePath()); err == nil {
 			t.Errorf("expected %q to be rejected", selection)
 		}
 	}
@@ -120,14 +156,16 @@ func TestANewConversationMayStartFromASession(t *testing.T) {
 }
 
 func TestASessionMayBeResumedWithAPromptBesideIt(t *testing.T) {
-	parsedOptions := parseOptions(t, "-r", "0347juX1xcrL9W0QKJe0cs", "carry", "on")
+	for _, argument := range []string{"-r", "--resume"} {
+		parsedOptions := parseOptions(t, argument, "0347juX1xcrL9W0QKJe0cs", "carry", "on")
 
-	if !parsedOptions.Resuming() {
-		t.Error("expected the session to be resumed")
-	}
+		if !parsedOptions.Resuming() {
+			t.Errorf("expected %s to resume the session", argument)
+		}
 
-	if parsedOptions.Message != "carry on" {
-		t.Errorf("expected the prompt beside it, got %q", parsedOptions.Message)
+		if parsedOptions.Message != "carry on" {
+			t.Errorf("expected the prompt beside %s, got %q", argument, parsedOptions.Message)
+		}
 	}
 }
 
@@ -147,10 +185,10 @@ func TestTheModelListIsAskedForOnItsOwn(t *testing.T) {
 	}
 }
 
-func TestTheSessionPickerIsAskedForOnItsOwn(t *testing.T) {
-	for _, argument := range []string{"--sessions", "-s"} {
-		if !bind(t, argument).Sessions {
-			t.Errorf("expected the session picker to be asked for by %s", argument)
+func TestTheSessionPickerIsAskedForByBareResumeOption(t *testing.T) {
+	for _, argument := range []string{"-r", "--resume"} {
+		if !bind(t, argument).IsSessionPicker {
+			t.Errorf("expected a bare %s to ask for the session picker", argument)
 		}
 	}
 }
@@ -228,8 +266,8 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 
 func TestAWorkspaceCannotBeGivenWhenContinuingAStoredSession(t *testing.T) {
 	for name, input := range map[string]Input{
-		"resume": {Session: "one", WorkspaceDir: "somewhere"},
-		"from":   {SourceSession: "one", WorkspaceDir: "somewhere"},
+		"resume": {inputFlags: inputFlags{Session: "one", WorkspaceDir: "somewhere"}},
+		"from":   {inputFlags: inputFlags{WorkspaceDir: "somewhere"}, SourceSession: "one"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			if _, err := input.Parse(modelCachePath()); err == nil {
@@ -240,14 +278,14 @@ func TestAWorkspaceCannotBeGivenWhenContinuingAStoredSession(t *testing.T) {
 }
 
 func TestASessionCannotBeResumedAndUsedAsTheSourceTogether(t *testing.T) {
-	input := Input{Session: "one", SourceSession: "another"}
+	input := Input{inputFlags: inputFlags{Session: "one"}, SourceSession: "another"}
 	if _, err := input.Parse(modelCachePath()); err == nil {
 		t.Error("expected an error")
 	}
 }
 
 func TestAModeNamedOnTheCommandLineCountsAsChosen(t *testing.T) {
-	opts := Input{Session: "one", Caps: "rx"}
+	opts := Input{inputFlags: inputFlags{Session: "one", Caps: "rx"}}
 	settledOptions, err := opts.Parse(modelCachePath())
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)

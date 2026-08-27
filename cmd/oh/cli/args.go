@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"crdx.org/duckopt/v2"
@@ -15,43 +16,39 @@ const defaultCapFlags = "rx"
 var usage = fmt.Sprintf(`oh — coding harness
 
 Usage:
-    $0 [options] [-t <tool>]... [--add <file>]... [<prompt>...]
+    $0 [options] [-t <tool>]... [<prompt>...]
 
 Options:
-    -d, --workspace <dir>                  Set working directory
-    -r, --resume <session>                 Resume the saved session by name
-    --from <session>                       Fork from a saved session
-    -s, --sessions                         Interactive session manager
-    -m, --model <provider/model@effort>    Set the provider, model, and reasoning effort
-    -c, --caps <flags>                     Capabilities: rxw bgs (read, exec, write, bg, git, web) (default: %s)
-    -t, --tool <tool>                      Override tool selection; may be repeated (all by default)
-    --add <file>                           Add a file to the agent scratch directory; may be repeated
-    -l, --list                             List the available models, then exit
-    -u, --update                           Update the cached model list, then exit
-    -v, --version                          Show version
-    -h, --help                             Show this help
-
-Environment:
-    OH_ENDPOINT_URL     Talk to somewhere other than the provider's default endpoint
+    -d, --workspace <dir>       Set working directory
+    -r, --resume [<session>]    Open the session picker, or resume a session by name
+    -m, --model <model>         Set the provider, model, and reasoning effort
+    -c, --caps <flags>          Set capability flags: rxw bgs (read, exec, write, bg, git, web) (default: %s)
+    -t, --tool <tool>           Set exclusive tool selection; may be repeated
+    -l, --list                  List the available models, then exit
+    -u, --update                Update the cached model list, then exit
+    -v, --version               Show version
+    -h, --help                  Show this help
 `, defaultCapFlags)
 
-// Input is the command line as accepted by duckopt.
-type Input struct {
-	Message       []string `docopt:"<prompt>"`
-	WorkspaceDir  string   `docopt:"--workspace"`
-	Session       string   `docopt:"--resume"`
-	SourceSession string   `docopt:"--from"`
-	Sessions      bool     `docopt:"--sessions"`
-	Model         string   `docopt:"--model"`
-	Caps          string   `docopt:"--caps"`
-	Tools         []string `docopt:"--tool"`
-	AddedFiles    []string `docopt:"--add"`
-	List          bool     `docopt:"--list"`
-	Update        bool     `docopt:"--update"`
-	Version       bool     `docopt:"--version"`
+type inputFlags struct {
+	Message         []string `docopt:"<prompt>"`
+	WorkspaceDir    string   `docopt:"--workspace"`
+	Session         string   `docopt:"--resume"`
+	IsSessionPicker bool     `docopt:"-r"`
+	Model           string   `docopt:"--model"`
+	Caps            string   `docopt:"--caps"`
+	Tools           []string `docopt:"--tool"`
+	List            bool     `docopt:"--list"`
+	Update          bool     `docopt:"--update"`
+	Version         bool     `docopt:"--version"`
 }
 
-// Options are the validated options needed to start or resume a conversation.
+type Input struct {
+	inputFlags
+
+	SourceSession string
+}
+
 type Options struct {
 	Message        string
 	WorkspaceDir   string
@@ -66,22 +63,42 @@ type Options struct {
 	AddedFiles     []string
 }
 
-// Bind reads and validates the process command line.
 func Bind() *Input {
-	return duckopt.MustBind[Input](usage, "$0")
+	originalArgs := os.Args
+	arguments := append([]string(nil), os.Args...)
+	var sourceSession string
+	isSessionPicker := false
+	for i := 1; i < len(arguments); i++ {
+		switch {
+		case (arguments[i] == "-r" || arguments[i] == "--resume") && (i+1 == len(arguments) || strings.HasPrefix(arguments[i+1], "-")):
+			isSessionPicker = true
+			arguments = append(arguments[:i], arguments[i+1:]...)
+			i--
+		case arguments[i] == "--from" && i+1 < len(arguments):
+			sourceSession = arguments[i+1]
+			arguments = append(arguments[:i], arguments[i+2:]...)
+			i--
+		case arguments[i] == "-r" && i+1 < len(arguments) && !strings.HasPrefix(arguments[i+1], "-"):
+			arguments[i] = "--resume"
+		}
+	}
+
+	os.Args = arguments
+	defer func() { os.Args = originalArgs }()
+
+	parsedFlags := duckopt.MustBind[inputFlags](usage, "$0")
+	parsedFlags.IsSessionPicker = isSessionPicker
+	return &Input{inputFlags: *parsedFlags, SourceSession: sourceSession}
 }
 
-// Resuming reports whether the options name a stored session to continue.
 func (self Options) Resuming() bool {
 	return self.Session != ""
 }
 
-// StartingFromSession reports whether a stored session supplies the new conversation's context.
 func (self Options) StartingFromSession() bool {
 	return self.SourceSession != ""
 }
 
-// Parse validates an input command line and resolves its requested model selection.
 func (self Input) Parse(modelCachePath string) (Options, error) {
 	options := Options{
 		WorkspaceDir:  self.WorkspaceDir,
@@ -89,7 +106,6 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 		Session:       self.Session,
 		SourceSession: self.SourceSession,
 		Tools:         self.Tools,
-		AddedFiles:    self.AddedFiles,
 	}
 
 	if self.Model != "" {
@@ -122,9 +138,6 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 	}
 	if options.StartingFromSession() && options.WorkspaceDir != "" {
 		return options, errors.New("a conversation started from a session takes its directory from that session")
-	}
-	if options.Resuming() && len(options.AddedFiles) > 0 {
-		return options, errors.New("files cannot be added to a resumed conversation")
 	}
 
 	if options.WorkspaceDir == "" {
