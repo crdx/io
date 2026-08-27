@@ -2,6 +2,7 @@ package sandbox
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -191,5 +192,52 @@ func TestAGrantThroughAnAdminSymlinkIsFollowed(t *testing.T) {
 	content, err := os.ReadFile(filepath.Join(linked, "content")) //nolint:gosec // the test's own link
 	if err != nil || string(content) != "visible" {
 		t.Errorf("the granted link got %q and %v", content, err)
+	}
+}
+
+func TestAConfinedProcessCannotReadItsOwnProc(t *testing.T) {
+	if !insideChildProcess() {
+		runAgainInChildProcess(t)
+		return
+	}
+
+	version, err := landlockVersion()
+	if err != nil {
+		t.Skipf("landlock cannot be asked here: %v", err)
+	}
+
+	if err := applyLandlock(grantingCoverage(Policy{}), version); err != nil {
+		t.Fatalf("could not enter the sandbox: %v", err)
+	}
+
+	if _, err := os.ReadFile("/proc/self/status"); err == nil {
+		t.Error("a confined process could read its own proc files")
+	}
+}
+
+func TestTheSupervisorCanReExecItsOwnBinary(t *testing.T) {
+	if !insideChildProcess() {
+		runAgainInChildProcess(t)
+		return
+	}
+
+	self, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	version, err := landlockVersion()
+	if err != nil {
+		t.Skipf("landlock cannot be asked here: %v", err)
+	}
+
+	policy := grantingCoverage(Policy{Exec: []string{self}})
+	if err := applyLandlock(policy, version); err != nil {
+		t.Fatalf("could not enter the sandbox: %v", err)
+	}
+
+	//nolint:gosec // the binary is this one, already running
+	if output, err := exec.Command(self, "-test.run=^$").CombinedOutput(); err != nil {
+		t.Errorf("the confined supervisor could not re-exec its binary: %v\n%s", err, output)
 	}
 }

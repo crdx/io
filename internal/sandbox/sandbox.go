@@ -31,7 +31,6 @@ var base = []grant{
 	{path: "/dev/full", rights: rightsWrite, isOptional: true},
 	{path: "/dev/random", rights: rightsRead, isOptional: true},
 	{path: "/dev/urandom", rights: rightsRead, isOptional: true},
-	{path: "/proc/self", rights: rightsRead, isOptional: true},
 }
 
 // Policy grants paths, environment, resources, and background behavior. Other paths and external

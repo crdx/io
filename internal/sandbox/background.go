@@ -23,6 +23,14 @@ import (
 
 const supervisorStatusFD = 3
 
+func selfExecutable() (string, error) {
+	path, err := os.Executable()
+	if err != nil {
+		return "", fmt.Errorf("could not resolve this binary: %w", err)
+	}
+	return path, nil
+}
+
 type supervisorStatus struct {
 	Result Result `json:"result"`
 	Error  string `json:"error,omitempty"`
@@ -42,6 +50,11 @@ func superviseSandboxed(encodedPolicy string) error {
 
 	report := func(result supervisorStatus) error {
 		return json.NewEncoder(status).Encode(result)
+	}
+
+	workerExecutable, err := selfExecutable()
+	if err != nil {
+		return report(supervisorStatus{Error: "could not find this binary to run the command"})
 	}
 
 	runtime.LockOSThread()
@@ -75,7 +88,7 @@ func superviseSandboxed(encodedPolicy string) error {
 		return report(supervisorStatus{Error: fmt.Sprintf("could not protect the supervisor: %v", err)})
 	}
 
-	worker := exec.Command(executable)
+	worker := exec.Command(workerExecutable) //nolint:gosec // the binary is this one, already running
 	worker.Stdin = os.Stdin
 	worker.Stdout = os.Stdout
 	worker.Stderr = os.Stderr
@@ -160,7 +173,6 @@ func resultFrom(state *os.ProcessState) Result {
 	return result
 }
 
-// Processes owns commands allowed to outlive a shell call.
 type Processes struct {
 	mutex             sync.Mutex
 	backgroundEnabled bool
@@ -172,19 +184,16 @@ type supervised struct {
 	doneSignal chan struct{}
 }
 
-// NewProcesses makes a process set in the given mode.
 func NewProcesses(backgroundEnabled bool) *Processes {
 	return &Processes{backgroundEnabled: backgroundEnabled, runningProcesses: map[*supervised]struct{}{}}
 }
 
-// Enable lets subsequent commands leave processes behind.
 func (self *Processes) Enable() {
 	self.mutex.Lock()
 	self.backgroundEnabled = true
 	self.mutex.Unlock()
 }
 
-// Disable prevents new background processes and kills every namespace the set owns.
 func (self *Processes) Disable() ([]string, error) {
 	self.mutex.Lock()
 	self.backgroundEnabled = false
@@ -311,7 +320,6 @@ func safeProcessName(processNameText string) string {
 	return name.String()
 }
 
-// Run confines a command and keeps its PID namespace while backgrounding is enabled.
 func (self *Processes) Run(
 	ctx context.Context,
 	directory string,
@@ -328,7 +336,12 @@ func (self *Processes) Run(
 	}
 
 	policy.Background = true
-	policy = policy.WithExec(executable)
+
+	path, err := selfExecutable()
+	if err != nil {
+		return Result{}, err
+	}
+	policy = policy.WithExec(path)
 
 	if err := validate(ctx, policy); err != nil {
 		return Result{}, err

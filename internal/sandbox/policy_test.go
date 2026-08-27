@@ -31,7 +31,7 @@ func TestAPolicyIsWritableOnlyBeyondItsScratch(t *testing.T) {
 func TestEveryPolicyGrantsWhatACommandNeedsToStart(t *testing.T) {
 	grants := Policy{}.grants()
 
-	for _, path := range []string{"/usr", "/lib", "/etc/passwd", "/dev/null", "/proc/self"} {
+	for _, path := range []string{"/usr", "/lib", "/etc/passwd", "/dev/null"} {
 		rights, granted := rightsFor(grants, path)
 		if !granted {
 			t.Errorf("%s was not granted at all", path)
@@ -40,6 +40,9 @@ func TestEveryPolicyGrantsWhatACommandNeedsToStart(t *testing.T) {
 		if rights&rightsRead != rightsRead {
 			t.Errorf("%s got rights %#x, want it readable", path, rights)
 		}
+	}
+	if _, granted := rightsFor(grants, "/proc/self"); granted {
+		t.Error("/proc/self was granted, pinning it to a single process")
 	}
 
 	if rights, _ := rightsFor(grants, "/usr"); rights&accessExecute == 0 {
