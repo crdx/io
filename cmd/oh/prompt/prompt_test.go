@@ -210,8 +210,8 @@ func TestTheScratchMappingIsWrittenInFull(t *testing.T) {
 	got := harnessContext("/workspace", "session-id", scratch, "/home/alice/.local/state/org.crdx/oh/home", caps.Read, shell.Paths{})
 
 	for _, want := range []string{
-		"/tmp maps to " + scratch + " on the user's machine",
-		"/tmp/result.png → " + scratch + "/result.png",
+		"It maps to " + scratch + " on the user's machine",
+		"/tmp/foo.png → " + scratch + "/foo.png",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("harness context does not contain %q: %q", want, got)
@@ -225,7 +225,7 @@ func TestTheHarnessDisclosesTheShellHome(t *testing.T) {
 	for _, want := range []string{
 		"path can only access the workspace, private home, and /tmp",
 		"HOME is /state/home",
-		"A ~ in the shell means that directory",
+		"A tilde (~) for you is not the same as for the user",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("harness context does not contain %q: %q", want, got)
@@ -287,15 +287,15 @@ func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
 		t.Errorf("expected the history to be reported as %q, got %q", want, system)
 	}
 
-	if !strings.Contains(system, "always "+filesystem(true)) {
+	if !strings.Contains(system, "which you can always read and write") {
 		t.Errorf("expected the scratch to be writable whatever the workspace is, got %q", system)
 	}
 
-	if !strings.Contains(system, "/tmp maps to /state/tmps/session on the user's machine") {
+	if !strings.Contains(system, "It maps to /state/tmps/session on the user's machine") {
 		t.Errorf("expected the scratch backing directory to be reported, got %q", system)
 	}
 
-	if !strings.Contains(system, "/tmp/result.png → /state/tmps/session/result.png") {
+	if !strings.Contains(system, "/tmp/foo.png → /state/tmps/session/foo.png") {
 		t.Errorf("expected an example translated scratch path, got %q", system)
 	}
 
