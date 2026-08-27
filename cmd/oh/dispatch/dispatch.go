@@ -2,6 +2,7 @@ package dispatch
 
 import (
 	"fmt"
+	"strings"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/slash"
@@ -9,7 +10,12 @@ import (
 
 type Result int
 
-const sendAsMessageHint = " (alt+enter sends as message)"
+const (
+	commandNotFoundMessage = "Command not found"
+	sendAsMessageHint      = " (alt+enter sends as message)"
+	snippetNotFoundMessage = "Snippet not found"
+	snippetPrefix          = "//"
+)
 
 const (
 	Ordinary Result = iota
@@ -36,7 +42,11 @@ func Handle(registry slash.Registry, actions Actions, message string) (Result, s
 		return Ordinary, ""
 	}
 
-	return Rejected, fmt.Sprintf("Command not found: %s%s", name, sendAsMessageHint)
+	notFoundMessage := commandNotFoundMessage
+	if strings.HasPrefix(name, snippetPrefix) {
+		notFoundMessage = snippetNotFoundMessage
+	}
+	return Rejected, fmt.Sprintf("%s: %s%s", notFoundMessage, name, sendAsMessageHint)
 }
 
 func (self Actions) Emit(event agent.Event) {

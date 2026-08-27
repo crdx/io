@@ -3472,10 +3472,13 @@ func TestATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
 		"a call still running": func() string { return replayWhileRunning(t, entries) },
 		"discarded reasoning":  func() string { return drawDiscardedReasoning(t) },
 		"unknown command during answer": func() string {
-			return drawUnknownCommandDuringStream(t, agent.ModelMessageEvent)
+			return drawUnknownSlashInputDuringStream(t, "/unknown", agent.ModelMessageEvent)
 		},
 		"unknown command during reasoning": func() string {
-			return drawUnknownCommandDuringStream(t, agent.ModelReasoningEvent)
+			return drawUnknownSlashInputDuringStream(t, "/unknown", agent.ModelReasoningEvent)
+		},
+		"unknown snippet during reasoning": func() string {
+			return drawUnknownSlashInputDuringStream(t, "//unknown", agent.ModelReasoningEvent)
 		},
 	}
 
@@ -3503,19 +3506,19 @@ func drawDiscardedReasoning(t *testing.T) string {
 	return strings.TrimSuffix(rig.drawn(), "\r\n")
 }
 
-func drawUnknownCommandDuringStream(t *testing.T, kind agent.Kind) string {
+func drawUnknownSlashInputDuringStream(t *testing.T, message string, kind agent.Kind) string {
 	t.Helper()
 
 	writer := &frameRecordingWriter{}
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.NewTerminalOfSize(writer, replayColumns, replayLines)
-	self.commands = fixtureCommandRegistry(t)
+	self.commands = fixtureSnippetRegistry(t, nil)
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 
 	history := edit.NewHistory("", historyLimit)
 	editor := edit.NewInput(history)
 	self.editor = editor
-	editor.SetText("/unknown")
+	editor.SetText(message)
 	self.show(editor)
 	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: kind, Text: "still working"})
 	framesBeforeCommand := len(writer.frames)
@@ -4994,7 +4997,7 @@ func TestUnknownSnippetShowsAnErrorAndKeepsTheInput(t *testing.T) {
 	if got := editor.Text(); got != "//unknown" {
 		t.Errorf("got input %q", got)
 	}
-	want := "Command not found: //unknown (alt+enter sends as message)"
+	want := "Snippet not found: //unknown (alt+enter sends as message)"
 	if len(self.events) != 1 || self.events[0].Text != want || self.events[0].Status != agent.ErrorStatus {
 		t.Errorf("got events %+v, want failed %q", self.events, want)
 	}
