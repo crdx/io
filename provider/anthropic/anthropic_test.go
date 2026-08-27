@@ -58,6 +58,7 @@ func thinkingDelta(index int, text string) string {
 		`"delta":{"type":"thinking_delta","thinking":%q}}`, index, text)
 }
 
+//nolint:unparam // the index is part of the shape, and every block helper here takes one
 func signatureDelta(index int, signature string) string {
 	return fmt.Sprintf(`{"type":"content_block_delta","index":%d,`+
 		`"delta":{"type":"signature_delta","signature":%q}}`, index, signature)
@@ -493,6 +494,16 @@ func TestCacheBreakpointsAreAppliedOnTheWayOutAndNeverStored(t *testing.T) {
 		t.Errorf("expected the four breakpoints the endpoint allows, got %d in %s", got, (*bodies)[0])
 	}
 
+	if !strings.Contains((*bodies)[0], `"cache_control":{"type":"ephemeral"},"system"`) {
+		t.Errorf("expected the conversation breakpoint to be left to the endpoint, got %s", (*bodies)[0])
+	}
+
+	for _, block := range requestBlocks(t, (*bodies)[0]) {
+		if _, isMarked := block["cache_control"]; isMarked {
+			t.Errorf("expected no breakpoint written into the conversation, got %v", block)
+		}
+	}
+
 	state, err := assistant.Dump()
 	if err != nil {
 		t.Fatal(err)
@@ -625,6 +636,68 @@ func TestAMalformedCallIsRetriedWithoutEnteringHistory(t *testing.T) {
 	if strings.Contains((*bodies)[1], "toolu_1") || strings.Contains((*bodies)[1], `{"city":"London",,}`) {
 		t.Errorf("expected the malformed call not to enter history, got %s", (*bodies)[1])
 	}
+}
+
+func TestAThoughtHeldForARetryIsNeverMarkedForCaching(t *testing.T) {
+	server, bodies := turns(
+		t,
+		script(
+			[]string{
+				messageStart,
+				thinkingStart(0),
+				thinkingDelta(0, "Asking about the weather first."),
+				signatureDelta(0, "seal-1"),
+				blockStop(0),
+			},
+			toolTurn(1, "toolu_1", "weather", `{"city":"London",,}`),
+			[]string{stop("tool_use"), messageStop},
+		),
+		script(answer("I corrected the call.")),
+	)
+
+	var callCount int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &callCount)})
+
+	if _, err := assistant.Send(t.Context(), "what is the weather?"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(*bodies) != 2 {
+		t.Fatalf("expected the malformed response to be retried once, got %d requests", len(*bodies))
+	}
+
+	retried := requestBlocks(t, (*bodies)[1])
+	if !slices.ContainsFunc(retried, func(block map[string]any) bool {
+		return block["type"] == "thinking"
+	}) {
+		t.Fatalf("expected the thought to be carried into the retry, got %s", (*bodies)[1])
+	}
+
+	for _, block := range retried {
+		if _, isMarked := block["cache_control"]; isMarked {
+			t.Errorf("expected the endpoint to place the breakpoint, got %v", block)
+		}
+	}
+}
+
+func requestBlocks(t *testing.T, body string) []map[string]any {
+	t.Helper()
+
+	var request struct {
+		Messages []struct {
+			Content []map[string]any `json:"content"`
+		} `json:"messages"`
+	}
+	if err := json.Unmarshal([]byte(body), &request); err != nil {
+		t.Fatal(err)
+	}
+
+	var blocks []map[string]any
+	for _, message := range request.Messages {
+		blocks = append(blocks, message.Content...)
+	}
+
+	return blocks
 }
 
 func TestAMalformedCallRejectsTheWholeResponse(t *testing.T) {

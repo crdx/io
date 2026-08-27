@@ -22,34 +22,11 @@ func merged(history []json.RawMessage) []message {
 	return joined
 }
 
-func cacheable(messages []message) []json.RawMessage {
-	if last := len(messages) - 1; last >= 0 {
-		content := messages[last].Content
-		if end := len(content) - 1; end >= 0 {
-			content[end] = withCacheControl(content[end])
-		}
-	}
-
+func encodeMessages(messages []message) []json.RawMessage {
 	encoded := make([]json.RawMessage, len(messages))
 	for i, item := range messages {
 		encoded[i] = encodeItem(item)
 	}
 
 	return encoded
-}
-
-func withCacheControl(block json.RawMessage) json.RawMessage {
-	var fields map[string]any
-	if json.Unmarshal(block, &fields) != nil {
-		return block
-	}
-
-	fields["cache_control"] = map[string]string{"type": "ephemeral"}
-
-	marked, err := json.Marshal(fields)
-	if err != nil {
-		return block
-	}
-
-	return marked
 }

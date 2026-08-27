@@ -222,11 +222,12 @@ func (self *Client) requestBody() request {
 		Model:           self.Model,
 		MaxOutputTokens: self.MaxOutputTokens,
 		Stream:          true,
+		Cache:           ephemeral(),
 		System:          self.system(),
 		Tools:           self.tools,
 		Thinking:        thinking{Type: "adaptive", Display: "summarized"},
 		Output:          outputConfig{Effort: self.Effort},
-		Messages:        cacheable(merged(self.history)),
+		Messages:        encodeMessages(merged(self.history)),
 	}
 }
 
@@ -258,6 +259,7 @@ type request struct {
 	Model           string            `json:"model"`
 	MaxOutputTokens int               `json:"max_tokens"`
 	Stream          bool              `json:"stream"`
+	Cache           *cacheControl     `json:"cache_control,omitempty"`
 	System          []textBlock       `json:"system,omitempty"`
 	Tools           []functionTool    `json:"tools,omitempty"`
 	Messages        []json.RawMessage `json:"messages"`

@@ -7560,6 +7560,57 @@ func resumeAppPlainTurn(t *testing.T, directory string, sessionName string) {
 	)
 }
 
+func TestNoRecordedRequestMarksAThoughtForCaching(t *testing.T) {
+	paths, err := filepath.Glob(filepath.Join("testdata", "output", "*.requests.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(paths) == 0 {
+		t.Fatal("no recorded requests")
+	}
+
+	for _, path := range paths {
+		t.Run(filepath.Base(path), func(t *testing.T) {
+			requests, err := os.ReadFile(path) //nolint:gosec // fixed testdata path
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			for line := range strings.SplitSeq(strings.TrimSpace(string(requests)), "\n") {
+				var request any
+				if err := json.Unmarshal([]byte(line), &request); err != nil {
+					t.Fatal(err)
+				}
+
+				for _, thought := range markedThoughts(request) {
+					t.Errorf("expected no cache breakpoint on a thought, got %v", thought)
+				}
+			}
+		})
+	}
+}
+
+func markedThoughts(node any) []map[string]any {
+	var found []map[string]any
+
+	switch node := node.(type) {
+	case map[string]any:
+		_, isMarked := node["cache_control"]
+		if isMarked && (node["type"] == "thinking" || node["type"] == "redacted_thinking") {
+			found = append(found, node)
+		}
+		for _, child := range node {
+			found = append(found, markedThoughts(child)...)
+		}
+	case []any:
+		for _, child := range node {
+			found = append(found, markedThoughts(child)...)
+		}
+	}
+
+	return found
+}
+
 func TestEverySessionGoldenOpensWithTheModeItIsIn(t *testing.T) {
 	paths, err := filepath.Glob(filepath.Join("testdata", "output", "*.jsonl"))
 	if err != nil {
