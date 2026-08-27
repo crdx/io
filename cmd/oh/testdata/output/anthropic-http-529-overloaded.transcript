@@ -18,23 +18,26 @@
 > 2001-01-01T00:00:01Z
 
 ```
-complete reasoning and then send an error
+ask while the endpoint is overloaded
 ```
 
-## Reasoning
+## Retrying
 
 > 2001-01-01T00:00:02Z
 
+- **Attempt:** `1`
+- **Waited:** `250ms`
+
 ```
-Completed thought.
+Overloaded
 ```
 
-## Failure
+## Assistant
 
 > 2001-01-01T00:00:03Z
 
 ```
-the request was rejected
+Through on the second attempt.
 ```
 
 ## User
@@ -42,7 +45,7 @@ the request was rejected
 > 2001-01-01T00:00:04Z
 
 ```
-continue after the transport failure
+carry on
 ```
 
 ## Assistant
@@ -50,6 +53,6 @@ continue after the transport failure
 > 2001-01-01T00:00:05Z
 
 ```
-Resumed.
+Carrying on.
 ```
 

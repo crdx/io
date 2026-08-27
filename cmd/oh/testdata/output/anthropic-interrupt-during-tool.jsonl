@@ -6,7 +6,7 @@
 {"kind":"event","event":{"kind":"interruption","text":"the user pressed escape"}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"interrupt while the tool is working"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_1","name":"work","input":{}}]}}
-{"kind":"item","payload":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_1","content":"compiling agent\nnote: the command was stopped after 12s because the user pressed escape."}]}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_1","content":"compiling agent\nnote: the command was stopped after 12s because the user pressed escape.","is_error":true}]}}
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"what did it manage to do"}}
 {"kind":"event","event":{"kind":"model_message","text":"It compiled the agent and then stopped."}}

@@ -453,6 +453,39 @@ func TestACallThatFailedWithSomethingToSaySaysItAndIsMarkedFailed(t *testing.T) 
 	}
 }
 
+func TestAFailedCallIsHandedBackToTheModelAsAFailure(t *testing.T) {
+	tests := map[string]struct {
+		calledTool  tool.Tool
+		wantIsError bool
+	}{
+		"a call that failed": {calledTool: failingTool(), wantIsError: true},
+		"a call that worked": {calledTool: plainOutputTool("done", nil), wantIsError: false},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			provider := &oneCallProvider{
+				call: agent.ToolCall{ID: "a", Name: test.calledTool.Name(), Arguments: `{}`},
+			}
+			assistant := agent.New("", provider, []tool.Tool{test.calledTool})
+
+			for _, err := range assistant.Stream(t.Context(), "go") {
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			if len(provider.results) != 1 {
+				t.Fatalf("expected one result, got %d", len(provider.results))
+			}
+
+			if provider.results[0].IsError != test.wantIsError {
+				t.Errorf("expected IsError %t, got %t", test.wantIsError, provider.results[0].IsError)
+			}
+		})
+	}
+}
+
 func TestASuccessfulCallIsMarkedSuccessful(t *testing.T) {
 	result := singleResult(t, plainOutputTool("done", nil))
 

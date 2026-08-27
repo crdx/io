@@ -2,6 +2,13 @@ package anthropic
 
 import "encoding/json"
 
+const (
+	userRole      = "user"
+	assistantRole = "assistant"
+
+	continueInstruction = "Your previous response was interrupted. Continue from where you left off."
+)
+
 func merged(history []json.RawMessage) []message {
 	joined := make([]message, 0, len(history))
 
@@ -20,6 +27,17 @@ func merged(history []json.RawMessage) []message {
 	}
 
 	return joined
+}
+
+func continued(messages []message) []message {
+	if last := len(messages) - 1; last < 0 || messages[last].Role != assistantRole {
+		return messages
+	}
+
+	return append(messages, message{
+		Role:    userRole,
+		Content: []json.RawMessage{encodeItem(textBlock{Type: "text", Text: continueInstruction})},
+	})
 }
 
 func encodeMessages(messages []message) []json.RawMessage {

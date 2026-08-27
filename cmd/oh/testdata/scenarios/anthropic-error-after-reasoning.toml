@@ -12,7 +12,7 @@ event = [
     '''{"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"Completed thought."}}''',
     '''{"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"seal-1"}}''',
     '''{"type":"content_block_stop","index":0}''',
-    '''{"type":"error","error":{"type":"overloaded_error","message":"provider overloaded"}}''',
+    '''{"type":"error","error":{"type":"invalid_request_error","message":"the request was rejected"}}''',
 ]
 
 [resume]

@@ -5960,6 +5960,23 @@ func newSessionGoldenAnthropicTokenSource(tokenError string) anthropic.TokenSour
 	return anthropic.Static("test-token")
 }
 
+func sessionGoldenProviderFor(
+	t *testing.T,
+	scenario sessionGoldenScenario,
+	endpoint string,
+	tokenError string,
+	sessionName string,
+) agent.Provider {
+	t.Helper()
+
+	provider := newSessionGoldenProvider(t, scenario, endpoint, tokenError)
+	if scoped, isScoped := provider.(interface{ UseSession(name string) }); isScoped {
+		scoped.UseSession(sessionName)
+	}
+
+	return provider
+}
+
 func newSessionGoldenProvider(
 	t *testing.T,
 	scenario sessionGoldenScenario,
@@ -6181,7 +6198,9 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 
 	firstAssistant := agent.New(
 		sessionGoldenSystemPrompt,
-		newSessionGoldenProvider(t, scenario, server.URL, scenario.FirstTokenError),
+		sessionGoldenProviderFor(
+			t, scenario, server.URL, scenario.FirstTokenError, log.Name(),
+		),
 		newSessionGoldenTools(t, scenario.Tools),
 	)
 	firstAssistant.TakeRetryWaitsAtOnce()
@@ -6212,7 +6231,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	}
 	resumedAssistant := agent.New(
 		storedSession.Meta.SystemPrompt,
-		newSessionGoldenProvider(t, scenario, server.URL, ""),
+		sessionGoldenProviderFor(t, scenario, server.URL, "", sessionName),
 		newSessionGoldenTools(t, scenario.Tools),
 	)
 	resumedAssistant.TakeRetryWaitsAtOnce()
@@ -6305,6 +6324,8 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 func canonicalProviderRequests(t *testing.T, requestBodies [][]byte) string {
 	t.Helper()
 
+	cacheKeys := map[string]string{}
+
 	var canonical bytes.Buffer
 	for _, requestBody := range requestBodies {
 		var request map[string]any
@@ -6312,7 +6333,12 @@ func canonicalProviderRequests(t *testing.T, requestBodies [][]byte) string {
 			t.Fatal(err)
 		}
 
-		delete(request, "prompt_cache_key")
+		if key, isKeyed := request["prompt_cache_key"].(string); isKeyed {
+			if _, isSeen := cacheKeys[key]; !isSeen {
+				cacheKeys[key] = fmt.Sprintf("session-%d", len(cacheKeys)+1)
+			}
+			request["prompt_cache_key"] = cacheKeys[key]
+		}
 		encoded, err := json.Marshal(request)
 		if err != nil {
 			t.Fatal(err)

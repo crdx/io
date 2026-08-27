@@ -2,7 +2,7 @@
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"complete reasoning and then send an error"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Completed thought."}}
-{"kind":"event","event":{"kind":"failure","text":"provider overloaded"}}
+{"kind":"event","event":{"kind":"failure","text":"the request was rejected"}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"complete reasoning and then send an error"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"thinking","thinking":"Completed thought.","signature":"seal-1"}]}}
 {"kind":"turn_completion"}

@@ -7,6 +7,7 @@ import (
 	"io"
 	"slices"
 	"strings"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/sse"
@@ -125,7 +126,7 @@ func (self *reply) assemble(shouldIncludeCalls bool) json.RawMessage {
 		return nil
 	}
 
-	return encodeItem(message{Role: "assistant", Content: blocks})
+	return encodeItem(message{Role: assistantRole, Content: blocks})
 }
 
 func (self *reply) validateToolInputs() error {
@@ -212,9 +213,33 @@ type eventError struct {
 	Message string `json:"message"`
 }
 
+var retriableFailures = map[string]bool{
+	"overloaded_error": true,
+	"api_error":        true,
+	"rate_limit_error": true,
+	"timeout_error":    true,
+}
+
+type streamError struct {
+	kind    string
+	message string
+}
+
+func (self *streamError) Error() string {
+	return self.message
+}
+
+func (self *streamError) Retriable() bool {
+	return retriableFailures[self.kind]
+}
+
+func (*streamError) RetryAfter() time.Duration {
+	return 0
+}
+
 func (self *event) failure(payload string) error {
 	if self.Error != nil && self.Error.Message != "" {
-		return errors.New(self.Error.Message)
+		return &streamError{kind: self.Error.Type, message: self.Error.Message}
 	}
 
 	return errors.New(payload)

@@ -280,6 +280,8 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
+	client.UseSession(log.Name())
+
 	sessionInfo = cycle.Session{
 		Name:         log.Name(),
 		ID:           log.ID(),

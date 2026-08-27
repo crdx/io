@@ -204,12 +204,15 @@ func (self *observedBody) finish(err error, incomplete bool) {
 	self.observer.Finish(time.Now(), err, incomplete)
 }
 
+const statusOverloaded = 529
+
 var retriableStatuses = map[int]bool{
 	http.StatusTooManyRequests:     true,
 	http.StatusInternalServerError: true,
 	http.StatusBadGateway:          true,
 	http.StatusServiceUnavailable:  true,
 	http.StatusGatewayTimeout:      true,
+	statusOverloaded:               true,
 }
 
 type StatusError struct {

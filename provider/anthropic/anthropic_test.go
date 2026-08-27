@@ -373,6 +373,7 @@ type wireToolResult struct {
 	Type      string          `json:"type"`
 	ToolUseID string          `json:"tool_use_id"`
 	Content   json.RawMessage `json:"content"`
+	IsError   bool            `json:"is_error"`
 }
 
 func toolResults(t *testing.T, body string) []wireToolResult {
@@ -638,6 +639,40 @@ func TestAMalformedCallIsRetriedWithoutEnteringHistory(t *testing.T) {
 	}
 }
 
+func TestAFailedCallIsMarkedAsOneOnTheWire(t *testing.T) {
+	server, bodies := turns(
+		t,
+		script(
+			[]string{messageStart},
+			toolTurn(0, "toolu_1", "weather", `{"city":"London"}`),
+			[]string{stop("tool_use"), messageStop},
+		),
+		script(answer("That did not work.")),
+	)
+
+	failing := tool.Implement(
+		tool.Definition{Name: "weather", Description: "report weather in a city", Schema: tool.Schema{}},
+		func(struct{}) (string, string) { return "", "" },
+	).Plain(func(context.Context, struct{}) (string, error) {
+		return "the city is not known", errors.New("lookup failed")
+	})
+
+	assistant := newAgent(t, server.URL, []tool.Tool{failing})
+
+	if _, err := assistant.Send(t.Context(), "what is the weather?"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	results := toolResults(t, (*bodies)[1])
+	if len(results) != 1 {
+		t.Fatalf("expected one result, got %v", results)
+	}
+
+	if !results[0].IsError {
+		t.Errorf("expected the failure to be marked, got %+v", results[0])
+	}
+}
+
 func TestAThoughtHeldForARetryIsNeverMarkedForCaching(t *testing.T) {
 	server, bodies := turns(
 		t,
@@ -677,6 +712,52 @@ func TestAThoughtHeldForARetryIsNeverMarkedForCaching(t *testing.T) {
 		if _, isMarked := block["cache_control"]; isMarked {
 			t.Errorf("expected the endpoint to place the breakpoint, got %v", block)
 		}
+	}
+}
+
+func TestARetriedRequestEndsWithAUserMessage(t *testing.T) {
+	server, bodies := turns(
+		t,
+		script(
+			[]string{
+				messageStart,
+				thinkingStart(0),
+				thinkingDelta(0, "Asking about the weather first."),
+				signatureDelta(0, "seal-1"),
+				blockStop(0),
+			},
+			toolTurn(1, "toolu_1", "weather", `{"city":"London",,}`),
+			[]string{stop("tool_use"), messageStop},
+		),
+		script(answer("I corrected the call.")),
+	)
+
+	var callCount int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &callCount)})
+
+	if _, err := assistant.Send(t.Context(), "what is the weather?"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(*bodies) != 2 {
+		t.Fatalf("expected the malformed response to be retried once, got %d requests", len(*bodies))
+	}
+
+	if last := lastMessage(t, (*bodies)[1]); last.Role != "user" {
+		t.Errorf("expected the retried conversation to end with a user message, got %q", last.Role)
+	}
+
+	if !strings.Contains((*bodies)[1], "Continue from where you left off.") {
+		t.Errorf("expected the model to be asked to carry on, got %s", (*bodies)[1])
+	}
+
+	state, err := assistant.Dump()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if held := heldConversation(state); strings.Contains(held, "Continue from where you left off.") {
+		t.Errorf("expected the instruction to stay out of the conversation, got %s", held)
 	}
 }
 
@@ -1145,13 +1226,36 @@ func TestSendRefusesAFrameItCannotRead(t *testing.T) {
 func TestSendShowsTheEndpointsOwnFailure(t *testing.T) {
 	server, _ := turns(
 		t,
-		events(`{"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}`),
+		events(`{"type":"error","error":{"type":"invalid_request_error","message":"Bad prompt"}}`),
 	)
 
 	assistant := newAgent(t, server.URL, nil)
 
-	if _, err := assistant.Send(t.Context(), "hello"); err == nil || err.Error() != "Overloaded" {
+	if _, err := assistant.Send(t.Context(), "hello"); err == nil || err.Error() != "Bad prompt" {
 		t.Errorf("expected the endpoint's own message, got %v", err)
+	}
+}
+
+func TestAnOverloadedStreamIsAskedAgain(t *testing.T) {
+	server, bodies := turns(
+		t,
+		events(`{"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}`),
+		script(answer("Through on the second attempt.")),
+	)
+
+	assistant := newAgent(t, server.URL, nil)
+
+	reply, err := assistant.Send(t.Context(), "hello")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if reply != "Through on the second attempt." {
+		t.Errorf("expected the second attempt to be handed back, got %q", reply)
+	}
+
+	if len(*bodies) != 2 {
+		t.Errorf("expected the overload to be asked again once, got %d requests", len(*bodies))
 	}
 }
 

@@ -3,6 +3,7 @@ package codex
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -64,6 +65,12 @@ func New(tokens TokenSource, model string, effort string) (*Client, error) {
 	}
 
 	return client, nil
+}
+
+// UseSession names the conversation this client is holding, so that the key its requests are cached
+// under is the same one every time the conversation is resumed.
+func (self *Client) UseSession(name string) {
+	self.session = sessionToken(name)
 }
 
 func Auth(model string, effort string) (*Client, error) {
@@ -264,4 +271,10 @@ func newToken() string {
 	_, _ = rand.Read(buffer)
 
 	return hex.EncodeToString(buffer)
+}
+
+func sessionToken(name string) string {
+	sum := sha256.Sum256([]byte(name))
+
+	return hex.EncodeToString(sum[:])
 }

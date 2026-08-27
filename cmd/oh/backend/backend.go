@@ -41,6 +41,16 @@ func (self *Connection) ObserveHTTP(observer req.Observer) {
 	self.Search.ObserveHTTP(observer)
 }
 
+type sessionScoped interface {
+	UseSession(name string)
+}
+
+func (self *Connection) UseSession(name string) {
+	if scoped, isScoped := self.Client.(sessionScoped); isScoped {
+		scoped.UseSession(name)
+	}
+}
+
 func Connect(choice model.Choice, effort string, endpoint string) (*Connection, error) {
 	connection, err := connectProvider(choice, effort, endpoint)
 	if err != nil {

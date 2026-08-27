@@ -90,7 +90,7 @@ func (self *Client) Configure(instructions string, tools []tool.Definition) {
 
 func (self *Client) AddUserMessage(text string) {
 	self.history = append(self.history, encodeItem(message{
-		Role:    "user",
+		Role:    userRole,
 		Content: []json.RawMessage{encodeItem(textBlock{Type: "text", Text: text})},
 	}))
 }
@@ -103,10 +103,11 @@ func (self *Client) AddToolResults(results []agent.ToolCallResult) {
 			Type:      "tool_result",
 			ToolUseID: result.ID,
 			Content:   encodeToolOutput(result),
+			IsError:   result.IsError,
 		}))
 	}
 
-	self.history = append(self.history, encodeItem(message{Role: "user", Content: blocks}))
+	self.history = append(self.history, encodeItem(message{Role: userRole, Content: blocks}))
 }
 
 func (self *Client) Dump() []json.RawMessage {
@@ -227,7 +228,7 @@ func (self *Client) requestBody() request {
 		Tools:           self.tools,
 		Thinking:        thinking{Type: "adaptive", Display: "summarized"},
 		Output:          outputConfig{Effort: self.Effort},
-		Messages:        encodeMessages(merged(self.history)),
+		Messages:        encodeMessages(continued(merged(self.history))),
 	}
 }
 
@@ -291,6 +292,7 @@ type toolResult struct {
 	Type      string `json:"type"`
 	ToolUseID string `json:"tool_use_id"`
 	Content   any    `json:"content"`
+	IsError   bool   `json:"is_error,omitempty"`
 }
 
 type imageBlock struct {

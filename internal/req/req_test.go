@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -126,10 +127,11 @@ func TestARefusalSaysWhetherAskingAgainIsWorthIt(t *testing.T) {
 		http.StatusBadGateway:          true,
 		http.StatusServiceUnavailable:  true,
 		http.StatusGatewayTimeout:      true,
+		529:                            true,
 	}
 
 	for status, worthIt := range tests {
-		t.Run(http.StatusText(status), func(t *testing.T) {
+		t.Run(strconv.Itoa(status), func(t *testing.T) {
 			url := refusingServer(t, status, `{"error":{"message":"no"}}`)
 
 			_, _, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)

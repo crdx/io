@@ -288,7 +288,7 @@ func cancelledResults(ctx context.Context, calls []ToolCall) []ToolCallResult {
 	output := CancelledOutput + stop.Phrase(ctx)
 
 	for i, call := range calls {
-		results[i] = ToolCallResult{ID: call.ID, Output: output}
+		results[i] = ToolCallResult{ID: call.ID, Output: output, IsError: true}
 	}
 
 	return results
@@ -424,9 +424,10 @@ func (self *Agent) runBatch(
 			}
 
 			results[i] = ToolCallResult{
-				ID:     item.rawToolCall.ID,
-				Output: executionResult.Output,
-				Image:  executionResult.Image,
+				ID:      item.rawToolCall.ID,
+				Output:  executionResult.Output,
+				Image:   executionResult.Image,
+				IsError: !ok,
 			}
 
 			if item.parsedToolCall != nil && executionResult.Stats.Kind == "" {

@@ -87,9 +87,10 @@ type ToolCall struct {
 }
 
 type ToolCallResult struct {
-	ID     string
-	Output string
-	Image  tool.Image
+	ID      string
+	Output  string
+	Image   tool.Image
+	IsError bool
 }
 
 type Kind string
