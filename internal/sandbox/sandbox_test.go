@@ -1082,3 +1082,49 @@ func TestADisabledSetKeepsNothingRunning(t *testing.T) {
 		t.Error("a disabled set left a process behind")
 	}
 }
+
+func TestAGrantThroughAModelSymlinkRefusesTheCommand(t *testing.T) {
+	requireLandlock(t)
+
+	home := t.TempDir()
+	victim := t.TempDir()
+	planted := filepath.Join(home, ".cache")
+	if err := os.Symlink(victim, planted); err != nil {
+		t.Fatal(err)
+	}
+
+	directory := t.TempDir()
+	command := "touch " + filepath.Join(victim, "pwned")
+
+	_, err := sandbox.Run(t.Context(), directory, command, sandbox.Policy{
+		Write: []string{home, planted},
+		Env:   []string{"PATH"},
+	})
+	if err == nil || !strings.Contains(err.Error(), "symbolic link") {
+		t.Errorf("got %v, want the planted link to refuse the command", err)
+	}
+
+	if _, statErr := os.Stat(filepath.Join(victim, "pwned")); statErr == nil {
+		t.Error("the redirected grant wrote outside the sandbox")
+	}
+}
+
+func TestARealCachePathStillGrantsWrite(t *testing.T) {
+	home := t.TempDir()
+	cache := filepath.Join(home, ".cache")
+	if err := os.Mkdir(cache, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	directory := t.TempDir()
+	kept := filepath.Join(cache, "kept")
+	result := run(t, directory, "printf kept > "+kept, sandbox.Policy{Write: []string{home, cache}})
+	if result.Code != 0 {
+		t.Fatalf("got exit status %d with output %q", result.Code, result.Output)
+	}
+
+	content, err := os.ReadFile(kept) //nolint:gosec // the test's own path
+	if err != nil || strings.TrimSpace(string(content)) != "kept" {
+		t.Errorf("got %q and %v", content, err)
+	}
+}

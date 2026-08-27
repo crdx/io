@@ -122,7 +122,7 @@ func applyLandlock(policy Policy, version int) error {
 			continue
 		}
 
-		if err := addRule(ruleset, grant.path, versionedRights(grant.rights, version, policy.Background)); err != nil {
+		if err := addRule(ruleset, grant.path, versionedRights(grant.rights, version, policy.Background), policy.Write); err != nil {
 			return err
 		}
 	}
@@ -138,8 +138,8 @@ func applyLandlock(policy Policy, version int) error {
 	return nil
 }
 
-func addRule(ruleset int, path string, rights uint64) error {
-	fd, err := unix.Open(path, unix.O_PATH|unix.O_CLOEXEC, 0)
+func addRule(ruleset int, path string, rights uint64, writableRoots []string) error {
+	fd, err := openGrantPath(path, writableRoots)
 	if err != nil {
 		return fmt.Errorf("could not grant access to %s: %w", path, err)
 	}

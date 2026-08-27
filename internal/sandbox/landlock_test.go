@@ -118,3 +118,78 @@ func TestAPathThatIsNotThereIsNamedWhenItIsGranted(t *testing.T) {
 		t.Errorf("got %v, want the path that could not be granted named", err)
 	}
 }
+
+func TestAGrantThroughAModelSymlinkIsRefused(t *testing.T) {
+	if !insideChildProcess() {
+		writeRoot := t.TempDir()
+		victim := t.TempDir()
+		planted := filepath.Join(writeRoot, ".cache")
+		if err := os.Symlink(victim, planted); err != nil {
+			t.Fatal(err)
+		}
+
+		runAgainInChildProcess(t, grantedVariable+"="+writeRoot)
+		return
+	}
+
+	writeRoot := os.Getenv(grantedVariable)
+	planted := filepath.Join(writeRoot, ".cache")
+
+	version, err := landlockVersion()
+	if err != nil {
+		t.Skipf("landlock cannot be asked here: %v", err)
+	}
+
+	err = applyLandlock(grantingCoverage(Policy{Write: []string{writeRoot, planted}}), version)
+	if err == nil {
+		t.Fatal("a grant through a symbolic link the model could have planted was accepted")
+	}
+	if !strings.Contains(err.Error(), planted) {
+		t.Errorf("got %v, want the planted link named", err)
+	}
+}
+
+func TestAGrantThroughAnAdminSymlinkIsFollowed(t *testing.T) {
+	if !insideChildProcess() {
+		root := t.TempDir()
+		realDir := filepath.Join(root, "real")
+		if err := os.Mkdir(realDir, 0o700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(realDir, "content"), []byte("visible"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Mkdir(filepath.Join(root, "scratch"), 0o700); err != nil {
+			t.Fatal(err)
+		}
+
+		linked := filepath.Join(root, "linked")
+		if err := os.Symlink(realDir, linked); err != nil {
+			t.Fatal(err)
+		}
+
+		runAgainInChildProcess(t, grantedVariable+"="+linked)
+		return
+	}
+
+	linked := os.Getenv(grantedVariable)
+	root := filepath.Dir(linked)
+
+	version, err := landlockVersion()
+	if err != nil {
+		t.Skipf("landlock cannot be asked here: %v", err)
+	}
+
+	policy := grantingCoverage(Policy{
+		Read:  []string{linked},
+		Write: []string{filepath.Join(root, "scratch")},
+	})
+	if err := applyLandlock(policy, version); err != nil {
+		t.Fatalf("a grant through a link the model could not have planted was refused: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(linked, "content")) //nolint:gosec // the test's own link
+	if err != nil || string(content) != "visible" {
+		t.Errorf("the granted link got %q and %v", content, err)
+	}
+}

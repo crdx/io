@@ -35,8 +35,9 @@ var base = []grant{
 }
 
 // Policy grants paths, environment, resources, and background behavior. Other paths and external
-// networks are denied. Read entries inside Write remain read-only, and TmpDir appears at /tmp.
-// VirtualResolver replaces the host resolver files with a deterministic private-loopback
+// networks are denied. Read entries inside Write remain read-only, and TmpDir appears at /tmp. A
+// grant may not pass through a symbolic link beneath a writable path, which the model could point
+// anywhere. VirtualResolver replaces the host resolver files with a deterministic private-loopback
 // configuration. Background policies run through Processes.
 type Policy struct {
 	Read            []string          `json:"read"`

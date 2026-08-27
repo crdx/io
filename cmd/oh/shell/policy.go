@@ -52,7 +52,7 @@ func execPaths(workspaceDir string) []string {
 	return paths
 }
 
-func furnish(homeDir string, sources []string) ([]string, error) {
+func furnish(homeDir string, sources []string, writableRoots []string) ([]string, error) {
 	granted := make([]string, 0, len(sources))
 
 	for _, source := range sources {
@@ -62,6 +62,10 @@ func furnish(homeDir string, sources []string) ([]string, error) {
 		}
 
 		target := filepath.Join(homeDir, relative)
+		if link, redirects := sandbox.FirstSymlinkBeneath(filepath.Dir(target), writableRoots); redirects {
+			return nil, fmt.Errorf("the shell home at %s passes through the symbolic link %s", target, link)
+		}
+
 		if err := os.MkdirAll(filepath.Dir(target), 0o700); err != nil {
 			return nil, err
 		}
@@ -111,16 +115,28 @@ func createPolicyWithSupportProbe(
 	supported supportProbe,
 ) (sandbox.Policy, error) {
 	cacheDir := filepath.Join(homeDir, ".cache")
+	writablePaths := allWritablePaths(workspaceDir, homeDir, extraPaths.Write, currentCaps)
+	writableRoots := slices.Concat(writablePaths, []string{cacheDir, tmpDir})
+
+	if link, redirects := sandbox.FirstSymlinkBeneath(cacheDir, writableRoots); redirects {
+		return sandbox.Policy{}, fmt.Errorf("the shell cache at %s passes through the symbolic link %s", cacheDir, link)
+	}
 	if err := os.MkdirAll(cacheDir, 0o700); err != nil {
 		return sandbox.Policy{}, fmt.Errorf("could not prepare the shell cache: %w", err)
 	}
 
 	lintCachePath := filepath.Join(".cache", goLintCacheDir)
-	if err := os.MkdirAll(filepath.Join(tmpDir, lintCachePath), 0o700); err != nil {
+	hostLintCachePath := filepath.Join(tmpDir, lintCachePath)
+	if link, redirects := sandbox.FirstSymlinkBeneath(hostLintCachePath, writableRoots); redirects {
+		return sandbox.Policy{}, fmt.Errorf(
+			"the shell lint cache at %s passes through the symbolic link %s", hostLintCachePath, link,
+		)
+	}
+	if err := os.MkdirAll(hostLintCachePath, 0o700); err != nil {
 		return sandbox.Policy{}, fmt.Errorf("could not prepare the shell lint cache: %w", err)
 	}
 
-	mappedPaths, err := furnish(homeDir, extraPaths.Home)
+	mappedPaths, err := furnish(homeDir, extraPaths.Home, writableRoots)
 	if err != nil {
 		return sandbox.Policy{}, fmt.Errorf("could not furnish the shell home: %w", err)
 	}
@@ -172,12 +188,11 @@ func createPolicyWithSupportProbe(
 		policy = policy.WithRead(proxyDir).WithSetEnv("GOPROXY", proxyURL)
 	}
 
-	writablePathsForPolicy := allWritablePaths(workspaceDir, homeDir, extraPaths.Write, currentCaps)
-	if len(writablePathsForPolicy) == 0 {
+	if len(writablePaths) == 0 {
 		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir, supported)
 	}
 
-	writablePolicy := grantWriteAccess(policy, writablePathsForPolicy)
+	writablePolicy := grantWriteAccess(policy, writablePaths)
 
 	if !currentCaps.Has(caps.Write) {
 		writablePolicy = writablePolicy.WithRead(workspaceDir)

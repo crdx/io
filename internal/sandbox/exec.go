@@ -243,6 +243,10 @@ func validate(ctx context.Context, policy Policy) error {
 		return err
 	}
 
+	if err := policy.grantPathsSafe(); err != nil {
+		return err
+	}
+
 	if absent := policy.missingPaths(); len(absent) > 0 {
 		return fmt.Errorf(
 			"the policy grants paths that do not exist: %s", strings.Join(absent, ", "),

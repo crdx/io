@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	"crdx.org/io/cmd/oh/caps"
@@ -611,7 +612,7 @@ func TestAMappedPathIsReadableAtTheSamePlaceInTheShellHome(t *testing.T) {
 	source := userHomeFile(t, filepath.Join(".config", "git", "ignore"), "*.tmp\n")
 	shellHome := t.TempDir()
 
-	granted, err := furnish(shellHome, []string{source})
+	granted, err := furnish(shellHome, []string{source}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -632,7 +633,7 @@ func TestAMappedPathIsReadableAtTheSamePlaceInTheShellHome(t *testing.T) {
 func TestNothingMappedLeavesTheShellHomeAlone(t *testing.T) {
 	shellHome := t.TempDir()
 
-	granted, err := furnish(shellHome, nil)
+	granted, err := furnish(shellHome, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -658,7 +659,7 @@ func TestAStaleLinkInTheShellHomeIsReplaced(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := furnish(shellHome, []string{source}); err != nil {
+	if _, err := furnish(shellHome, []string{source}, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -688,5 +689,55 @@ func TestAMappedPathReachesTheShellPolicy(t *testing.T) {
 
 	if !slices.Contains(policy.Read, source) {
 		t.Errorf("expected %s to be readable, got %v", source, policy.Read)
+	}
+}
+
+func TestASymlinkedCacheRefusesTheShellPolicy(t *testing.T) {
+	home := t.TempDir()
+	victim := t.TempDir()
+	planted := filepath.Join(home, ".cache")
+	if err := os.Symlink(victim, planted); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := createTestPolicy(t, t.TempDir(), home, t.TempDir(), Paths{}, caps.Write)
+	if err == nil || !strings.Contains(err.Error(), planted) {
+		t.Errorf("got %v, want the planted cache link named", err)
+	}
+}
+
+func TestASymlinkedLintCacheRefusesTheShellPolicy(t *testing.T) {
+	tmp := t.TempDir()
+	victim := t.TempDir()
+	planted := filepath.Join(tmp, ".cache")
+	if err := os.Symlink(victim, planted); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := createTestPolicy(t, t.TempDir(), t.TempDir(), tmp, Paths{}, caps.Read)
+	if err == nil || !strings.Contains(err.Error(), planted) {
+		t.Errorf("got %v, want the planted lint cache link named", err)
+	}
+}
+
+func TestAFurnishedHomeThroughAModelSymlinkIsRefused(t *testing.T) {
+	source := userHomeFile(t, filepath.Join(".config", "git", "ignore"), "*.tmp\n")
+	home := t.TempDir()
+	victim := t.TempDir()
+	planted := filepath.Join(home, ".config")
+	if err := os.Symlink(victim, planted); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := createTestPolicy(
+		t,
+		t.TempDir(),
+		home,
+		t.TempDir(),
+		Paths{Home: []string{source}},
+		caps.Write,
+	)
+	if err == nil || !strings.Contains(err.Error(), planted) {
+		t.Errorf("got %v, want the planted home link named", err)
 	}
 }
