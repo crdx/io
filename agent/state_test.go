@@ -22,8 +22,8 @@ func (*stateProvider) AddToolResults([]agent.ToolCallResult) {}
 func (*stateProvider) Send(context.Context, agent.Yield) (agent.Reply, error) {
 	return agent.Reply{}, nil
 }
-func (p *stateProvider) Dump() []json.RawMessage      { return slices.Clone(p.items) }
-func (p *stateProvider) Load(items []json.RawMessage) { p.items = slices.Clone(items) }
+func (self *stateProvider) Dump() []json.RawMessage      { return slices.Clone(self.items) }
+func (self *stateProvider) Load(items []json.RawMessage) { self.items = slices.Clone(items) }
 
 func TestAgentCarriesProviderState(t *testing.T) {
 	provider := &stateProvider{}

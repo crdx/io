@@ -60,8 +60,8 @@ const (
 	FragmentRect
 )
 
-func (f FragmentType) String() string {
-	switch f {
+func (self FragmentType) String() string {
+	switch self {
 	case FragmentLoop:
 		return "loop"
 	case FragmentOpt:
@@ -77,7 +77,7 @@ func (f FragmentType) String() string {
 	case FragmentRect:
 		return "rect"
 	default:
-		return fmt.Sprintf("FragmentType(%d)", int(f))
+		return fmt.Sprintf("FragmentType(%d)", int(self))
 	}
 }
 
@@ -109,8 +109,8 @@ const (
 	EventNote
 )
 
-func (k EventKind) String() string {
-	switch k {
+func (self EventKind) String() string {
+	switch self {
 	case EventMessage:
 		return "message"
 	case EventFragmentStart:
@@ -122,7 +122,7 @@ func (k EventKind) String() string {
 	case EventNote:
 		return "note"
 	default:
-		return fmt.Sprintf("EventKind(%d)", int(k))
+		return fmt.Sprintf("EventKind(%d)", int(self))
 	}
 }
 
@@ -183,8 +183,8 @@ const (
 	BidirectionalDotted
 )
 
-func (a ArrowType) String() string {
-	switch a {
+func (self ArrowType) String() string {
+	switch self {
 	case SolidArrow:
 		return "solid"
 	case DottedArrow:
@@ -206,24 +206,24 @@ func (a ArrowType) String() string {
 	case BidirectionalDotted:
 		return "bidirectional-dotted"
 	default:
-		return fmt.Sprintf("ArrowType(%d)", int(a))
+		return fmt.Sprintf("ArrowType(%d)", int(self))
 	}
 }
 
-func (a ArrowType) isDotted() bool {
-	switch a {
+func (self ArrowType) isDotted() bool {
+	switch self {
 	case DottedArrow, DottedOpen, DottedCross, DottedPoint, BidirectionalDotted:
 		return true
 	}
 	return false
 }
 
-func (a ArrowType) isBidirectional() bool {
-	return a == BidirectionalSolid || a == BidirectionalDotted
+func (self ArrowType) isBidirectional() bool {
+	return self == BidirectionalSolid || self == BidirectionalDotted
 }
 
-func (a ArrowType) head(chars BoxChars, rightward bool) (rune, bool) {
-	switch a {
+func (self ArrowType) head(chars BoxChars, rightward bool) (rune, bool) {
+	switch self {
 	case SolidArrow, DottedArrow, BidirectionalSolid, BidirectionalDotted:
 		if rightward {
 			return chars.ArrowRight, true
@@ -390,7 +390,7 @@ func Parse(input string) (*SequenceDiagram, error) {
 	return sd, nil
 }
 
-func (sd *SequenceDiagram) parseParticipant(line string, participants map[string]*Participant) (bool, error) {
+func (self *SequenceDiagram) parseParticipant(line string, participants map[string]*Participant) (bool, error) {
 	match := participantRegex.FindStringSubmatch(line)
 	if match == nil {
 		return false, nil
@@ -418,9 +418,9 @@ func (sd *SequenceDiagram) parseParticipant(line string, participants map[string
 	p := &Participant{
 		ID:    id,
 		Label: label,
-		Index: len(sd.Participants),
+		Index: len(self.Participants),
 	}
-	sd.Participants = append(sd.Participants, p)
+	self.Participants = append(self.Participants, p)
 	participants[id] = p
 	return true, nil
 }
@@ -511,14 +511,14 @@ func splitMessage(line string) (parsedMessage, bool) {
 	}, true
 }
 
-func (sd *SequenceDiagram) parseMessage(line string, participants map[string]*Participant) bool {
+func (self *SequenceDiagram) parseMessage(line string, participants map[string]*Participant) bool {
 	parsed, ok := splitMessage(line)
 	if !ok {
 		return false
 	}
 
-	from := sd.getParticipant(parsed.fromID, participants)
-	to := sd.getParticipant(parsed.toID, participants)
+	from := self.getParticipant(parsed.fromID, participants)
+	to := self.getParticipant(parsed.toID, participants)
 
 	var aType ArrowType
 	switch parsed.arrow {
@@ -545,8 +545,8 @@ func (sd *SequenceDiagram) parseMessage(line string, participants map[string]*Pa
 	}
 
 	msgNumber := 0
-	if sd.Autonumber {
-		msgNumber = len(sd.Messages) + 1
+	if self.Autonumber {
+		msgNumber = len(self.Messages) + 1
 	}
 
 	msg := &Message{
@@ -558,12 +558,12 @@ func (sd *SequenceDiagram) parseMessage(line string, participants map[string]*Pa
 		CentralTo:   parsed.centralTo,
 		Number:      msgNumber,
 	}
-	sd.Messages = append(sd.Messages, msg)
-	sd.Events = append(sd.Events, Event{Kind: EventMessage, Message: msg})
+	self.Messages = append(self.Messages, msg)
+	self.Events = append(self.Events, Event{Kind: EventMessage, Message: msg})
 	return true
 }
 
-func (sd *SequenceDiagram) getParticipant(id string, participants map[string]*Participant) *Participant {
+func (self *SequenceDiagram) getParticipant(id string, participants map[string]*Participant) *Participant {
 	if p, exists := participants[id]; exists {
 		return p
 	}
@@ -571,9 +571,9 @@ func (sd *SequenceDiagram) getParticipant(id string, participants map[string]*Pa
 	p := &Participant{
 		ID:    id,
 		Label: id,
-		Index: len(sd.Participants),
+		Index: len(self.Participants),
 	}
-	sd.Participants = append(sd.Participants, p)
+	self.Participants = append(self.Participants, p)
 	participants[id] = p
 	return p
 }

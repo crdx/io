@@ -13,33 +13,33 @@ type edge struct {
 	endDir          direction
 }
 
-func (g *graph) determinePath(e *edge) {
+func (self *graph) determinePath(e *edge) {
 	key := newEdgePair(e.from.index, e.to.index)
-	duplicateIndex := g.edgeCounts[key]
+	duplicateIndex := self.edgeCounts[key]
 
-	if startDir, endDir, ok := g.parallelDirections(e, duplicateIndex); ok {
+	if startDir, endDir, ok := self.parallelDirections(e, duplicateIndex); ok {
 		from := e.from.gridCoord.Direction(startDir)
 		to := e.to.gridCoord.Direction(endDir)
-		if path, err := g.getPath(from, to); err == nil {
+		if path, err := self.getPath(from, to); err == nil {
 			e.startDir = startDir
 			e.endDir = endDir
 			e.path = mergePath(path)
-			g.edgeCounts[key]++
+			self.edgeCounts[key]++
 			return
 		}
 	}
 
-	preferredDir, preferredOppositeDir, alternativeDir, alternativeOppositeDir := g.determineStartAndEndDir(e)
+	preferredDir, preferredOppositeDir, alternativeDir, alternativeOppositeDir := self.determineStartAndEndDir(e)
 	preferredFrom := e.from.gridCoord.Direction(preferredDir)
 	preferredTo := e.to.gridCoord.Direction(preferredOppositeDir)
-	preferredPath, preferredError := g.getPath(preferredFrom, preferredTo)
+	preferredPath, preferredError := self.getPath(preferredFrom, preferredTo)
 	if preferredError == nil {
 		preferredPath = mergePath(preferredPath)
 	}
 
 	alternativeFrom := e.from.gridCoord.Direction(alternativeDir)
 	alternativeTo := e.to.gridCoord.Direction(alternativeOppositeDir)
-	alternativePath, alternativeError := g.getPath(alternativeFrom, alternativeTo)
+	alternativePath, alternativeError := self.getPath(alternativeFrom, alternativeTo)
 	if alternativeError == nil {
 		alternativePath = mergePath(alternativePath)
 	}
@@ -56,22 +56,22 @@ func (g *graph) determinePath(e *edge) {
 	default:
 		return
 	}
-	g.edgeCounts[key]++
+	self.edgeCounts[key]++
 }
 
-func (g *graph) parallelDirections(e *edge, duplicateIndex int) (direction, direction, bool) {
+func (self *graph) parallelDirections(e *edge, duplicateIndex int) (direction, direction, bool) {
 	if duplicateIndex == 0 {
 		return Middle, Middle, false
 	}
 
 	dir := determineDirection(genericCoord(*e.from.gridCoord), genericCoord(*e.to.gridCoord))
 	switch {
-	case g.graphDirection == "LR" && (dir == Right || dir == Left):
+	case self.graphDirection == "LR" && (dir == Right || dir == Left):
 		options := [][2]direction{{Down, Down}, {Up, Up}}
 		if duplicateIndex-1 < len(options) {
 			return options[duplicateIndex-1][0], options[duplicateIndex-1][1], true
 		}
-	case g.graphDirection == "TD" && (dir == Down || dir == Up):
+	case self.graphDirection == "TD" && (dir == Down || dir == Up):
 		options := [][2]direction{{Right, Right}, {Left, Left}}
 		if duplicateIndex-1 < len(options) {
 			return options[duplicateIndex-1][0], options[duplicateIndex-1][1], true
@@ -81,7 +81,7 @@ func (g *graph) parallelDirections(e *edge, duplicateIndex int) (direction, dire
 	return Middle, Middle, false
 }
 
-func (g *graph) determineLabelLine(e *edge) {
+func (self *graph) determineLabelLine(e *edge) {
 	lenLabel := runewidth.StringWidth(e.text)
 	if lenLabel == 0 {
 		return
@@ -94,8 +94,8 @@ func (g *graph) determineLabelLine(e *edge) {
 	for _, step := range e.path[1:] {
 		line := []gridCoord{prevStep, step}
 		prevStep = step
-		lineWidth := g.calculateLineWidth(line)
-		if g.isNodeColumn(labelMiddleX(line)) {
+		lineWidth := self.calculateLineWidth(line)
+		if self.isNodeColumn(labelMiddleX(line)) {
 			if lineWidth > fallbackLineSize {
 				fallbackLineSize = lineWidth
 				fallbackLine = line
@@ -123,7 +123,7 @@ func (g *graph) determineLabelLine(e *edge) {
 	if e.isBidirectional {
 		labelPadding = 4
 	}
-	g.columnWidth[middleX] = Max(g.columnWidth[middleX], lenLabel+labelPadding)
+	self.columnWidth[middleX] = Max(self.columnWidth[middleX], lenLabel+labelPadding)
 	e.labelLine = largestLine
 }
 
@@ -135,8 +135,8 @@ func labelMiddleX(line []gridCoord) int {
 	return minX + (maxX-minX)/2
 }
 
-func (g *graph) isNodeColumn(x int) bool {
-	for _, n := range g.nodes {
+func (self *graph) isNodeColumn(x int) bool {
+	for _, n := range self.nodes {
 		if n.gridCoord == nil {
 			continue
 		}
@@ -147,10 +147,10 @@ func (g *graph) isNodeColumn(x int) bool {
 	return false
 }
 
-func (g *graph) calculateLineWidth(line []gridCoord) int {
+func (self *graph) calculateLineWidth(line []gridCoord) int {
 	totalSize := 0
 	for _, c := range line {
-		totalSize += g.columnWidth[c.x]
+		totalSize += self.columnWidth[c.x]
 	}
 	return totalSize
 }

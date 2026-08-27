@@ -62,7 +62,7 @@ build:
     go build -trimpath -o dist/ohctl ./cmd/ohctl
 
 check:
-    steps fmt vet lint1 lint2 mega test
+    steps fmt vet lint1 lint2 lint3 mega test
 
 # download the API references for each provider
 refs:
@@ -113,3 +113,7 @@ lint2:
         echo "$OUTPUT"
         exit 1
     fi
+
+[private]
+lint3:
+    fd -tf -e go -X go run ./internal/lint/receivername

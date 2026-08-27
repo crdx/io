@@ -34,27 +34,27 @@ type styleClass struct {
 	styles map[string]string
 }
 
-func (g *graph) drawNode(n *node) {
-	m := g.mergeDrawings(g.drawing, *n.drawingCoord, n.drawing)
-	g.drawing = m
+func (self *graph) drawNode(n *node) {
+	m := self.mergeDrawings(self.drawing, *n.drawingCoord, n.drawing)
+	self.drawing = m
 }
 
-func (g *graph) drawEdge(e *edge) (*drawing, *drawing, *drawing, *drawing, *drawing) {
-	return g.drawArrow(e)
+func (self *graph) drawEdge(e *edge) (*drawing, *drawing, *drawing, *drawing, *drawing) {
+	return self.drawArrow(e)
 }
 
-func (d *drawing) drawText(start drawingCoord, text string) {
+func (self *drawing) drawText(start drawingCoord, text string) {
 	cells := runewidth.Cells(text)
-	d.increaseSize(start.x+len(cells), start.y)
+	self.increaseSize(start.x+len(cells), start.y)
 	for i, cell := range cells {
-		(*d)[start.x+i][start.y] = cell
+		(*self)[start.x+i][start.y] = cell
 	}
 }
 
-func (g *graph) drawLine(d *drawing, from drawingCoord, to drawingCoord, offsetFrom int, offsetTo int) []drawingCoord {
+func (self *graph) drawLine(d *drawing, from drawingCoord, to drawingCoord, offsetFrom int, offsetTo int) []drawingCoord {
 	direction := determineDirection(genericCoord(from), genericCoord(to))
 	vertical, horizontal, rising, falling := "│", "─", "╱", "╲"
-	if g.useAscii {
+	if self.useAscii {
 		vertical, horizontal, rising, falling = "|", "-", "/", "\\"
 	}
 
@@ -230,29 +230,29 @@ func wrapTextInColor(text, c, styleType string) string {
 	}
 }
 
-func (d *drawing) increaseSize(x int, y int) {
-	currSizeX, currSizeY := getDrawingSize(d)
+func (self *drawing) increaseSize(x int, y int) {
+	currSizeX, currSizeY := getDrawingSize(self)
 	drawingWithNewSize := mkDrawing(Max(x, currSizeX), Max(y, currSizeY))
 	for x := range len(*drawingWithNewSize) {
 		for y := range len((*drawingWithNewSize)[0]) {
-			if x < len(*d) && y < len((*d)[0]) {
-				(*drawingWithNewSize)[x][y] = (*d)[x][y]
+			if x < len(*self) && y < len((*self)[0]) {
+				(*drawingWithNewSize)[x][y] = (*self)[x][y]
 			}
 		}
 	}
-	*d = *drawingWithNewSize
+	*self = *drawingWithNewSize
 }
 
-func (g *graph) setDrawingSizeToGridConstraints() {
+func (self *graph) setDrawingSizeToGridConstraints() {
 	maxX := 0
 	maxY := 0
-	for _, w := range g.columnWidth {
+	for _, w := range self.columnWidth {
 		maxX += w
 	}
-	for _, h := range g.rowHeight {
+	for _, h := range self.rowHeight {
 		maxY += h
 	}
-	g.drawing.increaseSize(maxX-1, maxY-1)
+	self.drawing.increaseSize(maxX-1, maxY-1)
 }
 
 func mergeJunctions(c1, c2 string) string {
@@ -276,7 +276,7 @@ func mergeJunctions(c1, c2 string) string {
 	return c1
 }
 
-func (g *graph) mergeDrawings(baseDrawing *drawing, mergeCoord drawingCoord, drawings ...*drawing) *drawing {
+func (self *graph) mergeDrawings(baseDrawing *drawing, mergeCoord drawingCoord, drawings ...*drawing) *drawing {
 	maxX, maxY := getDrawingSize(baseDrawing)
 	for _, d := range drawings {
 		if d == nil {
@@ -306,7 +306,7 @@ func (g *graph) mergeDrawings(baseDrawing *drawing, mergeCoord drawingCoord, dra
 				c := (*d)[x][y]
 				if c != " " {
 					currentChar := (*mergedDrawing)[x+mergeCoord.x][y+mergeCoord.y]
-					if !g.useAscii && isJunctionChar(c) && isJunctionChar(currentChar) {
+					if !self.useAscii && isJunctionChar(c) && isJunctionChar(currentChar) {
 						(*mergedDrawing)[x+mergeCoord.x][y+mergeCoord.y] = mergeJunctions(currentChar, c)
 					} else {
 						(*mergedDrawing)[x+mergeCoord.x][y+mergeCoord.y] = c

@@ -33,9 +33,9 @@ func newGraphLabel(raw string) graphLabel {
 	}
 }
 
-func (l graphLabel) contentHeight() int {
-	if len(l.lines) == 0 {
+func (self graphLabel) contentHeight() int {
+	if len(self.lines) == 0 {
 		return 0
 	}
-	return len(l.lines) + (len(l.lines)-1)*graphLabelLineGap
+	return len(self.lines) + (len(self.lines)-1)*graphLabelLineGap
 }

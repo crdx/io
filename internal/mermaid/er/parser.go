@@ -105,13 +105,13 @@ func IsErDiagram(input string) bool {
 	return false
 }
 
-func (d *ErDiagram) entity(name string) *Entity {
-	if e, ok := d.byName[name]; ok {
+func (self *ErDiagram) entity(name string) *Entity {
+	if e, ok := self.byName[name]; ok {
 		return e
 	}
 	e := &Entity{Name: name, Display: name}
-	d.byName[name] = e
-	d.Entities = append(d.Entities, e)
+	self.byName[name] = e
+	self.Entities = append(self.Entities, e)
 	return e
 }
 
@@ -281,7 +281,7 @@ func firstNonEmpty(a, b string) string {
 	return b
 }
 
-func (d *ErDiagram) parseRelationship(line string) bool {
+func (self *ErDiagram) parseRelationship(line string) bool {
 	before, after, ok := strings.Cut(line, ":")
 	if !ok {
 		return false
@@ -310,9 +310,9 @@ func (d *ErDiagram) parseRelationship(line string) bool {
 	if e1 == "" || e2 == "" || !lok || !rok {
 		return false
 	}
-	d.entity(e1)
-	d.entity(e2)
-	d.Relationships = append(d.Relationships, &Relationship{
+	self.entity(e1)
+	self.entity(e2)
+	self.Relationships = append(self.Relationships, &Relationship{
 		Left: e1, Right: e2, LeftCard: lc, RightCard: rc,
 		Identifying: identifying, Label: label,
 	})

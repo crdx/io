@@ -17,18 +17,18 @@ type (
 	drawingCoord genericCoord
 )
 
-func (c gridCoord) Equals(other gridCoord) bool {
-	return c.x == other.x && c.y == other.y
+func (self gridCoord) Equals(other gridCoord) bool {
+	return self.x == other.x && self.y == other.y
 }
 
-func (c drawingCoord) Equals(other drawingCoord) bool {
-	return c.x == other.x && c.y == other.y
+func (self drawingCoord) Equals(other drawingCoord) bool {
+	return self.x == other.x && self.y == other.y
 }
 
-func (g *graph) lineToDrawing(line []gridCoord) []drawingCoord {
+func (self *graph) lineToDrawing(line []gridCoord) []drawingCoord {
 	dc := []drawingCoord{}
 	for _, c := range line {
-		dc = append(dc, g.gridToDrawingCoord(c))
+		dc = append(dc, self.gridToDrawingCoord(c))
 	}
 	return dc
 }
@@ -115,22 +115,22 @@ func mkGraph(data *orderedmap.OrderedMap[string, []textEdge], nodeSpecs map[stri
 	return g
 }
 
-func (g *graph) setStyleClasses(properties *graphProperties) {
-	g.styleClasses = *properties.styleClasses
-	g.styleType = properties.styleType
-	g.boxBorderPadding = properties.boxBorderPadding
-	g.graphDirection = properties.graphDirection
-	g.paddingX = properties.paddingX
-	g.paddingY = properties.paddingY
-	for _, n := range g.nodes {
+func (self *graph) setStyleClasses(properties *graphProperties) {
+	self.styleClasses = *properties.styleClasses
+	self.styleType = properties.styleType
+	self.boxBorderPadding = properties.boxBorderPadding
+	self.graphDirection = properties.graphDirection
+	self.paddingX = properties.paddingX
+	self.paddingY = properties.paddingY
+	for _, n := range self.nodes {
 		if n.styleClassName != "" {
-			n.styleClass = g.styleClasses[n.styleClassName]
+			n.styleClass = self.styleClasses[n.styleClassName]
 		}
 	}
 }
 
-func (g *graph) setSubgraphs(textSubgraphs []*textSubgraph) {
-	g.subgraphs = []*subgraph{}
+func (self *graph) setSubgraphs(textSubgraphs []*textSubgraph) {
+	self.subgraphs = []*subgraph{}
 
 	for _, tsg := range textSubgraphs {
 		sg := &subgraph{
@@ -141,22 +141,22 @@ func (g *graph) setSubgraphs(textSubgraphs []*textSubgraph) {
 		}
 
 		for _, nodeName := range tsg.nodes {
-			node, err := g.getNode(nodeName)
+			node, err := self.getNode(nodeName)
 			if err == nil {
 				sg.nodes = append(sg.nodes, node)
 			}
 		}
 
-		g.subgraphs = append(g.subgraphs, sg)
+		self.subgraphs = append(self.subgraphs, sg)
 	}
 
 	for i, tsg := range textSubgraphs {
-		sg := g.subgraphs[i]
+		sg := self.subgraphs[i]
 
 		if tsg.parent != nil {
 			for j, parentTsg := range textSubgraphs {
 				if parentTsg == tsg.parent {
-					sg.parent = g.subgraphs[j]
+					sg.parent = self.subgraphs[j]
 					break
 				}
 			}
@@ -165,7 +165,7 @@ func (g *graph) setSubgraphs(textSubgraphs []*textSubgraph) {
 		for _, childTsg := range tsg.children {
 			for j, checkTsg := range textSubgraphs {
 				if checkTsg == childTsg {
-					sg.children = append(sg.children, g.subgraphs[j])
+					sg.children = append(sg.children, self.subgraphs[j])
 					break
 				}
 			}
@@ -173,17 +173,17 @@ func (g *graph) setSubgraphs(textSubgraphs []*textSubgraph) {
 	}
 }
 
-func (g *graph) createMapping() error {
+func (self *graph) createMapping() error {
 	highestPositionPerLevel := map[int]int{}
 
 	nodesFound := make(map[string]bool)
 	rootNodes := []*node{}
-	for _, n := range g.nodes {
+	for _, n := range self.nodes {
 		if _, ok := nodesFound[n.name]; !ok {
 			rootNodes = append(rootNodes, n)
 		}
 		nodesFound[n.name] = true
-		for _, child := range g.getChildren(n) {
+		for _, child := range self.getChildren(n) {
 			nodesFound[child.name] = true
 		}
 	}
@@ -191,8 +191,8 @@ func (g *graph) createMapping() error {
 	hasExternalRoots := false
 	hasSubgraphRootsWithEdges := false
 	for _, n := range rootNodes {
-		if g.isNodeInAnySubgraph(n) {
-			if len(g.getChildren(n)) > 0 {
+		if self.isNodeInAnySubgraph(n) {
+			if len(self.getChildren(n)) > 0 {
 				hasSubgraphRootsWithEdges = true
 			}
 		} else {
@@ -200,13 +200,13 @@ func (g *graph) createMapping() error {
 		}
 	}
 
-	shouldSeparate := g.graphDirection == "LR" && hasExternalRoots && hasSubgraphRootsWithEdges
+	shouldSeparate := self.graphDirection == "LR" && hasExternalRoots && hasSubgraphRootsWithEdges
 
 	externalRootNodes := []*node{}
 	subgraphRootNodes := []*node{}
 	if shouldSeparate {
 		for _, n := range rootNodes {
-			if g.isNodeInAnySubgraph(n) {
+			if self.isNodeInAnySubgraph(n) {
 				subgraphRootNodes = append(subgraphRootNodes, n)
 			} else {
 				externalRootNodes = append(externalRootNodes, n)
@@ -218,100 +218,100 @@ func (g *graph) createMapping() error {
 
 	for _, n := range externalRootNodes {
 		var mappingCoord *gridCoord
-		if g.graphDirection == "LR" {
-			mappingCoord = g.reserveSpotInGrid(g.nodes[n.index], &gridCoord{x: 0, y: highestPositionPerLevel[0]})
+		if self.graphDirection == "LR" {
+			mappingCoord = self.reserveSpotInGrid(self.nodes[n.index], &gridCoord{x: 0, y: highestPositionPerLevel[0]})
 		} else {
-			mappingCoord = g.reserveSpotInGrid(g.nodes[n.index], &gridCoord{x: highestPositionPerLevel[0], y: 0})
+			mappingCoord = self.reserveSpotInGrid(self.nodes[n.index], &gridCoord{x: highestPositionPerLevel[0], y: 0})
 		}
-		g.nodes[n.index].gridCoord = mappingCoord
+		self.nodes[n.index].gridCoord = mappingCoord
 		highestPositionPerLevel[0] += 4
 	}
 
 	if shouldSeparate && len(subgraphRootNodes) > 0 {
 		subgraphLevel := 4
 		for _, n := range subgraphRootNodes {
-			mappingCoord := g.reserveSpotInGrid(g.nodes[n.index], &gridCoord{x: subgraphLevel, y: highestPositionPerLevel[subgraphLevel]})
-			g.nodes[n.index].gridCoord = mappingCoord
+			mappingCoord := self.reserveSpotInGrid(self.nodes[n.index], &gridCoord{x: subgraphLevel, y: highestPositionPerLevel[subgraphLevel]})
+			self.nodes[n.index].gridCoord = mappingCoord
 			highestPositionPerLevel[subgraphLevel] += 4
 		}
 	}
 
-	for _, n := range g.nodes {
+	for _, n := range self.nodes {
 		var childLevel int
-		if g.graphDirection == "LR" {
+		if self.graphDirection == "LR" {
 			childLevel = n.gridCoord.x + 4
 		} else {
 			childLevel = n.gridCoord.y + 4
 		}
 		highestPosition := highestPositionPerLevel[childLevel]
-		for _, child := range g.getChildren(n) {
+		for _, child := range self.getChildren(n) {
 			if child.gridCoord != nil {
 				continue
 			}
 
 			var mappingCoord *gridCoord
-			if g.graphDirection == "LR" {
-				mappingCoord = g.reserveSpotInGrid(g.nodes[child.index], &gridCoord{x: childLevel, y: highestPosition})
+			if self.graphDirection == "LR" {
+				mappingCoord = self.reserveSpotInGrid(self.nodes[child.index], &gridCoord{x: childLevel, y: highestPosition})
 			} else {
-				mappingCoord = g.reserveSpotInGrid(g.nodes[child.index], &gridCoord{x: highestPosition, y: childLevel})
+				mappingCoord = self.reserveSpotInGrid(self.nodes[child.index], &gridCoord{x: highestPosition, y: childLevel})
 			}
-			g.nodes[child.index].gridCoord = mappingCoord
+			self.nodes[child.index].gridCoord = mappingCoord
 			highestPositionPerLevel[childLevel] = highestPosition + 4
 		}
 	}
 
-	for _, n := range g.nodes {
-		g.setColumnWidth(n)
+	for _, n := range self.nodes {
+		self.setColumnWidth(n)
 	}
 
-	for _, e := range g.edges {
-		g.determinePath(e)
-		g.increaseGridSizeForPath(e.path)
-		g.determineLabelLine(e)
+	for _, e := range self.edges {
+		self.determinePath(e)
+		self.increaseGridSizeForPath(e.path)
+		self.determineLabelLine(e)
 	}
 
-	for _, n := range g.nodes {
-		dc := g.gridToDrawingCoord(*n.gridCoord)
-		g.nodes[n.index].setCoord(&dc)
-		g.nodes[n.index].setDrawing(g)
+	for _, n := range self.nodes {
+		dc := self.gridToDrawingCoord(*n.gridCoord)
+		self.nodes[n.index].setCoord(&dc)
+		self.nodes[n.index].setDrawing(self)
 	}
 
-	g.calculateSubgraphBoundingBoxes()
+	self.calculateSubgraphBoundingBoxes()
 
-	g.offsetDrawingForSubgraphs()
-	if err := g.validateDrawingSize(); err != nil {
+	self.offsetDrawingForSubgraphs()
+	if err := self.validateDrawingSize(); err != nil {
 		return err
 	}
-	g.setDrawingSizeToGridConstraints()
+	self.setDrawingSizeToGridConstraints()
 	return nil
 }
 
-func (g *graph) validateDrawingSize() error {
-	columns := g.offsetX
-	rows := g.offsetY
-	for _, width := range g.columnWidth {
+func (self *graph) validateDrawingSize() error {
+	columns := self.offsetX
+	rows := self.offsetY
+	for _, width := range self.columnWidth {
 		columns += width
 	}
-	for _, height := range g.rowHeight {
+	for _, height := range self.rowHeight {
 		rows += height
 	}
-	for _, subgraph := range g.subgraphs {
+	for _, subgraph := range self.subgraphs {
 		columns = max(columns, subgraph.maxX+1)
 		rows = max(rows, subgraph.maxY+1)
 	}
 	return validateCanvasLimits(columns, rows)
 }
 
-func (g *graph) calculateSubgraphBoundingBoxes() {
-	for _, sg := range g.subgraphs {
-		g.calculateSubgraphBoundingBox(sg)
+func (self *graph) calculateSubgraphBoundingBoxes() {
+	for _, sg := range self.subgraphs {
+		self.calculateSubgraphBoundingBox(sg)
 	}
 
-	g.ensureSubgraphSpacing()
+	self.ensureSubgraphSpacing()
 }
 
-func (g *graph) isNodeInAnySubgraph(n *node) bool {
-	for _, sg := range g.subgraphs {
+func (self *graph) isNodeInAnySubgraph(n *node) bool {
+	for _, sg := range self.subgraphs {
 		if slices.Contains(sg.nodes, n) {
 			return true
 		}
@@ -319,8 +319,8 @@ func (g *graph) isNodeInAnySubgraph(n *node) bool {
 	return false
 }
 
-func (g *graph) getNodeSubgraph(n *node) *subgraph {
-	for _, sg := range g.subgraphs {
+func (self *graph) getNodeSubgraph(n *node) *subgraph {
+	for _, sg := range self.subgraphs {
 		if slices.Contains(sg.nodes, n) {
 			return sg
 		}
@@ -328,16 +328,16 @@ func (g *graph) getNodeSubgraph(n *node) *subgraph {
 	return nil
 }
 
-func (g *graph) hasIncomingEdgeFromOutsideSubgraph(n *node) bool {
-	nodeSubgraph := g.getNodeSubgraph(n)
+func (self *graph) hasIncomingEdgeFromOutsideSubgraph(n *node) bool {
+	nodeSubgraph := self.getNodeSubgraph(n)
 	if nodeSubgraph == nil {
 		return false
 	}
 
 	hasExternalEdge := false
-	for _, edge := range g.edges {
+	for _, edge := range self.edges {
 		if edge.to == n {
-			sourceSubgraph := g.getNodeSubgraph(edge.from)
+			sourceSubgraph := self.getNodeSubgraph(edge.from)
 			if sourceSubgraph != nodeSubgraph {
 				hasExternalEdge = true
 				break
@@ -354,9 +354,9 @@ func (g *graph) hasIncomingEdgeFromOutsideSubgraph(n *node) bool {
 			continue
 		}
 		otherHasExternal := false
-		for _, edge := range g.edges {
+		for _, edge := range self.edges {
 			if edge.to == otherNode {
-				sourceSubgraph := g.getNodeSubgraph(edge.from)
+				sourceSubgraph := self.getNodeSubgraph(edge.from)
 				if sourceSubgraph != nodeSubgraph {
 					otherHasExternal = true
 					break
@@ -371,11 +371,11 @@ func (g *graph) hasIncomingEdgeFromOutsideSubgraph(n *node) bool {
 	return true
 }
 
-func (g *graph) ensureSubgraphSpacing() {
+func (self *graph) ensureSubgraphSpacing() {
 	const minSpacing = 1
 
 	rootSubgraphs := []*subgraph{}
-	for _, sg := range g.subgraphs {
+	for _, sg := range self.subgraphs {
 		if sg.parent == nil && len(sg.nodes) > 0 {
 			rootSubgraphs = append(rootSubgraphs, sg)
 		}
@@ -409,7 +409,7 @@ func (g *graph) ensureSubgraphSpacing() {
 	}
 }
 
-func (g *graph) calculateSubgraphBoundingBox(sg *subgraph) {
+func (self *graph) calculateSubgraphBoundingBox(sg *subgraph) {
 	if len(sg.nodes) == 0 {
 		return
 	}
@@ -420,7 +420,7 @@ func (g *graph) calculateSubgraphBoundingBox(sg *subgraph) {
 	maxY := -1000000
 
 	for _, child := range sg.children {
-		g.calculateSubgraphBoundingBox(child)
+		self.calculateSubgraphBoundingBox(child)
 		if len(child.nodes) > 0 {
 			minX = Min(minX, child.minX)
 			minY = Min(minY, child.minY)
@@ -461,14 +461,14 @@ func (g *graph) calculateSubgraphBoundingBox(sg *subgraph) {
 	sg.maxY = maxY + subgraphPadding
 }
 
-func (g *graph) offsetDrawingForSubgraphs() {
-	if len(g.subgraphs) == 0 {
+func (self *graph) offsetDrawingForSubgraphs() {
+	if len(self.subgraphs) == 0 {
 		return
 	}
 
 	minX := 0
 	minY := 0
-	for _, sg := range g.subgraphs {
+	for _, sg := range self.subgraphs {
 		minX = Min(minX, sg.minX)
 		minY = Min(minY, sg.minY)
 	}
@@ -480,17 +480,17 @@ func (g *graph) offsetDrawingForSubgraphs() {
 		return
 	}
 
-	g.offsetX = offsetX
-	g.offsetY = offsetY
+	self.offsetX = offsetX
+	self.offsetY = offsetY
 
-	for _, sg := range g.subgraphs {
+	for _, sg := range self.subgraphs {
 		sg.minX += offsetX
 		sg.minY += offsetY
 		sg.maxX += offsetX
 		sg.maxY += offsetY
 	}
 
-	for _, n := range g.nodes {
+	for _, n := range self.nodes {
 		if n.drawingCoord != nil {
 			n.drawingCoord.x += offsetX
 			n.drawingCoord.y += offsetY
@@ -498,12 +498,12 @@ func (g *graph) offsetDrawingForSubgraphs() {
 	}
 }
 
-func (g *graph) draw() *drawing {
-	g.drawSubgraphs()
+func (self *graph) draw() *drawing {
+	self.drawSubgraphs()
 
-	for _, node := range g.nodes {
+	for _, node := range self.nodes {
 		if !node.drawn {
-			g.drawNode(node)
+			self.drawNode(node)
 		}
 	}
 	lineDrawings := []*drawing{}
@@ -511,8 +511,8 @@ func (g *graph) draw() *drawing {
 	arrowHeadDrawings := []*drawing{}
 	boxStartDrawings := []*drawing{}
 	labelDrawings := []*drawing{}
-	for _, edge := range g.edges {
-		line, boxStart, arrowHead, corners, label := g.drawEdge(edge)
+	for _, edge := range self.edges {
+		line, boxStart, arrowHead, corners, label := self.drawEdge(edge)
 		lineDrawings = append(lineDrawings, line)
 		cornerDrawings = append(cornerDrawings, corners)
 		arrowHeadDrawings = append(arrowHeadDrawings, arrowHead)
@@ -520,45 +520,45 @@ func (g *graph) draw() *drawing {
 		labelDrawings = append(labelDrawings, label)
 	}
 
-	g.drawing = g.mergeDrawings(g.drawing, drawingCoord{0, 0}, lineDrawings...)
-	g.drawing = g.mergeDrawings(g.drawing, drawingCoord{0, 0}, cornerDrawings...)
-	g.drawing = g.mergeDrawings(g.drawing, drawingCoord{0, 0}, arrowHeadDrawings...)
-	g.drawing = g.mergeDrawings(g.drawing, drawingCoord{0, 0}, boxStartDrawings...)
-	g.drawing = g.mergeDrawings(g.drawing, drawingCoord{0, 0}, labelDrawings...)
+	self.drawing = self.mergeDrawings(self.drawing, drawingCoord{0, 0}, lineDrawings...)
+	self.drawing = self.mergeDrawings(self.drawing, drawingCoord{0, 0}, cornerDrawings...)
+	self.drawing = self.mergeDrawings(self.drawing, drawingCoord{0, 0}, arrowHeadDrawings...)
+	self.drawing = self.mergeDrawings(self.drawing, drawingCoord{0, 0}, boxStartDrawings...)
+	self.drawing = self.mergeDrawings(self.drawing, drawingCoord{0, 0}, labelDrawings...)
 
-	g.drawSubgraphLabels()
+	self.drawSubgraphLabels()
 
-	return g.drawing
+	return self.drawing
 }
 
-func (g *graph) drawSubgraphs() {
-	sorted := g.sortSubgraphsByDepth()
+func (self *graph) drawSubgraphs() {
+	sorted := self.sortSubgraphsByDepth()
 
 	for _, sg := range sorted {
-		sgDrawing := drawSubgraph(sg, *g)
+		sgDrawing := drawSubgraph(sg, *self)
 		offset := drawingCoord{sg.minX, sg.minY}
-		g.drawing = g.mergeDrawings(g.drawing, offset, sgDrawing)
+		self.drawing = self.mergeDrawings(self.drawing, offset, sgDrawing)
 	}
 }
 
-func (g *graph) drawSubgraphLabels() {
-	for _, sg := range g.subgraphs {
+func (self *graph) drawSubgraphLabels() {
+	for _, sg := range self.subgraphs {
 		if len(sg.nodes) == 0 {
 			continue
 		}
 		labelDrawing, offset := drawSubgraphLabel(sg)
-		g.drawing = g.mergeDrawings(g.drawing, offset, labelDrawing)
+		self.drawing = self.mergeDrawings(self.drawing, offset, labelDrawing)
 	}
 }
 
-func (g *graph) sortSubgraphsByDepth() []*subgraph {
+func (self *graph) sortSubgraphsByDepth() []*subgraph {
 	depths := make(map[*subgraph]int)
-	for _, sg := range g.subgraphs {
-		depths[sg] = g.getSubgraphDepth(sg)
+	for _, sg := range self.subgraphs {
+		depths[sg] = self.getSubgraphDepth(sg)
 	}
 
-	sorted := make([]*subgraph, len(g.subgraphs))
-	copy(sorted, g.subgraphs)
+	sorted := make([]*subgraph, len(self.subgraphs))
+	copy(sorted, self.subgraphs)
 
 	for i := range sorted {
 		for j := i + 1; j < len(sorted); j++ {
@@ -571,15 +571,15 @@ func (g *graph) sortSubgraphsByDepth() []*subgraph {
 	return sorted
 }
 
-func (g *graph) getSubgraphDepth(sg *subgraph) int {
+func (self *graph) getSubgraphDepth(sg *subgraph) int {
 	if sg.parent == nil {
 		return 0
 	}
-	return 1 + g.getSubgraphDepth(sg.parent)
+	return 1 + self.getSubgraphDepth(sg.parent)
 }
 
-func (g *graph) getNode(nodeName string) (*node, error) {
-	for _, n := range g.nodes {
+func (self *graph) getNode(nodeName string) (*node, error) {
+	for _, n := range self.nodes {
 		if n.name == nodeName {
 			return n, nil
 		}
@@ -587,13 +587,13 @@ func (g *graph) getNode(nodeName string) (*node, error) {
 	return &node{}, errors.New("node " + nodeName + " not found")
 }
 
-func (g *graph) appendNode(n *node) {
-	g.nodes = append(g.nodes, n)
+func (self *graph) appendNode(n *node) {
+	self.nodes = append(self.nodes, n)
 }
 
-func (g *graph) getEdgesFromNode(n *node) []edge {
+func (self *graph) getEdgesFromNode(n *node) []edge {
 	edges := []edge{}
-	for _, edge := range g.edges {
+	for _, edge := range self.edges {
 		if (edge.from.name) == (n.name) {
 			edges = append(edges, *edge)
 		}
@@ -601,8 +601,8 @@ func (g *graph) getEdgesFromNode(n *node) []edge {
 	return edges
 }
 
-func (g *graph) getChildren(n *node) []*node {
-	edges := g.getEdgesFromNode(n)
+func (self *graph) getChildren(n *node) []*node {
+	edges := self.getEdgesFromNode(n)
 	children := []*node{}
 	for _, edge := range edges {
 		if edge.from.name == n.name {
@@ -612,17 +612,17 @@ func (g *graph) getChildren(n *node) []*node {
 	return children
 }
 
-func (g *graph) gridToDrawingCoord(coordinate gridCoord) drawingCoord {
+func (self *graph) gridToDrawingCoord(coordinate gridCoord) drawingCoord {
 	x := 0
 	y := 0
 	for column := range coordinate.x {
-		x += g.columnWidth[column]
+		x += self.columnWidth[column]
 	}
 	for row := range coordinate.y {
-		y += g.rowHeight[row]
+		y += self.rowHeight[row]
 	}
 	return drawingCoord{
-		x: x + g.columnWidth[coordinate.x]/2 + g.offsetX,
-		y: y + g.rowHeight[coordinate.y]/2 + g.offsetY,
+		x: x + self.columnWidth[coordinate.x]/2 + self.offsetX,
+		y: y + self.rowHeight[coordinate.y]/2 + self.offsetY,
 	}
 }

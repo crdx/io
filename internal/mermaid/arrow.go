@@ -16,35 +16,35 @@ type priorityQueueItem struct {
 
 type priorityQueue []*priorityQueueItem
 
-func (pq *priorityQueue) Len() int { return len(*pq) }
+func (self *priorityQueue) Len() int { return len(*self) }
 
-func (pq *priorityQueue) Less(i, j int) bool {
-	return (*pq)[i].priority < (*pq)[j].priority
+func (self *priorityQueue) Less(i, j int) bool {
+	return (*self)[i].priority < (*self)[j].priority
 }
 
-func (pq *priorityQueue) Swap(i, j int) {
-	items := *pq
+func (self *priorityQueue) Swap(i, j int) {
+	items := *self
 	items[i], items[j] = items[j], items[i]
 	items[i].index = i
 	items[j].index = j
 }
 
-func (pq *priorityQueue) Push(value any) {
+func (self *priorityQueue) Push(value any) {
 	item, ok := value.(*priorityQueueItem)
 	if !ok {
 		panic("priority queue received the wrong item type")
 	}
-	item.index = len(*pq)
-	*pq = append(*pq, item)
+	item.index = len(*self)
+	*self = append(*self, item)
 }
 
-func (pq *priorityQueue) Pop() any {
-	old := *pq
+func (self *priorityQueue) Pop() any {
+	old := *self
 	n := len(old)
 	item := old[n-1]
 	old[n-1] = nil
 	item.index = -1
-	*pq = old[0 : n-1]
+	*self = old[0 : n-1]
 	return item
 }
 
@@ -66,7 +66,7 @@ func heuristic(a, b gridCoord) int {
 	}
 }
 
-func (g *graph) getPath(from gridCoord, to gridCoord) ([]gridCoord, error) {
+func (self *graph) getPath(from gridCoord, to gridCoord) ([]gridCoord, error) {
 	pq := &priorityQueue{}
 	heap.Init(pq)
 	heap.Push(pq, &priorityQueueItem{coord: from, priority: 0})
@@ -90,7 +90,7 @@ func (g *graph) getPath(from gridCoord, to gridCoord) ([]gridCoord, error) {
 
 		for _, dir := range directions {
 			next := gridCoord{x: current.x + dir.x, y: current.y + dir.y}
-			if !g.isFreeInGrid(next) && !next.Equals(to) {
+			if !self.isFreeInGrid(next) && !next.Equals(to) {
 				continue
 			}
 
@@ -107,29 +107,29 @@ func (g *graph) getPath(from gridCoord, to gridCoord) ([]gridCoord, error) {
 	return nil, errors.New("no path found")
 }
 
-func (g *graph) isFreeInGrid(c gridCoord) bool {
+func (self *graph) isFreeInGrid(c gridCoord) bool {
 	if c.x < 0 || c.y < 0 {
 		return false
 	}
-	return g.grid[c] == nil
+	return self.grid[c] == nil
 }
 
-func (g *graph) drawArrow(e *edge) (*drawing, *drawing, *drawing, *drawing, *drawing) {
+func (self *graph) drawArrow(e *edge) (*drawing, *drawing, *drawing, *drawing, *drawing) {
 	if len(e.path) == 0 {
 		return nil, nil, nil, nil, nil
 	}
-	dLabel := g.drawArrowLabel(e)
-	dPath, linesDrawn, lineDirs := g.drawPath(e.path)
+	dLabel := self.drawArrowLabel(e)
+	dPath, linesDrawn, lineDirs := self.drawPath(e.path)
 	if len(linesDrawn) == 0 {
-		return dPath, nil, nil, g.drawCorners(e.path), dLabel
+		return dPath, nil, nil, self.drawCorners(e.path), dLabel
 	}
-	dBoxStart := g.drawBoxStart(e.path, linesDrawn[0])
-	dArrowHead := g.drawArrowHead(linesDrawn[len(linesDrawn)-1], lineDirs[len(lineDirs)-1])
+	dBoxStart := self.drawBoxStart(e.path, linesDrawn[0])
+	dArrowHead := self.drawArrowHead(linesDrawn[len(linesDrawn)-1], lineDirs[len(lineDirs)-1])
 	if e.isBidirectional && len(linesDrawn) > 0 {
-		dStartArrowHead := g.drawArrowHead(reverseDrawingLine(linesDrawn[0]), lineDirs[0].getOpposite())
-		dArrowHead = g.mergeDrawings(dArrowHead, drawingCoord{0, 0}, dStartArrowHead)
+		dStartArrowHead := self.drawArrowHead(reverseDrawingLine(linesDrawn[0]), lineDirs[0].getOpposite())
+		dArrowHead = self.mergeDrawings(dArrowHead, drawingCoord{0, 0}, dStartArrowHead)
 	}
-	dCorners := g.drawCorners(e.path)
+	dCorners := self.drawCorners(e.path)
 	return dPath, dBoxStart, dArrowHead, dCorners, dLabel
 }
 
@@ -169,20 +169,20 @@ func mergePath(path []gridCoord) []gridCoord {
 	return newPath
 }
 
-func (g *graph) drawPath(path []gridCoord) (*drawing, [][]drawingCoord, []direction) {
-	d := copyCanvas(g.drawing)
+func (self *graph) drawPath(path []gridCoord) (*drawing, [][]drawingCoord, []direction) {
+	d := copyCanvas(self.drawing)
 	previousCoord := path[0]
 	linesDrawn := make([][]drawingCoord, 0)
 	lineDirs := make([]direction, 0)
 	var previousDrawingCoord drawingCoord
 	for _, nextCoord := range path[1:] {
-		previousDrawingCoord = g.gridToDrawingCoord(previousCoord)
-		nextDrawingCoord := g.gridToDrawingCoord(nextCoord)
+		previousDrawingCoord = self.gridToDrawingCoord(previousCoord)
+		nextDrawingCoord := self.gridToDrawingCoord(nextCoord)
 		if previousDrawingCoord.Equals(nextDrawingCoord) {
 			continue
 		}
 		dir := determineDirection(genericCoord(previousCoord), genericCoord(nextCoord))
-		s := g.drawLine(d, previousDrawingCoord, nextDrawingCoord, 1, -1)
+		s := self.drawLine(d, previousDrawingCoord, nextDrawingCoord, 1, -1)
 		if len(s) == 0 {
 			s = append(s, previousDrawingCoord)
 		}
@@ -193,12 +193,12 @@ func (g *graph) drawPath(path []gridCoord) (*drawing, [][]drawingCoord, []direct
 	return d, linesDrawn, lineDirs
 }
 
-func (g *graph) drawBoxStart(path []gridCoord, firstLine []drawingCoord) *drawing {
-	d := *(copyCanvas(g.drawing))
+func (self *graph) drawBoxStart(path []gridCoord, firstLine []drawingCoord) *drawing {
+	d := *(copyCanvas(self.drawing))
 	from := firstLine[0]
 	dir := determineDirection(genericCoord(path[0]), genericCoord(path[1]))
 
-	if g.useAscii {
+	if self.useAscii {
 		return &d
 	}
 
@@ -215,8 +215,8 @@ func (g *graph) drawBoxStart(path []gridCoord, firstLine []drawingCoord) *drawin
 	return &d
 }
 
-func (g *graph) drawArrowHead(line []drawingCoord, fallback direction) *drawing {
-	d := *(copyCanvas(g.drawing))
+func (self *graph) drawArrowHead(line []drawingCoord, fallback direction) *drawing {
+	d := *(copyCanvas(self.drawing))
 	if len(line) == 0 {
 		return &d
 	}
@@ -228,7 +228,7 @@ func (g *graph) drawArrowHead(line []drawingCoord, fallback direction) *drawing 
 	}
 
 	var char string
-	if !g.useAscii {
+	if !self.useAscii {
 		switch dir {
 		case Up:
 			char = "▲"
@@ -268,19 +268,19 @@ func (g *graph) drawArrowHead(line []drawingCoord, fallback direction) *drawing 
 	return &d
 }
 
-func (g *graph) drawCorners(path []gridCoord) *drawing {
-	d := copyCanvas(g.drawing)
+func (self *graph) drawCorners(path []gridCoord) *drawing {
+	d := copyCanvas(self.drawing)
 	for idx, coord := range path {
 		if idx == 0 || idx == len(path)-1 {
 			continue
 		}
-		drawingCoord := g.gridToDrawingCoord(coord)
+		drawingCoord := self.gridToDrawingCoord(coord)
 
 		prevDir := determineDirection(genericCoord(path[idx-1]), genericCoord(coord))
 		nextDir := determineDirection(genericCoord(coord), genericCoord(path[idx+1]))
 
 		var corner string
-		if !g.useAscii {
+		if !self.useAscii {
 			switch {
 			case (prevDir == Right && nextDir == Down) || (prevDir == Up && nextDir == Left):
 				corner = "┐"
@@ -302,13 +302,13 @@ func (g *graph) drawCorners(path []gridCoord) *drawing {
 	return d
 }
 
-func (g *graph) drawArrowLabel(e *edge) *drawing {
-	d := copyCanvas(g.drawing)
+func (self *graph) drawArrowLabel(e *edge) *drawing {
+	d := copyCanvas(self.drawing)
 	if e.text == "" {
 		return d
 	}
 
-	line := g.lineToDrawing(e.labelLine)
+	line := self.lineToDrawing(e.labelLine)
 	if e.isBidirectional {
 		line = insetLine(line, 2, 2)
 	} else {
@@ -347,7 +347,7 @@ func insetLine(line []drawingCoord, insetStart, insetEnd int) []drawingCoord {
 	return []drawingCoord{a, b}
 }
 
-func (d *drawing) drawTextOnLine(line []drawingCoord, label string) {
+func (self *drawing) drawTextOnLine(line []drawingCoord, label string) {
 	var minX, maxX, minY, maxY int
 	if line[0].x > line[1].x {
 		minX = line[1].x
@@ -366,5 +366,5 @@ func (d *drawing) drawTextOnLine(line []drawingCoord, label string) {
 	middleX := minX + (maxX-minX)/2
 	middleY := minY + (maxY-minY)/2
 	startLabelCoord := drawingCoord{x: middleX - runewidth.StringWidth(label)/2, y: middleY}
-	d.drawText(startLabelCoord, label)
+	self.drawText(startLabelCoord, label)
 }

@@ -11,41 +11,41 @@ type canvas struct {
 	rows [][]string
 }
 
-func (c *canvas) ensure(x, y int) {
-	for len(c.rows) <= y {
-		c.rows = append(c.rows, nil)
+func (self *canvas) ensure(x, y int) {
+	for len(self.rows) <= y {
+		self.rows = append(self.rows, nil)
 	}
-	for len(c.rows[y]) <= x {
-		c.rows[y] = append(c.rows[y], " ")
+	for len(self.rows[y]) <= x {
+		self.rows[y] = append(self.rows[y], " ")
 	}
 }
 
-func (c *canvas) set(x, y int, cell string) {
+func (self *canvas) set(x, y int, cell string) {
 	if x < 0 || y < 0 {
 		return
 	}
-	c.ensure(x, y)
-	c.rows[y][x] = cell
+	self.ensure(x, y)
+	self.rows[y][x] = cell
 }
 
-func (c *canvas) at(x, y int) string {
-	if y < 0 || y >= len(c.rows) || x < 0 || x >= len(c.rows[y]) {
+func (self *canvas) at(x, y int) string {
+	if y < 0 || y >= len(self.rows) || x < 0 || x >= len(self.rows[y]) {
 		return " "
 	}
-	return c.rows[y][x]
+	return self.rows[y][x]
 }
 
-func (c *canvas) stamp(x0, y0 int, block []string) {
+func (self *canvas) stamp(x0, y0 int, block []string) {
 	for dy, line := range block {
 		for x, cell := range runewidth.Cells(line) {
-			c.set(x0+x, y0+dy, cell)
+			self.set(x0+x, y0+dy, cell)
 		}
 	}
 }
 
-func (c *canvas) string() string {
+func (self *canvas) string() string {
 	var b strings.Builder
-	for _, row := range c.rows {
+	for _, row := range self.rows {
 		b.WriteString(strings.TrimRight(strings.Join(row, ""), " "))
 		b.WriteByte('\n')
 	}
@@ -198,12 +198,12 @@ func newOverlay() *overlay {
 	}
 }
 
-func (o *overlay) bits(x, y int) uint8 { return o.solid[[2]int{x, y}] | o.dash[[2]int{x, y}] }
+func (self *overlay) bits(x, y int) uint8 { return self.solid[[2]int{x, y}] | self.dash[[2]int{x, y}] }
 
-func (o *overlay) polyline(pts [][2]int, solid bool) {
-	m := o.dash
+func (self *overlay) polyline(pts [][2]int, solid bool) {
+	m := self.dash
 	if solid {
-		m = o.solid
+		m = self.solid
 	}
 	for i := 0; i+1 < len(pts); i++ {
 		a, b := pts[i], pts[i+1]
@@ -357,15 +357,15 @@ func sidesFor(a, b *placedEntity) (side, side) {
 	}
 }
 
-func (l *layout) gutterY(e endpoint, lane int) int {
+func (self *layout) gutterY(e endpoint, lane int) int {
 	if e.s == sideB {
-		return l.hGutY[e.p.row+1] + lane
+		return self.hGutY[e.p.row+1] + lane
 	}
-	return l.hGutY[e.p.row] + lane
+	return self.hGutY[e.p.row] + lane
 }
 
-func (l *layout) trunkX(a, b *placedEntity, lane int) int {
-	return l.vGutX[min(a.col, b.col)+1] + l.gutW - l.lanes + lane
+func (self *layout) trunkX(a, b *placedEntity, lane int) int {
+	return self.vGutX[min(a.col, b.col)+1] + self.gutW - self.lanes + lane
 }
 
 type routePlan struct {
@@ -385,39 +385,39 @@ func newPlan(lay *layout, a, b endpoint, r *Relationship, lane int) routePlan {
 	return p
 }
 
-func (p routePlan) drawLine(o *overlay) {
-	if p.merged {
+func (self routePlan) drawLine(o *overlay) {
+	if self.merged {
 		o.polyline([][2]int{
-			{p.a.x, p.a.y}, {p.a.x, p.ya}, {p.b.x, p.ya}, {p.b.x, p.b.y},
-		}, p.rel.Identifying)
+			{self.a.x, self.a.y}, {self.a.x, self.ya}, {self.b.x, self.ya}, {self.b.x, self.b.y},
+		}, self.rel.Identifying)
 		return
 	}
 	o.polyline([][2]int{
-		{p.a.x, p.a.y}, {p.a.x, p.ya}, {p.tx, p.ya}, {p.tx, p.yb}, {p.b.x, p.yb}, {p.b.x, p.b.y},
-	}, p.rel.Identifying)
+		{self.a.x, self.a.y}, {self.a.x, self.ya}, {self.tx, self.ya}, {self.tx, self.yb}, {self.b.x, self.yb}, {self.b.x, self.b.y},
+	}, self.rel.Identifying)
 }
 
-func (p routePlan) decorate(o *overlay) {
-	if p.merged {
-		putToken(o, p.a, p.b.x, p.ya)
-		putToken(o, p.b, p.a.x, p.ya)
-		if p.a.p == p.b.p {
-			writeLabel(o, p.rel.Label, max(p.a.x, p.b.x)+2, p.ya, -1)
+func (self routePlan) decorate(o *overlay) {
+	if self.merged {
+		putToken(o, self.a, self.b.x, self.ya)
+		putToken(o, self.b, self.a.x, self.ya)
+		if self.a.p == self.b.p {
+			writeLabel(o, self.rel.Label, max(self.a.x, self.b.x)+2, self.ya, -1)
 		} else {
-			putLabel(o, p.rel.Label, [][3]int{{min(p.a.x, p.b.x), max(p.a.x, p.b.x), p.ya}})
+			putLabel(o, self.rel.Label, [][3]int{{min(self.a.x, self.b.x), max(self.a.x, self.b.x), self.ya}})
 		}
 		return
 	}
-	putToken(o, p.a, p.tx, p.ya)
-	putToken(o, p.b, p.tx, p.yb)
+	putToken(o, self.a, self.tx, self.ya)
+	putToken(o, self.b, self.tx, self.yb)
 	runs := [][3]int{
-		{min(p.a.x, p.tx), max(p.a.x, p.tx), p.ya},
-		{min(p.b.x, p.tx), max(p.b.x, p.tx), p.yb},
+		{min(self.a.x, self.tx), max(self.a.x, self.tx), self.ya},
+		{min(self.b.x, self.tx), max(self.b.x, self.tx), self.yb},
 	}
 	if runs[1][1]-runs[1][0] > runs[0][1]-runs[0][0] {
 		runs[0], runs[1] = runs[1], runs[0]
 	}
-	putLabel(o, p.rel.Label, runs)
+	putLabel(o, self.rel.Label, runs)
 }
 
 func putToken(o *overlay, ep endpoint, targetX, y int) {

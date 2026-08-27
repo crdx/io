@@ -190,82 +190,82 @@ func lockFile(file *os.File) error {
 	return err
 }
 
-func (w *Writer) SetMeta(journalMeta json.RawMessage, listingData json.RawMessage) error {
-	if w.file != nil {
+func (self *Writer) SetMeta(journalMeta json.RawMessage, listingData json.RawMessage) error {
+	if self.file != nil {
 		return errors.New("cannot change meta after the session has been stored")
 	}
 
-	w.journalMeta = slices.Clone(journalMeta)
-	w.listingData = slices.Clone(listingData)
+	self.journalMeta = slices.Clone(journalMeta)
+	self.listingData = slices.Clone(listingData)
 	return nil
 }
 
-func (w *Writer) Event(event agent.Event) (time.Time, error) {
-	writtenAt, err := w.write(Line{Kind: Event, Event: &event})
+func (self *Writer) Event(event agent.Event) (time.Time, error) {
+	writtenAt, err := self.write(Line{Kind: Event, Event: &event})
 	if err != nil {
 		return writtenAt, err
 	}
 
-	w.listingMeta.takeEvent(event, writtenAt)
-	return writtenAt, writeMeta(w.directory, w.listingMeta)
+	self.listingMeta.takeEvent(event, writtenAt)
+	return writtenAt, writeMeta(self.directory, self.listingMeta)
 }
 
-func (w *Writer) Item(payload json.RawMessage) error {
-	writtenAt, err := w.write(Line{Kind: Item, Payload: payload})
+func (self *Writer) Item(payload json.RawMessage) error {
+	writtenAt, err := self.write(Line{Kind: Item, Payload: payload})
 	if err != nil {
 		return err
 	}
 
-	w.listingMeta.Touched = writtenAt
-	return writeMeta(w.directory, w.listingMeta)
+	self.listingMeta.Touched = writtenAt
+	return writeMeta(self.directory, self.listingMeta)
 }
 
-func (w *Writer) CompleteTurn() error {
-	writtenAt, err := w.write(Line{Kind: TurnCompletion})
+func (self *Writer) CompleteTurn() error {
+	writtenAt, err := self.write(Line{Kind: TurnCompletion})
 	if err != nil {
 		return err
 	}
 
-	w.listingMeta.Touched = writtenAt
-	return writeMeta(w.directory, w.listingMeta)
+	self.listingMeta.Touched = writtenAt
+	return writeMeta(self.directory, self.listingMeta)
 }
 
-func (w *Writer) Name() string                 { return w.name }
-func (w *Writer) ID() string                   { return w.id }
-func (w *Writer) JournalMeta() json.RawMessage { return slices.Clone(w.journalMeta) }
-func (w *Writer) Started() time.Time           { return w.started }
-func (w *Writer) IsPersisted() bool            { return w.file != nil }
-func (w *Writer) EnsurePersisted() error       { return w.ensureOpen() }
+func (self *Writer) Name() string                 { return self.name }
+func (self *Writer) ID() string                   { return self.id }
+func (self *Writer) JournalMeta() json.RawMessage { return slices.Clone(self.journalMeta) }
+func (self *Writer) Started() time.Time           { return self.started }
+func (self *Writer) IsPersisted() bool            { return self.file != nil }
+func (self *Writer) EnsurePersisted() error       { return self.ensureOpen() }
 
-func (w *Writer) Close() error {
-	if w.file == nil {
+func (self *Writer) Close() error {
+	if self.file == nil {
 		return nil
 	}
-	if w.lock == nil {
-		return w.file.Close()
+	if self.lock == nil {
+		return self.file.Close()
 	}
 
-	return w.lock.Release()
+	return self.lock.Release()
 }
 
-func (w *Writer) write(line Line) (time.Time, error) {
-	if err := w.ensureOpen(); err != nil {
+func (self *Writer) write(line Line) (time.Time, error) {
+	if err := self.ensureOpen(); err != nil {
 		return time.Time{}, err
 	}
-	return w.record(line)
+	return self.record(line)
 }
 
-func (w *Writer) ensureOpen() error {
-	if w.file != nil {
+func (self *Writer) ensureOpen() error {
+	if self.file != nil {
 		return nil
 	}
 
-	directory := sessionDir(w.directory, w.name)
+	directory := sessionDir(self.directory, self.name)
 	if err := os.Mkdir(directory, 0o700); err != nil {
 		return err
 	}
 
-	sessionDir, err := openSessionDir(w.directory, w.name)
+	sessionDir, err := openSessionDir(self.directory, self.name)
 	if err != nil {
 		_ = os.Remove(directory)
 		return err
@@ -276,7 +276,7 @@ func (w *Writer) ensureOpen() error {
 		return err
 	}
 
-	file, err := os.OpenFile(journalPath(w.directory, w.name), os.O_WRONLY|os.O_CREATE|os.O_EXCL|os.O_APPEND, 0o600)
+	file, err := os.OpenFile(journalPath(self.directory, self.name), os.O_WRONLY|os.O_CREATE|os.O_EXCL|os.O_APPEND, 0o600)
 	if err != nil {
 		_ = sessionDir.Close()
 		_ = os.Remove(directory)
@@ -290,38 +290,38 @@ func (w *Writer) ensureOpen() error {
 		_ = os.Remove(directory)
 		return err
 	}
-	w.file = file
-	w.lock = &Lock{sessionDir: sessionDir, journalFile: file}
+	self.file = file
+	self.lock = &Lock{sessionDir: sessionDir, journalFile: file}
 
-	started, err := w.record(Line{Kind: Head, Version: JournalFormat, ID: w.id, Name: w.name, Meta: w.journalMeta})
+	started, err := self.record(Line{Kind: Head, Version: JournalFormat, ID: self.id, Name: self.name, Meta: self.journalMeta})
 	if err != nil {
-		_ = w.lock.Release()
+		_ = self.lock.Release()
 		_ = os.Remove(file.Name())
 		_ = os.Remove(directory)
-		w.file = nil
-		w.lock = nil
+		self.file = nil
+		self.lock = nil
 		return err
 	}
-	w.started = started
-	w.listingMeta = Meta{
-		Name:    w.name,
-		Data:    slices.Clone(w.listingData),
+	self.started = started
+	self.listingMeta = Meta{
+		Name:    self.name,
+		Data:    slices.Clone(self.listingData),
 		Started: started,
 		Touched: started,
 	}
-	if err := writeMeta(w.directory, w.listingMeta); err != nil {
-		_ = w.lock.Release()
+	if err := writeMeta(self.directory, self.listingMeta); err != nil {
+		_ = self.lock.Release()
 		_ = os.Remove(file.Name())
 		_ = os.Remove(directory)
-		w.file = nil
-		w.lock = nil
+		self.file = nil
+		self.lock = nil
 		return err
 	}
 
 	return nil
 }
 
-func (w *Writer) record(line Line) (time.Time, error) {
+func (self *Writer) record(line Line) (time.Time, error) {
 	line.Time = time.Now()
 	encodedLine, err := json.Marshal(line)
 	if err != nil {
@@ -329,7 +329,7 @@ func (w *Writer) record(line Line) (time.Time, error) {
 	}
 
 	encodedLine = append(encodedLine, '\n')
-	n, err := w.file.Write(encodedLine)
+	n, err := self.file.Write(encodedLine)
 	if err == nil && n != len(encodedLine) {
 		return line.Time, io.ErrShortWrite
 	}
@@ -406,28 +406,28 @@ func Records(directory string, name string, visit func(Line) error) error {
 	return nil
 }
 
-func (s *Session) take(line Line) {
-	if s.Started.IsZero() {
-		s.Started = line.Time
+func (self *Session) take(line Line) {
+	if self.Started.IsZero() {
+		self.Started = line.Time
 	}
-	s.Touched = line.Time
+	self.Touched = line.Time
 
 	switch line.Kind {
 	case Head:
-		s.ID = line.ID
-		s.Meta = line.Meta
+		self.ID = line.ID
+		self.Meta = line.Meta
 	case Event:
 		if line.Event != nil {
-			s.Events = append(s.Events, *line.Event)
+			self.Events = append(self.Events, *line.Event)
 			if line.Event.Kind == agent.UserMessageEvent {
-				s.HasIncompleteTurn = true
+				self.HasIncompleteTurn = true
 			}
 		}
 	case Item:
-		s.Items = append(s.Items, line.Payload)
+		self.Items = append(self.Items, line.Payload)
 	case TurnCompletion:
-		s.TurnCompletions++
-		s.HasIncompleteTurn = false
+		self.TurnCompletions++
+		self.HasIncompleteTurn = false
 	}
 }
 
@@ -441,12 +441,12 @@ type Meta struct {
 	Messages int             `json:"messages"`
 }
 
-func (s *Meta) takeEvent(event agent.Event, writtenAt time.Time) {
-	s.Touched = writtenAt
+func (self *Meta) takeEvent(event agent.Event, writtenAt time.Time) {
+	self.Touched = writtenAt
 
 	if event.Kind == agent.StateChangeEvent {
 		if title, isTitle := agent.TitleFromEvent(event); isTitle {
-			s.Title = title
+			self.Title = title
 		}
 		return
 	}
@@ -455,9 +455,9 @@ func (s *Meta) takeEvent(event agent.Event, writtenAt time.Time) {
 		return
 	}
 
-	s.Messages++
-	if s.Title == "" && event.Kind == agent.UserMessageEvent {
-		s.Title = event.Text
+	self.Messages++
+	if self.Title == "" && event.Kind == agent.UserMessageEvent {
+		self.Title = event.Text
 	}
 }
 

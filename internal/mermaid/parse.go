@@ -151,8 +151,8 @@ func parseNode(line string) (textNode, error) {
 	}, nil
 }
 
-func (gp *graphProperties) parseExpression(expression string) ([]textNode, error) {
-	nodes, err := gp.parseString(expression)
+func (self *graphProperties) parseExpression(expression string) ([]textNode, error) {
+	nodes, err := self.parseString(expression)
 	if err == nil {
 		return nodes, nil
 	}
@@ -230,7 +230,7 @@ func setData(parent textNode, edge textEdge, data *orderedmap.OrderedMap[string,
 	}
 }
 
-func (gp *graphProperties) parseString(line string) ([]textNode, error) {
+func (self *graphProperties) parseString(line string) ([]textNode, error) {
 	patterns := []struct {
 		regex   *regexp.Regexp
 		handler func([]string) ([]textNode, error)
@@ -244,57 +244,57 @@ func (gp *graphProperties) parseString(line string) ([]textNode, error) {
 		{
 			regex: regexp.MustCompile(`(?s)^(.+)\s*<-->\s*\|(.+)\|\s*(.+)$`),
 			handler: func(match []string) ([]textNode, error) {
-				left, err := gp.parseExpression(match[0])
+				left, err := self.parseExpression(match[0])
 				if err != nil {
 					return nil, err
 				}
-				right, err := gp.parseExpression(match[2])
+				right, err := self.parseExpression(match[2])
 				if err != nil {
 					return nil, err
 				}
-				return setArrowWithLabel(left, right, match[1], true, gp), nil
+				return setArrowWithLabel(left, right, match[1], true, self), nil
 			},
 		},
 		{
 			regex: regexp.MustCompile(`(?s)^(.+)\s*<-->\s*(.+)$`),
 			handler: func(match []string) ([]textNode, error) {
-				left, err := gp.parseExpression(match[0])
+				left, err := self.parseExpression(match[0])
 				if err != nil {
 					return nil, err
 				}
-				right, err := gp.parseExpression(match[1])
+				right, err := self.parseExpression(match[1])
 				if err != nil {
 					return nil, err
 				}
-				return setBidirectionalArrow(left, right, gp), nil
+				return setBidirectionalArrow(left, right, self), nil
 			},
 		},
 		{
 			regex: regexp.MustCompile(`(?s)^(.+)\s*-->\s*\|(.+)\|\s*(.+)$`),
 			handler: func(match []string) ([]textNode, error) {
-				left, err := gp.parseExpression(match[0])
+				left, err := self.parseExpression(match[0])
 				if err != nil {
 					return nil, err
 				}
-				right, err := gp.parseExpression(match[2])
+				right, err := self.parseExpression(match[2])
 				if err != nil {
 					return nil, err
 				}
-				return setArrowWithLabel(left, right, match[1], false, gp), nil
+				return setArrowWithLabel(left, right, match[1], false, self), nil
 			},
 		},
 		{
 			regex: regexp.MustCompile(`(?s)^(.+)\s*-->\s*(.+)$`),
 			handler: func(match []string) ([]textNode, error) {
-				left, err := gp.parseExpression(match[0])
+				left, err := self.parseExpression(match[0])
 				if err != nil {
 					return nil, err
 				}
-				right, err := gp.parseExpression(match[1])
+				right, err := self.parseExpression(match[1])
 				if err != nil {
 					return nil, err
 				}
-				return setArrow(left, right, gp), nil
+				return setArrow(left, right, self), nil
 			},
 		},
 		{
@@ -304,18 +304,18 @@ func (gp *graphProperties) parseString(line string) ([]textNode, error) {
 				if err != nil {
 					return nil, err
 				}
-				(*gp.styleClasses)[style.name] = style
+				(*self.styleClasses)[style.name] = style
 				return []textNode{}, nil
 			},
 		},
 		{
 			regex: regexp.MustCompile(`(?s)^(.+) & (.+)$`),
 			handler: func(match []string) ([]textNode, error) {
-				left, err := gp.parseExpression(match[0])
+				left, err := self.parseExpression(match[0])
 				if err != nil {
 					return nil, err
 				}
-				right, err := gp.parseExpression(match[1])
+				right, err := self.parseExpression(match[1])
 				if err != nil {
 					return nil, err
 				}

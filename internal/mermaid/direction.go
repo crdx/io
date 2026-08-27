@@ -14,8 +14,8 @@ var (
 	Middle     = direction{1, 1}
 )
 
-func (d direction) getOpposite() direction {
-	switch d {
+func (self direction) getOpposite() direction {
+	switch self {
 	case Up:
 		return Down
 	case Down:
@@ -38,30 +38,30 @@ func (d direction) getOpposite() direction {
 	panic("Unknown direction")
 }
 
-func (c gridCoord) Direction(dir direction) gridCoord {
-	return gridCoord{x: c.x + dir.x, y: c.y + dir.y}
+func (self gridCoord) Direction(dir direction) gridCoord {
+	return gridCoord{x: self.x + dir.x, y: self.y + dir.y}
 }
 
-func (g *graph) selfReferenceDirection() (direction, direction, direction, direction) {
-	if g.graphDirection == "LR" {
+func (self *graph) selfReferenceDirection() (direction, direction, direction, direction) {
+	if self.graphDirection == "LR" {
 		return Right, Down, Down, Right
 	}
 	return Down, Right, Right, Down
 }
 
-func (g *graph) determineStartAndEndDir(e *edge) (direction, direction, direction, direction) {
+func (self *graph) determineStartAndEndDir(e *edge) (direction, direction, direction, direction) {
 	if e.from == e.to {
-		return g.selfReferenceDirection()
+		return self.selfReferenceDirection()
 	}
 	d := determineDirection(genericCoord(*e.from.gridCoord), genericCoord(*e.to.gridCoord))
 	var preferredDir, preferredOppositeDir, alternativeDir, alternativeOppositeDir direction
 
-	isBackwards := (g.graphDirection == "LR" && (d == Left || d == UpperLeft || d == LowerLeft)) ||
-		(g.graphDirection != "LR" && (d == Up || d == UpperLeft || d == UpperRight))
+	isBackwards := (self.graphDirection == "LR" && (d == Left || d == UpperLeft || d == LowerLeft)) ||
+		(self.graphDirection != "LR" && (d == Up || d == UpperLeft || d == UpperRight))
 
 	switch d {
 	case LowerRight:
-		if g.graphDirection == "LR" {
+		if self.graphDirection == "LR" {
 			preferredDir = Down
 			preferredOppositeDir = Left
 			alternativeDir = Right
@@ -73,7 +73,7 @@ func (g *graph) determineStartAndEndDir(e *edge) (direction, direction, directio
 			alternativeOppositeDir = Left
 		}
 	case UpperRight:
-		if g.graphDirection == "LR" {
+		if self.graphDirection == "LR" {
 			preferredDir = Up
 			preferredOppositeDir = Left
 			alternativeDir = Right
@@ -85,7 +85,7 @@ func (g *graph) determineStartAndEndDir(e *edge) (direction, direction, directio
 			alternativeOppositeDir = Left
 		}
 	case LowerLeft:
-		if g.graphDirection == "LR" {
+		if self.graphDirection == "LR" {
 			preferredDir = Down
 			preferredOppositeDir = Down
 			alternativeDir = Left
@@ -97,7 +97,7 @@ func (g *graph) determineStartAndEndDir(e *edge) (direction, direction, directio
 			alternativeOppositeDir = Right
 		}
 	case UpperLeft:
-		if g.graphDirection == "LR" {
+		if self.graphDirection == "LR" {
 			preferredDir = Down
 			preferredOppositeDir = Down
 			alternativeDir = Left
@@ -111,12 +111,12 @@ func (g *graph) determineStartAndEndDir(e *edge) (direction, direction, directio
 	default:
 		if isBackwards {
 			switch {
-			case g.graphDirection == "LR" && d == Left:
+			case self.graphDirection == "LR" && d == Left:
 				preferredDir = Down
 				preferredOppositeDir = Down
 				alternativeDir = Left
 				alternativeOppositeDir = Right
-			case g.graphDirection == "TD" && d == Up:
+			case self.graphDirection == "TD" && d == Up:
 				preferredDir = Right
 				preferredOppositeDir = Right
 				alternativeDir = Up
