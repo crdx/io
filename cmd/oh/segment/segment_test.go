@@ -495,14 +495,14 @@ func TestTheTurnTimerShowsBothTurnsInWholeMinutes(t *testing.T) {
 	}
 }
 
-func TestTheTurnTimerDimsEverythingExceptTheActiveNumber(t *testing.T) {
+func TestTheTurnTimerMutesEverythingExceptTheActiveNumber(t *testing.T) {
 	timing := turn.Timing{UserTurn: 3 * time.Minute, ModelTurn: time.Minute}
 	tests := []struct {
 		isTurnRunning bool
 		want          string
 	}{
-		{want: style.Normal("3") + style.Faint("m") + style.Faint("/") + style.Faint("1m")},
-		{isTurnRunning: true, want: style.Faint("3m") + style.Faint("/") + style.Normal("1") + style.Faint("m")},
+		{want: style.Normal("3") + style.Dim("m") + style.Dim("/") + style.Dim("1m")},
+		{isTurnRunning: true, want: style.Dim("3m") + style.Dim("/") + style.Normal("1") + style.Dim("m")},
 	}
 
 	for _, test := range tests {

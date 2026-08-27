@@ -36,13 +36,13 @@ func (self state) NextRefresh(phase segment.Phase) time.Time {
 func (self state) Render(segment.Context) string {
 	timing := self.getTiming()
 	isTurnRunning := self.isTurnRunning()
-	return renderDuration(timing.UserTurn, !isTurnRunning) + style.Faint("/") + renderDuration(timing.ModelTurn, isTurnRunning)
+	return renderDuration(timing.UserTurn, !isTurnRunning) + style.Dim("/") + renderDuration(timing.ModelTurn, isTurnRunning)
 }
 
 func renderDuration(elapsed time.Duration, isActive bool) string {
 	number := strconv.FormatInt(int64(elapsed/time.Minute), 10)
 	if !isActive {
-		return style.Faint(number + "m")
+		return style.Dim(number + "m")
 	}
-	return style.Normal(number) + style.Faint("m")
+	return style.Normal(number) + style.Dim("m")
 }

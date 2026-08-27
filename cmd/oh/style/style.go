@@ -38,41 +38,41 @@ const (
 
 // The base visual styles.
 var (
-	Normal Style = hex(none)               // the terminal's foreground
-	Grey   Style = hex(grey)               // grey text
-	Faint  Style = decorate(col.Dim, Grey) // grey at reduced intensity
+	Normal Style = hex(none)              // the terminal's foreground
+	Dim    Style = hex(grey)              // grey text
+	Faint  Style = decorate(col.Dim, Dim) // grey at reduced intensity
 )
 
 // The mapping of kind of line to colour.
 var (
-	Reasoning   Style = decorate(col.Italic, Grey) // what the model thought on the way to an answer
-	Answer      Style = Normal                     // the reply the model gives after it has thought
-	Call        Style = Normal                     // the name of a call that changes nothing at all
-	Change      Style = hex(gold)                  // the name of a call that could change something
-	Success     Style = hex(lime)                  // the mark set against a call that has completed
-	Information Style = hex(steel)                 // what the harness says when passing information
-	Cancelled   Style = Grey                       // the name of a call stopped before it got going
-	Stopped     Style = hex(gold)                  // what the harness says of a turn it had to stop
-	Failure     Style = hex(red)                   // what went wrong, wherever the failure happened
-	Subject     Style = hex(copper)                // the subject of a call, whatever it operates on
-	Qualifier   Style = Grey                       // what qualifies the subject and narrows it down
-	Result      Style = Grey                       // the output a call handed back when it finished
-	Spinner     Style = hex(copper)                // the spinner that turns while a call is running
-	Prompt      Style = hex(copper)                // the harness prompting the user to enter a line
-	Rule        Style = Grey                       // the line drawn across the top of the input box
-	Subtle      Style = Grey                       // text held one small step back from the subject
-	Read        Style = hex(lime)                  // reading is on offer, and waiting to be granted
-	Write       Style = hex(gold)                  // writing is on offer, and waiting to be granted
-	Exec        Style = hex(red)                   // running a command is on offer, if you grant it
-	Shell       Style = hex(steel)                 // a shell prompt, tinted to match a command name
-	Skill       Style = hex(mauve)                 // a skill being read ahead of the work it guides
-	History     Style = hex(mauve)                 // rewriting the repository's history is on offer
-	Pending     Style = col.Underline              // waiting for the keypress that follows a prefix
-	Scrolled    Style = Grey                       // how much of the input is scrolled out of sight
-	Withheld    Style = Faint                      // a note that this access is not on offer at all
-	Chosen      Style = hex(copper)                // the row the cursor is resting on within a list
-	Typed       Style = Normal                     // what the user typed when a session is replayed
-	User        Style = background("#343541")      // a submitted message, kept apart from the reply
+	Reasoning   Style = decorate(col.Italic, Dim) // what the model thought on the way to an answer
+	Answer      Style = Normal                    // the reply the model gives after it has thought
+	Call        Style = Normal                    // the name of a call that changes nothing at all
+	Change      Style = hex(gold)                 // the name of a call that could change something
+	Success     Style = hex(lime)                 // the mark set against a call that has completed
+	Information Style = hex(steel)                // what the harness says when passing information
+	Cancelled   Style = Dim                       // the name of a call stopped before it got going
+	Stopped     Style = hex(gold)                 // what the harness says of a turn it had to stop
+	Failure     Style = hex(red)                  // what went wrong, wherever the failure happened
+	Subject     Style = hex(copper)               // the subject of a call, whatever it operates on
+	Qualifier   Style = Dim                       // what qualifies the subject and narrows it down
+	Result      Style = Dim                       // the output a call handed back when it finished
+	Spinner     Style = hex(copper)               // the spinner that turns while a call is running
+	Prompt      Style = hex(copper)               // the harness prompting the user to enter a line
+	Rule        Style = Dim                       // the line drawn across the top of the input box
+	Subtle      Style = Dim                       // text held one small step back from the subject
+	Read        Style = hex(lime)                 // reading is on offer, and waiting to be granted
+	Write       Style = hex(gold)                 // writing is on offer, and waiting to be granted
+	Exec        Style = hex(red)                  // running a command is on offer, if you grant it
+	Shell       Style = hex(steel)                // a shell prompt, tinted to match a command name
+	Skill       Style = hex(mauve)                // a skill being read ahead of the work it guides
+	History     Style = hex(mauve)                // rewriting the repository's history is on offer
+	Pending     Style = col.Underline             // waiting for the keypress that follows a prefix
+	Scrolled    Style = Dim                       // how much of the input is scrolled out of sight
+	Withheld    Style = Faint                     // a note that this access is not on offer at all
+	Chosen      Style = hex(copper)               // the row the cursor is resting on within a list
+	Typed       Style = Normal                    // what the user typed when a session is replayed
+	User        Style = background("#343541")     // a submitted message, kept apart from the reply
 )
 
 // Web marks permission to reach the internet through the web tools.
@@ -85,16 +85,16 @@ var Network Style = hex(red)
 var (
 	Heading Style = hex(gold)   // a heading, which is drawn in bold as well
 	Link    Style = hex(steel)  // what a link says
-	Address Style = Grey        // where it goes
+	Address Style = Dim         // where it goes
 	Code    Style = hex(copper) // code within a line
-	Block   Style = Grey        // code on lines of its own, where nothing highlights it
-	Quote   Style = Grey        // what is quoted
+	Block   Style = Dim         // code on lines of its own, where nothing highlights it
+	Quote   Style = Dim         // what is quoted
 	Bullet  Style = hex(copper) // what a list item is marked with
-	Border  Style = Grey        // a rule, a table's borders, and the bar down a quote
+	Border  Style = Dim         // a rule, a table's borders, and the bar down a quote
 )
 
 var (
-	Comment     Style = Grey
+	Comment     Style = Dim
 	Keyword     Style = hex(mauve)
 	Function    Style = hex(steel)
 	Literal     Style = hex(sage)

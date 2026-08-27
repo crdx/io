@@ -70,7 +70,7 @@ func (self state) NextRefresh(phase segment.Phase) time.Time {
 
 func (self state) Render(segment.Context) string {
 	if !self.isRunning() {
-		return style.Grey(self.idle)
+		return style.Dim(self.idle)
 	}
 
 	return style.Spinner(self.animation.Frame(self.frameIndex()))
