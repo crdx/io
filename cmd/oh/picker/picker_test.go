@@ -64,8 +64,48 @@ func TestTheCursorStopsAtEitherEnd(t *testing.T) {
 	}
 }
 
+func TestTheCursorSkipsRunningSessions(t *testing.T) {
+	self := &state{
+		sessions: []*Session{
+			{IsRunning: true},
+			{},
+			{IsRunning: true},
+			{},
+			{IsRunning: true},
+		},
+		cursor: 1,
+	}
+
+	self.apply(key.Key{Code: key.Down})
+	if self.cursor != 3 {
+		t.Errorf("expected the next available session, got %d", self.cursor)
+	}
+	self.apply(key.Key{Code: key.Down})
+	if self.cursor != 3 {
+		t.Errorf("expected the cursor to stop at the last available session, got %d", self.cursor)
+	}
+	self.apply(key.Key{Code: key.Home})
+	if self.cursor != 1 {
+		t.Errorf("expected home to choose the first available session, got %d", self.cursor)
+	}
+	self.apply(key.Key{Code: key.End})
+	if self.cursor != 3 {
+		t.Errorf("expected end to choose the last available session, got %d", self.cursor)
+	}
+}
+
+func TestARunningSessionCannotBeChosen(t *testing.T) {
+	self := &state{sessions: []*Session{{IsRunning: true}}}
+	if got := self.apply(key.Key{Code: key.Enter}); got != continuePicking {
+		t.Errorf("expected the running session to be ignored, got %v", got)
+	}
+	if got := firstSelectable(self.sessions); got != -1 {
+		t.Errorf("expected no initial choice, got %d", got)
+	}
+}
+
 func TestAnEmptyListIsNothingToChooseFrom(t *testing.T) {
-	if _, err := Choose(nil, nil, nil); !errors.Is(err, ErrCancelled) {
+	if _, err := Choose(nil, "", nil, nil); !errors.Is(err, ErrCancelled) {
 		t.Errorf("expected the choice to be abandoned, got %v", err)
 	}
 }

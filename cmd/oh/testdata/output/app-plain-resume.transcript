@@ -1,0 +1,47 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+say something
+```
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+```
+Said it.
+```
+
+## User
+
+> 2001-01-01T00:00:03Z
+
+```
+carry on
+```
+
+## Assistant
+
+> 2001-01-01T00:00:04Z
+
+```
+Said it.
+```
+

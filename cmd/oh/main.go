@@ -131,7 +131,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	if inputArgs.IsSessionPicker {
-		return sessions.Choose(sessionsDir, os.Stdin, os.Stdout)
+		return sessions.Choose(sessionsDir, inputArgs.WorkspaceDir, os.Stdin, os.Stdout)
 	}
 
 	if err := model.Ensure(os.Stdout, endpointURL, modelCachePath, backend.ListModels); err != nil {

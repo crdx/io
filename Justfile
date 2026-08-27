@@ -33,7 +33,7 @@ fuzz package target time='1m':
 
 # write what the tests drew back to the golden files
 golden:
-    go test ./cmd/oh ./cmd/oh/cli ./cmd/oh/commands -update
+    go test ./cmd/oh ./cmd/oh/cli ./cmd/oh/commands ./cmd/oh/picker -update
 
 # what every package covers, least covered first
 cov *args:

@@ -437,7 +437,7 @@ type Meta struct {
 	Data     json.RawMessage `json:"data,omitempty"`
 	Started  time.Time       `json:"started"`
 	Touched  time.Time       `json:"touched"`
-	Title    string          `json:"title,omitempty"` // the opening message until the model names the session, then the last name it gave
+	Title    string          `json:"title,omitempty"`
 	Messages int             `json:"messages"`
 }
 

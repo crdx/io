@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/store"
@@ -13,7 +14,12 @@ import (
 	"crdx.org/io/session"
 )
 
-func Choose(directory string, terminal *os.File, screen io.Writer) (string, error) {
+func Choose(directory string, workspaceDir string, terminal *os.File, screen io.Writer) (string, error) {
+	workspaceDir, err := ResolveWorkspaceDir(workspaceDir)
+	if err != nil {
+		return "", err
+	}
+
 	sessions, err := Load(directory)
 	if errors.Is(err, session.ErrMetaOutOfDate) {
 		_, _ = fmt.Fprintln(screen, style.Subtle("writing the session listing again from the journals"))
@@ -28,11 +34,12 @@ func Choose(directory string, terminal *os.File, screen io.Writer) (string, erro
 		}
 		return "", err
 	}
+	sessions = InWorkspace(sessions, workspaceDir)
 	if len(sessions) == 0 {
-		return "", errors.New("there are no stored conversations")
+		return "", errors.New("there are no stored conversations for this workspace")
 	}
 
-	chosenSession, err := picker.Choose(sessions, terminal, screen)
+	chosenSession, err := picker.Choose(sessions, workspaceDir, terminal, screen)
 	if errors.Is(err, picker.ErrCancelled) {
 		return "", nil
 	}
@@ -41,6 +48,30 @@ func Choose(directory string, terminal *os.File, screen io.Writer) (string, erro
 	}
 
 	return chosenSession.Name, nil
+}
+
+func ResolveWorkspaceDir(workspaceDir string) (string, error) {
+	if workspaceDir == "" {
+		workspaceDir = "."
+	}
+
+	workspaceDir, err := filepath.Abs(workspaceDir)
+	if err != nil {
+		return "", fmt.Errorf("could not resolve the workspace path: %w", err)
+	}
+
+	return workspaceDir, nil
+}
+
+func InWorkspace(sessions []*picker.Session, workspaceDir string) []*picker.Session {
+	chosen := make([]*picker.Session, 0, len(sessions))
+	for _, storedSession := range sessions {
+		if filepath.Clean(storedSession.WorkspaceDir) == workspaceDir {
+			chosen = append(chosen, storedSession)
+		}
+	}
+
+	return chosen
 }
 
 func Load(directory string) ([]*picker.Session, error) {
@@ -66,6 +97,7 @@ func Load(directory string) ([]*picker.Session, error) {
 		sessions = append(sessions, &picker.Session{
 			Name:         storedMeta.Name,
 			WorkspaceDir: data.WorkspaceDir,
+			Started:      storedMeta.Started,
 			Touched:      storedMeta.Touched,
 			Title:        storedMeta.Title,
 			MessageCount: storedMeta.Messages,

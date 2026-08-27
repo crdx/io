@@ -2458,6 +2458,8 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		".transcript",
 	})
 	for name, extensions := range map[string][]string{
+		"app-plain-resume":      {".jsonl", ".transcript"},
+		"app-plain-turn":        {".jsonl", ".transcript"},
 		"banner":                {".ansi", ".screen"},
 		"clearing":              {".ansi", ".screen"},
 		"completion":            {".txt"},
@@ -3408,9 +3410,10 @@ func TestPick(t *testing.T) {
 	}
 
 	directory := t.TempDir()
+	workspaceDir := "/home/alice/proj/io"
 
-	for i, prompt := range prompts {
-		meta := fmt.Appendf(nil, `{"workspaceDir":"/home/alice/proj/%d"}`, i)
+	for _, prompt := range prompts {
+		meta := fmt.Appendf(nil, `{"workspaceDir":%q}`, workspaceDir)
 		log, err := session.Create(directory, meta, meta)
 		if err != nil {
 			t.Fatal(err)
@@ -3430,7 +3433,7 @@ func TestPick(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	chosenSession, err := picker.Choose(sessions, os.Stdin, os.Stdout)
+	chosenSession, err := picker.Choose(sessions, workspaceDir, os.Stdin, os.Stdout)
 	screen := output.New(os.Stdout)
 
 	switch {
@@ -5304,11 +5307,47 @@ func TestSessionsComeFromJournalParsing(t *testing.T) {
 	if sessions[0].Title != "hello" {
 		t.Errorf("expected the provisional title, got %q", sessions[0].Title)
 	}
+	if sessions[0].Started.IsZero() {
+		t.Error("expected the session start time")
+	}
 }
 
 func TestChoosingWithoutStoredSessionsFails(t *testing.T) {
-	if _, err := sessions.Choose(t.TempDir(), nil, nil); err == nil {
+	if _, err := sessions.Choose(t.TempDir(), t.TempDir(), nil, nil); err == nil {
 		t.Error("expected an empty session list to fail")
+	}
+}
+
+func TestChoosingOnlyOffersTheSessionsOfTheCurrentWorkspace(t *testing.T) {
+	directory := t.TempDir()
+	workspaceDir := t.TempDir()
+
+	for _, sessionWorkspaceDir := range []string{workspaceDir, t.TempDir()} {
+		meta := fmt.Appendf(nil, `{"workspaceDir":%q}`, sessionWorkspaceDir)
+		writer, err := session.Create(directory, meta, meta)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "hello"}); err != nil {
+			t.Fatal(err)
+		}
+		if err := writer.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	loadedSessions, err := sessions.Load(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	chosen := sessions.InWorkspace(loadedSessions, workspaceDir)
+	if len(chosen) != 1 || chosen[0].WorkspaceDir != workspaceDir {
+		t.Fatalf("expected only the session of this workspace, got %+v", chosen)
+	}
+
+	if _, err := sessions.Choose(directory, t.TempDir(), nil, nil); err == nil {
+		t.Error("expected a workspace without sessions to fail")
 	}
 }
 
@@ -5328,7 +5367,7 @@ func TestChoosingASessionFromANewerOhAdvisesAnUpgrade(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err := sessions.Choose(directory, nil, nil)
+	_, err := sessions.Choose(directory, t.TempDir(), nil, nil)
 	if err == nil {
 		t.Fatal("expected the newer session to be refused")
 	}
@@ -5344,7 +5383,7 @@ func TestChoosingAnOutdatedSessionAdvisesMigration(t *testing.T) {
 	directory := t.TempDir()
 	writeStoredSession(t, directory, "able-dolphin", "2026-08-01T00:00:00Z")
 
-	_, err := sessions.Choose(directory, nil, nil)
+	_, err := sessions.Choose(directory, t.TempDir(), nil, nil)
 	if err == nil {
 		t.Fatal("expected the outdated session to be refused")
 	}
@@ -5884,6 +5923,7 @@ func compareScenarioGolden(t *testing.T, name string, got string) {
 		if err := os.MkdirAll(filepath.Dir(goldenPath), 0o700); err != nil {
 			t.Fatal(err)
 		}
+		//nolint:gosec // the path is built from the fixed testdata directory
 		if err := os.WriteFile(goldenPath, []byte(got), 0o600); err != nil {
 			t.Fatal(err)
 		}
@@ -7405,5 +7445,161 @@ func TestTheSessionTitleReachesTheTerminalLiveAndOnResume(t *testing.T) {
 
 	if got := self.terminal.GetSessionTitle(); got != "give sessions a title" {
 		t.Errorf("a retitled session went by %q", got)
+	}
+}
+
+type plainTurnProvider struct {
+	items []json.RawMessage
+}
+
+func (self *plainTurnProvider) Configure(string, []tool.Definition)   {}
+func (self *plainTurnProvider) AddToolResults([]agent.ToolCallResult) {}
+func (self *plainTurnProvider) Dump() []json.RawMessage               { return self.items }
+func (self *plainTurnProvider) Load(items []json.RawMessage)          { self.items = items }
+
+func (self *plainTurnProvider) AddUserMessage(text string) {
+	self.items = append(self.items, fmt.Appendf(nil, `{"role":"user","content":%q}`, text))
+}
+
+func (self *plainTurnProvider) Send(_ context.Context, yield agent.Yield) (agent.Reply, error) {
+	if !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: "Said it."}) {
+		return agent.Reply{}, nil
+	}
+	if !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true}) {
+		return agent.Reply{}, nil
+	}
+
+	self.items = append(self.items, json.RawMessage(`{"role":"assistant","content":"Said it."}`))
+
+	return agent.Reply{}, nil
+}
+
+func TestTheAppWritesAndResumesASessionOnItsOwn(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{
+		Model:        "claude-opus-5",
+		Provider:     "anthropic",
+		Effort:       "medium",
+		SystemPrompt: sessionGoldenSystemPrompt,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var screenOutput bytes.Buffer
+	self := &App{
+		agent:    agent.New(sessionGoldenSystemPrompt, &plainTurnProvider{}, nil),
+		screen:   output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.All()),
+	}
+
+	self.begin("say something")
+
+	sessionName := log.Name()
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	transcript, err := os.ReadFile(filepath.Join(directory, sessionName, "chat.md")) //nolint:gosec // the path is the test's own session directory
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	compareScenarioGolden(t, "app-plain-turn.jsonl", canonicalSessionJournal(t, directory, sessionName))
+	compareScenarioGolden(
+		t, "app-plain-turn.transcript", canonicalSessionTranscript(string(transcript), sessionName),
+	)
+
+	resumeAppPlainTurn(t, directory, sessionName)
+}
+
+func resumeAppPlainTurn(t *testing.T, directory string, sessionName string) {
+	t.Helper()
+
+	storedSession, err := store.Read(directory, sessionName)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resumedCaps, err := sessions.OpeningCaps(caps.All(), false, storedSession)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	log, err := store.Open(directory, sessionName)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var screenOutput bytes.Buffer
+	self := &App{
+		agent:    agent.New(storedSession.Meta.SystemPrompt, &plainTurnProvider{}, nil),
+		screen:   output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines),
+		recorder: record.New(log),
+		mode:     caps.NewResumedMode(resumedCaps),
+	}
+	self.restore(storedSession)
+
+	self.begin("carry on")
+
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	transcript, err := os.ReadFile(filepath.Join(directory, sessionName, "chat.md")) //nolint:gosec // the path is the test's own session directory
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	compareScenarioGolden(t, "app-plain-resume.jsonl", canonicalSessionJournal(t, directory, sessionName))
+	compareScenarioGolden(
+		t, "app-plain-resume.transcript", canonicalSessionTranscript(string(transcript), sessionName),
+	)
+}
+
+func TestEverySessionGoldenOpensWithTheModeItIsIn(t *testing.T) {
+	paths, err := filepath.Glob(filepath.Join("testdata", "output", "*.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(paths) == 0 {
+		t.Fatal("no session journals")
+	}
+
+	for _, path := range paths {
+		if strings.HasSuffix(path, ".requests.jsonl") {
+			continue
+		}
+
+		t.Run(filepath.Base(path), func(t *testing.T) {
+			journal, err := os.ReadFile(path) //nolint:gosec // fixed testdata path
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			for line := range strings.SplitSeq(strings.TrimSpace(string(journal)), "\n") {
+				var record struct {
+					Kind  session.Kind `json:"kind"`
+					Event *agent.Event `json:"event"`
+				}
+				if err := json.Unmarshal([]byte(line), &record); err != nil {
+					t.Fatal(err)
+				}
+				if record.Event == nil {
+					continue
+				}
+
+				if record.Event.Kind != caps.ModeChange {
+					t.Fatalf("expected the mode to be recorded first, got %q", record.Event.Kind)
+				}
+
+				return
+			}
+
+			t.Fatal("expected the session to record the mode it opened in")
+		})
 	}
 }
