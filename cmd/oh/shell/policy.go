@@ -146,9 +146,10 @@ func createPolicyWithSupportProbe(
 	executablePaths := append(append(execPaths(workspaceDir), extraPaths.Exec...), homeDir, sandbox.TmpDir)
 
 	policy := sandbox.Policy{
-		Read:  readablePaths,
-		Write: []string{cacheDir},
-		Exec:  executablePaths,
+		Read:    readablePaths,
+		Write:   []string{cacheDir},
+		Sockets: []string{cacheDir, sandbox.TmpDir},
+		Exec:    executablePaths,
 
 		TmpDir: tmpDir,
 		Env: []string{
@@ -173,8 +174,6 @@ func createPolicyWithSupportProbe(
 		OpenFiles: shellOpenFiles,
 
 		VirtualResolver: true,
-
-		Background: currentCaps.Has(caps.Background),
 	}
 
 	policy = policy.WithSetEnv("GOPROXY", "off").WithSetEnv("GOSUMDB", "off")
@@ -291,7 +290,6 @@ func New(
 	extraPaths Paths,
 	mode *caps.Mode,
 	files *file.Root,
-	processes *sandbox.Processes,
 ) tool.Tool {
 	fresh := func(ctx context.Context) (sandbox.Policy, error) {
 		currentCaps := mode.Current()
@@ -311,7 +309,7 @@ func New(
 		return policy, nil
 	}
 
-	return bash.New(files, fresh, processes)
+	return bash.New(files, fresh)
 }
 
 func allWritablePaths(workspaceDir, homeDir string, extraPaths []string, currentCaps caps.Set) []string {

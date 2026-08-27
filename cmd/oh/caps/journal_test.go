@@ -7,7 +7,7 @@ import (
 )
 
 func TestARecordedModeIsReadBackAsItWasWritten(t *testing.T) {
-	for _, grantedCaps := range []Set{Read, Read | Write, Read | Shell | Write | Git | Background} {
+	for _, grantedCaps := range []Set{Read, Read | Write, Read | Shell | Write | Git | Web} {
 		event := ModeEvent(grantedCaps)
 
 		if event.Kind != ModeChange {

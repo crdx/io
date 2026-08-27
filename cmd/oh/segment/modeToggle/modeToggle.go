@@ -30,7 +30,6 @@ func (self state) Render(segment.Context) string {
 		self.letter(caps.Shell, grantedCaps.Has(caps.Shell), style.Exec, isPrefixPending) +
 		self.letter(caps.Write, grantedCaps.Has(caps.Write), style.Write, isPrefixPending) +
 		gap +
-		self.letter(caps.Background, grantedCaps.Has(caps.Background), style.Background, isPrefixPending) +
 		self.letter(caps.Git, grantedCaps.Has(caps.Git), style.History, isPrefixPending) +
 		self.letter(caps.Web, grantedCaps.Has(caps.Web), style.Web, isPrefixPending)
 }

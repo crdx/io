@@ -471,6 +471,62 @@ func TestFormatSevenMigrationFallsBackToTheContextFilesItHas(t *testing.T) {
 	}
 }
 
+func TestAnOlderJournalNamingTheBackgroundCapabilityMigratesAllTheWay(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":4,"id":"one","name":"brave-otter","meta":{"system_prompt":"# State\n\n- Background processes are allowed to outlive shell commands\n- The bash tool is granted"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","name":"b","text":"rxb"}}`,
+	)
+
+	if _, err := migrate.Session(options(directory), name); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if currentCaps, recorded := caps.LastRecordedMode(storedSession.Events); !recorded || currentCaps != caps.Read|caps.Shell {
+		t.Errorf("recovered %s and %t, want rx", currentCaps.Flags(), recorded)
+	}
+}
+
+func TestFormatEightMigrationForgetsTheBackgroundCapability(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":8,"id":"one","name":"brave-otter"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxwb"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"mode_change","name":"b","text":"rxw"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"mode_change","name":"g","text":"rxwbg"}}`,
+	)
+
+	from, err := migrate.Session(options(directory), name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if from != 8 {
+		t.Errorf("migrated from format %d, want 8", from)
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var modeEvents int
+	for _, event := range storedSession.Events {
+		if event.Kind == caps.ModeChange {
+			modeEvents++
+		}
+	}
+	if modeEvents != 2 {
+		t.Errorf("kept %d mode events, want the two that still say something", modeEvents)
+	}
+
+	currentCaps, recorded := caps.LastRecordedMode(storedSession.Events)
+	if !recorded || currentCaps != caps.Read|caps.Shell|caps.Write|caps.Git {
+		t.Errorf("recovered %s and %t, want rxwg", currentCaps.Flags(), recorded)
+	}
+}
+
 func startupState(t *testing.T, line map[string]json.RawMessage) map[string]json.RawMessage {
 	t.Helper()
 

@@ -29,7 +29,6 @@ import (
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
-	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/stop"
 )
 
@@ -67,7 +66,6 @@ type App struct {
 	events        []agent.Event
 	screen        *output.Screen
 	recorder      *record.Recorder
-	processes     *sandbox.Processes
 	segmentLayout segment.Layout
 	editor        *edit.Input
 	mode          *caps.Mode
@@ -206,22 +204,6 @@ func (self *App) apply(editor *edit.Input, history *edit.History, keypress key.K
 
 	case edit.ToggleWeb:
 		self.toggleCap(caps.Web)
-
-	case edit.ToggleBackground:
-		if self.mode.Current().Has(caps.Background) {
-			names, err := self.processes.Disable()
-			if err == nil {
-				self.toggleCap(caps.Background)
-				if len(names) > 0 {
-					self.notifyStopped("Background processes killed (" + strings.Join(names, ", ") + ")")
-				}
-			} else {
-				self.processes.Enable()
-			}
-		} else {
-			self.processes.Enable()
-			self.toggleCap(caps.Background)
-		}
 
 	case edit.Draw:
 	}
@@ -722,10 +704,6 @@ func (self *App) storeEvent(event agent.Event) {
 
 func (self *App) notifyFailure(text string) {
 	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text, Status: agent.ErrorStatus})
-}
-
-func (self *App) notifyStopped(text string) {
-	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text, Status: agent.WarningStatus})
 }
 
 func (self *App) notify(event agent.Event) {

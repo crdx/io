@@ -26,6 +26,42 @@ var steps = map[int]step{
 	5: {migrateLine: addEventStatus},
 	6: {},
 	7: {migrateJournal: promptBytesReplaceContextFiles},
+	8: {migrateJournal: dropBackgroundCapability},
+}
+
+const legacyBackgroundFlag = "b"
+
+func dropBackgroundCapability(lines []map[string]json.RawMessage) ([]map[string]json.RawMessage, error) {
+	migrated := make([]map[string]json.RawMessage, 0, len(lines))
+
+	for index, line := range lines {
+		event, hasEvent, err := eventOf(line)
+		if err != nil {
+			return nil, fmt.Errorf("line %d: %w", index+1, err)
+		}
+
+		if hasEvent && event.Kind == caps.ModeChange {
+			if event.Name == legacyBackgroundFlag {
+				continue
+			}
+
+			event.Text = withoutBackgroundFlag(event.Text)
+
+			encodedEvent, err := json.Marshal(event)
+			if err != nil {
+				return nil, fmt.Errorf("line %d: %w", index+1, err)
+			}
+			line["event"] = encodedEvent
+		}
+
+		migrated = append(migrated, line)
+	}
+
+	return migrated, nil
+}
+
+func withoutBackgroundFlag(flags string) string {
+	return strings.ReplaceAll(flags, legacyBackgroundFlag, "")
 }
 
 func promptBytesReplaceContextFiles(lines []map[string]json.RawMessage) ([]map[string]json.RawMessage, error) {
@@ -171,7 +207,7 @@ func addLastMode(lines []map[string]json.RawMessage) ([]map[string]json.RawMessa
 				continue
 			}
 
-			currentCaps, err = caps.Parse(event.Text)
+			currentCaps, err = caps.Parse(withoutBackgroundFlag(event.Text))
 			if err != nil {
 				return nil, fmt.Errorf("line %d: the mode could not be read: %w", index+1, err)
 			}
@@ -217,8 +253,6 @@ func initialMode(head map[string]json.RawMessage) (caps.Set, error) {
 			currentCaps |= caps.Write
 		case strings.HasPrefix(line, "- The .git directory within it (") && strings.HasSuffix(line, " is read-write"):
 			currentCaps |= caps.Git
-		case line == "- Background processes are allowed to outlive shell commands":
-			currentCaps |= caps.Background
 		case line == "- The bash tool is granted":
 			currentCaps |= caps.Shell
 		}
@@ -283,12 +317,6 @@ func modeAfterNotice(currentCaps caps.Set, text string) caps.Set {
 	}
 	if strings.Contains(text, "The .git directory is now read-only.") {
 		currentCaps &^= caps.Git
-	}
-	if strings.Contains(text, "Background processes can now outlive shell commands.") {
-		currentCaps |= caps.Background
-	}
-	if strings.Contains(text, "Background processes have been killed and new ones will no longer outlive shell commands.") {
-		currentCaps &^= caps.Background
 	}
 	return currentCaps
 }

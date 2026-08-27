@@ -23,13 +23,13 @@ medium gpt-5.6-sol
 === local-time / default format ===
 14:32
 === mode-toggle / all granted ===
-rxw bgs
+rxw gs
 === mode-toggle / pending prefix ===
-rxw bgs
+rxw gs
 === mode-toggle / read only ===
-rxw bgs
+rxw gs
 === mode-toggle / web only ===
-rxw bgs
+rxw gs
 === scroll-overflow / down ===
 ↓ 7
 === scroll-overflow / empty ===

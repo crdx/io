@@ -75,9 +75,6 @@ var (
 	User        Style = background("#343541")      // a submitted message, kept apart from the reply
 )
 
-// Background marks permission to leave processes behind.
-var Background Style = hex(teal)
-
 // Web marks permission to reach the internet through the web tools.
 var Web Style = hex(steel)
 

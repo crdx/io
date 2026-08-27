@@ -21,7 +21,6 @@ import (
 const (
 	envPolicy  = "IO_SANDBOX_POLICY"
 	envCommand = "IO_SANDBOX_COMMAND"
-	envWorker  = "IO_SANDBOX_WORKER"
 	envProbe   = "IO_SANDBOX_PROBE"
 )
 
@@ -58,17 +57,7 @@ func Init() {
 
 	command := os.Getenv(envCommand)
 
-	var err error
-	switch {
-	case os.Getenv(envWorker) != "":
-		err = execWorker(encodedPolicy, command)
-	case policyAllowsBackground(encodedPolicy):
-		err = superviseSandboxed(encodedPolicy)
-	default:
-		err = execSandboxed(encodedPolicy, command)
-	}
-
-	if err != nil {
+	if err := execSandboxed(encodedPolicy, command); err != nil {
 		fmt.Fprint(os.Stderr, notice, err, "\n")
 		os.Exit(notStarted)
 	}
@@ -161,10 +150,6 @@ type Result struct {
 // Run executes command under policy and waits. Sandbox setup failures are errors; command exit
 // statuses are returned in Result. The executable must call Init during startup.
 func Run(ctx context.Context, directory string, command string, policy Policy) (Result, error) {
-	if policy.Background {
-		return Result{}, errors.New("a background policy needs a process set")
-	}
-
 	if err := validate(ctx, policy); err != nil {
 		return Result{}, err
 	}

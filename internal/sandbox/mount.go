@@ -231,7 +231,7 @@ func namespaceAttributes(policy Policy) *syscall.SysProcAttr {
 	}
 
 	return &syscall.SysProcAttr{
-		Setpgid:     !policy.Background,
+		Setpgid:     true,
 		Cloneflags:  flags,
 		UidMappings: []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getuid(), Size: 1}},
 		GidMappings: []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getgid(), Size: 1}},

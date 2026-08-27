@@ -27,7 +27,6 @@ type Args struct {
 func New(
 	root *file.Root,
 	fresh func(context.Context) (sandbox.Policy, error),
-	processes *sandbox.Processes,
 ) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
@@ -46,7 +45,7 @@ func New(
 			if err != nil {
 				return "", tool.Stats{}, err
 			}
-			return exec(ctx, root, policy, args, processes)
+			return exec(ctx, root, policy, args)
 		})
 }
 
@@ -186,9 +185,8 @@ func exec(
 	root *file.Root,
 	policy sandbox.Policy,
 	args Args,
-	processes *sandbox.Processes,
 ) (string, tool.Stats, error) {
-	result, err := processes.Run(ctx, root.Name(), args.Command, policy)
+	result, err := sandbox.Run(ctx, root.Name(), args.Command, policy)
 	stats := tool.Stats{
 		Kind:       tool.StatsResources,
 		CPUTime:    result.CPUTime,

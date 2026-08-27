@@ -47,7 +47,6 @@ func fixedShell(root *file.Root, policy func() sandbox.Policy) tool.Tool {
 	return bash.New(
 		root,
 		func(context.Context) (sandbox.Policy, error) { return policy(), nil },
-		sandbox.NewProcesses(false),
 	)
 }
 

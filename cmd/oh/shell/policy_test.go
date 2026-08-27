@@ -25,10 +25,6 @@ var everyCap = []caps.Set{
 	caps.Write,
 	caps.Git,
 	caps.Write | caps.Git,
-	caps.Background,
-	caps.Write | caps.Background,
-	caps.Git | caps.Background,
-	caps.Write | caps.Git | caps.Background,
 }
 
 func createTestPolicy(
@@ -61,10 +57,7 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read)
-	processes := sandbox.NewProcesses(false)
-	defer func() { _, _ = processes.Disable() }()
-
-	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), Paths{}, mode, files, processes)
+	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), Paths{}, mode, files)
 
 	if shell.Name() != "bash" {
 		t.Errorf("expected the shell to be offered as bash, got %q", shell.Name())
@@ -99,10 +92,7 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read | caps.Shell)
-	processes := sandbox.NewProcesses(false)
-	defer func() { _, _ = processes.Disable() }()
-
-	shell := New(workspace, home, tmp, Paths{}, mode, files, processes)
+	shell := New(workspace, home, tmp, Paths{}, mode, files)
 	run := func() {
 		call, parseErr := shell.Parse(`{"command":"printf %s \"$MISE_DATA_DIR\""}`)
 		if parseErr != nil {
@@ -145,9 +135,7 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 
 	mode := caps.NewMode(initialCaps)
 	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
-	processes := sandbox.NewProcesses(false)
-	defer func() { _, _ = processes.Disable() }()
-	shell := New(workspace, home, tmp, Paths{}, mode, files, processes)
+	shell := New(workspace, home, tmp, Paths{}, mode, files)
 
 	run := func() error {
 		call, parseErr := shell.Parse(`{"command":"touch .git/proof"}`)
@@ -233,13 +221,28 @@ func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 	}
 }
 
-func TestBackgroundModeReachesTheShellPolicy(t *testing.T) {
-	policy, err := createTestPolicy(t, t.TempDir(), t.TempDir(), t.TempDir(), Paths{}, caps.Background)
+func TestOnlyTheScratchAndTheCacheResolveUnixSockets(t *testing.T) {
+	workspace := t.TempDir()
+	homeDir := t.TempDir()
+
+	policy, err := createTestPolicy(t, workspace, homeDir, t.TempDir(), Paths{}, caps.Write)
 	if err != nil {
-		t.Fatalf("the sandbox cannot enforce background mode here: %v", err)
+		t.Skipf("the sandbox cannot enforce a shell policy here: %v", err)
 	}
-	if !policy.Background {
-		t.Error("background mode did not reach the shell policy")
+
+	if !slices.Contains(policy.Sockets, sandbox.TmpDir) {
+		t.Errorf("got socket paths %v, want the scratch among them", policy.Sockets)
+	}
+	if !slices.Contains(policy.Sockets, filepath.Join(homeDir, ".cache")) {
+		t.Errorf("got socket paths %v, want the cache among them", policy.Sockets)
+	}
+	if slices.Contains(policy.Sockets, workspace) {
+		t.Error("the workspace may resolve a socket something outside the sandbox is serving")
+	}
+	for _, path := range policy.Sockets {
+		if !slices.Contains(policy.Write, path) {
+			t.Errorf("%s may resolve sockets but is not writable", path)
+		}
 	}
 }
 

@@ -10,25 +10,22 @@ import (
 )
 
 var (
-	nowReadOnly      = workspaceIs(false)
-	nowReadWrite     = workspaceIs(true)
-	gitReadOnly      = historyIs(false)
-	gitWritable      = historyIs(true)
-	backgroundOn     = backgroundIs(true)
-	backgroundKilled = backgroundIs(false)
-	shellGranted     = shellIs(true)
-	shellWithheld    = shellIs(false)
-	webGranted       = webIs(true)
-	webWithheld      = webIs(false)
+	nowReadOnly   = workspaceIs(false)
+	nowReadWrite  = workspaceIs(true)
+	gitReadOnly   = historyIs(false)
+	gitWritable   = historyIs(true)
+	shellGranted  = shellIs(true)
+	shellWithheld = shellIs(false)
+	webGranted    = webIs(true)
+	webWithheld   = webIs(false)
 )
 
 func TestEveryClauseSaysSomethingAndSaysItBothWays(t *testing.T) {
 	for name, clauses := range map[string][2]string{
-		"workspace":  {nowReadOnly, nowReadWrite},
-		"history":    {gitReadOnly, gitWritable},
-		"background": {backgroundKilled, backgroundOn},
-		"shell":      {shellWithheld, shellGranted},
-		"web":        {webWithheld, webGranted},
+		"workspace": {nowReadOnly, nowReadWrite},
+		"history":   {gitReadOnly, gitWritable},
+		"shell":     {shellWithheld, shellGranted},
+		"web":       {webWithheld, webGranted},
 	} {
 		if clauses[0] == "" || clauses[1] == "" {
 			t.Errorf("%s: expected a clause either way, got %q and %q", name, clauses[0], clauses[1])
@@ -66,20 +63,6 @@ func TestASwappedModeIsAnnouncedOnceAndOnlyOnce(t *testing.T) {
 
 	if got := self.Inject(); got != nowReadWrite {
 		t.Errorf("expected %q, got %q", nowReadWrite, got)
-	}
-}
-
-func TestBackgroundModeIsAnnouncedOnItsOwn(t *testing.T) {
-	self := NewMode(writable())
-	self.Toggle(Background)
-
-	if got := self.Inject(); got != backgroundOn {
-		t.Errorf("expected %q, got %q", backgroundOn, got)
-	}
-
-	self.Toggle(Background)
-	if got := self.Inject(); got != backgroundKilled {
-		t.Errorf("expected %q, got %q", backgroundKilled, got)
 	}
 }
 
@@ -123,7 +106,7 @@ func TestAModeSwappedTwiceIsNotAnnounced(t *testing.T) {
 func TestAResumedConversationAlwaysSaysWhatTheModeAllows(t *testing.T) {
 	got := NewResumedMode(writable()).Inject()
 
-	for _, clause := range []string{nowReadWrite, gitReadOnly, backgroundKilled, shellWithheld, webWithheld} {
+	for _, clause := range []string{nowReadWrite, gitReadOnly, shellWithheld, webWithheld} {
 		if !strings.Contains(got, clause) {
 			t.Errorf("expected %q in %q", clause, got)
 		}

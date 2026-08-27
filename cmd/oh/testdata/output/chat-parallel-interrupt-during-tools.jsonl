@@ -1,4 +1,4 @@
-{"kind":"head","version":8,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":9,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"call two tools and interrupt while the second is working"}}
 {"kind":"event","event":{"render":"alpha","kind":"tool_call_request","id":"call-1","name":"alpha","arguments":"{}"}}
 {"kind":"event","event":{"render":"beta","kind":"tool_call_request","id":"call-2","name":"beta","arguments":"{}"}}

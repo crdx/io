@@ -1,4 +1,4 @@
-{"kind":"head","version":8,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":9,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"run a command while shell access is withheld"}}
 {"kind":"event","event":{"render":"echo forbidden","emphasis":{"kind":"syntax","value":"bash"},"kind":"tool_call_request","id":"call-1","name":"bash","arguments":"{\"command\":\"echo forbidden\"}"}}
 {"kind":"event","event":{"kind":"tool_call_result","text":"shell access is not granted; the user can grant it with ctrl+x x","id":"call-1","name":"bash","status":"error","stats":{"kind":"output","lines":1,"bytes":64,"total_bytes":64}}}

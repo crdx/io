@@ -16,18 +16,17 @@ type Action int
 
 // What a keypress can amount to.
 const (
-	Draw             Action = iota // the line changed, and wants drawing again
-	Accept                         // the line is finished
-	ForceAccept                    // alt+enter: send the line without interpreting a command
-	Continue                       // double enter on an empty line: send the get-on-with-it message
-	Cancel                         // escape, or ctrl+d while a turn runs: stop whatever is running
-	Quit                           // ctrl+d on an empty line with nothing running
-	ToggleWrite                    // ctrl+x w: swap whether files in the workspace may be changed
-	ToggleShell                    // ctrl+x x: swap whether shell commands may run at all
-	ToggleGit                      // ctrl+x g: swap whether a repository's own history may be changed
-	ToggleBackground               // ctrl+x b: swap whether commands may leave processes behind
-	ToggleWeb                      // ctrl+x s: swap whether the web tools may reach the internet
-	Complete                       // tab: complete a slash command when exactly one name matches
+	Draw        Action = iota // the line changed, and wants drawing again
+	Accept                    // the line is finished
+	ForceAccept               // alt+enter: send the line without interpreting a command
+	Continue                  // double enter on an empty line: send the get-on-with-it message
+	Cancel                    // escape, or ctrl+d while a turn runs: stop whatever is running
+	Quit                      // ctrl+d on an empty line with nothing running
+	ToggleWrite               // ctrl+x w: swap whether files in the workspace may be changed
+	ToggleShell               // ctrl+x x: swap whether shell commands may run at all
+	ToggleGit                 // ctrl+x g: swap whether a repository's own history may be changed
+	ToggleWeb                 // ctrl+x s: swap whether the web tools may reach the internet
+	Complete                  // tab: complete a slash command when exactly one name matches
 )
 
 // Input edits a line and walks its history.
@@ -299,9 +298,6 @@ func (self *Input) toggleMode(button key.Key) Action {
 
 	case 'g':
 		return ToggleGit
-
-	case 'b':
-		return ToggleBackground
 
 	case 's':
 		return ToggleWeb

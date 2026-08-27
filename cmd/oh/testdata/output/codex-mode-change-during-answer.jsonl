@@ -1,11 +1,11 @@
-{"kind":"head","version":8,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":9,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"user_message","text":"change two capabilities while the answer is streaming"}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
 {"kind":"event","event":{"kind":"interruption","text":"the user changed what the harness is allowed to do"}}
 {"kind":"item","payload":{"role":"user","content":"change two capabilities while the answer is streaming"}}
 {"kind":"turn_completion"}
-{"kind":"event","event":{"kind":"mode_change","text":"rxbgs"}}
-{"kind":"event","event":{"kind":"mode_change","text":"rxbs"}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxgs"}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxs"}}
 {"kind":"event","event":{"kind":"user_message","text":"The workspace is now read-only. The .git directory is now read-only."}}
 {"kind":"event","event":{"kind":"model_message","text":"The workspace and history are read-only now."}}
 {"kind":"item","payload":{"role":"user","content":"The previous turn was stopped before it finished because the user changed what the harness is allowed to do."}}

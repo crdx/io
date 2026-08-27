@@ -19,9 +19,8 @@ none
 high
 === capabilities ===
 rxw
-rxwb
-rxwbg
-rxwbgs
+rxwg
+rxwgs
 === tools ===
 read
 ls

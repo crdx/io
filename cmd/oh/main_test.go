@@ -1552,8 +1552,12 @@ func TestACallToAToolThatIsGoneKeepsWhatWasRecorded(t *testing.T) {
 	}
 }
 
+func notifyWarning(self *App, text string) {
+	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text, Status: agent.WarningStatus})
+}
+
 func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
-	const notice = "Background processes killed (tmux: server → bash → sleep)"
+	const notice = "The stored session could not be written (no space left on device)"
 
 	var live strings.Builder
 	self := &App{
@@ -1568,7 +1572,7 @@ func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	self.events = append(self.events, call)
 	self.currentTurn.painter.DrawEvent(call)
 
-	self.notifyStopped(notice)
+	notifyWarning(self, notice)
 
 	self.currentTurn.painter.Close(dynamic.Cancelled)
 	self.currentTurn = Turn{}
@@ -1615,7 +1619,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 		self.events = append(self.events, event)
 		livePainter.DrawEvent(event)
 	}
-	self.notifyStopped("Background processes killed (bash → sleep)")
+	notifyWarning(self, "The stored session could not be written (no space left)")
 
 	unansweredCall := agent.Event{Kind: agent.ToolCallRequestEvent, ID: "3", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "left.go"}}
 	self.events = append(self.events, unansweredCall)
@@ -1629,7 +1633,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 
 	plain := style.Plain(live.String())
 
-	for _, want := range []string{"Check", "Looking at the file.", "Need care.", "first answer.", "one.go", "Done.", "Background processes killed"} {
+	for _, want := range []string{"Check", "Looking at the file.", "Need care.", "first answer.", "one.go", "Done.", "could not be written"} {
 		if !strings.Contains(plain, want) {
 			t.Errorf("expected %q on the screen, got %q", want, plain)
 		}
@@ -3279,7 +3283,7 @@ func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 		SessionName:  "brave-otter",
 		TmpDir:       "/state/tmps/brave-otter",
 		HomeDir:      "/state/home",
-		CurrentCaps:  caps.Read | caps.Write | caps.Git | caps.Shell | caps.Background,
+		CurrentCaps:  caps.Read | caps.Write | caps.Git | caps.Shell,
 		ExtraPaths: shell.Paths{
 			Read:  []string{"/reference"},
 			Write: []string{"/output"},
@@ -3699,8 +3703,6 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 	workspaceDir := layOutWorkspace(t)
 
 	files := file.New(openWorkspaceRootAt(t, workspaceDir), caps.RefuseWrite(caps.NewMode(caps.All())))
-	processes := sandbox.NewProcesses(false)
-	t.Cleanup(func() { _, _ = processes.Disable() })
 
 	tools := toolbox.Rummage(files, file.NewSnapshots())
 	tools = append(
@@ -3708,7 +3710,6 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 		bash.New(
 			files,
 			func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
-			processes,
 		),
 		notify.New(),
 	)
@@ -3978,7 +3979,7 @@ func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
 func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{}
 
-	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwb", "rxwbg", "rxwbgs", "rgb", "rs"} {
+	for _, flags := range []string{"", "r", "rw", "rx", "rxw", "rxwg", "rxwgs", "rg", "rs"} {
 		grantedCaps, err := caps.Parse(flags)
 		if err != nil {
 			t.Fatal(err)
@@ -5635,10 +5636,8 @@ func newSessionGoldenWithheldShell(t *testing.T) tool.Tool {
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read)
-	processes := sandbox.NewProcesses(false)
-	t.Cleanup(func() { _, _ = processes.Disable() })
 
-	return shell.New(workspace, t.TempDir(), t.TempDir(), shell.Paths{}, mode, files, processes)
+	return shell.New(workspace, t.TempDir(), t.TempDir(), shell.Paths{}, mode, files)
 }
 
 func serveSessionGoldenResponse(

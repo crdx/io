@@ -26,14 +26,12 @@ func TestPolicyModifiersDoNotChangeTheSourcePolicy(t *testing.T) {
 	source := sandbox.Policy{
 		Read:   []string{"read"},
 		Write:  []string{"write"},
-		Exec:   []string{"exec"},
 		SetEnv: map[string]string{"EXISTING": "original"},
 	}
 
-	modified := source.WithRead("more-read").WithWrite("more-write").WithExec("more-exec").WithSetEnv("ADDED", "value")
+	modified := source.WithRead("more-read").WithWrite("more-write").WithSetEnv("ADDED", "value")
 	modified.Read[0] = "changed"
 	modified.Write[0] = "changed"
-	modified.Exec[0] = "changed"
 	modified.SetEnv["EXISTING"] = "changed"
 
 	if source.Read[0] != "read" {
@@ -41,9 +39,6 @@ func TestPolicyModifiersDoNotChangeTheSourcePolicy(t *testing.T) {
 	}
 	if source.Write[0] != "write" {
 		t.Errorf("write paths changed to %v", source.Write)
-	}
-	if source.Exec[0] != "exec" {
-		t.Errorf("executable paths changed to %v", source.Exec)
 	}
 	if source.SetEnv["EXISTING"] != "original" {
 		t.Errorf("environment changed to %v", source.SetEnv)
@@ -88,15 +83,7 @@ func run(t *testing.T, directory string, command string, policy sandbox.Policy) 
 		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
 
-	var result sandbox.Result
-	var err error
-	if policy.Background {
-		processes := sandbox.NewProcesses(true)
-		defer func() { _, _ = processes.Disable() }()
-		result, err = processes.Run(context.Background(), directory, command, policy)
-	} else {
-		result, err = sandbox.Run(context.Background(), directory, command, policy)
-	}
+	result, err := sandbox.Run(context.Background(), directory, command, policy)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -572,51 +559,50 @@ func TestAUnixSocketCannotReachAHostService(t *testing.T) {
 	}
 }
 
-func TestAUnixSocketMayReachAHostServiceUnderAWritableGrant(t *testing.T) {
-	directory := t.TempDir()
-	path := filepath.Join(directory, "host.sock")
-
-	listener, err := net.Listen("unix", path)
-	if err != nil {
-		t.Skipf("host Unix sockets are unavailable: %v", err)
-	}
-	defer func() { _ = listener.Close() }()
-
-	result := run(t, directory, "python3 -c '"+
-		"import socket; s=socket.socket(socket.AF_UNIX); s.connect(\"host.sock\")'",
-		sandbox.Policy{Background: true})
-
-	if strings.Contains(result.Output, "python3: command not found") {
-		t.Skip("python3 is unavailable")
-	}
-	if strings.Contains(result.Output, "Address family not supported") {
-		t.Skip("the kernel cannot grant pathname Unix sockets")
-	}
-	if result.Code != 0 {
-		t.Errorf("a service under a writable grant was unreachable: %q", result.Output)
-	}
-}
-
-func TestCommandsMayTalkOverAUnixSocketInsideTheSandbox(t *testing.T) {
-	command := `python3 - <<'PY'
+func unixSocketCommand(directory string) string {
+	return `python3 - <<'PY'
 import socket
 server = socket.socket(socket.AF_UNIX)
-server.bind("local.sock")
+server.bind("` + filepath.Join(directory, "local.sock") + `")
 server.listen()
 client = socket.socket(socket.AF_UNIX)
-client.connect("local.sock")
+client.connect("` + filepath.Join(directory, "local.sock") + `")
 print("connected")
 PY`
+}
 
-	result := run(t, t.TempDir(), command, sandbox.Policy{})
+func TestCommandsMayTalkOverAUnixSocketInTheScratch(t *testing.T) {
+	scratch := t.TempDir()
+	policy := sandbox.Policy{
+		Write:   []string{sandbox.TmpDir},
+		Sockets: []string{sandbox.TmpDir},
+		TmpDir:  scratch,
+	}
+
+	result := run(t, t.TempDir(), unixSocketCommand(sandbox.TmpDir), policy)
 	if strings.Contains(result.Output, "python3: command not found") {
 		t.Skip("python3 is unavailable")
 	}
 	if strings.Contains(result.Output, "Address family not supported") {
-		t.Skip("the kernel cannot isolate pathname Unix sockets")
+		t.Skip("this kernel refuses Unix sockets outright, having no way to isolate them")
 	}
 	if result.Code != 0 || !strings.Contains(result.Output, "connected") {
 		t.Errorf("commands in the sandbox could not connect: %q", result.Output)
+	}
+}
+
+func TestAUnixSocketOutsideTheNamedPathsIsRefused(t *testing.T) {
+	requireLandlock(t)
+
+	directory := t.TempDir()
+	policy := sandbox.Policy{Write: []string{directory}}
+
+	result := run(t, directory, unixSocketCommand(directory), policy)
+	if strings.Contains(result.Output, "python3: command not found") {
+		t.Skip("python3 is unavailable")
+	}
+	if result.Code == 0 {
+		t.Errorf("a writable path nothing named resolved a socket: %q", result.Output)
 	}
 }
 
@@ -968,118 +954,11 @@ func TestAPolicyNamingAMissingPathIsRefused(t *testing.T) {
 	}
 }
 
-func TestABackgroundPolicyNeedsAProcessSet(t *testing.T) {
-	_, err := sandbox.Run(t.Context(), t.TempDir(), "true", sandbox.Policy{Background: true})
-
-	if err == nil || !strings.Contains(err.Error(), "needs a process set") {
-		t.Errorf("got %v, want a background policy to be refused without a set", err)
-	}
-}
-
 func TestAPolicyWithALimitThatIsNotALimitIsRefusedBeforeAnythingRuns(t *testing.T) {
 	for _, policy := range []sandbox.Policy{{FileSize: -1}, {OpenFiles: -1}} {
 		if _, err := sandbox.Run(t.Context(), t.TempDir(), "true", policy); err == nil {
 			t.Errorf("%+v was accepted", policy)
 		}
-	}
-}
-
-func backgroundProcesses(t *testing.T, policy sandbox.Policy) *sandbox.Processes {
-	t.Helper()
-
-	if err := sandbox.Supported(t.Context(), policy); err != nil {
-		t.Skipf("the sandbox cannot enforce this policy: %v", err)
-	}
-
-	return sandbox.NewProcesses(true)
-}
-
-func backgroundPolicy(directory string) sandbox.Policy {
-	return sandbox.Policy{
-		Write:      []string{directory},
-		Env:        []string{"PATH"},
-		Timeout:    10 * time.Second,
-		Background: true,
-	}
-}
-
-func TestAProcessLeftBehindOutlivesTheCommandThatStartedIt(t *testing.T) {
-	directory := t.TempDir()
-	marker := filepath.Join(directory, "marker")
-	policy := backgroundPolicy(directory)
-
-	processes := backgroundProcesses(t, policy)
-	defer func() { _, _ = processes.Disable() }()
-
-	command := "sh -c 'sleep 0.3; printf escaped > " + marker + "' >/dev/null 2>&1 & printf started"
-	result, err := processes.Run(context.Background(), directory, command, policy)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result.Code != 0 || result.Output != "started" {
-		t.Fatalf("got exit status %d with output %q", result.Code, result.Output)
-	}
-
-	if _, err := os.Stat(marker); err == nil {
-		t.Fatal("the command waited for the process it left behind")
-	}
-
-	time.Sleep(time.Second)
-
-	content, err := os.ReadFile(marker) //nolint:gosec // reading the test's own marker is intended
-	if err != nil || string(content) != "escaped" {
-		t.Errorf("the process left behind did not run on: got %q and %v", content, err)
-	}
-}
-
-func TestDisablingTheSetStopsWhatItLeftBehind(t *testing.T) {
-	directory := t.TempDir()
-	marker := filepath.Join(directory, "marker")
-	policy := backgroundPolicy(directory)
-
-	processes := backgroundProcesses(t, policy)
-
-	command := "sleep 60 >/dev/null 2>&1 & sh -c 'sleep 0.5; printf escaped > " + marker +
-		"' >/dev/null 2>&1 & printf started"
-	if _, err := processes.Run(context.Background(), directory, command, policy); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	names, err := processes.Disable()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if len(names) > 0 && !strings.Contains(strings.Join(names, " "), "sleep") {
-		t.Errorf("got %v, want what was left behind named", names)
-	}
-
-	time.Sleep(time.Second)
-
-	if _, err := os.Stat(marker); err == nil {
-		t.Error("a process the set stopped went on to do its work")
-	}
-}
-
-func TestADisabledSetKeepsNothingRunning(t *testing.T) {
-	directory := t.TempDir()
-	marker := filepath.Join(directory, "marker")
-	policy := backgroundPolicy(directory)
-
-	processes := backgroundProcesses(t, policy)
-	if _, err := processes.Disable(); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	command := "sh -c 'sleep 0.3; printf escaped > " + marker + "' >/dev/null 2>&1 & printf started"
-	if _, err := processes.Run(context.Background(), directory, command, policy); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	time.Sleep(time.Second)
-
-	if _, err := os.Stat(marker); err == nil {
-		t.Error("a disabled set left a process behind")
 	}
 }
 

@@ -79,23 +79,18 @@ func TestOnlyAPolicyAskingForItGrantsTheResolverFiles(t *testing.T) {
 }
 
 func TestEveryCommandGetsAPIDNamespace(t *testing.T) {
-	for _, background := range []bool{false, true} {
-		attributes := namespaceAttributes(Policy{Background: background})
-		if attributes.Cloneflags&syscall.CLONE_NEWPID == 0 {
-			t.Errorf("background %t: expected a PID namespace", background)
-		}
-		if attributes.Unshareflags != 0 {
-			t.Errorf("background %t: expected namespaces to be created by clone", background)
-		}
+	attributes := namespaceAttributes(Policy{})
+	if attributes.Cloneflags&syscall.CLONE_NEWPID == 0 {
+		t.Error("expected a PID namespace")
+	}
+	if attributes.Unshareflags != 0 {
+		t.Error("expected namespaces to be created by clone")
 	}
 }
 
-func TestOnlyForegroundCommandsGetAProcessGroup(t *testing.T) {
+func TestEveryCommandOwnsItsProcessGroup(t *testing.T) {
 	if !namespaceAttributes(Policy{}).Setpgid {
-		t.Error("expected a foreground command to own its process group")
-	}
-	if namespaceAttributes(Policy{Background: true}).Setpgid {
-		t.Error("expected the namespace rather than a process group to own background processes")
+		t.Error("expected a command to own its process group")
 	}
 }
 

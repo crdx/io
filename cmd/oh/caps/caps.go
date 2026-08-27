@@ -15,7 +15,6 @@ const (
 	Shell
 	Write
 	Git
-	Background
 	Web
 )
 
@@ -26,7 +25,6 @@ var capsMap = []struct {
 	{Read, "r"},
 	{Shell, "x"},
 	{Write, "w"},
-	{Background, "b"},
 	{Git, "g"},
 	{Web, "s"},
 }
@@ -170,9 +168,6 @@ func lexicalDiff(changedCaps Set, currentCaps Set) string {
 	if changedCaps.Has(Git) {
 		clauses = append(clauses, historyIs(currentCaps.Has(Git)))
 	}
-	if changedCaps.Has(Background) {
-		clauses = append(clauses, backgroundIs(currentCaps.Has(Background)))
-	}
 	if changedCaps.Has(Web) {
 		clauses = append(clauses, webIs(currentCaps.Has(Web)))
 	}
@@ -202,14 +197,6 @@ func historyIs(writable bool) string {
 	}
 
 	return "The .git directory is now read-only."
-}
-
-func backgroundIs(enabled bool) string {
-	if enabled {
-		return "Background processes can now outlive shell commands."
-	}
-
-	return "Background processes have been killed and new ones will no longer outlive shell commands."
 }
 
 func webIs(granted bool) string {

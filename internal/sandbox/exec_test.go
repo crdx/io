@@ -3,7 +3,6 @@ package sandbox
 import (
 	"context"
 	"encoding/json"
-	"os/exec"
 	"slices"
 	"strings"
 	"testing"
@@ -49,35 +48,18 @@ func TestSetVariablesAreWrittenInAFixedOrder(t *testing.T) {
 	}
 }
 
-func TestAPolicyThatCannotBeReadDoesNotAskForBackgroundWork(t *testing.T) {
-	for _, test := range []struct {
-		name    string
-		encoded string
-		want    bool
-	}{
-		{name: "nonsense", encoded: "{", want: false},
-		{name: "foreground", encoded: `{"background":false}`, want: false},
-		{name: "background", encoded: `{"background":true}`, want: true},
-	} {
-		if got := policyAllowsBackground(test.encoded); got != test.want {
-			t.Errorf("%s: got %t, want %t", test.name, got, test.want)
-		}
-	}
-}
-
 func TestAPolicySurvivesBeingWrittenAndReadBack(t *testing.T) {
 	policy := Policy{
-		Read:       []string{"/read"},
-		Write:      []string{"/write"},
-		Exec:       []string{"/exec"},
-		TmpDir:     "/scratch",
-		Env:        []string{"PATH"},
-		SetEnv:     map[string]string{"NAME": "value"},
-		Timeout:    time.Second,
-		CPUTime:    2 * time.Second,
-		FileSize:   1024,
-		OpenFiles:  64,
-		Background: true,
+		Read:      []string{"/read"},
+		Write:     []string{"/write"},
+		Exec:      []string{"/exec"},
+		TmpDir:    "/scratch",
+		Env:       []string{"PATH"},
+		SetEnv:    map[string]string{"NAME": "value"},
+		Timeout:   time.Second,
+		CPUTime:   2 * time.Second,
+		FileSize:  1024,
+		OpenFiles: 64,
 	}
 
 	encoded, err := json.Marshal(policy)
@@ -93,7 +75,7 @@ func TestAPolicySurvivesBeingWrittenAndReadBack(t *testing.T) {
 	if got.TmpDir != policy.TmpDir || got.Timeout != policy.Timeout || got.CPUTime != policy.CPUTime {
 		t.Errorf("got %+v, want %+v", got, policy)
 	}
-	if got.FileSize != policy.FileSize || got.OpenFiles != policy.OpenFiles || !got.Background {
+	if got.FileSize != policy.FileSize || got.OpenFiles != policy.OpenFiles {
 		t.Errorf("got %+v, want %+v", got, policy)
 	}
 	if !slices.Equal(got.Read, policy.Read) || !slices.Equal(got.Write, policy.Write) {
@@ -101,31 +83,6 @@ func TestAPolicySurvivesBeingWrittenAndReadBack(t *testing.T) {
 	}
 	if !slices.Equal(got.Exec, policy.Exec) || got.SetEnv["NAME"] != "value" {
 		t.Errorf("got %+v, want %+v", got, policy)
-	}
-}
-
-func TestAResultIsEmptyWhereThereIsNoProcess(t *testing.T) {
-	if got := resultFrom(nil); got != (Result{}) {
-		t.Errorf("got %+v, want an empty result", got)
-	}
-}
-
-func TestAResultCarriesWhatTheProcessSpent(t *testing.T) {
-	command := exec.Command(shell, "-c", "exit 3")
-	if err := command.Run(); err == nil {
-		t.Fatal("expected the command to fail")
-	}
-
-	result := resultFrom(command.ProcessState)
-
-	if result.Code != 3 {
-		t.Errorf("got exit status %d, want 3", result.Code)
-	}
-	if result.CPUTime < 0 {
-		t.Errorf("got processor time %s, want none of it negative", result.CPUTime)
-	}
-	if result.PeakMemory == 0 {
-		t.Errorf("got no peak memory, want what the process used")
 	}
 }
 

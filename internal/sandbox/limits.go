@@ -50,6 +50,12 @@ func (self Policy) sane() error {
 		return fmt.Errorf("a cpu limit of %s rounds down to no time at all", self.CPUTime)
 	}
 
+	for _, path := range self.Sockets {
+		if !slices.Contains(self.Write, path) {
+			return fmt.Errorf("%s may resolve Unix sockets but is not writable", path)
+		}
+	}
+
 	return self.reachable()
 }
 

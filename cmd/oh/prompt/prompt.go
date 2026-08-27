@@ -23,7 +23,6 @@ const (
 var (
 	projectContextNames    = []string{"AGENTS.md", "AGENTS.local.md"}
 	harnessContextTemplate = template.Must(template.New("harness").Funcs(template.FuncMap{
-		"background":   background,
 		"filesystem":   filesystem,
 		"filepathJoin": filepath.Join,
 		"scopeRules":   scopeRules,
@@ -39,12 +38,13 @@ var (
 		# Personality
 
 		- Use casual lowercase when chatting with the user, but write normally everywhere else
-		- Adopt the personality of the animal in your session name, and use its emoji liberally
+		- Adopt the personality of the animal in your session name, and use its emoji
 
 		# Network
 
 		- Networking is limited to the sandbox's private loopback interface
 		- Processes in the same sandbox can communicate over 127.0.0.1 and ::1
+		- A Unix socket works beneath /tmp, and is refused beneath the workspace
 		- The host's loopback interface and external networks are unreachable
 		- The web search and fetch tools are {{ webAccess .WebGranted }}
 		- Anything else that requires external networking must be asked of the user
@@ -73,7 +73,6 @@ var (
 
 		- The workspace ({{ .WorkspaceDir }}) is {{ filesystem .WorkspaceWritable }}
 		- The .git directory within it ({{ filepathJoin .WorkspaceDir ".git" }}) is {{ filesystem .GitWritable }}
-		- Background processes are {{ background .BackgroundEnabled }}
 		- The bash tool is {{ shellAccess .ShellGranted }}
 
 		These states can change at any time. You will be told what changed when it does.
@@ -89,7 +88,6 @@ type harnessContextTemplateData struct {
 	ExtraPaths        shell.Paths
 	WorkspaceWritable bool
 	GitWritable       bool
-	BackgroundEnabled bool
 	ShellGranted      bool
 	WebGranted        bool
 }
@@ -212,7 +210,6 @@ func harnessContext(workspaceDir string, sessionName string, tmpDir string, home
 		ExtraPaths:        extraPaths,
 		WorkspaceWritable: currentCaps.Has(caps.Write),
 		GitWritable:       currentCaps.Has(caps.Git),
-		BackgroundEnabled: currentCaps.Has(caps.Background),
 		ShellGranted:      currentCaps.Has(caps.Shell),
 		WebGranted:        currentCaps.Has(caps.Web),
 	}
@@ -292,12 +289,4 @@ func webAccess(granted bool) string {
 	}
 
 	return "refused"
-}
-
-func background(enabled bool) string {
-	if enabled {
-		return "allowed to outlive shell commands"
-	}
-
-	return "killed when their shell command ends"
 }

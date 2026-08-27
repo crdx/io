@@ -93,10 +93,11 @@ func configuredRuleset(version int) rulesetAttr {
 	return attr
 }
 
-func versionedRights(rights uint64, version int, background bool) uint64 {
-	if background && version >= unixSocketsABI && rights&accessMakeSock != 0 {
-		rights |= accessResolveUnix
+func rightsAtVersion(rights uint64, version int) uint64 {
+	if version < unixSocketsABI {
+		rights &^= accessResolveUnix
 	}
+
 	return rights
 }
 
@@ -122,7 +123,9 @@ func applyLandlock(policy Policy, version int) error {
 			continue
 		}
 
-		if err := addRule(ruleset, grant.path, versionedRights(grant.rights, version, policy.Background), policy.Write); err != nil {
+		rights := rightsAtVersion(grant.rights, version)
+
+		if err := addRule(ruleset, grant.path, rights, policy.Write); err != nil {
 			return err
 		}
 	}
@@ -177,16 +180,11 @@ func isDir(fd int) bool {
 	return stat.Mode&unix.S_IFMT == unix.S_IFDIR
 }
 
-// AvailableAtAll reports whether this kernel can enforce a policy at all, so a caller may refuse to
-// start rather than hand a model a sandbox that is not there.
 func AvailableAtAll() error {
 	_, err := landlockVersion()
 	return err
 }
 
-// Supported reports whether this kernel can enforce a particular policy. Every command needs a
-// network namespace, nested paths need a mount namespace, and background commands need a PID
-// namespace; a machine may refuse to give any of them out.
 func Supported(ctx context.Context, policy Policy) error {
 	if err := AvailableAtAll(); err != nil {
 		return err

@@ -3,6 +3,7 @@ package sandbox
 import (
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -63,6 +64,35 @@ func TestEveryPolicyCanReadSystemFontConfiguration(t *testing.T) {
 	}
 	if rights != rightsRead {
 		t.Errorf("system font configuration got rights %#x, want %#x", rights, rightsRead)
+	}
+}
+
+func TestOnlyTheNamedWritablePathsResolveUnixSockets(t *testing.T) {
+	grants := Policy{
+		Read:    []string{"/read"},
+		Write:   []string{TmpDir, "/workspace"},
+		Sockets: []string{TmpDir},
+	}.grants()
+
+	if rights, _ := rightsFor(grants, TmpDir); rights&accessResolveUnix == 0 {
+		t.Error("the scratch cannot resolve a socket a command of its own made")
+	}
+	if rights, _ := rightsFor(grants, "/workspace"); rights&accessResolveUnix != 0 {
+		t.Error("the workspace can reach a socket something outside the sandbox is serving")
+	}
+	if rights, _ := rightsFor(grants, "/read"); rights&accessResolveUnix != 0 {
+		t.Error("a readable path can resolve a socket")
+	}
+}
+
+func TestASocketPathThatIsNotWritableIsRefused(t *testing.T) {
+	err := (Policy{Write: []string{TmpDir}, Sockets: []string{"/elsewhere"}}).sane()
+	if err == nil || !strings.Contains(err.Error(), "not writable") {
+		t.Errorf("got %v, want a socket path outside the writable ones refused", err)
+	}
+
+	if err := (Policy{Write: []string{TmpDir}, Sockets: []string{TmpDir}}).sane(); err != nil {
+		t.Errorf("got %v, want a writable socket path accepted", err)
 	}
 }
 

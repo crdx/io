@@ -246,9 +246,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer skill.Close(skillRoots)
 
-	processes := sandbox.NewProcesses(args.Caps.Has(caps.Background))
-	defer func() { _, _ = processes.Disable() }()
-
 	selection, err := backend.Resolve(
 		model.Selection{Provider: args.Provider, Model: args.Model, Effort: args.Effort},
 		resumedSelection(resumedSession),
@@ -350,7 +347,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
-	shellTool := shell.New(workspaceDir, homeDir, tmpDir, settings.Sandbox, mode, files, processes)
+	shellTool := shell.New(workspaceDir, homeDir, tmpDir, settings.Sandbox, mode, files)
 
 	toolboxTools = append(toolboxTools, shellTool)
 	if notify.IsAvailable() {
@@ -425,7 +422,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		recorder:           record.New(log),
 		workspaceDir:       workspaceDir,
 		mode:               mode,
-		processes:          processes,
 		getOnWithItMessage: settings.GetOnWithItMessage,
 		startedAt:          time.Now(),
 	}

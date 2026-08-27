@@ -24,17 +24,11 @@ func TestUnixSocketsAreIsolatedWhereLandlockCanEnforceIt(t *testing.T) {
 		t.Error("abstract Unix sockets were not isolated")
 	}
 
-	if versionedRights(rightsWrite, unixSocketsABI-1, true)&accessResolveUnix != 0 {
-		t.Error("an older ABI granted an unsupported Unix socket right")
+	if rightsAtVersion(rightsWrite|accessResolveUnix, unixSocketsABI-1)&accessResolveUnix != 0 {
+		t.Error("an older ABI was handed a right it would refuse the rule for")
 	}
-	if versionedRights(rightsWrite, unixSocketsABI, true)&accessResolveUnix == 0 {
-		t.Error("background mode did not grant Unix socket resolution")
-	}
-	if versionedRights(rightsWrite, unixSocketsABI, false)&accessResolveUnix != 0 {
-		t.Error("a foreground-only policy granted Unix socket resolution")
-	}
-	if versionedRights(rightsRead, unixSocketsABI, true)&accessResolveUnix != 0 {
-		t.Error("a read-only directory granted Unix socket resolution")
+	if rightsAtVersion(rightsWrite|accessResolveUnix, unixSocketsABI)&accessResolveUnix == 0 {
+		t.Error("a kernel that knows the right was not given it")
 	}
 }
 
@@ -215,7 +209,7 @@ func TestAConfinedProcessCannotReadItsOwnProc(t *testing.T) {
 	}
 }
 
-func TestTheSupervisorCanReExecItsOwnBinary(t *testing.T) {
+func TestAGrantedBinaryCanBeExecutedWithinTheSandbox(t *testing.T) {
 	if !insideChildProcess() {
 		runAgainInChildProcess(t)
 		return
@@ -236,8 +230,14 @@ func TestTheSupervisorCanReExecItsOwnBinary(t *testing.T) {
 		t.Fatalf("could not enter the sandbox: %v", err)
 	}
 
-	//nolint:gosec // the binary is this one, already running
-	if output, err := exec.Command(self, "-test.run=^$").CombinedOutput(); err != nil {
-		t.Errorf("the confined supervisor could not re-exec its binary: %v\n%s", err, output)
+	executed := exec.Command(self, "-test.run=^$") //nolint:gosec // the binary is this one, already running
+	executed.Env = []string{"PATH=" + os.Getenv("PATH")}
+
+	if coverage := os.Getenv(coverageVariable); coverage != "" {
+		executed.Env = append(executed.Env, "TMPDIR="+coverage, coverageVariable+"="+coverage)
+	}
+
+	if output, err := executed.CombinedOutput(); err != nil {
+		t.Errorf("the confined process could not execute a granted binary: %v\n%s", err, output)
 	}
 }

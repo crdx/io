@@ -22,7 +22,7 @@ Options:
     -d, --workspace <dir>       Set working directory
     -r, --resume [<session>]    Open the session picker, or resume a session by name
     -m, --model <model>         Set the provider, model, and reasoning effort
-    -c, --caps <flags>          Set capability flags: rxw bgs (read, exec, write, bg, git, web) (default: %s)
+    -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: %s)
     -t, --tool <tool>           Set exclusive tool selection; may be repeated
     -l, --list                  List the available models, then exit
     -u, --update                Update the cached model list, then exit
