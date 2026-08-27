@@ -61,3 +61,47 @@ func TestScrollbackIsNotResetOnRedirectedOutput(t *testing.T) {
 		t.Errorf("expected no erase sequence, got %q", output.String())
 	}
 }
+
+func TestTheSessionTitleStandsInTheWindowTitle(t *testing.T) {
+	output := &strings.Builder{}
+	managedTerminal := Terminal{title: interactiveTitle(output), workspaceName: "project"}
+
+	restore := managedTerminal.Begin(caps.Read)
+	managedTerminal.SetSessionTitle("fix the picker clipping")
+	managedTerminal.SetSessionTitle("fix the picker clipping")
+	managedTerminal.SetMode(caps.Read | caps.Write)
+	defer restore()
+
+	want := pushTitle +
+		"\x1b]2;project\x1b\\" +
+		"\x1b]2;fix the picker clipping\x1b\\" +
+		"\x1b]2;fix the picker clipping ✱\x1b\\"
+	if got := output.String(); got != want {
+		t.Errorf("got title sequence %q, want %q", got, want)
+	}
+	if got := managedTerminal.GetSessionTitle(); got != "fix the picker clipping" {
+		t.Errorf("the terminal is going by %q", got)
+	}
+}
+
+func TestATitleTakenBeforeTheTerminalIsHeldWaitsForIt(t *testing.T) {
+	output := &strings.Builder{}
+	managedTerminal := Terminal{title: interactiveTitle(output), workspaceName: "project"}
+
+	managedTerminal.SetSessionTitle("fix the picker clipping")
+	if output.Len() != 0 {
+		t.Fatalf("the title was written over before it was kept: %q", output.String())
+	}
+
+	restore := managedTerminal.Begin(caps.Read)
+	if got, want := output.String(), pushTitle+"\x1b]2;fix the picker clipping\x1b\\"; got != want {
+		t.Errorf("got title sequence %q, want %q", got, want)
+	}
+
+	output.Reset()
+	restore()
+	managedTerminal.SetSessionTitle("give sessions a title")
+	if got := output.String(); got != popTitle {
+		t.Errorf("got restore sequence %q, want %q", got, popTitle)
+	}
+}

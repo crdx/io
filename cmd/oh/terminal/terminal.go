@@ -26,6 +26,9 @@ type terminalTitler interface {
 type Terminal struct {
 	title         terminalTitler
 	workspaceName string
+	sessionTitle  string
+	mode          caps.Set
+	isBegun       bool
 }
 
 func New(writer io.Writer, workspaceDir string) Terminal {
@@ -36,23 +39,53 @@ func New(writer io.Writer, workspaceDir string) Terminal {
 }
 
 func (self *Terminal) Begin(mode caps.Set) func() {
+	self.mode = mode
 	if self.title == nil {
 		return func() {}
 	}
 
-	return self.title.Begin(titleText(mode, self.workspaceName))
+	self.isBegun = true
+	restore := self.title.Begin(self.titleText())
+
+	return func() {
+		self.isBegun = false
+		restore()
+	}
 }
 
 func (self *Terminal) SetMode(mode caps.Set) {
-	if self.title != nil {
-		self.title.Set(titleText(mode, self.workspaceName))
+	self.mode = mode
+	self.refreshTitle()
+}
+
+func (self *Terminal) SetSessionTitle(sessionTitle string) {
+	if sessionTitle == self.sessionTitle {
+		return
+	}
+
+	self.sessionTitle = sessionTitle
+	self.refreshTitle()
+}
+
+func (self *Terminal) GetSessionTitle() string {
+	return self.sessionTitle
+}
+
+func (self *Terminal) refreshTitle() {
+	if self.title != nil && self.isBegun {
+		self.title.Set(self.titleText())
 	}
 }
 
-func titleText(mode caps.Set, workspaceName string) string {
-	if mode.Has(caps.Write) {
-		return workspaceName + " " + writableMarker
-	} else {
-		return workspaceName
+func (self *Terminal) titleText() string {
+	subject := self.workspaceName
+	if self.sessionTitle != "" {
+		subject = self.sessionTitle
 	}
+
+	if self.mode.Has(caps.Write) {
+		return subject + " " + writableMarker
+	}
+
+	return subject
 }

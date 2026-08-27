@@ -30,6 +30,7 @@ write
 edit
 bash
 notify
+title
 web_search
 web_fetch
 === sessions ===

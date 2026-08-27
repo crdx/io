@@ -17,6 +17,7 @@ import (
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/notify"
+	"crdx.org/io/toolbox/title"
 	"crdx.org/io/toolbox/web"
 
 	"crdx.org/io/cmd/oh/backend"
@@ -54,6 +55,7 @@ var completableToolNames = []string{
 	"edit",
 	"bash",
 	"notify",
+	title.Name,
 	"web_search",
 	"web_fetch",
 }
@@ -355,6 +357,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if notify.IsAvailable() {
 		toolboxTools = append(toolboxTools, notify.New())
 	}
+	toolboxTools = append(toolboxTools, title.New())
 	toolboxTools = append(toolboxTools, web.New(func() bool {
 		return mode.Current().Has(caps.Web)
 	}, client.Search)...)

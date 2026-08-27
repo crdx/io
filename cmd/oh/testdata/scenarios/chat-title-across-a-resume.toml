@@ -1,0 +1,49 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[[tool]]
+name = "title"
+
+[first]
+prompt = "have a look at the picker"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":null}}]}''',
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","type":"function","function":{"name":"title","arguments":"{\"title\":\"fix the picker clipping\"}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Named it, and the row is one cell short."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "carry on"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":null}}]}''',
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-2","type":"function","function":{"name":"title","arguments":"{\"title\":\"fix the picker clipping\"}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-3","type":"function","function":{"name":"title","arguments":"{\"title\":\"give sessions a title\"}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"The task turned out to be a wider one."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

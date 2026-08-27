@@ -2,6 +2,7 @@ package truncate_test
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -242,5 +243,37 @@ func TestToolsWrapsEveryTool(t *testing.T) {
 		if !strings.Contains(exec(t, subject, `{"size":4000}`), "truncated at") {
 			t.Error("expected every tool to be capped")
 		}
+	}
+}
+
+func TestAWrappedToolKeepsOwningItsDurableState(t *testing.T) {
+	restored := ""
+	subject := truncate.Tool(newToolBuilder(t).
+		State("generated", func(state json.RawMessage) error {
+			restored = string(state)
+			return nil
+		}).
+		Run(func(context.Context, Args) (tool.ToolCallResult, error) {
+			return tool.ToolCallResult{Output: "done", State: json.RawMessage(`{"lines":2}`)}, nil
+		}))
+
+	if key := subject.StateKey(); key != "generated" {
+		t.Errorf("the wrapped tool owns %q", key)
+	}
+
+	call, err := subject.Parse(`{"size":2}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	result, err := call.Exec(t.Context())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if string(result.State) != `{"lines":2}` {
+		t.Errorf("the cap swallowed the state: %s", result.State)
+	}
+
+	if err := subject.Restore(result.State); err != nil || restored != `{"lines":2}` {
+		t.Errorf("the wrapped tool restored %q: %v", restored, err)
 	}
 }

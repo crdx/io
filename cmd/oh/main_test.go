@@ -91,6 +91,7 @@ import (
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/bash"
 	"crdx.org/io/toolbox/notify"
+	"crdx.org/io/toolbox/title"
 	"crdx.org/io/toolbox/web"
 )
 
@@ -5841,6 +5842,11 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 			continue
 		}
 
+		if specification.Name == title.Name {
+			tools = append(tools, title.New())
+			continue
+		}
+
 		if specification.WebWithheld || specification.WebAnswer != "" {
 			isGranted := specification.WebAnswer != ""
 			searcher := sessionGoldenSearcher{answer: specification.WebAnswer}
@@ -7167,5 +7173,96 @@ func TestEveryWayOfStoppingATurnSaysWhy(t *testing.T) {
 				t.Errorf("got %q, want the turn stopped because %q", got, test.want)
 			}
 		})
+	}
+}
+
+type notingProvider struct {
+	quietProvider
+
+	mutex sync.Mutex
+	notes []string
+}
+
+func (self *notingProvider) AddUserMessage(text string) {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+	self.notes = append(self.notes, text)
+}
+
+func (self *notingProvider) told() []string {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+	return slices.Clone(self.notes)
+}
+
+func TestTheHarnessAsksForATitleOnlyOnceTheModelHasAnsweredWithoutGivingOne(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	backend := &notingProvider{}
+	self.agent = agent.New("", backend, []tool.Tool{title.New()})
+
+	if note := self.titleNote(); note != "" {
+		t.Errorf("expected the opening turn to be left alone, got %q", note)
+	}
+
+	self.events = append(self.events, agent.Event{Kind: agent.ModelMessageEvent, Text: "done"})
+	if note := self.titleNote(); !strings.Contains(note, title.Name) {
+		t.Errorf("expected an unanswered session to be asked for a title, got %q", note)
+	}
+
+	completeTurn(self)
+	if !slices.ContainsFunc(backend.told(), func(note string) bool {
+		return strings.Contains(note, "has no title")
+	}) {
+		t.Errorf("the model was told %q", backend.told())
+	}
+
+	self.events = append(self.events, agent.Event{
+		Kind:  agent.StateChangeEvent,
+		Name:  agent.TitleStateKey,
+		State: json.RawMessage(`{"title":"fix the picker clipping"}`),
+	})
+	if note := self.titleNote(); note != "" {
+		t.Errorf("expected a titled session to be left alone, got %q", note)
+	}
+}
+
+func TestASessionWithoutTheTitleToolIsNeverAskedForATitle(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.agent = agent.NewWithEnabledTools("", quietProvider{}, []tool.Tool{title.New()}, nil)
+	self.events = append(self.events, agent.Event{Kind: agent.ModelMessageEvent, Text: "done"})
+
+	if note := self.titleNote(); note != "" {
+		t.Errorf("expected a session that cannot title itself to be left alone, got %q", note)
+	}
+}
+
+func TestTheSessionTitleReachesTheTerminalLiveAndOnResume(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+
+	self.restore(&store.Session{Events: []agent.Event{
+		{Kind: agent.UserMessageEvent, Text: "have a look at the picker"},
+		{
+			Kind:  agent.StateChangeEvent,
+			Name:  agent.TitleStateKey,
+			State: json.RawMessage(`{"title":"fix the picker clipping"}`),
+		},
+	}})
+
+	if got := self.terminal.GetSessionTitle(); got != "fix the picker clipping" {
+		t.Errorf("a resumed session went by %q", got)
+	}
+
+	self.currentTurn = Turn{painter: self.newPainter(true)}
+	self.recordEvent(agent.Event{
+		Kind:  agent.StateChangeEvent,
+		Name:  agent.TitleStateKey,
+		State: json.RawMessage(`{"title":"give sessions a title"}`),
+	})
+
+	if got := self.terminal.GetSessionTitle(); got != "give sessions a title" {
+		t.Errorf("a retitled session went by %q", got)
 	}
 }

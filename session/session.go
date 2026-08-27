@@ -437,12 +437,20 @@ type Meta struct {
 	Data     json.RawMessage `json:"data,omitempty"`
 	Started  time.Time       `json:"started"`
 	Touched  time.Time       `json:"touched"`
-	Title    string          `json:"title,omitempty"`
+	Title    string          `json:"title,omitempty"` // the opening message until the model names the session, then the last name it gave
 	Messages int             `json:"messages"`
 }
 
 func (s *Meta) takeEvent(event agent.Event, writtenAt time.Time) {
 	s.Touched = writtenAt
+
+	if event.Kind == agent.StateChangeEvent {
+		if title, isTitle := agent.TitleFromEvent(event); isTitle {
+			s.Title = title
+		}
+		return
+	}
+
 	if event.Kind != agent.UserMessageEvent && event.Kind != agent.ModelMessageEvent {
 		return
 	}

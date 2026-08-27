@@ -519,10 +519,14 @@ func (self *Agent) Tool(name string) (tool.Tool, bool) {
 	return found, known
 }
 
+func (self *Agent) IsToolEnabled(name string) bool {
+	_, isEnabled := self.enabledToolNames[name]
+	return isEnabled
+}
+
 func (self *Agent) parseCall(call ToolCall) (tool.ToolCall, string) {
 	calledTool, isRegistered := self.registeredTools[call.Name]
-	_, isEnabled := self.enabledToolNames[call.Name]
-	if !isRegistered || !isEnabled {
+	if !isRegistered || !self.IsToolEnabled(call.Name) {
 		return nil, fmt.Sprintf("there is no tool called %q", call.Name)
 	}
 

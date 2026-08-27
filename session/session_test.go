@@ -629,3 +629,87 @@ func TestMetadataInAnotherFormatIsNamedAsSuch(t *testing.T) {
 		t.Errorf("expected metadata in another format to be named as such, got %v", err)
 	}
 }
+
+func titleState(t *testing.T, name string) json.RawMessage {
+	t.Helper()
+
+	state, err := json.Marshal(agent.TitleState{Title: name})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return state
+}
+
+func TestTheTitleTheModelGivesReplacesTheOpeningMessage(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := session.Create(directory, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	events := []agent.Event{
+		{Kind: agent.UserMessageEvent, Text: "have a look at the picker"},
+		{Kind: agent.StateChangeEvent, Name: agent.TitleStateKey, State: titleState(t, "fix the picker clipping")},
+		{Kind: agent.ModelMessageEvent, Text: "done"},
+		{Kind: agent.StateChangeEvent, Name: agent.TitleStateKey, State: titleState(t, "give sessions a title")},
+		{Kind: agent.StateChangeEvent, Name: agent.TitleStateKey, State: json.RawMessage(`"another shape"`)},
+		{Kind: agent.StateChangeEvent, Name: agent.TitleStateKey, State: json.RawMessage(`{"title":""}`)},
+		{Kind: agent.StateChangeEvent, Name: "file_read", State: json.RawMessage(`{"title":"not a title"}`)},
+		{Kind: agent.UserMessageEvent, Text: "carry on"},
+	}
+	for _, event := range events {
+		if _, err := writer.Event(event); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	meta, err := session.ReadMeta(directory, writer.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if meta.Title != "give sessions a title" || meta.Messages != 3 {
+		t.Errorf("unexpected metadata: %+v", meta)
+	}
+
+	if err := os.Remove(filepath.Join(directory, writer.Name(), "meta.json")); err != nil {
+		t.Fatal(err)
+	}
+	if err := session.RebuildMeta(directory, writer.Name(), nil); err != nil {
+		t.Fatal(err)
+	}
+
+	rebuilt, err := session.ReadMeta(directory, writer.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rebuilt.Title != meta.Title || rebuilt.Messages != meta.Messages {
+		t.Errorf("a rebuilt listing lost the title: %+v", rebuilt)
+	}
+}
+
+func TestASessionKeepsItsOpeningMessageUntilItIsTitled(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := session.Create(directory, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "have a look"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	meta, err := session.ReadMeta(directory, writer.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if meta.Title != "have a look" {
+		t.Errorf("unexpected metadata: %+v", meta)
+	}
+}

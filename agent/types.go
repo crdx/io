@@ -108,6 +108,25 @@ const (
 	FailureEvent         Kind = "failure"
 )
 
+const TitleStateKey = "title"
+
+type TitleState struct {
+	Title string `json:"title"`
+}
+
+func TitleFromEvent(event Event) (string, bool) {
+	if event.Kind != StateChangeEvent || event.Name != TitleStateKey {
+		return "", false
+	}
+
+	var state TitleState
+	if err := json.Unmarshal(event.State, &state); err != nil || state.Title == "" {
+		return "", false
+	}
+
+	return state.Title, true
+}
+
 type Retriable interface {
 	error
 

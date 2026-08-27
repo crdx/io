@@ -31,6 +31,7 @@ import (
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/internal/stop"
+	"crdx.org/io/toolbox/title"
 )
 
 type SessionLogger = record.Session
@@ -594,6 +595,10 @@ func (self *App) restore(storedSession *store.Session) {
 	self.recorder.Resume(len(storedSession.Items))
 	self.events = append(self.events, storedSession.Events...)
 
+	for _, event := range storedSession.Events {
+		self.takeSessionTitle(event)
+	}
+
 	self.metrics.Restore(storedSession.Events, storedSession.TurnCompletions)
 
 	self.screen.Reset()
@@ -650,7 +655,7 @@ func (self *App) start(message string) {
 	self.metrics.BeginTurn()
 
 	notes := slices.DeleteFunc(
-		[]string{self.interruptionNote(), self.mode.Inject()},
+		[]string{self.interruptionNote(), self.mode.Inject(), self.titleNote()},
 		func(note string) bool { return note == "" },
 	)
 	if len(notes) > 0 {
@@ -665,6 +670,33 @@ func (self *App) start(message string) {
 	}
 
 	self.screen.ReportProgress(true)
+}
+
+func (self *App) takeSessionTitle(event agent.Event) {
+	if sessionTitle, isTitle := agent.TitleFromEvent(event); isTitle {
+		self.terminal.SetSessionTitle(sessionTitle)
+	}
+}
+
+func (self *App) titleNote() string {
+	if !self.agent.IsToolEnabled(title.Name) {
+		return ""
+	}
+
+	hasAnswered := false
+	for _, event := range self.events {
+		if _, isTitled := agent.TitleFromEvent(event); isTitled {
+			return ""
+		}
+		if event.Kind == agent.ModelMessageEvent {
+			hasAnswered = true
+		}
+	}
+	if !hasAnswered {
+		return ""
+	}
+
+	return "This session has no title yet. Name the task with the " + title.Name + " tool."
 }
 
 func (self *App) interruptionNote() string {
@@ -708,6 +740,7 @@ func (self *App) takeTurn(turnEvent TurnEvent) {
 
 func (self *App) recordEvent(event agent.Event) {
 	self.metrics.Record(event)
+	self.takeSessionTitle(event)
 
 	self.events = append(self.events, event)
 	self.currentTurn.painter.DrawEvent(event)
