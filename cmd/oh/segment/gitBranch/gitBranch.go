@@ -11,7 +11,7 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
-var _ segment.Persister = &state{}
+var _ segment.Refresher = &state{}
 
 const (
 	defaultRate    = 5 * time.Second
@@ -47,12 +47,12 @@ func New(workspaceDir string) segment.Factory {
 	}
 }
 
-func (self *state) RefreshInterval() time.Duration {
-	return self.rate
-}
+func (self *state) NextRefresh(phase segment.Phase) time.Time {
+	if self.readAt.IsZero() {
+		return phase.At
+	}
 
-func (self *state) Persistent() bool {
-	return true
+	return self.readAt.Add(self.rate)
 }
 
 func (self *state) Render(segment.Context) string {

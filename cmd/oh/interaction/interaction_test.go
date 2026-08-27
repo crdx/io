@@ -10,72 +10,114 @@ import (
 	"crdx.org/io/cmd/oh/turn"
 )
 
-func TestABarWithNothingIdlingIsNeverRedrawnBetweenTurns(t *testing.T) {
-	idle := idleRefresh{getInterval: func() time.Duration { return 0 }}
-
-	if idle.isDue(time.Now()) {
-		t.Error("expected a still bar to be left alone")
-	}
-}
-
-func TestAnIdlingBarIsRedrawnAtItsOwnPaceNotTheTickers(t *testing.T) {
+func TestABarWithNothingToSayIsNeverRedrawn(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
-		idle := idleRefresh{getInterval: func() time.Duration { return time.Second }}
+		refresh := newRefreshTimer(func(time.Time) time.Time { return time.Time{} })
+		defer refresh.stop()
 
-		if !idle.isDue(time.Now()) {
-			t.Fatal("expected the first idle tick to draw")
-		}
+		refresh.schedule()
 
-		time.Sleep(125 * time.Millisecond)
+		time.Sleep(time.Hour)
 
-		if idle.isDue(time.Now()) {
-			t.Error("expected a tick sooner than the interval to be passed over")
-		}
-
-		time.Sleep(time.Second)
-
-		if !idle.isDue(time.Now()) {
-			t.Error("expected the tick after the interval to draw")
+		select {
+		case at := <-refresh.timer.C:
+			t.Errorf("expected a still bar to be left alone, got a redraw at %s", at)
+		default:
 		}
 	})
 }
 
-func TestAnIdlingBarKeepingTheTickersPaceIsRedrawnOnEveryTick(t *testing.T) {
-	idle := idleRefresh{getInterval: func() time.Duration { return time.Second }}
-	tick := time.Now()
-
-	for count := range 5 {
-		if !idle.isDue(tick) {
-			t.Fatalf("expected tick %d to draw", count)
-		}
-		tick = tick.Add(time.Second)
-	}
-}
-
-func TestAnIdlingBarCanChangeItsRedrawPace(t *testing.T) {
+func TestARefreshIsTakenAtTheMomentItWasAskedFor(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
-		interval := time.Second
-		idle := idleRefresh{getInterval: func() time.Duration { return interval }}
+		startedAt := time.Now()
 
-		if !idle.isDue(time.Now()) {
-			t.Fatal("expected the first idle tick to draw")
-		}
+		refresh := newRefreshTimer(func(at time.Time) time.Time {
+			return at.Truncate(time.Second).Add(time.Second)
+		})
+		defer refresh.stop()
 
-		time.Sleep(125 * time.Millisecond)
-		interval = 100 * time.Millisecond
+		refresh.schedule()
 
-		if !idle.isDue(time.Now()) {
-			t.Error("expected the newly shortened interval to take effect")
+		at := <-refresh.timer.C
+
+		if got := at.Sub(startedAt); got != time.Second {
+			t.Errorf("expected the redraw a second on, got it %s on", got)
 		}
 	})
 }
 
-func TestRunStopsAndTicks(t *testing.T) {
+func TestALateRescheduleKeepsTheMomentAlreadyDueRatherThanPushingItAway(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		startedAt := time.Now()
+		dueAt := startedAt.Add(time.Second)
+
+		refresh := newRefreshTimer(func(time.Time) time.Time { return dueAt })
+		defer refresh.stop()
+
+		for range 8 {
+			refresh.schedule()
+			time.Sleep(100 * time.Millisecond)
+		}
+
+		at := <-refresh.timer.C
+
+		if got := at.Sub(startedAt); got != time.Second {
+			t.Errorf("expected the redraw to stand at a second on, got it %s on", got)
+		}
+	})
+}
+
+func TestARefreshAlreadyGoneIsTakenAtOnce(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		startedAt := time.Now()
+
+		refresh := newRefreshTimer(func(at time.Time) time.Time { return at.Add(-time.Minute) })
+		defer refresh.stop()
+
+		refresh.schedule()
+
+		at := <-refresh.timer.C
+
+		if got := at.Sub(startedAt); got != soonest {
+			t.Errorf("expected the redraw to be put off by %s, got %s", soonest, got)
+		}
+	})
+}
+
+func TestABarThatSettlesStopsBeingRedrawn(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		dueAt := time.Now().Add(time.Second)
+
+		refresh := newRefreshTimer(func(at time.Time) time.Time {
+			if at.After(dueAt) {
+				return time.Time{}
+			}
+
+			return dueAt
+		})
+		defer refresh.stop()
+
+		refresh.schedule()
+		<-refresh.timer.C
+
+		time.Sleep(time.Millisecond)
+		refresh.schedule()
+		time.Sleep(time.Hour)
+
+		select {
+		case at := <-refresh.timer.C:
+			t.Errorf("expected the bar to settle, got a redraw at %s", at)
+		default:
+		}
+	})
+}
+
+func TestRunStopsAndRedraws(t *testing.T) {
 	t.Run("key", func(t *testing.T) {
 		keys := make(chan key.Key, 1)
 		keys <- key.Key{Code: key.Escape}
 		handled := false
-		run(keys, make(chan os.Signal), make(chan time.Time), nil, func() time.Duration { return 0 }, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Key: func(key.Key) bool { handled = true; return false }})
+		run(keys, make(chan os.Signal), make(chan time.Time), func() {}, nil, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Key: func(key.Key) bool { handled = true; return false }})
 		if !handled {
 			t.Error("key not handled")
 		}
@@ -84,7 +126,7 @@ func TestRunStopsAndTicks(t *testing.T) {
 		turnEvents := make(chan turn.Event)
 		close(turnEvents)
 		finished := false
-		run(make(chan key.Key), make(chan os.Signal), make(chan time.Time), nil, func() time.Duration { return 0 }, Handler{
+		run(make(chan key.Key), make(chan os.Signal), make(chan time.Time), func() {}, nil, Handler{
 			Events: func() <-chan turn.Event { return turnEvents },
 			TurnFinished: func() bool {
 				finished = true
@@ -95,14 +137,30 @@ func TestRunStopsAndTicks(t *testing.T) {
 			t.Error("finished turn was not handled")
 		}
 	})
-	t.Run("tick", func(t *testing.T) {
+	t.Run("refresh", func(t *testing.T) {
 		keys := make(chan key.Key)
-		ticks := make(chan time.Time, 1)
-		ticks <- time.Now()
-		ticked, drawn := false, false
-		run(keys, make(chan os.Signal), ticks, nil, func() time.Duration { return 0 }, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Running: func() bool { return true }, Tick: func() { ticked = true; close(keys) }, Draw: func() { drawn = true }})
-		if !ticked || !drawn {
-			t.Errorf("ticked=%t drawn=%t", ticked, drawn)
+		refreshes := make(chan time.Time, 1)
+		refreshes <- time.Now()
+		scheduled, drawn := 0, false
+		run(keys, make(chan os.Signal), refreshes, func() { scheduled++ }, nil, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Draw: func() { drawn = true; close(keys) }, Key: func(key.Key) bool { return false }})
+		if scheduled < 2 || !drawn {
+			t.Errorf("scheduled=%d drawn=%t", scheduled, drawn)
+		}
+	})
+	t.Run("heartbeat with a redraw already due", func(t *testing.T) {
+		keys := make(chan key.Key)
+		heartbeats := make(chan time.Time, 1)
+		heartbeats <- time.Now()
+		refreshes := make(chan time.Time, 1)
+		beaten, drawn := false, false
+		run(keys, make(chan os.Signal), refreshes, func() {}, heartbeats, Handler{
+			Events: func() <-chan turn.Event { return make(chan turn.Event) },
+			Beat:   func() { beaten = true; refreshes <- time.Now() },
+			Key:    func(key.Key) bool { return false },
+			Draw:   func() { drawn = true; close(keys) },
+		})
+		if !beaten || !drawn {
+			t.Errorf("beaten=%t drawn=%t", beaten, drawn)
 		}
 	})
 	t.Run("heartbeat", func(t *testing.T) {
@@ -110,7 +168,7 @@ func TestRunStopsAndTicks(t *testing.T) {
 		heartbeats := make(chan time.Time, 1)
 		heartbeats <- time.Now()
 		beaten, drawn := false, false
-		run(keys, make(chan os.Signal), make(chan time.Time), heartbeats, func() time.Duration { return 0 }, Handler{
+		run(keys, make(chan os.Signal), make(chan time.Time), func() {}, heartbeats, Handler{
 			Events: func() <-chan turn.Event { return make(chan turn.Event) },
 			Beat:   func() { beaten = true; close(keys) },
 			Key:    func(key.Key) bool { return false },

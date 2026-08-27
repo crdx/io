@@ -50,7 +50,7 @@ type Options struct {
 }
 
 type Sources struct {
-	GetTurnActivity func() (bool, int)
+	IsTurnRunning   func() bool
 	GetContextUsage func() (int, int)
 	GetGrantedCaps  func() caps.Set
 	IsPrefixPending func() bool
@@ -60,7 +60,7 @@ type Sources struct {
 
 func NewRegistry(options Options) segment.Registry {
 	return segment.Registry{
-		activitySpinnerSegment: activitySpinner.New(options.Sources.GetTurnActivity),
+		activitySpinnerSegment: activitySpinner.New(options.Sources.IsTurnRunning, time.Now),
 		contextUsageSegment:    contextUsage.New(options.Sources.GetContextUsage),
 		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
 		workspaceDirSegment:    workspaceDir.New(options.WorkspaceDir),

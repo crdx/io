@@ -1,0 +1,66 @@
+=== clock alone to the minute ===
+    +1m0s  00:01
+    +2m0s  00:02
+    +3m0s  00:03
+=== clock alone to the second ===
+      +1s  00:00:01
+      +2s  00:00:02
+      +3s  00:00:03
+=== running turn ===
+      +0s  ✦· ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +125ms  ·✦ ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +250ms  ·✧ ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +375ms  ✧· ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +500ms  ✦· ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +625ms  ·✦ ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +750ms  ·✧ ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +875ms  ✧· ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+      +1s  ✦· ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+  +1.125s  ·✦ ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +1.25s  ·✧ ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+  +1.375s  ✧· ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+    +1.5s  ✦· ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+  +1.625s  ·✦ ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +1.75s  ·✧ ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+  +1.875s  ✧· ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+      +2s  ✦· ─ 2s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+=== running turn with a pass past due ===
+      +0s  ✦· ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +250ms  ·✧ ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +500ms  ✦· ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +750ms  ·✧ ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+      +1s  ✦· ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +1.25s  ·✧ ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+    +1.5s  ✦· ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +1.75s  ·✧ ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+      +2s  ✦· ─ 2s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+=== running turn with a slow pass ===
+      +0s  ✦· ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +125ms  ·✦ ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +250ms  ·✧ ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +375ms  ✧· ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +500ms  ✦· ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +625ms  ·✦ ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +750ms  ·✧ ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +875ms  ✧· ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+      +1s  ✦· ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+  +1.125s  ·✦ ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +1.25s  ·✧ ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+  +1.375s  ✧· ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+    +1.5s  ✦· ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+  +1.625s  ·✦ ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+   +1.75s  ·✧ ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+  +1.875s  ✧· ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+      +2s  ✦· ─ 2s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+=== turn timer alone on a slow loop ===
+      +1s  1s
+      +2s  2s
+      +3s  3s
+      +4s  4s
+      +5s  5s
+      +6s  6s
+=== waiting between turns ===
+      +0s  ✧· ─ 0s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+      +1s  ✧· ─ 1s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+      +2s  ✧· ─ 2s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?
+      +3s  ✧· ─ 3s ─ rxw bgs ─ workspace ─ high gpt-5.6-sol ─ ?% 0K/?

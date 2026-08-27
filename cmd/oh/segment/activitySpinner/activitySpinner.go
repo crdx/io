@@ -10,15 +10,16 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
-var _ segment.Ticker = state{}
+var _ segment.Refresher = state{}
 
 type state struct {
-	turn      func() (isRunning bool, frameIndex int)
+	isRunning func() bool
+	now       func() time.Time
 	animation spinner.Animation
 	idle      string
 }
 
-func New(turn func() (isRunning bool, frameIndex int)) segment.Factory {
+func New(isRunning func() bool, now func() time.Time) segment.Factory {
 	return func(options segment.Options) (segment.Segment, error) {
 		var args struct {
 			Idle   string        `toml:"idle"`
@@ -49,22 +50,34 @@ func New(turn func() (isRunning bool, frameIndex int)) segment.Factory {
 		}
 
 		return state{
-			turn:      turn,
+			isRunning: isRunning,
+			now:       now,
 			animation: spinner.Of(args.Rate, args.Frames...),
 			idle:      args.Idle,
 		}, nil
 	}
 }
 
-func (self state) RefreshInterval() time.Duration {
-	return self.animation.RefreshInterval()
+func (self state) NextRefresh(phase segment.Phase) time.Time {
+	if !phase.IsRunning {
+		return time.Time{}
+	}
+
+	interval := self.animation.RefreshInterval()
+
+	return phase.At.Truncate(interval).Add(interval)
 }
 
 func (self state) Render(segment.Context) string {
-	isRunning, frameIndex := self.turn()
-	if !isRunning {
+	if !self.isRunning() {
 		return style.Grey(self.idle)
 	}
 
-	return style.Spinner(self.animation.Frame(frameIndex))
+	return style.Spinner(self.animation.Frame(self.frameIndex()))
+}
+
+func (self state) frameIndex() int {
+	interval := self.animation.RefreshInterval()
+
+	return int(self.now().UnixNano() / interval.Nanoseconds())
 }

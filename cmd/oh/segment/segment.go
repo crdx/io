@@ -83,58 +83,35 @@ func (self Registry) Available() []string {
 	return slices.Sorted(maps.Keys(self))
 }
 
-type Ticker interface {
-	RefreshInterval() time.Duration
+type Phase struct {
+	At        time.Time
+	IsRunning bool
 }
 
-type Persister interface {
-	Ticker
-	Persistent() bool
+type Refresher interface {
+	NextRefresh(Phase) time.Time
 }
 
-type IdleTicker interface {
-	IdleRefreshInterval() time.Duration
-}
-
-func (self Layout) RefreshInterval() time.Duration {
-	var fastest time.Duration
+func (self Layout) NextRefresh(phase Phase) time.Time {
+	var soonest time.Time
 
 	for _, instances := range self {
 		for _, instance := range instances {
-			ticker, ok := instance.(Ticker)
+			refresher, ok := instance.(Refresher)
 			if !ok {
 				continue
 			}
 
-			if interval := ticker.RefreshInterval(); interval > 0 && (fastest == 0 || interval < fastest) {
-				fastest = interval
-			}
-		}
-	}
-
-	return fastest
-}
-
-func (self Layout) IdleRefreshInterval() time.Duration {
-	var fastest time.Duration
-
-	for _, instances := range self {
-		for _, instance := range instances {
-			persister, ok := instance.(Persister)
-			if !ok || !persister.Persistent() {
+			at := refresher.NextRefresh(phase)
+			if at.IsZero() {
 				continue
 			}
 
-			interval := persister.RefreshInterval()
-			if idleTicker, ok := instance.(IdleTicker); ok {
-				interval = idleTicker.IdleRefreshInterval()
-			}
-
-			if interval > 0 && (fastest == 0 || interval < fastest) {
-				fastest = interval
+			if soonest.IsZero() || at.Before(soonest) {
+				soonest = at
 			}
 		}
 	}
 
-	return fastest
+	return soonest
 }

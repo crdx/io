@@ -17,10 +17,7 @@ import (
 	"crdx.org/io/internal/req"
 )
 
-var (
-	_ segment.IdleTicker = &state{}
-	_ segment.Persister  = &state{}
-)
+var _ segment.Refresher = &state{}
 
 const (
 	defaultRate      = 5 * time.Minute
@@ -101,23 +98,21 @@ func New(reporter agent.UsageReporter, cachePath string, modelName string, now f
 	}
 }
 
-func (self *state) RefreshInterval() time.Duration {
-	return spinner.Activity.RefreshInterval()
-}
-
-func (self *state) IdleRefreshInterval() time.Duration {
+func (self *state) NextRefresh(phase segment.Phase) time.Time {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	if self.status == usageFetching || self.shouldRedraw {
-		return spinner.Activity.RefreshInterval()
+	if self.shouldRedraw {
+		return phase.At
 	}
 
-	return redrawInterval
-}
+	if self.status == usageFetching {
+		interval := spinner.Activity.RefreshInterval()
 
-func (self *state) Persistent() bool {
-	return true
+		return phase.At.Truncate(interval).Add(interval)
+	}
+
+	return phase.At.Truncate(redrawInterval).Add(redrawInterval)
 }
 
 func (self *state) Render(segment.Context) string {

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"crdx.org/io/cmd/oh/segment"
@@ -17,6 +18,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnTimer"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/internal/util"
 	"github.com/BurntSushi/toml"
 )
 
@@ -114,15 +116,18 @@ func TestTheNamesOnOfferAreListedInOrder(t *testing.T) {
 
 type tomlOptions string
 
-type dynamicIdleSegment struct {
-	idleInterval time.Duration
+type refreshingSegment struct {
+	after time.Duration
 }
 
-func (self *dynamicIdleSegment) Render(segment.Context) string  { return "" }
-func (self *dynamicIdleSegment) RefreshInterval() time.Duration { return 125 * time.Millisecond }
-func (self *dynamicIdleSegment) Persistent() bool               { return true }
-func (self *dynamicIdleSegment) IdleRefreshInterval() time.Duration {
-	return self.idleInterval
+func (self *refreshingSegment) Render(segment.Context) string { return "" }
+
+func (self *refreshingSegment) NextRefresh(phase segment.Phase) time.Time {
+	if self.after == 0 {
+		return time.Time{}
+	}
+
+	return phase.At.Add(self.after)
 }
 
 func (self tomlOptions) Read(into any) error {
@@ -130,32 +135,98 @@ func (self tomlOptions) Read(into any) error {
 	return err
 }
 
-func TestAChangingIdleIntervalIsReadEachTime(t *testing.T) {
-	built := &dynamicIdleSegment{idleInterval: time.Second}
-	layout := segment.Layout{segment.BottomLeft: {built}}
+func TestTheLayoutIsRedrawnForWhicheverSegmentChangesSoonest(t *testing.T) {
+	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
 
-	if got := layout.IdleRefreshInterval(); got != time.Second {
-		t.Errorf("initial idle interval = %s", got)
+	layout := segment.Layout{
+		segment.BottomLeft:  {&refreshingSegment{after: time.Second}, offeringSegment(t, "gpt")},
+		segment.BottomRight: {&refreshingSegment{after: 125 * time.Millisecond}},
 	}
 
-	built.idleInterval = 125 * time.Millisecond
-
-	if got := layout.IdleRefreshInterval(); got != 125*time.Millisecond {
-		t.Errorf("changed idle interval = %s", got)
+	if got := layout.NextRefresh(segment.Phase{At: at}); !got.Equal(at.Add(125 * time.Millisecond)) {
+		t.Errorf("expected the soonest of the two, got %s", got.Sub(at))
 	}
 }
 
-func TestTheActivitySegmentDrivesTheRedrawTicker(t *testing.T) {
-	options := tomlOptions("idle = \"·\"\nframes = [\"*\"]\nrate = \"125ms\"\n")
+func TestALayoutWithNothingToSayIsNeverRedrawn(t *testing.T) {
+	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
 
-	built, err := activitySpinner.New(func() (bool, int) { return true, 0 })(options)
+	layout := segment.Layout{
+		segment.TopRight: {offeringSegment(t, "gpt"), &refreshingSegment{}},
+	}
+
+	if got := layout.NextRefresh(segment.Phase{At: at}); !got.IsZero() {
+		t.Errorf("expected a still bar to be left alone, got %s", got)
+	}
+}
+
+func TestAChangingRefreshIsAskedForAfresh(t *testing.T) {
+	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
+
+	built := &refreshingSegment{after: time.Second}
+	layout := segment.Layout{segment.BottomLeft: {built}}
+
+	if got := layout.NextRefresh(segment.Phase{At: at}); !got.Equal(at.Add(time.Second)) {
+		t.Errorf("initial refresh = %s", got.Sub(at))
+	}
+
+	built.after = 125 * time.Millisecond
+
+	if got := layout.NextRefresh(segment.Phase{At: at}); !got.Equal(at.Add(125 * time.Millisecond)) {
+		t.Errorf("changed refresh = %s", got.Sub(at))
+	}
+}
+
+func spinnerAt(t *testing.T, at time.Time, isRunning bool) segment.Segment {
+	t.Helper()
+
+	options := tomlOptions("idle = \"·\"\nframes = [\"*\", \"+\"]\nrate = \"125ms\"\n")
+
+	built, err := activitySpinner.New(
+		func() bool { return isRunning },
+		func() time.Time { return at },
+	)(options)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	layout := segment.Layout{segment.BottomLeft: {built}}
-	if got := layout.RefreshInterval(); got != 125*time.Millisecond {
-		t.Errorf("expected the bar to ask for a redraw every 125ms, got %s", got)
+	return built
+}
+
+func TestTheActivitySegmentAsksForTheMomentItsFrameTurnsOver(t *testing.T) {
+	at := time.Date(2026, time.August, 17, 14, 32, 9, 40*int(time.Millisecond), time.UTC)
+
+	layout := segment.Layout{segment.BottomLeft: {spinnerAt(t, at, true)}}
+
+	want := time.Date(2026, time.August, 17, 14, 32, 9, 125*int(time.Millisecond), time.UTC)
+	if got := layout.NextRefresh(segment.Phase{At: at, IsRunning: true}); !got.Equal(want) {
+		t.Errorf("expected the next frame at %s, got %s", want, got)
+	}
+}
+
+func TestTheActivitySegmentStandsStillBetweenTurns(t *testing.T) {
+	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
+
+	layout := segment.Layout{segment.BottomLeft: {spinnerAt(t, at, false)}}
+
+	if got := layout.NextRefresh(segment.Phase{At: at}); !got.IsZero() {
+		t.Errorf("expected an idle spinner to ask for nothing, got %s", got)
+	}
+}
+
+func TestTheActivitySegmentTurnsItsFramesByTheClock(t *testing.T) {
+	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
+
+	first := style.Plain(spinnerAt(t, at, true).Render(segment.Context{}))
+	next := style.Plain(spinnerAt(t, at.Add(125*time.Millisecond), true).Render(segment.Context{}))
+
+	if first == next {
+		t.Errorf("expected the frame to turn over with the clock, got %q twice", first)
+	}
+
+	again := style.Plain(spinnerAt(t, at.Add(250*time.Millisecond), true).Render(segment.Context{}))
+	if again != first {
+		t.Errorf("expected the frames to come round again, got %q then %q", first, again)
 	}
 }
 
@@ -224,16 +295,24 @@ func TestTheBranchSegmentSaysNothingOutsideARepository(t *testing.T) {
 	}
 }
 
-func TestTheBranchSegmentLooksAgainBetweenTurns(t *testing.T) {
+func TestTheBranchSegmentLooksAgainAtItsOwnRate(t *testing.T) {
 	built, err := gitBranch.New(t.TempDir())(tomlOptions("rate = \"2s\"\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	layout := segment.Layout{segment.BottomLeft: {built}}
+	at := time.Now()
 
-	if got := layout.IdleRefreshInterval(); got != 2*time.Second {
-		t.Errorf("expected the given rate to pace the idle redraw, got %s", got)
+	if got := layout.NextRefresh(segment.Phase{At: at}); !got.Equal(at) {
+		t.Errorf("expected a branch never read to be read at once, got %s", got.Sub(at))
+	}
+
+	built.Render(segment.Context{})
+
+	readAt := time.Now()
+	if got := layout.NextRefresh(segment.Phase{At: readAt}); got.Sub(readAt) > 2*time.Second {
+		t.Errorf("expected the given rate to pace the next read, got %s", got.Sub(readAt))
 	}
 }
 
@@ -294,23 +373,23 @@ func TestTheClockSegmentTakesTheFormatItIsGiven(t *testing.T) {
 	}
 }
 
-func TestTheClockSegmentKeepsTheBarTickingBetweenTurns(t *testing.T) {
-	layout := segment.Layout{segment.TopRight: {stoppedClock(t, tomlOptions(""))}}
+func TestTheClockSegmentIsRedrawnOnlyWhenItsFaceChanges(t *testing.T) {
+	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
 
-	if got := layout.RefreshInterval(); got != time.Second {
-		t.Errorf("expected a redraw every second, got %s", got)
+	toTheMinute := segment.Layout{segment.TopRight: {stoppedClock(t, tomlOptions(""))}}
+
+	want := time.Date(2026, time.August, 17, 14, 33, 0, 0, time.UTC)
+	if got := toTheMinute.NextRefresh(segment.Phase{At: at}); !got.Equal(want) {
+		t.Errorf("expected a clock reading 14:32 to wait for 14:33, got %s", got)
 	}
 
-	if got := layout.IdleRefreshInterval(); got != time.Second {
-		t.Errorf("expected a clock to be redrawn every second between turns, got %s", got)
+	toTheSecond := segment.Layout{
+		segment.TopRight: {stoppedClock(t, tomlOptions("format = \"15:04:05\"\n"))},
 	}
-}
 
-func TestALayoutWithNothingIdlingSaysSo(t *testing.T) {
-	layout := segment.Layout{segment.TopRight: {offeringSegment(t, "gpt")}}
-
-	if got := layout.IdleRefreshInterval(); got != 0 {
-		t.Errorf("expected a still bar to be left alone between turns, got %s", got)
+	want = time.Date(2026, time.August, 17, 14, 32, 10, 0, time.UTC)
+	if got := toTheSecond.NextRefresh(segment.Phase{At: at}); !got.Equal(want) {
+		t.Errorf("expected a clock reading 14:32:09 to wait for 14:32:10, got %s", got)
 	}
 }
 
@@ -415,14 +494,62 @@ func TestTheTurnTimerHoldsItsUnitsBackFromItsNumbers(t *testing.T) {
 	}
 }
 
-func TestTheTurnTimerAsksForASecondlyRedraw(t *testing.T) {
-	layout := segment.Layout{segment.BottomLeft: {timerShowing(t, time.Second)}}
+func TestTheTurnTimerAsksForTheMomentItsOwnSecondTurnsOverRatherThanASecondFromNow(t *testing.T) {
+	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
 
-	if got := layout.RefreshInterval(); got != time.Second {
-		t.Errorf("expected a redraw every second, got %s", got)
+	for elapsed, want := range map[time.Duration]time.Duration{
+		3 * time.Second:                       time.Second,
+		3*time.Second + 400*time.Millisecond:  600 * time.Millisecond,
+		69*time.Second + 999*time.Millisecond: time.Millisecond,
+		2*time.Hour + 250*time.Millisecond:    750 * time.Millisecond,
+	} {
+		layout := segment.Layout{segment.BottomLeft: {timerShowing(t, elapsed)}}
+
+		phase := segment.Phase{At: at, IsRunning: true}
+		if got := layout.NextRefresh(phase).Sub(at); got != want {
+			t.Errorf("expected %s elapsed to be redrawn in %s, got %s", elapsed, want, got)
+		}
 	}
+}
 
-	if got := layout.IdleRefreshInterval(); got != time.Second {
-		t.Errorf("expected a redraw every second while idle, got %s", got)
+func TestABusyBarDrawsEverySecondOfATurnExactlyOnce(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		startedAt := time.Now()
+
+		built, err := turnTimer.New(func() time.Duration {
+			return time.Since(startedAt)
+		})(tomlOptions(""))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		layout := segment.Layout{
+			segment.BottomLeft:  {built},
+			segment.BottomRight: {stoppedClock(t, tomlOptions(""))},
+		}
+
+		var drawn []string
+
+		for pass := range 90 {
+			at := layout.NextRefresh(segment.Phase{At: time.Now(), IsRunning: true})
+			time.Sleep(time.Until(at))
+			drawn = append(drawn, style.Plain(built.Render(segment.Context{})))
+			time.Sleep(time.Duration(1+(pass*37)%40) * time.Millisecond)
+		}
+
+		for index, got := range drawn {
+			if want := util.CompactDuration(time.Duration(index+1) * time.Second); got != want {
+				t.Fatalf("draw %d read %q, want %q", index, got, want)
+			}
+		}
+	})
+}
+
+func TestTheTurnTimerKeepsCountingBetweenTurns(t *testing.T) {
+	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
+	layout := segment.Layout{segment.BottomLeft: {timerShowing(t, 3*time.Second)}}
+
+	if got := layout.NextRefresh(segment.Phase{At: at}); !got.Equal(at.Add(time.Second)) {
+		t.Errorf("expected the timer to keep counting while idle, got %s", got.Sub(at))
 	}
 }

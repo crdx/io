@@ -14,6 +14,7 @@ import (
 const (
 	settling  = 100 * time.Millisecond
 	heartRate = 15 * time.Second
+	soonest   = time.Millisecond
 )
 
 type Handler struct {
@@ -22,28 +23,27 @@ type Handler struct {
 	Turn         func(turn.Event)
 	TurnFinished func() bool
 	Resize       func()
-	Running      func() bool
-	Tick         func()
 	Beat         func()
 	Draw         func()
 }
 
-func Run(terminal *os.File, refreshInterval time.Duration, getIdleInterval func() time.Duration, handler Handler) {
+func Run(terminal *os.File, getNextRefresh func(time.Time) time.Time, handler Handler) {
 	resizeSignals := resizes()
 	defer signal.Stop(resizeSignals)
 
-	ticker := newOptionalTicker(refreshInterval)
-	defer ticker.Stop()
+	refresh := newRefreshTimer(getNextRefresh)
+	defer refresh.stop()
 
 	beater := time.NewTicker(heartRate)
 	defer beater.Stop()
 
-	run(keypresses(terminal), resizeSignals, ticker.C, beater.C, getIdleInterval, handler)
+	run(keypresses(terminal), resizeSignals, refresh.timer.C, refresh.schedule, beater.C, handler)
 }
 
-func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, ticks <-chan time.Time, beats <-chan time.Time, getIdleInterval func() time.Duration, handler Handler) {
-	idle := idleRefresh{getInterval: getIdleInterval}
+func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan time.Time, schedule func(), beats <-chan time.Time, handler Handler) {
 	for {
+		schedule()
+
 		select {
 		case keypress, open := <-keys:
 			if !open || !handler.Key(keypress) {
@@ -60,39 +60,49 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, ticks <-chan time.
 			handler.Resize()
 		case <-beats:
 			handler.Beat()
-			continue
-		case tick := <-ticks:
-			if handler.Running() {
-				handler.Tick()
-			} else if !idle.isDue(tick) {
+
+			select {
+			case <-refreshes:
+			default:
 				continue
 			}
+		case <-refreshes:
 		}
+
 		handler.Draw()
 	}
 }
 
-type idleRefresh struct {
-	getInterval func() time.Duration
-	drawnAt     time.Time
+type refreshTimer struct {
+	getNextRefresh func(time.Time) time.Time
+	timer          *time.Timer
 }
 
-func (self *idleRefresh) isDue(at time.Time) bool {
-	interval := self.getInterval()
-	if interval <= 0 || at.Sub(self.drawnAt) < interval {
-		return false
-	}
-	self.drawnAt = at
-	return true
+func newRefreshTimer(getNextRefresh func(time.Time) time.Time) *refreshTimer {
+	timer := time.NewTimer(time.Hour)
+	timer.Stop()
+
+	return &refreshTimer{getNextRefresh: getNextRefresh, timer: timer}
 }
 
-func newOptionalTicker(interval time.Duration) *time.Ticker {
-	if interval <= 0 {
-		ticker := time.NewTicker(time.Hour)
-		ticker.Stop()
-		return ticker
+func (self *refreshTimer) schedule() {
+	at := time.Now()
+
+	dueAt := self.getNextRefresh(at)
+	if dueAt.IsZero() {
+		self.stop()
+		return
 	}
-	return time.NewTicker(interval)
+
+	if delay := dueAt.Sub(at); delay > 0 {
+		self.timer.Reset(delay)
+	} else {
+		self.timer.Reset(soonest)
+	}
+}
+
+func (self *refreshTimer) stop() {
+	self.timer.Stop()
 }
 
 func keypresses(terminal *os.File) <-chan key.Key {

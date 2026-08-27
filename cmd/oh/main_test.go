@@ -2237,6 +2237,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"paste":                 {".ansi", ".screen"},
 		"resume-mode":           {".ansi"},
 		"running":               {".ansi", ".screen"},
+		"schedule":              {".ansi", ".screen"},
 		"segments":              {".ansi", ".screen"},
 		"startup":               {".ansi", ".screen"},
 	} {
@@ -3281,6 +3282,7 @@ const (
 	turnSoFar    = 9 * time.Second
 	idleSoFar    = 4 * time.Second
 	sessionSoFar = 2 * time.Minute
+	spinnerSoFar = 250 * time.Millisecond
 
 	workspaceMarker   = "/workspace"
 	lifecycleScenario = "success@rxw.jsonl"
@@ -3950,13 +3952,14 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 				return drawnOnAStoppedClock(t, func(t *testing.T) string {
 					t.Helper()
 
+					time.Sleep(spinnerSoFar)
+
 					held := &App{mode: caps.NewMode(grantedCaps)}
 					held.currentTurn.Stream = testTimedTurnStream(isRunning, time.Now().Add(-turnSoFar), time.Now().Add(-idleSoFar))
-					held.currentTurn.spinnerFrame = 2
 
 					built := goldenBarLayout(t, held)
 
-					return renderBar(built, segment.BottomLeft, edit.Frame{})
+					return renderBar(built, segment.BottomLeft)
 				})
 			}
 		}
@@ -3983,7 +3986,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 
 				built := goldenBarLayout(t, held)
 
-				return renderBar(built, segment.BottomLeft, edit.Frame{})
+				return renderBar(built, segment.BottomLeft)
 			})
 		}
 	}
@@ -4042,9 +4045,10 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 				return drawnOnAStoppedClock(t, func(t *testing.T) string {
 					t.Helper()
 
+					time.Sleep(spinnerSoFar)
+
 					held := &App{mode: caps.NewMode(caps.All())}
 					held.currentTurn.Stream = testTimedTurnStream(true, time.Now().Add(-turnSoFar), time.Time{})
-					held.currentTurn.spinnerFrame = 2
 
 					built := goldenBarLayout(t, held)
 
@@ -4357,11 +4361,8 @@ func availableSegments(
 	})
 }
 
-func renderBar(layout segment.Layout, position segment.Position, frame edit.Frame) string {
-	return bar.Render(layout, position, segment.Context{
-		HiddenLinesAbove: frame.HiddenLinesAbove,
-		HiddenLinesBelow: frame.HiddenLinesBelow,
-	})
+func renderBar(layout segment.Layout, position segment.Position) string {
+	return bar.Render(layout, position, segment.Context{})
 }
 
 func goldenBarLayout(t *testing.T, harness *App) segment.Layout {
@@ -4402,6 +4403,124 @@ func goldenBarLayout(t *testing.T, harness *App) segment.Layout {
 	return layout
 }
 
+func clockAt(at time.Time) func() time.Time {
+	return func() time.Time { return at }
+}
+
+func goldenSchedulePass(t *testing.T, isRunning bool, workPerPass time.Duration, span time.Duration) func() string {
+	t.Helper()
+
+	return func() string {
+		return drawnOnAStoppedClock(t, func(t *testing.T) string {
+			t.Helper()
+
+			startedAt := time.Now()
+
+			held := &App{mode: caps.NewMode(caps.All())}
+			held.currentTurn.Stream = testTimedTurnStream(isRunning, startedAt, startedAt)
+			held.segmentLayout = goldenBarLayout(t, held)
+
+			return filmstrip(startedAt, span, workPerPass, func() time.Time {
+				return held.nextBarRefresh(time.Now())
+			}, func() string {
+				return renderBar(held.segmentLayout, segment.BottomLeft)
+			})
+		})
+	}
+}
+
+func goldenTimerSchedulePass(t *testing.T, workPerPass time.Duration, span time.Duration) func() string {
+	t.Helper()
+
+	return func() string {
+		return drawnOnAStoppedClock(t, func(t *testing.T) string {
+			t.Helper()
+
+			startedAt := time.Now()
+
+			held := &App{mode: caps.NewMode(caps.All())}
+			held.currentTurn.Stream = testTimedTurnStream(true, startedAt, time.Time{})
+
+			built, err := turnTimer.New(held.timeElapsed)(goldenSegmentOptions(""))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			layout := segment.Layout{segment.BottomLeft: {built}}
+
+			return filmstrip(startedAt, span, workPerPass, func() time.Time {
+				return layout.NextRefresh(segment.Phase{At: time.Now(), IsRunning: true})
+			}, func() string {
+				return renderBar(layout, segment.BottomLeft)
+			})
+		})
+	}
+}
+
+func goldenClockSchedulePass(t *testing.T, format string, span time.Duration) func() string {
+	t.Helper()
+
+	return func() string {
+		return drawnOnAStoppedClock(t, func(t *testing.T) string {
+			t.Helper()
+
+			startedAt := time.Now()
+
+			built, err := localTime.New(time.Now)(goldenSegmentOptions(fmt.Sprintf("format = %q", format)))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			layout := segment.Layout{segment.TopRight: {built}}
+
+			return filmstrip(startedAt, span, 0, func() time.Time {
+				return layout.NextRefresh(segment.Phase{At: time.Now()})
+			}, func() string {
+				return renderBar(layout, segment.TopRight)
+			})
+		})
+	}
+}
+
+func filmstrip(
+	startedAt time.Time,
+	span time.Duration,
+	workPerPass time.Duration,
+	getNextRefresh func() time.Time,
+	draw func() string,
+) string {
+	var strip strings.Builder
+
+	for {
+		at := getNextRefresh()
+		if at.IsZero() || at.Sub(startedAt) > span {
+			return strip.String()
+		}
+
+		time.Sleep(time.Until(at))
+		since := "+" + time.Since(startedAt).Truncate(time.Millisecond).String()
+		fmt.Fprintf(&strip, "%9s  %s\n", since, draw())
+		time.Sleep(workPerPass)
+	}
+}
+
+func TestTheBarsRedrawScheduleRunsWhenItRanBefore(t *testing.T) {
+	t.Setenv("HOME", "/home/tester")
+
+	passes := map[string]func() string{
+		"running turn":                      goldenSchedulePass(t, true, 0, 2*time.Second),
+		"running turn with a slow pass":     goldenSchedulePass(t, true, 40*time.Millisecond, 2*time.Second),
+		"running turn with a pass past due": goldenSchedulePass(t, true, 200*time.Millisecond, 2*time.Second),
+		"waiting between turns":             goldenSchedulePass(t, false, 0, 3*time.Second),
+		"turn timer alone on a slow loop":   goldenTimerSchedulePass(t, 200*time.Millisecond, 6*time.Second),
+		"clock alone to the minute":         goldenClockSchedulePass(t, "15:04", 3*time.Minute),
+		"clock alone to the second":         goldenClockSchedulePass(t, "15:04:05", 3*time.Second),
+	}
+
+	compareWithGolden(t, "schedule", ".ansi", passes)
+	compareWithGolden(t, "schedule", ".screen", shownPasses(t, passes))
+}
+
 func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 	t.Setenv("HOME", "/home/tester")
 
@@ -4421,19 +4540,31 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"activity-spinner / idle": goldenSegmentPass(
 			t,
-			activitySpinner.New(func() (bool, int) { return false, 0 }),
+			activitySpinner.New(func() bool { return false }, clockAt(at)),
 			spinnerOptions,
 			segment.Context{},
 		),
 		"activity-spinner / running first frame": goldenSegmentPass(
 			t,
-			activitySpinner.New(func() (bool, int) { return true, 0 }),
+			activitySpinner.New(func() bool { return true }, clockAt(at)),
 			spinnerOptions,
 			segment.Context{},
 		),
 		"activity-spinner / running second frame": goldenSegmentPass(
 			t,
-			activitySpinner.New(func() (bool, int) { return true, 1 }),
+			activitySpinner.New(func() bool { return true }, clockAt(at.Add(125*time.Millisecond))),
+			spinnerOptions,
+			segment.Context{},
+		),
+		"activity-spinner / running frames coming round again": goldenSegmentPass(
+			t,
+			activitySpinner.New(func() bool { return true }, clockAt(at.Add(250*time.Millisecond))),
+			spinnerOptions,
+			segment.Context{},
+		),
+		"activity-spinner / running part way through a frame": goldenSegmentPass(
+			t,
+			activitySpinner.New(func() bool { return true }, clockAt(at.Add(190*time.Millisecond))),
 			spinnerOptions,
 			segment.Context{},
 		),

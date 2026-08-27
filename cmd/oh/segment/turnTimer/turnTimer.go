@@ -8,7 +8,9 @@ import (
 	"crdx.org/io/internal/util"
 )
 
-var _ segment.Persister = state{}
+var _ segment.Refresher = state{}
+
+const step = time.Second
 
 type state struct {
 	timeElapsed func() time.Duration
@@ -20,14 +22,10 @@ func New(timeElapsed func() time.Duration) segment.Factory {
 	}
 }
 
-func (self state) RefreshInterval() time.Duration {
-	return time.Second
-}
-
-func (self state) Persistent() bool {
-	return true
+func (self state) NextRefresh(phase segment.Phase) time.Time {
+	return phase.At.Add(step - self.timeElapsed()%step)
 }
 
 func (self state) Render(segment.Context) string {
-	return style.Quantity(util.CompactDuration(self.timeElapsed().Truncate(time.Second)))
+	return style.Quantity(util.CompactDuration(self.timeElapsed().Truncate(step)))
 }

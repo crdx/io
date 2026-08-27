@@ -91,8 +91,7 @@ type App struct {
 type Turn struct {
 	*turn.Stream
 
-	spinnerFrame int
-	painter      *painter.Picasso
+	painter *painter.Picasso
 }
 
 type TurnEvent = turn.Event
@@ -135,7 +134,7 @@ func (self *App) begin(message string) cycle.Transition {
 		return self.transition
 	}
 
-	interaction.Run(os.Stdin, self.segmentLayout.RefreshInterval(), self.segmentLayout.IdleRefreshInterval, interaction.Handler{
+	interaction.Run(os.Stdin, self.nextBarRefresh, interaction.Handler{
 		Events: func() <-chan turn.Event { return self.currentTurn.Events() },
 		Key:    func(keypress key.Key) bool { return self.handleKeypressAndShowInput(editor, history, keypress) },
 		Turn:   self.takeTurn,
@@ -143,11 +142,9 @@ func (self *App) begin(message string) cycle.Transition {
 			self.finish()
 			return !self.isTransitionRequested()
 		},
-		Resize:  self.redraw,
-		Running: func() bool { return self.currentTurn.Running() },
-		Tick:    func() { self.currentTurn.spinnerFrame++ },
-		Beat:    self.screen.RefreshProgress,
-		Draw:    func() { self.show(editor) },
+		Resize: self.redraw,
+		Beat:   self.screen.RefreshProgress,
+		Draw:   func() { self.show(editor) },
 	})
 
 	return self.transition
@@ -475,7 +472,7 @@ func (self *App) bar(position segment.Position, frame edit.Frame) string {
 
 func (self *App) getBarSources() bar.Sources {
 	return bar.Sources{
-		GetTurnActivity: self.turnActivity,
+		IsTurnRunning:   self.isTurnRunning,
 		GetContextUsage: self.contextUsage,
 		GetGrantedCaps:  self.grantedCaps,
 		IsPrefixPending: self.isPrefixPending,
@@ -484,8 +481,12 @@ func (self *App) getBarSources() bar.Sources {
 	}
 }
 
-func (self *App) turnActivity() (bool, int) {
-	return self.currentTurn.Running(), self.currentTurn.spinnerFrame
+func (self *App) isTurnRunning() bool {
+	return self.currentTurn.Running()
+}
+
+func (self *App) nextBarRefresh(at time.Time) time.Time {
+	return self.segmentLayout.NextRefresh(segment.Phase{At: at, IsRunning: self.isTurnRunning()})
 }
 
 func (self *App) timeElapsed() time.Duration {

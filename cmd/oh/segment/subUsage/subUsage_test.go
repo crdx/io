@@ -50,6 +50,10 @@ func (self *unavailableReporter) UsageWindows(context.Context) ([]agent.UsageWin
 
 var testNow = time.Date(2026, 1, 2, 12, 0, 0, 0, time.UTC)
 
+func phaseAt(at time.Time) segment.Phase {
+	return segment.Phase{At: at}
+}
+
 type testClock struct {
 	now time.Time
 }
@@ -307,8 +311,9 @@ func TestAnActiveFetchOnlyShowsASpinnerAfterTheDelay(t *testing.T) {
 		t.Errorf("long fetch = %q, want %q", got, want)
 	}
 
-	if got := built.IdleRefreshInterval(); got != 125*time.Millisecond {
-		t.Errorf("active idle refresh interval = %s", got)
+	spinnerRate := 125 * time.Millisecond
+	if got := built.NextRefresh(phaseAt(clock.read())); !got.Equal(clock.read().Add(spinnerRate)) {
+		t.Errorf("active refresh = %s", got.Sub(clock.read()))
 	}
 }
 
@@ -318,16 +323,16 @@ func TestAnEmptyReportShowsPendingStatus(t *testing.T) {
 
 	fetchNow(t, built)
 
-	if got := built.IdleRefreshInterval(); got != 125*time.Millisecond {
-		t.Errorf("unpainted completion idle refresh interval = %s", got)
+	if got := built.NextRefresh(phaseAt(testNow)); !got.Equal(testNow) {
+		t.Errorf("expected a landed fetch to be drawn at once, got it in %s", got.Sub(testNow))
 	}
 
 	if got := style.Plain(built.Render(segment.Context{})); got != "usage pending" {
 		t.Errorf("got %q", got)
 	}
 
-	if got := built.IdleRefreshInterval(); got != redrawInterval {
-		t.Errorf("pending idle refresh interval = %s", got)
+	if got := built.NextRefresh(phaseAt(testNow)); !got.Equal(testNow.Add(redrawInterval)) {
+		t.Errorf("pending refresh = %s", got.Sub(testNow))
 	}
 }
 
@@ -619,29 +624,20 @@ func TestAScopeIsMatchedAgainstTheModelHoweverItIsWritten(t *testing.T) {
 	}
 }
 
-func TestTheSegmentIsPersistentAndTicksWhileIdle(t *testing.T) {
+func TestTheSegmentPollsOnWhetherATurnIsRunningOrNot(t *testing.T) {
 	built := build(t, &scriptedReporter{})
 
-	persister, ok := built.(segment.Persister)
+	refresher, ok := built.(segment.Refresher)
 	if !ok {
-		t.Fatal("expected the segment to say whether it persists")
+		t.Fatal("expected the segment to say when it next changes")
 	}
 
-	if !persister.Persistent() {
-		t.Error("expected the usage segment to persist")
-	}
+	for _, isRunning := range []bool{false, true} {
+		phase := segment.Phase{At: testNow, IsRunning: isRunning}
 
-	if got := persister.RefreshInterval(); got != 125*time.Millisecond {
-		t.Errorf("refresh interval = %s", got)
-	}
-
-	ticker, ok := built.(segment.IdleTicker)
-	if !ok {
-		t.Fatal("expected the segment to tick while idle")
-	}
-
-	if got := ticker.IdleRefreshInterval(); got != redrawInterval {
-		t.Errorf("idle refresh interval = %s", got)
+		if got := refresher.NextRefresh(phase); !got.Equal(testNow.Add(redrawInterval)) {
+			t.Errorf("refresh while running=%t = %s", isRunning, got.Sub(testNow))
+		}
 	}
 }
 
