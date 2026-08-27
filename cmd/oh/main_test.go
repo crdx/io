@@ -5197,7 +5197,7 @@ func TestTabCompletionKeepsCommandNamespacesSeparate(t *testing.T) {
 
 	for input, want := range map[string]string{
 		"/":  "/conf",
-		"//": "//review",
+		"//": "//help",
 	} {
 		self.completion.Reset()
 		editor := edit.NewInput(nil)

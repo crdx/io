@@ -28,7 +28,7 @@ func (self *commandTestContext) Success(text string) {
 func newCommandRegistry(t *testing.T, environment commandEnvironment) slash.Registry {
 	t.Helper()
 
-	set, err := buildCommands(environment, nil)
+	set, err := buildCommands(environment)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func newCommandRegistryWithSnippets(
 	if err != nil {
 		t.Fatal(err)
 	}
-	systemSet, err := buildCommands(environment, snippetSet.GetHelpEntries())
+	systemSet, err := buildCommands(environment)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -415,8 +415,8 @@ func TestCommandsReportTargetsThatDoNotExistYet(t *testing.T) {
 	}
 }
 
-func TestHelpOmitsTheSnippetSectionWhenNoneAreConfigured(t *testing.T) {
-	got := helpText([]string{"/edit", "/help"}, "/help", nil, nil)
+func TestHelpLeavesTheSnippetsToTheirOwnHelpCommand(t *testing.T) {
+	got := helpText([]string{"/edit", "/help"}, "/help", nil)
 	if strings.Contains(got, "Snippets:") || strings.Contains(got, "/help") {
 		t.Errorf("got help %q", got)
 	}
@@ -433,7 +433,7 @@ func TestEditReportsAnUnconfiguredEditor(t *testing.T) {
 	set, err := New(Options{
 		ConfigDir:  configDirectory,
 		ConfigFile: filepath.Join(configDirectory, "config.toml"),
-	}, nil)
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

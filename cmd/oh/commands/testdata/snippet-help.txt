@@ -1,0 +1,7 @@
+=== snippets configured ===
+Snippets:
+  //add <args>  Add a task, then continue.
+  //ask <args>  Answer without making changes.
+  //note
+=== no snippets configured ===
+No snippets are configured.

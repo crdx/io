@@ -30,8 +30,9 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		{prefix: "/edit sn", steps: 1},
 		{prefix: "/open ", steps: 12},
 		{prefix: "/open sn", steps: 1},
-		{prefix: "//", steps: 3},
+		{prefix: "//", steps: 4},
 		{prefix: "//a", steps: 3},
+		{prefix: "//h", steps: 1},
 	} {
 		state := slash.Completion{}
 		current := test.prefix
@@ -47,8 +48,13 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		output.WriteByte('\n')
 	}
 
-	got := output.String()
-	goldenPath := filepath.Join("testdata", "completion.txt")
+	assertGolden(t, "completion.txt", output.String())
+}
+
+func assertGolden(t *testing.T, name string, got string) {
+	t.Helper()
+
+	goldenPath := filepath.Join("testdata", name)
 	if *updateGoldens {
 		if err := os.WriteFile(goldenPath, []byte(got), 0o600); err != nil {
 			t.Fatal(err)
@@ -60,7 +66,7 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got != string(want) {
-		t.Errorf("completion differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, got, want)
+		t.Errorf("output differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, got, want)
 	}
 }
 
@@ -91,6 +97,31 @@ func fixtureSnippets() map[string]snippets.Definition {
 	}
 }
 
+func TestSnippetHelpMatchesGolden(t *testing.T) {
+	var output strings.Builder
+	for _, test := range []struct {
+		label              string
+		configuredSnippets map[string]snippets.Definition
+	}{
+		{label: "snippets configured", configuredSnippets: fixtureSnippets()},
+		{label: "no snippets configured", configuredSnippets: nil},
+	} {
+		commands := newCommandRegistryWithSnippets(t, fixtureEnvironment(t), test.configuredSnippets)
+		invocation, found := commands.Find("//help")
+		if !found {
+			t.Fatal("expected //help to be registered")
+		}
+
+		context := &helpContext{}
+		if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
+			t.Fatal(err)
+		}
+		fmt.Fprintf(&output, "=== %s ===\n%s\n", test.label, context.notice)
+	}
+
+	assertGolden(t, "snippet-help.txt", output.String())
+}
+
 var updateGoldens = flag.Bool("update", false, "write command output back to the golden files")
 
 type helpContext struct {
@@ -115,19 +146,5 @@ func TestHelpMatchesGolden(t *testing.T) {
 	if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
 		t.Fatal(err)
 	}
-	got := context.notice + "\n"
-	goldenPath := filepath.Join("testdata", "help.txt")
-	if *updateGoldens {
-		if err := os.WriteFile(goldenPath, []byte(got), 0o600); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	want, err := os.ReadFile(goldenPath) //nolint:gosec // fixed testdata path
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got != string(want) {
-		t.Errorf("help differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, got, want)
-	}
+	assertGolden(t, "help.txt", context.notice+"\n")
 }

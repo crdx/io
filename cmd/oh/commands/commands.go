@@ -17,7 +17,6 @@ import (
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/terminal"
-	"crdx.org/io/cmd/oh/width"
 )
 
 const (
@@ -26,8 +25,6 @@ const (
 	sessionTranscriptName = "chat.md"
 
 	targetPlaceholder = "<target>"
-	helpIndent        = "  "
-	helpWidth         = 78
 )
 
 type Options struct {
@@ -86,7 +83,7 @@ type commandTarget struct {
 	resolveValues func() ([]string, error)
 }
 
-func New(options Options, snippetHelp []slash.HelpEntry) (slash.CommandSet, error) {
+func New(options Options) (slash.CommandSet, error) {
 	return buildCommands(commandEnvironment{
 		configDir:        options.ConfigDir,
 		configPath:       options.ConfigFile,
@@ -110,17 +107,17 @@ func New(options Options, snippetHelp []slash.HelpEntry) (slash.CommandSet, erro
 			return terminal.Copy(options.Output, strings.Join(values, "\n"))
 		},
 		startSession: options.StartSession,
-	}, snippetHelp)
+	})
 }
 
-func buildCommands(environment commandEnvironment, snippetHelp []slash.HelpEntry) (slash.CommandSet, error) {
+func buildCommands(environment commandEnvironment) (slash.CommandSet, error) {
 	targets := locationTargets(environment)
 	targetNames := slices.Sorted(maps.Keys(targets))
 
 	var set slash.CommandSet
 	var help slash.Command
 	help = helpCommand(func() string {
-		return helpText(set.Usages(), systemCommandPrefix+help.Name, snippetHelp, targetNames)
+		return helpText(set.Usages(), systemCommandPrefix+help.Name, targetNames)
 	})
 	commands := []slash.Command{
 		editorCommand("conf", configTarget(environment), environment.openEditor),
@@ -281,54 +278,21 @@ func commandsRequiringPersistedSession(isSessionPersisted func() bool, commands 
 	return commands
 }
 
-func helpText(
-	commandUsages []string,
-	hiddenCommandUsage string,
-	snippetHelp []slash.HelpEntry,
-	targetNames []string,
-) string {
+func helpText(commandUsages []string, hiddenCommandUsage string, targetNames []string) string {
 	visibleCommandUsages := slices.DeleteFunc(commandUsages, func(usage string) bool { return usage == hiddenCommandUsage })
 	usesTargets := false
 	for i, usage := range visibleCommandUsages {
 		if usage == "/new" || usage == "/fork" {
-			visibleCommandUsages[i] += " [model[@effort]]"
+			visibleCommandUsages[i] += " [model]"
 		}
 		usesTargets = usesTargets || strings.Contains(usage, targetPlaceholder)
 	}
-	sections := []string{"Commands:\n  " + strings.Join(visibleCommandUsages, "\n  ")}
+	sections := []string{"Commands:\n" + slash.HelpIndent + strings.Join(visibleCommandUsages, "\n"+slash.HelpIndent)}
 	if usesTargets {
-		targetRows := column.Rows(targetNames, helpWidth-len(helpIndent))
-		sections = append(sections, "Targets:\n"+helpIndent+strings.Join(targetRows, "\n"+helpIndent))
-	}
-	if len(snippetHelp) > 0 {
-		sections = append(sections, "Snippets:\n"+strings.Join(formatSnippetHelp(snippetHelp), "\n"))
+		targetRows := column.Rows(targetNames, slash.HelpWidth-len(slash.HelpIndent))
+		sections = append(sections, "Targets:\n"+slash.HelpIndent+strings.Join(targetRows, "\n"+slash.HelpIndent))
 	}
 	return strings.Join(sections, "\n\n")
-}
-
-func formatSnippetHelp(entries []slash.HelpEntry) []string {
-	usageWidth := 0
-	for _, entry := range entries {
-		usageWidth = max(usageWidth, width.Of(entry.Usage))
-	}
-
-	var lines []string
-	for _, entry := range entries {
-		if entry.Description == "" {
-			lines = append(lines, helpIndent+entry.Usage)
-			continue
-		}
-
-		padding := strings.Repeat(" ", usageWidth-width.Of(entry.Usage))
-		prefix := helpIndent + entry.Usage + padding + helpIndent
-		descriptionLines := width.Wrap(entry.Description, helpWidth-width.Of(prefix))
-		lines = append(lines, prefix+descriptionLines[0])
-		continuation := strings.Repeat(" ", width.Of(prefix))
-		for _, line := range descriptionLines[1:] {
-			lines = append(lines, continuation+line)
-		}
-	}
-	return lines
 }
 
 func staticTarget(values ...string) commandTarget {

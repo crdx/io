@@ -11,14 +11,18 @@ import (
 )
 
 type snippetContext struct {
-	sent string
+	sent   string
+	notice string
 }
 
 func (self *snippetContext) Emit(agent.Event) {}
 func (self *snippetContext) Send(prompt string) {
 	self.sent = prompt
 }
-func (self *snippetContext) Notice(string)  {}
+
+func (self *snippetContext) Notice(text string) {
+	self.notice = text
+}
 func (self *snippetContext) Success(string) {}
 
 func TestSnippetSendsItsConfiguredPrompt(t *testing.T) {
@@ -179,7 +183,7 @@ func TestSnippetUsagesAreDeterministic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"//optional [args]", "//review <args>", "//test"}
+	want := []string{"//optional [args]", "//review <args>", "//test", "//help"}
 	if got := set.Usages(); !slices.Equal(got, want) {
 		t.Errorf("got usages %v, want %v", got, want)
 	}
@@ -207,12 +211,12 @@ func TestExplicitArgumentPoliciesControlUsageAndValidation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	wantUsages := []string{"//none", "//optional [args]", "//required <args>"}
+	wantUsages := []string{"//none", "//optional [args]", "//required <args>", "//help"}
 	if got := set.Usages(); !slices.Equal(got, wantUsages) {
 		t.Errorf("got usages %v, want %v", got, wantUsages)
 	}
 	entries := set.GetHelpEntries()
-	if len(entries) != 3 || entries[1].Description != "Review a scope." {
+	if len(entries) != 4 || entries[1].Description != "Review a scope." {
 		t.Errorf("got help entries %#v", entries)
 	}
 
@@ -256,8 +260,8 @@ func TestAnUnsetArgumentPolicyIsReadFromTheTemplate(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if got := set.Usages(); !slices.Equal(got, []string{want}) {
-				t.Errorf("got usages %v, want [%s]", got, want)
+			if got := set.Usages(); !slices.Equal(got, []string{want, "//help"}) {
+				t.Errorf("got usages %v, want [%s //help]", got, want)
 			}
 		})
 	}
@@ -286,13 +290,61 @@ func TestAnInferredPolicyIsEnforced(t *testing.T) {
 	}
 }
 
+func TestHelpListsTheConfiguredSnippets(t *testing.T) {
+	invocation := getInvocation(t, map[string]snippets.Definition{
+		"note":   {Prompt: "Note this."},
+		"review": {Prompt: "Review {{.Arg}}.", Description: "Review the named scope."},
+	}, "//help")
+
+	context := &snippetContext{}
+	if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
+		t.Fatal(err)
+	}
+
+	want := strings.Join([]string{
+		"Snippets:",
+		"  //note",
+		"  //review <args>  Review the named scope.",
+	}, "\n")
+	if context.notice != want {
+		t.Errorf("got help\n%s\nwant\n%s", context.notice, want)
+	}
+}
+
+func TestHelpSaysWhenNoSnippetsAreConfigured(t *testing.T) {
+	invocation := getInvocation(t, nil, "//help")
+
+	context := &snippetContext{}
+	if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
+		t.Fatal(err)
+	}
+	if context.notice != "No snippets are configured." {
+		t.Errorf("got help %q", context.notice)
+	}
+}
+
+func TestHelpTakesNoArguments(t *testing.T) {
+	invocation := getInvocation(t, nil, "//help extra")
+
+	if err := invocation.Command.Run(&snippetContext{}, invocation.Arguments); !slash.IsUsageError(err) {
+		t.Errorf("got error %v, want usage error", err)
+	}
+}
+
+func TestASnippetCannotBeNamedHelp(t *testing.T) {
+	_, err := snippets.New(map[string]snippets.Definition{"help": {Prompt: "Help me."}})
+	if err == nil || !strings.Contains(err.Error(), "//help") {
+		t.Errorf("got %v", err)
+	}
+}
+
 func TestAnEmptySnippetSetStillOwnsItsPrefix(t *testing.T) {
 	set, err := snippets.New(nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(set.Usages()) != 0 {
-		t.Errorf("got usages %v", set.Usages())
+	if got := set.Usages(); !slices.Equal(got, []string{"//help"}) {
+		t.Errorf("got usages %v", got)
 	}
 	registry, err := slash.NewRegistry(set)
 	if err != nil {

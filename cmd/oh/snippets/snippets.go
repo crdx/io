@@ -14,6 +14,8 @@ import (
 )
 
 const (
+	snippetPrefix         = "//"
+	helpCommandName       = "help"
 	defaultFunctionName   = "default"
 	requiredArgumentUsage = "<args>"
 	optionalArgumentUsage = "[args]"
@@ -88,7 +90,32 @@ func New(configured map[string]Definition) (slash.CommandSet, error) {
 		commands = append(commands, command)
 	}
 
-	return slash.NewCommandSet("//", commands...)
+	var set slash.CommandSet
+	var help slash.Command
+	help = slash.Command{
+		Name: helpCommandName,
+		Run: func(context slash.Context, arguments []string) error {
+			if len(arguments) != 0 {
+				return slash.Usage()
+			}
+
+			context.Notice(helpText(set.GetHelpEntries(), snippetPrefix+help.Name))
+			return nil
+		},
+	}
+	commands = append(commands, help)
+
+	var err error
+	set, err = slash.NewCommandSet(snippetPrefix, commands...)
+	return set, err
+}
+
+func helpText(entries []slash.HelpEntry, hiddenUsage string) string {
+	visible := slices.DeleteFunc(entries, func(entry slash.HelpEntry) bool { return entry.Usage == hiddenUsage })
+	if len(visible) == 0 {
+		return "No snippets are configured."
+	}
+	return "Snippets:\n" + strings.Join(slash.FormatHelp(visible), "\n")
 }
 
 func inferArgumentPolicyFromTemplate(tree *parse.Tree) ArgumentPolicy {

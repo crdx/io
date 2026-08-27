@@ -407,7 +407,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			}
 			return chat.requestTransition(transition)
 		},
-	}, snippetCommands.GetHelpEntries())
+	})
 	if err != nil {
 		return "", err
 	}

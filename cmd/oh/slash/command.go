@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/width"
 )
 
 type usageError struct{}
@@ -127,9 +128,41 @@ func (self CommandSet) Usages() []string {
 	return usages
 }
 
+const (
+	HelpIndent = "  "
+	HelpWidth  = 78
+)
+
 type HelpEntry struct {
 	Usage       string
 	Description string
+}
+
+// FormatHelp lays each entry out as its usage, padded to a common column, followed by its
+// description wrapped within HelpWidth.
+func FormatHelp(entries []HelpEntry) []string {
+	usageWidth := 0
+	for _, entry := range entries {
+		usageWidth = max(usageWidth, width.Of(entry.Usage))
+	}
+
+	var lines []string
+	for _, entry := range entries {
+		if entry.Description == "" {
+			lines = append(lines, HelpIndent+entry.Usage)
+			continue
+		}
+
+		padding := strings.Repeat(" ", usageWidth-width.Of(entry.Usage))
+		prefix := HelpIndent + entry.Usage + padding + HelpIndent
+		descriptionLines := width.Wrap(entry.Description, HelpWidth-width.Of(prefix))
+		lines = append(lines, prefix+descriptionLines[0])
+		continuation := strings.Repeat(" ", width.Of(prefix))
+		for _, line := range descriptionLines[1:] {
+			lines = append(lines, continuation+line)
+		}
+	}
+	return lines
 }
 
 func (self CommandSet) GetHelpEntries() []HelpEntry {
