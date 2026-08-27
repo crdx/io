@@ -1,0 +1,124 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## Mode
+
+> 2001-01-01T00:00:01Z
+
+- **Caps:** `rxgs`
+
+## User
+
+> 2001-01-01T00:00:02Z
+
+```
+The workspace is now read-only.
+```
+
+## User
+
+> 2001-01-01T00:00:03Z
+
+```
+give it back while the tool is working
+```
+
+## Tool call
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `toolu_1`
+- **Name:** `work`
+- **Read only:** `false`
+
+**Arguments**
+
+```json
+{}
+```
+
+**Subject**
+
+```
+work
+```
+
+## Tool result
+
+> 2001-01-01T00:00:05Z
+
+- **ID:** `toolu_1`
+- **Name:** `work`
+- **Status:** `error`
+- **Duration:** `0s`
+
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":88,"total_bytes":88}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+the call was stopped after 4s because the user changed what the harness is allowed to do
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Interrupted
+
+> 2001-01-01T00:00:06Z
+
+The turn was interrupted because the user changed what the harness is allowed to do.
+
+## Mode
+
+> 2001-01-01T00:00:07Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:08Z
+
+```
+The workspace is now read-write.
+```
+
+## Assistant
+
+> 2001-01-01T00:00:09Z
+
+```
+Noted, the workspace is writable again.
+```
+
+## User
+
+> 2001-01-01T00:00:10Z
+
+```
+carry on
+```
+
+## Assistant
+
+> 2001-01-01T00:00:11Z
+
+```
+Carrying on.
+```
+

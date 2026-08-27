@@ -7,9 +7,15 @@
 - **Provider:** `chat`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 close without the done sentinel
@@ -17,7 +23,7 @@ close without the done sentinel
 
 ## Assistant
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Partial answer.
@@ -25,7 +31,7 @@ Partial answer.
 
 ## Retrying
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 - **Attempt:** `1`
 - **Waited:** `250ms`
@@ -36,7 +42,7 @@ the stream ended before the response did
 
 ## Assistant
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 Partial answer.
@@ -44,7 +50,7 @@ Partial answer.
 
 ## Retrying
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 - **Attempt:** `2`
 - **Waited:** `500ms`
@@ -55,7 +61,7 @@ the stream ended before the response did
 
 ## Assistant
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 Partial answer.
@@ -63,7 +69,7 @@ Partial answer.
 
 ## Failure
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 ```
 the stream ended before the response did
@@ -71,7 +77,7 @@ the stream ended before the response did
 
 ## User
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 ```
 continue after the first response
@@ -79,7 +85,7 @@ continue after the first response
 
 ## Assistant
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:09Z
 
 ```
 Resumed.

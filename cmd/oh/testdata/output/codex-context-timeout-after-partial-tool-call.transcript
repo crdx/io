@@ -7,9 +7,15 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 start a tool call, then wait beyond the request deadline
@@ -17,7 +23,7 @@ start a tool call, then wait beyond the request deadline
 
 ## Reasoning
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Prepare the tool call.
@@ -25,7 +31,7 @@ Prepare the tool call.
 
 ## Failure
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 context deadline exceeded
@@ -33,7 +39,7 @@ context deadline exceeded
 
 ## User
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 continue after the transport timeout
@@ -41,7 +47,7 @@ continue after the transport timeout
 
 ## Assistant
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 Resumed.

@@ -7,9 +7,15 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 change what I am allowed to do while the tool is working
@@ -17,7 +23,7 @@ change what I am allowed to do while the tool is working
 
 ## Tool call
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 - **ID:** `toolu_1`
 - **Name:** `work`
@@ -37,7 +43,7 @@ work
 
 ## Tool result
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 - **ID:** `toolu_1`
 - **Name:** `work`
@@ -60,19 +66,19 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Interrupted
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
 ## Mode
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 - **Caps:** `rxgs`
 
 ## User
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 The workspace is now read-only.
@@ -80,7 +86,7 @@ The workspace is now read-only.
 
 ## Assistant
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 ```
 Noted, the workspace is read-only now.
@@ -88,7 +94,7 @@ Noted, the workspace is read-only now.
 
 ## User
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 ```
 carry on
@@ -96,7 +102,7 @@ carry on
 
 ## Assistant
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:09Z
 
 ```
 Carrying on.

@@ -7,9 +7,15 @@
 - **Provider:** `chat`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 answer before anything goes wrong
@@ -17,7 +23,7 @@ answer before anything goes wrong
 
 ## Assistant
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 All well so far.
@@ -25,7 +31,7 @@ All well so far.
 
 ## User
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 receive HTTP 500 on the turn after a replay
@@ -33,7 +39,7 @@ receive HTTP 500 on the turn after a replay
 
 ## Retrying
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 - **Attempt:** `1`
 - **Waited:** `250ms`
@@ -44,7 +50,7 @@ request failed with status 500:
 
 ## Assistant
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 Recovered after the replay.

@@ -7,9 +7,15 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 complete two tool rounds, then keep thinking
@@ -17,7 +23,7 @@ complete two tool rounds, then keep thinking
 
 ## Reasoning
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Plan first.
@@ -25,7 +31,7 @@ Plan first.
 
 ## Tool call
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 - **ID:** `toolu_1`
 - **Name:** `work`
@@ -45,7 +51,7 @@ work
 
 ## State
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 - **ID:** `toolu_1`
 - **Name:** `work-count`
@@ -58,7 +64,7 @@ work
 
 ## Tool result
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 - **ID:** `toolu_1`
 - **Name:** `work`
@@ -81,7 +87,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Reasoning
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 Plan second.
@@ -89,7 +95,7 @@ Plan second.
 
 ## Tool call
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 - **ID:** `toolu_2`
 - **Name:** `work`
@@ -109,7 +115,7 @@ work
 
 ## State
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 - **ID:** `toolu_2`
 - **Name:** `work-count`
@@ -122,7 +128,7 @@ work
 
 ## Tool result
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:09Z
 
 - **ID:** `toolu_2`
 - **Name:** `work`
@@ -145,13 +151,13 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Interrupted
 
-> 2001-01-01T00:00:09Z
+> 2001-01-01T00:00:10Z
 
 The turn was interrupted because the user pressed escape.
 
 ## User
 
-> 2001-01-01T00:00:10Z
+> 2001-01-01T00:00:11Z
 
 ```
 continue from the last valid tool result
@@ -159,7 +165,7 @@ continue from the last valid tool result
 
 ## Reasoning
 
-> 2001-01-01T00:00:11Z
+> 2001-01-01T00:00:12Z
 
 ```
 Check restored state.
@@ -167,7 +173,7 @@ Check restored state.
 
 ## Tool call
 
-> 2001-01-01T00:00:12Z
+> 2001-01-01T00:00:13Z
 
 - **ID:** `toolu_3`
 - **Name:** `work`
@@ -187,7 +193,7 @@ work
 
 ## State
 
-> 2001-01-01T00:00:13Z
+> 2001-01-01T00:00:14Z
 
 - **ID:** `toolu_3`
 - **Name:** `work-count`
@@ -200,7 +206,7 @@ work
 
 ## Tool result
 
-> 2001-01-01T00:00:14Z
+> 2001-01-01T00:00:15Z
 
 - **ID:** `toolu_3`
 - **Name:** `work`
@@ -223,7 +229,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:15Z
+> 2001-01-01T00:00:16Z
 
 ```
 Recovered.

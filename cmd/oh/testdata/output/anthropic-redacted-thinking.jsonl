@@ -1,4 +1,5 @@
 {"kind":"head","version":9,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"think privately, then answer"}}
 {"kind":"event","event":{"kind":"model_message","text":"First answer."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"think privately, then answer"}]}}
@@ -6,6 +7,7 @@
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"answer again using the retained context"}}
 {"kind":"event","event":{"kind":"model_message","text":"Second answer."}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"The workspace is now read-write. The bash tool can now run shell commands. The .git directory is now read-write. The web search and fetch tools can now access the internet."}]}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"answer again using the retained context"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Second answer."}]}}
 {"kind":"turn_completion"}

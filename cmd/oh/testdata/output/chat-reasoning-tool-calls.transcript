@@ -7,9 +7,15 @@
 - **Provider:** `chat`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 reason, then call two tools in fragments
@@ -17,7 +23,7 @@ reason, then call two tools in fragments
 
 ## Reasoning
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Use both tools.
@@ -25,7 +31,7 @@ Use both tools.
 
 ## Tool call
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 - **ID:** `call-1`
 - **Name:** `alpha`
@@ -45,7 +51,7 @@ alpha
 
 ## Tool call
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 - **ID:** `call-2`
 - **Name:** `beta`
@@ -65,7 +71,7 @@ beta
 
 ## State
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 - **ID:** `call-1`
 - **Name:** `alpha-count`
@@ -78,7 +84,7 @@ beta
 
 ## Tool result
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 - **ID:** `call-1`
 - **Name:** `alpha`
@@ -101,7 +107,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## State
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 - **ID:** `call-2`
 - **Name:** `beta-count`
@@ -114,7 +120,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Tool result
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 - **ID:** `call-2`
 - **Name:** `beta`
@@ -137,7 +143,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:09Z
 
 ```
 Tools done.
@@ -145,7 +151,7 @@ Tools done.
 
 ## User
 
-> 2001-01-01T00:00:09Z
+> 2001-01-01T00:00:10Z
 
 ```
 continue after both tool results
@@ -153,7 +159,7 @@ continue after both tool results
 
 ## Assistant
 
-> 2001-01-01T00:00:10Z
+> 2001-01-01T00:00:11Z
 
 ```
 Resumed.

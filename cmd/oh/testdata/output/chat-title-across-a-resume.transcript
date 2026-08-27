@@ -7,9 +7,15 @@
 - **Provider:** `chat`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 have a look at the picker
@@ -17,7 +23,7 @@ have a look at the picker
 
 ## Tool call
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 - **ID:** `call-1`
 - **Name:** `title`
@@ -37,7 +43,7 @@ fix the picker clipping
 
 ## State
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 - **ID:** `call-1`
 - **Name:** `title`
@@ -50,7 +56,7 @@ fix the picker clipping
 
 ## Tool result
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 - **ID:** `call-1`
 - **Name:** `title`
@@ -73,7 +79,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 Named it, and the row is one cell short.
@@ -81,7 +87,7 @@ Named it, and the row is one cell short.
 
 ## User
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 carry on
@@ -89,7 +95,7 @@ carry on
 
 ## Tool call
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 - **ID:** `call-2`
 - **Name:** `title`
@@ -109,7 +115,7 @@ fix the picker clipping
 
 ## Tool result
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 - **ID:** `call-2`
 - **Name:** `title`
@@ -132,7 +138,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Tool call
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:09Z
 
 - **ID:** `call-3`
 - **Name:** `title`
@@ -152,7 +158,7 @@ give sessions a title
 
 ## State
 
-> 2001-01-01T00:00:09Z
+> 2001-01-01T00:00:10Z
 
 - **ID:** `call-3`
 - **Name:** `title`
@@ -165,7 +171,7 @@ give sessions a title
 
 ## Tool result
 
-> 2001-01-01T00:00:10Z
+> 2001-01-01T00:00:11Z
 
 - **ID:** `call-3`
 - **Name:** `title`
@@ -188,7 +194,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:11Z
+> 2001-01-01T00:00:12Z
 
 ```
 The task turned out to be a wider one.

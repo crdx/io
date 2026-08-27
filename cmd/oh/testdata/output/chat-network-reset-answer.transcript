@@ -7,9 +7,15 @@
 - **Provider:** `chat`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 lose the network during answer prose
@@ -17,7 +23,7 @@ lose the network during answer prose
 
 ## Reasoning
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Completed thought.
@@ -25,7 +31,7 @@ Completed thought.
 
 ## Assistant
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 Partial answer.
@@ -33,7 +39,7 @@ Partial answer.
 
 ## Failure
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 unexpected EOF
@@ -41,7 +47,7 @@ unexpected EOF
 
 ## User
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 continue after the network interruption
@@ -49,7 +55,7 @@ continue after the network interruption
 
 ## Assistant
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 Resumed.

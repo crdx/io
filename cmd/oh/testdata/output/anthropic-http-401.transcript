@@ -7,9 +7,15 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 receive HTTP 401
@@ -17,7 +23,7 @@ receive HTTP 401
 
 ## Failure
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 request failed with status 401: 
@@ -25,7 +31,7 @@ request failed with status 401:
 
 ## User
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 continue after the transport failure
@@ -33,7 +39,7 @@ continue after the transport failure
 
 ## Assistant
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 Resumed.

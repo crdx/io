@@ -1,4 +1,5 @@
 {"kind":"head","version":9,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"high","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"lose the network during answer prose"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Completed thought."}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
@@ -8,6 +9,7 @@
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the network interruption"}}
 {"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
+{"kind":"item","payload":{"role":"user","content":"The workspace is now read-write. The bash tool can now run shell commands. The .git directory is now read-write. The web search and fetch tools can now access the internet."}}
 {"kind":"item","payload":{"role":"user","content":"continue after the network interruption"}}
 {"kind":"item","payload":{"role":"assistant","content":"Resumed."}}
 {"kind":"turn_completion"}

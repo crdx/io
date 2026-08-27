@@ -99,6 +99,37 @@ func TestAnAcknowledgedSwapIsNotAnnouncedAgainByARetractionAfterIt(t *testing.T)
 	}
 }
 
+func TestARetractedSwapIsAnnouncedOnlyOnceUntilTheNextRetraction(t *testing.T) {
+	self := NewMode(writable())
+	self.Toggle(Write)
+	_ = self.Inject()
+	self.Retract()
+
+	if got := self.Inject(); got != nowReadOnly {
+		t.Fatalf("expected %q, got %q", nowReadOnly, got)
+	}
+
+	if got := self.Inject(); got != "" {
+		t.Errorf("expected nothing the second time in the same turn, got %q", got)
+	}
+}
+
+func TestASwapBackAfterARetractionIsStillAnnounced(t *testing.T) {
+	self := NewMode(Read)
+	self.Toggle(Write)
+
+	if got := self.Inject(); got != nowReadWrite {
+		t.Fatalf("expected %q, got %q", nowReadWrite, got)
+	}
+
+	self.Retract()
+	self.Toggle(Write)
+
+	if got := self.Inject(); got != nowReadOnly {
+		t.Errorf("expected the swap back to be announced, got %q", got)
+	}
+}
+
 func TestAResumedConversationIsToldEverythingAgainUntilATurnLands(t *testing.T) {
 	self := NewResumedMode(writable())
 

@@ -7,9 +7,15 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 interrupt the answer with ctrl+d
@@ -17,7 +23,7 @@ interrupt the answer with ctrl+d
 
 ## Assistant
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Partial answer.
@@ -25,13 +31,13 @@ Partial answer.
 
 ## Interrupted
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 The turn was interrupted because the user pressed ctrl+d.
 
 ## User
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 continue after the partial answer
@@ -39,7 +45,7 @@ continue after the partial answer
 
 ## Assistant
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 Resumed.

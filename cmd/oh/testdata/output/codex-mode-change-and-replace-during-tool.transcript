@@ -1,0 +1,118 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+send another message and change what I am allowed to do
+```
+
+## Tool call
+
+> 2001-01-01T00:00:02Z
+
+- **ID:** `call-1`
+- **Name:** `work`
+- **Read only:** `false`
+
+**Arguments**
+
+```json
+{}
+```
+
+**Subject**
+
+```
+work
+```
+
+## Tool result
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call-1`
+- **Name:** `work`
+- **Status:** `error`
+- **Duration:** `0s`
+
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":88,"total_bytes":88}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+the call was stopped after 3s because the user changed what the harness is allowed to do
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Interrupted
+
+> 2001-01-01T00:00:04Z
+
+The turn was interrupted because the user changed what the harness is allowed to do.
+
+## Mode
+
+> 2001-01-01T00:00:05Z
+
+- **Caps:** `rxgs`
+
+## User
+
+> 2001-01-01T00:00:06Z
+
+```
+The workspace is now read-only.
+```
+
+## User
+
+> 2001-01-01T00:00:07Z
+
+```
+do it read-only instead
+```
+
+## Assistant
+
+> 2001-01-01T00:00:08Z
+
+```
+Read-only it is.
+```
+
+## User
+
+> 2001-01-01T00:00:09Z
+
+```
+carry on
+```
+
+## Assistant
+
+> 2001-01-01T00:00:10Z
+
+```
+Carrying on.
+```
+

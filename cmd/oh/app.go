@@ -410,7 +410,7 @@ func stopKeyReason(keypress key.Key) string {
 
 func (self *App) cancelTurn(reason string) {
 	if self.currentTurn.Cancelled() {
-		self.queuedTurn.Clear()
+		self.queuedTurn.Drop()
 	}
 
 	self.interruptTurn(reason)
@@ -808,14 +808,21 @@ func (self *App) finish() {
 
 	self.currentTurn.Finish()
 
+	if self.isTransitionRequested() {
+		return
+	}
+
 	queued, message := self.queuedTurn.Take()
 	switch queued {
 	case turn.Replacement:
+		self.refreshPendingMessages()
 		self.start(message)
 	case turn.ModeChange:
 		if message := self.mode.Inject(); message != "" {
 			self.start(message)
 		}
+	case turn.ModeNotice:
+		self.refreshPendingMessages()
 	case turn.None:
 	}
 }

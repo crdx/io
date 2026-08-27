@@ -702,6 +702,13 @@ func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
 					test.wantKept, pending.Replacement, pending.ModeChange, pending.Message,
 				)
 			}
+
+			if pending.ModeNotice == test.wantKept {
+				t.Errorf(
+					"expected the dropped mode change to be left as a notice=%t, got %t",
+					!test.wantKept, pending.ModeNotice,
+				)
+			}
 		})
 	}
 }
@@ -714,8 +721,9 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	}
 	defer func() { _ = log.Close() }()
 
+	provider := &refusingOnceProvider{}
 	self := &App{
-		agent:    agent.New("", quietProvider{}, nil),
+		agent:    agent.New("", provider, nil),
 		screen:   output.New(&bytes.Buffer{}),
 		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
@@ -746,6 +754,10 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 		t.Error("expected the queued prompt to have started a turn")
 	}
 
+	if !slices.ContainsFunc(provider.messages, isReadOnlyNote) {
+		t.Errorf("expected the queued prompt to carry the mode change, got %q", provider.messages)
+	}
+
 	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
 	}
@@ -763,8 +775,111 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 		}
 	}
 
-	if !slices.Equal(messages, []string{"first", "second"}) {
-		t.Errorf("expected the queued prompt alone to follow, got %q", messages)
+	if !slices.Equal(messages, []string{"first", nowReadOnlyNote, "second"}) {
+		t.Errorf("expected the notice to be stored before the queued prompt, got %q", messages)
+	}
+}
+
+func TestAModeChangeDroppedByEscapeIsStillDrawnAndCarried(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var screenOutput bytes.Buffer
+	provider := &refusingOnceProvider{}
+	self := &App{
+		agent:    agent.New("", provider, nil),
+		screen:   output.New(&screenOutput),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
+	}
+
+	self.start("first")
+	self.toggleCap(caps.Write)
+	self.cancelTurn(escapeReason)
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	if self.currentTurn.Running() {
+		t.Error("expected the dropped mode change not to start a turn of its own")
+	}
+
+	provider.messages = nil
+	self.start("second")
+
+	if drawn := style.Plain(screenOutput.String()); !strings.Contains(drawn, nowReadOnlyNote) {
+		t.Errorf("expected the mode change to have been drawn, got %q", drawn)
+	}
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	if !slices.ContainsFunc(provider.messages, isReadOnlyNote) {
+		t.Errorf("expected the next turn to carry the mode change, got %q", provider.messages)
+	}
+
+	if err := log.Close(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	storedSession, err := store.Read(directory, log.Name())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var messages []string
+	for _, event := range storedSession.Events {
+		if event.Kind == agent.UserMessageEvent {
+			messages = append(messages, event.Text)
+		}
+	}
+
+	if !slices.Equal(messages, []string{"first", nowReadOnlyNote, "second"}) {
+		t.Errorf("expected the notice to be stored before the next prompt, got %q", messages)
+	}
+}
+
+func TestATransitionLeavesAQueuedModeChangeUnsent(t *testing.T) {
+	log, err := store.Create(t.TempDir(), store.Meta{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	defer func() { _ = log.Close() }()
+
+	provider := &refusingOnceProvider{}
+	self := &App{
+		agent:    agent.New("", provider, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
+	}
+
+	self.start("first")
+	self.toggleCap(caps.Write)
+
+	if err := self.requestTransition(cycle.Transition{Kind: cycle.NewSession}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	if self.currentTurn.Running() {
+		t.Error("expected the session being closed to start no further turn")
+	}
+
+	if !slices.Equal(provider.messages, []string{"first"}) {
+		t.Errorf("expected nothing sent while the session was closing, got %q", provider.messages)
 	}
 }
 
@@ -835,8 +950,10 @@ func TestAModeChangeThatFailedIsCarriedIntoTheNextTurn(t *testing.T) {
 	}
 }
 
+const nowReadOnlyNote = "The workspace is now read-only."
+
 func isReadOnlyNote(message string) bool {
-	return strings.Contains(message, "The workspace is now read-only.")
+	return strings.Contains(message, nowReadOnlyNote)
 }
 
 func TestPendingInputCanTakeBackAnyMessage(t *testing.T) {
@@ -5698,6 +5815,7 @@ type sessionGoldenTurn struct {
 	ReplaceAfterToolRequest   string                  `toml:"replace-after-tool-request"`
 	ToggleAfterMessageDelta   string                  `toml:"toggle-after-message-delta"`
 	ToggleAfterToolRequest    string                  `toml:"toggle-after-tool-request"`
+	CancelAfterToolToggle     bool                    `toml:"cancel-after-tool-toggle"`
 }
 
 type sessionGoldenTool struct {
@@ -6035,6 +6153,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	}
 	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
 	runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
+	firstHarness.settleMode()
 
 	sessionName := log.Name()
 	if err := log.Close(); err != nil {
@@ -6071,7 +6190,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		recorder: resumedRecorder,
 		events:   slices.Clone(storedSession.Events),
 	}
-	settleSessionGoldenMode(resumedHarness)
+	settleResumedSessionGoldenMode(resumedHarness, storedSession.Events)
 	resumedHarness.currentTurn = Turn{Stream: testRunningTurnStream()}
 	resumedHarness.replay()
 	requireSameVisibleScreen(
@@ -6080,7 +6199,11 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		firstScreenOutput.String(),
 		screenOutput.String(),
 	)
+	if note := resumedHarness.mode.Inject(); note != "" {
+		resumedAssistant.FYI(note)
+	}
 	runSessionGoldenTurn(t, resumedHarness, scenario.ResumeTurn, cancelSignals)
+	resumedHarness.settleMode()
 
 	if err := log.Close(); err != nil {
 		t.Fatal(err)
@@ -6170,10 +6293,18 @@ func requireSameVisibleScreen(t *testing.T, description string, firstOutput stri
 }
 
 func settleSessionGoldenMode(testHarness *App) {
-	mode := caps.NewMode(caps.All())
-	_ = mode.Inject()
-	testHarness.mode = mode
-	testHarness.settledCaps = mode.Current()
+	testHarness.mode = caps.NewMode(caps.All())
+	testHarness.settleMode()
+}
+
+func settleResumedSessionGoldenMode(testHarness *App, events []agent.Event) {
+	resumedCaps, found := caps.LastRecordedMode(events)
+	if !found {
+		resumedCaps = caps.All()
+	}
+
+	testHarness.mode = caps.NewResumedMode(resumedCaps)
+	testHarness.settledCaps = resumedCaps
 }
 
 func toggleSessionGoldenCaps(t *testing.T, testHarness *App, flags string) {
@@ -6230,6 +6361,24 @@ func runSessionGoldenTurn(
 		}
 	}()
 
+	takeToolRequest := func(toolRequests int) {
+		if toolRequests == turn.CancelAfterToolRequest {
+			interruptWithStopKey()
+		}
+		if toolRequests != 1 {
+			return
+		}
+		if turn.ReplaceAfterToolRequest != "" {
+			testHarness.replaceTurn(turn.ReplaceAfterToolRequest)
+		}
+		if turn.ToggleAfterToolRequest != "" {
+			toggleSessionGoldenCaps(t, testHarness, turn.ToggleAfterToolRequest)
+			if turn.CancelAfterToolToggle {
+				interruptWithStopKey()
+			}
+		}
+	}
+
 	reasoningDeltas := 0
 	reasoningEvents := 0
 	messageDeltas := 0
@@ -6268,15 +6417,7 @@ func runSessionGoldenTurn(
 		}
 		if update.Event != nil && update.Event.Kind == agent.ToolCallRequestEvent {
 			toolRequests++
-			if toolRequests == turn.CancelAfterToolRequest {
-				interruptWithStopKey()
-			}
-			if toolRequests == 1 && turn.ReplaceAfterToolRequest != "" {
-				testHarness.replaceTurn(turn.ReplaceAfterToolRequest)
-			}
-			if toolRequests == 1 && turn.ToggleAfterToolRequest != "" {
-				toggleSessionGoldenCaps(t, testHarness, turn.ToggleAfterToolRequest)
-			}
+			takeToolRequest(toolRequests)
 		}
 	}
 	if turn.IsCancelled && !testHarness.currentTurn.Cancelled() {

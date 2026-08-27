@@ -7,9 +7,15 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 send another message while the tool is working
@@ -17,7 +23,7 @@ send another message while the tool is working
 
 ## Tool call
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 - **ID:** `call-1`
 - **Name:** `work`
@@ -37,7 +43,7 @@ work
 
 ## Tool result
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 - **ID:** `call-1`
 - **Name:** `work`
@@ -60,13 +66,13 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Interrupted
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 The turn was interrupted because the user sent another message.
 
 ## User
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 stop that and read the file instead
@@ -74,7 +80,7 @@ stop that and read the file instead
 
 ## Assistant
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 Reading it instead.
@@ -82,7 +88,7 @@ Reading it instead.
 
 ## User
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 ```
 why did you stop the first one
@@ -90,7 +96,7 @@ why did you stop the first one
 
 ## Assistant
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 ```
 You sent another message while it was running.

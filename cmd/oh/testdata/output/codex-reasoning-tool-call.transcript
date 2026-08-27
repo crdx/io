@@ -7,9 +7,15 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 reason, call a tool, then answer
@@ -17,7 +23,7 @@ reason, call a tool, then answer
 
 ## Reasoning
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Use the tool.
@@ -25,7 +31,7 @@ Use the tool.
 
 ## Tool call
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 - **ID:** `call-1`
 - **Name:** `work`
@@ -45,7 +51,7 @@ work
 
 ## State
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 - **ID:** `call-1`
 - **Name:** `work-count`
@@ -58,7 +64,7 @@ work
 
 ## Tool result
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 - **ID:** `call-1`
 - **Name:** `work`
@@ -81,7 +87,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 Tool complete.
@@ -89,7 +95,7 @@ Tool complete.
 
 ## User
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 ```
 continue after the tool result
@@ -97,7 +103,7 @@ continue after the tool result
 
 ## Assistant
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 ```
 Resumed.

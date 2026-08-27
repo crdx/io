@@ -7,9 +7,15 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 interrupt while the tool is working
@@ -17,7 +23,7 @@ interrupt while the tool is working
 
 ## Tool call
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 - **ID:** `toolu_1`
 - **Name:** `work`
@@ -37,7 +43,7 @@ work
 
 ## Tool result
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 - **ID:** `toolu_1`
 - **Name:** `work`
@@ -61,13 +67,13 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Interrupted
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 The turn was interrupted because the user pressed escape.
 
 ## User
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 what did it manage to do
@@ -75,7 +81,7 @@ what did it manage to do
 
 ## Assistant
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 It compiled the agent and then stopped.

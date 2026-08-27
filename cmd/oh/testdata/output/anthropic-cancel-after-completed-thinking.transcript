@@ -7,9 +7,15 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 interrupt after completing a thought
@@ -17,7 +23,7 @@ interrupt after completing a thought
 
 ## Reasoning
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Completed thought.
@@ -25,13 +31,13 @@ Completed thought.
 
 ## Interrupted
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 The turn was interrupted because the user pressed escape.
 
 ## User
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 continue after the completed thought
@@ -39,7 +45,7 @@ continue after the completed thought
 
 ## Assistant
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 Resumed.

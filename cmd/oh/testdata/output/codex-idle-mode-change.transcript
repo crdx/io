@@ -11,11 +11,17 @@
 
 > 2001-01-01T00:00:00Z
 
+- **Caps:** `rxwgs`
+
+## Mode
+
+> 2001-01-01T00:00:01Z
+
 - **Caps:** `rxgs`
 
 ## User
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 The workspace is now read-only.
@@ -23,7 +29,7 @@ The workspace is now read-only.
 
 ## User
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 continue with the new mode
@@ -31,7 +37,7 @@ continue with the new mode
 
 ## Assistant
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 The workspace is read-only.
@@ -39,7 +45,7 @@ The workspace is read-only.
 
 ## User
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 continue
@@ -47,7 +53,7 @@ continue
 
 ## Assistant
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 Continued.

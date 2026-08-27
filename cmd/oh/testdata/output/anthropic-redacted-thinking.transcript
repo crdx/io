@@ -7,9 +7,15 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 think privately, then answer
@@ -17,7 +23,7 @@ think privately, then answer
 
 ## Assistant
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 First answer.
@@ -25,7 +31,7 @@ First answer.
 
 ## User
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 answer again using the retained context
@@ -33,7 +39,7 @@ answer again using the retained context
 
 ## Assistant
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 Second answer.

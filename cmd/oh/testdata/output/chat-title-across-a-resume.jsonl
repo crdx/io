@@ -1,4 +1,5 @@
 {"kind":"head","version":9,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"have a look at the picker"}}
 {"kind":"event","event":{"render":"fix the picker clipping","read_only":true,"kind":"tool_call_request","id":"call-1","name":"title","arguments":"{\"title\":\"fix the picker clipping\"}"}}
 {"kind":"event","event":{"kind":"state_change","id":"call-1","name":"title","state":{"title":"fix the picker clipping"}}}
@@ -16,6 +17,7 @@
 {"kind":"event","event":{"kind":"state_change","id":"call-3","name":"title","state":{"title":"give sessions a title"}}}
 {"kind":"event","event":{"kind":"tool_call_result","text":"the session is now titled \"give sessions a title\"","id":"call-3","name":"title","status":"success","stats":{"kind":"output","lines":1,"bytes":49,"total_bytes":49}}}
 {"kind":"event","event":{"kind":"model_message","text":"The task turned out to be a wider one."}}
+{"kind":"item","payload":{"role":"user","content":"The workspace is now read-write. The bash tool can now run shell commands. The .git directory is now read-write. The web search and fetch tools can now access the internet."}}
 {"kind":"item","payload":{"role":"user","content":"carry on"}}
 {"kind":"item","payload":{"role":"assistant","content":"","tool_calls":[{"id":"call-2","type":"function","function":{"name":"title","arguments":"{\"title\":\"fix the picker clipping\"}"}}]}}
 {"kind":"item","payload":{"role":"tool","content":"the session is already titled \"fix the picker clipping\"","tool_call_id":"call-2"}}

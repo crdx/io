@@ -7,9 +7,15 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 interrupt before thought text
@@ -17,13 +23,13 @@ interrupt before thought text
 
 ## Interrupted
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 The turn was interrupted because the user pressed escape.
 
 ## User
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 continue after the interruption
@@ -31,7 +37,7 @@ continue after the interruption
 
 ## Assistant
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 Resumed.

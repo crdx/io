@@ -7,9 +7,15 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 refuse this request
@@ -17,7 +23,7 @@ refuse this request
 
 ## Assistant
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 I cannot help with that.
@@ -25,7 +31,7 @@ I cannot help with that.
 
 ## User
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 continue after the first response
@@ -33,7 +39,7 @@ continue after the first response
 
 ## Assistant
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 Resumed.

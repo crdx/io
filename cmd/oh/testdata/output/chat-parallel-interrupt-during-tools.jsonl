@@ -1,4 +1,5 @@
 {"kind":"head","version":9,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"call two tools and interrupt while the second is working"}}
 {"kind":"event","event":{"render":"alpha","kind":"tool_call_request","id":"call-1","name":"alpha","arguments":"{}"}}
 {"kind":"event","event":{"render":"beta","kind":"tool_call_request","id":"call-2","name":"beta","arguments":"{}"}}
@@ -13,6 +14,7 @@
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"what happened to the second one"}}
 {"kind":"event","event":{"kind":"model_message","text":"It never finished."}}
+{"kind":"item","payload":{"role":"user","content":"The workspace is now read-write. The bash tool can now run shell commands. The .git directory is now read-write. The web search and fetch tools can now access the internet."}}
 {"kind":"item","payload":{"role":"user","content":"what happened to the second one"}}
 {"kind":"item","payload":{"role":"assistant","content":"It never finished."}}
 {"kind":"turn_completion"}

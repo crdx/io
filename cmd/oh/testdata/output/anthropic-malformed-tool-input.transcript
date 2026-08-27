@@ -7,9 +7,15 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 recover from malformed tool input
@@ -17,7 +23,7 @@ recover from malformed tool input
 
 ## Retrying
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 - **Attempt:** `1`
 - **Waited:** `250ms`
@@ -28,7 +34,7 @@ the work tool call did not contain a JSON object
 
 ## Assistant
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 ```
 I corrected the malformed call.
@@ -36,7 +42,7 @@ I corrected the malformed call.
 
 ## User
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 carry on
@@ -44,7 +50,7 @@ carry on
 
 ## Assistant
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 Carrying on.

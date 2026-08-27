@@ -1,4 +1,5 @@
 {"kind":"head","version":9,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"run a command while shell access is withheld"}}
 {"kind":"event","event":{"render":"echo forbidden","emphasis":{"kind":"syntax","value":"bash"},"kind":"tool_call_request","id":"call-1","name":"bash","arguments":"{\"command\":\"echo forbidden\"}"}}
 {"kind":"event","event":{"kind":"tool_call_result","text":"shell access is not granted; the user can grant it with ctrl+x x","id":"call-1","name":"bash","status":"error","stats":{"kind":"output","lines":1,"bytes":64,"total_bytes":64}}}
@@ -10,6 +11,7 @@
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the refused command"}}
 {"kind":"event","event":{"kind":"model_message","text":"Resumed after the refusal."}}
+{"kind":"item","payload":{"role":"user","content":"The workspace is now read-write. The bash tool can now run shell commands. The .git directory is now read-write. The web search and fetch tools can now access the internet."}}
 {"kind":"item","payload":{"role":"user","content":"continue after the refused command"}}
 {"kind":"item","payload":{"role":"assistant","content":"Resumed after the refusal."}}
 {"kind":"turn_completion"}

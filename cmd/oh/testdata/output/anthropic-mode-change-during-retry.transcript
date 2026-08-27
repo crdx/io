@@ -7,9 +7,15 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 change what I am allowed to do while the answer is being asked for again
@@ -17,7 +23,7 @@ change what I am allowed to do while the answer is being asked for again
 
 ## Assistant
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 ```
 Half an ans
@@ -25,7 +31,7 @@ Half an ans
 
 ## Retrying
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 - **Attempt:** `1`
 - **Waited:** `250ms`
@@ -36,19 +42,19 @@ the stream ended before the response did
 
 ## Interrupted
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
 ## Mode
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 - **Caps:** `rxgs`
 
 ## User
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 The workspace is now read-only.
@@ -56,7 +62,7 @@ The workspace is now read-only.
 
 ## Retrying
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 - **Attempt:** `1`
 - **Waited:** `250ms`
@@ -67,7 +73,7 @@ the stream ended before the response did
 
 ## Retrying
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:08Z
 
 - **Attempt:** `2`
 - **Waited:** `500ms`
@@ -78,7 +84,7 @@ the stream ended before the response did
 
 ## Assistant
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:09Z
 
 ```
 Noted, the workspace is read-only now.
@@ -86,7 +92,7 @@ Noted, the workspace is read-only now.
 
 ## User
 
-> 2001-01-01T00:00:09Z
+> 2001-01-01T00:00:10Z
 
 ```
 carry on
@@ -94,7 +100,7 @@ carry on
 
 ## Assistant
 
-> 2001-01-01T00:00:10Z
+> 2001-01-01T00:00:11Z
 
 ```
 Carrying on.

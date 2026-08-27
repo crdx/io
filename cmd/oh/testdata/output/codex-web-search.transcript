@@ -7,9 +7,15 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## User
+## Mode
 
 > 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
 
 ```
 search the web, then answer
@@ -17,7 +23,7 @@ search the web, then answer
 
 ## Tool call
 
-> 2001-01-01T00:00:01Z
+> 2001-01-01T00:00:02Z
 
 - **ID:** `call-1`
 - **Name:** `web_search`
@@ -37,7 +43,7 @@ latest Go release
 
 ## Tool result
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:03Z
 
 - **ID:** `call-1`
 - **Name:** `web_search`
@@ -60,7 +66,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 ## Assistant
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:04Z
 
 ```
 Go 1.26 is the current release.
@@ -68,7 +74,7 @@ Go 1.26 is the current release.
 
 ## User
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 continue after the search
@@ -76,7 +82,7 @@ continue after the search
 
 ## Assistant
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:06Z
 
 ```
 Resumed after the search.
