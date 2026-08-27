@@ -115,19 +115,21 @@ capture: harness
         [resume-edit]="rxw r rw"
         [resume-grep]="rxw"
         [resume-read]="rxw"
+        [retry]="rxw"
         [serial]="rxw r rw rx rxwgb"
         [success]="rxw rxwgb"
     )
 
     declare -A ASKED=(
         [error]=1
-        [failure]=4
+        [failure]=3
         [markdown]=1
         [parallel]=1
         [paths]=1
         [resume-edit]=1
         [resume-grep]=1
         [resume-read]=1
+        [retry]=2
         [serial]=1
         [success]=1
     )

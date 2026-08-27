@@ -189,13 +189,9 @@ func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update,
 		}
 
 		for {
-			listening := true
 			var prose proseStream
 
-			reply, err := self.provider.Send(ctx, func(output Output) bool {
-				listening = yieldUpdates(prose.add(output))
-				return listening
-			})
+			reply, listening, err := self.send(ctx, &prose, yieldUpdates, yieldEvent)
 
 			switch {
 			case !listening:
@@ -224,6 +220,45 @@ func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update,
 			if !self.runCalls(ctx, reply.Calls, usage, yieldEvent) {
 				return
 			}
+		}
+	}
+}
+
+func (self *Agent) send(
+	ctx context.Context,
+	prose *proseStream,
+	yieldUpdates func([]Update) bool,
+	yieldEvent func(Event, error) bool,
+) (Reply, bool, error) {
+	listening := true
+
+	for attempt := 1; ; attempt++ {
+		reply, err := self.provider.Send(ctx, func(output Output) bool {
+			listening = yieldUpdates(prose.add(output))
+			return listening
+		})
+
+		if !listening || err == nil {
+			return reply, listening, err
+		}
+
+		wait, worthIt := retryWait(err, attempt)
+		if !worthIt {
+			return reply, listening, err
+		}
+
+		if !yieldUpdates(prose.interrupted()) {
+			return reply, false, err
+		}
+
+		notice := Event{Kind: RetryingEvent, Text: err.Error(), Attempt: attempt, Took: wait}
+
+		if !yieldEvent(notice, nil) {
+			return reply, false, err
+		}
+
+		if !self.waitBeforeRetry(ctx, wait) {
+			return reply, listening, err
 		}
 	}
 }

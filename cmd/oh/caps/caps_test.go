@@ -66,6 +66,60 @@ func TestASwappedModeIsAnnouncedOnceAndOnlyOnce(t *testing.T) {
 	}
 }
 
+func TestASwapThatNeverReachedTheModelIsAnnouncedAgain(t *testing.T) {
+	self := NewMode(writable())
+	self.Toggle(Write)
+
+	if got := self.Inject(); got != nowReadOnly {
+		t.Errorf("expected %q, got %q", nowReadOnly, got)
+	}
+
+	self.Retract()
+
+	if got := self.Inject(); got != nowReadOnly {
+		t.Errorf("expected the swap to be announced again, got %q", got)
+	}
+
+	self.Acknowledge()
+
+	if got := self.Inject(); got != "" {
+		t.Errorf("expected nothing once it had landed, got %q", got)
+	}
+}
+
+func TestAnAcknowledgedSwapIsNotAnnouncedAgainByARetractionAfterIt(t *testing.T) {
+	self := NewMode(writable())
+	self.Toggle(Write)
+	_ = self.Inject()
+	self.Acknowledge()
+	self.Retract()
+
+	if got := self.Inject(); got != "" {
+		t.Errorf("expected nothing to be announced, got %q", got)
+	}
+}
+
+func TestAResumedConversationIsToldEverythingAgainUntilATurnLands(t *testing.T) {
+	self := NewResumedMode(writable())
+
+	first := self.Inject()
+	if !strings.Contains(first, nowReadWrite) {
+		t.Fatalf("expected everything to be announced, got %q", first)
+	}
+
+	self.Retract()
+
+	if got := self.Inject(); got != first {
+		t.Errorf("expected the same announcement again, got %q", got)
+	}
+
+	self.Acknowledge()
+
+	if got := self.Inject(); got != "" {
+		t.Errorf("expected nothing once it had landed, got %q", got)
+	}
+}
+
 func TestOpeningTheHistoryIsAnnouncedOnItsOwn(t *testing.T) {
 	self := NewMode(writable())
 	self.Toggle(Git)

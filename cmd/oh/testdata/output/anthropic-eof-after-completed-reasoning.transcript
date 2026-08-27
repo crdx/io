@@ -23,17 +23,28 @@ close after a completed thought
 Completed thought.
 ```
 
-## Failure
+## Retrying
 
 > 2001-01-01T00:00:02Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
 
 ```
 the stream ended before the response did
 ```
 
-## User
+## Assistant
 
 > 2001-01-01T00:00:03Z
+
+```
+Answered on the second attempt.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
 
 ```
 continue after the transport failure
@@ -41,7 +52,7 @@ continue after the transport failure
 
 ## Assistant
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 Resumed.

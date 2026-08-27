@@ -79,9 +79,31 @@ tool result
 
 Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
 
-## Failure
+## Retrying
 
 > 2001-01-01T00:00:05Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
+
+```
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+```
+
+## Retrying
+
+> 2001-01-01T00:00:06Z
+
+- **Attempt:** `2`
+- **Waited:** `500ms`
+
+```
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+```
+
+## Failure
+
+> 2001-01-01T00:00:07Z
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
@@ -89,7 +111,7 @@ request failed with status 503: upstream connect error or disconnect/reset befor
 
 ## User
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:08Z
 
 ```
 continue after the upstream failure
@@ -97,7 +119,7 @@ continue after the upstream failure
 
 ## Assistant
 
-> 2001-01-01T00:00:07Z
+> 2001-01-01T00:00:09Z
 
 ```
 Resumed.

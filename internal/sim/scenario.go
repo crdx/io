@@ -42,7 +42,8 @@ type Turn struct {
 
 	Truncate bool `toml:"truncate"`
 
-	Status int `toml:"status"`
+	Status     int      `toml:"status"`
+	RetryAfter Duration `toml:"retry-after"`
 }
 
 // Call is a tool the model asks for.

@@ -8,6 +8,13 @@ prompt = "send fields without SSE data"
 [[first.response]]
 line = ["event: message", "wat: unreadable", ""]
 
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Answered on the second attempt."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
 [resume]
 prompt = "continue after the transport failure"
 

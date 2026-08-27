@@ -494,7 +494,7 @@ func TestAFailedRefreshKeepsTheLastSnapshot(t *testing.T) {
 
 func TestARefusedFetchShowsTheStatusCode(t *testing.T) {
 	clock := &testClock{now: testNow}
-	refusal := &req.StatusError{Code: 401, Message: "the key is not yours"}
+	refusal := &req.StatusError{Status: 401, Message: "the key is not yours"}
 	built := buildState(t, &scriptedReporter{err: refusal}, clock)
 
 	fetchNow(t, built)

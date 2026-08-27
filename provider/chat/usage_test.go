@@ -127,7 +127,7 @@ func TestARefusedUsageRequestCarriesItsStatusCode(t *testing.T) {
 		t.Fatalf("expected a status error, got %v", err)
 	}
 
-	if refused.Code != http.StatusUnauthorized || refused.Message != "invalid key" {
+	if refused.Status != http.StatusUnauthorized || refused.Message != "invalid key" {
 		t.Errorf("got %+v", refused)
 	}
 }
@@ -217,7 +217,7 @@ func TestASubscriptionTheKeyDoesNotHoldIsReported(t *testing.T) {
 		t.Fatalf("expected a status error, got %v", err)
 	}
 
-	if refused.Code != http.StatusForbidden {
+	if refused.Status != http.StatusForbidden {
 		t.Errorf("got %+v", refused)
 	}
 }

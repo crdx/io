@@ -7,11 +7,6 @@ delay = "600ms"
 pace = "40ms"
 
 [[turn]]
-think = ["This one stops halfway."]
-say = "I was about to say something quite important when"
-truncate = true
-
-[[turn]]
 say = "Let me think about that. "
 fail = "the model is overloaded"
 
@@ -20,7 +15,7 @@ say = "I can only get so far before "
 incomplete = true
 
 [[turn]]
-status = 429
+status = 400
 
 [[turn]]
 say = "Reading that now."

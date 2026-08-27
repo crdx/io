@@ -767,6 +767,77 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	}
 }
 
+type refusingOnceProvider struct {
+	failures int
+	sent     int
+	messages []string
+}
+
+func (self *refusingOnceProvider) Configure(string, []tool.Definition)   {}
+func (self *refusingOnceProvider) AddToolResults([]agent.ToolCallResult) {}
+func (self *refusingOnceProvider) Dump() []json.RawMessage               { return nil }
+func (self *refusingOnceProvider) Load([]json.RawMessage)                {}
+
+func (self *refusingOnceProvider) AddUserMessage(text string) {
+	self.messages = append(self.messages, text)
+}
+
+func (self *refusingOnceProvider) Send(context.Context, agent.Yield) (agent.Reply, error) {
+	self.sent++
+
+	if self.sent <= self.failures {
+		return agent.Reply{}, errors.New("your prompt was flagged")
+	}
+
+	return agent.Reply{}, nil
+}
+
+func TestAModeChangeThatFailedIsCarriedIntoTheNextTurn(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = log.Close() }()
+
+	provider := &refusingOnceProvider{failures: 1}
+	self := &App{
+		agent:    agent.New("", provider, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
+	}
+
+	self.toggleCap(caps.Write)
+
+	takeTestTurn := func(message string) []string {
+		provider.messages = nil
+		self.start(message)
+		for report := range self.currentTurn.Events() {
+			self.takeTurn(report)
+		}
+		self.finish()
+
+		return provider.messages
+	}
+
+	if said := takeTestTurn("first"); !slices.ContainsFunc(said, isReadOnlyNote) {
+		t.Fatalf("expected the failed turn to have carried the mode change, got %q", said)
+	}
+
+	if said := takeTestTurn("second"); !slices.ContainsFunc(said, isReadOnlyNote) {
+		t.Errorf("expected the mode change to be carried again, got %q", said)
+	}
+
+	if said := takeTestTurn("third"); slices.ContainsFunc(said, isReadOnlyNote) {
+		t.Errorf("expected the mode change not to be repeated once it landed, got %q", said)
+	}
+}
+
+func isReadOnlyNote(message string) bool {
+	return strings.Contains(message, "The workspace is now read-only.")
+}
+
 func TestPendingInputCanTakeBackAnyMessage(t *testing.T) {
 	var pending pendingInput
 	pending.add(agent.Event{Kind: agent.UserMessageEvent, Text: "first"}, agent.Event{})
@@ -2832,7 +2903,8 @@ func completedInvalidMermaidScreen(t *testing.T) string {
 }
 
 func checkedModelCache(providers string) []byte {
-	return fmt.Appendf(nil,
+	return fmt.Appendf(
+		nil,
 		`{"version":2,"checked":%q,"providers":%s}`, time.Now().Format(time.RFC3339), providers,
 	)
 }
@@ -4799,7 +4871,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			},
 		}),
 		"subscription-usage / refused": goldenUsagePass(t, at, "gpt-5.6-sol", usageReport{
-			err: &req.StatusError{Code: 401, Message: "the key is not yours"},
+			err: &req.StatusError{Status: 401, Message: "the key is not yours"},
 		}),
 		"subscription-usage / unreachable": goldenUsagePass(t, at, "gpt-5.6-sol", usageReport{
 			err: errors.New("the endpoint is sulking"),
@@ -4818,7 +4890,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 				windows: []agent.UsageWindow{
 					{Duration: 5 * time.Hour, Percent: 40, ResetsAt: at.Add(150 * time.Minute)},
 				},
-				thenErr: &req.StatusError{Code: 429, Message: "slow down"},
+				thenErr: &req.StatusError{Status: 429, Message: "slow down"},
 			},
 		),
 		"turn-timer / user turn": goldenSegmentPass(
@@ -5418,6 +5490,7 @@ type sessionGoldenTurn struct {
 	CancelAfterReasoningEvent int                     `toml:"cancel-after-reasoning-event"`
 	CancelAfterMessageDelta   int                     `toml:"cancel-after-message-delta"`
 	CancelAfterToolRequest    int                     `toml:"cancel-after-tool-request"`
+	CancelAfterRetryNotice    int                     `toml:"cancel-after-retry-notice"`
 	ReplaceAfterToolRequest   string                  `toml:"replace-after-tool-request"`
 	ToggleAfterMessageDelta   string                  `toml:"toggle-after-message-delta"`
 	ToggleAfterToolRequest    string                  `toml:"toggle-after-tool-request"`
@@ -5715,7 +5788,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 
 		requestIndex := int(requestCount.Add(1) - 1)
 		if requestIndex >= len(responses) {
-			http.Error(writer, "scenario has no response for this request", http.StatusInternalServerError)
+			http.Error(writer, "scenario has no response for this request", http.StatusConflict)
 			return
 		}
 		serveSessionGoldenResponse(writer, request, responses[requestIndex], cancelSignals)
@@ -5738,6 +5811,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		newSessionGoldenProvider(t, scenario, server.URL, scenario.FirstTokenError),
 		newSessionGoldenTools(t, scenario.Tools),
 	)
+	firstAssistant.TakeRetryWaitsAtOnce()
 	var firstScreenOutput bytes.Buffer
 	firstHarness := &App{
 		agent:    firstAssistant,
@@ -5767,6 +5841,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		newSessionGoldenProvider(t, scenario, server.URL, ""),
 		newSessionGoldenTools(t, scenario.Tools),
 	)
+	resumedAssistant.TakeRetryWaitsAtOnce()
 	if err := resumedAssistant.RestoreState(storedSession.Events); err != nil {
 		t.Fatal(err)
 	}
@@ -5950,6 +6025,7 @@ func runSessionGoldenTurn(
 	reasoningEvents := 0
 	messageDeltas := 0
 	toolRequests := 0
+	retryNotices := 0
 	for update, streamError := range testHarness.agent.Stream(streamContext, turn.Prompt) {
 		testHarness.takeTurn(TurnEvent{Update: update, Err: streamError})
 		if update.Delta != nil {
@@ -5972,6 +6048,12 @@ func runSessionGoldenTurn(
 		if update.Event != nil && update.Event.Kind == agent.ModelReasoningEvent {
 			reasoningEvents++
 			if reasoningEvents == turn.CancelAfterReasoningEvent {
+				interruptWithStopKey()
+			}
+		}
+		if update.Event != nil && update.Event.Kind == agent.RetryingEvent {
+			retryNotices++
+			if retryNotices == turn.CancelAfterRetryNotice {
 				interruptWithStopKey()
 			}
 		}
@@ -6142,6 +6224,7 @@ func newStorageFaultHarness(log SessionLogger, assistant *agent.Agent) *App {
 		agent:    assistant,
 		screen:   output.New(&bytes.Buffer{}),
 		recorder: record.New(log),
+		mode:     caps.NewMode(caps.All()),
 	}
 	testHarness.currentTurn = Turn{
 		painter: testHarness.newPainter(false),

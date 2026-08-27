@@ -8,6 +8,13 @@ prompt = "close before producing output"
 [[first.response]]
 event = []
 
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Answered on the second attempt."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Answered on the second attempt."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
 [resume]
 prompt = "continue after the first response"
 

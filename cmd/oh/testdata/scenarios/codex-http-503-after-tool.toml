@@ -23,6 +23,16 @@ status = 503
 body = "upstream connect error or disconnect/reset before headers. reset reason: connection termination"
 headers = { Content-Type = "text/plain" }
 
+[[first.response]]
+status = 503
+body = "upstream connect error or disconnect/reset before headers. reset reason: connection termination"
+headers = { Content-Type = "text/plain" }
+
+[[first.response]]
+status = 503
+body = "upstream connect error or disconnect/reset before headers. reset reason: connection termination"
+headers = { Content-Type = "text/plain" }
+
 [resume]
 prompt = "continue after the upstream failure"
 

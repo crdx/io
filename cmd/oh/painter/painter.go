@@ -1,9 +1,12 @@
 package painter
 
 import (
+	"strconv"
 	"strings"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
 
 	"crdx.org/io/cmd/oh/call"
@@ -115,6 +118,10 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 			self.screen.Line(RenderSubmittedMessage(message, self.screen.Columns()))
 		}
 
+	case agent.RetryingEvent:
+		self.Close(dynamic.Cancelled)
+		self.screen.Line(style.Stopped(RenderRetry(event)))
+
 	case agent.FailureEvent:
 		self.Close(dynamic.Cancelled)
 		self.screen.Line(style.Failure(event.Text))
@@ -127,6 +134,22 @@ func (self *Picasso) ProvisionalDelta() agent.Delta {
 	}
 
 	return agent.Delta{Kind: agent.ModelMessageEvent, Text: self.answer.String()}
+}
+
+func RenderRetry(event agent.Event) string {
+	notice := "attempt " + strconv.Itoa(event.Attempt) + " failed"
+
+	if event.Took > 0 {
+		notice += ", asking again in " + util.CompactDuration(event.Took)
+	} else {
+		notice += ", asking again"
+	}
+
+	if event.Text != "" {
+		notice += ": " + strutil.FirstLine(event.Text)
+	}
+
+	return notice
 }
 
 func RenderSubmittedMessage(text string, columns int) string {

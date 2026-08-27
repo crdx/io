@@ -1,0 +1,13 @@
+
+ stop the turn while it is waiting to ask again
+
+
+Half an ans
+
+attempt 1 failed, asking again in 0.3s: the stream ended before the response did
+
+
+ continue after the stopped wait
+
+
+Resumed.

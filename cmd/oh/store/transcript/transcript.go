@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -121,6 +122,10 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		}
 	case agent.InterruptionEvent:
 		output.paragraph(interruptionSentence(event.Text))
+	case agent.RetryingEvent:
+		output.field("Attempt", strconv.Itoa(event.Attempt))
+		output.field("Waited", event.Took.String())
+		output.fence(event.Text, "")
 	case agent.FailureEvent:
 		output.fence(event.Text, "")
 	}
@@ -185,6 +190,8 @@ func title(kind agent.Kind) string {
 		return "Mode"
 	case agent.InterruptionEvent:
 		return "Interrupted"
+	case agent.RetryingEvent:
+		return "Retrying"
 	case agent.FailureEvent:
 		return "Failure"
 	default:

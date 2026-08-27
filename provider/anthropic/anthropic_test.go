@@ -1044,9 +1044,9 @@ func TestSendReportsARefusalExplanation(t *testing.T) {
 func TestSendRefusesATruncatedStream(t *testing.T) {
 	server, _ := turns(t, events(messageStart, textStart(0), textDelta(0, "It is raining ")))
 
-	assistant := newAgent(t, server.URL, nil)
+	client := newClient(t, server.URL)
 
-	reply, err := assistant.Send(t.Context(), "what is the weather?")
+	reply, err := sendOnce(t, client, "what is the weather?")
 	if !errors.Is(err, anthropic.ErrTruncated) {
 		t.Fatalf("expected a truncated stream to be refused, got %v", err)
 	}
@@ -1054,6 +1054,24 @@ func TestSendRefusesATruncatedStream(t *testing.T) {
 	if reply != "It is raining " {
 		t.Errorf("expected what did arrive to be handed back, got %q", reply)
 	}
+}
+
+func sendOnce(t *testing.T, client *anthropic.Client, message string) (string, error) {
+	t.Helper()
+
+	client.AddUserMessage(message)
+
+	var said strings.Builder
+
+	_, err := client.Send(t.Context(), func(output agent.Output) bool {
+		if output.Kind == agent.ModelMessageEvent {
+			said.WriteString(output.Text)
+		}
+
+		return true
+	})
+
+	return said.String(), err
 }
 
 func hangingTurns(t *testing.T, scripted ...string) (*httptest.Server, *[]string) {
@@ -1137,6 +1155,10 @@ func conversationText(t *testing.T, assistant *agent.Agent) string {
 		t.Fatal(err)
 	}
 
+	return heldConversation(conversation)
+}
+
+func heldConversation(conversation []json.RawMessage) string {
 	var held strings.Builder
 	for _, item := range conversation {
 		held.Write(item)
@@ -1151,13 +1173,14 @@ func TestATurnThatFailedKeepsWhatItSaidAndNotWhatItAskedFor(t *testing.T) {
 		toolTurn(1, "call_1", "weather", `{"city":"Paris"}`),
 	))
 
-	assistant := newAgent(t, server.URL, []tool.Tool{emptyTool("weather")})
+	client := newClient(t, server.URL)
+	client.Configure("You are a helpful assistant", []tool.Definition{tool.Describe(emptyTool("weather"))})
 
-	if _, err := assistant.Send(t.Context(), "what is the weather?"); !errors.Is(err, anthropic.ErrTruncated) {
+	if _, err := sendOnce(t, client, "what is the weather?"); !errors.Is(err, anthropic.ErrTruncated) {
 		t.Fatalf("expected a truncated stream to be refused, got %v", err)
 	}
 
-	held := conversationText(t, assistant)
+	held := heldConversation(client.Dump())
 
 	if !strings.Contains(held, "Looking it up.") {
 		t.Errorf("expected the conversation to hold what the model said, got %s", held)

@@ -1,0 +1,22 @@
+model = "gpt-5.6-sol"
+
+strict = true
+loop = false
+
+delay = "600ms"
+pace = "40ms"
+
+[[turn]]
+think = ["This one stops halfway."]
+say = "I was about to say something quite important when"
+truncate = true
+
+[[turn]]
+say = " the connection gave out. Here is the rest of it."
+
+[[turn]]
+status = 429
+retry-after = "3s"
+
+[[turn]]
+say = "Sorry about that. There were rather a lot of us asking at once."

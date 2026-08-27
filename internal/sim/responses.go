@@ -131,13 +131,18 @@ func (self *responsesDialect) Play(stream *Stream, _ *Scenario, turn Turn) {
 		stream.Send(responses.ReasoningItem(stream.ID("rs"), thought))
 	}
 
-	if turn.Truncate {
-		return
-	}
-
 	if turn.Say != "" {
 		stream.Type(responses.Answer, turn.Say)
+
+		if turn.Truncate {
+			return
+		}
+
 		stream.Send(responses.Message(turn.Say))
+	}
+
+	if turn.Truncate {
+		return
 	}
 
 	for _, call := range turn.Calls {

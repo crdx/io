@@ -1,0 +1,41 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[[tool]]
+name = "work"
+outputs = ["tool result"]
+state-key = "work-count"
+
+[first]
+prompt = "recover from a bad gateway once the tool has run"
+
+[[first.response]]
+event = [
+    '''{"type":"response.reasoning_summary_part.done","part":{"type":"summary_text","text":"Use the tool."}}''',
+    '''{"type":"response.output_item.done","item":{"id":"reasoning-1","type":"reasoning","content":[],"encrypted_content":"sealed","summary":[{"type":"summary_text","text":"Use the tool."}]}}''',
+    '''{"type":"response.output_item.done","item":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":"{}"}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[[first.response]]
+status = 502
+body = "upstream connect error or disconnect/reset before headers. reset reason: connection termination"
+headers = { Content-Type = "text/plain" }
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"The tool said: tool result."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"The tool said: tool result."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[resume]
+prompt = "continue after the bad gateway"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Resumed."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}''',
+    '''{"type":"response.completed"}''',
+]

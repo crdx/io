@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -151,6 +152,10 @@ func (self *Endpoint) answer(writer http.ResponseWriter, request *http.Request, 
 	turn, found := self.scenario.turn(asked.Turn)
 
 	if found && turn.Status != 0 {
+		if turn.RetryAfter.Duration > 0 {
+			writer.Header().Set("Retry-After", strconv.Itoa(int(turn.RetryAfter.Seconds())))
+		}
+
 		refuse(writer, turn.Status, "the endpoint is having a moment")
 
 		return

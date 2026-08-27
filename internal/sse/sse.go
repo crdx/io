@@ -5,16 +5,21 @@ import (
 	"errors"
 	"io"
 	"strings"
+	"time"
 )
 
-// ErrTruncated reports a stream that ended before Step accepted a payload.
-var ErrTruncated = errors.New("the stream ended before the response did")
+var ErrTruncated error = truncation{}
 
-// Step handles a payload and reports when reading should stop.
+type truncation struct{}
+
+func (truncation) Error() string { return "the stream ended before the response did" }
+
+func (truncation) Retriable() bool { return true }
+
+func (truncation) RetryAfter() time.Duration { return 0 }
+
 type Step func(payload string) (bool, error)
 
-// Read passes each frame to step until it accepts one. EOF before acceptance returns ErrTruncated.
-// Only a newline ends a line; a bare carriage return remains in the payload.
 func Read(body io.Reader, step Step) error {
 	reader := bufio.NewReader(body)
 

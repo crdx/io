@@ -87,13 +87,37 @@ func turns(t *testing.T, scripted ...string) (*httptest.Server, *[]string) {
 func newAgent(t *testing.T, url string, tools []tool.Tool) *agent.Agent {
 	t.Helper()
 
-	backend, err := codex.New(codex.Static("token", "account"), "gpt-5.6-sol", "high")
+	return agent.New("You are a helpful assistant", newClient(t, url), tools)
+}
+
+func newClient(t *testing.T, url string) *codex.Client {
+	t.Helper()
+
+	client, err := codex.New(codex.Static("token", "account"), "gpt-5.6-sol", "high")
 	if err != nil {
 		t.Fatal(err)
 	}
-	backend.URL = url
+	client.URL = url
 
-	return agent.New("You are a helpful assistant", backend, tools)
+	return client
+}
+
+func sendOnce(t *testing.T, client *codex.Client, message string) (string, error) {
+	t.Helper()
+
+	client.AddUserMessage(message)
+
+	var said strings.Builder
+
+	_, err := client.Send(t.Context(), func(output agent.Output) bool {
+		if output.Kind == agent.ModelMessageEvent {
+			said.WriteString(output.Text)
+		}
+
+		return true
+	})
+
+	return said.String(), err
 }
 
 func weatherTool(t *testing.T, callCount *int) tool.Tool {
@@ -696,9 +720,9 @@ func TestARefusalIsShownRatherThanSwallowed(t *testing.T) {
 func TestSendRefusesATruncatedStream(t *testing.T) {
 	server, _ := turns(t, events(answer("It is raining ")))
 
-	assistant := newAgent(t, server.URL, nil)
+	client := newClient(t, server.URL)
 
-	answer, err := assistant.Send(t.Context(), "what is the weather in London?")
+	answer, err := sendOnce(t, client, "what is the weather in London?")
 	if err == nil {
 		t.Fatal("expected a truncated stream to be refused")
 	}
@@ -827,19 +851,14 @@ func TestATurnThatFailedKeepsWhatItSaidAndNotWhatItAskedFor(t *testing.T) {
 		call("weather", `{"city":"London"}`),
 	))
 
-	assistant := newAgent(t, server.URL, nil)
+	client := newClient(t, server.URL)
 
-	if _, err := assistant.Send(t.Context(), "what is the weather?"); !errors.Is(err, codex.ErrTruncated) {
+	if _, err := sendOnce(t, client, "what is the weather?"); !errors.Is(err, codex.ErrTruncated) {
 		t.Fatalf("expected a truncated stream to be refused, got %v", err)
 	}
 
-	conversation, err := assistant.Dump()
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	var held strings.Builder
-	for _, item := range conversation {
+	for _, item := range client.Dump() {
 		held.Write(item)
 	}
 

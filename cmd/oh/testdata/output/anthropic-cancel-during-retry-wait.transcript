@@ -1,0 +1,58 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+stop the turn while it is waiting to ask again
+```
+
+## Assistant
+
+> 2001-01-01T00:00:01Z
+
+```
+Half an ans
+```
+
+## Retrying
+
+> 2001-01-01T00:00:02Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
+
+```
+the stream ended before the response did
+```
+
+## Interrupted
+
+> 2001-01-01T00:00:03Z
+
+The turn was interrupted because the user pressed escape.
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+continue after the stopped wait
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Resumed.
+```
+

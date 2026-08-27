@@ -23,9 +23,47 @@ close without the done sentinel
 Partial answer.
 ```
 
-## Failure
+## Retrying
 
 > 2001-01-01T00:00:02Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:04Z
+
+- **Attempt:** `2`
+- **Waited:** `500ms`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Partial answer.
+```
+
+## Failure
+
+> 2001-01-01T00:00:06Z
 
 ```
 the stream ended before the response did
@@ -33,7 +71,7 @@ the stream ended before the response did
 
 ## User
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:07Z
 
 ```
 continue after the first response
@@ -41,7 +79,7 @@ continue after the first response
 
 ## Assistant
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:08Z
 
 ```
 Resumed.

@@ -1,0 +1,26 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "answer before anything goes wrong"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"All well so far."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "receive HTTP 500 on the turn after a replay"
+
+[[resume.response]]
+status = 500
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Recovered after the replay."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

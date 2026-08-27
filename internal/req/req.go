@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -203,37 +204,61 @@ func (self *observedBody) finish(err error, incomplete bool) {
 	self.observer.Finish(time.Now(), err, incomplete)
 }
 
-// StatusError is what an endpoint refused a request with. It carries the status code alongside
-// whatever the endpoint said, so a caller can tell a refused key from a sulking server without
-// reading the code back out of a sentence.
+var retriableStatuses = map[int]bool{
+	http.StatusTooManyRequests:     true,
+	http.StatusInternalServerError: true,
+	http.StatusBadGateway:          true,
+	http.StatusServiceUnavailable:  true,
+	http.StatusGatewayTimeout:      true,
+}
+
 type StatusError struct {
-	Code    int
+	Status  int
+	Code    string
 	Message string
+	Body    string
+	Wait    time.Duration
 }
 
 func (self *StatusError) Error() string {
-	return self.Message
+	if self.Message != "" {
+		return self.Message
+	}
+
+	return fmt.Sprintf("request failed with status %d: %s", self.Status, self.Body)
+}
+
+func (self *StatusError) Retriable() bool {
+	return retriableStatuses[self.Status]
+}
+
+func (self *StatusError) RetryAfter() time.Duration {
+	return self.Wait
 }
 
 func refusal(response *http.Response) error {
 	body, _ := io.ReadAll(io.LimitReader(response.Body, bodyLimit))
 
+	refused := &StatusError{
+		Status: response.StatusCode,
+		Body:   string(body),
+		Wait:   retryAfter(response.Header.Get("Retry-After")),
+	}
+
 	var payload struct {
 		Error struct {
 			Message string `json:"message"`
+			Code    string `json:"code"`
 		} `json:"error"`
 
 		Detail string `json:"detail"`
 	}
 
-	refused := &StatusError{
-		Code:    response.StatusCode,
-		Message: fmt.Sprintf("request failed with status %d: %s", response.StatusCode, body),
-	}
-
 	if json.Unmarshal(body, &payload) != nil {
 		return refused
 	}
+
+	refused.Code = payload.Error.Code
 
 	for _, said := range []string{payload.Error.Message, payload.Detail} {
 		if said != "" {
@@ -244,4 +269,21 @@ func refusal(response *http.Response) error {
 	}
 
 	return refused
+}
+
+func retryAfter(header string) time.Duration {
+	header = strings.TrimSpace(header)
+	if header == "" {
+		return 0
+	}
+
+	if seconds, err := strconv.Atoi(header); err == nil {
+		return max(time.Duration(seconds)*time.Second, 0)
+	}
+
+	if date, err := http.ParseTime(header); err == nil {
+		return max(time.Until(date), 0)
+	}
+
+	return 0
 }

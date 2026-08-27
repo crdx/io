@@ -2,6 +2,8 @@
  receive HTTP 429
 
 
+attempt 1 failed, asking again in 0.3s: request failed with status 429:
+attempt 2 failed, asking again in 0.5s: request failed with status 429:
 request failed with status 429:
 
 

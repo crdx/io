@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/sim"
@@ -101,6 +102,16 @@ func standUp(t *testing.T, scenario *sim.Scenario, provider speaker) (*sim.Endpo
 }
 
 func newAgent(t *testing.T, provider speaker, address string, tools []tool.Tool) *agent.Agent {
+	t.Helper()
+
+	assistant := newPatientAgent(t, provider, address, tools)
+
+	assistant.TakeRetryWaitsAtOnce()
+
+	return assistant
+}
+
+func newPatientAgent(t *testing.T, provider speaker, address string, tools []tool.Tool) *agent.Agent {
 	t.Helper()
 
 	return agent.New("You are a helpful assistant", provider.connect(t, address), tools)
@@ -292,6 +303,7 @@ func TestATurnCutShortIsReported(t *testing.T) {
 func TestATruncatedStreamIsRefused(t *testing.T) {
 	stopped := &sim.Scenario{
 		Model: "fake",
+		Loop:  true,
 		Turns: []sim.Turn{{Think: []string{"Half a thought."}, Say: "never sent", Truncate: true}},
 	}
 
@@ -306,8 +318,71 @@ func TestATruncatedStreamIsRefused(t *testing.T) {
 	}
 }
 
+func TestATruncatedStreamIsAskedAgainAndFinishes(t *testing.T) {
+	recovered := &sim.Scenario{
+		Model: "fake",
+		Turns: []sim.Turn{
+			{Say: "It is raining ", Truncate: true},
+			{Say: "in London."},
+		},
+	}
+
+	for _, provider := range providers() {
+		t.Run(provider.name, func(t *testing.T) {
+			endpoint, address := standUp(t, recovered, provider)
+
+			answer, err := newAgent(t, provider, address, nil).Send(t.Context(), "hello")
+			if err != nil {
+				t.Fatalf("expected the turn to recover, got %v", err)
+			}
+
+			if answer != "It is raining in London." {
+				t.Errorf("expected the answer to carry on where it stopped, got %q", answer)
+			}
+
+			if asked := len(endpoint.Requests()); asked != 2 {
+				t.Errorf("expected the request to be made twice, got %d", asked)
+			}
+		})
+	}
+}
+
+func TestARefusalIsWaitedOutForAsLongAsItAsked(t *testing.T) {
+	const asked = 100 * time.Millisecond
+
+	busy := &sim.Scenario{
+		Model: "fake",
+		Turns: []sim.Turn{
+			{Status: http.StatusTooManyRequests, RetryAfter: sim.Duration{Duration: asked}},
+			{Say: "It is raining in London."},
+		},
+	}
+
+	provider := providers()[0]
+	_, address := standUp(t, busy, provider)
+
+	started := time.Now()
+
+	answer, err := newPatientAgent(t, provider, address, nil).Send(t.Context(), "hello")
+	if err != nil {
+		t.Fatalf("expected the turn to recover, got %v", err)
+	}
+
+	if answer != "It is raining in London." {
+		t.Errorf("expected the answer once the endpoint was ready, got %q", answer)
+	}
+
+	if waited := time.Since(started); waited < asked {
+		t.Errorf("expected the refusal to be waited out, and it waited %s", waited)
+	}
+}
+
 func TestARefusedStatusIsReported(t *testing.T) {
-	refused := &sim.Scenario{Model: "fake", Turns: []sim.Turn{{Status: http.StatusTooManyRequests}}}
+	refused := &sim.Scenario{
+		Model: "fake",
+		Loop:  true,
+		Turns: []sim.Turn{{Status: http.StatusTooManyRequests}},
+	}
 
 	for _, provider := range providers() {
 		t.Run(provider.name, func(t *testing.T) {

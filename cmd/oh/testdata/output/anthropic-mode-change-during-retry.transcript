@@ -1,0 +1,102 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+change what I am allowed to do while the answer is being asked for again
+```
+
+## Assistant
+
+> 2001-01-01T00:00:01Z
+
+```
+Half an ans
+```
+
+## Retrying
+
+> 2001-01-01T00:00:02Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
+
+```
+the stream ended before the response did
+```
+
+## Interrupted
+
+> 2001-01-01T00:00:03Z
+
+The turn was interrupted because the user changed what the harness is allowed to do.
+
+## Mode
+
+> 2001-01-01T00:00:04Z
+
+- **Caps:** `rxgs`
+
+## User
+
+> 2001-01-01T00:00:05Z
+
+```
+The workspace is now read-only.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:06Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
+
+```
+the stream ended before the response did
+```
+
+## Retrying
+
+> 2001-01-01T00:00:07Z
+
+- **Attempt:** `2`
+- **Waited:** `500ms`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:08Z
+
+```
+Noted, the workspace is read-only now.
+```
+
+## User
+
+> 2001-01-01T00:00:09Z
+
+```
+carry on
+```
+
+## Assistant
+
+> 2001-01-01T00:00:10Z
+
+```
+Carrying on.
+```
+

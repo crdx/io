@@ -15,9 +15,31 @@
 receive HTTP 500
 ```
 
-## Failure
+## Retrying
 
 > 2001-01-01T00:00:01Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:02Z
+
+- **Attempt:** `2`
+- **Waited:** `500ms`
+
+```
+request failed with status 500: 
+```
+
+## Failure
+
+> 2001-01-01T00:00:03Z
 
 ```
 request failed with status 500: 
@@ -25,7 +47,7 @@ request failed with status 500:
 
 ## User
 
-> 2001-01-01T00:00:02Z
+> 2001-01-01T00:00:04Z
 
 ```
 continue after the transport failure
@@ -33,7 +55,7 @@ continue after the transport failure
 
 ## Assistant
 
-> 2001-01-01T00:00:03Z
+> 2001-01-01T00:00:05Z
 
 ```
 Resumed.

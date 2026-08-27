@@ -2,7 +2,9 @@
  send fields without SSE data
 
 
-the stream ended before the response did
+attempt 1 failed, asking again in 0.3s: the stream ended before the response did
+
+Answered on the second attempt.
 
 
  continue after the transport failure

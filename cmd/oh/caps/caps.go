@@ -115,9 +115,11 @@ func RefuseWrite(mode *Mode) func(name string) error {
 }
 
 type Mode struct {
-	mutex       sync.Mutex
-	currentCaps Set
-	knownCaps   Set
+	mutex         sync.Mutex
+	currentCaps   Set
+	knownCaps     Set
+	announcedCaps Set
+	isAnnounced   bool
 }
 
 func NewMode(currentCaps Set) *Mode {
@@ -146,14 +148,37 @@ func (self *Mode) Inject() string {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	changedCaps := self.currentCaps ^ self.knownCaps
-	if self.knownCaps == 0 {
+	toldCaps := self.knownCaps
+	if self.isAnnounced {
+		toldCaps = self.announcedCaps
+	}
+
+	changedCaps := self.currentCaps ^ toldCaps
+	if toldCaps == 0 {
 		changedCaps = All()
 	}
 
-	self.knownCaps = self.currentCaps
+	self.announcedCaps = self.currentCaps
+	self.isAnnounced = true
 
 	return lexicalDiff(changedCaps, self.currentCaps)
+}
+
+func (self *Mode) Acknowledge() {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	if self.isAnnounced {
+		self.knownCaps = self.announcedCaps
+		self.isAnnounced = false
+	}
+}
+
+func (self *Mode) Retract() {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	self.isAnnounced = false
 }
 
 func lexicalDiff(changedCaps Set, currentCaps Set) string {

@@ -129,12 +129,12 @@ func (self completionsDialect) Play(stream *Stream, _ *Scenario, turn Turn) {
 		stream.Type(completions.Thought, thought)
 	}
 
-	if turn.Truncate {
-		return
-	}
-
 	if turn.Say != "" {
 		stream.Type(completions.Answer, turn.Say)
+	}
+
+	if turn.Truncate {
+		return
 	}
 
 	for i, call := range turn.Calls {

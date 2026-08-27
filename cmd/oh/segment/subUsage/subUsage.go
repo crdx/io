@@ -330,7 +330,7 @@ func durationLabel(duration time.Duration) string {
 
 func failureReason(err error) string {
 	if refused, ok := errors.AsType[*req.StatusError](err); ok {
-		return strconv.Itoa(refused.Code)
+		return strconv.Itoa(refused.Status)
 	}
 
 	return failureLabel

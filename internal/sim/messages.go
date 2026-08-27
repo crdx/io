@@ -165,16 +165,21 @@ func (self messagesDialect) Play(stream *Stream, scenario *Scenario, turn Turn) 
 		index++
 	}
 
-	if turn.Truncate {
-		return
-	}
-
 	if turn.Say != "" {
 		stream.Send(messages.TextStart(index))
 		stream.Type(func(word string) string { return messages.Answer(index, word) }, turn.Say)
+
+		if turn.Truncate {
+			return
+		}
+
 		stream.Send(messages.BlockStop(index))
 
 		index++
+	}
+
+	if turn.Truncate {
+		return
 	}
 
 	for _, call := range turn.Calls {

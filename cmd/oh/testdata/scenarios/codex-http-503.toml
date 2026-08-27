@@ -8,6 +8,12 @@ prompt = "receive HTTP 503"
 [[first.response]]
 status = 503
 
+[[first.response]]
+status = 503
+
+[[first.response]]
+status = 503
+
 [resume]
 prompt = "continue after the transport failure"
 

@@ -1,0 +1,13 @@
+
+ answer before anything goes wrong
+
+
+All well so far.
+
+
+ receive HTTP 500 on the turn after a replay
+
+
+attempt 1 failed, asking again in 0.3s: request failed with status 500:
+
+Recovered after the replay.

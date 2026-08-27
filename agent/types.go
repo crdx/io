@@ -104,8 +104,16 @@ const (
 	ToolCallResultEvent  Kind = "tool_call_result"
 	StateChangeEvent     Kind = "state_change"
 	InterruptionEvent    Kind = "interruption"
+	RetryingEvent        Kind = "retrying"
 	FailureEvent         Kind = "failure"
 )
+
+type Retriable interface {
+	error
+
+	Retriable() bool
+	RetryAfter() time.Duration
+}
 
 type FallbackRendering struct {
 	Subject  string        `json:"render,omitempty"`
@@ -139,6 +147,7 @@ type Event struct {
 	Arguments string          `json:"arguments,omitempty"`
 	Status    Status          `json:"status,omitempty"`
 	Took      time.Duration   `json:"took,omitempty"`
+	Attempt   int             `json:"attempt,omitempty"`
 	Stats     *tool.Stats     `json:"stats,omitempty"`
 	State     json.RawMessage `json:"state,omitempty"`
 	Usage     *Usage          `json:"usage,omitempty"`
@@ -150,4 +159,6 @@ type Agent struct {
 	enabledToolNames map[string]struct{}
 	owners           map[string]tool.Tool
 	state            []json.RawMessage
+
+	retryWaitsPassAtOnce bool
 }

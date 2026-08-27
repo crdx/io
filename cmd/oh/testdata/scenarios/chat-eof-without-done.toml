@@ -10,6 +10,16 @@ event = [
     '''{"choices":[{"delta":{"content":"Partial answer."}}]}''',
 ]
 
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Partial answer."}}]}''',
+]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Partial answer."}}]}''',
+]
+
 [resume]
 prompt = "continue after the first response"
 
