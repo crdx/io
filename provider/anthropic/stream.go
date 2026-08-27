@@ -46,6 +46,12 @@ func (self *block) argumentsOrEmpty() string {
 	return self.arguments.String()
 }
 
+func (self *block) hasObjectArguments() bool {
+	var object map[string]json.RawMessage
+
+	return json.Unmarshal([]byte(self.argumentsOrEmpty()), &object) == nil && object != nil
+}
+
 type reply struct {
 	blocks          []*block
 	stopReason      string
@@ -120,6 +126,16 @@ func (self *reply) assemble(shouldIncludeCalls bool) json.RawMessage {
 	}
 
 	return encodeItem(message{Role: "assistant", Content: blocks})
+}
+
+func (self *reply) validateToolInputs() error {
+	for _, held := range self.blocks {
+		if held.kind == "tool_use" && held.isDone && !held.hasObjectArguments() {
+			return invalidToolInputError{toolName: held.name}
+		}
+	}
+
+	return nil
 }
 
 func (self *reply) calls(knownTools []string) []agent.ToolCall {

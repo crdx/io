@@ -598,6 +598,66 @@ func TestACallTakingNothingIsReadAsAnEmptyObject(t *testing.T) {
 	}
 }
 
+func TestAMalformedCallIsRetriedWithoutEnteringHistory(t *testing.T) {
+	server, bodies := turns(
+		t,
+		script(
+			[]string{messageStart},
+			toolTurn(0, "toolu_1", "weather", `{"city":"London",,}`),
+			[]string{stop("tool_use"), messageStop},
+		),
+		script(answer("I corrected the call.")),
+	)
+
+	var callCount int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &callCount)})
+
+	if _, err := assistant.Send(t.Context(), "what is the weather?"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if callCount != 0 {
+		t.Errorf("expected the malformed call not to run, ran %d times", callCount)
+	}
+	if len(*bodies) != 2 {
+		t.Fatalf("expected the malformed response to be retried once, got %d requests", len(*bodies))
+	}
+	if strings.Contains((*bodies)[1], "toolu_1") || strings.Contains((*bodies)[1], `{"city":"London",,}`) {
+		t.Errorf("expected the malformed call not to enter history, got %s", (*bodies)[1])
+	}
+}
+
+func TestAMalformedCallRejectsTheWholeResponse(t *testing.T) {
+	server, bodies := turns(
+		t,
+		script(
+			[]string{messageStart},
+			toolTurn(0, "toolu_bad", "weather", `{"city":"London",,}`),
+			toolTurn(1, "toolu_good", "weather", `{"city":"Paris"}`),
+			[]string{stop("tool_use"), messageStop},
+		),
+		script(answer("I corrected the first call.")),
+	)
+
+	var callCount int
+	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &callCount)})
+
+	if _, err := assistant.Send(t.Context(), "what is the weather?"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if callCount != 0 {
+		t.Errorf("expected no call from the rejected response to run, ran %d times", callCount)
+	}
+	if strings.Contains((*bodies)[1], "toolu_bad") || strings.Contains((*bodies)[1], "toolu_good") ||
+		strings.Contains((*bodies)[1], `{"city":"London",,}`) || strings.Contains((*bodies)[1], `{"city":"Paris"}`) {
+		t.Errorf("expected the rejected response not to enter history, got %s", (*bodies)[1])
+	}
+	if results := toolResults(t, (*bodies)[1]); len(results) != 0 {
+		t.Errorf("expected no result from the rejected response, got %+v", results)
+	}
+}
+
 func TestAToolIsOfferedAndReadBackUnderClaudeCodesCasing(t *testing.T) {
 	server, bodies := turns(
 		t,

@@ -118,13 +118,35 @@ func (self *Client) Load(items []json.RawMessage) {
 }
 
 func encodeItem(item any) json.RawMessage {
-	encodedItem, _ := json.Marshal(item) //nolint:errchkjson // the wire items are plain structs
+	encodedItem, err := json.Marshal(item)
+	if err != nil {
+		panic(fmt.Errorf("anthropic: encode history item: %w", err))
+	}
 
 	return encodedItem
 }
 
+type invalidToolInputError struct {
+	toolName string
+}
+
+func (self invalidToolInputError) Error() string {
+	return fmt.Sprintf("the %s tool call did not contain a JSON object", self.toolName)
+}
+
+func (invalidToolInputError) Retriable() bool {
+	return true
+}
+
+func (invalidToolInputError) RetryAfter() time.Duration {
+	return 0
+}
+
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
 	reply, err := self.post(ctx, yield)
+	if err == nil {
+		err = reply.validateToolInputs()
+	}
 	if err != nil {
 		if said := reply.prose(); said != nil {
 			self.history = append(self.history, said)

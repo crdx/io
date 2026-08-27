@@ -1,0 +1,52 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+recover from malformed tool input
+```
+
+## Retrying
+
+> 2001-01-01T00:00:01Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
+
+```
+the work tool call did not contain a JSON object
+```
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+```
+I corrected the malformed call.
+```
+
+## User
+
+> 2001-01-01T00:00:03Z
+
+```
+carry on
+```
+
+## Assistant
+
+> 2001-01-01T00:00:04Z
+
+```
+Carrying on.
+```
+
