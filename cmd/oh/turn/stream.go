@@ -19,6 +19,7 @@ type State struct {
 	Reason     error
 	StartedAt  time.Time
 	FinishedAt time.Time
+	Timing     Timing
 }
 
 type Stream struct {
@@ -27,9 +28,14 @@ type Stream struct {
 	state  State
 }
 
-func Start(assistant *agent.Agent, message string) *Stream {
+type Timing struct {
+	UserTurn  time.Duration
+	ModelTurn time.Duration
+}
+
+func Start(assistant *agent.Agent, message string, timing Timing) *Stream {
 	streamContext, cancel := context.WithCancelCause(context.Background())
-	stream := Adopt(make(chan Event), cancel, State{Running: true, StartedAt: time.Now()})
+	stream := Adopt(make(chan Event), cancel, State{Running: true, StartedAt: time.Now(), Timing: timing})
 
 	go func() {
 		defer close(stream.events)
@@ -65,14 +71,18 @@ func (self *Stream) Error() error {
 	return self.state.Err
 }
 
-func (self *Stream) Elapsed() (bool, time.Duration, bool) {
+func (self *Stream) Timing() (Timing, bool) {
 	if self == nil || self.state.StartedAt.IsZero() {
-		return false, 0, false
+		return Timing{}, false
 	}
+	timing := self.state.Timing
 	if self.state.FinishedAt.IsZero() {
-		return self.state.Running, time.Since(self.state.StartedAt), true
+		timing.ModelTurn = time.Since(self.state.StartedAt)
+		return timing, true
 	}
-	return false, time.Since(self.state.FinishedAt), true
+	timing.UserTurn = time.Since(self.state.FinishedAt)
+	timing.ModelTurn = self.state.FinishedAt.Sub(self.state.StartedAt)
+	return timing, true
 }
 
 func (self *Stream) Interrupt(reason error) bool {

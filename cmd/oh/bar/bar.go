@@ -21,6 +21,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/turnTimer"
 	"crdx.org/io/cmd/oh/segment/workspaceDir"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/turn"
 )
 
 const (
@@ -54,7 +55,7 @@ type Sources struct {
 	GetContextUsage func() (int, int)
 	GetGrantedCaps  func() caps.Set
 	IsPrefixPending func() bool
-	GetTimeElapsed  func() time.Duration
+	GetTurnTiming   func() turn.Timing
 	GetTurnCount    func() int
 }
 
@@ -69,7 +70,7 @@ func NewRegistry(options Options) segment.Registry {
 		sessionNameSegment:     sessionName.New(options.CurrentSessionName),
 		sessionEmojiSegment:    sessionEmoji.New(options.CurrentSessionName),
 		localTimeSegment:       localTime.New(time.Now),
-		turnTimerSegment:       turnTimer.New(options.Sources.GetTimeElapsed),
+		turnTimerSegment:       turnTimer.New(options.Sources.GetTurnTiming, options.Sources.IsTurnRunning),
 		turnCountSegment:       turnCount.New(options.Sources.GetTurnCount),
 		gitBranchSegment:       gitBranch.New(options.WorkspaceDir),
 		subUsageSegment:        subUsage.New(options.UsageReporter, options.UsageCachePath, options.ModelName, time.Now),

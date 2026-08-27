@@ -28,7 +28,7 @@ func TestStreamLifecycle(t *testing.T) {
 		yield(agent.Output{Kind: agent.ModelMessageEvent, Text: "hello"})
 		return agent.Reply{}, nil
 	}}
-	stream := Start(agent.New("", provider, nil), "begin")
+	stream := Start(agent.New("", provider, nil), "begin", Timing{})
 	var events []Event
 	for event := range stream.Events() {
 		events = append(events, event)
@@ -38,7 +38,7 @@ func TestStreamLifecycle(t *testing.T) {
 	}
 	finishedAt := time.Now()
 	stream.MarkFinished(finishedAt)
-	if running, _, known := stream.Elapsed(); running || !known {
+	if _, known := stream.Timing(); !known {
 		t.Error("timing was lost when the turn finished")
 	}
 	stream.Finish()
@@ -53,7 +53,7 @@ func TestInterruptReachesProvider(t *testing.T) {
 			<-ctx.Done()
 			return agent.Reply{}, ctx.Err()
 		}}
-		stream := Start(agent.New("", provider, nil), "begin")
+		stream := Start(agent.New("", provider, nil), "begin", Timing{})
 		synctest.Wait()
 		if !stream.Interrupt(stop.Because("the user pressed escape")) || !stream.Cancelled() {
 			t.Fatal("stream was not interrupted")
@@ -86,22 +86,26 @@ func TestObserveAndExternalState(t *testing.T) {
 	}
 }
 
-func TestElapsedCountsUpFromEachSwapPoint(t *testing.T) {
+func TestTimingRetainsTheInactiveTurnAndCountsUpTheActiveTurn(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		startedAt := time.Now()
-		stream := Adopt(make(chan Event), func(error) {}, State{Running: true, StartedAt: startedAt})
+		stream := Adopt(make(chan Event), func(error) {}, State{
+			Running:   true,
+			StartedAt: startedAt,
+			Timing:    Timing{UserTurn: 12 * time.Minute},
+		})
 
 		time.Sleep(30 * time.Second)
-		if running, elapsed, known := stream.Elapsed(); !running || !known || elapsed != 30*time.Second {
-			t.Errorf("got running=%v, elapsed=%s, known=%v while running", running, elapsed, known)
+		if timing, known := stream.Timing(); !known || timing != (Timing{UserTurn: 12 * time.Minute, ModelTurn: 30 * time.Second}) {
+			t.Errorf("got timing %+v, known=%v while model turn was active", timing, known)
 		}
 
 		stream.MarkFinished(time.Now())
 		stream.Finish()
 
 		time.Sleep(5 * time.Second)
-		if running, elapsed, known := stream.Elapsed(); running || !known || elapsed != 5*time.Second {
-			t.Errorf("got running=%v, elapsed=%s, known=%v after finishing", running, elapsed, known)
+		if timing, known := stream.Timing(); !known || timing != (Timing{UserTurn: 5 * time.Second, ModelTurn: 30 * time.Second}) {
+			t.Errorf("got timing %+v, known=%v while user turn was active", timing, known)
 		}
 	})
 }
@@ -111,7 +115,7 @@ func TestAbsentStreamIsIdle(t *testing.T) {
 	if stream.Running() || stream.Cancelled() || stream.Error() != nil || stream.Events() != nil {
 		t.Error("absent stream is active")
 	}
-	if _, _, known := stream.Elapsed(); known {
+	if _, known := stream.Timing(); known {
 		t.Error("absent stream has timing")
 	}
 }

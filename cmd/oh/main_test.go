@@ -4483,7 +4483,7 @@ func goldenTimerSchedulePass(t *testing.T, workPerPass time.Duration, span time.
 			held := &App{mode: caps.NewMode(caps.All())}
 			held.currentTurn.Stream = testTimedTurnStream(true, startedAt, time.Time{})
 
-			built, err := turnTimer.New(held.timeElapsed)(goldenSegmentOptions(""))
+			built, err := turnTimer.New(held.turnTiming, held.isTurnRunning)(goldenSegmentOptions(""))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -4554,7 +4554,7 @@ func TestTheBarsRedrawScheduleRunsWhenItRanBefore(t *testing.T) {
 		"running turn with a slow pass":     goldenSchedulePass(t, true, 40*time.Millisecond, 2*time.Second),
 		"running turn with a pass past due": goldenSchedulePass(t, true, 200*time.Millisecond, 2*time.Second),
 		"waiting between turns":             goldenSchedulePass(t, false, 0, 3*time.Second),
-		"turn timer alone on a slow loop":   goldenTimerSchedulePass(t, 200*time.Millisecond, 6*time.Second),
+		"turn timer alone on a slow loop":   goldenTimerSchedulePass(t, 200*time.Millisecond, 3*time.Minute),
 		"clock alone to the minute":         goldenClockSchedulePass(t, "15:04", 3*time.Minute),
 		"clock alone to the second":         goldenClockSchedulePass(t, "15:04:05", 3*time.Second),
 	}
@@ -4820,15 +4820,23 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 				thenErr: &req.StatusError{Code: 429, Message: "slow down"},
 			},
 		),
-		"turn-timer / minutes and seconds": goldenSegmentPass(
+		"turn-timer / user turn": goldenSegmentPass(
 			t,
-			turnTimer.New(func() time.Duration { return 69 * time.Second }),
+			turnTimer.New(func() turn.Timing {
+				return turn.Timing{UserTurn: 12 * time.Minute, ModelTurn: 3 * time.Minute}
+			}, func() bool {
+				return false
+			}),
 			"",
 			segment.Context{},
 		),
-		"turn-timer / seconds": goldenSegmentPass(
+		"turn-timer / model turn": goldenSegmentPass(
 			t,
-			turnTimer.New(func() time.Duration { return 3 * time.Second }),
+			turnTimer.New(func() turn.Timing {
+				return turn.Timing{UserTurn: 3 * time.Minute, ModelTurn: time.Minute}
+			}, func() bool {
+				return true
+			}),
 			"",
 			segment.Context{},
 		),
@@ -6338,22 +6346,40 @@ func testTurnStream(events chan TurnEvent, cancel context.CancelCauseFunc, state
 	return turn.Adopt(events, cancel, state)
 }
 
-func TestTheTimerCountsUpFromTheCompletedTurn(t *testing.T) {
+func TestTheTimerRetainsTheModelTurnWhileTheUserTurnCountsUp(t *testing.T) {
 	finishedAt := time.Now().Add(-69 * time.Second)
 	harness := App{currentTurn: Turn{
 		Stream: testTimedTurnStream(false, finishedAt.Add(-time.Minute), finishedAt),
 	}}
 
-	if got := harness.timeElapsed().Round(time.Second); got != 69*time.Second {
-		t.Errorf("got %s, want the time since the turn finished", got)
+	got := harness.turnTiming()
+	want := turn.Timing{UserTurn: 69 * time.Second, ModelTurn: time.Minute}
+	if got.UserTurn.Round(time.Second) != want.UserTurn || got.ModelTurn != want.ModelTurn {
+		t.Errorf("got %+v, want %+v", got, want)
+	}
+}
+
+func TestTheTimerRetainsTheUserTurnWhileTheModelTurnCountsUp(t *testing.T) {
+	startedAt := time.Now().Add(-30 * time.Second)
+	harness := App{currentTurn: Turn{Stream: testTurnStream(nil, nil, turn.State{
+		Running:   true,
+		StartedAt: startedAt,
+		Timing:    turn.Timing{UserTurn: 3 * time.Minute},
+	})}}
+
+	got := harness.turnTiming()
+	want := turn.Timing{UserTurn: 3 * time.Minute, ModelTurn: 30 * time.Second}
+	if got.UserTurn != want.UserTurn || got.ModelTurn.Round(time.Second) != want.ModelTurn {
+		t.Errorf("got %+v, want %+v", got, want)
 	}
 }
 
 func TestTheTimerCountsUpFromTheSessionBeforeTheFirstTurn(t *testing.T) {
 	harness := App{startedAt: time.Now().Add(-30 * time.Second)}
 
-	if got := harness.timeElapsed().Round(time.Second); got != 30*time.Second {
-		t.Errorf("got %s, want the time since the session began", got)
+	got := harness.turnTiming()
+	if got.UserTurn.Round(time.Second) != 30*time.Second || got.ModelTurn != 0 {
+		t.Errorf("got %+v, want a 30 second user turn", got)
 	}
 }
 

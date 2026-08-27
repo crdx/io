@@ -2,6 +2,7 @@ package segment_test
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,7 +19,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnTimer"
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/internal/util"
+	"crdx.org/io/cmd/oh/turn"
 	"github.com/BurntSushi/toml"
 )
 
@@ -458,11 +459,13 @@ func TestTheTurnCountSegmentCountsFromTheFirstTurn(t *testing.T) {
 	}
 }
 
-func timerShowing(t *testing.T, elapsed time.Duration) segment.Segment {
+func timerShowing(t *testing.T, timing turn.Timing, isTurnRunning bool) segment.Segment {
 	t.Helper()
 
-	built, err := turnTimer.New(func() time.Duration {
-		return elapsed
+	built, err := turnTimer.New(func() turn.Timing {
+		return timing
+	}, func() bool {
+		return isTurnRunning
 	})(tomlOptions(""))
 	if err != nil {
 		t.Fatal(err)
@@ -471,53 +474,76 @@ func timerShowing(t *testing.T, elapsed time.Duration) segment.Segment {
 	return built
 }
 
-func TestTheTurnTimerCountsInWholeSeconds(t *testing.T) {
-	for elapsed, want := range map[time.Duration]string{
-		900 * time.Millisecond:               "0s",
-		9*time.Second + 400*time.Millisecond: "9s",
-		69 * time.Second:                     "1m09s",
-		2*time.Hour + 3*time.Minute:          "2h03m",
-	} {
-		built := timerShowing(t, elapsed)
+func TestTheTurnTimerShowsBothTurnsInWholeMinutes(t *testing.T) {
+	tests := []struct {
+		timing        turn.Timing
+		isTurnRunning bool
+		want          string
+	}{
+		{want: "0m/0m"},
+		{timing: turn.Timing{UserTurn: 3 * time.Minute, ModelTurn: time.Minute}, want: "3m/1m"},
+		{timing: turn.Timing{UserTurn: 3 * time.Minute}, isTurnRunning: true, want: "3m/0m"},
+		{timing: turn.Timing{UserTurn: 12*time.Minute + 59*time.Second, ModelTurn: 3*time.Minute + 59*time.Second}, want: "12m/3m"},
+	}
 
-		if got := style.Plain(built.Render(segment.Context{})); got != want {
-			t.Errorf("expected %s to read %q, got %q", elapsed, want, got)
+	for _, test := range tests {
+		built := timerShowing(t, test.timing, test.isTurnRunning)
+
+		if got := style.Plain(built.Render(segment.Context{})); got != test.want {
+			t.Errorf("expected %+v to read %q, got %q", test.timing, test.want, got)
 		}
 	}
 }
 
-func TestTheTurnTimerHoldsItsUnitsBackFromItsNumbers(t *testing.T) {
-	built := timerShowing(t, 69*time.Second)
+func TestTheTurnTimerDimsEverythingExceptTheActiveNumber(t *testing.T) {
+	timing := turn.Timing{UserTurn: 3 * time.Minute, ModelTurn: time.Minute}
+	tests := []struct {
+		isTurnRunning bool
+		want          string
+	}{
+		{want: style.Normal("3") + style.Faint("m") + style.Faint("/") + style.Faint("1m")},
+		{isTurnRunning: true, want: style.Faint("3m") + style.Faint("/") + style.Normal("1") + style.Faint("m")},
+	}
 
-	if got, want := built.Render(segment.Context{}), style.Quantity("1m09s"); got != want {
-		t.Errorf("got %q, want %q", got, want)
+	for _, test := range tests {
+		if got := timerShowing(t, timing, test.isTurnRunning).Render(segment.Context{}); got != test.want {
+			t.Errorf("got %q, want %q", got, test.want)
+		}
 	}
 }
 
-func TestTheTurnTimerAsksForTheMomentItsOwnSecondTurnsOverRatherThanASecondFromNow(t *testing.T) {
+func TestTheTurnTimerAsksForTheMomentItsActiveMinuteTurnsOver(t *testing.T) {
 	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
 
-	for elapsed, want := range map[time.Duration]time.Duration{
-		3 * time.Second:                       time.Second,
-		3*time.Second + 400*time.Millisecond:  600 * time.Millisecond,
-		69*time.Second + 999*time.Millisecond: time.Millisecond,
-		2*time.Hour + 250*time.Millisecond:    750 * time.Millisecond,
-	} {
-		layout := segment.Layout{segment.BottomLeft: {timerShowing(t, elapsed)}}
+	tests := []struct {
+		timing        turn.Timing
+		isTurnRunning bool
+		want          time.Duration
+	}{
+		{timing: turn.Timing{UserTurn: 3 * time.Second}, want: 57 * time.Second},
+		{timing: turn.Timing{UserTurn: 3*time.Second + 400*time.Millisecond}, want: 56*time.Second + 600*time.Millisecond},
+		{timing: turn.Timing{ModelTurn: 69*time.Second + 999*time.Millisecond}, isTurnRunning: true, want: 50*time.Second + time.Millisecond},
+		{timing: turn.Timing{ModelTurn: 2*time.Hour + 250*time.Millisecond}, isTurnRunning: true, want: 59*time.Second + 750*time.Millisecond},
+	}
 
-		phase := segment.Phase{At: at, IsRunning: true}
-		if got := layout.NextRefresh(phase).Sub(at); got != want {
-			t.Errorf("expected %s elapsed to be redrawn in %s, got %s", elapsed, want, got)
+	for _, test := range tests {
+		layout := segment.Layout{segment.BottomLeft: {timerShowing(t, test.timing, test.isTurnRunning)}}
+
+		phase := segment.Phase{At: at, IsRunning: test.isTurnRunning}
+		if got := layout.NextRefresh(phase).Sub(at); got != test.want {
+			t.Errorf("expected %+v to be redrawn in %s, got %s", test.timing, test.want, got)
 		}
 	}
 }
 
-func TestABusyBarDrawsEverySecondOfATurnExactlyOnce(t *testing.T) {
+func TestABusyBarDrawsEveryMinuteOfATurnExactlyOnce(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		startedAt := time.Now()
 
-		built, err := turnTimer.New(func() time.Duration {
-			return time.Since(startedAt)
+		built, err := turnTimer.New(func() turn.Timing {
+			return turn.Timing{ModelTurn: time.Since(startedAt)}
+		}, func() bool {
+			return true
 		})(tomlOptions(""))
 		if err != nil {
 			t.Fatal(err)
@@ -538,7 +564,8 @@ func TestABusyBarDrawsEverySecondOfATurnExactlyOnce(t *testing.T) {
 		}
 
 		for index, got := range drawn {
-			if want := util.CompactDuration(time.Duration(index+1) * time.Second); got != want {
+			want := fmt.Sprintf("0m/%dm", index+1)
+			if got != want {
 				t.Fatalf("draw %d read %q, want %q", index, got, want)
 			}
 		}
@@ -547,9 +574,9 @@ func TestABusyBarDrawsEverySecondOfATurnExactlyOnce(t *testing.T) {
 
 func TestTheTurnTimerKeepsCountingBetweenTurns(t *testing.T) {
 	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
-	layout := segment.Layout{segment.BottomLeft: {timerShowing(t, 3*time.Second)}}
+	layout := segment.Layout{segment.BottomLeft: {timerShowing(t, turn.Timing{UserTurn: 3 * time.Second}, false)}}
 
-	if got := layout.NextRefresh(segment.Phase{At: at}); !got.Equal(at.Add(time.Second)) {
+	if got := layout.NextRefresh(segment.Phase{At: at}); !got.Equal(at.Add(57 * time.Second)) {
 		t.Errorf("expected the timer to keep counting while idle, got %s", got.Sub(at))
 	}
 }

@@ -476,7 +476,7 @@ func (self *App) getBarSources() bar.Sources {
 		GetContextUsage: self.contextUsage,
 		GetGrantedCaps:  self.grantedCaps,
 		IsPrefixPending: self.isPrefixPending,
-		GetTimeElapsed:  self.timeElapsed,
+		GetTurnTiming:   self.turnTiming,
 		GetTurnCount:    self.turnCount,
 	}
 }
@@ -489,12 +489,15 @@ func (self *App) nextBarRefresh(at time.Time) time.Time {
 	return self.segmentLayout.NextRefresh(segment.Phase{At: at, IsRunning: self.isTurnRunning()})
 }
 
-func (self *App) timeElapsed() time.Duration {
-	if _, elapsed, known := self.currentTurn.Elapsed(); known {
-		return elapsed
+func (self *App) turnTiming() turn.Timing {
+	if timing, known := self.currentTurn.Timing(); known {
+		return timing
 	}
 
-	return time.Since(self.startedAt)
+	if self.startedAt.IsZero() {
+		return turn.Timing{}
+	}
+	return turn.Timing{UserTurn: time.Since(self.startedAt)}
 }
 
 func (self *App) turnCount() int {
@@ -636,6 +639,7 @@ func (self *App) redraw() {
 }
 
 func (self *App) start(message string) {
+	userTurnElapsed := self.turnTiming().UserTurn
 	self.settleMode()
 	self.metrics.BeginTurn()
 
@@ -649,7 +653,9 @@ func (self *App) start(message string) {
 
 	self.currentTurn = Turn{
 		painter: self.newPainter(true),
-		Stream:  turn.Start(self.agent, message),
+		Stream: turn.Start(self.agent, message, turn.Timing{
+			UserTurn: userTurnElapsed,
+		}),
 	}
 
 	self.screen.ReportProgress(true)

@@ -78,10 +78,10 @@ usage failed
 
 === turn-count / third turn ===
 #3
-=== turn-timer / minutes and seconds ===
-1m09s
-=== turn-timer / seconds ===
-3s
+=== turn-timer / model turn ===
+3m/1m
+=== turn-timer / user turn ===
+12m/3m
 === workspace-dir ===
 project
 === workspace-dir / full ===

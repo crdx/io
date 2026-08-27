@@ -78,10 +78,10 @@ usage \e[38;2;204;102;102mfailed\e[0m
 
 === turn-count / third turn ===
 \e[38;2;150;152;150m#3\e[0m
-=== turn-timer / minutes and seconds ===
-1\e[38;2;150;152;150mm\e[0m09\e[38;2;150;152;150ms\e[0m
-=== turn-timer / seconds ===
-3\e[38;2;150;152;150ms\e[0m
+=== turn-timer / model turn ===
+\e[2m\e[38;2;150;152;150m3m\e[0m\e[0m\e[2m\e[38;2;150;152;150m/\e[0m\e[0m1\e[2m\e[38;2;150;152;150mm\e[0m\e[0m
+=== turn-timer / user turn ===
+12\e[2m\e[38;2;150;152;150mm\e[0m\e[0m\e[2m\e[38;2;150;152;150m/\e[0m\e[0m\e[2m\e[38;2;150;152;150m3m\e[0m\e[0m
 === workspace-dir ===
 project
 === workspace-dir / full ===

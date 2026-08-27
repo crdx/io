@@ -1,31 +1,48 @@
 package turnTimer
 
 import (
+	"strconv"
 	"time"
 
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/internal/util"
+	"crdx.org/io/cmd/oh/turn"
 )
 
 var _ segment.Refresher = state{}
 
-const step = time.Second
+const step = time.Minute
 
 type state struct {
-	timeElapsed func() time.Duration
+	getTiming     func() turn.Timing
+	isTurnRunning func() bool
 }
 
-func New(timeElapsed func() time.Duration) segment.Factory {
+func New(getTiming func() turn.Timing, isTurnRunning func() bool) segment.Factory {
 	return func(segment.Options) (segment.Segment, error) {
-		return state{timeElapsed: timeElapsed}, nil
+		return state{getTiming: getTiming, isTurnRunning: isTurnRunning}, nil
 	}
 }
 
 func (self state) NextRefresh(phase segment.Phase) time.Time {
-	return phase.At.Add(step - self.timeElapsed()%step)
+	timing := self.getTiming()
+	active := timing.UserTurn
+	if phase.IsRunning {
+		active = timing.ModelTurn
+	}
+	return phase.At.Add(step - active%step)
 }
 
 func (self state) Render(segment.Context) string {
-	return style.Quantity(util.CompactDuration(self.timeElapsed().Truncate(step)))
+	timing := self.getTiming()
+	isTurnRunning := self.isTurnRunning()
+	return renderDuration(timing.UserTurn, !isTurnRunning) + style.Faint("/") + renderDuration(timing.ModelTurn, isTurnRunning)
+}
+
+func renderDuration(elapsed time.Duration, isActive bool) string {
+	number := strconv.FormatInt(int64(elapsed/time.Minute), 10)
+	if !isActive {
+		return style.Faint(number + "m")
+	}
+	return style.Normal(number) + style.Faint("m")
 }
