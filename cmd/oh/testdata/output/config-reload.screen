@@ -1,9 +1,9 @@
 === deleted config restores defaults ===
 Configuration reloaded.
 
-── ✧· ─ 0m/0m ─────────────────────────────── ?% 0K/? ──────────────────────────────── /workspace ──
+── ✧· ───────────────────────────────────────────────────────────────────────────────────── 0m/0m ──
 
-── rxw gs ─────────────────────────────── high gpt-5.6-sol ────────────── usage n/a ─ brave-otter ──
+── rxw gs ─ workspace ────────────────────── usage n/a ─────────────── high gpt-5.6-sol ─ ?% 0K/? ──
 === filesystem watch failure ===
 The configuration could not be reloaded: could not watch config: inotify stopped
 

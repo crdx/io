@@ -427,14 +427,36 @@ func TestTheSessionEmojiSegmentDrawsNothingForAnUnknownAnimal(t *testing.T) {
 	}
 }
 
-func TestTheSessionSegmentNamesTheSession(t *testing.T) {
-	built, err := sessionName.New("brave-otter")(tomlOptions(""))
+func TestTheSessionNameSegmentCanOmitTheAnimalEmoji(t *testing.T) {
+	built, err := sessionName.New("brave-otter")(tomlOptions("emoji = false\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if got := style.Plain(built.Render(segment.Context{})); got != "brave-otter" {
 		t.Errorf("expected the session name, got %q", got)
+	}
+}
+
+func TestTheSessionNameSegmentCanAppendTheAnimalEmoji(t *testing.T) {
+	built, err := sessionName.New("brave-otter")(tomlOptions("emoji = true\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got := style.Plain(built.Render(segment.Context{})); got != "brave-otter 🦦" {
+		t.Errorf("expected the session name and otter emoji, got %q", got)
+	}
+}
+
+func TestTheSessionNameSegmentOmitsAnUnknownAnimalEmoji(t *testing.T) {
+	built, err := sessionName.New("brave-tester")(tomlOptions("emoji = true\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got := style.Plain(built.Render(segment.Context{})); got != "brave-tester" {
+		t.Errorf("expected only the session name, got %q", got)
 	}
 }
 

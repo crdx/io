@@ -42,6 +42,8 @@
 
 === session-name ===
 \e[38;2;150;152;150mbrave-otter\e[0m
+=== session-name / emoji ===
+\e[38;2;150;152;150mbrave-otter\e[0m 🦦
 === subscription-usage / ahead of pace ===
 \e[38;2;207;173;0m5h 28% ▲\e[0m
 === subscription-usage / even burn ===

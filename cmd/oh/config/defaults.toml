@@ -23,25 +23,25 @@ home = []
 [bar.top]
 left = [
     { segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
-    { segment = "turn-timer" },
 ]
 center = [
-    { segment = "context-usage" },
 ]
 right = [
-    { segment = "workspace-dir", type = "short" },
+    { segment = "turn-timer" },
+    { segment = "session-name", emoji = true },
     { segment = "scroll-overflow", direction = "up" }
 ]
 
 [bar.bottom]
 left = [
     { segment = "mode-toggle" },
+    { segment = "workspace-dir", type = "base" },
 ]
 center = [
-    { segment = "active-model" },
+    { segment = "subscription-usage" },
 ]
 right = [
-    { segment = "subscription-usage" },
-    { segment = "session-name" },
+    { segment = "active-model" },
+    { segment = "context-usage" },
     { segment = "scroll-overflow", direction = "down" }
 ]

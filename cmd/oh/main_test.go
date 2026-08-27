@@ -5049,6 +5049,12 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			"",
 			segment.Context{},
 		),
+		"session-name / emoji": goldenSegmentPass(
+			t,
+			sessionName.New("brave-otter"),
+			"emoji = true",
+			segment.Context{},
+		),
 		"session-emoji": goldenSegmentPass(
 			t,
 			sessionEmoji.New("brave-otter"),
