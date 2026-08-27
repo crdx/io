@@ -1,4 +1,4 @@
-{"kind":"head","version":9,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":10,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"search the web, then answer"}}
 {"kind":"event","event":{"render":"latest Go release","read_only":true,"kind":"tool_call_request","id":"call-1","name":"web_search","arguments":"{\"query\":\"latest Go release\"}"}}

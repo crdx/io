@@ -70,23 +70,9 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 The turn was interrupted because the user pressed escape.
 
-## Mode
+## User
 
 > 2001-01-01T00:00:05Z
-
-- **Caps:** `rxgs`
-
-## User
-
-> 2001-01-01T00:00:06Z
-
-```
-The workspace is now read-only.
-```
-
-## User
-
-> 2001-01-01T00:00:07Z
 
 ```
 carry on
@@ -94,9 +80,9 @@ carry on
 
 ## Assistant
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:06Z
 
 ```
-Carrying on, read-only.
+Carrying on.
 ```
 

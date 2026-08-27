@@ -101,7 +101,6 @@ const historyLimit = 1000
 
 func (self *App) begin(message string) cycle.Transition {
 	self.settleMode()
-	defer self.settleMode()
 
 	history := edit.NewHistory(location.GetHistoryPath(), historyLimit)
 	editor := edit.NewInput(history)
@@ -122,6 +121,8 @@ func (self *App) begin(message string) cycle.Transition {
 	defer restoreCursor()
 
 	defer func() { self.screen.Release(self.recorder.IsPersisted()) }()
+
+	defer self.dropPendingInput()
 
 	self.show(editor)
 
@@ -383,7 +384,16 @@ func (self *App) settlePendingInput() {
 	}
 
 	if self.pending.block != nil {
+		self.pending.renderer.MarkSent()
+		self.screen.RefreshBlock(self.pending.block)
 		self.screen.SealBlock(self.pending.block)
+	}
+	self.pending = pendingInput{}
+}
+
+func (self *App) dropPendingInput() {
+	if self.pending.block != nil {
+		self.screen.DiscardBlock(self.pending.block)
 	}
 	self.pending = pendingInput{}
 }

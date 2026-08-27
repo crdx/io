@@ -28,6 +28,48 @@ var steps = map[int]step{
 	6: {},
 	7: {migrateJournal: promptBytesReplaceContextFiles},
 	8: {migrateJournal: dropBackgroundCapability},
+	9: {migrateJournal: dropUnrunModeChange},
+}
+
+func dropUnrunModeChange(lines []map[string]json.RawMessage) ([]map[string]json.RawMessage, error) {
+	tail := len(lines)
+	for tail > 0 && !isTurnCompletion(lines[tail-1]) {
+		tail--
+	}
+
+	announcedMode := ""
+	for index := tail; index < len(lines); index++ {
+		event, hasEvent, err := eventOf(lines[index])
+		if err != nil {
+			return nil, fmt.Errorf("line %d: %w", index+1, err)
+		}
+
+		switch {
+		case hasEvent && event.Kind == caps.ModeChange:
+			announcedMode = event.Text
+		case hasEvent && event.Kind == agent.UserMessageEvent && announces(announcedMode, event.Text):
+			announcedMode = ""
+		default:
+			return lines, nil
+		}
+	}
+
+	return lines[:tail], nil
+}
+
+func isTurnCompletion(line map[string]json.RawMessage) bool {
+	return string(line["kind"]) == `"`+string(session.TurnCompletion)+`"`
+}
+
+func announces(mode string, text string) bool {
+	for flag := range strings.SplitSeq(caps.AllFlags, "") {
+		notice, said := caps.ModeNotice(agent.Event{Name: flag, Text: mode})
+		if said && notice == text {
+			return true
+		}
+	}
+
+	return false
 }
 
 const legacyBackgroundFlag = "b"

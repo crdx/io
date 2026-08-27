@@ -2871,6 +2871,61 @@ func TestAnIdleModeMessageJoinsTheNextTurn(t *testing.T) {
 	}
 }
 
+func TestAModeChangeTheSessionClosesOnIsTakenBack(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var screenOutput bytes.Buffer
+	self := &App{
+		agent:    agent.New("", &messageCaptureProvider{}, nil),
+		screen:   output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
+	}
+	self.settleMode()
+
+	self.start("first")
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	self.toggleCap(caps.Write)
+	if !strings.Contains(screenOutput.String(), workspaceNowReadOnly()) {
+		t.Fatalf("the pending mode message was not displayed: %q", screenOutput.String())
+	}
+
+	self.dropPendingInput()
+
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, row := range visibleScreen(t, screenOutput.String(), replayColumns) {
+		if strings.Contains(row, workspaceNowReadOnly()) {
+			t.Errorf("the taken-back mode message was left on the screen: %q", row)
+		}
+	}
+
+	storedSession, err := store.Read(directory, log.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !storedSession.CanResume() {
+		t.Error("a session closed on a mode change was not resumable")
+	}
+	if got := len(storedSession.Events); got != 2 {
+		t.Errorf("stored %d events, want the mode it opened in and the message it ran: %v", got, storedSession.Events)
+	}
+	want := caps.Read | caps.Write
+	if got, said := caps.LastRecordedMode(storedSession.Events); !said || got != want {
+		t.Errorf("expected the mode the turn ran in, %s, got %s and %t", want.Flags(), got.Flags(), said)
+	}
+}
+
 func TestAModeChangeSaysItselfInTheScrollback(t *testing.T) {
 	var screenOutput bytes.Buffer
 
@@ -2887,13 +2942,14 @@ func TestAModeChangeSaysItselfInTheScrollback(t *testing.T) {
 func TestPendingModeMessagesAreSeparatedFromStartupAndEachOther(t *testing.T) {
 	requireSameVisibleScreen(
 		t,
-		"pending messages differ from independently submitted messages",
-		pendingModeMessagesStream(t, 2),
+		"messages a turn has taken differ from independently submitted messages",
+		sentModeMessagesStream(t),
 		submittedModeMessagesStream(),
 	)
 
 	compareWithGolden(t, "pending-mode-messages", ".ansi", map[string]func() string{
-		"complete interaction": func() string { return pendingModeMessagesStream(t, 2) },
+		"complete interaction":  func() string { return pendingModeMessagesStream(t, 2) },
+		"carried by a new turn": func() string { return sentModeMessagesStream(t) },
 	})
 	compareWithGolden(t, "pending-mode-messages", ".screen", shownPasses(t, map[string]func() string{
 		"1 startup":                    func() string { return pendingModeMessagesStream(t, 0) },
@@ -2903,6 +2959,18 @@ func TestPendingModeMessagesAreSeparatedFromStartupAndEachOther(t *testing.T) {
 }
 
 func pendingModeMessagesStream(t *testing.T, toggleCount int) string {
+	t.Helper()
+
+	return modeMessagesStream(t, toggleCount, false)
+}
+
+func sentModeMessagesStream(t *testing.T) string {
+	t.Helper()
+
+	return modeMessagesStream(t, 2, true)
+}
+
+func modeMessagesStream(t *testing.T, toggleCount int, isSent bool) string {
 	t.Helper()
 
 	self, _ := modeFixture(t)
@@ -2915,6 +2983,9 @@ func pendingModeMessagesStream(t *testing.T, toggleCount int) string {
 	}
 	if toggleCount > 1 {
 		self.toggleCap(caps.Git)
+	}
+	if isSent {
+		self.settleMode()
 	}
 
 	return screenOutput.String()
@@ -6223,7 +6294,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	}
 	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
 	runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
-	firstHarness.settleMode()
+	firstHarness.dropPendingInput()
 
 	sessionName := log.Name()
 	if err := log.Close(); err != nil {
@@ -6273,7 +6344,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		resumedAssistant.FYI(note)
 	}
 	runSessionGoldenTurn(t, resumedHarness, scenario.ResumeTurn, cancelSignals)
-	resumedHarness.settleMode()
+	resumedHarness.dropPendingInput()
 
 	if err := log.Close(); err != nil {
 		t.Fatal(err)

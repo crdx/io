@@ -553,6 +553,89 @@ func TestFormatEightMigrationForgetsTheBackgroundCapability(t *testing.T) {
 	}
 }
 
+func TestFormatNineMigrationForgetsTheModeASessionWasClosedOn(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":9,"id":"one","name":"brave-otter"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxwgs"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"user_message","text":"begin"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:03Z","payload":{"role":"user","content":"begin"}}`,
+		`{"kind":"turn_completion","time":"2026-08-01T00:00:04Z"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:05Z","event":{"kind":"mode_change","text":"rxgs"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:06Z","event":{"kind":"user_message","text":"The workspace is now read-only."}}`,
+	)
+
+	if _, err := migrate.Session(options(directory), name); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !storedSession.CanResume() {
+		t.Error("a session closed on a mode change was left unresumable")
+	}
+	if got := len(storedSession.Events); got != 2 {
+		t.Errorf("kept %d events, want the two the completed turn holds", got)
+	}
+	currentCaps, recorded := caps.LastRecordedMode(storedSession.Events)
+	if !recorded || currentCaps != caps.All() {
+		t.Errorf("recovered %s and %t, want the mode the turn ran in", currentCaps.Flags(), recorded)
+	}
+}
+
+func TestFormatNineMigrationKeepsAMessageTheModeChangeDoesNotAnnounce(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":9,"id":"one","name":"brave-otter"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxwgs"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"user_message","text":"begin"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:03Z","payload":{"role":"user","content":"begin"}}`,
+		`{"kind":"turn_completion","time":"2026-08-01T00:00:04Z"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:05Z","event":{"kind":"mode_change","text":"rxgs"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:06Z","event":{"kind":"user_message","text":"The .git directory is now read-only."}}`,
+	)
+
+	if _, err := migrate.Session(options(directory), name); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if storedSession.CanResume() {
+		t.Error("a message the mode change never said was taken for a notice")
+	}
+}
+
+func TestFormatNineMigrationKeepsTheMessagesOfACrashedTurn(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":9,"id":"one","name":"brave-otter"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxwgs"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"user_message","text":"begin"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:03Z","payload":{"role":"user","content":"begin"}}`,
+		`{"kind":"turn_completion","time":"2026-08-01T00:00:04Z"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:05Z","event":{"kind":"mode_change","text":"rxgs"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:06Z","event":{"kind":"user_message","text":"The workspace is now read-only."}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:07Z","event":{"kind":"user_message","text":"carry on"}}`,
+	)
+
+	if _, err := migrate.Session(options(directory), name); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if storedSession.CanResume() {
+		t.Error("a crashed turn became resumable")
+	}
+	if got := len(storedSession.Events); got != 5 {
+		t.Errorf("kept %d events, want every one the crashed turn recorded", got)
+	}
+}
+
 func startupState(t *testing.T, line map[string]json.RawMessage) map[string]json.RawMessage {
 	t.Helper()
 
