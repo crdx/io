@@ -17,7 +17,7 @@ func TestClipReturnsNothingWhenThereAreNoColumns(t *testing.T) {
 func TestARunningSessionIsFadedWithoutAMarker(t *testing.T) {
 	self := &state{sessions: []*Session{{IsRunning: true}, {}}, cursor: 1}
 	got := self.row(0, 80)
-	want := style.Faint(row(self.sessions[0], false, 80))
+	want := style.Dim(row(self.sessions[0], false, 80))
 
 	if got != want {
 		t.Errorf("expected a faded row, got %q", got)

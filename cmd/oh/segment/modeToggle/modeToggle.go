@@ -36,7 +36,7 @@ func (self state) Render(segment.Context) string {
 
 func (self state) letter(caps caps.Set, isGranted bool, paint style.Style, isPrefixPending bool) string {
 	if !isGranted {
-		paint = style.Withheld
+		paint = style.Dim
 	}
 
 	if isPrefixPending {

@@ -14,17 +14,17 @@ func enableColor(t *testing.T) {
 	t.Cleanup(func() { apply(previous) })
 }
 
-func TestDisabledCapabilitiesAreDimmedOverTheirMutedColour(t *testing.T) {
+func TestDisabledCapabilitiesTakeTheMutedColour(t *testing.T) {
 	enableColor(t)
 
-	got := Withheld("w")
+	got := Dim("w")
 
-	if !strings.Contains(got, "\x1b[2m") {
-		t.Errorf("expected a dim disabled capability, got %q", got)
+	if strings.Contains(got, "\x1b[2m") {
+		t.Errorf("expected no reduced intensity on a disabled capability, got %q", got)
 	}
 
 	if !strings.Contains(got, "\x1b[38;2;") {
-		t.Errorf("expected the dimming on top of the muted colour, got %q", got)
+		t.Errorf("expected the muted colour, got %q", got)
 	}
 }
 

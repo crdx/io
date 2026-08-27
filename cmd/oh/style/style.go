@@ -38,9 +38,8 @@ const (
 
 // The base visual styles.
 var (
-	Normal Style = hex(none)              // the terminal's foreground
-	Dim    Style = hex(grey)              // grey text
-	Faint  Style = decorate(col.Dim, Dim) // grey at reduced intensity
+	Normal Style = hex(none) // the terminal's foreground
+	Dim    Style = hex(grey) // grey text
 )
 
 // The mapping of kind of line to colour.
@@ -69,7 +68,6 @@ var (
 	History     Style = hex(mauve)                // rewriting the repository's history is on offer
 	Pending     Style = col.Underline             // waiting for the keypress that follows a prefix
 	Scrolled    Style = Dim                       // how much of the input is scrolled out of sight
-	Withheld    Style = Faint                     // a note that this access is not on offer at all
 	Chosen      Style = hex(copper)               // the row the cursor is resting on within a list
 	Typed       Style = Normal                    // what the user typed when a session is replayed
 	User        Style = background("#343541")     // a submitted message, kept apart from the reply

@@ -37,11 +37,11 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m ▪▪▪▪▪\e[38;2;150;152;150m▫\e[0m
 === mode-toggle / all granted ===
 \e[38;2;76;154;44mr\e[0m\e[38;2;204;102;102mx\e[0m\e[38;2;207;173;0mw\e[0m \e[38;2;201;166;212mg\e[0m\e[38;2;129;162;190ms\e[0m
 === mode-toggle / pending prefix ===
-\e[4m\e[38;2;76;154;44mr\e[0m\e[0m\e[4m\e[2m\e[38;2;150;152;150mx\e[0m\e[0m\e[0m\e[4m\e[2m\e[38;2;150;152;150mw\e[0m\e[0m\e[0m \e[4m\e[2m\e[38;2;150;152;150mg\e[0m\e[0m\e[0m\e[4m\e[2m\e[38;2;150;152;150ms\e[0m\e[0m\e[0m
+\e[4m\e[38;2;76;154;44mr\e[0m\e[0m\e[4m\e[38;2;150;152;150mx\e[0m\e[0m\e[4m\e[38;2;150;152;150mw\e[0m\e[0m \e[4m\e[38;2;150;152;150mg\e[0m\e[0m\e[4m\e[38;2;150;152;150ms\e[0m\e[0m
 === mode-toggle / read only ===
-\e[38;2;76;154;44mr\e[0m\e[2m\e[38;2;150;152;150mx\e[0m\e[0m\e[2m\e[38;2;150;152;150mw\e[0m\e[0m \e[2m\e[38;2;150;152;150mg\e[0m\e[0m\e[2m\e[38;2;150;152;150ms\e[0m\e[0m
+\e[38;2;76;154;44mr\e[0m\e[38;2;150;152;150mx\e[0m\e[38;2;150;152;150mw\e[0m \e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150ms\e[0m
 === mode-toggle / web only ===
-\e[38;2;76;154;44mr\e[0m\e[2m\e[38;2;150;152;150mx\e[0m\e[0m\e[2m\e[38;2;150;152;150mw\e[0m\e[0m \e[2m\e[38;2;150;152;150mg\e[0m\e[0m\e[38;2;129;162;190ms\e[0m
+\e[38;2;76;154;44mr\e[0m\e[38;2;150;152;150mx\e[0m\e[38;2;150;152;150mw\e[0m \e[38;2;150;152;150mg\e[0m\e[38;2;129;162;190ms\e[0m
 === scroll-overflow / down ===
 \e[38;2;150;152;150m↓ 7\e[0m
 === scroll-overflow / empty ===
@@ -69,11 +69,11 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m ▪▪▪▪▪\e[38;2;150;152;150m▫\e[0m
 === subscription-usage / no reset reported ===
 7\e[38;2;150;152;150md \e[0m6\e[38;2;150;152;150m%\e[0m
 === subscription-usage / not applicable ===
-\e[2m\e[38;2;150;152;150musage n/a\e[0m\e[0m
+\e[38;2;150;152;150musage n/a\e[0m
 === subscription-usage / nothing reported yet ===
 usage \e[38;2;150;152;150mpending\e[0m
 === subscription-usage / only other models metered ===
-\e[2m\e[38;2;150;152;150musage unavailable\e[0m\e[0m
+\e[38;2;150;152;150musage unavailable\e[0m
 === subscription-usage / refreshing keeps the figures ===
 5\e[38;2;150;152;150mh \e[0m40\e[38;2;150;152;150m%\e[0m \e[38;2;204;102;102m429\e[0m
 === subscription-usage / refused ===
@@ -87,7 +87,7 @@ usage \e[38;2;204;102;102mfailed\e[0m
 === subscription-usage / weekly plan window ===
 7\e[38;2;150;152;150md \e[0m6\e[38;2;150;152;150m%\e[0m
 === subscription-usage / window already elapsed ===
-\e[2m\e[38;2;150;152;150m5h stale\e[0m\e[0m
+\e[38;2;150;152;150m5h stale\e[0m
 === turn-count / nothing asked yet ===
 
 === turn-count / third turn ===

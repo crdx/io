@@ -223,7 +223,7 @@ func (self *state) row(index int, room int) string {
 	line := row(storedSession, index == self.cursor, room)
 
 	if storedSession.IsRunning {
-		return style.Faint(line)
+		return style.Dim(line)
 	}
 	if index == self.cursor {
 		return style.Chosen(line)

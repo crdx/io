@@ -117,7 +117,7 @@ func (self *state) NextRefresh(phase segment.Phase) time.Time {
 
 func (self *state) Render(segment.Context) string {
 	if self.reporter == nil || !self.reporter.IsAvailable() {
-		return style.Withheld("usage n/a")
+		return style.Dim("usage n/a")
 	}
 
 	self.mutex.Lock()
@@ -229,7 +229,7 @@ func (self *state) draw(current snapshot) string {
 		return appendUsageStatus(usage, "usage", style.Failure(current.failure))
 	default:
 		if usage == "" {
-			return style.Withheld("usage unavailable")
+			return style.Dim("usage unavailable")
 		}
 
 		return usage
@@ -269,7 +269,7 @@ func drawWindow(window agent.UsageWindow, fetchedAt time.Time, now time.Time) st
 	}
 
 	if !window.ResetsAt.After(now) {
-		return style.Faint(label + " stale")
+		return style.Dim(label + " stale")
 	}
 
 	expected := expectedPercent(window, fetchedAt)
