@@ -230,7 +230,8 @@ func TestAGrantedBinaryCanBeExecutedWithinTheSandbox(t *testing.T) {
 		t.Fatalf("could not enter the sandbox: %v", err)
 	}
 
-	executed := exec.Command(self, "-test.run=^$") //nolint:gosec // the binary is this one, already running
+	//nolint:gosec // the binary is this one, already running
+	executed := exec.CommandContext(t.Context(), self, "-test.run=^$")
 	executed.Env = []string{"PATH=" + os.Getenv("PATH")}
 
 	if coverage := os.Getenv(coverageVariable); coverage != "" {

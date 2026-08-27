@@ -61,7 +61,8 @@ func buildCommand(configured Command, paths []string) (*exec.Cmd, error) {
 
 	arguments := append([]string(nil), configured[1:]...)
 	arguments = append(arguments, paths...)
-	return exec.Command(name, arguments...), nil //nolint:gosec // the user deliberately configures the editor
+	//nolint:gosec,noctx // the user configures the editor, and it outlives this call
+	return exec.Command(name, arguments...), nil
 }
 
 func reportExit(command *exec.Cmd, errors io.Writer) {

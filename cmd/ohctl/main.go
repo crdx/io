@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -34,7 +35,7 @@ func main() {
 	var err error
 	switch os.Args[1] {
 	case "login":
-		err = login.Run()
+		err = login.Run(context.Background())
 	case "regen":
 		err = regen.Run()
 	case "migrate":

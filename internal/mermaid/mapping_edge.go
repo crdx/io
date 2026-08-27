@@ -147,7 +147,7 @@ func (g *graph) isNodeColumn(x int) bool {
 	return false
 }
 
-func (g graph) calculateLineWidth(line []gridCoord) int {
+func (g *graph) calculateLineWidth(line []gridCoord) int {
 	totalSize := 0
 	for _, c := range line {
 		totalSize += g.columnWidth[c.x]

@@ -54,36 +54,51 @@ func Open(path string, meta Meta, report func(error)) (*Recorder, error) {
 		return nil, err
 	}
 	if info.Size() == 0 {
-		if _, err := fmt.Fprintf(file, "# HTTP transcript\n# session: %s\n# started: %s\n# model: %s\n# effort: %s\n# provider: %s\n# workspace: %s\n\n", meta.Name, meta.Started.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace); err != nil {
+		if err := writeTranscriptHeader(file, meta); err != nil {
 			_ = file.Close()
 			return nil, err
 		}
 	} else {
-		if _, err := file.Seek(0, 0); err != nil {
+		next, err := nextExchangeNumber(file, recorder.next)
+		if err != nil {
 			_ = file.Close()
 			return nil, err
 		}
-		reader := bufio.NewReader(file)
-		for {
-			line, readError := reader.ReadString('\n')
-			var sequence int
-			if _, err := fmt.Sscanf(line, "# exchange %d start", &sequence); err == nil && sequence >= recorder.next {
-				recorder.next = sequence + 1
-			}
-			if errors.Is(readError, io.EOF) {
-				break
-			}
-			if readError != nil {
-				_ = file.Close()
-				return nil, readError
-			}
-		}
-		if _, err := file.Seek(0, 2); err != nil {
-			_ = file.Close()
-			return nil, err
-		}
+		recorder.next = next
 	}
 	return recorder, nil
+}
+
+func writeTranscriptHeader(file *os.File, meta Meta) error {
+	_, err := fmt.Fprintf(file, "# HTTP transcript\n# session: %s\n# started: %s\n# model: %s\n# effort: %s\n# provider: %s\n# workspace: %s\n\n", meta.Name, meta.Started.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace)
+	return err
+}
+
+func nextExchangeNumber(file *os.File, next int) (int, error) {
+	if _, err := file.Seek(0, 0); err != nil {
+		return 0, err
+	}
+
+	reader := bufio.NewReader(file)
+	for {
+		line, readError := reader.ReadString('\n')
+		var sequence int
+		if _, err := fmt.Sscanf(line, "# exchange %d start", &sequence); err == nil && sequence >= next {
+			next = sequence + 1
+		}
+		if errors.Is(readError, io.EOF) {
+			break
+		}
+		if readError != nil {
+			return 0, readError
+		}
+	}
+
+	if _, err := file.Seek(0, 2); err != nil {
+		return 0, err
+	}
+
+	return next, nil
 }
 
 // Start records a request and returns its exchange observer.

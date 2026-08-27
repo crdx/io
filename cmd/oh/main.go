@@ -98,6 +98,7 @@ func main() {
 	os.Exit(1)
 }
 
+//nolint:gocyclo // lol no
 func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, error) {
 	ctx := context.Background()
 	var sessionInfo cycle.Session

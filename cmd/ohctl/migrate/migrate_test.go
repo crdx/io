@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -86,7 +87,7 @@ func TestAJournalWithoutAVersionIsMigratedFromTheFirstFormat(t *testing.T) {
 
 	lines := journalLines(t, directory, name)
 
-	if got := string(lines[0]["version"]); got != fmt.Sprint(session.JournalFormat) {
+	if got := string(lines[0]["version"]); got != strconv.Itoa(session.JournalFormat) {
 		t.Errorf("expected the head to say format %d, got %q", session.JournalFormat, got)
 	}
 
@@ -473,7 +474,7 @@ func TestFormatSevenMigrationCountsTheWholeSystemPrompt(t *testing.T) {
 	if _, hasFiles := state["context"]; hasFiles {
 		t.Errorf("the startup facts kept the context files: %s", state)
 	}
-	if got := string(state["prompt"]); got != fmt.Sprint(len(systemPrompt)) {
+	if got := string(state["prompt"]); got != strconv.Itoa(len(systemPrompt)) {
 		t.Errorf("got prompt bytes %s, want %d", got, len(systemPrompt))
 	}
 	if got := string(state["tools"]); got != "614" {

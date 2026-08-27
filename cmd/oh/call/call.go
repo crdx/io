@@ -3,6 +3,7 @@ package call
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -228,20 +229,20 @@ func outputStatsText(stats *tool.Stats) string {
 
 func resourcesStatsText(took time.Duration, stats *tool.Stats) string {
 	return style.Subtle.Join(
-		fmt.Sprint(stats.Lines)+"L",
+		strconv.FormatInt(stats.Lines, 10)+"L",
 		tokenEstimate(stats),
 		util.CompactDuration(took),
 		util.CompactDuration(stats.CPUTime),
-		fmt.Sprint(stats.PeakMemory/bytesPerMegabyte)+"M",
+		strconv.FormatUint(stats.PeakMemory/bytesPerMegabyte, 10)+"M",
 	)
 }
 
 func readStatsText(stats *tool.Stats) string {
-	return style.Subtle.Join(fmt.Sprint(stats.Lines)+"L", tokenEstimate(stats))
+	return style.Subtle.Join(strconv.FormatInt(stats.Lines, 10)+"L", tokenEstimate(stats))
 }
 
 func listStatsText(stats *tool.Stats) string {
-	return style.Subtle(fmt.Sprint(stats.Lines) + "L")
+	return style.Subtle(strconv.FormatInt(stats.Lines, 10) + "L")
 }
 
 func imageStatsText(stats *tool.Stats) string {
@@ -249,7 +250,7 @@ func imageStatsText(stats *tool.Stats) string {
 }
 
 func writeStatsText(stats *tool.Stats) string {
-	return style.Subtle.Join(fmt.Sprint(stats.Lines)+"L", tokenEstimate(stats))
+	return style.Subtle.Join(strconv.FormatInt(stats.Lines, 10)+"L", tokenEstimate(stats))
 }
 
 func diffStatsText(stats *tool.Stats) string {

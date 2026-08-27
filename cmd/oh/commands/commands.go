@@ -412,7 +412,8 @@ func targetCommand(
 
 func openDesktopTargets(paths []string) error {
 	for _, path := range paths {
-		command := exec.Command("xdg-open", path) //nolint:gosec // the fixed opener receives a path selected by the command
+		//nolint:gosec,noctx // the opener is fixed, takes a path the command chose, and outlives this call
+		command := exec.Command("xdg-open", path)
 		if err := command.Start(); err != nil {
 			return fmt.Errorf("could not open %s: %w", path, err)
 		}

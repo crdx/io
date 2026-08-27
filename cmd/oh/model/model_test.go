@@ -436,11 +436,11 @@ func TestTheRealRegistryIsNeverAskedAboutOurProviderNames(t *testing.T) {
 func TestAStandInEndpointKeepsAModelCacheOfItsOwn(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
-	real := modelCachePath()
+	realCache := modelCachePath()
 
 	t.Setenv(endpointVariable, "http://localhost:8080/v1/messages")
 
-	if standIn := modelCachePath(); standIn == real {
+	if standIn := modelCachePath(); standIn == realCache {
 		t.Errorf("expected a cache of its own, got %q for both", standIn)
 	}
 }

@@ -438,6 +438,26 @@ func responsesAddress(t *testing.T, scenario *sim.Scenario) string {
 	return ""
 }
 
+func post(t *testing.T, address string, body string) *http.Response {
+	t.Helper()
+
+	request, err := http.NewRequestWithContext(
+		t.Context(), http.MethodPost, address, strings.NewReader(body),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return response
+}
+
 func TestACallWithNoOutputIsRefused(t *testing.T) {
 	address := responsesAddress(t, conversation)
 
@@ -461,11 +481,7 @@ func TestACallWithNoOutputIsRefused(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	//nolint:gosec // the address is the test's own server
-	response, err := http.Post(address, "application/json", strings.NewReader(string(body)))
-	if err != nil {
-		t.Fatal(err)
-	}
+	response := post(t, address, string(body))
 
 	defer func() { _ = response.Body.Close() }()
 
@@ -520,12 +536,7 @@ func TestAnAddressThatNoApiAnswersAtIsRefused(t *testing.T) {
 
 	t.Cleanup(server.Close)
 
-	response, err := http.Post(
-		server.URL+"/v1/somewhere", "application/json", strings.NewReader("{}"),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
+	response := post(t, server.URL+"/v1/somewhere", "{}")
 
 	defer func() { _ = response.Body.Close() }()
 

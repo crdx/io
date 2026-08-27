@@ -15,7 +15,7 @@ func (sizedTool) Schema() tool.Schema                 { return tool.Schema{} }
 func (sizedTool) Concurrent() bool                    { return true }
 func (sizedTool) ReadOnly() bool                      { return true }
 func (sizedTool) StateKey() string                    { return "" }
-func (sizedTool) Parse(string) (tool.ToolCall, error) { return nil, nil }
+func (sizedTool) Parse(string) (tool.ToolCall, error) { return nil, nil } //nolint:nilnil // the stub is never parsed
 func (sizedTool) Restore(json.RawMessage) error       { return nil }
 
 func TestToolsSizeMeasuresTheWireDefinitions(t *testing.T) {

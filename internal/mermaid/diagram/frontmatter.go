@@ -24,10 +24,10 @@ func StripFrontmatter(input string) (string, string) {
 	if start >= len(lines) || !isDelimiter(lines[start]) {
 		return input, ""
 	}
-	indent := lines[start][:strings.Index(lines[start], "-")]
+	indent := indentOf(lines[start])
 
 	for i := start + 1; i < len(lines); i++ {
-		if isDelimiter(lines[i]) && lines[i][:strings.Index(lines[i], "-")] == indent {
+		if isDelimiter(lines[i]) && indentOf(lines[i]) == indent {
 			return strings.Join(lines[i+1:], "\n"), title
 		}
 		trimmed := strings.TrimRight(lines[i], " \t\r")
@@ -42,6 +42,10 @@ func StripFrontmatter(input string) (string, string) {
 		}
 	}
 	return input, ""
+}
+
+func indentOf(line string) string {
+	return line[:len(line)-len(strings.TrimLeft(line, " \t"))]
 }
 
 func isDelimiter(line string) bool {

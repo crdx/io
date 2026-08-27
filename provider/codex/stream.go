@@ -182,22 +182,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 
 	case "response.reasoning_summary_part.done":
 		if event.Part != nil && event.Part.Text != "" {
-			self.isSummarised = true
-			streamed := self.summary.String()
-			if streamed == "" {
-				self.summary.WriteString(event.Part.Text)
-				if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: event.Part.Text}) {
-					return true, nil
-				}
-			} else if suffix, found := strings.CutPrefix(event.Part.Text, streamed); found && suffix != "" {
-				self.summary.WriteString(suffix)
-				if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: suffix}) {
-					return true, nil
-				}
-			}
-
-			self.summary.Reset()
-			if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true, AwaitUsage: true}) {
+			if self.completeSummarisedReasoning(event.Part.Text, yield) {
 				return true, nil
 			}
 		}
@@ -257,6 +242,27 @@ func (self *reply) addMessageText(text string, yield agent.Yield) bool {
 
 	self.isMessageStarted = true
 	return !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: text})
+}
+
+func (self *reply) completeSummarisedReasoning(part string, yield agent.Yield) bool {
+	self.isSummarised = true
+
+	streamed := self.summary.String()
+	if streamed == "" {
+		self.summary.WriteString(part)
+		if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: part}) {
+			return true
+		}
+	} else if suffix, found := strings.CutPrefix(part, streamed); found && suffix != "" {
+		self.summary.WriteString(suffix)
+		if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: suffix}) {
+			return true
+		}
+	}
+
+	self.summary.Reset()
+
+	return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true, AwaitUsage: true})
 }
 
 func (self *reply) completeRawReasoning(yield agent.Yield) bool {

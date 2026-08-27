@@ -101,7 +101,7 @@ func NewConfiguration(registry segment.Registry, layout segment.Layout) Configur
 }
 
 // GetRegistry returns the factories from which replacement layouts are built.
-func (self Configuration) GetRegistry() segment.Registry {
+func (self *Configuration) GetRegistry() segment.Registry {
 	return self.registry
 }
 
@@ -111,11 +111,11 @@ func (self *Configuration) ReplaceLayout(layout segment.Layout) {
 }
 
 // Render draws one position in the current layout.
-func (self Configuration) Render(position segment.Position, context segment.Context) string {
+func (self *Configuration) Render(position segment.Position, context segment.Context) string {
 	return Render(self.layout, position, context)
 }
 
 // NextRefresh returns the next time any segment in the current layout should be redrawn.
-func (self Configuration) NextRefresh(phase segment.Phase) time.Time {
+func (self *Configuration) NextRefresh(phase segment.Phase) time.Time {
 	return self.layout.NextRefresh(phase)
 }

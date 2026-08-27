@@ -38,17 +38,17 @@ func (self *Definition) UnmarshalTOML(value any) error {
 	}
 }
 
-func (self Definition) LoadFile(path string) (Definition, error) {
+func (self *Definition) LoadFile(path string) error {
 	contents, err := os.ReadFile(path) //nolint:gosec // the user deliberately configures this path
 	if err != nil {
-		return self, fmt.Errorf("could not read %s: %w", path, err)
+		return fmt.Errorf("could not read %s: %w", path, err)
 	}
 	self.File = path
 	self.Prompt = strings.TrimSpace(string(contents))
 	if self.Prompt == "" {
-		return self, errors.New("prompt file is empty")
+		return errors.New("prompt file is empty")
 	}
-	return self, nil
+	return nil
 }
 
 func (self *Definition) unmarshalTable(configured map[string]any) error {

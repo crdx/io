@@ -24,7 +24,7 @@ type ForkSource struct {
 
 func GetForkSource(directory string, name string, userMessage string) (*ForkSource, error) {
 	if name == "" {
-		return nil, nil
+		return nil, nil //nolint:nilnil // no name means no fork was asked for
 	}
 
 	storedSession, err := store.Read(directory, name)
@@ -46,7 +46,7 @@ func GetForkSource(directory string, name string, userMessage string) (*ForkSour
 
 func LoadForResume(directory string, name string) (*store.Session, error) {
 	if name == "" {
-		return nil, nil
+		return nil, nil //nolint:nilnil // no name means no fork was asked for
 	}
 
 	isRunning, err := session.IsInUse(directory, name)

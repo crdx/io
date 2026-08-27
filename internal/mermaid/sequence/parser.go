@@ -1,6 +1,7 @@
 package sequence
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -263,18 +264,18 @@ func hasSequenceKeyword(line string) bool {
 
 func Parse(input string) (*SequenceDiagram, error) {
 	if !utf8.ValidString(input) {
-		return nil, fmt.Errorf("input is not valid UTF-8")
+		return nil, errors.New("input is not valid UTF-8")
 	}
 
 	input = strings.TrimSpace(input)
 	if input == "" {
-		return nil, fmt.Errorf("empty input")
+		return nil, errors.New("empty input")
 	}
 
 	rawLines := diagram.SplitLines(input)
 	lines := diagram.RemoveComments(rawLines)
 	if len(lines) == 0 {
-		return nil, fmt.Errorf("no content found")
+		return nil, errors.New("no content found")
 	}
 
 	if !hasSequenceKeyword(strings.TrimSpace(lines[0])) {
@@ -383,7 +384,7 @@ func Parse(input string) (*SequenceDiagram, error) {
 	}
 
 	if len(sd.Participants) == 0 {
-		return nil, fmt.Errorf("no participants found")
+		return nil, errors.New("no participants found")
 	}
 
 	return sd, nil

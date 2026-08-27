@@ -25,7 +25,7 @@ func (c drawingCoord) Equals(other drawingCoord) bool {
 	return c.x == other.x && c.y == other.y
 }
 
-func (g graph) lineToDrawing(line []gridCoord) []drawingCoord {
+func (g *graph) lineToDrawing(line []gridCoord) []drawingCoord {
 	dc := []drawingCoord{}
 	for _, c := range line {
 		dc = append(dc, g.gridToDrawingCoord(c))
@@ -124,7 +124,7 @@ func (g *graph) setStyleClasses(properties *graphProperties) {
 	g.paddingY = properties.paddingY
 	for _, n := range g.nodes {
 		if n.styleClassName != "" {
-			(*n).styleClass = g.styleClasses[n.styleClassName]
+			n.styleClass = g.styleClasses[n.styleClassName]
 		}
 	}
 }
@@ -176,8 +176,6 @@ func (g *graph) setSubgraphs(textSubgraphs []*textSubgraph) {
 func (g *graph) createMapping() error {
 	highestPositionPerLevel := map[int]int{}
 
-	// TODO: should the mapping be bottom-to-top instead of top-to-bottom?
-	// Set root nodes to level 0
 	nodesFound := make(map[string]bool)
 	rootNodes := []*node{}
 	for _, n := range g.nodes {
@@ -226,7 +224,7 @@ func (g *graph) createMapping() error {
 			mappingCoord = g.reserveSpotInGrid(g.nodes[n.index], &gridCoord{x: highestPositionPerLevel[0], y: 0})
 		}
 		g.nodes[n.index].gridCoord = mappingCoord
-		highestPositionPerLevel[0] = highestPositionPerLevel[0] + 4
+		highestPositionPerLevel[0] += 4
 	}
 
 	if shouldSeparate && len(subgraphRootNodes) > 0 {
@@ -234,7 +232,7 @@ func (g *graph) createMapping() error {
 		for _, n := range subgraphRootNodes {
 			mappingCoord := g.reserveSpotInGrid(g.nodes[n.index], &gridCoord{x: subgraphLevel, y: highestPositionPerLevel[subgraphLevel]})
 			g.nodes[n.index].gridCoord = mappingCoord
-			highestPositionPerLevel[subgraphLevel] = highestPositionPerLevel[subgraphLevel] + 4
+			highestPositionPerLevel[subgraphLevel] += 4
 		}
 	}
 
@@ -275,7 +273,7 @@ func (g *graph) createMapping() error {
 	for _, n := range g.nodes {
 		dc := g.gridToDrawingCoord(*n.gridCoord)
 		g.nodes[n.index].setCoord(&dc)
-		g.nodes[n.index].setDrawing(*g)
+		g.nodes[n.index].setDrawing(g)
 	}
 
 	g.calculateSubgraphBoundingBoxes()
@@ -593,7 +591,7 @@ func (g *graph) appendNode(n *node) {
 	g.nodes = append(g.nodes, n)
 }
 
-func (g graph) getEdgesFromNode(n *node) []edge {
+func (g *graph) getEdgesFromNode(n *node) []edge {
 	edges := []edge{}
 	for _, edge := range g.edges {
 		if (edge.from.name) == (n.name) {

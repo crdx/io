@@ -24,7 +24,8 @@ func TestUsageMatchesTheGolden(t *testing.T) {
 		return
 	}
 
-	command := exec.Command(os.Args[0], "-test.run=^TestUsageMatchesTheGolden$") //nolint:gosec // rerun this test binary as its help subprocess
+	//nolint:gosec // rerun this test binary as its help subprocess
+	command := exec.CommandContext(t.Context(), os.Args[0], "-test.run=^TestUsageMatchesTheGolden$")
 	command.Env = append(os.Environ(), helpProcessVariable+"=1")
 	output, err := command.CombinedOutput()
 	var exitError *exec.ExitError

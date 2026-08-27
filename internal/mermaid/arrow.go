@@ -2,7 +2,7 @@ package mermaid
 
 import (
 	"container/heap"
-	"fmt"
+	"errors"
 	"slices"
 
 	"crdx.org/io/internal/mermaid/runewidth"
@@ -16,16 +16,17 @@ type priorityQueueItem struct {
 
 type priorityQueue []*priorityQueueItem
 
-func (pq priorityQueue) Len() int { return len(pq) }
+func (pq *priorityQueue) Len() int { return len(*pq) }
 
-func (pq priorityQueue) Less(i, j int) bool {
-	return pq[i].priority < pq[j].priority
+func (pq *priorityQueue) Less(i, j int) bool {
+	return (*pq)[i].priority < (*pq)[j].priority
 }
 
-func (pq priorityQueue) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
-	pq[i].index = i
-	pq[j].index = j
+func (pq *priorityQueue) Swap(i, j int) {
+	items := *pq
+	items[i], items[j] = items[j], items[i]
+	items[i].index = i
+	items[j].index = j
 }
 
 func (pq *priorityQueue) Push(value any) {
@@ -103,7 +104,7 @@ func (g *graph) getPath(from gridCoord, to gridCoord) ([]gridCoord, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("no path found")
+	return nil, errors.New("no path found")
 }
 
 func (g *graph) isFreeInGrid(c gridCoord) bool {

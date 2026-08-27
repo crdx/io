@@ -222,7 +222,7 @@ func TestWhitespaceLabelsCollapse(t *testing.T) {
 			d.Relationships[0].Label, d.Relationships[1].Label)
 	}
 	for line := range strings.SplitSeq(Render(d, false), "\n") {
-		if strings.Contains(line, "─ ") && strings.Contains(line[strings.Index(line, "─ "):], "─") {
+		if _, after, found := strings.Cut(line, "─ "); found && strings.Contains(after, "─") {
 			t.Errorf("hole punched in connector: %q", line)
 		}
 	}

@@ -16,7 +16,7 @@ func (n *node) setCoord(c *drawingCoord) {
 	n.drawingCoord = c
 }
 
-func (n *node) setDrawing(g graph) *drawing {
+func (n *node) setDrawing(g *graph) *drawing {
 	d := drawBox(n, g)
 	n.drawing = d
 	return d
@@ -40,7 +40,7 @@ func (g *graph) setColumnWidth(n *node) {
 	}
 
 	if n.gridCoord.x > 0 {
-		g.columnWidth[n.gridCoord.x-1] = g.paddingX // TODO: x2?
+		g.columnWidth[n.gridCoord.x-1] = g.paddingX
 	}
 	if n.gridCoord.y > 0 {
 		basePadding := g.paddingY

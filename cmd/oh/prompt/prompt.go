@@ -152,13 +152,13 @@ func readContextFile(name string, read func() ([]byte, error)) (*File, error) {
 	data, err := read()
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
-		return nil, nil
+		return nil, nil //nolint:nilnil // an absent context file is nothing to report
 	case err != nil:
 		return nil, err
 	}
 
 	if strings.TrimSpace(string(data)) == "" {
-		return nil, nil
+		return nil, nil //nolint:nilnil // an empty context file is nothing to report
 	}
 
 	return &File{Name: name, Body: string(data)}, nil

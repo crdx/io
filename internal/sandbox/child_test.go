@@ -34,7 +34,7 @@ func runAgainInChildProcess(t *testing.T, environment ...string) {
 		arguments = append(arguments, "-test.gocoverdir="+coverage)
 	}
 
-	child := exec.Command(self, arguments...) //nolint:gosec // the binary is this one
+	child := exec.CommandContext(t.Context(), self, arguments...) //nolint:gosec // the binary is this one
 	child.Env = append([]string{
 		childVariable + "=1",
 		coverageVariable + "=" + coverage,

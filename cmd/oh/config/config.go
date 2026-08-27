@@ -244,8 +244,7 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 			if err != nil {
 				return config, fmt.Errorf("%s: snippets.%s.file: %w", displayPath, name, err)
 			}
-			definition, err = definition.LoadFile(resolvedPath)
-			if err != nil {
+			if err := definition.LoadFile(resolvedPath); err != nil {
 				return config, fmt.Errorf("%s: snippets.%s: %w", displayPath, name, err)
 			}
 		}

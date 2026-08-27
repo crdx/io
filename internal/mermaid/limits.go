@@ -1,6 +1,7 @@
 package mermaid
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"unicode/utf8"
@@ -30,7 +31,7 @@ const (
 
 func validateSourceLimits(source string) error {
 	if !utf8.ValidString(source) {
-		return fmt.Errorf("source is not valid UTF-8")
+		return errors.New("source is not valid UTF-8")
 	}
 	if len(source) > maximumSourceBytes {
 		return fmt.Errorf("source exceeds %d bytes", maximumSourceBytes)

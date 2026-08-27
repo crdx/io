@@ -2,6 +2,7 @@ package login
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -34,7 +35,7 @@ type inputOpts struct {
 }
 
 // Run stores the credentials.
-func Run() error {
+func Run(ctx context.Context) error {
 	options := duckopt.MustBind[inputOpts](usage, "$0")
 
 	var path string
@@ -45,10 +46,10 @@ func Run() error {
 		err = loginOpenCodeGo(os.Stdin, os.Stdout, path)
 	case options.Anthropic:
 		path = anthropic.CredentialsPath()
-		err = anthropic.Login()
+		err = anthropic.Login(ctx)
 	case options.Codex:
 		path = codex.CredentialsPath()
-		err = codex.Login()
+		err = codex.Login(ctx)
 	default:
 		err = errors.New("tell me a provider")
 	}

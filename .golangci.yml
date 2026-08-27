@@ -4,7 +4,6 @@ run:
 linters:
   default: all
   disable:
-    - bodyclose
     - cyclop
     - depguard
     - dupword
@@ -14,31 +13,19 @@ linters:
     - forbidigo
     - funlen
     - gochecknoglobals
-    - gochecknoinits
     - gocognit
     - goconst
-    - gocritic
-    - gocyclo
-    - godot
-    - godox
     - gomodguard
+    - godot
     - inamedparam
     - ireturn
     - lll
     - maintidx
     - mnd
-    - nakedret
-    - nestif
-    - nilnil
     - nlreturn
-    - noctx
     - noinlineerr
     - paralleltest
-    - perfsprint
     - prealloc
-    - predeclared
-    - protogetter
-    - recvcheck
     - revive
     - tagalign
     - tagliatelle
@@ -55,6 +42,8 @@ linters:
         linters:
           - gosmopolitan
   settings:
+    gocyclo:
+      min-complexity: 32
     staticcheck:
       checks:
         - all

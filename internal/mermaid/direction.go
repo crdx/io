@@ -42,14 +42,14 @@ func (c gridCoord) Direction(dir direction) gridCoord {
 	return gridCoord{x: c.x + dir.x, y: c.y + dir.y}
 }
 
-func (g graph) selfReferenceDirection() (direction, direction, direction, direction) {
+func (g *graph) selfReferenceDirection() (direction, direction, direction, direction) {
 	if g.graphDirection == "LR" {
 		return Right, Down, Down, Right
 	}
 	return Down, Right, Right, Down
 }
 
-func (g graph) determineStartAndEndDir(e *edge) (direction, direction, direction, direction) {
+func (g *graph) determineStartAndEndDir(e *edge) (direction, direction, direction, direction) {
 	if e.from == e.to {
 		return g.selfReferenceDirection()
 	}
@@ -59,8 +59,6 @@ func (g graph) determineStartAndEndDir(e *edge) (direction, direction, direction
 	isBackwards := (g.graphDirection == "LR" && (d == Left || d == UpperLeft || d == LowerLeft)) ||
 		(g.graphDirection != "LR" && (d == Up || d == UpperLeft || d == UpperRight))
 
-	// TODO: This causes some squirmy lines if the corner spot is already occupied.
-	// For backwards edges, use special start positions: Down in LR mode, Right in TD mode
 	switch d {
 	case LowerRight:
 		if g.graphDirection == "LR" {
@@ -112,17 +110,18 @@ func (g graph) determineStartAndEndDir(e *edge) (direction, direction, direction
 		}
 	default:
 		if isBackwards {
-			if g.graphDirection == "LR" && d == Left {
+			switch {
+			case g.graphDirection == "LR" && d == Left:
 				preferredDir = Down
 				preferredOppositeDir = Down
 				alternativeDir = Left
 				alternativeOppositeDir = Right
-			} else if g.graphDirection == "TD" && d == Up {
+			case g.graphDirection == "TD" && d == Up:
 				preferredDir = Right
 				preferredOppositeDir = Right
 				alternativeDir = Up
 				alternativeOppositeDir = Down
-			} else {
+			default:
 				preferredDir = d
 				preferredOppositeDir = preferredDir.getOpposite()
 				alternativeDir = d
@@ -131,7 +130,6 @@ func (g graph) determineStartAndEndDir(e *edge) (direction, direction, direction
 		} else {
 			preferredDir = d
 			preferredOppositeDir = preferredDir.getOpposite()
-			// TODO: just return null and don't calculate alternative path
 			alternativeDir = d
 			alternativeOppositeDir = preferredOppositeDir
 		}

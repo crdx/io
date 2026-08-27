@@ -117,7 +117,7 @@ func drawMap(properties *graphProperties) (string, error) {
 	return drawingToString(g.draw()), nil
 }
 
-func drawBox(n *node, g graph) *drawing {
+func drawBox(n *node, g *graph) *drawing {
 	w := 0
 	for i := range 2 {
 		w += g.columnWidth[n.gridCoord.x+i]
@@ -358,29 +358,26 @@ func getDrawingSize(d *drawing) (int, int) {
 }
 
 func determineDirection(from genericCoord, to genericCoord) direction {
-	if from.x == to.x {
+	switch {
+	case from.x == to.x:
 		if from.y < to.y {
 			return Down
-		} else {
-			return Up
 		}
-	} else if from.y == to.y {
+		return Up
+	case from.y == to.y:
 		if from.x < to.x {
 			return Right
-		} else {
-			return Left
 		}
-	} else if from.x < to.x {
+		return Left
+	case from.x < to.x:
 		if from.y < to.y {
 			return LowerRight
-		} else {
-			return UpperRight
 		}
-	} else {
+		return UpperRight
+	default:
 		if from.y < to.y {
 			return LowerLeft
-		} else {
-			return UpperLeft
 		}
+		return UpperLeft
 	}
 }

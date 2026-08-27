@@ -32,10 +32,12 @@ const (
 const chill = 5 * time.Minute
 
 // Login authorises against a Claude subscription and stores the credentials.
-func Login() error {
+func Login(ctx context.Context) error {
 	token := newToken()
 
-	listener, err := net.Listen("tcp", callbackHost)
+	var config net.ListenConfig
+
+	listener, err := config.Listen(ctx, "tcp", callbackHost)
 	if err != nil {
 		return fmt.Errorf("listen on %s: %w", callbackHost, err)
 	}
@@ -49,12 +51,12 @@ func Login() error {
 
 	open(address)
 
-	code, err := waitForCallback(listener, token)
+	code, err := waitForCallback(ctx, listener, token)
 	if err != nil {
 		return err
 	}
 
-	credentials, err := exchange(code, token)
+	credentials, err := exchange(ctx, code, token)
 	if err != nil {
 		return err
 	}
@@ -79,7 +81,7 @@ func authoriseAddress(token string) string {
 	return authoriseURL + "?" + query.Encode()
 }
 
-func waitForCallback(listener net.Listener, state string) (string, error) {
+func waitForCallback(ctx context.Context, listener net.Listener, state string) (string, error) {
 	type transmission struct {
 		code string
 		err  error
@@ -127,15 +129,17 @@ func waitForCallback(listener net.Listener, state string) (string, error) {
 	go func() { _ = server.Serve(listener) }()
 
 	defer func() {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		stopping, cancel := context.WithTimeout(context.WithoutCancel(ctx), time.Second)
 		defer cancel()
 
-		_ = server.Shutdown(ctx)
+		_ = server.Shutdown(stopping)
 	}()
 
 	select {
 	case transmission := <-radio:
 		return transmission.code, transmission.err
+	case <-ctx.Done():
+		return "", ctx.Err()
 	case <-time.After(chill):
 		return "", errors.New("gave up waiting")
 	}
@@ -151,8 +155,8 @@ type tokenRequest struct {
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
-func exchange(code string, verifier string) (*Credentials, error) {
-	credentials, err := postToken(loginRequests, tokenRequest{
+func exchange(ctx context.Context, code string, verifier string) (*Credentials, error) {
+	credentials, err := postToken(ctx, loginRequests, tokenRequest{
 		GrantType:    "authorization_code",
 		ClientID:     clientID,
 		Code:         code,
@@ -168,7 +172,7 @@ func exchange(code string, verifier string) (*Credentials, error) {
 }
 
 func refreshToken(requests *req.Client, refresh string) (*Credentials, error) {
-	return postToken(requests, tokenRequest{
+	return postToken(context.Background(), requests, tokenRequest{
 		GrantType:    "refresh_token",
 		ClientID:     clientID,
 		RefreshToken: refresh,
@@ -179,14 +183,14 @@ const authTimeout = 30 * time.Second
 
 var loginRequests = req.New(authTimeout)
 
-func postToken(requests *req.Client, body tokenRequest) (*Credentials, error) {
+func postToken(ctx context.Context, requests *req.Client, body tokenRequest) (*Credentials, error) {
 	var payload struct {
 		Access    string `json:"access_token"`
 		Refresh   string `json:"refresh_token"`
 		ExpiresIn int64  `json:"expires_in"`
 	}
 
-	if err := requests.JSON(context.Background(), tokenEndpoint(), body, &payload); err != nil {
+	if err := requests.JSON(ctx, tokenEndpoint(), body, &payload); err != nil {
 		return nil, err
 	}
 
@@ -220,5 +224,6 @@ func newToken() string {
 }
 
 func open(address string) {
-	_ = exec.Command("xdg-open", address).Start() //nolint:gosec // the address is one we built
+	//nolint:gosec,noctx // the address is one we built, and the browser outlives this call
+	_ = exec.Command("xdg-open", address).Start()
 }

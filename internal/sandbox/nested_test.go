@@ -39,7 +39,8 @@ func TestGitMayCommitWithinAWorkspaceItMayNotOtherwiseChange(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	child := exec.Command(self, "-test.run", t.Name()) //nolint:gosec // the binary is this one
+	//nolint:gosec // the binary is this one
+	child := exec.CommandContext(t.Context(), self, "-test.run", t.Name())
 	child.Dir = workspace
 	child.Env = []string{
 		childVariable + "=1",
@@ -76,7 +77,8 @@ func repository(t *testing.T, workspace string, home string) {
 	}
 
 	for _, args := range [][]string{{"init", "-q"}, {"add", "."}, {"commit", "-q", "-m", "first"}} {
-		command := exec.Command("git", args...) //nolint:gosec // the arguments are written above
+		//nolint:gosec // the arguments are written above
+		command := exec.CommandContext(t.Context(), "git", args...)
 		command.Dir = workspace
 		command.Env = []string{"HOME=" + home, "PATH=" + os.Getenv("PATH"), "GIT_CONFIG_NOSYSTEM=1"}
 
@@ -124,7 +126,8 @@ func commitUnderLandlock(t *testing.T) {
 		{"log", "--oneline"},
 		{"gc", "--quiet"},
 	} {
-		command := exec.Command("git", args...) //nolint:gosec // the arguments are written above
+		//nolint:gosec // the arguments are written above
+		command := exec.CommandContext(t.Context(), "git", args...)
 		command.Dir = workspace
 		command.Env = os.Environ()
 

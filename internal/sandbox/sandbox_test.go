@@ -519,7 +519,9 @@ func TestDatagramsStayOnLoopback(t *testing.T) {
 }
 
 func TestHostLoopbackIsUnreachable(t *testing.T) {
-	listener, err := net.Listen("tcp4", "127.0.0.1:0")
+	var config net.ListenConfig
+
+	listener, err := config.Listen(t.Context(), "tcp4", "127.0.0.1:0")
 	if err != nil {
 		t.Skipf("host sockets are unavailable: %v", err)
 	}
@@ -540,7 +542,9 @@ func TestAUnixSocketCannotReachAHostService(t *testing.T) {
 	directory := t.TempDir()
 	path := filepath.Join(directory, "host.sock")
 
-	listener, err := net.Listen("unix", path)
+	var config net.ListenConfig
+
+	listener, err := config.Listen(t.Context(), "unix", path)
 	if err != nil {
 		t.Skipf("host Unix sockets are unavailable: %v", err)
 	}

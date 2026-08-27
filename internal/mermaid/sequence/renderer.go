@@ -1,6 +1,7 @@
 package sequence
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -78,7 +79,7 @@ func calculateLayout(sd *SequenceDiagram, config *diagram.Config) *diagramLayout
 
 func Render(sd *SequenceDiagram, config *diagram.Config) (string, error) {
 	if sd == nil || len(sd.Participants) == 0 {
-		return "", fmt.Errorf("no participants")
+		return "", errors.New("no participants")
 	}
 	if config == nil {
 		config = diagram.DefaultConfig()
@@ -504,6 +505,43 @@ func buildLine(participants []*Participant, layout *diagramLayout, draw func(int
 	return sb.String()
 }
 
+func drawRightwardArrow(line []string, from int, to int, arrow ArrowType, style rune, chars BoxChars) {
+	line[from] = string(chars.TeeRight)
+
+	for i := from + 1; i < to; i++ {
+		line[i] = string(style)
+	}
+
+	if head, hasHead := arrow.head(chars, true); hasHead {
+		line[to-1] = string(head)
+	}
+
+	if arrow.isBidirectional() {
+		line[from+1] = string(chars.ArrowLeft)
+	}
+
+	line[to] = string(chars.Vertical)
+}
+
+func drawLeftwardArrow(line []string, from int, to int, arrow ArrowType, style rune, chars BoxChars) {
+	line[to] = string(chars.Vertical)
+	line[to+1] = string(style)
+
+	if head, hasHead := arrow.head(chars, false); hasHead {
+		line[to+1] = string(head)
+	}
+
+	for i := to + 2; i < from; i++ {
+		line[i] = string(style)
+	}
+
+	if arrow.isBidirectional() {
+		line[from-1] = string(chars.ArrowRight)
+	}
+
+	line[from] = string(chars.TeeLeft)
+}
+
 func buildLifeline(layout *diagramLayout, chars BoxChars) string {
 	line := make([]string, layout.totalWidth+1)
 	for i := range line {
@@ -548,30 +586,9 @@ func renderMessage(msg *Message, layout *diagramLayout, chars BoxChars) []string
 	}
 
 	if from < to {
-		line[from] = string(chars.TeeRight)
-		for i := from + 1; i < to; i++ {
-			line[i] = string(style)
-		}
-		if head, ok := msg.ArrowType.head(chars, true); ok {
-			line[to-1] = string(head)
-		}
-		if msg.ArrowType.isBidirectional() {
-			line[from+1] = string(chars.ArrowLeft)
-		}
-		line[to] = string(chars.Vertical)
+		drawRightwardArrow(line, from, to, msg.ArrowType, style, chars)
 	} else {
-		line[to] = string(chars.Vertical)
-		line[to+1] = string(style)
-		if head, ok := msg.ArrowType.head(chars, false); ok {
-			line[to+1] = string(head)
-		}
-		for i := to + 2; i < from; i++ {
-			line[i] = string(style)
-		}
-		if msg.ArrowType.isBidirectional() {
-			line[from-1] = string(chars.ArrowRight)
-		}
-		line[from] = string(chars.TeeLeft)
+		drawLeftwardArrow(line, from, to, msg.ArrowType, style, chars)
 	}
 	if msg.CentralFrom {
 		line[from] = string(chars.Circle)

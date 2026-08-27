@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"crdx.org/io/agent"
@@ -107,7 +108,7 @@ func restateStartupContext(event map[string]json.RawMessage, promptBytes int) er
 
 	delete(state, "context")
 	if promptBytes > 0 {
-		state["prompt"] = json.RawMessage(fmt.Sprint(promptBytes))
+		state["prompt"] = json.RawMessage(strconv.Itoa(promptBytes))
 	}
 
 	restated, err := json.Marshal(state)

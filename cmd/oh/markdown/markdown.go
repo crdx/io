@@ -130,19 +130,10 @@ func (self *renderer) code(lines []string) {
 }
 
 func (self *renderer) mermaid(lines []string, block int) bool {
-	diagram, err := mermaid.Render(strings.Join(lines, "\n"))
-	if err == nil && diagram != "" {
-		rows := strings.Split(diagram, "\n")
-		if rowsFit(rows, self.columns) {
-			self.rows = append(self.rows, rows...)
-			if self.stream != nil {
-				if self.stream.mermaidRows == nil {
-					self.stream.mermaidRows = map[int][]string{}
-				}
-				self.stream.mermaidRows[block] = rows
-			}
-			return true
-		}
+	if rows, isDrawable := renderMermaidRows(lines, self.columns); isDrawable {
+		self.rows = append(self.rows, rows...)
+		self.rememberMermaidRows(block, rows)
+		return true
 	}
 
 	if self.stream == nil {
@@ -154,6 +145,32 @@ func (self *renderer) mermaid(lines []string, block int) bool {
 	}
 	self.rows = append(self.rows, cachedRows...)
 	return true
+}
+
+func renderMermaidRows(lines []string, columns int) ([]string, bool) {
+	diagram, err := mermaid.Render(strings.Join(lines, "\n"))
+	if err != nil || diagram == "" {
+		return nil, false
+	}
+
+	rows := strings.Split(diagram, "\n")
+	if !rowsFit(rows, columns) {
+		return nil, false
+	}
+
+	return rows, true
+}
+
+func (self *renderer) rememberMermaidRows(block int, rows []string) {
+	if self.stream == nil {
+		return
+	}
+
+	if self.stream.mermaidRows == nil {
+		self.stream.mermaidRows = map[int][]string{}
+	}
+
+	self.stream.mermaidRows[block] = rows
 }
 
 func rowsFit(rows []string, columns int) bool {

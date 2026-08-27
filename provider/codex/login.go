@@ -30,11 +30,13 @@ const chill = 5 * time.Minute
 
 // Login authorises against a ChatGPT subscription and stores the credentials, printing the URL to
 // visit and opening it where it can.
-func Login() error {
+func Login(ctx context.Context) error {
 	verifier := newToken()
 	state := newToken()
 
-	listener, err := net.Listen("tcp", callbackHost)
+	var config net.ListenConfig
+
+	listener, err := config.Listen(ctx, "tcp", callbackHost)
 	if err != nil {
 		return fmt.Errorf("listen on %s: %w", callbackHost, err)
 	}
@@ -48,12 +50,12 @@ func Login() error {
 
 	open(address)
 
-	code, err := waitForCallback(listener, state)
+	code, err := waitForCallback(ctx, listener, state)
 	if err != nil {
 		return err
 	}
 
-	credentials, err := exchange(code, verifier)
+	credentials, err := exchange(ctx, code, verifier)
 	if err != nil {
 		return err
 	}
@@ -80,7 +82,7 @@ func authoriseAddress(verifier string, state string) string {
 	return authoriseURL + "?" + query.Encode()
 }
 
-func waitForCallback(listener net.Listener, state string) (string, error) {
+func waitForCallback(ctx context.Context, listener net.Listener, state string) (string, error) {
 	type transmission struct {
 		code string
 		err  error
@@ -115,22 +117,24 @@ func waitForCallback(listener net.Listener, state string) (string, error) {
 	go func() { _ = server.Serve(listener) }()
 
 	defer func() {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		stopping, cancel := context.WithTimeout(context.WithoutCancel(ctx), time.Second)
 		defer cancel()
 
-		_ = server.Shutdown(ctx)
+		_ = server.Shutdown(stopping)
 	}()
 
 	select {
 	case transmission := <-radio:
 		return transmission.code, transmission.err
+	case <-ctx.Done():
+		return "", ctx.Err()
 	case <-time.After(chill):
 		return "", errors.New("gave up waiting")
 	}
 }
 
-func exchange(code string, verifier string) (*Credentials, error) {
-	credentials, err := postForm(loginRequests, url.Values{
+func exchange(ctx context.Context, code string, verifier string) (*Credentials, error) {
+	credentials, err := postForm(ctx, loginRequests, url.Values{
 		"grant_type":    {"authorization_code"},
 		"client_id":     {clientID},
 		"code":          {code},
@@ -150,7 +154,7 @@ func exchange(code string, verifier string) (*Credentials, error) {
 }
 
 func refreshToken(requests *req.Client, refresh string) (*Credentials, error) {
-	credentials, err := postForm(requests, url.Values{
+	credentials, err := postForm(context.Background(), requests, url.Values{
 		"grant_type":    {"refresh_token"},
 		"client_id":     {clientID},
 		"refresh_token": {refresh},
@@ -169,14 +173,14 @@ const authTimeout = 30 * time.Second
 
 var loginRequests = req.New(authTimeout)
 
-func postForm(requests *req.Client, form url.Values) (*Credentials, error) {
+func postForm(ctx context.Context, requests *req.Client, form url.Values) (*Credentials, error) {
 	var payload struct {
 		Access    string `json:"access_token"`
 		Refresh   string `json:"refresh_token"`
 		ExpiresIn int64  `json:"expires_in"`
 	}
 
-	if err := requests.Form(context.Background(), tokenEndpoint(), form, &payload); err != nil {
+	if err := requests.Form(ctx, tokenEndpoint(), form, &payload); err != nil {
 		return nil, err
 	}
 
@@ -231,5 +235,6 @@ func accountID(access string) (string, error) {
 }
 
 func open(address string) {
-	_ = exec.Command("xdg-open", address).Start() //nolint:gosec // the address is one we built
+	//nolint:gosec,noctx // the address is one we built, and the browser outlives this call
+	_ = exec.Command("xdg-open", address).Start()
 }

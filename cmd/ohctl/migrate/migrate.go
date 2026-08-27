@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"crdx.org/duckopt/v2"
 
@@ -238,7 +239,7 @@ func Session(options Options, name string) (int, error) {
 		}
 	}
 
-	lines[0]["version"] = json.RawMessage(fmt.Sprint(session.JournalFormat))
+	lines[0]["version"] = json.RawMessage(strconv.Itoa(session.JournalFormat))
 
 	if options.DryRun {
 		return fromFormat, nil

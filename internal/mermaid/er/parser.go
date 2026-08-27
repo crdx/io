@@ -3,6 +3,7 @@
 package er
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -219,7 +220,7 @@ func parseAttributeBlock(lines []string, start int) ([]Attribute, int, error) {
 			return attrs, i, nil
 		}
 	}
-	return nil, len(lines), fmt.Errorf("unclosed attribute block (missing '}')")
+	return nil, len(lines), errors.New("unclosed attribute block (missing '}')")
 }
 
 func parseAttribute(line string) (Attribute, error) {

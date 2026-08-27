@@ -220,10 +220,10 @@ func (self *Writer) release(event agent.Event) []agent.Event {
 		return nil
 	}
 
-	released := append(self.eventBuffer, event)
+	released := self.eventBuffer
 	self.eventBuffer = nil
 
-	return released
+	return append(released, event)
 }
 
 func (self *Writer) appendEvent(event agent.Event) error {

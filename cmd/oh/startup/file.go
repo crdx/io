@@ -26,7 +26,7 @@ func PrepareInitialFiles(sourcePaths []string, scratchDirectory string) (string,
 
 	listedPaths := make([]string, len(destinationPaths))
 	for i, destinationPath := range destinationPaths {
-		listedPaths[i] = fmt.Sprintf("- %s", destinationPath)
+		listedPaths[i] = "- " + destinationPath
 	}
 	return messageIntroduction + "\n\n" + strings.Join(listedPaths, "\n"), nil
 }

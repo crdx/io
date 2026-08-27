@@ -162,11 +162,14 @@ func rewriteEditorCommand(data []byte) []byte {
 }
 
 func editorCommandLine(line string) string {
-	at := strings.Index(line, "=")
-	key := line[:at]
+	key, value, found := strings.Cut(line, "=")
+	if !found {
+		return line
+	}
+
 	gap := key[len(strings.TrimRight(key, " \t")):]
 
-	return "command" + gap + line[at:]
+	return "command" + gap + "=" + value
 }
 
 func migrateConfigFromVersionTwo(data []byte) ([]byte, error) {
@@ -323,16 +326,16 @@ func rewriteVersionOneConfig(data []byte, removed map[string]bool, selection str
 	if len(prefix) > 0 {
 		prefix = append(prefix, "")
 	}
-	versioned := append(prefix, fmt.Sprintf("version = %d", config.RoundRobinFormat))
-	root = append(versioned, root[versionAt:]...)
+	prefix = append(prefix, fmt.Sprintf("version = %d", config.RoundRobinFormat))
+	root = append(prefix, root[versionAt:]...)
 
 	if selection != "" {
 		root = appendWithoutTrailingBlank(root, "", "[model]", "round_robin = ["+strconv.Quote(selection)+"]", "")
 	}
 
-	migrated := append(root, lines[tableStart:]...)
+	root = append(root, lines[tableStart:]...)
 
-	return []byte(strings.Join(migrated, "\n") + "\n")
+	return []byte(strings.Join(root, "\n") + "\n")
 }
 
 func rewriteConfigVersion(data []byte, version int) []byte {

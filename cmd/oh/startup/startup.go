@@ -2,7 +2,7 @@ package startup
 
 import (
 	"encoding/json"
-	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -66,9 +66,9 @@ func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
 	}
 	_, _ = line.WriteString(style.Subtle(" ready in ") + startupDuration(elapsed))
 	_, _ = line.WriteString(style.Subtle(" with "))
-	_, _ = line.WriteString(style.Normal(fmt.Sprint(info.ProjectSkills + info.GlobalSkills)))
+	_, _ = line.WriteString(style.Normal(strconv.Itoa(info.ProjectSkills + info.GlobalSkills)))
 	_, _ = line.WriteString(style.Subtle(" skills, "))
-	_, _ = line.WriteString(style.Normal(fmt.Sprint(info.Snippets)))
+	_, _ = line.WriteString(style.Normal(strconv.Itoa(info.Snippets)))
 	_, _ = line.WriteString(style.Subtle(" snippets, and "))
 	_, _ = line.WriteString(startupContextTokens(info))
 	_, _ = line.WriteString(style.Subtle(" of context."))

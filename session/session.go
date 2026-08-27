@@ -328,9 +328,9 @@ func (w *Writer) record(line Line) (time.Time, error) {
 		return line.Time, err
 	}
 
-	record := append(encodedLine, '\n')
-	n, err := w.file.Write(record)
-	if err == nil && n != len(record) {
+	encodedLine = append(encodedLine, '\n')
+	n, err := w.file.Write(encodedLine)
+	if err == nil && n != len(encodedLine) {
 		return line.Time, io.ErrShortWrite
 	}
 	return line.Time, err

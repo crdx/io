@@ -45,7 +45,7 @@ func TestOpenReportsAnEditorThatCannotStart(t *testing.T) {
 }
 
 func TestEditorExitFailureIsReported(t *testing.T) {
-	command := exec.Command("sh", "-c", "exit 42")
+	command := exec.CommandContext(t.Context(), "sh", "-c", "exit 42")
 	if err := command.Start(); err != nil {
 		t.Fatal(err)
 	}
