@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"crdx.org/io/cmd/oh/segment"
+	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
 	"crdx.org/io/cmd/oh/segment/localTime"
@@ -457,6 +458,63 @@ func TestTheSessionNameSegmentOmitsAnUnknownAnimalEmoji(t *testing.T) {
 
 	if got := style.Plain(built.Render(segment.Context{})); got != "brave-tester" {
 		t.Errorf("expected only the session name, got %q", got)
+	}
+}
+
+func TestTheActiveModelSegmentUsesFriendlyModelNames(t *testing.T) {
+	tests := map[string]string{
+		"codex/gpt-5.3-codex":                      "Codex 5.3",
+		"codex/gpt-5.3-codex-spark":                "Codex Spark 5.3",
+		"codex/gpt-5.4-mini":                       "GPT Mini 5.4",
+		"codex/gpt-5.4-nano":                       "GPT Nano 5.4",
+		"codex/gpt-5.5-pro":                        "GPT Pro 5.5",
+		"codex/gpt-5.6":                            "GPT 5.6",
+		"codex/gpt-5.6-luna":                       "GPT Luna 5.6",
+		"codex/gpt-5.6-sol":                        "GPT Sol 5.6",
+		"codex/gpt-5.6-terra":                      "GPT Terra 5.6",
+		"codex/o3":                                 "o3",
+		"codex/o3-pro":                             "o3 Pro",
+		"codex/o4-mini":                            "o4 Mini",
+		"opencode-go/kimi-k3":                      "Kimi K3",
+		"opencode-go/kimi-k2.7-code":               "Kimi Code K2.7",
+		"opencode-go/longcat-2.0":                  "LongCat 2.0",
+		"opencode-go/glm-5.3-flash":                "GLM Flash 5.3",
+		"opencode-go/glm-5.3":                      "GLM 5.3",
+		"opencode-go/deepseek-v4-pro":              "DeepSeek Pro 4",
+		"opencode-go/deepseek-v4-flash":            "DeepSeek Flash 4",
+		"opencode-go/deepseek-v4-flash-vision-exp": "DeepSeek Flash Vision Exp 4",
+		"opencode-go/mimo-v2-omni":                 "Mimo Omni v2",
+		"opencode-go/mimo-v2.5-pro":                "Mimo Pro v2.5",
+		"opencode-go/mimo-v2.5":                    "Mimo v2.5",
+		"opencode-go/hy3":                          "HY3",
+		"anthropic/claude-opus-5":                  "Opus 5",
+		"anthropic/claude-sonnet-5":                "Sonnet 5",
+		"anthropic/claude-fable-5":                 "Fable 5",
+		"openrouter/vendor/custom:free":            "custom",
+	}
+
+	for modelName, want := range tests {
+		t.Run(modelName, func(t *testing.T) {
+			if got := drawn(t, activeModel.New(modelName, "medium", nil)); got != want {
+				t.Errorf("got %q, want %q", got, want)
+			}
+		})
+	}
+}
+
+func TestTheActiveModelSegmentDrawsTheAvailableEffortLadder(t *testing.T) {
+	levels := []string{"none", "minimal", "low", "medium", "high"}
+	for effort, want := range map[string]string{
+		"none":    "GPT 5.6 ▫▫▫▫",
+		"minimal": "GPT 5.6 ▪▫▫▫",
+		"medium":  "GPT 5.6 ▪▪▪▫",
+		"high":    "GPT 5.6 ▪▪▪▪",
+	} {
+		t.Run(effort, func(t *testing.T) {
+			if got := drawn(t, activeModel.New("gpt-5.6", effort, levels)); got != want {
+				t.Errorf("got %q, want %q", got, want)
+			}
+		})
 	}
 }
 

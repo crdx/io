@@ -4796,6 +4796,7 @@ func availableSegments(
 		CurrentSessionName: currentSessionName,
 		ModelName:          modelName,
 		ModelEffort:        modelEffort,
+		ModelEffortLevels:  []string{"none", "minimal", "low", "medium", "high"},
 		Sources:            harness.getBarSources(),
 	})
 }
@@ -4971,12 +4972,6 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 	`
 
 	passes := map[string]func() string{
-		"active-model / medium effort": goldenSegmentPass(
-			t,
-			activeModel.New("gpt-5.6-sol", "medium"),
-			"",
-			segment.Context{},
-		),
 		"activity-spinner / idle": goldenSegmentPass(
 			t,
 			activitySpinner.New(func() bool { return false }, clockAt(at)),
@@ -5267,6 +5262,16 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			`type = "short"`,
 			segment.Context{},
 		),
+	}
+
+	modelEffortLevels := []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
+	for _, effort := range modelEffortLevels {
+		passes["active-model / "+effort+" effort"] = goldenSegmentPass(
+			t,
+			activeModel.New("gpt-5.6-sol", effort, modelEffortLevels),
+			"",
+			segment.Context{},
+		)
 	}
 
 	compareWithGolden(t, "segments", ".ansi", passes)

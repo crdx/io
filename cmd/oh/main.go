@@ -440,6 +440,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		CurrentSessionName: log.Name(),
 		ModelName:          selection.Model,
 		ModelEffort:        selection.Effort,
+		ModelEffortLevels:  choice.EffortLevels,
 		UsageReporter:      usageReporter,
 		UsageCachePath:     location.GetUsageCachePath(selection.Provider, endpointURL != ""),
 		Sources:            chat.getBarSources(),

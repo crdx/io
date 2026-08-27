@@ -45,6 +45,7 @@ type Options struct {
 	CurrentSessionName string
 	ModelName          string
 	ModelEffort        string
+	ModelEffortLevels  []string
 	UsageReporter      agent.UsageReporter
 	UsageCachePath     string
 	Sources            Sources
@@ -65,7 +66,7 @@ func NewRegistry(options Options) segment.Registry {
 		contextUsageSegment:    contextUsage.New(options.Sources.GetContextUsage),
 		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
 		workspaceDirSegment:    workspaceDir.New(options.WorkspaceDir),
-		activeModelSegment:     activeModel.New(options.ModelName, options.ModelEffort),
+		activeModelSegment:     activeModel.New(options.ModelName, options.ModelEffort, options.ModelEffortLevels),
 		scrollOverflowSegment:  scrollOverflow.New,
 		sessionNameSegment:     sessionName.New(options.CurrentSessionName),
 		sessionEmojiSegment:    sessionEmoji.New(options.CurrentSessionName),
