@@ -20,7 +20,10 @@ const (
 	actionAllow       = 0x7fff0000
 )
 
-const seccompSetModeFilter = 1
+const (
+	seccompSetModeFilter = 1
+	x32SyscallBase       = 0x40000000
+)
 
 func blockedFamilies(allowUnixSockets bool) []uint32 {
 	families := []uint32{unix.AF_PACKET, unix.AF_NETLINK}
@@ -72,6 +75,8 @@ func buildFilter(allowUnixSockets bool) ([]unix.SockFilter, error) {
 		jumpIfEqual(target.audit, 1, 0),
 		ret(actionKillProcess),
 		load(offsetNr),
+		jumpIfGreaterOrEqual(x32SyscallBase, 0, 1),
+		ret(actionErrno | uint32(unix.ENOSYS)),
 	}
 
 	filter = append(
@@ -117,6 +122,15 @@ func load(offset uint32) unix.SockFilter {
 func jumpIfEqual(value uint32, whenTrue uint8, whenFalse uint8) unix.SockFilter {
 	return unix.SockFilter{
 		Code: unix.BPF_JMP | unix.BPF_JEQ | unix.BPF_K,
+		Jt:   whenTrue,
+		Jf:   whenFalse,
+		K:    value,
+	}
+}
+
+func jumpIfGreaterOrEqual(value uint32, whenTrue uint8, whenFalse uint8) unix.SockFilter {
+	return unix.SockFilter{
+		Code: unix.BPF_JMP | unix.BPF_JGE | unix.BPF_K,
 		Jt:   whenTrue,
 		Jf:   whenFalse,
 		K:    value,

@@ -46,6 +46,11 @@ func TestTheSocketFilterAllowsOnlyNamespacedNetworking(t *testing.T) {
 			if got := evaluate(filter, 0, target.socket, unix.AF_INET); got != actionKillProcess {
 				t.Errorf("the wrong architecture got action %#x, want kill", got)
 			}
+			for _, number := range []uint32{x32SyscallBase, x32SyscallBase + target.socket} {
+				if got := evaluate(filter, target.audit, number, unix.AF_UNIX); got != actionErrno|uint32(unix.ENOSYS) {
+					t.Errorf("an x32 syscall got action %#x, want errno", got)
+				}
+			}
 		})
 	}
 }
@@ -166,6 +171,12 @@ func evaluate(filter []unix.SockFilter, arch uint32, number uint32, argument uin
 			} else {
 				at += int(instruction.Jf) + 1
 			}
+		case unix.BPF_JMP | unix.BPF_JGE | unix.BPF_K:
+			if accumulator >= instruction.K {
+				at += int(instruction.Jt) + 1
+			} else {
+				at += int(instruction.Jf) + 1
+			}
 		case unix.BPF_RET | unix.BPF_K:
 			return instruction.K
 		default:
@@ -174,4 +185,28 @@ func evaluate(filter []unix.SockFilter, arch uint32, number uint32, argument uin
 	}
 
 	panic("filter did not return")
+}
+
+func TestAnInstalledFilterRefusesTheX32ABI(t *testing.T) {
+	if !insideChildProcess() {
+		runAgainInChildProcess(t)
+		return
+	}
+
+	if err := applySeccomp(false); err != nil {
+		t.Fatalf("could not install the filter: %v", err)
+	}
+
+	fd, _, errno := unix.Syscall(
+		uintptr(unix.SYS_SOCKET)+x32SyscallBase,
+		uintptr(unix.AF_UNIX),
+		uintptr(unix.SOCK_STREAM),
+		0,
+	)
+	if errno == 0 {
+		_ = unix.Close(int(fd))
+	}
+	if errno != unix.ENOSYS {
+		t.Errorf("an x32 syscall got fd %d and %v, want the filter's refusal", fd, errno)
+	}
 }
