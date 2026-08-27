@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"io/fs"
 	"maps"
 	"os"
 	"path/filepath"
@@ -64,6 +63,26 @@ type Rule struct {
 	Left   []toml.Primitive `toml:"left"`
 	Center []toml.Primitive `toml:"center"`
 	Right  []toml.Primitive `toml:"right"`
+}
+
+type LiveConfig struct {
+	GetOnWithItMessage string
+	SegmentLayout      segment.Layout
+}
+
+func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
+	layout, err := self.BuildLayout(registry)
+	if err != nil {
+		return LiveConfig{}, err
+	}
+	if err := self.ValidateConsumed(); err != nil {
+		return LiveConfig{}, err
+	}
+
+	return LiveConfig{
+		GetOnWithItMessage: self.GetOnWithItMessage,
+		SegmentLayout:      layout,
+	}, nil
 }
 
 func (self Bar) entries() map[segment.Position][]toml.Primitive {
@@ -145,12 +164,7 @@ func (self Config) metaFor(position segment.Position) *toml.MetaData {
 	return self.fallback
 }
 
-func readConfigVersion(path string) (int, error) {
-	data, err := os.ReadFile(path) //nolint:gosec // the path is the configured one
-	if err != nil {
-		return 0, err
-	}
-
+func readConfigVersion(data []byte) (int, error) {
 	version, err := format.ReadTOML(data)
 	if err != nil {
 		return 0, err
@@ -163,6 +177,13 @@ func readConfigVersion(path string) (int, error) {
 }
 
 func Load(path string) (Config, error) {
+	if path == "" {
+		return loadSnapshot(path, snapshot{isMissing: true})
+	}
+	return loadSnapshot(path, readSnapshot(path))
+}
+
+func loadSnapshot(path string, current snapshot) (Config, error) {
 	var config Config
 
 	defaults, err := toml.Decode(defaultsTOML, &config)
@@ -172,17 +193,19 @@ func Load(path string) (Config, error) {
 
 	config.fallback = &defaults
 
-	if path == "" {
+	if path == "" || current.isMissing {
 		return config, nil
 	}
 
 	displayPath := pathutil.Shorten(path)
 	config.filePath = displayPath
 
-	version, err := readConfigVersion(path)
+	if current.failure != nil {
+		return config, fmt.Errorf("%s: %w", displayPath, current.failure)
+	}
+
+	version, err := readConfigVersion(current.data)
 	switch {
-	case errors.Is(err, fs.ErrNotExist):
-		return config, nil
 	case err != nil:
 		return config, fmt.Errorf("%s: %w", displayPath, err)
 	case version < Format:
@@ -193,7 +216,7 @@ func Load(path string) (Config, error) {
 		return config, fmt.Errorf("%s: config %w: upgrade oh", displayPath, err)
 	}
 
-	meta, err := toml.DecodeFile(path, &config)
+	meta, err := toml.Decode(string(current.data), &config)
 	if err != nil {
 		return config, fmt.Errorf("%s: %w", displayPath, err)
 	}

@@ -210,10 +210,11 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	defer func() { _ = homeRoot.Close() }()
 
 	configPath := location.GetConfigFile()
-	settings, err := config.Load(configPath)
+	settings, configObserver, err := config.Observe(configPath)
 	if err != nil {
 		return "", err
 	}
+	defer configObserver.Close()
 	snippetCommands, err := snippets.New(settings.Snippets)
 	if err != nil {
 		return "", fmt.Errorf("%s: snippets: %w", pathutil.Shorten(configPath), err)
@@ -414,21 +415,21 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	chat = &App{
-		agent:              agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
-		screen:             output.New(os.Stdout).LinkPathsUnder(workspaceDir),
-		terminal:           terminal.New(os.Stdout, workspaceDir),
-		metrics:            metrics.New(choice.ContextWindowTokens),
-		commands:           commandRegistry,
-		recorder:           record.New(log),
-		workspaceDir:       workspaceDir,
-		mode:               mode,
-		getOnWithItMessage: settings.GetOnWithItMessage,
-		startedAt:          time.Now(),
+		agent:          agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
+		screen:         output.New(os.Stdout).LinkPathsUnder(workspaceDir),
+		terminal:       terminal.New(os.Stdout, workspaceDir),
+		metrics:        metrics.New(choice.ContextWindowTokens),
+		commands:       commandRegistry,
+		recorder:       record.New(log),
+		workspaceDir:   workspaceDir,
+		mode:           mode,
+		configObserver: configObserver,
+		startedAt:      time.Now(),
 	}
 
 	usageReporter, _ := client.Client.(agent.UsageReporter)
 
-	chat.segmentLayout, err = settings.BuildLayout(bar.NewRegistry(bar.Options{
+	barRegistry := bar.NewRegistry(bar.Options{
 		WorkspaceDir:       workspaceDir,
 		CurrentSessionName: log.Name(),
 		ModelName:          selection.Model,
@@ -436,14 +437,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		UsageReporter:      usageReporter,
 		UsageCachePath:     location.GetUsageCachePath(selection.Provider, endpointURL != ""),
 		Sources:            chat.getBarSources(),
-	}))
+	})
+	liveSettings, err := settings.BuildLive(barRegistry)
 	if err != nil {
 		return "", err
 	}
-
-	if err := settings.ValidateConsumed(); err != nil {
-		return "", err
-	}
+	chat.getOnWithItMessage = liveSettings.GetOnWithItMessage
+	chat.barConfiguration = bar.NewConfiguration(barRegistry, liveSettings.SegmentLayout)
 
 	if resumedSession != nil {
 		chat.restore(resumedSession)

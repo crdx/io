@@ -24,6 +24,8 @@ type Handler struct {
 	TurnFinished func() bool
 	Resize       func()
 	Beat         func()
+	Changes      <-chan error
+	Change       func(error) bool
 	Draw         func()
 }
 
@@ -41,6 +43,7 @@ func Run(terminal *os.File, getNextRefresh func(time.Time) time.Time, handler Ha
 }
 
 func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan time.Time, schedule func(), beats <-chan time.Time, handler Handler) {
+	changes := handler.Changes
 	for {
 		schedule()
 
@@ -67,6 +70,14 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan t
 				continue
 			}
 		case <-refreshes:
+		case failure, open := <-changes:
+			if !open {
+				changes = nil
+				continue
+			}
+			if handler.Change != nil && !handler.Change(failure) {
+				continue
+			}
 		}
 
 		handler.Draw()

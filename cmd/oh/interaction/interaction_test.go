@@ -147,6 +147,25 @@ func TestRunStopsAndRedraws(t *testing.T) {
 			t.Errorf("scheduled=%d drawn=%t", scheduled, drawn)
 		}
 	})
+	t.Run("ignored change", func(t *testing.T) {
+		keys := make(chan key.Key)
+		changes := make(chan error, 1)
+		changes <- nil
+		drawn := false
+		run(keys, make(chan os.Signal), make(chan time.Time), func() {}, nil, Handler{
+			Events:  func() <-chan turn.Event { return make(chan turn.Event) },
+			Key:     func(key.Key) bool { return false },
+			Changes: changes,
+			Change: func(error) bool {
+				close(keys)
+				return false
+			},
+			Draw: func() { drawn = true },
+		})
+		if drawn {
+			t.Error("ignored change was drawn")
+		}
+	})
 	t.Run("heartbeat with a redraw already due", func(t *testing.T) {
 		keys := make(chan key.Key)
 		heartbeats := make(chan time.Time, 1)

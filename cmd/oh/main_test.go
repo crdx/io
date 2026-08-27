@@ -2343,6 +2343,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"banner":                {".ansi", ".screen"},
 		"clearing":              {".ansi", ".screen"},
 		"completion":            {".txt"},
+		"config-reload":         {".ansi", ".screen"},
 		"context":               {".prompt"},
 		"inputblock":            {".ansi", ".screen"},
 		"lifecycle":             {".ansi", ".screen"},
@@ -4167,19 +4168,19 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 
 					built := goldenBarLayout(t, held)
 
-					held.segmentLayout = built
+					held.barConfiguration = bar.NewConfiguration(nil, built)
 
 					block := input.Block{
 						Top: input.Ruler{
-							Left:   held.bar(segment.TopLeft, frame),
-							Center: held.bar(segment.TopCenter, frame),
-							Right:  held.bar(segment.TopRight, frame),
+							Left:   held.renderBar(segment.TopLeft, frame),
+							Center: held.renderBar(segment.TopCenter, frame),
+							Right:  held.renderBar(segment.TopRight, frame),
 						},
 						Input: frame,
 						Bottom: input.Ruler{
-							Left:   held.bar(segment.BottomLeft, frame),
-							Center: held.bar(segment.BottomCenter, frame),
-							Right:  held.bar(segment.BottomRight, frame),
+							Left:   held.renderBar(segment.BottomLeft, frame),
+							Center: held.renderBar(segment.BottomCenter, frame),
+							Right:  held.renderBar(segment.BottomRight, frame),
 						},
 					}
 
@@ -4202,6 +4203,208 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 
 	compareWithGolden(t, "inputblock", ".ansi", passes)
 	compareWithGolden(t, "inputblock", ".screen", shownPassesAtWidth)
+}
+
+func writeLiveConfig(t *testing.T, path string, body string) {
+	t.Helper()
+
+	contents := fmt.Sprintf("version = %d\n%s", config.Format, undentConfig(body))
+	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func prepareLiveConfig(t *testing.T, self *App, path string) {
+	t.Helper()
+
+	settings, observer, err := config.Observe(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	self.configObserver = observer
+	t.Cleanup(observer.Close)
+	registry := availableSegments(workspaceMarker, "brave-otter", "gpt-5.6-sol", "high", self)
+	live, err := settings.BuildLive(registry)
+	if err != nil {
+		t.Fatal(err)
+	}
+	self.getOnWithItMessage = live.GetOnWithItMessage
+	self.barConfiguration = bar.NewConfiguration(registry, live.SegmentLayout)
+}
+
+func settleLiveConfig(t *testing.T, self *App) {
+	t.Helper()
+
+	timeout := time.NewTimer(2 * time.Second)
+	defer timeout.Stop()
+	for {
+		select {
+		case failure, open := <-self.configObserver.Changes():
+			if !open {
+				t.Fatal("config watch closed before reporting the change")
+			}
+			if self.reloadConfig(failure) {
+				return
+			}
+		case <-timeout.C:
+			t.Fatal("timed out waiting for a config change")
+		}
+	}
+}
+
+func TestReloadingConfigChangesTheGetOnWithItMessage(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, `
+		get_on_with_it_message = "first"
+	`)
+
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	prepareLiveConfig(t, self, path)
+
+	writeLiveConfig(t, path, `
+		get_on_with_it_message = "second"
+	`)
+	settleLiveConfig(t, self)
+	writeLiveConfig(t, path, `
+		get_on_with_it_message = "carry on from the reloaded config"
+	`)
+	settleLiveConfig(t, self)
+
+	history := edit.NewHistory("", historyLimit)
+	editor := edit.NewInput(history)
+	self.apply(editor, history, key.Key{Code: key.Enter})
+	self.apply(editor, history, key.Key{Code: key.Enter})
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	hasSentReloadedMessage := false
+	reloadNotices := 0
+	for _, event := range self.events {
+		if event.Kind == agent.UserMessageEvent && event.Text == "carry on from the reloaded config" {
+			hasSentReloadedMessage = true
+		}
+		if event.Kind == agent.HarnessMessageEvent && event.Text == "Configuration reloaded." {
+			reloadNotices++
+		}
+	}
+	if !hasSentReloadedMessage {
+		t.Error("the reloaded message was not sent")
+	}
+	if reloadNotices != 2 {
+		t.Errorf("got %d reload notices, want one for each of 2 valid revisions", reloadNotices)
+	}
+}
+
+type configReloadScenario int
+
+const (
+	configReloadValid configReloadScenario = iota
+	configReloadInvalidRecovery
+	configReloadDeletion
+	configReloadWatchFailure
+	configReloadReplay
+)
+
+func TestReloadingConfigDrawsEveryVisibleState(t *testing.T) {
+	passes := map[string]func() string{
+		"valid revision":                   func() string { return configReloadStream(t, configReloadValid) },
+		"invalid revision then recovery":   func() string { return configReloadStream(t, configReloadInvalidRecovery) },
+		"deleted config restores defaults": func() string { return configReloadStream(t, configReloadDeletion) },
+		"filesystem watch failure":         func() string { return configReloadStream(t, configReloadWatchFailure) },
+		"replayed failure and recovery":    func() string { return configReloadStream(t, configReloadReplay) },
+	}
+
+	compareWithGolden(t, "config-reload", ".ansi", passes)
+	compareWithGolden(t, "config-reload", ".screen", shownPasses(t, passes))
+}
+
+func configReloadStream(t *testing.T, scenario configReloadScenario) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, `
+		get_on_with_it_message = "first"
+
+		[bar.top]
+		left = [{ segment = "session-name" }]
+		center = []
+		right = []
+
+		[bar.bottom]
+		left = []
+		center = []
+		right = []
+	`)
+
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	prepareLiveConfig(t, self, path)
+	editor := edit.NewInput(nil)
+	self.show(editor)
+
+	switch scenario {
+	case configReloadDeletion:
+		if err := os.Remove(path); err != nil {
+			t.Fatal(err)
+		}
+		settleLiveConfig(t, self)
+		self.show(editor)
+		return screenOutput.String()
+	case configReloadWatchFailure:
+		self.reloadConfig(errors.New("inotify stopped"))
+		self.show(editor)
+		return screenOutput.String()
+	case configReloadInvalidRecovery, configReloadReplay:
+		writeLiveConfig(t, path, `
+			[bar.top]
+			left = [{ segment = "missing" }]
+		`)
+		settleLiveConfig(t, self)
+	case configReloadValid:
+	}
+
+	writeLiveConfig(t, path, `
+		get_on_with_it_message = "second"
+
+		[bar.top]
+		left = []
+		center = []
+		right = []
+
+		[bar.bottom]
+		left = []
+		center = [{ segment = "active-model" }]
+		right = []
+	`)
+	settleLiveConfig(t, self)
+	self.show(editor)
+	if scenario != configReloadReplay {
+		return screenOutput.String()
+	}
+
+	var replayOutput bytes.Buffer
+	replayed := testConversation(t, &replayOutput)
+	replayed.screen = output.NewTerminalOfSize(&replayOutput, replayColumns, replayLines)
+	prepareLiveConfig(t, replayed, path)
+	replayed.events = append(replayed.events, self.events...)
+	replayed.replay()
+	replayed.show(edit.NewInput(nil))
+
+	liveScreen := visibleScreen(t, screenOutput.String(), replayColumns)
+	restoredScreen := visibleScreen(t, replayOutput.String(), replayColumns)
+	if !slices.Equal(liveScreen, restoredScreen) {
+		t.Errorf(
+			"reloaded config changed after replay\nlive:\n%s\nreplayed:\n%s",
+			strings.Join(liveScreen, "\n"),
+			strings.Join(restoredScreen, "\n"),
+		)
+	}
+	return replayOutput.String()
 }
 
 type screen struct {
@@ -4533,12 +4736,12 @@ func goldenSchedulePass(t *testing.T, isRunning bool, workPerPass time.Duration,
 
 			held := &App{mode: caps.NewMode(caps.All())}
 			held.currentTurn.Stream = testTimedTurnStream(isRunning, startedAt, startedAt)
-			held.segmentLayout = goldenBarLayout(t, held)
+			held.barConfiguration = bar.NewConfiguration(nil, goldenBarLayout(t, held))
 
 			return filmstrip(startedAt, span, workPerPass, func() time.Time {
 				return held.nextBarRefresh(time.Now())
 			}, func() string {
-				return renderBar(held.segmentLayout, segment.BottomLeft)
+				return held.barConfiguration.Render(segment.BottomLeft, segment.Context{})
 			})
 		})
 	}
@@ -6601,7 +6804,7 @@ func TestVisual(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	held.segmentLayout = built
+	held.barConfiguration = bar.NewConfiguration(nil, built)
 
 	held.begin("")
 }

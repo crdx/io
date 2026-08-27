@@ -11,6 +11,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/dispatch"
 	"crdx.org/io/cmd/oh/dynamic"
@@ -62,17 +63,18 @@ func (self *pendingInput) texts() []string {
 }
 
 type App struct {
-	agent         *agent.Agent
-	events        []agent.Event
-	screen        *output.Screen
-	recorder      *record.Recorder
-	segmentLayout segment.Layout
-	editor        *edit.Input
-	mode          *caps.Mode
-	settledCaps   caps.Set
-	pending       pendingInput
-	terminal      terminal.Terminal
-	metrics       metrics.Tracker
+	agent            *agent.Agent
+	events           []agent.Event
+	screen           *output.Screen
+	recorder         *record.Recorder
+	barConfiguration bar.Configuration
+	configObserver   *config.Observer
+	editor           *edit.Input
+	mode             *caps.Mode
+	settledCaps      caps.Set
+	pending          pendingInput
+	terminal         terminal.Terminal
+	metrics          metrics.Tracker
 
 	workspaceDir       string
 	getOnWithItMessage string
@@ -140,9 +142,11 @@ func (self *App) begin(message string) cycle.Transition {
 			self.finish()
 			return !self.isTransitionRequested()
 		},
-		Resize: self.redraw,
-		Beat:   self.screen.RefreshProgress,
-		Draw:   func() { self.show(editor) },
+		Resize:  self.redraw,
+		Beat:    self.screen.RefreshProgress,
+		Changes: self.configObserver.Changes(),
+		Change:  self.reloadConfig,
+		Draw:    func() { self.show(editor) },
 	})
 
 	return self.transition
@@ -430,23 +434,23 @@ func (self *App) show(editor *edit.Input) {
 
 	block := input.Block{
 		Top: input.Ruler{
-			Left:   self.bar(segment.TopLeft, frame),
-			Center: self.bar(segment.TopCenter, frame),
-			Right:  self.bar(segment.TopRight, frame),
+			Left:   self.renderBar(segment.TopLeft, frame),
+			Center: self.renderBar(segment.TopCenter, frame),
+			Right:  self.renderBar(segment.TopRight, frame),
 		},
 		Input: frame,
 		Bottom: input.Ruler{
-			Left:   self.bar(segment.BottomLeft, frame),
-			Center: self.bar(segment.BottomCenter, frame),
-			Right:  self.bar(segment.BottomRight, frame),
+			Left:   self.renderBar(segment.BottomLeft, frame),
+			Center: self.renderBar(segment.BottomCenter, frame),
+			Right:  self.renderBar(segment.BottomRight, frame),
 		},
 	}
 
 	self.screen.Footer(block.Rows(columns))
 }
 
-func (self *App) bar(position segment.Position, frame edit.Frame) string {
-	return bar.Render(self.segmentLayout, position, segment.Context{
+func (self *App) renderBar(position segment.Position, frame edit.Frame) string {
+	return self.barConfiguration.Render(position, segment.Context{
 		HiddenLinesAbove: frame.HiddenLinesAbove,
 		HiddenLinesBelow: frame.HiddenLinesBelow,
 	})
@@ -468,7 +472,27 @@ func (self *App) isTurnRunning() bool {
 }
 
 func (self *App) nextBarRefresh(at time.Time) time.Time {
-	return self.segmentLayout.NextRefresh(segment.Phase{At: at, IsRunning: self.isTurnRunning()})
+	return self.barConfiguration.NextRefresh(segment.Phase{At: at, IsRunning: self.isTurnRunning()})
+}
+
+func (self *App) reloadConfig(watchFailure error) bool {
+	result := self.configObserver.Reload(watchFailure, self.barConfiguration.GetRegistry())
+	switch result.Status {
+	case config.ReloadUnchanged:
+		return false
+	case config.ReloadFailed:
+		self.notifyFailure("The configuration could not be reloaded: " + result.Failure.Error())
+		return true
+	case config.ReloadApplied:
+		self.getOnWithItMessage = result.LiveConfig.GetOnWithItMessage
+		self.barConfiguration.ReplaceLayout(result.LiveConfig.SegmentLayout)
+		self.notify(agent.Event{
+			Kind:   agent.HarnessMessageEvent,
+			Text:   "Configuration reloaded.",
+			Status: agent.SuccessStatus,
+		})
+	}
+	return true
 }
 
 func (self *App) turnTiming() turn.Timing {

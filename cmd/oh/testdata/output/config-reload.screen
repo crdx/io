@@ -1,0 +1,36 @@
+=== deleted config restores defaults ===
+Configuration reloaded.
+
+── ✧· ─ 0m/0m ─────────────────────────────── ?% 0K/? ──────────────────────────────── /workspace ──
+
+── rxw gs ─────────────────────────────── high gpt-5.6-sol ────────────── usage n/a ─ brave-otter ──
+=== filesystem watch failure ===
+The configuration could not be reloaded: could not watch config: inotify stopped
+
+── brave-otter ─────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== invalid revision then recovery ===
+The configuration could not be reloaded: top.left: there is no segment called "missing", only: activ
+e-model, activity-spinner, context-usage, git-branch, local-time, mode-toggle, scroll-overflow, sess
+ion-emoji, session-name, subscription-usage, turn-count, turn-timer, workspace-dir
+Configuration reloaded.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────── high gpt-5.6-sol ─────────────────────────────────────────
+=== replayed failure and recovery ===
+The configuration could not be reloaded: top.left: there is no segment called "missing", only: activ
+e-model, activity-spinner, context-usage, git-branch, local-time, mode-toggle, scroll-overflow, sess
+ion-emoji, session-name, subscription-usage, turn-count, turn-timer, workspace-dir
+Configuration reloaded.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────── high gpt-5.6-sol ─────────────────────────────────────────
+=== valid revision ===
+Configuration reloaded.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────── high gpt-5.6-sol ─────────────────────────────────────────

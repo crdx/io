@@ -88,3 +88,34 @@ func Render(layout segment.Layout, position segment.Position, context segment.Co
 
 	return strings.Join(drawn, " "+style.Subtle("\u2500")+" ")
 }
+
+// Configuration holds the factories and current layout of a bar.
+type Configuration struct {
+	registry segment.Registry
+	layout   segment.Layout
+}
+
+// NewConfiguration returns a bar configuration with a built layout.
+func NewConfiguration(registry segment.Registry, layout segment.Layout) Configuration {
+	return Configuration{registry: registry, layout: layout}
+}
+
+// GetRegistry returns the factories from which replacement layouts are built.
+func (self Configuration) GetRegistry() segment.Registry {
+	return self.registry
+}
+
+// ReplaceLayout replaces the complete bar layout.
+func (self *Configuration) ReplaceLayout(layout segment.Layout) {
+	self.layout = layout
+}
+
+// Render draws one position in the current layout.
+func (self Configuration) Render(position segment.Position, context segment.Context) string {
+	return Render(self.layout, position, context)
+}
+
+// NextRefresh returns the next time any segment in the current layout should be redrawn.
+func (self Configuration) NextRefresh(phase segment.Phase) time.Time {
+	return self.layout.NextRefresh(phase)
+}
