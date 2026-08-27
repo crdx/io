@@ -1,15 +1,21 @@
 package dynamic
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 	"time"
+	"unicode"
 
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 )
 
-const wide = 100
+const (
+	wide   = 100
+	narrow = 40
+	tiny   = 12
+)
 
 func testBlock() *Block {
 	return &Block{refresh: func() {}, stop: make(chan struct{})}
@@ -27,6 +33,83 @@ func (self textLabel) Width() int { return width.Of(self.text) }
 
 func rowLabel(name string, subject string) Label {
 	return textLabel{text: name + " " + subject}
+}
+
+var colourEscape = regexp.MustCompile(`^\x1b\[[0-9;]*m`)
+
+func paintedOnly(row string) bool {
+	for at := 0; at < len(row); {
+		if row[at] != '\x1b' {
+			at++
+			continue
+		}
+
+		found := colourEscape.FindString(row[at:])
+		if found == "" {
+			return false
+		}
+
+		at += len(found)
+	}
+
+	return true
+}
+
+func bounded(value int, limit int) int {
+	within := value % limit
+	if within < 0 {
+		within = -within
+	}
+
+	return within
+}
+
+func FuzzARowFitsAndPaintsOnlyItsOwnColours(f *testing.F) {
+	for _, seed := range []string{
+		"hello",
+		"one\ntwo\n",
+		"\x1b[32mok\x1b[0m all six steps",
+		"\x1b[2J\x1b[H",
+		"\x1b]0;building\x07",
+		strings.Repeat("wordy ", wide),
+		"",
+	} {
+		for _, columns := range []int{0, 1, tiny, narrow, wide} {
+			f.Add(seed, 12, columns, false)
+			f.Add(seed, 12, columns, true)
+		}
+	}
+
+	f.Fuzz(func(t *testing.T, summary string, labelWidth int, columns int, hasFailed bool) {
+		const widestRow = 200
+
+		columns = bounded(columns, widestRow)
+
+		state := Done
+		if hasFailed {
+			state = Failed
+		}
+
+		block := testBlock()
+		block.Add(rowLabel("$", strings.Repeat("a", bounded(labelWidth, widestRow))))
+		block.FinaliseRow(0, state, time.Second, summary, "1L ~1t")
+
+		row := block.Rows(columns)[0]
+
+		if columns > 0 && style.Width(row) > columns {
+			t.Fatalf("expected the row to fit in %d columns, got %d in %q", columns, style.Width(row), row)
+		}
+
+		if !paintedOnly(row) {
+			t.Fatalf("expected the row to paint only its own colours, got %q", row)
+		}
+
+		for _, character := range style.Plain(row) {
+			if unicode.IsControl(character) {
+				t.Fatalf("expected nothing a terminal would act on, got %q in %q", character, row)
+			}
+		}
+	})
 }
 
 func TestARowSaysNothingOfItsProgressUntilItHasBeenGoingAWhile(t *testing.T) {
@@ -144,15 +227,75 @@ func TestALongReasonLeavesTheLabelItIsAbout(t *testing.T) {
 	}
 }
 
-func TestAReasonIsKeptOnlyForAFailure(t *testing.T) {
+func TestARowThatSucceededSaysWhatItHadToShowQuietly(t *testing.T) {
 	block := testBlock()
 
-	block.Add(rowLabel("read", "main.go"))
+	block.Add(rowLabel("$", "echo hello"))
 
-	block.FinaliseRow(0, Done, 0, "read 40 lines", "")
+	block.FinaliseRow(0, Done, 0, "hello", "")
 
-	if got := block.Rows(wide)[0]; strings.Contains(got, "read 40 lines") {
-		t.Errorf("expected nothing beside the mark, got %q", got)
+	if got := block.Rows(wide)[0]; !strings.Contains(got, style.Subtle("hello")) {
+		t.Errorf("expected the output in a subtle colour, got %q", got)
+	}
+}
+
+func TestASummaryIsPutOnTheOneRow(t *testing.T) {
+	block := testBlock()
+
+	block.Add(rowLabel("$", "make"))
+
+	block.FinaliseRow(0, Done, 0, "one\ntwo\r\n\tthree\n", "")
+
+	got := block.Rows(wide)[0]
+
+	if strings.ContainsAny(got, "\n\r\t") {
+		t.Errorf("expected one row, got %q", got)
+	}
+
+	if !strings.Contains(got, "one two three") {
+		t.Errorf("expected the output flattened onto the row, got %q", got)
+	}
+}
+
+func TestASummaryPaintsNoColourOfItsOwn(t *testing.T) {
+	block := testBlock()
+
+	block.Add(rowLabel("$", "just check"))
+
+	block.FinaliseRow(0, Done, 0, "\x1b[32mok\x1b[0m all six steps", "")
+
+	if got := block.Rows(wide)[0]; !strings.Contains(got, style.Subtle("ok all six steps")) {
+		t.Errorf("expected the row to keep its own colours, got %q", got)
+	}
+}
+
+func TestALongSummaryIsReadNoFurtherThanARowCanDraw(t *testing.T) {
+	block := testBlock()
+
+	block.Add(rowLabel("$", "yes"))
+
+	block.FinaliseRow(0, Done, 0, strings.Repeat("y\n", widestSummaryRead), "")
+
+	if got := width.Of(block.rows[0].summary); got > widestSummaryRead {
+		t.Errorf("expected no more than %d cells kept, got %d", widestSummaryRead, got)
+	}
+}
+
+func TestASummaryTakesOnlyTheRoomALabelLeaves(t *testing.T) {
+	block := testBlock()
+
+	block.Add(rowLabel("$", strings.Repeat("a", wide)))
+
+	block.FinaliseRow(0, Done, 0, "hello", "")
+
+	row := block.Rows(wide)[0]
+
+	if style.Width(row) > wide {
+		t.Errorf("expected the row to fit in %d columns, got %d in %q", wide, style.Width(row), row)
+	}
+
+	if strings.Contains(row, "hello") {
+		t.Errorf("expected the command to keep the room, got %q", row)
 	}
 }
 

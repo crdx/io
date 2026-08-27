@@ -4,6 +4,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
 )
 
@@ -15,6 +16,14 @@ const (
 )
 
 type ToolLookup func(string) (tool.Tool, bool)
+
+func Summary(event agent.Event) string {
+	if event.Status == agent.ErrorStatus || event.Name == shellTool {
+		return event.Text
+	}
+
+	return ""
+}
 
 func Describe(event agent.Event, getTool ToolLookup, workspaceDir string) agent.FallbackRendering {
 	shown := event.FallbackRendering
@@ -28,7 +37,14 @@ func Describe(event agent.Event, getTool ToolLookup, workspaceDir string) agent.
 			}
 		}
 	}
-	return shortenPaths(shown, workspaceDir)
+	return plain(shortenPaths(shown, workspaceDir))
+}
+
+func plain(shown agent.FallbackRendering) agent.FallbackRendering {
+	shown.Subject = strutil.Printable(shown.Subject)
+	shown.Note = strutil.Printable(shown.Note)
+
+	return shown
 }
 
 func LabelFor(event agent.Event, getTool ToolLookup, workspaceDir string) Label {

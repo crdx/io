@@ -91,6 +91,32 @@ func TestCallNamesAreDrawnFromTheTable(t *testing.T) {
 	}
 }
 
+func TestOnlyAShellCommandOrAFailureSaysWhatItReturned(t *testing.T) {
+	for name, test := range map[string]struct {
+		event agent.Event
+		want  string
+	}{
+		"shell": {
+			event: agent.Event{Name: "bash", Status: agent.SuccessStatus, Text: "hello"},
+			want:  "hello",
+		},
+		"failure": {
+			event: agent.Event{Name: "read", Status: agent.ErrorStatus, Text: "no such file"},
+			want:  "no such file",
+		},
+		"ordinary": {
+			event: agent.Event{Name: "read", Status: agent.SuccessStatus, Text: "package one"},
+			want:  "",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := call.Summary(test.event); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
 func TestASkillReadIsDrawnAsALoad(t *testing.T) {
 	label := call.LabelFor(agent.Event{
 		Name:              "read",

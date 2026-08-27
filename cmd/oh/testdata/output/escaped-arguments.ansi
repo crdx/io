@@ -1,0 +1,197 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m run whatever you like                  \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[?7l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m  \e[0m\e[38;2;129;162;190m[31mred\e[0m\e[38;2;150;152;150m [0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L 0s 0s 2M\e[0m \e[38;2;150;152;150mred\e[0m\r
+\r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\e[38;2;207;173;0mattempt 1 failed, asking again in 2s: up\r
+stream said no\e[0m\r
+\r
+\r\e[KNothing moved.\r
+\e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+u\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+v\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+y\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+u\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[?7l\r\e[K\e[38;2;129;162;190m\e[0m\r
+\r\e[K\r
+\r\e[K\r
+\r
+\e[38;2;207;173;0ma\r
+t\r
+t\r
+e\r
+m\r
+p\r
+t\r
+ \r
+1\r
+ \r
+f\r
+a\r
+i\r
+l\r
+e\r
+d\r
+,\r
+ \r
+a\r
+s\r
+k\r
+i\r
+n\r
+g\r
+ \r
+a\r
+g\r
+a\r
+i\r
+n\r
+ \r
+i\r
+n\r
+ \r
+2\r
+s\r
+:\r
+ \r
+u\r
+p\r
+s\r
+t\r
+r\r
+e\r
+a\r
+m\r
+ \r
+s\r
+a\r
+i\r
+d\r
+ \r
+n\r
+o\e[0m\r
+\r
+\r\e[KN\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Km\r
+\r\e[Ko\r
+\r\e[Kv\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[K.\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m run whatever you like\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m  \e[0m\e[38;2;129;162;190m[31mred\e[0m\e[38;2;150;152;150m [0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L 0s 0s 2M\e[0m \e[38;2;150;152;150mred\e[0m
+screenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+grep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+
+\e[38;2;207;173;0mattempt 1 failed, asking again in 2s: upstream said no\e[0m
+
+Nothing moved.
+
+=== streamed ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m run whatever you like                                                                              \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m  \e[0m\e[38;2;129;162;190m[31mred\e[0m\e[38;2;150;152;150m [0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m  \e[0m\e[38;2;129;162;190m[31mred\e[0m\e[38;2;150;152;150m [0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L 0s 0s 2M\e[0m \e[38;2;150;152;150mred\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone two\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[38;2;207;173;0mattempt 1 failed, asking again in 2s: upstream said no\e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KNoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing move\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing moved.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m run        \e[0m\r
+\e[48;2;52;53;65m whatever   \e[0m\r
+\e[48;2;52;53;65m you like   \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[?7l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[Kscre… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\e[38;2;207;173;0mattempt 1 fa\r
+iled, asking\r
+ again in 2s\r
+: upstream s\r
+aid no\e[0m\r
+\r
+\r\e[KNothing\r
+\r\e[Kmoved.\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m run whatever you like\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[?7l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m  \e[0m\e[38;2;129;162;190m[31mred\e[0m\e[38;2;150;152;150m [0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L 0s 0s 2M\e[0m \e[38;2;150;152;150mred\e[0m
+\r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\r\e[Kgrep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+
+\e[38;2;207;173;0mattempt 1 failed, asking again in 2s: upstream said no\e[0m
+
+\r\e[KNothing moved.
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m run whatever you like                                                                              \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m  \e[0m\e[38;2;129;162;190m[31mred\e[0m\e[38;2;150;152;150m [0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L 0s 0s 2M\e[0m \e[38;2;150;152;150mred\e[0m\r
+\r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\e[38;2;207;173;0mattempt 1 failed, asking again in 2s: upstream said no\e[0m\r
+\r
+\r\e[KNothing moved.\r
+\e[?25h\e[?2026l

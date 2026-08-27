@@ -9,6 +9,7 @@ import (
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/util/strutil"
 )
 
 const (
@@ -36,9 +37,9 @@ type row struct {
 	state     RowState
 	startedAt time.Time
 
-	timeTaken     time.Duration
-	failureReason string
-	stats         string
+	timeTaken time.Duration
+	summary   string
+	stats     string
 }
 
 type Block struct {
@@ -95,7 +96,7 @@ func (self *Block) FinaliseRow(
 	rowIndex int,
 	state RowState,
 	timeTaken time.Duration,
-	reason string,
+	summary string,
 	stats string,
 ) {
 	self.change(func() {
@@ -106,11 +107,18 @@ func (self *Block) FinaliseRow(
 		self.rows[rowIndex].state = state
 		self.rows[rowIndex].timeTaken = timeTaken
 		self.rows[rowIndex].stats = stats
-
-		if state == Failed {
-			self.rows[rowIndex].failureReason = strings.Join(strings.Fields(reason), " ")
-		}
+		self.rows[rowIndex].summary = summarise(summary)
 	})
+}
+
+const widestSummaryRead = 1024
+
+func summarise(text string) string {
+	if len(text) > widestSummaryRead {
+		text = strings.ToValidUTF8(text[:widestSummaryRead], "")
+	}
+
+	return strutil.Flatten(text)
 }
 
 func (self *Block) Stop() {
@@ -174,29 +182,43 @@ func (self *Block) line(row row, columns int) string {
 	result := self.fitResult(row, columns)
 
 	label := row.label
-	failure := row.failureReason
+	summary := row.summary
 
 	if columns > 0 {
 		room := columns - edgeGuard - style.Width(result) - resultSpacing(result)
 
-		if failure != "" {
-			spare := max(room-label.Width()-1, room/failureShare)
-			failure = width.Elide(failure, min(width.Of(failure), spare))
-			room -= width.Of(failure) + 1
+		summary = width.Elide(summary, summaryRoom(row.state, room, label.Width()))
+
+		if summary != "" {
+			room -= width.Of(summary) + 1
 		}
 
 		label = label.Elide(room)
 	}
 
-	return util.JoinNonEmpty(label.Render(), result, failureText(failure))
+	return util.JoinNonEmpty(label.Render(), result, summaryText(row.state, summary))
 }
 
-func failureText(failure string) string {
-	if failure == "" {
+func summaryRoom(state RowState, room int, labelWidth int) int {
+	spare := room - labelWidth - 1
+
+	if state == Failed {
+		return max(spare, room/failureShare)
+	}
+
+	return spare
+}
+
+func summaryText(state RowState, summary string) string {
+	if summary == "" {
 		return ""
 	}
 
-	return style.Failure(failure)
+	if state == Failed {
+		return style.Failure(summary)
+	}
+
+	return style.Subtle(summary)
 }
 
 func resultSpacing(result string) int {

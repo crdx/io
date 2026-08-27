@@ -146,7 +146,7 @@ func RenderRetry(event agent.Event) string {
 	}
 
 	if event.Text != "" {
-		notice += ": " + strutil.FirstLine(event.Text)
+		notice += ": " + strutil.Flatten(strutil.FirstLine(event.Text))
 	}
 
 	return notice
@@ -313,7 +313,7 @@ func (self *Picasso) mark(event agent.Event) {
 		index,
 		getState(event.Status),
 		event.Took,
-		event.Text,
+		call.Summary(event),
 		call.Measurements(event.Took, event.Stats),
 	)
 

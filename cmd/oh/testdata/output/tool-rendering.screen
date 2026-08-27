@@ -135,7 +135,7 @@ done.
  run a multiline command and notify me when it finishes
 
 
-$ for NAME in alpha beta; do echo "$NAME"; done 3L ✓ 2L 0s 0s 0M
+$ for NAME in alpha beta; do echo "$NAME"; done 3L ✓ 2L 0s 0s 0M alpha beta
 notify command finished alpha and beta were printed ✓ 1L
 search how to quote a shell variable ✓ 1L
 fetch https://gnu.org/bash clean_html ✓ 1L

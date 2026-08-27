@@ -27,6 +27,10 @@ fix:
 test:
     go test -cover ./...
 
+# run a fuzzing campaign against one target, for a minute unless told otherwise
+fuzz package target time='1m':
+    go test ./{{ package }} -run '^$' -fuzz '^{{ target }}$' -fuzztime {{ time }}
+
 # write what the tests drew back to the golden files
 golden:
     go test ./cmd/oh ./cmd/oh/cli ./cmd/oh/commands -update

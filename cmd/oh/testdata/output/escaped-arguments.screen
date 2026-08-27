@@ -1,0 +1,156 @@
+=== narrow ===
+
+ run whatever you like
+
+
+$ echo  [31mred [0m ✓ 1L 0s 0s 2M red
+screenshot notes [2J [H.md lines… ✓ 1L
+grep one two ✓ 1L
+
+attempt 1 failed, asking again in 2s: up
+stream said no
+
+Nothing moved.
+=== one column ===
+
+
+r
+
+u
+
+n
+
+w
+
+h
+
+a
+
+t
+
+e
+
+v
+
+e
+
+r
+
+y
+
+o
+
+u
+
+l
+
+i
+
+k
+
+e
+
+
+
+
+
+
+a
+t
+t
+e
+m
+p
+t
+
+1
+
+f
+a
+i
+l
+e
+d
+,
+
+a
+s
+k
+i
+n
+g
+
+a
+g
+a
+i
+n
+
+i
+n
+
+2
+s
+:
+
+u
+p
+s
+t
+r
+e
+a
+m
+
+s
+a
+i
+d
+
+n
+o
+
+N
+o
+t
+h
+i
+n
+g
+m
+o
+v
+e
+d
+.
+=== tiny ===
+
+ run
+ whatever
+ you like
+
+
+$ echo … ✓
+scre… ✓ 1L
+grep ✓ 1L
+
+attempt 1 fa
+iled, asking
+ again in 2s
+: upstream s
+aid no
+
+Nothing
+moved.
+=== wide ===
+
+ run whatever you like
+
+
+$ echo  [31mred [0m ✓ 1L 0s 0s 2M red
+screenshot notes [2J [H.md lines 1 to 40  ✓ 1L
+grep one two ✓ 1L
+
+attempt 1 failed, asking again in 2s: upstream said no
+
+Nothing moved.
