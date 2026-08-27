@@ -143,6 +143,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 	})
 
 	tests := map[string]string{
+		"/conf":                    "edit:" + strings.Join([]string{configDirectory, systemPromptPath, configPath}, ","),
 		"/edit config-file":        "edit:" + configPath,
 		"/edit system-prompt-file": "edit:" + systemPromptPath,
 		"/edit workspace-dir":      "edit:" + workspaceDirectory,
@@ -228,6 +229,40 @@ func TestSnippetsDirectoryTargetRequiresAnExistingDirectory(t *testing.T) {
 	}
 }
 
+func TestConfCreatesTheConfigDirBeforeOpeningIt(t *testing.T) {
+	configDirectory := filepath.Join(t.TempDir(), "org.crdx", "oh")
+	var opened []string
+	commands := newCommandRegistry(t, commandEnvironment{
+		configDir:        configDirectory,
+		configPath:       filepath.Join(configDirectory, "config.toml"),
+		systemPromptPath: filepath.Join(configDirectory, "SYSTEM.md"),
+		openEditor: func(paths []string) error {
+			opened = paths
+			return nil
+		},
+	})
+
+	invocation, found := commands.Find("/conf")
+	if !found {
+		t.Fatal("expected /conf to be registered")
+	}
+	if err := invocation.Command.Run(nil, invocation.Arguments); err != nil {
+		t.Fatal(err)
+	}
+
+	if info, err := os.Stat(configDirectory); err != nil || !info.IsDir() {
+		t.Errorf("config directory was not created: %v", err)
+	}
+	want := []string{
+		configDirectory,
+		filepath.Join(configDirectory, "SYSTEM.md"),
+		filepath.Join(configDirectory, "config.toml"),
+	}
+	if !slices.Equal(opened, want) {
+		t.Errorf("got %v, want %v", opened, want)
+	}
+}
+
 func TestForkRequiresAPersistedSession(t *testing.T) {
 	isPersisted := false
 	startRan := false
@@ -271,6 +306,7 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 
 	for _, input := range []string{
 		"/edit config-file extra",
+		"/conf extra",
 		"/edit unknown",
 		"/help extra",
 		"/new one two",

@@ -123,6 +123,7 @@ func buildCommands(environment commandEnvironment, snippetHelp []slash.HelpEntry
 		return helpText(set.Usages(), systemCommandPrefix+help.Name, snippetHelp, targetNames)
 	})
 	commands := []slash.Command{
+		editorCommand("conf", configTarget(environment), environment.openEditor),
 		targetCommand("copy", copyTargets(environment, targets), targetNames, environment.copyText, copyConfirmation),
 		targetCommand("edit", targets, targetNames, environment.openEditor, nil),
 		targetCommand("open", targets, targetNames, environment.openTarget, nil),
@@ -176,16 +177,29 @@ func copyTargets(environment commandEnvironment, targets map[string]commandTarge
 	return copied
 }
 
-func locationTargets(environment commandEnvironment) map[string]commandTarget {
-	prepareConfigDir := func() error {
+func configTarget(environment commandEnvironment) commandTarget {
+	return preparedTarget(
+		prepareConfigDir(environment),
+		environment.configDir,
+		environment.systemPromptPath,
+		environment.configPath,
+	)
+}
+
+func prepareConfigDir(environment commandEnvironment) func() error {
+	return func() error {
 		return os.MkdirAll(environment.configDir, 0o700)
 	}
+}
+
+func locationTargets(environment commandEnvironment) map[string]commandTarget {
+	prepareDirectory := prepareConfigDir(environment)
 
 	targets := map[string]commandTarget{
 		"agents-file":        existingTarget("Project context", prompt.ProjectContextPaths(environment.workspaceDir)...),
-		"config-dir":         preparedTarget(prepareConfigDir, environment.configDir),
-		"config-file":        preparedTarget(prepareConfigDir, environment.configPath),
-		"system-prompt-file": preparedTarget(prepareConfigDir, environment.systemPromptPath),
+		"config-dir":         preparedTarget(prepareDirectory, environment.configDir),
+		"config-file":        preparedTarget(prepareDirectory, environment.configPath),
+		"system-prompt-file": preparedTarget(prepareDirectory, environment.systemPromptPath),
 		"skills-dir":         existingTarget("Skills directory", environment.skillDirs...),
 		"workspace-dir":      staticTarget(environment.workspaceDir),
 		"scratch-dir":        staticTarget(environment.scratchDir),
@@ -218,6 +232,23 @@ func helpCommand(getHelp func() string) slash.Command {
 
 			context.Notice(getHelp())
 			return nil
+		},
+	}
+}
+
+func editorCommand(name string, target commandTarget, openEditor func([]string) error) slash.Command {
+	return slash.Command{
+		Name: name,
+		Run: func(_ slash.Context, arguments []string) error {
+			if len(arguments) != 0 {
+				return slash.Usage()
+			}
+
+			values, err := target.resolveValues()
+			if err != nil {
+				return err
+			}
+			return openEditor(values)
 		},
 	}
 }

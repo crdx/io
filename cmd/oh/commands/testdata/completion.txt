@@ -1,5 +1,5 @@
-/ -> /copy -> /edit -> /fork -> /help -> /new -> /open
-/c -> /copy
+/ -> /conf -> /copy -> /edit -> /fork -> /help -> /new -> /open
+/c -> /conf -> /copy
 /copy  -> /copy agents-file -> /copy config-dir -> /copy config-file
 /copy l -> /copy last-message
 /copy sn -> /copy snippets-dir
