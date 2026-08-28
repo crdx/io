@@ -34,7 +34,6 @@
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the upstream failure"}}
 {"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
-{"kind":"item","payload":{"role":"user","content":"The workspace is now read-write. The bash tool can now run shell commands. The .git directory is now read-write. The web search and fetch tools can now access the internet."}}
 {"kind":"item","payload":{"role":"user","content":"continue after the upstream failure"}}
 {"kind":"item","payload":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}
 {"kind":"turn_completion"}

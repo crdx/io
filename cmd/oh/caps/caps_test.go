@@ -107,16 +107,16 @@ func TestASwapBackIsStillAnnouncedAfterTheSwapBeforeIt(t *testing.T) {
 	}
 }
 
-func TestAResumedConversationIsToldEverythingOnce(t *testing.T) {
+func TestAResumedConversationDoesNotReannounceItsRecordedMode(t *testing.T) {
 	self := NewResumedMode(writable())
 
-	first := self.Inject()
-	if !strings.Contains(first, nowReadWrite) {
-		t.Fatalf("expected everything to be announced, got %q", first)
+	if got := self.Inject(); got != "" {
+		t.Errorf("expected no change to be announced, got %q", got)
 	}
 
-	if got := self.Inject(); got != "" {
-		t.Errorf("expected nothing once it had been said, got %q", got)
+	self.Toggle(Git)
+	if got := self.Inject(); got != gitWritable {
+		t.Errorf("expected only the new change to be announced, got %q", got)
 	}
 }
 
@@ -154,16 +154,6 @@ func TestAModeSwappedTwiceIsNotAnnounced(t *testing.T) {
 
 	if got := self.Inject(); got != "" {
 		t.Errorf("expected nothing to be announced, got %q", got)
-	}
-}
-
-func TestAResumedConversationAlwaysSaysWhatTheModeAllows(t *testing.T) {
-	got := NewResumedMode(writable()).Inject()
-
-	for _, clause := range []string{nowReadWrite, gitReadOnly, shellWithheld, webWithheld} {
-		if !strings.Contains(got, clause) {
-			t.Errorf("expected %q in %q", clause, got)
-		}
 	}
 }
 

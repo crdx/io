@@ -14,7 +14,6 @@
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"what happened to the second one"}}
 {"kind":"event","event":{"kind":"model_message","text":"It never finished."}}
-{"kind":"item","payload":{"role":"user","content":"The workspace is now read-write. The bash tool can now run shell commands. The .git directory is now read-write. The web search and fetch tools can now access the internet."}}
 {"kind":"item","payload":{"role":"user","content":"what happened to the second one"}}
 {"kind":"item","payload":{"role":"assistant","content":"It never finished."}}
 {"kind":"turn_completion"}

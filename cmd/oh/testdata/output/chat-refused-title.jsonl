@@ -20,7 +20,6 @@
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"and what did the picker make of it"}}
 {"kind":"event","event":{"kind":"model_message","text":"It fits, with room to spare."}}
-{"kind":"item","payload":{"role":"user","content":"The workspace is now read-write. The bash tool can now run shell commands. The .git directory is now read-write. The web search and fetch tools can now access the internet."}}
 {"kind":"item","payload":{"role":"user","content":"and what did the picker make of it"}}
 {"kind":"item","payload":{"role":"assistant","content":"It fits, with room to spare."}}
 {"kind":"turn_completion"}

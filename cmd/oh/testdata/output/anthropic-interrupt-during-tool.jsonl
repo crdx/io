@@ -10,7 +10,6 @@
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"what did it manage to do"}}
 {"kind":"event","event":{"kind":"model_message","text":"It compiled the agent and then stopped."}}
-{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"The workspace is now read-write. The bash tool can now run shell commands. The .git directory is now read-write. The web search and fetch tools can now access the internet."}]}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"what did it manage to do"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"It compiled the agent and then stopped."}]}}
 {"kind":"turn_completion"}

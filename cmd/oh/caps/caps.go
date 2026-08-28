@@ -125,7 +125,7 @@ func NewMode(currentCaps Set) *Mode {
 }
 
 func NewResumedMode(currentCaps Set) *Mode {
-	return &Mode{currentCaps: currentCaps}
+	return &Mode{currentCaps: currentCaps, knownCaps: currentCaps}
 }
 
 func (self *Mode) Current() Set {

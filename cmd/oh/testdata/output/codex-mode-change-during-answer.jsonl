@@ -16,7 +16,6 @@
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue"}}
 {"kind":"event","event":{"kind":"model_message","text":"Continued."}}
-{"kind":"item","payload":{"role":"user","content":"The workspace is now read-only. The bash tool can now run shell commands. The .git directory is now read-only. The web search and fetch tools can now access the internet."}}
 {"kind":"item","payload":{"role":"user","content":"continue"}}
 {"kind":"item","payload":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"Continued."}]}}
 {"kind":"turn_completion"}
