@@ -88,13 +88,19 @@ func New(reporter agent.UsageReporter, cachePath string, modelName string, now f
 			args.Rate = defaultRate
 		}
 
-		return &state{
-			reporter:  usage.Shared(reporter, cachePath, args.Rate, now),
+		shared := usage.Shared(reporter, cachePath, args.Rate, now)
+
+		self := &state{
+			reporter:  shared,
 			modelName: strings.ToLower(modelName),
 			rate:      args.Rate,
 			now:       now,
 			status:    usagePending,
-		}, nil
+		}
+
+		self.startFromSnapshot(shared)
+
+		return self, nil
 	}
 }
 
@@ -136,6 +142,22 @@ func (self *state) Render(segment.Context) string {
 	}
 
 	return self.draw(current)
+}
+
+func (self *state) startFromSnapshot(reporter agent.UsageReporter) {
+	snapshotter, ok := reporter.(usage.Snapshotter)
+	if !ok {
+		return
+	}
+
+	windows, fetchedAt := snapshotter.GetSnapshot()
+	if len(windows) == 0 || fetchedAt.IsZero() {
+		return
+	}
+
+	self.windows = windows
+	self.fetchedAt = fetchedAt
+	self.status = usageReady
 }
 
 func (self *state) getVisibleStatus() usageStatus {

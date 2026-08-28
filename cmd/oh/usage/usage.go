@@ -35,8 +35,15 @@ type shared struct {
 	ttl      time.Duration
 	now      func() time.Time
 
-	mutex   sync.Mutex
-	windows []agent.UsageWindow
+	mutex     sync.Mutex
+	windows   []agent.UsageWindow
+	fetchedAt time.Time
+}
+
+type Snapshotter interface {
+	agent.UsageReporter
+
+	GetSnapshot() ([]agent.UsageWindow, time.Time)
 }
 
 // Shared wraps a reporter so that what it costs to ask is paid once across every session, and so
@@ -50,13 +57,13 @@ func Shared(
 	}
 
 	self := &shared{reporter: reporter, path: path, ttl: ttl, now: now}
-	self.windows = self.stored().Windows
+
+	stored := self.stored()
+	self.windows, self.fetchedAt = stored.Windows, stored.FetchedAt
 
 	return self
 }
 
-// IsAvailable answers for the cache as well as the reporter, so a provider that knows nothing yet
-// still shows what another session found out.
 func (self *shared) IsAvailable() bool {
 	if self.reporter.IsAvailable() {
 		return true
@@ -68,10 +75,17 @@ func (self *shared) IsAvailable() bool {
 	return len(self.windows) > 0
 }
 
+func (self *shared) GetSnapshot() ([]agent.UsageWindow, time.Time) {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	return self.windows, self.fetchedAt
+}
+
 func (self *shared) UsageWindows(ctx context.Context) ([]agent.UsageWindow, error) {
 	claimed, err := state.TryUpdate(self.path, cacheFormat, func(stored *cache) error {
 		if self.isFresh(*stored) {
-			self.keep(stored.Windows)
+			self.keep(stored.Windows, stored.FetchedAt)
 
 			return nil
 		}
@@ -85,8 +99,10 @@ func (self *shared) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 			return nil
 		}
 
-		*stored = cache{Version: cacheFormat, FetchedAt: self.now(), Windows: windows}
-		self.keep(windows)
+		fetchedAt := self.now()
+
+		*stored = cache{Version: cacheFormat, FetchedAt: fetchedAt, Windows: windows}
+		self.keep(windows, fetchedAt)
 
 		return nil
 	})
@@ -95,7 +111,8 @@ func (self *shared) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 	}
 
 	if !claimed {
-		self.keep(self.stored().Windows)
+		stored := self.stored()
+		self.keep(stored.Windows, stored.FetchedAt)
 	}
 
 	self.mutex.Lock()
@@ -108,7 +125,7 @@ func (self *shared) isFresh(stored cache) bool {
 	return !stored.FetchedAt.IsZero() && self.now().Sub(stored.FetchedAt) < self.ttl
 }
 
-func (self *shared) keep(windows []agent.UsageWindow) {
+func (self *shared) keep(windows []agent.UsageWindow, fetchedAt time.Time) {
 	if len(windows) == 0 {
 		return
 	}
@@ -116,7 +133,7 @@ func (self *shared) keep(windows []agent.UsageWindow) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	self.windows = windows
+	self.windows, self.fetchedAt = windows, fetchedAt
 }
 
 func (self *shared) stored() cache {

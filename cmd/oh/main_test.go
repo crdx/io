@@ -74,6 +74,7 @@ import (
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/turn"
+	"crdx.org/io/cmd/oh/usage"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/cmd/oh/workspace"
 	"crdx.org/io/internal/file"
@@ -5331,6 +5332,15 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			"gpt-5.6-sol",
 			usageReport{},
 		),
+		"subscription-usage / another session's snapshot": goldenUsageFromCache(
+			t,
+			at,
+			"gpt-5.6-sol",
+			[]agent.UsageWindow{
+				{Duration: 5 * time.Hour, Percent: 40, ResetsAt: at.Add(150 * time.Minute)},
+				{Duration: 7 * 24 * time.Hour, Percent: 12, ResetsAt: at.Add(6 * 24 * time.Hour)},
+			},
+		),
 		"subscription-usage / refreshing keeps the figures": goldenUsagePass(
 			t,
 			at,
@@ -7465,6 +7475,29 @@ func goldenUsagePass(
 
 		return settleUsage(t, built, reporter, 2)
 	}
+}
+
+func goldenUsageFromCache(
+	t *testing.T, at time.Time, modelName string, windows []agent.UsageWindow,
+) func() string {
+	t.Helper()
+
+	readClock := func() time.Time { return at }
+	cachePath := filepath.Join(t.TempDir(), "usage", "codex.json")
+
+	seeded := &scriptedUsageReporter{report: usageReport{windows: windows}}
+	if _, err := usage.Shared(seeded, cachePath, time.Hour, readClock).UsageWindows(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	silent := &scriptedUsageReporter{}
+
+	built, err := subUsage.New(silent, cachePath, modelName, readClock)(goldenSegmentOptions(""))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return func() string { return built.Render(segment.Context{}) }
 }
 
 func settleUsage(

@@ -382,3 +382,33 @@ func TestTheSnapshotOutlivesTheSessionThatTookIt(t *testing.T) {
 		t.Errorf("got %+v, want %+v", windows[0], want)
 	}
 }
+
+func TestASnapshotIsHandedBackWithoutAskingTheProvider(t *testing.T) {
+	path := cachePath(t)
+	clock := &testClock{now: testNow}
+
+	first := &scriptedReporter{windows: windows(40), isAvailable: true}
+	if _, err := usage.Shared(first, path, rate, clock.read).UsageWindows(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	second := &scriptedReporter{isAvailable: true}
+
+	snapshotter, ok := usage.Shared(second, path, rate, clock.read).(usage.Snapshotter)
+	if !ok {
+		t.Fatal("expected a shared reporter to hand back its snapshot")
+	}
+
+	got, fetchedAt := snapshotter.GetSnapshot()
+	if len(got) != 1 || got[0].Percent != 40 {
+		t.Errorf("got %v", got)
+	}
+
+	if !fetchedAt.Equal(testNow) {
+		t.Errorf("fetched at %s, want %s", fetchedAt, testNow)
+	}
+
+	if asked := second.asked.Load(); asked != 0 {
+		t.Errorf("the provider was asked %d times", asked)
+	}
+}

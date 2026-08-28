@@ -3,6 +3,7 @@ package subUsage
 import (
 	"context"
 	"errors"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -11,6 +12,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/usage"
 	"crdx.org/io/internal/req"
 )
 
@@ -107,6 +109,36 @@ func renderSettled(t *testing.T, built segment.Segment) string {
 		}
 
 		time.Sleep(time.Millisecond)
+	}
+}
+
+func TestASharedSnapshotIsDrawnOnTheFirstPaint(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "usage", "codex.json")
+	clock := &testClock{now: testNow}
+
+	first := &scriptedReporter{windows: []agent.UsageWindow{{
+		Duration: 5 * time.Hour,
+		Percent:  40,
+		ResetsAt: testNow.Add(150 * time.Minute),
+	}}}
+
+	if _, err := usage.Shared(first, path, defaultRate, clock.read).UsageWindows(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	second := &scriptedReporter{}
+
+	built, err := New(second, path, "", clock.read)(noOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got := style.Plain(built.Render(segment.Context{})); got != "5h 40%" {
+		t.Errorf("first paint = %q", got)
+	}
+
+	if asked := second.asked.Load(); asked != 0 {
+		t.Errorf("a fresh snapshot was fetched again %d times", asked)
 	}
 }
 

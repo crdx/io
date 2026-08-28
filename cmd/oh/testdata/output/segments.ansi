@@ -62,6 +62,8 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m ▪▪▪▪▪\e[38;2;150;152;150m▫\e[0m
 \e[38;2;150;152;150mbrave-otter\e[0m 🦦
 === subscription-usage / ahead of pace ===
 \e[38;2;207;173;0m5h 28% ▲\e[0m
+=== subscription-usage / another session's snapshot ===
+5\e[38;2;150;152;150mh \e[0m40\e[38;2;150;152;150m%\e[0m 7\e[38;2;150;152;150md \e[0m12\e[38;2;150;152;150m%\e[0m
 === subscription-usage / even burn ===
 5\e[38;2;150;152;150mh \e[0m40\e[38;2;150;152;150m%\e[0m 7\e[38;2;150;152;150md \e[0m12\e[38;2;150;152;150m%\e[0m
 === subscription-usage / metered model in use ===
