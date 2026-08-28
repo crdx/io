@@ -1,29 +1,29 @@
 === active-model / deepseek high ===
-DeepSeek Pro 4 ▪▫
+DeepSeek Pro 4 ···▪·▫
 === active-model / deepseek max ===
-DeepSeek Pro 4 ▪▪
+DeepSeek Pro 4 ···▫·▪
 === active-model / high effort ===
-GPT Sol 5.6 ▪▪▪▪▫▫
+GPT Sol 5.6 ▫▫▫▪▫▫
 === active-model / low effort ===
-GPT Sol 5.6 ▪▪▫▫▫▫
+GPT Sol 5.6 ▫▪▫▫▫▫
 === active-model / max effort ===
-GPT Sol 5.6 ▪▪▪▪▪▪
+GPT Sol 5.6 ▫▫▫▫▫▪
 === active-model / medium effort ===
-GPT Sol 5.6 ▪▪▪▫▫▫
+GPT Sol 5.6 ▫▫▪▫▫▫
 === active-model / minimal effort ===
 GPT Sol 5.6 ▪▫▫▫▫▫
 === active-model / none effort ===
 GPT Sol 5.6 ▫▫▫▫▫▫
 === active-model / ollama thinking off ===
-qwen3.8 ▫▫▫
+qwen3.8 ·▫▫▫··
 === active-model / ollama without thinking ===
-llama3.3
+llama3.3 ······
 === active-model / opus medium ===
-Opus 5 ▪▪▫▫▫
+Opus 5 ·▫▪▫▫▫
 === active-model / sparse ladder ===
-GPT Sol 5.6 ▪
+GPT Sol 5.6 ···▪··
 === active-model / xhigh effort ===
-GPT Sol 5.6 ▪▪▪▪▪▫
+GPT Sol 5.6 ▫▫▫▫▪▫
 === activity-spinner / idle ===
 ✧·
 === activity-spinner / running first frame ===

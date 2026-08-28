@@ -1,15 +1,18 @@
 package activeModel
 
 import (
+	"slices"
 	"strings"
 
+	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
 )
 
 const (
-	filledSquare = "▪"
-	emptySquare  = "▫"
+	filledSquare      = "▪"
+	emptySquare       = "▫"
+	unsupportedSquare = "·"
 )
 
 var modelDisplayNames = map[string][]string{
@@ -61,19 +64,12 @@ func (self state) Render(segment.Context) string {
 		badge += " " + style.Subtle(name[1])
 	}
 
-	filled, total := thinkingSquares(self.effort, self.effortLevels)
-	if total == 0 {
+	squares := thinkingSquares(self.effort, self.effortLevels)
+	if squares == "" {
 		return badge
 	}
 
-	squares := ""
-	if filled > 0 {
-		squares += style.Normal(strings.Repeat(filledSquare, filled))
-	}
-	if empty := total - filled; empty > 0 {
-		squares += style.Subtle(strings.Repeat(emptySquare, empty))
-	}
-	return badge + " " + squares
+	return badge + " " + styleThinkingSquares(squares)
 }
 
 func displayName(model string) []string {
@@ -90,18 +86,47 @@ func displayName(model string) []string {
 	return []string{clean}
 }
 
-func thinkingSquares(effort string, effortLevels []string) (int, int) {
-	levels := make([]string, 0, len(effortLevels))
-	for _, level := range effortLevels {
-		if level != "none" {
-			levels = append(levels, level)
+func thinkingSquares(effort string, effortLevels []string) string {
+	if len(effortLevels) == 0 {
+		return ""
+	}
+
+	var squares strings.Builder
+
+	for _, level := range model.EffortOrder[1:] {
+		switch {
+		case !slices.Contains(effortLevels, level):
+			squares.WriteString(unsupportedSquare)
+		case level == effort:
+			squares.WriteString(filledSquare)
+		default:
+			squares.WriteString(emptySquare)
 		}
 	}
 
-	for i, level := range levels {
-		if level == effort {
-			return i + 1, len(levels)
+	return squares.String()
+}
+
+func styleThinkingSquares(squares string) string {
+	var rendered strings.Builder
+	var subtle strings.Builder
+
+	flushSubtle := func() {
+		if subtle.Len() > 0 {
+			rendered.WriteString(style.Subtle(subtle.String()))
+			subtle.Reset()
 		}
 	}
-	return 0, len(levels)
+
+	for _, square := range squares {
+		if string(square) == filledSquare {
+			flushSubtle()
+			rendered.WriteString(style.Chosen(string(square)))
+		} else {
+			subtle.WriteRune(square)
+		}
+	}
+	flushSubtle()
+
+	return rendered.String()
 }

@@ -1,29 +1,29 @@
 === active-model / deepseek high ===
-DeepSeek Pro \e[38;2;150;152;150m4\e[0m ▪\e[38;2;150;152;150m▫\e[0m
+DeepSeek Pro \e[38;2;150;152;150m4\e[0m \e[38;2;150;152;150m···\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m·▫\e[0m
 === active-model / deepseek max ===
-DeepSeek Pro \e[38;2;150;152;150m4\e[0m ▪▪
+DeepSeek Pro \e[38;2;150;152;150m4\e[0m \e[38;2;150;152;150m···▫·\e[0m\e[38;2;192;128;80m▪\e[0m
 === active-model / high effort ===
-GPT Sol \e[38;2;150;152;150m5.6\e[0m ▪▪▪▪\e[38;2;150;152;150m▫▫\e[0m
+GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m▫▫\e[0m
 === active-model / low effort ===
-GPT Sol \e[38;2;150;152;150m5.6\e[0m ▪▪\e[38;2;150;152;150m▫▫▫▫\e[0m
+GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m▫▫▫▫\e[0m
 === active-model / max effort ===
-GPT Sol \e[38;2;150;152;150m5.6\e[0m ▪▪▪▪▪▪
+GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫▫\e[0m\e[38;2;192;128;80m▪\e[0m
 === active-model / medium effort ===
-GPT Sol \e[38;2;150;152;150m5.6\e[0m ▪▪▪\e[38;2;150;152;150m▫▫▫\e[0m
+GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m▫▫▫\e[0m
 === active-model / minimal effort ===
-GPT Sol \e[38;2;150;152;150m5.6\e[0m ▪\e[38;2;150;152;150m▫▫▫▫▫\e[0m
+GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m▫▫▫▫▫\e[0m
 === active-model / none effort ===
 GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫▫▫\e[0m
 === active-model / ollama thinking off ===
-qwen3.8 \e[38;2;150;152;150m▫▫▫\e[0m
+qwen3.8 \e[38;2;150;152;150m·▫▫▫··\e[0m
 === active-model / ollama without thinking ===
-llama3.3
+llama3.3 \e[38;2;150;152;150m······\e[0m
 === active-model / opus medium ===
-Opus \e[38;2;150;152;150m5\e[0m ▪▪\e[38;2;150;152;150m▫▫▫\e[0m
+Opus \e[38;2;150;152;150m5\e[0m \e[38;2;150;152;150m·▫\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m▫▫▫\e[0m
 === active-model / sparse ladder ===
-GPT Sol \e[38;2;150;152;150m5.6\e[0m ▪
+GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m···\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m··\e[0m
 === active-model / xhigh effort ===
-GPT Sol \e[38;2;150;152;150m5.6\e[0m ▪▪▪▪▪\e[38;2;150;152;150m▫\e[0m
+GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m▫\e[0m
 === activity-spinner / idle ===
 \e[38;2;150;152;150m✧·\e[0m
 === activity-spinner / running first frame ===

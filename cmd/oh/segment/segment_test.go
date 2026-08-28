@@ -502,17 +502,35 @@ func TestTheActiveModelSegmentUsesFriendlyModelNames(t *testing.T) {
 	}
 }
 
-func TestTheActiveModelSegmentDrawsTheAvailableEffortLadder(t *testing.T) {
+func TestTheActiveModelSegmentDrawsAFixedEffortScale(t *testing.T) {
 	levels := []string{"none", "minimal", "low", "medium", "high"}
 	for effort, want := range map[string]string{
-		"none":    "GPT 5.6 ▫▫▫▫",
-		"minimal": "GPT 5.6 ▪▫▫▫",
-		"medium":  "GPT 5.6 ▪▪▪▫",
-		"high":    "GPT 5.6 ▪▪▪▪",
+		"none":    "GPT 5.6 ▫▫▫▫··",
+		"minimal": "GPT 5.6 ▪▫▫▫··",
+		"medium":  "GPT 5.6 ▫▫▪▫··",
+		"high":    "GPT 5.6 ▫▫▫▪··",
 	} {
 		t.Run(effort, func(t *testing.T) {
 			if got := drawn(t, activeModel.New("gpt-5.6", effort, levels)); got != want {
 				t.Errorf("got %q, want %q", got, want)
+			}
+		})
+	}
+}
+
+func TestTheActiveModelSegmentMarksUnsupportedEfforts(t *testing.T) {
+	for name, test := range map[string]struct {
+		effort string
+		levels []string
+		want   string
+	}{
+		"gapped":       {effort: "high", levels: []string{"high", "max"}, want: "DeepSeek Pro 4 ···▪·▫"},
+		"none only":    {effort: "none", levels: []string{"none"}, want: "DeepSeek Pro 4 ······"},
+		"unknown caps": {effort: "none", want: "DeepSeek Pro 4"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := drawn(t, activeModel.New("deepseek-v4-pro", test.effort, test.levels)); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
 			}
 		})
 	}

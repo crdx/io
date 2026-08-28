@@ -88,22 +88,22 @@ func ResolveQuery(query string, currentEffort string, choices []Choice) (Selecti
 	return Selection{Provider: choice.Provider, Model: choice.Model, Effort: effort}, nil
 }
 
-var effortOrder = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
+var EffortOrder = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
 const defaultEffort = "medium"
 
 func NearestEffort(current string, available []string) string {
-	currentIndex := slices.Index(effortOrder, current)
+	currentIndex := slices.Index(EffortOrder, current)
 
-	for distance := range effortOrder {
+	for distance := range EffortOrder {
 		higherIndex := currentIndex + distance
-		if higherIndex >= 0 && higherIndex < len(effortOrder) && slices.Contains(available, effortOrder[higherIndex]) {
-			return effortOrder[higherIndex]
+		if higherIndex >= 0 && higherIndex < len(EffortOrder) && slices.Contains(available, EffortOrder[higherIndex]) {
+			return EffortOrder[higherIndex]
 		}
 
 		lowerIndex := currentIndex - distance
-		if distance > 0 && lowerIndex >= 0 && slices.Contains(available, effortOrder[lowerIndex]) {
-			return effortOrder[lowerIndex]
+		if distance > 0 && lowerIndex >= 0 && slices.Contains(available, EffortOrder[lowerIndex]) {
+			return EffortOrder[lowerIndex]
 		}
 	}
 

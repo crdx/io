@@ -8,6 +8,7 @@ import (
 
 	"crdx.org/col"
 
+	"crdx.org/io/cmd/oh/escape"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/internal/util"
@@ -150,18 +151,15 @@ func Width(text string) int {
 func Plain(text string) string {
 	var out strings.Builder
 
-	escaped := false
-
-	for _, value := range text {
-		switch {
-		case escaped && (value == 'm' || value == 'K'):
-			escaped = false
-		case escaped:
-		case value == '\x1b':
-			escaped = true
-		default:
-			out.WriteRune(value)
+	runes := []rune(text)
+	for i := 0; i < len(runes); {
+		if runes[i] == '\x1b' {
+			i = escape.GetEnd(runes, i)
+			continue
 		}
+
+		out.WriteRune(runes[i])
+		i++
 	}
 
 	return out.String()

@@ -1,6 +1,10 @@
 package width
 
-import "strings"
+import (
+	"strings"
+
+	"crdx.org/io/cmd/oh/escape"
+)
 
 const reset = "\x1b[0m"
 
@@ -217,16 +221,7 @@ func split(text string) []atom {
 
 	for i := 0; i < len(runes); {
 		if runes[i] == '\x1b' {
-			end := i + 1
-
-			for end < len(runes) && runes[end] != 'm' && runes[end] != 'K' {
-				end++
-			}
-
-			if end < len(runes) {
-				end++
-			}
-
+			end := escape.GetEnd(runes, i)
 			atoms = append(atoms, atom{text: string(runes[i:end]), isEscape: true})
 			i = end
 

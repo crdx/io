@@ -55,6 +55,10 @@ func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
 		return ""
 	}
 
+	return renderSentence(elapsed, info)
+}
+
+func renderSentence(elapsed time.Duration, info Info) string {
 	var line strings.Builder
 
 	_, _ = line.WriteString(style.Subtle("Agent"))

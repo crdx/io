@@ -3,6 +3,7 @@ package output
 import (
 	"strings"
 
+	"crdx.org/io/cmd/oh/escape"
 	"crdx.org/io/cmd/oh/width"
 )
 
@@ -25,14 +26,7 @@ func (self *Screen) fit(text string) string {
 	for i := 0; i < len(runes); {
 		switch runes[i] {
 		case '\x1b':
-			end := i + 1
-			for end < len(runes) && runes[end] != 'm' && runes[end] != 'K' {
-				end++
-			}
-			if end < len(runes) {
-				end++
-			}
-
+			end := escape.GetEnd(runes, i)
 			out.WriteString(string(runes[i:end]))
 			i = end
 
