@@ -4996,7 +4996,7 @@ func goldenBarLayout(t *testing.T, harness *App) segment.Layout {
 
 		[bar.bottom]
 		left = [
-			{ segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
+			{ segment = "activity-spinner", idle = "✧··", frames = ["✦··", "·✦·", "··✦", "··✧", "·✧·", "✧··"], rate = "125ms" },
 			{ segment = "turn-timer" },
 			{ segment = "mode-toggle" },
 			{ segment = "workspace-dir" },

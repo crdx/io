@@ -25,7 +25,7 @@ home = []
 
 [bar.top]
 left = [
-    { segment = "activity-spinner", idle = "✧·", frames = ["✦·", "·✦", "·✧", "✧·"], rate = "125ms" },
+    { segment = "activity-spinner", idle = "·✦·", frames = ["✦··", "·✦·", "··✦", "··✦", "·✦·", "✦··"], rate = "125ms" },
 ]
 center = [
 ]
