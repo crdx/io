@@ -233,7 +233,11 @@ func (self *StatusError) Error() string {
 		return self.Message
 	}
 
-	return fmt.Sprintf("request failed with status %d: %s", self.Status, self.Body)
+	if body := strings.TrimSpace(self.Body); body != "" {
+		return fmt.Sprintf("request failed with status %d: %s", self.Status, body)
+	}
+
+	return fmt.Sprintf("request failed with status %d", self.Status)
 }
 
 func IsRejected(err error) bool {

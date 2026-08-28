@@ -2,7 +2,7 @@
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"send malformed data after an answer fragment"}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"The stream ended before the response did","attempt":1}}
+{"kind":"event","event":{"kind":"retrying","text":"the stream ended before the response did","attempt":1}}
 {"kind":"event","event":{"kind":"model_message","text":"Answered on the second attempt."}}
 {"kind":"item","payload":{"role":"user","content":"send malformed data after an answer fragment"}}
 {"kind":"item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Answered on the second attempt."}]}}

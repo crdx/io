@@ -17,7 +17,7 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫▫▫\e[0m
 === active-model / ollama thinking off ===
 Qwen \e[38;2;150;152;150m3.8 27B\e[0m \e[38;2;150;152;150m·▫▫▫··\e[0m
 === active-model / ollama without thinking ===
-Llama \e[38;2;150;152;150m3.3 70B\e[0m \e[38;2;150;152;150m······\e[0m
+Llama \e[38;2;150;152;150m3.3 70B\e[0m
 === active-model / opus medium ===
 Opus \e[38;2;150;152;150m5\e[0m \e[38;2;150;152;150m·▫\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m▫▫▫\e[0m
 === active-model / sparse ladder ===

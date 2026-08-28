@@ -9,7 +9,7 @@ of context.\e[0m\r
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mThis one stops halfway.\e[0m\e[0m\r
 \r
-\e[38;2;204;102;102mthe stream ended before the response did\e[0m\r
+\e[38;2;204;102;102mThe stream ended before the response did\e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m have a look at that                    \e[0m\r
@@ -17,7 +17,7 @@ of context.\e[0m\r
 \r
 \r\e[KLet me think about that.\r
 \r
-\e[38;2;204;102;102mthe model is overloaded\e[0m\r
+\e[38;2;204;102;102mThe model is overloaded\e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m have a look at that                    \e[0m\r
@@ -25,13 +25,13 @@ of context.\e[0m\r
 \r
 \r\e[KI can only get so far before\r
 \r
-\e[38;2;204;102;102mthe response was cut short\e[0m\r
+\e[38;2;204;102;102mThe response was cut short\e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m have a look at that                    \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
-\e[38;2;204;102;102mthe endpoint is having a moment\e[0m\r
+\e[38;2;204;102;102mThe endpoint is having a moment\e[0m\r
 \e[?25h\e[?2026l
 === one column ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mA\r
@@ -180,7 +180,7 @@ t\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150my\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150m.\e[0m\e[0m\r
 \r
-\e[38;2;204;102;102mt\r
+\e[38;2;204;102;102mT\r
 h\r
 e\r
  \r
@@ -275,7 +275,7 @@ t\e[0m\r
 \r\e[Kt\r
 \r\e[K.\r
 \r
-\e[38;2;204;102;102mt\r
+\e[38;2;204;102;102mT\r
 h\r
 e\r
  \r
@@ -355,7 +355,7 @@ t\e[0m\r
 \r\e[Kr\r
 \r\e[Ke\r
 \r
-\e[38;2;204;102;102mt\r
+\e[38;2;204;102;102mT\r
 h\r
 e\r
  \r
@@ -415,7 +415,7 @@ a\e[0m\r
 t\e[0m\r
 \e[48;2;52;53;65m \e[0m\r
 \r
-\e[38;2;204;102;102mt\r
+\e[38;2;204;102;102mT\r
 h\r
 e\r
  \r
@@ -455,26 +455,26 @@ t\e[0m\r
 \e[48;2;52;53;65m\e[0m
 \e[3m\e[38;2;150;152;150mThis one stops halfway.\e[0m\e[0m
 
-\e[38;2;204;102;102mthe stream ended before the response did\e[0m
+\e[38;2;204;102;102mThe stream ended before the response did\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
 Let me think about that.
 
-\e[38;2;204;102;102mthe model is overloaded\e[0m
+\e[38;2;204;102;102mThe model is overloaded\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
 I can only get so far before
 
-\e[38;2;204;102;102mthe response was cut short\e[0m
+\e[38;2;204;102;102mThe response was cut short\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[38;2;204;102;102mthe endpoint is having a moment\e[0m
+\e[38;2;204;102;102mThe endpoint is having a moment\e[0m
 
 === streamed ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
@@ -485,7 +485,7 @@ I can only get so far before
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mThis\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThis one\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThis one sto\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThis one stops h\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThis one stops halfw\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThis one stops halfway.\e[0m\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;204;102;102mthe stream ended before the response did\e[0m\r
+\e[38;2;204;102;102mThe stream ended before the response did\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -493,7 +493,7 @@ I can only get so far before
 \r
 \e[?2026h\e[?25l\r\e[KLet\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me think\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me think abo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me think about t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KLet me think about that.\e[?25h\e[?2026l\r
 \r
-\e[38;2;204;102;102mthe model is overloaded\e[0m\r
+\e[38;2;204;102;102mThe model is overloaded\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -501,13 +501,13 @@ I can only get so far before
 \r
 \e[?2026h\e[?25l\r\e[KI ca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can only g\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can only get s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can only get so fa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can only get so far be\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can only get so far before\e[?25h\e[?2026l\r
 \r
-\e[38;2;204;102;102mthe response was cut short\e[0m\r
+\e[38;2;204;102;102mThe response was cut short\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;204;102;102mthe endpoint is having a moment\e[0m\r
+\e[38;2;204;102;102mThe endpoint is having a moment\e[0m\r
 \e]9;4;0\e\\
 === tiny ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000\r
@@ -528,7 +528,7 @@ ontext.\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mstops\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mhalfway.\e[0m\e[0m\r
 \r
-\e[38;2;204;102;102mthe stream e\r
+\e[38;2;204;102;102mThe stream e\r
 nded before \r
 the response\r
  did\e[0m\r
@@ -541,7 +541,7 @@ the response\r
 \r\e[KLet me think\r
 \r\e[Kabout that.\r
 \r
-\e[38;2;204;102;102mthe model is\r
+\e[38;2;204;102;102mThe model is\r
  overloaded\e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
@@ -553,7 +553,7 @@ the response\r
 \r\e[Kget so far\r
 \r\e[Kbefore\r
 \r
-\e[38;2;204;102;102mthe response\r
+\e[38;2;204;102;102mThe response\r
  was cut sho\r
 rt\e[0m\r
 \r
@@ -562,7 +562,7 @@ rt\e[0m\r
 \e[48;2;52;53;65m at that    \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
-\e[38;2;204;102;102mthe endpoint\r
+\e[38;2;204;102;102mThe endpoint\r
  is having a\r
  moment\e[0m\r
 \e[?25h\e[?2026l
@@ -574,26 +574,26 @@ rt\e[0m\r
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mThis one stops halfway.\e[0m\e[0m
 
-\e[38;2;204;102;102mthe stream ended before the response did\e[0m
+\e[38;2;204;102;102mThe stream ended before the response did\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
 \r\e[KLet me think about that.
 
-\e[38;2;204;102;102mthe model is overloaded\e[0m
+\e[38;2;204;102;102mThe model is overloaded\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
 \r\e[KI can only get so far before
 
-\e[38;2;204;102;102mthe response was cut short\e[0m
+\e[38;2;204;102;102mThe response was cut short\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[38;2;204;102;102mthe endpoint is having a moment\e[0m
+\e[38;2;204;102;102mThe endpoint is having a moment\e[0m
 \e[?25h\e[?2026l
 === wide ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
@@ -604,7 +604,7 @@ rt\e[0m\r
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mThis one stops halfway.\e[0m\e[0m\r
 \r
-\e[38;2;204;102;102mthe stream ended before the response did\e[0m\r
+\e[38;2;204;102;102mThe stream ended before the response did\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -612,7 +612,7 @@ rt\e[0m\r
 \r
 \r\e[KLet me think about that.\r
 \r
-\e[38;2;204;102;102mthe model is overloaded\e[0m\r
+\e[38;2;204;102;102mThe model is overloaded\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -620,11 +620,11 @@ rt\e[0m\r
 \r
 \r\e[KI can only get so far before\r
 \r
-\e[38;2;204;102;102mthe response was cut short\e[0m\r
+\e[38;2;204;102;102mThe response was cut short\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;204;102;102mthe endpoint is having a moment\e[0m\r
+\e[38;2;204;102;102mThe endpoint is having a moment\e[0m\r
 \e[?25h\e[?2026l

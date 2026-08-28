@@ -2495,7 +2495,7 @@ func TestIncompleteReasoningIsErasedBeforeAFailure(t *testing.T) {
 	if strings.Contains(plain, "half a thought") {
 		t.Errorf("incomplete reasoning reached scrollback: %q", plain)
 	}
-	if !strings.Contains(plain, "stream failed") {
+	if !strings.Contains(plain, "Stream failed") {
 		t.Errorf("expected the failure, got %q", plain)
 	}
 }
@@ -4891,7 +4891,7 @@ func TestRetryRemainsDurableConversationHistory(t *testing.T) {
 	}
 	replayed.replay()
 
-	if !strings.Contains(style.Plain(replayOutput.String()), "Attempt 1 failed, asking again in 0.3s: temporary fault") {
+	if !strings.Contains(style.Plain(replayOutput.String()), "Attempt 1 failed, asking again in 0.3s: Temporary fault") {
 		t.Errorf("stored replay omitted the retry:\n%s", style.Plain(replayOutput.String()))
 	}
 	requireSameVisibleScreen(t, "durable retry changed after replay", liveOutput.String(), replayOutput.String())

@@ -36,7 +36,8 @@
 \r\e[Kcode, where \e[38;2;192;128;80m&amp;\e[0m and \e[38;2;192;128;80m&lt;div&gt;\e[0m stand\r
 \r\e[Kas they are written.\r
 \r
-\e[38;2;204;102;102ma warning that arrived with a carriage\rreturn in it\e[0m\r
+\e[38;2;204;102;102ma warning that arrived with a carriage r\r
+eturn in it\e[0m\r
 \e[?25h\e[?2026l
 === one column ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
@@ -515,7 +516,9 @@ r\r
 i\r
 a\r
 g\r
-e\rr\r
+e\r
+ \r
+r\r
 e\r
 t\r
 u\r
@@ -549,7 +552,7 @@ in angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which 
 
 Entities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and \e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.
 
-\e[38;2;204;102;102ma warning that arrived with a carriage\rreturn in it\e[0m
+\e[38;2;204;102;102ma warning that arrived with a carriage return in it\e[0m
 
 === streamed ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -605,7 +608,7 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 \e[?2026h\e[?25l\r\e[KEnti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are res\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolve\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in pro\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T be\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T become\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but lef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone insi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, whe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `&amp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `<\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\r
 \r\e[K`<div&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m sta\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are writt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\e[?25h\e[?2026l\r
 \r
-\e[38;2;204;102;102ma warning that arrived with a carriage\rreturn in it\e[0m\r
+\e[38;2;204;102;102ma warning that arrived with a carriage return in it\e[0m\r
 \e]9;4;0\e\\
 === tiny ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
@@ -672,7 +675,8 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 \e[38;2;204;102;102ma warning th\r
 at arrived w\r
 ith a carria\r
-ge\rreturn in it\e[0m\r
+ge return in\r
+ it\e[0m\r
 \e[?25h\e[?2026l
 === unsized ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
@@ -695,7 +699,7 @@ in angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which 
 
 \r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and \e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.
 
-\e[38;2;204;102;102ma warning that arrived with a carriage\rreturn in it\e[0m
+\e[38;2;204;102;102ma warning that arrived with a carriage return in it\e[0m
 \e[?25h\e[?2026l
 === wide ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -728,5 +732,5 @@ in angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which 
 \r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\r
 \r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\r
 \r
-\e[38;2;204;102;102ma warning that arrived with a carriage\rreturn in it\e[0m\r
+\e[38;2;204;102;102ma warning that arrived with a carriage return in it\e[0m\r
 \e[?25h\e[?2026l

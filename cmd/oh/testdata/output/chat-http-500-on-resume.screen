@@ -8,6 +8,6 @@ All well so far.
  receive HTTP 500 on the turn after a replay
 
 
-Attempt 1 failed, asking again in 1s: Request failed with status 500:
+Attempt 1 failed, asking again in 1s: Request failed with status 500
 
 Recovered after the replay.

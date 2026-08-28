@@ -146,6 +146,34 @@ func TestARowWorthWaitingForSaysHowLongItTook(t *testing.T) {
 	}
 }
 
+func TestARowWorthWaitingForSaysHowLongItTookBesideWhatItMeasured(t *testing.T) {
+	block := testBlock()
+
+	block.Add(rowLabel("grep", "*.go"))
+
+	block.FinaliseRow(0, Done, 9*time.Second, "", "1L")
+
+	got := block.Rows(wide)[0]
+	if !strings.Contains(got, style.Spinner("9s")) {
+		t.Errorf("expected the time it took, got %q", got)
+	}
+	if !strings.Contains(got, "1L") {
+		t.Errorf("expected what it measured, got %q", got)
+	}
+}
+
+func TestAQuickRowSaysOnlyWhatItMeasured(t *testing.T) {
+	block := testBlock()
+
+	block.Add(rowLabel("grep", "*.go"))
+
+	block.FinaliseRow(0, Done, 500*time.Millisecond, "", "1L")
+
+	if got := block.Rows(wide)[0]; strings.Contains(got, "0.5s") {
+		t.Errorf("expected no time on a quick row, got %q", got)
+	}
+}
+
 func TestRunningTimerUsesWholeSecondGranularity(t *testing.T) {
 	block := &Block{isSlow: true}
 	item := row{state: Running, startedAt: time.Now().Add(-5500 * time.Millisecond)}

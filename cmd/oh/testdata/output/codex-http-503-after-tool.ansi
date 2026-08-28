@@ -41,7 +41,7 @@ disconnect/reset before headers. reset reason: connection termination\e[0m\r
 disconnect/reset before headers. reset reason: connection termination\e[0m\r
 \e[38;2;207;173;0mAttempt 18 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or \r
 disconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;204;102;102mrequest failed with status 503: upstream connect error or disconnect/reset before headers. reset rea\r
+\e[38;2;204;102;102mRequest failed with status 503: upstream connect error or disconnect/reset before headers. reset rea\r
 son: connection termination\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

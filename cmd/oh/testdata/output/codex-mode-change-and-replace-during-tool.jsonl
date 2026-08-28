@@ -2,7 +2,7 @@
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"send another message and change what I am allowed to do"}}
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"call-1","name":"work","arguments":"{}"}}
-{"kind":"event","event":{"kind":"tool_call_result","text":"the call was stopped after 3s because the user changed what the harness is allowed to do","id":"call-1","name":"work","status":"error","stats":{"kind":"output","lines":1,"bytes":88,"total_bytes":88}}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"the call was stopped after 3s because the user changed what the harness is allowed to do","id":"call-1","name":"work","status":"cancelled","stats":{"kind":"output","lines":1,"bytes":88,"total_bytes":88}}}
 {"kind":"event","event":{"kind":"interruption","text":"the user changed what the harness is allowed to do"}}
 {"kind":"item","payload":{"role":"user","content":"send another message and change what I am allowed to do"}}
 {"kind":"item","payload":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":"{}"}}

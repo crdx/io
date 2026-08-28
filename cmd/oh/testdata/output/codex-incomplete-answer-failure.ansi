@@ -4,7 +4,7 @@
 \r
 \e[?7l\r\e[Kpartial answer\r
 \r
-\e[38;2;204;102;102mmodel overloaded\e[0m\e[?25h\e[?2026l\r
+\e[38;2;204;102;102mModel overloaded\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m continue after the failure                                                                         \e[0m\r

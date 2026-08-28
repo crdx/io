@@ -36,7 +36,8 @@ becomes AT&T — but left alone inside
 code, where &amp; and &lt;div&gt; stand
 as they are written.
 
-return in itat arrived with a carriage
+a warning that arrived with a carriage r
+eturn in it
 === one column ===
 
 
@@ -514,6 +515,8 @@ r
 i
 a
 g
+e
+
 r
 e
 t
@@ -591,7 +594,8 @@ written.
 a warning th
 at arrived w
 ith a carria
-return in it
+ge return in
+ it
 === wide ===
 
  draw the awkward markdown
@@ -623,4 +627,4 @@ in angle brackets https://example.com/bracketed, which are not the same thing.
 Entities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where &amp; and
 &lt;div&gt; stand as they are written.
 
-return in itat arrived with a carriage
+a warning that arrived with a carriage return in it

@@ -202,7 +202,7 @@ func (self *Block) line(row row, columns int) string {
 func summaryRoom(state RowState, room int, labelWidth int) int {
 	spare := room - labelWidth - 1
 
-	if state == Failed {
+	if state == Failed || state == Cancelled {
 		return max(spare, room/failureShare)
 	}
 
@@ -236,7 +236,7 @@ func (self *Block) fitResult(row row, columns int) string {
 		return result
 	}
 
-	if mark := self.getProgressIndicator(row); style.Width(mark)+edgeGuard <= columns {
+	if mark := self.getProgressIndicator(row); style.Width(mark) <= columns {
 		return mark
 	}
 
@@ -265,15 +265,12 @@ func (self *Block) getProgressIndicator(row row) string {
 }
 
 func getResultText(mark string, took time.Duration, measured string) string {
-	if measured == "" {
-		if took < patience {
-			return mark
-		}
-
-		return mark + " " + style.Spinner(util.CompactDuration(took))
+	waited := ""
+	if took >= patience {
+		waited = style.Spinner(util.CompactDuration(took))
 	}
 
-	return mark + " " + measured
+	return util.JoinNonEmpty(mark, waited, measured)
 }
 
 func glyph(state RowState) string {

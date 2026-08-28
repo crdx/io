@@ -4,7 +4,7 @@
 {"kind":"event","event":{"kind":"user_message","text":"The workspace is now read-only."}}
 {"kind":"event","event":{"kind":"user_message","text":"give it back while the tool is working"}}
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"toolu_1","name":"work","arguments":"{}"}}
-{"kind":"event","event":{"kind":"tool_call_result","text":"the call was stopped after 4s because the user changed what the harness is allowed to do","id":"toolu_1","name":"work","status":"error","stats":{"kind":"output","lines":1,"bytes":88,"total_bytes":88}}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"the call was stopped after 4s because the user changed what the harness is allowed to do","id":"toolu_1","name":"work","status":"cancelled","stats":{"kind":"output","lines":1,"bytes":88,"total_bytes":88}}}
 {"kind":"event","event":{"kind":"interruption","text":"the user changed what the harness is allowed to do"}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"The workspace is now read-only."}]}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"give it back while the tool is working"}]}}

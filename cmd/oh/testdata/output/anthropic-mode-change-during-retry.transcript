@@ -37,7 +37,7 @@ Half an ans
 - **Waited:** `1s`
 
 ```
-The stream ended before the response did
+the stream ended before the response did
 ```
 
 ## Interrupted
@@ -68,7 +68,7 @@ The workspace is now read-only.
 - **Waited:** `1s`
 
 ```
-The stream ended before the response did
+the stream ended before the response did
 ```
 
 ## Retrying
@@ -79,7 +79,7 @@ The stream ended before the response did
 - **Waited:** `5s`
 
 ```
-The stream ended before the response did
+the stream ended before the response did
 ```
 
 ## Assistant

@@ -163,10 +163,11 @@ func (self *FallbackRendering) Describe(toolCall tool.ToolCall) {
 type Status string
 
 const (
-	InfoStatus    Status = "info"
-	SuccessStatus Status = "success"
-	WarningStatus Status = "warning"
-	ErrorStatus   Status = "error"
+	InfoStatus      Status = "info"
+	SuccessStatus   Status = "success"
+	WarningStatus   Status = "warning"
+	ErrorStatus     Status = "error"
+	CancelledStatus Status = "cancelled"
 )
 
 type Event struct {

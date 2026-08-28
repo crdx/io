@@ -2,7 +2,7 @@
 \e[48;2;52;53;65m receive HTTP 404                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;204;102;102mrequest failed with status 404: \e[0m\e[?25h\e[?2026l\r
+\e[38;2;204;102;102mRequest failed with status 404\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m continue after the missing endpoint                                                                \e[0m\r

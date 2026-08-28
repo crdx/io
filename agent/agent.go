@@ -262,7 +262,7 @@ func (self *Agent) send(
 
 		notice := Event{
 			Kind:    RetryingEvent,
-			Text:    strutil.Capitalise(err.Error()),
+			Text:    err.Error(),
 			Attempt: attempt,
 			Took:    wait,
 		}
@@ -300,6 +300,17 @@ func (self *Agent) Send(ctx context.Context, message string) (string, error) {
 }
 
 const CancelledOutput = "the call was cancelled"
+
+func resultStatus(ctx context.Context, ok bool) Status {
+	switch {
+	case ok:
+		return SuccessStatus
+	case ctx.Err() != nil:
+		return CancelledStatus
+	default:
+		return ErrorStatus
+	}
+}
 
 func cancelledResults(ctx context.Context, calls []ToolCall) []ToolCallResult {
 	results := make([]ToolCallResult, len(calls))
@@ -457,10 +468,7 @@ func (self *Agent) runBatch(
 				stats = &executionResult.Stats
 			}
 
-			status := ErrorStatus
-			if ok {
-				status = SuccessStatus
-			}
+			status := resultStatus(ctx, ok)
 
 			completion := completedToolCall{result: Event{
 				Kind:   ToolCallResultEvent,

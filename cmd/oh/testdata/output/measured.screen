@@ -6,7 +6,7 @@
 
 One of each, then.
 
-$ COUNT=0; for NAME… ✓ 3L 0s 2.4s 700M
+$ COUNT=0; for NAME in… ✓ 3L 2.4s 700M
 ls ✓ 2L
 read diagram.png ✓ ~1.6Kt
 edit screen.go ✓ +12 −5
@@ -152,11 +152,11 @@ n
 .
 
 
+✓
+✓
 
-
-
-
-
+✓
+✓
 
 H
 e
@@ -405,7 +405,7 @@ measure.
 
 One of each, then.
 
-$ COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT ✓ 3L 0s 2.4s 700M
+$ COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT ✓ 3L 2.4s 700M
 ls ✓ 2L
 read diagram.png ✓ ~1.6Kt
 edit screen.go ✓ +12 −5

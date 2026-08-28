@@ -93,7 +93,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **Waited:** `1s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -104,7 +104,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `5s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -115,7 +115,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `10s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -126,7 +126,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `30s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -137,7 +137,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -148,7 +148,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -159,7 +159,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -170,7 +170,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -181,7 +181,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -192,7 +192,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -203,7 +203,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -214,7 +214,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -225,7 +225,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -236,7 +236,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -247,7 +247,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -258,7 +258,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -269,7 +269,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Retrying
@@ -280,7 +280,7 @@ Request failed with status 503: upstream connect error or disconnect/reset befor
 - **Waited:** `1m0s`
 
 ```
-Request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
 ## Failure

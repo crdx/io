@@ -5,7 +5,7 @@
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"call-1","name":"work","arguments":"{}"}}
 {"kind":"event","event":{"kind":"state_change","id":"call-1","name":"work-count","state":1}}
 {"kind":"event","event":{"kind":"tool_call_result","text":"tool result","id":"call-1","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":11,"total_bytes":11}}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 502: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":1}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 502: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":1}}
 {"kind":"event","event":{"kind":"model_message","text":"The tool said: tool result."}}
 {"kind":"item","payload":{"role":"user","content":"recover from a bad gateway once the tool has run"}}
 {"kind":"item","payload":{"id":"reasoning-1","type":"reasoning","content":[],"encrypted_content":"sealed","summary":[{"type":"summary_text","text":"Use the tool."}]}}

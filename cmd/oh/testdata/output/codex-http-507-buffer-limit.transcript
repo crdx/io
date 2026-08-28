@@ -29,7 +29,7 @@ receive HTTP 507 from the edge proxy
 - **Waited:** `1s`
 
 ```
-Request failed with status 507: exceeded request buffer limit while retrying upstream
+request failed with status 507: exceeded request buffer limit while retrying upstream
 ```
 
 ## Assistant

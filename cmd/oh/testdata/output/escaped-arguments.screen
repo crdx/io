@@ -3,11 +3,11 @@
  run whatever you like
 
 
-$ echo  [31mred [0m ✓ 1L 0s 0s 2M red
+$ echo  [31mred [0m ✓ 1L 2M red
 screenshot notes [2J [H.md lines… ✓ 1L
 grep one two ✓ 1L
 
-Attempt 1 failed, asking again in 2s: up
+Attempt 1 failed, asking again in 2s: Up
 stream said no
 
 Nothing moved.
@@ -52,8 +52,8 @@ e
 
 
 
-
-
+✓
+✓
 
 A
 t
@@ -93,7 +93,7 @@ n
 s
 :
 
-u
+U
 p
 s
 t
@@ -130,14 +130,14 @@ d
  you like
 
 
-$ echo … ✓
+$ ✓ 1L 2M
 scre… ✓ 1L
 grep ✓ 1L
 
 Attempt 1 fa
 iled, asking
  again in 2s
-: upstream s
+: Upstream s
 aid no
 
 Nothing
@@ -147,10 +147,10 @@ moved.
  run whatever you like
 
 
-$ echo  [31mred [0m ✓ 1L 0s 0s 2M red
+$ echo  [31mred [0m ✓ 1L 2M red
 screenshot notes [2J [H.md lines 1 to 40  ✓ 1L
 grep one two ✓ 1L
 
-Attempt 1 failed, asking again in 2s: upstream said no
+Attempt 1 failed, asking again in 2s: Upstream said no
 
 Nothing moved.

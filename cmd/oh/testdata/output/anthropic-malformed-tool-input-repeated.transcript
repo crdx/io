@@ -31,7 +31,7 @@ send malformed tool input three times over
 - **Name:** `work`
 
 ```
-The work tool call did not contain a JSON object
+the work tool call did not contain a JSON object
 ```
 
 **Arguments**
@@ -50,7 +50,7 @@ The work tool call did not contain a JSON object
 - **Name:** `work`
 
 ```
-The work tool call did not contain a JSON object
+the work tool call did not contain a JSON object
 ```
 
 **Arguments**
@@ -69,7 +69,7 @@ The work tool call did not contain a JSON object
 - **Name:** `work`
 
 ```
-The work tool call did not contain a JSON object
+the work tool call did not contain a JSON object
 ```
 
 **Arguments**

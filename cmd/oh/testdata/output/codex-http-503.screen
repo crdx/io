@@ -2,25 +2,25 @@
  receive HTTP 503
 
 
-Attempt 1 failed, asking again in 1s: Request failed with status 503:
-Attempt 2 failed, asking again in 5s: Request failed with status 503:
-Attempt 3 failed, asking again in 10s: Request failed with status 503:
-Attempt 4 failed, asking again in 30s: Request failed with status 503:
-Attempt 5 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 6 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 7 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 8 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 9 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 10 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 11 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 12 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 13 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 14 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 15 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 16 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 17 failed, asking again in 1m00s: Request failed with status 503:
-Attempt 18 failed, asking again in 1m00s: Request failed with status 503:
-request failed with status 503:
+Attempt 1 failed, asking again in 1s: Request failed with status 503
+Attempt 2 failed, asking again in 5s: Request failed with status 503
+Attempt 3 failed, asking again in 10s: Request failed with status 503
+Attempt 4 failed, asking again in 30s: Request failed with status 503
+Attempt 5 failed, asking again in 1m00s: Request failed with status 503
+Attempt 6 failed, asking again in 1m00s: Request failed with status 503
+Attempt 7 failed, asking again in 1m00s: Request failed with status 503
+Attempt 8 failed, asking again in 1m00s: Request failed with status 503
+Attempt 9 failed, asking again in 1m00s: Request failed with status 503
+Attempt 10 failed, asking again in 1m00s: Request failed with status 503
+Attempt 11 failed, asking again in 1m00s: Request failed with status 503
+Attempt 12 failed, asking again in 1m00s: Request failed with status 503
+Attempt 13 failed, asking again in 1m00s: Request failed with status 503
+Attempt 14 failed, asking again in 1m00s: Request failed with status 503
+Attempt 15 failed, asking again in 1m00s: Request failed with status 503
+Attempt 16 failed, asking again in 1m00s: Request failed with status 503
+Attempt 17 failed, asking again in 1m00s: Request failed with status 503
+Attempt 18 failed, asking again in 1m00s: Request failed with status 503
+Request failed with status 503
 
 
  continue after the transport failure

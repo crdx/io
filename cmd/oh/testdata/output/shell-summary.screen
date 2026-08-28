@@ -3,14 +3,14 @@
  check the tree, then build it
 
 
-$ git status --short ✓ 2L 0s 0s 4M M …
-$ touch build.lock ✓ 0L 0s 0s 2M
+$ git status --short ✓ 2L 4M M cmd/oh…
+$ touch build.lock ✓ no output 2M
 read cmd/oh/dynamic/dynamic.go ✓ 1L
-$ printf 'one\\ttwo\\r\\n\\… ✓ 3L 0s 0s 2M
-$ ls /usr/bin ✓ 1L 0s 0s 6M awk basen…
-$ for NAME in cmd/o… ✓ 1L 0s 1.4s 400M
-$ go bui… ✗ 2L 0s 0.9s 300M exit(1): …
-$ just check ✓ 1L 0s 0s 8M ok all six…
+$ printf 'one\\ttwo\\r\\n\\n\\tthr… ✓ 3L 2M
+$ ls /usr/bin ✓ 1L 6M awk basename ba…
+$ for NAME in cmd/oh/d… ✓ 1L 1.4s 400M
+$ go build… ✗ 2L 0.9s 300M exit(1): .…
+$ just check ✓ 1L 8M ok all six steps
 
 The tree is dirty and the build is
 broken.
@@ -68,7 +68,7 @@ t
 
 
 
-
+✓
 
 
 
@@ -116,14 +116,14 @@ n
  build it
 
 
-$ git s… ✓
+$ ✓ 2L 4M
 $ touch… ✓
 read ✓ 1L
-$ print… ✓
-$ ls /u… ✓
+$ ✓ 3L 2M
+$ ✓ 1L 6M
 $ for N… ✓
 $ … ✗ exi…
-$ just … ✓
+$ ✓ 1L 8M
 
 The tree is
 dirty and
@@ -134,13 +134,13 @@ broken.
  check the tree, then build it
 
 
-$ git status --short ✓ 2L 0s 0s 4M M cmd/oh/main.go M cmd/oh/dynamic/dynamic.go
-$ touch build.lock ✓ 0L 0s 0s 2M
+$ git status --short ✓ 2L 4M M cmd/oh/main.go M cmd/oh/dynamic/dynamic.go
+$ touch build.lock ✓ no output 2M
 read cmd/oh/dynamic/dynamic.go ✓ 1L
-$ printf 'one\\ttwo\\r\\n\\n\\tthree\\n' ✓ 3L 0s 0s 2M one two three
-$ ls /usr/bin ✓ 1L 0s 0s 6M awk basename bash cat chmod cp date diff du echo env find grep gzip h…
-$ for NAME in cmd/oh/dynamic cmd/oh/painter cmd/oh/call; do go vet ./$NAME; done ✓ 1L 0s 1.4s 400M
-$ go build ./... ✗ 2L 0s 0.9s 300M exit(1): ./cmd/oh/main.go:12:2: undefined: spinner
-$ just check ✓ 1L 0s 0s 8M ok all six steps
+$ printf 'one\\ttwo\\r\\n\\n\\tthree\\n' ✓ 3L 2M one two three
+$ ls /usr/bin ✓ 1L 6M awk basename bash cat chmod cp date diff du echo env find grep gzip head id…
+$ for NAME in cmd/oh/dynamic cmd/oh/painter cmd/oh/call; do go vet ./$NAME; done ✓ 1L 1.4s 400M ok
+$ go build ./... ✗ 2L 0.9s 300M exit(1): ./cmd/oh/main.go:12:2: undefined: spinner
+$ just check ✓ 1L 8M ok all six steps
 
 The tree is dirty and the build is broken.

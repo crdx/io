@@ -4,7 +4,7 @@
 
 
 read one.txt ✓ 1L
-read two.txt ✗ the call was cancelled…
+read two.txt – the call was cancelled…
 
 
  one was all I needed
@@ -52,8 +52,8 @@ e
 s
 
 
-
-
+✓
+–
 
 
 
@@ -96,7 +96,7 @@ d
 
 
 read ✓ 1L
-re… ✗ the…
+re… – the…
 
 
  one was all
@@ -107,7 +107,7 @@ re… ✗ the…
 
 
 read one.txt ✓ 1L
-read two.txt ✗ the call was cancelled because the user pressed escape
+read two.txt – the call was cancelled because the user pressed escape
 
 
  one was all I needed

@@ -5,7 +5,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/markdown"
@@ -18,6 +17,8 @@ import (
 const (
 	durationWidth    = 6
 	bytesPerMegabyte = 1 << 20
+
+	noTimeAtAll = "0s"
 )
 
 type Label struct {
@@ -188,7 +189,7 @@ func (self Label) style() style.Style {
 	return style.Change
 }
 
-func Measurements(took time.Duration, stats *tool.Stats) string {
+func Measurements(stats *tool.Stats) string {
 	if stats == nil {
 		return ""
 	}
@@ -197,7 +198,7 @@ func Measurements(took time.Duration, stats *tool.Stats) string {
 	case tool.StatsOutput:
 		return outputStatsText(stats)
 	case tool.StatsResources:
-		return resourcesStatsText(took, stats)
+		return resourcesStatsText(stats)
 	case tool.StatsRead:
 		return readStatsText(stats)
 	case tool.StatsList:
@@ -216,25 +217,34 @@ func Measurements(took time.Duration, stats *tool.Stats) string {
 }
 
 func outputStatsText(stats *tool.Stats) string {
+	return style.Subtle(outputMeasure(stats))
+}
+
+func outputMeasure(stats *tool.Stats) string {
 	if stats.Bytes == 0 && stats.Lines == 0 {
-		return style.Subtle("no output")
+		return "no output"
 	}
 
 	truncationMarker := ""
 	if stats.Truncated {
 		truncationMarker = "+"
 	}
-	return style.Subtle.Join(fmt.Sprintf("%dL%s", stats.Lines, truncationMarker), tokenEstimate(stats))
+
+	return util.JoinNonEmpty(fmt.Sprintf("%dL%s", stats.Lines, truncationMarker), tokenEstimate(stats))
 }
 
-func resourcesStatsText(took time.Duration, stats *tool.Stats) string {
-	return style.Subtle.Join(
-		strconv.FormatInt(stats.Lines, 10)+"L",
-		tokenEstimate(stats),
-		util.CompactDuration(took),
-		util.CompactDuration(stats.CPUTime),
-		strconv.FormatUint(stats.PeakMemory/bytesPerMegabyte, 10)+"M",
-	)
+func resourcesStatsText(stats *tool.Stats) string {
+	cpuTime := util.CompactDuration(stats.CPUTime)
+	if cpuTime == noTimeAtAll {
+		cpuTime = ""
+	}
+
+	peakMemory := ""
+	if megabytes := stats.PeakMemory / bytesPerMegabyte; megabytes > 0 {
+		peakMemory = strconv.FormatUint(megabytes, 10) + "M"
+	}
+
+	return style.Subtle.Join(outputMeasure(stats), cpuTime, peakMemory)
 }
 
 func readStatsText(stats *tool.Stats) string {

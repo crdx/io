@@ -4,7 +4,7 @@
  when it finishes
 
 
-$ for NAME in alpha bet… ✓ 2L 0s 0s 0M
+$ for NAME in alpha beta; do ech… ✓ 2L
 notify command finished alpha an… ✓ 1L
 search how to quote a shell vari… ✓ 1L
 fetch https://gnu.org/bash clean… ✓ 1L
@@ -124,7 +124,7 @@ e
  finishes
 
 
-$ for N… ✓
+$ fo… ✓ 2L
 noti… ✓ 1L
 sear… ✓ 1L
 fetch ✓ 1L
@@ -135,7 +135,7 @@ done.
  run a multiline command and notify me when it finishes
 
 
-$ for NAME in alpha beta; do echo "$NAME"; done 3L ✓ 2L 0s 0s 0M alpha beta
+$ for NAME in alpha beta; do echo "$NAME"; done 3L ✓ 2L alpha beta
 notify command finished alpha and beta were printed ✓ 1L
 search how to quote a shell variable ✓ 1L
 fetch https://gnu.org/bash clean_html ✓ 1L

@@ -524,9 +524,10 @@ func TestTheActiveModelSegmentMarksUnsupportedEfforts(t *testing.T) {
 		levels []string
 		want   string
 	}{
-		"gapped":       {effort: "high", levels: []string{"high", "max"}, want: "DeepSeek Pro 4 ···▪·▫"},
-		"none only":    {effort: "none", levels: []string{"none"}, want: "DeepSeek Pro 4 ······"},
-		"unknown caps": {effort: "none", want: "DeepSeek Pro 4"},
+		"gapped":         {effort: "high", levels: []string{"high", "max"}, want: "DeepSeek Pro 4 ···▪·▫"},
+		"one rung only":  {effort: "max", levels: []string{"max"}, want: "DeepSeek Pro 4 ·····▪"},
+		"no ladder":      {effort: "none", levels: []string{"none"}, want: "DeepSeek Pro 4"},
+		"unknown ladder": {effort: "none", want: "DeepSeek Pro 4"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			if got := drawn(t, activeModel.New("deepseek-v4-pro", test.effort, test.levels)); got != test.want {

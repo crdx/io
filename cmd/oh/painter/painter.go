@@ -121,7 +121,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 
 	case agent.FailureEvent:
 		self.Close(dynamic.Cancelled)
-		self.screen.Line(style.Failure(event.Text))
+		self.screen.Line(style.Failure(RenderFailure(event)))
 	}
 }
 
@@ -143,7 +143,7 @@ func RenderRetry(event agent.Event) string {
 	}
 
 	if event.Text != "" {
-		notice += ": " + strutil.Flatten(strutil.FirstLine(event.Text))
+		notice += ": " + strutil.Capitalise(strutil.Flatten(strutil.FirstLine(event.Text)))
 	}
 
 	if event.Arguments != "" {
@@ -186,6 +186,8 @@ func NoticeStyle(severity agent.Status) style.Style {
 		return style.Success
 	case agent.ErrorStatus:
 		return style.Failure
+	case agent.CancelledStatus:
+		return style.Cancelled
 	case agent.WarningStatus, "":
 		return style.Stopped
 	default:
@@ -194,11 +196,14 @@ func NoticeStyle(severity agent.Status) style.Style {
 }
 
 func getState(status agent.Status) dynamic.RowState {
-	if status == agent.ErrorStatus {
+	switch status {
+	case agent.ErrorStatus:
 		return dynamic.Failed
+	case agent.CancelledStatus:
+		return dynamic.Cancelled
+	default:
+		return dynamic.Done
 	}
-
-	return dynamic.Done
 }
 
 func RenderReasoning(thought string, columns int) []string {
@@ -293,7 +298,7 @@ func (self *Picasso) mark(event agent.Event) {
 		getState(event.Status),
 		event.Took,
 		call.Summary(event),
-		call.Measurements(event.Took, event.Stats),
+		call.Measurements(event.Stats),
 	)
 
 	if len(self.rows) == 0 {
@@ -306,5 +311,11 @@ func (self *Picasso) render(event agent.Event) string {
 		return startup.RenderEvent(event, self.screen.Columns(), self.screen.IsTextSizingSupported())
 	}
 
-	return NoticeStyle(event.Status)(event.Text)
+	return NoticeStyle(event.Status)(strutil.PrintableLines(event.Text))
+}
+
+// RenderFailure presents the error a turn ended on, which is written down as the provider gave it
+// and only made fit to read here, so that a session stored before this drew it the same way.
+func RenderFailure(event agent.Event) string {
+	return strutil.Capitalise(strutil.PrintableLines(event.Text))
 }

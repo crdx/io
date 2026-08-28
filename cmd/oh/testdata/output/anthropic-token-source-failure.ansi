@@ -2,7 +2,7 @@
 \e[48;2;52;53;65m fail before making the request                                                                     \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;204;102;102mtoken source failed\e[0m\e[?25h\e[?2026l\r
+\e[38;2;204;102;102mToken source failed\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m continue after the token source recovers                                                           \e[0m\r

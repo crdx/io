@@ -29,7 +29,7 @@ receive a rate limit that asks to be left alone for a moment
 - **Waited:** `3s`
 
 ```
-Rate limit exceeded
+rate limit exceeded
 ```
 
 ## Assistant

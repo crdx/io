@@ -2,7 +2,7 @@
  receive HTTP 401
 
 
-request failed with status 401:
+Request failed with status 401
 
 
  continue after the transport failure

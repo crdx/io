@@ -39,7 +39,7 @@ The call wants an object.
 - **Name:** `work`
 
 ```
-The work tool call did not contain a JSON object
+the work tool call did not contain a JSON object
 ```
 
 **Arguments**

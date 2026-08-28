@@ -76,7 +76,7 @@ Attempt 18 failed, asking again in 1m00s: Unexpected EOF
 
 Partial answer.
 
-unexpected EOF
+Unexpected EOF
 
 
  continue after the transport failure

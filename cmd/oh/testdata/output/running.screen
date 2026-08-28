@@ -13,7 +13,7 @@ grep prompt *.go ✦· 7s
 === discarded reasoning ===
 complete thought
 
-stream failed
+Stream failed
 === help during reasoning ===
 --- frame 1 ---
 thinking about it

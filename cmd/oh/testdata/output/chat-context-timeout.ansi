@@ -2,7 +2,7 @@
 \e[48;2;52;53;65m wait beyond the request deadline                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;204;102;102mcontext deadline exceeded\e[0m\e[?25h\e[?2026l\r
+\e[38;2;204;102;102mContext deadline exceeded\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m continue after the timeout                                                                         \e[0m\r

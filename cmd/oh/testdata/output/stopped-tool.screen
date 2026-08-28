@@ -5,7 +5,7 @@
 
 Building now.
 
-$ just bu… ✗ 3L 0s 11s 40M compiling …
+$ just build – 3L 11s 40M compiling a…
 
 
  leave it, the build is broken anyway
@@ -164,7 +164,7 @@ e
 Building
 now.
 
-$ … ✗ com…
+$ … – com…
 
 
  leave it,
@@ -181,7 +181,7 @@ Left alone.
 
 Building now.
 
-$ just build ✗ 3L 0s 11s 40M compiling agent compiling toolbox note: the command was stopped afte…
+$ just build – 3L 11s 40M compiling agent compiling toolbox note: the command was stopped after 1…
 
 
  leave it, the build is broken anyway

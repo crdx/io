@@ -2,7 +2,7 @@
  receive HTTP 403
 
 
-request failed with status 403:
+Request failed with status 403
 
 
  continue after the transport failure

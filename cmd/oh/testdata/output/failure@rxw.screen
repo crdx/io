@@ -9,7 +9,7 @@ of context.
 
 This one stops halfway.
 
-the stream ended before the response did
+The stream ended before the response did
 
 
  have a look at that
@@ -17,7 +17,7 @@ the stream ended before the response did
 
 Let me think about that.
 
-the model is overloaded
+The model is overloaded
 
 
  have a look at that
@@ -25,13 +25,13 @@ the model is overloaded
 
 I can only get so far before
 
-the response was cut short
+The response was cut short
 
 
  have a look at that
 
 
-the endpoint is having a moment
+The endpoint is having a moment
 === one column ===
 A
 g
@@ -179,7 +179,7 @@ a
 y
 .
 
-t
+T
 h
 e
 
@@ -274,7 +274,7 @@ a
 t
 .
 
-t
+T
 h
 e
 
@@ -354,7 +354,7 @@ o
 r
 e
 
-t
+T
 h
 e
 
@@ -414,7 +414,7 @@ a
 t
 
 
-t
+T
 h
 e
 
@@ -464,7 +464,7 @@ This one
 stops
 halfway.
 
-the stream e
+The stream e
 nded before
 the response
  did
@@ -477,7 +477,7 @@ the response
 Let me think
 about that.
 
-the model is
+The model is
  overloaded
 
 
@@ -489,7 +489,7 @@ I can only
 get so far
 before
 
-the response
+The response
  was cut sho
 rt
 
@@ -498,7 +498,7 @@ rt
  at that
 
 
-the endpoint
+The endpoint
  is having a
  moment
 === wide ===
@@ -510,7 +510,7 @@ Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t 
 
 This one stops halfway.
 
-the stream ended before the response did
+The stream ended before the response did
 
 
  have a look at that
@@ -518,7 +518,7 @@ the stream ended before the response did
 
 Let me think about that.
 
-the model is overloaded
+The model is overloaded
 
 
  have a look at that
@@ -526,10 +526,10 @@ the model is overloaded
 
 I can only get so far before
 
-the response was cut short
+The response was cut short
 
 
  have a look at that
 
 
-the endpoint is having a moment
+The endpoint is having a moment

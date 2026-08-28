@@ -26,7 +26,7 @@ receive HTTP 403
 > 2001-01-01T00:00:02Z
 
 ```
-request failed with status 403: 
+request failed with status 403
 ```
 
 ## User

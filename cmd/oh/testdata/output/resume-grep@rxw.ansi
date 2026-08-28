@@ -185,7 +185,7 @@ t\e[0m\r
 \r\e[Ks\r
 \r\e[K.\r
 \r
-\r\e[K\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KT\r
 \r\e[Kh\r

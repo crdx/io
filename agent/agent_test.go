@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/stop"
 	"crdx.org/io/tool"
 )
 
@@ -561,6 +562,36 @@ func TestAnEmptyPlainCallReceivesEmptyOutputStats(t *testing.T) {
 	result := singleResult(t, plainOutputTool("", nil))
 
 	requireStats(t, result, tool.OutputStats(""))
+}
+
+func TestACallTheUserStoppedIsMarkedApartFromOneThatFailed(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+
+	stoppedTool := tool.Implement(
+		tool.Definition{Name: "output", Description: "", Schema: tool.Schema{}},
+		func(struct{}) (string, string) { return "", "" },
+	).Plain(func(callContext context.Context, _ struct{}) (string, error) {
+		cancel(stop.Because("the user pressed escape"))
+		return "half done", callContext.Err()
+	})
+
+	provider := &oneCallProvider{call: agent.ToolCall{ID: "a", Name: "output", Arguments: `{}`}}
+	assistant := agent.New("", provider, []tool.Tool{stoppedTool})
+
+	var result *agent.Event
+	for update := range assistant.Stream(ctx, "go") {
+		if update.Event != nil && update.Event.Kind == agent.ToolCallResultEvent {
+			result = update.Event
+		}
+	}
+
+	if result == nil {
+		t.Fatal("expected the stopped call to report a result")
+	}
+	if result.Status != agent.CancelledStatus {
+		t.Errorf("got status %q, want the call marked as stopped rather than failed", result.Status)
+	}
 }
 
 func TestAFailedExecutedCallReceivesOutputStats(t *testing.T) {

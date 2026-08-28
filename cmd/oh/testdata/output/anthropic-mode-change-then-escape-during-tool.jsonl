@@ -2,7 +2,7 @@
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"change what I am allowed to do, then stop the turn"}}
 {"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"toolu_1","name":"work","arguments":"{}"}}
-{"kind":"event","event":{"kind":"tool_call_result","text":"the call was stopped after 4s because the user pressed escape","id":"toolu_1","name":"work","status":"error","stats":{"kind":"output","lines":1,"bytes":61,"total_bytes":61}}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"the call was stopped after 4s because the user pressed escape","id":"toolu_1","name":"work","status":"cancelled","stats":{"kind":"output","lines":1,"bytes":61,"total_bytes":61}}}
 {"kind":"event","event":{"kind":"interruption","text":"the user pressed escape"}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"change what I am allowed to do, then stop the turn"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_1","name":"work","input":{}}]}}

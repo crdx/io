@@ -23,8 +23,8 @@ func elided(t *testing.T, label Label, room int) Label {
 	return elidedLabel
 }
 
-func measured(took time.Duration, stats *tool.Stats) string {
-	text := Measurements(took, stats)
+func measured(stats *tool.Stats) string {
+	text := Measurements(stats)
 	if text == "" {
 		return "✓"
 	}
@@ -63,7 +63,15 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 				Lines:      7,
 				Bytes:      1200,
 			},
-			want: []string{"7L ~400t 1.4s 0.8s 92M"},
+			want: []string{"7L ~400t 0.8s 92M"},
+		},
+		"resources spent on nothing": {
+			stats: tool.Stats{Kind: tool.StatsResources},
+			want:  []string{"no output"},
+		},
+		"resources without a cost worth naming": {
+			stats: tool.Stats{Kind: tool.StatsResources, Lines: 3, Bytes: 40},
+			want:  []string{"3L"},
 		},
 		"read": {
 			stats: tool.Stats{Kind: tool.StatsRead, Lines: 42, Bytes: 1200},
@@ -115,7 +123,7 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := style.Plain(measured(1400*time.Millisecond, &test.stats))
+			got := style.Plain(measured(&test.stats))
 			for _, want := range test.want {
 				if !strings.Contains(got, want) {
 					t.Errorf("got %q, want %q", got, want)
@@ -126,27 +134,27 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 }
 
 func TestStatsUseTheirExpectedStyles(t *testing.T) {
-	output := measured(0, &tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 951})
+	output := measured(&tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 951})
 	if want := style.Subtle("4L ~300t"); !strings.Contains(output, want) {
 		t.Errorf("output stats got %q, want styled %q", output, want)
 	}
 
-	emptyOutput := measured(0, &tool.Stats{Kind: tool.StatsOutput})
+	emptyOutput := measured(&tool.Stats{Kind: tool.StatsOutput})
 	if want := style.Subtle("no output"); !strings.Contains(emptyOutput, want) {
 		t.Errorf("empty output stats got %q, want styled %q", emptyOutput, want)
 	}
 
-	read := measured(0, &tool.Stats{Kind: tool.StatsRead, Lines: 45, Bytes: 951})
+	read := measured(&tool.Stats{Kind: tool.StatsRead, Lines: 45, Bytes: 951})
 	if want := style.Subtle("45L ~300t"); !strings.Contains(read, want) {
 		t.Errorf("read stats got %q, want styled %q", read, want)
 	}
 
-	write := measured(0, &tool.Stats{Kind: tool.StatsWrite, Lines: 12, Bytes: 1200})
+	write := measured(&tool.Stats{Kind: tool.StatsWrite, Lines: 12, Bytes: 1200})
 	if want := style.Subtle("12L ~400t"); !strings.Contains(write, want) {
 		t.Errorf("write stats got %q, want styled %q", write, want)
 	}
 
-	search := measured(0, &tool.Stats{
+	search := measured(&tool.Stats{
 		Kind:       tool.StatsSearch,
 		Lines:      23,
 		Bytes:      1200,
@@ -157,16 +165,16 @@ func TestStatsUseTheirExpectedStyles(t *testing.T) {
 		t.Errorf("search stats got %q, want styled %q", search, want)
 	}
 
-	exec := measured(0, &tool.Stats{
+	exec := measured(&tool.Stats{
 		Kind:       tool.StatsResources,
 		PeakMemory: 26 << 20,
 	})
-	wantExec := style.Subtle("0L 0s 0s 26M")
+	wantExec := style.Subtle("no output 26M")
 	if !strings.Contains(exec, wantExec) {
 		t.Errorf("exec stats got %q, want styled %q", exec, wantExec)
 	}
 
-	edit := measured(0, &tool.Stats{Kind: tool.StatsDiff, Added: 2, Removed: 1})
+	edit := measured(&tool.Stats{Kind: tool.StatsDiff, Added: 2, Removed: 1})
 	wantEdit := style.Success("+2") + style.Subtle(" ") + style.Failure("−1")
 	if !strings.Contains(edit, wantEdit) {
 		t.Errorf("edit stats got %q, want styled %q", edit, wantEdit)

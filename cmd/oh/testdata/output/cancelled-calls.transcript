@@ -84,7 +84,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 
 - **ID:** `call_2`
 - **Name:** `read`
-- **Status:** `error`
+- **Status:** `cancelled`
 
 **Output preview (first 3 lines, up to 1 KiB)**
 

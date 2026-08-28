@@ -2,7 +2,7 @@
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"fail on the server after thinking"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Weighing the two ways round."}}
-{"kind":"event","event":{"kind":"retrying","text":"The server gave up","attempt":1}}
+{"kind":"event","event":{"kind":"retrying","text":"the server gave up","attempt":1}}
 {"kind":"event","event":{"kind":"model_message","text":"Through on the second attempt."}}
 {"kind":"item","payload":{"role":"user","content":"fail on the server after thinking"}}
 {"kind":"item","payload":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Through on the second attempt."}]}}

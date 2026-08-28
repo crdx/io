@@ -2,7 +2,7 @@
  receive a rate limit asking for longer than the harness will wait
 
 
-rate limit exceeded
+Rate limit exceeded
 
 
  continue after the rate limit

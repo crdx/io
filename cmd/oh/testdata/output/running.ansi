@@ -14,9 +14,9 @@
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mcomplete thought\e[0m\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mincomplete thought\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[?25h\e[?2026l\r
 \r
-\e[38;2;204;102;102mstream failed\e[0m\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mcomplete thought\e[0m\e[0m\r
+\e[38;2;204;102;102mStream failed\e[0m\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mcomplete thought\e[0m\e[0m\r
 \r
-\e[38;2;204;102;102mstream failed\e[0m\e[?25h\e[?2026l
+\e[38;2;204;102;102mStream failed\e[0m\e[?25h\e[?2026l
 === unknown command during answer ===
 \e[?2026h\e[?25l\e[?7l\r\e[38;2;150;152;150m────────────────────────────────────────────────────────────────────────────────────────────────────\e[0m\r
 /unknown\r

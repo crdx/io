@@ -18,7 +18,7 @@ const (
 type ToolLookup func(string) (tool.Tool, bool)
 
 func Summary(event agent.Event) string {
-	if event.Status == agent.ErrorStatus || event.Name == shellTool {
+	if event.Status != agent.SuccessStatus || event.Name == shellTool {
 		return event.Text
 	}
 

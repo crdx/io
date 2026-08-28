@@ -1,25 +1,25 @@
 {"kind":"head","version":10,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"receive HTTP 503"}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":1}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":2}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":3}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":4}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":5}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":6}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":7}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":8}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":9}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":10}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":11}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":12}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":13}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":14}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":15}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":16}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":17}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 503: ","attempt":18}}
-{"kind":"event","event":{"kind":"failure","text":"request failed with status 503: "}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":1}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":2}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":3}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":4}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":5}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":6}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":7}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":8}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":9}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":10}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":11}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":12}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":13}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":14}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":15}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":16}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":17}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503","attempt":18}}
+{"kind":"event","event":{"kind":"failure","text":"request failed with status 503"}}
 {"kind":"item","payload":{"role":"user","content":"receive HTTP 503"}}
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the transport failure"}}

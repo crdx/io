@@ -93,7 +93,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 - **Waited:** `1s`
 
 ```
-Unexpected EOF
+unexpected EOF
 ```
 
 ## Assistant

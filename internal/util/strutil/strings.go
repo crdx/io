@@ -25,6 +25,15 @@ func Flatten(text string) string {
 	return strings.Join(strings.Fields(stripped(text)), " ")
 }
 
+func PrintableLines(text string) string {
+	lines := strings.Split(text, "\n")
+	for i, line := range lines {
+		lines[i] = Printable(line)
+	}
+
+	return strings.Join(lines, "\n")
+}
+
 func Printable(text string) string {
 	var out strings.Builder
 

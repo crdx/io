@@ -2,7 +2,7 @@
  wait beyond the request deadline
 
 
-context deadline exceeded
+Context deadline exceeded
 
 
  continue after the timeout

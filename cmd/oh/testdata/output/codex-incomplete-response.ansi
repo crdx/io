@@ -4,7 +4,7 @@
 \r
 \e[?7l\r\e[KPartial answer.\r
 \r
-\e[38;2;204;102;102mthe response was cut short\e[0m\e[?25h\e[?2026l\r
+\e[38;2;204;102;102mThe response was cut short\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m continue after the first response                                                                  \e[0m\r

@@ -41,7 +41,7 @@ Attempt 17 failed, asking again in 1m00s: Request failed with status 503: upstre
 disconnect/reset before headers. reset reason: connection termination
 Attempt 18 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or
 disconnect/reset before headers. reset reason: connection termination
-request failed with status 503: upstream connect error or disconnect/reset before headers. reset rea
+Request failed with status 503: upstream connect error or disconnect/reset before headers. reset rea
 son: connection termination
 
 

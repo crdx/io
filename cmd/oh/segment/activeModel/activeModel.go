@@ -43,13 +43,15 @@ func (self state) Render(segment.Context) string {
 }
 
 func thinkingSquares(effort string, effortLevels []string) string {
-	if len(effortLevels) == 0 {
+	ladder := model.EffortOrder[1:]
+
+	if !slices.ContainsFunc(ladder, func(level string) bool { return slices.Contains(effortLevels, level) }) {
 		return ""
 	}
 
 	var squares strings.Builder
 
-	for _, level := range model.EffortOrder[1:] {
+	for _, level := range ladder {
 		switch {
 		case !slices.Contains(effortLevels, level):
 			squares.WriteString(unsupportedSquare)
