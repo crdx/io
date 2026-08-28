@@ -62,9 +62,7 @@ e
 m
 p
 t
-
 1
-
 f
 a
 i
@@ -72,27 +70,22 @@ l
 e
 d
 ,
-
 a
 s
 k
 i
 n
 g
-
 a
 g
 a
 i
 n
-
 i
 n
-
 2
 s
 :
-
 U
 p
 s
@@ -101,12 +94,10 @@ r
 e
 a
 m
-
 s
 a
 i
 d
-
 n
 o
 
@@ -136,9 +127,9 @@ grep ✓ 1L
 
 Attempt 1 fa
 iled, asking
- again in 2s
-: Upstream s
-aid no
+again in 2s:
+Upstream sai
+d no
 
 Nothing
 moved.

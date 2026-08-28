@@ -479,7 +479,6 @@ n
 .
 
 a
-
 w
 a
 r
@@ -487,12 +486,10 @@ n
 i
 n
 g
-
 t
 h
 a
 t
-
 a
 r
 r
@@ -500,14 +497,11 @@ i
 v
 e
 d
-
 w
 i
 t
 h
-
 a
-
 c
 a
 r
@@ -516,17 +510,14 @@ i
 a
 g
 e
-
 r
 e
 t
 u
 r
 n
-
 i
 n
-
 i
 t
 === tiny ===
@@ -595,7 +586,7 @@ a warning th
 at arrived w
 ith a carria
 ge return in
- it
+it
 === wide ===
 
  draw the awkward markdown

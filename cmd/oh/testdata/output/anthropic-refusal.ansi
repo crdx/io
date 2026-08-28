@@ -3,8 +3,8 @@
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[38;2;204;102;102mThis request was blocked as it seems to violate Anthropic's Terms of Service restrictions on reverse\r
- engineering or duplicating model outputs. To learn more, visit https://www.anthropic.com/legal/comm\r
-ercial-terms.\e[0m\e[?25h\e[?2026l\r
+engineering or duplicating model outputs. To learn more, visit https://www.anthropic.com/legal/comme\r
+rcial-terms.\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m continue after the refusal                                                                         \e[0m\r

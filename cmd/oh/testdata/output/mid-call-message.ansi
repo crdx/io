@@ -23,7 +23,7 @@
 \r
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \e[38;2;204;102;102mthe conversation could not be stored: no\r
- space left on device\e[0m\r
+space left on device\e[0m\r
 \e[?25h\e[?2026l
 === one column ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
@@ -290,7 +290,6 @@ o\r
 u\r
 n\r
 d\r
- \r
 p\r
 r\r
 o\r
@@ -300,14 +299,12 @@ s\r
 s\r
 e\r
 s\r
- \r
 k\r
 i\r
 l\r
 l\r
 e\r
 d\r
- \r
 (\r
 s\r
 l\r
@@ -319,7 +316,6 @@ p\r
 \e[38;2;204;102;102mt\r
 h\r
 e\r
- \r
 c\r
 o\r
 n\r
@@ -332,20 +328,16 @@ t\r
 i\r
 o\r
 n\r
- \r
 c\r
 o\r
 u\r
 l\r
 d\r
- \r
 n\r
 o\r
 t\r
- \r
 b\r
 e\r
- \r
 s\r
 t\r
 o\r
@@ -353,24 +345,19 @@ r\r
 e\r
 d\r
 :\r
- \r
 n\r
 o\r
- \r
 s\r
 p\r
 a\r
 c\r
 e\r
- \r
 l\r
 e\r
 f\r
 t\r
- \r
 o\r
 n\r
- \r
 d\r
 e\r
 v\r

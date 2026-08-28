@@ -480,7 +480,6 @@ n\e[0m\r
 \r\e[K.\r
 \r
 \e[38;2;204;102;102ma\r
- \r
 w\r
 a\r
 r\r
@@ -488,12 +487,10 @@ n\r
 i\r
 n\r
 g\r
- \r
 t\r
 h\r
 a\r
 t\r
- \r
 a\r
 r\r
 r\r
@@ -501,14 +498,11 @@ i\r
 v\r
 e\r
 d\r
- \r
 w\r
 i\r
 t\r
 h\r
- \r
 a\r
- \r
 c\r
 a\r
 r\r
@@ -517,17 +511,14 @@ i\r
 a\r
 g\r
 e\r
- \r
 r\r
 e\r
 t\r
 u\r
 r\r
 n\r
- \r
 i\r
 n\r
- \r
 i\r
 t\e[0m\r
 \e[?25h\e[?2026l
@@ -676,7 +667,7 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 at arrived w\r
 ith a carria\r
 ge return in\r
- it\e[0m\r
+it\e[0m\r
 \e[?25h\e[?2026l
 === unsized ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m

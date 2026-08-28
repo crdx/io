@@ -61,6 +61,10 @@ func (self *Screen) fit(text string) string {
 
 			for grapheme, cells := range width.Graphemes(string(runes[i:end])) {
 				if self.column+cells > self.columns && self.column > 0 {
+					if grapheme == " " {
+						continue
+					}
+
 					out.WriteString("\r\n")
 
 					self.column = 0

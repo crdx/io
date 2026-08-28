@@ -3,6 +3,8 @@ package output
 import (
 	"strings"
 	"testing"
+
+	"crdx.org/io/cmd/oh/style"
 )
 
 func TestTheConversationWrapsByCellsRatherThanCharacters(t *testing.T) {
@@ -94,6 +96,59 @@ func FuzzFittingTerminalTextKeepsAValidCursor(fuzzer *testing.F) {
 			t.Fatalf("fit(%q) opened %d rows", text, screen.openedRows)
 		}
 	})
+}
+
+func TestASpaceAtTheRowEdgeIsDroppedRatherThanCarried(t *testing.T) {
+	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 5}
+
+	if got := screen.fit("abcde fgh"); got != "abcde\r\nfgh" {
+		t.Errorf("expected the break to eat the space, got %q", got)
+	}
+
+	if screen.column != 3 {
+		t.Errorf("expected the cursor three cells along, got %d", screen.column)
+	}
+
+	if screen.openedRows != 1 {
+		t.Errorf("expected one opened row, got %d", screen.openedRows)
+	}
+}
+
+func TestEverySpaceAtTheRowEdgeIsDropped(t *testing.T) {
+	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 5}
+
+	if got := screen.fit("abcde   fgh"); got != "abcde\r\nfgh" {
+		t.Errorf("expected the break to eat every space, got %q", got)
+	}
+}
+
+func TestASpaceAtTheRowEdgeOpensNoRowOfItsOwn(t *testing.T) {
+	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 5}
+
+	if got := screen.fit("abcde \nx"); got != "abcde\r\nx" {
+		t.Errorf("expected the newline to open the only new row, got %q", got)
+	}
+
+	if screen.openedRows != 1 {
+		t.Errorf("expected one opened row, got %d", screen.openedRows)
+	}
+}
+
+func TestAStyledFailureBreakingOnItsLastSpaceLeavesNoLeadingSpace(t *testing.T) {
+	const columns = 61
+
+	failure := style.Failure(
+		`Post "https://api.anthropic.com/v1/messages": read tcp ` +
+			`10.0.0.2:52134->160.79.104.10:443: read: software caused connection abort`,
+	)
+
+	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: columns}
+
+	for row := range strings.SplitSeq(screen.fit(failure), "\r\n") {
+		if strings.HasPrefix(style.Plain(row), " ") {
+			t.Errorf("expected no row to begin with a space, got %q", row)
+		}
+	}
 }
 
 func TestACharacterWiderThanTheTerminalStaysWhereItIs(t *testing.T) {

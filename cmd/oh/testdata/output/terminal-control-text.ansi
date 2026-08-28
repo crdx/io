@@ -76,21 +76,17 @@ t\r
 i\r
 c\r
 e\r
- \r
 b\r
 e\r
 f\r
 o\r
 r\r
 e\r
- \r
 [\r
 2\r
 J\r
- \r
 [\r
 H\r
- \r
 a\r
 f\r
 t\r
@@ -102,12 +98,10 @@ c\r
 o\r
 n\r
 d\r
- \r
 l\r
 i\r
 n\r
-e\r
- \e[0m\r
+e\e[0m\r
 \e[38;2;204;102;102mF\r
 a\r
 i\r
@@ -115,14 +109,12 @@ l\r
 u\r
 r\r
 e\r
- \r
 b\r
 e\r
 f\r
 o\r
 r\r
 e\r
- \r
 ]\r
 2\r
 ;\r
@@ -132,14 +124,11 @@ o\r
 l\r
 e\r
 n\r
- \r
 t\r
 i\r
 t\r
 l\r
 e\r
- \r
- \r
 a\r
 f\r
 t\r
@@ -151,7 +140,6 @@ c\r
 o\r
 n\r
 d\r
- \r
 l\r
 i\r
 n\r
@@ -190,8 +178,7 @@ er\r
 second line \e[0m\r
 \e[38;2;204;102;102mFailure befo\r
 re ]2;stolen\r
- title  afte\r
-r\r
+title  after\r
 second line\e[0m\r
 \e[?25h\e[?2026l
 === unsized ===

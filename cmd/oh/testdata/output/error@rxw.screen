@@ -20,7 +20,6 @@ g
 e
 n
 t
-
 0
 0
 0
@@ -45,26 +44,20 @@ t
 0
 0
 0
-
 r
 e
 a
 d
 y
-
 i
 n
-
 0
 s
-
 w
 i
 t
 h
-
 0
-
 s
 k
 i
@@ -72,9 +65,7 @@ l
 l
 s
 ,
-
 0
-
 s
 n
 i
@@ -84,20 +75,16 @@ e
 t
 s
 ,
-
 a
 n
 d
-
 ~
 8
 0
 0
 t
-
 o
 f
-
 c
 o
 n
@@ -142,7 +129,6 @@ t
 
 {
 
-
 "
 t
 y
@@ -150,7 +136,6 @@ p
 e
 "
 :
-
 "
 e
 r
@@ -160,7 +145,6 @@ r
 "
 ,
 
-
 "
 e
 r
@@ -169,11 +153,7 @@ o
 r
 "
 :
-
 {
-
-
-
 
 "
 c
@@ -182,7 +162,6 @@ d
 e
 "
 :
-
 "
 o
 v
@@ -197,9 +176,6 @@ d
 "
 ,
 
-
-
-
 "
 r
 e
@@ -208,12 +184,10 @@ r
 y
 "
 :
-
 t
 r
 u
 e
-
 
 }
 }
@@ -221,11 +195,11 @@ e
 Agent 000000
 000000000000
 000000 ready
- in 0s with
-0 skills, 0
-snippets, an
-d ~800t of c
-ontext.
+in 0s with 0
+skills, 0 sn
+ippets, and
+~800t of con
+text.
 
 
  have a look
@@ -240,7 +214,7 @@ rror",
 "overloaded"
 ,
     "retry":
- true
+true
   }
 }
 === wide ===

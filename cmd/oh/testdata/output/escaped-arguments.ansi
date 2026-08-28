@@ -63,9 +63,7 @@ e\r
 m\r
 p\r
 t\r
- \r
 1\r
- \r
 f\r
 a\r
 i\r
@@ -73,27 +71,22 @@ l\r
 e\r
 d\r
 ,\r
- \r
 a\r
 s\r
 k\r
 i\r
 n\r
 g\r
- \r
 a\r
 g\r
 a\r
 i\r
 n\r
- \r
 i\r
 n\r
- \r
 2\r
 s\r
 :\r
- \r
 U\r
 p\r
 s\r
@@ -102,12 +95,10 @@ r\r
 e\r
 a\r
 m\r
- \r
 s\r
 a\r
 i\r
 d\r
- \r
 n\r
 o\e[0m\r
 \r
@@ -163,9 +154,9 @@ Nothing moved.
 \r
 \e[38;2;207;173;0mAttempt 1 fa\r
 iled, asking\r
- again in 2s\r
-: Upstream s\r
-aid no\e[0m\r
+again in 2s:\r
+Upstream sai\r
+d no\e[0m\r
 \r
 \r\e[KNothing\r
 \r\e[Kmoved.\r

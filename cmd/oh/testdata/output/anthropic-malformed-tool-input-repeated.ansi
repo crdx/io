@@ -7,7 +7,7 @@
 \e[38;2;207;173;0mAttempt 2 failed, asking again in 5s: The work tool call did not contain a JSON object: {"offset": 2\r
 45, , "limit": 1}\e[0m\r
 \e[38;2;207;173;0mAttempt 3 failed, asking again in 10s: The work tool call did not contain a JSON object: { "offset":\r
- 250,, "limit": 5 }\e[0m\r
+250,, "limit": 5 }\e[0m\r
 \r
 \e[?7l\r\e[KI got there in the end.\e[?25h\e[?2026l\r
 \r

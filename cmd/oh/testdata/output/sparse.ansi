@@ -83,42 +83,34 @@ s\e[0m\r
 \e[38;2;129;162;190mT\r
 h\r
 e\r
- \r
 w\r
 e\r
 b\r
- \r
 s\r
 e\r
 a\r
 r\r
 c\r
 h\r
- \r
 a\r
 n\r
 d\r
- \r
 f\r
 e\r
 t\r
 c\r
 h\r
- \r
 t\r
 o\r
 o\r
 l\r
 s\r
- \r
 a\r
 r\r
 e\r
- \r
 n\r
 o\r
 w\r
- \r
 r\r
 e\r
 f\r
@@ -140,7 +132,6 @@ o\r
 u\r
 n\r
 d\r
- \r
 p\r
 r\r
 o\r
@@ -150,14 +141,12 @@ s\r
 s\r
 e\r
 s\r
- \r
 k\r
 i\r
 l\r
 l\r
 e\r
 d\r
- \r
 (\r
 s\r
 l\r
@@ -225,8 +214,8 @@ Nothing came back.
 \r
 \e[38;2;129;162;190mThe web sear\r
 ch and fetch\r
- tools are n\r
-ow refused.\e[0m\r
+tools are no\r
+w refused.\e[0m\r
 \r
 \e[?7l\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\r
 \r
