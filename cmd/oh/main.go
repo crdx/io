@@ -126,15 +126,30 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", model.List(os.Stdout, modelCachePath)
 	}
 
-	if inputArgs.Update {
-		return "", model.Update(os.Stdout, endpointURL, modelCachePath, backend.ListModels)
-	}
-
 	if inputArgs.IsSessionPicker {
 		return sessions.Choose(sessionsDir, inputArgs.WorkspaceDir, os.Stdin, os.Stdout)
 	}
 
-	if err := model.Ensure(os.Stdout, endpointURL, modelCachePath, backend.ListModels); err != nil {
+	configPath := location.GetConfigFile()
+	settings, configObserver, err := config.Observe(configPath)
+	if err != nil {
+		return "", err
+	}
+	defer configObserver.Close()
+
+	endpoints := backend.EndpointSettings{
+		OverrideURL: endpointURL,
+		OllamaHost:  settings.Provider.Ollama.Host,
+	}
+	listProviderModels := func(ctx context.Context, providerName string) ([]agent.Model, error) {
+		return backend.ListModels(ctx, providerName, endpoints)
+	}
+
+	if inputArgs.Update {
+		return "", model.Update(os.Stdout, endpointURL, modelCachePath, listProviderModels)
+	}
+
+	if err := model.Ensure(os.Stdout, endpointURL, modelCachePath, listProviderModels); err != nil {
 		return "", err
 	}
 
@@ -212,12 +227,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer func() { _ = homeRoot.Close() }()
 
-	configPath := location.GetConfigFile()
-	settings, configObserver, err := config.Observe(configPath)
-	if err != nil {
-		return "", err
-	}
-	defer configObserver.Close()
 	snippetCommands, err := snippets.New(settings.Snippets)
 	if err != nil {
 		return "", fmt.Errorf("%s: snippets: %w", pathutil.Shorten(configPath), err)
@@ -264,7 +273,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	client, err := backend.Connect(choice, selection.Effort, endpointURL)
+	client, err := backend.Connect(choice, selection.Effort, endpoints)
 	if err != nil {
 		return "", err
 	}

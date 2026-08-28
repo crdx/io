@@ -62,6 +62,28 @@ func (self *Endpoint) serveListing(writer http.ResponseWriter) {
 	respond(writer, listing{Data: []listedModel{offered}})
 }
 
+type ollamaListing struct {
+	Models []ollamaListedModel `json:"models"`
+}
+
+type ollamaListedModel struct {
+	Name         string   `json:"name"`
+	Capabilities []string `json:"capabilities"`
+	Details      struct {
+		ContextWindowTokens int `json:"context_length"`
+	} `json:"details"`
+}
+
+func (self *Endpoint) serveOllamaListing(writer http.ResponseWriter) {
+	offered := ollamaListedModel{
+		Name:         self.scenario.Model,
+		Capabilities: []string{"completion", "thinking", "tools"},
+	}
+	offered.Details.ContextWindowTokens = simulatedContext
+
+	respond(writer, ollamaListing{Models: []ollamaListedModel{offered}})
+}
+
 func respond(writer http.ResponseWriter, document any) {
 	writer.Header().Set("Content-Type", "application/json")
 

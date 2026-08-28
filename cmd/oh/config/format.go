@@ -8,6 +8,7 @@ const (
 	SnippetDefinitionFormat = 5
 	RetiredTpsFormat        = 6
 	TurnTimerFormat         = 7
+	OllamaHostFormat        = 8
 
-	Format = TurnTimerFormat
+	Format = OllamaHostFormat
 )

@@ -77,6 +77,15 @@ var configSteps = map[int]configStep{
 	config.EditorCommandFormat:     migrateConfigFromVersionFour,
 	config.SnippetDefinitionFormat: migrateConfigFromVersionFive,
 	config.RetiredTpsFormat:        migrateConfigFromVersionSix,
+	config.TurnTimerFormat:         migrateConfigFromVersionSeven,
+}
+
+func migrateConfigFromVersionSeven(data []byte) ([]byte, error) {
+	if _, _, err := readConfigDocument(data); err != nil {
+		return nil, err
+	}
+
+	return rewriteConfigVersion(data, config.OllamaHostFormat), nil
 }
 
 func migrateConfigFromVersionSix(data []byte) ([]byte, error) {

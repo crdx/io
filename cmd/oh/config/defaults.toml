@@ -1,4 +1,4 @@
-version = 7
+version = 8
 
 get_on_with_it_message = "yes"
 
@@ -9,6 +9,9 @@ command = []
 
 [model]
 round_robin = []
+
+[provider.ollama]
+host = ""
 
 [skills]
 include = []

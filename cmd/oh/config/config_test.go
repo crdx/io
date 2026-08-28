@@ -56,6 +56,33 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	}
 }
 
+func TestConfiguredOllamaHostIsTrimmed(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[provider.ollama]\nhost = \"  speeder:11434  \"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.Provider.Ollama.Host != "speeder:11434" {
+		t.Errorf("got Ollama host %q", config.Provider.Ollama.Host)
+	}
+}
+
+func TestConfiguredOllamaHostCannotBeEmpty(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[provider.ollama]\nhost = \"  \"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil || !strings.Contains(err.Error(), "provider.ollama.host is empty") {
+		t.Fatalf("got error %v", err)
+	}
+}
+
 func TestConfiguredEditorAcceptsArguments(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
 	if err := writeConfigFile(path, "[editor]\ncommand = [\"subl\", \"--wait\"]\n"); err != nil {

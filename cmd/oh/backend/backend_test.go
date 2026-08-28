@@ -2,13 +2,16 @@ package backend
 
 import (
 	"bytes"
+	"context"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/internal/sim"
+	"crdx.org/io/provider/ollama"
 
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/model"
@@ -18,6 +21,7 @@ const (
 	codexProvider      = model.CodexProvider
 	opencodeGoProvider = model.OpencodeGoProvider
 	anthropicProvider  = model.AnthropicProvider
+	ollamaProvider     = model.OllamaProvider
 )
 
 func TestUpdatingAgainstAStandInEndpointDescribesEveryProvider(t *testing.T) {
@@ -32,8 +36,18 @@ func TestUpdatingAgainstAStandInEndpointDescribesEveryProvider(t *testing.T) {
 		t.Fatal("expected the Messages API to be served")
 	}
 
+	endpoints := EndpointSettings{OverrideURL: address}
+	listProviderModels := func(ctx context.Context, providerName string) ([]agent.Model, error) {
+		return ListModels(ctx, providerName, endpoints)
+	}
+
 	var output bytes.Buffer
-	if err := model.Update(&output, address, location.GetModelCachePath(os.Getenv(EndpointVariable) != ""), ListModels); err != nil {
+	if err := model.Update(
+		&output,
+		address,
+		location.GetModelCachePath(os.Getenv(EndpointVariable) != ""),
+		listProviderModels,
+	); err != nil {
 		t.Fatalf("unexpected error: %v, output %q", err, output.String())
 	}
 
@@ -73,11 +87,12 @@ func TestEveryProviderListsModelsWithoutAConversationModel(t *testing.T) {
 		{codexProvider, sim.Responses},
 		{opencodeGoProvider, sim.Completions},
 		{anthropicProvider, sim.Messages},
+		{ollamaProvider, sim.Completions},
 	}
 
 	for _, test := range tests {
 		t.Run(test.providerName, func(t *testing.T) {
-			models, err := ListModels(t.Context(), test.providerName, addresses[test.format])
+			models, err := ListModels(t.Context(), test.providerName, EndpointSettings{OverrideURL: addresses[test.format]})
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -89,7 +104,7 @@ func TestEveryProviderListsModelsWithoutAConversationModel(t *testing.T) {
 }
 
 func TestSubscriptionCodexDoesNotTrustTheUndocumentedModelListing(t *testing.T) {
-	models, err := ListModels(t.Context(), codexProvider, "")
+	models, err := ListModels(t.Context(), codexProvider, EndpointSettings{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -217,12 +232,73 @@ func TestAResumedModelDoesNotAdvanceTheConfiguredRotation(t *testing.T) {
 
 func TestAnthropicConnectsBeforeItNeedsCredentials(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
-	client, err := Connect(model.Choice{Provider: anthropicProvider, Model: "claude-opus-5", MaxOutputTokens: 128_000}, "high", "")
+	client, err := Connect(
+		model.Choice{Provider: anthropicProvider, Model: "claude-opus-5", MaxOutputTokens: 128_000},
+		"high",
+		EndpointSettings{},
+	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if client == nil {
 		t.Fatal("expected a connection")
+	}
+}
+
+func TestOllamaEndpointPrecedence(t *testing.T) {
+	for _, test := range []struct {
+		name      string
+		endpoints EndpointSettings
+		host      string
+		want      string
+	}{
+		{name: "default", want: ollama.EndpointURL},
+		{
+			name:      "config",
+			endpoints: EndpointSettings{OllamaHost: "configured:11434"},
+			want:      "configured:11434",
+		},
+		{
+			name:      "environment over config",
+			endpoints: EndpointSettings{OllamaHost: "configured:11434"},
+			host:      "environment:11434",
+			want:      "environment:11434",
+		},
+		{
+			name: "endpoint override over environment",
+			endpoints: EndpointSettings{
+				OverrideURL: "http://override/v1/chat/completions",
+				OllamaHost:  "configured:11434",
+			},
+			host: "environment:11434",
+			want: "http://override/v1/chat/completions",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			t.Setenv(ollama.HostVariable, test.host)
+			if got := ollamaEndpointURL(test.endpoints); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestOllamaConnectsToItsConfiguredHost(t *testing.T) {
+	connection, err := connectProvider(
+		model.Choice{Provider: ollamaProvider, Model: "qwen3.8", MaxOutputTokens: 32_768},
+		"high",
+		EndpointSettings{OllamaHost: "speeder:11434"},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	client, isOllama := connection.Client.(*ollama.Client)
+	if !isOllama {
+		t.Fatalf("got client %T", connection.Client)
+	}
+	if client.URL != "http://speeder:11434/v1/chat/completions" {
+		t.Errorf("got Ollama conversation URL %q", client.URL)
 	}
 }
 
@@ -235,11 +311,11 @@ func TestEveryConnectionCarriesAWebSearchClient(t *testing.T) {
 
 	address := endpoint.Addresses(server.URL)[sim.Messages]
 
-	for _, providerName := range []string{codexProvider, opencodeGoProvider, anthropicProvider} {
+	for _, providerName := range []string{codexProvider, opencodeGoProvider, anthropicProvider, ollamaProvider} {
 		client, err := Connect(
 			model.Choice{Provider: providerName, Model: "fake", MaxOutputTokens: 128_000},
 			"high",
-			address,
+			EndpointSettings{OverrideURL: address},
 		)
 		if err != nil {
 			t.Fatalf("%s: unexpected error: %v", providerName, err)
@@ -283,11 +359,17 @@ func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
 			"",
 			"anthropic: Model is empty",
 		},
+		{
+			"ollama",
+			model.Choice{Provider: ollamaProvider, Model: "qwen3.8"},
+			"",
+			"chat: MaxOutputTokens is 0",
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			client, err := Connect(test.choice, "high", test.endpoint)
+			client, err := Connect(test.choice, "high", EndpointSettings{OverrideURL: test.endpoint})
 
 			if err == nil || !strings.Contains(err.Error(), test.want) {
 				t.Fatalf("expected %q, got %v", test.want, err)
@@ -301,7 +383,7 @@ func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
 }
 
 func TestConnectRefusesAnUnknownProvider(t *testing.T) {
-	client, err := Connect(model.Choice{Provider: "nowhere"}, "high", "")
+	client, err := Connect(model.Choice{Provider: "nowhere"}, "high", EndpointSettings{})
 	if err == nil || !strings.Contains(err.Error(), `unknown provider "nowhere"`) {
 		t.Fatalf("got connection %+v and error %v", client, err)
 	}
@@ -309,7 +391,11 @@ func TestConnectRefusesAnUnknownProvider(t *testing.T) {
 
 func TestOpenCodeRequiresLogin(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
-	_, err := Connect(model.Choice{Provider: opencodeGoProvider, Model: "deepseek-v4-pro", MaxOutputTokens: 128_000}, "high", "")
+	_, err := Connect(
+		model.Choice{Provider: opencodeGoProvider, Model: "deepseek-v4-pro", MaxOutputTokens: 128_000},
+		"high",
+		EndpointSettings{},
+	)
 	if err == nil || !strings.Contains(err.Error(), "login command with opencode-go") {
 		t.Fatalf("got error %v", err)
 	}

@@ -155,6 +155,23 @@ func TestOpenCodeGoOnlyOffersModelsForItsWireProtocol(t *testing.T) {
 	}
 }
 
+func TestOllamaModelsAreSelectableWithoutARegistryEntry(t *testing.T) {
+	choices := choicesFor(ollamaProvider, []agent.Model{{
+		ID:                  "qwen3.8:27b",
+		EffortLevels:        []string{"none", "high"},
+		ContextWindowTokens: 262_144,
+		MaxOutputTokens:     32_768,
+	}})
+
+	if len(choices) != 1 {
+		t.Fatalf("got choices %v", choices)
+	}
+	if choices[0].Provider != ollamaProvider || choices[0].Model != "qwen3.8:27b" ||
+		choices[0].ContextWindowTokens != 262_144 || choices[0].MaxOutputTokens != 32_768 {
+		t.Errorf("got choice %+v", choices[0])
+	}
+}
+
 func TestTheRegistryFillsInWhatAListingLeftOut(t *testing.T) {
 	listed := []agent.Model{
 		{ID: "claude-opus-5", EffortLevels: []string{"high"}},
@@ -469,9 +486,8 @@ func TestProviderDescriptionCoversEveryEndpointAndRegistryCombination(t *testing
 			models, source, why := describeProviderModels(
 				t.Context(),
 				codexProvider,
-				"",
 				test.registered,
-				func(context.Context, string, string) ([]agent.Model, error) {
+				func(context.Context, string) ([]agent.Model, error) {
 					return test.listed, test.listingErr
 				},
 			)
@@ -492,9 +508,8 @@ func TestEndpointListingExcludesRegistryModelsTheProviderCannotUse(t *testing.T)
 	models, source, _ := describeProviderModels(
 		t.Context(),
 		codexProvider,
-		"",
 		registered,
-		func(context.Context, string, string) ([]agent.Model, error) {
+		func(context.Context, string) ([]agent.Model, error) {
 			return listed, nil
 		},
 	)

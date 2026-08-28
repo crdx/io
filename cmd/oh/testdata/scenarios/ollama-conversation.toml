@@ -1,0 +1,26 @@
+provider = "ollama"
+model = "qwen3.8:27b-mtp-q8_0-256k"
+effort = "high"
+
+[first]
+prompt = "answer through Ollama"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":"","reasoning":"Consider it."}}]}''',
+    '''{"choices":[{"delta":{"content":"Ollama answered."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''{"choices":[],"usage":{"prompt_tokens":321}}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "continue through Ollama"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Ollama resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''{"choices":[],"usage":{"prompt_tokens":456}}''',
+    '''[DONE]''',
+]

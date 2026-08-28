@@ -85,6 +85,7 @@ import (
 	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/codex"
+	"crdx.org/io/provider/ollama"
 	"crdx.org/io/session"
 	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
@@ -6204,6 +6205,12 @@ func newSessionGoldenProvider(
 			scenario.Effort,
 			128_000,
 		)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return client
+	case "ollama":
+		client, err := ollama.New(endpoint, scenario.Model, scenario.Effort, 32_768)
 		if err != nil {
 			t.Fatal(err)
 		}

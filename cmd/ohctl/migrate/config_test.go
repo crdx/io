@@ -383,6 +383,34 @@ left = [
 	}
 }
 
+func TestTheSeventhConfigFormatMakesRoomForTheOllamaHost(t *testing.T) {
+	original := `version = 7
+[model]
+round_robin = ["codex/gpt@high"]
+`
+	path := configFile(t, original)
+
+	from, isPresent, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isPresent || from != config.TurnTimerFormat {
+		t.Errorf("got present %t from format %d", isPresent, from)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	written := string(body)
+	if !strings.Contains(written, currentVersionLine()) || !strings.Contains(written, `round_robin = ["codex/gpt@high"]`) {
+		t.Errorf("unexpected migrated config:\n%s", written)
+	}
+	if _, err := config.Load(path); err != nil {
+		t.Fatalf("migrated config cannot be loaded: %v", err)
+	}
+}
+
 func TestCurrentConfigIsLeftAlone(t *testing.T) {
 	original := currentVersionLine() + "\n[model]\nround_robin = [\"codex/gpt@high\"]\n"
 	path := configFile(t, original)

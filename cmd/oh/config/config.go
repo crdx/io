@@ -28,6 +28,7 @@ type Config struct {
 	Version            int                            `toml:"version"`
 	Editor             Editor                         `toml:"editor"`
 	Model              Model                          `toml:"model"`
+	Provider           Provider                       `toml:"provider"`
 	GetOnWithItMessage string                         `toml:"get_on_with_it_message"`
 	Snippets           map[string]snippets.Definition `toml:"snippets"`
 	Skills             SkillPaths                     `toml:"skills"`
@@ -45,6 +46,14 @@ type Editor struct {
 
 type Model struct {
 	RoundRobin []string `toml:"round_robin"`
+}
+
+type Provider struct {
+	Ollama Ollama `toml:"ollama"`
+}
+
+type Ollama struct {
+	Host string `toml:"host"`
 }
 
 type SkillPaths struct {
@@ -232,6 +241,10 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 				return config, fmt.Errorf("%s: model.round_robin contains an empty selection", displayPath)
 			}
 		}
+	}
+	config.Provider.Ollama.Host = strings.TrimSpace(config.Provider.Ollama.Host)
+	if meta.IsDefined("provider", "ollama", "host") && config.Provider.Ollama.Host == "" {
+		return config, fmt.Errorf("%s: provider.ollama.host is empty", displayPath)
 	}
 	config.GetOnWithItMessage = strings.TrimSpace(config.GetOnWithItMessage)
 	if meta.IsDefined("get_on_with_it_message") && config.GetOnWithItMessage == "" {

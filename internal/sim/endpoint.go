@@ -85,9 +85,10 @@ func (self *Endpoint) Addresses(base string) map[string]string {
 }
 
 const (
-	versionPrefix = "/v1"
-	modelsPath    = "/v1/models"
-	registryPath  = "/models.dev/api.json"
+	versionPrefix    = "/v1"
+	modelsPath       = "/v1/models"
+	ollamaModelsPath = "/api/tags"
+	registryPath     = "/models.dev/api.json"
 )
 
 func (self *Endpoint) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -101,6 +102,11 @@ func (self *Endpoint) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 
 	case strings.HasSuffix(path, modelsPath):
 		self.serveListing(writer)
+
+		return
+
+	case strings.HasSuffix(path, ollamaModelsPath):
+		self.serveOllamaListing(writer)
 
 		return
 	}

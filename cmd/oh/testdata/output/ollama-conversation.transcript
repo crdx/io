@@ -1,0 +1,55 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `qwen3.8:27b-mtp-q8_0-256k`
+- **Effort:** `high`
+- **Provider:** `ollama`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+answer through Ollama
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:02Z
+
+```
+Consider it.
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Ollama answered.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+continue through Ollama
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Ollama resumed.
+```
+

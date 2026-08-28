@@ -14,6 +14,11 @@ import (
 
 const EndpointVariable = "OH_ENDPOINT_URL"
 
+type EndpointSettings struct {
+	OverrideURL string
+	OllamaHost  string
+}
+
 const (
 	standInToken           = "stand-in"
 	listingModel           = "listing"
@@ -51,14 +56,14 @@ func (self *Connection) UseSession(name string) {
 	}
 }
 
-func Connect(choice model.Choice, effort string, endpoint string) (*Connection, error) {
-	connection, err := connectProvider(choice, effort, endpoint)
+func Connect(choice model.Choice, effort string, endpoints EndpointSettings) (*Connection, error) {
+	connection, err := connectProvider(choice, effort, endpoints)
 	if err != nil {
 		return nil, err
 	}
 
 	if connection.Search == nil {
-		tokens, address := codexCredentials(endpoint)
+		tokens, address := codexCredentials(endpoints.OverrideURL)
 		if connection.Search, err = newSearchClient(tokens, address); err != nil {
 			return nil, err
 		}
@@ -67,21 +72,23 @@ func Connect(choice model.Choice, effort string, endpoint string) (*Connection, 
 	return connection, nil
 }
 
-func connectProvider(choice model.Choice, effort string, endpoint string) (*Connection, error) {
+func connectProvider(choice model.Choice, effort string, endpoints EndpointSettings) (*Connection, error) {
 	switch choice.Provider {
 	case model.CodexProvider:
-		return connectCodex(choice, effort, endpoint)
+		return connectCodex(choice, effort, endpoints.OverrideURL)
 	case model.OpencodeGoProvider:
-		return connectOpencodeGo(choice, effort, endpoint)
+		return connectOpencodeGo(choice, effort, endpoints.OverrideURL)
 	case model.AnthropicProvider:
-		return connectAnthropic(choice, effort, endpoint)
+		return connectAnthropic(choice, effort, endpoints.OverrideURL)
+	case model.OllamaProvider:
+		return connectOllama(choice, effort, endpoints)
 	default:
 		return nil, fmt.Errorf("unknown provider %q", choice.Provider)
 	}
 }
 
-func ListModels(ctx context.Context, providerName string, endpoint string) ([]agent.Model, error) {
-	if providerName == model.CodexProvider && endpoint == "" {
+func ListModels(ctx context.Context, providerName string, endpoints EndpointSettings) ([]agent.Model, error) {
+	if providerName == model.CodexProvider && endpoints.OverrideURL == "" {
 		return nil, nil
 	}
 
@@ -90,7 +97,7 @@ func ListModels(ctx context.Context, providerName string, endpoint string) ([]ag
 		Model:           listingModel,
 		MaxOutputTokens: listingMaxOutputTokens,
 	}
-	client, err := connectProvider(choice, listingEffort, endpoint)
+	client, err := connectProvider(choice, listingEffort, endpoints)
 	if err != nil {
 		return nil, err
 	}

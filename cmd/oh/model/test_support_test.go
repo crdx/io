@@ -14,6 +14,7 @@ const (
 	codexProvider      = CodexProvider
 	opencodeGoProvider = OpencodeGoProvider
 	anthropicProvider  = AnthropicProvider
+	ollamaProvider     = OllamaProvider
 )
 
 func modelCachePath() string {
@@ -33,13 +34,13 @@ func parseModelSelection(selection string) (string, string, string, error) {
 }
 
 func updateModelsWithoutProviderListings(output io.Writer, endpoint string, path string) error {
-	return Update(output, endpoint, path, func(context.Context, string, string) ([]agent.Model, error) {
+	return Update(output, endpoint, path, func(context.Context, string) ([]agent.Model, error) {
 		return nil, nil
 	})
 }
 
 func ensureModelsWithoutProviderListings(output io.Writer, endpoint string, path string) error {
-	return Ensure(output, endpoint, path, func(context.Context, string, string) ([]agent.Model, error) {
+	return Ensure(output, endpoint, path, func(context.Context, string) ([]agent.Model, error) {
 		return nil, nil
 	})
 }

@@ -14,6 +14,7 @@
 - `provider/anthropic`: the Claude subscription service
 - `provider/codex`: the ChatGPT Codex service
 - `provider/opencodego`: the OpenCode Go service
+- `provider/ollama`: local and network Ollama servers
 - ... and more, soon
 
 ## Installation
@@ -91,6 +92,22 @@ go run ./cmd/oh
 go run ./cmd/oh -r
 ```
 
+Ollama uses `http://localhost:11434` by default. After upgrading, run `go run ./cmd/ohctl migrate`, then configure a network server in `config.toml`:
+
+```toml
+[provider.ollama]
+host = "http://ollama-server:11434"
+```
+
+After changing the host, refresh the model cache and select one of the installed models:
+
+```bash
+go run ./cmd/oh -u
+go run ./cmd/oh -m ollama/qwen3.8:27b-mtp-q8_0-256k@high
+```
+
+`OLLAMA_HOST` temporarily overrides the configured host. `OH_ENDPOINT_URL`, used by the simulator, overrides both.
+
 ### simulate
 
 Stand in for every provider endpoint at once, playing scenarios defined in TOML files.
@@ -101,11 +118,11 @@ go run ./cmd/simulate --scenario internal/sim/scenarios/success.toml
 
 The simulator deals in wire formats, not providers. A provider speaks one of them, and more than one provider can speak the same one.
 
-| Wire format      | Served at              | Spoken by     |
-|------------------|------------------------|---------------|
-| Responses        | `/v1/codex/responses`  | `codex`       |
-| Chat Completions | `/v1/chat/completions` | `opencode-go` |
-| Messages         | `/v1/messages`         | `anthropic`   |
+| Wire format      | Served at              | Spoken by               |
+|------------------|------------------------|-------------------------|
+| Responses        | `/v1/codex/responses`  | `codex`                 |
+| Chat Completions | `/v1/chat/completions` | `opencode-go`, `ollama` |
+| Messages         | `/v1/messages`         | `anthropic`             |
 
 ## Examples
 

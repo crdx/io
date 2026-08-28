@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/internal/sim"
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/codex"
+	"crdx.org/io/provider/ollama"
 	"crdx.org/io/tool"
 	"crdx.org/io/wire/openai/chatcompletions"
 )
@@ -59,7 +60,7 @@ func providers() []speaker {
 			},
 		},
 		{
-			name:   "opencode-go",
+			name:   "chat-completions",
 			format: sim.Completions,
 			connect: func(t *testing.T, address string) agent.Provider {
 				t.Helper()
@@ -83,6 +84,20 @@ func providers() []speaker {
 					t.Fatal(err)
 				}
 				client.URL = address
+
+				return client
+			},
+		},
+		{
+			name:   "ollama",
+			format: sim.Completions,
+			connect: func(t *testing.T, address string) agent.Provider {
+				t.Helper()
+
+				client, err := ollama.New(address, "fake", "high", 128_000)
+				if err != nil {
+					t.Fatal(err)
+				}
 
 				return client
 			},

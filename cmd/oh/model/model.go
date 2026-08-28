@@ -37,6 +37,7 @@ const (
 	CodexProvider      = "codex"
 	OpencodeGoProvider = "opencode-go"
 	AnthropicProvider  = "anthropic"
+	OllamaProvider     = "ollama"
 )
 
 var registryNames = map[string]string{
@@ -46,7 +47,7 @@ var registryNames = map[string]string{
 }
 
 func ProviderNames() []string {
-	return []string{CodexProvider, OpencodeGoProvider, AnthropicProvider}
+	return []string{CodexProvider, OpencodeGoProvider, AnthropicProvider, OllamaProvider}
 }
 
 type modelCache struct {
@@ -293,7 +294,7 @@ func List(output io.Writer, path string) error {
 	return nil
 }
 
-type ProviderLister func(context.Context, string, string) ([]agent.Model, error)
+type ProviderLister func(context.Context, string) ([]agent.Model, error)
 
 func Ensure(output io.Writer, endpoint string, path string, listProviderModels ProviderLister) error {
 	cache := loadModelCache(path)
@@ -361,7 +362,7 @@ func updateModels(
 	for _, providerName := range ProviderNames() {
 		registered := registry.Provider(registryNames[providerName])
 
-		models, source, why := describeProviderModels(ctx, providerName, endpoint, registered, listProviderModels)
+		models, source, why := describeProviderModels(ctx, providerName, registered, listProviderModels)
 		models = latestModelIterations(models)
 		models = drivableModels(providerName, models)
 		if len(models) == 0 {
@@ -410,11 +411,10 @@ func pickable(models []agent.Model) string {
 func describeProviderModels(
 	ctx context.Context,
 	providerName string,
-	endpoint string,
 	registered map[string]agent.Model,
 	listProviderModels ProviderLister,
 ) ([]agent.Model, string, string) {
-	listed, err := listProviderModels(ctx, providerName, endpoint)
+	listed, err := listProviderModels(ctx, providerName)
 
 	why := "the endpoint lists no models"
 	if err != nil {

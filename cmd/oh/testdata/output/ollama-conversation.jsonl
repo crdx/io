@@ -1,0 +1,14 @@
+{"kind":"head","version":10,"meta":{"model":"qwen3.8:27b-mtp-q8_0-256k","workspaceDir":"","provider":"ollama","effort":"high","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"event","event":{"kind":"user_message","text":"answer through Ollama"}}
+{"kind":"event","event":{"kind":"model_reasoning","text":"Consider it."}}
+{"kind":"event","event":{"kind":"model_message","text":"Ollama answered.","usage":{"input_tokens":321}}}
+{"kind":"item","payload":{"role":"user","content":"answer through Ollama"}}
+{"kind":"item","payload":{"role":"assistant","content":"Ollama answered.","reasoning_content":"Consider it."}}
+{"kind":"turn_completion"}
+{"kind":"event","event":{"kind":"user_message","text":"continue through Ollama"}}
+{"kind":"event","event":{"kind":"model_message","text":"Ollama resumed.","usage":{"input_tokens":456}}}
+{"kind":"item","payload":{"role":"user","content":"The workspace is now read-write. The bash tool can now run shell commands. The .git directory is now read-write. The web search and fetch tools can now access the internet."}}
+{"kind":"item","payload":{"role":"user","content":"continue through Ollama"}}
+{"kind":"item","payload":{"role":"assistant","content":"Ollama resumed."}}
+{"kind":"turn_completion"}
