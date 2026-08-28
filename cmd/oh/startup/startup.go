@@ -18,6 +18,12 @@ func Elapsed() time.Duration {
 	return time.Since(startedAt)
 }
 
+func Wait(run func()) {
+	waitedFrom := time.Now()
+	run()
+	startedAt = startedAt.Add(time.Since(waitedFrom))
+}
+
 type Info struct {
 	Session       string `json:"session,omitempty"`
 	PromptBytes   int    `json:"prompt,omitempty"`

@@ -194,6 +194,29 @@ func TestTheSessionPickerIsAskedForByBareResumeOption(t *testing.T) {
 	}
 }
 
+func TestTheModelPickerIsAskedForByBareModelOption(t *testing.T) {
+	for _, argument := range []string{"-m", "--model"} {
+		input := bind(t, argument)
+		if !input.IsModelPicker {
+			t.Errorf("expected a bare %s to ask for the model picker", argument)
+		}
+		if input.Model != "" {
+			t.Errorf("expected no model to be named by %s, got %q", argument, input.Model)
+		}
+	}
+}
+
+func TestAModelGivenToTheModelOptionIsNotThePicker(t *testing.T) {
+	input := bind(t, "-m", "codex/gpt@high")
+
+	if input.IsModelPicker {
+		t.Error("expected a named model not to ask for the picker")
+	}
+	if input.Model != "codex/gpt@high" {
+		t.Errorf("expected the named model, got %q", input.Model)
+	}
+}
+
 func TestWhateverIsLeftOverIsTheFirstThingSaid(t *testing.T) {
 	parsedOptions := parseOptions(t, "why", "does", "the", "spinner", "stutter")
 

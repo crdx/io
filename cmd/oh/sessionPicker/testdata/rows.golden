@@ -1,0 +1,31 @@
+--- 150 columns ---
+  Agent                 Title                                                           Model                   Effort  Messages  Length  Last Message
+  🐟 chewy-sardine      why does the spinner stutter when a tool runs                   Codex 5.3                 high        12      8m      just now
+› 🐩 thick-poodle       add support for reasoning traces                                Sonnet 5                medium         4      1h       37m ago
+  🦡 funny-badger       the cancelled turn leaves a tool call unanswered and the next…  Qwen Coder 3 30B        medium       148      3h        5h ago
+  🐬 able-dolphin       (untitled)                                                      —                                      1      4h        3d ago
+  🦦 brave-otter        rename the harness to oh                                        Codex 5.3                             26      1d       12d ago
+
+--- 120 columns ---
+  Agent                 Title                             Model                   Effort  Messages  Length  Last Message
+  🐟 chewy-sardine      why does the spinner stutter wh…  Codex 5.3                 high        12      8m      just now
+› 🐩 thick-poodle       add support for reasoning traces  Sonnet 5                medium         4      1h       37m ago
+  🦡 funny-badger       the cancelled turn leaves a too…  Qwen Coder 3 30B        medium       148      3h        5h ago
+  🐬 able-dolphin       (untitled)                        —                                      1      4h        3d ago
+  🦦 brave-otter        rename the harness to oh          Codex 5.3                             26      1d       12d ago
+
+--- 80 columns ---
+  Agent                 Title                     Messages  Length  Last Message
+  🐟 chewy-sardine      why does the spinner st…        12      8m      just now
+› 🐩 thick-poodle       add support for reasoni…         4      1h       37m ago
+  🦡 funny-badger       the cancelled turn leav…       148      3h        5h ago
+  🐬 able-dolphin       (untitled)                       1      4h        3d ago
+  🦦 brave-otter        rename the harness to oh        26      1d       12d ago
+
+--- 46 columns ---
+  Agent      …  Messages  Length  Last Message
+  🐟 chewy-sa…        12      8m      just now
+› 🐩 thick-po…         4      1h       37m ago
+  🦡 funny-ba…       148      3h        5h ago
+  🐬 able-dol…         1      4h        3d ago
+  🦦 brave-ot…        26      1d       12d ago

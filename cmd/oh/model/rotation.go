@@ -25,9 +25,13 @@ type roundRobinState struct {
 	Last    Selection `json:"last"`
 }
 
+var ErrNoSelection = errors.New(
+	"no model selected: use -m provider/model@effort or configure model.round_robin",
+)
+
 func ReserveRoundRobin(path string, selections []Selection) (Selection, error) {
 	if len(selections) == 0 {
-		return Selection{}, errors.New("no model selected: use -m provider/model@effort or configure model.round_robin")
+		return Selection{}, ErrNoSelection
 	}
 	if len(selections) == 1 {
 		return selections[0], nil

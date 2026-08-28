@@ -1,0 +1,5 @@
+"-m"                             picker=true  model=""
+"--model"                        picker=true  model=""
+"-m codex/gpt-5.3-codex@high"    picker=false model="codex/gpt-5.3-codex@high"
+"--model codex/gpt-5.3-codex@high" picker=false model="codex/gpt-5.3-codex@high"
+"-m -r"                          picker=true  model=""

@@ -15,9 +15,9 @@ GPT Sol 5.6 ▪▫▫▫▫▫
 === active-model / none effort ===
 GPT Sol 5.6 ▫▫▫▫▫▫
 === active-model / ollama thinking off ===
-qwen3.8 ·▫▫▫··
+Qwen 3.8 27B ·▫▫▫··
 === active-model / ollama without thinking ===
-llama3.3 ······
+Llama 3.3 70B ······
 === active-model / opus medium ===
 Opus 5 ·▫▪▫▫▫
 === active-model / sparse ladder ===

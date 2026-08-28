@@ -31,6 +31,7 @@ import (
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/sessions"
@@ -153,12 +154,29 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
+	if inputArgs.IsModelPicker {
+		var chosenModel model.Selection
+		var err error
+		startup.Wait(func() { chosenModel, err = model.Choose(modelCachePath, os.Stdin, os.Stdout) })
+		if errors.Is(err, picker.ErrCancelled) {
+			return "", nil
+		}
+		if err != nil {
+			return "", err
+		}
+		inputArgs.Model = chosenModel.String()
+	}
+
 	args, err := inputArgs.Parse(modelCachePath)
 	if err != nil {
 		return "", err
 	}
 
 	if err := sessions.ValidateFormats(sessionsDir); err != nil {
+		return "", err
+	}
+
+	if err := sessions.RefreshListings(sessionsDir, os.Stdout); err != nil {
 		return "", err
 	}
 
@@ -265,6 +283,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		configuredModels,
 		location.GetModelRoundRobinPath(),
 	)
+	if err != nil {
+		startup.Wait(func() {
+			selection, err = model.ChooseWhenNoneSelected(err, modelCachePath, os.Stdin, os.Stdout)
+		})
+	}
+	if errors.Is(err, picker.ErrCancelled) {
+		return "", nil
+	}
 	if err != nil {
 		return "", err
 	}

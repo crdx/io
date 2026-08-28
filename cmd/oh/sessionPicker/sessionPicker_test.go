@@ -1,4 +1,4 @@
-package picker
+package sessionPicker
 
 import (
 	"strings"
@@ -8,16 +8,10 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
-func TestClipReturnsNothingWhenThereAreNoColumns(t *testing.T) {
-	if got := clip("session", 0); got != "" {
-		t.Errorf("expected no text in no columns, got %q", got)
-	}
-}
-
-func TestARunningSessionIsFadedWithoutAMarker(t *testing.T) {
-	self := &state{sessions: []*Session{{IsRunning: true}, {}}, cursor: 1}
-	got := self.row(0, 80)
-	want := style.Dim(row(self.sessions[0], false, 80))
+func TestARunningSessionIsFadedAndSlantedWithoutAMarker(t *testing.T) {
+	self := &sessionList{sessions: []*Session{{IsRunning: true}, {}}}
+	got := self.Row(0, false, 80)
+	want := style.Running(row(self.sessions[0], false, 80))
 
 	if got != want {
 		t.Errorf("expected a faded row, got %q", got)

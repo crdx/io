@@ -7,8 +7,11 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/picker"
+	"crdx.org/io/cmd/oh/sessionPicker"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/session"
@@ -20,14 +23,11 @@ func Choose(directory string, workspaceDir string, terminal *os.File, screen io.
 		return "", err
 	}
 
-	sessions, err := Load(directory)
-	if errors.Is(err, session.ErrMetaOutOfDate) {
-		_, _ = fmt.Fprintln(screen, style.Subtle("writing the session listing again from the journals"))
-		if _, err := store.RebuildStaleMeta(directory); err != nil {
-			return "", err
-		}
-		sessions, err = Load(directory)
+	if err := RefreshListings(directory, screen); err != nil {
+		return "", err
 	}
+
+	sessions, err := Load(directory)
 	if err != nil {
 		if migrationError := ValidateFormats(directory); migrationError != nil {
 			return "", migrationError
@@ -39,7 +39,7 @@ func Choose(directory string, workspaceDir string, terminal *os.File, screen io.
 		return "", errors.New("there are no stored conversations for this workspace")
 	}
 
-	chosenSession, err := picker.Choose(sessions, workspaceDir, terminal, screen)
+	chosenSession, err := sessionPicker.Choose(sessions, terminal, screen)
 	if errors.Is(err, picker.ErrCancelled) {
 		return "", nil
 	}
@@ -63,8 +63,8 @@ func ResolveWorkspaceDir(workspaceDir string) (string, error) {
 	return workspaceDir, nil
 }
 
-func InWorkspace(sessions []*picker.Session, workspaceDir string) []*picker.Session {
-	chosen := make([]*picker.Session, 0, len(sessions))
+func InWorkspace(sessions []*sessionPicker.Session, workspaceDir string) []*sessionPicker.Session {
+	chosen := make([]*sessionPicker.Session, 0, len(sessions))
 	for _, storedSession := range sessions {
 		if filepath.Clean(storedSession.WorkspaceDir) == workspaceDir {
 			chosen = append(chosen, storedSession)
@@ -74,16 +74,41 @@ func InWorkspace(sessions []*picker.Session, workspaceDir string) []*picker.Sess
 	return chosen
 }
 
-func Load(directory string) ([]*picker.Session, error) {
+// RefreshListings writes the listing metadata again for every session whose listing cannot be read,
+// because a listing is an index over the journal rather than a record of its own, and a build that
+// keeps it in a newer shape is entitled to rebuild what it finds.
+func RefreshListings(directory string, screen io.Writer) error {
+	stale, err := store.StaleMeta(directory)
+	if err != nil {
+		return err
+	}
+	if len(stale) == 0 {
+		return nil
+	}
+
+	if formatError := ValidateFormats(directory); formatError != nil {
+		return formatError
+	}
+
+	_, _ = fmt.Fprintln(screen, style.Subtle("writing the session listing again from the journals"))
+
+	_, err = store.RebuildStaleMeta(directory)
+
+	return err
+}
+
+func Load(directory string) ([]*sessionPicker.Session, error) {
 	metadata, err := session.ListMeta(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	sessions := make([]*picker.Session, 0, len(metadata))
+	sessions := make([]*sessionPicker.Session, 0, len(metadata))
 	for _, storedMeta := range metadata {
 		var data struct {
 			WorkspaceDir string `json:"workspaceDir"`
+			Model        string `json:"model"`
+			Effort       string `json:"effort"`
 		}
 		if len(storedMeta.Data) > 0 && json.Unmarshal(storedMeta.Data, &data) != nil {
 			continue
@@ -94,12 +119,15 @@ func Load(directory string) ([]*picker.Session, error) {
 			return nil, err
 		}
 
-		sessions = append(sessions, &picker.Session{
+		sessions = append(sessions, &sessionPicker.Session{
 			Name:         storedMeta.Name,
 			WorkspaceDir: data.WorkspaceDir,
 			Started:      storedMeta.Started,
 			Touched:      storedMeta.Touched,
 			Title:        storedMeta.Title,
+			Model:        strings.Join(model.DisplayName(data.Model), " "),
+			ModelID:      data.Model,
+			Effort:       data.Effort,
 			MessageCount: storedMeta.Messages,
 			IsRunning:    isRunning,
 		})

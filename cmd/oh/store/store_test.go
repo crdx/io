@@ -112,7 +112,8 @@ func TestASessionReadsBackAsItWasWritten(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(meta.Data) != `{"workspaceDir":"/tmp/somewhere"}` {
+	wantData := `{"workspaceDir":"/tmp/somewhere","provider":"codex","model":"gpt-5.6-sol","effort":"high"}`
+	if string(meta.Data) != wantData {
 		t.Errorf("unexpected meta data: %s", meta.Data)
 	}
 	if meta.Title != "what is the weather in London?" || meta.Messages != 3 {
@@ -642,5 +643,48 @@ func TestTheTranscriptQuotesTheTimesTheJournalRecorded(t *testing.T) {
 		if !strings.Contains(string(written), at) {
 			t.Errorf("the transcript does not quote the journal time %q", at)
 		}
+	}
+}
+
+func TestAListingWrittenBeforeTheModelWasInItIsRebuiltWithIt(t *testing.T) {
+	directory := t.TempDir()
+	name := write(t, directory)
+
+	path := filepath.Join(directory, name, "meta.json")
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(stored, &fields); err != nil {
+		t.Fatal(err)
+	}
+	fields["version"] = json.RawMessage("1")
+	fields["data"] = json.RawMessage(`{"workspaceDir":"/tmp/somewhere"}`)
+	behind, err := json.Marshal(fields)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, behind, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	rebuilt, err := store.RebuildStaleMeta(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rebuilt != 1 {
+		t.Errorf("expected the one stale listing to be rebuilt, got %d", rebuilt)
+	}
+
+	meta, err := session.ReadMeta(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := `{"workspaceDir":"/tmp/somewhere","provider":"codex","model":"gpt-5.6-sol","effort":"high"}`
+	if string(meta.Data) != want {
+		t.Errorf("expected the model to come back from the journal, got %s", meta.Data)
 	}
 }

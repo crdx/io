@@ -83,3 +83,13 @@ func TestAResumedConversationHasNoStartupLine(t *testing.T) {
 		t.Errorf("expected no startup line, got %q", line)
 	}
 }
+
+func TestWaitingOnAPersonIsNotTimeTheHarnessTook(t *testing.T) {
+	before := Elapsed()
+
+	Wait(func() { time.Sleep(20 * time.Millisecond) })
+
+	if waited := Elapsed() - before; waited > 10*time.Millisecond {
+		t.Errorf("expected the wait to be taken off the clock, got %s of it", waited)
+	}
+}

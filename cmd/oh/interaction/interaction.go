@@ -30,7 +30,7 @@ type Handler struct {
 }
 
 func Run(terminal *os.File, getNextRefresh func(time.Time) time.Time, handler Handler) {
-	resizeSignals := resizes()
+	resizeSignals := Resizes()
 	defer signal.Stop(resizeSignals)
 
 	refresh := newRefreshTimer(getNextRefresh)
@@ -39,7 +39,7 @@ func Run(terminal *os.File, getNextRefresh func(time.Time) time.Time, handler Ha
 	beater := time.NewTicker(heartRate)
 	defer beater.Stop()
 
-	run(keypresses(terminal), resizeSignals, refresh.timer.C, refresh.schedule, beater.C, handler)
+	run(Keypresses(terminal), resizeSignals, refresh.timer.C, refresh.schedule, beater.C, handler)
 }
 
 func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan time.Time, schedule func(), beats <-chan time.Time, handler Handler) {
@@ -59,7 +59,7 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan t
 				return
 			}
 		case <-resizeSignals:
-			settle(resizeSignals)
+			Settle(resizeSignals)
 			handler.Resize()
 		case <-beats:
 			handler.Beat()
@@ -116,7 +116,7 @@ func (self *refreshTimer) stop() {
 	self.timer.Stop()
 }
 
-func keypresses(terminal *os.File) <-chan key.Key {
+func Keypresses(terminal *os.File) <-chan key.Key {
 	keys := make(chan key.Key)
 	go func() {
 		defer close(keys)
@@ -132,13 +132,13 @@ func keypresses(terminal *os.File) <-chan key.Key {
 	return keys
 }
 
-func resizes() chan os.Signal {
+func Resizes() chan os.Signal {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGWINCH)
 	return signals
 }
 
-func settle(signals <-chan os.Signal) {
+func Settle(signals <-chan os.Signal) {
 	time.Sleep(settling)
 	for {
 		select {

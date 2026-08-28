@@ -483,14 +483,14 @@ func TestTheActiveModelSegmentUsesFriendlyModelNames(t *testing.T) {
 		"opencode-go/deepseek-v4-pro":              "DeepSeek Pro 4",
 		"opencode-go/deepseek-v4-flash":            "DeepSeek Flash 4",
 		"opencode-go/deepseek-v4-flash-vision-exp": "DeepSeek Flash Vision Exp 4",
-		"opencode-go/mimo-v2-omni":                 "Mimo Omni v2",
-		"opencode-go/mimo-v2.5-pro":                "Mimo Pro v2.5",
-		"opencode-go/mimo-v2.5":                    "Mimo v2.5",
+		"opencode-go/mimo-v2-omni":                 "Mimo Omni 2",
+		"opencode-go/mimo-v2.5-pro":                "Mimo Pro 2.5",
+		"opencode-go/mimo-v2.5":                    "Mimo 2.5",
 		"opencode-go/hy3":                          "HY3",
 		"anthropic/claude-opus-5":                  "Opus 5",
 		"anthropic/claude-sonnet-5":                "Sonnet 5",
 		"anthropic/claude-fable-5":                 "Fable 5",
-		"openrouter/vendor/custom:free":            "custom",
+		"openrouter/vendor/custom:free":            "Custom",
 	}
 
 	for modelName, want := range tests {

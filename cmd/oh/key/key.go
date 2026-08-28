@@ -22,6 +22,8 @@ const (
 	Down
 	Home
 	End
+	PageUp
+	PageDown
 	Escape
 	PasteStart
 	PasteEnd
@@ -122,6 +124,10 @@ func plain(value rune) Key {
 }
 
 func (self *Decoder) sequence() (Key, error) {
+	if self.reader.Buffered() == 0 {
+		return Key{Code: Escape}, nil
+	}
+
 	next, _, err := self.reader.ReadRune()
 	if err != nil {
 		return Key{}, err
@@ -229,6 +235,10 @@ func tilde(parameters string) Key {
 	switch number {
 	case 3:
 		return Key{Code: Delete, Mod: modifiers(parameters)}
+	case 5:
+		return Key{Code: PageUp, Mod: modifiers(parameters)}
+	case 6:
+		return Key{Code: PageDown, Mod: modifiers(parameters)}
 	case 200:
 		return Key{Code: PasteStart}
 	case 201:

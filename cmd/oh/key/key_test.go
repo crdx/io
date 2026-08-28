@@ -71,8 +71,8 @@ func TestControlCharactersStillCarryTheirModifier(t *testing.T) {
 }
 
 func TestAnEscapeOpensASequenceAndTheKeyboardProtocolReportsTheKey(t *testing.T) {
-	if got := decode(t, "\x1b"); len(got) != 0 {
-		t.Errorf("expected a lone escape to report nothing, got %v", got)
+	if got := decode(t, "\x1b"); len(got) != 1 || got[0] != (Key{Code: Escape}) {
+		t.Errorf("expected the bare byte to be an escape, got %v", got)
 	}
 
 	if got := decode(t, "\x1b[27u"); len(got) != 1 || got[0] != (Key{Code: Escape}) {
@@ -143,5 +143,20 @@ func TestOnlyTheLetterControlsCarryALetter(t *testing.T) {
 
 	if got := plain(26); got.Code != Rune || got.Value != 'z' || !got.Mod.Has(Ctrl) {
 		t.Errorf("plain(26) = %+v, want ctrl+z", got)
+	}
+}
+
+func TestAPageOfMovementArrivesAsAKey(t *testing.T) {
+	got := decode(t, "\x1b[5~\x1b[6~")
+	want := []Key{{Code: PageUp}, {Code: PageDown}}
+
+	if len(got) != len(want) {
+		t.Fatalf("expected %d keys, got %v", len(want), got)
+	}
+
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("expected %v, got %v", want[i], got[i])
+		}
 	}
 }

@@ -6,7 +6,7 @@ Usage:
 Options:
     -d, --workspace <dir>       Set working directory
     -r, --resume [<session>]    Open the session picker, or resume a session by name
-    -m, --model <model>         Set the provider, model, and reasoning effort
+    -m, --model [<model>]       Open the model picker, or set the provider, model, and effort
     -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: rx)
     -t, --tool <tool>           Set exclusive tool selection; may be repeated
     -l, --list                  List the available models, then exit

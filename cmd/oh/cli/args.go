@@ -21,7 +21,7 @@ Usage:
 Options:
     -d, --workspace <dir>       Set working directory
     -r, --resume [<session>]    Open the session picker, or resume a session by name
-    -m, --model <model>         Set the provider, model, and reasoning effort
+    -m, --model [<model>]       Open the model picker, or set the provider, model, and effort
     -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: %s)
     -t, --tool <tool>           Set exclusive tool selection; may be repeated
     -l, --list                  List the available models, then exit
@@ -36,6 +36,7 @@ type inputFlags struct {
 	Session         string   `docopt:"--resume"`
 	IsSessionPicker bool     `docopt:"-r"`
 	Model           string   `docopt:"--model"`
+	IsModelPicker   bool     `docopt:"-m"`
 	Caps            string   `docopt:"--caps"`
 	Tools           []string `docopt:"--tool"`
 	List            bool     `docopt:"--list"`
@@ -68,10 +69,15 @@ func Bind() *Input {
 	arguments := append([]string(nil), os.Args...)
 	var sourceSession string
 	isSessionPicker := false
+	isModelPicker := false
 	for i := 1; i < len(arguments); i++ {
 		switch {
 		case (arguments[i] == "-r" || arguments[i] == "--resume") && (i+1 == len(arguments) || strings.HasPrefix(arguments[i+1], "-")):
 			isSessionPicker = true
+			arguments = append(arguments[:i], arguments[i+1:]...)
+			i--
+		case (arguments[i] == "-m" || arguments[i] == "--model") && (i+1 == len(arguments) || strings.HasPrefix(arguments[i+1], "-")):
+			isModelPicker = true
 			arguments = append(arguments[:i], arguments[i+1:]...)
 			i--
 		case arguments[i] == "--from" && i+1 < len(arguments):
@@ -88,6 +94,7 @@ func Bind() *Input {
 
 	parsedFlags := duckopt.MustBind[inputFlags](usage, "$0")
 	parsedFlags.IsSessionPicker = isSessionPicker
+	parsedFlags.IsModelPicker = isModelPicker
 	return &Input{inputFlags: *parsedFlags, SourceSession: sourceSession}
 }
 

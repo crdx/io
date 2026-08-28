@@ -45,33 +45,35 @@ var (
 
 // The mapping of kind of line to colour.
 var (
-	Reasoning   Style = decorate(col.Italic, Dim) // what the model thought on the way to an answer
-	Answer      Style = Normal                    // the reply the model gives after it has thought
-	Call        Style = Normal                    // the name of a call that changes nothing at all
-	Change      Style = hex(gold)                 // the name of a call that could change something
-	Success     Style = hex(lime)                 // the mark set against a call that has completed
-	Information Style = hex(steel)                // what the harness says when passing information
-	Cancelled   Style = Dim                       // the name of a call stopped before it got going
-	Stopped     Style = hex(gold)                 // what the harness says of a turn it had to stop
-	Failure     Style = hex(red)                  // what went wrong, wherever the failure happened
-	Subject     Style = hex(copper)               // the subject of a call, whatever it operates on
-	Qualifier   Style = Dim                       // what qualifies the subject and narrows it down
-	Result      Style = Dim                       // the output a call handed back when it finished
-	Spinner     Style = hex(copper)               // the spinner that turns while a call is running
-	Prompt      Style = hex(copper)               // the harness prompting the user to enter a line
-	Rule        Style = Dim                       // the line drawn across the top of the input box
-	Subtle      Style = Dim                       // text held one small step back from the subject
-	Read        Style = hex(lime)                 // reading is on offer, and waiting to be granted
-	Write       Style = hex(gold)                 // writing is on offer, and waiting to be granted
-	Exec        Style = hex(red)                  // running a command is on offer, if you grant it
-	Shell       Style = hex(steel)                // a shell prompt, tinted to match a command name
-	Skill       Style = hex(mauve)                // a skill being read ahead of the work it guides
-	History     Style = hex(mauve)                // rewriting the repository's history is on offer
-	Pending     Style = col.Underline             // waiting for the keypress that follows a prefix
-	Scrolled    Style = Dim                       // how much of the input is scrolled out of sight
-	Chosen      Style = hex(copper)               // the row the cursor is resting on within a list
-	Typed       Style = Normal                    // what the user typed when a session is replayed
-	User        Style = background("#343541")     // a submitted message, kept apart from the reply
+	Reasoning   Style = decorate(col.Italic, Dim)    // what the model thought on the way to an answer
+	Answer      Style = Normal                       // the reply the model gives after it has thought
+	Call        Style = Normal                       // the name of a call that changes nothing at all
+	Change      Style = hex(gold)                    // the name of a call that could change something
+	Success     Style = hex(lime)                    // the mark set against a call that has completed
+	Information Style = hex(steel)                   // what the harness says when passing information
+	Cancelled   Style = Dim                          // the name of a call stopped before it got going
+	Stopped     Style = hex(gold)                    // what the harness says of a turn it had to stop
+	Failure     Style = hex(red)                     // what went wrong, wherever the failure happened
+	Subject     Style = hex(copper)                  // the subject of a call, whatever it operates on
+	Qualifier   Style = Dim                          // what qualifies the subject and narrows it down
+	Result      Style = Dim                          // the output a call handed back when it finished
+	Spinner     Style = hex(copper)                  // the spinner that turns while a call is running
+	Prompt      Style = hex(copper)                  // the harness prompting the user to enter a line
+	Rule        Style = Dim                          // the line drawn across the top of the input box
+	Subtle      Style = Dim                          // text held one small step back from the subject
+	Read        Style = hex(lime)                    // reading is on offer, and waiting to be granted
+	Write       Style = hex(gold)                    // writing is on offer, and waiting to be granted
+	Exec        Style = hex(red)                     // running a command is on offer, if you grant it
+	Shell       Style = hex(steel)                   // a shell prompt, tinted to match a command name
+	Skill       Style = hex(mauve)                   // a skill being read ahead of the work it guides
+	History     Style = hex(mauve)                   // rewriting the repository's history is on offer
+	Pending     Style = col.Underline                // waiting for the keypress that follows a prefix
+	Scrolled    Style = Dim                          // how much of the input is scrolled out of sight
+	Chosen      Style = hex(copper)                  // the row the cursor is resting on within a list
+	Running     Style = decorate(col.Italic, Dim)    // a session already open, which cannot be chosen
+	Column      Style = decorate(col.Underline, Dim) // the heading standing above a column of rows
+	Typed       Style = Normal                       // what the user typed when a session is replayed
+	User        Style = background("#343541")        // a submitted message, kept apart from the reply
 )
 
 // Web marks permission to reach the internet through the web tools.

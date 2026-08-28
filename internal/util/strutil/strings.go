@@ -1,6 +1,7 @@
 package strutil
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"unicode"
@@ -79,4 +80,29 @@ func Lines(text string) []string {
 	}
 
 	return lines
+}
+
+func VisibleEscapes(stream string) string {
+	var out strings.Builder
+
+	for _, character := range stream {
+		switch {
+		case character == '\n':
+			out.WriteByte('\n')
+		case character == '\\':
+			out.WriteString(`\\`)
+		case character == '\x1b':
+			out.WriteString(`\e`)
+		case character == '\r':
+			out.WriteString(`\r`)
+		case character == '\t':
+			out.WriteString(`\t`)
+		case character < ' ' || character == 0x7f:
+			fmt.Fprintf(&out, `\x%02X`, character)
+		default:
+			out.WriteRune(character)
+		}
+	}
+
+	return out.String()
 }

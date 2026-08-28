@@ -1,0 +1,128 @@
+package modelPicker
+
+import (
+	"fmt"
+	"io"
+	"os"
+	"slices"
+	"strings"
+
+	"crdx.org/io/cmd/oh/picker"
+	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/internal/util"
+)
+
+const (
+	providerColumn   = 12
+	nameColumn       = 28
+	contextColumn    = 7
+	identifierColumn = 28
+)
+
+type Model struct {
+	Provider            string
+	ProviderID          string
+	Name                string
+	ID                  string
+	EffortLevels        []string
+	Effort              string
+	ContextWindowTokens int
+}
+
+func Choose(models []*Model, terminal *os.File, screen io.Writer) (*Model, error) {
+	chosen, err := picker.Choose(&modelList{models: models}, terminal, screen)
+	if err != nil {
+		return nil, err
+	}
+
+	return models[chosen], nil
+}
+
+type modelList struct {
+	models []*Model
+}
+
+func (self *modelList) Len() int { return len(self.models) }
+
+func (self *modelList) IsChoosable(int) bool { return true }
+
+func (self *modelList) Text(index int) string {
+	model := self.models[index]
+
+	return strings.Join([]string{model.Provider, model.ProviderID, model.Name, model.ID}, " ")
+}
+
+func (self *modelList) Adjust(index int, direction int) {
+	model := self.models[index]
+
+	at := slices.Index(model.EffortLevels, model.Effort)
+	if at < 0 {
+		return
+	}
+
+	if wanted := at + direction; wanted >= 0 && wanted < len(model.EffortLevels) {
+		model.Effort = model.EffortLevels[wanted]
+	}
+}
+
+func (self *modelList) ColumnHeader(room int) string {
+	described, identifier := modelColumns(" ", "Provider", "Model", "Effort", "Context", "Identifier", room)
+
+	return described + identifier
+}
+
+func (self *modelList) Row(index int, isChosen bool, room int) string {
+	described, identifier := modelRow(self.models[index], isChosen, room)
+
+	paint := style.Answer
+	if isChosen {
+		paint = style.Chosen
+	}
+	if identifier == "" {
+		return paint(described)
+	}
+
+	return paint(described) + style.Subtle(identifier)
+}
+
+func modelRow(model *Model, isChosen bool, room int) (string, string) {
+	return modelColumns(
+		picker.Mark(isChosen),
+		model.Provider,
+		model.Name,
+		model.Effort,
+		contextWindow(model.ContextWindowTokens),
+		model.ID,
+		room,
+	)
+}
+
+func modelColumns(
+	prefix string,
+	providerName string,
+	name string,
+	effort string,
+	context string,
+	identifier string,
+	room int,
+) (string, string) {
+	columns := []string{
+		picker.Pad(providerName, providerColumn),
+		picker.Pad(name, nameColumn),
+		picker.Pad(effort, picker.EffortColumn),
+		fmt.Sprintf("%*s", contextColumn, context),
+	}
+
+	gap := strings.Repeat(" ", picker.ColumnGap)
+	described := picker.Clip(prefix+" "+strings.Join(columns, gap)+gap, room)
+
+	return described, picker.Clip(identifier, min(identifierColumn, room-style.Width(described)))
+}
+
+func contextWindow(tokens int) string {
+	if tokens <= 0 {
+		return "—"
+	}
+
+	return util.FormatTokenCount(tokens)
+}

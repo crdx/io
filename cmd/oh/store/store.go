@@ -26,6 +26,9 @@ type Meta struct {
 
 type listingData struct {
 	WorkspaceDir string `json:"workspaceDir"`
+	Provider     string `json:"provider,omitempty"`
+	Model        string `json:"model,omitempty"`
+	Effort       string `json:"effort,omitempty"`
 }
 
 func encodeMeta(meta Meta) (json.RawMessage, json.RawMessage, error) {
@@ -33,7 +36,12 @@ func encodeMeta(meta Meta) (json.RawMessage, json.RawMessage, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	data, err := json.Marshal(listingData{WorkspaceDir: meta.WorkspaceDir})
+	data, err := json.Marshal(listingData{
+		WorkspaceDir: meta.WorkspaceDir,
+		Provider:     meta.Provider,
+		Model:        meta.Model,
+		Effort:       meta.Effort,
+	})
 	if err != nil {
 		return nil, nil, err
 	}

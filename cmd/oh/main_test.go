@@ -64,6 +64,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnTimer"
 	"crdx.org/io/cmd/oh/segment/workspaceDir"
+	"crdx.org/io/cmd/oh/sessionPicker"
 	"crdx.org/io/cmd/oh/sessions"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
@@ -83,6 +84,7 @@ import (
 	"crdx.org/io/internal/sim"
 	"crdx.org/io/internal/stop"
 	"crdx.org/io/internal/util/pathutil"
+	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/codex"
 	"crdx.org/io/provider/ollama"
@@ -1469,9 +1471,43 @@ func TestResumeArgumentsMatchTheGolden(t *testing.T) {
 		)
 	}
 
-	goldenPath := filepath.Join("testdata", "output", "resume-arguments.txt")
+	compareArgumentsWithGolden(t, "resume-arguments.txt", output.String())
+}
+
+func TestModelArgumentsMatchTheGolden(t *testing.T) {
+	originalArgs := os.Args
+	t.Cleanup(func() { os.Args = originalArgs })
+
+	cases := [][]string{
+		{"-m"},
+		{"--model"},
+		{"-m", "codex/gpt-5.3-codex@high"},
+		{"--model", "codex/gpt-5.3-codex@high"},
+		{"-m", "-r"},
+	}
+
+	var output strings.Builder
+	for _, arguments := range cases {
+		os.Args = append([]string{"oh"}, arguments...)
+		input := cli.Bind()
+		fmt.Fprintf(
+			&output,
+			"%-32q picker=%-5t model=%q\n",
+			strings.Join(arguments, " "),
+			input.IsModelPicker,
+			input.Model,
+		)
+	}
+
+	compareArgumentsWithGolden(t, "model-arguments.txt", output.String())
+}
+
+func compareArgumentsWithGolden(t *testing.T, name string, got string) {
+	t.Helper()
+
+	goldenPath := filepath.Join("testdata", "output", name)
 	if *updateGoldens {
-		if err := os.WriteFile(goldenPath, []byte(output.String()), 0o600); err != nil {
+		if err := os.WriteFile(goldenPath, []byte(got), 0o600); err != nil {
 			t.Fatal(err)
 		}
 		return
@@ -1481,8 +1517,8 @@ func TestResumeArgumentsMatchTheGolden(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if output.String() != string(want) {
-		t.Errorf("resume arguments differ from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, output.String(), want)
+	if got != string(want) {
+		t.Errorf("arguments differ from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, got, want)
 	}
 }
 
@@ -2524,6 +2560,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"lifecycle":             {".ansi", ".screen"},
 		"mermaid-streaming":     {".screen"},
 		"mode-takeback":         {".ansi", ".screen"},
+		"model-arguments":       {".txt"},
 		"new-session":           {".txt"},
 		"pending-mode-messages": {".ansi", ".screen"},
 		"paste":                 {".ansi", ".screen"},
@@ -3559,7 +3596,7 @@ func TestPick(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	chosenSession, err := picker.Choose(sessions, workspaceDir, os.Stdin, os.Stdout)
+	chosenSession, err := sessionPicker.Choose(sessions, os.Stdin, os.Stdout)
 	screen := output.New(os.Stdout)
 
 	switch {
@@ -3941,7 +3978,7 @@ func compareWithGolden(t *testing.T, name string, suffix string, passes map[stri
 	var drawn strings.Builder
 
 	for _, pass := range slices.Sorted(maps.Keys(passes)) {
-		fmt.Fprintf(&drawn, "=== %s ===\n%s\n", pass, visibleEscapes(passes[pass]()))
+		fmt.Fprintf(&drawn, "=== %s ===\n%s\n", pass, strutil.VisibleEscapes(passes[pass]()))
 	}
 
 	goldenPath := filepath.Join("testdata", "output", name+suffix)
@@ -4251,31 +4288,6 @@ func layOutWorkspace(t *testing.T) string {
 	}
 
 	return workspaceDir
-}
-
-func visibleEscapes(stream string) string {
-	var out strings.Builder
-
-	for _, character := range stream {
-		switch {
-		case character == '\n':
-			out.WriteByte('\n')
-		case character == '\\':
-			out.WriteString(`\\`)
-		case character == '\x1b':
-			out.WriteString(`\e`)
-		case character == '\r':
-			out.WriteString(`\r`)
-		case character == '\t':
-			out.WriteString(`\t`)
-		case character < ' ' || character == 0x7f:
-			fmt.Fprintf(&out, `\x%02X`, character)
-		default:
-			out.WriteRune(character)
-		}
-	}
-
-	return out.String()
 }
 
 func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
@@ -6549,7 +6561,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	)
 	liveScreen := visibleScreen(t, screenOutput.String(), replayColumns)
 
-	ansi := strings.TrimRight(visibleEscapes(screenOutput.String()), "\n") + "\n"
+	ansi := strings.TrimRight(strutil.VisibleEscapes(screenOutput.String()), "\n") + "\n"
 	settledScreen := strings.Join(liveScreen, "\n") + "\n"
 
 	requestMutex.Lock()

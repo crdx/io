@@ -1,1 +1,1 @@
-{"data":{"workspaceDir":""},"messages":6,"name":"brave-otter","started":"2001-01-01T00:00:00Z","title":"The workspace is now read-only.","touched":"2001-01-01T00:00:00Z","version":1}
+{"data":{"workspaceDir":"","provider":"anthropic","model":"claude-opus-5","effort":"medium"},"messages":6,"name":"brave-otter","started":"2001-01-01T00:00:00Z","title":"The workspace is now read-only.","touched":"2001-01-01T00:00:00Z","version":2}
