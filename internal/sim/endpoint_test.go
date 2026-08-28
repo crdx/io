@@ -37,9 +37,10 @@ func weather(callCount *int) tool.Tool {
 }
 
 type speaker struct {
-	name    string                                            // the provider
-	format  string                                            // the wire format it speaks
-	connect func(t *testing.T, address string) agent.Provider // a client pointed at it
+	name                 string                                            // the provider
+	format               string                                            // the wire format it speaks
+	hasModelCapabilities bool                                              // its listing describes capabilities
+	connect              func(t *testing.T, address string) agent.Provider // a client pointed at it
 }
 
 func providers() []speaker {
@@ -74,8 +75,9 @@ func providers() []speaker {
 			},
 		},
 		{
-			name:   "anthropic",
-			format: sim.Messages,
+			name:                 "anthropic",
+			format:               sim.Messages,
+			hasModelCapabilities: true,
 			connect: func(t *testing.T, address string) agent.Provider {
 				t.Helper()
 
@@ -89,8 +91,9 @@ func providers() []speaker {
 			},
 		},
 		{
-			name:   "ollama",
-			format: sim.Completions,
+			name:                 "ollama",
+			format:               sim.Completions,
+			hasModelCapabilities: true,
 			connect: func(t *testing.T, address string) agent.Provider {
 				t.Helper()
 
@@ -434,8 +437,9 @@ func TestAModelListingAnswersEveryProvider(t *testing.T) {
 				t.Fatalf("expected the scenario's model, got %v", models)
 			}
 
-			if len(models[0].EffortLevels) == 0 {
-				t.Errorf("expected the model to take an effort level, got %v", models[0])
+			hasModelCapabilities := len(models[0].EffortLevels) > 0
+			if hasModelCapabilities != provider.hasModelCapabilities {
+				t.Errorf("got effort capabilities %v, want reported %t", models[0].EffortLevels, provider.hasModelCapabilities)
 			}
 		})
 	}

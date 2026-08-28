@@ -2,7 +2,6 @@ package chatcompletions
 
 import (
 	"context"
-	"slices"
 	"strings"
 
 	"crdx.org/io/agent"
@@ -12,8 +11,8 @@ const completionsSuffix = "/chat/completions"
 
 const modelsSuffix = "/models"
 
-// Models lists what the endpoint offers. The listing carries model names alone, so every one of
-// them is offered the whole effort range and the endpoint decides what it honours.
+// Models lists what the endpoint offers. The listing carries model names alone; callers supplement
+// their capabilities from a source that describes them.
 //
 // reference/chat-completions.md
 func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
@@ -36,7 +35,7 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 
 	for _, listed := range payload.Data {
 		if listed.ID != "" {
-			models = append(models, agent.Model{ID: listed.ID, EffortLevels: slices.Clone(Efforts)})
+			models = append(models, agent.Model{ID: listed.ID})
 		}
 	}
 

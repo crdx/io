@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"slices"
 	"testing"
 
 	"crdx.org/io/internal/req"
-	"crdx.org/io/wire/openai/chatcompletions"
 )
 
-func TestModelsListsTheEndpointModelsWithIndependentEffortLevels(t *testing.T) {
+func TestModelsLeavesUnlistedCapabilitiesUnknown(t *testing.T) {
 	var path string
 	var authorisation string
 	var accepted string
@@ -45,13 +43,8 @@ func TestModelsListsTheEndpointModelsWithIndependentEffortLevels(t *testing.T) {
 	if len(models) != 2 || models[0].ID != "first" || models[1].ID != "second" {
 		t.Fatalf("got models %+v", models)
 	}
-	if !slices.Equal(models[0].EffortLevels, chatcompletions.Efforts) || !slices.Equal(models[1].EffortLevels, chatcompletions.Efforts) {
-		t.Errorf("got effort levels %+v", models)
-	}
-
-	models[0].EffortLevels[0] = "changed"
-	if chatcompletions.Efforts[0] == "changed" || models[1].EffortLevels[0] == "changed" {
-		t.Error("listed models share their effort storage")
+	if models[0].EffortLevels != nil || models[1].EffortLevels != nil {
+		t.Errorf("the listing claimed effort levels it did not report: %+v", models)
 	}
 }
 

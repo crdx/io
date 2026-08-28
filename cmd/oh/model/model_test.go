@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -361,16 +362,20 @@ func TestACacheInAnotherFormatIsIgnored(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(path, []byte(`{"version":99,"providers":{"anthropic":{}}}`), 0o600); err != nil {
-		t.Fatal(err)
-	}
 
-	if got := loadModelCache(path); len(got.Providers) != 0 {
-		t.Errorf("expected a cache in another format to be ignored, got %v", got)
-	}
+	for _, version := range []int{2, 99} {
+		data := fmt.Appendf(nil, `{"version":%d,"providers":{"anthropic":{}}}`, version)
+		if err := os.WriteFile(path, data, 0o600); err != nil {
+			t.Fatal(err)
+		}
 
-	if _, _, _, err := parseModelSelection("opus@hi"); err == nil {
-		t.Error("expected a cache in another format to leave nothing selectable")
+		if got := loadModelCache(path); len(got.Providers) != 0 {
+			t.Errorf("expected version %d to be ignored, got %v", version, got)
+		}
+
+		if _, _, _, err := parseModelSelection("opus@hi"); err == nil {
+			t.Errorf("expected version %d to leave nothing selectable", version)
+		}
 	}
 }
 

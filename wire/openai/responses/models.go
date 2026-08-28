@@ -2,7 +2,6 @@ package responses
 
 import (
 	"context"
-	"slices"
 	"strings"
 
 	"crdx.org/io/agent"
@@ -24,9 +23,7 @@ func SupportsResponses(id string) bool {
 	return true
 }
 
-// Models lists what the endpoint offers. This listing is undocumented: it is what the ChatGPT web
-// client asks for its own model picker, and a subscription token is not promised to be honoured
-// for it. A caller that gets nothing back is expected to carry on with what it already knew.
+// Models lists what the endpoint offers.
 func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 	address, listable := modelsAddress(self.URL)
 	if !listable {
@@ -58,16 +55,15 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 	for _, listed := range payload.Models {
 		if listed.Slug != "" {
 			models = append(models, agent.Model{
-				ID:           listed.Slug,
-				Name:         listed.Title,
-				EffortLevels: slices.Clone(Efforts),
+				ID:   listed.Slug,
+				Name: listed.Title,
 			})
 		}
 	}
 
 	for _, listed := range payload.Data {
 		if listed.ID != "" {
-			models = append(models, agent.Model{ID: listed.ID, EffortLevels: slices.Clone(Efforts)})
+			models = append(models, agent.Model{ID: listed.ID})
 		}
 	}
 

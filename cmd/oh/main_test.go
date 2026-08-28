@@ -3152,7 +3152,7 @@ func completedInvalidMermaidScreen(t *testing.T) string {
 func checkedModelCache(providers string) []byte {
 	return fmt.Appendf(
 		nil,
-		`{"version":2,"checked":%q,"providers":%s}`, time.Now().Format(time.RFC3339), providers,
+		`{"version":3,"checked":%q,"providers":%s}`, time.Now().Format(time.RFC3339), providers,
 	)
 }
 
@@ -5457,6 +5457,27 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		passes["active-model / "+effort+" effort"] = goldenSegmentPass(
 			t,
 			activeModel.New("gpt-5.6-sol", effort, modelEffortLevels),
+			"",
+			segment.Context{},
+		)
+	}
+	effortLadders := []struct {
+		name   string
+		model  string
+		effort string
+		levels []string
+	}{
+		{name: "deepseek high", model: "deepseek-v4-pro", effort: "high", levels: []string{"high", "max"}},
+		{name: "deepseek max", model: "deepseek-v4-pro", effort: "max", levels: []string{"high", "max"}},
+		{name: "opus medium", model: "claude-opus-5", effort: "medium", levels: []string{"low", "medium", "high", "xhigh", "max"}},
+		{name: "ollama thinking off", model: "qwen3.8:27b", effort: "none", levels: []string{"none", "low", "medium", "high"}},
+		{name: "ollama without thinking", model: "llama3.3:70b", effort: "none", levels: []string{"none"}},
+		{name: "sparse ladder", model: "gpt-5.6-sol", effort: "high", levels: []string{"none", "high"}},
+	}
+	for _, ladder := range effortLadders {
+		passes["active-model / "+ladder.name] = goldenSegmentPass(
+			t,
+			activeModel.New(ladder.model, ladder.effort, ladder.levels),
 			"",
 			segment.Context{},
 		)
