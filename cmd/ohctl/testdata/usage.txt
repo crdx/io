@@ -1,0 +1,13 @@
+ohctl — oh control
+
+Usage:
+    ohctl login [codex | opencode-go | anthropic]
+    ohctl sessions [options]
+    ohctl regen [<session>...]
+    ohctl migrate [options] [<session>...]
+
+Commands:
+    login       Store provider credentials
+    sessions    List the stored sessions
+    regen       Write stored transcripts again from their journals
+    migrate     Bring configuration and stored sessions up to their current formats

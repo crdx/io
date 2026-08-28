@@ -1,0 +1,6 @@
+=== screen ===
+[38;2;150;152;150mwrote [0mstored-session
+=== failure ===
+[38;2;204;102;102mbrave-otter: no session named "brave-otter"[0m
+=== error ===
+1 of 2 could not be written

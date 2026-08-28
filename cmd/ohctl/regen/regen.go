@@ -2,12 +2,12 @@ package regen
 
 import (
 	"fmt"
-	"os"
 
 	"crdx.org/duckopt/v2"
+	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/internal/xdg"
+	"crdx.org/io/cmd/ohctl/console"
 	"crdx.org/io/session"
 )
 
@@ -27,9 +27,11 @@ type inputOpts struct {
 // Run rewrites the transcript of each named session, or of every stored session.
 func Run() error {
 	options := duckopt.MustBind[inputOpts](usage, "$0")
+	return run(location.GetSessionsDir(), options.Sessions, console.Standard())
+}
 
-	directory := sessionsDir()
-	names := options.Sessions
+func run(directory string, sessions []string, output console.Output) error {
+	names := sessions
 	if len(names) == 0 {
 		var err error
 		if names, err = storedNames(directory); err != nil {
@@ -44,17 +46,17 @@ func Run() error {
 	for _, name := range names {
 		if err := store.Rebuild(directory, name); err != nil {
 			failures++
-			fmt.Fprintln(os.Stderr, style.Failure(name+": "+err.Error()))
+			_, _ = fmt.Fprintln(output.Failure, style.Failure(name+": "+err.Error()))
 			continue
 		}
-		fmt.Println(style.Subtle("wrote ") + name)
+		_, _ = fmt.Fprintln(output.Screen, style.Subtle("wrote ")+name)
 	}
 
 	if failures > 0 {
 		return fmt.Errorf("%d of %d could not be written", failures, len(names))
 	}
 
-	fmt.Println(style.Subtle(fmt.Sprintf("%d transcripts written", len(names))))
+	_, _ = fmt.Fprintln(output.Screen, style.Subtle(fmt.Sprintf("%d transcripts written", len(names))))
 	return nil
 }
 
@@ -69,8 +71,4 @@ func storedNames(directory string) ([]string, error) {
 		names = append(names, entry.Name)
 	}
 	return names, nil
-}
-
-func sessionsDir() string {
-	return xdg.StatePath("org.crdx", "oh", "sessions")
 }

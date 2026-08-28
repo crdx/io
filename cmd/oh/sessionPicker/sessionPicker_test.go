@@ -3,7 +3,6 @@ package sessionPicker
 import (
 	"strings"
 	"testing"
-	"time"
 
 	"crdx.org/io/cmd/oh/style"
 )
@@ -18,22 +17,6 @@ func TestARunningSessionIsFadedAndSlantedWithoutAMarker(t *testing.T) {
 	}
 	if strings.Contains(got, "🟡") {
 		t.Errorf("expected no running marker, got %q", got)
-	}
-}
-
-func TestSessionLengthUsesCompactUnits(t *testing.T) {
-	cases := map[time.Duration]string{
-		0:                           "<1m",
-		59 * time.Second:            "<1m",
-		37 * time.Minute:            "37m",
-		5*time.Hour + 1*time.Minute: "5h",
-		73 * time.Hour:              "3d",
-	}
-
-	for elapsed, want := range cases {
-		if got := duration(elapsed); got != want {
-			t.Errorf("duration(%s) = %q, want %q", elapsed, got, want)
-		}
 	}
 }
 

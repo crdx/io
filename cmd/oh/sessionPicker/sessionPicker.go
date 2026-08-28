@@ -10,6 +10,8 @@ import (
 
 	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/session"
 )
 
@@ -99,11 +101,11 @@ func row(storedSession *Session, isChosen bool, room int) string {
 	return picker.Columns(
 		left,
 		sessionColumns(
-			orDash(storedSession.Model),
+			strutil.OrDash(storedSession.Model),
 			storedSession.Effort,
 			strconv.Itoa(storedSession.Messages()),
-			duration(storedSession.Touched.Sub(storedSession.Started)),
-			ago(storedSession.Touched),
+			util.CoarseDuration(storedSession.Touched.Sub(storedSession.Started)),
+			util.Ago(storedSession.Touched),
 			room,
 		),
 		room,
@@ -136,27 +138,6 @@ func sessionColumns(model string, effort string, messages string, length string,
 	return counted
 }
 
-func orDash(text string) string {
-	if text == "" {
-		return "—"
-	}
-
-	return text
-}
-
-func duration(elapsed time.Duration) string {
-	switch {
-	case elapsed < time.Minute:
-		return "<1m"
-	case elapsed < time.Hour:
-		return fmt.Sprintf("%dm", int(elapsed.Minutes()))
-	case elapsed < 24*time.Hour:
-		return fmt.Sprintf("%dh", int(elapsed.Hours()))
-	}
-
-	return fmt.Sprintf("%dd", int(elapsed.Hours()/24))
-}
-
 func sessionAnimal(storedSession *Session) string {
 	emoji := session.Emoji(storedSession.Name)
 	if emoji == "" {
@@ -172,19 +153,4 @@ func sessionTitle(storedSession *Session) string {
 	}
 
 	return strings.ReplaceAll(storedSession.Title, "\n", " ")
-}
-
-func ago(when time.Time) string {
-	elapsed := time.Since(when)
-
-	switch {
-	case elapsed < time.Minute:
-		return "just now"
-	case elapsed < time.Hour:
-		return fmt.Sprintf("%dm ago", int(elapsed.Minutes()))
-	case elapsed < 24*time.Hour:
-		return fmt.Sprintf("%dh ago", int(elapsed.Hours()))
-	}
-
-	return fmt.Sprintf("%dd ago", int(elapsed.Hours()/24))
 }

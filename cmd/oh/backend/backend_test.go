@@ -3,6 +3,7 @@ package backend
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
@@ -105,8 +106,8 @@ func TestEveryProviderListsModelsWithoutAConversationModel(t *testing.T) {
 
 func TestSubscriptionCodexDoesNotTrustTheUndocumentedModelListing(t *testing.T) {
 	models, err := ListModels(t.Context(), codexProvider, EndpointSettings{})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if !errors.Is(err, agent.ErrNoListing) {
+		t.Fatalf("expected the registry to be named as the only source, got %v", err)
 	}
 	if len(models) != 0 {
 		t.Errorf("got %v", models)

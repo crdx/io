@@ -89,7 +89,7 @@ type Lock struct {
 }
 
 func openSessionDir(directory string, name string) (*os.File, error) {
-	sessionDir, err := os.Open(sessionDir(directory, name))
+	sessionDir, err := os.Open(Dir(directory, name))
 	if errors.Is(err, fs.ErrNotExist) {
 		return nil, fmt.Errorf("%w %q", ErrNotFound, name)
 	}
@@ -260,7 +260,7 @@ func (self *Writer) ensureOpen() error {
 		return nil
 	}
 
-	directory := sessionDir(self.directory, self.name)
+	directory := Dir(self.directory, self.name)
 	if err := os.Mkdir(directory, 0o700); err != nil {
 		return err
 	}
@@ -551,7 +551,7 @@ func writeMeta(directory string, meta Meta) error {
 		return err
 	}
 
-	sessionDir := sessionDir(directory, meta.Name)
+	sessionDir := Dir(directory, meta.Name)
 	file, err := os.CreateTemp(sessionDir, "meta-*.json")
 	if err != nil {
 		return err
@@ -754,16 +754,16 @@ const (
 	maxLine     = 64 << 20
 )
 
-func sessionDir(directory, name string) string {
+func Dir(directory, name string) string {
 	return filepath.Join(directory, name)
 }
 
 func journalPath(directory, name string) string {
-	return filepath.Join(sessionDir(directory, name), journalName)
+	return filepath.Join(Dir(directory, name), journalName)
 }
 
 func metaPath(directory, name string) string {
-	return filepath.Join(sessionDir(directory, name), metaName)
+	return filepath.Join(Dir(directory, name), metaName)
 }
 
 func validateName(name string) error {

@@ -1,0 +1,10 @@
+ohctl sessions — list the stored sessions
+
+Usage:
+    ohctl sessions [options]
+
+Options:
+    -j, --json               Write the listing as JSON
+    -w, --workspace <dir>    List only the sessions of one workspace
+    -r, --running            List only the sessions that are running
+    -h, --help               Show this help

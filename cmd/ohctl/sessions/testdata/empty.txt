@@ -1,0 +1,5 @@
+=== screen ===
+[]
+=== failure ===
+[38;2;150;152;150mthere are no stored sessions to list[0m
+[38;2;150;152;150mthere are no stored sessions to list[0m

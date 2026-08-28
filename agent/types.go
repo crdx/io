@@ -19,6 +19,7 @@ type Provider interface {
 var (
 	ErrNoState       = errors.New("the provider does not expose conversation state")
 	ErrStateReplaced = errors.New("the provider replaced append-only conversation state")
+	ErrNoListing     = errors.New("it lists no models of its own, and only the registry describes it")
 )
 
 type State interface {

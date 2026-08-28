@@ -1,0 +1,4 @@
+=== screen ===
+[38;2;150;152;150mwrote [0mstored-session
+[38;2;150;152;150m1 transcripts written[0m
+=== failure ===

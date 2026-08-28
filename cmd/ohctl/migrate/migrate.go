@@ -12,10 +12,11 @@ import (
 	"crdx.org/duckopt/v2"
 
 	"crdx.org/io/cmd/oh/config"
+	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/ohctl/console"
 	"crdx.org/io/internal/format"
-	"crdx.org/io/internal/xdg"
 	"crdx.org/io/session"
 )
 
@@ -44,27 +45,30 @@ type inputOpts struct {
 
 // Run migrates each named session, or every session written in an older format.
 func Run() error {
-	inputArgs := duckopt.MustBind[inputOpts](usage, "$0")
+	return run(duckopt.MustBind[inputOpts](usage, "$0"), console.Standard())
+}
 
-	path := configPath()
+func run(inputArgs *inputOpts, output console.Output) error {
+	path := location.GetConfigFile()
 	configFrom, hasConfig, err := MigrateConfig(ConfigOptions{Path: path, DryRun: inputArgs.DryRun})
 	if err != nil {
 		return fmt.Errorf("config: %w", err)
 	}
 	if hasConfig && configFrom < config.Format {
 		if !inputArgs.DryRun {
-			fmt.Println(style.Subtle("copy kept in ") + configBackupPath(path))
+			_, _ = fmt.Fprintln(output.Screen, style.Subtle("copy kept in ")+configBackupPath(path))
 		}
-		fmt.Printf(
+		_, _ = fmt.Fprintf(
+			output.Screen,
 			"%s config %s\n",
 			style.Subtle(verb(inputArgs.DryRun)),
 			style.Subtle(fmt.Sprintf("%d → %d", configFrom, config.Format)),
 		)
 	}
 
-	directory := sessionsDir()
+	directory := location.GetSessionsDir()
 
-	if err := sweepListingMeta(directory, inputArgs.DryRun); err != nil {
+	if err := sweepListingMeta(directory, inputArgs.DryRun, output); err != nil {
 		return err
 	}
 
@@ -76,7 +80,7 @@ func Run() error {
 		}
 
 		if len(names) == 0 {
-			return sayNothingToDo(directory)
+			return sayNothingToDo(directory, output)
 		}
 	}
 
@@ -87,7 +91,7 @@ func Run() error {
 	}
 
 	if !options.DryRun {
-		fmt.Println(style.Subtle("copies kept in ") + options.BackupDir)
+		_, _ = fmt.Fprintln(output.Screen, style.Subtle("copies kept in ")+options.BackupDir)
 	}
 
 	failures := 0
@@ -96,24 +100,25 @@ func Run() error {
 	for _, name := range names {
 		from, err := Session(options, name)
 		if errors.Is(err, session.ErrInUse) {
-			fmt.Printf("%s %s %s\n", style.Subtle("skipped"), name, style.Subtle("in use"))
+			_, _ = fmt.Fprintf(output.Screen, "%s %s %s\n", style.Subtle("skipped"), name, style.Subtle("in use"))
 			continue
 		}
 		if err != nil {
 			failures++
-			fmt.Fprintln(os.Stderr, style.Failure(name+": "+err.Error()))
+			_, _ = fmt.Fprintln(output.Failure, style.Failure(name+": "+err.Error()))
 
 			continue
 		}
 
 		if from == session.JournalFormat {
-			fmt.Println(style.Subtle("already current ") + name)
+			_, _ = fmt.Fprintln(output.Screen, style.Subtle("already current ")+name)
 			continue
 		}
 
 		migrated++
 
-		fmt.Printf(
+		_, _ = fmt.Fprintf(
+			output.Screen,
 			"%s %s %s\n",
 			style.Subtle(verb(options.DryRun)),
 			name,
@@ -125,19 +130,19 @@ func Run() error {
 		return fmt.Errorf("%d of %d could not be migrated", failures, len(names))
 	}
 
-	fmt.Println(style.Subtle(fmt.Sprintf("%d of %d %s", migrated, len(names), summaryVerb(options.DryRun))))
+	_, _ = fmt.Fprintln(output.Screen, style.Subtle(fmt.Sprintf("%d of %d %s", migrated, len(names), summaryVerb(options.DryRun))))
 
 	return nil
 }
 
-func sweepListingMeta(directory string, dryRun bool) error {
+func sweepListingMeta(directory string, dryRun bool, output console.Output) error {
 	if dryRun {
 		stale, err := store.StaleMeta(directory)
 		if err != nil {
 			return err
 		}
 		if len(stale) > 0 {
-			fmt.Printf("%s listing metadata of %d\n", style.Subtle("would rebuild"), len(stale))
+			_, _ = fmt.Fprintf(output.Screen, "%s listing metadata of %d\n", style.Subtle("would rebuild"), len(stale))
 		}
 		return nil
 	}
@@ -147,24 +152,24 @@ func sweepListingMeta(directory string, dryRun bool) error {
 		return err
 	}
 	if rebuilt > 0 {
-		fmt.Printf("%s listing metadata of %d\n", style.Subtle("rebuilt"), rebuilt)
+		_, _ = fmt.Fprintf(output.Screen, "%s listing metadata of %d\n", style.Subtle("rebuilt"), rebuilt)
 	}
 
 	return nil
 }
 
-func sayNothingToDo(directory string) error {
+func sayNothingToDo(directory string, output console.Output) error {
 	entries, err := session.Entries(directory)
 	if err != nil {
 		return err
 	}
 
 	if len(entries) == 0 {
-		fmt.Println(style.Subtle("there are no stored sessions in ") + directory)
+		_, _ = fmt.Fprintln(output.Screen, style.Subtle("there are no stored sessions in ")+directory)
 		return nil
 	}
 
-	fmt.Println(style.Subtle(fmt.Sprintf("all %d stored sessions are at format %d", len(entries), session.JournalFormat)))
+	_, _ = fmt.Fprintln(output.Screen, style.Subtle(fmt.Sprintf("all %d stored sessions are at format %d", len(entries), session.JournalFormat)))
 
 	return nil
 }
@@ -389,12 +394,4 @@ func canonical(line map[string]json.RawMessage) ([]byte, error) {
 	}
 
 	return json.Marshal(record)
-}
-
-func configPath() string {
-	return xdg.ConfigPath("org.crdx", "oh", "config.toml")
-}
-
-func sessionsDir() string {
-	return xdg.StatePath("org.crdx", "oh", "sessions")
 }

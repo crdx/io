@@ -1,0 +1,7 @@
+models.dev: Get "<registry>": connect: connection refused
+codex        nothing to record: it lists no models of its own, and only the registry describes it
+opencode-go  nothing to record: not logged in to OpenCode Go: run the login command with opencode-go
+anthropic    nothing to record: not logged in to Anthropic: run the login command with anthropic
+ollama       nothing to record: Get "http://localhost:11434/api/tags": connect: connection refused
+=== error ===
+no provider could be described

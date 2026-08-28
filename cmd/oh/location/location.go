@@ -1,13 +1,24 @@
 package location
 
-import "crdx.org/io/internal/xdg"
+import (
+	"os"
+	"path/filepath"
+
+	"crdx.org/io/internal/xdg"
+)
 
 const (
 	namespace = "org.crdx"
 	app       = "oh"
+
+	StateDirVariable = "OH_STATE_DIR"
 )
 
 func GetStateDir(parts ...string) string {
+	if root := os.Getenv(StateDirVariable); filepath.IsAbs(root) {
+		return filepath.Join(append([]string{root}, parts...)...)
+	}
+
 	return xdg.StatePath(append([]string{namespace, app}, parts...)...)
 }
 

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/util/pathutil"
@@ -165,13 +166,14 @@ func createPolicyWithSupportProbe(
 			"USER",
 		},
 		SetEnv: map[string]string{
-			"GIT_CONFIG_NOSYSTEM": "1",
-			"GOCACHE":             filepath.Join(cacheDir, goBuildCacheDir),
-			"GOLANGCI_LINT_CACHE": filepath.Join(sandbox.TmpDir, lintCachePath),
-			"GOMODCACHE":          filepath.Join(cacheDir, goModuleCacheDir),
-			"HOME":                homeDir,
-			"MISE_DATA_DIR":       miseDataDir(),
-			"TMPDIR":              sandbox.TmpDir,
+			"GIT_CONFIG_NOSYSTEM":     "1",
+			"GOCACHE":                 filepath.Join(cacheDir, goBuildCacheDir),
+			"GOLANGCI_LINT_CACHE":     filepath.Join(sandbox.TmpDir, lintCachePath),
+			"GOMODCACHE":              filepath.Join(cacheDir, goModuleCacheDir),
+			"HOME":                    homeDir,
+			"MISE_DATA_DIR":           miseDataDir(),
+			location.StateDirVariable: location.GetStateDir(),
+			"TMPDIR":                  sandbox.TmpDir,
 		},
 
 		Timeout:   shellTimeout,

@@ -1,0 +1,4 @@
+=== screen ===
+=== failure ===
+=== error ===
+there are no stored sessions in /state/sessions

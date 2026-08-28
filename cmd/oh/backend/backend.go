@@ -89,7 +89,7 @@ func connectProvider(choice model.Choice, effort string, endpoints EndpointSetti
 
 func ListModels(ctx context.Context, providerName string, endpoints EndpointSettings) ([]agent.Model, error) {
 	if providerName == model.CodexProvider && endpoints.OverrideURL == "" {
-		return nil, nil
+		return nil, agent.ErrNoListing
 	}
 
 	choice := model.Choice{
@@ -104,7 +104,7 @@ func ListModels(ctx context.Context, providerName string, endpoints EndpointSett
 
 	lister, canList := client.Client.(agent.Lister)
 	if !canList {
-		return nil, nil
+		return nil, agent.ErrNoListing
 	}
 
 	return lister.Models(ctx)

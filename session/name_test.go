@@ -70,7 +70,7 @@ func TestTheIdentifierIsKeptButNamesNothing(t *testing.T) {
 	if len(writer.ID()) != idLength {
 		t.Errorf("the identifier %q is %d characters, want %d", writer.ID(), len(writer.ID()), idLength)
 	}
-	if _, err := os.Stat(sessionDir(directory, writer.ID())); err == nil {
+	if _, err := os.Stat(Dir(directory, writer.ID())); err == nil {
 		t.Error("the identifier names a directory, and should name nothing")
 	}
 
