@@ -22,11 +22,27 @@ func TestRegistryFindsACommandAndItsArguments(t *testing.T) {
 	if invocation.Name != "//open" || invocation.Usage != "//open" || invocation.Command.Name != "open" {
 		t.Errorf("got invocation %+v", invocation)
 	}
-	if !slices.Equal(invocation.Arguments, []string{"session-chat"}) {
-		t.Errorf("got arguments %v", invocation.Arguments)
+	if !slices.Equal(invocation.Arguments.Fields, []string{"session-chat"}) || invocation.Arguments.Text != "session-chat" {
+		t.Errorf("got arguments %+v", invocation.Arguments)
 	}
 	if _, found := registry.Find("/opening"); found {
 		t.Error("expected /opening not to match /open")
+	}
+}
+
+func TestRegistryKeepsTheWhitespaceWithinAnArgument(t *testing.T) {
+	registry := mustRegistry(t, mustSet(t, "//", slash.Command{Name: "add", Run: commandHandler}))
+
+	invocation, found := registry.Find("  //add  first line\n\n  - one\n  - two  \n")
+	if !found {
+		t.Fatal("expected //add to be found")
+	}
+	if !slices.Equal(invocation.Arguments.Fields, []string{"first", "line", "-", "one", "-", "two"}) {
+		t.Errorf("got fields %q", invocation.Arguments.Fields)
+	}
+	want := "first line\n\n  - one\n  - two"
+	if invocation.Arguments.Text != want {
+		t.Errorf("got text %q, want %q", invocation.Arguments.Text, want)
 	}
 }
 
@@ -70,7 +86,7 @@ func TestRegistryRejectsDuplicatePrefixes(t *testing.T) {
 	}
 }
 
-func commandHandler(slash.Context, []string) error {
+func commandHandler(slash.Context, slash.Arguments) error {
 	return nil
 }
 

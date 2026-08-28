@@ -5632,9 +5632,9 @@ func TestSlashCommandRunsImmediately(t *testing.T) {
 	ran := false
 	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
 		Name: "fixture",
-		Run: func(_ slash.Context, arguments []string) error {
-			if !slices.Equal(arguments, []string{"one", "two"}) {
-				t.Errorf("got arguments %v", arguments)
+		Run: func(_ slash.Context, arguments slash.Arguments) error {
+			if !slices.Equal(arguments.Fields, []string{"one", "two"}) {
+				t.Errorf("got arguments %v", arguments.Fields)
 			}
 			ran = true
 			return nil
@@ -5654,7 +5654,7 @@ func TestSlashCommandRunsImmediately(t *testing.T) {
 func TestSlashCommandCanAddANotice(t *testing.T) {
 	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
 		Name: "fixture",
-		Run: func(context slash.Context, _ []string) error {
+		Run: func(context slash.Context, _ slash.Arguments) error {
 			context.Notice("fixture notice")
 			return nil
 		},
@@ -5758,6 +5758,45 @@ func TestSnippetKeepsItsInvocationInHistoryAndQueuesItsRenderedPrompt(t *testing
 	}
 	if editor.Text() != "" {
 		t.Errorf("got editor text %q", editor.Text())
+	}
+}
+
+func TestSnippetKeepsTheLayoutOfAPastedArgument(t *testing.T) {
+	self := slashCommandFixture(t, caps.Read)
+	self.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
+		"add": {Prompt: "Add the following:\n\n{{ .Arg }}", Arguments: snippets.ArgumentsRequired},
+	})
+	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true})}
+
+	historyPath := filepath.Join(t.TempDir(), "history")
+	history := edit.NewHistory(historyPath, historyLimit)
+	editor := edit.NewInput(history)
+	for _, value := range "//add " {
+		editor.Apply(key.Key{Code: key.Rune, Value: value}, true)
+	}
+
+	editor.Apply(key.Key{Code: key.PasteStart}, true)
+	for _, value := range "review this\n\n- one\n- two" {
+		if value == '\n' {
+			editor.Apply(key.Key{Code: key.Enter}, true)
+			continue
+		}
+		editor.Apply(key.Key{Code: key.Rune, Value: value}, true)
+	}
+	editor.Apply(key.Key{Code: key.PasteEnd}, true)
+	self.acceptInput(editor, history)
+
+	pending := self.queuedTurn.Peek()
+	want := "Add the following:\n\nreview this\n\n- one\n- two"
+	if !pending.Replacement || pending.Message != want {
+		t.Errorf("got queued turn %+v, want message %q", pending, want)
+	}
+	body, err := os.ReadFile(historyPath) //nolint:gosec // the path is the test's own history file
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(body) != `//add review this\n\n- one\n- two`+"\n" {
+		t.Errorf("got history %q", body)
 	}
 }
 
@@ -5905,7 +5944,7 @@ func TestTabCompletesAUniqueSlashCommand(t *testing.T) {
 	}
 }
 
-func slashTestHandler(slash.Context, []string) error {
+func slashTestHandler(slash.Context, slash.Arguments) error {
 	return nil
 }
 
@@ -5997,7 +6036,7 @@ func TestARequestedTransitionStopsTheApp(t *testing.T) {
 func TestSlashCommandCanAddASuccessMessage(t *testing.T) {
 	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
 		Name: "fixture",
-		Run: func(context slash.Context, _ []string) error {
+		Run: func(context slash.Context, _ slash.Arguments) error {
 			context.Success("Copied to clipboard.")
 			return nil
 		},
@@ -6019,7 +6058,7 @@ func TestUsageErrorIsNotPrefixedWithTheCommandName(t *testing.T) {
 	self.screen = output.New(&bytes.Buffer{})
 	self.commands = fixtureCommandRegistry(t, slash.Command{
 		Name: "copy",
-		Run: func(slash.Context, []string) error {
+		Run: func(slash.Context, slash.Arguments) error {
 			return slash.Usage()
 		},
 	}.WithArguments("session-name", "session-id", "session-dir"))
@@ -6038,7 +6077,7 @@ func TestARefusedCommandKeepsWhatWasTypedAndSaysWhy(t *testing.T) {
 	self.screen = output.New(&bytes.Buffer{})
 	self.commands = fixtureCommandRegistry(t, slash.Command{
 		Name: "new",
-		Run: func(slash.Context, []string) error {
+		Run: func(slash.Context, slash.Arguments) error {
 			return errors.New(`model "opus" is ambiguous`)
 		},
 	})
@@ -7487,7 +7526,7 @@ func helpDuringReasoningFrames(t *testing.T) []string {
 	self.screen = output.NewTerminalOfSize(writer, replayColumns, replayLines)
 	self.commands = fixtureCommandRegistry(t, slash.Command{
 		Name: "help",
-		Run: func(context slash.Context, _ []string) error {
+		Run: func(context slash.Context, _ slash.Arguments) error {
 			context.Notice("Commands:\n  /conf\n  /copy")
 			return nil
 		},

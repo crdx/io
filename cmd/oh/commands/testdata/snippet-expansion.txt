@@ -1,0 +1,24 @@
+=== "//note" ===
+Note this.
+=== "//add pay the bill" ===
+Add the following:
+
+pay the bill
+=== "//add   spaced   out   words  " ===
+Add the following:
+
+spaced   out   words
+=== "//add first line\n\nsecond paragraph\n  - one\n  - two\n" ===
+Add the following:
+
+first line
+
+second paragraph
+  - one
+  - two
+=== "//add\nnothing on the command line\n" ===
+Add the following:
+
+nothing on the command line
+=== "//tag one two three" ===
+[one][two][three]

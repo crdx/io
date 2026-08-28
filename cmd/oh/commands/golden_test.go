@@ -122,6 +122,41 @@ func TestSnippetHelpMatchesGolden(t *testing.T) {
 	assertGolden(t, "snippet-help.txt", output.String())
 }
 
+func expansionSnippets() map[string]snippets.Definition {
+	return map[string]snippets.Definition{
+		"add":  {Prompt: "Add the following:\n\n{{.Arg}}"},
+		"note": {Prompt: "Note this."},
+		"tag":  {Prompt: "{{range .Args}}[{{.}}]{{end}}"},
+	}
+}
+
+func TestSnippetExpansionMatchesGolden(t *testing.T) {
+	commands := newCommandRegistryWithSnippets(t, fixtureEnvironment(t), expansionSnippets())
+	var output strings.Builder
+
+	for _, input := range []string{
+		"//note",
+		"//add pay the bill",
+		"//add   spaced   out   words  ",
+		"//add first line\n\nsecond paragraph\n  - one\n  - two\n",
+		"//add\nnothing on the command line\n",
+		"//tag one two three",
+	} {
+		invocation, found := commands.Find(input)
+		if !found {
+			t.Fatalf("expected %q to be found", input)
+		}
+
+		context := &promptContext{}
+		if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
+			t.Fatal(err)
+		}
+		fmt.Fprintf(&output, "=== %q ===\n%s\n", input, context.sent)
+	}
+
+	assertGolden(t, "snippet-expansion.txt", output.String())
+}
+
 var updateGoldens = flag.Bool("update", false, "write command output back to the golden files")
 
 type helpContext struct {
@@ -134,6 +169,17 @@ func (self *helpContext) Notice(text string) {
 	self.notice = text
 }
 func (self *helpContext) Success(string) {}
+
+type promptContext struct {
+	sent string
+}
+
+func (self *promptContext) Emit(agent.Event) {}
+func (self *promptContext) Send(prompt string) {
+	self.sent = prompt
+}
+func (self *promptContext) Notice(string)  {}
+func (self *promptContext) Success(string) {}
 
 func TestHelpMatchesGolden(t *testing.T) {
 	commands := newCommandRegistryWithSnippets(t, fixtureEnvironment(t), fixtureSnippets())

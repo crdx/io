@@ -42,10 +42,15 @@ type Context interface {
 	Success(string)
 }
 
+type Arguments struct {
+	Fields []string
+	Text   string
+}
+
 type Command struct {
 	Name          string
 	Description   string
-	Run           func(Context, []string) error
+	Run           func(Context, Arguments) error
 	arguments     []string
 	argumentUsage string
 }
@@ -78,7 +83,7 @@ type Invocation struct {
 	Name      string
 	Usage     string
 	Command   *Command
-	Arguments []string
+	Arguments Arguments
 }
 
 type CommandSet struct {
@@ -222,11 +227,18 @@ func (self Registry) Find(message string) (Invocation, bool) {
 	}
 
 	return Invocation{
-		Name:      set.prefix + command.Name,
-		Usage:     command.usage(set.prefix),
-		Command:   command,
-		Arguments: fields[1:],
+		Name:    set.prefix + command.Name,
+		Usage:   command.usage(set.prefix),
+		Command: command,
+		Arguments: Arguments{
+			Fields: fields[1:],
+			Text:   argumentText(message, fields[0]),
+		},
 	}, true
+}
+
+func argumentText(message string, name string) string {
+	return strings.TrimSpace(strings.TrimPrefix(strings.TrimLeftFunc(message, unicode.IsSpace), name))
 }
 
 func (self Registry) CommandName(message string) (string, bool) {

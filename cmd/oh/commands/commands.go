@@ -222,8 +222,8 @@ func locationTargets(environment commandEnvironment) map[string]commandTarget {
 func helpCommand(getHelp func() string) slash.Command {
 	return slash.Command{
 		Name: "help",
-		Run: func(context slash.Context, arguments []string) error {
-			if len(arguments) != 0 {
+		Run: func(context slash.Context, arguments slash.Arguments) error {
+			if len(arguments.Fields) != 0 {
 				return slash.Usage()
 			}
 
@@ -236,8 +236,8 @@ func helpCommand(getHelp func() string) slash.Command {
 func editorCommand(name string, target commandTarget, openEditor func([]string) error) slash.Command {
 	return slash.Command{
 		Name: name,
-		Run: func(_ slash.Context, arguments []string) error {
-			if len(arguments) != 0 {
+		Run: func(_ slash.Context, arguments slash.Arguments) error {
+			if len(arguments.Fields) != 0 {
 				return slash.Usage()
 			}
 
@@ -253,14 +253,14 @@ func editorCommand(name string, target commandTarget, openEditor func([]string) 
 func sessionCommand(name string, startSession func(string) error) slash.Command {
 	return slash.Command{
 		Name: name,
-		Run: func(_ slash.Context, arguments []string) error {
-			if len(arguments) > 1 {
+		Run: func(_ slash.Context, arguments slash.Arguments) error {
+			if len(arguments.Fields) > 1 {
 				return slash.Usage()
 			}
-			if len(arguments) == 0 {
+			if len(arguments.Fields) == 0 {
 				return startSession("")
 			}
-			return startSession(arguments[0])
+			return startSession(arguments.Fields[0])
 		},
 	}
 }
@@ -268,7 +268,7 @@ func sessionCommand(name string, startSession func(string) error) slash.Command 
 func commandsRequiringPersistedSession(isSessionPersisted func() bool, commands ...slash.Command) []slash.Command {
 	for i := range commands {
 		run := commands[i].Run
-		commands[i].Run = func(context slash.Context, arguments []string) error {
+		commands[i].Run = func(context slash.Context, arguments slash.Arguments) error {
 			if !isSessionPersisted() {
 				return errors.New("session does not exist yet")
 			}
@@ -379,12 +379,12 @@ func targetCommand(
 ) slash.Command {
 	command := slash.Command{
 		Name: name,
-		Run: func(context slash.Context, arguments []string) error {
-			if len(arguments) != 1 {
+		Run: func(context slash.Context, arguments slash.Arguments) error {
+			if len(arguments.Fields) != 1 {
 				return slash.Usage()
 			}
 
-			target, found := targets[arguments[0]]
+			target, found := targets[arguments.Fields[0]]
 			if !found {
 				return slash.Usage()
 			}
@@ -398,7 +398,7 @@ func targetCommand(
 				return err
 			}
 			if confirm != nil {
-				context.Success(confirm(arguments[0], values))
+				context.Success(confirm(arguments.Fields[0], values))
 			}
 			return nil
 		},

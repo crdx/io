@@ -54,22 +54,22 @@ func New(configured map[string]Definition) (slash.CommandSet, error) {
 		command := slash.Command{
 			Name:        name,
 			Description: definition.Description,
-			Run: func(context slash.Context, arguments []string) error {
+			Run: func(context slash.Context, arguments slash.Arguments) error {
 				switch argumentPolicy {
 				case ArgumentsRequired:
-					if len(arguments) == 0 {
+					if len(arguments.Fields) == 0 {
 						return slash.Usage()
 					}
 				case ArgumentsNone:
-					if len(arguments) != 0 {
+					if len(arguments.Fields) != 0 {
 						return slash.Usage()
 					}
 				}
 
 				var rendered strings.Builder
 				data := templateData{
-					Arg:  strings.Join(arguments, " "),
-					Args: arguments,
+					Arg:  arguments.Text,
+					Args: arguments.Fields,
 				}
 				if err := promptTemplate.Execute(&rendered, data); err != nil {
 					return fmt.Errorf("could not render template: %w", err)
@@ -94,8 +94,8 @@ func New(configured map[string]Definition) (slash.CommandSet, error) {
 	var help slash.Command
 	help = slash.Command{
 		Name: helpCommandName,
-		Run: func(context slash.Context, arguments []string) error {
-			if len(arguments) != 0 {
+		Run: func(context slash.Context, arguments slash.Arguments) error {
+			if len(arguments.Fields) != 0 {
 				return slash.Usage()
 			}
 

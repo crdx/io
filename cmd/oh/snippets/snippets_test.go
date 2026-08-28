@@ -60,6 +60,25 @@ func TestSnippetRendersArgumentsWithGoTemplates(t *testing.T) {
 	}
 }
 
+func TestSnippetKeepsTheLayoutOfAMultiLineArgument(t *testing.T) {
+	configured := map[string]snippets.Definition{
+		"add": {
+			Prompt:    "Add the following:\n\n{{.Arg}}",
+			Arguments: snippets.ArgumentsRequired,
+		},
+	}
+	invocation := getInvocation(t, configured, "//add first line\n\n  - one\n  - two\n")
+
+	context := &snippetContext{}
+	if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
+		t.Fatal(err)
+	}
+	want := "Add the following:\n\nfirst line\n\n  - one\n  - two"
+	if context.sent != want {
+		t.Errorf("sent %q, want %q", context.sent, want)
+	}
+}
+
 func TestSnippetRequiredArgumentsAreEnforced(t *testing.T) {
 	invocation := getInvocation(t, map[string]snippets.Definition{
 		"review": {
