@@ -4,7 +4,7 @@
 \r
 \e[?7l\r\e[KPartial answer.\r
 \r
-\e[38;2;207;173;0mAttempt 1 failed, asking again in 0.3s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0mAttempt 1 failed, asking again in 1s: The stream ended before the response did\e[0m\r
 \r
 \r\e[KAnswered on the second attempt.\e[?25h\e[?2026l\r
 \r

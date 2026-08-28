@@ -26,7 +26,7 @@ send fields without SSE data
 > 2001-01-01T00:00:02Z
 
 - **Attempt:** `1`
-- **Waited:** `250ms`
+- **Waited:** `1s`
 
 ```
 The stream ended before the response did

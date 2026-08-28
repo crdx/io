@@ -4,28 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"math/rand/v2"
 	"time"
 )
 
-const (
-	RetryAttempts  = 25
-	retryFirstWait = 250 * time.Millisecond
-	retryMaxWait   = time.Minute
-	retryBudget    = 15 * time.Minute
-)
+const retryBudget = 15 * time.Minute
 
 func (self *Agent) retryWait(err error, attempt int, spent time.Duration) (time.Duration, bool) {
 	var retriable Retriable
 
-	if attempt >= RetryAttempts || !errors.As(err, &retriable) || !retriable.Retriable() {
+	if !errors.As(err, &retriable) || !retriable.Retriable() {
 		return 0, false
 	}
 
-	wait := self.jittered(backoff(attempt))
-	if asked := retriable.RetryAfter(); asked > 0 {
-		wait = asked
-	}
+	wait := max(retryWaitForAttempt(attempt), retriable.RetryAfter())
 
 	if spent+wait > retryBudget {
 		return 0, false
@@ -34,17 +25,19 @@ func (self *Agent) retryWait(err error, attempt int, spent time.Duration) (time.
 	return wait, true
 }
 
-func backoff(attempt int) time.Duration {
-	return min(retryFirstWait<<(attempt-1), retryMaxWait)
-}
-
-func (self *Agent) jittered(wait time.Duration) time.Duration {
-	if self.retryWaitsPassAtOnce {
-		return wait
+func retryWaitForAttempt(attempt int) time.Duration {
+	switch attempt {
+	case 1:
+		return time.Second
+	case 2:
+		return 5 * time.Second
+	case 3:
+		return 10 * time.Second
+	case 4:
+		return 30 * time.Second
+	default:
+		return time.Minute
 	}
-
-	//nolint:gosec // a wait must be spread, not unguessable
-	return wait/2 + time.Duration(rand.Int64N(int64(wait/2)+1))
 }
 
 func isResumable(err error) bool {

@@ -151,10 +151,6 @@ func TestARequestThatKeepsFailingGivesUpAndReportsTheLastFailure(t *testing.T) {
 	if _, ok := errors.AsType[wireDiedError](err); !ok {
 		t.Fatalf("expected the failure to be reported, got %v", err)
 	}
-
-	if provider.sent != agent.RetryAttempts {
-		t.Errorf("expected %d attempts in all, got %d", agent.RetryAttempts, provider.sent)
-	}
 }
 
 func TestAFailureNotWorthRepeatingIsReportedStraightAway(t *testing.T) {
@@ -192,21 +188,31 @@ func TestAnEndpointAskingToBeLeftAloneForTooLongIsNotWaitedFor(t *testing.T) {
 	}
 }
 
-func TestAnEndpointAskingToBeLeftAloneIsWaitedForAsLongAsItAsked(t *testing.T) {
-	const asked = 40 * time.Millisecond
-
-	provider := &failingProvider{failures: 1, err: wireDiedError{wait: asked}}
-	assistant := agent.New("", provider, nil)
-
-	events, err := collect(t, assistant)
-	if err != nil {
-		t.Fatal(err)
+func TestAnEndpointCanLengthenButNotShortenTheRetryWait(t *testing.T) {
+	tests := map[string]struct {
+		asked time.Duration
+		want  time.Duration
+	}{
+		"shorter": {asked: 40 * time.Millisecond, want: time.Second},
+		"longer":  {asked: 2 * time.Second, want: 2 * time.Second},
 	}
 
-	for _, event := range events {
-		if event.Kind == agent.RetryingEvent && event.Took != asked {
-			t.Errorf("expected the wait the endpoint asked for, got %s", event.Took)
-		}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			provider := &failingProvider{failures: 1, err: wireDiedError{wait: test.asked}}
+			assistant := agent.New("", provider, nil)
+
+			events, err := collect(t, assistant)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			for _, event := range events {
+				if event.Kind == agent.RetryingEvent && event.Took != test.want {
+					t.Errorf("retry wait = %s, want %s", event.Took, test.want)
+				}
+			}
+		})
 	}
 }
 
@@ -353,8 +359,9 @@ func TestARequestThatKeepsFailingIsGivenUpOnWithinTheBudget(t *testing.T) {
 		t.Fatal("expected the failure to be reported")
 	}
 
-	if provider.sent >= agent.RetryAttempts {
-		t.Errorf("expected the budget to run out before the attempts, got %d", provider.sent)
+	const wantAttempts = 19
+	if provider.sent != wantAttempts {
+		t.Errorf("attempts = %d, want %d before the budget runs out", provider.sent, wantAttempts)
 	}
 
 	var waited time.Duration
@@ -373,30 +380,32 @@ func TestARequestThatKeepsFailingIsGivenUpOnWithinTheBudget(t *testing.T) {
 	}
 }
 
-func TestAWaitIsSpreadAroundWhatItWouldOtherwiseBe(t *testing.T) {
-	seen := map[time.Duration]bool{}
+func TestRequestsAreRetriedOnTheFixedCadence(t *testing.T) {
+	provider := &failingProvider{failures: 6, err: wireDiedError{}}
+	assistant := agent.New("", provider, nil)
+	assistant.TakeRetryWaitsAtOnce()
 
-	for range 20 {
-		provider := &failingProvider{failures: 1, err: wireDiedError{}}
-		assistant := agent.New("", provider, nil)
+	events, err := collect(t, assistant)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		events, err := collect(t, assistant)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		for _, event := range events {
-			if event.Kind == agent.RetryingEvent {
-				seen[event.Took] = true
-
-				if event.Took < 125*time.Millisecond || event.Took > 250*time.Millisecond {
-					t.Fatalf("expected a wait within half of 250ms, got %s", event.Took)
-				}
-			}
+	var waits []time.Duration
+	for _, event := range events {
+		if event.Kind == agent.RetryingEvent {
+			waits = append(waits, event.Took)
 		}
 	}
 
-	if len(seen) < 2 {
-		t.Errorf("expected the wait to vary between turns, got only %v", seen)
+	want := []time.Duration{
+		time.Second,
+		5 * time.Second,
+		10 * time.Second,
+		30 * time.Second,
+		time.Minute,
+		time.Minute,
+	}
+	if !slices.Equal(waits, want) {
+		t.Errorf("retry waits = %v, want %v", waits, want)
 	}
 }

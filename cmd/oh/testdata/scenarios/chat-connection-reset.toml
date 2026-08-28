@@ -6,7 +6,7 @@ effort = "medium"
 prompt = "reset the connection until the attempts run out"
 
 [[first.response]]
-repeat = 22
+repeat = 19
 reset-after-wire-event = 1
 event = [
     '''{"choices":[{"delta":{"content":"Partial answer."}}]}''',

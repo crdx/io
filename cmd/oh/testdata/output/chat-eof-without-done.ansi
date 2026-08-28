@@ -4,35 +4,35 @@
 \r
 \e[?7l\r\e[KPartial answer.\r
 \r
-\e[38;2;207;173;0mAttempt 1 failed, asking again in 0.3s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0mAttempt 1 failed, asking again in 1s: The stream ended before the response did\e[0m\r
 \r
 \r\e[KPartial answer.\r
 \r
-\e[38;2;207;173;0mAttempt 2 failed, asking again in 0.5s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0mAttempt 2 failed, asking again in 5s: The stream ended before the response did\e[0m\r
 \r
 \r\e[KPartial answer.\r
 \r
-\e[38;2;207;173;0mAttempt 3 failed, asking again in 1s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0mAttempt 3 failed, asking again in 10s: The stream ended before the response did\e[0m\r
 \r
 \r\e[KPartial answer.\r
 \r
-\e[38;2;207;173;0mAttempt 4 failed, asking again in 2s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0mAttempt 4 failed, asking again in 30s: The stream ended before the response did\e[0m\r
 \r
 \r\e[KPartial answer.\r
 \r
-\e[38;2;207;173;0mAttempt 5 failed, asking again in 4s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0mAttempt 5 failed, asking again in 1m00s: The stream ended before the response did\e[0m\r
 \r
 \r\e[KPartial answer.\r
 \r
-\e[38;2;207;173;0mAttempt 6 failed, asking again in 8s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0mAttempt 6 failed, asking again in 1m00s: The stream ended before the response did\e[0m\r
 \r
 \r\e[KPartial answer.\r
 \r
-\e[38;2;207;173;0mAttempt 7 failed, asking again in 16s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0mAttempt 7 failed, asking again in 1m00s: The stream ended before the response did\e[0m\r
 \r
 \r\e[KPartial answer.\r
 \r
-\e[38;2;207;173;0mAttempt 8 failed, asking again in 32s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0mAttempt 8 failed, asking again in 1m00s: The stream ended before the response did\e[0m\r
 \r
 \r\e[KPartial answer.\r
 \r
@@ -73,18 +73,6 @@
 \r\e[KPartial answer.\r
 \r
 \e[38;2;207;173;0mAttempt 18 failed, asking again in 1m00s: The stream ended before the response did\e[0m\r
-\r
-\r\e[KPartial answer.\r
-\r
-\e[38;2;207;173;0mAttempt 19 failed, asking again in 1m00s: The stream ended before the response did\e[0m\r
-\r
-\r\e[KPartial answer.\r
-\r
-\e[38;2;207;173;0mAttempt 20 failed, asking again in 1m00s: The stream ended before the response did\e[0m\r
-\r
-\r\e[KPartial answer.\r
-\r
-\e[38;2;207;173;0mAttempt 21 failed, asking again in 1m00s: The stream ended before the response did\e[0m\r
 \r
 \r\e[KPartial answer.\r
 \r

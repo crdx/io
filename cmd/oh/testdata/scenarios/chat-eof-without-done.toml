@@ -6,7 +6,7 @@ effort = "medium"
 prompt = "close without the done sentinel"
 
 [[first.response]]
-repeat = 22
+repeat = 19
 event = [
     '''{"choices":[{"delta":{"content":"Partial answer."}}]}''',
 ]

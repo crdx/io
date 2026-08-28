@@ -2,8 +2,8 @@
  recover from malformed tool input
 
 
-Attempt 1 failed, asking again in 0.3s: The work tool call did not contain a JSON object: {"value":1
-,,}
+Attempt 1 failed, asking again in 1s: The work tool call did not contain a JSON object: {"value":1,,
+}
 
 I corrected the malformed call.
 

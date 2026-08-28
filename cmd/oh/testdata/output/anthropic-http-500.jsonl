@@ -19,9 +19,6 @@
 {"kind":"event","event":{"kind":"retrying","text":"Request failed with status 500: ","attempt":16}}
 {"kind":"event","event":{"kind":"retrying","text":"Request failed with status 500: ","attempt":17}}
 {"kind":"event","event":{"kind":"retrying","text":"Request failed with status 500: ","attempt":18}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 500: ","attempt":19}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 500: ","attempt":20}}
-{"kind":"event","event":{"kind":"retrying","text":"Request failed with status 500: ","attempt":21}}
 {"kind":"event","event":{"kind":"failure","text":"request failed with status 500: "}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"receive HTTP 500"}]}}
 {"kind":"turn_completion"}

@@ -26,7 +26,7 @@ send malformed tool input three times over
 > 2001-01-01T00:00:02Z
 
 - **Attempt:** `1`
-- **Waited:** `250ms`
+- **Waited:** `1s`
 - **ID:** `toolu_first`
 - **Name:** `work`
 
@@ -45,7 +45,7 @@ The work tool call did not contain a JSON object
 > 2001-01-01T00:00:03Z
 
 - **Attempt:** `2`
-- **Waited:** `500ms`
+- **Waited:** `5s`
 - **ID:** `toolu_second`
 - **Name:** `work`
 
@@ -64,7 +64,7 @@ The work tool call did not contain a JSON object
 > 2001-01-01T00:00:04Z
 
 - **Attempt:** `3`
-- **Waited:** `1s`
+- **Waited:** `10s`
 - **ID:** `toolu_third`
 - **Name:** `work`
 

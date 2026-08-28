@@ -42,7 +42,7 @@ Partial answer.
 > 2001-01-01T00:00:04Z
 
 - **Attempt:** `1`
-- **Waited:** `250ms`
+- **Waited:** `1s`
 
 ```
 Unexpected EOF

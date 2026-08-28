@@ -42,7 +42,7 @@ receive HTTP 500 on the turn after a replay
 > 2001-01-01T00:00:04Z
 
 - **Attempt:** `1`
-- **Waited:** `250ms`
+- **Waited:** `1s`
 
 ```
 Request failed with status 500: 

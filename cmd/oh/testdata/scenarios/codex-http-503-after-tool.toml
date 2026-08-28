@@ -19,7 +19,7 @@ event = [
 ]
 
 [[first.response]]
-repeat = 22
+repeat = 19
 status = 503
 body = "upstream connect error or disconnect/reset before headers. reset reason: connection termination"
 headers = { Content-Type = "text/plain" }

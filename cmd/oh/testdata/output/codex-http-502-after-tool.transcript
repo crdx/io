@@ -90,7 +90,7 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 > 2001-01-01T00:00:06Z
 
 - **Attempt:** `1`
-- **Waited:** `250ms`
+- **Waited:** `1s`
 
 ```
 Request failed with status 502: upstream connect error or disconnect/reset before headers. reset reason: connection termination

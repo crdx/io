@@ -6,7 +6,7 @@ effort = "medium"
 prompt = "receive HTTP 429"
 
 [[first.response]]
-repeat = 22
+repeat = 19
 status = 429
 
 [resume]

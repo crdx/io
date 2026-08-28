@@ -6,7 +6,7 @@ effort = "medium"
 prompt = "receive HTTP 503"
 
 [[first.response]]
-repeat = 22
+repeat = 19
 status = 503
 
 [resume]

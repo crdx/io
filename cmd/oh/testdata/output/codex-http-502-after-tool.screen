@@ -5,8 +5,8 @@
 Use the tool.
 work work ✓ 1L
 
-Attempt 1 failed, asking again in 0.3s: Request failed with status 502: upstream connect error or di
-sconnect/reset before headers. reset reason: connection termination
+Attempt 1 failed, asking again in 1s: Request failed with status 502: upstream connect error or disc
+onnect/reset before headers. reset reason: connection termination
 
 The tool said: tool result.
 

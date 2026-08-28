@@ -38,12 +38,6 @@
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
 {"kind":"event","event":{"kind":"retrying","text":"Unexpected EOF","attempt":18}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"Unexpected EOF","attempt":19}}
-{"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"Unexpected EOF","attempt":20}}
-{"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"Unexpected EOF","attempt":21}}
-{"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
 {"kind":"event","event":{"kind":"failure","text":"unexpected EOF"}}
 {"kind":"item","payload":{"role":"user","content":"reset the connection until the attempts run out"}}
 {"kind":"item","payload":{"role":"assistant","content":"Partial answer."}}

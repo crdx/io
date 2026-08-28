@@ -26,7 +26,7 @@ send tool input that parses but is not an object
 > 2001-01-01T00:00:02Z
 
 - **Attempt:** `1`
-- **Waited:** `250ms`
+- **Waited:** `1s`
 - **ID:** `toolu_array`
 - **Name:** `work`
 

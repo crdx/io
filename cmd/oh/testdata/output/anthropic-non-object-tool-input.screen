@@ -2,7 +2,7 @@
  send tool input that parses but is not an object
 
 
-Attempt 1 failed, asking again in 0.3s: The work tool call did not contain a JSON object: [1, 2, 3]
+Attempt 1 failed, asking again in 1s: The work tool call did not contain a JSON object: [1, 2, 3]
 
 I sent an object that time.
 

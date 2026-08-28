@@ -2,14 +2,14 @@
 \e[48;2;52;53;65m receive HTTP 429                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;207;173;0mAttempt 1 failed, asking again in 0.3s: Request failed with status 429:\e[0m\r
-\e[38;2;207;173;0mAttempt 2 failed, asking again in 0.5s: Request failed with status 429:\e[0m\r
-\e[38;2;207;173;0mAttempt 3 failed, asking again in 1s: Request failed with status 429:\e[0m\r
-\e[38;2;207;173;0mAttempt 4 failed, asking again in 2s: Request failed with status 429:\e[0m\r
-\e[38;2;207;173;0mAttempt 5 failed, asking again in 4s: Request failed with status 429:\e[0m\r
-\e[38;2;207;173;0mAttempt 6 failed, asking again in 8s: Request failed with status 429:\e[0m\r
-\e[38;2;207;173;0mAttempt 7 failed, asking again in 16s: Request failed with status 429:\e[0m\r
-\e[38;2;207;173;0mAttempt 8 failed, asking again in 32s: Request failed with status 429:\e[0m\r
+\e[38;2;207;173;0mAttempt 1 failed, asking again in 1s: Request failed with status 429:\e[0m\r
+\e[38;2;207;173;0mAttempt 2 failed, asking again in 5s: Request failed with status 429:\e[0m\r
+\e[38;2;207;173;0mAttempt 3 failed, asking again in 10s: Request failed with status 429:\e[0m\r
+\e[38;2;207;173;0mAttempt 4 failed, asking again in 30s: Request failed with status 429:\e[0m\r
+\e[38;2;207;173;0mAttempt 5 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
+\e[38;2;207;173;0mAttempt 6 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
+\e[38;2;207;173;0mAttempt 7 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
+\e[38;2;207;173;0mAttempt 8 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
 \e[38;2;207;173;0mAttempt 9 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
 \e[38;2;207;173;0mAttempt 10 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
 \e[38;2;207;173;0mAttempt 11 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
@@ -20,9 +20,6 @@
 \e[38;2;207;173;0mAttempt 16 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
 \e[38;2;207;173;0mAttempt 17 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
 \e[38;2;207;173;0mAttempt 18 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
-\e[38;2;207;173;0mAttempt 19 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
-\e[38;2;207;173;0mAttempt 20 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
-\e[38;2;207;173;0mAttempt 21 failed, asking again in 1m00s: Request failed with status 429:\e[0m\r
 \e[38;2;204;102;102mrequest failed with status 429: \e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

@@ -2,7 +2,7 @@
  send fields without SSE data
 
 
-Attempt 1 failed, asking again in 0.3s: The stream ended before the response did
+Attempt 1 failed, asking again in 1s: The stream ended before the response did
 
 Answered on the second attempt.
 

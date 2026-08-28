@@ -26,7 +26,7 @@ receive HTTP 503
 > 2001-01-01T00:00:02Z
 
 - **Attempt:** `1`
-- **Waited:** `250ms`
+- **Waited:** `1s`
 
 ```
 Request failed with status 503: 
@@ -37,7 +37,7 @@ Request failed with status 503:
 > 2001-01-01T00:00:03Z
 
 - **Attempt:** `2`
-- **Waited:** `500ms`
+- **Waited:** `5s`
 
 ```
 Request failed with status 503: 
@@ -48,7 +48,7 @@ Request failed with status 503:
 > 2001-01-01T00:00:04Z
 
 - **Attempt:** `3`
-- **Waited:** `1s`
+- **Waited:** `10s`
 
 ```
 Request failed with status 503: 
@@ -59,7 +59,7 @@ Request failed with status 503:
 > 2001-01-01T00:00:05Z
 
 - **Attempt:** `4`
-- **Waited:** `2s`
+- **Waited:** `30s`
 
 ```
 Request failed with status 503: 
@@ -70,7 +70,7 @@ Request failed with status 503:
 > 2001-01-01T00:00:06Z
 
 - **Attempt:** `5`
-- **Waited:** `4s`
+- **Waited:** `1m0s`
 
 ```
 Request failed with status 503: 
@@ -81,7 +81,7 @@ Request failed with status 503:
 > 2001-01-01T00:00:07Z
 
 - **Attempt:** `6`
-- **Waited:** `8s`
+- **Waited:** `1m0s`
 
 ```
 Request failed with status 503: 
@@ -92,7 +92,7 @@ Request failed with status 503:
 > 2001-01-01T00:00:08Z
 
 - **Attempt:** `7`
-- **Waited:** `16s`
+- **Waited:** `1m0s`
 
 ```
 Request failed with status 503: 
@@ -103,7 +103,7 @@ Request failed with status 503:
 > 2001-01-01T00:00:09Z
 
 - **Attempt:** `8`
-- **Waited:** `32s`
+- **Waited:** `1m0s`
 
 ```
 Request failed with status 503: 
@@ -219,42 +219,9 @@ Request failed with status 503:
 Request failed with status 503: 
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:20Z
-
-- **Attempt:** `19`
-- **Waited:** `1m0s`
-
-```
-Request failed with status 503: 
-```
-
-## Retrying
-
-> 2001-01-01T00:00:21Z
-
-- **Attempt:** `20`
-- **Waited:** `1m0s`
-
-```
-Request failed with status 503: 
-```
-
-## Retrying
-
-> 2001-01-01T00:00:22Z
-
-- **Attempt:** `21`
-- **Waited:** `1m0s`
-
-```
-Request failed with status 503: 
-```
-
 ## Failure
 
-> 2001-01-01T00:00:23Z
+> 2001-01-01T00:00:20Z
 
 ```
 request failed with status 503: 
@@ -262,7 +229,7 @@ request failed with status 503:
 
 ## User
 
-> 2001-01-01T00:00:24Z
+> 2001-01-01T00:00:21Z
 
 ```
 continue after the transport failure
@@ -270,7 +237,7 @@ continue after the transport failure
 
 ## Assistant
 
-> 2001-01-01T00:00:25Z
+> 2001-01-01T00:00:22Z
 
 ```
 Resumed.
