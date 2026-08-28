@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"crdx.org/io/provider/chat"
+	"crdx.org/io/provider/opencodego"
 )
 
 func TestLoginOpenCodePromptsAndStoresTheKey(t *testing.T) {
@@ -19,7 +19,7 @@ func TestLoginOpenCodePromptsAndStoresTheKey(t *testing.T) {
 	if output.String() != "OpenCode Go API key: " {
 		t.Errorf("got prompt %q", output.String())
 	}
-	key, err := chat.StoredKeyAt(path)
+	key, err := opencodego.StoredKeyAt(path)
 	if err != nil {
 		t.Fatal(err)
 	}

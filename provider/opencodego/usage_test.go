@@ -1,4 +1,4 @@
-package chat_test
+package opencodego_test
 
 import (
 	"errors"
@@ -12,10 +12,10 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/req"
-	"crdx.org/io/provider/chat"
+	"crdx.org/io/provider/opencodego"
 )
 
-var _ agent.UsageReporter = (*chat.Client)(nil)
+var _ agent.UsageReporter = (*opencodego.Client)(nil)
 
 func usageServer(t *testing.T, code int, payload string) *httptest.Server {
 	t.Helper()

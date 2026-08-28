@@ -1,4 +1,4 @@
-package chat
+package opencodego
 
 import (
 	"context"
@@ -7,13 +7,9 @@ import (
 	"crdx.org/io/agent"
 )
 
-// GoEndpoint is where OpenCode Go holds a conversation, and GoUsageEndpoint is where it answers for
-// the subscription behind it. The usage address is undocumented, and is only ever asked of a
-// client the caller has said is an OpenCode Go one: every other endpoint this package speaks to is
-// some other OpenAI-compatible server, which would answer the guess with a 404.
 const (
-	GoEndpoint      = "https://opencode.ai/zen/go/v1/chat/completions"
-	GoUsageEndpoint = "https://opencode.ai/zen/go/v1/usage"
+	EndpointURL      = "https://opencode.ai/zen/go/v1/chat/completions"
+	UsageEndpointURL = "https://opencode.ai/zen/go/v1/usage"
 )
 
 const (

@@ -1,4 +1,4 @@
-package codex
+package responses
 
 import (
 	"context"
@@ -49,7 +49,7 @@ func NewSearch(tokens TokenSource, model string) (*SearchClient, error) {
 func (self *SearchClient) ObserveHTTP(observer req.Observer) {
 	self.requests.Observe(observer)
 	if source, ok := self.tokens.(observedTokenSource); ok {
-		source.observeHTTP(observer)
+		source.ObserveHTTP(observer)
 	}
 }
 

@@ -11,8 +11,8 @@ import (
 
 	"crdx.org/duckopt/v2"
 	"crdx.org/io/provider/anthropic"
-	"crdx.org/io/provider/chat"
 	"crdx.org/io/provider/codex"
+	"crdx.org/io/provider/opencodego"
 	"golang.org/x/term"
 )
 
@@ -42,7 +42,7 @@ func Run(ctx context.Context) error {
 	var err error
 	switch {
 	case options.OpenCodeGo:
-		path = chat.CredentialsPath()
+		path = opencodego.CredentialsPath()
 		err = loginOpenCodeGo(os.Stdin, os.Stdout, path)
 	case options.Anthropic:
 		path = anthropic.CredentialsPath()
@@ -68,7 +68,7 @@ func loginOpenCodeGo(input io.Reader, output io.Writer, path string) error {
 		return err
 	}
 
-	return chat.SaveKeyAt(path, key)
+	return opencodego.SaveKeyAt(path, key)
 }
 
 func readOpenCodeGoKey(input io.Reader, output io.Writer) (string, error) {

@@ -20,8 +20,8 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/modelsdev"
 	"crdx.org/io/provider/anthropic"
-	"crdx.org/io/provider/chat"
 	"crdx.org/io/provider/codex"
+	"crdx.org/io/provider/opencodego"
 )
 
 const refreshMessage = "Refreshing the model list..."
@@ -225,7 +225,7 @@ func isDrivable(providerName string, id string) bool {
 	case CodexProvider:
 		return codex.SupportsResponses(id)
 	case OpencodeGoProvider:
-		return chat.SupportsCompletions(id)
+		return opencodego.SupportsCompletions(id)
 	default:
 		return true
 	}

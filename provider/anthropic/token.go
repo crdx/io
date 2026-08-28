@@ -7,18 +7,13 @@ import (
 	"time"
 
 	"crdx.org/io/internal/req"
+	"crdx.org/io/wire/anthropic/messages"
 )
 
 const refreshWindow = 5 * time.Minute
 
 // TokenSource hands over a token to make a request with.
-type TokenSource interface {
-	Token() (string, error)
-}
-
-type observedTokenSource interface {
-	observeHTTP(req.Observer)
-}
+type TokenSource = messages.TokenSource
 
 // Static is a token that is already held, and never changes.
 func Static(access string) TokenSource {
@@ -73,7 +68,7 @@ func (self *credentialStore) Token() (string, error) {
 	return self.credentials.Access, nil
 }
 
-func (self *credentialStore) observeHTTP(observer req.Observer) {
+func (self *credentialStore) ObserveHTTP(observer req.Observer) {
 	self.requests.Observe(observer)
 }
 

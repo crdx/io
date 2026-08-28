@@ -12,9 +12,9 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/sim"
 	"crdx.org/io/provider/anthropic"
-	"crdx.org/io/provider/chat"
 	"crdx.org/io/provider/codex"
 	"crdx.org/io/tool"
+	"crdx.org/io/wire/openai/chatcompletions"
 )
 
 type params struct {
@@ -64,7 +64,7 @@ func providers() []speaker {
 			connect: func(t *testing.T, address string) agent.Provider {
 				t.Helper()
 
-				client, err := chat.New(address, "token", "fake", "high", 128_000)
+				client, err := chatcompletions.New(address, http.Header{"Authorization": {"Bearer token"}}, "fake", "high", 128_000)
 				if err != nil {
 					t.Fatal(err)
 				}

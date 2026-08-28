@@ -8,9 +8,12 @@
 - `tool`: tools, schemas, middleware, and concurrency
 - `toolbox`: implementation of standard tools, plus extras
 - `session`: session saving and resumption, as an append-only journal
-- `provider/codex`: the Responses API, the OpenAI way
-- `provider/chat`: the OpenAI-compatible Chat Completions API
-- `provider/anthropic`: the Messages API, the Anthropic way
+- `wire/anthropic/messages`: the Anthropic Messages protocol
+- `wire/openai/chatcompletions`: the OpenAI-compatible Chat Completions protocol
+- `wire/openai/responses`: the OpenAI Responses protocol
+- `provider/anthropic`: the Claude subscription service
+- `provider/codex`: the ChatGPT Codex service
+- `provider/opencodego`: the OpenCode Go service
 - ... and more, soon
 
 ## Installation

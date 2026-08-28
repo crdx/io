@@ -1,4 +1,4 @@
-package chat_test
+package chatcompletions_test
 
 import (
 	"encoding/json"
@@ -12,8 +12,8 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/provider/chat"
 	"crdx.org/io/tool"
+	"crdx.org/io/wire/openai/chatcompletions"
 )
 
 func scriptedServer(t *testing.T, bodies *[]string, payloads ...string) *httptest.Server {
@@ -36,10 +36,10 @@ func scriptedServer(t *testing.T, bodies *[]string, payloads ...string) *httptes
 	return server
 }
 
-func newClient(t *testing.T, url string) *chat.Client {
+func newClient(t *testing.T, url string) *chatcompletions.Client {
 	t.Helper()
 
-	client, err := chat.New(url, "secret", "deepseek-v4-pro", "high", 128_000)
+	client, err := chatcompletions.New(url, bearerHeader(), "deepseek-v4-pro", "high", 128_000)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,15 +47,64 @@ func newClient(t *testing.T, url string) *chat.Client {
 	return client
 }
 
+func bearerHeader() http.Header {
+	header := http.Header{}
+	header.Set("Authorization", "Bearer secret")
+	return header
+}
+
 func TestNewHandsBackAClientHoldingWhatItWasAsked(t *testing.T) {
-	client, err := chat.New("http://somewhere/v1/chat/completions", "secret", "deepseek-v4-pro", "low", 64_000)
+	client, err := chatcompletions.New("http://somewhere/v1/chat/completions", bearerHeader(), "deepseek-v4-pro", "low", 64_000)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if client.URL != "http://somewhere/v1/chat/completions" || client.Token != "secret" ||
-		client.Model != "deepseek-v4-pro" || client.Effort != "low" || client.MaxOutputTokens != 64_000 {
+	if client.URL != "http://somewhere/v1/chat/completions" || client.Model != "deepseek-v4-pro" ||
+		client.Effort != "low" || client.MaxOutputTokens != 64_000 {
 		t.Errorf("expected what was asked for to be held verbatim, got %+v", client)
+	}
+}
+
+func TestRequestHeadersAreOptionalAndOwnedByTheClient(t *testing.T) {
+	for _, test := range []struct {
+		name              string
+		header            http.Header
+		mutate            bool
+		wantAuthorisation string
+	}{
+		{name: "no provider headers"},
+		{name: "provider headers", header: bearerHeader(), mutate: true, wantAuthorisation: "Bearer secret"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var authorisation string
+			var accepted string
+			server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+				authorisation = request.Header.Get("Authorization")
+				accepted = request.Header.Get("Accept")
+				writer.Header().Set("Content-Type", "text/event-stream")
+				_, _ = fmt.Fprint(writer, "data: [DONE]\n\n")
+			}))
+			t.Cleanup(server.Close)
+
+			client, err := chatcompletions.New(server.URL, test.header, "model", "none", 8_192)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if test.mutate {
+				test.header.Set("Authorization", "Bearer changed")
+			}
+			client.AddUserMessage("hello")
+			if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
+				t.Fatal(err)
+			}
+
+			if authorisation != test.wantAuthorisation {
+				t.Errorf("got authorisation %q, want %q", authorisation, test.wantAuthorisation)
+			}
+			if accepted != "text/event-stream" {
+				t.Errorf("got accept %q", accepted)
+			}
+		})
 	}
 }
 
@@ -63,20 +112,18 @@ func TestASettingLeftOutIsRefusedRatherThanSubstituted(t *testing.T) {
 	tests := []struct {
 		name            string
 		url             string
-		token           string
 		model           string
 		maxOutputTokens int
 		want            string
 	}{
-		{"url", "", "secret", "deepseek-v4-pro", 128_000, "chat: URL is empty"},
-		{"token", "http://somewhere", "", "deepseek-v4-pro", 128_000, "chat: Token is empty"},
-		{"model", "http://somewhere", "secret", "", 128_000, "chat: Model is empty"},
-		{"max tokens", "http://somewhere", "secret", "deepseek-v4-pro", 0, "chat: MaxOutputTokens is 0"},
+		{"url", "", "deepseek-v4-pro", 128_000, "chat: URL is empty"},
+		{"model", "http://somewhere", "", 128_000, "chat: Model is empty"},
+		{"max tokens", "http://somewhere", "deepseek-v4-pro", 0, "chat: MaxOutputTokens is 0"},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			client, err := chat.New(test.url, test.token, test.model, "high", test.maxOutputTokens)
+			client, err := chatcompletions.New(test.url, bearerHeader(), test.model, "high", test.maxOutputTokens)
 
 			if err == nil || !strings.Contains(err.Error(), test.want) {
 				t.Fatalf("expected %q, got %v", test.want, err)
@@ -181,7 +228,7 @@ func TestATurnCutShortAgainstTheTokenLimitIsReported(t *testing.T) {
 	client.AddUserMessage("what is the weather?")
 
 	_, err := client.Send(t.Context(), func(agent.Output) bool { return true })
-	if !errors.Is(err, chat.ErrIncomplete) {
+	if !errors.Is(err, chatcompletions.ErrIncomplete) {
 		t.Fatalf("expected an incomplete response to be reported, got %v", err)
 	}
 }
@@ -219,7 +266,7 @@ func TestATopLevelErrorEnvelopeIsReported(t *testing.T) {
 func TestAChunkCarryingNothingWeReadIsIgnored(t *testing.T) {
 	var bodies []string
 	server := scriptedServer(t, &bodies,
-		`{"id":"chunk-1","object":"chat.completion.chunk","system_fingerprint":"fp"}`,
+		`{"id":"chunk-1","object":"chatcompletions.completion.chunk","system_fingerprint":"fp"}`,
 		`{"choices":[{"delta":{"content":"done"}}]}`,
 		"[DONE]")
 
@@ -321,7 +368,7 @@ func TestAnAnswerAFilterTookAwayIsReportedAsCutShort(t *testing.T) {
 	client.AddUserMessage("hello")
 
 	_, err := client.Send(t.Context(), func(agent.Output) bool { return true })
-	if !errors.Is(err, chat.ErrIncomplete) {
+	if !errors.Is(err, chatcompletions.ErrIncomplete) {
 		t.Errorf("expected a filtered answer to be reported as cut short, got %v", err)
 	}
 }
@@ -482,7 +529,7 @@ func TestATurnThatFailedKeepsWhatItSaidAndNotWhatItAskedFor(t *testing.T) {
 	client := newClient(t, server.URL)
 	client.AddUserMessage("what is the weather?")
 
-	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); !errors.Is(err, chat.ErrTruncated) {
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); !errors.Is(err, chatcompletions.ErrTruncated) {
 		t.Fatalf("expected a truncated stream to be refused, got %v", err)
 	}
 

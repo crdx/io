@@ -1,4 +1,4 @@
-package codex
+package responses
 
 import (
 	"context"

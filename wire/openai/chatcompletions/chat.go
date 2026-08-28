@@ -1,4 +1,4 @@
-package chat
+package chatcompletions
 
 import (
 	"context"
@@ -23,32 +23,31 @@ const (
 
 type Client struct {
 	URL             string
-	UsageURL        string
-	Token           string
 	Model           string
 	Effort          string
 	MaxOutputTokens int
 
-	instructions string
-	tools        []functionTool
-	history      []json.RawMessage
-	requests     *req.Client
-	observer     req.Observer
+	requestHeader http.Header
+	instructions  string
+	tools         []functionTool
+	history       []json.RawMessage
+	requests      *req.Client
+	observer      req.Observer
 }
 
 func New(
 	url string,
-	token string,
+	requestHeader http.Header,
 	model string,
 	effort string,
 	maxOutputTokens int,
 ) (*Client, error) {
 	client := &Client{
 		URL:             url,
-		Token:           token,
 		Model:           model,
 		Effort:          effort,
 		MaxOutputTokens: maxOutputTokens,
+		requestHeader:   cloneHeader(requestHeader),
 		requests:        req.New(turnTimeout),
 	}
 
@@ -57,6 +56,14 @@ func New(
 	}
 
 	return client, nil
+}
+
+func cloneHeader(header http.Header) http.Header {
+	if header == nil {
+		return http.Header{}
+	}
+
+	return header.Clone()
 }
 
 func (self *Client) Configure(instructions string, tools []tool.Definition) {
@@ -103,7 +110,7 @@ func (self *Client) Load(messages []json.RawMessage) {
 }
 
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
-	stream, _, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers())
+	stream, _, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers("text/event-stream"))
 	if err != nil {
 		return agent.Reply{}, err
 	}
@@ -141,7 +148,6 @@ func (self *Client) settled() error {
 	}{
 		{"URL", self.URL},
 		{"Model", self.Model},
-		{"Token", self.Token},
 	} {
 		if setting.value == "" {
 			return fmt.Errorf("chat: %s is empty", setting.name)
@@ -181,10 +187,9 @@ func (self *Client) requestBody() request {
 	return body
 }
 
-func (self *Client) headers() http.Header {
-	header := http.Header{}
-	header.Set("Authorization", "Bearer "+self.Token)
-	header.Set("Accept", "text/event-stream")
+func (self *Client) headers(accept string) http.Header {
+	header := self.requestHeader.Clone()
+	header.Set("Accept", accept)
 	return header
 }
 

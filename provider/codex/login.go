@@ -2,8 +2,10 @@ package codex
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -232,6 +234,13 @@ func accountID(access string) (string, error) {
 	}
 
 	return claims.Auth.AccountID, nil
+}
+
+func newToken() string {
+	buffer := make([]byte, 32)
+	_, _ = rand.Read(buffer)
+
+	return hex.EncodeToString(buffer)
 }
 
 func open(address string) {

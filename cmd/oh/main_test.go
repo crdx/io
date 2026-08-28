@@ -84,7 +84,6 @@ import (
 	"crdx.org/io/internal/stop"
 	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/provider/anthropic"
-	"crdx.org/io/provider/chat"
 	"crdx.org/io/provider/codex"
 	"crdx.org/io/session"
 	"crdx.org/io/tool"
@@ -94,6 +93,7 @@ import (
 	"crdx.org/io/toolbox/notify"
 	"crdx.org/io/toolbox/title"
 	"crdx.org/io/toolbox/web"
+	"crdx.org/io/wire/openai/chatcompletions"
 )
 
 func TestEscapeAtRestDoesNotPanic(t *testing.T) {
@@ -6197,7 +6197,13 @@ func newSessionGoldenProvider(
 		client.URL = endpoint
 		return client
 	case "chat":
-		client, err := chat.New(endpoint, "test-token", scenario.Model, scenario.Effort, 128_000)
+		client, err := chatcompletions.New(
+			endpoint,
+			http.Header{"Authorization": {"Bearer test-token"}},
+			scenario.Model,
+			scenario.Effort,
+			128_000,
+		)
 		if err != nil {
 			t.Fatal(err)
 		}

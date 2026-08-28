@@ -7,24 +7,16 @@ import (
 	"time"
 
 	"crdx.org/io/internal/req"
+	"crdx.org/io/wire/openai/responses"
 )
 
 const refreshWindow = 5 * time.Minute
 
 // Token is what one request is authorised with.
-type Token struct {
-	Access    string
-	AccountID string
-}
+type Token = responses.Token
 
 // TokenSource hands over a token to make a request with.
-type TokenSource interface {
-	Token() (Token, error)
-}
-
-type observedTokenSource interface {
-	observeHTTP(req.Observer)
-}
+type TokenSource = responses.TokenSource
 
 // Static is a token that is already held, and never changes.
 func Static(access string, accountID string) TokenSource {
@@ -82,7 +74,7 @@ func (self *credentialStore) Token() (Token, error) {
 	}, nil
 }
 
-func (self *credentialStore) observeHTTP(observer req.Observer) {
+func (self *credentialStore) ObserveHTTP(observer req.Observer) {
 	self.requests.Observe(observer)
 }
 
