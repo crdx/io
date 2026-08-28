@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"crdx.org/io/cmd/oh/model"
@@ -74,9 +75,6 @@ func InWorkspace(sessions []*sessionPicker.Session, workspaceDir string) []*sess
 	return chosen
 }
 
-// RefreshListings writes the listing metadata again for every session whose listing cannot be read,
-// because a listing is an index over the journal rather than a record of its own, and a build that
-// keeps it in a newer shape is entitled to rebuild what it finds.
 func RefreshListings(directory string, screen io.Writer) error {
 	stale, err := store.StaleMeta(directory)
 	if err != nil {
@@ -90,21 +88,43 @@ func RefreshListings(directory string, screen io.Writer) error {
 		return formatError
 	}
 
-	_, _ = fmt.Fprintln(screen, style.Subtle("writing the session listing again from the journals"))
-
-	_, err = store.RebuildStaleMeta(directory)
-
-	return err
+	rebuilt := 0
+	for _, name := range stale {
+		wasRebuilt, err := store.RebuildMetaIfIdle(directory, name)
+		if err != nil {
+			return err
+		}
+		if wasRebuilt {
+			rebuilt++
+		}
+	}
+	if rebuilt > 0 {
+		_, _ = fmt.Fprintln(screen, style.Subtle("writing the session listing again from the journals"))
+	}
+	return nil
 }
 
 func Load(directory string) ([]*sessionPicker.Session, error) {
-	metadata, err := session.ListMeta(directory)
+	entries, err := session.Entries(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	sessions := make([]*sessionPicker.Session, 0, len(metadata))
-	for _, storedMeta := range metadata {
+	sessions := make([]*sessionPicker.Session, 0, len(entries))
+	for _, entry := range entries {
+		isRunning, err := session.IsInUse(directory, entry.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		storedMeta, err := session.ReadMeta(directory, entry.Name)
+		if err != nil && isRunning {
+			storedMeta, err = store.GetListingMeta(directory, entry.Name)
+		}
+		if err != nil {
+			return nil, fmt.Errorf("could not read session %s metadata: %w", entry.Name, err)
+		}
+
 		var data struct {
 			WorkspaceDir string `json:"workspaceDir"`
 			Model        string `json:"model"`
@@ -112,11 +132,6 @@ func Load(directory string) ([]*sessionPicker.Session, error) {
 		}
 		if len(storedMeta.Data) > 0 && json.Unmarshal(storedMeta.Data, &data) != nil {
 			continue
-		}
-
-		isRunning, err := session.IsInUse(directory, storedMeta.Name)
-		if err != nil {
-			return nil, err
 		}
 
 		sessions = append(sessions, &sessionPicker.Session{
@@ -133,5 +148,11 @@ func Load(directory string) ([]*sessionPicker.Session, error) {
 		})
 	}
 
+	slices.SortFunc(sessions, func(first, second *sessionPicker.Session) int {
+		if order := second.Touched.Compare(first.Touched); order != 0 {
+			return order
+		}
+		return strings.Compare(second.Name, first.Name)
+	})
 	return sessions, nil
 }

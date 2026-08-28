@@ -515,13 +515,14 @@ func ListMeta(directory string) ([]*Meta, error) {
 	return metadata, nil
 }
 
-func RebuildMeta(directory string, name string, listingData json.RawMessage) error {
+func ReadMetaFromJournal(directory string, name string, listingData json.RawMessage) (*Meta, error) {
 	storedSession, err := Read(directory, name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	meta := Meta{
+		Version: MetaFormat,
 		Name:    storedSession.Name,
 		Data:    slices.Clone(listingData),
 		Started: storedSession.Started,
@@ -531,7 +532,15 @@ func RebuildMeta(directory string, name string, listingData json.RawMessage) err
 		meta.takeEvent(event, storedSession.Touched)
 	}
 
-	return writeMeta(directory, meta)
+	return &meta, nil
+}
+
+func RebuildMeta(directory string, name string, listingData json.RawMessage) error {
+	meta, err := ReadMetaFromJournal(directory, name, listingData)
+	if err != nil {
+		return err
+	}
+	return writeMeta(directory, *meta)
 }
 
 func writeMeta(directory string, meta Meta) error {

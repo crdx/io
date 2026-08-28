@@ -1,0 +1,3 @@
+=== running old session, twice ===
+=== stopped old session ===
+[38;2;150;152;150mwriting the session listing again from the journals[0m

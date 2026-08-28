@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -405,6 +406,18 @@ func (self *Session) CanResume() bool {
 	return !self.HasIncompleteTurn
 }
 
+func GetListingMeta(directory, name string) (*session.Meta, error) {
+	storedSession, err := Read(directory, name)
+	if err != nil {
+		return nil, err
+	}
+	_, data, err := encodeMeta(storedSession.Meta)
+	if err != nil {
+		return nil, err
+	}
+	return session.ReadMetaFromJournal(directory, name, data)
+}
+
 func RebuildMeta(directory, name string) error {
 	storedSession, err := Read(directory, name)
 	if err != nil {
@@ -415,6 +428,23 @@ func RebuildMeta(directory, name string) error {
 		return err
 	}
 	return session.RebuildMeta(directory, name, data)
+}
+
+func RebuildMetaIfIdle(directory, name string) (bool, error) {
+	heldLock, err := session.AcquireLock(directory, name)
+	if errors.Is(err, session.ErrInUse) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+
+	rebuildError := RebuildMeta(directory, name)
+	releaseError := heldLock.Release()
+	if err := errors.Join(rebuildError, releaseError); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func StaleMeta(directory string) ([]string, error) {

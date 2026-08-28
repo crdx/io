@@ -3,6 +3,7 @@ package sessions
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,6 +14,8 @@ import (
 
 	"crdx.org/io/cmd/oh/store"
 )
+
+var updateGoldens = flag.Bool("update", false, "update golden files")
 
 func TestLoadingSessionsIdentifiesThoseThatAreRunning(t *testing.T) {
 	directory := t.TempDir()
@@ -116,6 +119,88 @@ func TestAListingInAnOlderFormatIsWrittenAgainRatherThanRefused(t *testing.T) {
 	}
 	if loadedSessions[0].Model != "GPT Sol 5.6" {
 		t.Errorf("expected the model to be named for a person, got %q", loadedSessions[0].Model)
+	}
+}
+
+func TestAnOlderRunningSessionDoesNotKeepTriggeringListingRebuilds(t *testing.T) {
+	directory := t.TempDir()
+	workspaceDir := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: workspaceDir, Model: "gpt-5.6-sol"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+	name := writer.Name()
+	putListingBehind(t, directory, name)
+
+	var runningOutput strings.Builder
+	for range 2 {
+		if err := RefreshListings(directory, &runningOutput); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if runningOutput.String() != "" {
+		t.Errorf("expected no rebuild of a running session, got %q", runningOutput.String())
+	}
+	if _, err := session.ReadMeta(directory, name); !errors.Is(err, session.ErrMetaOutOfDate) {
+		t.Fatalf("expected the old listing to remain in place, got %v", err)
+	}
+
+	loadedSessions, err := Load(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(loadedSessions) != 1 || !loadedSessions[0].IsRunning {
+		t.Fatalf("expected one running session, got %+v", loadedSessions)
+	}
+	if loadedSessions[0].WorkspaceDir != workspaceDir || loadedSessions[0].ModelID != "gpt-5.6-sol" {
+		t.Errorf("expected the journal to supply the current listing, got %+v", loadedSessions[0])
+	}
+
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	var stoppedOutput strings.Builder
+	if err := RefreshListings(directory, &stoppedOutput); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(stoppedOutput.String(), "writing the session listing again") {
+		t.Errorf("expected the stopped session to be rebuilt, got %q", stoppedOutput.String())
+	}
+	if _, err := session.ReadMeta(directory, name); err != nil {
+		t.Fatalf("expected the stopped session to have a current listing, got %v", err)
+	}
+
+	comparePickerGolden(t, "listing-refresh.txt", strings.Join([]string{
+		"=== running old session, twice ===\n",
+		runningOutput.String(),
+		"=== stopped old session ===\n",
+		stoppedOutput.String(),
+	}, ""))
+}
+
+func comparePickerGolden(t *testing.T, name string, drawn string) {
+	t.Helper()
+
+	goldenPath := filepath.Join("testdata", name)
+	if *updateGoldens {
+		if err := os.MkdirAll(filepath.Dir(goldenPath), 0o700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(goldenPath, []byte(drawn), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		return
+	}
+
+	want, err := os.ReadFile(goldenPath) //nolint:gosec // fixed testdata path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if drawn != string(want) {
+		t.Errorf("output differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, drawn, want)
 	}
 }
 
