@@ -3,8 +3,8 @@
     "able",
     "above",
     "active",
-    "actual",
     "adept",
+    "adorable",
     "adored",
     "aged",
     "agile",
@@ -31,13 +31,11 @@
     "balmy",
     "bare",
     "bashful",
-    "basic",
     "beige",
     "bendy",
     "best",
     "better",
     "black",
-    "blank",
     "blessed",
     "blithe",
     "blue",
@@ -70,6 +68,7 @@
     "cheery",
     "chewy",
     "chief",
+    "chirpy",
     "chosen",
     "chrome",
     "chunky",
@@ -113,19 +112,18 @@
     "deep",
     "defiant",
     "deft",
-    "dense",
     "devout",
     "dewy",
+    "dinky",
     "direct",
     "discreet",
     "distant",
     "divine",
     "downy",
+    "dozy",
     "dreamy",
     "dressy",
-    "dried",
     "dry",
-    "dual",
     "dulcet",
     "dusky",
     "dusty",
@@ -146,12 +144,10 @@
     "elfin",
     "elite",
     "eminent",
-    "empty",
     "endless",
     "epic",
     "equal",
     "eternal",
-    "exact",
     "exotic",
     "expert",
     "extra",
@@ -166,15 +162,12 @@
     "fervent",
     "festive",
     "fiery",
-    "final",
     "fine",
     "firm",
     "first",
     "fitting",
-    "flat",
     "fleet",
     "fleeting",
-    "flinty",
     "floral",
     "fluent",
     "fluffy",
@@ -182,7 +175,6 @@
     "focused",
     "foggy",
     "fond",
-    "forceful",
     "formal",
     "forward",
     "fragrant",
@@ -215,10 +207,8 @@
     "grand",
     "granite",
     "grassy",
-    "gravel",
     "great",
     "green",
-    "gritty",
     "guarded",
     "gusty",
     "halcyon",
@@ -228,7 +218,6 @@
     "hazel",
     "hazy",
     "hearty",
-    "heavy",
     "helpful",
     "heroic",
     "hidden",
@@ -236,6 +225,7 @@
     "honest",
     "hopeful",
     "huge",
+    "huggable",
     "humble",
     "husky",
     "icy",
@@ -256,21 +246,14 @@
     "kind",
     "kindly",
     "lacy",
-    "laden",
     "large",
-    "last",
-    "late",
     "lavish",
-    "lawful",
     "leafy",
     "lean",
     "learned",
-    "legal",
     "lemon",
-    "lengthy",
     "level",
     "light",
-    "likely",
     "lilac",
     "limber",
     "lime",
@@ -279,9 +262,9 @@
     "lively",
     "loamy",
     "lofty",
-    "lone",
     "long",
     "loud",
+    "lovable",
     "loyal",
     "lucid",
     "lucky",
@@ -290,8 +273,6 @@
     "lyric",
     "magenta",
     "magic",
-    "main",
-    "major",
     "mannered",
     "marble",
     "marine",
@@ -302,7 +283,6 @@
     "mild",
     "milky",
     "mindful",
-    "minor",
     "mint",
     "minty",
     "misty",
@@ -313,9 +293,7 @@
     "moral",
     "mossy",
     "mottled",
-    "mute",
     "mystic",
-    "native",
     "natty",
     "neat",
     "new",
@@ -323,7 +301,6 @@
     "nifty",
     "nimble",
     "noble",
-    "normal",
     "northern",
     "novel",
     "nutty",
@@ -332,7 +309,6 @@
     "oblong",
     "ochre",
     "odd",
-    "oiled",
     "olden",
     "olive",
     "opal",
@@ -341,7 +317,6 @@
     "orange",
     "orderly",
     "ornate",
-    "outer",
     "oval",
     "pale",
     "palm",
@@ -357,7 +332,6 @@
     "pewter",
     "pink",
     "placid",
-    "plain",
     "playful",
     "pleasant",
     "pliant",
@@ -370,19 +344,16 @@
     "polished",
     "polite",
     "poplar",
-    "potent",
     "prairie",
     "precise",
     "pretty",
     "primal",
     "prime",
     "pristine",
-    "private",
     "prompt",
     "proper",
     "proud",
     "prudent",
-    "public",
     "punchy",
     "pure",
     "purple",
@@ -397,14 +368,11 @@
     "ready",
     "real",
     "rebel",
-    "recent",
     "regal",
     "remote",
     "rich",
-    "right",
     "ripe",
     "rippling",
-    "roasted",
     "robust",
     "rocky",
     "rogue",
@@ -421,13 +389,11 @@
     "sage",
     "salty",
     "sandy",
-    "sane",
     "sassy",
     "satin",
     "scarlet",
     "scenic",
     "seaside",
-    "second",
     "secret",
     "sedate",
     "serene",
@@ -442,29 +408,28 @@
     "silken",
     "silver",
     "simple",
-    "single",
     "sleek",
+    "sleepy",
     "slender",
     "slim",
     "sly",
     "small",
     "smart",
+    "smiley",
     "smoky",
     "smooth",
     "snappy",
     "snowy",
     "snug",
+    "snuggly",
     "soaring",
-    "sober",
     "social",
     "soft",
     "solar",
-    "solemn",
     "solid",
     "sonic",
     "sound",
     "southern",
-    "spare",
     "special",
     "speckled",
     "spicy",
@@ -479,22 +444,15 @@
     "staid",
     "stalwart",
     "starry",
-    "static",
     "steady",
-    "steely",
-    "steep",
     "stellar",
-    "stern",
     "still",
     "stoic",
     "stout",
-    "straight",
-    "strict",
     "striking",
     "strong",
     "sturdy",
     "subtle",
-    "sudden",
     "sugary",
     "sunlit",
     "sunny",
@@ -505,19 +463,17 @@
     "swanky",
     "sweet",
     "swift",
-    "tacit",
     "tall",
     "tame",
     "tangy",
     "tawny",
     "teal",
+    "teeny",
     "tender",
-    "terse",
     "thankful",
-    "thick",
-    "thin",
     "thorough",
     "thrifty",
+    "ticklish",
     "tidal",
     "tidy",
     "tiny",
@@ -531,14 +487,13 @@
     "trusty",
     "twilight",
     "twin",
+    "twinkly",
     "twisty",
     "ultra",
     "umber",
     "upbeat",
-    "upper",
     "upright",
     "urban",
-    "usual",
     "vaulted",
     "velvet",
     "verdant",
@@ -546,7 +501,6 @@
     "vibrant",
     "vintage",
     "violet",
-    "virtual",
     "vital",
     "vivid",
     "vocal",
@@ -554,15 +508,15 @@
     "warm",
     "wary",
     "watchful",
+    "wee",
     "western",
     "white",
-    "whole",
-    "wide",
     "wiggly",
     "wild",
     "willing",
     "windy",
     "winged",
+    "winsome",
     "wintry",
     "wiry",
     "wise",
@@ -575,7 +529,6 @@
     "worldly",
     "worthy",
     "woven",
-    "yearly",
     "yellow",
     "young",
     "youthful",
@@ -614,12 +567,12 @@
       "emoji": "🦍"
     },
     {
-      "name": "aphid",
-      "emoji": "🐛"
-    },
-    {
       "name": "asp",
       "emoji": "🐍"
+    },
+    {
+      "name": "axolotl",
+      "emoji": "🦎"
     },
     {
       "name": "baboon",
@@ -628,10 +581,6 @@
     {
       "name": "badger",
       "emoji": "🦡"
-    },
-    {
-      "name": "barnacle",
-      "emoji": "🐚"
     },
     {
       "name": "bass",
@@ -706,10 +655,6 @@
       "emoji": "🐒"
     },
     {
-      "name": "buzzard",
-      "emoji": "🦅"
-    },
-    {
       "name": "camel",
       "emoji": "🐫"
     },
@@ -754,6 +699,10 @@
       "emoji": "🐒"
     },
     {
+      "name": "chinchilla",
+      "emoji": "🐭"
+    },
+    {
       "name": "chipmunk",
       "emoji": "🐿️"
     },
@@ -794,6 +743,10 @@
       "emoji": "🐦"
     },
     {
+      "name": "corgi",
+      "emoji": "🐕"
+    },
+    {
       "name": "cougar",
       "emoji": "🐆"
     },
@@ -828,6 +781,10 @@
     {
       "name": "cuckoo",
       "emoji": "🐦"
+    },
+    {
+      "name": "cygnet",
+      "emoji": "🐥"
     },
     {
       "name": "deer",
@@ -870,12 +827,12 @@
       "emoji": "🦆"
     },
     {
-      "name": "eagle",
-      "emoji": "🦅"
+      "name": "duckling",
+      "emoji": "🐥"
     },
     {
-      "name": "earwig",
-      "emoji": "🐛"
+      "name": "eagle",
+      "emoji": "🦅"
     },
     {
       "name": "eel",
@@ -906,6 +863,10 @@
       "emoji": "🦌"
     },
     {
+      "name": "fennec",
+      "emoji": "🦊"
+    },
+    {
       "name": "ferret",
       "emoji": "🦦"
     },
@@ -915,15 +876,11 @@
     },
     {
       "name": "firefly",
-      "emoji": "🪰"
+      "emoji": "🪲"
     },
     {
       "name": "flamingo",
       "emoji": "🦩"
-    },
-    {
-      "name": "flea",
-      "emoji": "🐛"
     },
     {
       "name": "flounder",
@@ -966,10 +923,6 @@
       "emoji": "🪱"
     },
     {
-      "name": "gnat",
-      "emoji": "🦟"
-    },
-    {
       "name": "gnu",
       "emoji": "🐃"
     },
@@ -992,6 +945,10 @@
     {
       "name": "gorilla",
       "emoji": "🦍"
+    },
+    {
+      "name": "gosling",
+      "emoji": "🐥"
     },
     {
       "name": "grouse",
@@ -1058,16 +1015,16 @@
       "emoji": "🐦"
     },
     {
-      "name": "hornet",
-      "emoji": "🐝"
-    },
-    {
       "name": "horse",
       "emoji": "🐎"
     },
     {
       "name": "hound",
       "emoji": "🐕"
+    },
+    {
+      "name": "hummingbird",
+      "emoji": "🐦"
     },
     {
       "name": "husky",
@@ -1108,6 +1065,10 @@
     {
       "name": "jay",
       "emoji": "🐦"
+    },
+    {
+      "name": "jellyfish",
+      "emoji": "🪼"
     },
     {
       "name": "kangaroo",
@@ -1184,10 +1145,6 @@
     {
       "name": "lobster",
       "emoji": "🦞"
-    },
-    {
-      "name": "locust",
-      "emoji": "🦗"
     },
     {
       "name": "loon",
@@ -1268,10 +1225,6 @@
     {
       "name": "minnow",
       "emoji": "🐟"
-    },
-    {
-      "name": "mite",
-      "emoji": "🐛"
     },
     {
       "name": "mole",
@@ -1366,10 +1319,6 @@
       "emoji": "🦉"
     },
     {
-      "name": "oyster",
-      "emoji": "🦪"
-    },
-    {
       "name": "panda",
       "emoji": "🐼"
     },
@@ -1415,14 +1364,10 @@
     },
     {
       "name": "pika",
-      "emoji": "🐁"
+      "emoji": "🐇"
     },
     {
       "name": "pike",
-      "emoji": "🐟"
-    },
-    {
-      "name": "piranha",
       "emoji": "🐟"
     },
     {
@@ -1432,10 +1377,6 @@
     {
       "name": "plover",
       "emoji": "🐦"
-    },
-    {
-      "name": "polecat",
-      "emoji": "🦡"
     },
     {
       "name": "pony",
@@ -1451,7 +1392,7 @@
     },
     {
       "name": "possum",
-      "emoji": "🦘"
+      "emoji": "🐀"
     },
     {
       "name": "prawn",
@@ -1480,6 +1421,10 @@
     {
       "name": "quokka",
       "emoji": "🦘"
+    },
+    {
+      "name": "quoll",
+      "emoji": "🐆"
     },
     {
       "name": "rabbit",
@@ -1538,16 +1483,16 @@
       "emoji": "🐚"
     },
     {
-      "name": "scorpion",
-      "emoji": "🦂"
-    },
-    {
       "name": "seahorse",
       "emoji": "🐠"
     },
     {
       "name": "seal",
       "emoji": "🦭"
+    },
+    {
+      "name": "serval",
+      "emoji": "🐆"
     },
     {
       "name": "shark",
@@ -1578,10 +1523,6 @@
       "emoji": "🦥"
     },
     {
-      "name": "slug",
-      "emoji": "🐌"
-    },
-    {
       "name": "snail",
       "emoji": "🐌"
     },
@@ -1610,10 +1551,6 @@
       "emoji": "🕷️"
     },
     {
-      "name": "sponge",
-      "emoji": "🧽"
-    },
-    {
       "name": "squid",
       "emoji": "🦑"
     },
@@ -1635,7 +1572,7 @@
     },
     {
       "name": "stoat",
-      "emoji": "🦡"
+      "emoji": "🦦"
     },
     {
       "name": "stork",
@@ -1660,6 +1597,10 @@
     {
       "name": "tadpole",
       "emoji": "🐸"
+    },
+    {
+      "name": "tamarin",
+      "emoji": "🐒"
     },
     {
       "name": "tapir",
@@ -1722,10 +1663,6 @@
       "emoji": "🐁"
     },
     {
-      "name": "vulture",
-      "emoji": "🦅"
-    },
-    {
       "name": "wallaby",
       "emoji": "🦘"
     },
@@ -1742,16 +1679,8 @@
       "emoji": "🐗"
     },
     {
-      "name": "wasp",
-      "emoji": "🐝"
-    },
-    {
       "name": "weasel",
-      "emoji": "🦡"
-    },
-    {
-      "name": "weevil",
-      "emoji": "🪲"
+      "emoji": "🦦"
     },
     {
       "name": "whale",
@@ -1772,10 +1701,6 @@
     {
       "name": "wombat",
       "emoji": "🐨"
-    },
-    {
-      "name": "worm",
-      "emoji": "🪱"
     },
     {
       "name": "wren",
