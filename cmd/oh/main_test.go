@@ -1404,8 +1404,12 @@ func TestCompletionProtocolMatchesTheGolden(t *testing.T) {
 	}
 
 	directory := t.TempDir()
-	writeStoredSession(t, directory, "older-badger", "2024-01-01T00:00:00Z")
-	writeStoredSession(t, directory, "newer-jaguar", "2025-01-01T00:00:00Z")
+	workspaceDir, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeStoredSession(t, directory, workspaceDir, "older-badger", "2024-01-01T00:00:00Z")
+	writeStoredSession(t, directory, workspaceDir, "newer-jaguar", "2025-01-01T00:00:00Z")
 	sources := cli.Sources{ModelCachePath: cachePath, SessionsDir: directory, ToolNames: completableToolNames}
 
 	requests := []struct {
@@ -3417,7 +3421,7 @@ func resolveNewSessionGlobs(t *testing.T) string {
 		"nope",
 		"nonsense",
 	} {
-		transition, err := newSessionTransition("/workspace", glob, "medium", choices)
+		transition, err := newSessionTransition(glob, "medium", choices)
 		if err != nil {
 			fmt.Fprintf(&written, "%-28q error: %v\n", glob, err)
 
@@ -6022,7 +6026,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 	compareWithGolden(t, "segments", ".screen", shownPasses(t, passes))
 }
 
-func writeStoredSession(t *testing.T, directory string, name string, started string) {
+func writeStoredJournal(t *testing.T, directory string, name string, started string) {
 	t.Helper()
 
 	if err := os.MkdirAll(filepath.Join(directory, name), 0o700); err != nil {
@@ -6031,6 +6035,20 @@ func writeStoredSession(t *testing.T, directory string, name string, started str
 
 	head := fmt.Sprintf(`{"kind":"head","time":%q,"id":%q,"name":%q}`+"\n", started, name, name)
 	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), []byte(head), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func writeStoredSession(t *testing.T, directory string, workspaceDir string, name string, started string) {
+	t.Helper()
+
+	writeStoredJournal(t, directory, name, started)
+
+	meta := fmt.Sprintf(
+		`{"version":%d,"name":%q,"data":{"workspaceDir":%q},"started":%q,"touched":%q}`+"\n",
+		session.MetaFormat, name, workspaceDir, started, started,
+	)
+	if err := os.WriteFile(filepath.Join(directory, name, "meta.json"), []byte(meta), 0o600); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -6136,7 +6154,7 @@ func TestChoosingASessionFromANewerOhAdvisesAnUpgrade(t *testing.T) {
 
 func TestChoosingAnOutdatedSessionAdvisesMigration(t *testing.T) {
 	directory := t.TempDir()
-	writeStoredSession(t, directory, "able-dolphin", "2026-08-01T00:00:00Z")
+	writeStoredJournal(t, directory, "able-dolphin", "2026-08-01T00:00:00Z")
 
 	_, err := sessions.Choose(directory, t.TempDir(), nil, nil)
 	if err == nil {
@@ -6579,7 +6597,7 @@ func TestConsecutiveTabsCycleCommandArguments(t *testing.T) {
 
 func TestARequestedTransitionStopsTheApp(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
-	transition := cycle.Transition{Kind: cycle.NewSession, Arguments: []string{"-d", "/workspace"}}
+	transition := cycle.Transition{Kind: cycle.NewSession, Arguments: []string{"-m", "codex/gpt@high"}}
 	if err := self.requestTransition(transition); err != nil {
 		t.Fatal(err)
 	}

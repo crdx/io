@@ -9,9 +9,10 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/model"
+	"crdx.org/io/session"
 )
 
-func writeStoredSession(t *testing.T, directory string, name string, started string) {
+func writeStoredSession(t *testing.T, directory string, workspaceDir string, name string, started string) {
 	t.Helper()
 
 	if err := os.MkdirAll(filepath.Join(directory, name), 0o700); err != nil {
@@ -20,6 +21,14 @@ func writeStoredSession(t *testing.T, directory string, name string, started str
 
 	head := fmt.Sprintf(`{"kind":"head","time":%q,"id":%q,"name":%q}`+"\n", started, name, name)
 	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), []byte(head), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	meta := fmt.Sprintf(
+		`{"version":%d,"name":%q,"data":{"workspaceDir":%q},"started":%q,"touched":%q}`+"\n",
+		session.MetaFormat, name, workspaceDir, started, started,
+	)
+	if err := os.WriteFile(filepath.Join(directory, name, "meta.json"), []byte(meta), 0o600); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -149,10 +158,13 @@ func TestWritingCompletionsLinesThemUp(t *testing.T) {
 	}
 }
 
-func TestSessionCompletionsNameTheNewestFirst(t *testing.T) {
+func TestSessionCompletionsNameTheWorkspaceNewestFirst(t *testing.T) {
 	directory := t.TempDir()
-	writeStoredSession(t, directory, "older-badger", "2024-01-01T00:00:00Z")
-	writeStoredSession(t, directory, "newer-jaguar", "2025-01-01T00:00:00Z")
+	workspaceDir := t.TempDir()
+	t.Chdir(workspaceDir)
+	writeStoredSession(t, directory, workspaceDir, "older-badger", "2024-01-01T00:00:00Z")
+	writeStoredSession(t, directory, workspaceDir, "newer-jaguar", "2025-01-01T00:00:00Z")
+	writeStoredSession(t, directory, t.TempDir(), "elsewhere-otter", "2026-01-01T00:00:00Z")
 
 	names := sessionNames(directory)
 	if !slices.Equal(names, []string{"newer-jaguar", "older-badger"}) {

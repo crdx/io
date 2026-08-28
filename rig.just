@@ -48,8 +48,9 @@ live scenario=SCENARIO workspace=WORKSPACE opening="" caps="rxw": harness down
     tmux set-option -t {{ SESSION }} remain-on-exit on
     sleep 0.3
     OH_ENDPOINT_URL={{ ENDPOINT }} {{ OH }} -u >/dev/null
-    tmux split-window -t {{ SESSION }} -v -e OH_ENDPOINT_URL={{ ENDPOINT }} \
-        {{ OH }} --workspace {{ workspace }} --caps {{ caps }} -m {{ MODEL }} {{ opening }}
+    tmux split-window -t {{ SESSION }} -v -c {{ justfile_directory() }}/{{ workspace }} \
+        -e OH_ENDPOINT_URL={{ ENDPOINT }} \
+        {{ OH }} --caps {{ caps }} -m {{ MODEL }} {{ opening }}
     tmux select-pane -t {{ SESSION }}.{bottom}
 
 # start an isolated session whose read snapshot can be resumed
@@ -62,9 +63,9 @@ resume-up scenario="internal/sim/scenarios/resume-read.toml": harness down
     tmux set-option -t {{ SESSION }} remain-on-exit on
     sleep 0.3
     OH_ENDPOINT_URL={{ ENDPOINT }} XDG_STATE_HOME={{ STATE }} {{ OH }} -u >/dev/null
-    tmux split-window -t {{ SESSION }} -v \
+    tmux split-window -t {{ SESSION }} -v -c {{ justfile_directory() }}/{{ WORKSPACE }} \
         -e OH_ENDPOINT_URL={{ ENDPOINT }} -e XDG_STATE_HOME={{ STATE }} \
-        {{ OH }} --workspace {{ WORKSPACE }} --caps rw -m {{ MODEL }}
+        {{ OH }} --caps rw -m {{ MODEL }}
     tmux select-pane -t {{ SESSION }}.{bottom}
 
 # restart the fake endpoint and resume the isolated session
@@ -76,7 +77,7 @@ resume scenario="internal/sim/scenarios/resume-edit.toml": harness
     tmux respawn-pane -k -t {{ SESSION }}.{top} \
         {{ SIM }} --scenario {{ scenario }} --address {{ ADDRESS }}
     sleep 0.3
-    tmux respawn-pane -k -t {{ SESSION }}.{bottom} \
+    tmux respawn-pane -k -t {{ SESSION }}.{bottom} -c {{ justfile_directory() }}/{{ WORKSPACE }} \
         -e OH_ENDPOINT_URL={{ ENDPOINT }} -e XDG_STATE_HOME={{ STATE }} \
         {{ OH }} --caps rw --resume "$ID"
     tmux select-pane -t {{ SESSION }}.{bottom}
@@ -158,7 +159,7 @@ capture: harness
         {{ OH }} -u >/dev/null 2>&1
 
         for _ in $(seq 1 "${ASKED[$NAME]}"); do echo "have a look at that"; done |
-            {{ OH }} -d "$CAPTURE_WORKSPACE" -c "$CAPS" -m {{ MODEL }} >/dev/null 2>&1
+            (cd "$CAPTURE_WORKSPACE" && {{ OH }} -c "$CAPS" -m {{ MODEL }} >/dev/null 2>&1)
 
         kill $SIM_PID 2>/dev/null || true
         trap - EXIT

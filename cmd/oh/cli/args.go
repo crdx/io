@@ -19,7 +19,6 @@ Usage:
     $0 [options] [-t <tool>]... [<prompt>...]
 
 Options:
-    -d, --workspace <dir>       Set working directory
     -r, --resume [<session>]    Open the session picker, or resume a session by name
     -m, --model [<model>]       Open the model picker, or set the provider, model, and effort
     -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: %s)
@@ -32,7 +31,6 @@ Options:
 
 type inputFlags struct {
 	Message         []string `docopt:"<prompt>"`
-	WorkspaceDir    string   `docopt:"--workspace"`
 	Session         string   `docopt:"--resume"`
 	IsSessionPicker bool     `docopt:"-r"`
 	Model           string   `docopt:"--model"`
@@ -52,7 +50,6 @@ type Input struct {
 
 type Options struct {
 	Message        string
-	WorkspaceDir   string
 	Session        string
 	SourceSession  string
 	Provider       string
@@ -108,7 +105,6 @@ func (self Options) StartingFromSession() bool {
 
 func (self Input) Parse(modelCachePath string) (Options, error) {
 	options := Options{
-		WorkspaceDir:  self.WorkspaceDir,
 		Message:       strings.Join(self.Message, " "),
 		Session:       self.Session,
 		SourceSession: self.SourceSession,
@@ -139,16 +135,6 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 
 	if options.Resuming() && options.StartingFromSession() {
 		return options, errors.New("a conversation cannot be resumed while another session supplies its context")
-	}
-	if options.Resuming() && options.WorkspaceDir != "" {
-		return options, errors.New("a resumed conversation takes its directory from the session")
-	}
-	if options.StartingFromSession() && options.WorkspaceDir != "" {
-		return options, errors.New("a conversation started from a session takes its directory from that session")
-	}
-
-	if options.WorkspaceDir == "" {
-		options.WorkspaceDir = "."
 	}
 
 	return options, nil

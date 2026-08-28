@@ -7,7 +7,6 @@
 --tool
 --update
 --version
---workspace
 === models ===
 anthropic/claude-sonnet-5@none
 anthropic/claude-sonnet-5@high

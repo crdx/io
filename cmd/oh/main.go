@@ -128,8 +128,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", model.List(os.Stdout, modelCachePath)
 	}
 
+	workspaceDir, err := sessions.ResolveWorkspaceDir()
+	if err != nil {
+		return "", err
+	}
+
 	if inputArgs.IsSessionPicker {
-		return sessions.Choose(sessionsDir, inputArgs.WorkspaceDir, os.Stdin, os.Stdout)
+		return sessions.Choose(sessionsDir, workspaceDir, os.Stdin, os.Stdout)
 	}
 
 	configPath := location.GetConfigFile()
@@ -181,22 +186,18 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	forkSource, err := sessions.GetForkSource(sessionsDir, args.SourceSession, args.Message)
+	forkSource, err := sessions.GetForkSource(sessionsDir, workspaceDir, args.SourceSession, args.Message)
 	if err != nil {
 		return "", err
 	}
 	if forkSource != nil {
-		args.WorkspaceDir = forkSource.WorkspaceDir
 		args.AddedFiles = append([]string{forkSource.InitialFilePath}, args.AddedFiles...)
 		args.Message = forkSource.InitialUserMessage
 	}
 
-	resumedSession, err := sessions.LoadForResume(sessionsDir, args.Session)
+	resumedSession, err := sessions.LoadForResume(sessionsDir, workspaceDir, args.Session)
 	if err != nil {
 		return "", err
-	}
-	if resumedSession != nil {
-		args.WorkspaceDir = resumedSession.Meta.WorkspaceDir
 	}
 
 	args.Caps, err = sessions.OpeningCaps(args.Caps, args.WereCapsChosen, resumedSession)
@@ -204,17 +205,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	root, err := os.OpenRoot(args.WorkspaceDir)
+	root, err := os.OpenRoot(workspaceDir)
 	if err != nil {
 		return "", err
 	}
 
 	defer func() { _ = root.Close() }()
 
-	workspaceDir, err := filepath.Abs(root.Name())
-	if err != nil {
-		return "", fmt.Errorf("could not resolve the workspace path: %w", err)
-	}
 	if err := workspace.Validate(workspaceDir); err != nil {
 		return "", err
 	}
@@ -432,7 +429,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 				)
 			} else {
 				transition, err = newSessionTransition(
-					workspaceDir,
 					start.ModelGlob,
 					selection.Effort,
 					model.Choices(modelCachePath),

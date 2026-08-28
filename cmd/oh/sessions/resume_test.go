@@ -50,7 +50,8 @@ func TestAResumedConversationCannotBeAskedForAnotherMode(t *testing.T) {
 
 func TestLoadingACrashedSessionIsRefusedWithoutChangingItsJournal(t *testing.T) {
 	directory := t.TempDir()
-	writer, err := store.Create(directory, store.Meta{WorkspaceDir: t.TempDir()})
+	workspaceDir := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: workspaceDir})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +71,7 @@ func TestLoadingACrashedSessionIsRefusedWithoutChangingItsJournal(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := LoadForResume(directory, name); err == nil || !strings.Contains(err.Error(), "did not finish every turn") {
+	if _, err := LoadForResume(directory, workspaceDir, name); err == nil || !strings.Contains(err.Error(), "did not finish every turn") {
 		t.Fatalf("expected the crashed session to be refused, got %v", err)
 	}
 	match, err := os.ReadFile(path) //nolint:gosec // the test's own session
@@ -95,12 +96,9 @@ func TestGettingAForkSourcePreparesTheNewConversation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	forkSource, err := GetForkSource(directory, writer.Name(), "focus on tests")
+	forkSource, err := GetForkSource(directory, workspaceDirectory, writer.Name(), "focus on tests")
 	if err != nil {
 		t.Fatal(err)
-	}
-	if forkSource.WorkspaceDir != workspaceDirectory {
-		t.Errorf("got workspace %q, want %q", forkSource.WorkspaceDir, workspaceDirectory)
 	}
 	wantInitialFilePath := filepath.Join(directory, writer.Name(), "chat.md")
 	if forkSource.InitialFilePath != wantInitialFilePath {
@@ -111,7 +109,7 @@ func TestGettingAForkSourcePreparesTheNewConversation(t *testing.T) {
 		t.Errorf("got message %q, want %q", forkSource.InitialUserMessage, wantMessage)
 	}
 
-	forkSource, err = GetForkSource(directory, writer.Name(), "")
+	forkSource, err = GetForkSource(directory, workspaceDirectory, writer.Name(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +120,8 @@ func TestGettingAForkSourcePreparesTheNewConversation(t *testing.T) {
 
 func TestLoadingARunningSessionReportsThatItIsRunning(t *testing.T) {
 	directory := t.TempDir()
-	writer, err := store.Create(directory, store.Meta{WorkspaceDir: t.TempDir()})
+	workspaceDir := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: workspaceDir})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,14 +131,15 @@ func TestLoadingARunningSessionReportsThatItIsRunning(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := LoadForResume(directory, writer.Name()); err == nil || !strings.Contains(err.Error(), "is running") {
+	if _, err := LoadForResume(directory, workspaceDir, writer.Name()); err == nil || !strings.Contains(err.Error(), "is running") {
 		t.Fatalf("expected the running session to be identified, got %v", err)
 	}
 }
 
 func TestLoadingACompletedSessionSucceeds(t *testing.T) {
 	directory := t.TempDir()
-	writer, err := store.Create(directory, store.Meta{WorkspaceDir: t.TempDir()})
+	workspaceDir := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: workspaceDir})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,13 +156,36 @@ func TestLoadingACompletedSessionSucceeds(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := LoadForResume(directory, writer.Name()); err != nil {
+	if _, err := LoadForResume(directory, workspaceDir, writer.Name()); err != nil {
 		t.Fatalf("expected the completed session to load: %v", err)
+	}
+
+	if _, err := LoadForResume(directory, t.TempDir(), writer.Name()); err == nil ||
+		!strings.Contains(err.Error(), "can only be opened there") {
+		t.Fatalf("expected a session of another workspace to be refused, got %v", err)
+	}
+}
+
+func TestAForkSourceOfAnotherWorkspaceIsRefused(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = writer.Close() }()
+
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := GetForkSource(directory, t.TempDir(), writer.Name(), ""); err == nil ||
+		!strings.Contains(err.Error(), "can only be opened there") {
+		t.Fatalf("expected a session of another workspace to be refused, got %v", err)
 	}
 }
 
 func TestNamingNoSessionResumesNothing(t *testing.T) {
-	resumedSession, err := LoadForResume(t.TempDir(), "")
+	resumedSession, err := LoadForResume(t.TempDir(), t.TempDir(), "")
 	if err != nil || resumedSession != nil {
 		t.Errorf("expected nothing to resume, got %v and %v", resumedSession, err)
 	}

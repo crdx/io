@@ -7,14 +7,8 @@ import (
 
 const sourceSessionOption = "--from"
 
-func newSessionTransition(workspaceDir string, modelGlob string, currentEffort string, choices []model.Choice) (cycle.Transition, error) {
-	transition, err := selectedModelTransition(modelGlob, currentEffort, choices)
-	if err != nil {
-		return cycle.Transition{}, err
-	}
-
-	transition.Arguments = append([]string{"-d", workspaceDir}, transition.Arguments...)
-	return transition, nil
+func newSessionTransition(modelGlob string, currentEffort string, choices []model.Choice) (cycle.Transition, error) {
+	return selectedModelTransition(modelGlob, currentEffort, choices)
 }
 
 func forkedSessionTransition(

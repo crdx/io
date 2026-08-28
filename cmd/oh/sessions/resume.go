@@ -17,18 +17,20 @@ const (
 )
 
 type ForkSource struct {
-	WorkspaceDir       string
 	InitialFilePath    string
 	InitialUserMessage string
 }
 
-func GetForkSource(directory string, name string, userMessage string) (*ForkSource, error) {
+func GetForkSource(directory string, workspaceDir string, name string, userMessage string) (*ForkSource, error) {
 	if name == "" {
 		return nil, nil //nolint:nilnil // no name means no fork was asked for
 	}
 
 	storedSession, err := store.Read(directory, name)
 	if err != nil {
+		return nil, err
+	}
+	if err := requireWorkspace(storedSession, workspaceDir); err != nil {
 		return nil, err
 	}
 
@@ -38,13 +40,12 @@ func GetForkSource(directory string, name string, userMessage string) (*ForkSour
 	}
 
 	return &ForkSource{
-		WorkspaceDir:       storedSession.Meta.WorkspaceDir,
 		InitialFilePath:    filepath.Join(directory, storedSession.Name, sessionTranscriptName),
 		InitialUserMessage: initialUserMessage,
 	}, nil
 }
 
-func LoadForResume(directory string, name string) (*store.Session, error) {
+func LoadForResume(directory string, workspaceDir string, name string) (*store.Session, error) {
 	if name == "" {
 		return nil, nil //nolint:nilnil // no name means no fork was asked for
 	}
@@ -61,11 +62,26 @@ func LoadForResume(directory string, name string) (*store.Session, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := requireWorkspace(storedSession, workspaceDir); err != nil {
+		return nil, err
+	}
 	if !storedSession.CanResume() {
 		return nil, fmt.Errorf("session %s did not finish every turn and cannot be resumed safely (yet)", name)
 	}
 
 	return storedSession, nil
+}
+
+func requireWorkspace(storedSession *store.Session, workspaceDir string) error {
+	if filepath.Clean(storedSession.Meta.WorkspaceDir) == filepath.Clean(workspaceDir) {
+		return nil
+	}
+
+	return fmt.Errorf(
+		"session %s belongs to %s and can only be opened there",
+		storedSession.Name,
+		storedSession.Meta.WorkspaceDir,
+	)
 }
 
 func OpenWriter(directory string, resumedSession *store.Session, meta store.Meta) (*store.Writer, error) {

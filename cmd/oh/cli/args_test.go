@@ -101,7 +101,6 @@ func TestEveryOptionIsRead(t *testing.T) {
 	parsedOptions := parseOptions(
 		t,
 		"-c", "r",
-		"-d", "somewhere",
 		"-m", "deepseek@hi",
 		"-t", "read",
 		"--tool", "grep",
@@ -110,10 +109,6 @@ func TestEveryOptionIsRead(t *testing.T) {
 
 	if parsedOptions.Caps != caps.Read {
 		t.Errorf("expected reading alone, got %s", parsedOptions.Caps.Flags())
-	}
-
-	if parsedOptions.WorkspaceDir != "somewhere" {
-		t.Errorf("expected the directory, got %q", parsedOptions.WorkspaceDir)
 	}
 
 	if parsedOptions.Provider != model.OpencodeGoProvider || parsedOptions.Model != "deepseek-v4-pro" || parsedOptions.Effort != "high" {
@@ -223,22 +218,6 @@ func TestWhateverIsLeftOverIsTheFirstThingSaid(t *testing.T) {
 	if parsedOptions.Message != "why does the spinner stutter" {
 		t.Errorf("expected the words back as one, got %q", parsedOptions.Message)
 	}
-
-	if parsedOptions.WorkspaceDir != "." {
-		t.Errorf("expected the current directory, got %q", parsedOptions.WorkspaceDir)
-	}
-}
-
-func TestTheWorkingDirectoryIsNotTakenFromThePrompt(t *testing.T) {
-	parsedOptions := parseOptions(t, "read", "main.go", "-d", "/tmp")
-
-	if parsedOptions.WorkspaceDir != "/tmp" {
-		t.Errorf("expected the directory to come from the option, got %q", parsedOptions.WorkspaceDir)
-	}
-
-	if parsedOptions.Message != "read main.go" {
-		t.Errorf("expected the rest to be the prompt, got %q", parsedOptions.Message)
-	}
 }
 
 func TestTheDefaultCapabilitiesAreReadingAndTheShell(t *testing.T) {
@@ -285,19 +264,6 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 
 	if got := grantedCaps.Flags(); got != "r" {
 		t.Errorf("expected r, got %q", got)
-	}
-}
-
-func TestAWorkspaceCannotBeGivenWhenContinuingAStoredSession(t *testing.T) {
-	for name, input := range map[string]Input{
-		"resume": {inputFlags: inputFlags{Session: "one", WorkspaceDir: "somewhere"}},
-		"from":   {inputFlags: inputFlags{WorkspaceDir: "somewhere"}, SourceSession: "one"},
-	} {
-		t.Run(name, func(t *testing.T) {
-			if _, err := input.Parse(modelCachePath()); err == nil {
-				t.Error("expected an error")
-			}
-		})
 	}
 }
 

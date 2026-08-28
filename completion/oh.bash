@@ -14,11 +14,6 @@ function _oh {
     fi
 
     case $PREVIOUS in
-        -d | --workspace)
-            mapfile -t COMPREPLY < <(compgen -d -- "$WORD")
-            compopt -o filenames
-            return
-            ;;
         -r | --resume) KIND=session ;;
         -c | --caps) KIND=caps ;;
         -t | --tool) KIND=tool ;;

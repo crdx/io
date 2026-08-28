@@ -19,11 +19,6 @@ import (
 )
 
 func Choose(directory string, workspaceDir string, terminal *os.File, screen io.Writer) (string, error) {
-	workspaceDir, err := ResolveWorkspaceDir(workspaceDir)
-	if err != nil {
-		return "", err
-	}
-
 	if err := RefreshListings(directory, screen); err != nil {
 		return "", err
 	}
@@ -51,12 +46,8 @@ func Choose(directory string, workspaceDir string, terminal *os.File, screen io.
 	return chosenSession.Name, nil
 }
 
-func ResolveWorkspaceDir(workspaceDir string) (string, error) {
-	if workspaceDir == "" {
-		workspaceDir = "."
-	}
-
-	workspaceDir, err := filepath.Abs(workspaceDir)
+func ResolveWorkspaceDir() (string, error) {
+	workspaceDir, err := filepath.Abs(".")
 	if err != nil {
 		return "", fmt.Errorf("could not resolve the workspace path: %w", err)
 	}

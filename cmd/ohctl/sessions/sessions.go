@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -84,9 +85,9 @@ func run(options *inputOpts, output console.Output) error {
 	}
 
 	if options.Workspace != "" {
-		workspaceDir, err := ohSessions.ResolveWorkspaceDir(options.Workspace)
+		workspaceDir, err := filepath.Abs(options.Workspace)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not resolve the workspace path: %w", err)
 		}
 		stored = ohSessions.InWorkspace(stored, workspaceDir)
 	}
