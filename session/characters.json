@@ -1714,5 +1714,83 @@
       "name": "zebra",
       "emoji": "🦓"
     }
+  ],
+  "retired": [
+    {
+      "name": "aphid",
+      "emoji": "🐛"
+    },
+    {
+      "name": "barnacle",
+      "emoji": "🐚"
+    },
+    {
+      "name": "buzzard",
+      "emoji": "🦅"
+    },
+    {
+      "name": "earwig",
+      "emoji": "🐛"
+    },
+    {
+      "name": "flea",
+      "emoji": "🐛"
+    },
+    {
+      "name": "gnat",
+      "emoji": "🦟"
+    },
+    {
+      "name": "hornet",
+      "emoji": "🐝"
+    },
+    {
+      "name": "locust",
+      "emoji": "🦗"
+    },
+    {
+      "name": "mite",
+      "emoji": "🐛"
+    },
+    {
+      "name": "oyster",
+      "emoji": "🦪"
+    },
+    {
+      "name": "piranha",
+      "emoji": "🐟"
+    },
+    {
+      "name": "polecat",
+      "emoji": "🦡"
+    },
+    {
+      "name": "scorpion",
+      "emoji": "🦂"
+    },
+    {
+      "name": "slug",
+      "emoji": "🐌"
+    },
+    {
+      "name": "sponge",
+      "emoji": "🧽"
+    },
+    {
+      "name": "vulture",
+      "emoji": "🦅"
+    },
+    {
+      "name": "wasp",
+      "emoji": "🐝"
+    },
+    {
+      "name": "weevil",
+      "emoji": "🪲"
+    },
+    {
+      "name": "worm",
+      "emoji": "🪱"
+    }
   ]
 }
