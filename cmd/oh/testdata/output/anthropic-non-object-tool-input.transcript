@@ -18,7 +18,7 @@
 > 2001-01-01T00:00:01Z
 
 ```
-recover from malformed tool input
+send tool input that parses but is not an object
 ```
 
 ## Retrying
@@ -27,7 +27,7 @@ recover from malformed tool input
 
 - **Attempt:** `1`
 - **Waited:** `250ms`
-- **ID:** `toolu_bad`
+- **ID:** `toolu_array`
 - **Name:** `work`
 
 ```
@@ -37,7 +37,7 @@ The work tool call did not contain a JSON object
 **Arguments**
 
 ```
-{"value":1,,}
+[1, 2, 3]
 ```
 
 ## Assistant
@@ -45,7 +45,7 @@ The work tool call did not contain a JSON object
 > 2001-01-01T00:00:03Z
 
 ```
-I corrected the malformed call.
+I sent an object that time.
 ```
 
 ## User

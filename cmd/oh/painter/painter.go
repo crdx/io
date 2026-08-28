@@ -19,6 +19,8 @@ import (
 	"crdx.org/io/cmd/oh/width"
 )
 
+const retryArgumentsCells = 120
+
 type Picasso struct {
 	screen         *output.Screen
 	toolBlock      *dynamic.Block
@@ -147,6 +149,10 @@ func RenderRetry(event agent.Event) string {
 
 	if event.Text != "" {
 		notice += ": " + strutil.Flatten(strutil.FirstLine(event.Text))
+	}
+
+	if event.Arguments != "" {
+		notice += ": " + width.Elide(strutil.Flatten(event.Arguments), retryArgumentsCells)
 	}
 
 	return notice

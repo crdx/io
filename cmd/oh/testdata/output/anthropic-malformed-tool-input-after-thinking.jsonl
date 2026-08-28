@@ -2,7 +2,7 @@
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"think, then send malformed tool input"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"The call wants an object."}}
-{"kind":"event","event":{"kind":"retrying","text":"The work tool call did not contain a JSON object","attempt":1}}
+{"kind":"event","event":{"kind":"retrying","text":"The work tool call did not contain a JSON object","id":"toolu_bad","name":"work","arguments":"{\"value\":1,,}","attempt":1}}
 {"kind":"event","event":{"kind":"model_message","text":"I corrected the malformed call."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"think, then send malformed tool input"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"thinking","thinking":"The call wants an object.","signature":"seal-1"}]}}

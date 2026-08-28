@@ -125,7 +125,13 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 	case agent.RetryingEvent:
 		output.field("Attempt", strconv.Itoa(event.Attempt))
 		output.field("Waited", event.Took.String())
+		output.field("ID", event.ID)
+		output.field("Name", event.Name)
 		output.fence(event.Text, "")
+		if event.Arguments != "" {
+			output.paragraph("**Arguments**")
+			output.fence(event.Arguments, "")
+		}
 	case agent.FailureEvent:
 		output.fence(event.Text, "")
 	}

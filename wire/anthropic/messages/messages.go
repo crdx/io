@@ -139,11 +139,17 @@ func encodeItem(item any) json.RawMessage {
 }
 
 type invalidToolInputError struct {
-	toolName string
+	toolID    string
+	toolName  string
+	arguments string
 }
 
 func (self invalidToolInputError) Error() string {
 	return fmt.Sprintf("the %s tool call did not contain a JSON object", self.toolName)
+}
+
+func (self invalidToolInputError) FaultedCall() agent.ToolCall {
+	return agent.ToolCall{ID: self.toolID, Name: self.toolName, Arguments: self.arguments}
 }
 
 func (invalidToolInputError) Retriable() bool {

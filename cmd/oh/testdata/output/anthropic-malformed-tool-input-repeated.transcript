@@ -1,0 +1,107 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+send malformed tool input three times over
+```
+
+## Retrying
+
+> 2001-01-01T00:00:02Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
+- **ID:** `toolu_first`
+- **Name:** `work`
+
+```
+The work tool call did not contain a JSON object
+```
+
+**Arguments**
+
+```
+{"offset": 240,, "limit": 20}
+```
+
+## Retrying
+
+> 2001-01-01T00:00:03Z
+
+- **Attempt:** `2`
+- **Waited:** `500ms`
+- **ID:** `toolu_second`
+- **Name:** `work`
+
+```
+The work tool call did not contain a JSON object
+```
+
+**Arguments**
+
+```
+{"offset": 245, , "limit": 1}
+```
+
+## Retrying
+
+> 2001-01-01T00:00:04Z
+
+- **Attempt:** `3`
+- **Waited:** `1s`
+- **ID:** `toolu_third`
+- **Name:** `work`
+
+```
+The work tool call did not contain a JSON object
+```
+
+**Arguments**
+
+```
+{
+  "offset": 250,,
+  "limit": 5
+}
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+I got there in the end.
+```
+
+## User
+
+> 2001-01-01T00:00:06Z
+
+```
+carry on
+```
+
+## Assistant
+
+> 2001-01-01T00:00:07Z
+
+```
+Carrying on.
+```
+

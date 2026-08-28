@@ -132,7 +132,11 @@ func (self *reply) assemble(shouldIncludeCalls bool) json.RawMessage {
 func (self *reply) validateToolInputs() error {
 	for _, held := range self.blocks {
 		if held.kind == "tool_use" && held.isDone && !held.hasObjectArguments() {
-			return invalidToolInputError{toolName: held.name}
+			return invalidToolInputError{
+				toolID:    held.id,
+				toolName:  held.name,
+				arguments: held.argumentsOrEmpty(),
+			}
 		}
 	}
 

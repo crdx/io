@@ -1,0 +1,13 @@
+
+ send null as tool input
+
+
+Attempt 1 failed, asking again in 0.3s: The work tool call did not contain a JSON object: null
+
+I sent an object that time.
+
+
+ carry on
+
+
+Carrying on.

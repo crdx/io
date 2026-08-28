@@ -141,6 +141,12 @@ type Resumable interface {
 	Resumable() bool
 }
 
+type CallFaulted interface {
+	error
+
+	FaultedCall() ToolCall
+}
+
 type FallbackRendering struct {
 	Subject  string        `json:"render,omitempty"`
 	Note     string        `json:"detail,omitempty"`

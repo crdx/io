@@ -1,0 +1,15 @@
+{"kind":"head","version":10,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"event","event":{"kind":"user_message","text":"send malformed tool input three times over"}}
+{"kind":"event","event":{"kind":"retrying","text":"The work tool call did not contain a JSON object","id":"toolu_first","name":"work","arguments":"{\"offset\": 240,, \"limit\": 20}","attempt":1}}
+{"kind":"event","event":{"kind":"retrying","text":"The work tool call did not contain a JSON object","id":"toolu_second","name":"work","arguments":"{\"offset\": 245, , \"limit\": 1}","attempt":2}}
+{"kind":"event","event":{"kind":"retrying","text":"The work tool call did not contain a JSON object","id":"toolu_third","name":"work","arguments":"{\n  \"offset\": 250,,\n  \"limit\": 5\n}","attempt":3}}
+{"kind":"event","event":{"kind":"model_message","text":"I got there in the end."}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"send malformed tool input three times over"}]}}
+{"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"I got there in the end."}]}}
+{"kind":"turn_completion"}
+{"kind":"event","event":{"kind":"user_message","text":"carry on"}}
+{"kind":"event","event":{"kind":"model_message","text":"Carrying on."}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"carry on"}]}}
+{"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Carrying on."}]}}
+{"kind":"turn_completion"}

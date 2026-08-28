@@ -9,6 +9,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/width"
 )
 
 func TestNewQuestionClosesOldToolBlockAndResetsRows(t *testing.T) {
@@ -59,5 +60,51 @@ func TestARetryIsDrawnFromWhatItWasRatherThanFromWhatItSaid(t *testing.T) {
 
 	if strings.Contains(drawn, "nobody needs") {
 		t.Errorf("expected only the first line of what stopped it, got %q", drawn)
+	}
+}
+
+func TestARetryShowsTheCallThatProvokedIt(t *testing.T) {
+	var screenOutput bytes.Buffer
+
+	paint := New(output.New(&screenOutput), false, nil, "")
+	paint.DrawEvent(agent.Event{
+		Kind:      agent.RetryingEvent,
+		Text:      "The read tool call did not contain a JSON object",
+		Name:      "read",
+		Arguments: `{"path": "one.go",, "limit": 20}`,
+		Attempt:   1,
+	})
+
+	drawn := style.Plain(screenOutput.String())
+
+	if !strings.Contains(drawn, `{"path": "one.go",, "limit": 20}`) {
+		t.Errorf("expected the call that provoked the retry to be drawn, got %q", drawn)
+	}
+}
+
+func TestALongFaultedCallIsCutRatherThanDrawnWhole(t *testing.T) {
+	var screenOutput bytes.Buffer
+
+	arguments := `{"text": "` + strings.Repeat("x", 4*retryArgumentsCells) + `"}`
+
+	paint := New(output.New(&screenOutput), false, nil, "")
+	paint.DrawEvent(agent.Event{
+		Kind:      agent.RetryingEvent,
+		Text:      "The write tool call did not contain a JSON object",
+		Name:      "write",
+		Arguments: arguments,
+		Attempt:   1,
+	})
+
+	drawn := style.Plain(screenOutput.String())
+
+	if strings.Contains(drawn, arguments) {
+		t.Error("expected a long call to be cut rather than drawn whole")
+	}
+	if !strings.Contains(drawn, width.Ellipsis) {
+		t.Errorf("expected the cut to be marked, got %q", drawn)
+	}
+	if !strings.Contains(drawn, `{"text": "xxx`) {
+		t.Errorf("expected what was kept to start the call, got %q", drawn)
 	}
 }

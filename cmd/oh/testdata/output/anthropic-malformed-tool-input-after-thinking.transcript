@@ -35,9 +35,17 @@ The call wants an object.
 
 - **Attempt:** `1`
 - **Waited:** `250ms`
+- **ID:** `toolu_bad`
+- **Name:** `work`
 
 ```
 The work tool call did not contain a JSON object
+```
+
+**Arguments**
+
+```
+{"value":1,,}
 ```
 
 ## Assistant

@@ -1,0 +1,18 @@
+
+ send malformed tool input three times over
+
+
+Attempt 1 failed, asking again in 0.3s: The work tool call did not contain a JSON object: {"offset":
+ 240,, "limit": 20}
+Attempt 2 failed, asking again in 0.5s: The work tool call did not contain a JSON object: {"offset":
+ 245, , "limit": 1}
+Attempt 3 failed, asking again in 1s: The work tool call did not contain a JSON object: { "offset":
+250,, "limit": 5 }
+
+I got there in the end.
+
+
+ carry on
+
+
+Carrying on.

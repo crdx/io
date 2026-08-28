@@ -53,6 +53,16 @@ func isResumable(err error) bool {
 	return errors.As(err, &resumable) && resumable.Resumable()
 }
 
+func faultedCall(err error) (ToolCall, bool) {
+	var faulted CallFaulted
+
+	if !errors.As(err, &faulted) {
+		return ToolCall{}, false
+	}
+
+	return faulted.FaultedCall(), true
+}
+
 type rewind struct {
 	state State
 	items []json.RawMessage

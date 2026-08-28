@@ -18,7 +18,7 @@
 > 2001-01-01T00:00:01Z
 
 ```
-recover from malformed tool input
+send malformed tool input too long to show
 ```
 
 ## Retrying
@@ -27,7 +27,7 @@ recover from malformed tool input
 
 - **Attempt:** `1`
 - **Waited:** `250ms`
-- **ID:** `toolu_bad`
+- **ID:** `toolu_long`
 - **Name:** `work`
 
 ```
@@ -37,7 +37,7 @@ The work tool call did not contain a JSON object
 **Arguments**
 
 ```
-{"value":1,,}
+{"value":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",,}
 ```
 
 ## Assistant

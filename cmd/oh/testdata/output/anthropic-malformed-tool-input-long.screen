@@ -1,0 +1,15 @@
+
+ send malformed tool input too long to show
+
+
+Attempt 1 failed, asking again in 0.3s: The work tool call did not contain a JSON object: {"value":"
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaa…
+
+I corrected the malformed call.
+
+
+ carry on
+
+
+Carrying on.
