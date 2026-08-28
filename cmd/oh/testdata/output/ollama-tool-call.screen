@@ -1,0 +1,14 @@
+
+ call a tool through Ollama
+
+
+Call the tool.
+alpha alpha ✓ 1L
+
+Ollama used the tool.
+
+
+ continue after the tool result
+
+
+Ollama resumed.

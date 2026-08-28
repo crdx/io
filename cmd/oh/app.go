@@ -137,10 +137,13 @@ func (self *App) begin(message string) cycle.Transition {
 	restoreCursor := self.screen.BeginEditing()
 
 	restoreTerminal := func() {
-		self.screen.Release(self.recorder.IsPersisted())
-		restoreCursor()
-		restoreTitle()
-		restoreTTY()
+		restoreTerminalState(
+			self.screen,
+			self.recorder.IsPersisted(),
+			restoreCursor,
+			restoreTitle,
+			restoreTTY,
+		)
 	}
 
 	defer restoreTerminal()
@@ -178,6 +181,13 @@ func (self *App) begin(message string) cycle.Transition {
 	})
 
 	return self.transition
+}
+
+func restoreTerminalState(screen *output.Screen, isPersisted bool, restorers ...func()) {
+	screen.Release(isPersisted)
+	for _, restore := range restorers {
+		restore()
+	}
 }
 
 func (self *App) handleKeypressAndShowInput(editor *edit.Input, history *edit.History, keypress key.Key) bool {

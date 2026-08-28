@@ -1,0 +1,39 @@
+provider = "ollama"
+model = "qwen3.8:27b-mtp-q8_0-256k"
+effort = "high"
+
+[[tool]]
+name = "alpha"
+outputs = ["alpha result"]
+state-key = "alpha-count"
+
+[first]
+prompt = "call a tool through Ollama"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":"","reasoning":"Call the tool."}}]}''',
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","type":"function","function":{"name":"alpha","arguments":"{\"x\":"}}]}}]}''',
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"1}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Ollama used the tool."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''{"choices":[],"usage":{"prompt_tokens":512}}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "continue after the tool result"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Ollama resumed."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''{"choices":[],"usage":{"prompt_tokens":640}}''',
+    '''[DONE]''',
+]

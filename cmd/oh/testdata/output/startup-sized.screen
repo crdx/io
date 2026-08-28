@@ -1,0 +1,11 @@
+=== below minimum width ===
+Agent brave-otter 🦦 ready in 2ms wi
+th 4 skills, 2 snippets, and ~1.6Kt
+of context.
+=== minimum width with emoji ===
+ 🦦  Agent brave-otter ready in 2ms
+       4 skills, 2 snippets, and ~1.6
+Kt of context
+=== wide with emoji ===
+ 🦦  Agent brave-otter ready in 2ms
+       4 skills, 2 snippets, and ~1.6Kt of context

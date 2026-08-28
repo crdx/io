@@ -141,6 +141,36 @@ func TestTurnCompletionIsReadBackSeparatelyFromEventsAndItems(t *testing.T) {
 	}
 }
 
+func TestProviderStateCarryingTheLargestReadableImageCanBeListed(t *testing.T) {
+	const readToolMaximumImageBytes = 20 * 1024 * 1024
+
+	encodedImageBytes := 4 * ((readToolMaximumImageBytes + 2) / 3)
+	payload := json.RawMessage(`{"image":"` + strings.Repeat("A", encodedImageBytes) + `"}`)
+
+	directory := t.TempDir()
+	writer, err := session.Create(directory, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Item(payload); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSessions, err := session.List(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(storedSessions) != 1 || len(storedSessions[0].Items) != 1 {
+		t.Fatalf("large session was omitted: %+v", storedSessions)
+	}
+	if got := len(storedSessions[0].Items[0]); got != len(payload) {
+		t.Errorf("large provider state has %d bytes, want %d", got, len(payload))
+	}
+}
+
 func TestSeveralMessagesCanShareOneCompletedTurn(t *testing.T) {
 	directory := t.TempDir()
 	writer, err := session.Create(directory, nil, nil)

@@ -751,7 +751,7 @@ func List(directory string) ([]*Session, error) {
 const (
 	journalName = "session.jsonl"
 	metaName    = "meta.json"
-	maxLine     = 16 << 20
+	maxLine     = 64 << 20
 )
 
 func sessionDir(directory, name string) string {

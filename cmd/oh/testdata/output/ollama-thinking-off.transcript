@@ -1,0 +1,47 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `llama3.3:70b`
+- **Effort:** `none`
+- **Provider:** `ollama`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+answer without thinking
+```
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+```
+Ollama answered without thinking.
+```
+
+## User
+
+> 2001-01-01T00:00:03Z
+
+```
+continue without thinking
+```
+
+## Assistant
+
+> 2001-01-01T00:00:04Z
+
+```
+Ollama resumed without thinking.
+```
+

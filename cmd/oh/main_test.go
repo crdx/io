@@ -23,6 +23,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"testing"
 	"testing/synctest"
 	"time"
@@ -74,6 +75,7 @@ import (
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/oh/usage"
 	"crdx.org/io/cmd/oh/width"
@@ -2559,6 +2561,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"clearing":              {".ansi", ".screen"},
 		"completion":            {".txt"},
 		"config-reload":         {".ansi", ".screen"},
+		"default-bar":           {".ansi", ".screen"},
 		"feedback":              {".ansi", ".screen", ".txt"},
 		"context":               {".prompt"},
 		"inputblock":            {".ansi", ".screen"},
@@ -2567,6 +2570,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"mode-takeback":         {".ansi", ".screen"},
 		"model-arguments":       {".txt"},
 		"new-session":           {".txt"},
+		"ordinary-tab":          {".ansi", ".screen"},
 		"pending-mode-messages": {".ansi", ".screen"},
 		"paste":                 {".ansi", ".screen"},
 		"resume-arguments":      {".txt"},
@@ -2574,9 +2578,10 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"running":               {".ansi", ".screen"},
 		"schedule":              {".ansi", ".screen"},
 		"segments":              {".ansi", ".screen"},
+		"signal-restoration":    {".ansi"},
 		"startup":               {".ansi", ".screen"},
-		"startup-sized":         {".ansi"},
-		"startup-sized-output":  {".ansi"},
+		"startup-sized":         {".ansi", ".screen"},
+		"startup-sized-output":  {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}
@@ -3696,6 +3701,8 @@ const (
 
 	workspaceMarker   = "/workspace"
 	lifecycleScenario = "success@rxw.jsonl"
+
+	retiredAnimalSession = "brave-vulture"
 )
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
@@ -3851,6 +3858,54 @@ func TestTheScreenAroundAConversationDrawsWhatItDrewBefore(t *testing.T) {
 
 	passes["editing cursor lifecycle"] = drawEditingCursorLifecycle
 	compareWithGolden(t, "lifecycle", ".ansi", passes)
+}
+
+const signalGoldenProcessVariable = "OH_TEST_SIGNAL_GOLDEN_PROCESS"
+
+func TestFatalSignalTerminalRestorationMatchesTheGolden(t *testing.T) {
+	if os.Getenv(signalGoldenProcessVariable) != "" {
+		screen := output.NewTerminalOfSize(os.Stdout, replayColumns, replayLines)
+		restoreCursor := screen.BeginEditing()
+		screen.Footer([]string{footerPrompt}, 0, len(footerPrompt))
+
+		restore := func() {
+			restoreTerminalState(
+				screen,
+				false,
+				restoreCursor,
+				func() { _, _ = io.WriteString(os.Stdout, "\x1b[23;0t") },
+				func() { _, _ = io.WriteString(os.Stdout, key.Disable) },
+			)
+		}
+		stopListening := tty.RestoreOnSignal(restore)
+		defer stopListening()
+
+		if err := syscall.Kill(os.Getpid(), syscall.SIGTERM); err != nil {
+			t.Fatal(err)
+		}
+		time.Sleep(10 * time.Second)
+		return
+	}
+
+	//nolint:gosec // rerun this test binary as its signalled subprocess
+	command := exec.CommandContext(
+		t.Context(), os.Args[0], "-test.run=^TestFatalSignalTerminalRestorationMatchesTheGolden$",
+	)
+	command.Env = append(os.Environ(), signalGoldenProcessVariable+"=1")
+	output, err := command.CombinedOutput()
+
+	var exitError *exec.ExitError
+	if !errors.As(err, &exitError) {
+		t.Fatalf("the signalled process returned %v, having drawn %q", err, string(output))
+	}
+	status, ok := exitError.Sys().(syscall.WaitStatus)
+	if !ok || !status.Signaled() || status.Signal() != syscall.SIGTERM {
+		t.Fatalf("the process ended with %v, want SIGTERM", exitError.Sys())
+	}
+
+	compareWithGolden(t, "signal-restoration", ".ansi", map[string]func() string{
+		"fatal signal": func() string { return string(output) },
+	})
 }
 
 func drawEditingCursorLifecycle() string {
@@ -4377,6 +4432,57 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 	compareWithGolden(t, "banner", ".screen", shownPasses(t, passes))
 }
 
+func TestTheBarConfiguredByDefaultDrawsWhatItDrewBefore(t *testing.T) {
+	t.Setenv("HOME", "/home/tester")
+
+	passes := map[string]func() string{}
+
+	for _, isRunning := range []bool{false, true} {
+		state := "waiting"
+		if isRunning {
+			state = "running"
+		}
+
+		for _, position := range segment.Positions {
+			passes[position.String()+" while "+state] = func() string {
+				return drawnOnAStoppedClock(t, func(t *testing.T) string {
+					t.Helper()
+
+					time.Sleep(spinnerSoFar)
+
+					held := &App{
+						mode:      caps.NewMode(caps.All()),
+						metrics:   metrics.New(200_000),
+						startedAt: time.Now().Add(-sessionSoFar),
+						events: []agent.Event{{
+							Kind:  agent.ModelMessageEvent,
+							Usage: &agent.Usage{InputTokens: 42_000},
+						}},
+					}
+					held.metrics.Restore(held.events, 0)
+					held.currentTurn.Stream = testTimedTurnStream(
+						isRunning,
+						time.Now().Add(-turnSoFar),
+						time.Now().Add(-idleSoFar),
+					)
+
+					layout, err := configFrom(t, "").BuildLayout(
+						availableSegments(workspaceMarker, "brave-otter", "gpt-5.6-sol", "high", held),
+					)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					return renderBar(layout, position)
+				})
+			}
+		}
+	}
+
+	compareWithGolden(t, "default-bar", ".ansi", passes)
+	compareWithGolden(t, "default-bar", ".screen", shownPasses(t, passes))
+}
+
 func TestTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 	line := func(sessionName string, columns int, isTextSizingSupported bool) string {
 		event := startup.NewEvent(1500*time.Microsecond, startup.Info{
@@ -4421,8 +4527,20 @@ func TestTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 		"minimum width with emoji": func() string { return line("brave-otter", minimumColumns, true) },
 		"below minimum width":      func() string { return line("brave-otter", minimumColumns-1, true) },
 		"unknown animal":           func() string { return line("brave-tester", replayColumns, true) },
+		"retired animal":           func() string { return line(retiredAnimalSession, replayColumns, true) },
 		"no session":               func() string { return line("", replayColumns, true) },
 		"unsupported protocol":     func() string { return line("brave-otter", replayColumns, false) },
+	})
+	compareWithGolden(t, "startup-sized", ".screen", map[string]func() string{
+		"wide with emoji": func() string {
+			return shown(t, line("brave-otter", replayColumns, true), replayColumns)
+		},
+		"minimum width with emoji": func() string {
+			return shown(t, line("brave-otter", minimumColumns, true), minimumColumns)
+		},
+		"below minimum width": func() string {
+			return shown(t, line("brave-otter", minimumColumns-1, true), minimumColumns-1)
+		},
 	})
 
 	terminalStream := func(columns int) string {
@@ -4437,6 +4555,17 @@ func TestTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 		"wide then following output":            func() string { return terminalStream(replayColumns) },
 		"wrapped details then following output": func() string { return terminalStream(minimumColumns) },
 		"fallback then following output":        func() string { return terminalStream(minimumColumns - 1) },
+	})
+	compareWithGolden(t, "startup-sized-output", ".screen", map[string]func() string{
+		"wide then following output": func() string {
+			return shown(t, terminalStream(replayColumns), replayColumns)
+		},
+		"wrapped details then following output": func() string {
+			return shown(t, terminalStream(minimumColumns), minimumColumns)
+		},
+		"fallback then following output": func() string {
+			return shown(t, terminalStream(minimumColumns-1), minimumColumns-1)
+		},
 	})
 }
 
@@ -5062,11 +5191,38 @@ func (self *screen) escape(stream string, at int) int {
 	case '[':
 		return self.control(stream, at)
 	case ']':
-		return skipUntilStringTerminator(stream, at)
+		return self.operatingSystemCommand(stream, at)
 	default:
 		self.t.Fatalf("the screen was sent an escape it does not know: %q", stream[at:min(at+8, len(stream))])
 		return len(stream)
 	}
+}
+
+func (self *screen) operatingSystemCommand(stream string, at int) int {
+	end := skipUntilStringTerminator(stream, at)
+	terminatorWidth := 1
+	if end >= 2 && stream[end-2:end] == "\x1b\\" {
+		terminatorWidth = 2
+	}
+	payload := stream[at+2 : end-terminatorWidth]
+	if !strings.HasPrefix(payload, "66;") {
+		return end
+	}
+
+	parts := strings.SplitN(payload, ";", 3)
+	if len(parts) != 3 {
+		return end
+	}
+
+	scale := 1
+	declaredWidth := width.Of(parts[2])
+	for option := range strings.SplitSeq(parts[1], ":") {
+		scale = prefixedNumber(option, "s=", scale)
+		declaredWidth = prefixedNumber(option, "w=", declaredWidth)
+	}
+	self.put(parts[2], scale*declaredWidth)
+
+	return end
 }
 
 func (self *screen) control(stream string, at int) int {
@@ -5227,6 +5383,15 @@ func skipUntilStringTerminator(stream string, at int) int {
 	}
 
 	return len(stream)
+}
+
+func prefixedNumber(parameter string, prefix string, fallback int) int {
+	value, err := strconv.Atoi(strings.TrimPrefix(parameter, prefix))
+	if err != nil || !strings.HasPrefix(parameter, prefix) {
+		return fallback
+	}
+
+	return value
 }
 
 func numberOr(parameters string, fallback int) int {
@@ -5573,6 +5738,18 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			"",
 			segment.Context{},
 		),
+		"session-emoji / retired animal": goldenSegmentPass(
+			t,
+			sessionEmoji.New(retiredAnimalSession),
+			"",
+			segment.Context{},
+		),
+		"session-name / retired animal": goldenSegmentPass(
+			t,
+			sessionName.New(retiredAnimalSession),
+			"emoji = true",
+			segment.Context{},
+		),
 		"local-time / custom format": goldenSegmentPass(
 			t,
 			localTime.New(func() time.Time { return at }),
@@ -5752,6 +5929,32 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			t,
 			turnTimer.New(func() turn.Timing {
 				return turn.Timing{UserTurn: 3 * time.Minute, ModelTurn: time.Minute}
+			}, func() bool {
+				return true
+			}),
+			"",
+			segment.Context{},
+		),
+		"turn-timer / nothing asked yet": goldenSegmentPass(
+			t,
+			turnTimer.New(func() turn.Timing { return turn.Timing{} }, func() bool { return false }),
+			"",
+			segment.Context{},
+		),
+		"turn-timer / part of a minute": goldenSegmentPass(
+			t,
+			turnTimer.New(func() turn.Timing {
+				return turn.Timing{UserTurn: 40 * time.Second, ModelTurn: 20 * time.Second}
+			}, func() bool {
+				return true
+			}),
+			"",
+			segment.Context{},
+		),
+		"turn-timer / turns past an hour": goldenSegmentPass(
+			t,
+			turnTimer.New(func() turn.Timing {
+				return turn.Timing{UserTurn: 3*time.Hour + 5*time.Minute, ModelTurn: 95 * time.Minute}
 			}, func() bool {
 				return true
 			}),
@@ -7718,6 +7921,31 @@ func (self *frameRecordingWriter) Write(value []byte) (int, error) {
 	_, _ = self.stream.Write(value)
 	self.frames = append(self.frames, self.stream.String())
 	return len(value), nil
+}
+
+func TestOrdinaryTabDrawsWhatItDrewBefore(t *testing.T) {
+	pass := func() string {
+		self := slashCommandFixture(t, caps.Read)
+		var screenOutput strings.Builder
+		self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+
+		history := edit.NewHistory("", historyLimit)
+		editor := edit.NewInput(history)
+		editor.SetText("ordinary input")
+
+		self.screen.Line("conversation remains in scrollback")
+		self.show(editor)
+		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: '\t'})
+		for _, value := range "after tab" {
+			self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: value})
+		}
+
+		return screenOutput.String()
+	}
+	passes := map[string]func() string{"tab inserts four spaces": pass}
+
+	compareWithGolden(t, "ordinary-tab", ".ansi", passes)
+	compareWithGolden(t, "ordinary-tab", ".screen", shownPasses(t, passes))
 }
 
 func TestAPasteIsDrawnOnlyWhenItHasFinished(t *testing.T) {

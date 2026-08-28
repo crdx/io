@@ -102,3 +102,28 @@
 \e[K\r
 \e[K\r
 \e[K\e[J
+=== a filter no model answers to ===
+\e[H\e[38;2;150;152;150mFilter: \e[0mgemini\e[K\r
+\e[4m\e[38;2;150;152;150m  Provider      Model                         Effort    Context  Identifier\e[0m\e[0m\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\r
+\e[K\e[J

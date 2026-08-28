@@ -6,8 +6,10 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/session"
@@ -45,6 +47,43 @@ func TestLoadingSessionsIdentifiesThoseThatAreRunning(t *testing.T) {
 	}
 	if len(loadedSessions) != 1 || loadedSessions[0].IsRunning {
 		t.Errorf("expected one stopped session, got %+v", loadedSessions)
+	}
+}
+
+func TestTheSessionAddedToLastIsOfferedFirstByThePicker(t *testing.T) {
+	directory := t.TempDir()
+	workspaceDir := t.TempDir()
+
+	names := make([]string, 0, 3)
+	for range cap(names) {
+		writer, err := store.Create(directory, store.Meta{WorkspaceDir: workspaceDir})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+			t.Fatal(err)
+		}
+		if err := writer.Close(); err != nil {
+			t.Fatal(err)
+		}
+
+		names = append(names, writer.Name())
+		time.Sleep(2 * time.Millisecond)
+	}
+
+	loadedSessions, err := Load(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	loaded := make([]string, 0, len(loadedSessions))
+	for _, loadedSession := range loadedSessions {
+		loaded = append(loaded, loadedSession.Name)
+	}
+
+	slices.Reverse(names)
+	if !slices.Equal(loaded, names) {
+		t.Errorf("sessions loaded as %v, want the most recently touched first: %v", loaded, names)
 	}
 }
 

@@ -1,0 +1,3 @@
+{"event": {"kind": "user_message", "text": "show terminal-active text safely"}}
+{"event": {"kind": "harness_message", "text": "notice before\u001b[2J\u001b[H after\nsecond\tline\u0007", "status": "info"}}
+{"event": {"kind": "failure", "text": "failure before\u001b]2;stolen title\u0007 after\nsecond\rline"}}

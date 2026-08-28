@@ -258,7 +258,7 @@ func (self *Input) insert(value rune) {
 
 func (self *Input) rune(keypress key.Key, running bool) Action {
 	if !keypress.Mod.Has(key.Ctrl) {
-		if keypress.Value == '\t' {
+		if keypress.Value == '\t' && strings.HasPrefix(self.buffer.String(), "/") {
 			return Complete
 		}
 		self.insert(keypress.Value)

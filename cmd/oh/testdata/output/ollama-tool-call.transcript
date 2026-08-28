@@ -1,0 +1,111 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `qwen3.8:27b-mtp-q8_0-256k`
+- **Effort:** `high`
+- **Provider:** `ollama`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+call a tool through Ollama
+```
+
+## Reasoning
+
+> 2001-01-01T00:00:02Z
+
+```
+Call the tool.
+```
+
+## Tool call
+
+> 2001-01-01T00:00:03Z
+
+- **ID:** `call-1`
+- **Name:** `alpha`
+- **Read only:** `false`
+
+**Arguments**
+
+```json
+{"x":1}
+```
+
+**Subject**
+
+```
+alpha
+```
+
+## State
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `call-1`
+- **Name:** `alpha-count`
+
+**State**
+
+```json
+1
+```
+
+## Tool result
+
+> 2001-01-01T00:00:05Z
+
+- **ID:** `call-1`
+- **Name:** `alpha`
+- **Status:** `success`
+- **Duration:** `0s`
+
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":12,"total_bytes":12}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+alpha result
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Assistant
+
+> 2001-01-01T00:00:06Z
+
+```
+Ollama used the tool.
+```
+
+## User
+
+> 2001-01-01T00:00:07Z
+
+```
+continue after the tool result
+```
+
+## Assistant
+
+> 2001-01-01T00:00:08Z
+
+```
+Ollama resumed.
+```
+

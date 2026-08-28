@@ -1,0 +1,39 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User
+
+> 2001-01-01T00:00:00Z
+
+```
+show terminal-active text safely
+```
+
+## Notice
+
+> 2001-01-01T00:00:01Z
+
+- **Status:** `info`
+
+```
+notice before\e[2J\e[H after
+second\tline\x07
+```
+
+## Failure
+
+> 2001-01-01T00:00:02Z
+
+```
+failure before\e]2;stolen title\x07 after
+second\rline
+```
+
+

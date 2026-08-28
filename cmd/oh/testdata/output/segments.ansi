@@ -66,12 +66,16 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫\e[0m\e[38;
 \e[38;2;150;152;150m↑ 3\e[0m
 === session-emoji ===
 🦦
+=== session-emoji / retired animal ===
+🦅
 === session-emoji / unknown animal ===
 
 === session-name ===
 \e[38;2;150;152;150mbrave-otter\e[0m
 === session-name / emoji ===
 \e[38;2;150;152;150mbrave-otter\e[0m 🦦
+=== session-name / retired animal ===
+\e[38;2;150;152;150mbrave-vulture\e[0m 🦅
 === subscription-usage / ahead of pace ===
 \e[38;2;207;173;0m5h 28% ▲\e[0m
 === subscription-usage / another session's snapshot ===
@@ -112,6 +116,12 @@ usage \e[38;2;204;102;102mfailed\e[0m
 \e[38;2;150;152;150m#3\e[0m
 === turn-timer / model turn ===
 \e[38;2;150;152;150m3m\e[0m 1\e[38;2;150;152;150mm\e[0m
+=== turn-timer / nothing asked yet ===
+0\e[38;2;150;152;150mm\e[0m \e[38;2;150;152;150m0m\e[0m
+=== turn-timer / part of a minute ===
+\e[38;2;150;152;150m0m\e[0m 0\e[38;2;150;152;150mm\e[0m
+=== turn-timer / turns past an hour ===
+\e[38;2;150;152;150m185m\e[0m 95\e[38;2;150;152;150mm\e[0m
 === turn-timer / user turn ===
 12\e[38;2;150;152;150mm\e[0m \e[38;2;150;152;150m3m\e[0m
 === workspace-dir ===

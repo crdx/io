@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/internal/util/strutil"
 )
 
@@ -78,4 +79,28 @@ func TestWhatAPickerPaintsMatchesTheGolden(t *testing.T) {
 	}
 
 	compareWithGolden(t, "painted.ansi", output.String())
+}
+
+func TestTheCompletePickerLifecycleMatchesTheGolden(t *testing.T) {
+	keys := make(chan key.Key, 3)
+	keys <- key.Key{Code: key.Down}
+	keys <- key.Key{Code: key.Rune, Value: 'f'}
+	keys <- key.Key{Code: key.Enter}
+	close(keys)
+
+	var output strings.Builder
+	chosen, err := choose(
+		paintedRows(),
+		keys,
+		func() (int, int) { return 46, 6 },
+		&output,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if chosen != 2 {
+		t.Errorf("chose row %d, want 2", chosen)
+	}
+
+	compareWithGolden(t, "lifecycle.ansi", strutil.VisibleEscapes(output.String()))
 }

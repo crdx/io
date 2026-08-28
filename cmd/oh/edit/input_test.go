@@ -530,6 +530,17 @@ func TestControlDAtRestLeavesOnlyFromAnEmptyLine(t *testing.T) {
 	}
 }
 
+func TestTabInOrdinaryInputBecomesSpaces(t *testing.T) {
+	self := inputFromKeys(t, "one")
+
+	if got := self.Apply(key.Key{Code: key.Rune, Value: '\t'}, false); got != Draw {
+		t.Errorf("got action %v", got)
+	}
+	if got := self.Text(); got != "one"+strings.Repeat(" ", tabStop) {
+		t.Errorf("got text %q", got)
+	}
+}
+
 func TestTabRequestsCompletionWithoutChangingTheInput(t *testing.T) {
 	self := inputFromKeys(t, "/co")
 

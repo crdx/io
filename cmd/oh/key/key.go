@@ -233,8 +233,12 @@ func tilde(parameters string) Key {
 	number, _ := field(parameters, 0)
 
 	switch number {
+	case 1:
+		return Key{Code: Home, Mod: modifiers(parameters)}
 	case 3:
 		return Key{Code: Delete, Mod: modifiers(parameters)}
+	case 4:
+		return Key{Code: End, Mod: modifiers(parameters)}
 	case 5:
 		return Key{Code: PageUp, Mod: modifiers(parameters)}
 	case 6:

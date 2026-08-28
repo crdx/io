@@ -1,0 +1,65 @@
+=== a command that succeeded ===
+cmd/oh/main.go
+
+
+=== a command that failed on its own ===
+exit(1):
+make: *** [all] Error 1
+
+=== a command that failed silently ===
+exit(2)
+
+=== a kill the sandbox saw itself ===
+exit(-1)
+note: the command was killed by SIGKILL.
+the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
+every process this command started used 1h30m of processor time between them.
+
+=== a kill only the shell saw ===
+exit(137):
+error: recipe `lint` was terminated on line 104 by signal 9
+note: the shell reports that a process was killed by SIGKILL.
+the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
+every process this command started used 1h01m of processor time between them.
+
+=== a kill for writing too large a file ===
+exit(153):
+dd: writing 'big': File size limit exceeded
+note: the shell reports that a process was killed by SIGXFSZ.
+the sandbox lets a command write no more than 1G to a single file.
+
+=== a kill under a policy that sets no processor limit ===
+exit(137):
+Killed
+note: the shell reports that a process was killed by SIGKILL.
+
+=== a refusal the sandbox made ===
+exit(1):
+cp: cannot create regular file '/etc/hosts': Permission denied
+note: this command ran in a sandbox, and the failure may be the sandbox refusing it.
+external networks and the host's loopback interface are unavailable.
+writable: /workspace, /tmp
+readable: /etc/ssl/certs, /nix/store
+
+=== a write a read-only mount refused, which no note is made of ===
+exit(1):
+cp: cannot create regular file '/etc/hosts': Read-only file system
+
+=== a refusal under a policy granting nothing to read ===
+exit(1):
+cat: /etc/shadow: Permission denied
+note: this command ran in a sandbox, and the failure may be the sandbox refusing it.
+external networks and the host's loopback interface are unavailable.
+writable: /workspace
+
+=== a refusal that reads like a kill ===
+exit(137):
+cp: cannot open 'x': Permission denied
+note: the shell reports that a process was killed by SIGKILL.
+the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
+every process this command started used 3s of processor time between them.
+
+=== a command that overran ===
+exit(1):
+go: writing cache: open /cache/go-build/x: Too many open files
+note: the sandbox stopped this command for using too much.

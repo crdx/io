@@ -132,6 +132,20 @@ func TestApplicationCursorKeysAreArrows(t *testing.T) {
 	}
 }
 
+func TestLegacyTildeHomeAndEndKeysAreNavigation(t *testing.T) {
+	for input, want := range map[string]Key{
+		"\x1b[1~":   {Code: Home},
+		"\x1b[4~":   {Code: End},
+		"\x1b[1;5~": {Code: Home, Mod: Ctrl},
+		"\x1b[4;5~": {Code: End, Mod: Ctrl},
+	} {
+		keypresses := decode(t, input)
+		if len(keypresses) != 1 || keypresses[0] != want {
+			t.Errorf("%q gave %+v, want %+v", input, keypresses, want)
+		}
+	}
+}
+
 func TestOnlyTheLetterControlsCarryALetter(t *testing.T) {
 	if got := plain(0); got.Code != Unknown {
 		t.Errorf("plain(0) = %+v, want unknown", got)

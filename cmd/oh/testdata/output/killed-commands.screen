@@ -1,0 +1,269 @@
+=== narrow ===
+
+ run the linter, write the big file,
+ then copy the readme over the host's
+ hosts file
+
+
+$ j… ✗ 1m11s 5L ~100t 1h01m 1144M exi…
+$ dd if=/de… ✗ 4L 2.3s 8M exit(153): …
+$ cp READM… ✗ 6L ~100t 2M exit(1): cp…
+
+The linter was killed for its processor
+time, the write for its size, and the
+copy refused.
+=== one column ===
+
+
+r
+
+u
+
+n
+
+t
+
+h
+
+e
+
+l
+
+i
+
+n
+
+t
+
+e
+
+r
+
+,
+
+w
+
+r
+
+i
+
+t
+
+e
+
+t
+
+h
+
+e
+
+b
+
+i
+
+g
+
+f
+
+i
+
+l
+
+e
+
+,
+
+t
+
+h
+
+e
+
+n
+
+c
+
+o
+
+p
+
+y
+
+t
+
+h
+
+e
+
+r
+
+e
+
+a
+
+d
+
+m
+
+e
+
+o
+
+v
+
+e
+
+r
+
+t
+
+h
+
+e
+
+h
+
+o
+
+s
+
+t
+
+'
+
+s
+
+h
+
+o
+
+s
+
+t
+
+s
+
+f
+
+i
+
+l
+
+e
+
+
+
+
+
+
+T
+h
+e
+l
+i
+n
+t
+e
+r
+w
+a
+s
+k
+i
+l
+l
+e
+d
+f
+o
+r
+i
+t
+s
+p
+r
+o
+c
+e
+s
+s
+o
+r
+t
+i
+m
+e
+,
+t
+h
+e
+w
+r
+i
+t
+e
+f
+o
+r
+i
+t
+s
+s
+i
+z
+e
+,
+a
+n
+d
+t
+h
+e
+c
+o
+p
+y
+r
+e
+f
+u
+s
+e
+d
+.
+=== tiny ===
+
+ run the
+ linter,
+ write the
+ big file,
+ then copy
+ the readme
+ over the
+ host's
+ hosts file
+
+
+$ … ✗ exi…
+$ … ✗ exi…
+$ … ✗ exi…
+
+The linter
+was killed
+for its
+processor
+time, the
+write for
+its size,
+and the copy
+refused.
+=== wide ===
+
+ run the linter, write the big file, then copy the readme over the host's hosts file
+
+
+$ just lint ✗ 1m11s 5L ~100t 1h01m 1144M exit(137): error: recipe `lint` was terminated on line 1…
+$ dd if=/dev/zero of=big bs=1M count=4096 ✗ 4L 2.3s 8M exit(153): dd: writing 'big': File size li…
+$ cp README.md /etc/hosts ✗ 6L ~100t 2M exit(1): cp: cannot create regular file '/etc/hosts': Per…
+
+The linter was killed for its processor time, the write for its size, and the copy refused.

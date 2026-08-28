@@ -1,0 +1,25 @@
+provider = "ollama"
+model = "llama3.3:70b"
+effort = "none"
+
+[first]
+prompt = "answer without thinking"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":"Ollama answered without thinking."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''{"choices":[],"usage":{"prompt_tokens":128}}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "continue without thinking"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Ollama resumed without thinking."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''{"choices":[],"usage":{"prompt_tokens":192}}''',
+    '''[DONE]''',
+]

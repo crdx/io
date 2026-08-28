@@ -35,6 +35,7 @@ fuzz package target time='1m':
 golden:
     go test ./cmd/oh ./cmd/oh/cli ./cmd/oh/commands -update
     go test ./cmd/oh/picker ./cmd/oh/sessionPicker ./cmd/oh/modelPicker ./cmd/oh/sessions -update
+    go test ./toolbox/bash -update
 
 # what every package covers, least covered first
 cov *args:

@@ -66,12 +66,16 @@ rxw gs
 ↑ 3
 === session-emoji ===
 🦦
+=== session-emoji / retired animal ===
+🦅
 === session-emoji / unknown animal ===
 
 === session-name ===
 brave-otter
 === session-name / emoji ===
 brave-otter 🦦
+=== session-name / retired animal ===
+brave-vulture 🦅
 === subscription-usage / ahead of pace ===
 5h 28% ▲
 === subscription-usage / another session's snapshot ===
@@ -112,6 +116,12 @@ usage failed
 #3
 === turn-timer / model turn ===
 3m 1m
+=== turn-timer / nothing asked yet ===
+0m 0m
+=== turn-timer / part of a minute ===
+0m 0m
+=== turn-timer / turns past an hour ===
+185m 95m
 === turn-timer / user turn ===
 12m 3m
 === workspace-dir ===

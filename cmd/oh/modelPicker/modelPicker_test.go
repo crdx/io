@@ -174,6 +174,7 @@ func TestWhatTheModelPickerPaintsMatchesTheGolden(t *testing.T) {
 		{name: "no room for every row, so the list is scrolled to the cursor", room: 80, height: 3, cursor: 2},
 		{name: "a narrow terminal, where the columns are clipped", room: 46, height: 24, cursor: 0},
 		{name: "a filter narrowing the list to one provider", room: 80, height: 24, cursor: 0, query: "opencode"},
+		{name: "a filter no model answers to", room: 80, height: 24, cursor: 0, query: "gemini"},
 	}
 
 	var output strings.Builder

@@ -1,0 +1,183 @@
+=== narrow ===
+
+ show terminal-active text safely
+
+
+notice before [2J [H after
+second line
+Failure before ]2;stolen title  after
+second line
+=== one column ===
+
+
+s
+
+h
+
+o
+
+w
+
+t
+
+e
+
+r
+
+m
+
+i
+
+n
+
+a
+
+l
+
+-
+
+a
+
+c
+
+t
+
+i
+
+v
+
+e
+
+t
+
+e
+
+x
+
+t
+
+s
+
+a
+
+f
+
+e
+
+l
+
+y
+
+
+n
+o
+t
+i
+c
+e
+
+b
+e
+f
+o
+r
+e
+
+[
+2
+J
+
+[
+H
+
+a
+f
+t
+e
+r
+s
+e
+c
+o
+n
+d
+
+l
+i
+n
+e
+
+F
+a
+i
+l
+u
+r
+e
+
+b
+e
+f
+o
+r
+e
+
+]
+2
+;
+s
+t
+o
+l
+e
+n
+
+t
+i
+t
+l
+e
+
+
+a
+f
+t
+e
+r
+s
+e
+c
+o
+n
+d
+
+l
+i
+n
+e
+=== tiny ===
+
+ show
+ terminal-ac
+ tive text
+ safely
+
+
+notice befor
+e [2J [H aft
+er
+second line
+Failure befo
+re ]2;stolen
+ title  afte
+r
+second line
+=== wide ===
+
+ show terminal-active text safely
+
+
+notice before [2J [H after
+second line
+Failure before ]2;stolen title  after
+second line
