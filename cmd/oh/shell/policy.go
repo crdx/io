@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"time"
@@ -21,16 +22,20 @@ import (
 )
 
 const (
-	shellTimeout   = 5 * time.Minute
-	shellCPUTime   = 60 * time.Second
-	shellFileSize  = 1024 << 20
-	shellOpenFiles = 4096
-	shellProcesses = 1024
+	shellTimeout    = 5 * time.Minute
+	shellCPUPercent = 80
+	shellFileSize   = 1024 << 20
+	shellOpenFiles  = 4096
+	shellProcesses  = 1024
 
 	goBuildCacheDir  = "go-build"
 	goModuleCacheDir = "go-mod"
 	goLintCacheDir   = "golangci-lint"
 )
+
+func shellCPUTime() time.Duration {
+	return shellTimeout * time.Duration(runtime.NumCPU()) * shellCPUPercent / 100
+}
 
 func execPaths(workspaceDir string) []string {
 	paths := []string{workspaceDir}
@@ -170,7 +175,7 @@ func createPolicyWithSupportProbe(
 		},
 
 		Timeout:   shellTimeout,
-		CPUTime:   shellCPUTime,
+		CPUTime:   shellCPUTime(),
 		FileSize:  shellFileSize,
 		OpenFiles: shellOpenFiles,
 		Processes: shellProcesses,

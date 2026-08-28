@@ -6,9 +6,11 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/file"
@@ -46,6 +48,34 @@ func createTestPolicy(
 		currentCaps,
 		func(context.Context, sandbox.Policy) error { return nil },
 	)
+}
+
+func TestOnlyACommandSaturatingTheMachineReachesTheProcessorLimit(t *testing.T) {
+	limit := shellCPUTime()
+	cores := runtime.NumCPU()
+
+	saturated := shellTimeout * time.Duration(cores)
+	if limit >= saturated {
+		t.Errorf("got %s, want less than the %s a command could burn on every core", limit, saturated)
+	}
+
+	threeQuarters := shellTimeout * time.Duration(cores) * 3 / 4
+	if limit <= threeQuarters {
+		t.Errorf("got %s, want more than the %s a command using most of them would", limit, threeQuarters)
+	}
+
+	if cores > 1 && limit <= shellTimeout {
+		t.Errorf("got %s, want more than the %s wall clock a command is given", limit, shellTimeout)
+	}
+
+	policy, err := createTestPolicy(t, t.TempDir(), t.TempDir(), t.TempDir(), Paths{}, 0)
+	if err != nil {
+		t.Fatalf("could not create the policy: %v", err)
+	}
+
+	if policy.CPUTime != limit {
+		t.Errorf("got %s, want the shell to carry the %s limit", policy.CPUTime, limit)
+	}
 }
 
 func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
