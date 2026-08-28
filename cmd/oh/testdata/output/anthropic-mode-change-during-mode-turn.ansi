@@ -1,0 +1,23 @@
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m change what I am allowed to do twice over, once in each turn                                       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[KHalf an ans\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m The workspace is now read-only.                                                                    \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\r\e[KThe workspace is read-onl\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m The .git directory is now read-only.                                                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\r\e[KThe history is read-only now.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m carry on                                                                                           \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KCarrying on.\e[?25h\e[?2026l\r

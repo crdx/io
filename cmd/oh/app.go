@@ -808,12 +808,6 @@ func (self *App) finish() {
 		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: self.currentTurn.Error().Error()})
 	}
 
-	if self.currentTurn.Error() == nil {
-		self.mode.Acknowledge()
-	} else {
-		self.mode.Retract()
-	}
-
 	if self.storeProviderState() {
 		if err := self.recorder.CompleteTurn(); err != nil {
 			self.notifyFailure("The turn completion could not be stored: " + err.Error())

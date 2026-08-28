@@ -909,7 +909,7 @@ func (self *refusingOnceProvider) Send(context.Context, agent.Yield) (agent.Repl
 	return agent.Reply{}, nil
 }
 
-func TestAModeChangeThatFailedIsCarriedIntoTheNextTurn(t *testing.T) {
+func TestAModeChangeThatFailedIsSaidOnceAndNotRepeated(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{})
 	if err != nil {
@@ -927,6 +927,39 @@ func TestAModeChangeThatFailedIsCarriedIntoTheNextTurn(t *testing.T) {
 
 	self.toggleCap(caps.Write)
 
+	takeTestTurn := func(message string) {
+		self.start(message)
+		for report := range self.currentTurn.Events() {
+			self.takeTurn(report)
+		}
+		self.finish()
+	}
+
+	takeTestTurn("first")
+	takeTestTurn("second")
+	takeTestTurn("third")
+
+	if said := countModeNotes(provider.messages, nowReadOnlyNote); said != 1 {
+		t.Errorf("expected the mode change to be carried once, said %d times in %q", said, provider.messages)
+	}
+}
+
+func TestModeChangesAcrossFailedTurnsDoNotAccumulate(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = log.Close() }()
+
+	provider := &refusingOnceProvider{failures: 3}
+	self := &App{
+		agent:    agent.New("", provider, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
+	}
+
 	takeTestTurn := func(message string) []string {
 		provider.messages = nil
 		self.start(message)
@@ -938,23 +971,43 @@ func TestAModeChangeThatFailedIsCarriedIntoTheNextTurn(t *testing.T) {
 		return provider.messages
 	}
 
-	if said := takeTestTurn("first"); !slices.ContainsFunc(said, isReadOnlyNote) {
-		t.Fatalf("expected the failed turn to have carried the mode change, got %q", said)
+	self.toggleCap(caps.Write)
+	takeTestTurn("first")
+
+	self.toggleCap(caps.Git)
+	said := takeTestTurn("second")
+
+	if !slices.ContainsFunc(said, containsNote(historyNowReadWriteNote)) {
+		t.Fatalf("expected the swap that had just been made, got %q", said)
 	}
 
-	if said := takeTestTurn("second"); !slices.ContainsFunc(said, isReadOnlyNote) {
-		t.Errorf("expected the mode change to be carried again, got %q", said)
-	}
-
-	if said := takeTestTurn("third"); slices.ContainsFunc(said, isReadOnlyNote) {
-		t.Errorf("expected the mode change not to be repeated once it landed, got %q", said)
+	if slices.ContainsFunc(said, containsNote(nowReadOnlyNote)) {
+		t.Errorf("expected a swap said in an earlier turn not to be said again, got %q", said)
 	}
 }
 
-const nowReadOnlyNote = "The workspace is now read-only."
+const (
+	nowReadOnlyNote         = "The workspace is now read-only."
+	historyNowReadWriteNote = "The .git directory is now read-write."
+)
+
+func containsNote(note string) func(message string) bool {
+	return func(message string) bool { return strings.Contains(message, note) }
+}
 
 func isReadOnlyNote(message string) bool {
 	return strings.Contains(message, nowReadOnlyNote)
+}
+
+func countModeNotes(messages []string, note string) int {
+	said := 0
+	for _, message := range messages {
+		if strings.Contains(message, note) {
+			said++
+		}
+	}
+
+	return said
 }
 
 func TestPendingInputCanTakeBackAnyMessage(t *testing.T) {
@@ -6001,6 +6054,7 @@ type sessionGoldenTurn struct {
 	ReplaceAfterToolRequest   string                  `toml:"replace-after-tool-request"`
 	ToggleAfterMessageDelta   string                  `toml:"toggle-after-message-delta"`
 	ToggleAfterToolRequest    string                  `toml:"toggle-after-tool-request"`
+	ToggleDuringModeTurn      string                  `toml:"toggle-during-mode-turn"`
 	CancelAfterToolToggle     bool                    `toml:"cancel-after-tool-toggle"`
 }
 
@@ -6661,9 +6715,22 @@ func runSessionGoldenTurn(
 	}
 	testHarness.finish()
 
+	runQueuedSessionGoldenTurns(t, testHarness, turn.ToggleDuringModeTurn)
+}
+
+func runQueuedSessionGoldenTurns(t *testing.T, testHarness *App, toggleDuringModeTurn string) {
+	t.Helper()
+
 	for testHarness.currentTurn.Running() {
 		for event := range testHarness.currentTurn.Events() {
 			testHarness.takeTurn(event)
+			if toggleDuringModeTurn == "" || event.Update.Delta == nil {
+				continue
+			}
+			if event.Update.Delta.Kind == agent.ModelMessageEvent {
+				toggleSessionGoldenCaps(t, testHarness, toggleDuringModeTurn)
+				toggleDuringModeTurn = ""
+			}
 		}
 		testHarness.finish()
 	}
@@ -7872,5 +7939,80 @@ func TestEverySessionGoldenOpensWithTheModeItIsIn(t *testing.T) {
 
 			t.Fatal("expected the session to record the mode it opened in")
 		})
+	}
+}
+
+func TestAModeChangeIsNotLostWhenItsQueuedTurnIsDropped(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = log.Close() }()
+
+	provider := &refusingOnceProvider{}
+	self := &App{
+		agent:    agent.New("", provider, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
+	}
+
+	takeTestTurn := func(message string) {
+		self.start(message)
+		for report := range self.currentTurn.Events() {
+			self.takeTurn(report)
+		}
+		self.finish()
+	}
+
+	self.start("first")
+	self.toggleCap(caps.Write)
+	self.cancelTurn(escapeReason)
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	if self.currentTurn.Running() {
+		t.Fatal("expected the dropped mode change to have started no turn of its own")
+	}
+
+	takeTestTurn("second")
+
+	if said := countModeNotes(provider.messages, nowReadOnlyNote); said != 1 {
+		t.Errorf("expected the dropped mode change to be said once, said %d in %q", said, provider.messages)
+	}
+}
+
+func TestAModeChangeIsNotLostWhenAMessageReplacesItsTurn(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = log.Close() }()
+
+	provider := &refusingOnceProvider{}
+	self := &App{
+		agent:    agent.New("", provider, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
+	}
+
+	self.start("first")
+	self.toggleCap(caps.Write)
+	self.replaceTurn("second")
+
+	for self.currentTurn.Running() {
+		for report := range self.currentTurn.Events() {
+			self.takeTurn(report)
+		}
+		self.finish()
+	}
+
+	if said := countModeNotes(provider.messages, nowReadOnlyNote); said != 1 {
+		t.Errorf("expected the replaced mode change to be said once, said %d in %q", said, provider.messages)
 	}
 }
