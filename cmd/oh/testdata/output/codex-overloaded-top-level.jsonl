@@ -1,7 +1,7 @@
 {"kind":"head","version":10,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"be overloaded before the answer"}}
-{"kind":"event","event":{"kind":"retrying","text":"model overloaded","attempt":1}}
+{"kind":"event","event":{"kind":"retrying","text":"Model overloaded","attempt":1}}
 {"kind":"event","event":{"kind":"model_message","text":"Through on the second attempt."}}
 {"kind":"item","payload":{"role":"user","content":"be overloaded before the answer"}}
 {"kind":"item","payload":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Through on the second attempt."}]}}

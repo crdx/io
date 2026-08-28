@@ -2,27 +2,27 @@
 \e[48;2;52;53;65m receive HTTP 500                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;207;173;0mattempt 1 failed, asking again in 0.3s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 2 failed, asking again in 0.5s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 3 failed, asking again in 1s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 4 failed, asking again in 2s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 5 failed, asking again in 4s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 6 failed, asking again in 8s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 7 failed, asking again in 16s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 8 failed, asking again in 32s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 9 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 10 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 11 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 12 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 13 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 14 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 15 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 16 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 17 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 18 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 19 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 20 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
-\e[38;2;207;173;0mattempt 21 failed, asking again in 1m00s: request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 1 failed, asking again in 0.3s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 2 failed, asking again in 0.5s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 3 failed, asking again in 1s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 4 failed, asking again in 2s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 5 failed, asking again in 4s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 6 failed, asking again in 8s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 7 failed, asking again in 16s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 8 failed, asking again in 32s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 9 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 10 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 11 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 12 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 13 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 14 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 15 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 16 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 17 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 18 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 19 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 20 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
+\e[38;2;207;173;0mAttempt 21 failed, asking again in 1m00s: Request failed with status 500:\e[0m\r
 \e[38;2;204;102;102mrequest failed with status 500: \e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

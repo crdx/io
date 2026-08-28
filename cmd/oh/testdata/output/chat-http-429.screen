@@ -2,27 +2,27 @@
  receive HTTP 429
 
 
-attempt 1 failed, asking again in 0.3s: request failed with status 429:
-attempt 2 failed, asking again in 0.5s: request failed with status 429:
-attempt 3 failed, asking again in 1s: request failed with status 429:
-attempt 4 failed, asking again in 2s: request failed with status 429:
-attempt 5 failed, asking again in 4s: request failed with status 429:
-attempt 6 failed, asking again in 8s: request failed with status 429:
-attempt 7 failed, asking again in 16s: request failed with status 429:
-attempt 8 failed, asking again in 32s: request failed with status 429:
-attempt 9 failed, asking again in 1m00s: request failed with status 429:
-attempt 10 failed, asking again in 1m00s: request failed with status 429:
-attempt 11 failed, asking again in 1m00s: request failed with status 429:
-attempt 12 failed, asking again in 1m00s: request failed with status 429:
-attempt 13 failed, asking again in 1m00s: request failed with status 429:
-attempt 14 failed, asking again in 1m00s: request failed with status 429:
-attempt 15 failed, asking again in 1m00s: request failed with status 429:
-attempt 16 failed, asking again in 1m00s: request failed with status 429:
-attempt 17 failed, asking again in 1m00s: request failed with status 429:
-attempt 18 failed, asking again in 1m00s: request failed with status 429:
-attempt 19 failed, asking again in 1m00s: request failed with status 429:
-attempt 20 failed, asking again in 1m00s: request failed with status 429:
-attempt 21 failed, asking again in 1m00s: request failed with status 429:
+Attempt 1 failed, asking again in 0.3s: Request failed with status 429:
+Attempt 2 failed, asking again in 0.5s: Request failed with status 429:
+Attempt 3 failed, asking again in 1s: Request failed with status 429:
+Attempt 4 failed, asking again in 2s: Request failed with status 429:
+Attempt 5 failed, asking again in 4s: Request failed with status 429:
+Attempt 6 failed, asking again in 8s: Request failed with status 429:
+Attempt 7 failed, asking again in 16s: Request failed with status 429:
+Attempt 8 failed, asking again in 32s: Request failed with status 429:
+Attempt 9 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 10 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 11 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 12 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 13 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 14 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 15 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 16 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 17 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 18 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 19 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 20 failed, asking again in 1m00s: Request failed with status 429:
+Attempt 21 failed, asking again in 1m00s: Request failed with status 429:
 request failed with status 429:
 
 

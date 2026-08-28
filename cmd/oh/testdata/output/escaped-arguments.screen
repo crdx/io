@@ -7,7 +7,7 @@ $ echo  [31mred [0m ✓ 1L 0s 0s 2M red
 screenshot notes [2J [H.md lines… ✓ 1L
 grep one two ✓ 1L
 
-attempt 1 failed, asking again in 2s: up
+Attempt 1 failed, asking again in 2s: up
 stream said no
 
 Nothing moved.
@@ -55,7 +55,7 @@ e
 
 
 
-a
+A
 t
 t
 e
@@ -134,7 +134,7 @@ $ echo … ✓
 scre… ✓ 1L
 grep ✓ 1L
 
-attempt 1 fa
+Attempt 1 fa
 iled, asking
  again in 2s
 : upstream s
@@ -151,6 +151,6 @@ $ echo  [31mred [0m ✓ 1L 0s 0s 2M red
 screenshot notes [2J [H.md lines 1 to 40  ✓ 1L
 grep one two ✓ 1L
 
-attempt 1 failed, asking again in 2s: upstream said no
+Attempt 1 failed, asking again in 2s: upstream said no
 
 Nothing moved.

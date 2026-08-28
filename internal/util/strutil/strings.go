@@ -7,6 +7,14 @@ import (
 	"unicode/utf8"
 )
 
+func Capitalise(text string) string {
+	characters := []rune(text)
+	if len(characters) > 0 {
+		characters[0] = unicode.ToUpper(characters[0])
+	}
+	return string(characters)
+}
+
 func FirstLine(text string) string {
 	line, _, _ := strings.Cut(strings.TrimSpace(text), "\n")
 	return strings.TrimSpace(line)

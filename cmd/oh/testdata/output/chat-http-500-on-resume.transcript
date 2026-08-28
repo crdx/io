@@ -45,7 +45,7 @@ receive HTTP 500 on the turn after a replay
 - **Waited:** `250ms`
 
 ```
-request failed with status 500: 
+Request failed with status 500: 
 ```
 
 ## Assistant

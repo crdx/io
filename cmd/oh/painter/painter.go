@@ -137,7 +137,7 @@ func (self *Picasso) ProvisionalDelta() agent.Delta {
 }
 
 func RenderRetry(event agent.Event) string {
-	notice := "attempt " + strconv.Itoa(event.Attempt) + " failed"
+	notice := "Attempt " + strconv.Itoa(event.Attempt) + " failed"
 
 	if event.Took > 0 {
 		notice += ", asking again in " + util.CompactDuration(event.Took)

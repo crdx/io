@@ -29,7 +29,7 @@ receive HTTP 429
 - **Waited:** `250ms`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -40,7 +40,7 @@ request failed with status 429:
 - **Waited:** `500ms`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -51,7 +51,7 @@ request failed with status 429:
 - **Waited:** `1s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -62,7 +62,7 @@ request failed with status 429:
 - **Waited:** `2s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -73,7 +73,7 @@ request failed with status 429:
 - **Waited:** `4s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -84,7 +84,7 @@ request failed with status 429:
 - **Waited:** `8s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -95,7 +95,7 @@ request failed with status 429:
 - **Waited:** `16s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -106,7 +106,7 @@ request failed with status 429:
 - **Waited:** `32s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -117,7 +117,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -128,7 +128,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -139,7 +139,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -150,7 +150,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -161,7 +161,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -172,7 +172,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -183,7 +183,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -194,7 +194,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -205,7 +205,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -216,7 +216,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -227,7 +227,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -238,7 +238,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Retrying
@@ -249,7 +249,7 @@ request failed with status 429:
 - **Waited:** `1m0s`
 
 ```
-request failed with status 429: 
+Request failed with status 429: 
 ```
 
 ## Failure

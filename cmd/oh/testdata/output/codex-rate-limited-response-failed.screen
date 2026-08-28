@@ -2,7 +2,7 @@
  be rate limited before the answer
 
 
-attempt 1 failed, asking again in 0.3s: too many requests
+Attempt 1 failed, asking again in 0.3s: Too many requests
 
 Through once the limit lifted.
 

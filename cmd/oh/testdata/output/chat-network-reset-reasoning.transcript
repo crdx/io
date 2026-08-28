@@ -29,7 +29,7 @@ lose the network during reasoning
 - **Waited:** `250ms`
 
 ```
-unexpected EOF
+Unexpected EOF
 ```
 
 ## Assistant

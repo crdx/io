@@ -4,7 +4,7 @@
 \r
 \e[?7l\r\e[KHalf an ans\r
 \r
-\e[38;2;207;173;0mattempt 1 failed, asking again in 0.3s: Overloaded\e[0m\r
+\e[38;2;207;173;0mAttempt 1 failed, asking again in 0.3s: Overloaded\e[0m\r
 \r
 \r\e[KThrough on the second attempt.\e[?25h\e[?2026l\r
 \r

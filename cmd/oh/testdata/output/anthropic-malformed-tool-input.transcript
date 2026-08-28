@@ -29,7 +29,7 @@ recover from malformed tool input
 - **Waited:** `250ms`
 
 ```
-the work tool call did not contain a JSON object
+The work tool call did not contain a JSON object
 ```
 
 ## Assistant

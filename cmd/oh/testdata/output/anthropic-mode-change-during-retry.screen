@@ -4,14 +4,14 @@
 
 Half an ans
 
-attempt 1 failed, asking again in 0.3s: the stream ended before the response did
+Attempt 1 failed, asking again in 0.3s: The stream ended before the response did
 
 
  The workspace is now read-only.
 
 
-attempt 1 failed, asking again in 0.3s: the stream ended before the response did
-attempt 2 failed, asking again in 0.5s: the stream ended before the response did
+Attempt 1 failed, asking again in 0.3s: The stream ended before the response did
+Attempt 2 failed, asking again in 0.5s: The stream ended before the response did
 
 Noted, the workspace is read-only now.
 

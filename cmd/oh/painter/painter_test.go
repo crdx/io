@@ -40,7 +40,7 @@ func TestARetryIsDrawnFromWhatItWasRatherThanFromWhatItSaid(t *testing.T) {
 	paint := New(output.New(&screenOutput), false, nil, "")
 	paint.DrawEvent(agent.Event{
 		Kind:    agent.RetryingEvent,
-		Text:    "the stream ended before the response did\nand a second line nobody needs",
+		Text:    "The stream ended before the response did\nand a second line nobody needs",
 		Attempt: 2,
 		Took:    500 * time.Millisecond,
 	})
@@ -48,9 +48,9 @@ func TestARetryIsDrawnFromWhatItWasRatherThanFromWhatItSaid(t *testing.T) {
 	drawn := style.Plain(screenOutput.String())
 
 	for _, want := range []string{
-		"attempt 2 failed",
+		"Attempt 2 failed",
 		"asking again in 0.5s",
-		"the stream ended before the response did",
+		"The stream ended before the response did",
 	} {
 		if !strings.Contains(drawn, want) {
 			t.Errorf("expected %q to be drawn, got %q", want, drawn)

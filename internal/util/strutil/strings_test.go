@@ -10,6 +10,18 @@ import (
 	"crdx.org/io/internal/util/strutil"
 )
 
+func TestCapitaliseUppercasesTheFirstRune(t *testing.T) {
+	for text, want := range map[string]string{
+		"":        "",
+		"already": "Already",
+		"éclair":  "Éclair",
+	} {
+		if got := strutil.Capitalise(text); got != want {
+			t.Errorf("Capitalise(%q) = %q, want %q", text, got, want)
+		}
+	}
+}
+
 func TestLinesDoesNotAddALineAfterATrailingNewline(t *testing.T) {
 	got := strutil.Lines("one\ntwo\n")
 	want := []string{"one", "two"}

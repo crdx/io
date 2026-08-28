@@ -5,7 +5,7 @@
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mUse the tool.\e[0m\e[0m\r
 \r\e[K\e[38;2;207;173;0mwork\e[0m \e[38;2;192;128;80mwork\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
-\e[38;2;207;173;0mattempt 1 failed, asking again in 0.3s: request failed with status 502: upstream connect error or di\r
+\e[38;2;207;173;0mAttempt 1 failed, asking again in 0.3s: Request failed with status 502: upstream connect error or di\r
 sconnect/reset before headers. reset reason: connection termination\e[0m\r
 \r
 \r\e[KThe tool said: tool result.\e[?25h\e[?2026l\r

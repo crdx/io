@@ -29,7 +29,7 @@ send fields without SSE data
 - **Waited:** `250ms`
 
 ```
-the stream ended before the response did
+The stream ended before the response did
 ```
 
 ## Assistant

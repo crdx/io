@@ -260,7 +260,7 @@ func (self *Agent) send(
 			return reply, false, err
 		}
 
-		notice := Event{Kind: RetryingEvent, Text: err.Error(), Attempt: attempt, Took: wait}
+		notice := Event{Kind: RetryingEvent, Text: strutil.Capitalise(err.Error()), Attempt: attempt, Took: wait}
 
 		if !yieldEvent(notice, nil) {
 			return reply, false, err

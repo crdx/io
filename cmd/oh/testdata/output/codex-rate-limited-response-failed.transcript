@@ -29,7 +29,7 @@ be rate limited before the answer
 - **Waited:** `250ms`
 
 ```
-too many requests
+Too many requests
 ```
 
 ## Assistant

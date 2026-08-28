@@ -2,7 +2,7 @@
  recover from malformed tool input
 
 
-attempt 1 failed, asking again in 0.3s: the work tool call did not contain a JSON object
+Attempt 1 failed, asking again in 0.3s: The work tool call did not contain a JSON object
 
 I corrected the malformed call.
 

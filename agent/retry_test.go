@@ -137,8 +137,8 @@ func TestAFailedRequestSaysSoBeforeItIsMadeAgain(t *testing.T) {
 		t.Errorf("expected the failed attempt to be numbered, got %d", notices[0].Attempt)
 	case notices[0].Took <= 0:
 		t.Errorf("expected the wait to be reported, got %s", notices[0].Took)
-	case notices[0].Text != wireDiedError{}.Error():
-		t.Errorf("expected what stopped it to be reported, got %q", notices[0].Text)
+	case notices[0].Text != "The stream ended before the response did":
+		t.Errorf("expected what stopped it to be capitalised, got %q", notices[0].Text)
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/internal/util/strutil"
 )
 
 type usageError struct{}
@@ -31,11 +32,7 @@ func FormatError(invocation Invocation, err error) string {
 		return "Usage: " + invocation.Usage
 	}
 
-	message := []rune(err.Error())
-	if len(message) > 0 {
-		message[0] = []rune(strings.ToUpper(string(message[0])))[0]
-	}
-	return invocation.Name + ": " + string(message)
+	return invocation.Name + ": " + strutil.Capitalise(err.Error())
 }
 
 type Context interface {
