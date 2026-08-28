@@ -1,0 +1,5 @@
+=== long URL ===
+https://auth.example.test/oauth/authorize?client_id=oh-desktop&code_challenge=ab
+cdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ&code_challenge_meth
+od=S256&redirect_uri=http%3A%2F%2Flocalhost%3A1455%2Fauth%2Fcallback&response_ty
+pe=code&scope=openid%20profile%20email%20offline_access

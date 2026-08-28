@@ -18,6 +18,14 @@ const pathExpression = `(?:~|\.{1,2})?/(?:[[:alnum:]_.@+%=-]+/)*[[:alnum:]_.@+%=
 
 var pathPattern = regexp.MustCompile(`(` + pathExpression + `)(?::([0-9]+)(?::([0-9]+))?)?`)
 
+func RenderURL(text string, address string) string {
+	return openPrefix + address + terminator + text + closeLink
+}
+
+func Plain(text string) string {
+	return visibleTextOf(text).text
+}
+
 // Render adds OSC 8 links to path-like spans which resolve beneath workspace or name an absolute
 // path. ANSI styling around and within a path is preserved.
 func Render(text string, workspace string) string {

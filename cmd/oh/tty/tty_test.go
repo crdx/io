@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"os"
+	"reflect"
 	"testing"
+
+	"golang.org/x/term"
 )
 
 func TestNothingButAFileCanBeATerminal(t *testing.T) {
@@ -33,6 +36,28 @@ func TestRawRefusesAScreenThatIsNotATerminal(t *testing.T) {
 
 	if screen.Len() != 0 {
 		t.Errorf("expected nothing written, got %q", screen.String())
+	}
+}
+
+func TestRawRestoresTheTerminalState(t *testing.T) {
+	terminal := pty(t)
+	before, err := term.GetState(int(terminal.Fd()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	restore, err := Raw(terminal, terminal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	restore()
+
+	after, err := term.GetState(int(terminal.Fd()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(after, before) {
+		t.Error("raw mode did not restore the terminal state")
 	}
 }
 

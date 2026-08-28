@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"crdx.org/io/cmd/oh/key"
+	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
 )
 
@@ -39,7 +40,10 @@ func Run(terminal *os.File, getNextRefresh func(time.Time) time.Time, handler Ha
 	beater := time.NewTicker(heartRate)
 	defer beater.Stop()
 
-	run(Keypresses(terminal), resizeSignals, refresh.timer.C, refresh.schedule, beater.C, handler)
+	keys, stopReading := Keypresses(terminal)
+	defer stopReading()
+
+	run(keys, resizeSignals, refresh.timer.C, refresh.schedule, beater.C, handler)
 }
 
 func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan time.Time, schedule func(), beats <-chan time.Time, handler Handler) {
@@ -116,20 +120,36 @@ func (self *refreshTimer) stop() {
 	self.timer.Stop()
 }
 
-func Keypresses(terminal *os.File) <-chan key.Key {
+// Keypresses decodes keys until the returned stop is called, which waits for the reading to finish
+// so that the terminal is nobody's before it returns.
+func Keypresses(terminal *os.File) (<-chan key.Key, func()) {
+	reader := tty.NewReader(terminal)
 	keys := make(chan key.Key)
+	finished := make(chan struct{})
+
 	go func() {
+		defer close(finished)
 		defer close(keys)
-		decoder := key.NewDecoder(bufio.NewReader(terminal))
+
+		decoder := key.NewDecoder(bufio.NewReader(reader))
 		for {
 			keypress, err := decoder.Next()
 			if err != nil {
 				return
 			}
-			keys <- keypress
+
+			select {
+			case keys <- keypress:
+			case <-reader.Stopping():
+				return
+			}
 		}
 	}()
-	return keys
+
+	return keys, func() {
+		reader.Stop()
+		<-finished
+	}
 }
 
 func Resizes() chan os.Signal {

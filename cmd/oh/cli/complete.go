@@ -14,12 +14,13 @@ import (
 const completeFlag = "--complete"
 
 const (
-	completeOption  = "option"
-	completeModel   = "model"
-	completeEffort  = "effort"
-	completeSession = "session"
-	completeCaps    = "caps"
-	completeTool    = "tool"
+	completeOption   = "option"
+	completeModel    = "model"
+	completeEffort   = "effort"
+	completeSession  = "session"
+	completeProvider = "provider"
+	completeCaps     = "caps"
+	completeTool     = "tool"
 )
 
 func completionRequest(args []string) (string, string, bool) {
@@ -80,6 +81,8 @@ func completions(kind string, word string, sources Sources) []string {
 		return effortCompletions(word, model.Choices(sources.ModelCachePath))
 	case completeSession:
 		return withPrefix(word, sessionNames(sources.SessionsDir))
+	case completeProvider:
+		return withPrefix(word, model.LoginProviderNames())
 	case completeCaps:
 		return withPrefix(word, capsCompletions())
 	case completeTool:

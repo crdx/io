@@ -11,9 +11,10 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os/exec"
 	"time"
 
+	"crdx.org/io/internal/browser"
+	"crdx.org/io/internal/oauth"
 	"crdx.org/io/internal/req"
 )
 
@@ -33,6 +34,22 @@ const chill = 5 * time.Minute
 
 // Login authorises against a Claude subscription and stores the credentials.
 func Login(ctx context.Context) error {
+	return LoginWithAddress(ctx, printAuthorisationAddress)
+}
+
+// LoginWithAddress authorises against a Claude subscription after handing the authorisation address
+// to the given visitor.
+func LoginWithAddress(ctx context.Context, presentAddress func(string)) error {
+	return LoginWithRedirect(ctx, presentAddress, nil)
+}
+
+// LoginWithRedirect authorises against a Claude subscription through either the loopback callback
+// or a complete redirect URL received from redirects.
+func LoginWithRedirect(
+	ctx context.Context,
+	presentAddress func(string),
+	redirects <-chan string,
+) error {
 	token := newToken()
 
 	var config net.ListenConfig
@@ -43,15 +60,9 @@ func Login(ctx context.Context) error {
 	}
 
 	address := authoriseAddress(token)
+	presentAddress(address)
 
-	fmt.Println("Visit this address to authorise:")
-	fmt.Println()
-	fmt.Println("  " + address)
-	fmt.Println()
-
-	open(address)
-
-	code, err := waitForCallback(ctx, listener, token)
+	code, err := waitForCallback(ctx, listener, token, redirects)
 	if err != nil {
 		return err
 	}
@@ -62,6 +73,18 @@ func Login(ctx context.Context) error {
 	}
 
 	return saveCredentials(CredentialsPath(), credentials)
+}
+
+func printAuthorisationAddress(address string) {
+	fmt.Println("Visit this address to authorise:")
+	fmt.Println()
+	fmt.Println("  " + address)
+	fmt.Println()
+	if err := browser.Open(address); err != nil {
+		fmt.Println("Could not open a browser:", err)
+		fmt.Println("Visit the address above to continue.")
+		fmt.Println()
+	}
 }
 
 func authoriseAddress(token string) string {
@@ -81,7 +104,12 @@ func authoriseAddress(token string) string {
 	return authoriseURL + "?" + query.Encode()
 }
 
-func waitForCallback(ctx context.Context, listener net.Listener, state string) (string, error) {
+func waitForCallback(
+	ctx context.Context,
+	listener net.Listener,
+	state string,
+	redirects <-chan string,
+) (string, error) {
 	type transmission struct {
 		code string
 		err  error
@@ -138,6 +166,8 @@ func waitForCallback(ctx context.Context, listener net.Listener, state string) (
 	select {
 	case transmission := <-radio:
 		return transmission.code, transmission.err
+	case redirect := <-redirects:
+		return oauth.CodeFromRedirect(redirect, state)
 	case <-ctx.Done():
 		return "", ctx.Err()
 	case <-time.After(chill):
@@ -221,9 +251,4 @@ func newToken() string {
 	_, _ = rand.Read(buffer)
 
 	return hex.EncodeToString(buffer)
-}
-
-func open(address string) {
-	//nolint:gosec,noctx // the address is one we built, and the browser outlives this call
-	_ = exec.Command("xdg-open", address).Start()
 }

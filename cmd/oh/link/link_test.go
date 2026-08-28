@@ -8,6 +8,18 @@ import (
 	"testing"
 )
 
+func TestURLLinkKeepsTheCompleteAddressVisible(t *testing.T) {
+	address := "https://example.test/authorise?token=one"
+	got := RenderURL(address, address)
+	want := "\x1b]8;;" + address + "\x1b\\" + address + "\x1b]8;;\x1b\\"
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if Plain(got) != address {
+		t.Errorf("visible address is %q", Plain(got))
+	}
+}
+
 func TestSourceLocationsBecomeFileFragmentsWithoutChangingTheirText(t *testing.T) {
 	workspace := t.TempDir()
 	path := prepareFile(t, workspace, "cmd/oh/draw.go")

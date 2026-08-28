@@ -3,8 +3,12 @@ package model
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"slices"
 	"testing"
+	"time"
+
+	"crdx.org/io/agent"
 )
 
 func TestTheEffortsOfferedRunFromLeastToMost(t *testing.T) {
@@ -44,7 +48,7 @@ func TestAModelIsOfferedAtTheEffortNearestTheOneWanted(t *testing.T) {
 }
 
 func TestThePickerOnlyOpensWhereItCanBeDrawn(t *testing.T) {
-	_, err := ChooseWhenNoneSelected(ErrNoSelection, t.TempDir()+"/models.json", nil, nil)
+	_, err := ChooseWhenNoneSelected(ErrNoSelection, t.TempDir()+"/models.json", everyoneSignedIn, nil, nil)
 
 	if !errors.Is(err, ErrNoSelection) {
 		t.Errorf("expected the reason nothing was selected to stand, got %v", err)
@@ -54,7 +58,7 @@ func TestThePickerOnlyOpensWhereItCanBeDrawn(t *testing.T) {
 func TestOnlyAnUnselectedModelOpensThePicker(t *testing.T) {
 	wanted := errors.New("something else went wrong")
 
-	_, err := ChooseWhenNoneSelected(wanted, t.TempDir()+"/models.json", os.Stdin, os.Stdout)
+	_, err := ChooseWhenNoneSelected(wanted, t.TempDir()+"/models.json", everyoneSignedIn, os.Stdin, os.Stdout)
 
 	if !errors.Is(err, wanted) {
 		t.Errorf("expected the original reason back, got %v", err)
@@ -62,7 +66,58 @@ func TestOnlyAnUnselectedModelOpensThePicker(t *testing.T) {
 }
 
 func TestNothingCanBeChosenWhenNoModelsAreKnown(t *testing.T) {
-	if _, err := Choose(t.TempDir()+"/models.json", nil, nil); err == nil {
+	if _, err := Choose(t.TempDir()+"/models.json", everyoneSignedIn, nil, nil); err == nil {
 		t.Error("expected the empty model list to be refused")
 	}
+}
+
+func TestThePickerRefusesToOpenWhereNoProviderIsSignedIntoAtAll(t *testing.T) {
+	path := writeChoosableModels(t)
+
+	_, err := Choose(path, func(string) bool { return false }, nil, nil)
+	if !errors.Is(err, ErrNotLoggedIn) {
+		t.Errorf("expected the picker to advise signing in, got %v", err)
+	}
+}
+
+func TestOnlyTheModelsOfASignedIntoProviderAreOffered(t *testing.T) {
+	choices := signedInto([]Choice{
+		{Provider: CodexProvider, Model: "gpt-5.6-sol"},
+		{Provider: AnthropicProvider, Model: "claude-opus-5"},
+		{Provider: OllamaProvider, Model: "qwen3.8:27b"},
+	}, func(providerName string) bool { return providerName != AnthropicProvider })
+
+	offeredNames := make([]string, len(choices))
+	for i, choice := range choices {
+		offeredNames[i] = choice.Provider + "/" + choice.Model
+	}
+
+	want := []string{"codex/gpt-5.6-sol", "ollama/qwen3.8:27b"}
+	if !slices.Equal(offeredNames, want) {
+		t.Errorf("got %v, want %v", offeredNames, want)
+	}
+}
+
+func everyoneSignedIn(string) bool {
+	return true
+}
+
+func writeChoosableModels(t *testing.T) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), "models.json")
+	cache := modelCache{
+		Version: cacheVersion,
+		Checked: time.Now(),
+		Providers: map[string]cachedModels{
+			CodexProvider: {Models: []agent.Model{
+				{ID: "gpt-5.6-sol", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+			}},
+		},
+	}
+	if err := saveModelCache(path, cache); err != nil {
+		t.Fatal(err)
+	}
+
+	return path
 }

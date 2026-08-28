@@ -1,6 +1,7 @@
 package interaction
 
 import (
+	"io"
 	"os"
 	"testing"
 	"testing/synctest"
@@ -197,4 +198,36 @@ func TestRunStopsAndRedraws(t *testing.T) {
 			t.Errorf("beaten=%t drawn=%t", beaten, drawn)
 		}
 	})
+}
+
+func TestKeypressesGiveTheTerminalBackWhenTheyAreStopped(t *testing.T) {
+	terminal, err := os.OpenFile("/dev/ptmx", os.O_RDWR, 0)
+	if err != nil {
+		t.Skipf("no pseudo-terminal to test against: %v", err)
+	}
+	t.Cleanup(func() { _ = terminal.Close() })
+
+	keys, stopReading := Keypresses(terminal)
+	stopReading()
+
+	select {
+	case _, open := <-keys:
+		if open {
+			t.Error("a stopped reader handed back a keypress")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("the keypress channel stayed open after stopping")
+	}
+
+	if _, err := io.WriteString(terminal, "x"); err != nil {
+		t.Fatal(err)
+	}
+
+	var taken [1]byte
+	if _, err := terminal.Read(taken[:]); err != nil {
+		t.Fatal(err)
+	}
+	if taken[0] != 'x' {
+		t.Errorf("the next reader got %q, so the keypress reader was still holding the terminal", taken[0])
+	}
 }

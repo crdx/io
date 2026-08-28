@@ -1,9 +1,0 @@
-ohctl login — store provider credentials
-
-Usage:
-    ohctl login [codex | opencode-go | anthropic]
-
-Providers:
-    codex         Authorise a ChatGPT subscription with OAuth [default]
-    opencode-go   Store an OpenCode Go API key
-    anthropic     Authorise a Claude subscription with OAuth

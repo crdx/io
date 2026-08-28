@@ -30,6 +30,7 @@ import (
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/model"
+	"crdx.org/io/cmd/oh/onboarding"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/prompt"
@@ -124,6 +125,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", nil
 	}
 
+	if inputArgs.Login {
+		err := onboarding.Login(inputArgs.LoginProvider, os.Stdin, os.Stdout)
+		if errors.Is(err, onboarding.ErrCancelled) {
+			return "", nil
+		}
+		return "", err
+	}
+
 	if inputArgs.List {
 		return "", model.List(os.Stdout, modelCachePath)
 	}
@@ -163,7 +172,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if inputArgs.IsModelPicker {
 		var chosenModel model.Selection
 		var err error
-		startup.Wait(func() { chosenModel, err = model.Choose(modelCachePath, os.Stdin, os.Stdout) })
+		startup.Wait(func() { chosenModel, err = model.Choose(modelCachePath, backend.IsLoggedIn, os.Stdin, os.Stdout) })
 		if errors.Is(err, picker.ErrCancelled) {
 			return "", nil
 		}
@@ -279,7 +288,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	)
 	if err != nil {
 		startup.Wait(func() {
-			selection, err = model.ChooseWhenNoneSelected(err, modelCachePath, os.Stdin, os.Stdout)
+			selection, err = model.ChooseWhenNoneSelected(err, modelCachePath, backend.IsLoggedIn, os.Stdin, os.Stdout)
 		})
 	}
 	if errors.Is(err, picker.ErrCancelled) {

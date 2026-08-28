@@ -56,7 +56,7 @@ func TestCompletionRequestReadsTheKindAndWord(t *testing.T) {
 func TestOptionCompletionsComeFromTheUsage(t *testing.T) {
 	options := usageOptions(usage)
 
-	for _, wanted := range []string{"-r", "--resume", "-m", "--model", "-t", "--tool", "-l", "--list", "-h", "--help"} {
+	for _, wanted := range []string{"-L", "--login", "-r", "--resume", "-m", "--model", "-t", "--tool", "-l", "--list", "-h", "--help"} {
 		if !slices.Contains(options, wanted) {
 			t.Errorf("expected %q among %v", wanted, options)
 		}
@@ -66,6 +66,13 @@ func TestOptionCompletionsComeFromTheUsage(t *testing.T) {
 		if slices.Contains(options, unwanted) {
 			t.Errorf("did not expect %q among %v", unwanted, options)
 		}
+	}
+}
+
+func TestProviderCompletionsUseTheLoginNames(t *testing.T) {
+	got := completions(completeProvider, "op", Sources{})
+	if !slices.Equal(got, []string{model.OpencodeGoProvider}) {
+		t.Errorf("got %v", got)
 	}
 }
 

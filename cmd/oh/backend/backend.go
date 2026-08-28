@@ -6,7 +6,9 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/req"
+	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/codex"
+	"crdx.org/io/provider/opencodego"
 	"crdx.org/io/tool"
 
 	"crdx.org/io/cmd/oh/model"
@@ -57,6 +59,10 @@ func (self *Connection) UseSession(name string) {
 }
 
 func Connect(choice model.Choice, effort string, endpoints EndpointSettings) (*Connection, error) {
+	if err := requireCredentials(choice.Provider, endpoints.OverrideURL); err != nil {
+		return nil, err
+	}
+
 	connection, err := connectProvider(choice, effort, endpoints)
 	if err != nil {
 		return nil, err
@@ -70,6 +76,33 @@ func Connect(choice model.Choice, effort string, endpoints EndpointSettings) (*C
 	}
 
 	return connection, nil
+}
+
+func IsLoggedIn(providerName string) bool {
+	return requireCredentials(providerName, "") == nil
+}
+
+func requireCredentials(providerName string, overrideURL string) error {
+	if overrideURL != "" {
+		return nil
+	}
+
+	switch providerName {
+	case model.CodexProvider:
+		_, err := codex.LoadStoredCredentials()
+
+		return err
+	case model.AnthropicProvider:
+		_, err := anthropic.LoadStoredCredentials()
+
+		return err
+	case model.OpencodeGoProvider:
+		_, err := opencodego.StoredKey()
+
+		return err
+	default:
+		return nil
+	}
 }
 
 func connectProvider(choice model.Choice, effort string, endpoints EndpointSettings) (*Connection, error) {

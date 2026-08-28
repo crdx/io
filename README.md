@@ -25,13 +25,15 @@ go get crdx.org/io
 
 ## Authentication
 
-Implementors glue the auth flow together themselves. The example is a reference, and a way to get started quickly.
+Implementors glue the auth flow together themselves. The **oh** implementation handles it with `-L`:
 
 ```bash
-go run ./cmd/ohctl login codex
-go run ./cmd/ohctl login opencode-go
-go run ./cmd/ohctl login anthropic
+go run ./cmd/oh -L codex
+go run ./cmd/oh -L opencode-go
+go run ./cmd/oh -L anthropic
 ```
+
+Omit the provider to choose interactively.
 
 ## Usage
 

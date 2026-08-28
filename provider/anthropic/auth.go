@@ -22,9 +22,12 @@ func inherit(childCredentials *Credentials, parentCredentials *Credentials) {
 	}
 }
 
-// CredentialsPath is where Login writes and Auth reads.
 func CredentialsPath() string {
 	return auth.Path()
+}
+
+func LoadStoredCredentials() (*Credentials, error) {
+	return loadCredentials(CredentialsPath())
 }
 
 func loadCredentials(path string) (*Credentials, error) {

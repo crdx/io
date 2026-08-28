@@ -26,15 +26,18 @@ func inherit(childCredentials *Credentials, parentCredentials *Credentials) {
 	}
 }
 
-// CredentialsPath is where Login writes and Auth reads.
 func CredentialsPath() string {
 	return auth.Path()
+}
+
+func LoadStoredCredentials() (*Credentials, error) {
+	return loadCredentials(CredentialsPath())
 }
 
 func loadCredentials(path string) (*Credentials, error) {
 	stored, err := auth.Load(path)
 	if errors.Is(err, os.ErrNotExist) || err == nil && stored.Codex == nil {
-		return nil, errors.New("not logged in: run the login command")
+		return nil, errors.New("not logged in to ChatGPT: run the login command with codex")
 	}
 	if err != nil {
 		return nil, err

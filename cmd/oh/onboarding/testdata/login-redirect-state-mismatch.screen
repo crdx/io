@@ -1,0 +1,5 @@
+Opening your browser to authorise ChatGPT…
+https://example.test/authorise
+If authorisation does not complete automatically, paste the complete redirect URL here and press Enter.
+http://localhost:1455/auth/callback?code=accepted&state=wrong
+the pasted redirect state did not match

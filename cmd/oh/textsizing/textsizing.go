@@ -34,9 +34,8 @@ func Detect(input *os.File, output *os.File) bool {
 		return false
 	}
 	defer func() { _ = term.Restore(int(input.Fd()), terminalState) }()
-	defer func() { _, _ = io.WriteString(output, endProbe) }()
 
-	if _, err := io.WriteString(output, beginProbe); err != nil {
+	if _, err := io.WriteString(output, beginProbe+endProbe); err != nil {
 		return false
 	}
 

@@ -11,10 +11,21 @@ import (
 	"crdx.org/io/cmd/oh/tty"
 )
 
-func Choose(path string, terminal *os.File, screen io.Writer) (Selection, error) {
+var ErrNotLoggedIn = errors.New("not logged in to any provider: run oh -L to sign in")
+
+func Choose(
+	path string,
+	isLoggedIn func(providerName string) bool,
+	terminal *os.File,
+	screen io.Writer,
+) (Selection, error) {
 	choices := Choices(path)
 	if len(choices) == 0 {
 		return Selection{}, errors.New("no models are known: run with -u to fetch the model list")
+	}
+
+	if choices = signedInto(choices, isLoggedIn); len(choices) == 0 {
+		return Selection{}, ErrNotLoggedIn
 	}
 
 	chosen, err := modelPicker.Choose(offered(choices, defaultEffort), terminal, screen)
@@ -25,12 +36,30 @@ func Choose(path string, terminal *os.File, screen io.Writer) (Selection, error)
 	return Selection{Provider: chosen.ProviderID, Model: chosen.ID, Effort: chosen.Effort}, nil
 }
 
-func ChooseWhenNoneSelected(reason error, path string, terminal *os.File, screen io.Writer) (Selection, error) {
+func ChooseWhenNoneSelected(
+	reason error,
+	path string,
+	isLoggedIn func(providerName string) bool,
+	terminal *os.File,
+	screen io.Writer,
+) (Selection, error) {
 	if !errors.Is(reason, ErrNoSelection) || !tty.Is(terminal) || !tty.Is(screen) {
 		return Selection{}, reason
 	}
 
-	return Choose(path, terminal, screen)
+	return Choose(path, isLoggedIn, terminal, screen)
+}
+
+func signedInto(choices []Choice, isLoggedIn func(providerName string) bool) []Choice {
+	available := make([]Choice, 0, len(choices))
+
+	for _, choice := range choices {
+		if isLoggedIn(choice.Provider) {
+			available = append(available, choice)
+		}
+	}
+
+	return available
 }
 
 func offered(choices []Choice, currentEffort string) []*modelPicker.Model {

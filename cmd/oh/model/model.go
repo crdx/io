@@ -50,6 +50,10 @@ func ProviderNames() []string {
 	return []string{CodexProvider, OpencodeGoProvider, AnthropicProvider, OllamaProvider}
 }
 
+func LoginProviderNames() []string {
+	return []string{CodexProvider, OpencodeGoProvider, AnthropicProvider}
+}
+
 type modelCache struct {
 	Version   int                     `json:"version"`
 	Checked   time.Time               `json:"checked"`

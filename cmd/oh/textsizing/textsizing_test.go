@@ -32,14 +32,14 @@ func TestOnlyBothPartsOfTheTextSizingProtocolCountAsSupport(t *testing.T) {
 	}
 }
 
-func TestDetectionQueriesARealTerminalAndRestoresItsScreen(t *testing.T) {
+func TestDetectionLeavesTheScreenBeforeWaitingForTheReply(t *testing.T) {
 	t.Setenv("KITTY_WINDOW_ID", "1")
 	master, slave := openPTY(t)
 
 	written := make(chan string, 1)
 	go func() {
-		probe := make([]byte, len(beginProbe))
-		if _, err := io.ReadFull(master, probe); err != nil {
+		sent := make([]byte, len(beginProbe)+len(endProbe))
+		if _, err := io.ReadFull(master, sent); err != nil {
 			written <- "read probe: " + err.Error()
 			return
 		}
@@ -47,12 +47,7 @@ func TestDetectionQueriesARealTerminalAndRestoresItsScreen(t *testing.T) {
 			written <- "write replies: " + err.Error()
 			return
 		}
-		restore := make([]byte, len(endProbe))
-		if _, err := io.ReadFull(master, restore); err != nil {
-			written <- "read restore: " + err.Error()
-			return
-		}
-		written <- string(probe) + string(restore)
+		written <- string(sent)
 	}()
 
 	if !Detect(slave, slave) {

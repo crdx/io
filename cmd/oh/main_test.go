@@ -43,6 +43,7 @@ import (
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/key"
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/model"
@@ -1392,6 +1393,31 @@ func addWireLifecycleFeatures(features map[string]struct{}, provider string, pay
 	}
 }
 
+func TestPickerMenuAlignmentMatchesTheGolden(t *testing.T) {
+	stream := picker.RenderMenu("Choose your provider:", []string{"ChatGPT", "Anthropic", "OpenCode Go"}, 0)
+	compareWithGolden(t, "picker-menu", ".ansi", map[string]func() string{
+		"initial frame": func() string { return stream },
+	})
+	compareWithGolden(t, "picker-menu", ".screen", map[string]func() string{
+		"initial frame": func() string {
+			return strings.Join(visibleScreen(t, stream, 80), "\n")
+		},
+	})
+}
+
+func TestLongAuthorisationURLMatchesTheGolden(t *testing.T) {
+	address := "https://auth.example.test/oauth/authorize?client_id=oh-desktop&code_challenge=abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ&code_challenge_method=S256&redirect_uri=http%3A%2F%2Flocalhost%3A1455%2Fauth%2Fcallback&response_type=code&scope=openid%20profile%20email%20offline_access"
+	stream := link.RenderURL(address, address)
+	compareWithGolden(t, "authorisation-url", ".ansi", map[string]func() string{
+		"long URL": func() string { return stream },
+	})
+	compareWithGolden(t, "authorisation-url", ".screen", map[string]func() string{
+		"long URL": func() string {
+			return strings.Join(visibleScreen(t, stream, 80), "\n")
+		},
+	})
+}
+
 func TestCompletionProtocolMatchesTheGolden(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	cachePath := location.GetModelCachePath(os.Getenv(backend.EndpointVariable) != "")
@@ -1420,6 +1446,7 @@ func TestCompletionProtocolMatchesTheGolden(t *testing.T) {
 		{name: "models", args: []string{"--complete", "model", "sonnet"}},
 		{name: "models of a provider", args: []string{"--complete", "model", "anthropic/"}},
 		{name: "efforts", args: []string{"--complete", "effort", "sonnet@"}},
+		{name: "providers", args: []string{"--complete", "provider", ""}},
 		{name: "capabilities", args: []string{"--complete", "caps", "rxw"}},
 		{name: "tools", args: []string{"--complete", "tool", ""}},
 		{name: "sessions", args: []string{"--complete", "session", ""}},
@@ -2561,6 +2588,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 	for name, extensions := range map[string][]string{
 		"app-plain-resume":      {".jsonl", ".transcript"},
 		"app-plain-turn":        {".jsonl", ".transcript"},
+		"authorisation-url":     {".ansi", ".screen"},
 		"banner":                {".ansi", ".screen"},
 		"clearing":              {".ansi", ".screen"},
 		"completion":            {".txt"},
@@ -2577,6 +2605,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"ordinary-tab":          {".ansi", ".screen"},
 		"pending-mode-messages": {".ansi", ".screen"},
 		"paste":                 {".ansi", ".screen"},
+		"picker-menu":           {".ansi", ".screen"},
 		"resume-arguments":      {".txt"},
 		"resume-mode":           {".ansi"},
 		"running":               {".ansi", ".screen"},

@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/sim"
@@ -231,8 +233,39 @@ func TestAResumedModelDoesNotAdvanceTheConfiguredRotation(t *testing.T) {
 	}
 }
 
-func TestAnthropicConnectsBeforeItNeedsCredentials(t *testing.T) {
-	t.Setenv("XDG_STATE_HOME", t.TempDir())
+func TestASessionIsRefusedBeforeAnyoneHasLoggedIn(t *testing.T) {
+	tests := map[string]struct {
+		choice model.Choice
+		want   string
+	}{
+		"codex": {
+			choice: model.Choice{Provider: codexProvider, Model: "gpt-5.6-sol"},
+			want:   "login command with codex",
+		},
+		"anthropic": {
+			choice: model.Choice{Provider: anthropicProvider, Model: "claude-opus-5", MaxOutputTokens: 128_000},
+			want:   "login command with anthropic",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+			client, err := Connect(test.choice, "high", EndpointSettings{})
+			if err == nil || !strings.Contains(err.Error(), test.want) {
+				t.Fatalf("expected %q, got %v", test.want, err)
+			}
+			if client != nil {
+				t.Errorf("expected no connection to be handed back, got %+v", client)
+			}
+		})
+	}
+}
+
+func TestASessionConnectsOnceCredentialsAreStored(t *testing.T) {
+	writeStoredCredentials(t)
+
 	client, err := Connect(
 		model.Choice{Provider: anthropicProvider, Model: "claude-opus-5", MaxOutputTokens: 128_000},
 		"high",
@@ -243,6 +276,59 @@ func TestAnthropicConnectsBeforeItNeedsCredentials(t *testing.T) {
 	}
 	if client == nil {
 		t.Fatal("expected a connection")
+	}
+}
+
+func TestOnlyASignedIntoProviderIsReadyForASession(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	for _, providerName := range []string{codexProvider, anthropicProvider, opencodeGoProvider} {
+		if IsLoggedIn(providerName) {
+			t.Errorf("%s was ready with no credentials stored", providerName)
+		}
+	}
+
+	if !IsLoggedIn(ollamaProvider) {
+		t.Error("a provider wanting no credentials was not ready")
+	}
+
+	writeStoredCredentials(t)
+
+	for _, providerName := range []string{codexProvider, anthropicProvider} {
+		if !IsLoggedIn(providerName) {
+			t.Errorf("%s was not ready with credentials stored", providerName)
+		}
+	}
+}
+
+func TestListingModelsAsksForNoCredentials(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	if _, err := ListModels(t.Context(), anthropicProvider, EndpointSettings{OverrideURL: "http://somewhere"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func writeStoredCredentials(t *testing.T) {
+	t.Helper()
+
+	state := t.TempDir()
+	t.Setenv("XDG_STATE_HOME", state)
+
+	path := filepath.Join(state, "org.crdx", "io")
+	if err := os.MkdirAll(path, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	credentials := fmt.Sprintf(
+		`{"version":1,"codex":{"access":"stored","refresh":"refresh-me","account_id":"account","expires_at":%d},`+
+			`"anthropic":{"access":"stored","refresh":"refresh-me","expires_at":%d}}`,
+		time.Now().Add(time.Hour).UnixMilli(),
+		time.Now().Add(time.Hour).UnixMilli(),
+	)
+
+	if err := os.WriteFile(filepath.Join(path, "auth.json"), []byte(credentials), 0o600); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -345,7 +431,7 @@ func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
 		{
 			"codex",
 			model.Choice{Provider: codexProvider},
-			"",
+			"http://somewhere",
 			"codex: Model is empty",
 		},
 		{
@@ -357,7 +443,7 @@ func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
 		{
 			"anthropic",
 			model.Choice{Provider: anthropicProvider, MaxOutputTokens: 128_000},
-			"",
+			"http://somewhere",
 			"anthropic: Model is empty",
 		},
 		{

@@ -16,9 +16,11 @@ const defaultCapFlags = "rx"
 var usage = fmt.Sprintf(`oh — coding harness
 
 Usage:
+    $0 -L [<login-provider>]
     $0 [options] [-t <tool>]... [<prompt>...]
 
 Options:
+    -L, --login                 Log in to a provider, choosing when omitted
     -r, --resume [<session>]    Open the session picker, or resume a session by name
     -m, --model [<model>]       Open the model picker, or set the provider, model, and effort
     -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: %s)
@@ -31,6 +33,8 @@ Options:
 
 type inputFlags struct {
 	Message         []string `docopt:"<prompt>"`
+	Login           bool     `docopt:"--login"`
+	LoginProvider   string   `docopt:"<login-provider>"`
 	Session         string   `docopt:"--resume"`
 	IsSessionPicker bool     `docopt:"-r"`
 	Model           string   `docopt:"--model"`

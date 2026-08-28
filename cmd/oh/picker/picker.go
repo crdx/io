@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	enterScreen = "\x1b[?1049h\x1b[?25l"
-	leaveScreen = "\x1b[?25h\x1b[?1049l"
+	enterScreen = "\x1b[?1049h" + hideCursor
+	leaveScreen = showCursor + "\x1b[?1049l"
 	homeCursor  = "\x1b[H"
 	eraseLine   = "\x1b[K"
 	eraseBelow  = "\x1b[J"
@@ -67,7 +67,10 @@ func Choose(rows List, terminal *os.File, screen io.Writer) (int, error) {
 
 	defer restore()
 
-	return choose(rows, interaction.Keypresses(terminal), measuring(terminal), screen)
+	keys, stopReading := interaction.Keypresses(terminal)
+	defer stopReading()
+
+	return choose(rows, keys, measuring(terminal), screen)
 }
 
 func choose(rows List, keys <-chan key.Key, measure func() (int, int), screen io.Writer) (int, error) {
