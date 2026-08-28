@@ -419,7 +419,7 @@ func TestListPutsTheSessionTouchedLastAtTheTop(t *testing.T) {
 	}
 }
 
-func TestHTTPObservationCanCreateTheBundleBeforeTheFirstEvent(t *testing.T) {
+func TestHTTPObservationDoesNotCreateTheBundleBeforeTheFirstEvent(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{
 		Model:        "model",
@@ -431,27 +431,43 @@ func TestHTTPObservationCanCreateTheBundleBeforeTheFirstEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	exchange := log.Observer().Start(req.Request{
+	request := req.Request{
 		Started:  time.Now(),
 		Method:   "POST",
 		URL:      "https://example.com",
 		Protocol: "HTTP/1.1",
-	})
-	if exchange == nil {
-		t.Fatal("expected the HTTP exchange to be recorded")
+	}
+
+	if exchange := log.Observer().Start(request); exchange != nil {
+		t.Error("expected an exchange before the first event to go unrecorded")
+	}
+	if log.IsPersisted() {
+		t.Error("expected an exchange before the first event to leave the session unwritten")
 	}
 	if warnings := log.TakeWarnings(); len(warnings) != 0 {
 		t.Fatalf("expected no recorder warnings, got %v", warnings)
 	}
 
+	bundle := filepath.Join(directory, log.Name())
+	if _, err := os.Stat(bundle); !os.IsNotExist(err) {
+		t.Errorf("expected no bundle at %s: %v", bundle, err)
+	}
+
 	if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "hello"}); err != nil {
 		t.Fatal(err)
 	}
+
+	if exchange := log.Observer().Start(request); exchange == nil {
+		t.Error("expected an exchange after the first event to be recorded")
+	}
+	if warnings := log.TakeWarnings(); len(warnings) != 0 {
+		t.Fatalf("expected no recorder warnings, got %v", warnings)
+	}
+
 	if err := log.Close(); err != nil {
 		t.Fatal(err)
 	}
 
-	bundle := filepath.Join(directory, log.Name())
 	for _, name := range []string{"session.jsonl", "meta.json", "chat.md", "wire.http"} {
 		if _, err := os.Stat(filepath.Join(bundle, name)); err != nil {
 			t.Errorf("expected %s: %v", name, err)

@@ -88,6 +88,7 @@ import (
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/codex"
 	"crdx.org/io/provider/ollama"
+	"crdx.org/io/provider/opencodego"
 	"crdx.org/io/session"
 	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
@@ -7891,6 +7892,62 @@ func resumeAppPlainTurn(t *testing.T, directory string, sessionName string) {
 	compareScenarioGolden(
 		t, "app-plain-resume.transcript", canonicalSessionTranscript(string(transcript), sessionName),
 	)
+}
+
+func TestTheStartupUsageProbeLeavesNoSessionBehind(t *testing.T) {
+	var probes atomic.Int64
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		probes.Add(1)
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(writer, `{"usage":{"rolling":{"status":"ok","percent":6}}}`)
+	}))
+	defer server.Close()
+
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{Model: "model", Provider: "opencode-go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	client, err := opencodego.New(server.URL, "token", "model", "medium", 1024)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.UsageURL = server.URL
+	client.ObserveHTTP(log.Observer())
+
+	cachePath := filepath.Join(t.TempDir(), "usage", "opencode-go.json")
+	built, err := subUsage.New(client, cachePath, "model", time.Now)(goldenSegmentOptions(""))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deadline := time.Now().Add(5 * time.Second)
+	for probes.Load() == 0 {
+		if time.Now().After(deadline) {
+			t.Fatal("the usage probe was never made")
+		}
+		built.Render(segment.Context{})
+		time.Sleep(time.Millisecond)
+	}
+
+	if log.IsPersisted() {
+		t.Error("the usage probe wrote the session down before anything was said in it")
+	}
+	if warnings := log.TakeWarnings(); len(warnings) != 0 {
+		t.Errorf("expected no recorder warnings, got %v", warnings)
+	}
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	entries, err := os.ReadDir(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range entries {
+		t.Errorf("the usage probe left %s behind", entry.Name())
+	}
 }
 
 func TestNoRecordedRequestMarksAThoughtForCaching(t *testing.T) {

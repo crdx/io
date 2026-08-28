@@ -311,6 +311,10 @@ func (self *Writer) queueWarning(err error) {
 type writerObserver struct{ writer *Writer }
 
 func (self writerObserver) Start(request req.Request) req.ExchangeObserver {
+	if !self.writer.IsPersisted() {
+		return nil
+	}
+
 	self.writer.startRecorders()
 	self.writer.recorderMutex.Lock()
 	recorder := self.writer.wireRecorder
