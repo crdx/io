@@ -3,7 +3,7 @@
 
 
 title work out why the session picker clips a long title ✗ title must be at most 30 characters
-title {"title":"   "} ✗ title is required
+title ✗ title is required
 title fix picker clipping ✓ 1L
 
 Third time lucky.

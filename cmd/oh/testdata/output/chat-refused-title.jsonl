@@ -3,7 +3,7 @@
 {"kind":"event","event":{"kind":"user_message","text":"name this session"}}
 {"kind":"event","event":{"render":"work out why the session picker clips a long title","read_only":true,"kind":"tool_call_request","id":"call-1","name":"title","arguments":"{\"title\":\"work out why the session picker clips a long title\"}"}}
 {"kind":"event","event":{"kind":"tool_call_result","text":"title must be at most 30 characters","id":"call-1","name":"title","status":"error"}}
-{"kind":"event","event":{"render":"{\"title\":\"   \"}","read_only":true,"kind":"tool_call_request","id":"call-2","name":"title","arguments":"{\"title\":\"   \"}"}}
+{"kind":"event","event":{"read_only":true,"kind":"tool_call_request","id":"call-2","name":"title","arguments":"{\"title\":\"   \"}"}}
 {"kind":"event","event":{"kind":"tool_call_result","text":"title is required","id":"call-2","name":"title","status":"error"}}
 {"kind":"event","event":{"render":"fix picker clipping","read_only":true,"kind":"tool_call_request","id":"call-3","name":"title","arguments":"{\"title\":\"fix picker clipping\"}"}}
 {"kind":"event","event":{"kind":"state_change","id":"call-3","name":"title","state":{"title":"fix picker clipping"}}}

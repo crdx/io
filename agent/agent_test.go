@@ -718,12 +718,12 @@ func TestARefusedCallIsShownAsItsArgumentsInTheOrderTheToolDeclaresThem(t *testi
 	}
 }
 
-func TestARefusedCallWithNothingToShowFallsBackToItsArguments(t *testing.T) {
+func TestARefusedCallWithOnlyBlankArgumentsHasNoSubject(t *testing.T) {
 	arguments := `{"message":"   "}`
 	got := unparsedToolCallSubject(t, []tool.Tool{refusingTool()}, "shout", arguments)
 
-	if got != arguments {
-		t.Errorf("expected the raw arguments, got %q", got)
+	if got != "" {
+		t.Errorf("expected no subject, got %q", got)
 	}
 }
 

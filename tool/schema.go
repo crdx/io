@@ -103,12 +103,14 @@ func DescribeUnparsedArguments(subject Tool, arguments string) string {
 	}
 
 	var values []string
+	knownParameterCount := 0
 
 	for _, parameter := range subject.Schema() {
 		raw, present := decoded[parameter.Name]
 		if !present {
 			continue
 		}
+		knownParameterCount++
 
 		var text string
 		if json.Unmarshal(raw, &text) != nil {
@@ -120,9 +122,12 @@ func DescribeUnparsedArguments(subject Tool, arguments string) string {
 		}
 	}
 
-	if len(values) == 0 {
-		return strutil.FirstLine(arguments)
+	if len(values) > 0 {
+		return strutil.FirstLine(strings.Join(values, " "))
+	}
+	if decoded != nil && knownParameterCount == len(decoded) {
+		return ""
 	}
 
-	return strutil.FirstLine(strings.Join(values, " "))
+	return strutil.FirstLine(arguments)
 }
