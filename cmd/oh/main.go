@@ -235,10 +235,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	mode := caps.NewMode(args.Caps)
 
-	if resumedSession != nil {
-		mode = caps.NewResumedMode(args.Caps)
-	}
-
 	files := file.New(root, caps.RefuseWrite(mode))
 	homeRoot, err := mountHomeDir(files, homeDir, mode)
 	if err != nil {

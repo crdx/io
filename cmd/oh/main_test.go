@@ -2804,7 +2804,7 @@ func TestAResumedConversationDrawsItsRecordedMode(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resumedHarness := &App{mode: caps.NewResumedMode(restoredCaps)}
+	resumedHarness := &App{mode: caps.NewMode(restoredCaps)}
 	modeSegment, err := modeToggle.New(resumedHarness.grantedCaps, resumedHarness.isPrefixPending)(nil)
 	if err != nil {
 		t.Fatal(err)
@@ -7043,7 +7043,7 @@ func settleResumedSessionGoldenMode(testHarness *App, events []agent.Event) {
 		resumedCaps = caps.All()
 	}
 
-	testHarness.mode = caps.NewResumedMode(resumedCaps)
+	testHarness.mode = caps.NewMode(resumedCaps)
 	testHarness.settledCaps = resumedCaps
 }
 
@@ -8275,7 +8275,7 @@ func resumeAppPlainTurn(t *testing.T, directory string, sessionName string) {
 		agent:    agent.New(storedSession.Meta.SystemPrompt, &plainTurnProvider{}, nil),
 		screen:   output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines),
 		recorder: record.New(log),
-		mode:     caps.NewResumedMode(resumedCaps),
+		mode:     caps.NewMode(resumedCaps),
 	}
 	self.restore(storedSession)
 

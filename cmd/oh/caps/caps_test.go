@@ -108,7 +108,7 @@ func TestASwapBackIsStillAnnouncedAfterTheSwapBeforeIt(t *testing.T) {
 }
 
 func TestAResumedConversationDoesNotReannounceItsRecordedMode(t *testing.T) {
-	self := NewResumedMode(writable())
+	self := NewMode(writable())
 
 	if got := self.Inject(); got != "" {
 		t.Errorf("expected no change to be announced, got %q", got)

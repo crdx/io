@@ -124,10 +124,6 @@ func NewMode(currentCaps Set) *Mode {
 	return &Mode{currentCaps: currentCaps, knownCaps: currentCaps}
 }
 
-func NewResumedMode(currentCaps Set) *Mode {
-	return &Mode{currentCaps: currentCaps, knownCaps: currentCaps}
-}
-
 func (self *Mode) Current() Set {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -147,9 +143,6 @@ func (self *Mode) Inject() string {
 	defer self.mutex.Unlock()
 
 	changedCaps := self.currentCaps ^ self.knownCaps
-	if self.knownCaps == 0 {
-		changedCaps = All()
-	}
 
 	self.knownCaps = self.currentCaps
 
