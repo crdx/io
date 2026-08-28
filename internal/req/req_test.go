@@ -162,6 +162,7 @@ func TestARefusalSaysWhetherAskingAgainIsWorthIt(t *testing.T) {
 		http.StatusBadGateway:          true,
 		http.StatusServiceUnavailable:  true,
 		http.StatusGatewayTimeout:      true,
+		http.StatusInsufficientStorage: true,
 		529:                            true,
 	}
 

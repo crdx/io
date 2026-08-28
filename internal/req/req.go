@@ -216,6 +216,7 @@ var retriableStatuses = map[int]bool{
 	http.StatusBadGateway:          true,
 	http.StatusServiceUnavailable:  true,
 	http.StatusGatewayTimeout:      true,
+	http.StatusInsufficientStorage: true,
 	statusOverloaded:               true,
 }
 

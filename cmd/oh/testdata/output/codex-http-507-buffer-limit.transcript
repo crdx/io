@@ -1,0 +1,58 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+receive HTTP 507 from the edge proxy
+```
+
+## Retrying
+
+> 2001-01-01T00:00:02Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
+
+```
+request failed with status 507: exceeded request buffer limit while retrying upstream
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Asked again, and answered.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+continue after the buffered retry
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Resumed.
+```
+

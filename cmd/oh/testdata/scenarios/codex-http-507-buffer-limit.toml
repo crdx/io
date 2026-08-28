@@ -1,0 +1,28 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[first]
+prompt = "receive HTTP 507 from the edge proxy"
+
+[[first.response]]
+status = 507
+body = "exceeded request buffer limit while retrying upstream"
+headers = { Content-Type = "text/plain" }
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Asked again, and answered."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Asked again, and answered."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[resume]
+prompt = "continue after the buffered retry"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Resumed."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}''',
+    '''{"type":"response.completed"}''',
+]
