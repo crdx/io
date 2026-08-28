@@ -112,15 +112,20 @@ func (self *App) begin(message string) cycle.Transition {
 		return self.transition
 	}
 
-	defer restoreTTY()
+	restoreTitle := self.terminal.Begin(self.mode.Current())
+	restoreCursor := self.screen.BeginEditing()
 
-	restoreTerminal := self.terminal.Begin(self.mode.Current())
+	restoreTerminal := func() {
+		self.screen.Release(self.recorder.IsPersisted())
+		restoreCursor()
+		restoreTitle()
+		restoreTTY()
+	}
+
 	defer restoreTerminal()
 
-	restoreCursor := self.screen.BeginEditing()
-	defer restoreCursor()
-
-	defer func() { self.screen.Release(self.recorder.IsPersisted()) }()
+	stopListening := tty.RestoreOnSignal(restoreTerminal)
+	defer stopListening()
 
 	defer self.dropPendingInput()
 
