@@ -31,9 +31,10 @@ const (
 
 // Input edits a line and walks its history.
 type Input struct {
-	buffer  *Buffer
-	history *History
-	recall  *Recall
+	buffer     *Buffer
+	history    *History
+	recall     *Recall
+	frameWidth int
 
 	isPasting       bool
 	pasteStart      int              // where the current paste begins in the buffer
@@ -97,6 +98,7 @@ type Frame struct {
 }
 
 func (self *Input) Frame(width int) Frame {
+	self.frameWidth = width
 	rows, cursorRow, cursorColumn := layout(self.buffer, width)
 
 	framedRows := window(rows, cursorRow)
@@ -167,12 +169,12 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 		}
 
 	case key.Up:
-		if !self.buffer.MoveUp() {
+		if !moveCursorVertically(self.buffer, self.frameWidth, -1) {
 			self.walk(-1)
 		}
 
 	case key.Down:
-		if !self.buffer.MoveDown() {
+		if !moveCursorVertically(self.buffer, self.frameWidth, 1) {
 			self.walk(1)
 		}
 

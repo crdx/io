@@ -255,6 +255,72 @@ func TestAWordWiderThanTheInputStillWraps(t *testing.T) {
 	}
 }
 
+func TestVerticalMovementUsesWrappedRowsBeforeHistory(t *testing.T) {
+	history := NewHistory("", 0)
+	history.Add("earlier message")
+	self := NewInput(history)
+	self.SetText("one two three")
+	self.Frame(7)
+
+	self.Apply(key.Key{Code: key.Up}, false)
+	frame := self.Frame(7)
+
+	if got := self.Text(); got != "one two three" {
+		t.Errorf("expected the draft to stay in place, got %q", got)
+	}
+	if frame.Row != 0 || frame.Column != 5 {
+		t.Errorf("expected the cursor at 0,5, got %d,%d", frame.Row, frame.Column)
+	}
+
+	self.Apply(key.Key{Code: key.Down}, false)
+	frame = self.Frame(7)
+	if frame.Row != 1 || frame.Column != 5 {
+		t.Errorf("expected the cursor back at 1,5, got %d,%d", frame.Row, frame.Column)
+	}
+
+	self.Apply(key.Key{Code: key.Up}, false)
+	self.Apply(key.Key{Code: key.Up}, false)
+	if got := self.Text(); got != "earlier message" {
+		t.Errorf("expected history after moving past the first row, got %q", got)
+	}
+}
+
+func TestVerticalMovementUsesDisplayColumnsForWideCharacters(t *testing.T) {
+	self := NewInput(nil)
+	self.SetText("日本ab")
+	self.Frame(4)
+
+	self.Apply(key.Key{Code: key.Up}, false)
+	frame := self.Frame(4)
+	if frame.Row != 0 || frame.Column != 2 {
+		t.Errorf("expected the cursor after one wide character, got %d,%d", frame.Row, frame.Column)
+	}
+
+	self.Apply(key.Key{Code: key.Down}, false)
+	frame = self.Frame(4)
+	if frame.Row != 1 || frame.Column != 2 {
+		t.Errorf("expected the cursor back at the end, got %d,%d", frame.Row, frame.Column)
+	}
+}
+
+func TestVerticalMovementIncludesTheTrailingCursorRow(t *testing.T) {
+	self := NewInput(nil)
+	self.SetText("full")
+	self.Frame(4)
+
+	self.Apply(key.Key{Code: key.Up}, false)
+	frame := self.Frame(4)
+	if frame.Row != 0 || frame.Column != 0 {
+		t.Errorf("expected the cursor at the start of the full row, got %d,%d", frame.Row, frame.Column)
+	}
+
+	self.Apply(key.Key{Code: key.Down}, false)
+	frame = self.Frame(4)
+	if frame.Row != 1 || frame.Column != 0 {
+		t.Errorf("expected the cursor back on the trailing row, got %d,%d", frame.Row, frame.Column)
+	}
+}
+
 func TestLeadingWhitespaceKeepsItsRoom(t *testing.T) {
 	frame := (&Input{buffer: &Buffer{runes: []rune("    one")}}).Frame(3)
 	want := []string{"   ", "one"}

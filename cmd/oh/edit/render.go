@@ -30,13 +30,48 @@ func layout(buffer *Buffer, room int) ([]string, int, int) {
 		rows = append(rows, row.Text)
 	}
 
-	if room > 0 && buffer.Cursor() == len(runes) && width.Of(rows[len(rows)-1]) >= room {
+	if buffer.Cursor() == len(runes) && hasTrailingCursorRow(laid, room) {
 		return append(rows, ""), len(rows), 0
 	}
 
 	cursorRow, cursorColumn := locate(laid, runes, buffer.Cursor(), room)
 
 	return rows, cursorRow, cursorColumn
+}
+
+func hasTrailingCursorRow(rows []width.Row, room int) bool {
+	return room > 0 && width.Of(rows[len(rows)-1].Text) >= room
+}
+
+func moveCursorVertically(buffer *Buffer, room int, direction int) bool {
+	runes := buffer.Runes()
+	rows := width.Rows(string(runes), room)
+	cursorRow, cursorColumn := locate(rows, runes, buffer.Cursor(), room)
+
+	if hasTrailingCursorRow(rows, room) {
+		rows = append(rows, width.Row{Begin: len(runes), End: len(runes), Next: len(runes)})
+		if buffer.Cursor() == len(runes) {
+			cursorRow = len(rows) - 1
+			cursorColumn = 0
+		}
+	}
+
+	targetRow := cursorRow + direction
+	if targetRow < 0 || targetRow >= len(rows) {
+		return false
+	}
+
+	buffer.cursor = positionAtColumn(rows[targetRow], runes, cursorColumn)
+	return true
+}
+
+func positionAtColumn(row width.Row, runes []rune, column int) int {
+	position := row.Begin
+	for position < row.End && width.Of(string(runes[row.Begin:position+1])) <= column {
+		position++
+	}
+
+	return position
 }
 
 func locate(rows []width.Row, runes []rune, cursor int, room int) (int, int) {

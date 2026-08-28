@@ -1,0 +1,19 @@
+=== 1 wrapped draft ===
+────────────
+one two
+three
+────────────
+=== 2 up within the draft ===
+────────────
+one two
+three
+────────────
+=== 3 up into history ===
+────────────
+earlier
+────────────
+=== 4 down within the draft ===
+────────────
+one two
+three
+────────────

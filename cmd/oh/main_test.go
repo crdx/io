@@ -2586,6 +2586,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"startup":               {".ansi", ".screen"},
 		"startup-sized":         {".ansi", ".screen"},
 		"startup-sized-output":  {".ansi", ".screen"},
+		"vertical-movement":     {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}
@@ -4637,6 +4638,56 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 
 	compareWithGolden(t, "inputblock", ".ansi", passes)
 	compareWithGolden(t, "inputblock", ".screen", shownPassesAtWidth)
+}
+
+func TestVerticalInputMovementDrawsWhatItDrewBefore(t *testing.T) {
+	up := key.Key{Code: key.Up}
+	down := key.Key{Code: key.Down}
+
+	passes := map[string]func() string{
+		"1 wrapped draft": func() string {
+			return verticalInputMovementStream(t)
+		},
+		"2 up within the draft": func() string {
+			return verticalInputMovementStream(t, up)
+		},
+		"3 up into history": func() string {
+			return verticalInputMovementStream(t, up, up)
+		},
+		"4 down within the draft": func() string {
+			return verticalInputMovementStream(t, up, down)
+		},
+	}
+
+	shownPasses := map[string]func() string{}
+	for name, pass := range passes {
+		shownPasses[name] = func() string {
+			return shown(t, pass(), tinyColumns)
+		}
+	}
+
+	compareWithGolden(t, "vertical-movement", ".ansi", passes)
+	compareWithGolden(t, "vertical-movement", ".screen", shownPasses)
+}
+
+func verticalInputMovementStream(t *testing.T, keypresses ...key.Key) string {
+	t.Helper()
+
+	self := slashCommandFixture(t, caps.Read)
+	var screenOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&screenOutput, tinyColumns, replayLines)
+
+	history := edit.NewHistory("", historyLimit)
+	history.Add("earlier")
+	editor := edit.NewInput(history)
+	editor.SetText("one two three")
+	self.show(editor)
+
+	for _, keypress := range keypresses {
+		self.handleKeypressAndShowInput(editor, history, keypress)
+	}
+
+	return screenOutput.String()
 }
 
 func writeLiveConfig(t *testing.T, path string, body string) {
