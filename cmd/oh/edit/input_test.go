@@ -464,6 +464,64 @@ func TestACharacterWiderThanTheLineStaysWhereItIs(t *testing.T) {
 
 var controlC = key.Key{Code: key.Rune, Value: 'c', Mod: key.Ctrl}
 
+func TestReadlineControlBindingsEditTheCurrentLine(t *testing.T) {
+	for name, test := range map[string]struct {
+		letter rune
+		before string
+		want   string
+	}{
+		"beginning":     {letter: 'a', before: "one\nt|wo", want: "one\n|two"},
+		"backward":      {letter: 'b', before: "one\nt|wo", want: "one\n|two"},
+		"end":           {letter: 'e', before: "one\nt|wo", want: "one\ntwo|"},
+		"forward":       {letter: 'f', before: "one\nt|wo", want: "one\ntw|o"},
+		"kill line":     {letter: 'k', before: "one\nt|wo", want: "one\nt|"},
+		"backward word": {letter: 'w', before: "one two|", want: "one |"},
+	} {
+		self := NewInput(nil)
+		self.buffer = bufferFrom(t, test.before)
+
+		self.Apply(key.Key{Code: key.Rune, Value: test.letter, Mod: key.Ctrl}, false)
+
+		if got := markCursor(self.buffer); got != test.want {
+			t.Errorf("%s: got %q, want %q", name, got, test.want)
+		}
+	}
+}
+
+func TestControlRSearchesHistoryIncrementallyAndRepeatsBackwards(t *testing.T) {
+	history := NewHistory("", 0)
+	for _, line := range []string{"git status", "just test", "git diff"} {
+		history.Add(line)
+	}
+	self := NewInput(history)
+	controlR := key.Key{Code: key.Rune, Value: 'r', Mod: key.Ctrl}
+
+	self.Apply(controlR, false)
+	if frame := self.Frame(80); !frame.IsSearching || frame.SearchQuery != "" {
+		t.Fatalf("ctrl+r did not start an empty search: %+v", frame)
+	}
+
+	for _, value := range "git" {
+		self.Apply(key.Key{Code: key.Rune, Value: value}, false)
+	}
+	if got := self.Text(); got != "git diff" {
+		t.Fatalf("got %q, want the newest match", got)
+	}
+
+	self.Apply(controlR, false)
+	if got := self.Text(); got != "git status" {
+		t.Errorf("got %q, want the previous match", got)
+	}
+
+	self.Apply(key.Key{Code: key.Escape}, false)
+	if frame := self.Frame(80); frame.IsSearching {
+		t.Error("escape did not finish the search")
+	}
+	if got := self.Text(); got != "git status" {
+		t.Errorf("finishing the search changed the match to %q", got)
+	}
+}
+
 func TestControlUAlwaysClearsTheInput(t *testing.T) {
 	self := inputFromKeys(t, "hello")
 	self.Apply(key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl}, false)

@@ -102,3 +102,62 @@ func TestRecallStopsAtEitherEndOfTheEntries(t *testing.T) {
 		t.Errorf("expected nothing behind the oldest entry, got %q", got)
 	}
 }
+
+func TestSearchNarrowsTheNewestMatchingHistoryEntryIncrementally(t *testing.T) {
+	history := NewHistory("", 0)
+	for _, line := range []string{"git status", "just test", "git diff"} {
+		history.Add(line)
+	}
+
+	self := history.search("unfinished")
+	self.add('g')
+	self.add('i')
+	self.add('t')
+
+	if got := self.getText(); got != "git diff" {
+		t.Errorf("got %q, want the newest matching entry", got)
+	}
+	if got := self.getQuery(); got != "git" {
+		t.Errorf("got query %q, want %q", got, "git")
+	}
+
+	self.previous()
+	if got := self.getText(); got != "git status" {
+		t.Errorf("got %q, want the previous matching entry", got)
+	}
+}
+
+func TestSearchBackspaceRestoresTheMatchForTheShorterQuery(t *testing.T) {
+	history := NewHistory("", 0)
+	history.Add("git status")
+	history.Add("git diff")
+
+	self := history.search("unfinished")
+	for _, value := range "status" {
+		self.add(value)
+	}
+	if got := self.getText(); got != "git status" {
+		t.Fatalf("got %q, want the older narrow match", got)
+	}
+
+	for range len("status") {
+		self.deleteBackward()
+	}
+	if got := self.getText(); got != "unfinished" {
+		t.Errorf("got %q, want the original input", got)
+	}
+}
+
+func TestSearchKeepsTheLastMatchWhenTheQueryFails(t *testing.T) {
+	history := NewHistory("", 0)
+	history.Add("git diff")
+
+	self := history.search("unfinished")
+	for _, value := range "git z" {
+		self.add(value)
+	}
+
+	if got := self.getText(); got != "git diff" {
+		t.Errorf("got %q, want the last matching entry", got)
+	}
+}

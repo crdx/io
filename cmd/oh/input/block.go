@@ -25,13 +25,18 @@ type Block struct {
 func (self Block) Rows(width int) ([]string, int, int) {
 	rows := make([]string, 0, len(self.Input.Rows)+3)
 
+	top := self.Top
+	if self.Input.IsSearching {
+		top.Left = style.Subtle("reverse-i-search: " + self.Input.SearchQuery)
+	}
+
 	bottom := self.Bottom
 	if getWidth(bottom.Left, edgePad)+getWidth(bottom.Right, edgePad) > width {
 		bottom.Right = ""
 	}
 
 	rows = append(rows, self.Status...)
-	rows = append(rows, self.Top.render(width))
+	rows = append(rows, top.render(width))
 	rows = append(rows, self.Input.Rows...)
 	rows = append(rows, bottom.render(width))
 

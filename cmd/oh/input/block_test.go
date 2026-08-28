@@ -119,6 +119,18 @@ func TestTheBlockFramesTheInputBetweenItsRules(t *testing.T) {
 	}
 }
 
+func TestAHistorySearchLabelsTheLeftOfTheTopRule(t *testing.T) {
+	block := Block{
+		Top:   Ruler{Left: "ordinary"},
+		Input: edit.Frame{Rows: []string{"git diff"}, IsSearching: true, SearchQuery: "git"},
+	}
+
+	rows, _, _ := block.Rows(40)
+	if got := style.Plain(rows[0]); !strings.HasPrefix(got, "── reverse-i-search: git ") {
+		t.Errorf("expected the search query at the left of the top rule, got %q", got)
+	}
+}
+
 func TestStatusRowsSitAboveTheTopRuleWithoutMovingTheInput(t *testing.T) {
 	block := Block{
 		Input:  edit.Frame{Rows: []string{"input"}, Row: 0, Column: 3},

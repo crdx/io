@@ -53,6 +53,17 @@ func (self *History) recall() *Recall {
 	return &Recall{lines: self.lines, index: len(self.lines)}
 }
 
+func (self *History) search(current string) *historySearch {
+	return &historySearch{
+		lines:    self.lines,
+		original: current,
+		states: []searchState{{
+			index: len(self.lines),
+			text:  current,
+		}},
+	}
+}
+
 func (self *History) trim() {
 	if self.limit > 0 && len(self.lines) > self.limit {
 		self.lines = self.lines[len(self.lines)-self.limit:]
@@ -148,4 +159,85 @@ func (self *Recall) Walk(current string, direction int) (string, bool) {
 	}
 
 	return self.lines[self.index], true
+}
+
+type historySearch struct {
+	lines    []string
+	original string
+	states   []searchState
+}
+
+type searchState struct {
+	query      string
+	index      int
+	text       string
+	hasMatched bool
+}
+
+func (self *historySearch) getQuery() string {
+	return self.current().query
+}
+
+func (self *historySearch) getText() string {
+	return self.current().text
+}
+
+func (self *historySearch) add(value rune) {
+	previous := self.current()
+	query := previous.query + string(value)
+	start := previous.index
+
+	if !previous.hasMatched {
+		if previous.query == "" {
+			start = len(self.lines) - 1
+		} else {
+			start = -1
+		}
+	}
+
+	self.states = append(self.states, self.find(query, start, previous))
+}
+
+func (self *historySearch) deleteBackward() {
+	if len(self.states) > 1 {
+		self.states = self.states[:len(self.states)-1]
+	}
+}
+
+func (self *historySearch) previous() {
+	current := self.current()
+	start := current.index - 1
+	if !current.hasMatched {
+		if current.query == "" {
+			start = len(self.lines) - 1
+		} else {
+			start = -1
+		}
+	}
+
+	self.states[len(self.states)-1] = self.find(current.query, start, current)
+}
+
+func (self *historySearch) find(query string, start int, fallback searchState) searchState {
+	for i := start; i >= 0; i-- {
+		if strings.Contains(self.lines[i], query) {
+			return searchState{query: query, index: i, text: self.lines[i], hasMatched: true}
+		}
+	}
+
+	fallback.query = query
+	fallback.hasMatched = false
+	return fallback
+}
+
+func (self *historySearch) current() searchState {
+	return self.states[len(self.states)-1]
+}
+
+func (self *historySearch) recall() *Recall {
+	return &Recall{
+		lines:        self.lines,
+		index:        self.current().index,
+		pendingInput: self.original,
+	}
 }

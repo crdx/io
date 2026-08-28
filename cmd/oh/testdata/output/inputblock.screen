@@ -11,6 +11,18 @@ r
 ────────────────────────────────────────────────────────────────────────────────
 > what is the weather
 ── ··✦ ─ 0m 0m ─ rxw gs ─ workspace ─ GPT Sol 5.6 ▫▫▫▪·· ─ ?% 0K/? ─────────────
+=== reverse history search at 20 columns ===
+────────────────────
+git diff
+────────────────────
+=== reverse history search at 40 columns ===
+── reverse-i-search: git ───────────────
+git diff
+────────────────────────────────────────
+=== reverse history search at 80 columns ===
+── reverse-i-search: git ───────────────────────────────────────────────────────
+git diff
+── ··✦ ─ 0m 0m ─ rxw gs ─ workspace ─ GPT Sol 5.6 ▫▫▫▪·· ─ ?% 0K/? ─────────────
 === scrolled both ways at 20 columns ===
 ───────────── ↑ 2 ──
 > the third row

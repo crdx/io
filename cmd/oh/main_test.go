@@ -2606,6 +2606,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"pending-mode-messages": {".ansi", ".screen"},
 		"paste":                 {".ansi", ".screen"},
 		"picker-menu":           {".ansi", ".screen"},
+		"readline-bindings":     {".ansi", ".screen"},
 		"resume-arguments":      {".txt"},
 		"resume-mode":           {".ansi"},
 		"running":               {".ansi", ".screen"},
@@ -4608,6 +4609,10 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 		"one row": {
 			Rows: []string{"> what is the weather"}, Row: 0, Column: 21,
 		},
+		"reverse history search": {
+			Rows: []string{"git diff"}, Row: 0, Column: 8,
+			IsSearching: true, SearchQuery: "git",
+		},
 		"scrolled both ways": {
 			Rows: []string{"> the third row", "> the fourth row"}, Row: 1, Column: 16,
 			HiddenLinesAbove: 2, HiddenLinesBelow: 7,
@@ -4710,6 +4715,93 @@ func verticalInputMovementStream(t *testing.T, keypresses ...key.Key) string {
 	history.Add("earlier")
 	editor := edit.NewInput(history)
 	editor.SetText("one two three")
+	self.show(editor)
+
+	for _, keypress := range keypresses {
+		self.handleKeypressAndShowInput(editor, history, keypress)
+	}
+
+	return screenOutput.String()
+}
+
+func TestReadlineInputBindingsDrawWhatTheyDrewBefore(t *testing.T) {
+	control := func(value rune) key.Key {
+		return key.Key{Code: key.Rune, Value: value, Mod: key.Ctrl}
+	}
+	character := func(value rune) key.Key {
+		return key.Key{Code: key.Rune, Value: value}
+	}
+
+	historyLines := []string{"git status", "just test", "git diff"}
+	passes := map[string]func() string{
+		"01 ctrl+a": func() string {
+			return readlineInputStream(t, nil, "one two", control('a'), character('!'))
+		},
+		"02 ctrl+e": func() string {
+			return readlineInputStream(t, nil, "one two", key.Key{Code: key.Home}, control('e'), character('!'))
+		},
+		"03 ctrl+b": func() string {
+			return readlineInputStream(t, nil, "one two", control('b'), character('!'))
+		},
+		"04 ctrl+f": func() string {
+			return readlineInputStream(t, nil, "one two", key.Key{Code: key.Home}, control('f'), character('!'))
+		},
+		"05 ctrl+w": func() string {
+			return readlineInputStream(t, nil, "one --two", control('w'))
+		},
+		"06 ctrl+k": func() string {
+			return readlineInputStream(t, nil, "one two", key.Key{Code: key.Home}, control('f'), control('k'))
+		},
+		"07 ctrl+r empty history": func() string {
+			return readlineInputStream(t, nil, "unfinished", control('r'))
+		},
+		"08 ctrl+r query": func() string {
+			return readlineInputStream(t, historyLines, "unfinished", control('r'), character('g'), character('i'), character('t'))
+		},
+		"09 ctrl+r again": func() string {
+			return readlineInputStream(t, historyLines, "unfinished", control('r'), character('g'), character('i'), character('t'), control('r'))
+		},
+		"10 ctrl+r backspace": func() string {
+			return readlineInputStream(t, historyLines, "unfinished", control('r'), character('g'), character('i'), character('t'), key.Key{Code: key.Backspace})
+		},
+		"11 ctrl+r failed query": func() string {
+			return readlineInputStream(t, historyLines, "unfinished", control('r'), character('g'), character('i'), character('t'), character('z'))
+		},
+		"12 ctrl+r erased query": func() string {
+			return readlineInputStream(t, historyLines, "unfinished", control('r'), character('g'), key.Key{Code: key.Backspace})
+		},
+		"13 ctrl+r escape": func() string {
+			return readlineInputStream(t, historyLines, "unfinished", control('r'), character('g'), character('i'), character('t'), key.Key{Code: key.Escape})
+		},
+		"14 ctrl+r then ctrl+a": func() string {
+			return readlineInputStream(t, historyLines, "unfinished", control('r'), character('g'), character('i'), character('t'), control('a'), character('!'))
+		},
+	}
+
+	shownPasses := map[string]func() string{}
+	for name, pass := range passes {
+		shownPasses[name] = func() string {
+			return shown(t, pass(), 40)
+		}
+	}
+
+	compareWithGolden(t, "readline-bindings", ".ansi", passes)
+	compareWithGolden(t, "readline-bindings", ".screen", shownPasses)
+}
+
+func readlineInputStream(t *testing.T, historyLines []string, text string, keypresses ...key.Key) string {
+	t.Helper()
+
+	self := slashCommandFixture(t, caps.Read)
+	var screenOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&screenOutput, 40, replayLines)
+
+	history := edit.NewHistory("", historyLimit)
+	for _, line := range historyLines {
+		history.Add(line)
+	}
+	editor := edit.NewInput(history)
+	editor.SetText(text)
 	self.show(editor)
 
 	for _, keypress := range keypresses {
@@ -4850,7 +4942,8 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		terminalLines = 8
 	}
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, terminalLines)
-	self.commands = fixtureCommandRegistry(t,
+	self.commands = fixtureCommandRegistry(
+		t,
 		slash.Command{
 			Name: "help",
 			Run: func(context slash.Context, _ slash.Arguments) error {

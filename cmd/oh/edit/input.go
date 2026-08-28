@@ -34,6 +34,7 @@ type Input struct {
 	buffer     *Buffer
 	history    *History
 	recall     *Recall
+	search     *historySearch
 	frameWidth int
 
 	isPasting       bool
@@ -61,6 +62,7 @@ func NewInput(history *History) *Input {
 // Reset empties the line and starts the walk through history again.
 func (self *Input) Reset() {
 	self.buffer = &Buffer{}
+	self.search = nil
 	self.isPasting = false
 	self.isPrefixPending = false
 	self.isEnterPending = false
@@ -78,6 +80,7 @@ func (self *Input) Text() string {
 }
 
 func (self *Input) SetText(text string) {
+	self.finishSearch()
 	self.buffer.Set(text)
 }
 
@@ -93,6 +96,8 @@ type Frame struct {
 	Rows             []string
 	Row              int
 	Column           int
+	IsSearching      bool
+	SearchQuery      string
 	HiddenLinesAbove int // the rows out of sight above
 	HiddenLinesBelow int // the rows out of sight below
 }
@@ -103,6 +108,10 @@ func (self *Input) Frame(width int) Frame {
 
 	framedRows := window(rows, cursorRow)
 	framedRows.Column = cursorColumn
+	if self.search != nil {
+		framedRows.IsSearching = true
+		framedRows.SearchQuery = self.search.getQuery()
+	}
 
 	return framedRows
 }
@@ -113,22 +122,8 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 	}
 	self.wasRunning = running
 
-	if keypress.Code == key.Rune && keypress.Mod.Has(key.Ctrl) {
-		switch keypress.Value {
-		case 'u':
-			self.Reset()
-			return Draw
-
-		case 'c':
-			if self.buffer.Len() > 0 && !self.isClearPending {
-				self.isClearPending = true
-				return Draw
-			}
-
-			self.Reset()
-
-			return Draw
-		}
+	if self.applyClearKey(keypress) {
+		return Draw
 	}
 
 	self.isClearPending = false
@@ -136,6 +131,14 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 	if self.isPasting {
 		self.isEnterPending = false
 		self.paste(keypress)
+		return Draw
+	}
+
+	if self.applySearchKey(keypress) {
+		return Draw
+	}
+
+	if self.applyReadlineKey(keypress) {
 		return Draw
 	}
 
@@ -203,6 +206,99 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 	}
 
 	return Draw
+}
+
+func (self *Input) applyClearKey(keypress key.Key) bool {
+	if keypress.Code != key.Rune || !keypress.Mod.Has(key.Ctrl) {
+		return false
+	}
+
+	switch keypress.Value {
+	case 'u':
+		self.Reset()
+		return true
+	case 'c':
+		if self.buffer.Len() > 0 && !self.isClearPending {
+			self.isClearPending = true
+			return true
+		}
+
+		self.Reset()
+		return true
+	}
+
+	return false
+}
+
+func (self *Input) applyReadlineKey(keypress key.Key) bool {
+	if keypress.Code != key.Rune || !keypress.Mod.Has(key.Ctrl) {
+		return false
+	}
+
+	switch keypress.Value {
+	case 'a':
+		self.buffer.MoveHome()
+	case 'b':
+		self.buffer.MoveLeft()
+	case 'e':
+		self.buffer.MoveEnd()
+	case 'f':
+		self.buffer.MoveRight()
+	case 'k':
+		self.buffer.DeleteToEnd()
+	case 'r':
+		self.startSearch()
+	case 'w':
+		self.buffer.DeleteWhitespaceWordBackward()
+	default:
+		return false
+	}
+
+	return true
+}
+
+func (self *Input) applySearchKey(keypress key.Key) bool {
+	if self.search == nil {
+		return false
+	}
+
+	switch {
+	case keypress.Code == key.Rune && keypress.Value == 'r' && keypress.Mod.Has(key.Ctrl):
+		self.search.previous()
+		self.buffer.Set(self.search.getText())
+		return true
+	case keypress.Code == key.Rune && keypress.Mod == 0:
+		self.search.add(keypress.Value)
+		self.buffer.Set(self.search.getText())
+		return true
+	case keypress.Code == key.Backspace && keypress.Mod == 0:
+		self.search.deleteBackward()
+		self.buffer.Set(self.search.getText())
+		return true
+	case keypress.Code == key.Escape:
+		self.finishSearch()
+		return true
+	default:
+		self.finishSearch()
+		return false
+	}
+}
+
+func (self *Input) startSearch() {
+	if self.history == nil {
+		return
+	}
+
+	self.search = self.history.search(self.buffer.String())
+}
+
+func (self *Input) finishSearch() {
+	if self.search == nil {
+		return
+	}
+
+	self.recall = self.search.recall()
+	self.search = nil
 }
 
 const (

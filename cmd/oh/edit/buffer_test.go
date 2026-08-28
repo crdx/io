@@ -198,3 +198,24 @@ func TestDeletingAWordBackwardLeavesTheCursorWhereTheWordBegan(t *testing.T) {
 		"snake_case|": "snake_|",
 	})
 }
+
+func TestDeletingAWhitespaceWordBackwardKeepsPunctuationWithItsWord(t *testing.T) {
+	moves(t, (*Buffer).DeleteWhitespaceWordBackward, map[string]string{
+		"one --two|":  "one |",
+		"one --two |": "one |",
+		"one --tw|o":  "one |o",
+		"|one":        "|one",
+		"one\ntwo|":   "one\n|",
+	})
+}
+
+func TestDeletingToTheEndStopsAtTheEndOfTheCurrentLine(t *testing.T) {
+	moves(t, (*Buffer).DeleteToEnd, map[string]string{
+		"|one":        "|",
+		"o|ne":        "o|",
+		"one|":        "one|",
+		"one\nt|wo":   "one\nt|",
+		"o|ne\ntwo":   "o|\ntwo",
+		"one\n|\ntwo": "one\n|\ntwo",
+	})
+}
