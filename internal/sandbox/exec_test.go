@@ -1,6 +1,7 @@
 package sandbox
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"slices"
@@ -60,6 +61,7 @@ func TestAPolicySurvivesBeingWrittenAndReadBack(t *testing.T) {
 		CPUTime:   2 * time.Second,
 		FileSize:  1024,
 		OpenFiles: 64,
+		Processes: 128,
 	}
 
 	encoded, err := json.Marshal(policy)
@@ -78,11 +80,52 @@ func TestAPolicySurvivesBeingWrittenAndReadBack(t *testing.T) {
 	if got.FileSize != policy.FileSize || got.OpenFiles != policy.OpenFiles {
 		t.Errorf("got %+v, want %+v", got, policy)
 	}
+	if got.Processes != policy.Processes {
+		t.Errorf("got %+v, want %+v", got, policy)
+	}
 	if !slices.Equal(got.Read, policy.Read) || !slices.Equal(got.Write, policy.Write) {
 		t.Errorf("got %+v, want %+v", got, policy)
 	}
 	if !slices.Equal(got.Exec, policy.Exec) || got.SetEnv["NAME"] != "value" {
 		t.Errorf("got %+v, want %+v", got, policy)
+	}
+}
+
+func TestOutputIsKeptUpToTheLimitAndAcceptedBeyondIt(t *testing.T) {
+	var output boundedBuffer
+
+	const chunk = 1 << 20
+
+	written := 0
+	for range 3 * maxOutput / chunk {
+		count, err := output.Write(bytes.Repeat([]byte("x"), chunk))
+		if err != nil {
+			t.Fatalf("got %v, want a write a command can never be blocked by", err)
+		}
+		written += count
+	}
+
+	if written != 3*maxOutput {
+		t.Errorf("got %d bytes accepted, want every one of %d", written, 3*maxOutput)
+	}
+
+	if len(output.String()) != maxOutput {
+		t.Errorf("got %d bytes kept, want no more than %d", len(output.String()), maxOutput)
+	}
+}
+
+func TestOutputWithinTheLimitIsKeptWhole(t *testing.T) {
+	var output boundedBuffer
+
+	if _, err := output.Write([]byte("hello ")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := output.Write([]byte("world")); err != nil {
+		t.Fatal(err)
+	}
+
+	if output.String() != "hello world" {
+		t.Errorf("got %q, want the writes in the order they arrived", output.String())
 	}
 }
 

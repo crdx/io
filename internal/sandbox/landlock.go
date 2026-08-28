@@ -43,10 +43,12 @@ const (
 	rightsRead  = accessReadFile | accessReadDir
 	rightsExec  = rightsRead | accessExecute
 	rightsWrite = rightsRead | accessWriteFile | accessTruncate | accessRemoveDir |
-		accessRemoveFile | accessMakeChar | accessMakeDir | accessMakeReg | accessMakeSock |
-		accessMakeFifo | accessMakeBlock | accessMakeSym | accessRefer
+		accessRemoveFile | accessMakeDir | accessMakeReg | accessMakeSock |
+		accessMakeFifo | accessMakeSym | accessRefer
 
 	rightsFile = accessReadFile | accessExecute | accessWriteFile | accessTruncate
+
+	rightsDevice = accessMakeChar | accessMakeBlock
 )
 
 const (
@@ -54,7 +56,7 @@ const (
 	scopeAbstractUnix = 1 << 0
 )
 
-const handledRights = rightsWrite | accessExecute
+const handledRights = rightsWrite | rightsDevice | accessExecute
 
 type rulesetAttr struct {
 	handledAccessFS    uint64

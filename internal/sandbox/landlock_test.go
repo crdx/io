@@ -32,6 +32,22 @@ func TestUnixSocketsAreIsolatedWhereLandlockCanEnforceIt(t *testing.T) {
 	}
 }
 
+func TestDeviceNodesAreHandledEverywhereAndGrantedNowhere(t *testing.T) {
+	if rightsWrite&rightsDevice != 0 {
+		t.Error("a writable path was granted the making of device nodes")
+	}
+
+	for _, rights := range []uint64{rightsRead, rightsExec, rightsFile} {
+		if rights&rightsDevice != 0 {
+			t.Errorf("rights %d were granted the making of device nodes", rights)
+		}
+	}
+
+	if configuredRuleset(minABI).handledAccessFS&rightsDevice != rightsDevice {
+		t.Error("the ruleset left the making of device nodes unhandled, which allows it everywhere")
+	}
+}
+
 func TestAFileGrantReachesNothingAroundIt(t *testing.T) {
 	if !insideChildProcess() {
 		directory := t.TempDir()

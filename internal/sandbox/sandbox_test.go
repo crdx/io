@@ -2,6 +2,8 @@ package sandbox_test
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net"
 	"os"
 	"os/exec"
@@ -15,7 +17,11 @@ import (
 	"crdx.org/io/internal/sandbox"
 )
 
-const opensslConfigurationPath = "/etc/ssl/openssl.cnf"
+const (
+	opensslConfigurationPath    = "/etc/ssl/openssl.cnf"
+	ownerDeathHelperVariable    = "IO_SANDBOX_OWNER_DEATH_HELPER"
+	ownerDeathDirectoryVariable = "IO_SANDBOX_OWNER_DEATH_DIRECTORY"
+)
 
 func TestMain(m *testing.M) {
 	sandbox.Init()
@@ -91,6 +97,49 @@ func run(t *testing.T, directory string, command string, policy sandbox.Policy) 
 	return result
 }
 
+type concurrentRun struct {
+	index  int
+	result sandbox.Result
+	err    error
+}
+
+func runConcurrently(
+	t *testing.T,
+	directories [2]string,
+	commands [2]string,
+	policies [2]sandbox.Policy,
+) [2]sandbox.Result {
+	t.Helper()
+
+	for i, policy := range policies {
+		if err := sandbox.Supported(t.Context(), policy); err != nil {
+			t.Skipf("the sandbox cannot enforce policy %d: %v", i, err)
+		}
+	}
+
+	started := make(chan struct{})
+	finished := make(chan concurrentRun, len(policies))
+	for i := range policies {
+		go func() {
+			<-started
+			result, err := sandbox.Run(t.Context(), directories[i], commands[i], policies[i])
+			finished <- concurrentRun{index: i, result: result, err: err}
+		}()
+	}
+	close(started)
+
+	var results [2]sandbox.Result
+	for range policies {
+		got := <-finished
+		if got.err != nil {
+			t.Fatalf("command %d failed to run: %v", got.index, got.err)
+		}
+		results[got.index] = got.result
+	}
+
+	return results
+}
+
 func TestACommandRunsAndReportsItsOutput(t *testing.T) {
 	result := run(t, t.TempDir(), "echo hello", sandbox.Policy{})
 
@@ -100,6 +149,15 @@ func TestACommandRunsAndReportsItsOutput(t *testing.T) {
 
 	if result.Code != 0 {
 		t.Errorf("got exit status %d, want 0", result.Code)
+	}
+}
+
+func TestACommandCombinesOutputInTheOrderItWasWritten(t *testing.T) {
+	command := "printf one; printf two >&2; printf three; printf four >&2"
+	result := run(t, t.TempDir(), command, sandbox.Policy{})
+
+	if result.Code != 0 || result.Output != "onetwothreefour" {
+		t.Errorf("got exit status %d with output %q", result.Code, result.Output)
 	}
 }
 
@@ -130,6 +188,206 @@ func TestANewSessionCannotOutliveItsCommand(t *testing.T) {
 	time.Sleep(400 * time.Millisecond)
 	content, err = os.ReadFile(marker) //nolint:gosec // reading the test's own marker is intended
 	if err != nil || string(content) != "started" {
+		t.Errorf("the detached session survived: got marker %q, %v", content, err)
+	}
+}
+
+func TestADetachedSessionCannotHoldCommandOutputOpen(t *testing.T) {
+	startedAt := time.Now()
+	result := run(t, t.TempDir(), "setsid sleep 30 & printf finished", sandbox.Policy{})
+
+	if result.Code != 0 || result.Output != "finished" {
+		t.Errorf("got exit status %d with output %q", result.Code, result.Output)
+	}
+	if duration := time.Since(startedAt); duration > 2*time.Second {
+		t.Errorf("the detached session held the command open for %s", duration)
+	}
+}
+
+func TestAFailedCommandCannotLeaveANewSessionBehind(t *testing.T) {
+	directory := t.TempDir()
+	marker := filepath.Join(directory, "failed-detached")
+	command := "setsid sh -c 'sleep 0.2; printf escaped > " + marker + "' & exit 23"
+
+	result := run(t, directory, command, sandbox.Policy{})
+	if result.Code != 23 {
+		t.Fatalf("got exit status %d with output %q, want 23", result.Code, result.Output)
+	}
+
+	time.Sleep(400 * time.Millisecond)
+	if content, err := os.ReadFile(marker); err == nil { //nolint:gosec // reading the test's own marker is intended
+		t.Errorf("the detached session survived: got marker %q", content)
+	} else if !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("could not inspect the marker: %v", err)
+	}
+}
+
+func TestACommandDiesWhenItsOwnerIsKilled(t *testing.T) {
+	if os.Getenv(ownerDeathHelperVariable) != "" {
+		runOwnerDeathHelper(t)
+		return
+	}
+
+	directory := t.TempDir()
+	policy := sandbox.Policy{
+		Write:   []string{directory},
+		Env:     []string{"PATH"},
+		Timeout: 10 * time.Second,
+	}
+	if err := sandbox.Supported(t.Context(), policy); err != nil {
+		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	}
+
+	owner := exec.CommandContext(t.Context(), os.Args[0], "-test.run=^TestACommandDiesWhenItsOwnerIsKilled$") //nolint:gosec // rerunning this test binary is intended
+	owner.Env = append(
+		os.Environ(),
+		ownerDeathHelperVariable+"=1",
+		ownerDeathDirectoryVariable+"="+directory,
+	)
+	if err := owner.Start(); err != nil {
+		t.Fatalf("could not start the command owner: %v", err)
+	}
+	defer func() { _ = owner.Process.Kill() }()
+
+	ready := filepath.Join(directory, "ready")
+	activity := filepath.Join(directory, "activity")
+	waitForFileContents(t, ready, "ready")
+
+	if err := owner.Process.Kill(); err != nil {
+		t.Fatalf("could not kill the command owner: %v", err)
+	}
+	if err := owner.Wait(); err == nil {
+		t.Error("the killed command owner exited successfully")
+	}
+
+	time.Sleep(100 * time.Millisecond)
+	content, err := os.ReadFile(activity) //nolint:gosec // reading the test's own marker is intended
+	if err != nil {
+		t.Fatalf("could not read the command's activity: %v", err)
+	}
+	assertFileContentsRemain(t, activity, string(content))
+}
+
+func runOwnerDeathHelper(t *testing.T) {
+	t.Helper()
+
+	directory := os.Getenv(ownerDeathDirectoryVariable)
+	ready := filepath.Join(directory, "ready")
+	activity := filepath.Join(directory, "activity")
+	command := "printf x > " + activity + "; printf ready > " + ready +
+		"; for _ in {1..30}; do sleep 0.05; printf x >> " + activity + "; done"
+	policy := sandbox.Policy{
+		Write:   []string{directory},
+		Env:     []string{"PATH"},
+		Timeout: 10 * time.Second,
+	}
+
+	if _, err := sandbox.Run(t.Context(), directory, command, policy); err != nil {
+		t.Fatalf("the owned command did not run: %v", err)
+	}
+}
+
+func TestACancelledContextStartsNoCommand(t *testing.T) {
+	directory := t.TempDir()
+	marker := filepath.Join(directory, "never-started")
+	policy := sandbox.Policy{Write: []string{directory}, Env: []string{"PATH"}}
+
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+
+	_, err := sandbox.Run(ctx, directory, "printf started > "+marker, policy)
+	if err == nil {
+		t.Error("the command with an already cancelled context was allowed to run")
+	}
+	if content, err := os.ReadFile(marker); err == nil { //nolint:gosec // reading the test's own marker is intended
+		t.Errorf("the cancelled command wrote %q", content)
+	} else if !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("could not inspect the command marker: %v", err)
+	}
+}
+
+func TestCancellingACommandKillsItsDetachedSessions(t *testing.T) {
+	directory := t.TempDir()
+	marker := filepath.Join(directory, "cancelled-detached")
+	policy := sandbox.Policy{
+		Write:   []string{directory},
+		Env:     []string{"PATH"},
+		Timeout: 10 * time.Second,
+	}
+	if err := sandbox.Supported(t.Context(), policy); err != nil {
+		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	}
+
+	ctx, cancel := context.WithCancel(t.Context())
+	finished := make(chan error, 1)
+	go func() {
+		_, err := sandbox.Run(ctx, directory, delayedDetachedWrite(marker), policy)
+		finished <- err
+	}()
+
+	waitForFileContents(t, marker, "started")
+	cancel()
+
+	select {
+	case err := <-finished:
+		if err == nil || !strings.Contains(err.Error(), "command was stopped") {
+			t.Errorf("got %v, want the command to report its cancellation", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("the cancelled command did not stop")
+	}
+
+	assertFileContentsRemain(t, marker, "started")
+}
+
+func TestTimingOutACommandKillsItsDetachedSessions(t *testing.T) {
+	directory := t.TempDir()
+	marker := filepath.Join(directory, "timed-out-detached")
+	policy := sandbox.Policy{
+		Write:   []string{directory},
+		Env:     []string{"PATH"},
+		Timeout: 200 * time.Millisecond,
+	}
+	if err := sandbox.Supported(t.Context(), policy); err != nil {
+		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	}
+
+	_, err := sandbox.Run(t.Context(), directory, delayedDetachedWrite(marker), policy)
+	if err == nil || !strings.Contains(err.Error(), "did not finish within 200ms") {
+		t.Errorf("got %v, want the command to report its timeout", err)
+	}
+
+	waitForFileContents(t, marker, "started")
+	assertFileContentsRemain(t, marker, "started")
+}
+
+func delayedDetachedWrite(marker string) string {
+	return "setsid sh -c 'printf started > " + marker +
+		"; sleep 0.5; printf escaped >> " + marker + "' & sleep 30"
+}
+
+func waitForFileContents(t *testing.T, path string, want string) {
+	t.Helper()
+
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		content, err := os.ReadFile(path) //nolint:gosec // reading the test's own marker is intended
+		if err == nil && string(content) == want {
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	content, err := os.ReadFile(path) //nolint:gosec // reading the test's own marker is intended
+	t.Fatalf("got marker %q, %v, want %q", content, err, want)
+}
+
+func assertFileContentsRemain(t *testing.T, path string, want string) {
+	t.Helper()
+
+	time.Sleep(700 * time.Millisecond)
+	content, err := os.ReadFile(path) //nolint:gosec // reading the test's own marker is intended
+	if err != nil || string(content) != want {
 		t.Errorf("the detached session survived: got marker %q, %v", content, err)
 	}
 }
@@ -167,6 +425,107 @@ func TestASetEnvironmentVariableWinsOverTheParent(t *testing.T) {
 
 	if result.Output != "chosen" {
 		t.Errorf("got %q, want %q", result.Output, "chosen")
+	}
+}
+
+func TestConcurrentCommandsKeepIndependentFilesystemPolicies(t *testing.T) {
+	firstDirectory := t.TempDir()
+	secondDirectory := t.TempDir()
+	coordinationDirectory := t.TempDir()
+	firstReady := filepath.Join(coordinationDirectory, "first-ready")
+	secondReady := filepath.Join(coordinationDirectory, "second-ready")
+
+	commands := [2]string{
+		concurrentWriteCommand(firstReady, secondReady, firstDirectory, secondDirectory),
+		concurrentWriteCommand(secondReady, firstReady, secondDirectory, firstDirectory),
+	}
+	policies := [2]sandbox.Policy{
+		{
+			Read:    []string{secondDirectory},
+			Write:   []string{firstDirectory, coordinationDirectory},
+			Env:     []string{"PATH"},
+			Timeout: 10 * time.Second,
+		},
+		{
+			Read:    []string{firstDirectory},
+			Write:   []string{secondDirectory, coordinationDirectory},
+			Env:     []string{"PATH"},
+			Timeout: 10 * time.Second,
+		},
+	}
+
+	results := runConcurrently(
+		t,
+		[2]string{firstDirectory, secondDirectory},
+		commands,
+		policies,
+	)
+	for i, result := range results {
+		if result.Code != 0 {
+			t.Errorf("command %d got exit status %d with output %q", i, result.Code, result.Output)
+		}
+	}
+
+	for _, directory := range []string{firstDirectory, secondDirectory} {
+		content, err := os.ReadFile(filepath.Join(directory, "own")) //nolint:gosec // reading the test's own file is intended
+		if err != nil || string(content) != "own" {
+			t.Errorf("got own file %q, %v", content, err)
+		}
+		if content, err := os.ReadFile(filepath.Join(directory, "crossed")); err == nil { //nolint:gosec // reading the test's own file is intended
+			t.Errorf("another command crossed into the policy with %q", content)
+		} else if !errors.Is(err, os.ErrNotExist) {
+			t.Errorf("could not inspect the crossed file: %v", err)
+		}
+	}
+}
+
+func concurrentWriteCommand(ready string, peerReady string, ownDirectory string, foreignDirectory string) string {
+	return "touch " + ready + "; " +
+		"for _ in {1..100}; do test -e " + peerReady + " && break; sleep 0.01; done; " +
+		"test -e " + peerReady + " || exit 24; " +
+		"printf own > " + filepath.Join(ownDirectory, "own") + "; " +
+		"if printf crossed > " + filepath.Join(foreignDirectory, "crossed") + " 2>/dev/null; then exit 25; fi"
+}
+
+func TestConcurrentCommandsKeepIndependentEnvironmentsAndLimits(t *testing.T) {
+	coordinationDirectory := t.TempDir()
+	firstReady := filepath.Join(coordinationDirectory, "first-ready")
+	secondReady := filepath.Join(coordinationDirectory, "second-ready")
+
+	command := func(ready string, peerReady string) string {
+		return "touch " + ready + "; " +
+			"for _ in {1..100}; do test -e " + peerReady + " && break; sleep 0.01; done; " +
+			`printf '%s %s %s' "$NAME" "$(ulimit -n)" "$(ulimit -u)"`
+	}
+	policies := [2]sandbox.Policy{
+		{
+			Write:     []string{coordinationDirectory},
+			Env:       []string{"PATH"},
+			SetEnv:    map[string]string{"NAME": "first"},
+			Timeout:   10 * time.Second,
+			OpenFiles: 64,
+			Processes: 32,
+		},
+		{
+			Write:     []string{coordinationDirectory},
+			Env:       []string{"PATH"},
+			SetEnv:    map[string]string{"NAME": "second"},
+			Timeout:   10 * time.Second,
+			OpenFiles: 128,
+			Processes: 64,
+		},
+	}
+
+	results := runConcurrently(
+		t,
+		[2]string{coordinationDirectory, coordinationDirectory},
+		[2]string{command(firstReady, secondReady), command(secondReady, firstReady)},
+		policies,
+	)
+	for i, want := range []string{"first 64 32", "second 128 64"} {
+		if results[i].Code != 0 || results[i].Output != want {
+			t.Errorf("command %d got exit status %d with output %q, want %q", i, results[i].Code, results[i].Output, want)
+		}
 	}
 }
 
@@ -848,6 +1207,41 @@ func TestWhatACommandWritesToTmpLandsInTheScratch(t *testing.T) {
 	}
 }
 
+func TestCommandsSharingAScratchShareItsContents(t *testing.T) {
+	scratch := t.TempDir()
+	policy := sandbox.Policy{TmpDir: scratch, Write: []string{sandbox.TmpDir}}
+
+	written := run(t, t.TempDir(), "printf durable > /tmp/state", policy)
+	if written.Code != 0 {
+		t.Fatalf("the first command failed with exit status %d and output %q", written.Code, written.Output)
+	}
+
+	read := run(t, t.TempDir(), "cat /tmp/state", policy)
+	if read.Code != 0 || read.Output != "durable" {
+		t.Errorf("the second command got exit status %d with output %q", read.Code, read.Output)
+	}
+}
+
+func TestCommandsWithDifferentScratchesCannotSeeEachOthersContents(t *testing.T) {
+	firstPolicy := sandbox.Policy{TmpDir: t.TempDir(), Write: []string{sandbox.TmpDir}}
+	secondPolicy := sandbox.Policy{TmpDir: t.TempDir(), Write: []string{sandbox.TmpDir}}
+
+	written := run(t, t.TempDir(), "printf private > /tmp/state", firstPolicy)
+	if written.Code != 0 {
+		t.Fatalf("the first command failed with exit status %d and output %q", written.Code, written.Output)
+	}
+
+	hidden := run(t, t.TempDir(), "test ! -e /tmp/state", secondPolicy)
+	if hidden.Code != 0 {
+		t.Errorf("the second command saw the first command's scratch: %q", hidden.Output)
+	}
+
+	kept := run(t, t.TempDir(), "cat /tmp/state", firstPolicy)
+	if kept.Code != 0 || kept.Output != "private" {
+		t.Errorf("the first scratch got exit status %d with output %q", kept.Code, kept.Output)
+	}
+}
+
 func TestAnExecutableBuiltInTmpMayRunWhenGranted(t *testing.T) {
 	scratch := t.TempDir()
 	policy := sandbox.Policy{
@@ -926,6 +1320,64 @@ func TestDescriptorsAreLimited(t *testing.T) {
 
 	if strings.TrimSpace(result.Output) != "64" {
 		t.Errorf("got %q, want %q", result.Output, "64")
+	}
+}
+
+func TestCompletedCommandsLeakNoDescriptors(t *testing.T) {
+	directory := t.TempDir()
+	policy := sandbox.Policy{
+		Write:   []string{directory},
+		Env:     []string{"PATH"},
+		Timeout: 10 * time.Second,
+	}
+	if err := sandbox.Supported(t.Context(), policy); err != nil {
+		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	}
+
+	before := openDescriptorCount(t)
+	for range 10 {
+		result, err := sandbox.Run(t.Context(), directory, "true", policy)
+		if err != nil || result.Code != 0 {
+			t.Fatalf("command got exit status %d with error %v and output %q", result.Code, err, result.Output)
+		}
+	}
+	after := openDescriptorCount(t)
+
+	if after != before {
+		t.Errorf("got %d open descriptors after the commands, started with %d", after, before)
+	}
+}
+
+func openDescriptorCount(t *testing.T) int {
+	t.Helper()
+
+	entries, err := os.ReadDir("/proc/self/fd")
+	if err != nil {
+		t.Skipf("the process descriptor directory is unavailable: %v", err)
+	}
+	return len(entries)
+}
+
+func TestProcessesAreLimited(t *testing.T) {
+	result := run(t, t.TempDir(), "ulimit -u", sandbox.Policy{Processes: 64})
+
+	if strings.TrimSpace(result.Output) != "64" {
+		t.Errorf("got %q, want %q", result.Output, "64")
+	}
+}
+
+const outputLimit = 8 << 20
+
+func TestOutputBeyondWhatIsKeptDoesNotStopTheCommand(t *testing.T) {
+	command := fmt.Sprintf("yes .........| head -c %d", 3*outputLimit)
+	result := run(t, t.TempDir(), command, sandbox.Policy{})
+
+	if result.Code != 0 {
+		t.Errorf("got exit status %d, want a command writing past the cap to finish", result.Code)
+	}
+
+	if len(result.Output) != outputLimit {
+		t.Errorf("got %d bytes, want the output held at %d", len(result.Output), outputLimit)
 	}
 }
 

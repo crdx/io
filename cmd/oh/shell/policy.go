@@ -25,6 +25,7 @@ const (
 	shellCPUTime   = 60 * time.Second
 	shellFileSize  = 1024 << 20
 	shellOpenFiles = 4096
+	shellProcesses = 1024
 
 	goBuildCacheDir  = "go-build"
 	goModuleCacheDir = "go-mod"
@@ -172,6 +173,7 @@ func createPolicyWithSupportProbe(
 		CPUTime:   shellCPUTime,
 		FileSize:  shellFileSize,
 		OpenFiles: shellOpenFiles,
+		Processes: shellProcesses,
 
 		VirtualResolver: true,
 	}

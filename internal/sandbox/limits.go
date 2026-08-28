@@ -20,6 +20,7 @@ func applyLimits(policy Policy) error {
 		{unix.RLIMIT_CPU, uint64(policy.CPUTime.Seconds()), policy.CPUTime > 0},
 		{unix.RLIMIT_FSIZE, uint64(policy.FileSize), policy.FileSize > 0},    //nolint:gosec // sane rejects a negative
 		{unix.RLIMIT_NOFILE, uint64(policy.OpenFiles), policy.OpenFiles > 0}, //nolint:gosec // sane rejects a negative
+		{unix.RLIMIT_NPROC, uint64(policy.Processes), policy.Processes > 0},  //nolint:gosec // sane rejects a negative
 	}
 
 	for _, limit := range limits {
@@ -44,6 +45,10 @@ func (self Policy) sane() error {
 
 	if self.OpenFiles < 0 {
 		return fmt.Errorf("an open file limit of %d is not a count", self.OpenFiles)
+	}
+
+	if self.Processes < 0 {
+		return fmt.Errorf("a process limit of %d is not a count", self.Processes)
 	}
 
 	if self.CPUTime > 0 && self.CPUTime < time.Second {

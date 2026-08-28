@@ -94,6 +94,12 @@ func TestEveryCommandOwnsItsProcessGroup(t *testing.T) {
 	}
 }
 
+func TestEveryCommandDiesWithItsOwner(t *testing.T) {
+	if namespaceAttributes(Policy{}).Pdeathsig != syscall.SIGKILL {
+		t.Error("expected the command to be killed when its owner dies")
+	}
+}
+
 func TestAScratchThatIsNotThereIsRefused(t *testing.T) {
 	absent := Policy{TmpDir: "/scratch"}
 

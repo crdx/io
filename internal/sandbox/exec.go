@@ -139,6 +139,24 @@ func configuredEnvironment(allowed []string, set map[string]string) []string {
 	return environment
 }
 
+const maxOutput = 8 << 20
+
+type boundedBuffer struct {
+	buffer bytes.Buffer
+}
+
+func (self *boundedBuffer) Write(data []byte) (int, error) {
+	if room := maxOutput - self.buffer.Len(); room > 0 {
+		self.buffer.Write(data[:min(room, len(data))])
+	}
+
+	return len(data), nil
+}
+
+func (self *boundedBuffer) String() string {
+	return self.buffer.String()
+}
+
 // Result is what a sandboxed command produced.
 type Result struct {
 	Output     string        `json:"-"` // stdout and stderr, interleaved as the command wrote them
@@ -165,7 +183,7 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 		defer cancel()
 	}
 
-	var output bytes.Buffer
+	var output boundedBuffer
 
 	startedAt := time.Now()
 
@@ -185,15 +203,6 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 	}
 
 	err = stub.Run()
-
-	if stub.Process != nil {
-		cleanupErr := syscall.Kill(-stub.Process.Pid, syscall.SIGKILL)
-		if cleanupErr != nil && !errors.Is(cleanupErr, syscall.ESRCH) {
-			return Result{Output: output.String()}, fmt.Errorf(
-				"could not clean up the command's processes: %w", cleanupErr,
-			)
-		}
-	}
 
 	result := Result{Output: output.String()}
 	if stub.ProcessState != nil {

@@ -47,6 +47,7 @@ type Policy struct {
 	CPUTime   time.Duration `json:"cpu_time"`
 	FileSize  int64         `json:"file_size"` // the largest file it may write, in bytes
 	OpenFiles int64         `json:"open_files"`
+	Processes int64         `json:"processes"` // the most tasks it may have at once
 }
 
 // WithRead returns a policy with additional readable paths without sharing the changed slice with

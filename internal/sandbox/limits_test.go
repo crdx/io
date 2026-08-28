@@ -16,6 +16,7 @@ func TestALimitThatIsNotALimitIsRefused(t *testing.T) {
 	}{
 		{name: "a negative file size", policy: Policy{FileSize: -1}, want: "is not a size"},
 		{name: "a negative file count", policy: Policy{OpenFiles: -1}, want: "is not a count"},
+		{name: "a negative process count", policy: Policy{Processes: -1}, want: "is not a count"},
 		{name: "a sub-second cpu limit", policy: Policy{CPUTime: time.Millisecond}, want: "no time at all"},
 	} {
 		err := test.policy.sane()
@@ -26,7 +27,7 @@ func TestALimitThatIsNotALimitIsRefused(t *testing.T) {
 }
 
 func TestALimitThatCanBeMetIsAccepted(t *testing.T) {
-	policy := Policy{FileSize: 1024, OpenFiles: 64, CPUTime: time.Second}
+	policy := Policy{FileSize: 1024, OpenFiles: 64, Processes: 64, CPUTime: time.Second}
 
 	if err := policy.sane(); err != nil {
 		t.Errorf("got %v, want a policy that can be met", err)
@@ -58,7 +59,12 @@ func TestTheLimitsAPolicyNamesAreTheOnesTheCommandGets(t *testing.T) {
 		return
 	}
 
-	policy := Policy{CPUTime: 30 * time.Second, FileSize: coverableFileSize, OpenFiles: 64}
+	policy := Policy{
+		CPUTime:   30 * time.Second,
+		FileSize:  coverableFileSize,
+		OpenFiles: 64,
+		Processes: 128,
+	}
 	if err := applyLimits(policy); err != nil {
 		t.Fatalf("could not apply the limits: %v", err)
 	}
@@ -72,6 +78,7 @@ func TestTheLimitsAPolicyNamesAreTheOnesTheCommandGets(t *testing.T) {
 		{name: "processor time", resource: unix.RLIMIT_CPU, want: 30},
 		{name: "file size", resource: unix.RLIMIT_FSIZE, want: coverableFileSize},
 		{name: "open files", resource: unix.RLIMIT_NOFILE, want: 64},
+		{name: "processes", resource: unix.RLIMIT_NPROC, want: 128},
 	} {
 		var limit unix.Rlimit
 		if err := unix.Getrlimit(test.resource, &limit); err != nil {
@@ -89,21 +96,33 @@ func TestAPolicyNamingNoLimitsLeavesThemAloneApartFromCores(t *testing.T) {
 		return
 	}
 
-	var before unix.Rlimit
-	if err := unix.Getrlimit(unix.RLIMIT_NOFILE, &before); err != nil {
-		t.Fatalf("could not read the limit: %v", err)
+	untouched := []struct {
+		name     string
+		resource int
+	}{
+		{name: "descriptor", resource: unix.RLIMIT_NOFILE},
+		{name: "process", resource: unix.RLIMIT_NPROC},
+	}
+
+	before := make([]unix.Rlimit, len(untouched))
+	for i, limit := range untouched {
+		if err := unix.Getrlimit(limit.resource, &before[i]); err != nil {
+			t.Fatalf("%s: could not read the limit: %v", limit.name, err)
+		}
 	}
 
 	if err := applyLimits(Policy{}); err != nil {
 		t.Fatalf("could not apply the limits: %v", err)
 	}
 
-	var after unix.Rlimit
-	if err := unix.Getrlimit(unix.RLIMIT_NOFILE, &after); err != nil {
-		t.Fatalf("could not read the limit: %v", err)
-	}
-	if after != before {
-		t.Errorf("got %+v, want the descriptor limit left at %+v", after, before)
+	for i, limit := range untouched {
+		var after unix.Rlimit
+		if err := unix.Getrlimit(limit.resource, &after); err != nil {
+			t.Fatalf("%s: could not read the limit: %v", limit.name, err)
+		}
+		if after != before[i] {
+			t.Errorf("got %+v, want the %s limit left at %+v", after, limit.name, before[i])
+		}
 	}
 
 	var cores unix.Rlimit
