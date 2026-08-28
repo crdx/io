@@ -1,47 +1,52 @@
-=== a call still running ===
-Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
+=== combined storage warnings ===
+chat.md recording disabled: transcript append failed
+wire.http recording disabled: wire append failed
+────────────────────────────────────────────────────────────────────────────────────────────────────
 
-
- have a look at that
-
-
-Looking for where the prompt is drawn.
-
-I'll have a look at how the editor draws its prompt.
-
-grep prompt *.go ✦· 7s
-=== discarded reasoning ===
-complete thought
-
-stream failed
-=== help during reasoning ===
---- frame 1 ---
-thinking about it
-
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== command error ===
+Command not found: /unknown (alt+enter sends as message)
+────────────────────────────────────────────────────────────────────────────────────────────────────
+/unknown
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== editing clears feedback ===
+────────────────────────────────────────────────────────────────────────────────────────────────────
+/unknownx
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== multiline help ===
 Commands:
   /conf
   /copy
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
+/help
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-=== unknown command during answer ===
-still working
+=== success confirmation ===
+Copied last message to clipboard
+────────────────────────────────────────────────────────────────────────────────────────────────────
+/copy
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== tall answer stays untouched ===
+01 alpha
+
+02 bravo
+
+03 charlie
+
+04 delta
+
+05 echo
+
+06 foxtrot
+
+07 golf
 
 Command not found: /unknown (alt+enter sends as message)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 /unknown
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-=== unknown command during reasoning ===
+=== turn completion clears it ===
 still working
 
-Command not found: /unknown (alt+enter sends as message)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 /unknown
-────────────────────────────────────────────────────────────────────────────────────────────────────
-=== unknown snippet during reasoning ===
-still working
-
-Snippet not found: //unknown (alt+enter sends as message)
-────────────────────────────────────────────────────────────────────────────────────────────────────
-//unknown
 ────────────────────────────────────────────────────────────────────────────────────────────────────

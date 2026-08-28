@@ -1914,13 +1914,16 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 
 	plain := style.Plain(live.String())
 
-	for _, want := range []string{"Check", "Looking at the file.", "Need care.", "first answer.", "one.go", "Done.", "could not be written"} {
+	for _, want := range []string{"Check", "Looking at the file.", "Need care.", "first answer.", "one.go", "Done."} {
 		if !strings.Contains(plain, want) {
 			t.Errorf("expected %q on the screen, got %q", want, plain)
 		}
 	}
 	if !strings.Contains(plain, "Need care.\n\nThe first") {
 		t.Errorf("expected a blank line between reasoning and the answer, got %q", plain)
+	}
+	if self.feedback.message.text != "The stored session could not be written (no space left)" {
+		t.Errorf("storage warning was not retained as interface feedback: %+v", self.feedback.message)
 	}
 
 	if live.String() != replayOutput.String() {
@@ -2556,6 +2559,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"clearing":              {".ansi", ".screen"},
 		"completion":            {".txt"},
 		"config-reload":         {".ansi", ".screen"},
+		"feedback":              {".ansi", ".screen", ".txt"},
 		"context":               {".prompt"},
 		"inputblock":            {".ansi", ".screen"},
 		"lifecycle":             {".ansi", ".screen"},
@@ -4579,21 +4583,145 @@ func TestReloadingConfigChangesTheGetOnWithItMessage(t *testing.T) {
 	self.finish()
 
 	hasSentReloadedMessage := false
-	reloadNotices := 0
 	for _, event := range self.events {
 		if event.Kind == agent.UserMessageEvent && event.Text == "carry on from the reloaded config" {
 			hasSentReloadedMessage = true
 		}
-		if event.Kind == agent.HarnessMessageEvent && event.Text == "Configuration reloaded." {
-			reloadNotices++
+		if event.Kind == agent.HarnessMessageEvent {
+			t.Errorf("successful reload entered conversation history: %+v", event)
 		}
 	}
 	if !hasSentReloadedMessage {
 		t.Error("the reloaded message was not sent")
 	}
-	if reloadNotices != 2 {
-		t.Errorf("got %d reload notices, want one for each of 2 valid revisions", reloadNotices)
+}
+
+type feedbackScenario int
+
+const (
+	feedbackCommandError feedbackScenario = iota
+	feedbackHelp
+	feedbackSuccess
+	feedbackClearedByEditing
+	feedbackClearedByTurnCompletion
+	feedbackStorageWarnings
+	feedbackTallAnswer
+)
+
+func TestFeedbackDrawsEveryVisibleState(t *testing.T) {
+	passes := map[string]func() string{
+		"command error":               func() string { return feedbackStream(t, feedbackCommandError) },
+		"multiline help":              func() string { return feedbackStream(t, feedbackHelp) },
+		"success confirmation":        func() string { return feedbackStream(t, feedbackSuccess) },
+		"editing clears feedback":     func() string { return feedbackStream(t, feedbackClearedByEditing) },
+		"turn completion clears it":   func() string { return feedbackStream(t, feedbackClearedByTurnCompletion) },
+		"combined storage warnings":   func() string { return feedbackStream(t, feedbackStorageWarnings) },
+		"tall answer stays untouched": func() string { return feedbackStream(t, feedbackTallAnswer) },
 	}
+
+	compareWithGolden(t, "feedback", ".ansi", passes)
+	compareWithGolden(t, "feedback", ".screen", shownPasses(t, passes))
+	compareWithGolden(t, "feedback", ".txt", map[string]func() string{
+		"plain help": func() string { return plainFeedback(t) },
+	})
+}
+
+func feedbackStream(t *testing.T, scenario feedbackScenario) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	self := slashCommandFixture(t, caps.Read)
+	self.agent = agent.New("", quietProvider{}, nil)
+	terminalLines := replayLines
+	if scenario == feedbackTallAnswer {
+		terminalLines = 8
+	}
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, terminalLines)
+	self.commands = fixtureCommandRegistry(t,
+		slash.Command{
+			Name: "help",
+			Run: func(context slash.Context, _ slash.Arguments) error {
+				context.Notice("Commands:\n  /conf\n  /copy")
+				return nil
+			},
+		},
+		slash.Command{
+			Name: "copy",
+			Run: func(context slash.Context, _ slash.Arguments) error {
+				context.Success("Copied last message to clipboard")
+				return nil
+			},
+		},
+	)
+
+	editor := edit.NewInput(nil)
+	self.editor = editor
+
+	switch scenario {
+	case feedbackCommandError, feedbackClearedByEditing, feedbackClearedByTurnCompletion, feedbackTallAnswer:
+		editor.SetText("/unknown")
+	case feedbackHelp:
+		editor.SetText("/help")
+	case feedbackSuccess:
+		editor.SetText("/copy")
+	case feedbackStorageWarnings:
+	}
+	self.show(editor)
+
+	switch scenario {
+	case feedbackCommandError:
+		self.handleCommand("/unknown")
+		self.show(editor)
+	case feedbackHelp:
+		self.handleCommand("/help")
+		self.show(editor)
+	case feedbackSuccess:
+		self.handleCommand("/copy")
+		self.show(editor)
+	case feedbackClearedByEditing:
+		self.handleCommand("/unknown")
+		self.show(editor)
+		self.handleKeypressAndShowInput(editor, nil, key.Key{Code: key.Rune, Value: 'x'})
+	case feedbackClearedByTurnCompletion:
+		self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+		self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "still working"})
+		self.handleCommand("/unknown")
+		self.show(editor)
+		completed := agent.Event{Kind: agent.ModelMessageEvent, Text: "still working"}
+		self.takeTurn(TurnEvent{Update: agent.Update{Event: &completed}})
+		self.finish()
+		self.show(editor)
+	case feedbackStorageWarnings:
+		self.notifyFailure("chat.md recording disabled: transcript append failed\nwire.http recording disabled: wire append failed")
+		self.show(editor)
+	case feedbackTallAnswer:
+		const answer = "01 alpha\n\n02 bravo\n\n03 charlie\n\n04 delta\n\n05 echo\n\n06 foxtrot\n\n07 golf"
+		self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+		self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: answer})
+		self.handleCommand("/unknown")
+		self.show(editor)
+	}
+
+	return screenOutput.String()
+}
+
+func plainFeedback(t *testing.T) string {
+	t.Helper()
+
+	var screenOutput bytes.Buffer
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.New(&screenOutput)
+	self.isPlain = true
+	self.commands = fixtureCommandRegistry(t, slash.Command{
+		Name: "help",
+		Run: func(context slash.Context, _ slash.Arguments) error {
+			context.Notice("Commands:\n  /help")
+			return nil
+		},
+	})
+	self.handleCommand("/help")
+	self.screen.End()
+	return strings.TrimSuffix(style.Plain(screenOutput.String()), "\n")
 }
 
 type configReloadScenario int
@@ -4621,6 +4749,160 @@ func TestReloadingConfigDrawsEveryVisibleState(t *testing.T) {
 
 	compareWithGolden(t, "config-reload", ".ansi", passes)
 	compareWithGolden(t, "config-reload", ".screen", shownPasses(t, passes))
+}
+
+func TestEphemeralInterfaceFeedbackStaysOutOfConversationHistory(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, `
+		get_on_with_it_message = "first"
+	`)
+
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = log.Close() })
+
+	const terminalLines = 8
+	const answer = "01 alpha\n\n02 bravo\n\n03 charlie\n\n04 delta\n\n05 echo\n\n06 foxtrot\n\n07 golf"
+
+	var liveOutput bytes.Buffer
+	self := &App{
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.NewTerminalOfSize(&liveOutput, replayColumns, terminalLines),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read),
+		commands: fixtureCommandRegistry(t, slash.Command{
+			Name: "help",
+			Run: func(context slash.Context, _ slash.Arguments) error {
+				context.Notice("Commands:\n  /help")
+				return nil
+			},
+		}),
+	}
+	prepareLiveConfig(t, self, path)
+	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+	self.recordEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "show me the answer"})
+	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: answer})
+
+	beforeFeedback := liveOutput.String()
+	self.handleCommand("/foo")
+	self.handleCommand("/help")
+	writeLiveConfig(t, path, `
+		get_on_with_it_message = "second"
+	`)
+	settleLiveConfig(t, self)
+	writeLiveConfig(t, path, `
+		get_on_with_it_message = "third"
+	`)
+	settleLiveConfig(t, self)
+
+	if liveOutput.String() != beforeFeedback {
+		t.Error("ephemeral interface feedback changed conversation scrollback before the answer was sealed")
+	}
+	if len(self.events) != 1 || self.events[0].Kind != agent.UserMessageEvent {
+		t.Errorf("conversation events before the answer was sealed are %v, want [user_message]", getEventKinds(self.events))
+	}
+
+	completed := agent.Event{Kind: agent.ModelMessageEvent, Text: answer}
+	self.takeTurn(TurnEvent{Update: agent.Update{Event: &completed}})
+	self.finish()
+
+	sessionName := log.Name()
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+	storedSession, err := store.Read(directory, sessionName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(storedSession.Events) != 2 ||
+		storedSession.Events[0].Kind != agent.UserMessageEvent ||
+		storedSession.Events[1].Kind != agent.ModelMessageEvent {
+		t.Errorf("stored conversation events are %v, want [user_message model_message]", getEventKinds(storedSession.Events))
+	}
+
+	var replayOutput bytes.Buffer
+	replayed := &App{
+		agent:  agent.New("", quietProvider{}, nil),
+		screen: output.NewTerminalOfSize(&replayOutput, replayColumns, terminalLines),
+		events: storedSession.Events,
+	}
+	replayed.replay()
+
+	liveScreen := visibleScreen(t, liveOutput.String(), replayColumns)
+	restoredScreen := visibleScreen(t, replayOutput.String(), replayColumns)
+	if !slices.Equal(liveScreen, restoredScreen) {
+		t.Errorf(
+			"ephemeral interface feedback changed the stored replay\nlive:\n%s\nreplayed:\n%s",
+			strings.Join(liveScreen, "\n"),
+			strings.Join(restoredScreen, "\n"),
+		)
+	}
+}
+
+func TestRetryRemainsDurableConversationHistory(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = log.Close() })
+
+	var liveOutput bytes.Buffer
+	self := &App{
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.NewTerminalOfSize(&liveOutput, replayColumns, replayLines),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read),
+	}
+	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+	self.recordEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "try it"})
+	self.recordEvent(agent.Event{
+		Kind:    agent.RetryingEvent,
+		Text:    "temporary fault",
+		Attempt: 1,
+		Took:    300 * time.Millisecond,
+	})
+	self.recordEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: "done"})
+	self.finish()
+
+	sessionName := log.Name()
+	if err := log.Close(); err != nil {
+		t.Fatal(err)
+	}
+	storedSession, err := store.Read(directory, sessionName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(storedSession.Events) != 3 ||
+		storedSession.Events[0].Kind != agent.UserMessageEvent ||
+		storedSession.Events[1].Kind != agent.RetryingEvent ||
+		storedSession.Events[2].Kind != agent.ModelMessageEvent {
+		t.Errorf("stored conversation events are %v, want [user_message retrying model_message]", getEventKinds(storedSession.Events))
+	}
+
+	var replayOutput bytes.Buffer
+	replayed := &App{
+		agent:  agent.New("", quietProvider{}, nil),
+		screen: output.NewTerminalOfSize(&replayOutput, replayColumns, replayLines),
+		events: storedSession.Events,
+	}
+	replayed.replay()
+
+	if !strings.Contains(style.Plain(replayOutput.String()), "Attempt 1 failed, asking again in 0.3s: temporary fault") {
+		t.Errorf("stored replay omitted the retry:\n%s", style.Plain(replayOutput.String()))
+	}
+	requireSameVisibleScreen(t, "durable retry changed after replay", liveOutput.String(), replayOutput.String())
+}
+
+func getEventKinds(events []agent.Event) []agent.Kind {
+	kinds := make([]agent.Kind, len(events))
+	for i, event := range events {
+		kinds[i] = event.Kind
+	}
+	return kinds
 }
 
 func configReloadStream(t *testing.T, scenario configReloadScenario) string {
@@ -5688,7 +5970,7 @@ func TestSlashCommandRunsImmediately(t *testing.T) {
 	}
 }
 
-func TestSlashCommandCanAddANotice(t *testing.T) {
+func TestSlashCommandCanAddFeedback(t *testing.T) {
 	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
 		Name: "fixture",
 		Run: func(context slash.Context, _ slash.Arguments) error {
@@ -5703,11 +5985,37 @@ func TestSlashCommandCanAddANotice(t *testing.T) {
 	if got := self.handleCommand("/fixture"); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
-	if len(self.events) != 1 {
-		t.Fatalf("got events %v", self.events)
+	if len(self.events) != 0 {
+		t.Fatalf("command notice entered conversation events: %v", self.events)
 	}
-	if self.events[0].Kind != agent.HarnessMessageEvent || self.events[0].Text != "fixture notice" {
-		t.Errorf("got event %v", self.events[0])
+	if self.feedback.message.text != "fixture notice" || self.feedback.message.status != agent.InfoStatus {
+		t.Errorf("got feedback %v", self.feedback.message)
+	}
+}
+
+func TestPlainCommandFeedbackIsPrintedWithoutEnteringConversationHistory(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.New(&screenOutput)
+	self.isPlain = true
+	self.commands = fixtureCommandRegistry(t, slash.Command{
+		Name: "help",
+		Run: func(context slash.Context, _ slash.Arguments) error {
+			context.Notice("Commands:\n  /help")
+			return nil
+		},
+	})
+
+	if got := self.handleCommand("/help"); got != dispatch.Handled {
+		t.Fatalf("got slash input result %d", got)
+	}
+	self.screen.End()
+
+	if len(self.events) != 0 {
+		t.Errorf("plain command feedback entered conversation events: %+v", self.events)
+	}
+	if !strings.Contains(style.Plain(screenOutput.String()), "Commands:\n  /help") {
+		t.Errorf("plain command feedback was not printed: %q", style.Plain(screenOutput.String()))
 	}
 }
 
@@ -5727,12 +6035,12 @@ func TestUnknownSlashCommandShowsOneErrorWhileReturnRepeatsAndKeepsTheInput(t *t
 	if got := editor.Text(); got != "/unknown" {
 		t.Errorf("got input %q", got)
 	}
-	if len(self.events) != 1 {
-		t.Fatalf("got %d repeated errors, want one: %v", len(self.events), self.events)
+	if len(self.events) != 0 {
+		t.Fatalf("repeated command errors entered conversation events: %v", self.events)
 	}
 	want := "Command not found: /unknown (alt+enter sends as message)"
-	if self.events[0].Text != want || self.events[0].Status != agent.ErrorStatus {
-		t.Errorf("got event %+v, want failed %q", self.events[0], want)
+	if self.feedback.message.text != want || self.feedback.message.status != agent.ErrorStatus {
+		t.Errorf("got feedback %+v, want failed %q", self.feedback.message, want)
 	}
 }
 
@@ -5757,10 +6065,11 @@ func TestUnknownSlashCommandDoesNotInterruptARunningTurn(t *testing.T) {
 	self.currentTurn.painter.DrawEvent(agent.Event{Kind: agent.ModelReasoningEvent, Text: "still working on it"})
 	self.screen.End()
 	plainOutput := style.Plain(screenOutput.String())
-	errorIndex := strings.Index(plainOutput, "Command not found: /unknown")
-	reasoningIndex := strings.Index(plainOutput, "still working on it")
-	if errorIndex < 0 || reasoningIndex < 0 || errorIndex > reasoningIndex {
-		t.Errorf("expected the error before the preserved running output, got %q", plainOutput)
+	if self.feedback.message.text != "Command not found: /unknown (alt+enter sends as message)" {
+		t.Errorf("command error was not retained as interface feedback: %+v", self.feedback.message)
+	}
+	if strings.Contains(plainOutput, "Command not found") {
+		t.Errorf("command error entered conversation scrollback: %q", plainOutput)
 	}
 	if strings.Count(plainOutput, "still working") != 1 {
 		t.Errorf("expected the completed reasoning once, got %q", plainOutput)
@@ -5854,8 +6163,11 @@ func TestSnippetWithoutArgumentsShowsUsageAndKeepsTheInput(t *testing.T) {
 	if editor.Text() != "//add" {
 		t.Errorf("got editor text %q", editor.Text())
 	}
-	if len(self.events) != 1 || self.events[0].Text != "Usage: //add <args> (alt+enter sends as message)" {
-		t.Errorf("got events %+v", self.events)
+	if len(self.events) != 0 {
+		t.Errorf("snippet usage entered conversation events: %+v", self.events)
+	}
+	if self.feedback.message.text != "Usage: //add <args> (alt+enter sends as message)" {
+		t.Errorf("got feedback %+v", self.feedback.message)
 	}
 }
 
@@ -5898,11 +6210,14 @@ func TestSnippetTemplateErrorsAreReportedAndKeepTheInput(t *testing.T) {
 	if got := self.handleCommand("//review only-one"); got != dispatch.Rejected {
 		t.Fatalf("got slash input result %d", got)
 	}
-	if len(self.events) != 1 || !strings.HasPrefix(self.events[0].Text, "//review: Could not render template:") {
-		t.Errorf("got events %+v", self.events)
+	if len(self.events) != 0 {
+		t.Errorf("snippet error entered conversation events: %+v", self.events)
 	}
-	if !strings.HasSuffix(self.events[0].Text, " (alt+enter sends as message)") {
-		t.Errorf("expected the way out to be offered, got %q", self.events[0].Text)
+	if !strings.HasPrefix(self.feedback.message.text, "//review: Could not render template:") {
+		t.Errorf("got feedback %+v", self.feedback.message)
+	}
+	if !strings.HasSuffix(self.feedback.message.text, " (alt+enter sends as message)") {
+		t.Errorf("expected the way out to be offered, got %q", self.feedback.message.text)
 	}
 }
 
@@ -5921,8 +6236,11 @@ func TestUnknownSnippetShowsAnErrorAndKeepsTheInput(t *testing.T) {
 		t.Errorf("got input %q", got)
 	}
 	want := "Snippet not found: //unknown (alt+enter sends as message)"
-	if len(self.events) != 1 || self.events[0].Text != want || self.events[0].Status != agent.ErrorStatus {
-		t.Errorf("got events %+v, want failed %q", self.events, want)
+	if len(self.events) != 0 {
+		t.Errorf("snippet error entered conversation events: %+v", self.events)
+	}
+	if self.feedback.message.text != want || self.feedback.message.status != agent.ErrorStatus {
+		t.Errorf("got feedback %+v, want failed %q", self.feedback.message, want)
 	}
 }
 
@@ -6070,7 +6388,7 @@ func TestARequestedTransitionStopsTheApp(t *testing.T) {
 	}
 }
 
-func TestSlashCommandCanAddASuccessMessage(t *testing.T) {
+func TestSlashCommandCanAddSuccessFeedback(t *testing.T) {
 	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
 		Name: "fixture",
 		Run: func(context slash.Context, _ slash.Arguments) error {
@@ -6085,8 +6403,11 @@ func TestSlashCommandCanAddASuccessMessage(t *testing.T) {
 	if got := self.handleCommand("/fixture"); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
-	if len(self.events) != 1 || self.events[0].Status != agent.SuccessStatus {
-		t.Errorf("got events %+v", self.events)
+	if len(self.events) != 0 {
+		t.Errorf("success feedback entered conversation events: %+v", self.events)
+	}
+	if self.feedback.message.text != "Copied to clipboard." || self.feedback.message.status != agent.SuccessStatus {
+		t.Errorf("got feedback %+v", self.feedback.message)
 	}
 }
 
@@ -6104,8 +6425,11 @@ func TestUsageErrorIsNotPrefixedWithTheCommandName(t *testing.T) {
 		t.Fatalf("got slash input result %d", got)
 	}
 	want := "Usage: /copy {session-dir|session-id|session-name} (alt+enter sends as message)"
-	if len(self.events) != 1 || self.events[0].Text != want {
-		t.Errorf("got events %+v, want %q", self.events, want)
+	if len(self.events) != 0 {
+		t.Errorf("usage feedback entered conversation events: %+v", self.events)
+	}
+	if self.feedback.message.text != want {
+		t.Errorf("got feedback %+v, want %q", self.feedback.message, want)
 	}
 }
 
@@ -6131,8 +6455,11 @@ func TestARefusedCommandKeepsWhatWasTypedAndSaysWhy(t *testing.T) {
 	}
 
 	want := `/new: Model "opus" is ambiguous (alt+enter sends as message)`
-	if len(self.events) != 1 || self.events[0].Text != want {
-		t.Errorf("got events %+v, want %q", self.events, want)
+	if len(self.events) != 0 {
+		t.Errorf("command feedback entered conversation events: %+v", self.events)
+	}
+	if self.feedback.message.text != want {
+		t.Errorf("got feedback %+v, want %q", self.feedback.message, want)
 	}
 }
 
@@ -7083,11 +7410,11 @@ func TestProviderItemWriteFailureWarnsAndLeavesCanonicalJournalReadable(t *testi
 	if log.completionAttempts != 0 {
 		t.Errorf("attempted %d completion writes after the provider state failed", log.completionAttempts)
 	}
-	if len(storedSession.Events) != 2 ||
-		storedSession.Events[1].Kind != agent.HarnessMessageEvent ||
-		storedSession.Events[1].Status != agent.ErrorStatus ||
-		!strings.Contains(storedSession.Events[1].Text, "item write failed") {
+	if len(storedSession.Events) != 1 || storedSession.Events[0].Kind != agent.UserMessageEvent {
 		t.Errorf("unexpected canonical events: %+v", storedSession.Events)
+	}
+	if testHarness.feedback.message.status != agent.ErrorStatus || !strings.Contains(testHarness.feedback.message.text, "item write failed") {
+		t.Errorf("provider item failure was not retained as interface feedback: %+v", testHarness.feedback.message)
 	}
 }
 
@@ -7159,14 +7486,13 @@ func TestAuxiliaryRecorderWarningsAreShownOnceAndRemainCanonical(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var warningEvents int
-	for _, event := range storedSession.Events {
-		if event.Kind == agent.HarnessMessageEvent {
-			warningEvents++
-		}
+	if len(storedSession.Events) != 1 || storedSession.Events[0].Kind != agent.UserMessageEvent {
+		t.Errorf("unexpected canonical events: %+v", storedSession.Events)
 	}
-	if warningEvents != 2 {
-		t.Errorf("stored %d warning events, want 2", warningEvents)
+	for _, want := range []string{"transcript append failed", "wire append failed"} {
+		if !strings.Contains(testHarness.feedback.message.text, want) {
+			t.Errorf("interface feedback omitted %q: %+v", want, testHarness.feedback.message)
+		}
 	}
 }
 

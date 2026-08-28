@@ -51,11 +51,6 @@ func (self *Picasso) DrawRestoredDelta(delta agent.Delta, previous *Picasso) {
 }
 
 func (self *Picasso) DrawEvent(event agent.Event) {
-	if event.Kind == agent.HarnessMessageEvent && (self.reasoning.Len() > 0 || self.answer.Len() > 0) {
-		self.drawHarnessMessageDuringStream(event)
-		return
-	}
-
 	switch {
 	case event.Kind == agent.ModelReasoningEvent && self.previousKind == agent.ModelReasoningEvent && self.reasoning.Len() == 0:
 		self.screen.End()
@@ -239,28 +234,6 @@ func (self *Picasso) Stop() {
 		self.rows = nil
 
 		self.screen.Seal()
-	}
-}
-
-func (self *Picasso) drawHarnessMessageDuringStream(event agent.Event) {
-	if !self.screen.RetractLive() {
-		self.previousKind = event.Kind
-		self.discardProvisionalReasoning()
-		self.answer.Reset()
-		self.screen.Line(self.render(event))
-		return
-	}
-
-	self.screen.Line(self.render(event))
-	if self.reasoning.Len() > 0 {
-		if !self.screen.DrawReasoning(RenderReasoning(self.reasoning.String(), self.screen.Columns())) {
-			self.isStale = true
-		}
-		return
-	}
-
-	if !self.screen.DrawAnswer(self.answerRenderer.Render(self.answer.String(), self.screen.Columns())) {
-		self.isStale = true
 	}
 }
 

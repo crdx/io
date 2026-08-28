@@ -84,7 +84,7 @@ func TestTheBottomRuleDropsItsRightLabelToKeepItsLeftOne(t *testing.T) {
 func bottomRuleOf(block Block, width int) string {
 	rows, _, _ := block.Rows(width)
 
-	return rows[len(rows)-1]
+	return rows[len(block.Status)+len(block.Input.Rows)+1]
 }
 
 func TestALabelPaintedDownToNothingCostsNothing(t *testing.T) {
@@ -116,6 +116,25 @@ func TestTheBlockFramesTheInputBetweenItsRules(t *testing.T) {
 	}
 	if cursorColumn != 2 {
 		t.Errorf("expected the cursor column to be carried over, got %d", cursorColumn)
+	}
+}
+
+func TestStatusRowsSitAboveTheTopRuleWithoutMovingTheInput(t *testing.T) {
+	block := Block{
+		Input:  edit.Frame{Rows: []string{"input"}, Row: 0, Column: 3},
+		Status: []string{"first status row", "second status row"},
+	}
+
+	rows, cursorRow, cursorColumn := block.Rows(40)
+
+	if len(rows) != 5 || rows[0] != "first status row" || rows[1] != "second status row" {
+		t.Errorf("expected status rows above the top rule, got %q", rows)
+	}
+	if cursorRow != 3 || cursorColumn != 3 {
+		t.Errorf("status moved the cursor to %d,%d within the footer", cursorRow, cursorColumn)
+	}
+	if rowsFromBottom := len(rows) - cursorRow; rowsFromBottom != 2 {
+		t.Errorf("status moved the input to %d rows from the bottom, want 2", rowsFromBottom)
 	}
 }
 

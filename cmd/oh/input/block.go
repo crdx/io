@@ -19,6 +19,7 @@ type Block struct {
 	Top    Ruler
 	Input  edit.Frame
 	Bottom Ruler
+	Status []string
 }
 
 func (self Block) Rows(width int) ([]string, int, int) {
@@ -29,11 +30,12 @@ func (self Block) Rows(width int) ([]string, int, int) {
 		bottom.Right = ""
 	}
 
+	rows = append(rows, self.Status...)
 	rows = append(rows, self.Top.render(width))
 	rows = append(rows, self.Input.Rows...)
 	rows = append(rows, bottom.render(width))
 
-	return rows, self.Input.Row + 1, self.Input.Column
+	return rows, len(self.Status) + self.Input.Row + 1, self.Input.Column
 }
 
 func (self Ruler) render(width int) string {

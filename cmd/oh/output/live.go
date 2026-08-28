@@ -60,16 +60,6 @@ func (self *Screen) DiscardLive() bool {
 	return true
 }
 
-// RetractLive erases the live region and restores the drawing origin when all of it remains on
-// screen.
-func (self *Screen) RetractLive() bool {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-
-	self.blocks = nil
-	return self.discardBlock()
-}
-
 func (self *Screen) discardBlock() bool {
 	if len(self.liveRegion.rows) == 0 {
 		return true

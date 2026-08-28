@@ -1,0 +1,3 @@
+=== plain help ===
+Commands:
+  /help

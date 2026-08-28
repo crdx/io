@@ -30,6 +30,7 @@ import (
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
+	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/internal/stop"
 	"crdx.org/io/toolbox/title"
 )
@@ -45,6 +46,24 @@ type pendingInput struct {
 	items    []pendingMessage
 	renderer *painter.PendingMessages
 	block    *output.BlockHandle
+}
+
+type feedbackSource int
+
+const (
+	systemFeedback feedbackSource = iota
+	commandFeedback
+	configFeedback
+)
+
+type feedbackMessage struct {
+	text   string
+	status agent.Status
+}
+
+type feedbackState struct {
+	source  feedbackSource
+	message feedbackMessage
 }
 
 func (self *pendingInput) add(message agent.Event, state agent.Event) {
@@ -74,6 +93,7 @@ type App struct {
 	mode             *caps.Mode
 	settledCaps      caps.Set
 	pending          pendingInput
+	feedback         feedbackState
 	terminal         terminal.Terminal
 	metrics          metrics.Tracker
 
@@ -87,6 +107,7 @@ type App struct {
 	queuedTurn  turn.Queue
 	currentTurn Turn
 	startedAt   time.Time
+	isPlain     bool
 }
 
 type Turn struct {
@@ -178,7 +199,11 @@ func (self *App) apply(editor *edit.Input, history *edit.History, keypress key.K
 		return true
 	}
 
+	previousText := editor.Text()
 	action := editor.Apply(keypress, self.currentTurn.Running())
+	if editor.Text() != previousText {
+		self.clearFeedback(commandFeedback)
+	}
 	if action != edit.Complete {
 		self.completion.Reset()
 	}
@@ -235,12 +260,16 @@ func (self *App) requestTransition(transition cycle.Transition) error {
 }
 
 func (self *App) handleCommand(message string) dispatch.Result {
+	self.clearFeedback(commandFeedback)
 	result, failure := dispatch.Handle(self.commands, dispatch.Actions{
 		EmitEvent:  self.notify,
 		SendPrompt: self.sendCommandPrompt,
+		ShowFeedback: func(text string, status agent.Status) {
+			self.showFeedback(commandFeedback, feedbackMessage{text: text, status: status})
+		},
 	}, message)
 	if failure != "" {
-		self.notifyFailure(failure)
+		self.showFeedback(commandFeedback, feedbackMessage{text: failure, status: agent.ErrorStatus})
 	}
 	return result
 }
@@ -460,9 +489,34 @@ func (self *App) show(editor *edit.Input) {
 			Center: self.renderBar(segment.BottomCenter, frame),
 			Right:  self.renderBar(segment.BottomRight, frame),
 		},
+		Status: self.feedbackRows(columns),
 	}
 
 	self.screen.Footer(block.Rows(columns))
+}
+
+func (self *App) feedbackRows(columns int) []string {
+	if self.feedback.message.text == "" {
+		return nil
+	}
+
+	styled := painter.NoticeStyle(self.feedback.message.status)(self.feedback.message.text)
+	return width.Wrap(styled, columns)
+}
+
+func (self *App) showFeedback(source feedbackSource, message feedbackMessage) {
+	if self.isPlain {
+		self.screen.Line(painter.NoticeStyle(message.status)(message.text))
+		return
+	}
+
+	self.feedback = feedbackState{source: source, message: message}
+}
+
+func (self *App) clearFeedback(source feedbackSource) {
+	if self.feedback.message.text != "" && self.feedback.source == source {
+		self.feedback = feedbackState{}
+	}
 }
 
 func (self *App) renderBar(position segment.Position, frame edit.Frame) string {
@@ -497,16 +551,15 @@ func (self *App) reloadConfig(watchFailure error) bool {
 	case config.ReloadUnchanged:
 		return false
 	case config.ReloadFailed:
-		self.notifyFailure("The configuration could not be reloaded: " + result.Failure.Error())
+		self.showFeedback(configFeedback, feedbackMessage{
+			text:   "The configuration could not be reloaded: " + result.Failure.Error(),
+			status: agent.ErrorStatus,
+		})
 		return true
 	case config.ReloadApplied:
 		self.getOnWithItMessage = result.LiveConfig.GetOnWithItMessage
 		self.barConfiguration.ReplaceLayout(result.LiveConfig.SegmentLayout)
-		self.notify(agent.Event{
-			Kind:   agent.HarnessMessageEvent,
-			Text:   "Configuration reloaded.",
-			Status: agent.SuccessStatus,
-		})
+		self.clearFeedback(configFeedback)
 	}
 	return true
 }
@@ -539,6 +592,9 @@ func (self *App) isPrefixPending() bool {
 }
 
 func (self *App) plainly(history *edit.History, initialMessage string) {
+	self.isPlain = true
+	defer func() { self.isPlain = false }()
+
 	self.acceptPlainInput(history, initialMessage)
 	if self.isTransitionRequested() {
 		return
@@ -784,6 +840,11 @@ func (self *App) notifyFailure(text string) {
 }
 
 func (self *App) notify(event agent.Event) {
+	if event.Kind == agent.HarnessMessageEvent {
+		self.showFeedback(systemFeedback, feedbackMessage{text: event.Text, status: event.Status})
+		return
+	}
+
 	self.events = append(self.events, event)
 	self.noticePainter().DrawEvent(event)
 
@@ -819,6 +880,7 @@ func (self *App) finish() {
 		self.redraw()
 	}
 	self.screen.End()
+	self.clearFeedback(commandFeedback)
 
 	self.currentTurn.Finish()
 
@@ -857,7 +919,14 @@ func (self *App) storeProviderState() bool {
 }
 
 func (self *App) showStorageWarnings() {
-	for _, err := range self.recorder.TakeWarnings() {
-		self.notifyFailure(err.Error())
+	warnings := self.recorder.TakeWarnings()
+	if len(warnings) == 0 {
+		return
 	}
+
+	messages := make([]string, len(warnings))
+	for i, warning := range warnings {
+		messages[i] = warning.Error()
+	}
+	self.notifyFailure(strings.Join(messages, "\n"))
 }

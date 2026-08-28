@@ -24,8 +24,9 @@ const (
 )
 
 type Actions struct {
-	EmitEvent  func(agent.Event)
-	SendPrompt func(string)
+	EmitEvent    func(agent.Event)
+	SendPrompt   func(string)
+	ShowFeedback func(string, agent.Status)
 }
 
 func Handle(registry slash.Registry, actions Actions, message string) (Result, string) {
@@ -58,9 +59,9 @@ func (self Actions) Send(message string) {
 }
 
 func (self Actions) Notice(message string) {
-	self.Emit(agent.Event{Kind: agent.HarnessMessageEvent, Text: message, Status: agent.InfoStatus})
+	self.ShowFeedback(message, agent.InfoStatus)
 }
 
 func (self Actions) Success(message string) {
-	self.Emit(agent.Event{Kind: agent.HarnessMessageEvent, Text: message, Status: agent.SuccessStatus})
+	self.ShowFeedback(message, agent.SuccessStatus)
 }
