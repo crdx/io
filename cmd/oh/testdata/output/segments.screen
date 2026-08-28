@@ -111,9 +111,9 @@ usage failed
 === turn-count / third turn ===
 #3
 === turn-timer / model turn ===
-3m/1m
+3m 1m
 === turn-timer / user turn ===
-12m/3m
+12m 3m
 === workspace-dir ===
 project
 === workspace-dir / full ===

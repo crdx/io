@@ -36,7 +36,7 @@ func (self state) NextRefresh(phase segment.Phase) time.Time {
 func (self state) Render(segment.Context) string {
 	timing := self.getTiming()
 	isTurnRunning := self.isTurnRunning()
-	return renderDuration(timing.UserTurn, !isTurnRunning) + style.Dim("/") + renderDuration(timing.ModelTurn, isTurnRunning)
+	return renderDuration(timing.UserTurn, !isTurnRunning) + " " + renderDuration(timing.ModelTurn, isTurnRunning)
 }
 
 func renderDuration(elapsed time.Duration, isActive bool) string {

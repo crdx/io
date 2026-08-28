@@ -10,7 +10,7 @@ r
 === one row at 80 columns ===
 ────────────────────────────────────────────────────────────────────────────────
 > what is the weather
-── ··✦ ─ 0m/0m ─ rxw gs ─ workspace ─ GPT Sol 5.6 ▫▫▫▪·· ─ ?% 0K/? ─────────────
+── ··✦ ─ 0m 0m ─ rxw gs ─ workspace ─ GPT Sol 5.6 ▫▫▫▪·· ─ ?% 0K/? ─────────────
 === scrolled both ways at 20 columns ===
 ───────────── ↑ 2 ──
 > the third row
@@ -25,4 +25,4 @@ r
 ───────────────────────────────────────────────────────────────────────── ↑ 2 ──
 > the third row
 > the fourth row
-── ··✦ ─ 0m/0m ─ rxw gs ─ workspace ─ GPT Sol 5.6 ▫▫▫▪·· ─ ?% 0K/? ─────────────
+── ··✦ ─ 0m 0m ─ rxw gs ─ workspace ─ GPT Sol 5.6 ▫▫▫▪·· ─ ?% 0K/? ─────────────

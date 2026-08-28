@@ -578,10 +578,10 @@ func TestTheTurnTimerShowsBothTurnsInWholeMinutes(t *testing.T) {
 		isTurnRunning bool
 		want          string
 	}{
-		{want: "0m/0m"},
-		{timing: turn.Timing{UserTurn: 3 * time.Minute, ModelTurn: time.Minute}, want: "3m/1m"},
-		{timing: turn.Timing{UserTurn: 3 * time.Minute}, isTurnRunning: true, want: "3m/0m"},
-		{timing: turn.Timing{UserTurn: 12*time.Minute + 59*time.Second, ModelTurn: 3*time.Minute + 59*time.Second}, want: "12m/3m"},
+		{want: "0m 0m"},
+		{timing: turn.Timing{UserTurn: 3 * time.Minute, ModelTurn: time.Minute}, want: "3m 1m"},
+		{timing: turn.Timing{UserTurn: 3 * time.Minute}, isTurnRunning: true, want: "3m 0m"},
+		{timing: turn.Timing{UserTurn: 12*time.Minute + 59*time.Second, ModelTurn: 3*time.Minute + 59*time.Second}, want: "12m 3m"},
 	}
 
 	for _, test := range tests {
@@ -599,8 +599,8 @@ func TestTheTurnTimerMutesEverythingExceptTheActiveNumber(t *testing.T) {
 		isTurnRunning bool
 		want          string
 	}{
-		{want: style.Normal("3") + style.Dim("m") + style.Dim("/") + style.Dim("1m")},
-		{isTurnRunning: true, want: style.Dim("3m") + style.Dim("/") + style.Normal("1") + style.Dim("m")},
+		{want: style.Normal("3") + style.Dim("m") + " " + style.Dim("1m")},
+		{isTurnRunning: true, want: style.Dim("3m") + " " + style.Normal("1") + style.Dim("m")},
 	}
 
 	for _, test := range tests {
@@ -662,7 +662,7 @@ func TestABusyBarDrawsEveryMinuteOfATurnExactlyOnce(t *testing.T) {
 		}
 
 		for index, got := range drawn {
-			want := fmt.Sprintf("0m/%dm", index+1)
+			want := fmt.Sprintf("0m %dm", index+1)
 			if got != want {
 				t.Fatalf("draw %d read %q, want %q", index, got, want)
 			}
