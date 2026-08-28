@@ -3,9 +3,10 @@ model = "deepseek-v4-pro"
 effort = "medium"
 
 [first]
-prompt = "reset the connection during an answer"
+prompt = "reset the connection until the attempts run out"
 
 [[first.response]]
+repeat = 22
 reset-after-wire-event = 1
 event = [
     '''{"choices":[{"delta":{"content":"Partial answer."}}]}''',

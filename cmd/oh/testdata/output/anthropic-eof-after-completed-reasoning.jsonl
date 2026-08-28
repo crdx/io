@@ -5,7 +5,6 @@
 {"kind":"event","event":{"kind":"retrying","text":"the stream ended before the response did","attempt":1}}
 {"kind":"event","event":{"kind":"model_message","text":"Answered on the second attempt."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"close after a completed thought"}]}}
-{"kind":"item","payload":{"role":"assistant","content":[{"type":"thinking","thinking":"Completed thought.","signature":"seal-1"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Answered on the second attempt."}]}}
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the transport failure"}}

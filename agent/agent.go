@@ -78,7 +78,7 @@ func cloneState(items []json.RawMessage) []json.RawMessage {
 	return clonedItems
 }
 
-func (self *Agent) FYI(text string) {
+func (self *Agent) AddUserMessage(text string) {
 	self.provider.AddUserMessage(text)
 }
 
@@ -231,6 +231,9 @@ func (self *Agent) send(
 	yieldEvent func(Event, error) bool,
 ) (Reply, bool, error) {
 	listening := true
+	asked := rewindOf(self.provider)
+
+	var spent time.Duration
 
 	for attempt := 1; ; attempt++ {
 		reply, err := self.provider.Send(ctx, func(output Output) bool {
@@ -242,9 +245,15 @@ func (self *Agent) send(
 			return reply, listening, err
 		}
 
-		wait, worthIt := retryWait(err, attempt)
+		wait, worthIt := self.retryWait(err, attempt, spent)
 		if !worthIt {
 			return reply, listening, err
+		}
+
+		spent += wait
+
+		if !isResumable(err) {
+			asked.restore()
 		}
 
 		if !yieldUpdates(prose.interrupted()) {

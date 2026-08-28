@@ -1,0 +1,58 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+lose the connection before it answers
+```
+
+## Retrying
+
+> 2001-01-01T00:00:02Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
+
+```
+Post "http://endpoint": EOF
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Through on the second attempt.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+carry on
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Carrying on.
+```
+

@@ -21,17 +21,28 @@
 lose the network during reasoning
 ```
 
-## Failure
+## Retrying
 
 > 2001-01-01T00:00:02Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
 
 ```
 unexpected EOF
 ```
 
-## User
+## Assistant
 
 > 2001-01-01T00:00:03Z
+
+```
+Through on the second attempt.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
 
 ```
 continue after the network interruption
@@ -39,7 +50,7 @@ continue after the network interruption
 
 ## Assistant
 
-> 2001-01-01T00:00:04Z
+> 2001-01-01T00:00:05Z
 
 ```
 Resumed.

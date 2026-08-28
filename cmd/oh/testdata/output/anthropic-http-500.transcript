@@ -43,9 +43,218 @@ request failed with status 500:
 request failed with status 500: 
 ```
 
-## Failure
+## Retrying
 
 > 2001-01-01T00:00:04Z
+
+- **Attempt:** `3`
+- **Waited:** `1s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:05Z
+
+- **Attempt:** `4`
+- **Waited:** `2s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:06Z
+
+- **Attempt:** `5`
+- **Waited:** `4s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:07Z
+
+- **Attempt:** `6`
+- **Waited:** `8s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:08Z
+
+- **Attempt:** `7`
+- **Waited:** `16s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:09Z
+
+- **Attempt:** `8`
+- **Waited:** `32s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:10Z
+
+- **Attempt:** `9`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:11Z
+
+- **Attempt:** `10`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:12Z
+
+- **Attempt:** `11`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:13Z
+
+- **Attempt:** `12`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:14Z
+
+- **Attempt:** `13`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:15Z
+
+- **Attempt:** `14`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:16Z
+
+- **Attempt:** `15`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:17Z
+
+- **Attempt:** `16`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:18Z
+
+- **Attempt:** `17`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:19Z
+
+- **Attempt:** `18`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:20Z
+
+- **Attempt:** `19`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:21Z
+
+- **Attempt:** `20`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Retrying
+
+> 2001-01-01T00:00:22Z
+
+- **Attempt:** `21`
+- **Waited:** `1m0s`
+
+```
+request failed with status 500: 
+```
+
+## Failure
+
+> 2001-01-01T00:00:23Z
 
 ```
 request failed with status 500: 
@@ -53,7 +262,7 @@ request failed with status 500:
 
 ## User
 
-> 2001-01-01T00:00:05Z
+> 2001-01-01T00:00:24Z
 
 ```
 continue after the transport failure
@@ -61,7 +270,7 @@ continue after the transport failure
 
 ## Assistant
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:25Z
 
 ```
 Resumed.

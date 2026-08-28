@@ -85,17 +85,28 @@ tool result
 
 Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
 
-## Failure
+## Retrying
 
 > 2001-01-01T00:00:06Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
 
 ```
 unexpected EOF
 ```
 
-## User
+## Assistant
 
 > 2001-01-01T00:00:07Z
+
+```
+Through on the second attempt.
+```
+
+## User
+
+> 2001-01-01T00:00:08Z
 
 ```
 continue after the network interruption
@@ -103,7 +114,7 @@ continue after the network interruption
 
 ## Assistant
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:09Z
 
 ```
 Resumed.

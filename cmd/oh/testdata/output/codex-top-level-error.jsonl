@@ -1,7 +1,7 @@
 {"kind":"head","version":10,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"receive a top-level Responses API error"}}
-{"kind":"event","event":{"kind":"failure","text":"model overloaded"}}
+{"kind":"event","event":{"kind":"failure","text":"the prompt was refused"}}
 {"kind":"item","payload":{"role":"user","content":"receive a top-level Responses API error"}}
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the endpoint error"}}

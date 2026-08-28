@@ -1,8 +1,92 @@
 \e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m reset the connection during an answer                                                              \e[0m\r
+\e[48;2;52;53;65m reset the connection until the attempts run out                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?7l\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 1 failed, asking again in 0.3s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 2 failed, asking again in 0.5s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 3 failed, asking again in 1s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 4 failed, asking again in 2s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 5 failed, asking again in 4s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 6 failed, asking again in 8s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 7 failed, asking again in 16s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 8 failed, asking again in 32s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 9 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 10 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 11 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 12 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 13 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 14 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 15 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 16 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 17 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 18 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 19 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 20 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mattempt 21 failed, asking again in 1m00s: unexpected EOF\e[0m\r
+\r
+\r\e[KPartial answer.\r
 \r
 \e[38;2;204;102;102munexpected EOF\e[0m\e[?25h\e[?2026l\r
 \r

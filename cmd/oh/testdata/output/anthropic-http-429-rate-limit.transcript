@@ -18,7 +18,7 @@
 > 2001-01-01T00:00:01Z
 
 ```
-receive a structured rate-limit response
+receive a rate limit asking for longer than the harness will wait
 ```
 
 ## Failure

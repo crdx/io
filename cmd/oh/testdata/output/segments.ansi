@@ -28,6 +28,10 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m ▪▪▪▪▪\e[38;2;150;152;150m▫\e[0m
 50\e[38;2;150;152;150m% \e[0m500\e[38;2;150;152;150mK/\e[0m1\e[38;2;150;152;150mM\e[0m
 === context-usage / unknown ===
 ?\e[38;2;150;152;150m% \e[0m0\e[38;2;150;152;150mK/\e[0m?
+=== git-branch / detached head ===
+\e[38;2;150;152;150m1fd1900\e[0m
+=== git-branch / on a branch ===
+\e[38;2;150;152;150mfeature/bars\e[0m
 === git-branch / outside a repository ===
 \e[38;2;150;152;150m\e[0m
 === local-time / custom format ===

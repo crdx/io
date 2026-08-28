@@ -1,0 +1,103 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `medium`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+what does the picker do with a long title
+```
+
+## Assistant
+
+> 2001-01-01T00:00:02Z
+
+```
+It clips it, and marks the clipping.
+```
+
+## User
+
+> 2001-01-01T00:00:03Z
+
+```
+carry on
+```
+
+## Tool call
+
+> 2001-01-01T00:00:04Z
+
+- **ID:** `call-1`
+- **Name:** `title`
+- **Read only:** `true`
+
+**Arguments**
+
+```json
+{"title":"clip long picker titles"}
+```
+
+**Subject**
+
+```
+clip long picker titles
+```
+
+## State
+
+> 2001-01-01T00:00:05Z
+
+- **ID:** `call-1`
+- **Name:** `title`
+
+**State**
+
+```json
+{"title":"clip long picker titles"}
+```
+
+## Tool result
+
+> 2001-01-01T00:00:06Z
+
+- **ID:** `call-1`
+- **Name:** `title`
+- **Status:** `success`
+- **Duration:** `0s`
+
+**Stats**
+
+```json
+{"kind":"output","lines":1,"bytes":51,"total_bytes":51}
+```
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+the session is now titled "clip long picker titles"
+```
+
+Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+
+## Assistant
+
+> 2001-01-01T00:00:07Z
+
+```
+Named it, now that the task is clear.
+```
+

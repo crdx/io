@@ -5,7 +5,6 @@
 {"kind":"event","event":{"kind":"retrying","text":"the stream ended before the response did","attempt":1}}
 {"kind":"event","event":{"kind":"interruption","text":"the user changed what the harness is allowed to do"}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"change what I am allowed to do while the answer is being asked for again"}]}}
-{"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Half an ans"}]}}
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"mode_change","text":"rxgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"The workspace is now read-only."}}

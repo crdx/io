@@ -7,7 +7,7 @@ prompt = "receive a top-level Responses API error"
 
 [[first.response]]
 event = [
-    '''{"type":"error","error":{"type":"service_unavailable_error","code":"server_is_overloaded","message":"model overloaded"}}''',
+    '''{"type":"error","error":{"type":"invalid_request_error","code":"invalid_prompt","message":"the prompt was refused"}}''',
 ]
 
 [resume]

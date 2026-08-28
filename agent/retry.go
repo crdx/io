@@ -2,38 +2,77 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"math/rand/v2"
 	"time"
 )
 
 const (
-	RetryAttempts = 3
-
+	RetryAttempts  = 25
 	retryFirstWait = 250 * time.Millisecond
-	retryMaxWait   = 4 * time.Second
-
-	retryPatience = time.Minute
+	retryMaxWait   = time.Minute
+	retryBudget    = 15 * time.Minute
 )
 
-func retryWait(err error, attempt int) (time.Duration, bool) {
+func (self *Agent) retryWait(err error, attempt int, spent time.Duration) (time.Duration, bool) {
 	var retriable Retriable
 
 	if attempt >= RetryAttempts || !errors.As(err, &retriable) || !retriable.Retriable() {
 		return 0, false
 	}
 
-	switch asked := retriable.RetryAfter(); {
-	case asked > retryPatience:
-		return 0, false
-	case asked > 0:
-		return asked, true
+	wait := self.jittered(backoff(attempt))
+	if asked := retriable.RetryAfter(); asked > 0 {
+		wait = asked
 	}
 
-	return backoff(attempt), true
+	if spent+wait > retryBudget {
+		return 0, false
+	}
+
+	return wait, true
 }
 
 func backoff(attempt int) time.Duration {
 	return min(retryFirstWait<<(attempt-1), retryMaxWait)
+}
+
+func (self *Agent) jittered(wait time.Duration) time.Duration {
+	if self.retryWaitsPassAtOnce {
+		return wait
+	}
+
+	//nolint:gosec // a wait must be spread, not unguessable
+	return wait/2 + time.Duration(rand.Int64N(int64(wait/2)+1))
+}
+
+func isResumable(err error) bool {
+	var resumable Resumable
+
+	return errors.As(err, &resumable) && resumable.Resumable()
+}
+
+type rewind struct {
+	state State
+	items []json.RawMessage
+}
+
+func rewindOf(provider Provider) *rewind {
+	state, isRewindable := provider.(State)
+	if !isRewindable {
+		return nil
+	}
+
+	return &rewind{state: state, items: cloneState(state.Dump())}
+}
+
+func (self *rewind) restore() {
+	if self == nil {
+		return
+	}
+
+	self.state.Load(cloneState(self.items))
 }
 
 func (self *Agent) TakeRetryWaitsAtOnce() {

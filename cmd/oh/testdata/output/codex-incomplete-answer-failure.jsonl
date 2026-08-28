@@ -4,6 +4,7 @@
 {"kind":"event","event":{"kind":"model_message","text":"partial answer"}}
 {"kind":"event","event":{"kind":"failure","text":"model overloaded"}}
 {"kind":"item","payload":{"role":"user","content":"start answering, then fail"}}
+{"kind":"item","payload":{"content":[{"text":"partial answer","type":"output_text"}],"role":"assistant","type":"message"}}
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the failure"}}
 {"kind":"event","event":{"kind":"model_message","text":"Resumed."}}

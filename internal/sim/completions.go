@@ -57,16 +57,12 @@ func (self completionsDialect) Read(_ *http.Request, raw []byte) (Request, bool)
 		IncludeUsage: sent.StreamOptions.IncludeUsage,
 	}
 
-	var roles []string
-
 	for i, message := range sent.Messages {
 		if message.Role == "system" && i == 0 {
 			asked.Instructions = flatten(message.Content)
 
 			continue
 		}
-
-		roles = append(roles, message.Role)
 
 		item, _ := json.Marshal(message) //nolint:errchkjson // read from JSON a moment ago
 
@@ -95,8 +91,6 @@ func (self completionsDialect) Read(_ *http.Request, raw []byte) (Request, bool)
 			})
 		}
 	}
-
-	asked.Turn = assistantTurns(roles)
 
 	for _, offered := range sent.Tools {
 		asked.Tools = append(asked.Tools, offered.Function.Name)

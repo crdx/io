@@ -5,7 +5,6 @@
 {"kind":"event","event":{"kind":"retrying","text":"Overloaded","attempt":1}}
 {"kind":"event","event":{"kind":"model_message","text":"Through on the second attempt."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"be overloaded halfway through the answer"}]}}
-{"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Half an ans"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Through on the second attempt."}]}}
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"carry on"}}

@@ -1,0 +1,14 @@
+{"kind":"head","version":10,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"event","event":{"kind":"user_message","text":"lose the connection before it answers"}}
+{"kind":"event","event":{"kind":"retrying","text":"Post \"http://endpoint\": EOF","attempt":1}}
+{"kind":"event","event":{"kind":"model_message","text":"Through on the second attempt."}}
+{"kind":"item","payload":{"role":"user","content":"lose the connection before it answers"}}
+{"kind":"item","payload":{"role":"assistant","content":"Through on the second attempt."}}
+{"kind":"turn_completion"}
+{"kind":"event","event":{"kind":"user_message","text":"carry on"}}
+{"kind":"event","event":{"kind":"model_message","text":"Carrying on."}}
+{"kind":"item","payload":{"role":"user","content":"The workspace is now read-write. The bash tool can now run shell commands. The .git directory is now read-write. The web search and fetch tools can now access the internet."}}
+{"kind":"item","payload":{"role":"user","content":"carry on"}}
+{"kind":"item","payload":{"role":"assistant","content":"Carrying on."}}
+{"kind":"turn_completion"}

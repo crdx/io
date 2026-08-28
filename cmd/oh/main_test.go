@@ -4499,6 +4499,7 @@ const (
 	configReloadDeletion
 	configReloadWatchFailure
 	configReloadReplay
+	configReloadSettingThatIsNotLive
 )
 
 func TestReloadingConfigDrawsEveryVisibleState(t *testing.T) {
@@ -4508,6 +4509,9 @@ func TestReloadingConfigDrawsEveryVisibleState(t *testing.T) {
 		"deleted config restores defaults": func() string { return configReloadStream(t, configReloadDeletion) },
 		"filesystem watch failure":         func() string { return configReloadStream(t, configReloadWatchFailure) },
 		"replayed failure and recovery":    func() string { return configReloadStream(t, configReloadReplay) },
+		"revision to a setting that only a restart picks up": func() string {
+			return configReloadStream(t, configReloadSettingThatIsNotLive)
+		},
 	}
 
 	compareWithGolden(t, "config-reload", ".ansi", passes)
@@ -4549,6 +4553,26 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 		return screenOutput.String()
 	case configReloadWatchFailure:
 		self.reloadConfig(errors.New("inotify stopped"))
+		self.show(editor)
+		return screenOutput.String()
+	case configReloadSettingThatIsNotLive:
+		writeLiveConfig(t, path, `
+			get_on_with_it_message = "first"
+
+			[editor]
+			command = "vi"
+
+			[bar.top]
+			left = [{ segment = "session-name" }]
+			center = []
+			right = []
+
+			[bar.bottom]
+			left = []
+			center = []
+			right = []
+		`)
+		settleLiveConfig(t, self)
 		self.show(editor)
 		return screenOutput.String()
 	case configReloadInvalidRecovery, configReloadReplay:
@@ -4855,6 +4879,23 @@ func goldenSegmentPass(
 	return func() string { return built.Render(context) }
 }
 
+func goldenRepository(t *testing.T, head string) string {
+	t.Helper()
+
+	workspaceDir := t.TempDir()
+	gitDir := filepath.Join(workspaceDir, ".git")
+
+	if err := os.MkdirAll(gitDir, 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(gitDir, "HEAD"), []byte(head), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	return workspaceDir
+}
+
 func availableSegments(
 	workspaceDir string,
 	currentSessionName string,
@@ -5094,6 +5135,18 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"git-branch / outside a repository": goldenSegmentPass(
 			t,
 			gitBranch.New(workspaceMarker),
+			"",
+			segment.Context{},
+		),
+		"git-branch / on a branch": goldenSegmentPass(
+			t,
+			gitBranch.New(goldenRepository(t, "ref: refs/heads/feature/bars\n")),
+			"",
+			segment.Context{},
+		),
+		"git-branch / detached head": goldenSegmentPass(
+			t,
+			gitBranch.New(goldenRepository(t, "1fd19004e0f4a2c8b4c5d6e7f8a9b0c1d2e3f4a5\n")),
 			"",
 			segment.Context{},
 		),
@@ -5917,6 +5970,8 @@ type sessionGoldenResponse struct {
 	Body                 string            `toml:"body"`
 	Headers              map[string]string `toml:"headers"`
 	Status               int               `toml:"status"`
+	Repeat               int               `toml:"repeat"`
+	RefuseConnection     bool              `toml:"refuse-connection"`
 	CancelAfterWireEvent int               `toml:"cancel-after-wire-event"`
 	ResetAfterWireEvent  int               `toml:"reset-after-wire-event"`
 	WaitForCancellation  bool              `toml:"wait-for-cancellation"`
@@ -6185,6 +6240,11 @@ func serveSessionGoldenResponse(
 	response sessionGoldenResponse,
 	cancelSignals chan<- struct{},
 ) {
+	if response.RefuseConnection {
+		resetSessionGoldenConnection(writer)
+		return
+	}
+
 	writer.Header().Set("Content-Type", "text/event-stream")
 	for name, value := range response.Headers {
 		writer.Header().Set(name, value)
@@ -6234,10 +6294,22 @@ func resetSessionGoldenConnection(writer http.ResponseWriter) {
 	_ = connection.Close()
 }
 
+func expandSessionGoldenResponses(responses []sessionGoldenResponse) []sessionGoldenResponse {
+	expanded := make([]sessionGoldenResponse, 0, len(responses))
+
+	for _, response := range responses {
+		expanded = append(expanded, slices.Repeat([]sessionGoldenResponse{response}, max(response.Repeat, 1))...)
+	}
+
+	return expanded
+}
+
 func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[string]string {
 	t.Helper()
 
-	responses := append(slices.Clone(scenario.FirstTurn.Responses), scenario.ResumeTurn.Responses...)
+	responses := expandSessionGoldenResponses(
+		append(slices.Clone(scenario.FirstTurn.Responses), scenario.ResumeTurn.Responses...),
+	)
 	cancelSignals := make(chan struct{}, len(responses))
 	var requestCount atomic.Int32
 	var requestMutex sync.Mutex
@@ -6290,7 +6362,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	if scenario.ToggleBeforeFirst != "" {
 		toggleSessionGoldenCaps(t, firstHarness, scenario.ToggleBeforeFirst)
 		firstHarness.settleMode()
-		firstAssistant.FYI(firstHarness.mode.Inject())
+		firstAssistant.AddUserMessage(firstHarness.mode.Inject())
 	}
 	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
 	runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
@@ -6340,8 +6412,8 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		firstScreenOutput.String(),
 		screenOutput.String(),
 	)
-	if note := resumedHarness.mode.Inject(); note != "" {
-		resumedAssistant.FYI(note)
+	if note := resumedHarness.prelude(); note != "" {
+		resumedAssistant.AddUserMessage(note)
 	}
 	runSessionGoldenTurn(t, resumedHarness, scenario.ResumeTurn, cancelSignals)
 	resumedHarness.dropPendingInput()
@@ -6387,7 +6459,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	requestMutex.Unlock()
 	requests := canonicalProviderRequests(t, capturedRequestBodies)
 
-	return map[string]string{
+	outputs := map[string]string{
 		".jsonl":          canonicalSessionJournal(t, directory, sessionName),
 		".meta.json":      canonicalSessionMeta(t, directory, sessionName),
 		".ansi":           ansi,
@@ -6395,6 +6467,12 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		".transcript":     canonicalSessionTranscript(string(transcript), sessionName),
 		".requests.jsonl": requests,
 	}
+
+	for extension, drawn := range outputs {
+		outputs[extension] = endpointAddressPattern.ReplaceAllString(drawn, "http://endpoint")
+	}
+
+	return outputs
 }
 
 func canonicalProviderRequests(t *testing.T, requestBodies [][]byte) string {
@@ -6654,6 +6732,7 @@ func canonicalSessionJournal(t *testing.T, directory string, name string) string
 }
 
 var (
+	endpointAddressPattern    = regexp.MustCompile(`http://127\.0\.0\.1:\d+`)
 	transcriptStartedPattern  = regexp.MustCompile(`(?m)^- \*\*Started:\*\* ` + "`[^`]+`$")
 	transcriptEventPattern    = regexp.MustCompile(`(?m)^> [^\n]+$`)
 	transcriptDurationPattern = regexp.MustCompile(`(?m)^- \*\*Duration:\*\* ` + "`[^`]+`$")

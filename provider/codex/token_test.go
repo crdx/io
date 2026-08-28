@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -92,6 +93,58 @@ func TestStoredRefreshesATokenNearExpiry(t *testing.T) {
 	}
 	if stored.OpenCodeGo == nil || stored.OpenCodeGo.APIKey != "open-code-key" {
 		t.Errorf("expected the OpenCode key to survive, got %+v", stored.OpenCodeGo)
+	}
+}
+
+func TestARefusedRefreshSaysToLogInAgain(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(
+		func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			_, _ = fmt.Fprint(writer, `{"error":"invalid_grant","error_description":"Refresh token not found"}`)
+		},
+	))
+
+	t.Cleanup(server.Close)
+
+	codex.TokenURL = server.URL
+	t.Cleanup(func() { codex.TokenURL = "" })
+
+	path := writeCredentials(t, -time.Minute)
+
+	_, err := codex.StoredCredentialsAt(path).Token()
+	if err == nil {
+		t.Fatal("expected the refusal to be reported")
+	}
+
+	if !strings.Contains(err.Error(), "run the login command again") {
+		t.Errorf("expected the way out to be named, got %v", err)
+	}
+}
+
+func TestAFailedRefreshIsNotMistakenForARefusal(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(
+		func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusInternalServerError)
+			_, _ = fmt.Fprint(writer, `{"error":"server_error"}`)
+		},
+	))
+
+	t.Cleanup(server.Close)
+
+	codex.TokenURL = server.URL
+	t.Cleanup(func() { codex.TokenURL = "" })
+
+	path := writeCredentials(t, -time.Minute)
+
+	_, err := codex.StoredCredentialsAt(path).Token()
+	if err == nil {
+		t.Fatal("expected the failure to be reported")
+	}
+
+	if strings.Contains(err.Error(), "run the login command again") {
+		t.Errorf("expected a passing failure not to send the user to the login command, got %v", err)
 	}
 }
 

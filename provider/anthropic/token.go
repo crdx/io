@@ -84,6 +84,10 @@ func (self *credentialStore) refresh() error {
 
 	refreshedToken, err := refreshToken(self.requests, self.credentials.Refresh)
 	if err != nil {
+		if req.IsRejected(err) {
+			return fmt.Errorf("credentials were refused: run the login command again: %w", err)
+		}
+
 		return fmt.Errorf("refresh credentials: %w", err)
 	}
 

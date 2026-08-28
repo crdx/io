@@ -1,6 +1,7 @@
 package req_test
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -114,6 +115,40 @@ func TestARefusalKeepsWhatItWasAsWellAsWhatItSaid(t *testing.T) {
 		t.Errorf("expected what it said, got %q", refused.Message)
 	case !refused.Retriable():
 		t.Error("expected a rate limit to be worth asking again after")
+	}
+}
+
+func TestAConnectionThatWasNeverMadeIsWorthAskingAgainAfter(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	address := server.URL
+	server.Close()
+
+	_, _, err := req.New(time.Second).Stream(t.Context(), address, map[string]string{}, nil)
+	if err == nil {
+		t.Fatal("expected the dial to fail")
+	}
+
+	var retriable interface{ Retriable() bool }
+	if !errors.As(err, &retriable) || !retriable.Retriable() {
+		t.Errorf("expected a connection that was never made to be worth another attempt, got %v", err)
+	}
+}
+
+func TestACancelledRequestIsNotWorthAskingAgainAfter(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	t.Cleanup(server.Close)
+
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+
+	_, _, err := req.New(time.Second).Stream(ctx, server.URL, map[string]string{}, nil)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected the cancellation to be kept, got %v", err)
+	}
+
+	var retriable interface{ Retriable() bool }
+	if errors.As(err, &retriable) && retriable.Retriable() {
+		t.Error("expected a cancelled request to be left alone")
 	}
 }
 

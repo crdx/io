@@ -67,9 +67,370 @@ the stream ended before the response did
 Partial answer.
 ```
 
-## Failure
+## Retrying
 
 > 2001-01-01T00:00:07Z
+
+- **Attempt:** `3`
+- **Waited:** `1s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:08Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:09Z
+
+- **Attempt:** `4`
+- **Waited:** `2s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:10Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:11Z
+
+- **Attempt:** `5`
+- **Waited:** `4s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:12Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:13Z
+
+- **Attempt:** `6`
+- **Waited:** `8s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:14Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:15Z
+
+- **Attempt:** `7`
+- **Waited:** `16s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:16Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:17Z
+
+- **Attempt:** `8`
+- **Waited:** `32s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:18Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:19Z
+
+- **Attempt:** `9`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:20Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:21Z
+
+- **Attempt:** `10`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:22Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:23Z
+
+- **Attempt:** `11`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:24Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:25Z
+
+- **Attempt:** `12`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:26Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:27Z
+
+- **Attempt:** `13`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:28Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:29Z
+
+- **Attempt:** `14`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:30Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:31Z
+
+- **Attempt:** `15`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:32Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:33Z
+
+- **Attempt:** `16`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:34Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:35Z
+
+- **Attempt:** `17`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:36Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:37Z
+
+- **Attempt:** `18`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:38Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:39Z
+
+- **Attempt:** `19`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:40Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:41Z
+
+- **Attempt:** `20`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:42Z
+
+```
+Partial answer.
+```
+
+## Retrying
+
+> 2001-01-01T00:00:43Z
+
+- **Attempt:** `21`
+- **Waited:** `1m0s`
+
+```
+the stream ended before the response did
+```
+
+## Assistant
+
+> 2001-01-01T00:00:44Z
+
+```
+Partial answer.
+```
+
+## Failure
+
+> 2001-01-01T00:00:45Z
 
 ```
 the stream ended before the response did
@@ -77,7 +438,7 @@ the stream ended before the response did
 
 ## User
 
-> 2001-01-01T00:00:08Z
+> 2001-01-01T00:00:46Z
 
 ```
 continue after the first response
@@ -85,7 +446,7 @@ continue after the first response
 
 ## Assistant
 
-> 2001-01-01T00:00:09Z
+> 2001-01-01T00:00:47Z
 
 ```
 Resumed.

@@ -1,0 +1,58 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+receive a rate limit asking to be left alone for minutes
+```
+
+## Retrying
+
+> 2001-01-01T00:00:02Z
+
+- **Attempt:** `1`
+- **Waited:** `2m0s`
+
+```
+rate limit exceeded
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Ready now.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+continue after the rate limit
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Resumed.
+```
+

@@ -1,0 +1,48 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[[tool]]
+name = "title"
+
+[first]
+prompt = "name this session"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":null}}]}''',
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","type":"function","function":{"name":"title","arguments":"{\"title\":\"work out why the session picker clips a long title\"}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-2","type":"function","function":{"name":"title","arguments":"{\"title\":\"   \"}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-3","type":"function","function":{"name":"title","arguments":"{\"title\":\"fix picker clipping\"}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Third time lucky."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "and what did the picker make of it"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":"It fits, with room to spare."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

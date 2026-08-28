@@ -8,7 +8,9 @@ import (
 )
 
 // Scenario is what the endpoint pretends to be, read from a file. Every new session starts at the
-// first turn and takes the next one with each request it makes.
+// first turn and takes the next one with each request it makes, counting a request the client
+// later abandons and asks again, so a turn is answered once however the attempt it belongs to
+// ends. A scenario wanting the same answer however often it is asked says so with Loop.
 //
 // A scenario says what the model does, not how that reaches a client, so the same file is played
 // through whichever provider API the request arrived in. The one exception is error-event, which

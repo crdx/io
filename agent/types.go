@@ -135,6 +135,12 @@ type Retriable interface {
 	RetryAfter() time.Duration
 }
 
+type Resumable interface {
+	error
+
+	Resumable() bool
+}
+
 type FallbackRendering struct {
 	Subject  string        `json:"render,omitempty"`
 	Note     string        `json:"detail,omitempty"`

@@ -4,28 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sync"
 
 	"crdx.org/io/internal/sim/wire/responses"
 )
 
-type responsesDialect struct {
-	mutex    sync.Mutex     // guards the turn counts
-	sessions map[string]int // how many turns each conversation has taken
-}
+type responsesDialect struct{}
 
-func newResponsesDialect() *responsesDialect {
-	return &responsesDialect{sessions: map[string]int{}}
-}
-
-func (self *responsesDialect) Name() string {
+func (self responsesDialect) Name() string {
 	return Responses
 }
 
 // Path carries codex in it because that is where the ChatGPT backend serves this API, and a client
 // finds the model listing by trading the tail of its own turn address for one. Matching is done by
 // suffix, so an endpoint serving the same API at a plainer address is recognised here as well.
-func (self *responsesDialect) Path() string {
+func (self responsesDialect) Path() string {
 	return "/codex/responses"
 }
 
@@ -41,7 +33,7 @@ type responsesBody struct {
 	} `json:"tools"`
 }
 
-func (self *responsesDialect) Read(request *http.Request, raw []byte) (Request, bool) {
+func (self responsesDialect) Read(request *http.Request, raw []byte) (Request, bool) {
 	var sent responsesBody
 	if json.Unmarshal(raw, &sent) != nil {
 		return Request{}, false
@@ -59,7 +51,6 @@ func (self *responsesDialect) Read(request *http.Request, raw []byte) (Request, 
 		Instructions: sent.Instructions,
 		Streaming:    sent.Stream,
 		Stored:       sent.Store,
-		Turn:         self.take(key),
 		Input:        responsesEntries(sent.Input),
 	}
 
@@ -105,7 +96,7 @@ func responsesEntries(items []json.RawMessage) []Entry {
 	return read
 }
 
-func (self *responsesDialect) Check(scenario *Scenario, asked Request) string {
+func (self responsesDialect) Check(scenario *Scenario, asked Request) string {
 	switch {
 	case !asked.Streaming:
 		return "only streaming responses are supported"
@@ -124,7 +115,7 @@ func (self *responsesDialect) Check(scenario *Scenario, asked Request) string {
 	return ""
 }
 
-func (self *responsesDialect) Play(stream *Stream, _ *Scenario, turn Turn) {
+func (self responsesDialect) Play(stream *Stream, _ *Scenario, turn Turn) {
 	for _, thought := range turn.Think {
 		stream.Type(responses.Thought, thought)
 		stream.Send(responses.ThinkingPart(thought))
@@ -163,19 +154,9 @@ func (self *responsesDialect) Play(stream *Stream, _ *Scenario, turn Turn) {
 	stream.Send(responses.Done)
 }
 
-func (self *responsesDialect) Exhausted(stream *Stream, message string) {
+func (self responsesDialect) Exhausted(stream *Stream, message string) {
 	stream.Send(responses.Answer(message))
 	stream.Send(responses.Message(message))
 	stream.Send(responses.CompletedResponse(freshTokens + cachedTokens))
 	stream.Send(responses.Done)
-}
-
-func (self *responsesDialect) take(key string) int {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-
-	turn := self.sessions[key]
-	self.sessions[key] = turn + 1
-
-	return turn
 }

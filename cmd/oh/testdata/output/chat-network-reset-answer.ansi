@@ -6,7 +6,9 @@
 \r
 \r\e[KPartial answer.\r
 \r
-\e[38;2;204;102;102munexpected EOF\e[0m\e[?25h\e[?2026l\r
+\e[38;2;207;173;0mattempt 1 failed, asking again in 0.3s: unexpected EOF\e[0m\r
+\r
+\r\e[KThrough on the second attempt.\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m continue after the network interruption                                                            \e[0m\r

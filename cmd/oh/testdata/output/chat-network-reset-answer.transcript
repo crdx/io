@@ -37,17 +37,28 @@ Completed thought.
 Partial answer.
 ```
 
-## Failure
+## Retrying
 
 > 2001-01-01T00:00:04Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
 
 ```
 unexpected EOF
 ```
 
-## User
+## Assistant
 
 > 2001-01-01T00:00:05Z
+
+```
+Through on the second attempt.
+```
+
+## User
+
+> 2001-01-01T00:00:06Z
 
 ```
 continue after the network interruption
@@ -55,7 +66,7 @@ continue after the network interruption
 
 ## Assistant
 
-> 2001-01-01T00:00:06Z
+> 2001-01-01T00:00:07Z
 
 ```
 Resumed.

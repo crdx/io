@@ -35,6 +35,8 @@ const (
 	lengthColumn      = 6
 	lastMessageColumn = 12
 	titlePrefixWidth  = 2
+	defaultColumns    = 80
+	defaultRows       = 24
 )
 
 // ErrCancelled is the choice being abandoned, which is not a failure and is not a choice either.
@@ -76,16 +78,27 @@ func Choose(sessions []*Session, workspaceDir string, terminal *os.File, screen 
 		workspaceDir: workspaceDir,
 		decoder:      key.NewDecoder(bufio.NewReader(terminal)),
 		cursor:       firstSelectable(sessions),
-		terminal:     terminal,
+		measure:      measuring(terminal),
 		screen:       screen,
 	}).run()
+}
+
+func measuring(terminal *os.File) func() (int, int) {
+	return func() (int, int) {
+		room, height, err := term.GetSize(int(terminal.Fd()))
+		if err != nil {
+			return defaultColumns, defaultRows
+		}
+
+		return room, height
+	}
 }
 
 type state struct {
 	sessions     []*Session
 	workspaceDir string
 	decoder      *key.Decoder
-	terminal     *os.File
+	measure      func() (int, int)
 	screen       io.Writer
 
 	cursor int
@@ -342,12 +355,11 @@ func clip(text string, room int) string {
 }
 
 func (self *state) size() (int, int) {
-	room, height, err := term.GetSize(int(self.terminal.Fd()))
-	if err != nil {
-		return 80, 24
+	if self.measure == nil {
+		return defaultColumns, defaultRows
 	}
 
-	return room, height
+	return self.measure()
 }
 
 func write(screen io.Writer, text string) {

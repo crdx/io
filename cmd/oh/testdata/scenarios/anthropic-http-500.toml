@@ -6,12 +6,7 @@ effort = "medium"
 prompt = "receive HTTP 500"
 
 [[first.response]]
-status = 500
-
-[[first.response]]
-status = 500
-
-[[first.response]]
+repeat = 22
 status = 500
 
 [resume]

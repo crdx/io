@@ -1,0 +1,26 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "lose the connection before it answers"
+
+[[first.response]]
+refuse-connection = true
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Through on the second attempt."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "carry on"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Carrying on."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

@@ -4,6 +4,7 @@
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
 {"kind":"event","event":{"kind":"interruption","text":"the user changed what the harness is allowed to do"}}
 {"kind":"item","payload":{"role":"user","content":"change two capabilities while the answer is streaming"}}
+{"kind":"item","payload":{"content":[{"text":"Partial answer.","type":"output_text"}],"role":"assistant","type":"message"}}
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"mode_change","text":"rxgs"}}
 {"kind":"event","event":{"kind":"mode_change","text":"rxs"}}

@@ -6,6 +6,8 @@ import (
 	"io"
 	"strings"
 	"time"
+
+	"crdx.org/io/internal/transient"
 )
 
 var ErrTruncated error = truncation{}
@@ -30,7 +32,7 @@ func Read(body io.Reader, step Step) error {
 		eof := errors.Is(err, io.EOF)
 
 		if err != nil && !eof {
-			return err
+			return transient.Wrap(err)
 		}
 
 		text := strings.TrimRight(line, "\r\n")

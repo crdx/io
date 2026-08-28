@@ -11,6 +11,13 @@ event = [
     '''{"choices":[{"delta":{"reasoning_content":"Provisional thought."}}]}''',
 ]
 
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Through on the second attempt."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
 [resume]
 prompt = "continue after the network interruption"
 

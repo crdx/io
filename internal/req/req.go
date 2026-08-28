@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"crdx.org/io/internal/transient"
 )
 
 const bodyLimit = 64 * 1024
@@ -138,9 +140,11 @@ func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser
 
 	response, err := self.http.Do(request)
 	if err != nil {
+		err = transient.Wrap(err)
 		if exchange != nil {
 			exchange.Finish(time.Now(), err, false)
 		}
+
 		return nil, nil, err
 	}
 
@@ -229,6 +233,12 @@ func (self *StatusError) Error() string {
 	}
 
 	return fmt.Sprintf("request failed with status %d: %s", self.Status, self.Body)
+}
+
+func IsRejected(err error) bool {
+	var refused *StatusError
+
+	return errors.As(err, &refused) && refused.Status >= 400 && refused.Status < 500
 }
 
 func (self *StatusError) Retriable() bool {

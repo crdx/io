@@ -568,31 +568,70 @@ func TestSendReportsAnEndpointFailure(t *testing.T) {
 	}
 }
 
+const refusalPayload = `{"type":"error","error":{"type":"invalid_request_error","code":"invalid_prompt","message":"Your prompt was flagged.","param":null},"sequence_number":2}`
+
 func TestSendReportsADirectEndpointFailure(t *testing.T) {
+	server, _ := turns(t, events(refusalPayload))
+	assistant := newAgent(t, server.URL, nil)
+
+	if _, err := assistant.Send(t.Context(), "hello"); err == nil ||
+		err.Error() != "Your prompt was flagged." {
+		t.Errorf("expected the endpoint's own message, got %v", err)
+	}
+}
+
+func TestADirectEndpointFailureCarriesItsCode(t *testing.T) {
+	server, _ := turns(t, events(refusalPayload))
+	assistant := newAgent(t, server.URL, nil)
+
+	_, err := assistant.Send(t.Context(), "hello")
+
+	var failure *codex.StreamError
+	if !errors.As(err, &failure) {
+		t.Fatalf("expected a typed stream error, got %v", err)
+	}
+
+	if failure.Code != "invalid_prompt" {
+		t.Errorf("expected the endpoint's own code, got %q", failure.Code)
+	}
+}
+
+func TestATransientEndpointFailureIsAskedAgain(t *testing.T) {
 	tests := []struct {
 		name    string
 		payload string
-		message string
 	}{
 		{
 			name:    "server error",
-			payload: `{"type":"error","error":{"type":"server_error","code":"server_error","message":"An error occurred while processing your request. You can retry your request, or contact us through our help center at help.openai.com if the error persists. Please include the request ID 0e133235-2da5-47a2-8300-2049027f6968 in your message.","param":null},"sequence_number":2}`,
-			message: "An error occurred while processing your request. You can retry your request, or contact us through our help center at help.openai.com if the error persists. Please include the request ID 0e133235-2da5-47a2-8300-2049027f6968 in your message.",
+			payload: `{"type":"error","error":{"type":"server_error","code":"server_error","message":"An error occurred while processing your request.","param":null},"sequence_number":2}`,
 		},
 		{
 			name:    "service unavailable",
 			payload: `{"type":"error","error":{"type":"service_unavailable_error","code":"server_is_overloaded","message":"Our servers are currently overloaded. Please try again later.","param":null},"sequence_number":2}`,
-			message: "Our servers are currently overloaded. Please try again later.",
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			server, _ := turns(t, events(test.payload))
+			server, bodies := turns(
+				t,
+				events(test.payload),
+				events(answer("Through on the second attempt."), completed),
+			)
+
 			assistant := newAgent(t, server.URL, nil)
 
-			if _, err := assistant.Send(t.Context(), "hello"); err == nil || err.Error() != test.message {
-				t.Errorf("expected the endpoint's own message, got %v", err)
+			reply, err := assistant.Send(t.Context(), "hello")
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if reply != "Through on the second attempt." {
+				t.Errorf("expected the second attempt to be handed back, got %q", reply)
+			}
+
+			if len(*bodies) != 2 {
+				t.Errorf("expected the failure to be asked again once, got %d requests", len(*bodies))
 			}
 		})
 	}
@@ -841,6 +880,68 @@ func thought(id string) string {
 	item := fmt.Sprintf(`{"type":"reasoning","id":%q,"summary":[]}`, id)
 
 	return fmt.Sprintf(`{"type":"response.output_item.done","item":%s}`, item)
+}
+
+func TestATurnThatFailedForGoodKeepsTheAnswerItHadBegun(t *testing.T) {
+	server, _ := turns(t, events(
+		answer("Half an ans"),
+		`{"type":"response.failed","response":{"error":{"code":"invalid_prompt","message":"refused"}}}`,
+	))
+
+	client := newClient(t, server.URL)
+
+	if _, err := sendOnce(t, client, "what is the weather?"); err == nil {
+		t.Fatal("expected the turn to fail")
+	}
+
+	var held strings.Builder
+	for _, item := range client.Dump() {
+		held.Write(item)
+	}
+
+	if !strings.Contains(held.String(), "Half an ans") {
+		t.Errorf("expected the conversation to hold what was said, got %s", held.String())
+	}
+}
+
+func TestATurnThatWillBeAskedAgainForgetsTheAnswerItHadBegun(t *testing.T) {
+	server, _ := turns(t, events(
+		answer("Half an ans"),
+		`{"type":"response.failed","response":{"error":{"code":"server_is_overloaded","message":"overloaded"}}}`,
+	))
+
+	client := newClient(t, server.URL)
+
+	if _, err := sendOnce(t, client, "what is the weather?"); err == nil {
+		t.Fatal("expected the turn to fail")
+	}
+
+	var held strings.Builder
+	for _, item := range client.Dump() {
+		held.Write(item)
+	}
+
+	if strings.Contains(held.String(), "Half an ans") {
+		t.Errorf("expected the abandoned attempt to be left out, got %s", held.String())
+	}
+}
+
+func TestAConfirmedAnswerIsHeldOnceWhenTheTurnLaterFails(t *testing.T) {
+	server, _ := turns(t, events(
+		answer("Looking it up."),
+		message("Looking it up."),
+		`{"type":"response.failed","response":{"error":{"code":"invalid_prompt","message":"refused"}}}`,
+	))
+
+	client := newClient(t, server.URL)
+
+	if _, err := sendOnce(t, client, "what is the weather?"); err == nil {
+		t.Fatal("expected the turn to fail")
+	}
+
+	if held := len(client.Dump()); held != 2 {
+		t.Errorf("expected the user message and one answer, got %d items", held)
+	}
 }
 
 func TestATurnThatFailedKeepsWhatItSaidAndNotWhatItAskedFor(t *testing.T) {

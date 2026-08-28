@@ -12,9 +12,10 @@ import (
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
-func TestPickerMatchesTheGolden(t *testing.T) {
+func storedSessions() []*Session {
 	now := time.Now()
-	sessions := []*Session{
+
+	return []*Session{
 		{
 			Name:         "chewy-sardine",
 			Title:        "why does the spinner stutter when a tool runs",
@@ -51,8 +52,39 @@ func TestPickerMatchesTheGolden(t *testing.T) {
 			Touched:      now.Add(-300 * time.Hour),
 		},
 	}
+}
+
+func compareWithGolden(t *testing.T, name string, drawn string) {
+	t.Helper()
+
+	goldenPath := filepath.Join("testdata", name)
+
+	if *updateGoldens {
+		if err := os.MkdirAll(filepath.Dir(goldenPath), 0o700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(goldenPath, []byte(drawn), 0o600); err != nil {
+			t.Fatal(err)
+		}
+
+		return
+	}
+
+	want, err := os.ReadFile(goldenPath) //nolint:gosec // fixed testdata path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if drawn != string(want) {
+		t.Errorf("picker differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, drawn, want)
+	}
+}
+
+func TestPickerMatchesTheGolden(t *testing.T) {
+	sessions := storedSessions()
 
 	var output strings.Builder
+
 	for i, room := range []int{80, 46} {
 		if i > 0 {
 			_, _ = fmt.Fprintln(&output)
@@ -66,21 +98,66 @@ func TestPickerMatchesTheGolden(t *testing.T) {
 		}
 	}
 
-	goldenPath := filepath.Join("testdata", "picker.golden")
-	if *updateGoldens {
-		if err := os.MkdirAll(filepath.Dir(goldenPath), 0o700); err != nil {
-			t.Fatal(err)
+	compareWithGolden(t, "picker.golden", output.String())
+}
+
+func TestWhatThePickerPaintsMatchesTheGolden(t *testing.T) {
+	frames := []struct {
+		name    string
+		room    int
+		height  int
+		cursor  int
+		measure func() (int, int)
+	}{
+		{name: "the cursor resting on the first session that can be chosen", room: 80, height: 24, cursor: 1},
+		{name: "the cursor further down the list", room: 80, height: 24, cursor: 3},
+		{name: "no room for every row, so the list is scrolled to the cursor", room: 80, height: 6, cursor: 4},
+		{name: "a narrow terminal, where the columns are clipped", room: 46, height: 24, cursor: 1},
+		{name: "one row of room, which is as small as the list goes", room: 80, height: 1, cursor: 2},
+	}
+
+	var output strings.Builder
+
+	for _, frame := range frames {
+		var screen strings.Builder
+
+		self := &state{
+			sessions:     storedSessions(),
+			workspaceDir: "/workspace",
+			cursor:       frame.cursor,
+			screen:       &screen,
+			measure:      func() (int, int) { return frame.room, frame.height },
 		}
-		if err := os.WriteFile(goldenPath, []byte(output.String()), 0o600); err != nil {
-			t.Fatal(err)
+
+		self.draw()
+
+		fmt.Fprintf(&output, "=== %s ===\n%s\n", frame.name, visibleEscapes(screen.String()))
+	}
+
+	compareWithGolden(t, "painted.ansi", output.String())
+}
+
+func visibleEscapes(stream string) string {
+	var out strings.Builder
+
+	for _, character := range stream {
+		switch {
+		case character == '\n':
+			out.WriteByte('\n')
+		case character == '\\':
+			out.WriteString(`\\`)
+		case character == '\x1b':
+			out.WriteString(`\e`)
+		case character == '\r':
+			out.WriteString(`\r`)
+		case character == '\t':
+			out.WriteString(`\t`)
+		case character < ' ' || character == 0x7f:
+			fmt.Fprintf(&out, `\x%02X`, character)
+		default:
+			out.WriteRune(character)
 		}
 	}
 
-	want, err := os.ReadFile(goldenPath) //nolint:gosec // fixed testdata path
-	if err != nil {
-		t.Fatal(err)
-	}
-	if output.String() != string(want) {
-		t.Errorf("picker differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, output.String(), want)
-	}
+	return out.String()
 }

@@ -5,7 +5,9 @@
 Use the tool.
 work work ✓ 1L
 
-unexpected EOF
+attempt 1 failed, asking again in 0.3s: unexpected EOF
+
+Through on the second attempt.
 
 
  continue after the network interruption

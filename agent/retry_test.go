@@ -2,7 +2,9 @@ package agent_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"slices"
 	"strings"
 	"testing"
 	"testing/synctest"
@@ -248,5 +250,153 @@ func TestNothingIsRepeatedOnceTheCallerHasStoppedListening(t *testing.T) {
 
 	if provider.sent != 1 {
 		t.Errorf("expected an abandoned turn not to be retried, got %d attempts", provider.sent)
+	}
+}
+
+type resumedError struct{}
+
+func (resumedError) Error() string             { return "the tool call was malformed" }
+func (resumedError) Retriable() bool           { return true }
+func (resumedError) RetryAfter() time.Duration { return 0 }
+func (resumedError) Resumable() bool           { return true }
+
+type failingStateProvider struct {
+	failures int
+	err      error
+
+	sent  int
+	items []json.RawMessage
+}
+
+func (*failingStateProvider) Configure(string, []tool.Definition)   {}
+func (*failingStateProvider) AddToolResults([]agent.ToolCallResult) {}
+
+func (self *failingStateProvider) AddUserMessage(message string) {
+	self.items = append(self.items, json.RawMessage(`"asked: `+message+`"`))
+}
+
+func (self *failingStateProvider) Dump() []json.RawMessage      { return slices.Clone(self.items) }
+func (self *failingStateProvider) Load(items []json.RawMessage) { self.items = slices.Clone(items) }
+
+func (self *failingStateProvider) Send(_ context.Context, yield agent.Yield) (agent.Reply, error) {
+	self.sent++
+
+	if self.sent <= self.failures {
+		self.items = append(self.items, json.RawMessage(`"abandoned attempt "`))
+		yield(agent.Output{Kind: agent.ModelMessageEvent, Text: "half an ans"})
+
+		return agent.Reply{}, self.err
+	}
+
+	self.items = append(self.items, json.RawMessage(`"answered"`))
+	yield(agent.Output{Kind: agent.ModelMessageEvent, Text: "wer"})
+	yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true})
+
+	return agent.Reply{}, nil
+}
+
+func held(provider *failingStateProvider) string {
+	var all strings.Builder
+	for _, item := range provider.items {
+		all.Write(item)
+	}
+
+	return all.String()
+}
+
+func TestAnAbandonedAttemptLeavesNothingBehindForTheOneThatReplacesIt(t *testing.T) {
+	provider := &failingStateProvider{failures: 2, err: wireDiedError{}}
+	assistant := agent.New("", provider, nil)
+
+	if _, err := collect(t, assistant); err != nil {
+		t.Fatalf("expected the turn to recover, got %v", err)
+	}
+
+	if want := `"asked: go""answered"`; held(provider) != want {
+		t.Errorf("expected the conversation to hold %s, got %s", want, held(provider))
+	}
+}
+
+func TestAFailureTheNextAttemptCarriesOnFromIsNotRewound(t *testing.T) {
+	provider := &failingStateProvider{failures: 1, err: resumedError{}}
+	assistant := agent.New("", provider, nil)
+
+	if _, err := collect(t, assistant); err != nil {
+		t.Fatalf("expected the turn to recover, got %v", err)
+	}
+
+	if want := `"asked: go""abandoned attempt ""answered"`; held(provider) != want {
+		t.Errorf("expected the conversation to hold %s, got %s", want, held(provider))
+	}
+}
+
+func TestTheLastAttemptOfATurnThatKeepsFailingKeepsWhatItSaid(t *testing.T) {
+	provider := &failingStateProvider{failures: 100, err: wireDiedError{}}
+	assistant := agent.New("", provider, nil)
+
+	if _, err := collect(t, assistant); err == nil {
+		t.Fatal("expected the turn to fail")
+	}
+
+	if want := `"asked: go""abandoned attempt "`; held(provider) != want {
+		t.Errorf("expected the conversation to hold %s, got %s", want, held(provider))
+	}
+}
+
+func TestARequestThatKeepsFailingIsGivenUpOnWithinTheBudget(t *testing.T) {
+	provider := &failingProvider{failures: 1000, err: wireDiedError{}}
+	assistant := agent.New("", provider, nil)
+	assistant.TakeRetryWaitsAtOnce()
+
+	events, err := collect(t, assistant)
+	if err == nil {
+		t.Fatal("expected the failure to be reported")
+	}
+
+	if provider.sent >= agent.RetryAttempts {
+		t.Errorf("expected the budget to run out before the attempts, got %d", provider.sent)
+	}
+
+	var waited time.Duration
+	for _, event := range events {
+		if event.Kind == agent.RetryingEvent {
+			waited += event.Took
+		}
+	}
+
+	if waited > 15*time.Minute {
+		t.Errorf("expected no more than fifteen minutes of waiting, got %s", waited)
+	}
+
+	if waited < 10*time.Minute {
+		t.Errorf("expected the budget to be spent before giving up, got %s", waited)
+	}
+}
+
+func TestAWaitIsSpreadAroundWhatItWouldOtherwiseBe(t *testing.T) {
+	seen := map[time.Duration]bool{}
+
+	for range 20 {
+		provider := &failingProvider{failures: 1, err: wireDiedError{}}
+		assistant := agent.New("", provider, nil)
+
+		events, err := collect(t, assistant)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, event := range events {
+			if event.Kind == agent.RetryingEvent {
+				seen[event.Took] = true
+
+				if event.Took < 125*time.Millisecond || event.Took > 250*time.Millisecond {
+					t.Fatalf("expected a wait within half of 250ms, got %s", event.Took)
+				}
+			}
+		}
+	}
+
+	if len(seen) < 2 {
+		t.Errorf("expected the wait to vary between turns, got only %v", seen)
 	}
 }

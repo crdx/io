@@ -744,3 +744,38 @@ func TestAFurnishedHomeThroughAModelSymlinkIsRefused(t *testing.T) {
 		t.Errorf("got %v, want the planted home link named", err)
 	}
 }
+
+func TestASymlinkedCacheIsReportedToWhoeverAskedForTheCommand(t *testing.T) {
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	home := t.TempDir()
+	planted := filepath.Join(home, ".cache")
+	if err := os.Symlink(t.TempDir(), planted); err != nil {
+		t.Fatal(err)
+	}
+
+	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
+	mode := caps.NewMode(caps.Write | caps.Shell)
+	shell := New(workspace, home, t.TempDir(), Paths{}, mode, files)
+
+	call, err := shell.Parse(`{"command":"echo one"}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = call.Exec(t.Context())
+	if err == nil {
+		t.Fatal("expected the command to be refused")
+	}
+	if !strings.Contains(err.Error(), "the shell cannot be confined") {
+		t.Errorf("expected the refusal to say the shell could not be confined, got %v", err)
+	}
+	if !strings.Contains(err.Error(), planted) {
+		t.Errorf("expected the planted link to be named, got %v", err)
+	}
+}

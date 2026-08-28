@@ -712,7 +712,7 @@ func TestANoteGoesAheadOfTheNextPrompt(t *testing.T) {
 	provider := &notingProvider{}
 	self := agent.New("", provider, nil)
 
-	self.FYI("something changed")
+	self.AddUserMessage("something changed")
 
 	if len(provider.messages) != 1 {
 		t.Fatalf("expected the note to have been added, got %v", provider.messages)

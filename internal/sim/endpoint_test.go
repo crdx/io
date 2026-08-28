@@ -268,7 +268,11 @@ func TestAScenarioThatRunsOutSaysSo(t *testing.T) {
 }
 
 func TestAFailedTurnIsReported(t *testing.T) {
-	failing := &sim.Scenario{Model: "fake", Turns: []sim.Turn{{Fail: "the model is overloaded"}}}
+	failing := &sim.Scenario{
+		Model: "fake",
+		Loop:  true,
+		Turns: []sim.Turn{{Fail: "the model is overloaded"}},
+	}
 
 	for _, provider := range providers() {
 		t.Run(provider.name, func(t *testing.T) {

@@ -1,5 +1,5 @@
 \e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m receive a structured rate-limit response                                                           \e[0m\r
+\e[48;2;52;53;65m receive a rate limit asking for longer than the harness will wait                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[38;2;204;102;102mrate limit exceeded\e[0m\e[?25h\e[?2026l\r

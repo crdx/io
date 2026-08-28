@@ -1,0 +1,34 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[[tool]]
+name = "title"
+
+[first]
+prompt = "what does the picker do with a long title"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":"It clips it, and marks the clipping."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "carry on"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":null}}]}''',
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","type":"function","function":{"name":"title","arguments":"{\"title\":\"clip long picker titles\"}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Named it, now that the task is clear."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

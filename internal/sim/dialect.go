@@ -39,7 +39,7 @@ type Dialect interface {
 // Dialects are the wire formats the endpoint answers in, all of them at once: which one a request
 // gets is decided by where it was posted, so one running endpoint stands in for every provider.
 func Dialects() []Dialect {
-	return []Dialect{newResponsesDialect(), completionsDialect{}, messagesDialect{}}
+	return []Dialect{responsesDialect{}, completionsDialect{}, messagesDialect{}}
 }
 
 // Stream is the wire one turn is played onto. It paces itself the way the scenario asked and hands
@@ -93,16 +93,4 @@ func unansweredCall(input []Entry) string {
 	}
 
 	return ""
-}
-
-func assistantTurns(roles []string) int {
-	var count int
-
-	for _, role := range roles {
-		if role == "assistant" {
-			count++
-		}
-	}
-
-	return count
 }

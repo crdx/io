@@ -121,7 +121,7 @@ func encodeItem(item any) json.RawMessage {
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
 	reply, err := self.post(ctx, yield)
 	if err != nil {
-		self.history = append(self.history, reply.prose()...)
+		self.history = append(self.history, reply.prose(isFinalFailure(err))...)
 
 		return agent.Reply{}, err
 	}

@@ -16,16 +16,17 @@ type Endpoint struct {
 	scenario *Scenario // what the endpoint acts out
 	dialects []Dialect // the APIs it answers in
 
-	mutex    sync.Mutex // guards endpoint state
-	requests []Request  // the requests received
-	nextID   int        // the next identifier
+	mutex    sync.Mutex     // guards endpoint state
+	requests []Request      // the requests received
+	sessions map[string]int // how many turns each conversation has taken
+	nextID   int            // the next identifier
 }
 
 const exhausted = "The scenario has nothing more to say."
 
 // New builds an endpoint over a scenario, answering in every API a provider here speaks.
 func New(scenario *Scenario) *Endpoint {
-	return &Endpoint{scenario: scenario, dialects: Dialects()}
+	return &Endpoint{scenario: scenario, dialects: Dialects(), sessions: map[string]int{}}
 }
 
 // The kinds of item a conversation holds, named the same way whichever API carried them, so that
@@ -139,6 +140,8 @@ func (self *Endpoint) answer(writer http.ResponseWriter, request *http.Request, 
 		return
 	}
 
+	asked.Turn = self.take(asked.Session)
+
 	self.record(asked)
 
 	if self.scenario.Strict {
@@ -197,6 +200,16 @@ func (self *Endpoint) identifier(prefix string) string {
 	self.nextID++
 
 	return fmt.Sprintf("%s_%d", prefix, self.nextID)
+}
+
+func (self *Endpoint) take(session string) int {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	turn := self.sessions[session]
+	self.sessions[session] = turn + 1
+
+	return turn
 }
 
 func (self *Endpoint) record(asked Request) {

@@ -3,9 +3,10 @@
 {"kind":"event","event":{"kind":"user_message","text":"lose the network during answer prose"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Completed thought."}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"failure","text":"unexpected EOF"}}
+{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":1}}
+{"kind":"event","event":{"kind":"model_message","text":"Through on the second attempt."}}
 {"kind":"item","payload":{"role":"user","content":"lose the network during answer prose"}}
-{"kind":"item","payload":{"role":"assistant","content":"Partial answer.","reasoning_content":"Completed thought."}}
+{"kind":"item","payload":{"role":"assistant","content":"Through on the second attempt."}}
 {"kind":"turn_completion"}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the network interruption"}}
 {"kind":"event","event":{"kind":"model_message","text":"Resumed."}}

@@ -1,0 +1,58 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## Mode
+
+> 2001-01-01T00:00:00Z
+
+- **Caps:** `rxwgs`
+
+## User
+
+> 2001-01-01T00:00:01Z
+
+```
+be overloaded before the answer
+```
+
+## Retrying
+
+> 2001-01-01T00:00:02Z
+
+- **Attempt:** `1`
+- **Waited:** `250ms`
+
+```
+model overloaded
+```
+
+## Assistant
+
+> 2001-01-01T00:00:03Z
+
+```
+Through on the second attempt.
+```
+
+## User
+
+> 2001-01-01T00:00:04Z
+
+```
+carry on
+```
+
+## Assistant
+
+> 2001-01-01T00:00:05Z
+
+```
+Carrying on.
+```
+

@@ -143,6 +143,10 @@ func (invalidToolInputError) RetryAfter() time.Duration {
 	return 0
 }
 
+func (invalidToolInputError) Resumable() bool {
+	return true
+}
+
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
 	reply, err := self.post(ctx, yield)
 	if err == nil {

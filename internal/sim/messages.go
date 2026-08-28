@@ -70,14 +70,9 @@ func (self messagesDialect) Read(_ *http.Request, raw []byte) (Request, bool) {
 		}
 	}
 
-	roles := make([]string, 0, len(sent.Messages))
-
 	for _, message := range sent.Messages {
-		roles = append(roles, message.Role)
 		asked.Input = append(asked.Input, messagesEntries(message.Role, message.Content)...)
 	}
-
-	asked.Turn = assistantTurns(roles)
 
 	for _, offered := range sent.Tools {
 		asked.Tools = append(asked.Tools, offered.Name)

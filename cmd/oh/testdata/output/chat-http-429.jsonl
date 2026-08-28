@@ -3,6 +3,25 @@
 {"kind":"event","event":{"kind":"user_message","text":"receive HTTP 429"}}
 {"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":1}}
 {"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":2}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":3}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":4}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":5}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":6}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":7}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":8}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":9}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":10}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":11}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":12}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":13}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":14}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":15}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":16}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":17}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":18}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":19}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":20}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 429: ","attempt":21}}
 {"kind":"event","event":{"kind":"failure","text":"request failed with status 429: "}}
 {"kind":"item","payload":{"role":"user","content":"receive HTTP 429"}}
 {"kind":"turn_completion"}

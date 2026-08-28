@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"strings"
+	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/sse"
@@ -24,6 +25,7 @@ type reply struct {
 	items            []json.RawMessage
 	usage            agent.Usage
 	summary          strings.Builder
+	message          strings.Builder // answer text streamed but not yet confirmed by an item
 	isSummarised     bool
 	isRawReasoning   bool
 	isMessageStarted bool
@@ -45,7 +47,13 @@ func (self *reply) calls() []agent.ToolCall {
 	return calls
 }
 
-func (self *reply) prose() []json.RawMessage {
+func isFinalFailure(err error) bool {
+	var retriable agent.Retriable
+
+	return !errors.As(err, &retriable) || !retriable.Retriable()
+}
+
+func (self *reply) prose(isFinal bool) []json.RawMessage {
 	kept := make([]json.RawMessage, 0, len(self.items))
 
 	for _, raw := range self.items {
@@ -54,11 +62,25 @@ func (self *reply) prose() []json.RawMessage {
 		}
 	}
 
+	if answer := self.message.String(); isFinal && answer != "" {
+		kept = append(kept, partialMessage(answer))
+	}
+
 	for len(kept) > 0 && decodeItem(kept[len(kept)-1]).Type == "reasoning" {
 		kept = kept[:len(kept)-1]
 	}
 
 	return kept
+}
+
+func partialMessage(text string) json.RawMessage {
+	return encodeItem(map[string]any{
+		"type": "message",
+		"role": "assistant",
+		"content": []map[string]string{
+			{"type": "output_text", "text": text},
+		},
+	})
 }
 
 func decodeItem(raw json.RawMessage) outputItem {
@@ -96,15 +118,39 @@ type eventResponse struct {
 
 type eventError struct {
 	Message string `json:"message"`
+	Code    string `json:"code"`
+}
+
+var retriableFailures = map[string]bool{
+	"server_error":         true,
+	"server_is_overloaded": true,
+	"rate_limit_exceeded":  true,
+}
+
+type StreamError struct {
+	Code    string
+	Message string
+}
+
+func (self *StreamError) Error() string {
+	return self.Message
+}
+
+func (self *StreamError) Retriable() bool {
+	return retriableFailures[self.Code]
+}
+
+func (*StreamError) RetryAfter() time.Duration {
+	return 0
 }
 
 func (self *event) failure(payload string) error {
 	if self.Response != nil && self.Response.Error != nil && self.Response.Error.Message != "" {
-		return errors.New(self.Response.Error.Message)
+		return &StreamError{Code: self.Response.Error.Code, Message: self.Response.Error.Message}
 	}
 
 	if self.Error != nil && self.Error.Message != "" {
-		return errors.New(self.Error.Message)
+		return &StreamError{Code: self.Error.Code, Message: self.Error.Message}
 	}
 
 	if self.Message != "" {
@@ -208,6 +254,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 					return true, nil
 				}
 			case "message":
+				self.message.Reset()
 				if self.completeMessage(yield) {
 					return true, nil
 				}
@@ -241,6 +288,8 @@ func (self *reply) addMessageText(text string, yield agent.Yield) bool {
 	}
 
 	self.isMessageStarted = true
+	self.message.WriteString(text)
+
 	return !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: text})
 }
 

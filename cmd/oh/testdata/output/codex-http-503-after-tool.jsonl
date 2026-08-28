@@ -7,6 +7,25 @@
 {"kind":"event","event":{"kind":"tool_call_result","text":"tool result","id":"call-1","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":11,"total_bytes":11}}}
 {"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":1}}
 {"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":2}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":3}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":4}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":5}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":6}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":7}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":8}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":9}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":10}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":11}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":12}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":13}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":14}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":15}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":16}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":17}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":18}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":19}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":20}}
+{"kind":"event","event":{"kind":"retrying","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination","attempt":21}}
 {"kind":"event","event":{"kind":"failure","text":"request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination"}}
 {"kind":"item","payload":{"role":"user","content":"complete a tool round before an upstream failure"}}
 {"kind":"item","payload":{"id":"reasoning-1","type":"reasoning","content":[],"encrypted_content":"sealed","summary":[{"type":"summary_text","text":"Use the tool."}]}}

@@ -664,12 +664,8 @@ func (self *App) start(message string) {
 	self.settleMode()
 	self.metrics.BeginTurn()
 
-	notes := slices.DeleteFunc(
-		[]string{self.interruptionNote(), self.mode.Inject(), self.titleNote()},
-		func(note string) bool { return note == "" },
-	)
-	if len(notes) > 0 {
-		self.agent.FYI(strings.Join(notes, " "))
+	if note := self.prelude(); note != "" {
+		self.agent.AddUserMessage(note)
 	}
 
 	self.currentTurn = Turn{
@@ -686,6 +682,15 @@ func (self *App) takeSessionTitle(event agent.Event) {
 	if sessionTitle, isTitle := agent.TitleFromEvent(event); isTitle {
 		self.terminal.SetSessionTitle(sessionTitle)
 	}
+}
+
+func (self *App) prelude() string {
+	notes := slices.DeleteFunc(
+		[]string{self.interruptionNote(), self.mode.Inject(), self.titleNote()},
+		func(note string) bool { return note == "" },
+	)
+
+	return strings.Join(notes, " ")
 }
 
 func (self *App) titleNote() string {

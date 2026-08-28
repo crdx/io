@@ -1,7 +1,9 @@
 package sse_test
 
 import (
+	"context"
 	"errors"
+	"io"
 	"slices"
 	"strings"
 	"testing"
@@ -99,6 +101,44 @@ func TestAStreamThatEndsEarlyIsTruncated(t *testing.T) {
 
 	if !slices.Equal(payloads, []string{"one"}) {
 		t.Errorf("expected what did arrive, got %v", payloads)
+	}
+}
+
+type failingReader struct {
+	failure error
+}
+
+func (self failingReader) Read([]byte) (int, error) {
+	return 0, self.failure
+}
+
+func TestAStreamThatBrokeIsWorthAskingAgainAfter(t *testing.T) {
+	tests := map[string]struct {
+		failure         error
+		wantIsRetriable bool
+	}{
+		"a connection that went away": {failure: io.ErrUnexpectedEOF, wantIsRetriable: true},
+		"a turn the user cancelled":   {failure: context.Canceled, wantIsRetriable: false},
+		"a turn that ran out of time": {failure: context.DeadlineExceeded, wantIsRetriable: false},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := sse.Read(failingReader{failure: test.failure}, func(string) (bool, error) {
+				return false, nil
+			})
+
+			if !errors.Is(err, test.failure) {
+				t.Fatalf("expected what went wrong to be kept, got %v", err)
+			}
+
+			var retriable interface{ Retriable() bool }
+			isRetriable := errors.As(err, &retriable) && retriable.Retriable()
+
+			if isRetriable != test.wantIsRetriable {
+				t.Errorf("expected retriable %t, got %t", test.wantIsRetriable, isRetriable)
+			}
+		})
 	}
 }
 
