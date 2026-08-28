@@ -159,10 +159,11 @@ func (self *boundedBuffer) String() string {
 
 // Result is what a sandboxed command produced.
 type Result struct {
-	Output     string        `json:"-"` // stdout and stderr, interleaved as the command wrote them
-	Code       int           `json:"code"`
-	CPUTime    time.Duration `json:"cpu_time"`    // user and system processor time together
-	PeakMemory uint64        `json:"peak_memory"` // largest resident set in bytes
+	Output     string         `json:"-"` // stdout and stderr, interleaved as the command wrote them
+	Code       int            `json:"code"`
+	Signal     syscall.Signal `json:"signal"`      // what killed the command itself, where one did
+	CPUTime    time.Duration  `json:"cpu_time"`    // user and system processor time together
+	PeakMemory uint64         `json:"peak_memory"` // largest resident set in bytes
 }
 
 // Run executes command under policy and waits. Sandbox setup failures are errors; command exit
@@ -208,6 +209,9 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 	if stub.ProcessState != nil {
 		result.Code = stub.ProcessState.ExitCode()
 		result.CPUTime = stub.ProcessState.UserTime() + stub.ProcessState.SystemTime()
+		if status, ok := stub.ProcessState.Sys().(syscall.WaitStatus); ok && status.Signaled() {
+			result.Signal = status.Signal()
+		}
 		if usage, ok := stub.ProcessState.SysUsage().(*syscall.Rusage); ok && usage.Maxrss > 0 {
 			result.PeakMemory = uint64(usage.Maxrss) * 1024
 		}

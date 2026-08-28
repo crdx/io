@@ -8,11 +8,14 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"syscall"
 
+	"golang.org/x/sys/unix"
 	"mvdan.cc/sh/v3/syntax"
 
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
@@ -241,7 +244,9 @@ func report(result sandbox.Result, policy sandbox.Policy) string {
 		parts = append(parts, output)
 	}
 
-	switch {
+	switch killedNote := killed(result, policy); {
+	case killedNote != "":
+		parts = append(parts, killedNote)
 	case matches(output, denials):
 		parts = append(parts, note(policy))
 	case matches(output, overruns):
@@ -249,6 +254,66 @@ func report(result sandbox.Result, policy sandbox.Policy) string {
 	}
 
 	return strings.Join(parts, "\n")
+}
+
+const signalled = 128
+
+func endingSignal(result sandbox.Result) (syscall.Signal, bool) {
+	if result.Signal != 0 {
+		return result.Signal, true
+	}
+
+	if result.Code > signalled {
+		return syscall.Signal(result.Code - signalled), false
+	}
+
+	return 0, false
+}
+
+func killed(result sandbox.Result, policy sandbox.Policy) string {
+	signal, isObserved := endingSignal(result)
+
+	name := unix.SignalName(signal)
+	if name == "" {
+		return ""
+	}
+
+	opening := fmt.Sprintf("note: the shell reports that a process was killed by %s.", name)
+	if isObserved {
+		opening = fmt.Sprintf("note: the command was killed by %s.", name)
+	}
+
+	lines := []string{opening}
+
+	switch signal {
+	case syscall.SIGKILL, syscall.SIGXCPU:
+		lines = append(lines, processorLimit(result, policy)...)
+	case syscall.SIGXFSZ:
+		lines = append(lines, fmt.Sprintf(
+			"the sandbox lets a command write no more than %s to a single file.",
+			util.FormatBytes(policy.FileSize, 3),
+		))
+	}
+
+	return strings.Join(lines, "\n")
+}
+
+func processorLimit(result sandbox.Result, policy sandbox.Policy) []string {
+	if policy.CPUTime <= 0 {
+		return nil
+	}
+
+	return []string{
+		fmt.Sprintf(
+			"the sandbox gives each process %s of processor time, counted across every thread it runs,"+
+				" and stops the whole command after %s of wall clock.",
+			util.CompactDuration(policy.CPUTime), util.CompactDuration(policy.Timeout),
+		),
+		fmt.Sprintf(
+			"every process this command started used %s of processor time between them.",
+			util.CompactDuration(result.CPUTime),
+		),
+	}
 }
 
 var denials = []string{

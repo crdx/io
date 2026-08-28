@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"slices"
@@ -30,8 +31,9 @@ const (
 var Efforts = []string{"low", "medium", "high", "xhigh", "max"}
 
 const (
-	turnTimeout  = 60 * time.Minute
-	asideTimeout = 30 * time.Second
+	turnTimeout               = 60 * time.Minute
+	asideTimeout              = 30 * time.Second
+	toolInputCorrectionFormat = "Your previous response could not be used because the %q tool call did not contain a JSON object. Try again with a JSON object for its input."
 )
 
 // TokenSource hands over a token to make a request with.
@@ -49,13 +51,14 @@ type Client struct {
 	Effort          string
 	MaxOutputTokens int
 
-	tokens       TokenSource
-	instructions string
-	tools        []functionTool
-	toolNames    []string
-	history      []json.RawMessage
-	requests     *req.Client
-	observer     req.Observer
+	tokens              TokenSource
+	instructions        string
+	tools               []functionTool
+	toolNames           []string
+	history             []json.RawMessage
+	toolInputCorrection string
+	requests            *req.Client
+	observer            req.Observer
 }
 
 func New(tokens TokenSource, model string, effort string, maxOutputTokens int) (*Client, error) {
@@ -94,6 +97,7 @@ func (self *Client) Configure(instructions string, tools []tool.Definition) {
 }
 
 func (self *Client) AddUserMessage(text string) {
+	self.toolInputCorrection = ""
 	self.history = append(self.history, encodeItem(message{
 		Role:    userRole,
 		Content: []json.RawMessage{encodeItem(textBlock{Type: "text", Text: text})},
@@ -101,6 +105,7 @@ func (self *Client) AddUserMessage(text string) {
 }
 
 func (self *Client) AddToolResults(results []agent.ToolCallResult) {
+	self.toolInputCorrection = ""
 	blocks := make([]json.RawMessage, 0, len(results))
 
 	for _, result := range results {
@@ -120,6 +125,7 @@ func (self *Client) Dump() []json.RawMessage {
 }
 
 func (self *Client) Load(items []json.RawMessage) {
+	self.toolInputCorrection = ""
 	self.history = slices.Clone(items)
 }
 
@@ -152,10 +158,18 @@ func (invalidToolInputError) Resumable() bool {
 	return true
 }
 
+func (self invalidToolInputError) getCorrection() string {
+	return fmt.Sprintf(toolInputCorrectionFormat, self.toolName)
+}
+
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
 	reply, err := self.post(ctx, yield)
 	if err == nil {
+		self.toolInputCorrection = ""
 		err = reply.validateToolInputs()
+		if invalidInput, ok := errors.AsType[invalidToolInputError](err); ok {
+			self.toolInputCorrection = invalidInput.getCorrection()
+		}
 	}
 	if err != nil {
 		if said := reply.prose(); said != nil {
@@ -246,6 +260,9 @@ func (self *Client) system() []textBlock {
 
 	if self.instructions != "" {
 		blocks = append(blocks, textBlock{Type: "text", Text: self.instructions, Cache: ephemeral()})
+	}
+	if self.toolInputCorrection != "" {
+		blocks = append(blocks, textBlock{Type: "text", Text: self.toolInputCorrection})
 	}
 
 	return blocks

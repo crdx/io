@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -1312,6 +1313,22 @@ func TestACommandMayNotBurnMoreProcessorTimeThanTheLimit(t *testing.T) {
 
 	if result.Code == 0 {
 		t.Errorf("the command was allowed to run on")
+	}
+
+	if result.Signal != syscall.SIGKILL && result.Signal != syscall.SIGXCPU {
+		t.Errorf("got signal %d, want the one the processor limit ended the command with", result.Signal)
+	}
+}
+
+func TestACommandThatEndsOfItsOwnAccordReportsNoSignal(t *testing.T) {
+	result := run(t, t.TempDir(), "exit 3", sandbox.Policy{})
+
+	if result.Code != 3 {
+		t.Errorf("got exit status %d, want the one the command chose", result.Code)
+	}
+
+	if result.Signal != 0 {
+		t.Errorf("got signal %d, want none where nothing killed the command", result.Signal)
 	}
 }
 
