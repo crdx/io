@@ -146,7 +146,7 @@ func (self Style) Join(parts ...string) string {
 
 // Width is how many cells text takes up once painted.
 func Width(text string) int {
-	return width.Of(Plain(text))
+	return width.Of(text)
 }
 
 // Plain is text with the colour escape sequences taken out.
@@ -156,7 +156,9 @@ func Plain(text string) string {
 	runes := []rune(text)
 	for i := 0; i < len(runes); {
 		if runes[i] == '\x1b' {
-			i = escape.GetEnd(runes, i)
+			sequence := escape.GetSequence(runes, i)
+			out.WriteString(sequence.Text)
+			i = sequence.End
 			continue
 		}
 

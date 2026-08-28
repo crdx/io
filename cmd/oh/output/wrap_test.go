@@ -45,6 +45,57 @@ func TestAnEscapeSequenceTakesNoRoomOnTheRow(t *testing.T) {
 	}
 }
 
+func TestSizedTextTakesItsDeclaredRoomOnTheRow(t *testing.T) {
+	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 5}
+	fish := "\x1b]66;s=2:n=3:d=4:w=2;🐟\x1b\\"
+
+	if got := screen.fit("a " + fish); got != "a \r\n"+fish {
+		t.Errorf("expected room to be made for the fish, got %q", got)
+	}
+	if screen.column != 4 {
+		t.Errorf("expected the cursor four cells along, got %d", screen.column)
+	}
+}
+
+func TestCursorMovementTakesItsDeclaredRoomOnTheRow(t *testing.T) {
+	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 10}
+	text := "\x1b[4C  x"
+
+	if got := screen.fit(text); got != text {
+		t.Errorf("fit() = %q, want %q", got, text)
+	}
+	if screen.column != 7 {
+		t.Errorf("expected the cursor seven cells along, got %d", screen.column)
+	}
+}
+
+func FuzzFittingTerminalTextKeepsAValidCursor(fuzzer *testing.F) {
+	for _, text := range []string{
+		"plain words",
+		"日本語",
+		"\x1b[31mred\x1b[0m",
+		"\x1b[4Cright",
+		"\x1b[999999999999999999999Cright",
+		"\x1b]66;s=2:w=2;🐟\x1b\\ after",
+		"\x1b]66;s=-1:w=999999999999999999999;x",
+	} {
+		fuzzer.Add(text, uint8(20))
+	}
+
+	fuzzer.Fuzz(func(t *testing.T, text string, rawColumns uint8) {
+		columns := int(rawColumns%80) + 1
+		screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: columns}
+		_ = screen.fit(text)
+
+		if screen.column < 0 || screen.column > columns {
+			t.Fatalf("fit(%q) left the cursor at %d of %d columns", text, screen.column, columns)
+		}
+		if screen.openedRows < 0 {
+			t.Fatalf("fit(%q) opened %d rows", text, screen.openedRows)
+		}
+	})
+}
+
 func TestACharacterWiderThanTheTerminalStaysWhereItIs(t *testing.T) {
 	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 1}
 

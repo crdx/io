@@ -2571,6 +2571,8 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"schedule":              {".ansi", ".screen"},
 		"segments":              {".ansi", ".screen"},
 		"startup":               {".ansi", ".screen"},
+		"startup-sized":         {".ansi"},
+		"startup-sized-output":  {".ansi"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}
@@ -3069,7 +3071,7 @@ func modeMessagesStream(t *testing.T, toggleCount int, isSent bool) string {
 	self, _ := modeFixture(t)
 	var screenOutput strings.Builder
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
-	self.screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "brave-otter"}))
+	self.screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "brave-otter"}, replayColumns, false))
 
 	if toggleCount > 0 {
 		self.toggleCap(caps.Write)
@@ -3087,7 +3089,7 @@ func modeMessagesStream(t *testing.T, toggleCount int, isSent bool) string {
 func submittedModeMessagesStream() string {
 	var screenOutput strings.Builder
 	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
-	screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "brave-otter"}))
+	screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "brave-otter"}, replayColumns, false))
 	picasso := painter.New(screen, false, nil, "")
 	picasso.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: workspaceNowReadOnly()})
 	picasso.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "The .git directory is now read-write."})
@@ -4372,19 +4374,20 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 }
 
 func TestTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
-	line := func() string {
-		return startup.RenderBanner(1500*time.Microsecond, false, startup.Info{
-			Session:       "brave-otter",
+	line := func(sessionName string, columns int, isTextSizingSupported bool) string {
+		event := startup.NewEvent(1500*time.Microsecond, startup.Info{
+			Session:       sessionName,
 			PromptBytes:   740 + 3*1024,
 			ProjectSkills: 3,
 			GlobalSkills:  1,
 			Snippets:      2,
 			ToolBytes:     614,
 		})
+		return startup.RenderEvent(event, columns, isTextSizingSupported)
 	}
 
 	compareWithGolden(t, "startup", ".ansi", map[string]func() string{
-		"styled": line,
+		"styled": func() string { return line("brave-otter", replayColumns, false) },
 	})
 
 	passes := map[string]func() string{}
@@ -4394,9 +4397,43 @@ func TestTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 		"tiny":       tinyColumns,
 		"one column": oneColumn,
 	} {
-		passes[name] = func() string { return shown(t, line(), columns) }
+		passes[name] = func() string { return shown(t, line("brave-otter", columns, false), columns) }
 	}
 	compareWithGolden(t, "startup", ".screen", passes)
+
+	minimumColumns := 0
+	for columns := 1; columns <= replayColumns; columns++ {
+		if strings.Contains(line("brave-otter", columns, true), "\x1b]66;") {
+			minimumColumns = columns
+			break
+		}
+	}
+	if minimumColumns == 0 {
+		t.Fatal("sized startup banner never fits")
+	}
+
+	compareWithGolden(t, "startup-sized", ".ansi", map[string]func() string{
+		"wide with emoji":          func() string { return line("brave-otter", replayColumns, true) },
+		"minimum width with emoji": func() string { return line("brave-otter", minimumColumns, true) },
+		"below minimum width":      func() string { return line("brave-otter", minimumColumns-1, true) },
+		"unknown animal":           func() string { return line("brave-tester", replayColumns, true) },
+		"no session":               func() string { return line("", replayColumns, true) },
+		"unsupported protocol":     func() string { return line("brave-otter", replayColumns, false) },
+	})
+
+	terminalStream := func(columns int) string {
+		var stream strings.Builder
+		screen := output.NewTerminalOfSize(&stream, columns, replayLines)
+		screen.Line(line("brave-otter", columns, true))
+		screen.Line("Following output.")
+		screen.End()
+		return stream.String()
+	}
+	compareWithGolden(t, "startup-sized-output", ".ansi", map[string]func() string{
+		"wide then following output":            func() string { return terminalStream(replayColumns) },
+		"wrapped details then following output": func() string { return terminalStream(minimumColumns) },
+		"fallback then following output":        func() string { return terminalStream(minimumColumns - 1) },
+	})
 }
 
 func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {

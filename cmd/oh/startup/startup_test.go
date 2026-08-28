@@ -2,6 +2,7 @@ package startup
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -20,7 +21,7 @@ func TestAStartupEventKeepsItsFactsForReplay(t *testing.T) {
 	}
 
 	event := NewEvent(12*time.Millisecond, info)
-	got := style.Plain(RenderEvent(event))
+	got := style.Plain(RenderEvent(event, 80, false))
 	want := "Agent brave-otter 🦦 ready in 12ms with 5 skills, 4 snippets, and ~13Kt of context."
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -29,7 +30,7 @@ func TestAStartupEventKeepsItsFactsForReplay(t *testing.T) {
 
 func TestMalformedStartupFactsRenderNothing(t *testing.T) {
 	event := agent.Event{Kind: agent.StartupEvent, State: json.RawMessage("{")}
-	if got := RenderEvent(event); got != "" {
+	if got := RenderEvent(event, 80, false); got != "" {
 		t.Errorf("got %q, want nothing", got)
 	}
 }
@@ -68,7 +69,7 @@ func TestStartupQuantitiesPutOnlyTheirNumbersInTheNormalForeground(t *testing.T)
 }
 
 func TestAnEmptyStartupSaysTheSentenceAlone(t *testing.T) {
-	line := style.Plain(RenderBanner(time.Millisecond, false, Info{}))
+	line := style.Plain(RenderBanner(time.Millisecond, false, Info{}, 80, false))
 	want := "Agent ready in 1ms with 0 skills, 0 snippets, and 0t of context."
 
 	if line != want {
@@ -77,10 +78,33 @@ func TestAnEmptyStartupSaysTheSentenceAlone(t *testing.T) {
 }
 
 func TestAResumedConversationHasNoStartupLine(t *testing.T) {
-	line := RenderBanner(time.Millisecond, true, Info{ProjectSkills: 2})
+	line := RenderBanner(time.Millisecond, true, Info{ProjectSkills: 2}, 80, false)
 
 	if line != "" {
 		t.Errorf("expected no startup line, got %q", line)
+	}
+}
+
+func TestKittyGetsATwoRowStartupBannerWithASizedEmoji(t *testing.T) {
+	line := RenderBanner(time.Millisecond, false, Info{Session: "brave-otter"}, 80, true)
+
+	if !strings.HasPrefix(line, " \x1b]66;s=2:w=2;🦦\x1b\\") {
+		t.Errorf("expected a sized otter, got %q", line)
+	}
+	want := " 🦦  Agent brave-otter ready in 1ms\n  0 skills, 0 snippets, and 0t of context"
+	if got := style.Plain(line); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestAHeadingThatDoesNotFitBesideTheEmojiGetsTheOrdinaryStartupSentence(t *testing.T) {
+	info := Info{Session: "brave-otter"}
+	headingWidth := style.Width(renderHeading(time.Millisecond, info, false))
+	columns := bannerLeftPadding + sizedEmojiCells + bannerGap + headingWidth - 1
+	line := RenderBanner(time.Millisecond, false, info, columns, true)
+
+	if strings.Contains(line, "\x1b]66;") {
+		t.Errorf("expected no sized text where the heading cannot fit, got %q", line)
 	}
 }
 

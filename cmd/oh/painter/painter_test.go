@@ -8,9 +8,27 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 )
+
+func TestStartupDrawingUsesTheScreensTextSizingSupport(t *testing.T) {
+	for name, isSupported := range map[string]bool{"supported": true, "unsupported": false} {
+		t.Run(name, func(t *testing.T) {
+			var screenOutput bytes.Buffer
+			screen := output.NewTerminalOfSize(&screenOutput, 80, 24)
+			screen.SetTextSizingSupported(isSupported)
+			paint := New(screen, false, nil, "")
+			paint.DrawEvent(startup.NewEvent(time.Millisecond, startup.Info{Session: "brave-otter"}))
+
+			got := strings.Contains(screenOutput.String(), "\x1b]66;")
+			if got != isSupported {
+				t.Errorf("sized startup presence = %t, want %t", got, isSupported)
+			}
+		})
+	}
+}
 
 func TestNewQuestionClosesOldToolBlockAndResetsRows(t *testing.T) {
 	paint := New(output.New(&bytes.Buffer{}), false, nil, "")

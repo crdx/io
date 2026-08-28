@@ -64,6 +64,16 @@ func TestReasoningIsItalic(t *testing.T) {
 	}
 }
 
+func TestPlainKeepsTextCarriedByTheTextSizingProtocol(t *testing.T) {
+	sized := "\x1b]66;s=2:w=2;🐟\x1b\\"
+	if got := Plain("before " + sized + " after"); got != "before 🐟 after" {
+		t.Errorf("got %q, want the visible text", got)
+	}
+	if got := Width(sized); got != 4 {
+		t.Errorf("width = %d, want 4", got)
+	}
+}
+
 func TestNothingIsPaintedWhereTheScreenIsNotATerminal(t *testing.T) {
 	t.Cleanup(Init(&strings.Builder{}))
 

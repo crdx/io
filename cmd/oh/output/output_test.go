@@ -9,6 +9,18 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
+func TestTextSizingSupportIsRemembered(t *testing.T) {
+	screen := output.New(&bytes.Buffer{})
+	if screen.IsTextSizingSupported() {
+		t.Fatal("new screen unexpectedly supports text sizing")
+	}
+
+	screen.SetTextSizingSupported(true)
+	if !screen.IsTextSizingSupported() {
+		t.Error("screen forgot text sizing support")
+	}
+}
+
 func TestAFinishedTurnEndsWithANewline(t *testing.T) {
 	var screenOutput bytes.Buffer
 

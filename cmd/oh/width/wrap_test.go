@@ -30,6 +30,46 @@ func TestWrappingBreaksAtSpacesAndMidWordWhereThereAreNone(t *testing.T) {
 	}
 }
 
+func TestSizedTextWrapsAtItsDeclaredWidth(t *testing.T) {
+	fish := "\x1b]66;s=2:n=3:d=4:w=2;🐟\x1b\\"
+	got := Wrap(fish+" hi", 6)
+	want := []string{fish, "hi"}
+
+	if !slices.Equal(got, want) {
+		t.Errorf("Wrap() = %q, want %q", got, want)
+	}
+}
+
+func FuzzWrappingTerminalTextTerminatesWithValidWidths(fuzzer *testing.F) {
+	for _, text := range []string{
+		"plain words",
+		"日本語",
+		"\x1b[31mred words\x1b[0m",
+		"\x1b[4Cright",
+		"\x1b[999999999999999999999Cright",
+		"\x1b]66;s=2:w=2;🐟\x1b\\ after",
+		"\x1b]66;s=-1:w=999999999999999999999;x",
+	} {
+		fuzzer.Add(text, uint8(20))
+	}
+
+	fuzzer.Fuzz(func(t *testing.T, text string, rawColumns uint8) {
+		columns := int(rawColumns%80) + 1
+		rows := Wrap(text, columns)
+		if len(rows) == 0 {
+			t.Fatalf("Wrap(%q, %d) returned no rows", text, columns)
+		}
+		if len(rows) > len([]rune(text))+1 {
+			t.Fatalf("Wrap(%q, %d) returned an implausible %d rows", text, columns, len(rows))
+		}
+		for _, row := range rows {
+			if cells := Of(row); cells < 0 {
+				t.Fatalf("Wrap(%q, %d) returned a row with %d cells", text, columns, cells)
+			}
+		}
+	})
+}
+
 func TestAStyleThatSpansABreakIsClosedAndOpenedAgain(t *testing.T) {
 	got := Wrap("\x1b[1mbold words here\x1b[0m", 10)
 

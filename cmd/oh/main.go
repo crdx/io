@@ -43,6 +43,7 @@ import (
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/terminal"
+	"crdx.org/io/cmd/oh/textsizing"
 	"crdx.org/io/cmd/oh/toolset"
 	"crdx.org/io/cmd/oh/workspace"
 )
@@ -455,9 +456,12 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
+	screen := output.New(os.Stdout).LinkPathsUnder(workspaceDir)
+	screen.SetTextSizingSupported(textsizing.Detect(os.Stdin, os.Stdout))
+
 	chat = &App{
 		agent:          agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
-		screen:         output.New(os.Stdout).LinkPathsUnder(workspaceDir),
+		screen:         screen,
 		terminal:       terminal.New(os.Stdout, workspaceDir),
 		metrics:        metrics.New(choice.ContextWindowTokens),
 		commands:       commandRegistry,

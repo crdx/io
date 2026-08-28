@@ -26,9 +26,15 @@ func (self *Screen) fit(text string) string {
 	for i := 0; i < len(runes); {
 		switch runes[i] {
 		case '\x1b':
-			end := escape.GetEnd(runes, i)
-			out.WriteString(string(runes[i:end]))
-			i = end
+			sequence := escape.GetSequence(runes, i)
+			if self.column+sequence.Cells > self.columns && self.column > 0 {
+				out.WriteString("\r\n")
+				self.column = 0
+				self.openedRows++
+			}
+			self.column = min(self.column+sequence.Cells, self.columns)
+			out.WriteString(string(runes[i:sequence.End]))
+			i = sequence.End
 
 		case '\n':
 			if last != '\r' {

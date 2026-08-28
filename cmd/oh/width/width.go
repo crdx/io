@@ -4,6 +4,7 @@ import (
 	"iter"
 	"strings"
 
+	"crdx.org/io/cmd/oh/escape"
 	"github.com/rivo/uniseg"
 )
 
@@ -21,8 +22,24 @@ func Graphemes(text string) iter.Seq2[string, int] {
 
 func Of(text string) int {
 	cells := 0
-	for _, graphemeCells := range Graphemes(text) {
-		cells += graphemeCells
+	runes := []rune(text)
+
+	for i := 0; i < len(runes); {
+		if runes[i] == '\x1b' {
+			sequence := escape.GetSequence(runes, i)
+			cells += sequence.Cells
+			i = sequence.End
+			continue
+		}
+
+		end := i + 1
+		for end < len(runes) && runes[end] != '\x1b' {
+			end++
+		}
+		for _, graphemeCells := range Graphemes(string(runes[i:end])) {
+			cells += graphemeCells
+		}
+		i = end
 	}
 	return cells
 }

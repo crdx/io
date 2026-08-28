@@ -330,7 +330,7 @@ func (self *Picasso) mark(event agent.Event) {
 
 func (self *Picasso) render(event agent.Event) string {
 	if event.Kind == agent.StartupEvent {
-		return startup.RenderEvent(event)
+		return startup.RenderEvent(event, self.screen.Columns(), self.screen.IsTextSizingSupported())
 	}
 
 	return NoticeStyle(event.Status)(event.Text)

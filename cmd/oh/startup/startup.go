@@ -43,8 +43,15 @@ func NewEvent(elapsed time.Duration, info Info) agent.Event {
 	return agent.Event{Kind: agent.StartupEvent, Took: elapsed, State: facts}
 }
 
-// RenderEvent renders a recorded startup event.
-func RenderEvent(event agent.Event) string {
+const (
+	sizedEmojiCells    = 4
+	bannerLeftPadding  = 1
+	bannerGap          = 2
+	textSizingMetadata = "s=2:w=2"
+)
+
+// RenderEvent renders a recorded startup event for the available terminal width.
+func RenderEvent(event agent.Event, columns int, isTextSizingSupported bool) string {
 	var info Info
 	if len(event.State) > 0 {
 		if err := json.Unmarshal(event.State, &info); err != nil {
@@ -52,38 +59,62 @@ func RenderEvent(event agent.Event) string {
 		}
 	}
 
-	return RenderBanner(event.Took, false, info)
+	return RenderBanner(event.Took, false, info, columns, isTextSizingSupported)
 }
 
-// RenderBanner renders the startup summary as a sentence.
-func RenderBanner(elapsed time.Duration, resumed bool, info Info) string {
+// RenderBanner renders the startup summary for the available terminal width.
+func RenderBanner(elapsed time.Duration, resumed bool, info Info, columns int, isTextSizingSupported bool) string {
 	if resumed {
 		return ""
 	}
 
-	return renderSentence(elapsed, info)
+	emoji := session.Emoji(info.Session)
+	heading := renderHeading(elapsed, info, false)
+	headingRoom := columns - bannerLeftPadding - sizedEmojiCells - bannerGap
+	if emoji == "" || !isTextSizingSupported || style.Width(heading) > headingRoom {
+		return renderSentence(elapsed, info)
+	}
+
+	leftPadding := strings.Repeat(" ", bannerLeftPadding)
+	indent := "\x1b[" + strconv.Itoa(bannerLeftPadding+sizedEmojiCells) + "C" + strings.Repeat(" ", bannerGap)
+	return leftPadding + sizedEmoji(emoji) + style.Subtle(strings.Repeat(" ", bannerGap)) + heading + "\n" + indent + renderDetails(info, "", "")
 }
 
 func renderSentence(elapsed time.Duration, info Info) string {
+	return renderHeading(elapsed, info, true) + renderDetails(info, " with ", ".")
+}
+
+func renderHeading(elapsed time.Duration, info Info, shouldIncludeEmoji bool) string {
 	var line strings.Builder
 
 	_, _ = line.WriteString(style.Subtle("Agent"))
 	if info.Session != "" {
 		_, _ = line.WriteString(style.Subtle(" ") + style.Normal(info.Session))
-		if emoji := session.Emoji(info.Session); emoji != "" {
+		if emoji := session.Emoji(info.Session); shouldIncludeEmoji && emoji != "" {
 			_, _ = line.WriteString(style.Subtle(" ") + style.Normal(emoji))
 		}
 	}
 	_, _ = line.WriteString(style.Subtle(" ready in ") + startupDuration(elapsed))
-	_, _ = line.WriteString(style.Subtle(" with "))
+	return line.String()
+}
+
+func renderDetails(info Info, introduction string, conclusion string) string {
+	var line strings.Builder
+
+	if introduction != "" {
+		_, _ = line.WriteString(style.Subtle(introduction))
+	}
 	_, _ = line.WriteString(style.Normal(strconv.Itoa(info.ProjectSkills + info.GlobalSkills)))
 	_, _ = line.WriteString(style.Subtle(" skills, "))
 	_, _ = line.WriteString(style.Normal(strconv.Itoa(info.Snippets)))
 	_, _ = line.WriteString(style.Subtle(" snippets, and "))
 	_, _ = line.WriteString(startupContextTokens(info))
-	_, _ = line.WriteString(style.Subtle(" of context."))
-
+	_, _ = line.WriteString(style.Subtle(" of context" + conclusion))
 	return line.String()
+}
+
+func sizedEmoji(emoji string) string {
+	return "\x1b]66;" + textSizingMetadata + ";" + emoji + "\x1b\\"
 }
 
 func startupDuration(elapsed time.Duration) string {

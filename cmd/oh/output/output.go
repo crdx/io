@@ -26,9 +26,10 @@ type Screen struct {
 	lastGroup        Group // what was written last, so that a change of group opens a blank line
 	hasPrinted       bool  // whether anything has reached the screen yet, latched by emit until Reset
 
-	isTTY              bool   // whether the writer is a terminal rather than a file or a pipe
-	linkRoot           string // where relative paths drawn in the scrollback begin, and "" to link nothing
-	isProgressReported bool   // whether the terminal has been told a turn is running
+	isTTY                 bool   // whether the writer is a terminal rather than a file or a pipe
+	isTextSizingSupported bool   // whether text can occupy declared multi-cell blocks
+	linkRoot              string // where relative paths drawn in the scrollback begin, and "" to link nothing
+	isProgressReported    bool   // whether the terminal has been told a turn is running
 
 	columns    int // the terminal width
 	lines      int // the terminal height
@@ -64,6 +65,16 @@ func NewTerminalOfSize(writer io.Writer, columns int, lines int) *Screen {
 		columns: columns,
 		lines:   lines,
 	}
+}
+
+// SetTextSizingSupported records whether the terminal can draw declared multi-cell text.
+func (self *Screen) SetTextSizingSupported(isSupported bool) {
+	self.isTextSizingSupported = isSupported
+}
+
+// IsTextSizingSupported reports whether the terminal can draw declared multi-cell text.
+func (self *Screen) IsTextSizingSupported() bool {
+	return self.isTextSizingSupported
 }
 
 // LinkPathsUnder marks the paths drawn text names as terminal hyperlinks, resolving the relative

@@ -59,6 +59,7 @@ type atom struct {
 	text     string
 	cells    int
 	isEscape bool
+	isStyle  bool
 }
 
 func wrapLine(line string, cells int, base int) []Row {
@@ -145,7 +146,7 @@ func reach(atoms []atom, begin int, cells int) (int, int) {
 	for ; end < len(atoms); end++ {
 		one := atoms[end]
 
-		if one.isEscape {
+		if one.isEscape && one.cells == 0 {
 			continue
 		}
 
@@ -174,7 +175,7 @@ func reach(atoms []atom, begin int, cells int) (int, int) {
 func advance(atoms []atom, begin int) int {
 	end := begin
 
-	for end < len(atoms) && atoms[end].isEscape {
+	for end < len(atoms) && atoms[end].isEscape && atoms[end].cells == 0 {
 		end++
 	}
 
@@ -202,7 +203,7 @@ func stylesAt(atoms []atom) []string {
 
 	for i, one := range atoms {
 		switch {
-		case !one.isEscape:
+		case !one.isStyle:
 			openStyles[i+1] = openStyles[i]
 		case one.text == reset || one.text == "\x1b[m":
 			openStyles[i+1] = ""
@@ -221,9 +222,14 @@ func split(text string) []atom {
 
 	for i := 0; i < len(runes); {
 		if runes[i] == '\x1b' {
-			end := escape.GetEnd(runes, i)
-			atoms = append(atoms, atom{text: string(runes[i:end]), isEscape: true})
-			i = end
+			sequence := escape.GetSequence(runes, i)
+			atoms = append(atoms, atom{
+				text:     string(runes[i:sequence.End]),
+				cells:    sequence.Cells,
+				isEscape: true,
+				isStyle:  sequence.IsStyle,
+			})
+			i = sequence.End
 
 			continue
 		}
