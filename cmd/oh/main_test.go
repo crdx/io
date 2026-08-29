@@ -3408,10 +3408,10 @@ func resolveCommandLineSelections(t *testing.T) string {
 
 func newSessionFixtureChoices() []model.Choice {
 	return []model.Choice{
-		{Provider: "anthropic", Model: "claude-opus-4-5", EffortLevels: []string{"low", "high"}},
-		{Provider: "anthropic", Model: "claude-opus-5", EffortLevels: []string{"medium", "max"}},
-		{Provider: "anthropic", Model: "claude-sonnet-4-5", EffortLevels: []string{"medium"}},
-		{Provider: "codex", Model: "gpt-5.6-sol", EffortLevels: []string{"none", "high"}},
+		{Provider: "anthropic", ID: "claude-opus-4-5", EffortLevels: []string{"low", "high"}},
+		{Provider: "anthropic", ID: "claude-opus-5", EffortLevels: []string{"medium", "max"}},
+		{Provider: "anthropic", ID: "claude-sonnet-4-5", EffortLevels: []string{"medium"}},
+		{Provider: "codex", ID: "gpt-5.6-sol", EffortLevels: []string{"none", "high"}},
 	}
 }
 

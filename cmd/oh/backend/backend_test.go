@@ -74,7 +74,7 @@ func TestUpdatingAgainstAStandInEndpointDescribesEveryProvider(t *testing.T) {
 			}
 		}
 
-		if len(matches) != 1 || matches[0].Model != "fake" {
+		if len(matches) != 1 || matches[0].ID != "fake" {
 			t.Errorf("expected %s to offer the scenario's model, got %v", providerName, matches)
 
 			continue
@@ -250,11 +250,11 @@ func TestASessionIsRefusedBeforeAnyoneHasLoggedIn(t *testing.T) {
 		want   string
 	}{
 		"codex": {
-			choice: model.Choice{Provider: codexProvider, Model: "gpt-5.6-sol"},
+			choice: model.Choice{Provider: codexProvider, ID: "gpt-5.6-sol"},
 			want:   "login command with codex",
 		},
 		"anthropic": {
-			choice: model.Choice{Provider: anthropicProvider, Model: "claude-opus-5", MaxOutputTokens: 128_000},
+			choice: model.Choice{Provider: anthropicProvider, ID: "claude-opus-5", MaxOutputTokens: 128_000},
 			want:   "login command with anthropic",
 		},
 	}
@@ -278,7 +278,7 @@ func TestASessionConnectsOnceCredentialsAreStored(t *testing.T) {
 	writeStoredCredentials(t)
 
 	client, err := Connect(
-		model.Choice{Provider: anthropicProvider, Model: "claude-opus-5", MaxOutputTokens: 128_000},
+		model.Choice{Provider: anthropicProvider, ID: "claude-opus-5", MaxOutputTokens: 128_000},
 		"high",
 		EndpointSettings{},
 	)
@@ -383,7 +383,7 @@ func TestOllamaEndpointPrecedence(t *testing.T) {
 
 func TestOllamaConnectsToItsConfiguredHost(t *testing.T) {
 	connection, err := connectProvider(
-		model.Choice{Provider: ollamaProvider, Model: "qwen3.8", MaxOutputTokens: 32_768},
+		model.Choice{Provider: ollamaProvider, ID: "qwen3.8", MaxOutputTokens: 32_768},
 		"high",
 		EndpointSettings{OllamaHost: "speeder:11434"},
 	)
@@ -411,7 +411,7 @@ func TestEveryConnectionCarriesAWebSearchClient(t *testing.T) {
 
 	for _, providerName := range []string{codexProvider, opencodeGoProvider, anthropicProvider, ollamaProvider} {
 		client, err := Connect(
-			model.Choice{Provider: providerName, Model: "fake", MaxOutputTokens: 128_000},
+			model.Choice{Provider: providerName, ID: "fake", MaxOutputTokens: 128_000},
 			"high",
 			EndpointSettings{OverrideURL: address},
 		)
@@ -447,7 +447,7 @@ func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
 		},
 		{
 			"opencode-go",
-			model.Choice{Provider: opencodeGoProvider, Model: "deepseek-v4-pro"},
+			model.Choice{Provider: opencodeGoProvider, ID: "deepseek-v4-pro"},
 			"http://somewhere",
 			"chat: MaxOutputTokens is 0",
 		},
@@ -459,7 +459,7 @@ func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
 		},
 		{
 			"ollama",
-			model.Choice{Provider: ollamaProvider, Model: "qwen3.8"},
+			model.Choice{Provider: ollamaProvider, ID: "qwen3.8"},
 			"",
 			"chat: MaxOutputTokens is 0",
 		},
@@ -490,7 +490,7 @@ func TestConnectRefusesAnUnknownProvider(t *testing.T) {
 func TestOpenCodeRequiresLogin(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	_, err := Connect(
-		model.Choice{Provider: opencodeGoProvider, Model: "deepseek-v4-pro", MaxOutputTokens: 128_000},
+		model.Choice{Provider: opencodeGoProvider, ID: "deepseek-v4-pro", MaxOutputTokens: 128_000},
 		"high",
 		EndpointSettings{},
 	)

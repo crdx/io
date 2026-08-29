@@ -142,7 +142,7 @@ func modelCompletions(word string, choices []model.Choice) []string {
 		}
 
 		for _, effort := range efforts {
-			selections = append(selections, choice.Provider+"/"+choice.Model+"@"+effort)
+			selections = append(selections, choice.Provider+"/"+choice.ID+"@"+effort)
 		}
 	}
 

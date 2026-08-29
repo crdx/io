@@ -94,8 +94,8 @@ func TestNothingTypedOffersTheLongOptions(t *testing.T) {
 
 func TestModelCompletionsAreWholeSelections(t *testing.T) {
 	choices := []model.Choice{
-		{Provider: "openai", Model: "gpt-5", EffortLevels: []string{"low", "high"}},
-		{Provider: "anthropic", Model: "claude-sonnet-5", EffortLevels: []string{"none", "high"}},
+		{Provider: "openai", ID: "gpt-5", EffortLevels: []string{"low", "high"}},
+		{Provider: "anthropic", ID: "claude-sonnet-5", EffortLevels: []string{"none", "high"}},
 	}
 
 	selections := modelCompletions("sonnet", choices)
@@ -115,8 +115,8 @@ func TestModelCompletionsAreWholeSelections(t *testing.T) {
 
 func TestEffortCompletionsAreBareLevels(t *testing.T) {
 	choices := []model.Choice{
-		{Provider: "openai", Model: "gpt-5", EffortLevels: []string{"low", "high"}},
-		{Provider: "anthropic", Model: "claude-sonnet-5", EffortLevels: []string{"none", "high"}},
+		{Provider: "openai", ID: "gpt-5", EffortLevels: []string{"low", "high"}},
+		{Provider: "anthropic", ID: "claude-sonnet-5", EffortLevels: []string{"none", "high"}},
 	}
 
 	if efforts := effortCompletions("sonnet@", choices); !slices.Equal(efforts, []string{"none", "high"}) {

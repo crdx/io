@@ -43,9 +43,9 @@ func TestOnlyTheCachedListingDescribesAProvider(t *testing.T) {
 	var models []string
 	for _, choice := range available {
 		if choice.Provider != anthropicProvider {
-			t.Errorf("expected nothing from %s, got %s", choice.Provider, choice.Model)
+			t.Errorf("expected nothing from %s, got %s", choice.Provider, choice.ID)
 		}
-		models = append(models, choice.Model)
+		models = append(models, choice.ID)
 	}
 
 	want := []string{"claude-sonnet-5", "claude-sonnet-4-6"}
@@ -67,7 +67,7 @@ func TestAModelTheClientCannotTalkToIsNeverOffered(t *testing.T) {
 
 	var models []string
 	for _, choice := range availableModelChoices(cache) {
-		models = append(models, choice.Model)
+		models = append(models, choice.ID)
 	}
 
 	if want := []string{"claude-opus-5"}; !slices.Equal(models, want) {
@@ -136,7 +136,7 @@ func TestAModelTakingNoEffortLevelCannotBeSelected(t *testing.T) {
 		{ID: "", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
 	})
 
-	if len(choices) != 1 || choices[0].Model != "gpt-5.6-sol" {
+	if len(choices) != 1 || choices[0].ID != "gpt-5.6-sol" {
 		t.Errorf("expected only what can be asked to think, got %v", choices)
 	}
 }
@@ -151,7 +151,7 @@ func TestOpenCodeGoOnlyOffersModelsForItsWireProtocol(t *testing.T) {
 	}
 
 	choices := choicesFor(opencodeGoProvider, models)
-	if len(choices) != 2 || choices[0].Model != "ox-alpha-free" || choices[1].Model != "mimo-v2-omni" {
+	if len(choices) != 2 || choices[0].ID != "ox-alpha-free" || choices[1].ID != "mimo-v2-omni" {
 		t.Errorf("got %v", choices)
 	}
 }
@@ -167,7 +167,7 @@ func TestOllamaModelsAreSelectableWithoutARegistryEntry(t *testing.T) {
 	if len(choices) != 1 {
 		t.Fatalf("got choices %v", choices)
 	}
-	if choices[0].Provider != ollamaProvider || choices[0].Model != "qwen3.8:27b" ||
+	if choices[0].Provider != ollamaProvider || choices[0].ID != "qwen3.8:27b" ||
 		choices[0].ContextWindowTokens != 262_144 || choices[0].MaxOutputTokens != 32_768 {
 		t.Errorf("got choice %+v", choices[0])
 	}
@@ -563,7 +563,7 @@ func TestAProviderThatListsNothingIsDescribedByTheRegistryAlone(t *testing.T) {
 	}
 
 	choices := choicesFor(codexProvider, cached.Models)
-	if len(choices) != 1 || choices[0].Model != "gpt-5.6-sol" {
+	if len(choices) != 1 || choices[0].ID != "gpt-5.6-sol" {
 		t.Fatalf("expected only the one that reasons to be selectable, got %v", choices)
 	}
 
@@ -650,7 +650,7 @@ func TestNothingCachedIsFetchedRatherThanAskedFor(t *testing.T) {
 	}
 
 	choices := availableModelChoices(loadModelCache(modelCachePath()))
-	if len(choices) != 1 || choices[0].Model != "gpt-5.6-sol" {
+	if len(choices) != 1 || choices[0].ID != "gpt-5.6-sol" {
 		t.Errorf("expected an empty cache to be filled, got %v", choices)
 	}
 }

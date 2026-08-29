@@ -75,8 +75,8 @@ func offered(choices []Choice, currentEffort string) []*modelPicker.Model {
 		models = append(models, &modelPicker.Model{
 			Provider:            ProviderName(choice.Provider),
 			ProviderID:          choice.Provider,
-			Name:                strings.Join(DisplayName(choice.Model), " "),
-			ID:                  choice.Model,
+			Name:                strings.Join(DisplayName(choice.ID), " "),
+			ID:                  choice.ID,
 			EffortLevels:        efforts,
 			Effort:              effort,
 			ContextWindowTokens: choice.ContextWindowTokens,

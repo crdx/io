@@ -22,9 +22,9 @@ func TestTheEffortsOfferedRunFromLeastToMost(t *testing.T) {
 
 func TestAModelIsOfferedAtTheEffortNearestTheOneWanted(t *testing.T) {
 	offers := offered([]Choice{
-		{Provider: "codex", Model: "gpt-5.3-codex", EffortLevels: []string{"xhigh", "low", "medium"}},
-		{Provider: "ollama", Model: "qwen3-coder:30b", EffortLevels: []string{"none"}},
-		{Provider: "ollama", Model: "unlevelled", EffortLevels: []string{"whatever"}},
+		{Provider: "codex", ID: "gpt-5.3-codex", EffortLevels: []string{"xhigh", "low", "medium"}},
+		{Provider: "ollama", ID: "qwen3-coder:30b", EffortLevels: []string{"none"}},
+		{Provider: "ollama", ID: "unlevelled", EffortLevels: []string{"whatever"}},
 	}, "high")
 
 	if offers[0].Effort != "xhigh" {
@@ -82,14 +82,14 @@ func TestThePickerRefusesToOpenWhereNoProviderIsSignedIntoAtAll(t *testing.T) {
 
 func TestOnlyTheModelsOfASignedIntoProviderAreOffered(t *testing.T) {
 	choices := signedInto([]Choice{
-		{Provider: CodexProvider, Model: "gpt-5.6-sol"},
-		{Provider: AnthropicProvider, Model: "claude-opus-5"},
-		{Provider: OllamaProvider, Model: "qwen3.8:27b"},
+		{Provider: CodexProvider, ID: "gpt-5.6-sol"},
+		{Provider: AnthropicProvider, ID: "claude-opus-5"},
+		{Provider: OllamaProvider, ID: "qwen3.8:27b"},
 	}, func(providerName string) bool { return providerName != AnthropicProvider })
 
 	offeredNames := make([]string, len(choices))
 	for i, choice := range choices {
-		offeredNames[i] = choice.Provider + "/" + choice.Model
+		offeredNames[i] = choice.Provider + "/" + choice.ID
 	}
 
 	want := []string{"codex/gpt-5.6-sol", "ollama/qwen3.8:27b"}

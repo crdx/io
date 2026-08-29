@@ -9,7 +9,8 @@ import (
 
 type Choice struct {
 	Provider            string
-	Model               string
+	ID                  string
+	Name                string
 	EffortLevels        []string
 	ContextWindowTokens int
 	MaxOutputTokens     int
@@ -17,7 +18,7 @@ type Choice struct {
 
 func Chosen(path string, providerName string, model string) (Choice, error) {
 	for _, choice := range Choices(path) {
-		if choice.Provider == providerName && choice.Model == model {
+		if choice.Provider == providerName && choice.ID == model {
 			return choice, nil
 		}
 	}
@@ -51,17 +52,17 @@ func ParseSelection(path string, selection string) (string, string, string, erro
 		return "", "", "", err
 	}
 
-	effort := NearestEffort(defaultEffort, choice.EffortLevels)
+	effort := DefaultEffort(choice.EffortLevels)
 
 	if hasEffort {
 		if effort, err = matchEffort(effortQuery, choice); err != nil {
 			return "", "", "", err
 		}
 	} else if effort == "" {
-		return "", "", "", fmt.Errorf("model %s has no recognised effort levels", choice.Model)
+		return "", "", "", fmt.Errorf("model %s has no recognised effort levels", choice.ID)
 	}
 
-	return choice.Provider, choice.Model, effort, nil
+	return choice.Provider, choice.ID, effort, nil
 }
 
 func ResolveQuery(query string, currentEffort string, choices []Choice) (Selection, error) {
@@ -82,15 +83,19 @@ func ResolveQuery(query string, currentEffort string, choices []Choice) (Selecti
 			return Selection{}, err
 		}
 	} else if effort == "" {
-		return Selection{}, fmt.Errorf("model %s has no recognised effort levels", choice.Model)
+		return Selection{}, fmt.Errorf("model %s has no recognised effort levels", choice.ID)
 	}
 
-	return Selection{Provider: choice.Provider, Model: choice.Model, Effort: effort}, nil
+	return Selection{Provider: choice.Provider, Model: choice.ID, Effort: effort}, nil
 }
 
 var EffortOrder = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
 const defaultEffort = "medium"
+
+func DefaultEffort(available []string) string {
+	return NearestEffort(defaultEffort, available)
+}
 
 func NearestEffort(current string, available []string) string {
 	currentIndex := slices.Index(EffortOrder, current)
@@ -187,7 +192,7 @@ func onlyMatch(query string, matches []Choice) (Choice, error) {
 	default:
 		names := make([]string, len(matches))
 		for i, choice := range matches {
-			names[i] = choice.Provider + "/" + choice.Model
+			names[i] = choice.Provider + "/" + choice.ID
 		}
 		return Choice{}, fmt.Errorf("model %q is ambiguous; matches: %s", query, strings.Join(names, ", "))
 	}
@@ -218,9 +223,9 @@ func matchingModels(query string, choices []Choice, matching matcher) []Choice {
 	var matches []Choice
 
 	for _, choice := range choices {
-		candidate := strings.ToLower(choice.Model)
+		candidate := strings.ToLower(choice.ID)
 		if namesProvider {
-			candidate = strings.ToLower(choice.Provider + "/" + choice.Model)
+			candidate = strings.ToLower(choice.Provider + "/" + choice.ID)
 		}
 
 		if matching(candidate, query) {

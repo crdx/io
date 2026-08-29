@@ -9,7 +9,12 @@ import (
 	"os"
 	"strings"
 
+	"crdx.org/io/agent"
+
+	"crdx.org/io/cmd/oh/backend"
+	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/link"
+	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/tty"
@@ -19,7 +24,7 @@ import (
 	"crdx.org/io/provider/opencodego"
 )
 
-// ErrCancelled means the user left the provider picker without signing in.
+// ErrCancelled means the user left onboarding without choosing a model.
 var ErrCancelled = picker.ErrCancelled
 
 const (
@@ -43,6 +48,61 @@ var providers = []provider{
 	{name: openCodeGoName, identifier: model.OpencodeGoProvider},
 }
 
+// Options are the resources first-run onboarding needs.
+type Options struct {
+	Input          *os.File
+	Output         io.Writer
+	EndpointURL    string
+	RequestedModel string
+	ResumedSession string
+}
+
+// PrepareConfig loads the configuration, running first-run setup before returning it when startup
+// has no other way to choose a model.
+func PrepareConfig(options Options) (config.Config, error) {
+	configPath := location.GetConfigFile()
+	settings, err := config.Load(configPath)
+	if err != nil || !isRequired(options, settings.Model.RoundRobin) {
+		return settings, err
+	}
+
+	modelCachePath := location.GetModelCachePath(options.EndpointURL != "")
+	harry := wizard{
+		output: options.Output,
+		choose: func(prompt string, labels []string) (int, error) {
+			return picker.ChooseIndex(options.Input, options.Output, prompt, labels)
+		},
+		login:       login(options.Input, options.Output),
+		openBrowser: browser.Open,
+		refreshModels: func() error {
+			endpoints := backend.EndpointSettings{
+				OverrideURL: options.EndpointURL,
+				OllamaHost:  settings.Provider.Ollama.Host,
+			}
+
+			return model.Update(io.Discard, options.EndpointURL, modelCachePath,
+				func(ctx context.Context, providerName string) ([]agent.Model, error) {
+					return backend.ListModels(ctx, providerName, endpoints)
+				})
+		},
+		getModels: func() []model.Choice { return model.Choices(modelCachePath) },
+		setInitialModel: func(selection string) error {
+			_, err := setInitialModel(configPath, selection)
+			return err
+		},
+	}
+
+	if err := harry.castSpell(); err != nil {
+		return config.Config{}, err
+	}
+	return config.Load(configPath)
+}
+
+func isRequired(options Options, configuredModels []string) bool {
+	return options.EndpointURL == "" && options.RequestedModel == "" && options.ResumedSession == "" &&
+		len(configuredModels) == 0
+}
+
 func Login(providerName string, terminal *os.File, output io.Writer) error {
 	harry := wizard{
 		output: output,
@@ -53,28 +113,78 @@ func Login(providerName string, terminal *os.File, output io.Writer) error {
 		openBrowser: browser.Open,
 	}
 
-	return harry.chooseProvider(providerName)
+	_, err := harry.chooseProvider(providerName)
+	return err
 }
 
 type wizard struct {
-	output      io.Writer
-	choose      func(string, []string) (int, error)
-	login       func(provider, func(string)) error
-	openBrowser func(string) error
+	output          io.Writer
+	choose          func(string, []string) (int, error)
+	login           func(provider, func(string)) error
+	openBrowser     func(string) error
+	refreshModels   func() error
+	getModels       func() []model.Choice
+	setInitialModel func(string) error
 }
 
-func (self wizard) chooseProvider(providerName string) error {
+func (self wizard) castSpell() error {
+	if _, err := fmt.Fprint(self.output, "Oh, hello.\n\n"); err != nil {
+		return err
+	}
+
+	chosenProvider, err := self.chooseProvider("")
+	if err != nil {
+		return err
+	}
+
+	if err := self.refreshModels(); err != nil {
+		return fmt.Errorf("find models: %w", err)
+	}
+
+	choices := choicesForProvider(self.getModels(), chosenProvider.identifier)
+	if len(choices) == 0 {
+		return fmt.Errorf("no models are available for %s", chosenProvider.name)
+	}
+
+	labels := make([]string, len(choices))
+	for i, choice := range choices {
+		labels[i] = choice.Name
+		if labels[i] == "" {
+			labels[i] = choice.ID
+		}
+	}
+
+	chosen, err := self.choose("Choose a model:", labels)
+	if err != nil {
+		return err
+	}
+
+	choice := choices[chosen]
+	effort := model.DefaultEffort(choice.EffortLevels)
+	if effort == "" {
+		return fmt.Errorf("model %s has no recognised effort levels", choice.ID)
+	}
+
+	selection := model.Selection{Provider: choice.Provider, Model: choice.ID, Effort: effort}
+	if err := self.setInitialModel(selection.String()); err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprint(self.output, "\nThanks. Transferring you…\n")
+	return err
+}
+
+func (self wizard) chooseProvider(providerName string) (provider, error) {
 	if providerName != "" {
 		chosenProvider, found := providerNamed(providerName)
 		if !found {
-			return fmt.Errorf(
+			return provider{}, fmt.Errorf(
 				"unknown provider %q: choose one of %s",
 				providerName,
 				strings.Join(model.LoginProviderNames(), ", "),
 			)
 		}
-
-		return self.authenticate(chosenProvider, false)
+		return chosenProvider, self.authenticate(chosenProvider, false)
 	}
 
 	labels := make([]string, len(providers))
@@ -85,13 +195,14 @@ func (self wizard) chooseProvider(providerName string) error {
 	for {
 		chosen, err := self.choose("Choose your provider:", labels)
 		if err != nil {
-			return err
+			return provider{}, err
 		}
 
-		if err := self.authenticate(providers[chosen], true); err == nil {
-			return nil
+		chosenProvider := providers[chosen]
+		if err := self.authenticate(chosenProvider, true); err == nil {
+			return chosenProvider, nil
 		} else if _, writeErr := fmt.Fprintf(self.output, "Couldn’t sign in: %s\n\n", err); writeErr != nil {
-			return writeErr
+			return provider{}, writeErr
 		}
 	}
 }
@@ -132,6 +243,16 @@ func (self wizard) authenticate(chosenProvider provider, shouldSeparate bool) er
 
 	_, err = fmt.Fprint(self.output, "✓ Signed in\n\n")
 	return err
+}
+
+func choicesForProvider(choices []model.Choice, providerName string) []model.Choice {
+	matching := make([]model.Choice, 0, len(choices))
+	for _, choice := range choices {
+		if choice.Provider == providerName {
+			matching = append(matching, choice)
+		}
+	}
+	return matching
 }
 
 func login(terminal *os.File, output io.Writer) func(provider, func(string)) error {

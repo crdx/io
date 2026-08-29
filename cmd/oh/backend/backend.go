@@ -127,7 +127,7 @@ func ListModels(ctx context.Context, providerName string, endpoints EndpointSett
 
 	choice := model.Choice{
 		Provider:        providerName,
-		Model:           listingModel,
+		ID:              listingModel,
 		MaxOutputTokens: listingMaxOutputTokens,
 	}
 	client, err := connectProvider(choice, listingEffort, endpoints)

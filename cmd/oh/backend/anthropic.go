@@ -15,7 +15,7 @@ func connectAnthropic(choice model.Choice, effort string, endpoint string) (*Con
 		address = endpoint
 	}
 
-	client, err := anthropic.New(tokens, choice.Model, effort, choice.MaxOutputTokens)
+	client, err := anthropic.New(tokens, choice.ID, effort, choice.MaxOutputTokens)
 	if err != nil {
 		return nil, err
 	}

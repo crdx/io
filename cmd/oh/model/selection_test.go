@@ -115,11 +115,11 @@ func TestASelectionWithAnEmptyEffortIsRefused(t *testing.T) {
 
 func listedModels() []Choice {
 	return []Choice{
-		{Provider: anthropicProvider, Model: "claude-opus-4-5"},
-		{Provider: anthropicProvider, Model: "claude-opus-4-5-20251101"},
-		{Provider: anthropicProvider, Model: "claude-opus-5"},
-		{Provider: anthropicProvider, Model: "claude-sonnet-5"},
-		{Provider: codexProvider, Model: "gpt-5.6-sol"},
+		{Provider: anthropicProvider, ID: "claude-opus-4-5"},
+		{Provider: anthropicProvider, ID: "claude-opus-4-5-20251101"},
+		{Provider: anthropicProvider, ID: "claude-opus-5"},
+		{Provider: anthropicProvider, ID: "claude-sonnet-5"},
+		{Provider: codexProvider, ID: "gpt-5.6-sol"},
 	}
 }
 
@@ -142,16 +142,16 @@ func TestACloserReadingOfAQueryWinsOutright(t *testing.T) {
 			continue
 		}
 
-		if choice.Model != want {
-			t.Errorf("expected %s to find %s, got %s", query, want, choice.Model)
+		if choice.ID != want {
+			t.Errorf("expected %s to find %s, got %s", query, want, choice.ID)
 		}
 	}
 }
 
 func TestABareQueryBorrowsNoLettersFromTheProviderName(t *testing.T) {
 	choices := []Choice{
-		{Provider: anthropicProvider, Model: "claude-opus-5"},
-		{Provider: anthropicProvider, Model: "claude-sonnet-5"},
+		{Provider: anthropicProvider, ID: "claude-opus-5"},
+		{Provider: anthropicProvider, ID: "claude-sonnet-5"},
 	}
 
 	choice, err := matchModel("opus5", choices)
@@ -159,15 +159,15 @@ func TestABareQueryBorrowsNoLettersFromTheProviderName(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if choice.Model != "claude-opus-5" {
-		t.Errorf("got %s", choice.Model)
+	if choice.ID != "claude-opus-5" {
+		t.Errorf("got %s", choice.ID)
 	}
 }
 
 func TestAQualifiedQueryIsStillReadLoosely(t *testing.T) {
 	choices := []Choice{
-		{Provider: opencodeGoProvider, Model: "deepseek-v4-pro"},
-		{Provider: anthropicProvider, Model: "claude-opus-5"},
+		{Provider: opencodeGoProvider, ID: "deepseek-v4-pro"},
+		{Provider: anthropicProvider, ID: "claude-opus-5"},
 	}
 
 	choice, err := matchModel("opencode/deepseek", choices)
@@ -175,8 +175,8 @@ func TestAQualifiedQueryIsStillReadLoosely(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if choice.Model != "deepseek-v4-pro" {
-		t.Errorf("got %s", choice.Model)
+	if choice.ID != "deepseek-v4-pro" {
+		t.Errorf("got %s", choice.ID)
 	}
 }
 
@@ -201,15 +201,15 @@ func TestAModelOffersOnlyTheEffortLevelsItTakes(t *testing.T) {
 	}
 
 	for _, choice := range Choices(modelCachePath()) {
-		want, known := wanted[choice.Model]
+		want, known := wanted[choice.ID]
 		if !known {
-			t.Errorf("no effort levels pinned for %s", choice.Model)
+			t.Errorf("no effort levels pinned for %s", choice.ID)
 
 			continue
 		}
 
 		if !slices.Equal(choice.EffortLevels, want) {
-			t.Errorf("expected %s to take %v, got %v", choice.Model, want, choice.EffortLevels)
+			t.Errorf("expected %s to take %v, got %v", choice.ID, want, choice.EffortLevels)
 		}
 	}
 }
@@ -251,8 +251,8 @@ func TestOffIsNotOfferedToAModelThatCannotStopReasoning(t *testing.T) {
 
 func TestAmbiguousModelSelectionShowsEveryMatch(t *testing.T) {
 	choices := []Choice{
-		{Provider: opencodeGoProvider, Model: "deepseek-v4", EffortLevels: []string{"high"}},
-		{Provider: opencodeGoProvider, Model: "deepseek-v4-pro", EffortLevels: []string{"high"}},
+		{Provider: opencodeGoProvider, ID: "deepseek-v4", EffortLevels: []string{"high"}},
+		{Provider: opencodeGoProvider, ID: "deepseek-v4-pro", EffortLevels: []string{"high"}},
 	}
 
 	_, err := matchModel("deepseek", choices)
@@ -282,15 +282,15 @@ func TestAQueryScatteredThroughANameIsReadOnlyWhenGuessingIsAllowed(t *testing.T
 
 func TestExactModelSelectionWinsOverFuzzyMatches(t *testing.T) {
 	choices := []Choice{
-		{Provider: opencodeGoProvider, Model: "deepseek-v4", EffortLevels: []string{"high"}},
-		{Provider: opencodeGoProvider, Model: "deepseek-v4-pro", EffortLevels: []string{"high"}},
+		{Provider: opencodeGoProvider, ID: "deepseek-v4", EffortLevels: []string{"high"}},
+		{Provider: opencodeGoProvider, ID: "deepseek-v4-pro", EffortLevels: []string{"high"}},
 	}
 
 	choice, err := matchModel("deepseek-v4", choices)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if choice.Model != "deepseek-v4" {
-		t.Errorf("got model %q", choice.Model)
+	if choice.ID != "deepseek-v4" {
+		t.Errorf("got model %q", choice.ID)
 	}
 }

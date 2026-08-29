@@ -30,7 +30,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 					return nil
 				},
 			}
-			err := harry.chooseProvider("")
+			_, err := harry.chooseProvider("")
 			return err
 		},
 		"login-anthropic": func(t *testing.T, output *bytes.Buffer) error {
@@ -46,7 +46,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 					return nil
 				},
 			}
-			err := harry.chooseProvider(model.AnthropicProvider)
+			_, err := harry.chooseProvider(model.AnthropicProvider)
 			return err
 		},
 		"login-browser-failure": func(_ *testing.T, output *bytes.Buffer) error {
@@ -58,7 +58,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 				},
 				openBrowser: func(string) error { return errors.New("no browser is available") },
 			}
-			err := harry.chooseProvider(model.CodexProvider)
+			_, err := harry.chooseProvider(model.CodexProvider)
 			return err
 		},
 		"login-long-url": func(t *testing.T, output *bytes.Buffer) error {
@@ -80,7 +80,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 					return nil
 				},
 			}
-			if err := harry.chooseProvider(model.CodexProvider); err != nil {
+			if _, err := harry.chooseProvider(model.CodexProvider); err != nil {
 				return err
 			}
 			if openedAddress != address {
@@ -96,7 +96,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 					return errors.New("authorisation was refused")
 				},
 			}
-			err := harry.chooseProvider(model.AnthropicProvider)
+			_, err := harry.chooseProvider(model.AnthropicProvider)
 			if err == nil {
 				return errors.New("expected direct login to fail")
 			}
@@ -114,7 +114,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 					return err
 				},
 			}
-			err := harry.chooseProvider(model.CodexProvider)
+			_, err := harry.chooseProvider(model.CodexProvider)
 			return err
 		},
 		"login-malformed-redirect": func(_ *testing.T, output *bytes.Buffer) error {
@@ -128,7 +128,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 					return err
 				},
 			}
-			err := harry.chooseProvider(model.CodexProvider)
+			_, err := harry.chooseProvider(model.CodexProvider)
 			if err == nil {
 				return errors.New("expected malformed redirect to fail")
 			}
@@ -146,7 +146,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 					return err
 				},
 			}
-			err := harry.chooseProvider(model.CodexProvider)
+			_, err := harry.chooseProvider(model.CodexProvider)
 			if err == nil {
 				return errors.New("expected mismatched redirect to fail")
 			}
@@ -170,7 +170,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 					)
 				},
 			}
-			err := harry.chooseProvider(model.OpencodeGoProvider)
+			_, err := harry.chooseProvider(model.OpencodeGoProvider)
 			return err
 		},
 		"login-opencode-rejected": func(t *testing.T, output *bytes.Buffer) error {
@@ -192,7 +192,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 					return nil
 				},
 			}
-			err := harry.chooseProvider("")
+			_, err := harry.chooseProvider("")
 			return err
 		},
 		"login-retry": func(_ *testing.T, output *bytes.Buffer) error {
@@ -209,7 +209,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 					return nil
 				},
 			}
-			err := harry.chooseProvider("")
+			_, err := harry.chooseProvider("")
 			return err
 		},
 		"login-cancelled": func(_ *testing.T, output *bytes.Buffer) error {
@@ -222,7 +222,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 					return 0, ErrCancelled
 				},
 			}
-			err := harry.chooseProvider("")
+			_, err := harry.chooseProvider("")
 			if !errors.Is(err, ErrCancelled) {
 				return fmt.Errorf("got %w", err)
 			}
@@ -245,6 +245,48 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestOpenCodeGoOnboardingMatchesTheGolden(t *testing.T) {
+	var output bytes.Buffer
+	restoreStyle := style.Init(&output)
+	t.Cleanup(restoreStyle)
+
+	harry := wizard{
+		output: &output,
+		choose: menuChoices(&output, 2, 0),
+		login: func(chosen provider, _ func(string)) error {
+			if chosen.identifier != model.OpencodeGoProvider {
+				t.Errorf("got provider %q", chosen.identifier)
+			}
+			return storeOpenCodeGoKey(
+				typed("secret\n", &output),
+				&output,
+				filepath.Join(t.TempDir(), "auth.json"),
+				func(string) error { return nil },
+			)
+		},
+		refreshModels: func() error { return nil },
+		getModels: func() []model.Choice {
+			return []model.Choice{{
+				Provider:     model.OpencodeGoProvider,
+				ID:           "deepseek-v4-pro",
+				Name:         "DeepSeek V4 Pro",
+				EffortLevels: []string{"medium", "high"},
+			}}
+		},
+		setInitialModel: func(selection string) error {
+			if selection != "opencode-go/deepseek-v4-pro@medium" {
+				t.Errorf("saved %q", selection)
+			}
+			return nil
+		},
+	}
+
+	if err := harry.castSpell(); err != nil {
+		t.Fatal(err)
+	}
+	assertScreenGolden(t, "first-run-opencode-go", output.String())
 }
 
 func typed(text string, terminal io.Writer) io.Reader {

@@ -35,7 +35,7 @@ fuzz package target time='1m':
 
 # write what the tests drew back to the golden files
 golden:
-    go test ./cmd/oh ./cmd/oh/cli ./cmd/oh/commands -update
+    go test ./cmd/oh ./cmd/oh/cli ./cmd/oh/commands ./cmd/oh/onboarding -update
     go test ./cmd/oh/picker ./cmd/oh/sessionPicker ./cmd/oh/modelPicker ./cmd/oh/sessions -update
     go test ./toolbox/bash -update
     go test ./cmd/ohctl/... -update

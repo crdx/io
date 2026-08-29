@@ -146,7 +146,22 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return sessions.Choose(sessionsDir, workspaceDir, os.Stdin, os.Stdout)
 	}
 
+	if _, err := onboarding.PrepareConfig(onboarding.Options{
+		Input:          os.Stdin,
+		Output:         os.Stdout,
+		EndpointURL:    endpointURL,
+		RequestedModel: inputArgs.Model,
+		ResumedSession: inputArgs.Session,
+	}); err != nil {
+		if errors.Is(err, onboarding.ErrCancelled) {
+			return "", nil
+		}
+
+		return "", err
+	}
+
 	configPath := location.GetConfigFile()
+
 	settings, configObserver, err := config.Observe(configPath)
 	if err != nil {
 		return "", err

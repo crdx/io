@@ -261,7 +261,8 @@ func choicesFor(providerName string, models []agent.Model) []Choice {
 
 		choices = append(choices, Choice{
 			Provider:            providerName,
-			Model:               model.ID,
+			ID:                  model.ID,
+			Name:                model.Name,
 			EffortLevels:        model.EffortLevels,
 			ContextWindowTokens: model.ContextWindowTokens,
 			MaxOutputTokens:     model.MaxOutputTokens,
@@ -290,7 +291,7 @@ func List(output io.Writer, path string) error {
 	}
 
 	for _, choice := range choices {
-		if _, err := fmt.Fprintf(output, "%s/%s\n", choice.Provider, choice.Model); err != nil {
+		if _, err := fmt.Fprintf(output, "%s/%s\n", choice.Provider, choice.ID); err != nil {
 			return err
 		}
 	}

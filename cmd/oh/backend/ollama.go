@@ -9,7 +9,7 @@ import (
 )
 
 func connectOllama(choice model.Choice, effort string, endpoints EndpointSettings) (*Connection, error) {
-	client, err := ollama.New(ollamaEndpointURL(endpoints), choice.Model, effort, choice.MaxOutputTokens)
+	client, err := ollama.New(ollamaEndpointURL(endpoints), choice.ID, effort, choice.MaxOutputTokens)
 	if err != nil {
 		return nil, err
 	}

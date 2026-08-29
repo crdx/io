@@ -18,7 +18,7 @@ func connectOpencodeGo(choice model.Choice, effort string, endpoint string) (*Co
 		}
 	}
 
-	client, err := opencodego.New(endpoint, token, choice.Model, effort, choice.MaxOutputTokens)
+	client, err := opencodego.New(endpoint, token, choice.ID, effort, choice.MaxOutputTokens)
 	if err != nil {
 		return nil, err
 	}

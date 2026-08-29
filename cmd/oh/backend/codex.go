@@ -11,7 +11,7 @@ const webSearchModel = "gpt-5.6-terra"
 func connectCodex(choice model.Choice, effort string, endpoint string) (*Connection, error) {
 	tokens, address := codexCredentials(endpoint)
 
-	client, err := codex.New(tokens, choice.Model, effort)
+	client, err := codex.New(tokens, choice.ID, effort)
 	if err != nil {
 		return nil, err
 	}
