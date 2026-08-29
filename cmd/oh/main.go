@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"syscall"
 	"time"
 
@@ -121,7 +120,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	sessionsDir := location.GetSessionsDir()
 
 	if inputArgs.Version {
-		fmt.Println(version())
+		fmt.Println(cli.Version())
 		return "", nil
 	}
 
@@ -257,7 +256,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	mode := caps.NewMode(args.Caps)
 
 	files := file.New(root, caps.RefuseWrite(mode))
-	homeRoot, err := mountHomeDir(files, homeDir, mode)
+	homeRoot, err := shell.MountHomeDirectory(files, homeDir, mode)
 	if err != nil {
 		return "", err
 	}
@@ -297,7 +296,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	selection, err := backend.Resolve(
 		model.Selection{Provider: args.Provider, Model: args.Model, Effort: args.Effort},
-		resumedSelection(resumedSession),
+		sessions.ModelSelection(resumedSession),
 		configuredModels,
 		location.GetModelRoundRobinPath(),
 	)
@@ -348,7 +347,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	hooks.EmitSessionStarting(ctx, cycle.SessionStarting{Session: sessionInfo})
 	client.ObserveHTTP(log.Observer())
 
-	tmpDir, err := openTmpDir(log.Name())
+	tmpDir, err := sessions.PrepareTemporaryDirectory(log.Name())
 	if err != nil {
 		return "", err
 	}
@@ -398,7 +397,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		}
 	}
 
-	tmpRoot, err := mountTmpDir(files, tmpDir)
+	tmpRoot, err := shell.MountTemporaryDirectory(files, tmpDir)
 	if err != nil {
 		return "", err
 	}
@@ -445,14 +444,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			var transition cycle.Transition
 			var err error
 			if start.SourceSessionName != "" {
-				transition, err = forkedSessionTransition(
+				transition, err = cycle.ForkedSessionTransition(
 					start.ModelGlob,
 					selection.Effort,
 					model.Choices(modelCachePath),
 					start.SourceSessionName,
 				)
 			} else {
-				transition, err = newSessionTransition(
+				transition, err = cycle.NewSessionTransition(
 					start.ModelGlob,
 					selection.Effort,
 					model.Choices(modelCachePath),
@@ -537,55 +536,4 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	return "", nil
-}
-
-func resumedSelection(resumedSession *store.Session) model.Selection {
-	if resumedSession == nil {
-		return model.Selection{}
-	}
-
-	return model.Selection{
-		Provider: resumedSession.Meta.Provider,
-		Model:    resumedSession.Meta.Model,
-		Effort:   resumedSession.Meta.Effort,
-	}
-}
-
-func openTmpDir(name string) (string, error) {
-	tmp := location.GetTmpDir(name)
-
-	if err := os.MkdirAll(tmp, 0o700); err != nil {
-		return "", fmt.Errorf("could not prepare the tmp dir: %w", err)
-	}
-
-	return tmp, nil
-}
-
-func mountHomeDir(files *file.Root, homeDir string, mode *caps.Mode) (*os.Root, error) {
-	homeRoot, err := os.OpenRoot(homeDir)
-	if err != nil {
-		return nil, fmt.Errorf("could not open the shell home: %w", err)
-	}
-
-	files.Mount(homeDir, file.New(homeRoot, caps.RefuseWrite(mode)))
-	return homeRoot, nil
-}
-
-func mountTmpDir(files *file.Root, tmpDir string) (*os.Root, error) {
-	tmpRoot, err := os.OpenRoot(tmpDir)
-	if err != nil {
-		return nil, fmt.Errorf("could not open the tmp dir: %w", err)
-	}
-
-	files.Mount(sandbox.TmpDir, file.New(tmpRoot, func(string) error { return nil }))
-	return tmpRoot, nil
-}
-
-func version() string {
-	info, ok := debug.ReadBuildInfo()
-	if !ok || info.Main.Version == "" {
-		return "unknown"
-	}
-
-	return info.Main.Version
 }

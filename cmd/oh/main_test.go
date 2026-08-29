@@ -2767,63 +2767,6 @@ func unsetInheritedStateDirectory() {
 	}
 }
 
-func TestHomeMountIsReadableByFileTools(t *testing.T) {
-	workspaceRoot, err := os.OpenRoot(t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = workspaceRoot.Close() }()
-
-	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
-	home := t.TempDir()
-	path := filepath.Join(home, "reference")
-	if err := os.WriteFile(path, []byte("hello"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-
-	homeRoot, err := mountHomeDir(files, home, caps.NewMode(caps.Read))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = homeRoot.Close() }()
-
-	resolvedRoot, name, err := files.Resolve(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	data, err := resolvedRoot.ReadFile(name)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if string(data) != "hello" {
-		t.Errorf("got %q, want hello", data)
-	}
-}
-
-func TestTmpMountIsWritableWithoutAShell(t *testing.T) {
-	workspaceRoot, err := os.OpenRoot(t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = workspaceRoot.Close() }()
-
-	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
-	tmp := t.TempDir()
-	tmpRoot, err := mountTmpDir(files, tmp)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = tmpRoot.Close() }()
-
-	resolvedRoot, name, err := files.Resolve("/tmp/proof")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := resolvedRoot.WriteFile(name, []byte("written"), 0o600); err != nil {
-		t.Fatalf("tmp was not writable: %v", err)
-	}
-}
-
 func TestAResumedConversationDrawsItsRecordedMode(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{Model: "gpt"})
@@ -3281,6 +3224,16 @@ func testBinaryEnvironment(t *testing.T, stateDirectory string) []string {
 	)
 }
 
+func TestVersionDispatchRunsThroughTheBinary(t *testing.T) {
+	binary := buildTestBinary(t)
+	stateDirectory := t.TempDir()
+
+	output := runTestBinary(t, binary, testBinaryEnvironment(t, stateDirectory), "--version")
+	if strings.TrimSpace(output) == "" || strings.Count(output, "\n") != 1 {
+		t.Errorf("got %q, want one non-empty line", output)
+	}
+}
+
 func TestModelListDispatchRunsThroughTheBinary(t *testing.T) {
 	binary := buildTestBinary(t)
 	stateDirectory := t.TempDir()
@@ -3422,7 +3375,7 @@ func resolveForkedSessionGlobs(t *testing.T) string {
 	var written strings.Builder
 
 	for _, glob := range []string{"", "opus-5", "opus-5@max", "nope"} {
-		transition, err := forkedSessionTransition(glob, "medium", choices, "able-dolphin")
+		transition, err := cycle.ForkedSessionTransition(glob, "medium", choices, "able-dolphin")
 		if err != nil {
 			fmt.Fprintf(&written, "%-28q error: %v\n", glob, err)
 
@@ -3459,7 +3412,7 @@ func resolveNewSessionGlobs(t *testing.T) string {
 		"nope",
 		"nonsense",
 	} {
-		transition, err := newSessionTransition(glob, "medium", choices)
+		transition, err := cycle.NewSessionTransition(glob, "medium", choices)
 		if err != nil {
 			fmt.Fprintf(&written, "%-28q error: %v\n", glob, err)
 
@@ -7966,12 +7919,6 @@ func TestTheTimerCountsUpFromTheSessionBeforeTheFirstTurn(t *testing.T) {
 	got := harness.turnTiming()
 	if got.UserTurn.Round(time.Second) != 30*time.Second || got.ModelTurn != 0 {
 		t.Errorf("got %+v, want a 30 second user turn", got)
-	}
-}
-
-func TestVersionIsNotEmpty(t *testing.T) {
-	if version() == "" {
-		t.Error("expected a version, got nothing")
 	}
 }
 
