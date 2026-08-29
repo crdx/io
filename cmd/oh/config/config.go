@@ -25,6 +25,8 @@ import (
 //go:embed defaults.toml
 var defaultsTOML string
 
+const minimumToolOutputBytes = 1024
+
 type Config struct {
 	Version  int                            `toml:"version"`
 	Editor   Editor                         `toml:"editor"`
@@ -36,6 +38,7 @@ type Config struct {
 	Sandbox  sandbox                        `toml:"sandbox"`
 	Bar      Bar                            `toml:"bar"`
 	Ui       Ui                             `toml:"ui"`
+	Tool     Tool                           `toml:"tool"`
 
 	fallback *toml.MetaData
 	user     *toml.MetaData
@@ -64,6 +67,10 @@ type Ollama struct {
 
 type Ui struct {
 	StreamingMode output.StreamingMode `toml:"stream"`
+}
+
+type Tool struct {
+	Output Size `toml:"output"`
 }
 
 type SkillPaths struct {
@@ -261,6 +268,12 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 	config.Input.Continue = strings.TrimSpace(config.Input.Continue)
 	if meta.IsDefined("input", "continue") && config.Input.Continue == "" {
 		return config, fmt.Errorf("%s: input.continue is empty", displayPath)
+	}
+	if meta.IsDefined("tool", "output") && config.Tool.Output.Bytes < minimumToolOutputBytes {
+		return config, fmt.Errorf(
+			"%s: tool.output is too small to say anything with; write at least %d bytes",
+			displayPath, minimumToolOutputBytes,
+		)
 	}
 	for _, name := range slices.Sorted(maps.Keys(config.Snippets)) {
 		definition := config.Snippets[name]

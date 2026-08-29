@@ -74,13 +74,31 @@ Full output, from the session directory:
 jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_6") | .event.text' session.jsonl
 ```
 
-## usage · +13s
+## Tool call — summon · `too much` · +13s
 
-## Interrupted · +14s
+→ success, 900 lines, 12K of 58.6K, truncated · +14s
+
+**Output preview (first 3 lines, up to 1 KiB)**
+
+```
+one line of text
+two lines of text
+three lines of text
+```
+
+Full output, from the session directory:
+
+```sh
+jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_7") | .event.text' session.jsonl
+```
+
+## usage · +15s
+
+## Interrupted · +16s
 
 The turn was interrupted because the user asked something else.
 
-## Assistant · +15s
+## Assistant · +17s
 
 ```
 That is all of the awkward ones.

@@ -415,7 +415,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	toolboxTools = append(toolboxTools, web.New(func() bool {
 		return mode.Current().Has(caps.Web)
 	}, client.Search)...)
-	toolboxTools = truncate.Tools(toolboxTools)
+	toolboxTools = truncate.Tools(toolboxTools, settings.Tool.Output.Bytes)
 
 	enabledTools, err := toolset.Reduce(toolboxTools, args.Tools)
 	if err != nil {

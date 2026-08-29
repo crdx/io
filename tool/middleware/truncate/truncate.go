@@ -12,27 +12,26 @@ import (
 	"crdx.org/io/tool"
 )
 
-// Limit is the most a tool may hand back before it is cut.
-const Limit = 32 * 1024
-
-// Tools wraps every tool so none of them can answer with more than Limit.
-func Tools(subjects []tool.Tool) []tool.Tool {
+// Tools wraps every tool so none of them can answer with more than limit bytes.
+func Tools(subjects []tool.Tool, limit int) []tool.Tool {
 	wrappedTools := make([]tool.Tool, len(subjects))
 
 	for i, subject := range subjects {
-		wrappedTools[i] = Tool(subject)
+		wrappedTools[i] = Tool(subject, limit)
 	}
 
 	return wrappedTools
 }
 
-// Tool wraps one tool so its output is truncated.
-func Tool(inner tool.Tool) tool.Tool {
-	return truncatedTool{Tool: inner}
+// Tool wraps one tool so its output is cut at limit bytes.
+func Tool(inner tool.Tool, limit int) tool.Tool {
+	return truncatedTool{Tool: inner, limit: limit}
 }
 
 type truncatedTool struct {
 	tool.Tool
+
+	limit int
 }
 
 func (self truncatedTool) Parse(arguments string) (tool.ToolCall, error) {
@@ -41,16 +40,18 @@ func (self truncatedTool) Parse(arguments string) (tool.ToolCall, error) {
 		return nil, err
 	}
 
-	return truncatedToolCall{ToolCall: call}, nil
+	return truncatedToolCall{ToolCall: call, limit: self.limit}, nil
 }
 
 type truncatedToolCall struct {
 	tool.ToolCall
+
+	limit int
 }
 
 func (self truncatedToolCall) Exec(ctx context.Context) (tool.ToolCallResult, error) {
 	result, err := self.ToolCall.Exec(ctx)
-	cappedOutput, returnedBytes, totalBytes := outputWithSizes(result.Output)
+	cappedOutput, returnedBytes, totalBytes := outputWithSizes(result.Output, self.limit)
 	result.Output = cappedOutput
 
 	if result.Stats.Kind == tool.StatsResources || returnedBytes < totalBytes {
@@ -62,21 +63,22 @@ func (self truncatedToolCall) Exec(ctx context.Context) (tool.ToolCallResult, er
 	return result, err
 }
 
-// Output caps one reply, cutting at a line boundary where there is one and a rune boundary where
-// there is not. The cut is said out loud, and the whole of it written to a file the notice names.
-func Output(output string) string {
-	cappedOutput, _, _ := outputWithSizes(output)
+// Output caps one reply at limit bytes, cutting at a line boundary where there is one and a rune
+// boundary where there is not. The cut is said out loud, and the whole of it written to a file the
+// notice names.
+func Output(output string, limit int) string {
+	cappedOutput, _, _ := outputWithSizes(output, limit)
 	return cappedOutput
 }
 
-func outputWithSizes(output string) (string, int, int) {
-	if len(output) <= Limit {
+func outputWithSizes(output string, limit int) (string, int, int) {
+	if len(output) <= limit {
 		return output, len(output), len(output)
 	}
 
-	end := Limit
+	end := limit
 
-	if newline := strings.LastIndexByte(output[:Limit], '\n'); newline > 0 {
+	if newline := strings.LastIndexByte(output[:limit], '\n'); newline > 0 {
 		end = newline
 	} else {
 		for end > 0 && !utf8.RuneStart(output[end]) {

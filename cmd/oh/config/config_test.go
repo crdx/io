@@ -707,3 +707,98 @@ func TestAConfigWrittenBeforeTheStreamingModeExistedNeedsNoMigrating(t *testing.
 		t.Errorf("got %v", err)
 	}
 }
+
+func TestTheToolOutputLimitDefaultsToTwelveKilobytes(t *testing.T) {
+	config, err := Load("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.Tool.Output.Bytes != 12*1024 {
+		t.Errorf("got tool output limit %d, want %d", config.Tool.Output.Bytes, 12*1024)
+	}
+}
+
+func TestTheToolOutputLimitIsRead(t *testing.T) {
+	config := configFrom(t, `
+		[tool]
+		output = "48K"
+	`)
+
+	if config.Tool.Output.Bytes != 48*1024 {
+		t.Errorf("got tool output limit %d, want %d", config.Tool.Output.Bytes, 48*1024)
+	}
+	if err := config.ValidateConsumed(); err != nil {
+		t.Errorf("got %v", err)
+	}
+}
+
+func TestAToolOutputLimitTooSmallToSayAnythingWithIsRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[tool]\noutput = \"3\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil || !strings.Contains(err.Error(), "tool.output is too small") {
+		t.Errorf("got %v, want a complaint about tool.output", err)
+	}
+}
+
+func TestAToolOutputLimitThatIsNotASizeIsRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[tool]\noutput = \"a bit\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil || !strings.Contains(err.Error(), "is not a size") {
+		t.Errorf("got %v, want a complaint about the size", err)
+	}
+}
+
+func TestAConfigWrittenBeforeTheToolOutputLimitExistedNeedsNoMigrating(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte("version = 9\n[input]\ncontinue = \"go on\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatalf("a config from before the setting existed was refused: %v", err)
+	}
+	if config.Tool.Output.Bytes != 12*1024 {
+		t.Errorf("got tool output limit %d, want the default %d", config.Tool.Output.Bytes, 12*1024)
+	}
+}
+
+func TestASizeIsReadPlainlyOrWithAUnitAfterIt(t *testing.T) {
+	sizes := []struct {
+		written string
+		want    int
+	}{
+		{"0", 0},
+		{"512", 512},
+		{"12K", 12 * 1024},
+		{" 12k ", 12 * 1024},
+		{"2M", 2 * 1024 * 1024},
+		{"1G", 1024 * 1024 * 1024},
+	}
+
+	for _, size := range sizes {
+		var read Size
+		if err := read.UnmarshalText([]byte(size.written)); err != nil {
+			t.Errorf("%q was refused: %v", size.written, err)
+		} else if read.Bytes != size.want {
+			t.Errorf("%q read as %d, want %d", size.written, read.Bytes, size.want)
+		}
+	}
+}
+
+func TestASizeThatIsNotOneIsRefused(t *testing.T) {
+	for _, written := range []string{"", "K", "-1", "12KB", "one", "1.5M"} {
+		var size Size
+		if err := size.UnmarshalText([]byte(written)); err == nil {
+			t.Errorf("%q was read as %d, want a complaint", written, size.Bytes)
+		}
+	}
+}

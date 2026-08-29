@@ -12,6 +12,8 @@ import (
 	"crdx.org/io/tool/middleware/truncate"
 )
 
+const limitBytes = 12 * 1024
+
 type Args struct {
 	Size int `json:"size"`
 }
@@ -63,7 +65,7 @@ func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
 		return "done", tool.Stats{Kind: tool.StatsRead, Lines: 3, Bytes: 12}, nil
 	})
 
-	call, err := truncate.Tool(subject).Parse(`{}`)
+	call, err := truncate.Tool(subject, limitBytes).Parse(`{}`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +93,7 @@ func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
 		return whole, tool.Stats{Kind: tool.StatsResources}, nil
 	})
 
-	call, err := truncate.Tool(subject).Parse(`{}`)
+	call, err := truncate.Tool(subject, limitBytes).Parse(`{}`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +103,7 @@ func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
 	}
 
 	statistics := result.Stats
-	if statistics.Bytes <= 0 || statistics.Bytes > truncate.Limit || statistics.TotalBytes != int64(len(whole)) || !statistics.Truncated {
+	if statistics.Bytes <= 0 || statistics.Bytes > limitBytes || statistics.TotalBytes != int64(len(whole)) || !statistics.Truncated {
 		t.Errorf("expected returned and total output statistics, got %+v", statistics)
 	}
 }
@@ -118,7 +120,7 @@ func TestAnAttachedImagePassesThroughTheOutputCap(t *testing.T) {
 		return "image/png image", tool.Image{MediaType: "image/png", Data: []byte{1}}, tool.Stats{}, nil
 	})
 
-	call, err := truncate.Tool(subject).Parse(`{}`)
+	call, err := truncate.Tool(subject, limitBytes).Parse(`{}`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,10 +135,22 @@ func TestAnAttachedImagePassesThroughTheOutputCap(t *testing.T) {
 }
 
 func TestOutputThatFitsIsLeftAlone(t *testing.T) {
-	output := truncate.Output("hello\n")
+	output := truncate.Output("hello\n", limitBytes)
 
 	if output != "hello\n" {
 		t.Errorf("expected the output untouched, got %q", output)
+	}
+}
+
+func TestTheLimitItIsGivenIsTheOneItCutsAt(t *testing.T) {
+	t.Setenv("TMPDIR", t.TempDir())
+
+	whole := strings.Repeat("a line of text\n", 4000)
+
+	output := truncate.Output(whole, 2*1024)
+
+	if !strings.Contains(output, "truncated at 1.99K of 58.6K") {
+		t.Errorf("expected the cut at the limit it was given, got %q", output)
 	}
 }
 
@@ -145,9 +159,9 @@ func TestOutputTooBigIsCutAndSaved(t *testing.T) {
 
 	whole := strings.Repeat("a line of text\n", 4000)
 
-	output := truncate.Output(whole)
+	output := truncate.Output(whole, limitBytes)
 
-	if len(output) > truncate.Limit+300 {
+	if len(output) > limitBytes+300 {
 		t.Errorf("expected the output to be capped, got %d bytes", len(output))
 	}
 
@@ -160,7 +174,7 @@ func TestOutputTooBigIsCutAndSaved(t *testing.T) {
 		t.Fatalf("expected the whole of it saved once, got %v and %v", saved, err)
 	}
 
-	if !strings.Contains(output, "truncated at 32K of 58.6K") {
+	if !strings.Contains(output, "truncated at 12K of 58.6K") {
 		t.Errorf("expected compact byte sizes in the notice, got %q", output)
 	}
 	if !strings.Contains(output, saved[0]) {
@@ -179,7 +193,7 @@ func TestOutputTooBigIsCutAndSaved(t *testing.T) {
 
 func TestAWrappedToolKeepsItsSyntaxHighlighting(t *testing.T) {
 	subject := buildTool(newToolBuilder(t).Syntax("bash"))
-	call, err := truncate.Tool(subject).Parse(`{"size":2}`)
+	call, err := truncate.Tool(subject, limitBytes).Parse(`{"size":2}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -192,7 +206,7 @@ func TestAWrappedToolKeepsItsSyntaxHighlighting(t *testing.T) {
 
 func TestAWrappedToolKeepsItsFocusedRendering(t *testing.T) {
 	subject := buildTool(newToolBuilder(t).Focuses(func(tool.ToolCall) string { return "generate" }))
-	call, err := truncate.Tool(subject).Parse(`{"size":2}`)
+	call, err := truncate.Tool(subject, limitBytes).Parse(`{"size":2}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -204,7 +218,7 @@ func TestAWrappedToolKeepsItsFocusedRendering(t *testing.T) {
 }
 
 func TestAWrappedToolIsCapped(t *testing.T) {
-	subject := truncate.Tool(buildTool(newToolBuilder(t)))
+	subject := truncate.Tool(buildTool(newToolBuilder(t)), limitBytes)
 
 	if subject.Name() != "generate" {
 		t.Errorf("expected the name to survive, got %q", subject.Name())
@@ -233,7 +247,7 @@ func TestToolsWrapsEveryTool(t *testing.T) {
 	wrappedTools := truncate.Tools([]tool.Tool{
 		buildTool(newToolBuilder(t)),
 		buildTool(newToolBuilder(t)),
-	})
+	}, limitBytes)
 
 	if len(wrappedTools) != 2 {
 		t.Fatalf("expected both tools back, got %d", len(wrappedTools))
@@ -255,7 +269,7 @@ func TestAWrappedToolKeepsOwningItsDurableState(t *testing.T) {
 		}).
 		Run(func(context.Context, Args) (tool.ToolCallResult, error) {
 			return tool.ToolCallResult{Output: "done", State: json.RawMessage(`{"lines":2}`)}, nil
-		}))
+		}), limitBytes)
 
 	if key := subject.StateKey(); key != "generated" {
 		t.Errorf("the wrapped tool owns %q", key)

@@ -9,6 +9,9 @@ continue = "yes"
 [ui]
 stream = "line"
 
+[tool]
+output = "12K"
+
 [snippets]
 
 [model]

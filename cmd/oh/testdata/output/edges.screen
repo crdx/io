@@ -9,6 +9,7 @@ $ for do done esac fi … ✗ syntax error
 summon nothing ✓ no output
 summon plen… ✓ 900L+ ~700t (of ~321Kt)
 summon japanese ✓ 1L ~1.9Kt
+summon too … ✓ 900L+ ~4.4Kt (of ~21Kt)
 
 That is all of the awkward ones.
 === one column ===
@@ -53,6 +54,7 @@ s
 ✓
 ✓
 ✓
+✓
 
 T
 h
@@ -92,6 +94,7 @@ $ … ✗ syn…
 summon … ✓
 summon … ✓
 summon … ✓
+summon … ✓
 
 That is all
 of the
@@ -108,5 +111,6 @@ $ for do done esac fi "unclosed ✗ syntax error
 summon nothing ✓ no output
 summon plenty ✓ 900L+ ~700t (of ~321Kt)
 summon japanese ✓ 1L ~1.9Kt
+summon too much ✓ 900L+ ~4.4Kt (of ~21Kt)
 
 That is all of the awkward ones.
