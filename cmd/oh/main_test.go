@@ -762,13 +762,14 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 		t.Error("expected the queued prompt to have started a turn")
 	}
 
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+
 	if !slices.ContainsFunc(provider.messages, isReadOnlyNote) {
 		t.Errorf("expected the queued prompt to carry the mode change, got %q", provider.messages)
 	}
 
-	for report := range self.currentTurn.Events() {
-		self.takeTurn(report)
-	}
 	self.finish()
 
 	storedSession, err := store.Read(directory, log.Name())
