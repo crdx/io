@@ -9,7 +9,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/location"
-	"crdx.org/io/cmd/oh/sessionPicker"
+	"crdx.org/io/cmd/oh/sessions/picker"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
@@ -188,7 +188,7 @@ func TestTheJSONListingCarriesWhatTheTableCannot(t *testing.T) {
 }
 
 func TestATitleSpanningLinesIsFlattenedIntoOne(t *testing.T) {
-	listings := describe("/sessions", []*sessionPicker.Session{
+	listings := describe("/sessions", []*picker.Session{
 		{Name: "chewy-raven", Title: "check\nunmerged\nwork"},
 	}, false)
 

@@ -1,4 +1,4 @@
-package picker
+package menu
 
 import (
 	"bufio"
@@ -16,16 +16,16 @@ import (
 )
 
 const (
-	clearLine                 = "\r\x1b[2K"
-	hideCursor                = "\x1b[?25l"
-	showCursor                = "\x1b[?25h"
-	restorePickerPresentation = "\x1b[0m" + showCursor
+	clearLine               = "\r\x1b[2K"
+	hideCursor              = "\x1b[?25l"
+	showCursor              = "\x1b[?25h"
+	restoreMenuPresentation = "\x1b[0m" + showCursor
 )
 
 // ChooseIndex displays labels and returns the selected index.
 func ChooseIndex(terminal *os.File, output io.Writer, prompt string, labels []string) (int, error) {
 	if terminal == nil || !term.IsTerminal(int(terminal.Fd())) {
-		return 0, errors.New("picker needs an interactive terminal")
+		return 0, errors.New("menu needs an interactive terminal")
 	}
 
 	restore, err := tty.Raw(terminal, output)
@@ -34,7 +34,7 @@ func ChooseIndex(terminal *os.File, output io.Writer, prompt string, labels []st
 	}
 	defer restore()
 
-	restorePresentation, err := beginPickerPresentation(output)
+	restorePresentation, err := beginMenuPresentation(output)
 	if err != nil {
 		return 0, err
 	}
@@ -90,11 +90,11 @@ func ChooseIndex(terminal *os.File, output io.Writer, prompt string, labels []st
 	}
 }
 
-func beginPickerPresentation(output io.Writer) (func(), error) {
+func beginMenuPresentation(output io.Writer) (func(), error) {
 	if _, err := io.WriteString(output, hideCursor); err != nil {
 		return nil, err
 	}
-	return func() { _, _ = io.WriteString(output, restorePickerPresentation) }, nil
+	return func() { _, _ = io.WriteString(output, restoreMenuPresentation) }, nil
 }
 
 type menu struct {

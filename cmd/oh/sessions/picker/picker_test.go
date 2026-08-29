@@ -1,4 +1,4 @@
-package sessionPicker
+package picker
 
 import (
 	"strings"

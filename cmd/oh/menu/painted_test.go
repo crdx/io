@@ -1,4 +1,4 @@
-package picker
+package menu
 
 import (
 	"flag"
@@ -49,11 +49,11 @@ func compareWithGolden(t *testing.T, name string, drawn string) {
 	}
 
 	if drawn != string(want) {
-		t.Errorf("picker differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, drawn, want)
+		t.Errorf("menu differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, drawn, want)
 	}
 }
 
-func TestWhatAPickerPaintsMatchesTheGolden(t *testing.T) {
+func TestWhatAMenuPaintsMatchesTheGolden(t *testing.T) {
 	frames := []struct {
 		name   string
 		room   int
@@ -81,7 +81,7 @@ func TestWhatAPickerPaintsMatchesTheGolden(t *testing.T) {
 	compareWithGolden(t, "painted.ansi", output.String())
 }
 
-func TestTheCompletePickerLifecycleMatchesTheGolden(t *testing.T) {
+func TestTheCompleteMenuLifecycleMatchesTheGolden(t *testing.T) {
 	keys := make(chan key.Key, 3)
 	keys <- key.Key{Code: key.Down}
 	keys <- key.Key{Code: key.Rune, Value: 'f'}

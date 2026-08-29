@@ -12,7 +12,7 @@ import (
 	"crdx.org/duckopt/v2"
 
 	"crdx.org/io/cmd/oh/location"
-	"crdx.org/io/cmd/oh/sessionPicker"
+	"crdx.org/io/cmd/oh/sessions/picker"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/cmd/ohctl/console"
@@ -104,7 +104,7 @@ func run(options *inputOpts, output console.Output) error {
 	return writeTable(listings, output.Screen)
 }
 
-func describe(directory string, stored []*sessionPicker.Session, runningOnly bool) []Listing {
+func describe(directory string, stored []*picker.Session, runningOnly bool) []Listing {
 	listings := make([]Listing, 0, len(stored))
 	for _, storedSession := range stored {
 		if runningOnly && !storedSession.IsRunning {

@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"crdx.org/io/cmd/oh/modelPicker"
+	"crdx.org/io/cmd/oh/model/picker"
 	"crdx.org/io/cmd/oh/tty"
 )
 
@@ -28,7 +28,7 @@ func Choose(
 		return Selection{}, ErrNotLoggedIn
 	}
 
-	chosen, err := modelPicker.Choose(offered(choices, defaultEffort), terminal, screen)
+	chosen, err := picker.Choose(offered(choices, defaultEffort), terminal, screen)
 	if err != nil {
 		return Selection{}, err
 	}
@@ -62,8 +62,8 @@ func signedInto(choices []Choice, isLoggedIn func(providerName string) bool) []C
 	return available
 }
 
-func offered(choices []Choice, currentEffort string) []*modelPicker.Model {
-	models := make([]*modelPicker.Model, 0, len(choices))
+func offered(choices []Choice, currentEffort string) []*picker.Model {
+	models := make([]*picker.Model, 0, len(choices))
 
 	for _, choice := range choices {
 		efforts := orderedEfforts(choice.EffortLevels)
@@ -72,7 +72,7 @@ func offered(choices []Choice, currentEffort string) []*modelPicker.Model {
 			effort = efforts[0]
 		}
 
-		models = append(models, &modelPicker.Model{
+		models = append(models, &picker.Model{
 			Provider:            ProviderName(choice.Provider),
 			ProviderID:          choice.Provider,
 			Name:                strings.Join(DisplayName(choice.ID), " "),

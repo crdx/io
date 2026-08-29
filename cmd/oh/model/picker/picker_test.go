@@ -1,4 +1,4 @@
-package modelPicker
+package picker
 
 import (
 	"flag"
@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"crdx.org/io/cmd/oh/picker"
+	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/internal/util/strutil"
 )
 
@@ -181,7 +181,7 @@ func TestWhatTheModelPickerPaintsMatchesTheGolden(t *testing.T) {
 
 	for _, frame := range frames {
 		fmt.Fprintf(&output, "=== %s ===\n%s\n", frame.name, strutil.VisibleEscapes(
-			picker.Paint(
+			menu.Paint(
 				&modelList{models: availableModels()},
 				frame.room,
 				frame.height,

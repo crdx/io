@@ -1,4 +1,4 @@
-package picker
+package menu
 
 import (
 	"errors"
@@ -50,7 +50,7 @@ func rowsNamed(names ...string) *fakeList {
 	return &fakeList{rows: names}
 }
 
-func pickerState() *state {
+func defaultState() *state {
 	return listState(rowsNamed("first", "second", "third"), 0)
 }
 
@@ -66,28 +66,28 @@ func TestEveryWayOfAbandoningTheChoice(t *testing.T) {
 		"csi-u escape": {Code: key.Escape, Mod: key.Ctrl},
 		"ctrl+c":       {Code: key.Rune, Value: 'c', Mod: key.Ctrl},
 	} {
-		if got := pickerState().apply(keypress); got != choiceCancelled {
+		if got := defaultState().apply(keypress); got != choiceCancelled {
 			t.Errorf("%s: expected the choice to be abandoned, got %v", name, got)
 		}
 	}
 }
 
 func TestAnUnrecognisedSequenceChangesNothing(t *testing.T) {
-	if got := pickerState().apply(key.Key{Code: key.Unknown}); got != continuePicking {
+	if got := defaultState().apply(key.Key{Code: key.Unknown}); got != continuePicking {
 		t.Errorf("expected nothing to happen, got %v", got)
 	}
 }
 
 func TestPlainLettersAreNotACancellation(t *testing.T) {
 	for _, value := range []rune{'a', 'c', 'q', 'Q'} {
-		if got := pickerState().apply(key.Key{Code: key.Rune, Value: value}); got != continuePicking {
+		if got := defaultState().apply(key.Key{Code: key.Rune, Value: value}); got != continuePicking {
 			t.Errorf("%q: expected nothing to happen, got %v", value, got)
 		}
 	}
 }
 
 func TestTheCursorStopsAtEitherEnd(t *testing.T) {
-	self := pickerState()
+	self := defaultState()
 
 	for range 5 {
 		self.apply(key.Key{Code: key.Up})

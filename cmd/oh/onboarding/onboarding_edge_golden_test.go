@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/model"
-	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/style"
 )
 
@@ -47,7 +47,7 @@ func TestOnboardingEdgeCasesMatchTheGoldens(t *testing.T) {
 			harry := wizard{
 				output: output,
 				choose: func(prompt string, labels []string) (int, error) {
-					_, _ = output.WriteString(picker.RenderMenu(prompt, labels, 0))
+					_, _ = output.WriteString(menu.RenderMenu(prompt, labels, 0))
 					choiceIndex++
 					if choiceIndex == 2 {
 						return 0, ErrCancelled

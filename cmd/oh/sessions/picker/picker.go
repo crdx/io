@@ -1,4 +1,4 @@
-package sessionPicker
+package picker
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"crdx.org/io/cmd/oh/picker"
+	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/strutil"
@@ -43,7 +43,7 @@ func (self *Session) Messages() int { return self.MessageCount }
 func Choose(sessions []*Session, terminal *os.File, screen io.Writer) (*Session, error) {
 	rows := &sessionList{sessions: sessions}
 
-	chosen, err := picker.Choose(rows, terminal, screen)
+	chosen, err := menu.Choose(rows, terminal, screen)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (self *sessionList) Text(index int) string {
 }
 
 func (self *sessionList) ColumnHeader(room int) string {
-	return picker.Columns(
+	return menu.Columns(
 		leftColumns(strings.Repeat(" ", markWidth), "Agent", "Title"),
 		sessionColumns("Model", "Effort", "Messages", "Length", "Last Message", room),
 		room,
@@ -96,9 +96,9 @@ func (self *sessionList) Row(index int, isChosen bool, room int) string {
 }
 
 func row(storedSession *Session, isChosen bool, room int) string {
-	prefix := picker.Mark(isChosen) + " "
+	prefix := menu.Mark(isChosen) + " "
 	left := leftColumns(prefix, sessionAnimal(storedSession), sessionTitle(storedSession))
-	return picker.Columns(
+	return menu.Columns(
 		left,
 		sessionColumns(
 			strutil.OrDash(storedSession.Model),
@@ -113,7 +113,7 @@ func row(storedSession *Session, isChosen bool, room int) string {
 }
 
 func leftColumns(prefix string, animal string, title string) string {
-	return prefix + picker.Pad(animal, animalColumn) + strings.Repeat(" ", picker.ColumnGap) + title
+	return prefix + menu.Pad(animal, animalColumn) + strings.Repeat(" ", menu.ColumnGap) + title
 }
 
 func sessionColumns(model string, effort string, messages string, length string, lastMessage string, room int) string {
@@ -128,11 +128,11 @@ func sessionColumns(model string, effort string, messages string, length string,
 	)
 
 	if room >= roomForModel {
-		named := picker.Pad(model, modelColumn) +
-			strings.Repeat(" ", picker.ColumnGap) +
-			fmt.Sprintf("%*s", picker.EffortColumn, effort)
+		named := menu.Pad(model, modelColumn) +
+			strings.Repeat(" ", menu.ColumnGap) +
+			fmt.Sprintf("%*s", menu.EffortColumn, effort)
 
-		counted = named + strings.Repeat(" ", picker.ColumnGap) + counted
+		counted = named + strings.Repeat(" ", menu.ColumnGap) + counted
 	}
 
 	return counted

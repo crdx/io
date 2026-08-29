@@ -1,4 +1,4 @@
-package modelPicker
+package picker
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"crdx.org/io/cmd/oh/picker"
+	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/util"
 )
@@ -30,7 +30,7 @@ type Model struct {
 }
 
 func Choose(models []*Model, terminal *os.File, screen io.Writer) (*Model, error) {
-	chosen, err := picker.Choose(&modelList{models: models}, terminal, screen)
+	chosen, err := menu.Choose(&modelList{models: models}, terminal, screen)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (self *modelList) Row(index int, isChosen bool, room int) string {
 
 func modelRow(model *Model, isChosen bool, room int) (string, string) {
 	return modelColumns(
-		picker.Mark(isChosen),
+		menu.Mark(isChosen),
 		model.Provider,
 		model.Name,
 		model.Effort,
@@ -107,16 +107,16 @@ func modelColumns(
 	room int,
 ) (string, string) {
 	columns := []string{
-		picker.Pad(providerName, providerColumn),
-		picker.Pad(name, nameColumn),
-		picker.Pad(effort, picker.EffortColumn),
+		menu.Pad(providerName, providerColumn),
+		menu.Pad(name, nameColumn),
+		menu.Pad(effort, menu.EffortColumn),
 		fmt.Sprintf("%*s", contextColumn, context),
 	}
 
-	gap := strings.Repeat(" ", picker.ColumnGap)
-	described := picker.Clip(prefix+" "+strings.Join(columns, gap)+gap, room)
+	gap := strings.Repeat(" ", menu.ColumnGap)
+	described := menu.Clip(prefix+" "+strings.Join(columns, gap)+gap, room)
 
-	return described, picker.Clip(identifier, min(identifierColumn, room-style.Width(described)))
+	return described, menu.Clip(identifier, min(identifierColumn, room-style.Width(described)))
 }
 
 func contextWindow(tokens int) string {

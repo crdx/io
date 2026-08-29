@@ -15,8 +15,8 @@ import (
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/location"
+	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/model"
-	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/internal/browser"
 	"crdx.org/io/provider/anthropic"
@@ -25,7 +25,7 @@ import (
 )
 
 // ErrCancelled means the user left onboarding without choosing a model.
-var ErrCancelled = picker.ErrCancelled
+var ErrCancelled = menu.ErrCancelled
 
 const (
 	chatGPTName    = "ChatGPT"
@@ -70,7 +70,7 @@ func PrepareConfig(options Options) (config.Config, error) {
 	harry := wizard{
 		output: options.Output,
 		choose: func(prompt string, labels []string) (int, error) {
-			return picker.ChooseIndex(options.Input, options.Output, prompt, labels)
+			return menu.ChooseIndex(options.Input, options.Output, prompt, labels)
 		},
 		login:       login(options.Input, options.Output),
 		openBrowser: browser.Open,
@@ -107,7 +107,7 @@ func Login(providerName string, terminal *os.File, output io.Writer) error {
 	harry := wizard{
 		output: output,
 		choose: func(prompt string, labels []string) (int, error) {
-			return picker.ChooseIndex(terminal, output, prompt, labels)
+			return menu.ChooseIndex(terminal, output, prompt, labels)
 		},
 		login:       login(terminal, output),
 		openBrowser: browser.Open,

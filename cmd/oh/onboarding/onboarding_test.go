@@ -11,8 +11,8 @@ import (
 
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/link"
+	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/model"
-	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/style"
 )
 
@@ -33,7 +33,7 @@ func TestFirstRunOnboardingMatchesTheGolden(t *testing.T) {
 		choose: func(prompt string, labels []string) (int, error) {
 			chosen := choices[choiceIndex]
 			choiceIndex++
-			_, err := output.WriteString(picker.RenderMenu(prompt, labels, chosen))
+			_, err := output.WriteString(menu.RenderMenu(prompt, labels, chosen))
 			return chosen, err
 		},
 		login: func(chosen provider, presentAddress func(string)) error {

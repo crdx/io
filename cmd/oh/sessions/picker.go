@@ -10,9 +10,9 @@ import (
 	"slices"
 	"strings"
 
+	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/model"
-	"crdx.org/io/cmd/oh/picker"
-	"crdx.org/io/cmd/oh/sessionPicker"
+	"crdx.org/io/cmd/oh/sessions/picker"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/session"
@@ -35,8 +35,8 @@ func Choose(directory string, workspaceDir string, terminal *os.File, screen io.
 		return "", errors.New("there are no stored conversations for this workspace")
 	}
 
-	chosenSession, err := sessionPicker.Choose(sessions, terminal, screen)
-	if errors.Is(err, picker.ErrCancelled) {
+	chosenSession, err := picker.Choose(sessions, terminal, screen)
+	if errors.Is(err, menu.ErrCancelled) {
 		return "", nil
 	}
 	if err != nil {
@@ -55,8 +55,8 @@ func ResolveWorkspaceDir() (string, error) {
 	return workspaceDir, nil
 }
 
-func InWorkspace(sessions []*sessionPicker.Session, workspaceDir string) []*sessionPicker.Session {
-	chosen := make([]*sessionPicker.Session, 0, len(sessions))
+func InWorkspace(sessions []*picker.Session, workspaceDir string) []*picker.Session {
+	chosen := make([]*picker.Session, 0, len(sessions))
 	for _, storedSession := range sessions {
 		if filepath.Clean(storedSession.WorkspaceDir) == workspaceDir {
 			chosen = append(chosen, storedSession)
@@ -95,13 +95,13 @@ func RefreshListings(directory string, screen io.Writer) error {
 	return nil
 }
 
-func Load(directory string) ([]*sessionPicker.Session, error) {
+func Load(directory string) ([]*picker.Session, error) {
 	entries, err := session.Entries(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	sessions := make([]*sessionPicker.Session, 0, len(entries))
+	sessions := make([]*picker.Session, 0, len(entries))
 	for _, entry := range entries {
 		isRunning, err := session.IsInUse(directory, entry.Name)
 		if err != nil {
@@ -125,7 +125,7 @@ func Load(directory string) ([]*sessionPicker.Session, error) {
 			continue
 		}
 
-		sessions = append(sessions, &sessionPicker.Session{
+		sessions = append(sessions, &picker.Session{
 			Name:         storedMeta.Name,
 			WorkspaceDir: data.WorkspaceDir,
 			Started:      storedMeta.Started,
@@ -139,7 +139,7 @@ func Load(directory string) ([]*sessionPicker.Session, error) {
 		})
 	}
 
-	slices.SortFunc(sessions, func(first, second *sessionPicker.Session) int {
+	slices.SortFunc(sessions, func(first, second *picker.Session) int {
 		if order := second.Touched.Compare(first.Touched); order != 0 {
 			return order
 		}

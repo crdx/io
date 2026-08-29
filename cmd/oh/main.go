@@ -28,11 +28,11 @@ import (
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/location"
+	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/onboarding"
 	"crdx.org/io/cmd/oh/output"
-	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/sessions"
@@ -188,7 +188,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		var chosenModel model.Selection
 		var err error
 		startup.Wait(func() { chosenModel, err = model.Choose(modelCachePath, backend.IsLoggedIn, os.Stdin, os.Stdout) })
-		if errors.Is(err, picker.ErrCancelled) {
+		if errors.Is(err, menu.ErrCancelled) {
 			return "", nil
 		}
 		if err != nil {
@@ -306,7 +306,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			selection, err = model.ChooseWhenNoneSelected(err, modelCachePath, backend.IsLoggedIn, os.Stdin, os.Stdout)
 		})
 	}
-	if errors.Is(err, picker.ErrCancelled) {
+	if errors.Is(err, menu.ErrCancelled) {
 		return "", nil
 	}
 	if err != nil {

@@ -1,4 +1,4 @@
-package picker
+package menu
 
 import (
 	"bytes"
@@ -18,19 +18,19 @@ func TestMenuRenderingReturnsEveryLineToColumnZero(t *testing.T) {
 	}
 }
 
-func TestPickerPresentationAlwaysRestoresTheCursorAndStyle(t *testing.T) {
+func TestMenuPresentationAlwaysRestoresTheCursorAndStyle(t *testing.T) {
 	var output bytes.Buffer
-	restore, err := beginPickerPresentation(&output)
+	restore, err := beginMenuPresentation(&output)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if output.String() != hideCursor {
-		t.Errorf("picker began with %q", output.String())
+		t.Errorf("menu began with %q", output.String())
 	}
 
 	restore()
-	want := hideCursor + restorePickerPresentation
+	want := hideCursor + restoreMenuPresentation
 	if output.String() != want {
-		t.Errorf("picker lifecycle wrote %q, want %q", output.String(), want)
+		t.Errorf("menu lifecycle wrote %q, want %q", output.String(), want)
 	}
 }

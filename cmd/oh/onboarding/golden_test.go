@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/link"
+	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/model"
-	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/oauth"
 )
@@ -216,7 +216,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 			harry := wizard{
 				output: output,
 				choose: func(prompt string, labels []string) (int, error) {
-					if _, err := output.WriteString(picker.RenderMenu(prompt, labels, 0)); err != nil {
+					if _, err := output.WriteString(menu.RenderMenu(prompt, labels, 0)); err != nil {
 						return 0, err
 					}
 					return 0, ErrCancelled
@@ -298,7 +298,7 @@ func menuChoices(output *bytes.Buffer, choices ...int) func(string, []string) (i
 	return func(prompt string, labels []string) (int, error) {
 		chosen := choices[choiceIndex]
 		choiceIndex++
-		_, err := output.WriteString(picker.RenderMenu(prompt, labels, chosen))
+		_, err := output.WriteString(menu.RenderMenu(prompt, labels, chosen))
 		return chosen, err
 	}
 }

@@ -45,11 +45,11 @@ import (
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/location"
+	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/painter"
-	"crdx.org/io/cmd/oh/picker"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/segment"
@@ -66,8 +66,8 @@ import (
 	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnTimer"
 	"crdx.org/io/cmd/oh/segment/workspaceDir"
-	"crdx.org/io/cmd/oh/sessionPicker"
 	"crdx.org/io/cmd/oh/sessions"
+	"crdx.org/io/cmd/oh/sessions/picker"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/slash"
@@ -1394,7 +1394,7 @@ func addWireLifecycleFeatures(features map[string]struct{}, provider string, pay
 }
 
 func TestPickerMenuAlignmentMatchesTheGolden(t *testing.T) {
-	stream := picker.RenderMenu("Choose your provider:", []string{"ChatGPT", "Anthropic", "OpenCode Go"}, 0)
+	stream := menu.RenderMenu("Choose your provider:", []string{"ChatGPT", "Anthropic", "OpenCode Go"}, 0)
 	compareWithGolden(t, "picker-menu", ".ansi", map[string]func() string{
 		"initial frame": func() string { return stream },
 	})
@@ -3650,11 +3650,11 @@ func TestPick(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	chosenSession, err := sessionPicker.Choose(sessions, os.Stdin, os.Stdout)
+	chosenSession, err := picker.Choose(sessions, os.Stdin, os.Stdout)
 	screen := output.New(os.Stdout)
 
 	switch {
-	case errors.Is(err, picker.ErrCancelled):
+	case errors.Is(err, menu.ErrCancelled):
 		screen.Line(style.Cancelled("nothing was chosen"))
 	case err != nil:
 		t.Fatal(err)
