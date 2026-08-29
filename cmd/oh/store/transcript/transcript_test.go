@@ -37,6 +37,29 @@ func TestTranscriptPreservesReasoningFormatting(t *testing.T) {
 	}
 }
 
+func TestTranscriptRoundsShortElapsedTimesToTenths(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	startedAt := time.Unix(1, 0)
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: startedAt, Model: "model"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(startedAt.Add(50*time.Millisecond), agent.Event{Kind: agent.ModelMessageEvent, Text: "answer"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(stored), "## Assistant · +0.1s") {
+		t.Errorf("short elapsed time was not rendered to tenths:\n%s", stored)
+	}
+}
+
 func TestTranscriptNamesACallInItsHeadingAndReadsItsMeasurementsOut(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
 	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", Started: time.Unix(1, 2), Model: "model"})

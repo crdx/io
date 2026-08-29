@@ -15,19 +15,19 @@
 wait beyond the request deadline
 ```
 
-## Failure · +0.1s
+## Failure · +0s
 
 ```
 context deadline exceeded
 ```
 
-## User · +0.1s
+## User · +0s
 
 ```
 continue after the timeout
 ```
 
-## Assistant · +0.1s
+## Assistant · +0s
 
 ```
 Resumed.

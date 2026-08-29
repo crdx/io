@@ -15,25 +15,25 @@
 start a tool call, then wait beyond the request deadline
 ```
 
-## Reasoning · +0.1s
+## Reasoning · +0s
 
 ```
 Prepare the tool call.
 ```
 
-## Failure · +0.1s
+## Failure · +0s
 
 ```
 context deadline exceeded
 ```
 
-## User · +0.1s
+## User · +0s
 
 ```
 continue after the transport timeout
 ```
 
-## Assistant · +0.1s
+## Assistant · +0s
 
 ```
 Resumed.

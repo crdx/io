@@ -7617,6 +7617,7 @@ var (
 	transcriptStartedPattern  = regexp.MustCompile(`(?m)^- \*\*Started:\*\* ` + "`[^`]+`$")
 	transcriptEventPattern    = regexp.MustCompile(`(?m)^> [^\n]+$`)
 	transcriptDurationPattern = regexp.MustCompile(`(?m)^- \*\*Duration:\*\* ` + "`[^`]+`$")
+	transcriptElapsedPattern  = regexp.MustCompile(`(?m)(^## .+ · )\+[^ \n]+$`)
 )
 
 func canonicalSessionTranscript(transcript string, sessionName string) string {
@@ -7626,6 +7627,7 @@ func canonicalSessionTranscript(transcript string, sessionName string) string {
 		"- **Started:** `"+transcriptTime.Format(time.RFC3339Nano)+"`",
 	)
 	canonical = transcriptDurationPattern.ReplaceAllString(canonical, "- **Duration:** `0s`")
+	canonical = transcriptElapsedPattern.ReplaceAllString(canonical, "${1}+0s")
 
 	eventIndex := 0
 	return transcriptEventPattern.ReplaceAllStringFunc(canonical, func(string) string {
@@ -7633,6 +7635,13 @@ func canonicalSessionTranscript(transcript string, sessionName string) string {
 		eventIndex++
 		return "> " + when.Format(time.RFC3339Nano)
 	})
+}
+
+func TestCanonicalTranscriptElapsedTimeDoesNotDependOnTestExecutionSpeed(t *testing.T) {
+	transcript := "## Assistant · +0.1s\n"
+	if got := canonicalSessionTranscript(transcript, "session"); got != "## Assistant · +0s\n" {
+		t.Errorf("got %q", got)
+	}
 }
 
 type faultingConversationLog struct {
