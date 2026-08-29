@@ -8,29 +8,21 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## Startup
+## Startup · +0s
 
-> 2001-01-01T00:00:00Z
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +1s
 
 ```
 show the customer data model
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +2s
 
 ```
 Sketching the data model.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:03Z
+## Assistant · +3s
 
 ````
 # Customer orders

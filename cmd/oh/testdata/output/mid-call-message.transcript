@@ -8,133 +8,59 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 read the renderer and tell me what it does
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:01Z
+## Reasoning · +1s
 
 ```
 Reading the renderer before saying anything about it.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +2s
 
 ```
 Reading it now.
 ```
 
-## Tool call
+## Tool call — read · `cmd/oh/line/render.go` · +3s
 
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_1`
-- **Name:** `read`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"path":"cmd/oh/line/render.go"}
-```
-
-**Subject**
-
-```
-cmd/oh/line/render.go
-```
-
-## Notice
-
-> 2001-01-01T00:00:04Z
-
-- **Status:** `warning`
+## Notice · warning · +4s
 
 ```
 The turn was interrupted.
 ```
 
-## User
-
-> 2001-01-01T00:00:05Z
+## User · +5s
 
 ```
 never mind, what is in target.txt?
 ```
 
-## Tool call
+## Tool call — read · `target.txt` · +6s
 
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_2`
-- **Name:** `read`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"path":"target.txt"}
-```
-
-**Subject**
-
-```
-target.txt
-```
-
-## Tool result
-
-> 2001-01-01T00:00:07Z
-
-- **ID:** `call_2`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":1,"bytes":4,"total_bytes":4}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 4B · +7s
 
 ```
 one
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:08Z
+## Assistant · +8s
 
 ```
 It holds the word `one`, and nothing else.
 ```
 
-## Notice
-
-> 2001-01-01T00:00:09Z
-
-- **Status:** `warning`
+## Notice · warning · +9s
 
 ```
 Background processes killed (sleep).
 ```
 
-## Notice
-
-> 2001-01-01T00:00:10Z
-
-- **Status:** `error`
+## Notice · error · +10s
 
 ```
 the conversation could not be stored: no space left on device

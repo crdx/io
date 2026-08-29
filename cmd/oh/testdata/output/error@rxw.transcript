@@ -8,21 +8,15 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## Startup
+## Startup · +0s
 
-> 2001-01-01T00:00:00Z
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +1s
 
 ```
 have a look at that
 ```
 
-## Failure
-
-> 2001-01-01T00:00:02Z
+## Failure · +2s
 
 ```
 {

@@ -8,210 +8,46 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 run a multiline command and notify me when it finishes
 ```
 
-## Tool call
+## Tool call — bash (stale qualifier) · `stale shell rendering` · +1s
 
-> 2001-01-01T00:00:01Z
-
-- **ID:** `call_1`
-- **Name:** `bash`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{"command":"for NAME in alpha beta; do\\n  echo \\"$NAME\\"\\ndone"}
-```
-
-**Subject**
-
-```
-stale shell rendering
-```
-
-**Qualifier**
-
-```
-stale qualifier
-```
-
-## Tool result
-
-> 2001-01-01T00:00:02Z
-
-- **ID:** `call_1`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","lines":2,"bytes":11,"total_bytes":11}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 2 lines, 11B · +2s
 
 ```
 alpha
 beta
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+## Tool call — notify (stale notification message) · `stale notification title` · +3s
 
-## Tool call
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_2`
-- **Name:** `notify`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{"title":"command finished","message":"alpha and beta were printed","icon":"success"}
-```
-
-**Subject**
-
-```
-stale notification title
-```
-
-**Qualifier**
-
-```
-stale notification message
-```
-
-## Tool result
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_2`
-- **Name:** `notify`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":17,"total_bytes":17}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 17B · +4s
 
 ```
 notified the user
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+## Tool call — web_search (stale search qualifier) · `stale search rendering` · +5s
 
-## Tool call
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_3`
-- **Name:** `web_search`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{"query":"how to quote a shell variable"}
-```
-
-**Subject**
-
-```
-stale search rendering
-```
-
-**Qualifier**
-
-```
-stale search qualifier
-```
-
-## Tool result
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_3`
-- **Name:** `web_search`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":63,"total_bytes":63}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 63B · +6s
 
 ```
 Quote it as "$NAME", per [the bash manual](https://gnu.org/bash).
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+## Tool call — web_fetch (stale fetch qualifier) · `stale fetch rendering` · +7s
 
-## Tool call
-
-> 2001-01-01T00:00:07Z
-
-- **ID:** `call_4`
-- **Name:** `web_fetch`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{"url":"https://gnu.org/bash","type":"clean_html"}
-```
-
-**Subject**
-
-```
-stale fetch rendering
-```
-
-**Qualifier**
-
-```
-stale fetch qualifier
-```
-
-## Tool result
-
-> 2001-01-01T00:00:08Z
-
-- **ID:** `call_4`
-- **Name:** `web_fetch`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":16,"total_bytes":16}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 16B · +8s
 
 ```
 <p>Quote it.</p>
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:09Z
+## Assistant · +9s
 
 ```
 done.

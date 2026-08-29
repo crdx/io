@@ -8,159 +8,53 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## Startup
+## Startup · +0s
 
-> 2001-01-01T00:00:00Z
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +1s
 
 ```
 have a look at that
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +2s
 
 ```
 Looking for where the prompt is drawn.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:03Z
+## Assistant · +3s
 
 ```
 I'll have a look at how the editor draws its prompt.
 ```
 
-## Tool call
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_2`
-- **Name:** `grep`
-- **Read only:** `true`
-- **Emphasis:** `syntax regexp`
-
-**Arguments**
-
-```json
-{"pattern":"prompt","glob":"*.go"}
-```
-
-**Subject**
+## Tool call — grep (*.go) · +4s
 
 ```regexp
 prompt
 ```
 
-**Qualifier**
-
-```
-*.go
-```
-
-## State
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_2`
-- **Name:** `file_read`
-
-**State**
-
-```json
-{"files":[{"path":"cmd/oh/line/render.go","sha256":"20a0815670f99c0a9de02e0e66948fb6ee69dc76dcc0a8e4ffa8b81c110be52b"}]}
-```
-
-## Tool result
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_2`
-- **Name:** `grep`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":44,"total_bytes":44}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 44B · +6s
 
 ```
 cmd/oh/line/render.go:4:\treturn "the prompt"
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Reasoning
-
-> 2001-01-01T00:00:07Z
+## Reasoning · +7s
 
 ```
 The prompt is drawn by the renderer, so that is the file to read.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:08Z
+## Assistant · +8s
 
 ```
 Found it. Reading the renderer now.
 ```
 
-## Tool call
+## Tool call — read · `cmd/oh/line/render.go` · +9s
 
-> 2001-01-01T00:00:09Z
-
-- **ID:** `call_4`
-- **Name:** `read`
-- **Read only:** `true`
-- **Emphasis:** `focus render.go`
-
-**Arguments**
-
-```json
-{"path":"cmd/oh/line/render.go"}
-```
-
-**Subject**
-
-```
-cmd/oh/line/render.go
-```
-
-## State
-
-> 2001-01-01T00:00:10Z
-
-- **ID:** `call_4`
-- **Name:** `file_read`
-
-**State**
-
-```json
-{"files":[{"path":"cmd/oh/line/render.go","sha256":"20a0815670f99c0a9de02e0e66948fb6ee69dc76dcc0a8e4ffa8b81c110be52b"}]}
-```
-
-## Tool result
-
-> 2001-01-01T00:00:11Z
-
-- **ID:** `call_4`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":5,"bytes":60}
-```
+→ success, 5 lines, 60B · +11s
 
 **Output preview (first 3 lines, up to 1 KiB)**
 
@@ -170,11 +64,13 @@ package line
 func layout() string {
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+Full output, from the session directory:
 
-## Assistant
+```sh
+jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_4") | .event.text' session.jsonl
+```
 
-> 2001-01-01T00:00:12Z
+## Assistant · +12s
 
 ```
 The prompt is drawn by `layout`, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.

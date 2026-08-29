@@ -7,96 +7,45 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 send another message while the tool is working
 ```
 
-## Tool call
+## Tool call — work · `work` · +0s
 
-> 2001-01-01T00:00:02Z
-
-- **ID:** `call-1`
-- **Name:** `work`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{}
-```
-
-**Subject**
-
-```
-work
-```
-
-## Tool result
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call-1`
-- **Name:** `work`
-- **Status:** `cancelled`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":67,"total_bytes":67}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ cancelled, 1 line, 67B · +0s
 
 ```
 the call was stopped after 3s because the user sent another message
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Interrupted
-
-> 2001-01-01T00:00:04Z
+## Interrupted · +0s
 
 The turn was interrupted because the user sent another message.
 
-## User
-
-> 2001-01-01T00:00:05Z
+## User · +0s
 
 ```
 stop that and read the file instead
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:06Z
+## Assistant · +0s
 
 ```
 Reading it instead.
 ```
 
-## User
-
-> 2001-01-01T00:00:07Z
+## User · +0s
 
 ```
 why did you stop the first one
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:08Z
+## Assistant · +0s
 
 ```
 You sent another message while it was running.

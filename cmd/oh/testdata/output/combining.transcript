@@ -8,25 +8,19 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 what does the accented file say? 🖊
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:01Z
+## Reasoning · +1s
 
 ```
 Reading the file with the combining marks in its name.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +2s
 
 ```
 The name is written `café` rather than `café`, so the accent is a mark of its own.
@@ -37,9 +31,7 @@ Combining marks pile up too: á̂̃̄ is one letter under four of them.
 
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:03Z
+## Assistant · +3s
 
 ```
 A styled wide rune has nowhere to go in one column: `日本` in code, **中文** in bold.

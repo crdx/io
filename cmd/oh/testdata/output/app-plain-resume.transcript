@@ -7,39 +7,27 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 say something
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +0s
 
 ```
 Said it.
 ```
 
-## User
-
-> 2001-01-01T00:00:03Z
+## User · +0s
 
 ```
 carry on
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:04Z
+## Assistant · +0s
 
 ```
 Said it.

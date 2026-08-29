@@ -7,81 +7,34 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 interrupt while the tool is working
 ```
 
-## Tool call
+## Tool call — work · `work` · +0s
 
-> 2001-01-01T00:00:02Z
-
-- **ID:** `toolu_1`
-- **Name:** `work`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{}
-```
-
-**Subject**
-
-```
-work
-```
-
-## Tool result
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `toolu_1`
-- **Name:** `work`
-- **Status:** `cancelled`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":2,"bytes":88,"total_bytes":88}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ cancelled, 2 lines, 88B · +0s
 
 ```
 compiling agent
 note: the command was stopped after 12s because the user pressed escape.
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Interrupted
-
-> 2001-01-01T00:00:04Z
+## Interrupted · +0s
 
 The turn was interrupted because the user pressed escape.
 
-## User
-
-> 2001-01-01T00:00:05Z
+## User · +0s
 
 ```
 what did it manage to do
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:06Z
+## Assistant · +0s
 
 ```
 It compiled the agent and then stopped.

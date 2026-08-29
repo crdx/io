@@ -8,28 +8,20 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 show terminal-active text safely
 ```
 
-## Notice
-
-> 2001-01-01T00:00:01Z
-
-- **Status:** `info`
+## Notice · info · +1s
 
 ```
 notice before\e[2J\e[H after
 second\tline\x07
 ```
 
-## Failure
-
-> 2001-01-01T00:00:02Z
+## Failure · +2s
 
 ```
 failure before\e]2;stolen title\x07 after

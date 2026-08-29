@@ -8,258 +8,72 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 do one of everything so I can see what each call says about itself
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:01Z
+## Assistant · +1s
 
 ```
 One of each, then.
 ```
 
-## Tool call
-
-> 2001-01-01T00:00:02Z
-
-- **ID:** `call_1`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command":"COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT"}
-```
-
-**Subject**
+## Tool call — bash · +2s
 
 ```bash
 COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT
 ```
 
-## Tool result
+→ success, 3 lines, 96B, 2.4s CPU, 700M peak · +3s
 
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_1`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":2400000000,"peak_memory":734003200,"lines":3,"bytes":96,"total_bytes":96}
-```
-
-## Tool call
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_2`
-- **Name:** `ls`
-- **Read only:** `true`
-
-**Arguments**
+## Tool call — ls · +4s
 
 ```json
 {"path":"."}
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_2`
-- **Name:** `ls`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"list","lines":2}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 2 lines · +5s
 
 ```
 README.md
 screen.go
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+## Tool call — read · `diagram.png` · +6s
 
-## Tool call
+→ success, 180K, ~1.6Kt · +7s
 
-> 2001-01-01T00:00:06Z
+## Tool call — edit · `screen.go` · +8s
 
-- **ID:** `call_3`
-- **Name:** `read`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"path":"diagram.png"}
-```
-
-**Subject**
-
-```
-diagram.png
-```
-
-## Tool result
-
-> 2001-01-01T00:00:07Z
-
-- **ID:** `call_3`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"image","bytes":184320,"estimated_tokens":1580}
-```
-
-## Tool call
-
-> 2001-01-01T00:00:08Z
-
-- **ID:** `call_4`
-- **Name:** `edit`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{"path":"screen.go","old_text":"cursor","new_text":"caret"}
-```
-
-**Subject**
-
-```
-screen.go
-```
-
-## Tool result
-
-> 2001-01-01T00:00:09Z
-
-- **ID:** `call_4`
-- **Name:** `edit`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"diff","added":12,"removed":5}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, +12 −5 · +9s
 
 ```
 edited screen.go
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool call
-
-> 2001-01-01T00:00:10Z
-
-- **ID:** `call_5`
-- **Name:** `grep`
-- **Read only:** `true`
-- **Emphasis:** `syntax regexp`
-
-**Arguments**
-
-```json
-{"pattern":"^func\\\\s+(New|Draw)[A-Z]\\\\w{2,8}\\\\(","glob":"*.go"}
-```
-
-**Subject**
+## Tool call — grep · +10s
 
 ```regexp
 ^func\\s+(New|Draw)[A-Z]\\w{2,8}\\(
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:11Z
-
-- **ID:** `call_5`
-- **Name:** `grep`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"search","lines":7,"bytes":240,"total_bytes":9600,"truncated":true}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 7 lines, 240B of 9.38K, truncated · +11s
 
 ```
 screen.go:3:var spinner
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+## Tool call — read · `README.md` · +12s
 
-## Tool call
-
-> 2001-01-01T00:00:12Z
-
-- **ID:** `call_6`
-- **Name:** `read`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"path":"README.md"}
-```
-
-**Subject**
-
-```
-README.md
-```
-
-## Tool result
-
-> 2001-01-01T00:00:13Z
-
-- **ID:** `call_6`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":3,"bytes":52,"total_bytes":52,"estimated_tokens":13}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 3 lines, 52B, ~100t · +13s
 
 ```
 # The Workspace
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:14Z
+## Assistant · +14s
 
 ````
 Here is a script, and a pattern beside it:
@@ -277,9 +91,7 @@ done
 
 ````
 
-## Assistant
-
-> 2001-01-01T00:00:15Z
+## Assistant · +15s
 
 ```
 That is one call of every kind the harness knows how to measure.

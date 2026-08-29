@@ -7,47 +7,33 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 stop against a model limit
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Failure
-
-> 2001-01-01T00:00:03Z
+## Failure · +0s
 
 ```
 the response was cut short
 ```
 
-## User
-
-> 2001-01-01T00:00:04Z
+## User · +0s
 
 ```
 continue after the first response
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:05Z
+## Assistant · +0s
 
 ```
 Resumed.

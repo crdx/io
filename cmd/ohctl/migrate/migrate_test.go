@@ -404,7 +404,7 @@ func TestTheTranscriptIsWrittenAgainFromTheCarriedJournal(t *testing.T) {
 		t.Error("expected the transcript to be written again rather than left as it was")
 	}
 
-	if !strings.Contains(string(written), "Emphasis") {
+	if !strings.Contains(string(written), "draw.go") {
 		t.Errorf("expected the transcript to say what the migrated journal says, got %s", written)
 	}
 }

@@ -1,7 +1,6 @@
 package transcript
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
@@ -12,6 +11,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
 )
@@ -19,9 +19,21 @@ import (
 const (
 	toolResultPreviewLines = 3
 	toolResultPreviewBytes = 1 << 10
+
+	formattedBytePrecision = 3
+	maximumInlineSubject   = 120
+
+	partSeparator = " · "
+	resultArrow   = "→ "
+
+	patience    = 5 * time.Second
+	noTimeAtAll = "0s"
 )
 
-var safeSyntax = regexp.MustCompile(`^[A-Za-z0-9_+.-]+$`)
+var (
+	safeSyntax = regexp.MustCompile(`^[A-Za-z0-9_+.-]+$`)
+	safeID     = regexp.MustCompile(`^[A-Za-z0-9_.:|-]+$`)
+)
 
 // Meta identifies the conversation rendered into a transcript.
 type Meta struct {
@@ -31,7 +43,9 @@ type Meta struct {
 
 // Recorder appends conversation events as Markdown.
 type Recorder struct {
-	file *os.File
+	file       *os.File
+	started    time.Time
+	lastCallID string
 }
 
 // Open opens or creates a Markdown transcript.
@@ -40,7 +54,7 @@ func Open(path string, meta Meta) (*Recorder, error) {
 	if err != nil {
 		return nil, err
 	}
-	recorder := &Recorder{file: file}
+	recorder := &Recorder{file: file, started: meta.Started}
 	info, err := file.Stat()
 	if err != nil {
 		_ = file.Close()
@@ -61,83 +75,176 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 	if self.file == nil {
 		return os.ErrClosed
 	}
+	if event.Kind == agent.StateChangeEvent {
+		return nil
+	}
+
+	answersTheCallAbove := event.Kind == agent.ToolCallResultEvent && event.ID != "" && event.ID == self.lastCallID
+	self.lastCallID = ""
+	if event.Kind == agent.ToolCallRequestEvent {
+		self.lastCallID = event.ID
+	}
+
 	var output document
-	output.paragraph("## " + title(event.Kind))
-	output.paragraph("> " + at.UTC().Format(time.RFC3339Nano))
+	if answersTheCallAbove {
+		output.paragraph(joinParts(resultArrow+outcome(event), self.offset(at)))
+	} else {
+		output.paragraph("## " + joinParts(append(heading(event), self.offset(at))...))
+	}
 
 	switch event.Kind {
-	case agent.UserMessageEvent, agent.ModelReasoningEvent, agent.ModelMessageEvent:
-		output.fence(event.Text, "")
-	case agent.HarnessMessageEvent:
-		output.field("Status", string(event.Status))
+	case agent.UserMessageEvent, agent.ModelReasoningEvent, agent.ModelMessageEvent, agent.HarnessMessageEvent, agent.FailureEvent:
 		output.fence(event.Text, "")
 	case agent.ToolCallRequestEvent:
-		output.field("ID", event.ID)
-		output.field("Name", event.Name)
-		output.flag("Read only", event.ReadOnly)
-		output.field("Emphasis", describeEmphasis(event.Emphasis))
-		if event.Arguments != "" {
-			output.paragraph("**Arguments**")
+		if event.Subject != "" && inlineSubject(event) == "" {
+			output.fence(event.Subject, emphasisLanguage(event.Emphasis))
+		} else if event.Subject == "" && event.Arguments != "" {
 			output.fence(event.Arguments, "json")
 		}
-		if event.Subject != "" {
-			output.paragraph("**Subject**")
-			output.fence(event.Subject, emphasisLanguage(event.Emphasis))
-		}
-		if event.Note != "" {
-			output.paragraph("**Qualifier**")
-			output.fence(event.Note, "")
-		}
 	case agent.ToolCallResultEvent:
-		output.field("ID", event.ID)
-		output.field("Name", event.Name)
-		output.field("Status", string(event.Status))
-		if event.Took != 0 {
-			output.field("Duration", event.Took.String())
-		}
-		output.field("Qualifier", event.Note)
-		output.field("Emphasis", describeEmphasis(event.Emphasis))
-		if event.Stats != nil {
-			stats, err := json.Marshal(event.Stats)
-			if err != nil {
-				return err
-			}
-			output.paragraph("**Stats**")
-			output.fence(string(stats), "json")
-		}
 		if event.Text != "" {
-			output.toolResultPreview(event.Text, emphasisLanguage(event.Emphasis))
+			output.toolResultPreview(event.ID, event.Text, emphasisLanguage(event.Emphasis))
 		}
-	case agent.StateChangeEvent:
-		output.field("ID", event.ID)
-		output.field("Name", event.Name)
-		output.paragraph("**State**")
-		output.fence(string(event.State), "json")
 	case caps.ModeChange:
-		output.field("Swapped", event.Name)
-		output.field("Caps", event.Text)
-
 		if notice, said := caps.ModeNotice(event); said {
 			output.fence(notice, "")
 		}
 	case agent.InterruptionEvent:
 		output.paragraph(interruptionSentence(event.Text))
 	case agent.RetryingEvent:
-		output.field("Attempt", strconv.Itoa(event.Attempt))
-		output.field("Waited", event.Took.String())
-		output.field("ID", event.ID)
-		output.field("Name", event.Name)
 		output.fence(event.Text, "")
 		if event.Arguments != "" {
-			output.paragraph("**Arguments**")
 			output.fence(event.Arguments, "")
 		}
-	case agent.FailureEvent:
-		output.fence(event.Text, "")
 	}
 
 	_, err := self.file.WriteString(output.String())
 	return err
+}
+
+func heading(event agent.Event) []string {
+	name := title(event.Kind)
+	if event.Name != "" && namesACall(event.Kind) {
+		name += " — " + event.Name
+	}
+
+	switch event.Kind {
+	case agent.ToolCallRequestEvent:
+		if event.Note != "" {
+			name += " (" + event.Note + ")"
+		}
+
+		return []string{name, code(inlineSubject(event))}
+	case agent.ToolCallResultEvent:
+		return []string{name, outcome(event)}
+	case agent.HarnessMessageEvent:
+		return []string{name, string(event.Status)}
+	case caps.ModeChange:
+		return []string{name, event.Text, prefixed("toggled ", event.Name)}
+	case agent.RetryingEvent:
+		return []string{name, "attempt " + strconv.Itoa(event.Attempt), prefixed("waited ", util.CompactDuration(event.Took))}
+	}
+
+	return []string{name}
+}
+
+func namesACall(kind agent.Kind) bool {
+	return kind == agent.ToolCallRequestEvent || kind == agent.ToolCallResultEvent || kind == agent.RetryingEvent
+}
+
+func inlineSubject(event agent.Event) string {
+	tooLongToRead := len([]rune(event.Subject)) > maximumInlineSubject
+	if emphasisLanguage(event.Emphasis) != "" || tooLongToRead || strings.ContainsAny(event.Subject, "\n`") {
+		return ""
+	}
+
+	return event.Subject
+}
+
+func outcome(event agent.Event) string {
+	status := string(event.Status)
+	if event.Took >= patience {
+		status = strings.TrimSpace(status + " in " + util.CompactDuration(event.Took))
+	}
+
+	var parts []string
+	for _, part := range []string{status, event.Note, measurements(event.Stats)} {
+		if part != "" {
+			parts = append(parts, part)
+		}
+	}
+
+	return strings.Join(parts, ", ")
+}
+
+func measurements(stats *tool.Stats) string {
+	if stats == nil {
+		return ""
+	}
+
+	var parts []string
+	if stats.Lines > 0 {
+		parts = append(parts, plural(stats.Lines, "line"))
+	}
+	if stats.Bytes > 0 {
+		size := util.FormatBytes(stats.Bytes, formattedBytePrecision)
+		if stats.TotalBytes > stats.Bytes {
+			size += " of " + util.FormatBytes(stats.TotalBytes, formattedBytePrecision)
+		}
+		parts = append(parts, size)
+	}
+	if stats.Added > 0 || stats.Removed > 0 {
+		parts = append(parts, fmt.Sprintf("+%d −%d", stats.Added, stats.Removed))
+	}
+	if stats.EstimatedTokens > 0 {
+		parts = append(parts, util.FormatEstimatedTokenCount(stats.EstimatedTokens))
+	}
+	if cpuTime := util.CompactDuration(stats.CPUTime); stats.CPUTime > 0 && cpuTime != noTimeAtAll {
+		parts = append(parts, cpuTime+" CPU")
+	}
+	if stats.PeakMemory > 0 {
+		parts = append(parts, util.FormatBytes(stats.PeakMemory, formattedBytePrecision)+" peak")
+	}
+	if stats.Truncated {
+		parts = append(parts, "truncated")
+	}
+
+	return strings.Join(parts, ", ")
+}
+
+func joinParts(parts ...string) string {
+	var present []string
+	for _, part := range parts {
+		if part != "" {
+			present = append(present, part)
+		}
+	}
+
+	return strings.Join(present, partSeparator)
+}
+
+func prefixed(prefix, value string) string {
+	if value == "" {
+		return ""
+	}
+
+	return prefix + value
+}
+
+func code(value string) string {
+	if value == "" {
+		return ""
+	}
+
+	return "`" + value + "`"
+}
+
+func plural(count int64, noun string) string {
+	if count == 1 {
+		return "1 " + noun
+	}
+
+	return fmt.Sprintf("%d %ss", count, noun)
 }
 
 func interruptionSentence(reason string) string {
@@ -146,14 +253,6 @@ func interruptionSentence(reason string) string {
 	}
 
 	return "The turn was interrupted because " + reason + "."
-}
-
-func describeEmphasis(emphasis tool.Emphasis) string {
-	if emphasis.Kind == "" {
-		return ""
-	}
-
-	return string(emphasis.Kind) + " " + emphasis.Value
 }
 
 func emphasisLanguage(emphasis tool.Emphasis) string {
@@ -174,6 +273,14 @@ func (self *Recorder) Close() error {
 	return err
 }
 
+func (self *Recorder) offset(at time.Time) string {
+	if self.started.IsZero() {
+		return ""
+	}
+
+	return "+" + util.CompactDuration(at.Sub(self.started))
+}
+
 func title(kind agent.Kind) string {
 	switch kind {
 	case agent.StartupEvent:
@@ -190,8 +297,6 @@ func title(kind agent.Kind) string {
 		return "Tool call"
 	case agent.ToolCallResultEvent:
 		return "Tool result"
-	case agent.StateChangeEvent:
-		return "State"
 	case caps.ModeChange:
 		return "Mode"
 	case agent.InterruptionEvent:
@@ -206,25 +311,11 @@ func title(kind agent.Kind) string {
 }
 
 type document struct {
-	text          strings.Builder
-	isInFieldList bool
+	text strings.Builder
 }
 
 func (self *document) String() string {
 	return self.text.String() + "\n"
-}
-
-func (self *document) field(label, value string) {
-	if value == "" {
-		return
-	}
-	self.openField()
-	fmt.Fprintf(&self.text, "- **%s:** `%s`\n", label, value)
-}
-
-func (self *document) flag(label string, value bool) {
-	self.openField()
-	fmt.Fprintf(&self.text, "- **%s:** `%t`\n", label, value)
 }
 
 func (self *document) paragraph(text string) {
@@ -233,21 +324,13 @@ func (self *document) paragraph(text string) {
 	self.text.WriteString("\n")
 }
 
-func (self *document) openField() {
-	if !self.isInFieldList {
-		self.openBlock()
-		self.isInFieldList = true
-	}
-}
-
 func (self *document) openBlock() {
-	self.isInFieldList = false
 	if self.text.Len() > 0 {
 		self.text.WriteString("\n")
 	}
 }
 
-func (self *document) toolResultPreview(value, syntax string) {
+func (self *document) toolResultPreview(id, value, syntax string) {
 	lines := strutil.Lines(value)
 	preview := strings.Join(lines[:min(len(lines), toolResultPreviewLines)], "\n")
 	if len(preview) > toolResultPreviewBytes {
@@ -257,9 +340,19 @@ func (self *document) toolResultPreview(value, syntax string) {
 		}
 		preview = preview[:end]
 	}
+	if preview == strings.TrimSuffix(value, "\n") {
+		self.fence(preview, syntax)
+		return
+	}
+
 	self.paragraph("**Output preview (first 3 lines, up to 1 KiB)**")
 	self.fence(preview, syntax)
-	self.paragraph("Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.")
+	if !safeID.MatchString(id) {
+		self.paragraph("Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.")
+		return
+	}
+	self.paragraph("Full output, from the session directory:")
+	self.fence(fmt.Sprintf("jq -r 'select(.event.kind == %q and .event.id == %q) | .event.text' session.jsonl", agent.ToolCallResultEvent, id), "sh")
 }
 
 func (self *document) fence(value, syntax string) {

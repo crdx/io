@@ -8,131 +8,43 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## Startup
+## Startup · +0s
 
-> 2001-01-01T00:00:00Z
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +1s
 
 ```
 have a look at that
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +2s
 
 ```
 Taking the four of them together rather than one after another.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:03Z
+## Assistant · +3s
 
 ```
 Let me get the shape of this first.
 ```
 
-## Tool call
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_2`
-- **Name:** `ls`
-- **Read only:** `true`
-- **Emphasis:** `focus `
-
-**Arguments**
+## Tool call — ls · +4s
 
 ```json
 {"path":"."}
 ```
 
-## Tool call
+## Tool call — find · `**/*.go` · +5s
 
-> 2001-01-01T00:00:05Z
+## Tool call — find · `**/*.toml` · +6s
 
-- **ID:** `call_3`
-- **Name:** `find`
-- **Read only:** `true`
-- **Emphasis:** `focus `
-
-**Arguments**
-
-```json
-{"pattern":"**/*.go"}
-```
-
-**Subject**
-
-```
-**/*.go
-```
-
-## Tool call
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_4`
-- **Name:** `find`
-- **Read only:** `true`
-- **Emphasis:** `focus `
-
-**Arguments**
-
-```json
-{"pattern":"**/*.toml"}
-```
-
-**Subject**
-
-```
-**/*.toml
-```
-
-## Tool call
-
-> 2001-01-01T00:00:07Z
-
-- **ID:** `call_5`
-- **Name:** `grep`
-- **Read only:** `true`
-- **Emphasis:** `syntax regexp`
-
-**Arguments**
-
-```json
-{"pattern":"package","glob":"*.go"}
-```
-
-**Subject**
+## Tool call — grep (*.go) · +7s
 
 ```regexp
 package
 ```
 
-**Qualifier**
-
-```
-*.go
-```
-
-## Tool result
-
-> 2001-01-01T00:00:08Z
-
-- **ID:** `call_2`
-- **Name:** `ls`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":7,"bytes":65,"total_bytes":65}
-```
+## Tool result — ls · success, 7 lines, 65B · +8s
 
 **Output preview (first 3 lines, up to 1 KiB)**
 
@@ -142,370 +54,101 @@ cmd/
 screen.go
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+Full output, from the session directory:
 
-## Tool result
-
-> 2001-01-01T00:00:09Z
-
-- **ID:** `call_3`
-- **Name:** `find`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":2,"bytes":31,"total_bytes":31}
+```sh
+jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_2") | .event.text' session.jsonl
 ```
 
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — find · success, 2 lines, 31B · +9s
 
 ```
 cmd/oh/line/render.go
 screen.go
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool result
-
-> 2001-01-01T00:00:10Z
-
-- **ID:** `call_4`
-- **Name:** `find`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":13,"total_bytes":13}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — find · success, 1 line, 13B · +10s
 
 ```
 settings.toml
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## State
-
-> 2001-01-01T00:00:11Z
-
-- **ID:** `call_5`
-- **Name:** `file_read`
-
-**State**
-
-```json
-{"files":[{"path":"screen.go","sha256":"dc25e27e64083a7d4689a7c1bc5d325f1ba7d98a9c8adc4bea9a62a6b26e2beb"},{"path":"cmd/oh/line/render.go","sha256":"20a0815670f99c0a9de02e0e66948fb6ee69dc76dcc0a8e4ffa8b81c110be52b"}]}
-```
-
-## Tool result
-
-> 2001-01-01T00:00:12Z
-
-- **ID:** `call_5`
-- **Name:** `grep`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":2,"bytes":63,"total_bytes":63}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — grep · success, 2 lines, 63B · +12s
 
 ```
 screen.go:1:package output
 cmd/oh/line/render.go:1:package line
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Reasoning
-
-> 2001-01-01T00:00:13Z
+## Reasoning · +13s
 
 ```
 Three searches, all at once.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:14Z
+## Assistant · +14s
 
 ```
 Now to find where the drawing happens.
 ```
 
-## Tool call
-
-> 2001-01-01T00:00:15Z
-
-- **ID:** `call_7`
-- **Name:** `grep`
-- **Read only:** `true`
-- **Emphasis:** `syntax regexp`
-
-**Arguments**
-
-```json
-{"pattern":"spinner","glob":"*.go"}
-```
-
-**Subject**
+## Tool call — grep (*.go) · +15s
 
 ```regexp
 spinner
 ```
 
-**Qualifier**
-
-```
-*.go
-```
-
-## Tool call
-
-> 2001-01-01T00:00:16Z
-
-- **ID:** `call_8`
-- **Name:** `grep`
-- **Read only:** `true`
-- **Emphasis:** `syntax regexp`
-
-**Arguments**
-
-```json
-{"pattern":"footer","glob":"*.go"}
-```
-
-**Subject**
+## Tool call — grep (*.go) · +16s
 
 ```regexp
 footer
 ```
 
-**Qualifier**
-
-```
-*.go
-```
-
-## Tool call
-
-> 2001-01-01T00:00:17Z
-
-- **ID:** `call_9`
-- **Name:** `grep`
-- **Read only:** `true`
-- **Emphasis:** `syntax regexp`
-
-**Arguments**
-
-```json
-{"pattern":"cursor","glob":"*.go"}
-```
-
-**Subject**
+## Tool call — grep (*.go) · +17s
 
 ```regexp
 cursor
 ```
 
-**Qualifier**
-
-```
-*.go
-```
-
-## State
-
-> 2001-01-01T00:00:18Z
-
-- **ID:** `call_7`
-- **Name:** `file_read`
-
-**State**
-
-```json
-{"files":[{"path":"screen.go","sha256":"dc25e27e64083a7d4689a7c1bc5d325f1ba7d98a9c8adc4bea9a62a6b26e2beb"}]}
-```
-
-## Tool result
-
-> 2001-01-01T00:00:19Z
-
-- **ID:** `call_7`
-- **Name:** `grep`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":46,"total_bytes":46}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — grep · success, 1 line, 46B · +19s
 
 ```
 screen.go:3:var spinner, footer, cursor string
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## State
-
-> 2001-01-01T00:00:20Z
-
-- **ID:** `call_9`
-- **Name:** `file_read`
-
-**State**
-
-```json
-{"files":[{"path":"screen.go","sha256":"dc25e27e64083a7d4689a7c1bc5d325f1ba7d98a9c8adc4bea9a62a6b26e2beb"}]}
-```
-
-## Tool result
-
-> 2001-01-01T00:00:21Z
-
-- **ID:** `call_9`
-- **Name:** `grep`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":46,"total_bytes":46}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — grep · success, 1 line, 46B · +21s
 
 ```
 screen.go:3:var spinner, footer, cursor string
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## State
-
-> 2001-01-01T00:00:22Z
-
-- **ID:** `call_8`
-- **Name:** `file_read`
-
-**State**
-
-```json
-{"files":[{"path":"screen.go","sha256":"dc25e27e64083a7d4689a7c1bc5d325f1ba7d98a9c8adc4bea9a62a6b26e2beb"}]}
-```
-
-## Tool result
-
-> 2001-01-01T00:00:23Z
-
-- **ID:** `call_8`
-- **Name:** `grep`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":46,"total_bytes":46}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — grep · success, 1 line, 46B · +23s
 
 ```
 screen.go:3:var spinner, footer, cursor string
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:24Z
+## Assistant · +24s
 
 ```
 One more pair, and one of them will not be there.
 ```
 
-## Tool call
-
-> 2001-01-01T00:00:25Z
-
-- **ID:** `call_10`
-- **Name:** `ls`
-- **Read only:** `true`
-- **Emphasis:** `focus `
-
-**Arguments**
+## Tool call — ls · +25s
 
 ```json
 {"path":"."}
 ```
 
-## Tool call
+## Tool call — read · `nowhere/at/all.go` · +26s
 
-> 2001-01-01T00:00:26Z
-
-- **ID:** `call_11`
-- **Name:** `read`
-- **Read only:** `true`
-- **Emphasis:** `focus all.go`
-
-**Arguments**
-
-```json
-{"path":"nowhere/at/all.go"}
-```
-
-**Subject**
-
-```
-nowhere/at/all.go
-```
-
-## Tool result
-
-> 2001-01-01T00:00:27Z
-
-- **ID:** `call_11`
-- **Name:** `read`
-- **Status:** `error`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":44,"total_bytes":44}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ error, 1 line, 44B · +27s
 
 ```
 nowhere/at/all.go: no such file or directory
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool result
-
-> 2001-01-01T00:00:28Z
-
-- **ID:** `call_10`
-- **Name:** `ls`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":7,"bytes":65,"total_bytes":65}
-```
+## Tool result — ls · success, 7 lines, 65B · +28s
 
 **Output preview (first 3 lines, up to 1 KiB)**
 
@@ -515,11 +158,13 @@ cmd/
 screen.go
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+Full output, from the session directory:
 
-## Assistant
+```sh
+jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_10") | .event.text' session.jsonl
+```
 
-> 2001-01-01T00:00:29Z
+## Assistant · +29s
 
 ```
 That is the lot: four together, then three together, then a pair where only one of them could be answered.

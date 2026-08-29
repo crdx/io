@@ -8,240 +8,59 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 the awkward shapes
 ```
 
-## Tool call
+## Tool call — divine (lines 1-400) · `one.go` · +1s
 
-> 2001-01-01T00:00:01Z
-
-- **ID:** `call_1`
-- **Name:** `divine`
-- **Read only:** `true`
-- **Emphasis:** `focus 1-400`
-
-**Arguments**
-
-```json
-{"path": "one.go"}
-```
-
-**Subject**
-
-```
-one.go
-```
-
-**Qualifier**
-
-```
-lines 1-400
-```
-
-## Tool result
-
-> 2001-01-01T00:00:02Z
-
-- **ID:** `call_1`
-- **Name:** `divine`
-- **Status:** `success`
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success · +2s
 
 ```
 nothing to say
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool call
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_2`
-- **Name:** `conjure`
-- **Read only:** `true`
-- **Emphasis:** `syntax go`
-
-**Arguments**
-
-```json
-{"source": "x"}
-```
-
-**Subject**
+## Tool call — conjure · +3s
 
 ```go
 func Draw(rows []string, columns int) ([]string, error) { return rows, nil }
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_2`
-- **Name:** `conjure`
-- **Status:** `success`
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success · +4s
 
 ```
 ok
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool call
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_3`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "for do done esac fi \\"unclosed"}
-```
-
-**Subject**
+## Tool call — bash · +5s
 
 ```bash
 for do done esac fi "unclosed
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_3`
-- **Name:** `bash`
-- **Status:** `error`
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ error · +6s
 
 ```
 syntax error
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+## Tool call — summon · `nothing` · +7s
 
-## Tool call
+→ success · +8s
 
-> 2001-01-01T00:00:07Z
+## Tool call — summon · `plenty` · +9s
 
-- **ID:** `call_4`
-- **Name:** `summon`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"what": "nothing"}
-```
-
-**Subject**
-
-```
-nothing
-```
-
-## Tool result
-
-> 2001-01-01T00:00:08Z
-
-- **ID:** `call_4`
-- **Name:** `summon`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output"}
-```
-
-## Tool call
-
-> 2001-01-01T00:00:09Z
-
-- **ID:** `call_5`
-- **Name:** `summon`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"what": "plenty"}
-```
-
-**Subject**
-
-```
-plenty
-```
-
-## Tool result
-
-> 2001-01-01T00:00:10Z
-
-- **ID:** `call_5`
-- **Name:** `summon`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":900,"bytes":2048,"total_bytes":900000,"truncated":true}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 900 lines, 2K of 879K, truncated · +10s
 
 ```
 lots
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+## Tool call — summon · `japanese` · +11s
 
-## Tool call
-
-> 2001-01-01T00:00:11Z
-
-- **ID:** `call_6`
-- **Name:** `summon`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"what": "japanese"}
-```
-
-**Subject**
-
-```
-japanese
-```
-
-## Tool result
-
-> 2001-01-01T00:00:12Z
-
-- **ID:** `call_6`
-- **Name:** `summon`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":1,"bytes":5400,"total_bytes":5400}
-```
+→ success, 1 line, 5.27K · +12s
 
 **Output preview (first 3 lines, up to 1 KiB)**
 
@@ -249,21 +68,19 @@ japanese
 日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト。日本語のテキスト
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+Full output, from the session directory:
 
-## usage
+```sh
+jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_6") | .event.text' session.jsonl
+```
 
-> 2001-01-01T00:00:13Z
+## usage · +13s
 
-## Interrupted
-
-> 2001-01-01T00:00:14Z
+## Interrupted · +14s
 
 The turn was interrupted because the user asked something else.
 
-## Assistant
-
-> 2001-01-01T00:00:15Z
+## Assistant · +15s
 
 ```
 That is all of the awkward ones.

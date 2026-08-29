@@ -8,93 +8,69 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## Startup
+## Startup · +0s
 
-> 2001-01-01T00:00:00Z
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +1s
 
 ```
 have a look at that
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +2s
 
 ```
 This one stops halfway.
 ```
 
-## Failure
-
-> 2001-01-01T00:00:03Z
+## Failure · +3s
 
 ```
 the stream ended before the response did
 ```
 
-## User
-
-> 2001-01-01T00:00:04Z
+## User · +4s
 
 ```
 have a look at that
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:05Z
+## Assistant · +5s
 
 ```
 Let me think about that. 
 ```
 
-## Failure
-
-> 2001-01-01T00:00:06Z
+## Failure · +6s
 
 ```
 the model is overloaded
 ```
 
-## User
-
-> 2001-01-01T00:00:07Z
+## User · +7s
 
 ```
 have a look at that
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:08Z
+## Assistant · +8s
 
 ```
 I can only get so far before 
 ```
 
-## Failure
-
-> 2001-01-01T00:00:09Z
+## Failure · +9s
 
 ```
 the response was cut short
 ```
 
-## User
-
-> 2001-01-01T00:00:10Z
+## User · +10s
 
 ```
 have a look at that
 ```
 
-## Failure
-
-> 2001-01-01T00:00:11Z
+## Failure · +11s
 
 ```
 the endpoint is having a moment

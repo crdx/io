@@ -7,301 +7,149 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 complete a tool round before an upstream failure
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +0s
 
 ```
 Use the tool.
 ```
 
-## Tool call
+## Tool call — work · `work` · +0s
 
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call-1`
-- **Name:** `work`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{}
-```
-
-**Subject**
-
-```
-work
-```
-
-## State
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call-1`
-- **Name:** `work-count`
-
-**State**
-
-```json
-1
-```
-
-## Tool result
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call-1`
-- **Name:** `work`
-- **Status:** `success`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":11,"total_bytes":11}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 11B · +0s
 
 ```
 tool result
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Retrying
-
-> 2001-01-01T00:00:06Z
-
-- **Attempt:** `1`
-- **Waited:** `1s`
+## Retrying · attempt 1 · waited 1s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:07Z
-
-- **Attempt:** `2`
-- **Waited:** `5s`
+## Retrying · attempt 2 · waited 5s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:08Z
-
-- **Attempt:** `3`
-- **Waited:** `10s`
+## Retrying · attempt 3 · waited 10s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:09Z
-
-- **Attempt:** `4`
-- **Waited:** `30s`
+## Retrying · attempt 4 · waited 30s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:10Z
-
-- **Attempt:** `5`
-- **Waited:** `1m0s`
+## Retrying · attempt 5 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:11Z
-
-- **Attempt:** `6`
-- **Waited:** `1m0s`
+## Retrying · attempt 6 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:12Z
-
-- **Attempt:** `7`
-- **Waited:** `1m0s`
+## Retrying · attempt 7 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:13Z
-
-- **Attempt:** `8`
-- **Waited:** `1m0s`
+## Retrying · attempt 8 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:14Z
-
-- **Attempt:** `9`
-- **Waited:** `1m0s`
+## Retrying · attempt 9 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:15Z
-
-- **Attempt:** `10`
-- **Waited:** `1m0s`
+## Retrying · attempt 10 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:16Z
-
-- **Attempt:** `11`
-- **Waited:** `1m0s`
+## Retrying · attempt 11 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:17Z
-
-- **Attempt:** `12`
-- **Waited:** `1m0s`
+## Retrying · attempt 12 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:18Z
-
-- **Attempt:** `13`
-- **Waited:** `1m0s`
+## Retrying · attempt 13 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:19Z
-
-- **Attempt:** `14`
-- **Waited:** `1m0s`
+## Retrying · attempt 14 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:20Z
-
-- **Attempt:** `15`
-- **Waited:** `1m0s`
+## Retrying · attempt 15 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:21Z
-
-- **Attempt:** `16`
-- **Waited:** `1m0s`
+## Retrying · attempt 16 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:22Z
-
-- **Attempt:** `17`
-- **Waited:** `1m0s`
+## Retrying · attempt 17 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:23Z
-
-- **Attempt:** `18`
-- **Waited:** `1m0s`
+## Retrying · attempt 18 · waited 1m00s · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## Failure
-
-> 2001-01-01T00:00:24Z
+## Failure · +0s
 
 ```
 request failed with status 503: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-## User
-
-> 2001-01-01T00:00:25Z
+## User · +0s
 
 ```
 continue after the upstream failure
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:26Z
+## Assistant · +0s
 
 ```
 Resumed.

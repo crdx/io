@@ -7,159 +7,49 @@
 - **Provider:** `chat`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 reason, then call two tools in fragments
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +0s
 
 ```
 Use both tools.
 ```
 
-## Tool call
+## Tool call — alpha · `alpha` · +0s
 
-> 2001-01-01T00:00:03Z
+## Tool call — beta · `beta` · +0s
 
-- **ID:** `call-1`
-- **Name:** `alpha`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{"x":1}
-```
-
-**Subject**
-
-```
-alpha
-```
-
-## Tool call
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call-2`
-- **Name:** `beta`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{"y":2}
-```
-
-**Subject**
-
-```
-beta
-```
-
-## State
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call-1`
-- **Name:** `alpha-count`
-
-**State**
-
-```json
-1
-```
-
-## Tool result
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call-1`
-- **Name:** `alpha`
-- **Status:** `success`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":12,"total_bytes":12}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — alpha · success, 1 line, 12B · +0s
 
 ```
 alpha result
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## State
-
-> 2001-01-01T00:00:07Z
-
-- **ID:** `call-2`
-- **Name:** `beta-count`
-
-**State**
-
-```json
-1
-```
-
-## Tool result
-
-> 2001-01-01T00:00:08Z
-
-- **ID:** `call-2`
-- **Name:** `beta`
-- **Status:** `success`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":11,"total_bytes":11}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — beta · success, 1 line, 11B · +0s
 
 ```
 beta result
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:09Z
+## Assistant · +0s
 
 ```
 Tools done.
 ```
 
-## User
-
-> 2001-01-01T00:00:10Z
+## User · +0s
 
 ```
 continue after both tool results
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:11Z
+## Assistant · +0s
 
 ```
 Resumed.

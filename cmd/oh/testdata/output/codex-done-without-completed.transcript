@@ -7,39 +7,27 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 finish with the done sentinel
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +0s
 
 ```
 Done by sentinel.
 ```
 
-## User
-
-> 2001-01-01T00:00:03Z
+## User · +0s
 
 ```
 continue after the first response
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:04Z
+## Assistant · +0s
 
 ```
 Resumed.

@@ -8,196 +8,59 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## Startup
+## Startup · +0s
 
-> 2001-01-01T00:00:00Z
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +1s
 
 ```
 have a look at that
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +2s
 
 ```
 Writing the file the rest of this needs.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:03Z
+## Assistant · +3s
 
 ```
 I'll put a file down to work with.
 ```
 
-## Tool call
+## Tool call — write (26B) · `notes.md` · +4s
 
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_2`
-- **Name:** `write`
-- **Read only:** `false`
-- **Emphasis:** `focus notes.md`
-
-**Arguments**
-
-```json
-{"path":"notes.md","content":"# Notes\\n\\nOne.\\nTwo.\\nThree.\\n"}
-```
-
-**Subject**
-
-```
-notes.md
-```
-
-**Qualifier**
-
-```
-26B
-```
-
-## Tool result
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_2`
-- **Name:** `write`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"write","lines":5,"bytes":26}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 5 lines, 26B · +5s
 
 ```
 wrote 26B to notes.md
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Reasoning
-
-> 2001-01-01T00:00:06Z
+## Reasoning · +6s
 
 ```
 Reading, then writing, then reading what was written.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:07Z
+## Assistant · +7s
 
 ```
 Now to read it, add to it, and read it back.
 ```
 
-## Tool call
+## Tool call — read · `notes.md` · +8s
 
-> 2001-01-01T00:00:08Z
-
-- **ID:** `call_4`
-- **Name:** `read`
-- **Read only:** `true`
-- **Emphasis:** `focus notes.md`
-
-**Arguments**
-
-```json
-{"path":"notes.md"}
-```
-
-**Subject**
-
-```
-notes.md
-```
-
-## Tool call
-
-> 2001-01-01T00:00:09Z
-
-- **ID:** `call_5`
-- **Name:** `ls`
-- **Read only:** `true`
-- **Emphasis:** `focus `
-
-**Arguments**
+## Tool call — ls · +9s
 
 ```json
 {"path":"."}
 ```
 
-## Tool call
+## Tool call — write (32B) · `notes.md` · +10s
 
-> 2001-01-01T00:00:10Z
+## Tool call — read · `notes.md` · +11s
 
-- **ID:** `call_6`
-- **Name:** `write`
-- **Read only:** `false`
-- **Emphasis:** `focus notes.md`
-
-**Arguments**
-
-```json
-{"path":"notes.md","content":"# Notes\\n\\nOne.\\nTwo.\\nThree.\\nFour.\\n"}
-```
-
-**Subject**
-
-```
-notes.md
-```
-
-**Qualifier**
-
-```
-32B
-```
-
-## Tool call
-
-> 2001-01-01T00:00:11Z
-
-- **ID:** `call_7`
-- **Name:** `read`
-- **Read only:** `true`
-- **Emphasis:** `focus notes.md`
-
-**Arguments**
-
-```json
-{"path":"notes.md"}
-```
-
-**Subject**
-
-```
-notes.md
-```
-
-## Tool result
-
-> 2001-01-01T00:00:12Z
-
-- **ID:** `call_5`
-- **Name:** `ls`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":8,"bytes":74,"total_bytes":74}
-```
+## Tool result — ls · success, 8 lines, 74B · +12s
 
 **Output preview (first 3 lines, up to 1 KiB)**
 
@@ -207,34 +70,13 @@ cmd/
 notes.md
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+Full output, from the session directory:
 
-## State
-
-> 2001-01-01T00:00:13Z
-
-- **ID:** `call_4`
-- **Name:** `file_read`
-
-**State**
-
-```json
-{"files":[{"path":"notes.md","sha256":"112259ce4bfd558379d6e9cff39cfd4dc7a013e8ed0ba9068f0d304e9816b400"}]}
+```sh
+jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_5") | .event.text' session.jsonl
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:14Z
-
-- **ID:** `call_4`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":5,"bytes":26}
-```
+## Tool result — read · success, 5 lines, 26B · +14s
 
 **Output preview (first 3 lines, up to 1 KiB)**
 
@@ -244,56 +86,19 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 One.
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+Full output, from the session directory:
 
-## Tool result
-
-> 2001-01-01T00:00:15Z
-
-- **ID:** `call_6`
-- **Name:** `write`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"write","lines":6,"bytes":32}
+```sh
+jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_4") | .event.text' session.jsonl
 ```
 
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — write · success, 6 lines, 32B · +15s
 
 ```
 wrote 32B to notes.md
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## State
-
-> 2001-01-01T00:00:16Z
-
-- **ID:** `call_7`
-- **Name:** `file_read`
-
-**State**
-
-```json
-{"files":[{"path":"notes.md","sha256":"88b89465d4e017872f58fd8cc3533dd7a6641b947c3f7ae29299ecfb9825f51e"}]}
-```
-
-## Tool result
-
-> 2001-01-01T00:00:17Z
-
-- **ID:** `call_7`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":6,"bytes":32}
-```
+## Tool result — read · success, 6 lines, 32B · +17s
 
 **Output preview (first 3 lines, up to 1 KiB)**
 
@@ -303,11 +108,13 @@ Full output: [`session.jsonl`](session.jsonl), in the matching result event's `e
 One.
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+Full output, from the session directory:
 
-## Assistant
+```sh
+jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_7") | .event.text' session.jsonl
+```
 
-> 2001-01-01T00:00:18Z
+## Assistant · +18s
 
 ```
 The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.

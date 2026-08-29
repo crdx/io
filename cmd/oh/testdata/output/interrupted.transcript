@@ -8,101 +8,39 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 read the renderer and tell me what it does
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:01Z
+## Assistant · +1s
 
 ```
 Reading it now.
 ```
 
-## Tool call
+## Tool call — read · `cmd/oh/line/render.go` · +2s
 
-> 2001-01-01T00:00:02Z
-
-- **ID:** `call_1`
-- **Name:** `read`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"path":"cmd/oh/line/render.go"}
-```
-
-**Subject**
-
-```
-cmd/oh/line/render.go
-```
-
-## Interrupted
-
-> 2001-01-01T00:00:03Z
+## Interrupted · +3s
 
 The turn was interrupted.
 
-## User
-
-> 2001-01-01T00:00:04Z
+## User · +4s
 
 ```
 never mind, what is in target.txt?
 ```
 
-## Tool call
+## Tool call — read · `target.txt` · +5s
 
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_2`
-- **Name:** `read`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"path":"target.txt"}
-```
-
-**Subject**
-
-```
-target.txt
-```
-
-## Tool result
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_2`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":1,"bytes":4,"total_bytes":4}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 4B · +6s
 
 ```
 one
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:07Z
+## Assistant · +7s
 
 ```
 It holds the word `one`, and nothing else.

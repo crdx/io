@@ -8,362 +8,89 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 run each shape of command and load the skill
 ```
 
-## Tool call
-
-> 2001-01-01T00:00:01Z
-
-- **ID:** `call_1`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else echo none; fi"}
-```
-
-**Subject**
+## Tool call — bash · +1s
 
 ```bash
 if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else echo none; fi
 ```
 
-## Tool result
+→ success, 1 line, 2B · +2s
 
-> 2001-01-01T00:00:02Z
-
-- **ID:** `call_1`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
-```
-
-## Tool call
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_2`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "while read -r NAME; do echo \\"$NAME\\" > out.txt 2>&1; done < list.txt"}
-```
-
-**Subject**
+## Tool call — bash · +3s
 
 ```bash
 while read -r NAME; do echo "$NAME" > out.txt 2>&1; done < list.txt
 ```
 
-## Tool result
+→ success, 1 line, 2B · +4s
 
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_2`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
-```
-
-## Tool call
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_3`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "until [[ -z \\"$REST\\" ]]; do REST=\\"\\"; done"}
-```
-
-**Subject**
+## Tool call — bash · +5s
 
 ```bash
 until [[ -z "$REST" ]]; do REST=""; done
 ```
 
-## Tool result
+→ success, 1 line, 2B · +6s
 
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_3`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
-```
-
-## Tool call
-
-> 2001-01-01T00:00:07Z
-
-- **ID:** `call_4`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "case \\"$MODE\\" in read) echo r ;; write) echo w ;; *) echo o ;; esac"}
-```
-
-**Subject**
+## Tool call — bash · +7s
 
 ```bash
 case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac
 ```
 
-## Tool result
+→ success, 1 line, 2B · +8s
 
-> 2001-01-01T00:00:08Z
-
-- **ID:** `call_4`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
-```
-
-## Tool call
-
-> 2001-01-01T00:00:09Z
-
-- **ID:** `call_5`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "select CHOICE in one two; do break; done"}
-```
-
-**Subject**
+## Tool call — bash · +9s
 
 ```bash
 select CHOICE in one two; do break; done
 ```
 
-## Tool result
+→ success, 1 line, 2B · +10s
 
-> 2001-01-01T00:00:10Z
-
-- **ID:** `call_5`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
-```
-
-## Tool call
-
-> 2001-01-01T00:00:11Z
-
-- **ID:** `call_6`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "ls -la | grep -v \\"^d\\" | wc -l"}
-```
-
-**Subject**
+## Tool call — bash · +11s
 
 ```bash
 ls -la | grep -v "^d" | wc -l
 ```
 
-## Tool result
+→ success, 1 line, 2B · +12s
 
-> 2001-01-01T00:00:12Z
-
-- **ID:** `call_6`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":1000000,"lines":1,"bytes":2,"total_bytes":2}
-```
-
-## Tool call
-
-> 2001-01-01T00:00:13Z
-
-- **ID:** `call_7`
-- **Name:** `grep`
-- **Read only:** `true`
-- **Emphasis:** `syntax regexp`
-
-**Arguments**
-
-```json
-{"pattern": "^\\\\p{Lu}\\\\w{2,8}(?:-\\\\d+)?$", "glob": "*.go"}
-```
-
-**Subject**
+## Tool call — grep · +13s
 
 ```regexp
 ^\\p{Lu}\\w{2,8}(?:-\\d+)?$
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:14Z
-
-- **ID:** `call_7`
-- **Name:** `grep`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"search","lines":1,"bytes":24,"total_bytes":24}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 24B · +14s
 
 ```
 screen.go:3:var spinner
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+## Tool call — read · `skills/tidy/SKILL.md` · +15s
 
-## Tool call
-
-> 2001-01-01T00:00:15Z
-
-- **ID:** `call_8`
-- **Name:** `read`
-- **Read only:** `true`
-- **Emphasis:** `focus SKILL.md`
-
-**Arguments**
-
-```json
-{"path": "skills/tidy/SKILL.md"}
-```
-
-**Subject**
-
-```
-skills/tidy/SKILL.md
-```
-
-## Tool result
-
-> 2001-01-01T00:00:16Z
-
-- **ID:** `call_8`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":8,"bytes":72,"total_bytes":72}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 8 lines, 72B · +16s
 
 ```
 # Tidy
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+## Tool call — read (日本語 🎉) · `wide.md` · +17s
 
-## Tool call
-
-> 2001-01-01T00:00:17Z
-
-- **ID:** `call_9`
-- **Name:** `read`
-- **Read only:** `true`
-- **Emphasis:** `focus 日本語 🎉`
-
-**Arguments**
-
-```json
-{"path": "wide.md"}
-```
-
-**Subject**
-
-```
-wide.md
-```
-
-**Qualifier**
-
-```
-日本語 🎉
-```
-
-## Tool result
-
-> 2001-01-01T00:00:18Z
-
-- **ID:** `call_9`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":3,"bytes":96,"total_bytes":96}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 3 lines, 96B · +18s
 
 ```
 # 見出し
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:19Z
+## Assistant · +19s
 
 ````
 The listing is `日本語のテキストと絵文字 🎉 が混ざった行`, which is wider on screen than it is long.

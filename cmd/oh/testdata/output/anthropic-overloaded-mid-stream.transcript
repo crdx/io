@@ -7,58 +7,39 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 be overloaded halfway through the answer
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +0s
 
 ```
 Half an ans
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:03Z
-
-- **Attempt:** `1`
-- **Waited:** `1s`
+## Retrying · attempt 1 · waited 1s · +0s
 
 ```
 Overloaded
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:04Z
+## Assistant · +0s
 
 ```
 Through on the second attempt.
 ```
 
-## User
-
-> 2001-01-01T00:00:05Z
+## User · +0s
 
 ```
 carry on
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:06Z
+## Assistant · +0s
 
 ```
 Carrying on.

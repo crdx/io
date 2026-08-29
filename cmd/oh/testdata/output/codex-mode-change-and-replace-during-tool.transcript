@@ -7,110 +7,53 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 send another message and change what I am allowed to do
 ```
 
-## Tool call
+## Tool call — work · `work` · +0s
 
-> 2001-01-01T00:00:02Z
-
-- **ID:** `call-1`
-- **Name:** `work`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{}
-```
-
-**Subject**
-
-```
-work
-```
-
-## Tool result
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call-1`
-- **Name:** `work`
-- **Status:** `cancelled`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":88,"total_bytes":88}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ cancelled, 1 line, 88B · +0s
 
 ```
 the call was stopped after 3s because the user changed what the harness is allowed to do
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Interrupted
-
-> 2001-01-01T00:00:04Z
+## Interrupted · +0s
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
-## Mode
+## Mode · rxgs · +0s
 
-> 2001-01-01T00:00:05Z
-
-- **Caps:** `rxgs`
-
-## User
-
-> 2001-01-01T00:00:06Z
+## User · +0s
 
 ```
 The workspace is now read-only.
 ```
 
-## User
-
-> 2001-01-01T00:00:07Z
+## User · +0s
 
 ```
 do it read-only instead
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:08Z
+## Assistant · +0s
 
 ```
 Read-only it is.
 ```
 
-## User
-
-> 2001-01-01T00:00:09Z
+## User · +0s
 
 ```
 carry on
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:10Z
+## Assistant · +0s
 
 ```
 Carrying on.

@@ -7,229 +7,67 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 complete two tool rounds, then keep thinking
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +0s
 
 ```
 Plan first.
 ```
 
-## Tool call
+## Tool call — work · `work` · +0s
 
-> 2001-01-01T00:00:03Z
-
-- **ID:** `toolu_1`
-- **Name:** `work`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{}
-```
-
-**Subject**
-
-```
-work
-```
-
-## State
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `toolu_1`
-- **Name:** `work-count`
-
-**State**
-
-```json
-1
-```
-
-## Tool result
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `toolu_1`
-- **Name:** `work`
-- **Status:** `success`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":12,"total_bytes":12}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 12B · +0s
 
 ```
 first result
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Reasoning
-
-> 2001-01-01T00:00:06Z
+## Reasoning · +0s
 
 ```
 Plan second.
 ```
 
-## Tool call
+## Tool call — work · `work` · +0s
 
-> 2001-01-01T00:00:07Z
-
-- **ID:** `toolu_2`
-- **Name:** `work`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{}
-```
-
-**Subject**
-
-```
-work
-```
-
-## State
-
-> 2001-01-01T00:00:08Z
-
-- **ID:** `toolu_2`
-- **Name:** `work-count`
-
-**State**
-
-```json
-2
-```
-
-## Tool result
-
-> 2001-01-01T00:00:09Z
-
-- **ID:** `toolu_2`
-- **Name:** `work`
-- **Status:** `success`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":13,"total_bytes":13}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 13B · +0s
 
 ```
 second result
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Interrupted
-
-> 2001-01-01T00:00:10Z
+## Interrupted · +0s
 
 The turn was interrupted because the user pressed escape.
 
-## User
-
-> 2001-01-01T00:00:11Z
+## User · +0s
 
 ```
 continue from the last valid tool result
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:12Z
+## Reasoning · +0s
 
 ```
 Check restored state.
 ```
 
-## Tool call
+## Tool call — work · `work` · +0s
 
-> 2001-01-01T00:00:13Z
-
-- **ID:** `toolu_3`
-- **Name:** `work`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{}
-```
-
-**Subject**
-
-```
-work
-```
-
-## State
-
-> 2001-01-01T00:00:14Z
-
-- **ID:** `toolu_3`
-- **Name:** `work-count`
-
-**State**
-
-```json
-3
-```
-
-## Tool result
-
-> 2001-01-01T00:00:15Z
-
-- **ID:** `toolu_3`
-- **Name:** `work`
-- **Status:** `success`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":14,"total_bytes":14}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 14B · +0s
 
 ```
 resumed result
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:16Z
+## Assistant · +0s
 
 ```
 Recovered.

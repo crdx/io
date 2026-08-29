@@ -8,115 +8,37 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## Startup
+## Startup · +0s
 
-> 2001-01-01T00:00:00Z
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +1s
 
 ```
 what is the current go release, and what does the blog say about it?
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +2s
 
 ```
 Searching first, then reading the announcement the search cites.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:03Z
+## Assistant · +3s
 
 ```
 Let me search, then read the announcement.
 ```
 
-## Tool call
+## Tool call — web_search · `latest Go release` · +4s
 
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_2`
-- **Name:** `web_search`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"query":"latest Go release"}
-```
-
-**Subject**
-
-```
-latest Go release
-```
-
-## Tool result
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_2`
-- **Name:** `web_search`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":86,"total_bytes":86}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 86B · +5s
 
 ```
 Go 1.26 is the current release, announced on [the Go blog](https://go.dev/blog/go1.26).
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+## Tool call — web_fetch (markdown) · `https://go.dev/blog/go1.26` · +6s
 
-## Tool call
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_3`
-- **Name:** `web_fetch`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"url":"https://go.dev/blog/go1.26","type":"markdown"}
-```
-
-**Subject**
-
-```
-https://go.dev/blog/go1.26
-```
-
-**Qualifier**
-
-```
-markdown
-```
-
-## Tool result
-
-> 2001-01-01T00:00:07Z
-
-- **ID:** `call_3`
-- **Name:** `web_fetch`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":8,"bytes":253,"total_bytes":253}
-```
+→ success, 8 lines, 253B · +7s
 
 **Output preview (first 3 lines, up to 1 KiB)**
 
@@ -126,79 +48,39 @@ markdown
 The **container/heap** package now takes an iterator, and `go test` reports
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+Full output, from the session directory:
 
-## Assistant
+```sh
+jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_3") | .event.text' session.jsonl
+```
 
-> 2001-01-01T00:00:08Z
+## Assistant · +8s
 
 ```
 Go **1.26** is current. The announcement calls out iterators in `container/heap`, flaky-run reporting in `go test`, and a smaller allocation header.
 ```
 
-## User
-
-> 2001-01-01T00:00:09Z
+## User · +9s
 
 ```
 now read the release notes as plain text
 ```
 
-## Notice
-
-> 2001-01-01T00:00:10Z
-
-- **Status:** `info`
+## Notice · info · +10s
 
 ```
 The web search and fetch tools are now refused.
 ```
 
-## Tool call
+## Tool call — web_fetch (text) · `https://go.dev/doc/go1.26` · +11s
 
-> 2001-01-01T00:00:11Z
-
-- **ID:** `call_4`
-- **Name:** `web_fetch`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"url":"https://go.dev/doc/go1.26","type":"text"}
-```
-
-**Subject**
-
-```
-https://go.dev/doc/go1.26
-```
-
-**Qualifier**
-
-```
-text
-```
-
-## Tool result
-
-> 2001-01-01T00:00:12Z
-
-- **ID:** `call_4`
-- **Name:** `web_fetch`
-- **Status:** `error`
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ error · +12s
 
 ```
 web access is not granted; the user can grant it with ctrl+x s
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:13Z
+## Assistant · +13s
 
 ```
 The web tools are refused, so I cannot read the notes until you grant access again.

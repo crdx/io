@@ -8,91 +8,33 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## Startup
+## Startup · +0s
 
-> 2001-01-01T00:00:00Z
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +1s
 
 ```
 have a look at that
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +2s
 
 ```
 Searching the target before the process restarts.
 ```
 
-## Tool call
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_1`
-- **Name:** `grep`
-- **Read only:** `true`
-- **Emphasis:** `syntax regexp`
-
-**Arguments**
-
-```json
-{"pattern":"one","path":"target.txt"}
-```
-
-**Subject**
+## Tool call — grep (target.txt) · +3s
 
 ```regexp
 one
 ```
 
-**Qualifier**
-
-```
-target.txt
-```
-
-## State
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_1`
-- **Name:** `file_read`
-
-**State**
-
-```json
-{"files":[{"path":"target.txt","sha256":"2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"}]}
-```
-
-## Tool result
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_1`
-- **Name:** `grep`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":16,"total_bytes":16}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 16B · +5s
 
 ```
 target.txt:1:one
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:06Z
+## Assistant · +6s
 
 ```
 The matching target is now safely recorded.

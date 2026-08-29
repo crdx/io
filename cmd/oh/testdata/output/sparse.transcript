@@ -8,81 +8,33 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 run the thing that takes no arguments
 ```
 
-## Notice
-
-> 2001-01-01T00:00:01Z
-
-- **Status:** `info`
+## Notice · info · +1s
 
 ```
 The web search and fetch tools are now refused.
 ```
 
-## Tool call
+## Tool call — status · +2s
 
-> 2001-01-01T00:00:02Z
+→ success · +3s
 
-- **ID:** `call_1`
-- **Name:** `status`
-- **Read only:** `true`
-
-## Tool result
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_1`
-- **Name:** `status`
-- **Status:** `success`
-
-## Notice
-
-> 2001-01-01T00:00:04Z
-
-- **Status:** `warning`
+## Notice · warning · +4s
 
 ```
 Background processes killed (sleep).
 ```
 
-## Tool call
+## Tool call — notify · `done` · +5s
 
-> 2001-01-01T00:00:05Z
+→ info · +6s
 
-- **ID:** `call_2`
-- **Name:** `notify`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{"title":"done","message":"nothing to report","icon":"info"}
-```
-
-**Subject**
-
-```
-done
-```
-
-## Tool result
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_2`
-- **Name:** `notify`
-- **Status:** `info`
-
-## Assistant
-
-> 2001-01-01T00:00:07Z
+## Assistant · +7s
 
 ```
 Nothing came back.

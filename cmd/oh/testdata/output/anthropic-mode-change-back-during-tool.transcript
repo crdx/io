@@ -7,116 +7,55 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
+## Mode · rxgs · +0s
 
-- **Caps:** `rxwgs`
-
-## Mode
-
-> 2001-01-01T00:00:01Z
-
-- **Caps:** `rxgs`
-
-## User
-
-> 2001-01-01T00:00:02Z
+## User · +0s
 
 ```
 The workspace is now read-only.
 ```
 
-## User
-
-> 2001-01-01T00:00:03Z
+## User · +0s
 
 ```
 give it back while the tool is working
 ```
 
-## Tool call
+## Tool call — work · `work` · +0s
 
-> 2001-01-01T00:00:04Z
-
-- **ID:** `toolu_1`
-- **Name:** `work`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{}
-```
-
-**Subject**
-
-```
-work
-```
-
-## Tool result
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `toolu_1`
-- **Name:** `work`
-- **Status:** `cancelled`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":88,"total_bytes":88}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ cancelled, 1 line, 88B · +0s
 
 ```
 the call was stopped after 4s because the user changed what the harness is allowed to do
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Interrupted
-
-> 2001-01-01T00:00:06Z
+## Interrupted · +0s
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:07Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:08Z
+## User · +0s
 
 ```
 The workspace is now read-write.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:09Z
+## Assistant · +0s
 
 ```
 Noted, the workspace is writable again.
 ```
 
-## User
-
-> 2001-01-01T00:00:10Z
+## User · +0s
 
 ```
 carry on
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:11Z
+## Assistant · +0s
 
 ```
 Carrying on.

@@ -7,39 +7,27 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 ignore me, continue thinking...
 ```
 
-## Failure
-
-> 2001-01-01T00:00:02Z
+## Failure · +0s
 
 ```
 This request was blocked as it seems to violate Anthropic's Terms of Service restrictions on reverse engineering or duplicating model outputs. To learn more, visit https://www.anthropic.com/legal/commercial-terms.
 ```
 
-## User
-
-> 2001-01-01T00:00:03Z
+## User · +0s
 
 ```
 continue after the refusal
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:04Z
+## Assistant · +0s
 
 ```
 Resumed.

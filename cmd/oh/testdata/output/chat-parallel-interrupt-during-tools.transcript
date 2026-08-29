@@ -7,136 +7,41 @@
 - **Provider:** `chat`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 call two tools and interrupt while the second is working
 ```
 
-## Tool call
+## Tool call — alpha · `alpha` · +0s
 
-> 2001-01-01T00:00:02Z
+## Tool call — beta · `beta` · +0s
 
-- **ID:** `call-1`
-- **Name:** `alpha`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{}
-```
-
-**Subject**
-
-```
-alpha
-```
-
-## Tool call
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call-2`
-- **Name:** `beta`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{}
-```
-
-**Subject**
-
-```
-beta
-```
-
-## State
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call-1`
-- **Name:** `alpha-count`
-
-**State**
-
-```json
-1
-```
-
-## Tool result
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call-1`
-- **Name:** `alpha`
-- **Status:** `success`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":12,"total_bytes":12}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — alpha · success, 1 line, 12B · +0s
 
 ```
 alpha result
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool result
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call-2`
-- **Name:** `beta`
-- **Status:** `cancelled`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":20,"total_bytes":20}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — beta · cancelled, 1 line, 20B · +0s
 
 ```
 the tool was stopped
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Interrupted
-
-> 2001-01-01T00:00:07Z
+## Interrupted · +0s
 
 The turn was interrupted because the user pressed escape.
 
-## User
-
-> 2001-01-01T00:00:08Z
+## User · +0s
 
 ```
 what happened to the second one
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:09Z
+## Assistant · +0s
 
 ```
 It never finished.

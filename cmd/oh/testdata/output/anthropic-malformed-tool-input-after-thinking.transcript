@@ -7,66 +7,43 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 think, then send malformed tool input
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +0s
 
 ```
 The call wants an object.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:03Z
-
-- **Attempt:** `1`
-- **Waited:** `1s`
-- **ID:** `toolu_bad`
-- **Name:** `work`
+## Retrying — work · attempt 1 · waited 1s · +0s
 
 ```
 the work tool call did not contain a JSON object
 ```
 
-**Arguments**
-
 ```
 {"value":1,,}
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:04Z
+## Assistant · +0s
 
 ```
 I corrected the malformed call.
 ```
 
-## User
-
-> 2001-01-01T00:00:05Z
+## User · +0s
 
 ```
 carry on
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:06Z
+## Assistant · +0s
 
 ```
 Carrying on.

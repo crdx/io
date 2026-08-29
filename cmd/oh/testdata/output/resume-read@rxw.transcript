@@ -8,85 +8,29 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## Startup
+## Startup · +0s
 
-> 2001-01-01T00:00:00Z
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +1s
 
 ```
 have a look at that
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +2s
 
 ```
 Reading the target before the process restarts.
 ```
 
-## Tool call
+## Tool call — read · `target.txt` · +3s
 
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_1`
-- **Name:** `read`
-- **Read only:** `true`
-- **Emphasis:** `focus target.txt`
-
-**Arguments**
-
-```json
-{"path":"target.txt"}
-```
-
-**Subject**
-
-```
-target.txt
-```
-
-## State
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_1`
-- **Name:** `file_read`
-
-**State**
-
-```json
-{"files":[{"path":"target.txt","sha256":"2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"}]}
-```
-
-## Tool result
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_1`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":1,"bytes":4}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 4B · +5s
 
 ```
 one
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:06Z
+## Assistant · +6s
 
 ```
 The target is now safely recorded.

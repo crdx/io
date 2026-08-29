@@ -8,76 +8,47 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 what am i allowed to do here?
 ```
 
-## Mode
+## Mode · rx · +1s
 
-> 2001-01-01T00:00:01Z
-
-- **Caps:** `rx`
-
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +2s
 
 ```
 Reading and running commands, but not writing.
 ```
 
-## Mode
-
-> 2001-01-01T00:00:03Z
-
-- **Swapped:** `w`
-- **Caps:** `rxw`
+## Mode · rxw · toggled w · +3s
 
 ```
 The workspace is now read-write.
 ```
 
-## User
-
-> 2001-01-01T00:00:04Z
+## User · +4s
 
 ```
 now write it down
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:05Z
+## Assistant · +5s
 
 ```
 Writing it down.
 ```
 
-## Mode
-
-> 2001-01-01T00:00:06Z
-
-- **Swapped:** `x`
-- **Caps:** `rw`
+## Mode · rw · toggled x · +6s
 
 ```
 The bash tool is now refused, and will turn away every command until it is granted again.
 ```
 
-## Mode
+## Mode · rw · toggled ? · +7s
 
-> 2001-01-01T00:00:07Z
-
-- **Swapped:** `?`
-- **Caps:** `rw`
-
-## Assistant
-
-> 2001-01-01T00:00:08Z
+## Assistant · +8s
 
 ```
 Done.

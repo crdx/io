@@ -8,17 +8,13 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 draw the awkward markdown
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:01Z
+## Assistant · +1s
 
 ```
 A table whose rows do not all reach the end:
@@ -40,20 +36,14 @@ in angle brackets <https://example.com/bracketed>, which are not the same thing.
 
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +2s
 
 ```
 Entities are resolved in prose — AT&amp;T becomes AT&T — but left alone inside code, where `&amp;` and `&lt;div&gt;` stand as they are written.
 
 ```
 
-## Notice
-
-> 2001-01-01T00:00:03Z
-
-- **Status:** `error`
+## Notice · error · +3s
 
 ```
 a warning that arrived with a carriage\rreturn in it

@@ -8,164 +8,53 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 run whatever you like
 ```
 
-## Tool call
-
-> 2001-01-01T00:00:01Z
-
-- **ID:** `call_1`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "echo \\u001b[31mred\\u001b[0m"}
-```
-
-**Subject**
+## Tool call — bash · +1s
 
 ```bash
 echo \e[31mred\e[0m
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:02Z
-
-- **ID:** `call_1`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","peak_memory":2097152,"lines":1,"bytes":12,"total_bytes":12}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 12B, 2M peak · +2s
 
 ```
 \e[31mred\e[0m
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+## Tool call — screenshot (lines 1 to 40\x07) · `notes\e[2J\e[H.md` · +3s
 
-## Tool call
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_2`
-- **Name:** `screenshot`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"path": "notes.md"}
-```
-
-**Subject**
-
-```
-notes\e[2J\e[H.md
-```
-
-**Qualifier**
-
-```
-lines 1 to 40\x07
-```
-
-## Tool result
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_2`
-- **Name:** `screenshot`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":1,"bytes":8,"total_bytes":8,"estimated_tokens":2}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 8B, ~2t · +4s
 
 ```
 # Notes
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool call
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_3`
-- **Name:** `grep`
-- **Read only:** `true`
-- **Emphasis:** `syntax regexp`
-
-**Arguments**
-
-```json
-{"pattern": "one\\ntwo"}
-```
-
-**Subject**
+## Tool call — grep · +5s
 
 ```regexp
 one
 two
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_3`
-- **Name:** `grep`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"search","lines":1,"bytes":11,"total_bytes":11}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 11B · +6s
 
 ```
 a.go:1:one
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Retrying
-
-> 2001-01-01T00:00:07Z
-
-- **Attempt:** `1`
-- **Waited:** `2s`
+## Retrying · attempt 1 · waited 2s · +7s
 
 ```
 \e[1;31mupstream said no\e[0m
 and said it twice
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:08Z
+## Assistant · +8s
 
 ```
 Nothing moved.

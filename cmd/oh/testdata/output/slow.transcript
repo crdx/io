@@ -8,93 +8,43 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 search everything for the spinner
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:01Z
+## Assistant · +1s
 
 ```
 That will take a moment.
 ```
 
-## Tool call
-
-> 2001-01-01T00:00:02Z
-
-- **ID:** `call_1`
-- **Name:** `grep`
-- **Read only:** `true`
-
-**Arguments**
+## Tool call — grep · +2s
 
 ```json
 {"pattern":"spinner","glob":"*.go"}
 ```
 
-## Tool call
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_2`
-- **Name:** `find`
-- **Read only:** `true`
-
-**Arguments**
+## Tool call — find · +3s
 
 ```json
 {"pattern":"**/*.go"}
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_1`
-- **Name:** `grep`
-- **Status:** `success`
-- **Duration:** `9.5s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":44,"total_bytes":44}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — grep · success in 9.5s, 1 line, 44B · +4s
 
 ```
 screen.go:3:var spinner, footer, cursor string
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool result
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_2`
-- **Name:** `find`
-- **Status:** `error`
-- **Duration:** `1m2s`
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — find · error in 1m02s · +5s
 
 ```
 the search went on too long
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:06Z
+## Assistant · +6s
 
 ```
 The grep took nine seconds and the find gave up after a minute.

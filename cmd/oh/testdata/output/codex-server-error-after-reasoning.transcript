@@ -7,58 +7,39 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 fail on the server after thinking
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +0s
 
 ```
 Weighing the two ways round.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:03Z
-
-- **Attempt:** `1`
-- **Waited:** `1s`
+## Retrying · attempt 1 · waited 1s · +0s
 
 ```
 the server gave up
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:04Z
+## Assistant · +0s
 
 ```
 Through on the second attempt.
 ```
 
-## User
-
-> 2001-01-01T00:00:05Z
+## User · +0s
 
 ```
 carry on
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:06Z
+## Assistant · +0s
 
 ```
 Carrying on.

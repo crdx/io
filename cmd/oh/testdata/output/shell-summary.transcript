@@ -8,171 +8,48 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 check the tree, then build it
 ```
 
-## Tool call
-
-> 2001-01-01T00:00:01Z
-
-- **ID:** `call_1`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "git status --short"}
-```
-
-**Subject**
+## Tool call — bash · +1s
 
 ```bash
 git status --short
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:02Z
-
-- **ID:** `call_1`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":10000000,"peak_memory":4194304,"lines":2,"bytes":47,"total_bytes":47}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 2 lines, 47B, 4M peak · +2s
 
 ```
 M  cmd/oh/main.go
  M cmd/oh/dynamic/dynamic.go
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool call
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_2`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "touch build.lock"}
-```
-
-**Subject**
+## Tool call — bash · +3s
 
 ```bash
 touch build.lock
 ```
 
-## Tool result
+→ success, 2M peak · +4s
 
-> 2001-01-01T00:00:04Z
+## Tool call — read · `cmd/oh/dynamic/dynamic.go` · +5s
 
-- **ID:** `call_2`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":1000000,"peak_memory":2097152}
-```
-
-## Tool call
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_3`
-- **Name:** `read`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"path": "cmd/oh/dynamic/dynamic.go"}
-```
-
-**Subject**
-
-```
-cmd/oh/dynamic/dynamic.go
-```
-
-## Tool result
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_3`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":1,"bytes":16,"total_bytes":16,"estimated_tokens":4}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 16B, ~4t · +6s
 
 ```
 package dynamic
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool call
-
-> 2001-01-01T00:00:07Z
-
-- **ID:** `call_4`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "printf 'one\\\\ttwo\\\\r\\\\n\\\\n\\\\tthree\\\\n'"}
-```
-
-**Subject**
+## Tool call — bash · +7s
 
 ```bash
 printf 'one\\ttwo\\r\\n\\n\\tthree\\n'
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:08Z
-
-- **ID:** `call_4`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":2000000,"peak_memory":2097152,"lines":3,"bytes":17,"total_bytes":17}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 3 lines, 17B, 2M peak · +8s
 
 ```
 one\ttwo\r
@@ -180,184 +57,56 @@ one\ttwo\r
 \tthree
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool call
-
-> 2001-01-01T00:00:09Z
-
-- **ID:** `call_5`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "ls /usr/bin"}
-```
-
-**Subject**
+## Tool call — bash · +9s
 
 ```bash
 ls /usr/bin
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:10Z
-
-- **ID:** `call_5`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":30000000,"peak_memory":6291456,"lines":1,"bytes":177,"total_bytes":177}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 177B, 6M peak · +10s
 
 ```
 awk basename bash cat chmod cp date diff du echo env find grep gzip head id join less ln ls mkdir mv nl od paste ps pwd rm sed seq sort stat tail tar tee touch tr uniq wc xargs
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool call
-
-> 2001-01-01T00:00:11Z
-
-- **ID:** `call_6`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "for NAME in cmd/oh/dynamic cmd/oh/painter cmd/oh/call; do go vet ./$NAME; done"}
-```
-
-**Subject**
+## Tool call — bash · +11s
 
 ```bash
 for NAME in cmd/oh/dynamic cmd/oh/painter cmd/oh/call; do go vet ./$NAME; done
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:12Z
-
-- **ID:** `call_6`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":1400000000,"peak_memory":419430400,"lines":1,"bytes":3,"total_bytes":3}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 3B, 1.4s CPU, 400M peak · +12s
 
 ```
 ok
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool call
-
-> 2001-01-01T00:00:13Z
-
-- **ID:** `call_7`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "go build ./..."}
-```
-
-**Subject**
+## Tool call — bash · +13s
 
 ```bash
 go build ./...
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:14Z
-
-- **ID:** `call_7`
-- **Name:** `bash`
-- **Status:** `error`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":900000000,"peak_memory":314572800,"lines":2,"bytes":51,"total_bytes":51}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ error, 2 lines, 51B, 0.9s CPU, 300M peak · +14s
 
 ```
 exit(1):
 ./cmd/oh/main.go:12:2: undefined: spinner
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool call
-
-> 2001-01-01T00:00:15Z
-
-- **ID:** `call_8`
-- **Name:** `bash`
-- **Read only:** `false`
-- **Emphasis:** `syntax bash`
-
-**Arguments**
-
-```json
-{"command": "just check"}
-```
-
-**Subject**
+## Tool call — bash · +15s
 
 ```bash
 just check
 ```
 
-## Tool result
-
-> 2001-01-01T00:00:16Z
-
-- **ID:** `call_8`
-- **Name:** `bash`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"resources","cpu_time":40000000,"peak_memory":8388608,"lines":1,"bytes":26,"total_bytes":26}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 26B, 8M peak · +16s
 
 ```
 \e[32mok\e[0m all six steps
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Assistant
-
-> 2001-01-01T00:00:17Z
+## Assistant · +17s
 
 ```
 The tree is dirty and the build is broken.

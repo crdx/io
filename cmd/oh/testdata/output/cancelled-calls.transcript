@@ -8,101 +8,33 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 read both of those files
 ```
 
-## Tool call
+## Tool call — read · `one.txt` · +1s
 
-> 2001-01-01T00:00:01Z
+## Tool call — read · `two.txt` · +2s
 
-- **ID:** `call_1`
-- **Name:** `read`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"path":"one.txt"}
-```
-
-**Subject**
-
-```
-one.txt
-```
-
-## Tool call
-
-> 2001-01-01T00:00:02Z
-
-- **ID:** `call_2`
-- **Name:** `read`
-- **Read only:** `true`
-
-**Arguments**
-
-```json
-{"path":"two.txt"}
-```
-
-**Subject**
-
-```
-two.txt
-```
-
-## Tool result
-
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call_1`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":1,"bytes":4,"total_bytes":4}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — read · success, 1 line, 4B · +3s
 
 ```
 one
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Tool result
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_2`
-- **Name:** `read`
-- **Status:** `cancelled`
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool result — read · cancelled · +4s
 
 ```
 the call was cancelled because the user pressed escape
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Interrupted
-
-> 2001-01-01T00:00:05Z
+## Interrupted · +5s
 
 The turn was interrupted.
 
-## User
-
-> 2001-01-01T00:00:06Z
+## User · +6s
 
 ```
 one was all I needed

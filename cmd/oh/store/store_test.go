@@ -635,14 +635,18 @@ func TestRebuildRefusesASessionThatIsNotThere(t *testing.T) {
 	}
 }
 
-func TestTheTranscriptQuotesTheTimesTheJournalRecorded(t *testing.T) {
+func TestTheTranscriptCountsTimeFromWhenTheSessionStarted(t *testing.T) {
 	directory := t.TempDir()
 	name := write(t, directory)
 
-	var recorded []string
+	var started string
+	var events []string
 	err := session.Records(directory, name, func(line session.Line) error {
-		if line.Kind == session.Head || line.Kind == session.Event {
-			recorded = append(recorded, line.Time.UTC().Format(time.RFC3339Nano))
+		switch line.Kind {
+		case session.Head:
+			started = line.Time.UTC().Format(time.RFC3339Nano)
+		case session.Event:
+			events = append(events, line.Time.UTC().Format(time.RFC3339Nano))
 		}
 		return nil
 	})
@@ -654,11 +658,18 @@ func TestTheTranscriptQuotesTheTimesTheJournalRecorded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	transcript := string(written)
 
-	for _, at := range recorded {
-		if !strings.Contains(string(written), at) {
-			t.Errorf("the transcript does not quote the journal time %q", at)
+	if !strings.Contains(transcript, started) {
+		t.Errorf("the transcript does not say when the session started, %q", started)
+	}
+	for _, at := range events {
+		if strings.Contains(transcript, at) {
+			t.Errorf("the transcript quotes the absolute time %q rather than an offset from the start", at)
 		}
+	}
+	if !strings.Contains(transcript, " · +") {
+		t.Errorf("the transcript counts no event from the start:\n%s", transcript)
 	}
 }
 

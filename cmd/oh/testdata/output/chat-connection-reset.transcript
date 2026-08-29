@@ -7,389 +7,249 @@
 - **Provider:** `chat`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 reset the connection until the attempts run out
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:03Z
-
-- **Attempt:** `1`
-- **Waited:** `1s`
+## Retrying · attempt 1 · waited 1s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:04Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:05Z
-
-- **Attempt:** `2`
-- **Waited:** `5s`
+## Retrying · attempt 2 · waited 5s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:06Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:07Z
-
-- **Attempt:** `3`
-- **Waited:** `10s`
+## Retrying · attempt 3 · waited 10s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:08Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:09Z
-
-- **Attempt:** `4`
-- **Waited:** `30s`
+## Retrying · attempt 4 · waited 30s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:10Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:11Z
-
-- **Attempt:** `5`
-- **Waited:** `1m0s`
+## Retrying · attempt 5 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:12Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:13Z
-
-- **Attempt:** `6`
-- **Waited:** `1m0s`
+## Retrying · attempt 6 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:14Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:15Z
-
-- **Attempt:** `7`
-- **Waited:** `1m0s`
+## Retrying · attempt 7 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:16Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:17Z
-
-- **Attempt:** `8`
-- **Waited:** `1m0s`
+## Retrying · attempt 8 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:18Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:19Z
-
-- **Attempt:** `9`
-- **Waited:** `1m0s`
+## Retrying · attempt 9 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:20Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:21Z
-
-- **Attempt:** `10`
-- **Waited:** `1m0s`
+## Retrying · attempt 10 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:22Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:23Z
-
-- **Attempt:** `11`
-- **Waited:** `1m0s`
+## Retrying · attempt 11 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:24Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:25Z
-
-- **Attempt:** `12`
-- **Waited:** `1m0s`
+## Retrying · attempt 12 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:26Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:27Z
-
-- **Attempt:** `13`
-- **Waited:** `1m0s`
+## Retrying · attempt 13 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:28Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:29Z
-
-- **Attempt:** `14`
-- **Waited:** `1m0s`
+## Retrying · attempt 14 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:30Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:31Z
-
-- **Attempt:** `15`
-- **Waited:** `1m0s`
+## Retrying · attempt 15 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:32Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:33Z
-
-- **Attempt:** `16`
-- **Waited:** `1m0s`
+## Retrying · attempt 16 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:34Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:35Z
-
-- **Attempt:** `17`
-- **Waited:** `1m0s`
+## Retrying · attempt 17 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:36Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:37Z
-
-- **Attempt:** `18`
-- **Waited:** `1m0s`
+## Retrying · attempt 18 · waited 1m00s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:38Z
+## Assistant · +0s
 
 ```
 Partial answer.
 ```
 
-## Failure
-
-> 2001-01-01T00:00:39Z
+## Failure · +0s
 
 ```
 unexpected EOF
 ```
 
-## User
-
-> 2001-01-01T00:00:40Z
+## User · +0s
 
 ```
 continue after the transport failure
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:41Z
+## Assistant · +0s
 
 ```
 Resumed.

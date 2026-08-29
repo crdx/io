@@ -7,50 +7,33 @@
 - **Provider:** `codex`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 receive HTTP 507 from the edge proxy
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:02Z
-
-- **Attempt:** `1`
-- **Waited:** `1s`
+## Retrying · attempt 1 · waited 1s · +0s
 
 ```
 request failed with status 507: exceeded request buffer limit while retrying upstream
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:03Z
+## Assistant · +0s
 
 ```
 Asked again, and answered.
 ```
 
-## User
-
-> 2001-01-01T00:00:04Z
+## User · +0s
 
 ```
 continue after the buffered retry
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:05Z
+## Assistant · +0s
 
 ```
 Resumed.

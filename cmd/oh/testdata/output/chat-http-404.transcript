@@ -7,39 +7,27 @@
 - **Provider:** `chat`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 receive HTTP 404
 ```
 
-## Failure
-
-> 2001-01-01T00:00:02Z
+## Failure · +0s
 
 ```
 request failed with status 404
 ```
 
-## User
-
-> 2001-01-01T00:00:03Z
+## User · +0s
 
 ```
 continue after the missing endpoint
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:04Z
+## Assistant · +0s
 
 ```
 Resumed.

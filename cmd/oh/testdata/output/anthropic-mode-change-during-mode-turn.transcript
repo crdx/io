@@ -7,95 +7,63 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 change what I am allowed to do twice over, once in each turn
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +0s
 
 ```
 Half an ans
 ```
 
-## Interrupted
-
-> 2001-01-01T00:00:03Z
+## Interrupted · +0s
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
-## Mode
+## Mode · rxgs · +0s
 
-> 2001-01-01T00:00:04Z
-
-- **Caps:** `rxgs`
-
-## User
-
-> 2001-01-01T00:00:05Z
+## User · +0s
 
 ```
 The workspace is now read-only.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:06Z
+## Assistant · +0s
 
 ```
 The workspace is read-onl
 ```
 
-## Interrupted
-
-> 2001-01-01T00:00:07Z
+## Interrupted · +0s
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
-## Mode
+## Mode · rxs · +0s
 
-> 2001-01-01T00:00:08Z
-
-- **Caps:** `rxs`
-
-## User
-
-> 2001-01-01T00:00:09Z
+## User · +0s
 
 ```
 The .git directory is now read-only.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:10Z
+## Assistant · +0s
 
 ```
 The history is read-only now.
 ```
 
-## User
-
-> 2001-01-01T00:00:11Z
+## User · +0s
 
 ```
 carry on
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:12Z
+## Assistant · +0s
 
 ```
 Carrying on.

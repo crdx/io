@@ -8,25 +8,19 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 show me every kind of formatting you can draw
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:01Z
+## Reasoning · +1s
 
 ```
 Laying out one of each.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +2s
 
 ```
 # Everything the renderer knows
@@ -73,9 +67,7 @@ The end.
 
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:03Z
+## Assistant · +3s
 
 ````
 A script with a bit of everything in it:

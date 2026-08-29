@@ -7,58 +7,37 @@
 - **Provider:** `anthropic`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 send null as tool input
 ```
 
-## Retrying
-
-> 2001-01-01T00:00:02Z
-
-- **Attempt:** `1`
-- **Waited:** `1s`
-- **ID:** `toolu_null`
-- **Name:** `work`
+## Retrying — work · attempt 1 · waited 1s · +0s
 
 ```
 the work tool call did not contain a JSON object
 ```
 
-**Arguments**
-
 ```
 null
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:03Z
+## Assistant · +0s
 
 ```
 I sent an object that time.
 ```
 
-## User
-
-> 2001-01-01T00:00:04Z
+## User · +0s
 
 ```
 carry on
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:05Z
+## Assistant · +0s
 
 ```
 Carrying on.

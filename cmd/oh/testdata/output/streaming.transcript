@@ -8,25 +8,19 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 show me how to count the go files
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:01Z
+## Reasoning · +1s
 
 ```
 A loop over the listing is the shortest way to say it.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +2s
 
 ````
 Try this.
@@ -39,9 +33,7 @@ That is all.
 
 ````
 
-## Assistant
-
-> 2001-01-01T00:00:03Z
+## Assistant · +3s
 
 ```
 And a table, which changes shape as its rows arrive:

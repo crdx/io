@@ -8,81 +8,29 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## Startup
+## Startup · +0s
 
-> 2001-01-01T00:00:00Z
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +1s
 
 ```
 have a look at that
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +2s
 
 ```
 Reading the renderer before saying anything about it.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:03Z
+## Assistant · +3s
 
 ```
 Let me read the renderer.
 ```
 
-## Tool call
+## Tool call — read · `cmd/oh/line/render.go` · +4s
 
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call_2`
-- **Name:** `read`
-- **Read only:** `true`
-- **Emphasis:** `focus render.go`
-
-**Arguments**
-
-```json
-{"path":"cmd/oh/line/render.go"}
-```
-
-**Subject**
-
-```
-cmd/oh/line/render.go
-```
-
-## State
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call_2`
-- **Name:** `file_read`
-
-**State**
-
-```json
-{"files":[{"path":"cmd/oh/line/render.go","sha256":"20a0815670f99c0a9de02e0e66948fb6ee69dc76dcc0a8e4ffa8b81c110be52b"}]}
-```
-
-## Tool result
-
-> 2001-01-01T00:00:06Z
-
-- **ID:** `call_2`
-- **Name:** `read`
-- **Status:** `success`
-
-**Stats**
-
-```json
-{"kind":"read","lines":5,"bytes":60}
-```
+→ success, 5 lines, 60B · +6s
 
 **Output preview (first 3 lines, up to 1 KiB)**
 
@@ -92,11 +40,13 @@ package line
 func layout() string {
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
+Full output, from the session directory:
 
-## Assistant
+```sh
+jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_2") | .event.text' session.jsonl
+```
 
-> 2001-01-01T00:00:07Z
+## Assistant · +7s
 
 ```
 The prompt is built in cmd/oh/line/render.go:4:9, and screen.go holds the spinner beside it. There is nothing about it in README.md, and nothing at all in cmd/oh/line/missing.go, which is where I looked first. settings.toml names the workspace and target.txt is the file everything else works on.

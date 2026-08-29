@@ -7,114 +7,47 @@
 - **Provider:** `chat`
 - **Workspace:** ``
 
-## Mode
+## Mode · rxwgs · +0s
 
-> 2001-01-01T00:00:00Z
-
-- **Caps:** `rxwgs`
-
-## User
-
-> 2001-01-01T00:00:01Z
+## User · +0s
 
 ```
 complete a tool round, then lose the network
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:02Z
+## Reasoning · +0s
 
 ```
 Use the tool.
 ```
 
-## Tool call
+## Tool call — work · `work` · +0s
 
-> 2001-01-01T00:00:03Z
-
-- **ID:** `call-1`
-- **Name:** `work`
-- **Read only:** `false`
-
-**Arguments**
-
-```json
-{}
-```
-
-**Subject**
-
-```
-work
-```
-
-## State
-
-> 2001-01-01T00:00:04Z
-
-- **ID:** `call-1`
-- **Name:** `work-count`
-
-**State**
-
-```json
-1
-```
-
-## Tool result
-
-> 2001-01-01T00:00:05Z
-
-- **ID:** `call-1`
-- **Name:** `work`
-- **Status:** `success`
-- **Duration:** `0s`
-
-**Stats**
-
-```json
-{"kind":"output","lines":1,"bytes":11,"total_bytes":11}
-```
-
-**Output preview (first 3 lines, up to 1 KiB)**
+→ success, 1 line, 11B · +0s
 
 ```
 tool result
 ```
 
-Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.
-
-## Retrying
-
-> 2001-01-01T00:00:06Z
-
-- **Attempt:** `1`
-- **Waited:** `1s`
+## Retrying · attempt 1 · waited 1s · +0s
 
 ```
 unexpected EOF
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:07Z
+## Assistant · +0s
 
 ```
 Through on the second attempt.
 ```
 
-## User
-
-> 2001-01-01T00:00:08Z
+## User · +0s
 
 ```
 continue after the network interruption
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:09Z
+## Assistant · +0s
 
 ```
 Resumed.

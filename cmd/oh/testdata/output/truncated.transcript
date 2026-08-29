@@ -8,25 +8,19 @@
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
 
-## User
-
-> 2001-01-01T00:00:00Z
+## User · +0s
 
 ```
 show me the loop again
 ```
 
-## Reasoning
-
-> 2001-01-01T00:00:01Z
+## Reasoning · +1s
 
 ```
 Writing it out.
 ```
 
-## Assistant
-
-> 2001-01-01T00:00:02Z
+## Assistant · +2s
 
 ````
 Try this.
