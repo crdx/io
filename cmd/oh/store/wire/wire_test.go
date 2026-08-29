@@ -43,6 +43,94 @@ func TestRecorderContinuesSequenceNumbersAfterLongLines(t *testing.T) {
 	}
 }
 
+func TestRecorderFindsTheLastSequenceNumberFarFromTheEnd(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "wire.http")
+	stored := strings.Join([]string{
+		"# HTTP transcript\n",
+		"# exchange 7 start\n",
+		strings.Repeat("body line\n", 200*1024),
+	}, "")
+	if err := os.WriteFile(path, []byte(stored), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	recorder, err := wire.Open(path, wire.Meta{}, func(err error) {
+		t.Errorf("unexpected recorder failure: %v", err)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	recorder.Start(req.Request{Started: time.Unix(2, 0), Method: http.MethodPost})
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	transcript, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(transcript), "# exchange 8 start") {
+		t.Errorf("expected the marker to be found beyond the first window read back")
+	}
+}
+
+func TestRecorderNumbersTheFirstExchangeOfATranscriptWithoutOne(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "wire.http")
+	if err := os.WriteFile(path, []byte("# HTTP transcript\n\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	recorder, err := wire.Open(path, wire.Meta{}, func(err error) {
+		t.Errorf("unexpected recorder failure: %v", err)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	recorder.Start(req.Request{Started: time.Unix(2, 0), Method: http.MethodPost})
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	transcript, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(transcript), "# exchange 1 start") {
+		t.Errorf("expected numbering to begin at one, got %q", string(transcript))
+	}
+}
+
+func TestRecorderIgnoresAnEndMarkerWhenNumberingTheNextExchange(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "wire.http")
+	stored := strings.Join([]string{
+		"# HTTP transcript\n",
+		"# exchange 4 start\n",
+		"# exchange 4 end 1970-01-01T00:00:00Z elapsed=1s completed\n\n",
+	}, "")
+	if err := os.WriteFile(path, []byte(stored), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	recorder, err := wire.Open(path, wire.Meta{}, func(err error) {
+		t.Errorf("unexpected recorder failure: %v", err)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	recorder.Start(req.Request{Started: time.Unix(2, 0), Method: http.MethodPost})
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	transcript, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(transcript), "# exchange 5 start") {
+		t.Errorf("expected the end marker to be passed over, got %q", string(transcript))
+	}
+}
+
 func TestRecorderCensorsHeadersJSONFormsSSEAndBearerText(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "wire.http")
 	recorder, err := wire.Open(path, wire.Meta{Name: "brave-otter", Started: time.Unix(1, 0)}, func(err error) {

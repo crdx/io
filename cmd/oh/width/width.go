@@ -3,6 +3,7 @@ package width
 import (
 	"iter"
 	"strings"
+	"unicode/utf8"
 
 	"crdx.org/io/cmd/oh/escape"
 	"github.com/rivo/uniseg"
@@ -10,17 +11,60 @@ import (
 
 func Graphemes(text string) iter.Seq2[string, int] {
 	return func(yield func(string, int) bool) {
-		graphemes := uniseg.NewGraphemes(text)
-		for graphemes.Next() {
-			grapheme := graphemes.Str()
-			if !yield(grapheme, graphemeWidth(grapheme, graphemes.Width())) {
+		for one := range graphemes(text) {
+			if !yield(one.text, one.cells) {
 				return
 			}
 		}
 	}
 }
 
+type grapheme struct {
+	at    int
+	text  string
+	cells int
+}
+
+func graphemes(text string) iter.Seq[grapheme] {
+	return func(yield func(grapheme) bool) {
+		state := -1
+
+		for at := 0; at < len(text); {
+			if isLoneASCII(text, at) {
+				if !yield(grapheme{at: at, text: text[at : at+1], cells: 1}) {
+					return
+				}
+
+				at++
+				state = -1
+
+				continue
+			}
+
+			cluster, rest, measuredWidth, newState := uniseg.FirstGraphemeClusterInString(text[at:], state)
+			if !yield(grapheme{at: at, text: cluster, cells: graphemeWidth(cluster, measuredWidth)}) {
+				return
+			}
+
+			at = len(text) - len(rest)
+			state = newState
+		}
+	}
+}
+
+func isLoneASCII(text string, at int) bool {
+	if text[at] < ' ' || text[at] > '~' {
+		return false
+	}
+
+	return at+1 == len(text) || text[at+1] < utf8.RuneSelf
+}
+
 func Of(text string) int {
+	if plain, isPlain := plainWidth(text); isPlain {
+		return plain
+	}
+
 	cells := 0
 	runes := []rune(text)
 
@@ -46,32 +90,41 @@ func Of(text string) int {
 
 func Cut(text string, cells int) (string, int) {
 	takenCells := 0
-	graphemes := uniseg.NewGraphemes(text)
-	for graphemes.Next() {
-		size := graphemeWidth(graphemes.Str(), graphemes.Width())
-		if takenCells+size > cells {
-			start, _ := graphemes.Positions()
-			return text[:start], takenCells
+
+	for one := range graphemes(text) {
+		if takenCells+one.cells > cells {
+			return text[:one.at], takenCells
 		}
-		takenCells += size
+		takenCells += one.cells
 	}
+
 	return text, takenCells
 }
 
 func Cells(text string) []string {
 	var cells []string
-	graphemes := uniseg.NewGraphemes(text)
-	for graphemes.Next() {
-		graphemeCells := graphemeWidth(graphemes.Str(), graphemes.Width())
-		if graphemeCells == 0 {
+
+	for one := range graphemes(text) {
+		if one.cells == 0 {
 			continue
 		}
-		cells = append(cells, graphemes.Str())
-		for range graphemeCells - 1 {
+		cells = append(cells, one.text)
+		for range one.cells - 1 {
 			cells = append(cells, "")
 		}
 	}
+
 	return cells
+}
+
+func plainWidth(text string) (int, bool) {
+	for at := range len(text) {
+		if text[at] < ' ' || text[at] > '~' {
+			return 0, false
+		}
+	}
+
+	return len(text), true
 }
 
 func graphemeWidth(grapheme string, measuredWidth int) int {

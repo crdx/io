@@ -1,7 +1,6 @@
 package wire
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -74,31 +73,56 @@ func writeTranscriptHeader(file *os.File, meta Meta) error {
 	return err
 }
 
+const exchangeMarker = "# exchange "
+
+const firstTailWindow = 64 << 10
+
 func nextExchangeNumber(file *os.File, next int) (int, error) {
-	if _, err := file.Seek(0, 0); err != nil {
+	size, err := file.Seek(0, io.SeekEnd)
+	if err != nil {
 		return 0, err
 	}
 
-	reader := bufio.NewReader(file)
-	for {
-		line, readError := reader.ReadString('\n')
+	for window := int64(firstTailWindow); ; window *= 2 {
+		at := max(size-window, 0)
+
+		tail := make([]byte, size-at)
+		if _, err := file.ReadAt(tail, at); err != nil && !errors.Is(err, io.EOF) {
+			return 0, err
+		}
+
+		if sequence, wasFound := lastExchangeNumber(tail, at == 0); wasFound {
+			return max(next, sequence+1), nil
+		}
+
+		if at == 0 {
+			return next, nil
+		}
+	}
+}
+
+func lastExchangeNumber(tail []byte, isWholeFile bool) (int, bool) {
+	for at := len(tail); at > 0; {
+		lineEnd := at
+		lineStart := bytes.LastIndexByte(tail[:lineEnd], '\n') + 1
+		at = lineStart - 1
+
+		if lineStart == 0 && !isWholeFile {
+			return 0, false
+		}
+
+		line := tail[lineStart:lineEnd]
+		if !bytes.HasPrefix(line, []byte(exchangeMarker)) {
+			continue
+		}
+
 		var sequence int
-		if _, err := fmt.Sscanf(line, "# exchange %d start", &sequence); err == nil && sequence >= next {
-			next = sequence + 1
-		}
-		if errors.Is(readError, io.EOF) {
-			break
-		}
-		if readError != nil {
-			return 0, readError
+		if _, err := fmt.Sscanf(string(line), exchangeMarker+"%d start", &sequence); err == nil {
+			return sequence, true
 		}
 	}
 
-	if _, err := file.Seek(0, 2); err != nil {
-		return 0, err
-	}
-
-	return next, nil
+	return 0, false
 }
 
 // Start records a request and returns its exchange observer.

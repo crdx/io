@@ -2,6 +2,7 @@ package width
 
 import (
 	"strings"
+	"unicode/utf8"
 
 	"crdx.org/io/cmd/oh/escape"
 )
@@ -37,22 +38,22 @@ func Wrap(text string, cells int) []string {
 // Rows wraps as Wrap does, and says which runes of the input each row came from. There is always at
 // least one row.
 func Rows(text string, cells int) []Row {
-	runes := []rune(text)
-
 	var rows []Row
 
 	start := 0
 
-	for i := 0; i <= len(runes); i++ {
-		if i < len(runes) && runes[i] != '\n' {
-			continue
+	for {
+		line, rest, hasMore := strings.Cut(text, "\n")
+
+		rows = append(rows, wrapLine(line, cells, start)...)
+
+		if !hasMore {
+			return rows
 		}
 
-		rows = append(rows, wrapLine(string(runes[start:i]), cells, start)...)
-		start = i + 1
+		start += utf8.RuneCountInString(line) + 1
+		text = rest
 	}
-
-	return rows
 }
 
 type atom struct {
@@ -183,7 +184,13 @@ func advance(atoms []atom, begin int) int {
 }
 
 func join(atoms []atom, begin int, end int, openStyles []string) string {
+	span := 0
+	for _, one := range atoms[begin:end] {
+		span += len(one.text)
+	}
+
 	var out strings.Builder
+	out.Grow(len(openStyles[begin]) + span + len(reset))
 
 	out.WriteString(openStyles[begin])
 
@@ -216,7 +223,7 @@ func stylesAt(atoms []atom) []string {
 }
 
 func split(text string) []atom {
-	var atoms []atom
+	atoms := make([]atom, 0, utf8.RuneCountInString(text))
 
 	runes := []rune(text)
 
