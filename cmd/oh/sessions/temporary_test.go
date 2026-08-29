@@ -17,7 +17,7 @@ func TestPrepareTemporaryDirectoryCreatesTheSessionDirectoryPrivately(t *testing
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := filepath.Join(stateDirectory, "tmps", "brave-otter")
+	want := filepath.Join(stateDirectory, "farm", "brave-otter")
 	if temporaryDirectory != want {
 		t.Errorf("got %q, want %q", temporaryDirectory, want)
 	}
@@ -56,7 +56,7 @@ func TestPrepareTemporaryDirectoryReportsCreationFailure(t *testing.T) {
 	stateDirectory := t.TempDir()
 	t.Setenv(location.StateDirVariable, stateDirectory)
 
-	temporaryParentPath := filepath.Join(stateDirectory, "tmps")
+	temporaryParentPath := filepath.Join(stateDirectory, "farm")
 	if err := os.WriteFile(temporaryParentPath, []byte("not a directory"), 0o600); err != nil {
 		t.Fatal(err)
 	}

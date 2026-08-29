@@ -24,9 +24,9 @@
 # /tmp
 
 - /tmp is your persistent scratch space, which you can always read and write to
-- It maps to /state/tmps/brave-otter on the user's machine, so bear that in mind
+- It maps to /state/farm/brave-otter on the user's machine, so bear that in mind
 - Always translate /tmp paths to the user's equivalent path before giving it to them
-	- For example: /tmp/foo.png → /state/tmps/brave-otter/foo.png
+	- For example: /tmp/foo.png → /state/farm/brave-otter/foo.png
 - It's persistent so you should tidy up after yourself and clean up large artifacts
 	- For example: git clones, source trees, binaries
 - If you encounter a read-only workspace, follow this process:

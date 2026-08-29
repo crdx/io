@@ -67,5 +67,5 @@ func GetShellHomeDir() string {
 }
 
 func GetTmpDir(name string) string {
-	return GetStateDir("tmps", name)
+	return GetStateDir("farm", name)
 }

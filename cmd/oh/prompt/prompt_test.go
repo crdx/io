@@ -38,7 +38,7 @@ func loadTestContext(root *os.Root, workspaceDir string, skills []skill.Skill) (
 		Root:         root,
 		WorkspaceDir: workspaceDir,
 		SessionName:  "session-id",
-		TmpDir:       "/state/tmps/session",
+		TmpDir:       "/state/farm/session",
 		HomeDir:      "/state/home",
 		CurrentCaps:  caps.Read,
 		ExtraPaths:   shell.Paths{},
@@ -148,7 +148,7 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 		Write: []string{"/output"},
 		Exec:  []string{"/commands"},
 	}
-	got := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", caps.Read|caps.Write, paths)
+	got := harnessContext("/workspace", "session-id", "/state/farm/session", "/state/home", caps.Read|caps.Write, paths)
 
 	for _, want := range []string{
 		"configured path /reference is read-only",
@@ -206,7 +206,7 @@ func TestTheHarnessDisclosesPrivateLoopbackNetworking(t *testing.T) {
 func TestTheScratchMappingIsWrittenInFull(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
-	scratch := "/home/alice/.local/state/org.crdx/oh/tmps/0d3f"
+	scratch := "/home/alice/.local/state/org.crdx/oh/farm/0d3f"
 	got := harnessContext("/workspace", "session-id", scratch, "/home/alice/.local/state/org.crdx/oh/home", caps.Read, shell.Paths{})
 
 	for _, want := range []string{
@@ -240,7 +240,7 @@ func TestTheHarnessNeverAbbreviatesAPathToATilde(t *testing.T) {
 	got := harnessContext(
 		filepath.Join(home, "workspace"),
 		"session-id",
-		filepath.Join(home, ".local", "state", "org.crdx", "oh", "tmps", "0d3f"),
+		filepath.Join(home, ".local", "state", "org.crdx", "oh", "farm", "0d3f"),
 		filepath.Join(home, ".local", "state", "org.crdx", "oh", "home"),
 		caps.Read|caps.Write|caps.Shell,
 		shell.Paths{
@@ -277,7 +277,7 @@ func TestTheSkillCatalogueIsAppendedToTheContext(t *testing.T) {
 }
 
 func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
-	system := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", caps.Read, shell.Paths{})
+	system := harnessContext("/workspace", "session-id", "/state/farm/session", "/state/home", caps.Read, shell.Paths{})
 
 	if want := "The workspace (/workspace) is " + filesystem(false); !strings.Contains(system, want) {
 		t.Errorf("expected the workspace to be reported as %q, got %q", want, system)
@@ -291,11 +291,11 @@ func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
 		t.Errorf("expected the scratch to be writable whatever the workspace is, got %q", system)
 	}
 
-	if !strings.Contains(system, "It maps to /state/tmps/session on the user's machine") {
+	if !strings.Contains(system, "It maps to /state/farm/session on the user's machine") {
 		t.Errorf("expected the scratch backing directory to be reported, got %q", system)
 	}
 
-	if !strings.Contains(system, "/tmp/foo.png → /state/tmps/session/foo.png") {
+	if !strings.Contains(system, "/tmp/foo.png → /state/farm/session/foo.png") {
 		t.Errorf("expected an example translated scratch path, got %q", system)
 	}
 
@@ -313,7 +313,7 @@ func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
 		"refused": {caps.Read, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := harnessContext("/workspace", "session-id", "/state/tmps/session", "/state/home", test.currentCaps, shell.Paths{})
+			got := harnessContext("/workspace", "session-id", "/state/farm/session", "/state/home", test.currentCaps, shell.Paths{})
 
 			if want := "The bash tool is " + shellAccess(test.granted); !strings.Contains(got, want) {
 				t.Errorf("expected %q in %q", want, got)

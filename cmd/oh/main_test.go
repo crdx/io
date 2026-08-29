@@ -3887,7 +3887,7 @@ func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 		Root:         root,
 		WorkspaceDir: "/workspace",
 		SessionName:  "brave-otter",
-		TmpDir:       "/state/tmps/brave-otter",
+		TmpDir:       "/state/farm/brave-otter",
 		HomeDir:      "/state/home",
 		CurrentCaps:  caps.Read | caps.Write | caps.Git | caps.Shell,
 		ExtraPaths: shell.Paths{

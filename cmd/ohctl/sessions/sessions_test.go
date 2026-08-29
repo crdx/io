@@ -87,7 +87,7 @@ func TestAListingSaysWhereASessionKeepsItsFiles(t *testing.T) {
 	if listing.SessionDir != session.Dir(directory, listing.Name) {
 		t.Errorf("unexpected session directory %q", listing.SessionDir)
 	}
-	if want := filepath.Join(stateDir, "tmps", listing.Name); listing.ScratchDir != want {
+	if want := filepath.Join(stateDir, "farm", listing.Name); listing.ScratchDir != want {
 		t.Errorf("got scratch directory %q, want %q", listing.ScratchDir, want)
 	}
 }
@@ -179,7 +179,7 @@ func TestTheJSONListingCarriesWhatTheTableCannot(t *testing.T) {
 	if !decoded[0].IsRunning || decoded[1].IsRunning {
 		t.Errorf("expected the running session to be marked, got %+v", decoded)
 	}
-	if decoded[0].ScratchDir != "/tmps/wild-scorpion" {
+	if decoded[0].ScratchDir != "/farm/wild-scorpion" {
 		t.Errorf("expected the scratch directory to be carried, got %q", decoded[0].ScratchDir)
 	}
 	if decoded[0].Touched.IsZero() {
@@ -229,7 +229,7 @@ func sample() []Listing {
 			IsRunning:    true,
 			Title:        "audit-golden-files",
 			WorkspaceDir: "/workspace/io",
-			ScratchDir:   "/tmps/wild-scorpion",
+			ScratchDir:   "/farm/wild-scorpion",
 			SessionDir:   "/sessions/wild-scorpion",
 			Model:        "claude-opus-5",
 			Effort:       "medium",
@@ -242,7 +242,7 @@ func sample() []Listing {
 			Status:       endedStatus,
 			Title:        "retry-payload",
 			WorkspaceDir: "/workspace/io",
-			ScratchDir:   "/tmps/dewy-vole",
+			ScratchDir:   "/farm/dewy-vole",
 			SessionDir:   "/sessions/dewy-vole",
 			Model:        "gpt-5.3-codex",
 			Effort:       "high",

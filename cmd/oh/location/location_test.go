@@ -27,7 +27,7 @@ func TestAnAbsoluteStateDirectoryIsTakenOverTheHomeDirectory(t *testing.T) {
 	if got, want := location.GetSessionsDir(), filepath.Join(root, "sessions"); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
-	if got, want := location.GetTmpDir("chewy-raven"), filepath.Join(root, "tmps", "chewy-raven"); got != want {
+	if got, want := location.GetTmpDir("chewy-raven"), filepath.Join(root, "farm", "chewy-raven"); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
