@@ -13,15 +13,15 @@ import (
 	"crdx.org/io/provider/opencodego"
 )
 
-func TestLoginOpenCodePromptsAndStoresTheKey(t *testing.T) {
+func TestTheKeyPromptLeavesTheEchoToTheTerminal(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "auth.json")
 	var output bytes.Buffer
 	if err := storeOpenCodeGoKey(strings.NewReader("  pasted-key  \n"), &output, path, func(string) error { return nil }); err != nil {
 		t.Fatal(err)
 	}
 
-	if output.String() != "OpenCode Go API key: **********\n" {
-		t.Errorf("got prompt %q", output.String())
+	if output.String() != "OpenCode Go API key: " {
+		t.Errorf("got prompt %q, and anything beyond it is an echo of the key", output.String())
 	}
 	key, err := opencodego.StoredKeyAt(path)
 	if err != nil {

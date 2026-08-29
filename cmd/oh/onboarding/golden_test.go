@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -162,7 +163,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 						t.Errorf("got provider %q", chosen.identifier)
 					}
 					return storeOpenCodeGoKey(
-						strings.NewReader("secret\n"),
+						typed("secret\n", output),
 						output,
 						filepath.Join(t.TempDir(), "auth.json"),
 						func(string) error { return nil },
@@ -181,7 +182,7 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 				login: func(chosen provider, presentAddress func(string)) error {
 					if chosen.identifier == model.OpencodeGoProvider {
 						return storeOpenCodeGoKey(
-							strings.NewReader("bad-key\n"),
+							typed("bad-key\n", output),
 							output,
 							filepath.Join(t.TempDir(), "auth.json"),
 							func(string) error { return errors.New("the key was refused") },
@@ -244,6 +245,10 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 			}
 		})
 	}
+}
+
+func typed(text string, terminal io.Writer) io.Reader {
+	return io.TeeReader(strings.NewReader(text), terminal)
 }
 
 func menuChoices(output *bytes.Buffer, choices ...int) func(string, []string) (int, error) {

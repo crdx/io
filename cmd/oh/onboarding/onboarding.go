@@ -210,27 +210,15 @@ func readOpenCodeGoKey(input io.Reader, output io.Writer) (string, error) {
 		return "", err
 	}
 
-	var key string
-	if terminal, ok := input.(*os.File); ok && tty.Is(terminal) {
-		var err error
-		key, err = tty.ReadMaskedLine(terminal, output)
-		if err != nil {
-			return "", fmt.Errorf("read API key: %w", err)
-		}
-	} else {
-		line, err := bufio.NewReader(input).ReadString('\n')
-		if err != nil && !errors.Is(err, io.EOF) {
-			return "", fmt.Errorf("read API key: %w", err)
-		}
-		key = strings.TrimSpace(line)
-		if _, err := fmt.Fprintln(output, strings.Repeat("*", len(key))); err != nil {
-			return "", err
-		}
+	line, err := bufio.NewReader(input).ReadString('\n')
+	if err != nil && !errors.Is(err, io.EOF) {
+		return "", fmt.Errorf("read API key: %w", err)
 	}
 
-	key = strings.TrimSpace(key)
+	key := strings.TrimSpace(line)
 	if key == "" {
 		return "", errors.New("OpenCode Go API key is empty")
 	}
+
 	return key, nil
 }
