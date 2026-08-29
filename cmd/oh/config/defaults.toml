@@ -31,10 +31,8 @@ home = []
 left = [
     { segment = "activity-spinner", idle = "·✦·", frames = ["✦··", "·✦·", "··✦", "··✦", "·✦·", "✦··"], rate = "125ms" },
 ]
-center = [
-]
+center = []
 right = [
-    { segment = "turn-timer" },
     { segment = "session-name", emoji = true },
     { segment = "scroll-overflow", direction = "up" }
 ]
@@ -45,10 +43,10 @@ left = [
     { segment = "workspace-dir", type = "base" },
 ]
 center = [
-    { segment = "subscription-usage" },
-]
-right = [
     { segment = "active-model" },
     { segment = "context-usage" },
+]
+right = [
+    { segment = "subscription-usage" },
     { segment = "scroll-overflow", direction = "down" }
 ]
