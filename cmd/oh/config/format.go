@@ -9,6 +9,7 @@ const (
 	RetiredTpsFormat        = 6
 	TurnTimerFormat         = 7
 	OllamaHostFormat        = 8
+	ContinueMessageFormat   = 9
 
-	Format = OllamaHostFormat
+	Format = ContinueMessageFormat
 )

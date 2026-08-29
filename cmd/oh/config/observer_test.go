@@ -45,15 +45,15 @@ func awaitObservedConfig(t *testing.T, observer *Observer) (Config, error) {
 
 func TestWritingAnObservedConfigLoadsTheNewRevision(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "get_on_with_it_message = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
 		t.Fatal(err)
 	}
 
 	settings, observer := observeConfig(t, path)
-	if settings.GetOnWithItMessage != "first" {
-		t.Errorf("got initial message %q", settings.GetOnWithItMessage)
+	if settings.Input.Continue != "first" {
+		t.Errorf("got initial message %q", settings.Input.Continue)
 	}
-	if err := writeConfigFile(path, "get_on_with_it_message = \"second\"\n"); err != nil {
+	if err := writeConfigFile(path, "[input]\ncontinue = \"second\"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -61,21 +61,21 @@ func TestWritingAnObservedConfigLoadsTheNewRevision(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.GetOnWithItMessage != "second" {
-		t.Errorf("got changed message %q", settings.GetOnWithItMessage)
+	if settings.Input.Continue != "second" {
+		t.Errorf("got changed message %q", settings.Input.Continue)
 	}
 }
 
 func TestAtomicallyReplacingAnObservedConfigLoadsTheNewRevision(t *testing.T) {
 	directory := t.TempDir()
 	path := filepath.Join(directory, "config.toml")
-	if err := writeConfigFile(path, "get_on_with_it_message = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer := observeConfig(t, path)
 
 	replacement := filepath.Join(directory, "replacement.toml")
-	if err := writeConfigFile(replacement, "get_on_with_it_message = \"replacement\"\n"); err != nil {
+	if err := writeConfigFile(replacement, "[input]\ncontinue = \"replacement\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Rename(replacement, path); err != nil {
@@ -86,21 +86,21 @@ func TestAtomicallyReplacingAnObservedConfigLoadsTheNewRevision(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.GetOnWithItMessage != "replacement" {
-		t.Errorf("got replacement message %q", settings.GetOnWithItMessage)
+	if settings.Input.Continue != "replacement" {
+		t.Errorf("got replacement message %q", settings.Input.Continue)
 	}
 }
 
 func TestCreatingAConfigBelowMissingDirectoriesReplacesTheDefaults(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "one", "two", "config.toml")
 	settings, observer := observeConfig(t, path)
-	if settings.GetOnWithItMessage != "yes" {
-		t.Errorf("initial default message=%q", settings.GetOnWithItMessage)
+	if settings.Input.Continue != "yes" {
+		t.Errorf("initial default message=%q", settings.Input.Continue)
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if err := writeConfigFile(path, "get_on_with_it_message = \"created\"\n"); err != nil {
+	if err := writeConfigFile(path, "[input]\ncontinue = \"created\"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -108,14 +108,14 @@ func TestCreatingAConfigBelowMissingDirectoriesReplacesTheDefaults(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.GetOnWithItMessage != "created" {
-		t.Errorf("got created message %q", settings.GetOnWithItMessage)
+	if settings.Input.Continue != "created" {
+		t.Errorf("got created message %q", settings.Input.Continue)
 	}
 }
 
 func TestDeletingAnObservedConfigRestoresTheDefaults(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "get_on_with_it_message = \"configured\"\n"); err != nil {
+	if err := writeConfigFile(path, "[input]\ncontinue = \"configured\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer := observeConfig(t, path)
@@ -127,14 +127,14 @@ func TestDeletingAnObservedConfigRestoresTheDefaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.GetOnWithItMessage != "yes" {
-		t.Errorf("got default message %q", settings.GetOnWithItMessage)
+	if settings.Input.Continue != "yes" {
+		t.Errorf("got default message %q", settings.Input.Continue)
 	}
 }
 
 func TestAnInvalidObservedRevisionIsReportedOnlyOnce(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "get_on_with_it_message = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer := observeConfig(t, path)
@@ -153,7 +153,7 @@ func TestAnInvalidObservedRevisionIsReportedOnlyOnce(t *testing.T) {
 func TestAnUnrelatedDirectoryEventDoesNotChangeTheObservedConfig(t *testing.T) {
 	directory := t.TempDir()
 	path := filepath.Join(directory, "config.toml")
-	if err := writeConfigFile(path, "get_on_with_it_message = \"kept\"\n"); err != nil {
+	if err := writeConfigFile(path, "[input]\ncontinue = \"kept\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer := observeConfig(t, path)
@@ -173,7 +173,7 @@ func TestAnUnrelatedDirectoryEventDoesNotChangeTheObservedConfig(t *testing.T) {
 
 func TestAValidReloadAfterAFailureIsApplied(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "get_on_with_it_message = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	observer := &Observer{path: path, handled: readSnapshot(path)}
@@ -182,7 +182,7 @@ func TestAValidReloadAfterAFailureIsApplied(t *testing.T) {
 	if failed.Status != ReloadFailed || failed.Failure == nil {
 		t.Fatalf("failed reload status=%v failure=%v", failed.Status, failed.Failure)
 	}
-	if err := writeConfigFile(path, "get_on_with_it_message = \"recovered\"\n"); err != nil {
+	if err := writeConfigFile(path, "[input]\ncontinue = \"recovered\"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -190,8 +190,8 @@ func TestAValidReloadAfterAFailureIsApplied(t *testing.T) {
 	if applied.Status != ReloadApplied || applied.Failure != nil {
 		t.Fatalf("applied reload status=%v failure=%v", applied.Status, applied.Failure)
 	}
-	if applied.LiveConfig.GetOnWithItMessage != "recovered" {
-		t.Errorf("applied message=%q", applied.LiveConfig.GetOnWithItMessage)
+	if applied.LiveConfig.ContinueMessage != "recovered" {
+		t.Errorf("applied message=%q", applied.LiveConfig.ContinueMessage)
 	}
 }
 
@@ -209,7 +209,7 @@ func TestObserveReportsAnInvalidInitialConfig(t *testing.T) {
 
 func TestClosingAnObserverClosesItsChanges(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "get_on_with_it_message = \"first\"\n"); err != nil {
+	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
 		t.Fatal(err)
 	}
 	_, observer, err := Observe(path)

@@ -23,7 +23,7 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	absolute := filepath.Join(t.TempDir(), "skills")
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	contents := "get_on_with_it_message = \"carry on\"\n[model]\nround_robin = [\"opencode/deepseek@hi\"]\n[editor]\ncommand = \"  subl  \"\n[skills]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
+	contents := "[input]\ncontinue = \"carry on\"\n[model]\nround_robin = [\"opencode/deepseek@hi\"]\n[editor]\ncommand = \"  subl  \"\n[skills]\ninclude = [\"" + absolute + "\", \"shared/skills\", \"~/.system/config/pi/agent/skills\"]\n"
 	if err := writeConfigFile(path, contents); err != nil {
 		t.Fatal(err)
 	}
@@ -38,8 +38,8 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 	if !slices.Equal(config.Editor.Command, []string{"subl"}) {
 		t.Errorf("got editor %q", config.Editor.Command)
 	}
-	if config.GetOnWithItMessage != "carry on" {
-		t.Errorf("got get-on-with-it message %q", config.GetOnWithItMessage)
+	if config.Input.Continue != "carry on" {
+		t.Errorf("got continue message %q", config.Input.Continue)
 	}
 	directories := config.Skills.Include
 	want := []string{
@@ -111,8 +111,8 @@ func TestAMissingConfigFileIsAllowed(t *testing.T) {
 	if len(config.Editor.Command) != 0 {
 		t.Errorf("got default editor %q", config.Editor.Command)
 	}
-	if config.GetOnWithItMessage != "yes" {
-		t.Errorf("got default get-on-with-it message %q", config.GetOnWithItMessage)
+	if config.Input.Continue != "yes" {
+		t.Errorf("got default continue message %q", config.Input.Continue)
 	}
 	if config.Version != Format {
 		t.Errorf("got config format %d, want %d", config.Version, Format)
@@ -216,11 +216,11 @@ func TestConfiguredSkillExclusionsRejectAnEmptyDirectory(t *testing.T) {
 
 func TestConfiguredStringsCannotBeEmpty(t *testing.T) {
 	for name, contents := range map[string]string{
-		"model round robin":                 "[model]\nround_robin = []\n",
-		"model selection":                   "[model]\nround_robin = [\"\"]\n",
-		"model selection whitespace":        "[model]\nround_robin = [\"  \"]\n",
-		"get_on_with_it_message":            "get_on_with_it_message = \"\"\n",
-		"get_on_with_it_message whitespace": "get_on_with_it_message = \"  \"\n",
+		"model round robin":          "[model]\nround_robin = []\n",
+		"model selection":            "[model]\nround_robin = [\"\"]\n",
+		"model selection whitespace": "[model]\nround_robin = [\"  \"]\n",
+		"input continue":             "[input]\ncontinue = \"\"\n",
+		"input continue whitespace":  "[input]\ncontinue = \"  \"\n",
 	} {
 		t.Run(name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "config.toml")
@@ -234,9 +234,9 @@ func TestConfiguredStringsCannotBeEmpty(t *testing.T) {
 	}
 }
 
-func TestTheConfiguredGetOnWithItMessageIsTrimmed(t *testing.T) {
+func TestTheConfiguredContinueMessageIsTrimmed(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "get_on_with_it_message = \"  carry on  \"\n"); err != nil {
+	if err := writeConfigFile(path, "[input]\ncontinue = \"  carry on  \"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -244,8 +244,8 @@ func TestTheConfiguredGetOnWithItMessageIsTrimmed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if config.GetOnWithItMessage != "carry on" {
-		t.Errorf("got get-on-with-it message %q", config.GetOnWithItMessage)
+	if config.Input.Continue != "carry on" {
+		t.Errorf("got continue message %q", config.Input.Continue)
 	}
 }
 
@@ -538,7 +538,7 @@ func TestTheBuiltInDefaultsSetEverySettingThereIs(t *testing.T) {
 	}
 
 	for _, key := range []string{
-		"version", "editor", "model", "get_on_with_it_message", "snippets", "skills", "sandbox", "bar",
+		"version", "editor", "input", "model", "snippets", "skills", "sandbox", "bar",
 	} {
 		if _, ok := written[key]; !ok {
 			t.Errorf("expected the defaults to say what %q is", key)
@@ -692,7 +692,7 @@ func TestTheStreamingModeDefaultsToWholeLines(t *testing.T) {
 
 func TestAConfigWrittenBeforeTheStreamingModeExistedNeedsNoMigrating(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(path, []byte("version = 8\nget_on_with_it_message = \"go on\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte("version = 9\n[input]\ncontinue = \"go on\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 

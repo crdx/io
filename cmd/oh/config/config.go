@@ -26,16 +26,16 @@ import (
 var defaultsTOML string
 
 type Config struct {
-	Version            int                            `toml:"version"`
-	Editor             Editor                         `toml:"editor"`
-	Model              Model                          `toml:"model"`
-	Provider           Provider                       `toml:"provider"`
-	GetOnWithItMessage string                         `toml:"get_on_with_it_message"`
-	Snippets           map[string]snippets.Definition `toml:"snippets"`
-	Skills             SkillPaths                     `toml:"skills"`
-	Sandbox            sandbox                        `toml:"sandbox"`
-	Bar                Bar                            `toml:"bar"`
-	Ui                 Ui                             `toml:"ui"`
+	Version  int                            `toml:"version"`
+	Editor   Editor                         `toml:"editor"`
+	Input    Input                          `toml:"input"`
+	Model    Model                          `toml:"model"`
+	Provider Provider                       `toml:"provider"`
+	Snippets map[string]snippets.Definition `toml:"snippets"`
+	Skills   SkillPaths                     `toml:"skills"`
+	Sandbox  sandbox                        `toml:"sandbox"`
+	Bar      Bar                            `toml:"bar"`
+	Ui       Ui                             `toml:"ui"`
 
 	fallback *toml.MetaData
 	user     *toml.MetaData
@@ -44,6 +44,10 @@ type Config struct {
 
 type Editor struct {
 	Command editor.Command `toml:"command"`
+}
+
+type Input struct {
+	Continue string `toml:"continue"`
 }
 
 type Model struct {
@@ -81,9 +85,9 @@ type Rule struct {
 }
 
 type LiveConfig struct {
-	GetOnWithItMessage string
-	SegmentLayout      segment.Layout
-	StreamingMode      output.StreamingMode
+	ContinueMessage string
+	SegmentLayout   segment.Layout
+	StreamingMode   output.StreamingMode
 }
 
 func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
@@ -96,9 +100,9 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 	}
 
 	return LiveConfig{
-		GetOnWithItMessage: self.GetOnWithItMessage,
-		SegmentLayout:      layout,
-		StreamingMode:      self.Ui.StreamingMode,
+		ContinueMessage: self.Input.Continue,
+		SegmentLayout:   layout,
+		StreamingMode:   self.Ui.StreamingMode,
 	}, nil
 }
 
@@ -254,9 +258,9 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 	if meta.IsDefined("provider", "ollama", "host") && config.Provider.Ollama.Host == "" {
 		return config, fmt.Errorf("%s: provider.ollama.host is empty", displayPath)
 	}
-	config.GetOnWithItMessage = strings.TrimSpace(config.GetOnWithItMessage)
-	if meta.IsDefined("get_on_with_it_message") && config.GetOnWithItMessage == "" {
-		return config, fmt.Errorf("%s: get_on_with_it_message is empty", displayPath)
+	config.Input.Continue = strings.TrimSpace(config.Input.Continue)
+	if meta.IsDefined("input", "continue") && config.Input.Continue == "" {
+		return config, fmt.Errorf("%s: input.continue is empty", displayPath)
 	}
 	for _, name := range slices.Sorted(maps.Keys(config.Snippets)) {
 		definition := config.Snippets[name]

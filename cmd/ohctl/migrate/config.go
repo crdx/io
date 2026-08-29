@@ -78,6 +78,21 @@ var configSteps = map[int]configStep{
 	config.SnippetDefinitionFormat: migrateConfigFromVersionFive,
 	config.RetiredTpsFormat:        migrateConfigFromVersionSix,
 	config.TurnTimerFormat:         migrateConfigFromVersionSeven,
+	config.OllamaHostFormat:        migrateConfigFromVersionEight,
+}
+
+func migrateConfigFromVersionEight(data []byte) ([]byte, error) {
+	_, document, err := readConfigDocument(data)
+	if err != nil {
+		return nil, err
+	}
+
+	migrated := data
+	if _, hasMessage := document["get_on_with_it_message"]; hasMessage {
+		migrated = moveRootKeyIntoTable(migrated, "get_on_with_it_message", "input", "continue")
+	}
+
+	return rewriteConfigVersion(migrated, config.ContinueMessageFormat), nil
 }
 
 func migrateConfigFromVersionSeven(data []byte) ([]byte, error) {
@@ -121,19 +136,19 @@ func migrateConfigFromVersionThree(data []byte) ([]byte, error) {
 
 	migrated := data
 	if _, hasEditor := document["editor"]; hasEditor {
-		migrated = rewriteEditorCommand(migrated)
+		migrated = moveRootKeyIntoTable(migrated, "editor", "editor", "command")
 	}
 
 	return rewriteConfigVersion(migrated, config.EditorCommandFormat), nil
 }
 
-func rewriteEditorCommand(data []byte) []byte {
+func moveRootKeyIntoTable(data []byte, name string, table string, key string) []byte {
 	text := string(data)
 	hasFinalNewline := strings.HasSuffix(text, "\n")
 	lines := strings.Split(strings.TrimSuffix(text, "\n"), "\n")
 
 	tableStart := len(lines)
-	editorAt := -1
+	movedAt := -1
 	for i, line := range lines {
 		trimmed := strings.TrimSpace(line)
 		if strings.HasPrefix(trimmed, "[") {
@@ -141,22 +156,20 @@ func rewriteEditorCommand(data []byte) []byte {
 			break
 		}
 
-		if editorAt < 0 {
-			if key, hasKey := configLineKey(line); hasKey && key == "editor" {
-				editorAt = i
+		if movedAt < 0 {
+			if found, hasKey := configLineKey(line); hasKey && found == name {
+				movedAt = i
 			}
 		}
 	}
 
-	if editorAt < 0 {
+	if movedAt < 0 {
 		return data
 	}
 
-	commandLine := editorCommandLine(lines[editorAt])
-
-	migrated := append([]string(nil), lines[:editorAt]...)
-	migrated = append(migrated, lines[editorAt+1:tableStart]...)
-	migrated = appendWithoutTrailingBlank(migrated, "", "[editor]", commandLine)
+	migrated := append([]string(nil), lines[:movedAt]...)
+	migrated = append(migrated, lines[movedAt+1:tableStart]...)
+	migrated = appendWithoutTrailingBlank(migrated, "", "["+table+"]", rewriteLineKey(lines[movedAt], key))
 	if tableStart < len(lines) {
 		migrated = append(migrated, "")
 		migrated = append(migrated, lines[tableStart:]...)
@@ -170,15 +183,15 @@ func rewriteEditorCommand(data []byte) []byte {
 	return []byte(joined)
 }
 
-func editorCommandLine(line string) string {
-	key, value, found := strings.Cut(line, "=")
+func rewriteLineKey(line string, key string) string {
+	written, value, found := strings.Cut(line, "=")
 	if !found {
 		return line
 	}
 
-	gap := key[len(strings.TrimRight(key, " \t")):]
+	gap := written[len(strings.TrimRight(written, " \t")):]
 
-	return "command" + gap + "=" + value
+	return key + gap + "=" + value
 }
 
 func migrateConfigFromVersionTwo(data []byte) ([]byte, error) {

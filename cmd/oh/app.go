@@ -97,9 +97,9 @@ type App struct {
 	terminal         terminal.Terminal
 	metrics          metrics.Tracker
 
-	workspaceDir       string
-	getOnWithItMessage string
-	streamingMode      output.StreamingMode
+	workspaceDir    string
+	continueMessage string
+	streamingMode   output.StreamingMode
 
 	commands   slash.Registry
 	completion slash.Completion
@@ -227,7 +227,7 @@ func (self *App) apply(editor *edit.Input, history *edit.History, keypress key.K
 		self.submitInput(editor, history, strings.TrimSpace(editor.Text()))
 
 	case edit.Continue:
-		self.submitInput(editor, history, self.getOnWithItMessage)
+		self.submitInput(editor, history, self.continueMessage)
 
 	case edit.Cancel:
 		self.cancelTurn(stopKeyReason(keypress))
@@ -568,7 +568,7 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		})
 		return true
 	case config.ReloadApplied:
-		self.getOnWithItMessage = result.LiveConfig.GetOnWithItMessage
+		self.continueMessage = result.LiveConfig.ContinueMessage
 		self.streamingMode = result.LiveConfig.StreamingMode
 		self.barConfiguration.ReplaceLayout(result.LiveConfig.SegmentLayout)
 		self.clearFeedback(configFeedback)

@@ -149,10 +149,10 @@ func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 	}
 }
 
-func TestTwoReturnsOnAnEmptyIdleLineSendTheGetOnWithItMessage(t *testing.T) {
+func TestTwoReturnsOnAnEmptyIdleLineSendTheContinueMessage(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
-	self.getOnWithItMessage = "carry on"
+	self.continueMessage = "carry on"
 	history := edit.NewHistory("", historyLimit)
 	editor := edit.NewInput(history)
 
@@ -246,7 +246,7 @@ func workspaceNowReadOnly() string {
 	return withdrawn.Inject()
 }
 
-func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *testing.T) {
+func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithTheContinueMessage(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	history := edit.NewHistory("", historyLimit)
@@ -288,7 +288,7 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithAGetOnWithItMessage(t *
 		interrupted = interrupted || record.Kind == agent.InterruptionEvent
 	}
 
-	wantMessages := []string{"first", builtInConfig(t).GetOnWithItMessage}
+	wantMessages := []string{"first", builtInConfig(t).Input.Continue}
 	if !slices.Equal(messages, wantMessages) {
 		t.Errorf("got messages %q, want %q", messages, wantMessages)
 	}
@@ -2094,11 +2094,11 @@ func testConversation(t *testing.T, screenOutput *bytes.Buffer) *App {
 	backend := quietProvider{}
 
 	return &App{
-		agent:              agent.New("", backend, nil),
-		screen:             output.New(screenOutput),
-		recorder:           record.New(log),
-		mode:               caps.NewMode(caps.Read | caps.Write),
-		getOnWithItMessage: builtInConfig(t).GetOnWithItMessage,
+		agent:           agent.New("", backend, nil),
+		screen:          output.New(screenOutput),
+		recorder:        record.New(log),
+		mode:            caps.NewMode(caps.Read | caps.Write),
+		continueMessage: builtInConfig(t).Input.Continue,
 	}
 }
 
@@ -4993,7 +4993,7 @@ func prepareLiveConfig(t *testing.T, self *App, path string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	self.getOnWithItMessage = live.GetOnWithItMessage
+	self.continueMessage = live.ContinueMessage
 	self.streamingMode = live.StreamingMode
 	self.barConfiguration = bar.NewConfiguration(registry, live.SegmentLayout)
 }
@@ -5018,10 +5018,11 @@ func settleLiveConfig(t *testing.T, self *App) {
 	}
 }
 
-func TestReloadingConfigChangesTheGetOnWithItMessage(t *testing.T) {
+func TestReloadingConfigChangesTheContinueMessage(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
 	writeLiveConfig(t, path, `
-		get_on_with_it_message = "first"
+		[input]
+		continue = "first"
 	`)
 
 	var screenOutput bytes.Buffer
@@ -5029,11 +5030,13 @@ func TestReloadingConfigChangesTheGetOnWithItMessage(t *testing.T) {
 	prepareLiveConfig(t, self, path)
 
 	writeLiveConfig(t, path, `
-		get_on_with_it_message = "second"
+		[input]
+		continue = "second"
 	`)
 	settleLiveConfig(t, self)
 	writeLiveConfig(t, path, `
-		get_on_with_it_message = "carry on from the reloaded config"
+		[input]
+		continue = "carry on from the reloaded config"
 	`)
 	settleLiveConfig(t, self)
 
@@ -5237,7 +5240,8 @@ func TestReloadingConfigDrawsEveryVisibleState(t *testing.T) {
 func TestEphemeralInterfaceFeedbackStaysOutOfConversationHistory(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
 	writeLiveConfig(t, path, `
-		get_on_with_it_message = "first"
+		[input]
+		continue = "first"
 	`)
 
 	directory := t.TempDir()
@@ -5273,11 +5277,13 @@ func TestEphemeralInterfaceFeedbackStaysOutOfConversationHistory(t *testing.T) {
 	self.handleCommand("/foo")
 	self.handleCommand("/help")
 	writeLiveConfig(t, path, `
-		get_on_with_it_message = "second"
+		[input]
+		continue = "second"
 	`)
 	settleLiveConfig(t, self)
 	writeLiveConfig(t, path, `
-		get_on_with_it_message = "third"
+		[input]
+		continue = "third"
 	`)
 	settleLiveConfig(t, self)
 
@@ -5393,7 +5399,8 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 
 	path := filepath.Join(t.TempDir(), "config.toml")
 	writeLiveConfig(t, path, `
-		get_on_with_it_message = "first"
+		[input]
+		continue = "first"
 
 		[bar.top]
 		left = [{ segment = "session-name" }]
@@ -5427,7 +5434,8 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 		return screenOutput.String()
 	case configReloadSettingThatIsNotLive:
 		writeLiveConfig(t, path, `
-			get_on_with_it_message = "first"
+			[input]
+			continue = "first"
 
 			[editor]
 			command = "vi"
@@ -5455,7 +5463,8 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 	}
 
 	writeLiveConfig(t, path, `
-		get_on_with_it_message = "second"
+		[input]
+		continue = "second"
 
 		[bar.top]
 		left = []

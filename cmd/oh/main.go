@@ -503,7 +503,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
-	chat.getOnWithItMessage = liveSettings.GetOnWithItMessage
+	chat.continueMessage = liveSettings.ContinueMessage
 	chat.streamingMode = liveSettings.StreamingMode
 	chat.barConfiguration = bar.NewConfiguration(barRegistry, liveSettings.SegmentLayout)
 

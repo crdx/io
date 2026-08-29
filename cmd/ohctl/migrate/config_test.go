@@ -411,6 +411,74 @@ round_robin = ["codex/gpt@high"]
 	}
 }
 
+func TestTheEighthConfigMigrationMovesTheContinueMessageIntoTheInputTable(t *testing.T) {
+	original := `version = 8
+get_on_with_it_message = "carry on" # what an empty line sends
+
+[model]
+round_robin = ["codex/gpt@high"]
+`
+	path := configFile(t, original)
+
+	from, isPresent, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isPresent || from != config.OllamaHostFormat {
+		t.Errorf("got present %t from format %d", isPresent, from)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	written := string(body)
+	for _, expected := range []string{
+		currentVersionLine(),
+		"[input]",
+		`continue = "carry on" # what an empty line sends`,
+		`round_robin = ["codex/gpt@high"]`,
+	} {
+		if !strings.Contains(written, expected) {
+			t.Errorf("migration omitted %q from:\n%s", expected, written)
+		}
+	}
+	if strings.Contains(written, "get_on_with_it_message") {
+		t.Errorf("migration kept the old key in:\n%s", written)
+	}
+	if _, err := config.Load(path); err != nil {
+		t.Fatalf("migrated config cannot be loaded: %v", err)
+	}
+
+	backup, err := os.ReadFile(backupPath(path))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(backup) != original {
+		t.Errorf("backup changed:\n%s", backup)
+	}
+}
+
+func TestTheEighthConfigMigrationLeavesAConfigWithoutTheMessageAlone(t *testing.T) {
+	path := configFile(t, "version = 8\n[model]\nround_robin = [\"codex/gpt@high\"]\n")
+
+	if _, _, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path}); err != nil {
+		t.Fatal(err)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	written := string(body)
+	if strings.Contains(written, "[input]") {
+		t.Errorf("migration invented an input table in:\n%s", written)
+	}
+	if !strings.Contains(written, currentVersionLine()) {
+		t.Errorf("migration left the version behind in:\n%s", written)
+	}
+}
+
 func TestCurrentConfigIsLeftAlone(t *testing.T) {
 	original := currentVersionLine() + "\n[model]\nround_robin = [\"codex/gpt@high\"]\n"
 	path := configFile(t, original)

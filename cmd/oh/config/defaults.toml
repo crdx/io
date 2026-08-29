@@ -1,9 +1,10 @@
-version = 8
-
-get_on_with_it_message = "yes"
+version = 9
 
 [editor]
 command = []
+
+[input]
+continue = "yes"
 
 [ui]
 stream = "line"
