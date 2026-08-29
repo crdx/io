@@ -149,6 +149,7 @@ func Keypresses(terminal *os.File) (<-chan key.Key, func()) {
 	return keys, func() {
 		reader.Stop()
 		<-finished
+		reader.Close()
 	}
 }
 

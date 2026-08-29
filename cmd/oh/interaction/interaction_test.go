@@ -201,11 +201,7 @@ func TestRunStopsAndRedraws(t *testing.T) {
 }
 
 func TestKeypressesGiveTheTerminalBackWhenTheyAreStopped(t *testing.T) {
-	terminal, err := os.OpenFile("/dev/ptmx", os.O_RDWR, 0)
-	if err != nil {
-		t.Skipf("no pseudo-terminal to test against: %v", err)
-	}
-	t.Cleanup(func() { _ = terminal.Close() })
+	terminal := openTerminal(t)
 
 	keys, stopReading := Keypresses(terminal)
 	stopReading()
@@ -230,4 +226,66 @@ func TestKeypressesGiveTheTerminalBackWhenTheyAreStopped(t *testing.T) {
 	if taken[0] != 'x' {
 		t.Errorf("the next reader got %q, so the keypress reader was still holding the terminal", taken[0])
 	}
+}
+
+func TestKeypressesAreHandedOnUntilTheyAreStopped(t *testing.T) {
+	terminal := openTerminal(t)
+
+	keys, stopReading := Keypresses(terminal)
+	t.Cleanup(stopReading)
+
+	if _, err := io.WriteString(terminal, "a"); err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case keypress := <-keys:
+		if keypress.Code != key.Rune || keypress.Value != 'a' {
+			t.Errorf("got %+v", keypress)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("the keypress was never handed on")
+	}
+}
+
+const decodingPause = 50 * time.Millisecond
+
+func TestStoppingLetsGoOfAKeypressNobodyIsWaitingFor(t *testing.T) {
+	terminal := openTerminal(t)
+
+	keys, stopReading := Keypresses(terminal)
+
+	if _, err := io.WriteString(terminal, "a"); err != nil {
+		t.Fatal(err)
+	}
+
+	time.Sleep(decodingPause)
+
+	stopped := make(chan struct{})
+	go func() {
+		stopReading()
+		close(stopped)
+	}()
+
+	select {
+	case <-stopped:
+	case <-time.After(time.Second):
+		t.Fatal("stopping waited on a keypress nobody wanted")
+	}
+
+	if _, open := <-keys; open {
+		t.Error("a stopped reader was still handing keypresses on")
+	}
+}
+
+func openTerminal(t *testing.T) *os.File {
+	t.Helper()
+
+	terminal, err := os.OpenFile("/dev/ptmx", os.O_RDWR, 0)
+	if err != nil {
+		t.Skipf("no pseudo-terminal to test against: %v", err)
+	}
+	t.Cleanup(func() { _ = terminal.Close() })
+
+	return terminal
 }
