@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -50,13 +52,59 @@ func Open(configured Command, paths ...string) error {
 	return nil
 }
 
-func buildCommand(configured Command, paths []string) (*exec.Cmd, error) {
-	if len(configured) == 0 {
-		return nil, errors.New("editor is not configured: set editor in config.toml")
+var candidates = []Command{
+	{"subl", "--wait"},
+	{"code", "--wait"},
+}
+
+var terminalEditors = []string{
+	"ed",
+	"emacs",
+	"helix",
+	"hx",
+	"jed",
+	"joe",
+	"kak",
+	"mcedit",
+	"micro",
+	"nano",
+	"ne",
+	"nvim",
+	"pico",
+	"vi",
+	"view",
+	"vim",
+}
+
+func Detect() (Command, bool) {
+	for _, candidate := range candidates {
+		if _, err := exec.LookPath(candidate[0]); err == nil {
+			return candidate, true
+		}
 	}
+
+	return nil, false
+}
+
+func IsTerminalEditor(name string) bool {
+	return slices.Contains(terminalEditors, filepath.Base(name))
+}
+
+func buildCommand(configured Command, paths []string) (*exec.Cmd, error) {
+	if len(configured) == 0 || strings.TrimSpace(configured[0]) == "" {
+		detected, found := Detect()
+		if !found {
+			return nil, errors.New("no editor was found: set editor in config.toml")
+		}
+		configured = detected
+	}
+
 	name := strings.TrimSpace(configured[0])
-	if name == "" {
-		return nil, errors.New("editor is not configured: set editor in config.toml")
+	if IsTerminalEditor(name) {
+		return nil, fmt.Errorf(
+			"%s is not supported yet: set a graphical editor in config.toml",
+			name,
+		)
 	}
 
 	arguments := append([]string(nil), configured[1:]...)

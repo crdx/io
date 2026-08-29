@@ -429,6 +429,8 @@ func TestBrowseIsNotACommandAnymore(t *testing.T) {
 }
 
 func TestEditReportsAnUnconfiguredEditor(t *testing.T) {
+	t.Setenv("PATH", t.TempDir())
+
 	configDirectory := t.TempDir()
 	set, err := New(Options{
 		ConfigDir:  configDirectory,
