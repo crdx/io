@@ -1,0 +1,30 @@
+=== wide to narrow ===
+--- before resize at 36 columns ---
+one two three four five six seven
+eight nine ten eleven twelve
+--- resize frame at 18 columns ---
+one two three four
+five six seven
+eight nine ten
+eleven twelve
+--- after" fifteen" ---
+one two three four
+five six seven
+eight nine ten
+eleven twelve
+thirteen fourteen
+--- after" seventeen" ---
+one two three four
+five six seven
+eight nine ten
+eleven twelve
+thirteen fourteen
+fifteen sixteen
+--- after" nineteen" ---
+one two three four
+five six seven
+eight nine ten
+eleven twelve
+thirteen fourteen
+fifteen sixteen
+seventeen eighteen

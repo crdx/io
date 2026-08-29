@@ -2598,6 +2598,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"context":               {".prompt"},
 		"inputblock":            {".ansi", ".screen"},
 		"lifecycle":             {".ansi", ".screen"},
+		"line-resize":           {".screen"},
 		"streaming-modes":       {".screen"},
 		"mermaid-streaming":     {".screen"},
 		"mode-takeback":         {".ansi", ".screen"},
@@ -3211,6 +3212,57 @@ func everyStreamingMode() map[string]output.StreamingMode {
 		"line":  output.StreamingModeLine,
 		"paced": output.StreamingModePaced,
 	}
+}
+
+func TestLineStreamingDrawsEveryFrameAcrossANarrowerResize(t *testing.T) {
+	compareWithGolden(t, "line-resize", ".screen", map[string]func() string{
+		"wide to narrow": func() string { return lineResizeFrames(t) },
+	})
+}
+
+func lineResizeFrames(t *testing.T) string {
+	t.Helper()
+
+	const wideColumns = 36
+	const narrowColumns = 18
+	const initial = "one two three four five six seven eight nine ten eleven twelve thirteen"
+
+	var screenOutput bytes.Buffer
+	wideScreen := output.NewTerminalOfSize(&screenOutput, wideColumns, replayLines)
+	widePainter := newStreamedTestPainter(wideScreen, true, output.StreamingModeLine)
+	widePainter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: initial})
+	wideRows := visibleScreen(t, screenOutput.String(), wideColumns)
+
+	var frames strings.Builder
+	fmt.Fprintf(&frames, "--- before resize at %d columns ---\n%s\n", wideColumns, strings.Join(wideRows, "\n"))
+
+	provisional := widePainter.ProvisionalDelta()
+	narrowScreen := output.NewTerminalOfSize(&screenOutput, narrowColumns, replayLines)
+	narrowScreen.Reset()
+	narrowPainter := newStreamedTestPainter(narrowScreen, true, output.StreamingModeLine)
+	narrowPainter.DrawRestoredDelta(provisional, widePainter)
+	narrowRows := visibleScreen(t, screenOutput.String(), narrowColumns)
+	fmt.Fprintf(&frames, "--- resize frame at %d columns ---\n%s\n", narrowColumns, strings.Join(narrowRows, "\n"))
+
+	if len(narrowRows) < len(wideRows)+2 {
+		t.Errorf("expected narrowing to reveal several newly complete rows, wide=%q narrow=%q", wideRows, narrowRows)
+	}
+
+	previousRows := narrowRows
+	for _, delta := range []string{" fourteen", " fifteen", " sixteen", " seventeen", " eighteen", " nineteen", " twenty"} {
+		narrowPainter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: delta})
+		rows := visibleScreen(t, screenOutput.String(), narrowColumns)
+		if slices.Equal(rows, previousRows) {
+			continue
+		}
+		if len(rows) != len(previousRows)+1 {
+			t.Errorf("delta %q revealed %d rows, want one: before=%q after=%q", delta, len(rows)-len(previousRows), previousRows, rows)
+		}
+		fmt.Fprintf(&frames, "--- after%q ---\n%s\n", delta, strings.Join(rows, "\n"))
+		previousRows = rows
+	}
+
+	return strings.TrimSuffix(frames.String(), "\n")
 }
 
 func TestAStreamThatStopsStillShowsEverythingThatArrived(t *testing.T) {

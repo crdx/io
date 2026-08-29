@@ -9,7 +9,8 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
-	east "github.com/yuin/goldmark/extension/ast"
+	extensionast "github.com/yuin/goldmark/extension/ast"
+	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
 
 	"crdx.org/io/cmd/oh/style"
@@ -21,7 +22,7 @@ const tab = "    "
 
 const mermaidLanguage = "mermaid"
 
-var parser = goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser()
+var markdownParser = goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser()
 
 // Render lays markdown out as the rows to draw, styled and wrapped to the given columns.
 func Render(markdown string, columns int) []string {
@@ -30,13 +31,21 @@ func Render(markdown string, columns int) []string {
 
 // StreamRenderer retains successful Mermaid diagrams while incomplete Markdown continues arriving.
 type StreamRenderer struct {
-	mermaidRows   map[int][]string
-	isTailMermaid bool
+	mermaidRows             map[int][]string
+	isTailMermaid           bool
+	hasMermaid              bool
+	hasLinkReference        bool
+	stableCandidateStart    int
+	hasStableCandidateStart bool
 }
 
 // Render lays out the current prefix of a Markdown stream.
 func (self *StreamRenderer) Render(markdown string, columns int) []string {
 	self.isTailMermaid = false
+	self.hasMermaid = false
+	self.hasLinkReference = false
+	self.stableCandidateStart = 0
+	self.hasStableCandidateStart = false
 
 	return render(markdown, columns, self)
 }
@@ -50,16 +59,46 @@ func (self *StreamRenderer) IsTailMermaid() bool {
 func (self *StreamRenderer) Reset() {
 	clear(self.mermaidRows)
 	self.isTailMermaid = false
+	self.hasMermaid = false
+	self.hasLinkReference = false
+	self.stableCandidateStart = 0
+	self.hasStableCandidateStart = false
 }
 
 func render(markdown string, columns int, stream *StreamRenderer) []string {
 	source := []byte(strings.ReplaceAll(markdown, "\t", tab))
+	parserContext := parser.NewContext()
+	document := markdownParser.Parse(text.NewReader(source), parser.WithContext(parserContext))
+	if stream != nil {
+		stream.hasLinkReference = len(parserContext.References()) > 0
+		if lastBlock := document.LastChild(); lastBlock != nil {
+			if candidate := lastBlock.PreviousSibling(); candidate != nil && candidate.Pos() >= 0 {
+				stream.stableCandidateStart = originalOffset(markdown, candidate.Pos())
+				stream.hasStableCandidateStart = true
+			}
+		}
+	}
 
 	mermaidBlock := 0
 	renderer := &renderer{source: source, columns: columns, mermaidBlock: &mermaidBlock, stream: stream}
-	renderer.blocks(parser.Parse(text.NewReader(source)))
+	renderer.blocks(document)
 
 	return renderer.rows
+}
+
+func originalOffset(markdown string, expandedOffset int) int {
+	expandedAt := 0
+	for originalAt := range len(markdown) {
+		if expandedAt >= expandedOffset {
+			return originalAt
+		}
+		if markdown[originalAt] == '\t' {
+			expandedAt += len(tab)
+		} else {
+			expandedAt++
+		}
+	}
+	return len(markdown)
 }
 
 type renderer struct {
@@ -98,6 +137,10 @@ func (self *renderer) block(node ast.Node) {
 		language := string(node.Language(self.source))
 		lines := self.lines(node)
 		if language == mermaidLanguage {
+			if self.stream != nil {
+				self.stream.hasMermaid = true
+			}
+
 			block := *self.mermaidBlock
 			*self.mermaidBlock++
 			if self.mermaid(lines, block) {
@@ -125,7 +168,7 @@ func (self *renderer) block(node ast.Node) {
 	case *ast.List:
 		self.list(node)
 
-	case *east.Table:
+	case *extensionast.Table:
 		self.rows = append(self.rows, self.table(node)...)
 
 	default:

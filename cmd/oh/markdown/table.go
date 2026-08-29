@@ -7,7 +7,7 @@ import (
 	"crdx.org/col"
 
 	"github.com/yuin/goldmark/ast"
-	east "github.com/yuin/goldmark/extension/ast"
+	extensionast "github.com/yuin/goldmark/extension/ast"
 
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
@@ -15,14 +15,14 @@ import (
 
 const widest = 30
 
-func (self *renderer) table(node *east.Table) []string {
+func (self *renderer) table(node *extensionast.Table) []string {
 	var head []string
 	var body [][]string
 
 	for row := node.FirstChild(); row != nil; row = row.NextSibling() {
 		cells := self.cellsOf(row)
 
-		if _, is := row.(*east.TableHeader); is {
+		if _, is := row.(*extensionast.TableHeader); is {
 			head = cells
 			continue
 		}
@@ -141,7 +141,7 @@ func border(widths []int, left string, between string, right string) string {
 	return style.Border(left + strings.Join(parts, between) + right)
 }
 
-func tableRows(cells []string, aligns []east.Alignment, widths []int, isHeading bool) []string {
+func tableRows(cells []string, aligns []extensionast.Alignment, widths []int, isHeading bool) []string {
 	wrappedCells := make([][]string, len(widths))
 	height := 1
 
@@ -185,26 +185,26 @@ func tableRows(cells []string, aligns []east.Alignment, widths []int, isHeading 
 	return rows
 }
 
-func alignment(aligns []east.Alignment, at int) east.Alignment {
+func alignment(aligns []extensionast.Alignment, at int) extensionast.Alignment {
 	if at < len(aligns) {
 		return aligns[at]
 	}
 
-	return east.AlignNone
+	return extensionast.AlignNone
 }
 
-func pad(text string, cells int, align east.Alignment) string {
+func pad(text string, cells int, align extensionast.Alignment) string {
 	spare := cells - style.Width(text)
 	if spare <= 0 {
 		return text
 	}
 
 	switch align {
-	case east.AlignRight:
+	case extensionast.AlignRight:
 		return strings.Repeat(" ", spare) + text
-	case east.AlignCenter:
+	case extensionast.AlignCenter:
 		return strings.Repeat(" ", spare/2) + text + strings.Repeat(" ", spare-spare/2)
-	case east.AlignLeft, east.AlignNone:
+	case extensionast.AlignLeft, extensionast.AlignNone:
 	}
 
 	return text + strings.Repeat(" ", spare)

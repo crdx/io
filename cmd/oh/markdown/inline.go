@@ -6,7 +6,7 @@ import (
 	"crdx.org/col"
 
 	"github.com/yuin/goldmark/ast"
-	east "github.com/yuin/goldmark/extension/ast"
+	extensionast "github.com/yuin/goldmark/extension/ast"
 	"github.com/yuin/goldmark/util"
 
 	"crdx.org/io/cmd/oh/style"
@@ -42,7 +42,7 @@ func (self *renderer) renderInlineNode(node ast.Node) string {
 
 		return over(col.Italic, self.inline(node))
 
-	case *east.Strikethrough:
+	case *extensionast.Strikethrough:
 		return over(col.Strikethrough, self.inline(node))
 
 	case *ast.Link:
@@ -57,7 +57,7 @@ func (self *renderer) renderInlineNode(node ast.Node) string {
 	case *ast.RawHTML:
 		return style.Subtle(self.raw(node))
 
-	case *east.TaskCheckBox:
+	case *extensionast.TaskCheckBox:
 		if node.IsChecked {
 			return style.Success("[x] ")
 		}

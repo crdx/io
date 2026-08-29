@@ -26,7 +26,7 @@ type Picasso struct {
 	toolBlock      *dynamic.Block
 	rows           map[string]int
 	answer         liveText
-	answerRenderer markdown.StreamRenderer
+	answerRenderer markdown.IncrementalRenderer
 	reasoning      liveText
 	previousKind   agent.Kind
 
