@@ -11,6 +11,8 @@ LINT_CACHE := env('GOLANGCI_LINT_CACHE', home_directory() / '.cache' / 'golangci
 
 export GOLANGCI_LINT_CACHE := LINT_CACHE / sha256(justfile_directory())
 
+export GOEXPERIMENT := "jsonv2"
+
 [private]
 help:
     just --list --unsorted --list-submodules

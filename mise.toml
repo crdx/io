@@ -2,3 +2,6 @@
 "go:crdx.org/cmd/unbuffer" = "latest"
 golangci-lint = "latest"
 ripgrep = "latest"
+
+[env]
+GOEXPERIMENT = "jsonv2"
