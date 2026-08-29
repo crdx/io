@@ -117,6 +117,23 @@ func TestWhatAPolicyNamesIsGrantedWithTheRightsItAsked(t *testing.T) {
 	}
 }
 
+func TestOnlyAPolicyWithAPrivateProcessFilesystemGrantsProcessInformation(t *testing.T) {
+	if _, granted := rightsFor(Policy{}.grants(), processFilesystemPath); granted {
+		t.Error("a policy without a private process filesystem was granted process information")
+	}
+
+	rights, granted := rightsFor(
+		Policy{UseProcFS: true}.grants(),
+		processFilesystemPath,
+	)
+	if !granted {
+		t.Fatal("a private process filesystem was not granted")
+	}
+	if rights != rightsRead {
+		t.Errorf("the private process filesystem got rights %#x, want %#x", rights, rightsRead)
+	}
+}
+
 func TestOnlyAPolicyWithItsOwnMountsGrantsPseudoterminals(t *testing.T) {
 	if _, granted := rightsFor(Policy{}.grants(), "/dev/ptmx"); granted {
 		t.Error("a policy without mounts of its own granted the pseudoterminal multiplexer")

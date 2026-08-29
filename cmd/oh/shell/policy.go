@@ -153,18 +153,21 @@ func createPolicyWithSupportProbe(
 	executablePaths := append(append(execPaths(workspaceDir), extraPaths.Exec...), homeDir, sandbox.TmpDir)
 
 	policy := sandbox.Policy{
-		Read:    readablePaths,
-		Write:   []string{cacheDir},
-		Sockets: []string{cacheDir, sandbox.TmpDir},
-		Exec:    executablePaths,
+		Read:               readablePaths,
+		Write:              []string{cacheDir},
+		Sockets:            []string{cacheDir, sandbox.TmpDir},
+		Exec:               executablePaths,
+		TmpDir:             tmpDir,
+		UseProcFS:          true,
+		UseVirtualResolver: true,
 
-		TmpDir: tmpDir,
 		Env: []string{
 			"PATH",
 			"LANG",
 			"TERM",
 			"USER",
 		},
+
 		SetEnv: map[string]string{
 			"GIT_CONFIG_NOSYSTEM":     "1",
 			"GOCACHE":                 filepath.Join(cacheDir, goBuildCacheDir),
@@ -181,8 +184,6 @@ func createPolicyWithSupportProbe(
 		FileSize:  shellFileSize,
 		OpenFiles: shellOpenFiles,
 		Processes: shellProcesses,
-
-		VirtualResolver: true,
 	}
 
 	policy = policy.WithSetEnv("GOPROXY", "off").WithSetEnv("GOSUMDB", "off")

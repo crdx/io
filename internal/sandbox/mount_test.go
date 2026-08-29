@@ -29,7 +29,12 @@ func TestAnythingMountedAsksForAMountNamespace(t *testing.T) {
 		t.Error("expected a scratch to ask for a mount namespace")
 	}
 
-	virtual := Policy{VirtualResolver: true}
+	privateProcessFilesystem := Policy{UseProcFS: true}
+	if namespaceAttributes(privateProcessFilesystem).Cloneflags&syscall.CLONE_NEWNS == 0 {
+		t.Error("expected a private process filesystem to ask for a mount namespace")
+	}
+
+	virtual := Policy{UseVirtualResolver: true}
 	if namespaceAttributes(virtual).Cloneflags&syscall.CLONE_NEWNS == 0 {
 		t.Error("expected virtual resolver configuration to ask for a mount namespace")
 	}
@@ -72,7 +77,7 @@ func TestOnlyAPolicyAskingForItGrantsTheResolverFiles(t *testing.T) {
 		if slices.Contains(granted(Policy{}), file.path) {
 			t.Errorf("a policy asking for nothing was granted %s", file.path)
 		}
-		if !slices.Contains(granted(Policy{VirtualResolver: true}), file.path) {
+		if !slices.Contains(granted(Policy{UseVirtualResolver: true}), file.path) {
 			t.Errorf("a policy with virtual resolver configuration lacks %s", file.path)
 		}
 	}

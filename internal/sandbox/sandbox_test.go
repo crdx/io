@@ -1034,6 +1034,22 @@ func TestALocalSocketPairStillWorks(t *testing.T) {
 	}
 }
 
+func TestAPrivateProcessFilesystemContainsOnlySandboxProcesses(t *testing.T) {
+	command := fmt.Sprintf(`
+		test -r /proc/self/status &&
+		test -d /proc/self/fd &&
+		test ! -e /proc/%d/status &&
+		sh -c 'test -r /proc/self/status && test -d /proc/self/fd' &&
+		test -r /proc/sys/kernel/hostname &&
+		if sh -c 'printf nope > /proc/sys/kernel/hostname' 2>/dev/null; then exit 1; fi
+	`, os.Getpid())
+
+	result := run(t, t.TempDir(), command, sandbox.Policy{UseProcFS: true})
+	if result.Code != 0 {
+		t.Errorf("the private process filesystem was not isolated and readable: %q", result.Output)
+	}
+}
+
 func TestOnlyTheNamedPartsOfEtcAreReachable(t *testing.T) {
 	if result := run(t, t.TempDir(), "cat /etc/passwd", sandbox.Policy{}); result.Code != 0 {
 		t.Errorf("a command cannot resolve a user: %q", result.Output)
@@ -1069,7 +1085,7 @@ var virtualResolverFiles = map[string]string{
 }
 
 func TestVirtualResolverurationReplacesTheHostFiles(t *testing.T) {
-	policy := sandbox.Policy{VirtualResolver: true}
+	policy := sandbox.Policy{UseVirtualResolver: true}
 
 	for path, contents := range virtualResolverFiles {
 		result := run(t, t.TempDir(), "cat "+path, policy)
@@ -1096,7 +1112,7 @@ func TestTheHostResolverFilesStayHiddenWithoutTheirPolicy(t *testing.T) {
 }
 
 func TestTheVirtualResolverFilesAreRefusedByTheMountRatherThanLandlock(t *testing.T) {
-	policy := sandbox.Policy{VirtualResolver: true}
+	policy := sandbox.Policy{UseVirtualResolver: true}
 
 	for path := range virtualResolverFiles {
 		result := run(t, t.TempDir(), "printf changed > "+path, policy)
@@ -1111,7 +1127,7 @@ func TestTheVirtualResolverFilesAreRefusedByTheMountRatherThanLandlock(t *testin
 }
 
 func TestTheVirtualResolverFilesCannotBeChanged(t *testing.T) {
-	policy := sandbox.Policy{VirtualResolver: true}
+	policy := sandbox.Policy{UseVirtualResolver: true}
 
 	for path := range virtualResolverFiles {
 		if result := run(t, t.TempDir(), "printf changed > "+path, policy); result.Code == 0 {

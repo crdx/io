@@ -32,11 +32,16 @@ func (self Policy) nestedPaths() []string {
 	return inside
 }
 
+const processFilesystemPath = "/proc"
+
 // TmpDir is where a policy's scratch space is attached inside the sandbox.
 const TmpDir = "/tmp"
 
 func (self Policy) usesMountNamespace() bool {
-	return len(self.nestedPaths()) > 0 || self.TmpDir != "" || self.VirtualResolver
+	return len(self.nestedPaths()) > 0 ||
+		self.TmpDir != "" ||
+		self.UseProcFS ||
+		self.UseVirtualResolver
 }
 
 type virtualFile struct {
@@ -100,6 +105,12 @@ func namespaceProbeCommand(ctx context.Context, policy Policy) *exec.Cmd {
 }
 
 func applyMounts(policy Policy) error {
+	if policy.UseProcFS {
+		if err := mountProcessFilesystem(); err != nil {
+			return err
+		}
+	}
+
 	if policy.usesMountNamespace() {
 		if err := mountPseudoterminals(); err != nil {
 			return err
@@ -112,7 +123,7 @@ func applyMounts(policy Policy) error {
 		}
 	}
 
-	if policy.VirtualResolver {
+	if policy.UseVirtualResolver {
 		for _, file := range resolverFiles {
 			if err := mountReadOnlyTextFile(file.path, file.contents); err != nil {
 				return err
@@ -173,6 +184,15 @@ func writeTemporaryFile(contents string) (string, error) {
 
 func mountReadOnly(path string) error {
 	return attach(path, path, &unix.MountAttr{Attr_set: unix.MOUNT_ATTR_RDONLY})
+}
+
+func mountProcessFilesystem() error {
+	flags := uintptr(unix.MS_RDONLY | unix.MS_NOSUID | unix.MS_NODEV | unix.MS_NOEXEC)
+	if err := unix.Mount("proc", processFilesystemPath, "proc", flags, ""); err != nil {
+		return fmt.Errorf("could not mount the private process filesystem: %w", err)
+	}
+
+	return nil
 }
 
 func mountPseudoterminals() error {

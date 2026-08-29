@@ -246,7 +246,11 @@ func TestTheShellMayUseItsWorkspaceAndHome(t *testing.T) {
 		t.Errorf("got TMPDIR %q, want %q", policy.SetEnv["TMPDIR"], sandbox.TmpDir)
 	}
 
-	if !policy.VirtualResolver {
+	if !policy.UseProcFS {
+		t.Error("the shell policy does not mount a private process filesystem")
+	}
+
+	if !policy.UseVirtualResolver {
 		t.Error("the shell policy does not virtualise the resolver configuration")
 	}
 }
