@@ -55,8 +55,6 @@ var (
 		- It maps to {{ .TmpDir }} on the user's machine, so bear that in mind
 		- Always translate /tmp paths to the user's equivalent path before giving it to them
 			- For example: /tmp/foo.png → {{ filepathJoin .TmpDir "foo.png" }}
-		- It's persistent so you should tidy up after yourself and clean up large artifacts
-			- For example: git clones, source trees, binaries
 		- If you encounter a read-only workspace, follow this process:
 			- Copy the current workspace into your scratch space
 			- Do the work there, then produce a *.patch file the user can apply to their repo
@@ -65,7 +63,7 @@ var (
 		# Home
 
 		- HOME is {{ .HomeDir }}, which is exclusively for you and your agent companions
-		- A tilde (~) for you is not the same as for the user. The user has their own home dir.
+		- A tilde (~) for you is not the same as for the user. The user has their own HOME.
 		- Every path on the user's machine, including the ones above, is written here in full
 		- Write them the same way back, and never abbreviate one to a tilde
 
