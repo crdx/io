@@ -693,7 +693,7 @@ bash\e[38;2;150;152;150m | \e[0mruns a command in a sandbox with no network\e[38
 
 See \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the rest.
 
-=== streamed ===
+=== streamed asap ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -822,6 +822,199 @@ See \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/
 \r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mT\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe c\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are mad\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, an\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and th\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the ta\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is h\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to b\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to be wa\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to be watche\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to be watched as\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to be watched as it\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to be watched as it draw\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to be watched as it draws.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[KSee\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](http\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](https://\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](https://exam\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](https://example.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](\e[38;2;129;162;190mhttps://example.com/\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](\e[38;2;129;162;190mhttps://example.com/note\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the rest.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mLaying the answer out.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mWhat the tools cost\e[0m\e[0m\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A run looks like this:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A run looks like this:\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mmain\e[0m() {\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K    fmt.\e[38;2;129;162;190mPrintln\e[0m(\e[38;2;181;189;104m"hello"\e[0m)\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K}\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;192;128;80m• \e[0mread first, and read widely\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;192;128;80m• \e[0mrun only what the reading could not answer\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K  \e[38;2;192;128;80m• \e[0ma nested point, to show the indent\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K| Tool | What it does                                   |  Cost |\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m┌──────┬──────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────┼──────┤\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m              \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m rea  \e[38;2;150;152;150m│\e[0m              \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m              \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m take         \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a      \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m     \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m         \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and han \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m             \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands i \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                 \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it ba \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[K\e[38;2;150;152;150m┌──────┬────────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                   \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back \e[38;2;150;152;150m│\e[0m    1 \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m g    \e[38;2;150;152;150m│\e[0m                                \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m                                \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m wa                             \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks                          \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the                      \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree                 \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree loo             \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking         \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for     \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a p \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[5A\r\e[K\e[38;2;150;152;150m┌──────┬────────────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                       \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back     \e[38;2;150;152;150m│\e[0m    1 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a patte \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[5A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                         \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back       \e[38;2;150;152;150m│\e[0m    1 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a pattern \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a pattern \e[38;2;150;152;150m│\e[0m    4 \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m                                      \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bas  \e[38;2;150;152;150m│\e[0m                                      \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m                                      \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs                                 \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a c                             \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a comma                         \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command i                     \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a                  \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sand             \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox          \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox with     \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox with no  \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[7A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                             \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back           \e[38;2;150;152;150m│\e[0m    1 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a pattern     \e[38;2;150;152;150m│\e[0m    4 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox with no netw \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[7A\r\e[K\e[38;2;150;152;150m┌──────┬─────────────────────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                                \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼─────────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back              \e[38;2;150;152;150m│\e[0m    1 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼─────────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a pattern        \e[38;2;150;152;150m│\e[0m    4 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼─────────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox with no network \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox with no network \e[38;2;150;152;150m│\e[0m   40 \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;150;152;150m└──────┴─────────────────────────────────────────────┴──────┘\e[0m\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m└──────┴─────────────────────────────────────────────┴──────┘\e[0m\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K┌────┐\r
+\r\e[K│    │\r
+\r\e[K│ re │\r
+\r\e[K│    │\r
+\r\e[K└────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K┌──────┐\r
+\r\e[K│      │\r
+\r\e[K│ read │\r
+\r\e[K│      │\r
+\r\e[K└──────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K┌──────┐     ┌─────┐\r
+\r\e[K│      │     │     │\r
+\r\e[K│ read ├────►│ bas │\r
+\r\e[K│      │     │     │\r
+\r\e[K└──────┘     └─────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K┌──────┐     ┌──────┐\r
+\r\e[K│      │     │      │\r
+\r\e[K│ read ├────►│ bash │\r
+\r\e[K│      │     │      │\r
+\r\e[K└──────┘     └──────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to be watched as it draws.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the rest.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed paced ===
+\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mLayi\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mLaying t\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mLaying the a\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mLaying the answe\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mLaying the answer ou\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mLaying the answer out.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mWh\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mWhat t\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mWhat the t\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mWhat the tools\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mWhat the tools cos\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mWhat the tools cost\e[0m\e[0m\r
+\r\e[K\r
+\r\e[KT\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe *\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe **rea\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is chea\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and `b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the *ord\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A run l\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A run looks\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A run looks lik\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A run looks like th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A run looks like this:\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[Kf\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mfunc\e[0m \e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mfunc\e[0m main\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mmain\e[0m() {\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K    fm\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K    fmt.Pr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K    fmt.Printl\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K    fmt.\e[38;2;129;162;190mPrintln\e[0m(\e[38;2;150;152;150m"\e[0mh\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K    fmt.\e[38;2;129;162;190mPrintln\e[0m(\e[38;2;150;152;150m"\e[0mhello\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K    fmt.\e[38;2;129;162;190mPrintln\e[0m(\e[38;2;181;189;104m"hello"\e[0m)\r
+\r\e[K}\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[K\e[38;2;192;128;80m• \e[0mread\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread fir\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread first,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread first, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread first, and read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread first, and read wid\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread first, and read widely\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;192;128;80m• \e[0mru\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mrun on\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mrun only w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mrun only what\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mrun only what the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mrun only what the read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mrun only what the reading\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mrun only what the reading coul\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mrun only what the reading could no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mrun only what the reading could not an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mrun only what the reading could not answer\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K  \e[38;2;192;128;80m• \e[0ma\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0ma nes\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0ma nested\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0ma nested poin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0ma nested point, t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0ma nested point, to sh\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0ma nested point, to show t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0ma nested point, to show the i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0ma nested point, to show the inden\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0ma nested point, to show the indent\r
+\r\e[K\r
+\r\e[K|\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| Too\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| Tool |\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| Tool | What\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| Tool | What it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| Tool | What it does\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| Tool | What it does                                   |\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K| Tool | What it does                                   |  Cost |\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K|:-----\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K|:-----|:------\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K|:-----|:--------------\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K|:-----|:----------------------\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K|:-----|:------------------------------\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K|:-----|:--------------------------------------\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K|:-----|:----------------------------------------------\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m rea  \e[38;2;150;152;150m│\e[0m              \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m take         \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m         \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and han \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                 \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it ba \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e[38;2;150;152;150m┌──────┬────────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                   \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back \e[38;2;150;152;150m│\e[0m    1 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m g    \e[38;2;150;152;150m│\e[0m                                \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m wa                             \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the                      \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree loo             \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for     \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[6A\r\e[K\e[38;2;150;152;150m┌──────┬────────────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                       \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back     \e[38;2;150;152;150m│\e[0m    1 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a patte \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴────────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[6A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                         \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back       \e[38;2;150;152;150m│\e[0m    1 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a pattern \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a pattern \e[38;2;150;152;150m│\e[0m    4 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m                                      \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m                                      \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a c                             \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command i                     \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox          \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e[38;2;150;152;150m┌──────┬──────────────────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                             \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back           \e[38;2;150;152;150m│\e[0m    1 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a pattern     \e[38;2;150;152;150m│\e[0m    4 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼──────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox with no netw \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴──────────────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K\e[38;2;150;152;150m┌──────┬─────────────────────────────────────────────┬──────┐\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                                \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼─────────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back              \e[38;2;150;152;150m│\e[0m    1 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼─────────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a pattern        \e[38;2;150;152;150m│\e[0m    4 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m├──────┼─────────────────────────────────────────────┼──────┤\e[0m\r
+\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox with no network \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴─────────────────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox with no network \e[38;2;150;152;150m│\e[0m   40 \e[38;2;150;152;150m│\e[0m\r
+\r\e[K\e[38;2;150;152;150m└──────┴─────────────────────────────────────────────┴──────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[K\e[38;2;150;152;150mgraph L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K┌──────┐\r
+\r\e[K│      │\r
+\r\e[K│ read │\r
+\r\e[K│      │\r
+\r\e[K└──────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K┌──────┐     ┌──────┐\r
+\r\e[K│      │     │      │\r
+\r\e[K│ read ├────►│ bash │\r
+\r\e[K│      │     │      │\r
+\r\e[K└──────┘     └──────┘\r
+\r\e[K\r
+\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mT\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, an\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to b\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to be watched as\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to be watched as it draws.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[KSee [the not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](https://\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee [the notes](\e[38;2;129;162;190mhttps://example.com/\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSee \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the rest.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000\r

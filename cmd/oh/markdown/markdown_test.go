@@ -548,3 +548,39 @@ func TestAStyleOverAnotherLeavesTextAloneWhereNothingIsPainted(t *testing.T) {
 		t.Errorf("got %q, want the text left alone where there is no reset to find", got)
 	}
 }
+
+func TestAStreamRendererKnowsWhetherItsTailIsMermaid(t *testing.T) {
+	for name, test := range map[string]struct {
+		markdown      string
+		isTailMermaid bool
+	}{
+		"plain prose":     {markdown: "plain prose"},
+		"ordinary code":   {markdown: "```go\nfunc main() {}"},
+		"backtick fence":  {markdown: "```mermaid\ngraph LR\nA --> B", isTailMermaid: true},
+		"completed fence": {markdown: "```mermaid\ngraph LR\nA --> B\n```", isTailMermaid: true},
+		"tilde fence":     {markdown: "~~~mermaid\ngraph LR\nA --> B", isTailMermaid: true},
+		"quoted fence":    {markdown: "> ```mermaid\n> graph LR\n> A --> B", isTailMermaid: true},
+		"listed fence":    {markdown: "- ```mermaid\n  graph LR\n  A --> B", isTailMermaid: true},
+		"following prose": {markdown: "```mermaid\ngraph LR\nA --> B\n```\n\nafter"},
+		"invalid diagram": {markdown: "```mermaid\ngraph LR\nA -->"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			var renderer StreamRenderer
+			renderer.Render(test.markdown, 100)
+
+			if got := renderer.IsTailMermaid(); got != test.isTailMermaid {
+				t.Errorf("IsTailMermaid() = %t, want %t", got, test.isTailMermaid)
+			}
+		})
+	}
+}
+
+func TestTheLastValidMermaidRemainsTheTailWhileItsSourceIsInvalid(t *testing.T) {
+	var renderer StreamRenderer
+	renderer.Render("```mermaid\ngraph LR\nA --> B", 100)
+	renderer.Render("```mermaid\ngraph LR\nA --> B\nB -->", 100)
+
+	if !renderer.IsTailMermaid() {
+		t.Error("expected the cached Mermaid rendering to remain the tail")
+	}
+}

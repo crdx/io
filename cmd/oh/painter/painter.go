@@ -25,20 +25,38 @@ type Picasso struct {
 	screen         *output.Screen
 	toolBlock      *dynamic.Block
 	rows           map[string]int
-	answer         strings.Builder
+	answer         liveText
 	answerRenderer markdown.StreamRenderer
-	reasoning      strings.Builder
+	reasoning      liveText
 	previousKind   agent.Kind
 
-	isStale   bool
-	isRunning bool
+	isStale       bool
+	isRunning     bool
+	streamingMode output.StreamingMode
 
 	getTool      func(string) (tool.Tool, bool)
 	workspaceDir string
 }
 
-func New(screen *output.Screen, isRunning bool, getTool func(string) (tool.Tool, bool), workspaceDir string) *Picasso {
-	return &Picasso{screen: screen, isRunning: isRunning, getTool: getTool, workspaceDir: workspaceDir}
+func New(
+	screen *output.Screen,
+	isRunning bool,
+	getTool func(string) (tool.Tool, bool),
+	workspaceDir string,
+	streamingMode output.StreamingMode,
+) *Picasso {
+	self := &Picasso{
+		screen:        screen,
+		isRunning:     isRunning,
+		getTool:       getTool,
+		workspaceDir:  workspaceDir,
+		streamingMode: streamingMode,
+	}
+
+	self.answer.streamingMode = streamingMode
+	self.reasoning.streamingMode = streamingMode
+
+	return self
 }
 
 func (self *Picasso) DrawDelta(delta agent.Delta) {
@@ -61,6 +79,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 
 	if event.Kind != agent.ModelReasoningEvent && event.Kind != agent.ModelMessageEvent {
 		self.discardProvisionalReasoning()
+		self.settleAnswer()
 		self.answer.Reset()
 	}
 
@@ -77,17 +96,15 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.ModelReasoningEvent:
 		self.answer.Reset()
 		self.reasoning.Reset()
-		self.reasoning.WriteString(event.Text)
-		if !self.screen.DrawReasoning(RenderReasoning(self.reasoning.String(), self.screen.Columns())) {
-			self.isStale = true
-		}
+		self.reasoning.Write(event.Text)
+		self.drawReasoning(true)
 		self.screen.Seal()
 		self.reasoning.Reset()
 
 	case agent.ModelMessageEvent:
 		self.discardProvisionalReasoning()
 		self.answer.Reset()
-		self.answer.WriteString(event.Text)
+		self.answer.Write(event.Text)
 		if !self.screen.DrawAnswer(markdown.Render(self.answer.String(), self.screen.Columns())) {
 			self.isStale = true
 		}
@@ -221,6 +238,7 @@ func (self *Picasso) Stale() bool { return self.isStale }
 
 func (self *Picasso) Close(state dynamic.RowState) {
 	self.discardProvisionalReasoning()
+	self.settleAnswer()
 
 	if self.toolBlock != nil {
 		self.toolBlock.Close(state)
@@ -251,9 +269,9 @@ func (self *Picasso) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldR
 		if self.reasoning.Len() == 0 && self.previousKind == agent.ModelReasoningEvent {
 			self.screen.End()
 		}
-		self.reasoning.WriteString(delta.Text)
-		if !self.screen.DrawReasoning(RenderReasoning(self.reasoning.String(), self.screen.Columns())) {
-			self.isStale = true
+		self.reasoning.Write(delta.Text)
+		if self.reasoning.IsDue() {
+			self.drawReasoning(false)
 		}
 
 	case agent.ModelMessageEvent:
@@ -266,11 +284,55 @@ func (self *Picasso) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldR
 				self.screen.Blank()
 			}
 		}
-		self.answer.WriteString(delta.Text)
-		if !self.screen.DrawAnswer(self.answerRenderer.Render(self.answer.String(), self.screen.Columns())) {
-			self.isStale = true
+		self.answer.Write(delta.Text)
+		if self.answer.IsDue() {
+			self.drawAnswer(false)
 		}
 	}
+}
+
+func (self *Picasso) settleAnswer() {
+	if self.answer.IsOwed() {
+		self.drawAnswer(true)
+	}
+}
+
+func (self *Picasso) drawReasoning(isSettled bool) {
+	rows := RenderReasoning(self.reasoning.String(), self.screen.Columns())
+
+	isTailHidden := !isSettled && self.streamingMode == output.StreamingModeLine
+	if isTailHidden {
+		rows = rows[:max(len(rows)-1, 0)]
+	}
+
+	self.reasoning.MarkDrawn(isTailHidden)
+
+	if !self.screen.DrawReasoning(rows) {
+		self.isStale = true
+	}
+}
+
+func (self *Picasso) drawAnswer(isSettled bool) {
+	rows := self.answerRenderer.Render(self.answer.String(), self.screen.Columns())
+
+	isTailHidden := self.isTailHeldBack(isSettled)
+	if isTailHidden {
+		rows = rows[:max(len(rows)-1, 0)]
+	}
+
+	self.answer.MarkDrawn(isTailHidden)
+
+	if !self.screen.DrawAnswer(rows) {
+		self.isStale = true
+	}
+}
+
+func (self *Picasso) isTailHeldBack(isSettled bool) bool {
+	if isSettled || self.streamingMode != output.StreamingModeLine {
+		return false
+	}
+
+	return !strings.HasSuffix(self.answer.String(), "\n") && !self.answerRenderer.IsTailMermaid()
 }
 
 func (self *Picasso) discardProvisionalReasoning() {

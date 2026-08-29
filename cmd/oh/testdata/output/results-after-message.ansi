@@ -263,7 +263,55 @@ grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;1
 
 Both still mention the spinner.
 
-=== streamed ===
+=== streamed asap ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m look at both of those and tell me what changed                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KTaki\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them toge\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them together\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KTaking them together.\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
+\r\e[K\r
+\r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
+\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\r
+\r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
+\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
+\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth sti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still menti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the spinn\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the spinner.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m look at both of those and tell me what changed                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KTaking them together.\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\r
+\r\e[K\r
+\r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
+\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\r
+\r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
+\r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
+\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KBoth still mention the spinner.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed paced ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m look at both of those and tell me what changed                                                     \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

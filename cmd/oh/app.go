@@ -99,6 +99,7 @@ type App struct {
 
 	workspaceDir       string
 	getOnWithItMessage string
+	streamingMode      output.StreamingMode
 
 	commands   slash.Registry
 	completion slash.Completion
@@ -568,6 +569,7 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		return true
 	case config.ReloadApplied:
 		self.getOnWithItMessage = result.LiveConfig.GetOnWithItMessage
+		self.streamingMode = result.LiveConfig.StreamingMode
 		self.barConfiguration.ReplaceLayout(result.LiveConfig.SegmentLayout)
 		self.clearFeedback(configFeedback)
 	}
@@ -687,7 +689,7 @@ func (self *App) restore(storedSession *store.Session) {
 }
 
 func (self *App) newPainter(isRunning bool) *painter.Picasso {
-	return painter.New(self.screen, isRunning, self.agent.Tool, self.workspaceDir)
+	return painter.New(self.screen, isRunning, self.agent.Tool, self.workspaceDir, self.streamingMode)
 }
 
 func (self *App) replay() {

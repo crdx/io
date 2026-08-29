@@ -394,7 +394,53 @@ Writing it down.
 \e[48;2;52;53;65m\e[0m
 Done.
 
-=== streamed ===
+=== streamed asap ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what am i allowed to do here?                                                                      \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KRead\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and runn\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running comm\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands, bu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands, but no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands, but not wr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands, but not writin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading and running commands, but not writing.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m The workspace is now read-write.                                                                   \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m now write it down                                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KWrit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KWriting\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KWriting it d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KWriting it down.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m The bash tool is now refused, and will turn away every command until it is granted again.          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KDone\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KDone.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what am i allowed to do here?                                                                      \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KReading and running commands, but not writing.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m The workspace is now read-write.                                                                   \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m now write it down                                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KWriting it down.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m The bash tool is now refused, and will turn away every command until it is granted again.          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KDone.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed paced ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what am i allowed to do here?                                                                      \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

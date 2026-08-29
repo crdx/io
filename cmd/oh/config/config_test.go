@@ -10,6 +10,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 
+	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
 	"crdx.org/io/cmd/oh/segment/workspaceDir"
@@ -628,4 +629,81 @@ func brokenLayout(t *testing.T, body string) (segment.Layout, error) {
 	t.Helper()
 
 	return configFrom(t, body).BuildLayout(testSegments())
+}
+
+func TestEveryStreamingModeIsAccepted(t *testing.T) {
+	for name, want := range map[string]output.StreamingMode{
+		"asap":  output.StreamingModeASAP,
+		"line":  output.StreamingModeLine,
+		"paced": output.StreamingModePaced,
+	} {
+		path := filepath.Join(t.TempDir(), "config.toml")
+		if err := writeConfigFile(path, "[ui]\nstream = \""+name+"\"\n"); err != nil {
+			t.Fatal(err)
+		}
+
+		config, err := Load(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if config.Ui.StreamingMode != want {
+			t.Errorf("stream = %q read as %d, want %d", name, config.Ui.StreamingMode, want)
+		}
+	}
+}
+
+func TestAnUnknownStreamingModeNamesTheOnesThatExist(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[ui]\nstream = \"instant\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil {
+		t.Fatal("expected an unknown streaming mode to be refused")
+	}
+	for _, name := range []string{"instant", "asap", "line", "paced"} {
+		if !strings.Contains(err.Error(), name) {
+			t.Errorf("expected %q to be named, got %v", name, err)
+		}
+	}
+}
+
+func TestAStreamingModeThatIsNotTextIsRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[ui]\nstream = 3\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := Load(path); err == nil {
+		t.Fatal("expected a streaming mode that is not text to be refused")
+	}
+}
+
+func TestTheStreamingModeDefaultsToWholeLines(t *testing.T) {
+	config, err := Load("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.Ui.StreamingMode != output.StreamingModeLine {
+		t.Errorf("got streaming mode %d, want whole lines", config.Ui.StreamingMode)
+	}
+}
+
+func TestAConfigWrittenBeforeTheStreamingModeExistedNeedsNoMigrating(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte("version = 8\nget_on_with_it_message = \"go on\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatalf("a config from before the setting existed was refused: %v", err)
+	}
+	if config.Ui.StreamingMode != output.StreamingModeLine {
+		t.Errorf("got streaming mode %d, want whole lines", config.Ui.StreamingMode)
+	}
+	if err := config.ValidateConsumed(); err != nil {
+		t.Errorf("got %v", err)
+	}
 }

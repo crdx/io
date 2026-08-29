@@ -189,7 +189,37 @@ status \e[38;2;76;154;44m✓\e[0m
 
 Nothing came back.
 
-=== streamed ===
+=== streamed asap ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[Kstatus\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
+\r
+\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KNoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came bac\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came back.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[Kstatus\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kstatus \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
+\r
+\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KNothing came back.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed paced ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

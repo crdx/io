@@ -16,8 +16,6 @@ complete thought
 Stream failed
 === help during reasoning ===
 --- frame 1 ---
-thinking about it
-
 Commands:
   /conf
   /copy
@@ -25,22 +23,16 @@ Commands:
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === unknown command during answer ===
-still working
-
 Command not found: /unknown (alt+enter sends as message)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 /unknown
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === unknown command during reasoning ===
-still working
-
 Command not found: /unknown (alt+enter sends as message)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 /unknown
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === unknown snippet during reasoning ===
-still working
-
 Snippet not found: //unknown (alt+enter sends as message)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 //unknown

@@ -4,25 +4,49 @@
 │ A ├────►│ B │
 │   │     │   │
 └───┘     └───┘
-=== 2 invalid extension ===
+=== 2 tilde-fenced prefix ===
 ┌───┐     ┌───┐
 │   │     │   │
 │ A ├────►│ B │
 │   │     │   │
 └───┘     └───┘
-=== 3 invalid after redraw ===
+=== 3 completed fence ===
 ┌───┐     ┌───┐
 │   │     │   │
 │ A ├────►│ B │
 │   │     │   │
 └───┘     └───┘
-=== 4 next valid prefix ===
+=== 4 quoted prefix ===
+│ ┌───┐     ┌───┐
+│ │   │     │   │
+│ │ A ├────►│ B │
+│ │   │     │   │
+│ └───┘     └───┘
+=== 5 listed prefix ===
+• ┌───┐     ┌───┐
+  │   │     │   │
+  │ A ├────►│ B │
+  │   │     │   │
+  └───┘     └───┘
+=== 6 invalid extension ===
+┌───┐     ┌───┐
+│   │     │   │
+│ A ├────►│ B │
+│   │     │   │
+└───┘     └───┘
+=== 7 invalid after redraw ===
+┌───┐     ┌───┐
+│   │     │   │
+│ A ├────►│ B │
+│   │     │   │
+└───┘     └───┘
+=== 8 next valid prefix ===
 ┌───┐     ┌───┐     ┌───┐
 │   │     │   │     │   │
 │ A ├────►│ B ├────►│ C │
 │   │     │   │     │   │
 └───┘     └───┘     └───┘
-=== 5 completed invalid diagram ===
+=== 9 completed invalid diagram ===
 graph LR
 A --> B
 B -->

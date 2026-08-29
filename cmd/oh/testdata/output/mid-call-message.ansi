@@ -387,7 +387,59 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m
 \e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m
 
-=== streamed ===
+=== streamed asap ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m read the renderer and tell me what it does                                                         \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mRead\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the rend\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer bef\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before sayi\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying a\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anyth\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anything\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anything abou\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anything about it\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anything about it.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KRead\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading it n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading it now.\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[K\e[38;2;207;173;0mThe turn was interrupted.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r\e[K\r
+\r\e[K\e[38;2;207;173;0mThe turn was interrupted.\e[0m\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m never mind, what is in target.txt?                                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KIt h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the wor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word `o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing els\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\e[?25h\e[?2026l\r
+\r
+\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
+\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m read the renderer and tell me what it does                                                         \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mReading the renderer before saying anything about it.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KReading it now.\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[K\e[38;2;207;173;0mThe turn was interrupted.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[Kread \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r\e[K\r
+\r\e[K\e[38;2;207;173;0mThe turn was interrupted.\e[0m\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m never mind, what is in target.txt?                                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\e[?25h\e[?2026l\r
+\r
+\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
+\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\r
+\e]9;4;0\e\\
+=== streamed paced ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m read the renderer and tell me what it does                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

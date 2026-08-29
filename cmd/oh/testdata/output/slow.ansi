@@ -160,7 +160,33 @@ find \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;12
 
 The grep took nine seconds and the find gave up after a minute.
 
-=== streamed ===
+=== streamed asap ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat wil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat will ta\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat will take a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat will take a mom\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat will take a moment.\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;192;128;80m9.5s\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went on too long\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep too\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took ni\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine secon\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up afte\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a minu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a minute.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KThat will take a moment.\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;192;128;80m9.5s\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went on too long\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe grep took nine seconds and the find gave up after a minute.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed paced ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

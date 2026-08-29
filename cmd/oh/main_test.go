@@ -2598,6 +2598,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"context":               {".prompt"},
 		"inputblock":            {".ansi", ".screen"},
 		"lifecycle":             {".ansi", ".screen"},
+		"streaming-modes":       {".screen"},
 		"mermaid-streaming":     {".screen"},
 		"mode-takeback":         {".ansi", ".screen"},
 		"model-arguments":       {".txt"},
@@ -3084,7 +3085,7 @@ func submittedModeMessagesStream() string {
 	var screenOutput strings.Builder
 	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 	screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "brave-otter"}, replayColumns, false))
-	picasso := painter.New(screen, false, nil, "")
+	picasso := painter.New(screen, false, nil, "", defaultStreamingMode)
 	picasso.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: workspaceNowReadOnly()})
 	picasso.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "The .git directory is now read-write."})
 	return screenOutput.String()
@@ -3136,19 +3137,202 @@ func TestMermaidStreamingDrawsWhatItDrewBefore(t *testing.T) {
 		"1 first valid prefix": func() string {
 			return mermaidStreamingScreen(t, "```mermaid\ngraph LR\nA --> B")
 		},
-		"2 invalid extension": func() string {
+		"2 tilde-fenced prefix": func() string {
+			return mermaidStreamingScreen(t, "~~~mermaid\ngraph LR\nA --> B")
+		},
+		"3 completed fence": func() string {
+			return mermaidStreamingScreen(t, "```mermaid\ngraph LR\nA --> B\n```")
+		},
+		"4 quoted prefix": func() string {
+			return mermaidStreamingScreen(t, "> ```mermaid\n> graph LR\n> A --> B")
+		},
+		"5 listed prefix": func() string {
+			return mermaidStreamingScreen(t, "- ```mermaid\n  graph LR\n  A --> B")
+		},
+		"6 invalid extension": func() string {
 			return mermaidStreamingScreen(t, "```mermaid\ngraph LR\nA --> B", "\nB -->")
 		},
-		"3 invalid after redraw": func() string {
+		"7 invalid after redraw": func() string {
 			return mermaidStreamingRedrawnScreen(t)
 		},
-		"4 next valid prefix": func() string {
+		"8 next valid prefix": func() string {
 			return mermaidStreamingScreen(t, "```mermaid\ngraph LR\nA --> B", "\nB -->", " C")
 		},
-		"5 completed invalid diagram": func() string {
+		"9 completed invalid diagram": func() string {
 			return completedInvalidMermaidScreen(t)
 		},
 	})
+}
+
+const streamedAnswerTail = "pika."
+
+func streamedAnswerText() string {
+	var text strings.Builder
+	for text.Len() < 900 {
+		text.WriteString("A sentence of a model answer that goes on long enough to back the redrawing off. ")
+	}
+	text.WriteString("and this is the very last word: " + streamedAnswerTail)
+
+	return text.String()
+}
+
+func streamText(painter *Painter, kind agent.Kind) {
+	text := streamedAnswerText()
+	for at := 0; at < len(text); at += 5 {
+		painter.DrawDelta(agent.Delta{Kind: kind, Text: text[at:min(at+5, len(text))]})
+	}
+}
+
+func interruptedStreamScreen(t *testing.T, kind agent.Kind, streamingMode output.StreamingMode) string {
+	t.Helper()
+
+	var screenOutput bytes.Buffer
+	painter := newStreamedTestPainter(output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines), true, streamingMode)
+	streamText(painter, kind)
+	painter.Close(dynamic.Cancelled)
+
+	return shown(t, screenOutput.String(), replayColumns)
+}
+
+func streamThenHarnessMessageScreen(t *testing.T, streamingMode output.StreamingMode) string {
+	t.Helper()
+
+	var screenOutput bytes.Buffer
+	painter := newStreamedTestPainter(output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines), true, streamingMode)
+	streamText(painter, agent.ModelMessageEvent)
+	painter.DrawEvent(agent.Event{Kind: agent.HarnessMessageEvent, Text: "the turn was interrupted"})
+
+	return shown(t, screenOutput.String(), replayColumns)
+}
+
+func everyStreamingMode() map[string]output.StreamingMode {
+	return map[string]output.StreamingMode{
+		"asap":  output.StreamingModeASAP,
+		"line":  output.StreamingModeLine,
+		"paced": output.StreamingModePaced,
+	}
+}
+
+func TestAStreamThatStopsStillShowsEverythingThatArrived(t *testing.T) {
+	passes := map[string]func() string{}
+
+	for name, streamingMode := range everyStreamingMode() {
+		passes[name+" answer closed"] = func() string {
+			return interruptedStreamScreen(t, agent.ModelMessageEvent, streamingMode)
+		}
+		passes[name+" answer then a harness message"] = func() string {
+			return streamThenHarnessMessageScreen(t, streamingMode)
+		}
+		passes[name+" reasoning closed"] = func() string {
+			return interruptedStreamScreen(t, agent.ModelReasoningEvent, streamingMode)
+		}
+	}
+
+	compareWithGolden(t, "streaming-modes", ".screen", passes)
+}
+
+func TestNoStreamedAnswerIsLeftOffTheScreenWhenTheStreamStops(t *testing.T) {
+	for name, streamingMode := range everyStreamingMode() {
+		for ending, drawn := range map[string]func() string{
+			"closed":                 func() string { return interruptedStreamScreen(t, agent.ModelMessageEvent, streamingMode) },
+			"then a harness message": func() string { return streamThenHarnessMessageScreen(t, streamingMode) },
+		} {
+			if !strings.Contains(drawn(), streamedAnswerTail) {
+				t.Errorf("a %s answer %s dropped the end of what arrived:\n%s", name, ending, drawn())
+			}
+		}
+	}
+}
+
+func streamedAnswerScreen(t *testing.T, streamingMode output.StreamingMode, deltas ...string) string {
+	t.Helper()
+
+	var screenOutput bytes.Buffer
+	painter := newStreamedTestPainter(
+		output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines), true, streamingMode,
+	)
+
+	for _, delta := range deltas {
+		painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: delta})
+	}
+
+	return shown(t, screenOutput.String(), replayColumns)
+}
+
+func TestAnAnswerThatShowsEverythingIsOnScreenBeforeAnythingSettlesIt(t *testing.T) {
+	for name, streamingMode := range map[string]output.StreamingMode{
+		"asap":  output.StreamingModeASAP,
+		"paced": output.StreamingModePaced,
+	} {
+		if drawn := streamedAnswerScreen(t, streamingMode, "still ", "working"); !strings.Contains(drawn, "still working") {
+			t.Errorf("a %s answer was not on screen while it streamed, got:\n%s", name, drawn)
+		}
+	}
+}
+
+func TestALineIsOnScreenOnceTheOneAfterItHasBegun(t *testing.T) {
+	drawn := streamedAnswerScreen(t, output.StreamingModeLine, "still ", "working", "\n\nand ", "more")
+
+	if !strings.Contains(drawn, "still working") {
+		t.Errorf("expected a settled line to be shown, got:\n%s", drawn)
+	}
+	if strings.Contains(drawn, "and more") {
+		t.Errorf("expected the line still arriving to be held back, got:\n%s", drawn)
+	}
+}
+
+func TestALineIsOnScreenAsSoonAsItEnds(t *testing.T) {
+	drawn := streamedAnswerScreen(t, output.StreamingModeLine, "still ", "working", "\n")
+
+	if !strings.Contains(drawn, "still working") {
+		t.Errorf("expected a line to be shown the moment it ended, got:\n%s", drawn)
+	}
+}
+
+func TestAWrappedLineIsShownAsSoonAsTheNextOneBegins(t *testing.T) {
+	for name, kind := range map[string]agent.Kind{
+		"answer":    agent.ModelMessageEvent,
+		"reasoning": agent.ModelReasoningEvent,
+	} {
+		var screenOutput bytes.Buffer
+		painter := newStreamedTestPainter(output.NewTerminalOfSize(&screenOutput, 12, replayLines), true, output.StreamingModeLine)
+		painter.DrawDelta(agent.Delta{Kind: kind, Text: "one two thre"})
+		painter.DrawDelta(agent.Delta{Kind: kind, Text: "e"})
+		drawn := shown(t, screenOutput.String(), 12)
+
+		if !strings.Contains(drawn, "one two") {
+			t.Errorf("expected the complete %s line to be shown, got:\n%s", name, drawn)
+		}
+		if strings.Contains(drawn, "three") {
+			t.Errorf("expected the incomplete %s line to be held back, got:\n%s", name, drawn)
+		}
+	}
+}
+
+func TestCodeIsShownLineByLineWhileADiagramIsShownWhole(t *testing.T) {
+	code := streamedAnswerScreen(t, output.StreamingModeLine, "```go\n", "func main() {}\n", "\tmore")
+	if !strings.Contains(code, "func main() {}") {
+		t.Errorf("expected a settled line of code to be shown, got:\n%s", code)
+	}
+
+	diagram := streamedAnswerScreen(t, output.StreamingModeLine, "```mermaid\n", "graph LR\n", "A --> B")
+	if !strings.Contains(diagram, "└") {
+		t.Errorf("expected a diagram to keep its closing edge, got:\n%s", diagram)
+	}
+}
+
+func TestALineStillArrivingIsHeldBackUntilSomethingSettlesIt(t *testing.T) {
+	if drawn := streamedAnswerScreen(t, output.StreamingModeLine, "still ", "working"); strings.Contains(drawn, "still working") {
+		t.Errorf("expected the only line to be held back while it arrived, got:\n%s", drawn)
+	}
+}
+
+func TestAProvisionalThoughtIsTakenBackWhateverWasDrawnOfIt(t *testing.T) {
+	for name, streamingMode := range everyStreamingMode() {
+		if drawn := interruptedStreamScreen(t, agent.ModelReasoningEvent, streamingMode); strings.Contains(drawn, "sentence") {
+			t.Errorf("expected a %s thought to be taken back, got:\n%s", name, drawn)
+		}
+	}
 }
 
 func mermaidStreamingScreen(t *testing.T, deltas ...string) string {
@@ -3476,8 +3660,14 @@ func useRoundRobinModelCache(t *testing.T) string {
 
 type Painter = painter.Picasso
 
+const defaultStreamingMode = output.StreamingModeLine
+
 func newTestPainter(screen *output.Screen, isRunning bool) *Painter {
-	return painter.New(screen, isRunning, nil, "")
+	return newStreamedTestPainter(screen, isRunning, defaultStreamingMode)
+}
+
+func newStreamedTestPainter(screen *output.Screen, isRunning bool, streamingMode output.StreamingMode) *Painter {
+	return painter.New(screen, isRunning, nil, "", streamingMode)
 }
 
 func describeHarnessCall(harness *App, event agent.Event) agent.FallbackRendering {
@@ -3751,13 +3941,15 @@ func TestEveryScenarioDrawsWhatItDrewBefore(t *testing.T) {
 			entries := readJournal(t, journal.path)
 
 			compareWithGolden(t, journal.name, ".ansi", map[string]func() string{
-				"wide":       func() string { return replayAtWidth(t, entries, replayColumns) },
-				"narrow":     func() string { return replayAtWidth(t, entries, narrowColumns) },
-				"tiny":       func() string { return replayAtWidth(t, entries, tinyColumns) },
-				"unsized":    func() string { return replayAtWidth(t, entries, noColumns) },
-				"one column": func() string { return replayAtWidth(t, entries, oneColumn) },
-				"streamed":   func() string { return streamIntoBuffer(t, entries) },
-				"plain":      func() string { return replayPlainly(t, entries) },
+				"wide":           func() string { return replayAtWidth(t, entries, replayColumns) },
+				"narrow":         func() string { return replayAtWidth(t, entries, narrowColumns) },
+				"tiny":           func() string { return replayAtWidth(t, entries, tinyColumns) },
+				"unsized":        func() string { return replayAtWidth(t, entries, noColumns) },
+				"one column":     func() string { return replayAtWidth(t, entries, oneColumn) },
+				"streamed asap":  func() string { return streamIntoBuffer(t, entries, output.StreamingModeASAP) },
+				"streamed line":  func() string { return streamIntoBuffer(t, entries, output.StreamingModeLine) },
+				"streamed paced": func() string { return streamIntoBuffer(t, entries, output.StreamingModePaced) },
+				"plain":          func() string { return replayPlainly(t, entries) },
 			})
 		})
 	}
@@ -4174,10 +4366,11 @@ func replayInto(rig *replayRig, entries []replayEntry) string {
 	return rig.drawn()
 }
 
-func streamIntoBuffer(t *testing.T, entries []replayEntry) string {
+func streamIntoBuffer(t *testing.T, entries []replayEntry, streamingMode output.StreamingMode) string {
 	t.Helper()
 
 	rig := newReplayRig(t, replayColumns)
+	rig.chat.streamingMode = streamingMode
 	rig.chat.currentTurn = Turn{Stream: testRunningTurnStream(), painter: rig.chat.newPainter(true)}
 	rig.chat.screen.ReportProgress(true)
 
@@ -4353,11 +4546,17 @@ func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
 			entries := readJournal(t, journal.path)
 
 			replayed := visibleScreen(t, replayAtWidth(t, entries, replayColumns), replayColumns)
-			live := visibleScreen(t, streamIntoBuffer(t, entries), replayColumns)
 
-			if !slices.Equal(replayed, live) {
+			for name, streamingMode := range everyStreamingMode() {
+				live := visibleScreen(t, streamIntoBuffer(t, entries, streamingMode), replayColumns)
+
+				if slices.Equal(replayed, live) {
+					continue
+				}
+
 				t.Errorf(
-					"a live turn and a replay of it left different screens\n--- replayed ---\n%s\n--- live ---\n%s",
+					"a live %s turn and a replay of it left different screens\n--- replayed ---\n%s\n--- live ---\n%s",
+					name,
 					strings.Join(replayed, "\n"), strings.Join(live, "\n"),
 				)
 			}
@@ -4795,6 +4994,7 @@ func prepareLiveConfig(t *testing.T, self *App, path string) {
 		t.Fatal(err)
 	}
 	self.getOnWithItMessage = live.GetOnWithItMessage
+	self.streamingMode = live.StreamingMode
 	self.barConfiguration = bar.NewConfiguration(registry, live.SegmentLayout)
 }
 
@@ -4858,6 +5058,23 @@ func TestReloadingConfigChangesTheGetOnWithItMessage(t *testing.T) {
 	}
 	if !hasSentReloadedMessage {
 		t.Error("the reloaded message was not sent")
+	}
+}
+
+func TestReloadingConfigChangesTheStreamingModeForTheNextTurn(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, "[ui]\nstream = \"asap\"\n")
+
+	self := testConversation(t, &bytes.Buffer{})
+	prepareLiveConfig(t, self, path)
+	if self.streamingMode != output.StreamingModeASAP {
+		t.Fatalf("initial streaming mode is %d, want asap", self.streamingMode)
+	}
+
+	writeLiveConfig(t, path, "[ui]\nstream = \"paced\"\n")
+	settleLiveConfig(t, self)
+	if self.streamingMode != output.StreamingModePaced {
+		t.Errorf("reloaded streaming mode is %d, want paced", self.streamingMode)
 	}
 }
 

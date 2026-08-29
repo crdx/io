@@ -328,7 +328,181 @@ l\e[0m\r
 \e[38;2;150;152;150m}\e[0m
 \e[38;2;150;152;150mCUSTOMER ||--o{ ORDER : 1️⃣ places\e[0m
 
-=== streamed ===
+=== streamed asap ===
+\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show the customer data model                                                                       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mSket\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSketchin\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSketching th\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSketching the da\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSketching the data m\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSketching the data model\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mSketching the data model.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mCu\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mCustom\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mCustomer o\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mCustomer order\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mCustomer orders\e[0m\e[0m\r
+\r\e[K\r
+\r\e[K`\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150mer\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150merDiag\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150merDiagram\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K┌──────┐\r
+\r\e[K│ CUST │\r
+\r\e[K└──────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K┌──────────┐\r
+\r\e[K│ CUSTOMER │\r
+\r\e[K└──────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K┌────────────────────┐\r
+\r\e[K│    👩‍🚀 Customer     │\r
+\r\e[K├────────┬──────┬────┤\r
+\r\e[K│ int    │ id   │ PK │\r
+\r\e[K│ string │ name │    │\r
+\r\e[K└────────┴──────┴────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[5A\r\e[K┌────────────────────┐      ┌─────┐\r
+\r\e[K│    👩‍🚀 Customer     │      │ ORD │\r
+\r\e[K├────────┬──────┬────┤      └─────┘\r
+\r\e[K│ int    │ id   │ PK │\r
+\r\e[K│ string │ name │    │\r
+\r\e[K└────────┴──────┴────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[5A\r\e[K┌────────────────────┐      ┌──────────┐\r
+\r\e[K│    👩‍🚀 Customer     │      │ ❤️ Order │\r
+\r\e[K├────────┬──────┬────┤      └──────────┘\r
+\r\e[K│ int    │ id   │ PK │\r
+\r\e[K│ string │ name │    │\r
+\r\e[K└────────┴──────┴────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[5A\r\e[K┌────────────────────┐      ┌────────────────────────┐\r
+\r\e[K│    👩‍🚀 Customer     │      │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤      ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │      │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │      │ int │ customer_id │ FK │\r
+\r\e[K└────────┴──────┴────┘      └─────┴─────────────┴────┘\r
+\r\e[K\r
+\r\e[K┌────┐\r
+\r\e[K│ CU │\r
+\r\e[K└────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K┌────────┐\r
+\r\e[K│ CUSTOM │\r
+\r\e[K└────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K│         |          │      │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤      ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │      │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │      │ int │ customer_id │ FK │\r
+\r\e[K└────────┴──────┴────┘      └─────┴─────────────┴────┘\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K│       ||--o        │      │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤      ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │      │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │      │ int │ customer_id │ FK │\r
+\r\e[K└────────┴──────┴────┘      └─────┴─────────────┴────┘\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[9A\r\e[K┌────────────────────┐       ┌────────────────────────┐\r
+\r\e[K│    👩‍🚀 Customer     │       │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤       ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │       │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │       │ int │ customer_id │ FK │\r
+\r\e[K└────────┴┬─────┴────┘       └─────┴──────┬──────┴────┘\r
+\r\e[K          └||─────────────1️─────────────o{┘\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[9A\r\e[K┌────────────────────┐           ┌────────────────────────┐\r
+\r\e[K│    👩‍🚀 Customer     │           │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤           ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │           │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │           │ int │ customer_id │ FK │\r
+\r\e[K└────────┴┬─────┴────┘           └─────┴──────┬──────┴────┘\r
+\r\e[K          └||─────────────1️⃣ pl─────────────o{┘\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[9A\r\e[K┌────────────────────┐               ┌────────────────────────┐\r
+\r\e[K│    👩‍🚀 Customer     │               │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤               ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │               │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │               │ int │ customer_id │ FK │\r
+\r\e[K└────────┴┬─────┴────┘               └─────┴──────┬──────┴────┘\r
+\r\e[K          └||─────────────1️⃣ places─────────────o{┘\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[J\r\e[K          └||─────────────1️⃣ places─────────────o{┘\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show the customer data model                                                                       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mSketching the data model.\e[0m\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mCustomer orders\e[0m\e[0m\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[1m\e[38;2;207;173;0mCustomer orders\e[0m\e[0m\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;150;152;150merDiagram\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K┌──────┐\r
+\r\e[K│ CUST │\r
+\r\e[K└──────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K┌──────────┐\r
+\r\e[K│ CUSTOMER │\r
+\r\e[K└──────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K┌────────────────────┐\r
+\r\e[K│    👩‍🚀 Customer     │\r
+\r\e[K├────────┬──────┬────┤\r
+\r\e[K│ int    │ id   │ PK │\r
+\r\e[K│ string │ name │    │\r
+\r\e[K└────────┴──────┴────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[5A\r\e[K┌────────────────────┐      ┌─────┐\r
+\r\e[K│    👩‍🚀 Customer     │      │ ORD │\r
+\r\e[K├────────┬──────┬────┤      └─────┘\r
+\r\e[K│ int    │ id   │ PK │\r
+\r\e[K│ string │ name │    │\r
+\r\e[K└────────┴──────┴────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[5A\r\e[K┌────────────────────┐      ┌──────────┐\r
+\r\e[K│    👩‍🚀 Customer     │      │ ❤️ Order │\r
+\r\e[K├────────┬──────┬────┤      └──────────┘\r
+\r\e[K│ int    │ id   │ PK │\r
+\r\e[K│ string │ name │    │\r
+\r\e[K└────────┴──────┴────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[5A\r\e[K┌────────────────────┐      ┌────────────────────────┐\r
+\r\e[K│    👩‍🚀 Customer     │      │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤      ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │      │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │      │ int │ customer_id │ FK │\r
+\r\e[K└────────┴──────┴────┘      └─────┴─────────────┴────┘\r
+\r\e[K\r
+\r\e[K┌────┐\r
+\r\e[K│ CU │\r
+\r\e[K└────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K┌────────┐\r
+\r\e[K│ CUSTOM │\r
+\r\e[K└────────┘\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K│         |          │      │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤      ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │      │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │      │ int │ customer_id │ FK │\r
+\r\e[K└────────┴──────┴────┘      └─────┴─────────────┴────┘\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[8A\r\e[K│       ||--o        │      │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤      ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │      │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │      │ int │ customer_id │ FK │\r
+\r\e[K└────────┴──────┴────┘      └─────┴─────────────┴────┘\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[9A\r\e[K┌────────────────────┐       ┌────────────────────────┐\r
+\r\e[K│    👩‍🚀 Customer     │       │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤       ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │       │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │       │ int │ customer_id │ FK │\r
+\r\e[K└────────┴┬─────┴────┘       └─────┴──────┬──────┴────┘\r
+\r\e[K          └||─────────────1️─────────────o{┘\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[9A\r\e[K┌────────────────────┐           ┌────────────────────────┐\r
+\r\e[K│    👩‍🚀 Customer     │           │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤           ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │           │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │           │ int │ customer_id │ FK │\r
+\r\e[K└────────┴┬─────┴────┘           └─────┴──────┬──────┴────┘\r
+\r\e[K          └||─────────────1️⃣ pl─────────────o{┘\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[9A\r\e[K┌────────────────────┐               ┌────────────────────────┐\r
+\r\e[K│    👩‍🚀 Customer     │               │        ❤️ Order        │\r
+\r\e[K├────────┬──────┬────┤               ├─────┬─────────────┬────┤\r
+\r\e[K│ int    │ id   │ PK │               │ int │ id          │ PK │\r
+\r\e[K│ string │ name │    │               │ int │ customer_id │ FK │\r
+\r\e[K└────────┴┬─────┴────┘               └─────┴──────┬──────┴────┘\r
+\r\e[K          └||─────────────1️⃣ places─────────────o{┘\r
+\r\e[K\r
+\r\e[K\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[J\r\e[K          └||─────────────1️⃣ places─────────────o{┘\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed paced ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

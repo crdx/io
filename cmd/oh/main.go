@@ -504,6 +504,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 	chat.getOnWithItMessage = liveSettings.GetOnWithItMessage
+	chat.streamingMode = liveSettings.StreamingMode
 	chat.barConfiguration = bar.NewConfiguration(barRegistry, liveSettings.SegmentLayout)
 
 	if resumedSession != nil {

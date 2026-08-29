@@ -5,6 +5,9 @@ get_on_with_it_message = "yes"
 [editor]
 command = []
 
+[ui]
+stream = "line"
+
 [snippets]
 
 [model]

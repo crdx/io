@@ -19,7 +19,7 @@ func TestStartupDrawingUsesTheScreensTextSizingSupport(t *testing.T) {
 			var screenOutput bytes.Buffer
 			screen := output.NewTerminalOfSize(&screenOutput, 80, 24)
 			screen.SetTextSizingSupported(isSupported)
-			paint := New(screen, false, nil, "")
+			paint := New(screen, false, nil, "", output.StreamingModeLine)
 			paint.DrawEvent(startup.NewEvent(time.Millisecond, startup.Info{Session: "brave-otter"}))
 
 			got := strings.Contains(screenOutput.String(), "\x1b]66;")
@@ -31,7 +31,7 @@ func TestStartupDrawingUsesTheScreensTextSizingSupport(t *testing.T) {
 }
 
 func TestNewQuestionClosesOldToolBlockAndResetsRows(t *testing.T) {
-	paint := New(output.New(&bytes.Buffer{}), false, nil, "")
+	paint := New(output.New(&bytes.Buffer{}), false, nil, "", output.StreamingModeLine)
 	paint.DrawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}})
 	paint.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "never mind"})
 	if paint.toolBlock != nil {
@@ -45,7 +45,7 @@ func TestNewQuestionClosesOldToolBlockAndResetsRows(t *testing.T) {
 }
 
 func TestHarnessAsideKeepsToolBlockOpen(t *testing.T) {
-	paint := New(output.New(&bytes.Buffer{}), true, nil, "")
+	paint := New(output.New(&bytes.Buffer{}), true, nil, "", output.StreamingModeLine)
 	paint.DrawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read"})
 	paint.DrawEvent(agent.Event{Kind: agent.HarnessMessageEvent, Text: "something happened"})
 	if paint.toolBlock == nil {
@@ -56,7 +56,7 @@ func TestHarnessAsideKeepsToolBlockOpen(t *testing.T) {
 func TestARetryIsDrawnFromWhatItWasRatherThanFromWhatItSaid(t *testing.T) {
 	var screenOutput bytes.Buffer
 
-	paint := New(output.New(&screenOutput), false, nil, "")
+	paint := New(output.New(&screenOutput), false, nil, "", output.StreamingModeLine)
 	paint.DrawEvent(agent.Event{
 		Kind:    agent.RetryingEvent,
 		Text:    "The stream ended before the response did\nand a second line nobody needs",
@@ -84,7 +84,7 @@ func TestARetryIsDrawnFromWhatItWasRatherThanFromWhatItSaid(t *testing.T) {
 func TestARetryShowsTheCallThatProvokedIt(t *testing.T) {
 	var screenOutput bytes.Buffer
 
-	paint := New(output.New(&screenOutput), false, nil, "")
+	paint := New(output.New(&screenOutput), false, nil, "", output.StreamingModeLine)
 	paint.DrawEvent(agent.Event{
 		Kind:      agent.RetryingEvent,
 		Text:      "The read tool call did not contain a JSON object",
@@ -108,7 +108,7 @@ func TestALongFaultedCallIsCutRatherThanDrawnWhole(t *testing.T) {
 
 	arguments := `{"text": "` + strings.Repeat("x", 4*retryArgumentsCells) + `"}`
 
-	paint := New(output.New(&screenOutput), false, nil, "")
+	paint := New(output.New(&screenOutput), false, nil, "", output.StreamingModeLine)
 	paint.DrawEvent(agent.Event{
 		Kind:      agent.RetryingEvent,
 		Text:      "The write tool call did not contain a JSON object",

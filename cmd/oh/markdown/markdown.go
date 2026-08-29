@@ -19,6 +19,8 @@ import (
 
 const tab = "    "
 
+const mermaidLanguage = "mermaid"
+
 var parser = goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser()
 
 // Render lays markdown out as the rows to draw, styled and wrapped to the given columns.
@@ -28,17 +30,26 @@ func Render(markdown string, columns int) []string {
 
 // StreamRenderer retains successful Mermaid diagrams while incomplete Markdown continues arriving.
 type StreamRenderer struct {
-	mermaidRows map[int][]string
+	mermaidRows   map[int][]string
+	isTailMermaid bool
 }
 
 // Render lays out the current prefix of a Markdown stream.
 func (self *StreamRenderer) Render(markdown string, columns int) []string {
+	self.isTailMermaid = false
+
 	return render(markdown, columns, self)
+}
+
+// IsTailMermaid reports whether the last rendered row belongs to a Mermaid diagram.
+func (self *StreamRenderer) IsTailMermaid() bool {
+	return self.isTailMermaid
 }
 
 // Reset forgets rendering state from the previous stream.
 func (self *StreamRenderer) Reset() {
 	clear(self.mermaidRows)
+	self.isTailMermaid = false
 }
 
 func render(markdown string, columns int, stream *StreamRenderer) []string {
@@ -75,6 +86,10 @@ func (self *renderer) blocks(parent ast.Node) {
 }
 
 func (self *renderer) block(node ast.Node) {
+	if self.stream != nil {
+		self.stream.isTailMermaid = false
+	}
+
 	switch node := node.(type) {
 	case *ast.Heading:
 		self.appendWrapped(over(col.Bold, style.Heading(self.inline(node))))
@@ -82,10 +97,14 @@ func (self *renderer) block(node ast.Node) {
 	case *ast.FencedCodeBlock:
 		language := string(node.Language(self.source))
 		lines := self.lines(node)
-		if language == "mermaid" {
+		if language == mermaidLanguage {
 			block := *self.mermaidBlock
 			*self.mermaidBlock++
 			if self.mermaid(lines, block) {
+				if self.stream != nil {
+					self.stream.isTailMermaid = true
+				}
+
 				return
 			}
 		}
@@ -209,6 +228,10 @@ func (self *renderer) list(node *ast.List) {
 }
 
 func (self *renderer) item(marker string, node ast.Node) {
+	if self.stream != nil {
+		self.stream.isTailMermaid = false
+	}
+
 	room := self.columns - width.Of(marker)
 	if room < 1 {
 		self.appendWrapped(style.Bullet(marker) + self.inline(node))

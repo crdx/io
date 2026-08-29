@@ -154,7 +154,27 @@ second line \e[0m
 \e[38;2;204;102;102mFailure before ]2;stolen title  after
 second line\e[0m
 
-=== streamed ===
+=== streamed asap ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show terminal-active text safely                                                                   \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[38;2;129;162;190mnotice before [2J [H after\r
+second line \e[0m\r
+\e[38;2;204;102;102mFailure before ]2;stolen title  after\r
+second line\e[0m\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show terminal-active text safely                                                                   \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[38;2;129;162;190mnotice before [2J [H after\r
+second line \e[0m\r
+\e[38;2;204;102;102mFailure before ]2;stolen title  after\r
+second line\e[0m\r
+\e]9;4;0\e\\
+=== streamed paced ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m show terminal-active text safely                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

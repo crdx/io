@@ -13,6 +13,7 @@ import (
 	"github.com/BurntSushi/toml"
 
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/snippets"
@@ -34,6 +35,7 @@ type Config struct {
 	Skills             SkillPaths                     `toml:"skills"`
 	Sandbox            sandbox                        `toml:"sandbox"`
 	Bar                Bar                            `toml:"bar"`
+	Ui                 Ui                             `toml:"ui"`
 
 	fallback *toml.MetaData
 	user     *toml.MetaData
@@ -54,6 +56,10 @@ type Provider struct {
 
 type Ollama struct {
 	Host string `toml:"host"`
+}
+
+type Ui struct {
+	StreamingMode output.StreamingMode `toml:"stream"`
 }
 
 type SkillPaths struct {
@@ -77,6 +83,7 @@ type Rule struct {
 type LiveConfig struct {
 	GetOnWithItMessage string
 	SegmentLayout      segment.Layout
+	StreamingMode      output.StreamingMode
 }
 
 func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
@@ -91,6 +98,7 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 	return LiveConfig{
 		GetOnWithItMessage: self.GetOnWithItMessage,
 		SegmentLayout:      layout,
+		StreamingMode:      self.Ui.StreamingMode,
 	}, nil
 }
 
