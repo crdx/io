@@ -2757,7 +2757,14 @@ func TestTestdataContainsNoPersonalOrSecretMaterial(t *testing.T) {
 
 func TestMain(testingMain *testing.M) {
 	sandbox.Init()
+	unsetInheritedStateDirectory()
 	os.Exit(testingMain.Run())
+}
+
+func unsetInheritedStateDirectory() {
+	if err := os.Unsetenv(location.StateDirVariable); err != nil {
+		panic(err)
+	}
 }
 
 func TestHomeMountIsReadableByFileTools(t *testing.T) {

@@ -27,6 +27,17 @@ const (
 	ollamaProvider     = model.OllamaProvider
 )
 
+func TestMain(testingMain *testing.M) {
+	unsetInheritedStateDirectory()
+	os.Exit(testingMain.Run())
+}
+
+func unsetInheritedStateDirectory() {
+	if err := os.Unsetenv(location.StateDirVariable); err != nil {
+		panic(err)
+	}
+}
+
 func TestUpdatingAgainstAStandInEndpointDescribesEveryProvider(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
