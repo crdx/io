@@ -2,7 +2,7 @@
  ask while the endpoint is overloaded
 
 
-Attempt 1 failed, asking again in 1s: Overloaded
+Request failed; retrying in 1s: Overloaded
 
 Through on the second attempt.
 

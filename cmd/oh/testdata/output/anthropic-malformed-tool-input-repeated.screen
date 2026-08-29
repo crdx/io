@@ -2,12 +2,12 @@
  send malformed tool input three times over
 
 
-Attempt 1 failed, asking again in 1s: The work tool call did not contain a JSON object: {"offset": 2
-40,, "limit": 20}
-Attempt 2 failed, asking again in 5s: The work tool call did not contain a JSON object: {"offset": 2
-45, , "limit": 1}
-Attempt 3 failed, asking again in 10s: The work tool call did not contain a JSON object: { "offset":
-250,, "limit": 5 }
+Request failed; retrying in 1s: The work tool call did not contain a JSON object: {"offset": 240,, "
+limit": 20}
+Request failed on attempt 2; retrying in 5s: The work tool call did not contain a JSON object: {"off
+set": 245, , "limit": 1}
+Request failed on attempt 3; retrying in 10s: The work tool call did not contain a JSON object: { "o
+ffset": 250,, "limit": 5 }
 
 I got there in the end.
 

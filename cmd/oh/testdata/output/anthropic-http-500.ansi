@@ -2,24 +2,24 @@
 \e[48;2;52;53;65m receive HTTP 500                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;207;173;0mAttempt 1 failed, asking again in 1s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 2 failed, asking again in 5s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 3 failed, asking again in 10s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 4 failed, asking again in 30s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 5 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 6 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 7 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 8 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 9 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 10 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 11 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 12 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 13 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 14 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 15 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 16 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 17 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
-\e[38;2;207;173;0mAttempt 18 failed, asking again in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed; retrying in 1s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 2; retrying in 5s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 3; retrying in 10s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 4; retrying in 30s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 5; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 6; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 7; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 8; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 9; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 10; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 11; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 12; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 13; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 14; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 15; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 16; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 17; retrying in 1m00s: Request failed with status 500\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 18; retrying in 1m00s: Request failed with status 500\e[0m\r
 \e[38;2;204;102;102mRequest failed with status 500\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

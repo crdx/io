@@ -67,8 +67,8 @@ func TestARetryIsDrawnFromWhatItWasRatherThanFromWhatItSaid(t *testing.T) {
 	drawn := style.Plain(screenOutput.String())
 
 	for _, want := range []string{
-		"Attempt 2 failed",
-		"asking again in 0.5s",
+		"Request failed on attempt 2",
+		"retrying in 0.5s",
 		"The stream ended before the response did",
 	} {
 		if !strings.Contains(drawn, want) {
@@ -95,6 +95,9 @@ func TestARetryShowsTheCallThatProvokedIt(t *testing.T) {
 
 	drawn := style.Plain(screenOutput.String())
 
+	if !strings.Contains(drawn, "Request failed; retrying") {
+		t.Errorf("expected the first retry to omit its attempt number, got %q", drawn)
+	}
 	if !strings.Contains(drawn, `{"path": "one.go",, "limit": 20}`) {
 		t.Errorf("expected the call that provoked the retry to be drawn, got %q", drawn)
 	}

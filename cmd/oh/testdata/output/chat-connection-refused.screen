@@ -2,7 +2,7 @@
  lose the connection before it answers
 
 
-Attempt 1 failed, asking again in 1s: Post "http://endpoint": EOF
+Request failed; retrying in 1s: Post "http://endpoint": EOF
 
 Through on the second attempt.
 

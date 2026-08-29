@@ -2,8 +2,8 @@
  receive HTTP 507 from the edge proxy
 
 
-Attempt 1 failed, asking again in 1s: Request failed with status 507: exceeded request buffer limit
-while retrying upstream
+Request failed; retrying in 1s: Request failed with status 507: exceeded request buffer limit while
+retrying upstream
 
 Asked again, and answered.
 

@@ -4,8 +4,7 @@
 
 The call wants an object.
 
-Attempt 1 failed, asking again in 1s: The work tool call did not contain a JSON object: {"value":1,,
-}
+Request failed; retrying in 1s: The work tool call did not contain a JSON object: {"value":1,,}
 
 I corrected the malformed call.
 

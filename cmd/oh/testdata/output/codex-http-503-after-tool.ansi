@@ -5,42 +5,42 @@
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mUse the tool.\e[0m\e[0m\r
 \r\e[K\e[38;2;207;173;0mwork\e[0m \e[38;2;192;128;80mwork\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
-\e[38;2;207;173;0mAttempt 1 failed, asking again in 1s: Request failed with status 503: upstream connect error or disc\r
-onnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 2 failed, asking again in 5s: Request failed with status 503: upstream connect error or disc\r
-onnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 3 failed, asking again in 10s: Request failed with status 503: upstream connect error or dis\r
-connect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 4 failed, asking again in 30s: Request failed with status 503: upstream connect error or dis\r
-connect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 5 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or d\r
-isconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 6 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or d\r
-isconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 7 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or d\r
-isconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 8 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or d\r
-isconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 9 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or d\r
-isconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 10 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or \r
-disconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 11 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or \r
-disconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 12 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or \r
-disconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 13 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or \r
-disconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 14 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or \r
-disconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 15 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or \r
-disconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 16 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or \r
-disconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 17 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or \r
-disconnect/reset before headers. reset reason: connection termination\e[0m\r
-\e[38;2;207;173;0mAttempt 18 failed, asking again in 1m00s: Request failed with status 503: upstream connect error or \r
-disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed; retrying in 1s: Request failed with status 503: upstream connect error or disconnect\r
+/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 2; retrying in 5s: Request failed with status 503: upstream connect error \r
+or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 3; retrying in 10s: Request failed with status 503: upstream connect error\r
+or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 4; retrying in 30s: Request failed with status 503: upstream connect error\r
+or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 5; retrying in 1m00s: Request failed with status 503: upstream connect err\r
+or or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 6; retrying in 1m00s: Request failed with status 503: upstream connect err\r
+or or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 7; retrying in 1m00s: Request failed with status 503: upstream connect err\r
+or or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 8; retrying in 1m00s: Request failed with status 503: upstream connect err\r
+or or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 9; retrying in 1m00s: Request failed with status 503: upstream connect err\r
+or or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 10; retrying in 1m00s: Request failed with status 503: upstream connect er\r
+ror or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 11; retrying in 1m00s: Request failed with status 503: upstream connect er\r
+ror or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 12; retrying in 1m00s: Request failed with status 503: upstream connect er\r
+ror or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 13; retrying in 1m00s: Request failed with status 503: upstream connect er\r
+ror or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 14; retrying in 1m00s: Request failed with status 503: upstream connect er\r
+ror or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 15; retrying in 1m00s: Request failed with status 503: upstream connect er\r
+ror or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 16; retrying in 1m00s: Request failed with status 503: upstream connect er\r
+ror or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 17; retrying in 1m00s: Request failed with status 503: upstream connect er\r
+ror or disconnect/reset before headers. reset reason: connection termination\e[0m\r
+\e[38;2;207;173;0mRequest failed on attempt 18; retrying in 1m00s: Request failed with status 503: upstream connect er\r
+ror or disconnect/reset before headers. reset reason: connection termination\e[0m\r
 \e[38;2;204;102;102mRequest failed with status 503: upstream connect error or disconnect/reset before headers. reset rea\r
 son: connection termination\e[0m\e[?25h\e[?2026l\r
 \r
