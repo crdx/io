@@ -17,6 +17,8 @@ import (
 	"crdx.org/io/internal/oauth"
 )
 
+const authorisationURL = "https://example.test/authorise"
+
 func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 	tests := map[string]func(*testing.T, *bytes.Buffer) error{
 		"login-picker": func(t *testing.T, output *bytes.Buffer) error {
@@ -245,6 +247,56 @@ func TestAuthenticationFlowsMatchTheGoldens(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestThePaintedWizardMatchesTheGolden(t *testing.T) {
+	var output bytes.Buffer
+
+	harry := wizard{
+		output:        &output,
+		choose:        menuChoices(&output, 0, 1),
+		login:         func(_ provider, presentAddress func(string)) error { presentAddress(authorisationURL); return nil },
+		refreshModels: func() error { return nil },
+		getModels: func() []model.Choice {
+			return []model.Choice{
+				{Provider: model.CodexProvider, ID: "gpt-5.6-sol", Name: "GPT-5.6 Sol", EffortLevels: []string{"medium"}},
+				{Provider: model.CodexProvider, ID: "gpt-5.6-luna", Name: "GPT-5.6 Luna", EffortLevels: []string{"high"}},
+			}
+		},
+		setInitialModel: func(string) error { return nil },
+	}
+
+	if err := harry.castSpell(); err != nil {
+		t.Fatal(err)
+	}
+	assertANSIGolden(t, "first-run-painted", output.String())
+}
+
+func TestThePaintedWizardShowsWhatWentWrongMatchingTheGolden(t *testing.T) {
+	var output bytes.Buffer
+
+	harry := wizard{
+		output: &output,
+		choose: menuChoices(&output, 2, 0),
+		login: func(chosen provider, presentAddress func(string)) error {
+			if chosen.identifier == model.OpencodeGoProvider {
+				return storeOpenCodeGoKey(
+					typed("bad-key\n", &output),
+					&output,
+					filepath.Join(t.TempDir(), "auth.json"),
+					func(string) error { return errors.New("the key was refused") },
+				)
+			}
+			presentAddress(authorisationURL)
+			return nil
+		},
+		openBrowser: func(string) error { return errors.New("no browser is available") },
+	}
+
+	if _, err := harry.chooseProvider(""); err != nil {
+		t.Fatal(err)
+	}
+	assertANSIGolden(t, "login-failure-painted", output.String())
 }
 
 func TestOpenCodeGoOnboardingMatchesTheGolden(t *testing.T) {

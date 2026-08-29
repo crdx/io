@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/provider/opencodego"
 )
 
@@ -20,8 +21,8 @@ func TestTheKeyPromptLeavesTheEchoToTheTerminal(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if output.String() != "OpenCode Go API key: " {
-		t.Errorf("got prompt %q, and anything beyond it is an echo of the key", output.String())
+	if got := style.Plain(output.String()); got != openCodeGoPrompt {
+		t.Errorf("got prompt %q, and anything beyond it is an echo of the key", got)
 	}
 	key, err := opencodego.StoredKeyAt(path)
 	if err != nil {

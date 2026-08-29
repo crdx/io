@@ -1,16 +1,18 @@
-Oh, hello.
+Oh, hello. *yawns*
+Yes? Oh, right. Let's get you signed in.
+────────────────────────────────────────
 
 Choose your provider:
 
-  ChatGPT
-  Anthropic
-› OpenCode Go
+  ChatGPT      OAuth
+  Anthropic    OAuth
+› OpenCode Go  Key
 
 OpenCode Go API key: secret
-✓ Signed in
+✓ Signed in to OpenCode Go
 
 Choose a model:
 
-› DeepSeek V4 Pro
+› DeepSeek V4 Pro  deepseek-v4-pro
 
-Thanks. Transferring you…
+✓ Thanks. Transferring you…

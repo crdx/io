@@ -37,6 +37,8 @@ const (
 	none = ""
 )
 
+const reset = "\x1b[0m"
+
 // The base visual styles.
 var (
 	Normal Style = hex(none) // the terminal's foreground
@@ -71,16 +73,13 @@ var (
 	Scrolled    Style = Dim                          // how much of the input is scrolled out of sight
 	Chosen      Style = hex(copper)                  // the row the cursor is resting on within a list
 	Running     Style = decorate(col.Italic, Dim)    // a session already open, which cannot be chosen
-	Column      Style = decorate(col.Underline, Dim) // the heading standing above a column of rows
+	Column      Style = decorate(col.Underline, Dim) // the heading standing above the column of rows!
 	Typed       Style = Normal                       // what the user typed when a session is replayed
 	User        Style = background("#343541")        // a submitted message, kept apart from the reply
+	Greeting    Style = col.Italic                   // the italic hello with which a first run begins
+	Web         Style = hex(steel)                   // reaching the internet is offered to a web tool
+	Network     Style = hex(red)                     // the name of a call which departs this computer
 )
-
-// Web marks permission to reach the internet through the web tools.
-var Web Style = hex(steel)
-
-// Network marks the name of a call that leaves the machine, which no other call does.
-var Network Style = hex(red)
 
 // The markdown of an answer.
 var (
@@ -133,6 +132,22 @@ func apply(enabled bool) {
 	} else {
 		col.Disable()
 	}
+}
+
+func (self Style) Over(text string) string {
+	const marker = "\x00"
+
+	opening, closing, found := strings.Cut(self(marker), marker)
+	if !found || opening == "" {
+		return text
+	}
+
+	resumed := strings.TrimSuffix(strings.ReplaceAll(text, reset, reset+opening), opening)
+	if strings.HasSuffix(resumed, closing) {
+		return opening + resumed
+	}
+
+	return opening + resumed + closing
 }
 
 func (self Style) Join(parts ...string) string {
@@ -215,7 +230,7 @@ func hex(value string) Style {
 			return text
 		}
 
-		return "\x1b[" + code + "m" + text + "\x1b[0m"
+		return "\x1b[" + code + "m" + text + reset
 	}
 }
 
@@ -235,9 +250,9 @@ func background(value string) Style {
 
 		openingSequence := "\x1b[" + code + "m"
 
-		text = strings.ReplaceAll(text, "\x1b[0m", "\x1b[0m"+openingSequence)
+		text = strings.ReplaceAll(text, reset, reset+openingSequence)
 
-		return openingSequence + text + "\x1b[0m"
+		return openingSequence + text + reset
 	}
 }
 

@@ -1,18 +1,23 @@
-Oh, hello.
+Oh, hello. *yawns*
+Yes? Oh, right. Let's get you signed in.
+────────────────────────────────────────
 
 Choose your provider:
 
-  ChatGPT
-› Anthropic
-  OpenCode Go
+  ChatGPT      OAuth
+› Anthropic    OAuth
+  OpenCode Go  Key
 
-Opening your browser to authorise Anthropic…
+→ Opening your browser to shake hands with Anthropic…
+
 https://example.test/authorise
-If authorisation does not complete automatically, paste the complete redirect URL here and press Enter.
-✓ Signed in
+
+If the redirect breaks, paste the full redirect URL here instead.
+
+✓ Signed in to Anthropic
 
 Choose a model:
 
-› Claude Opus 5
+› Claude Opus 5  claude-opus-5
 
-Thanks. Transferring you…
+✓ Thanks. Transferring you…

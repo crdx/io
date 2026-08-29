@@ -1,5 +1,8 @@
-Opening your browser to authorise ChatGPT…
+→ Opening your browser to shake hands with ChatGPT…
+
 https://auth.example.test/oauth/authorize?client_id=oh-desktop&code_challenge=abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ&code_challenge_method=S256&redirect_uri=http%3A%2F%2Flocalhost%3A1455%2Fauth%2Fcallback&response_type=code&scope=openid%20profile%20email%20offline_access
-If authorisation does not complete automatically, paste the complete redirect URL here and press Enter.
-✓ Signed in
+
+If the redirect breaks, paste the full redirect URL here instead.
+
+✓ Signed in to ChatGPT
 

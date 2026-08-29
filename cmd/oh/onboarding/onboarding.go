@@ -8,17 +8,21 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"crdx.org/io/agent"
 
 	"crdx.org/io/cmd/oh/backend"
 	"crdx.org/io/cmd/oh/config"
+	"crdx.org/io/cmd/oh/escape"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/model"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/internal/browser"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/codex"
 	"crdx.org/io/provider/opencodego"
@@ -37,15 +41,48 @@ const (
 	validationMaxOutputTokens = 1
 )
 
+const (
+	stepMark    = "→"
+	successMark = "✓"
+	failureMark = "✗"
+	noteGap     = "  "
+	openingRule = "─"
+)
+
+const (
+	typingInterval = 32 * time.Millisecond
+	drowsyInterval = 110 * time.Millisecond
+	ruleInterval   = 16 * time.Millisecond
+	clauseRest     = 180 * time.Millisecond
+	sentenceRest   = 360 * time.Millisecond
+	wakingRest     = 600 * time.Millisecond
+)
+
+const (
+	greeting         = "Oh, hello."
+	greetingAside    = "*yawns*"
+	introduction     = "Yes? Oh, right. Let's get you signed in."
+	farewell         = "Thanks. Transferring you…"
+	providerPrompt   = "Choose your provider:"
+	modelPrompt      = "Choose a model:"
+	openCodeGoPrompt = "OpenCode Go API key: "
+	pasteHint        = "If the redirect breaks, paste the full redirect URL here instead."
+	browserHint      = "Visit the URL above to continue."
+	openingBrowser   = "Opening your browser to shake hands with %s…"
+	signedIn         = "Signed in to %s"
+	signInFailure    = "Unable to sign in: %s"
+)
+
 type provider struct {
 	name       string
 	identifier string
+	note       string
 }
 
 var providers = []provider{
-	{name: chatGPTName, identifier: model.CodexProvider},
-	{name: anthropicName, identifier: model.AnthropicProvider},
-	{name: openCodeGoName, identifier: model.OpencodeGoProvider},
+	{name: chatGPTName, identifier: model.CodexProvider, note: "OAuth"},
+	{name: anthropicName, identifier: model.AnthropicProvider, note: "OAuth"},
+	{name: openCodeGoName, identifier: model.OpencodeGoProvider, note: "Key"},
 }
 
 // Options are the resources first-run onboarding needs.
@@ -57,8 +94,6 @@ type Options struct {
 	ResumedSession string
 }
 
-// PrepareConfig loads the configuration, running first-run setup before returning it when startup
-// has no other way to choose a model.
 func PrepareConfig(options Options) (config.Config, error) {
 	configPath := location.GetConfigFile()
 	settings, err := config.Load(configPath)
@@ -69,6 +104,7 @@ func PrepareConfig(options Options) (config.Config, error) {
 	modelCachePath := location.GetModelCachePath(options.EndpointURL != "")
 	harry := wizard{
 		output: options.Output,
+		pause:  typingPause(options.Output),
 		choose: func(prompt string, labels []string) (int, error) {
 			return menu.ChooseIndex(options.Input, options.Output, prompt, labels)
 		},
@@ -122,13 +158,14 @@ type wizard struct {
 	choose          func(string, []string) (int, error)
 	login           func(provider, func(string)) error
 	openBrowser     func(string) error
+	pause           func(time.Duration)
 	refreshModels   func() error
 	getModels       func() []model.Choice
 	setInitialModel func(string) error
 }
 
 func (self wizard) castSpell() error {
-	if _, err := fmt.Fprint(self.output, "Oh, hello.\n\n"); err != nil {
+	if err := self.openScreen(); err != nil {
 		return err
 	}
 
@@ -146,15 +183,7 @@ func (self wizard) castSpell() error {
 		return fmt.Errorf("no models are available for %s", chosenProvider.name)
 	}
 
-	labels := make([]string, len(choices))
-	for i, choice := range choices {
-		labels[i] = choice.Name
-		if labels[i] == "" {
-			labels[i] = choice.ID
-		}
-	}
-
-	chosen, err := self.choose("Choose a model:", labels)
+	chosen, err := self.choose(style.Prompt(modelPrompt), modelLabels(choices))
 	if err != nil {
 		return err
 	}
@@ -170,8 +199,139 @@ func (self wizard) castSpell() error {
 		return err
 	}
 
-	_, err = fmt.Fprint(self.output, "\nThanks. Transferring you…\n")
+	_, err = fmt.Fprintf(self.output, "\n%s %s\n", style.Success(successMark), style.Subtle(farewell))
 	return err
+}
+
+func (self wizard) openScreen() error {
+	width := max(style.Width(spoken(greeting, greetingAside)), style.Width(spoken(introduction, "")))
+
+	if err := self.speakOut(greeting, greetingAside); err != nil {
+		return err
+	}
+
+	self.rest(wakingRest)
+
+	if err := self.speakOut(introduction, ""); err != nil {
+		return err
+	}
+
+	if err := self.typeOut(style.Rule(strings.Repeat(openingRule, width)), ruleInterval); err != nil {
+		return err
+	}
+
+	_, err := io.WriteString(self.output, "\n\n")
+	return err
+}
+
+func spoken(text string, aside string) string {
+	return util.JoinNonEmpty(text, aside)
+}
+
+func (self wizard) speakOut(text string, aside string) error {
+	if err := self.typeOut(text, typingInterval); err != nil {
+		return err
+	}
+
+	if aside != "" {
+		if _, err := io.WriteString(self.output, " "); err != nil {
+			return err
+		}
+		if err := self.typeOut(style.Greeting(aside), drowsyInterval); err != nil {
+			return err
+		}
+	}
+
+	_, err := io.WriteString(self.output, "\n")
+	return err
+}
+
+func restAfter(character rune) time.Duration {
+	switch character {
+	case ',', ';', ':':
+		return clauseRest
+	case '.', '?', '!':
+		return sentenceRest
+	default:
+		return 0
+	}
+}
+
+func (self wizard) rest(interval time.Duration) {
+	if self.pause != nil {
+		self.pause(interval)
+	}
+}
+
+func (self wizard) typeOut(text string, interval time.Duration) error {
+	runes := []rune(text)
+
+	for at := 0; at < len(runes); {
+		end := at
+		for end < len(runes) && runes[end] == '\x1b' {
+			end = escape.GetEnd(runes, end)
+		}
+
+		hasCharacter := end < len(runes)
+		if hasCharacter {
+			end++
+		}
+
+		if _, err := io.WriteString(self.output, string(runes[at:end])); err != nil {
+			return err
+		}
+		if hasCharacter {
+			self.rest(interval + restAfter(runes[end-1]))
+		}
+
+		at = end
+	}
+
+	return nil
+}
+
+func typingPause(output io.Writer) func(time.Duration) {
+	if !tty.Is(output) {
+		return nil
+	}
+
+	return time.Sleep
+}
+
+func modelLabels(choices []model.Choice) []string {
+	labels := make([]string, len(choices))
+	notes := make([]string, len(choices))
+
+	for i, choice := range choices {
+		labels[i] = choice.Name
+		if labels[i] == "" {
+			labels[i] = choice.ID
+		} else {
+			notes[i] = choice.ID
+		}
+	}
+
+	return alignedLabels(labels, notes)
+}
+
+func alignedLabels(labels []string, notes []string) []string {
+	column := 0
+	for i, label := range labels {
+		if notes[i] != "" {
+			column = max(column, style.Width(label))
+		}
+	}
+
+	aligned := make([]string, len(labels))
+	for i, label := range labels {
+		aligned[i] = label
+		if notes[i] != "" {
+			padding := strings.Repeat(" ", column-style.Width(label))
+			aligned[i] = label + padding + noteGap + style.Qualifier(notes[i])
+		}
+	}
+
+	return aligned
 }
 
 func (self wizard) chooseProvider(providerName string) (provider, error) {
@@ -187,13 +347,10 @@ func (self wizard) chooseProvider(providerName string) (provider, error) {
 		return chosenProvider, self.authenticate(chosenProvider, false)
 	}
 
-	labels := make([]string, len(providers))
-	for i, provider := range providers {
-		labels[i] = provider.name
-	}
+	labels := providerLabels()
 
 	for {
-		chosen, err := self.choose("Choose your provider:", labels)
+		chosen, err := self.choose(style.Prompt(providerPrompt), labels)
 		if err != nil {
 			return provider{}, err
 		}
@@ -201,10 +358,26 @@ func (self wizard) chooseProvider(providerName string) (provider, error) {
 		chosenProvider := providers[chosen]
 		if err := self.authenticate(chosenProvider, true); err == nil {
 			return chosenProvider, nil
-		} else if _, writeErr := fmt.Fprintf(self.output, "Couldn’t sign in: %s\n\n", err); writeErr != nil {
+		} else if _, writeErr := fmt.Fprintf(
+			self.output,
+			"%s\n\n",
+			style.Failure(failureMark+" "+signInFailure, err),
+		); writeErr != nil {
 			return provider{}, writeErr
 		}
 	}
+}
+
+func providerLabels() []string {
+	labels := make([]string, len(providers))
+	notes := make([]string, len(providers))
+
+	for i, candidate := range providers {
+		labels[i] = candidate.name
+		notes[i] = candidate.note
+	}
+
+	return alignedLabels(labels, notes)
 }
 
 func providerNamed(identifier string) (provider, bool) {
@@ -224,24 +397,33 @@ func (self wizard) authenticate(chosenProvider provider, shouldSeparate bool) er
 	}
 
 	err := self.login(chosenProvider, func(address string) {
-		_, _ = fmt.Fprintf(self.output, "Opening your browser to authorise %s…\n", chosenProvider.name)
-		_, _ = fmt.Fprintln(self.output, link.RenderURL(address, address))
+		_, _ = fmt.Fprintf(
+			self.output,
+			"%s %s\n\n%s\n\n",
+			style.Information(stepMark),
+			fmt.Sprintf(openingBrowser, style.Subject(chosenProvider.name)),
+			link.RenderURL(style.Link(address), address),
+		)
+
 		if self.openBrowser != nil {
 			if err := self.openBrowser(address); err != nil {
-				_, _ = fmt.Fprintf(self.output, "Could not open a browser: %s\n", err)
-				_, _ = fmt.Fprintln(self.output, "Visit the address above to continue.")
+				_, _ = fmt.Fprintf(self.output, "%s\n", style.Failure("%s", err))
+				_, _ = fmt.Fprintf(self.output, "%s\n\n", style.Subtle(browserHint))
 			}
 		}
-		_, _ = fmt.Fprintln(
-			self.output,
-			"If authorisation does not complete automatically, paste the complete redirect URL here and press Enter.",
-		)
+
+		_, _ = fmt.Fprintf(self.output, "%s\n\n", style.Subtle(pasteHint))
 	})
 	if err != nil {
 		return err
 	}
 
-	_, err = fmt.Fprint(self.output, "✓ Signed in\n\n")
+	_, err = fmt.Fprintf(
+		self.output,
+		"%s %s\n\n",
+		style.Success(successMark),
+		fmt.Sprintf(signedIn, style.Subject(chosenProvider.name)),
+	)
 	return err
 }
 
@@ -327,7 +509,7 @@ func validateOpenCodeGoKeyAt(key string, usageURL string) error {
 }
 
 func readOpenCodeGoKey(input io.Reader, output io.Writer) (string, error) {
-	if _, err := fmt.Fprint(output, "OpenCode Go API key: "); err != nil {
+	if _, err := fmt.Fprint(output, style.Prompt(openCodeGoPrompt)); err != nil {
 		return "", err
 	}
 

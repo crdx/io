@@ -1,6 +1,9 @@
-Opening your browser to authorise ChatGPT…
+→ Opening your browser to shake hands with ChatGPT…
+
 https://example.test/authorise
-If authorisation does not complete automatically, paste the complete redirect URL here and press Enter.
+
+If the redirect breaks, paste the full redirect URL here instead.
+
 http://localhost:1455/auth/callback?code=accepted&state=expected
-✓ Signed in
+✓ Signed in to ChatGPT
 

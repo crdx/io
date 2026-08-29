@@ -70,13 +70,13 @@ build:
 check:
     steps fmt vet lint1 lint2 lint3 mega test
 
-# download the API references for each provider
+# download the API references for each wire format
 refs:
     #!/bin/bash
     set -euo pipefail
     GREEN='\e[32m'
     NC='\e[0m'
-    for SOURCES in provider/*/reference/sources.txt; do
+    for SOURCES in wire/*/*/reference/sources.txt; do
         DIRECTORY="$(dirname "$SOURCES")"
         while read -r NAME ADDRESS; do
             if [[ -z "$NAME" || "$NAME" == \#* ]]; then
@@ -113,8 +113,8 @@ lint1:
 lint2:
     #!/bin/bash
     set -euo pipefail
-    OUTPUT="$(fd -tf -g '*.go' | xargs gopls check -severity=hint 2>&1)"
-    STATUS=$?
+    STATUS=0
+    OUTPUT="$(fd -tf -g '*.go' | xargs gopls check -severity=hint 2>&1)" || STATUS=$?
     if [[ $STATUS -ne 0 || -n "$OUTPUT" ]]; then
         echo "$OUTPUT"
         exit 1

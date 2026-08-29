@@ -111,6 +111,32 @@ func TestOnboardingEdgeCasesMatchTheGoldens(t *testing.T) {
 			_, writeError := fmt.Fprintln(output, err)
 			return writeError
 		},
+		"first-run-unnamed-model": func(t *testing.T, output *bytes.Buffer) error {
+			t.Helper()
+
+			harry := wizard{
+				output: output,
+				choose: menuChoices(output, 0, 1),
+				login: func(_ provider, presentAddress func(string)) error {
+					presentAddress(authorisationURL)
+					return nil
+				},
+				refreshModels: func() error { return nil },
+				getModels: func() []model.Choice {
+					return []model.Choice{
+						{Provider: model.CodexProvider, ID: "gpt-5.6-sol", Name: "GPT-5.6 Sol", EffortLevels: []string{"medium"}},
+						{Provider: model.CodexProvider, ID: "gpt-5.6-experimental-preview", EffortLevels: []string{"high"}},
+					}
+				},
+				setInitialModel: func(selection string) error {
+					if selection != "codex/gpt-5.6-experimental-preview@high" {
+						t.Errorf("saved %q", selection)
+					}
+					return nil
+				},
+			}
+			return harry.castSpell()
+		},
 		"first-run-config-write-failure": func(_ *testing.T, output *bytes.Buffer) error {
 			harry := wizard{
 				output: output,

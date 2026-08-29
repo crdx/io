@@ -1,20 +1,23 @@
 Choose your provider:
 
-  ChatGPT
-  Anthropic
-› OpenCode Go
+  ChatGPT      OAuth
+  Anthropic    OAuth
+› OpenCode Go  Key
 
 OpenCode Go API key: bad-key
-Couldn’t sign in: validate OpenCode Go API key: the key was refused
+✗ Unable to sign in: validate OpenCode Go API key: the key was refused
 
 Choose your provider:
 
-› ChatGPT
-  Anthropic
-  OpenCode Go
+› ChatGPT      OAuth
+  Anthropic    OAuth
+  OpenCode Go  Key
 
-Opening your browser to authorise ChatGPT…
+→ Opening your browser to shake hands with ChatGPT…
+
 https://example.test/authorise
-If authorisation does not complete automatically, paste the complete redirect URL here and press Enter.
-✓ Signed in
+
+If the redirect breaks, paste the full redirect URL here instead.
+
+✓ Signed in to ChatGPT
 

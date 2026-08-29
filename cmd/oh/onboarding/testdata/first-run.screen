@@ -1,20 +1,25 @@
-Oh, hello.
+Oh, hello. *yawns*
+Yes? Oh, right. Let's get you signed in.
+────────────────────────────────────────
 
 Choose your provider:
 
-› ChatGPT
-  Anthropic
-  OpenCode Go
+› ChatGPT      OAuth
+  Anthropic    OAuth
+  OpenCode Go  Key
 
-Opening your browser to authorise ChatGPT…
+→ Opening your browser to shake hands with ChatGPT…
+
 https://example.test/authorise
-If authorisation does not complete automatically, paste the complete redirect URL here and press Enter.
-✓ Signed in
+
+If the redirect breaks, paste the full redirect URL here instead.
+
+✓ Signed in to ChatGPT
 
 Choose a model:
 
-› GPT-5.6 Sol
-  GPT-5.6 Luna
-  GPT-5.6 Terra
+› GPT-5.6 Sol    gpt-5.6-sol
+  GPT-5.6 Luna   gpt-5.6-luna
+  GPT-5.6 Terra  gpt-5.6-terra
 
-Thanks. Transferring you…
+✓ Thanks. Transferring you…

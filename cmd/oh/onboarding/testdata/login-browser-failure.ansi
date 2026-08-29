@@ -1,7 +1,11 @@
-Opening your browser to authorise ChatGPT…
+→ Opening your browser to shake hands with ChatGPT…
+
 \e]8;;https://example.test/authorise?token=one\e\https://example.test/authorise?token=one\e]8;;\e\
-Could not open a browser: no browser is available
-Visit the address above to continue.
-If authorisation does not complete automatically, paste the complete redirect URL here and press Enter.
-✓ Signed in
+
+no browser is available
+Visit the URL above to continue.
+
+If the redirect breaks, paste the full redirect URL here instead.
+
+✓ Signed in to ChatGPT
 

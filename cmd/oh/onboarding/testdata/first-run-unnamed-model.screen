@@ -4,16 +4,21 @@ Yes? Oh, right. Let's get you signed in.
 
 Choose your provider:
 
-  ChatGPT      OAuth
-› Anthropic    OAuth
+› ChatGPT      OAuth
+  Anthropic    OAuth
   OpenCode Go  Key
 
-→ Opening your browser to shake hands with Anthropic…
+→ Opening your browser to shake hands with ChatGPT…
 
 https://example.test/authorise
 
 If the redirect breaks, paste the full redirect URL here instead.
 
-✓ Signed in to Anthropic
+✓ Signed in to ChatGPT
 
-no models are available for Anthropic
+Choose a model:
+
+  GPT-5.6 Sol  gpt-5.6-sol
+› gpt-5.6-experimental-preview
+
+✓ Thanks. Transferring you…

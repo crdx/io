@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"flag"
+	"fmt"
 	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/link"
@@ -124,7 +126,7 @@ func TestOnboardingOffersAnotherProviderAfterLoginFails(t *testing.T) {
 	onboarding := wizard{
 		output: &output,
 		choose: func(prompt string, _ []string) (int, error) {
-			if prompt == "Choose a model:" {
+			if style.Plain(prompt) == modelPrompt {
 				return 0, nil
 			}
 			chosen := chosenProviders[providerChoices]
@@ -155,7 +157,7 @@ func TestOnboardingOffersAnotherProviderAfterLoginFails(t *testing.T) {
 	if loginAttempts != 2 {
 		t.Errorf("got %d login attempts", loginAttempts)
 	}
-	if !strings.Contains(output.String(), "Couldn’t sign in: authorisation was refused") {
+	if !strings.Contains(output.String(), fmt.Sprintf(signInFailure, "authorisation was refused")) {
 		t.Errorf("failure was not shown in %q", output.String())
 	}
 }
@@ -181,8 +183,9 @@ func TestNamedLoginSkipsTheProviderPicker(t *testing.T) {
 	if loggedInTo != model.AnthropicProvider {
 		t.Errorf("logged in to %q", loggedInTo)
 	}
-	if output.String() != "✓ Signed in\n\n" {
-		t.Errorf("got output %q", output.String())
+	welcome := fmt.Sprintf("%s %s\n\n", successMark, fmt.Sprintf(signedIn, anthropicName))
+	if got, want := style.Plain(output.String()), welcome; got != want {
+		t.Errorf("got output %q, want %q", got, want)
 	}
 }
 
@@ -190,6 +193,112 @@ func TestNamedLoginRejectsAnUnknownProvider(t *testing.T) {
 	harry := wizard{}
 	if _, err := harry.chooseProvider("somewhere"); err == nil || !strings.Contains(err.Error(), "unknown provider") {
 		t.Errorf("got %v", err)
+	}
+}
+
+func TestTheRuleIsDrawnOneCharacterAtATime(t *testing.T) {
+	var writes []string
+	pauses := 0
+
+	painted := style.Rule(strings.Repeat(openingRule, 4))
+	harry := wizard{
+		output: writerFunc(func(piece []byte) (int, error) {
+			writes = append(writes, string(piece))
+			return len(piece), nil
+		}),
+		pause: func(time.Duration) { pauses++ },
+	}
+
+	if err := harry.typeOut(painted, ruleInterval); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := strings.Join(writes, ""); got != painted {
+		t.Errorf("drawing wrote %q, want %q", got, painted)
+	}
+	if pauses != 4 {
+		t.Errorf("waited %d times, want one wait for each of the 4 characters", pauses)
+	}
+	if got := style.Plain(writes[0]); got != openingRule {
+		t.Errorf("first write carried %q, want the opening sequences and %q", got, openingRule)
+	}
+	if last := writes[len(writes)-1]; style.Plain(last) != "" {
+		t.Errorf("last write was %q, want the closing sequences alone", last)
+	}
+}
+
+func TestTheOpeningIsTypedInTheRhythmOfSomebodyWakingUp(t *testing.T) {
+	var output bytes.Buffer
+	var waits []time.Duration
+
+	harry := wizard{
+		output: &output,
+		pause:  func(interval time.Duration) { waits = append(waits, interval) },
+	}
+
+	if err := harry.openScreen(); err != nil {
+		t.Fatal(err)
+	}
+
+	rule := strings.Repeat(openingRule, style.Width(spoken(introduction, "")))
+	lines := strings.Split(style.Plain(output.String()), "\n")
+	if want := []string{spoken(greeting, greetingAside), introduction, rule, "", ""}; !slices.Equal(lines, want) {
+		t.Errorf("the opening drew %q, want %q", lines, want)
+	}
+
+	want := slices.Concat(
+		typingWaits(greeting, typingInterval),
+		typingWaits(greetingAside, drowsyInterval),
+		[]time.Duration{wakingRest},
+		typingWaits(introduction, typingInterval),
+		typingWaits(rule, ruleInterval),
+	)
+	if !slices.Equal(waits, want) {
+		t.Errorf("the opening waited\n%v\nwant\n%v", waits, want)
+	}
+}
+
+func typingWaits(text string, interval time.Duration) []time.Duration {
+	waits := make([]time.Duration, 0, len([]rune(text)))
+	for _, character := range text {
+		waits = append(waits, interval+restAfter(character))
+	}
+
+	return waits
+}
+
+func TestTypingRestsLongerAtTheEndOfASentenceThanWithinOne(t *testing.T) {
+	if restAfter('.') <= restAfter(',') || restAfter(',') <= restAfter('o') {
+		t.Errorf("rests do not lengthen with the pause a reader takes: %v, %v, %v",
+			restAfter('o'), restAfter(','), restAfter('.'))
+	}
+}
+
+func TestOnlyTheAsideIsDrawnInItalics(t *testing.T) {
+	var output bytes.Buffer
+	harry := wizard{output: &output}
+
+	if err := harry.speakOut(greeting, greetingAside); err != nil {
+		t.Fatal(err)
+	}
+
+	drawn := output.String()
+	if !strings.HasPrefix(drawn, greeting+" ") {
+		t.Errorf("the greeting %q painted the words, want the terminal's own colour", drawn)
+	}
+
+	italics := strings.Index(drawn, "\x1b[3m")
+	if italics < 0 {
+		t.Fatalf("the greeting %q drew no italics", drawn)
+	}
+	if style.Plain(strings.TrimSuffix(drawn[italics:], "\n")) != greetingAside {
+		t.Errorf("the greeting %q put more than the aside in italics", drawn)
+	}
+}
+
+func TestTypingWaitsForNobodyWhereTheScreenIsNotATerminal(t *testing.T) {
+	if typingPause(&bytes.Buffer{}) != nil {
+		t.Error("expected no waiting where the typing cannot be watched")
 	}
 }
 
@@ -223,4 +332,10 @@ func visibleTranscript(rendered string) string {
 		lines[i] = strings.TrimRight(line, " ")
 	}
 	return strings.Join(lines, "\n")
+}
+
+type writerFunc func([]byte) (int, error)
+
+func (self writerFunc) Write(piece []byte) (int, error) {
+	return self(piece)
 }

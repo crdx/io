@@ -50,6 +50,33 @@ func TestAUserMessageHasABackgroundThatSurvivesInnerStyles(t *testing.T) {
 	}
 }
 
+func TestAStyleOverAnotherResumesWhereTheInnerOneReset(t *testing.T) {
+	enableColor(t)
+
+	opening := "\x1b[" + sgr(copper) + "m"
+	got := Chosen.Over("row " + Qualifier("note") + " tail")
+
+	if count := strings.Count(got, opening); count != 2 {
+		t.Errorf("expected the outer style to resume after the inner one, got %q", got)
+	}
+
+	if strings.HasSuffix(got, opening+reset) {
+		t.Errorf("expected nothing opened at the very end, got %q", got)
+	}
+
+	if plain := Plain(got); plain != "row note tail" {
+		t.Errorf("expected the row's text unchanged, got %q", plain)
+	}
+}
+
+func TestAStyleOverAnotherPaintsNothingWhereNothingIsPainted(t *testing.T) {
+	t.Cleanup(Init(&strings.Builder{}))
+
+	if got := Chosen.Over("row note"); got != "row note" {
+		t.Errorf("got %q, want the text left alone", got)
+	}
+}
+
 func TestReasoningIsItalic(t *testing.T) {
 	enableColor(t)
 
