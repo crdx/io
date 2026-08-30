@@ -1,0 +1,22 @@
+{"kind":"head","version":10,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"high","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"event","event":{"kind":"user_message","text":"show me both pictures"}}
+{"kind":"event","event":{"render":"snapshot","kind":"tool_call_request","id":"call-1","name":"snapshot","arguments":"{}"}}
+{"kind":"event","event":{"render":"thumbnail","kind":"tool_call_request","id":"call-2","name":"thumbnail","arguments":"{}"}}
+{"kind":"event","event":{"kind":"state_change","id":"call-1","name":"snapshot-count","state":1}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"snapshot.png","id":"call-1","name":"snapshot","status":"success","stats":{"kind":"image","bytes":11146,"estimated_tokens":1225}}}
+{"kind":"event","event":{"kind":"state_change","id":"call-2","name":"thumbnail-count","state":1}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"thumbnail.png","id":"call-2","name":"thumbnail","status":"success","stats":{"kind":"image","bytes":2796,"estimated_tokens":475}}}
+{"kind":"event","event":{"kind":"model_message","text":"I can see both pictures."}}
+{"kind":"item","payload":{"role":"user","content":"show me both pictures"}}
+{"kind":"item","payload":{"role":"assistant","content":"","tool_calls":[{"id":"call-1","type":"function","function":{"name":"snapshot","arguments":"{}"}},{"id":"call-2","type":"function","function":{"name":"thumbnail","arguments":"{}"}}]}}
+{"kind":"item","payload":{"role":"tool","content":"snapshot.png","tool_call_id":"call-1"}}
+{"kind":"item","payload":{"role":"tool","content":"thumbnail.png","tool_call_id":"call-2"}}
+{"kind":"item","payload":{"content":[{"text":"Attached image(s) from tool result:","type":"text"},{"image_url":{"url":"[image/png 2400x1200]"},"type":"image_url"},{"image_url":{"url":"[image/png 800x600]"},"type":"image_url"}],"role":"user"}}
+{"kind":"item","payload":{"role":"assistant","content":"I can see both pictures."}}
+{"kind":"turn_completion"}
+{"kind":"event","event":{"kind":"user_message","text":"describe the larger one"}}
+{"kind":"event","event":{"kind":"model_message","text":"The larger one is a plain blue field."}}
+{"kind":"item","payload":{"role":"user","content":"describe the larger one"}}
+{"kind":"item","payload":{"role":"assistant","content":"The larger one is a plain blue field."}}
+{"kind":"turn_completion"}

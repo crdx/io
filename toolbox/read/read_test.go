@@ -87,6 +87,27 @@ func TestAnImageReportsAnEstimateFromItsDimensions(t *testing.T) {
 	}
 }
 
+func TestAnOversizedImageIsEstimatedAtTheSizeThatWillBeSent(t *testing.T) {
+	var encoded bytes.Buffer
+	if err := png.Encode(&encoded, image.NewRGBA(image.Rect(0, 0, 3200, 320))); err != nil {
+		t.Fatalf("could not encode the test image: %v", err)
+	}
+
+	root := testRoot(t, "picture.png", encoded.String())
+	call, err := read.New(root, file.NewSnapshots()).Parse(`{"path":"picture.png"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	result, err := call.Exec(t.Context())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result.Stats.EstimatedTokens != 49*5 {
+		t.Errorf("expected the estimate to follow the bounded size, got %#v", result.Stats)
+	}
+}
+
 func TestAnImageCannotBeReadAsLines(t *testing.T) {
 	content := "\x89PNG\r\n\x1a\n" + strings.Repeat("\x00", 24)
 	root := testRoot(t, "picture.png", content)

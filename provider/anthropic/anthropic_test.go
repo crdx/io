@@ -1,10 +1,14 @@
 package anthropic_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
+	"image/png"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -14,6 +18,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/util/imageutil"
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/tool"
 )
@@ -255,6 +260,94 @@ func TestPartialImagesAreNotSent(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAnOversizedImageIsScaledBeforeItIsSent(t *testing.T) {
+	server, bodies := turns(t, script(answer("Seen.")))
+
+	client := newClient(t, server.URL)
+	client.AddToolResults([]agent.ToolCallResult{{ID: "toolu_1", Output: "text", Image: oversizedPNG(t)}})
+
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
+		t.Fatal(err)
+	}
+
+	requireBoundedImage(t, (*bodies)[0], `"data":"`)
+}
+
+func TestAnOversizedImageInStoredHistoryIsScaledBeforeItIsSent(t *testing.T) {
+	server, bodies := turns(t, script(answer("Seen.")))
+
+	client := newClient(t, server.URL)
+	client.Load([]json.RawMessage{storedImageItem(t)})
+
+	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
+		t.Fatal(err)
+	}
+
+	requireBoundedImage(t, (*bodies)[0], `"data":"`)
+}
+
+func TestStoredHistoryIsHandedBackExactlyAsItWasLoaded(t *testing.T) {
+	client := newClient(t, "http://somewhere")
+	stored := []json.RawMessage{storedImageItem(t)}
+
+	client.Load(stored)
+
+	dumped := client.Dump()
+	if len(dumped) != 1 || !bytes.Equal(dumped[0], stored[0]) {
+		t.Errorf("stored history was rewritten, so an append-only recorder would refuse it:\n%d bytes became %d",
+			len(stored[0]), len(dumped[0]))
+	}
+}
+
+func storedImageItem(t *testing.T) json.RawMessage {
+	t.Helper()
+
+	return json.RawMessage(
+		`{"role":"user","content":[{"type":"image","source":{"type":"base64","media_type":"image/png","data":"` +
+			base64.StdEncoding.EncodeToString(oversizedPNG(t).Data) + `"}}]}`,
+	)
+}
+
+func requireBoundedImage(t *testing.T, body string, marker string) {
+	t.Helper()
+
+	data := sentImage(t, body, marker)
+
+	width, height, isMeasured := imageutil.Dimensions(data)
+	if !isMeasured || width > imageutil.MaxEdge || height > imageutil.MaxEdge {
+		t.Errorf("expected an image within %d pixels, got %dx%d", imageutil.MaxEdge, width, height)
+	}
+}
+
+func oversizedPNG(t *testing.T) tool.Image {
+	t.Helper()
+
+	var encoded bytes.Buffer
+	if err := png.Encode(&encoded, image.NewNRGBA(image.Rect(0, 0, 2400, 1200))); err != nil {
+		t.Fatalf("could not encode the test image: %v", err)
+	}
+
+	return tool.Image{MediaType: "image/png", Data: encoded.Bytes()}
+}
+
+func sentImage(t *testing.T, dumped string, marker string) []byte {
+	t.Helper()
+
+	_, after, found := strings.Cut(dumped, marker)
+	if !found {
+		t.Fatalf("no image was sent: %s", dumped)
+	}
+
+	encoded, _, _ := strings.Cut(after, `"`)
+
+	data, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	return data
 }
 
 func TestTheModelListingFollowsTheEndpointItWasGiven(t *testing.T) {

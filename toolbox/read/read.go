@@ -1,15 +1,10 @@
 package read
 
 import (
-	"bytes"
 	"context"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"image/gif"
-	"image/jpeg"
-	"image/png"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -17,6 +12,7 @@ import (
 	"crdx.org/io/internal/file"
 
 	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/util/imageutil"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
 )
@@ -96,7 +92,7 @@ func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 
 	stats := tool.Stats{Kind: tool.StatsRead, Bytes: int64(len(data))}
 	mediaType := http.DetectContentType(data)
-	if isSupportedImage(mediaType) {
+	if imageutil.IsSupported(mediaType) {
 		if args.Offset > 0 || args.Limit > 0 {
 			return tool.ToolCallResult{Stats: stats}, errors.New("line ranges are not supported for images")
 		}
@@ -105,8 +101,8 @@ func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 		}
 
 		stats.Kind = tool.StatsImage
-		if width, height, ok := imageDimensions(data, mediaType); ok {
-			stats.EstimatedTokens = util.EstimateImageTokenCount(width, height)
+		if width, height, ok := imageutil.Dimensions(data); ok {
+			stats.EstimatedTokens = util.EstimateImageTokenCount(imageutil.Fit(width, height))
 		}
 
 		return successfulResult(
@@ -161,80 +157,4 @@ func successfulResult(
 		Image:  image,
 		Stats:  stats,
 	}
-}
-
-func isSupportedImage(mediaType string) bool {
-	switch mediaType {
-	case "image/gif", "image/jpeg", "image/png", "image/webp":
-		return true
-	default:
-		return false
-	}
-}
-
-func imageDimensions(data []byte, mediaType string) (int, int, bool) {
-	reader := bytes.NewReader(data)
-
-	switch mediaType {
-	case "image/gif":
-		config, err := gif.DecodeConfig(reader)
-		return config.Width, config.Height, err == nil
-	case "image/jpeg":
-		config, err := jpeg.DecodeConfig(reader)
-		return config.Width, config.Height, err == nil
-	case "image/png":
-		config, err := png.DecodeConfig(reader)
-		return config.Width, config.Height, err == nil
-	case "image/webp":
-		return webPDimensions(data)
-	default:
-		return 0, 0, false
-	}
-}
-
-func webPDimensions(data []byte) (int, int, bool) {
-	const riffHeaderLength = 12
-	if len(data) < riffHeaderLength || string(data[:4]) != "RIFF" || string(data[8:12]) != "WEBP" {
-		return 0, 0, false
-	}
-
-	for chunkOffset := riffHeaderLength; chunkOffset+8 <= len(data); {
-		chunkSize := int(binary.LittleEndian.Uint32(data[chunkOffset+4 : chunkOffset+8]))
-		chunkStart := chunkOffset + 8
-		chunkEnd := chunkStart + chunkSize
-		if chunkEnd > len(data) {
-			return 0, 0, false
-		}
-
-		chunkData := data[chunkStart:chunkEnd]
-		switch string(data[chunkOffset : chunkOffset+4]) {
-		case "VP8 ":
-			if len(chunkData) >= 10 && string(chunkData[3:6]) == "\x9d\x01\x2a" {
-				width := int(binary.LittleEndian.Uint16(chunkData[6:8]) & 0x3fff)
-				height := int(binary.LittleEndian.Uint16(chunkData[8:10]) & 0x3fff)
-				return width, height, width > 0 && height > 0
-			}
-		case "VP8L":
-			if len(chunkData) >= 5 && chunkData[0] == 0x2f {
-				dimensions := binary.LittleEndian.Uint32(chunkData[1:5])
-				width := int(dimensions&0x3fff) + 1
-				height := int((dimensions>>14)&0x3fff) + 1
-				return width, height, true
-			}
-		case "VP8X":
-			if len(chunkData) >= 10 {
-				width := littleEndianUint24(chunkData[4:7]) + 1
-				height := littleEndianUint24(chunkData[7:10]) + 1
-				return width, height, true
-			}
-		}
-
-		chunkOffset = chunkEnd + chunkSize%2
-	}
-
-	return 0, 0, false
-}
-
-func littleEndianUint24(data []byte) int {
-	return int(data[0]) | int(data[1])<<8 | int(data[2])<<16
 }

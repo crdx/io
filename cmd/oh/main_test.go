@@ -4,10 +4,15 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/png"
 	"io"
 	"iter"
 	"maps"
@@ -86,6 +91,8 @@ import (
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sim"
 	"crdx.org/io/internal/stop"
+	"crdx.org/io/internal/util"
+	"crdx.org/io/internal/util/imageutil"
 	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/provider/anthropic"
@@ -7132,6 +7139,7 @@ type sessionGoldenTurn struct {
 type sessionGoldenTool struct {
 	Name          string   `toml:"name"`
 	Outputs       []string `toml:"outputs"`
+	Image         string   `toml:"image"`
 	StateKey      string   `toml:"state-key"`
 	ShellWithheld bool     `toml:"shell-withheld"`
 	WebWithheld   bool     `toml:"web-withheld"`
@@ -7328,6 +7336,7 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 				return json.Unmarshal(state, &callCount)
 			})
 		}
+		attachment, attachmentStats := sessionGoldenImage(t, specification.Image)
 		tools = append(tools, builder.Run(func(context.Context, struct{}) (tool.ToolCallResult, error) {
 			if callCount >= len(specification.Outputs) {
 				return tool.ToolCallResult{}, fmt.Errorf("tool %s has no output for call %d", specification.Name, callCount+1)
@@ -7339,10 +7348,39 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 			if err != nil {
 				return tool.ToolCallResult{}, err
 			}
-			return tool.ToolCallResult{Output: output, State: state}, nil
+			return tool.ToolCallResult{Output: output, Image: attachment, Stats: attachmentStats, State: state}, nil
 		}))
 	}
 	return tools
+}
+
+func sessionGoldenImage(t *testing.T, size string) (tool.Image, tool.Stats) {
+	t.Helper()
+
+	if size == "" {
+		return tool.Image{}, tool.Stats{}
+	}
+
+	var width, height int
+	if _, err := fmt.Sscanf(size, "%dx%d", &width, &height); err != nil {
+		t.Fatalf("unreadable scenario image size %q: %v", size, err)
+	}
+
+	subject := image.NewNRGBA(image.Rect(0, 0, width, height))
+	draw.Draw(subject, subject.Bounds(), image.NewUniform(color.NRGBA{R: 40, G: 80, B: 120, A: 255}), image.Point{}, draw.Src)
+
+	var encoded bytes.Buffer
+	if err := png.Encode(&encoded, subject); err != nil {
+		t.Fatalf("could not encode the scenario image: %v", err)
+	}
+
+	stats := tool.Stats{
+		Kind:            tool.StatsImage,
+		Bytes:           int64(encoded.Len()),
+		EstimatedTokens: util.EstimateImageTokenCount(imageutil.Fit(width, height)),
+	}
+
+	return tool.Image{MediaType: "image/png", Data: encoded.Bytes()}, stats
 }
 
 var errSessionGoldenToolStopped = errors.New("the tool was stopped")
@@ -7640,7 +7678,8 @@ func canonicalProviderRequests(t *testing.T, requestBodies [][]byte) string {
 			}
 			request["prompt_cache_key"] = cacheKeys[key]
 		}
-		encoded, err := json.Marshal(request)
+		canonicalRequest, _ := canonicalImages(request)
+		encoded, err := json.Marshal(canonicalRequest)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -7648,6 +7687,82 @@ func canonicalProviderRequests(t *testing.T, requestBodies [][]byte) string {
 		canonical.WriteByte('\n')
 	}
 	return canonical.String()
+}
+
+func canonicalImages(value any) (any, bool) {
+	switch typed := value.(type) {
+	case map[string]any:
+		wasDescribed := false
+		for key, item := range typed {
+			described, itemWasDescribed := canonicalImages(item)
+			typed[key] = described
+			wasDescribed = wasDescribed || itemWasDescribed
+		}
+		return typed, wasDescribed
+	case []any:
+		wasDescribed := false
+		for index, item := range typed {
+			described, itemWasDescribed := canonicalImages(item)
+			typed[index] = described
+			wasDescribed = wasDescribed || itemWasDescribed
+		}
+		return typed, wasDescribed
+	case string:
+		if description, isImage := describeEncodedImage(typed); isImage {
+			return description, true
+		}
+	}
+
+	return value, false
+}
+
+func describeEncodedImage(value string) (string, bool) {
+	encoded := value
+	if _, payload, isDataURL := strings.Cut(value, ";base64,"); isDataURL {
+		encoded = payload
+	}
+
+	data, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		return "", false
+	}
+
+	mediaType := http.DetectContentType(data)
+	if !imageutil.IsSupported(mediaType) {
+		return "", false
+	}
+
+	width, height, isMeasured := imageutil.Dimensions(data)
+	if !isMeasured {
+		return "", false
+	}
+
+	return fmt.Sprintf("[%s %dx%d]", mediaType, width, height), true
+}
+
+func canonicalImagePayload(t *testing.T, payload json.RawMessage) json.RawMessage {
+	t.Helper()
+
+	if len(payload) == 0 {
+		return payload
+	}
+
+	var value any
+	if json.Unmarshal(payload, &value) != nil {
+		return payload
+	}
+
+	described, wasDescribed := canonicalImages(value)
+	if !wasDescribed {
+		return payload
+	}
+
+	encoded, err := json.Marshal(described)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return encoded
 }
 
 func requireSameVisibleScreen(t *testing.T, description string, firstOutput string, secondOutput string) {
@@ -7873,7 +7988,7 @@ func canonicalSessionJournal(t *testing.T, directory string, name string) string
 			Version: line.Version,
 			Meta:    line.Meta,
 			Event:   event,
-			Payload: line.Payload,
+			Payload: canonicalImagePayload(t, line.Payload),
 		}
 
 		encoded, err := json.Marshal(record)

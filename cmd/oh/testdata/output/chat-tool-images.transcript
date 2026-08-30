@@ -1,0 +1,51 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `deepseek-v4-pro`
+- **Effort:** `high`
+- **Provider:** `chat`
+- **Workspace:** ``
+
+## Mode · rxwgs · +0s
+
+## User · +0s
+
+```
+show me both pictures
+```
+
+## Tool call — snapshot · `snapshot` · +0s
+
+## Tool call — thumbnail · `thumbnail` · +0s
+
+## Tool result — snapshot · success, 10.9K, ~1.2Kt · +0s
+
+```
+snapshot.png
+```
+
+## Tool result — thumbnail · success, 2.73K, ~500t · +0s
+
+```
+thumbnail.png
+```
+
+## Assistant · +0s
+
+```
+I can see both pictures.
+```
+
+## User · +0s
+
+```
+describe the larger one
+```
+
+## Assistant · +0s
+
+```
+The larger one is a plain blue field.
+```
+

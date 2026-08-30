@@ -1,0 +1,43 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "high"
+
+[[tool]]
+name = "snapshot"
+outputs = ["snapshot.png"]
+image = "2400x1200"
+state-key = "snapshot-count"
+
+[[tool]]
+name = "thumbnail"
+outputs = ["thumbnail.png"]
+image = "800x600"
+state-key = "thumbnail-count"
+
+[first]
+prompt = "show me both pictures"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","type":"function","function":{"name":"snapshot","arguments":"{}"}}]}}]}''',
+    '''{"choices":[{"delta":{"tool_calls":[{"index":1,"id":"call-2","type":"function","function":{"name":"thumbnail","arguments":"{}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"I can see both pictures."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "describe the larger one"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"The larger one is a plain blue field."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

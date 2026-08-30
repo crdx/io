@@ -1,6 +1,7 @@
 package wire_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -257,5 +258,103 @@ func TestRecorderCensorsIdentityMetadataWithoutCensoringProtocolIDs(t *testing.T
 		if !strings.Contains(transcript, kept) {
 			t.Errorf("expected protocol value %q to survive:\n%s", kept, transcript)
 		}
+	}
+}
+
+func recordBody(t *testing.T, body []byte, contentType string, events string) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), "wire.http")
+	recorder, err := wire.Open(path, wire.Meta{}, func(err error) {
+		t.Errorf("unexpected recorder failure: %v", err)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	exchange := recorder.Start(req.Request{
+		Started:  time.Unix(2, 0),
+		Method:   http.MethodPost,
+		URL:      "https://example.test/",
+		Protocol: "HTTP/1.1",
+		Header:   http.Header{"Content-Type": {contentType}},
+		Body:     body,
+	})
+	exchange.Response(req.Response{
+		Received: time.Unix(3, 0),
+		Protocol: "HTTP/1.1",
+		Status:   "200 OK",
+		Code:     200,
+		Header:   http.Header{"Content-Type": {"text/event-stream"}},
+	})
+	if events != "" {
+		exchange.Body([]byte(events))
+	}
+	exchange.Finish(time.Unix(4, 0), nil, false)
+
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return string(stored)
+}
+
+func recordedLine(t *testing.T, transcript string, prefix string) string {
+	t.Helper()
+
+	for line := range strings.SplitSeq(transcript, "\n") {
+		if strings.HasPrefix(line, prefix) {
+			return line
+		}
+	}
+
+	t.Fatalf("no line starting %q in:\n%s", prefix, transcript)
+	return ""
+}
+
+func TestACensoredBodyIsStillTheJSONItWas(t *testing.T) {
+	body := []byte(`{"messages":[{"text":"got != \"Bearer accepted-key\" {"}],"token":"secret"}`)
+
+	transcript := recordBody(t, body, "application/json", "")
+	recorded := recordedLine(t, transcript, `{"messages"`)
+
+	if strings.Contains(recorded, "accepted-key") {
+		t.Errorf("the token survived censorship: %s", recorded)
+	}
+
+	var value any
+	if err := json.Unmarshal([]byte(recorded), &value); err != nil {
+		t.Errorf("the censored body no longer decodes: %v\n%s", err, recorded)
+	}
+}
+
+func TestACensoredEventIsStillTheJSONItWas(t *testing.T) {
+	events := "data: {\"text\":\"got != \\\"Bearer accepted-key\\\" {\"}\n\n"
+
+	transcript := recordBody(t, []byte(`{}`), "application/json", events)
+	recorded := recordedLine(t, transcript, "data: ")
+
+	if strings.Contains(recorded, "accepted-key") {
+		t.Errorf("the token survived censorship: %s", recorded)
+	}
+
+	var value any
+	if err := json.Unmarshal([]byte(strings.TrimPrefix(recorded, "data: ")), &value); err != nil {
+		t.Errorf("the censored event no longer decodes: %v\n%s", err, recorded)
+	}
+}
+
+func TestABodyWithNothingToHideIsRecordedAsItWasSent(t *testing.T) {
+	body := []byte(`{"zebra":1,"apple":2,"nested":{"kept":"as it is"}}`)
+
+	transcript := recordBody(t, body, "application/json", "")
+
+	if !strings.Contains(transcript, string(body)) {
+		t.Errorf("expected the body unchanged, got:\n%s", transcript)
 	}
 }

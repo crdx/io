@@ -279,15 +279,19 @@ func censorBody(body []byte, contentType string) []byte {
 	if strings.Contains(lowerType, "event-stream") {
 		lines := strings.Split(string(body), "\n")
 		for i, line := range lines {
-			if data, found := strings.CutPrefix(line, "data:"); found {
-				space := ""
-				if remaining, found := strings.CutPrefix(data, " "); found {
-					space, data = " ", remaining
-				}
-				lines[i] = "data:" + space + string(censorJSON([]byte(data)))
+			data, found := strings.CutPrefix(line, "data:")
+			if !found {
+				lines[i] = censorBearer(line)
+				continue
 			}
+
+			space := ""
+			if remaining, found := strings.CutPrefix(data, " "); found {
+				space, data = " ", remaining
+			}
+			lines[i] = "data:" + space + string(censorJSON([]byte(data)))
 		}
-		return []byte(censorBearer(strings.Join(lines, "\n")))
+		return []byte(strings.Join(lines, "\n"))
 	}
 	return []byte(censorBearer(string(body)))
 }
@@ -297,46 +301,48 @@ func censorJSON(body []byte) []byte {
 	if json.Unmarshal(body, &value) != nil {
 		return []byte(censorBearer(string(body)))
 	}
-	if !containsSensitiveValue(value) {
-		return []byte(censorBearer(string(body)))
+
+	censored, wasCensored := censorValue(value)
+	if !wasCensored {
+		return body
 	}
-	censorValue(value)
-	encoded, err := json.Marshal(value)
+
+	encoded, err := json.Marshal(censored)
 	if err != nil {
 		return []byte(censorBearer(string(body)))
 	}
-	return []byte(censorBearer(string(encoded)))
+	return encoded
 }
 
-func containsSensitiveValue(value any) bool {
+func censorValue(value any) (any, bool) {
 	switch typed := value.(type) {
 	case map[string]any:
-		for key, item := range typed {
-			if isSensitiveName(key) || containsSensitiveValue(item) {
-				return true
-			}
-		}
-	case []any:
-		return slices.ContainsFunc(typed, containsSensitiveValue)
-	}
-	return false
-}
-
-func censorValue(value any) {
-	switch typed := value.(type) {
-	case map[string]any:
+		wasCensored := false
 		for key, item := range typed {
 			if isSensitiveName(key) {
 				typed[key] = redacted
-			} else {
-				censorValue(item)
+				wasCensored = true
+				continue
 			}
+
+			censored, itemWasCensored := censorValue(item)
+			typed[key] = censored
+			wasCensored = wasCensored || itemWasCensored
 		}
+		return typed, wasCensored
 	case []any:
-		for _, item := range typed {
-			censorValue(item)
+		wasCensored := false
+		for index, item := range typed {
+			censored, itemWasCensored := censorValue(item)
+			typed[index] = censored
+			wasCensored = wasCensored || itemWasCensored
 		}
+		return typed, wasCensored
+	case string:
+		censored := censorBearer(typed)
+		return censored, censored != typed
 	}
+	return value, false
 }
 
 func isSensitiveName(name string) bool {

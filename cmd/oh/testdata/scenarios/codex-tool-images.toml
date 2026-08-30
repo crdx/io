@@ -1,0 +1,42 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[[tool]]
+name = "snapshot"
+outputs = ["snapshot.png"]
+image = "2400x1200"
+state-key = "snapshot-count"
+
+[[tool]]
+name = "thumbnail"
+outputs = ["thumbnail.png"]
+image = "800x600"
+state-key = "thumbnail-count"
+
+[first]
+prompt = "show me both pictures"
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_item.done","item":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"snapshot","arguments":"{}"}}''',
+    '''{"type":"response.output_item.done","item":{"id":"call-item-2","type":"function_call","call_id":"call-2","name":"thumbnail","arguments":"{}"}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"I can see both pictures."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"I can see both pictures."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[resume]
+prompt = "describe the larger one"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"The larger one is a plain blue field."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"The larger one is a plain blue field."}]}}''',
+    '''{"type":"response.completed"}''',
+]

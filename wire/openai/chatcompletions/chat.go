@@ -11,6 +11,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/req"
+	"crdx.org/io/internal/util/imageutil"
 	"crdx.org/io/tool"
 )
 
@@ -166,7 +167,7 @@ func (self *Client) requestBody() request {
 	if self.instructions != "" {
 		messages = append(messages, encode(message{Role: "system", Content: self.instructions}))
 	}
-	messages = append(messages, self.history...)
+	messages = append(messages, imageutil.BoundHistory(self.history)...)
 
 	body := request{
 		Model:           self.Model,
