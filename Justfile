@@ -121,3 +121,4 @@ lint2:
 [private]
 lint3:
     fd -tf -e go -X go run ./internal/lint/receivername
+    fd -tf -e go -X go run ./internal/lint/stdstream

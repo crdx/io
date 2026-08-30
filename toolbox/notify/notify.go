@@ -26,8 +26,8 @@ var desktopIconNames = map[string]string{
 	"progress": "process-working",
 }
 
-// IsAvailable reports whether a notification can be shown: with Kitty's notification kitten when
-// running inside Kitty, and with notify-send elsewhere.
+type EscapeWriter func(escape string) bool
+
 func IsAvailable() bool {
 	if isKitty() {
 		_, err := exec.LookPath("kitten")
@@ -38,15 +38,10 @@ func IsAvailable() bool {
 	return err == nil
 }
 
-// Command builds the command that shows a desktop notification, preferring Kitty's notification
-// kitten when running inside Kitty so that clicking the notification focuses the terminal. The
-// second result reports whether the command writes a Kitty escape code to the terminal rather than
-// talking directly to the notification service, in which case its standard output must be the
-// terminal.
 func Command(ctx context.Context, title, message, icon string) (*exec.Cmd, bool) {
 	if isKitty() {
 		//nolint:gosec // the executable and options are fixed, and the arguments are inert
-		return exec.CommandContext(ctx, "kitten", "notify", "--icon="+icon, "--app-name="+applicationName, title, message), true
+		return exec.CommandContext(ctx, "kitten", "notify", "--only-print-escape-code", "--icon="+icon, "--app-name="+applicationName, title, message), true
 	}
 
 	//nolint:gosec // the executable and options are fixed, and the arguments are inert
@@ -57,15 +52,13 @@ func isKitty() bool {
 	return os.Getenv("KITTY_WINDOW_ID") != ""
 }
 
-// Args is what a desktop notification takes.
 type Args struct {
 	Title   string `json:"title"`
 	Message string `json:"message"`
 	Icon    string `json:"icon"`
 }
 
-// New builds a tool that alerts the user with a desktop notification.
-func New() tool.Tool {
+func New(writeEscape EscapeWriter) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
 			Name:        "notify",
@@ -79,10 +72,11 @@ func New() tool.Tool {
 		Describe,
 	).
 		Validate(validate).
-		Plain(run)
+		Plain(func(ctx context.Context, args Args) (string, error) {
+			return run(ctx, writeEscape, args)
+		})
 }
 
-// Describe reports the notification title and text.
 func Describe(args Args) (string, string) {
 	return args.Title, args.Message
 }
@@ -101,10 +95,16 @@ func validate(args Args) error {
 	return nil
 }
 
-func run(ctx context.Context, args Args) (string, error) {
-	command, writesToTerminal := Command(ctx, args.Title, args.Message, desktopIconNames[args.Icon])
-	if writesToTerminal {
-		command.Stdout = os.Stdout
+func run(ctx context.Context, writeEscape EscapeWriter, args Args) (string, error) {
+	command, printsEscapeCode := Command(ctx, args.Title, args.Message, desktopIconNames[args.Icon])
+
+	var escape strings.Builder
+	if printsEscapeCode {
+		if writeEscape == nil {
+			return "", errors.New("could not notify the user: nothing to write the notification to")
+		}
+
+		command.Stdout = &escape
 	}
 
 	if err := command.Run(); err != nil {
@@ -113,6 +113,10 @@ func run(ctx context.Context, args Args) (string, error) {
 		}
 
 		return "", fmt.Errorf("could not notify the user: %w", err)
+	}
+
+	if printsEscapeCode && !writeEscape(escape.String()) {
+		return "", errors.New("could not notify the user: the terminal that raises it is not there")
 	}
 
 	return "notified the user", nil

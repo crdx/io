@@ -57,6 +57,53 @@ func TestAnUnchangedInputIsNotDrawnAgain(t *testing.T) {
 	}
 }
 
+func TestAnEscapeCodeIsWrittenWholeAndReportsThatItReachedTheTerminal(t *testing.T) {
+	const escapeCode = "\x1b]99;i=1:d=0;VGl0bGU=\x1b\\\x1b]99;i=1;\x1b\\"
+
+	screenOutput := &strings.Builder{}
+	screen := &Screen{writer: screenOutput, isTTY: true}
+
+	if !screen.WriteEscape(escapeCode) {
+		t.Error("expected a terminal to take the escape code")
+	}
+
+	if got := screenOutput.String(); got != escapeCode {
+		t.Errorf("got %q, want the escape code whole", got)
+	}
+}
+
+func TestAnEscapeCodeIsHeldBackUntilTheDrawingAroundItFinishes(t *testing.T) {
+	const escapeCode = "\x1b]99;i=1;\x1b\\"
+
+	screenOutput := &strings.Builder{}
+	screen := &Screen{writer: screenOutput, isTTY: true}
+
+	screen.Sync(func() {
+		screen.WriteEscape(escapeCode)
+
+		if screenOutput.Len() != 0 {
+			t.Errorf("expected the escape code to be withheld while drawing, got %q", screenOutput.String())
+		}
+	})
+
+	if got := screenOutput.String(); !strings.Contains(got, escapeCode) {
+		t.Errorf("got %q, want the escape code once the update closed", got)
+	}
+}
+
+func TestAnEscapeCodeIsNotWrittenToRedirectedOutput(t *testing.T) {
+	screenOutput := &strings.Builder{}
+	screen := New(screenOutput)
+
+	if screen.WriteEscape("\x1b]99;i=1;\x1b\\") {
+		t.Error("expected a redirected screen to refuse the escape code")
+	}
+
+	if screenOutput.Len() != 0 {
+		t.Errorf("expected nothing to be written, got %q", screenOutput.String())
+	}
+}
+
 func TestProgressReportsAnIndeterminateTurnAndClearsIt(t *testing.T) {
 	screenOutput := &strings.Builder{}
 	screen := &Screen{writer: screenOutput, isTTY: true}

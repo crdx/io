@@ -15,6 +15,8 @@ import (
 	"crdx.org/io/toolbox/notify"
 )
 
+func discardEscape(string) bool { return true }
+
 func TestAvailabilityFollowsTheNotificationCommandOnPath(t *testing.T) {
 	bin := t.TempDir()
 	t.Setenv("PATH", bin)
@@ -71,7 +73,7 @@ func TestNotificationMapsEveryIconForNotifySend(t *testing.T) {
 				`{"title":"Build","message":"The build is finished","icon":%q}`,
 				icon,
 			)
-			call, err := notify.New().Parse(arguments)
+			call, err := notify.New(discardEscape).Parse(arguments)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -104,9 +106,13 @@ func TestNotificationMapsEveryIconForNotifySend(t *testing.T) {
 }
 
 func TestNotificationUsesKittysNotificationKittenInsideKitty(t *testing.T) {
+	const escapeCode = "\x1b]99;i=1:d=0;VGl0bGU=\x1b\\\x1b]99;i=1;\x1b\\"
+
 	bin := t.TempDir()
 	capturePath := filepath.Join(t.TempDir(), "arguments")
-	fixture := "#!/bin/bash\nset -euo pipefail\nprintf '%s\\n' \"$@\" > \"$NOTIFY_CAPTURE\"\n"
+	fixture := "#!/bin/bash\nset -euo pipefail\n" +
+		"printf '%s\\n' \"$@\" > \"$NOTIFY_CAPTURE\"\n" +
+		"printf '%s' \"$NOTIFY_ESCAPE\"\n"
 	//nolint:gosec // an executable test fixture
 	if err := os.WriteFile(filepath.Join(bin, "kitten"), []byte(fixture), 0o700); err != nil {
 		t.Fatalf("could not write fake kitten: %v", err)
@@ -114,8 +120,15 @@ func TestNotificationUsesKittysNotificationKittenInsideKitty(t *testing.T) {
 	t.Setenv("PATH", bin)
 	t.Setenv("KITTY_WINDOW_ID", "1")
 	t.Setenv("NOTIFY_CAPTURE", capturePath)
+	t.Setenv("NOTIFY_ESCAPE", escapeCode)
 
-	call, err := notify.New().Parse(`{"title":"Build","message":"The build is finished","icon":"error"}`)
+	var written []string
+	writeEscape := func(escape string) bool {
+		written = append(written, escape)
+		return true
+	}
+
+	call, err := notify.New(writeEscape).Parse(`{"title":"Build","message":"The build is finished","icon":"error"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -136,6 +149,7 @@ func TestNotificationUsesKittysNotificationKittenInsideKitty(t *testing.T) {
 	got := strings.Split(strings.TrimSuffix(string(captured), "\n"), "\n")
 	want := []string{
 		"notify",
+		"--only-print-escape-code",
 		"--icon=dialog-error",
 		"--app-name=oh",
 		"Build",
@@ -144,16 +158,51 @@ func TestNotificationUsesKittysNotificationKittenInsideKitty(t *testing.T) {
 	if !slices.Equal(got, want) {
 		t.Errorf("got arguments %q, want %q", got, want)
 	}
+
+	if !slices.Equal(written, []string{escapeCode}) {
+		t.Errorf("got escape codes %q, want the whole of it in one write", written)
+	}
+}
+
+func TestNotificationReportsATerminalThatCannotRaiseIt(t *testing.T) {
+	bin := t.TempDir()
+	fixture := "#!/bin/bash\nset -euo pipefail\nprintf 'escape'\n"
+	//nolint:gosec // an executable test fixture
+	if err := os.WriteFile(filepath.Join(bin, "kitten"), []byte(fixture), 0o700); err != nil {
+		t.Fatalf("could not write fake kitten: %v", err)
+	}
+	t.Setenv("PATH", bin)
+	t.Setenv("KITTY_WINDOW_ID", "1")
+
+	arguments := `{"title":"Build","message":"The build is finished","icon":"error"}`
+
+	call, err := notify.New(func(string) bool { return false }).Parse(arguments)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, err := call.Exec(t.Context()); err == nil ||
+		!strings.Contains(err.Error(), "could not notify the user") {
+		t.Errorf("expected an undeliverable notification to be reported, got %v", err)
+	}
+
+	call, err = notify.New(nil).Parse(arguments)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, err := call.Exec(t.Context()); err == nil ||
+		!strings.Contains(err.Error(), "could not notify the user") {
+		t.Errorf("expected a missing escape writer to be reported, got %v", err)
+	}
 }
 
 func TestNotificationTitleIsRequired(t *testing.T) {
-	if _, err := notify.New().Parse(`{"title":"  ","message":"hello","icon":"info"}`); err == nil {
+	if _, err := notify.New(discardEscape).Parse(`{"title":"  ","message":"hello","icon":"info"}`); err == nil {
 		t.Error("expected a blank title to be refused")
 	}
 }
 
 func TestNotificationMessageIsRequired(t *testing.T) {
-	if _, err := notify.New().Parse(`{"title":"Greeting","message":"  ","icon":"info"}`); err == nil {
+	if _, err := notify.New(discardEscape).Parse(`{"title":"Greeting","message":"  ","icon":"info"}`); err == nil {
 		t.Error("expected a blank message to be refused")
 	}
 }
@@ -161,7 +210,7 @@ func TestNotificationMessageIsRequired(t *testing.T) {
 func TestNotificationIconIsConstrained(t *testing.T) {
 	for _, icon := range []string{"", "good", "dialog-warning"} {
 		arguments := fmt.Sprintf(`{"title":"Greeting","message":"hello","icon":%q}`, icon)
-		if _, err := notify.New().Parse(arguments); err == nil {
+		if _, err := notify.New(discardEscape).Parse(arguments); err == nil {
 			t.Errorf("expected icon %q to be refused", icon)
 		} else if !strings.Contains(err.Error(), "success, info, warning, error, question, progress") {
 			t.Errorf("expected every choice in the error, got %q", err)
@@ -173,7 +222,7 @@ func TestNotificationReportsNotifySendFailure(t *testing.T) {
 	t.Setenv("PATH", t.TempDir())
 	t.Setenv("KITTY_WINDOW_ID", "")
 
-	call, err := notify.New().Parse(`{"title":"Greeting","message":"hello","icon":"info"}`)
+	call, err := notify.New(discardEscape).Parse(`{"title":"Greeting","message":"hello","icon":"info"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -194,7 +243,7 @@ func TestCancelledNotificationStopsNotifySend(t *testing.T) {
 	t.Setenv("PATH", bin)
 	t.Setenv("KITTY_WINDOW_ID", "")
 
-	call, err := notify.New().Parse(`{"title":"Greeting","message":"hello","icon":"info"}`)
+	call, err := notify.New(discardEscape).Parse(`{"title":"Greeting","message":"hello","icon":"info"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -217,7 +266,7 @@ func TestCancelledNotificationStopsNotifySend(t *testing.T) {
 
 func TestIconParameterDescriptionListsEveryChoice(t *testing.T) {
 	var description string
-	for _, parameter := range notify.New().Schema() {
+	for _, parameter := range notify.New(discardEscape).Schema() {
 		if parameter.Name == "icon" {
 			description = parameter.Description
 		}

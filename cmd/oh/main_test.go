@@ -4370,6 +4370,10 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 
 	files := file.New(openWorkspaceRootAt(t, workspaceDir), caps.RefuseWrite(caps.NewMode(caps.All())))
 
+	var written strings.Builder
+
+	screen := openScreen(&written, workspaceDir)
+
 	tools := toolbox.Rummage(files, file.NewSnapshots())
 	tools = append(
 		tools,
@@ -4377,13 +4381,9 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 			files,
 			func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
 		),
-		notify.New(),
+		notify.New(screen.WriteEscape),
 	)
 	tools = append(tools, web.New(func() bool { return true }, sessionGoldenSearcher{})...)
-
-	var written strings.Builder
-
-	screen := openScreen(&written, workspaceDir)
 
 	return &replayRig{
 		written:      &written,

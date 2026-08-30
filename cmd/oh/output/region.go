@@ -110,6 +110,19 @@ func (self *Screen) Footer(rows []string, cursorRow int, cursorColumn int) {
 	self.redraw("")
 }
 
+func (self *Screen) WriteEscape(escape string) bool {
+	if !self.isTTY {
+		return false
+	}
+
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	self.raw(escape)
+
+	return true
+}
+
 // ReportProgress reports whether a turn is running through the terminal progress protocol.
 func (self *Screen) ReportProgress(isRunning bool) {
 	if !self.isTTY {

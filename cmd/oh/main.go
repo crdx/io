@@ -403,13 +403,16 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer func() { _ = tmpRoot.Close() }()
 
+	screen := output.New(os.Stdout).LinkPathsUnder(workspaceDir)
+	screen.SetTextSizingSupported(textsizing.Detect(os.Stdin, os.Stdout))
+
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
 	shellTool := shell.New(workspaceDir, homeDir, tmpDir, settings.Sandbox, mode, files)
 
 	toolboxTools = append(toolboxTools, shellTool)
 	if notify.IsAvailable() {
-		toolboxTools = append(toolboxTools, notify.New())
+		toolboxTools = append(toolboxTools, notify.New(screen.WriteEscape))
 	}
 	toolboxTools = append(toolboxTools, title.New())
 	toolboxTools = append(toolboxTools, web.New(func() bool {
@@ -470,9 +473,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
-
-	screen := output.New(os.Stdout).LinkPathsUnder(workspaceDir)
-	screen.SetTextSizingSupported(textsizing.Detect(os.Stdin, os.Stdout))
 
 	chat = &App{
 		agent:          agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
