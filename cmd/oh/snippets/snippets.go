@@ -64,6 +64,7 @@ func New(configured map[string]Definition) (slash.CommandSet, error) {
 					if len(arguments.Fields) != 0 {
 						return slash.Usage()
 					}
+				case ArgumentsOptional:
 				}
 
 				var rendered strings.Builder
@@ -86,6 +87,7 @@ func New(configured map[string]Definition) (slash.CommandSet, error) {
 			command = command.WithArgumentUsage(requiredArgumentUsage)
 		case ArgumentsOptional:
 			command = command.WithArgumentUsage(optionalArgumentUsage)
+		case ArgumentsNone:
 		}
 		commands = append(commands, command)
 	}
@@ -185,7 +187,7 @@ func walkBranch(branch parse.BranchNode, visit func(parse.Node)) {
 	walkTemplate(branch.ElseList, visit)
 }
 
-func defaultValue(fallback, value any) any {
+func defaultValue(fallback any, value any) any {
 	if isEmpty(value) {
 		return fallback
 	}
@@ -213,6 +215,10 @@ func isEmpty(value any) bool {
 		return reflected.Float() == 0
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 		return reflected.Uint() == 0
+	case reflect.Invalid:
+		return true
+	case reflect.Struct:
+		return false
 	default:
 		return false
 	}

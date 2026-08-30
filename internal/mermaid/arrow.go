@@ -18,11 +18,11 @@ type priorityQueue []*priorityQueueItem
 
 func (self *priorityQueue) Len() int { return len(*self) }
 
-func (self *priorityQueue) Less(i, j int) bool {
+func (self *priorityQueue) Less(i int, j int) bool {
 	return (*self)[i].priority < (*self)[j].priority
 }
 
-func (self *priorityQueue) Swap(i, j int) {
+func (self *priorityQueue) Swap(i int, j int) {
 	items := *self
 	items[i], items[j] = items[j], items[i]
 	items[i].index = i
@@ -56,7 +56,7 @@ func mustPriorityQueueItem(value any) *priorityQueueItem {
 	return item
 }
 
-func heuristic(a, b gridCoord) int {
+func heuristic(a gridCoord, b gridCoord) int {
 	absX := Abs(a.x - b.x)
 	absY := Abs(a.y - b.y)
 	if absX == 0 || absY == 0 {
@@ -114,22 +114,22 @@ func (self *graph) isFreeInGrid(c gridCoord) bool {
 	return self.grid[c] == nil
 }
 
-func (self *graph) drawArrow(e *edge) (*drawing, *drawing, *drawing, *drawing, *drawing) {
-	if len(e.path) == 0 {
+func (self *graph) drawArrow(edge *edge) (*drawing, *drawing, *drawing, *drawing, *drawing) {
+	if len(edge.path) == 0 {
 		return nil, nil, nil, nil, nil
 	}
-	dLabel := self.drawArrowLabel(e)
-	dPath, linesDrawn, lineDirs := self.drawPath(e.path)
+	dLabel := self.drawArrowLabel(edge)
+	dPath, linesDrawn, lineDirs := self.drawPath(edge.path)
 	if len(linesDrawn) == 0 {
-		return dPath, nil, nil, self.drawCorners(e.path), dLabel
+		return dPath, nil, nil, self.drawCorners(edge.path), dLabel
 	}
-	dBoxStart := self.drawBoxStart(e.path, linesDrawn[0])
+	dBoxStart := self.drawBoxStart(edge.path, linesDrawn[0])
 	dArrowHead := self.drawArrowHead(linesDrawn[len(linesDrawn)-1], lineDirs[len(lineDirs)-1])
-	if e.isBidirectional && len(linesDrawn) > 0 {
+	if edge.isBidirectional && len(linesDrawn) > 0 {
 		dStartArrowHead := self.drawArrowHead(reverseDrawingLine(linesDrawn[0]), lineDirs[0].getOpposite())
 		dArrowHead = self.mergeDrawings(dArrowHead, drawingCoord{0, 0}, dStartArrowHead)
 	}
-	dCorners := self.drawCorners(e.path)
+	dCorners := self.drawCorners(edge.path)
 	return dPath, dBoxStart, dArrowHead, dCorners, dLabel
 }
 
@@ -151,18 +151,18 @@ func mergePath(path []gridCoord) []gridCoord {
 	indexToRemove := []int{}
 	step0 := path[0]
 	step1 := path[1]
-	for idx, step2 := range path[2:] {
-		prevDir := determineDirection(genericCoord(step0), genericCoord(step1))
+	for index, step2 := range path[2:] {
+		previousDir := determineDirection(genericCoord(step0), genericCoord(step1))
 		dir := determineDirection(genericCoord(step1), genericCoord(step2))
-		if prevDir == dir {
-			indexToRemove = append(indexToRemove, idx+1)
+		if previousDir == dir {
+			indexToRemove = append(indexToRemove, index+1)
 		}
 		step0 = step1
 		step1 = step2
 	}
 	newPath := []gridCoord{}
-	for idx, step := range path {
-		if !slices.Contains(indexToRemove, idx) {
+	for index, step := range path {
+		if !slices.Contains(indexToRemove, index) {
 			newPath = append(newPath, step)
 		}
 	}
@@ -170,7 +170,7 @@ func mergePath(path []gridCoord) []gridCoord {
 }
 
 func (self *graph) drawPath(path []gridCoord) (*drawing, [][]drawingCoord, []direction) {
-	d := copyCanvas(self.drawing)
+	sketch := copyCanvas(self.drawing)
 	previousCoord := path[0]
 	linesDrawn := make([][]drawingCoord, 0)
 	lineDirs := make([]direction, 0)
@@ -182,7 +182,7 @@ func (self *graph) drawPath(path []gridCoord) (*drawing, [][]drawingCoord, []dir
 			continue
 		}
 		dir := determineDirection(genericCoord(previousCoord), genericCoord(nextCoord))
-		s := self.drawLine(d, previousDrawingCoord, nextDrawingCoord, 1, -1)
+		s := self.drawLine(sketch, previousDrawingCoord, nextDrawingCoord, 1, -1)
 		if len(s) == 0 {
 			s = append(s, previousDrawingCoord)
 		}
@@ -190,39 +190,39 @@ func (self *graph) drawPath(path []gridCoord) (*drawing, [][]drawingCoord, []dir
 		lineDirs = append(lineDirs, dir)
 		previousCoord = nextCoord
 	}
-	return d, linesDrawn, lineDirs
+	return sketch, linesDrawn, lineDirs
 }
 
 func (self *graph) drawBoxStart(path []gridCoord, firstLine []drawingCoord) *drawing {
-	d := *(copyCanvas(self.drawing))
+	sketch := *(copyCanvas(self.drawing))
 	from := firstLine[0]
 	dir := determineDirection(genericCoord(path[0]), genericCoord(path[1]))
 
 	if self.useAscii {
-		return &d
+		return &sketch
 	}
 
 	switch dir {
 	case Up:
-		d[from.x][from.y+1] = "┴"
+		sketch[from.x][from.y+1] = "┴"
 	case Down:
-		d[from.x][from.y-1] = "┬"
+		sketch[from.x][from.y-1] = "┬"
 	case Left:
-		d[from.x+1][from.y] = "┤"
+		sketch[from.x+1][from.y] = "┤"
 	case Right:
-		d[from.x-1][from.y] = "├"
+		sketch[from.x-1][from.y] = "├"
 	}
-	return &d
+	return &sketch
 }
 
 func (self *graph) drawArrowHead(line []drawingCoord, fallback direction) *drawing {
-	d := *(copyCanvas(self.drawing))
+	sketch := *(copyCanvas(self.drawing))
 	if len(line) == 0 {
-		return &d
+		return &sketch
 	}
 	from := line[0]
-	lastPos := line[len(line)-1]
-	dir := determineDirection(genericCoord(from), genericCoord(lastPos))
+	lastPosition := line[len(line)-1]
+	dir := determineDirection(genericCoord(from), genericCoord(lastPosition))
 	if len(line) == 1 || dir == Middle {
 		dir = fallback
 	}
@@ -264,31 +264,31 @@ func (self *graph) drawArrowHead(line []drawingCoord, fallback direction) *drawi
 		}
 	}
 
-	d[lastPos.x][lastPos.y] = char
-	return &d
+	sketch[lastPosition.x][lastPosition.y] = char
+	return &sketch
 }
 
 func (self *graph) drawCorners(path []gridCoord) *drawing {
-	d := copyCanvas(self.drawing)
-	for idx, coord := range path {
-		if idx == 0 || idx == len(path)-1 {
+	sketch := copyCanvas(self.drawing)
+	for index, coord := range path {
+		if index == 0 || index == len(path)-1 {
 			continue
 		}
 		drawingCoord := self.gridToDrawingCoord(coord)
 
-		prevDir := determineDirection(genericCoord(path[idx-1]), genericCoord(coord))
-		nextDir := determineDirection(genericCoord(coord), genericCoord(path[idx+1]))
+		previousDir := determineDirection(genericCoord(path[index-1]), genericCoord(coord))
+		nextDir := determineDirection(genericCoord(coord), genericCoord(path[index+1]))
 
 		var corner string
 		if !self.useAscii {
 			switch {
-			case (prevDir == Right && nextDir == Down) || (prevDir == Up && nextDir == Left):
+			case (previousDir == Right && nextDir == Down) || (previousDir == Up && nextDir == Left):
 				corner = "┐"
-			case (prevDir == Right && nextDir == Up) || (prevDir == Down && nextDir == Left):
+			case (previousDir == Right && nextDir == Up) || (previousDir == Down && nextDir == Left):
 				corner = "┘"
-			case (prevDir == Left && nextDir == Down) || (prevDir == Up && nextDir == Right):
+			case (previousDir == Left && nextDir == Down) || (previousDir == Up && nextDir == Right):
 				corner = "┌"
-			case (prevDir == Left && nextDir == Up) || (prevDir == Down && nextDir == Right):
+			case (previousDir == Left && nextDir == Up) || (previousDir == Down && nextDir == Right):
 				corner = "└"
 			default:
 				corner = "+"
@@ -297,28 +297,28 @@ func (self *graph) drawCorners(path []gridCoord) *drawing {
 			corner = "+"
 		}
 
-		(*d)[drawingCoord.x][drawingCoord.y] = corner
+		(*sketch)[drawingCoord.x][drawingCoord.y] = corner
 	}
-	return d
+	return sketch
 }
 
-func (self *graph) drawArrowLabel(e *edge) *drawing {
-	d := copyCanvas(self.drawing)
-	if e.text == "" {
-		return d
+func (self *graph) drawArrowLabel(edge *edge) *drawing {
+	sketch := copyCanvas(self.drawing)
+	if edge.text == "" {
+		return sketch
 	}
 
-	line := self.lineToDrawing(e.labelLine)
-	if e.isBidirectional {
+	line := self.lineToDrawing(edge.labelLine)
+	if edge.isBidirectional {
 		line = insetLine(line, 2, 2)
 	} else {
 		line = insetLine(line, 1, 2)
 	}
-	d.drawTextOnLine(line, e.text)
-	return d
+	sketch.drawTextOnLine(line, edge.text)
+	return sketch
 }
 
-func insetLine(line []drawingCoord, insetStart, insetEnd int) []drawingCoord {
+func insetLine(line []drawingCoord, insetStart int, insetEnd int) []drawingCoord {
 	if len(line) < 2 || (insetStart == 0 && insetEnd == 0) {
 		return line
 	}
@@ -327,24 +327,24 @@ func insetLine(line []drawingCoord, insetStart, insetEnd int) []drawingCoord {
 		endInset = insetEnd - 1
 	}
 	dir := determineDirection(genericCoord(line[0]), genericCoord(line[1]))
-	a, b := line[0], line[1]
+	start, end := line[0], line[1]
 	switch dir {
 	case Right:
-		a.x += insetStart
-		b.x -= endInset
+		start.x += insetStart
+		end.x -= endInset
 	case Left:
-		a.x -= insetStart
-		b.x += endInset
+		start.x -= insetStart
+		end.x += endInset
 	case Down:
-		a.y += insetStart
-		b.y -= endInset
+		start.y += insetStart
+		end.y -= endInset
 	case Up:
-		a.y -= insetStart
-		b.y += endInset
+		start.y -= insetStart
+		end.y += endInset
 	default:
 		return line
 	}
-	return []drawingCoord{a, b}
+	return []drawingCoord{start, end}
 }
 
 func (self *drawing) drawTextOnLine(line []drawingCoord, label string) {

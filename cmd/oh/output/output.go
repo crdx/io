@@ -13,7 +13,7 @@ import (
 	"golang.org/x/term"
 )
 
-// Screen serializes terminal drawing.
+// Screen serialises terminal drawing.
 type Screen struct {
 	writer io.Writer
 

@@ -31,7 +31,7 @@ const (
 type Client interface {
 	agent.Provider
 	agent.State
-	ObserveHTTP(req.Observer)
+	ObserveHTTP(observer req.Observer)
 }
 
 type Connection struct {

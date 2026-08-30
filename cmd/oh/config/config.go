@@ -322,7 +322,7 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 	return config, nil
 }
 
-func resolveConfigPath(configPath, written string) (string, error) {
+func resolveConfigPath(configPath string, written string) (string, error) {
 	if written == "" {
 		return "", errors.New("path is empty")
 	}

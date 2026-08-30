@@ -60,8 +60,8 @@ type canonicalWriter interface {
 }
 
 type canonicalAppender interface {
-	Event(agent.Event) (time.Time, error)
-	Item(json.RawMessage) error
+	Event(event agent.Event) (time.Time, error)
+	Item(item json.RawMessage) error
 	CompleteTurn() error
 }
 
@@ -72,7 +72,7 @@ type canonicalSession interface {
 	Started() time.Time
 	IsPersisted() bool
 	EnsurePersisted() error
-	SetMeta(json.RawMessage, json.RawMessage) error
+	SetMeta(journalMeta json.RawMessage, listingData json.RawMessage) error
 	Close() error
 }
 
@@ -113,7 +113,7 @@ func Create(directory string, meta Meta) (*Writer, error) {
 	}, nil
 }
 
-func Open(directory, name string) (*Writer, error) {
+func Open(directory string, name string) (*Writer, error) {
 	innerWriter, err := session.Open(directory, name)
 	if err != nil {
 		return nil, err
@@ -338,7 +338,7 @@ type Session struct {
 	HasIncompleteTurn bool
 }
 
-func Read(directory, name string) (*Session, error) {
+func Read(directory string, name string) (*Session, error) {
 	storedSession, err := session.Read(directory, name)
 	if err != nil {
 		return nil, err
@@ -406,7 +406,7 @@ func (self *Session) CanResume() bool {
 	return !self.HasIncompleteTurn
 }
 
-func GetListingMeta(directory, name string) (*session.Meta, error) {
+func GetListingMeta(directory string, name string) (*session.Meta, error) {
 	storedSession, err := Read(directory, name)
 	if err != nil {
 		return nil, err
@@ -418,7 +418,7 @@ func GetListingMeta(directory, name string) (*session.Meta, error) {
 	return session.ReadMetaFromJournal(directory, name, data)
 }
 
-func RebuildMeta(directory, name string) error {
+func RebuildMeta(directory string, name string) error {
 	storedSession, err := Read(directory, name)
 	if err != nil {
 		return err
@@ -430,7 +430,7 @@ func RebuildMeta(directory, name string) error {
 	return session.RebuildMeta(directory, name, data)
 }
 
-func RebuildMetaIfIdle(directory, name string) (bool, error) {
+func RebuildMetaIfIdle(directory string, name string) (bool, error) {
 	heldLock, err := session.AcquireLock(directory, name)
 	if errors.Is(err, session.ErrInUse) {
 		return false, nil
@@ -478,7 +478,7 @@ func RebuildStaleMeta(directory string) (int, error) {
 	return len(stale), nil
 }
 
-func Rebuild(directory, name string) error {
+func Rebuild(directory string, name string) error {
 	storedSession, err := Read(directory, name)
 	if err != nil {
 		return err

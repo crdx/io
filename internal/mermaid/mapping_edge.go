@@ -13,32 +13,32 @@ type edge struct {
 	endDir          direction
 }
 
-func (self *graph) determinePath(e *edge) {
-	key := newEdgePair(e.from.index, e.to.index)
+func (self *graph) determinePath(edge *edge) {
+	key := newEdgePair(edge.from.index, edge.to.index)
 	duplicateIndex := self.edgeCounts[key]
 
-	if startDir, endDir, ok := self.parallelDirections(e, duplicateIndex); ok {
-		from := e.from.gridCoord.Direction(startDir)
-		to := e.to.gridCoord.Direction(endDir)
+	if startDir, endDir, ok := self.parallelDirections(edge, duplicateIndex); ok {
+		from := edge.from.gridCoord.Direction(startDir)
+		to := edge.to.gridCoord.Direction(endDir)
 		if path, err := self.getPath(from, to); err == nil {
-			e.startDir = startDir
-			e.endDir = endDir
-			e.path = mergePath(path)
+			edge.startDir = startDir
+			edge.endDir = endDir
+			edge.path = mergePath(path)
 			self.edgeCounts[key]++
 			return
 		}
 	}
 
-	preferredDir, preferredOppositeDir, alternativeDir, alternativeOppositeDir := self.determineStartAndEndDir(e)
-	preferredFrom := e.from.gridCoord.Direction(preferredDir)
-	preferredTo := e.to.gridCoord.Direction(preferredOppositeDir)
+	preferredDir, preferredOppositeDir, alternativeDir, alternativeOppositeDir := self.determineStartAndEndDir(edge)
+	preferredFrom := edge.from.gridCoord.Direction(preferredDir)
+	preferredTo := edge.to.gridCoord.Direction(preferredOppositeDir)
 	preferredPath, preferredError := self.getPath(preferredFrom, preferredTo)
 	if preferredError == nil {
 		preferredPath = mergePath(preferredPath)
 	}
 
-	alternativeFrom := e.from.gridCoord.Direction(alternativeDir)
-	alternativeTo := e.to.gridCoord.Direction(alternativeOppositeDir)
+	alternativeFrom := edge.from.gridCoord.Direction(alternativeDir)
+	alternativeTo := edge.to.gridCoord.Direction(alternativeOppositeDir)
 	alternativePath, alternativeError := self.getPath(alternativeFrom, alternativeTo)
 	if alternativeError == nil {
 		alternativePath = mergePath(alternativePath)
@@ -46,13 +46,13 @@ func (self *graph) determinePath(e *edge) {
 
 	switch {
 	case preferredError == nil && (alternativeError != nil || len(preferredPath) <= len(alternativePath)):
-		e.startDir = preferredDir
-		e.endDir = preferredOppositeDir
-		e.path = preferredPath
+		edge.startDir = preferredDir
+		edge.endDir = preferredOppositeDir
+		edge.path = preferredPath
 	case alternativeError == nil:
-		e.startDir = alternativeDir
-		e.endDir = alternativeOppositeDir
-		e.path = alternativePath
+		edge.startDir = alternativeDir
+		edge.endDir = alternativeOppositeDir
+		edge.path = alternativePath
 	default:
 		return
 	}
@@ -81,19 +81,19 @@ func (self *graph) parallelDirections(e *edge, duplicateIndex int) (direction, d
 	return Middle, Middle, false
 }
 
-func (self *graph) determineLabelLine(e *edge) {
-	lenLabel := runewidth.StringWidth(e.text)
+func (self *graph) determineLabelLine(edge *edge) {
+	lenLabel := runewidth.StringWidth(edge.text)
 	if lenLabel == 0 {
 		return
 	}
-	prevStep := e.path[0]
+	previousStep := edge.path[0]
 	var largestLine []gridCoord
 	var largestLineSize int
 	var fallbackLine []gridCoord
 	var fallbackLineSize int
-	for _, step := range e.path[1:] {
-		line := []gridCoord{prevStep, step}
-		prevStep = step
+	for _, step := range edge.path[1:] {
+		line := []gridCoord{previousStep, step}
+		previousStep = step
 		lineWidth := self.calculateLineWidth(line)
 		if self.isNodeColumn(labelMiddleX(line)) {
 			if lineWidth > fallbackLineSize {
@@ -115,16 +115,16 @@ func (self *graph) determineLabelLine(e *edge) {
 		largestLine = fallbackLine
 	}
 	if largestLine == nil {
-		largestLine = []gridCoord{e.path[0], e.path[1]}
+		largestLine = []gridCoord{edge.path[0], edge.path[1]}
 	}
 
 	middleX := labelMiddleX(largestLine)
 	labelPadding := 3
-	if e.isBidirectional {
+	if edge.isBidirectional {
 		labelPadding = 4
 	}
 	self.columnWidth[middleX] = Max(self.columnWidth[middleX], lenLabel+labelPadding)
-	e.labelLine = largestLine
+	edge.labelLine = largestLine
 }
 
 func labelMiddleX(line []gridCoord) int {

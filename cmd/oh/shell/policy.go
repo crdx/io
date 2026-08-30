@@ -322,7 +322,7 @@ func New(
 	return bash.New(files, fresh)
 }
 
-func allWritablePaths(workspaceDir, homeDir string, extraPaths []string, currentCaps caps.Set) []string {
+func allWritablePaths(workspaceDir string, homeDir string, extraPaths []string, currentCaps caps.Set) []string {
 	paths := writablePaths(workspaceDir, homeDir, currentCaps)
 
 	switch {

@@ -42,22 +42,22 @@ func calculateLayout(sd *SequenceDiagram, config *diagram.Config) *diagramLayout
 		widths[i] = w
 	}
 
-	centers := make([]int, len(sd.Participants))
+	centres := make([]int, len(sd.Participants))
 	currentX := 0
 	for i := range sd.Participants {
 		boxWidth := widths[i] + boxBorderWidth
 		if i == 0 {
-			centers[i] = boxWidth / 2
+			centres[i] = boxWidth / 2
 			currentX = boxWidth
 		} else {
 			currentX += participantSpacing
-			centers[i] = currentX + boxWidth/2
+			centres[i] = currentX + boxWidth/2
 			currentX += boxWidth
 		}
 	}
 
 	last := len(sd.Participants) - 1
-	totalWidth := centers[last] + (widths[last]+boxBorderWidth)/2
+	totalWidth := centres[last] + (widths[last]+boxBorderWidth)/2
 
 	msgSpacing := config.SequenceMessageSpacing
 	if msgSpacing <= 0 {
@@ -70,7 +70,7 @@ func calculateLayout(sd *SequenceDiagram, config *diagram.Config) *diagramLayout
 
 	return &diagramLayout{
 		participantWidths:  widths,
-		participantCenters: centers,
+		participantCenters: centres,
 		totalWidth:         totalWidth,
 		messageSpacing:     msgSpacing,
 		selfMessageWidth:   selfWidth,
@@ -184,6 +184,7 @@ func fragmentDepth(events []Event) int {
 			}
 		case EventFragmentEnd:
 			cur--
+		case EventMessage, EventFragmentDivider, EventNote:
 		}
 	}
 	return maxDepth
@@ -200,6 +201,7 @@ func matchingFragmentEnd(events []Event, start int) int {
 			if depth == 0 {
 				return i
 			}
+		case EventMessage, EventFragmentDivider, EventNote:
 		}
 	}
 	return len(events)
@@ -229,6 +231,7 @@ func noteLeftGutter(events []Event, layout *diagramLayout) int {
 			if need := -left + extra; need > gutter {
 				gutter = need
 			}
+		case EventMessage, EventFragmentDivider:
 		}
 	}
 	return gutter
@@ -244,9 +247,9 @@ func noteCells(note *Note) []string {
 
 func noteBoxColumns(note *Note, layout *diagramLayout) (int, int) {
 	boxW := len(noteCells(note)) + 4
-	centers := layout.participantCenters
-	first := centers[note.Participants[0].Index]
-	last := centers[note.Participants[len(note.Participants)-1].Index]
+	centres := layout.participantCenters
+	first := centres[note.Participants[0].Index]
+	last := centres[note.Participants[len(note.Participants)-1].Index]
 
 	switch note.Placement {
 	case NoteRightOf:
@@ -255,18 +258,19 @@ func noteBoxColumns(note *Note, layout *diagramLayout) (int, int) {
 	case NoteLeftOf:
 		right := first - 2
 		return right - boxW + 1, right
-	default:
-		lo, hi := first, last
-		if hi < lo {
-			lo, hi = hi, lo
-		}
-		left, right := lo-1, hi+1
-		if extra := boxW - (right - left + 1); extra > 0 {
-			left -= extra / 2
-			right += extra - extra/2
-		}
-		return left, right
+	case NoteOver:
 	}
+
+	lo, hi := first, last
+	if hi < lo {
+		lo, hi = hi, lo
+	}
+	left, right := lo-1, hi+1
+	if extra := boxW - (right - left + 1); extra > 0 {
+		left -= extra / 2
+		right += extra - extra/2
+	}
+	return left, right
 }
 
 func renderNote(note *Note, layout *diagramLayout, chars BoxChars) []string {
@@ -321,9 +325,9 @@ func wrapFragment(frag *Fragment, inner []Event, layout *diagramLayout, chars Bo
 	}
 	body = append(body, buildLifeline(layout, chars))
 
-	leftIdx, rightIdx := involvedParticipants(inner, layout)
-	leftCol := layout.participantCenters[leftIdx] - frameIndent*(fragmentDepth(inner)+1)
-	rightCol := layout.participantCenters[rightIdx] + frameIndent
+	leftIndex, rightIndex := involvedParticipants(inner, layout)
+	leftCol := layout.participantCenters[leftIndex] - frameIndent*(fragmentDepth(inner)+1)
+	rightCol := layout.participantCenters[rightIndex] + frameIndent
 
 	rd := 0
 	for _, ev := range inner {
@@ -340,6 +344,7 @@ func wrapFragment(frag *Fragment, inner []Event, layout *diagramLayout, chars Bo
 			if x := nr + 1 + rd*frameIndent; x > rightCol {
 				rightCol = x
 			}
+		case EventMessage, EventFragmentDivider:
 		}
 	}
 	if leftCol < 0 {
@@ -370,8 +375,8 @@ func wrapFragment(frag *Fragment, inner []Event, layout *diagramLayout, chars Bo
 	}
 
 	out := []string{fragmentBorder(layout, chars, leftCol, rightCol, label, true)}
-	for idx, l := range body {
-		if dl, ok := dividerAt[idx]; ok {
+	for index, l := range body {
+		if dl, ok := dividerAt[index]; ok {
 			out = append(out, fragmentDivider(layout, chars, leftCol, rightCol, dl))
 		} else {
 			out = append(out, overlayFrameSides(l, chars, leftCol, rightCol))
@@ -399,13 +404,14 @@ func splitSections(inner []Event) ([][]Event, []string) {
 				cur = []Event{}
 				continue
 			}
+		case EventMessage, EventNote:
 		}
 		cur = append(cur, ev)
 	}
 	return append(sections, cur), labels
 }
 
-func fragmentDivider(layout *diagramLayout, chars BoxChars, leftCol, rightCol int, label string) string {
+func fragmentDivider(layout *diagramLayout, chars BoxChars, leftCol int, rightCol int, label string) string {
 	line := padCells(buildLifeline(layout, chars), rightCol+1)
 	line[leftCol] = string(chars.TeeRight)
 	for column := leftCol + 1; column < rightCol; column++ {
@@ -425,13 +431,13 @@ func fragmentDivider(layout *diagramLayout, chars BoxChars, leftCol, rightCol in
 }
 
 func involvedParticipants(events []Event, layout *diagramLayout) (int, int) {
-	minIdx, maxIdx := -1, -1
-	note := func(idx int) {
-		if minIdx == -1 || idx < minIdx {
-			minIdx = idx
+	minIndex, maxIndex := -1, -1
+	note := func(index int) {
+		if minIndex == -1 || index < minIndex {
+			minIndex = index
 		}
-		if maxIdx == -1 || idx > maxIdx {
-			maxIdx = idx
+		if maxIndex == -1 || index > maxIndex {
+			maxIndex = index
 		}
 	}
 	for _, ev := range events {
@@ -440,13 +446,13 @@ func involvedParticipants(events []Event, layout *diagramLayout) (int, int) {
 			note(ev.Message.To.Index)
 		}
 	}
-	if minIdx == -1 {
+	if minIndex == -1 {
 		return 0, len(layout.participantCenters) - 1
 	}
-	return minIdx, maxIdx
+	return minIndex, maxIndex
 }
 
-func fragmentBorder(layout *diagramLayout, chars BoxChars, leftCol, rightCol int, label string, top bool) string {
+func fragmentBorder(layout *diagramLayout, chars BoxChars, leftCol int, rightCol int, label string, top bool) string {
 	line := padCells(buildLifeline(layout, chars), rightCol+1)
 
 	leftCorner, rightCorner := chars.BottomLeft, chars.BottomRight
@@ -471,7 +477,7 @@ func fragmentBorder(layout *diagramLayout, chars BoxChars, leftCol, rightCol int
 	return cellsToString(line)
 }
 
-func overlayFrameSides(line string, chars BoxChars, leftCol, rightCol int) string {
+func overlayFrameSides(line string, chars BoxChars, leftCol int, rightCol int) string {
 	cells := padCells(line, rightCol+1)
 	cells[leftCol] = string(chars.Vertical)
 	cells[rightCol] = string(chars.Vertical)

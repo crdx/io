@@ -46,7 +46,7 @@ type TokenSource interface {
 }
 
 type observedTokenSource interface {
-	ObserveHTTP(req.Observer)
+	ObserveHTTP(observer req.Observer)
 }
 
 type Client struct {

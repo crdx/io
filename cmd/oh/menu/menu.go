@@ -80,6 +80,9 @@ func ChooseIndex(terminal *os.File, output io.Writer, prompt string, labels []st
 				return 0, ErrCancelled
 			}
 			continue
+		case key.Backspace, key.Delete, key.Left, key.Right, key.PageUp, key.PageDown,
+			key.PasteStart, key.PasteEnd, key.FocusIn, key.FocusOut, key.Unknown:
+			continue
 		default:
 			continue
 		}

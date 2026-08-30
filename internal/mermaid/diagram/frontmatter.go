@@ -5,9 +5,9 @@ import "strings"
 // StripFrontmatter removes a leading YAML frontmatter block (delimited by `---` lines) from a
 // mermaid document, returning the remaining input and the frontmatter's title, if one was set.
 //
-// Mermaid uses frontmatter for a diagram title and theme/config overrides (colors, CSS). The config
-// has no meaning in ASCII output, so it is discarded; the title is surfaced so callers can print
-// it above the diagram, as mermaid does.
+// Mermaid uses frontmatter for a diagram title and theme/config overrides (colours, CSS). The
+// config has no meaning in ASCII output, so it is discarded; the title is surfaced so callers can
+// print it above the diagram, as mermaid does.
 //
 // Matching mermaid's own frontmatter semantics (frontmatter.spec.ts):
 // frontmatter is only recognised at the start of the document, the closing delimiter must sit at
@@ -31,14 +31,14 @@ func StripFrontmatter(input string) (string, string) {
 			return strings.Join(lines[i+1:], "\n"), title
 		}
 		trimmed := strings.TrimRight(lines[i], " \t\r")
-		if v, ok := strings.CutPrefix(trimmed, indent+"title:"); ok && (v == "" || v[0] == ' ' || v[0] == '\t') {
-			v = strings.TrimSpace(v)
-			if !strings.HasPrefix(v, `"`) && !strings.HasPrefix(v, `'`) {
-				if idx := strings.Index(v, " #"); idx != -1 {
-					v = strings.TrimSpace(v[:idx])
+		if rest, ok := strings.CutPrefix(trimmed, indent+"title:"); ok && (rest == "" || rest[0] == ' ' || rest[0] == '\t') {
+			rest = strings.TrimSpace(rest)
+			if !strings.HasPrefix(rest, `"`) && !strings.HasPrefix(rest, `'`) {
+				if index := strings.Index(rest, " #"); index != -1 {
+					rest = strings.TrimSpace(rest[:index])
 				}
 			}
-			title = strings.Trim(v, `"'`)
+			title = strings.Trim(rest, `"'`)
 		}
 	}
 	return input, ""

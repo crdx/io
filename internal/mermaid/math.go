@@ -1,13 +1,13 @@
 package mermaid
 
-func Min(x, y int) int {
+func Min(x int, y int) int {
 	if x < y {
 		return x
 	}
 	return y
 }
 
-func Max(x, y int) int {
+func Max(x int, y int) int {
 	if x > y {
 		return x
 	}
@@ -21,7 +21,7 @@ func Abs(x int) int {
 	return x
 }
 
-func CeilDiv(x, y int) int {
+func CeilDiv(x int, y int) int {
 	if x%y == 0 {
 		return x / y
 	}

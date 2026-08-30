@@ -16,21 +16,21 @@ var (
 	asciiGlyphs   = glyphs{'-', '|', '+', '+', '+', '+', '+', '+', '+', '+', '+', '.', ':'}
 )
 
-func renderEntity(e *Entity, g glyphs, minInner int) []string {
-	if len(e.Attributes) == 0 {
-		inner := max(runewidth.StringWidth(e.Display)+2, minInner)
-		pad := inner - runewidth.StringWidth(e.Display)
+func renderEntity(entity *Entity, glyphSet glyphs, minInner int) []string {
+	if len(entity.Attributes) == 0 {
+		inner := max(runewidth.StringWidth(entity.Display)+2, minInner)
+		pad := inner - runewidth.StringWidth(entity.Display)
 		return []string{
-			string(g.tl) + strings.Repeat(string(g.h), inner) + string(g.tr),
-			string(g.v) + strings.Repeat(" ", pad/2) + e.Display +
-				strings.Repeat(" ", pad-pad/2) + string(g.v),
-			string(g.bl) + strings.Repeat(string(g.h), inner) + string(g.br),
+			string(glyphSet.tl) + strings.Repeat(string(glyphSet.h), inner) + string(glyphSet.tr),
+			string(glyphSet.v) + strings.Repeat(" ", pad/2) + entity.Display +
+				strings.Repeat(" ", pad-pad/2) + string(glyphSet.v),
+			string(glyphSet.bl) + strings.Repeat(string(glyphSet.h), inner) + string(glyphSet.br),
 		}
 	}
 
-	rows := make([][4]string, len(e.Attributes))
+	rows := make([][4]string, len(entity.Attributes))
 	has := [4]bool{true, true, false, false}
-	for i, a := range e.Attributes {
+	for i, a := range entity.Attributes {
 		rows[i] = [4]string{a.Type, a.Name, strings.Join(a.Keys, ","), a.Comment}
 		if rows[i][2] != "" {
 			has[2] = true
@@ -62,7 +62,7 @@ func renderEntity(e *Entity, g glyphs, minInner int) []string {
 			inner++
 		}
 	}
-	if need := max(runewidth.StringWidth(e.Display)+2, minInner); need > inner && len(cols) > 0 {
+	if need := max(runewidth.StringWidth(entity.Display)+2, minInner); need > inner && len(cols) > 0 {
 		width[cols[len(cols)-1]] += need - inner
 		inner = need
 	}
@@ -71,53 +71,53 @@ func renderEntity(e *Entity, g glyphs, minInner int) []string {
 		return " " + s + strings.Repeat(" ", w-runewidth.StringWidth(s)) + " "
 	}
 	rule := func(left, mid, right rune) string {
-		var b strings.Builder
-		b.WriteRune(left)
+		var builder strings.Builder
+		builder.WriteRune(left)
 		for i, c := range cols {
 			if i > 0 {
-				b.WriteRune(mid)
+				builder.WriteRune(mid)
 			}
-			b.WriteString(strings.Repeat(string(g.h), width[c]+2))
+			builder.WriteString(strings.Repeat(string(glyphSet.h), width[c]+2))
 		}
-		b.WriteRune(right)
-		return b.String()
+		builder.WriteRune(right)
+		return builder.String()
 	}
 
 	var out []string
-	out = append(out, string(g.tl)+strings.Repeat(string(g.h), inner)+string(g.tr))
-	namePad := inner - runewidth.StringWidth(e.Display)
-	out = append(out, string(g.v)+strings.Repeat(" ", namePad/2)+e.Display+
-		strings.Repeat(" ", namePad-namePad/2)+string(g.v))
-	out = append(out, rule(g.teeR, g.teeD, g.teeL))
-	for _, r := range rows {
-		var b strings.Builder
-		b.WriteRune(g.v)
+	out = append(out, string(glyphSet.tl)+strings.Repeat(string(glyphSet.h), inner)+string(glyphSet.tr))
+	namePad := inner - runewidth.StringWidth(entity.Display)
+	out = append(out, string(glyphSet.v)+strings.Repeat(" ", namePad/2)+entity.Display+
+		strings.Repeat(" ", namePad-namePad/2)+string(glyphSet.v))
+	out = append(out, rule(glyphSet.teeR, glyphSet.teeD, glyphSet.teeL))
+	for _, row := range rows {
+		var builder strings.Builder
+		builder.WriteRune(glyphSet.v)
 		for i, c := range cols {
 			if i > 0 {
-				b.WriteRune(g.v)
+				builder.WriteRune(glyphSet.v)
 			}
-			b.WriteString(pad(r[c], width[c]))
+			builder.WriteString(pad(row[c], width[c]))
 		}
-		b.WriteRune(g.v)
-		out = append(out, b.String())
+		builder.WriteRune(glyphSet.v)
+		out = append(out, builder.String())
 	}
-	out = append(out, rule(g.bl, g.teeU, g.br))
+	out = append(out, rule(glyphSet.bl, glyphSet.teeU, glyphSet.br))
 	return out
 }
 
 // Render lays out the entity tables in 2D and draws the relationships between
 // them. (Stage 3: placement + stamping; connectors added in stage 4.)
-func Render(d *ErDiagram, useAscii bool) string {
-	g := unicodeGlyphs
+func Render(diagram *ErDiagram, useAscii bool) string {
+	glyphSet := unicodeGlyphs
 	if useAscii {
-		g = asciiGlyphs
+		glyphSet = asciiGlyphs
 	}
-	lay := placeEntities(d, g)
+	lay := placeEntities(diagram, glyphSet)
 
 	c := &canvas{}
 	for _, p := range lay.placed {
 		c.stamp(p.x, p.y, p.lines)
 	}
-	drawConnectors(c, lay, d, g)
+	drawConnectors(c, lay, diagram, glyphSet)
 	return c.string()
 }

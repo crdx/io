@@ -11,7 +11,7 @@ type canvas struct {
 	rows [][]string
 }
 
-func (self *canvas) ensure(x, y int) {
+func (self *canvas) ensure(x int, y int) {
 	for len(self.rows) <= y {
 		self.rows = append(self.rows, nil)
 	}
@@ -20,7 +20,7 @@ func (self *canvas) ensure(x, y int) {
 	}
 }
 
-func (self *canvas) set(x, y int, cell string) {
+func (self *canvas) set(x int, y int, cell string) {
 	if x < 0 || y < 0 {
 		return
 	}
@@ -28,14 +28,14 @@ func (self *canvas) set(x, y int, cell string) {
 	self.rows[y][x] = cell
 }
 
-func (self *canvas) at(x, y int) string {
+func (self *canvas) at(x int, y int) string {
 	if y < 0 || y >= len(self.rows) || x < 0 || x >= len(self.rows[y]) {
 		return " "
 	}
 	return self.rows[y][x]
 }
 
-func (self *canvas) stamp(x0, y0 int, block []string) {
+func (self *canvas) stamp(x0 int, y0 int, block []string) {
 	for dy, line := range block {
 		for x, cell := range runewidth.Cells(line) {
 			self.set(x0+x, y0+dy, cell)
@@ -76,15 +76,15 @@ type layout struct {
 	hGutY  []int // top edge y of each horizontal gutter (len rows+1)
 }
 
-func placeEntities(d *ErDiagram, g glyphs) *layout {
-	n := len(d.Entities)
-	cols := max(int(math.Ceil(math.Sqrt(float64(n)))), 1)
-	rows := (n + cols - 1) / cols
+func placeEntities(diagram *ErDiagram, glyphSet glyphs) *layout {
+	entityCount := len(diagram.Entities)
+	cols := max(int(math.Ceil(math.Sqrt(float64(entityCount)))), 1)
+	rows := (entityCount + cols - 1) / cols
 
-	lanes := max(len(d.Relationships), 1)
+	lanes := max(len(diagram.Relationships), 1)
 
 	maxLabel := 0
-	for _, r := range d.Relationships {
+	for _, r := range diagram.Relationships {
 		if w := runewidth.StringWidth(r.Label); w > maxLabel {
 			maxLabel = w
 		}
@@ -93,7 +93,7 @@ func placeEntities(d *ErDiagram, g glyphs) *layout {
 
 	deg := map[string]int{}
 	selfLoop := map[string]bool{}
-	for _, r := range d.Relationships {
+	for _, r := range diagram.Relationships {
 		deg[r.Left]++
 		deg[r.Right]++
 		if r.Left == r.Right {
@@ -101,18 +101,18 @@ func placeEntities(d *ErDiagram, g glyphs) *layout {
 		}
 	}
 
-	placed := make([]*placedEntity, n)
-	for i, e := range d.Entities {
-		minW := 4*deg[e.Name] + 1
-		if selfLoop[e.Name] {
+	placed := make([]*placedEntity, entityCount)
+	for i, entity := range diagram.Entities {
+		minW := 4*deg[entity.Name] + 1
+		if selfLoop[entity.Name] {
 			minW = 11
-			if deg[e.Name] > 2 {
-				minW = 4*deg[e.Name] + 9
+			if deg[entity.Name] > 2 {
+				minW = 4*deg[entity.Name] + 9
 			}
 		}
-		lines := renderEntity(e, g, minW-2)
+		lines := renderEntity(entity, glyphSet, minW-2)
 		placed[i] = &placedEntity{
-			entity: e, lines: lines,
+			entity: entity, lines: lines,
 			w: blockWidth(lines), h: len(lines),
 			row: i / cols, col: i % cols,
 		}
@@ -132,30 +132,30 @@ func placeEntities(d *ErDiagram, g glyphs) *layout {
 	vGutX := make([]int, cols+1)
 	colX := make([]int, cols)
 	x := 0
-	for c := range cols {
-		vGutX[c] = x
-		if c > 0 {
+	for column := range cols {
+		vGutX[column] = x
+		if column > 0 {
 			x += gutW
-			colX[c] = x
+			colX[column] = x
 		} else {
 			colX[0] = 0
 		}
-		x += colW[c]
+		x += colW[column]
 	}
 	vGutX[cols] = x
 
 	hGutY := make([]int, rows+1)
 	rowY := make([]int, rows)
 	y := 0
-	for r := range rows {
-		hGutY[r] = y
-		if r > 0 {
+	for row := range rows {
+		hGutY[row] = y
+		if row > 0 {
 			y += lanes
-			rowY[r] = y
+			rowY[row] = y
 		} else {
 			rowY[0] = 0
 		}
-		y += rowH[r]
+		y += rowH[row]
 	}
 	hGutY[rows] = y
 
@@ -168,13 +168,13 @@ func placeEntities(d *ErDiagram, g glyphs) *layout {
 }
 
 func blockWidth(lines []string) int {
-	w := 0
+	width := 0
 	for _, l := range lines {
-		if lw := runewidth.StringWidth(l); lw > w {
-			w = lw
+		if lw := runewidth.StringWidth(l); lw > width {
+			width = lw
 		}
 	}
-	return w
+	return width
 }
 
 const (
@@ -198,12 +198,14 @@ func newOverlay() *overlay {
 	}
 }
 
-func (self *overlay) bits(x, y int) uint8 { return self.solid[[2]int{x, y}] | self.dash[[2]int{x, y}] }
+func (self *overlay) bits(x int, y int) uint8 {
+	return self.solid[[2]int{x, y}] | self.dash[[2]int{x, y}]
+}
 
 func (self *overlay) polyline(pts [][2]int, solid bool) {
-	m := self.dash
+	marks := self.dash
 	if solid {
-		m = self.solid
+		marks = self.solid
 	}
 	for i := 0; i+1 < len(pts); i++ {
 		a, b := pts[i], pts[i+1]
@@ -211,41 +213,41 @@ func (self *overlay) polyline(pts [][2]int, solid bool) {
 		x, y := a[0], a[1]
 		for x != b[0] || y != b[1] {
 			if dx > 0 {
-				m[[2]int{x, y}] |= dE
+				marks[[2]int{x, y}] |= dE
 			} else if dx < 0 {
-				m[[2]int{x, y}] |= dW
+				marks[[2]int{x, y}] |= dW
 			}
 			if dy > 0 {
-				m[[2]int{x, y}] |= dS
+				marks[[2]int{x, y}] |= dS
 			} else if dy < 0 {
-				m[[2]int{x, y}] |= dN
+				marks[[2]int{x, y}] |= dN
 			}
 			x += dx
 			y += dy
 			if dx > 0 {
-				m[[2]int{x, y}] |= dW
+				marks[[2]int{x, y}] |= dW
 			} else if dx < 0 {
-				m[[2]int{x, y}] |= dE
+				marks[[2]int{x, y}] |= dE
 			}
 			if dy > 0 {
-				m[[2]int{x, y}] |= dN
+				marks[[2]int{x, y}] |= dN
 			} else if dy < 0 {
-				m[[2]int{x, y}] |= dS
+				marks[[2]int{x, y}] |= dS
 			}
 		}
 	}
 }
 
-func attach(p *placedEntity, s side, idx, total int) (int, int) {
-	lo, hi := p.x+1, p.x+p.w-2
-	x := lo + (hi-lo-4*(total-1))/2 + 4*idx
-	if (s == sideB) == (x%2 != 0) {
+func attach(placed *placedEntity, attachSide side, index int, total int) (int, int) {
+	lo, hi := placed.x+1, placed.x+placed.w-2
+	x := lo + (hi-lo-4*(total-1))/2 + 4*index
+	if (attachSide == sideB) == (x%2 != 0) {
 		x++
 	}
 	x = max(lo, min(x, hi))
-	y := p.y + p.h - 1
-	if s == sideT {
-		y = p.y
+	y := placed.y + placed.h - 1
+	if attachSide == sideT {
+		y = placed.y
 	}
 	return x, y
 }
@@ -257,28 +259,28 @@ type endpoint struct {
 	card Cardinality
 }
 
-func drawConnectors(c *canvas, lay *layout, d *ErDiagram, g glyphs) {
-	o := newOverlay()
+func drawConnectors(grid *canvas, lay *layout, diagram *ErDiagram, glyphSet glyphs) {
+	layer := newOverlay()
 
 	type ends struct{ a, b endpoint }
-	all := make([]ends, len(d.Relationships))
+	all := make([]ends, len(diagram.Relationships))
 	slotCount := map[[2]int]int{}
-	entIdx := map[*placedEntity]int{}
+	entityIndex := map[*placedEntity]int{}
 	for i, p := range lay.placed {
-		entIdx[p] = i
+		entityIndex[p] = i
 	}
-	for i, r := range d.Relationships {
-		a, b := lay.byName[r.Left], lay.byName[r.Right]
-		if a == nil || b == nil {
+	for i, relationship := range diagram.Relationships {
+		left, right := lay.byName[relationship.Left], lay.byName[relationship.Right]
+		if left == nil || right == nil {
 			continue
 		}
-		sa, sb := sidesFor(a, b)
+		sa, sb := sidesFor(left, right)
 		all[i] = ends{
-			a: endpoint{p: a, s: sa, card: r.LeftCard},
-			b: endpoint{p: b, s: sb, card: r.RightCard},
+			a: endpoint{p: left, s: sa, card: relationship.LeftCard},
+			b: endpoint{p: right, s: sb, card: relationship.RightCard},
 		}
-		slotCount[[2]int{entIdx[a], int(sa)}]++
-		slotCount[[2]int{entIdx[b], int(sb)}]++
+		slotCount[[2]int{entityIndex[left], int(sa)}]++
+		slotCount[[2]int{entityIndex[right], int(sb)}]++
 	}
 	slotUsed := map[[2]int]int{}
 	selfSeen := map[*placedEntity]int{}
@@ -287,7 +289,7 @@ func drawConnectors(c *canvas, lay *layout, d *ErDiagram, g glyphs) {
 			continue
 		}
 		for _, ep := range []*endpoint{&all[i].a, &all[i].b} {
-			key := [2]int{entIdx[ep.p], int(ep.s)}
+			key := [2]int{entityIndex[ep.p], int(ep.s)}
 			ep.x, ep.y = attach(ep.p, ep.s, slotUsed[key], slotCount[key])
 			slotUsed[key]++
 		}
@@ -305,8 +307,8 @@ func drawConnectors(c *canvas, lay *layout, d *ErDiagram, g glyphs) {
 		}
 	}
 
-	plans := make([]routePlan, 0, len(d.Relationships))
-	for i, r := range d.Relationships {
+	plans := make([]routePlan, 0, len(diagram.Relationships))
+	for i, r := range diagram.Relationships {
 		if all[i].a.p == nil {
 			continue
 		}
@@ -314,40 +316,40 @@ func drawConnectors(c *canvas, lay *layout, d *ErDiagram, g glyphs) {
 	}
 
 	for _, p := range plans {
-		p.drawLine(o)
+		p.drawLine(layer)
 	}
 	for _, p := range plans {
-		p.decorate(o)
+		p.decorate(layer)
 	}
 
-	composite(c, o, g)
+	composite(grid, layer, glyphSet)
 
 	for _, p := range plans {
-		setAttachTee(c, p.a, g)
-		setAttachTee(c, p.b, g)
+		setAttachTee(grid, p.a, glyphSet)
+		setAttachTee(grid, p.b, glyphSet)
 	}
 }
 
-func setAttachTee(c *canvas, ep endpoint, g glyphs) {
-	tee, opposite := g.teeD, g.teeU
+func setAttachTee(grid *canvas, ep endpoint, glyphSet glyphs) {
+	tee, opposite := glyphSet.teeD, glyphSet.teeU
 	if ep.s == sideT {
-		tee, opposite = g.teeU, g.teeD
+		tee, opposite = glyphSet.teeU, glyphSet.teeD
 	}
-	if c.at(ep.x, ep.y) == string(opposite) {
-		tee = g.cross
+	if grid.at(ep.x, ep.y) == string(opposite) {
+		tee = glyphSet.cross
 	}
-	c.set(ep.x, ep.y, string(tee))
+	grid.set(ep.x, ep.y, string(tee))
 }
 
-func sidesFor(a, b *placedEntity) (side, side) {
-	sameColAdjacent := a.col == b.col && abs(a.row-b.row) == 1
+func sidesFor(first *placedEntity, second *placedEntity) (side, side) {
+	sameColAdjacent := first.col == second.col && abs(first.row-second.row) == 1
 	switch {
-	case a.row < b.row:
+	case first.row < second.row:
 		if sameColAdjacent {
 			return sideB, sideB
 		}
 		return sideB, sideT
-	case a.row > b.row:
+	case first.row > second.row:
 		if sameColAdjacent {
 			return sideB, sideB
 		}
@@ -364,7 +366,7 @@ func (self *layout) gutterY(e endpoint, lane int) int {
 	return self.hGutY[e.p.row] + lane
 }
 
-func (self *layout) trunkX(a, b *placedEntity, lane int) int {
+func (self *layout) trunkX(a *placedEntity, b *placedEntity, lane int) int {
 	return self.vGutX[min(a.col, b.col)+1] + self.gutW - self.lanes + lane
 }
 
@@ -376,7 +378,7 @@ type routePlan struct {
 	merged bool // both stubs meet one gutter row: single run, no trunk
 }
 
-func newPlan(lay *layout, a, b endpoint, r *Relationship, lane int) routePlan {
+func newPlan(lay *layout, a endpoint, b endpoint, r *Relationship, lane int) routePlan {
 	ya, yb := lay.gutterY(a, lane), lay.gutterY(b, lane)
 	p := routePlan{rel: r, a: a, b: b, ya: ya, yb: yb, merged: ya == yb}
 	if !p.merged {
@@ -385,31 +387,31 @@ func newPlan(lay *layout, a, b endpoint, r *Relationship, lane int) routePlan {
 	return p
 }
 
-func (self routePlan) drawLine(o *overlay) {
+func (self routePlan) drawLine(layer *overlay) {
 	if self.merged {
-		o.polyline([][2]int{
+		layer.polyline([][2]int{
 			{self.a.x, self.a.y}, {self.a.x, self.ya}, {self.b.x, self.ya}, {self.b.x, self.b.y},
 		}, self.rel.Identifying)
 		return
 	}
-	o.polyline([][2]int{
+	layer.polyline([][2]int{
 		{self.a.x, self.a.y}, {self.a.x, self.ya}, {self.tx, self.ya}, {self.tx, self.yb}, {self.b.x, self.yb}, {self.b.x, self.b.y},
 	}, self.rel.Identifying)
 }
 
-func (self routePlan) decorate(o *overlay) {
+func (self routePlan) decorate(layer *overlay) {
 	if self.merged {
-		putToken(o, self.a, self.b.x, self.ya)
-		putToken(o, self.b, self.a.x, self.ya)
+		putToken(layer, self.a, self.b.x, self.ya)
+		putToken(layer, self.b, self.a.x, self.ya)
 		if self.a.p == self.b.p {
-			writeLabel(o, self.rel.Label, max(self.a.x, self.b.x)+2, self.ya, -1)
+			writeLabel(layer, self.rel.Label, max(self.a.x, self.b.x)+2, self.ya, -1)
 		} else {
-			putLabel(o, self.rel.Label, [][3]int{{min(self.a.x, self.b.x), max(self.a.x, self.b.x), self.ya}})
+			putLabel(layer, self.rel.Label, [][3]int{{min(self.a.x, self.b.x), max(self.a.x, self.b.x), self.ya}})
 		}
 		return
 	}
-	putToken(o, self.a, self.tx, self.ya)
-	putToken(o, self.b, self.tx, self.yb)
+	putToken(layer, self.a, self.tx, self.ya)
+	putToken(layer, self.b, self.tx, self.yb)
 	runs := [][3]int{
 		{min(self.a.x, self.tx), max(self.a.x, self.tx), self.ya},
 		{min(self.b.x, self.tx), max(self.b.x, self.tx), self.yb},
@@ -417,27 +419,27 @@ func (self routePlan) decorate(o *overlay) {
 	if runs[1][1]-runs[1][0] > runs[0][1]-runs[0][0] {
 		runs[0], runs[1] = runs[1], runs[0]
 	}
-	putLabel(o, self.rel.Label, runs)
+	putLabel(layer, self.rel.Label, runs)
 }
 
-func putToken(o *overlay, ep endpoint, targetX, y int) {
+func putToken(layer *overlay, ep endpoint, targetX int, y int) {
 	if ep.x < targetX {
 		for i, cell := range runewidth.Cells(leftToken(ep.card)) {
-			o.token[[2]int{ep.x + 1 + i, y}] = cell
+			layer.token[[2]int{ep.x + 1 + i, y}] = cell
 		}
 		return
 	}
 	tokenCells := runewidth.Cells(rightToken(ep.card))
 	for i, cell := range tokenCells {
-		o.token[[2]int{ep.x - len(tokenCells) + i, y}] = cell
+		layer.token[[2]int{ep.x - len(tokenCells) + i, y}] = cell
 	}
 }
 
-func putLabel(o *overlay, s string, runs [][3]int) {
-	if s == "" {
+func putLabel(layer *overlay, label string, runs [][3]int) {
+	if label == "" {
 		return
 	}
-	lw := runewidth.StringWidth(s)
+	lw := runewidth.StringWidth(label)
 	type spot struct{ start, cost, y, hi int }
 	best := spot{cost: -1}
 	for _, r := range runs {
@@ -445,7 +447,7 @@ func putLabel(o *overlay, s string, runs [][3]int) {
 		if hi-lo+1 < lw {
 			continue
 		}
-		start, cost := labelStart(o, lo, hi, lw, y)
+		start, cost := labelStart(layer, lo, hi, lw, y)
 		if best.cost < 0 || cost < best.cost {
 			best = spot{start, cost, y, hi}
 		}
@@ -458,21 +460,21 @@ func putLabel(o *overlay, s string, runs [][3]int) {
 		if lo > hi {
 			return
 		}
-		start, _ := labelStart(o, lo, hi, lw, y)
+		start, _ := labelStart(layer, lo, hi, lw, y)
 		best = spot{start, 0, y, hi}
 	}
-	writeLabel(o, s, best.start, best.y, best.hi)
+	writeLabel(layer, label, best.start, best.y, best.hi)
 }
 
-func labelStart(o *overlay, lo, hi, lw, y int) (int, int) {
+func labelStart(layer *overlay, lo int, hi int, lw int, y int) (int, int) {
 	centre := max(lo, lo+(hi-lo+1-lw)/2)
-	start, cost := centre, vCrossings(o, centre, min(centre+lw-1, hi), y)
+	start, cost := centre, vCrossings(layer, centre, min(centre+lw-1, hi), y)
 	for d := 1; d <= hi-lo && cost > 0; d++ {
 		for _, c := range []int{centre - d, centre + d} {
 			if c < lo || c+lw-1 > hi {
 				continue
 			}
-			if n := vCrossings(o, c, c+lw-1, y); n < cost {
+			if n := vCrossings(layer, c, c+lw-1, y); n < cost {
 				start, cost = c, n
 			}
 		}
@@ -480,99 +482,99 @@ func labelStart(o *overlay, lo, hi, lw, y int) (int, int) {
 	return start, cost
 }
 
-func vCrossings(o *overlay, x0, x1, y int) int {
-	n := 0
+func vCrossings(o *overlay, x0 int, x1 int, y int) int {
+	crossings := 0
 	for x := x0; x <= x1; x++ {
 		if o.bits(x, y)&(dN|dS) != 0 {
-			n++
+			crossings++
 		}
 	}
-	return n
+	return crossings
 }
 
-func writeLabel(o *overlay, label string, x, y, limit int) {
+func writeLabel(layer *overlay, label string, x int, y int, limit int) {
 	for _, cell := range runewidth.Cells(label) {
 		if limit >= 0 && x > limit {
 			return
 		}
-		if cell != " " || o.bits(x, y)&(dN|dS) == 0 {
-			o.label[[2]int{x, y}] = cell
+		if cell != " " || layer.bits(x, y)&(dN|dS) == 0 {
+			layer.label[[2]int{x, y}] = cell
 		}
 		x++
 	}
 }
 
-func composite(c *canvas, o *overlay, g glyphs) {
+func composite(grid *canvas, layer *overlay, glyphSet glyphs) {
 	seen := map[[2]int]bool{}
 	mark := func(x, y int) {
-		p := [2]int{x, y}
-		if seen[p] {
+		point := [2]int{x, y}
+		if seen[point] {
 			return
 		}
-		seen[p] = true
-		bits := o.bits(x, y)
+		seen[point] = true
+		bits := layer.bits(x, y)
 		if bits == 0 {
 			return
 		}
-		if c.at(x, y) != " " {
+		if grid.at(x, y) != " " {
 			return
 		}
-		c.set(x, y, string(glyphFor(bits, o.solid[p] != 0, g)))
+		grid.set(x, y, string(glyphFor(bits, layer.solid[point] != 0, glyphSet)))
 	}
-	for p := range o.solid {
+	for p := range layer.solid {
 		mark(p[0], p[1])
 	}
-	for p := range o.dash {
+	for p := range layer.dash {
 		mark(p[0], p[1])
 	}
-	for p, r := range o.label {
-		c.set(p[0], p[1], r)
+	for p, r := range layer.label {
+		grid.set(p[0], p[1], r)
 	}
-	for p, r := range o.token {
-		c.set(p[0], p[1], r)
+	for p, r := range layer.token {
+		grid.set(p[0], p[1], r)
 	}
 }
 
-func glyphFor(bits uint8, solid bool, g glyphs) rune {
+func glyphFor(bits uint8, solid bool, glyphSet glyphs) rune {
 	switch bits {
 	case dN | dS:
 		if solid {
-			return g.v
+			return glyphSet.v
 		}
-		return g.vd
+		return glyphSet.vd
 	case dE | dW:
 		if solid {
-			return g.h
+			return glyphSet.h
 		}
-		return g.hd
+		return glyphSet.hd
 	case dN | dE:
-		return g.bl
+		return glyphSet.bl
 	case dN | dW:
-		return g.br
+		return glyphSet.br
 	case dS | dE:
-		return g.tl
+		return glyphSet.tl
 	case dS | dW:
-		return g.tr
+		return glyphSet.tr
 	case dN | dS | dE:
-		return g.teeR
+		return glyphSet.teeR
 	case dN | dS | dW:
-		return g.teeL
+		return glyphSet.teeL
 	case dN | dE | dW:
-		return g.teeU
+		return glyphSet.teeU
 	case dS | dE | dW:
-		return g.teeD
+		return glyphSet.teeD
 	case dN | dS | dE | dW:
-		return g.cross
+		return glyphSet.cross
 	case dN, dS:
 		if solid {
-			return g.v
+			return glyphSet.v
 		}
-		return g.vd
+		return glyphSet.vd
 	default:
 		if solid {
-			return g.h
+			return glyphSet.h
 		}
-		return g.hd
+		return glyphSet.hd
 	}
 }
 
@@ -584,6 +586,8 @@ func leftToken(c Cardinality) string {
 		return "|o"
 	case ZeroOrMore:
 		return "}o"
+	case OneOrMore:
+		return "}|"
 	default:
 		return "}|"
 	}
@@ -597,6 +601,8 @@ func rightToken(c Cardinality) string {
 		return "o|"
 	case ZeroOrMore:
 		return "o{"
+	case OneOrMore:
+		return "|{"
 	default:
 		return "|{"
 	}

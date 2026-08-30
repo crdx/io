@@ -203,6 +203,8 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 
 	case key.Rune:
 		return self.rune(keypress, running)
+
+	case key.PageUp, key.PageDown, key.PasteEnd, key.FocusIn, key.FocusOut, key.Unknown:
 	}
 
 	return Draw

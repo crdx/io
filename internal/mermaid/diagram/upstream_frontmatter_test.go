@@ -28,14 +28,14 @@ func TestStripFrontmatter(t *testing.T) {
 		{"hash kept inside quoted title", "---\ntitle: \"a # b\"\n---\ndiagram", "diagram", "a # b"},
 		{"no space after colon is not a mapping", "---\ntitle:xyz\n---\ndiagram", "diagram", ""},
 	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			rest, title := StripFrontmatter(c.in)
-			if rest != c.wantRest {
-				t.Errorf("rest = %q, want %q", rest, c.wantRest)
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			rest, title := StripFrontmatter(test.in)
+			if rest != test.wantRest {
+				t.Errorf("rest = %q, want %q", rest, test.wantRest)
 			}
-			if title != c.wantTitle {
-				t.Errorf("title = %q, want %q", title, c.wantTitle)
+			if title != test.wantTitle {
+				t.Errorf("title = %q, want %q", title, test.wantTitle)
 			}
 		})
 	}

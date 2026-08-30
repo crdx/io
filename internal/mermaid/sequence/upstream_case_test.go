@@ -97,12 +97,12 @@ func mustNote(t *testing.T, input string, want NotePlacement) *Note {
 	if err != nil {
 		t.Fatalf("parse %q: %v", input, err)
 	}
-	n := firstNote(sd)
-	if n == nil {
+	note := firstNote(sd)
+	if note == nil {
 		t.Fatalf("no note parsed from %q", input)
 	}
-	if n.Placement != want {
-		t.Errorf("placement = %v, want %v", n.Placement, want)
+	if note.Placement != want {
+		t.Errorf("placement = %v, want %v", note.Placement, want)
 	}
-	return n
+	return note
 }

@@ -102,6 +102,7 @@ func TestParseFragments(t *testing.T) {
 					starts++
 				case EventFragmentEnd:
 					ends++
+				case EventMessage, EventFragmentDivider, EventNote:
 				}
 			}
 			if starts != ends {

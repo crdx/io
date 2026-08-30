@@ -33,18 +33,18 @@ func TestRenderWithFrontmatter(t *testing.T) {
 			[]string{"Deps", "A", "B"},
 		},
 	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			stripped, _ := diagram.StripFrontmatter(c.input)
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			stripped, _ := diagram.StripFrontmatter(test.input)
 			diag := rendererFor(stripped)
-			if diag.Type() != c.wantType {
-				t.Errorf("detected %q, want %q", diag.Type(), c.wantType)
+			if diag.Type() != test.wantType {
+				t.Errorf("detected %q, want %q", diag.Type(), test.wantType)
 			}
-			out, err := renderUpstreamDiagram(c.input, diagram.DefaultConfig())
+			out, err := renderUpstreamDiagram(test.input, diagram.DefaultConfig())
 			if err != nil {
 				t.Fatal(err)
 			}
-			for _, want := range c.wantParts {
+			for _, want := range test.wantParts {
 				if !strings.Contains(out, want) {
 					t.Errorf("output missing %q:\n%s", want, out)
 				}

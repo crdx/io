@@ -223,7 +223,7 @@ func addEventStatus(line map[string]json.RawMessage) error {
 	})
 }
 
-func addSessionMeta(directory, name string) error {
+func addSessionMeta(directory string, name string) error {
 	return store.RebuildMeta(directory, name)
 }
 
@@ -409,7 +409,7 @@ func addTurnCompletions(lines []map[string]json.RawMessage) ([]map[string]json.R
 	return migrated, nil
 }
 
-func markMigratedTurnCompletion(lines []map[string]json.RawMessage, start, end int, completionAfter map[int]bool) {
+func markMigratedTurnCompletion(lines []map[string]json.RawMessage, start int, end int, completionAfter map[int]bool) {
 	if start < 0 {
 		return
 	}

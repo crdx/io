@@ -180,7 +180,7 @@ func parseStyleClass(matchedLine []string) (styleClass, error) {
 	return styleClass{className, styleMap}, nil
 }
 
-func setArrowWithLabel(lhs, rhs []textNode, label string, isBidirectional bool, gp *graphProperties) []textNode {
+func setArrowWithLabel(lhs []textNode, rhs []textNode, label string, isBidirectional bool, gp *graphProperties) []textNode {
 	for _, l := range lhs {
 		for _, r := range rhs {
 			setData(l, textEdge{l, r, label, isBidirectional}, gp.data, gp.nodeSpecs)
@@ -189,11 +189,11 @@ func setArrowWithLabel(lhs, rhs []textNode, label string, isBidirectional bool, 
 	return rhs
 }
 
-func setArrow(lhs, rhs []textNode, gp *graphProperties) []textNode {
+func setArrow(lhs []textNode, rhs []textNode, gp *graphProperties) []textNode {
 	return setArrowWithLabel(lhs, rhs, "", false, gp)
 }
 
-func setBidirectionalArrow(lhs, rhs []textNode, gp *graphProperties) []textNode {
+func setBidirectionalArrow(lhs []textNode, rhs []textNode, gp *graphProperties) []textNode {
 	return setArrowWithLabel(lhs, rhs, "", true, gp)
 }
 
@@ -344,8 +344,8 @@ func mermaidFileToMap(mermaid string) (*graphProperties, error) {
 			continue
 		}
 
-		if idx := strings.Index(line, "%%"); idx != -1 {
-			line = strings.TrimSpace(line[:idx])
+		if index := strings.Index(line, "%%"); index != -1 {
+			line = strings.TrimSpace(line[:index])
 		}
 
 		if len(strings.TrimSpace(line)) > 0 {

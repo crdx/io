@@ -301,6 +301,8 @@ func (self regexpStyle) paint() style.Style {
 		return style.Keyword
 	case regexpOperator:
 		return style.Operator
+	case regexpLiteral, regexpPunctuation:
+		return style.Block
 	default:
 		return style.Block
 	}
@@ -421,7 +423,7 @@ func plainly(lines []string) []string {
 }
 
 func tokenStyle(token chroma.TokenType) style.Style {
-	switch token.Category() {
+	switch token.Category() { //nolint:exhaustive // Category collapses tokens into top-level groups.
 	case chroma.Comment:
 		return style.Comment
 	case chroma.Keyword:
@@ -444,7 +446,7 @@ func tokenStyle(token chroma.TokenType) style.Style {
 }
 
 func generic(token chroma.TokenType) style.Style {
-	switch token {
+	switch token { //nolint:exhaustive // Unlisted generic tokens deliberately use the plain style.
 	case chroma.GenericInserted:
 		return style.Inserted
 	case chroma.GenericDeleted:
@@ -473,7 +475,7 @@ func literal(token chroma.TokenType) style.Style {
 }
 
 func name(token chroma.TokenType) style.Style {
-	switch token {
+	switch token { //nolint:exhaustive // Unlisted name tokens deliberately use the variable style.
 	case chroma.NameFunction, chroma.NameFunctionMagic:
 		return style.Function
 	case chroma.NameClass, chroma.NameNamespace, chroma.NameBuiltin:

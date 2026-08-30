@@ -16,8 +16,8 @@ func RemoveComments(lines []string) []string {
 			continue
 		}
 
-		if idx := strings.Index(line, "%%"); idx != -1 {
-			line = strings.TrimSpace(line[:idx])
+		if index := strings.Index(line, "%%"); index != -1 {
+			line = strings.TrimSpace(line[:index])
 		}
 
 		if len(strings.TrimSpace(line)) > 0 {

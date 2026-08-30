@@ -132,7 +132,7 @@ func backtickRun(line string) int {
 	return len(line) - len(strings.TrimLeft(line, "`"))
 }
 
-func startsABlock(line, previous string) bool {
+func startsABlock(line string, previous string) bool {
 	switch {
 	case strings.HasPrefix(line, "#"), strings.HasPrefix(line, ">"), strings.HasPrefix(line, "**"):
 		return true

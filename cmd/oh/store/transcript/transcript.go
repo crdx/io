@@ -116,6 +116,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		if event.Arguments != "" {
 			output.fence(event.Arguments, "")
 		}
+	case agent.StartupEvent, agent.StateChangeEvent:
 	}
 
 	_, err := self.file.WriteString(output.String())
@@ -143,6 +144,8 @@ func heading(event agent.Event) []string {
 		return []string{name, event.Text, prefixed("toggled ", event.Name)}
 	case agent.RetryingEvent:
 		return []string{name, "attempt " + strconv.Itoa(event.Attempt), prefixed("waited ", util.CompactDuration(event.Took))}
+	case agent.StartupEvent, agent.UserMessageEvent, agent.ModelReasoningEvent, agent.ModelMessageEvent,
+		agent.StateChangeEvent, agent.InterruptionEvent, agent.FailureEvent:
 	}
 
 	return []string{name}
@@ -223,7 +226,7 @@ func joinParts(parts ...string) string {
 	return strings.Join(present, partSeparator)
 }
 
-func prefixed(prefix, value string) string {
+func prefixed(prefix string, value string) string {
 	if value == "" {
 		return ""
 	}
@@ -305,6 +308,8 @@ func title(kind agent.Kind) string {
 		return "Retrying"
 	case agent.FailureEvent:
 		return "Failure"
+	case agent.StateChangeEvent:
+		return string(kind)
 	default:
 		return string(kind)
 	}
@@ -330,7 +335,7 @@ func (self *document) openBlock() {
 	}
 }
 
-func (self *document) toolResultPreview(id, value, syntax string) {
+func (self *document) toolResultPreview(id string, value string, syntax string) {
 	lines := strutil.Lines(value)
 	preview := strings.Join(lines[:min(len(lines), toolResultPreviewLines)], "\n")
 	if len(preview) > toolResultPreviewBytes {
@@ -355,7 +360,7 @@ func (self *document) toolResultPreview(id, value, syntax string) {
 	self.fence(fmt.Sprintf("jq -r 'select(.event.kind == %q and .event.id == %q) | .event.text' session.jsonl", agent.ToolCallResultEvent, id), "sh")
 }
 
-func (self *document) fence(value, syntax string) {
+func (self *document) fence(value string, syntax string) {
 	longest := 0
 	for _, run := range strings.FieldsFunc(value, func(character rune) bool { return character != '`' }) {
 		if len(run) > longest {

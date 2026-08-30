@@ -657,7 +657,7 @@ func storedNames(directory string) ([]string, error) {
 	return names, nil
 }
 
-func readHeadSummary(directory, name string) (Line, error) {
+func readHeadSummary(directory string, name string) (Line, error) {
 	file, err := openJournal(directory, name, os.O_RDONLY)
 	if err != nil {
 		return Line{}, err
@@ -700,7 +700,7 @@ func readHeadSummary(directory, name string) (Line, error) {
 	return head, nil
 }
 
-func readHead(directory, name string) (Line, error) {
+func readHead(directory string, name string) (Line, error) {
 	file, err := openJournal(directory, name, os.O_RDONLY)
 	if err != nil {
 		return Line{}, err
@@ -754,15 +754,15 @@ const (
 	maxLine     = 64 << 20
 )
 
-func Dir(directory, name string) string {
+func Dir(directory string, name string) string {
 	return filepath.Join(directory, name)
 }
 
-func journalPath(directory, name string) string {
+func journalPath(directory string, name string) string {
 	return filepath.Join(Dir(directory, name), journalName)
 }
 
-func metaPath(directory, name string) string {
+func metaPath(directory string, name string) string {
 	return filepath.Join(Dir(directory, name), metaName)
 }
 

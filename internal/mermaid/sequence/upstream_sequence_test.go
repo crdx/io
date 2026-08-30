@@ -86,14 +86,14 @@ func TestParticipantAlias(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d, err := Parse(tt.input)
+			parsed, err := Parse(tt.input)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
-			if len(d.Participants) == 0 {
+			if len(parsed.Participants) == 0 {
 				t.Fatal("expected at least one participant")
 			}
-			p := d.Participants[0]
+			p := parsed.Participants[0]
 			if p.ID != tt.wantID {
 				t.Errorf("ID = %q, want %q", p.ID, tt.wantID)
 			}
@@ -101,7 +101,7 @@ func TestParticipantAlias(t *testing.T) {
 				t.Errorf("Label = %q, want %q", p.Label, tt.wantLabel)
 			}
 			config := diagram.DefaultConfig()
-			output, err := Render(d, config)
+			output, err := Render(parsed, config)
 			if err != nil {
 				t.Fatalf("render error: %v", err)
 			}
@@ -251,15 +251,15 @@ func FuzzParseSequenceDiagram(f *testing.F) {
 			return
 		}
 
-		for i, p := range sd.Participants {
-			if p.Index != i {
-				t.Errorf("Participant %q has incorrect index: got %d, expected %d", p.ID, p.Index, i)
+		for i, participant := range sd.Participants {
+			if participant.Index != i {
+				t.Errorf("Participant %q has incorrect index: got %d, expected %d", participant.ID, participant.Index, i)
 			}
-			if p.ID == "" {
+			if participant.ID == "" {
 				t.Errorf("Participant at index %d has empty ID", i)
 			}
-			if p.Label == "" {
-				t.Errorf("Participant %q has empty label", p.ID)
+			if participant.Label == "" {
+				t.Errorf("Participant %q has empty label", participant.ID)
 			}
 		}
 

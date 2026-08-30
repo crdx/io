@@ -23,18 +23,18 @@ func TestActorDeclarations(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d, err := Parse(tt.input)
+			parsed, err := Parse(tt.input)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
-			if len(d.Participants) == 0 {
+			if len(parsed.Participants) == 0 {
 				t.Fatal("expected at least one participant")
 			}
-			p := d.Participants[0]
+			p := parsed.Participants[0]
 			if p.ID != tt.wantID || p.Label != tt.wantLabel {
 				t.Errorf("got %q/%q, want %q/%q", p.ID, p.Label, tt.wantID, tt.wantLabel)
 			}
-			output, err := Render(d, diagram.DefaultConfig())
+			output, err := Render(parsed, diagram.DefaultConfig())
 			if err != nil {
 				t.Fatalf("render error: %v", err)
 			}
@@ -46,18 +46,18 @@ func TestActorDeclarations(t *testing.T) {
 }
 
 func TestActorParticipantMix(t *testing.T) {
-	d, err := Parse("sequenceDiagram\nactor Alice as Alice2\nactor Bob\nparticipant John as John2\nparticipant Mandy\nAlice->>Bob: Hi Bob\nBob->>Alice: Hi Alice\nAlice->>John: Hi John\nJohn->>Mandy: Hi Mandy\nMandy ->>Joan: Hi Joan")
+	diagram, err := Parse("sequenceDiagram\nactor Alice as Alice2\nactor Bob\nparticipant John as John2\nparticipant Mandy\nAlice->>Bob: Hi Bob\nBob->>Alice: Hi Alice\nAlice->>John: Hi John\nJohn->>Mandy: Hi Mandy\nMandy ->>Joan: Hi Joan")
 	if err != nil {
 		t.Fatal(err)
 	}
 	wantOrder := []struct{ id, label string }{
 		{"Alice", "Alice2"}, {"Bob", "Bob"}, {"John", "John2"}, {"Mandy", "Mandy"}, {"Joan", "Joan"},
 	}
-	if len(d.Participants) != len(wantOrder) {
-		t.Fatalf("want %d participants, got %d", len(wantOrder), len(d.Participants))
+	if len(diagram.Participants) != len(wantOrder) {
+		t.Fatalf("want %d participants, got %d", len(wantOrder), len(diagram.Participants))
 	}
 	for i, w := range wantOrder {
-		if p := d.Participants[i]; p.ID != w.id || p.Label != w.label {
+		if p := diagram.Participants[i]; p.ID != w.id || p.Label != w.label {
 			t.Errorf("participant %d = %q/%q, want %q/%q", i, p.ID, p.Label, w.id, w.label)
 		}
 	}

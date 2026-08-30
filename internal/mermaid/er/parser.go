@@ -125,7 +125,7 @@ func Parse(input string) (*ErDiagram, error) {
 		lines[i] = stripComment(l)
 	}
 
-	d := &ErDiagram{byName: map[string]*Entity{}}
+	diagram := &ErDiagram{byName: map[string]*Entity{}}
 
 	seenKeyword := false
 	for i := 0; i < len(lines); i++ {
@@ -163,20 +163,20 @@ func Parse(input string) (*ErDiagram, error) {
 
 		if m := entityHeaderRegex.FindStringSubmatch(line); m != nil {
 			name := firstNonEmpty(m[1], m[2])
-			e := d.entity(name)
+			entity := diagram.entity(name)
 			if alias := firstNonEmpty(m[3], m[4]); alias != "" {
-				e.Display = alias
+				entity.Display = alias
 			}
 			attrs, next, err := parseAttributeBlock(lines, i+1)
 			if err != nil {
 				return nil, fmt.Errorf("entity %q: %w", name, err)
 			}
-			e.Attributes = append(e.Attributes, attrs...)
+			entity.Attributes = append(entity.Attributes, attrs...)
 			i = next
 			continue
 		}
 
-		if d.parseRelationship(line) {
+		if diagram.parseRelationship(line) {
 			continue
 		}
 
@@ -185,7 +185,7 @@ func Parse(input string) (*ErDiagram, error) {
 		}
 
 		if m := loneEntityRegex.FindStringSubmatch(line); m != nil {
-			e := d.entity(firstNonEmpty(m[1], m[2]))
+			e := diagram.entity(firstNonEmpty(m[1], m[2]))
 			if alias := firstNonEmpty(m[3], m[4]); alias != "" {
 				e.Display = alias
 			}
@@ -195,7 +195,7 @@ func Parse(input string) (*ErDiagram, error) {
 		return nil, fmt.Errorf("line %d: invalid syntax: %q", i+1, line)
 	}
 
-	return d, nil
+	return diagram, nil
 }
 
 func parseAttributeBlock(lines []string, start int) ([]Attribute, int, error) {
@@ -225,13 +225,13 @@ func parseAttributeBlock(lines []string, start int) ([]Attribute, int, error) {
 
 func parseAttribute(line string) (Attribute, error) {
 	comment := ""
-	if idx := strings.Index(line, `"`); idx != -1 {
-		if end := strings.LastIndex(line, `"`); end > idx {
-			comment = line[idx+1 : end]
+	if index := strings.Index(line, `"`); index != -1 {
+		if end := strings.LastIndex(line, `"`); end > index {
+			comment = line[index+1 : end]
 		} else {
-			comment = line[idx+1:]
+			comment = line[index+1:]
 		}
-		line = strings.TrimSpace(line[:idx])
+		line = strings.TrimSpace(line[:index])
 	}
 	fields := splitAttrTokens(line)
 	if len(fields) < 2 {
@@ -274,7 +274,7 @@ func stripComment(line string) string {
 	return line
 }
 
-func firstNonEmpty(a, b string) string {
+func firstNonEmpty(a string, b string) string {
 	if a != "" {
 		return a
 	}
@@ -354,7 +354,7 @@ func splitEntityCard(part string, entityFirst bool) (string, string) {
 	return strings.Trim(toks[len(toks)-1], `"`), strings.Join(toks[:len(toks)-1], " ")
 }
 
-func splitAttrTokens(s string) []string {
+func splitAttrTokens(text string) []string {
 	var toks []string
 	var cur strings.Builder
 	depth := 0
@@ -365,23 +365,23 @@ func splitAttrTokens(s string) []string {
 			cur.Reset()
 		}
 	}
-	for _, r := range s {
+	for _, letter := range text {
 		switch {
-		case r == '`':
+		case letter == '`':
 			inTick = !inTick
-			cur.WriteRune(r)
-		case r == '(' && !inTick:
+			cur.WriteRune(letter)
+		case letter == '(' && !inTick:
 			depth++
-			cur.WriteRune(r)
-		case r == ')' && !inTick:
+			cur.WriteRune(letter)
+		case letter == ')' && !inTick:
 			if depth > 0 {
 				depth--
 			}
-			cur.WriteRune(r)
-		case (r == ' ' || r == '\t') && depth == 0 && !inTick:
+			cur.WriteRune(letter)
+		case (letter == ' ' || letter == '\t') && depth == 0 && !inTick:
 			flush()
 		default:
-			cur.WriteRune(r)
+			cur.WriteRune(letter)
 		}
 	}
 	flush()

@@ -47,7 +47,7 @@ type Context struct {
 }
 
 type Segment interface {
-	Render(Context) string
+	Render(context Context) string
 }
 
 type Options interface {
@@ -89,7 +89,7 @@ type Phase struct {
 }
 
 type Refresher interface {
-	NextRefresh(Phase) time.Time
+	NextRefresh(phase Phase) time.Time
 }
 
 func (self Layout) NextRefresh(phase Phase) time.Time {

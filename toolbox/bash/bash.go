@@ -285,7 +285,7 @@ func killed(result sandbox.Result, policy sandbox.Policy) string {
 
 	lines := []string{opening}
 
-	switch signal {
+	switch signal { //nolint:exhaustive // Only signals caused by quantified sandbox limits add detail.
 	case syscall.SIGKILL, syscall.SIGXCPU:
 		lines = append(lines, processorLimit(result, policy)...)
 	case syscall.SIGXFSZ:

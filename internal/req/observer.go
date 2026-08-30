@@ -26,12 +26,12 @@ type Response struct {
 
 // Observer receives logical HTTP exchanges without affecting request control flow.
 type Observer interface {
-	Start(Request) ExchangeObserver
+	Start(request Request) ExchangeObserver
 }
 
 // ExchangeObserver receives one response body and its terminal state.
 type ExchangeObserver interface {
-	Response(Response)
-	Body([]byte)
-	Finish(time.Time, error, bool)
+	Response(response Response)
+	Body(body []byte)
+	Finish(finishedAt time.Time, err error, isIncomplete bool)
 }

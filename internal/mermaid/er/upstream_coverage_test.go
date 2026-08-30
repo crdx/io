@@ -22,8 +22,8 @@ func TestCardinalityMatrix(t *testing.T) {
 
 func TestIdentifyingVariants(t *testing.T) {
 	cases := []struct {
-		in    string
-		ident bool
+		in          string
+		identifying bool
 	}{
 		{"erDiagram\n A ||--|| B : r", true},
 		{"erDiagram\n A ||..|| B : r", false},
@@ -32,13 +32,13 @@ func TestIdentifyingVariants(t *testing.T) {
 		{"erDiagram\n A only one to one or more B : r", true},
 		{"erDiagram\n A many optionally to zero or one B : r", false},
 	}
-	for _, c := range cases {
-		d, err := Parse(c.in)
+	for _, test := range cases {
+		d, err := Parse(test.in)
 		if err != nil {
-			t.Fatalf("%q: %v", c.in, err)
+			t.Fatalf("%q: %v", test.in, err)
 		}
-		if d.Relationships[0].Identifying != c.ident {
-			t.Errorf("%q ident = %v, want %v", c.in, d.Relationships[0].Identifying, c.ident)
+		if d.Relationships[0].Identifying != test.identifying {
+			t.Errorf("%q ident = %v, want %v", test.in, d.Relationships[0].Identifying, test.identifying)
 		}
 	}
 }
@@ -59,15 +59,15 @@ func TestParenTypesAndMultiBlock(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	a := d.Entities[0].Attributes
-	if len(a) != 2 {
-		t.Fatalf("want 2 attrs (multi-block append), got %d", len(a))
+	attributes := d.Entities[0].Attributes
+	if len(attributes) != 2 {
+		t.Fatalf("want 2 attrs (multi-block append), got %d", len(attributes))
 	}
-	if a[0].Type != "decimal(10, 2)" || a[0].Name != "amount" {
-		t.Errorf("paren type parsed wrong: %+v", a[0])
+	if attributes[0].Type != "decimal(10, 2)" || attributes[0].Name != "amount" {
+		t.Errorf("paren type parsed wrong: %+v", attributes[0])
 	}
-	if a[1].Type != "varchar(255)" || a[1].Name != "name" || len(a[1].Keys) != 1 || a[1].Comment != "the name" {
-		t.Errorf("attr 2 wrong: %+v", a[1])
+	if attributes[1].Type != "varchar(255)" || attributes[1].Name != "name" || len(attributes[1].Keys) != 1 || attributes[1].Comment != "the name" {
+		t.Errorf("attr 2 wrong: %+v", attributes[1])
 	}
 }
 
@@ -82,15 +82,15 @@ func TestStyleLinesSkipped(t *testing.T) {
 }
 
 func TestRecursiveAndDuplicate(t *testing.T) {
-	d, err := Parse("erDiagram\n NODE ||--o{ NODE : parent\n NODE ||--|| NODE : self")
+	diagram, err := Parse("erDiagram\n NODE ||--o{ NODE : parent\n NODE ||--|| NODE : self")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(d.Entities) != 1 {
-		t.Errorf("recursive rels should not duplicate entity: got %d", len(d.Entities))
+	if len(diagram.Entities) != 1 {
+		t.Errorf("recursive rels should not duplicate entity: got %d", len(diagram.Entities))
 	}
-	if len(d.Relationships) != 2 {
-		t.Errorf("want 2 relationships, got %d", len(d.Relationships))
+	if len(diagram.Relationships) != 2 {
+		t.Errorf("want 2 relationships, got %d", len(diagram.Relationships))
 	}
 }
 
@@ -111,14 +111,14 @@ func TestEntityAliases(t *testing.T) {
 		{"erDiagram\n" + ` fua["Fresha User Account"] {` + "\n  int id\n }", "fua", "Fresha User Account"},
 		{"erDiagram\n" + ` acct["Account Ledger"]`, "acct", "Account Ledger"},
 	}
-	for _, c := range cases {
-		d, err := Parse(c.in)
+	for _, test := range cases {
+		d, err := Parse(test.in)
 		if err != nil {
-			t.Fatalf("%q: %v", c.in, err)
+			t.Fatalf("%q: %v", test.in, err)
 		}
 		e := d.Entities[0]
-		if e.Name != c.id || e.Display != c.display {
-			t.Errorf("%q => id=%q display=%q, want id=%q display=%q", c.in, e.Name, e.Display, c.id, c.display)
+		if e.Name != test.id || e.Display != test.display {
+			t.Errorf("%q => id=%q display=%q, want id=%q display=%q", test.in, e.Name, e.Display, test.id, test.display)
 		}
 	}
 }

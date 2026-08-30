@@ -203,10 +203,7 @@ func (self *App) handleKeypressAndShowInput(editor *edit.Input, history *edit.Hi
 }
 
 func (self *App) apply(editor *edit.Input, history *edit.History, keypress key.Key) bool {
-	switch keypress.Code {
-	case key.FocusIn:
-		return true
-	case key.FocusOut:
+	if keypress.Code == key.FocusIn || keypress.Code == key.FocusOut {
 		return true
 	}
 
@@ -301,6 +298,7 @@ func (self *App) acceptInput(editor *edit.Input, history *edit.History) {
 		editor.Reset()
 	case dispatch.Ordinary:
 		self.submitInput(editor, history, message)
+	case dispatch.Rejected:
 	}
 }
 

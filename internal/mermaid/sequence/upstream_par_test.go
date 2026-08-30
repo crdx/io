@@ -37,15 +37,15 @@ func TestParseParCriticalBreakRect(t *testing.T) {
 			if err != nil {
 				t.Fatalf("parse: %v", err)
 			}
-			f := firstFragment(sd)
-			if f == nil {
+			fragment := firstFragment(sd)
+			if fragment == nil {
 				t.Fatal("no fragment start")
 			}
-			if f.Type != tt.wantType {
-				t.Errorf("type = %v, want %v", f.Type, tt.wantType)
+			if fragment.Type != tt.wantType {
+				t.Errorf("type = %v, want %v", fragment.Type, tt.wantType)
 			}
-			if f.Label != tt.wantLabel {
-				t.Errorf("label = %q, want %q", f.Label, tt.wantLabel)
+			if fragment.Label != tt.wantLabel {
+				t.Errorf("label = %q, want %q", fragment.Label, tt.wantLabel)
 			}
 			got := altDividers(sd)
 			if len(got) != len(tt.wantDividers) {

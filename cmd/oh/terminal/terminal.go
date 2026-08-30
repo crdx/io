@@ -19,8 +19,8 @@ func ResetScrollback(writer io.Writer) {
 }
 
 type terminalTitler interface {
-	Begin(string) func()
-	Set(string)
+	Begin(text string) func()
+	Set(text string)
 }
 
 type Terminal struct {

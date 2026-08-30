@@ -53,13 +53,13 @@ func (self *graph) determineStartAndEndDir(e *edge) (direction, direction, direc
 	if e.from == e.to {
 		return self.selfReferenceDirection()
 	}
-	d := determineDirection(genericCoord(*e.from.gridCoord), genericCoord(*e.to.gridCoord))
+	arrowDirection := determineDirection(genericCoord(*e.from.gridCoord), genericCoord(*e.to.gridCoord))
 	var preferredDir, preferredOppositeDir, alternativeDir, alternativeOppositeDir direction
 
-	isBackwards := (self.graphDirection == "LR" && (d == Left || d == UpperLeft || d == LowerLeft)) ||
-		(self.graphDirection != "LR" && (d == Up || d == UpperLeft || d == UpperRight))
+	isBackwards := (self.graphDirection == "LR" && (arrowDirection == Left || arrowDirection == UpperLeft || arrowDirection == LowerLeft)) ||
+		(self.graphDirection != "LR" && (arrowDirection == Up || arrowDirection == UpperLeft || arrowDirection == UpperRight))
 
-	switch d {
+	switch arrowDirection {
 	case LowerRight:
 		if self.graphDirection == "LR" {
 			preferredDir = Down
@@ -111,26 +111,26 @@ func (self *graph) determineStartAndEndDir(e *edge) (direction, direction, direc
 	default:
 		if isBackwards {
 			switch {
-			case self.graphDirection == "LR" && d == Left:
+			case self.graphDirection == "LR" && arrowDirection == Left:
 				preferredDir = Down
 				preferredOppositeDir = Down
 				alternativeDir = Left
 				alternativeOppositeDir = Right
-			case self.graphDirection == "TD" && d == Up:
+			case self.graphDirection == "TD" && arrowDirection == Up:
 				preferredDir = Right
 				preferredOppositeDir = Right
 				alternativeDir = Up
 				alternativeOppositeDir = Down
 			default:
-				preferredDir = d
+				preferredDir = arrowDirection
 				preferredOppositeDir = preferredDir.getOpposite()
-				alternativeDir = d
+				alternativeDir = arrowDirection
 				alternativeOppositeDir = preferredOppositeDir
 			}
 		} else {
-			preferredDir = d
+			preferredDir = arrowDirection
 			preferredOppositeDir = preferredDir.getOpposite()
-			alternativeDir = d
+			alternativeDir = arrowDirection
 			alternativeOppositeDir = preferredOppositeDir
 		}
 	}

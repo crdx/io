@@ -8,19 +8,19 @@ import (
 )
 
 func TestUnquotedAliasForms(t *testing.T) {
-	d, err := Parse("erDiagram\n p[Person] {\n  string firstName\n }\n a[\"Customer Account\"] {\n  string email\n }\n p ||--o| a : has")
+	diagram, err := Parse("erDiagram\n p[Person] {\n  string firstName\n }\n a[\"Customer Account\"] {\n  string email\n }\n p ||--o| a : has")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(d.Entities) != 2 {
-		t.Fatalf("want 2 entities, got %d", len(d.Entities))
+	if len(diagram.Entities) != 2 {
+		t.Fatalf("want 2 entities, got %d", len(diagram.Entities))
 	}
-	if d.Entities[0].Display != "Person" || d.Entities[1].Display != "Customer Account" {
-		t.Errorf("aliases not applied: %q, %q", d.Entities[0].Display, d.Entities[1].Display)
+	if diagram.Entities[0].Display != "Person" || diagram.Entities[1].Display != "Customer Account" {
+		t.Errorf("aliases not applied: %q, %q", diagram.Entities[0].Display, diagram.Entities[1].Display)
 	}
-	if d.Relationships[0].Left != "p" || d.Relationships[0].Right != "a" {
+	if diagram.Relationships[0].Left != "p" || diagram.Relationships[0].Right != "a" {
 		t.Errorf("relationship should reference ids p/a, got %q/%q",
-			d.Relationships[0].Left, d.Relationships[0].Right)
+			diagram.Relationships[0].Left, diagram.Relationships[0].Right)
 	}
 
 	d2, err := Parse("erDiagram\n p[Person]\n a[\"Customer Account\"]")
@@ -33,15 +33,15 @@ func TestUnquotedAliasForms(t *testing.T) {
 }
 
 func TestQuotedEntityNameInRelationship(t *testing.T) {
-	d, err := Parse("erDiagram\n \"ORDER ITEM\" {\n  int id\n }\n CUSTOMER ||--o{ \"ORDER ITEM\" : has\n \"ORDER ITEM\" ||--|| SKU : tracks")
+	diagram, err := Parse("erDiagram\n \"ORDER ITEM\" {\n  int id\n }\n CUSTOMER ||--o{ \"ORDER ITEM\" : has\n \"ORDER ITEM\" ||--|| SKU : tracks")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(d.Entities) != 3 {
-		t.Fatalf("want 3 entities, got %d: quoted name split apart", len(d.Entities))
+	if len(diagram.Entities) != 3 {
+		t.Fatalf("want 3 entities, got %d: quoted name split apart", len(diagram.Entities))
 	}
-	if d.Relationships[0].Right != "ORDER ITEM" || d.Relationships[1].Left != "ORDER ITEM" {
-		t.Errorf("quoted name not matched to declaration: %+v", d.Relationships)
+	if diagram.Relationships[0].Right != "ORDER ITEM" || diagram.Relationships[1].Left != "ORDER ITEM" {
+		t.Errorf("quoted name not matched to declaration: %+v", diagram.Relationships)
 	}
 }
 
@@ -95,13 +95,13 @@ func TestManyRelationshipsDistinctAttach(t *testing.T) {
 }
 
 func TestEntityNamedClass(t *testing.T) {
-	d, err := Parse("erDiagram\n class {\n  int id\n }\n class ||--|| B : has")
+	diagram, err := Parse("erDiagram\n class {\n  int id\n }\n class ||--|| B : has")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(d.Entities) != 2 || len(d.Relationships) != 1 {
+	if len(diagram.Entities) != 2 || len(diagram.Relationships) != 1 {
 		t.Fatalf("entity named class mishandled: %d entities, %d relationships",
-			len(d.Entities), len(d.Relationships))
+			len(diagram.Entities), len(diagram.Relationships))
 	}
 }
 
@@ -123,17 +123,17 @@ func TestAccDescrBlockSkipped(t *testing.T) {
 }
 
 func TestLongLabelSurvivesManyLanes(t *testing.T) {
-	var b strings.Builder
-	b.WriteString("erDiagram\n")
+	var builder strings.Builder
+	builder.WriteString("erDiagram\n")
 	for i := range 14 {
-		b.WriteString(" ")
-		b.WriteString(entityName(i % 9))
-		b.WriteString(" ||--|| ")
-		b.WriteString(entityName((i + 1) % 9))
-		b.WriteString(" : r\n")
+		builder.WriteString(" ")
+		builder.WriteString(entityName(i % 9))
+		builder.WriteString(" ||--|| ")
+		builder.WriteString(entityName((i + 1) % 9))
+		builder.WriteString(" : r\n")
 	}
-	b.WriteString(" E0 ||--|| E7 : twenty-char-label-xx\n")
-	d, err := Parse(b.String())
+	builder.WriteString(" E0 ||--|| E7 : twenty-char-label-xx\n")
+	d, err := Parse(builder.String())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,25 +145,25 @@ func TestLongLabelSurvivesManyLanes(t *testing.T) {
 func entityName(i int) string { return "E" + strconv.Itoa(i) }
 
 func TestClassShorthandStripped(t *testing.T) {
-	d, err := Parse("erDiagram\n A:::x\n B:::y,z {\n  int id\n }\n C[\"Custom C\"]:::w\n A:::x ||--o{ B:::y : links")
+	diagram, err := Parse("erDiagram\n A:::x\n B:::y,z {\n  int id\n }\n C[\"Custom C\"]:::w\n A:::x ||--o{ B:::y : links")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(d.Entities) != 3 {
-		t.Fatalf("want 3 entities, got %d: %+v", len(d.Entities), d.Entities)
+	if len(diagram.Entities) != 3 {
+		t.Fatalf("want 3 entities, got %d: %+v", len(diagram.Entities), diagram.Entities)
 	}
 	for i, want := range []string{"A", "B", "C"} {
-		if d.Entities[i].Name != want {
-			t.Errorf("entity %d = %q, want %q (::: not stripped)", i, d.Entities[i].Name, want)
+		if diagram.Entities[i].Name != want {
+			t.Errorf("entity %d = %q, want %q (::: not stripped)", i, diagram.Entities[i].Name, want)
 		}
 	}
-	if d.Entities[2].Display != "Custom C" {
-		t.Errorf("alias lost when stripping :::, got %q", d.Entities[2].Display)
+	if diagram.Entities[2].Display != "Custom C" {
+		t.Errorf("alias lost when stripping :::, got %q", diagram.Entities[2].Display)
 	}
-	if r := d.Relationships[0]; r.Left != "A" || r.Right != "B" {
+	if r := diagram.Relationships[0]; r.Left != "A" || r.Right != "B" {
 		t.Errorf("relationship endpoints = %q/%q, want A/B", r.Left, r.Right)
 	}
-	if out := Render(d, false); strings.Contains(out, ":::") {
+	if out := Render(diagram, false); strings.Contains(out, ":::") {
 		t.Errorf("::: leaked into render:\n%s", out)
 	}
 }
@@ -176,11 +176,11 @@ func TestSubgraphRejected(t *testing.T) {
 }
 
 func TestBacktickAttributesStripped(t *testing.T) {
-	d, err := Parse("erDiagram\n X {\n  type `geo.accuracy`\n  `geo point` `two words` PK\n }")
+	diagram, err := Parse("erDiagram\n X {\n  type `geo.accuracy`\n  `geo point` `two words` PK\n }")
 	if err != nil {
 		t.Fatal(err)
 	}
-	attrs := d.Entities[0].Attributes
+	attrs := diagram.Entities[0].Attributes
 	want := [][2]string{{"type", "geo.accuracy"}, {"geo point", "two words"}}
 	for i, w := range want {
 		if attrs[i].Type != w[0] || attrs[i].Name != w[1] {
@@ -190,7 +190,7 @@ func TestBacktickAttributesStripped(t *testing.T) {
 	if len(attrs[1].Keys) != 1 || attrs[1].Keys[0] != "PK" {
 		t.Errorf("PK key lost after backtick tokens: %+v", attrs[1])
 	}
-	if out := Render(d, false); strings.Contains(out, "`") {
+	if out := Render(diagram, false); strings.Contains(out, "`") {
 		t.Errorf("backticks leaked into render:\n%s", out)
 	}
 }
@@ -213,15 +213,15 @@ func TestTwoSelfLoopsDistinct(t *testing.T) {
 }
 
 func TestWhitespaceLabelsCollapse(t *testing.T) {
-	d, err := Parse("erDiagram\n A ||--o{ B : \"   \"\n A ||--o{ C : \"     x\"")
+	diagram, err := Parse("erDiagram\n A ||--o{ B : \"   \"\n A ||--o{ C : \"     x\"")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if d.Relationships[0].Label != "" || d.Relationships[1].Label != "x" {
+	if diagram.Relationships[0].Label != "" || diagram.Relationships[1].Label != "x" {
 		t.Fatalf("labels not collapsed: %q, %q",
-			d.Relationships[0].Label, d.Relationships[1].Label)
+			diagram.Relationships[0].Label, diagram.Relationships[1].Label)
 	}
-	for line := range strings.SplitSeq(Render(d, false), "\n") {
+	for line := range strings.SplitSeq(Render(diagram, false), "\n") {
 		if _, after, found := strings.Cut(line, "─ "); found && strings.Contains(after, "─") {
 			t.Errorf("hole punched in connector: %q", line)
 		}

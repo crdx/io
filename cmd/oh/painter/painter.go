@@ -139,6 +139,8 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.FailureEvent:
 		self.Close(dynamic.Cancelled)
 		self.screen.Line(style.Failure(RenderFailure(event)))
+
+	case agent.StateChangeEvent, agent.InterruptionEvent:
 	}
 }
 
@@ -221,6 +223,8 @@ func getState(status agent.Status) dynamic.RowState {
 		return dynamic.Failed
 	case agent.CancelledStatus:
 		return dynamic.Cancelled
+	case agent.InfoStatus, agent.SuccessStatus, agent.WarningStatus:
+		return dynamic.Done
 	default:
 		return dynamic.Done
 	}
@@ -264,7 +268,7 @@ func (self *Picasso) Stop() {
 }
 
 func (self *Picasso) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldResetAnswerRenderer bool) {
-	switch delta.Kind {
+	switch delta.Kind { //nolint:exhaustive // Only model prose event kinds can be deltas.
 	case agent.ModelReasoningEvent:
 		if self.reasoning.Len() == 0 && self.previousKind == agent.ModelReasoningEvent {
 			self.screen.End()

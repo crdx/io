@@ -40,23 +40,23 @@ func TestParseNotes(t *testing.T) {
 			if err != nil {
 				t.Fatalf("parse: %v", err)
 			}
-			n := firstNote(sd)
-			if n == nil {
+			note := firstNote(sd)
+			if note == nil {
 				t.Fatal("no note event parsed")
 			}
-			if n.Placement != tt.wantPlace {
-				t.Errorf("placement = %v, want %v", n.Placement, tt.wantPlace)
+			if note.Placement != tt.wantPlace {
+				t.Errorf("placement = %v, want %v", note.Placement, tt.wantPlace)
 			}
-			if len(n.Participants) != len(tt.wantActors) {
-				t.Fatalf("actors = %d, want %d", len(n.Participants), len(tt.wantActors))
+			if len(note.Participants) != len(tt.wantActors) {
+				t.Fatalf("actors = %d, want %d", len(note.Participants), len(tt.wantActors))
 			}
 			for i, a := range tt.wantActors {
-				if n.Participants[i].ID != a {
-					t.Errorf("actor %d = %q, want %q", i, n.Participants[i].ID, a)
+				if note.Participants[i].ID != a {
+					t.Errorf("actor %d = %q, want %q", i, note.Participants[i].ID, a)
 				}
 			}
-			if n.Text != tt.wantText {
-				t.Errorf("text = %q, want %q", n.Text, tt.wantText)
+			if note.Text != tt.wantText {
+				t.Errorf("text = %q, want %q", note.Text, tt.wantText)
 			}
 		})
 	}

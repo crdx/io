@@ -10,7 +10,7 @@ import (
 	"crdx.org/io/internal/file"
 )
 
-func writeSkill(t *testing.T, skillsDirectory, directory, body string) string {
+func writeSkill(t *testing.T, skillsDirectory string, directory string, body string) string {
 	t.Helper()
 
 	path := filepath.Join(skillsDirectory, directory, filename)

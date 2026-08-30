@@ -36,10 +36,10 @@ func FormatError(invocation Invocation, err error) string {
 }
 
 type Context interface {
-	Emit(agent.Event)
-	Send(string)
-	Notice(string)
-	Success(string)
+	Emit(event agent.Event)
+	Send(message string)
+	Notice(message string)
+	Success(message string)
 }
 
 type Arguments struct {

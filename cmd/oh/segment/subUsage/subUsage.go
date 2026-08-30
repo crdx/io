@@ -249,13 +249,14 @@ func (self *state) draw(current snapshot) string {
 		return appendUsageStatus(usage, "usage", style.Subtle("pending"))
 	case usageRetrying:
 		return appendUsageStatus(usage, "usage", style.Failure(current.failure))
-	default:
-		if usage == "" {
-			return style.Dim("usage unavailable")
-		}
-
-		return usage
+	case usageReady:
 	}
+
+	if usage == "" {
+		return style.Dim("usage unavailable")
+	}
+
+	return usage
 }
 
 func (self *state) governsThisSession(window agent.UsageWindow) bool {
@@ -301,9 +302,10 @@ func drawWindow(window agent.UsageWindow, fetchedAt time.Time, now time.Time) st
 		return style.Change(text + " ▲")
 	case paceCritical:
 		return style.Failure(text + " ▲")
-	default:
-		return style.Quantity(text)
+	case paceEven:
 	}
+
+	return style.Quantity(text)
 }
 
 func expectedPercent(window agent.UsageWindow, at time.Time) int {

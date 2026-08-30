@@ -77,13 +77,13 @@ func TestEntityRelationshipCanvasAndRoutingEdgeCases(t *testing.T) {
 
 	layout := &layout{vGutX: []int{0, 20}, hGutY: []int{0, 10, 20}, gutW: 8, lanes: 2}
 	other := &placedEntity{x: 20, y: 12, w: 12, h: 5, row: 1, col: 1}
-	a := endpoint{p: entity, s: sideB, x: 4, y: 5, card: OnlyOne}
-	nonMerged := newPlan(layout, a, endpoint{p: other, s: sideB, x: 24, y: 16, card: ZeroOrMore}, &Relationship{Label: "long label", Identifying: true}, 0)
+	first := endpoint{p: entity, s: sideB, x: 4, y: 5, card: OnlyOne}
+	nonMerged := newPlan(layout, first, endpoint{p: other, s: sideB, x: 24, y: 16, card: ZeroOrMore}, &Relationship{Label: "long label", Identifying: true}, 0)
 	for _, plan := range []routePlan{
 		nonMerged,
 		{rel: &Relationship{Label: "reverse runs"}, a: endpoint{p: entity, x: 17, y: 0}, b: endpoint{p: other, x: 0, y: 10}, ya: 3, yb: 8, tx: 18},
-		{rel: &Relationship{Label: "merged"}, a: a, b: endpoint{p: other, s: sideB, x: 24, y: 5, card: OneOrMore}, ya: 8, yb: 8, merged: true},
-		{rel: &Relationship{Label: "self"}, a: a, b: endpoint{p: entity, s: sideB, x: 10, y: 5, card: ZeroOrOne}, ya: 8, yb: 8, merged: true},
+		{rel: &Relationship{Label: "merged"}, a: first, b: endpoint{p: other, s: sideB, x: 24, y: 5, card: OneOrMore}, ya: 8, yb: 8, merged: true},
+		{rel: &Relationship{Label: "self"}, a: first, b: endpoint{p: entity, s: sideB, x: 10, y: 5, card: ZeroOrOne}, ya: 8, yb: 8, merged: true},
 	} {
 		plan.drawLine(overlay)
 		plan.decorate(overlay)

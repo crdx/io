@@ -11,8 +11,8 @@ import (
 type Session interface {
 	IsPersisted() bool
 	Name() string
-	Event(agent.Event) error
-	Item(json.RawMessage) error
+	Event(event agent.Event) error
+	Item(item json.RawMessage) error
 	CompleteTurn() error
 	TakeWarnings() []error
 }

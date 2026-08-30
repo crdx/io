@@ -36,20 +36,20 @@ func FormatEstimatedTokenCount[Count count](tokens Count) string {
 		return "0" + tokenUnit
 	}
 
-	n := float64(tokens)
-	if n < 10 {
-		return formatScaledUnit(n, tokenPrecision, estimateMark, tokenUnit)
+	estimate := float64(tokens)
+	if estimate < 10 {
+		return formatScaledUnit(estimate, tokenPrecision, estimateMark, tokenUnit)
 	}
 
-	if n < thousandTokens {
-		n = max(math.Round(n/100)*100, 100)
+	if estimate < thousandTokens {
+		estimate = max(math.Round(estimate/100)*100, 100)
 	}
 
-	if n < thousandTokens {
-		return formatScaledUnit(n, tokenPrecision, estimateMark, tokenUnit)
+	if estimate < thousandTokens {
+		return formatScaledUnit(estimate, tokenPrecision, estimateMark, tokenUnit)
 	}
 
-	return formatLargeTokenCount(n, estimateMark, tokenUnit)
+	return formatLargeTokenCount(estimate, estimateMark, tokenUnit)
 }
 
 func FormatTokenCount[Count count](tokens Count) string {

@@ -11,13 +11,13 @@ import (
 func TestRenderGraphHandlesLongChainWithoutPanic(t *testing.T) {
 	config := upstreamASCIIFlowchartConfig()
 
-	var b strings.Builder
-	b.WriteString("graph TD\n")
+	var builder strings.Builder
+	builder.WriteString("graph TD\n")
 	for i := 1; i < 30; i++ {
-		fmt.Fprintf(&b, "N%d --> N%d\n", i, i+1)
+		fmt.Fprintf(&builder, "N%d --> N%d\n", i, i+1)
 	}
 
-	output, err := renderUpstreamDiagram(b.String(), config)
+	output, err := renderUpstreamDiagram(builder.String(), config)
 	if err != nil {
 		t.Fatalf("renderUpstreamDiagram() error = %v", err)
 	}

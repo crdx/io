@@ -58,7 +58,7 @@ type edgePair struct {
 	to   int
 }
 
-func newEdgePair(from, to int) edgePair {
+func newEdgePair(from int, to int) edgePair {
 	if from < to {
 		return edgePair{from: from, to: to}
 	}
@@ -78,41 +78,41 @@ type subgraph struct {
 }
 
 func mkGraph(data *orderedmap.OrderedMap[string, []textEdge], nodeSpecs map[string]graphNodeSpec) graph {
-	g := graph{drawing: mkDrawing(0, 0)}
-	g.grid = make(map[gridCoord]*node)
-	g.edgeCounts = make(map[edgePair]int)
-	g.columnWidth = make(map[int]int)
-	g.rowHeight = make(map[int]int)
-	g.styleClasses = make(map[string]styleClass)
+	built := graph{drawing: mkDrawing(0, 0)}
+	built.grid = make(map[gridCoord]*node)
+	built.edgeCounts = make(map[edgePair]int)
+	built.columnWidth = make(map[int]int)
+	built.rowHeight = make(map[int]int)
+	built.styleClasses = make(map[string]styleClass)
 	index := 0
 	for el := data.Front(); el != nil; el = el.Next() {
 		nodeName := el.Key
 		children := el.Value
 		spec := nodeSpecs[nodeName]
-		parentNode, err := g.getNode(nodeName)
+		parentNode, err := built.getNode(nodeName)
 		if err != nil {
 			parentNode = &node{name: nodeName, label: spec.label, index: index, styleClassName: spec.styleClass}
-			g.appendNode(parentNode)
+			built.appendNode(parentNode)
 			index += 1
 		}
 		for _, textEdge := range children {
 			childSpec := nodeSpecs[textEdge.child.name]
-			childNode, err := g.getNode(textEdge.child.name)
+			childNode, err := built.getNode(textEdge.child.name)
 			if err != nil {
 				childNode = &node{name: textEdge.child.name, label: childSpec.label, index: index, styleClassName: childSpec.styleClass}
-				g.appendNode(childNode)
+				built.appendNode(childNode)
 				index += 1
 			}
-			e := edge{
+			created := edge{
 				from:            parentNode,
 				to:              childNode,
 				text:            textEdge.label,
 				isBidirectional: textEdge.isBidirectional,
 			}
-			g.edges = append(g.edges, &e)
+			built.edges = append(built.edges, &created)
 		}
 	}
-	return g
+	return built
 }
 
 func (self *graph) setStyleClasses(properties *graphProperties) {
@@ -216,14 +216,14 @@ func (self *graph) createMapping() error {
 		externalRootNodes = rootNodes
 	}
 
-	for _, n := range externalRootNodes {
+	for _, node := range externalRootNodes {
 		var mappingCoord *gridCoord
 		if self.graphDirection == "LR" {
-			mappingCoord = self.reserveSpotInGrid(self.nodes[n.index], &gridCoord{x: 0, y: highestPositionPerLevel[0]})
+			mappingCoord = self.reserveSpotInGrid(self.nodes[node.index], &gridCoord{x: 0, y: highestPositionPerLevel[0]})
 		} else {
-			mappingCoord = self.reserveSpotInGrid(self.nodes[n.index], &gridCoord{x: highestPositionPerLevel[0], y: 0})
+			mappingCoord = self.reserveSpotInGrid(self.nodes[node.index], &gridCoord{x: highestPositionPerLevel[0], y: 0})
 		}
-		self.nodes[n.index].gridCoord = mappingCoord
+		self.nodes[node.index].gridCoord = mappingCoord
 		highestPositionPerLevel[0] += 4
 	}
 
@@ -236,15 +236,15 @@ func (self *graph) createMapping() error {
 		}
 	}
 
-	for _, n := range self.nodes {
+	for _, node := range self.nodes {
 		var childLevel int
 		if self.graphDirection == "LR" {
-			childLevel = n.gridCoord.x + 4
+			childLevel = node.gridCoord.x + 4
 		} else {
-			childLevel = n.gridCoord.y + 4
+			childLevel = node.gridCoord.y + 4
 		}
 		highestPosition := highestPositionPerLevel[childLevel]
-		for _, child := range self.getChildren(n) {
+		for _, child := range self.getChildren(node) {
 			if child.gridCoord != nil {
 				continue
 			}
@@ -328,15 +328,15 @@ func (self *graph) getNodeSubgraph(n *node) *subgraph {
 	return nil
 }
 
-func (self *graph) hasIncomingEdgeFromOutsideSubgraph(n *node) bool {
-	nodeSubgraph := self.getNodeSubgraph(n)
+func (self *graph) hasIncomingEdgeFromOutsideSubgraph(node *node) bool {
+	nodeSubgraph := self.getNodeSubgraph(node)
 	if nodeSubgraph == nil {
 		return false
 	}
 
 	hasExternalEdge := false
 	for _, edge := range self.edges {
-		if edge.to == n {
+		if edge.to == node {
 			sourceSubgraph := self.getNodeSubgraph(edge.from)
 			if sourceSubgraph != nodeSubgraph {
 				hasExternalEdge = true
@@ -350,7 +350,7 @@ func (self *graph) hasIncomingEdgeFromOutsideSubgraph(n *node) bool {
 	}
 
 	for _, otherNode := range nodeSubgraph.nodes {
-		if otherNode == n || otherNode.gridCoord == nil {
+		if otherNode == node || otherNode.gridCoord == nil {
 			continue
 		}
 		otherHasExternal := false
@@ -363,7 +363,7 @@ func (self *graph) hasIncomingEdgeFromOutsideSubgraph(n *node) bool {
 				}
 			}
 		}
-		if otherHasExternal && otherNode.gridCoord.y < n.gridCoord.y {
+		if otherHasExternal && otherNode.gridCoord.y < node.gridCoord.y {
 			return false
 		}
 	}

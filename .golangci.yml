@@ -5,10 +5,8 @@ linters:
   default: all
   disable:
     - cyclop
-    - depguard
     - dupword
     - err113
-    - exhaustive
     - exhaustruct
     - forbidigo
     - funlen
@@ -17,7 +15,6 @@ linters:
     - goconst
     - gomodguard
     - godot
-    - inamedparam
     - ireturn
     - lll
     - maintidx
@@ -26,11 +23,8 @@ linters:
     - noinlineerr
     - paralleltest
     - prealloc
-    - revive
-    - tagalign
     - tagliatelle
     - testpackage
-    - varnamelen
     - wrapcheck
     - wsl
     - wsl_v5
@@ -42,14 +36,42 @@ linters:
         linters:
           - gosmopolitan
   settings:
+    depguard:
+      rules:
+        everything:
+          deny:
+            - pkg: github.com/stretchr/testify
+              desc: use stdlib-style tests
+            - pkg: github.com/imroc/req
+              desc: use net/http
     gocyclo:
       min-complexity: 32
+    misspell:
+      locale: UK
+      ignore-rules:
+        - center
+        - color
+        - organization
+        - organizations
+        - signaled
+        - summarized
+    revive:
+      rules:
+        - name: enforce-repeated-arg-type-style
+          arguments: [full]
     staticcheck:
       checks:
         - all
         - '-ST1000' # Incorrect or missing package comment [https://staticcheck.dev/docs/checks#ST1000]
         - '-ST1003' # Poorly chosen identifier             [https://staticcheck.dev/docs/checks#ST1003]
         - '-ST1006' # Poorly chosen receiver name          [https://staticcheck.dev/docs/checks#ST1006]
+    varnamelen:
+      max-distance: 0
+      min-name-length: 2
+      ignore-names: [i, x, y]
+      ignore-type-assert-ok: true
+      ignore-map-index-ok: true
+      ignore-chan-recv-ok: true
 formatters:
   enable:
     - gofumpt

@@ -51,7 +51,7 @@ func (self *drawing) drawText(start drawingCoord, text string) {
 	}
 }
 
-func (self *graph) drawLine(d *drawing, from drawingCoord, to drawingCoord, offsetFrom int, offsetTo int) []drawingCoord {
+func (self *graph) drawLine(target *drawing, from drawingCoord, to drawingCoord, offsetFrom int, offsetTo int) []drawingCoord {
 	direction := determineDirection(genericCoord(from), genericCoord(to))
 	vertical, horizontal, rising, falling := "│", "─", "╱", "╲"
 	if self.useAscii {
@@ -63,84 +63,84 @@ func (self *graph) drawLine(d *drawing, from drawingCoord, to drawingCoord, offs
 	case Up:
 		for y := from.y - offsetFrom; y >= to.y-offsetTo; y-- {
 			drawnCoords = append(drawnCoords, drawingCoord{from.x, y})
-			(*d)[from.x][y] = vertical
+			(*target)[from.x][y] = vertical
 		}
 	case Down:
 		for y := from.y + offsetFrom; y <= to.y+offsetTo; y++ {
 			drawnCoords = append(drawnCoords, drawingCoord{from.x, y})
-			(*d)[from.x][y] = vertical
+			(*target)[from.x][y] = vertical
 		}
 	case Left:
 		for x := from.x - offsetFrom; x >= to.x-offsetTo; x-- {
 			drawnCoords = append(drawnCoords, drawingCoord{x, from.y})
-			(*d)[x][from.y] = horizontal
+			(*target)[x][from.y] = horizontal
 		}
 	case Right:
 		for x := from.x + offsetFrom; x <= to.x+offsetTo; x++ {
 			drawnCoords = append(drawnCoords, drawingCoord{x, from.y})
-			(*d)[x][from.y] = horizontal
+			(*target)[x][from.y] = horizontal
 		}
 	case UpperLeft:
 		for x, y := from.x, from.y-offsetFrom; x >= to.x-offsetTo && y >= to.y-offsetTo; x, y = x-1, y-1 {
 			drawnCoords = append(drawnCoords, drawingCoord{x, y})
-			(*d)[x][y] = falling
+			(*target)[x][y] = falling
 		}
 	case UpperRight:
 		for x, y := from.x, from.y-offsetFrom; x <= to.x+offsetTo && y >= to.y-offsetTo; x, y = x+1, y-1 {
 			drawnCoords = append(drawnCoords, drawingCoord{x, y})
-			(*d)[x][y] = rising
+			(*target)[x][y] = rising
 		}
 	case LowerLeft:
 		for x, y := from.x, from.y+offsetFrom; x >= to.x-offsetTo && y <= to.y+offsetTo; x, y = x-1, y+1 {
 			drawnCoords = append(drawnCoords, drawingCoord{x, y})
-			(*d)[x][y] = rising
+			(*target)[x][y] = rising
 		}
 	case LowerRight:
 		for x, y := from.x, from.y+offsetFrom; x <= to.x+offsetTo && y <= to.y+offsetTo; x, y = x+1, y+1 {
 			drawnCoords = append(drawnCoords, drawingCoord{x, y})
-			(*d)[x][y] = falling
+			(*target)[x][y] = falling
 		}
 	}
 	return drawnCoords
 }
 
 func drawMap(properties *graphProperties) (string, error) {
-	g := mkGraph(properties.data, properties.nodeSpecs)
-	g.setStyleClasses(properties)
-	g.paddingX = properties.paddingX
-	g.paddingY = properties.paddingY
-	g.useAscii = properties.useAscii
-	g.setSubgraphs(properties.subgraphs)
-	if err := g.createMapping(); err != nil {
+	graph := mkGraph(properties.data, properties.nodeSpecs)
+	graph.setStyleClasses(properties)
+	graph.paddingX = properties.paddingX
+	graph.paddingY = properties.paddingY
+	graph.useAscii = properties.useAscii
+	graph.setSubgraphs(properties.subgraphs)
+	if err := graph.createMapping(); err != nil {
 		return "", err
 	}
-	return drawingToString(g.draw()), nil
+	return drawingToString(graph.draw()), nil
 }
 
-func drawBox(n *node, g *graph) *drawing {
-	w := 0
+func drawBox(node *node, graph *graph) *drawing {
+	width := 0
 	for i := range 2 {
-		w += g.columnWidth[n.gridCoord.x+i]
+		width += graph.columnWidth[node.gridCoord.x+i]
 	}
-	h := 0
+	height := 0
 	for i := range 2 {
-		h += g.rowHeight[n.gridCoord.y+i]
+		height += graph.rowHeight[node.gridCoord.y+i]
 	}
 
 	from := drawingCoord{0, 0}
-	to := drawingCoord{w, h}
+	to := drawingCoord{width, height}
 	boxDrawing := *(mkDrawing(Max(from.x, to.x), Max(from.y, to.y)))
-	drawRectangleBorder(&boxDrawing, from, to, g.useAscii)
+	drawRectangleBorder(&boxDrawing, from, to, graph.useAscii)
 	innerTop := from.y + 1
-	innerHeight := h - 1
-	contentTop := innerTop + (innerHeight-n.label.contentHeight())/2
-	for lineIdx, line := range n.label.lines {
-		textY := contentTop + lineIdx*(graphLabelLineGap+1)
+	innerHeight := height - 1
+	contentTop := innerTop + (innerHeight-node.label.contentHeight())/2
+	for lineIndex, line := range node.label.lines {
+		textY := contentTop + lineIndex*(graphLabelLineGap+1)
 		textWidth := runewidth.StringWidth(line)
-		textX := from.x + w/2 - CeilDiv(textWidth, 2) + 1
+		textX := from.x + width/2 - CeilDiv(textWidth, 2) + 1
 		for _, cell := range runewidth.Cells(line) {
 			if cell != "" {
-				cell = wrapTextInColor(cell, n.styleClass.styles["color"], g.styleType)
+				cell = wrapTextInColor(cell, node.styleClass.styles["color"], graph.styleType)
 			}
 			boxDrawing[textX][textY] = cell
 			textX++
@@ -150,7 +150,7 @@ func drawBox(n *node, g *graph) *drawing {
 	return &boxDrawing
 }
 
-func drawSubgraph(sg *subgraph, g graph) *drawing {
+func drawSubgraph(sg *subgraph, graph graph) *drawing {
 	width := sg.maxX - sg.minX
 	height := sg.maxY - sg.minY
 
@@ -162,7 +162,7 @@ func drawSubgraph(sg *subgraph, g graph) *drawing {
 	to := drawingCoord{width, height}
 	subgraphDrawing := *(mkDrawing(width, height))
 
-	drawRectangleBorder(&subgraphDrawing, from, to, g.useAscii)
+	drawRectangleBorder(&subgraphDrawing, from, to, graph.useAscii)
 	return &subgraphDrawing
 }
 
@@ -200,8 +200,8 @@ func drawSubgraphLabel(sg *subgraph) (*drawing, drawingCoord) {
 	to := drawingCoord{width, height}
 	labelDrawing := *(mkDrawing(width, height))
 
-	for lineIdx, line := range sg.label.lines {
-		labelY := from.y + 1 + lineIdx*(graphLabelLineGap+1)
+	for lineIndex, line := range sg.label.lines {
+		labelY := from.y + 1 + lineIndex*(graphLabelLineGap+1)
 		labelX := max(from.x+width/2-runewidth.StringWidth(line)/2, from.x+1)
 		for _, cell := range runewidth.Cells(line) {
 			if labelX < to.x {
@@ -215,15 +215,15 @@ func drawSubgraphLabel(sg *subgraph) (*drawing, drawingCoord) {
 	return &labelDrawing, offset
 }
 
-func wrapTextInColor(text, c, styleType string) string {
-	if c == "" {
+func wrapTextInColor(text string, colorName string, styleType string) string {
+	if colorName == "" {
 		return text
 	}
 	switch styleType {
 	case "html":
-		return fmt.Sprintf("<span style='color: %s'>%s</span>", c, text)
+		return fmt.Sprintf("<span style='color: %s'>%s</span>", colorName, text)
 	case "cli":
-		cliColor := color.HEX(c)
+		cliColor := color.HEX(colorName)
 		return cliColor.Sprint(text)
 	default:
 		return text
@@ -231,8 +231,8 @@ func wrapTextInColor(text, c, styleType string) string {
 }
 
 func (self *drawing) increaseSize(x int, y int) {
-	currSizeX, currSizeY := getDrawingSize(self)
-	drawingWithNewSize := mkDrawing(Max(x, currSizeX), Max(y, currSizeY))
+	currentSizeX, currentSizeY := getDrawingSize(self)
+	drawingWithNewSize := mkDrawing(Max(x, currentSizeX), Max(y, currentSizeY))
 	for x := range len(*drawingWithNewSize) {
 		for y := range len((*drawingWithNewSize)[0]) {
 			if x < len(*self) && y < len((*self)[0]) {
@@ -255,7 +255,7 @@ func (self *graph) setDrawingSizeToGridConstraints() {
 	self.drawing.increaseSize(maxX-1, maxY-1)
 }
 
-func mergeJunctions(c1, c2 string) string {
+func mergeJunctions(c1 string, c2 string) string {
 	junctionMap := map[string]map[string]string{
 		"─": {"│": "┼", "┌": "┬", "┐": "┬", "└": "┴", "┘": "┴", "├": "┼", "┤": "┼", "┬": "┬", "┴": "┴"},
 		"│": {"─": "┼", "┌": "├", "┐": "┤", "└": "├", "┘": "┤", "├": "├", "┤": "┤", "┬": "┼", "┴": "┼"},
@@ -297,19 +297,19 @@ func (self *graph) mergeDrawings(baseDrawing *drawing, mergeCoord drawingCoord, 
 		}
 	}
 
-	for _, d := range drawings {
-		if d == nil {
+	for _, layer := range drawings {
+		if layer == nil {
 			continue
 		}
-		for x := range len(*d) {
-			for y := range len((*d)[0]) {
-				c := (*d)[x][y]
-				if c != " " {
+		for x := range len(*layer) {
+			for y := range len((*layer)[0]) {
+				cell := (*layer)[x][y]
+				if cell != " " {
 					currentChar := (*mergedDrawing)[x+mergeCoord.x][y+mergeCoord.y]
-					if !self.useAscii && isJunctionChar(c) && isJunctionChar(currentChar) {
-						(*mergedDrawing)[x+mergeCoord.x][y+mergeCoord.y] = mergeJunctions(currentChar, c)
+					if !self.useAscii && isJunctionChar(cell) && isJunctionChar(currentChar) {
+						(*mergedDrawing)[x+mergeCoord.x][y+mergeCoord.y] = mergeJunctions(currentChar, cell)
 					} else {
-						(*mergedDrawing)[x+mergeCoord.x][y+mergeCoord.y] = c
+						(*mergedDrawing)[x+mergeCoord.x][y+mergeCoord.y] = cell
 					}
 				}
 			}
@@ -338,14 +338,14 @@ func drawingToString(d *drawing) string {
 }
 
 func mkDrawing(x int, y int) *drawing {
-	d := make(drawing, x+1)
+	result := make(drawing, x+1)
 	for i := 0; i <= x; i++ {
-		d[i] = make([]string, y+1)
+		result[i] = make([]string, y+1)
 		for j := 0; j <= y; j++ {
-			d[i][j] = " "
+			result[i][j] = " "
 		}
 	}
-	return &d
+	return &result
 }
 
 func copyCanvas(toBeCopied *drawing) *drawing {

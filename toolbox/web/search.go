@@ -13,7 +13,7 @@ type SearchArgs struct {
 }
 
 type Searcher interface {
-	Search(context.Context, string) (string, error)
+	Search(context context.Context, query string) (string, error)
 }
 
 func newSearch(allowed func() bool, searcher Searcher) tool.Tool {

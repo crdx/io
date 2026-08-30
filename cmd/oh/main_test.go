@@ -7875,7 +7875,7 @@ func runSessionGoldenTurn(
 	for update, streamError := range testHarness.agent.Stream(streamContext, turn.Prompt) {
 		testHarness.takeTurn(TurnEvent{Update: update, Err: streamError})
 		if update.Delta != nil {
-			switch update.Delta.Kind {
+			switch update.Delta.Kind { //nolint:exhaustive // Only model prose event kinds can be deltas.
 			case agent.ModelReasoningEvent:
 				reasoningDeltas++
 				if reasoningDeltas == turn.CancelAfterReasoningDelta {

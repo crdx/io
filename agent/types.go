@@ -24,7 +24,7 @@ var (
 
 type State interface {
 	Dump() []json.RawMessage
-	Load([]json.RawMessage)
+	Load(items []json.RawMessage)
 }
 
 type Model struct {
@@ -36,7 +36,7 @@ type Model struct {
 }
 
 type Lister interface {
-	Models(context.Context) ([]Model, error)
+	Models(context context.Context) ([]Model, error)
 }
 
 type UsageWindow struct {
@@ -49,7 +49,7 @@ type UsageWindow struct {
 
 type UsageReporter interface {
 	IsAvailable() bool
-	UsageWindows(context.Context) ([]UsageWindow, error)
+	UsageWindows(context context.Context) ([]UsageWindow, error)
 }
 
 type Output struct {

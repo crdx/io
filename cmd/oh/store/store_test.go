@@ -647,6 +647,7 @@ func TestTheTranscriptCountsTimeFromWhenTheSessionStarted(t *testing.T) {
 			started = line.Time.UTC().Format(time.RFC3339Nano)
 		case session.Event:
 			events = append(events, line.Time.UTC().Format(time.RFC3339Nano))
+		case session.Item, session.TurnCompletion:
 		}
 		return nil
 	})

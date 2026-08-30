@@ -214,6 +214,8 @@ func (self ArrowType) isDotted() bool {
 	switch self {
 	case DottedArrow, DottedOpen, DottedCross, DottedPoint, BidirectionalDotted:
 		return true
+	case SolidArrow, SolidOpen, SolidCross, SolidPoint, BidirectionalSolid:
+		return false
 	}
 	return false
 }
@@ -236,6 +238,8 @@ func (self ArrowType) head(chars BoxChars, rightward bool) (rune, bool) {
 			return chars.PointRight, true
 		}
 		return chars.PointLeft, true
+	case SolidOpen, DottedOpen:
+		return 0, false
 	}
 	return 0, false
 }
@@ -299,16 +303,16 @@ func Parse(input string) (*SequenceDiagram, error) {
 			continue
 		}
 
-		if m := noteRegex.FindStringSubmatch(trimmed); m != nil {
+		if matches := noteRegex.FindStringSubmatch(trimmed); matches != nil {
 			placement := NoteOver
-			switch strings.ToLower(m[1]) {
+			switch strings.ToLower(matches[1]) {
 			case "left of":
 				placement = NoteLeftOf
 			case "right of":
 				placement = NoteRightOf
 			}
 			var parts []*Participant
-			for id := range strings.SplitSeq(m[2], ",") {
+			for id := range strings.SplitSeq(matches[2], ",") {
 				id = strings.Trim(strings.TrimSpace(id), `"`)
 				if id != "" {
 					parts = append(parts, sd.getParticipant(id, participantMap))
@@ -317,7 +321,7 @@ func Parse(input string) (*SequenceDiagram, error) {
 			if len(parts) == 0 {
 				return nil, fmt.Errorf("line %d: note without a participant", i+2)
 			}
-			text := strings.TrimSpace(m[3])
+			text := strings.TrimSpace(matches[3])
 			for _, pre := range []string{"nowrap:", "wrap:"} {
 				if strings.HasPrefix(strings.ToLower(text), pre) {
 					text = strings.TrimSpace(text[len(pre):])
@@ -415,13 +419,13 @@ func (self *SequenceDiagram) parseParticipant(line string, participants map[stri
 		return true, fmt.Errorf("duplicate participant %q", id)
 	}
 
-	p := &Participant{
+	participant := &Participant{
 		ID:    id,
 		Label: label,
 		Index: len(self.Participants),
 	}
-	self.Participants = append(self.Participants, p)
-	participants[id] = p
+	self.Participants = append(self.Participants, participant)
+	participants[id] = participant
 	return true, nil
 }
 
@@ -568,12 +572,12 @@ func (self *SequenceDiagram) getParticipant(id string, participants map[string]*
 		return p
 	}
 
-	p := &Participant{
+	participant := &Participant{
 		ID:    id,
 		Label: id,
 		Index: len(self.Participants),
 	}
-	self.Participants = append(self.Participants, p)
-	participants[id] = p
-	return p
+	self.Participants = append(self.Participants, participant)
+	participants[id] = participant
+	return participant
 }
