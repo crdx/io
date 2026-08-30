@@ -13,7 +13,6 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/req"
-	"crdx.org/io/internal/util/imageutil"
 	"crdx.org/io/tool"
 )
 
@@ -258,7 +257,7 @@ func (self *Client) requestBody() request {
 		Tools:           self.tools,
 		Thinking:        thinking{Type: "adaptive", Display: "summarized"},
 		Output:          outputConfig{Effort: self.Effort},
-		Messages:        encodeMessages(continued(merged(imageutil.BoundHistory(self.history)))),
+		Messages:        encodeMessages(continued(merged(boundImageHistory(self.history)))),
 	}
 }
 

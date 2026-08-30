@@ -2,9 +2,7 @@ package imageutil_test
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/binary"
-	"encoding/json"
 	"image"
 	"image/color"
 	"image/gif"
@@ -12,7 +10,6 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"crdx.org/io/internal/util/imageutil"
@@ -283,123 +280,6 @@ func nrgbaAt(t *testing.T, subject image.Image, x int) color.NRGBA {
 	}
 
 	return shade
-}
-
-func TestStoredImagesAreScaledWhenHistoryIsRestored(t *testing.T) {
-	subject := pngOf(t, filled(1600, 800, color.NRGBA{R: 70, G: 70, B: 70, A: 255}))
-	encoded := base64.StdEncoding.EncodeToString(subject.Data)
-
-	tests := map[string]struct {
-		stored string
-		want   string
-	}{
-		"media type beside data": {
-			stored: `{"source":{"type":"base64","media_type":"image/png","data":"` + encoded + `"}}`,
-			want:   "image/png",
-		},
-		"data url": {
-			stored: `{"image_url":"data:image/png;base64,` + encoded + `"}`,
-			want:   "image/png",
-		},
-		"data url in an object": {
-			stored: `{"image_url":{"url":"data:image/png;base64,` + encoded + `"}}`,
-			want:   "image/png",
-		},
-	}
-
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			bounded := imageutil.BoundJSON([]byte(test.stored))
-			if len(bounded) >= len(test.stored) {
-				t.Fatalf("expected fewer than %d bytes, got %d", len(test.stored), len(bounded))
-			}
-
-			mediaType, width, height := storedImage(t, string(bounded))
-			if mediaType != test.want || width != imageutil.MaxEdge || height != imageutil.MaxEdge/2 {
-				t.Errorf("expected %s at %dx%d, got %s at %dx%d",
-					test.want, imageutil.MaxEdge, imageutil.MaxEdge/2, mediaType, width, height)
-			}
-		})
-	}
-}
-
-func TestAStoredGIFCarriesTheMediaTypeItWasScaledInto(t *testing.T) {
-	var encoded bytes.Buffer
-	if err := gif.Encode(&encoded, filled(1600, 800, color.NRGBA{R: 20, G: 90, B: 20, A: 255}), nil); err != nil {
-		t.Fatalf("could not encode the test image: %v", err)
-	}
-
-	stored := `{"source":{"type":"base64","media_type":"image/gif","data":"` +
-		base64.StdEncoding.EncodeToString(encoded.Bytes()) + `"}}`
-
-	mediaType, width, _ := storedImage(t, string(imageutil.BoundJSON([]byte(stored))))
-	if mediaType != "image/png" || width != imageutil.MaxEdge {
-		t.Errorf("expected a PNG %d wide, got %s at %d", imageutil.MaxEdge, mediaType, width)
-	}
-}
-
-func TestStoredHistoryWithNothingToScaleIsLeftExactlyAsItWas(t *testing.T) {
-	subject := pngOf(t, filled(64, 33, color.NRGBA{R: 1, G: 1, B: 1, A: 255}))
-	items := []json.RawMessage{
-		json.RawMessage(`{"zebra":1,"apple":2}`),
-		json.RawMessage(`{"source":{"media_type":"image/png","data":"` +
-			base64.StdEncoding.EncodeToString(subject.Data) + `"}}`),
-		json.RawMessage(`not json at all`),
-	}
-
-	for index, bounded := range imageutil.BoundHistory(items) {
-		if string(bounded) != string(items[index]) {
-			t.Errorf("item %d was rewritten:\n%s\n%s", index, bounded, items[index])
-		}
-	}
-}
-
-func storedImage(t *testing.T, stored string) (string, int, int) {
-	t.Helper()
-
-	var value any
-	if err := json.Unmarshal([]byte(stored), &value); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	mediaType, data, found := findStoredImage(value)
-	if !found {
-		t.Fatalf("no image in: %s", stored)
-	}
-
-	width, height, isMeasured := imageutil.Dimensions(data)
-	if !isMeasured {
-		t.Fatalf("the stored image could not be measured: %s", mediaType)
-	}
-
-	return mediaType, width, height
-}
-
-func findStoredImage(value any) (string, []byte, bool) {
-	switch typed := value.(type) {
-	case map[string]any:
-		mediaType, hasMediaType := typed["media_type"].(string)
-		if encoded, hasData := typed["data"].(string); hasMediaType && hasData {
-			data, err := base64.StdEncoding.DecodeString(encoded)
-			return mediaType, data, err == nil
-		}
-
-		for _, item := range typed {
-			if mediaType, data, found := findStoredImage(item); found {
-				return mediaType, data, true
-			}
-		}
-	case string:
-		head, encoded, isDataURL := strings.Cut(typed, ";base64,")
-		if !isDataURL {
-			return "", nil, false
-		}
-
-		data, err := base64.StdEncoding.DecodeString(encoded)
-		return strings.TrimPrefix(head, "data:"), data, err == nil
-	}
-
-	return "", nil, false
 }
 
 func TestAnOversizedWebPIsScaledIntoAPNG(t *testing.T) {

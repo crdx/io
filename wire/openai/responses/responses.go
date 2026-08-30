@@ -16,8 +16,8 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/req"
-	"crdx.org/io/internal/util/imageutil"
 	"crdx.org/io/tool"
+	"crdx.org/io/wire/openai/internal/imagehistory"
 )
 
 const (
@@ -191,7 +191,7 @@ func (self *Client) requestBody() request {
 		Model:             self.Model,
 		Store:             false,
 		Stream:            true,
-		Input:             imageutil.BoundHistory(self.history),
+		Input:             imagehistory.Bound(self.history),
 		Reasoning:         reasoning{Effort: self.Effort, Summary: Summary},
 		Include:           []string{"reasoning.encrypted_content"},
 		PromptCacheKey:    self.session,

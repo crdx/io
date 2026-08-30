@@ -11,8 +11,8 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/req"
-	"crdx.org/io/internal/util/imageutil"
 	"crdx.org/io/tool"
+	"crdx.org/io/wire/openai/internal/imagehistory"
 )
 
 var Efforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
@@ -167,7 +167,7 @@ func (self *Client) requestBody() request {
 	if self.instructions != "" {
 		messages = append(messages, encode(message{Role: "system", Content: self.instructions}))
 	}
-	messages = append(messages, imageutil.BoundHistory(self.history)...)
+	messages = append(messages, imagehistory.Bound(self.history)...)
 
 	body := request{
 		Model:           self.Model,
