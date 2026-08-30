@@ -28,12 +28,13 @@ type Client struct {
 	Effort          string
 	MaxOutputTokens int
 
-	requestHeader http.Header
-	instructions  string
-	tools         []functionTool
-	history       []json.RawMessage
-	requests      *req.Client
-	observer      req.Observer
+	requestHeader  http.Header
+	instructions   string
+	tools          []functionTool
+	history        []json.RawMessage
+	requestHistory imagehistory.Cache
+	requests       *req.Client
+	observer       req.Observer
 }
 
 func New(
@@ -108,6 +109,7 @@ func (self *Client) Dump() []json.RawMessage {
 
 func (self *Client) Load(messages []json.RawMessage) {
 	self.history = slices.Clone(messages)
+	self.requestHistory.Reset()
 }
 
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
@@ -167,7 +169,7 @@ func (self *Client) requestBody() request {
 	if self.instructions != "" {
 		messages = append(messages, encode(message{Role: "system", Content: self.instructions}))
 	}
-	messages = append(messages, imagehistory.Bound(self.history)...)
+	messages = append(messages, self.requestHistory.Prepare(self.history)...)
 
 	body := request{
 		Model:           self.Model,

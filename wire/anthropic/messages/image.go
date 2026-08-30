@@ -8,13 +8,23 @@ import (
 	"crdx.org/io/tool"
 )
 
-func boundImageHistory(items []json.RawMessage) []json.RawMessage {
-	boundedItems := make([]json.RawMessage, len(items))
-	for index, item := range items {
-		boundedItems[index] = boundJSONImages(item)
+type imageHistory struct {
+	preparedItems []json.RawMessage
+}
+
+func (self *imageHistory) prepare(items []json.RawMessage) []json.RawMessage {
+	if len(items) < len(self.preparedItems) {
+		self.reset()
 	}
 
-	return boundedItems
+	for _, item := range items[len(self.preparedItems):] {
+		self.preparedItems = append(self.preparedItems, boundJSONImages(item))
+	}
+	return self.preparedItems
+}
+
+func (self *imageHistory) reset() {
+	self.preparedItems = nil
 }
 
 func boundJSONImages(payload []byte) []byte {

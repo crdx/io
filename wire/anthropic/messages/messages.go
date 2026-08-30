@@ -56,6 +56,7 @@ type Client struct {
 	tools               []functionTool
 	toolNames           []string
 	history             []json.RawMessage
+	requestHistory      imageHistory
 	toolInputCorrection string
 	requests            *req.Client
 	observer            req.Observer
@@ -127,6 +128,7 @@ func (self *Client) Dump() []json.RawMessage {
 func (self *Client) Load(items []json.RawMessage) {
 	self.toolInputCorrection = ""
 	self.history = slices.Clone(items)
+	self.requestHistory.reset()
 }
 
 func encodeItem(item any) json.RawMessage {
@@ -257,7 +259,7 @@ func (self *Client) requestBody() request {
 		Tools:           self.tools,
 		Thinking:        thinking{Type: "adaptive", Display: "summarized"},
 		Output:          outputConfig{Effort: self.Effort},
-		Messages:        encodeMessages(continued(merged(boundImageHistory(self.history)))),
+		Messages:        encodeMessages(continued(merged(self.requestHistory.prepare(self.history)))),
 	}
 }
 

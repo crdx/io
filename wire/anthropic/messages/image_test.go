@@ -16,7 +16,8 @@ func TestStoredAnthropicImageIsBounded(t *testing.T) {
 	stored := json.RawMessage(`{"source":{"type":"base64","media_type":"image/png","data":"` +
 		base64.StdEncoding.EncodeToString(encodePNG(t, image.Rect(0, 0, 1600, 800))) + `"}}`)
 
-	bounded := boundImageHistory([]json.RawMessage{stored})[0]
+	var history imageHistory
+	bounded := history.prepare([]json.RawMessage{stored})[0]
 	mediaType, data := getImageSource(t, bounded)
 	width, height, isMeasured := imageutil.Dimensions(data)
 	if mediaType != "image/png" || !isMeasured || width != imageutil.MaxEdge || height != imageutil.MaxEdge/2 {
@@ -32,7 +33,8 @@ func TestStoredAnthropicGIFCarriesItsBoundedMediaType(t *testing.T) {
 	stored := json.RawMessage(`{"source":{"type":"base64","media_type":"image/gif","data":"` +
 		base64.StdEncoding.EncodeToString(encoded.Bytes()) + `"}}`)
 
-	bounded := boundImageHistory([]json.RawMessage{stored})[0]
+	var history imageHistory
+	bounded := history.prepare([]json.RawMessage{stored})[0]
 	mediaType, data := getImageSource(t, bounded)
 	width, _, isMeasured := imageutil.Dimensions(data)
 	if mediaType != "image/png" || !isMeasured || width != imageutil.MaxEdge {
@@ -50,10 +52,37 @@ func TestAnthropicHistoryWithoutAnOversizedImageIsLeftExactlyAsStored(t *testing
 		json.RawMessage(`not json at all`),
 	}
 
-	for index, bounded := range boundImageHistory(items) {
+	var history imageHistory
+	for index, bounded := range history.prepare(items) {
 		if !bytes.Equal(bounded, items[index]) {
 			t.Errorf("item %d was rewritten:\n%s\n%s", index, bounded, items[index])
 		}
+	}
+}
+
+func TestAnthropicHistoryReusesPreparedItemsUntilReset(t *testing.T) {
+	var history imageHistory
+	items := []json.RawMessage{json.RawMessage(`{"source":{"type":"base64","media_type":"image/png","data":"` +
+		base64.StdEncoding.EncodeToString(encodePNG(t, image.Rect(0, 0, 1600, 800))) + `"}}`)}
+
+	prepared := history.prepare(items)
+	if allocations := testing.AllocsPerRun(100, func() { history.prepare(items) }); allocations != 0 {
+		t.Errorf("unchanged history allocated %.1f times per preparation", allocations)
+	}
+
+	firstPrepared := bytes.Clone(prepared[0])
+	appended := json.RawMessage(`{"content":"appended"}`)
+	items = append(items, appended)
+	prepared = history.prepare(items)
+	if len(prepared) != 2 || !bytes.Equal(prepared[0], firstPrepared) || !bytes.Equal(prepared[1], appended) {
+		t.Errorf("appending rebuilt prepared history: %s", prepared)
+	}
+
+	replacement := []json.RawMessage{json.RawMessage(`{"content":"replacement"}`)}
+	history.reset()
+	prepared = history.prepare(replacement)
+	if !bytes.Equal(prepared[0], replacement[0]) {
+		t.Errorf("reset history retained the old item: %s", prepared[0])
 	}
 }
 

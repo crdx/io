@@ -54,13 +54,14 @@ type Client struct {
 	Model  string
 	Effort string
 
-	tokens       TokenSource
-	instructions string
-	tools        []functionTool
-	session      string
-	history      []json.RawMessage
-	requests     *req.Client
-	observer     req.Observer
+	tokens         TokenSource
+	instructions   string
+	tools          []functionTool
+	session        string
+	history        []json.RawMessage
+	requestHistory imagehistory.Cache
+	requests       *req.Client
+	observer       req.Observer
 
 	usageMutex   sync.Mutex
 	usageWindows []agent.UsageWindow
@@ -122,6 +123,7 @@ func (self *Client) Dump() []json.RawMessage {
 
 func (self *Client) Load(items []json.RawMessage) {
 	self.history = slices.Clone(items)
+	self.requestHistory.Reset()
 }
 
 func encodeItem(item any) json.RawMessage {
@@ -191,7 +193,7 @@ func (self *Client) requestBody() request {
 		Model:             self.Model,
 		Store:             false,
 		Stream:            true,
-		Input:             imagehistory.Bound(self.history),
+		Input:             self.requestHistory.Prepare(self.history),
 		Reasoning:         reasoning{Effort: self.Effort, Summary: Summary},
 		Include:           []string{"reasoning.encrypted_content"},
 		PromptCacheKey:    self.session,

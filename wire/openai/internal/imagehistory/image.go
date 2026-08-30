@@ -9,14 +9,23 @@ import (
 	"crdx.org/io/tool"
 )
 
-// Bound scales images in OpenAI history without changing the stored history itself.
-func Bound(items []json.RawMessage) []json.RawMessage {
-	boundedItems := make([]json.RawMessage, len(items))
-	for index, item := range items {
-		boundedItems[index] = boundJSONImages(item)
+type Cache struct {
+	preparedItems []json.RawMessage
+}
+
+func (self *Cache) Prepare(items []json.RawMessage) []json.RawMessage {
+	if len(items) < len(self.preparedItems) {
+		self.Reset()
 	}
 
-	return boundedItems
+	for _, item := range items[len(self.preparedItems):] {
+		self.preparedItems = append(self.preparedItems, boundJSONImages(item))
+	}
+	return self.preparedItems
+}
+
+func (self *Cache) Reset() {
+	self.preparedItems = nil
 }
 
 func boundJSONImages(payload []byte) []byte {

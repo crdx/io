@@ -22,7 +22,8 @@ func TestStoredOpenAIImagesAreBounded(t *testing.T) {
 
 	for name, stored := range tests {
 		t.Run(name, func(t *testing.T) {
-			bounded := imagehistory.Bound([]json.RawMessage{json.RawMessage(stored)})[0]
+			var history imagehistory.Cache
+			bounded := history.Prepare([]json.RawMessage{json.RawMessage(stored)})[0]
 			dataURL := getDataURL(t, bounded)
 			_, encoded, isDataURL := strings.Cut(dataURL, ";base64,")
 			if !isDataURL {
@@ -48,10 +49,37 @@ func TestOpenAIHistoryWithoutAnOversizedImageIsLeftExactlyAsStored(t *testing.T)
 		json.RawMessage(`not json at all`),
 	}
 
-	for index, bounded := range imagehistory.Bound(items) {
+	var history imagehistory.Cache
+	for index, bounded := range history.Prepare(items) {
 		if !bytes.Equal(bounded, items[index]) {
 			t.Errorf("item %d was rewritten:\n%s\n%s", index, bounded, items[index])
 		}
+	}
+}
+
+func TestOpenAIHistoryReusesPreparedItemsUntilReset(t *testing.T) {
+	var history imagehistory.Cache
+	items := []json.RawMessage{json.RawMessage(`{"image_url":"data:image/png;base64,` +
+		base64.StdEncoding.EncodeToString(oversizedPNG(t)) + `"}`)}
+
+	prepared := history.Prepare(items)
+	if allocations := testing.AllocsPerRun(100, func() { history.Prepare(items) }); allocations != 0 {
+		t.Errorf("unchanged history allocated %.1f times per preparation", allocations)
+	}
+
+	firstPrepared := bytes.Clone(prepared[0])
+	appended := json.RawMessage(`{"content":"appended"}`)
+	items = append(items, appended)
+	prepared = history.Prepare(items)
+	if len(prepared) != 2 || !bytes.Equal(prepared[0], firstPrepared) || !bytes.Equal(prepared[1], appended) {
+		t.Errorf("appending rebuilt prepared history: %s", prepared)
+	}
+
+	replacement := []json.RawMessage{json.RawMessage(`{"content":"replacement"}`)}
+	history.Reset()
+	prepared = history.Prepare(replacement)
+	if !bytes.Equal(prepared[0], replacement[0]) {
+		t.Errorf("reset history retained the old item: %s", prepared[0])
 	}
 }
 
