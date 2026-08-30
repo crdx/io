@@ -2641,6 +2641,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"model-arguments":       {".txt"},
 		"new-session":           {".txt"},
 		"ordinary-tab":          {".ansi", ".screen"},
+		"path-message":          {".ansi", ".screen"},
 		"pending-mode-messages": {".ansi", ".screen"},
 		"paste":                 {".ansi", ".screen"},
 		"picker-menu":           {".ansi", ".screen"},
@@ -5247,6 +5248,35 @@ func TestReloadingConfigChangesTheStreamingModeForTheNextTurn(t *testing.T) {
 	if self.streamingMode != output.StreamingModePaced {
 		t.Errorf("reloaded streaming mode is %d, want paced", self.streamingMode)
 	}
+}
+
+func TestAnExistingPathDrawsAsAConversationMessage(t *testing.T) {
+	passes := map[string]func() string{
+		"existing path sent": func() string { return drawExistingPathMessage(t) },
+	}
+
+	compareWithGolden(t, "path-message", ".ansi", passes)
+	compareWithGolden(t, "path-message", ".screen", shownPasses(t, passes))
+}
+
+func drawExistingPathMessage(t *testing.T) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	self := slashCommandFixture(t, caps.Read)
+	self.agent = agent.New("", quietProvider{}, nil)
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	self.commands = fixtureCommandRegistry(t)
+
+	editor := edit.NewInput(nil)
+	self.editor = editor
+	editor.SetText("/etc/hosts")
+	self.show(editor)
+	self.acceptInput(editor, edit.NewHistory("", historyLimit))
+	self.waitForCurrentTurn()
+	self.show(editor)
+
+	return screenOutput.String()
 }
 
 type feedbackScenario int
