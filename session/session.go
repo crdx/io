@@ -370,8 +370,7 @@ func Records(directory string, name string, visit func(Line) error) error {
 	}
 	defer func() { _ = file.Close() }()
 
-	lines := bufio.NewScanner(file)
-	lines.Buffer(nil, maxLine)
+	decoder := json.NewDecoder(bufio.NewReaderSize(file, 8192))
 	sawHead := false
 	lineNumber := 0
 
@@ -388,13 +387,17 @@ func Records(directory string, name string, visit func(Line) error) error {
 		endsWithNewline = lastByte[0] == '\n'
 	}
 
-	for lines.Scan() {
+	for {
 		lineNumber++
 		var line Line
-		if err := json.Unmarshal(lines.Bytes(), &line); err != nil {
-			if !endsWithNewline && !lines.Scan() && lines.Err() == nil {
-				break
-			}
+		err := decoder.Decode(&line)
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if errors.Is(err, io.ErrUnexpectedEOF) && !endsWithNewline {
+			break
+		}
+		if err != nil {
 			return fmt.Errorf("session %s: malformed journal line %d: %w", name, lineNumber, err)
 		}
 
@@ -415,9 +418,6 @@ func Records(directory string, name string, visit func(Line) error) error {
 		}
 	}
 
-	if err := lines.Err(); err != nil {
-		return err
-	}
 	if !sawHead {
 		return errors.New("session has no complete head")
 	}
@@ -726,7 +726,7 @@ func readHead(directory string, name string) (Line, error) {
 	defer func() { _ = file.Close() }()
 
 	lines := bufio.NewScanner(file)
-	lines.Buffer(nil, maxLine)
+	lines.Buffer(nil, maxHeadLine)
 	if !lines.Scan() {
 		if err := lines.Err(); err != nil {
 			return Line{}, err
@@ -769,7 +769,7 @@ func List(directory string) ([]*Session, error) {
 const (
 	journalName = "session.jsonl"
 	metaName    = "meta.json"
-	maxLine     = 64 << 20
+	maxHeadLine = 64 << 20
 )
 
 func Dir(directory string, name string) string {

@@ -196,11 +196,12 @@ func TestTurnCompletionIsReadBackSeparatelyFromEventsAndItems(t *testing.T) {
 	}
 }
 
-func TestProviderStateCarryingTheLargestReadableImageCanBeListed(t *testing.T) {
+func TestProviderStateCarryingThreeLargestReadableImagesCanBeListed(t *testing.T) {
 	const readToolMaximumImageBytes = 20 * 1024 * 1024
 
 	encodedImageBytes := 4 * ((readToolMaximumImageBytes + 2) / 3)
-	payload := json.RawMessage(`{"image":"` + strings.Repeat("A", encodedImageBytes) + `"}`)
+	encodedImage := strings.Repeat("A", encodedImageBytes)
+	payload := json.RawMessage(`{"images":["` + encodedImage + `","` + encodedImage + `","` + encodedImage + `"]}`)
 
 	directory := t.TempDir()
 	writer, err := session.Create(directory, nil, nil)

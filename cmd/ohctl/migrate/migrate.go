@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -34,8 +35,6 @@ stored session is done when none is.
 The configuration file and each session bundle are copied aside before anything is written. A
 session transcript is written again from the journal it was migrated into.
 `
-
-const maxLine = 64 * 1024 * 1024
 
 type inputOpts struct {
 	Migrate  bool     `docopt:"migrate"`
@@ -299,21 +298,19 @@ func readJournal(path string) ([]map[string]json.RawMessage, int, error) {
 	defer func() { _ = file.Close() }()
 
 	var lines []map[string]json.RawMessage
+	decoder := json.NewDecoder(bufio.NewReaderSize(file, 8192))
 
-	scanner := bufio.NewScanner(file)
-	scanner.Buffer(nil, maxLine)
-
-	for scanner.Scan() {
+	for {
 		var line map[string]json.RawMessage
-		if err := json.Unmarshal(scanner.Bytes(), &line); err != nil {
+		err := decoder.Decode(&line)
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
 			return nil, 0, fmt.Errorf("line %d could not be read: %w", len(lines)+1, err)
 		}
 
 		lines = append(lines, line)
-	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, 0, err
 	}
 
 	if len(lines) == 0 {
