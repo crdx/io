@@ -373,11 +373,29 @@ func Records(directory string, name string, visit func(Line) error) error {
 	lines := bufio.NewScanner(file)
 	lines.Buffer(nil, maxLine)
 	sawHead := false
+	lineNumber := 0
+
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return err
+	}
+	endsWithNewline := true
+	if fileInfo.Size() > 0 {
+		var lastByte [1]byte
+		if _, err := file.ReadAt(lastByte[:], fileInfo.Size()-1); err != nil {
+			return err
+		}
+		endsWithNewline = lastByte[0] == '\n'
+	}
 
 	for lines.Scan() {
+		lineNumber++
 		var line Line
-		if json.Unmarshal(lines.Bytes(), &line) != nil {
-			break
+		if err := json.Unmarshal(lines.Bytes(), &line); err != nil {
+			if !endsWithNewline && !lines.Scan() && lines.Err() == nil {
+				break
+			}
+			return fmt.Errorf("session %s: malformed journal line %d: %w", name, lineNumber, err)
 		}
 
 		if !sawHead {

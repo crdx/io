@@ -113,6 +113,61 @@ func TestMetaCarriesOnlyListingData(t *testing.T) {
 	}
 }
 
+func TestMalformedJournalRecordsAreReportedUnlessTheLastIsUnterminated(t *testing.T) {
+	tests := []struct {
+		name        string
+		suffix      string
+		wantFailure bool
+	}{
+		{name: "interior record", suffix: "not-json\n{}\n", wantFailure: true},
+		{name: "terminated final record", suffix: "not-json\n", wantFailure: true},
+		{name: "unterminated final record", suffix: `{"kind":"event"`},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			directory := t.TempDir()
+			writer, err := session.Create(directory, nil, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "kept"}); err != nil {
+				t.Fatal(err)
+			}
+			if err := writer.Close(); err != nil {
+				t.Fatal(err)
+			}
+
+			path := filepath.Join(directory, writer.Name(), "session.jsonl")
+			journal, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, 0o600) //nolint:gosec // test-owned journal path
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := journal.WriteString(test.suffix); err != nil {
+				_ = journal.Close()
+				t.Fatal(err)
+			}
+			if err := journal.Close(); err != nil {
+				t.Fatal(err)
+			}
+
+			storedSession, err := session.Read(directory, writer.Name())
+			if test.wantFailure {
+				if err == nil || !strings.Contains(err.Error(), "malformed journal line 3") {
+					t.Fatalf("got %v, want the malformed third line reported", err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(storedSession.Events) != 1 || storedSession.Events[0].Text != "kept" {
+				t.Errorf("unexpected recovered events: %#v", storedSession.Events)
+			}
+		})
+	}
+}
+
 func TestTurnCompletionIsReadBackSeparatelyFromEventsAndItems(t *testing.T) {
 	directory := t.TempDir()
 	writer, err := session.Create(directory, nil, nil)

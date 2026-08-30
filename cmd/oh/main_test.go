@@ -2628,6 +2628,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"clearing":              {".ansi", ".screen"},
 		"completion":            {".txt"},
 		"config-reload":         {".ansi", ".screen"},
+		"corrupt-session":       {".txt"},
 		"default-bar":           {".ansi", ".screen"},
 		"feedback":              {".ansi", ".screen", ".txt"},
 		"context":               {".prompt"},
@@ -3493,6 +3494,86 @@ func testBinaryEnvironment(t *testing.T, stateDirectory string) []string {
 		"XDG_CONFIG_HOME="+t.TempDir(),
 		"XDG_STATE_HOME="+stateDirectory,
 	)
+}
+
+func TestCorruptedSessionFailureMatchesGolden(t *testing.T) {
+	compareWithGolden(t, "corrupt-session", ".txt", map[string]func() string{
+		"terminated malformed record": func() string { return corruptedSessionFailure(t) },
+	})
+}
+
+func corruptedSessionFailure(t *testing.T) string {
+	t.Helper()
+
+	binary := buildTestBinary(t)
+	stateDirectory := t.TempDir()
+	configDirectory := t.TempDir()
+	applicationStateDirectory := filepath.Join(stateDirectory, "org.crdx", "oh")
+
+	configPath := filepath.Join(configDirectory, "org.crdx", "oh", "config.toml")
+	if err := os.MkdirAll(filepath.Dir(configPath), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(configPath, fmt.Appendf(nil, "version = %d\n", config.Format), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	modelCachePath := filepath.Join(applicationStateDirectory, "models.json")
+	if err := os.MkdirAll(filepath.Dir(modelCachePath), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	modelCache := checkedModelCache(`{"codex":{"models":[{"id":"gpt-5.6-sol","efforts":["high"],"output":128000}]}}`)
+	if err := os.WriteFile(modelCachePath, modelCache, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	sessionsDirectory := filepath.Join(applicationStateDirectory, "sessions")
+	writer, err := store.Create(sessionsDirectory, store.Meta{
+		Model:        "gpt-5.6-sol",
+		WorkspaceDir: "/",
+		Provider:     "codex",
+		Effort:       "high",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "keep this message"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.CompleteTurn(); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	journalPath := filepath.Join(sessionsDirectory, writer.Name(), "session.jsonl")
+	journal, err := os.OpenFile(journalPath, os.O_WRONLY|os.O_APPEND, 0o600) //nolint:gosec // test-owned path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := journal.WriteString("not-json\n"); err != nil {
+		_ = journal.Close()
+		t.Fatal(err)
+	}
+	if err := journal.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.CommandContext(t.Context(), binary, "-r", writer.Name()) //nolint:gosec // running the binary under test
+	command.Dir = "/"
+	command.Env = append(
+		os.Environ(),
+		"HOME="+t.TempDir(),
+		"XDG_CONFIG_HOME="+configDirectory,
+		"XDG_STATE_HOME="+stateDirectory,
+	)
+	output, err := command.CombinedOutput()
+	if err == nil {
+		t.Fatalf("corrupted session unexpectedly opened: %s", output)
+	}
+
+	return strings.ReplaceAll(string(output), writer.Name(), "brave-otter")
 }
 
 func TestVersionDispatchRunsThroughTheBinary(t *testing.T) {

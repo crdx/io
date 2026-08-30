@@ -1,0 +1,3 @@
+=== terminated malformed record ===
+session brave-otter: malformed journal line 4: invalid character 'o' in literal null (expecting 'u')
+
