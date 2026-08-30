@@ -1,0 +1,254 @@
+=== narrow ===
+Agent 000000000000000000000000 ready in
+0s with 0 skills, 0 snippets, and ~800t
+of context.
+
+
+ check every refused boundary
+
+
+I checked each boundary without crossing
+it.
+
+read huge.log ✗ 0L ~96Mt file is larg…
+
+Each boundary stayed closed.
+=== one column ===
+A
+g
+e
+n
+t
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+r
+e
+a
+d
+y
+i
+n
+0
+s
+w
+i
+t
+h
+0
+s
+k
+i
+l
+l
+s
+,
+0
+s
+n
+i
+p
+p
+e
+t
+s
+,
+a
+n
+d
+~
+8
+0
+0
+t
+o
+f
+c
+o
+n
+t
+e
+x
+t
+.
+
+
+
+c
+
+h
+
+e
+
+c
+
+k
+
+e
+
+v
+
+e
+
+r
+
+y
+
+r
+
+e
+
+f
+
+u
+
+s
+
+e
+
+d
+
+b
+
+o
+
+u
+
+n
+
+d
+
+a
+
+r
+
+y
+
+
+I
+c
+h
+e
+c
+k
+e
+d
+e
+a
+c
+h
+b
+o
+u
+n
+d
+a
+r
+y
+w
+i
+t
+h
+o
+u
+t
+c
+r
+o
+s
+s
+i
+n
+g
+i
+t
+.
+
+✗
+
+E
+a
+c
+h
+b
+o
+u
+n
+d
+a
+r
+y
+s
+t
+a
+y
+e
+d
+c
+l
+o
+s
+e
+d
+.
+=== tiny ===
+Agent 000000
+000000000000
+000000 ready
+in 0s with 0
+skills, 0 sn
+ippets, and
+~800t of con
+text.
+
+
+ check every
+ refused
+ boundary
+
+
+I checked
+each
+boundary
+without
+crossing it.
+
+✗ 0L ~96Mt
+
+Each
+boundary
+stayed
+closed.
+=== wide ===
+Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
+
+
+ check every refused boundary
+
+
+I checked each boundary without crossing it.
+
+read huge.log ✗ 0L ~96Mt file is larger than the 20971520-byte limit
+
+Each boundary stayed closed.

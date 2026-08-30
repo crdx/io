@@ -6,6 +6,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -200,6 +201,69 @@ func TestAHugeFileIsNotCutShort(t *testing.T) {
 
 	if output != content {
 		t.Errorf("expected %d bytes, got %d", len(content), len(output))
+	}
+}
+
+func TestFilesAboveTheReadLimitAreRefusedBeforeTheirContentsAreLoaded(t *testing.T) {
+	const fileBytes = 256 * 1024 * 1024
+
+	tests := []struct {
+		name    string
+		header  string
+		failure string
+	}{
+		{name: "image", header: "\x89PNG\r\n\x1a\n", failure: "image is larger than the 20971520-byte limit"},
+		{name: "text", header: "plain text", failure: "file is larger than the 20971520-byte limit"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			directory := t.TempDir()
+			path := filepath.Join(directory, "large")
+			opened, err := os.Create(path) //nolint:gosec // test-owned path
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := opened.WriteString(test.header); err != nil {
+				_ = opened.Close()
+				t.Fatal(err)
+			}
+			if err := opened.Truncate(fileBytes); err != nil {
+				_ = opened.Close()
+				t.Fatal(err)
+			}
+			if err := opened.Close(); err != nil {
+				t.Fatal(err)
+			}
+
+			rootHandle, err := os.OpenRoot(directory)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = rootHandle.Close() }()
+			root := file.New(rootHandle, allowAll)
+			call, err := read.New(root, file.NewSnapshots()).Parse(`{"path":"large"}`)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			runtime.GC()
+			var before runtime.MemStats
+			runtime.ReadMemStats(&before)
+			result, err := call.Exec(t.Context())
+			var after runtime.MemStats
+			runtime.ReadMemStats(&after)
+
+			if err == nil || err.Error() != test.failure {
+				t.Fatalf("got %v, want %q", err, test.failure)
+			}
+			if result.Stats.Bytes != fileBytes {
+				t.Errorf("reported %d bytes, want %d", result.Stats.Bytes, fileBytes)
+			}
+			if allocated := after.TotalAlloc - before.TotalAlloc; allocated > 8*1024*1024 {
+				t.Errorf("allocated %d bytes before refusing the file", allocated)
+			}
+		})
 	}
 }
 

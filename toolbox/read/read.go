@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -17,7 +18,15 @@ import (
 	"crdx.org/io/tool"
 )
 
-const maxImageBytes = 20 * 1024 * 1024
+const maxFileBytes = 20 * 1024 * 1024
+
+var errFileTooLarge = errors.New("file is too large to read")
+
+type loadedFile struct {
+	data      []byte
+	mediaType string
+	size      int64
+}
 
 // Args is what a read takes. An absent offset or limit is zero, which means the whole file.
 type Args struct {
@@ -81,7 +90,18 @@ func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 		return tool.ToolCallResult{}, err
 	}
 
-	data, err := root.ReadFile(name)
+	loaded, err := load(root, name)
+	stats := tool.Stats{Kind: tool.StatsRead, Bytes: loaded.size}
+	if errors.Is(err, errFileTooLarge) {
+		if imageutil.IsSupported(loaded.mediaType) && (args.Offset > 0 || args.Limit > 0) {
+			return tool.ToolCallResult{Stats: stats}, errors.New("line ranges are not supported for images")
+		}
+		noun := "file"
+		if imageutil.IsSupported(loaded.mediaType) {
+			noun = "image"
+		}
+		return tool.ToolCallResult{Stats: stats}, fmt.Errorf("%s is larger than the %d-byte limit", noun, maxFileBytes)
+	}
 	if err != nil {
 		if pathError, ok := errors.AsType[*fs.PathError](err); ok {
 			return tool.ToolCallResult{}, fmt.Errorf("%s: %w", args.Path, pathError.Err)
@@ -90,14 +110,11 @@ func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 		return tool.ToolCallResult{}, err
 	}
 
-	stats := tool.Stats{Kind: tool.StatsRead, Bytes: int64(len(data))}
-	mediaType := http.DetectContentType(data)
+	data := loaded.data
+	mediaType := loaded.mediaType
 	if imageutil.IsSupported(mediaType) {
 		if args.Offset > 0 || args.Limit > 0 {
 			return tool.ToolCallResult{Stats: stats}, errors.New("line ranges are not supported for images")
-		}
-		if len(data) > maxImageBytes {
-			return tool.ToolCallResult{Stats: stats}, fmt.Errorf("image is larger than the %d-byte limit", maxImageBytes)
 		}
 
 		stats.Kind = tool.StatsImage
@@ -140,6 +157,43 @@ func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 	stats.Lines = int64(end - start)
 	stats.Bytes = int64(len(output))
 	return successfulResult(args.Path, data, output, tool.Image{}, stats), nil
+}
+
+func load(root *file.Root, name string) (loadedFile, error) {
+	opened, err := root.Open(name)
+	if err != nil {
+		return loadedFile{}, err
+	}
+	defer func() { _ = opened.Close() }()
+
+	info, err := opened.Stat()
+	if err != nil {
+		return loadedFile{}, err
+	}
+	if info.Size() > maxFileBytes {
+		header, err := io.ReadAll(io.LimitReader(opened, 512))
+		if err != nil {
+			return loadedFile{}, err
+		}
+		return loadedFile{
+			mediaType: http.DetectContentType(header),
+			size:      info.Size(),
+		}, errFileTooLarge
+	}
+
+	data, err := io.ReadAll(io.LimitReader(opened, maxFileBytes+1))
+	if err != nil {
+		return loadedFile{}, err
+	}
+	mediaType := http.DetectContentType(data)
+	if len(data) > maxFileBytes {
+		return loadedFile{
+			mediaType: mediaType,
+			size:      max(info.Size(), int64(len(data))),
+		}, errFileTooLarge
+	}
+
+	return loadedFile{data: data, mediaType: mediaType, size: int64(len(data))}, nil
 }
 
 func successfulResult(
