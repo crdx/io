@@ -30,6 +30,7 @@ import (
 	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/model"
+	"crdx.org/io/cmd/oh/notification"
 	"crdx.org/io/cmd/oh/onboarding"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/prompt"
@@ -485,6 +486,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		mode:           mode,
 		configObserver: configObserver,
 		startedAt:      time.Now(),
+	}
+	chat.onFailure = func(failure error) {
+		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspaceDir, failure)
 	}
 
 	usageReporter, _ := client.Client.(agent.UsageReporter)

@@ -96,6 +96,7 @@ type App struct {
 	feedback         feedbackState
 	terminal         terminal.Terminal
 	metrics          metrics.Tracker
+	onFailure        func(failure error)
 
 	workspaceDir    string
 	continueMessage string
@@ -873,10 +874,11 @@ func (self *App) finish() {
 	self.currentTurn.MarkFinished(time.Now())
 	self.screen.ReportProgress(false)
 
+	var turnError error
 	if self.currentTurn.Cancelled() {
 		self.recordEvent(agent.Event{Kind: agent.InterruptionEvent, Text: self.interruptionReason()})
-	} else if self.currentTurn.Error() != nil {
-		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: self.currentTurn.Error().Error()})
+	} else if turnError = self.currentTurn.Error(); turnError != nil {
+		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: turnError.Error()})
 	}
 
 	if self.storeProviderState() {
@@ -893,6 +895,10 @@ func (self *App) finish() {
 	self.clearFeedback(commandFeedback)
 
 	self.currentTurn.Finish()
+
+	if turnError != nil && self.onFailure != nil {
+		self.onFailure(turnError)
+	}
 
 	if self.isTransitionRequested() {
 		return

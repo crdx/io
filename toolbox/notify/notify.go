@@ -95,13 +95,17 @@ func validate(args Args) error {
 	return nil
 }
 
-func run(ctx context.Context, writeEscape EscapeWriter, args Args) (string, error) {
+func Send(ctx context.Context, writeEscape EscapeWriter, args Args) error {
+	if err := validate(args); err != nil {
+		return err
+	}
+
 	command, printsEscapeCode := Command(ctx, args.Title, args.Message, desktopIconNames[args.Icon])
 
 	var escape strings.Builder
 	if printsEscapeCode {
 		if writeEscape == nil {
-			return "", errors.New("could not notify the user: nothing to write the notification to")
+			return errors.New("could not notify the user: nothing to write the notification to")
 		}
 
 		command.Stdout = &escape
@@ -109,14 +113,22 @@ func run(ctx context.Context, writeEscape EscapeWriter, args Args) (string, erro
 
 	if err := command.Run(); err != nil {
 		if ctx.Err() != nil {
-			return "", stop.Error(ctx, "the notification")
+			return stop.Error(ctx, "the notification")
 		}
 
-		return "", fmt.Errorf("could not notify the user: %w", err)
+		return fmt.Errorf("could not notify the user: %w", err)
 	}
 
 	if printsEscapeCode && !writeEscape(escape.String()) {
-		return "", errors.New("could not notify the user: the terminal that raises it is not there")
+		return errors.New("could not notify the user: the terminal that raises it is not there")
+	}
+
+	return nil
+}
+
+func run(ctx context.Context, writeEscape EscapeWriter, args Args) (string, error) {
+	if err := Send(ctx, writeEscape, args); err != nil {
+		return "", err
 	}
 
 	return "notified the user", nil

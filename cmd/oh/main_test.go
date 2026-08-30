@@ -900,6 +900,7 @@ func TestATransitionLeavesAQueuedModeChangeUnsent(t *testing.T) {
 }
 
 type refusingOnceProvider struct {
+	failure  error
 	failures int
 	sent     int
 	messages []string
@@ -918,6 +919,9 @@ func (self *refusingOnceProvider) Send(context.Context, agent.Yield) (agent.Repl
 	self.sent++
 
 	if self.sent <= self.failures {
+		if self.failure != nil {
+			return agent.Reply{}, self.failure
+		}
 		return agent.Reply{}, errors.New("your prompt was flagged")
 	}
 
@@ -2127,6 +2131,29 @@ func TestATurnThatFinishedByItselfIsNotCalledCancelled(t *testing.T) {
 
 	if strings.Contains(screenOutput.String(), "cancelled") {
 		t.Errorf("expected a finished turn to say nothing about cancelling, got %q", screenOutput.String())
+	}
+}
+
+func TestANonRetryableTurnErrorSendsADesktopNotification(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	turnFailure := errors.New("your prompt was flagged")
+	self.agent = agent.New("", &refusingOnceProvider{failure: turnFailure, failures: 1}, nil)
+
+	var notifiedFailure error
+	wasTurnRunning := true
+	self.onFailure = func(failure error) {
+		notifiedFailure = failure
+		wasTurnRunning = self.currentTurn.Running()
+	}
+
+	completeTurn(self)
+
+	if !errors.Is(notifiedFailure, turnFailure) {
+		t.Errorf("got notification error %v, want the original turn error", notifiedFailure)
+	}
+	if wasTurnRunning {
+		t.Error("the turn was still running when its error notification was sent")
 	}
 }
 
