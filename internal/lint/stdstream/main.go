@@ -1,58 +1,24 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
-	"go/parser"
-	"go/token"
-	"os"
 	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
+
+	"crdx.org/io/internal/lint/runner"
 )
 
 const message = "a library package minds its own business"
 
-var applicationRoots = []string{"cmd", "internal"}
-
-var standardStreams = []string{"Stdin", "Stdout", "Stderr"}
-
-type diagnostic struct {
-	position token.Position
-	message  string
-}
+var (
+	applicationRoots = []string{"cmd", "internal"}
+	standardStreams  = []string{"Stdin", "Stdout", "Stderr"}
+)
 
 func main() {
-	filenames := os.Args[1:]
-	slices.Sort(filenames)
-
-	hasDiagnostics := false
-	for _, filename := range filenames {
-		filename = filepath.Clean(filename)
-		if isApplication(filename) {
-			continue
-		}
-		source, err := os.ReadFile(filename)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			hasDiagnostics = true
-			continue
-		}
-		diagnostics, err := analyse(filename, source)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			hasDiagnostics = true
-			continue
-		}
-		for _, diagnostic := range diagnostics {
-			fmt.Printf("%s: %s (stdstream)\n", diagnostic.position, diagnostic.message)
-			hasDiagnostics = true
-		}
-	}
-	if hasDiagnostics {
-		os.Exit(1)
-	}
+	runner.Main("stdstream", analyse)
 }
 
 func isApplication(filename string) bool {
@@ -60,35 +26,30 @@ func isApplication(filename string) bool {
 	return slices.Contains(applicationRoots, root)
 }
 
-func analyse(filename string, source []byte) ([]diagnostic, error) {
-	fileSet := token.NewFileSet()
-	file, err := parser.ParseFile(fileSet, filename, source, 0)
-	if err != nil {
-		return nil, err
+func analyse(file runner.File) []runner.Diagnostic {
+	if isApplication(file.Name) {
+		return nil
 	}
 
-	packageName, isImported := importedName(file)
+	packageName, isImported := importedName(file.Syntax)
 	if !isImported {
-		return nil, nil
+		return nil
 	}
 
-	var diagnostics []diagnostic
-	ast.Inspect(file, func(node ast.Node) bool {
+	var diagnostics []runner.Diagnostic
+	ast.Inspect(file.Syntax, func(node ast.Node) bool {
 		selector, isSelector := node.(*ast.SelectorExpr)
 		if !isSelector || !slices.Contains(standardStreams, selector.Sel.Name) {
 			return true
 		}
 		if identifier, isIdentifier := selector.X.(*ast.Ident); isIdentifier && identifier.Name == packageName {
-			diagnostics = append(diagnostics, diagnostic{
-				position: fileSet.Position(selector.Pos()),
-				message:  message,
-			})
+			diagnostics = append(diagnostics, file.Report(selector, message))
 		}
 
 		return true
 	})
 
-	return diagnostics, nil
+	return diagnostics
 }
 
 func importedName(file *ast.File) (string, bool) {

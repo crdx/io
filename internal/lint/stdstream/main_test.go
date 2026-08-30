@@ -3,6 +3,8 @@ package main
 import (
 	"reflect"
 	"testing"
+
+	"crdx.org/io/internal/lint/runner"
 )
 
 func TestAnalyse(t *testing.T) {
@@ -54,13 +56,13 @@ func TestAnalyse(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			diagnostics, err := analyse("example.go", []byte(test.source))
+			diagnostics, err := runner.CheckSource(analyse, "example.go", []byte(test.source))
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
 			var actual []string
 			for _, diagnostic := range diagnostics {
-				actual = append(actual, diagnostic.position.String()+": "+diagnostic.message)
+				actual = append(actual, diagnostic.Position.String()+": "+diagnostic.Message)
 			}
 			if !reflect.DeepEqual(actual, test.expected) {
 				t.Errorf("got %v, want %v", actual, test.expected)
@@ -70,7 +72,7 @@ func TestAnalyse(t *testing.T) {
 }
 
 func TestAnalyseRejectsInvalidGo(t *testing.T) {
-	_, err := analyse("example.go", []byte("package"))
+	_, err := runner.CheckSource(analyse, "example.go", []byte("package"))
 	if err == nil {
 		t.Error("expected an error")
 	}
