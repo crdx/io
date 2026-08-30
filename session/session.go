@@ -225,6 +225,9 @@ func (self *Writer) CompleteTurn() error {
 	if err != nil {
 		return err
 	}
+	if err := self.file.Sync(); err != nil {
+		return fmt.Errorf("sync session journal: %w", err)
+	}
 
 	self.listingMeta.Touched = writtenAt
 	return writeMeta(self.directory, self.listingMeta)

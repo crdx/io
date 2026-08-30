@@ -3,6 +3,7 @@ package session
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -16,6 +17,26 @@ func TestReadRejectsASessionWithoutAHead(t *testing.T) {
 	}
 	if _, err := Read(directory, "broken-toad"); err == nil {
 		t.Error("expected an empty session to be rejected")
+	}
+}
+
+func TestCompletingATurnSyncsTheJournalBeforeWritingMetadata(t *testing.T) {
+	journalReader, journalWriter, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = journalReader.Close() }()
+
+	writer := &Writer{
+		file:        journalWriter,
+		directory:   t.TempDir(),
+		listingMeta: Meta{Name: "missing-directory"},
+	}
+	defer func() { _ = writer.Close() }()
+
+	err = writer.CompleteTurn()
+	if err == nil || !strings.Contains(err.Error(), "sync session journal") {
+		t.Fatalf("got %v, want the pipe's sync failure", err)
 	}
 }
 
