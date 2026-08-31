@@ -86,6 +86,33 @@ func TestRegistryRejectsDuplicatePrefixes(t *testing.T) {
 	}
 }
 
+func TestReplacingACommandSetKeepsTheOtherPrefixes(t *testing.T) {
+	registry := mustRegistry(t,
+		mustSet(t, "/", slash.Command{Name: "open", Run: commandHandler}),
+		mustSet(t, "//", slash.Command{Name: "old", Run: commandHandler}),
+	)
+
+	replacement := mustSet(t, "//", slash.Command{Name: "new", Run: commandHandler})
+	if err := registry.ReplaceCommandSet(replacement); err != nil {
+		t.Fatal(err)
+	}
+	if _, found := registry.Find("//old"); found {
+		t.Error("found the replaced command")
+	}
+	for _, command := range []string{"/open", "//new"} {
+		if _, found := registry.Find(command); !found {
+			t.Errorf("did not find %s", command)
+		}
+	}
+}
+
+func TestReplacingAnUnregisteredCommandSetIsRefused(t *testing.T) {
+	registry := mustRegistry(t, mustSet(t, "/"))
+	if err := registry.ReplaceCommandSet(mustSet(t, "//")); err == nil {
+		t.Error("expected the unregistered prefix to be refused")
+	}
+}
+
 func commandHandler(slash.Context, slash.Arguments) error {
 	return nil
 }

@@ -9,9 +9,35 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 )
 
 type Command []string
+
+type Configuration struct {
+	mutex   sync.RWMutex
+	command Command
+}
+
+func NewConfiguration(command Command) *Configuration {
+	return &Configuration{command: slices.Clone(command)}
+}
+
+func (self *Configuration) GetCommand() Command {
+	self.mutex.RLock()
+	defer self.mutex.RUnlock()
+	return slices.Clone(self.command)
+}
+
+func (self *Configuration) ReplaceCommand(command Command) {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+	self.command = slices.Clone(command)
+}
+
+func (self *Configuration) Open(paths ...string) error {
+	return Open(self.GetCommand(), paths...)
+}
 
 func (self *Command) UnmarshalTOML(value any) error {
 	switch configuredValue := value.(type) {

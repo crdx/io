@@ -16,6 +16,7 @@ import (
 	"crdx.org/io/cmd/oh/dispatch"
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
+	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/interaction"
 	"crdx.org/io/cmd/oh/key"
@@ -32,6 +33,7 @@ import (
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/internal/stop"
+	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox/title"
 )
 
@@ -83,20 +85,22 @@ func (self *pendingInput) texts() []string {
 }
 
 type App struct {
-	agent            *agent.Agent
-	events           []agent.Event
-	screen           *output.Screen
-	recorder         *record.Recorder
-	barConfiguration bar.Configuration
-	configObserver   *config.Observer
-	editor           *edit.Input
-	mode             *caps.Mode
-	settledCaps      caps.Set
-	pending          pendingInput
-	feedback         feedbackState
-	terminal         terminal.Terminal
-	metrics          metrics.Tracker
-	onFailure        func(failure error)
+	agent               *agent.Agent
+	events              []agent.Event
+	screen              *output.Screen
+	recorder            *record.Recorder
+	barConfiguration    bar.Configuration
+	configObserver      *config.Observer
+	editor              *edit.Input
+	editorConfiguration *editor.Configuration
+	mode                *caps.Mode
+	settledCaps         caps.Set
+	pending             pendingInput
+	feedback            feedbackState
+	terminal            terminal.Terminal
+	metrics             metrics.Tracker
+	toolOutputLimit     *truncate.Limit
+	onFailure           func(failure error)
 
 	workspaceDir    string
 	continueMessage string
@@ -567,8 +571,18 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		})
 		return true
 	case config.ReloadApplied:
+		if err := self.commands.ReplaceCommandSet(result.LiveConfig.SnippetCommandSet); err != nil {
+			self.showFeedback(configFeedback, feedbackMessage{
+				text:   "The configuration could not be reloaded: could not replace snippets: " + err.Error(),
+				status: agent.ErrorStatus,
+			})
+			return true
+		}
+		self.completion.Reset()
 		self.continueMessage = result.LiveConfig.ContinueMessage
+		self.editorConfiguration.ReplaceCommand(result.LiveConfig.EditorCommand)
 		self.streamingMode = result.LiveConfig.StreamingMode
+		self.toolOutputLimit.Replace(result.LiveConfig.ToolOutputBytes)
 		self.barConfiguration.ReplaceLayout(result.LiveConfig.SegmentLayout)
 		self.clearFeedback(configFeedback)
 	}

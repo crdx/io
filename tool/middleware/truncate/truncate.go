@@ -6,32 +6,49 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"unicode/utf8"
 
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 )
 
-// Tools wraps every tool so none of them can answer with more than limit bytes.
-func Tools(subjects []tool.Tool, limit int) []tool.Tool {
+type Limit struct {
+	bytes atomic.Int64
+}
+
+func NewLimit(bytes int) *Limit {
+	limit := &Limit{}
+	limit.Replace(bytes)
+	return limit
+}
+
+func (self *Limit) GetBytes() int {
+	return int(self.bytes.Load())
+}
+
+func (self *Limit) Replace(bytes int) {
+	self.bytes.Store(int64(bytes))
+}
+
+func Tools(subjects []tool.Tool, limit *Limit) []tool.Tool {
 	wrappedTools := make([]tool.Tool, len(subjects))
 
 	for i, subject := range subjects {
-		wrappedTools[i] = Tool(subject, limit)
+		wrappedTools[i] = truncatedTool{Tool: subject, getLimit: limit.GetBytes}
 	}
 
 	return wrappedTools
 }
 
-// Tool wraps one tool so its output is cut at limit bytes.
 func Tool(inner tool.Tool, limit int) tool.Tool {
-	return truncatedTool{Tool: inner, limit: limit}
+	return truncatedTool{Tool: inner, getLimit: func() int { return limit }}
 }
 
 type truncatedTool struct {
 	tool.Tool
 
-	limit int
+	getLimit func() int
 }
 
 func (self truncatedTool) Parse(arguments string) (tool.ToolCall, error) {
@@ -40,7 +57,7 @@ func (self truncatedTool) Parse(arguments string) (tool.ToolCall, error) {
 		return nil, err
 	}
 
-	return truncatedToolCall{ToolCall: call, limit: self.limit}, nil
+	return truncatedToolCall{ToolCall: call, limit: self.getLimit()}, nil
 }
 
 type truncatedToolCall struct {
@@ -63,9 +80,6 @@ func (self truncatedToolCall) Exec(ctx context.Context) (tool.ToolCallResult, er
 	return result, err
 }
 
-// Output caps one reply at limit bytes, cutting at a line boundary where there is one and a rune
-// boundary where there is not. The cut is said out loud, and the whole of it written to a file the
-// notice names.
 func Output(output string, limit int) string {
 	cappedOutput, _, _ := outputWithSizes(output, limit)
 	return cappedOutput

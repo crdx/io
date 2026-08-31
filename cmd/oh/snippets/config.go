@@ -3,7 +3,6 @@ package snippets
 import (
 	"errors"
 	"fmt"
-	"os"
 	"slices"
 	"strings"
 )
@@ -38,11 +37,7 @@ func (self *Definition) UnmarshalTOML(value any) error {
 	}
 }
 
-func (self *Definition) LoadFile(path string) error {
-	contents, err := os.ReadFile(path) //nolint:gosec // the user deliberately configures this path
-	if err != nil {
-		return fmt.Errorf("could not read %s: %w", path, err)
-	}
+func (self *Definition) LoadFileContents(path string, contents []byte) error {
 	self.File = path
 	self.Prompt = strings.TrimSpace(string(contents))
 	if self.Prompt == "" {

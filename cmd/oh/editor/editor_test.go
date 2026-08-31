@@ -10,6 +10,28 @@ import (
 	"testing"
 )
 
+func TestConfigurationCanReplaceItsEditorCommand(t *testing.T) {
+	initial := Command{"first-editor", "--wait"}
+	configuration := NewConfiguration(initial)
+	initial[0] = "mutated"
+
+	if got := configuration.GetCommand(); !slices.Equal(got, Command{"first-editor", "--wait"}) {
+		t.Errorf("got initial command %v", got)
+	}
+
+	replacement := Command{"second-editor"}
+	configuration.ReplaceCommand(replacement)
+	replacement[0] = "mutated"
+	got := configuration.GetCommand()
+	if !slices.Equal(got, Command{"second-editor"}) {
+		t.Errorf("got replacement command %v", got)
+	}
+	got[0] = "mutated"
+	if current := configuration.GetCommand(); !slices.Equal(current, Command{"second-editor"}) {
+		t.Errorf("returned command changed the configuration to %v", current)
+	}
+}
+
 func TestConfiguredEditorIsUsed(t *testing.T) {
 	command, err := buildCommand(Command{"configured-editor", "--wait"}, []string{"/tmp/config.toml"})
 	if err != nil {

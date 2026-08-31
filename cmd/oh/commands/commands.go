@@ -37,7 +37,7 @@ type Options struct {
 	HomeDir          string
 	Session          Session
 
-	Editor       editor.Command
+	Editor       *editor.Configuration
 	Output       io.Writer
 	StartSession func(SessionStart) error
 }
@@ -84,6 +84,11 @@ type commandTarget struct {
 }
 
 func New(options Options) (slash.CommandSet, error) {
+	editorConfiguration := options.Editor
+	if editorConfiguration == nil {
+		editorConfiguration = editor.NewConfiguration(nil)
+	}
+
 	return buildCommands(commandEnvironment{
 		configDir:        options.ConfigDir,
 		configPath:       options.ConfigFile,
@@ -100,7 +105,7 @@ func New(options Options) (slash.CommandSet, error) {
 			getLastMessage: options.Session.GetLastMessage,
 		},
 		openEditor: func(paths []string) error {
-			return editor.Open(options.Editor, paths...)
+			return editorConfiguration.Open(paths...)
 		},
 		openTarget: openDesktopTargets,
 		copyText: func(values []string) error {

@@ -46,6 +46,7 @@ import (
 	"crdx.org/io/cmd/oh/dispatch"
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
+	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/link"
@@ -2104,13 +2105,17 @@ func testConversation(t *testing.T, screenOutput *bytes.Buffer) *App {
 	t.Cleanup(func() { _ = log.Close() })
 
 	backend := quietProvider{}
+	settings := builtInConfig(t)
 
 	return &App{
-		agent:           agent.New("", backend, nil),
-		screen:          output.New(screenOutput),
-		recorder:        record.New(log),
-		mode:            caps.NewMode(caps.Read | caps.Write),
-		continueMessage: builtInConfig(t).Input.Continue,
+		agent:               agent.New("", backend, nil),
+		screen:              output.New(screenOutput),
+		recorder:            record.New(log),
+		mode:                caps.NewMode(caps.Read | caps.Write),
+		commands:            fixtureSnippetRegistry(t, nil),
+		continueMessage:     settings.Input.Continue,
+		editorConfiguration: editor.NewConfiguration(settings.Editor.Command),
+		toolOutputLimit:     truncate.NewLimit(settings.Tool.Output.Bytes),
 	}
 }
 
@@ -5162,6 +5167,19 @@ func prepareLiveConfig(t *testing.T, self *App, path string) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if err := self.commands.ReplaceCommandSet(live.SnippetCommandSet); err != nil {
+		t.Fatal(err)
+	}
+	if self.editorConfiguration == nil {
+		self.editorConfiguration = editor.NewConfiguration(live.EditorCommand)
+	} else {
+		self.editorConfiguration.ReplaceCommand(live.EditorCommand)
+	}
+	if self.toolOutputLimit == nil {
+		self.toolOutputLimit = truncate.NewLimit(live.ToolOutputBytes)
+	} else {
+		self.toolOutputLimit.Replace(live.ToolOutputBytes)
+	}
 	self.continueMessage = live.ContinueMessage
 	self.streamingMode = live.StreamingMode
 	self.barConfiguration = bar.NewConfiguration(registry, live.SegmentLayout)
@@ -5247,6 +5265,69 @@ func TestReloadingConfigChangesTheStreamingModeForTheNextTurn(t *testing.T) {
 	settleLiveConfig(t, self)
 	if self.streamingMode != output.StreamingModePaced {
 		t.Errorf("reloaded streaming mode is %d, want paced", self.streamingMode)
+	}
+}
+
+func TestReloadingConfigChangesTheEditorAndToolOutputLimit(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, `
+		[editor]
+		command = ["first-editor", "--wait"]
+
+		[tool]
+		output = "2K"
+	`)
+
+	self := testConversation(t, &bytes.Buffer{})
+	prepareLiveConfig(t, self, path)
+
+	writeLiveConfig(t, path, `
+		[editor]
+		command = "second-editor"
+
+		[tool]
+		output = "4K"
+	`)
+	settleLiveConfig(t, self)
+
+	if got := self.editorConfiguration.GetCommand(); !slices.Equal(got, editor.Command{"second-editor"}) {
+		t.Errorf("reloaded editor command is %v", got)
+	}
+	if got := self.toolOutputLimit.GetBytes(); got != 4*1024 {
+		t.Errorf("reloaded tool output limit is %d", got)
+	}
+}
+
+func TestReloadingConfigReplacesSnippetsAtomically(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, "[snippets]\nold = \"Keep the old snippet.\"\n")
+
+	self := testConversation(t, &bytes.Buffer{})
+	prepareLiveConfig(t, self, path)
+
+	writeLiveConfig(t, path, "[snippets]\nbroken = \"{{\"\n")
+	settleLiveConfig(t, self)
+	if _, found := self.commands.Find("//old"); !found {
+		t.Error("an invalid revision replaced the working snippets")
+	}
+	if _, found := self.commands.Find("//broken"); found {
+		t.Error("the invalid snippet was registered")
+	}
+
+	writeLiveConfig(t, path, "[snippets]\nnew = \"Use the new snippet.\"\n")
+	settleLiveConfig(t, self)
+	if _, found := self.commands.Find("//old"); found {
+		t.Error("the old snippet survived a valid replacement")
+	}
+	if _, found := self.commands.Find("//new"); !found {
+		t.Error("the reloaded snippet was not registered")
+	}
+
+	editor := edit.NewInput(nil)
+	editor.SetText("//ne")
+	self.apply(editor, nil, key.Key{Code: key.Rune, Value: '\t'})
+	if editor.Text() != "//new" {
+		t.Errorf("reloaded completion is %q", editor.Text())
 	}
 }
 
@@ -5417,6 +5498,7 @@ const (
 	configReloadWatchFailure
 	configReloadReplay
 	configReloadSettingThatIsNotLive
+	configReloadSnippets
 )
 
 func TestReloadingConfigDrawsEveryVisibleState(t *testing.T) {
@@ -5426,6 +5508,7 @@ func TestReloadingConfigDrawsEveryVisibleState(t *testing.T) {
 		"deleted config restores defaults": func() string { return configReloadStream(t, configReloadDeletion) },
 		"filesystem watch failure":         func() string { return configReloadStream(t, configReloadWatchFailure) },
 		"replayed failure and recovery":    func() string { return configReloadStream(t, configReloadReplay) },
+		"reloaded snippets":                func() string { return configReloadStream(t, configReloadSnippets) },
 		"revision to a setting that only a restart picks up": func() string {
 			return configReloadStream(t, configReloadSettingThatIsNotLive)
 		},
@@ -5458,7 +5541,7 @@ func TestEphemeralInterfaceFeedbackStaysOutOfConversationHistory(t *testing.T) {
 		screen:   output.NewTerminalOfSize(&liveOutput, replayColumns, terminalLines),
 		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read),
-		commands: fixtureCommandRegistry(t, slash.Command{
+		commands: fixtureCommandRegistryWithSnippets(t, nil, slash.Command{
 			Name: "help",
 			Run: func(context slash.Context, _ slash.Arguments) error {
 				context.Notice("Commands:\n  /help")
@@ -5630,13 +5713,35 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 		self.reloadConfig(errors.New("inotify stopped"))
 		self.show(editor)
 		return screenOutput.String()
+	case configReloadSnippets:
+		writeLiveConfig(t, path, `
+			[input]
+			continue = "first"
+
+			[snippets]
+			review = { prompt = "Review the changes.", description = "Review the working tree." }
+
+			[bar.top]
+			left = [{ segment = "session-name" }]
+			center = []
+			right = []
+
+			[bar.bottom]
+			left = []
+			center = []
+			right = []
+		`)
+		settleLiveConfig(t, self)
+		self.handleCommand("//help")
+		self.show(editor)
+		return screenOutput.String()
 	case configReloadSettingThatIsNotLive:
 		writeLiveConfig(t, path, `
 			[input]
 			continue = "first"
 
-			[editor]
-			command = "vi"
+			[model]
+			round_robin = ["ollama/example"]
 
 			[bar.top]
 			left = [{ segment = "session-name" }]
@@ -7093,8 +7198,17 @@ func fixtureCommandRegistry(t *testing.T, commands ...slash.Command) slash.Regis
 
 func fixtureSnippetRegistry(t *testing.T, configured map[string]snippets.Definition) slash.Registry {
 	t.Helper()
+	return fixtureCommandRegistryWithSnippets(t, configured)
+}
 
-	systemSet, err := slash.NewCommandSet("/")
+func fixtureCommandRegistryWithSnippets(
+	t *testing.T,
+	configured map[string]snippets.Definition,
+	commands ...slash.Command,
+) slash.Registry {
+	t.Helper()
+
+	systemSet, err := slash.NewCommandSet("/", commands...)
 	if err != nil {
 		t.Fatal(err)
 	}

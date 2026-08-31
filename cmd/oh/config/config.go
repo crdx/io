@@ -16,6 +16,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/shell"
+	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/snippets"
 
 	"crdx.org/io/internal/format"
@@ -40,9 +41,10 @@ type Config struct {
 	Ui       Ui                             `toml:"ui"`
 	Tool     Tool                           `toml:"tool"`
 
-	fallback *toml.MetaData
-	user     *toml.MetaData
-	filePath string
+	fallback             *toml.MetaData
+	user                 *toml.MetaData
+	filePath             string
+	snippetFileSnapshots map[string]snapshot
 }
 
 type Editor struct {
@@ -92,9 +94,12 @@ type Rule struct {
 }
 
 type LiveConfig struct {
-	ContinueMessage string
-	SegmentLayout   segment.Layout
-	StreamingMode   output.StreamingMode
+	ContinueMessage   string
+	EditorCommand     editor.Command
+	SegmentLayout     segment.Layout
+	SnippetCommandSet slash.CommandSet
+	StreamingMode     output.StreamingMode
+	ToolOutputBytes   int
 }
 
 func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
@@ -102,14 +107,24 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 	if err != nil {
 		return LiveConfig{}, err
 	}
+	snippetCommandSet, err := snippets.New(self.Snippets)
+	if err != nil {
+		if self.filePath == "" {
+			return LiveConfig{}, fmt.Errorf("snippets: %w", err)
+		}
+		return LiveConfig{}, fmt.Errorf("%s: snippets: %w", self.filePath, err)
+	}
 	if err := self.ValidateConsumed(); err != nil {
 		return LiveConfig{}, err
 	}
 
 	return LiveConfig{
-		ContinueMessage: self.Input.Continue,
-		SegmentLayout:   layout,
-		StreamingMode:   self.Ui.StreamingMode,
+		ContinueMessage:   self.Input.Continue,
+		EditorCommand:     self.Editor.Command,
+		SegmentLayout:     layout,
+		SnippetCommandSet: snippetCommandSet,
+		StreamingMode:     self.Ui.StreamingMode,
+		ToolOutputBytes:   self.Tool.Output.Bytes,
 	}, nil
 }
 
@@ -282,7 +297,24 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 			if err != nil {
 				return config, fmt.Errorf("%s: snippets.%s.file: %w", displayPath, name, err)
 			}
-			if err := definition.LoadFile(resolvedPath); err != nil {
+			definition.File = resolvedPath
+			config.Snippets[name] = definition
+
+			current := readSnapshot(resolvedPath)
+			if config.snippetFileSnapshots == nil {
+				config.snippetFileSnapshots = make(map[string]snapshot)
+			}
+			config.snippetFileSnapshots[resolvedPath] = current
+			if current.failure != nil {
+				return config, fmt.Errorf(
+					"%s: snippets.%s: could not read %s: %w",
+					displayPath,
+					name,
+					resolvedPath,
+					current.failure,
+				)
+			}
+			if err := definition.LoadFileContents(resolvedPath, current.data); err != nil {
 				return config, fmt.Errorf("%s: snippets.%s: %w", displayPath, name, err)
 			}
 		}

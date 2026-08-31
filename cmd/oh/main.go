@@ -12,7 +12,6 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
-	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/notify"
@@ -26,6 +25,7 @@ import (
 	"crdx.org/io/cmd/oh/commands"
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/cycle"
+	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/metrics"
@@ -39,7 +39,6 @@ import (
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/slash"
-	"crdx.org/io/cmd/oh/snippets"
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
@@ -168,6 +167,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer configObserver.Close()
 
+	editorConfiguration := editor.NewConfiguration(settings.Editor.Command)
+	toolOutputLimit := truncate.NewLimit(settings.Tool.Output.Bytes)
+
 	endpoints := backend.EndpointSettings{
 		OverrideURL: endpointURL,
 		OllamaHost:  settings.Provider.Ollama.Host,
@@ -263,10 +265,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer func() { _ = homeRoot.Close() }()
 
-	snippetCommands, err := snippets.New(settings.Snippets)
-	if err != nil {
-		return "", fmt.Errorf("%s: snippets: %w", pathutil.Shorten(configPath), err)
-	}
 	configuredModels, err := model.ParseRoundRobin(modelCachePath, settings.Model.RoundRobin)
 	if err != nil {
 		return "", err
@@ -419,7 +417,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	toolboxTools = append(toolboxTools, web.New(func() bool {
 		return mode.Current().Has(caps.Web)
 	}, client.Search)...)
-	toolboxTools = truncate.Tools(toolboxTools, settings.Tool.Output.Bytes)
+	toolboxTools = truncate.Tools(toolboxTools, toolOutputLimit)
 
 	enabledTools, err := toolset.Reduce(toolboxTools, args.Tools)
 	if err != nil {
@@ -435,7 +433,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		WorkspaceDir:     workspaceDir,
 		ScratchDir:       tmpDir,
 		HomeDir:          homeDir,
-		Editor:           settings.Editor.Command,
+		Editor:           editorConfiguration,
 		Output:           os.Stdout,
 		Session: commands.Session{
 			Name:           log.Name(),
@@ -470,22 +468,19 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
-	commandRegistry, err := slash.NewRegistry(systemCommands, snippetCommands)
-	if err != nil {
-		return "", err
-	}
 
 	chat = &App{
-		agent:          agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
-		screen:         screen,
-		terminal:       terminal.New(os.Stdout, workspaceDir),
-		metrics:        metrics.New(choice.ContextWindowTokens),
-		commands:       commandRegistry,
-		recorder:       record.New(log),
-		workspaceDir:   workspaceDir,
-		mode:           mode,
-		configObserver: configObserver,
-		startedAt:      time.Now(),
+		agent:               agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
+		screen:              screen,
+		terminal:            terminal.New(os.Stdout, workspaceDir),
+		metrics:             metrics.New(choice.ContextWindowTokens),
+		recorder:            record.New(log),
+		editorConfiguration: editorConfiguration,
+		toolOutputLimit:     toolOutputLimit,
+		workspaceDir:        workspaceDir,
+		mode:                mode,
+		configObserver:      configObserver,
+		startedAt:           time.Now(),
 	}
 	chat.onFailure = func(failure error) {
 		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspaceDir, failure)
@@ -507,6 +502,11 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
+	commandRegistry, err := slash.NewRegistry(systemCommands, liveSettings.SnippetCommandSet)
+	if err != nil {
+		return "", err
+	}
+	chat.commands = commandRegistry
 	chat.continueMessage = liveSettings.ContinueMessage
 	chat.streamingMode = liveSettings.StreamingMode
 	chat.barConfiguration = bar.NewConfiguration(barRegistry, liveSettings.SegmentLayout)

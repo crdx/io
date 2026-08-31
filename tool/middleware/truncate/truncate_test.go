@@ -247,7 +247,7 @@ func TestToolsWrapsEveryTool(t *testing.T) {
 	wrappedTools := truncate.Tools([]tool.Tool{
 		buildTool(newToolBuilder(t)),
 		buildTool(newToolBuilder(t)),
-	}, limitBytes)
+	}, truncate.NewLimit(limitBytes))
 
 	if len(wrappedTools) != 2 {
 		t.Fatalf("expected both tools back, got %d", len(wrappedTools))
@@ -257,6 +257,28 @@ func TestToolsWrapsEveryTool(t *testing.T) {
 		if !strings.Contains(exec(t, subject, `{"size":4000}`), "truncated at") {
 			t.Error("expected every tool to be capped")
 		}
+	}
+}
+
+func TestEachCallKeepsTheOutputLimitItStartedWith(t *testing.T) {
+	limit := truncate.NewLimit(1024)
+	subject := truncate.Tools([]tool.Tool{buildTool(newToolBuilder(t))}, limit)[0]
+
+	started, err := subject.Parse(`{"size":400}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	limit.Replace(limitBytes)
+
+	result, err := started.Exec(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(result.Output, "truncated at") {
+		t.Error("the started call lost its original limit")
+	}
+	if output := exec(t, subject, `{"size":400}`); strings.Contains(output, "truncated at") {
+		t.Error("a later call did not use the replacement limit")
 	}
 }
 

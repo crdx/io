@@ -202,6 +202,19 @@ func NewRegistry(sets ...CommandSet) (Registry, error) {
 	return Registry{sets: registeredSets}, nil
 }
 
+func (self Registry) ReplaceCommandSet(replacement CommandSet) error {
+	if err := validatePrefix(replacement.prefix); err != nil {
+		return err
+	}
+	for i, set := range self.sets {
+		if set.prefix == replacement.prefix {
+			self.sets[i] = replacement
+			return nil
+		}
+	}
+	return fmt.Errorf("command prefix %q is not registered", replacement.prefix)
+}
+
 func validatePrefix(prefix string) error {
 	if prefix == "" || strings.ContainsFunc(prefix, unicode.IsSpace) {
 		return fmt.Errorf("invalid command prefix %q", prefix)

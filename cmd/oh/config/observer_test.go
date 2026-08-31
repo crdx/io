@@ -66,6 +66,70 @@ func TestWritingAnObservedConfigLoadsTheNewRevision(t *testing.T) {
 	}
 }
 
+func TestWritingAnObservedSnippetFileLoadsTheNewPrompt(t *testing.T) {
+	directory := t.TempDir()
+	snippetsDirectory := filepath.Join(directory, "snippets")
+	if err := os.Mkdir(snippetsDirectory, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	snippetPath := filepath.Join(snippetsDirectory, "review.md")
+	if err := os.WriteFile(snippetPath, []byte("Review the first revision."), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	configPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(configPath, "[snippets]\nreview = { file = \"snippets/review.md\" }\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, observer := observeConfig(t, configPath)
+	if settings.Snippets["review"].Prompt != "Review the first revision." {
+		t.Errorf("got initial snippet %q", settings.Snippets["review"].Prompt)
+	}
+	if err := os.WriteFile(snippetPath, []byte("Review the reloaded revision."), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := awaitObservedConfig(t, observer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.Snippets["review"].Prompt != "Review the reloaded revision." {
+		t.Errorf("got changed snippet %q", settings.Snippets["review"].Prompt)
+	}
+}
+
+func TestCreatingAMissingObservedSnippetFileRecoversTheConfig(t *testing.T) {
+	directory := t.TempDir()
+	configPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(configPath, "[input]\ncontinue = \"first\"\n"); err != nil {
+		t.Fatal(err)
+	}
+	_, observer := observeConfig(t, configPath)
+
+	if err := writeConfigFile(configPath, "[snippets]\nreview = { file = \"new/review.md\" }\n"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := awaitObservedConfig(t, observer); err == nil {
+		t.Fatal("expected the missing snippet file to fail")
+	}
+
+	snippetPath := filepath.Join(directory, "new", "review.md")
+	if err := os.Mkdir(filepath.Dir(snippetPath), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(snippetPath, []byte("Review after recovery."), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := awaitObservedConfig(t, observer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.Snippets["review"].Prompt != "Review after recovery." {
+		t.Errorf("got recovered snippet %q", settings.Snippets["review"].Prompt)
+	}
+}
+
 func TestAtomicallyReplacingAnObservedConfigLoadsTheNewRevision(t *testing.T) {
 	directory := t.TempDir()
 	path := filepath.Join(directory, "config.toml")
@@ -176,7 +240,7 @@ func TestAValidReloadAfterAFailureIsApplied(t *testing.T) {
 	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
 		t.Fatal(err)
 	}
-	observer := &Observer{path: path, handledSnapshot: readSnapshot(path)}
+	_, observer := observeConfig(t, path)
 
 	failed := observer.Reload(errors.New("watch stopped"), testSegments())
 	if failed.Status != ReloadFailed || failed.Failure == nil {
