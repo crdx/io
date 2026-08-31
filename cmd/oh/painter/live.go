@@ -15,6 +15,7 @@ type liveText struct {
 	streamingMode output.StreamingMode
 	arrivedText   strings.Builder
 	drawn         int
+	drawnRowCount int
 	isTailHidden  bool
 }
 
@@ -33,12 +34,24 @@ func (self *liveText) Write(text string) {
 func (self *liveText) Reset() {
 	self.arrivedText.Reset()
 	self.drawn = 0
+	self.drawnRowCount = 0
 	self.isTailHidden = false
 }
 
-func (self *liveText) MarkDrawn(isTailHidden bool) {
+func (self *liveText) MarkDrawn() {
 	self.drawn = self.arrivedText.Len()
+}
+
+func (self *liveText) Take(rows []string, isTailHidden bool) []string {
+	if isTailHidden {
+		rows = rows[:min(max(len(rows)-1, self.drawnRowCount), len(rows))]
+	}
+
+	self.drawnRowCount = len(rows)
 	self.isTailHidden = isTailHidden
+	self.MarkDrawn()
+
+	return rows
 }
 
 func (self *liveText) IsDue() bool {

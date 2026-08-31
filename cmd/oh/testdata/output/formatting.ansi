@@ -1376,7 +1376,7 @@ And a pattern with a unicode class in it:
 \r\e[K\e[38;2;192;128;80m• \e[0m\e[38;2;76;154;44m[x] \e[0ma thing already done\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;192;128;80m• \e[0m\e[38;2;150;152;150m[ ] \e[0ma thing still to do\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[K\e[1m\e[38;2;207;173;0mAn indented code block\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mAn indented code block\e[0m\e[0m\r
+\r\e[K\e[1m\e[38;2;207;173;0mAn indented code block\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;150;152;150mplain = "indented four spaces, so it has no language"\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;150;152;150mprint(plain)\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
@@ -1403,8 +1403,6 @@ And a pattern with a unicode class in it:
 \r\e[KThe end.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KA script with a bit of everything in it:\r
-\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\r
-\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[KA script with a bit of everything in it:\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;201;166;212mif\e[0m \e[38;2;138;190;183m[\e[0m\e[38;2;138;190;183m[\e[0m \e[38;2;150;152;150m-d\e[0m \e[38;2;181;189;104m"\e[0m$DIR\e[38;2;181;189;104m"\e[0m \e[38;2;138;190;183m]\e[0m\e[38;2;138;190;183m]\e[0m; \e[38;2;201;166;212mthen\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K    \e[38;2;240;198;116mecho\e[0m \e[38;2;181;189;104m"there"\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
@@ -1414,17 +1412,17 @@ And a pattern with a unicode class in it:
 \r\e[K    \e[38;2;240;198;116mecho\e[0m \e[38;2;181;189;104m"nowhere"\e[0m\r
 \r\e[K\e[38;2;201;166;212mfi\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[K\e[38;2;201;166;212mwhile\e[0m \e[38;2;240;198;116mread\e[0m \e[38;2;150;152;150m-r\e[0m \e[38;2;150;152;150mNAME\e[0m; \e[38;2;201;166;212mdo\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212mwhile\e[0m \e[38;2;240;198;116mread\e[0m \e[38;2;150;152;150m-r\e[0m \e[38;2;150;152;150mNAME\e[0m; \e[38;2;201;166;212mdo\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;201;166;212mwhile\e[0m \e[38;2;240;198;116mread\e[0m \e[38;2;150;152;150m-r\e[0m \e[38;2;150;152;150mNAME\e[0m; \e[38;2;201;166;212mdo\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K    \e[38;2;240;198;116mecho\e[0m \e[38;2;181;189;104m"\e[0m$NAME\e[38;2;181;189;104m"\e[0m \e[38;2;150;152;150m>\e[0m \e[38;2;150;152;150mout.txt\e[0m \e[38;2;150;152;150m2>\e[0m&\e[38;2;192;128;80m1\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;201;166;212mdone\e[0m \e[38;2;150;152;150m<\e[0m \e[38;2;150;152;150mlist.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[K\e[38;2;201;166;212muntil\e[0m \e[38;2;138;190;183m[\e[0m\e[38;2;138;190;183m[\e[0m \e[38;2;150;152;150m-z\e[0m \e[38;2;181;189;104m"\e[0m$REST\e[38;2;181;189;104m"\e[0m \e[38;2;138;190;183m]\e[0m\e[38;2;138;190;183m]\e[0m; \e[38;2;201;166;212mdo\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;201;166;212muntil\e[0m \e[38;2;138;190;183m[\e[0m\e[38;2;138;190;183m[\e[0m \e[38;2;150;152;150m-z\e[0m \e[38;2;181;189;104m"\e[0m$REST\e[38;2;181;189;104m"\e[0m \e[38;2;138;190;183m]\e[0m\e[38;2;138;190;183m]\e[0m; \e[38;2;201;166;212mdo\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;201;166;212muntil\e[0m \e[38;2;138;190;183m[\e[0m\e[38;2;138;190;183m[\e[0m \e[38;2;150;152;150m-z\e[0m \e[38;2;181;189;104m"\e[0m$REST\e[38;2;181;189;104m"\e[0m \e[38;2;138;190;183m]\e[0m\e[38;2;138;190;183m]\e[0m; \e[38;2;201;166;212mdo\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K    REST\e[38;2;138;190;183m=\e[0m\e[38;2;181;189;104m""\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;201;166;212mdone\e[0m\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;201;166;212mcase\e[0m \e[38;2;181;189;104m"\e[0m$MODE\e[38;2;181;189;104m"\e[0m \e[38;2;150;152;150min\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K    \e[38;2;240;198;116mread\e[0m\e[38;2;138;190;183m)\e[0m  \e[38;2;240;198;116mecho\e[0m \e[38;2;150;152;150mreading\e[0m ;;\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[K    \e[38;2;150;152;150mwrite\e[0m\e[38;2;138;190;183m)\e[0m \e[38;2;240;198;116mecho\e[0m \e[38;2;150;152;150mwriting\e[0m ;;\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K    \e[38;2;150;152;150mwrite\e[0m\e[38;2;138;190;183m)\e[0m \e[38;2;240;198;116mecho\e[0m \e[38;2;150;152;150mwriting\e[0m ;;\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K    \e[38;2;150;152;150mwrite\e[0m\e[38;2;138;190;183m)\e[0m \e[38;2;240;198;116mecho\e[0m \e[38;2;150;152;150mwriting\e[0m ;;\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K    \e[38;2;150;152;150m*\e[0m\e[38;2;138;190;183m)\e[0m     \e[38;2;240;198;116mecho\e[0m \e[38;2;150;152;150mother\e[0m ;;\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;201;166;212mesac\e[0m\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
@@ -1433,8 +1431,6 @@ And a pattern with a unicode class in it:
 \r\e[K\e[38;2;150;152;150mls\e[0m \e[38;2;150;152;150m-la\e[0m | \e[38;2;150;152;150mgrep\e[0m \e[38;2;150;152;150m-v\e[0m \e[38;2;181;189;104m'^d'\e[0m | \e[38;2;150;152;150mwc\e[0m \e[38;2;150;152;150m-l\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[KAnd a pattern with a unicode class in it:\r
-\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\r
-\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[KAnd a pattern with a unicode class in it:\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;150;152;150m^\\p{Lu}\\w{2,8}(?:-\\d+)?$\e[0m\e[?25h\e[?2026l\r
 \e]9;4;0\e\\

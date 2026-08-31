@@ -47,4 +47,18 @@ That is the lot.
 
 ```
 
+## Assistant · +4s
+
+```
+And a nested list, whose markers arrive before the items they introduce:
+
+- read takes a file and hands it back
+  - and says how big it was
+  - and leaves it where it found it
+- grep walks the tree for a pattern
+
+That is the lot.
+
+```
+
 

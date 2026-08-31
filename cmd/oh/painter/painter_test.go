@@ -2,11 +2,14 @@ package painter
 
 import (
 	"bytes"
+	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/style"
@@ -29,6 +32,81 @@ func TestStartupDrawingUsesTheScreensTextSizingSupport(t *testing.T) {
 		})
 	}
 }
+
+func TestNoUnfinishedLineEverWithdrawsARowThatWasDrawn(t *testing.T) {
+	answers := map[string]string{
+		"a bullet marker":       "Here is the list.\n\n- one\n- two\n- three\n\nAnd after it.\n",
+		"a nested marker":       "Here is the list.\n\n- one\n  - deeper\n  - deeper still\n- two\n\nAnd after it.\n",
+		"an ordered marker":     "Here is the list.\n\n1. one\n2. two\n3. three\n\nAnd after it.\n",
+		"a task marker":         "Here is the list.\n\n- [ ] one\n- [x] two\n\nAnd after it.\n",
+		"a quoted marker":       "Here is the quote.\n\n> - one\n> - two\n\nAnd after it.\n",
+		"a heading marker":      "Here is the heading.\n\n## One\n\nAnd after it.\n",
+		"an indented code line": "Here is the code.\n\n    one = 1\n    two = 2\n\nAnd after it.\n",
+		"a table row":           "Here is the table.\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\nAnd after it.\n",
+	}
+
+	for name, answer := range answers {
+		t.Run(name, func(t *testing.T) {
+			for _, deltaRunes := range []int{1, 2, 3, 4, 5, 7} {
+				t.Run(strconv.Itoa(deltaRunes), func(t *testing.T) {
+					streamWithoutWithdrawing(t, answer, deltaRunes)
+				})
+			}
+		})
+	}
+}
+
+func streamWithoutWithdrawing(t *testing.T, answer string, deltaRunes int) {
+	t.Helper()
+
+	const columns = 40
+
+	var screenOutput bytes.Buffer
+
+	paint := New(output.NewTerminalOfSize(&screenOutput, columns, 24), false, nil, "", output.StreamingModeLine)
+
+	runes := []rune(answer)
+	drawnRowCount := 0
+
+	var arrived strings.Builder
+
+	for at := 0; at < len(runes); at += deltaRunes {
+		delta := string(runes[at:min(at+deltaRunes, len(runes))])
+		arrived.WriteString(delta)
+
+		screenOutput.Reset()
+		paint.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: delta})
+
+		rendered := len(markdown.Render(arrived.String(), columns))
+
+		if paint.answer.drawnRowCount < drawnRowCount && rendered >= drawnRowCount {
+			t.Errorf(
+				"delta %q took the drawn rows from %d down to %d while %d were rendered",
+				delta, drawnRowCount, paint.answer.drawnRowCount, rendered,
+			)
+		}
+		drawnRowCount = paint.answer.drawnRowCount
+
+		if drawsNothingButErases(screenOutput.String()) {
+			t.Errorf("delta %q sent a frame that erased without drawing: %q", delta, screenOutput.String())
+		}
+	}
+}
+
+func drawsNothingButErases(frame string) bool {
+	payload := style.Plain(frame)
+	for _, wrapper := range []string{"\x1b[?2026h", "\x1b[?2026l", "\x1b[?25l", "\x1b[?25h", "\x1b[?7l"} {
+		payload = strings.ReplaceAll(payload, wrapper, "")
+	}
+
+	if payload == "" || !strings.Contains(frame, "\x1b[K") && !strings.Contains(frame, "\x1b[J") {
+		return false
+	}
+
+	return strings.TrimLeft(cursorMotion.ReplaceAllString(payload, ""), "\r") == ""
+}
+
+var cursorMotion = regexp.MustCompile(`\x1b\[[0-9]*[ABCDJK]`)
 
 func TestNewQuestionClosesOldToolBlockAndResetsRows(t *testing.T) {
 	paint := New(output.New(&bytes.Buffer{}), false, nil, "", output.StreamingModeLine)

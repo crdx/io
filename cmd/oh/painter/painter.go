@@ -305,13 +305,8 @@ func (self *Picasso) drawReasoning(isSettled bool) {
 	rows := RenderReasoning(self.reasoning.String(), self.screen.Columns())
 
 	isTailHidden := !isSettled && self.streamingMode == output.StreamingModeLine
-	if isTailHidden {
-		rows = rows[:max(len(rows)-1, 0)]
-	}
 
-	self.reasoning.MarkDrawn(isTailHidden)
-
-	if !self.screen.DrawReasoning(rows) {
+	if !self.screen.DrawReasoning(self.reasoning.Take(rows, isTailHidden)) {
 		self.isStale = true
 	}
 }
@@ -319,14 +314,7 @@ func (self *Picasso) drawReasoning(isSettled bool) {
 func (self *Picasso) drawAnswer(isSettled bool) {
 	rows := self.answerRenderer.Render(self.answer.String(), self.screen.Columns())
 
-	isTailHidden := self.isTailHeldBack(isSettled)
-	if isTailHidden {
-		rows = rows[:max(len(rows)-1, 0)]
-	}
-
-	self.answer.MarkDrawn(isTailHidden)
-
-	if !self.screen.DrawAnswer(rows) {
+	if !self.screen.DrawAnswer(self.answer.Take(rows, self.isTailHeldBack(isSettled))) {
 		self.isStale = true
 	}
 }

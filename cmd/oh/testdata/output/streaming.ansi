@@ -28,6 +28,16 @@
 \r\e[K\e[38;2;150;152;150m└──────┴───────────────────────────────┘\e[0m\r
 \r\e[K\r
 \r\e[KThat is the lot.\r
+\r
+\r\e[KAnd a nested list, whose markers arrive\r
+\r\e[Kbefore the items they introduce:\r
+\r\e[K\r
+\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands it back\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand says how big it was\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it where it found it\r
+\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree for a pattern\r
+\r\e[K\r
+\r\e[KThat is the lot.\r
 \e[?25h\e[?2026l
 === one column ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
@@ -371,6 +381,183 @@ s\e[0m\r
 \r\e[Ko\r
 \r\e[Kt\r
 \r\e[K.\r
+\r
+\r\e[KA\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[Kl\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[K,\r
+\r\e[Kw\r
+\r\e[Kh\r
+\r\e[Ko\r
+\r\e[Ks\r
+\r\e[Ke\r
+\r\e[Km\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Kk\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kr\r
+\r\e[Kr\r
+\r\e[Ki\r
+\r\e[Kv\r
+\r\e[Ke\r
+\r\e[Kb\r
+\r\e[Ke\r
+\r\e[Kf\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Km\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ky\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[Kr\r
+\r\e[Ko\r
+\r\e[Kd\r
+\r\e[Ku\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[K:\r
+\r\e[K\r
+\r\e[K\e[38;2;192;128;80m•\e[0m\r
+\r\e[K\e[38;2;192;128;80m\e[0mr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[Kt\r
+\r\e[Ka\r
+\r\e[Kk\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kf\r
+\r\e[Ki\r
+\r\e[Kl\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ks\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Kb\r
+\r\e[Ka\r
+\r\e[Kc\r
+\r\e[Kk\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Ky\r
+\r\e[Ks\r
+\r\e[Kh\r
+\r\e[Ko\r
+\r\e[Kw\r
+\r\e[Kb\r
+\r\e[Ki\r
+\r\e[Kg\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Kw\r
+\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Kl\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kv\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Kw\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Kf\r
+\r\e[Ko\r
+\r\e[Ku\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[K\e[38;2;192;128;80m•\e[0m\r
+\r\e[K\e[38;2;192;128;80m\e[0mg\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kp\r
+\r\e[Kw\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Kk\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ke\r
+\r\e[Kf\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kp\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Kn\r
+\r\e[K\r
+\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kl\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[K.\r
 \e[?25h\e[?2026l
 === plain ===
 \e[48;2;52;53;65m\e[0m
@@ -389,6 +576,13 @@ And a table, which changes shape as its rows arrive:
 Tool\e[38;2;150;152;150m | \e[0mWhat it does when it is asked to
 read\e[38;2;150;152;150m | \e[0mtakes a file and hands it back to you
 grep\e[38;2;150;152;150m | \e[0mwalks the whole tree looking for a pattern
+
+That is the lot.
+
+And a nested list, whose markers arrive before the items they introduce:
+
+\e[38;2;192;128;80m• \e[0mread takes a file and hands it backand says how big it wasand leaves it where it found it
+\e[38;2;192;128;80m• \e[0mgrep walks the tree for a pattern
 
 That is the lot.
 
@@ -456,6 +650,15 @@ That is the lot.
 \r\e[K\e[38;2;150;152;150m└──────┴────────────────────────────────────────────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[KT\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the l\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot.\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KAnd\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a ne\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested lis\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose mar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive befo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the items\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the items the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the items they in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the items they introd\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the items they introduce:\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[K\e[38;2;192;128;80m• \e[0mread\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread tak\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a fil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands it b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands it back\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0m\e[1m\e[38;2;207;173;0mread takes a file and hands it back\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands it back\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand says\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand says how\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand says how big\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand says how big it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand says how big it was\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leav\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it wh\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it where\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it where it f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it where it found\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it where it found it\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;192;128;80m• \e[0mgr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree fo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree for a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree for a patt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree for a pattern\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[KTha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -465,8 +668,6 @@ That is the lot.
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mA loop over the listing is the shortest way to say it.\e[0m\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KTry this.\r
-\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\r
-\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[KTry this.\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;201;166;212mfor\e[0m \e[38;2;150;152;150mNAME\e[0m \e[38;2;150;152;150min\e[0m \e[38;2;201;166;212m$(\e[0m\e[38;2;150;152;150mls\e[0m \e[38;2;150;152;150m*.go\e[0m\e[38;2;201;166;212m)\e[0m; \e[38;2;201;166;212mdo\e[0m \e[38;2;240;198;116mecho\e[0m \e[38;2;181;189;104m"\e[0m$NAME\e[38;2;181;189;104m is quite a long line indeed\e[0m\e[38;2;181;189;104m"\e[0m; \e[38;2;201;166;212mdone\e[0m\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
@@ -497,6 +698,15 @@ That is the lot.
 \r\e[K\e[38;2;150;152;150m├──────┼────────────────────────────────────────────┤\e[0m\r
 \r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the whole tree looking for a pattern \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;150;152;150m└──────┴────────────────────────────────────────────┘\e[0m\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[KThat is the lot.\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the items they introduce:\r
+\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands it back\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0m\e[1m\e[38;2;207;173;0mread takes a file and hands it back\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands it back\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand says how big it was\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it where it found it\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree for a pattern\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[KThat is the lot.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -564,6 +774,15 @@ That is the lot.
 \r\e[K\e[38;2;150;152;150m└──────┴────────────────────────────────────────────┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
 \r\e[KT\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the l\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot.\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KAnd\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a ne\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested lis\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose mar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive befo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the items\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the items the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the items they in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the items they introd\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KAnd a nested list, whose markers arrive before the items they introduce:\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[K\e[38;2;192;128;80m• \e[0mread\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread tak\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a fil\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands it b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands it back\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0m\e[1m\e[38;2;207;173;0mread takes a file and hands it back\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands it back\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand says\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand says how\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand says how big\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand says how big it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand says how big it was\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leav\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it wh\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it where\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it where it f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it where it found\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it where it found it\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;192;128;80m• \e[0mgr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree fo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree for a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree for a patt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree for a pattern\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\r
+\r\e[KTha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
@@ -645,6 +864,34 @@ That is the lot.
 \r\e[K\r
 \r\e[KThat is the\r
 \r\e[Klot.\r
+\r
+\r\e[KAnd a nested\r
+\r\e[Klist, whose\r
+\r\e[Kmarkers\r
+\r\e[Karrive\r
+\r\e[Kbefore the\r
+\r\e[Kitems they\r
+\r\e[Kintroduce:\r
+\r\e[K\r
+\r\e[K\e[38;2;192;128;80m• \e[0mread takes\r
+\r\e[K  a file and\r
+\r\e[K  hands it\r
+\r\e[K  back\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand says\r
+\r\e[K    how big\r
+\r\e[K    it was\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand\r
+\r\e[K    leaves\r
+\r\e[K    it where\r
+\r\e[K    it found\r
+\r\e[K    it\r
+\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks\r
+\r\e[K  the tree\r
+\r\e[K  for a\r
+\r\e[K  pattern\r
+\r\e[K\r
+\r\e[KThat is the\r
+\r\e[Klot.\r
 \e[?25h\e[?2026l
 === unsized ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
@@ -663,6 +910,13 @@ That is the lot.
 \r\e[KTool\e[38;2;150;152;150m | \e[0mWhat it does when it is asked to\r
 \r\e[Kread\e[38;2;150;152;150m | \e[0mtakes a file and hands it back to you\r
 \r\e[Kgrep\e[38;2;150;152;150m | \e[0mwalks the whole tree looking for a pattern\r
+\r\e[K\r
+\r\e[KThat is the lot.
+
+\r\e[KAnd a nested list, whose markers arrive before the items they introduce:\r
+\r\e[K\r
+\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands it backand says how big it wasand leaves it where it found it\r
+\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree for a pattern\r
 \r\e[K\r
 \r\e[KThat is the lot.
 \e[?25h\e[?2026l
@@ -688,6 +942,15 @@ That is the lot.
 \r\e[K\e[38;2;150;152;150m├──────┼────────────────────────────────────────────┤\e[0m\r
 \r\e[K\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the whole tree looking for a pattern \e[38;2;150;152;150m│\e[0m\r
 \r\e[K\e[38;2;150;152;150m└──────┴────────────────────────────────────────────┘\e[0m\r
+\r\e[K\r
+\r\e[KThat is the lot.\r
+\r
+\r\e[KAnd a nested list, whose markers arrive before the items they introduce:\r
+\r\e[K\r
+\r\e[K\e[38;2;192;128;80m• \e[0mread takes a file and hands it back\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand says how big it was\r
+\r\e[K  \e[38;2;192;128;80m• \e[0mand leaves it where it found it\r
+\r\e[K\e[38;2;192;128;80m• \e[0mgrep walks the tree for a pattern\r
 \r\e[K\r
 \r\e[KThat is the lot.\r
 \e[?25h\e[?2026l

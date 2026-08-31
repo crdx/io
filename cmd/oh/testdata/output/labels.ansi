@@ -385,7 +385,7 @@ I left a note in ~/README.md and the skill is at ~/skills/tidy/SKILL.md.
 \r
 \e[?2026h\e[?25l\r\e[KThe listing is \e[38;2;192;128;80m日本語のテキストと絵文字 🎉 が混ざった行\e[0m, which is wider on screen than it is long.\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.md.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.md.\r
+\r\e[KI left a note in \e]8;;file:///workspace/README.md\e\\~/README.md\e]8;;\e\\ and the skill is at ~/skills/tidy/SKILL.md.\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;150;152;150m// count reports how many there were.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mcount\e[0m() \e[38;2;240;198;116mint\e[0m {\e[?25h\e[?2026l\e[?2026h\e[?25l\r

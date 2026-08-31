@@ -566,8 +566,6 @@ w\e[0m\r
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mMapping the request path.\e[0m\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mRequest processing\e[0m\e[0m\r
-\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\r
-\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[1m\e[38;2;207;173;0mRequest processing\e[0m\e[0m\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K┌────┐\r
 \r\e[K│    │\r

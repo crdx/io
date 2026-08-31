@@ -834,7 +834,7 @@ See \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/
 \r
 \e[?2026h\e[?25l\r\e[K\e[1m\e[38;2;207;173;0mWhat the tools cost\e[0m\e[0m\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A run looks like this:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A run looks like this:\r
+\r\e[KThe \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A run looks like this:\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mmain\e[0m() {\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K    fmt.\e[38;2;129;162;190mPrintln\e[0m(\e[38;2;181;189;104m"hello"\e[0m)\e[?25h\e[?2026l\e[?2026h\e[?25l\r
@@ -892,8 +892,6 @@ See \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/
 \r\e[K\e[38;2;150;152;150m├──────┼─────────────────────────────────────────────┼──────┤\e[0m\r
 \r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox with no network \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox with no network \e[38;2;150;152;150m│\e[0m   40 \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;150;152;150m└──────┴─────────────────────────────────────────────┴──────┘\e[0m\r
-\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\r
-\r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m└──────┴─────────────────────────────────────────────┴──────┘\e[0m\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K┌────┐\r
 \r\e[K│    │\r
