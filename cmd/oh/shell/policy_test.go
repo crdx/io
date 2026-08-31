@@ -2,12 +2,14 @@ package shell
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -50,6 +52,17 @@ func createTestPolicy(
 	)
 }
 
+func newTestPathAccess(t *testing.T, files *file.Root, mode *caps.Mode) *PathAccess {
+	t.Helper()
+
+	access, err := NewPathAccess(files, mode, Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(access.Close)
+	return access
+}
+
 func TestOnlyACommandSaturatingTheMachineReachesTheProcessorLimit(t *testing.T) {
 	limit := shellCPUTime()
 	cores := runtime.NumCPU()
@@ -87,7 +100,8 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read)
-	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), Paths{}, mode, files)
+	pathAccess := newTestPathAccess(t, files, mode)
+	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), pathAccess, mode, files)
 
 	if shell.Name() != "bash" {
 		t.Errorf("expected the shell to be offered as bash, got %q", shell.Name())
@@ -122,7 +136,8 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read | caps.Shell)
-	shell := New(workspace, home, tmp, Paths{}, mode, files)
+	pathAccess := newTestPathAccess(t, files, mode)
+	shell := New(workspace, home, tmp, pathAccess, mode, files)
 	run := func() {
 		call, parseErr := shell.Parse(`{"command":"printf %s \"$MISE_DATA_DIR\""}`)
 		if parseErr != nil {
@@ -165,7 +180,8 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 
 	mode := caps.NewMode(initialCaps)
 	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
-	shell := New(workspace, home, tmp, Paths{}, mode, files)
+	pathAccess := newTestPathAccess(t, files, mode)
+	shell := New(workspace, home, tmp, pathAccess, mode, files)
 
 	run := func() error {
 		call, parseErr := shell.Parse(`{"command":"touch .git/proof"}`)
@@ -183,6 +199,100 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 	mode.Toggle(caps.Git)
 	if err := run(); err != nil {
 		t.Fatalf("repository metadata remained read-only after git was granted: %v", err)
+	}
+}
+
+func TestTemporaryPathAccessChangesTheNextShellCommand(t *testing.T) {
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	home := t.TempDir()
+	tmp := t.TempDir()
+	externalDirectory := t.TempDir()
+	externalFile := filepath.Join(externalDirectory, "reference")
+	if err := os.WriteFile(externalFile, []byte("reference text"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	currentCaps := caps.Read | caps.Shell
+	if _, err := createPolicy(t.Context(), workspace, home, tmp, Paths{Read: []string{externalDirectory}}, currentCaps); err != nil {
+		t.Skipf("the sandbox cannot enforce a shell policy here: %v", err)
+	}
+
+	mode := caps.NewMode(currentCaps)
+	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	access, err := NewPathAccess(files, mode, Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+	shellTool := New(workspace, home, tmp, access, mode, files)
+	run := func() (string, error) {
+		arguments, marshalErr := json.Marshal(map[string]string{"command": "cat " + strconv.Quote(externalFile)})
+		if marshalErr != nil {
+			t.Fatal(marshalErr)
+		}
+		call, parseErr := shellTool.Parse(string(arguments))
+		if parseErr != nil {
+			t.Fatal(parseErr)
+		}
+		result, execErr := call.Exec(t.Context())
+		return result.Output, execErr
+	}
+
+	if _, err := run(); err == nil {
+		t.Fatal("external path was readable before it was granted")
+	}
+	if _, err := access.Grant(externalDirectory, false); err != nil {
+		t.Fatal(err)
+	}
+	if output, err := run(); err != nil || output != "reference text" {
+		t.Errorf("granted read got %q and %v", output, err)
+	}
+	access.Revoke(externalDirectory)
+	if _, err := run(); err == nil {
+		t.Fatal("external path remained readable after revocation")
+	}
+}
+
+func TestFreshPoliciesFollowTemporaryPathAccess(t *testing.T) {
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	mode := caps.NewMode(caps.Read | caps.Write)
+	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	access, err := NewPathAccess(files, mode, Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	temporaryDirectory := t.TempDir()
+	if _, err := access.Grant(temporaryDirectory, true); err != nil {
+		t.Fatal(err)
+	}
+	policy, err := createTestPolicy(t, workspace, t.TempDir(), t.TempDir(), access.GetPaths(), mode.Current())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Contains(policy.Write, temporaryDirectory) {
+		t.Errorf("temporary write path is absent from %#v", policy)
+	}
+
+	access.Revoke(temporaryDirectory)
+	policy, err = createTestPolicy(t, workspace, t.TempDir(), t.TempDir(), access.GetPaths(), mode.Current())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if slices.Contains(policy.Read, temporaryDirectory) || slices.Contains(policy.Write, temporaryDirectory) {
+		t.Errorf("revoked path survived in %#v", policy)
 	}
 }
 
@@ -791,7 +901,8 @@ func TestASymlinkedCacheIsReportedToWhoeverAskedForTheCommand(t *testing.T) {
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Write | caps.Shell)
-	shell := New(workspace, home, t.TempDir(), Paths{}, mode, files)
+	pathAccess := newTestPathAccess(t, files, mode)
+	shell := New(workspace, home, t.TempDir(), pathAccess, mode, files)
 
 	call, err := shell.Parse(`{"command":"echo one"}`)
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"syscall"
 
 	"crdx.org/io/internal/util/pathutil"
@@ -47,7 +48,9 @@ type mountedRoot struct {
 type Root struct {
 	root   *os.Root
 	refuse func(name string) error // what stands in the way of changing a path, asked afresh
-	mounts map[string]mountedRoot
+
+	mountsMutex sync.RWMutex
+	mounts      map[string]mountedRoot
 }
 
 // New builds a Root over an open directory. refuse is checked before each change.
@@ -55,14 +58,22 @@ func New(root *os.Root, refuseWrite func(name string) error) *Root {
 	return &Root{root: root, refuse: refuseWrite, mounts: map[string]mountedRoot{}}
 }
 
-// Mount adds a tree at an absolute path.
 func (self *Root) Mount(path string, root *Root) {
+	self.mountsMutex.Lock()
+	defer self.mountsMutex.Unlock()
 	self.mounts[filepath.Clean(path)] = mountedRoot{root: root, name: "."}
 }
 
-// MountFile adds one file from a tree at an absolute path.
 func (self *Root) MountFile(path string, root *Root, name string) {
+	self.mountsMutex.Lock()
+	defer self.mountsMutex.Unlock()
 	self.mounts[filepath.Clean(path)] = mountedRoot{root: root, name: name, isExact: true}
+}
+
+func (self *Root) Unmount(path string) {
+	self.mountsMutex.Lock()
+	defer self.mountsMutex.Unlock()
+	delete(self.mounts, filepath.Clean(path))
 }
 
 // Resolve finds the tree and local name for a path.
@@ -81,6 +92,9 @@ func (self *Root) Resolve(path string) (*Root, string, error) {
 	if name, ok := pathutil.RelativeTo(self.Name(), path); ok {
 		return self, name, nil
 	}
+
+	self.mountsMutex.RLock()
+	defer self.mountsMutex.RUnlock()
 
 	var resolvedRoot *Root
 	resolvedName := ""

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 
 	"crdx.org/io/cmd/oh/caps"
@@ -125,7 +126,7 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	roots, err := MountPaths(files, mode, Paths{
+	access, err := NewPathAccess(files, mode, Paths{
 		Read:  []string{readDirectory},
 		Write: []string{writeDirectory},
 		Exec:  []string{execDirectory},
@@ -133,7 +134,7 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer CloseRoots(roots)
+	defer access.Close()
 
 	readRoot, name, err := files.Resolve(filepath.Join(readDirectory, "reference"))
 	if err != nil {
@@ -170,6 +171,107 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 	}
 }
 
+func TestTemporaryAccessOverridesAndThenRestoresConfiguredAccess(t *testing.T) {
+	mode := caps.NewMode(caps.Read | caps.Write)
+	files := configuredPathTestRoot(t, mode)
+	configuredDirectory := t.TempDir()
+
+	access, err := NewPathAccess(files, mode, Paths{Read: []string{configuredDirectory}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	mountedRoot, name, err := files.Resolve(filepath.Join(configuredDirectory, "proof"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := mountedRoot.WriteFile(name, []byte("blocked"), 0o600); !errors.Is(err, file.ErrReadOnly) {
+		t.Errorf("configured read path write got %v", err)
+	}
+
+	if hasChanged, err := access.Grant(configuredDirectory, true); err != nil || !hasChanged {
+		t.Fatalf("grant changed=%t: %v", hasChanged, err)
+	}
+	mountedRoot, name, err = files.Resolve(filepath.Join(configuredDirectory, "proof"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := mountedRoot.WriteFile(name, []byte("written"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if !access.Revoke(configuredDirectory) {
+		t.Fatal("temporary access was not revoked")
+	}
+	mountedRoot, name, err = files.Resolve(filepath.Join(configuredDirectory, "proof"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := mountedRoot.WriteFile(name, []byte("blocked again"), 0o600); !errors.Is(err, file.ErrReadOnly) {
+		t.Errorf("restored read path write got %v", err)
+	}
+}
+
+func TestRevokingANewTemporaryPathRemovesItFromBothEnforcers(t *testing.T) {
+	mode := caps.NewMode(caps.Read)
+	files := configuredPathTestRoot(t, mode)
+	access, err := NewPathAccess(files, mode, Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	temporaryDirectory := t.TempDir()
+	if hasChanged, err := access.Grant(temporaryDirectory, false); err != nil || !hasChanged {
+		t.Fatalf("grant changed=%t: %v", hasChanged, err)
+	}
+	if _, _, err := files.Resolve(temporaryDirectory); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Contains(access.GetPaths().Read, temporaryDirectory) {
+		t.Errorf("shell paths do not include %s", temporaryDirectory)
+	}
+
+	if !access.Revoke(temporaryDirectory) {
+		t.Fatal("temporary access was not revoked")
+	}
+	if _, _, err := files.Resolve(temporaryDirectory); !errors.Is(err, file.ErrOutsideRoot) {
+		t.Errorf("revoked file path resolved with %v", err)
+	}
+	if slices.Contains(access.GetPaths().Read, temporaryDirectory) {
+		t.Errorf("shell paths kept %s", temporaryDirectory)
+	}
+}
+
+func TestTemporaryMountsCanChangeWhileFileToolsResolvePaths(t *testing.T) {
+	mode := caps.NewMode(caps.Read)
+	files := configuredPathTestRoot(t, mode)
+	access, err := NewPathAccess(files, mode, Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	temporaryDirectory := t.TempDir()
+	var waitGroup sync.WaitGroup
+	waitGroup.Add(2)
+	go func() {
+		defer waitGroup.Done()
+		for range 100 {
+			_, _ = access.Grant(temporaryDirectory, false)
+			access.Revoke(temporaryDirectory)
+		}
+	}()
+	go func() {
+		defer waitGroup.Done()
+		for range 1000 {
+			_, _, _ = files.Resolve(temporaryDirectory)
+		}
+	}()
+	waitGroup.Wait()
+}
+
 func TestConfiguredFilesAreMountedWithoutTheirSiblings(t *testing.T) {
 	mode := caps.NewMode(caps.Read)
 	files := configuredPathTestRoot(t, mode)
@@ -184,14 +286,14 @@ func TestConfiguredFilesAreMountedWithoutTheirSiblings(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	roots, err := MountPaths(files, mode, Paths{
+	access, err := NewPathAccess(files, mode, Paths{
 		Read:  []string{readPath, writePath},
 		Write: []string{writePath},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer CloseRoots(roots)
+	defer access.Close()
 
 	readRoot, name, err := files.Resolve(readPath)
 	if err != nil {
@@ -237,11 +339,11 @@ func TestAConfiguredFileSymlinkCannotDisguiseRepositoryMetadata(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	roots, err := MountPaths(files, mode, Paths{Write: []string{alias}})
+	access, err := NewPathAccess(files, mode, Paths{Write: []string{alias}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer CloseRoots(roots)
+	defer access.Close()
 
 	mountedRoot, name, err := files.Resolve(alias)
 	if err != nil {

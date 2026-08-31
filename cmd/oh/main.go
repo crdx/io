@@ -273,11 +273,11 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
-	configuredRoots, err := shell.MountPaths(files, mode, settings.Sandbox)
+	pathAccess, err := shell.NewPathAccess(files, mode, settings.Sandbox)
 	if err != nil {
 		return "", err
 	}
-	defer shell.CloseRoots(configuredRoots)
+	defer pathAccess.Close()
 
 	globalSkillDirs := append([]string{location.GetConfigDir("skills")}, settings.Skills.Include...)
 	availableSkills, err := skill.Discover(workspaceDir, globalSkillDirs, os.Stderr)
@@ -407,7 +407,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
-	shellTool := shell.New(workspaceDir, homeDir, tmpDir, settings.Sandbox, mode, files)
+	shellTool := shell.New(workspaceDir, homeDir, tmpDir, pathAccess, mode, files)
 
 	toolboxTools = append(toolboxTools, shellTool)
 	if notify.IsAvailable() {

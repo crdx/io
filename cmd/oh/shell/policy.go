@@ -297,7 +297,7 @@ func New(
 	workspaceDir string,
 	homeDir string,
 	tmpDir string,
-	extraPaths Paths,
+	pathAccess *PathAccess,
 	mode *caps.Mode,
 	files *file.Root,
 ) tool.Tool {
@@ -308,7 +308,7 @@ func New(
 			return sandbox.Policy{}, ErrWithheld
 		}
 
-		policy, err := createPolicy(ctx, workspaceDir, homeDir, tmpDir, extraPaths, currentCaps)
+		policy, err := createPolicy(ctx, workspaceDir, homeDir, tmpDir, pathAccess.GetPaths(), currentCaps)
 		if err != nil {
 			if ctx.Err() != nil {
 				return policy, ctx.Err()

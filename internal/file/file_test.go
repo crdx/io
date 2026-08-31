@@ -258,6 +258,21 @@ func TestTheMostSpecificMountResolvesANestedPath(t *testing.T) {
 	}
 }
 
+func TestAnUnmountedPathNoLongerResolves(t *testing.T) {
+	isWritable := false
+	root, _ := testRoot(t, &isWritable)
+	mounted, mountedPath := testRoot(t, &isWritable)
+
+	root.Mount(mountedPath, mounted)
+	if _, _, err := root.Resolve(mountedPath); err != nil {
+		t.Fatal(err)
+	}
+	root.Unmount(mountedPath)
+	if _, _, err := root.Resolve(mountedPath); !errors.Is(err, file.ErrOutsideRoot) {
+		t.Errorf("unmounted path resolved with %v", err)
+	}
+}
+
 func TestAnExactFileMountResolvesOnlyTheNamedFile(t *testing.T) {
 	isWritable := false
 	root, _ := testRoot(t, &isWritable)

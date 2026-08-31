@@ -7667,8 +7667,13 @@ func newSessionGoldenWithheldShell(t *testing.T) tool.Tool {
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read)
+	pathAccess, err := shell.NewPathAccess(files, mode, shell.Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(pathAccess.Close)
 
-	return shell.New(workspace, t.TempDir(), t.TempDir(), shell.Paths{}, mode, files)
+	return shell.New(workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files)
 }
 
 func serveSessionGoldenResponse(
