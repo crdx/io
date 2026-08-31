@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/internal/util/strutil"
 )
 
 const (
@@ -25,6 +26,10 @@ func (self *liveText) Len() int {
 
 func (self *liveText) String() string {
 	return self.arrivedText.String()
+}
+
+func (self *liveText) Text() string {
+	return strutil.StripControl(self.arrivedText.String())
 }
 
 func (self *liveText) Write(text string) {

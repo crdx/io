@@ -3,6 +3,8 @@
  show terminal-active text safely
 
 
+reasoning before after second line
+
 notice before [2J [H after
 second line
 Failure before ]2;stolen title  after
@@ -68,6 +70,37 @@ l
 
 y
 
+
+r
+e
+a
+s
+o
+n
+i
+n
+g
+b
+e
+f
+o
+r
+e
+a
+f
+t
+e
+r
+s
+e
+c
+o
+n
+d
+l
+i
+n
+e
 
 n
 o
@@ -151,6 +184,10 @@ e
  safely
 
 
+reasoning
+before after
+second line
+
 notice befor
 e [2J [H aft
 er
@@ -163,6 +200,8 @@ second line
 
  show terminal-active text safely
 
+
+reasoning before after second line
 
 notice before [2J [H after
 second line

@@ -90,6 +90,8 @@ type proseStream struct {
 }
 
 func (self *proseStream) add(output Output) []Update {
+	output.Text = strutil.StripControl(output.Text)
+
 	if output.Done {
 		if self.kind != output.Kind || self.text.Len() == 0 {
 			self.resetText()

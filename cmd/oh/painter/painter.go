@@ -105,7 +105,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		self.discardProvisionalReasoning()
 		self.answer.Reset()
 		self.answer.Write(event.Text)
-		if !self.screen.DrawAnswer(markdown.Render(self.answer.String(), self.screen.Columns())) {
+		if !self.screen.DrawAnswer(markdown.Render(self.answer.Text(), self.screen.Columns())) {
 			self.isStale = true
 		}
 		self.screen.Seal()
@@ -181,7 +181,7 @@ func RenderSubmittedMessage(text string, columns int) string {
 		contentColumns--
 	}
 
-	content := markdown.Render(text, contentColumns)
+	content := markdown.Render(strutil.StripControl(text), contentColumns)
 	for i, row := range content {
 		content[i] = " " + row
 	}
@@ -302,7 +302,7 @@ func (self *Picasso) settleAnswer() {
 }
 
 func (self *Picasso) drawReasoning(isSettled bool) {
-	rows := RenderReasoning(self.reasoning.String(), self.screen.Columns())
+	rows := RenderReasoning(self.reasoning.Text(), self.screen.Columns())
 
 	isTailHidden := !isSettled && self.streamingMode == output.StreamingModeLine
 
@@ -312,7 +312,7 @@ func (self *Picasso) drawReasoning(isSettled bool) {
 }
 
 func (self *Picasso) drawAnswer(isSettled bool) {
-	rows := self.answerRenderer.Render(self.answer.String(), self.screen.Columns())
+	rows := self.answerRenderer.Render(self.answer.Text(), self.screen.Columns())
 
 	if !self.screen.DrawAnswer(self.answer.Take(rows, self.isTailHeldBack(isSettled))) {
 		self.isStale = true

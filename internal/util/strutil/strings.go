@@ -72,6 +72,18 @@ var escapeSequence = regexp.MustCompile(
 	`\x1b(?:` + controlSequence + `|` + commandString + `|` + otherSequence + `)`,
 )
 
+func StripControl(text string) string {
+	return strings.Map(withoutControl, escapeSequence.ReplaceAllString(text, ""))
+}
+
+func withoutControl(character rune) rune {
+	if character == '\n' || character == '\t' || !unicode.IsControl(character) {
+		return character
+	}
+
+	return -1
+}
+
 func stripped(text string) string {
 	return strings.Map(strippedRune, escapeSequence.ReplaceAllString(text, ""))
 }

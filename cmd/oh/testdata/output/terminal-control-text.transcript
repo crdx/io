@@ -14,14 +14,21 @@
 show terminal-active text safely
 ```
 
-## Notice · info · +1s
+## Reasoning · +1s
+
+```
+reasoning before\e[2J after
+second line
+```
+
+## Notice · info · +2s
 
 ```
 notice before\e[2J\e[H after
 second\tline\x07
 ```
 
-## Failure · +2s
+## Failure · +3s
 
 ```
 failure before\e]2;stolen title\x07 after
