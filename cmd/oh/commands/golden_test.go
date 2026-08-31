@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/snippets"
 )
@@ -21,8 +22,12 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		prefix string
 		steps  int
 	}{
-		{prefix: "/", steps: 7},
+		{prefix: "/", steps: 10},
 		{prefix: "/c", steps: 2},
+		{prefix: "/g", steps: 2},
+		{prefix: "/grant ", steps: 2},
+		{prefix: "/r", steps: 1},
+		{prefix: "/revoke ", steps: 1},
 		{prefix: "/copy ", steps: 3},
 		{prefix: "/copy l", steps: 1},
 		{prefix: "/copy sn", steps: 1},
@@ -76,7 +81,9 @@ func fixtureEnvironment(t *testing.T) commandEnvironment {
 	if err := os.Mkdir(filepath.Join(configDirectory, "snippets"), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	return commandEnvironment{configDir: configDirectory}
+	grants, current := fixturePathGrants()
+	*current = []pathgrant.Grant{{Path: "/reference", Access: pathgrant.ReadAccess}}
+	return commandEnvironment{configDir: configDirectory, pathGrants: grants}
 }
 
 func fixtureSnippets() map[string]snippets.Definition {
@@ -95,6 +102,34 @@ func fixtureSnippets() map[string]snippets.Definition {
 			Prompt: "Note this.",
 		},
 	}
+}
+
+func TestPathGrantListingMatchesGolden(t *testing.T) {
+	var output strings.Builder
+	for _, test := range []struct {
+		label  string
+		grants []pathgrant.Grant
+	}{
+		{label: "grants configured", grants: []pathgrant.Grant{
+			{Path: "/reference", Access: pathgrant.ReadAccess},
+			{Path: "/output", Access: pathgrant.WriteAccess},
+		}},
+		{label: "no grants configured"},
+	} {
+		pathGrants, current := fixturePathGrants()
+		*current = test.grants
+		commands := newCommandRegistry(t, commandEnvironment{pathGrants: pathGrants})
+		invocation, found := commands.Find("/grants")
+		if !found {
+			t.Fatal("expected /grants to be registered")
+		}
+		context := &helpContext{}
+		if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
+			t.Fatal(err)
+		}
+		fmt.Fprintf(&output, "=== %s ===\n%s\n", test.label, context.notice)
+	}
+	assertGolden(t, "path-grants.txt", output.String())
 }
 
 func TestSnippetHelpMatchesGolden(t *testing.T) {

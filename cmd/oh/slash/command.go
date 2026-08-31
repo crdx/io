@@ -51,12 +51,17 @@ type Command struct {
 	Name          string
 	Description   string
 	Run           func(Context, Arguments) error
-	arguments     []string
+	listArguments func() []string
 	argumentUsage string
 }
 
 func (self Command) WithArguments(arguments ...string) Command {
-	self.arguments = append([]string(nil), arguments...)
+	fixedArguments := append([]string(nil), arguments...)
+	return self.WithListedArguments(func() []string { return slices.Clone(fixedArguments) })
+}
+
+func (self Command) WithListedArguments(list func() []string) Command {
+	self.listArguments = list
 	return self
 }
 
@@ -65,16 +70,24 @@ func (self Command) WithArgumentUsage(usage string) Command {
 	return self
 }
 
+func (self Command) getArguments() []string {
+	if self.listArguments == nil {
+		return nil
+	}
+	return self.listArguments()
+}
+
 func (self Command) usage(prefix string) string {
 	name := prefix + self.Name
 	if self.argumentUsage != "" {
 		return name + " " + self.argumentUsage
 	}
-	if len(self.arguments) == 0 {
+	arguments := self.getArguments()
+	if len(arguments) == 0 {
 		return name
 	}
 
-	arguments := append([]string(nil), self.arguments...)
+	arguments = append([]string(nil), arguments...)
 	slices.Sort(arguments)
 	return name + " {" + strings.Join(arguments, "|") + "}"
 }
@@ -332,7 +345,7 @@ func (self Registry) completions(prefix string) []string {
 		return nil
 	}
 
-	arguments := matchingPrefixes(argumentPrefix, command.arguments)
+	arguments := matchingPrefixes(argumentPrefix, command.getArguments())
 	for i := range arguments {
 		arguments[i] = name + " " + arguments[i]
 	}

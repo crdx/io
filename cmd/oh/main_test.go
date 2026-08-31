@@ -41,6 +41,7 @@ import (
 	"crdx.org/io/cmd/oh/call"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
+	"crdx.org/io/cmd/oh/commands"
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/dispatch"
@@ -56,6 +57,7 @@ import (
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/painter"
+	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/segment"
@@ -65,6 +67,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/gitBranch"
 	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
+	"crdx.org/io/cmd/oh/segment/pathGrants"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
 	"crdx.org/io/cmd/oh/segment/sessionEmoji"
 	"crdx.org/io/cmd/oh/segment/sessionName"
@@ -2646,6 +2649,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"model-arguments":       {".txt"},
 		"new-session":           {".txt"},
 		"ordinary-tab":          {".ansi", ".screen"},
+		"path-grant-lifecycle":  {".ansi", ".screen"},
 		"path-message":          {".ansi", ".screen"},
 		"pending-mode-messages": {".ansi", ".screen"},
 		"paste":                 {".ansi", ".screen"},
@@ -6097,6 +6101,26 @@ func goldenSegmentPass(
 	return func() string { return built.Render(context) }
 }
 
+func goldenFittedSegmentPass(
+	t *testing.T,
+	factory segment.Factory,
+	options string,
+	context segment.Context,
+	cells int,
+) func() string {
+	t.Helper()
+
+	built, err := factory(goldenSegmentOptions(options))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fitter, ok := built.(segment.Fitter)
+	if !ok {
+		t.Fatal("segment does not support fitting")
+	}
+	return func() string { return fitter.RenderWithin(context, cells) }
+}
+
 func goldenRepository(t *testing.T, head string) string {
 	t.Helper()
 
@@ -6449,6 +6473,50 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"mode-toggle / web only": goldenSegmentPass(
 			t,
 			modeToggle.New(func() caps.Set { return caps.Read | caps.Web }, func() bool { return false }),
+			"",
+			segment.Context{},
+		),
+		"path-grants / empty": goldenSegmentPass(
+			t,
+			pathGrants.New(func() []pathgrant.Grant { return nil }),
+			"",
+			segment.Context{},
+		),
+		"path-grants / read and write": goldenSegmentPass(
+			t,
+			pathGrants.New(func() []pathgrant.Grant {
+				return []pathgrant.Grant{
+					{Path: "/reference", Access: pathgrant.ReadAccess},
+					{Path: "/output", Access: pathgrant.WriteAccess},
+				}
+			}),
+			"",
+			segment.Context{},
+		),
+		"path-grants / many constrained": goldenFittedSegmentPass(
+			t,
+			pathGrants.New(func() []pathgrant.Grant {
+				grants := make([]pathgrant.Grant, 50)
+				for i := range grants {
+					grants[i] = pathgrant.Grant{
+						Path:   fmt.Sprintf("/path-%02d", i+1),
+						Access: pathgrant.ReadAccess,
+					}
+				}
+				return grants
+			}),
+			"",
+			segment.Context{},
+			36,
+		),
+		"path-grants / duplicate basenames": goldenSegmentPass(
+			t,
+			pathGrants.New(func() []pathgrant.Grant {
+				return []pathgrant.Grant{
+					{Path: "/one/reference", Access: pathgrant.ReadAccess},
+					{Path: "/two/reference", Access: pathgrant.WriteAccess},
+				}
+			}),
 			"",
 			segment.Context{},
 		),
@@ -6853,6 +6921,310 @@ func TestSlashCommandRunsImmediately(t *testing.T) {
 	}
 }
 
+func TestPathGrantCommandBecomesPendingAccessAndUpdatesTheModel(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	workspace := t.TempDir()
+	grants := preparePathGrantCommands(t, self, workspace)
+	self.settleAccess()
+	directory := t.TempDir()
+
+	if got := self.handleCommand("/grant read " + directory); got != dispatch.Handled {
+		t.Fatalf("got slash input result %d", got)
+	}
+	if len(self.pending.items) != 1 || self.pending.items[0].state.Kind != pathgrant.Change {
+		t.Fatalf("got pending input %#v", self.pending.items)
+	}
+	if current := grants.GetCurrent(); len(current) != 1 || current[0].Path != directory {
+		t.Errorf("got grants %#v", current)
+	}
+
+	self.start("continue")
+	if message := grants.Inject(); message != "" {
+		t.Errorf("model access was not advanced: %q", message)
+	}
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+
+	hasGrantEvent := false
+	for _, event := range self.events {
+		hasGrantEvent = hasGrantEvent || event.Kind == pathgrant.Change
+	}
+	if !hasGrantEvent {
+		t.Error("settled conversation did not record the grant")
+	}
+}
+
+func TestRestoredGrantCorrectionRemainsPendingUntilATurnCanTellTheModel(t *testing.T) {
+	self := testConversation(t, &bytes.Buffer{})
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = workspaceRoot.Close() })
+	files := file.New(workspaceRoot, caps.RefuseWrite(self.mode))
+	pathAccess, err := shell.NewPathAccess(files, self.mode, shell.Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(pathAccess.Close)
+
+	missing := filepath.Join(t.TempDir(), "missing")
+	grants, result := pathgrant.NewRestored(workspace, pathAccess, []pathgrant.Grant{{
+		Path:   missing,
+		Access: pathgrant.ReadAccess,
+	}})
+	if len(result.Failures) != 1 {
+		t.Fatalf("got restoration failures %#v", result.Failures)
+	}
+	self.pathGrants = grants
+	self.settledCaps = self.mode.Current()
+	correction, err := pathgrant.ChangeEvent(missing, grants.GetCurrent())
+	if err != nil {
+		t.Fatal(err)
+	}
+	self.queuePathGrantChange(correction)
+	self.initialiseAccess()
+
+	for _, event := range self.events {
+		if event.Kind == pathgrant.Change {
+			t.Fatal("correction was recorded before a turn could tell the model")
+		}
+	}
+	self.start("continue")
+	if message := grants.Inject(); message != "" {
+		t.Errorf("model access was not advanced: %q", message)
+	}
+	isFound := false
+	for _, event := range self.events {
+		isFound = isFound || event.Kind == pathgrant.Change
+	}
+	if !isFound {
+		t.Error("correction was not recorded with the turn")
+	}
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+}
+
+func TestPathGrantCommandInterruptsAnActiveTurn(t *testing.T) {
+	self := testConversation(t, &bytes.Buffer{})
+	preparePathGrantCommands(t, self, t.TempDir())
+	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+
+	if got := self.handleCommand("/grant read " + t.TempDir()); got != dispatch.Handled {
+		t.Fatalf("got slash input result %d", got)
+	}
+	if !self.currentTurn.Cancelled() {
+		t.Error("active turn was not interrupted")
+	}
+	pending := self.queuedTurn.Peek()
+	if !pending.AccessChange {
+		t.Errorf("queued turn is %#v", pending)
+	}
+}
+
+type pathGrantGoldenScenario int
+
+const (
+	pathGrantPending pathGrantGoldenScenario = iota
+	pathGrantSettled
+	pathGrantInterrupted
+	pathGrantMissing
+	pathGrantDuplicate
+	pathGrantMany
+	pathGrantUnknownAccess
+	pathGrantRevokeMissing
+	pathGrantRestorePending
+	pathGrantRestoreSettled
+)
+
+func TestPathGrantLifecycleDrawsEveryVisibleState(t *testing.T) {
+	passes := map[string]func() string{
+		"active turn interrupted":        func() string { return pathGrantGoldenStream(t, pathGrantInterrupted) },
+		"duplicate grant rejected":       func() string { return pathGrantGoldenStream(t, pathGrantDuplicate) },
+		"many grants truncated":          func() string { return pathGrantGoldenStream(t, pathGrantMany) },
+		"missing path rejected":          func() string { return pathGrantGoldenStream(t, pathGrantMissing) },
+		"pending grant":                  func() string { return pathGrantGoldenStream(t, pathGrantPending) },
+		"restoration correction pending": func() string { return pathGrantGoldenStream(t, pathGrantRestorePending) },
+		"restoration correction settled": func() string { return pathGrantGoldenStream(t, pathGrantRestoreSettled) },
+		"revoke without grant rejected":  func() string { return pathGrantGoldenStream(t, pathGrantRevokeMissing) },
+		"settled into next turn":         func() string { return pathGrantGoldenStream(t, pathGrantSettled) },
+		"unknown access rejected":        func() string { return pathGrantGoldenStream(t, pathGrantUnknownAccess) },
+	}
+	compareWithGolden(t, "path-grant-lifecycle", ".ansi", passes)
+	compareWithGolden(t, "path-grant-lifecycle", ".screen", shownPasses(t, passes))
+}
+
+func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) string {
+	t.Helper()
+
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	workspace := t.TempDir()
+	preparePathGrantCommands(t, self, workspace)
+	self.settleAccess()
+	registry := availableSegments(workspace, "brave-otter", "gpt-5.6-sol", "high", self)
+	live, err := configFrom(t, `
+		[bar.top]
+		left = [
+			{ segment = "activity-spinner", idle = "·✦·", frames = ["✦··"], rate = "125ms" },
+			{ segment = "path-grants" },
+		]
+		center = []
+		right = [{ segment = "session-name" }]
+
+		[bar.bottom]
+		left = []
+		center = []
+		right = []
+	`).BuildLive(registry)
+	if err != nil {
+		t.Fatal(err)
+	}
+	self.barConfiguration = bar.NewConfiguration(registry, live.SegmentLayout)
+	referencePath := stableGrantGoldenPath(t, "reference", true)
+	missingPath := stableGrantGoldenPath(t, "missing", false)
+
+	editor := edit.NewInput(nil)
+	self.editor = editor
+	self.show(editor)
+
+	switch scenario {
+	case pathGrantPending:
+		self.handleCommand("/grant read " + referencePath)
+	case pathGrantSettled:
+		self.handleCommand("/grant read " + referencePath)
+		self.start("continue")
+		self.waitForCurrentTurn()
+	case pathGrantInterrupted:
+		turnEvents := make(chan TurnEvent)
+		self.currentTurn = Turn{
+			Stream: testTurnStream(
+				turnEvents,
+				func(error) { close(turnEvents) },
+				turn.State{Running: true},
+			),
+			painter: self.newPainter(true),
+		}
+		self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "still working"})
+		self.handleCommand("/grant read " + referencePath)
+		self.waitForCurrentTurn()
+		self.waitForCurrentTurn()
+	case pathGrantMissing:
+		self.handleCommand("/grant read " + missingPath)
+	case pathGrantDuplicate:
+		self.handleCommand("/grant read " + referencePath)
+		self.handleCommand("/grant read " + referencePath)
+	case pathGrantMany:
+		pathAccess := pathGrantAccess(t, self.mode, workspace)
+		manyGrants := stableManyGrantGoldenPaths(t)
+		grants, result := pathgrant.NewRestored(workspace, pathAccess, manyGrants)
+		if len(result.Failures) != 0 {
+			t.Fatalf("got restoration failures %#v", result.Failures)
+		}
+		self.pathGrants = grants
+	case pathGrantUnknownAccess:
+		self.handleCommand("/grant execute " + referencePath)
+	case pathGrantRevokeMissing:
+		self.handleCommand("/revoke " + referencePath)
+	case pathGrantRestorePending, pathGrantRestoreSettled:
+		pathAccess := pathGrantAccess(t, self.mode, workspace)
+		grants, result := pathgrant.NewRestored(workspace, pathAccess, []pathgrant.Grant{{
+			Path:   missingPath,
+			Access: pathgrant.ReadAccess,
+		}})
+		if len(result.Failures) != 1 {
+			t.Fatalf("got restoration failures %#v", result.Failures)
+		}
+		self.pathGrants = grants
+		correction, err := pathgrant.ChangeEvent(missingPath, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		self.queuePathGrantChange(correction)
+		self.notifyFailure("Temporary access could not be restored: path does not exist")
+		self.show(editor)
+		self.refreshPendingMessages()
+		if scenario == pathGrantRestoreSettled {
+			self.start("continue")
+			self.waitForCurrentTurn()
+		}
+	}
+	self.show(editor)
+
+	stream := screenOutput.String()
+	stream = strings.ReplaceAll(stream, referencePath, "/reference")
+	stream = strings.ReplaceAll(stream, missingPath, "/missing")
+	return stream
+}
+
+func stableGrantGoldenPath(t *testing.T, label string, shouldExist bool) string {
+	t.Helper()
+
+	parent := fmt.Sprintf("/tmp/oh-grant-%s-%010d", label, os.Getpid())
+	path := filepath.Join(parent, label)
+	if err := os.RemoveAll(parent); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(parent) })
+	if err := os.MkdirAll(parent, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if shouldExist {
+		if err := os.Mkdir(path, 0o700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return path
+}
+
+func stableManyGrantGoldenPaths(t *testing.T) []pathgrant.Grant {
+	t.Helper()
+
+	parent := fmt.Sprintf("/tmp/oh-many-grants-%010d", os.Getpid())
+	if err := os.RemoveAll(parent); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(parent) })
+
+	grants := make([]pathgrant.Grant, 50)
+	for i := range grants {
+		path := filepath.Join(parent, fmt.Sprintf("path-%02d", i+1))
+		if err := os.MkdirAll(path, 0o700); err != nil {
+			t.Fatal(err)
+		}
+		access := pathgrant.ReadAccess
+		if i%2 == 1 {
+			access = pathgrant.WriteAccess
+		}
+		grants[i] = pathgrant.Grant{Path: path, Access: access}
+	}
+	return grants
+}
+
+func pathGrantAccess(t *testing.T, mode *caps.Mode, workspace string) *shell.PathAccess {
+	t.Helper()
+
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = workspaceRoot.Close() })
+	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	access, err := shell.NewPathAccess(files, mode, shell.Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(access.Close)
+	return access
+}
+
 func TestSlashCommandCanAddFeedback(t *testing.T) {
 	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
 		Name: "fixture",
@@ -7227,6 +7599,39 @@ func fixtureRegistry(t *testing.T, sets ...slash.CommandSet) slash.Registry {
 		t.Fatal(err)
 	}
 	return registry
+}
+
+func preparePathGrantCommands(t *testing.T, self *App, workspaceDir string) *pathgrant.Grants {
+	t.Helper()
+
+	workspaceRoot, err := os.OpenRoot(workspaceDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = workspaceRoot.Close() })
+	files := file.New(workspaceRoot, caps.RefuseWrite(self.mode))
+	pathAccess, err := shell.NewPathAccess(files, self.mode, shell.Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(pathAccess.Close)
+
+	grants := pathgrant.New(workspaceDir, pathAccess)
+	systemSet, err := commands.New(commands.Options{PathGrants: commands.PathGrants{
+		Grant:      grants.Grant,
+		Revoke:     grants.Revoke,
+		GetCurrent: grants.GetCurrent,
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	snippetSet, err := snippets.New(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	self.commands = fixtureRegistry(t, systemSet, snippetSet)
+	self.pathGrants = grants
+	return grants
 }
 
 func slashCommandFixture(t *testing.T, currentCaps caps.Set) *App {

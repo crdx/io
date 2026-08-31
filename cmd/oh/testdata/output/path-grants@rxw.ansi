@@ -1,0 +1,698 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m use the external reference             \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m Granted temporary read-only access to  \e[0m\r
+\e[48;2;52;53;65m /reference.                            \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[?7l\r\e[KI can read the external reference now.\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m Granted temporary write access to      \e[0m\r
+\e[48;2;52;53;65m /reference; changes follow the         \e[0m\r
+\e[48;2;52;53;65m workspace write capability.            \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\r\e[KI can also change it while workspace\r
+\r\e[Kwriting is granted.\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m Revoked temporary path access to       \e[0m\r
+\e[48;2;52;53;65m /reference.                            \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\r\e[KI will no longer use it.\r
+\e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+u\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+x\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+f\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+G\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+m\e[0m\r
+\e[48;2;52;53;65m \r
+p\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+y\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+-\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+y\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+/\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+f\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+.\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[?7l\r\e[KI\r
+\r\e[Kc\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ke\r
+\r\e[Kx\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Kn\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kf\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kw\r
+\r\e[K.\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+G\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+m\e[0m\r
+\e[48;2;52;53;65m \r
+p\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+y\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+/\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+f\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+;\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+g\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+f\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+p\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+p\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+b\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+y\e[0m\r
+\e[48;2;52;53;65m \r
+.\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\r\e[KI\r
+\r\e[Kc\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Ks\r
+\r\e[Ko\r
+\r\e[Kc\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Ke\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Kw\r
+\r\e[Kh\r
+\r\e[Ki\r
+\r\e[Kl\r
+\r\e[Ke\r
+\r\e[Kw\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Kk\r
+\r\e[Ks\r
+\r\e[Kp\r
+\r\e[Ka\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[Kw\r
+\r\e[Kr\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[Kg\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[K.\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+R\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+v\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+d\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+m\e[0m\r
+\e[48;2;52;53;65m \r
+p\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+y\e[0m\r
+\e[48;2;52;53;65m \r
+p\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+/\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+f\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+c\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+.\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\r\e[KI\r
+\r\e[Kw\r
+\r\e[Ki\r
+\r\e[Kl\r
+\r\e[Kl\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kl\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Kg\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ku\r
+\r\e[Ks\r
+\r\e[Ke\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[K.\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m use the external reference\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m Granted temporary read-only access to /reference.\e[0m
+\e[48;2;52;53;65m\e[0m
+I can read the external reference now.
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m Granted temporary write access to /reference; changes follow the workspace write capability.\e[0m
+\e[48;2;52;53;65m\e[0m
+I can also change it while workspace writing is granted.
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m Revoked temporary path access to /reference.\e[0m
+\e[48;2;52;53;65m\e[0m
+I will no longer use it.
+
+=== streamed asap ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m use the external reference                                                                         \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Granted temporary read-only access to /reference.                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KI ca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the e\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the exter\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the external\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the external refe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the external referenc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the external reference no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the external reference now.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Granted temporary write access to /reference; changes follow the workspace write capability.       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KI ca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also chang\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it whi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while works\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace wri\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace writing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace writing is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace writing is gran\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace writing is granted.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Revoked temporary path access to /reference.                                                       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KI wi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no lo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer use\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer use it.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m use the external reference                                                                         \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Granted temporary read-only access to /reference.                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KI can read the external reference now.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Granted temporary write access to /reference; changes follow the workspace write capability.       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KI can also change it while workspace writing is granted.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Revoked temporary path access to /reference.                                                       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KI will no longer use it.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed paced ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m use the external reference                                                                         \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Granted temporary read-only access to /reference.                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[KI ca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the e\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the exter\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the external\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the external refe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the external referenc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the external reference no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can read the external reference now.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Granted temporary write access to /reference; changes follow the workspace write capability.       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KI ca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also chang\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it whi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while works\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace wri\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace writing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace writing is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace writing is gran\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI can also change it while workspace writing is granted.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Revoked temporary path access to /reference.                                                       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KI wi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no lo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer use\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KI will no longer use it.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m use the    \e[0m\r
+\e[48;2;52;53;65m external   \e[0m\r
+\e[48;2;52;53;65m reference  \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m Granted    \e[0m\r
+\e[48;2;52;53;65m temporary  \e[0m\r
+\e[48;2;52;53;65m read-only  \e[0m\r
+\e[48;2;52;53;65m access to  \e[0m\r
+\e[48;2;52;53;65m /reference.\e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[?7l\r\e[KI can read\r
+\r\e[Kthe external\r
+\r\e[Kreference\r
+\r\e[Know.\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m Granted    \e[0m\r
+\e[48;2;52;53;65m temporary  \e[0m\r
+\e[48;2;52;53;65m write      \e[0m\r
+\e[48;2;52;53;65m access to  \e[0m\r
+\e[48;2;52;53;65m /reference;\e[0m\r
+\e[48;2;52;53;65m changes    \e[0m\r
+\e[48;2;52;53;65m follow the \e[0m\r
+\e[48;2;52;53;65m workspace  \e[0m\r
+\e[48;2;52;53;65m write      \e[0m\r
+\e[48;2;52;53;65m capability.\e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\r\e[KI can also\r
+\r\e[Kchange it\r
+\r\e[Kwhile\r
+\r\e[Kworkspace\r
+\r\e[Kwriting is\r
+\r\e[Kgranted.\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m Revoked    \e[0m\r
+\e[48;2;52;53;65m temporary  \e[0m\r
+\e[48;2;52;53;65m path access\e[0m\r
+\e[48;2;52;53;65m to         \e[0m\r
+\e[48;2;52;53;65m /reference.\e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\r\e[KI will no\r
+\r\e[Klonger use\r
+\r\e[Kit.\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m use the external reference\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m Granted temporary read-only access to /reference.\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[?7l\r\e[KI can read the external reference now.
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m Granted temporary write access to /reference; changes follow the workspace write capability.\e[0m
+\e[48;2;52;53;65m\e[0m
+\r\e[KI can also change it while workspace writing is granted.
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m Revoked temporary path access to /reference.\e[0m
+\e[48;2;52;53;65m\e[0m
+\r\e[KI will no longer use it.
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m use the external reference                                                                         \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Granted temporary read-only access to /reference.                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[KI can read the external reference now.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Granted temporary write access to /reference; changes follow the workspace write capability.       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\r\e[KI can also change it while workspace writing is granted.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m Revoked temporary path access to /reference.                                                       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\r\e[KI will no longer use it.\r
+\e[?25h\e[?2026l

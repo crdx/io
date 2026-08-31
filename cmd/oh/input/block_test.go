@@ -37,6 +37,18 @@ func TestARuleWithBothLabelsIsExactlyAsWideAsTheScreen(t *testing.T) {
 	}
 }
 
+func TestLeftContentRoomKeepsAFittingRightLabel(t *testing.T) {
+	if got := LeftContentWidth(20, "right"); got != 7 {
+		t.Errorf("got %d cells, want 7", got)
+	}
+	if got := LeftContentWidth(20, ""); got != 16 {
+		t.Errorf("got %d cells without a right label, want 16", got)
+	}
+	if got := LeftContentWidth(5, "far too long"); got != 1 {
+		t.Errorf("got %d cells beside an unfit right label, want 1", got)
+	}
+}
+
 func TestTheLeftLabelIsDroppedFirstWhenTheRightIsKept(t *testing.T) {
 	rule := Ruler{Left: "↑ 12", Right: "gpt ⠶ io"}
 

@@ -50,6 +50,10 @@ type Segment interface {
 	Render(context Context) string
 }
 
+type Fitter interface {
+	RenderWithin(context Context, cells int) string
+}
+
 type Options interface {
 	Read(into any) error
 }

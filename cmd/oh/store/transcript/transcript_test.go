@@ -11,6 +11,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/tool"
 )
@@ -493,6 +494,41 @@ func TestTranscriptRecordsWhatANoticeSaid(t *testing.T) {
 	}
 	transcript := string(stored)
 	for _, want := range []string{"## Notice · error", "no space left on device"} {
+		if !strings.Contains(transcript, want) {
+			t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)
+		}
+	}
+}
+
+func TestTranscriptRendersPathGrantEventsFromStructuredState(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	event, err := pathgrant.ChangeEvent("/reference", []pathgrant.Grant{{
+		Path:   "/reference",
+		Access: pathgrant.WriteAccess,
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(3, 4), event); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	transcript := string(stored)
+	for _, want := range []string{
+		"## Path grant · 1 path · changed /reference · +2.0s",
+		"Granted temporary write access to /reference; changes follow the workspace write capability.",
+	} {
 		if !strings.Contains(transcript, want) {
 			t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)
 		}

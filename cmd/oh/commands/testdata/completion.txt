@@ -1,5 +1,9 @@
-/ -> /conf -> /copy -> /edit -> /fork -> /help -> /new -> /open
+/ -> /conf -> /copy -> /edit -> /fork -> /grant -> /grants -> /help -> /new -> /open -> /revoke
 /c -> /conf -> /copy
+/g -> /grant -> /grants
+/grant  -> /grant read -> /grant write
+/r -> /revoke
+/revoke  -> /revoke /reference
 /copy  -> /copy agents-file -> /copy config-dir -> /copy config-file
 /copy l -> /copy last-message
 /copy sn -> /copy snippets-dir

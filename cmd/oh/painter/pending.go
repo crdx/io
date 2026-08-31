@@ -6,6 +6,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/pathgrant"
 )
 
 const unsentMark = "⏳"
@@ -49,6 +50,17 @@ func (self *PendingMessages) render(message string, columns int) string {
 	return RenderSubmittedMessage(unsentMark+" "+message, columns)
 }
 
-func renderModeMessage(event agent.Event) (string, bool) {
-	return caps.ModeNotice(event)
+func renderAccessMessage(event agent.Event) (string, bool) {
+	switch event.Kind {
+	case caps.ModeChange:
+		return caps.ModeNotice(event)
+	case pathgrant.Change:
+		return pathgrant.Notice(event)
+	case agent.StartupEvent, agent.UserMessageEvent, agent.HarnessMessageEvent,
+		agent.ModelReasoningEvent, agent.ModelMessageEvent, agent.ToolCallRequestEvent,
+		agent.ToolCallResultEvent, agent.StateChangeEvent, agent.InterruptionEvent,
+		agent.RetryingEvent, agent.FailureEvent:
+		return "", false
+	}
+	return "", false
 }

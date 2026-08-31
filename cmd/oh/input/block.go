@@ -15,6 +15,14 @@ type Ruler struct {
 	Right  string
 }
 
+func LeftContentWidth(width int, right string) int {
+	rightWidth := getWidth(right, edgePad)
+	if rightWidth > width {
+		rightWidth = 0
+	}
+	return max(width-rightWidth-edgePad-2, 0)
+}
+
 type Block struct {
 	Top    Ruler
 	Input  edit.Frame

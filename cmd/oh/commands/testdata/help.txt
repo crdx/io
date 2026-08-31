@@ -4,6 +4,9 @@ Commands:
   /edit <target>
   /open <target>
   /new [model]
+  /grant {read|write} <path>
+  /grants
+  /revoke <path>
   /fork [model]
 
 Targets:

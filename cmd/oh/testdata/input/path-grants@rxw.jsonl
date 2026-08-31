@@ -1,0 +1,10 @@
+{"event":{"kind":"user_message","text":"use the external reference"}}
+{"event":{"kind":"path_grant_change","state":{"grants":[{"path":"/reference","access":"read"}]}}}
+{"event":{"kind":"user_message","text":"Granted temporary read-only access to /reference."}}
+{"event":{"kind":"model_message","text":"I can read the external reference now."}}
+{"event":{"kind":"path_grant_change","state":{"grants":[{"path":"/reference","access":"write"}]}}}
+{"event":{"kind":"user_message","text":"Granted temporary write access to /reference; changes follow the workspace write capability."}}
+{"event":{"kind":"model_message","text":"I can also change it while workspace writing is granted."}}
+{"event":{"kind":"path_grant_change","state":{"grants":[]}}}
+{"event":{"kind":"user_message","text":"Revoked temporary path access to /reference."}}
+{"event":{"kind":"model_message","text":"I will no longer use it."}}

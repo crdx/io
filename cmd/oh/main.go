@@ -33,6 +33,7 @@ import (
 	"crdx.org/io/cmd/oh/notification"
 	"crdx.org/io/cmd/oh/onboarding"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/sessions"
@@ -402,6 +403,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer func() { _ = tmpRoot.Close() }()
 
+	pathGrants := pathgrant.New(workspaceDir, pathAccess)
+	var pathGrantRestoreResult pathgrant.RestoreResult
+	if resumedSession != nil {
+		if recordedGrants, found := pathgrant.LastRecorded(resumedSession.Events); found {
+			pathGrants, pathGrantRestoreResult = pathgrant.NewRestored(workspaceDir, pathAccess, recordedGrants)
+		}
+	}
+
 	screen := output.New(os.Stdout).LinkPathsUnder(workspaceDir)
 	screen.SetTextSizingSupported(textsizing.Detect(os.Stdin, os.Stdout))
 
@@ -435,6 +444,11 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		HomeDir:          homeDir,
 		Editor:           editorConfiguration,
 		Output:           os.Stdout,
+		PathGrants: commands.PathGrants{
+			Grant:      pathGrants.Grant,
+			Revoke:     pathGrants.Revoke,
+			GetCurrent: pathGrants.GetCurrent,
+		},
 		Session: commands.Session{
 			Name:           log.Name(),
 			ID:             log.ID(),
@@ -479,6 +493,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		toolOutputLimit:     toolOutputLimit,
 		workspaceDir:        workspaceDir,
 		mode:                mode,
+		pathGrants:          pathGrants,
 		configObserver:      configObserver,
 		startedAt:           time.Now(),
 	}
@@ -513,6 +528,18 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	if resumedSession != nil {
 		chat.restore(resumedSession)
+	}
+	for _, failure := range pathGrantRestoreResult.Failures {
+		correction, err := pathgrant.ChangeEvent(failure.Grant.Path, pathGrants.GetCurrent())
+		if err != nil {
+			return "", err
+		}
+		chat.queuePathGrantChange(correction)
+		chat.notifyFailure(fmt.Sprintf(
+			"Temporary access to %s could not be restored: %v",
+			failure.Grant.Path,
+			failure.Err,
+		))
 	}
 
 	projectSkills, globalSkills := skill.Counts(availableSkills)

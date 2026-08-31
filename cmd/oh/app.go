@@ -25,6 +25,7 @@ import (
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/painter"
+	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/slash"
@@ -95,6 +96,7 @@ type App struct {
 	editor              *edit.Input
 	editorConfiguration *editor.Configuration
 	mode                *caps.Mode
+	pathGrants          *pathgrant.Grants
 	settledCaps         caps.Set
 	pending             pendingInput
 	feedback            feedbackState
@@ -128,7 +130,7 @@ type TurnEvent = turn.Event
 const historyLimit = 1000
 
 func (self *App) begin(message string) cycle.Transition {
-	self.settleAccess()
+	self.initialiseAccess()
 
 	history := edit.NewHistory(location.GetHistoryPath(), historyLimit)
 	editor := edit.NewInput(history)
@@ -161,6 +163,9 @@ func (self *App) begin(message string) cycle.Transition {
 	defer self.dropPendingInput()
 
 	self.show(editor)
+	if len(self.pending.items) > 0 {
+		self.refreshPendingMessages()
+	}
 
 	if message != "" {
 		history.Add(message)
@@ -276,7 +281,7 @@ func (self *App) requestTransition(transition cycle.Transition) error {
 func (self *App) handleCommand(message string) dispatch.Result {
 	self.clearFeedback(commandFeedback)
 	result, failure := dispatch.Handle(self.commands, dispatch.Actions{
-		EmitEvent:  self.notify,
+		EmitEvent:  self.emitCommandEvent,
 		SendPrompt: self.sendCommandPrompt,
 		ShowFeedback: func(text string, status agent.Status) {
 			self.showFeedback(commandFeedback, feedbackMessage{text: text, status: status})
@@ -286,6 +291,29 @@ func (self *App) handleCommand(message string) dispatch.Result {
 		self.showFeedback(commandFeedback, feedbackMessage{text: failure, status: agent.ErrorStatus})
 	}
 	return result
+}
+
+func (self *App) emitCommandEvent(event agent.Event) {
+	if event.Kind != pathgrant.Change {
+		self.notify(event)
+		return
+	}
+
+	self.queuePathGrantChange(event)
+	if self.currentTurn.Running() {
+		self.queuedTurn.MarkAccessChange()
+		self.interruptTurn(accessReason)
+		return
+	}
+	self.refreshPendingMessages()
+}
+
+func (self *App) queuePathGrantChange(event agent.Event) {
+	message, shown := pathgrant.Notice(event)
+	if !shown {
+		return
+	}
+	self.pending.add(agent.Event{Kind: agent.UserMessageEvent, Text: message}, event)
 }
 
 func (self *App) sendCommandPrompt(message string) {
@@ -335,7 +363,7 @@ func (self *App) toggleCap(whichCaps caps.Set) {
 
 	if self.currentTurn.Running() {
 		self.queuedTurn.MarkAccessChange()
-		self.interruptTurn(modeReason)
+		self.interruptTurn(accessReason)
 	}
 }
 
@@ -405,11 +433,17 @@ func (self *App) refreshPendingMessages() {
 	}
 }
 
+func (self *App) initialiseAccess() {
+	if self.settledCaps != 0 {
+		return
+	}
+	self.settledCaps = self.mode.Current()
+	self.recordModeEvent(caps.ModeEvent(self.settledCaps))
+}
+
 func (self *App) settleAccess() {
 	if self.settledCaps == 0 {
-		self.settledCaps = self.mode.Current()
-		self.recordModeEvent(caps.ModeEvent(self.settledCaps))
-
+		self.initialiseAccess()
 		return
 	}
 
@@ -455,7 +489,7 @@ const (
 	escapeReason     = "the user pressed escape"
 	ctrlDReason      = "the user pressed ctrl+d"
 	replacedReason   = "the user sent another message"
-	modeReason       = "the user changed what the harness is allowed to do"
+	accessReason     = "the user changed what the harness is allowed to do"
 	transitionReason = "the session is being closed"
 )
 
@@ -492,17 +526,19 @@ func (self *App) show(editor *edit.Input) {
 	columns := self.screen.Columns()
 	frame := editor.Frame(columns)
 
+	topRight := self.renderBar(segment.TopRight, frame)
+	bottomRight := self.renderBar(segment.BottomRight, frame)
 	block := input.Block{
 		Top: input.Ruler{
-			Left:   self.renderBar(segment.TopLeft, frame),
+			Left:   self.renderBarWithin(segment.TopLeft, frame, input.LeftContentWidth(columns, topRight)),
 			Center: self.renderBar(segment.TopCenter, frame),
-			Right:  self.renderBar(segment.TopRight, frame),
+			Right:  topRight,
 		},
 		Input: frame,
 		Bottom: input.Ruler{
-			Left:   self.renderBar(segment.BottomLeft, frame),
+			Left:   self.renderBarWithin(segment.BottomLeft, frame, input.LeftContentWidth(columns, bottomRight)),
 			Center: self.renderBar(segment.BottomCenter, frame),
-			Right:  self.renderBar(segment.BottomRight, frame),
+			Right:  bottomRight,
 		},
 		Status: self.feedbackRows(columns),
 	}
@@ -535,10 +571,18 @@ func (self *App) clearFeedback(source feedbackSource) {
 }
 
 func (self *App) renderBar(position segment.Position, frame edit.Frame) string {
-	return self.barConfiguration.Render(position, segment.Context{
+	return self.barConfiguration.Render(position, getBarContext(frame))
+}
+
+func (self *App) renderBarWithin(position segment.Position, frame edit.Frame, cells int) string {
+	return self.barConfiguration.RenderWithin(position, getBarContext(frame), cells)
+}
+
+func getBarContext(frame edit.Frame) segment.Context {
+	return segment.Context{
 		HiddenLinesAbove: frame.HiddenLinesAbove,
 		HiddenLinesBelow: frame.HiddenLinesBelow,
-	})
+	}
 }
 
 func (self *App) getBarSources() bar.Sources {
@@ -546,6 +590,7 @@ func (self *App) getBarSources() bar.Sources {
 		IsTurnRunning:   self.isTurnRunning,
 		GetContextUsage: self.contextUsage,
 		GetGrantedCaps:  self.grantedCaps,
+		GetPathGrants:   self.getPathGrants,
 		IsPrefixPending: self.isPrefixPending,
 		GetTurnTiming:   self.turnTiming,
 		GetTurnCount:    self.turnCount,
@@ -611,6 +656,13 @@ func (self *App) contextUsage() (int, int) {
 
 func (self *App) grantedCaps() caps.Set {
 	return self.mode.Current()
+}
+
+func (self *App) getPathGrants() []pathgrant.Grant {
+	if self.pathGrants == nil {
+		return nil
+	}
+	return self.pathGrants.GetCurrent()
 }
 
 func (self *App) isPrefixPending() bool {
@@ -781,7 +833,11 @@ func (self *App) prelude() string {
 }
 
 func (self *App) accessMessage() string {
-	return access.NewGroup(self.mode).Inject()
+	tellers := []access.Teller{self.mode}
+	if self.pathGrants != nil {
+		tellers = append(tellers, self.pathGrants)
+	}
+	return access.NewGroup(tellers...).Inject()
 }
 
 func (self *App) titleNote() string {

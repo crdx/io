@@ -11,6 +11,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
@@ -30,6 +31,23 @@ func TestStartupDrawingUsesTheScreensTextSizingSupport(t *testing.T) {
 				t.Errorf("sized startup presence = %t, want %t", got, isSupported)
 			}
 		})
+	}
+}
+
+func TestPathGrantEventsAreDrawnFromTheirStructuredState(t *testing.T) {
+	var screenOutput bytes.Buffer
+	paint := New(output.NewTerminalOfSize(&screenOutput, 80, 24), false, nil, "", output.StreamingModeLine)
+	event, err := pathgrant.ChangeEvent("/reference", []pathgrant.Grant{{
+		Path:   "/reference",
+		Access: pathgrant.ReadAccess,
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	paint.DrawEvent(event)
+	if drawn := style.Plain(screenOutput.String()); !strings.Contains(drawn, "Granted temporary read-only access to /reference.") {
+		t.Errorf("got drawing %q", drawn)
 	}
 }
 

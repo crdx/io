@@ -58,6 +58,14 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫\e[0m\e[38;
 \e[38;2;76;154;44mr\e[0m\e[38;2;150;152;150mx\e[0m\e[38;2;150;152;150mw\e[0m \e[38;2;150;152;150mg\e[0m\e[38;2;150;152;150ms\e[0m
 === mode-toggle / web only ===
 \e[38;2;76;154;44mr\e[0m\e[38;2;150;152;150mx\e[0m\e[38;2;150;152;150mw\e[0m \e[38;2;150;152;150mg\e[0m\e[38;2;129;162;190ms\e[0m
+=== path-grants / duplicate basenames ===
+\e[38;2;76;154;44mr\e[0m\e[38;2;150;152;150m:\e[0m/one/reference\e[38;2;150;152;150m, \e[0m\e[38;2;207;173;0mw\e[0m\e[38;2;150;152;150m:\e[0m/two/reference
+=== path-grants / empty ===
+
+=== path-grants / many constrained ===
+\e[38;2;76;154;44mr\e[0m\e[38;2;150;152;150m:\e[0mpath-01\e[38;2;150;152;150m, \e[0m\e[38;2;76;154;44mr\e[0m\e[38;2;150;152;150m:\e[0mpath-02\e[38;2;150;152;150m, \e[0m\e[38;2;76;154;44mr\e[0m\e[38;2;150;152;150m:\e[0mpath-03\e[38;2;150;152;150m, \e[0m\e[38;2;150;152;150m+47\e[0m
+=== path-grants / read and write ===
+\e[38;2;76;154;44mr\e[0m\e[38;2;150;152;150m:\e[0mreference\e[38;2;150;152;150m, \e[0m\e[38;2;207;173;0mw\e[0m\e[38;2;150;152;150m:\e[0moutput
 === scroll-overflow / down ===
 \e[38;2;150;152;150m↓ 7\e[0m
 === scroll-overflow / empty ===

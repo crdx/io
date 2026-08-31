@@ -142,6 +142,19 @@ func TestCompletionCyclesThroughNamesWithinTheLongestPrefix(t *testing.T) {
 	}
 }
 
+func TestCompletionReadsDynamicArgumentsWhenAsked(t *testing.T) {
+	arguments := []string{"first"}
+	registry := mustRegistry(t, mustSet(t, "/",
+		slash.Command{Name: "revoke", Run: commandHandler}.
+			WithListedArguments(func() []string { return slices.Clone(arguments) }).
+			WithArgumentUsage("<path>"),
+	))
+
+	assertCompletionCycle(t, registry, "/revoke ", []string{"/revoke first"})
+	arguments = []string{"second"}
+	assertCompletionCycle(t, registry, "/revoke ", []string{"/revoke second"})
+}
+
 func TestCompletionCyclesThroughMatchingArguments(t *testing.T) {
 	registry := mustRegistry(t, mustSet(t, "/",
 		slash.Command{Name: "ask", Run: commandHandler}.WithArgumentUsage("<args>"),

@@ -11,6 +11,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
@@ -109,6 +110,10 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		if notice, said := caps.ModeNotice(event); said {
 			output.fence(notice, "")
 		}
+	case pathgrant.Change:
+		if notice, said := pathgrant.Notice(event); said {
+			output.fence(notice, "")
+		}
 	case agent.InterruptionEvent:
 		output.paragraph(interruptionSentence(event.Text))
 	case agent.RetryingEvent:
@@ -142,6 +147,9 @@ func heading(event agent.Event) []string {
 		return []string{name, string(event.Status)}
 	case caps.ModeChange:
 		return []string{name, event.Text, prefixed("toggled ", event.Name)}
+	case pathgrant.Change:
+		summary, _ := pathgrant.Summary(event)
+		return []string{name, summary, prefixed("changed ", event.Name)}
 	case agent.RetryingEvent:
 		return []string{name, "attempt " + strconv.Itoa(event.Attempt), prefixed("waited ", util.CompactDuration(event.Took))}
 	case agent.StartupEvent, agent.UserMessageEvent, agent.ModelReasoningEvent, agent.ModelMessageEvent,
@@ -302,6 +310,8 @@ func title(kind agent.Kind) string {
 		return "Tool result"
 	case caps.ModeChange:
 		return "Mode"
+	case pathgrant.Change:
+		return "Path grant"
 	case agent.InterruptionEvent:
 		return "Interrupted"
 	case agent.RetryingEvent:

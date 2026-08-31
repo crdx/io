@@ -58,6 +58,14 @@ rxw gs
 rxw gs
 === mode-toggle / web only ===
 rxw gs
+=== path-grants / duplicate basenames ===
+r:/one/reference, w:/two/reference
+=== path-grants / empty ===
+
+=== path-grants / many constrained ===
+r:path-01, r:path-02, r:path-03, +47
+=== path-grants / read and write ===
+r:reference, w:output
 === scroll-overflow / down ===
 ↓ 7
 === scroll-overflow / empty ===

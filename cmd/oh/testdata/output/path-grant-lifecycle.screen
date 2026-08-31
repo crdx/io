@@ -1,0 +1,83 @@
+=== active turn interrupted ===
+still working
+
+
+ The path /reference now has temporary read-only access.
+
+
+── ·✦· ─ r:reference ──────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== duplicate grant rejected ===
+
+ ⏳ Granted temporary read-only access to /reference.
+
+
+/grant: /reference already has temporary read access (alt+enter
+sends as message)
+── ·✦· ─ r:reference ──────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== many grants truncated ===
+── ·✦· ─ r:path-01, w:path-02, r:path-03, w:path-04, r:path-05, w:path-06, +44 ────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== missing path rejected ===
+/grant: Could not resolve /missing: lstat
+/missing: no such file or directory (alt+enter sends as message)
+── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== pending grant ===
+
+ ⏳ Granted temporary read-only access to /reference.
+
+
+── ·✦· ─ r:reference ──────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== restoration correction pending ===
+
+ ⏳ Revoked temporary path access to /missing.
+
+
+Temporary access could not be restored: path does not exist
+── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== restoration correction settled ===
+
+ Revoked temporary path access to /missing.
+
+
+
+ continue
+
+
+Temporary access could not be restored: path does not exist
+── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== revoke without grant rejected ===
+/revoke: /reference has no temporary grant (alt+enter sends as
+message)
+── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== settled into next turn ===
+
+ Granted temporary read-only access to /reference.
+
+
+
+ continue
+
+
+── ·✦· ─ r:reference ──────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== unknown access rejected ===
+Usage: /grant {read|write} <path> (alt+enter sends as message)
+── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────

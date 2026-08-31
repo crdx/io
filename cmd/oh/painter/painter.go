@@ -14,6 +14,7 @@ import (
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
+	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
@@ -126,8 +127,8 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.StartupEvent, agent.HarnessMessageEvent:
 		self.screen.Line(self.render(event))
 
-	case caps.ModeChange:
-		if message, said := renderModeMessage(event); said {
+	case caps.ModeChange, pathgrant.Change:
+		if message, said := renderAccessMessage(event); said {
 			self.Close(dynamic.Cancelled)
 			self.screen.Line(RenderSubmittedMessage(message, self.screen.Columns()))
 		}

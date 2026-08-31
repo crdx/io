@@ -561,6 +561,7 @@ func testSegments() segment.Registry {
 		"activity-spinner":   inertFactory,
 		"context-usage":      inertFactory,
 		"mode-toggle":        inertFactory,
+		"path-grants":        inertFactory,
 		"workspace-dir":      workspaceDir.New("/tmp/somewhere"),
 		"active-model":       inertFactory,
 		"scroll-overflow":    scrollOverflow.New,
