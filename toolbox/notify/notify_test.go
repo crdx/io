@@ -95,6 +95,7 @@ func TestNotificationMapsEveryIconForNotifySend(t *testing.T) {
 			want := []string{
 				"--icon=" + desktopIcon,
 				"--app-name=oh",
+				"--",
 				"Build",
 				"The build is finished",
 			}
@@ -152,6 +153,7 @@ func TestNotificationUsesKittysNotificationKittenInsideKitty(t *testing.T) {
 		"--only-print-escape-code",
 		"--icon=dialog-error",
 		"--app-name=oh",
+		"--",
 		"Build",
 		"The build is finished",
 	}
@@ -283,5 +285,14 @@ func TestDescribeReportsTheTitleAndMessage(t *testing.T) {
 	subject, qualifier := notify.Describe(notify.Args{Title: "Greeting", Message: "hello"})
 	if subject != "Greeting" || qualifier != "hello" {
 		t.Errorf("got subject %q and qualifier %q", subject, qualifier)
+	}
+}
+
+func TestATitleThatLooksLikeAnOptionIsPassedAsText(t *testing.T) {
+	command, _ := notify.Command(t.Context(), "--wait", "--urgency=critical", "dialog-error")
+
+	arguments := command.Args[len(command.Args)-3:]
+	if want := []string{"--", "--wait", "--urgency=critical"}; !slices.Equal(arguments, want) {
+		t.Errorf("got trailing arguments %q, want %q", arguments, want)
 	}
 }

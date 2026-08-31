@@ -41,11 +41,11 @@ func IsAvailable() bool {
 func Command(ctx context.Context, title string, message string, icon string) (*exec.Cmd, bool) {
 	if isKitty() {
 		//nolint:gosec // the executable and options are fixed, and the arguments are inert
-		return exec.CommandContext(ctx, "kitten", "notify", "--only-print-escape-code", "--icon="+icon, "--app-name="+applicationName, title, message), true
+		return exec.CommandContext(ctx, "kitten", "notify", "--only-print-escape-code", "--icon="+icon, "--app-name="+applicationName, "--", title, message), true
 	}
 
 	//nolint:gosec // the executable and options are fixed, and the arguments are inert
-	return exec.CommandContext(ctx, "notify-send", "--icon="+icon, "--app-name="+applicationName, title, message), false
+	return exec.CommandContext(ctx, "notify-send", "--icon="+icon, "--app-name="+applicationName, "--", title, message), false
 }
 
 func isKitty() bool {

@@ -36,6 +36,7 @@ func TestTurnErrorNotificationNamesTheWorkspaceAndShowsTheFailure(t *testing.T) 
 	want := []string{
 		"--icon=dialog-error",
 		"--app-name=oh",
+		"--",
 		"oh — io",
 		"access denied",
 	}
