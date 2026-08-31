@@ -42,13 +42,13 @@ func MigrateConfig(options ConfigOptions) (int, bool, error) {
 		return fromFormat, true, nil
 	}
 
-	migrated := data
+	migratedData := data
 	for format := fromFormat; format < config.Format; format++ {
-		migrationStep, found := configSteps[format]
-		if !found {
+		migrationStep, isFound := configSteps[format]
+		if !isFound {
 			return fromFormat, true, fmt.Errorf("nothing knows how to migrate config format %d", format)
 		}
-		migrated, err = migrationStep(migrated)
+		migratedData, err = migrationStep(migratedData)
 		if err != nil {
 			return fromFormat, true, fmt.Errorf("format %d: %w", format, err)
 		}
@@ -61,7 +61,7 @@ func MigrateConfig(options ConfigOptions) (int, bool, error) {
 	if err := keepConfigCopy(backupPath, data); err != nil {
 		return fromFormat, true, err
 	}
-	if err := writeConfig(options.Path, migrated); err != nil {
+	if err := writeConfig(options.Path, migratedData); err != nil {
 		return fromFormat, true, err
 	}
 
@@ -87,12 +87,12 @@ func migrateConfigFromVersionEight(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	migrated := data
+	migratedData := data
 	if _, hasMessage := document["get_on_with_it_message"]; hasMessage {
-		migrated = moveRootKeyIntoTable(migrated, "get_on_with_it_message", "input", "continue")
+		migratedData = moveRootKeyIntoTable(migratedData, "get_on_with_it_message", "input", "continue")
 	}
 
-	return rewriteConfigVersion(migrated, config.ContinueMessageFormat), nil
+	return rewriteConfigVersion(migratedData, config.ContinueMessageFormat), nil
 }
 
 func migrateConfigFromVersionSeven(data []byte) ([]byte, error) {
@@ -108,10 +108,10 @@ func migrateConfigFromVersionSix(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	migrated := renameConfigSegment(data, "turn-elapsed", "turn-timer")
-	migrated = renameConfigSegment(migrated, "working-directory", "workspace-dir")
+	migratedData := renameConfigSegment(data, "turn-elapsed", "turn-timer")
+	migratedData = renameConfigSegment(migratedData, "working-directory", "workspace-dir")
 
-	return rewriteConfigVersion(migrated, config.TurnTimerFormat), nil
+	return rewriteConfigVersion(migratedData, config.TurnTimerFormat), nil
 }
 
 func migrateConfigFromVersionFive(data []byte) ([]byte, error) {
@@ -119,9 +119,9 @@ func migrateConfigFromVersionFive(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	migrated := removeConfigSegment(data, "last-tps")
+	migratedData := removeConfigSegment(data, "last-tps")
 
-	return rewriteConfigVersion(migrated, config.RetiredTpsFormat), nil
+	return rewriteConfigVersion(migratedData, config.RetiredTpsFormat), nil
 }
 
 func migrateConfigFromVersionFour(data []byte) ([]byte, error) {
@@ -134,12 +134,12 @@ func migrateConfigFromVersionThree(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	migrated := data
+	migratedData := data
 	if _, hasEditor := document["editor"]; hasEditor {
-		migrated = moveRootKeyIntoTable(migrated, "editor", "editor", "command")
+		migratedData = moveRootKeyIntoTable(migratedData, "editor", "editor", "command")
 	}
 
-	return rewriteConfigVersion(migrated, config.EditorCommandFormat), nil
+	return rewriteConfigVersion(migratedData, config.EditorCommandFormat), nil
 }
 
 func moveRootKeyIntoTable(data []byte, name string, table string, key string) []byte {
@@ -150,8 +150,8 @@ func moveRootKeyIntoTable(data []byte, name string, table string, key string) []
 	tableStart := len(lines)
 	movedAt := -1
 	for i, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if strings.HasPrefix(trimmed, "[") {
+		trimmedLine := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmedLine, "[") {
 			tableStart = i
 			break
 		}
@@ -167,20 +167,20 @@ func moveRootKeyIntoTable(data []byte, name string, table string, key string) []
 		return data
 	}
 
-	migrated := append([]string(nil), lines[:movedAt]...)
-	migrated = append(migrated, lines[movedAt+1:tableStart]...)
-	migrated = appendWithoutTrailingBlank(migrated, "", "["+table+"]", rewriteLineKey(lines[movedAt], key))
+	migratedLines := append([]string(nil), lines[:movedAt]...)
+	migratedLines = append(migratedLines, lines[movedAt+1:tableStart]...)
+	migratedLines = appendWithoutTrailingBlank(migratedLines, "", "["+table+"]", rewriteLineKey(lines[movedAt], key))
 	if tableStart < len(lines) {
-		migrated = append(migrated, "")
-		migrated = append(migrated, lines[tableStart:]...)
+		migratedLines = append(migratedLines, "")
+		migratedLines = append(migratedLines, lines[tableStart:]...)
 	}
 
-	joined := strings.Join(migrated, "\n")
+	joinedLines := strings.Join(migratedLines, "\n")
 	if hasFinalNewline {
-		joined += "\n"
+		joinedLines += "\n"
 	}
 
-	return []byte(joined)
+	return []byte(joinedLines)
 }
 
 func rewriteLineKey(line string, key string) string {
@@ -199,10 +199,10 @@ func migrateConfigFromVersionTwo(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	renamed := renameConfigSegment(data, "current-session", "session-name")
-	renamed = renameConfigSegment(renamed, "current-time", "local-time")
+	renamedData := renameConfigSegment(data, "current-session", "session-name")
+	renamedData = renameConfigSegment(renamedData, "current-time", "local-time")
 
-	return rewriteConfigVersion(renamed, config.SegmentNamesFormat), nil
+	return rewriteConfigVersion(renamedData, config.SegmentNamesFormat), nil
 }
 
 func renameConfigSegment(data []byte, oldName string, newName string) []byte {
@@ -218,14 +218,14 @@ func removeConfigSegment(data []byte, name string) []byte {
 	table := `\{[\t ]*segment[\t ]*=[\t ]*(?:"` + quotedName + `"|'` + quotedName + `')[\t ]*\}`
 
 	wholeLine := regexp.MustCompile(`(?m)^[\t ]*` + table + `[\t ]*,?[\t ]*(?:#[^\r\n]*)?\r?\n`)
-	migrated := wholeLine.ReplaceAll(data, nil)
+	migratedData := wholeLine.ReplaceAll(data, nil)
 	followedByComma := regexp.MustCompile(table + `[\t ]*,[\t ]*`)
-	migrated = followedByComma.ReplaceAll(migrated, nil)
+	migratedData = followedByComma.ReplaceAll(migratedData, nil)
 	precededByComma := regexp.MustCompile(`,[\t ]*` + table)
-	migrated = precededByComma.ReplaceAll(migrated, nil)
+	migratedData = precededByComma.ReplaceAll(migratedData, nil)
 	standalone := regexp.MustCompile(table)
 
-	return standalone.ReplaceAll(migrated, nil)
+	return standalone.ReplaceAll(migratedData, nil)
 }
 
 func readConfigDocument(data []byte) (int, map[string]any, error) {
@@ -284,19 +284,19 @@ func migrateConfigFromVersionOne(data []byte) ([]byte, error) {
 		selection = providerName + "/" + model + "@" + effort
 	}
 
-	removed := map[string]bool{
+	removedKeys := map[string]bool{
 		"version":  true,
 		"provider": hasProvider,
 		"effort":   hasEffort,
 		"model":    hasLegacyModel,
 	}
 
-	return rewriteVersionOneConfig(data, removed, selection), nil
+	return rewriteVersionOneConfig(data, removedKeys, selection), nil
 }
 
 func configString(document map[string]any, name string) (string, bool, error) {
-	value, found := document[name]
-	if !found {
+	value, isFound := document[name]
+	if !isFound {
 		return "", false, nil
 	}
 
@@ -317,7 +317,7 @@ func defaultConfigEffort(providerName string) string {
 	}
 }
 
-func rewriteVersionOneConfig(data []byte, removed map[string]bool, selection string) []byte {
+func rewriteVersionOneConfig(data []byte, removedKeys map[string]bool, selection string) []byte {
 	lines := strings.Split(strings.TrimSuffix(string(data), "\n"), "\n")
 	tableStart := len(lines)
 	for i, line := range lines {
@@ -330,7 +330,7 @@ func rewriteVersionOneConfig(data []byte, removed map[string]bool, selection str
 	root := make([]string, 0, tableStart+1)
 	for _, line := range lines[:tableStart] {
 		key, hasKey := configLineKey(line)
-		if hasKey && removed[key] {
+		if hasKey && removedKeys[key] {
 			continue
 		}
 		root = append(root, line)
@@ -338,8 +338,8 @@ func rewriteVersionOneConfig(data []byte, removed map[string]bool, selection str
 
 	versionAt := 0
 	for versionAt < len(root) {
-		trimmed := strings.TrimSpace(root[versionAt])
-		if trimmed != "" && !strings.HasPrefix(trimmed, "#") {
+		trimmedLine := strings.TrimSpace(root[versionAt])
+		if trimmedLine != "" && !strings.HasPrefix(trimmedLine, "#") {
 			break
 		}
 		versionAt++
@@ -383,21 +383,21 @@ func rewriteConfigVersion(data []byte, version int) []byte {
 		break
 	}
 
-	migrated := strings.Join(lines, "\n")
+	migratedText := strings.Join(lines, "\n")
 	if hasFinalNewline {
-		migrated += "\n"
+		migratedText += "\n"
 	}
 
-	return []byte(migrated)
+	return []byte(migratedText)
 }
 
 func configLineKey(line string) (string, bool) {
-	trimmed := strings.TrimSpace(line)
-	if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+	trimmedLine := strings.TrimSpace(line)
+	if trimmedLine == "" || strings.HasPrefix(trimmedLine, "#") {
 		return "", false
 	}
 
-	key, _, found := strings.Cut(trimmed, "=")
+	key, _, found := strings.Cut(trimmedLine, "=")
 	if !found {
 		return "", false
 	}
@@ -405,12 +405,12 @@ func configLineKey(line string) (string, bool) {
 	return strings.TrimSpace(key), true
 }
 
-func appendWithoutTrailingBlank(lines []string, added ...string) []string {
+func appendWithoutTrailingBlank(lines []string, addedLines ...string) []string {
 	for len(lines) > 0 && strings.TrimSpace(lines[len(lines)-1]) == "" {
 		lines = lines[:len(lines)-1]
 	}
 
-	return append(lines, added...)
+	return append(lines, addedLines...)
 }
 
 func configBackupPath(path string) string {

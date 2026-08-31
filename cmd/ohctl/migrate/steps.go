@@ -75,7 +75,7 @@ func announces(mode string, text string) bool {
 const legacyBackgroundFlag = "b"
 
 func dropBackgroundCapability(lines []map[string]json.RawMessage) ([]map[string]json.RawMessage, error) {
-	migrated := make([]map[string]json.RawMessage, 0, len(lines))
+	migratedLines := make([]map[string]json.RawMessage, 0, len(lines))
 
 	for index, line := range lines {
 		event, hasEvent, err := eventOf(line)
@@ -97,10 +97,10 @@ func dropBackgroundCapability(lines []map[string]json.RawMessage) ([]map[string]
 			line["event"] = encodedEvent
 		}
 
-		migrated = append(migrated, line)
+		migratedLines = append(migratedLines, line)
 	}
 
-	return migrated, nil
+	return migratedLines, nil
 }
 
 func withoutBackgroundFlag(flags string) string {
@@ -141,11 +141,11 @@ func restateStartupContext(event map[string]json.RawMessage, promptBytes int) er
 	}
 
 	if promptBytes == 0 {
-		recorded, err := contextFileBytes(state)
+		recordedContext, err := contextFileBytes(state)
 		if err != nil {
 			return err
 		}
-		promptBytes = recorded
+		promptBytes = recordedContext
 	}
 
 	delete(state, "context")
@@ -153,11 +153,11 @@ func restateStartupContext(event map[string]json.RawMessage, promptBytes int) er
 		state["prompt"] = json.RawMessage(strconv.Itoa(promptBytes))
 	}
 
-	restated, err := json.Marshal(state)
+	restatedState, err := json.Marshal(state)
 	if err != nil {
 		return err
 	}
-	event["state"] = restated
+	event["state"] = restatedState
 
 	return nil
 }
@@ -233,7 +233,7 @@ func addLastMode(lines []map[string]json.RawMessage) ([]map[string]json.RawMessa
 		return nil, err
 	}
 
-	migrated := make([]map[string]json.RawMessage, 0, len(lines)+1)
+	migratedLines := make([]map[string]json.RawMessage, 0, len(lines)+1)
 	lastTime := lines[0]["time"]
 
 	for index, line := range lines {
@@ -264,20 +264,20 @@ func addLastMode(lines []map[string]json.RawMessage) ([]map[string]json.RawMessa
 			currentCaps = modeAfterNotice(currentCaps, text)
 		}
 
-		migrated = append(migrated, line)
+		migratedLines = append(migratedLines, line)
 	}
 
 	encodedEvent, err := json.Marshal(caps.ModeEvent(currentCaps))
 	if err != nil {
 		return nil, err
 	}
-	migrated = append(migrated, map[string]json.RawMessage{
+	migratedLines = append(migratedLines, map[string]json.RawMessage{
 		"kind":  json.RawMessage(`"event"`),
 		"time":  lastTime,
 		"event": encodedEvent,
 	})
 
-	return migrated, nil
+	return migratedLines, nil
 }
 
 func initialMode(head map[string]json.RawMessage) (caps.Set, error) {
@@ -396,17 +396,17 @@ func addTurnCompletions(lines []map[string]json.RawMessage) ([]map[string]json.R
 	}
 	markMigratedTurnCompletion(lines, turnStart, len(lines), completionAfter)
 
-	migrated := make([]map[string]json.RawMessage, 0, len(lines)+len(completionAfter))
+	migratedLines := make([]map[string]json.RawMessage, 0, len(lines)+len(completionAfter))
 	for index, line := range lines {
-		migrated = append(migrated, line)
+		migratedLines = append(migratedLines, line)
 		if completionAfter[index] {
-			migrated = append(migrated, map[string]json.RawMessage{
+			migratedLines = append(migratedLines, map[string]json.RawMessage{
 				"kind": json.RawMessage(`"turn_completion"`),
 				"time": line["time"],
 			})
 		}
 	}
-	return migrated, nil
+	return migratedLines, nil
 }
 
 func markMigratedTurnCompletion(lines []map[string]json.RawMessage, start int, end int, completionAfter map[int]bool) {

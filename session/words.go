@@ -12,9 +12,9 @@ type animalCharacter struct {
 }
 
 type characterSet struct {
-	Adjectives []string          `json:"adjectives"`
-	Animals    []animalCharacter `json:"animals"`
-	Retired    []animalCharacter `json:"retired"`
+	Adjectives     []string          `json:"adjectives"`
+	Animals        []animalCharacter `json:"animals"`
+	RetiredAnimals []animalCharacter `json:"retired"`
 }
 
 //go:embed characters.json
@@ -24,7 +24,7 @@ var (
 	characters   = decodeCharacters(characterData)
 	adjectives   = characters.Adjectives
 	animals      = getAnimalNames(characters.Animals)
-	animalEmojis = getAnimalEmojis(characters.Animals, characters.Retired)
+	animalEmojis = getAnimalEmojis(characters.Animals, characters.RetiredAnimals)
 )
 
 func decodeCharacters(data []byte) characterSet {
@@ -43,9 +43,9 @@ func getAnimalNames(characterAnimals []animalCharacter) []string {
 	return names
 }
 
-func getAnimalEmojis(named []animalCharacter, retired []animalCharacter) map[string]string {
-	emojis := make(map[string]string, len(named)+len(retired))
-	for _, animal := range slices.Concat(named, retired) {
+func getAnimalEmojis(namedAnimals []animalCharacter, retiredAnimals []animalCharacter) map[string]string {
+	emojis := make(map[string]string, len(namedAnimals)+len(retiredAnimals))
+	for _, animal := range slices.Concat(namedAnimals, retiredAnimals) {
 		emojis[animal.Name] = animal.Emoji
 	}
 	return emojis

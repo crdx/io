@@ -82,8 +82,8 @@ func TestEntityRelationshipCanvasAndRoutingEdgeCases(t *testing.T) {
 	for _, plan := range []routePlan{
 		nonMerged,
 		{rel: &Relationship{Label: "reverse runs"}, a: endpoint{p: entity, x: 17, y: 0}, b: endpoint{p: other, x: 0, y: 10}, ya: 3, yb: 8, tx: 18},
-		{rel: &Relationship{Label: "merged"}, a: first, b: endpoint{p: other, s: sideB, x: 24, y: 5, card: OneOrMore}, ya: 8, yb: 8, merged: true},
-		{rel: &Relationship{Label: "self"}, a: first, b: endpoint{p: entity, s: sideB, x: 10, y: 5, card: ZeroOrOne}, ya: 8, yb: 8, merged: true},
+		{rel: &Relationship{Label: "merged"}, a: first, b: endpoint{p: other, s: sideB, x: 24, y: 5, card: OneOrMore}, ya: 8, yb: 8, isMerged: true},
+		{rel: &Relationship{Label: "self"}, a: first, b: endpoint{p: entity, s: sideB, x: 10, y: 5, card: ZeroOrOne}, ya: 8, yb: 8, isMerged: true},
 	} {
 		plan.drawLine(overlay)
 		plan.decorate(overlay)
@@ -134,7 +134,7 @@ func TestEntityRelationshipConnectorAndPlacementEdgeCases(t *testing.T) {
 	}
 	layout := placeEntities(diagram, unicodeGlyphs)
 	canvas := &canvas{}
-	for _, entity := range layout.placed {
+	for _, entity := range layout.placedEntities {
 		canvas.stamp(entity.x, entity.y, entity.lines)
 	}
 	drawConnectors(canvas, layout, diagram, unicodeGlyphs)
@@ -143,8 +143,8 @@ func TestEntityRelationshipConnectorAndPlacementEdgeCases(t *testing.T) {
 	}
 
 	empty := placeEntities(&ErDiagram{}, asciiGlyphs)
-	if len(empty.placed) != 0 {
-		t.Fatalf("empty layout has %d entities", len(empty.placed))
+	if len(empty.placedEntities) != 0 {
+		t.Fatalf("empty layout has %d entities", len(empty.placedEntities))
 	}
 	_ = blockWidth([]string{"a", "wide"})
 	_ = renderEntity(&Entity{Display: "wide", Attributes: []Attribute{{Type: "int", Name: "id"}}}, unicodeGlyphs, 40)

@@ -31,8 +31,8 @@ func matchSegments(patternSegments []string, nameSegments []string) bool {
 		return false
 	}
 
-	matched, err := path.Match(patternSegments[0], nameSegments[0])
-	if err != nil || !matched {
+	isMatched, err := path.Match(patternSegments[0], nameSegments[0])
+	if err != nil || !isMatched {
 		return false
 	}
 

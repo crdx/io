@@ -1418,14 +1418,14 @@ func hangingTurns(t *testing.T, scripted ...string) (*httptest.Server, *[]string
 			writer.Header().Set("Content-Type", "text/event-stream")
 			_, _ = fmt.Fprint(writer, scripted[index])
 
-			held := index == 0
+			isHeld := index == 0
 			index++
 
 			if flusher, ok := writer.(http.Flusher); ok {
 				flusher.Flush()
 			}
 
-			if held {
+			if isHeld {
 				<-request.Context().Done()
 			}
 		},

@@ -38,13 +38,13 @@ var (
 // Meta identifies the conversation rendered into a transcript.
 type Meta struct {
 	Name, Model, Effort, Provider, Workspace string
-	Started                                  time.Time
+	StartedAt                                time.Time
 }
 
 // Recorder appends conversation events as Markdown.
 type Recorder struct {
 	file       *os.File
-	started    time.Time
+	startedAt  time.Time
 	lastCallID string
 }
 
@@ -54,14 +54,14 @@ func Open(path string, meta Meta) (*Recorder, error) {
 	if err != nil {
 		return nil, err
 	}
-	recorder := &Recorder{file: file, started: meta.Started}
+	recorder := &Recorder{file: file, startedAt: meta.StartedAt}
 	info, err := file.Stat()
 	if err != nil {
 		_ = file.Close()
 		return nil, err
 	}
 	if info.Size() == 0 {
-		_, err = fmt.Fprintf(file, "# Conversation\n\n- **Session:** `%s`\n- **Started:** `%s`\n- **Model:** `%s`\n- **Effort:** `%s`\n- **Provider:** `%s`\n- **Workspace:** `%s`\n\n", meta.Name, meta.Started.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace)
+		_, err = fmt.Fprintf(file, "# Conversation\n\n- **Session:** `%s`\n- **Started:** `%s`\n- **Model:** `%s`\n- **Effort:** `%s`\n- **Provider:** `%s`\n- **Workspace:** `%s`\n\n", meta.Name, meta.StartedAt.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace)
 		if err != nil {
 			_ = file.Close()
 			return nil, err
@@ -79,14 +79,14 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		return nil
 	}
 
-	answersTheCallAbove := event.Kind == agent.ToolCallResultEvent && event.ID != "" && event.ID == self.lastCallID
+	isAnswerToTheCallAbove := event.Kind == agent.ToolCallResultEvent && event.ID != "" && event.ID == self.lastCallID
 	self.lastCallID = ""
 	if event.Kind == agent.ToolCallRequestEvent {
 		self.lastCallID = event.ID
 	}
 
 	var output document
-	if answersTheCallAbove {
+	if isAnswerToTheCallAbove {
 		output.paragraph(joinParts(resultArrow+outcome(event), self.offset(at)))
 	} else {
 		output.paragraph("## " + joinParts(append(heading(event), self.offset(at))...))
@@ -156,8 +156,8 @@ func namesACall(kind agent.Kind) bool {
 }
 
 func inlineSubject(event agent.Event) string {
-	tooLongToRead := len([]rune(event.Subject)) > maximumInlineSubject
-	if emphasisLanguage(event.Emphasis) != "" || tooLongToRead || strings.ContainsAny(event.Subject, "\n`") {
+	isTooLongToRead := len([]rune(event.Subject)) > maximumInlineSubject
+	if emphasisLanguage(event.Emphasis) != "" || isTooLongToRead || strings.ContainsAny(event.Subject, "\n`") {
 		return ""
 	}
 
@@ -196,8 +196,8 @@ func measurements(stats *tool.Stats) string {
 		}
 		parts = append(parts, size)
 	}
-	if stats.Added > 0 || stats.Removed > 0 {
-		parts = append(parts, fmt.Sprintf("+%d −%d", stats.Added, stats.Removed))
+	if stats.AddedLines > 0 || stats.RemovedLines > 0 {
+		parts = append(parts, fmt.Sprintf("+%d −%d", stats.AddedLines, stats.RemovedLines))
 	}
 	if stats.EstimatedTokens > 0 {
 		parts = append(parts, util.FormatEstimatedTokenCount(stats.EstimatedTokens))
@@ -208,7 +208,7 @@ func measurements(stats *tool.Stats) string {
 	if stats.PeakMemory > 0 {
 		parts = append(parts, util.FormatBytes(stats.PeakMemory, formattedBytePrecision)+" peak")
 	}
-	if stats.Truncated {
+	if stats.IsTruncated {
 		parts = append(parts, "truncated")
 	}
 
@@ -277,11 +277,11 @@ func (self *Recorder) Close() error {
 }
 
 func (self *Recorder) offset(at time.Time) string {
-	if self.started.IsZero() {
+	if self.startedAt.IsZero() {
 		return ""
 	}
 
-	return "+" + util.CompactDuration(at.Sub(self.started))
+	return "+" + util.CompactDuration(at.Sub(self.startedAt))
 }
 
 func title(kind agent.Kind) string {

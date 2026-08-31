@@ -190,7 +190,7 @@ func TestEntriesIdentifyEverySessionWithoutLoadingIt(t *testing.T) {
 		if entry.ID != wanted[entry.Name] {
 			t.Errorf("%q carries the identifier %q, want %q", entry.Name, entry.ID, wanted[entry.Name])
 		}
-		if entry.Started.IsZero() {
+		if entry.StartedAt.IsZero() {
 			t.Errorf("%q has no start time", entry.Name)
 		}
 	}

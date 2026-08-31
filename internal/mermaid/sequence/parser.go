@@ -224,17 +224,17 @@ func (self ArrowType) isBidirectional() bool {
 	return self == BidirectionalSolid || self == BidirectionalDotted
 }
 
-func (self ArrowType) head(chars BoxChars, rightward bool) (rune, bool) {
+func (self ArrowType) head(chars BoxChars, isRightward bool) (rune, bool) {
 	switch self {
 	case SolidArrow, DottedArrow, BidirectionalSolid, BidirectionalDotted:
-		if rightward {
+		if isRightward {
 			return chars.ArrowRight, true
 		}
 		return chars.ArrowLeft, true
 	case SolidCross, DottedCross:
 		return chars.CrossHead, true
 	case SolidPoint, DottedPoint:
-		if rightward {
+		if isRightward {
 			return chars.PointRight, true
 		}
 		return chars.PointLeft, true
@@ -247,11 +247,11 @@ func (self ArrowType) head(chars BoxChars, rightward bool) (rune, bool) {
 func IsSequenceDiagram(input string) bool {
 	lines := strings.SplitSeq(input, "\n")
 	for line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" || strings.HasPrefix(trimmed, "%%") {
+		trimmedLine := strings.TrimSpace(line)
+		if trimmedLine == "" || strings.HasPrefix(trimmedLine, "%%") {
 			continue
 		}
-		return hasSequenceKeyword(trimmed)
+		return hasSequenceKeyword(trimmedLine)
 	}
 	return false
 }
@@ -296,14 +296,14 @@ func Parse(input string) (*SequenceDiagram, error) {
 	var openFragments []FragmentType
 
 	for i, line := range lines {
-		trimmed := strings.TrimSpace(line)
+		trimmedLine := strings.TrimSpace(line)
 
-		if autonumberRegex.MatchString(trimmed) {
+		if autonumberRegex.MatchString(trimmedLine) {
 			sd.Autonumber = true
 			continue
 		}
 
-		if matches := noteRegex.FindStringSubmatch(trimmed); matches != nil {
+		if matches := noteRegex.FindStringSubmatch(trimmedLine); matches != nil {
 			placement := NoteOver
 			switch strings.ToLower(matches[1]) {
 			case "left of":
@@ -335,17 +335,17 @@ func Parse(input string) (*SequenceDiagram, error) {
 			continue
 		}
 
-		if matched, err := sd.parseParticipant(trimmed, participantMap); err != nil {
+		if wasMatched, err := sd.parseParticipant(trimmedLine, participantMap); err != nil {
 			return nil, fmt.Errorf("line %d: %w", i+2, err)
-		} else if matched {
+		} else if wasMatched {
 			continue
 		}
 
-		if sd.parseMessage(trimmed, participantMap) {
+		if sd.parseMessage(trimmedLine, participantMap) {
 			continue
 		}
 
-		if match := fragmentStartRegex.FindStringSubmatch(trimmed); match != nil {
+		if match := fragmentStartRegex.FindStringSubmatch(trimmedLine); match != nil {
 			fType := fragmentKeywords[strings.ToLower(match[1])]
 			label := strings.TrimSpace(match[2])
 			if fType == FragmentRect {
@@ -359,10 +359,10 @@ func Parse(input string) (*SequenceDiagram, error) {
 			continue
 		}
 
-		if match := fragmentDividerRegex.FindStringSubmatch(trimmed); match != nil {
+		if match := fragmentDividerRegex.FindStringSubmatch(trimmedLine); match != nil {
 			want := dividerKeywords[strings.ToLower(match[1])]
 			if len(openFragments) == 0 || openFragments[len(openFragments)-1] != want {
-				return nil, fmt.Errorf("line %d: %q outside a matching %s block", i+2, trimmed, want)
+				return nil, fmt.Errorf("line %d: %q outside a matching %s block", i+2, trimmedLine, want)
 			}
 			sd.Events = append(sd.Events, Event{
 				Kind:     EventFragmentDivider,
@@ -371,16 +371,16 @@ func Parse(input string) (*SequenceDiagram, error) {
 			continue
 		}
 
-		if fragmentEndRegex.MatchString(trimmed) {
+		if fragmentEndRegex.MatchString(trimmedLine) {
 			if len(openFragments) == 0 {
-				return nil, fmt.Errorf("line %d: %q without a matching fragment opener", i+2, trimmed)
+				return nil, fmt.Errorf("line %d: %q without a matching fragment opener", i+2, trimmedLine)
 			}
 			sd.Events = append(sd.Events, Event{Kind: EventFragmentEnd})
 			openFragments = openFragments[:len(openFragments)-1]
 			continue
 		}
 
-		return nil, fmt.Errorf("line %d: invalid syntax: %q", i+2, trimmed)
+		return nil, fmt.Errorf("line %d: invalid syntax: %q", i+2, trimmedLine)
 	}
 
 	if len(openFragments) > 0 {
@@ -430,12 +430,12 @@ func (self *SequenceDiagram) parseParticipant(line string, participants map[stri
 }
 
 func findArrow(line string) (int, string) {
-	inQuotes := false
+	isInQuotes := false
 	for i := range len(line) {
 		switch {
 		case line[i] == '"':
-			inQuotes = !inQuotes
-		case !inQuotes && (line[i] == '-' || line[i] == '<'):
+			isInQuotes = !isInQuotes
+		case !isInQuotes && (line[i] == '-' || line[i] == '<'):
 			for _, tok := range arrowTokens {
 				if strings.HasPrefix(line[i:], tok) {
 					return i, tok
@@ -516,16 +516,16 @@ func splitMessage(line string) (parsedMessage, bool) {
 }
 
 func (self *SequenceDiagram) parseMessage(line string, participants map[string]*Participant) bool {
-	parsed, ok := splitMessage(line)
+	parsedMessage, ok := splitMessage(line)
 	if !ok {
 		return false
 	}
 
-	from := self.getParticipant(parsed.fromID, participants)
-	to := self.getParticipant(parsed.toID, participants)
+	from := self.getParticipant(parsedMessage.fromID, participants)
+	to := self.getParticipant(parsedMessage.toID, participants)
 
 	var aType ArrowType
-	switch parsed.arrow {
+	switch parsedMessage.arrow {
 	case "->>":
 		aType = SolidArrow
 	case "-->>":
@@ -556,10 +556,10 @@ func (self *SequenceDiagram) parseMessage(line string, participants map[string]*
 	msg := &Message{
 		From:        from,
 		To:          to,
-		Label:       parsed.label,
+		Label:       parsedMessage.label,
 		ArrowType:   aType,
-		CentralFrom: parsed.centralFrom,
-		CentralTo:   parsed.centralTo,
+		CentralFrom: parsedMessage.centralFrom,
+		CentralTo:   parsedMessage.centralTo,
 		Number:      msgNumber,
 	}
 	self.Messages = append(self.Messages, msg)

@@ -40,13 +40,13 @@ func (self *Endpoint) serveRegistry(writer http.ResponseWriter, request *http.Re
 	entry.Limit.Context = simulatedContext
 	entry.Limit.Output = simulatedOutput
 
-	described := registryProvider{Models: map[string]registryEntry{self.scenario.Model: entry}}
+	describedProvider := registryProvider{Models: map[string]registryEntry{self.scenario.Model: entry}}
 
 	registry := map[string]registryProvider{}
 
 	for name := range strings.SplitSeq(request.URL.Query().Get(registryQuery), ",") {
 		if name != "" {
-			registry[name] = described
+			registry[name] = describedProvider
 		}
 	}
 

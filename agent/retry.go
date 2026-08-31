@@ -47,13 +47,13 @@ func isResumable(err error) bool {
 }
 
 func faultedCall(err error) (ToolCall, bool) {
-	var faulted CallFaulted
+	var faultedCall CallFaulted
 
-	if !errors.As(err, &faulted) {
+	if !errors.As(err, &faultedCall) {
 		return ToolCall{}, false
 	}
 
-	return faulted.FaultedCall(), true
+	return faultedCall.FaultedCall(), true
 }
 
 type rewind struct {

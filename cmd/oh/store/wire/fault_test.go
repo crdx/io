@@ -20,7 +20,7 @@ func TestAppendFailureDisablesRecordingAndWarnsOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request := req.Request{Started: time.Now(), Method: "POST", URL: "https://example.com"}
+	request := req.Request{StartedAt: time.Now(), Method: "POST", URL: "https://example.com"}
 	recorder.Start(request)
 	recorder.Start(request)
 

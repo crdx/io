@@ -26,7 +26,7 @@ var bearerPattern = regexp.MustCompile(`(?i)bearer[ \t]+[^\s"']+`)
 // Meta identifies the session whose exchanges are recorded.
 type Meta struct {
 	Name, Model, Effort, Provider, Workspace string
-	Started                                  time.Time
+	StartedAt                                time.Time
 }
 
 // Recorder appends censored logical HTTP exchanges.
@@ -69,7 +69,7 @@ func Open(path string, meta Meta, report func(error)) (*Recorder, error) {
 }
 
 func writeTranscriptHeader(file *os.File, meta Meta) error {
-	_, err := fmt.Fprintf(file, "# HTTP transcript\n# session: %s\n# started: %s\n# model: %s\n# effort: %s\n# provider: %s\n# workspace: %s\n\n", meta.Name, meta.Started.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace)
+	_, err := fmt.Fprintf(file, "# HTTP transcript\n# session: %s\n# started: %s\n# model: %s\n# effort: %s\n# provider: %s\n# workspace: %s\n\n", meta.Name, meta.StartedAt.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace)
 	return err
 }
 
@@ -131,8 +131,8 @@ func (self *Recorder) Start(request req.Request) req.ExchangeObserver {
 	defer self.mutex.Unlock()
 	sequence := self.next
 	self.next++
-	exchange := &exchange{recorder: self, sequence: sequence, startedAt: request.Started}
-	self.write(fmt.Sprintf("# exchange %d start %s\n> %s %s %s\n", sequence, request.Started.UTC().Format(time.RFC3339Nano), request.Method, request.URL, request.Protocol))
+	exchange := &exchange{recorder: self, sequence: sequence, startedAt: request.StartedAt}
+	self.write(fmt.Sprintf("# exchange %d start %s\n> %s %s %s\n", sequence, request.StartedAt.UTC().Format(time.RFC3339Nano), request.Method, request.URL, request.Protocol))
 	self.writeHeaders(">", request.Header)
 	self.write("\n")
 	self.write(string(censorBody(request.Body, request.Header.Get("Content-Type"))))
@@ -227,25 +227,25 @@ func (self *exchange) Body(body []byte) {
 	defer self.recorder.mutex.Unlock()
 	_, _ = self.body.Write(body)
 	for {
-		buffered := self.body.Bytes()
-		lineEnd := bytes.IndexByte(buffered, '\n')
+		bufferedBody := self.body.Bytes()
+		lineEnd := bytes.IndexByte(bufferedBody, '\n')
 		if lineEnd < 0 {
 			return
 		}
-		line := bytes.Clone(buffered[:lineEnd+1])
+		line := bytes.Clone(bufferedBody[:lineEnd+1])
 		self.body.Next(lineEnd + 1)
 		self.recorder.write(string(censorBody(line, self.contentType)))
 	}
 }
 
-func (self *exchange) Finish(finished time.Time, err error, incomplete bool) {
+func (self *exchange) Finish(finishedAt time.Time, err error, isIncomplete bool) {
 	self.recorder.mutex.Lock()
 	defer self.recorder.mutex.Unlock()
 	self.recorder.write(string(censorBody(self.body.Bytes(), self.contentType)))
 	self.recorder.write("\n")
 	state := "completed"
 	switch {
-	case incomplete:
+	case isIncomplete:
 		state = "incomplete close"
 	case errors.Is(err, context.Canceled):
 		state = "cancelled"
@@ -254,7 +254,7 @@ func (self *exchange) Finish(finished time.Time, err error, incomplete bool) {
 	case err != nil:
 		state = "read error: " + censorBearer(err.Error())
 	}
-	self.recorder.write(fmt.Sprintf("# exchange %d end %s elapsed=%s %s\n\n", self.sequence, finished.UTC().Format(time.RFC3339Nano), finished.Sub(self.startedAt), state))
+	self.recorder.write(fmt.Sprintf("# exchange %d end %s elapsed=%s %s\n\n", self.sequence, finishedAt.UTC().Format(time.RFC3339Nano), finishedAt.Sub(self.startedAt), state))
 }
 
 func censorBody(body []byte, contentType string) []byte {
@@ -302,52 +302,52 @@ func censorJSON(body []byte) []byte {
 		return []byte(censorBearer(string(body)))
 	}
 
-	censored, wasCensored := censorValue(value)
+	censoredValue, wasCensored := censorValue(value)
 	if !wasCensored {
 		return body
 	}
 
-	encoded, err := json.Marshal(censored)
+	encodedValue, err := json.Marshal(censoredValue)
 	if err != nil {
 		return []byte(censorBearer(string(body)))
 	}
-	return encoded
+	return encodedValue
 }
 
 func censorValue(value any) (any, bool) {
-	switch typed := value.(type) {
+	switch typedValue := value.(type) {
 	case map[string]any:
 		wasCensored := false
-		for key, item := range typed {
+		for key, item := range typedValue {
 			if isSensitiveName(key) {
-				typed[key] = redacted
+				typedValue[key] = redacted
 				wasCensored = true
 				continue
 			}
 
-			censored, itemWasCensored := censorValue(item)
-			typed[key] = censored
+			censoredItem, itemWasCensored := censorValue(item)
+			typedValue[key] = censoredItem
 			wasCensored = wasCensored || itemWasCensored
 		}
-		return typed, wasCensored
+		return typedValue, wasCensored
 	case []any:
 		wasCensored := false
-		for index, item := range typed {
-			censored, itemWasCensored := censorValue(item)
-			typed[index] = censored
+		for index, item := range typedValue {
+			censoredItem, itemWasCensored := censorValue(item)
+			typedValue[index] = censoredItem
 			wasCensored = wasCensored || itemWasCensored
 		}
-		return typed, wasCensored
+		return typedValue, wasCensored
 	case string:
-		censored := censorBearer(typed)
-		return censored, censored != typed
+		censoredText := censorBearer(typedValue)
+		return censoredText, censoredText != typedValue
 	}
 	return value, false
 }
 
 func isSensitiveName(name string) bool {
-	normalised := strings.NewReplacer("-", "", "_", "").Replace(strings.ToLower(name))
-	switch normalised {
+	normalisedName := strings.NewReplacer("-", "", "_", "").Replace(strings.ToLower(name))
+	switch normalisedName {
 	case
 		"authorization",
 		"proxyauthorization",
@@ -378,11 +378,11 @@ func isSensitiveName(name string) bool {
 		"password":
 		return true
 	}
-	return strings.Contains(normalised, "credential") ||
-		strings.HasSuffix(normalised, "accountid") ||
-		strings.HasSuffix(normalised, "organizationid") ||
-		strings.HasSuffix(normalised, "workspaceid") ||
-		strings.HasSuffix(normalised, "requestid")
+	return strings.Contains(normalisedName, "credential") ||
+		strings.HasSuffix(normalisedName, "accountid") ||
+		strings.HasSuffix(normalisedName, "organizationid") ||
+		strings.HasSuffix(normalisedName, "workspaceid") ||
+		strings.HasSuffix(normalisedName, "requestid")
 }
 
 func censorBearer(value string) string {

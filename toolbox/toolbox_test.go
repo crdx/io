@@ -10,7 +10,7 @@ import (
 	"crdx.org/io/tool"
 )
 
-func testRoot(t *testing.T, writable bool) *file.Root {
+func testRoot(t *testing.T, isWritable bool) *file.Root {
 	t.Helper()
 
 	root, err := os.OpenRoot(t.TempDir())
@@ -21,7 +21,7 @@ func testRoot(t *testing.T, writable bool) *file.Root {
 	t.Cleanup(func() { _ = root.Close() })
 
 	return file.New(root, func(string) error {
-		if writable {
+		if isWritable {
 			return nil
 		}
 
@@ -29,12 +29,12 @@ func testRoot(t *testing.T, writable bool) *file.Root {
 	})
 }
 
-func names(t *testing.T, writable bool) []string {
+func names(t *testing.T, isWritable bool) []string {
 	t.Helper()
 
 	var built []string
 
-	for _, one := range Rummage(testRoot(t, writable), file.NewSnapshots()) {
+	for _, one := range Rummage(testRoot(t, isWritable), file.NewSnapshots()) {
 		built = append(built, one.Name())
 	}
 

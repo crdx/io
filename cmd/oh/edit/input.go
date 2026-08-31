@@ -116,11 +116,11 @@ func (self *Input) Frame(width int) Frame {
 	return framedRows
 }
 
-func (self *Input) Apply(keypress key.Key, running bool) Action {
-	if self.wasRunning != running {
+func (self *Input) Apply(keypress key.Key, isRunning bool) Action {
+	if self.wasRunning != isRunning {
 		self.isEnterPending = false
 	}
-	self.wasRunning = running
+	self.wasRunning = isRunning
 
 	if self.applyClearKey(keypress) {
 		return Draw
@@ -202,7 +202,7 @@ func (self *Input) Apply(keypress key.Key, running bool) Action {
 		self.pasteStart = self.buffer.Cursor()
 
 	case key.Rune:
-		return self.rune(keypress, running)
+		return self.rune(keypress, isRunning)
 
 	case key.PageUp, key.PageDown, key.PasteEnd, key.FocusIn, key.FocusOut, key.Unknown:
 	}
@@ -356,7 +356,7 @@ func (self *Input) insert(value rune) {
 	self.buffer.Insert([]rune{value})
 }
 
-func (self *Input) rune(keypress key.Key, running bool) Action {
+func (self *Input) rune(keypress key.Key, isRunning bool) Action {
 	if !keypress.Mod.Has(key.Ctrl) {
 		if keypress.Value == '\t' && strings.HasPrefix(self.buffer.String(), "/") {
 			return Complete
@@ -367,7 +367,7 @@ func (self *Input) rune(keypress key.Key, running bool) Action {
 
 	switch keypress.Value {
 	case 'd':
-		if running {
+		if isRunning {
 			return Cancel
 		}
 
@@ -420,9 +420,9 @@ func (self *Input) paste(keypress key.Key) {
 
 func (self *Input) normalisePasteIndentation() {
 	end := self.buffer.Cursor()
-	pasted := string(self.buffer.Runes()[self.pasteStart:end])
-	lines := strings.Split(pasted, "\n")
-	indentation := len(pasted)
+	pastedText := string(self.buffer.Runes()[self.pasteStart:end])
+	lines := strings.Split(pastedText, "\n")
+	indentation := len(pastedText)
 
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" {
@@ -432,7 +432,7 @@ func (self *Input) normalisePasteIndentation() {
 		indentation = min(indentation, len(line)-len(strings.TrimLeft(line, " ")))
 	}
 
-	if indentation == 0 || indentation == len(pasted) {
+	if indentation == 0 || indentation == len(pastedText) {
 		return
 	}
 

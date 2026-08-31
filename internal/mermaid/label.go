@@ -17,10 +17,10 @@ type graphLabel struct {
 }
 
 func newGraphLabel(raw string) graphLabel {
-	normalised := htmlBreakPattern.ReplaceAllString(raw, "\n")
-	normalised = strings.ReplaceAll(normalised, `\n`, "\n")
+	normalisedText := htmlBreakPattern.ReplaceAllString(raw, "\n")
+	normalisedText = strings.ReplaceAll(normalisedText, `\n`, "\n")
 
-	lines := strings.Split(normalised, "\n")
+	lines := strings.Split(normalisedText, "\n")
 
 	width := 0
 	for _, line := range lines {

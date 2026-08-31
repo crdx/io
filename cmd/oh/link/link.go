@@ -130,33 +130,33 @@ func submatch(text string, begin int, end int) string {
 }
 
 func resolve(path string, workspace string) (string, bool) {
-	resolved := path
+	resolvedPath := path
 
-	if strings.HasPrefix(resolved, "~/") {
+	if strings.HasPrefix(resolvedPath, "~/") {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return "", false
 		}
 
-		resolved = filepath.Join(home, strings.TrimPrefix(resolved, "~/"))
-	} else if !filepath.IsAbs(resolved) {
+		resolvedPath = filepath.Join(home, strings.TrimPrefix(resolvedPath, "~/"))
+	} else if !filepath.IsAbs(resolvedPath) {
 		if workspace == "" {
 			return "", false
 		}
 
-		resolved = filepath.Join(workspace, resolved)
+		resolvedPath = filepath.Join(workspace, resolvedPath)
 	}
 
-	resolved, err := filepath.Abs(resolved)
+	resolvedPath, err := filepath.Abs(resolvedPath)
 	if err != nil {
 		return "", false
 	}
 
-	if _, err := os.Stat(resolved); err != nil {
+	if _, err := os.Stat(resolvedPath); err != nil {
 		return "", false
 	}
 
-	return resolved, true
+	return resolvedPath, true
 }
 
 func linkURL(path string, line string, column string) string {

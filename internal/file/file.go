@@ -85,14 +85,14 @@ func (self *Root) Resolve(path string) (*Root, string, error) {
 	var resolvedRoot *Root
 	resolvedName := ""
 	resolvedAt := ""
-	for at, mounted := range self.mounts {
+	for at, mountedRoot := range self.mounts {
 		name, below := pathutil.RelativeTo(at, path)
-		if !below || len(at) <= len(resolvedAt) || (mounted.isExact && name != ".") {
+		if !below || len(at) <= len(resolvedAt) || (mountedRoot.isExact && name != ".") {
 			continue
 		}
 
-		resolvedRoot = mounted.root
-		resolvedName = filepath.Join(mounted.name, name)
+		resolvedRoot = mountedRoot.root
+		resolvedName = filepath.Join(mountedRoot.name, name)
 		resolvedAt = at
 	}
 	if resolvedRoot != nil {
@@ -147,7 +147,7 @@ func (self *Root) refuseWrite(name string) error {
 
 	for range 255 {
 		parts := strings.Split(resolvedName, string(filepath.Separator))
-		followedSymlink := false
+		didFollowSymlink := false
 
 		for i := range parts {
 			prefix := filepath.Join(parts[:i+1]...)
@@ -173,11 +173,11 @@ func (self *Root) refuseWrite(name string) error {
 				return err
 			}
 
-			followedSymlink = true
+			didFollowSymlink = true
 			break
 		}
 
-		if !followedSymlink {
+		if !didFollowSymlink {
 			return nil
 		}
 	}

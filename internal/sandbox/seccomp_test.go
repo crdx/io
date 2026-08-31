@@ -81,9 +81,9 @@ func TestAnInstalledFilterRefusesTheFamiliesItNames(t *testing.T) {
 		return
 	}
 
-	allowUnixSockets := os.Getenv(unixSocketsVariable) != ""
+	allowsUnixSockets := os.Getenv(unixSocketsVariable) != ""
 
-	if err := applySeccomp(allowUnixSockets); err != nil {
+	if err := applySeccomp(allowsUnixSockets); err != nil {
 		t.Fatalf("could not install the filter: %v", err)
 	}
 

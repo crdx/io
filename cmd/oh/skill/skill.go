@@ -62,8 +62,8 @@ func ExcludeGlobal(skills []Skill, directories []string) []Skill {
 
 	filteredSkills := make([]Skill, 0, len(skills))
 	for _, foundSkill := range skills {
-		_, excluded := excludedDirectories[foundSkill.directory]
-		if foundSkill.isGlobal && excluded {
+		_, isExcluded := excludedDirectories[foundSkill.directory]
+		if foundSkill.isGlobal && isExcluded {
 			continue
 		}
 		filteredSkills = append(filteredSkills, foundSkill)
@@ -103,11 +103,11 @@ func Discover(project string, globalDirectories []string, warnings io.Writer) ([
 		directory = filepath.Clean(directory)
 
 		identity := directory
-		if resolved, err := filepath.EvalSymlinks(directory); err == nil {
-			identity = resolved
+		if resolvedDirectory, err := filepath.EvalSymlinks(directory); err == nil {
+			identity = resolvedDirectory
 		}
 
-		if _, seen := seenDirectories[identity]; seen {
+		if _, wasSeen := seenDirectories[identity]; wasSeen {
 			continue
 		}
 		seenDirectories[identity] = struct{}{}

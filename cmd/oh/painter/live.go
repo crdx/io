@@ -13,31 +13,31 @@ const (
 
 type liveText struct {
 	streamingMode output.StreamingMode
-	arrived       strings.Builder
+	arrivedText   strings.Builder
 	drawn         int
 	isTailHidden  bool
 }
 
 func (self *liveText) Len() int {
-	return self.arrived.Len()
+	return self.arrivedText.Len()
 }
 
 func (self *liveText) String() string {
-	return self.arrived.String()
+	return self.arrivedText.String()
 }
 
 func (self *liveText) Write(text string) {
-	_, _ = self.arrived.WriteString(text)
+	_, _ = self.arrivedText.WriteString(text)
 }
 
 func (self *liveText) Reset() {
-	self.arrived.Reset()
+	self.arrivedText.Reset()
 	self.drawn = 0
 	self.isTailHidden = false
 }
 
 func (self *liveText) MarkDrawn(isTailHidden bool) {
-	self.drawn = self.arrived.Len()
+	self.drawn = self.arrivedText.Len()
 	self.isTailHidden = isTailHidden
 }
 

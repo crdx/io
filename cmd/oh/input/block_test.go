@@ -89,7 +89,7 @@ func bottomRuleOf(block Block, width int) string {
 
 func TestALabelPaintedDownToNothingCostsNothing(t *testing.T) {
 	bare := Ruler{Right: "here"}
-	painted := Ruler{Left: style.Scrolled(""), Right: "here"}
+	painted := Ruler{Left: style.ScrolledInput(""), Right: "here"}
 
 	if want, got := bare.render(20), painted.render(20); want != got {
 		t.Errorf("expected an empty painted label to be ignored, got %q rather than %q", got, want)

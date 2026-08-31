@@ -77,28 +77,28 @@ func declaredNames(file *ast.File) []*ast.Ident {
 	}
 
 	ast.Inspect(file, func(node ast.Node) bool {
-		switch typed := node.(type) {
+		switch typedNode := node.(type) {
 		case *ast.FuncDecl:
-			add(typed.Name)
+			add(typedNode.Name)
 		case *ast.TypeSpec:
-			add(typed.Name)
+			add(typedNode.Name)
 		case *ast.ValueSpec:
-			add(typed.Names...)
+			add(typedNode.Names...)
 		case *ast.Field:
-			add(typed.Names...)
+			add(typedNode.Names...)
 		case *ast.LabeledStmt:
-			add(typed.Label)
+			add(typedNode.Label)
 		case *ast.AssignStmt:
-			if typed.Tok != token.DEFINE {
+			if typedNode.Tok != token.DEFINE {
 				return true
 			}
-			for _, target := range typed.Lhs {
+			for _, target := range typedNode.Lhs {
 				if identifier, isIdentifier := target.(*ast.Ident); isIdentifier {
 					add(identifier)
 				}
 			}
 		case *ast.RangeStmt:
-			for _, target := range []ast.Expr{typed.Key, typed.Value} {
+			for _, target := range []ast.Expr{typedNode.Key, typedNode.Value} {
 				if identifier, isIdentifier := target.(*ast.Ident); isIdentifier {
 					add(identifier)
 				}

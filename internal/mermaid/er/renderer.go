@@ -107,15 +107,15 @@ func renderEntity(entity *Entity, glyphSet glyphs, minInner int) []string {
 
 // Render lays out the entity tables in 2D and draws the relationships between
 // them. (Stage 3: placement + stamping; connectors added in stage 4.)
-func Render(diagram *ErDiagram, useAscii bool) string {
+func Render(diagram *ErDiagram, shouldUseAscii bool) string {
 	glyphSet := unicodeGlyphs
-	if useAscii {
+	if shouldUseAscii {
 		glyphSet = asciiGlyphs
 	}
 	lay := placeEntities(diagram, glyphSet)
 
 	c := &canvas{}
-	for _, p := range lay.placed {
+	for _, p := range lay.placedEntities {
 		c.stamp(p.x, p.y, p.lines)
 	}
 	drawConnectors(c, lay, diagram, glyphSet)

@@ -147,8 +147,8 @@ func announce(endpoint *sim.Endpoint, base string, model string) {
 	fmt.Printf("  %s\n\n", col.White("oh -m <provider>/"+model+"@high"))
 }
 
-func loops(looping bool) string {
-	if looping {
+func loops(isLooping bool) string {
+	if isLooping {
 		return ", looping"
 	}
 

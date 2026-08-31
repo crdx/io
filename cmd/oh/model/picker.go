@@ -87,11 +87,11 @@ func offered(choices []Choice, currentEffort string) []*picker.Model {
 }
 
 func orderedEfforts(efforts []string) []string {
-	ordered := slices.Clone(efforts)
+	orderedEfforts := slices.Clone(efforts)
 
-	slices.SortStableFunc(ordered, func(first string, second string) int {
+	slices.SortStableFunc(orderedEfforts, func(first string, second string) int {
 		return slices.Index(EffortOrder, first) - slices.Index(EffortOrder, second)
 	})
 
-	return ordered
+	return orderedEfforts
 }

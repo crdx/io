@@ -149,8 +149,8 @@ func (self *Decoder) applicationCursor() (Key, error) {
 		return Key{}, err
 	}
 
-	code, found := letters[final]
-	if !found {
+	code, isFound := letters[final]
+	if !isFound {
 		return Key{Code: Unknown}, nil
 	}
 
@@ -187,8 +187,8 @@ func csi(parameters string, final rune) Key {
 		return Key{Code: FocusOut}
 	}
 
-	code, found := letters[final]
-	if !found {
+	code, isFound := letters[final]
+	if !isFound {
 		return Key{Code: Unknown}
 	}
 
@@ -218,7 +218,7 @@ func unicodeKey(parameters string) Key {
 
 	modifier := modifiers(parameters)
 
-	if code, found := codepoints[number]; found {
+	if code, isFound := codepoints[number]; isFound {
 		return Key{Code: code, Mod: modifier}
 	}
 

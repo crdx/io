@@ -161,7 +161,7 @@ func TestMatchCountDoesNotCapSmallResults(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if stats.Lines != matchCount || stats.Truncated {
+	if stats.Lines != matchCount || stats.IsTruncated {
 		t.Errorf("expected all %d small matches, got %+v", matchCount, stats)
 	}
 	if strings.Contains(output, "narrow the search") {
@@ -183,7 +183,7 @@ func TestHittingTheByteCapIsSaidOutLoud(t *testing.T) {
 		t.Errorf("expected the byte cap to be reported, got the last of %q", output[len(output)-100:])
 	}
 	wantStats := tool.OutputStats(output)
-	wantStats.Truncated = true
+	wantStats.IsTruncated = true
 	if stats != wantStats {
 		t.Errorf("got stats %+v, want %+v", stats, wantStats)
 	}

@@ -48,7 +48,7 @@ var (
 )
 
 func ProviderName(id string) string {
-	if name, found := providerNames[id]; found {
+	if name, isFound := providerNames[id]; isFound {
 		return name
 	}
 
@@ -108,18 +108,18 @@ func derivedName(base string, tag string) []string {
 			continue
 		}
 
-		if counted, isIteration := readIteration(word, at == 0); isIteration {
+		if countedWord, isIteration := readIteration(word, at == 0); isIteration {
 			if iteration == "" {
-				iteration = counted
+				iteration = countedWord
 			}
 
 			continue
 		}
 
-		if written, counted, hasCount := readCountedWord(word); hasCount {
+		if written, countedNumber, hasCount := readCountedWord(word); hasCount {
 			words = append(words, written)
 			if iteration == "" {
-				iteration = counted
+				iteration = countedNumber
 			}
 
 			continue
@@ -172,12 +172,12 @@ func readCountedWord(word string) (string, string, bool) {
 		return "", "", false
 	}
 
-	letters, counted := parts[1], parts[2]
+	letters, countedNumber := parts[1], parts[2]
 	if len(letters) <= joinedLetters {
-		return capitalise(letters) + counted, "", true
+		return capitalise(letters) + countedNumber, "", true
 	}
 
-	return capitalise(letters), counted, true
+	return capitalise(letters), countedNumber, true
 }
 
 func fromStandalone(words []string) []string {
@@ -210,7 +210,7 @@ func contextOf(tag string) string {
 }
 
 func capitalise(word string) string {
-	if known, found := spellings[word]; found {
+	if known, isFound := spellings[word]; isFound {
 		return known
 	}
 	if quantityWord.MatchString(word) {

@@ -14,13 +14,13 @@ import (
 type Command []string
 
 func (self *Command) UnmarshalTOML(value any) error {
-	switch configured := value.(type) {
+	switch configuredValue := value.(type) {
 	case string:
-		*self = Command{strings.TrimSpace(configured)}
+		*self = Command{strings.TrimSpace(configuredValue)}
 		return nil
 	case []any:
-		command := make(Command, len(configured))
-		for i, argument := range configured {
+		command := make(Command, len(configuredValue))
+		for i, argument := range configuredValue {
 			text, ok := argument.(string)
 			if !ok {
 				return fmt.Errorf("editor argument %d is not a string", i+1)
@@ -37,8 +37,8 @@ func (self *Command) UnmarshalTOML(value any) error {
 	}
 }
 
-func Open(configured Command, paths ...string) error {
-	command, err := buildCommand(configured, paths)
+func Open(configuredCommand Command, paths ...string) error {
+	command, err := buildCommand(configuredCommand, paths)
 	if err != nil {
 		return err
 	}
@@ -90,16 +90,16 @@ func IsTerminalEditor(name string) bool {
 	return slices.Contains(terminalEditors, filepath.Base(name))
 }
 
-func buildCommand(configured Command, paths []string) (*exec.Cmd, error) {
-	if len(configured) == 0 || strings.TrimSpace(configured[0]) == "" {
-		detected, found := Detect()
+func buildCommand(configuredCommand Command, paths []string) (*exec.Cmd, error) {
+	if len(configuredCommand) == 0 || strings.TrimSpace(configuredCommand[0]) == "" {
+		detectedCommand, found := Detect()
 		if !found {
 			return nil, errors.New("no editor was found: set editor in config.toml")
 		}
-		configured = detected
+		configuredCommand = detectedCommand
 	}
 
-	name := strings.TrimSpace(configured[0])
+	name := strings.TrimSpace(configuredCommand[0])
 	if IsTerminalEditor(name) {
 		return nil, fmt.Errorf(
 			"%s is not supported yet: set a graphical editor in config.toml",
@@ -107,7 +107,7 @@ func buildCommand(configured Command, paths []string) (*exec.Cmd, error) {
 		)
 	}
 
-	arguments := append([]string(nil), configured[1:]...)
+	arguments := append([]string(nil), configuredCommand[1:]...)
 	arguments = append(arguments, paths...)
 	//nolint:gosec,noctx // the user configures the editor, and it outlives this call
 	return exec.Command(name, arguments...), nil

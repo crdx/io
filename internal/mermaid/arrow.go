@@ -137,11 +137,11 @@ func reverseDrawingLine(line []drawingCoord) []drawingCoord {
 	if len(line) == 0 {
 		return line
 	}
-	reversed := make([]drawingCoord, len(line))
+	reversedLine := make([]drawingCoord, len(line))
 	for i, coord := range line {
-		reversed[len(line)-1-i] = coord
+		reversedLine[len(line)-1-i] = coord
 	}
-	return reversed
+	return reversedLine
 }
 
 func mergePath(path []gridCoord) []gridCoord {

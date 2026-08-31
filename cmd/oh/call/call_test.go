@@ -47,11 +47,11 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 		},
 		"capped output": {
 			stats: tool.Stats{
-				Kind:       tool.StatsOutput,
-				Lines:      4,
-				Bytes:      1200,
-				TotalBytes: 1200,
-				Truncated:  true,
+				Kind:        tool.StatsOutput,
+				Lines:       4,
+				Bytes:       1200,
+				TotalBytes:  1200,
+				IsTruncated: true,
 			},
 			want: []string{"4L+ ~400t"},
 		},
@@ -94,7 +94,7 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 			want:  []string{"3L ~100t"},
 		},
 		"diff": {
-			stats: tool.Stats{Kind: tool.StatsDiff, Added: 3, Removed: 2},
+			stats: tool.Stats{Kind: tool.StatsDiff, AddedLines: 3, RemovedLines: 2},
 			want:  []string{"+3 −2"},
 		},
 		"search": {
@@ -103,21 +103,21 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 		},
 		"small capped output with a large total": {
 			stats: tool.Stats{
-				Kind:       tool.StatsSearch,
-				Lines:      2,
-				Bytes:      280,
-				TotalBytes: 1200,
-				Truncated:  true,
+				Kind:        tool.StatsSearch,
+				Lines:       2,
+				Bytes:       280,
+				TotalBytes:  1200,
+				IsTruncated: true,
 			},
 			want: []string{"2L+ (of ~400t)"},
 		},
 		"capped search": {
 			stats: tool.Stats{
-				Kind:       tool.StatsSearch,
-				Lines:      100,
-				Bytes:      32_000,
-				TotalBytes: 80_000,
-				Truncated:  true,
+				Kind:        tool.StatsSearch,
+				Lines:       100,
+				Bytes:       32_000,
+				TotalBytes:  80_000,
+				IsTruncated: true,
 			},
 			want: []string{"100L+ ~11Kt (of ~29Kt)"},
 		},
@@ -155,11 +155,11 @@ func TestStatsUseTheirExpectedStyles(t *testing.T) {
 	}
 
 	search := measured(&tool.Stats{
-		Kind:       tool.StatsSearch,
-		Lines:      23,
-		Bytes:      1200,
-		TotalBytes: 2400,
-		Truncated:  true,
+		Kind:        tool.StatsSearch,
+		Lines:       23,
+		Bytes:       1200,
+		TotalBytes:  2400,
+		IsTruncated: true,
 	})
 	if want := style.Subtle("23L+ ~400t (of ~900t)"); !strings.Contains(search, want) {
 		t.Errorf("search stats got %q, want styled %q", search, want)
@@ -174,7 +174,7 @@ func TestStatsUseTheirExpectedStyles(t *testing.T) {
 		t.Errorf("exec stats got %q, want styled %q", exec, wantExec)
 	}
 
-	edit := measured(&tool.Stats{Kind: tool.StatsDiff, Added: 2, Removed: 1})
+	edit := measured(&tool.Stats{Kind: tool.StatsDiff, AddedLines: 2, RemovedLines: 1})
 	wantEdit := style.Success("+2") + style.Subtle(" ") + style.Failure("−1")
 	if !strings.Contains(edit, wantEdit) {
 		t.Errorf("edit stats got %q, want styled %q", edit, wantEdit)

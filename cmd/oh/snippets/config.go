@@ -24,15 +24,15 @@ type Definition struct {
 }
 
 func (self *Definition) UnmarshalTOML(value any) error {
-	switch configured := value.(type) {
+	switch configuredValue := value.(type) {
 	case string:
-		self.Prompt = strings.TrimSpace(configured)
+		self.Prompt = strings.TrimSpace(configuredValue)
 		if self.Prompt == "" {
 			return errors.New("prompt is empty")
 		}
 		return nil
 	case map[string]any:
-		return self.unmarshalTable(configured)
+		return self.unmarshalTable(configuredValue)
 	default:
 		return errors.New("definition is not a prompt or a table")
 	}
@@ -51,7 +51,7 @@ func (self *Definition) LoadFile(path string) error {
 	return nil
 }
 
-func (self *Definition) unmarshalTable(configured map[string]any) error {
+func (self *Definition) unmarshalTable(configuredTable map[string]any) error {
 	known := map[string]bool{
 		"arguments":   true,
 		"description": true,
@@ -59,7 +59,7 @@ func (self *Definition) unmarshalTable(configured map[string]any) error {
 		"prompt":      true,
 	}
 	var unknown []string
-	for name := range configured {
+	for name := range configuredTable {
 		if !known[name] {
 			unknown = append(unknown, name)
 		}
@@ -70,16 +70,16 @@ func (self *Definition) unmarshalTable(configured map[string]any) error {
 	}
 
 	var err error
-	if self.Prompt, err = getString(configured, "prompt"); err != nil {
+	if self.Prompt, err = getString(configuredTable, "prompt"); err != nil {
 		return err
 	}
-	if self.File, err = getString(configured, "file"); err != nil {
+	if self.File, err = getString(configuredTable, "file"); err != nil {
 		return err
 	}
-	if self.Description, err = getString(configured, "description"); err != nil {
+	if self.Description, err = getString(configuredTable, "description"); err != nil {
 		return err
 	}
-	arguments, err := getString(configured, "arguments")
+	arguments, err := getString(configuredTable, "arguments")
 	if err != nil {
 		return err
 	}
@@ -99,9 +99,9 @@ func (self *Definition) unmarshalTable(configured map[string]any) error {
 	}
 }
 
-func getString(configured map[string]any, name string) (string, error) {
-	value, found := configured[name]
-	if !found {
+func getString(configuredTable map[string]any, name string) (string, error) {
+	value, isFound := configuredTable[name]
+	if !isFound {
 		return "", nil
 	}
 	text, ok := value.(string)

@@ -90,14 +90,14 @@ func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 		return tool.ToolCallResult{}, err
 	}
 
-	loaded, err := load(root, name)
-	stats := tool.Stats{Kind: tool.StatsRead, Bytes: loaded.size}
+	loadedFile, err := load(root, name)
+	stats := tool.Stats{Kind: tool.StatsRead, Bytes: loadedFile.size}
 	if errors.Is(err, errFileTooLarge) {
-		if imageutil.IsSupported(loaded.mediaType) && (args.Offset > 0 || args.Limit > 0) {
+		if imageutil.IsSupported(loadedFile.mediaType) && (args.Offset > 0 || args.Limit > 0) {
 			return tool.ToolCallResult{Stats: stats}, errors.New("line ranges are not supported for images")
 		}
 		noun := "file"
-		if imageutil.IsSupported(loaded.mediaType) {
+		if imageutil.IsSupported(loadedFile.mediaType) {
 			noun = "image"
 		}
 		return tool.ToolCallResult{Stats: stats}, fmt.Errorf("%s is larger than the %d-byte limit", noun, maxFileBytes)
@@ -110,8 +110,8 @@ func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 		return tool.ToolCallResult{}, err
 	}
 
-	data := loaded.data
-	mediaType := loaded.mediaType
+	data := loadedFile.data
+	mediaType := loadedFile.mediaType
 	if imageutil.IsSupported(mediaType) {
 		if args.Offset > 0 || args.Limit > 0 {
 			return tool.ToolCallResult{Stats: stats}, errors.New("line ranges are not supported for images")
@@ -160,18 +160,18 @@ func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 }
 
 func load(root *file.Root, name string) (loadedFile, error) {
-	opened, err := root.Open(name)
+	openedFile, err := root.Open(name)
 	if err != nil {
 		return loadedFile{}, err
 	}
-	defer func() { _ = opened.Close() }()
+	defer func() { _ = openedFile.Close() }()
 
-	info, err := opened.Stat()
+	info, err := openedFile.Stat()
 	if err != nil {
 		return loadedFile{}, err
 	}
 	if info.Size() > maxFileBytes {
-		header, err := io.ReadAll(io.LimitReader(opened, 512))
+		header, err := io.ReadAll(io.LimitReader(openedFile, 512))
 		if err != nil {
 			return loadedFile{}, err
 		}
@@ -181,7 +181,7 @@ func load(root *file.Root, name string) (loadedFile, error) {
 		}, errFileTooLarge
 	}
 
-	data, err := io.ReadAll(io.LimitReader(opened, maxFileBytes+1))
+	data, err := io.ReadAll(io.LimitReader(openedFile, maxFileBytes+1))
 	if err != nil {
 		return loadedFile{}, err
 	}

@@ -195,11 +195,11 @@ func NewRegistry(sets ...CommandSet) (Registry, error) {
 		prefixes[set.prefix] = struct{}{}
 	}
 
-	registered := append([]CommandSet(nil), sets...)
-	slices.SortStableFunc(registered, func(left, right CommandSet) int {
+	registeredSets := append([]CommandSet(nil), sets...)
+	slices.SortStableFunc(registeredSets, func(left, right CommandSet) int {
 		return len(right.prefix) - len(left.prefix)
 	})
-	return Registry{sets: registered}, nil
+	return Registry{sets: registeredSets}, nil
 }
 
 func validatePrefix(prefix string) error {
@@ -215,14 +215,14 @@ func (self Registry) Find(message string) (Invocation, bool) {
 		return Invocation{}, false
 	}
 
-	set, found := self.getSet(fields[0])
-	if !found {
+	set, isFound := self.getSet(fields[0])
+	if !isFound {
 		return Invocation{}, false
 	}
 
 	bareName := strings.TrimPrefix(fields[0], set.prefix)
-	command, found := set.commands[bareName]
-	if !found {
+	command, isFound := set.commands[bareName]
+	if !isFound {
 		return Invocation{}, false
 	}
 
@@ -297,8 +297,8 @@ func (self Registry) completions(prefix string) []string {
 	}
 
 	name, argumentPrefix, hasArgument := strings.Cut(prefix, " ")
-	set, found := self.getSet(name)
-	if !found {
+	set, isFound := self.getSet(name)
+	if !isFound {
 		return nil
 	}
 
@@ -314,8 +314,8 @@ func (self Registry) completions(prefix string) []string {
 		return nil
 	}
 
-	command, found := set.commands[bareName]
-	if !found {
+	command, isFound := set.commands[bareName]
+	if !isFound {
 		return nil
 	}
 

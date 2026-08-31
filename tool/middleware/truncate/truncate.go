@@ -57,7 +57,7 @@ func (self truncatedToolCall) Exec(ctx context.Context) (tool.ToolCallResult, er
 	if result.Stats.Kind == tool.StatsResources || returnedBytes < totalBytes {
 		result.Stats.Bytes = int64(returnedBytes)
 		result.Stats.TotalBytes = int64(totalBytes)
-		result.Stats.Truncated = result.Stats.Truncated || returnedBytes < totalBytes
+		result.Stats.IsTruncated = result.Stats.IsTruncated || returnedBytes < totalBytes
 	}
 
 	return result, err

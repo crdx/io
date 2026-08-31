@@ -42,9 +42,9 @@ func errorText(err error) string {
 }
 
 type Observer struct {
-	path    string
-	handled snapshot
-	watcher *fileWatcher
+	path            string
+	handledSnapshot snapshot
+	watcher         *fileWatcher
 }
 
 type ReloadStatus int
@@ -83,7 +83,7 @@ func Observe(path string) (Config, *Observer, error) {
 		current = latest
 	}
 
-	return settings, &Observer{path: path, handled: current, watcher: watcher}, nil
+	return settings, &Observer{path: path, handledSnapshot: current, watcher: watcher}, nil
 }
 
 func (self *Observer) Changes() <-chan error {
@@ -94,8 +94,8 @@ func (self *Observer) Changes() <-chan error {
 }
 
 func (self *Observer) Reload(watchFailure error, registry segment.Registry) ReloadResult {
-	settings, changed, err := self.refresh(watchFailure)
-	if err == nil && changed {
+	settings, hasChanged, err := self.refresh(watchFailure)
+	if err == nil && hasChanged {
 		var live LiveConfig
 		live, err = settings.BuildLive(registry)
 		if err == nil {
@@ -123,10 +123,10 @@ func (self *Observer) refresh(watchFailure error) (Config, bool, error) {
 	}
 
 	current := readSnapshot(self.path)
-	if current.equal(self.handled) {
+	if current.equal(self.handledSnapshot) {
 		return Config{}, false, nil
 	}
-	self.handled = current
+	self.handledSnapshot = current
 
 	settings, err := loadSnapshot(self.path, current)
 	if err != nil {
@@ -152,9 +152,9 @@ type fileWatcher struct {
 	cancelWrite       int
 	watchDescriptor   int
 
-	events chan error
-	closed chan struct{}
-	once   sync.Once
+	events        chan error
+	closedChannel chan struct{}
+	once          sync.Once
 }
 
 func newFileWatcher(path string) (*fileWatcher, error) {
@@ -176,7 +176,7 @@ func newFileWatcher(path string) (*fileWatcher, error) {
 		cancelWrite:       cancel[1],
 		watchDescriptor:   -1,
 		events:            make(chan error, 1),
-		closed:            make(chan struct{}),
+		closedChannel:     make(chan struct{}),
 	}
 	if err := watcher.arm(); err != nil {
 		watcher.closeDescriptors()
@@ -226,7 +226,7 @@ func deepestExistingDirectory(path string) (string, error) {
 }
 
 func (self *fileWatcher) run() {
-	defer close(self.closed)
+	defer close(self.closedChannel)
 	defer close(self.events)
 	defer self.closeDescriptors()
 
@@ -287,7 +287,7 @@ func (self *fileWatcher) publishFailure(err error) {
 func (self *fileWatcher) close() {
 	self.once.Do(func() {
 		_, _ = unix.Write(self.cancelWrite, []byte{0})
-		<-self.closed
+		<-self.closedChannel
 	})
 }
 

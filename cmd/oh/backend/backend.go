@@ -53,8 +53,8 @@ type sessionScoped interface {
 }
 
 func (self *Connection) UseSession(name string) {
-	if scoped, isScoped := self.Client.(sessionScoped); isScoped {
-		scoped.UseSession(name)
+	if scopedClient, isScoped := self.Client.(sessionScoped); isScoped {
+		scopedClient.UseSession(name)
 	}
 }
 
@@ -144,25 +144,25 @@ func ListModels(ctx context.Context, providerName string, endpoints EndpointSett
 }
 
 func Resolve(
-	requested model.Selection,
-	resumed model.Selection,
-	configured []model.Selection,
+	requestedSelection model.Selection,
+	resumedSelection model.Selection,
+	configuredSelections []model.Selection,
 	roundRobinPath string,
 ) (model.Selection, error) {
-	if resumed != (model.Selection{}) {
-		if requested.Provider != "" && requested.Provider != resumed.Provider {
+	if resumedSelection != (model.Selection{}) {
+		if requestedSelection.Provider != "" && requestedSelection.Provider != resumedSelection.Provider {
 			return model.Selection{}, fmt.Errorf(
-				"cannot resume a %s session with %s", resumed.Provider, requested.Provider,
+				"cannot resume a %s session with %s", resumedSelection.Provider, requestedSelection.Provider,
 			)
 		}
-		if requested.Model == "" {
-			return resumed, nil
+		if requestedSelection.Model == "" {
+			return resumedSelection, nil
 		}
 	}
 
-	if requested.Model != "" {
-		return requested, nil
+	if requestedSelection.Model != "" {
+		return requestedSelection, nil
 	}
 
-	return model.ReserveRoundRobin(roundRobinPath, configured)
+	return model.ReserveRoundRobin(roundRobinPath, configuredSelections)
 }

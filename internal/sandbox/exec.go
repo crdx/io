@@ -108,15 +108,15 @@ func execSandboxed(encodedPolicy string, command string) error {
 	return syscall.Exec(shell, []string{shell, "-c", command}, environment)
 }
 
-func passedEnvironment(allowed []string) []string {
-	return configuredEnvironment(allowed, nil)
+func passedEnvironment(allowedNames []string) []string {
+	return configuredEnvironment(allowedNames, nil)
 }
 
-func configuredEnvironment(allowed []string, set map[string]string) []string {
-	environment := make([]string, 0, len(allowed)+len(set))
+func configuredEnvironment(allowedNames []string, set map[string]string) []string {
+	environment := make([]string, 0, len(allowedNames)+len(set))
 
-	for _, name := range allowed {
-		if _, overridden := set[name]; overridden {
+	for _, name := range allowedNames {
+		if _, isOverridden := set[name]; isOverridden {
 			continue
 		}
 

@@ -29,8 +29,8 @@ func awaitObservedConfig(t *testing.T, observer *Observer) (Config, error) {
 	defer timeout.Stop()
 	for {
 		select {
-		case failure, open := <-observer.Changes():
-			if !open {
+		case failure, isOpen := <-observer.Changes():
+			if !isOpen {
 				t.Fatal("config watch closed before reporting the change")
 			}
 			settings, changed, err := observer.refresh(failure)
@@ -176,7 +176,7 @@ func TestAValidReloadAfterAFailureIsApplied(t *testing.T) {
 	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {
 		t.Fatal(err)
 	}
-	observer := &Observer{path: path, handled: readSnapshot(path)}
+	observer := &Observer{path: path, handledSnapshot: readSnapshot(path)}
 
 	failed := observer.Reload(errors.New("watch stopped"), testSegments())
 	if failed.Status != ReloadFailed || failed.Failure == nil {
@@ -218,7 +218,7 @@ func TestClosingAnObserverClosesItsChanges(t *testing.T) {
 	}
 	observer.Close()
 
-	if _, open := <-observer.Changes(); open {
+	if _, isOpen := <-observer.Changes(); isOpen {
 		t.Error("changes remained open")
 	}
 }

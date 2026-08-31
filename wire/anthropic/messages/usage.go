@@ -58,7 +58,7 @@ func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 }
 
 func usageWindows(limits []usageLimit) []agent.UsageWindow {
-	var unscoped, scoped []agent.UsageWindow
+	var unscopedWindows, scopedWindows []agent.UsageWindow
 
 	for _, limit := range limits {
 		resetsAt, err := time.Parse(time.RFC3339, limit.ResetsAt)
@@ -73,21 +73,21 @@ func usageWindows(limits []usageLimit) []agent.UsageWindow {
 
 		switch {
 		case limit.Group == "session":
-			unscoped = append(unscoped, agent.UsageWindow{
+			unscopedWindows = append(unscopedWindows, agent.UsageWindow{
 				Duration: sessionWindow,
 				Percent:  limit.Percent,
 				ResetsAt: resetsAt,
 			})
 
 		case limit.Group == "weekly" && limit.Scope == nil:
-			unscoped = append(unscoped, agent.UsageWindow{
+			unscopedWindows = append(unscopedWindows, agent.UsageWindow{
 				Duration: weeklyWindow,
 				Percent:  limit.Percent,
 				ResetsAt: resetsAt,
 			})
 
 		case limit.Group == "weekly" && scopeName != "":
-			scoped = append(scoped, agent.UsageWindow{
+			scopedWindows = append(scopedWindows, agent.UsageWindow{
 				Duration: weeklyWindow,
 				Percent:  limit.Percent,
 				ResetsAt: resetsAt,
@@ -96,7 +96,7 @@ func usageWindows(limits []usageLimit) []agent.UsageWindow {
 		}
 	}
 
-	return append(unscoped, scoped...)
+	return append(unscopedWindows, scopedWindows...)
 }
 
 func usageAddress(turnAddress string) (string, bool) {

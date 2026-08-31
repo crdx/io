@@ -212,11 +212,11 @@ func harnessContext(workspaceDir string, sessionName string, tmpDir string, home
 		WebGranted:        currentCaps.Has(caps.Web),
 	}
 
-	var rendered strings.Builder
-	if err := harnessContextTemplate.Execute(&rendered, data); err != nil {
+	var renderedText strings.Builder
+	if err := harnessContextTemplate.Execute(&renderedText, data); err != nil {
 		panic(err)
 	}
-	return strings.TrimSpace(rendered.String())
+	return strings.TrimSpace(renderedText.String())
 }
 
 func scopeRules(extraPaths shell.Paths, currentCaps caps.Set) string {
@@ -265,24 +265,24 @@ func mergeContexts(sections ...string) string {
 	return strings.Join(out, "\n\n")
 }
 
-func filesystem(writable bool) string {
-	if writable {
+func filesystem(isWritable bool) string {
+	if isWritable {
 		return "read-write"
 	}
 
 	return "read-only"
 }
 
-func shellAccess(granted bool) string {
-	if granted {
+func shellAccess(isGranted bool) string {
+	if isGranted {
 		return "granted"
 	}
 
 	return "refused"
 }
 
-func webAccess(granted bool) string {
-	if granted {
+func webAccess(isGranted bool) string {
+	if isGranted {
 		return "granted external network access"
 	}
 

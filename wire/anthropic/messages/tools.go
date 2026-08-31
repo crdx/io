@@ -44,7 +44,7 @@ var claudeCodeNames = map[string]string{
 }
 
 func toClaudeCodeName(name string) string {
-	if canonical, found := claudeCodeNames[strings.ToLower(name)]; found {
+	if canonical, isFound := claudeCodeNames[strings.ToLower(name)]; isFound {
 		return canonical
 	}
 

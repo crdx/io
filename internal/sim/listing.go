@@ -29,20 +29,20 @@ type listedModel struct {
 }
 
 type effortCapability struct {
-	Supported bool           `json:"supported"`
-	Low       levelSupported `json:"low"`
-	Medium    levelSupported `json:"medium"`
-	High      levelSupported `json:"high"`
-	XHigh     levelSupported `json:"xhigh"`
-	Max       levelSupported `json:"max"`
+	IsSupported bool           `json:"supported"`
+	Low         levelSupported `json:"low"`
+	Medium      levelSupported `json:"medium"`
+	High        levelSupported `json:"high"`
+	XHigh       levelSupported `json:"xhigh"`
+	Max         levelSupported `json:"max"`
 }
 
 type levelSupported struct {
-	Supported bool `json:"supported"`
+	IsSupported bool `json:"supported"`
 }
 
 func (self *Endpoint) serveListing(writer http.ResponseWriter) {
-	offered := listedModel{
+	offeredModel := listedModel{
 		Type:           "model",
 		ID:             self.scenario.Model,
 		DisplayName:    self.scenario.Model,
@@ -50,16 +50,16 @@ func (self *Endpoint) serveListing(writer http.ResponseWriter) {
 		MaxTokens:      simulatedOutput,
 	}
 
-	offered.Capabilities.Effort = effortCapability{
-		Supported: true,
-		Low:       levelSupported{Supported: true},
-		Medium:    levelSupported{Supported: true},
-		High:      levelSupported{Supported: true},
-		XHigh:     levelSupported{Supported: true},
-		Max:       levelSupported{Supported: true},
+	offeredModel.Capabilities.Effort = effortCapability{
+		IsSupported: true,
+		Low:         levelSupported{IsSupported: true},
+		Medium:      levelSupported{IsSupported: true},
+		High:        levelSupported{IsSupported: true},
+		XHigh:       levelSupported{IsSupported: true},
+		Max:         levelSupported{IsSupported: true},
 	}
 
-	respond(writer, listing{Data: []listedModel{offered}})
+	respond(writer, listing{Data: []listedModel{offeredModel}})
 }
 
 type ollamaListing struct {
@@ -75,13 +75,13 @@ type ollamaListedModel struct {
 }
 
 func (self *Endpoint) serveOllamaListing(writer http.ResponseWriter) {
-	offered := ollamaListedModel{
+	offeredModel := ollamaListedModel{
 		Name:         self.scenario.Model,
 		Capabilities: []string{"completion", "thinking", "tools"},
 	}
-	offered.Details.ContextWindowTokens = simulatedContext
+	offeredModel.Details.ContextWindowTokens = simulatedContext
 
-	respond(writer, ollamaListing{Models: []ollamaListedModel{offered}})
+	respond(writer, ollamaListing{Models: []ollamaListedModel{offeredModel}})
 }
 
 func respond(writer http.ResponseWriter, document any) {

@@ -255,7 +255,7 @@ func TestADryRunWritesNothing(t *testing.T) {
 	}
 
 	lines := journalLines(t, directory, name)
-	if _, numbered := lines[0]["version"]; numbered {
+	if _, isNumbered := lines[0]["version"]; isNumbered {
 		t.Error("expected a dry run to leave the head unnumbered")
 	}
 	if !strings.Contains(string(lines[1]["event"]), "highlight") {
@@ -282,7 +282,7 @@ func TestAnInUseJournalIsNotMigrated(t *testing.T) {
 	}
 
 	lines := journalLines(t, directory, name)
-	if _, numbered := lines[0]["version"]; numbered {
+	if _, isNumbered := lines[0]["version"]; isNumbered {
 		t.Error("expected the in-use journal to be left untouched")
 	}
 	if _, err := os.Stat(options(directory).BackupDir); !os.IsNotExist(err) {

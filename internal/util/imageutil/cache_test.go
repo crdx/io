@@ -79,9 +79,9 @@ func TestBoundDoesNotCacheAnImageThatCannotBeDecoded(t *testing.T) {
 		t.Fatal("the malformed PNG unexpectedly decoded")
 	}
 
-	bounded.mutex.Lock()
-	before := len(bounded.images)
-	bounded.mutex.Unlock()
+	boundedCache.mutex.Lock()
+	before := len(boundedCache.images)
+	boundedCache.mutex.Unlock()
 
 	subject := tool.Image{MediaType: mediaTypePNG, Data: malformed}
 	result := Bound(subject)
@@ -89,9 +89,9 @@ func TestBoundDoesNotCacheAnImageThatCannotBeDecoded(t *testing.T) {
 		t.Error("the malformed image was changed")
 	}
 
-	bounded.mutex.Lock()
-	after := len(bounded.images)
-	bounded.mutex.Unlock()
+	boundedCache.mutex.Lock()
+	after := len(boundedCache.images)
+	boundedCache.mutex.Unlock()
 	if after != before {
 		t.Errorf("cache grew from %d to %d entries", before, after)
 	}

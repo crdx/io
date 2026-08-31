@@ -322,16 +322,16 @@ func alignedLabels(labels []string, notes []string) []string {
 		}
 	}
 
-	aligned := make([]string, len(labels))
+	alignedLabels := make([]string, len(labels))
 	for i, label := range labels {
-		aligned[i] = label
+		alignedLabels[i] = label
 		if notes[i] != "" {
 			padding := strings.Repeat(" ", column-style.Width(label))
-			aligned[i] = label + padding + noteGap + style.Qualifier(notes[i])
+			alignedLabels[i] = label + padding + noteGap + style.Qualifier(notes[i])
 		}
 	}
 
-	return aligned
+	return alignedLabels
 }
 
 func (self wizard) chooseProvider(providerName string) (provider, error) {

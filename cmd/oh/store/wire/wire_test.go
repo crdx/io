@@ -30,7 +30,7 @@ func TestRecorderContinuesSequenceNumbersAfterLongLines(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	recorder.Start(req.Request{Started: time.Unix(2, 0), Method: http.MethodPost})
+	recorder.Start(req.Request{StartedAt: time.Unix(2, 0), Method: http.MethodPost})
 	if err := recorder.Close(); err != nil {
 		t.Fatal(err)
 	}
@@ -61,7 +61,7 @@ func TestRecorderFindsTheLastSequenceNumberFarFromTheEnd(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	recorder.Start(req.Request{Started: time.Unix(2, 0), Method: http.MethodPost})
+	recorder.Start(req.Request{StartedAt: time.Unix(2, 0), Method: http.MethodPost})
 	if err := recorder.Close(); err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func TestRecorderNumbersTheFirstExchangeOfATranscriptWithoutOne(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	recorder.Start(req.Request{Started: time.Unix(2, 0), Method: http.MethodPost})
+	recorder.Start(req.Request{StartedAt: time.Unix(2, 0), Method: http.MethodPost})
 	if err := recorder.Close(); err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func TestRecorderIgnoresAnEndMarkerWhenNumberingTheNextExchange(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	recorder.Start(req.Request{Started: time.Unix(2, 0), Method: http.MethodPost})
+	recorder.Start(req.Request{StartedAt: time.Unix(2, 0), Method: http.MethodPost})
 	if err := recorder.Close(); err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func TestRecorderIgnoresAnEndMarkerWhenNumberingTheNextExchange(t *testing.T) {
 
 func TestRecorderCensorsHeadersJSONFormsSSEAndBearerText(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "wire.http")
-	recorder, err := wire.Open(path, wire.Meta{Name: "brave-otter", Started: time.Unix(1, 0)}, func(err error) {
+	recorder, err := wire.Open(path, wire.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 0)}, func(err error) {
 		t.Errorf("unexpected recorder failure: %v", err)
 	})
 	if err != nil {
@@ -142,10 +142,10 @@ func TestRecorderCensorsHeadersJSONFormsSSEAndBearerText(t *testing.T) {
 	}
 
 	exchange := recorder.Start(req.Request{
-		Started:  time.Unix(2, 0),
-		Method:   http.MethodPost,
-		URL:      "http://example.test/",
-		Protocol: "HTTP/1.1",
+		StartedAt: time.Unix(2, 0),
+		Method:    http.MethodPost,
+		URL:       "http://example.test/",
+		Protocol:  "HTTP/1.1",
 		Header: http.Header{
 			"Authorization": {"Bearer request-secret"},
 			"Content-Type":  {"application/json"},
@@ -153,11 +153,11 @@ func TestRecorderCensorsHeadersJSONFormsSSEAndBearerText(t *testing.T) {
 		Body: []byte(`{"nested":{"access_token":"json-secret","innocent":"kept"}}`),
 	})
 	exchange.Response(req.Response{
-		Received: time.Unix(3, 0),
-		Protocol: "HTTP/1.1",
-		Status:   "200 OK",
-		Code:     200,
-		Header:   http.Header{"Content-Type": {"text/event-stream"}},
+		ReceivedAt: time.Unix(3, 0),
+		Protocol:   "HTTP/1.1",
+		Status:     "200 OK",
+		Code:       200,
+		Header:     http.Header{"Content-Type": {"text/event-stream"}},
 	})
 	exchange.Body([]byte("data: {\"refresh_token\":\"sse-secret\",\"ok\":true}\n\ndata: Bearer response-secret\n"))
 	exchange.Finish(time.Unix(4, 0), nil, false)
@@ -196,10 +196,10 @@ func TestRecorderCensorsIdentityMetadataWithoutCensoringProtocolIDs(t *testing.T
 	}
 
 	exchange := recorder.Start(req.Request{
-		Started:  time.Unix(2, 0),
-		Method:   http.MethodPost,
-		URL:      "https://example.test/",
-		Protocol: "HTTP/1.1",
+		StartedAt: time.Unix(2, 0),
+		Method:    http.MethodPost,
+		URL:       "https://example.test/",
+		Protocol:  "HTTP/1.1",
 		Header: http.Header{
 			"Anthropic-Organization-Id": {"organisation-secret"},
 			"Anthropic-Workspace-Id":    {"workspace-secret"},
@@ -211,10 +211,10 @@ func TestRecorderCensorsIdentityMetadataWithoutCensoringProtocolIDs(t *testing.T
 		Body: []byte(`{"account":{"email_address":"person@example.test","uuid":"account-secret"},"organization":{"name":"Private Organisation","uuid":"organisation-body-secret"},"token_uuid":"token-secret","request_id":"request-body-secret","safety_identifier":"safety-secret","id":"message-id","call_id":"call-id","innocent":"kept"}`),
 	})
 	exchange.Response(req.Response{
-		Received: time.Unix(3, 0),
-		Protocol: "HTTP/1.1",
-		Status:   "200 OK",
-		Code:     200,
+		ReceivedAt: time.Unix(3, 0),
+		Protocol:   "HTTP/1.1",
+		Status:     "200 OK",
+		Code:       200,
 		Header: http.Header{
 			"Content-Type":              {"text/event-stream"},
 			"Anthropic-Organization-Id": {"response-organisation-secret"},
@@ -273,19 +273,19 @@ func recordBody(t *testing.T, body []byte, contentType string, events string) st
 	}
 
 	exchange := recorder.Start(req.Request{
-		Started:  time.Unix(2, 0),
-		Method:   http.MethodPost,
-		URL:      "https://example.test/",
-		Protocol: "HTTP/1.1",
-		Header:   http.Header{"Content-Type": {contentType}},
-		Body:     body,
+		StartedAt: time.Unix(2, 0),
+		Method:    http.MethodPost,
+		URL:       "https://example.test/",
+		Protocol:  "HTTP/1.1",
+		Header:    http.Header{"Content-Type": {contentType}},
+		Body:      body,
 	})
 	exchange.Response(req.Response{
-		Received: time.Unix(3, 0),
-		Protocol: "HTTP/1.1",
-		Status:   "200 OK",
-		Code:     200,
-		Header:   http.Header{"Content-Type": {"text/event-stream"}},
+		ReceivedAt: time.Unix(3, 0),
+		Protocol:   "HTTP/1.1",
+		Status:     "200 OK",
+		Code:       200,
+		Header:     http.Header{"Content-Type": {"text/event-stream"}},
 	})
 	if events != "" {
 		exchange.Body([]byte(events))

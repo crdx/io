@@ -61,9 +61,9 @@ func newTool(t *testing.T, ran *bool) tool.Tool {
 }
 
 func TestParseBindsTheArgumentsToTheCall(t *testing.T) {
-	var ran bool
+	var didRun bool
 
-	call, err := newTool(t, &ran).Parse(`{"city":"London"}`)
+	call, err := newTool(t, &didRun).Parse(`{"city":"London"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -72,7 +72,7 @@ func TestParseBindsTheArgumentsToTheCall(t *testing.T) {
 		t.Errorf("expected the bound arguments, got %q", subject)
 	}
 
-	if ran {
+	if didRun {
 		t.Error("expected rendering not to run the tool")
 	}
 
@@ -85,7 +85,7 @@ func TestParseBindsTheArgumentsToTheCall(t *testing.T) {
 		t.Errorf("expected the output, got %q", result.Output)
 	}
 
-	if !ran {
+	if !didRun {
 		t.Error("expected the tool to have run")
 	}
 }
@@ -153,9 +153,9 @@ func TestSyntaxCanUseDecodedArgumentsAsItsSource(t *testing.T) {
 }
 
 func TestParseRefusesArgumentsItCannotRead(t *testing.T) {
-	var ran bool
+	var didRun bool
 
-	call, err := newTool(t, &ran).Parse(`{"city":`)
+	call, err := newTool(t, &didRun).Parse(`{"city":`)
 	if err == nil {
 		t.Fatal("expected malformed arguments to be refused")
 	}
@@ -164,15 +164,15 @@ func TestParseRefusesArgumentsItCannotRead(t *testing.T) {
 		t.Error("expected no call to be handed back")
 	}
 
-	if ran {
+	if didRun {
 		t.Error("expected the tool never to run")
 	}
 }
 
 func TestParseTakesAbsentArgumentsAsEmpty(t *testing.T) {
-	var ran bool
+	var didRun bool
 
-	call, err := newTool(t, &ran).Parse("")
+	call, err := newTool(t, &didRun).Parse("")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -184,9 +184,9 @@ func TestParseTakesAbsentArgumentsAsEmpty(t *testing.T) {
 
 func TestValidationRunsForAbsentArguments(t *testing.T) {
 	validationError := errors.New("city is required")
-	validated := false
+	wasValidated := false
 	subject := newToolBuilder(t).Validate(func(args Params) error {
-		validated = true
+		wasValidated = true
 		if args.City != "" {
 			t.Errorf("expected empty arguments, got %#v", args)
 		}
@@ -199,7 +199,7 @@ func TestValidationRunsForAbsentArguments(t *testing.T) {
 	if !errors.Is(err, validationError) {
 		t.Fatalf("expected validation error, got %v", err)
 	}
-	if !validated {
+	if !wasValidated {
 		t.Error("empty arguments bypassed validation")
 	}
 	if call != nil {
@@ -209,8 +209,8 @@ func TestValidationRunsForAbsentArguments(t *testing.T) {
 
 func TestDefineStatsValidatesDecodedArgumentsWhenAsked(t *testing.T) {
 	validationError := errors.New("London is unavailable")
-	rendered := false
-	executed := false
+	wasRendered := false
+	wasExecuted := false
 
 	subject := tool.Implement(
 		tool.Definition{
@@ -219,7 +219,7 @@ func TestDefineStatsValidatesDecodedArgumentsWhenAsked(t *testing.T) {
 			Schema:      tool.Schema{tool.String("city", "the city to look up")},
 		},
 		func(_ Params) (string, string) {
-			rendered = true
+			wasRendered = true
 			return "", ""
 		},
 	).Validate(func(args Params) error {
@@ -228,7 +228,7 @@ func TestDefineStatsValidatesDecodedArgumentsWhenAsked(t *testing.T) {
 		}
 		return validationError
 	}).Stats(func(_ context.Context, _ Params) (string, tool.Stats, error) {
-		executed = true
+		wasExecuted = true
 		return "", tool.Stats{}, nil
 	})
 
@@ -239,7 +239,7 @@ func TestDefineStatsValidatesDecodedArgumentsWhenAsked(t *testing.T) {
 	if call != nil {
 		t.Error("expected validation to prevent call construction")
 	}
-	if rendered || executed {
+	if wasRendered || wasExecuted {
 		t.Error("expected validation not to render or execute the call")
 	}
 }

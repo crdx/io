@@ -165,10 +165,10 @@ func (self *Screen) write(text string) {
 
 func (self *Screen) emit(text string) {
 	self.hasPrinted = true
-	fitted := self.fit(text)
+	fittedText := self.fit(text)
 	self.advance(text)
 	self.count(text)
-	self.at(fitted)
+	self.at(fittedText)
 }
 
 const apart = 2

@@ -74,7 +74,7 @@ func (self Policy) reachable() error {
 			continue
 		}
 
-		if _, covered := pathutil.RelativeTo(TmpDir, path); covered {
+		if _, isCovered := pathutil.RelativeTo(TmpDir, path); isCovered {
 			return fmt.Errorf("a scratch at %s covers %s, which is granted but unreachable", TmpDir, path)
 		}
 	}

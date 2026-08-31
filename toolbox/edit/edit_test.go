@@ -181,8 +181,8 @@ func switchableRoot(t *testing.T, writable *bool) (*file.Root, string) {
 }
 
 func TestEditingIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
-	writable := false
-	root, directory := switchableRoot(t, &writable)
+	isWritable := false
+	root, directory := switchableRoot(t, &isWritable)
 
 	arguments := `{"path":"a.txt","old_text":"one","new_text":"two"}`
 
@@ -201,8 +201,8 @@ func TestEditingIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
 }
 
 func TestTheToolSaysItWritesEvenOverAReadOnlyTree(t *testing.T) {
-	writable := false
-	root, _ := switchableRoot(t, &writable)
+	isWritable := false
+	root, _ := switchableRoot(t, &isWritable)
 
 	if edit.New(root, file.NewSnapshots()).ReadOnly() {
 		t.Error("expected an edit tool to say it writes whatever the tree of the moment allows")

@@ -46,9 +46,9 @@ type Stats struct {
 	Bytes           int64         `json:"bytes,omitempty"`
 	TotalBytes      int64         `json:"total_bytes,omitempty"`
 	EstimatedTokens int64         `json:"estimated_tokens,omitempty"`
-	Added           int64         `json:"added,omitempty"`
-	Removed         int64         `json:"removed,omitempty"`
-	Truncated       bool          `json:"truncated,omitempty"`
+	AddedLines      int64         `json:"added,omitempty"`
+	RemovedLines    int64         `json:"removed,omitempty"`
+	IsTruncated     bool          `json:"truncated,omitempty"`
 }
 
 // Stats kinds classify call measurements.

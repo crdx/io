@@ -8,7 +8,7 @@ import (
 func enableColor(t *testing.T) {
 	t.Helper()
 
-	previous := colorEnabled
+	previous := isColorEnabled
 	apply(true)
 
 	t.Cleanup(func() { apply(previous) })
@@ -104,7 +104,7 @@ func TestPlainKeepsTextCarriedByTheTextSizingProtocol(t *testing.T) {
 func TestNothingIsPaintedWhereTheScreenIsNotATerminal(t *testing.T) {
 	t.Cleanup(Init(&strings.Builder{}))
 
-	if colorEnabled {
+	if isColorEnabled {
 		t.Fatal("expected colour to be off where the screen is not a terminal")
 	}
 
@@ -129,13 +129,13 @@ func TestInitPutsTheDecisionBackWhenItsRestoreIsCalled(t *testing.T) {
 
 	restore := Init(&strings.Builder{})
 
-	if colorEnabled {
+	if isColorEnabled {
 		t.Fatal("expected colour off while the screen is not a terminal")
 	}
 
 	restore()
 
-	if !colorEnabled {
+	if !isColorEnabled {
 		t.Fatal("expected colour back on once the decision was put back")
 	}
 

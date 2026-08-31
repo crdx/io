@@ -131,17 +131,17 @@ func (self Config) BuildLayout(registry segment.Registry) (segment.Layout, error
 		meta := self.metaFor(position)
 
 		for _, entry := range entries {
-			var named struct {
+			var namedFields struct {
 				Segment string `toml:"segment"`
 			}
 
-			if err := meta.PrimitiveDecode(entry, &named); err != nil {
+			if err := meta.PrimitiveDecode(entry, &namedFields); err != nil {
 				return nil, fmt.Errorf("%s: %w", position, err)
 			}
 
 			options := segmentOptions{meta: meta, entry: entry}
 
-			built, err := registry.Build(named.Segment, position, options)
+			built, err := registry.Build(namedFields.Segment, position, options)
 			if err != nil {
 				return nil, err
 			}
@@ -172,14 +172,14 @@ func (self Config) ValidateConsumed() error {
 		return nil
 	}
 
-	named := make([]string, 0, len(unknown))
+	namedKeys := make([]string, 0, len(unknown))
 	for _, key := range unknown {
-		named = append(named, key.String())
+		namedKeys = append(namedKeys, key.String())
 	}
 
-	slices.Sort(named)
+	slices.Sort(namedKeys)
 
-	return fmt.Errorf("%s: nothing is done with: %s", self.filePath, strings.Join(named, ", "))
+	return fmt.Errorf("%s: nothing is done with: %s", self.filePath, strings.Join(namedKeys, ", "))
 }
 
 func (self Config) metaFor(position segment.Position) *toml.MetaData {
@@ -302,19 +302,19 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 	}
 	for _, list := range lists {
 		for i, written := range *list.values {
-			resolved, err := resolveConfigPath(path, written)
+			resolvedPath, err := resolveConfigPath(path, written)
 			if err != nil {
 				return config, fmt.Errorf("%s: %s: %w", displayPath, list.name, err)
 			}
-			(*list.values)[i] = resolved
+			(*list.values)[i] = resolvedPath
 		}
 	}
 
-	for _, mapped := range config.Sandbox.Home {
-		if _, below := shell.HomeRelativePath(mapped); !below {
+	for _, mappedPath := range config.Sandbox.Home {
+		if _, below := shell.HomeRelativePath(mappedPath); !below {
 			return config, fmt.Errorf(
 				"%s: sandbox.home: %s is not below the home directory, so it has nowhere to land",
-				displayPath, mapped,
+				displayPath, mappedPath,
 			)
 		}
 	}

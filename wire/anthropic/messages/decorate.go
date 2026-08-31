@@ -10,7 +10,7 @@ const (
 )
 
 func merged(history []json.RawMessage) []message {
-	joined := make([]message, 0, len(history))
+	joinedMessages := make([]message, 0, len(history))
 
 	for _, item := range history {
 		var next message
@@ -18,15 +18,15 @@ func merged(history []json.RawMessage) []message {
 			continue
 		}
 
-		if last := len(joined) - 1; last >= 0 && joined[last].Role == next.Role {
-			joined[last].Content = append(joined[last].Content, next.Content...)
+		if last := len(joinedMessages) - 1; last >= 0 && joinedMessages[last].Role == next.Role {
+			joinedMessages[last].Content = append(joinedMessages[last].Content, next.Content...)
 			continue
 		}
 
-		joined = append(joined, next)
+		joinedMessages = append(joinedMessages, next)
 	}
 
-	return joined
+	return joinedMessages
 }
 
 func continued(messages []message) []message {
@@ -41,10 +41,10 @@ func continued(messages []message) []message {
 }
 
 func encodeMessages(messages []message) []json.RawMessage {
-	encoded := make([]json.RawMessage, len(messages))
+	encodedMessages := make([]json.RawMessage, len(messages))
 	for i, item := range messages {
-		encoded[i] = encodeItem(item)
+		encodedMessages[i] = encodeItem(item)
 	}
 
-	return encoded
+	return encodedMessages
 }

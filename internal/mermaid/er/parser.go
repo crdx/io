@@ -127,14 +127,14 @@ func Parse(input string) (*ErDiagram, error) {
 
 	diagram := &ErDiagram{byName: map[string]*Entity{}}
 
-	seenKeyword := false
+	hasSeenKeyword := false
 	for i := 0; i < len(lines); i++ {
 		line := strings.TrimSpace(lines[i])
 		if line == "" {
 			continue
 		}
-		if !seenKeyword {
-			seenKeyword = true
+		if !hasSeenKeyword {
+			hasSeenKeyword = true
 			continue
 		}
 
@@ -262,12 +262,12 @@ func stripClassShorthand(line string) string {
 }
 
 func stripComment(line string) string {
-	inQuote := false
+	isInQuote := false
 	for i := range len(line) {
 		switch {
 		case line[i] == '"':
-			inQuote = !inQuote
-		case !inQuote && line[i] == '%' && i+1 < len(line) && line[i+1] == '%':
+			isInQuote = !isInQuote
+		case !isInQuote && line[i] == '%' && i+1 < len(line) && line[i+1] == '%':
 			return strings.TrimRight(line[:i], " \t")
 		}
 	}
@@ -290,31 +290,31 @@ func (self *ErDiagram) parseRelationship(line string) bool {
 	label := strings.Join(strings.Fields(strings.Trim(strings.TrimSpace(after), `"`)), " ")
 
 	var left, right string
-	var identifying bool
+	var isIdentifying bool
 	if loc := lineOpRegex.FindStringIndex(main); loc != nil {
 		left = strings.TrimSpace(main[:loc[0]])
 		right = strings.TrimSpace(main[loc[1]:])
-		identifying = main[loc[0]:loc[1]] == "--"
+		isIdentifying = main[loc[0]:loc[1]] == "--"
 	} else if i, w := findWordOp(main); i >= 0 {
 		left = strings.TrimSpace(main[:i])
 		right = strings.TrimSpace(main[i+len(w):])
-		identifying = w == " to "
+		isIdentifying = w == " to "
 	} else {
 		return false
 	}
 
 	e1, lcard := splitEntityCard(left, true)
 	e2, rcard := splitEntityCard(right, false)
-	lc, lok := cardAny[strings.ToLower(lcard)]
-	rc, rok := cardAny[strings.ToLower(rcard)]
-	if e1 == "" || e2 == "" || !lok || !rok {
+	lc, isLeftKnown := cardAny[strings.ToLower(lcard)]
+	rc, isRightKnown := cardAny[strings.ToLower(rcard)]
+	if e1 == "" || e2 == "" || !isLeftKnown || !isRightKnown {
 		return false
 	}
 	self.entity(e1)
 	self.entity(e2)
 	self.Relationships = append(self.Relationships, &Relationship{
 		Left: e1, Right: e2, LeftCard: lc, RightCard: rc,
-		Identifying: identifying, Label: label,
+		Identifying: isIdentifying, Label: label,
 	})
 	return true
 }
@@ -328,9 +328,9 @@ func findWordOp(s string) (int, string) {
 	return -1, ""
 }
 
-func splitEntityCard(part string, entityFirst bool) (string, string) {
+func splitEntityCard(part string, isEntityFirst bool) (string, string) {
 	part = strings.TrimSpace(part)
-	if entityFirst {
+	if isEntityFirst {
 		if strings.HasPrefix(part, `"`) {
 			if end := strings.Index(part[1:], `"`); end >= 0 {
 				return part[1 : end+1], strings.TrimSpace(part[end+2:])
@@ -358,7 +358,7 @@ func splitAttrTokens(text string) []string {
 	var toks []string
 	var cur strings.Builder
 	depth := 0
-	inTick := false
+	isInTick := false
 	flush := func() {
 		if cur.Len() > 0 {
 			toks = append(toks, cur.String())
@@ -368,17 +368,17 @@ func splitAttrTokens(text string) []string {
 	for _, letter := range text {
 		switch {
 		case letter == '`':
-			inTick = !inTick
+			isInTick = !isInTick
 			cur.WriteRune(letter)
-		case letter == '(' && !inTick:
+		case letter == '(' && !isInTick:
 			depth++
 			cur.WriteRune(letter)
-		case letter == ')' && !inTick:
+		case letter == ')' && !isInTick:
 			if depth > 0 {
 				depth--
 			}
 			cur.WriteRune(letter)
-		case (letter == ' ' || letter == '\t') && depth == 0 && !inTick:
+		case (letter == ' ' || letter == '\t') && depth == 0 && !isInTick:
 			flush()
 		default:
 			cur.WriteRune(letter)

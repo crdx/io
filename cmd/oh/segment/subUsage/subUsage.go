@@ -63,7 +63,7 @@ type state struct {
 	fetchedAt         time.Time
 	retryAt           time.Time
 	fetchStartedAt    time.Time
-	waited            time.Duration
+	waitedTime        time.Duration
 	failure           string
 	status            usageStatus
 	statusBeforeFetch usageStatus
@@ -88,17 +88,17 @@ func New(reporter agent.UsageReporter, cachePath string, modelName string, now f
 			args.Rate = defaultRate
 		}
 
-		shared := usage.Shared(reporter, cachePath, args.Rate, now)
+		sharedUsage := usage.Shared(reporter, cachePath, args.Rate, now)
 
 		self := &state{
-			reporter:  shared,
+			reporter:  sharedUsage,
 			modelName: strings.ToLower(modelName),
 			rate:      args.Rate,
 			now:       now,
 			status:    usagePending,
 		}
 
-		self.startFromSnapshot(shared)
+		self.startFromSnapshot(sharedUsage)
 
 		return self, nil
 	}
@@ -210,16 +210,16 @@ func (self *state) fetch() {
 	self.windows = windows
 	self.fetchedAt = self.now()
 	self.retryAt = time.Time{}
-	self.waited = 0
+	self.waitedTime = 0
 }
 
 func (self *state) waitLonger(first time.Duration) {
-	self.waited = min(max(self.waited*backoffFactor, first), self.rate)
-	self.retryAt = self.now().Add(self.waited)
+	self.waitedTime = min(max(self.waitedTime*backoffFactor, first), self.rate)
+	self.retryAt = self.now().Add(self.waitedTime)
 }
 
 func (self *state) draw(current snapshot) string {
-	var parts, scoped []string
+	var parts, scopedParts []string
 
 	for _, window := range current.windows {
 		if !self.governsThisSession(window) {
@@ -231,13 +231,13 @@ func (self *state) draw(current snapshot) string {
 		if window.Scope == "" {
 			parts = append(parts, text)
 		} else {
-			scoped = append(scoped, text)
+			scopedParts = append(scopedParts, text)
 		}
 	}
 
-	if len(scoped) > 0 {
+	if len(scopedParts) > 0 {
 		parts = append(parts, style.Subtle(scopeMark))
-		parts = append(parts, scoped...)
+		parts = append(parts, scopedParts...)
 	}
 
 	usage := strings.Join(parts, " ")
@@ -295,9 +295,9 @@ func drawWindow(window agent.UsageWindow, fetchedAt time.Time, now time.Time) st
 		return style.Dim(label + " stale")
 	}
 
-	expected := expectedPercent(window, fetchedAt)
+	expectedPercentage := expectedPercent(window, fetchedAt)
 
-	switch classifyPace(actual, expected) {
+	switch classifyPace(actual, expectedPercentage) {
 	case paceAhead:
 		return style.Change(text + " ▲")
 	case paceCritical:
@@ -311,12 +311,12 @@ func drawWindow(window agent.UsageWindow, fetchedAt time.Time, now time.Time) st
 func expectedPercent(window agent.UsageWindow, at time.Time) int {
 	start := window.ResetsAt.Add(-window.Duration)
 
-	elapsed := at.Sub(start)
-	if elapsed < 0 {
+	elapsedTime := at.Sub(start)
+	if elapsedTime < 0 {
 		return 0
 	}
 
-	percent := int(elapsed * percentCeiling / window.Duration)
+	percent := int(elapsedTime * percentCeiling / window.Duration)
 
 	return min(percentCeiling, percent)
 }
@@ -329,12 +329,12 @@ const (
 	paceCritical
 )
 
-func classifyPace(actual int, expected int) pace {
-	if actual < overPacePercent || actual <= expected {
+func classifyPace(actual int, expectedPercentage int) pace {
+	if actual < overPacePercent || actual <= expectedPercentage {
 		return paceEven
 	}
 
-	if actual >= nearLimit || float64(actual) >= float64(expected)*overPaceRatio {
+	if actual >= nearLimit || float64(actual) >= float64(expectedPercentage)*overPaceRatio {
 		return paceCritical
 	}
 
@@ -353,8 +353,8 @@ func durationLabel(duration time.Duration) string {
 }
 
 func failureReason(err error) string {
-	if refused, ok := errors.AsType[*req.StatusError](err); ok {
-		return strconv.Itoa(refused.Status)
+	if refusedRequest, ok := errors.AsType[*req.StatusError](err); ok {
+		return strconv.Itoa(refusedRequest.Status)
 	}
 
 	return failureLabel

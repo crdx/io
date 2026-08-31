@@ -112,8 +112,8 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.Stats, e
 		return "", tool.Stats{}, fmt.Errorf("could not start ripgrep: %w", err)
 	}
 
-	matches, truncated, readErr := readMatches(stdout, name == ".")
-	if truncated {
+	matches, isTruncated, readErr := readMatches(stdout, name == ".")
+	if isTruncated {
 		stopSearch()
 	}
 
@@ -126,7 +126,7 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.Stats, e
 		return "", tool.Stats{}, fmt.Errorf("could not read ripgrep output: %w", readErr)
 	}
 
-	if truncated {
+	if isTruncated {
 		output, stats := searchReport(matches, true)
 		return output, stats, nil
 	}
@@ -152,10 +152,10 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.Stats, e
 	return output, stats, nil
 }
 
-func searchReport(matches []string, truncated bool) (string, tool.Stats) {
-	output := util.ReportSearchResults(matches, truncated)
+func searchReport(matches []string, isTruncated bool) (string, tool.Stats) {
+	output := util.ReportSearchResults(matches, isTruncated)
 	stats := tool.OutputStats(output)
-	stats.Truncated = truncated
+	stats.IsTruncated = isTruncated
 
 	return output, stats
 }
@@ -206,9 +206,9 @@ func readMatches(reader io.Reader, shouldTrimWorkingDirectory bool) ([]string, b
 				line = strings.TrimPrefix(line, "./")
 			}
 
-			var truncated bool
-			matches, returnedBytes, truncated = util.AppendSearchResult(matches, returnedBytes, line)
-			if truncated {
+			var isTruncated bool
+			matches, returnedBytes, isTruncated = util.AppendSearchResult(matches, returnedBytes, line)
+			if isTruncated {
 				return matches, true, nil
 			}
 		}

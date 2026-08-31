@@ -52,12 +52,12 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan t
 		schedule()
 
 		select {
-		case keypress, open := <-keys:
-			if !open || !handler.Key(keypress) {
+		case keypress, isOpen := <-keys:
+			if !isOpen || !handler.Key(keypress) {
 				return
 			}
-		case event, running := <-handler.Events():
-			if running {
+		case event, isRunning := <-handler.Events():
+			if isRunning {
 				handler.Turn(event)
 			} else if !handler.TurnFinished() {
 				return
@@ -74,8 +74,8 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan t
 				continue
 			}
 		case <-refreshes:
-		case failure, open := <-changes:
-			if !open {
+		case failure, isOpen := <-changes:
+			if !isOpen {
 				changes = nil
 				continue
 			}
@@ -125,10 +125,10 @@ func (self *refreshTimer) stop() {
 func Keypresses(terminal *os.File) (<-chan key.Key, func()) {
 	reader := tty.NewReader(terminal)
 	keys := make(chan key.Key)
-	finished := make(chan struct{})
+	finishedChannel := make(chan struct{})
 
 	go func() {
-		defer close(finished)
+		defer close(finishedChannel)
 		defer close(keys)
 
 		decoder := key.NewDecoder(bufio.NewReader(reader))
@@ -148,7 +148,7 @@ func Keypresses(terminal *os.File) (<-chan key.Key, func()) {
 
 	return keys, func() {
 		reader.Stop()
-		<-finished
+		<-finishedChannel
 		reader.Close()
 	}
 }

@@ -66,24 +66,24 @@ func (self *Client) recordUsageWindows(header http.Header, now time.Time) {
 }
 
 func limitBuckets(header http.Header) []limitBucket {
-	var named []string
+	var namedBuckets []string
 
 	for name := range header {
 		prefix, found := strings.CutSuffix(http.CanonicalHeaderKey(name), primaryPart+usedSuffix)
 		if found && strings.HasPrefix(prefix, headerPrefix+"-") {
-			named = append(named, prefix)
+			namedBuckets = append(namedBuckets, prefix)
 		}
 	}
 
-	slices.Sort(named)
+	slices.Sort(namedBuckets)
 
 	var buckets []limitBucket
 
-	if !activeLimitNamesBucket(header, named) {
+	if !activeLimitNamesBucket(header, namedBuckets) {
 		buckets = append(buckets, limitBucket{prefix: headerPrefix})
 	}
 
-	for _, prefix := range named {
+	for _, prefix := range namedBuckets {
 		buckets = append(buckets, limitBucket{prefix: prefix, scope: scopeName(header, prefix)})
 	}
 
@@ -112,7 +112,7 @@ func scopeName(header http.Header, prefix string) string {
 func usageWindow(
 	header http.Header, bucket limitBucket, part string, now time.Time,
 ) (agent.UsageWindow, bool) {
-	used, err := strconv.ParseFloat(header.Get(bucket.prefix+part+usedSuffix), 64)
+	usedPercentage, err := strconv.ParseFloat(header.Get(bucket.prefix+part+usedSuffix), 64)
 	if err != nil {
 		return agent.UsageWindow{}, false
 	}
@@ -124,7 +124,7 @@ func usageWindow(
 
 	return agent.UsageWindow{
 		Duration: time.Duration(minutes) * time.Minute,
-		Percent:  used,
+		Percent:  usedPercentage,
 		ResetsAt: resetTime(header, bucket.prefix+part, now),
 		Scope:    bucket.scope,
 	}, true

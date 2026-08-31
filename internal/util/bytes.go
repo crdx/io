@@ -41,9 +41,9 @@ func FormatBytes[Count count](bytes Count, precision int) string {
 func formatScaledUnit(value float64, precision int, prefix string, unit string) string {
 	wholeDigits := int(math.Floor(math.Log10(value))) + 1
 	decimalPlaces := max(precision-wholeDigits, 0)
-	formatted := fmt.Sprintf("%.*f", decimalPlaces, value)
+	formattedNumber := fmt.Sprintf("%.*f", decimalPlaces, value)
 	if decimalPlaces > 0 {
-		formatted = strings.TrimRight(strings.TrimRight(formatted, "0"), ".")
+		formattedNumber = strings.TrimRight(strings.TrimRight(formattedNumber, "0"), ".")
 	}
-	return prefix + formatted + unit
+	return prefix + formattedNumber + unit
 }

@@ -128,8 +128,8 @@ func (self *state) pick(resizeSignals <-chan os.Signal) (int, error) {
 		self.draw()
 
 		select {
-		case keypress, open := <-self.keys:
-			if !open {
+		case keypress, isOpen := <-self.keys:
+			if !isOpen {
 				return 0, ErrCancelled
 			}
 
@@ -217,15 +217,15 @@ func (self *state) narrow(query string) {
 		return
 	}
 
-	wanted := -1
+	wantedIndex := -1
 	if self.cursor >= 0 {
-		wanted = self.chosen()
+		wantedIndex = self.chosen()
 	}
 
 	self.query = query
 	self.refilter()
 
-	if at := slices.Index(self.matches, wanted); at >= 0 && self.list.IsChoosable(wanted) {
+	if at := slices.Index(self.matches, wantedIndex); at >= 0 && self.list.IsChoosable(wantedIndex) {
 		self.cursor = at
 	}
 }

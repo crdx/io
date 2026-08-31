@@ -452,11 +452,11 @@ func involvedParticipants(events []Event, layout *diagramLayout) (int, int) {
 	return minIndex, maxIndex
 }
 
-func fragmentBorder(layout *diagramLayout, chars BoxChars, leftCol int, rightCol int, label string, top bool) string {
+func fragmentBorder(layout *diagramLayout, chars BoxChars, leftCol int, rightCol int, label string, isTop bool) string {
 	line := padCells(buildLifeline(layout, chars), rightCol+1)
 
 	leftCorner, rightCorner := chars.BottomLeft, chars.BottomRight
-	if top {
+	if isTop {
 		leftCorner, rightCorner = chars.TopLeft, chars.TopRight
 	}
 	line[leftCol] = string(leftCorner)
@@ -502,9 +502,9 @@ func buildLine(participants []*Participant, layout *diagramLayout, draw func(int
 		boxWidth := layout.participantWidths[i] + boxBorderWidth
 		left := layout.participantCenters[i] - boxWidth/2
 
-		needed := left - runewidth.StringWidth(sb.String())
-		if needed > 0 {
-			sb.WriteString(strings.Repeat(" ", needed))
+		neededWidth := left - runewidth.StringWidth(sb.String())
+		if neededWidth > 0 {
+			sb.WriteString(strings.Repeat(" ", neededWidth))
 		}
 		sb.WriteString(draw(i))
 	}
@@ -624,8 +624,8 @@ func renderSelfMessage(msg *Message, layout *diagramLayout, chars BoxChars) []st
 		line := ensureWidth(buildLifeline(layout, chars))
 		start := center + labelLeftMargin
 		labelWidth := runewidth.StringWidth(label)
-		needed := start + labelWidth + labelBufferSpace
-		for len(line) < needed {
+		neededWidth := start + labelWidth + labelBufferSpace
+		for len(line) < neededWidth {
 			line = append(line, " ")
 		}
 		column := start

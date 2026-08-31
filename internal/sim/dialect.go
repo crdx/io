@@ -78,16 +78,16 @@ func (self *Stream) ID(prefix string) string {
 }
 
 func unansweredCall(input []Entry) string {
-	answered := map[string]bool{}
+	answeredCalls := map[string]bool{}
 
 	for _, entry := range input {
 		if entry.Type == CallOutput {
-			answered[entry.CallID] = true
+			answeredCalls[entry.CallID] = true
 		}
 	}
 
 	for _, entry := range input {
-		if entry.Type == CallMade && !answered[entry.CallID] {
+		if entry.Type == CallMade && !answeredCalls[entry.CallID] {
 			return entry.CallID
 		}
 	}

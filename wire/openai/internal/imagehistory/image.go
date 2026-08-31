@@ -39,66 +39,66 @@ func boundJSONImages(payload []byte) []byte {
 		return payload
 	}
 
-	encoded, err := json.Marshal(boundedValue)
+	encodedPayload, err := json.Marshal(boundedValue)
 	if err != nil {
 		return payload
 	}
 
-	return encoded
+	return encodedPayload
 }
 
 func boundValueImages(value any) (any, bool) {
-	switch typed := value.(type) {
+	switch typedValue := value.(type) {
 	case map[string]any:
 		wasBounded := false
-		for key, item := range typed {
+		for key, item := range typedValue {
 			var boundedItem any
-			var itemWasBounded bool
+			var wasItemBounded bool
 			if key == "image_url" {
-				boundedItem, itemWasBounded = boundImageURL(item)
+				boundedItem, wasItemBounded = boundImageURL(item)
 			} else {
-				boundedItem, itemWasBounded = boundValueImages(item)
+				boundedItem, wasItemBounded = boundValueImages(item)
 			}
-			typed[key] = boundedItem
-			wasBounded = wasBounded || itemWasBounded
+			typedValue[key] = boundedItem
+			wasBounded = wasBounded || wasItemBounded
 		}
-		return typed, wasBounded
+		return typedValue, wasBounded
 	case []any:
 		wasBounded := false
-		for index, item := range typed {
-			boundedItem, itemWasBounded := boundValueImages(item)
-			typed[index] = boundedItem
-			wasBounded = wasBounded || itemWasBounded
+		for index, item := range typedValue {
+			boundedItem, wasItemBounded := boundValueImages(item)
+			typedValue[index] = boundedItem
+			wasBounded = wasBounded || wasItemBounded
 		}
-		return typed, wasBounded
+		return typedValue, wasBounded
 	}
 
 	return value, false
 }
 
 func boundImageURL(value any) (any, bool) {
-	switch typed := value.(type) {
+	switch typedValue := value.(type) {
 	case string:
-		boundedURL, wasBounded := boundDataURL(typed)
+		boundedURL, wasBounded := boundDataURL(typedValue)
 		if wasBounded {
 			return boundedURL, true
 		}
 	case map[string]any:
-		dataURL, hasURL := typed["url"].(string)
+		dataURL, hasURL := typedValue["url"].(string)
 		if !hasURL {
 			return value, false
 		}
 		boundedURL, wasBounded := boundDataURL(dataURL)
 		if wasBounded {
-			typed["url"] = boundedURL
-			return typed, true
+			typedValue["url"] = boundedURL
+			return typedValue, true
 		}
 	}
 	return value, false
 }
 
 func boundDataURL(dataURL string) (string, bool) {
-	mediaType, encoded, isDataURL := strings.Cut(dataURL, dataURLSeparator)
+	mediaType, encodedData, isDataURL := strings.Cut(dataURL, dataURLSeparator)
 	if !isDataURL {
 		return "", false
 	}
@@ -108,7 +108,7 @@ func boundDataURL(dataURL string) (string, bool) {
 		return "", false
 	}
 
-	boundedImage, wasBounded := boundEncodedImage(mediaType, encoded)
+	boundedImage, wasBounded := boundEncodedImage(mediaType, encodedData)
 	if !wasBounded {
 		return "", false
 	}
@@ -122,8 +122,8 @@ const (
 	dataURLSeparator = ";base64,"
 )
 
-func boundEncodedImage(mediaType string, encoded string) (tool.Image, bool) {
-	data, err := base64.StdEncoding.DecodeString(encoded)
+func boundEncodedImage(mediaType string, encodedData string) (tool.Image, bool) {
+	data, err := base64.StdEncoding.DecodeString(encodedData)
 	if err != nil {
 		return tool.Image{}, false
 	}

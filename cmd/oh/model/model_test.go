@@ -586,9 +586,9 @@ func writeCheckedModelCache(t *testing.T, checked time.Time) {
 	t.Helper()
 
 	if err := saveModelCache(modelCachePath(), modelCache{
-		Checked: checked,
+		CheckedAt: checked,
 		Providers: map[string]cachedModels{
-			codexProvider: {Fetched: checked, Source: sourceRegistry, Models: []agent.Model{
+			codexProvider: {FetchedAt: checked, Source: sourceRegistry, Models: []agent.Model{
 				{ID: "stale-model", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
 			}},
 		},

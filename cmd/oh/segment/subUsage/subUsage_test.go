@@ -484,13 +484,13 @@ func fetchNow(t *testing.T, built *state) {
 	built.fetch()
 }
 
-func assertFetchStarts(t *testing.T, built *state, clock *testClock, now time.Time, want bool) {
+func assertFetchStarts(t *testing.T, built *state, clock *testClock, now time.Time, shouldStart bool) {
 	t.Helper()
 
 	clock.set(now)
 
-	if got := built.noteFetchStarting(); got != want {
-		t.Errorf("at %s fetch start = %t, want %t", now.Sub(testNow), got, want)
+	if got := built.noteFetchStarting(); got != shouldStart {
+		t.Errorf("at %s fetch start = %t, want %t", now.Sub(testNow), got, shouldStart)
 	}
 }
 

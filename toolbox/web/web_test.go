@@ -26,8 +26,8 @@ func TestNewBuildsBothReadOnlyConcurrentWebTools(t *testing.T) {
 }
 
 func TestBothToolsConsultAccessWhenTheCallExecutes(t *testing.T) {
-	granted := false
-	for _, offeredTool := range New(func() bool { return granted }, &searchStub{}) {
+	isGranted := false
+	for _, offeredTool := range New(func() bool { return isGranted }, &searchStub{}) {
 		arguments := `{"query":"weather"}`
 		if offeredTool.Name() == "web_fetch" {
 			arguments = `{"url":"https://example.com","type":"text"}`

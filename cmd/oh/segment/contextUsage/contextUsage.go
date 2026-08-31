@@ -49,9 +49,9 @@ func formatPercentage(usedTokens int, totalTokens int) string {
 		return "0%"
 	}
 
-	used := (usedTokens*fullPercentage + totalTokens/2) / totalTokens
+	usedPercentage := (usedTokens*fullPercentage + totalTokens/2) / totalTokens
 
-	return strconv.Itoa(min(fullPercentage, used)) + "%"
+	return strconv.Itoa(min(fullPercentage, usedPercentage)) + "%"
 }
 
 func formatTotalTokens(tokens int) string {

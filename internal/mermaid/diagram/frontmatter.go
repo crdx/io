@@ -30,8 +30,8 @@ func StripFrontmatter(input string) (string, string) {
 		if isDelimiter(lines[i]) && indentOf(lines[i]) == indent {
 			return strings.Join(lines[i+1:], "\n"), title
 		}
-		trimmed := strings.TrimRight(lines[i], " \t\r")
-		if rest, ok := strings.CutPrefix(trimmed, indent+"title:"); ok && (rest == "" || rest[0] == ' ' || rest[0] == '\t') {
+		trimmedLine := strings.TrimRight(lines[i], " \t\r")
+		if rest, ok := strings.CutPrefix(trimmedLine, indent+"title:"); ok && (rest == "" || rest[0] == ' ' || rest[0] == '\t') {
 			rest = strings.TrimSpace(rest)
 			if !strings.HasPrefix(rest, `"`) && !strings.HasPrefix(rest, `'`) {
 				if index := strings.Index(rest, " #"); index != -1 {

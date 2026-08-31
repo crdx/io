@@ -54,11 +54,11 @@ type textSubgraph struct {
 }
 
 func parseSubgraphHeader(header string) textSubgraph {
-	trimmed := strings.TrimSpace(header)
-	labelText := trimmed
+	trimmedHeader := strings.TrimSpace(header)
+	labelText := trimmedHeader
 	id := ""
 
-	if match := regexp.MustCompile(`^(\S+)\s*\[(.+)\]$`).FindStringSubmatch(trimmed); match != nil {
+	if match := regexp.MustCompile(`^(\S+)\s*\[(.+)\]$`).FindStringSubmatch(trimmedHeader); match != nil {
 		id = strings.TrimSpace(match[1])
 		labelText = strings.TrimSpace(match[2])
 		labelText = strings.Trim(labelText, `"`)
@@ -76,18 +76,18 @@ func splitGraphLines(mermaid string) []string {
 	lines := []string{}
 	var current strings.Builder
 	bracketDepth := 0
-	inQuotes := false
+	isInQuotes := false
 
 	for i := 0; i < len(mermaid); i++ {
 		switch mermaid[i] {
 		case '"':
-			inQuotes = !inQuotes
+			isInQuotes = !isInQuotes
 		case '[':
-			if !inQuotes {
+			if !isInQuotes {
 				bracketDepth++
 			}
 		case ']':
-			if !inQuotes && bracketDepth > 0 {
+			if !isInQuotes && bracketDepth > 0 {
 				bracketDepth--
 			}
 		case '\n':
@@ -369,8 +369,8 @@ func mermaidFileToMap(mermaid string) (*graphProperties, error) {
 
 	paddingRegex := regexp.MustCompile(`^(?i)padding([xy])\s*=\s*(\d+)$`)
 	for len(lines) > 0 {
-		trimmed := strings.TrimSpace(lines[0])
-		if match := paddingRegex.FindStringSubmatch(trimmed); match != nil {
+		trimmedLine := strings.TrimSpace(lines[0])
+		if match := paddingRegex.FindStringSubmatch(trimmedLine); match != nil {
 			paddingValue, err := strconv.Atoi(match[2])
 			if err != nil {
 				return &properties, err

@@ -39,8 +39,8 @@ func (self state) Render(segment.Context) string {
 	return renderDuration(timing.UserTurn, !isTurnRunning) + " " + renderDuration(timing.ModelTurn, isTurnRunning)
 }
 
-func renderDuration(elapsed time.Duration, isActive bool) string {
-	number := strconv.FormatInt(int64(elapsed/time.Minute), 10)
+func renderDuration(elapsedTime time.Duration, isActive bool) string {
+	number := strconv.FormatInt(int64(elapsedTime/time.Minute), 10)
 	if !isActive {
 		return style.Dim(number + "m")
 	}

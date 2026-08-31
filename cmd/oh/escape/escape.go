@@ -108,7 +108,7 @@ func getTextSizing(sequence string) (string, int) {
 		if !found {
 			continue
 		}
-		parsed, err := strconv.Atoi(value)
+		parsedNumber, err := strconv.Atoi(value)
 		if err != nil {
 			if key == "s" || key == "w" {
 				return "", 0
@@ -117,15 +117,15 @@ func getTextSizing(sequence string) (string, int) {
 		}
 		switch key {
 		case "s":
-			if parsed < 1 || parsed > 7 {
+			if parsedNumber < 1 || parsedNumber > 7 {
 				return "", 0
 			}
-			scale = parsed
+			scale = parsedNumber
 		case "w":
-			if parsed < 1 || parsed > 7 {
+			if parsedNumber < 1 || parsedNumber > 7 {
 				return "", 0
 			}
-			scaledWidth = parsed
+			scaledWidth = parsedNumber
 			hasScaledWidth = true
 		}
 	}

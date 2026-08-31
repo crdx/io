@@ -161,7 +161,7 @@ func TestHittingTheByteCapIsSaidOutLoud(t *testing.T) {
 		t.Errorf("expected later results to be omitted, got %q", output)
 	}
 	wantStats := tool.OutputStats(output)
-	wantStats.Truncated = true
+	wantStats.IsTruncated = true
 	if stats != wantStats {
 		t.Errorf("got stats %+v, want %+v", stats, wantStats)
 	}

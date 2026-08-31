@@ -20,16 +20,16 @@ func Rows(values []string, cells int) []string {
 
 	var rows []string
 	var row strings.Builder
-	used := 0
+	usedWidth := 0
 	for _, value := range values {
-		if used > 0 && used+columnWidth > cells {
+		if usedWidth > 0 && usedWidth+columnWidth > cells {
 			rows = append(rows, strings.TrimRight(row.String(), " "))
 			row.Reset()
-			used = 0
+			usedWidth = 0
 		}
 		row.WriteString(value)
 		row.WriteString(strings.Repeat(" ", columnWidth-width.Of(value)))
-		used += columnWidth
+		usedWidth += columnWidth
 	}
 
 	return append(rows, strings.TrimRight(row.String(), " "))

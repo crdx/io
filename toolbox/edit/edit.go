@@ -93,7 +93,7 @@ func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.S
 	snapshots.Record(root, name, updatedData)
 
 	addedLines, removedLines := changedLines(args.OldText, args.NewText)
-	stats := tool.Stats{Kind: tool.StatsDiff, Added: addedLines, Removed: removedLines}
+	stats := tool.Stats{Kind: tool.StatsDiff, AddedLines: addedLines, RemovedLines: removedLines}
 	return "edited " + args.Path, stats, nil
 }
 

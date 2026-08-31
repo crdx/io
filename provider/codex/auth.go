@@ -35,15 +35,15 @@ func LoadStoredCredentials() (*Credentials, error) {
 }
 
 func loadCredentials(path string) (*Credentials, error) {
-	stored, err := auth.Load(path)
-	if errors.Is(err, os.ErrNotExist) || err == nil && stored.Codex == nil {
+	storedCredentials, err := auth.Load(path)
+	if errors.Is(err, os.ErrNotExist) || err == nil && storedCredentials.Codex == nil {
 		return nil, errors.New("not logged in to ChatGPT: run the login command with codex")
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	return stored.Codex, nil
+	return storedCredentials.Codex, nil
 }
 
 func saveCredentials(path string, credentials *Credentials) error {

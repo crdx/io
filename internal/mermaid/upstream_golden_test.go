@@ -52,7 +52,7 @@ func TestUpstreamRenderingFixtures(t *testing.T) {
 					actual = normalizeUpstreamRendering(actual)
 					expected = normalizeUpstreamRendering(expected)
 					fixture := filepath.Join(test.directory, entry.Name())
-					if reason, differsIntentionally := intentionalUpstreamRenderingDifferences[fixture]; differsIntentionally {
+					if reason, isIntentionalDifference := intentionalUpstreamRenderingDifferences[fixture]; isIntentionalDifference {
 						if actual == "" {
 							t.Errorf("intentional difference %q rendered nothing", reason)
 						}
@@ -84,10 +84,10 @@ func readUpstreamRenderingFixture(t *testing.T, path string) (string, string) {
 	return strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
 }
 
-func renderUpstreamFixture(t *testing.T, source string, diagramType string, useASCII bool) string {
+func renderUpstreamFixture(t *testing.T, source string, diagramType string, shouldUseASCII bool) string {
 	t.Helper()
 	config := diagram.DefaultConfig()
-	config.UseAscii = useASCII
+	config.UseAscii = shouldUseASCII
 
 	switch diagramType {
 	case "flowchart":
@@ -95,7 +95,7 @@ func renderUpstreamFixture(t *testing.T, source string, diagramType string, useA
 		if err != nil {
 			t.Fatal(err)
 		}
-		properties.useAscii = useASCII
+		properties.useAscii = shouldUseASCII
 		rendering, err := drawMap(properties)
 		return mustUpstreamRendering(t, rendering, err)
 	case "entity-relationship":
@@ -103,7 +103,7 @@ func renderUpstreamFixture(t *testing.T, source string, diagramType string, useA
 		if err != nil {
 			t.Fatal(err)
 		}
-		return er.Render(parsed, useASCII)
+		return er.Render(parsed, shouldUseASCII)
 	case "sequence":
 		parsed, err := sequence.Parse(source)
 		if err != nil {

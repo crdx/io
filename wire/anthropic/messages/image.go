@@ -38,38 +38,38 @@ func boundJSONImages(payload []byte) []byte {
 		return payload
 	}
 
-	encoded, err := json.Marshal(boundedValue)
+	encodedPayload, err := json.Marshal(boundedValue)
 	if err != nil {
 		return payload
 	}
 
-	return encoded
+	return encodedPayload
 }
 
 func boundValueImages(value any) (any, bool) {
-	switch typed := value.(type) {
+	switch typedValue := value.(type) {
 	case map[string]any:
 		wasBounded := false
-		for key, item := range typed {
+		for key, item := range typedValue {
 			if key == "source" {
 				if source, isSource := item.(map[string]any); isSource && boundImageSource(source) {
 					wasBounded = true
 					continue
 				}
 			}
-			boundedItem, itemWasBounded := boundValueImages(item)
-			typed[key] = boundedItem
-			wasBounded = wasBounded || itemWasBounded
+			boundedItem, wasItemBounded := boundValueImages(item)
+			typedValue[key] = boundedItem
+			wasBounded = wasBounded || wasItemBounded
 		}
-		return typed, wasBounded
+		return typedValue, wasBounded
 	case []any:
 		wasBounded := false
-		for index, item := range typed {
-			boundedItem, itemWasBounded := boundValueImages(item)
-			typed[index] = boundedItem
-			wasBounded = wasBounded || itemWasBounded
+		for index, item := range typedValue {
+			boundedItem, wasItemBounded := boundValueImages(item)
+			typedValue[index] = boundedItem
+			wasBounded = wasBounded || wasItemBounded
 		}
-		return typed, wasBounded
+		return typedValue, wasBounded
 	}
 
 	return value, false
@@ -77,12 +77,12 @@ func boundValueImages(value any) (any, bool) {
 
 func boundImageSource(source map[string]any) bool {
 	mediaType, hasMediaType := source["media_type"].(string)
-	encoded, hasData := source["data"].(string)
+	encodedData, hasData := source["data"].(string)
 	if !hasMediaType || !hasData || !imageutil.IsSupported(mediaType) {
 		return false
 	}
 
-	boundedImage, wasBounded := boundEncodedImage(mediaType, encoded)
+	boundedImage, wasBounded := boundEncodedImage(mediaType, encodedData)
 	if !wasBounded {
 		return false
 	}
@@ -93,8 +93,8 @@ func boundImageSource(source map[string]any) bool {
 	return true
 }
 
-func boundEncodedImage(mediaType string, encoded string) (tool.Image, bool) {
-	data, err := base64.StdEncoding.DecodeString(encoded)
+func boundEncodedImage(mediaType string, encodedData string) (tool.Image, bool) {
+	data, err := base64.StdEncoding.DecodeString(encodedData)
 	if err != nil {
 		return tool.Image{}, false
 	}

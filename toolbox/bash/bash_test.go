@@ -512,7 +512,7 @@ func allowAll(string) error { return nil }
 func TestThePolicyIsAskedForEveryCommand(t *testing.T) {
 	root, directory := testRoot(t)
 
-	writable := true
+	isWritable := true
 
 	grantedPolicy := sandbox.Policy{
 		Write:   []string{directory},
@@ -531,7 +531,7 @@ func TestThePolicyIsAskedForEveryCommand(t *testing.T) {
 	}
 
 	built := fixedShell(root, func() sandbox.Policy {
-		if writable {
+		if isWritable {
 			return grantedPolicy
 		}
 
@@ -553,7 +553,7 @@ func TestThePolicyIsAskedForEveryCommand(t *testing.T) {
 		t.Errorf("expected the write to be allowed, got %q", output)
 	}
 
-	writable = false
+	isWritable = false
 
 	if output := run(); !strings.Contains(output, "denied") {
 		t.Errorf("expected the write to be refused, got %q", output)

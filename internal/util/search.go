@@ -84,9 +84,9 @@ func AppendSearchResult(results []string, returnedBytes int64, result string) ([
 }
 
 // ReportSearchResults renders what a search found, saying so where the byte cap was hit.
-func ReportSearchResults(results []string, truncated bool) string {
+func ReportSearchResults(results []string, isTruncated bool) string {
 	joinedResults := strings.Join(results, "\n")
-	if truncated {
+	if isTruncated {
 		if joinedResults != "" {
 			joinedResults += "\n\n"
 		}

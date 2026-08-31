@@ -28,10 +28,10 @@ type templateData struct {
 	Args []string
 }
 
-func New(configured map[string]Definition) (slash.CommandSet, error) {
-	commands := make([]slash.Command, 0, len(configured))
-	for _, name := range slices.Sorted(maps.Keys(configured)) {
-		definition := configured[name]
+func New(configuredDefinitions map[string]Definition) (slash.CommandSet, error) {
+	commands := make([]slash.Command, 0, len(configuredDefinitions))
+	for _, name := range slices.Sorted(maps.Keys(configuredDefinitions)) {
+		definition := configuredDefinitions[name]
 		prompt := strings.TrimSpace(definition.Prompt)
 		if prompt == "" {
 			return slash.CommandSet{}, fmt.Errorf("%s: prompt is empty", name)
@@ -67,18 +67,18 @@ func New(configured map[string]Definition) (slash.CommandSet, error) {
 				case ArgumentsOptional:
 				}
 
-				var rendered strings.Builder
+				var renderedText strings.Builder
 				data := templateData{
 					Arg:  arguments.Text,
 					Args: arguments.Fields,
 				}
-				if err := promptTemplate.Execute(&rendered, data); err != nil {
+				if err := promptTemplate.Execute(&renderedText, data); err != nil {
 					return fmt.Errorf("could not render template: %w", err)
 				}
-				if strings.TrimSpace(rendered.String()) == "" {
+				if strings.TrimSpace(renderedText.String()) == "" {
 					return errors.New("template rendered an empty prompt")
 				}
-				context.Send(rendered.String())
+				context.Send(renderedText.String())
 				return nil
 			},
 		}
@@ -121,19 +121,19 @@ func helpText(entries []slash.HelpEntry, hiddenUsage string) string {
 }
 
 func inferArgumentPolicyFromTemplate(tree *parse.Tree) ArgumentPolicy {
-	referencesArguments := false
+	usesArguments := false
 	usesDefault := false
 	walkTemplate(tree.Root, func(node parse.Node) {
-		switch typed := node.(type) {
+		switch typedNode := node.(type) {
 		case *parse.FieldNode:
-			referencesArguments = referencesArguments || isArgumentField(typed.Ident)
+			usesArguments = usesArguments || isArgumentField(typedNode.Ident)
 		case *parse.IdentifierNode:
-			usesDefault = usesDefault || typed.Ident == defaultFunctionName
+			usesDefault = usesDefault || typedNode.Ident == defaultFunctionName
 		}
 	})
 
 	switch {
-	case !referencesArguments:
+	case !usesArguments:
 		return ArgumentsNone
 	case usesDefault:
 		return ArgumentsOptional
@@ -153,31 +153,31 @@ func walkTemplate(node parse.Node, visit func(parse.Node)) {
 	}
 	visit(node)
 
-	switch typed := node.(type) {
+	switch typedNode := node.(type) {
 	case *parse.ListNode:
-		for _, child := range typed.Nodes {
+		for _, child := range typedNode.Nodes {
 			walkTemplate(child, visit)
 		}
 	case *parse.ActionNode:
-		walkTemplate(typed.Pipe, visit)
+		walkTemplate(typedNode.Pipe, visit)
 	case *parse.PipeNode:
-		for _, command := range typed.Cmds {
+		for _, command := range typedNode.Cmds {
 			walkTemplate(command, visit)
 		}
 	case *parse.CommandNode:
-		for _, argument := range typed.Args {
+		for _, argument := range typedNode.Args {
 			walkTemplate(argument, visit)
 		}
 	case *parse.IfNode:
-		walkBranch(typed.BranchNode, visit)
+		walkBranch(typedNode.BranchNode, visit)
 	case *parse.RangeNode:
-		walkBranch(typed.BranchNode, visit)
+		walkBranch(typedNode.BranchNode, visit)
 	case *parse.WithNode:
-		walkBranch(typed.BranchNode, visit)
+		walkBranch(typedNode.BranchNode, visit)
 	case *parse.TemplateNode:
-		walkTemplate(typed.Pipe, visit)
+		walkTemplate(typedNode.Pipe, visit)
 	case *parse.ChainNode:
-		walkTemplate(typed.Node, visit)
+		walkTemplate(typedNode.Node, visit)
 	}
 }
 
@@ -195,26 +195,26 @@ func defaultValue(fallback any, value any) any {
 }
 
 func isEmpty(value any) bool {
-	reflected := reflect.ValueOf(value)
-	if !reflected.IsValid() {
+	reflectedValue := reflect.ValueOf(value)
+	if !reflectedValue.IsValid() {
 		return true
 	}
 
-	switch reflected.Kind() {
+	switch reflectedValue.Kind() {
 	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
-		return reflected.Len() == 0
+		return reflectedValue.Len() == 0
 	case reflect.Bool:
-		return !reflected.Bool()
+		return !reflectedValue.Bool()
 	case reflect.Complex64, reflect.Complex128:
-		return reflected.Complex() == 0
+		return reflectedValue.Complex() == 0
 	case reflect.Chan, reflect.Func, reflect.Pointer, reflect.UnsafePointer, reflect.Interface:
-		return reflected.IsNil()
+		return reflectedValue.IsNil()
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return reflected.Int() == 0
+		return reflectedValue.Int() == 0
 	case reflect.Float32, reflect.Float64:
-		return reflected.Float() == 0
+		return reflectedValue.Float() == 0
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		return reflected.Uint() == 0
+		return reflectedValue.Uint() == 0
 	case reflect.Invalid:
 		return true
 	case reflect.Struct:

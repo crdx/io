@@ -44,13 +44,13 @@ func findElement(node *html.Node, name string) *html.Node {
 }
 
 func renderChildren(parent *html.Node) (string, error) {
-	var rendered bytes.Buffer
+	var renderedText bytes.Buffer
 	for child := parent.FirstChild; child != nil; child = child.NextSibling {
-		if err := html.Render(&rendered, child); err != nil {
+		if err := html.Render(&renderedText, child); err != nil {
 			return "", fmt.Errorf("could not render the web page: %w", err)
 		}
 	}
-	return strings.TrimSpace(rendered.String()), nil
+	return strings.TrimSpace(renderedText.String()), nil
 }
 
 func renderText(root *html.Node) string {

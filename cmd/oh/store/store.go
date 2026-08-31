@@ -229,10 +229,10 @@ func (self *Writer) release(event agent.Event) []agent.Event {
 		return nil
 	}
 
-	released := self.eventBuffer
+	releasedEvents := self.eventBuffer
 	self.eventBuffer = nil
 
-	return append(released, event)
+	return append(releasedEvents, event)
 }
 
 func (self *Writer) appendEvent(event agent.Event) error {
@@ -260,7 +260,7 @@ func (self *Writer) appendEvent(event agent.Event) error {
 func (self *Writer) startRecorders() {
 	self.writerMutex.Lock()
 	err := self.innerWriter.EnsurePersisted()
-	started := self.innerWriter.Started()
+	startedAt := self.innerWriter.Started()
 	self.writerMutex.Unlock()
 	if err != nil {
 		return
@@ -272,7 +272,7 @@ func (self *Writer) startRecorders() {
 	if self.transcriptRecorder == nil && self.transcriptLoggingEnabled {
 		recorder, err := transcript.Open(filepath.Join(bundleDirectory, transcriptName), transcript.Meta{
 			Name:      self.Name(),
-			Started:   started,
+			StartedAt: startedAt,
 			Model:     self.meta.Model,
 			Effort:    self.meta.Effort,
 			Provider:  self.meta.Provider,
@@ -288,7 +288,7 @@ func (self *Writer) startRecorders() {
 	if self.wireRecorder == nil && self.wireRecordingEnabled {
 		recorder, err := wire.Open(filepath.Join(bundleDirectory, wireName), wire.Meta{
 			Name:      self.Name(),
-			Started:   started,
+			StartedAt: startedAt,
 			Model:     self.meta.Model,
 			Effort:    self.meta.Effort,
 			Provider:  self.meta.Provider,
@@ -330,8 +330,8 @@ type Session struct {
 	Name              string
 	ID                string
 	Meta              Meta
-	Started           time.Time
-	Touched           time.Time
+	StartedAt         time.Time
+	TouchedAt         time.Time
 	Events            []agent.Event
 	Items             []json.RawMessage
 	TurnCompletions   int
@@ -374,8 +374,8 @@ func decode(storedSession *session.Session) (*Session, error) {
 		Name:              storedSession.Name,
 		ID:                storedSession.ID,
 		Meta:              meta,
-		Started:           storedSession.Started,
-		Touched:           storedSession.Touched,
+		StartedAt:         storedSession.StartedAt,
+		TouchedAt:         storedSession.TouchedAt,
 		Events:            storedSession.Events,
 		Items:             storedSession.Items,
 		TurnCompletions:   storedSession.TurnCompletions,
@@ -491,7 +491,7 @@ func Rebuild(directory string, name string) error {
 
 	recorder, err := transcript.Open(path, transcript.Meta{
 		Name:      name,
-		Started:   storedSession.Started,
+		StartedAt: storedSession.StartedAt,
 		Model:     storedSession.Meta.Model,
 		Effort:    storedSession.Meta.Effort,
 		Provider:  storedSession.Meta.Provider,

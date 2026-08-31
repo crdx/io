@@ -296,13 +296,13 @@ func (self *reply) addMessageText(text string, yield agent.Yield) bool {
 func (self *reply) completeSummarisedReasoning(part string, yield agent.Yield) bool {
 	self.isSummarised = true
 
-	streamed := self.summary.String()
-	if streamed == "" {
+	streamedSummary := self.summary.String()
+	if streamedSummary == "" {
 		self.summary.WriteString(part)
 		if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: part}) {
 			return true
 		}
-	} else if suffix, found := strings.CutPrefix(part, streamed); found && suffix != "" {
+	} else if suffix, found := strings.CutPrefix(part, streamedSummary); found && suffix != "" {
 		self.summary.WriteString(suffix)
 		if !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: suffix}) {
 			return true

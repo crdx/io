@@ -9,8 +9,8 @@ import (
 )
 
 func TestRestoringReadStateSkipsPathsThatAreNoLongerMounted(t *testing.T) {
-	writable := false
-	root, directory := testRoot(t, &writable)
+	isWritable := false
+	root, directory := testRoot(t, &isWritable)
 	snapshots := file.NewSnapshots()
 	content := []byte("current")
 

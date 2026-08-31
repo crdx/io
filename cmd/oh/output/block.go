@@ -152,12 +152,12 @@ func (self *Screen) paintBlocks() {
 func renderGroupedBlocks(blocks []groupedBlock, columns int) ([]string, Group, Group) {
 	var rows []string
 
-	for i, grouped := range blocks {
-		if i > 0 && blocks[i-1].group != grouped.group {
+	for i, groupedBlock := range blocks {
+		if i > 0 && blocks[i-1].group != groupedBlock.group {
 			rows = append(rows, "")
 		}
 
-		rows = append(rows, grouped.Rows(columns)...)
+		rows = append(rows, groupedBlock.Rows(columns)...)
 	}
 
 	return rows, blocks[0].group, blocks[len(blocks)-1].group

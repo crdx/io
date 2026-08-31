@@ -265,14 +265,14 @@ func TestConfCreatesTheConfigDirBeforeOpeningIt(t *testing.T) {
 
 func TestForkRequiresAPersistedSession(t *testing.T) {
 	isPersisted := false
-	startRan := false
+	didStartRun := false
 	commands := newCommandRegistry(t, commandEnvironment{
 		session: commandSession{
 			name:        "brave-otter",
 			isPersisted: func() bool { return isPersisted },
 		},
 		startSession: func(SessionStart) error {
-			startRan = true
+			didStartRun = true
 			return nil
 		},
 	})
@@ -285,7 +285,7 @@ func TestForkRequiresAPersistedSession(t *testing.T) {
 	if failure != want {
 		t.Errorf("got %q, want %q", failure, want)
 	}
-	if startRan {
+	if didStartRun {
 		t.Error("fork started before the session was stored")
 	}
 
@@ -294,7 +294,7 @@ func TestForkRequiresAPersistedSession(t *testing.T) {
 	if result != dispatch.Handled || failure != "" {
 		t.Errorf("stored session got result %d and failure %q", result, failure)
 	}
-	if !startRan {
+	if !didStartRun {
 		t.Error("fork did not start after the session was stored")
 	}
 }
@@ -379,12 +379,12 @@ func TestTargetCommandsExposeTheirArgumentsForCompletion(t *testing.T) {
 
 func TestCommandsReportTargetsThatDoNotExistYet(t *testing.T) {
 	sessionDirectory := filepath.Join(t.TempDir(), "missing-session")
-	actionRan := false
+	didActionRun := false
 	commands := newCommandRegistry(t, commandEnvironment{
 		session:   commandSession{directory: sessionDirectory},
 		skillDirs: []string{filepath.Join(t.TempDir(), "missing-skills")},
 		openTarget: func([]string) error {
-			actionRan = true
+			didActionRun = true
 			return nil
 		},
 	})
@@ -398,7 +398,7 @@ func TestCommandsReportTargetsThatDoNotExistYet(t *testing.T) {
 		"/copy last-message":      "no model message has been received yet",
 	} {
 		t.Run(input, func(t *testing.T) {
-			actionRan = false
+			didActionRun = false
 			invocation, found := commands.Find(input)
 			if !found {
 				t.Fatal("expected command to be found")
@@ -408,7 +408,7 @@ func TestCommandsReportTargetsThatDoNotExistYet(t *testing.T) {
 			if err == nil || !strings.Contains(err.Error(), want) {
 				t.Errorf("got error %v, want %q", err, want)
 			}
-			if actionRan {
+			if didActionRun {
 				t.Error("action ran for a missing target")
 			}
 		})

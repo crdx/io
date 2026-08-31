@@ -32,10 +32,10 @@ func TestFetchOmitsModelsWithDatedVersionSuffixes(t *testing.T) {
 	if len(anthropic) != 2 {
 		t.Fatalf("expected only undated Anthropic models, got %v", anthropic)
 	}
-	if _, found := anthropic["claude-opus-4-5"]; !found {
+	if _, isFound := anthropic["claude-opus-4-5"]; !isFound {
 		t.Error("expected the undated model to remain")
 	}
-	if _, found := anthropic["not-a-date"]; !found {
+	if _, isFound := anthropic["not-a-date"]; !isFound {
 		t.Error("expected a non-date numeric suffix to remain")
 	}
 	if len(registry.Provider("openai")) != 0 {

@@ -29,8 +29,8 @@ func (self observer) Start(request req.Request) req.ExchangeObserver {
 func (self *observedExchange) Response(response req.Response) { self.response = response }
 func (self *observedExchange) Body(body []byte)               { self.body = append(self.body, body...) }
 
-func (self *observedExchange) Finish(_ time.Time, err error, incomplete bool) {
-	self.isFinished, self.err, self.incomplete = true, err, incomplete
+func (self *observedExchange) Finish(_ time.Time, err error, isIncomplete bool) {
+	self.isFinished, self.err, self.incomplete = true, err, isIncomplete
 }
 
 func TestObserverSeesTheBytesConsumedByTheCaller(t *testing.T) {

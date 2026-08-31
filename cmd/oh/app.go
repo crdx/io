@@ -510,8 +510,8 @@ func (self *App) feedbackRows(columns int) []string {
 		return nil
 	}
 
-	styled := painter.NoticeStyle(self.feedback.message.status)(self.feedback.message.text)
-	return width.Wrap(styled, columns)
+	styledText := painter.NoticeStyle(self.feedback.message.status)(self.feedback.message.text)
+	return width.Wrap(styledText, columns)
 }
 
 func (self *App) showFeedback(source feedbackSource, message feedbackMessage) {
@@ -904,8 +904,8 @@ func (self *App) finish() {
 		return
 	}
 
-	queued, message := self.queuedTurn.Take()
-	switch queued {
+	queuedKind, message := self.queuedTurn.Take()
+	switch queuedKind {
 	case turn.Replacement:
 		self.refreshPendingMessages()
 		self.start(message)

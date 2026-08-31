@@ -26,8 +26,8 @@ func storedSessions() []*Session {
 			ModelID:      "gpt-5.3-codex",
 			Effort:       "high",
 			MessageCount: 12,
-			Started:      now.Add(-8 * time.Minute),
-			Touched:      now,
+			StartedAt:    now.Add(-8 * time.Minute),
+			TouchedAt:    now,
 			IsRunning:    true,
 		},
 		{
@@ -37,8 +37,8 @@ func storedSessions() []*Session {
 			ModelID:      "claude-sonnet-5",
 			Effort:       "medium",
 			MessageCount: 4,
-			Started:      now.Add(-127 * time.Minute),
-			Touched:      now.Add(-37 * time.Minute),
+			StartedAt:    now.Add(-127 * time.Minute),
+			TouchedAt:    now.Add(-37 * time.Minute),
 		},
 		{
 			Name:         "funny-badger",
@@ -47,14 +47,14 @@ func storedSessions() []*Session {
 			Effort:       "medium",
 			Title:        "the cancelled turn leaves a tool call unanswered\nand the next request fails",
 			MessageCount: 148,
-			Started:      now.Add(-8 * time.Hour),
-			Touched:      now.Add(-5 * time.Hour),
+			StartedAt:    now.Add(-8 * time.Hour),
+			TouchedAt:    now.Add(-5 * time.Hour),
 		},
 		{
 			Name:         "able-dolphin",
 			MessageCount: 1,
-			Started:      now.Add(-77 * time.Hour),
-			Touched:      now.Add(-73 * time.Hour),
+			StartedAt:    now.Add(-77 * time.Hour),
+			TouchedAt:    now.Add(-73 * time.Hour),
 		},
 		{
 			Name:         "brave-otter",
@@ -62,8 +62,8 @@ func storedSessions() []*Session {
 			Model:        "Codex 5.3",
 			ModelID:      "gpt-5.3-codex",
 			MessageCount: 26,
-			Started:      now.Add(-330 * time.Hour),
-			Touched:      now.Add(-300 * time.Hour),
+			StartedAt:    now.Add(-330 * time.Hour),
+			TouchedAt:    now.Add(-300 * time.Hour),
 		},
 	}
 }

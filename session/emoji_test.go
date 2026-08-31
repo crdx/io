@@ -7,7 +7,7 @@ import (
 )
 
 func TestEveryAnimalIsGivenAnEmoji(t *testing.T) {
-	for _, animal := range slices.Concat(characters.Animals, characters.Retired) {
+	for _, animal := range slices.Concat(characters.Animals, characters.RetiredAnimals) {
 		if animal.Emoji == "" || strings.TrimFunc(animal.Emoji, func(character rune) bool { return character > 0x7f }) != "" {
 			t.Errorf("%q is given %q, which is not an emoji", animal.Name, animal.Emoji)
 		}
@@ -26,11 +26,11 @@ func TestANameWithoutAKnownAnimalHasNoEmoji(t *testing.T) {
 }
 
 func TestARetiredAnimalKeepsItsEmojiForTheSessionsNamedAfterIt(t *testing.T) {
-	if len(characters.Retired) == 0 {
+	if len(characters.RetiredAnimals) == 0 {
 		t.Fatal("expected the animals taken out of the naming to be kept")
 	}
 
-	for _, animal := range characters.Retired {
+	for _, animal := range characters.RetiredAnimals {
 		if got := Emoji("able-" + animal.Name); got != animal.Emoji {
 			t.Errorf("%q is stood for by %q, want %q", animal.Name, got, animal.Emoji)
 		}

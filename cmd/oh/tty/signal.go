@@ -17,32 +17,32 @@ func RestoreOnSignal(restore func()) func() {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, fatalSignals...)
 
-	stopped := make(chan struct{})
+	stoppedChannel := make(chan struct{})
 
-	go watch(signals, stopped, restore, reraise)
+	go watch(signals, stoppedChannel, restore, reraise)
 
 	return func() {
 		signal.Stop(signals)
-		close(stopped)
+		close(stoppedChannel)
 	}
 }
 
-func watch(signals <-chan os.Signal, stopped <-chan struct{}, restore func(), raise func(os.Signal)) {
+func watch(signals <-chan os.Signal, stoppedChannel <-chan struct{}, restore func(), raise func(os.Signal)) {
 	select {
-	case received := <-signals:
+	case receivedSignal := <-signals:
 		restore()
-		raise(received)
-	case <-stopped:
+		raise(receivedSignal)
+	case <-stoppedChannel:
 	}
 }
 
-func reraise(received os.Signal) {
-	signal.Reset(received)
+func reraise(receivedSignal os.Signal) {
+	signal.Reset(receivedSignal)
 
 	process, err := os.FindProcess(os.Getpid())
 	if err != nil {
 		os.Exit(1)
 	}
 
-	_ = process.Signal(received)
+	_ = process.Signal(receivedSignal)
 }

@@ -94,7 +94,7 @@ func TestMetaCarriesOnlyListingData(t *testing.T) {
 	if meta.Title != "first question" || meta.Messages != 2 {
 		t.Errorf("unexpected metadata: %+v", meta)
 	}
-	if meta.Started.IsZero() || meta.Touched.Before(meta.Started) {
+	if meta.StartedAt.IsZero() || meta.TouchedAt.Before(meta.StartedAt) {
 		t.Errorf("unexpected metadata times: %+v", meta)
 	}
 

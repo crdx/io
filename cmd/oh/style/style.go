@@ -47,38 +47,38 @@ var (
 
 // The mapping of kind of line to colour.
 var (
-	Reasoning   Style = decorate(col.Italic, Dim)    // what the model thought on the way to an answer
-	Answer      Style = Normal                       // the reply the model gives after it has thought
-	Call        Style = Normal                       // the name of a call that changes nothing at all
-	Change      Style = hex(gold)                    // the name of a call that could change something
-	Success     Style = hex(lime)                    // the mark set against a call that has completed
-	Information Style = hex(steel)                   // what the harness says when passing information
-	Cancelled   Style = Dim                          // the name of a call stopped before it got going
-	Stopped     Style = hex(gold)                    // what the harness says of a turn it had to stop
-	Failure     Style = hex(red)                     // what went wrong, wherever the failure happened
-	Subject     Style = hex(copper)                  // the subject of a call, whatever it operates on
-	Qualifier   Style = Dim                          // what qualifies the subject and narrows it down
-	Result      Style = Dim                          // the output a call handed back when it finished
-	Spinner     Style = hex(copper)                  // the spinner that turns while a call is running
-	Prompt      Style = hex(copper)                  // the harness prompting the user to enter a line
-	Rule        Style = Dim                          // the line drawn across the top of the input box
-	Subtle      Style = Dim                          // text held one small step back from the subject
-	Read        Style = hex(lime)                    // reading is on offer, and waiting to be granted
-	Write       Style = hex(gold)                    // writing is on offer, and waiting to be granted
-	Exec        Style = hex(red)                     // running a command is on offer, if you grant it
-	Shell       Style = hex(steel)                   // a shell prompt, tinted to match a command name
-	Skill       Style = hex(mauve)                   // a skill being read ahead of the work it guides
-	History     Style = hex(mauve)                   // rewriting the repository's history is on offer
-	Pending     Style = col.Underline                // waiting for the keypress that follows a prefix
-	Scrolled    Style = Dim                          // how much of the input is scrolled out of sight
-	Chosen      Style = hex(copper)                  // the row the cursor is resting on within a list
-	Running     Style = decorate(col.Italic, Dim)    // a session already open, which cannot be chosen
-	Column      Style = decorate(col.Underline, Dim) // the heading standing above the column of rows!
-	Typed       Style = Normal                       // what the user typed when a session is replayed
-	User        Style = background("#343541")        // a submitted message, kept apart from the reply
-	Greeting    Style = col.Italic                   // the italic hello with which a first run begins
-	Web         Style = hex(steel)                   // reaching the internet is offered to a web tool
-	Network     Style = hex(red)                     // the name of a call which departs this computer
+	Reasoning     Style = decorate(col.Italic, Dim)    // what the model thought on the way to an answer
+	Answer        Style = Normal                       // the reply the model gives after it has thought
+	Call          Style = Normal                       // the name of a call that changes nothing at all
+	Change        Style = hex(gold)                    // the name of a call that could change something
+	Success       Style = hex(lime)                    // the mark set against a call that has completed
+	Information   Style = hex(steel)                   // what the harness says when passing information
+	CancelledCall Style = Dim                          // the name of a call stopped before it got going
+	StoppedTurn   Style = hex(gold)                    // what the harness says of a turn it had to stop
+	Failure       Style = hex(red)                     // what went wrong, wherever the failure happened
+	Subject       Style = hex(copper)                  // the subject of a call, whatever it operates on
+	Qualifier     Style = Dim                          // what qualifies the subject and narrows it down
+	Result        Style = Dim                          // the output a call handed back when it finished
+	Spinner       Style = hex(copper)                  // the spinner that turns while a call is running
+	Prompt        Style = hex(copper)                  // the harness prompting the user to enter a line
+	Rule          Style = Dim                          // the line drawn across the top of the input box
+	Subtle        Style = Dim                          // text held one small step back from the subject
+	Read          Style = hex(lime)                    // reading is on offer, and waiting to be granted
+	Write         Style = hex(gold)                    // writing is on offer, and waiting to be granted
+	Exec          Style = hex(red)                     // running a command is on offer, if you grant it
+	Shell         Style = hex(steel)                   // a shell prompt, tinted to match a command name
+	Skill         Style = hex(mauve)                   // a skill being read ahead of the work it guides
+	History       Style = hex(mauve)                   // rewriting the repository's history is on offer
+	Pending       Style = col.Underline                // waiting for the keypress that follows a prefix
+	ScrolledInput Style = Dim                          // how much of the input is scrolled out of sight
+	Chosen        Style = hex(copper)                  // the row the cursor is resting on within a list
+	Running       Style = decorate(col.Italic, Dim)    // a session already open, which cannot be chosen
+	Column        Style = decorate(col.Underline, Dim) // the heading standing above the column of rows!
+	TypedInput    Style = Normal                       // what the user typed when a session is replayed
+	User          Style = background("#343541")        // a submitted message, kept apart from the reply
+	Greeting      Style = col.Italic                   // the italic hello with which a first run begins
+	Web           Style = hex(steel)                   // reaching the internet is offered to a web tool
+	Network       Style = hex(red)                     // the name of a call which departs this computer
 )
 
 // The markdown of an answer.
@@ -106,16 +106,16 @@ var (
 )
 
 var (
-	Inserted Style = hex(lime)
-	Deleted  Style = hex(red)
-	Hunk     Style = hex(steel)
+	InsertedText Style = hex(lime)
+	DeletedText  Style = hex(red)
+	Hunk         Style = hex(steel)
 )
 
-var colorEnabled = true
+var isColorEnabled = true
 
 // Init decides whether anything is painted at all.
 func Init(screen any) func() {
-	previous := colorEnabled
+	previous := isColorEnabled
 
 	apply(os.Getenv("NO_COLOR") == "" && tty.Is(screen))
 
@@ -124,10 +124,10 @@ func Init(screen any) func() {
 	}
 }
 
-func apply(enabled bool) {
-	colorEnabled = enabled
+func apply(isEnabled bool) {
+	isColorEnabled = isEnabled
 
-	if enabled {
+	if isEnabled {
 		col.Enable()
 	} else {
 		col.Disable()
@@ -142,21 +142,21 @@ func (self Style) Over(text string) string {
 		return text
 	}
 
-	resumed := strings.TrimSuffix(strings.ReplaceAll(text, reset, reset+opening), opening)
-	if strings.HasSuffix(resumed, closing) {
-		return opening + resumed
+	resumedText := strings.TrimSuffix(strings.ReplaceAll(text, reset, reset+opening), opening)
+	if strings.HasSuffix(resumedText, closing) {
+		return opening + resumedText
 	}
 
-	return opening + resumed + closing
+	return opening + resumedText + closing
 }
 
 func (self Style) Join(parts ...string) string {
-	joined := util.JoinNonEmpty(parts...)
-	if joined == "" {
+	joinedText := util.JoinNonEmpty(parts...)
+	if joinedText == "" {
 		return ""
 	}
 
-	return self(joined)
+	return self(joinedText)
 }
 
 // Width is how many cells text takes up once painted.
@@ -226,7 +226,7 @@ func hex(value string) Style {
 			text = fmt.Sprintf(text, args...)
 		}
 
-		if code == "" || !colorEnabled {
+		if code == "" || !isColorEnabled {
 			return text
 		}
 
@@ -244,7 +244,7 @@ func background(value string) Style {
 			text = fmt.Sprintf(text, args...)
 		}
 
-		if code == "" || !colorEnabled {
+		if code == "" || !isColorEnabled {
 			return text
 		}
 

@@ -19,8 +19,8 @@ func ReadLine(ctx context.Context, input *os.File) (string, error) {
 	var character [1]byte
 
 	for {
-		if cancelled := ctx.Err(); cancelled != nil {
-			return "", cancelled
+		if cancellation := ctx.Err(); cancellation != nil {
+			return "", cancellation
 		}
 
 		read, err := reader.Read(character[:])
@@ -34,8 +34,8 @@ func ReadLine(ctx context.Context, input *os.File) (string, error) {
 		}
 
 		if errors.Is(err, io.EOF) {
-			if cancelled := ctx.Err(); cancelled != nil {
-				return "", cancelled
+			if cancellation := ctx.Err(); cancellation != nil {
+				return "", cancellation
 			}
 
 			return line.String(), err

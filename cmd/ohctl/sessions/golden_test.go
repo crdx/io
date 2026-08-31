@@ -68,8 +68,8 @@ func goldenListings(now time.Time) []Listing {
 			Model:        "claude-opus-5",
 			Effort:       "medium",
 			Messages:     32,
-			Started:      now.Add(-7 * time.Hour),
-			Touched:      now.Add(-3 * time.Hour),
+			StartedAt:    now.Add(-7 * time.Hour),
+			TouchedAt:    now.Add(-3 * time.Hour),
 		},
 		{
 			Name:         "dewy-vole",
@@ -81,8 +81,8 @@ func goldenListings(now time.Time) []Listing {
 			Model:        "gpt-5.3-codex",
 			Effort:       "high",
 			Messages:     8,
-			Started:      now.Add(-90 * time.Minute),
-			Touched:      now.Add(-30 * time.Minute),
+			StartedAt:    now.Add(-90 * time.Minute),
+			TouchedAt:    now.Add(-30 * time.Minute),
 		},
 		{
 			Name:         "chewy-raven",
@@ -90,8 +90,8 @@ func goldenListings(now time.Time) []Listing {
 			WorkspaceDir: "/home/agent/.system",
 			ScratchDir:   "/state/farm/chewy-raven",
 			SessionDir:   "/state/sessions/chewy-raven",
-			Started:      now,
-			Touched:      now,
+			StartedAt:    now,
+			TouchedAt:    now,
 		},
 	}
 }

@@ -35,24 +35,24 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 	}
 
 	models := make([]agent.Model, 0, len(payload.Models))
-	for _, listed := range payload.Models {
-		if listed.Name == "" || !slices.Contains(listed.Capabilities, "completion") ||
-			!slices.Contains(listed.Capabilities, "tools") {
+	for _, listedModel := range payload.Models {
+		if listedModel.Name == "" || !slices.Contains(listedModel.Capabilities, "completion") ||
+			!slices.Contains(listedModel.Capabilities, "tools") {
 			continue
 		}
 
-		contextWindowTokens := listed.Details.ContextWindowTokens
+		contextWindowTokens := listedModel.Details.ContextWindowTokens
 		if contextWindowTokens <= 0 {
 			contextWindowTokens = defaultContextWindow
 		}
 
 		effortLevels := []string{"none"}
-		if slices.Contains(listed.Capabilities, "thinking") {
+		if slices.Contains(listedModel.Capabilities, "thinking") {
 			effortLevels = slices.Clone(Efforts)
 		}
 
 		models = append(models, agent.Model{
-			ID:                  listed.Name,
+			ID:                  listedModel.Name,
 			EffortLevels:        effortLevels,
 			ContextWindowTokens: contextWindowTokens,
 			MaxOutputTokens:     maxOutputTokens(contextWindowTokens),

@@ -45,7 +45,7 @@ type Request struct {
 	Instructions string
 	Streaming    bool
 	IncludeUsage bool
-	Stored       bool
+	IsStored     bool
 	Turn         int
 	Input        []Entry
 	Tools        []string
@@ -139,26 +139,26 @@ func (self *Endpoint) answer(writer http.ResponseWriter, request *http.Request, 
 		return
 	}
 
-	asked, readable := dialect.Read(request, raw)
+	askedRequest, readable := dialect.Read(request, raw)
 	if !readable {
 		refuse(writer, http.StatusBadRequest, "the request was not json")
 
 		return
 	}
 
-	asked.Turn = self.take(asked.Session)
+	askedRequest.Turn = self.take(askedRequest.Session)
 
-	self.record(asked)
+	self.record(askedRequest)
 
 	if self.scenario.Strict {
-		if failure := dialect.Check(self.scenario, asked); failure != "" {
+		if failure := dialect.Check(self.scenario, askedRequest); failure != "" {
 			refuse(writer, http.StatusBadRequest, failure)
 
 			return
 		}
 	}
 
-	turn, found := self.scenario.turn(asked.Turn)
+	turn, found := self.scenario.turn(askedRequest.Turn)
 
 	if found && turn.Status != 0 {
 		if turn.RetryAfter.Duration > 0 {
@@ -218,22 +218,22 @@ func (self *Endpoint) take(session string) int {
 	return turn
 }
 
-func (self *Endpoint) record(asked Request) {
+func (self *Endpoint) record(askedRequest Request) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	self.requests = append(self.requests, asked)
+	self.requests = append(self.requests, askedRequest)
 }
 
 func flatten(content any) string {
-	switch typed := content.(type) {
+	switch typedContent := content.(type) {
 	case string:
-		return typed
+		return typedContent
 
 	case []any:
 		var said strings.Builder
 
-		for _, part := range typed {
+		for _, part := range typedContent {
 			if held, isObject := part.(map[string]any); isObject {
 				if text, isText := held["text"].(string); isText {
 					said.WriteString(text)

@@ -47,7 +47,7 @@ func TestTheVirtualResolverFilesAreDistinctAbsolutePathsWithContents(t *testing.
 		if !filepath.IsAbs(file.path) {
 			t.Errorf("got resolver file %q, want an absolute path", file.path)
 		}
-		if _, duplicate := seen[file.path]; duplicate {
+		if _, isDuplicate := seen[file.path]; isDuplicate {
 			t.Errorf("resolver file %q is mounted twice", file.path)
 		}
 		seen[file.path] = struct{}{}

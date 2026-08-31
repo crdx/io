@@ -245,8 +245,8 @@ func (self *Block) fitResult(row row, columns int) string {
 
 func (self *Block) getResult(row row) string {
 	if row.state == Running {
-		elapsed := time.Since(row.startedAt).Truncate(time.Second)
-		return getResultText(self.getProgressIndicator(row), elapsed, "")
+		elapsedTime := time.Since(row.startedAt).Truncate(time.Second)
+		return getResultText(self.getProgressIndicator(row), elapsedTime, "")
 	}
 
 	return getResultText(self.getProgressIndicator(row), row.timeTaken, row.stats)
@@ -264,13 +264,13 @@ func (self *Block) getProgressIndicator(row row) string {
 	return style.Spinner(spinner.Activity.Frame(self.spinnerFrame))
 }
 
-func getResultText(mark string, took time.Duration, measured string) string {
-	waited := ""
+func getResultText(mark string, took time.Duration, measuredText string) string {
+	waitedText := ""
 	if took >= patience {
-		waited = style.Spinner(util.CompactDuration(took))
+		waitedText = style.Spinner(util.CompactDuration(took))
 	}
 
-	return util.JoinNonEmpty(mark, waited, measured)
+	return util.JoinNonEmpty(mark, waitedText, measuredText)
 }
 
 func glyph(state RowState) string {
@@ -278,7 +278,7 @@ func glyph(state RowState) string {
 	case Failed:
 		return style.Failure("✗")
 	case Cancelled:
-		return style.Cancelled("–")
+		return style.CancelledCall("–")
 	case Done, Running:
 		return style.Success("✓")
 	}

@@ -32,7 +32,7 @@ func defaultFetchClient() *http.Client {
 	return &http.Client{Timeout: fetchTimeout}
 }
 
-func newFetch(allowed func() bool, client *http.Client) tool.Tool {
+func newFetch(isAllowed func() bool, client *http.Client) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
 			Name:        "web_fetch",
@@ -48,7 +48,7 @@ func newFetch(allowed func() bool, client *http.Client) tool.Tool {
 		Focuses(func(call tool.ToolCall) string { return call.Subject() }).
 		IsEmbarrassinglyParallel().
 		ChangesNothing().
-		Run(runAfterAccess(allowed, func(ctx context.Context, args FetchArgs) (tool.ToolCallResult, error) {
+		Run(runAfterAccess(isAllowed, func(ctx context.Context, args FetchArgs) (tool.ToolCallResult, error) {
 			output, err := fetchPage(ctx, client, args)
 			if err != nil {
 				return tool.ToolCallResult{}, err

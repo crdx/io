@@ -34,13 +34,13 @@ type Info struct {
 }
 
 // NewEvent records startup facts for live display and later replay.
-func NewEvent(elapsed time.Duration, info Info) agent.Event {
+func NewEvent(elapsedTime time.Duration, info Info) agent.Event {
 	facts, err := json.Marshal(info)
 	if err != nil {
-		return agent.Event{Kind: agent.StartupEvent, Took: elapsed}
+		return agent.Event{Kind: agent.StartupEvent, Took: elapsedTime}
 	}
 
-	return agent.Event{Kind: agent.StartupEvent, Took: elapsed, State: facts}
+	return agent.Event{Kind: agent.StartupEvent, Took: elapsedTime, State: facts}
 }
 
 const (
@@ -63,16 +63,16 @@ func RenderEvent(event agent.Event, columns int, isTextSizingSupported bool) str
 }
 
 // RenderBanner renders the startup summary for the available terminal width.
-func RenderBanner(elapsed time.Duration, resumed bool, info Info, columns int, isTextSizingSupported bool) string {
-	if resumed {
+func RenderBanner(elapsedTime time.Duration, wasResumed bool, info Info, columns int, isTextSizingSupported bool) string {
+	if wasResumed {
 		return ""
 	}
 
 	emoji := session.Emoji(info.Session)
-	heading := renderHeading(elapsed, info, false)
+	heading := renderHeading(elapsedTime, info, false)
 	headingRoom := columns - bannerLeftPadding - sizedEmojiCells - bannerGap
 	if emoji == "" || !isTextSizingSupported || style.Width(heading) > headingRoom {
-		return renderSentence(elapsed, info)
+		return renderSentence(elapsedTime, info)
 	}
 
 	leftPadding := strings.Repeat(" ", bannerLeftPadding)
@@ -80,11 +80,11 @@ func RenderBanner(elapsed time.Duration, resumed bool, info Info, columns int, i
 	return leftPadding + sizedEmoji(emoji) + style.Subtle(strings.Repeat(" ", bannerGap)) + heading + "\n" + indent + renderDetails(info, "", "")
 }
 
-func renderSentence(elapsed time.Duration, info Info) string {
-	return renderHeading(elapsed, info, true) + renderDetails(info, " with ", ".")
+func renderSentence(elapsedTime time.Duration, info Info) string {
+	return renderHeading(elapsedTime, info, true) + renderDetails(info, " with ", ".")
 }
 
-func renderHeading(elapsed time.Duration, info Info, shouldIncludeEmoji bool) string {
+func renderHeading(elapsedTime time.Duration, info Info, shouldIncludeEmoji bool) string {
 	var line strings.Builder
 
 	_, _ = line.WriteString(style.Subtle("Agent"))
@@ -94,7 +94,7 @@ func renderHeading(elapsed time.Duration, info Info, shouldIncludeEmoji bool) st
 			_, _ = line.WriteString(style.Subtle(" ") + style.Normal(emoji))
 		}
 	}
-	_, _ = line.WriteString(style.Subtle(" ready in ") + startupDuration(elapsed))
+	_, _ = line.WriteString(style.Subtle(" ready in ") + startupDuration(elapsedTime))
 	return line.String()
 }
 
@@ -117,9 +117,9 @@ func sizedEmoji(emoji string) string {
 	return "\x1b]66;" + textSizingMetadata + ";" + emoji + "\x1b\\"
 }
 
-func startupDuration(elapsed time.Duration) string {
+func startupDuration(elapsedTime time.Duration) string {
 	var field startupLine
-	field.quantity(timeTaken(elapsed), false)
+	field.quantity(timeTaken(elapsedTime), false)
 	return field.String()
 }
 
@@ -168,10 +168,10 @@ func (self *startupLine) quantity(text string, isUnitNormal bool) {
 	self.dim(text[at:])
 }
 
-func timeTaken(elapsed time.Duration) string {
-	if elapsed < time.Millisecond {
-		return elapsed.Round(time.Microsecond).String()
+func timeTaken(elapsedTime time.Duration) string {
+	if elapsedTime < time.Millisecond {
+		return elapsedTime.Round(time.Microsecond).String()
 	}
 
-	return elapsed.Round(time.Millisecond).String()
+	return elapsedTime.Round(time.Millisecond).String()
 }

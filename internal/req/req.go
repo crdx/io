@@ -129,12 +129,12 @@ func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser
 	var exchange ExchangeObserver
 	if self.observer != nil {
 		exchange = self.observer.Start(Request{
-			Started:  time.Now(),
-			Method:   request.Method,
-			URL:      request.URL.String(),
-			Protocol: request.Proto,
-			Header:   request.Header.Clone(),
-			Body:     bytes.Clone(requestBody),
+			StartedAt: time.Now(),
+			Method:    request.Method,
+			URL:       request.URL.String(),
+			Protocol:  request.Proto,
+			Header:    request.Header.Clone(),
+			Body:      bytes.Clone(requestBody),
 		})
 	}
 
@@ -150,11 +150,11 @@ func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser
 
 	if exchange != nil {
 		exchange.Response(Response{
-			Received: time.Now(),
-			Protocol: response.Proto,
-			Status:   response.Status,
-			Code:     response.StatusCode,
-			Header:   response.Header.Clone(),
+			ReceivedAt: time.Now(),
+			Protocol:   response.Proto,
+			Status:     response.Status,
+			Code:       response.StatusCode,
+			Header:     response.Header.Clone(),
 		})
 		response.Body = &observedBody{
 			ReadCloser: response.Body,
@@ -197,7 +197,7 @@ func (self *observedBody) Close() error {
 	return err
 }
 
-func (self *observedBody) finish(err error, incomplete bool) {
+func (self *observedBody) finish(err error, isIncomplete bool) {
 	if self.isFinished {
 		return
 	}
@@ -205,7 +205,7 @@ func (self *observedBody) finish(err error, incomplete bool) {
 	if errors.Is(err, io.EOF) {
 		err = nil
 	}
-	self.observer.Finish(time.Now(), err, incomplete)
+	self.observer.Finish(time.Now(), err, isIncomplete)
 }
 
 const statusOverloaded = 529
@@ -241,9 +241,9 @@ func (self *StatusError) Error() string {
 }
 
 func IsRejected(err error) bool {
-	var refused *StatusError
+	var refusedRequest *StatusError
 
-	return errors.As(err, &refused) && refused.Status >= 400 && refused.Status < 500
+	return errors.As(err, &refusedRequest) && refusedRequest.Status >= 400 && refusedRequest.Status < 500
 }
 
 func (self *StatusError) Retriable() bool {
@@ -257,7 +257,7 @@ func (self *StatusError) RetryAfter() time.Duration {
 func refusal(response *http.Response) error {
 	body, _ := io.ReadAll(io.LimitReader(response.Body, bodyLimit))
 
-	refused := &StatusError{
+	refusedRequest := &StatusError{
 		Status: response.StatusCode,
 		Body:   string(body),
 		Wait:   retryAfter(response.Header.Get("Retry-After")),
@@ -273,20 +273,20 @@ func refusal(response *http.Response) error {
 	}
 
 	if json.Unmarshal(body, &payload) != nil {
-		return refused
+		return refusedRequest
 	}
 
-	refused.Code = payload.Error.Code
+	refusedRequest.Code = payload.Error.Code
 
 	for _, said := range []string{payload.Error.Message, payload.Detail} {
 		if said != "" {
-			refused.Message = said
+			refusedRequest.Message = said
 
 			break
 		}
 	}
 
-	return refused
+	return refusedRequest
 }
 
 func retryAfter(header string) time.Duration {

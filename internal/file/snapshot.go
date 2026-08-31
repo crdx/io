@@ -99,12 +99,12 @@ func (self *Snapshots) Check(root *Root, name string, content []byte) error {
 }
 
 func (self *Snapshots) restoreHash(root *Root, name string, hash string) error {
-	decoded, err := hex.DecodeString(hash)
-	if err != nil || len(decoded) != sha256.Size {
+	decodedHash, err := hex.DecodeString(hash)
+	if err != nil || len(decodedHash) != sha256.Size {
 		return fmt.Errorf("invalid SHA-256 hash %q", hash)
 	}
 
-	self.recordHash(root, name, hex.EncodeToString(decoded))
+	self.recordHash(root, name, hex.EncodeToString(decodedHash))
 	return nil
 }
 

@@ -16,7 +16,7 @@ type Searcher interface {
 	Search(context context.Context, query string) (string, error)
 }
 
-func newSearch(allowed func() bool, searcher Searcher) tool.Tool {
+func newSearch(isAllowed func() bool, searcher Searcher) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
 			Name:        "web_search",
@@ -30,7 +30,7 @@ func newSearch(allowed func() bool, searcher Searcher) tool.Tool {
 		Validate(validateSearch).
 		IsEmbarrassinglyParallel().
 		ChangesNothing().
-		Run(runAfterAccess(allowed, func(ctx context.Context, args SearchArgs) (tool.ToolCallResult, error) {
+		Run(runAfterAccess(isAllowed, func(ctx context.Context, args SearchArgs) (tool.ToolCallResult, error) {
 			output, err := searcher.Search(ctx, args.Query)
 			if err != nil {
 				return tool.ToolCallResult{}, err

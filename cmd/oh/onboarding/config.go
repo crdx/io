@@ -33,8 +33,8 @@ func setInitialModel(path string, selection string) (bool, error) {
 		return false, err
 	}
 
-	updated := addInitialModel(contents, selection)
-	if err := writeConfig(path, updated); err != nil {
+	updatedContents := addInitialModel(contents, selection)
+	if err := writeConfig(path, updatedContents); err != nil {
 		return false, err
 	}
 

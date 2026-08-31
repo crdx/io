@@ -11,12 +11,12 @@ func ValidateFormats(directory string) error {
 	if err != nil {
 		return err
 	}
-	var ahead, outdated []string
+	var ahead, outdatedNames []string
 	for _, entry := range entries {
 		if entry.Format > session.JournalFormat {
 			ahead = append(ahead, entry.Name)
 		} else if entry.Format < session.JournalFormat {
-			outdated = append(outdated, entry.Name)
+			outdatedNames = append(outdatedNames, entry.Name)
 		}
 	}
 
@@ -28,11 +28,11 @@ func ValidateFormats(directory string) error {
 		)
 	}
 
-	if len(outdated) == 0 {
+	if len(outdatedNames) == 0 {
 		return nil
 	}
 
-	subject, object := nameSessions(outdated)
+	subject, object := nameSessions(outdatedNames)
 
 	return fmt.Errorf(
 		"%s written in an older journal format: run `ohctl migrate` to bring %s up to format %d",

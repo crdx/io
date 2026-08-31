@@ -56,14 +56,14 @@ func LoginProviderNames() []string {
 
 type modelCache struct {
 	Version   int                     `json:"version"`
-	Checked   time.Time               `json:"checked"`
+	CheckedAt time.Time               `json:"checked"`
 	Providers map[string]cachedModels `json:"providers"`
 }
 
 type cachedModels struct {
-	Fetched time.Time     `json:"fetched"`
-	Source  string        `json:"source"`
-	Models  []agent.Model `json:"models"`
+	FetchedAt time.Time     `json:"fetched"`
+	Source    string        `json:"source"`
+	Models    []agent.Model `json:"models"`
 }
 
 const (
@@ -82,14 +82,14 @@ func registryAddress(endpoint string) string {
 		return ""
 	}
 
-	wanted := make([]string, 0, len(registryNames))
+	wantedNames := make([]string, 0, len(registryNames))
 	for _, name := range registryNames {
-		wanted = append(wanted, name)
+		wantedNames = append(wantedNames, name)
 	}
 
-	sort.Strings(wanted)
+	sort.Strings(wantedNames)
 
-	query := url.Values{simulatedRegistryQuery: {strings.Join(wanted, ",")}}
+	query := url.Values{simulatedRegistryQuery: {strings.Join(wantedNames, ",")}}
 
 	return address.Scheme + "://" + address.Host + simulatedRegistryPath + "?" + query.Encode()
 }
@@ -134,12 +134,12 @@ func saveModelCache(path string, cache modelCache) error {
 	return os.WriteFile(path, data, 0o600)
 }
 
-func supplement(listed []agent.Model, registered map[string]agent.Model) []agent.Model {
-	supplemented := make([]agent.Model, 0, len(listed))
+func supplement(listedModels []agent.Model, registeredModels map[string]agent.Model) []agent.Model {
+	supplementedModels := make([]agent.Model, 0, len(listedModels))
 
-	for _, model := range listed {
-		known, found := registered[model.ID]
-		if found {
+	for _, model := range listedModels {
+		known, isFound := registeredModels[model.ID]
+		if isFound {
 			if model.Name == "" {
 				model.Name = known.Name
 			}
@@ -154,15 +154,15 @@ func supplement(listed []agent.Model, registered map[string]agent.Model) []agent
 			}
 		}
 
-		supplemented = append(supplemented, model)
+		supplementedModels = append(supplementedModels, model)
 	}
 
-	return supplemented
+	return supplementedModels
 }
 
-func fromRegistry(registered map[string]agent.Model) []agent.Model {
-	models := make([]agent.Model, 0, len(registered))
-	for _, model := range registered {
+func fromRegistry(registeredModels map[string]agent.Model) []agent.Model {
+	models := make([]agent.Model, 0, len(registeredModels))
+	for _, model := range registeredModels {
 		models = append(models, model)
 	}
 
@@ -212,15 +212,15 @@ func latestModelIterations(models []agent.Model) []agent.Model {
 		}
 	}
 
-	retained := make([]agent.Model, 0, len(latest))
+	retainedModels := make([]agent.Model, 0, len(latest))
 	for _, model := range models {
 		family, iteration, hasIteration := getModelIteration(model.ID)
 		if !hasIteration || slices.Equal(iteration, latest[family]) {
-			retained = append(retained, model)
+			retainedModels = append(retainedModels, model)
 		}
 	}
 
-	return retained
+	return retainedModels
 }
 
 func isDrivable(providerName string, id string) bool {
@@ -237,14 +237,14 @@ func isDrivable(providerName string, id string) bool {
 }
 
 func drivableModels(providerName string, models []agent.Model) []agent.Model {
-	retained := make([]agent.Model, 0, len(models))
+	retainedModels := make([]agent.Model, 0, len(models))
 	for _, model := range models {
 		if isDrivable(providerName, model.ID) {
-			retained = append(retained, model)
+			retainedModels = append(retainedModels, model)
 		}
 	}
 
-	return retained
+	return retainedModels
 }
 
 func choicesFor(providerName string, models []agent.Model) []Choice {
@@ -276,7 +276,7 @@ func availableModelChoices(cache modelCache) []Choice {
 	var available []Choice
 
 	for _, providerName := range ProviderNames() {
-		if listing, found := cache.Providers[providerName]; found {
+		if listing, isFound := cache.Providers[providerName]; isFound {
 			available = append(available, choicesFor(providerName, listing.Models)...)
 		}
 	}
@@ -312,14 +312,14 @@ func Ensure(output io.Writer, endpoint string, path string, listProviderModels P
 	ctx, cancel := context.WithTimeout(context.Background(), refreshTimeout)
 	defer cancel()
 
-	var reported bytes.Buffer
+	var reportedText bytes.Buffer
 
-	err := updateModels(ctx, &reported, endpoint, path, listProviderModels)
+	err := updateModels(ctx, &reportedText, endpoint, path, listProviderModels)
 	if err == nil {
 		return nil
 	}
 
-	_, _ = io.Copy(output, &reported)
+	_, _ = io.Copy(output, &reportedText)
 
 	if len(cache.Providers) == 0 {
 		return err
@@ -327,17 +327,17 @@ func Ensure(output io.Writer, endpoint string, path string, listProviderModels P
 
 	_, _ = fmt.Fprintf(output, "model list not refreshed: %s\n", err)
 
-	cache.Checked = time.Now()
+	cache.CheckedAt = time.Now()
 
 	return saveModelCache(path, cache)
 }
 
 func isCacheCurrent(cache modelCache, now time.Time) bool {
-	if len(cache.Providers) == 0 || cache.Checked.IsZero() {
+	if len(cache.Providers) == 0 || cache.CheckedAt.IsZero() {
 		return false
 	}
 
-	return now.Sub(cache.Checked) < maximumCacheAge
+	return now.Sub(cache.CheckedAt) < maximumCacheAge
 }
 
 func Update(output io.Writer, endpoint string, path string, listProviderModels ProviderLister) error {
@@ -362,12 +362,12 @@ func updateModels(
 
 	cache := loadModelCache(path)
 
-	var described int
+	var describedCount int
 
 	for _, providerName := range ProviderNames() {
-		registered := registry.Provider(registryNames[providerName])
+		registeredModels := registry.Provider(registryNames[providerName])
 
-		models, source, why := describeProviderModels(ctx, providerName, registered, listProviderModels)
+		models, source, why := describeProviderModels(ctx, providerName, registeredModels, listProviderModels)
 		models = latestModelIterations(models)
 		models = drivableModels(providerName, models)
 		if len(models) == 0 {
@@ -377,21 +377,21 @@ func updateModels(
 		}
 
 		cache.Providers[providerName] = cachedModels{
-			Fetched: time.Now(),
-			Source:  source,
-			Models:  models,
+			FetchedAt: time.Now(),
+			Source:    source,
+			Models:    models,
 		}
-		described++
+		describedCount++
 
 		_, _ = fmt.Fprintf(output, "%-12s %3d models  %-19s %s\n",
 			providerName, len(models), source, pickable(models))
 	}
 
-	if described == 0 {
+	if describedCount == 0 {
 		return errors.New("no provider could be described")
 	}
 
-	cache.Checked = time.Now()
+	cache.CheckedAt = time.Now()
 
 	if err := saveModelCache(path, cache); err != nil {
 		return err
@@ -416,26 +416,26 @@ func pickable(models []agent.Model) string {
 func describeProviderModels(
 	ctx context.Context,
 	providerName string,
-	registered map[string]agent.Model,
+	registeredModels map[string]agent.Model,
 	listProviderModels ProviderLister,
 ) ([]agent.Model, string, string) {
-	listed, err := listProviderModels(ctx, providerName)
+	listedModels, err := listProviderModels(ctx, providerName)
 
 	why := "the endpoint lists no models"
 	if err != nil {
 		why = err.Error()
 	}
 
-	if len(listed) > 0 {
-		if len(registered) == 0 {
-			return listed, sourceEndpoint, ""
+	if len(listedModels) > 0 {
+		if len(registeredModels) == 0 {
+			return listedModels, sourceEndpoint, ""
 		}
 
-		return supplement(listed, registered), sourceBoth, ""
+		return supplement(listedModels, registeredModels), sourceBoth, ""
 	}
 
-	if len(registered) > 0 {
-		return fromRegistry(registered), sourceRegistry, why
+	if len(registeredModels) > 0 {
+		return fromRegistry(registeredModels), sourceRegistry, why
 	}
 
 	return nil, "", why

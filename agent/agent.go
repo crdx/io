@@ -230,30 +230,30 @@ func (self *Agent) send(
 	yieldUpdates func([]Update) bool,
 	yieldEvent func(Event, error) bool,
 ) (Reply, bool, error) {
-	listening := true
-	asked := rewindOf(self.provider)
+	isListening := true
+	askedRewind := rewindOf(self.provider)
 
 	var spent time.Duration
 
 	for attempt := 1; ; attempt++ {
 		reply, err := self.provider.Send(ctx, func(output Output) bool {
-			listening = yieldUpdates(prose.add(output))
-			return listening
+			isListening = yieldUpdates(prose.add(output))
+			return isListening
 		})
 
-		if !listening || err == nil {
-			return reply, listening, err
+		if !isListening || err == nil {
+			return reply, isListening, err
 		}
 
 		wait, worthIt := self.retryWait(err, attempt, spent)
 		if !worthIt {
-			return reply, listening, err
+			return reply, isListening, err
 		}
 
 		spent += wait
 
 		if !isResumable(err) {
-			asked.restore()
+			askedRewind.restore()
 		}
 
 		if !yieldUpdates(prose.interrupted()) {
@@ -267,7 +267,7 @@ func (self *Agent) send(
 			Took:    wait,
 		}
 
-		if call, faulted := faultedCall(err); faulted {
+		if call, faultedCall := faultedCall(err); faultedCall {
 			notice.ID, notice.Name, notice.Arguments = call.ID, call.Name, call.Arguments
 		}
 
@@ -276,7 +276,7 @@ func (self *Agent) send(
 		}
 
 		if !self.waitBeforeRetry(ctx, wait) {
-			return reply, listening, err
+			return reply, isListening, err
 		}
 	}
 }
@@ -380,15 +380,15 @@ func (self *Agent) runCalls(
 		}
 	}
 
-	listening := true
+	isListening := true
 
-	for start := 0; start < len(queuedCalls) && listening; {
+	for start := 0; start < len(queuedCalls) && isListening; {
 		end := self.batchEnd(queuedCalls, start)
-		listening = self.runBatch(ctx, queuedCalls[start:end], results[start:end], yield)
+		isListening = self.runBatch(ctx, queuedCalls[start:end], results[start:end], yield)
 		start = end
 	}
 
-	return listening
+	return isListening
 }
 
 func (self *Agent) batchEnd(queuedCalls []pendingCall, start int) int {
@@ -405,14 +405,14 @@ func (self *Agent) batchEnd(queuedCalls []pendingCall, start int) int {
 }
 
 func (self *Agent) concurrent(call ToolCall) bool {
-	calledTool, found := self.registeredTools[call.Name]
+	calledTool, isFound := self.registeredTools[call.Name]
 
-	return found && calledTool.Concurrent()
+	return isFound && calledTool.Concurrent()
 }
 
 func (self *Agent) describeUnparsedToolCall(call ToolCall) string {
-	calledTool, found := self.registeredTools[call.Name]
-	if !found {
+	calledTool, isFound := self.registeredTools[call.Name]
+	if !isFound {
 		return strutil.FirstLine(call.Arguments)
 	}
 
@@ -420,9 +420,9 @@ func (self *Agent) describeUnparsedToolCall(call ToolCall) string {
 }
 
 func (self *Agent) readOnly(call ToolCall) bool {
-	calledTool, found := self.registeredTools[call.Name]
+	calledTool, isFound := self.registeredTools[call.Name]
 
-	return found && calledTool.ReadOnly()
+	return isFound && calledTool.ReadOnly()
 }
 
 type completedToolCall struct {
@@ -492,28 +492,28 @@ func (self *Agent) runBatch(
 		}()
 	}
 
-	listening := true
+	isListening := true
 
 	for range batch {
 		completion := <-done
 
 		if completion.state.Kind != "" {
 			if err := self.restoreState(completion.state); err != nil {
-				if listening {
+				if isListening {
 					yield(Event{}, err)
 				}
 				return false
 			}
 		}
-		if listening && completion.state.Kind != "" {
-			listening = yield(completion.state, nil)
+		if isListening && completion.state.Kind != "" {
+			isListening = yield(completion.state, nil)
 		}
-		if listening {
-			listening = yield(completion.result, nil)
+		if isListening {
+			isListening = yield(completion.result, nil)
 		}
 	}
 
-	return listening
+	return isListening
 }
 
 func (self *Agent) RestoreState(events []Event) error {
@@ -530,8 +530,8 @@ func (self *Agent) RestoreState(events []Event) error {
 }
 
 func (self *Agent) restoreState(event Event) error {
-	calledTool, known := self.owners[event.Name]
-	if !known {
+	calledTool, isKnown := self.owners[event.Name]
+	if !isKnown {
 		return nil
 	}
 	if err := calledTool.Restore(event.State); err != nil {
@@ -542,8 +542,8 @@ func (self *Agent) restoreState(event Event) error {
 }
 
 func (self *Agent) Tool(name string) (tool.Tool, bool) {
-	found, known := self.registeredTools[name]
-	return found, known
+	found, isKnown := self.registeredTools[name]
+	return found, isKnown
 }
 
 func (self *Agent) IsToolEnabled(name string) bool {

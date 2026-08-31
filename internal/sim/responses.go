@@ -44,21 +44,21 @@ func (self responsesDialect) Read(request *http.Request, raw []byte) (Request, b
 		key = request.Header.Get("Session_id")
 	}
 
-	asked := Request{
+	askedRequest := Request{
 		API:          self.Name(),
 		Session:      key,
 		Model:        sent.Model,
 		Instructions: sent.Instructions,
 		Streaming:    sent.Stream,
-		Stored:       sent.Store,
+		IsStored:     sent.Store,
 		Input:        responsesEntries(sent.Input),
 	}
 
-	for _, offered := range sent.Tools {
-		asked.Tools = append(asked.Tools, offered.Name)
+	for _, offeredTool := range sent.Tools {
+		askedRequest.Tools = append(askedRequest.Tools, offeredTool.Name)
 	}
 
-	return asked, true
+	return askedRequest, true
 }
 
 func responsesEntries(items []json.RawMessage) []Entry {
@@ -96,19 +96,19 @@ func responsesEntries(items []json.RawMessage) []Entry {
 	return read
 }
 
-func (self responsesDialect) Check(scenario *Scenario, asked Request) string {
+func (self responsesDialect) Check(scenario *Scenario, askedRequest Request) string {
 	switch {
-	case !asked.Streaming:
+	case !askedRequest.Streaming:
 		return "only streaming responses are supported"
-	case asked.Stored:
+	case askedRequest.IsStored:
 		return "this endpoint does not store conversations"
-	case asked.Instructions == "":
+	case askedRequest.Instructions == "":
 		return "the request carried no instructions"
-	case asked.Model != scenario.Model:
-		return fmt.Sprintf("the model %q is not available", asked.Model)
+	case askedRequest.Model != scenario.Model:
+		return fmt.Sprintf("the model %q is not available", askedRequest.Model)
 	}
 
-	if hanging := unansweredCall(asked.Input); hanging != "" {
+	if hanging := unansweredCall(askedRequest.Input); hanging != "" {
 		return "No tool output found for function call " + hanging + "."
 	}
 

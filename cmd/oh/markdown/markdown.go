@@ -176,8 +176,8 @@ func (self *renderer) block(node ast.Node) {
 	}
 }
 
-func (self *renderer) appendWrapped(styled string) {
-	self.rows = append(self.rows, width.Wrap(styled, self.columns)...)
+func (self *renderer) appendWrapped(styledText string) {
+	self.rows = append(self.rows, width.Wrap(styledText, self.columns)...)
 }
 
 func (self *renderer) code(lines []string) {

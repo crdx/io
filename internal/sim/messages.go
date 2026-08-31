@@ -58,27 +58,27 @@ func (self messagesDialect) Read(_ *http.Request, raw []byte) (Request, bool) {
 		return Request{}, false
 	}
 
-	asked := Request{
+	askedRequest := Request{
 		API:       self.Name(),
 		Model:     sent.Model,
 		Streaming: sent.Stream,
 	}
 
 	for _, block := range sent.System {
-		if asked.Instructions == "" || len(sent.System) > 1 {
-			asked.Instructions = block.Text
+		if askedRequest.Instructions == "" || len(sent.System) > 1 {
+			askedRequest.Instructions = block.Text
 		}
 	}
 
 	for _, message := range sent.Messages {
-		asked.Input = append(asked.Input, messagesEntries(message.Role, message.Content)...)
+		askedRequest.Input = append(askedRequest.Input, messagesEntries(message.Role, message.Content)...)
 	}
 
-	for _, offered := range sent.Tools {
-		asked.Tools = append(asked.Tools, offered.Name)
+	for _, offeredTool := range sent.Tools {
+		askedRequest.Tools = append(askedRequest.Tools, offeredTool.Name)
 	}
 
-	return asked, true
+	return askedRequest, true
 }
 
 func messagesEntries(role string, content []json.RawMessage) []Entry {
@@ -121,25 +121,25 @@ func encodeArguments(input any) string {
 		return ""
 	}
 
-	encoded, err := json.Marshal(input)
+	encodedInput, err := json.Marshal(input)
 	if err != nil {
 		return ""
 	}
 
-	return string(encoded)
+	return string(encodedInput)
 }
 
-func (self messagesDialect) Check(scenario *Scenario, asked Request) string {
+func (self messagesDialect) Check(scenario *Scenario, askedRequest Request) string {
 	switch {
-	case !asked.Streaming:
+	case !askedRequest.Streaming:
 		return "only streaming responses are supported"
-	case asked.Instructions == "":
+	case askedRequest.Instructions == "":
 		return "the request carried no instructions"
-	case asked.Model != scenario.Model:
-		return fmt.Sprintf("the model %q is not available", asked.Model)
+	case askedRequest.Model != scenario.Model:
+		return fmt.Sprintf("the model %q is not available", askedRequest.Model)
 	}
 
-	if hanging := unansweredCall(asked.Input); hanging != "" {
+	if hanging := unansweredCall(askedRequest.Input); hanging != "" {
 		return "No tool output found for function call " + hanging + "."
 	}
 

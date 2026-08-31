@@ -201,8 +201,8 @@ func TestAModelOffersOnlyTheEffortLevelsItTakes(t *testing.T) {
 	}
 
 	for _, choice := range Choices(modelCachePath()) {
-		want, known := wanted[choice.ID]
-		if !known {
+		want, isKnown := wanted[choice.ID]
+		if !isKnown {
 			t.Errorf("no effort levels pinned for %s", choice.ID)
 
 			continue

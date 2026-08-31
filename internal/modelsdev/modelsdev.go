@@ -96,10 +96,10 @@ func Fetch(ctx context.Context, address string, observer req.Observer) (Registry
 
 	registry := make(Registry, len(payload))
 
-	for providerName, described := range payload {
-		models := make(map[string]agent.Model, len(described.Models))
-		for modelName, described := range described.Models {
-			model := described.model(modelName)
+	for providerName, describedProvider := range payload {
+		models := make(map[string]agent.Model, len(describedProvider.Models))
+		for modelName, describedModel := range describedProvider.Models {
+			model := describedModel.model(modelName)
 			if hasDatedVersionSuffix(model.ID) {
 				continue
 			}

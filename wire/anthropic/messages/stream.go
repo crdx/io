@@ -325,7 +325,7 @@ func (self *reply) open(event event) {
 		return
 	}
 
-	opened := &block{
+	openedBlock := &block{
 		kind:  event.ContentBlock.Type,
 		index: event.Index,
 		id:    event.ContentBlock.ID,
@@ -333,11 +333,11 @@ func (self *reply) open(event event) {
 		data:  event.ContentBlock.Data,
 	}
 
-	if opened.kind == "redacted_thinking" {
-		opened.isDone = true
+	if openedBlock.kind == "redacted_thinking" {
+		openedBlock.isDone = true
 	}
 
-	self.blocks = append(self.blocks, opened)
+	self.blocks = append(self.blocks, openedBlock)
 }
 
 func (self *reply) add(event event, yield agent.Yield) bool {

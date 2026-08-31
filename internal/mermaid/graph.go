@@ -103,13 +103,13 @@ func mkGraph(data *orderedmap.OrderedMap[string, []textEdge], nodeSpecs map[stri
 				built.appendNode(childNode)
 				index += 1
 			}
-			created := edge{
+			createdEdge := edge{
 				from:            parentNode,
 				to:              childNode,
 				text:            textEdge.label,
 				isBidirectional: textEdge.isBidirectional,
 			}
-			built.edges = append(built.edges, &created)
+			built.edges = append(built.edges, &createdEdge)
 		}
 	}
 	return built
@@ -353,17 +353,17 @@ func (self *graph) hasIncomingEdgeFromOutsideSubgraph(node *node) bool {
 		if otherNode == node || otherNode.gridCoord == nil {
 			continue
 		}
-		otherHasExternal := false
+		hasOtherExternal := false
 		for _, edge := range self.edges {
 			if edge.to == otherNode {
 				sourceSubgraph := self.getNodeSubgraph(edge.from)
 				if sourceSubgraph != nodeSubgraph {
-					otherHasExternal = true
+					hasOtherExternal = true
 					break
 				}
 			}
 		}
-		if otherHasExternal && otherNode.gridCoord.y < node.gridCoord.y {
+		if hasOtherExternal && otherNode.gridCoord.y < node.gridCoord.y {
 			return false
 		}
 	}
@@ -532,9 +532,9 @@ func (self *graph) draw() *drawing {
 }
 
 func (self *graph) drawSubgraphs() {
-	sorted := self.sortSubgraphsByDepth()
+	sortedSubgraphs := self.sortSubgraphsByDepth()
 
-	for _, sg := range sorted {
+	for _, sg := range sortedSubgraphs {
 		sgDrawing := drawSubgraph(sg, *self)
 		offset := drawingCoord{sg.minX, sg.minY}
 		self.drawing = self.mergeDrawings(self.drawing, offset, sgDrawing)
@@ -557,18 +557,18 @@ func (self *graph) sortSubgraphsByDepth() []*subgraph {
 		depths[sg] = self.getSubgraphDepth(sg)
 	}
 
-	sorted := make([]*subgraph, len(self.subgraphs))
-	copy(sorted, self.subgraphs)
+	sortedSubgraphs := make([]*subgraph, len(self.subgraphs))
+	copy(sortedSubgraphs, self.subgraphs)
 
-	for i := range sorted {
-		for j := i + 1; j < len(sorted); j++ {
-			if depths[sorted[i]] > depths[sorted[j]] {
-				sorted[i], sorted[j] = sorted[j], sorted[i]
+	for i := range sortedSubgraphs {
+		for j := i + 1; j < len(sortedSubgraphs); j++ {
+			if depths[sortedSubgraphs[i]] > depths[sortedSubgraphs[j]] {
+				sortedSubgraphs[i], sortedSubgraphs[j] = sortedSubgraphs[j], sortedSubgraphs[i]
 			}
 		}
 	}
 
-	return sorted
+	return sortedSubgraphs
 }
 
 func (self *graph) getSubgraphDepth(sg *subgraph) int {

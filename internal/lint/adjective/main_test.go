@@ -1,0 +1,64 @@
+package main
+
+import (
+	"reflect"
+	"testing"
+
+	"crdx.org/io/internal/lint/runner"
+)
+
+func TestAnalyse(t *testing.T) {
+	tests := map[string]struct {
+		source   string
+		expected []string
+	}{
+		"an adjective": {
+			source:   "package example\n\nvar parsed value\n",
+			expected: []string{"example.go:3:5: parsed: say what was parsed, since a name is a noun rather than an adjective"},
+		},
+		"a compound name": {
+			source: "package example\n\nvar parsedValue value\n",
+		},
+		"an explicitly typed boolean variable": {
+			source: "package example\n\nvar stopped bool\n",
+		},
+		"an explicitly typed boolean parameter": {
+			source: "package example\n\nfunc shellIs(granted bool) {}\n",
+		},
+		"an explicitly typed named boolean result": {
+			source: "package example\n\nfunc read() (stopped bool) {\n\treturn\n}\n",
+		},
+		"a non-boolean adjective parameter": {
+			source:   "package example\n\nfunc read(stored cache) {}\n",
+			expected: []string{"example.go:3:11: stored: say what was stored, since a name is a noun rather than an adjective"},
+		},
+		"a constant": {
+			source: "package example\n\nconst stopped = true\n",
+		},
+		"a function": {
+			source: "package example\n\nfunc parsed() {}\n",
+		},
+		"an interface method": {
+			source: "package example\n\ntype reader interface {\n\tparsed()\n}\n",
+		},
+		"a word ending in ed": {
+			source: "package example\n\nvar need value\n",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			diagnostics, err := runner.CheckSource(analyse, "example.go", []byte(test.source))
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			var actual []string
+			for _, diagnostic := range diagnostics {
+				actual = append(actual, diagnostic.Position.String()+": "+diagnostic.Message)
+			}
+			if !reflect.DeepEqual(actual, test.expected) {
+				t.Errorf("got %v, want %v", actual, test.expected)
+			}
+		})
+	}
+}

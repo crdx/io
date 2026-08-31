@@ -28,6 +28,6 @@ func Validate(workspaceDir string) error {
 }
 
 func IsShadowed(workspaceDir string) bool {
-	_, shadowed := pathutil.RelativeTo(sandbox.TmpDir, workspaceDir)
-	return shadowed
+	_, isShadowed := pathutil.RelativeTo(sandbox.TmpDir, workspaceDir)
+	return isShadowed
 }

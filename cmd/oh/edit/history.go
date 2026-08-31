@@ -96,27 +96,27 @@ func escape(line string) string {
 func unescape(line string) string {
 	var out strings.Builder
 
-	escaped := false
+	isEscaped := false
 
 	for _, value := range line {
 		switch {
-		case escaped && value == 'n':
+		case isEscaped && value == 'n':
 			out.WriteRune('\n')
-			escaped = false
-		case escaped:
+			isEscaped = false
+		case isEscaped:
 			if value != '\\' {
 				out.WriteRune('\\')
 			}
 			out.WriteRune(value)
-			escaped = false
+			isEscaped = false
 		case value == '\\':
-			escaped = true
+			isEscaped = true
 		default:
 			out.WriteRune(value)
 		}
 	}
 
-	if escaped {
+	if isEscaped {
 		out.WriteRune('\\')
 	}
 

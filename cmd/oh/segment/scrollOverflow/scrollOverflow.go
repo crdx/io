@@ -46,5 +46,5 @@ func (self state) Render(context segment.Context) string {
 		return ""
 	}
 
-	return style.Scrolled(fmt.Sprintf("%s %d", self.arrow, rows))
+	return style.ScrolledInput(fmt.Sprintf("%s %d", self.arrow, rows))
 }

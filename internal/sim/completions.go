@@ -50,7 +50,7 @@ func (self completionsDialect) Read(_ *http.Request, raw []byte) (Request, bool)
 		return Request{}, false
 	}
 
-	asked := Request{
+	askedRequest := Request{
 		API:          self.Name(),
 		Model:        sent.Model,
 		Streaming:    sent.Stream,
@@ -59,7 +59,7 @@ func (self completionsDialect) Read(_ *http.Request, raw []byte) (Request, bool)
 
 	for i, message := range sent.Messages {
 		if message.Role == "system" && i == 0 {
-			asked.Instructions = flatten(message.Content)
+			askedRequest.Instructions = flatten(message.Content)
 
 			continue
 		}
@@ -79,10 +79,10 @@ func (self completionsDialect) Read(_ *http.Request, raw []byte) (Request, bool)
 			entry.Output = entry.Content
 		}
 
-		asked.Input = append(asked.Input, entry)
+		askedRequest.Input = append(askedRequest.Input, entry)
 
 		for _, call := range message.ToolCalls {
-			asked.Input = append(asked.Input, Entry{
+			askedRequest.Input = append(askedRequest.Input, Entry{
 				Type:      CallMade,
 				CallID:    call.ID,
 				Name:      call.Function.Name,
@@ -92,26 +92,26 @@ func (self completionsDialect) Read(_ *http.Request, raw []byte) (Request, bool)
 		}
 	}
 
-	for _, offered := range sent.Tools {
-		asked.Tools = append(asked.Tools, offered.Function.Name)
+	for _, offeredTool := range sent.Tools {
+		askedRequest.Tools = append(askedRequest.Tools, offeredTool.Function.Name)
 	}
 
-	return asked, true
+	return askedRequest, true
 }
 
-func (self completionsDialect) Check(scenario *Scenario, asked Request) string {
+func (self completionsDialect) Check(scenario *Scenario, askedRequest Request) string {
 	switch {
-	case !asked.Streaming:
+	case !askedRequest.Streaming:
 		return "only streaming responses are supported"
-	case !asked.IncludeUsage:
+	case !askedRequest.IncludeUsage:
 		return "stream usage was not requested"
-	case asked.Instructions == "":
+	case askedRequest.Instructions == "":
 		return "the request carried no instructions"
-	case asked.Model != scenario.Model:
-		return fmt.Sprintf("the model %q is not available", asked.Model)
+	case askedRequest.Model != scenario.Model:
+		return fmt.Sprintf("the model %q is not available", askedRequest.Model)
 	}
 
-	if hanging := unansweredCall(asked.Input); hanging != "" {
+	if hanging := unansweredCall(askedRequest.Input); hanging != "" {
 		return "No tool output found for function call " + hanging + "."
 	}
 

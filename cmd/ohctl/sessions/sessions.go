@@ -61,8 +61,8 @@ type Listing struct {
 	Model        string    `json:"model"`
 	Effort       string    `json:"effort"`
 	Messages     int       `json:"messages"`
-	Started      time.Time `json:"started"`
-	Touched      time.Time `json:"touched"`
+	StartedAt    time.Time `json:"started"`
+	TouchedAt    time.Time `json:"touched"`
 }
 
 // Run lists the stored sessions, newest first.
@@ -76,7 +76,7 @@ func run(options *inputOpts, output console.Output) error {
 		return err
 	}
 
-	stored, err := ohSessions.Load(directory)
+	storedSessions, err := ohSessions.Load(directory)
 	if err != nil {
 		if migrationError := ohSessions.ValidateFormats(directory); migrationError != nil {
 			return migrationError
@@ -89,10 +89,10 @@ func run(options *inputOpts, output console.Output) error {
 		if err != nil {
 			return fmt.Errorf("could not resolve the workspace path: %w", err)
 		}
-		stored = ohSessions.InWorkspace(stored, workspaceDir)
+		storedSessions = ohSessions.InWorkspace(storedSessions, workspaceDir)
 	}
 
-	listings := describe(directory, stored, options.Running)
+	listings := describe(directory, storedSessions, options.Running)
 	if len(listings) == 0 {
 		_, _ = fmt.Fprintln(output.Failure, style.Subtle("there are no stored sessions to list"))
 	}
@@ -104,10 +104,10 @@ func run(options *inputOpts, output console.Output) error {
 	return writeTable(listings, output.Screen)
 }
 
-func describe(directory string, stored []*picker.Session, runningOnly bool) []Listing {
-	listings := make([]Listing, 0, len(stored))
-	for _, storedSession := range stored {
-		if runningOnly && !storedSession.IsRunning {
+func describe(directory string, storedSessions []*picker.Session, isRunningOnly bool) []Listing {
+	listings := make([]Listing, 0, len(storedSessions))
+	for _, storedSession := range storedSessions {
+		if isRunningOnly && !storedSession.IsRunning {
 			continue
 		}
 
@@ -122,8 +122,8 @@ func describe(directory string, stored []*picker.Session, runningOnly bool) []Li
 			Model:        storedSession.ModelID,
 			Effort:       storedSession.Effort,
 			Messages:     storedSession.MessageCount,
-			Started:      storedSession.Started,
-			Touched:      storedSession.Touched,
+			StartedAt:    storedSession.StartedAt,
+			TouchedAt:    storedSession.TouchedAt,
 		})
 	}
 
@@ -167,8 +167,8 @@ func writeTable(listings []Listing, writer io.Writer) error {
 				listing.Name,
 				width.Elide(strutil.OrDash(listing.Title), titleColumn),
 				strconv.Itoa(listing.Messages),
-				util.CoarseDuration(listing.Touched.Sub(listing.Started)),
-				util.Ago(listing.Touched),
+				util.CoarseDuration(listing.TouchedAt.Sub(listing.StartedAt)),
+				util.Ago(listing.TouchedAt),
 				strutil.OrDash(listing.Model),
 				strutil.OrDash(listing.Effort),
 				listing.WorkspaceDir,

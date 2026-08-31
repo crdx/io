@@ -335,8 +335,8 @@ func TestCodeIsHighlightedWhereTheLanguageIsKnown(t *testing.T) {
 func TestADiffIsPaintedByWhatEachLineDoes(t *testing.T) {
 	for line, want := range map[string]style.Style{
 		"@@ -1,2 +1,2 @@": style.Hunk,
-		"-gone":           style.Deleted,
-		"+here":           style.Inserted,
+		"-gone":           style.DeletedText,
+		"+here":           style.InsertedText,
 		" kept":           style.Block,
 	} {
 		if got := Emphasise(line, "diff"); got != want(line) {

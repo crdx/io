@@ -6,13 +6,13 @@ import (
 
 // Start opens a turn, and is where the account of what it read arrives. Cached tokens are reported
 // apart from fresh ones, so a reader adding them up is exercised rather than taken on trust.
-func Start(model string, fresh int, cached int) string {
+func Start(model string, fresh int, cachedTokens int) string {
 	return fmt.Sprintf(
 		`{"type":"message_start","message":{"id":"msg_sim","type":"message","role":"assistant",`+
 			`"model":%q,"content":[],"stop_reason":null,`+
 			`"usage":{"input_tokens":%d,"cache_read_input_tokens":%d,`+
 			`"cache_creation_input_tokens":0,"output_tokens":1}}}`,
-		model, fresh, cached,
+		model, fresh, cachedTokens,
 	)
 }
 
@@ -69,12 +69,12 @@ func BlockStop(index int) string {
 }
 
 // Stop says why the model stopped, and carries the final account of what the turn read.
-func Stop(reason string, fresh int, cached int) string {
+func Stop(reason string, fresh int, cachedTokens int) string {
 	return fmt.Sprintf(
 		`{"type":"message_delta","delta":{"stop_reason":%q,"stop_sequence":null},`+
 			`"usage":{"input_tokens":%d,"cache_read_input_tokens":%d,`+
 			`"cache_creation_input_tokens":0,"output_tokens":42}}`,
-		reason, fresh, cached,
+		reason, fresh, cachedTokens,
 	)
 }
 

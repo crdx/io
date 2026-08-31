@@ -10,9 +10,9 @@ import (
 
 var ErrNewer = errors.New("written by a newer build than this one")
 
-func Check(found int, supported int) error {
-	if found > supported {
-		return fmt.Errorf("format %d was %w (this one reads format %d)", found, ErrNewer, supported)
+func Check(found int, supportedFormat int) error {
+	if found > supportedFormat {
+		return fmt.Errorf("format %d was %w (this one reads format %d)", found, ErrNewer, supportedFormat)
 	}
 
 	return nil

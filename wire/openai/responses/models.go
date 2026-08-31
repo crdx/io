@@ -52,18 +52,18 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 
 	models := make([]agent.Model, 0, len(payload.Models)+len(payload.Data))
 
-	for _, listed := range payload.Models {
-		if listed.Slug != "" {
+	for _, listedModel := range payload.Models {
+		if listedModel.Slug != "" {
 			models = append(models, agent.Model{
-				ID:   listed.Slug,
-				Name: listed.Title,
+				ID:   listedModel.Slug,
+				Name: listedModel.Title,
 			})
 		}
 	}
 
-	for _, listed := range payload.Data {
-		if listed.ID != "" {
-			models = append(models, agent.Model{ID: listed.ID})
+	for _, listedModel := range payload.Data {
+		if listedModel.ID != "" {
+			models = append(models, agent.Model{ID: listedModel.ID})
 		}
 	}
 

@@ -72,14 +72,14 @@ func emphasise(lines []string, language string) []string {
 }
 
 // Highlight highlights a prefix using the complete source syntax tree.
-func Highlight(source string, target string, language string, elided bool) string {
+func Highlight(source string, target string, language string, isElided bool) string {
 	switch language {
 	case "bash":
-		return highlightBash(source, target, elided)
+		return highlightBash(source, target, isElided)
 	case "regexp":
-		return highlightRegExp(source, target, elided)
+		return highlightRegExp(source, target, isElided)
 	default:
-		if elided {
+		if isElided {
 			target += "…"
 		}
 		return emphasise([]string{target}, language)[0]
@@ -141,13 +141,13 @@ func highlightBash(source string, target string, wasElided bool) string {
 }
 
 func bashCommandSpans(source string) ([]sourceSpan, error) {
-	parsed, err := syntax.NewParser(syntax.Variant(syntax.LangBash)).Parse(strings.NewReader(source), "")
+	parsedScript, err := syntax.NewParser(syntax.Variant(syntax.LangBash)).Parse(strings.NewReader(source), "")
 	if err != nil {
 		return nil, err
 	}
 
 	var spans []sourceSpan
-	syntax.Walk(parsed, func(node syntax.Node) bool {
+	syntax.Walk(parsedScript, func(node syntax.Node) bool {
 		switch node := node.(type) {
 		case *syntax.CallExpr:
 			for _, word := range node.Args[:min(2, len(node.Args))] {
@@ -308,7 +308,7 @@ func (self regexpStyle) paint() style.Style {
 	}
 }
 
-func highlightRegExp(source string, retainedPrefix string, elided bool) string {
+func highlightRegExp(source string, retainedPrefix string, isElided bool) string {
 	spans := regexpSpans(source)
 	boundary := len(retainedPrefix)
 	var output strings.Builder
@@ -321,7 +321,7 @@ func highlightRegExp(source string, retainedPrefix string, elided bool) string {
 		output.WriteString(span.style.paint()(retainedPrefix[span.start:min(span.end, boundary)]))
 	}
 
-	if elided {
+	if isElided {
 		style := regexpLiteral
 		for _, span := range spans {
 			if span.start <= boundary && boundary < span.end {
@@ -337,7 +337,7 @@ func highlightRegExp(source string, retainedPrefix string, elided bool) string {
 
 func regexpSpans(source string) []styledSpan {
 	spans := make([]styledSpan, 0, len(source))
-	inCharacterClass := false
+	isInCharacterClass := false
 
 	for start := 0; start < len(source); {
 		end := start + 1
@@ -348,27 +348,27 @@ func regexpSpans(source string) []styledSpan {
 			end = regexpEscapeEnd(source, start)
 			style = regexpKeyword
 		case '[':
-			inCharacterClass = true
+			isInCharacterClass = true
 			style = regexpPunctuation
 		case ']':
-			inCharacterClass = false
+			isInCharacterClass = false
 			style = regexpPunctuation
 		case '-', '&':
-			if inCharacterClass {
+			if isInCharacterClass {
 				style = regexpOperator
 			}
 		case '^', '$':
-			if !inCharacterClass {
+			if !isInCharacterClass {
 				style = regexpKeyword
 			}
 		case '(', ')':
 			style = regexpPunctuation
 		case '.', '*', '+', '?', '|':
-			if !inCharacterClass {
+			if !isInCharacterClass {
 				style = regexpOperator
 			}
 		case '{':
-			if !inCharacterClass {
+			if !isInCharacterClass {
 				end = regexpRepetitionEnd(source, start)
 				style = regexpOperator
 			}
@@ -448,9 +448,9 @@ func tokenStyle(token chroma.TokenType) style.Style {
 func generic(token chroma.TokenType) style.Style {
 	switch token { //nolint:exhaustive // Unlisted generic tokens deliberately use the plain style.
 	case chroma.GenericInserted:
-		return style.Inserted
+		return style.InsertedText
 	case chroma.GenericDeleted:
-		return style.Deleted
+		return style.DeletedText
 	case chroma.GenericHeading, chroma.GenericSubheading:
 		return style.Hunk
 	}

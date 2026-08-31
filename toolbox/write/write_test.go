@@ -130,15 +130,15 @@ func TestAWriteOutsideTheRootIsRefused(t *testing.T) {
 
 func TestAMountedRootFollowsItsWriteMode(t *testing.T) {
 	root, _ := testRoot(t)
-	writable := false
-	tmp, directory := switchableRoot(t, &writable)
+	isWritable := false
+	tmp, directory := switchableRoot(t, &isWritable)
 	root.Mount("/tmp", tmp)
 
 	if _, err := exec(t, root, `{"path":"/tmp/result.txt","content":"answer\n"}`); !errors.Is(err, file.ErrReadOnly) {
 		t.Errorf("expected the write to be refused, got %v", err)
 	}
 
-	writable = true
+	isWritable = true
 	if _, err := exec(t, root, `{"path":"/tmp/result.txt","content":"answer\n"}`); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -196,8 +196,8 @@ func switchableRoot(t *testing.T, writable *bool) (*file.Root, string) {
 }
 
 func TestWritingIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
-	writable := false
-	root, directory := switchableRoot(t, &writable)
+	isWritable := false
+	root, directory := switchableRoot(t, &isWritable)
 
 	if _, err := exec(t, root, `{"path":"made.txt","content":"x"}`); !errors.Is(err, file.ErrReadOnly) {
 		t.Errorf("expected the write to be refused, got %v", err)
@@ -209,8 +209,8 @@ func TestWritingIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
 }
 
 func TestTheToolSaysItWritesEvenOverAReadOnlyTree(t *testing.T) {
-	writable := false
-	root, _ := switchableRoot(t, &writable)
+	isWritable := false
+	root, _ := switchableRoot(t, &isWritable)
 
 	if write.New(root, file.NewSnapshots()).ReadOnly() {
 		t.Error("expected a write tool to say it writes whatever the tree of the moment allows")

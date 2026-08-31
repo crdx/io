@@ -2,8 +2,8 @@ package sequence
 
 import "crdx.org/io/internal/mermaid/diagram"
 
-func upstreamTestConfig(useASCII bool) *diagram.Config {
+func upstreamTestConfig(shouldUseASCII bool) *diagram.Config {
 	config := diagram.DefaultConfig()
-	config.UseAscii = useASCII
+	config.UseAscii = shouldUseASCII
 	return config
 }

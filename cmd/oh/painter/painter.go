@@ -134,7 +134,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 
 	case agent.RetryingEvent:
 		self.Close(dynamic.Cancelled)
-		self.screen.Line(style.Stopped(RenderRetry(event)))
+		self.screen.Line(style.StoppedTurn(RenderRetry(event)))
 
 	case agent.FailureEvent:
 		self.Close(dynamic.Cancelled)
@@ -209,9 +209,9 @@ func NoticeStyle(severity agent.Status) style.Style {
 	case agent.ErrorStatus:
 		return style.Failure
 	case agent.CancelledStatus:
-		return style.Cancelled
+		return style.CancelledCall
 	case agent.WarningStatus, "":
-		return style.Stopped
+		return style.StoppedTurn
 	default:
 		return style.Normal
 	}
@@ -231,11 +231,11 @@ func getState(status agent.Status) dynamic.RowState {
 }
 
 func RenderReasoning(thought string, columns int) []string {
-	rendered := markdown.Render(thought, columns)
-	plain := style.Plain(strings.Join(rendered, "\n"))
-	stripped := strings.Join(strings.Fields(plain), " ")
+	renderedRows := markdown.Render(thought, columns)
+	plain := style.Plain(strings.Join(renderedRows, "\n"))
+	strippedText := strings.Join(strings.Fields(plain), " ")
 
-	return width.Wrap(style.Reasoning(stripped), columns)
+	return width.Wrap(style.Reasoning(strippedText), columns)
 }
 
 func (self *Picasso) Stale() bool { return self.isStale }
@@ -355,8 +355,8 @@ func (self *Picasso) mark(event agent.Event) {
 		return
 	}
 
-	index, known := self.rows[event.ID]
-	if !known {
+	index, isKnown := self.rows[event.ID]
+	if !isKnown {
 		return
 	}
 

@@ -60,29 +60,29 @@ func (self *modelList) Adjust(index int, direction int) {
 		return
 	}
 
-	if wanted := at + direction; wanted >= 0 && wanted < len(model.EffortLevels) {
-		model.Effort = model.EffortLevels[wanted]
+	if wantedIndex := at + direction; wantedIndex >= 0 && wantedIndex < len(model.EffortLevels) {
+		model.Effort = model.EffortLevels[wantedIndex]
 	}
 }
 
 func (self *modelList) ColumnHeader(room int) string {
-	described, identifier := modelColumns(" ", "Provider", "Model", "Effort", "Context", "Identifier", room)
+	describedModel, identifier := modelColumns(" ", "Provider", "Model", "Effort", "Context", "Identifier", room)
 
-	return described + identifier
+	return describedModel + identifier
 }
 
 func (self *modelList) Row(index int, isChosen bool, room int) string {
-	described, identifier := modelRow(self.models[index], isChosen, room)
+	describedModel, identifier := modelRow(self.models[index], isChosen, room)
 
 	paint := style.Answer
 	if isChosen {
 		paint = style.Chosen
 	}
 	if identifier == "" {
-		return paint(described)
+		return paint(describedModel)
 	}
 
-	return paint(described) + style.Subtle(identifier)
+	return paint(describedModel) + style.Subtle(identifier)
 }
 
 func modelRow(model *Model, isChosen bool, room int) (string, string) {
@@ -114,9 +114,9 @@ func modelColumns(
 	}
 
 	gap := strings.Repeat(" ", menu.ColumnGap)
-	described := menu.Clip(prefix+" "+strings.Join(columns, gap)+gap, room)
+	describedRow := menu.Clip(prefix+" "+strings.Join(columns, gap)+gap, room)
 
-	return described, menu.Clip(identifier, min(identifierColumn, room-style.Width(described)))
+	return describedRow, menu.Clip(identifier, min(identifierColumn, room-style.Width(describedRow)))
 }
 
 func contextWindow(tokens int) string {

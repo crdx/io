@@ -82,16 +82,16 @@ func validateFlowchartLimits(properties *graphProperties) error {
 	return nil
 }
 
-func validateSequenceLimits(parsed *sequence.SequenceDiagram) error {
-	if len(parsed.Participants) > maximumSequenceParticipants {
+func validateSequenceLimits(parsedDiagram *sequence.SequenceDiagram) error {
+	if len(parsedDiagram.Participants) > maximumSequenceParticipants {
 		return fmt.Errorf("sequence diagram exceeds %d participants", maximumSequenceParticipants)
 	}
-	if len(parsed.Events) > maximumSequenceEvents {
+	if len(parsedDiagram.Events) > maximumSequenceEvents {
 		return fmt.Errorf("sequence diagram exceeds %d events", maximumSequenceEvents)
 	}
 
 	columns := 0
-	for _, participant := range parsed.Participants {
+	for _, participant := range parsedDiagram.Participants {
 		columns += runewidth.StringWidth(participant.Label) + 8
 	}
 	if columns > maximumCanvasColumns {
@@ -101,16 +101,16 @@ func validateSequenceLimits(parsed *sequence.SequenceDiagram) error {
 	return nil
 }
 
-func validateEntityRelationshipLimits(parsed *er.ErDiagram) error {
-	if len(parsed.Entities) > maximumEntities {
+func validateEntityRelationshipLimits(parsedDiagram *er.ErDiagram) error {
+	if len(parsedDiagram.Entities) > maximumEntities {
 		return fmt.Errorf("entity-relationship diagram exceeds %d entities", maximumEntities)
 	}
-	if len(parsed.Relationships) > maximumRelationships {
+	if len(parsedDiagram.Relationships) > maximumRelationships {
 		return fmt.Errorf("entity-relationship diagram exceeds %d relationships", maximumRelationships)
 	}
 
 	attributeCount := 0
-	for _, entity := range parsed.Entities {
+	for _, entity := range parsedDiagram.Entities {
 		attributeCount += len(entity.Attributes)
 	}
 	if attributeCount > maximumAttributes {

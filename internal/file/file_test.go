@@ -33,8 +33,8 @@ func testRoot(t *testing.T, writable *bool) (*file.Root, string) {
 }
 
 func TestWritingGoesThroughWhileTheTreeMayBeChanged(t *testing.T) {
-	writable := true
-	root, directory := testRoot(t, &writable)
+	isWritable := true
+	root, directory := testRoot(t, &isWritable)
 
 	if err := root.WriteFile("made.txt", []byte("content"), 0o644); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -51,8 +51,8 @@ func TestWritingGoesThroughWhileTheTreeMayBeChanged(t *testing.T) {
 }
 
 func TestWritingIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
-	writable := false
-	root, directory := testRoot(t, &writable)
+	isWritable := false
+	root, directory := testRoot(t, &isWritable)
 
 	if err := root.WriteFile("made.txt", []byte("content"), 0o644); !errors.Is(err, file.ErrReadOnly) {
 		t.Errorf("expected the write to be refused, got %v", err)
@@ -64,8 +64,8 @@ func TestWritingIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
 }
 
 func TestMakingDirectoriesIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
-	writable := false
-	root, directory := testRoot(t, &writable)
+	isWritable := false
+	root, directory := testRoot(t, &isWritable)
 
 	if err := root.MkdirAll("one/two", 0o755); !errors.Is(err, file.ErrReadOnly) {
 		t.Errorf("expected the directory to be refused, got %v", err)
@@ -77,20 +77,20 @@ func TestMakingDirectoriesIsRefusedWhileTheTreeIsReadOnly(t *testing.T) {
 }
 
 func TestWhetherTheTreeMayBeChangedIsAskedForEveryCall(t *testing.T) {
-	writable := true
-	root, _ := testRoot(t, &writable)
+	isWritable := true
+	root, _ := testRoot(t, &isWritable)
 
 	if err := root.WriteFile("one.txt", nil, 0o644); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	writable = false
+	isWritable = false
 
 	if err := root.WriteFile("two.txt", nil, 0o644); !errors.Is(err, file.ErrReadOnly) {
 		t.Errorf("expected the write to be refused, got %v", err)
 	}
 
-	writable = true
+	isWritable = true
 
 	if err := root.WriteFile("three.txt", nil, 0o644); err != nil {
 		t.Errorf("expected the write to be allowed again, got %v", err)
@@ -98,8 +98,8 @@ func TestWhetherTheTreeMayBeChangedIsAskedForEveryCall(t *testing.T) {
 }
 
 func TestReadingGoesThroughWhileTheTreeIsReadOnly(t *testing.T) {
-	writable := false
-	root, directory := testRoot(t, &writable)
+	isWritable := false
+	root, directory := testRoot(t, &isWritable)
 
 	if err := os.WriteFile(filepath.Join(directory, "there.txt"), []byte("content"), 0o600); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -126,14 +126,14 @@ func TestReadingGoesThroughWhileTheTreeIsReadOnly(t *testing.T) {
 }
 
 func TestTheTreeSaysWhetherItMayBeChanged(t *testing.T) {
-	writable := true
-	root, directory := testRoot(t, &writable)
+	isWritable := true
+	root, directory := testRoot(t, &isWritable)
 
 	if err := root.RefuseWrite("."); err != nil {
 		t.Errorf("expected a writable tree to stand in nothing's way, got %v", err)
 	}
 
-	writable = false
+	isWritable = false
 
 	if err := root.RefuseWrite("."); !errors.Is(err, file.ErrReadOnly) {
 		t.Errorf("expected a read-only tree to say so, got %v", err)
@@ -241,10 +241,10 @@ func TestRefuseGitDir(t *testing.T) {
 }
 
 func TestTheMostSpecificMountResolvesANestedPath(t *testing.T) {
-	writable := false
-	root, _ := testRoot(t, &writable)
-	parent, parentPath := testRoot(t, &writable)
-	child, _ := testRoot(t, &writable)
+	isWritable := false
+	root, _ := testRoot(t, &isWritable)
+	parent, parentPath := testRoot(t, &isWritable)
+	child, _ := testRoot(t, &isWritable)
 
 	root.Mount(parentPath, parent)
 	root.Mount(filepath.Join(parentPath, "nested"), child)
@@ -259,9 +259,9 @@ func TestTheMostSpecificMountResolvesANestedPath(t *testing.T) {
 }
 
 func TestAnExactFileMountResolvesOnlyTheNamedFile(t *testing.T) {
-	writable := false
-	root, _ := testRoot(t, &writable)
-	mounted, mountedPath := testRoot(t, &writable)
+	isWritable := false
+	root, _ := testRoot(t, &isWritable)
+	mounted, mountedPath := testRoot(t, &isWritable)
 	path := filepath.Join(mountedPath, "shared")
 
 	root.MountFile(path, mounted, "shared")

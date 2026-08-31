@@ -107,8 +107,8 @@ func writeChoosableModels(t *testing.T) string {
 
 	path := filepath.Join(t.TempDir(), "models.json")
 	cache := modelCache{
-		Version: cacheVersion,
-		Checked: time.Now(),
+		Version:   cacheVersion,
+		CheckedAt: time.Now(),
 		Providers: map[string]cachedModels{
 			CodexProvider: {Models: []agent.Model{
 				{ID: "gpt-5.6-sol", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},

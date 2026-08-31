@@ -17,7 +17,7 @@ func Convert(root *html.Node) string {
 	return strings.TrimSpace(output.String())
 }
 
-func renderMarkdownNode(output *textwriter.Writer, node *html.Node, inline bool) {
+func renderMarkdownNode(output *textwriter.Writer, node *html.Node, isInline bool) {
 	if node.Type == html.TextNode {
 		output.Text(node.Data)
 		return
@@ -34,19 +34,19 @@ func renderMarkdownNode(output *textwriter.Writer, node *html.Node, inline bool)
 		renderMarkdownChildren(output, node, true)
 		output.Newlines(2)
 	case "p":
-		if !inline {
+		if !isInline {
 			output.Newlines(2)
 		}
 		renderMarkdownChildren(output, node, true)
-		if !inline {
+		if !isInline {
 			output.Newlines(2)
 		}
 	case "div", "section", "article", "header", "footer", "main", "figure", "figcaption", "details", "summary":
-		if !inline {
+		if !isInline {
 			output.Newlines(1)
 		}
-		renderMarkdownChildren(output, node, inline)
-		if !inline {
+		renderMarkdownChildren(output, node, isInline)
+		if !isInline {
 			output.Newlines(1)
 		}
 	case "br":
@@ -84,13 +84,13 @@ func renderMarkdownNode(output *textwriter.Writer, node *html.Node, inline bool)
 	case "li":
 		renderMarkdownChildren(output, node, true)
 	default:
-		renderMarkdownChildren(output, node, inline)
+		renderMarkdownChildren(output, node, isInline)
 	}
 }
 
-func renderMarkdownChildren(output *textwriter.Writer, parent *html.Node, inline bool) {
+func renderMarkdownChildren(output *textwriter.Writer, parent *html.Node, isInline bool) {
 	for child := parent.FirstChild; child != nil; child = child.NextSibling {
-		renderMarkdownNode(output, child, inline)
+		renderMarkdownNode(output, child, isInline)
 	}
 }
 
@@ -114,9 +114,9 @@ func renderImage(output *textwriter.Writer, node *html.Node) {
 }
 
 func renderBlockquote(output *textwriter.Writer, node *html.Node) {
-	var quoted textwriter.Writer
-	renderMarkdownChildren(&quoted, node, false)
-	text := strings.TrimSpace(quoted.String())
+	var quotedText textwriter.Writer
+	renderMarkdownChildren(&quotedText, node, false)
+	text := strings.TrimSpace(quotedText.String())
 	if text == "" {
 		return
 	}
@@ -129,7 +129,7 @@ func renderBlockquote(output *textwriter.Writer, node *html.Node) {
 	output.Newlines(1)
 }
 
-func renderList(output *textwriter.Writer, node *html.Node, ordered bool, depth int) {
+func renderList(output *textwriter.Writer, node *html.Node, isOrdered bool, depth int) {
 	output.Newlines(1)
 	index := 1
 	for item := node.FirstChild; item != nil; item = item.NextSibling {
@@ -138,7 +138,7 @@ func renderList(output *textwriter.Writer, node *html.Node, ordered bool, depth 
 		}
 
 		output.Raw(strings.Repeat("    ", depth))
-		if ordered {
+		if isOrdered {
 			output.Raw(fmt.Sprintf("%d. ", index))
 			index++
 		} else {

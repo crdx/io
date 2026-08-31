@@ -94,7 +94,7 @@ func run(inputArgs *inputOpts, output console.Output) error {
 	}
 
 	failures := 0
-	migrated := 0
+	migratedCount := 0
 
 	for _, name := range names {
 		from, err := Session(options, name)
@@ -114,7 +114,7 @@ func run(inputArgs *inputOpts, output console.Output) error {
 			continue
 		}
 
-		migrated++
+		migratedCount++
 
 		_, _ = fmt.Fprintf(
 			output.Screen,
@@ -129,13 +129,13 @@ func run(inputArgs *inputOpts, output console.Output) error {
 		return fmt.Errorf("%d of %d could not be migrated", failures, len(names))
 	}
 
-	_, _ = fmt.Fprintln(output.Screen, style.Subtle(fmt.Sprintf("%d of %d %s", migrated, len(names), summaryVerb(options.DryRun))))
+	_, _ = fmt.Fprintln(output.Screen, style.Subtle(fmt.Sprintf("%d of %d %s", migratedCount, len(names), summaryVerb(options.DryRun))))
 
 	return nil
 }
 
-func sweepListingMeta(directory string, dryRun bool, output console.Output) error {
-	if dryRun {
+func sweepListingMeta(directory string, isDryRun bool, output console.Output) error {
+	if isDryRun {
 		stale, err := store.StaleMeta(directory)
 		if err != nil {
 			return err
@@ -173,16 +173,16 @@ func sayNothingToDo(directory string, output console.Output) error {
 	return nil
 }
 
-func verb(dryRun bool) string {
-	if dryRun {
+func verb(isDryRun bool) string {
+	if isDryRun {
 		return "would migrate"
 	}
 
 	return "migrated"
 }
 
-func summaryVerb(dryRun bool) string {
-	if dryRun {
+func summaryVerb(isDryRun bool) string {
+	if isDryRun {
 		return "would be migrated"
 	}
 
@@ -350,12 +350,12 @@ func writeJournal(path string, lines []map[string]json.RawMessage) error {
 	writer := bufio.NewWriter(file)
 
 	for index, line := range lines {
-		encoded, err := canonical(line)
+		encodedLine, err := canonical(line)
 		if err != nil {
 			return fmt.Errorf("line %d: %w", index+1, err)
 		}
 
-		if _, err := writer.Write(append(encoded, '\n')); err != nil {
+		if _, err := writer.Write(append(encodedLine, '\n')); err != nil {
 			return err
 		}
 	}
@@ -380,13 +380,13 @@ func writeJournal(path string, lines []map[string]json.RawMessage) error {
 }
 
 func canonical(line map[string]json.RawMessage) ([]byte, error) {
-	assembled, err := json.Marshal(line)
+	assembledLine, err := json.Marshal(line)
 	if err != nil {
 		return nil, err
 	}
 
 	var record session.Line
-	if err := json.Unmarshal(assembled, &record); err != nil {
+	if err := json.Unmarshal(assembledLine, &record); err != nil {
 		return nil, err
 	}
 

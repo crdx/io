@@ -9,15 +9,15 @@ import (
 
 var ErrAccessWithheld = errors.New("web access is not granted; the user can grant it with ctrl+x s")
 
-func New(allowed func() bool, searcher Searcher) []tool.Tool {
+func New(isAllowed func() bool, searcher Searcher) []tool.Tool {
 	return []tool.Tool{
-		newSearch(allowed, searcher),
-		newFetch(allowed, defaultFetchClient()),
+		newSearch(isAllowed, searcher),
+		newFetch(isAllowed, defaultFetchClient()),
 	}
 }
 
-func requireAccess(allowed func() bool) error {
-	if allowed() {
+func requireAccess(isAllowed func() bool) error {
+	if isAllowed() {
 		return nil
 	}
 
@@ -39,11 +39,11 @@ func noQualifier[T any](describe func(T) string) tool.Describer[T] {
 }
 
 func runAfterAccess[T any](
-	allowed func() bool,
+	isAllowed func() bool,
 	execute func(context.Context, T) (tool.ToolCallResult, error),
 ) tool.ResultExecutor[T] {
 	return func(ctx context.Context, args T) (tool.ToolCallResult, error) {
-		if err := requireAccess(allowed); err != nil {
+		if err := requireAccess(isAllowed); err != nil {
 			return tool.ToolCallResult{}, err
 		}
 

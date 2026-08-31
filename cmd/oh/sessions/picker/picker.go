@@ -28,8 +28,8 @@ const (
 type Session struct {
 	Name         string
 	WorkspaceDir string
-	Started      time.Time
-	Touched      time.Time
+	StartedAt    time.Time
+	TouchedAt    time.Time
 	Title        string
 	Model        string
 	ModelID      string
@@ -104,8 +104,8 @@ func row(storedSession *Session, isChosen bool, room int) string {
 			strutil.OrDash(storedSession.Model),
 			storedSession.Effort,
 			strconv.Itoa(storedSession.Messages()),
-			util.CoarseDuration(storedSession.Touched.Sub(storedSession.Started)),
-			util.Ago(storedSession.Touched),
+			util.CoarseDuration(storedSession.TouchedAt.Sub(storedSession.StartedAt)),
+			util.Ago(storedSession.TouchedAt),
 			room,
 		),
 		room,
@@ -117,7 +117,7 @@ func leftColumns(prefix string, animal string, title string) string {
 }
 
 func sessionColumns(model string, effort string, messages string, length string, lastMessage string, room int) string {
-	counted := fmt.Sprintf(
+	countedText := fmt.Sprintf(
 		"%*s  %*s  %*s",
 		messageColumn,
 		messages,
@@ -128,14 +128,14 @@ func sessionColumns(model string, effort string, messages string, length string,
 	)
 
 	if room >= roomForModel {
-		named := menu.Pad(model, modelColumn) +
+		namedText := menu.Pad(model, modelColumn) +
 			strings.Repeat(" ", menu.ColumnGap) +
 			fmt.Sprintf("%*s", menu.EffortColumn, effort)
 
-		counted = named + strings.Repeat(" ", menu.ColumnGap) + counted
+		countedText = namedText + strings.Repeat(" ", menu.ColumnGap) + countedText
 	}
 
-	return counted
+	return countedText
 }
 
 func sessionAnimal(storedSession *Session) string {

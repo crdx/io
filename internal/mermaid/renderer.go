@@ -58,23 +58,23 @@ func rendererFor(source string) diagram.Diagram {
 }
 
 type sequenceRenderer struct {
-	parsed *sequence.SequenceDiagram
+	parsedDiagram *sequence.SequenceDiagram
 }
 
 func (self *sequenceRenderer) Parse(source string) error {
-	parsed, err := sequence.Parse(source)
+	parsedDiagram, err := sequence.Parse(source)
 	if err != nil {
 		return err
 	}
-	if err := validateSequenceLimits(parsed); err != nil {
+	if err := validateSequenceLimits(parsedDiagram); err != nil {
 		return err
 	}
-	self.parsed = parsed
+	self.parsedDiagram = parsedDiagram
 	return nil
 }
 
 func (self *sequenceRenderer) Render(config *diagram.Config) (string, error) {
-	return sequence.Render(self.parsed, config)
+	return sequence.Render(self.parsedDiagram, config)
 }
 
 func (self *sequenceRenderer) Type() string {
@@ -111,23 +111,23 @@ func (self *flowchartRenderer) Type() string {
 }
 
 type entityRelationshipRenderer struct {
-	parsed *er.ErDiagram
+	parsedDiagram *er.ErDiagram
 }
 
 func (self *entityRelationshipRenderer) Parse(source string) error {
-	parsed, err := er.Parse(source)
+	parsedDiagram, err := er.Parse(source)
 	if err != nil {
 		return err
 	}
-	if err := validateEntityRelationshipLimits(parsed); err != nil {
+	if err := validateEntityRelationshipLimits(parsedDiagram); err != nil {
 		return err
 	}
-	self.parsed = parsed
+	self.parsedDiagram = parsedDiagram
 	return nil
 }
 
 func (self *entityRelationshipRenderer) Render(config *diagram.Config) (string, error) {
-	return er.Render(self.parsed, config.UseAscii), nil
+	return er.Render(self.parsedDiagram, config.UseAscii), nil
 }
 
 func (self *entityRelationshipRenderer) Type() string {

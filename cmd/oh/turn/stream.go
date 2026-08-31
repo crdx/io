@@ -13,13 +13,13 @@ type Event struct {
 }
 
 type State struct {
-	Running    bool
-	Cancelled  bool
-	Err        error
-	Reason     error
-	StartedAt  time.Time
-	FinishedAt time.Time
-	Timing     Timing
+	Running     bool
+	IsCancelled bool
+	Err         error
+	Reason      error
+	StartedAt   time.Time
+	FinishedAt  time.Time
+	Timing      Timing
 }
 
 type Stream struct {
@@ -62,7 +62,7 @@ func (self *Stream) Events() <-chan Event {
 }
 
 func (self *Stream) Running() bool   { return self != nil && self.state.Running }
-func (self *Stream) Cancelled() bool { return self != nil && self.state.Cancelled }
+func (self *Stream) Cancelled() bool { return self != nil && self.state.IsCancelled }
 
 func (self *Stream) Error() error {
 	if self == nil {
@@ -89,7 +89,7 @@ func (self *Stream) Interrupt(reason error) bool {
 	if !self.Running() {
 		return false
 	}
-	self.state.Cancelled = true
+	self.state.IsCancelled = true
 	self.state.Reason = reason
 	self.cancel(reason)
 	return true
@@ -110,8 +110,8 @@ func (self *Stream) Observe(event Event) bool {
 	return true
 }
 
-func (self *Stream) SetCancelled(cancelled bool) { self.state.Cancelled = cancelled }
-func (self *Stream) MarkFinished(at time.Time)   { self.state.FinishedAt = at }
+func (self *Stream) SetCancelled(isCancelled bool) { self.state.IsCancelled = isCancelled }
+func (self *Stream) MarkFinished(at time.Time)     { self.state.FinishedAt = at }
 
 func (self *Stream) Finish() {
 	self.state.Running = false

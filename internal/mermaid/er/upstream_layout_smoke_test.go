@@ -17,7 +17,7 @@ func TestLayoutPlacement(t *testing.T) {
 		}
 	}
 	lay := placeEntities(diagram, unicodeGlyphs)
-	placed := lay.placed
+	placed := lay.placedEntities
 	for i := range placed {
 		for j := i + 1; j < len(placed); j++ {
 			a, b := placed[i], placed[j]

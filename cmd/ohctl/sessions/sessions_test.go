@@ -126,11 +126,11 @@ func TestAWideTitleIsElidedAndAnEmojiStillLinesUp(t *testing.T) {
 	listings := []Listing{
 		{
 			Name: "canny-parrot", Status: runningStatus, Title: "fix-blank-title 🟡",
-			Model: "gpt-5.6-sol", WorkspaceDir: "/workspace/io", Started: now, Touched: now,
+			Model: "gpt-5.6-sol", WorkspaceDir: "/workspace/io", StartedAt: now, TouchedAt: now,
 		},
 		{
 			Name: "wild-scorpion", Status: endedStatus, Title: strings.Repeat("long-", 40),
-			Model: "claude-opus-5", WorkspaceDir: "/workspace/elsewhere", Started: now, Touched: now,
+			Model: "claude-opus-5", WorkspaceDir: "/workspace/elsewhere", StartedAt: now, TouchedAt: now,
 		},
 	}
 
@@ -182,7 +182,7 @@ func TestTheJSONListingCarriesWhatTheTableCannot(t *testing.T) {
 	if decoded[0].ScratchDir != "/farm/wild-scorpion" {
 		t.Errorf("expected the scratch directory to be carried, got %q", decoded[0].ScratchDir)
 	}
-	if decoded[0].Touched.IsZero() {
+	if decoded[0].TouchedAt.IsZero() {
 		t.Error("expected the moment it was last touched to be carried")
 	}
 }
@@ -208,7 +208,7 @@ func columnStart(t *testing.T, line string, marker string) int {
 	return width.Of(before)
 }
 
-func load(t *testing.T, directory string, runningOnly bool) []Listing {
+func load(t *testing.T, directory string, isRunningOnly bool) []Listing {
 	t.Helper()
 
 	stored, err := ohSessions.Load(directory)
@@ -216,7 +216,7 @@ func load(t *testing.T, directory string, runningOnly bool) []Listing {
 		t.Fatal(err)
 	}
 
-	return describe(directory, stored, runningOnly)
+	return describe(directory, stored, isRunningOnly)
 }
 
 func sample() []Listing {
@@ -234,8 +234,8 @@ func sample() []Listing {
 			Model:        "claude-opus-5",
 			Effort:       "medium",
 			Messages:     20,
-			Started:      started,
-			Touched:      time.Now(),
+			StartedAt:    started,
+			TouchedAt:    time.Now(),
 		},
 		{
 			Name:         "dewy-vole",
@@ -247,8 +247,8 @@ func sample() []Listing {
 			Model:        "gpt-5.3-codex",
 			Effort:       "high",
 			Messages:     8,
-			Started:      started,
-			Touched:      started.Add(time.Hour),
+			StartedAt:    started,
+			TouchedAt:    started.Add(time.Hour),
 		},
 	}
 }

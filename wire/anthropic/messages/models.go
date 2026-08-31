@@ -66,29 +66,29 @@ func generationOf(id string) (generation, bool) {
 }
 
 type supported struct {
-	Supported bool `json:"supported"`
+	IsSupported bool `json:"supported"`
 }
 
 type effortCapability struct {
-	Supported bool      `json:"supported"`
-	Low       supported `json:"low"`
-	Medium    supported `json:"medium"`
-	High      supported `json:"high"`
-	XHigh     supported `json:"xhigh"`
-	Max       supported `json:"max"`
+	IsSupported bool      `json:"supported"`
+	Low         supported `json:"low"`
+	Medium      supported `json:"medium"`
+	High        supported `json:"high"`
+	XHigh       supported `json:"xhigh"`
+	Max         supported `json:"max"`
 }
 
 func (self effortCapability) levels() []string {
-	if !self.Supported {
+	if !self.IsSupported {
 		return nil
 	}
 
 	taken := map[string]bool{
-		"low":    self.Low.Supported,
-		"medium": self.Medium.Supported,
-		"high":   self.High.Supported,
-		"xhigh":  self.XHigh.Supported,
-		"max":    self.Max.Supported,
+		"low":    self.Low.IsSupported,
+		"medium": self.Medium.IsSupported,
+		"high":   self.High.IsSupported,
+		"xhigh":  self.XHigh.IsSupported,
+		"max":    self.Max.IsSupported,
 	}
 
 	var levels []string
@@ -135,17 +135,17 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 
 	models := make([]agent.Model, 0, len(payload.Data))
 
-	for _, listed := range payload.Data {
-		if listed.ID == "" {
+	for _, listedModel := range payload.Data {
+		if listedModel.ID == "" {
 			continue
 		}
 
 		models = append(models, agent.Model{
-			ID:                  listed.ID,
-			Name:                listed.DisplayName,
-			EffortLevels:        listed.Capabilities.Effort.levels(),
-			ContextWindowTokens: listed.MaxInputTokens,
-			MaxOutputTokens:     listed.MaxTokens,
+			ID:                  listedModel.ID,
+			Name:                listedModel.DisplayName,
+			EffortLevels:        listedModel.Capabilities.Effort.levels(),
+			ContextWindowTokens: listedModel.MaxInputTokens,
+			MaxOutputTokens:     listedModel.MaxTokens,
 		})
 	}
 

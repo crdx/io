@@ -103,7 +103,7 @@ func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
 	}
 
 	statistics := result.Stats
-	if statistics.Bytes <= 0 || statistics.Bytes > limitBytes || statistics.TotalBytes != int64(len(whole)) || !statistics.Truncated {
+	if statistics.Bytes <= 0 || statistics.Bytes > limitBytes || statistics.TotalBytes != int64(len(whole)) || !statistics.IsTruncated {
 		t.Errorf("expected returned and total output statistics, got %+v", statistics)
 	}
 }

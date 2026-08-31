@@ -58,8 +58,8 @@ func Shared(
 
 	self := &shared{reporter: reporter, path: path, ttl: ttl, now: now}
 
-	stored := self.stored()
-	self.windows, self.fetchedAt = stored.Windows, stored.FetchedAt
+	storedCache := self.stored()
+	self.windows, self.fetchedAt = storedCache.Windows, storedCache.FetchedAt
 
 	return self
 }
@@ -83,9 +83,9 @@ func (self *shared) GetSnapshot() ([]agent.UsageWindow, time.Time) {
 }
 
 func (self *shared) UsageWindows(ctx context.Context) ([]agent.UsageWindow, error) {
-	claimed, err := state.TryUpdate(self.path, cacheFormat, func(stored *cache) error {
-		if self.isFresh(*stored) {
-			self.keep(stored.Windows, stored.FetchedAt)
+	hasClaimed, err := state.TryUpdate(self.path, cacheFormat, func(storedCache *cache) error {
+		if self.isFresh(*storedCache) {
+			self.keep(storedCache.Windows, storedCache.FetchedAt)
 
 			return nil
 		}
@@ -101,7 +101,7 @@ func (self *shared) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 
 		fetchedAt := self.now()
 
-		*stored = cache{Version: cacheFormat, FetchedAt: fetchedAt, Windows: windows}
+		*storedCache = cache{Version: cacheFormat, FetchedAt: fetchedAt, Windows: windows}
 		self.keep(windows, fetchedAt)
 
 		return nil
@@ -110,9 +110,9 @@ func (self *shared) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 		return nil, err
 	}
 
-	if !claimed {
-		stored := self.stored()
-		self.keep(stored.Windows, stored.FetchedAt)
+	if !hasClaimed {
+		storedCache := self.stored()
+		self.keep(storedCache.Windows, storedCache.FetchedAt)
 	}
 
 	self.mutex.Lock()
@@ -121,8 +121,8 @@ func (self *shared) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 	return self.windows, nil
 }
 
-func (self *shared) isFresh(stored cache) bool {
-	return !stored.FetchedAt.IsZero() && self.now().Sub(stored.FetchedAt) < self.ttl
+func (self *shared) isFresh(storedCache cache) bool {
+	return !storedCache.FetchedAt.IsZero() && self.now().Sub(storedCache.FetchedAt) < self.ttl
 }
 
 func (self *shared) keep(windows []agent.UsageWindow, fetchedAt time.Time) {
@@ -137,11 +137,11 @@ func (self *shared) keep(windows []agent.UsageWindow, fetchedAt time.Time) {
 }
 
 func (self *shared) stored() cache {
-	var stored cache
+	var storedCache cache
 
-	if err := state.Read(self.path, cacheFormat, &stored); err != nil {
+	if err := state.Read(self.path, cacheFormat, &storedCache); err != nil {
 		return cache{}
 	}
 
-	return stored
+	return storedCache
 }

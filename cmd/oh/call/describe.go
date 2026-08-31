@@ -62,7 +62,7 @@ func LabelFor(event agent.Event, getTool ToolLookup, workspaceDir string) Label 
 		skillName, isSkillLoad = skill.NameFromPath(shown.Subject)
 	}
 
-	if toolLabel, known := toolLabels[event.Name]; known {
+	if toolLabel, isKnown := toolLabels[event.Name]; isKnown {
 		label.Name = toolLabel.name
 		label.NameStyle = toolLabel.style
 	}

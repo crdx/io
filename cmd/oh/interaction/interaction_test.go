@@ -117,24 +117,24 @@ func TestRunStopsAndRedraws(t *testing.T) {
 	t.Run("key", func(t *testing.T) {
 		keys := make(chan key.Key, 1)
 		keys <- key.Key{Code: key.Escape}
-		handled := false
-		run(keys, make(chan os.Signal), make(chan time.Time), func() {}, nil, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Key: func(key.Key) bool { handled = true; return false }})
-		if !handled {
+		wasHandled := false
+		run(keys, make(chan os.Signal), make(chan time.Time), func() {}, nil, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Key: func(key.Key) bool { wasHandled = true; return false }})
+		if !wasHandled {
 			t.Error("key not handled")
 		}
 	})
 	t.Run("finished turn requests exit", func(t *testing.T) {
 		turnEvents := make(chan turn.Event)
 		close(turnEvents)
-		finished := false
+		hasFinished := false
 		run(make(chan key.Key), make(chan os.Signal), make(chan time.Time), func() {}, nil, Handler{
 			Events: func() <-chan turn.Event { return turnEvents },
 			TurnFinished: func() bool {
-				finished = true
+				hasFinished = true
 				return false
 			},
 		})
-		if !finished {
+		if !hasFinished {
 			t.Error("finished turn was not handled")
 		}
 	})
@@ -142,17 +142,17 @@ func TestRunStopsAndRedraws(t *testing.T) {
 		keys := make(chan key.Key)
 		refreshes := make(chan time.Time, 1)
 		refreshes <- time.Now()
-		scheduled, drawn := 0, false
-		run(keys, make(chan os.Signal), refreshes, func() { scheduled++ }, nil, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Draw: func() { drawn = true; close(keys) }, Key: func(key.Key) bool { return false }})
-		if scheduled < 2 || !drawn {
-			t.Errorf("scheduled=%d drawn=%t", scheduled, drawn)
+		scheduled, wasDrawn := 0, false
+		run(keys, make(chan os.Signal), refreshes, func() { scheduled++ }, nil, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Draw: func() { wasDrawn = true; close(keys) }, Key: func(key.Key) bool { return false }})
+		if scheduled < 2 || !wasDrawn {
+			t.Errorf("scheduled=%d drawn=%t", scheduled, wasDrawn)
 		}
 	})
 	t.Run("ignored change", func(t *testing.T) {
 		keys := make(chan key.Key)
 		changes := make(chan error, 1)
 		changes <- nil
-		drawn := false
+		wasDrawn := false
 		run(keys, make(chan os.Signal), make(chan time.Time), func() {}, nil, Handler{
 			Events:  func() <-chan turn.Event { return make(chan turn.Event) },
 			Key:     func(key.Key) bool { return false },
@@ -161,9 +161,9 @@ func TestRunStopsAndRedraws(t *testing.T) {
 				close(keys)
 				return false
 			},
-			Draw: func() { drawn = true },
+			Draw: func() { wasDrawn = true },
 		})
-		if drawn {
+		if wasDrawn {
 			t.Error("ignored change was drawn")
 		}
 	})
@@ -172,30 +172,30 @@ func TestRunStopsAndRedraws(t *testing.T) {
 		heartbeats := make(chan time.Time, 1)
 		heartbeats <- time.Now()
 		refreshes := make(chan time.Time, 1)
-		beaten, drawn := false, false
+		wasBeaten, wasDrawn := false, false
 		run(keys, make(chan os.Signal), refreshes, func() {}, heartbeats, Handler{
 			Events: func() <-chan turn.Event { return make(chan turn.Event) },
-			Beat:   func() { beaten = true; refreshes <- time.Now() },
+			Beat:   func() { wasBeaten = true; refreshes <- time.Now() },
 			Key:    func(key.Key) bool { return false },
-			Draw:   func() { drawn = true; close(keys) },
+			Draw:   func() { wasDrawn = true; close(keys) },
 		})
-		if !beaten || !drawn {
-			t.Errorf("beaten=%t drawn=%t", beaten, drawn)
+		if !wasBeaten || !wasDrawn {
+			t.Errorf("beaten=%t drawn=%t", wasBeaten, wasDrawn)
 		}
 	})
 	t.Run("heartbeat", func(t *testing.T) {
 		keys := make(chan key.Key)
 		heartbeats := make(chan time.Time, 1)
 		heartbeats <- time.Now()
-		beaten, drawn := false, false
+		wasBeaten, wasDrawn := false, false
 		run(keys, make(chan os.Signal), make(chan time.Time), func() {}, heartbeats, Handler{
 			Events: func() <-chan turn.Event { return make(chan turn.Event) },
-			Beat:   func() { beaten = true; close(keys) },
+			Beat:   func() { wasBeaten = true; close(keys) },
 			Key:    func(key.Key) bool { return false },
-			Draw:   func() { drawn = true },
+			Draw:   func() { wasDrawn = true },
 		})
-		if !beaten || drawn {
-			t.Errorf("beaten=%t drawn=%t", beaten, drawn)
+		if !wasBeaten || wasDrawn {
+			t.Errorf("beaten=%t drawn=%t", wasBeaten, wasDrawn)
 		}
 	})
 }
@@ -207,8 +207,8 @@ func TestKeypressesGiveTheTerminalBackWhenTheyAreStopped(t *testing.T) {
 	stopReading()
 
 	select {
-	case _, open := <-keys:
-		if open {
+	case _, isOpen := <-keys:
+		if isOpen {
 			t.Error("a stopped reader handed back a keypress")
 		}
 	case <-time.After(time.Second):
@@ -273,7 +273,7 @@ func TestStoppingLetsGoOfAKeypressNobodyIsWaitingFor(t *testing.T) {
 		t.Fatal("stopping waited on a keypress nobody wanted")
 	}
 
-	if _, open := <-keys; open {
+	if _, isOpen := <-keys; isOpen {
 		t.Error("a stopped reader was still handing keypresses on")
 	}
 }

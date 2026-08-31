@@ -25,17 +25,17 @@ const (
 	x32SyscallBase       = 0x40000000
 )
 
-func blockedFamilies(allowUnixSockets bool) []uint32 {
+func blockedFamilies(allowsUnixSockets bool) []uint32 {
 	families := []uint32{unix.AF_PACKET, unix.AF_NETLINK}
-	if !allowUnixSockets {
+	if !allowsUnixSockets {
 		families = append(families, unix.AF_UNIX)
 	}
 
 	return families
 }
 
-func applySeccomp(allowUnixSockets bool) error {
-	filter, err := buildFilter(allowUnixSockets)
+func applySeccomp(allowsUnixSockets bool) error {
+	filter, err := buildFilter(allowsUnixSockets)
 	if err != nil {
 		return err
 	}
@@ -63,13 +63,13 @@ func applySeccomp(allowUnixSockets bool) error {
 	return nil
 }
 
-func buildFilter(allowUnixSockets bool) ([]unix.SockFilter, error) {
+func buildFilter(allowsUnixSockets bool) ([]unix.SockFilter, error) {
 	target, err := architecture()
 	if err != nil {
 		return nil, err
 	}
 
-	blockedSocketFamilies := blockedFamilies(allowUnixSockets)
+	blockedSocketFamilies := blockedFamilies(allowsUnixSockets)
 	filter := []unix.SockFilter{
 		load(offsetArch),
 		jumpIfEqual(target.audit, 1, 0),

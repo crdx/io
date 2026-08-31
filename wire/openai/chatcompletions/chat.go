@@ -92,7 +92,7 @@ func (self *Client) AddToolResults(results []agent.ToolCallResult) {
 			Content:    toolResultText(result),
 		}))
 
-		if part, carried := imagePart(result); carried {
+		if part, isCarried := imagePart(result); isCarried {
 			images = append(images, part)
 		}
 	}
@@ -182,9 +182,9 @@ func (self *Client) requestBody() request {
 	}
 
 	if len(self.tools) > 0 {
-		parallel := true
+		isParallel := true
 		body.ToolChoice = "auto"
-		body.ParallelToolCalls = &parallel
+		body.ParallelToolCalls = &isParallel
 	}
 
 	return body
@@ -197,8 +197,8 @@ func (self *Client) headers(accept string) http.Header {
 }
 
 func encode(value any) json.RawMessage {
-	encoded, _ := json.Marshal(value) //nolint:errchkjson // the wire values are plain structs
-	return encoded
+	encodedValue, _ := json.Marshal(value) //nolint:errchkjson // the wire values are plain structs
+	return encodedValue
 }
 
 type request struct {
@@ -253,9 +253,9 @@ type functionSpec struct {
 }
 
 func describe(tools []tool.Definition) []functionTool {
-	described := make([]functionTool, len(tools))
+	describedTools := make([]functionTool, len(tools))
 	for i, definition := range tools {
-		described[i] = functionTool{
+		describedTools[i] = functionTool{
 			Type: "function",
 			Function: functionSpec{
 				Name:        definition.Name,
@@ -264,7 +264,7 @@ func describe(tools []tool.Definition) []functionTool {
 			},
 		}
 	}
-	return described
+	return describedTools
 }
 
 func ToolsSize(tools []tool.Tool) int {

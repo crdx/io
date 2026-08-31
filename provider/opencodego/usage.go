@@ -52,7 +52,7 @@ func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 
 	var windows []agent.UsageWindow
 
-	for _, reported := range []struct {
+	for _, reportedWindow := range []struct {
 		limit    usageLimit
 		duration time.Duration
 	}{
@@ -60,7 +60,7 @@ func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 		{limit: payload.Usage.Weekly, duration: weeklyWindow},
 		{limit: payload.Usage.Monthly, duration: monthlyWindow},
 	} {
-		if window, ok := usageWindow(reported.limit, reported.duration); ok {
+		if window, ok := usageWindow(reportedWindow.limit, reportedWindow.duration); ok {
 			windows = append(windows, window)
 		}
 	}

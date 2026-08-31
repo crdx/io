@@ -33,9 +33,9 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 
 	models := make([]agent.Model, 0, len(payload.Data))
 
-	for _, listed := range payload.Data {
-		if listed.ID != "" {
-			models = append(models, agent.Model{ID: listed.ID})
+	for _, listedModel := range payload.Data {
+		if listedModel.ID != "" {
+			models = append(models, agent.Model{ID: listedModel.ID})
 		}
 	}
 

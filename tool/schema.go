@@ -54,7 +54,7 @@ type property struct {
 type object struct {
 	Type                 DataType            `json:"type"`
 	Properties           map[string]property `json:"properties"`
-	Required             []string            `json:"required,omitempty"`
+	RequiredNames        []string            `json:"required,omitempty"`
 	AdditionalProperties bool                `json:"additionalProperties"`
 }
 
@@ -72,7 +72,7 @@ func (self Schema) MarshalJSON() ([]byte, error) {
 		}
 
 		if !parameter.isOptional {
-			renderedSchema.Required = append(renderedSchema.Required, parameter.Name)
+			renderedSchema.RequiredNames = append(renderedSchema.RequiredNames, parameter.Name)
 		}
 	}
 
@@ -97,8 +97,8 @@ func Describe(subject Tool) Definition {
 
 // DescribeUnparsedArguments reports the subject of arguments no call could be parsed from.
 func DescribeUnparsedArguments(subject Tool, arguments string) string {
-	var decoded map[string]json.RawMessage
-	if json.Unmarshal([]byte(arguments), &decoded) != nil {
+	var decodedFields map[string]json.RawMessage
+	if json.Unmarshal([]byte(arguments), &decodedFields) != nil {
 		return strutil.FirstLine(arguments)
 	}
 
@@ -106,8 +106,8 @@ func DescribeUnparsedArguments(subject Tool, arguments string) string {
 	knownParameterCount := 0
 
 	for _, parameter := range subject.Schema() {
-		raw, present := decoded[parameter.Name]
-		if !present {
+		raw, isPresent := decodedFields[parameter.Name]
+		if !isPresent {
 			continue
 		}
 		knownParameterCount++
@@ -125,7 +125,7 @@ func DescribeUnparsedArguments(subject Tool, arguments string) string {
 	if len(values) > 0 {
 		return strutil.FirstLine(strings.Join(values, " "))
 	}
-	if decoded != nil && knownParameterCount == len(decoded) {
+	if decodedFields != nil && knownParameterCount == len(decodedFields) {
 		return ""
 	}
 

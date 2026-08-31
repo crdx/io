@@ -130,13 +130,13 @@ func (self Label) renderSubject() string {
 
 	var out strings.Builder
 	at := 0
-	for _, marked := range spans {
-		if marked.start < at {
+	for _, markedSpan := range spans {
+		if markedSpan.start < at {
 			continue
 		}
-		out.WriteString(style.Subtle(self.Subject[at:marked.start]))
-		out.WriteString(marked.style(self.Subject[marked.start:marked.end]))
-		at = marked.end
+		out.WriteString(style.Subtle(self.Subject[at:markedSpan.start]))
+		out.WriteString(markedSpan.style(self.Subject[markedSpan.start:markedSpan.end]))
+		at = markedSpan.end
 	}
 	if at < len(self.Subject) {
 		out.WriteString(style.Subtle(self.Subject[at:]))
@@ -226,7 +226,7 @@ func outputMeasure(stats *tool.Stats) string {
 	}
 
 	truncationMarker := ""
-	if stats.Truncated {
+	if stats.IsTruncated {
 		truncationMarker = "+"
 	}
 
@@ -264,13 +264,13 @@ func writeStatsText(stats *tool.Stats) string {
 }
 
 func diffStatsText(stats *tool.Stats) string {
-	return style.Success("+%d", stats.Added) +
-		style.Subtle(" ") + style.Failure("−%d", stats.Removed)
+	return style.Success("+%d", stats.AddedLines) +
+		style.Subtle(" ") + style.Failure("−%d", stats.RemovedLines)
 }
 
 func searchStatsText(stats *tool.Stats) string {
 	capMarker := ""
-	if stats.Truncated {
+	if stats.IsTruncated {
 		capMarker = "+"
 	}
 	return style.Subtle.Join(fmt.Sprintf("%dL%s", stats.Lines, capMarker), tokenEstimate(stats))
@@ -281,11 +281,11 @@ func tokenEstimate(stats *tool.Stats) string {
 
 	returnedTokens := util.EstimateTokenCount(stats.Bytes)
 	if returnedTokens > maximumHiddenTokenEstimate {
-		returned := util.FormatEstimatedTokenCount(returnedTokens)
+		returnedText := util.FormatEstimatedTokenCount(returnedTokens)
 		if stats.TotalBytes > stats.Bytes {
-			return returned + " (of " + util.FormatTokenEstimate(stats.TotalBytes) + ")"
+			return returnedText + " (of " + util.FormatTokenEstimate(stats.TotalBytes) + ")"
 		}
-		return returned
+		return returnedText
 	}
 
 	if stats.TotalBytes > stats.Bytes && util.EstimateTokenCount(stats.TotalBytes) > maximumHiddenTokenEstimate {

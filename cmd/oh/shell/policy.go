@@ -60,7 +60,7 @@ func execPaths(workspaceDir string) []string {
 }
 
 func furnish(homeDir string, sources []string, writableRoots []string) ([]string, error) {
-	granted := make([]string, 0, len(sources))
+	grantedPaths := make([]string, 0, len(sources))
 
 	for _, source := range sources {
 		relative, below := HomeRelativePath(source)
@@ -85,10 +85,10 @@ func furnish(homeDir string, sources []string, writableRoots []string) ([]string
 			return nil, err
 		}
 
-		granted = append(granted, source)
+		grantedPaths = append(grantedPaths, source)
 	}
 
-	return granted, nil
+	return grantedPaths, nil
 }
 
 type supportProbe func(context.Context, sandbox.Policy) error
@@ -119,7 +119,7 @@ func createPolicyWithSupportProbe(
 	tmpDir string,
 	extraPaths Paths,
 	currentCaps caps.Set,
-	supported supportProbe,
+	supportedProbe supportProbe,
 ) (sandbox.Policy, error) {
 	cacheDir := filepath.Join(homeDir, ".cache")
 	writablePaths := allWritablePaths(workspaceDir, homeDir, extraPaths.Write, currentCaps)
@@ -198,7 +198,7 @@ func createPolicyWithSupportProbe(
 	}
 
 	if len(writablePaths) == 0 {
-		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir, supported)
+		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir, supportedProbe)
 	}
 
 	writablePolicy := grantWriteAccess(policy, writablePaths)
@@ -217,8 +217,8 @@ func createPolicyWithSupportProbe(
 	}
 
 	writablePolicy = writablePolicy.WithWrite(sandbox.TmpDir)
-	if supported(ctx, writablePolicy) != nil {
-		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir, supported)
+	if supportedProbe(ctx, writablePolicy) != nil {
+		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir, supportedProbe)
 	}
 
 	return writablePolicy, nil
@@ -233,23 +233,23 @@ func readOnlySandboxPolicy(
 	policy sandbox.Policy,
 	workspaceDir string,
 	homeDir string,
-	supported supportProbe,
+	supportedProbe supportProbe,
 ) (sandbox.Policy, error) {
 	policy = policy.WithRead(workspaceDir, homeDir).WithWrite(sandbox.TmpDir)
 
-	return policy, supported(ctx, policy)
+	return policy, supportedProbe(ctx, policy)
 }
 
 func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, error) {
 	var readOnlyPaths []string
-	visited := make(map[string]struct{}, len(roots))
+	visitedRoots := make(map[string]struct{}, len(roots))
 
 	for _, root := range roots {
 		root = filepath.Clean(root)
-		if _, seen := visited[root]; seen {
+		if _, wasSeen := visitedRoots[root]; wasSeen {
 			continue
 		}
-		visited[root] = struct{}{}
+		visitedRoots[root] = struct{}{}
 
 		resolvedRoot, err := filepath.EvalSymlinks(root)
 		if err != nil {

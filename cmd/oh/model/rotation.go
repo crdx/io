@@ -37,19 +37,19 @@ func ReserveRoundRobin(path string, selections []Selection) (Selection, error) {
 		return selections[0], nil
 	}
 
-	var selected Selection
-	err := state.Update(path, roundRobinStateVersion, func(stored *roundRobinState) error {
-		if stored.Version != 0 && stored.Version != roundRobinStateVersion {
-			return fmt.Errorf("model round-robin state has version %d, expected %d", stored.Version, roundRobinStateVersion)
+	var selectedModel Selection
+	err := state.Update(path, roundRobinStateVersion, func(storedState *roundRobinState) error {
+		if storedState.Version != 0 && storedState.Version != roundRobinStateVersion {
+			return fmt.Errorf("model round-robin state has version %d, expected %d", storedState.Version, roundRobinStateVersion)
 		}
 
-		selected = roundrobin.Next(selections, stored.Last)
-		*stored = roundRobinState{Version: roundRobinStateVersion, Last: selected}
+		selectedModel = roundrobin.Next(selections, storedState.Last)
+		*storedState = roundRobinState{Version: roundRobinStateVersion, Last: selectedModel}
 
 		return nil
 	})
 
-	return selected, err
+	return selectedModel, err
 }
 
 func ParseRoundRobin(path string, writtenSelections []string) ([]Selection, error) {
@@ -64,7 +64,7 @@ func ParseRoundRobin(path string, writtenSelections []string) ([]Selection, erro
 
 		selection := Selection{Provider: providerName, Model: model, Effort: effort}
 		canonical := selection.String()
-		if _, found := seen[canonical]; found {
+		if _, isFound := seen[canonical]; isFound {
 			return nil, fmt.Errorf("model.round_robin selects %s more than once", canonical)
 		}
 

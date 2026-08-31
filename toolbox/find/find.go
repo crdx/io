@@ -58,7 +58,7 @@ func exec(root *file.Root, args Args) (string, tool.Stats, error) {
 
 	var matches []string
 	returnedBytes := int64(0)
-	truncated := false
+	isTruncated := false
 
 	err = util.Walk(root.FS(), name, func(path string, entry fs.DirEntry) error {
 		if entry.IsDir() {
@@ -74,8 +74,8 @@ func exec(root *file.Root, args Args) (string, tool.Stats, error) {
 			return nil
 		}
 
-		matches, returnedBytes, truncated = util.AppendSearchResult(matches, returnedBytes, path)
-		if truncated {
+		matches, returnedBytes, isTruncated = util.AppendSearchResult(matches, returnedBytes, path)
+		if isTruncated {
 			return fs.SkipAll
 		}
 
@@ -85,9 +85,9 @@ func exec(root *file.Root, args Args) (string, tool.Stats, error) {
 		return "", tool.Stats{}, err
 	}
 
-	output := util.ReportSearchResults(matches, truncated)
+	output := util.ReportSearchResults(matches, isTruncated)
 	stats := tool.OutputStats(output)
-	stats.Truncated = truncated
+	stats.IsTruncated = isTruncated
 
 	return output, stats, nil
 }

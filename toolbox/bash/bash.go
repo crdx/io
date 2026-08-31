@@ -69,16 +69,16 @@ func ProtectedPolicy(policy sandbox.Policy) sandbox.Policy {
 
 // Describe formats a command into one display-safe line and reports its original line count.
 func Describe(args Args) (string, string) {
-	parsed, err := parse(args.Command)
+	parsedScript, err := parse(args.Command)
 	if err != nil {
 		return oneLine(args.Command), spread(args.Command)
 	}
 
-	if hasHereDocument(parsed) {
+	if hasHereDocument(parsedScript) {
 		return strutil.FirstLine(args.Command), spread(args.Command)
 	}
 
-	return format(parsed), spread(args.Command)
+	return format(parsedScript), spread(args.Command)
 }
 
 func emphasisSource(args Args, subject string) string {
@@ -90,18 +90,18 @@ func emphasisSource(args Args, subject string) string {
 	return ""
 }
 
-func hasHereDocument(parsed *syntax.File) bool {
-	found := false
+func hasHereDocument(parsedScript *syntax.File) bool {
+	isFound := false
 
-	syntax.Walk(parsed, func(node syntax.Node) bool {
+	syntax.Walk(parsedScript, func(node syntax.Node) bool {
 		if redirect, ok := node.(*syntax.Redirect); ok && redirect.Hdoc != nil {
-			found = true
+			isFound = true
 		}
 
-		return !found
+		return !isFound
 	})
 
-	return found
+	return isFound
 }
 
 func validate(args Args) error {
@@ -120,9 +120,9 @@ func parse(command string) (*syntax.File, error) {
 	return syntax.NewParser(syntax.Variant(syntax.LangBash)).Parse(strings.NewReader(command), "")
 }
 
-func format(parsed *syntax.File) string {
+func format(parsedScript *syntax.File) string {
 	var output bytes.Buffer
-	if err := syntax.NewPrinter(syntax.SingleLine(true)).Print(&output, parsed); err != nil {
+	if err := syntax.NewPrinter(syntax.SingleLine(true)).Print(&output, parsedScript); err != nil {
 		panic(err)
 	}
 
@@ -136,7 +136,7 @@ func format(parsed *syntax.File) string {
 
 func oneLine(command string) string {
 	var out strings.Builder
-	separated := true
+	isSeparated := true
 
 	for line := range strings.FieldsFuncSeq(command, func(r rune) bool { return r == '\n' || r == '\r' }) {
 		line = strings.Join(strings.Fields(line), " ")
@@ -145,7 +145,7 @@ func oneLine(command string) string {
 		}
 
 		if out.Len() > 0 {
-			if separated {
+			if isSeparated {
 				out.WriteByte(' ')
 			} else {
 				out.WriteString("; ")
@@ -153,7 +153,7 @@ func oneLine(command string) string {
 		}
 
 		out.WriteString(line)
-		separated = hasSeparator(line)
+		isSeparated = hasSeparator(line)
 	}
 
 	return out.String()

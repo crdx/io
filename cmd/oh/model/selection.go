@@ -248,15 +248,15 @@ func matchPrefixes(query string, candidates []string) []string {
 }
 
 func holdsInOrder(candidate string, query string) bool {
-	wanted := []rune(query)
+	wantedRunes := []rune(query)
 
-	var matched int
+	var matchedCount int
 
 	for _, letter := range candidate {
-		if matched < len(wanted) && letter == wanted[matched] {
-			matched++
+		if matchedCount < len(wantedRunes) && letter == wantedRunes[matchedCount] {
+			matchedCount++
 		}
 	}
 
-	return matched == len(wanted)
+	return matchedCount == len(wantedRunes)
 }

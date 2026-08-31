@@ -68,12 +68,12 @@ type placedEntity struct {
 }
 
 type layout struct {
-	byName map[string]*placedEntity
-	placed []*placedEntity
-	lanes  int   // one lane per relationship (global, so lanes never clash)
-	gutW   int   // width of each vertical gutter
-	vGutX  []int // left edge x of each vertical gutter (len cols+1)
-	hGutY  []int // top edge y of each horizontal gutter (len rows+1)
+	byName         map[string]*placedEntity
+	placedEntities []*placedEntity
+	lanes          int   // one lane per relationship (global, so lanes never clash)
+	gutW           int   // width of each vertical gutter
+	vGutX          []int // left edge x of each vertical gutter (len cols+1)
+	hGutY          []int // top edge y of each horizontal gutter (len rows+1)
 }
 
 func placeEntities(diagram *ErDiagram, glyphSet glyphs) *layout {
@@ -101,7 +101,7 @@ func placeEntities(diagram *ErDiagram, glyphSet glyphs) *layout {
 		}
 	}
 
-	placed := make([]*placedEntity, entityCount)
+	placedEntities := make([]*placedEntity, entityCount)
 	for i, entity := range diagram.Entities {
 		minW := 4*deg[entity.Name] + 1
 		if selfLoop[entity.Name] {
@@ -111,7 +111,7 @@ func placeEntities(diagram *ErDiagram, glyphSet glyphs) *layout {
 			}
 		}
 		lines := renderEntity(entity, glyphSet, minW-2)
-		placed[i] = &placedEntity{
+		placedEntities[i] = &placedEntity{
 			entity: entity, lines: lines,
 			w: blockWidth(lines), h: len(lines),
 			row: i / cols, col: i % cols,
@@ -120,7 +120,7 @@ func placeEntities(diagram *ErDiagram, glyphSet glyphs) *layout {
 
 	colW := make([]int, cols)
 	rowH := make([]int, rows)
-	for _, p := range placed {
+	for _, p := range placedEntities {
 		if p.w > colW[p.col] {
 			colW[p.col] = p.w
 		}
@@ -160,11 +160,11 @@ func placeEntities(diagram *ErDiagram, glyphSet glyphs) *layout {
 	hGutY[rows] = y
 
 	byName := map[string]*placedEntity{}
-	for _, p := range placed {
+	for _, p := range placedEntities {
 		p.x, p.y = colX[p.col], rowY[p.row]
 		byName[p.entity.Name] = p
 	}
-	return &layout{byName: byName, placed: placed, lanes: lanes, gutW: gutW, vGutX: vGutX, hGutY: hGutY}
+	return &layout{byName: byName, placedEntities: placedEntities, lanes: lanes, gutW: gutW, vGutX: vGutX, hGutY: hGutY}
 }
 
 func blockWidth(lines []string) int {
@@ -202,9 +202,9 @@ func (self *overlay) bits(x int, y int) uint8 {
 	return self.solid[[2]int{x, y}] | self.dash[[2]int{x, y}]
 }
 
-func (self *overlay) polyline(pts [][2]int, solid bool) {
+func (self *overlay) polyline(pts [][2]int, isSolid bool) {
 	marks := self.dash
-	if solid {
+	if isSolid {
 		marks = self.solid
 	}
 	for i := 0; i+1 < len(pts); i++ {
@@ -238,16 +238,16 @@ func (self *overlay) polyline(pts [][2]int, solid bool) {
 	}
 }
 
-func attach(placed *placedEntity, attachSide side, index int, total int) (int, int) {
-	lo, hi := placed.x+1, placed.x+placed.w-2
+func attach(placedEntity *placedEntity, attachSide side, index int, total int) (int, int) {
+	lo, hi := placedEntity.x+1, placedEntity.x+placedEntity.w-2
 	x := lo + (hi-lo-4*(total-1))/2 + 4*index
 	if (attachSide == sideB) == (x%2 != 0) {
 		x++
 	}
 	x = max(lo, min(x, hi))
-	y := placed.y + placed.h - 1
+	y := placedEntity.y + placedEntity.h - 1
 	if attachSide == sideT {
-		y = placed.y
+		y = placedEntity.y
 	}
 	return x, y
 }
@@ -266,7 +266,7 @@ func drawConnectors(grid *canvas, lay *layout, diagram *ErDiagram, glyphSet glyp
 	all := make([]ends, len(diagram.Relationships))
 	slotCount := map[[2]int]int{}
 	entityIndex := map[*placedEntity]int{}
-	for i, p := range lay.placed {
+	for i, p := range lay.placedEntities {
 		entityIndex[p] = i
 	}
 	for i, relationship := range diagram.Relationships {
@@ -342,15 +342,15 @@ func setAttachTee(grid *canvas, ep endpoint, glyphSet glyphs) {
 }
 
 func sidesFor(first *placedEntity, second *placedEntity) (side, side) {
-	sameColAdjacent := first.col == second.col && abs(first.row-second.row) == 1
+	isSameColAdjacent := first.col == second.col && abs(first.row-second.row) == 1
 	switch {
 	case first.row < second.row:
-		if sameColAdjacent {
+		if isSameColAdjacent {
 			return sideB, sideB
 		}
 		return sideB, sideT
 	case first.row > second.row:
-		if sameColAdjacent {
+		if isSameColAdjacent {
 			return sideB, sideB
 		}
 		return sideT, sideB
@@ -371,24 +371,24 @@ func (self *layout) trunkX(a *placedEntity, b *placedEntity, lane int) int {
 }
 
 type routePlan struct {
-	rel    *Relationship
-	a, b   endpoint
-	ya, yb int
-	tx     int  // trunk column, valid only when !merged
-	merged bool // both stubs meet one gutter row: single run, no trunk
+	rel      *Relationship
+	a, b     endpoint
+	ya, yb   int
+	tx       int  // trunk column, valid only when !merged
+	isMerged bool // both stubs meet one gutter row: single run, no trunk
 }
 
 func newPlan(lay *layout, a endpoint, b endpoint, r *Relationship, lane int) routePlan {
 	ya, yb := lay.gutterY(a, lane), lay.gutterY(b, lane)
-	p := routePlan{rel: r, a: a, b: b, ya: ya, yb: yb, merged: ya == yb}
-	if !p.merged {
+	p := routePlan{rel: r, a: a, b: b, ya: ya, yb: yb, isMerged: ya == yb}
+	if !p.isMerged {
 		p.tx = lay.trunkX(a.p, b.p, lane)
 	}
 	return p
 }
 
 func (self routePlan) drawLine(layer *overlay) {
-	if self.merged {
+	if self.isMerged {
 		layer.polyline([][2]int{
 			{self.a.x, self.a.y}, {self.a.x, self.ya}, {self.b.x, self.ya}, {self.b.x, self.b.y},
 		}, self.rel.Identifying)
@@ -400,7 +400,7 @@ func (self routePlan) drawLine(layer *overlay) {
 }
 
 func (self routePlan) decorate(layer *overlay) {
-	if self.merged {
+	if self.isMerged {
 		putToken(layer, self.a, self.b.x, self.ya)
 		putToken(layer, self.b, self.a.x, self.ya)
 		if self.a.p == self.b.p {
@@ -535,15 +535,15 @@ func composite(grid *canvas, layer *overlay, glyphSet glyphs) {
 	}
 }
 
-func glyphFor(bits uint8, solid bool, glyphSet glyphs) rune {
+func glyphFor(bits uint8, isSolid bool, glyphSet glyphs) rune {
 	switch bits {
 	case dN | dS:
-		if solid {
+		if isSolid {
 			return glyphSet.v
 		}
 		return glyphSet.vd
 	case dE | dW:
-		if solid {
+		if isSolid {
 			return glyphSet.h
 		}
 		return glyphSet.hd
@@ -566,12 +566,12 @@ func glyphFor(bits uint8, solid bool, glyphSet glyphs) rune {
 	case dN | dS | dE | dW:
 		return glyphSet.cross
 	case dN, dS:
-		if solid {
+		if isSolid {
 			return glyphSet.v
 		}
 		return glyphSet.vd
 	default:
-		if solid {
+		if isSolid {
 			return glyphSet.h
 		}
 		return glyphSet.hd

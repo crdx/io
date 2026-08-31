@@ -432,10 +432,10 @@ func TestHTTPObservationDoesNotCreateTheBundleBeforeTheFirstEvent(t *testing.T) 
 	}
 
 	request := req.Request{
-		Started:  time.Now(),
-		Method:   "POST",
-		URL:      "https://example.com",
-		Protocol: "HTTP/1.1",
+		StartedAt: time.Now(),
+		Method:    "POST",
+		URL:       "https://example.com",
+		Protocol:  "HTTP/1.1",
 	}
 
 	if exchange := log.Observer().Start(request); exchange != nil {

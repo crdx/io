@@ -166,10 +166,10 @@ func drawSubgraph(sg *subgraph, graph graph) *drawing {
 	return &subgraphDrawing
 }
 
-func drawRectangleBorder(target *drawing, from drawingCoord, to drawingCoord, useAscii bool) {
+func drawRectangleBorder(target *drawing, from drawingCoord, to drawingCoord, shouldUseAscii bool) {
 	horizontal, vertical := "─", "│"
 	topLeft, topRight, bottomLeft, bottomRight := "┌", "┐", "└", "┘"
-	if useAscii {
+	if shouldUseAscii {
 		horizontal, vertical = "-", "|"
 		topLeft, topRight, bottomLeft, bottomRight = "+", "+", "+", "+"
 	}
@@ -269,8 +269,8 @@ func mergeJunctions(c1 string, c2 string) string {
 		"┴": {"─": "┴", "│": "┼", "┌": "┼", "┐": "┼", "└": "┴", "┘": "┴", "├": "┼", "┤": "┼", "┬": "┼"},
 	}
 
-	if merged, ok := junctionMap[c1][c2]; ok {
-		return merged
+	if mergedJunction, ok := junctionMap[c1][c2]; ok {
+		return mergedJunction
 	}
 
 	return c1

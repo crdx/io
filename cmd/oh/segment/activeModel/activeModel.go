@@ -66,12 +66,12 @@ func thinkingSquares(effort string, effortLevels []string) string {
 }
 
 func styleThinkingSquares(squares string) string {
-	var rendered strings.Builder
+	var renderedText strings.Builder
 	var subtle strings.Builder
 
 	flushSubtle := func() {
 		if subtle.Len() > 0 {
-			rendered.WriteString(style.Subtle(subtle.String()))
+			renderedText.WriteString(style.Subtle(subtle.String()))
 			subtle.Reset()
 		}
 	}
@@ -79,12 +79,12 @@ func styleThinkingSquares(squares string) string {
 	for _, square := range squares {
 		if string(square) == filledSquare {
 			flushSubtle()
-			rendered.WriteString(style.Chosen(string(square)))
+			renderedText.WriteString(style.Chosen(string(square)))
 		} else {
 			subtle.WriteRune(square)
 		}
 	}
 	flushSubtle()
 
-	return rendered.String()
+	return renderedText.String()
 }

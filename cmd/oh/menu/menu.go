@@ -109,8 +109,8 @@ type menu struct {
 
 // RenderMenu renders a complete menu frame without terminal-control sequences.
 func RenderMenu(prompt string, labels []string, cursor int) string {
-	displayed := menu{labels: labels, cursor: cursor, rows: len(labels)}
-	return fmt.Sprintf("%s\r\n\r\n%s", prompt, displayed.render(false))
+	displayedMenu := menu{labels: labels, cursor: cursor, rows: len(labels)}
+	return fmt.Sprintf("%s\r\n\r\n%s", prompt, displayedMenu.render(false))
 }
 
 func (self *menu) move(distance int) {
@@ -128,17 +128,17 @@ func (self *menu) scroll() {
 }
 
 func (self *menu) render(shouldClear bool) string {
-	var rendered strings.Builder
+	var renderedText strings.Builder
 	for i := self.offset; i < self.offset+self.rows; i++ {
 		line := "  " + self.labels[i]
 		if i == self.cursor {
 			line = style.Chosen.Over("› " + self.labels[i])
 		}
 		if shouldClear {
-			rendered.WriteString(clearLine)
+			renderedText.WriteString(clearLine)
 		}
-		rendered.WriteString(line)
-		rendered.WriteString("\r\n")
+		renderedText.WriteString(line)
+		renderedText.WriteString("\r\n")
 	}
-	return rendered.String()
+	return renderedText.String()
 }

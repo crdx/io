@@ -50,20 +50,20 @@ func Bound(img tool.Image) tool.Image {
 	}
 
 	key := imageCacheKey{digest: sha256.Sum256(img.Data), mediaType: img.MediaType}
-	if remembered, wasRemembered := bounded.get(key); wasRemembered {
-		return remembered
+	if rememberedImage, wasRemembered := boundedCache.get(key); wasRemembered {
+		return rememberedImage
 	}
 
-	decoded, format, err := image.Decode(bytes.NewReader(img.Data))
+	decodedImage, format, err := image.Decode(bytes.NewReader(img.Data))
 	if err != nil {
 		return img
 	}
-	scaled, err := encode(downscale(decoded, boundedWidth, boundedHeight), format)
+	scaledImage, err := encode(downscale(decodedImage, boundedWidth, boundedHeight), format)
 	if err != nil {
 		return img
 	}
 
-	return bounded.store(key, scaled)
+	return boundedCache.store(key, scaledImage)
 }
 
 const (
@@ -103,20 +103,20 @@ func (self *boundedImageCache) get(key imageCacheKey) (tool.Image, bool) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	remembered, wasRemembered := self.images[key]
+	rememberedImage, wasRemembered := self.images[key]
 	if wasRemembered {
-		self.order.MoveToBack(remembered.orderAt)
+		self.order.MoveToBack(rememberedImage.orderAt)
 	}
-	return remembered.image, wasRemembered
+	return rememberedImage.image, wasRemembered
 }
 
 func (self *boundedImageCache) store(key imageCacheKey, image tool.Image) tool.Image {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	if remembered, wasRemembered := self.images[key]; wasRemembered {
-		self.order.MoveToBack(remembered.orderAt)
-		return remembered.image
+	if rememberedImage, wasRemembered := self.images[key]; wasRemembered {
+		self.order.MoveToBack(rememberedImage.orderAt)
+		return rememberedImage.image
 	}
 	imageBytes := cap(image.Data)
 	if imageBytes > self.maximumBytes || self.maximumImages == 0 {
@@ -137,7 +137,7 @@ func (self *boundedImageCache) store(key imageCacheKey, image tool.Image) tool.I
 	return image
 }
 
-var bounded = newBoundedImageCache(maxBoundedImageCacheBytes, maxBoundedImageCacheEntries)
+var boundedCache = newBoundedImageCache(maxBoundedImageCacheBytes, maxBoundedImageCacheEntries)
 
 func Fit(width int, height int) (int, int) {
 	if width <= 0 || height <= 0 || (width <= MaxEdge && height <= MaxEdge) {
@@ -152,21 +152,21 @@ func Fit(width int, height int) (int, int) {
 }
 
 func encode(subject image.Image, format string) (tool.Image, error) {
-	var encoded bytes.Buffer
+	var encodedBuffer bytes.Buffer
 
 	if format == formatJPEG {
-		if err := jpeg.Encode(&encoded, subject, &jpeg.Options{Quality: jpegQuality}); err != nil {
+		if err := jpeg.Encode(&encodedBuffer, subject, &jpeg.Options{Quality: jpegQuality}); err != nil {
 			return tool.Image{}, err
 		}
 
-		return tool.Image{MediaType: mediaTypeJPEG, Data: encoded.Bytes()}, nil
+		return tool.Image{MediaType: mediaTypeJPEG, Data: encodedBuffer.Bytes()}, nil
 	}
 
-	if err := png.Encode(&encoded, subject); err != nil {
+	if err := png.Encode(&encodedBuffer, subject); err != nil {
 		return tool.Image{}, err
 	}
 
-	return tool.Image{MediaType: mediaTypePNG, Data: encoded.Bytes()}, nil
+	return tool.Image{MediaType: mediaTypePNG, Data: encodedBuffer.Bytes()}, nil
 }
 
 func downscale(source image.Image, width int, height int) image.Image {

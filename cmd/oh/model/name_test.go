@@ -151,7 +151,7 @@ func TestEveryProviderIsWrittenForAPerson(t *testing.T) {
 
 func TestEveryProviderThereIsHasAName(t *testing.T) {
 	for _, id := range ProviderNames() {
-		if _, found := providerNames[id]; !found {
+		if _, isFound := providerNames[id]; !isFound {
 			t.Errorf("%s is not written for a person anywhere", id)
 		}
 	}

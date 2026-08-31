@@ -131,15 +131,15 @@ func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 
 	keypress := key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
 
-	stopped := false
+	wasStopped := false
 
-	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) { stopped = true }, turn.State{Running: true})}
+	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) { wasStopped = true }, turn.State{Running: true})}
 
 	if !self.apply(editor, nil, keypress) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
 	}
 
-	if !stopped || !self.currentTurn.Cancelled() {
+	if !wasStopped || !self.currentTurn.Cancelled() {
 		t.Error("expected the turn to have been cancelled, as escape cancels it")
 	}
 
@@ -287,19 +287,19 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithTheContinueMessage(t *t
 	self.finish()
 
 	var messages []string
-	var interrupted bool
+	var wasInterrupted bool
 	for _, record := range self.events {
 		if record.Kind == agent.UserMessageEvent {
 			messages = append(messages, record.Text)
 		}
-		interrupted = interrupted || record.Kind == agent.InterruptionEvent
+		wasInterrupted = wasInterrupted || record.Kind == agent.InterruptionEvent
 	}
 
 	wantMessages := []string{"first", builtInConfig(t).Input.Continue}
 	if !slices.Equal(messages, wantMessages) {
 		t.Errorf("got messages %q, want %q", messages, wantMessages)
 	}
-	if !interrupted {
+	if !wasInterrupted {
 		t.Error("expected the replacement to record an interruption")
 	}
 }
@@ -560,16 +560,16 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var sent, interruptionStored bool
+	var wasSent, wasInterruptionStored bool
 	for _, event := range storedSession.Events {
-		sent = sent || event.Kind == agent.UserMessageEvent && event.Text == "follow up"
-		interruptionStored = interruptionStored || event.Kind == agent.InterruptionEvent
+		wasSent = wasSent || event.Kind == agent.UserMessageEvent && event.Text == "follow up"
+		wasInterruptionStored = wasInterruptionStored || event.Kind == agent.InterruptionEvent
 	}
 
-	if !sent {
+	if !wasSent {
 		t.Error("expected the accepted input to be sent after the interruption")
 	}
-	if !interruptionStored {
+	if !wasInterruptionStored {
 		t.Error("expected the interruption to be stored in the session log")
 	}
 }
@@ -673,15 +673,15 @@ func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
 
 	editor.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
 
-	stopped := false
+	wasStopped := false
 
-	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) { stopped = true }, turn.State{Running: true})}
+	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) { wasStopped = true }, turn.State{Running: true})}
 
 	if !self.apply(editor, nil, key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
 	}
 
-	if !stopped || !self.currentTurn.Cancelled() {
+	if !wasStopped || !self.currentTurn.Cancelled() {
 		t.Error("expected the turn to have been cancelled")
 	}
 
@@ -702,7 +702,7 @@ func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			self := &App{
-				currentTurn: Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true, Cancelled: test.isCancelled})},
+				currentTurn: Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true, IsCancelled: test.isCancelled})},
 			}
 			self.queuedTurn.Replace("later")
 			self.queuedTurn.MarkModeChange()
@@ -710,8 +710,8 @@ func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
 			self.cancelTurn(escapeReason)
 
 			pending := self.queuedTurn.Peek()
-			kept := pending.Replacement && pending.ModeChange && pending.Message == "later"
-			if kept != test.wantKept {
+			wasKept := pending.Replacement && pending.ModeChange && pending.Message == "later"
+			if wasKept != test.wantKept {
 				t.Errorf(
 					"expected the queue kept=%t, got queued=%t mode=%t prompt=%q",
 					test.wantKept, pending.Replacement, pending.ModeChange, pending.Message,
@@ -1337,7 +1337,7 @@ func TestSanitisedWireCaptureLifecyclesAreCoveredByScenarios(t *testing.T) {
 	}
 
 	for feature := range capturedFeatures {
-		if _, covered := scenarioFeatures[feature]; !covered {
+		if _, isCovered := scenarioFeatures[feature]; !isCovered {
 			t.Errorf("captured lifecycle feature %q has no generated scenario", feature)
 		}
 	}
@@ -2727,7 +2727,7 @@ func claimFixtureName(
 
 	for _, extension := range extensions {
 		output := name + extension
-		if previousOwner, duplicate := expected[output]; duplicate {
+		if previousOwner, isDuplicate := expected[output]; isDuplicate {
 			t.Errorf("%s and %s both own %s", previousOwner, owner, output)
 			continue
 		}
@@ -2750,7 +2750,7 @@ func TestFixtureSourceNamesAreUnique(t *testing.T) {
 				continue
 			}
 			name := strings.TrimSuffix(entry.Name(), extension)
-			if previousOwner, duplicate := owners[name]; duplicate {
+			if previousOwner, isDuplicate := owners[name]; isDuplicate {
 				t.Errorf("duplicate fixture name %q in %s and %s", name, previousOwner, directory)
 			}
 			owners[name] = directory
@@ -3967,7 +3967,7 @@ func TestPick(t *testing.T) {
 
 	switch {
 	case errors.Is(err, menu.ErrCancelled):
-		screen.Line(style.Cancelled("nothing was chosen"))
+		screen.Line(style.CancelledCall("nothing was chosen"))
 	case err != nil:
 		t.Fatal(err)
 	default:
@@ -4147,7 +4147,7 @@ func writeTranscript(t *testing.T, entries []replayEntry) string {
 		Effort:    "high",
 		Provider:  "codex",
 		Workspace: workspaceMarker,
-		Started:   transcriptTime,
+		StartedAt: transcriptTime,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -5174,8 +5174,8 @@ func settleLiveConfig(t *testing.T, self *App) {
 	defer timeout.Stop()
 	for {
 		select {
-		case failure, open := <-self.configObserver.Changes():
-			if !open {
+		case failure, isOpen := <-self.configObserver.Changes():
+			if !isOpen {
 				t.Fatal("config watch closed before reporting the change")
 			}
 			if self.reloadConfig(failure) {
@@ -6637,7 +6637,7 @@ func TestSessionsComeFromJournalParsing(t *testing.T) {
 	if sessions[0].Title != "hello" {
 		t.Errorf("expected the provisional title, got %q", sessions[0].Title)
 	}
-	if sessions[0].Started.IsZero() {
+	if sessions[0].StartedAt.IsZero() {
 		t.Error("expected the session start time")
 	}
 }
@@ -6726,14 +6726,14 @@ func TestChoosingAnOutdatedSessionAdvisesMigration(t *testing.T) {
 }
 
 func TestSlashCommandRunsImmediately(t *testing.T) {
-	ran := false
+	didRun := false
 	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
 		Name: "fixture",
 		Run: func(_ slash.Context, arguments slash.Arguments) error {
 			if !slices.Equal(arguments.Fields, []string{"one", "two"}) {
 				t.Errorf("got arguments %v", arguments.Fields)
 			}
-			ran = true
+			didRun = true
 			return nil
 		},
 	})
@@ -6743,7 +6743,7 @@ func TestSlashCommandRunsImmediately(t *testing.T) {
 	if got := self.handleCommand("/fixture one two"); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
-	if !ran {
+	if !didRun {
 		t.Error("expected the command to run immediately")
 	}
 }

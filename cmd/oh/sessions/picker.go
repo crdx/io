@@ -128,8 +128,8 @@ func Load(directory string) ([]*picker.Session, error) {
 		sessions = append(sessions, &picker.Session{
 			Name:         storedMeta.Name,
 			WorkspaceDir: data.WorkspaceDir,
-			Started:      storedMeta.Started,
-			Touched:      storedMeta.Touched,
+			StartedAt:    storedMeta.StartedAt,
+			TouchedAt:    storedMeta.TouchedAt,
 			Title:        storedMeta.Title,
 			Model:        strings.Join(model.DisplayName(data.Model), " "),
 			ModelID:      data.Model,
@@ -140,7 +140,7 @@ func Load(directory string) ([]*picker.Session, error) {
 	}
 
 	slices.SortFunc(sessions, func(first, second *picker.Session) int {
-		if order := second.Touched.Compare(first.Touched); order != 0 {
+		if order := second.TouchedAt.Compare(first.TouchedAt); order != 0 {
 			return order
 		}
 		return strings.Compare(second.Name, first.Name)

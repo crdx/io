@@ -163,15 +163,15 @@ func summariseTargets(argumentNames []string, targetNames []string) string {
 }
 
 func copyTargets(environment commandEnvironment, targets map[string]commandTarget) map[string]commandTarget {
-	copied := maps.Clone(targets)
-	copied["last-message"] = lastMessageTarget(environment.session.getLastMessage)
-	copied["session-chat"] = textFileTarget(
+	copiedTargets := maps.Clone(targets)
+	copiedTargets["last-message"] = lastMessageTarget(environment.session.getLastMessage)
+	copiedTargets["session-chat"] = textFileTarget(
 		"Session chat",
 		filepath.Join(environment.session.directory, sessionTranscriptName),
 	)
-	copied["session-name"] = staticTarget(environment.session.name)
-	copied["session-id"] = staticTarget(environment.session.id)
-	return copied
+	copiedTargets["session-name"] = staticTarget(environment.session.name)
+	copiedTargets["session-id"] = staticTarget(environment.session.id)
+	return copiedTargets
 }
 
 func configTarget(environment commandEnvironment) commandTarget {
@@ -384,8 +384,8 @@ func targetCommand(
 				return slash.Usage()
 			}
 
-			target, found := targets[arguments.Fields[0]]
-			if !found {
+			target, isFound := targets[arguments.Fields[0]]
+			if !isFound {
 				return slash.Usage()
 			}
 

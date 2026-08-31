@@ -20,9 +20,10 @@ import (
 	"crdx.org/io/internal/format"
 )
 
-const JournalFormat = 10
-
-const MetaFormat = 2
+const (
+	JournalFormat = 10
+	MetaFormat    = 2
+)
 
 var ErrMetaOutOfDate = errors.New("listing metadata is in another format")
 
@@ -54,7 +55,7 @@ type Writer struct {
 	directory   string
 	id          string
 	name        string
-	started     time.Time
+	startedAt   time.Time
 	journalMeta json.RawMessage
 	listingData json.RawMessage
 	listingMeta Meta
@@ -176,7 +177,7 @@ func Open(directory string, name string) (*Writer, error) {
 		directory:   directory,
 		id:          head.ID,
 		name:        name,
-		started:     head.Time,
+		startedAt:   head.Time,
 		journalMeta: slices.Clone(head.Meta),
 		listingMeta: *listingMeta,
 	}, nil
@@ -216,7 +217,7 @@ func (self *Writer) Item(payload json.RawMessage) error {
 		return err
 	}
 
-	self.listingMeta.Touched = writtenAt
+	self.listingMeta.TouchedAt = writtenAt
 	return writeMeta(self.directory, self.listingMeta)
 }
 
@@ -229,14 +230,14 @@ func (self *Writer) CompleteTurn() error {
 		return fmt.Errorf("sync session journal: %w", err)
 	}
 
-	self.listingMeta.Touched = writtenAt
+	self.listingMeta.TouchedAt = writtenAt
 	return writeMeta(self.directory, self.listingMeta)
 }
 
 func (self *Writer) Name() string                 { return self.name }
 func (self *Writer) ID() string                   { return self.id }
 func (self *Writer) JournalMeta() json.RawMessage { return slices.Clone(self.journalMeta) }
-func (self *Writer) Started() time.Time           { return self.started }
+func (self *Writer) Started() time.Time           { return self.startedAt }
 func (self *Writer) IsPersisted() bool            { return self.file != nil }
 func (self *Writer) EnsurePersisted() error       { return self.ensureOpen() }
 
@@ -296,7 +297,7 @@ func (self *Writer) ensureOpen() error {
 	self.file = file
 	self.lock = &Lock{sessionDir: sessionDir, journalFile: file}
 
-	started, err := self.record(Line{Kind: Head, Version: JournalFormat, ID: self.id, Name: self.name, Meta: self.journalMeta})
+	startedAt, err := self.record(Line{Kind: Head, Version: JournalFormat, ID: self.id, Name: self.name, Meta: self.journalMeta})
 	if err != nil {
 		_ = self.lock.Release()
 		_ = os.Remove(file.Name())
@@ -305,12 +306,12 @@ func (self *Writer) ensureOpen() error {
 		self.lock = nil
 		return err
 	}
-	self.started = started
+	self.startedAt = startedAt
 	self.listingMeta = Meta{
-		Name:    self.name,
-		Data:    slices.Clone(self.listingData),
-		Started: started,
-		Touched: started,
+		Name:      self.name,
+		Data:      slices.Clone(self.listingData),
+		StartedAt: startedAt,
+		TouchedAt: startedAt,
 	}
 	if err := writeMeta(self.directory, self.listingMeta); err != nil {
 		_ = self.lock.Release()
@@ -343,8 +344,8 @@ type Session struct {
 	Name              string
 	ID                string
 	Meta              json.RawMessage
-	Started           time.Time
-	Touched           time.Time
+	StartedAt         time.Time
+	TouchedAt         time.Time
 	Events            []agent.Event
 	Items             []json.RawMessage
 	TurnCompletions   int
@@ -374,20 +375,20 @@ func Records(directory string, name string, visit func(Line) error) error {
 	defer func() { _ = file.Close() }()
 
 	decoder := json.NewDecoder(bufio.NewReaderSize(file, 8192))
-	sawHead := false
+	hasSeenHead := false
 	lineNumber := 0
 
 	fileInfo, err := file.Stat()
 	if err != nil {
 		return err
 	}
-	endsWithNewline := true
+	hasTrailingNewline := true
 	if fileInfo.Size() > 0 {
 		var lastByte [1]byte
 		if _, err := file.ReadAt(lastByte[:], fileInfo.Size()-1); err != nil {
 			return err
 		}
-		endsWithNewline = lastByte[0] == '\n'
+		hasTrailingNewline = lastByte[0] == '\n'
 	}
 
 	for {
@@ -397,21 +398,21 @@ func Records(directory string, name string, visit func(Line) error) error {
 		if errors.Is(err, io.EOF) {
 			break
 		}
-		if errors.Is(err, io.ErrUnexpectedEOF) && !endsWithNewline {
+		if errors.Is(err, io.ErrUnexpectedEOF) && !hasTrailingNewline {
 			break
 		}
 		if err != nil {
 			return fmt.Errorf("session %s: malformed journal line %d: %w", name, lineNumber, err)
 		}
 
-		if !sawHead {
+		if !hasSeenHead {
 			if line.Kind != Head {
 				return errors.New("session does not start with a head")
 			}
 			if err := format.Check(formatOf(line), JournalFormat); err != nil {
 				return fmt.Errorf("session %s: journal %w", name, err)
 			}
-			sawHead = true
+			hasSeenHead = true
 		} else if line.Kind == Head {
 			return errors.New("session contains more than one head")
 		}
@@ -421,17 +422,17 @@ func Records(directory string, name string, visit func(Line) error) error {
 		}
 	}
 
-	if !sawHead {
+	if !hasSeenHead {
 		return errors.New("session has no complete head")
 	}
 	return nil
 }
 
 func (self *Session) take(line Line) {
-	if self.Started.IsZero() {
-		self.Started = line.Time
+	if self.StartedAt.IsZero() {
+		self.StartedAt = line.Time
 	}
-	self.Touched = line.Time
+	self.TouchedAt = line.Time
 
 	switch line.Kind {
 	case Head:
@@ -453,17 +454,17 @@ func (self *Session) take(line Line) {
 }
 
 type Meta struct {
-	Version  int             `json:"version"`
-	Name     string          `json:"name"`
-	Data     json.RawMessage `json:"data,omitempty"`
-	Started  time.Time       `json:"started"`
-	Touched  time.Time       `json:"touched"`
-	Title    string          `json:"title,omitempty"`
-	Messages int             `json:"messages"`
+	Version   int             `json:"version"`
+	Name      string          `json:"name"`
+	Data      json.RawMessage `json:"data,omitempty"`
+	StartedAt time.Time       `json:"started"`
+	TouchedAt time.Time       `json:"touched"`
+	Title     string          `json:"title,omitempty"`
+	Messages  int             `json:"messages"`
 }
 
 func (self *Meta) takeEvent(event agent.Event, writtenAt time.Time) {
-	self.Touched = writtenAt
+	self.TouchedAt = writtenAt
 
 	if event.Kind == agent.StateChangeEvent {
 		if title, isTitle := agent.TitleFromEvent(event); isTitle {
@@ -487,12 +488,12 @@ func ReadMeta(directory string, name string) (*Meta, error) {
 		return nil, err
 	}
 
-	encoded, err := os.ReadFile(metaPath(directory, name))
+	encodedMeta, err := os.ReadFile(metaPath(directory, name))
 	if err != nil {
 		return nil, err
 	}
 
-	storedFormat, err := format.ReadJSON(encoded)
+	storedFormat, err := format.ReadJSON(encodedMeta)
 	if err != nil {
 		return nil, err
 	}
@@ -503,7 +504,7 @@ func ReadMeta(directory string, name string) (*Meta, error) {
 	}
 
 	var meta Meta
-	if err := json.Unmarshal(encoded, &meta); err != nil {
+	if err := json.Unmarshal(encodedMeta, &meta); err != nil {
 		return nil, err
 	}
 	if meta.Name != name {
@@ -528,7 +529,7 @@ func ListMeta(directory string) ([]*Meta, error) {
 	}
 
 	slices.SortFunc(metadata, func(first, second *Meta) int {
-		if order := second.Touched.Compare(first.Touched); order != 0 {
+		if order := second.TouchedAt.Compare(first.TouchedAt); order != 0 {
 			return order
 		}
 		return strings.Compare(second.Name, first.Name)
@@ -543,14 +544,14 @@ func ReadMetaFromJournal(directory string, name string, listingData json.RawMess
 	}
 
 	meta := Meta{
-		Version: MetaFormat,
-		Name:    storedSession.Name,
-		Data:    slices.Clone(listingData),
-		Started: storedSession.Started,
-		Touched: storedSession.Touched,
+		Version:   MetaFormat,
+		Name:      storedSession.Name,
+		Data:      slices.Clone(listingData),
+		StartedAt: storedSession.StartedAt,
+		TouchedAt: storedSession.TouchedAt,
 	}
 	for _, event := range storedSession.Events {
-		meta.takeEvent(event, storedSession.Touched)
+		meta.takeEvent(event, storedSession.TouchedAt)
 	}
 
 	return &meta, nil
@@ -567,7 +568,7 @@ func RebuildMeta(directory string, name string, listingData json.RawMessage) err
 func writeMeta(directory string, meta Meta) error {
 	meta.Version = MetaFormat
 
-	encoded, err := json.Marshal(meta)
+	encodedMeta, err := json.Marshal(meta)
 	if err != nil {
 		return err
 	}
@@ -583,7 +584,7 @@ func writeMeta(directory string, meta Meta) error {
 		_ = os.Remove(temporaryPath)
 	}()
 
-	if _, err := file.Write(encoded); err != nil {
+	if _, err := file.Write(encodedMeta); err != nil {
 		return err
 	}
 	if err := file.Close(); err != nil {
@@ -596,10 +597,10 @@ func writeMeta(directory string, meta Meta) error {
 }
 
 type Entry struct {
-	Name    string
-	ID      string
-	Started time.Time
-	Format  int
+	Name      string
+	ID        string
+	StartedAt time.Time
+	Format    int
 }
 
 func Entries(directory string) ([]Entry, error) {
@@ -615,15 +616,15 @@ func Entries(directory string) ([]Entry, error) {
 			continue
 		}
 		entries = append(entries, Entry{
-			Name:    name,
-			ID:      head.ID,
-			Started: head.Time,
-			Format:  formatOf(head),
+			Name:      name,
+			ID:        head.ID,
+			StartedAt: head.Time,
+			Format:    formatOf(head),
 		})
 	}
 
 	slices.SortFunc(entries, func(first, second Entry) int {
-		return first.Started.Compare(second.Started)
+		return first.StartedAt.Compare(second.StartedAt)
 	})
 	return entries, nil
 }
@@ -637,14 +638,14 @@ func formatOf(head Line) int {
 }
 
 func Outdated(directory string) ([]string, error) {
-	return namesInFormat(directory, func(stored int) bool { return stored < JournalFormat })
+	return namesInFormat(directory, func(storedFormat int) bool { return storedFormat < JournalFormat })
 }
 
 func Ahead(directory string) ([]string, error) {
-	return namesInFormat(directory, func(stored int) bool { return stored > JournalFormat })
+	return namesInFormat(directory, func(storedFormat int) bool { return storedFormat > JournalFormat })
 }
 
-func namesInFormat(directory string, wanted func(stored int) bool) ([]string, error) {
+func namesInFormat(directory string, isWanted func(storedFormat int) bool) ([]string, error) {
 	entries, err := Entries(directory)
 	if err != nil {
 		return nil, err
@@ -652,7 +653,7 @@ func namesInFormat(directory string, wanted func(stored int) bool) ([]string, er
 
 	var names []string
 	for _, entry := range entries {
-		if wanted(entry.Format) {
+		if isWanted(entry.Format) {
 			names = append(names, entry.Name)
 		}
 	}
@@ -761,7 +762,7 @@ func List(directory string) ([]*Session, error) {
 	}
 
 	slices.SortFunc(sessions, func(first, second *Session) int {
-		if order := second.Touched.Compare(first.Touched); order != 0 {
+		if order := second.TouchedAt.Compare(first.TouchedAt); order != 0 {
 			return order
 		}
 		return strings.Compare(second.Name, first.Name)

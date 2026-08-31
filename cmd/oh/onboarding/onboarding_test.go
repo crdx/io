@@ -28,7 +28,7 @@ func TestFirstRunOnboardingMatchesTheGolden(t *testing.T) {
 	choices := []int{0, 0}
 	choiceIndex := 0
 	var savedSelection string
-	modelsWereRefreshed := false
+	wereModelsRefreshed := false
 
 	onboarding := wizard{
 		output: &output,
@@ -46,11 +46,11 @@ func TestFirstRunOnboardingMatchesTheGolden(t *testing.T) {
 			return nil
 		},
 		refreshModels: func() error {
-			modelsWereRefreshed = true
+			wereModelsRefreshed = true
 			return nil
 		},
 		getModels: func() []model.Choice {
-			if !modelsWereRefreshed {
+			if !wereModelsRefreshed {
 				t.Error("models were read before they were refreshed")
 			}
 			return []model.Choice{

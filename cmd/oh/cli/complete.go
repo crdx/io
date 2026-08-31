@@ -50,8 +50,8 @@ type Sources struct {
 
 // Complete returns completions when args contain an internal completion request.
 func Complete(args []string, sources Sources) ([]string, bool) {
-	kind, word, wanted := completionRequest(args)
-	if !wanted {
+	kind, word, isWanted := completionRequest(args)
+	if !isWanted {
 		return nil, false
 	}
 
@@ -60,12 +60,12 @@ func Complete(args []string, sources Sources) ([]string, bool) {
 
 // WriteCompletions writes an internal completion request and reports whether it was handled.
 func WriteCompletions(out io.Writer, args []string, sources Sources) bool {
-	completed, wanted := Complete(args, sources)
-	if !wanted {
+	completions, isWanted := Complete(args, sources)
+	if !isWanted {
 		return false
 	}
 
-	for _, completion := range completed {
+	for _, completion := range completions {
 		_, _ = fmt.Fprintln(out, completion)
 	}
 	return true
@@ -131,13 +131,13 @@ func usageOptions(text string) []string {
 }
 
 func modelCompletions(word string, choices []model.Choice) []string {
-	modelQuery, effortQuery, qualified := strings.Cut(word, "@")
+	modelQuery, effortQuery, isQualified := strings.Cut(word, "@")
 
 	var selections []string
 
 	for _, choice := range model.RankedChoices(modelQuery, choices) {
 		efforts := choice.EffortLevels
-		if qualified {
+		if isQualified {
 			efforts = model.EffortsMatching(effortQuery, choice.EffortLevels)
 		}
 
@@ -171,13 +171,13 @@ func sessionNames(directory string) []string {
 		return nil
 	}
 
-	stored, err := sessions.Load(directory)
+	storedSessions, err := sessions.Load(directory)
 	if err != nil {
 		return nil
 	}
 
-	names := make([]string, 0, len(stored))
-	for _, storedSession := range sessions.InWorkspace(stored, workspaceDir) {
+	names := make([]string, 0, len(storedSessions))
+	for _, storedSession := range sessions.InWorkspace(storedSessions, workspaceDir) {
 		names = append(names, storedSession.Name)
 	}
 

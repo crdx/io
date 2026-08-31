@@ -605,7 +605,7 @@ func TestAFailedExecutedCallReceivesOutputStats(t *testing.T) {
 }
 
 func TestSpecialisedStatsTakePrecedenceOverOutputStats(t *testing.T) {
-	want := tool.Stats{Kind: tool.StatsSearch, Lines: 17, Bytes: 1200, TotalBytes: 2400, Truncated: true}
+	want := tool.Stats{Kind: tool.StatsSearch, Lines: 17, Bytes: 1200, TotalBytes: 2400, IsTruncated: true}
 	result := singleResult(t, statsOutputTool("generic output", want))
 
 	requireStats(t, result, want)
@@ -881,7 +881,7 @@ func TestStreamDiscardsIncompleteReasoning(t *testing.T) {
 	}
 	assistant := agent.New("", provider, nil)
 
-	var completedReasoning bool
+	var hasCompletedReasoning bool
 	for update, err := range assistant.Stream(t.Context(), "go") {
 		if err != nil {
 			if !errors.Is(err, failure) {
@@ -889,10 +889,10 @@ func TestStreamDiscardsIncompleteReasoning(t *testing.T) {
 			}
 			continue
 		}
-		completedReasoning = completedReasoning || update.Event != nil && update.Event.Kind == agent.ModelReasoningEvent
+		hasCompletedReasoning = hasCompletedReasoning || update.Event != nil && update.Event.Kind == agent.ModelReasoningEvent
 	}
 
-	if completedReasoning {
+	if hasCompletedReasoning {
 		t.Error("incomplete reasoning became a durable event")
 	}
 }
