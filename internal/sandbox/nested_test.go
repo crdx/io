@@ -98,8 +98,7 @@ func commitUnderLandlock(t *testing.T) {
 	workspace := os.Getenv(workspaceVariable)
 	home := os.Getenv(homeVariable)
 
-	version, err := landlockVersion()
-	if err != nil {
+	if err := AvailableAtAll(); err != nil {
 		t.Fatal(err)
 	}
 
@@ -109,7 +108,7 @@ func commitUnderLandlock(t *testing.T) {
 		Exec:  []string{"/usr/bin", "/usr/local/bin"},
 	}
 
-	if err := applyLandlock(policy, version); err != nil {
+	if _, err := applyLandlock(policy); err != nil {
 		t.Fatalf("could not enter the sandbox: %v", err)
 	}
 

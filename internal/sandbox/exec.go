@@ -85,16 +85,12 @@ func execSandboxed(encodedPolicy string, command string) error {
 		return err
 	}
 
-	version, err := landlockVersion()
+	isUnixSocketScoped, err := applyLandlock(policy)
 	if err != nil {
 		return err
 	}
 
-	if err := applyLandlock(policy, version); err != nil {
-		return err
-	}
-
-	if err := applySeccomp(version >= unixSocketsABI); err != nil {
+	if err := applySeccomp(isUnixSocketScoped); err != nil {
 		return err
 	}
 

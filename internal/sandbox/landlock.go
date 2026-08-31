@@ -103,7 +103,12 @@ func rightsAtVersion(rights uint64, version int) uint64 {
 	return rights
 }
 
-func applyLandlock(policy Policy, version int) error {
+func applyLandlock(policy Policy) (bool, error) {
+	version, err := landlockVersion()
+	if err != nil {
+		return false, err
+	}
+
 	attr := configuredRuleset(version)
 
 	fd, _, errno := unix.Syscall(
@@ -114,7 +119,7 @@ func applyLandlock(policy Policy, version int) error {
 	)
 
 	if errno != 0 {
-		return fmt.Errorf("could not create the ruleset: %w", errno)
+		return false, fmt.Errorf("could not create the ruleset: %w", errno)
 	}
 
 	ruleset := int(fd)
@@ -128,19 +133,19 @@ func applyLandlock(policy Policy, version int) error {
 		rights := rightsAtVersion(grant.rights, version)
 
 		if err := addRule(ruleset, grant.path, rights, policy.Write); err != nil {
-			return err
+			return false, err
 		}
 	}
 
 	if err := unix.Prctl(unix.PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0); err != nil {
-		return fmt.Errorf("could not set no_new_privs: %w", err)
+		return false, fmt.Errorf("could not set no_new_privs: %w", err)
 	}
 
 	if _, _, errno := unix.Syscall(sysRestrictSelf, uintptr(ruleset), 0, 0); errno != 0 {
-		return fmt.Errorf("could not enter the sandbox: %w", errno)
+		return false, fmt.Errorf("could not enter the sandbox: %w", errno)
 	}
 
-	return nil
+	return version >= unixSocketsABI, nil
 }
 
 func addRule(ruleset int, path string, rights uint64, writableRoots []string) error {

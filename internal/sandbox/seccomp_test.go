@@ -15,15 +15,15 @@ func TestTheSocketFilterAllowsOnlyNamespacedNetworking(t *testing.T) {
 	}
 
 	for _, test := range []struct {
-		name             string
-		allowUnixSockets bool
-		unixAction       uint32
+		name               string
+		isUnixSocketScoped bool
+		unixAction         uint32
 	}{
 		{name: "before Unix socket isolation", unixAction: actionErrno | uint32(unix.EAFNOSUPPORT)},
-		{name: "with Unix socket isolation", allowUnixSockets: true, unixAction: actionAllow},
+		{name: "with Unix socket isolation", isUnixSocketScoped: true, unixAction: actionAllow},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			filter, err := buildFilter(test.allowUnixSockets)
+			filter, err := buildFilter(test.isUnixSocketScoped)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -81,9 +81,9 @@ func TestAnInstalledFilterRefusesTheFamiliesItNames(t *testing.T) {
 		return
 	}
 
-	allowsUnixSockets := os.Getenv(unixSocketsVariable) != ""
+	isUnixSocketScoped := os.Getenv(unixSocketsVariable) != ""
 
-	if err := applySeccomp(allowsUnixSockets); err != nil {
+	if err := applySeccomp(isUnixSocketScoped); err != nil {
 		t.Fatalf("could not install the filter: %v", err)
 	}
 

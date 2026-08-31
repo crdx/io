@@ -65,12 +65,11 @@ func TestAFileGrantReachesNothingAroundIt(t *testing.T) {
 	exact := os.Getenv(grantedVariable)
 	directory := filepath.Dir(exact)
 
-	version, err := landlockVersion()
-	if err != nil {
+	if err := AvailableAtAll(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
-	if err := applyLandlock(grantingCoverage(Policy{Read: []string{exact}}), version); err != nil {
+	if _, err := applyLandlock(grantingCoverage(Policy{Read: []string{exact}})); err != nil {
 		t.Fatalf("could not enter the sandbox: %v", err)
 	}
 
@@ -98,12 +97,11 @@ func TestAnOptionalPathTheMachineLacksDoesNotStopTheSandbox(t *testing.T) {
 		return
 	}
 
-	version, err := landlockVersion()
-	if err != nil {
+	if err := AvailableAtAll(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
-	if err := applyLandlock(grantingCoverage(Policy{}), version); err != nil {
+	if _, err := applyLandlock(grantingCoverage(Policy{})); err != nil {
 		t.Errorf("a policy naming only what the machine may have was refused: %v", err)
 	}
 }
@@ -116,12 +114,11 @@ func TestAPathThatIsNotThereIsNamedWhenItIsGranted(t *testing.T) {
 
 	absent := os.Getenv(grantedVariable)
 
-	version, err := landlockVersion()
-	if err != nil {
+	if err := AvailableAtAll(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
-	err = applyLandlock(grantingCoverage(Policy{Read: []string{absent}}), version)
+	_, err := applyLandlock(grantingCoverage(Policy{Read: []string{absent}}))
 	if err == nil {
 		t.Fatal("a grant of a path that is not there was accepted")
 	}
@@ -146,12 +143,11 @@ func TestAGrantThroughAModelSymlinkIsRefused(t *testing.T) {
 	writeRoot := os.Getenv(grantedVariable)
 	planted := filepath.Join(writeRoot, ".cache")
 
-	version, err := landlockVersion()
-	if err != nil {
+	if err := AvailableAtAll(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
-	err = applyLandlock(grantingCoverage(Policy{Write: []string{writeRoot, planted}}), version)
+	_, err := applyLandlock(grantingCoverage(Policy{Write: []string{writeRoot, planted}}))
 	if err == nil {
 		t.Fatal("a grant through a symbolic link the model could have planted was accepted")
 	}
@@ -186,8 +182,7 @@ func TestAGrantThroughAnAdminSymlinkIsFollowed(t *testing.T) {
 	linked := os.Getenv(grantedVariable)
 	root := filepath.Dir(linked)
 
-	version, err := landlockVersion()
-	if err != nil {
+	if err := AvailableAtAll(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
@@ -195,7 +190,7 @@ func TestAGrantThroughAnAdminSymlinkIsFollowed(t *testing.T) {
 		Read:  []string{linked},
 		Write: []string{filepath.Join(root, "scratch")},
 	})
-	if err := applyLandlock(policy, version); err != nil {
+	if _, err := applyLandlock(policy); err != nil {
 		t.Fatalf("a grant through a link the model could not have planted was refused: %v", err)
 	}
 
@@ -211,12 +206,11 @@ func TestAConfinedProcessCannotReadItsOwnProc(t *testing.T) {
 		return
 	}
 
-	version, err := landlockVersion()
-	if err != nil {
+	if err := AvailableAtAll(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
-	if err := applyLandlock(grantingCoverage(Policy{}), version); err != nil {
+	if _, err := applyLandlock(grantingCoverage(Policy{})); err != nil {
 		t.Fatalf("could not enter the sandbox: %v", err)
 	}
 
@@ -236,13 +230,12 @@ func TestAGrantedBinaryCanBeExecutedWithinTheSandbox(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	version, err := landlockVersion()
-	if err != nil {
+	if err := AvailableAtAll(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
 	policy := grantingCoverage(Policy{Exec: []string{self}})
-	if err := applyLandlock(policy, version); err != nil {
+	if _, err := applyLandlock(policy); err != nil {
 		t.Fatalf("could not enter the sandbox: %v", err)
 	}
 
