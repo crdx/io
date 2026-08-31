@@ -29,7 +29,7 @@ type FetchArgs struct {
 }
 
 func defaultFetchClient() *http.Client {
-	return &http.Client{Timeout: fetchTimeout}
+	return &http.Client{Timeout: fetchTimeout, Transport: publicTransport()}
 }
 
 func newFetch(isAllowed func() bool, client *http.Client) tool.Tool {

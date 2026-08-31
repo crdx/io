@@ -42,7 +42,15 @@ secret
 linked: path escapes from parent
 ```
 
-## Assistant · +7s
+## Tool call — web_fetch (text) · `http://[2001:db8::1]/private` · +7s
+
+→ error · +8s
+
+```
+web fetch failed: Get "http://[2001:db8::1]/private": dial tcp [2001:db8::1]:80: 2001:db8::1 is documentation space, and the web tools reach only the public internet
+```
+
+## Assistant · +9s
 
 ```
 Each boundary stayed closed.
