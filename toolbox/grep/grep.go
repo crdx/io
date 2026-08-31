@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -67,6 +68,18 @@ func Describe(args Args) (string, string) {
 	return util.DescribeSearch(args.Pattern, args.Path, args.Glob)
 }
 
+func confined(root *file.Root, name string) error {
+	if _, err := root.Stat(name); err != nil {
+		if pathError, ok := errors.AsType[*fs.PathError](err); ok {
+			return fmt.Errorf("%s: %w", name, pathError.Err)
+		}
+
+		return err
+	}
+
+	return nil
+}
+
 func run(ctx context.Context, root *file.Root, args Args) (string, tool.Stats, error) {
 	if args.Pattern == "" {
 		return "", tool.Stats{}, errors.New("pattern is required")
@@ -74,6 +87,10 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.Stats, e
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
+		return "", tool.Stats{}, err
+	}
+
+	if err := confined(root, name); err != nil {
 		return "", tool.Stats{}, err
 	}
 

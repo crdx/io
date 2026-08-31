@@ -249,4 +249,64 @@ func TestRenderSaysNothingOfTheWorkingDirectory(t *testing.T) {
 	}
 }
 
+func TestASymbolicLinkOutOfTheRootIsNotSearched(t *testing.T) {
+	base := t.TempDir()
+	outside := filepath.Join(base, "outside")
+	workspace := filepath.Join(base, "workspace")
+
+	for _, directory := range []string{outside, workspace} {
+		if err := os.MkdirAll(directory, 0o750); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	}
+
+	secret := filepath.Join(outside, "credentials")
+	if err := os.WriteFile(secret, []byte("password\n"), 0o600); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if err := os.Symlink(outside, filepath.Join(workspace, "directory")); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := os.Symlink(secret, filepath.Join(workspace, "file")); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	openedRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	t.Cleanup(func() { _ = openedRoot.Close() })
+
+	root := file.New(openedRoot, allowAll)
+
+	for _, path := range []string{"directory", "file", "directory/credentials"} {
+		output, err := exec(t, root, `{"pattern":"password","path":"`+path+`"}`)
+		if err == nil {
+			t.Errorf("expected %s to be refused, got %q", path, output)
+		}
+		if strings.Contains(output, "password") {
+			t.Errorf("expected nothing outside the root to be read, got %q", output)
+		}
+	}
+}
+
+func TestASymbolicLinkInsideTheRootIsStillSearched(t *testing.T) {
+	root := testRoot(t, map[string]string{"inner/main.go": "hello\n"})
+
+	if err := os.Symlink("inner", filepath.Join(root.Name(), "linked")); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	output, err := exec(t, root, `{"pattern":"hello","path":"linked"}`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(output, "hello") {
+		t.Errorf("expected the linked directory to be searched, got %q", output)
+	}
+}
+
 func allowAll(string) error { return nil }

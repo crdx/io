@@ -30,7 +30,19 @@ I checked each boundary without crossing it.
 file is larger than the 20971520-byte limit
 ```
 
-## Assistant · +5s
+## Tool call — grep (linked) · +5s
+
+```regexp
+secret
+```
+
+→ error · +6s
+
+```
+linked: path escapes from parent
+```
+
+## Assistant · +7s
 
 ```
 Each boundary stayed closed.

@@ -11,6 +11,7 @@ I checked each boundary without crossing
 it.
 
 read huge.log ✗ 0L ~96Mt file is larg…
+grep secret link… ✗ linked: path esca…
 
 Each boundary stayed closed.
 === one column ===
@@ -186,6 +187,7 @@ t
 .
 
 ✗
+✗
 
 E
 a
@@ -235,6 +237,7 @@ without
 crossing it.
 
 ✗ 0L ~96Mt
+gr… ✗ lin…
 
 Each
 boundary
@@ -250,5 +253,6 @@ Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t 
 I checked each boundary without crossing it.
 
 read huge.log ✗ 0L ~96Mt file is larger than the 20971520-byte limit
+grep secret linked ✗ linked: path escapes from parent
 
 Each boundary stayed closed.
