@@ -64,6 +64,8 @@ var completableToolNames = []string{
 }
 
 func main() {
+	sandbox.Init()
+
 	if cli.WriteCompletions(os.Stdout, os.Args[1:], cli.Sources{
 		ModelCachePath: location.GetModelCachePath(os.Getenv(backend.EndpointVariable) != ""),
 		SessionsDir:    location.GetSessionsDir(),
@@ -71,8 +73,6 @@ func main() {
 	}) {
 		return
 	}
-
-	sandbox.Init()
 
 	style.Init(os.Stdout)
 
