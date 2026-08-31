@@ -13,6 +13,7 @@ of context.\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhuge.log\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m0L ~96Mt\e[0m \e[38;2;204;102;102mfile is larg…\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlink…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mlinked: path esca…\e[0m\r
 \r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;192;128;80mhttp://[20…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb fetch failed:…\e[0m\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mready\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe shell cannot be co…\e[0m\r
 \r
 \r\e[KEach boundary stayed closed.\r
 \e[?25h\e[?2026l
@@ -191,6 +192,7 @@ y\e[0m\r
 \r\e[K\e[38;2;204;102;102m✗\e[0m\r
 \r\e[K\e[38;2;204;102;102m✗\e[0m\r
 \r\e[K\e[38;2;204;102;102m\e[0m \e[38;2;204;102;102m✗\e[0m\r
+\r\e[K\e[38;2;129;162;190m\e[0m \e[38;2;204;102;102m✗\e[0m\r
 \r
 \r\e[KE\r
 \r\e[Ka\r
@@ -229,6 +231,7 @@ I checked each boundary without crossing it.
 read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhuge.log\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m0L ~96Mt\e[0m \e[38;2;204;102;102mfile is larger than the 20971520-byte limit\e[0m
 grep \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlinked\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mlinked: path escapes from parent\e[0m
 \e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttp://[2001:db8::1]/private\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb fetch failed: Get "http://[2001:db8::1]/private": dial tcp [2001:db8::1]:80: 2001:db8::1 is documentation space, and the web tools reach only the public internet\e[0m
+\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mready\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe shell cannot be confined: writable policy unsupported\e[0m
 
 Each boundary stayed closed.
 
@@ -244,6 +247,7 @@ Each boundary stayed closed.
 \e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhuge.log\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhuge.log\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m0L ~96Mt\e[0m \e[38;2;204;102;102mfile is larger than the 20971520-byte limit\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlinked\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlinked\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mlinked: path escapes from parent\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttp://[2001:db8::1]/private\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttp://[2001:db8::1]/private\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb fetch failed: Get "http://[2001:db8::1]/private": d…\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mready\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mready\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe shell cannot be confined: writable policy unsupported\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KEach\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach bou\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach boundar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach boundary st\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach boundary stayed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach boundary stayed clo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach boundary stayed closed.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -259,6 +263,7 @@ Each boundary stayed closed.
 \e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhuge.log\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhuge.log\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m0L ~96Mt\e[0m \e[38;2;204;102;102mfile is larger than the 20971520-byte limit\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlinked\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlinked\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mlinked: path escapes from parent\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttp://[2001:db8::1]/private\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttp://[2001:db8::1]/private\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb fetch failed: Get "http://[2001:db8::1]/private": d…\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mready\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mready\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe shell cannot be confined: writable policy unsupported\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KEach boundary stayed closed.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -274,6 +279,7 @@ Each boundary stayed closed.
 \e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhuge.log\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhuge.log\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m0L ~96Mt\e[0m \e[38;2;204;102;102mfile is larger than the 20971520-byte limit\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlinked\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlinked\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mlinked: path escapes from parent\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttp://[2001:db8::1]/private\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttp://[2001:db8::1]/private\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb fetch failed: Get "http://[2001:db8::1]/private": d…\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mready\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mready\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe shell cannot be confined: writable policy unsupported\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KEach\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach bou\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach boundar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach boundary st\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach boundary stayed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach boundary stayed clo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEach boundary stayed closed.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -302,6 +308,7 @@ text.\e[0m\r
 \r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m0L ~96Mt\e[0m\r
 \r\e[Kgr… \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mlin…\e[0m\r
 \r\e[K\e[38;2;204;102;102mfe…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb…\e[0m\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190m…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe…\e[0m\r
 \r
 \r\e[KEach\r
 \r\e[Kboundary\r
@@ -319,6 +326,7 @@ text.\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhuge.log\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m0L ~96Mt\e[0m \e[38;2;204;102;102mfile is larger than the 20971520-byte limit\e[0m
 \r\e[Kgrep \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlinked\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mlinked: path escapes from parent\e[0m
 \r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttp://[2001:db8::1]/private\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb fetch failed: Get "http://[2001:db8::1]/private": dial tcp [2001:db8::1]:80: 2001:db8::1 is documentation space, and the web tools reach only the public internet\e[0m
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mready\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe shell cannot be confined: writable policy unsupported\e[0m
 
 \r\e[KEach boundary stayed closed.
 \e[?25h\e[?2026l
@@ -334,6 +342,7 @@ text.\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhuge.log\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m0L ~96Mt\e[0m \e[38;2;204;102;102mfile is larger than the 20971520-byte limit\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlinked\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mlinked: path escapes from parent\e[0m\r
 \r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttp://[2001:db8::1]/private\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb fetch failed: Get "http://[2001:db8::1]/private": d…\e[0m\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mready\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe shell cannot be confined: writable policy unsupported\e[0m\r
 \r
 \r\e[KEach boundary stayed closed.\r
 \e[?25h\e[?2026l

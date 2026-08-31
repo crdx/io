@@ -217,8 +217,8 @@ func createPolicyWithSupportProbe(
 	}
 
 	writablePolicy = writablePolicy.WithWrite(sandbox.TmpDir)
-	if supportedProbe(ctx, writablePolicy) != nil {
-		return readOnlySandboxPolicy(ctx, policy, workspaceDir, homeDir, supportedProbe)
+	if err := supportedProbe(ctx, writablePolicy); err != nil {
+		return sandbox.Policy{}, err
 	}
 
 	return writablePolicy, nil

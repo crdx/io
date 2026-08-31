@@ -13,6 +13,7 @@ it.
 read huge.log ✗ 0L ~96Mt file is larg…
 grep secret link… ✗ linked: path esca…
 fetch http://[20… ✗ web fetch failed:…
+$ echo ready ✗ the shell cannot be co…
 
 Each boundary stayed closed.
 === one column ===
@@ -191,6 +192,7 @@ t
 ✗
 
 
+
 E
 a
 c
@@ -241,6 +243,7 @@ crossing it.
 ✗ 0L ~96Mt
 gr… ✗ lin…
 fe… ✗ web…
+$ … ✗ the…
 
 Each
 boundary
@@ -258,5 +261,6 @@ I checked each boundary without crossing it.
 read huge.log ✗ 0L ~96Mt file is larger than the 20971520-byte limit
 grep secret linked ✗ linked: path escapes from parent
 fetch http://[2001:db8::1]/private text ✗ web fetch failed: Get "http://[2001:db8::1]/private": d…
+$ echo ready ✗ the shell cannot be confined: writable policy unsupported
 
 Each boundary stayed closed.

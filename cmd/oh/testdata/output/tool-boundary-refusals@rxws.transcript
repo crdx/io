@@ -50,7 +50,15 @@ linked: path escapes from parent
 web fetch failed: Get "http://[2001:db8::1]/private": dial tcp [2001:db8::1]:80: 2001:db8::1 is documentation space, and the web tools reach only the public internet
 ```
 
-## Assistant · +9s
+## Tool call — bash · `echo ready` · +9s
+
+→ error · +10s
+
+```
+the shell cannot be confined: writable policy unsupported
+```
+
+## Assistant · +11s
 
 ```
 Each boundary stayed closed.

@@ -280,10 +280,10 @@ func TestOnlyTheScratchAndTheCacheResolveUnixSockets(t *testing.T) {
 	}
 }
 
-func TestAnUnsupportedWritablePolicyFallsBackToReadOnly(t *testing.T) {
+func TestAnUnsupportedWritablePolicyIsRefusedRatherThanQuietlyMadeReadOnly(t *testing.T) {
 	workspace := t.TempDir()
 	homeDir := t.TempDir()
-	var probes int
+	unsupported := errors.New("writable policy unsupported")
 
 	policy, err := createPolicyWithSupportProbe(
 		t.Context(),
@@ -293,21 +293,17 @@ func TestAnUnsupportedWritablePolicyFallsBackToReadOnly(t *testing.T) {
 		Paths{},
 		caps.Write,
 		func(_ context.Context, policy sandbox.Policy) error {
-			probes++
 			if slices.Contains(policy.Write, workspace) {
-				return errors.New("writable policy unsupported")
+				return unsupported
 			}
 			return nil
 		},
 	)
-	if err != nil {
-		t.Fatal(err)
+	if !errors.Is(err, unsupported) {
+		t.Errorf("got %v, want %v", err, unsupported)
 	}
-	if probes != 2 {
-		t.Errorf("probed %d policies, want writable then read-only", probes)
-	}
-	if slices.Contains(policy.Write, workspace) || slices.Contains(policy.Write, homeDir) {
-		t.Errorf("fallback remained writable: %v", policy.Write)
+	if len(policy.Write) > 0 {
+		t.Errorf("a refused policy still granted %v", policy.Write)
 	}
 }
 
