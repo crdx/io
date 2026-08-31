@@ -1,9 +1,8 @@
 package caps
 
 import (
-	"slices"
-
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/access"
 )
 
 const ModeChange agent.Kind = "mode_change"
@@ -48,15 +47,7 @@ func ModeWithout(event agent.Event, swappedCaps Set) agent.Event {
 }
 
 func LastRecordedMode(events []agent.Event) (Set, bool) {
-	for _, event := range slices.Backward(events) {
-		if event.Kind != ModeChange {
-			continue
-		}
-
-		if grantedCaps, err := Parse(event.Text); err == nil {
-			return grantedCaps, true
-		}
-	}
-
-	return 0, false
+	return access.LastRecorded(events, ModeChange, func(event agent.Event) (Set, error) {
+		return Parse(event.Text)
+	})
 }

@@ -706,23 +706,23 @@ func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
 				currentTurn: Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true, IsCancelled: test.isCancelled})},
 			}
 			self.queuedTurn.Replace("later")
-			self.queuedTurn.MarkModeChange()
+			self.queuedTurn.MarkAccessChange()
 
 			self.cancelTurn(escapeReason)
 
 			pending := self.queuedTurn.Peek()
-			wasKept := pending.Replacement && pending.ModeChange && pending.Message == "later"
+			wasKept := pending.Replacement && pending.AccessChange && pending.Message == "later"
 			if wasKept != test.wantKept {
 				t.Errorf(
 					"expected the queue kept=%t, got queued=%t mode=%t prompt=%q",
-					test.wantKept, pending.Replacement, pending.ModeChange, pending.Message,
+					test.wantKept, pending.Replacement, pending.AccessChange, pending.Message,
 				)
 			}
 
-			if pending.ModeNotice == test.wantKept {
+			if pending.AccessNotice == test.wantKept {
 				t.Errorf(
 					"expected the dropped mode change to be left as a notice=%t, got %t",
-					!test.wantKept, pending.ModeNotice,
+					!test.wantKept, pending.AccessNotice,
 				)
 			}
 		})
@@ -750,10 +750,10 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 	self.replaceTurn("second")
 
 	pending := self.queuedTurn.Peek()
-	if !pending.Replacement || !pending.ModeChange || pending.Message != "second" {
+	if !pending.Replacement || !pending.AccessChange || pending.Message != "second" {
 		t.Fatalf(
 			"expected both a queued prompt and a queued mode change, got queued=%t mode=%t prompt=%q",
-			pending.Replacement, pending.ModeChange, pending.Message,
+			pending.Replacement, pending.AccessChange, pending.Message,
 		)
 	}
 
@@ -2874,7 +2874,7 @@ func modeFixture(t *testing.T) (*App, string) {
 		screen:   output.New(&bytes.Buffer{}),
 		mode:     caps.NewMode(currentCaps),
 	}
-	self.settleMode()
+	self.settleAccess()
 
 	return self, directory
 }
@@ -2901,7 +2901,7 @@ func TestAModeChangeIsWrittenDownOnceItSettles(t *testing.T) {
 	self, directory := modeFixture(t)
 
 	self.toggleCap(caps.Git)
-	self.settleMode()
+	self.settleAccess()
 
 	recorded := recordedModes(t, self, directory)
 	if len(recorded) != 2 {
@@ -2930,7 +2930,7 @@ func TestACapabilitySwappedBackIsTakenBackRatherThanWrittenDown(t *testing.T) {
 		t.Errorf("expected the change to be taken back, got %v", self.pending.items)
 	}
 
-	self.settleMode()
+	self.settleAccess()
 	if recorded := recordedModes(t, self, directory); len(recorded) != 1 {
 		t.Errorf("expected the opening mode alone, got %v", recorded)
 	}
@@ -2952,7 +2952,7 @@ func TestACapabilitySwappedBackLeavesTheOtherChangesSayingWhatTheySaid(t *testin
 		t.Errorf("expected %q, got %q", shown, again)
 	}
 
-	self.settleMode()
+	self.settleAccess()
 	want := caps.Read | caps.Shell
 	if got, _ := caps.LastRecordedMode(recordedModes(t, self, directory)); got != want {
 		t.Errorf("expected %s, got %s", want.Flags(), got.Flags())
@@ -2975,7 +2975,7 @@ func TestAnIdleModeMessageJoinsTheNextTurn(t *testing.T) {
 		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
-	self.settleMode()
+	self.settleAccess()
 
 	self.toggleCap(caps.Write)
 	modeMessage := workspaceNowReadOnly()
@@ -3018,7 +3018,7 @@ func TestAModeChangeTheSessionClosesOnIsTakenBack(t *testing.T) {
 		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
-	self.settleMode()
+	self.settleAccess()
 
 	self.start("first")
 	for report := range self.currentTurn.Events() {
@@ -3065,7 +3065,7 @@ func TestAModeChangeSaysItselfInTheScrollback(t *testing.T) {
 	self, _ := modeFixture(t)
 	self.screen = output.New(&screenOutput)
 	self.toggleCap(caps.Git)
-	self.settleMode()
+	self.settleAccess()
 
 	if !strings.Contains(screenOutput.String(), "The .git directory is now read-write.") {
 		t.Errorf("expected the change to be said, got %q", screenOutput.String())
@@ -3118,7 +3118,7 @@ func modeMessagesStream(t *testing.T, toggleCount int, isSent bool) string {
 		self.toggleCap(caps.Git)
 	}
 	if isSent {
-		self.settleMode()
+		self.settleAccess()
 	}
 
 	return screenOutput.String()
@@ -7798,7 +7798,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	settleSessionGoldenMode(firstHarness)
 	if scenario.ToggleBeforeFirst != "" {
 		toggleSessionGoldenCaps(t, firstHarness, scenario.ToggleBeforeFirst)
-		firstHarness.settleMode()
+		firstHarness.settleAccess()
 		firstAssistant.AddUserMessage(firstHarness.mode.Inject())
 	}
 	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
@@ -8034,7 +8034,7 @@ func requireSameVisibleScreen(t *testing.T, description string, firstOutput stri
 
 func settleSessionGoldenMode(testHarness *App) {
 	testHarness.mode = caps.NewMode(caps.All())
-	testHarness.settleMode()
+	testHarness.settleAccess()
 }
 
 func settleResumedSessionGoldenMode(testHarness *App, events []agent.Event) {

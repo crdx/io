@@ -2,21 +2,21 @@ package turn
 
 import "testing"
 
-func TestLatestReplacementWinsAndKeepsModeChange(t *testing.T) {
+func TestLatestReplacementWinsAndKeepsAccessChange(t *testing.T) {
 	var queue Queue
 	queue.Replace("first")
-	queue.MarkModeChange()
+	queue.MarkAccessChange()
 	queue.Replace("second")
 
 	pending := queue.Peek()
-	if !pending.Replacement || !pending.ModeChange || pending.Message != "second" {
+	if !pending.Replacement || !pending.AccessChange || pending.Message != "second" {
 		t.Errorf("got %+v", pending)
 	}
 }
 
 func TestReplacementTakesPriorityAndConsumesTheQueue(t *testing.T) {
 	var queue Queue
-	queue.MarkModeChange()
+	queue.MarkAccessChange()
 	queue.Replace("continue")
 
 	kind, message := queue.Take()
@@ -28,12 +28,12 @@ func TestReplacementTakesPriorityAndConsumesTheQueue(t *testing.T) {
 	}
 }
 
-func TestModeChangeIsTakenWithoutAReplacement(t *testing.T) {
+func TestAccessChangeIsTakenWithoutAReplacement(t *testing.T) {
 	var queue Queue
-	queue.MarkModeChange()
+	queue.MarkAccessChange()
 
 	kind, message := queue.Take()
-	if kind != ModeChange || message != "" {
+	if kind != AccessChange || message != "" {
 		t.Errorf("got %v %q", kind, message)
 	}
 }
@@ -41,7 +41,7 @@ func TestModeChangeIsTakenWithoutAReplacement(t *testing.T) {
 func TestClearDropsEveryQueuedAction(t *testing.T) {
 	var queue Queue
 	queue.Replace("later")
-	queue.MarkModeChange()
+	queue.MarkAccessChange()
 	queue.Clear()
 
 	kind, message := queue.Take()

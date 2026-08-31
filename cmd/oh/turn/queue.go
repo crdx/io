@@ -5,15 +5,15 @@ type Kind int
 const (
 	None Kind = iota
 	Replacement
-	ModeChange
-	ModeNotice
+	AccessChange
+	AccessNotice
 )
 
 type Pending struct {
-	Message     string
-	Replacement bool
-	ModeChange  bool
-	ModeNotice  bool
+	Message      string
+	Replacement  bool
+	AccessChange bool
+	AccessNotice bool
 }
 
 type Queue struct {
@@ -25,8 +25,8 @@ func (self *Queue) Replace(message string) {
 	self.pending.Replacement = true
 }
 
-func (self *Queue) MarkModeChange() {
-	self.pending.ModeChange = true
+func (self *Queue) MarkAccessChange() {
+	self.pending.AccessChange = true
 }
 
 func (self *Queue) Clear() {
@@ -34,11 +34,11 @@ func (self *Queue) Clear() {
 }
 
 func (self *Queue) Drop() {
-	self.pending = Pending{ModeNotice: self.pending.ModeChange || self.pending.ModeNotice}
+	self.pending = Pending{AccessNotice: self.pending.AccessChange || self.pending.AccessNotice}
 }
 
 func (self *Queue) Empty() bool {
-	return !self.pending.Replacement && !self.pending.ModeChange && !self.pending.ModeNotice
+	return !self.pending.Replacement && !self.pending.AccessChange && !self.pending.AccessNotice
 }
 
 func (self *Queue) Peek() Pending {
@@ -52,10 +52,10 @@ func (self *Queue) Take() (Kind, string) {
 	switch {
 	case pending.Replacement:
 		return Replacement, pending.Message
-	case pending.ModeChange:
-		return ModeChange, ""
-	case pending.ModeNotice:
-		return ModeNotice, ""
+	case pending.AccessChange:
+		return AccessChange, ""
+	case pending.AccessNotice:
+		return AccessNotice, ""
 	default:
 		return None, ""
 	}

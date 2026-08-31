@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/access"
 	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/config"
@@ -127,7 +128,7 @@ type TurnEvent = turn.Event
 const historyLimit = 1000
 
 func (self *App) begin(message string) cycle.Transition {
-	self.settleMode()
+	self.settleAccess()
 
 	history := edit.NewHistory(location.GetHistoryPath(), historyLimit)
 	editor := edit.NewInput(history)
@@ -333,7 +334,7 @@ func (self *App) toggleCap(whichCaps caps.Set) {
 	}
 
 	if self.currentTurn.Running() {
-		self.queuedTurn.MarkModeChange()
+		self.queuedTurn.MarkAccessChange()
 		self.interruptTurn(modeReason)
 	}
 }
@@ -404,7 +405,7 @@ func (self *App) refreshPendingMessages() {
 	}
 }
 
-func (self *App) settleMode() {
+func (self *App) settleAccess() {
 	if self.settledCaps == 0 {
 		self.settledCaps = self.mode.Current()
 		self.recordModeEvent(caps.ModeEvent(self.settledCaps))
@@ -747,7 +748,7 @@ func (self *App) redraw() {
 
 func (self *App) start(message string) {
 	userTurnElapsed := self.turnTiming().UserTurn
-	self.settleMode()
+	self.settleAccess()
 	self.metrics.BeginTurn()
 
 	if note := self.prelude(); note != "" {
@@ -772,11 +773,15 @@ func (self *App) takeSessionTitle(event agent.Event) {
 
 func (self *App) prelude() string {
 	notes := slices.DeleteFunc(
-		[]string{self.interruptionNote(), self.mode.Inject(), self.titleNote()},
+		[]string{self.interruptionNote(), self.accessMessage(), self.titleNote()},
 		func(note string) bool { return note == "" },
 	)
 
 	return strings.Join(notes, " ")
+}
+
+func (self *App) accessMessage() string {
+	return access.NewGroup(self.mode).Inject()
 }
 
 func (self *App) titleNote() string {
@@ -923,11 +928,11 @@ func (self *App) finish() {
 	case turn.Replacement:
 		self.refreshPendingMessages()
 		self.start(message)
-	case turn.ModeChange:
-		if message := self.mode.Inject(); message != "" {
+	case turn.AccessChange:
+		if message := self.accessMessage(); message != "" {
 			self.start(message)
 		}
-	case turn.ModeNotice:
+	case turn.AccessNotice:
 		self.refreshPendingMessages()
 	case turn.None:
 	}

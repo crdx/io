@@ -3,8 +3,8 @@ package caps
 import (
 	"fmt"
 	"strings"
-	"sync"
 
+	"crdx.org/io/cmd/oh/access"
 	"crdx.org/io/internal/file"
 )
 
@@ -115,38 +115,32 @@ func RefuseWrite(mode *Mode) func(name string) error {
 }
 
 type Mode struct {
-	mutex       sync.Mutex
-	currentCaps Set
-	knownCaps   Set
+	state *access.State[Set]
+}
+
+func modeDefinition() access.Definition[Set] {
+	return access.Definition[Set]{
+		Clone: func(grantedCaps Set) Set { return grantedCaps },
+		Describe: func(knownCaps Set, currentCaps Set) string {
+			return lexicalDiff(currentCaps^knownCaps, currentCaps)
+		},
+	}
 }
 
 func NewMode(currentCaps Set) *Mode {
-	return &Mode{currentCaps: currentCaps, knownCaps: currentCaps}
+	return &Mode{state: access.New(currentCaps, modeDefinition())}
 }
 
 func (self *Mode) Current() Set {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-
-	return self.currentCaps
+	return self.state.GetCurrent()
 }
 
 func (self *Mode) Toggle(whichCaps Set) {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-
-	self.currentCaps ^= whichCaps
+	self.state.Change(func(currentCaps Set) Set { return currentCaps ^ whichCaps })
 }
 
 func (self *Mode) Inject() string {
-	self.mutex.Lock()
-	defer self.mutex.Unlock()
-
-	changedCaps := self.currentCaps ^ self.knownCaps
-
-	self.knownCaps = self.currentCaps
-
-	return lexicalDiff(changedCaps, self.currentCaps)
+	return self.state.Inject()
 }
 
 func lexicalDiff(changedCaps Set, currentCaps Set) string {
