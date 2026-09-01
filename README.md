@@ -42,17 +42,20 @@ type WeatherParams struct {
     City string
 }
 
-weather := tool.Define(
-    "weather",
-    "report weather in a city",
-    tool.Schema{tool.String("city", "the city to look up")},
-    func(args WeatherParams) (string, string) { return args.City, "" },
-    func(_ context.Context, _ WeatherParams) (string, error) {
-        return "Take a guess.", nil
+weather := tool.Implement(
+    tool.Definition{
+        Name:        "weather",
+        Description: "report weather in a city",
+        Schema:      tool.Schema{tool.String("city", "the city to look up")},
     },
-)
+    func(args WeatherParams) (string, string) { return args.City, "" },
+).Plain(func(_ context.Context, _ WeatherParams) (string, error) {
+    return "Take a guess.", nil
+})
 
-assistant := agent.New("You are a helpful weatherperson", codex.Auth(), []tool.Tool{weather})
+client, _ := codex.Auth("gpt-5.6-sol", "high")
+
+assistant := agent.New("You are a helpful weatherperson", client, []tool.Tool{weather})
 
 answer, _ := assistant.Send(ctx, "what is the weather in London?")
 fmt.Println(answer) // => "It's probably raining."
