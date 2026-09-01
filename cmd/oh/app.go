@@ -420,7 +420,7 @@ func (self *App) refreshPendingMessages() {
 
 	messages := self.pending.texts()
 	if self.pending.renderer == nil {
-		self.pending.renderer = painter.NewPendingMessages(messages)
+		self.pending.renderer = painter.NewPendingMessages(messages, self.screen.IsTerminal())
 		self.screen.Blank()
 		self.pending.block = self.screen.OpenNotice(self.pending.renderer)
 		return

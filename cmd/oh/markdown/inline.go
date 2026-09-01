@@ -9,6 +9,7 @@ import (
 	extensionast "github.com/yuin/goldmark/extension/ast"
 	"github.com/yuin/goldmark/util"
 
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/style"
 )
 
@@ -46,13 +47,19 @@ func (self *renderer) renderInlineNode(node ast.Node) string {
 		return over(col.Strikethrough, self.inline(node))
 
 	case *ast.Link:
-		return style.Link(self.inline(node)) + style.Address(" ("+string(node.Destination)+")")
+		address := string(node.Destination)
+		label := self.hyperlink(style.Link(self.inline(node)), address)
+		return label + style.Address(" ("+address+")")
 
 	case *ast.Image:
 		return style.Link(self.inline(node)) + style.Address(" ("+string(node.Destination)+")")
 
 	case *ast.AutoLink:
-		return style.Link(string(node.URL(self.source)))
+		address := string(node.URL(self.source))
+		if node.AutoLinkType == ast.AutoLinkEmail {
+			address = "mailto:" + address
+		}
+		return self.hyperlink(style.Link(string(node.URL(self.source))), address)
 
 	case *ast.RawHTML:
 		return style.Subtle(self.raw(node))
@@ -66,6 +73,14 @@ func (self *renderer) renderInlineNode(node ast.Node) string {
 	}
 
 	return self.inline(node)
+}
+
+func (self *renderer) hyperlink(text string, address string) string {
+	if !self.shouldRenderHyperlinks {
+		return text
+	}
+
+	return link.RenderWebURL(text, address)
 }
 
 func (self *renderer) text(node *ast.Text) string {

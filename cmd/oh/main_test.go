@@ -2663,6 +2663,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"schedule":              {".ansi", ".screen"},
 		"segments":              {".ansi", ".screen"},
 		"signal-restoration":    {".ansi"},
+		"special-links":         {".ansi", ".screen"},
 		"startup":               {".ansi", ".screen"},
 		"startup-sized":         {".ansi", ".screen"},
 		"startup-sized-output":  {".ansi", ".screen"},

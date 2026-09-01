@@ -7,13 +7,14 @@ import (
 	"regexp"
 	"strings"
 
+	"crdx.org/io/cmd/oh/escape"
 	"crdx.org/io/internal/util/pathutil"
 )
 
 const (
 	openPrefix = "\x1b]8;;"
 	terminator = "\x1b\\"
-	closeLink  = openPrefix + terminator
+	closeLink  = escape.HyperlinkClose
 )
 
 const pathExpression = `(?:~|\.{1,2})?/(?:[[:alnum:]_.@+%=-]+/)*[[:alnum:]_.@+%=-]+|[[:alnum:]_.@+%=-]+(?:/[[:alnum:]_.@+%=-]+)+|[[:alnum:]_@+%=-]+(?:\.[[:alnum:]_@+%=-]+)+|\.[[:alnum:]_@+%=-]+`
@@ -24,12 +25,41 @@ func RenderURL(text string, address string) string {
 	return openPrefix + address + terminator + text + closeLink
 }
 
+func RenderWebURL(text string, address string) string {
+	target, isSupported := webURL(address)
+	if !isSupported {
+		return text
+	}
+
+	return RenderURL(text, target)
+}
+
+func webURL(address string) (string, bool) {
+	target, err := url.Parse(address)
+	if err != nil {
+		return "", false
+	}
+
+	switch strings.ToLower(target.Scheme) {
+	case "http", "https":
+		if target.Host == "" {
+			return "", false
+		}
+	case "mailto":
+		if target.Opaque == "" && target.Path == "" {
+			return "", false
+		}
+	default:
+		return "", false
+	}
+
+	return target.String(), true
+}
+
 func Plain(text string) string {
 	return visibleTextOf(text).text
 }
 
-// Render adds OSC 8 links to path-like spans which resolve beneath workspace or name an absolute
-// path. ANSI styling around and within a path is preserved.
 func Render(text string, workspace string) string {
 	visible := visibleTextOf(text)
 	matches := pathPattern.FindAllStringSubmatchIndex(visible.text, -1)
@@ -41,6 +71,10 @@ func Render(text string, workspace string) string {
 	sourceAt := 0
 
 	for _, match := range matches {
+		if visible.hasLink(match[0], match[1]) {
+			continue
+		}
+
 		path := visible.text[match[2]:match[3]]
 		target, exists := resolve(path, workspace)
 		if !exists {
@@ -69,30 +103,49 @@ func Render(text string, workspace string) string {
 }
 
 type visibleText struct {
-	text   string
-	starts []int
-	ends   []int
+	text     string
+	starts   []int
+	ends     []int
+	isLinked []bool
+}
+
+func (self visibleText) hasLink(begin int, end int) bool {
+	for _, isLinked := range self.isLinked[begin:end] {
+		if isLinked {
+			return true
+		}
+	}
+
+	return false
 }
 
 func visibleTextOf(text string) visibleText {
 	var plain strings.Builder
 	starts := []int{0}
 	ends := []int{0}
+	var isLinked []bool
+	isLinkActive := false
 
 	for i := 0; i < len(text); {
 		if text[i] == '\x1b' {
-			i = escapeEnd(text, i)
+			end := escapeEnd(text, i)
+			sequence := text[i:end]
+			if strings.HasPrefix(sequence, openPrefix) {
+				isLinkActive = sequence != closeLink
+			}
+			i = end
 			starts[len(starts)-1] = i
 			continue
 		}
 
 		plain.WriteByte(text[i])
+		isLinked = append(isLinked, isLinkActive)
 		i++
 		starts = append(starts, i)
 		ends = append(ends, i)
 	}
 
-	return visibleText{text: plain.String(), starts: starts, ends: ends}
+	return visibleText{text: plain.String(), starts: starts, ends: ends, isLinked: isLinked}
 }
 
 func escapeEnd(text string, start int) int {

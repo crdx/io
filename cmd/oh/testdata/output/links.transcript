@@ -1,0 +1,31 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+
+## User · +0s
+
+```
+compare [the references](https://example.test/question) with https://example.test/request
+```
+
+## Assistant · +1s
+
+```
+# Terminal links
+
+A [label with **nested emphasis**](https://example.test/label), a bare secure URL https://example.test/bare, a bare ordinary URL http://example.test/plain, and a www URL www.example.test/path.
+
+This [long linked label crosses narrow rows without leaking into its neighbours](https://example.test/a-long-destination?first=one&second=two), while [mixed-case HTTPS](HTTPS://example.test/case) is accepted too.
+
+Unsupported [script links](javascript:alert(1)), [relative links](docs/page.md), [hostless links](https:path), and FTP ftp://example.test/archive remain visible but inert.
+
+An image remains a fallback: ![diagram](diagram.png).
+```
+
+

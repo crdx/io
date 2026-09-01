@@ -41,6 +41,20 @@ func TestIncrementalRendererMatchesMarkdownThatCanChangeEarlierBlocks(t *testing
 	}
 }
 
+func TestIncrementalHyperlinkRenderingMatchesTheCompleteStream(t *testing.T) {
+	source := "first paragraph\n\n[linked words](https://example.test/path) and https://example.test/bare"
+	var incremental IncrementalRenderer
+	var baseline StreamRenderer
+
+	for at := 1; at <= len(source); at++ {
+		want := baseline.render(source[:at], 24, true)
+		got := incremental.RenderWithHyperlinks(source[:at], 24)
+		if !slices.Equal(got, want) {
+			t.Fatalf("byte %d produced different rows\nwant: %q\ngot:  %q", at, want, got)
+		}
+	}
+}
+
 func TestIncrementalRendererDisablesForDocumentWideState(t *testing.T) {
 	for name, source := range map[string]string{
 		"link reference":           "see [the note][note]\n\n[note]: https://example.com",

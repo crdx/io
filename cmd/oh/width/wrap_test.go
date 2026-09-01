@@ -4,6 +4,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"crdx.org/io/cmd/oh/escape"
 )
 
 func TestWrappingBreaksAtSpacesAndMidWordWhereThereAreNone(t *testing.T) {
@@ -49,6 +51,7 @@ func FuzzWrappingTerminalTextTerminatesWithValidWidths(fuzzer *testing.F) {
 		"\x1b[999999999999999999999Cright",
 		"\x1b]66;s=2:w=2;🐟\x1b\\ after",
 		"\x1b]66;s=-1:w=999999999999999999999;x",
+		"\x1b]8;;https://example.test\x1b\\linked words\x1b]8;;\x1b\\",
 	} {
 		fuzzer.Add(text, uint8(20))
 	}
@@ -68,6 +71,25 @@ func FuzzWrappingTerminalTextTerminatesWithValidWidths(fuzzer *testing.F) {
 			}
 		}
 	})
+}
+
+func TestAHyperlinkThatSpansABreakIsClosedAndOpenedAgain(t *testing.T) {
+	opening := "\x1b]8;;https://example.test\x1b\\"
+	got := Wrap(opening+"\x1b[1mlinked words\x1b[0m"+escape.HyperlinkClose, 6)
+
+	if len(got) != 2 {
+		t.Fatalf("expected two rows, got %q", got)
+	}
+
+	for i, row := range got {
+		if !strings.HasPrefix(row, opening+"\x1b[1m") || !strings.HasSuffix(row, reset+escape.HyperlinkClose) {
+			t.Errorf("row %d does not contain a balanced hyperlink and style: %q", i, row)
+		}
+	}
+
+	if visible := []string{plain(got[0]), plain(got[1])}; !slices.Equal(visible, []string{"linked", "words"}) {
+		t.Errorf("visible rows = %q", visible)
+	}
 }
 
 func TestAStyleThatSpansABreakIsClosedAndOpenedAgain(t *testing.T) {

@@ -12,12 +12,16 @@ import (
 const unsentMark = "⏳"
 
 type PendingMessages struct {
-	messages []string
-	isSent   bool
+	messages               []string
+	isSent                 bool
+	shouldRenderHyperlinks bool
 }
 
-func NewPendingMessages(messages []string) *PendingMessages {
-	return &PendingMessages{messages: slices.Clone(messages)}
+func NewPendingMessages(messages []string, shouldRenderHyperlinks bool) *PendingMessages {
+	return &PendingMessages{
+		messages:               slices.Clone(messages),
+		shouldRenderHyperlinks: shouldRenderHyperlinks,
+	}
 }
 
 func (self *PendingMessages) Replace(messages []string) {
@@ -43,11 +47,14 @@ func (self *PendingMessages) Rows(columns int) []string {
 }
 
 func (self *PendingMessages) render(message string, columns int) string {
-	if self.isSent {
-		return RenderSubmittedMessage(message, columns)
+	if !self.isSent {
+		message = unsentMark + " " + message
+	}
+	if self.shouldRenderHyperlinks {
+		return RenderSubmittedMessageWithHyperlinks(message, columns)
 	}
 
-	return RenderSubmittedMessage(unsentMark+" "+message, columns)
+	return RenderSubmittedMessage(message, columns)
 }
 
 func renderAccessMessage(event agent.Event) (string, bool) {

@@ -57,20 +57,27 @@ func Rows(text string, cells int) []Row {
 }
 
 type atom struct {
-	text     string
-	cells    int
-	isEscape bool
-	isStyle  bool
+	text        string
+	cells       int
+	hyperlink   string
+	isEscape    bool
+	isStyle     bool
+	isHyperlink bool
+}
+
+type presentationState struct {
+	styles    string
+	hyperlink string
 }
 
 func wrapLine(line string, cells int, base int) []Row {
 	atoms := split(line)
-	openStyles := stylesAt(atoms)
+	states := statesAt(atoms)
 	offsets := offsetsOf(atoms)
 
 	row := func(begin int, end int, next int) Row {
 		return Row{
-			Text:  join(atoms, begin, end, openStyles),
+			Text:  join(atoms, begin, end, states),
 			Begin: base + offsets[begin],
 			End:   base + offsets[end],
 			Next:  base + offsets[next],
@@ -183,43 +190,53 @@ func advance(atoms []atom, begin int) int {
 	return min(end+1, len(atoms))
 }
 
-func join(atoms []atom, begin int, end int, openStyles []string) string {
+func join(atoms []atom, begin int, end int, states []presentationState) string {
 	span := 0
 	for _, one := range atoms[begin:end] {
 		span += len(one.text)
 	}
 
 	var out strings.Builder
-	out.Grow(len(openStyles[begin]) + span + len(reset))
+	out.Grow(len(states[begin].hyperlink) + len(states[begin].styles) + span + len(reset) + len(escape.HyperlinkClose))
 
-	out.WriteString(openStyles[begin])
+	out.WriteString(states[begin].hyperlink)
+	out.WriteString(states[begin].styles)
 
 	for _, one := range atoms[begin:end] {
 		out.WriteString(one.text)
 	}
 
-	if openStyles[end] != "" {
+	if states[end].styles != "" {
 		out.WriteString(reset)
+	}
+	if states[end].hyperlink != "" {
+		out.WriteString(escape.HyperlinkClose)
 	}
 
 	return out.String()
 }
 
-func stylesAt(atoms []atom) []string {
-	openStyles := make([]string, len(atoms)+1)
+func statesAt(atoms []atom) []presentationState {
+	states := make([]presentationState, len(atoms)+1)
 
 	for i, one := range atoms {
-		switch {
-		case !one.isStyle:
-			openStyles[i+1] = openStyles[i]
-		case one.text == reset || one.text == "\x1b[m":
-			openStyles[i+1] = ""
-		default:
-			openStyles[i+1] = openStyles[i] + one.text
+		states[i+1] = states[i]
+
+		if one.isHyperlink {
+			states[i+1].hyperlink = one.hyperlink
+			continue
 		}
+		if !one.isStyle {
+			continue
+		}
+		if one.text == reset || one.text == "\x1b[m" {
+			states[i+1].styles = ""
+			continue
+		}
+		states[i+1].styles += one.text
 	}
 
-	return openStyles
+	return states
 }
 
 func split(text string) []atom {
@@ -231,10 +248,12 @@ func split(text string) []atom {
 		if runes[i] == '\x1b' {
 			sequence := escape.GetSequence(runes, i)
 			atoms = append(atoms, atom{
-				text:     string(runes[i:sequence.End]),
-				cells:    sequence.Cells,
-				isEscape: true,
-				isStyle:  sequence.IsStyle,
+				text:        string(runes[i:sequence.End]),
+				cells:       sequence.Cells,
+				hyperlink:   sequence.Hyperlink,
+				isEscape:    true,
+				isStyle:     sequence.IsStyle,
+				isHyperlink: sequence.IsHyperlink,
 			})
 			i = sequence.End
 

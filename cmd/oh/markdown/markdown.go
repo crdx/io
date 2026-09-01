@@ -26,7 +26,12 @@ var markdownParser = goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser
 
 // Render lays markdown out as the rows to draw, styled and wrapped to the given columns.
 func Render(markdown string, columns int) []string {
-	return render(markdown, columns, nil)
+	return render(markdown, columns, nil, false)
+}
+
+// RenderWithHyperlinks lays markdown out with terminal hyperlinks.
+func RenderWithHyperlinks(markdown string, columns int) []string {
+	return render(markdown, columns, nil, true)
 }
 
 // StreamRenderer retains successful Mermaid diagrams while incomplete Markdown continues arriving.
@@ -41,13 +46,7 @@ type StreamRenderer struct {
 
 // Render lays out the current prefix of a Markdown stream.
 func (self *StreamRenderer) Render(markdown string, columns int) []string {
-	self.isTailMermaid = false
-	self.hasMermaid = false
-	self.hasLinkReference = false
-	self.stableCandidateStart = 0
-	self.hasStableCandidateStart = false
-
-	return render(markdown, columns, self)
+	return self.render(markdown, columns, false)
 }
 
 // IsTailMermaid reports whether the last rendered row belongs to a Mermaid diagram.
@@ -65,7 +64,17 @@ func (self *StreamRenderer) Reset() {
 	self.hasStableCandidateStart = false
 }
 
-func render(markdown string, columns int, stream *StreamRenderer) []string {
+func (self *StreamRenderer) render(markdown string, columns int, shouldRenderHyperlinks bool) []string {
+	self.isTailMermaid = false
+	self.hasMermaid = false
+	self.hasLinkReference = false
+	self.stableCandidateStart = 0
+	self.hasStableCandidateStart = false
+
+	return render(markdown, columns, self, shouldRenderHyperlinks)
+}
+
+func render(markdown string, columns int, stream *StreamRenderer, shouldRenderHyperlinks bool) []string {
 	source := []byte(strings.ReplaceAll(markdown, "\t", tab))
 	parserContext := parser.NewContext()
 	document := markdownParser.Parse(text.NewReader(source), parser.WithContext(parserContext))
@@ -80,7 +89,13 @@ func render(markdown string, columns int, stream *StreamRenderer) []string {
 	}
 
 	mermaidBlock := 0
-	renderer := &renderer{source: source, columns: columns, mermaidBlock: &mermaidBlock, stream: stream}
+	renderer := &renderer{
+		source:                 source,
+		columns:                columns,
+		mermaidBlock:           &mermaidBlock,
+		stream:                 stream,
+		shouldRenderHyperlinks: shouldRenderHyperlinks,
+	}
 	renderer.blocks(document)
 
 	return renderer.rows
@@ -102,12 +117,13 @@ func originalOffset(markdown string, expandedOffset int) int {
 }
 
 type renderer struct {
-	source       []byte // the markdown being drawn, which every node is a position in
-	columns      int
-	mermaidBlock *int
-	isTight      bool     // whether its blocks stand apart, which those of a tight list do not
-	rows         []string // what has been drawn so far
-	stream       *StreamRenderer
+	source                 []byte // the markdown being drawn, which every node is a position in
+	columns                int
+	mermaidBlock           *int
+	isTight                bool     // whether its blocks stand apart, which those of a tight list do not
+	rows                   []string // what has been drawn so far
+	stream                 *StreamRenderer
+	shouldRenderHyperlinks bool
 }
 
 func (self *renderer) blocks(parent ast.Node) {
@@ -247,7 +263,13 @@ func rowsFit(rows []string, columns int) bool {
 func (self *renderer) quote(node ast.Node) {
 	lead, room := margin(self.columns, "│ ")
 
-	inner := &renderer{source: self.source, columns: room, mermaidBlock: self.mermaidBlock, stream: self.stream}
+	inner := &renderer{
+		source:                 self.source,
+		columns:                room,
+		mermaidBlock:           self.mermaidBlock,
+		stream:                 self.stream,
+		shouldRenderHyperlinks: self.shouldRenderHyperlinks,
+	}
 	inner.blocks(node)
 
 	for _, row := range inner.rows {
@@ -281,7 +303,14 @@ func (self *renderer) item(marker string, node ast.Node) {
 		return
 	}
 
-	inner := &renderer{source: self.source, columns: room, mermaidBlock: self.mermaidBlock, isTight: true, stream: self.stream}
+	inner := &renderer{
+		source:                 self.source,
+		columns:                room,
+		mermaidBlock:           self.mermaidBlock,
+		isTight:                true,
+		stream:                 self.stream,
+		shouldRenderHyperlinks: self.shouldRenderHyperlinks,
+	}
 	inner.blocks(node)
 
 	hangingIndent := strings.Repeat(" ", width.Of(marker))

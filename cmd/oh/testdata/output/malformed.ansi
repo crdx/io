@@ -25,10 +25,10 @@
 \r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\r
 \r\e[K\r
 \r\e[KA bare URL the renderer has to find for\r
-\r\e[Kitself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and\r
+\r\e[Kitself: \e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mhttps://example.com/plain\e[0m\e]8;;\e\\ and\r
 \r\e[Kone\r
 \r\e[Kin angle brackets\r
-\r\e[K\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are\r
 \r\e[Knot the same thing.\r
 \r
 \r\e[KEntities are resolved in prose — AT&T\r
@@ -265,31 +265,31 @@ n\e[0m\r
 \r\e[Kl\r
 \r\e[Kf\r
 \r\e[K:\r
-\r\e[K\e[38;2;129;162;190mh\e[0m\r
-\r\e[K\e[38;2;129;162;190mt\e[0m\r
-\r\e[K\e[38;2;129;162;190mt\e[0m\r
-\r\e[K\e[38;2;129;162;190mp\e[0m\r
-\r\e[K\e[38;2;129;162;190ms\e[0m\r
-\r\e[K\e[38;2;129;162;190m:\e[0m\r
-\r\e[K\e[38;2;129;162;190m/\e[0m\r
-\r\e[K\e[38;2;129;162;190m/\e[0m\r
-\r\e[K\e[38;2;129;162;190me\e[0m\r
-\r\e[K\e[38;2;129;162;190mx\e[0m\r
-\r\e[K\e[38;2;129;162;190ma\e[0m\r
-\r\e[K\e[38;2;129;162;190mm\e[0m\r
-\r\e[K\e[38;2;129;162;190mp\e[0m\r
-\r\e[K\e[38;2;129;162;190ml\e[0m\r
-\r\e[K\e[38;2;129;162;190me\e[0m\r
-\r\e[K\e[38;2;129;162;190m.\e[0m\r
-\r\e[K\e[38;2;129;162;190mc\e[0m\r
-\r\e[K\e[38;2;129;162;190mo\e[0m\r
-\r\e[K\e[38;2;129;162;190mm\e[0m\r
-\r\e[K\e[38;2;129;162;190m/\e[0m\r
-\r\e[K\e[38;2;129;162;190mp\e[0m\r
-\r\e[K\e[38;2;129;162;190ml\e[0m\r
-\r\e[K\e[38;2;129;162;190ma\e[0m\r
-\r\e[K\e[38;2;129;162;190mi\e[0m\r
-\r\e[K\e[38;2;129;162;190mn\e[0m\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mh\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mt\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mt\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mp\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190ms\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190m:\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190m/\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190m/\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190me\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mx\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190ma\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mm\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mp\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190ml\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190me\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190m.\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mc\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mo\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mm\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190m/\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mp\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190ml\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190ma\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mi\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mn\e[0m\e]8;;\e\\\r
 \r\e[Ka\r
 \r\e[Kn\r
 \r\e[Kd\r
@@ -311,35 +311,35 @@ n\e[0m\r
 \r\e[Ke\r
 \r\e[Kt\r
 \r\e[Ks\r
-\r\e[K\e[38;2;129;162;190mh\e[0m\r
-\r\e[K\e[38;2;129;162;190mt\e[0m\r
-\r\e[K\e[38;2;129;162;190mt\e[0m\r
-\r\e[K\e[38;2;129;162;190mp\e[0m\r
-\r\e[K\e[38;2;129;162;190ms\e[0m\r
-\r\e[K\e[38;2;129;162;190m:\e[0m\r
-\r\e[K\e[38;2;129;162;190m/\e[0m\r
-\r\e[K\e[38;2;129;162;190m/\e[0m\r
-\r\e[K\e[38;2;129;162;190me\e[0m\r
-\r\e[K\e[38;2;129;162;190mx\e[0m\r
-\r\e[K\e[38;2;129;162;190ma\e[0m\r
-\r\e[K\e[38;2;129;162;190mm\e[0m\r
-\r\e[K\e[38;2;129;162;190mp\e[0m\r
-\r\e[K\e[38;2;129;162;190ml\e[0m\r
-\r\e[K\e[38;2;129;162;190me\e[0m\r
-\r\e[K\e[38;2;129;162;190m.\e[0m\r
-\r\e[K\e[38;2;129;162;190mc\e[0m\r
-\r\e[K\e[38;2;129;162;190mo\e[0m\r
-\r\e[K\e[38;2;129;162;190mm\e[0m\r
-\r\e[K\e[38;2;129;162;190m/\e[0m\r
-\r\e[K\e[38;2;129;162;190mb\e[0m\r
-\r\e[K\e[38;2;129;162;190mr\e[0m\r
-\r\e[K\e[38;2;129;162;190ma\e[0m\r
-\r\e[K\e[38;2;129;162;190mc\e[0m\r
-\r\e[K\e[38;2;129;162;190mk\e[0m\r
-\r\e[K\e[38;2;129;162;190me\e[0m\r
-\r\e[K\e[38;2;129;162;190mt\e[0m\r
-\r\e[K\e[38;2;129;162;190me\e[0m\r
-\r\e[K\e[38;2;129;162;190md\e[0m\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mh\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mt\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mt\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mp\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190ms\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190m:\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190m/\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190m/\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190me\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mx\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190ma\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mm\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mp\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190ml\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190me\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190m.\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mc\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mo\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mm\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190m/\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mb\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mr\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190ma\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mc\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mk\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190me\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mt\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190me\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190md\e[0m\e]8;;\e\\\r
 \r\e[K,\r
 \r\e[Kw\r
 \r\e[Kh\r
@@ -593,8 +593,8 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 \r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m 1 \e[38;2;150;152;150m│\e[0m 2 \e[38;2;150;152;150m│\e[0m\r
 \r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
-\r\e[KA\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the ren\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the rendere\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to fin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find fo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: ht\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https://ex\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https://exampl\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.co\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/pl\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and one\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kin a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle bra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle bracket\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://e\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://examp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.com/b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.com/brack\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.com/bracketed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the sam\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same thing.\e[?25h\e[?2026l\r
+\r\e[KA\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the ren\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the rendere\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to fin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find fo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: ht\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https://ex\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https://exampl\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e]8;;https://example.co\e\\\e[38;2;129;162;190mhttps://example.co\e[0m\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e]8;;https://example.com/pl\e\\\e[38;2;129;162;190mhttps://example.com/pl\e[0m\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mhttps://example.com/plain\e[0m\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mhttps://example.com/plain\e[0m\e]8;;\e\\ and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mhttps://example.com/plain\e[0m\e]8;;\e\\ and one\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kin a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle bra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle bracket\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://e\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://examp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.com/b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.com/brack\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.com/bracketed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the sam\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the same th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the same thing.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KEnti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are res\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolve\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in pro\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T be\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T become\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but lef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone insi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, whe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `&amp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `<\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\r
 \r\e[K`<div&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m sta\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are writt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\e[?25h\e[?2026l\r
@@ -631,8 +631,8 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 \r\e[K\e[38;2;150;152;150m│\e[0m   \e[38;2;150;152;150m│\e[0m   \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m 1 \e[38;2;150;152;150m│\e[0m   \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;150;152;150m│\e[0m 1 \e[38;2;150;152;150m│\e[0m 2 \e[38;2;150;152;150m│\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\r
 \r\e[K\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and one\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same thing.\e[?25h\e[?2026l\r
+\r\e[KA bare URL the renderer has to find for itself: \e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mhttps://example.com/plain\e[0m\e]8;;\e\\ and one\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the same thing.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\e[?25h\e[?2026l\r
@@ -687,8 +687,8 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 \r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e[38;2;150;152;150m│\e[0m 1 \e[38;2;150;152;150m│\e[0m 2 \e[38;2;150;152;150m│\e[0m\r
 \r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\r
-\r\e[KA\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the ren\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the rendere\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to fin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find fo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https://exampl\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/pl\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and one\r
-\r\e[Kin a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle bra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://e\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.com/brack\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same thing.\e[?25h\e[?2026l\r
+\r\e[KA\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the ren\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the rendere\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to fin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find fo\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for it\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: https://exampl\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e]8;;https://example.com/pl\e\\\e[38;2;129;162;190mhttps://example.com/pl\e[0m\e]8;;\e\\\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mhttps://example.com/plain\e[0m\e]8;;\e\\ and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KA bare URL the renderer has to find for itself: \e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mhttps://example.com/plain\e[0m\e]8;;\e\\ and one\r
+\r\e[Kin a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle bra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://e\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets <https://example.com/brack\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the same th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the same thing.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KEnti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are res\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolve\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in pro\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T be\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T become\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but lef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone insi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, whe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `&amp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `<\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\r
 \r\e[K`<div&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m sta\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are writt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\e[?25h\e[?2026l\r
@@ -733,14 +733,14 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 \r\e[Kthe renderer\r
 \r\e[Khas to find\r
 \r\e[Kfor itself:\r
-\r\e[K\e[38;2;129;162;190mhttps://exam\e[0m\r
-\r\e[K\e[38;2;129;162;190mple.com/plai\e[0m\r
-\r\e[K\e[38;2;129;162;190mn\e[0m and one\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mhttps://exam\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mple.com/plai\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mn\e[0m\e]8;;\e\\ and one\r
 \r\e[Kin angle\r
 \r\e[Kbrackets\r
-\r\e[K\e[38;2;129;162;190mhttps://exam\e[0m\r
-\r\e[K\e[38;2;129;162;190mple.com/brac\e[0m\r
-\r\e[K\e[38;2;129;162;190mketed\e[0m, which\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://exam\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mple.com/brac\e[0m\e]8;;\e\\\r
+\r\e[K\e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mketed\e[0m\e]8;;\e\\, which\r
 \r\e[Kare not the\r
 \r\e[Ksame thing.\r
 \r
@@ -779,8 +779,8 @@ it\e[0m\r
 \r\e[Ka\e[38;2;150;152;150m | \e[0mb\r
 \r\e[K1\e[38;2;150;152;150m | \e[0m2\r
 \r\e[K\r
-\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and one
-in angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same thing.
+\r\e[KA bare URL the renderer has to find for itself: \e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mhttps://example.com/plain\e[0m\e]8;;\e\\ and one
+in angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the same thing.
 
 \r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and \e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.
 
@@ -811,8 +811,8 @@ in angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which 
 \r\e[K\e[38;2;150;152;150m│\e[0m 1 \e[38;2;150;152;150m│\e[0m 2 \e[38;2;150;152;150m│\e[0m\r
 \r\e[K\e[38;2;150;152;150m└───┴───┘\e[0m\r
 \r\e[K\r
-\r\e[KA bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://example.com/plain\e[0m and one\r
-\r\e[Kin angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same thing.\r
+\r\e[KA bare URL the renderer has to find for itself: \e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mhttps://example.com/plain\e[0m\e]8;;\e\\ and one\r
+\r\e[Kin angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the same thing.\r
 \r
 \r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\r
 \r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\r

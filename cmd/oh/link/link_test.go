@@ -20,6 +20,31 @@ func TestURLLinkKeepsTheCompleteAddressVisible(t *testing.T) {
 	}
 }
 
+func TestWebURLsAreLinkedOnlyForSupportedSchemes(t *testing.T) {
+	for name, test := range map[string]struct {
+		address      string
+		shouldRender bool
+	}{
+		"http":             {address: "http://example.test/path", shouldRender: true},
+		"https":            {address: "https://example.test/path", shouldRender: true},
+		"email":            {address: "mailto:person@example.test", shouldRender: true},
+		"encoded space":    {address: "https://example.test/a b", shouldRender: true},
+		"relative":         {address: "docs/page.html"},
+		"missing host":     {address: "https:path"},
+		"unsupported":      {address: "javascript:alert(1)"},
+		"terminal control": {address: "https://example.test/\x1b]8;;bad"},
+	} {
+		got := RenderWebURL("label", test.address)
+		wasRendered := got != "label"
+		if wasRendered != test.shouldRender {
+			t.Errorf("%s: rendered=%t: %q", name, wasRendered, got)
+		}
+		if Plain(got) != "label" {
+			t.Errorf("%s: visible label = %q", name, Plain(got))
+		}
+	}
+}
+
 func TestSourceLocationsBecomeFileFragmentsWithoutChangingTheirText(t *testing.T) {
 	workspace := t.TempDir()
 	path := prepareFile(t, workspace, "cmd/oh/draw.go")
@@ -40,6 +65,16 @@ func TestSourceLocationsBecomeFileFragmentsWithoutChangingTheirText(t *testing.T
 		if stripEscapes(got) != "see "+test.location+" and carry on" {
 			t.Errorf("expected the visible text unchanged, got %q", stripEscapes(got))
 		}
+	}
+}
+
+func TestAPathAlreadyLinkedToTheWebIsNotNestedInAFileLink(t *testing.T) {
+	workspace := t.TempDir()
+	prepareFile(t, workspace, "cmd/oh/draw.go")
+	linkedPath := RenderWebURL("cmd/oh/draw.go", "https://example.test/source")
+
+	if got := Render("read "+linkedPath, workspace); got != "read "+linkedPath {
+		t.Errorf("already-linked path changed: %q", got)
 	}
 }
 

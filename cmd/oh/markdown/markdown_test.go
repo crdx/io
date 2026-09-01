@@ -112,6 +112,35 @@ func TestAnUnclosedDelimiterIsLiteral(t *testing.T) {
 	}
 }
 
+func TestMarkdownLinksAndBareURLsCanBeTerminalHyperlinks(t *testing.T) {
+	source := "[docs](https://example.test/docs) https://example.test/bare person@example.test"
+	plainRows := Render(source, columns)
+	if plain := strings.Join(plainRows, "\n"); strings.Contains(plain, "\x1b]8;;") {
+		t.Errorf("plain rendering contains a terminal hyperlink: %q", plain)
+	}
+
+	linked := strings.Join(RenderWithHyperlinks(source, columns), "\n")
+	if got := strings.Count(linked, "\x1b]8;;"); got != 6 {
+		t.Errorf("got %d OSC 8 openings and closings, want 6: %q", got, linked)
+	}
+	for _, address := range []string{
+		"https://example.test/docs",
+		"https://example.test/bare",
+		"mailto:person@example.test",
+	} {
+		if !strings.Contains(linked, "\x1b]8;;"+address+"\x1b\\") {
+			t.Errorf("missing hyperlink to %q in %q", address, linked)
+		}
+	}
+}
+
+func TestUnsupportedMarkdownDestinationsStayPlain(t *testing.T) {
+	got := strings.Join(RenderWithHyperlinks("[unsafe](javascript:alert(1))", columns), "\n")
+	if strings.Contains(got, "\x1b]8;;") {
+		t.Errorf("unsupported destination became a terminal hyperlink: %q", got)
+	}
+}
+
 func TestANestedListKeepsItsChildrenWithTheirParent(t *testing.T) {
 	source := "- `one`\n\n  - child\n  - another\n- `two`\n\n  - child"
 	got := style.Plain(strings.Join(Render(source, columns), "\n"))

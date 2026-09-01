@@ -34,6 +34,19 @@ func TestGetSequenceDescribesSizedText(t *testing.T) {
 	}
 }
 
+func TestGetSequenceDescribesHyperlinkChanges(t *testing.T) {
+	opening := "\x1b]8;;https://example.test\x1b\\"
+	opened := GetSequence([]rune(opening), 0)
+	if !opened.IsHyperlink || opened.Hyperlink != opening {
+		t.Errorf("opening sequence = %+v", opened)
+	}
+
+	closed := GetSequence([]rune(HyperlinkClose), 0)
+	if !closed.IsHyperlink || closed.Hyperlink != "" {
+		t.Errorf("closing sequence = %+v", closed)
+	}
+}
+
 func TestGetSequenceDescribesRightwardCursorMovement(t *testing.T) {
 	got := GetSequence([]rune("\x1b[4Cafter"), 0)
 	if got.End != len([]rune("\x1b[4C")) || got.Cells != 4 || got.IsStyle {
@@ -69,6 +82,7 @@ func FuzzGetSequence(fuzzer *testing.F) {
 		"\x1b[999999999999999999999Cright",
 		"\x1b]66;s=2:w=2;🐟\x1b\\",
 		"\x1b]66;s=-999999999999999999:w=2;x",
+		"\x1b]8;;https://example.test\x1b\\link\x1b]8;;\x1b\\",
 	} {
 		fuzzer.Add(text)
 	}
@@ -95,6 +109,9 @@ func FuzzGetSequence(fuzzer *testing.F) {
 			}
 			if sequence.IsStyle && sequence.Cells != 0 {
 				t.Fatalf("GetSequence(%q, %d) is both style and text: %+v", text, start, sequence)
+			}
+			if sequence.IsHyperlink && (sequence.IsStyle || sequence.Cells != 0 || sequence.Text != "") {
+				t.Fatalf("GetSequence(%q, %d) describes a malformed hyperlink: %+v", text, start, sequence)
 			}
 		}
 	})

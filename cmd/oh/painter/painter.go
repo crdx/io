@@ -91,7 +91,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		self.answer.Reset()
 		self.Close(dynamic.Cancelled)
 		self.screen.Blank()
-		self.screen.Line(RenderSubmittedMessage(event.Text, self.screen.Columns()))
+		self.screen.Line(self.renderSubmittedMessage(event.Text))
 		self.screen.End()
 		self.screen.Blank()
 
@@ -107,7 +107,13 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		self.discardProvisionalReasoning()
 		self.answer.Reset()
 		self.answer.Write(event.Text)
-		if !self.screen.DrawAnswer(markdown.Render(self.answer.Text(), self.screen.Columns())) {
+		var renderedAnswer []string
+		if self.screen.IsTerminal() {
+			renderedAnswer = markdown.RenderWithHyperlinks(self.answer.Text(), self.screen.Columns())
+		} else {
+			renderedAnswer = markdown.Render(self.answer.Text(), self.screen.Columns())
+		}
+		if !self.screen.DrawAnswer(renderedAnswer) {
 			self.isStale = true
 		}
 		self.screen.Seal()
@@ -131,7 +137,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case caps.ModeChange, pathgrant.Change:
 		if message, isSaid := renderAccessMessage(event); isSaid {
 			self.Close(dynamic.Cancelled)
-			self.screen.Line(RenderSubmittedMessage(message, self.screen.Columns()))
+			self.screen.Line(self.renderSubmittedMessage(message))
 		}
 
 	case agent.RetryingEvent:
@@ -175,12 +181,26 @@ func RenderRetry(event agent.Event) string {
 }
 
 func RenderSubmittedMessage(text string, columns int) string {
+	return renderSubmittedMessage(text, columns, false)
+}
+
+// RenderSubmittedMessageWithHyperlinks draws a submitted message with terminal hyperlinks.
+func RenderSubmittedMessageWithHyperlinks(text string, columns int) string {
+	return renderSubmittedMessage(text, columns, true)
+}
+
+func renderSubmittedMessage(text string, columns int, shouldRenderHyperlinks bool) string {
 	contentColumns := columns
 	if contentColumns > 1 {
 		contentColumns--
 	}
 
-	content := markdown.Render(strutil.StripControl(text), contentColumns)
+	var content []string
+	if shouldRenderHyperlinks {
+		content = markdown.RenderWithHyperlinks(strutil.StripControl(text), contentColumns)
+	} else {
+		content = markdown.Render(strutil.StripControl(text), contentColumns)
+	}
 	for i, row := range content {
 		content[i] = " " + row
 	}
@@ -266,6 +286,14 @@ func (self *Picasso) Stop() {
 	}
 }
 
+func (self *Picasso) renderSubmittedMessage(text string) string {
+	if self.screen.IsTerminal() {
+		return RenderSubmittedMessageWithHyperlinks(text, self.screen.Columns())
+	}
+
+	return RenderSubmittedMessage(text, self.screen.Columns())
+}
+
 func (self *Picasso) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldResetAnswerRenderer bool) {
 	switch delta.Kind { //nolint:exhaustive // Only model prose event kinds can be deltas.
 	case agent.ModelReasoningEvent:
@@ -311,7 +339,12 @@ func (self *Picasso) drawReasoning(isSettled bool) {
 }
 
 func (self *Picasso) drawAnswer(isSettled bool) {
-	rows := self.answerRenderer.Render(self.answer.Text(), self.screen.Columns())
+	var rows []string
+	if self.screen.IsTerminal() {
+		rows = self.answerRenderer.RenderWithHyperlinks(self.answer.Text(), self.screen.Columns())
+	} else {
+		rows = self.answerRenderer.Render(self.answer.Text(), self.screen.Columns())
+	}
 
 	if !self.screen.DrawAnswer(self.answer.Take(rows, self.isTailHeldBack(isSettled))) {
 		self.isStale = true

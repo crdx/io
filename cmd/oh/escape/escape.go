@@ -10,11 +10,16 @@ const (
 	maximumCursorCells = 65_535
 )
 
+// HyperlinkClose ends an OSC 8 hyperlink.
+const HyperlinkClose = "\x1b]8;;\x1b\\"
+
 type Sequence struct {
-	End     int
-	Text    string
-	Cells   int
-	IsStyle bool
+	End         int
+	Text        string
+	Cells       int
+	Hyperlink   string
+	IsStyle     bool
+	IsHyperlink bool
 }
 
 func GetSequence(runes []rune, start int) Sequence {
@@ -34,7 +39,11 @@ func GetSequence(runes []rune, start int) Sequence {
 		if !isTerminated {
 			return Sequence{End: end}
 		}
-		text, cells := getTextSizing(string(runes[start:end]))
+		sequence := string(runes[start:end])
+		if hyperlink, isHyperlink := getHyperlink(sequence); isHyperlink {
+			return Sequence{End: end, Hyperlink: hyperlink, IsHyperlink: true}
+		}
+		text, cells := getTextSizing(sequence)
 		return Sequence{End: end, Text: text, Cells: cells}
 	default:
 		return Sequence{End: getLegacyEnd(runes, start)}
@@ -87,6 +96,24 @@ func getLegacyEnd(runes []rune, start int) int {
 		end++
 	}
 	return end
+}
+
+func getHyperlink(sequence string) (string, bool) {
+	body := strings.TrimPrefix(sequence, "\x1b]")
+	body = strings.TrimSuffix(strings.TrimSuffix(body, "\x1b\\"), "\a")
+	if !strings.HasPrefix(body, "8;") {
+		return "", false
+	}
+
+	_, address, found := strings.Cut(strings.TrimPrefix(body, "8;"), ";")
+	if !found {
+		return "", false
+	}
+	if address == "" {
+		return "", true
+	}
+
+	return sequence, true
 }
 
 func getTextSizing(sequence string) (string, int) {

@@ -77,6 +77,11 @@ func (self *Screen) IsTextSizingSupported() bool {
 	return self.isTextSizingSupported
 }
 
+// IsTerminal reports whether the screen draws to a terminal.
+func (self *Screen) IsTerminal() bool {
+	return self.isTTY
+}
+
 // LinkPathsUnder marks the paths drawn text names as terminal hyperlinks, resolving the relative
 // ones against root. Nothing is linked until it is given one.
 func (self *Screen) LinkPathsUnder(root string) *Screen {

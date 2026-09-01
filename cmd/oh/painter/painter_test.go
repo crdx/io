@@ -51,6 +51,30 @@ func TestPathGrantEventsAreDrawnFromTheirStructuredState(t *testing.T) {
 	}
 }
 
+func TestOnlyTerminalConversationMessagesContainHyperlinks(t *testing.T) {
+	for eventName, kind := range map[string]agent.Kind{
+		"assistant": agent.ModelMessageEvent,
+		"user":      agent.UserMessageEvent,
+	} {
+		for streamName, isTerminal := range map[string]bool{"terminal": true, "stream": false} {
+			t.Run(eventName+"/"+streamName, func(t *testing.T) {
+				var screenOutput bytes.Buffer
+				screen := output.New(&screenOutput)
+				if isTerminal {
+					screen = output.NewTerminalOfSize(&screenOutput, 80, 24)
+				}
+				paint := New(screen, false, nil, "", output.StreamingModeLine)
+				paint.DrawEvent(agent.Event{Kind: kind, Text: "[docs](https://example.test)"})
+
+				hasHyperlink := strings.Contains(screenOutput.String(), "\x1b]8;;https://example.test\x1b\\")
+				if hasHyperlink != isTerminal {
+					t.Errorf("hyperlink presence = %t in %q", hasHyperlink, screenOutput.String())
+				}
+			})
+		}
+	}
+}
+
 func TestNoUnfinishedLineEverWithdrawsARowThatWasDrawn(t *testing.T) {
 	answers := map[string]string{
 		"a bullet marker":       "Here is the list.\n\n- one\n- two\n- three\n\nAnd after it.\n",
