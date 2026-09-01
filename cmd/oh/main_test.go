@@ -8272,6 +8272,7 @@ type sessionGoldenScenario struct {
 	Model              string              `toml:"model"`
 	Effort             string              `toml:"effort"`
 	IsFast             bool                `toml:"fast"`
+	IdleAfter          string              `toml:"idle-after"`
 	FirstTokenError    string              `toml:"first-token-error"`
 	CredentialRefresh  string              `toml:"credential-refresh"`
 	ToggleBeforeFirst  string              `toml:"toggle-before-first"`
@@ -8417,6 +8418,17 @@ func sessionGoldenProviderFor(
 	provider := newSessionGoldenProvider(t, scenario, endpoint, tokenError)
 	if scoped, isScoped := provider.(interface{ UseSession(name string) }); isScoped {
 		scoped.UseSession(sessionName)
+	}
+	if scenario.IdleAfter != "" {
+		after, err := time.ParseDuration(scenario.IdleAfter)
+		if err != nil {
+			t.Fatal(err)
+		}
+		quietable, canIdle := provider.(interface{ IdleAfter(after time.Duration) })
+		if !canIdle {
+			t.Fatalf("provider %q cannot be given an idle bound", scenario.Provider)
+		}
+		quietable.IdleAfter(after)
 	}
 
 	return provider

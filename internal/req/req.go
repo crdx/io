@@ -20,11 +20,28 @@ const bodyLimit = 64 * 1024
 
 type Client struct {
 	http     *http.Client
+	idle     time.Duration
 	observer Observer
 }
 
 func New(timeout time.Duration) *Client {
 	return &Client{http: &http.Client{Timeout: timeout}}
+}
+
+func NewStreaming(responseHeaderTimeout time.Duration, idleTimeout time.Duration) *Client {
+	transport, isStandard := http.DefaultTransport.(*http.Transport)
+	if !isStandard {
+		return &Client{http: &http.Client{}, idle: idleTimeout}
+	}
+
+	streaming := transport.Clone()
+	streaming.ResponseHeaderTimeout = responseHeaderTimeout
+
+	return &Client{http: &http.Client{Transport: streaming}, idle: idleTimeout}
+}
+
+func (self *Client) IdleAfter(after time.Duration) {
+	self.idle = after
 }
 
 func (self *Client) Observe(observer Observer) {
@@ -126,6 +143,13 @@ func (self *Client) postJSON(
 }
 
 func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser, http.Header, error) {
+	var watchdog *idleWatchdog
+	if self.idle > 0 {
+		ctx, cancel := context.WithCancel(request.Context())
+		watchdog = newIdleWatchdog(self.idle, cancel)
+		request = request.WithContext(ctx)
+	}
+
 	var exchange ExchangeObserver
 	if self.observer != nil {
 		exchange = self.observer.Start(Request{
@@ -140,12 +164,20 @@ func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser
 
 	response, err := self.http.Do(request)
 	if err != nil {
+		if watchdog != nil {
+			watchdog.stop()
+		}
+
 		err = transient.Wrap(err)
 		if exchange != nil {
 			exchange.Finish(time.Now(), err, false)
 		}
 
 		return nil, nil, err
+	}
+
+	if watchdog != nil {
+		response.Body = watchdog.watch(response.Body)
 	}
 
 	if exchange != nil {

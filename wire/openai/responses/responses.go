@@ -31,8 +31,9 @@ const (
 var Efforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
 const (
-	turnTimeout  = 60 * time.Minute
-	asideTimeout = 30 * time.Second
+	responseHeaderTimeout = 10 * time.Minute
+	streamIdleTimeout     = 10 * time.Minute
+	asideTimeout          = 30 * time.Second
 )
 
 type Token struct {
@@ -74,7 +75,7 @@ func New(tokens TokenSource, model string, effort string) (*Client, error) {
 		Effort:   effort,
 		tokens:   tokens,
 		session:  newToken(),
-		requests: req.New(turnTimeout),
+		requests: req.NewStreaming(responseHeaderTimeout, streamIdleTimeout),
 	}
 
 	if err := client.settled(); err != nil {
@@ -91,6 +92,10 @@ func (self *Client) UseSession(name string) {
 func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	self.instructions = instructions
 	self.tools = describe(tools)
+}
+
+func (self *Client) IdleAfter(after time.Duration) {
+	self.requests.IdleAfter(after)
 }
 
 func (self *Client) ObserveHTTP(observer req.Observer) {

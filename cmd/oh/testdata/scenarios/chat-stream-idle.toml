@@ -1,0 +1,30 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+idle-after = "200ms"
+
+[first]
+prompt = "go quiet halfway through the answer"
+
+[[first.response]]
+wait-for-cancellation = true
+event = [
+    '''{"choices":[{"delta":{"content":"Half an ans"}}]}''',
+]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Through on the second attempt."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "carry on"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Carrying on."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

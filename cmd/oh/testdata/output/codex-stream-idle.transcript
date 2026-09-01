@@ -1,0 +1,47 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+
+## Mode · rxwgs · +0s
+
+## User · +0s
+
+```
+go quiet halfway through the answer
+```
+
+## Assistant · +0s
+
+```
+Half an ans
+```
+
+## Retrying · attempt 1 · waited 1s · +0s
+
+```
+the stream sent nothing for 0.2s
+```
+
+## Assistant · +0s
+
+```
+Through on the second attempt.
+```
+
+## User · +0s
+
+```
+carry on
+```
+
+## Assistant · +0s
+
+```
+Carrying on.
+```
+

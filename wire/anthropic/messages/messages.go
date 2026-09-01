@@ -31,7 +31,8 @@ const (
 var Efforts = []string{"low", "medium", "high", "xhigh", "max"}
 
 const (
-	turnTimeout               = 60 * time.Minute
+	responseHeaderTimeout     = 10 * time.Minute
+	streamIdleTimeout         = 10 * time.Minute
 	asideTimeout              = 30 * time.Second
 	toolInputCorrectionFormat = "Your previous response could not be used because the %q tool call did not contain a JSON object. Try again with a JSON object for its input."
 )
@@ -68,7 +69,7 @@ func New(tokens TokenSource, model string, effort string, maxOutputTokens int) (
 		Effort:          effort,
 		MaxOutputTokens: maxOutputTokens,
 		tokens:          tokens,
-		requests:        req.New(turnTimeout),
+		requests:        req.NewStreaming(responseHeaderTimeout, streamIdleTimeout),
 	}
 
 	if err := client.settled(); err != nil {
@@ -76,6 +77,10 @@ func New(tokens TokenSource, model string, effort string, maxOutputTokens int) (
 	}
 
 	return client, nil
+}
+
+func (self *Client) IdleAfter(after time.Duration) {
+	self.requests.IdleAfter(after)
 }
 
 func (self *Client) ObserveHTTP(observer req.Observer) {
