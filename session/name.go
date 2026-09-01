@@ -14,9 +14,9 @@ func newName(directory string) (string, error) {
 		return "", err
 	}
 
-	taken := make(map[string]bool, len(names))
+	takenNames := make(map[string]bool, len(names))
 	for _, name := range names {
-		taken[name] = true
+		takenNames[name] = true
 	}
 
 	total := len(adjectives) * len(animals)
@@ -25,7 +25,7 @@ func newName(directory string) (string, error) {
 	for offset := range total {
 		index := (start + offset) % total
 		candidate := adjectives[index/len(animals)] + "-" + animals[index%len(animals)]
-		if !taken[candidate] {
+		if !takenNames[candidate] {
 			return candidate, nil
 		}
 	}

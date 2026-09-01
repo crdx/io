@@ -83,7 +83,7 @@ func (self effortCapability) levels() []string {
 		return nil
 	}
 
-	taken := map[string]bool{
+	supportedLevels := map[string]bool{
 		"low":    self.Low.IsSupported,
 		"medium": self.Medium.IsSupported,
 		"high":   self.High.IsSupported,
@@ -93,7 +93,7 @@ func (self effortCapability) levels() []string {
 
 	var levels []string
 	for _, level := range Efforts {
-		if taken[level] {
+		if supportedLevels[level] {
 			levels = append(levels, level)
 		}
 	}

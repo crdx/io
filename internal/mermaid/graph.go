@@ -78,29 +78,29 @@ type subgraph struct {
 }
 
 func mkGraph(data *orderedmap.OrderedMap[string, []textEdge], nodeSpecs map[string]graphNodeSpec) graph {
-	built := graph{drawing: mkDrawing(0, 0)}
-	built.grid = make(map[gridCoord]*node)
-	built.edgeCounts = make(map[edgePair]int)
-	built.columnWidth = make(map[int]int)
-	built.rowHeight = make(map[int]int)
-	built.styleClasses = make(map[string]styleClass)
+	builtGraph := graph{drawing: mkDrawing(0, 0)}
+	builtGraph.grid = make(map[gridCoord]*node)
+	builtGraph.edgeCounts = make(map[edgePair]int)
+	builtGraph.columnWidth = make(map[int]int)
+	builtGraph.rowHeight = make(map[int]int)
+	builtGraph.styleClasses = make(map[string]styleClass)
 	index := 0
 	for el := data.Front(); el != nil; el = el.Next() {
 		nodeName := el.Key
 		children := el.Value
 		spec := nodeSpecs[nodeName]
-		parentNode, err := built.getNode(nodeName)
+		parentNode, err := builtGraph.getNode(nodeName)
 		if err != nil {
 			parentNode = &node{name: nodeName, label: spec.label, index: index, styleClassName: spec.styleClass}
-			built.appendNode(parentNode)
+			builtGraph.appendNode(parentNode)
 			index += 1
 		}
 		for _, textEdge := range children {
 			childSpec := nodeSpecs[textEdge.child.name]
-			childNode, err := built.getNode(textEdge.child.name)
+			childNode, err := builtGraph.getNode(textEdge.child.name)
 			if err != nil {
 				childNode = &node{name: textEdge.child.name, label: childSpec.label, index: index, styleClassName: childSpec.styleClass}
-				built.appendNode(childNode)
+				builtGraph.appendNode(childNode)
 				index += 1
 			}
 			createdEdge := edge{
@@ -109,10 +109,10 @@ func mkGraph(data *orderedmap.OrderedMap[string, []textEdge], nodeSpecs map[stri
 				text:            textEdge.label,
 				isBidirectional: textEdge.isBidirectional,
 			}
-			built.edges = append(built.edges, &createdEdge)
+			builtGraph.edges = append(builtGraph.edges, &createdEdge)
 		}
 	}
-	return built
+	return builtGraph
 }
 
 func (self *graph) setStyleClasses(properties *graphProperties) {

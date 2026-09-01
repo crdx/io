@@ -8,20 +8,20 @@ import (
 )
 
 type state struct {
-	taken func() int
+	getTurnCount func() int
 }
 
-func New(taken func() int) segment.Factory {
+func New(getTurnCount func() int) segment.Factory {
 	return func(segment.Options) (segment.Segment, error) {
-		return state{taken: taken}, nil
+		return state{getTurnCount: getTurnCount}, nil
 	}
 }
 
 func (self state) Render(segment.Context) string {
-	taken := self.taken()
-	if taken == 0 {
+	turnCount := self.getTurnCount()
+	if turnCount == 0 {
 		return ""
 	}
 
-	return style.Subtle("#" + strconv.Itoa(taken))
+	return style.Subtle("#" + strconv.Itoa(turnCount))
 }

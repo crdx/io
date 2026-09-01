@@ -44,6 +44,16 @@ func TestAnalyse(t *testing.T) {
 		"a word ending in ed": {
 			source: "package example\n\nvar need value\n",
 		},
+		"an irregular participle": {
+			source:   "package example\n\nvar written path\n",
+			expected: []string{"example.go:3:5: written: say what was written, since a name is a noun rather than an adjective"},
+		},
+		"a compound irregular participle": {
+			source: "package example\n\nvar writtenPath path\n",
+		},
+		"an explicitly typed boolean named for an irregular participle": {
+			source: "package example\n\nvar held bool\n",
+		},
 	}
 
 	for name, test := range tests {

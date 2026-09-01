@@ -183,12 +183,12 @@ func (self wizard) castSpell() error {
 		return fmt.Errorf("no models are available for %s", chosenProvider.name)
 	}
 
-	chosen, err := self.choose(style.Prompt(modelPrompt), modelLabels(choices))
+	chosenIndex, err := self.choose(style.Prompt(modelPrompt), modelLabels(choices))
 	if err != nil {
 		return err
 	}
 
-	choice := choices[chosen]
+	choice := choices[chosenIndex]
 	effort := model.DefaultEffort(choice.EffortLevels)
 	if effort == "" {
 		return fmt.Errorf("model %s has no recognised effort levels", choice.ID)
@@ -350,12 +350,12 @@ func (self wizard) chooseProvider(providerName string) (provider, error) {
 	labels := providerLabels()
 
 	for {
-		chosen, err := self.choose(style.Prompt(providerPrompt), labels)
+		chosenIndex, err := self.choose(style.Prompt(providerPrompt), labels)
 		if err != nil {
 			return provider{}, err
 		}
 
-		chosenProvider := providers[chosen]
+		chosenProvider := providers[chosenIndex]
 		if err := self.authenticate(chosenProvider, true); err == nil {
 			return chosenProvider, nil
 		} else if _, writeErr := fmt.Fprintf(

@@ -138,19 +138,19 @@ func supplement(listedModels []agent.Model, registeredModels map[string]agent.Mo
 	supplementedModels := make([]agent.Model, 0, len(listedModels))
 
 	for _, model := range listedModels {
-		known, isFound := registeredModels[model.ID]
+		knownModel, isFound := registeredModels[model.ID]
 		if isFound {
 			if model.Name == "" {
-				model.Name = known.Name
+				model.Name = knownModel.Name
 			}
 			if len(model.EffortLevels) == 0 {
-				model.EffortLevels = slices.Clone(known.EffortLevels)
+				model.EffortLevels = slices.Clone(knownModel.EffortLevels)
 			}
 			if model.ContextWindowTokens == 0 {
-				model.ContextWindowTokens = known.ContextWindowTokens
+				model.ContextWindowTokens = knownModel.ContextWindowTokens
 			}
 			if model.MaxOutputTokens == 0 {
-				model.MaxOutputTokens = known.MaxOutputTokens
+				model.MaxOutputTokens = knownModel.MaxOutputTokens
 			}
 		}
 
@@ -206,8 +206,8 @@ func latestModelIterations(models []agent.Model) []agent.Model {
 	latest := make(map[modelFamily][]int)
 	for _, model := range models {
 		family, iteration, hasIteration := getModelIteration(model.ID)
-		known, hasKnown := latest[family]
-		if hasIteration && (!hasKnown || slices.Compare(iteration, known) > 0) {
+		knownIteration, hasKnown := latest[family]
+		if hasIteration && (!hasKnown || slices.Compare(iteration, knownIteration) > 0) {
 			latest[family] = iteration
 		}
 	}

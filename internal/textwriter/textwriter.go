@@ -51,12 +51,12 @@ func (self *Writer) Newlines(count int) {
 	self.isSpaceHeld = false
 	contents := self.String()
 
-	written := 0
+	writtenNewlines := 0
 	for i := len(contents) - 1; i >= 0 && contents[i] == '\n'; i-- {
-		written++
+		writtenNewlines++
 	}
 
-	if missing := count - written; missing > 0 {
+	if missing := count - writtenNewlines; missing > 0 {
 		_, _ = self.builder.WriteString(strings.Repeat("\n", missing))
 	}
 }

@@ -7,7 +7,7 @@ import (
 
 type Definition[Value any] struct {
 	Clone    func(Value) Value
-	Describe func(known Value, current Value) string
+	Describe func(knownValue Value, currentValue Value) string
 }
 
 type State[Value any] struct {
@@ -18,15 +18,15 @@ type State[Value any] struct {
 	knownValue   Value
 }
 
-func New[Value any](current Value, definition Definition[Value]) *State[Value] {
-	return NewRestored(current, current, definition)
+func New[Value any](currentValue Value, definition Definition[Value]) *State[Value] {
+	return NewRestored(currentValue, currentValue, definition)
 }
 
-func NewRestored[Value any](current Value, known Value, definition Definition[Value]) *State[Value] {
+func NewRestored[Value any](currentValue Value, knownValue Value, definition Definition[Value]) *State[Value] {
 	return &State[Value]{
 		definition:   definition,
-		currentValue: definition.Clone(current),
-		knownValue:   definition.Clone(known),
+		currentValue: definition.Clone(currentValue),
+		knownValue:   definition.Clone(knownValue),
 	}
 }
 
@@ -46,11 +46,11 @@ func (self *State[Value]) Change(transform func(Value) Value) Value {
 	return self.definition.Clone(self.currentValue)
 }
 
-func (self *State[Value]) Replace(current Value) {
+func (self *State[Value]) Replace(currentValue Value) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	self.currentValue = self.definition.Clone(current)
+	self.currentValue = self.definition.Clone(currentValue)
 }
 
 func (self *State[Value]) Inject() string {

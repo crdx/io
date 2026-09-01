@@ -155,12 +155,12 @@ func (self Config) BuildLayout(registry segment.Registry) (segment.Layout, error
 
 			options := segmentOptions{meta: meta, entry: entry}
 
-			built, err := registry.Build(namedFields.Segment, position, options)
+			builtSegment, err := registry.Build(namedFields.Segment, position, options)
 			if err != nil {
 				return nil, err
 			}
 
-			layout[position] = append(layout[position], built)
+			layout[position] = append(layout[position], builtSegment)
 		}
 	}
 
@@ -332,8 +332,8 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 		{"sandbox.home", &config.Sandbox.Home},
 	}
 	for _, list := range lists {
-		for i, written := range *list.values {
-			resolvedPath, err := resolveConfigPath(path, written)
+		for i, writtenPath := range *list.values {
+			resolvedPath, err := resolveConfigPath(path, writtenPath)
 			if err != nil {
 				return config, fmt.Errorf("%s: %s: %w", displayPath, list.name, err)
 			}
@@ -353,14 +353,14 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 	return config, nil
 }
 
-func resolveConfigPath(configPath string, written string) (string, error) {
-	if written == "" {
+func resolveConfigPath(configPath string, writtenPath string) (string, error) {
+	if writtenPath == "" {
 		return "", errors.New("path is empty")
 	}
 
-	path, err := pathutil.Expand(written)
+	path, err := pathutil.Expand(writtenPath)
 	if err != nil {
-		return "", fmt.Errorf("could not expand %q: %w", written, err)
+		return "", fmt.Errorf("could not expand %q: %w", writtenPath, err)
 	}
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(filepath.Dir(configPath), path)

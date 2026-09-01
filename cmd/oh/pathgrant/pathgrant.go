@@ -211,17 +211,17 @@ func definition() access.Definition[[]Grant] {
 	}
 }
 
-func describeChanges(known []Grant, current []Grant) string {
+func describeChanges(knownGrants []Grant, currentGrants []Grant) string {
 	var clauses []string
-	for _, grant := range current {
-		previous, found := findGrant(known, grant.Path)
+	for _, grant := range currentGrants {
+		previous, found := findGrant(knownGrants, grant.Path)
 		if found && previous.Access == grant.Access {
 			continue
 		}
 		clauses = append(clauses, modelGrantNotice(grant))
 	}
-	for _, grant := range known {
-		if _, found := findGrant(current, grant.Path); !found {
+	for _, grant := range knownGrants {
+		if _, found := findGrant(currentGrants, grant.Path); !found {
 			clauses = append(clauses, "The temporary path grant for "+grant.Path+" has been revoked.")
 		}
 	}

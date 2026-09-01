@@ -15,7 +15,7 @@ const (
 type liveText struct {
 	streamingMode output.StreamingMode
 	arrivedText   strings.Builder
-	drawn         int
+	drawnBytes    int
 	drawnRowCount int
 	isTailHidden  bool
 }
@@ -38,13 +38,13 @@ func (self *liveText) Write(text string) {
 
 func (self *liveText) Reset() {
 	self.arrivedText.Reset()
-	self.drawn = 0
+	self.drawnBytes = 0
 	self.drawnRowCount = 0
 	self.isTailHidden = false
 }
 
 func (self *liveText) MarkDrawn() {
-	self.drawn = self.arrivedText.Len()
+	self.drawnBytes = self.arrivedText.Len()
 }
 
 func (self *liveText) Take(rows []string, isTailHidden bool) []string {
@@ -61,14 +61,14 @@ func (self *liveText) Take(rows []string, isTailHidden bool) []string {
 
 func (self *liveText) IsDue() bool {
 	if self.streamingMode != output.StreamingModePaced {
-		return self.Len() > self.drawn
+		return self.Len() > self.drawnBytes
 	}
 
-	return self.Len()-self.drawn >= self.step()
+	return self.Len()-self.drawnBytes >= self.step()
 }
 
 func (self *liveText) IsOwed() bool {
-	return self.drawn < self.Len() || self.isTailHidden
+	return self.drawnBytes < self.Len() || self.isTailHidden
 }
 
 func (self *liveText) step() int {

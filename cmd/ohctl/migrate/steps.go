@@ -63,8 +63,8 @@ func isTurnCompletion(line map[string]json.RawMessage) bool {
 
 func announces(mode string, text string) bool {
 	for flag := range strings.SplitSeq(caps.AllFlags, "") {
-		notice, said := caps.ModeNotice(agent.Event{Name: flag, Text: mode})
-		if said && notice == text {
+		notice, isSaid := caps.ModeNotice(agent.Event{Name: flag, Text: mode})
+		if isSaid && notice == text {
 			return true
 		}
 	}

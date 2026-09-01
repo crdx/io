@@ -111,8 +111,8 @@ func (self *Endpoint) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	dialect, spoken := self.dialectFor(path)
-	if !spoken {
+	dialect, isSpoken := self.dialectFor(path)
+	if !isSpoken {
 		refuse(writer, http.StatusNotFound, "nothing here speaks for "+path)
 
 		return
@@ -231,17 +231,17 @@ func flatten(content any) string {
 		return typedContent
 
 	case []any:
-		var said strings.Builder
+		var sentence strings.Builder
 
 		for _, part := range typedContent {
-			if held, isObject := part.(map[string]any); isObject {
-				if text, isText := held["text"].(string); isText {
-					said.WriteString(text)
+			if block, isObject := part.(map[string]any); isObject {
+				if text, isText := block["text"].(string); isText {
+					sentence.WriteString(text)
 				}
 			}
 		}
 
-		return said.String()
+		return sentence.String()
 	}
 
 	return ""

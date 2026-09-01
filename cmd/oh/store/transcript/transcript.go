@@ -107,11 +107,11 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			output.toolResultPreview(event.ID, event.Text, emphasisLanguage(event.Emphasis))
 		}
 	case caps.ModeChange:
-		if notice, said := caps.ModeNotice(event); said {
+		if notice, isSaid := caps.ModeNotice(event); isSaid {
 			output.fence(notice, "")
 		}
 	case pathgrant.Change:
-		if notice, said := pathgrant.Notice(event); said {
+		if notice, isSaid := pathgrant.Notice(event); isSaid {
 			output.fence(notice, "")
 		}
 	case agent.InterruptionEvent:

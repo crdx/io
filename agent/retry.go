@@ -9,7 +9,7 @@ import (
 
 const retryBudget = 15 * time.Minute
 
-func (self *Agent) retryWait(err error, attempt int, spent time.Duration) (time.Duration, bool) {
+func (self *Agent) retryWait(err error, attempt int, spentTime time.Duration) (time.Duration, bool) {
 	var retriable Retriable
 
 	if !errors.As(err, &retriable) || !retriable.Retriable() {
@@ -18,7 +18,7 @@ func (self *Agent) retryWait(err error, attempt int, spent time.Duration) (time.
 
 	wait := max(retryWaitForAttempt(attempt), retriable.RetryAfter())
 
-	if spent+wait > retryBudget {
+	if spentTime+wait > retryBudget {
 		return 0, false
 	}
 

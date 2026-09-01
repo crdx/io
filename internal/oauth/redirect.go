@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-func CodeFromRedirect(written string, expectedState string) (string, error) {
-	redirect, err := url.Parse(strings.TrimSpace(written))
+func CodeFromRedirect(writtenRedirect string, expectedState string) (string, error) {
+	redirect, err := url.Parse(strings.TrimSpace(writtenRedirect))
 	if err != nil || !redirect.IsAbs() || redirect.Host == "" {
 		return "", errors.New("the pasted redirect is not a complete URL")
 	}

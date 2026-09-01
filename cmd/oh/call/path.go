@@ -8,11 +8,11 @@ import (
 	"crdx.org/io/internal/util/pathutil"
 )
 
-func shortenPaths(shown agent.FallbackRendering, workspaceDir string) agent.FallbackRendering {
-	shown.Subject = shortenPathPrefix(shown.Subject, workspaceDir)
-	shown.Note = shortenPathPrefix(shown.Note, workspaceDir)
-	shown.Emphasis.Source = shortenPathPrefix(shown.Emphasis.Source, workspaceDir)
-	return shown
+func shortenPaths(rendering agent.FallbackRendering, workspaceDir string) agent.FallbackRendering {
+	rendering.Subject = shortenPathPrefix(rendering.Subject, workspaceDir)
+	rendering.Note = shortenPathPrefix(rendering.Note, workspaceDir)
+	rendering.Emphasis.Source = shortenPathPrefix(rendering.Emphasis.Source, workspaceDir)
+	return rendering
 }
 
 func shortenPathPrefix(value string, workspaceDir string) string {

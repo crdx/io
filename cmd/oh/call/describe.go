@@ -26,40 +26,40 @@ func Summary(event agent.Event) string {
 }
 
 func Describe(event agent.Event, getTool ToolLookup, workspaceDir string) agent.FallbackRendering {
-	shown := event.FallbackRendering
+	rendering := event.FallbackRendering
 	if getTool != nil {
-		if calledTool, known := getTool(event.Name); known {
-			shown.ReadOnly = calledTool.ReadOnly()
+		if calledTool, isKnown := getTool(event.Name); isKnown {
+			rendering.ReadOnly = calledTool.ReadOnly()
 			if parsedToolCall, err := calledTool.Parse(event.Arguments); err == nil {
-				shown.Describe(parsedToolCall)
+				rendering.Describe(parsedToolCall)
 			} else {
-				shown.Subject = tool.DescribeUnparsedArguments(calledTool, event.Arguments)
+				rendering.Subject = tool.DescribeUnparsedArguments(calledTool, event.Arguments)
 			}
 		}
 	}
-	return plain(shortenPaths(shown, workspaceDir))
+	return plain(shortenPaths(rendering, workspaceDir))
 }
 
-func plain(shown agent.FallbackRendering) agent.FallbackRendering {
-	shown.Subject = strutil.Printable(shown.Subject)
-	shown.Note = strutil.Printable(shown.Note)
+func plain(rendering agent.FallbackRendering) agent.FallbackRendering {
+	rendering.Subject = strutil.Printable(rendering.Subject)
+	rendering.Note = strutil.Printable(rendering.Note)
 
-	return shown
+	return rendering
 }
 
 func LabelFor(event agent.Event, getTool ToolLookup, workspaceDir string) Label {
-	shown := Describe(event, getTool, workspaceDir)
+	rendering := Describe(event, getTool, workspaceDir)
 	label := Label{
 		Name:      event.Name,
-		Subject:   shown.Subject,
-		Emphasis:  shown.Emphasis,
-		Qualifier: shown.Note,
-		ReadOnly:  shown.ReadOnly,
+		Subject:   rendering.Subject,
+		Emphasis:  rendering.Emphasis,
+		Qualifier: rendering.Note,
+		ReadOnly:  rendering.ReadOnly,
 	}
 
 	skillName, isSkillLoad := "", false
 	if event.Name == readTool {
-		skillName, isSkillLoad = skill.NameFromPath(shown.Subject)
+		skillName, isSkillLoad = skill.NameFromPath(rendering.Subject)
 	}
 
 	if toolLabel, isKnown := toolLabels[event.Name]; isKnown {

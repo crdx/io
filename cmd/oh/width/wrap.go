@@ -272,7 +272,7 @@ func Elide(text string, cells int) string {
 		return Ellipsis
 	}
 
-	kept, _ := Cut(text, cells-1)
+	keptText, _ := Cut(text, cells-1)
 
-	return kept + Ellipsis
+	return keptText + Ellipsis
 }

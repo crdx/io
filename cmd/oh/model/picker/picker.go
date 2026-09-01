@@ -30,12 +30,12 @@ type Model struct {
 }
 
 func Choose(models []*Model, terminal *os.File, screen io.Writer) (*Model, error) {
-	chosen, err := menu.Choose(&modelList{models: models}, terminal, screen)
+	chosenIndex, err := menu.Choose(&modelList{models: models}, terminal, screen)
 	if err != nil {
 		return nil, err
 	}
 
-	return models[chosen], nil
+	return models[chosenIndex], nil
 }
 
 type modelList struct {
@@ -76,7 +76,7 @@ func (self *modelList) Row(index int, isChosen bool, room int) string {
 
 	paint := style.Answer
 	if isChosen {
-		paint = style.Chosen
+		paint = style.ChosenRow
 	}
 	if identifier == "" {
 		return paint(describedModel)

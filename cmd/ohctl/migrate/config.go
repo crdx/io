@@ -184,12 +184,12 @@ func moveRootKeyIntoTable(data []byte, name string, table string, key string) []
 }
 
 func rewriteLineKey(line string, key string) string {
-	written, value, found := strings.Cut(line, "=")
+	writtenKey, value, found := strings.Cut(line, "=")
 	if !found {
 		return line
 	}
 
-	gap := written[len(strings.TrimRight(written, " \t")):]
+	gap := writtenKey[len(strings.TrimRight(writtenKey, " \t")):]
 
 	return key + gap + "=" + value
 }
@@ -300,12 +300,12 @@ func configString(document map[string]any, name string) (string, bool, error) {
 		return "", false, nil
 	}
 
-	written, ok := value.(string)
+	writtenValue, ok := value.(string)
 	if !ok {
 		return "", false, fmt.Errorf("%s is not a string", name)
 	}
 
-	return written, true, nil
+	return writtenValue, true, nil
 }
 
 func defaultConfigEffort(providerName string) string {

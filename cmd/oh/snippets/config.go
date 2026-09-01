@@ -47,7 +47,7 @@ func (self *Definition) LoadFileContents(path string, contents []byte) error {
 }
 
 func (self *Definition) unmarshalTable(configuredTable map[string]any) error {
-	known := map[string]bool{
+	knownFields := map[string]bool{
 		"arguments":   true,
 		"description": true,
 		"file":        true,
@@ -55,7 +55,7 @@ func (self *Definition) unmarshalTable(configuredTable map[string]any) error {
 	}
 	var unknown []string
 	for name := range configuredTable {
-		if !known[name] {
+		if !knownFields[name] {
 			unknown = append(unknown, name)
 		}
 	}

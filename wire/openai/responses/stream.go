@@ -54,23 +54,23 @@ func isFinalFailure(err error) bool {
 }
 
 func (self *reply) prose(isFinal bool) []json.RawMessage {
-	kept := make([]json.RawMessage, 0, len(self.items))
+	keptItems := make([]json.RawMessage, 0, len(self.items))
 
 	for _, raw := range self.items {
 		if decodeItem(raw).Type != "function_call" {
-			kept = append(kept, raw)
+			keptItems = append(keptItems, raw)
 		}
 	}
 
 	if answer := self.message.String(); isFinal && answer != "" {
-		kept = append(kept, partialMessage(answer))
+		keptItems = append(keptItems, partialMessage(answer))
 	}
 
-	for len(kept) > 0 && decodeItem(kept[len(kept)-1]).Type == "reasoning" {
-		kept = kept[:len(kept)-1]
+	for len(keptItems) > 0 && decodeItem(keptItems[len(keptItems)-1]).Type == "reasoning" {
+		keptItems = keptItems[:len(keptItems)-1]
 	}
 
-	return kept
+	return keptItems
 }
 
 func partialMessage(text string) json.RawMessage {

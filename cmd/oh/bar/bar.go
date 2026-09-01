@@ -94,12 +94,12 @@ func RenderWithin(layout segment.Layout, position segment.Position, context segm
 }
 
 func render(layout segment.Layout, position segment.Position, context segment.Context, cells int) string {
-	drawn := make([]string, 0, len(layout[position]))
+	drawnSegments := make([]string, 0, len(layout[position]))
 	usedCells := 0
 
 	for _, instance := range layout[position] {
 		separatorCells := 0
-		if len(drawn) > 0 {
+		if len(drawnSegments) > 0 {
 			separatorCells = style.Width(segmentSeparator)
 		}
 
@@ -117,11 +117,11 @@ func render(layout segment.Layout, position segment.Position, context segment.Co
 			break
 		}
 
-		drawn = append(drawn, text)
+		drawnSegments = append(drawnSegments, text)
 		usedCells += separatorCells + textCells
 	}
 
-	return strings.Join(drawn, segmentSeparator)
+	return strings.Join(drawnSegments, segmentSeparator)
 }
 
 // Configuration holds the factories and current layout of a bar.

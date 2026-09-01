@@ -11,6 +11,44 @@ import (
 	"crdx.org/io/internal/lint/runner"
 )
 
+var irregularParticiples = []string{
+	"born",
+	"broken",
+	"built",
+	"chosen",
+	"dealt",
+	"drawn",
+	"driven",
+	"fallen",
+	"felt",
+	"forgotten",
+	"frozen",
+	"given",
+	"grown",
+	"held",
+	"hidden",
+	"kept",
+	"known",
+	"lost",
+	"meant",
+	"paid",
+	"said",
+	"sent",
+	"shown",
+	"sold",
+	"spent",
+	"spoken",
+	"stolen",
+	"swept",
+	"taken",
+	"thrown",
+	"told",
+	"torn",
+	"woken",
+	"worn",
+	"written",
+}
+
 var wordsEndingInEd = []string{
 	"bed",
 	"bled",
@@ -59,6 +97,9 @@ func analyse(file runner.File) []runner.Diagnostic {
 }
 
 func isParticiple(word string) bool {
+	if slices.Contains(irregularParticiples, word) {
+		return true
+	}
 	if !strings.HasSuffix(word, "ed") || len(word) < 4 {
 		return false
 	}

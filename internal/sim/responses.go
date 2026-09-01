@@ -34,12 +34,12 @@ type responsesBody struct {
 }
 
 func (self responsesDialect) Read(request *http.Request, raw []byte) (Request, bool) {
-	var sent responsesBody
-	if json.Unmarshal(raw, &sent) != nil {
+	var sentBody responsesBody
+	if json.Unmarshal(raw, &sentBody) != nil {
 		return Request{}, false
 	}
 
-	key := sent.PromptCacheKey
+	key := sentBody.PromptCacheKey
 	if key == "" {
 		key = request.Header.Get("Session_id")
 	}
@@ -47,14 +47,14 @@ func (self responsesDialect) Read(request *http.Request, raw []byte) (Request, b
 	askedRequest := Request{
 		API:          self.Name(),
 		Session:      key,
-		Model:        sent.Model,
-		Instructions: sent.Instructions,
-		Streaming:    sent.Stream,
-		IsStored:     sent.Store,
-		Input:        responsesEntries(sent.Input),
+		Model:        sentBody.Model,
+		Instructions: sentBody.Instructions,
+		Streaming:    sentBody.Stream,
+		IsStored:     sentBody.Store,
+		Input:        responsesEntries(sentBody.Input),
 	}
 
-	for _, offeredTool := range sent.Tools {
+	for _, offeredTool := range sentBody.Tools {
 		askedRequest.Tools = append(askedRequest.Tools, offeredTool.Name)
 	}
 
@@ -65,7 +65,7 @@ func responsesEntries(items []json.RawMessage) []Entry {
 	read := make([]Entry, 0, len(items))
 
 	for _, item := range items {
-		var sent struct {
+		var sentItem struct {
 			Type    string `json:"type"`
 			Role    string `json:"role"`
 			Content any    `json:"content"`
@@ -74,15 +74,15 @@ func responsesEntries(items []json.RawMessage) []Entry {
 			Output  string `json:"output"`
 		}
 
-		_ = json.Unmarshal(item, &sent)
+		_ = json.Unmarshal(item, &sentItem)
 
 		entry := Entry{
-			Type:    sent.Type,
-			Role:    sent.Role,
-			Content: flatten(sent.Content),
-			CallID:  sent.CallID,
-			Name:    sent.Name,
-			Output:  sent.Output,
+			Type:    sentItem.Type,
+			Role:    sentItem.Role,
+			Content: flatten(sentItem.Content),
+			CallID:  sentItem.CallID,
+			Name:    sentItem.Name,
+			Output:  sentItem.Output,
 			Raw:     item,
 		}
 

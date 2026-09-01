@@ -43,12 +43,12 @@ func (self *Session) Messages() int { return self.MessageCount }
 func Choose(sessions []*Session, terminal *os.File, screen io.Writer) (*Session, error) {
 	rows := &sessionList{sessions: sessions}
 
-	chosen, err := menu.Choose(rows, terminal, screen)
+	chosenIndex, err := menu.Choose(rows, terminal, screen)
 	if err != nil {
 		return nil, err
 	}
 
-	return sessions[chosen], nil
+	return sessions[chosenIndex], nil
 }
 
 type sessionList struct {
@@ -89,7 +89,7 @@ func (self *sessionList) Row(index int, isChosen bool, room int) string {
 		return style.Running(line)
 	}
 	if isChosen {
-		return style.Chosen(line)
+		return style.ChosenRow(line)
 	}
 
 	return style.Answer(line)

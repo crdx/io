@@ -235,7 +235,7 @@ func (self *Agent) send(
 	isListening := true
 	askedRewind := rewindOf(self.provider)
 
-	var spent time.Duration
+	var spentTime time.Duration
 
 	for attempt := 1; ; attempt++ {
 		reply, err := self.provider.Send(ctx, func(output Output) bool {
@@ -247,12 +247,12 @@ func (self *Agent) send(
 			return reply, isListening, err
 		}
 
-		wait, worthIt := self.retryWait(err, attempt, spent)
+		wait, worthIt := self.retryWait(err, attempt, spentTime)
 		if !worthIt {
 			return reply, isListening, err
 		}
 
-		spent += wait
+		spentTime += wait
 
 		if !isResumable(err) {
 			askedRewind.restore()

@@ -20,8 +20,8 @@ func ModeToggleEvent(swappedCaps Set, grantedCaps Set) agent.Event {
 }
 
 func ModeNotice(event agent.Event) (string, bool) {
-	swappedCaps, known := Named(event.Name)
-	if !known {
+	swappedCaps, isKnown := Named(event.Name)
+	if !isKnown {
 		return "", false
 	}
 

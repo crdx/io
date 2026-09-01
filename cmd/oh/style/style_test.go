@@ -54,7 +54,7 @@ func TestAStyleOverAnotherResumesWhereTheInnerOneReset(t *testing.T) {
 	enableColor(t)
 
 	opening := "\x1b[" + sgr(copper) + "m"
-	got := Chosen.Over("row " + Qualifier("note") + " tail")
+	got := ChosenRow.Over("row " + Qualifier("note") + " tail")
 
 	if count := strings.Count(got, opening); count != 2 {
 		t.Errorf("expected the outer style to resume after the inner one, got %q", got)
@@ -72,7 +72,7 @@ func TestAStyleOverAnotherResumesWhereTheInnerOneReset(t *testing.T) {
 func TestAStyleOverAnotherPaintsNothingWhereNothingIsPainted(t *testing.T) {
 	t.Cleanup(Init(&strings.Builder{}))
 
-	if got := Chosen.Over("row note"); got != "row note" {
+	if got := ChosenRow.Over("row note"); got != "row note" {
 		t.Errorf("got %q, want the text left alone", got)
 	}
 }

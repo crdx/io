@@ -79,7 +79,7 @@ func styleThinkingSquares(squares string) string {
 	for _, square := range squares {
 		if string(square) == filledSquare {
 			flushSubtle()
-			renderedText.WriteString(style.Chosen(string(square)))
+			renderedText.WriteString(style.ChosenRow(string(square)))
 		} else {
 			subtle.WriteRune(square)
 		}

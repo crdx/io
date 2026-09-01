@@ -309,8 +309,8 @@ func (self *App) emitCommandEvent(event agent.Event) {
 }
 
 func (self *App) queuePathGrantChange(event agent.Event) {
-	message, shown := pathgrant.Notice(event)
-	if !shown {
+	message, isShown := pathgrant.Notice(event)
+	if !isShown {
 		return
 	}
 	self.pending.add(agent.Event{Kind: agent.UserMessageEvent, Text: message}, event)
@@ -636,7 +636,7 @@ func (self *App) reloadConfig(watchFailure error) bool {
 }
 
 func (self *App) turnTiming() turn.Timing {
-	if timing, known := self.currentTurn.Timing(); known {
+	if timing, isKnown := self.currentTurn.Timing(); isKnown {
 		return timing
 	}
 

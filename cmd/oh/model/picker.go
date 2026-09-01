@@ -28,12 +28,12 @@ func Choose(
 		return Selection{}, ErrNotLoggedIn
 	}
 
-	chosen, err := picker.Choose(offered(choices, defaultEffort), terminal, screen)
+	chosenModel, err := picker.Choose(offered(choices, defaultEffort), terminal, screen)
 	if err != nil {
 		return Selection{}, err
 	}
 
-	return Selection{Provider: chosen.ProviderID, Model: chosen.ID, Effort: chosen.Effort}, nil
+	return Selection{Provider: chosenModel.ProviderID, Model: chosenModel.ID, Effort: chosenModel.Effort}, nil
 }
 
 func ChooseWhenNoneSelected(

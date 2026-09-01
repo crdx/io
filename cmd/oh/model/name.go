@@ -67,15 +67,15 @@ func DisplayName(id string) []string {
 }
 
 func readable(name []string) []string {
-	kept := make([]string, 0, len(name))
+	keptParts := make([]string, 0, len(name))
 
 	for _, part := range name {
 		if part = plainly(part); part != "" {
-			kept = append(kept, part)
+			keptParts = append(keptParts, part)
 		}
 	}
 
-	return kept
+	return keptParts
 }
 
 func plainly(text string) string {
@@ -116,8 +116,8 @@ func derivedName(base string, tag string) []string {
 			continue
 		}
 
-		if written, countedNumber, hasCount := readCountedWord(word); hasCount {
-			words = append(words, written)
+		if writtenWord, countedNumber, hasCount := readCountedWord(word); hasCount {
+			words = append(words, writtenWord)
 			if iteration == "" {
 				iteration = countedNumber
 			}
@@ -210,8 +210,8 @@ func contextOf(tag string) string {
 }
 
 func capitalise(word string) string {
-	if known, isFound := spellings[word]; isFound {
-		return known
+	if knownSpelling, isFound := spellings[word]; isFound {
+		return knownSpelling
 	}
 	if quantityWord.MatchString(word) {
 		return strings.ToUpper(word)

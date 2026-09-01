@@ -51,8 +51,8 @@ func toClaudeCodeName(name string) string {
 	return name
 }
 
-func fromClaudeCodeName(name string, known []string) string {
-	for _, candidate := range known {
+func fromClaudeCodeName(name string, knownNames []string) string {
+	for _, candidate := range knownNames {
 		if strings.EqualFold(candidate, name) {
 			return candidate
 		}

@@ -180,8 +180,8 @@ func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, e
 		}
 	}
 	if err != nil {
-		if said := reply.prose(); said != nil {
-			self.history = append(self.history, said)
+		if prose := reply.prose(); prose != nil {
+			self.history = append(self.history, prose)
 		}
 
 		return agent.Reply{}, err

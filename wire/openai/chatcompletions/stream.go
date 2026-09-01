@@ -48,10 +48,10 @@ func (self *reply) hasSpoken() bool {
 }
 
 func (self *reply) prose() message {
-	said := self.message()
-	said.ToolCalls = nil
+	proseMessage := self.message()
+	proseMessage.ToolCalls = nil
 
-	return said
+	return proseMessage
 }
 
 func (self *reply) calls() []agent.ToolCall {
@@ -195,18 +195,18 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 			return true, nil
 		}
 	}
-	said := delta.Content
-	if said == "" {
-		said = delta.Refusal
+	sentence := delta.Content
+	if sentence == "" {
+		sentence = delta.Refusal
 	}
-	if said != "" {
+	if sentence != "" {
 		if self.completeReasoning(yield) {
 			return true, nil
 		}
 
-		self.content += said
+		self.content += sentence
 		self.isContentOpen = true
-		if !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: said}) {
+		if !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: sentence}) {
 			return true, nil
 		}
 	}

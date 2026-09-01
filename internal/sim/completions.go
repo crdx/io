@@ -45,19 +45,19 @@ type completionsBody struct {
 }
 
 func (self completionsDialect) Read(_ *http.Request, raw []byte) (Request, bool) {
-	var sent completionsBody
-	if json.Unmarshal(raw, &sent) != nil {
+	var sentBody completionsBody
+	if json.Unmarshal(raw, &sentBody) != nil {
 		return Request{}, false
 	}
 
 	askedRequest := Request{
 		API:          self.Name(),
-		Model:        sent.Model,
-		Streaming:    sent.Stream,
-		IncludeUsage: sent.StreamOptions.IncludeUsage,
+		Model:        sentBody.Model,
+		Streaming:    sentBody.Stream,
+		IncludeUsage: sentBody.StreamOptions.IncludeUsage,
 	}
 
-	for i, message := range sent.Messages {
+	for i, message := range sentBody.Messages {
 		if message.Role == "system" && i == 0 {
 			askedRequest.Instructions = flatten(message.Content)
 
@@ -92,7 +92,7 @@ func (self completionsDialect) Read(_ *http.Request, raw []byte) (Request, bool)
 		}
 	}
 
-	for _, offeredTool := range sent.Tools {
+	for _, offeredTool := range sentBody.Tools {
 		askedRequest.Tools = append(askedRequest.Tools, offeredTool.Function.Name)
 	}
 

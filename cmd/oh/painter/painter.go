@@ -128,7 +128,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		self.screen.Line(self.render(event))
 
 	case caps.ModeChange, pathgrant.Change:
-		if message, said := renderAccessMessage(event); said {
+		if message, isSaid := renderAccessMessage(event); isSaid {
 			self.Close(dynamic.Cancelled)
 			self.screen.Line(RenderSubmittedMessage(message, self.screen.Columns()))
 		}

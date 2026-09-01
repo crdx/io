@@ -71,7 +71,7 @@ var (
 	History       Style = hex(mauve)                   // rewriting the repository's history is on offer
 	Pending       Style = col.Underline                // waiting for the keypress that follows a prefix
 	ScrolledInput Style = Dim                          // how much of the input is scrolled out of sight
-	Chosen        Style = hex(copper)                  // the row the cursor is resting on within a list
+	ChosenRow     Style = hex(copper)                  // the row the cursor is resting on within a list
 	Running       Style = decorate(col.Italic, Dim)    // a session already open, which cannot be chosen
 	Column        Style = decorate(col.Underline, Dim) // the heading standing above the column of rows!
 	TypedInput    Style = Normal                       // what the user typed when a session is replayed

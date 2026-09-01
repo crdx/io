@@ -53,28 +53,28 @@ type messagesBlock struct {
 }
 
 func (self messagesDialect) Read(_ *http.Request, raw []byte) (Request, bool) {
-	var sent messagesBody
-	if json.Unmarshal(raw, &sent) != nil {
+	var sentBody messagesBody
+	if json.Unmarshal(raw, &sentBody) != nil {
 		return Request{}, false
 	}
 
 	askedRequest := Request{
 		API:       self.Name(),
-		Model:     sent.Model,
-		Streaming: sent.Stream,
+		Model:     sentBody.Model,
+		Streaming: sentBody.Stream,
 	}
 
-	for _, block := range sent.System {
-		if askedRequest.Instructions == "" || len(sent.System) > 1 {
+	for _, block := range sentBody.System {
+		if askedRequest.Instructions == "" || len(sentBody.System) > 1 {
 			askedRequest.Instructions = block.Text
 		}
 	}
 
-	for _, message := range sent.Messages {
+	for _, message := range sentBody.Messages {
 		askedRequest.Input = append(askedRequest.Input, messagesEntries(message.Role, message.Content)...)
 	}
 
-	for _, offeredTool := range sent.Tools {
+	for _, offeredTool := range sentBody.Tools {
 		askedRequest.Tools = append(askedRequest.Tools, offeredTool.Name)
 	}
 

@@ -71,9 +71,9 @@ func (self usage) contextTokens() int {
 }
 
 func (self *reply) find(index int) *block {
-	for _, held := range self.blocks {
-		if held.index == index {
-			return held
+	for _, heldBlock := range self.blocks {
+		if heldBlock.index == index {
+			return heldBlock
 		}
 	}
 
@@ -91,32 +91,32 @@ func (self *reply) prose() json.RawMessage {
 func (self *reply) assemble(shouldIncludeCalls bool) json.RawMessage {
 	blocks := make([]json.RawMessage, 0, len(self.blocks))
 
-	for _, held := range self.blocks {
-		switch held.kind {
+	for _, heldBlock := range self.blocks {
+		switch heldBlock.kind {
 		case "text":
-			if held.text.Len() > 0 {
-				blocks = append(blocks, encodeItem(textBlock{Type: "text", Text: held.text.String()}))
+			if heldBlock.text.Len() > 0 {
+				blocks = append(blocks, encodeItem(textBlock{Type: "text", Text: heldBlock.text.String()}))
 			}
 
 		case "redacted_thinking":
-			blocks = append(blocks, encodeItem(redactedBlock{Type: "redacted_thinking", Data: held.data}))
+			blocks = append(blocks, encodeItem(redactedBlock{Type: "redacted_thinking", Data: heldBlock.data}))
 
 		case "thinking":
-			if held.signature.Len() > 0 {
+			if heldBlock.signature.Len() > 0 {
 				blocks = append(blocks, encodeItem(thinkingBlock{
 					Type:      "thinking",
-					Thinking:  held.text.String(),
-					Signature: held.signature.String(),
+					Thinking:  heldBlock.text.String(),
+					Signature: heldBlock.signature.String(),
 				}))
 			}
 
 		case "tool_use":
-			if held.isDone && shouldIncludeCalls {
+			if heldBlock.isDone && shouldIncludeCalls {
 				blocks = append(blocks, encodeItem(toolUse{
 					Type:  "tool_use",
-					ID:    held.id,
-					Name:  held.name,
-					Input: json.RawMessage(held.argumentsOrEmpty()),
+					ID:    heldBlock.id,
+					Name:  heldBlock.name,
+					Input: json.RawMessage(heldBlock.argumentsOrEmpty()),
 				}))
 			}
 		}
@@ -130,12 +130,12 @@ func (self *reply) assemble(shouldIncludeCalls bool) json.RawMessage {
 }
 
 func (self *reply) validateToolInputs() error {
-	for _, held := range self.blocks {
-		if held.kind == "tool_use" && held.isDone && !held.hasObjectArguments() {
+	for _, heldBlock := range self.blocks {
+		if heldBlock.kind == "tool_use" && heldBlock.isDone && !heldBlock.hasObjectArguments() {
 			return invalidToolInputError{
-				toolID:    held.id,
-				toolName:  held.name,
-				arguments: held.argumentsOrEmpty(),
+				toolID:    heldBlock.id,
+				toolName:  heldBlock.name,
+				arguments: heldBlock.argumentsOrEmpty(),
 			}
 		}
 	}
@@ -146,12 +146,12 @@ func (self *reply) validateToolInputs() error {
 func (self *reply) calls(knownTools []string) []agent.ToolCall {
 	var calls []agent.ToolCall
 
-	for _, held := range self.blocks {
-		if held.kind == "tool_use" && held.isDone {
+	for _, heldBlock := range self.blocks {
+		if heldBlock.kind == "tool_use" && heldBlock.isDone {
 			calls = append(calls, agent.ToolCall{
-				ID:        held.id,
-				Name:      fromClaudeCodeName(held.name, knownTools),
-				Arguments: held.argumentsOrEmpty(),
+				ID:        heldBlock.id,
+				Name:      fromClaudeCodeName(heldBlock.name, knownTools),
+				Arguments: heldBlock.argumentsOrEmpty(),
 			})
 		}
 	}
@@ -341,39 +341,39 @@ func (self *reply) open(event event) {
 }
 
 func (self *reply) add(event event, yield agent.Yield) bool {
-	held := self.find(event.Index)
-	if held == nil || event.Delta == nil {
+	heldBlock := self.find(event.Index)
+	if heldBlock == nil || event.Delta == nil {
 		return false
 	}
 
 	switch event.Delta.Type {
 	case "text_delta":
-		held.text.WriteString(event.Delta.Text)
+		heldBlock.text.WriteString(event.Delta.Text)
 
 		return !yield(agent.Output{Kind: agent.ModelMessageEvent, Text: event.Delta.Text})
 
 	case "thinking_delta":
-		held.text.WriteString(event.Delta.Thinking)
+		heldBlock.text.WriteString(event.Delta.Thinking)
 
 		return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: event.Delta.Thinking})
 
 	case "signature_delta":
-		held.signature.WriteString(event.Delta.Signature)
+		heldBlock.signature.WriteString(event.Delta.Signature)
 
 	case "input_json_delta":
-		held.arguments.WriteString(event.Delta.PartialJSON)
+		heldBlock.arguments.WriteString(event.Delta.PartialJSON)
 	}
 
 	return false
 }
 
 func (self *reply) close(event event, yield agent.Yield) bool {
-	held := self.find(event.Index)
-	if held == nil {
+	heldBlock := self.find(event.Index)
+	if heldBlock == nil {
 		return false
 	}
 
-	held.isDone = true
+	heldBlock.isDone = true
 
 	var reportedUsage *agent.Usage
 	if self.usage.InputTokens > 0 {
@@ -382,9 +382,9 @@ func (self *reply) close(event event, yield agent.Yield) bool {
 	}
 
 	switch {
-	case held.kind == "text" && held.text.Len() > 0:
+	case heldBlock.kind == "text" && heldBlock.text.Len() > 0:
 		return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true, Usage: reportedUsage})
-	case held.kind == "thinking" && held.text.Len() > 0 && held.signature.Len() > 0:
+	case heldBlock.kind == "thinking" && heldBlock.text.Len() > 0 && heldBlock.signature.Len() > 0:
 		return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true, Usage: reportedUsage})
 	default:
 		return false

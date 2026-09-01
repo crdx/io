@@ -278,9 +278,9 @@ func refusal(response *http.Response) error {
 
 	refusedRequest.Code = payload.Error.Code
 
-	for _, said := range []string{payload.Error.Message, payload.Detail} {
-		if said != "" {
-			refusedRequest.Message = said
+	for _, sentence := range []string{payload.Error.Message, payload.Detail} {
+		if sentence != "" {
+			refusedRequest.Message = sentence
 
 			break
 		}

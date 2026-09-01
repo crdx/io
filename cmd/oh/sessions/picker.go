@@ -56,14 +56,14 @@ func ResolveWorkspaceDir() (string, error) {
 }
 
 func InWorkspace(sessions []*picker.Session, workspaceDir string) []*picker.Session {
-	chosen := make([]*picker.Session, 0, len(sessions))
+	chosenSessions := make([]*picker.Session, 0, len(sessions))
 	for _, storedSession := range sessions {
 		if filepath.Clean(storedSession.WorkspaceDir) == workspaceDir {
-			chosen = append(chosen, storedSession)
+			chosenSessions = append(chosenSessions, storedSession)
 		}
 	}
 
-	return chosen
+	return chosenSessions
 }
 
 func RefreshListings(directory string, screen io.Writer) error {

@@ -18,24 +18,24 @@ type Size struct {
 }
 
 func (self *Size) UnmarshalText(text []byte) error {
-	written := strings.TrimSpace(string(text))
+	writtenSize := strings.TrimSpace(string(text))
 
 	multiplier := 1
 
 	switch {
-	case strings.HasSuffix(strings.ToUpper(written), "K"):
+	case strings.HasSuffix(strings.ToUpper(writtenSize), "K"):
 		multiplier = kilobyte
-	case strings.HasSuffix(strings.ToUpper(written), "M"):
+	case strings.HasSuffix(strings.ToUpper(writtenSize), "M"):
 		multiplier = megabyte
-	case strings.HasSuffix(strings.ToUpper(written), "G"):
+	case strings.HasSuffix(strings.ToUpper(writtenSize), "G"):
 		multiplier = gigabyte
 	}
 
 	if multiplier > 1 {
-		written = written[:len(written)-1]
+		writtenSize = writtenSize[:len(writtenSize)-1]
 	}
 
-	count, err := strconv.Atoi(strings.TrimSpace(written))
+	count, err := strconv.Atoi(strings.TrimSpace(writtenSize))
 	if err != nil || count < 0 {
 		return fmt.Errorf("%q is not a size; write a count of bytes, or one with a K, M or G after it", text)
 	}
