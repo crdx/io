@@ -2,9 +2,9 @@
 \e[48;2;52;53;65m send malformed tool input too long to show                                                         \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;207;173;0m[#1] Request failed; retrying in 1s: The work tool call did not contain a JSON object: {"value":"aaa\r
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\r
-aaaaaa…\e[0m\r
+\e[38;2;207;173;0m[#1] Request failed; retrying in 1s: The work tool call did not contain a JSON object:\e[0m\r
+\e[38;2;207;173;0m{"value":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\e[0m\r
+\e[38;2;207;173;0maaaaaaaaaaaaaaaaaaa…\e[0m\r
 \r
 \e[?7l\r\e[KI corrected the malformed call.\e[?25h\e[?2026l\r
 \r

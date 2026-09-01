@@ -2,10 +2,10 @@
  send malformed tool input three times over
 
 
-[#1] Request failed; retrying in 1s: The work tool call did not contain a JSON object: {"offset": 24
-0,, "limit": 20}
-[#2] Request failed; retrying in 5s: The work tool call did not contain a JSON object: {"offset": 24
-5, , "limit": 1}
+[#1] Request failed; retrying in 1s: The work tool call did not contain a JSON object: {"offset":
+240,, "limit": 20}
+[#2] Request failed; retrying in 5s: The work tool call did not contain a JSON object: {"offset":
+245, , "limit": 1}
 [#3] Request failed; retrying in 10s: The work tool call did not contain a JSON object: { "offset":
 250,, "limit": 5 }
 

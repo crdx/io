@@ -7,8 +7,8 @@ $ echo  [31mred [0m ✓ 1L 2M red
 screenshot notes [2J [H.md lines… ✓ 1L
 grep one two ✓ 1L
 
-[#1] Request failed; retrying in 2s: Ups
-tream said no
+[#1] Request failed; retrying in 2s:
+Upstream said no
 
 Nothing moved.
 === one column ===
@@ -126,10 +126,10 @@ scre… ✓ 1L
 grep ✓ 1L
 
 [#1] Request
-failed; retr
-ying in 2s:
-Upstream sai
-d no
+failed;
+retrying in
+2s: Upstream
+said no
 
 Nothing
 moved.

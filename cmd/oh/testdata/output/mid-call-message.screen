@@ -400,15 +400,16 @@ word one,
 and nothing
 else.
 
-Background p
-rocesses kil
-led (sleep).
-the conversa
-tion could n
-ot be stored
-: no space l
-eft on devic
-e
+Background
+processes
+killed
+(sleep).
+the
+conversation
+could not be
+stored: no
+space left
+on device
 === wide ===
 
  read the renderer and tell me what it does

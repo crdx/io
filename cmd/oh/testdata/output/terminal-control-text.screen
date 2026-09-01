@@ -134,6 +134,7 @@ l
 i
 n
 e
+
 F
 a
 i
@@ -188,12 +189,13 @@ reasoning
 before after
 second line
 
-notice befor
-e [2J [H aft
-er
+notice
+before [2J
+[H after
 second line
-Failure befo
-re ]2;stolen
+Failure
+before
+]2;stolen
 title  after
 second line
 === wide ===

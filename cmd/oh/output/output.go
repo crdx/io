@@ -9,6 +9,7 @@ import (
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
+	"crdx.org/io/cmd/oh/width"
 
 	"golang.org/x/term"
 )
@@ -99,7 +100,7 @@ func (self *Screen) Line(text string) {
 		self.newline()
 	}
 
-	self.write(text)
+	self.write(self.wrapToWidth(text))
 }
 
 func (self *Screen) Blank() {
@@ -120,6 +121,14 @@ func (self *Screen) End() {
 		self.isMidLine = false
 		self.hasPendingText = false
 	}
+}
+
+func (self *Screen) wrapToWidth(text string) string {
+	if self.columns <= 0 {
+		return text
+	}
+
+	return strings.Join(width.Wrap(text, self.columns), "\n")
 }
 
 func (self *Screen) drawRow(text string) {

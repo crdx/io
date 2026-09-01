@@ -1,7 +1,7 @@
 === narrow ===
 Agent 000000000000000000000000 ready in
-0s with 0 skills ⧸ 0 snippets ⧸ ~800t co
-ntext.
+0s with 0 skills ⧸ 0 snippets ⧸ ~800t
+context.
 
 
  what is the current go release, and
@@ -27,8 +27,8 @@ smaller allocation header.
  text
 
 
-The web search and fetch tools are now r
-efused.
+The web search and fetch tools are now
+refused.
 
 fetch https://go… ✗ web access is not…
 
@@ -621,13 +621,15 @@ i
 n
 .
 === tiny ===
-Agent 000000
+Agent
 000000000000
-000000 ready
-in 0s with 0
-skills ⧸ 0 s
-nippets ⧸ ~8
-00t context.
+000000000000
+ready in 0s
+with 0
+skills ⧸ 0
+snippets ⧸
+~800t
+context.
 
 
  what is the
@@ -676,10 +678,11 @@ header.
  plain text
 
 
-The web sear
-ch and fetch
-tools are no
-w refused.
+The web
+search and
+fetch tools
+are now
+refused.
 
 fe… ✗ web…
 

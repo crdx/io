@@ -1,7 +1,7 @@
 === narrow ===
 Agent 000000000000000000000000 ready in
-0s with 0 skills ⧸ 0 snippets ⧸ ~800t co
-ntext.
+0s with 0 skills ⧸ 0 snippets ⧸ ~800t
+context.
 
 
  have a look at that
@@ -410,13 +410,15 @@ e
 n
 t
 === tiny ===
-Agent 000000
+Agent
 000000000000
-000000 ready
-in 0s with 0
-skills ⧸ 0 s
-nippets ⧸ ~8
-00t context.
+000000000000
+ready in 0s
+with 0
+skills ⧸ 0
+snippets ⧸
+~800t
+context.
 
 
  have a look
@@ -427,8 +429,8 @@ This one
 stops
 halfway.
 
-The stream e
-nded before
+The stream
+ended before
 the response
 did
 
@@ -453,8 +455,8 @@ get so far
 before
 
 The response
-was cut shor
-t
+was cut
+short
 
 
  have a look
