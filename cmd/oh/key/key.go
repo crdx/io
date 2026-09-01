@@ -184,12 +184,26 @@ func (self *Decoder) escape() (Key, error) {
 		return self.applicationCursor()
 	}
 
-	return Key{Code: Unknown}, nil
+	return self.alt(next), nil
 }
 
 func (self *Decoder) escapeContinues() bool {
 	return self.reader.Buffered() > 0 ||
 		self.hasEscapeContinuation != nil && self.hasEscapeContinuation()
+}
+
+func (self *Decoder) alt(value rune) Key {
+	if value == '\r' {
+		self.swallow('\n')
+		return Key{Code: Enter, Mod: Alt}
+	}
+
+	keypress := plain(value)
+	if keypress.Code != Unknown {
+		keypress.Mod |= Alt
+	}
+
+	return keypress
 }
 
 func (self *Decoder) applicationCursor() (Key, error) {

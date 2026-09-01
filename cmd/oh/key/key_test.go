@@ -95,6 +95,12 @@ func TestAnEscapeSequenceMayBeSplitAcrossTerminalReads(t *testing.T) {
 	}
 }
 
+func TestAltEnterMayBeSplitAcrossTerminalReads(t *testing.T) {
+	if got := decodeFragmentedTerminal(t, "\r"); got != (Key{Code: Enter, Mod: Alt}) {
+		t.Errorf("got %+v, want Alt+Enter", got)
+	}
+}
+
 func TestABareTerminalEscapeReturnsAfterTheSequenceDeadline(t *testing.T) {
 	terminal, writer, err := os.Pipe()
 	if err != nil {
@@ -176,6 +182,19 @@ func TestLegacyAndKeyboardProtocolEscapesAreReported(t *testing.T) {
 		got := decode(t, input)
 		if len(got) != 1 || got[0] != (Key{Code: Escape}) {
 			t.Errorf("%s: expected an Escape, got %v", name, got)
+		}
+	}
+}
+
+func TestLegacyAltPrefixesModifyTheFollowingKey(t *testing.T) {
+	for input, want := range map[string]Key{
+		"\x1ba":    {Code: Rune, Value: 'a', Mod: Alt},
+		"\x1b\r":   {Code: Enter, Mod: Alt},
+		"\x1b\x7f": {Code: Backspace, Mod: Alt},
+	} {
+		got := decode(t, input)
+		if len(got) != 1 || got[0] != want {
+			t.Errorf("%q: expected %+v, got %v", input, want, got)
 		}
 	}
 }

@@ -2641,6 +2641,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"feedback":              {".ansi", ".screen", ".txt"},
 		"context":               {".prompt"},
 		"inputblock":            {".ansi", ".screen"},
+		"legacy-alt-enter":      {".ansi", ".screen"},
 		"lifecycle":             {".ansi", ".screen"},
 		"line-resize":           {".screen"},
 		"streaming-modes":       {".screen"},
