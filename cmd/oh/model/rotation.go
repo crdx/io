@@ -27,8 +27,9 @@ func (self Selection) String() string {
 const roundRobinStateVersion = 1
 
 type roundRobinState struct {
-	Version int       `json:"version"`
-	Last    Selection `json:"last"`
+	Version   int       `json:"version"`
+	Last      Selection `json:"last"`
+	LastIndex int       `json:"last_index"`
 }
 
 var ErrNoSelection = errors.New(
@@ -49,8 +50,13 @@ func ReserveRoundRobin(path string, selections []Selection) (Selection, error) {
 			return fmt.Errorf("model round-robin state has version %d, expected %d", storedState.Version, roundRobinStateVersion)
 		}
 
-		selectedModel = roundrobin.Next(selections, storedState.Last)
-		*storedState = roundRobinState{Version: roundRobinStateVersion, Last: selectedModel}
+		selectedIndex := roundrobin.NextIndex(selections, storedState.Last, storedState.LastIndex)
+		selectedModel = selections[selectedIndex]
+		*storedState = roundRobinState{
+			Version:   roundRobinStateVersion,
+			Last:      selectedModel,
+			LastIndex: selectedIndex,
+		}
 
 		return nil
 	})
@@ -60,7 +66,6 @@ func ReserveRoundRobin(path string, selections []Selection) (Selection, error) {
 
 func ParseRoundRobin(path string, writtenSelections []string) ([]Selection, error) {
 	selections := make([]Selection, 0, len(writtenSelections))
-	seen := make(map[string]struct{}, len(writtenSelections))
 
 	for _, writtenSelection := range writtenSelections {
 		selection, err := ParseSelection(path, writtenSelection)
@@ -68,12 +73,6 @@ func ParseRoundRobin(path string, writtenSelections []string) ([]Selection, erro
 			return nil, fmt.Errorf("model.round_robin: %q: %w", writtenSelection, err)
 		}
 
-		canonical := selection.String()
-		if _, isFound := seen[canonical]; isFound {
-			return nil, fmt.Errorf("model.round_robin selects %s more than once", canonical)
-		}
-
-		seen[canonical] = struct{}{}
 		selections = append(selections, selection)
 	}
 

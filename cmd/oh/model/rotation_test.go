@@ -3,6 +3,7 @@ package model
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -30,15 +31,39 @@ func TestRoundRobinSelectionsResolveEveryEntry(t *testing.T) {
 	}
 }
 
-func TestRoundRobinSelectionsRejectCanonicalDuplicates(t *testing.T) {
+func TestRoundRobinSelectionsKeepCanonicalDuplicates(t *testing.T) {
 	useCachedModels(t)
 
-	_, err := ParseRoundRobin(modelCachePath(), []string{
+	selections, err := ParseRoundRobin(modelCachePath(), []string{
 		"opencode-go/deepseek-v4-pro@high",
 		"opencode/deepseek@hi",
 	})
-	if err == nil || !strings.Contains(err.Error(), "more than once") {
-		t.Fatalf("expected a duplicate error, got %v", err)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(selections) != 2 || selections[0] != selections[1] {
+		t.Errorf("got %v, want the same selection twice", selections)
+	}
+}
+
+func TestRepeatedRoundRobinSelectionsWeightTheRotation(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "round-robin.json")
+	frequent := Selection{Provider: CodexProvider, Model: "frequent", Effort: "high"}
+	occasional := Selection{Provider: AnthropicProvider, Model: "occasional", Effort: "high"}
+	selections := []Selection{frequent, frequent, occasional}
+
+	var selected []Selection
+	for range len(selections) * 2 {
+		selection, err := ReserveRoundRobin(path, selections)
+		if err != nil {
+			t.Fatal(err)
+		}
+		selected = append(selected, selection)
+	}
+
+	want := []Selection{frequent, frequent, occasional, frequent, frequent, occasional}
+	if !slices.Equal(selected, want) {
+		t.Errorf("got %v, want %v", selected, want)
 	}
 }
 
