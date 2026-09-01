@@ -10,6 +10,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/store"
+	"crdx.org/io/cmd/oh/work"
 )
 
 const (
@@ -22,7 +23,7 @@ type ForkSource struct {
 	InitialUserMessage string
 }
 
-func GetForkSource(directory string, workspaceDir string, name string, userMessage string) (*ForkSource, error) {
+func GetForkSource(directory string, workspace *work.Space, name string, userMessage string) (*ForkSource, error) {
 	if name == "" {
 		return nil, nil //nolint:nilnil // no name means no fork was asked for
 	}
@@ -31,7 +32,7 @@ func GetForkSource(directory string, workspaceDir string, name string, userMessa
 	if err != nil {
 		return nil, err
 	}
-	if err := requireWorkspace(storedSession, workspaceDir); err != nil {
+	if err := requireWorkspace(storedSession, workspace); err != nil {
 		return nil, err
 	}
 
@@ -46,7 +47,7 @@ func GetForkSource(directory string, workspaceDir string, name string, userMessa
 	}, nil
 }
 
-func LoadForResume(directory string, workspaceDir string, name string) (*store.Session, error) {
+func LoadForResume(directory string, workspace *work.Space, name string) (*store.Session, error) {
 	if name == "" {
 		return nil, nil //nolint:nilnil // no name means no fork was asked for
 	}
@@ -63,7 +64,7 @@ func LoadForResume(directory string, workspaceDir string, name string) (*store.S
 	if err != nil {
 		return nil, err
 	}
-	if err := requireWorkspace(storedSession, workspaceDir); err != nil {
+	if err := requireWorkspace(storedSession, workspace); err != nil {
 		return nil, err
 	}
 	if !storedSession.CanResume() {
@@ -73,8 +74,8 @@ func LoadForResume(directory string, workspaceDir string, name string) (*store.S
 	return storedSession, nil
 }
 
-func requireWorkspace(storedSession *store.Session, workspaceDir string) error {
-	if filepath.Clean(storedSession.Meta.WorkspaceDir) == filepath.Clean(workspaceDir) {
+func requireWorkspace(storedSession *store.Session, workspace *work.Space) error {
+	if workspace.IsAt(storedSession.Meta.WorkspaceDir) {
 		return nil
 	}
 

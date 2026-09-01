@@ -61,6 +61,24 @@ func (self *Space) Validate() error {
 	return nil
 }
 
+func (self *Space) IsAt(dir string) bool {
+	if self == nil {
+		return false
+	}
+
+	dir = filepath.Clean(dir)
+	if dir == filepath.Clean(self.dir) {
+		return true
+	}
+
+	resolvedDir, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		return false
+	}
+
+	return filepath.Clean(resolvedDir) == filepath.Clean(self.resolvedDir)
+}
+
 func (self *Space) Open() error {
 	root, err := os.OpenRoot(self.dir)
 	if err != nil {

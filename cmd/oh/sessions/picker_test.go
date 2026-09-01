@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/session"
 
 	"crdx.org/io/cmd/oh/store"
+	"crdx.org/io/cmd/oh/work"
 )
 
 var updateGoldens = flag.Bool("update", false, "update golden files")
@@ -87,6 +88,41 @@ func TestTheSessionAddedToLastIsOfferedFirstByThePicker(t *testing.T) {
 	}
 }
 
+func TestASessionRecordedThroughALinkBelongsToTheWorkspaceItNames(t *testing.T) {
+	directory := t.TempDir()
+	workspaceDir := t.TempDir()
+	alias := filepath.Join(t.TempDir(), "alias")
+	if err := os.Symlink(workspaceDir, alias); err != nil {
+		t.Fatal(err)
+	}
+
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: alias})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	loadedSessions, err := Load(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, named := range []string{workspaceDir, alias} {
+		if chosen := InWorkspace(loadedSessions, work.At(named)); len(chosen) != 1 {
+			t.Errorf("the session was not offered in %q, got %+v", named, chosen)
+		}
+	}
+
+	if chosen := InWorkspace(loadedSessions, work.At(t.TempDir())); len(chosen) != 0 {
+		t.Errorf("the session was offered in another workspace, got %+v", chosen)
+	}
+}
+
 func TestAWorkspaceWithNothingStoredSaysSo(t *testing.T) {
 	directory := t.TempDir()
 	workspaceDir := t.TempDir()
@@ -101,7 +137,7 @@ func TestAWorkspaceWithNothingStoredSaysSo(t *testing.T) {
 
 	var screen strings.Builder
 
-	_, err = Choose(directory, workspaceDir, nil, &screen)
+	_, err = Choose(directory, work.At(workspaceDir), nil, &screen)
 	if err == nil {
 		t.Fatal("expected the empty workspace to be reported")
 	}

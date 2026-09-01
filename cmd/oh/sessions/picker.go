@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"slices"
 	"strings"
 
@@ -15,10 +14,11 @@ import (
 	"crdx.org/io/cmd/oh/sessions/picker"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/session"
 )
 
-func Choose(directory string, workspaceDir string, terminal *os.File, screen io.Writer) (string, error) {
+func Choose(directory string, workspace *work.Space, terminal *os.File, screen io.Writer) (string, error) {
 	if err := RefreshListings(directory, screen); err != nil {
 		return "", err
 	}
@@ -30,7 +30,7 @@ func Choose(directory string, workspaceDir string, terminal *os.File, screen io.
 		}
 		return "", err
 	}
-	sessions = InWorkspace(sessions, workspaceDir)
+	sessions = InWorkspace(sessions, workspace)
 	if len(sessions) == 0 {
 		return "", errors.New("there are no stored conversations for this workspace")
 	}
@@ -46,10 +46,10 @@ func Choose(directory string, workspaceDir string, terminal *os.File, screen io.
 	return chosenSession.Name, nil
 }
 
-func InWorkspace(sessions []*picker.Session, workspaceDir string) []*picker.Session {
+func InWorkspace(sessions []*picker.Session, workspace *work.Space) []*picker.Session {
 	chosenSessions := make([]*picker.Session, 0, len(sessions))
 	for _, storedSession := range sessions {
-		if filepath.Clean(storedSession.WorkspaceDir) == workspaceDir {
+		if workspace.IsAt(storedSession.WorkspaceDir) {
 			chosenSessions = append(chosenSessions, storedSession)
 		}
 	}

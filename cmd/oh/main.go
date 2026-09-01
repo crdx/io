@@ -145,7 +145,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	workspaceDir := workspace.GetDir()
 
 	if inputArgs.IsSessionPicker {
-		return sessions.Choose(sessionsDir, workspaceDir, os.Stdin, os.Stdout)
+		return sessions.Choose(sessionsDir, workspace, os.Stdin, os.Stdout)
 	}
 
 	if _, err := onboarding.PrepareConfig(onboarding.Options{
@@ -215,7 +215,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	forkSource, err := sessions.GetForkSource(sessionsDir, workspaceDir, args.SourceSession, args.Message)
+	forkSource, err := sessions.GetForkSource(sessionsDir, workspace, args.SourceSession, args.Message)
 	if err != nil {
 		return "", err
 	}
@@ -224,7 +224,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		args.Message = forkSource.InitialUserMessage
 	}
 
-	resumedSession, err := sessions.LoadForResume(sessionsDir, workspaceDir, args.Session)
+	resumedSession, err := sessions.LoadForResume(sessionsDir, workspace, args.Session)
 	if err != nil {
 		return "", err
 	}

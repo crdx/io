@@ -40,6 +40,19 @@ func TestTitleCannotContainTerminalControlCharacters(t *testing.T) {
 	}
 }
 
+func TestTheTerminalIsNamedAfterTheWorkspace(t *testing.T) {
+	output := &strings.Builder{}
+	managedTerminal := New(output, work.At("/work/project"))
+	managedTerminal.title = interactiveTitle(output)
+
+	restore := managedTerminal.Begin(caps.Read)
+	defer restore()
+
+	if got, want := output.String(), pushTitle+"\x1b]2;project\x1b\\"; got != want {
+		t.Errorf("got title sequence %q, want %q", got, want)
+	}
+}
+
 func TestTerminalDoesNotWriteItsTitleToRedirectedOutput(t *testing.T) {
 	output := &strings.Builder{}
 	managedTerminal := New(output, work.At("/work/project"))

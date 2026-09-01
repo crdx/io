@@ -2651,6 +2651,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"ordinary-tab":          {".ansi", ".screen"},
 		"path-grant-lifecycle":  {".ansi", ".screen"},
 		"path-message":          {".ansi", ".screen"},
+		"workspace-paths":       {".ansi", ".screen"},
 		"pending-mode-messages": {".ansi", ".screen"},
 		"paste":                 {".ansi", ".screen"},
 		"picker-menu":           {".ansi", ".screen"},
@@ -3890,6 +3891,34 @@ func TestAWorkspaceNamedThroughTmpIsRefused(t *testing.T) {
 
 	if err := work.At(alias).Validate(); !errors.Is(err, work.ErrShadowed) {
 		t.Errorf("got %v, want the workspace shadowing error", err)
+	}
+}
+
+func TestAWorkspaceIsAtEveryPathNamingIt(t *testing.T) {
+	directory := t.TempDir()
+	alias := filepath.Join(t.TempDir(), "alias")
+	if err := os.Symlink(directory, alias); err != nil {
+		t.Fatalf("could not create workspace alias: %v", err)
+	}
+
+	for _, named := range []*work.Space{work.At(directory), work.At(alias)} {
+		for _, dir := range []string{directory, alias, directory + string(filepath.Separator)} {
+			if !named.IsAt(dir) {
+				t.Errorf("%q was not recognised as %q", dir, named.GetDir())
+			}
+		}
+
+		if named.IsAt(t.TempDir()) {
+			t.Errorf("%q was recognised as another directory", named.GetDir())
+		}
+	}
+}
+
+func TestAnAbsentWorkspaceIsAtNothing(t *testing.T) {
+	var absent *work.Space
+
+	if absent.IsAt(t.TempDir()) {
+		t.Error("a workspace that is nowhere was recognised somewhere")
 	}
 }
 
@@ -5405,6 +5434,57 @@ func TestReloadingConfigReplacesSnippetsAtomically(t *testing.T) {
 	}
 }
 
+func TestWorkspacePathsInCallLabelsLoseTheirPrefix(t *testing.T) {
+	passes := map[string]func() string{
+		"paths named against the workspace": func() string { return drawWorkspacePathLabels(t) },
+	}
+
+	compareWithGolden(t, "workspace-paths", ".ansi", passes)
+	compareWithGolden(t, "workspace-paths", ".screen", shownPasses(t, passes))
+}
+
+func drawWorkspacePathLabels(t *testing.T) string {
+	t.Helper()
+
+	rig := newWideRig(t)
+	workspaceDir := rig.workspace.GetDir()
+
+	calls := []struct {
+		name      string
+		arguments string
+	}{
+		{"read", fmt.Sprintf(`{"path":%q}`, filepath.Join(workspaceDir, "named-in-full.md"))},
+		{"read", `{"path":"~/named-by-tilde.md"}`},
+		{"read", fmt.Sprintf(`{"path":%q}`, workspaceDir)},
+		{"read", `{"path":"~"}`},
+		{"read", `{"path":"/etc/hosts"}`},
+		{"grep", fmt.Sprintf(`{"pattern":"in-full","path":%q,"glob":"**/*.go"}`, workspaceDir)},
+		{"grep", `{"pattern":"by-tilde","path":"~","glob":"**/*.md"}`},
+	}
+
+	for at, call := range calls {
+		id := strconv.Itoa(at)
+		rig.chat.events = append(rig.chat.events,
+			agent.Event{
+				Kind:      agent.ToolCallRequestEvent,
+				ID:        id,
+				Name:      call.name,
+				Arguments: call.arguments,
+			},
+			agent.Event{
+				Kind:   agent.ToolCallResultEvent,
+				Status: agent.SuccessStatus,
+				ID:     id,
+				Name:   call.name,
+			},
+		)
+	}
+
+	rig.chat.replay()
+
+	return rig.drawn()
+}
+
 func TestAnExistingPathDrawsAsAConversationMessage(t *testing.T) {
 	passes := map[string]func() string{
 		"existing path sent": func() string { return drawExistingPathMessage(t) },
@@ -6886,7 +6966,7 @@ func TestSessionsComeFromJournalParsing(t *testing.T) {
 }
 
 func TestChoosingWithoutStoredSessionsFails(t *testing.T) {
-	if _, err := sessions.Choose(t.TempDir(), t.TempDir(), nil, nil); err == nil {
+	if _, err := sessions.Choose(t.TempDir(), work.At(t.TempDir()), nil, nil); err == nil {
 		t.Error("expected an empty session list to fail")
 	}
 }
@@ -6914,12 +6994,12 @@ func TestChoosingOnlyOffersTheSessionsOfTheCurrentWorkspace(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	chosen := sessions.InWorkspace(loadedSessions, workspaceDir)
+	chosen := sessions.InWorkspace(loadedSessions, work.At(workspaceDir))
 	if len(chosen) != 1 || chosen[0].WorkspaceDir != workspaceDir {
 		t.Fatalf("expected only the session of this workspace, got %+v", chosen)
 	}
 
-	if _, err := sessions.Choose(directory, t.TempDir(), nil, nil); err == nil {
+	if _, err := sessions.Choose(directory, work.At(t.TempDir()), nil, nil); err == nil {
 		t.Error("expected a workspace without sessions to fail")
 	}
 }
@@ -6940,7 +7020,7 @@ func TestChoosingASessionFromANewerOhAdvisesAnUpgrade(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err := sessions.Choose(directory, t.TempDir(), nil, nil)
+	_, err := sessions.Choose(directory, work.At(t.TempDir()), nil, nil)
 	if err == nil {
 		t.Fatal("expected the newer session to be refused")
 	}
@@ -6956,7 +7036,7 @@ func TestChoosingAnOutdatedSessionAdvisesMigration(t *testing.T) {
 	directory := t.TempDir()
 	writeStoredJournal(t, directory, "able-dolphin", "2026-08-01T00:00:00Z")
 
-	_, err := sessions.Choose(directory, t.TempDir(), nil, nil)
+	_, err := sessions.Choose(directory, work.At(t.TempDir()), nil, nil)
 	if err == nil {
 		t.Fatal("expected the outdated session to be refused")
 	}

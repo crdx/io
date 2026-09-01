@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/cmd/oh/sessions/picker"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/cmd/ohctl/console"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/strutil"
@@ -89,7 +90,7 @@ func run(options *inputOpts, output console.Output) error {
 		if err != nil {
 			return fmt.Errorf("could not resolve the workspace path: %w", err)
 		}
-		storedSessions = ohSessions.InWorkspace(storedSessions, workspaceDir)
+		storedSessions = ohSessions.InWorkspace(storedSessions, work.At(workspaceDir))
 	}
 
 	listings := describe(directory, storedSessions, options.Running)

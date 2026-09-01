@@ -178,7 +178,7 @@ func sessionNames(directory string) []string {
 	}
 
 	names := make([]string, 0, len(storedSessions))
-	for _, storedSession := range sessions.InWorkspace(storedSessions, workspace.GetDir()) {
+	for _, storedSession := range sessions.InWorkspace(storedSessions, workspace) {
 		names = append(names, storedSession.Name)
 	}
 
