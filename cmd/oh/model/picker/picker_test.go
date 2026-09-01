@@ -37,6 +37,24 @@ func compareWithGolden(t *testing.T, name string, drawn string) {
 	}
 }
 
+func levels(names ...string) []Effort {
+	ladder := make([]Effort, 0, len(names))
+	for _, name := range names {
+		ladder = append(ladder, Effort{Level: name})
+	}
+
+	return ladder
+}
+
+func fastLadder(names ...string) []Effort {
+	ladder := make([]Effort, 0, len(names)*2)
+	for _, name := range names {
+		ladder = append(ladder, Effort{Level: name}, Effort{Level: name, IsFast: true})
+	}
+
+	return ladder
+}
+
 func availableModels() []*Model {
 	return []*Model{
 		{
@@ -44,8 +62,8 @@ func availableModels() []*Model {
 			ProviderID:          "anthropic",
 			Name:                "Sonnet 5",
 			ID:                  "claude-sonnet-5",
-			EffortLevels:        []string{"none", "low", "medium", "high"},
-			Effort:              "medium",
+			EffortLevels:        levels("none", "low", "medium", "high"),
+			Effort:              Effort{Level: "medium"},
 			ContextWindowTokens: 200000,
 		},
 		{
@@ -53,8 +71,8 @@ func availableModels() []*Model {
 			ProviderID:          "codex",
 			Name:                "Codex 5.3",
 			ID:                  "gpt-5.3-codex",
-			EffortLevels:        []string{"low", "medium", "high", "xhigh"},
-			Effort:              "medium",
+			EffortLevels:        fastLadder("low", "medium", "high", "xhigh"),
+			Effort:              Effort{Level: "medium", IsFast: true},
 			ContextWindowTokens: 272000,
 		},
 		{
@@ -62,8 +80,8 @@ func availableModels() []*Model {
 			ProviderID:          "opencode-go",
 			Name:                "DeepSeek Flash Vision Exp 4",
 			ID:                  "deepseek-v4-flash-vision-exp",
-			EffortLevels:        []string{"low", "medium", "high"},
-			Effort:              "high",
+			EffortLevels:        levels("low", "medium", "high"),
+			Effort:              Effort{Level: "high"},
 			ContextWindowTokens: 1000000,
 		},
 		{
@@ -71,8 +89,8 @@ func availableModels() []*Model {
 			ProviderID:          "ollama",
 			Name:                "Qwen Coder 3 30B",
 			ID:                  "qwen3-coder:30b",
-			EffortLevels:        []string{"medium"},
-			Effort:              "medium",
+			EffortLevels:        levels("medium"),
+			Effort:              Effort{Level: "medium"},
 			ContextWindowTokens: 0,
 		},
 	}
@@ -88,40 +106,55 @@ func TestEveryModelCanBeChosen(t *testing.T) {
 	}
 }
 
-func TestTheEffortOfAModelIsSetOneLevelAtATime(t *testing.T) {
+func TestTheEffortOfAModelIsSetOneStepAtATime(t *testing.T) {
 	models := availableModels()
 	list := &modelList{models: models}
 
 	list.Adjust(1, 1)
-	if models[1].Effort != "high" {
-		t.Errorf("expected a higher effort, got %q", models[1].Effort)
+	if models[1].Effort != (Effort{Level: "high"}) {
+		t.Errorf("expected the step above a fast effort to be the next level, got %s", models[1].Effort)
 	}
 
-	for range 5 {
+	list.Adjust(1, 1)
+	if models[1].Effort != (Effort{Level: "high", IsFast: true}) {
+		t.Errorf("expected fast mode to sit beside each level, got %s", models[1].Effort)
+	}
+
+	for range 9 {
 		list.Adjust(1, 1)
 	}
-	if models[1].Effort != "xhigh" {
-		t.Errorf("expected the effort to stop at the highest, got %q", models[1].Effort)
+	if models[1].Effort != (Effort{Level: "xhigh", IsFast: true}) {
+		t.Errorf("expected the effort to stop at the highest, got %s", models[1].Effort)
 	}
 
-	for range 5 {
+	for range 9 {
 		list.Adjust(1, -1)
 	}
-	if models[1].Effort != "low" {
-		t.Errorf("expected the effort to stop at the lowest, got %q", models[1].Effort)
+	if models[1].Effort != (Effort{Level: "low"}) {
+		t.Errorf("expected the effort to stop at the lowest, got %s", models[1].Effort)
 	}
 
-	if models[0].Effort != "medium" {
-		t.Errorf("expected the other models to keep their effort, got %q", models[0].Effort)
+	if models[0].Effort != (Effort{Level: "medium"}) {
+		t.Errorf("expected the other models to keep their effort, got %s", models[0].Effort)
 	}
 }
 
 func TestAnEffortTheModelDoesNotOfferIsLeftAlone(t *testing.T) {
-	models := []*Model{{EffortLevels: []string{"low", "high"}, Effort: "medium"}}
+	models := []*Model{{EffortLevels: levels("low", "high"), Effort: Effort{Level: "medium"}}}
 	(&modelList{models: models}).Adjust(0, 1)
 
-	if models[0].Effort != "medium" {
-		t.Errorf("expected the effort to be left alone, got %q", models[0].Effort)
+	if models[0].Effort != (Effort{Level: "medium"}) {
+		t.Errorf("expected the effort to be left alone, got %s", models[0].Effort)
+	}
+}
+
+func TestAFastEffortIsWrittenWithTheFastMark(t *testing.T) {
+	if got := (Effort{Level: "high"}).String(); got != "high" {
+		t.Errorf("got %q", got)
+	}
+
+	if got := (Effort{Level: "high", IsFast: true}).String(); got != "high⚡" {
+		t.Errorf("got %q", got)
 	}
 }
 

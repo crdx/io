@@ -33,7 +33,12 @@ func Choose(
 		return Selection{}, err
 	}
 
-	return Selection{Provider: chosenModel.ProviderID, Model: chosenModel.ID, Effort: chosenModel.Effort}, nil
+	return Selection{
+		Provider: chosenModel.ProviderID,
+		Model:    chosenModel.ID,
+		Effort:   chosenModel.Effort.Level,
+		IsFast:   chosenModel.Effort.IsFast,
+	}, nil
 }
 
 func ChooseWhenNoneSelected(
@@ -77,13 +82,27 @@ func offered(choices []Choice, currentEffort string) []*picker.Model {
 			ProviderID:          choice.Provider,
 			Name:                strings.Join(DisplayName(choice.ID), " "),
 			ID:                  choice.ID,
-			EffortLevels:        efforts,
-			Effort:              effort,
+			EffortLevels:        effortLadder(efforts, SupportsFastMode(choice.Provider)),
+			Effort:              picker.Effort{Level: effort},
 			ContextWindowTokens: choice.ContextWindowTokens,
 		})
 	}
 
 	return models
+}
+
+func effortLadder(efforts []string, isFastOffered bool) []picker.Effort {
+	ladder := make([]picker.Effort, 0, len(efforts)*2)
+
+	for _, effort := range efforts {
+		ladder = append(ladder, picker.Effort{Level: effort})
+
+		if isFastOffered {
+			ladder = append(ladder, picker.Effort{Level: effort, IsFast: true})
+		}
+	}
+
+	return ladder
 }
 
 func orderedEfforts(efforts []string) []string {

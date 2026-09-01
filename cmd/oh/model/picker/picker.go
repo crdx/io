@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"crdx.org/io/cmd/oh/menu"
+	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/util"
 )
@@ -19,13 +20,26 @@ const (
 	identifierColumn = 28
 )
 
+type Effort struct {
+	Level  string
+	IsFast bool
+}
+
+func (self Effort) String() string {
+	if self.IsFast {
+		return self.Level + fastMode.FastMark
+	}
+
+	return self.Level
+}
+
 type Model struct {
 	Provider            string
 	ProviderID          string
 	Name                string
 	ID                  string
-	EffortLevels        []string
-	Effort              string
+	EffortLevels        []Effort
+	Effort              Effort
 	ContextWindowTokens int
 }
 
@@ -90,7 +104,7 @@ func modelRow(model *Model, isChosen bool, room int) (string, string) {
 		menu.Mark(isChosen),
 		model.Provider,
 		model.Name,
-		model.Effort,
+		model.Effort.String(),
 		contextWindow(model.ContextWindowTokens),
 		model.ID,
 		room,

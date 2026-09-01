@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"crdx.org/io/cmd/oh/menu"
+	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/strutil"
@@ -36,6 +37,7 @@ type Session struct {
 	Effort       string
 	MessageCount int
 	IsRunning    bool
+	IsFast       bool
 }
 
 func (self *Session) Messages() int { return self.MessageCount }
@@ -63,6 +65,10 @@ func (self *sessionList) Adjust(int, int) {}
 
 func (self *sessionList) Text(index int) string {
 	storedSession := self.sessions[index]
+	mode := ""
+	if storedSession.IsFast {
+		mode = "fast"
+	}
 
 	return strings.Join([]string{
 		storedSession.Name,
@@ -70,6 +76,7 @@ func (self *sessionList) Text(index int) string {
 		storedSession.Model,
 		storedSession.ModelID,
 		storedSession.Effort,
+		mode,
 	}, " ")
 }
 
@@ -101,7 +108,7 @@ func row(storedSession *Session, isChosen bool, room int) string {
 	return menu.Columns(
 		left,
 		sessionColumns(
-			strutil.OrDash(storedSession.Model),
+			sessionModel(storedSession),
 			storedSession.Effort,
 			strconv.Itoa(storedSession.Messages()),
 			util.CoarseDuration(storedSession.TouchedAt.Sub(storedSession.StartedAt)),
@@ -114,6 +121,14 @@ func row(storedSession *Session, isChosen bool, room int) string {
 
 func leftColumns(prefix string, animal string, title string) string {
 	return prefix + menu.Pad(animal, animalColumn) + strings.Repeat(" ", menu.ColumnGap) + title
+}
+
+func sessionModel(storedSession *Session) string {
+	name := strutil.OrDash(storedSession.Model)
+	if storedSession.IsFast {
+		return fastMode.GetMark(true) + " " + name
+	}
+	return name
 }
 
 func sessionColumns(model string, effort string, messages string, length string, lastMessage string, room int) string {

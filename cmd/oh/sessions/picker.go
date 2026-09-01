@@ -109,11 +109,20 @@ func Load(directory string) ([]*picker.Session, error) {
 
 		var data struct {
 			WorkspaceDir string `json:"workspaceDir"`
+			Provider     string `json:"provider"`
 			Model        string `json:"model"`
 			Effort       string `json:"effort"`
 		}
 		if len(storedMeta.Data) > 0 && json.Unmarshal(storedMeta.Data, &data) != nil {
 			continue
+		}
+
+		isFast := false
+		if model.SupportsFastMode(data.Provider) {
+			isFast, err = getFastMode(directory, entry.Name)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		sessions = append(sessions, &picker.Session{
@@ -127,6 +136,7 @@ func Load(directory string) ([]*picker.Session, error) {
 			Effort:       data.Effort,
 			MessageCount: storedMeta.Messages,
 			IsRunning:    isRunning,
+			IsFast:       isFast,
 		})
 	}
 
@@ -137,4 +147,26 @@ func Load(directory string) ([]*picker.Session, error) {
 		return strings.Compare(second.Name, first.Name)
 	})
 	return sessions, nil
+}
+
+var errFastModeFound = errors.New("fast mode found")
+
+func getFastMode(directory string, name string) (bool, error) {
+	isFast := false
+	err := session.Records(directory, name, func(line session.Line) error {
+		if line.Event == nil {
+			return nil
+		}
+
+		var isFound bool
+		isFast, isFound = model.FastModeFromEvent(*line.Event)
+		if isFound {
+			return errFastModeFound
+		}
+		return nil
+	})
+	if errors.Is(err, errFastModeFound) {
+		return isFast, nil
+	}
+	return isFast, err
 }

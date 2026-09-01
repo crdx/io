@@ -29,6 +29,7 @@ func storedSessions() []*Session {
 			StartedAt:    now.Add(-8 * time.Minute),
 			TouchedAt:    now,
 			IsRunning:    true,
+			IsFast:       true,
 		},
 		{
 			Name:         "thick-poodle",

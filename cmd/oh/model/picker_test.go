@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/model/picker"
 )
 
 func TestTheEffortsOfferedRunFromLeastToMost(t *testing.T) {
@@ -27,23 +28,41 @@ func TestAModelIsOfferedAtTheEffortNearestTheOneWanted(t *testing.T) {
 		{Provider: "ollama", ID: "unlevelled", EffortLevels: []string{"whatever"}},
 	}, "high")
 
-	if offers[0].Effort != "xhigh" {
-		t.Errorf("expected the nearest effort above the one wanted, got %q", offers[0].Effort)
+	if offers[0].Effort != (picker.Effort{Level: "xhigh"}) {
+		t.Errorf("expected the nearest effort above the one wanted, got %s", offers[0].Effort)
 	}
-	if !slices.Equal(offers[0].EffortLevels, []string{"low", "medium", "xhigh"}) {
-		t.Errorf("expected the efforts in order, got %v", offers[0].EffortLevels)
+	if offers[1].Effort != (picker.Effort{Level: "none"}) {
+		t.Errorf("expected the only effort there is, got %s", offers[1].Effort)
 	}
-	if offers[1].Effort != "none" {
-		t.Errorf("expected the only effort there is, got %q", offers[1].Effort)
-	}
-	if offers[2].Effort != "whatever" {
-		t.Errorf("expected an unrecognised effort to be offered as it stands, got %q", offers[2].Effort)
+	if offers[2].Effort != (picker.Effort{Level: "whatever"}) {
+		t.Errorf("expected an unrecognised effort to be offered as it stands, got %s", offers[2].Effort)
 	}
 	if offers[0].Name != "Codex 5.3" || offers[0].ID != "gpt-5.3-codex" {
 		t.Errorf("expected the model to be named for a person, got %q of %q", offers[0].Name, offers[0].ID)
 	}
 	if offers[0].Provider != "Codex" || offers[0].ProviderID != "codex" {
 		t.Errorf("expected the provider named for a person, got %q of %q", offers[0].Provider, offers[0].ProviderID)
+	}
+}
+
+func TestOnlyAProviderWithFastModeOffersItBesideEachEffort(t *testing.T) {
+	offers := offered([]Choice{
+		{Provider: CodexProvider, ID: "gpt-5.6-sol", EffortLevels: []string{"low", "high"}},
+		{Provider: AnthropicProvider, ID: "claude-opus-5", EffortLevels: []string{"low", "high"}},
+	}, "high")
+
+	fastLadder := []picker.Effort{
+		{Level: "low"},
+		{Level: "low", IsFast: true},
+		{Level: "high"},
+		{Level: "high", IsFast: true},
+	}
+	if !slices.Equal(offers[0].EffortLevels, fastLadder) {
+		t.Errorf("expected a fast step beside each effort, got %v", offers[0].EffortLevels)
+	}
+
+	if !slices.Equal(offers[1].EffortLevels, []picker.Effort{{Level: "low"}, {Level: "high"}}) {
+		t.Errorf("expected the efforts alone, got %v", offers[1].EffortLevels)
 	}
 }
 

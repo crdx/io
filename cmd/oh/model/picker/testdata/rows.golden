@@ -1,14 +1,14 @@
 --- 150 columns ---
   Provider      Model                         Effort    Context  Identifier
   Anthropic     Sonnet 5                      medium       200K  claude-sonnet-5
-› Codex         Codex 5.3                     medium       272K  gpt-5.3-codex
+› Codex         Codex 5.3                     medium⚡     272K  gpt-5.3-codex
   OpenCode Go   DeepSeek Flash Vision Exp 4   high           1M  deepseek-v4-flash-vision-exp
   Ollama        Qwen Coder 3 30B              medium          —  qwen3-coder:30b
 
 --- 80 columns ---
   Provider      Model                         Effort    Context  Identifier
   Anthropic     Sonnet 5                      medium       200K  claude-sonnet-5
-› Codex         Codex 5.3                     medium       272K  gpt-5.3-codex
+› Codex         Codex 5.3                     medium⚡     272K  gpt-5.3-codex
   OpenCode Go   DeepSeek Flash Vision Exp 4   high           1M  deepseek-v4-fl…
   Ollama        Qwen Coder 3 30B              medium          —  qwen3-coder:30b
 

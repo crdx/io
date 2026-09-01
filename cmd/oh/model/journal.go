@@ -22,15 +22,22 @@ func FastModeEvent(isFast bool) agent.Event {
 	return agent.Event{Kind: agent.StateChangeEvent, Name: FastModeStateKey, State: state}
 }
 
+func FastModeFromEvent(event agent.Event) (bool, bool) {
+	if event.Kind != agent.StateChangeEvent || event.Name != FastModeStateKey {
+		return false, false
+	}
+
+	var state fastModeState
+	if err := json.Unmarshal(event.State, &state); err != nil {
+		return false, false
+	}
+	return state.IsFast, true
+}
+
 func LastRecordedFastMode(events []agent.Event) (bool, bool) {
 	for _, event := range slices.Backward(events) {
-		if event.Kind != agent.StateChangeEvent || event.Name != FastModeStateKey {
-			continue
-		}
-
-		var state fastModeState
-		if err := json.Unmarshal(event.State, &state); err == nil {
-			return state.IsFast, true
+		if isFast, isFound := FastModeFromEvent(event); isFound {
+			return isFast, true
 		}
 	}
 
