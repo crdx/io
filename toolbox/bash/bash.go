@@ -116,17 +116,21 @@ func parse(command string) (*syntax.File, error) {
 }
 
 func format(parsedScript *syntax.File) string {
+	command := printScript(parsedScript, syntax.SingleLine(true))
+	if _, err := parse(command); err == nil {
+		return command
+	}
+
+	return oneLine(printScript(parsedScript))
+}
+
+func printScript(parsedScript *syntax.File, options ...syntax.PrinterOption) string {
 	var output bytes.Buffer
-	if err := syntax.NewPrinter(syntax.SingleLine(true)).Print(&output, parsedScript); err != nil {
+	if err := syntax.NewPrinter(options...).Print(&output, parsedScript); err != nil {
 		panic(err)
 	}
 
-	command := strings.TrimSuffix(output.String(), "\n")
-	if strings.ContainsAny(command, "\n\r") {
-		return oneLine(command)
-	}
-
-	return command
+	return strings.TrimSuffix(output.String(), "\n")
 }
 
 func oneLine(command string) string {
@@ -167,7 +171,7 @@ func hasSeparator(line string) bool {
 	fields := strings.Fields(line)
 	last := fields[len(fields)-1]
 
-	return last == "then" || last == "do" || last == "else" || last == "{"
+	return last == "then" || last == "do" || last == "else" || last == "in" || last == "{" || last == "("
 }
 
 func spread(command string) string {

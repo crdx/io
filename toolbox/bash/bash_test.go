@@ -229,6 +229,7 @@ func TestCommandsAreFormattedOnOneLine(t *testing.T) {
 		"group":                {"{\necho one\n}", "{ echo one; }"},
 		"subshell":             {"(\necho one\n)", "(echo one)"},
 		"command substitution": {"echo $(\nprintf one\n)", "echo $(printf one)"},
+		"case then subshell":   {"NAME=alpha\ncase \"$NAME\" in alpha) echo alpha ;; esac\n(echo beta)", "NAME=alpha; case \"$NAME\" in alpha) echo alpha ;; esac; (echo beta)"},
 		"assignment":           {"GOCACHE=/tmp/io-go-cache go   list", "GOCACHE=/tmp/io-go-cache go list"},
 		"blank lines":          {"echo one\n\n\necho two", "echo one; echo two"},
 	} {
