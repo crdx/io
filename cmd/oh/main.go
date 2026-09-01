@@ -296,7 +296,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	defer skill.Close(skillRoots)
 
 	selection, err := backend.Resolve(
-		model.Selection{Provider: args.Provider, Model: args.Model, Effort: args.Effort},
+		args.Selection,
 		sessions.ModelSelection(resumedSession),
 		configuredModels,
 		location.GetModelRoundRobinPath(),
@@ -317,7 +317,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	client, err := backend.Connect(choice, selection.Effort, endpoints)
+	client, err := backend.Connect(choice, selection, endpoints)
 	if err != nil {
 		return "", err
 	}

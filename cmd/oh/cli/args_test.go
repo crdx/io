@@ -123,8 +123,9 @@ func TestEveryOptionIsRead(t *testing.T) {
 		t.Errorf("expected reading alone, got %s", parsedOptions.Caps.Flags())
 	}
 
-	if parsedOptions.Provider != model.OpencodeGoProvider || parsedOptions.Model != "deepseek-v4-pro" || parsedOptions.Effort != "high" {
-		t.Errorf("expected opencode-go/deepseek-v4-pro@high, got %s/%s@%s", parsedOptions.Provider, parsedOptions.Model, parsedOptions.Effort)
+	wantSelection := model.Selection{Provider: model.OpencodeGoProvider, Model: "deepseek-v4-pro", Effort: "high"}
+	if parsedOptions.Selection != wantSelection {
+		t.Errorf("expected %s, got %s", wantSelection, parsedOptions.Selection)
 	}
 
 	if !slices.Equal(parsedOptions.Tools, []string{"read", "grep"}) {

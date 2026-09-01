@@ -8,10 +8,10 @@ import (
 
 const webSearchModel = "gpt-5.6-terra"
 
-func connectCodex(choice model.Choice, effort string, endpoint string) (*Connection, error) {
+func connectCodex(choice model.Choice, selection model.Selection, endpoint string) (*Connection, error) {
 	tokens, address := codexCredentials(endpoint)
 
-	client, err := codex.New(tokens, choice.ID, effort)
+	client, err := codex.New(tokens, choice.ID, selection.Effort)
 	if err != nil {
 		return nil, err
 	}

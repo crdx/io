@@ -38,6 +38,10 @@ func unsetInheritedStateDirectory() {
 	}
 }
 
+func testSelection() model.Selection {
+	return model.Selection{Effort: "high"}
+}
+
 func TestUpdatingAgainstAStandInEndpointDescribesEveryProvider(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
@@ -263,7 +267,7 @@ func TestASessionIsRefusedBeforeAnyoneHasLoggedIn(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Setenv("XDG_STATE_HOME", t.TempDir())
 
-			client, err := Connect(test.choice, "high", EndpointSettings{})
+			client, err := Connect(test.choice, testSelection(), EndpointSettings{})
 			if err == nil || !strings.Contains(err.Error(), test.want) {
 				t.Fatalf("expected %q, got %v", test.want, err)
 			}
@@ -279,7 +283,7 @@ func TestASessionConnectsOnceCredentialsAreStored(t *testing.T) {
 
 	client, err := Connect(
 		model.Choice{Provider: anthropicProvider, ID: "claude-opus-5", MaxOutputTokens: 128_000},
-		"high",
+		testSelection(),
 		EndpointSettings{},
 	)
 	if err != nil {
@@ -384,7 +388,7 @@ func TestOllamaEndpointPrecedence(t *testing.T) {
 func TestOllamaConnectsToItsConfiguredHost(t *testing.T) {
 	connection, err := connectProvider(
 		model.Choice{Provider: ollamaProvider, ID: "qwen3.8", MaxOutputTokens: 32_768},
-		"high",
+		testSelection(),
 		EndpointSettings{OllamaHost: "speeder:11434"},
 	)
 	if err != nil {
@@ -412,7 +416,7 @@ func TestEveryConnectionCarriesAWebSearchClient(t *testing.T) {
 	for _, providerName := range []string{codexProvider, opencodeGoProvider, anthropicProvider, ollamaProvider} {
 		client, err := Connect(
 			model.Choice{Provider: providerName, ID: "fake", MaxOutputTokens: 128_000},
-			"high",
+			testSelection(),
 			EndpointSettings{OverrideURL: address},
 		)
 		if err != nil {
@@ -467,7 +471,7 @@ func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			client, err := Connect(test.choice, "high", EndpointSettings{OverrideURL: test.endpoint})
+			client, err := Connect(test.choice, testSelection(), EndpointSettings{OverrideURL: test.endpoint})
 
 			if err == nil || !strings.Contains(err.Error(), test.want) {
 				t.Fatalf("expected %q, got %v", test.want, err)
@@ -481,7 +485,7 @@ func TestConnectReportsWhatTheProviderRefused(t *testing.T) {
 }
 
 func TestConnectRefusesAnUnknownProvider(t *testing.T) {
-	client, err := Connect(model.Choice{Provider: "nowhere"}, "high", EndpointSettings{})
+	client, err := Connect(model.Choice{Provider: "nowhere"}, testSelection(), EndpointSettings{})
 	if err == nil || !strings.Contains(err.Error(), `unknown provider "nowhere"`) {
 		t.Fatalf("got connection %+v and error %v", client, err)
 	}
@@ -491,7 +495,7 @@ func TestOpenCodeRequiresLogin(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 	_, err := Connect(
 		model.Choice{Provider: opencodeGoProvider, ID: "deepseek-v4-pro", MaxOutputTokens: 128_000},
-		"high",
+		testSelection(),
 		EndpointSettings{},
 	)
 	if err == nil || !strings.Contains(err.Error(), "login command with opencode-go") {

@@ -29,8 +29,10 @@ func chosenModel(providerName string, model string) (Choice, error) {
 	return Chosen(modelCachePath(), providerName, model)
 }
 
-func parseModelSelection(selection string) (string, string, string, error) {
-	return ParseSelection(modelCachePath(), selection)
+func parseModelSelection(writtenSelection string) (string, string, string, error) {
+	selection, err := ParseSelection(modelCachePath(), writtenSelection)
+
+	return selection.Provider, selection.Model, selection.Effort, err
 }
 
 func updateModelsWithoutProviderListings(output io.Writer, endpoint string, path string) error {

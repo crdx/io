@@ -58,12 +58,12 @@ func (self *Connection) UseSession(name string) {
 	}
 }
 
-func Connect(choice model.Choice, effort string, endpoints EndpointSettings) (*Connection, error) {
+func Connect(choice model.Choice, selection model.Selection, endpoints EndpointSettings) (*Connection, error) {
 	if err := requireCredentials(choice.Provider, endpoints.OverrideURL); err != nil {
 		return nil, err
 	}
 
-	connection, err := connectProvider(choice, effort, endpoints)
+	connection, err := connectProvider(choice, selection, endpoints)
 	if err != nil {
 		return nil, err
 	}
@@ -105,16 +105,16 @@ func requireCredentials(providerName string, overrideURL string) error {
 	}
 }
 
-func connectProvider(choice model.Choice, effort string, endpoints EndpointSettings) (*Connection, error) {
+func connectProvider(choice model.Choice, selection model.Selection, endpoints EndpointSettings) (*Connection, error) {
 	switch choice.Provider {
 	case model.CodexProvider:
-		return connectCodex(choice, effort, endpoints.OverrideURL)
+		return connectCodex(choice, selection, endpoints.OverrideURL)
 	case model.OpencodeGoProvider:
-		return connectOpencodeGo(choice, effort, endpoints.OverrideURL)
+		return connectOpencodeGo(choice, selection.Effort, endpoints.OverrideURL)
 	case model.AnthropicProvider:
-		return connectAnthropic(choice, effort, endpoints.OverrideURL)
+		return connectAnthropic(choice, selection.Effort, endpoints.OverrideURL)
 	case model.OllamaProvider:
-		return connectOllama(choice, effort, endpoints)
+		return connectOllama(choice, selection.Effort, endpoints)
 	default:
 		return nil, fmt.Errorf("unknown provider %q", choice.Provider)
 	}
@@ -130,7 +130,8 @@ func ListModels(ctx context.Context, providerName string, endpoints EndpointSett
 		ID:              listingModel,
 		MaxOutputTokens: listingMaxOutputTokens,
 	}
-	client, err := connectProvider(choice, listingEffort, endpoints)
+	selection := model.Selection{Provider: providerName, Model: listingModel, Effort: listingEffort}
+	client, err := connectProvider(choice, selection, endpoints)
 	if err != nil {
 		return nil, err
 	}

@@ -3712,14 +3712,14 @@ func resolveCommandLineSelections(t *testing.T) string {
 		"claude",
 		"nope",
 	} {
-		providerName, chosen, effort, err := model.ParseSelection(path, selection)
+		chosen, err := model.ParseSelection(path, selection)
 		if err != nil {
 			fmt.Fprintf(&written, "%-28q error: %v\n", selection, err)
 
 			continue
 		}
 
-		fmt.Fprintf(&written, "%-28q %s/%s@%s\n", selection, providerName, chosen, effort)
+		fmt.Fprintf(&written, "%-28q %s\n", selection, chosen)
 	}
 
 	return written.String()

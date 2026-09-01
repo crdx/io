@@ -56,9 +56,7 @@ type Options struct {
 	Message        string
 	Session        string
 	SourceSession  string
-	Provider       string
-	Model          string
-	Effort         string
+	Selection      model.Selection
 	Caps           caps.Set
 	WereCapsChosen bool
 	Tools          []string
@@ -116,13 +114,11 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 	}
 
 	if self.Model != "" {
-		providerName, model, effort, err := model.ParseSelection(modelCachePath, self.Model)
+		selection, err := model.ParseSelection(modelCachePath, self.Model)
 		if err != nil {
 			return options, err
 		}
-		options.Provider = providerName
-		options.Model = model
-		options.Effort = effort
+		options.Selection = selection
 	}
 
 	capFlags := self.Caps

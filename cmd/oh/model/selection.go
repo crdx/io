@@ -39,30 +39,30 @@ func Choices(path string) []Choice {
 	return availableModelChoices(loadModelCache(path))
 }
 
-func ParseSelection(path string, selection string) (string, string, string, error) {
-	modelQuery, effortQuery, hasEffort := strings.Cut(selection, "@")
+func ParseSelection(path string, writtenSelection string) (Selection, error) {
+	modelQuery, effortQuery, hasEffort := strings.Cut(writtenSelection, "@")
 	if modelQuery == "" || (hasEffort && effortQuery == "") {
-		return "", "", "", fmt.Errorf(
-			"model must be written as provider/model or provider/model@effort, got %q", selection,
+		return Selection{}, fmt.Errorf(
+			"model must be written as provider/model or provider/model@effort, got %q", writtenSelection,
 		)
 	}
 
 	choice, err := matchModel(modelQuery, Choices(path))
 	if err != nil {
-		return "", "", "", err
+		return Selection{}, err
 	}
 
 	effort := DefaultEffort(choice.EffortLevels)
 
 	if hasEffort {
 		if effort, err = matchEffort(effortQuery, choice); err != nil {
-			return "", "", "", err
+			return Selection{}, err
 		}
 	} else if effort == "" {
-		return "", "", "", fmt.Errorf("model %s has no recognised effort levels", choice.ID)
+		return Selection{}, fmt.Errorf("model %s has no recognised effort levels", choice.ID)
 	}
 
-	return choice.Provider, choice.ID, effort, nil
+	return Selection{Provider: choice.Provider, Model: choice.ID, Effort: effort}, nil
 }
 
 func ResolveQuery(query string, currentEffort string, choices []Choice) (Selection, error) {

@@ -57,12 +57,11 @@ func ParseRoundRobin(path string, writtenSelections []string) ([]Selection, erro
 	seen := make(map[string]struct{}, len(writtenSelections))
 
 	for _, writtenSelection := range writtenSelections {
-		providerName, model, effort, err := ParseSelection(path, writtenSelection)
+		selection, err := ParseSelection(path, writtenSelection)
 		if err != nil {
 			return nil, fmt.Errorf("model.round_robin: %q: %w", writtenSelection, err)
 		}
 
-		selection := Selection{Provider: providerName, Model: model, Effort: effort}
 		canonical := selection.String()
 		if _, isFound := seen[canonical]; isFound {
 			return nil, fmt.Errorf("model.round_robin selects %s more than once", canonical)
