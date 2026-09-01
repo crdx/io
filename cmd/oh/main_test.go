@@ -64,6 +64,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
+	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
 	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
@@ -3750,6 +3751,8 @@ func resolveCommandLineSelections(t *testing.T) string {
 		"codex",
 		"opus-5@max",
 		"sol@off",
+		"sol@high+fast",
+		"sonnet@high+fast",
 		"sonnet@hi",
 		"opus-5@high",
 		"opus-5@",
@@ -3786,7 +3789,7 @@ func resolveForkedSessionGlobs(t *testing.T) string {
 	choices := newSessionFixtureChoices()
 	var written strings.Builder
 
-	for _, glob := range []string{"", "opus-5", "opus-5@max", "nope"} {
+	for _, glob := range []string{"", "opus-5", "opus-5@max", "gpt@high+fast", "nope"} {
 		transition, err := cycle.ForkedSessionTransition(glob, "medium", choices, "able-dolphin")
 		if err != nil {
 			fmt.Fprintf(&written, "%-28q error: %v\n", glob, err)
@@ -3818,6 +3821,8 @@ func resolveNewSessionGlobs(t *testing.T) string {
 		"opus-4-5@high",
 		"opus-4-5@hi",
 		"gpt@off",
+		"gpt@high+fast",
+		"sonnet@high+fast",
 		"sonnet@nope",
 		"opus-5@",
 		"@high",
@@ -6923,6 +6928,18 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			"",
 			segment.Context{},
 		),
+		"fast-mode / fast": goldenSegmentPass(
+			t,
+			fastMode.New(true),
+			"",
+			segment.Context{},
+		),
+		"fast-mode / standard": goldenSegmentPass(
+			t,
+			fastMode.New(false),
+			"",
+			segment.Context{},
+		),
 		"workspace-dir": goldenSegmentPass(
 			t,
 			workspaceDir.New(work.At("/workspace/project")),
@@ -6953,11 +6970,17 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 	for _, effort := range modelEffortLevels {
 		passes["active-model / "+effort+" effort"] = goldenSegmentPass(
 			t,
-			activeModel.New("gpt-5.6-sol", effort, modelEffortLevels),
+			activeModel.New("gpt-5.6-sol", effort, modelEffortLevels, false),
 			"",
 			segment.Context{},
 		)
 	}
+	passes["active-model / fast"] = goldenSegmentPass(
+		t,
+		activeModel.New("gpt-5.6-sol", "high", modelEffortLevels, true),
+		"",
+		segment.Context{},
+	)
 	effortLadders := []struct {
 		name   string
 		model  string
@@ -6974,7 +6997,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 	for _, ladder := range effortLadders {
 		passes["active-model / "+ladder.name] = goldenSegmentPass(
 			t,
-			activeModel.New(ladder.model, ladder.effort, ladder.levels),
+			activeModel.New(ladder.model, ladder.effort, ladder.levels, false),
 			"",
 			segment.Context{},
 		)
@@ -8239,6 +8262,7 @@ type sessionGoldenScenario struct {
 	Provider          string              `toml:"provider"`
 	Model             string              `toml:"model"`
 	Effort            string              `toml:"effort"`
+	IsFast            bool                `toml:"fast"`
 	FirstTokenError   string              `toml:"first-token-error"`
 	ToggleBeforeFirst string              `toml:"toggle-before-first"`
 	Tools             []sessionGoldenTool `toml:"tool"`
@@ -8360,6 +8384,7 @@ func newSessionGoldenProvider(
 			t.Fatal(err)
 		}
 		client.URL = endpoint
+		client.IsFast = scenario.IsFast
 		return client
 	case "chat":
 		client, err := chatcompletions.New(
@@ -8619,7 +8644,6 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	firstAssistant := agent.New(
 		sessionGoldenSystemPrompt,
 		sessionGoldenProviderFor(
@@ -8633,6 +8657,9 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		agent:    firstAssistant,
 		screen:   output.NewTerminalOfSize(&firstScreenOutput, replayColumns, replayLines),
 		recorder: record.New(log),
+	}
+	if scenario.Provider == model.CodexProvider {
+		firstHarness.openingEvents = []agent.Event{model.FastModeEvent(scenario.IsFast)}
 	}
 	settleSessionGoldenMode(firstHarness)
 	if scenario.ToggleBeforeFirst != "" {

@@ -21,8 +21,9 @@ import (
 )
 
 const (
-	Endpoint = "https://chatgpt.com/backend-api/codex/responses"
-	Summary  = "auto"
+	Endpoint        = "https://chatgpt.com/backend-api/codex/responses"
+	Summary         = "auto"
+	fastServiceTier = "ultrafast"
 
 	Originator = "io"
 )
@@ -53,6 +54,7 @@ type Client struct {
 	URL    string
 	Model  string
 	Effort string
+	IsFast bool
 
 	tokens         TokenSource
 	instructions   string
@@ -189,8 +191,14 @@ func (self *Client) settled() error {
 }
 
 func (self *Client) requestBody() request {
+	serviceTier := ""
+	if self.IsFast {
+		serviceTier = fastServiceTier
+	}
+
 	return request{
 		Model:             self.Model,
+		ServiceTier:       serviceTier,
 		Store:             false,
 		Stream:            true,
 		Input:             self.requestHistory.Prepare(self.history),
@@ -214,6 +222,7 @@ func userAgent() string {
 
 type request struct {
 	Model             string         `json:"model"`
+	ServiceTier       string         `json:"service_tier,omitempty"`
 	Store             bool           `json:"store"`
 	Tools             []functionTool `json:"tools"`
 	Instructions      string         `json:"instructions,omitempty"`

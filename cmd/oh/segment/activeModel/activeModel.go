@@ -6,6 +6,7 @@ import (
 
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/segment"
+	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/style"
 )
 
@@ -19,11 +20,12 @@ type state struct {
 	name         string
 	effort       string
 	effortLevels []string
+	isFast       bool
 }
 
-func New(name string, effort string, effortLevels []string) segment.Factory {
+func New(name string, effort string, effortLevels []string, isFast bool) segment.Factory {
 	return func(segment.Options) (segment.Segment, error) {
-		return state{name: name, effort: effort, effortLevels: effortLevels}, nil
+		return state{name: name, effort: effort, effortLevels: effortLevels, isFast: isFast}, nil
 	}
 }
 
@@ -32,6 +34,9 @@ func (self state) Render(segment.Context) string {
 	badge := style.Normal(name[0])
 	if len(name) > 1 {
 		badge += " " + style.Subtle(name[1])
+	}
+	if self.isFast {
+		badge = fastMode.GetMark(true) + " " + badge
 	}
 
 	squares := thinkingSquares(self.effort, self.effortLevels)

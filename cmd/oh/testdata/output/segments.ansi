@@ -2,6 +2,8 @@
 DeepSeek Pro \e[38;2;150;152;150m4\e[0m \e[38;2;150;152;150m···\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m·▫\e[0m
 === active-model / deepseek max ===
 DeepSeek Pro \e[38;2;150;152;150m4\e[0m \e[38;2;150;152;150m···▫·\e[0m\e[38;2;192;128;80m▪\e[0m
+=== active-model / fast ===
+\e[38;2;192;128;80m⚡\e[0m GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m▫▫\e[0m
 === active-model / high effort ===
 GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫\e[0m\e[38;2;192;128;80m▪\e[0m\e[38;2;150;152;150m▫▫\e[0m
 === active-model / low effort ===
@@ -40,6 +42,10 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫\e[0m\e[38;
 50\e[38;2;150;152;150m% \e[0m500\e[38;2;150;152;150mK/\e[0m1\e[38;2;150;152;150mM\e[0m
 === context-usage / unknown ===
 ?\e[38;2;150;152;150m% \e[0m0\e[38;2;150;152;150mK/\e[0m?
+=== fast-mode / fast ===
+\e[38;2;192;128;80m⚡\e[0m
+=== fast-mode / standard ===
+\e[38;2;150;152;150m·\e[0m
 === git-branch / detached head ===
 \e[38;2;150;152;150m1fd1900\e[0m
 === git-branch / on a branch ===

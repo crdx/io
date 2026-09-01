@@ -132,7 +132,8 @@ func usageOptions(text string) []string {
 }
 
 func modelCompletions(word string, choices []model.Choice) []string {
-	modelQuery, effortQuery, isQualified := strings.Cut(word, "@")
+	selectionQuery, modeQuery, hasMode := strings.Cut(word, "+")
+	modelQuery, effortQuery, isQualified := strings.Cut(selectionQuery, "@")
 
 	var selections []string
 
@@ -143,11 +144,23 @@ func modelCompletions(word string, choices []model.Choice) []string {
 		}
 
 		for _, effort := range efforts {
-			selections = append(selections, choice.Provider+"/"+choice.ID+"@"+effort)
+			selection := choice.Provider + "/" + choice.ID + "@" + effort
+			if hasMode {
+				if model.SupportsFastMode(choice.Provider) && isFastModePrefix(modeQuery) {
+					selections = append(selections, selection+"+fast")
+				}
+				continue
+			}
+			selections = append(selections, selection)
 		}
 	}
 
 	return selections
+}
+
+func isFastModePrefix(query string) bool {
+	_, isFound := strings.CutPrefix("fast", query)
+	return isFound
 }
 
 func effortCompletions(word string, choices []model.Choice) []string {

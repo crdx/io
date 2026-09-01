@@ -16,6 +16,7 @@ func connectCodex(choice model.Choice, selection model.Selection, endpoint strin
 		return nil, err
 	}
 	client.URL = address
+	client.IsFast = selection.IsFast
 
 	search, err := newSearchClient(tokens, address)
 	if err != nil {

@@ -451,6 +451,17 @@ func TestTheBuiltInBarLayoutCanBeBuilt(t *testing.T) {
 	layoutFrom(t, "")
 }
 
+func TestFastModeCanBePlacedIndependently(t *testing.T) {
+	layout := layoutFrom(t, `
+		[bar.top]
+		center = [{ segment = "fast-mode" }]
+	`)
+
+	if got := len(layout[segment.TopCenter]); got != 1 {
+		t.Errorf("got %d segments", got)
+	}
+}
+
 func TestWhatAConfigDoesNotMentionKeepsItsDefault(t *testing.T) {
 	defaults := layoutFrom(t, "")
 	layout := layoutFrom(t, `
@@ -561,6 +572,7 @@ func testSegments() segment.Registry {
 	return segment.Registry{
 		"activity-spinner":   inertFactory,
 		"context-usage":      inertFactory,
+		"fast-mode":          inertFactory,
 		"mode-toggle":        inertFactory,
 		"path-grants":        inertFactory,
 		"workspace-dir":      workspaceDir.New(work.At("/tmp/somewhere")),

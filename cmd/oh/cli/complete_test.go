@@ -113,6 +113,23 @@ func TestModelCompletionsAreWholeSelections(t *testing.T) {
 	}
 }
 
+func TestFastModeCompletionsReachOnlyCodex(t *testing.T) {
+	choices := []model.Choice{
+		{Provider: model.CodexProvider, ID: "gpt-5.6-sol", EffortLevels: []string{"high"}},
+		{Provider: model.AnthropicProvider, ID: "claude-opus-5", EffortLevels: []string{"high"}},
+	}
+
+	if selections := modelCompletions("sol@high+f", choices); !slices.Equal(
+		selections,
+		[]string{"codex/gpt-5.6-sol@high+fast"},
+	) {
+		t.Errorf("got %v", selections)
+	}
+	if selections := modelCompletions("opus@high+f", choices); len(selections) != 0 {
+		t.Errorf("got %v", selections)
+	}
+}
+
 func TestEffortCompletionsAreBareLevels(t *testing.T) {
 	choices := []model.Choice{
 		{Provider: "openai", ID: "gpt-5", EffortLevels: []string{"low", "high"}},

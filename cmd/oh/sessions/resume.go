@@ -99,16 +99,18 @@ func OpenWriter(directory string, resumedSession *store.Session, meta store.Meta
 	return log, err
 }
 
-// ModelSelection returns the provider, model, and effort stored by a resumed session.
 func ModelSelection(resumedSession *store.Session) model.Selection {
 	if resumedSession == nil {
 		return model.Selection{}
 	}
 
+	isFast, _ := model.LastRecordedFastMode(resumedSession.Events)
+
 	return model.Selection{
 		Provider: resumedSession.Meta.Provider,
 		Model:    resumedSession.Meta.Model,
 		Effort:   resumedSession.Meta.Effort,
+		IsFast:   isFast,
 	}
 }
 

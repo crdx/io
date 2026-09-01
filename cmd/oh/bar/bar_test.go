@@ -5,6 +5,7 @@ import (
 
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/work"
 )
 
 type fixedSegment string
@@ -24,6 +25,21 @@ func (self fittingSegment) Render(segment.Context) string {
 func (self fittingSegment) RenderWithin(_ segment.Context, cells int) string {
 	*self.availableCells = cells
 	return "+50"
+}
+
+func TestTheFastModeSegmentIsRegisteredWithTheCurrentSelection(t *testing.T) {
+	for _, isFast := range []bool{false, true} {
+		registry := NewRegistry(Options{Workspace: work.At(t.TempDir()), IsFast: isFast})
+		builtSegment, err := registry[fastModeSegment](nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got := style.Plain(builtSegment.Render(segment.Context{}))
+		if isFast && got != "⚡" || !isFast && got != "·" {
+			t.Errorf("fast=%t drew %q", isFast, got)
+		}
+	}
 }
 
 func TestRenderWithinHandsAFittingSegmentOnlyTheRoomThatRemains(t *testing.T) {

@@ -11,10 +11,12 @@
 "codex"                      error: model "codex" does not match any known model
 "opus-5@max"                 anthropic/claude-opus-5@max
 "sol@off"                    codex/gpt-5.6-sol@none
+"sol@high+fast"              codex/gpt-5.6-sol@high+fast
+"sonnet@high+fast"           error: anthropic does not support fast mode
 "sonnet@hi"                  anthropic/claude-sonnet-5@high
 "opus-5@high"                error: effort "high" does not match any of: medium, max
-"opus-5@"                    error: model must be written as provider/model or provider/model@effort, got "opus-5@"
-"@high"                      error: model must be written as provider/model or provider/model@effort, got "@high"
+"opus-5@"                    error: model must be written as provider/model or provider/model@effort[+fast], got "opus-5@"
+"@high"                      error: model must be written as provider/model or provider/model@effort[+fast], got "@high"
 "sol@none@high"              error: effort "none@high" does not match any of: none, high
 "claude"                     error: model "claude" is ambiguous; matches: anthropic/claude-opus-5, anthropic/claude-sonnet-5
 "nope"                       error: model "nope" does not match any known model
@@ -49,6 +51,7 @@
 ""                           new --from able-dolphin
 "opus-5"                     new -m anthropic/claude-opus-5@medium --from able-dolphin
 "opus-5@max"                 new -m anthropic/claude-opus-5@max --from able-dolphin
+"gpt@high+fast"              new -m codex/gpt-5.6-sol@high+fast --from able-dolphin
 "nope"                       error: model "nope" does not match any known model
 
 === new session model globs ===
@@ -63,9 +66,11 @@
 "opus-4-5@high"              new -m anthropic/claude-opus-4-5@high
 "opus-4-5@hi"                new -m anthropic/claude-opus-4-5@high
 "gpt@off"                    new -m codex/gpt-5.6-sol@none
+"gpt@high+fast"              new -m codex/gpt-5.6-sol@high+fast
+"sonnet@high+fast"           error: anthropic does not support fast mode
 "sonnet@nope"                error: effort "nope" does not match any of: medium
-"opus-5@"                    error: model must be written as model or model@effort, got "opus-5@"
-"@high"                      error: model must be written as model or model@effort, got "@high"
+"opus-5@"                    error: model must be written as model or model@effort[+fast], got "opus-5@"
+"@high"                      error: model must be written as model or model@effort[+fast], got "@high"
 "nope"                       error: model "nope" does not match any known model
 "nonsense"                   error: model "nonsense" does not match any known model
 

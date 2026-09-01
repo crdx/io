@@ -12,10 +12,16 @@ type Selection struct {
 	Provider string
 	Model    string
 	Effort   string
+	IsFast   bool
 }
 
 func (self Selection) String() string {
-	return self.Provider + "/" + self.Model + "@" + self.Effort
+	writtenSelection := self.Provider + "/" + self.Model + "@" + self.Effort
+	if self.IsFast {
+		writtenSelection += "+fast"
+	}
+
+	return writtenSelection
 }
 
 const roundRobinStateVersion = 1
@@ -26,7 +32,7 @@ type roundRobinState struct {
 }
 
 var ErrNoSelection = errors.New(
-	"no model selected: use -m provider/model@effort or configure model.round_robin",
+	"no model selected: use -m provider/model@effort[+fast] or configure model.round_robin",
 )
 
 func ReserveRoundRobin(path string, selections []Selection) (Selection, error) {

@@ -11,6 +11,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
+	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
 	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
@@ -34,6 +35,7 @@ const (
 	pathGrantsSegment      = "path-grants"
 	workspaceDirSegment    = "workspace-dir"
 	activeModelSegment     = "active-model"
+	fastModeSegment        = "fast-mode"
 	scrollOverflowSegment  = "scroll-overflow"
 	sessionNameSegment     = "session-name"
 	sessionEmojiSegment    = "session-emoji"
@@ -50,6 +52,7 @@ type Options struct {
 	ModelName          string
 	ModelEffort        string
 	ModelEffortLevels  []string
+	IsFast             bool
 	UsageReporter      agent.UsageReporter
 	UsageCachePath     string
 	Sources            Sources
@@ -72,15 +75,18 @@ func NewRegistry(options Options) segment.Registry {
 		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
 		pathGrantsSegment:      pathGrants.New(options.Sources.GetPathGrants),
 		workspaceDirSegment:    workspaceDir.New(options.Workspace),
-		activeModelSegment:     activeModel.New(options.ModelName, options.ModelEffort, options.ModelEffortLevels),
-		scrollOverflowSegment:  scrollOverflow.New,
-		sessionNameSegment:     sessionName.New(options.CurrentSessionName),
-		sessionEmojiSegment:    sessionEmoji.New(options.CurrentSessionName),
-		localTimeSegment:       localTime.New(time.Now),
-		turnTimerSegment:       turnTimer.New(options.Sources.GetTurnTiming, options.Sources.IsTurnRunning),
-		turnCountSegment:       turnCount.New(options.Sources.GetTurnCount),
-		gitBranchSegment:       gitBranch.New(options.Workspace.GetDir()),
-		subUsageSegment:        subUsage.New(options.UsageReporter, options.UsageCachePath, options.ModelName, time.Now),
+		activeModelSegment: activeModel.New(
+			options.ModelName, options.ModelEffort, options.ModelEffortLevels, options.IsFast,
+		),
+		fastModeSegment:       fastMode.New(options.IsFast),
+		scrollOverflowSegment: scrollOverflow.New,
+		sessionNameSegment:    sessionName.New(options.CurrentSessionName),
+		sessionEmojiSegment:   sessionEmoji.New(options.CurrentSessionName),
+		localTimeSegment:      localTime.New(time.Now),
+		turnTimerSegment:      turnTimer.New(options.Sources.GetTurnTiming, options.Sources.IsTurnRunning),
+		turnCountSegment:      turnCount.New(options.Sources.GetTurnCount),
+		gitBranchSegment:      gitBranch.New(options.Workspace.GetDir()),
+		subUsageSegment:       subUsage.New(options.UsageReporter, options.UsageCachePath, options.ModelName, time.Now),
 	}
 }
 

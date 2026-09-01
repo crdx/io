@@ -2,6 +2,8 @@
 DeepSeek Pro 4 ···▪·▫
 === active-model / deepseek max ===
 DeepSeek Pro 4 ···▫·▪
+=== active-model / fast ===
+⚡ GPT Sol 5.6 ▫▫▫▪▫▫
 === active-model / high effort ===
 GPT Sol 5.6 ▫▫▫▪▫▫
 === active-model / low effort ===
@@ -40,6 +42,10 @@ GPT Sol 5.6 ▫▫▫▫▪▫
 50% 500K/1M
 === context-usage / unknown ===
 ?% 0K/?
+=== fast-mode / fast ===
+⚡
+=== fast-mode / standard ===
+·
 === git-branch / detached head ===
 1fd1900
 === git-branch / on a branch ===

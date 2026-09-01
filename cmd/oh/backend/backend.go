@@ -59,6 +59,9 @@ func (self *Connection) UseSession(name string) {
 }
 
 func Connect(choice model.Choice, selection model.Selection, endpoints EndpointSettings) (*Connection, error) {
+	if selection.IsFast && !model.SupportsFastMode(choice.Provider) {
+		return nil, fmt.Errorf("%s does not support fast mode", choice.Provider)
+	}
 	if err := requireCredentials(choice.Provider, endpoints.OverrideURL); err != nil {
 		return nil, err
 	}

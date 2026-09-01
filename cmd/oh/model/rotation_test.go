@@ -42,6 +42,18 @@ func TestRoundRobinSelectionsRejectCanonicalDuplicates(t *testing.T) {
 	}
 }
 
+func TestNormalAndFastRoundRobinSelectionsAreDistinct(t *testing.T) {
+	useCachedModels(t)
+
+	selections, err := ParseRoundRobin(modelCachePath(), []string{"sol@high", "sol@high+fast"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(selections) != 2 || selections[0].IsFast || !selections[1].IsFast {
+		t.Errorf("got %v", selections)
+	}
+}
+
 func TestOneRoundRobinSelectionNeedsNoState(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "round-robin.json")
 	selection := Selection{Provider: CodexProvider, Model: "only", Effort: "high"}

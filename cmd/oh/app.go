@@ -91,6 +91,7 @@ func (self *pendingInput) texts() []string {
 type App struct {
 	agent               *agent.Agent
 	events              []agent.Event
+	openingEvents       []agent.Event
 	screen              *output.Screen
 	recorder            *record.Recorder
 	barConfiguration    bar.Configuration
@@ -476,6 +477,10 @@ func (self *App) initialiseAccess() {
 	}
 	self.settledCaps = self.mode.Current()
 	self.recordModeEvent(caps.ModeEvent(self.settledCaps))
+	for _, event := range self.openingEvents {
+		self.storeEvent(event)
+	}
+	self.openingEvents = nil
 }
 
 func (self *App) settleAccess() {

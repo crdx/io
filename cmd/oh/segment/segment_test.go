@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
+	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
 	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/sessionEmoji"
@@ -461,6 +462,29 @@ func TestTheSessionNameSegmentOmitsAnUnknownAnimalEmoji(t *testing.T) {
 	}
 }
 
+func TestTheFastModeSegmentAlwaysShowsItsState(t *testing.T) {
+	for name, test := range map[string]struct {
+		isFast bool
+		want   string
+	}{
+		"fast":     {isFast: true, want: "⚡"},
+		"standard": {want: "·"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := drawn(t, fastMode.New(test.isFast)); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestTheActiveModelSegmentMarksFastModeBeforeTheName(t *testing.T) {
+	got := drawn(t, activeModel.New("gpt-5.6-sol", "high", []string{"medium", "high"}, true))
+	if want := "⚡ GPT Sol 5.6 ··▫▪··"; got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestTheActiveModelSegmentUsesFriendlyModelNames(t *testing.T) {
 	tests := map[string]string{
 		"codex/gpt-5.3-codex":                      "Codex 5.3",
@@ -495,7 +519,7 @@ func TestTheActiveModelSegmentUsesFriendlyModelNames(t *testing.T) {
 
 	for modelName, want := range tests {
 		t.Run(modelName, func(t *testing.T) {
-			if got := drawn(t, activeModel.New(modelName, "medium", nil)); got != want {
+			if got := drawn(t, activeModel.New(modelName, "medium", nil, false)); got != want {
 				t.Errorf("got %q, want %q", got, want)
 			}
 		})
@@ -511,7 +535,7 @@ func TestTheActiveModelSegmentDrawsAFixedEffortScale(t *testing.T) {
 		"high":    "GPT 5.6 ▫▫▫▪··",
 	} {
 		t.Run(effort, func(t *testing.T) {
-			if got := drawn(t, activeModel.New("gpt-5.6", effort, levels)); got != want {
+			if got := drawn(t, activeModel.New("gpt-5.6", effort, levels, false)); got != want {
 				t.Errorf("got %q, want %q", got, want)
 			}
 		})
@@ -530,7 +554,7 @@ func TestTheActiveModelSegmentMarksUnsupportedEfforts(t *testing.T) {
 		"unknown ladder": {effort: "none", want: "DeepSeek Pro 4"},
 	} {
 		t.Run(name, func(t *testing.T) {
-			if got := drawn(t, activeModel.New("deepseek-v4-pro", test.effort, test.levels)); got != test.want {
+			if got := drawn(t, activeModel.New("deepseek-v4-pro", test.effort, test.levels, false)); got != test.want {
 				t.Errorf("got %q, want %q", got, test.want)
 			}
 		})

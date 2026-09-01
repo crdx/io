@@ -1,5 +1,6 @@
 {"kind":"head","version":11,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"fail on the server after thinking"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Weighing the two ways round."}}
 {"kind":"event","event":{"kind":"retrying","text":"the server gave up","attempt":1}}

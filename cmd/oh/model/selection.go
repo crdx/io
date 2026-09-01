@@ -40,16 +40,24 @@ func Choices(path string) []Choice {
 }
 
 func ParseSelection(path string, writtenSelection string) (Selection, error) {
-	modelQuery, effortQuery, hasEffort := strings.Cut(writtenSelection, "@")
+	selectionQuery, isFast, err := splitFastMode(writtenSelection)
+	if err != nil {
+		return Selection{}, err
+	}
+
+	modelQuery, effortQuery, hasEffort := strings.Cut(selectionQuery, "@")
 	if modelQuery == "" || (hasEffort && effortQuery == "") {
 		return Selection{}, fmt.Errorf(
-			"model must be written as provider/model or provider/model@effort, got %q", writtenSelection,
+			"model must be written as provider/model or provider/model@effort[+fast], got %q", writtenSelection,
 		)
 	}
 
 	choice, err := matchModel(modelQuery, Choices(path))
 	if err != nil {
 		return Selection{}, err
+	}
+	if isFast && !SupportsFastMode(choice.Provider) {
+		return Selection{}, fmt.Errorf("%s does not support fast mode", choice.Provider)
 	}
 
 	effort := DefaultEffort(choice.EffortLevels)
@@ -62,18 +70,26 @@ func ParseSelection(path string, writtenSelection string) (Selection, error) {
 		return Selection{}, fmt.Errorf("model %s has no recognised effort levels", choice.ID)
 	}
 
-	return Selection{Provider: choice.Provider, Model: choice.ID, Effort: effort}, nil
+	return Selection{Provider: choice.Provider, Model: choice.ID, Effort: effort, IsFast: isFast}, nil
 }
 
 func ResolveQuery(query string, currentEffort string, choices []Choice) (Selection, error) {
-	modelQuery, effortQuery, hasEffort := strings.Cut(query, "@")
+	selectionQuery, isFast, err := splitFastMode(query)
+	if err != nil {
+		return Selection{}, err
+	}
+
+	modelQuery, effortQuery, hasEffort := strings.Cut(selectionQuery, "@")
 	if modelQuery == "" || (hasEffort && effortQuery == "") {
-		return Selection{}, fmt.Errorf("model must be written as model or model@effort, got %q", query)
+		return Selection{}, fmt.Errorf("model must be written as model or model@effort[+fast], got %q", query)
 	}
 
 	choice, err := onlyMatch(modelQuery, RankedChoicesWithoutGuessing(modelQuery, choices))
 	if err != nil {
 		return Selection{}, err
+	}
+	if isFast && !SupportsFastMode(choice.Provider) {
+		return Selection{}, fmt.Errorf("%s does not support fast mode", choice.Provider)
 	}
 
 	effort := NearestEffort(currentEffort, choice.EffortLevels)
@@ -86,7 +102,23 @@ func ResolveQuery(query string, currentEffort string, choices []Choice) (Selecti
 		return Selection{}, fmt.Errorf("model %s has no recognised effort levels", choice.ID)
 	}
 
-	return Selection{Provider: choice.Provider, Model: choice.ID, Effort: effort}, nil
+	return Selection{Provider: choice.Provider, Model: choice.ID, Effort: effort, IsFast: isFast}, nil
+}
+
+func splitFastMode(writtenSelection string) (string, bool, error) {
+	selectionQuery, mode, hasMode := strings.Cut(writtenSelection, "+")
+	if !hasMode {
+		return selectionQuery, false, nil
+	}
+	if mode != "fast" {
+		return "", false, fmt.Errorf("model mode must be fast, got %q", mode)
+	}
+
+	return selectionQuery, true, nil
+}
+
+func SupportsFastMode(providerName string) bool {
+	return providerName == CodexProvider
 }
 
 var EffortOrder = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}

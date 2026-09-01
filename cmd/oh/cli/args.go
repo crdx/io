@@ -24,7 +24,7 @@ Usage:
 Options:
     -L, --login                 Log in to a provider, choosing when omitted
     -r, --resume [<session>]    Open the session picker, or resume a session by name
-    -m, --model [<model>]       Open the model picker, or set the provider, model, and effort
+    -m, --model [<model>]       Open the model picker, or set the provider, model, effort, and optional +fast mode
     -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: %s)
     -t, --tool <tool>           Set exclusive tool selection; may be repeated
         --yolo                  Live dangerously and don't sandbox anything

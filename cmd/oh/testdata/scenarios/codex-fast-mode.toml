@@ -1,0 +1,22 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "high"
+fast = true
+
+[first]
+prompt = "answer quickly"
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Fast answer."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Fast answer."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[resume]
+prompt = "still fast?"
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Still fast."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Still fast."}]}}''',
+    '''{"type":"response.completed"}''',
+]

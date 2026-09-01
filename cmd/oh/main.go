@@ -512,6 +512,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		startedAt:           time.Now(),
 		isYolo:              args.Yolo,
 	}
+	if resumedSession == nil && model.SupportsFastMode(selection.Provider) {
+		chat.openingEvents = []agent.Event{model.FastModeEvent(selection.IsFast)}
+	}
 	chat.onFailure = func(failure error) {
 		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspace, failure)
 	}
@@ -524,6 +527,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		ModelName:          selection.Model,
 		ModelEffort:        selection.Effort,
 		ModelEffortLevels:  choice.EffortLevels,
+		IsFast:             selection.IsFast,
 		UsageReporter:      usageReporter,
 		UsageCachePath:     location.GetUsageCachePath(selection.Provider, endpointURL != ""),
 		Sources:            chat.getBarSources(),

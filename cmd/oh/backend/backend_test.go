@@ -14,6 +14,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/sim"
+	"crdx.org/io/provider/codex"
 	"crdx.org/io/provider/ollama"
 
 	"crdx.org/io/cmd/oh/location"
@@ -291,6 +292,35 @@ func TestASessionConnectsOnceCredentialsAreStored(t *testing.T) {
 	}
 	if client == nil {
 		t.Fatal("expected a connection")
+	}
+}
+
+func TestCodexConnectionsCarryFastMode(t *testing.T) {
+	selection := model.Selection{Provider: codexProvider, Model: "gpt-5.6-sol", Effort: "high", IsFast: true}
+	connection, err := Connect(
+		model.Choice{Provider: codexProvider, ID: selection.Model},
+		selection,
+		EndpointSettings{OverrideURL: "http://somewhere"},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	client, isCodex := connection.Client.(*codex.Client)
+	if !isCodex || !client.IsFast {
+		t.Errorf("got client %+v", connection.Client)
+	}
+}
+
+func TestFastModeIsRejectedBeforeConnectingAnotherProvider(t *testing.T) {
+	selection := model.Selection{Provider: anthropicProvider, Model: "claude-opus-5", Effort: "high", IsFast: true}
+	connection, err := Connect(
+		model.Choice{Provider: anthropicProvider, ID: selection.Model, MaxOutputTokens: 128_000},
+		selection,
+		EndpointSettings{OverrideURL: "http://somewhere"},
+	)
+	if err == nil || !strings.Contains(err.Error(), "does not support fast mode") {
+		t.Fatalf("got connection %+v and error %v", connection, err)
 	}
 }
 

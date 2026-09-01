@@ -19,7 +19,9 @@ function _oh {
         -c | --caps) KIND=caps ;;
         -t | --tool) KIND=tool ;;
         -m | --model)
-            if [[ $WORD == *@* && $COMP_WORDBREAKS == *@* ]]; then
+            if [[ $WORD == *+* ]]; then
+                KIND=model
+            elif [[ $WORD == *@* && $COMP_WORDBREAKS == *@* ]]; then
                 KIND=effort
             else
                 KIND=model

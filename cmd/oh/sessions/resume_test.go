@@ -10,9 +10,23 @@ import (
 	"crdx.org/io/agent"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/work"
 )
+
+func TestAResumedSessionRestoresFastModeFromItsJournal(t *testing.T) {
+	meta := store.Meta{Provider: model.CodexProvider, Model: "gpt-5.6-sol", Effort: "high"}
+	fastSelection := ModelSelection(&store.Session{Meta: meta, Events: []agent.Event{model.FastModeEvent(true)}})
+	if !fastSelection.IsFast || fastSelection.String() != "codex/gpt-5.6-sol@high+fast" {
+		t.Errorf("got %s", fastSelection)
+	}
+
+	standardSelection := ModelSelection(&store.Session{Meta: meta})
+	if standardSelection.IsFast || standardSelection.String() != "codex/gpt-5.6-sol@high" {
+		t.Errorf("got %s", standardSelection)
+	}
+}
 
 func TestAResumedConversationOpensInTheModeItWasLeftIn(t *testing.T) {
 	leftCaps := caps.Read | caps.Git

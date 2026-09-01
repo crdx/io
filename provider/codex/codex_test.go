@@ -161,6 +161,36 @@ func TestNewHandsBackAClientHoldingWhatItWasAsked(t *testing.T) {
 	}
 }
 
+func TestFastModeUsesTheUltrafastServiceTier(t *testing.T) {
+	server, bodies := turns(t, events(answer("Fast."), completed), events(answer("Standard."), completed))
+	client := newClient(t, server.URL)
+
+	client.IsFast = true
+	if _, err := sendOnce(t, client, "fast"); err != nil {
+		t.Fatal(err)
+	}
+	client.IsFast = false
+	if _, err := sendOnce(t, client, "standard"); err != nil {
+		t.Fatal(err)
+	}
+
+	var fastRequest map[string]json.RawMessage
+	if err := json.Unmarshal([]byte((*bodies)[0]), &fastRequest); err != nil {
+		t.Fatal(err)
+	}
+	if got := string(fastRequest["service_tier"]); got != `"ultrafast"` {
+		t.Errorf("got service tier %s", got)
+	}
+
+	var standardRequest map[string]json.RawMessage
+	if err := json.Unmarshal([]byte((*bodies)[1]), &standardRequest); err != nil {
+		t.Fatal(err)
+	}
+	if _, isFound := standardRequest["service_tier"]; isFound {
+		t.Errorf("standard request carried a service tier: %s", (*bodies)[1])
+	}
+}
+
 func TestASettingLeftOutIsRefusedRatherThanSubstituted(t *testing.T) {
 	tests := []struct {
 		name   string

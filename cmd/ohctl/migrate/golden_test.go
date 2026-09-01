@@ -60,6 +60,18 @@ func TestNothingLeftToMigrateMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "nothing-to-do.txt", migration(t, directory, &inputOpts{}))
 }
 
+func TestAFastModeBackfillMatchesTheGolden(t *testing.T) {
+	directory := goldenSessions(t, currentCodexJournal()...)
+
+	assertGolden(t, "fast-mode.txt", migration(t, directory, &inputOpts{}))
+}
+
+func TestAFastModeBackfillDryRunMatchesTheGolden(t *testing.T) {
+	directory := goldenSessions(t, currentCodexJournal()...)
+
+	assertGolden(t, "fast-mode-dry-run.txt", migration(t, directory, &inputOpts{DryRun: true}))
+}
+
 func TestAConfigMigrationMatchesTheGolden(t *testing.T) {
 	directory := goldenSessions(t)
 	storedConfig(t, `provider = "codex"
@@ -74,6 +86,17 @@ func TestNoStoredSessionsMatchesTheGolden(t *testing.T) {
 	directory := goldenSessions(t)
 
 	assertGolden(t, "no-sessions.txt", migration(t, directory, &inputOpts{}))
+}
+
+func currentCodexJournal() []string {
+	return []string{
+		fmt.Sprintf(
+			`{"kind":"head","time":"2026-08-01T00:00:00Z","version":%d,"id":"one","name":%q,"meta":{"provider":"codex","model":"gpt-5.6-sol","effort":"high","workspaceDir":"/workspace"}}`,
+			session.JournalFormat,
+			goldenName,
+		),
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rx"}}`,
+	}
 }
 
 func oldJournal() string {

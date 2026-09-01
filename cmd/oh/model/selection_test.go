@@ -52,6 +52,62 @@ func TestModelSelectionAcceptsQualifiedAndFuzzyNames(t *testing.T) {
 	}
 }
 
+func TestCodexSelectionsMayEnableFastMode(t *testing.T) {
+	useCachedModels(t)
+
+	for writtenSelection, wantEffort := range map[string]string{
+		"codex/gpt-5.6-sol@high+fast": "high",
+		"sol+fast":                    "medium",
+	} {
+		selection, err := ParseSelection(modelCachePath(), writtenSelection)
+		if err != nil {
+			t.Errorf("%s: %v", writtenSelection, err)
+			continue
+		}
+		if !selection.IsFast || selection.Effort != wantEffort {
+			t.Errorf("%s: got %s", writtenSelection, selection)
+		}
+		if !strings.HasSuffix(selection.String(), "+fast") {
+			t.Errorf("%s lost fast mode in its canonical spelling", selection)
+		}
+	}
+}
+
+func TestFastModeIsRefusedWhereItCannotBeProvided(t *testing.T) {
+	useCachedModels(t)
+
+	for _, writtenSelection := range []string{
+		"anthropic/claude-opus-5@high+fast",
+		"opencode-go/deepseek-v4-pro@high+fast",
+	} {
+		if _, err := ParseSelection(modelCachePath(), writtenSelection); err == nil ||
+			!strings.Contains(err.Error(), "does not support fast mode") {
+			t.Errorf("%s: got %v", writtenSelection, err)
+		}
+	}
+}
+
+func TestUnknownModelModesAreRefused(t *testing.T) {
+	useCachedModels(t)
+
+	for _, writtenSelection := range []string{"sol+", "sol+slow", "sol+fast+fast"} {
+		if _, err := ParseSelection(modelCachePath(), writtenSelection); err == nil {
+			t.Errorf("expected %s to be refused", writtenSelection)
+		}
+	}
+}
+
+func TestNewSessionQueriesCarryFastMode(t *testing.T) {
+	choices := []Choice{{Provider: codexProvider, ID: "gpt-5.6-sol", EffortLevels: []string{"medium", "high"}}}
+	selection, err := ResolveQuery("sol+fast", "high", choices)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !selection.IsFast || selection.String() != "codex/gpt-5.6-sol@high+fast" {
+		t.Errorf("got %s", selection)
+	}
+}
+
 func TestModelSelectionReachesAnthropic(t *testing.T) {
 	useCachedModels(t)
 
