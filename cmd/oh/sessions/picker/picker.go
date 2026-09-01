@@ -122,13 +122,13 @@ func (self *sessionList) Row(index int, isChosen bool, room int) string {
 	line := row(storedSession, isChosen, room)
 
 	if storedSession.IsRunning {
-		return style.Running(line)
+		return style.Running.Over(line)
 	}
 	if isChosen {
-		return style.ChosenRow(line)
+		return style.ChosenRow.Over(line)
 	}
 
-	return style.Answer(line)
+	return style.Answer.Over(line)
 }
 
 func row(storedSession *Session, isChosen bool, room int) string {

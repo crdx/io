@@ -40,6 +40,7 @@ func storedSessions() []*Session {
 			MessageCount: 4,
 			StartedAt:    now.Add(-127 * time.Minute),
 			TouchedAt:    now.Add(-37 * time.Minute),
+			IsFast:       true,
 		},
 		{
 			Name:         "funny-badger",
