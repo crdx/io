@@ -121,7 +121,10 @@ func TestMalformedJournalRecordsAreReportedUnlessTheLastIsUnterminated(t *testin
 	}{
 		{name: "interior record", suffix: "not-json\n{}\n", wantFailure: true},
 		{name: "terminated final record", suffix: "not-json\n", wantFailure: true},
-		{name: "unterminated final record", suffix: `{"kind":"event"`},
+		{name: "record split across lines", suffix: "{\"kind\":\"event\",\n\"event\":{}}\n", wantFailure: true},
+		{name: "records joined on one line", suffix: "{\"kind\":\"event\"}{\"kind\":\"event\"}\n", wantFailure: true},
+		{name: "incomplete unterminated final record", suffix: `{"kind":"event"`},
+		{name: "complete unterminated final record", suffix: `{"kind":"event"}`},
 	}
 
 	for _, test := range tests {

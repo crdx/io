@@ -3558,15 +3558,23 @@ func testBinaryEnvironment(t *testing.T, stateDirectory string) []string {
 }
 
 func TestCorruptedSessionFailureMatchesGolden(t *testing.T) {
+	binary := buildTestBinary(t)
 	compareWithGolden(t, "corrupt-session", ".txt", map[string]func() string{
-		"terminated malformed record": func() string { return corruptedSessionFailure(t) },
+		"record split across lines": func() string {
+			return corruptedSessionFailure(t, binary, "{\"kind\":\"event\",\n\"event\":{}}\n")
+		},
+		"records joined on one line": func() string {
+			return corruptedSessionFailure(t, binary, "{\"kind\":\"event\"}{\"kind\":\"event\"}\n")
+		},
+		"terminated malformed record": func() string {
+			return corruptedSessionFailure(t, binary, "not-json\n")
+		},
 	})
 }
 
-func corruptedSessionFailure(t *testing.T) string {
+func corruptedSessionFailure(t *testing.T, binary string, suffix string) string {
 	t.Helper()
 
-	binary := buildTestBinary(t)
 	stateDirectory := t.TempDir()
 	configDirectory := t.TempDir()
 	applicationStateDirectory := filepath.Join(stateDirectory, "org.crdx", "oh")
@@ -3613,7 +3621,7 @@ func corruptedSessionFailure(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := journal.WriteString("not-json\n"); err != nil {
+	if _, err := journal.WriteString(suffix); err != nil {
 		_ = journal.Close()
 		t.Fatal(err)
 	}

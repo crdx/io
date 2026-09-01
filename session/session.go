@@ -2,6 +2,7 @@ package session
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/json"
@@ -374,31 +375,26 @@ func Records(directory string, name string, visit func(Line) error) error {
 	}
 	defer func() { _ = file.Close() }()
 
-	decoder := json.NewDecoder(bufio.NewReaderSize(file, 8192))
+	reader := bufio.NewReaderSize(file, 8192)
 	hasSeenHead := false
 	lineNumber := 0
 
-	fileInfo, err := file.Stat()
-	if err != nil {
-		return err
-	}
-	hasTrailingNewline := true
-	if fileInfo.Size() > 0 {
-		var lastByte [1]byte
-		if _, err := file.ReadAt(lastByte[:], fileInfo.Size()-1); err != nil {
-			return err
-		}
-		hasTrailingNewline = lastByte[0] == '\n'
-	}
-
 	for {
-		lineNumber++
-		var line Line
-		err := decoder.Decode(&line)
-		if errors.Is(err, io.EOF) {
+		encodedLine, readErr := reader.ReadBytes('\n')
+		if readErr != nil && !errors.Is(readErr, io.EOF) {
+			return fmt.Errorf("session %s: could not read journal line %d: %w", name, lineNumber+1, readErr)
+		}
+		if len(encodedLine) == 0 && errors.Is(readErr, io.EOF) {
 			break
 		}
-		if errors.Is(err, io.ErrUnexpectedEOF) && !hasTrailingNewline {
+
+		lineNumber++
+		hasTrailingNewline := encodedLine[len(encodedLine)-1] == '\n'
+		encodedLine = bytes.TrimSuffix(encodedLine, []byte{'\n'})
+
+		var line Line
+		err := json.Unmarshal(encodedLine, &line)
+		if err != nil && errors.Is(readErr, io.EOF) && !hasTrailingNewline && isIncompleteJSON(encodedLine) {
 			break
 		}
 		if err != nil {
@@ -420,12 +416,21 @@ func Records(directory string, name string, visit func(Line) error) error {
 		if err := visit(line); err != nil {
 			return err
 		}
+		if errors.Is(readErr, io.EOF) {
+			break
+		}
 	}
 
 	if !hasSeenHead {
 		return errors.New("session has no complete head")
 	}
 	return nil
+}
+
+func isIncompleteJSON(data []byte) bool {
+	var value json.RawMessage
+	err := json.NewDecoder(bytes.NewReader(data)).Decode(&value)
+	return errors.Is(err, io.ErrUnexpectedEOF)
 }
 
 func (self *Session) take(line Line) {
