@@ -28,6 +28,7 @@ type Block struct {
 	Input  edit.Frame
 	Bottom Ruler
 	Status []string
+	Rule   style.Style
 }
 
 func (self Block) Rows(width int) ([]string, int, int) {
@@ -44,14 +45,22 @@ func (self Block) Rows(width int) ([]string, int, int) {
 	}
 
 	rows = append(rows, self.Status...)
-	rows = append(rows, top.render(width))
+	rows = append(rows, top.render(width, self.rule()))
 	rows = append(rows, self.Input.Rows...)
-	rows = append(rows, bottom.render(width))
+	rows = append(rows, bottom.render(width, self.rule()))
 
 	return rows, len(self.Status) + self.Input.Row + 1, self.Input.Column
 }
 
-func (self Ruler) render(width int) string {
+func (self Block) rule() style.Style {
+	if self.Rule == nil {
+		return style.Rule
+	}
+
+	return self.Rule
+}
+
+func (self Ruler) render(width int, rule style.Style) string {
 	leftWidth := getWidth(self.Left, edgePad)
 	rightWidth := getWidth(self.Right, edgePad)
 
@@ -59,30 +68,30 @@ func (self Ruler) render(width int) string {
 	if leftWidth == 0 || leftWidth+rightWidth > width {
 		leftWidth = 0
 	} else {
-		head = style.Rule(strings.Repeat("─", edgePad)) + " " + self.Left + " "
+		head = rule(strings.Repeat("─", edgePad)) + " " + self.Left + " "
 	}
 
 	tail := ""
 	if rightWidth == 0 || leftWidth+rightWidth > width {
 		rightWidth = 0
 	} else {
-		tail = " " + self.Right + " " + style.Rule(strings.Repeat("─", edgePad))
+		tail = " " + self.Right + " " + rule(strings.Repeat("─", edgePad))
 	}
 
 	middleWidth := max(width-leftWidth-rightWidth, 0)
 
-	return head + renderCentredSpan(middleWidth, self.Center, leftWidth, width) + tail
+	return head + renderCentredSpan(middleWidth, self.Center, leftWidth, width, rule) + tail
 }
 
-func renderCentredSpan(availableWidth int, center string, startColumn int, ruleWidth int) string {
+func renderCentredSpan(availableWidth int, center string, startColumn int, ruleWidth int, rule style.Style) string {
 	centerWidth := getWidth(center, 0)
 	beforeWidth := (ruleWidth-centerWidth)/2 - startColumn
 	if centerWidth == 0 || beforeWidth < 0 || beforeWidth+centerWidth > availableWidth {
-		return style.Rule(strings.Repeat("─", availableWidth))
+		return rule(strings.Repeat("─", availableWidth))
 	}
 
-	before := style.Rule(strings.Repeat("─", beforeWidth))
-	after := style.Rule(strings.Repeat("─", availableWidth-centerWidth-beforeWidth))
+	before := rule(strings.Repeat("─", beforeWidth))
+	after := rule(strings.Repeat("─", availableWidth-centerWidth-beforeWidth))
 
 	return before + " " + center + " " + after
 }

@@ -95,7 +95,8 @@ func main() {
 
 	self, err := os.Executable()
 	if err == nil {
-		arguments := append([]string{self}, transition.Arguments...)
+		arguments := append([]string{self}, cli.InheritedOptions(os.Args[1:], transition.Kind)...)
+		arguments = append(arguments, transition.Arguments...)
 		err = syscall.Exec(self, arguments, os.Environ()) //nolint:gosec // re-executing the binary itself
 	}
 
@@ -234,6 +235,11 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
+	args.Yolo, err = sessions.OpeningConfinement(args.Yolo, resumedSession)
+	if err != nil {
+		return "", err
+	}
+
 	if err := workspace.Validate(); err != nil {
 		return "", err
 	}
@@ -243,6 +249,12 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	defer func() { _ = workspace.Close() }()
+
+	if !args.Yolo {
+		if err := shell.RequireSandbox(ctx); err != nil {
+			return "", err
+		}
+	}
 
 	homeDir := location.GetShellHomeDir()
 	if homeDir == "" {
@@ -327,6 +339,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		WorkspaceDir: workspaceDir,
 		Provider:     selection.Provider,
 		Effort:       selection.Effort,
+		Yolo:         args.Yolo,
 	}
 
 	log, err := sessions.OpenWriter(sessionsDir, resumedSession, meta)
@@ -384,6 +397,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			CurrentCaps: args.Caps,
 			ExtraPaths:  settings.Sandbox,
 			Skills:      availableSkills,
+			Yolo:        args.Yolo,
 		})
 		if err != nil {
 			return "", err
@@ -416,7 +430,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
-	shellTool := shell.New(workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files)
+	shellTool := shell.New(workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo)
 
 	toolboxTools = append(toolboxTools, shellTool)
 	if notify.IsAvailable() {
@@ -496,6 +510,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		pathGrants:          pathGrants,
 		configObserver:      configObserver,
 		startedAt:           time.Now(),
+		isYolo:              args.Yolo,
 	}
 	chat.onFailure = func(failure error) {
 		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspace, failure)

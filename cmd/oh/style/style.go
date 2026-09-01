@@ -63,6 +63,7 @@ var (
 	Spinner       Style = hex(copper)                  // the spinner that turns while a call is running
 	Prompt        Style = hex(copper)                  // the harness prompting the user to enter a line
 	Rule          Style = Dim                          // the line drawn across the top of the input box
+	Hazard        Style = hex(red)                     // that same line, with no sandbox holding a call
 	Subtle        Style = Dim                          // text held one small step back from the subject
 	Read          Style = hex(lime)                    // reading is on offer, and waiting to be granted
 	Write         Style = hex(gold)                    // writing is on offer, and waiting to be granted

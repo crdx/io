@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/model"
 )
 
@@ -299,5 +300,37 @@ func TestAModeNamedOnTheCommandLineCountsAsChosen(t *testing.T) {
 	}
 	if !settledOptions.WereCapsChosen {
 		t.Error("expected the named capabilities to count as chosen")
+	}
+}
+
+func TestTheYoloFlagWaivesTheSandbox(t *testing.T) {
+	settledOptions, err := Input{inputFlags: inputFlags{Yolo: true}}.Parse(modelCachePath())
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if !settledOptions.Yolo {
+		t.Error("expected --yolo to waive the sandbox")
+	}
+
+	settledOptions, err = Input{}.Parse(modelCachePath())
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if settledOptions.Yolo {
+		t.Error("expected a sandbox without --yolo")
+	}
+}
+
+func TestOnlyANewSessionInheritsAWaivedSandbox(t *testing.T) {
+	if got := InheritedOptions([]string{"--yolo", "hello"}, cycle.NewSession); !slices.Equal(got, []string{"--yolo"}) {
+		t.Errorf("got %v, want --yolo handed on to a new session", got)
+	}
+
+	if got := InheritedOptions([]string{"--yolo"}, cycle.ResumeSession); got != nil {
+		t.Errorf("got %v, want a resumed session to take its confinement from its own journal", got)
+	}
+
+	if got := InheritedOptions([]string{"hello"}, cycle.NewSession); got != nil {
+		t.Errorf("got %v, want nothing handed on by a sandboxed session", got)
 	}
 }

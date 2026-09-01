@@ -254,3 +254,41 @@ func TestResumeCommandNamesTheBinaryAndSession(t *testing.T) {
 		t.Errorf("got %q", got)
 	}
 }
+
+func TestAResumedConversationOpensInTheConfinementItWasLeftIn(t *testing.T) {
+	confined := &store.Session{Meta: store.Meta{}}
+	yolo := &store.Session{Meta: store.Meta{Yolo: true}}
+
+	got, err := OpeningConfinement(false, yolo)
+	if err != nil || !got {
+		t.Errorf("expected a yolo conversation to reopen without being asked again, got %v and %v", got, err)
+	}
+
+	got, err = OpeningConfinement(true, yolo)
+	if err != nil || !got {
+		t.Errorf("expected a yolo conversation to reopen when asked for again, got %v and %v", got, err)
+	}
+
+	got, err = OpeningConfinement(false, confined)
+	if err != nil || got {
+		t.Errorf("expected a sandboxed conversation to reopen sandboxed, got %v and %v", got, err)
+	}
+
+	if _, err := OpeningConfinement(true, confined); err == nil {
+		t.Error("expected a sandboxed conversation to refuse being reopened without its sandbox")
+	}
+
+	got, err = OpeningConfinement(true, nil)
+	if err != nil || !got {
+		t.Errorf("expected a fresh conversation to open as asked, got %v and %v", got, err)
+	}
+}
+
+func TestTheRefusalOfAConfinementChangeMatchesTheGolden(t *testing.T) {
+	_, err := OpeningConfinement(true, &store.Session{Meta: store.Meta{}})
+	if err == nil {
+		t.Fatal("expected a sandboxed conversation to refuse being reopened without its sandbox")
+	}
+
+	comparePickerGolden(t, "confinement-refusal.txt", err.Error()+"\n")
+}

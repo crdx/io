@@ -51,6 +51,10 @@ func goldenPolicy() sandbox.Policy {
 	}
 }
 
+func yoloGoldenPolicy() sandbox.Policy {
+	return sandbox.Policy{Yolo: true, Timeout: 5 * time.Minute}
+}
+
 func TestEveryWholeReportACommandCanEndOnMatchesTheGolden(t *testing.T) {
 	reports := []struct {
 		name   string
@@ -143,6 +147,23 @@ func TestEveryWholeReportACommandCanEndOnMatchesTheGolden(t *testing.T) {
 				Output: "go: writing cache: open /cache/go-build/x: Too many open files",
 			},
 			policy: goldenPolicy(),
+		},
+		{
+			name: "a refusal with no sandbox to blame it on",
+			result: sandbox.Result{
+				Code:   1,
+				Output: "cp: cannot create regular file '/etc/hosts': Permission denied",
+			},
+			policy: yoloGoldenPolicy(),
+		},
+		{
+			name: "a kill with no sandbox limit behind it",
+			result: sandbox.Result{
+				Code:    -1,
+				Signal:  syscall.SIGKILL,
+				CPUTime: 90 * time.Minute,
+			},
+			policy: yoloGoldenPolicy(),
 		},
 	}
 

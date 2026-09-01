@@ -63,3 +63,11 @@ every process this command started used 3s of processor time between them.
 exit(1):
 go: writing cache: open /cache/go-build/x: Too many open files
 note: the sandbox stopped this command for using too much.
+
+=== a refusal with no sandbox to blame it on ===
+exit(1):
+cp: cannot create regular file '/etc/hosts': Permission denied
+
+=== a kill with no sandbox limit behind it ===
+exit(-1)
+note: the command was killed by SIGKILL.

@@ -12,7 +12,7 @@ func TestTheRuleIsExactlyAsWideAsTheScreen(t *testing.T) {
 	for _, width := range []int{0, 1, 40, 100} {
 		for _, label := range []string{"", "gpt ⠶ 6 tools ⠶ io", strings.Repeat("wide", 40)} {
 			rule := Ruler{Right: label}
-			if got := style.Width(rule.render(width)); got != width {
+			if got := style.Width(rule.render(width, style.Rule)); got != width {
 				t.Errorf("expected a rule of %d columns, got %d", width, got)
 			}
 		}
@@ -23,7 +23,7 @@ func TestTheLabelSitsAtTheRightHandEndOfTheRule(t *testing.T) {
 	rule := Ruler{Right: style.Subtle("here")}
 
 	want := " " + style.Subtle("here") + " " + style.Rule("──")
-	if got := rule.render(20); !strings.HasSuffix(got, want) {
+	if got := rule.render(20, style.Rule); !strings.HasSuffix(got, want) {
 		t.Errorf("expected %q to end in %q", got, want)
 	}
 }
@@ -31,7 +31,7 @@ func TestTheLabelSitsAtTheRightHandEndOfTheRule(t *testing.T) {
 func TestARuleWithBothLabelsIsExactlyAsWideAsTheScreen(t *testing.T) {
 	for _, width := range []int{0, 1, 20, 40, 100} {
 		rule := Ruler{Left: "↑ 12", Right: "gpt ⠶ io"}
-		if got := style.Width(rule.render(width)); got != width {
+		if got := style.Width(rule.render(width, style.Rule)); got != width {
 			t.Errorf("expected a rule of %d columns, got %d", width, got)
 		}
 	}
@@ -52,7 +52,7 @@ func TestLeftContentRoomKeepsAFittingRightLabel(t *testing.T) {
 func TestTheLeftLabelIsDroppedFirstWhenTheRightIsKept(t *testing.T) {
 	rule := Ruler{Left: "↑ 12", Right: "gpt ⠶ io"}
 
-	got := rule.render(18)
+	got := rule.render(18, style.Rule)
 	if strings.Contains(got, "12") {
 		t.Errorf("expected the left label to be dropped, got %q", got)
 	}
@@ -64,7 +64,7 @@ func TestTheLeftLabelIsDroppedFirstWhenTheRightIsKept(t *testing.T) {
 func TestALabelTooWideForTheScreenIsDropped(t *testing.T) {
 	rule := Ruler{Right: "far too long"}
 
-	if got := rule.render(5); strings.Contains(got, "far") {
+	if got := rule.render(5, style.Rule); strings.Contains(got, "far") {
 		t.Errorf("expected the label to be dropped, got %q", got)
 	}
 }
@@ -103,7 +103,7 @@ func TestALabelPaintedDownToNothingCostsNothing(t *testing.T) {
 	bare := Ruler{Right: "here"}
 	painted := Ruler{Left: style.ScrolledInput(""), Right: "here"}
 
-	if want, got := bare.render(20), painted.render(20); want != got {
+	if want, got := bare.render(20, style.Rule), painted.render(20, style.Rule); want != got {
 		t.Errorf("expected an empty painted label to be ignored, got %q rather than %q", got, want)
 	}
 }
@@ -165,7 +165,7 @@ func TestStatusRowsSitAboveTheTopRuleWithoutMovingTheInput(t *testing.T) {
 func TestACentredLabelSitsInTheMiddleOfTheDashes(t *testing.T) {
 	rule := Ruler{Center: "io"}
 
-	got := style.Plain(rule.render(40))
+	got := style.Plain(rule.render(40, style.Rule))
 	if want := strings.Repeat("─", 18) + " io " + strings.Repeat("─", 18); got != want {
 		t.Errorf("expected %q, got %q", want, got)
 	}
@@ -174,7 +174,7 @@ func TestACentredLabelSitsInTheMiddleOfTheDashes(t *testing.T) {
 func TestACentredLabelIsPositionedRelativeToTheRuleEdges(t *testing.T) {
 	rule := Ruler{Left: "L", Center: "io", Right: "right side"}
 
-	got := style.Plain(rule.render(40))
+	got := style.Plain(rule.render(40, style.Rule))
 	beforeCenter, _, _ := strings.Cut(got, " io ")
 	if want := (40 - len(" io ")) / 2; style.Width(beforeCenter) != want {
 		t.Errorf("expected the centred label to start at column %d, got %q", want, got)
@@ -184,7 +184,7 @@ func TestACentredLabelIsPositionedRelativeToTheRuleEdges(t *testing.T) {
 func TestARuleWithALabelAtEveryPlaceIsExactlyAsWideAsTheScreen(t *testing.T) {
 	for _, width := range []int{0, 1, 5, 20, 21, 40, 100} {
 		rule := Ruler{Left: "↑ 12", Center: "io", Right: "gpt ⠶ io"}
-		if got := style.Width(rule.render(width)); got != width {
+		if got := style.Width(rule.render(width, style.Rule)); got != width {
 			t.Errorf("expected a rule of %d columns, got %d", width, got)
 		}
 	}
@@ -193,7 +193,7 @@ func TestARuleWithALabelAtEveryPlaceIsExactlyAsWideAsTheScreen(t *testing.T) {
 func TestTheCentredLabelIsTheFirstToGiveWay(t *testing.T) {
 	rule := Ruler{Left: "↑ 12", Center: "workspace", Right: "gpt ⠶ io"}
 
-	got := style.Plain(rule.render(25))
+	got := style.Plain(rule.render(25, style.Rule))
 	if strings.Contains(got, "workspace") {
 		t.Errorf("expected the centred label to give way, got %q", got)
 	}
@@ -205,7 +205,7 @@ func TestTheCentredLabelIsTheFirstToGiveWay(t *testing.T) {
 func TestACentredLabelIsKeptWhenThereIsRoomForItBetweenTheEnds(t *testing.T) {
 	rule := Ruler{Left: "↑ 12", Center: "io", Right: "gpt"}
 
-	got := style.Plain(rule.render(40))
+	got := style.Plain(rule.render(40, style.Rule))
 	for _, want := range []string{"↑ 12", "io", "gpt"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("expected %q to survive, got %q", want, got)
@@ -216,8 +216,39 @@ func TestACentredLabelIsKeptWhenThereIsRoomForItBetweenTheEnds(t *testing.T) {
 func TestACentredLabelGivesWayRatherThanMovingOffCentre(t *testing.T) {
 	rule := Ruler{Left: "↑ 12", Center: "workspace", Right: "gpt ⠶ io"}
 
-	got := style.Plain(rule.render(30))
+	got := style.Plain(rule.render(30, style.Rule))
 	if strings.Contains(got, "workspace") {
 		t.Errorf("expected the centred label to give way, got %q", got)
+	}
+}
+
+func TestABlockDrawsItsRulesInTheStyleItWasGiven(t *testing.T) {
+	build := func(rule style.Style) []string {
+		block := Block{
+			Top:    Ruler{Left: "left"},
+			Input:  edit.Frame{Rows: []string{"> hello"}},
+			Bottom: Ruler{Right: "right"},
+			Rule:   rule,
+		}
+
+		rows, _, _ := block.Rows(40)
+		return rows
+	}
+
+	given := build(style.Failure)
+	byDefault := build(nil)
+
+	for i, row := range given {
+		if style.Plain(row) != style.Plain(byDefault[i]) {
+			t.Errorf("row %d reads %q with a style and %q without one", i, style.Plain(row), style.Plain(byDefault[i]))
+		}
+	}
+
+	if given[0] == byDefault[0] || given[2] == byDefault[2] {
+		t.Error("expected the rules to be painted in the style the block was given")
+	}
+
+	if given[1] != byDefault[1] {
+		t.Error("expected the input itself to be left alone")
 	}
 }

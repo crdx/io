@@ -101,7 +101,7 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read)
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), pathAccess, mode, files)
+	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), pathAccess, mode, files, false)
 
 	if shell.Name() != "bash" {
 		t.Errorf("expected the shell to be offered as bash, got %q", shell.Name())
@@ -137,7 +137,7 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read | caps.Shell)
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(workspace, home, tmp, pathAccess, mode, files)
+	shell := New(workspace, home, tmp, pathAccess, mode, files, false)
 	run := func() {
 		call, parseErr := shell.Parse(`{"command":"printf %s \"$MISE_DATA_DIR\""}`)
 		if parseErr != nil {
@@ -181,7 +181,7 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 	mode := caps.NewMode(initialCaps)
 	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(workspace, home, tmp, pathAccess, mode, files)
+	shell := New(workspace, home, tmp, pathAccess, mode, files, false)
 
 	run := func() error {
 		call, parseErr := shell.Parse(`{"command":"touch .git/proof"}`)
@@ -229,7 +229,7 @@ func TestTemporaryPathAccessChangesTheNextShellCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer access.Close()
-	shellTool := New(workspace, home, tmp, access, mode, files)
+	shellTool := New(workspace, home, tmp, access, mode, files, false)
 	run := func() (string, error) {
 		arguments, marshalErr := json.Marshal(map[string]string{"command": "cat " + strconv.Quote(externalFile)})
 		if marshalErr != nil {
@@ -889,7 +889,7 @@ func TestASymlinkedCacheIsReportedToWhoeverAskedForTheCommand(t *testing.T) {
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Write | caps.Shell)
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(workspace, home, t.TempDir(), pathAccess, mode, files)
+	shell := New(workspace, home, t.TempDir(), pathAccess, mode, files, false)
 
 	call, err := shell.Parse(`{"command":"echo one"}`)
 	if err != nil {
@@ -905,5 +905,82 @@ func TestASymlinkedCacheIsReportedToWhoeverAskedForTheCommand(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), planted) {
 		t.Errorf("expected the planted link to be named, got %v", err)
+	}
+}
+
+func TestAWaivedSandboxStillWithholdsAnUngrantedShell(t *testing.T) {
+	workspaceRoot, err := os.OpenRoot(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
+	mode := caps.NewMode(caps.Read)
+	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), newTestPathAccess(t, files, mode), mode, files, true)
+
+	call, err := shell.Parse(`{"command":"echo one"}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := call.Exec(t.Context()); !errors.Is(err, ErrWithheld) {
+		t.Errorf("expected the command to be turned away, got %v", err)
+	}
+}
+
+func TestAWaivedSandboxRunsACommandWhereTheSandboxCouldNot(t *testing.T) {
+	workspace := t.TempDir()
+	workspaceRoot, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = workspaceRoot.Close() }()
+
+	home := t.TempDir()
+	tmp := t.TempDir()
+
+	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
+	mode := caps.NewMode(caps.Read | caps.Shell)
+	shell := New(workspace, home, tmp, newTestPathAccess(t, files, mode), mode, files, true)
+
+	call, err := shell.Parse(`{"command":"printf %s \"$HOME:$TMPDIR\""}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := call.Exec(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := home + ":" + tmp; result.Output != want {
+		t.Errorf("got %q, want %q", result.Output, want)
+	}
+}
+
+func TestAWaivedSandboxBoundsNothingButTheDeadline(t *testing.T) {
+	policy := YoloPolicy(t.TempDir(), t.TempDir())
+
+	if !policy.Yolo {
+		t.Error("expected the policy to say the sandbox has been waived")
+	}
+	if policy.Timeout != shellTimeout {
+		t.Errorf("got a deadline of %s, want %s", policy.Timeout, shellTimeout)
+	}
+	for name, bound := range map[string]int64{
+		"file size": policy.FileSize, "open files": policy.OpenFiles, "processes": policy.Processes,
+	} {
+		if bound != 0 {
+			t.Errorf("expected no %s limit, got %d", name, bound)
+		}
+	}
+	if policy.CPUTime != 0 {
+		t.Errorf("expected no processor limit, got %s", policy.CPUTime)
+	}
+	for name, granted := range map[string][]string{
+		"read": policy.Read, "write": policy.Write, "exec": policy.Exec,
+	} {
+		if len(granted) != 0 {
+			t.Errorf("expected nothing named as %s, got %v", name, granted)
+		}
 	}
 }

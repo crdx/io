@@ -10,6 +10,7 @@ Options:
     -m, --model [<model>]       Open the model picker, or set the provider, model, and effort
     -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: rx)
     -t, --tool <tool>           Set exclusive tool selection; may be repeated
+        --yolo                  Live dangerously and don't sandbox anything
     -l, --list                  List the available models, then exit
     -u, --update                Update the cached model list, then exit
     -v, --version               Show version

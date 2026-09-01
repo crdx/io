@@ -390,3 +390,53 @@ func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
 		})
 	}
 }
+
+func TestAWaivedSandboxIsDisclosedRatherThanImplied(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/state/farm/session",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read | caps.Shell,
+		Yolo:        true,
+	})
+
+	for _, want := range []string{
+		"# No Sandbox",
+		"the bash tool runs with no sandbox at all",
+		"There is no sandbox, so a command reaches whatever network this machine reaches",
+		"/tmp is the machine's own /tmp",
+		"Your persistent scratch space is /state/farm/session",
+		"The bash tool is granted, and runs unconfined",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("harness context does not contain %q: %q", want, got)
+		}
+	}
+
+	for _, unwanted := range []string{
+		"private loopback interface",
+		"external networks are unreachable",
+		"It maps to /state/farm/session on the user's machine",
+	} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("harness context still claims %q: %q", unwanted, got)
+		}
+	}
+}
+
+func TestASandboxedSessionIsNeverToldThereIsNoSandbox(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/state/farm/session",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read | caps.Shell,
+	})
+
+	for _, unwanted := range []string{"# No Sandbox", "unconfined", "--yolo"} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("harness context contains %q: %q", unwanted, got)
+		}
+	}
+}

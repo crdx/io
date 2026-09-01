@@ -247,6 +247,7 @@ func report(result sandbox.Result, policy sandbox.Policy) string {
 	switch killedNote := killed(result, policy); {
 	case killedNote != "":
 		parts = append(parts, killedNote)
+	case policy.Yolo:
 	case matches(output, denials):
 		parts = append(parts, note(policy))
 	case matches(output, overruns):
@@ -289,10 +290,12 @@ func killed(result sandbox.Result, policy sandbox.Policy) string {
 	case syscall.SIGKILL, syscall.SIGXCPU:
 		lines = append(lines, processorLimit(result, policy)...)
 	case syscall.SIGXFSZ:
-		lines = append(lines, fmt.Sprintf(
-			"the sandbox lets a command write no more than %s to a single file.",
-			util.FormatBytes(policy.FileSize, 3),
-		))
+		if policy.FileSize > 0 {
+			lines = append(lines, fmt.Sprintf(
+				"the sandbox lets a command write no more than %s to a single file.",
+				util.FormatBytes(policy.FileSize, 3),
+			))
+		}
 	}
 
 	return strings.Join(lines, "\n")

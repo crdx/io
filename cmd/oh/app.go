@@ -30,6 +30,7 @@ import (
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/store"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
@@ -118,6 +119,7 @@ type App struct {
 	currentTurn Turn
 	startedAt   time.Time
 	isPlain     bool
+	isYolo      bool
 }
 
 type Turn struct {
@@ -576,9 +578,18 @@ func (self *App) show(inputLine *edit.Input) {
 			Right:  bottomRight,
 		},
 		Status: self.feedbackRows(columns),
+		Rule:   self.ruleStyle(),
 	}
 
 	self.screen.Footer(block.Rows(columns))
+}
+
+func (self *App) ruleStyle() style.Style {
+	if self.isYolo {
+		return style.Hazard
+	}
+
+	return style.Rule
 }
 
 func (self *App) feedbackRows(columns int) []string {

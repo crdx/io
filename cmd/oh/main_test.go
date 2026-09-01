@@ -2640,6 +2640,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"default-bar":           {".ansi", ".screen"},
 		"feedback":              {".ansi", ".screen", ".txt"},
 		"context":               {".prompt"},
+		"context-yolo":          {".prompt"},
 		"inputblock":            {".ansi", ".screen"},
 		"legacy-alt-enter":      {".ansi", ".screen"},
 		"lifecycle":             {".ansi", ".screen"},
@@ -2659,6 +2660,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"readline-bindings":     {".ansi", ".screen"},
 		"resume-arguments":      {".txt"},
 		"resume-mode":           {".ansi"},
+		"resume-confinement":    {".ansi"},
 		"running":               {".ansi", ".screen"},
 		"schedule":              {".ansi", ".screen"},
 		"segments":              {".ansi", ".screen"},
@@ -2858,6 +2860,50 @@ func TestAResumedConversationDrawsItsRecordedMode(t *testing.T) {
 	}
 
 	compareWithGolden(t, "resume-mode", ".ansi", passes)
+}
+
+func TestAResumedConversationDrawsItsRecordedConfinement(t *testing.T) {
+	drawnRules := func(isYolo bool) func() string {
+		return func() string {
+			directory := t.TempDir()
+			log, err := store.Create(directory, store.Meta{Model: "gpt", Yolo: isYolo})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := log.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "hello"}); err != nil {
+				t.Fatal(err)
+			}
+			if err := log.Close(); err != nil {
+				t.Fatal(err)
+			}
+
+			storedSession, err := store.Read(directory, log.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			restoredYolo, err := sessions.OpeningConfinement(false, storedSession)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			resumedHarness := &App{isYolo: restoredYolo}
+			block := input.Block{
+				Top:    input.Ruler{Left: "oh"},
+				Input:  edit.Frame{Rows: []string{"> carry on"}},
+				Bottom: input.Ruler{Right: "rxw gs"},
+				Rule:   resumedHarness.ruleStyle(),
+			}
+			rows, _, _ := block.Rows(narrowColumns)
+
+			return strings.Join(rows, "\n")
+		}
+	}
+
+	compareWithGolden(t, "resume-confinement", ".ansi", map[string]func() string{
+		"recorded as sandboxed, resumed without the flag": drawnRules(false),
+		"recorded as yolo, resumed without the flag":      drawnRules(true),
+	})
 }
 
 func modeFixture(t *testing.T) (*App, string) {
@@ -4106,12 +4152,22 @@ func TestPick(t *testing.T) {
 }
 
 func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
+	for name, isYolo := range map[string]bool{"context": false, "context-yolo": true} {
+		t.Run(name, func(t *testing.T) {
+			compareSystemPromptWithGolden(t, name, isYolo)
+		})
+	}
+}
+
+func compareSystemPromptWithGolden(t *testing.T, name string, isYolo bool) {
+	t.Helper()
+
 	workspaceDirectory := t.TempDir()
-	for name, body := range map[string]string{
+	for fileName, body := range map[string]string{
 		"AGENTS.md":       "Follow the project rules.",
 		"AGENTS.local.md": "Prefer the local rules.",
 	} {
-		if err := os.WriteFile(filepath.Join(workspaceDirectory, name), []byte(body), 0o600); err != nil {
+		if err := os.WriteFile(filepath.Join(workspaceDirectory, fileName), []byte(body), 0o600); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -4140,6 +4196,7 @@ func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 			Description: "Exercise complete prompt assembly.",
 			Location:    "/skills/golden/SKILL.md",
 		}},
+		Yolo: isYolo,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -4147,7 +4204,7 @@ func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 	got = strings.ReplaceAll(got, workspaceDirectory, "/workspace")
 	got = strings.ReplaceAll(got, "127.0.0.1", "<loopback>")
 
-	goldenPath := filepath.Join("testdata", "output", "context.prompt")
+	goldenPath := filepath.Join("testdata", "output", name+".prompt")
 	if *updateGoldens {
 		if err := os.WriteFile(goldenPath, []byte(got), 0o600); err != nil {
 			t.Fatal(err)
@@ -5061,53 +5118,58 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 	passes := map[string]func() string{}
 	shownPassesAtWidth := map[string]func() string{}
 
-	for _, width := range []int{80, 40, 20} {
-		for name, frame := range frames {
-			passName := fmt.Sprintf("%s at %d columns", name, width)
+	addPass := func(passName string, frame edit.Frame, width int, isYolo bool) {
+		passes[passName] = func() string {
+			return drawnOnAStoppedClock(t, func(t *testing.T) string {
+				t.Helper()
 
-			passes[passName] = func() string {
-				return drawnOnAStoppedClock(t, func(t *testing.T) string {
-					t.Helper()
+				time.Sleep(spinnerSoFar)
 
-					time.Sleep(spinnerSoFar)
+				held := &App{mode: caps.NewMode(caps.All()), isYolo: isYolo}
+				held.currentTurn.Stream = testTimedTurnStream(true, time.Now().Add(-turnSoFar), time.Time{})
 
-					held := &App{mode: caps.NewMode(caps.All())}
-					held.currentTurn.Stream = testTimedTurnStream(true, time.Now().Add(-turnSoFar), time.Time{})
+				built := goldenBarLayout(t, held)
 
-					built := goldenBarLayout(t, held)
+				held.barConfiguration = bar.NewConfiguration(nil, built)
 
-					held.barConfiguration = bar.NewConfiguration(nil, built)
+				block := input.Block{
+					Top: input.Ruler{
+						Left:   held.renderBar(segment.TopLeft, frame),
+						Center: held.renderBar(segment.TopCenter, frame),
+						Right:  held.renderBar(segment.TopRight, frame),
+					},
+					Input: frame,
+					Bottom: input.Ruler{
+						Left:   held.renderBar(segment.BottomLeft, frame),
+						Center: held.renderBar(segment.BottomCenter, frame),
+						Right:  held.renderBar(segment.BottomRight, frame),
+					},
+					Rule: held.ruleStyle(),
+				}
 
-					block := input.Block{
-						Top: input.Ruler{
-							Left:   held.renderBar(segment.TopLeft, frame),
-							Center: held.renderBar(segment.TopCenter, frame),
-							Right:  held.renderBar(segment.TopRight, frame),
-						},
-						Input: frame,
-						Bottom: input.Ruler{
-							Left:   held.renderBar(segment.BottomLeft, frame),
-							Center: held.renderBar(segment.BottomCenter, frame),
-							Right:  held.renderBar(segment.BottomRight, frame),
-						},
-					}
+				rows, cursorRow, cursorColumn := block.Rows(width)
 
-					rows, cursorRow, cursorColumn := block.Rows(width)
+				return fmt.Sprintf(
+					"%s\ncursor row %d column %d",
+					strings.Join(rows, "\n"), cursorRow, cursorColumn,
+				)
+			})
+		}
 
-					return fmt.Sprintf(
-						"%s\ncursor row %d column %d",
-						strings.Join(rows, "\n"), cursorRow, cursorColumn,
-					)
-				})
-			}
+		shownPassesAtWidth[passName] = func() string {
+			drawn := passes[passName]()
 
-			shownPassesAtWidth[passName] = func() string {
-				drawn := passes[passName]()
-
-				return shown(t, drawn[:strings.LastIndex(drawn, "\ncursor row ")], width)
-			}
+			return shown(t, drawn[:strings.LastIndex(drawn, "\ncursor row ")], width)
 		}
 	}
+
+	for _, width := range []int{80, 40, 20} {
+		for name, frame := range frames {
+			addPass(fmt.Sprintf("%s at %d columns", name, width), frame, width, false)
+		}
+	}
+
+	addPass("one row yolo at 80 columns", frames["one row"], 80, true)
 
 	compareWithGolden(t, "inputblock", ".ansi", passes)
 	compareWithGolden(t, "inputblock", ".screen", shownPassesAtWidth)
@@ -8445,7 +8507,7 @@ func newSessionGoldenWithheldShell(t *testing.T) tool.Tool {
 	}
 	t.Cleanup(pathAccess.Close)
 
-	return shell.New(workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files)
+	return shell.New(workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files, false)
 }
 
 func serveSessionGoldenResponse(

@@ -24,13 +24,17 @@ const (
 var (
 	projectContextNames    = []string{"AGENTS.md", "AGENTS.local.md"}
 	harnessContextTemplate = template.Must(template.New("harness").Funcs(template.FuncMap{
-		"filesystem":   filesystem,
-		"filepathJoin": filepath.Join,
-		"scopeRules":   scopeRules,
-		"shellAccess":  shellAccess,
-		"webAccess":    webAccess,
+		"filesystem":    filesystem,
+		"filepathJoin":  filepath.Join,
+		"scopeRules":    scopeRules,
+		"shellAccess":   shellAccess,
+		"webAccess":     webAccess,
+		"networkRules":  networkRules,
+		"scratchRules":  scratchRules,
+		"shellSandbox":  shellSandbox,
+		"sandboxHeader": sandboxHeader,
 	}).Parse(hereduck.D(`
-		# Scope
+		{{ sandboxHeader .Yolo }}# Scope
 
 		- Your workspace is the current directory, {{ .WorkspaceDir }}
 		- Your session is named {{ .SessionName }}
@@ -43,19 +47,11 @@ var (
 
 		# Network
 
-		- Networking is limited to the sandbox's private loopback interface
-		- Processes in the same sandbox can communicate over 127.0.0.1 and ::1
-		- A Unix socket works beneath /tmp, and is refused beneath the workspace
-		- The host's loopback interface and external networks are unreachable
-		- The web search and fetch tools are {{ webAccess .WebGranted }}
-		- Anything else that requires external networking must be asked of the user
+		{{ networkRules . }}
 
 		# /tmp
 
-		- /tmp is your persistent scratch space, which you can always read and write to
-		- It maps to {{ .TmpDir }} on the user's machine, so bear that in mind
-		- Always translate /tmp paths to the user's equivalent path before giving it to them
-			- For example: /tmp/foo.png → {{ filepathJoin .TmpDir "foo.png" }}
+		{{ scratchRules .TmpDir .Yolo }}
 		- If you encounter a read-only workspace, follow this process:
 			- Copy the current workspace into your scratch space
 			- Do the work there, then produce a *.patch file the user can apply to their repo
@@ -72,7 +68,7 @@ var (
 
 		- The workspace ({{ .WorkspaceDir }}) is {{ filesystem .WorkspaceWritable }}
 		- The .git directory within it ({{ filepathJoin .WorkspaceDir ".git" }}) is {{ filesystem .GitWritable }}
-		- The bash tool is {{ shellAccess .ShellGranted }}
+		- The bash tool is {{ shellAccess .ShellGranted }}{{ shellSandbox .Yolo }}
 
 		These states can change at any time. You will be told what changed when it does.
 	`)))
@@ -89,6 +85,7 @@ type harnessContextTemplateData struct {
 	GitWritable       bool
 	ShellGranted      bool
 	WebGranted        bool
+	Yolo              bool
 }
 
 func ProjectContextPaths(workspace *work.Space) []string {
@@ -113,6 +110,7 @@ type Config struct {
 	CurrentCaps caps.Set
 	ExtraPaths  shell.Paths
 	Skills      []skill.Skill
+	Yolo        bool
 }
 
 func Load(config Config) (string, []File, error) {
@@ -204,6 +202,7 @@ func harnessContext(config Config) string {
 		GitWritable:       currentCaps.Has(caps.Git),
 		ShellGranted:      currentCaps.Has(caps.Shell),
 		WebGranted:        currentCaps.Has(caps.Web),
+		Yolo:              config.Yolo,
 	}
 
 	var renderedText strings.Builder
@@ -281,4 +280,62 @@ func webAccess(isGranted bool) string {
 	}
 
 	return "refused"
+}
+
+func sandboxHeader(isYolo bool) string {
+	if !isYolo {
+		return ""
+	}
+
+	return hereduck.D(`
+		# No Sandbox
+
+		- This session was started with --yolo, so the bash tool runs with no sandbox at all
+		- A command can read, write, delete, and reach the network as freely as the user can
+		- Nothing stops a mistake, so read a destructive command back to yourself before running it
+		- The states below still govern the file tools; hold the bash tool to them yourself
+	`) + "\n"
+}
+
+func networkRules(data harnessContextTemplateData) string {
+	if data.Yolo {
+		return strings.Join([]string{
+			"- There is no sandbox, so a command reaches whatever network this machine reaches",
+			"- The web search and fetch tools are " + webAccess(data.WebGranted),
+		}, "\n")
+	}
+
+	return strings.Join([]string{
+		"- Networking is limited to the sandbox's private loopback interface",
+		"- Processes in the same sandbox can communicate over 127.0.0.1 and ::1",
+		"- A Unix socket works beneath /tmp, and is refused beneath the workspace",
+		"- The host's loopback interface and external networks are unreachable",
+		"- The web search and fetch tools are " + webAccess(data.WebGranted),
+		"- Anything else that requires external networking must be asked of the user",
+	}, "\n")
+}
+
+func scratchRules(tmpDir string, isYolo bool) string {
+	if isYolo {
+		return strings.Join([]string{
+			"- /tmp is the machine's own /tmp, shared with everything else running on it",
+			"- Your persistent scratch space is " + tmpDir + ", which you can always read and write to",
+			"- Give the user that path exactly as it is written here",
+		}, "\n")
+	}
+
+	return strings.Join([]string{
+		"- /tmp is your persistent scratch space, which you can always read and write to",
+		"- It maps to " + tmpDir + " on the user's machine, so bear that in mind",
+		"- Always translate /tmp paths to the user's equivalent path before giving it to them",
+		"\t- For example: /tmp/foo.png → " + filepath.Join(tmpDir, "foo.png"),
+	}, "\n")
+}
+
+func shellSandbox(isYolo bool) string {
+	if isYolo {
+		return ", and runs unconfined"
+	}
+
+	return ""
 }

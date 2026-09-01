@@ -165,6 +165,10 @@ type Result struct {
 // Run executes command under policy and waits. Sandbox setup failures are errors; command exit
 // statuses are returned in Result. The executable must call Init during startup.
 func Run(ctx context.Context, directory string, command string, policy Policy) (Result, error) {
+	if policy.Yolo {
+		return runYolo(ctx, directory, command, policy)
+	}
+
 	if err := validate(ctx, policy); err != nil {
 		return Result{}, err
 	}

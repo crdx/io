@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"crdx.org/duckopt/v2"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/model"
 )
 
@@ -25,6 +27,7 @@ Options:
     -m, --model [<model>]       Open the model picker, or set the provider, model, and effort
     -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: %s)
     -t, --tool <tool>           Set exclusive tool selection; may be repeated
+        --yolo                  Live dangerously and don't sandbox anything
     -l, --list                  List the available models, then exit
     -u, --update                Update the cached model list, then exit
     -v, --version               Show version
@@ -41,6 +44,7 @@ type inputFlags struct {
 	IsModelPicker   bool     `docopt:"-m"`
 	Caps            string   `docopt:"--caps"`
 	Tools           []string `docopt:"--tool"`
+	Yolo            bool     `docopt:"--yolo"`
 	List            bool     `docopt:"--list"`
 	Update          bool     `docopt:"--update"`
 	Version         bool     `docopt:"--version"`
@@ -61,6 +65,7 @@ type Options struct {
 	WereCapsChosen bool
 	Tools          []string
 	AddedFiles     []string
+	Yolo           bool
 }
 
 func Bind() *Input {
@@ -111,6 +116,7 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 		Session:       self.Session,
 		SourceSession: self.SourceSession,
 		Tools:         self.Tools,
+		Yolo:          self.Yolo,
 	}
 
 	if self.Model != "" {
@@ -138,4 +144,18 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 	}
 
 	return options, nil
+}
+
+// InheritedOptions are the options a session hands to the session that follows it. A resumed
+// conversation takes its confinement from what it was left in, so only a new one inherits --yolo.
+func InheritedOptions(arguments []string, kind cycle.TransitionKind) []string {
+	if kind != cycle.NewSession {
+		return nil
+	}
+
+	if slices.Contains(arguments, "--yolo") {
+		return []string{"--yolo"}
+	}
+
+	return nil
 }

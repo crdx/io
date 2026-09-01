@@ -284,13 +284,49 @@ func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, err
 	return bash.ProtectedPolicy(policy.WithRead(readOnlyPaths...)), nil
 }
 
-// ErrWithheld is a command turned away before it is confined, the shell not being granted.
 var ErrWithheld = errors.New(
 	"shell access is not granted; the user can grant it with ctrl+x x",
 )
 
-// New constructs the bash tool with a fresh policy derived from the current capabilities for every
-// call.
+func RequireSandbox(ctx context.Context) error {
+	return sandboxRefusal(sandbox.Supported(ctx))
+}
+
+func sandboxRefusal(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	return fmt.Errorf(
+		"this machine cannot sandbox a command: %w\n"+
+			"pass --yolo to run commands with no sandbox around them at all",
+		err,
+	)
+}
+
+func YoloPolicy(homeDir string, tmpDir string) sandbox.Policy {
+	return sandbox.Policy{
+		Yolo: true,
+
+		Env: []string{
+			"PATH",
+			"LANG",
+			"TERM",
+			"USER",
+		},
+
+		SetEnv: map[string]string{
+			"GIT_CONFIG_NOSYSTEM":     "1",
+			"HOME":                    homeDir,
+			"MISE_DATA_DIR":           miseDataDir(),
+			location.StateDirVariable: location.GetStateDir(),
+			"TMPDIR":                  tmpDir,
+		},
+
+		Timeout: shellTimeout,
+	}
+}
+
 func New(
 	workspaceDir string,
 	homeDir string,
@@ -298,12 +334,17 @@ func New(
 	pathAccess *PathAccess,
 	mode *caps.Mode,
 	files *file.Root,
+	isYolo bool,
 ) tool.Tool {
 	fresh := func(ctx context.Context) (sandbox.Policy, error) {
 		currentCaps := mode.Current()
 
 		if !currentCaps.Has(caps.Shell) {
 			return sandbox.Policy{}, ErrWithheld
+		}
+
+		if isYolo {
+			return YoloPolicy(homeDir, tmpDir), nil
 		}
 
 		policy, err := createPolicy(ctx, workspaceDir, homeDir, tmpDir, pathAccess.GetPaths(), currentCaps)

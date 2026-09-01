@@ -23,6 +23,7 @@ type Meta struct {
 	Provider     string `json:"provider"`
 	Effort       string `json:"effort,omitempty"`
 	SystemPrompt string `json:"system_prompt,omitempty"`
+	Yolo         bool   `json:"yolo,omitempty"`
 }
 
 type listingData struct {

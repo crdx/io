@@ -8,6 +8,7 @@
 --tool
 --update
 --version
+--yolo
 === models ===
 anthropic/claude-sonnet-5@none
 anthropic/claude-sonnet-5@high

@@ -34,6 +34,7 @@ var base = []grant{
 }
 
 type Policy struct {
+	Yolo    bool              `json:"yolo,omitempty"` // run with no sandbox at all
 	Read    []string          `json:"read"`
 	Write   []string          `json:"write"`   // paths readable and writable
 	Sockets []string          `json:"sockets"` // writable paths whose Unix sockets resolve

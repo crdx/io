@@ -172,3 +172,54 @@ func TestACommandStoppedForAReasonRepeatsIt(t *testing.T) {
 		t.Errorf("got %q, want what the command managed to write", result.Output)
 	}
 }
+
+func TestAYoloCommandRunsWithNothingAroundIt(t *testing.T) {
+	result, err := Run(
+		t.Context(),
+		t.TempDir(),
+		"printf %s \"$IO_SANDBOX_MARKER\"",
+		Policy{
+			Yolo:    true,
+			SetEnv:  map[string]string{"IO_SANDBOX_MARKER": "yolo"},
+			Timeout: time.Minute,
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Code != 0 || result.Output != "yolo" {
+		t.Errorf("got exit %d and %q, want the command's own output", result.Code, result.Output)
+	}
+}
+
+func TestAYoloCommandIsNotHeldToAPolicyItCannotKeep(t *testing.T) {
+	unkeepable := Policy{
+		Yolo:    true,
+		Read:    []string{"/there/is/no/such/path"},
+		Timeout: time.Minute,
+	}
+
+	if err := validate(t.Context(), unkeepable); err == nil {
+		t.Fatal("expected a confined run of this policy to be refused")
+	}
+
+	result, err := Run(t.Context(), t.TempDir(), "exit 3", unkeepable)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Code != 3 {
+		t.Errorf("got exit %d, want the command's own status", result.Code)
+	}
+}
+
+func TestAYoloCommandIsStoppedWhenItRunsOutOfTime(t *testing.T) {
+	result, err := Run(
+		t.Context(),
+		t.TempDir(),
+		"sleep 30",
+		Policy{Yolo: true, Env: []string{"PATH"}, Timeout: 100 * time.Millisecond},
+	)
+	if err == nil || !strings.Contains(err.Error(), "did not finish within") {
+		t.Fatalf("got %v and %v, want the command stopped at its deadline", result, err)
+	}
+}

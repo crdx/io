@@ -1,7 +1,2 @@
-relax = ["comment-inlines"]
-
-[comment-lines]
-include = ["."]
-
-[comment-inlines]
+[no-comments]
 include = ["."]
