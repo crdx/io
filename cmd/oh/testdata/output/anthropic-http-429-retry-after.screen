@@ -2,7 +2,7 @@
  receive a rate limit that asks to be left alone for a moment
 
 
-Request failed; retrying in 3s: Rate limit exceeded
+[#1] Request failed; retrying in 3s: Rate limit exceeded
 
 Ready now.
 

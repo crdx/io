@@ -2,7 +2,7 @@
  be rate limited before the answer
 
 
-Request failed; retrying in 1s: Too many requests
+[#1] Request failed; retrying in 1s: Too many requests
 
 Through once the limit lifted.
 

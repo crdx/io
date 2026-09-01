@@ -2,7 +2,7 @@
 \e[48;2;52;53;65m ask while the endpoint is overloaded                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;207;173;0mRequest failed; retrying in 1s: Overloaded\e[0m\r
+\e[38;2;207;173;0m[#1] Request failed; retrying in 1s: Overloaded\e[0m\r
 \r
 \e[?7l\r\e[KThrough on the second attempt.\e[?25h\e[?2026l\r
 \r

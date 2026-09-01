@@ -4,14 +4,14 @@
 \r
 \e[?7l\r\e[KHalf an ans\r
 \r
-\e[38;2;207;173;0mRequest failed; retrying in 1s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0m[#1] Request failed; retrying in 1s: The stream ended before the response did\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m The workspace is now read-only.                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;207;173;0mRequest failed; retrying in 1s: The stream ended before the response did\e[0m\r
-\e[38;2;207;173;0mRequest failed on attempt 2; retrying in 5s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0m[#1] Request failed; retrying in 1s: The stream ended before the response did\e[0m\r
+\e[38;2;207;173;0m[#2] Request failed; retrying in 5s: The stream ended before the response did\e[0m\r
 \r
 \r\e[KNoted, the workspace is read-only now.\e[?25h\e[?2026l\r
 \r

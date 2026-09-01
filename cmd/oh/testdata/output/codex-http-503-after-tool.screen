@@ -5,42 +5,42 @@
 Use the tool.
 work work ✓ 1L
 
-Request failed; retrying in 1s: Request failed with status 503: upstream connect error or disconnect
-/reset before headers. reset reason: connection termination
-Request failed on attempt 2; retrying in 5s: Request failed with status 503: upstream connect error
-or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 3; retrying in 10s: Request failed with status 503: upstream connect error
-or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 4; retrying in 30s: Request failed with status 503: upstream connect error
-or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 5; retrying in 1m00s: Request failed with status 503: upstream connect err
-or or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 6; retrying in 1m00s: Request failed with status 503: upstream connect err
-or or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 7; retrying in 1m00s: Request failed with status 503: upstream connect err
-or or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 8; retrying in 1m00s: Request failed with status 503: upstream connect err
-or or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 9; retrying in 1m00s: Request failed with status 503: upstream connect err
-or or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 10; retrying in 1m00s: Request failed with status 503: upstream connect er
-ror or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 11; retrying in 1m00s: Request failed with status 503: upstream connect er
-ror or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 12; retrying in 1m00s: Request failed with status 503: upstream connect er
-ror or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 13; retrying in 1m00s: Request failed with status 503: upstream connect er
-ror or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 14; retrying in 1m00s: Request failed with status 503: upstream connect er
-ror or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 15; retrying in 1m00s: Request failed with status 503: upstream connect er
-ror or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 16; retrying in 1m00s: Request failed with status 503: upstream connect er
-ror or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 17; retrying in 1m00s: Request failed with status 503: upstream connect er
-ror or disconnect/reset before headers. reset reason: connection termination
-Request failed on attempt 18; retrying in 1m00s: Request failed with status 503: upstream connect er
-ror or disconnect/reset before headers. reset reason: connection termination
+[#1] Request failed; retrying in 1s: Request failed with status 503: upstream connect error or disco
+nnect/reset before headers. reset reason: connection termination
+[#2] Request failed; retrying in 5s: Request failed with status 503: upstream connect error or disco
+nnect/reset before headers. reset reason: connection termination
+[#3] Request failed; retrying in 10s: Request failed with status 503: upstream connect error or disc
+onnect/reset before headers. reset reason: connection termination
+[#4] Request failed; retrying in 30s: Request failed with status 503: upstream connect error or disc
+onnect/reset before headers. reset reason: connection termination
+[#5] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or di
+sconnect/reset before headers. reset reason: connection termination
+[#6] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or di
+sconnect/reset before headers. reset reason: connection termination
+[#7] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or di
+sconnect/reset before headers. reset reason: connection termination
+[#8] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or di
+sconnect/reset before headers. reset reason: connection termination
+[#9] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or di
+sconnect/reset before headers. reset reason: connection termination
+[#10] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or d
+isconnect/reset before headers. reset reason: connection termination
+[#11] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or d
+isconnect/reset before headers. reset reason: connection termination
+[#12] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or d
+isconnect/reset before headers. reset reason: connection termination
+[#13] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or d
+isconnect/reset before headers. reset reason: connection termination
+[#14] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or d
+isconnect/reset before headers. reset reason: connection termination
+[#15] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or d
+isconnect/reset before headers. reset reason: connection termination
+[#16] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or d
+isconnect/reset before headers. reset reason: connection termination
+[#17] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or d
+isconnect/reset before headers. reset reason: connection termination
+[#18] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or d
+isconnect/reset before headers. reset reason: connection termination
 Request failed with status 503: upstream connect error or disconnect/reset before headers. reset rea
 son: connection termination
 

@@ -2,9 +2,9 @@
  send malformed tool input too long to show
 
 
-Request failed; retrying in 1s: The work tool call did not contain a JSON object: {"value":"aaaaaaaa
+[#1] Request failed; retrying in 1s: The work tool call did not contain a JSON object: {"value":"aaa
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-a…
+aaaaaa…
 
 I corrected the malformed call.
 

@@ -5,7 +5,7 @@
 Use the tool.
 work work ✓ 1L
 
-Request failed; retrying in 1s: Unexpected EOF
+[#1] Request failed; retrying in 1s: Unexpected EOF
 
 Through on the second attempt.
 

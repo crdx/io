@@ -5665,7 +5665,7 @@ func TestRetryRemainsDurableConversationHistory(t *testing.T) {
 	}
 	replayed.replay()
 
-	if !strings.Contains(style.Plain(replayOutput.String()), "Request failed; retrying in 0.3s: Temporary fault") {
+	if !strings.Contains(style.Plain(replayOutput.String()), "[#1] Request failed; retrying in 0.3s: Temporary fault") {
 		t.Errorf("stored replay omitted the retry:\n%s", style.Plain(replayOutput.String()))
 	}
 	requireSameVisibleScreen(t, "durable retry changed after replay", liveOutput.String(), replayOutput.String())

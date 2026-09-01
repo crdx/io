@@ -2,8 +2,8 @@
 \e[48;2;52;53;65m receive HTTP 507 from the edge proxy                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;207;173;0mRequest failed; retrying in 1s: Request failed with status 507: exceeded request buffer limit while \r
-retrying upstream\e[0m\r
+\e[38;2;207;173;0m[#1] Request failed; retrying in 1s: Request failed with status 507: exceeded request buffer limit w\r
+hile retrying upstream\e[0m\r
 \r
 \e[?7l\r\e[KAsked again, and answered.\e[?25h\e[?2026l\r
 \r

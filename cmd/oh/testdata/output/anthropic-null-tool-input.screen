@@ -2,7 +2,7 @@
  send null as tool input
 
 
-Request failed; retrying in 1s: The work tool call did not contain a JSON object: null
+[#1] Request failed; retrying in 1s: The work tool call did not contain a JSON object: null
 
 I sent an object that time.
 

@@ -4,75 +4,75 @@
 
 Partial answer.
 
-Request failed; retrying in 1s: Unexpected EOF
+[#1] Request failed; retrying in 1s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 2; retrying in 5s: Unexpected EOF
+[#2] Request failed; retrying in 5s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 3; retrying in 10s: Unexpected EOF
+[#3] Request failed; retrying in 10s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 4; retrying in 30s: Unexpected EOF
+[#4] Request failed; retrying in 30s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 5; retrying in 1m00s: Unexpected EOF
+[#5] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 6; retrying in 1m00s: Unexpected EOF
+[#6] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 7; retrying in 1m00s: Unexpected EOF
+[#7] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 8; retrying in 1m00s: Unexpected EOF
+[#8] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 9; retrying in 1m00s: Unexpected EOF
+[#9] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 10; retrying in 1m00s: Unexpected EOF
+[#10] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 11; retrying in 1m00s: Unexpected EOF
+[#11] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 12; retrying in 1m00s: Unexpected EOF
+[#12] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 13; retrying in 1m00s: Unexpected EOF
+[#13] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 14; retrying in 1m00s: Unexpected EOF
+[#14] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 15; retrying in 1m00s: Unexpected EOF
+[#15] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 16; retrying in 1m00s: Unexpected EOF
+[#16] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 17; retrying in 1m00s: Unexpected EOF
+[#17] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 
-Request failed on attempt 18; retrying in 1m00s: Unexpected EOF
+[#18] Request failed; retrying in 1m00s: Unexpected EOF
 
 Partial answer.
 

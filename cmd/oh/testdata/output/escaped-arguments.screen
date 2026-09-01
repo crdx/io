@@ -7,8 +7,8 @@ $ echo  [31mred [0m ✓ 1L 2M red
 screenshot notes [2J [H.md lines… ✓ 1L
 grep one two ✓ 1L
 
-Request failed; retrying in 2s: Upstream
-said no
+[#1] Request failed; retrying in 2s: Ups
+tream said no
 
 Nothing moved.
 === one column ===
@@ -55,6 +55,10 @@ e
 ✓
 ✓
 
+[
+#
+1
+]
 R
 e
 q
@@ -121,10 +125,11 @@ $ ✓ 1L 2M
 scre… ✓ 1L
 grep ✓ 1L
 
-Request fail
-ed; retrying
-in 2s: Upstr
-eam said no
+[#1] Request
+failed; retr
+ying in 2s:
+Upstream sai
+d no
 
 Nothing
 moved.
@@ -137,6 +142,6 @@ $ echo  [31mred [0m ✓ 1L 2M red
 screenshot notes [2J [H.md lines 1 to 40  ✓ 1L
 grep one two ✓ 1L
 
-Request failed; retrying in 2s: Upstream said no
+[#1] Request failed; retrying in 2s: Upstream said no
 
 Nothing moved.

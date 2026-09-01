@@ -7,8 +7,8 @@
 \r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
-\e[38;2;207;173;0mRequest failed; retrying in 2s: Upstream\r
-said no\e[0m\r
+\e[38;2;207;173;0m[#1] Request failed; retrying in 2s: Ups\r
+tream said no\e[0m\r
 \r
 \r\e[KNothing moved.\r
 \e[?25h\e[?2026l
@@ -56,7 +56,11 @@ e\e[0m\r
 \r\e[K\e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;76;154;44m✓\e[0m\r
 \r
-\e[38;2;207;173;0mR\r
+\e[38;2;207;173;0m[\r
+#\r
+1\r
+]\r
+R\r
 e\r
 q\r
 u\r
@@ -120,7 +124,7 @@ o\e[0m\r
 screenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 grep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
-\e[38;2;207;173;0mRequest failed; retrying in 2s: Upstream said no\e[0m
+\e[38;2;207;173;0m[#1] Request failed; retrying in 2s: Upstream said no\e[0m
 
 Nothing moved.
 
@@ -133,7 +137,7 @@ Nothing moved.
 \e[?2026h\e[?25l\r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone two\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mRequest failed; retrying in 2s: Upstream said no\e[0m\r
+\e[38;2;207;173;0m[#1] Request failed; retrying in 2s: Upstream said no\e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KNoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing move\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing moved.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -146,7 +150,7 @@ Nothing moved.
 \e[?2026h\e[?25l\r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone two\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mRequest failed; retrying in 2s: Upstream said no\e[0m\r
+\e[38;2;207;173;0m[#1] Request failed; retrying in 2s: Upstream said no\e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KNothing moved.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -159,7 +163,7 @@ Nothing moved.
 \e[?2026h\e[?25l\r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone two\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mRequest failed; retrying in 2s: Upstream said no\e[0m\r
+\e[38;2;207;173;0m[#1] Request failed; retrying in 2s: Upstream said no\e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[KNoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing move\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing moved.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -174,10 +178,11 @@ Nothing moved.
 \r\e[Kscre… \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
-\e[38;2;207;173;0mRequest fail\r
-ed; retrying\r
-in 2s: Upstr\r
-eam said no\e[0m\r
+\e[38;2;207;173;0m[#1] Request\r
+failed; retr\r
+ying in 2s: \r
+Upstream sai\r
+d no\e[0m\r
 \r
 \r\e[KNothing\r
 \r\e[Kmoved.\r
@@ -190,7 +195,7 @@ eam said no\e[0m\r
 \r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 \r\e[Kgrep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
-\e[38;2;207;173;0mRequest failed; retrying in 2s: Upstream said no\e[0m
+\e[38;2;207;173;0m[#1] Request failed; retrying in 2s: Upstream said no\e[0m
 
 \r\e[KNothing moved.
 \e[?25h\e[?2026l
@@ -203,7 +208,7 @@ eam said no\e[0m\r
 \r\e[Kscreenshot \e[38;2;192;128;80mnotes [2J [H.md\e[0m \e[38;2;150;152;150mlines 1 to 40 \e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kgrep \e[38;2;150;152;150mone two\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
-\e[38;2;207;173;0mRequest failed; retrying in 2s: Upstream said no\e[0m\r
+\e[38;2;207;173;0m[#1] Request failed; retrying in 2s: Upstream said no\e[0m\r
 \r
 \r\e[KNothing moved.\r
 \e[?25h\e[?2026l
