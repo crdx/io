@@ -38,3 +38,42 @@ func TestAnUntitledSessionDoesNotPutAnEscapeSequenceThroughTheClipper(t *testing
 		t.Errorf("expected the placeholder title, got %q", got)
 	}
 }
+
+func TestOnlyASessionThatIsNotRunningCanBeArchived(t *testing.T) {
+	var archived []string
+	self := &sessionList{
+		sessions: []*Session{{Name: "chewy-sardine", IsRunning: true}, {Name: "thick-poodle"}},
+		archive: func(storedSession *Session) error {
+			archived = append(archived, storedSession.Name)
+			return nil
+		},
+	}
+
+	if self.IsRemovable(0) {
+		t.Error("expected a running session to be left alone")
+	}
+	if !self.IsRemovable(1) {
+		t.Error("expected an ended session to be archivable")
+	}
+	if got := self.RemovalPrompt(1); got != "Archive 🐩 thick-poodle?" {
+		t.Errorf("unexpected prompt: %q", got)
+	}
+
+	if err := self.Remove(1); err != nil {
+		t.Fatal(err)
+	}
+	if len(archived) != 1 || archived[0] != "thick-poodle" {
+		t.Errorf("got the sessions archived as %v", archived)
+	}
+	if self.Len() != 1 {
+		t.Errorf("expected the archived session to leave the list, got %d rows", self.Len())
+	}
+}
+
+func TestASessionPickerWithNowhereToArchiveToRemovesNothing(t *testing.T) {
+	self := &sessionList{sessions: []*Session{{Name: "thick-poodle"}}}
+
+	if self.IsRemovable(0) {
+		t.Error("expected no session to be archivable without an archiver")
+	}
+}

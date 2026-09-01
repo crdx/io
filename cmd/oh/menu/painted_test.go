@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -103,4 +104,51 @@ func TestTheCompleteMenuLifecycleMatchesTheGolden(t *testing.T) {
 	}
 
 	compareWithGolden(t, "lifecycle.ansi", strutil.VisibleEscapes(output.String()))
+}
+
+func TestTheCompleteRemovalLifecycleMatchesTheGolden(t *testing.T) {
+	rows := &removableList{
+		fakeList: fakeList{
+			rows: []string{
+				"chewy-sardine   why does the spinner stutter when a tool runs",
+				"thick-poodle    add support for reasoning traces",
+				"funny-badger    the cancelled turn leaves a tool call unanswered",
+				"able-dolphin    (untitled)",
+			},
+			unrunnable: []bool{true, false, false, false},
+		},
+		refused: []string{"able-dolphin    (untitled)"},
+	}
+
+	keypresses := []key.Key{
+		{Code: key.Delete},
+		{Code: key.Rune, Value: 'n'},
+		{Code: key.Delete},
+		{Code: key.Rune, Value: 'y'},
+		{Code: key.End},
+		{Code: key.Delete},
+		{Code: key.Rune, Value: 'y'},
+		{Code: key.Up},
+		{Code: key.Enter},
+	}
+
+	keys := make(chan key.Key, len(keypresses))
+	for _, keypress := range keypresses {
+		keys <- keypress
+	}
+	close(keys)
+
+	var output strings.Builder
+	chosen, err := choose(rows, keys, func() (int, int) { return 46, 6 }, &output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if chosen != 1 {
+		t.Errorf("chose row %d, want 1", chosen)
+	}
+	if !slices.Equal(rows.removed, []string{"thick-poodle    add support for reasoning traces"}) {
+		t.Errorf("got the rows removed as %v", rows.removed)
+	}
+
+	compareWithGolden(t, "removal.ansi", strutil.VisibleEscapes(output.String()))
 }

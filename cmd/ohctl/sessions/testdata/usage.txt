@@ -1,10 +1,14 @@
 ohctl sessions — list the stored sessions
 
 Usage:
-    ohctl sessions [options]
+    ohctl sessions [options] [<filter>]
 
 Options:
     -j, --json               Write the listing as JSON
     -w, --workspace <dir>    List only the sessions of one workspace
     -r, --running            List only the sessions that are running
+    -a, --archived           List the archived sessions rather than the stored ones
     -h, --help               Show this help
+
+The newest 50 sessions are listed, unless a filter of more than three characters is given, which
+lists every session it matches.

@@ -116,11 +116,12 @@ func TestTheRowsOfTheSessionPickerMatchTheGolden(t *testing.T) {
 
 func TestWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
 	frames := []struct {
-		name   string
-		room   int
-		height int
-		cursor int
-		query  string
+		name           string
+		room           int
+		height         int
+		cursor         int
+		query          string
+		isRemovalAsked bool
 	}{
 		{name: "a wide terminal, where the title has the room", room: 150, height: 24, cursor: 1},
 		{name: "a terminal wide enough for the model that answered", room: 120, height: 24, cursor: 1},
@@ -129,14 +130,23 @@ func TestWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
 		{name: "a filter narrowing the list to the model that answered", room: 120, height: 24, cursor: 0, query: "codex"},
 		{name: "a filter matching the mode a session ran in", room: 120, height: 24, cursor: 0, query: "fast"},
 		{name: "a filter no session answers to", room: 120, height: 24, cursor: 0, query: "kimi"},
+		{name: "the confirmation asked before a session is archived", room: 120, height: 24, cursor: 1, isRemovalAsked: true},
+		{name: "the confirmation in a narrow terminal", room: 46, height: 24, cursor: 1, isRemovalAsked: true},
+		{name: "the confirmation taking the place of a filter being typed", room: 120, height: 24, cursor: 1, query: "codex", isRemovalAsked: true},
+		{name: "a running session under the cursor, which is never offered for archiving", room: 120, height: 24, cursor: 0, query: "codex", isRemovalAsked: true},
 	}
 
 	var output strings.Builder
 
 	for _, frame := range frames {
+		paint := menu.Paint
+		if frame.isRemovalAsked {
+			paint = menu.PaintRemoval
+		}
+
 		fmt.Fprintf(&output, "=== %s ===\n%s\n", frame.name, strutil.VisibleEscapes(
-			menu.Paint(
-				&sessionList{sessions: storedSessions()},
+			paint(
+				&sessionList{sessions: storedSessions(), archive: archiving()},
 				frame.room,
 				frame.height,
 				frame.cursor,
@@ -146,4 +156,8 @@ func TestWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
 	}
 
 	compareWithGolden(t, "painted.ansi", output.String())
+}
+
+func archiving() func(*Session) error {
+	return func(*Session) error { return nil }
 }

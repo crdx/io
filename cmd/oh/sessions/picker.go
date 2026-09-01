@@ -35,7 +35,11 @@ func Choose(directory string, workspace *work.Space, terminal *os.File, screen i
 		return "", errors.New("there are no stored conversations for this workspace")
 	}
 
-	chosenSession, err := picker.Choose(sessions, terminal, screen)
+	archive := func(storedSession *picker.Session) error {
+		return session.Archive(directory, storedSession.Name)
+	}
+
+	chosenSession, err := picker.Choose(sessions, archive, terminal, screen)
 	if errors.Is(err, menu.ErrCancelled) {
 		return "", nil
 	}
@@ -118,6 +122,32 @@ func Load(directory string) ([]*picker.Session, error) {
 				return nil, err
 			}
 		}
+
+		sessions = append(sessions, listing)
+	}
+
+	newestFirst(sessions)
+	return sessions, nil
+}
+
+func LoadArchived(directory string) ([]*picker.Session, error) {
+	names, err := session.ArchivedNames(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	sessions := make([]*picker.Session, 0, len(names))
+	for _, name := range names {
+		storedMeta, err := session.ArchivedMeta(directory, name)
+		if err != nil {
+			return nil, fmt.Errorf("could not read archived session %s metadata: %w", name, err)
+		}
+
+		listing, _, isDescribed := describe(storedMeta)
+		if !isDescribed {
+			continue
+		}
+		listing.IsArchived = true
 
 		sessions = append(sessions, listing)
 	}

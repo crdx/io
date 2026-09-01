@@ -4150,7 +4150,7 @@ func TestPick(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	chosenSession, err := picker.Choose(sessions, os.Stdin, os.Stdout)
+	chosenSession, err := picker.Choose(sessions, nil, os.Stdin, os.Stdout)
 	screen := output.New(os.Stdout)
 
 	switch {

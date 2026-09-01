@@ -1,0 +1,16 @@
+=== commands ===
+analyse
+migrate
+regen
+restore
+sessions
+=== commands beginning with a word ===
+regen
+restore
+=== sessions ===
+able-dolphin
+chewy-sardine
+=== sessions beginning with a word ===
+able-dolphin
+=== archived sessions ===
+brave-otter

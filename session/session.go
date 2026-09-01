@@ -93,19 +93,22 @@ type Lock struct {
 func openSessionDir(directory string, name string) (*os.File, error) {
 	sessionDir, err := os.Open(Dir(directory, name))
 	if errors.Is(err, fs.ErrNotExist) {
-		return nil, missing(name)
+		return nil, missing(directory, name)
 	}
 	return sessionDir, err
 }
 
-func missing(name string) error {
+func missing(directory string, name string) error {
+	if IsArchived(directory, name) {
+		return fmt.Errorf("%w %q, so restore it with: ohctl restore %s", ErrArchived, name, name)
+	}
 	return fmt.Errorf("%w %q", ErrNotFound, name)
 }
 
 func openJournal(directory string, name string, flag int) (*os.File, error) {
 	file, err := os.OpenFile(journalPath(directory, name), flag, 0o600)
 	if errors.Is(err, fs.ErrNotExist) {
-		return nil, missing(name)
+		return nil, missing(directory, name)
 	}
 	return file, err
 }

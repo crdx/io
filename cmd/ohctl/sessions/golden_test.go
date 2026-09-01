@@ -49,10 +49,28 @@ func TestAnEmptyListingMatchesTheGolden(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if err := run(&inputOpts{Archived: true}, output); err != nil {
+		t.Fatal(err)
+	}
+	if err := run(&inputOpts{Filter: "kimi"}, output); err != nil {
+		t.Fatal(err)
+	}
+
 	assertGolden(t, "empty.txt", strings.Join([]string{
 		"=== screen ===\n", screen.String(),
 		"=== failure ===\n", failure.String(),
 	}, ""))
+}
+
+func TestTheNoticeThatCapsTheListingMatchesTheGolden(t *testing.T) {
+	var failure strings.Builder
+
+	withinLimit(manyListings(listLimit+7), "", &failure)
+	withinLimit(manyListings(listLimit+7), "ses", &failure)
+	withinLimit(manyListings(listLimit+7), "sessions", &failure)
+	withinLimit(manyListings(listLimit), "", &failure)
+
+	assertGolden(t, "capped.txt", failure.String())
 }
 
 func goldenListings(now time.Time) []Listing {
@@ -83,6 +101,20 @@ func goldenListings(now time.Time) []Listing {
 			Messages:     8,
 			StartedAt:    now.Add(-90 * time.Minute),
 			TouchedAt:    now.Add(-30 * time.Minute),
+		},
+		{
+			Name:         "brave-otter",
+			Status:       archivedStatus,
+			IsArchived:   true,
+			Title:        "rename the harness to oh",
+			WorkspaceDir: "/home/agent/proj/io",
+			ScratchDir:   "/state/farm/brave-otter",
+			SessionDir:   "/state/sessions/brave-otter.tgz",
+			Model:        "gpt-5.3-codex",
+			Effort:       "medium",
+			Messages:     26,
+			StartedAt:    now.Add(-300 * time.Hour),
+			TouchedAt:    now.Add(-290 * time.Hour),
 		},
 		{
 			Name:         "chewy-raven",

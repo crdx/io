@@ -27,20 +27,27 @@ import (
 const usage = `ohctl sessions — list the stored sessions
 
 Usage:
-    $0 sessions [options]
+    $0 sessions [options] [<filter>]
 
 Options:
     -j, --json               Write the listing as JSON
     -w, --workspace <dir>    List only the sessions of one workspace
     -r, --running            List only the sessions that are running
+    -a, --archived           List the archived sessions rather than the stored ones
     -h, --help               Show this help
+
+The newest 50 sessions are listed, unless a filter of more than three characters is given, which
+lists every session it matches.
 `
 
 const (
-	runningStatus = "running"
-	endedStatus   = "ended"
-	columnGap     = 2
-	titleColumn   = 40
+	runningStatus  = "running"
+	endedStatus    = "ended"
+	archivedStatus = "archived"
+	columnGap      = 2
+	titleColumn    = 40
+	listLimit      = 50
+	shortFilter    = 3
 )
 
 type inputOpts struct {
@@ -48,12 +55,15 @@ type inputOpts struct {
 	JSON      bool   `docopt:"--json"`
 	Workspace string `docopt:"--workspace"`
 	Running   bool   `docopt:"--running"`
+	Archived  bool   `docopt:"--archived"`
+	Filter    string `docopt:"<filter>"`
 }
 
 type Listing struct {
 	Name         string    `json:"name"`
 	Status       string    `json:"status"`
 	IsRunning    bool      `json:"isRunning"`
+	IsArchived   bool      `json:"isArchived"`
 	Title        string    `json:"title"`
 	WorkspaceDir string    `json:"workspaceDir"`
 	ScratchDir   string    `json:"scratchDir"`
@@ -75,7 +85,7 @@ func run(options *inputOpts, output console.Output) error {
 		return err
 	}
 
-	storedSessions, err := ohSessions.Load(directory)
+	storedSessions, err := loadSessions(directory, options.Archived)
 	if err != nil {
 		if migrationError := ohSessions.ValidateFormats(directory); migrationError != nil {
 			return migrationError
@@ -91,16 +101,68 @@ func run(options *inputOpts, output console.Output) error {
 		storedSessions = ohSessions.InWorkspace(storedSessions, work.At(workspaceDir))
 	}
 
+	storedSessions = matching(storedSessions, options.Filter)
+
 	listings := describe(directory, storedSessions, options.Running)
 	if len(listings) == 0 {
-		_, _ = fmt.Fprintln(output.Failure, style.Subtle("there are no stored sessions to list"))
+		_, _ = fmt.Fprintln(output.Failure, style.Subtle(nothingToList(options)))
 	}
+
+	listings = withinLimit(listings, options.Filter, output.Failure)
 
 	if options.JSON {
 		return writeJSON(listings, output.Screen)
 	}
 
 	return writeTable(listings, output.Screen)
+}
+
+func nothingToList(options *inputOpts) string {
+	kind := "stored"
+	if options.Archived {
+		kind = "archived"
+	}
+	if options.Filter != "" {
+		return fmt.Sprintf("no %s session matches %q", kind, options.Filter)
+	}
+
+	return "there are no " + kind + " sessions to list"
+}
+
+func loadSessions(directory string, isArchivedWanted bool) ([]*picker.Session, error) {
+	if isArchivedWanted {
+		return ohSessions.LoadArchived(directory)
+	}
+
+	return ohSessions.Load(directory)
+}
+
+func matching(storedSessions []*picker.Session, filter string) []*picker.Session {
+	if filter == "" {
+		return storedSessions
+	}
+
+	matches := make([]*picker.Session, 0, len(storedSessions))
+	for _, storedSession := range storedSessions {
+		if strutil.MatchesQuery(storedSession.Text(), filter) {
+			matches = append(matches, storedSession)
+		}
+	}
+
+	return matches
+}
+
+func withinLimit(listings []Listing, filter string, failure io.Writer) []Listing {
+	if len(filter) > shortFilter || len(listings) <= listLimit {
+		return listings
+	}
+
+	_, _ = fmt.Fprintln(failure, style.Subtle(fmt.Sprintf(
+		"listing the newest %d of %d sessions, which a filter of more than %d characters lists in full",
+		listLimit, len(listings), shortFilter,
+	)))
+
+	return listings[:listLimit]
 }
 
 func describe(directory string, storedSessions []*picker.Session, isRunningOnly bool) []Listing {
@@ -112,12 +174,13 @@ func describe(directory string, storedSessions []*picker.Session, isRunningOnly 
 
 		listings = append(listings, Listing{
 			Name:         storedSession.Name,
-			Status:       status(storedSession.IsRunning),
+			Status:       status(storedSession),
 			IsRunning:    storedSession.IsRunning,
+			IsArchived:   storedSession.IsArchived,
 			Title:        oneLine(storedSession.Title),
 			WorkspaceDir: storedSession.WorkspaceDir,
 			ScratchDir:   location.GetTmpDir(storedSession.Name),
-			SessionDir:   session.Dir(directory, storedSession.Name),
+			SessionDir:   sessionPath(directory, storedSession),
 			Model:        storedSession.ModelID,
 			Effort:       storedSession.Effort,
 			Messages:     storedSession.MessageCount,
@@ -129,12 +192,23 @@ func describe(directory string, storedSessions []*picker.Session, isRunningOnly 
 	return listings
 }
 
-func status(isRunning bool) string {
-	if isRunning {
+func status(storedSession *picker.Session) string {
+	switch {
+	case storedSession.IsArchived:
+		return archivedStatus
+	case storedSession.IsRunning:
 		return runningStatus
+	default:
+		return endedStatus
+	}
+}
+
+func sessionPath(directory string, storedSession *picker.Session) string {
+	if storedSession.IsArchived {
+		return session.ArchivePath(directory, storedSession.Name)
 	}
 
-	return endedStatus
+	return session.Dir(directory, storedSession.Name)
 }
 
 func writeJSON(listings []Listing, writer io.Writer) error {

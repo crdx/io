@@ -3,6 +3,7 @@ package sessions
 import (
 	"encoding/json"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -250,5 +251,99 @@ func sample() []Listing {
 			StartedAt:    started,
 			TouchedAt:    started.Add(time.Hour),
 		},
+	}
+}
+
+func manyListings(count int) []Listing {
+	listings := make([]Listing, 0, count)
+	for i := range count {
+		listings = append(listings, Listing{Name: "chewy-raven", Title: "session " + strconv.Itoa(i)})
+	}
+
+	return listings
+}
+
+func TestTheListingIsCappedUntilAFilterIsLongEnoughToLiftTheCap(t *testing.T) {
+	tests := map[string]struct {
+		filter string
+		wanted int
+	}{
+		"no filter at all":              {filter: "", wanted: listLimit},
+		"a filter of three characters":  {filter: "ses", wanted: listLimit},
+		"a filter of four characters":   {filter: "sess", wanted: listLimit + 1},
+		"a filter longer than the name": {filter: "chewy-raven", wanted: listLimit + 1},
+	}
+
+	for name, test := range tests {
+		var failure strings.Builder
+		got := withinLimit(manyListings(listLimit+1), test.filter, &failure)
+
+		if len(got) != test.wanted {
+			t.Errorf("%s: listed %d, want %d", name, len(got), test.wanted)
+		}
+		if isCapped := len(got) == listLimit; isCapped != strings.Contains(failure.String(), "newest 50 of 51") {
+			t.Errorf("%s: the cap and what was said about it disagree: %q", name, failure.String())
+		}
+	}
+}
+
+func TestAFilterKeepsOnlyTheSessionsItMatches(t *testing.T) {
+	storedSessions := []*picker.Session{
+		{Name: "chewy-raven", Title: "audit the goldens"},
+		{Name: "wild-scorpion", Title: "add the archive feature", ModelID: "gpt-5.3-codex", IsFast: true},
+	}
+
+	if got := matching(storedSessions, ""); len(got) != 2 {
+		t.Errorf("expected no filter to keep everything, got %d", len(got))
+	}
+	if got := matching(storedSessions, "archive"); len(got) != 1 || got[0].Name != "wild-scorpion" {
+		t.Errorf("expected the title to be matched, got %+v", got)
+	}
+	if got := matching(storedSessions, "codex scorpion"); len(got) != 1 {
+		t.Errorf("expected every word of the filter to have to match, got %+v", got)
+	}
+	if got := matching(storedSessions, "fast"); len(got) != 1 || got[0].Name != "wild-scorpion" {
+		t.Errorf("expected the mode a session ran in to be matched, got %+v", got)
+	}
+	if got := matching(storedSessions, "kimi"); len(got) != 0 {
+		t.Errorf("expected nothing to match, got %+v", got)
+	}
+}
+
+func TestAnArchivedSessionIsListedOnlyWhenTheArchiveIsAskedFor(t *testing.T) {
+	directory := t.TempDir()
+
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	name := writer.Name()
+	if err := session.Archive(directory, name); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := loadSessions(directory, false)
+	if err != nil || len(stored) != 0 {
+		t.Fatalf("expected the archived session to be out of the listing, got %+v and %v", stored, err)
+	}
+
+	archived, err := loadSessions(directory, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	listings := describe(directory, archived, false)
+	if len(listings) != 1 || listings[0].Status != archivedStatus || !listings[0].IsArchived {
+		t.Fatalf("expected one archived session, got %+v", listings)
+	}
+	if listings[0].SessionDir != session.ArchivePath(directory, name) {
+		t.Errorf("expected the archive path, got %q", listings[0].SessionDir)
 	}
 }

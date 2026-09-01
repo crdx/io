@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -38,23 +39,30 @@ type Session struct {
 	MessageCount int
 	IsRunning    bool
 	IsFast       bool
+	IsArchived   bool
 }
 
 func (self *Session) Messages() int { return self.MessageCount }
 
-func Choose(sessions []*Session, terminal *os.File, screen io.Writer) (*Session, error) {
-	rows := &sessionList{sessions: sessions}
+func Choose(
+	sessions []*Session,
+	archive func(*Session) error,
+	terminal *os.File,
+	screen io.Writer,
+) (*Session, error) {
+	rows := &sessionList{sessions: sessions, archive: archive}
 
 	chosenIndex, err := menu.Choose(rows, terminal, screen)
 	if err != nil {
 		return nil, err
 	}
 
-	return sessions[chosenIndex], nil
+	return rows.sessions[chosenIndex], nil
 }
 
 type sessionList struct {
 	sessions []*Session
+	archive  func(*Session) error
 }
 
 func (self *sessionList) Len() int { return len(self.sessions) }
@@ -62,6 +70,24 @@ func (self *sessionList) Len() int { return len(self.sessions) }
 func (self *sessionList) IsChoosable(index int) bool { return !self.sessions[index].IsRunning }
 
 func (self *sessionList) Adjust(int, int) {}
+
+func (self *sessionList) IsRemovable(index int) bool {
+	return self.archive != nil && !self.sessions[index].IsRunning
+}
+
+func (self *sessionList) RemovalPrompt(index int) string {
+	return "Archive " + sessionAnimal(self.sessions[index]) + "?"
+}
+
+func (self *sessionList) Remove(index int) error {
+	if err := self.archive(self.sessions[index]); err != nil {
+		return err
+	}
+
+	self.sessions = slices.Delete(self.sessions, index, index+1)
+
+	return nil
+}
 
 func (self *sessionList) Text(index int) string {
 	return self.sessions[index].Text()

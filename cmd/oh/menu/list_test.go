@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"slices"
+	"strings"
 	"syscall"
 	"testing"
 
@@ -39,7 +40,7 @@ func (self *fakeList) Adjust(index int, direction int) {
 	self.adjusted[index] += direction
 }
 
-func listState(rows *fakeList, cursor int) *state {
+func listState(rows List, cursor int) *state {
 	self := newState(rows)
 	self.cursor = cursor
 
@@ -313,5 +314,122 @@ func TestAPageIsAtLeastOneRowWhenNothingHasBeenDrawn(t *testing.T) {
 	self.apply(key.Key{Code: key.PageDown})
 	if self.cursor != 1 {
 		t.Errorf("expected a single row of movement, got %d", self.cursor)
+	}
+}
+
+type removableList struct {
+	fakeList
+
+	removed []string
+	refused []string
+	failure error
+}
+
+func (self *removableList) IsRemovable(index int) bool { return self.IsChoosable(index) }
+
+func (self *removableList) RemovalPrompt(index int) string {
+	return "Archive " + self.rows[index] + "?"
+}
+
+func (self *removableList) Remove(index int) error {
+	if self.failure != nil {
+		return self.failure
+	}
+	if slices.Contains(self.refused, self.rows[index]) {
+		return errors.New("the session is already open elsewhere")
+	}
+
+	self.removed = append(self.removed, self.rows[index])
+	self.rows = slices.Delete(self.rows, index, index+1)
+
+	return nil
+}
+
+func removableRows(names ...string) *removableList {
+	return &removableList{fakeList: fakeList{rows: names}}
+}
+
+func TestARowIsRemovedOnlyOnceTheAnswerIsYes(t *testing.T) {
+	rows := removableRows("first", "second", "third")
+	self := listState(rows, 1)
+
+	self.apply(key.Key{Code: key.Delete})
+	if self.removal.index != 1 {
+		t.Fatalf("expected the second row to be awaiting an answer, got %d", self.removal.index)
+	}
+
+	self.apply(key.Key{Code: key.Rune, Value: 'n'})
+	if self.removal.index != -1 || len(rows.removed) != 0 {
+		t.Fatalf("expected the refusal to leave the row alone, got %v", rows.removed)
+	}
+
+	self.apply(key.Key{Code: key.Delete})
+	self.apply(key.Key{Code: key.Rune, Value: 'y'})
+
+	if !slices.Equal(rows.removed, []string{"second"}) {
+		t.Fatalf("got the rows removed as %v", rows.removed)
+	}
+	if !slices.Equal(rows.rows, []string{"first", "third"}) {
+		t.Fatalf("got the rows left as %v", rows.rows)
+	}
+	if self.cursor != 1 || self.chosen() != 1 {
+		t.Errorf("expected the cursor to hold its place, got %d", self.cursor)
+	}
+}
+
+func TestRemovingTheLastRowLeavesTheCursorOnTheOneBefore(t *testing.T) {
+	rows := removableRows("first", "second")
+	self := listState(rows, 1)
+
+	self.apply(key.Key{Code: key.Delete})
+	self.apply(key.Key{Code: key.Rune, Value: 'y'})
+
+	if self.cursor != 0 {
+		t.Errorf("expected the cursor to fall back a row, got %d", self.cursor)
+	}
+
+	self.apply(key.Key{Code: key.Delete})
+	self.apply(key.Key{Code: key.Rune, Value: 'y'})
+
+	if self.cursor != -1 {
+		t.Errorf("expected an empty list to have no cursor, got %d", self.cursor)
+	}
+}
+
+func TestARowThatCannotBeRemovedIsNotAskedAbout(t *testing.T) {
+	rows := removableRows("first", "second")
+	rows.unrunnable = []bool{false, true}
+	self := listState(rows, 1)
+
+	self.apply(key.Key{Code: key.Delete})
+	if self.removal.index != -1 {
+		t.Errorf("expected the running row to be left alone, got %d", self.removal.index)
+	}
+}
+
+func TestALisWithoutRemovalIgnoresTheDeleteKey(t *testing.T) {
+	self := defaultState()
+
+	self.apply(key.Key{Code: key.Delete})
+	if self.removal.index != -1 {
+		t.Errorf("expected nothing to be asked, got %d", self.removal.index)
+	}
+}
+
+func TestAFailedRemovalIsReportedInPlaceOfTheFilter(t *testing.T) {
+	rows := removableRows("first", "second")
+	rows.failure = errors.New("the session is already open elsewhere")
+	self := listState(rows, 0)
+
+	self.apply(key.Key{Code: key.Delete})
+	self.apply(key.Key{Code: key.Rune, Value: 'y'})
+
+	if !strings.Contains(self.promptLine(80), rows.failure.Error()) {
+		t.Errorf("expected the failure on the prompt line, got %q", self.promptLine(80))
+	}
+
+	self.apply(key.Key{Code: key.Down})
+	if !strings.Contains(self.promptLine(80), filterPrompt) {
+		t.Errorf("expected the filter back on the prompt line, got %q", self.promptLine(80))
 	}
 }
