@@ -201,17 +201,7 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 
 	err = stub.Run()
 
-	result := Result{Output: output.String()}
-	if stub.ProcessState != nil {
-		result.Code = stub.ProcessState.ExitCode()
-		result.CPUTime = stub.ProcessState.UserTime() + stub.ProcessState.SystemTime()
-		if status, ok := stub.ProcessState.Sys().(syscall.WaitStatus); ok && status.Signaled() {
-			result.Signal = status.Signal()
-		}
-		if usage, ok := stub.ProcessState.SysUsage().(*syscall.Rusage); ok && usage.Maxrss > 0 {
-			result.PeakMemory = uint64(usage.Maxrss) * 1024
-		}
-	}
+	result := collect(stub, &output)
 
 	if ctx.Err() != nil {
 		return stoppedResult(ctx, policy, result, startedAt)
@@ -230,6 +220,24 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 	}
 
 	return result, nil
+}
+
+func collect(child *exec.Cmd, output *boundedBuffer) Result {
+	result := Result{Output: output.String()}
+	if child.ProcessState == nil {
+		return result
+	}
+
+	result.Code = child.ProcessState.ExitCode()
+	result.CPUTime = child.ProcessState.UserTime() + child.ProcessState.SystemTime()
+	if status, ok := child.ProcessState.Sys().(syscall.WaitStatus); ok && status.Signaled() {
+		result.Signal = status.Signal()
+	}
+	if usage, ok := child.ProcessState.SysUsage().(*syscall.Rusage); ok && usage.Maxrss > 0 {
+		result.PeakMemory = uint64(usage.Maxrss) * 1024
+	}
+
+	return result
 }
 
 func validate(ctx context.Context, policy Policy) error {
