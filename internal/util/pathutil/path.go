@@ -31,6 +31,23 @@ func Shorten(path string) string {
 	return path
 }
 
+func Expand(path string) (string, error) {
+	if path != "~" && !strings.HasPrefix(path, "~"+separator) {
+		return path, nil
+	}
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	if path == "~" {
+		return home, nil
+	}
+
+	return filepath.Join(home, strings.TrimPrefix(path, "~"+separator)), nil
+}
+
 // Exists reports whether path can be statted.
 func Exists(path string) bool {
 	_, err := os.Stat(path)

@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"crdx.org/io/internal/util/pathutil"
 )
 
 const (
@@ -130,16 +132,12 @@ func submatch(text string, begin int, end int) string {
 }
 
 func resolve(path string, workspace string) (string, bool) {
-	resolvedPath := path
+	resolvedPath, err := pathutil.Expand(path)
+	if err != nil {
+		return "", false
+	}
 
-	if strings.HasPrefix(resolvedPath, "~/") {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return "", false
-		}
-
-		resolvedPath = filepath.Join(home, strings.TrimPrefix(resolvedPath, "~/"))
-	} else if !filepath.IsAbs(resolvedPath) {
+	if !filepath.IsAbs(resolvedPath) {
 		if workspace == "" {
 			return "", false
 		}
@@ -147,7 +145,7 @@ func resolve(path string, workspace string) (string, bool) {
 		resolvedPath = filepath.Join(workspace, resolvedPath)
 	}
 
-	resolvedPath, err := filepath.Abs(resolvedPath)
+	resolvedPath, err = filepath.Abs(resolvedPath)
 	if err != nil {
 		return "", false
 	}

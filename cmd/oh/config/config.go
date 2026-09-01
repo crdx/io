@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -359,16 +358,9 @@ func resolveConfigPath(configPath string, written string) (string, error) {
 		return "", errors.New("path is empty")
 	}
 
-	path := written
-	if path == "~" || strings.HasPrefix(path, "~/") {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return "", fmt.Errorf("could not expand %q: %w", written, err)
-		}
-		path = home
-		if written != "~" {
-			path = filepath.Join(home, strings.TrimPrefix(written, "~/"))
-		}
+	path, err := pathutil.Expand(written)
+	if err != nil {
+		return "", fmt.Errorf("could not expand %q: %w", written, err)
 	}
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(filepath.Dir(configPath), path)

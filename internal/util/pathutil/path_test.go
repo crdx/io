@@ -34,6 +34,37 @@ func TestShortenLeavesAPathAloneWithoutAHome(t *testing.T) {
 	}
 }
 
+func TestExpandReadsAPathTheWayTheUserWroteIt(t *testing.T) {
+	t.Setenv("HOME", "/home/alice")
+
+	tests := map[string]string{
+		"~/proj/io":  "/home/alice/proj/io",
+		"~":          "/home/alice",
+		"~other/dir": "~other/dir",
+		"/etc/hosts": "/etc/hosts",
+		"proj/io":    "proj/io",
+		"":           "",
+	}
+
+	for path, want := range tests {
+		got, err := pathutil.Expand(path)
+		if err != nil || got != want {
+			t.Errorf("got %q and %v for %q, want %q", got, err, path, want)
+		}
+	}
+}
+
+func TestExpandFailsWithoutAHome(t *testing.T) {
+	t.Setenv("HOME", "")
+
+	if _, err := pathutil.Expand("~/proj"); err == nil {
+		t.Error("expected a home path without a home to fail")
+	}
+	if got, err := pathutil.Expand("/etc/hosts"); err != nil || got != "/etc/hosts" {
+		t.Errorf("got %q and %v, want the path as it went in", got, err)
+	}
+}
+
 func TestExistsReportsWhatCanBeStatted(t *testing.T) {
 	directory := t.TempDir()
 	if !pathutil.Exists(directory) {
