@@ -4,11 +4,71 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
 	"crdx.org/io/internal/auth"
 )
+
+func TestConcurrentUpdatesAreSerialisedAcrossStores(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "auth.json")
+	if err := auth.Save(path, &auth.Credentials{Version: auth.Version}); err != nil {
+		t.Fatal(err)
+	}
+
+	firstEntered := make(chan struct{})
+	releaseFirst := make(chan struct{})
+	firstDone := make(chan error, 1)
+	go func() {
+		firstDone <- auth.Update(path, func(credentials *auth.Credentials) error {
+			close(firstEntered)
+			<-releaseFirst
+			credentials.Anthropic = &auth.AnthropicCredentials{Access: "first"}
+			return nil
+		})
+	}()
+	<-firstEntered
+
+	secondStarted := make(chan struct{})
+	secondEntered := make(chan struct{})
+	secondDone := make(chan error, 1)
+	go func() {
+		close(secondStarted)
+		secondDone <- auth.Update(path, func(credentials *auth.Credentials) error {
+			close(secondEntered)
+			if credentials.Anthropic == nil || credentials.Anthropic.Access != "first" {
+				return errors.New("the second update did not see the first")
+			}
+			credentials.Codex = &auth.CodexCredentials{Access: "second"}
+			return nil
+		})
+	}()
+	<-secondStarted
+	runtime.Gosched()
+
+	select {
+	case <-secondEntered:
+		t.Fatal("the second update entered while the first held the credentials lock")
+	default:
+	}
+
+	close(releaseFirst)
+	if err := <-firstDone; err != nil {
+		t.Fatal(err)
+	}
+	if err := <-secondDone; err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := auth.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.Anthropic == nil || stored.Anthropic.Access != "first" || stored.Codex == nil || stored.Codex.Access != "second" {
+		t.Errorf("concurrent updates lost credentials: %+v", stored)
+	}
+}
 
 func TestSaveOpenCodeGoKeyPreservesCodexCredentials(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "auth.json")

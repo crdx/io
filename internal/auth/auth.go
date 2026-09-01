@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"syscall"
 
 	"crdx.org/io/internal/format"
 	"crdx.org/io/internal/xdg"
@@ -113,15 +114,55 @@ func Save(path string, credentials *Credentials) error {
 	return nil
 }
 
-func SaveOpenCodeGoKey(path string, key string) error {
-	credentials, err := Load(path)
+func Update(path string, update func(*Credentials) error) error {
+	lock, err := lock(path)
 	if err != nil {
-		if !Unusable(err) {
-			return err
-		}
+		return err
+	}
+	defer unlock(lock)
+
+	credentials, err := Load(path)
+	if Unusable(err) {
 		credentials = &Credentials{Version: Version}
+	} else if err != nil {
+		return err
 	}
 
-	credentials.OpenCodeGo = &OpenCodeGoCredentials{APIKey: key}
+	if err := update(credentials); err != nil {
+		return err
+	}
+
 	return Save(path, credentials)
+}
+
+func lock(path string) (*os.File, error) {
+	if path == "" {
+		return nil, errors.New("could not determine where credentials live")
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return nil, fmt.Errorf("create state directory: %w", err)
+	}
+
+	file, err := os.OpenFile(path+".lock", os.O_CREATE|os.O_RDWR, 0o600) //nolint:gosec // the path is selected by the caller
+	if err != nil {
+		return nil, fmt.Errorf("open credentials lock: %w", err)
+	}
+	if err := syscall.Flock(int(file.Fd()), syscall.LOCK_EX); err != nil {
+		_ = file.Close()
+		return nil, fmt.Errorf("lock credentials: %w", err)
+	}
+
+	return file, nil
+}
+
+func unlock(lock *os.File) {
+	_ = syscall.Flock(int(lock.Fd()), syscall.LOCK_UN)
+	_ = lock.Close()
+}
+
+func SaveOpenCodeGoKey(path string, key string) error {
+	return Update(path, func(credentials *Credentials) error {
+		credentials.OpenCodeGo = &OpenCodeGoCredentials{APIKey: key}
+		return nil
+	})
 }

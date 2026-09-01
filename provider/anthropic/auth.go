@@ -2,7 +2,6 @@ package anthropic
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
@@ -42,16 +41,11 @@ func loadCredentials(path string) (*Credentials, error) {
 }
 
 func saveCredentials(path string, credentials *Credentials) error {
-	storedCredentials, err := auth.Load(path)
-	if auth.Unusable(err) {
-		storedCredentials = &auth.Credentials{Version: auth.Version}
-	} else if err != nil {
-		return fmt.Errorf("preserve credentials: %w", err)
-	}
-
-	if storedCredentials.Anthropic != nil {
-		inherit(credentials, storedCredentials.Anthropic)
-	}
-	storedCredentials.Anthropic = credentials
-	return auth.Save(path, storedCredentials)
+	return auth.Update(path, func(storedCredentials *auth.Credentials) error {
+		if storedCredentials.Anthropic != nil {
+			inherit(credentials, storedCredentials.Anthropic)
+		}
+		storedCredentials.Anthropic = credentials
+		return nil
+	})
 }

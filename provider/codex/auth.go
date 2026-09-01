@@ -2,7 +2,6 @@ package codex
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
@@ -46,16 +45,11 @@ func loadCredentials(path string) (*Credentials, error) {
 }
 
 func saveCredentials(path string, credentials *Credentials) error {
-	storedCredentials, err := auth.Load(path)
-	if auth.Unusable(err) {
-		storedCredentials = &auth.Credentials{Version: auth.Version}
-	} else if err != nil {
-		return fmt.Errorf("preserve credentials: %w", err)
-	}
-
-	if storedCredentials.Codex != nil {
-		inherit(credentials, storedCredentials.Codex)
-	}
-	storedCredentials.Codex = credentials
-	return auth.Save(path, storedCredentials)
+	return auth.Update(path, func(storedCredentials *auth.Credentials) error {
+		if storedCredentials.Codex != nil {
+			inherit(credentials, storedCredentials.Codex)
+		}
+		storedCredentials.Codex = credentials
+		return nil
+	})
 }

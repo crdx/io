@@ -91,6 +91,7 @@ import (
 	"crdx.org/io/cmd/oh/usage"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/cmd/oh/work"
+	"crdx.org/io/internal/auth"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/req"
 	"crdx.org/io/internal/sandbox"
@@ -8266,16 +8267,19 @@ type sessionGoldenTool struct {
 }
 
 type sessionGoldenScenario struct {
-	Name              string              `toml:"-"`
-	Provider          string              `toml:"provider"`
-	Model             string              `toml:"model"`
-	Effort            string              `toml:"effort"`
-	IsFast            bool                `toml:"fast"`
-	FirstTokenError   string              `toml:"first-token-error"`
-	ToggleBeforeFirst string              `toml:"toggle-before-first"`
-	Tools             []sessionGoldenTool `toml:"tool"`
-	FirstTurn         sessionGoldenTurn   `toml:"first"`
-	ResumeTurn        sessionGoldenTurn   `toml:"resume"`
+	Name               string              `toml:"-"`
+	Provider           string              `toml:"provider"`
+	Model              string              `toml:"model"`
+	Effort             string              `toml:"effort"`
+	IsFast             bool                `toml:"fast"`
+	FirstTokenError    string              `toml:"first-token-error"`
+	CredentialRefresh  string              `toml:"credential-refresh"`
+	ToggleBeforeFirst  string              `toml:"toggle-before-first"`
+	Tools              []sessionGoldenTool `toml:"tool"`
+	FirstTurn          sessionGoldenTurn   `toml:"first"`
+	ResumeTurn         sessionGoldenTurn   `toml:"resume"`
+	CredentialsPath    string              `toml:"-"`
+	CredentialRecovery func()              `toml:"-"`
 }
 
 func TestScenariosProduceCanonicalOutputs(t *testing.T) {
@@ -8345,11 +8349,60 @@ func (self failingAnthropicTokenSource) Token() (string, error) {
 	return "", self.failure
 }
 
-func newSessionGoldenAnthropicTokenSource(tokenError string) anthropic.TokenSource {
+type sessionGoldenAnthropicTokenSource struct {
+	source          anthropic.TokenSource
+	credentialsPath string
+}
+
+func (self sessionGoldenAnthropicTokenSource) Token() (string, error) {
+	token, err := self.source.Token()
+	return token, canonicalSessionGoldenCredentialError(err, self.credentialsPath)
+}
+
+type sessionGoldenCodexTokenSource struct {
+	source          codex.TokenSource
+	credentialsPath string
+}
+
+func (self sessionGoldenCodexTokenSource) Token() (codex.Token, error) {
+	token, err := self.source.Token()
+	return token, canonicalSessionGoldenCredentialError(err, self.credentialsPath)
+}
+
+func canonicalSessionGoldenCredentialError(err error, credentialsPath string) error {
+	if err == nil {
+		return nil
+	}
+	pendingCredentialsPattern := regexp.MustCompile(regexp.QuoteMeta(credentialsPath) + `\.[0-9]+`)
+	message := pendingCredentialsPattern.ReplaceAllString(err.Error(), "auth.json.pending")
+	message = strings.ReplaceAll(message, credentialsPath, "auth.json")
+	if message == err.Error() {
+		return err
+	}
+	return errors.New(message)
+}
+
+func newSessionGoldenAnthropicTokenSource(tokenError string, credentialsPath string) anthropic.TokenSource {
 	if tokenError != "" {
 		return failingAnthropicTokenSource{failure: errors.New(tokenError)}
 	}
+	if credentialsPath != "" {
+		return sessionGoldenAnthropicTokenSource{
+			source:          anthropic.StoredCredentialsAt(credentialsPath),
+			credentialsPath: credentialsPath,
+		}
+	}
 	return anthropic.Static("test-token")
+}
+
+func newSessionGoldenCodexTokenSource(credentialsPath string) codex.TokenSource {
+	if credentialsPath != "" {
+		return sessionGoldenCodexTokenSource{
+			source:          codex.StoredCredentialsAt(credentialsPath),
+			credentialsPath: credentialsPath,
+		}
+	}
+	return codex.Static("test-token", "test-account")
 }
 
 func sessionGoldenProviderFor(
@@ -8379,7 +8432,7 @@ func newSessionGoldenProvider(
 
 	switch scenario.Provider {
 	case "anthropic":
-		tokens := newSessionGoldenAnthropicTokenSource(tokenError)
+		tokens := newSessionGoldenAnthropicTokenSource(tokenError, scenario.CredentialsPath)
 		client, err := anthropic.New(tokens, scenario.Model, scenario.Effort, 128_000)
 		if err != nil {
 			t.Fatal(err)
@@ -8387,7 +8440,7 @@ func newSessionGoldenProvider(
 		client.URL = endpoint
 		return client
 	case "codex":
-		client, err := codex.New(codex.Static("test-token", "test-account"), scenario.Model, scenario.Effort)
+		client, err := codex.New(newSessionGoldenCodexTokenSource(scenario.CredentialsPath), scenario.Model, scenario.Effort)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -8613,8 +8666,255 @@ func expandSessionGoldenResponses(responses []sessionGoldenResponse) []sessionGo
 	return expanded
 }
 
+const (
+	sessionGoldenCredentialRefreshSuccess         = "success"
+	sessionGoldenCredentialRefreshRotation        = "rotation"
+	sessionGoldenCredentialRefreshRejection       = "rejection"
+	sessionGoldenCredentialRefreshFailure         = "failure"
+	sessionGoldenCredentialRefreshMissingToken    = "missing-token"
+	sessionGoldenCredentialRefreshMissingProvider = "missing-provider"
+	sessionGoldenCredentialRefreshStoreFailure    = "store-failure"
+)
+
+func newSessionGoldenStoredCredentials() *auth.Credentials {
+	return &auth.Credentials{
+		Version: auth.Version,
+		Anthropic: &auth.AnthropicCredentials{
+			Access:    "old-anthropic-access",
+			Refresh:   "old-anthropic-refresh",
+			ExpiresAt: time.Now().Add(-time.Minute).UnixMilli(),
+		},
+		Codex: &auth.CodexCredentials{
+			Access:    "old-codex-access",
+			Refresh:   "old-codex-refresh",
+			ExpiresAt: time.Now().Add(-time.Minute).UnixMilli(),
+			AccountID: "old-codex-account",
+		},
+		OpenCodeGo: &auth.OpenCodeGoCredentials{APIKey: "old-key"},
+	}
+}
+
+func newSessionGoldenRotatedCredentials() *auth.Credentials {
+	return &auth.Credentials{
+		Version: auth.Version,
+		Anthropic: &auth.AnthropicCredentials{
+			Access:    "rotated-anthropic-access",
+			Refresh:   "rotated-anthropic-refresh",
+			ExpiresAt: time.Now().Add(time.Hour).UnixMilli(),
+		},
+		Codex: &auth.CodexCredentials{
+			Access:    "rotated-codex-access",
+			Refresh:   "rotated-codex-refresh",
+			ExpiresAt: time.Now().Add(time.Hour).UnixMilli(),
+			AccountID: "rotated-codex-account",
+		},
+		OpenCodeGo: &auth.OpenCodeGoCredentials{APIKey: "rotated-key"},
+	}
+}
+
+func serveSessionGoldenSuccessfulCredentialRefresh(writer http.ResponseWriter, provider string) {
+	switch provider {
+	case model.AnthropicProvider:
+		_, _ = fmt.Fprint(writer, `{"access_token":"refreshed-anthropic-access","expires_in":3600}`)
+	case model.CodexProvider:
+		_, _ = fmt.Fprint(writer, `{"access_token":"not.a.jwt","expires_in":3600}`)
+	}
+}
+
+func serveSessionGoldenCredentialRefresh(
+	t *testing.T,
+	writer http.ResponseWriter,
+	scenario sessionGoldenScenario,
+	credentialsPath string,
+	isRecovery bool,
+) {
+	t.Helper()
+
+	writer.Header().Set("Content-Type", "application/json")
+	switch scenario.CredentialRefresh {
+	case sessionGoldenCredentialRefreshSuccess:
+		serveSessionGoldenSuccessfulCredentialRefresh(writer, scenario.Provider)
+	case sessionGoldenCredentialRefreshRotation:
+		if err := auth.Save(credentialsPath, newSessionGoldenRotatedCredentials()); err != nil {
+			t.Errorf("rotate credentials: %v", err)
+		}
+		writer.WriteHeader(http.StatusBadRequest)
+		_, _ = fmt.Fprint(writer, `{"error":"invalid_grant"}`)
+	case sessionGoldenCredentialRefreshRejection:
+		if isRecovery {
+			serveSessionGoldenSuccessfulCredentialRefresh(writer, scenario.Provider)
+			return
+		}
+		writer.WriteHeader(http.StatusBadRequest)
+		_, _ = fmt.Fprint(writer, `{"error":"invalid_grant"}`)
+	case sessionGoldenCredentialRefreshFailure:
+		if isRecovery {
+			serveSessionGoldenSuccessfulCredentialRefresh(writer, scenario.Provider)
+			return
+		}
+		writer.WriteHeader(http.StatusInternalServerError)
+		_, _ = fmt.Fprint(writer, `{"error":"server_error"}`)
+	case sessionGoldenCredentialRefreshStoreFailure:
+		if !isRecovery {
+			if err := syscall.Chmod(filepath.Dir(credentialsPath), 0o500); err != nil {
+				t.Errorf("make credentials read-only: %v", err)
+			}
+		}
+		serveSessionGoldenSuccessfulCredentialRefresh(writer, scenario.Provider)
+	}
+}
+
+func checkSessionGoldenStoredCredentials(t *testing.T, scenario sessionGoldenScenario, credentialsPath string) {
+	t.Helper()
+
+	storedCredentials, err := auth.Load(credentialsPath)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	anthropicAccess := "old-anthropic-access"
+	anthropicRefresh := "old-anthropic-refresh"
+	codexAccess := "old-codex-access"
+	codexRefresh := "old-codex-refresh"
+	codexAccount := "old-codex-account"
+	openCodeGoKey := "old-key"
+	hasRotatedCredentials := scenario.CredentialRefresh == sessionGoldenCredentialRefreshRotation ||
+		scenario.CredentialRefresh == sessionGoldenCredentialRefreshMissingToken ||
+		scenario.CredentialRefresh == sessionGoldenCredentialRefreshMissingProvider
+	if hasRotatedCredentials {
+		anthropicAccess = "rotated-anthropic-access"
+		anthropicRefresh = "rotated-anthropic-refresh"
+		codexAccess = "rotated-codex-access"
+		codexRefresh = "rotated-codex-refresh"
+		codexAccount = "rotated-codex-account"
+		openCodeGoKey = "rotated-key"
+	} else {
+		switch scenario.Provider {
+		case model.AnthropicProvider:
+			anthropicAccess = "refreshed-anthropic-access"
+		case model.CodexProvider:
+			codexAccess = "not.a.jwt"
+		}
+	}
+
+	if storedCredentials.Anthropic == nil || storedCredentials.Anthropic.Access != anthropicAccess || storedCredentials.Anthropic.Refresh != anthropicRefresh {
+		t.Errorf("got Anthropic credentials %+v, want access %q and refresh %q", storedCredentials.Anthropic, anthropicAccess, anthropicRefresh)
+	}
+	if storedCredentials.Codex == nil || storedCredentials.Codex.Access != codexAccess || storedCredentials.Codex.Refresh != codexRefresh || storedCredentials.Codex.AccountID != codexAccount {
+		t.Errorf("got Codex credentials %+v, want access %q, refresh %q, and account %q", storedCredentials.Codex, codexAccess, codexRefresh, codexAccount)
+	}
+	if storedCredentials.OpenCodeGo == nil || storedCredentials.OpenCodeGo.APIKey != openCodeGoKey {
+		t.Errorf("got OpenCode Go credentials %+v, want key %q", storedCredentials.OpenCodeGo, openCodeGoKey)
+	}
+}
+
+func prepareSessionGoldenCredentials(t *testing.T, scenario *sessionGoldenScenario) {
+	t.Helper()
+
+	if scenario.CredentialRefresh == "" {
+		return
+	}
+	switch scenario.CredentialRefresh {
+	case sessionGoldenCredentialRefreshSuccess,
+		sessionGoldenCredentialRefreshRotation,
+		sessionGoldenCredentialRefreshRejection,
+		sessionGoldenCredentialRefreshFailure,
+		sessionGoldenCredentialRefreshStoreFailure,
+		sessionGoldenCredentialRefreshMissingToken,
+		sessionGoldenCredentialRefreshMissingProvider:
+	default:
+		t.Fatalf("unknown credential refresh %q", scenario.CredentialRefresh)
+	}
+	if scenario.Provider != model.AnthropicProvider && scenario.Provider != model.CodexProvider {
+		t.Fatalf("credential refresh is not supported for provider %q", scenario.Provider)
+	}
+
+	credentialsPath := filepath.Join(t.TempDir(), "auth.json")
+	storedCredentials := newSessionGoldenStoredCredentials()
+	if scenario.CredentialRefresh == sessionGoldenCredentialRefreshMissingToken {
+		switch scenario.Provider {
+		case model.AnthropicProvider:
+			storedCredentials.Anthropic.Refresh = ""
+		case model.CodexProvider:
+			storedCredentials.Codex.Refresh = ""
+		}
+	}
+	if scenario.CredentialRefresh == sessionGoldenCredentialRefreshMissingProvider {
+		switch scenario.Provider {
+		case model.AnthropicProvider:
+			storedCredentials.Anthropic = nil
+		case model.CodexProvider:
+			storedCredentials.Codex = nil
+		}
+	}
+	if err := auth.Save(credentialsPath, storedCredentials); err != nil {
+		t.Fatal(err)
+	}
+
+	var refreshRequests atomic.Int32
+	var requestsBeforeRecovery atomic.Int32
+	var isRecovery atomic.Bool
+	tokenServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		refreshRequests.Add(1)
+		serveSessionGoldenCredentialRefresh(t, writer, *scenario, credentialsPath, isRecovery.Load())
+	}))
+	t.Cleanup(tokenServer.Close)
+
+	switch scenario.Provider {
+	case model.AnthropicProvider:
+		anthropic.TokenURL = tokenServer.URL
+		t.Cleanup(func() { anthropic.TokenURL = "" })
+	case model.CodexProvider:
+		codex.TokenURL = tokenServer.URL
+		t.Cleanup(func() { codex.TokenURL = "" })
+	}
+	scenario.CredentialsPath = credentialsPath
+	switch scenario.CredentialRefresh {
+	case sessionGoldenCredentialRefreshRejection, sessionGoldenCredentialRefreshFailure:
+		scenario.CredentialRecovery = func() {
+			requestsBeforeRecovery.Store(refreshRequests.Load())
+			isRecovery.Store(true)
+		}
+	case sessionGoldenCredentialRefreshStoreFailure:
+		scenario.CredentialRecovery = func() {
+			requestsBeforeRecovery.Store(refreshRequests.Load())
+			if err := syscall.Chmod(filepath.Dir(credentialsPath), 0o700); err != nil {
+				t.Fatal(err)
+			}
+			isRecovery.Store(true)
+		}
+	case sessionGoldenCredentialRefreshMissingToken, sessionGoldenCredentialRefreshMissingProvider:
+		scenario.CredentialRecovery = func() {
+			if err := auth.Save(credentialsPath, newSessionGoldenRotatedCredentials()); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+
+	t.Cleanup(func() {
+		switch scenario.CredentialRefresh {
+		case sessionGoldenCredentialRefreshSuccess, sessionGoldenCredentialRefreshRotation:
+			if refreshRequests.Load() != 1 {
+				t.Errorf("got %d refresh requests, want one", refreshRequests.Load())
+			}
+		case sessionGoldenCredentialRefreshRejection, sessionGoldenCredentialRefreshFailure, sessionGoldenCredentialRefreshStoreFailure:
+			if requestsBeforeRecovery.Load() == 0 || refreshRequests.Load() != requestsBeforeRecovery.Load()+1 {
+				t.Errorf("got %d refresh requests before recovery and %d in total, want failures followed by one recovery", requestsBeforeRecovery.Load(), refreshRequests.Load())
+			}
+		case sessionGoldenCredentialRefreshMissingToken, sessionGoldenCredentialRefreshMissingProvider:
+			if refreshRequests.Load() != 0 {
+				t.Errorf("got %d refresh requests, want none", refreshRequests.Load())
+			}
+		}
+		checkSessionGoldenStoredCredentials(t, *scenario, credentialsPath)
+	})
+}
+
 func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[string]string {
 	t.Helper()
+
+	prepareSessionGoldenCredentials(t, &scenario)
 
 	responses := expandSessionGoldenResponses(
 		append(slices.Clone(scenario.FirstTurn.Responses), scenario.ResumeTurn.Responses...),
@@ -8678,6 +8978,9 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
 	runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
 	firstHarness.dropPendingInput()
+	if scenario.CredentialRecovery != nil {
+		scenario.CredentialRecovery()
+	}
 
 	sessionName := log.Name()
 	if err := log.Close(); err != nil {
@@ -8780,6 +9083,11 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	}
 
 	for extension, drawn := range outputs {
+		if scenario.CredentialsPath != "" {
+			pendingCredentialsPattern := regexp.MustCompile(regexp.QuoteMeta(scenario.CredentialsPath) + `\.[0-9]+`)
+			drawn = pendingCredentialsPattern.ReplaceAllString(drawn, "auth.json.pending")
+			drawn = strings.ReplaceAll(drawn, scenario.CredentialsPath, "auth.json")
+		}
 		outputs[extension] = endpointAddressPattern.ReplaceAllString(drawn, "http://endpoint")
 	}
 

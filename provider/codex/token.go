@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"crdx.org/io/internal/auth"
 	"crdx.org/io/internal/req"
 	"crdx.org/io/wire/openai/responses"
 )
@@ -73,26 +74,51 @@ func (self *credentialStore) ObserveHTTP(observer req.Observer) {
 }
 
 func (self *credentialStore) refresh() error {
-	if self.credentials.Refresh == "" {
-		return errors.New("credentials have expired: run the login command again")
-	}
+	var currentCredentials *Credentials
+	wasRefreshed := false
 
-	refreshedToken, err := refreshToken(self.requests, self.credentials.Refresh)
-	if err != nil {
-		if req.IsRejected(err) {
-			return fmt.Errorf("credentials were refused: run the login command again: %w", err)
+	err := auth.Update(self.path, func(storedCredentials *auth.Credentials) error {
+		currentCredentials = storedCredentials.Codex
+		if currentCredentials == nil {
+			return errors.New("not logged in to ChatGPT: run the login command with codex")
+		}
+		if !stale(currentCredentials) {
+			return nil
+		}
+		if currentCredentials.Refresh == "" {
+			return errors.New("credentials have expired: run the login command again")
 		}
 
-		return fmt.Errorf("refresh credentials: %w", err)
+		attemptedCredentials := *currentCredentials
+		refreshedCredentials, err := refreshToken(self.requests, currentCredentials.Refresh)
+		if err != nil {
+			if req.IsRejected(err) {
+				latestStoredCredentials, loadErr := auth.Load(self.path)
+				if loadErr == nil && latestStoredCredentials.Codex != nil && *latestStoredCredentials.Codex != attemptedCredentials && !stale(latestStoredCredentials.Codex) {
+					*storedCredentials = *latestStoredCredentials
+					currentCredentials = latestStoredCredentials.Codex
+					return nil
+				}
+
+				return fmt.Errorf("credentials were refused: run the login command again: %w", err)
+			}
+
+			return fmt.Errorf("refresh credentials: %w", err)
+		}
+
+		inherit(refreshedCredentials, currentCredentials)
+		storedCredentials.Codex = refreshedCredentials
+		currentCredentials = refreshedCredentials
+		wasRefreshed = true
+		return nil
+	})
+	if err != nil {
+		if wasRefreshed {
+			return fmt.Errorf("store the refreshed credentials: %w", err)
+		}
+		return err
 	}
 
-	inherit(refreshedToken, self.credentials)
-
-	self.credentials = refreshedToken
-
-	if err := saveCredentials(self.path, refreshedToken); err != nil {
-		return fmt.Errorf("store the refreshed credentials: %w", err)
-	}
-
+	self.credentials = currentCredentials
 	return nil
 }
