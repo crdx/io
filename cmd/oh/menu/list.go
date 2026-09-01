@@ -16,6 +16,7 @@ import (
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/internal/util/strutil"
 )
 
 const (
@@ -234,25 +235,13 @@ func (self *state) refilter() {
 	self.matches = self.matches[:0]
 
 	for index := range self.list.Len() {
-		if matchesQuery(self.list.Text(index), self.query) {
+		if strutil.MatchesQuery(self.list.Text(index), self.query) {
 			self.matches = append(self.matches, index)
 		}
 	}
 
 	self.cursor = self.firstSelectable()
 	self.offset = 0
-}
-
-func matchesQuery(text string, query string) bool {
-	text = strings.ToLower(text)
-
-	for word := range strings.FieldsSeq(strings.ToLower(query)) {
-		if !strings.Contains(text, word) {
-			return false
-		}
-	}
-
-	return true
 }
 
 func (self *state) move(direction int) {

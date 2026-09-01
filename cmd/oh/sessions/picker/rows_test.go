@@ -127,6 +127,7 @@ func TestWhatTheSessionPickerPaintsMatchesTheGolden(t *testing.T) {
 		{name: "no room for the model, so the room goes to the title", room: 80, height: 24, cursor: 3},
 		{name: "a narrow terminal, where the columns are clipped", room: 46, height: 24, cursor: 1},
 		{name: "a filter narrowing the list to the model that answered", room: 120, height: 24, cursor: 0, query: "codex"},
+		{name: "a filter matching the mode a session ran in", room: 120, height: 24, cursor: 0, query: "fast"},
 		{name: "a filter no session answers to", room: 120, height: 24, cursor: 0, query: "kimi"},
 	}
 

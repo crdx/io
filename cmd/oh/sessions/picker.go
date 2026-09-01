@@ -107,46 +107,58 @@ func Load(directory string) ([]*picker.Session, error) {
 			return nil, fmt.Errorf("could not read session %s metadata: %w", entry.Name, err)
 		}
 
-		var data struct {
-			WorkspaceDir string `json:"workspaceDir"`
-			Provider     string `json:"provider"`
-			Model        string `json:"model"`
-			Effort       string `json:"effort"`
-		}
-		if len(storedMeta.Data) > 0 && json.Unmarshal(storedMeta.Data, &data) != nil {
+		listing, data, isDescribed := describe(storedMeta)
+		if !isDescribed {
 			continue
 		}
+		listing.IsRunning = isRunning
 
-		isFast := false
 		if model.SupportsFastMode(data.Provider) {
-			isFast, err = getFastMode(directory, entry.Name)
-			if err != nil {
+			if listing.IsFast, err = getFastMode(directory, entry.Name); err != nil {
 				return nil, err
 			}
 		}
 
-		sessions = append(sessions, &picker.Session{
-			Name:         storedMeta.Name,
-			WorkspaceDir: data.WorkspaceDir,
-			StartedAt:    storedMeta.StartedAt,
-			TouchedAt:    storedMeta.TouchedAt,
-			Title:        storedMeta.Title,
-			Model:        strings.Join(model.DisplayName(data.Model), " "),
-			ModelID:      data.Model,
-			Effort:       data.Effort,
-			MessageCount: storedMeta.Messages,
-			IsRunning:    isRunning,
-			IsFast:       isFast,
-		})
+		sessions = append(sessions, listing)
 	}
 
+	newestFirst(sessions)
+	return sessions, nil
+}
+
+type listingData struct {
+	WorkspaceDir string `json:"workspaceDir"`
+	Provider     string `json:"provider"`
+	Model        string `json:"model"`
+	Effort       string `json:"effort"`
+}
+
+func describe(storedMeta *session.Meta) (*picker.Session, listingData, bool) {
+	var data listingData
+	if len(storedMeta.Data) > 0 && json.Unmarshal(storedMeta.Data, &data) != nil {
+		return nil, data, false
+	}
+
+	return &picker.Session{
+		Name:         storedMeta.Name,
+		WorkspaceDir: data.WorkspaceDir,
+		StartedAt:    storedMeta.StartedAt,
+		TouchedAt:    storedMeta.TouchedAt,
+		Title:        storedMeta.Title,
+		Model:        strings.Join(model.DisplayName(data.Model), " "),
+		ModelID:      data.Model,
+		Effort:       data.Effort,
+		MessageCount: storedMeta.Messages,
+	}, data, true
+}
+
+func newestFirst(sessions []*picker.Session) {
 	slices.SortFunc(sessions, func(first, second *picker.Session) int {
 		if order := second.TouchedAt.Compare(first.TouchedAt); order != 0 {
 			return order
 		}
 		return strings.Compare(second.Name, first.Name)
 	})
-	return sessions, nil
 }
 
 var errFastModeFound = errors.New("fast mode found")

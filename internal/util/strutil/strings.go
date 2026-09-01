@@ -29,6 +29,18 @@ func FirstLine(text string) string {
 	return strings.TrimSpace(line)
 }
 
+func MatchesQuery(text string, query string) bool {
+	text = strings.ToLower(text)
+
+	for word := range strings.FieldsSeq(strings.ToLower(query)) {
+		if !strings.Contains(text, word) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func Flatten(text string) string {
 	return strings.Join(strings.Fields(stripped(text)), " ")
 }

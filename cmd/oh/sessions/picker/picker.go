@@ -64,18 +64,21 @@ func (self *sessionList) IsChoosable(index int) bool { return !self.sessions[ind
 func (self *sessionList) Adjust(int, int) {}
 
 func (self *sessionList) Text(index int) string {
-	storedSession := self.sessions[index]
+	return self.sessions[index].Text()
+}
+
+func (self *Session) Text() string {
 	mode := ""
-	if storedSession.IsFast {
+	if self.IsFast {
 		mode = "fast"
 	}
 
 	return strings.Join([]string{
-		storedSession.Name,
-		storedSession.Title,
-		storedSession.Model,
-		storedSession.ModelID,
-		storedSession.Effort,
+		self.Name,
+		self.Title,
+		self.Model,
+		self.ModelID,
+		self.Effort,
 		mode,
 	}, " ")
 }

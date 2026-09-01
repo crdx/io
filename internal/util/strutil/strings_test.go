@@ -169,3 +169,23 @@ func TestNoTextHasNoLines(t *testing.T) {
 		t.Errorf("got %#v, want nil", got)
 	}
 }
+
+func TestAQueryMatchesTextHoldingEveryWordOfIt(t *testing.T) {
+	const text = "wild-scorpion Audit the goldens gpt-5.3-codex high fast"
+
+	tests := map[string]bool{
+		"":                    true,
+		"codex":               true,
+		"CODEX":               true,
+		"scorpion codex fast": true,
+		"audit":               true,
+		"kimi":                false,
+		"codex kimi":          false,
+	}
+
+	for query, wanted := range tests {
+		if got := strutil.MatchesQuery(text, query); got != wanted {
+			t.Errorf("MatchesQuery(%q) = %t, want %t", query, got, wanted)
+		}
+	}
+}
