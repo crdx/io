@@ -117,15 +117,8 @@ func TestWhatAPolicyNamesIsGrantedWithTheRightsItAsked(t *testing.T) {
 	}
 }
 
-func TestOnlyAPolicyWithAPrivateProcessFilesystemGrantsProcessInformation(t *testing.T) {
-	if _, granted := rightsFor(Policy{}.grants(), processFilesystemPath); granted {
-		t.Error("a policy without a private process filesystem was granted process information")
-	}
-
-	rights, granted := rightsFor(
-		Policy{UseProcFS: true}.grants(),
-		processFilesystemPath,
-	)
+func TestEveryPolicyGrantsTheProcessInformationOfItsOwnNamespace(t *testing.T) {
+	rights, granted := rightsFor(Policy{}.grants(), processFilesystemPath)
 	if !granted {
 		t.Fatal("a private process filesystem was not granted")
 	}
@@ -134,16 +127,12 @@ func TestOnlyAPolicyWithAPrivateProcessFilesystemGrantsProcessInformation(t *tes
 	}
 }
 
-func TestOnlyAPolicyWithItsOwnMountsGrantsPseudoterminals(t *testing.T) {
-	if _, granted := rightsFor(Policy{}.grants(), "/dev/ptmx"); granted {
-		t.Error("a policy without mounts of its own granted the pseudoterminal multiplexer")
-	}
-
-	grants := Policy{TmpDir: "/scratch"}.grants()
+func TestEveryPolicyGrantsPseudoterminals(t *testing.T) {
+	grants := Policy{}.grants()
 	for _, path := range []string{"/dev/ptmx", "/dev/pts"} {
 		rights, granted := rightsFor(grants, path)
 		if !granted {
-			t.Errorf("%s was not granted to a policy that mounts its own devices", path)
+			t.Errorf("%s was not granted", path)
 			continue
 		}
 		if rights != rightsWrite {
@@ -171,16 +160,10 @@ func TestOnlyAReadPathInsideAWritePathIsNested(t *testing.T) {
 	if !slices.Equal(inside.nestedPaths(), []string{"/work/held"}) {
 		t.Errorf("got %v, want the read path within the write path", inside.nestedPaths())
 	}
-	if !inside.usesMountNamespace() {
-		t.Error("a nested path needs a mount namespace to be held read-only")
-	}
 
 	outside := Policy{Read: []string{"/elsewhere"}, Write: []string{"/work"}}
 	if len(outside.nestedPaths()) != 0 {
 		t.Errorf("got %v, want nothing nested", outside.nestedPaths())
-	}
-	if outside.usesMountNamespace() {
-		t.Error("a policy with nothing to mount asked for a mount namespace")
 	}
 }
 

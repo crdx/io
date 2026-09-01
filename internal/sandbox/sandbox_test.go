@@ -86,8 +86,8 @@ func run(t *testing.T, directory string, command string, policy sandbox.Policy) 
 		policy.Timeout = 10 * time.Second
 	}
 
-	if err := sandbox.Supported(t.Context(), policy); err != nil {
-		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot be built here: %v", err)
 	}
 
 	result, err := sandbox.Run(context.Background(), directory, command, policy)
@@ -112,10 +112,8 @@ func runConcurrently(
 ) [2]sandbox.Result {
 	t.Helper()
 
-	for i, policy := range policies {
-		if err := sandbox.Supported(t.Context(), policy); err != nil {
-			t.Skipf("the sandbox cannot enforce policy %d: %v", i, err)
-		}
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot be built here: %v", err)
 	}
 
 	started := make(chan struct{})
@@ -230,13 +228,8 @@ func TestACommandDiesWhenItsOwnerIsKilled(t *testing.T) {
 	}
 
 	directory := t.TempDir()
-	policy := sandbox.Policy{
-		Write:   []string{directory},
-		Env:     []string{"PATH"},
-		Timeout: 10 * time.Second,
-	}
-	if err := sandbox.Supported(t.Context(), policy); err != nil {
-		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot be built here: %v", err)
 	}
 
 	owner := exec.CommandContext(t.Context(), os.Args[0], "-test.run=^TestACommandDiesWhenItsOwnerIsKilled$") //nolint:gosec // rerunning this test binary is intended
@@ -315,8 +308,8 @@ func TestCancellingACommandKillsItsDetachedSessions(t *testing.T) {
 		Env:     []string{"PATH"},
 		Timeout: 10 * time.Second,
 	}
-	if err := sandbox.Supported(t.Context(), policy); err != nil {
-		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot be built here: %v", err)
 	}
 
 	ctx, cancel := context.WithCancel(t.Context())
@@ -349,8 +342,8 @@ func TestTimingOutACommandKillsItsDetachedSessions(t *testing.T) {
 		Env:     []string{"PATH"},
 		Timeout: 200 * time.Millisecond,
 	}
-	if err := sandbox.Supported(t.Context(), policy); err != nil {
-		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot be built here: %v", err)
 	}
 
 	_, err := sandbox.Run(t.Context(), directory, delayedDetachedWrite(marker), policy)
@@ -1044,7 +1037,7 @@ func TestAPrivateProcessFilesystemContainsOnlySandboxProcesses(t *testing.T) {
 		if sh -c 'printf nope > /proc/sys/kernel/hostname' 2>/dev/null; then exit 1; fi
 	`, os.Getpid())
 
-	result := run(t, t.TempDir(), command, sandbox.Policy{UseProcFS: true})
+	result := run(t, t.TempDir(), command, sandbox.Policy{})
 	if result.Code != 0 {
 		t.Errorf("the private process filesystem was not isolated and readable: %q", result.Output)
 	}
@@ -1084,8 +1077,8 @@ var virtualResolverFiles = map[string]string{
 	`),
 }
 
-func TestVirtualResolverurationReplacesTheHostFiles(t *testing.T) {
-	policy := sandbox.Policy{UseVirtualResolver: true}
+func TestTheVirtualResolverReplacesTheHostFiles(t *testing.T) {
+	policy := sandbox.Policy{}
 
 	for path, contents := range virtualResolverFiles {
 		result := run(t, t.TempDir(), "cat "+path, policy)
@@ -1099,20 +1092,8 @@ func TestVirtualResolverurationReplacesTheHostFiles(t *testing.T) {
 	}
 }
 
-func TestTheHostResolverFilesStayHiddenWithoutTheirPolicy(t *testing.T) {
-	for path := range virtualResolverFiles {
-		if path == "/etc/nsswitch.conf" {
-			continue
-		}
-
-		if result := run(t, t.TempDir(), "cat "+path, sandbox.Policy{}); result.Code == 0 {
-			t.Errorf("%s was readable without asking for it: %q", path, result.Output)
-		}
-	}
-}
-
 func TestTheVirtualResolverFilesAreRefusedByTheMountRatherThanLandlock(t *testing.T) {
-	policy := sandbox.Policy{UseVirtualResolver: true}
+	policy := sandbox.Policy{}
 
 	for path := range virtualResolverFiles {
 		result := run(t, t.TempDir(), "printf changed > "+path, policy)
@@ -1127,7 +1108,7 @@ func TestTheVirtualResolverFilesAreRefusedByTheMountRatherThanLandlock(t *testin
 }
 
 func TestTheVirtualResolverFilesCannotBeChanged(t *testing.T) {
-	policy := sandbox.Policy{UseVirtualResolver: true}
+	policy := sandbox.Policy{}
 
 	for path := range virtualResolverFiles {
 		if result := run(t, t.TempDir(), "printf changed > "+path, policy); result.Code == 0 {
@@ -1285,8 +1266,8 @@ func TestACommandThatOverrunsIsStopped(t *testing.T) {
 		Timeout: 200 * time.Millisecond,
 	}
 
-	if err := sandbox.Supported(t.Context(), policy); err != nil {
-		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot be built here: %v", err)
 	}
 
 	_, err := sandbox.Run(context.Background(), directory, "sleep 30", policy)
@@ -1363,8 +1344,8 @@ func TestCompletedCommandsLeakNoDescriptors(t *testing.T) {
 		Env:     []string{"PATH"},
 		Timeout: 10 * time.Second,
 	}
-	if err := sandbox.Supported(t.Context(), policy); err != nil {
-		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot be built here: %v", err)
 	}
 
 	before := openDescriptorCount(t)

@@ -192,10 +192,10 @@ func AvailableAtAll() error {
 	return err
 }
 
-func Supported(ctx context.Context, policy Policy) error {
+func Supported(ctx context.Context) error {
 	if err := AvailableAtAll(); err != nil {
 		return err
 	}
 
-	return checkNamespaces(ctx, policy)
+	return checkNamespaces(ctx)
 }

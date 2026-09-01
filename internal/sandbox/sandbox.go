@@ -34,16 +34,14 @@ var base = []grant{
 }
 
 type Policy struct {
-	Read               []string          `json:"read"`
-	Write              []string          `json:"write"`   // paths readable and writable
-	Sockets            []string          `json:"sockets"` // writable paths whose Unix sockets resolve
-	Exec               []string          `json:"exec"`
-	TmpDir             string            `json:"tmpdir"` // a directory to appear at /tmp
-	UseProcFS          bool              `json:"procfs"`
-	UseVirtualResolver bool              `json:"virtual_resolver"` // synthesise the resolver files
-	Env                []string          `json:"env"`
-	SetEnv             map[string]string `json:"set_env"`
-	Timeout            time.Duration     `json:"timeout"`
+	Read    []string          `json:"read"`
+	Write   []string          `json:"write"`   // paths readable and writable
+	Sockets []string          `json:"sockets"` // writable paths whose Unix sockets resolve
+	Exec    []string          `json:"exec"`
+	TmpDir  string            `json:"tmpdir"` // a directory to appear at /tmp
+	Env     []string          `json:"env"`
+	SetEnv  map[string]string `json:"set_env"`
+	Timeout time.Duration     `json:"timeout"`
 
 	CPUTime   time.Duration `json:"cpu_time"`
 	FileSize  int64         `json:"file_size"` // the largest file it may write, in bytes
@@ -103,22 +101,15 @@ func (self Policy) grants() []grant {
 	grants := make([]grant, 0, len(base)+len(self.Read)+len(self.Write)+len(self.Exec)+2)
 	grants = append(grants, base...)
 
-	if self.usesMountNamespace() {
-		grants = append(
-			grants,
-			grant{path: "/dev/ptmx", rights: rightsWrite},
-			grant{path: "/dev/pts", rights: rightsWrite},
-		)
-	}
+	grants = append(
+		grants,
+		grant{path: "/dev/ptmx", rights: rightsWrite},
+		grant{path: "/dev/pts", rights: rightsWrite},
+		grant{path: processFilesystemPath, rights: rightsRead},
+	)
 
-	if self.UseProcFS {
-		grants = append(grants, grant{path: processFilesystemPath, rights: rightsRead})
-	}
-
-	if self.UseVirtualResolver {
-		for _, file := range resolverFiles {
-			grants = append(grants, grant{path: file.path, rights: rightsRead})
-		}
+	for _, file := range resolverFiles {
+		grants = append(grants, grant{path: file.path, rights: rightsRead})
 	}
 
 	for _, path := range self.Read {

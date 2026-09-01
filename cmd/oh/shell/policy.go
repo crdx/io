@@ -91,7 +91,7 @@ func furnish(homeDir string, sources []string, writableRoots []string) ([]string
 	return grantedPaths, nil
 }
 
-type supportProbe func(context.Context, sandbox.Policy) error
+type supportProbe func(context.Context) error
 
 func createPolicy(
 	ctx context.Context,
@@ -153,13 +153,11 @@ func createPolicyWithSupportProbe(
 	executablePaths := append(append(execPaths(workspaceDir), extraPaths.Exec...), homeDir, sandbox.TmpDir)
 
 	policy := sandbox.Policy{
-		Read:               readablePaths,
-		Write:              []string{cacheDir},
-		Sockets:            []string{cacheDir, sandbox.TmpDir},
-		Exec:               executablePaths,
-		TmpDir:             tmpDir,
-		UseProcFS:          true,
-		UseVirtualResolver: true,
+		Read:    readablePaths,
+		Write:   []string{cacheDir},
+		Sockets: []string{cacheDir, sandbox.TmpDir},
+		Exec:    executablePaths,
+		TmpDir:  tmpDir,
 
 		Env: []string{
 			"PATH",
@@ -217,7 +215,7 @@ func createPolicyWithSupportProbe(
 	}
 
 	writablePolicy = writablePolicy.WithWrite(sandbox.TmpDir)
-	if err := supportedProbe(ctx, writablePolicy); err != nil {
+	if err := supportedProbe(ctx); err != nil {
 		return sandbox.Policy{}, err
 	}
 
@@ -237,7 +235,7 @@ func readOnlySandboxPolicy(
 ) (sandbox.Policy, error) {
 	policy = policy.WithRead(workspaceDir, homeDir).WithWrite(sandbox.TmpDir)
 
-	return policy, supportedProbe(ctx, policy)
+	return policy, supportedProbe(ctx)
 }
 
 func protectedPolicy(policy sandbox.Policy, roots []string) (sandbox.Policy, error) {

@@ -10,7 +10,7 @@ import (
 )
 
 func TestTheNamespaceProbeCannotRunTestsIfInitIsMissing(t *testing.T) {
-	probe := namespaceProbeCommand(t.Context(), Policy{})
+	probe := namespaceProbeCommand(t.Context())
 
 	if !slices.Contains(probe.Args, "-test.run=^$") {
 		t.Errorf("the namespace probe could recursively run tests: %v", probe.Args)
@@ -20,23 +20,9 @@ func TestTheNamespaceProbeCannotRunTestsIfInitIsMissing(t *testing.T) {
 	}
 }
 
-func TestAnythingMountedAsksForAMountNamespace(t *testing.T) {
-	if namespaceAttributes(Policy{}).Cloneflags&syscall.CLONE_NEWNS != 0 {
-		t.Error("expected a policy wanting no mount to ask for no mount namespace")
-	}
-
-	if namespaceAttributes(Policy{TmpDir: "/scratch"}).Cloneflags&syscall.CLONE_NEWNS == 0 {
-		t.Error("expected a scratch to ask for a mount namespace")
-	}
-
-	privateProcessFilesystem := Policy{UseProcFS: true}
-	if namespaceAttributes(privateProcessFilesystem).Cloneflags&syscall.CLONE_NEWNS == 0 {
-		t.Error("expected a private process filesystem to ask for a mount namespace")
-	}
-
-	virtual := Policy{UseVirtualResolver: true}
-	if namespaceAttributes(virtual).Cloneflags&syscall.CLONE_NEWNS == 0 {
-		t.Error("expected virtual resolver configuration to ask for a mount namespace")
+func TestEveryCommandGetsAMountNamespace(t *testing.T) {
+	if namespaceAttributes().Cloneflags&syscall.CLONE_NEWNS == 0 {
+		t.Error("expected every command to be given a mount namespace of its own")
 	}
 }
 
@@ -62,29 +48,23 @@ func TestTheVirtualResolverFilesAreDistinctAbsolutePathsWithContents(t *testing.
 	}
 }
 
-func TestOnlyAPolicyAskingForItGrantsTheResolverFiles(t *testing.T) {
-	granted := func(policy Policy) []string {
-		var paths []string
-		for _, grant := range policy.grants() {
-			if !grant.isOptional {
-				paths = append(paths, grant.path)
-			}
+func TestEveryPolicyGrantsTheResolverFiles(t *testing.T) {
+	var granted []string
+	for _, grant := range (Policy{}).grants() {
+		if !grant.isOptional {
+			granted = append(granted, grant.path)
 		}
-		return paths
 	}
 
 	for _, file := range resolverFiles {
-		if slices.Contains(granted(Policy{}), file.path) {
-			t.Errorf("a policy asking for nothing was granted %s", file.path)
-		}
-		if !slices.Contains(granted(Policy{UseVirtualResolver: true}), file.path) {
-			t.Errorf("a policy with virtual resolver configuration lacks %s", file.path)
+		if !slices.Contains(granted, file.path) {
+			t.Errorf("a policy granting nothing of its own lacks %s", file.path)
 		}
 	}
 }
 
 func TestEveryCommandGetsAPIDNamespace(t *testing.T) {
-	attributes := namespaceAttributes(Policy{})
+	attributes := namespaceAttributes()
 	if attributes.Cloneflags&syscall.CLONE_NEWPID == 0 {
 		t.Error("expected a PID namespace")
 	}
@@ -94,13 +74,13 @@ func TestEveryCommandGetsAPIDNamespace(t *testing.T) {
 }
 
 func TestEveryCommandOwnsItsProcessGroup(t *testing.T) {
-	if !namespaceAttributes(Policy{}).Setpgid {
+	if !namespaceAttributes().Setpgid {
 		t.Error("expected a command to own its process group")
 	}
 }
 
 func TestEveryCommandDiesWithItsOwner(t *testing.T) {
-	if namespaceAttributes(Policy{}).Pdeathsig != syscall.SIGKILL {
+	if namespaceAttributes().Pdeathsig != syscall.SIGKILL {
 		t.Error("expected the command to be killed when its owner dies")
 	}
 }
@@ -113,14 +93,8 @@ func TestAScratchThatIsNotThereIsRefused(t *testing.T) {
 	}
 }
 
-func TestAPolicyWithNoMountsOfItsOwnRearrangesNothing(t *testing.T) {
-	if err := applyMounts(Policy{Read: []string{"/elsewhere"}, Write: []string{"/work"}}); err != nil {
-		t.Errorf("got %v, want a policy with nothing nested to leave the mounts alone", err)
-	}
-}
-
-func TestAPolicyWithNothingNestedStillGetsTheOtherNamespaces(t *testing.T) {
-	attributes := namespaceAttributes(Policy{})
+func TestEveryCommandGetsTheOtherNamespacesToo(t *testing.T) {
+	attributes := namespaceAttributes()
 
 	for name, flag := range map[string]uintptr{
 		"user":    syscall.CLONE_NEWUSER,

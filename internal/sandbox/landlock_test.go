@@ -200,7 +200,7 @@ func TestAGrantThroughAnAdminSymlinkIsFollowed(t *testing.T) {
 	}
 }
 
-func TestAConfinedProcessCannotReadItsOwnProc(t *testing.T) {
+func TestAConfinedProcessCannotWriteThroughItsOwnProc(t *testing.T) {
 	if !insideChildProcess() {
 		runAgainInChildProcess(t)
 		return
@@ -214,8 +214,12 @@ func TestAConfinedProcessCannotReadItsOwnProc(t *testing.T) {
 		t.Fatalf("could not enter the sandbox: %v", err)
 	}
 
-	if _, err := os.ReadFile("/proc/self/status"); err == nil {
-		t.Error("a confined process could read its own proc files")
+	if _, err := os.ReadFile("/proc/self/status"); err != nil {
+		t.Errorf("a confined process cannot read the process filesystem it was granted: %v", err)
+	}
+
+	if err := os.WriteFile("/proc/self/oom_score_adj", []byte("0"), 0o600); err == nil {
+		t.Error("a confined process could write through the process filesystem it only reads")
 	}
 }
 

@@ -37,13 +37,6 @@ const processFilesystemPath = "/proc"
 // TmpDir is where a policy's scratch space is attached inside the sandbox.
 const TmpDir = "/tmp"
 
-func (self Policy) usesMountNamespace() bool {
-	return len(self.nestedPaths()) > 0 ||
-		self.TmpDir != "" ||
-		self.UseProcFS ||
-		self.UseVirtualResolver
-}
-
 type virtualFile struct {
 	path     string
 	contents string
@@ -77,11 +70,11 @@ var resolverFiles = []virtualFile{
 	{path: "/etc/nsswitch.conf", contents: nssContents},
 }
 
-func checkNamespaces(ctx context.Context, policy Policy) error {
+func checkNamespaces(ctx context.Context) error {
 	probeContext, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	probe := namespaceProbeCommand(probeContext, policy)
+	probe := namespaceProbeCommand(probeContext)
 	output, err := probe.CombinedOutput()
 	message := strings.TrimSpace(strings.TrimPrefix(string(output), notice))
 	if err != nil {
@@ -97,24 +90,20 @@ func checkNamespaces(ctx context.Context, policy Policy) error {
 	return nil
 }
 
-func namespaceProbeCommand(ctx context.Context, policy Policy) *exec.Cmd {
+func namespaceProbeCommand(ctx context.Context) *exec.Cmd {
 	probe := exec.CommandContext(ctx, executable, "-test.run=^$")
 	probe.Env = []string{envProbe + "=1"}
-	probe.SysProcAttr = namespaceAttributes(policy)
+	probe.SysProcAttr = namespaceAttributes()
 	return probe
 }
 
 func applyMounts(policy Policy) error {
-	if policy.UseProcFS {
-		if err := mountProcessFilesystem(); err != nil {
-			return err
-		}
+	if err := mountProcessFilesystem(); err != nil {
+		return err
 	}
 
-	if policy.usesMountNamespace() {
-		if err := mountPseudoterminals(); err != nil {
-			return err
-		}
+	if err := mountPseudoterminals(); err != nil {
+		return err
 	}
 
 	for _, path := range policy.nestedPaths() {
@@ -123,11 +112,9 @@ func applyMounts(policy Policy) error {
 		}
 	}
 
-	if policy.UseVirtualResolver {
-		for _, file := range resolverFiles {
-			if err := mountReadOnlyTextFile(file.path, file.contents); err != nil {
-				return err
-			}
+	for _, file := range resolverFiles {
+		if err := mountReadOnlyTextFile(file.path, file.contents); err != nil {
+			return err
 		}
 	}
 
@@ -244,11 +231,10 @@ func dropCapabilities() error {
 	return nil
 }
 
-func namespaceAttributes(policy Policy) *syscall.SysProcAttr {
-	flags := uintptr(syscall.CLONE_NEWUSER | syscall.CLONE_NEWNET | syscall.CLONE_NEWPID)
-	if policy.usesMountNamespace() {
-		flags |= syscall.CLONE_NEWNS
-	}
+func namespaceAttributes() *syscall.SysProcAttr {
+	flags := uintptr(
+		syscall.CLONE_NEWUSER | syscall.CLONE_NEWNET | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
+	)
 
 	return &syscall.SysProcAttr{
 		Setpgid:     true,

@@ -194,7 +194,7 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 		envCommand+"="+command,
 	)
 
-	stub.SysProcAttr = namespaceAttributes(policy)
+	stub.SysProcAttr = namespaceAttributes()
 	stub.Cancel = func() error {
 		return syscall.Kill(-stub.Process.Pid, syscall.SIGKILL)
 	}
@@ -255,7 +255,7 @@ func validate(ctx context.Context, policy Policy) error {
 		)
 	}
 
-	return Supported(ctx, policy)
+	return Supported(ctx)
 }
 
 func stoppedResult(ctx context.Context, policy Policy, result Result, startedAt time.Time) (Result, error) {

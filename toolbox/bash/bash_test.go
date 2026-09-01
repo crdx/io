@@ -71,7 +71,7 @@ func execWithStats(
 		Timeout: 10 * time.Second,
 	})
 
-	if err := sandbox.Supported(t.Context(), policy); err != nil {
+	if err := sandbox.Supported(t.Context()); err != nil {
 		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
 
@@ -335,8 +335,8 @@ func TestARepositoryCannotBeClobbered(t *testing.T) {
 	root, directory := testRoot(t)
 	metadata := repository(t, directory)
 
-	if err := sandbox.Supported(t.Context(), bash.ProtectedPolicy(sandbox.Policy{Write: []string{directory}})); err != nil {
-		t.Skipf("the sandbox cannot hold a repository back: %v", err)
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
 
 	for _, command := range []string{
@@ -374,7 +374,7 @@ func TestAPolicyIsPassedThroughAsItIs(t *testing.T) {
 		Timeout: 10 * time.Second,
 	}
 
-	if err := sandbox.Supported(t.Context(), policy); err != nil {
+	if err := sandbox.Supported(t.Context()); err != nil {
 		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
 
@@ -422,7 +422,7 @@ func TestAStoppedCommandKeepsWhatItPrintedAndSaysWhyItEnded(t *testing.T) {
 	root, directory := testRoot(t)
 
 	policy := sandbox.Policy{Write: []string{directory}, Env: []string{"PATH"}}
-	if err := sandbox.Supported(t.Context(), bash.ProtectedPolicy(policy)); err != nil {
+	if err := sandbox.Supported(t.Context()); err != nil {
 		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
 
@@ -485,7 +485,7 @@ func TestACancelledContextStopsTheCommand(t *testing.T) {
 	ctx, stop := context.WithCancel(t.Context())
 
 	policy := sandbox.Policy{Write: []string{directory}, Env: []string{"PATH"}}
-	if err := sandbox.Supported(t.Context(), bash.ProtectedPolicy(policy)); err != nil {
+	if err := sandbox.Supported(t.Context()); err != nil {
 		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
 
@@ -526,7 +526,7 @@ func TestThePolicyIsAskedForEveryCommand(t *testing.T) {
 		Timeout: 10 * time.Second,
 	}
 
-	if err := sandbox.Supported(t.Context(), bash.ProtectedPolicy(grantedPolicy)); err != nil {
+	if err := sandbox.Supported(t.Context()); err != nil {
 		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
 
