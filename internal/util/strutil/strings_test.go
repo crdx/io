@@ -65,13 +65,14 @@ func TestFlattenPutsTextOnOneLine(t *testing.T) {
 	}
 }
 
-func TestPrintableLeavesEveryOtherByteWhereItWas(t *testing.T) {
+func TestPrintableRemovesWhatATerminalWouldActOn(t *testing.T) {
 	for name, test := range map[string]struct {
 		text string
 		want string
 	}{
-		"colour":          {text: "\x1b[32mok", want: " [32mok"},
-		"cursor movement": {text: "one\x1b[2Jtwo", want: "one [2Jtwo"},
+		"colour":          {text: "\x1b[32mok", want: "ok"},
+		"cursor movement": {text: "one\x1b[2Jtwo", want: "onetwo"},
+		"window title":    {text: "one\x1b]0;stolen\atwo", want: "onetwo"},
 		"lines":           {text: "cat <<EOF\none\nEOF", want: "cat <<EOF one EOF"},
 		"tabs":            {text: "one\ttwo", want: "one two"},
 		"a bell":          {text: "done\a", want: "done "},
@@ -85,8 +86,8 @@ func TestPrintableLeavesEveryOtherByteWhereItWas(t *testing.T) {
 				t.Errorf("got %q, want %q", got, test.want)
 			}
 
-			if len(got) != len(test.text) {
-				t.Errorf("expected %d bytes to stay %d, got %d", len(test.text), len(test.text), len(got))
+			if len(got) > len(test.text) {
+				t.Errorf("expected no more than %d bytes, got %d", len(test.text), len(got))
 			}
 		})
 	}
@@ -114,8 +115,8 @@ func FuzzPrintable(f *testing.F) {
 			}
 		}
 
-		if utf8.ValidString(text) && len(printable) != len(text) {
-			t.Errorf("expected %d bytes back, got %d in %q", len(text), len(printable), printable)
+		if utf8.ValidString(text) && len(printable) > len(text) {
+			t.Errorf("expected no more than %d bytes back, got %d in %q", len(text), len(printable), printable)
 		}
 	})
 }

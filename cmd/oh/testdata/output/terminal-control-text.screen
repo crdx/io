@@ -5,9 +5,9 @@
 
 reasoning before after second line
 
-notice before [2J [H after
+notice before after
 second line
-Failure before ]2;stolen title  after
+Failure before after
 second line
 === one column ===
 
@@ -114,11 +114,6 @@ f
 o
 r
 e
-[
-2
-J
-[
-H
 a
 f
 t
@@ -148,20 +143,6 @@ f
 o
 r
 e
-]
-2
-;
-s
-t
-o
-l
-e
-n
-t
-i
-t
-l
-e
 a
 f
 t
@@ -190,13 +171,10 @@ before after
 second line
 
 notice
-before [2J
-[H after
+before after
 second line
 Failure
-before
-]2;stolen
-title  after
+before after
 second line
 === wide ===
 
@@ -205,7 +183,7 @@ second line
 
 reasoning before after second line
 
-notice before [2J [H after
+notice before after
 second line
-Failure before ]2;stolen title  after
+Failure before after
 second line

@@ -57,6 +57,8 @@ func PrintableLines(text string) string {
 func Printable(text string) string {
 	var out strings.Builder
 
+	text = escapeSequence.ReplaceAllString(text, "")
+
 	out.Grow(len(text))
 
 	for _, character := range text {
