@@ -123,16 +123,16 @@ func waitForCallback(
 
 			query := request.URL.Query()
 
-			if failure := query.Get("error"); failure != "" {
-				http.Error(writer, failure, http.StatusBadRequest)
-				radio <- transmission{err: errors.New("authorisation failed: " + failure)}
+			if query.Get("state") != state {
+				http.Error(writer, "state did not match", http.StatusBadRequest)
+				radio <- transmission{err: errors.New("the callback state did not match")}
 
 				return
 			}
 
-			if query.Get("state") != state {
-				http.Error(writer, "state did not match", http.StatusBadRequest)
-				radio <- transmission{err: errors.New("the callback state did not match")}
+			if failure := query.Get("error"); failure != "" {
+				http.Error(writer, failure, http.StatusBadRequest)
+				radio <- transmission{err: errors.New("authorisation failed: " + failure)}
 
 				return
 			}

@@ -49,6 +49,46 @@ func TestWaitForCallbackAcceptsTheLoopbackCallback(t *testing.T) {
 	}
 }
 
+func TestWaitForCallbackValidatesTheStateOfAnError(t *testing.T) {
+	for _, test := range []struct {
+		query string
+		want  string
+	}{
+		{query: "error=denied", want: "the callback state did not match"},
+		{query: "error=denied&state=wrong", want: "the callback state did not match"},
+		{query: "error=denied&state=expected", want: "authorisation failed: denied"},
+	} {
+		var listenConfig net.ListenConfig
+
+		listener, err := listenConfig.Listen(t.Context(), "tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		result := make(chan error, 1)
+		go func() {
+			_, err := waitForCallback(t.Context(), listener, "expected", nil)
+			result <- err
+		}()
+
+		address := fmt.Sprintf("http://%s/callback?%s", listener.Addr(), test.query)
+		request, err := http.NewRequestWithContext(t.Context(), http.MethodGet, address, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		response, err := http.DefaultClient.Do(request)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = response.Body.Close()
+
+		if err := <-result; err == nil || err.Error() != test.want {
+			t.Errorf("%s: got %v, want %q", test.query, err, test.want)
+		}
+	}
+}
+
 func TestWaitForCallbackAcceptsAPastedRedirect(t *testing.T) {
 	var listenConfig net.ListenConfig
 
