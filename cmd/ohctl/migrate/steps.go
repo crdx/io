@@ -9,6 +9,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/session"
 )
@@ -20,15 +21,61 @@ type step struct {
 }
 
 var steps = map[int]step{
-	1: {migrateLine: emphasisReplacesHighlight},
-	2: {finalise: addSessionMeta},
-	3: {migrateJournal: addTurnCompletions},
-	4: {migrateJournal: addLastMode},
-	5: {migrateLine: addEventStatus},
-	6: {},
-	7: {migrateJournal: promptBytesReplaceContextFiles},
-	8: {migrateJournal: dropBackgroundCapability},
-	9: {migrateJournal: dropUnrunModeChange},
+	1:  {migrateLine: emphasisReplacesHighlight},
+	2:  {finalise: addSessionMeta},
+	3:  {migrateJournal: addTurnCompletions},
+	4:  {migrateJournal: addLastMode},
+	5:  {migrateLine: addEventStatus},
+	6:  {},
+	7:  {migrateJournal: promptBytesReplaceContextFiles},
+	8:  {migrateJournal: dropBackgroundCapability},
+	9:  {migrateJournal: dropUnrunModeChange},
+	10: {migrateLine: pathGrantFlagsReplaceWords},
+}
+
+var legacyGrantAccess = map[string]string{
+	"read":  "r",
+	"write": "rw",
+	"exec":  "rx",
+}
+
+func pathGrantFlagsReplaceWords(line map[string]json.RawMessage) error {
+	return with(line, func(event map[string]json.RawMessage) error {
+		if string(event["kind"]) != `"`+string(pathgrant.Change)+`"` {
+			return nil
+		}
+
+		raw, ok := event["state"]
+		if !ok {
+			return nil
+		}
+
+		var state struct {
+			Grants []struct {
+				Path   string `json:"path"`
+				Access string `json:"access"`
+			} `json:"grants"`
+		}
+		if err := json.Unmarshal(raw, &state); err != nil {
+			return fmt.Errorf("the path grants could not be read: %w", err)
+		}
+
+		for index, grant := range state.Grants {
+			flags, isWord := legacyGrantAccess[grant.Access]
+			if !isWord {
+				continue
+			}
+			state.Grants[index].Access = flags
+		}
+
+		restatedState, err := json.Marshal(state)
+		if err != nil {
+			return err
+		}
+		event["state"] = restatedState
+
+		return nil
+	})
 }
 
 func dropUnrunModeChange(lines []map[string]json.RawMessage) ([]map[string]json.RawMessage, error) {

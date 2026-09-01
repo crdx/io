@@ -37,6 +37,13 @@ func (self *State[Value]) GetCurrent() Value {
 	return self.definition.Clone(self.currentValue)
 }
 
+func (self *State[Value]) GetKnown() Value {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	return self.definition.Clone(self.knownValue)
+}
+
 func (self *State[Value]) Change(transform func(Value) Value) Value {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()

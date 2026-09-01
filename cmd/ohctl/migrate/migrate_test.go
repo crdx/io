@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/ohctl/migrate"
 	"crdx.org/io/session"
@@ -633,6 +635,38 @@ func TestFormatNineMigrationKeepsTheMessagesOfACrashedTurn(t *testing.T) {
 	}
 	if got := len(storedSession.Events); got != 5 {
 		t.Errorf("kept %d events, want every one the crashed turn recorded", got)
+	}
+}
+
+func TestFormatTenMigrationSpellsPathGrantsWithFlags(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":10,"id":"one","name":"brave-otter"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","text":"rxwgs"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"path_grant_change","state":`+
+			`{"grants":[{"path":"/one","access":"read"},{"path":"/two","access":"write"},`+
+			`{"path":"/three","access":"exec"}]}}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"user_message","text":"begin"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:04Z","payload":{"role":"user","content":"begin"}}`,
+		`{"kind":"turn_completion","time":"2026-08-01T00:00:05Z"}`,
+	)
+
+	if _, err := migrate.Session(options(directory), name); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	restored, found := pathgrant.LastRecorded(storedSession.Events)
+	want := []pathgrant.Grant{
+		{Path: "/one", Access: pathgrant.ReadAccess},
+		{Path: "/three", Access: pathgrant.ReadAccess | pathgrant.ExecAccess},
+		{Path: "/two", Access: pathgrant.ReadAccess | pathgrant.WriteAccess},
+	}
+	if !found || !slices.Equal(restored, want) {
+		t.Errorf("recovered %#v and %t", restored, found)
 	}
 }
 

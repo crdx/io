@@ -166,8 +166,12 @@ func TestConfiguredPathsAreMountedWithTheirRequestedFileAccess(t *testing.T) {
 		t.Errorf("repository metadata write with git capability: %v", err)
 	}
 
-	if _, _, err := files.Resolve(execDirectory); !errors.Is(err, file.ErrOutsideRoot) {
-		t.Errorf("exec-only path resolved through file tools with %v", err)
+	execRoot, name, err := files.Resolve(filepath.Join(execDirectory, "proof"))
+	if err != nil {
+		t.Fatalf("exec path did not resolve through file tools: %v", err)
+	}
+	if err := execRoot.WriteFile(name, []byte("blocked"), 0o600); !errors.Is(err, file.ErrReadOnly) {
+		t.Errorf("exec path write got %v, want read-only", err)
 	}
 }
 
@@ -190,7 +194,7 @@ func TestTemporaryAccessOverridesAndThenRestoresConfiguredAccess(t *testing.T) {
 		t.Errorf("configured read path write got %v", err)
 	}
 
-	if hasChanged, err := access.Grant(configuredDirectory, WriteAccess); err != nil || !hasChanged {
+	if hasChanged, err := access.Grant(configuredDirectory, ReadAccess|WriteAccess); err != nil || !hasChanged {
 		t.Fatalf("grant changed=%t: %v", hasChanged, err)
 	}
 	mountedRoot, name, err = files.Resolve(filepath.Join(configuredDirectory, "proof"))
@@ -241,6 +245,59 @@ func TestRevokingANewTemporaryPathRemovesItFromBothEnforcers(t *testing.T) {
 	}
 	if slices.Contains(access.GetPaths().Read, temporaryDirectory) {
 		t.Errorf("shell paths kept %s", temporaryDirectory)
+	}
+}
+
+func TestAnExecutableGrantIsReadableAndReplacesTheMountBeneathIt(t *testing.T) {
+	mode := caps.NewMode(caps.Read)
+	files := configuredPathTestRoot(t, mode)
+	access, err := NewPathAccess(files, mode, Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	temporaryDirectory := t.TempDir()
+	if hasChanged, err := access.Grant(temporaryDirectory, ReadAccess); err != nil || !hasChanged {
+		t.Fatalf("grant changed=%t: %v", hasChanged, err)
+	}
+	if _, _, err := files.Resolve(temporaryDirectory); err != nil {
+		t.Fatal(err)
+	}
+
+	if hasChanged, err := access.Grant(temporaryDirectory, ReadAccess|ExecAccess); err != nil || !hasChanged {
+		t.Fatalf("executable grant changed=%t: %v", hasChanged, err)
+	}
+	if _, _, err := files.Resolve(temporaryDirectory); err != nil {
+		t.Errorf("executable path did not resolve through file tools: %v", err)
+	}
+	paths := access.GetPaths()
+	if !slices.Contains(paths.Exec, temporaryDirectory) {
+		t.Errorf("shell paths do not execute %s", temporaryDirectory)
+	}
+	if !slices.Contains(paths.Read, temporaryDirectory) {
+		t.Errorf("shell paths do not read %s", temporaryDirectory)
+	}
+
+	if !access.Revoke(temporaryDirectory) {
+		t.Fatal("temporary access was not revoked")
+	}
+	if slices.Contains(access.GetPaths().Exec, temporaryDirectory) {
+		t.Errorf("shell paths kept %s", temporaryDirectory)
+	}
+}
+
+func TestAnExecutableGrantNeedsAPathThatExists(t *testing.T) {
+	mode := caps.NewMode(caps.Read)
+	files := configuredPathTestRoot(t, mode)
+	access, err := NewPathAccess(files, mode, Paths{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer access.Close()
+
+	if _, err := access.Grant(filepath.Join(t.TempDir(), "absent"), ReadAccess|ExecAccess); err == nil {
+		t.Error("expected an absent path not to be granted")
 	}
 }
 

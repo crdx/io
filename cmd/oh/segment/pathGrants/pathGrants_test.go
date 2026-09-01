@@ -51,8 +51,13 @@ func TestTheSegmentReadsTheCurrentGrantListEveryTime(t *testing.T) {
 		t.Errorf("got %q", got)
 	}
 
-	grants = []pathgrant.Grant{{Path: "/output", Access: pathgrant.WriteAccess}}
-	if got := style.Plain(built.Render(segment.Context{})); got != "w:output" {
+	grants = []pathgrant.Grant{{Path: "/output", Access: pathgrant.ReadAccess | pathgrant.WriteAccess}}
+	if got := style.Plain(built.Render(segment.Context{})); got != "rw:output" {
+		t.Errorf("got %q", got)
+	}
+
+	grants = []pathgrant.Grant{{Path: "/tools", Access: pathgrant.ReadAccess | pathgrant.ExecAccess}}
+	if got := style.Plain(built.Render(segment.Context{})); got != "rx:tools" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -60,7 +65,7 @@ func TestTheSegmentReadsTheCurrentGrantListEveryTime(t *testing.T) {
 func TestDuplicateBasenamesExpandToDistinguishingPaths(t *testing.T) {
 	grants := []pathgrant.Grant{
 		{Path: "/one/reference", Access: pathgrant.ReadAccess},
-		{Path: "/two/reference", Access: pathgrant.WriteAccess},
+		{Path: "/two/reference", Access: pathgrant.ReadAccess | pathgrant.WriteAccess},
 	}
 	got := style.Plain(buildSegment(t, &grants, "").Render(segment.Context{}))
 	for _, want := range []string{"r:/one/reference", "w:/two/reference"} {

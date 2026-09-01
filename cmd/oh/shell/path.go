@@ -14,18 +14,6 @@ type Paths struct {
 	Home  []string `toml:"home"`
 }
 
-type Access string
-
-const (
-	ReadAccess  Access = "read"
-	WriteAccess Access = "write"
-	ExecAccess  Access = "exec"
-)
-
-func IsAccess(access Access) bool {
-	return access == ReadAccess || access == WriteAccess || access == ExecAccess
-}
-
 func HomeRelativePath(path string) (string, bool) {
 	home, err := os.UserHomeDir()
 	if err != nil {

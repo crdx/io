@@ -275,7 +275,7 @@ func TestFreshPoliciesFollowTemporaryPathAccess(t *testing.T) {
 	defer access.Close()
 
 	temporaryDirectory := t.TempDir()
-	if _, err := access.Grant(temporaryDirectory, WriteAccess); err != nil {
+	if _, err := access.Grant(temporaryDirectory, ReadAccess|WriteAccess); err != nil {
 		t.Fatal(err)
 	}
 	policy, err := createTestPolicy(t, workspace, t.TempDir(), t.TempDir(), access.GetPaths(), mode.Current())

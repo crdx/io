@@ -6640,7 +6640,20 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			pathGrants.New(func() []pathgrant.Grant {
 				return []pathgrant.Grant{
 					{Path: "/reference", Access: pathgrant.ReadAccess},
-					{Path: "/output", Access: pathgrant.WriteAccess},
+					{Path: "/output", Access: pathgrant.ReadAccess | pathgrant.WriteAccess},
+				}
+			}),
+			"",
+			segment.Context{},
+		),
+		"path-grants / every access": goldenSegmentPass(
+			t,
+			pathGrants.New(func() []pathgrant.Grant {
+				return []pathgrant.Grant{
+					{Path: "/reference", Access: pathgrant.ReadAccess},
+					{Path: "/output", Access: pathgrant.ReadAccess | pathgrant.WriteAccess},
+					{Path: "/tools", Access: pathgrant.ReadAccess | pathgrant.ExecAccess},
+					{Path: "/build", Access: pathgrant.ReadAccess | pathgrant.WriteAccess | pathgrant.ExecAccess},
 				}
 			}),
 			"",
@@ -6667,7 +6680,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			pathGrants.New(func() []pathgrant.Grant {
 				return []pathgrant.Grant{
 					{Path: "/one/reference", Access: pathgrant.ReadAccess},
-					{Path: "/two/reference", Access: pathgrant.WriteAccess},
+					{Path: "/two/reference", Access: pathgrant.ReadAccess | pathgrant.WriteAccess},
 				}
 			}),
 			"",
@@ -7081,7 +7094,7 @@ func TestPathGrantCommandBecomesPendingAccessAndUpdatesTheModel(t *testing.T) {
 	self.settleAccess()
 	directory := t.TempDir()
 
-	if got := self.handleCommand("/grant read " + directory); got != dispatch.Handled {
+	if got := self.handleCommand("/grant r " + directory); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
 	if len(self.pending.items) != 1 || self.pending.items[0].state.Kind != pathgrant.Change {
@@ -7163,7 +7176,7 @@ func TestPathGrantCommandInterruptsAnActiveTurn(t *testing.T) {
 	preparePathGrantCommands(t, self, openTestWorkspace(t, t.TempDir()))
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 
-	if got := self.handleCommand("/grant read " + t.TempDir()); got != dispatch.Handled {
+	if got := self.handleCommand("/grant r " + t.TempDir()); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
 	if !self.currentTurn.Cancelled() {
@@ -7172,6 +7185,181 @@ func TestPathGrantCommandInterruptsAnActiveTurn(t *testing.T) {
 	pending := self.queuedTurn.Peek()
 	if !pending.AccessChange {
 		t.Errorf("queued turn is %#v", pending)
+	}
+}
+
+func TestARegrantedPathIsForgottenByEveryPendingMessage(t *testing.T) {
+	self := testConversation(t, &bytes.Buffer{})
+	grants := preparePathGrantCommands(t, self, openTestWorkspace(t, t.TempDir()))
+	firstPath, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondPath, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	self.handleCommand("/grant r " + firstPath)
+	self.handleCommand("/grant r " + secondPath)
+	self.handleCommand("/grant rw " + firstPath)
+	self.handleCommand("/revoke " + firstPath)
+
+	if len(self.pending.items) != 1 {
+		t.Fatalf("got pending items %#v", self.pending.items)
+	}
+	recorded, found := pathgrant.LastRecorded([]agent.Event{self.pending.items[0].state})
+	want := []pathgrant.Grant{{Path: secondPath, Access: pathgrant.ReadAccess}}
+	if !found || !slices.Equal(recorded, want) {
+		t.Errorf("got recorded grants %#v and %t", recorded, found)
+	}
+	if !grants.IsTold(firstPath) {
+		t.Error("the re-granted path is still waiting to be told")
+	}
+}
+
+func FuzzPendingPathGrantsSayWhatTheModelHasNotBeenTold(fuzzer *testing.F) {
+	for _, commands := range []string{"", "\x00", "\x04", "\x00\x04", "\x00\x01\x04", "\x00\x05\x04", "\x00\x06\x0a\x04"} {
+		fuzzer.Add(commands)
+	}
+
+	fuzzer.Fuzz(func(t *testing.T, commands string) {
+		self := testConversation(t, &bytes.Buffer{})
+		grants := preparePathGrantCommands(t, self, openTestWorkspace(t, t.TempDir()))
+		self.settledCaps = self.mode.Current()
+
+		paths := make([]string, 3)
+		for i := range paths {
+			path, err := filepath.EvalSymlinks(t.TempDir())
+			if err != nil {
+				t.Fatal(err)
+			}
+			paths[i] = path
+		}
+
+		for _, command := range []byte(commands) {
+			path := paths[int(command/6)%len(paths)]
+			switch command % 6 {
+			case 0:
+				self.handleCommand("/grant r " + path)
+			case 1:
+				self.handleCommand("/grant rw " + path)
+			case 2:
+				self.handleCommand("/grant rx " + path)
+			case 3:
+				self.handleCommand("/grant rwx " + path)
+			case 4:
+				self.handleCommand("/revoke " + path)
+			case 5:
+				self.settleAccess()
+				self.accessMessage()
+			}
+			assertPendingPathGrants(t, self, grants, paths)
+		}
+
+		self.settleAccess()
+		self.accessMessage()
+		assertPendingPathGrants(t, self, grants, paths)
+		if len(self.pending.items) != 0 {
+			t.Fatalf("a settled turn left %d pending messages", len(self.pending.items))
+		}
+	})
+}
+
+func assertPendingPathGrants(t *testing.T, self *App, grants *pathgrant.Grants, paths []string) {
+	t.Helper()
+
+	pendingPaths := map[string]bool{}
+	lastState := agent.Event{}
+
+	for _, item := range self.pending.items {
+		if item.state.Kind != pathgrant.Change {
+			continue
+		}
+		if pendingPaths[item.state.Name] {
+			t.Fatalf("%s waits in two pending messages", item.state.Name)
+		}
+		pendingPaths[item.state.Name] = true
+
+		notice, isShown := pathgrant.Notice(item.state)
+		if !isShown || notice != item.message.Text {
+			t.Fatalf("a pending message says %q, and its event says %q", item.message.Text, notice)
+		}
+		lastState = item.state
+	}
+
+	for _, path := range paths {
+		if pendingPaths[path] == grants.IsTold(path) {
+			t.Fatalf("%s waits=%t, but the model knows it=%t", path, pendingPaths[path], grants.IsTold(path))
+		}
+	}
+
+	if lastState.Kind == "" {
+		return
+	}
+	recorded, found := pathgrant.LastRecorded([]agent.Event{lastState})
+	if !found {
+		t.Fatal("the last pending message records no grants")
+	}
+	if want := grants.GetCurrent(); !slices.Equal(recorded, want) {
+		t.Fatalf("the last pending message records %#v, and the session holds %#v", recorded, want)
+	}
+}
+
+func TestAGrantTakenBackBeforeItIsSentLeavesNothingBehind(t *testing.T) {
+	self := testConversation(t, &bytes.Buffer{})
+	grants := preparePathGrantCommands(t, self, openTestWorkspace(t, t.TempDir()))
+	firstPath, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondPath, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	self.handleCommand("/grant r " + firstPath)
+	self.handleCommand("/grant r " + secondPath)
+	self.handleCommand("/revoke " + firstPath)
+
+	if len(self.pending.items) != 1 {
+		t.Fatalf("got pending items %#v", self.pending.items)
+	}
+	if name := self.pending.items[0].state.Name; name != secondPath {
+		t.Errorf("got pending path %q", name)
+	}
+
+	recorded, found := pathgrant.LastRecorded([]agent.Event{self.pending.items[0].state})
+	want := []pathgrant.Grant{{Path: secondPath, Access: pathgrant.ReadAccess}}
+	if !found || !slices.Equal(recorded, want) {
+		t.Errorf("got recorded grants %#v and %t", recorded, found)
+	}
+	if !grants.IsTold(firstPath) {
+		t.Error("the taken-back path is still waiting to be told")
+	}
+
+	self.handleCommand("/revoke " + secondPath)
+	if len(self.pending.items) != 0 {
+		t.Errorf("got pending items %#v", self.pending.items)
+	}
+}
+
+func TestAGrantChangedBeforeItIsSentReplacesItsNotice(t *testing.T) {
+	self := testConversation(t, &bytes.Buffer{})
+	preparePathGrantCommands(t, self, openTestWorkspace(t, t.TempDir()))
+	path, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	self.handleCommand("/grant r " + path)
+	self.handleCommand("/grant rw " + path)
+
+	if len(self.pending.items) != 1 {
+		t.Fatalf("got pending items %#v", self.pending.items)
+	}
+	if text := self.pending.items[0].message.Text; !strings.Contains(text, "write access") {
+		t.Errorf("got pending message %q", text)
 	}
 }
 
@@ -7190,12 +7378,20 @@ const (
 	pathGrantRestoreSettled
 	pathGrantHomePath
 	pathGrantHomePathMissing
+	pathGrantExec
+	pathGrantTakenBack
+	pathGrantReplaced
 )
 
 func TestPathGrantLifecycleDrawsEveryVisibleState(t *testing.T) {
 	passes := map[string]func() string{
-		"active turn interrupted":        func() string { return pathGrantGoldenStream(t, pathGrantInterrupted) },
-		"duplicate grant rejected":       func() string { return pathGrantGoldenStream(t, pathGrantDuplicate) },
+		"active turn interrupted":       func() string { return pathGrantGoldenStream(t, pathGrantInterrupted) },
+		"duplicate grant rejected":      func() string { return pathGrantGoldenStream(t, pathGrantDuplicate) },
+		"executable grant":              func() string { return pathGrantGoldenStream(t, pathGrantExec) },
+		"grant replaced before sending": func() string { return pathGrantGoldenStream(t, pathGrantReplaced) },
+		"grant taken back before sending": func() string {
+			return pathGrantGoldenStream(t, pathGrantTakenBack)
+		},
 		"home path granted":              func() string { return pathGrantGoldenStream(t, pathGrantHomePath) },
 		"missing home path rejected":     func() string { return pathGrantGoldenStream(t, pathGrantHomePathMissing) },
 		"many grants truncated":          func() string { return pathGrantGoldenStream(t, pathGrantMany) },
@@ -7250,9 +7446,9 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 
 	switch scenario {
 	case pathGrantPending:
-		self.handleCommand("/grant read " + referencePath)
+		self.handleCommand("/grant r " + referencePath)
 	case pathGrantSettled:
-		self.handleCommand("/grant read " + referencePath)
+		self.handleCommand("/grant r " + referencePath)
 		self.start("continue")
 		self.waitForCurrentTurn()
 	case pathGrantInterrupted:
@@ -7266,21 +7462,29 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 			painter: self.newPainter(true),
 		}
 		self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "still working"})
-		self.handleCommand("/grant read " + referencePath)
+		self.handleCommand("/grant r " + referencePath)
 		self.waitForCurrentTurn()
 		self.waitForCurrentTurn()
 	case pathGrantMissing:
-		self.handleCommand("/grant read " + missingPath)
+		self.handleCommand("/grant r " + missingPath)
 	case pathGrantHomePath:
 		if err := os.Mkdir(filepath.Join(homePath, "reference"), 0o700); err != nil {
 			t.Fatal(err)
 		}
-		self.handleCommand("/grant read ~/reference")
+		self.handleCommand("/grant r ~/reference")
 	case pathGrantHomePathMissing:
-		self.handleCommand("/grant read ~/missing")
+		self.handleCommand("/grant r ~/missing")
+	case pathGrantExec:
+		self.handleCommand("/grant rx " + referencePath)
+	case pathGrantTakenBack:
+		self.handleCommand("/grant r " + referencePath)
+		self.handleCommand("/revoke " + referencePath)
+	case pathGrantReplaced:
+		self.handleCommand("/grant r " + referencePath)
+		self.handleCommand("/grant rw " + referencePath)
 	case pathGrantDuplicate:
-		self.handleCommand("/grant read " + referencePath)
-		self.handleCommand("/grant read " + referencePath)
+		self.handleCommand("/grant r " + referencePath)
+		self.handleCommand("/grant r " + referencePath)
 	case pathGrantMany:
 		pathAccess := pathGrantAccess(t, self.mode, workspace)
 		manyGrants := stableManyGrantGoldenPaths(t)
@@ -7290,7 +7494,7 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 		}
 		self.pathGrants = grants
 	case pathGrantUnknownAccess:
-		self.handleCommand("/grant execute " + referencePath)
+		self.handleCommand("/grant rwz " + referencePath)
 	case pathGrantRevokeMissing:
 		self.handleCommand("/revoke " + referencePath)
 	case pathGrantRestorePending, pathGrantRestoreSettled:
@@ -7362,7 +7566,7 @@ func stableManyGrantGoldenPaths(t *testing.T) []pathgrant.Grant {
 		}
 		access := pathgrant.ReadAccess
 		if i%2 == 1 {
-			access = pathgrant.WriteAccess
+			access = pathgrant.ReadAccess | pathgrant.WriteAccess
 		}
 		grants[i] = pathgrant.Grant{Path: path, Access: access}
 	}

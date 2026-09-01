@@ -1,5 +1,5 @@
 === screen ===
 [38;2;150;152;150mwould rebuild[0m listing metadata of 1
-[38;2;150;152;150mwould migrate[0m brave-otter [38;2;150;152;150m1 → 10[0m
+[38;2;150;152;150mwould migrate[0m brave-otter [38;2;150;152;150m1 → 11[0m
 [38;2;150;152;150m1 of 1 would be migrated[0m
 === failure ===

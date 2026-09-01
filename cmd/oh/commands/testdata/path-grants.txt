@@ -1,6 +1,6 @@
 === grants configured ===
 Temporary path grants:
-  write  /output
-  read   /reference
+  rw   /output
+  r    /reference
 === no grants configured ===
 No temporary path grants.

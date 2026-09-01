@@ -107,9 +107,24 @@ func renderGrant(grant pathgrant.Grant, pathType string) string {
 	case full:
 	}
 
-	access := style.Read("r")
-	if grant.Access == pathgrant.WriteAccess {
-		access = style.Write("w")
+	return renderAccess(grant.Access) + style.Subtle(":") + style.Normal(path)
+}
+
+func renderAccess(access pathgrant.Access) string {
+	var flags strings.Builder
+
+	for _, right := range []struct {
+		access pathgrant.Access
+		render style.Style
+	}{
+		{pathgrant.ReadAccess, style.Read},
+		{pathgrant.WriteAccess, style.Write},
+		{pathgrant.ExecAccess, style.Exec},
+	} {
+		if access.Has(right.access) {
+			flags.WriteString(right.render(right.access.Flags()))
+		}
 	}
-	return access + style.Subtle(":") + style.Normal(path)
+
+	return flags.String()
 }

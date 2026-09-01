@@ -25,7 +25,7 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		{prefix: "/", steps: 10},
 		{prefix: "/c", steps: 2},
 		{prefix: "/g", steps: 2},
-		{prefix: "/grant ", steps: 2},
+		{prefix: "/grant ", steps: 4},
 		{prefix: "/r", steps: 1},
 		{prefix: "/revoke ", steps: 1},
 		{prefix: "/copy ", steps: 3},
@@ -112,7 +112,7 @@ func TestPathGrantListingMatchesGolden(t *testing.T) {
 	}{
 		{label: "grants configured", grants: []pathgrant.Grant{
 			{Path: "/reference", Access: pathgrant.ReadAccess},
-			{Path: "/output", Access: pathgrant.WriteAccess},
+			{Path: "/output", Access: pathgrant.ReadAccess | pathgrant.WriteAccess},
 		}},
 		{label: "no grants configured"},
 	} {

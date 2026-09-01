@@ -1,7 +1,7 @@
 / → /conf → /copy → /edit → /fork → /grant → /grants → /help → /new → /open → /revoke
 /c → /conf → /copy
 /g → /grant → /grants
-/grant  → /grant read → /grant write
+/grant  → /grant r → /grant rw → /grant rwx → /grant rx
 /r → /revoke
 /revoke  → /revoke /reference
 /copy  → /copy agents-file → /copy config-dir → /copy config-file

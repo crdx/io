@@ -13,9 +13,31 @@ still working
  ⏳ Granted temporary read-only access to /reference.
 
 
-/grant: /reference already has temporary read access (alt+enter
-sends as message)
+/grant: /reference already has temporary read-only access
+(alt+enter sends as message)
 ── ·✦· ─ r:reference ──────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== executable grant ===
+
+ ⏳ Granted temporary read and execute access to /reference.
+ Execution there follows the shell capability.
+
+
+── ·✦· ─ rx:reference ─────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== grant replaced before sending ===
+
+ ⏳ Granted temporary read and write access to /reference. Changes
+ there follow the workspace write capability.
+
+
+── ·✦· ─ rw:reference ─────────────────────────────────────────────────────────────── brave-otter ──
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== grant taken back before sending ===
+── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === home path granted ===
@@ -27,7 +49,7 @@ sends as message)
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === many grants truncated ===
-── ·✦· ─ r:path-01, w:path-02, r:path-03, w:path-04, r:path-05, w:path-06, +44 ────── brave-otter ──
+── ·✦· ─ r:path-01, rw:path-02, r:path-03, rw:path-04, r:path-05, rw:path-06, +44 ─── brave-otter ──
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === missing home path rejected ===
@@ -91,7 +113,7 @@ message)
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === unknown access rejected ===
-Usage: /grant {read|write} <path> (alt+enter sends as message)
+Usage: /grant {r|rw|rx|rwx} <path> (alt+enter sends as message)
 ── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────

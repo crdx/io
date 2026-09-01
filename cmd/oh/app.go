@@ -310,11 +310,42 @@ func (self *App) emitCommandEvent(event agent.Event) {
 }
 
 func (self *App) queuePathGrantChange(event agent.Event) {
+	if index, isPending := self.pendingPathGrantChange(event.Name); isPending {
+		self.takeBackPathGrantChange(index, event.Name)
+
+		if self.pathGrants.IsTold(event.Name) {
+			return
+		}
+	}
+
 	message, isShown := pathgrant.Notice(event)
 	if !isShown {
 		return
 	}
 	self.pending.add(agent.Event{Kind: agent.UserMessageEvent, Text: message}, event)
+}
+
+func (self *App) pendingPathGrantChange(path string) (int, bool) {
+	for index, item := range self.pending.items {
+		if item.state.Kind == pathgrant.Change && item.state.Name == path {
+			return index, true
+		}
+	}
+
+	return 0, false
+}
+
+func (self *App) takeBackPathGrantChange(index int, path string) {
+	self.pending.takeBack(index)
+
+	grants := self.pathGrants.GetCurrent()
+	for other := range self.pending.items {
+		item := &self.pending.items[other]
+		if item.state.Kind != pathgrant.Change {
+			continue
+		}
+		item.state = pathgrant.WithGrantOf(item.state, path, grants)
+	}
 }
 
 func (self *App) sendCommandPrompt(message string) {
@@ -394,6 +425,9 @@ func (self *App) takeBackModeChange(index int, whichCaps caps.Set) {
 
 	for other := index; other < len(self.pending.items); other++ {
 		item := &self.pending.items[other]
+		if item.state.Kind != caps.ModeChange {
+			continue
+		}
 		item.state = caps.ModeWithout(item.state, whichCaps)
 		item.message.Text, _ = caps.ModeNotice(item.state)
 	}

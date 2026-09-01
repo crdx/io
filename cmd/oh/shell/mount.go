@@ -70,13 +70,15 @@ func (self *PathAccess) GetPaths() Paths {
 
 	paths := clonePaths(self.configuredPaths)
 	for _, path := range slices.Sorted(maps.Keys(self.temporaryAccess)) {
-		switch self.temporaryAccess[path] {
-		case WriteAccess:
+		access := self.temporaryAccess[path]
+		switch {
+		case access.Has(WriteAccess):
 			paths.Write = append(paths.Write, path)
-		case ExecAccess:
-			paths.Exec = append(paths.Exec, path)
-		case ReadAccess:
+		default:
 			paths.Read = append(paths.Read, path)
+		}
+		if access.Has(ExecAccess) {
+			paths.Exec = append(paths.Exec, path)
 		}
 	}
 	return paths
@@ -208,12 +210,18 @@ type pathMode struct {
 }
 
 func sortedPathModes(paths Paths) []pathMode {
-	accessByPath := make(map[string]Access, len(paths.Read)+len(paths.Write))
-	for _, path := range paths.Read {
-		accessByPath[filepath.Clean(path)] = ReadAccess
-	}
-	for _, path := range paths.Write {
-		accessByPath[filepath.Clean(path)] = WriteAccess
+	accessByPath := make(map[string]Access, len(paths.Read)+len(paths.Write)+len(paths.Exec))
+	for _, list := range []struct {
+		paths  []string
+		access Access
+	}{
+		{paths.Read, ReadAccess},
+		{paths.Write, ReadAccess | WriteAccess},
+		{paths.Exec, ReadAccess | ExecAccess},
+	} {
+		for _, path := range list.paths {
+			accessByPath[filepath.Clean(path)] |= list.access
+		}
 	}
 
 	names := slices.Sorted(maps.Keys(accessByPath))
@@ -226,7 +234,7 @@ func sortedPathModes(paths Paths) []pathMode {
 
 func newMountedRoot(mode *caps.Mode, mount configuredMount, access Access) *file.Root {
 	refuseWrite := func(string) error { return file.ErrReadOnly }
-	if access == WriteAccess {
+	if access.Has(WriteAccess) {
 		currentRefusal := caps.RefuseWrite(mode)
 		refuseWrite = func(name string) error {
 			if mount.isExact {

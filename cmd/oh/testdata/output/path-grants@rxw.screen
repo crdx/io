@@ -11,13 +11,42 @@
 I can read the external reference now.
 
 
- Granted temporary write access to
- /reference; changes follow the
+ Granted temporary read and write access
+ to /reference. Changes there follow the
  workspace write capability.
 
 
 I can also change it while workspace
 writing is granted.
+
+
+ Granted temporary read and execute
+ access to /tools. Execution there
+ follows the shell capability.
+
+
+I can run what is in the tools directory
+now.
+
+
+ Granted temporary read, write, and
+ execute access to /build. Changes there
+ follow the workspace write capability.
+ Execution there follows the shell
+ capability.
+
+
+I can build in place and run what comes
+out of it.
+
+
+ Revoked temporary path access to
+ /build. Revoked temporary path access
+ to /tools.
+
+
+I will use the reference alone from
+here.
 
 
  Revoked temporary path access to
@@ -233,6 +262,20 @@ r
 
 y
 
+r
+
+e
+
+a
+
+d
+
+a
+
+n
+
+d
+
 w
 
 r
@@ -279,9 +322,9 @@ c
 
 e
 
-;
+.
 
-c
+C
 
 h
 
@@ -294,6 +337,16 @@ g
 e
 
 s
+
+t
+
+h
+
+e
+
+r
+
+e
 
 f
 
@@ -410,6 +463,713 @@ n
 t
 e
 d
+.
+
+
+
+G
+
+r
+
+a
+
+n
+
+t
+
+e
+
+d
+
+t
+
+e
+
+m
+
+p
+
+o
+
+r
+
+a
+
+r
+
+y
+
+r
+
+e
+
+a
+
+d
+
+a
+
+n
+
+d
+
+e
+
+x
+
+e
+
+c
+
+u
+
+t
+
+e
+
+a
+
+c
+
+c
+
+e
+
+s
+
+s
+
+t
+
+o
+
+/
+
+t
+
+o
+
+o
+
+l
+
+s
+
+.
+
+E
+
+x
+
+e
+
+c
+
+u
+
+t
+
+i
+
+o
+
+n
+
+t
+
+h
+
+e
+
+r
+
+e
+
+f
+
+o
+
+l
+
+l
+
+o
+
+w
+
+s
+
+t
+
+h
+
+e
+
+s
+
+h
+
+e
+
+l
+
+l
+
+c
+
+a
+
+p
+
+a
+
+b
+
+i
+
+l
+
+i
+
+t
+
+y
+
+.
+
+
+I
+c
+a
+n
+r
+u
+n
+w
+h
+a
+t
+i
+s
+i
+n
+t
+h
+e
+t
+o
+o
+l
+s
+d
+i
+r
+e
+c
+t
+o
+r
+y
+n
+o
+w
+.
+
+
+
+G
+
+r
+
+a
+
+n
+
+t
+
+e
+
+d
+
+t
+
+e
+
+m
+
+p
+
+o
+
+r
+
+a
+
+r
+
+y
+
+r
+
+e
+
+a
+
+d
+
+,
+
+w
+
+r
+
+i
+
+t
+
+e
+
+,
+
+a
+
+n
+
+d
+
+e
+
+x
+
+e
+
+c
+
+u
+
+t
+
+e
+
+a
+
+c
+
+c
+
+e
+
+s
+
+s
+
+t
+
+o
+
+/
+
+b
+
+u
+
+i
+
+l
+
+d
+
+.
+
+C
+
+h
+
+a
+
+n
+
+g
+
+e
+
+s
+
+t
+
+h
+
+e
+
+r
+
+e
+
+f
+
+o
+
+l
+
+l
+
+o
+
+w
+
+t
+
+h
+
+e
+
+w
+
+o
+
+r
+
+k
+
+s
+
+p
+
+a
+
+c
+
+e
+
+w
+
+r
+
+i
+
+t
+
+e
+
+c
+
+a
+
+p
+
+a
+
+b
+
+i
+
+l
+
+i
+
+t
+
+y
+
+.
+
+E
+
+x
+
+e
+
+c
+
+u
+
+t
+
+i
+
+o
+
+n
+
+t
+
+h
+
+e
+
+r
+
+e
+
+f
+
+o
+
+l
+
+l
+
+o
+
+w
+
+s
+
+t
+
+h
+
+e
+
+s
+
+h
+
+e
+
+l
+
+l
+
+c
+
+a
+
+p
+
+a
+
+b
+
+i
+
+l
+
+i
+
+t
+
+y
+
+.
+
+
+I
+c
+a
+n
+b
+u
+i
+l
+d
+i
+n
+p
+l
+a
+c
+e
+a
+n
+d
+r
+u
+n
+w
+h
+a
+t
+c
+o
+m
+e
+s
+o
+u
+t
+o
+f
+i
+t
+.
+
+
+
+R
+
+e
+
+v
+
+o
+
+k
+
+e
+
+d
+
+t
+
+e
+
+m
+
+p
+
+o
+
+r
+
+a
+
+r
+
+y
+
+p
+
+a
+
+t
+
+h
+
+a
+
+c
+
+c
+
+e
+
+s
+
+s
+
+t
+
+o
+
+/
+
+b
+
+u
+
+i
+
+l
+
+d
+
+.
+
+R
+
+e
+
+v
+
+o
+
+k
+
+e
+
+d
+
+t
+
+e
+
+m
+
+p
+
+o
+
+r
+
+a
+
+r
+
+y
+
+p
+
+a
+
+t
+
+h
+
+a
+
+c
+
+c
+
+e
+
+s
+
+s
+
+t
+
+o
+
+/
+
+t
+
+o
+
+o
+
+l
+
+s
+
+.
+
+
+I
+w
+i
+l
+l
+u
+s
+e
+t
+h
+e
+r
+e
+f
+e
+r
+e
+n
+c
+e
+a
+l
+o
+n
+e
+f
+r
+o
+m
+h
+e
+r
+e
 .
 
 
@@ -535,10 +1295,12 @@ now.
 
  Granted
  temporary
+ read and
  write
  access to
- /reference;
- changes
+ /reference.
+ Changes
+ there
  follow the
  workspace
  write
@@ -551,6 +1313,70 @@ while
 workspace
 writing is
 granted.
+
+
+ Granted
+ temporary
+ read and
+ execute
+ access to
+ /tools.
+ Execution
+ there
+ follows the
+ shell
+ capability.
+
+
+I can run
+what is in
+the tools
+directory
+now.
+
+
+ Granted
+ temporary
+ read,
+ write, and
+ execute
+ access to
+ /build.
+ Changes
+ there
+ follow the
+ workspace
+ write
+ capability.
+ Execution
+ there
+ follows the
+ shell
+ capability.
+
+
+I can build
+in place and
+run what
+comes out of
+it.
+
+
+ Revoked
+ temporary
+ path access
+ to /build.
+ Revoked
+ temporary
+ path access
+ to /tools.
+
+
+I will use
+the
+reference
+alone from
+here.
 
 
  Revoked
@@ -575,10 +1401,30 @@ it.
 I can read the external reference now.
 
 
- Granted temporary write access to /reference; changes follow the workspace write capability.
+ Granted temporary read and write access to /reference. Changes there follow the workspace write
+ capability.
 
 
 I can also change it while workspace writing is granted.
+
+
+ Granted temporary read and execute access to /tools. Execution there follows the shell capability.
+
+
+I can run what is in the tools directory now.
+
+
+ Granted temporary read, write, and execute access to /build. Changes there follow the workspace
+ write capability. Execution there follows the shell capability.
+
+
+I can build in place and run what comes out of it.
+
+
+ Revoked temporary path access to /build. Revoked temporary path access to /tools.
+
+
+I will use the reference alone from here.
 
 
  Revoked temporary path access to /reference.

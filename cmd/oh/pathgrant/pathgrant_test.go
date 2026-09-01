@@ -68,7 +68,7 @@ func TestReadAndWriteGrantsReachTheFileToolsAndFollowTheWriteCapability(t *testi
 		t.Errorf("read grant write got %v", err)
 	}
 
-	if _, err := grants.Grant(directory, WriteAccess); err != nil {
+	if _, err := grants.Grant(directory, ReadAccess|WriteAccess); err != nil {
 		t.Fatal(err)
 	}
 	mountedRoot, name, err = files.Resolve(proof)
@@ -171,14 +171,45 @@ func TestAHomePathIsExpandedRatherThanJoinedToTheWorkspace(t *testing.T) {
 	}
 }
 
+func TestAnExecutableGrantIsToldToTheModelAndReadableByTheFileTools(t *testing.T) {
+	grants, files, _ := newTestGrants(t)
+	directory := t.TempDir()
+
+	event, err := grants.Grant(directory, ReadAccess|ExecAccess)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "Granted temporary read and execute access to " + directory +
+		". Execution there follows the shell capability."
+	if notice, found := Notice(event); !found || notice != want {
+		t.Errorf("got notice %q and %t", notice, found)
+	}
+	if _, _, err := files.Resolve(directory); err != nil {
+		t.Errorf("executable path did not resolve through file tools: %v", err)
+	}
+	if injection := grants.Inject(); !strings.Contains(injection, "Execution there follows the shell capability") {
+		t.Errorf("got injection %q", injection)
+	}
+}
+
+func TestAnAccessWithoutReadIsRefused(t *testing.T) {
+	grants, _, _ := newTestGrants(t)
+
+	if _, err := grants.Grant(t.TempDir(), WriteAccess); err == nil ||
+		!strings.Contains(err.Error(), `want some of "rwx"`) {
+		t.Errorf("got %v", err)
+	}
+}
+
 func TestGrantChangesAreInjectedOnce(t *testing.T) {
 	grants, _, _ := newTestGrants(t)
 	directory := t.TempDir()
-	if _, err := grants.Grant(directory, WriteAccess); err != nil {
+	if _, err := grants.Grant(directory, ReadAccess|WriteAccess); err != nil {
 		t.Fatal(err)
 	}
 
-	want := "The path " + directory + " now has temporary read-write access when the workspace write capability is granted."
+	want := "The path " + directory +
+		" now has temporary read and write access. Changes there follow the workspace write capability."
 	if got := grants.Inject(); got != want {
 		t.Errorf("got injection %q", got)
 	}
@@ -194,13 +225,13 @@ func TestTheLatestCompleteEventRestoresTheGrantCollection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := ChangeEvent(secondPath, []Grant{{Path: secondPath, Access: WriteAccess}})
+	second, err := ChangeEvent(secondPath, []Grant{{Path: secondPath, Access: ReadAccess | WriteAccess}})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	restored, found := LastRecorded([]agent.Event{first, {Kind: Change, State: []byte("broken")}, second})
-	want := []Grant{{Path: secondPath, Access: WriteAccess}}
+	want := []Grant{{Path: secondPath, Access: ReadAccess | WriteAccess}}
 	if !found || !reflect.DeepEqual(restored, want) {
 		t.Errorf("got %#v and %t", restored, found)
 	}
@@ -267,13 +298,13 @@ func TestRestoreReopensPresentPathsAndCorrectsMissingOnes(t *testing.T) {
 	missing := filepath.Join(t.TempDir(), "missing")
 	recorded := []Grant{
 		{Path: missing, Access: ReadAccess},
-		{Path: present, Access: WriteAccess},
+		{Path: present, Access: ReadAccess | WriteAccess},
 	}
 	grants, result := NewRestored(workspace, access, recorded)
 	if len(result.Failures) != 1 || result.Failures[0].Grant.Path != missing {
 		t.Fatalf("got restoration failures %#v", result.Failures)
 	}
-	if current := grants.GetCurrent(); !reflect.DeepEqual(current, []Grant{{Path: present, Access: WriteAccess}}) {
+	if current := grants.GetCurrent(); !reflect.DeepEqual(current, []Grant{{Path: present, Access: ReadAccess | WriteAccess}}) {
 		t.Errorf("got restored grants %#v", current)
 	}
 	if _, _, err := files.Resolve(present); err != nil {

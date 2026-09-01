@@ -1,4 +1,4 @@
-{"kind":"head","version":10,"meta":{"model":"qwen3.8:27b-mtp-q8_0-256k","workspaceDir":"","provider":"ollama","effort":"high","system_prompt":"You are a test assistant."}}
+{"kind":"head","version":11,"meta":{"model":"qwen3.8:27b-mtp-q8_0-256k","workspaceDir":"","provider":"ollama","effort":"high","system_prompt":"You are a test assistant."}}
 {"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"call a tool through Ollama"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Call the tool."}}

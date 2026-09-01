@@ -7,6 +7,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/slash"
 )
 
@@ -31,7 +32,7 @@ func pathGrantCommands(grants PathGrants) []slash.Command {
 func grantCommand(grants PathGrants) slash.Command {
 	return slash.Command{
 		Name:        "grant",
-		Description: "Grant temporary read-only or read-write path access.",
+		Description: "Grant temporary path access, spelled with the flags r, w, and x.",
 		Run: func(context slash.Context, arguments slash.Arguments) error {
 			accessText, path, found := strings.Cut(arguments.Text, " ")
 			path = strings.TrimSpace(path)
@@ -39,8 +40,8 @@ func grantCommand(grants PathGrants) slash.Command {
 				return slash.Usage()
 			}
 
-			access := pathgrant.Access(strings.TrimSpace(accessText))
-			if access != pathgrant.ReadAccess && access != pathgrant.WriteAccess {
+			access, err := shell.ParseAccess(strings.TrimSpace(accessText))
+			if err != nil {
 				return slash.Usage()
 			}
 			event, err := grants.Grant(path, access)
@@ -51,8 +52,24 @@ func grantCommand(grants PathGrants) slash.Command {
 			return nil
 		},
 	}.
-		WithArguments(string(pathgrant.ReadAccess), string(pathgrant.WriteAccess)).
-		WithArgumentUsage("{read|write} <path>")
+		WithArguments(grantFlagChoices()...).
+		WithArgumentUsage("{r|rw|rx|rwx} <path>")
+}
+
+func grantFlagChoices() []string {
+	choices := []pathgrant.Access{
+		pathgrant.ReadAccess,
+		pathgrant.ReadAccess | pathgrant.WriteAccess,
+		pathgrant.ReadAccess | pathgrant.ExecAccess,
+		pathgrant.ReadAccess | pathgrant.WriteAccess | pathgrant.ExecAccess,
+	}
+
+	flags := make([]string, 0, len(choices))
+	for _, access := range choices {
+		flags = append(flags, access.Flags())
+	}
+
+	return flags
 }
 
 func grantsCommand(grants PathGrants) slash.Command {
@@ -109,7 +126,7 @@ func formatPathGrants(grants []pathgrant.Grant) string {
 
 	lines := make([]string, 0, len(grantList))
 	for _, grant := range grantList {
-		lines = append(lines, fmt.Sprintf("  %-5s  %s", grant.Access, grant.Path))
+		lines = append(lines, fmt.Sprintf("  %-3s  %s", grant.Access.Flags(), grant.Path))
 	}
 	return "Temporary path grants:\n" + strings.Join(lines, "\n")
 }
