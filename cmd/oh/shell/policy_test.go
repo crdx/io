@@ -246,7 +246,7 @@ func TestTemporaryPathAccessChangesTheNextShellCommand(t *testing.T) {
 	if _, err := run(); err == nil {
 		t.Fatal("external path was readable before it was granted")
 	}
-	if _, err := access.Grant(externalDirectory, false); err != nil {
+	if _, err := access.Grant(externalDirectory, ReadAccess); err != nil {
 		t.Fatal(err)
 	}
 	if output, err := run(); err != nil || output != "reference text" {
@@ -275,7 +275,7 @@ func TestFreshPoliciesFollowTemporaryPathAccess(t *testing.T) {
 	defer access.Close()
 
 	temporaryDirectory := t.TempDir()
-	if _, err := access.Grant(temporaryDirectory, true); err != nil {
+	if _, err := access.Grant(temporaryDirectory, WriteAccess); err != nil {
 		t.Fatal(err)
 	}
 	policy, err := createTestPolicy(t, workspace, t.TempDir(), t.TempDir(), access.GetPaths(), mode.Current())

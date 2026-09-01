@@ -7,7 +7,6 @@ import (
 	"crdx.org/io/internal/util/pathutil"
 )
 
-// Paths are the additional host paths made available to shell and file tools.
 type Paths struct {
 	Read  []string `toml:"read"`
 	Write []string `toml:"write"`
@@ -15,7 +14,18 @@ type Paths struct {
 	Home  []string `toml:"home"`
 }
 
-// HomeRelativePath returns the path relative to the host home directory.
+type Access string
+
+const (
+	ReadAccess  Access = "read"
+	WriteAccess Access = "write"
+	ExecAccess  Access = "exec"
+)
+
+func IsAccess(access Access) bool {
+	return access == ReadAccess || access == WriteAccess || access == ExecAccess
+}
+
 func HomeRelativePath(path string) (string, bool) {
 	home, err := os.UserHomeDir()
 	if err != nil {

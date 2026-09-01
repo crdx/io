@@ -190,7 +190,7 @@ func TestTemporaryAccessOverridesAndThenRestoresConfiguredAccess(t *testing.T) {
 		t.Errorf("configured read path write got %v", err)
 	}
 
-	if hasChanged, err := access.Grant(configuredDirectory, true); err != nil || !hasChanged {
+	if hasChanged, err := access.Grant(configuredDirectory, WriteAccess); err != nil || !hasChanged {
 		t.Fatalf("grant changed=%t: %v", hasChanged, err)
 	}
 	mountedRoot, name, err = files.Resolve(filepath.Join(configuredDirectory, "proof"))
@@ -223,7 +223,7 @@ func TestRevokingANewTemporaryPathRemovesItFromBothEnforcers(t *testing.T) {
 	defer access.Close()
 
 	temporaryDirectory := t.TempDir()
-	if hasChanged, err := access.Grant(temporaryDirectory, false); err != nil || !hasChanged {
+	if hasChanged, err := access.Grant(temporaryDirectory, ReadAccess); err != nil || !hasChanged {
 		t.Fatalf("grant changed=%t: %v", hasChanged, err)
 	}
 	if _, _, err := files.Resolve(temporaryDirectory); err != nil {
@@ -259,7 +259,7 @@ func TestTemporaryMountsCanChangeWhileFileToolsResolvePaths(t *testing.T) {
 	go func() {
 		defer waitGroup.Done()
 		for range 100 {
-			_, _ = access.Grant(temporaryDirectory, false)
+			_, _ = access.Grant(temporaryDirectory, ReadAccess)
 			access.Revoke(temporaryDirectory)
 		}
 	}()

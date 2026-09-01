@@ -33,26 +33,26 @@ type PathAccess struct {
 	files *file.Root
 	mode  *caps.Mode
 
-	mutex             sync.RWMutex
-	configuredPaths   Paths
-	configuredMounts  map[string]mountedPath
-	temporaryMounts   map[string]mountedPath
-	temporaryWritable map[string]bool
-	roots             []*os.Root
+	mutex            sync.RWMutex
+	configuredPaths  Paths
+	configuredMounts map[string]mountedPath
+	temporaryMounts  map[string]mountedPath
+	temporaryAccess  map[string]Access
+	roots            []*os.Root
 }
 
 func NewPathAccess(files *file.Root, mode *caps.Mode, paths Paths) (*PathAccess, error) {
 	access := &PathAccess{
-		files:             files,
-		mode:              mode,
-		configuredPaths:   clonePaths(paths),
-		configuredMounts:  make(map[string]mountedPath),
-		temporaryMounts:   make(map[string]mountedPath),
-		temporaryWritable: make(map[string]bool),
+		files:            files,
+		mode:             mode,
+		configuredPaths:  clonePaths(paths),
+		configuredMounts: make(map[string]mountedPath),
+		temporaryMounts:  make(map[string]mountedPath),
+		temporaryAccess:  make(map[string]Access),
 	}
 
 	for _, path := range sortedPathModes(paths) {
-		configuredPathMount, err := access.openMountedPath(path.path, path.isWritable)
+		configuredPathMount, err := access.openMountedPath(path.path, path.access)
 		if err != nil {
 			access.Close()
 			return nil, fmt.Errorf("could not mount configured path %s: %w", pathutil.Shorten(path.path), err)
@@ -69,36 +69,36 @@ func (self *PathAccess) GetPaths() Paths {
 	defer self.mutex.RUnlock()
 
 	paths := clonePaths(self.configuredPaths)
-	for _, path := range slices.Sorted(maps.Keys(self.temporaryWritable)) {
-		if self.temporaryWritable[path] {
+	for _, path := range slices.Sorted(maps.Keys(self.temporaryAccess)) {
+		switch self.temporaryAccess[path] {
+		case WriteAccess:
 			paths.Write = append(paths.Write, path)
-		} else {
+		case ExecAccess:
+			paths.Exec = append(paths.Exec, path)
+		case ReadAccess:
 			paths.Read = append(paths.Read, path)
 		}
 	}
 	return paths
 }
 
-func (self *PathAccess) Grant(path string, isWritable bool) (bool, error) {
+func (self *PathAccess) Grant(path string, access Access) (bool, error) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
 	path = filepath.Clean(path)
-	if current, exists := self.temporaryWritable[path]; exists && current == isWritable {
+	if current, exists := self.temporaryAccess[path]; exists && current == access {
 		return false, nil
 	}
 
-	temporaryPathMount, err := self.openMountedPath(path, isWritable)
+	temporaryPathMount, err := self.openMountedPath(path, access)
 	if err != nil {
 		return false, err
 	}
-	previousMount, hasPreviousMount := self.temporaryMounts[path]
+	self.releaseTemporaryMount(path)
 	self.temporaryMounts[path] = temporaryPathMount
-	self.temporaryWritable[path] = isWritable
+	self.temporaryAccess[path] = access
 	self.install(path, temporaryPathMount)
-	if hasPreviousMount {
-		_ = previousMount.mount.root.Close()
-	}
 	return true, nil
 }
 
@@ -107,19 +107,11 @@ func (self *PathAccess) Revoke(path string) bool {
 	defer self.mutex.Unlock()
 
 	path = filepath.Clean(path)
-	if _, exists := self.temporaryWritable[path]; !exists {
+	if _, exists := self.temporaryAccess[path]; !exists {
 		return false
 	}
-	temporaryPathMount := self.temporaryMounts[path]
-	delete(self.temporaryMounts, path)
-	delete(self.temporaryWritable, path)
-
-	if configuredPathMount, exists := self.configuredMounts[path]; exists {
-		self.install(path, configuredPathMount)
-	} else {
-		self.files.Unmount(path)
-	}
-	_ = temporaryPathMount.mount.root.Close()
+	delete(self.temporaryAccess, path)
+	self.releaseTemporaryMount(path)
 	return true
 }
 
@@ -130,13 +122,28 @@ func (self *PathAccess) Close() {
 	self.roots = nil
 }
 
-func (self *PathAccess) openMountedPath(path string, isWritable bool) (mountedPath, error) {
+func (self *PathAccess) releaseTemporaryMount(path string) {
+	temporaryPathMount, exists := self.temporaryMounts[path]
+	if !exists {
+		return
+	}
+	delete(self.temporaryMounts, path)
+
+	if configuredPathMount, exists := self.configuredMounts[path]; exists {
+		self.install(path, configuredPathMount)
+	} else {
+		self.files.Unmount(path)
+	}
+	_ = temporaryPathMount.mount.root.Close()
+}
+
+func (self *PathAccess) openMountedPath(path string, access Access) (mountedPath, error) {
 	mount, err := openConfiguredMount(path)
 	if err != nil {
 		return mountedPath{}, err
 	}
 	self.roots = append(self.roots, mount.root)
-	return mountedPath{mount: &mount, root: newMountedRoot(self.mode, mount, isWritable)}, nil
+	return mountedPath{mount: &mount, root: newMountedRoot(self.mode, mount, access)}, nil
 }
 
 func (self *PathAccess) install(path string, pathMount mountedPath) {
@@ -156,7 +163,6 @@ func clonePaths(paths Paths) Paths {
 	}
 }
 
-// PreparePaths creates configured paths that do not yet exist and omits any that cannot be created.
 func PreparePaths(paths Paths, warnings io.Writer) (Paths, error) {
 	filteredPaths := Paths{}
 	lists := []struct {
@@ -197,30 +203,30 @@ func PreparePaths(paths Paths, warnings io.Writer) (Paths, error) {
 }
 
 type pathMode struct {
-	path       string
-	isWritable bool
+	path   string
+	access Access
 }
 
 func sortedPathModes(paths Paths) []pathMode {
-	writable := make(map[string]bool, len(paths.Read)+len(paths.Write))
+	accessByPath := make(map[string]Access, len(paths.Read)+len(paths.Write))
 	for _, path := range paths.Read {
-		writable[filepath.Clean(path)] = false
+		accessByPath[filepath.Clean(path)] = ReadAccess
 	}
 	for _, path := range paths.Write {
-		writable[filepath.Clean(path)] = true
+		accessByPath[filepath.Clean(path)] = WriteAccess
 	}
 
-	names := slices.Sorted(maps.Keys(writable))
+	names := slices.Sorted(maps.Keys(accessByPath))
 	modes := make([]pathMode, 0, len(names))
 	for _, path := range names {
-		modes = append(modes, pathMode{path: path, isWritable: writable[path]})
+		modes = append(modes, pathMode{path: path, access: accessByPath[path]})
 	}
 	return modes
 }
 
-func newMountedRoot(mode *caps.Mode, mount configuredMount, isWritable bool) *file.Root {
+func newMountedRoot(mode *caps.Mode, mount configuredMount, access Access) *file.Root {
 	refuseWrite := func(string) error { return file.ErrReadOnly }
-	if isWritable {
+	if access == WriteAccess {
 		currentRefusal := caps.RefuseWrite(mode)
 		refuseWrite = func(name string) error {
 			if mount.isExact {

@@ -17,11 +17,12 @@ import (
 	"crdx.org/io/internal/util/pathutil"
 )
 
-type Access string
+type Access = shell.Access
 
 const (
-	ReadAccess  Access = "read"
-	WriteAccess Access = "write"
+	ReadAccess  = shell.ReadAccess
+	WriteAccess = shell.WriteAccess
+	ExecAccess  = shell.ExecAccess
 )
 
 type Grant struct {
@@ -64,7 +65,7 @@ func NewRestored(
 		var err error
 		if !filepath.IsAbs(grant.Path) || filepath.Clean(grant.Path) != grant.Path {
 			err = fmt.Errorf("invalid recorded path %q", grant.Path)
-		} else if grant.Access != ReadAccess && grant.Access != WriteAccess {
+		} else if !shell.IsAccess(grant.Access) {
 			err = fmt.Errorf("invalid recorded access %q", grant.Access)
 		}
 		canonicalPath := ""
@@ -75,7 +76,7 @@ func NewRestored(
 			err = fmt.Errorf("path now resolves to %s", filepath.Clean(canonicalPath))
 		}
 		if err == nil {
-			_, err = pathAccess.Grant(grant.Path, grant.Access == WriteAccess)
+			_, err = pathAccess.Grant(grant.Path, grant.Access)
 		}
 		if err != nil {
 			result.Failures = append(result.Failures, RestoreFailure{Grant: grant, Err: err})
@@ -103,8 +104,8 @@ func (self *Grants) Grant(path string, access Access) (agent.Event, error) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	if access != ReadAccess && access != WriteAccess {
-		return agent.Event{}, fmt.Errorf("access is %q, want read or write", access)
+	if !shell.IsAccess(access) {
+		return agent.Event{}, fmt.Errorf("access is %q, want read, write, or exec", access)
 	}
 	canonicalPath, err := self.canonicalPath(path, true)
 	if err != nil {
@@ -115,7 +116,7 @@ func (self *Grants) Grant(path string, access Access) (agent.Event, error) {
 	if existing, found := findGrant(current, canonicalPath); found && existing.Access == access {
 		return agent.Event{}, fmt.Errorf("%s already has temporary %s access", pathutil.Shorten(canonicalPath), access)
 	}
-	if _, err := self.pathAccess.Grant(canonicalPath, access == WriteAccess); err != nil {
+	if _, err := self.pathAccess.Grant(canonicalPath, access); err != nil {
 		return agent.Event{}, fmt.Errorf("could not grant access to %s: %w", pathutil.Shorten(canonicalPath), err)
 	}
 
@@ -261,7 +262,7 @@ func decodeEvent(event agent.Event) ([]Grant, error) {
 	}
 	for _, grant := range state.Grants {
 		if !filepath.IsAbs(grant.Path) || filepath.Clean(grant.Path) != grant.Path ||
-			(grant.Access != ReadAccess && grant.Access != WriteAccess) {
+			!shell.IsAccess(grant.Access) {
 			return nil, errors.New("invalid path grant state")
 		}
 	}
