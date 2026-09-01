@@ -28,14 +28,12 @@ type loadedFile struct {
 	size      int64
 }
 
-// Args is what a read takes. An absent offset or limit is zero, which means the whole file.
 type Args struct {
 	Path   string `json:"path"`
 	Offset int    `json:"offset"`
 	Limit  int    `json:"limit"`
 }
 
-// New builds the read tool confined to root.
 func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	restoreReadState := func(payload json.RawMessage) error {
 		return snapshots.RestoreReadState(root, payload)
@@ -62,7 +60,6 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 		})
 }
 
-// Describe reports a read's subject and qualifier: the path, and the lines it asks for.
 func Describe(args Args) (string, string) {
 	return args.Path, span(args.Offset, args.Limit)
 }

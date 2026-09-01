@@ -55,8 +55,6 @@ func New(workspace *work.Space) segment.Factory {
 	}
 }
 
-// Render holds the basename forward, since that is the name the user calls the workspace by, and
-// leaves whatever leads up to it a step behind.
 func (self state) Render(segment.Context) string {
 	leading, name := splitLeadingPath(self.value)
 

@@ -16,7 +16,6 @@ func Capitalise(text string) string {
 	return string(characters)
 }
 
-// OrDash uses an ai-dash in the place of a value.
 func OrDash(text string) string {
 	if text == "" {
 		return "—"

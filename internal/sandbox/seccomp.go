@@ -100,8 +100,8 @@ func buildFilter(isUnixSocketScoped bool) ([]unix.SockFilter, error) {
 }
 
 type target struct {
-	audit  uint32 // the AUDIT_ARCH value the filter must match
-	socket uint32 // the socket(2) number
+	audit  uint32
+	socket uint32
 }
 
 func architecture() (target, error) {

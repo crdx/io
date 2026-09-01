@@ -24,7 +24,6 @@ type inputOpts struct {
 	Sessions []string `docopt:"<session>"`
 }
 
-// Run rewrites the transcript of each named session, or of every stored session.
 func Run() error {
 	options := duckopt.MustBind[inputOpts](usage, "$0")
 	return run(location.GetSessionsDir(), options.Sessions, console.Standard())

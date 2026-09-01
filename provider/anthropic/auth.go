@@ -9,7 +9,6 @@ import (
 	"crdx.org/io/internal/auth"
 )
 
-// Credentials are what a Claude subscription was authorised as.
 type Credentials = auth.AnthropicCredentials
 
 func stale(credentials *Credentials) bool {

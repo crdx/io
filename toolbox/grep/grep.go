@@ -20,8 +20,6 @@ import (
 	"crdx.org/io/tool"
 )
 
-// Args is what a search by content takes. An absent path is the working directory, and an absent
-// glob every file below it.
 type Args struct {
 	Pattern string `json:"pattern"`
 	Path    string `json:"path"`
@@ -30,7 +28,6 @@ type Args struct {
 
 var matchPathPattern = regexp.MustCompile(`^(.+):[0-9]+:`)
 
-// New builds the grep tool confined to root. A match is reported as path:line:text.
 func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	restoreReadState := func(payload json.RawMessage) error {
 		return snapshots.RestoreReadState(root, payload)
@@ -63,7 +60,6 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 		})
 }
 
-// Describe reports the search's subject and qualifier.
 func Describe(args Args) (string, string) {
 	return util.DescribeSearch(args.Pattern, args.Path, args.Glob)
 }

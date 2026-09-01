@@ -10,12 +10,10 @@ import (
 	"crdx.org/io/tool"
 )
 
-// Args is what a listing takes. An absent path is the working directory.
 type Args struct {
 	Path string `json:"path"`
 }
 
-// New builds the ls tool confined to root. A directory is marked with a trailing slash.
 func New(root *file.Root) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
@@ -35,7 +33,6 @@ func New(root *file.Root) tool.Tool {
 		})
 }
 
-// Describe names the path, the working directory going without saying.
 func Describe(args Args) (string, string) {
 	if args.Path == "." {
 		return "", ""

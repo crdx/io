@@ -23,13 +23,11 @@ const redacted = "[REDACTED]"
 
 var bearerPattern = regexp.MustCompile(`(?i)bearer[ \t]+[^\s"']+`)
 
-// Meta identifies the session whose exchanges are recorded.
 type Meta struct {
 	Name, Model, Effort, Provider, Workspace string
 	StartedAt                                time.Time
 }
 
-// Recorder appends censored logical HTTP exchanges.
 type Recorder struct {
 	mutex     sync.Mutex
 	file      *os.File
@@ -38,7 +36,6 @@ type Recorder struct {
 	report    func(error)
 }
 
-// Open opens or creates an HTTP transcript.
 func Open(path string, meta Meta, report func(error)) (*Recorder, error) {
 	recorder := &Recorder{report: report, next: 1}
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0o600) //nolint:gosec // the parent store supplies the fixed bundle path
@@ -125,7 +122,6 @@ func lastExchangeNumber(tail []byte, isWholeFile bool) (int, bool) {
 	return 0, false
 }
 
-// Start records a request and returns its exchange observer.
 func (self *Recorder) Start(request req.Request) req.ExchangeObserver {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -140,7 +136,6 @@ func (self *Recorder) Start(request req.Request) req.ExchangeObserver {
 	return exchange
 }
 
-// Close closes the HTTP transcript.
 func (self *Recorder) Close() error {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()

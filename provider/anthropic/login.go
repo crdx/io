@@ -32,19 +32,14 @@ const (
 
 const chill = 5 * time.Minute
 
-// Login authorises against a Claude subscription and stores the credentials.
 func Login(ctx context.Context) error {
 	return LoginWithAddress(ctx, printAuthorisationAddress)
 }
 
-// LoginWithAddress authorises against a Claude subscription after handing the authorisation address
-// to the given visitor.
 func LoginWithAddress(ctx context.Context, presentAddress func(string)) error {
 	return LoginWithRedirect(ctx, presentAddress, nil)
 }
 
-// LoginWithRedirect authorises against a Claude subscription through either the loopback callback
-// or a complete redirect URL received from redirects.
 func LoginWithRedirect(
 	ctx context.Context,
 	presentAddress func(string),
@@ -235,7 +230,6 @@ func postToken(ctx context.Context, requests *req.Client, body tokenRequest) (*C
 	}, nil
 }
 
-// TokenURL is the address credentials are traded at, and is the real one when left empty.
 var TokenURL string
 
 func tokenEndpoint() string {

@@ -45,8 +45,8 @@ type messagesBody struct {
 type messagesBlock struct {
 	Type      string `json:"type"`
 	Text      string `json:"text"`
-	ID        string `json:"id"`   // which call, for a tool_use block
-	Name      string `json:"name"` // which tool, for a tool_use block
+	ID        string `json:"id"`
+	Name      string `json:"name"`
 	ToolUseID string `json:"tool_use_id"`
 	Content   any    `json:"content"`
 	Input     any    `json:"input"`

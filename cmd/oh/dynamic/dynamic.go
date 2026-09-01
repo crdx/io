@@ -52,7 +52,6 @@ type Block struct {
 	stopWait     sync.WaitGroup
 }
 
-// NewBlock opens an empty block, which asks refresh to draw it whenever its rows change.
 func NewBlock(refresh func()) *Block {
 	self := &Block{
 		refresh: refresh,
@@ -66,7 +65,6 @@ func NewBlock(refresh func()) *Block {
 	return self
 }
 
-// Add puts a row on the block and hands back where it went.
 func (self *Block) Add(label Label) int {
 	index := 0
 
@@ -78,7 +76,6 @@ func (self *Block) Add(label Label) int {
 	return index
 }
 
-// Rows is what the block looks like at the given width.
 func (self *Block) Rows(columns int) []string {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()

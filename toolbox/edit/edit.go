@@ -12,14 +12,12 @@ import (
 	"crdx.org/io/tool"
 )
 
-// Args is what an edit takes.
 type Args struct {
 	Path    string `json:"path"`
 	OldText string `json:"old_text"`
 	NewText string `json:"new_text"`
 }
 
-// New builds an edit tool confined to root.
 func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
@@ -37,7 +35,6 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	})
 }
 
-// Describe names the file.
 func Describe(args Args) (string, string) {
 	return args.Path, ""
 }

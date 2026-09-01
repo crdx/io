@@ -14,12 +14,6 @@ import (
 	"crdx.org/io/internal/util"
 )
 
-// —————————————————————————————————————————————————————————————————————————————————————————————————
-// mega:allow-file comment-inlines
-// —————————————————————————————————————————————————————————————————————————————————————————————————
-
-// Style renders text as one kind of line, and formats nothing when given no arguments, so a delta
-// with a percent sign in it is safe to hand one.
 type Style func(format any, args ...any) string
 
 const (
@@ -39,60 +33,57 @@ const (
 
 const reset = "\x1b[0m"
 
-// The base visual styles.
 var (
 	Accent Style = hex(copper)
-	Normal Style = hex(none) // the terminal's foreground
-	Dim    Style = hex(grey) // grey text
+	Normal Style = hex(none)
+	Dim    Style = hex(grey)
 )
 
-// The mapping of kind of line to colour.
 var (
-	Reasoning     Style = decorate(col.Italic, Dim)    // what the model thought on the way to an answer
-	Answer        Style = Normal                       // the reply the model gives after it has thought
-	Call          Style = Normal                       // the name of a call that changes nothing at all
-	Change        Style = hex(gold)                    // the name of a call that could change something
-	Success       Style = hex(lime)                    // the mark set against a call that has completed
-	Information   Style = hex(steel)                   // what the harness says when passing information
-	CancelledCall Style = Dim                          // the name of a call stopped before it got going
-	StoppedTurn   Style = hex(gold)                    // what the harness says of a turn it had to stop
-	Failure       Style = hex(red)                     // what went wrong, wherever the failure happened
-	Subject       Style = hex(copper)                  // the subject of a call, whatever it operates on
-	Qualifier     Style = Dim                          // what qualifies the subject and narrows it down
-	Result        Style = Dim                          // the output a call handed back when it finished
-	Spinner       Style = hex(copper)                  // the spinner that turns while a call is running
-	Prompt        Style = hex(copper)                  // the harness prompting the user to enter a line
-	Rule          Style = Dim                          // the line drawn across the top of the input box
-	Hazard        Style = hex(red)                     // that same line, with no sandbox holding a call
-	Subtle        Style = Dim                          // text held one small step back from the subject
-	Read          Style = hex(lime)                    // reading is on offer, and waiting to be granted
-	Write         Style = hex(gold)                    // writing is on offer, and waiting to be granted
-	Exec          Style = hex(red)                     // running a command is on offer, if you grant it
-	Shell         Style = hex(steel)                   // a shell prompt, tinted to match a command name
-	Skill         Style = hex(mauve)                   // a skill being read ahead of the work it guides
-	History       Style = hex(mauve)                   // rewriting the repository's history is on offer
-	Pending       Style = col.Underline                // waiting for the keypress that follows a prefix
-	ScrolledInput Style = Dim                          // how much of the input is scrolled out of sight
-	ChosenRow     Style = hex(copper)                  // the row the cursor is resting on within a list
-	Running       Style = decorate(col.Italic, Dim)    // a session already open, which cannot be chosen
-	Column        Style = decorate(col.Underline, Dim) // the heading standing above the column of rows!
-	TypedInput    Style = Normal                       // what the user typed when a session is replayed
-	User          Style = background("#343541")        // a submitted message, kept apart from the reply
-	Greeting      Style = col.Italic                   // the italic hello with which a first run begins
-	Web           Style = hex(steel)                   // reaching the internet is offered to a web tool
-	Network       Style = hex(red)                     // the name of a call which departs this computer
+	Reasoning     Style = decorate(col.Italic, Dim)
+	Answer        Style = Normal
+	Call          Style = Normal
+	Change        Style = hex(gold)
+	Success       Style = hex(lime)
+	Information   Style = hex(steel)
+	CancelledCall Style = Dim
+	StoppedTurn   Style = hex(gold)
+	Failure       Style = hex(red)
+	Subject       Style = hex(copper)
+	Qualifier     Style = Dim
+	Result        Style = Dim
+	Spinner       Style = hex(copper)
+	Prompt        Style = hex(copper)
+	Rule          Style = Dim
+	Hazard        Style = hex(red)
+	Subtle        Style = Dim
+	Read          Style = hex(lime)
+	Write         Style = hex(gold)
+	Exec          Style = hex(red)
+	Shell         Style = hex(steel)
+	Skill         Style = hex(mauve)
+	History       Style = hex(mauve)
+	Pending       Style = col.Underline
+	ScrolledInput Style = Dim
+	ChosenRow     Style = hex(copper)
+	Running       Style = decorate(col.Italic, Dim)
+	Column        Style = decorate(col.Underline, Dim)
+	TypedInput    Style = Normal
+	User          Style = background("#343541")
+	Greeting      Style = col.Italic
+	Web           Style = hex(steel)
+	Network       Style = hex(red)
 )
 
-// The markdown of an answer.
 var (
-	Heading Style = hex(gold)   // a heading, which is drawn in bold as well
-	Link    Style = hex(steel)  // what a link says
-	Address Style = Dim         // where it goes
-	Code    Style = hex(copper) // code within a line
-	Block   Style = Dim         // code on lines of its own, where nothing highlights it
-	Quote   Style = Dim         // what is quoted
-	Bullet  Style = hex(copper) // what a list item is marked with
-	Border  Style = Dim         // a rule, a table's borders, and the bar down a quote
+	Heading Style = hex(gold)
+	Link    Style = hex(steel)
+	Address Style = Dim
+	Code    Style = hex(copper)
+	Block   Style = Dim
+	Quote   Style = Dim
+	Bullet  Style = hex(copper)
+	Border  Style = Dim
 )
 
 var (
@@ -115,7 +106,6 @@ var (
 
 var isColorEnabled = true
 
-// Init decides whether anything is painted at all.
 func Init(screen any) func() {
 	previous := isColorEnabled
 
@@ -161,12 +151,10 @@ func (self Style) Join(parts ...string) string {
 	return self(joinedText)
 }
 
-// Width is how many cells text takes up once painted.
 func Width(text string) int {
 	return width.Of(text)
 }
 
-// Plain is text with the colour escape sequences taken out.
 func Plain(text string) string {
 	var out strings.Builder
 
@@ -260,7 +248,7 @@ func background(value string) Style {
 
 func sgr(value string) string {
 	if len(value) != len("#rrggbb") || value[0] != '#' {
-		return "" // not a colour, and so drawn in whatever the terminal draws with
+		return ""
 	}
 
 	channels := make([]uint64, 3)

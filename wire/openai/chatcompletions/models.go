@@ -11,10 +11,6 @@ const completionsSuffix = "/chat/completions"
 
 const modelsSuffix = "/models"
 
-// Models lists what the endpoint offers. The listing carries model names alone; callers supplement
-// their capabilities from a source that describes them.
-//
-// reference/chat-completions.md
 func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 	address, listable := modelsAddress(self.URL)
 	if !listable {

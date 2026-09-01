@@ -67,7 +67,7 @@ type rulesetAttr struct {
 type pathBeneathAttr struct {
 	allowedAccess uint64
 	parentFD      int32
-	_             [4]byte // the kernel struct is packed to 8 bytes
+	_             [4]byte
 }
 
 func landlockVersion() (int, error) {

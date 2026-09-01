@@ -7,7 +7,6 @@ import (
 	"crdx.org/io/cmd/oh/location"
 )
 
-// PrepareTemporaryDirectory creates the scratch directory for a session.
 func PrepareTemporaryDirectory(name string) (string, error) {
 	temporaryDirectory := location.GetTmpDir(name)
 

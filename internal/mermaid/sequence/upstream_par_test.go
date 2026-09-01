@@ -20,7 +20,7 @@ func TestParseParCriticalBreakRect(t *testing.T) {
 		input        string
 		wantType     FragmentType
 		wantDividers []string
-		wantLabel    string // opener label (after keyword)
+		wantLabel    string
 	}{
 		{"par with and", "sequenceDiagram\n par a\n  A->>B: 1\n and b\n  A->>C: 2\n end", FragmentPar, []string{"b"}, "a"},
 		{"par multiple and", "sequenceDiagram\n par a\n  A->>B: 1\n and b\n  A->>B: 2\n and c\n  A->>B: 3\n end", FragmentPar, []string{"b", "c"}, "a"},

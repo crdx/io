@@ -12,7 +12,7 @@ type functionTool struct {
 	Description string `json:"description"`
 	Strict      bool   `json:"strict"`
 
-	Schema tool.Schema `json:"parameters"` // never omitempty: a tool taking nothing still needs one
+	Schema tool.Schema `json:"parameters"`
 }
 
 func describe(tools []tool.Definition) []functionTool {
@@ -31,7 +31,6 @@ func describe(tools []tool.Definition) []functionTool {
 	return offeredTools
 }
 
-// ToolsSize is the number of bytes the tools occupy in their provider wire representation.
 func ToolsSize(tools []tool.Tool) int {
 	definitions := make([]tool.Definition, len(tools))
 	for i, offeredTool := range tools {

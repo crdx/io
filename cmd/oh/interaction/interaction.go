@@ -120,8 +120,6 @@ func (self *refreshTimer) stop() {
 	self.timer.Stop()
 }
 
-// Keypresses decodes keys until the returned stop is called, which waits for the reading to finish
-// so that the terminal is nobody's before it returns.
 func Keypresses(terminal *os.File) (<-chan key.Key, func()) {
 	reader := tty.NewReader(terminal)
 	keys := make(chan key.Key)

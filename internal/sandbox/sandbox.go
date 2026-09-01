@@ -34,30 +34,27 @@ var base = []grant{
 }
 
 type Policy struct {
-	Yolo    bool              `json:"yolo,omitempty"` // run with no sandbox at all
+	Yolo    bool              `json:"yolo,omitempty"`
 	Read    []string          `json:"read"`
-	Write   []string          `json:"write"`   // paths readable and writable
-	Sockets []string          `json:"sockets"` // writable paths whose Unix sockets resolve
+	Write   []string          `json:"write"`
+	Sockets []string          `json:"sockets"`
 	Exec    []string          `json:"exec"`
-	TmpDir  string            `json:"tmpdir"` // a directory to appear at /tmp
+	TmpDir  string            `json:"tmpdir"`
 	Env     []string          `json:"env"`
 	SetEnv  map[string]string `json:"set_env"`
 	Timeout time.Duration     `json:"timeout"`
 
 	CPUTime   time.Duration `json:"cpu_time"`
-	FileSize  int64         `json:"file_size"` // the largest file it may write, in bytes
+	FileSize  int64         `json:"file_size"`
 	OpenFiles int64         `json:"open_files"`
-	Processes int64         `json:"processes"` // the most tasks it may have at once
+	Processes int64         `json:"processes"`
 }
 
-// WithRead returns a policy with additional readable paths without sharing the changed slice with
-// the original policy.
 func (self Policy) WithRead(paths ...string) Policy {
 	self.Read = append(slices.Clone(self.Read), paths...)
 	return self
 }
 
-// WithoutRead returns a policy without the named readable paths.
 func (self Policy) WithoutRead(paths ...string) Policy {
 	self.Read = slices.DeleteFunc(slices.Clone(self.Read), func(path string) bool {
 		return slices.Contains(paths, path)
@@ -65,13 +62,11 @@ func (self Policy) WithoutRead(paths ...string) Policy {
 	return self
 }
 
-// WithWrite returns a policy with additional writable paths.
 func (self Policy) WithWrite(paths ...string) Policy {
 	self.Write = append(slices.Clone(self.Write), paths...)
 	return self
 }
 
-// WithSetEnv returns a policy with an environment variable set.
 func (self Policy) WithSetEnv(name string, value string) Policy {
 	self.SetEnv = maps.Clone(self.SetEnv)
 	if self.SetEnv == nil {
@@ -81,7 +76,6 @@ func (self Policy) WithSetEnv(name string, value string) Policy {
 	return self
 }
 
-// Writable reports whether the policy grants changes outside its temporary directory.
 func (self Policy) Writable() bool {
 	for _, path := range self.Write {
 		if path != TmpDir {

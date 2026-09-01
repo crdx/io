@@ -11,7 +11,6 @@ import (
 	"crdx.org/io/toolbox/write"
 )
 
-// Rummage builds every file tool confined to root.
 func Rummage(root *file.Root, snapshots *file.Snapshots) []tool.Tool {
 	return []tool.Tool{
 		read.New(root, snapshots),

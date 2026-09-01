@@ -8,7 +8,6 @@ import (
 
 const separator = string(os.PathSeparator)
 
-// Shorten ensures a path is as compact as it can be.
 func Shorten(path string) string {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -48,13 +47,11 @@ func Expand(path string) (string, error) {
 	return filepath.Join(home, strings.TrimPrefix(path, "~"+separator)), nil
 }
 
-// Exists reports whether path can be statted.
 func Exists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
 }
 
-// RelativeTo returns path relative to root when path is within root.
 func RelativeTo(root string, path string) (string, bool) {
 	root, err := filepath.Abs(root)
 	if err != nil {

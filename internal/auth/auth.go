@@ -11,18 +11,14 @@ import (
 	"crdx.org/io/internal/xdg"
 )
 
-// Version is the current credentials format.
 const Version = 1
 
-// ErrUnsupportedVersion is returned when stored credentials are in a format this build cannot read.
 var ErrUnsupportedVersion = errors.New("credentials are in a format this build does not read: run the login command again")
 
-// Unusable reports whether stored credentials could not be read and may be written over afresh.
 func Unusable(err error) bool {
 	return errors.Is(err, os.ErrNotExist) || errors.Is(err, ErrUnsupportedVersion)
 }
 
-// Credentials are the provider credentials held in auth.json.
 type Credentials struct {
 	Version    int                    `json:"version"`
 	Codex      *CodexCredentials      `json:"codex,omitempty"`
@@ -30,7 +26,6 @@ type Credentials struct {
 	Anthropic  *AnthropicCredentials  `json:"anthropic,omitempty"`
 }
 
-// CodexCredentials are what a ChatGPT subscription was authorised as.
 type CodexCredentials struct {
 	Access    string `json:"access"`
 	Refresh   string `json:"refresh"`
@@ -38,24 +33,20 @@ type CodexCredentials struct {
 	AccountID string `json:"account_id"`
 }
 
-// AnthropicCredentials are what a Claude subscription was authorised as.
 type AnthropicCredentials struct {
 	Access    string `json:"access"`
 	Refresh   string `json:"refresh"`
 	ExpiresAt int64  `json:"expires_at"`
 }
 
-// OpenCodeGoCredentials authorise requests against OpenCode Go.
 type OpenCodeGoCredentials struct {
 	APIKey string `json:"api_key"`
 }
 
-// Path is where provider credentials are stored.
 func Path() string {
 	return xdg.StatePath("org.crdx", "io", "auth.json")
 }
 
-// Load reads credentials from path.
 func Load(path string) (*Credentials, error) {
 	if path == "" {
 		return nil, errors.New("could not determine where credentials live")
@@ -82,7 +73,6 @@ func Load(path string) (*Credentials, error) {
 	return &credentials, nil
 }
 
-// Save writes credentials to path with user-only permissions.
 func Save(path string, credentials *Credentials) error {
 	if path == "" {
 		return errors.New("could not determine where credentials live")
@@ -123,7 +113,6 @@ func Save(path string, credentials *Credentials) error {
 	return nil
 }
 
-// SaveOpenCodeGoKey updates the OpenCode Go key without replacing other provider credentials.
 func SaveOpenCodeGoKey(path string, key string) error {
 	credentials, err := Load(path)
 	if err != nil {

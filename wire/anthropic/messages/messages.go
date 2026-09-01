@@ -36,7 +36,6 @@ const (
 	toolInputCorrectionFormat = "Your previous response could not be used because the %q tool call did not contain a JSON object. Try again with a JSON object for its input."
 )
 
-// TokenSource hands over a token to make a request with.
 type TokenSource interface {
 	Token() (string, error)
 }

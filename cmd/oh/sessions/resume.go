@@ -135,9 +135,6 @@ func OpeningCaps(requestedCaps caps.Set, wereCapsChosen bool, resumedSession *st
 	return lastCaps, nil
 }
 
-// OpeningConfinement reports whether a resumed conversation opens with the sandbox waived. It can
-// only open the way it was left, its stored context having described one confinement or the other
-// as a fact.
 func OpeningConfinement(wasYoloChosen bool, resumedSession *store.Session) (bool, error) {
 	if resumedSession == nil {
 		return wasYoloChosen, nil

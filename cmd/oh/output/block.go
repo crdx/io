@@ -6,13 +6,10 @@ import (
 	"crdx.org/io/cmd/oh/width"
 )
 
-// Block is a run of rows in the live region. The screen asks a block what it looks like whenever
-// anything in the region changes, so a block never draws itself and never owns where it sits.
 type Block interface {
 	Rows(columns int) []string
 }
 
-// BlockHandle is a position-independent handle to a block.
 type BlockHandle byte
 
 type groupedBlock struct {
@@ -22,12 +19,10 @@ type groupedBlock struct {
 	handle *BlockHandle
 }
 
-// Open puts a work block at the end of the live sequence, under whatever is already open.
 func (self *Screen) Open(block Block) {
 	self.open(block, WorkGroup, nil)
 }
 
-// OpenNotice opens a notice block that its owner may refresh or discard while it remains live.
 func (self *Screen) OpenNotice(block Block) *BlockHandle {
 	handle := new(BlockHandle)
 	self.open(block, NoticeGroup, handle)
@@ -61,7 +56,6 @@ func (self *Screen) open(block Block, group Group, handle *BlockHandle) {
 	self.refresh()
 }
 
-// RefreshBlock refreshes a block if nothing has since sealed or joined its live region.
 func (self *Screen) RefreshBlock(handle *BlockHandle) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -75,7 +69,6 @@ func (self *Screen) RefreshBlock(handle *BlockHandle) bool {
 	return true
 }
 
-// DiscardBlock retracts a block if nothing has since sealed or joined its live region.
 func (self *Screen) DiscardBlock(handle *BlockHandle) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -89,7 +82,6 @@ func (self *Screen) DiscardBlock(handle *BlockHandle) bool {
 	return self.discardBlock()
 }
 
-// SealBlock seals a block if nothing has since sealed or joined its live region.
 func (self *Screen) SealBlock(handle *BlockHandle) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -103,7 +95,6 @@ func (self *Screen) SealBlock(handle *BlockHandle) bool {
 	return true
 }
 
-// Seal ends the live sequence, leaving what it last drew behind as scrollback.
 func (self *Screen) Seal() {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -111,7 +102,6 @@ func (self *Screen) Seal() {
 	self.seal()
 }
 
-// Refresh draws the live sequence again, which is how a block says it has changed.
 func (self *Screen) Refresh() {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()

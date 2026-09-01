@@ -35,13 +35,11 @@ const (
 	asideTimeout = 30 * time.Second
 )
 
-// Token is what one request is authorised with.
 type Token struct {
 	Access    string
 	AccountID string
 }
 
-// TokenSource hands over a token to make a request with.
 type TokenSource interface {
 	Token() (Token, error)
 }
@@ -86,8 +84,6 @@ func New(tokens TokenSource, model string, effort string) (*Client, error) {
 	return client, nil
 }
 
-// UseSession names the conversation this client is holding, so that the key its requests are cached
-// under is the same one every time the conversation is resumed.
 func (self *Client) UseSession(name string) {
 	self.session = sessionToken(name)
 }

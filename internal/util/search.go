@@ -9,7 +9,6 @@ import (
 	"crdx.org/io/tool"
 )
 
-// MaxSearchBytes caps the matching content.
 const MaxSearchBytes = 16 * 1024
 
 var skipDirs = map[string]bool{
@@ -17,7 +16,6 @@ var skipDirs = map[string]bool{
 	"node_modules": true,
 }
 
-// DescribeSearch reports a search's subject and qualifier.
 func DescribeSearch(pattern string, path string, globPattern string) (string, string) {
 	var qualifier string
 
@@ -36,7 +34,6 @@ func DescribeSearch(pattern string, path string, globPattern string) (string, st
 	return pattern, qualifier
 }
 
-// SearchPath returns the final component of the path in a described search call.
 func SearchPath(call tool.ToolCall) string {
 	qualifier := strings.TrimSpace(call.Qualifier())
 	if qualifier == "" {
@@ -46,7 +43,6 @@ func SearchPath(call tool.ToolCall) string {
 	return filepath.Base(qualifier)
 }
 
-// Walk visits every entry below root within filesystem, skipping symlinks and the unwanted dirs.
 func Walk(filesystem fs.FS, root string, visit func(path string, entry fs.DirEntry) error) error {
 	return fs.WalkDir(filesystem, root, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
@@ -69,7 +65,6 @@ func Walk(filesystem fs.FS, root string, visit func(path string, entry fs.DirEnt
 	})
 }
 
-// AppendSearchResult adds a complete result where it fits within the shared search byte cap.
 func AppendSearchResult(results []string, returnedBytes int64, result string) ([]string, int64, bool) {
 	separatorBytes := 0
 	if len(results) > 0 {
@@ -83,7 +78,6 @@ func AppendSearchResult(results []string, returnedBytes int64, result string) ([
 	return append(results, result), returnedBytes + resultBytes, false
 }
 
-// ReportSearchResults renders what a search found, saying so where the byte cap was hit.
 func ReportSearchResults(results []string, isTruncated bool) string {
 	joinedResults := strings.Join(results, "\n")
 	if isTruncated {

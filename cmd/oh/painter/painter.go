@@ -184,7 +184,6 @@ func RenderSubmittedMessage(text string, columns int) string {
 	return renderSubmittedMessage(text, columns, false)
 }
 
-// RenderSubmittedMessageWithHyperlinks draws a submitted message with terminal hyperlinks.
 func RenderSubmittedMessageWithHyperlinks(text string, columns int) string {
 	return renderSubmittedMessage(text, columns, true)
 }
@@ -403,8 +402,6 @@ func (self *Picasso) render(event agent.Event) string {
 	return NoticeStyle(event.Status)(strutil.PrintableLines(event.Text))
 }
 
-// RenderFailure presents the error a turn ended on, which is written down as the provider gave it
-// and only made fit to read here, so that a session stored before this drew it the same way.
 func RenderFailure(event agent.Event) string {
 	return strutil.Capitalise(strutil.PrintableLines(event.Text))
 }

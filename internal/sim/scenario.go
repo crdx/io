@@ -7,15 +7,6 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-// Scenario is what the endpoint pretends to be, read from a file. Every new session starts at the
-// first turn and takes the next one with each request it makes, counting a request the client
-// later abandons and asks again, so a turn is answered once however the attempt it belongs to
-// ends. A scenario wanting the same answer however often it is asked says so with Loop.
-//
-// A scenario says what the model does, not how that reaches a client, so the same file is played
-// through whichever provider API the request arrived in. The one exception is error-event, which
-// is a payload written out by hand and therefore only means anything to the API it was written
-// for.
 type Scenario struct {
 	Model string `toml:"model"`
 
@@ -29,7 +20,6 @@ type Scenario struct {
 	Turns []Turn `toml:"turn"`
 }
 
-// Turn is one request answered: what the model thinks, says, and asks to be run, in that order.
 type Turn struct {
 	Think []string `toml:"think"`
 	Say   string   `toml:"say"`
@@ -40,7 +30,7 @@ type Turn struct {
 
 	Fail       string `toml:"fail"`
 	Incomplete bool   `toml:"incomplete"`
-	ErrorEvent string `toml:"error-event"` // a raw error event, in the shape of one API alone
+	ErrorEvent string `toml:"error-event"`
 
 	Truncate bool `toml:"truncate"`
 
@@ -48,18 +38,15 @@ type Turn struct {
 	RetryAfter Duration `toml:"retry-after"`
 }
 
-// Call is a tool the model asks for.
 type Call struct {
 	Name      string `toml:"name"`
 	Arguments string `toml:"arguments"`
 }
 
-// Duration is a length of time written the way Go writes one, as in "150ms".
 type Duration struct {
-	time.Duration // the parsed duration
+	time.Duration
 }
 
-// UnmarshalText reads a duration from the file.
 func (self *Duration) UnmarshalText(text []byte) error {
 	durationValue, err := time.ParseDuration(string(text))
 	if err != nil {
@@ -71,7 +58,6 @@ func (self *Duration) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// Read loads a scenario, and says what is wrong with it rather than pretending it is fine.
 func Read(path string) (*Scenario, error) {
 	var self Scenario
 

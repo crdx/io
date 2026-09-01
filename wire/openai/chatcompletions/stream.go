@@ -14,10 +14,8 @@ import (
 
 const donePayload = "[DONE]"
 
-// ErrTruncated is a stream that stopped without a completion marker.
 var ErrTruncated = sse.ErrTruncated
 
-// ErrIncomplete is a response the endpoint cut short, usually against a limit.
 var ErrIncomplete = errors.New("the response was cut short")
 
 type reply struct {

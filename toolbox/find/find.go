@@ -11,13 +11,11 @@ import (
 	"crdx.org/io/tool"
 )
 
-// Args is what a search by name takes. An absent path is the working directory.
 type Args struct {
 	Pattern string `json:"pattern"`
 	Path    string `json:"path"`
 }
 
-// New builds the find tool confined to root.
 func New(root *file.Root) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
@@ -41,7 +39,6 @@ func New(root *file.Root) tool.Tool {
 		})
 }
 
-// Describe reports the search's subject and qualifier.
 func Describe(args Args) (string, string) {
 	return util.DescribeSearch(args.Pattern, args.Path, "")
 }

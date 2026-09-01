@@ -11,7 +11,6 @@ const responsesSuffix = "/codex/responses"
 
 const modelsSuffix = "/models"
 
-// SupportsResponses reports whether a model ID names a model for the Responses API.
 func SupportsResponses(id string) bool {
 	for segment := range strings.SplitSeq(id, "-") {
 		switch segment {
@@ -23,7 +22,6 @@ func SupportsResponses(id string) bool {
 	return true
 }
 
-// Models lists what the endpoint offers.
 func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 	address, listable := modelsAddress(self.URL)
 	if !listable {

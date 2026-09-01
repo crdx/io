@@ -2,7 +2,6 @@ package cli
 
 import "runtime/debug"
 
-// Version returns the version embedded in the running build.
 func Version() string {
 	return buildVersion(debug.ReadBuildInfo())
 }

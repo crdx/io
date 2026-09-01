@@ -10,7 +10,6 @@ const (
 	maximumCursorCells = 65_535
 )
 
-// HyperlinkClose ends an OSC 8 hyperlink.
 const HyperlinkClose = "\x1b]8;;\x1b\\"
 
 type Sequence struct {

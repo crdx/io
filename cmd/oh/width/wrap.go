@@ -9,8 +9,6 @@ import (
 
 const reset = "\x1b[0m"
 
-// Row maps rendered text to source runes. Text may carry ANSI state across the break; [End, Next)
-// is discarded break whitespace.
 type Row struct {
 	Text  string
 	Begin int
@@ -18,8 +16,6 @@ type Row struct {
 	Next  int
 }
 
-// Wrap breaks styled text into rows no wider than cells, preferring spaces. ANSI escapes take no
-// cells, and their styling continues across breaks.
 func Wrap(text string, cells int) []string {
 	if cells <= 0 {
 		return []string{text}
@@ -35,8 +31,6 @@ func Wrap(text string, cells int) []string {
 	return texts
 }
 
-// Rows wraps as Wrap does, and says which runes of the input each row came from. There is always at
-// least one row.
 func Rows(text string, cells int) []Row {
 	var rows []Row
 
@@ -274,10 +268,8 @@ func split(text string) []atom {
 	return atoms
 }
 
-// Ellipsis marks where text was cut.
 const Ellipsis = "…"
 
-// Elide cuts text to the cells it has, marking what it dropped with an ellipsis.
 func Elide(text string, cells int) string {
 	if cells <= 0 {
 		return ""

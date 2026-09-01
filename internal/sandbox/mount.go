@@ -34,7 +34,6 @@ func (self Policy) nestedPaths() []string {
 
 const processFilesystemPath = "/proc"
 
-// TmpDir is where a policy's scratch space is attached inside the sandbox.
 const TmpDir = "/tmp"
 
 type virtualFile struct {

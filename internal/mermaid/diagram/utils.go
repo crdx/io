@@ -5,9 +5,6 @@ import (
 	"strings"
 )
 
-// RemoveComments removes Mermaid comment lines from input. This function is shared between graph
-// and sequence diagram parsers. It handles both full-line comments (%% at start) and inline
-// comments (%% after content).
 func RemoveComments(lines []string) []string {
 	cleanedLines := make([]string, 0, len(lines))
 
@@ -28,7 +25,6 @@ func RemoveComments(lines []string) []string {
 	return cleanedLines
 }
 
-// SplitLines splits input on both actual newlines and escaped newlines (for curl compatibility).
 func SplitLines(input string) []string {
 	newlinePattern := regexp.MustCompile(`\n|\\n`)
 	return newlinePattern.Split(input, -1)

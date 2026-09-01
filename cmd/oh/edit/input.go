@@ -7,29 +7,22 @@ import (
 	"crdx.org/io/cmd/oh/key"
 )
 
-// —————————————————————————————————————————————————————————————————————————————————————————————————
-// mega:allow-file comment-inlines
-// —————————————————————————————————————————————————————————————————————————————————————————————————
-
-// Action is what a keypress amounted to, for whoever is driving the input.
 type Action int
 
-// What a keypress can amount to.
 const (
-	Draw        Action = iota // the line changed, and wants drawing again
-	Accept                    // the line is finished
-	ForceAccept               // alt+enter: send the line without interpreting a command
-	Continue                  // double enter on an empty line: send the get-on-with-it message
-	Cancel                    // escape, or ctrl+d while a turn runs: stop whatever is running
-	Quit                      // ctrl+d on an empty line with nothing running
-	ToggleWrite               // ctrl+x w: swap whether files in the workspace may be changed
-	ToggleShell               // ctrl+x x: swap whether shell commands may run at all
-	ToggleGit                 // ctrl+x g: swap whether a repository's own history may be changed
-	ToggleWeb                 // ctrl+x s: swap whether the web tools may reach the internet
-	Complete                  // tab: complete a slash command when exactly one name matches
+	Draw Action = iota
+	Accept
+	ForceAccept
+	Continue
+	Cancel
+	Quit
+	ToggleWrite
+	ToggleShell
+	ToggleGit
+	ToggleWeb
+	Complete
 )
 
-// Input edits a line and walks its history.
 type Input struct {
 	buffer     *Buffer
 	history    *History
@@ -38,17 +31,16 @@ type Input struct {
 	frameWidth int
 
 	isPasting       bool
-	pasteStart      int              // where the current paste begins in the buffer
-	isPrefixPending bool             // whether ctrl+x went before, so the next key names a mode
-	isEnterPending  bool             // whether one enter awaits a second before sending
-	isClearPending  bool             // whether one ctrl+c awaits a second before wiping
-	acceptAfter     time.Time        // when another return may accept the line
-	continueAfter   time.Time        // when another double enter may continue
-	currentTime     func() time.Time // supplies the time for the enter cool-offs
-	wasRunning      bool             // whether a turn ran when the previous key was applied
+	pasteStart      int
+	isPrefixPending bool
+	isEnterPending  bool
+	isClearPending  bool
+	acceptAfter     time.Time
+	continueAfter   time.Time
+	currentTime     func() time.Time
+	wasRunning      bool
 }
 
-// NewInput builds an empty line.
 func NewInput(history *History) *Input {
 	self := &Input{
 		history:     history,
@@ -59,7 +51,6 @@ func NewInput(history *History) *Input {
 	return self
 }
 
-// Reset empties the line and starts the walk through history again.
 func (self *Input) Reset() {
 	self.buffer = &Buffer{}
 	self.search = nil
@@ -98,8 +89,8 @@ type Frame struct {
 	Column           int
 	IsSearching      bool
 	SearchQuery      string
-	HiddenLinesAbove int // the rows out of sight above
-	HiddenLinesBelow int // the rows out of sight below
+	HiddenLinesAbove int
+	HiddenLinesBelow int
 }
 
 func (self *Input) Frame(width int) Frame {

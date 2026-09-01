@@ -28,7 +28,6 @@ func (self *PendingMessages) Replace(messages []string) {
 	self.messages = slices.Clone(messages)
 }
 
-// MarkSent says that a turn has taken the messages, which are drawn as any other from then on.
 func (self *PendingMessages) MarkSent() {
 	self.isSent = true
 }

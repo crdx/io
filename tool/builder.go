@@ -28,25 +28,21 @@ func Implement[T any](definition Definition, describe Describer[T]) Builder[T] {
 	}
 }
 
-// Validate returns a builder that validates decoded arguments before constructing a call.
 func (self Builder[T]) Validate(validate Validator[T]) Builder[T] {
 	self.validate = validate
 	return self
 }
 
-// IsEmbarrassinglyParallel marks a tool as safe to run alongside others.
 func (self Builder[T]) IsEmbarrassinglyParallel() Builder[T] {
 	self.parallel = true
 	return self
 }
 
-// ChangesNothing marks a tool as changing nothing.
 func (self Builder[T]) ChangesNothing() Builder[T] {
 	self.readOnly = true
 	return self
 }
 
-// State makes a tool the owner of named durable state.
 func (self Builder[T]) State(name string, restore Restorer) Builder[T] {
 	self.stateName = name
 	self.restore = restore
@@ -54,7 +50,6 @@ func (self Builder[T]) State(name string, restore Restorer) Builder[T] {
 	return self
 }
 
-// Syntax highlights a call rendering as the named language, replacing any emphasis set before.
 func (self Builder[T]) Syntax(language string) Builder[T] {
 	self.emphasis = func(ToolCall) Emphasis {
 		return Emphasis{Kind: EmphasisSyntax, Value: language}
@@ -64,14 +59,12 @@ func (self Builder[T]) Syntax(language string) Builder[T] {
 	return self
 }
 
-// SyntaxFrom highlights a call rendering by parsing source selected from its decoded arguments.
 func (self Builder[T]) SyntaxFrom(language string, source func(args T, subject string) string) Builder[T] {
 	self = self.Syntax(language)
 	self.emphasisSource = source
 	return self
 }
 
-// Focuses sets one part of a call rendering apart, replacing any emphasis set before.
 func (self Builder[T]) Focuses(pick func(ToolCall) string) Builder[T] {
 	self.emphasis = func(call ToolCall) Emphasis {
 		return Emphasis{Kind: EmphasisFocus, Value: pick(call)}
@@ -81,7 +74,6 @@ func (self Builder[T]) Focuses(pick func(ToolCall) string) Builder[T] {
 	return self
 }
 
-// FocusPath sets apart the last component of a path rendering.
 func (self Builder[T]) FocusPath() Builder[T] {
 	return self.Focuses(func(call ToolCall) string {
 		subject := call.Subject()
@@ -93,12 +85,10 @@ func (self Builder[T]) FocusPath() Builder[T] {
 	})
 }
 
-// Run builds a tool whose calls return one complete result.
 func (self Builder[T]) Run(execute ResultExecutor[T]) Tool {
 	return self.build(execute)
 }
 
-// Plain builds a tool whose calls return text.
 func (self Builder[T]) Plain(execute Executor[T]) Tool {
 	return self.Run(func(ctx context.Context, args T) (ToolCallResult, error) {
 		output, err := execute(ctx, args)
@@ -106,7 +96,6 @@ func (self Builder[T]) Plain(execute Executor[T]) Tool {
 	})
 }
 
-// Stats builds a tool whose calls return text and stats.
 func (self Builder[T]) Stats(execute StatsExecutor[T]) Tool {
 	return self.Run(func(ctx context.Context, args T) (ToolCallResult, error) {
 		output, stats, err := execute(ctx, args)
@@ -114,7 +103,6 @@ func (self Builder[T]) Stats(execute StatsExecutor[T]) Tool {
 	})
 }
 
-// StatsWithImage builds a tool with stats whose calls may also return an image.
 func (self Builder[T]) StatsWithImage(execute StatsWithImageExecutor[T]) Tool {
 	return self.Run(func(ctx context.Context, args T) (ToolCallResult, error) {
 		output, image, stats, err := execute(ctx, args)

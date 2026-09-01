@@ -22,7 +22,6 @@ const (
 	directoryName = "skills"
 )
 
-// Skill is the part of a skill disclosed before its body is read.
 type Skill struct {
 	Name        string
 	Description string
@@ -37,7 +36,6 @@ type metadata struct {
 	Description string `yaml:"description"`
 }
 
-// Counts reports how many discovered skills came from each scope.
 func Counts(skills []Skill) (int, int) {
 	var project int
 	var global int
@@ -53,7 +51,6 @@ func Counts(skills []Skill) (int, int) {
 	return project, global
 }
 
-// ExcludeGlobal removes globally-scoped skills in configured absolute directories.
 func ExcludeGlobal(skills []Skill, directories []string) []Skill {
 	excludedDirectories := make(map[string]struct{}, len(directories))
 	for _, directory := range directories {
@@ -72,7 +69,6 @@ func ExcludeGlobal(skills []Skill, directories []string) []Skill {
 	return filteredSkills
 }
 
-// NameFromPath reports the skill a path is the SKILL.md of.
 func NameFromPath(path string) (string, bool) {
 	if filepath.Base(path) != filename {
 		return "", false
@@ -86,7 +82,6 @@ func NameFromPath(path string) (string, bool) {
 	return filepath.Base(directory), true
 }
 
-// Discover finds skills in the project scope and each global skills directory.
 func Discover(project string, globalDirectories []string, warnings io.Writer) ([]Skill, error) {
 	projectSkills, err := discover(filepath.Join(project, ".agents", directoryName), false, warnings)
 	if err != nil {
@@ -225,7 +220,6 @@ func parse(data []byte) (metadata, error) {
 	return parsedMetadata, nil
 }
 
-// MountGlobalSkills makes globally-scoped skills readable by file tools.
 func MountGlobalSkills(root *file.Root, skills []Skill) ([]*os.Root, error) {
 	var openedRoots []*os.Root
 
@@ -247,7 +241,6 @@ func MountGlobalSkills(root *file.Root, skills []Skill) ([]*os.Root, error) {
 	return openedRoots, nil
 }
 
-// Close closes roots returned by MountGlobalSkills.
 func Close(roots []*os.Root) {
 	closeRoots(roots)
 }

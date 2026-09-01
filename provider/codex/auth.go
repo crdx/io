@@ -9,7 +9,6 @@ import (
 	"crdx.org/io/internal/auth"
 )
 
-// Credentials are what a ChatGPT subscription was authorised as.
 type Credentials = auth.CodexCredentials
 
 func stale(credentials *Credentials) bool {

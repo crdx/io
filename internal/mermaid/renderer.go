@@ -1,8 +1,3 @@
-// Package mermaid renders a terminal-native subset of Mermaid diagrams.
-//
-// The renderer is derived from mermaid-ascii 1.5.0, Copyright (c) 2023 Alexander Grooff, under the
-// MIT licence in LICENSE. It supports flowcharts, sequence diagrams, and entity-relationship
-// diagrams.
 package mermaid
 
 import (
@@ -20,7 +15,6 @@ const (
 	paddingBetweenY  = 5
 )
 
-// Render turns Mermaid source into Unicode rows.
 func Render(source string) (string, error) {
 	if err := validateSourceLimits(source); err != nil {
 		return "", err

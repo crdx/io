@@ -12,7 +12,7 @@ type functionTool struct {
 	Description string        `json:"description"`
 	Cache       *cacheControl `json:"cache_control,omitempty"`
 
-	Schema tool.Schema `json:"input_schema"` // never omitempty: a tool taking nothing still needs one
+	Schema tool.Schema `json:"input_schema"`
 }
 
 type cacheControl struct {
@@ -79,7 +79,6 @@ func describe(tools []tool.Definition) []functionTool {
 	return offeredTools
 }
 
-// ToolsSize is the number of bytes the tools occupy in their provider wire representation.
 func ToolsSize(tools []tool.Tool) int {
 	definitions := make([]tool.Definition, len(tools))
 	for i, offeredTool := range tools {

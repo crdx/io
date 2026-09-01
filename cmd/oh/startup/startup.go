@@ -33,7 +33,6 @@ type Info struct {
 	ToolBytes     int    `json:"tools,omitempty"`
 }
 
-// NewEvent records startup facts for live display and later replay.
 func NewEvent(elapsedTime time.Duration, info Info) agent.Event {
 	facts, err := json.Marshal(info)
 	if err != nil {
@@ -51,7 +50,6 @@ const (
 	startupDetailsSeparator = "⧸"
 )
 
-// RenderEvent renders a recorded startup event for the available terminal width.
 func RenderEvent(event agent.Event, columns int, isTextSizingSupported bool) string {
 	var info Info
 	if len(event.State) > 0 {
@@ -63,7 +61,6 @@ func RenderEvent(event agent.Event, columns int, isTextSizingSupported bool) str
 	return RenderBanner(event.Took, false, info, columns, isTextSizingSupported)
 }
 
-// RenderBanner renders the startup summary for the available terminal width.
 func RenderBanner(elapsedTime time.Duration, wasResumed bool, info Info, columns int, isTextSizingSupported bool) string {
 	if wasResumed {
 		return ""

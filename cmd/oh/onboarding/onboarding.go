@@ -28,7 +28,6 @@ import (
 	"crdx.org/io/provider/opencodego"
 )
 
-// ErrCancelled means the user left onboarding without choosing a model.
 var ErrCancelled = menu.ErrCancelled
 
 const (
@@ -85,7 +84,6 @@ var providers = []provider{
 	{name: openCodeGoName, identifier: model.OpencodeGoProvider, note: "Key"},
 }
 
-// Options are the resources first-run onboarding needs.
 type Options struct {
 	Input          *os.File
 	Output         io.Writer

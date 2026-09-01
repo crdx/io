@@ -9,14 +9,10 @@ import (
 type StreamingMode int
 
 const (
-	// StreamingModeLine shows whole lines only, so nothing already read ever re-wraps.
 	StreamingModeLine StreamingMode = iota
 
-	// StreamingModeASAP shows everything that has arrived, including the half-written line.
 	StreamingModeASAP
 
-	// StreamingModePaced lays the answer out again only once it has grown by a step, which costs
-	// the least and shows the fewest frames.
 	StreamingModePaced
 )
 

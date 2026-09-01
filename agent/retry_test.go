@@ -29,10 +29,10 @@ func (flatRefusalError) Retriable() bool           { return false }
 func (flatRefusalError) RetryAfter() time.Duration { return 0 }
 
 type failingProvider struct {
-	failures int   // how many of the first requests fail
-	err      error // what they fail with
+	failures int
+	err      error
 
-	sent int // how many requests were made in all
+	sent int
 }
 
 func (self *failingProvider) Configure(string, []tool.Definition)   {}

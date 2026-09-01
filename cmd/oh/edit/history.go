@@ -6,15 +6,12 @@ import (
 	"strings"
 )
 
-// History is the entries typed before, oldest first, one per line of the file with newlines
-// escaped.
 type History struct {
 	path  string
 	limit int
-	lines []string // the entries, oldest first
+	lines []string
 }
 
-// NewHistory reads the history file. A missing one is what a first run looks like.
 func NewHistory(path string, limit int) *History {
 	self := &History{path: path, limit: limit}
 
@@ -34,7 +31,6 @@ func NewHistory(path string, limit int) *History {
 	return self
 }
 
-// Add records an entry, unless it is blank or the one just entered.
 func (self *History) Add(line string) {
 	if strings.TrimSpace(line) == "" {
 		return
@@ -123,16 +119,12 @@ func unescape(line string) string {
 	return out.String()
 }
 
-// Recall is a walk back through the history and forward again, holding on to whatever was being
-// typed when the walk started so that walking all the way forward gives it back.
 type Recall struct {
 	lines        []string
 	index        int
 	pendingInput string
 }
 
-// Walk steps one entry back through the history for a negative direction and one forward for a
-// positive one, reporting whether there was an entry that way to step to.
 func (self *Recall) Walk(current string, direction int) (string, bool) {
 	if direction < 0 {
 		if self.index == 0 {

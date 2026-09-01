@@ -35,8 +35,6 @@ const (
 	probeSucceeded = "sandbox probe succeeded"
 )
 
-// Init runs sandbox work encoded in the environment and returns immediately otherwise. Programs
-// using Run must call it before opening sensitive resources or starting goroutines.
 func Init() {
 	if os.Getenv(envProbe) != "" {
 		if err := applyNetwork(); err != nil {
@@ -153,17 +151,14 @@ func (self *boundedBuffer) String() string {
 	return self.buffer.String()
 }
 
-// Result is what a sandboxed command produced.
 type Result struct {
-	Output     string         `json:"-"` // stdout and stderr, interleaved as the command wrote them
+	Output     string         `json:"-"`
 	Code       int            `json:"code"`
-	Signal     syscall.Signal `json:"signal"`      // what killed the command itself, where one did
-	CPUTime    time.Duration  `json:"cpu_time"`    // user and system processor time together
-	PeakMemory uint64         `json:"peak_memory"` // largest resident set in bytes
+	Signal     syscall.Signal `json:"signal"`
+	CPUTime    time.Duration  `json:"cpu_time"`
+	PeakMemory uint64         `json:"peak_memory"`
 }
 
-// Run executes command under policy and waits. Sandbox setup failures are errors; command exit
-// statuses are returned in Result. The executable must call Init during startup.
 func Run(ctx context.Context, directory string, command string, policy Policy) (Result, error) {
 	if policy.Yolo {
 		return runYolo(ctx, directory, command, policy)

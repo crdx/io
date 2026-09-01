@@ -14,13 +14,11 @@ import (
 	"crdx.org/io/tool"
 )
 
-// Args is what a write takes.
 type Args struct {
 	Path    string `json:"path"`
 	Content string `json:"content"`
 }
 
-// New builds a write tool confined to root.
 func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
@@ -37,7 +35,6 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 	})
 }
 
-// Describe names the file, saying how much is being written rather than what.
 func Describe(args Args) (string, string) {
 	return args.Path, util.FormatBytes(len(args.Content), 3)
 }

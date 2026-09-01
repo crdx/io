@@ -7,20 +7,16 @@ import (
 	"crdx.org/io/internal/util/strutil"
 )
 
-// DataType is the JSON Schema type of one value.
 type DataType string
 
-// The JSON Schema types a parameter may declare.
 const (
 	TypeObject  DataType = "object"
 	TypeString  DataType = "string"
 	TypeInteger DataType = "integer"
 )
 
-// Schema is a tool's parameters, in the order the tool declares them.
 type Schema []Parameter
 
-// Parameter is one argument a tool takes.
 type Parameter struct {
 	Name        string
 	Type        DataType
@@ -29,19 +25,15 @@ type Parameter struct {
 	isOptional bool
 }
 
-// Optional marks a parameter the model may leave out. An absent argument decodes as its zero value,
-// which is what a call carrying none means, so a tool reads one the same either way.
 func (self Parameter) Optional() Parameter {
 	self.isOptional = true
 	return self
 }
 
-// String declares a string parameter.
 func String(name string, description string) Parameter {
 	return Parameter{Name: name, Type: TypeString, Description: description}
 }
 
-// Integer declares an integer parameter.
 func Integer(name string, description string) Parameter {
 	return Parameter{Name: name, Type: TypeInteger, Description: description}
 }
@@ -58,7 +50,6 @@ type object struct {
 	AdditionalProperties bool                `json:"additionalProperties"`
 }
 
-// MarshalJSON renders the parameters as the JSON Schema object the endpoint expects.
 func (self Schema) MarshalJSON() ([]byte, error) {
 	renderedSchema := object{
 		Type:       TypeObject,
@@ -79,14 +70,12 @@ func (self Schema) MarshalJSON() ([]byte, error) {
 	return json.Marshal(renderedSchema)
 }
 
-// Definition is what a tool is, in a form no wire format's shape leaks into.
 type Definition struct {
 	Name        string
 	Description string
 	Schema      Schema
 }
 
-// Describe says what a tool is, for a provider to offer to the model however it offers things.
 func Describe(subject Tool) Definition {
 	return Definition{
 		Name:        subject.Name(),
@@ -95,7 +84,6 @@ func Describe(subject Tool) Definition {
 	}
 }
 
-// DescribeUnparsedArguments reports the subject of arguments no call could be parsed from.
 func DescribeUnparsedArguments(subject Tool, arguments string) string {
 	var decodedFields map[string]json.RawMessage
 	if json.Unmarshal([]byte(arguments), &decodedFields) != nil {

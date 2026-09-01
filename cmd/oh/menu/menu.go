@@ -22,7 +22,6 @@ const (
 	restoreMenuPresentation = "\x1b[0m" + showCursor
 )
 
-// ChooseIndex displays labels and returns the selected index.
 func ChooseIndex(terminal *os.File, output io.Writer, prompt string, labels []string) (int, error) {
 	if terminal == nil || !term.IsTerminal(int(terminal.Fd())) {
 		return 0, errors.New("menu needs an interactive terminal")
@@ -107,7 +106,6 @@ type menu struct {
 	rows   int
 }
 
-// RenderMenu renders a complete menu frame without terminal-control sequences.
 func RenderMenu(prompt string, labels []string, cursor int) string {
 	displayedMenu := menu{labels: labels, cursor: cursor, rows: len(labels)}
 	return fmt.Sprintf("%s\r\n\r\n%s", prompt, displayedMenu.render(false))

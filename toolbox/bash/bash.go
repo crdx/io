@@ -21,12 +21,10 @@ import (
 	"crdx.org/io/tool"
 )
 
-// Args is what a shell command takes.
 type Args struct {
 	Command string `json:"command"`
 }
 
-// New builds a shell that starts in root and is confined anew for each command.
 func New(
 	root *file.Root,
 	fresh func(context.Context) (sandbox.Policy, error),
@@ -52,8 +50,6 @@ func New(
 		})
 }
 
-// ProtectedPolicy makes .git at each writable root read-only. It does not search nested
-// directories.
 func ProtectedPolicy(policy sandbox.Policy) sandbox.Policy {
 	var readOnlyPaths []string
 	for _, path := range policy.Write {
@@ -67,7 +63,6 @@ func ProtectedPolicy(policy sandbox.Policy) sandbox.Policy {
 	return policy.WithRead(readOnlyPaths...)
 }
 
-// Describe formats a command into one display-safe line and reports its original line count.
 func Describe(args Args) (string, string) {
 	parsedScript, err := parse(args.Command)
 	if err != nil {
@@ -208,7 +203,6 @@ func exec(
 	return reportText, stats, nil
 }
 
-// ErrCommandFailed marks a nonzero command exit; output is still returned.
 var ErrCommandFailed = errors.New("the command failed")
 
 func measured(reportText string, stats *tool.Stats) string {

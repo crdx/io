@@ -5,9 +5,6 @@ import (
 	"strings"
 )
 
-// MatchGlob reports whether name, a slash-separated relative path, matches pattern. '*', '?' and
-// '[...]' are path.Match within one segment, and '**' as a whole segment matches zero or more of
-// them.
 func MatchGlob(pattern string, name string) bool {
 	return matchSegments(strings.Split(pattern, "/"), strings.Split(name, "/"))
 }

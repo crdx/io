@@ -42,14 +42,12 @@ func completionRequest(args []string) (string, string, bool) {
 	return rest[0], word, true
 }
 
-// Sources names the cached data used to produce completions.
 type Sources struct {
 	ModelCachePath string
 	SessionsDir    string
 	ToolNames      []string
 }
 
-// Complete returns completions when args contain an internal completion request.
 func Complete(args []string, sources Sources) ([]string, bool) {
 	kind, word, isWanted := completionRequest(args)
 	if !isWanted {
@@ -59,7 +57,6 @@ func Complete(args []string, sources Sources) ([]string, bool) {
 	return completions(kind, word, sources), true
 }
 
-// WriteCompletions writes an internal completion request and reports whether it was handled.
 func WriteCompletions(out io.Writer, args []string, sources Sources) bool {
 	completions, isWanted := Complete(args, sources)
 	if !isWanted {

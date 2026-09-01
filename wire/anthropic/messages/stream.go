@@ -13,11 +13,8 @@ import (
 	"crdx.org/io/internal/sse"
 )
 
-// ErrIncomplete is a response the endpoint cut short, usually against a limit.
 var ErrIncomplete = errors.New("the response was cut short")
 
-// ErrTruncated is a stream that stopped without ever saying it was finished, which means the wire
-// went quiet mid-turn rather than the model reaching an end.
 var ErrTruncated = sse.ErrTruncated
 
 const (

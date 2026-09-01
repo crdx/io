@@ -37,10 +37,10 @@ func weather(callCount *int) tool.Tool {
 }
 
 type speaker struct {
-	name                 string                                            // the provider
-	format               string                                            // the wire format it speaks
-	hasModelCapabilities bool                                              // its listing describes capabilities
-	connect              func(t *testing.T, address string) agent.Provider // a client pointed at it
+	name                 string
+	format               string
+	hasModelCapabilities bool
+	connect              func(t *testing.T, address string) agent.Provider
 }
 
 func providers() []speaker {

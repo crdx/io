@@ -42,7 +42,6 @@ type Connection struct {
 	Search *codex.SearchClient
 }
 
-// ObserveHTTP watches the conversation and the searches made beside it alike.
 func (self *Connection) ObserveHTTP(observer req.Observer) {
 	self.Client.ObserveHTTP(observer)
 	self.Search.ObserveHTTP(observer)

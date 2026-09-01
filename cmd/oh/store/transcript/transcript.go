@@ -36,20 +36,17 @@ var (
 	safeID     = regexp.MustCompile(`^[A-Za-z0-9_.:|-]+$`)
 )
 
-// Meta identifies the conversation rendered into a transcript.
 type Meta struct {
 	Name, Model, Effort, Provider, Workspace string
 	StartedAt                                time.Time
 }
 
-// Recorder appends conversation events as Markdown.
 type Recorder struct {
 	file       *os.File
 	startedAt  time.Time
 	lastCallID string
 }
 
-// Open opens or creates a Markdown transcript.
 func Open(path string, meta Meta) (*Recorder, error) {
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o600) //nolint:gosec // the parent store supplies the fixed bundle path
 	if err != nil {
@@ -71,7 +68,6 @@ func Open(path string, meta Meta) (*Recorder, error) {
 	return recorder, nil
 }
 
-// Event appends one portable conversation event.
 func (self *Recorder) Event(at time.Time, event agent.Event) error {
 	if self.file == nil {
 		return os.ErrClosed
@@ -274,7 +270,6 @@ func emphasisLanguage(emphasis tool.Emphasis) string {
 	return ""
 }
 
-// Close closes the transcript.
 func (self *Recorder) Close() error {
 	if self.file == nil {
 		return nil

@@ -13,23 +13,18 @@ import (
 	"crdx.org/io/internal/util/pathutil"
 )
 
-// ErrReadOnly is what a call that would change something gets while writing is withheld.
 var ErrReadOnly = errors.New("the filesystem is read-only")
 
-// ErrGitDir refuses a change inside a repository's own metadata.
 var ErrGitDir = errors.New("refusing to touch anything inside a .git directory")
 
-// ErrOutsideRoot is a path resolving to somewhere the root does not reach.
 var ErrOutsideRoot = errors.New("path is outside the root")
 
-// InGitDir reports whether a path contains a .git component.
 func InGitDir(name string) bool {
 	segments := strings.Split(filepath.Clean(name), string(filepath.Separator))
 
 	return slices.Contains(segments, ".git")
 }
 
-// RefuseGitDir returns ErrGitDir for paths containing a .git component.
 func RefuseGitDir(name string) error {
 	if InGitDir(name) {
 		return ErrGitDir
@@ -41,19 +36,17 @@ func RefuseGitDir(name string) error {
 type mountedRoot struct {
 	root    *Root
 	name    string
-	isExact bool // for single files
+	isExact bool
 }
 
-// Root is a directory the tools are confined to, and a rule about what may be changed within it.
 type Root struct {
 	root   *os.Root
-	refuse func(name string) error // what stands in the way of changing a path, asked afresh
+	refuse func(name string) error
 
 	mountsMutex sync.RWMutex
 	mounts      map[string]mountedRoot
 }
 
-// New builds a Root over an open directory. refuse is checked before each change.
 func New(root *os.Root, refuseWrite func(name string) error) *Root {
 	return &Root{root: root, refuse: refuseWrite, mounts: map[string]mountedRoot{}}
 }
@@ -76,7 +69,6 @@ func (self *Root) Unmount(path string) {
 	delete(self.mounts, filepath.Clean(path))
 }
 
-// Resolve finds the tree and local name for a path.
 func (self *Root) Resolve(path string) (*Root, string, error) {
 	if path == "" {
 		return self, ".", nil
@@ -116,25 +108,18 @@ func (self *Root) Resolve(path string) (*Root, string, error) {
 	return nil, "", ErrOutsideRoot
 }
 
-// RefuseWrite returns the current refusal for a path.
 func (self *Root) RefuseWrite(name string) error { return self.refuse(name) }
 
-// Name is the directory the tools are confined to.
 func (self *Root) Name() string { return self.root.Name() }
 
-// FS is the tree as a filesystem, for walking and reading.
 func (self *Root) FS() fs.FS { return self.root.FS() }
 
-// Open opens a file or a directory for reading.
 func (self *Root) Open(name string) (*os.File, error) { return self.root.Open(name) }
 
-// ReadFile reads a whole file.
 func (self *Root) ReadFile(name string) ([]byte, error) { return self.root.ReadFile(name) }
 
-// Stat is what is known about a file without opening it.
 func (self *Root) Stat(name string) (os.FileInfo, error) { return self.root.Stat(name) }
 
-// WriteFile writes a whole file, where the rule allows it.
 func (self *Root) WriteFile(name string, data []byte, perm os.FileMode) error {
 	if err := self.refuseWrite(name); err != nil {
 		return err
@@ -143,7 +128,6 @@ func (self *Root) WriteFile(name string, data []byte, perm os.FileMode) error {
 	return self.root.WriteFile(name, data, perm)
 }
 
-// MkdirAll makes a directory and every parent it needs, where the rule allows it.
 func (self *Root) MkdirAll(name string, perm os.FileMode) error {
 	if err := self.refuseWrite(name); err != nil {
 		return err

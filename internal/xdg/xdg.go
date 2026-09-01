@@ -5,12 +5,10 @@ import (
 	"path/filepath"
 )
 
-// StatePath returns a path below the XDG state directory.
 func StatePath(parts ...string) string {
 	return resolve("XDG_STATE_HOME", filepath.Join(".local", "state"), parts)
 }
 
-// ConfigPath returns a path below the XDG config directory.
 func ConfigPath(parts ...string) string {
 	return resolve("XDG_CONFIG_HOME", ".config", parts)
 }

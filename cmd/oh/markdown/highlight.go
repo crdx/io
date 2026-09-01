@@ -13,7 +13,6 @@ import (
 	"crdx.org/io/cmd/oh/style"
 )
 
-// Emphasise paints one line of source in the named language.
 func Emphasise(line string, language string) string {
 	return Highlight(line, line, language, false)
 }
@@ -71,7 +70,6 @@ func emphasise(lines []string, language string) []string {
 	return rows[:min(len(rows), len(lines))]
 }
 
-// Highlight highlights a prefix using the complete source syntax tree.
 func Highlight(source string, target string, language string, isElided bool) string {
 	switch language {
 	case "bash":

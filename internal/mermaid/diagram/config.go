@@ -1,6 +1,5 @@
 package diagram
 
-// Config controls the terminal rendering choices used by the supported diagrams.
 type Config struct {
 	UseAscii bool
 
@@ -19,7 +18,6 @@ type Config struct {
 	SequenceSelfMessageWidth int
 }
 
-// DefaultConfig returns the terminal renderer's defaults.
 func DefaultConfig() *Config {
 	return &Config{
 		UseAscii:                   false,

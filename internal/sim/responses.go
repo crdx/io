@@ -14,9 +14,6 @@ func (self responsesDialect) Name() string {
 	return Responses
 }
 
-// Path carries codex in it because that is where the ChatGPT backend serves this API, and a client
-// finds the model listing by trading the tail of its own turn address for one. Matching is done by
-// suffix, so an endpoint serving the same API at a plainer address is recognised here as well.
 func (self responsesDialect) Path() string {
 	return "/codex/responses"
 }

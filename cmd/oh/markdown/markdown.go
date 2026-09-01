@@ -24,17 +24,14 @@ const mermaidLanguage = "mermaid"
 
 var markdownParser = goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser()
 
-// Render lays markdown out as the rows to draw, styled and wrapped to the given columns.
 func Render(markdown string, columns int) []string {
 	return render(markdown, columns, nil, false)
 }
 
-// RenderWithHyperlinks lays markdown out with terminal hyperlinks.
 func RenderWithHyperlinks(markdown string, columns int) []string {
 	return render(markdown, columns, nil, true)
 }
 
-// StreamRenderer retains successful Mermaid diagrams while incomplete Markdown continues arriving.
 type StreamRenderer struct {
 	mermaidRows             map[int][]string
 	isTailMermaid           bool
@@ -44,17 +41,14 @@ type StreamRenderer struct {
 	hasStableCandidateStart bool
 }
 
-// Render lays out the current prefix of a Markdown stream.
 func (self *StreamRenderer) Render(markdown string, columns int) []string {
 	return self.render(markdown, columns, false)
 }
 
-// IsTailMermaid reports whether the last rendered row belongs to a Mermaid diagram.
 func (self *StreamRenderer) IsTailMermaid() bool {
 	return self.isTailMermaid
 }
 
-// Reset forgets rendering state from the previous stream.
 func (self *StreamRenderer) Reset() {
 	clear(self.mermaidRows)
 	self.isTailMermaid = false
@@ -117,11 +111,11 @@ func originalOffset(markdown string, expandedOffset int) int {
 }
 
 type renderer struct {
-	source                 []byte // the markdown being drawn, which every node is a position in
+	source                 []byte
 	columns                int
 	mermaidBlock           *int
-	isTight                bool     // whether its blocks stand apart, which those of a tight list do not
-	rows                   []string // what has been drawn so far
+	isTight                bool
+	rows                   []string
 	stream                 *StreamRenderer
 	shouldRenderHyperlinks bool
 }

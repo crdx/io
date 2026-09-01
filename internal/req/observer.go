@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-// Request is an immutable snapshot of one logical HTTP request.
 type Request struct {
 	StartedAt time.Time
 	Method    string
@@ -15,7 +14,6 @@ type Request struct {
 	Body      []byte
 }
 
-// Response is an immutable snapshot of one logical HTTP response.
 type Response struct {
 	ReceivedAt time.Time
 	Protocol   string
@@ -24,12 +22,10 @@ type Response struct {
 	Header     http.Header
 }
 
-// Observer receives logical HTTP exchanges without affecting request control flow.
 type Observer interface {
 	Start(request Request) ExchangeObserver
 }
 
-// ExchangeObserver receives one response body and its terminal state.
 type ExchangeObserver interface {
 	Response(response Response)
 	Body(body []byte)

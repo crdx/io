@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-// CompactDuration formats short durations precisely and longer durations compactly.
 func CompactDuration(took time.Duration) string {
 	if took > -time.Second && took < time.Second {
 		tenths := took.Round(100 * time.Millisecond).Seconds()
@@ -20,7 +19,6 @@ func CompactDuration(took time.Duration) string {
 	return FormatDuration(took)
 }
 
-// CoarseDuration formats a duration to a single unit.
 func CoarseDuration(elapsedTime time.Duration) string {
 	switch {
 	case elapsedTime < time.Minute:
@@ -34,7 +32,6 @@ func CoarseDuration(elapsedTime time.Duration) string {
 	return fmt.Sprintf("%dd", int(elapsedTime.Hours()/24))
 }
 
-// Ago says how long ago a moment was, coarsely, in the past tense.
 func Ago(when time.Time) string {
 	elapsedTime := time.Since(when)
 	if elapsedTime < time.Minute {
@@ -44,7 +41,6 @@ func Ago(when time.Time) string {
 	return CoarseDuration(elapsedTime) + " ago"
 }
 
-// FormatDuration formats a duration in no more than six characters.
 func FormatDuration(took time.Duration) string {
 	switch {
 	case took < time.Minute:

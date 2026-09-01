@@ -12,10 +12,8 @@ import (
 
 const refreshWindow = 5 * time.Minute
 
-// TokenSource hands over a token to make a request with.
 type TokenSource = messages.TokenSource
 
-// Static is a token that is already held, and never changes.
 func Static(access string) TokenSource {
 	return static{token: access}
 }
@@ -28,12 +26,10 @@ func (self static) Token() (string, error) {
 	return self.token, nil
 }
 
-// StoredCredentials reads and refreshes credentials written by Login.
 func StoredCredentials() TokenSource {
 	return &credentialStore{path: CredentialsPath(), requests: req.New(authTimeout)}
 }
 
-// StoredCredentialsAt reads credentials from path.
 func StoredCredentialsAt(path string) TokenSource {
 	return &credentialStore{path: path, requests: req.New(authTimeout)}
 }
@@ -45,7 +41,6 @@ type credentialStore struct {
 	credentials *Credentials
 }
 
-// Token reads the credentials on first use and refreshes them when needed.
 func (self *credentialStore) Token() (string, error) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()

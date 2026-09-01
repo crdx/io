@@ -14,18 +14,15 @@ import (
 
 const donePayload = "[DONE]"
 
-// ErrIncomplete is a response the endpoint cut short, usually against a limit.
 var ErrIncomplete = errors.New("the response was cut short")
 
-// ErrTruncated is a stream that stopped without ever saying it was finished, which means the wire
-// went quiet mid-turn rather than the model reaching an end.
 var ErrTruncated = sse.ErrTruncated
 
 type reply struct {
 	items            []json.RawMessage
 	usage            agent.Usage
 	summary          strings.Builder
-	message          strings.Builder // answer text streamed but not yet confirmed by an item
+	message          strings.Builder
 	isSummarised     bool
 	isRawReasoning   bool
 	isMessageStarted bool

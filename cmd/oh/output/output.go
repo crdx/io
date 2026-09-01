@@ -13,42 +13,40 @@ import (
 	"golang.org/x/term"
 )
 
-// Screen serialises terminal drawing.
 type Screen struct {
 	writer io.Writer
 
-	mutex sync.Mutex // guards drawing
+	mutex sync.Mutex
 
-	isMidLine        bool  // whether the cursor follows text on the current line
-	hasPendingText   bool  // whether streamed text has not ended in a newline
-	isBlankOwed      bool  // whether an empty line is owed to whatever is written next
-	trailingNewlines int   // how many newlines the last thing written ended with
-	lastGroup        Group // what was written last, so that a change of group opens a blank line
-	hasPrinted       bool  // whether anything has reached the screen yet, latched by emit until Reset
+	isMidLine        bool
+	hasPendingText   bool
+	isBlankOwed      bool
+	trailingNewlines int
+	lastGroup        Group
+	hasPrinted       bool
 
-	isTTY                 bool   // whether the writer is a terminal rather than a file or a pipe
-	isTextSizingSupported bool   // whether text can occupy declared multi-cell blocks
-	linkRoot              string // where relative paths drawn in the scrollback begin, and "" to link nothing
-	isProgressReported    bool   // whether the terminal has been told a turn is running
+	isTTY                 bool
+	isTextSizingSupported bool
+	linkRoot              string
+	isProgressReported    bool
 
-	columns    int // the terminal width
-	lines      int // the terminal height
-	column     int // the cursor column
-	openedRows int // how many conversation rows precede the current one
+	columns    int
+	lines      int
+	column     int
+	openedRows int
 
-	isWrapping        bool            // whether the terminal wraps at its edge
-	nestedUpdates     int             // how many whole-screen updates are holding their intermediate frames back
-	synchronisedBytes strings.Builder // output withheld until the outer synchronised update is complete
+	isWrapping        bool
+	nestedUpdates     int
+	synchronisedBytes strings.Builder
 
-	input       footer // what the input should look like
-	shownFooter footer // what is on the screen
+	input       footer
+	shownFooter footer
 
-	liveRegion  liveRegion     // the rows being repainted in place
-	isLiveDirty bool           // whether a deferred refresh is owed
-	blocks      []groupedBlock // the blocks the live region is made of, in the order they opened
+	liveRegion  liveRegion
+	isLiveDirty bool
+	blocks      []groupedBlock
 }
 
-// New builds the output over a writer, which is a terminal or is not.
 func New(writer io.Writer) *Screen {
 	self := &Screen{writer: writer, isTTY: tty.Is(writer)}
 
@@ -57,7 +55,6 @@ func New(writer io.Writer) *Screen {
 	return self
 }
 
-// NewTerminalOfSize builds an Output that is drawn as a terminal of the given size.
 func NewTerminalOfSize(writer io.Writer, columns int, lines int) *Screen {
 	return &Screen{
 		writer:  writer,
@@ -67,30 +64,23 @@ func NewTerminalOfSize(writer io.Writer, columns int, lines int) *Screen {
 	}
 }
 
-// SetTextSizingSupported records whether the terminal can draw declared multi-cell text.
 func (self *Screen) SetTextSizingSupported(isSupported bool) {
 	self.isTextSizingSupported = isSupported
 }
 
-// IsTextSizingSupported reports whether the terminal can draw declared multi-cell text.
 func (self *Screen) IsTextSizingSupported() bool {
 	return self.isTextSizingSupported
 }
 
-// IsTerminal reports whether the screen draws to a terminal.
 func (self *Screen) IsTerminal() bool {
 	return self.isTTY
 }
 
-// LinkPathsUnder marks the paths drawn text names as terminal hyperlinks, resolving the relative
-// ones against root. Nothing is linked until it is given one.
 func (self *Screen) LinkPathsUnder(root string) *Screen {
 	self.linkRoot = root
 	return self
 }
 
-// Line writes text on a line of its own after any streamed answer. Where blocks are open, the text
-// joins the sequence as a block of its own rather than disturbing them.
 func (self *Screen) Line(text string) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -112,7 +102,6 @@ func (self *Screen) Line(text string) {
 	self.write(text)
 }
 
-// Blank schedules one empty line before the next output. Repeated calls coalesce.
 func (self *Screen) Blank() {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -120,7 +109,6 @@ func (self *Screen) Blank() {
 	self.isBlankOwed = self.hasPrinted
 }
 
-// End finishes the turn on a complete line. Repeated calls are inert.
 func (self *Screen) End() {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()

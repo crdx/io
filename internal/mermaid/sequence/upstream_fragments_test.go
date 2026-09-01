@@ -19,9 +19,9 @@ func TestParseFragments(t *testing.T) {
 	tests := []struct {
 		name          string
 		input         string
-		wantMessages  int            // flat Messages count (backward-compatible field)
-		wantFragments []FragmentType // fragment openers, in order
-		wantLabels    []string       // labels of those openers, in order
+		wantMessages  int
+		wantFragments []FragmentType
+		wantLabels    []string
 	}{
 		{
 			name:          "loop with label",
@@ -128,7 +128,7 @@ func TestParseFragmentErrors(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   string
-		wantErr string // substring expected in the error message
+		wantErr string
 	}{
 		{
 			name:    "unclosed loop",

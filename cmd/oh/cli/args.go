@@ -146,8 +146,6 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 	return options, nil
 }
 
-// InheritedOptions are the options a session hands to the session that follows it. A resumed
-// conversation takes its confinement from what it was left in, so only a new one inherits --yolo.
 func InheritedOptions(arguments []string, kind cycle.TransitionKind) []string {
 	if kind != cycle.NewSession {
 		return nil

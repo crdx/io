@@ -8,7 +8,7 @@ import (
 
 type glyphs struct {
 	h, v, tl, tr, bl, br, teeD, teeU, teeL, teeR, cross rune
-	hd, vd                                              rune // dashed line, for non-identifying relationships
+	hd, vd                                              rune
 }
 
 var (
@@ -105,8 +105,6 @@ func renderEntity(entity *Entity, glyphSet glyphs, minInner int) []string {
 	return out
 }
 
-// Render lays out the entity tables in 2D and draws the relationships between
-// them. (Stage 3: placement + stamping; connectors added in stage 4.)
 func Render(diagram *ErDiagram, shouldUseAscii bool) string {
 	glyphSet := unicodeGlyphs
 	if shouldUseAscii {

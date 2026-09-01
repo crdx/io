@@ -16,7 +16,6 @@ type skill struct {
 	Location    string `xml:"location"`
 }
 
-// Context renders the skills.
 func Context(skills []Skill) string {
 	if len(skills) == 0 {
 		return ""

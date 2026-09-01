@@ -221,7 +221,6 @@ func postForm(ctx context.Context, requests *req.Client, form url.Values) (*Cred
 	}, nil
 }
 
-// TokenURL is the address credentials are traded at, and is the real one when left empty.
 var TokenURL string
 
 func tokenEndpoint() string {

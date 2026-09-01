@@ -1,6 +1,5 @@
 package sequence
 
-// BoxChars defines the characters used for drawing the diagram.
 type BoxChars struct {
 	TopLeft      rune
 	TopRight     rune
@@ -14,10 +13,10 @@ type BoxChars struct {
 	Cross        rune
 	ArrowRight   rune
 	ArrowLeft    rune
-	CrossHead    rune // head of -x / --x (lost/failed message)
-	PointRight   rune // head of -) / --) (async message)
+	CrossHead    rune
+	PointRight   rune
 	PointLeft    rune
-	Circle       rune // central-connection marker ("()") on a lifeline
+	Circle       rune
 	SolidLine    rune
 	DottedLine   rune
 	SelfTopRight rune

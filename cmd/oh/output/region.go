@@ -22,7 +22,6 @@ const (
 	progressClear         = "\x1b]9;4;0\x1b\\"
 )
 
-// BeginEditing uses a bar cursor until its returned restore function is called.
 func (self *Screen) BeginEditing() func() {
 	if !self.isTTY {
 		return func() {}
@@ -32,7 +31,6 @@ func (self *Screen) BeginEditing() func() {
 	return func() { self.writeRaw(defaultCursor) }
 }
 
-// Sync holds every intermediate update back until draw has finished.
 func (self *Screen) Sync(draw func()) {
 	if !self.isTTY {
 		draw()
@@ -85,13 +83,11 @@ type footer struct {
 	rows            []string
 	cursorRow       int
 	cursorColumn    int
-	column          int  // the conversation column above
-	separators      int  // rows between the conversation cursor and the input
-	hasContentAbove bool // whether the input sits below conversation
+	column          int
+	separators      int
+	hasContentAbove bool
 }
 
-// Footer draws the input under the conversation, and leaves the cursor sitting in it, which is
-// where someone typing expects to find it.
 func (self *Screen) Footer(rows []string, cursorRow int, cursorColumn int) {
 	if !self.isTTY {
 		return
@@ -123,7 +119,6 @@ func (self *Screen) WriteEscape(escape string) bool {
 	return true
 }
 
-// ReportProgress reports whether a turn is running through the terminal progress protocol.
 func (self *Screen) ReportProgress(isRunning bool) {
 	if !self.isTTY {
 		return
@@ -162,8 +157,6 @@ func (self *Screen) setProgress(isRunning bool) {
 	self.isProgressReported = isRunning
 }
 
-// Release takes the input away. A kept conversation leaves the cursor on the line below it; an
-// unused one is erased so whatever ran the harness can reuse its line.
 func (self *Screen) Release(shouldKeep bool) {
 	if !self.isTTY {
 		return
@@ -192,7 +185,6 @@ func (self *Screen) Release(shouldKeep bool) {
 	self.hasPendingText = false
 }
 
-// Reset clears the terminal and forgets all drawing state for a full replay.
 func (self *Screen) Reset() {
 	if !self.isTTY {
 		return
@@ -305,7 +297,6 @@ func moveRight(columns int) string {
 	return fmt.Sprintf(right, columns)
 }
 
-// Columns is how wide the terminal is, which is what a line is laid out against.
 func (self *Screen) Columns() int {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()

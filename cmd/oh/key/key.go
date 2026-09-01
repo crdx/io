@@ -13,10 +13,8 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// Code is which key was pressed.
 type Code int
 
-// The keys a decoder reports.
 const (
 	Rune Code = iota
 	Enter
@@ -38,40 +36,33 @@ const (
 	Unknown
 )
 
-// Modifier is what was held down with the key.
 type Modifier int
 
-// The modifiers a key can carry.
 const (
 	Shift Modifier = 1 << iota
 	Alt
 	Ctrl
 )
 
-// Has says whether every modifier in the mask was held.
 func (self Modifier) Has(mask Modifier) bool {
 	return self&mask == mask
 }
 
-// Key is one keypress.
 type Key struct {
 	Code  Code
 	Value rune
 	Mod   Modifier
 }
 
-// Decoder reads keypresses off a terminal.
 type Decoder struct {
 	reader                *bufio.Reader
 	hasEscapeContinuation func() bool
 }
 
-// NewDecoder builds a decoder over a buffered input stream.
 func NewDecoder(reader *bufio.Reader) *Decoder {
 	return newDecoder(reader, nil)
 }
 
-// NewTerminalDecoder builds a decoder which distinguishes a bare Escape from a fragmented sequence.
 func NewTerminalDecoder(reader *bufio.Reader, terminal *os.File) *Decoder {
 	return newDecoder(reader, func() bool {
 		return hasTerminalInput(terminal, escapeSequenceTimeout)
@@ -113,14 +104,11 @@ func hasTerminalInput(terminal *os.File, timeout time.Duration) bool {
 	}
 }
 
-// Enable turns the keyboard protocol, bracketed paste, and focus reporting on. Disable puts the
-// terminal back.
 const (
 	Enable  = "\x1b[>1u\x1b[?2004h\x1b[?1004h"
 	Disable = "\x1b[?1004l\x1b[?2004l\x1b[<u"
 )
 
-// Next blocks until a key is pressed.
 func (self *Decoder) Next() (Key, error) {
 	first, _, err := self.reader.ReadRune()
 	if err != nil {

@@ -62,18 +62,18 @@ const (
 type placedEntity struct {
 	entity   *Entity
 	lines    []string
-	x, y     int // top-left
-	w, h     int // box dimensions
-	row, col int // grid cell
+	x, y     int
+	w, h     int
+	row, col int
 }
 
 type layout struct {
 	byName         map[string]*placedEntity
 	placedEntities []*placedEntity
-	lanes          int   // one lane per relationship (global, so lanes never clash)
-	gutW           int   // width of each vertical gutter
-	vGutX          []int // left edge x of each vertical gutter (len cols+1)
-	hGutY          []int // top edge y of each horizontal gutter (len rows+1)
+	lanes          int
+	gutW           int
+	vGutX          []int
+	hGutY          []int
 }
 
 func placeEntities(diagram *ErDiagram, glyphSet glyphs) *layout {
@@ -374,8 +374,8 @@ type routePlan struct {
 	rel      *Relationship
 	a, b     endpoint
 	ya, yb   int
-	tx       int  // trunk column, valid only when !merged
-	isMerged bool // both stubs meet one gutter row: single run, no trunk
+	tx       int
+	isMerged bool
 }
 
 func newPlan(lay *layout, a endpoint, b endpoint, r *Relationship, lane int) routePlan {

@@ -42,7 +42,6 @@ type inputOpts struct {
 	Sessions []string `docopt:"<session>"`
 }
 
-// Run migrates each named session, or every session written in an older format.
 func Run() error {
 	return run(duckopt.MustBind[inputOpts](usage, "$0"), console.Standard())
 }

@@ -50,7 +50,6 @@ type inputOpts struct {
 	Running   bool   `docopt:"--running"`
 }
 
-// Listing is one stored session as the command reports it.
 type Listing struct {
 	Name         string    `json:"name"`
 	Status       string    `json:"status"`
@@ -66,7 +65,6 @@ type Listing struct {
 	TouchedAt    time.Time `json:"touched"`
 }
 
-// Run lists the stored sessions, newest first.
 func Run() error {
 	return run(duckopt.MustBind[inputOpts](usage, "$0"), console.Standard())
 }

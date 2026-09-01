@@ -1,5 +1,3 @@
-// Package er parses and renders mermaid entity-relationship (erDiagram) diagrams as ASCII: entity
-// attribute tables connected by crow's-foot relationships.
 package er
 
 import (
@@ -13,7 +11,6 @@ import (
 
 const erKeyword = "erDiagram"
 
-// Cardinality is one end of a relationship (crow's-foot notation).
 type Cardinality int
 
 const (
@@ -23,33 +20,27 @@ const (
 	OneOrMore
 )
 
-// Attribute is one row of an entity's attribute table.
 type Attribute struct {
 	Type    string
 	Name    string
-	Keys    []string // PK, FK, UK
+	Keys    []string
 	Comment string
 }
 
-// Entity is a named box with an optional list of attributes. Name is the id used in relationships;
-// Display is the label shown in the box (an alias if one was given, otherwise the name).
 type Entity struct {
 	Name       string
 	Display    string
 	Attributes []Attribute
 }
 
-// Relationship connects two entities with a cardinality at each end.
 type Relationship struct {
 	Left, Right string
 	LeftCard    Cardinality
 	RightCard   Cardinality
-	Identifying bool // true for a solid (--) line, false for dashed (..)
+	Identifying bool
 	Label       string
 }
 
-// ErDiagram is a parsed entity-relationship diagram. Entities are kept in first -seen order; a
-// relationship referencing an undeclared entity auto-creates it.
 type ErDiagram struct {
 	Entities      []*Entity
 	Relationships []*Relationship
@@ -90,8 +81,6 @@ var (
 	subgraphRegex = regexp.MustCompile(`^subgraph\b`)
 )
 
-// IsErDiagram reports whether the input's first meaningful line declares an erDiagram
-// (case-insensitive, whole token).
 func IsErDiagram(input string) bool {
 	for line := range strings.SplitSeq(input, "\n") {
 		t := strings.TrimSpace(line)
@@ -115,7 +104,6 @@ func (self *ErDiagram) entity(name string) *Entity {
 	return e
 }
 
-// Parse parses an erDiagram into entities and relationships.
 func Parse(input string) (*ErDiagram, error) {
 	if !IsErDiagram(input) {
 		return nil, fmt.Errorf("expected %q keyword", erKeyword)

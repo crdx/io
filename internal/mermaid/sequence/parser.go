@@ -38,7 +38,6 @@ var (
 	noteRegex = regexp.MustCompile(`(?i)^\s*note\s+(right of|left of|over)\s+([^:]+?)\s*:\s*(.*)$`)
 )
 
-// SequenceDiagram represents a parsed sequence diagram.
 type SequenceDiagram struct {
 	Participants []*Participant
 	Messages     []*Message
@@ -46,8 +45,6 @@ type SequenceDiagram struct {
 	Autonumber   bool
 }
 
-// FragmentType identifies a control-flow fragment (a "framed" block of messages) such as a loop or
-// an optional section.
 type FragmentType int
 
 const (
@@ -91,14 +88,11 @@ var dividerKeywords = map[string]FragmentType{
 	"else": FragmentAlt, "and": FragmentPar, "option": FragmentCritical,
 }
 
-// Fragment describes the opening of a control-flow block: its kind and the optional condition text
-// shown in the frame's label tab.
 type Fragment struct {
 	Type  FragmentType
 	Label string
 }
 
-// EventKind tags each Event in the diagram body.
 type EventKind int
 
 const (
@@ -126,9 +120,6 @@ func (self EventKind) String() string {
 	}
 }
 
-// Event is one item in the diagram body. Exactly one payload field is set:
-// Message when Kind is EventMessage, Fragment when Kind is EventFragmentStart, Note when Kind is
-// EventNote. An EventFragmentEnd carries no payload; it just marks where a block closes.
 type Event struct {
 	Kind     EventKind
 	Message  *Message
@@ -136,7 +127,6 @@ type Event struct {
 	Note     *Note
 }
 
-// NotePlacement describes where a note box sits relative to its participant(s).
 type NotePlacement int
 
 const (
@@ -145,10 +135,9 @@ const (
 	NoteRightOf
 )
 
-// Note is an annotation box drawn over or beside participant lifelines.
 type Note struct {
 	Placement    NotePlacement
-	Participants []*Participant // one participant, or two for "over A,B"
+	Participants []*Participant
 	Text         string
 }
 
@@ -165,7 +154,7 @@ type Message struct {
 	ArrowType   ArrowType
 	CentralFrom bool
 	CentralTo   bool
-	Number      int // Message number when autonumber is enabled (0 means no number)
+	Number      int
 }
 
 type ArrowType int

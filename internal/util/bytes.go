@@ -10,8 +10,6 @@ type count interface {
 	~int | ~int64 | ~uint64
 }
 
-// FormatBytes renders a byte count using binary K and M units at the requested significant-digit
-// precision.
 func FormatBytes[Count count](bytes Count, precision int) string {
 	if bytes <= 0 {
 		return "0B"

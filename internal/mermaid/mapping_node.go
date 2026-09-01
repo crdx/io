@@ -7,7 +7,7 @@ type node struct {
 	drawingCoord   *drawingCoord
 	gridCoord      *gridCoord
 	drawn          bool
-	index          int // Index of the node in the graph.nodes slice
+	index          int
 	styleClassName string
 	styleClass     styleClass
 }

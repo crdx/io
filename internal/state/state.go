@@ -12,8 +12,6 @@ import (
 	"crdx.org/io/internal/format"
 )
 
-// Update reads the state, hands it to update, and writes back what update leaves behind. It waits
-// for whoever else holds the state before doing any of that.
 func Update[State any](path string, supportedFormat int, update func(*State) error) error {
 	lock, err := lock(path, syscall.LOCK_EX)
 	if err != nil {
@@ -24,9 +22,6 @@ func Update[State any](path string, supportedFormat int, update func(*State) err
 	return updateHeld(path, supportedFormat, update)
 }
 
-// TryUpdate is Update for a caller with something better to do than wait. It reports whether the
-// state was held by somebody else, in which case nothing was read, updated, or written, and the
-// caller is expected to carry on with whatever Read last gave it.
 func TryUpdate[State any](path string, supportedFormat int, update func(*State) error) (bool, error) {
 	lock, err := lock(path, syscall.LOCK_EX|syscall.LOCK_NB)
 	if errors.Is(err, syscall.EWOULDBLOCK) {
@@ -40,7 +35,6 @@ func TryUpdate[State any](path string, supportedFormat int, update func(*State) 
 	return true, updateHeld(path, supportedFormat, update)
 }
 
-// Read reads the state as it stands. A write lands whole, so no lock is needed to read one.
 func Read[State any](path string, supportedFormat int, state *State) error {
 	return read(path, supportedFormat, state)
 }

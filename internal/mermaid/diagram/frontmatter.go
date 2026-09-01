@@ -2,17 +2,6 @@ package diagram
 
 import "strings"
 
-// StripFrontmatter removes a leading YAML frontmatter block (delimited by `---` lines) from a
-// mermaid document, returning the remaining input and the frontmatter's title, if one was set.
-//
-// Mermaid uses frontmatter for a diagram title and theme/config overrides (colours, CSS). The
-// config has no meaning in ASCII output, so it is discarded; the title is surfaced so callers can
-// print it above the diagram, as mermaid does.
-//
-// Matching mermaid's own frontmatter semantics (frontmatter.spec.ts):
-// frontmatter is only recognised at the start of the document, the closing delimiter must sit at
-// the same indentation as the opening one, and an unclosed block is not frontmatter at all — the
-// input is returned untouched for the diagram parser to deal with.
 func StripFrontmatter(input string) (string, string) {
 	lines := strings.Split(input, "\n")
 	title := ""

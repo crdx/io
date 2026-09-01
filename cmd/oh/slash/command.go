@@ -133,8 +133,6 @@ func NewCommandSet(prefix string, commands ...Command) (CommandSet, error) {
 	return set, nil
 }
 
-// Usages are in the order the commands were registered, which is the order they are meant to be
-// read in rather than the order they happen to sort in.
 func (self CommandSet) Usages() []string {
 	usages := make([]string, 0, len(self.order))
 	for _, name := range self.order {
@@ -153,8 +151,6 @@ type HelpEntry struct {
 	Description string
 }
 
-// FormatHelp lays each entry out as its usage, padded to a common column, followed by its
-// description wrapped within HelpWidth.
 func FormatHelp(entries []HelpEntry) []string {
 	usageWidth := 0
 	for _, entry := range entries {
