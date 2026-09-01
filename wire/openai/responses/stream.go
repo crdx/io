@@ -112,8 +112,29 @@ type eventPart struct {
 }
 
 type eventResponse struct {
-	Error *eventError `json:"error"`
-	Usage agent.Usage `json:"usage"`
+	Error *eventError   `json:"error"`
+	Usage responseUsage `json:"usage"`
+}
+
+type responseUsage struct {
+	InputTokens int                   `json:"input_tokens"`
+	Details     *responseCacheDetails `json:"input_tokens_details"`
+}
+
+type responseCacheDetails struct {
+	ReadTokens  int `json:"cached_tokens"`
+	WriteTokens int `json:"cache_write_tokens"`
+}
+
+func (self responseUsage) normalised() agent.Usage {
+	usage := agent.Usage{InputTokens: self.InputTokens}
+	if self.Details != nil {
+		usage.Cache = &agent.CacheUsage{
+			ReadTokens:  self.Details.ReadTokens,
+			WriteTokens: self.Details.WriteTokens,
+		}
+	}
+	return usage
 }
 
 type eventError struct {
@@ -263,7 +284,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 
 	case "response.completed", "response.done":
 		if event.Response != nil {
-			self.usage = event.Response.Usage
+			self.usage = event.Response.Usage.normalised()
 		}
 		self.completeOpenOutput(yield)
 		return true, nil

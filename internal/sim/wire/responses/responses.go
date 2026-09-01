@@ -8,10 +8,12 @@ import (
 const Done = "[DONE]"
 
 // CompletedResponse ends a turn that went to plan.
-func CompletedResponse(inputTokens int) string {
+func CompletedResponse(inputTokens int, cachedTokens int) string {
 	return fmt.Sprintf(
-		`{"type":"response.completed","response":{"usage":{"input_tokens":%d}}}`,
+		`{"type":"response.completed","response":{"usage":{"input_tokens":%d,`+
+			`"input_tokens_details":{"cached_tokens":%d,"cache_write_tokens":0}}}}`,
 		inputTokens,
+		cachedTokens,
 	)
 }
 

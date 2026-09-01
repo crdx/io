@@ -88,7 +88,24 @@ type chunk struct {
 }
 
 type usage struct {
-	PromptTokens int `json:"prompt_tokens"`
+	PromptTokens int                 `json:"prompt_tokens"`
+	Details      *promptCacheDetails `json:"prompt_tokens_details"`
+}
+
+type promptCacheDetails struct {
+	ReadTokens  int `json:"cached_tokens"`
+	WriteTokens int `json:"cache_write_tokens"`
+}
+
+func (self usage) normalised() agent.Usage {
+	normalisedUsage := agent.Usage{InputTokens: self.PromptTokens}
+	if self.Details != nil {
+		normalisedUsage.Cache = &agent.CacheUsage{
+			ReadTokens:  self.Details.ReadTokens,
+			WriteTokens: self.Details.WriteTokens,
+		}
+	}
+	return normalisedUsage
 }
 
 type choice struct {
@@ -173,7 +190,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 		return true, errors.New(chunk.Error.Message)
 	}
 	if chunk.Usage != nil && chunk.Usage.PromptTokens > 0 {
-		self.usage = agent.Usage{InputTokens: chunk.Usage.PromptTokens}
+		self.usage = chunk.Usage.normalised()
 	}
 	if len(chunk.Choices) == 0 {
 		return false, nil

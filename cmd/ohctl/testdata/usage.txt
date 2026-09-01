@@ -2,10 +2,12 @@ ohctl — oh control
 
 Usage:
     ohctl sessions [options]
+    ohctl analyse [options] [<session>...]
     ohctl regen [<session>...]
     ohctl migrate [options] [<session>...]
 
 Commands:
     sessions    List the stored sessions
+    analyse     Analyse stored sessions
     regen       Write stored transcripts again from their journals
     migrate     Bring configuration and stored sessions up to their current formats

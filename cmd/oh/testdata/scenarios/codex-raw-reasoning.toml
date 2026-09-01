@@ -12,7 +12,7 @@ event = [
     '''{"type":"response.output_item.done","item":{"id":"reasoning-1","type":"reasoning","content":[],"encrypted_content":"sealed-raw","summary":[]}}''',
     '''{"type":"response.output_text.delta","delta":"Done."}''',
     '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Done."}]}}''',
-    '''{"type":"response.completed"}''',
+    '''{"type":"response.completed","response":{"usage":{"input_tokens":5000,"input_tokens_details":{"cached_tokens":0,"cache_write_tokens":5000}}}}''',
 ]
 
 [resume]
@@ -22,5 +22,5 @@ prompt = "continue after the first response"
 event = [
     '''{"type":"response.output_text.delta","delta":"Resumed."}''',
     '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}''',
-    '''{"type":"response.completed"}''',
+    '''{"type":"response.completed","response":{"usage":{"input_tokens":5100,"input_tokens_details":{"cached_tokens":5000,"cache_write_tokens":100}}}}''',
 ]

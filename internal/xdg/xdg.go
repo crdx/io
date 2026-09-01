@@ -15,6 +15,10 @@ func ConfigPath(parts ...string) string {
 	return resolve("XDG_CONFIG_HOME", ".config", parts)
 }
 
+func CachePath(parts ...string) string {
+	return resolve("XDG_CACHE_HOME", ".cache", parts)
+}
+
 func resolve(variable string, fallback string, parts []string) string {
 	root := os.Getenv(variable)
 

@@ -36,10 +36,12 @@ func Call(index int, id string, name string, arguments string) string {
 }
 
 // Usage reports the context consumed by a completed request.
-func Usage(promptTokens int) string {
+func Usage(promptTokens int, cachedTokens int) string {
 	return fmt.Sprintf(
-		`{"object":"chat.completion.chunk","choices":[],"usage":{"prompt_tokens":%d}}`,
+		`{"object":"chat.completion.chunk","choices":[],"usage":{"prompt_tokens":%d,`+
+			`"prompt_tokens_details":{"cached_tokens":%d,"cache_write_tokens":0}}}`,
 		promptTokens,
+		cachedTokens,
 	)
 }
 

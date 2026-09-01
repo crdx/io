@@ -50,6 +50,10 @@ func GetUsageCachePath(provider string, isSimulation bool) string {
 	return GetStateDir("usage", provider+".json")
 }
 
+func GetAnalysisCachePath() string {
+	return xdg.CachePath(namespace, app, "analysis.json")
+}
+
 func GetModelRoundRobinPath() string {
 	return GetStateDir("model-round-robin.json")
 }

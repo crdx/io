@@ -7,7 +7,7 @@ prompt = "think privately, then answer"
 
 [[first.response]]
 event = [
-    '''{"type":"message_start","message":{}}''',
+    '''{"type":"message_start","message":{"usage":{"input_tokens":2,"cache_read_input_tokens":0,"cache_creation_input_tokens":5000}}}''',
     '''{"type":"content_block_start","index":0,"content_block":{"type":"redacted_thinking","data":"encrypted-private-thought"}}''',
     '''{"type":"content_block_stop","index":0}''',
     '''{"type":"content_block_start","index":1,"content_block":{"type":"text","text":""}}''',
@@ -22,7 +22,7 @@ prompt = "answer again using the retained context"
 
 [[resume.response]]
 event = [
-    '''{"type":"message_start","message":{}}''',
+    '''{"type":"message_start","message":{"usage":{"input_tokens":2,"cache_read_input_tokens":5000,"cache_creation_input_tokens":100}}}''',
     '''{"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}''',
     '''{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Second answer."}}''',
     '''{"type":"content_block_stop","index":0}''',

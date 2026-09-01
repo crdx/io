@@ -496,7 +496,8 @@ func TestAStreamingRequestAsksForAndReportsUsage(t *testing.T) {
 		&bodies,
 		`{"choices":[{"delta":{"content":"hello"}}]}`,
 		`{"choices":[{"delta":{},"finish_reason":"stop"}]}`,
-		`{"choices":[],"usage":{"prompt_tokens":5000}}`,
+		`{"choices":[],"usage":{"prompt_tokens":5000,"prompt_tokens_details":`+
+			`{"cached_tokens":4000,"cache_write_tokens":300}}}`,
 		"[DONE]",
 	)
 
@@ -515,10 +516,12 @@ func TestAStreamingRequestAsksForAndReportsUsage(t *testing.T) {
 	if !strings.Contains(bodies[0], `"stream_options":{"include_usage":true}`) {
 		t.Errorf("usage was not requested: %s", bodies[0])
 	}
-	if reply.Usage.InputTokens != 5000 {
-		t.Errorf("got usage %d, want 5000", reply.Usage.InputTokens)
+	if reply.Usage.InputTokens != 5000 || reply.Usage.Cache == nil ||
+		reply.Usage.Cache.ReadTokens != 4000 || reply.Usage.Cache.WriteTokens != 300 {
+		t.Errorf("got usage %#v", reply.Usage)
 	}
-	if len(outputs) == 0 || outputs[len(outputs)-1].Usage == nil || outputs[len(outputs)-1].Usage.InputTokens != 5000 {
+	if len(outputs) == 0 || outputs[len(outputs)-1].Usage == nil ||
+		outputs[len(outputs)-1].Usage.Cache == nil || outputs[len(outputs)-1].Usage.Cache.ReadTokens != 4000 {
 		t.Errorf("final output did not carry usage: %#v", outputs)
 	}
 }

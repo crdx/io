@@ -12,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -53,10 +54,13 @@ const callID = "c1"
 
 const completed = `{"type":"response.completed"}`
 
-func completedWithUsage(inputTokens int) string {
+func completedWithUsage(inputTokens int, cacheReadTokens int, cacheWriteTokens int) string {
 	return fmt.Sprintf(
-		`{"type":"response.completed","response":{"usage":{"input_tokens":%d}}}`,
+		`{"type":"response.completed","response":{"usage":{"input_tokens":%d,`+
+			`"input_tokens_details":{"cached_tokens":%d,"cache_write_tokens":%d}}}}`,
 		inputTokens,
+		cacheReadTokens,
+		cacheWriteTokens,
 	)
 }
 
@@ -536,8 +540,8 @@ func TestStreamReportsEachTurnAsItHappens(t *testing.T) {
 func TestStreamAttachesEachRequestsContextUsageToItsFinalEvent(t *testing.T) {
 	server, _ := turns(
 		t,
-		events(call("weather", `{"city":"London"}`), completedWithUsage(12_000)),
-		events(answer("It is raining."), completedWithUsage(27_400)),
+		events(call("weather", `{"city":"London"}`), completedWithUsage(12_000, 8_000, 500)),
+		events(answer("It is raining."), completedWithUsage(27_400, 24_000, 700)),
 	)
 
 	var callCount int
@@ -553,8 +557,11 @@ func TestStreamAttachesEachRequestsContextUsageToItsFinalEvent(t *testing.T) {
 		}
 	}
 
-	want := []agent.Usage{{InputTokens: 12_000}, {InputTokens: 27_400}}
-	if !slices.Equal(usages, want) {
+	want := []agent.Usage{
+		{InputTokens: 12_000, Cache: &agent.CacheUsage{ReadTokens: 8_000, WriteTokens: 500}},
+		{InputTokens: 27_400, Cache: &agent.CacheUsage{ReadTokens: 24_000, WriteTokens: 700}},
+	}
+	if !reflect.DeepEqual(usages, want) {
 		t.Errorf("got usage %v, want %v", usages, want)
 	}
 }

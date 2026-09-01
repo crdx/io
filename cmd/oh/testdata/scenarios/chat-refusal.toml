@@ -10,6 +10,7 @@ event = [
     '''{"choices":[{"delta":{"role":"assistant","content":null,"reasoning_content":""}}]}''',
     '''{"choices":[{"delta":{"content":"I cannot help with that."}}]}''',
     '''{"choices":[{"delta":{"content":"","reasoning_content":""},"finish_reason":"stop"}]}''',
+    '''{"choices":[],"usage":{"prompt_tokens":5000,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":5000}}}''',
     '''[DONE]''',
 ]
 
@@ -20,5 +21,6 @@ prompt = "continue after the first response"
 event = [
     '''{"choices":[{"delta":{"content":"Resumed."}}]}''',
     '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''{"choices":[],"usage":{"prompt_tokens":5100,"prompt_tokens_details":{"cached_tokens":5000,"cache_write_tokens":100}}}''',
     '''[DONE]''',
 ]

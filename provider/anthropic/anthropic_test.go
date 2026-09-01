@@ -1217,6 +1217,9 @@ func TestUsageCountsEverythingTheTurnReadAndNotOnlyWhatWasReadAfresh(t *testing.
 	if reply.Usage.InputTokens != 5000 {
 		t.Errorf("expected the cached tokens to be counted too, got %d", reply.Usage.InputTokens)
 	}
+	if reply.Usage.Cache == nil || reply.Usage.Cache.ReadTokens != 4000 || reply.Usage.Cache.WriteTokens != 880 {
+		t.Errorf("expected the cache usage to be retained, got %#v", reply.Usage.Cache)
+	}
 }
 
 func TestAnAccountOfOnlyWhatWasWrittenLeavesTheContextCountStanding(t *testing.T) {

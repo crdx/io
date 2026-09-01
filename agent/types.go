@@ -78,7 +78,13 @@ type Reply struct {
 }
 
 type Usage struct {
-	InputTokens int `json:"input_tokens"`
+	InputTokens int         `json:"input_tokens"`
+	Cache       *CacheUsage `json:"cache,omitempty"`
+}
+
+type CacheUsage struct {
+	ReadTokens  int `json:"read_tokens"`
+	WriteTokens int `json:"write_tokens,omitempty"`
 }
 
 type ToolCall struct {

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/ohctl/analyse"
 	"crdx.org/io/cmd/ohctl/migrate"
 	"crdx.org/io/cmd/ohctl/regen"
 	"crdx.org/io/cmd/ohctl/sessions"
@@ -14,11 +15,13 @@ const usage = `ohctl — oh control
 
 Usage:
     ohctl sessions [options]
+    ohctl analyse [options] [<session>...]
     ohctl regen [<session>...]
     ohctl migrate [options] [<session>...]
 
 Commands:
     sessions    List the stored sessions
+    analyse     Analyse stored sessions
     regen       Write stored transcripts again from their journals
     migrate     Bring configuration and stored sessions up to their current formats
 `
@@ -35,6 +38,8 @@ func main() {
 	switch os.Args[1] {
 	case "sessions":
 		err = sessions.Run()
+	case "analyse":
+		err = analyse.Run()
 	case "regen":
 		err = regen.Run()
 	case "migrate":

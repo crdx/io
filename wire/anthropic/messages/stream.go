@@ -66,8 +66,14 @@ type usage struct {
 	CacheCreation int `json:"cache_creation_input_tokens"`
 }
 
-func (self usage) contextTokens() int {
-	return self.InputTokens + self.CacheRead + self.CacheCreation
+func (self usage) normalised() agent.Usage {
+	return agent.Usage{
+		InputTokens: self.InputTokens + self.CacheRead + self.CacheCreation,
+		Cache: &agent.CacheUsage{
+			ReadTokens:  self.CacheRead,
+			WriteTokens: self.CacheCreation,
+		},
+	}
 }
 
 func (self *reply) find(index int) *block {
@@ -315,8 +321,9 @@ func (self *reply) recordUsage(usage *usage) {
 		return
 	}
 
-	if inputTokens := usage.contextTokens(); inputTokens > 0 {
-		self.usage = agent.Usage{InputTokens: inputTokens}
+	normalisedUsage := usage.normalised()
+	if normalisedUsage.InputTokens > 0 {
+		self.usage = normalisedUsage
 	}
 }
 

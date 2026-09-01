@@ -142,7 +142,7 @@ func (self completionsDialect) Play(stream *Stream, _ *Scenario, turn Turn) {
 		stream.Send(completions.Error(turn.Fail))
 	default:
 		stream.Send(completions.Finish(finishReason(turn)))
-		stream.Send(completions.Usage(freshTokens + cachedTokens))
+		stream.Send(completions.Usage(freshTokens+cachedTokens, cachedTokens))
 	}
 
 	stream.Send(completions.Done)
@@ -162,6 +162,6 @@ func finishReason(turn Turn) string {
 func (self completionsDialect) Exhausted(stream *Stream, message string) {
 	stream.Send(completions.Answer(message))
 	stream.Send(completions.Finish(completions.Stopped))
-	stream.Send(completions.Usage(freshTokens + cachedTokens))
+	stream.Send(completions.Usage(freshTokens+cachedTokens, cachedTokens))
 	stream.Send(completions.Done)
 }
