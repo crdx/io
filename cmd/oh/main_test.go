@@ -2665,6 +2665,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"startup":               {".ansi", ".screen"},
 		"startup-sized":         {".ansi", ".screen"},
 		"startup-sized-output":  {".ansi", ".screen"},
+		"terminal-escape":       {".ansi", ".screen"},
 		"vertical-movement":     {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)

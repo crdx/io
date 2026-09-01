@@ -2,9 +2,15 @@ package key
 
 import (
 	"bufio"
+	"errors"
+	"os"
 	"strconv"
 	"strings"
+	"syscall"
+	"time"
 	"unicode"
+
+	"golang.org/x/sys/unix"
 )
 
 // Code is which key was pressed.
@@ -56,18 +62,56 @@ type Key struct {
 
 // Decoder reads keypresses off a terminal.
 type Decoder struct {
-	reader *bufio.Reader
+	reader                *bufio.Reader
+	hasEscapeContinuation func() bool
 }
 
-// NewDecoder builds a decoder over a buffered terminal.
+// NewDecoder builds a decoder over a buffered input stream.
 func NewDecoder(reader *bufio.Reader) *Decoder {
-	return &Decoder{reader: reader}
+	return newDecoder(reader, nil)
+}
+
+// NewTerminalDecoder builds a decoder which distinguishes a bare Escape from a fragmented sequence.
+func NewTerminalDecoder(reader *bufio.Reader, terminal *os.File) *Decoder {
+	return newDecoder(reader, func() bool {
+		return hasTerminalInput(terminal, escapeSequenceTimeout)
+	})
+}
+
+func newDecoder(reader *bufio.Reader, hasEscapeContinuation func() bool) *Decoder {
+	return &Decoder{reader: reader, hasEscapeContinuation: hasEscapeContinuation}
 }
 
 const (
-	escapeByte = '\x1b'
-	delByte    = '\x7f'
+	escapeByte            = '\x1b'
+	delByte               = '\x7f'
+	escapeSequenceTimeout = 25 * time.Millisecond
 )
+
+func hasTerminalInput(terminal *os.File, timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+
+	for {
+		remaining := time.Until(deadline)
+		if remaining <= 0 {
+			return false
+		}
+
+		descriptors := []unix.PollFd{{
+			Fd:     int32(terminal.Fd()), //nolint:gosec // Unix file descriptors fit PollFd
+			Events: unix.POLLIN,
+		}}
+		ready, err := unix.Poll(descriptors, max(1, int(remaining.Milliseconds())))
+		if errors.Is(err, syscall.EINTR) {
+			continue
+		}
+		if err != nil || ready == 0 {
+			return false
+		}
+
+		return descriptors[0].Revents&unix.POLLIN != 0
+	}
+}
 
 // Enable turns the keyboard protocol, bracketed paste, and focus reporting on. Disable puts the
 // terminal back.
@@ -84,7 +128,7 @@ func (self *Decoder) Next() (Key, error) {
 	}
 
 	if first == escapeByte {
-		return self.sequence()
+		return self.escape()
 	}
 
 	if first == '\r' {
@@ -123,8 +167,8 @@ func plain(value rune) Key {
 	return Key{Code: Rune, Value: value}
 }
 
-func (self *Decoder) sequence() (Key, error) {
-	if self.reader.Buffered() == 0 {
+func (self *Decoder) escape() (Key, error) {
+	if !self.escapeContinues() {
 		return Key{Code: Escape}, nil
 	}
 
@@ -141,6 +185,11 @@ func (self *Decoder) sequence() (Key, error) {
 	}
 
 	return Key{Code: Unknown}, nil
+}
+
+func (self *Decoder) escapeContinues() bool {
+	return self.reader.Buffered() > 0 ||
+		self.hasEscapeContinuation != nil && self.hasEscapeContinuation()
 }
 
 func (self *Decoder) applicationCursor() (Key, error) {

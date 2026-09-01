@@ -131,7 +131,7 @@ func Keypresses(terminal *os.File) (<-chan key.Key, func()) {
 		defer close(finishedChannel)
 		defer close(keys)
 
-		decoder := key.NewDecoder(bufio.NewReader(reader))
+		decoder := key.NewTerminalDecoder(bufio.NewReader(reader), terminal)
 		for {
 			keypress, err := decoder.Next()
 			if err != nil {

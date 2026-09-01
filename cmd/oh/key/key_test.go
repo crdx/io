@@ -2,8 +2,10 @@ package key
 
 import (
 	"bufio"
+	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func decode(t *testing.T, input string) []Key {
@@ -20,6 +22,102 @@ func decode(t *testing.T, input string) []Key {
 		}
 
 		keypresses = append(keypresses, next)
+	}
+}
+
+type decodedKey struct {
+	keypress Key
+	err      error
+}
+
+func decodeNext(decoder *Decoder) <-chan decodedKey {
+	decoded := make(chan decodedKey, 1)
+	go func() {
+		keypress, err := decoder.Next()
+		decoded <- decodedKey{keypress: keypress, err: err}
+	}()
+
+	return decoded
+}
+
+func decodeFragmentedTerminal(t *testing.T, continuation string) Key {
+	t.Helper()
+
+	terminal, writer, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = terminal.Close() }()
+	defer func() { _ = writer.Close() }()
+
+	isWaiting := make(chan struct{})
+	decoder := newDecoder(bufio.NewReader(terminal), func() bool {
+		close(isWaiting)
+		return hasTerminalInput(terminal, escapeSequenceTimeout)
+	})
+	decoded := decodeNext(decoder)
+
+	if _, err := writer.WriteString("\x1b"); err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case <-isWaiting:
+	case got := <-decoded:
+		if got.err != nil {
+			t.Fatal(got.err)
+		}
+		return got.keypress
+	case <-time.After(time.Second):
+		t.Fatal("decoder did not inspect the escape")
+		return Key{}
+	}
+
+	if _, err := writer.WriteString(continuation); err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case got := <-decoded:
+		if got.err != nil {
+			t.Fatal(got.err)
+		}
+		return got.keypress
+	case <-time.After(time.Second):
+		t.Fatal("decoder did not finish")
+		return Key{}
+	}
+}
+
+func TestAnEscapeSequenceMayBeSplitAcrossTerminalReads(t *testing.T) {
+	if got := decodeFragmentedTerminal(t, "[A"); got != (Key{Code: Up}) {
+		t.Errorf("got %+v, want Up", got)
+	}
+}
+
+func TestABareTerminalEscapeReturnsAfterTheSequenceDeadline(t *testing.T) {
+	terminal, writer, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = terminal.Close() }()
+	defer func() { _ = writer.Close() }()
+
+	decoded := decodeNext(NewTerminalDecoder(bufio.NewReader(terminal), terminal))
+	if _, err := writer.WriteString("\x1b"); err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case got := <-decoded:
+		if got.err != nil {
+			t.Fatal(got.err)
+		}
+		if got.keypress != (Key{Code: Escape}) {
+			t.Errorf("got %+v, want Escape", got.keypress)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("bare Escape did not return")
 	}
 }
 
@@ -70,13 +168,15 @@ func TestControlCharactersStillCarryTheirModifier(t *testing.T) {
 	}
 }
 
-func TestAnEscapeOpensASequenceAndTheKeyboardProtocolReportsTheKey(t *testing.T) {
-	if got := decode(t, "\x1b"); len(got) != 1 || got[0] != (Key{Code: Escape}) {
-		t.Errorf("expected the bare byte to be an escape, got %v", got)
-	}
-
-	if got := decode(t, "\x1b[27u"); len(got) != 1 || got[0] != (Key{Code: Escape}) {
-		t.Errorf("expected an escape, got %v", got)
+func TestLegacyAndKeyboardProtocolEscapesAreReported(t *testing.T) {
+	for name, input := range map[string]string{
+		"legacy":            "\x1b",
+		"keyboard protocol": "\x1b[27u",
+	} {
+		got := decode(t, input)
+		if len(got) != 1 || got[0] != (Key{Code: Escape}) {
+			t.Errorf("%s: expected an Escape, got %v", name, got)
+		}
 	}
 }
 

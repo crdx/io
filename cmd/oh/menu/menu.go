@@ -53,7 +53,7 @@ func ChooseIndex(terminal *os.File, output io.Writer, prompt string, labels []st
 		return 0, err
 	}
 
-	decoder := key.NewDecoder(bufio.NewReader(terminal))
+	decoder := key.NewTerminalDecoder(bufio.NewReader(terminal), terminal)
 	for {
 		keypress, err := decoder.Next()
 		if err != nil {
