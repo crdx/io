@@ -10,18 +10,18 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
+	"crdx.org/io/cmd/oh/work"
 )
 
-func systemRoot(t *testing.T) (*os.Root, string) {
+func systemWorkspace(t *testing.T) *work.Space {
 	t.Helper()
 
-	workspace := t.TempDir()
-	root, err := os.OpenRoot(workspace)
-	if err != nil {
+	workspace := work.At(t.TempDir())
+	if err := workspace.Open(); err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { _ = root.Close() })
-	return root, workspace
+	t.Cleanup(func() { _ = workspace.Close() })
+	return workspace
 }
 
 func configDir() string {
@@ -32,22 +32,21 @@ func globalContextPath() string {
 	return filepath.Join(configDir(), globalContextName)
 }
 
-func loadTestContext(root *os.Root, workspaceDir string, skills []skill.Skill) (string, []File, error) {
+func loadTestContext(workspace *work.Space, skills []skill.Skill) (string, []File, error) {
 	return Load(Config{
-		GlobalPath:   globalContextPath(),
-		Root:         root,
-		WorkspaceDir: workspaceDir,
-		SessionName:  "session-id",
-		TmpDir:       "/state/farm/session",
-		HomeDir:      "/state/home",
-		CurrentCaps:  caps.Read,
-		ExtraPaths:   shell.Paths{},
-		Skills:       skills,
+		GlobalPath:  globalContextPath(),
+		Workspace:   workspace,
+		SessionName: "session-id",
+		TmpDir:      "/state/farm/session",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{},
+		Skills:      skills,
 	})
 }
 
 func TestTheGlobalContextReplacesTheBuiltInOpeningButKeepsTheHarnessState(t *testing.T) {
-	root, workspace := systemRoot(t)
+	workspace := systemWorkspace(t)
 	config := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", config)
 	if err := os.MkdirAll(configDir(), 0o700); err != nil {
@@ -58,7 +57,7 @@ func TestTheGlobalContextReplacesTheBuiltInOpeningButKeepsTheHarnessState(t *tes
 		t.Fatal(err)
 	}
 
-	got, contextFiles, err := loadTestContext(root, workspace, nil)
+	got, contextFiles, err := loadTestContext(workspace, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,8 +75,8 @@ func TestTheGlobalContextReplacesTheBuiltInOpeningButKeepsTheHarnessState(t *tes
 		t.Errorf("the harness does not come before the global context: %q", got)
 	}
 	for _, want := range []string{
-		"The workspace (" + workspace + ") is read-only",
-		"The .git directory within it (" + filepath.Join(workspace, ".git") + ") is read-only",
+		"The workspace (" + workspace.GetDir() + ") is read-only",
+		"The .git directory within it (" + filepath.Join(workspace.GetDir(), ".git") + ") is read-only",
 		"The bash tool is refused",
 	} {
 		if !strings.Contains(got, want) {
@@ -87,10 +86,10 @@ func TestTheGlobalContextReplacesTheBuiltInOpeningButKeepsTheHarnessState(t *tes
 }
 
 func TestAMissingGlobalContextUsesTheBuiltInOpening(t *testing.T) {
-	root, workspace := systemRoot(t)
+	workspace := systemWorkspace(t)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 
-	got, _, err := loadTestContext(root, workspace, nil)
+	got, _, err := loadTestContext(workspace, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +102,7 @@ func TestAMissingGlobalContextUsesTheBuiltInOpening(t *testing.T) {
 }
 
 func TestContextcontextFilesFollowTheOrderTheyAreConcatenatedIn(t *testing.T) {
-	root, workspace := systemRoot(t)
+	workspace := systemWorkspace(t)
 	config := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", config)
 	if err := os.MkdirAll(configDir(), 0o700); err != nil {
@@ -117,12 +116,12 @@ func TestContextcontextFilesFollowTheOrderTheyAreConcatenatedIn(t *testing.T) {
 		"AGENTS.md":       "Run the broad checks.",
 		"AGENTS.local.md": "Never grant more access.",
 	} {
-		if err := os.WriteFile(filepath.Join(workspace, name), []byte(body), 0o600); err != nil {
+		if err := os.WriteFile(filepath.Join(workspace.GetDir(), name), []byte(body), 0o600); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	got, contextFiles, err := loadTestContext(root, workspace, nil)
+	got, contextFiles, err := loadTestContext(workspace, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -258,10 +257,10 @@ func TestTheHarnessNeverAbbreviatesAPathToATilde(t *testing.T) {
 }
 
 func TestTheSkillCatalogueIsAppendedToTheContext(t *testing.T) {
-	root, workspace := systemRoot(t)
+	workspace := systemWorkspace(t)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 
-	got, _, err := loadTestContext(root, workspace, []skill.Skill{{
+	got, _, err := loadTestContext(workspace, []skill.Skill{{
 		Name:        "pdf",
 		Description: "Work with PDFs.",
 		Location:    "/skills/pdf/SKILL.md",

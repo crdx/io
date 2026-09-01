@@ -18,6 +18,7 @@ import (
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/cmd/oh/work"
 )
 
 const retryArgumentsCells = 120
@@ -35,22 +36,22 @@ type Picasso struct {
 	isRunning     bool
 	streamingMode output.StreamingMode
 
-	getTool      func(string) (tool.Tool, bool)
-	workspaceDir string
+	getTool   func(string) (tool.Tool, bool)
+	workspace *work.Space
 }
 
 func New(
 	screen *output.Screen,
 	isRunning bool,
 	getTool func(string) (tool.Tool, bool),
-	workspaceDir string,
+	workspace *work.Space,
 	streamingMode output.StreamingMode,
 ) *Picasso {
 	self := &Picasso{
 		screen:        screen,
 		isRunning:     isRunning,
 		getTool:       getTool,
-		workspaceDir:  workspaceDir,
+		workspace:     workspace,
 		streamingMode: streamingMode,
 	}
 
@@ -119,7 +120,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 			self.rows = map[string]int{}
 		}
 
-		self.rows[event.ID] = self.toolBlock.Add(call.LabelFor(event, self.getTool, self.workspaceDir))
+		self.rows[event.ID] = self.toolBlock.Add(call.LabelFor(event, self.getTool, self.workspace))
 
 	case agent.ToolCallResultEvent:
 		self.mark(event)

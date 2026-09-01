@@ -82,7 +82,7 @@ func TestCallNamesAreDrawnFromTheTable(t *testing.T) {
 		"ordinary":   {eventName: "grep", want: call.Label{Name: "grep"}},
 	} {
 		t.Run(name, func(t *testing.T) {
-			label := call.LabelFor(agent.Event{Name: test.eventName}, nil, "")
+			label := call.LabelFor(agent.Event{Name: test.eventName}, nil, nil)
 
 			if got, want := label.Render(), test.want.Render(); got != want {
 				t.Errorf("got %q, want %q", got, want)
@@ -121,7 +121,7 @@ func TestASkillReadIsDrawnAsALoad(t *testing.T) {
 	label := call.LabelFor(agent.Event{
 		Name:              "read",
 		FallbackRendering: agent.FallbackRendering{Subject: "/skills/guard-basics/SKILL.md"},
-	}, nil, "")
+	}, nil, nil)
 
 	want := call.Label{
 		Name:        "load",

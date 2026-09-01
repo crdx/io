@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/access"
 	"crdx.org/io/cmd/oh/shell"
+	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/internal/util/pathutil"
 )
 
@@ -38,21 +39,25 @@ type RestoreResult struct {
 }
 
 type Grants struct {
-	workspaceDir string
-	pathAccess   *shell.PathAccess
-	state        *access.State[[]Grant]
-	mutex        sync.Mutex
+	workspace  *work.Space
+	pathAccess *shell.PathAccess
+	state      *access.State[[]Grant]
+	mutex      sync.Mutex
 }
 
-func New(workspaceDir string, pathAccess *shell.PathAccess) *Grants {
+func New(workspace *work.Space, pathAccess *shell.PathAccess) *Grants {
 	return &Grants{
-		workspaceDir: workspaceDir,
-		pathAccess:   pathAccess,
-		state:        access.New([]Grant(nil), definition()),
+		workspace:  workspace,
+		pathAccess: pathAccess,
+		state:      access.New([]Grant(nil), definition()),
 	}
 }
 
-func NewRestored(workspaceDir string, pathAccess *shell.PathAccess, recordedGrants []Grant) (*Grants, RestoreResult) {
+func NewRestored(
+	workspace *work.Space,
+	pathAccess *shell.PathAccess,
+	recordedGrants []Grant,
+) (*Grants, RestoreResult) {
 	current := make([]Grant, 0, len(recordedGrants))
 	result := RestoreResult{}
 	for _, grant := range canonicalGrants(recordedGrants) {
@@ -80,9 +85,9 @@ func NewRestored(workspaceDir string, pathAccess *shell.PathAccess, recordedGran
 	}
 
 	return &Grants{
-		workspaceDir: workspaceDir,
-		pathAccess:   pathAccess,
-		state:        access.NewRestored(current, canonicalGrants(recordedGrants), definition()),
+		workspace:  workspace,
+		pathAccess: pathAccess,
+		state:      access.NewRestored(current, canonicalGrants(recordedGrants), definition()),
 	}, result
 }
 
@@ -150,7 +155,7 @@ func (self *Grants) canonicalPath(path string, mustExist bool) (string, error) {
 		return "", fmt.Errorf("could not expand %s: %w", writtenPath, err)
 	}
 	if !filepath.IsAbs(path) {
-		path = filepath.Join(self.workspaceDir, path)
+		path = filepath.Join(self.workspace.GetResolvedDir(), path)
 	}
 	path = filepath.Clean(path)
 

@@ -34,6 +34,7 @@ import (
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/internal/stop"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox/title"
@@ -105,7 +106,7 @@ type App struct {
 	toolOutputLimit     *truncate.Limit
 	onFailure           func(failure error)
 
-	workspaceDir    string
+	workspace       *work.Space
 	continueMessage string
 	streamingMode   output.StreamingMode
 
@@ -755,7 +756,7 @@ func (self *App) restore(storedSession *store.Session) {
 }
 
 func (self *App) newPainter(isRunning bool) *painter.Picasso {
-	return painter.New(self.screen, isRunning, self.agent.Tool, self.workspaceDir, self.streamingMode)
+	return painter.New(self.screen, isRunning, self.agent.Tool, self.workspace, self.streamingMode)
 }
 
 func (self *App) replay() {

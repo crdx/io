@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
 	"crdx.org/io/cmd/oh/segment/workspaceDir"
 	"crdx.org/io/cmd/oh/snippets"
+	"crdx.org/io/cmd/oh/work"
 )
 
 func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testing.T) {
@@ -562,7 +563,7 @@ func testSegments() segment.Registry {
 		"context-usage":      inertFactory,
 		"mode-toggle":        inertFactory,
 		"path-grants":        inertFactory,
-		"workspace-dir":      workspaceDir.New("/tmp/somewhere"),
+		"workspace-dir":      workspaceDir.New(work.At("/tmp/somewhere")),
 		"active-model":       inertFactory,
 		"scroll-overflow":    scrollOverflow.New,
 		"session-name":       inertFactory,

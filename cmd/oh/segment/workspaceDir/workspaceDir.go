@@ -3,12 +3,11 @@ package workspaceDir
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/internal/util/pathutil"
+	"crdx.org/io/cmd/oh/work"
 )
 
 const (
@@ -23,7 +22,7 @@ type state struct {
 	value string
 }
 
-func New(path string) segment.Factory {
+func New(workspace *work.Space) segment.Factory {
 	return func(options segment.Options) (segment.Segment, error) {
 		var args struct {
 			Type string `toml:"type"`
@@ -33,14 +32,15 @@ func New(path string) segment.Factory {
 			return nil, err
 		}
 
-		value := path
+		var value string
 
 		switch args.Type {
 		case "", base:
-			value = filepath.Base(path)
+			value = workspace.GetName()
 		case short:
-			value = pathutil.Shorten(path)
+			value = workspace.GetShortDir()
 		case full:
+			value = workspace.GetDir()
 		default:
 			return nil, fmt.Errorf(
 				"type is %q, and wants to be omitted or %q, %q, or %q",

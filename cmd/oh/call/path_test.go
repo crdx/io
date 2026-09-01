@@ -1,6 +1,10 @@
 package call
 
-import "testing"
+import (
+	"testing"
+
+	"crdx.org/io/cmd/oh/work"
+)
 
 func TestWorkspacePathPrefixesAreShortened(t *testing.T) {
 	const workspaceDir = "/home/alice/project"
@@ -17,7 +21,7 @@ func TestWorkspacePathPrefixesAreShortened(t *testing.T) {
 		"/home/alice/projectile/other.go": "~/projectile/other.go",
 	}
 	for value, want := range tests {
-		if got := shortenPathPrefix(value, workspaceDir); got != want {
+		if got := shortenPathPrefix(value, work.At(workspaceDir)); got != want {
 			t.Errorf("shortenPathPrefix(%q) = %q, want %q", value, got, want)
 		}
 	}

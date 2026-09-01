@@ -9,6 +9,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/sessions"
+	"crdx.org/io/cmd/oh/work"
 )
 
 const completeFlag = "--complete"
@@ -166,7 +167,7 @@ func effortCompletions(word string, choices []model.Choice) []string {
 }
 
 func sessionNames(directory string) []string {
-	workspaceDir, err := sessions.ResolveWorkspaceDir()
+	workspace, err := work.Current()
 	if err != nil {
 		return nil
 	}
@@ -177,7 +178,7 @@ func sessionNames(directory string) []string {
 	}
 
 	names := make([]string, 0, len(storedSessions))
-	for _, storedSession := range sessions.InWorkspace(storedSessions, workspaceDir) {
+	for _, storedSession := range sessions.InWorkspace(storedSessions, workspace.GetDir()) {
 		names = append(names, storedSession.Name)
 	}
 

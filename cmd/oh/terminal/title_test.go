@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/work"
 )
 
 func interactiveTitle(writer *strings.Builder) *title {
@@ -41,7 +42,7 @@ func TestTitleCannotContainTerminalControlCharacters(t *testing.T) {
 
 func TestTerminalDoesNotWriteItsTitleToRedirectedOutput(t *testing.T) {
 	output := &strings.Builder{}
-	managedTerminal := New(output, "/work/project")
+	managedTerminal := New(output, work.At("/work/project"))
 
 	restore := managedTerminal.Begin(caps.Read | caps.Write)
 	managedTerminal.SetMode(caps.Read | caps.Write | caps.Git)

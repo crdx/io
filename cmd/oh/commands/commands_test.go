@@ -12,6 +12,7 @@ import (
 	"crdx.org/io/cmd/oh/dispatch"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/snippets"
+	"crdx.org/io/cmd/oh/work"
 )
 
 type commandTestContext struct {
@@ -111,7 +112,7 @@ func TestCommandsRunWithoutStoppingTheHarness(t *testing.T) {
 		configDir:        configDirectory,
 		configPath:       configPath,
 		systemPromptPath: systemPromptPath,
-		workspaceDir:     workspaceDirectory,
+		workspace:        work.At(workspaceDirectory),
 		scratchDir:       scratchDirectory,
 		homeDir:          homeDirectory,
 		skillDirs:        skillDirectories,

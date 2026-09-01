@@ -11,21 +11,29 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/shell"
+	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/internal/file"
 )
+
+func openTestWorkspace(t *testing.T) *work.Space {
+	t.Helper()
+
+	workspace := work.At(t.TempDir())
+	if err := workspace.Open(); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = workspace.Close() })
+
+	return workspace
+}
 
 func newTestGrants(t *testing.T) (*Grants, *file.Root, *caps.Mode) {
 	t.Helper()
 
-	workspace := t.TempDir()
-	workspaceRoot, err := os.OpenRoot(workspace)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = workspaceRoot.Close() })
+	workspace := openTestWorkspace(t)
 
 	mode := caps.NewMode(caps.Read)
-	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	files := file.New(workspace.GetRoot(), caps.RefuseWrite(mode))
 	access, err := shell.NewPathAccess(files, mode, shell.Paths{})
 	if err != nil {
 		t.Fatal(err)
@@ -119,14 +127,9 @@ func TestAnExactFileGrantDoesNotExposeItsSiblings(t *testing.T) {
 }
 
 func TestRelativePathsResolveFromTheWorkspaceAndPathsMayContainSpaces(t *testing.T) {
-	workspace := t.TempDir()
-	workspaceRoot, err := os.OpenRoot(workspace)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = workspaceRoot.Close() })
+	workspace := openTestWorkspace(t)
 	mode := caps.NewMode(caps.Read)
-	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	files := file.New(workspace.GetRoot(), caps.RefuseWrite(mode))
 	access, err := shell.NewPathAccess(files, mode, shell.Paths{})
 	if err != nil {
 		t.Fatal(err)
@@ -134,7 +137,7 @@ func TestRelativePathsResolveFromTheWorkspaceAndPathsMayContainSpaces(t *testing
 	t.Cleanup(access.Close)
 	grants := New(workspace, access)
 
-	path := filepath.Join(workspace, "path with spaces")
+	path := filepath.Join(workspace.GetDir(), "path with spaces")
 	if err := os.Mkdir(path, 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -204,14 +207,9 @@ func TestTheLatestCompleteEventRestoresTheGrantCollection(t *testing.T) {
 }
 
 func TestExactRestoreNeedsNoNewModelAnnouncement(t *testing.T) {
-	workspace := t.TempDir()
-	workspaceRoot, err := os.OpenRoot(workspace)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = workspaceRoot.Close() })
+	workspace := openTestWorkspace(t)
 	mode := caps.NewMode(caps.Read)
-	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	files := file.New(workspace.GetRoot(), caps.RefuseWrite(mode))
 	access, err := shell.NewPathAccess(files, mode, shell.Paths{})
 	if err != nil {
 		t.Fatal(err)
@@ -229,14 +227,9 @@ func TestExactRestoreNeedsNoNewModelAnnouncement(t *testing.T) {
 }
 
 func TestRestoreRefusesARecordedPathThatBecameASymlink(t *testing.T) {
-	workspace := t.TempDir()
-	workspaceRoot, err := os.OpenRoot(workspace)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = workspaceRoot.Close() })
+	workspace := openTestWorkspace(t)
 	mode := caps.NewMode(caps.Read)
-	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	files := file.New(workspace.GetRoot(), caps.RefuseWrite(mode))
 	access, err := shell.NewPathAccess(files, mode, shell.Paths{})
 	if err != nil {
 		t.Fatal(err)
@@ -261,14 +254,9 @@ func TestRestoreRefusesARecordedPathThatBecameASymlink(t *testing.T) {
 }
 
 func TestRestoreReopensPresentPathsAndCorrectsMissingOnes(t *testing.T) {
-	workspace := t.TempDir()
-	workspaceRoot, err := os.OpenRoot(workspace)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = workspaceRoot.Close() })
+	workspace := openTestWorkspace(t)
 	mode := caps.NewMode(caps.Read)
-	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	files := file.New(workspace.GetRoot(), caps.RefuseWrite(mode))
 	access, err := shell.NewPathAccess(files, mode, shell.Paths{})
 	if err != nil {
 		t.Fatal(err)

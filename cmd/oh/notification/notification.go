@@ -2,14 +2,19 @@ package notification
 
 import (
 	"context"
-	"path/filepath"
 
+	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/toolbox/notify"
 )
 
-func SendTurnError(ctx context.Context, writeEscape notify.EscapeWriter, workspaceDir string, failure error) error {
+func SendTurnError(
+	ctx context.Context,
+	writeEscape notify.EscapeWriter,
+	workspace *work.Space,
+	failure error,
+) error {
 	return notify.Send(ctx, writeEscape, notify.Args{
-		Title:   "oh — " + filepath.Base(workspaceDir),
+		Title:   "oh — " + workspace.GetName(),
 		Message: failure.Error(),
 		Icon:    "error",
 	})

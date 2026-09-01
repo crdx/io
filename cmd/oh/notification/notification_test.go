@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"crdx.org/io/cmd/oh/notification"
+	"crdx.org/io/cmd/oh/work"
 )
 
 func TestTurnErrorNotificationNamesTheWorkspaceAndShowsTheFailure(t *testing.T) {
@@ -23,7 +24,12 @@ func TestTurnErrorNotificationNamesTheWorkspaceAndShowsTheFailure(t *testing.T) 
 	t.Setenv("KITTY_WINDOW_ID", "")
 	t.Setenv("NOTIFY_CAPTURE", capturePath)
 
-	if err := notification.SendTurnError(t.Context(), nil, "/workspace/io", errors.New("access denied")); err != nil {
+	if err := notification.SendTurnError(
+		t.Context(),
+		nil,
+		work.At("/workspace/io"),
+		errors.New("access denied"),
+	); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

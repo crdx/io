@@ -5,19 +5,20 @@ import (
 	"strings"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/internal/util/pathutil"
 )
 
-func shortenPaths(rendering agent.FallbackRendering, workspaceDir string) agent.FallbackRendering {
-	rendering.Subject = shortenPathPrefix(rendering.Subject, workspaceDir)
-	rendering.Note = shortenPathPrefix(rendering.Note, workspaceDir)
-	rendering.Emphasis.Source = shortenPathPrefix(rendering.Emphasis.Source, workspaceDir)
+func shortenPaths(rendering agent.FallbackRendering, workspace *work.Space) agent.FallbackRendering {
+	rendering.Subject = shortenPathPrefix(rendering.Subject, workspace)
+	rendering.Note = shortenPathPrefix(rendering.Note, workspace)
+	rendering.Emphasis.Source = shortenPathPrefix(rendering.Emphasis.Source, workspace)
 	return rendering
 }
 
-func shortenPathPrefix(value string, workspaceDir string) string {
-	if workspaceDir != "" {
-		for _, prefix := range []string{workspaceDir, pathutil.Shorten(workspaceDir)} {
+func shortenPathPrefix(value string, workspace *work.Space) string {
+	if workspaceDir := workspace.GetDir(); workspaceDir != "" {
+		for _, prefix := range []string{workspaceDir, workspace.GetShortDir()} {
 			rest, hasPrefix := strings.CutPrefix(value, prefix)
 			switch {
 			case !hasPrefix:

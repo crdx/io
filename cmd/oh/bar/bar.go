@@ -24,6 +24,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/workspaceDir"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/turn"
+	"crdx.org/io/cmd/oh/work"
 )
 
 const (
@@ -44,7 +45,7 @@ const (
 )
 
 type Options struct {
-	WorkspaceDir       string
+	Workspace          *work.Space
 	CurrentSessionName string
 	ModelName          string
 	ModelEffort        string
@@ -70,7 +71,7 @@ func NewRegistry(options Options) segment.Registry {
 		contextUsageSegment:    contextUsage.New(options.Sources.GetContextUsage),
 		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
 		pathGrantsSegment:      pathGrants.New(options.Sources.GetPathGrants),
-		workspaceDirSegment:    workspaceDir.New(options.WorkspaceDir),
+		workspaceDirSegment:    workspaceDir.New(options.Workspace),
 		activeModelSegment:     activeModel.New(options.ModelName, options.ModelEffort, options.ModelEffortLevels),
 		scrollOverflowSegment:  scrollOverflow.New,
 		sessionNameSegment:     sessionName.New(options.CurrentSessionName),
@@ -78,7 +79,7 @@ func NewRegistry(options Options) segment.Registry {
 		localTimeSegment:       localTime.New(time.Now),
 		turnTimerSegment:       turnTimer.New(options.Sources.GetTurnTiming, options.Sources.IsTurnRunning),
 		turnCountSegment:       turnCount.New(options.Sources.GetTurnCount),
-		gitBranchSegment:       gitBranch.New(options.WorkspaceDir),
+		gitBranchSegment:       gitBranch.New(options.Workspace.GetDir()),
 		subUsageSegment:        subUsage.New(options.UsageReporter, options.UsageCachePath, options.ModelName, time.Now),
 	}
 }

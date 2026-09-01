@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
+	"crdx.org/io/cmd/oh/work"
 )
 
 const (
@@ -90,10 +91,10 @@ type harnessContextTemplateData struct {
 	WebGranted        bool
 }
 
-func ProjectContextPaths(workspaceDir string) []string {
+func ProjectContextPaths(workspace *work.Space) []string {
 	paths := make([]string, 0, len(projectContextNames))
 	for _, name := range projectContextNames {
-		paths = append(paths, filepath.Join(workspaceDir, name))
+		paths = append(paths, filepath.Join(workspace.GetDir(), name))
 	}
 	return paths
 }
@@ -104,15 +105,14 @@ type File struct {
 }
 
 type Config struct {
-	GlobalPath   string
-	Root         *os.Root
-	WorkspaceDir string
-	SessionName  string
-	TmpDir       string
-	HomeDir      string
-	CurrentCaps  caps.Set
-	ExtraPaths   shell.Paths
-	Skills       []skill.Skill
+	GlobalPath  string
+	Workspace   *work.Space
+	SessionName string
+	TmpDir      string
+	HomeDir     string
+	CurrentCaps caps.Set
+	ExtraPaths  shell.Paths
+	Skills      []skill.Skill
 }
 
 func Load(config Config) (string, []File, error) {
@@ -121,7 +121,7 @@ func Load(config Config) (string, []File, error) {
 		return "", nil, err
 	}
 
-	projectFiles, err := readProjectContext(config.Root)
+	projectFiles, err := readProjectContext(config.Workspace.GetRoot())
 	if err != nil {
 		return "", nil, err
 	}
@@ -133,7 +133,7 @@ func Load(config Config) (string, []File, error) {
 
 	return mergeContexts(
 		harnessContext(
-			config.WorkspaceDir,
+			config.Workspace.GetDir(),
 			config.SessionName,
 			config.TmpDir,
 			config.HomeDir,

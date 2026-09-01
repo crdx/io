@@ -46,15 +46,6 @@ func Choose(directory string, workspaceDir string, terminal *os.File, screen io.
 	return chosenSession.Name, nil
 }
 
-func ResolveWorkspaceDir() (string, error) {
-	workspaceDir, err := filepath.Abs(".")
-	if err != nil {
-		return "", fmt.Errorf("could not resolve the workspace path: %w", err)
-	}
-
-	return workspaceDir, nil
-}
-
 func InWorkspace(sessions []*picker.Session, workspaceDir string) []*picker.Session {
 	chosenSessions := make([]*picker.Session, 0, len(sessions))
 	for _, storedSession := range sessions {

@@ -2,10 +2,10 @@ package terminal
 
 import (
 	"io"
-	"path/filepath"
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/tty"
+	"crdx.org/io/cmd/oh/work"
 )
 
 const writableMarker = "✱"
@@ -31,10 +31,10 @@ type Terminal struct {
 	isBegun       bool
 }
 
-func New(writer io.Writer, workspaceDir string) Terminal {
+func New(writer io.Writer, workspace *work.Space) Terminal {
 	return Terminal{
 		title:         newTitle(writer),
-		workspaceName: filepath.Base(workspaceDir),
+		workspaceName: workspace.GetName(),
 	}
 }
 

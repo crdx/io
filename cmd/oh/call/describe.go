@@ -4,6 +4,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
 )
@@ -25,7 +26,7 @@ func Summary(event agent.Event) string {
 	return ""
 }
 
-func Describe(event agent.Event, getTool ToolLookup, workspaceDir string) agent.FallbackRendering {
+func Describe(event agent.Event, getTool ToolLookup, workspace *work.Space) agent.FallbackRendering {
 	rendering := event.FallbackRendering
 	if getTool != nil {
 		if calledTool, isKnown := getTool(event.Name); isKnown {
@@ -37,7 +38,7 @@ func Describe(event agent.Event, getTool ToolLookup, workspaceDir string) agent.
 			}
 		}
 	}
-	return plain(shortenPaths(rendering, workspaceDir))
+	return plain(shortenPaths(rendering, workspace))
 }
 
 func plain(rendering agent.FallbackRendering) agent.FallbackRendering {
@@ -47,8 +48,8 @@ func plain(rendering agent.FallbackRendering) agent.FallbackRendering {
 	return rendering
 }
 
-func LabelFor(event agent.Event, getTool ToolLookup, workspaceDir string) Label {
-	rendering := Describe(event, getTool, workspaceDir)
+func LabelFor(event agent.Event, getTool ToolLookup, workspace *work.Space) Label {
+	rendering := Describe(event, getTool, workspace)
 	label := Label{
 		Name:      event.Name,
 		Subject:   rendering.Subject,

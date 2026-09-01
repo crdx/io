@@ -15,7 +15,7 @@ func drawnBytes(t *testing.T, draw func(*Picasso)) string {
 	t.Helper()
 
 	var screenOutput bytes.Buffer
-	paint := New(output.NewTerminalOfSize(&screenOutput, 80, 24), true, nil, "", output.StreamingModeLine)
+	paint := New(output.NewTerminalOfSize(&screenOutput, 80, 24), true, nil, nil, output.StreamingModeLine)
 	draw(paint)
 	paint.Close(0)
 
@@ -65,7 +65,7 @@ func TestASubmittedMessageCannotInstructTheTerminal(t *testing.T) {
 }
 
 func TestAProvisionalDeltaRecordsWhatArrivedRatherThanWhatWasDrawn(t *testing.T) {
-	paint := New(output.New(&bytes.Buffer{}), true, nil, "", output.StreamingModeLine)
+	paint := New(output.New(&bytes.Buffer{}), true, nil, nil, output.StreamingModeLine)
 	paint.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: injection})
 
 	if got := paint.ProvisionalDelta().Text; got != injection {

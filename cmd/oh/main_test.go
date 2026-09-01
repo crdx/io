@@ -89,7 +89,7 @@ import (
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/oh/usage"
 	"crdx.org/io/cmd/oh/width"
-	"crdx.org/io/cmd/oh/workspace"
+	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/req"
 	"crdx.org/io/internal/sandbox"
@@ -2404,8 +2404,8 @@ func TestWorkspacePrefixIsOmittedFromRenderedCallPaths(t *testing.T) {
 		func(args fakeArgs) (string, string) { return args.Path, pathutil.Shorten(args.Path) },
 	).FocusPath().Plain(func(context.Context, fakeArgs) (string, error) { return "", nil })
 	testConversation := &App{
-		agent:        agent.New("", quietProvider{}, []tool.Tool{current}),
-		workspaceDir: workspaceDir,
+		agent:     agent.New("", quietProvider{}, []tool.Tool{current}),
+		workspace: work.At(workspaceDir),
 	}
 
 	fallback := describeHarnessCall(testConversation, agent.Event{
@@ -3132,7 +3132,7 @@ func submittedModeMessagesStream() string {
 	var screenOutput strings.Builder
 	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 	screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "brave-otter"}, replayColumns, false))
-	picasso := painter.New(screen, false, nil, "", defaultStreamingMode)
+	picasso := painter.New(screen, false, nil, nil, defaultStreamingMode)
 	picasso.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: workspaceNowReadOnly()})
 	picasso.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "The .git directory is now read-write."})
 	return screenOutput.String()
@@ -3845,39 +3845,39 @@ func newTestPainter(screen *output.Screen, isRunning bool) *Painter {
 }
 
 func newStreamedTestPainter(screen *output.Screen, isRunning bool, streamingMode output.StreamingMode) *Painter {
-	return painter.New(screen, isRunning, nil, "", streamingMode)
+	return painter.New(screen, isRunning, nil, nil, streamingMode)
 }
 
 func describeHarnessCall(harness *App, event agent.Event) agent.FallbackRendering {
-	return call.Describe(event, harness.agent.Tool, harness.workspaceDir)
+	return call.Describe(event, harness.agent.Tool, harness.workspace)
 }
 
 func describeBareCall(workspaceDir string, event agent.Event) agent.FallbackRendering {
-	return call.Describe(event, nil, workspaceDir)
+	return call.Describe(event, nil, work.At(workspaceDir))
 }
 
 func TestTmpWouldShadowAWorkspace(t *testing.T) {
 	for _, workspaceDir := range []string{sandbox.TmpDir, filepath.Join(sandbox.TmpDir, "project")} {
-		if !workspace.IsShadowed(workspaceDir) {
+		if !work.IsShadowed(workspaceDir) {
 			t.Errorf("expected %q to be shadowed", workspaceDir)
 		}
 	}
 
 	for _, workspaceDir := range []string{"/", "/tmp-project"} {
-		if workspace.IsShadowed(workspaceDir) {
+		if work.IsShadowed(workspaceDir) {
 			t.Errorf("did not expect %q to be shadowed", workspaceDir)
 		}
 	}
 }
 
 func TestAWorkspaceUnderTmpIsRefused(t *testing.T) {
-	if err := workspace.Validate(t.TempDir()); !errors.Is(err, workspace.ErrShadowed) {
+	if err := work.At(t.TempDir()).Validate(); !errors.Is(err, work.ErrShadowed) {
 		t.Errorf("got %v, want the workspace shadowing error", err)
 	}
 }
 
 func TestAWorkspaceOutsideTmpIsAccepted(t *testing.T) {
-	if err := workspace.Validate("/"); err != nil {
+	if err := work.At("/").Validate(); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
@@ -3888,9 +3888,96 @@ func TestAWorkspaceNamedThroughTmpIsRefused(t *testing.T) {
 		t.Fatalf("could not create workspace alias: %v", err)
 	}
 
-	if err := workspace.Validate(alias); !errors.Is(err, workspace.ErrShadowed) {
+	if err := work.At(alias).Validate(); !errors.Is(err, work.ErrShadowed) {
 		t.Errorf("got %v, want the workspace shadowing error", err)
 	}
+}
+
+func TestAWorkspaceDescribesItselfEveryWayItIsDrawn(t *testing.T) {
+	t.Setenv("HOME", "/home/alice")
+
+	described := work.At("/home/alice/proj/io")
+
+	for name, got := range map[string]string{
+		"dir":       described.GetDir(),
+		"name":      described.GetName(),
+		"short dir": described.GetShortDir(),
+	} {
+		want := map[string]string{
+			"dir":       "/home/alice/proj/io",
+			"name":      "io",
+			"short dir": "~/proj/io",
+		}[name]
+
+		if got != want {
+			t.Errorf("%s is %q, want %q", name, got, want)
+		}
+	}
+
+	if root := described.GetRoot(); root != nil {
+		t.Errorf("a described workspace opened a root: %v", root)
+	}
+}
+
+func TestADescribedWorkspaceFollowsTheLinksItIsNamedThrough(t *testing.T) {
+	target := t.TempDir()
+	alias := filepath.Join(t.TempDir(), "alias")
+	if err := os.Symlink(target, alias); err != nil {
+		t.Fatalf("could not create workspace alias: %v", err)
+	}
+
+	described := work.At(alias)
+
+	if got := described.GetDir(); got != alias {
+		t.Errorf("dir is %q, want the name it was given %q", got, alias)
+	}
+
+	if got, want := described.GetResolvedDir(), mustResolveLinks(t, target); got != want {
+		t.Errorf("resolved dir is %q, want %q", got, want)
+	}
+}
+
+func TestAnAbsentWorkspaceAnswersForItself(t *testing.T) {
+	var absent *work.Space
+
+	if got := absent.GetDir(); got != "" {
+		t.Errorf("dir is %q, want nothing", got)
+	}
+
+	if got := absent.GetRoot(); got != nil {
+		t.Errorf("root is %v, want nothing", got)
+	}
+
+	if err := absent.Close(); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestAnOpenedWorkspaceCarriesARootOnItself(t *testing.T) {
+	directory := t.TempDir()
+	if err := os.WriteFile(filepath.Join(directory, "AGENTS.md"), []byte("rules"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	body, err := openTestWorkspace(t, directory).GetRoot().ReadFile("AGENTS.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got := string(body); got != "rules" {
+		t.Errorf("read %q through the workspace root, want %q", got, "rules")
+	}
+}
+
+func mustResolveLinks(t *testing.T, path string) string {
+	t.Helper()
+
+	resolvedPath, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return resolvedPath
 }
 
 func TestARelativeXDGStateHomeIsIgnored(t *testing.T) {
@@ -3987,21 +4074,17 @@ func TestPick(t *testing.T) {
 }
 
 func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
-	workspace := t.TempDir()
+	workspaceDirectory := t.TempDir()
 	for name, body := range map[string]string{
 		"AGENTS.md":       "Follow the project rules.",
 		"AGENTS.local.md": "Prefer the local rules.",
 	} {
-		if err := os.WriteFile(filepath.Join(workspace, name), []byte(body), 0o600); err != nil {
+		if err := os.WriteFile(filepath.Join(workspaceDirectory, name), []byte(body), 0o600); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	root, err := os.OpenRoot(workspace)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = root.Close() }()
+	workspace := openTestWorkspace(t, workspaceDirectory)
 
 	globalPath := filepath.Join(t.TempDir(), "SYSTEM.md")
 	if err := os.WriteFile(globalPath, []byte("You are the golden test assistant."), 0o600); err != nil {
@@ -4009,13 +4092,12 @@ func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 	}
 
 	got, _, err := prompt.Load(prompt.Config{
-		GlobalPath:   globalPath,
-		Root:         root,
-		WorkspaceDir: "/workspace",
-		SessionName:  "brave-otter",
-		TmpDir:       "/state/farm/brave-otter",
-		HomeDir:      "/state/home",
-		CurrentCaps:  caps.Read | caps.Write | caps.Git | caps.Shell,
+		GlobalPath:  globalPath,
+		Workspace:   workspace,
+		SessionName: "brave-otter",
+		TmpDir:      "/state/farm/brave-otter",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read | caps.Write | caps.Git | caps.Shell,
 		ExtraPaths: shell.Paths{
 			Read:  []string{"/reference"},
 			Write: []string{"/output"},
@@ -4030,6 +4112,7 @@ func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	got = strings.ReplaceAll(got, workspaceDirectory, "/workspace")
 	got = strings.ReplaceAll(got, "127.0.0.1", "<loopback>")
 
 	goldenPath := filepath.Join("testdata", "output", "context.prompt")
@@ -4454,9 +4537,9 @@ func readJournal(t *testing.T, path string) []replayEntry {
 }
 
 type replayRig struct {
-	chat         *App
-	written      *strings.Builder
-	workspaceDir string
+	chat      *App
+	written   *strings.Builder
+	workspace *work.Space
 }
 
 func newReplayRig(t *testing.T, columns int) *replayRig {
@@ -4484,13 +4567,13 @@ func newPlainRig(t *testing.T) *replayRig {
 func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Screen) *replayRig {
 	t.Helper()
 
-	workspaceDir := layOutWorkspace(t)
+	workspace := layOutWorkspace(t)
 
-	files := file.New(openWorkspaceRootAt(t, workspaceDir), caps.RefuseWrite(caps.NewMode(caps.All())))
+	files := file.New(workspace.GetRoot(), caps.RefuseWrite(caps.NewMode(caps.All())))
 
 	var written strings.Builder
 
-	screen := openScreen(&written, workspaceDir)
+	screen := openScreen(&written, workspace.GetDir())
 
 	tools := toolbox.Rummage(files, file.NewSnapshots())
 	tools = append(
@@ -4504,13 +4587,13 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 	tools = append(tools, web.New(func() bool { return true }, sessionGoldenSearcher{})...)
 
 	return &replayRig{
-		written:      &written,
-		workspaceDir: workspaceDir,
+		written:   &written,
+		workspace: workspace,
 		chat: &App{
-			agent:        agent.New("", quietProvider{}, tools),
-			screen:       screen,
-			workspaceDir: workspaceDir,
-			recorder:     record.New(testLog(t)),
+			agent:     agent.New("", quietProvider{}, tools),
+			screen:    screen,
+			workspace: workspace,
+			recorder:  record.New(testLog(t)),
 		},
 	}
 }
@@ -4522,7 +4605,7 @@ func (self *replayRig) load(entries []replayEntry) {
 }
 
 func (self *replayRig) drawn() string {
-	return strings.ReplaceAll(self.written.String(), self.workspaceDir, workspaceMarker)
+	return strings.ReplaceAll(self.written.String(), self.workspace.GetDir(), workspaceMarker)
 }
 
 func replayAtWidth(t *testing.T, entries []replayEntry, columns int) string {
@@ -4691,20 +4774,7 @@ func entriesUpToFirstCall(entries []replayEntry) []replayEntry {
 	return entries
 }
 
-func openWorkspaceRootAt(t *testing.T, workspaceDir string) *os.Root {
-	t.Helper()
-
-	workspaceRoot, err := os.OpenRoot(workspaceDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Cleanup(func() { _ = workspaceRoot.Close() })
-
-	return workspaceRoot
-}
-
-func layOutWorkspace(t *testing.T) string {
+func layOutWorkspace(t *testing.T) *work.Space {
 	t.Helper()
 
 	workspaceDir := filepath.Join(t.TempDir(), "workspace")
@@ -4715,7 +4785,7 @@ func layOutWorkspace(t *testing.T) string {
 		t.Fatal(err)
 	}
 
-	return workspaceDir
+	return openTestWorkspace(t, workspaceDir)
 }
 
 func TestALiveTurnLeavesTheSameScreenAsAReplayOfIt(t *testing.T) {
@@ -4839,7 +4909,7 @@ func TestTheBarConfiguredByDefaultDrawsWhatItDrewBefore(t *testing.T) {
 					)
 
 					layout, err := configFrom(t, "").BuildLayout(
-						availableSegments(workspaceMarker, "brave-otter", "gpt-5.6-sol", "high", held),
+						availableSegments(work.At(workspaceMarker), "brave-otter", "gpt-5.6-sol", "high", held),
 					)
 					if err != nil {
 						t.Fatal(err)
@@ -5166,7 +5236,7 @@ func prepareLiveConfig(t *testing.T, self *App, path string) {
 	}
 	self.configObserver = observer
 	t.Cleanup(observer.Close)
-	registry := availableSegments(workspaceMarker, "brave-otter", "gpt-5.6-sol", "high", self)
+	registry := availableSegments(work.At(workspaceMarker), "brave-otter", "gpt-5.6-sol", "high", self)
 	live, err := settings.BuildLive(registry)
 	if err != nil {
 		t.Fatal(err)
@@ -6139,14 +6209,14 @@ func goldenRepository(t *testing.T, head string) string {
 }
 
 func availableSegments(
-	workspaceDir string,
+	workspace *work.Space,
 	currentSessionName string,
 	modelName string,
 	modelEffort string,
 	harness *App,
 ) segment.Registry {
 	return bar.NewRegistry(bar.Options{
-		WorkspaceDir:       workspaceDir,
+		Workspace:          workspace,
 		CurrentSessionName: currentSessionName,
 		ModelName:          modelName,
 		ModelEffort:        modelEffort,
@@ -6188,7 +6258,7 @@ func goldenBarLayout(t *testing.T, harness *App) segment.Layout {
 	`)
 
 	layout, err := config.BuildLayout(
-		availableSegments(workspaceMarker, "brave-otter", "gpt-5.6-sol", "high", harness),
+		availableSegments(work.At(workspaceMarker), "brave-otter", "gpt-5.6-sol", "high", harness),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -6697,25 +6767,25 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"workspace-dir": goldenSegmentPass(
 			t,
-			workspaceDir.New("/workspace/project"),
+			workspaceDir.New(work.At("/workspace/project")),
 			"",
 			segment.Context{},
 		),
 		"workspace-dir / full": goldenSegmentPass(
 			t,
-			workspaceDir.New("/workspace/project"),
+			workspaceDir.New(work.At("/workspace/project")),
 			`type = "full"`,
 			segment.Context{},
 		),
 		"workspace-dir / short below home": goldenSegmentPass(
 			t,
-			workspaceDir.New("/home/tester/proj/project"),
+			workspaceDir.New(work.At("/home/tester/proj/project")),
 			`type = "short"`,
 			segment.Context{},
 		),
 		"workspace-dir / short outside home": goldenSegmentPass(
 			t,
-			workspaceDir.New("/workspace/project"),
+			workspaceDir.New(work.At("/workspace/project")),
 			`type = "short"`,
 			segment.Context{},
 		),
@@ -6924,8 +6994,7 @@ func TestSlashCommandRunsImmediately(t *testing.T) {
 func TestPathGrantCommandBecomesPendingAccessAndUpdatesTheModel(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
-	workspace := t.TempDir()
-	grants := preparePathGrantCommands(t, self, workspace)
+	grants := preparePathGrantCommands(t, self, openTestWorkspace(t, t.TempDir()))
 	self.settleAccess()
 	directory := t.TempDir()
 
@@ -6959,13 +7028,8 @@ func TestPathGrantCommandBecomesPendingAccessAndUpdatesTheModel(t *testing.T) {
 
 func TestRestoredGrantCorrectionRemainsPendingUntilATurnCanTellTheModel(t *testing.T) {
 	self := testConversation(t, &bytes.Buffer{})
-	workspace := t.TempDir()
-	workspaceRoot, err := os.OpenRoot(workspace)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = workspaceRoot.Close() })
-	files := file.New(workspaceRoot, caps.RefuseWrite(self.mode))
+	workspace := openTestWorkspace(t, t.TempDir())
+	files := file.New(workspace.GetRoot(), caps.RefuseWrite(self.mode))
 	pathAccess, err := shell.NewPathAccess(files, self.mode, shell.Paths{})
 	if err != nil {
 		t.Fatal(err)
@@ -7013,7 +7077,7 @@ func TestRestoredGrantCorrectionRemainsPendingUntilATurnCanTellTheModel(t *testi
 
 func TestPathGrantCommandInterruptsAnActiveTurn(t *testing.T) {
 	self := testConversation(t, &bytes.Buffer{})
-	preparePathGrantCommands(t, self, t.TempDir())
+	preparePathGrantCommands(t, self, openTestWorkspace(t, t.TempDir()))
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 
 	if got := self.handleCommand("/grant read " + t.TempDir()); got != dispatch.Handled {
@@ -7070,7 +7134,7 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
-	workspace := t.TempDir()
+	workspace := openTestWorkspace(t, t.TempDir())
 	preparePathGrantCommands(t, self, workspace)
 	self.settleAccess()
 	registry := availableSegments(workspace, "brave-otter", "gpt-5.6-sol", "high", self)
@@ -7222,15 +7286,10 @@ func stableManyGrantGoldenPaths(t *testing.T) []pathgrant.Grant {
 	return grants
 }
 
-func pathGrantAccess(t *testing.T, mode *caps.Mode, workspace string) *shell.PathAccess {
+func pathGrantAccess(t *testing.T, mode *caps.Mode, workspace *work.Space) *shell.PathAccess {
 	t.Helper()
 
-	workspaceRoot, err := os.OpenRoot(workspace)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = workspaceRoot.Close() })
-	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
+	files := file.New(workspace.GetRoot(), caps.RefuseWrite(mode))
 	access, err := shell.NewPathAccess(files, mode, shell.Paths{})
 	if err != nil {
 		t.Fatal(err)
@@ -7615,22 +7674,29 @@ func fixtureRegistry(t *testing.T, sets ...slash.CommandSet) slash.Registry {
 	return registry
 }
 
-func preparePathGrantCommands(t *testing.T, self *App, workspaceDir string) *pathgrant.Grants {
+func openTestWorkspace(t *testing.T, directory string) *work.Space {
 	t.Helper()
 
-	workspaceRoot, err := os.OpenRoot(workspaceDir)
-	if err != nil {
+	workspace := work.At(directory)
+	if err := workspace.Open(); err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { _ = workspaceRoot.Close() })
-	files := file.New(workspaceRoot, caps.RefuseWrite(self.mode))
+	t.Cleanup(func() { _ = workspace.Close() })
+
+	return workspace
+}
+
+func preparePathGrantCommands(t *testing.T, self *App, workspace *work.Space) *pathgrant.Grants {
+	t.Helper()
+
+	files := file.New(workspace.GetRoot(), caps.RefuseWrite(self.mode))
 	pathAccess, err := shell.NewPathAccess(files, self.mode, shell.Paths{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(pathAccess.Close)
 
-	grants := pathgrant.New(workspaceDir, pathAccess)
+	grants := pathgrant.New(workspace, pathAccess)
 	systemSet, err := commands.New(commands.Options{PathGrants: commands.PathGrants{
 		Grant:      grants.Grant,
 		Revoke:     grants.Revoke,
@@ -9125,7 +9191,7 @@ func TestVisual(t *testing.T) {
 	}
 
 	built, err := configFrom(t, "").BuildLayout(
-		availableSegments("/tmp/somewhere", log.Name(), "fake", "medium", held),
+		availableSegments(work.At("/tmp/somewhere"), log.Name(), "fake", "medium", held),
 	)
 	if err != nil {
 		t.Fatal(err)

@@ -46,7 +46,7 @@ import (
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/textsizing"
 	"crdx.org/io/cmd/oh/toolset"
-	"crdx.org/io/cmd/oh/workspace"
+	"crdx.org/io/cmd/oh/work"
 )
 
 var completableToolNames = []string{
@@ -137,10 +137,12 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", model.List(os.Stdout, modelCachePath)
 	}
 
-	workspaceDir, err := sessions.ResolveWorkspaceDir()
+	workspace, err := work.Current()
 	if err != nil {
 		return "", err
 	}
+
+	workspaceDir := workspace.GetDir()
 
 	if inputArgs.IsSessionPicker {
 		return sessions.Choose(sessionsDir, workspaceDir, os.Stdin, os.Stdout)
@@ -232,16 +234,15 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	root, err := os.OpenRoot(workspaceDir)
-	if err != nil {
+	if err := workspace.Validate(); err != nil {
 		return "", err
 	}
 
-	defer func() { _ = root.Close() }()
-
-	if err := workspace.Validate(workspaceDir); err != nil {
+	if err := workspace.Open(); err != nil {
 		return "", err
 	}
+
+	defer func() { _ = workspace.Close() }()
 
 	homeDir := location.GetShellHomeDir()
 	if homeDir == "" {
@@ -259,7 +260,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	mode := caps.NewMode(args.Caps)
 
-	files := file.New(root, caps.RefuseWrite(mode))
+	files := file.New(workspace.GetRoot(), caps.RefuseWrite(mode))
 	homeRoot, err := shell.MountHomeDirectory(files, homeDir, mode)
 	if err != nil {
 		return "", err
@@ -281,7 +282,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	defer pathAccess.Close()
 
 	globalSkillDirs := append([]string{location.GetConfigDir("skills")}, settings.Skills.Include...)
-	availableSkills, err := skill.Discover(workspaceDir, globalSkillDirs, os.Stderr)
+	availableSkills, err := skill.Discover(workspace.GetDir(), globalSkillDirs, os.Stderr)
 	if err != nil {
 		return "", err
 	}
@@ -375,15 +376,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		systemPrompt = resumedSession.Meta.SystemPrompt
 	} else {
 		systemPrompt, _, err = prompt.Load(prompt.Config{
-			GlobalPath:   location.GetGlobalContextPath(),
-			Root:         root,
-			WorkspaceDir: workspaceDir,
-			SessionName:  log.Name(),
-			TmpDir:       tmpDir,
-			HomeDir:      homeDir,
-			CurrentCaps:  args.Caps,
-			ExtraPaths:   settings.Sandbox,
-			Skills:       availableSkills,
+			GlobalPath:  location.GetGlobalContextPath(),
+			Workspace:   workspace,
+			SessionName: log.Name(),
+			TmpDir:      tmpDir,
+			HomeDir:     homeDir,
+			CurrentCaps: args.Caps,
+			ExtraPaths:  settings.Sandbox,
+			Skills:      availableSkills,
 		})
 		if err != nil {
 			return "", err
@@ -403,20 +403,20 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer func() { _ = tmpRoot.Close() }()
 
-	pathGrants := pathgrant.New(workspaceDir, pathAccess)
+	pathGrants := pathgrant.New(workspace, pathAccess)
 	var pathGrantRestoreResult pathgrant.RestoreResult
 	if resumedSession != nil {
 		if recordedGrants, found := pathgrant.LastRecorded(resumedSession.Events); found {
-			pathGrants, pathGrantRestoreResult = pathgrant.NewRestored(workspaceDir, pathAccess, recordedGrants)
+			pathGrants, pathGrantRestoreResult = pathgrant.NewRestored(workspace, pathAccess, recordedGrants)
 		}
 	}
 
-	screen := output.New(os.Stdout).LinkPathsUnder(workspaceDir)
+	screen := output.New(os.Stdout).LinkPathsUnder(workspace.GetDir())
 	screen.SetTextSizingSupported(textsizing.Detect(os.Stdin, os.Stdout))
 
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
-	shellTool := shell.New(workspaceDir, homeDir, tmpDir, pathAccess, mode, files)
+	shellTool := shell.New(workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files)
 
 	toolboxTools = append(toolboxTools, shellTool)
 	if notify.IsAvailable() {
@@ -439,7 +439,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		ConfigFile:       configPath,
 		SystemPromptFile: location.GetGlobalContextPath(),
 		SkillDirs:        globalSkillDirs,
-		WorkspaceDir:     workspaceDir,
+		Workspace:        workspace,
 		ScratchDir:       tmpDir,
 		HomeDir:          homeDir,
 		Editor:           editorConfiguration,
@@ -486,25 +486,25 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	chat = &App{
 		agent:               agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
 		screen:              screen,
-		terminal:            terminal.New(os.Stdout, workspaceDir),
+		terminal:            terminal.New(os.Stdout, workspace),
 		metrics:             metrics.New(choice.ContextWindowTokens),
 		recorder:            record.New(log),
 		editorConfiguration: editorConfiguration,
 		toolOutputLimit:     toolOutputLimit,
-		workspaceDir:        workspaceDir,
+		workspace:           workspace,
 		mode:                mode,
 		pathGrants:          pathGrants,
 		configObserver:      configObserver,
 		startedAt:           time.Now(),
 	}
 	chat.onFailure = func(failure error) {
-		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspaceDir, failure)
+		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspace, failure)
 	}
 
 	usageReporter, _ := client.Client.(agent.UsageReporter)
 
 	barRegistry := bar.NewRegistry(bar.Options{
-		WorkspaceDir:       workspaceDir,
+		Workspace:          workspace,
 		CurrentSessionName: log.Name(),
 		ModelName:          selection.Model,
 		ModelEffort:        selection.Effort,

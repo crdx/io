@@ -17,6 +17,7 @@ import (
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/terminal"
+	"crdx.org/io/cmd/oh/work"
 )
 
 const (
@@ -32,7 +33,7 @@ type Options struct {
 	ConfigFile       string
 	SystemPromptFile string
 	SkillDirs        []string
-	WorkspaceDir     string
+	Workspace        *work.Space
 	ScratchDir       string
 	HomeDir          string
 	Session          Session
@@ -61,7 +62,7 @@ type commandEnvironment struct {
 	configPath       string
 	systemPromptPath string
 	skillDirs        []string
-	workspaceDir     string
+	workspace        *work.Space
 	scratchDir       string
 	homeDir          string
 	session          commandSession
@@ -96,7 +97,7 @@ func New(options Options) (slash.CommandSet, error) {
 		configPath:       options.ConfigFile,
 		systemPromptPath: options.SystemPromptFile,
 		skillDirs:        options.SkillDirs,
-		workspaceDir:     options.WorkspaceDir,
+		workspace:        options.Workspace,
 		scratchDir:       options.ScratchDir,
 		homeDir:          options.HomeDir,
 		session: commandSession{
@@ -204,12 +205,12 @@ func locationTargets(environment commandEnvironment) map[string]commandTarget {
 	prepareDirectory := prepareConfigDir(environment)
 
 	targets := map[string]commandTarget{
-		"agents-file":        existingTarget("Project context", prompt.ProjectContextPaths(environment.workspaceDir)...),
+		"agents-file":        existingTarget("Project context", prompt.ProjectContextPaths(environment.workspace)...),
 		"config-dir":         preparedTarget(prepareDirectory, environment.configDir),
 		"config-file":        preparedTarget(prepareDirectory, environment.configPath),
 		"system-prompt-file": preparedTarget(prepareDirectory, environment.systemPromptPath),
 		"skills-dir":         existingTarget("Skills directory", environment.skillDirs...),
-		"workspace-dir":      staticTarget(environment.workspaceDir),
+		"workspace-dir":      staticTarget(environment.workspace.GetDir()),
 		"scratch-dir":        staticTarget(environment.scratchDir),
 		"home-dir":           staticTarget(environment.homeDir),
 		"session-dir":        existingTarget("Session directory", environment.session.directory),
