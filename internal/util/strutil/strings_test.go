@@ -22,6 +22,22 @@ func TestCapitaliseUppercasesTheFirstRune(t *testing.T) {
 	}
 }
 
+func TestCapitaliseSentenceLeavesANameAsItWasWritten(t *testing.T) {
+	for text, want := range map[string]string{
+		"":                                     "",
+		"the turn was interrupted":             "The turn was interrupted",
+		"the conversation\ncould not be saved": "The conversation\ncould not be saved",
+		"chat.md recording disabled":           "chat.md recording disabled",
+		"wire.http recording disabled":         "wire.http recording disabled",
+		"cmd/oh/main.go could not be read":     "cmd/oh/main.go could not be read",
+		"exit(1) was returned":                 "exit(1) was returned",
+	} {
+		if got := strutil.CapitaliseSentence(text); got != want {
+			t.Errorf("CapitaliseSentence(%q) = %q, want %q", text, got, want)
+		}
+	}
+}
+
 func TestLinesDoesNotAddALineAfterATrailingNewline(t *testing.T) {
 	got := strutil.Lines("one\ntwo\n")
 	want := []string{"one", "two"}

@@ -22,7 +22,7 @@ read target.txt ✓ 1L
 It holds the word one, and nothing else.
 
 Background processes killed (sleep).
-the conversation could not be stored: no
+The conversation could not be stored: no
 space left on device
 === one column ===
 
@@ -312,7 +312,7 @@ e
 p
 )
 .
-t
+T
 h
 e
 c
@@ -404,7 +404,7 @@ Background
 processes
 killed
 (sleep).
-the
+The
 conversation
 could not be
 stored: no
@@ -432,4 +432,4 @@ read target.txt ✓ 1L
 It holds the word one, and nothing else.
 
 Background processes killed (sleep).
-the conversation could not be stored: no space left on device
+The conversation could not be stored: no space left on device

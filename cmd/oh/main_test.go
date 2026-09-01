@@ -1759,12 +1759,12 @@ func TestReplayingSaysTheWholeConversationAgain(t *testing.T) {
 	testConversation.events = []agent.Event{
 		{Kind: agent.UserMessageEvent, Text: "what is the weather"},
 		{Kind: agent.ModelMessageEvent, Text: "it is raining"},
-		{Kind: agent.HarnessMessageEvent, Text: "cancelled"},
+		{Kind: agent.HarnessMessageEvent, Text: "Cancelled"},
 	}
 
 	testConversation.replay()
 
-	for _, want := range []string{"what is the weather", "it is raining", "cancelled"} {
+	for _, want := range []string{"what is the weather", "it is raining", "Cancelled"} {
 		if !strings.Contains(screenOutput.String(), want) {
 			t.Errorf("expected %q to be drawn again, got %q", want, screenOutput.String())
 		}
@@ -2493,7 +2493,7 @@ func TestAnAsideStandsBetweenTheCallsItArrivedAmong(t *testing.T) {
 		Name:              "read",
 		FallbackRendering: agent.FallbackRendering{Subject: "one.txt"},
 	})
-	painter.DrawEvent(agent.Event{Kind: agent.HarnessMessageEvent, Text: "something happened"})
+	painter.DrawEvent(agent.Event{Kind: agent.HarnessMessageEvent, Text: "Something happened"})
 
 	painter.DrawEvent(agent.Event{Kind: agent.ToolCallResultEvent, ID: "1", Took: time.Second})
 
@@ -2506,7 +2506,7 @@ func TestAnAsideStandsBetweenTheCallsItArrivedAmong(t *testing.T) {
 	if !strings.Contains(rows[0], "one.txt") || !strings.Contains(rows[0], "✓") {
 		t.Errorf("expected the call to keep its result above the aside, got %q", rows[0])
 	}
-	if !strings.Contains(rows[1], "something happened") {
+	if !strings.Contains(rows[1], "Something happened") {
 		t.Errorf("expected the aside under the call, got %q", rows[1])
 	}
 }

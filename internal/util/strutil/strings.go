@@ -16,6 +16,21 @@ func Capitalise(text string) string {
 	return string(characters)
 }
 
+func CapitaliseSentence(text string) string {
+	firstWord, _, _ := strings.Cut(text, " ")
+	firstWord, _, _ = strings.Cut(firstWord, "\n")
+
+	if firstWord == "" || isNameLike(firstWord) {
+		return text
+	}
+
+	return Capitalise(text)
+}
+
+func isNameLike(word string) bool {
+	return strings.ContainsAny(word, `./:\_`) || strings.ContainsFunc(word, unicode.IsDigit)
+}
+
 func OrDash(text string) string {
 	if text == "" {
 		return "—"

@@ -417,9 +417,9 @@ func (self *Picasso) render(event agent.Event) string {
 		return startup.RenderEvent(event, self.screen.Columns(), self.screen.IsTextSizingSupported())
 	}
 
-	return NoticeStyle(event.Status)(strutil.PrintableLines(event.Text))
+	return NoticeStyle(event.Status)(strutil.CapitaliseSentence(strutil.PrintableLines(event.Text)))
 }
 
 func RenderFailure(event agent.Event) string {
-	return strutil.Capitalise(strutil.PrintableLines(event.Text))
+	return strutil.CapitaliseSentence(strutil.PrintableLines(event.Text))
 }

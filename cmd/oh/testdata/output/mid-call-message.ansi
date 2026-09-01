@@ -22,7 +22,7 @@
 \r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \r
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\e[38;2;204;102;102mthe conversation could not be stored: no\e[0m\r
+\e[38;2;204;102;102mThe conversation could not be stored: no\e[0m\r
 \e[38;2;204;102;102mspace left on device\e[0m\r
 \e[?25h\e[?2026l
 === one column ===
@@ -313,7 +313,7 @@
 \e[38;2;207;173;0mp\e[0m\r
 \e[38;2;207;173;0m)\e[0m\r
 \e[38;2;207;173;0m.\e[0m\r
-\e[38;2;204;102;102mt\e[0m\r
+\e[38;2;204;102;102mT\e[0m\r
 \e[38;2;204;102;102mh\e[0m\r
 \e[38;2;204;102;102me\e[0m\r
 \e[38;2;204;102;102mc\e[0m\r
@@ -385,7 +385,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;
 It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.
 
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m
-\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m
+\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m
 
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -411,7 +411,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.
 \e[?2026h\e[?25l\r\e[KIt h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the wor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word `o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing els\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\e[?25h\e[?2026l\r
 \r
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\r
+\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m\r
 \e]9;4;0\e\\
 === streamed line ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -437,7 +437,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.
 \e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\e[?25h\e[?2026l\r
 \r
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\r
+\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m\r
 \e]9;4;0\e\\
 === streamed paced ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -463,7 +463,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.
 \e[?2026h\e[?25l\r\e[KIt h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the wor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word `o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing els\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\e[?25h\e[?2026l\r
 \r
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\r
+\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m\r
 \e]9;4;0\e\\
 === tiny ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
@@ -506,7 +506,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.
 \e[38;2;207;173;0mprocesses\e[0m\r
 \e[38;2;207;173;0mkilled\e[0m\r
 \e[38;2;207;173;0m(sleep).\e[0m\r
-\e[38;2;204;102;102mthe\e[0m\r
+\e[38;2;204;102;102mThe\e[0m\r
 \e[38;2;204;102;102mconversation\e[0m\r
 \e[38;2;204;102;102mcould not be\e[0m\r
 \e[38;2;204;102;102mstored: no\e[0m\r
@@ -533,7 +533,7 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.
 \r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.
 
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m
-\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m
+\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m
 \e[?25h\e[?2026l
 === wide ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -557,5 +557,5 @@ It holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.
 \r\e[KIt holds the word \e[38;2;192;128;80mone\e[0m, and nothing else.\r
 \r
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\r
+\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m\r
 \e[?25h\e[?2026l

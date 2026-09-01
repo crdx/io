@@ -11,7 +11,7 @@
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no\e[0m\r
+\r\e[K\e[38;2;204;102;102mThe conversation could not be stored: no\e[0m\r
 \r\e[K\e[38;2;204;102;102mspace left on device\e[0m\r
 \r
 \r\e[KBoth still mention the spinner.\r
@@ -168,7 +168,7 @@
 \r\e[K\e[38;2;76;154;44mr\e[0m\r
 \r\e[K\e[38;2;76;154;44md\e[0m\r
 \r\e[K\e[38;2;76;154;44m.\e[0m\r
-\r\e[K\e[38;2;204;102;102mt\e[0m\r
+\r\e[K\e[38;2;204;102;102mT\e[0m\r
 \r\e[K\e[38;2;204;102;102mh\e[0m\r
 \r\e[K\e[38;2;204;102;102me\e[0m\r
 \r\e[K\e[38;2;204;102;102mc\e[0m\r
@@ -259,7 +259,7 @@ grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;1
 
 \e[38;2;207;173;0mBackground processes killed (sleep).\e[0m
 \e[38;2;76;154;44mCopied to clipboard.\e[0m
-\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m
+\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m
 
 Both still mention the spinner.
 
@@ -279,11 +279,11 @@ Both still mention the spinner.
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\r
+\r\e[K\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth sti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still menti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the spinn\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the spinner.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -303,11 +303,11 @@ Both still mention the spinner.
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\r
+\r\e[K\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KBoth still mention the spinner.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -327,11 +327,11 @@ Both still mention the spinner.
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[4A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\r
+\r\e[K\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth sti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still menti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the spinn\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth still mention the spinner.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -357,7 +357,7 @@ Both still mention the spinner.
 \r\e[K\e[38;2;207;173;0m(sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to\e[0m\r
 \r\e[K\e[38;2;76;154;44mclipboard.\e[0m\r
-\r\e[K\e[38;2;204;102;102mthe\e[0m\r
+\r\e[K\e[38;2;204;102;102mThe\e[0m\r
 \r\e[K\e[38;2;204;102;102mconversation\e[0m\r
 \r\e[K\e[38;2;204;102;102mcould not be\e[0m\r
 \r\e[K\e[38;2;204;102;102mstored: no\e[0m\r
@@ -379,7 +379,7 @@ Both still mention the spinner.
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m
+\r\e[K\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m
 
 \r\e[KBoth still mention the spinner.
 \e[?25h\e[?2026l
@@ -395,7 +395,7 @@ Both still mention the spinner.
 \r\e[K\r
 \r\e[K\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
 \r\e[K\e[38;2;76;154;44mCopied to clipboard.\e[0m\r
-\r\e[K\e[38;2;204;102;102mthe conversation could not be stored: no space left on device\e[0m\r
+\r\e[K\e[38;2;204;102;102mThe conversation could not be stored: no space left on device\e[0m\r
 \r
 \r\e[KBoth still mention the spinner.\r
 \e[?25h\e[?2026l
