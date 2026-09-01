@@ -22,9 +22,18 @@ func TestAStartupEventKeepsItsFactsForReplay(t *testing.T) {
 
 	event := NewEvent(12*time.Millisecond, info)
 	got := style.Plain(RenderEvent(event, 80, false))
-	want := "Agent brave-otter 🦦 ready in 12ms with 5 skills, 4 snippets, and ~13Kt of context."
+	want := "Agent brave-otter 🦦 ready in 12ms with 5 skills ⧸ 4 snippets ⧸ ~13Kt context."
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestStartupSeparatorsTakeTheAccentColour(t *testing.T) {
+	line := RenderBanner(time.Millisecond, false, Info{}, 80, false)
+	separator := style.Accent(startupDetailsSeparator)
+
+	if count := strings.Count(line, separator); count != 2 {
+		t.Errorf("got %d accent separators in %q, want 2", count, line)
 	}
 }
 
@@ -70,7 +79,7 @@ func TestStartupQuantitiesPutOnlyTheirNumbersInTheNormalForeground(t *testing.T)
 
 func TestAnEmptyStartupSaysTheSentenceAlone(t *testing.T) {
 	line := style.Plain(RenderBanner(time.Millisecond, false, Info{}, 80, false))
-	want := "Agent ready in 1ms with 0 skills, 0 snippets, and 0t of context."
+	want := "Agent ready in 1ms with 0 skills ⧸ 0 snippets ⧸ 0t context."
 
 	if line != want {
 		t.Errorf("got %q, want %q", line, want)
@@ -91,7 +100,7 @@ func TestKittyGetsATwoRowStartupBannerWithASizedEmoji(t *testing.T) {
 	if !strings.HasPrefix(line, " \x1b]66;s=2:w=2;🦦\x1b\\") {
 		t.Errorf("expected a sized otter, got %q", line)
 	}
-	want := " 🦦  Agent brave-otter ready in 1ms\n  0 skills, 0 snippets, and 0t of context"
+	want := " 🦦  Agent brave-otter ready in 1ms\n  0 skills ⧸ 0 snippets ⧸ 0t context"
 	if got := style.Plain(line); got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}

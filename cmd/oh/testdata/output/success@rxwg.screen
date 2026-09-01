@@ -1,7 +1,7 @@
 === narrow ===
 Agent 000000000000000000000000 ready in
-0s with 0 skills, 0 snippets, and ~800t
-of context.
+0s with 0 skills ⧸ 0 snippets ⧸ ~800t co
+ntext.
 
 
  have a look at that
@@ -76,7 +76,7 @@ i
 l
 l
 s
-,
+⧸
 0
 s
 n
@@ -86,17 +86,12 @@ p
 e
 t
 s
-,
-a
-n
-d
+⧸
 ~
 8
 0
 0
 t
-o
-f
 c
 o
 n
@@ -483,10 +478,9 @@ Agent 000000
 000000000000
 000000 ready
 in 0s with 0
-skills, 0 sn
-ippets, and
-~800t of con
-text.
+skills ⧸ 0 s
+nippets ⧸ ~8
+00t context.
 
 
  have a look
@@ -542,7 +536,7 @@ in the
 output layer
 instead.
 === wide ===
-Agent 000000000000000000000000 ready in 0s with 0 skills, 0 snippets, and ~800t of context.
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
 
 
  have a look at that

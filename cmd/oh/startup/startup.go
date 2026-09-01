@@ -44,10 +44,11 @@ func NewEvent(elapsedTime time.Duration, info Info) agent.Event {
 }
 
 const (
-	sizedEmojiCells    = 4
-	bannerLeftPadding  = 1
-	bannerGap          = 2
-	textSizingMetadata = "s=2:w=2"
+	sizedEmojiCells         = 4
+	bannerLeftPadding       = 1
+	bannerGap               = 2
+	textSizingMetadata      = "s=2:w=2"
+	startupDetailsSeparator = "⧸"
 )
 
 // RenderEvent renders a recorded startup event for the available terminal width.
@@ -105,11 +106,11 @@ func renderDetails(info Info, introduction string, conclusion string) string {
 		_, _ = line.WriteString(style.Subtle(introduction))
 	}
 	_, _ = line.WriteString(style.Normal(strconv.Itoa(info.ProjectSkills + info.GlobalSkills)))
-	_, _ = line.WriteString(style.Subtle(" skills, "))
+	_, _ = line.WriteString(style.Subtle(" skills ") + style.Accent(startupDetailsSeparator) + style.Subtle(" "))
 	_, _ = line.WriteString(style.Normal(strconv.Itoa(info.Snippets)))
-	_, _ = line.WriteString(style.Subtle(" snippets, and "))
+	_, _ = line.WriteString(style.Subtle(" snippets ") + style.Accent(startupDetailsSeparator) + style.Subtle(" "))
 	_, _ = line.WriteString(startupContextTokens(info))
-	_, _ = line.WriteString(style.Subtle(" of context" + conclusion))
+	_, _ = line.WriteString(style.Subtle(" context" + conclusion))
 	return line.String()
 }
 

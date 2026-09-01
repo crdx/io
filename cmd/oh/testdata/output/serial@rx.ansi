@@ -1,7 +1,7 @@
 === narrow ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m\r
-0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m \r
-of context.\e[0m\r
+0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m co\r
+ntext.\e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m have a look at that                    \e[0m\r
@@ -79,8 +79,8 @@ k\r
 i\r
 l\r
 l\r
-s\r
-,\e[0m\r
+s\e[0m\e[38;2;192;128;80m\r
+⧸\e[0m\e[38;2;150;152;150m\e[0m\r
 0\e[38;2;150;152;150m\r
 s\r
 n\r
@@ -89,18 +89,13 @@ p\r
 p\r
 e\r
 t\r
-s\r
-,\r
-a\r
-n\r
-d\e[0m\e[38;2;150;152;150m\r
+s\e[0m\e[38;2;192;128;80m\r
+⧸\e[0m\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150m\r
 ~\e[0m\r
 8\r
 0\r
 0\e[38;2;150;152;150m\r
 t\e[0m\e[38;2;150;152;150m\r
-o\r
-f\r
 c\r
 o\r
 n\r
@@ -458,7 +453,7 @@ t\e[0m\r
 \r\e[K.\r
 \e[?25h\e[?2026l
 === plain ===
-\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -480,7 +475,7 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mnotes.md\e[0m \e[38;2;204;102;1
 The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.
 
 === streamed asap ===
-\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -511,7 +506,7 @@ The reads went together, the write waited for them and ran on its own, and the r
 \r\e[Kfirst.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -542,7 +537,7 @@ The reads went together, the write waited for them and ran on its own, and the r
 \r\e[Kfirst.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -577,10 +572,9 @@ The reads went together, the write waited for them and ran on its own, and the r
 000000000000\r
 000000\e[38;2;150;152;150m ready\r
 in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m\r
-skills, \e[0m0\e[38;2;150;152;150m sn\r
-ippets, and \e[0m\e[38;2;150;152;150m\r
-~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of con\r
-text.\e[0m\r
+skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m s\r
+nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m8\r
+00\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m have a look\e[0m\r
@@ -636,7 +630,7 @@ text.\e[0m\r
 \r\e[Kfirst.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -658,7 +652,7 @@ text.\e[0m\r
 \r\e[KThe reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r

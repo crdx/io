@@ -1,7 +1,7 @@
 === editing cursor lifecycle ===
 \e[5 q\e[?2026h\e[?25l\e[?7l\r> ask something else\r\e[20C\e[?25h\e[?2026l\r\e[J\e[?7h\e[?25h\e[0 q
 === progress refreshed mid-turn ===
-\e]9;4;3\e\\\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e]9;4;3\e\\\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -24,7 +24,7 @@
 \e[?25h\e[?2026l\e[?2026h\e[?25l\r
 > ask something else\r\e[20C\e[?25h\e[?2026l\e]9;4;3\e\\
 === progress refreshed mid-turn on a pipe ===
-\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -43,7 +43,7 @@ read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[3
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 
 === released and kept ===
-\e]9;4;3\e\\\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e]9;4;3\e\\\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -67,7 +67,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 > ask something else\r\e[20C\e[?25h\e[?2026l\e]9;4;0\e\\\r\e[J\e[1A\r
 \e[?7h\e[?25h
 === released and kept on a pipe ===
-\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -86,7 +86,7 @@ read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[3
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 
 === released and unused ===
-\e]9;4;3\e\\\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e]9;4;3\e\\\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -109,7 +109,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \e[?25h\e[?2026l\e[?2026h\e[?25l\r
 > ask something else\r\e[20C\e[?25h\e[?2026l\e]9;4;0\e\\\r\e[J\e[1A\r\e[18A\e[J\e[?7h\e[?25h
 === released and unused on a pipe ===
-\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -128,7 +128,7 @@ read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[3
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 
 === resized ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -148,7 +148,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r\e[KThe prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where\r
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r
 \r\e[Klayer instead.\r
-\e[?25h\e[?2026l\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e[?25h\e[?2026l\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -170,7 +170,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r\e[Klayer instead.\r
 \e[?25h\e[?2026l
 === resized mid-turn ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -180,7 +180,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r
 \r\e[KI'll have a look at how the editor draws its prompt.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[H\e[2J\e[3J\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
@@ -192,7 +192,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r
 \r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;152;150m–\e[0m\e[?25h\e[?2026l
 === resized mid-turn on a pipe ===
-\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -203,7 +203,7 @@ I'll have a look at how the editor draws its prompt.
 
 grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m
 
-\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -214,7 +214,7 @@ I'll have a look at how the editor draws its prompt.
 
 grep \e[38;2;150;152;150mprompt\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;152;150m–\e[0m
 === resized on a pipe ===
-\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -232,7 +232,7 @@ read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[3
 
 The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 
-\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m
@@ -252,10 +252,10 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 
 === under a footer ===
 \e[?2026h\e[?25l\e[?7l\r> ask something else\r
-> and a second row\r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[1A\e[J\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+> and a second row\r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[1A\e[J\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 > ask something else\r
-> and a second row\r\r\e[1A\e[J\e[2A\e[91C\r
+> and a second row\r\r\e[1A\e[J\e[2A\e[86C\r
 \r
 > ask something else\r
 > and a second row\r\r\e[1A\e[J\e[1A\r
@@ -326,7 +326,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 > ask something else\r
 > and a second row\r\e[?25h\e[?2026l
 === under a footer on a pipe ===
-\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m have a look at that\e[0m

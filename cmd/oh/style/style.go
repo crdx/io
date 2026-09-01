@@ -41,6 +41,7 @@ const reset = "\x1b[0m"
 
 // The base visual styles.
 var (
+	Accent Style = hex(copper)
 	Normal Style = hex(none) // the terminal's foreground
 	Dim    Style = hex(grey) // grey text
 )

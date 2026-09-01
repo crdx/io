@@ -39,7 +39,7 @@ func drawEmailLink(t *testing.T) string {
 		output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines),
 		false,
 		nil,
-		"",
+		nil,
 		output.StreamingModeLine,
 	)
 	paint.DrawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: address})

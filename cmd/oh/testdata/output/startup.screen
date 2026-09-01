@@ -1,7 +1,6 @@
 === narrow ===
 Agent brave-otter 🦦 ready in 2ms with 4
- skills, 2 snippets, and ~1.6Kt of conte
-xt.
+ skills ⧸ 2 snippets ⧸ ~1.6Kt context.
 === one column ===
 A
 g
@@ -49,7 +48,8 @@ i
 l
 l
 s
-,
+
+⧸
 
 2
 
@@ -61,11 +61,8 @@ p
 e
 t
 s
-,
 
-a
-n
-d
+⧸
 
 ~
 1
@@ -73,9 +70,6 @@ d
 6
 K
 t
-
-o
-f
 
 c
 o
@@ -89,9 +83,9 @@ t
 Agent brave-
 otter 🦦 rea
 dy in 2ms wi
-th 4 skills,
- 2 snippets,
- and ~1.6Kt
-of context.
+th 4 skills
+⧸ 2 snippets
+ ⧸ ~1.6Kt co
+ntext.
 === wide ===
-Agent brave-otter 🦦 ready in 2ms with 4 skills, 2 snippets, and ~1.6Kt of context.
+Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context.

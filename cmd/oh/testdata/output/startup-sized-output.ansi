@@ -1,17 +1,17 @@
 === fallback then following output ===
 \e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0mbrave-otter\e[38;2;150;152;150m \e[0m🦦\e[38;2;150;152;150m ready in \e[0m2\e[38;2;150;152;150mms\e[0m\e[38;2;150;152;150m wi\r
-th \e[0m4\e[38;2;150;152;150m skills, \e[0m2\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m1.6\e[38;2;150;152;150mKt\e[0m\e[38;2;150;152;150m \r
-of context.\e[0m\r
+th \e[0m4\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m2\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m1.6\e[38;2;150;152;150mKt\e[0m\e[38;2;150;152;150m co\r
+ntext.\e[0m\r
 Following output.\r
 
 === wide then following output ===
  \e]66;s=2:w=2;🦦\e\\\e[38;2;150;152;150m  \e[0m\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0mbrave-otter\e[38;2;150;152;150m ready in \e[0m2\e[38;2;150;152;150mms\e[0m\r
-\e[5C  4\e[38;2;150;152;150m skills, \e[0m2\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m1.6\e[38;2;150;152;150mKt\e[0m\e[38;2;150;152;150m of context\e[0m\r
+\e[5C  4\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m2\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m1.6\e[38;2;150;152;150mKt\e[0m\e[38;2;150;152;150m context\e[0m\r
 Following output.\r
 
 === wrapped details then following output ===
  \e]66;s=2:w=2;🦦\e\\\e[38;2;150;152;150m  \e[0m\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0mbrave-otter\e[38;2;150;152;150m ready in \e[0m2\e[38;2;150;152;150mms\e[0m\r
-\e[5C  4\e[38;2;150;152;150m skills, \e[0m2\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m1.6\e[38;2;150;152;150m\r
-Kt\e[0m\e[38;2;150;152;150m of context\e[0m\r
+\e[5C  4\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m2\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m1.6\e[38;2;150;152;150mKt\e[0m\e[38;2;150;152;150m\r
+context\e[0m\r
 Following output.\r
 

@@ -1,7 +1,7 @@
 === narrow ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m\r
-0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m \r
-of context.\e[0m\r
+0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m co\r
+ntext.\e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m what is the current go release, and    \e[0m\r
@@ -85,8 +85,8 @@ k\r
 i\r
 l\r
 l\r
-s\r
-,\e[0m\r
+s\e[0m\e[38;2;192;128;80m\r
+⧸\e[0m\e[38;2;150;152;150m\e[0m\r
 0\e[38;2;150;152;150m\r
 s\r
 n\r
@@ -95,18 +95,13 @@ p\r
 p\r
 e\r
 t\r
-s\r
-,\r
-a\r
-n\r
-d\e[0m\e[38;2;150;152;150m\r
+s\e[0m\e[38;2;192;128;80m\r
+⧸\e[0m\e[38;2;150;152;150m\e[0m\e[38;2;150;152;150m\r
 ~\e[0m\r
 8\r
 0\r
 0\e[38;2;150;152;150m\r
 t\e[0m\e[38;2;150;152;150m\r
-o\r
-f\r
 c\r
 o\r
 n\r
@@ -628,7 +623,7 @@ d\r
 \r\e[K.\r
 \e[?25h\e[?2026l
 === plain ===
-\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?\e[0m
@@ -652,7 +647,7 @@ Go \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;19
 The web tools are refused, so I cannot read the notes until you grant access again.
 
 === streamed asap ===
-\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r
@@ -679,7 +674,7 @@ The web tools are refused, so I cannot read the notes until you grant access aga
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tool\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools ar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refuse\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cann\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot r\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the note\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes un\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you gran\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant ac\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant access\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant access aga\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant access again.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
-\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r
@@ -706,7 +701,7 @@ The web tools are refused, so I cannot read the notes until you grant access aga
 \e[?2026h\e[?25l\r\e[KThe web tools are refused, so I cannot read the notes until you grant access again.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
-\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r
@@ -737,10 +732,9 @@ The web tools are refused, so I cannot read the notes until you grant access aga
 000000000000\r
 000000\e[38;2;150;152;150m ready\r
 in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m\r
-skills, \e[0m0\e[38;2;150;152;150m sn\r
-ippets, and \e[0m\e[38;2;150;152;150m\r
-~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of con\r
-text.\e[0m\r
+skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m s\r
+nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m8\r
+00\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m what is the\e[0m\r
@@ -807,7 +801,7 @@ w refused.\e[0m\r
 \r\e[Kagain.\r
 \e[?25h\e[?2026l
 === unsized ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m
+\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?\e[0m
@@ -831,7 +825,7 @@ w refused.\e[0m\r
 \r\e[KThe web tools are refused, so I cannot read the notes until you grant access again.
 \e[?25h\e[?2026l
 === wide ===
-\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills, \e[0m0\e[38;2;150;152;150m snippets, and \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m of context.\e[0m\r
+\e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r

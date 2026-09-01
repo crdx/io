@@ -63,7 +63,7 @@ func TestOnlyTerminalConversationMessagesContainHyperlinks(t *testing.T) {
 				if isTerminal {
 					screen = output.NewTerminalOfSize(&screenOutput, 80, 24)
 				}
-				paint := New(screen, false, nil, "", output.StreamingModeLine)
+				paint := New(screen, false, nil, nil, output.StreamingModeLine)
 				paint.DrawEvent(agent.Event{Kind: kind, Text: "[docs](https://example.test)"})
 
 				hasHyperlink := strings.Contains(screenOutput.String(), "\x1b]8;;https://example.test\x1b\\")
