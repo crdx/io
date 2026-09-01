@@ -7041,12 +7041,16 @@ const (
 	pathGrantRevokeMissing
 	pathGrantRestorePending
 	pathGrantRestoreSettled
+	pathGrantHomePath
+	pathGrantHomePathMissing
 )
 
 func TestPathGrantLifecycleDrawsEveryVisibleState(t *testing.T) {
 	passes := map[string]func() string{
 		"active turn interrupted":        func() string { return pathGrantGoldenStream(t, pathGrantInterrupted) },
 		"duplicate grant rejected":       func() string { return pathGrantGoldenStream(t, pathGrantDuplicate) },
+		"home path granted":              func() string { return pathGrantGoldenStream(t, pathGrantHomePath) },
+		"missing home path rejected":     func() string { return pathGrantGoldenStream(t, pathGrantHomePathMissing) },
 		"many grants truncated":          func() string { return pathGrantGoldenStream(t, pathGrantMany) },
 		"missing path rejected":          func() string { return pathGrantGoldenStream(t, pathGrantMissing) },
 		"pending grant":                  func() string { return pathGrantGoldenStream(t, pathGrantPending) },
@@ -7090,6 +7094,8 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 	self.barConfiguration = bar.NewConfiguration(registry, live.SegmentLayout)
 	referencePath := stableGrantGoldenPath(t, "reference", true)
 	missingPath := stableGrantGoldenPath(t, "missing", false)
+	homePath := stableGrantGoldenPath(t, "user", true)
+	t.Setenv("HOME", homePath)
 
 	editor := edit.NewInput(nil)
 	self.editor = editor
@@ -7118,6 +7124,13 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 		self.waitForCurrentTurn()
 	case pathGrantMissing:
 		self.handleCommand("/grant read " + missingPath)
+	case pathGrantHomePath:
+		if err := os.Mkdir(filepath.Join(homePath, "reference"), 0o700); err != nil {
+			t.Fatal(err)
+		}
+		self.handleCommand("/grant read ~/reference")
+	case pathGrantHomePathMissing:
+		self.handleCommand("/grant read ~/missing")
 	case pathGrantDuplicate:
 		self.handleCommand("/grant read " + referencePath)
 		self.handleCommand("/grant read " + referencePath)
@@ -7161,6 +7174,7 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 	stream := screenOutput.String()
 	stream = strings.ReplaceAll(stream, referencePath, "/reference")
 	stream = strings.ReplaceAll(stream, missingPath, "/missing")
+	stream = strings.ReplaceAll(stream, homePath, "/user")
 	return stream
 }
 

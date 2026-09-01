@@ -141,9 +141,13 @@ func (self *Grants) Revoke(path string) (agent.Event, error) {
 }
 
 func (self *Grants) canonicalPath(path string, mustExist bool) (string, error) {
-	path = strings.TrimSpace(path)
-	if path == "" {
+	writtenPath := strings.TrimSpace(path)
+	if writtenPath == "" {
 		return "", errors.New("path is empty")
+	}
+	path, err := pathutil.Expand(writtenPath)
+	if err != nil {
+		return "", fmt.Errorf("could not expand %s: %w", writtenPath, err)
 	}
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(self.workspaceDir, path)

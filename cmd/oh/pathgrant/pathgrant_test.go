@@ -146,6 +146,28 @@ func TestRelativePathsResolveFromTheWorkspaceAndPathsMayContainSpaces(t *testing
 	}
 }
 
+func TestAHomePathIsExpandedRatherThanJoinedToTheWorkspace(t *testing.T) {
+	grants, _, _ := newTestGrants(t)
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+
+	path := filepath.Join(home, "granted")
+	if err := os.Mkdir(path, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := grants.Grant("~/granted", ReadAccess); err != nil {
+		t.Fatal(err)
+	}
+	if current := grants.GetCurrent(); len(current) != 1 || current[0].Path != path {
+		t.Errorf("got grants %#v", current)
+	}
+
+	if _, err := grants.Grant("~/absent", ReadAccess); err == nil ||
+		!strings.Contains(err.Error(), "~/absent") {
+		t.Errorf("got %v, want a failure naming the path as it was written", err)
+	}
+}
+
 func TestGrantChangesAreInjectedOnce(t *testing.T) {
 	grants, _, _ := newTestGrants(t)
 	directory := t.TempDir()
