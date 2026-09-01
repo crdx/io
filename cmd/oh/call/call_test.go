@@ -63,7 +63,7 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 				Lines:      7,
 				Bytes:      1200,
 			},
-			want: []string{"7L ~400t 0.8s 92M"},
+			want: []string{"0.8s 7L ~400t 92M"},
 		},
 		"resources spent on nothing": {
 			stats: tool.Stats{Kind: tool.StatsResources},
@@ -109,7 +109,7 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 				TotalBytes:  1200,
 				IsTruncated: true,
 			},
-			want: []string{"2L+ (of ~400t)"},
+			want: []string{"2L+ ~100t (of ~400t)"},
 		},
 		"capped search": {
 			stats: tool.Stats{

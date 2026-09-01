@@ -97,7 +97,7 @@ notes.md: no such file or directory
 ## Assistant · +16s
 
 ```
-The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.
+The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. Every write was refused because the workspace is read-only, so nothing was there for the reads to find.
 
 ```
 

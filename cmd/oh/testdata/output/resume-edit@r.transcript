@@ -33,7 +33,7 @@ the filesystem is read-only
 ## Assistant · +5s
 
 ```
-The resumed edit completed.
+The resumed edit was refused because the workspace is read-only.
 ```
 
 

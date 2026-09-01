@@ -26,9 +26,9 @@ read notes.md ✗ 1L notes.md: no such …
 The reads went together, the write
 waited for them and ran on its own, and
 the read after it waited for the write.
-The last read has four lines, which it
-could only have if the write had
-finished first.
+Every write was refused because the
+workspace is read-only, so nothing was
+there for the reads to find.
 === one column ===
 A
 g
@@ -379,76 +379,91 @@ i
 t
 e
 .
-T
-h
+E
+v
 e
-l
-a
-s
-t
 r
-e
-a
-d
-h
-a
-s
-f
-o
-u
-r
-l
-i
-n
-e
-s
-,
+y
 w
-h
-i
-c
-h
+r
 i
 t
-c
-o
+e
+w
+a
+s
+r
+e
+f
 u
-l
+s
+e
 d
+b
+e
+c
+a
+u
+s
+e
+t
+h
+e
+w
+o
+r
+k
+s
+p
+a
+c
+e
+i
+s
+r
+e
+a
+d
+-
 o
 n
 l
 y
-h
-a
-v
-e
-i
-f
+,
+s
+o
+n
+o
 t
 h
-e
+i
+n
+g
 w
-r
-i
+a
+s
 t
-e
 h
+e
+r
+e
+f
+o
+r
+t
+h
+e
+r
+e
 a
 d
+s
+t
+o
 f
 i
 n
-i
-s
-h
-e
 d
-f
-i
-r
-s
-t
 .
 === tiny ===
 Agent
@@ -504,15 +519,16 @@ and the read
 after it
 waited for
 the write.
-The last
-read has
-four lines,
-which it
-could only
-have if the
-write had
-finished
-first.
+Every write
+was refused
+because the
+workspace is
+read-only,
+so nothing
+was there
+for the
+reads to
+find.
 === wide ===
 Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
 
@@ -535,5 +551,5 @@ write notes.md 32B ✗ 1L the filesystem is read-only
 read notes.md ✗ 1L notes.md: no such file or directory
 
 The reads went together, the write waited for them and ran on its own, and the read after it waited
-for the write. The last read has four lines, which it could only have if the write had finished
-first.
+for the write. Every write was refused because the workspace is read-only, so nothing was there for
+the reads to find.

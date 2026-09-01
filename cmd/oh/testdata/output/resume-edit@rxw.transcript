@@ -33,7 +33,7 @@ file has not been read yet — ensure you read target.txt before editing it
 ## Assistant · +5s
 
 ```
-The resumed edit completed.
+The resumed edit was refused because the file has not been read in this session.
 ```
 
 

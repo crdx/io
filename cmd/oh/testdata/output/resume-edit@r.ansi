@@ -12,7 +12,8 @@
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0medit\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem i…\e[0m\r
 \r
-\r\e[KThe resumed edit completed.\r
+\r\e[KThe resumed edit was refused because the\r
+\r\e[Kworkspace is read-only.\r
 \e[?25h\e[?2026l
 === one column ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mA\e[0m\r
@@ -177,15 +178,46 @@
 \r\e[Kd\r
 \r\e[Ki\r
 \r\e[Kt\r
-\r\e[Kc\r
-\r\e[Ko\r
-\r\e[Km\r
-\r\e[Kp\r
-\r\e[Kl\r
+\r\e[Kw\r
+\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Kr\r
 \r\e[Ke\r
-\r\e[Kt\r
+\r\e[Kf\r
+\r\e[Ku\r
+\r\e[Ks\r
 \r\e[Ke\r
 \r\e[Kd\r
+\r\e[Kb\r
+\r\e[Ke\r
+\r\e[Kc\r
+\r\e[Ka\r
+\r\e[Ku\r
+\r\e[Ks\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kw\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Kk\r
+\r\e[Ks\r
+\r\e[Kp\r
+\r\e[Ka\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kd\r
+\r\e[K-\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Kl\r
+\r\e[Ky\r
 \r\e[K.\r
 \e[?25h\e[?2026l
 === plain ===
@@ -198,7 +230,7 @@ Editing the target without reading it again.
 
 \e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem is read-only\e[0m
 
-The resumed edit completed.
+The resumed edit was refused because the workspace is read-only.
 
 === streamed asap ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
@@ -211,7 +243,7 @@ The resumed edit completed.
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0medit\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem is read-only\e[0m\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit com\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit complet\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit completed.\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was ref\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused bec\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the wor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the workspa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the workspace i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the workspace is re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the workspace is read-o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the workspace is read-only.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
@@ -224,7 +256,7 @@ The resumed edit completed.
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0medit\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem is read-only\e[0m\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[KThe resumed edit completed.\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the workspace is read-only.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
@@ -237,7 +269,7 @@ The resumed edit completed.
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0medit\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0medit\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem is read-only\e[0m\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit com\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit complet\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit completed.\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was ref\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused bec\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the wor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the workspa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the workspace i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the workspace is re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the workspace is read-o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe resumed edit was refused because the workspace is read-only.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m\e[0m\r
@@ -264,8 +296,11 @@ The resumed edit completed.
 \r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0me…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mt…\e[0m\r
 \r
 \r\e[KThe resumed\r
-\r\e[Kedit\r
-\r\e[Kcompleted.\r
+\r\e[Kedit was\r
+\r\e[Krefused\r
+\r\e[Kbecause the\r
+\r\e[Kworkspace is\r
+\r\e[Kread-only.\r
 \e[?25h\e[?2026l
 === unsized ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
@@ -277,7 +312,7 @@ The resumed edit completed.
 
 \r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0medit\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem is read-only\e[0m
 
-\r\e[KThe resumed edit completed.
+\r\e[KThe resumed edit was refused because the workspace is read-only.
 \e[?25h\e[?2026l
 === wide ===
 \e[?2026h\e[?25l\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
@@ -290,5 +325,5 @@ The resumed edit completed.
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0medit\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mthe filesystem is read-only\e[0m\r
 \r
-\r\e[KThe resumed edit completed.\r
+\r\e[KThe resumed edit was refused because the workspace is read-only.\r
 \e[?25h\e[?2026l

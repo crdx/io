@@ -250,7 +250,7 @@ func resourcesStatsText(stats *tool.Stats) string {
 		peakMemory = strconv.FormatUint(megabytes, 10) + "M"
 	}
 
-	return style.Subtle.Join(outputMeasure(stats), cpuTime, peakMemory)
+	return style.Subtle.Join(cpuTime, outputMeasure(stats), peakMemory)
 }
 
 func readStatsText(stats *tool.Stats) string {
@@ -286,16 +286,17 @@ func tokenEstimate(stats *tool.Stats) string {
 	const maximumHiddenTokenEstimate = 100
 
 	returnedTokens := util.EstimateTokenCount(stats.Bytes)
-	if returnedTokens > maximumHiddenTokenEstimate {
-		returnedText := util.FormatEstimatedTokenCount(returnedTokens)
-		if stats.TotalBytes > stats.Bytes {
-			return returnedText + " (of " + util.FormatTokenEstimate(stats.TotalBytes) + ")"
-		}
-		return returnedText
+	isTotalSaid := stats.TotalBytes > stats.Bytes &&
+		util.EstimateTokenCount(stats.TotalBytes) > maximumHiddenTokenEstimate
+
+	if returnedTokens <= maximumHiddenTokenEstimate && !isTotalSaid {
+		return ""
 	}
 
-	if stats.TotalBytes > stats.Bytes && util.EstimateTokenCount(stats.TotalBytes) > maximumHiddenTokenEstimate {
-		return "(of " + util.FormatTokenEstimate(stats.TotalBytes) + ")"
+	returnedText := util.FormatEstimatedTokenCount(returnedTokens)
+	if isTotalSaid {
+		return returnedText + " (of " + util.FormatTokenEstimate(stats.TotalBytes) + ")"
 	}
-	return ""
+
+	return returnedText
 }

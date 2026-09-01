@@ -12,7 +12,8 @@ again.
 
 edit target.txt ✗ 1L the filesystem i…
 
-The resumed edit completed.
+The resumed edit was refused because the
+workspace is read-only.
 === one column ===
 A
 g
@@ -176,15 +177,46 @@ e
 d
 i
 t
-c
-o
-m
-p
-l
+w
+a
+s
+r
 e
-t
+f
+u
+s
 e
 d
+b
+e
+c
+a
+u
+s
+e
+t
+h
+e
+w
+o
+r
+k
+s
+p
+a
+c
+e
+i
+s
+r
+e
+a
+d
+-
+o
+n
+l
+y
 .
 === tiny ===
 Agent
@@ -211,8 +243,11 @@ again.
 e… ✗ 1L t…
 
 The resumed
-edit
-completed.
+edit was
+refused
+because the
+workspace is
+read-only.
 === wide ===
 Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
 
@@ -224,4 +259,4 @@ Editing the target without reading it again.
 
 edit target.txt ✗ 1L the filesystem is read-only
 
-The resumed edit completed.
+The resumed edit was refused because the workspace is read-only.

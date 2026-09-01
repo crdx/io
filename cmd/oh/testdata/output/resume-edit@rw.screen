@@ -12,7 +12,8 @@ again.
 
 edit target.txt ✗ 1L file has not bee…
 
-The resumed edit completed.
+The resumed edit was refused because the
+file has not been read in this session.
 === one column ===
 A
 g
@@ -176,15 +177,57 @@ e
 d
 i
 t
-c
-o
-m
-p
-l
+w
+a
+s
+r
 e
-t
+f
+u
+s
 e
 d
+b
+e
+c
+a
+u
+s
+e
+t
+h
+e
+f
+i
+l
+e
+h
+a
+s
+n
+o
+t
+b
+e
+e
+n
+r
+e
+a
+d
+i
+n
+t
+h
+i
+s
+s
+e
+s
+s
+i
+o
+n
 .
 === tiny ===
 Agent
@@ -211,8 +254,13 @@ again.
 e… ✗ 1L f…
 
 The resumed
-edit
-completed.
+edit was
+refused
+because the
+file has not
+been read in
+this
+session.
 === wide ===
 Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
 
@@ -224,4 +272,4 @@ Editing the target without reading it again.
 
 edit target.txt ✗ 1L file has not been read yet — ensure you read target.txt before editing it
 
-The resumed edit completed.
+The resumed edit was refused because the file has not been read in this session.

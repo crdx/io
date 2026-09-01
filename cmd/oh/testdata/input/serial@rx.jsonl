@@ -2,16 +2,16 @@
 {"event":{"kind":"user_message","text":"have a look at that"}}
 {"event":{"kind":"model_reasoning","text":"Writing the file the rest of this needs."}}
 {"event":{"kind":"model_message","text":"I'll put a file down to work with."}}
-{"event":{"kind":"tool_call_request","id":"call_2","name":"write","arguments":"{\"path\":\"notes.md\",\"content\":\"# Notes\\n\\nOne.\\nTwo.\\nThree.\\n\"}","render":"notes.md","detail":"26B","emphasis":{"kind":"focus","value":"notes.md"},"read_only":true}}
+{"event":{"kind":"tool_call_request","id":"call_2","name":"write","arguments":"{\"path\":\"notes.md\",\"content\":\"# Notes\\n\\nOne.\\nTwo.\\nThree.\\n\"}","render":"notes.md","detail":"26B","emphasis":{"kind":"focus","value":"notes.md"}}}
 {"event":{"kind":"tool_call_result","text":"the filesystem is read-only","id":"call_2","name":"write","status":"error","took":0,"stats":{"kind":"output","lines":1,"bytes":27,"total_bytes":27}}}
 {"event":{"kind":"model_reasoning","text":"Reading, then writing, then reading what was written."}}
 {"event":{"kind":"model_message","text":"Now to read it, add to it, and read it back."}}
 {"event":{"kind":"tool_call_request","id":"call_4","name":"read","arguments":"{\"path\":\"notes.md\"}","render":"notes.md","emphasis":{"kind":"focus","value":"notes.md"},"read_only":true}}
 {"event":{"kind":"tool_call_request","id":"call_5","name":"ls","arguments":"{\"path\":\".\"}","emphasis":{"kind":"focus","value":""},"read_only":true}}
-{"event":{"kind":"tool_call_request","id":"call_6","name":"write","arguments":"{\"path\":\"notes.md\",\"content\":\"# Notes\\n\\nOne.\\nTwo.\\nThree.\\nFour.\\n\"}","render":"notes.md","detail":"32B","emphasis":{"kind":"focus","value":"notes.md"},"read_only":true}}
+{"event":{"kind":"tool_call_request","id":"call_6","name":"write","arguments":"{\"path\":\"notes.md\",\"content\":\"# Notes\\n\\nOne.\\nTwo.\\nThree.\\nFour.\\n\"}","render":"notes.md","detail":"32B","emphasis":{"kind":"focus","value":"notes.md"}}}
 {"event":{"kind":"tool_call_request","id":"call_7","name":"read","arguments":"{\"path\":\"notes.md\"}","render":"notes.md","emphasis":{"kind":"focus","value":"notes.md"},"read_only":true}}
 {"event":{"kind":"tool_call_result","text":"notes.md: no such file or directory","id":"call_4","name":"read","status":"error","took":0,"stats":{"kind":"output","lines":1,"bytes":35,"total_bytes":35}}}
 {"event":{"kind":"tool_call_result","status":"success","text":"README.md\ncmd/\nscreen.go\nsettings.toml\nskills/\ntarget.txt\nwide.md","id":"call_5","name":"ls","took":0,"stats":{"kind":"output","lines":7,"bytes":65,"total_bytes":65}}}
 {"event":{"kind":"tool_call_result","text":"the filesystem is read-only","id":"call_6","name":"write","status":"error","took":0,"stats":{"kind":"output","lines":1,"bytes":27,"total_bytes":27}}}
 {"event":{"kind":"tool_call_result","text":"notes.md: no such file or directory","id":"call_7","name":"read","status":"error","took":0,"stats":{"kind":"output","lines":1,"bytes":35,"total_bytes":35}}}
-{"event":{"kind":"model_message","text":"The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.\n"}}
+{"event":{"kind":"model_message","text":"The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. Every write was refused because the workspace is read-only, so nothing was there for the reads to find.\n"}}
