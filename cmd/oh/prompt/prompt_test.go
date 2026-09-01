@@ -147,7 +147,14 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 		Write: []string{"/output"},
 		Exec:  []string{"/commands"},
 	}
-	got := harnessContext("/workspace", "session-id", "/state/farm/session", "/state/home", caps.Read|caps.Write, paths)
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/state/farm/session",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read | caps.Write,
+		ExtraPaths:  paths,
+	})
 
 	for _, want := range []string{
 		"configured path /reference is read-only",
@@ -161,7 +168,14 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 }
 
 func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
-	got := harnessContext("/workspace", "brave-otter", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "brave-otter",
+		TmpDir:      "/tmp/x",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{},
+	})
 
 	if !strings.Contains(got, "Your session is named brave-otter") {
 		t.Errorf("harness context does not contain the session name: %q", got)
@@ -169,7 +183,14 @@ func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
 }
 
 func TestTheHarnessGivesTheSessionItsAnimalPersonality(t *testing.T) {
-	got := harnessContext("/workspace", "brave-otter", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "brave-otter",
+		TmpDir:      "/tmp/x",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{},
+	})
 
 	if !strings.Contains(got, "Adopt the personality of the animal in your session name") {
 		t.Errorf("harness context does not give the session its animal personality: %q", got)
@@ -177,19 +198,40 @@ func TestTheHarnessGivesTheSessionItsAnimalPersonality(t *testing.T) {
 }
 
 func TestTheHarnessDisclosesWebAccess(t *testing.T) {
-	withheld := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
+	withheld := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/tmp/x",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{},
+	})
 	if !strings.Contains(withheld, "web search and fetch tools are refused") {
 		t.Errorf("harness context does not disclose withheld web access: %q", withheld)
 	}
 
-	granted := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read|caps.Web, shell.Paths{})
+	granted := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/tmp/x",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read | caps.Web,
+		ExtraPaths:  shell.Paths{},
+	})
 	if !strings.Contains(granted, "web search and fetch tools are granted external network access") {
 		t.Errorf("harness context does not disclose granted web access: %q", granted)
 	}
 }
 
 func TestTheHarnessDisclosesPrivateLoopbackNetworking(t *testing.T) {
-	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/tmp/x",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{},
+	})
 
 	for _, want := range []string{
 		"private loopback interface",
@@ -206,7 +248,14 @@ func TestTheScratchMappingIsWrittenInFull(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
 	scratch := "/home/alice/.local/state/org.crdx/oh/farm/0d3f"
-	got := harnessContext("/workspace", "session-id", scratch, "/home/alice/.local/state/org.crdx/oh/home", caps.Read, shell.Paths{})
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      scratch,
+		HomeDir:     "/home/alice/.local/state/org.crdx/oh/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{},
+	})
 
 	for _, want := range []string{
 		"It maps to " + scratch + " on the user's machine",
@@ -219,7 +268,14 @@ func TestTheScratchMappingIsWrittenInFull(t *testing.T) {
 }
 
 func TestTheHarnessDisclosesTheShellHome(t *testing.T) {
-	got := harnessContext("/workspace", "session-id", "/tmp/x", "/state/home", caps.Read, shell.Paths{})
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/tmp/x",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{},
+	})
 
 	for _, want := range []string{
 		"path can only access the workspace, private home, and /tmp",
@@ -236,18 +292,14 @@ func TestTheHarnessNeverAbbreviatesAPathToATilde(t *testing.T) {
 	home := "/home/alice"
 	t.Setenv("HOME", home)
 
-	got := harnessContext(
-		filepath.Join(home, "workspace"),
-		"session-id",
-		filepath.Join(home, ".local", "state", "org.crdx", "oh", "farm", "0d3f"),
-		filepath.Join(home, ".local", "state", "org.crdx", "oh", "home"),
-		caps.Read|caps.Write|caps.Shell,
-		shell.Paths{
-			Read:  []string{filepath.Join(home, "reference")},
-			Write: []string{filepath.Join(home, "output")},
-			Exec:  []string{filepath.Join(home, "commands")},
-		},
-	)
+	got := harnessContext(Config{
+		Workspace:   work.At(filepath.Join(home, "workspace")),
+		SessionName: "session-id",
+		TmpDir:      filepath.Join(home, ".local", "state", "org.crdx", "oh", "farm", "0d3f"),
+		HomeDir:     filepath.Join(home, ".local", "state", "org.crdx", "oh", "home"),
+		CurrentCaps: caps.Read | caps.Write | caps.Shell,
+		ExtraPaths:  shell.Paths{Read: []string{filepath.Join(home, "reference")}, Write: []string{filepath.Join(home, "output")}, Exec: []string{filepath.Join(home, "commands")}},
+	})
 
 	for line := range strings.SplitSeq(got, "\n") {
 		if strings.Contains(line, "~/") {
@@ -276,7 +328,14 @@ func TestTheSkillCatalogueIsAppendedToTheContext(t *testing.T) {
 }
 
 func TestPromptSeparatesTheWorkspaceFromTmp(t *testing.T) {
-	system := harnessContext("/workspace", "session-id", "/state/farm/session", "/state/home", caps.Read, shell.Paths{})
+	system := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/state/farm/session",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{},
+	})
 
 	if want := "The workspace (/workspace) is " + filesystem(false); !strings.Contains(system, want) {
 		t.Errorf("expected the workspace to be reported as %q, got %q", want, system)
@@ -312,7 +371,14 @@ func TestPromptStatesWhetherTheShellCanRun(t *testing.T) {
 		"refused": {caps.Read, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := harnessContext("/workspace", "session-id", "/state/farm/session", "/state/home", test.currentCaps, shell.Paths{})
+			got := harnessContext(Config{
+				Workspace:   work.At("/workspace"),
+				SessionName: "session-id",
+				TmpDir:      "/state/farm/session",
+				HomeDir:     "/state/home",
+				CurrentCaps: test.currentCaps,
+				ExtraPaths:  shell.Paths{},
+			})
 
 			if want := "The bash tool is " + shellAccess(test.granted); !strings.Contains(got, want) {
 				t.Errorf("expected %q in %q", want, got)

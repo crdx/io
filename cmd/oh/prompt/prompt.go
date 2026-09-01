@@ -132,14 +132,7 @@ func Load(config Config) (string, []File, error) {
 	}
 
 	return mergeContexts(
-		harnessContext(
-			config.Workspace.GetDir(),
-			config.SessionName,
-			config.TmpDir,
-			config.HomeDir,
-			config.CurrentCaps,
-			config.ExtraPaths,
-		),
+		harnessContext(config),
 		globalContext(globalFile),
 		projectContext(projectFiles),
 		skill.Context(config.Skills),
@@ -198,14 +191,15 @@ func globalContext(file *File) string {
 	return file.Body
 }
 
-func harnessContext(workspaceDir string, sessionName string, tmpDir string, homeDir string, currentCaps caps.Set, extraPaths shell.Paths) string {
+func harnessContext(config Config) string {
+	currentCaps := config.CurrentCaps
 	data := harnessContextTemplateData{
-		WorkspaceDir:      workspaceDir,
-		SessionName:       sessionName,
-		TmpDir:            tmpDir,
-		HomeDir:           homeDir,
+		WorkspaceDir:      config.Workspace.GetDir(),
+		SessionName:       config.SessionName,
+		TmpDir:            config.TmpDir,
+		HomeDir:           config.HomeDir,
 		CurrentCaps:       currentCaps,
-		ExtraPaths:        extraPaths,
+		ExtraPaths:        config.ExtraPaths,
 		WorkspaceWritable: currentCaps.Has(caps.Write),
 		GitWritable:       currentCaps.Has(caps.Git),
 		ShellGranted:      currentCaps.Has(caps.Shell),
