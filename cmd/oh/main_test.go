@@ -116,7 +116,7 @@ import (
 
 func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 	self := &App{screen: output.New(&bytes.Buffer{})}
-	editor := edit.NewInput(nil)
+	inputLine := edit.NewInput(nil)
 
 	defer func() {
 		if panicValue := recover(); panicValue != nil {
@@ -124,14 +124,14 @@ func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 		}
 	}()
 
-	if !self.apply(editor, nil, key.Key{Code: key.Escape}) {
+	if !self.apply(inputLine, nil, key.Key{Code: key.Escape}) {
 		t.Error("expected escape at rest to leave the conversation open")
 	}
 }
 
 func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 	self := &App{screen: output.New(&bytes.Buffer{})}
-	editor := edit.NewInput(nil)
+	inputLine := edit.NewInput(nil)
 
 	keypress := key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
 
@@ -139,7 +139,7 @@ func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 
 	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) { wasStopped = true }, turn.State{Running: true})}
 
-	if !self.apply(editor, nil, keypress) {
+	if !self.apply(inputLine, nil, keypress) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
 	}
 
@@ -149,13 +149,13 @@ func TestControlDStopsATurnBeforeItIsAWayOut(t *testing.T) {
 
 	self.currentTurn = Turn{}
 
-	if self.apply(editor, nil, keypress) {
+	if self.apply(inputLine, nil, keypress) {
 		t.Error("expected ctrl+d at rest to be the way out")
 	}
 
-	editor.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
+	inputLine.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
 
-	if !self.apply(editor, nil, keypress) {
+	if !self.apply(inputLine, nil, keypress) {
 		t.Error("expected ctrl+d on a line with something on it to leave the harness running")
 	}
 }
@@ -165,14 +165,14 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheContinueMessage(t *testing.T) {
 	self := testConversation(t, &screenOutput)
 	self.continueMessage = "carry on"
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 
-	self.apply(editor, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
 	if self.currentTurn.Running() {
 		t.Error("expected the first return to do nothing")
 	}
 
-	self.apply(editor, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
 	if !self.currentTurn.Running() {
 		t.Fatal("expected the second return to start a turn")
 	}
@@ -194,16 +194,16 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheContinueMessage(t *testing.T) {
 func TestAcceptedInputCanImmediatelyBeRecalled(t *testing.T) {
 	self := &App{currentTurn: Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true})}}
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 
 	for _, value := range "latest" {
-		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
+		self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
 	}
-	self.apply(editor, history, key.Key{Code: key.Enter})
-	self.apply(editor, history, key.Key{Code: key.Up})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Up})
 
-	if editor.Text() != "latest" {
-		t.Errorf("expected the latest input to be recalled, got %q", editor.Text())
+	if inputLine.Text() != "latest" {
+		t.Errorf("expected the latest input to be recalled, got %q", inputLine.Text())
 	}
 }
 
@@ -211,13 +211,13 @@ func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.currentTurn.Events()
 
-	self.apply(editor, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
-	self.apply(editor, history, key.Key{Code: key.Rune, Value: 'w'})
+	self.apply(inputLine, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
+	self.apply(inputLine, history, key.Key{Code: key.Rune, Value: 'w'})
 
 	if !self.currentTurn.Cancelled() {
 		t.Fatal("expected the capability change to interrupt the turn")
@@ -261,17 +261,17 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithTheContinueMessage(t *t
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.currentTurn.Events()
 
-	self.apply(editor, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
 	if self.currentTurn.Cancelled() {
 		t.Error("expected the first return to leave the turn running")
 	}
 
-	self.apply(editor, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
 	if !self.currentTurn.Cancelled() {
 		t.Error("expected the second return to cancel the turn")
 	}
@@ -406,15 +406,15 @@ func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) 
 		currentTurn: Turn{Stream: testTurnStream(make(chan TurnEvent), func(error) {}, turn.State{Running: true})},
 	}
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 
 	for _, value := range "dfd" {
-		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
+		self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
 	}
-	self.apply(editor, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
 
-	if editor.Text() != "" {
-		t.Fatalf("expected accepted editor input to disappear, got %q", editor.Text())
+	if inputLine.Text() != "" {
+		t.Fatalf("expected accepted input to disappear, got %q", inputLine.Text())
 	}
 	if !self.currentTurn.Running() {
 		t.Fatal("expected cancelled turn to remain running until its event channel closes")
@@ -436,13 +436,13 @@ func TestTheLatestOfTwoRapidReplacementsWins(t *testing.T) {
 		},
 	}
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 
 	for _, replacement := range []string{"first replacement", "second replacement"} {
 		for _, value := range replacement {
-			self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
+			self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
 		}
-		self.apply(editor, history, key.Key{Code: key.Enter})
+		self.apply(inputLine, history, key.Key{Code: key.Enter})
 	}
 
 	pending := self.queuedTurn.Peek()
@@ -470,7 +470,7 @@ func TestReplacementInputCancelsProvisionalReasoningAndStartsTheNextTurn(t *test
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.currentTurn.Events()
@@ -482,9 +482,9 @@ func TestReplacementInputCancelsProvisionalReasoningAndStartsTheNextTurn(t *test
 		}
 	}
 	for _, value := range "replacement" {
-		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
+		self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
 	}
-	self.apply(editor, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
 
 	for report := range interruptedEvents {
 		self.takeTurn(report)
@@ -528,15 +528,15 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 		mode:     caps.NewMode(caps.Read | caps.Write),
 	}
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.currentTurn.Events()
 
 	for _, value := range "follow up" {
-		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
+		self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
 	}
-	self.apply(editor, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
 
 	for report := range interruptedEvents {
 		self.takeTurn(report)
@@ -640,16 +640,16 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 
 	self.start("first")
 	interruptedEvents := self.currentTurn.Events()
 
 	for _, value := range "follow up" {
-		self.apply(editor, history, key.Key{Code: key.Rune, Value: value})
+		self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
 	}
-	self.apply(editor, history, key.Key{Code: key.Enter})
-	self.apply(editor, history, key.Key{Code: key.Escape})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Escape})
 
 	for report := range interruptedEvents {
 		self.takeTurn(report)
@@ -673,15 +673,15 @@ func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *te
 
 func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
 	self := &App{screen: output.New(&bytes.Buffer{})}
-	editor := edit.NewInput(nil)
+	inputLine := edit.NewInput(nil)
 
-	editor.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
+	inputLine.Apply(key.Key{Code: key.Rune, Value: 'a'}, false)
 
 	wasStopped := false
 
 	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) { wasStopped = true }, turn.State{Running: true})}
 
-	if !self.apply(editor, nil, key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}) {
+	if !self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}) {
 		t.Error("expected ctrl+d during a turn to stop the turn rather than the harness")
 	}
 
@@ -689,8 +689,8 @@ func TestControlDStopsATurnWhateverHasBeenTyped(t *testing.T) {
 		t.Error("expected the turn to have been cancelled")
 	}
 
-	if editor.Text() != "a" {
-		t.Errorf("expected what was typed to be left alone, got %q", editor.Text())
+	if inputLine.Text() != "a" {
+		t.Errorf("expected what was typed to be left alone, got %q", inputLine.Text())
 	}
 }
 
@@ -3165,15 +3165,15 @@ func modeTakebackStream(t *testing.T, toggleCount int) string {
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
-	self.editor = editor
+	inputLine := edit.NewInput(history)
+	self.inputLine = inputLine
 
 	self.screen.Line("conversation remains in scrollback")
-	self.show(editor)
+	self.show(inputLine)
 
 	for range toggleCount {
-		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
-		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: 's'})
+		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: 'x', Mod: key.Ctrl})
+		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: 's'})
 	}
 
 	return screenOutput.String()
@@ -4431,14 +4431,14 @@ func drawUnknownSlashInputDuringStream(t *testing.T, message string, kind agent.
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
-	self.editor = editor
-	editor.SetText(message)
-	self.show(editor)
+	inputLine := edit.NewInput(history)
+	self.inputLine = inputLine
+	inputLine.SetText(message)
+	self.show(inputLine)
 	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: kind, Text: "still working"})
 	framesBeforeCommand := len(writer.frames)
 
-	self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Enter})
+	self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Enter})
 
 	frames := writer.frames[framesBeforeCommand:]
 	self.currentTurn.painter.Close(dynamic.Cancelled)
@@ -5120,12 +5120,12 @@ func verticalInputMovementStream(t *testing.T, keypresses ...key.Key) string {
 
 	history := edit.NewHistory("", historyLimit)
 	history.Add("earlier")
-	editor := edit.NewInput(history)
-	editor.SetText("one two three")
-	self.show(editor)
+	inputLine := edit.NewInput(history)
+	inputLine.SetText("one two three")
+	self.show(inputLine)
 
 	for _, keypress := range keypresses {
-		self.handleKeypressAndShowInput(editor, history, keypress)
+		self.handleKeypressAndShowInput(inputLine, history, keypress)
 	}
 
 	return screenOutput.String()
@@ -5207,12 +5207,12 @@ func readlineInputStream(t *testing.T, historyLines []string, text string, keypr
 	for _, line := range historyLines {
 		history.Add(line)
 	}
-	editor := edit.NewInput(history)
-	editor.SetText(text)
-	self.show(editor)
+	inputLine := edit.NewInput(history)
+	inputLine.SetText(text)
+	self.show(inputLine)
 
 	for _, keypress := range keypresses {
-		self.handleKeypressAndShowInput(editor, history, keypress)
+		self.handleKeypressAndShowInput(inputLine, history, keypress)
 	}
 
 	return screenOutput.String()
@@ -5302,9 +5302,9 @@ func TestReloadingConfigChangesTheContinueMessage(t *testing.T) {
 	settleLiveConfig(t, self)
 
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
-	self.apply(editor, history, key.Key{Code: key.Enter})
-	self.apply(editor, history, key.Key{Code: key.Enter})
+	inputLine := edit.NewInput(history)
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
 
 	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
@@ -5397,11 +5397,11 @@ func TestReloadingConfigReplacesSnippetsAtomically(t *testing.T) {
 		t.Error("the reloaded snippet was not registered")
 	}
 
-	editor := edit.NewInput(nil)
-	editor.SetText("//ne")
-	self.apply(editor, nil, key.Key{Code: key.Rune, Value: '\t'})
-	if editor.Text() != "//new" {
-		t.Errorf("reloaded completion is %q", editor.Text())
+	inputLine := edit.NewInput(nil)
+	inputLine.SetText("//ne")
+	self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: '\t'})
+	if inputLine.Text() != "//new" {
+		t.Errorf("reloaded completion is %q", inputLine.Text())
 	}
 }
 
@@ -5423,13 +5423,13 @@ func drawExistingPathMessage(t *testing.T) string {
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 	self.commands = fixtureCommandRegistry(t)
 
-	editor := edit.NewInput(nil)
-	self.editor = editor
-	editor.SetText("/etc/hosts")
-	self.show(editor)
-	self.acceptInput(editor, edit.NewHistory("", historyLimit))
+	inputLine := edit.NewInput(nil)
+	self.inputLine = inputLine
+	inputLine.SetText("/etc/hosts")
+	self.show(inputLine)
+	self.acceptInput(inputLine, edit.NewHistory("", historyLimit))
 	self.waitForCurrentTurn()
-	self.show(editor)
+	self.show(inputLine)
 
 	return screenOutput.String()
 }
@@ -5493,52 +5493,52 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		},
 	)
 
-	editor := edit.NewInput(nil)
-	self.editor = editor
+	inputLine := edit.NewInput(nil)
+	self.inputLine = inputLine
 
 	switch scenario {
 	case feedbackCommandError, feedbackClearedByEditing, feedbackClearedByTurnCompletion, feedbackTallAnswer:
-		editor.SetText("/unknown")
+		inputLine.SetText("/unknown")
 	case feedbackHelp:
-		editor.SetText("/help")
+		inputLine.SetText("/help")
 	case feedbackSuccess:
-		editor.SetText("/copy")
+		inputLine.SetText("/copy")
 	case feedbackStorageWarnings:
 	}
-	self.show(editor)
+	self.show(inputLine)
 
 	switch scenario {
 	case feedbackCommandError:
 		self.handleCommand("/unknown")
-		self.show(editor)
+		self.show(inputLine)
 	case feedbackHelp:
 		self.handleCommand("/help")
-		self.show(editor)
+		self.show(inputLine)
 	case feedbackSuccess:
 		self.handleCommand("/copy")
-		self.show(editor)
+		self.show(inputLine)
 	case feedbackClearedByEditing:
 		self.handleCommand("/unknown")
-		self.show(editor)
-		self.handleKeypressAndShowInput(editor, nil, key.Key{Code: key.Rune, Value: 'x'})
+		self.show(inputLine)
+		self.handleKeypressAndShowInput(inputLine, nil, key.Key{Code: key.Rune, Value: 'x'})
 	case feedbackClearedByTurnCompletion:
 		self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 		self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: "still working"})
 		self.handleCommand("/unknown")
-		self.show(editor)
+		self.show(inputLine)
 		completed := agent.Event{Kind: agent.ModelMessageEvent, Text: "still working"}
 		self.takeTurn(TurnEvent{Update: agent.Update{Event: &completed}})
 		self.finish()
-		self.show(editor)
+		self.show(inputLine)
 	case feedbackStorageWarnings:
 		self.notifyFailure("chat.md recording disabled: transcript append failed\nwire.http recording disabled: wire append failed")
-		self.show(editor)
+		self.show(inputLine)
 	case feedbackTallAnswer:
 		const answer = "01 alpha\n\n02 bravo\n\n03 charlie\n\n04 delta\n\n05 echo\n\n06 foxtrot\n\n07 golf"
 		self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 		self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: answer})
 		self.handleCommand("/unknown")
-		self.show(editor)
+		self.show(inputLine)
 	}
 
 	return screenOutput.String()
@@ -5772,8 +5772,8 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 	self := testConversation(t, &screenOutput)
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 	prepareLiveConfig(t, self, path)
-	editor := edit.NewInput(nil)
-	self.show(editor)
+	inputLine := edit.NewInput(nil)
+	self.show(inputLine)
 
 	switch scenario {
 	case configReloadDeletion:
@@ -5781,11 +5781,11 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 			t.Fatal(err)
 		}
 		settleLiveConfig(t, self)
-		self.show(editor)
+		self.show(inputLine)
 		return screenOutput.String()
 	case configReloadWatchFailure:
 		self.reloadConfig(errors.New("inotify stopped"))
-		self.show(editor)
+		self.show(inputLine)
 		return screenOutput.String()
 	case configReloadSnippets:
 		writeLiveConfig(t, path, `
@@ -5807,7 +5807,7 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 		`)
 		settleLiveConfig(t, self)
 		self.handleCommand("//help")
-		self.show(editor)
+		self.show(inputLine)
 		return screenOutput.String()
 	case configReloadSettingThatIsNotLive:
 		writeLiveConfig(t, path, `
@@ -5828,7 +5828,7 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 			right = []
 		`)
 		settleLiveConfig(t, self)
-		self.show(editor)
+		self.show(inputLine)
 		return screenOutput.String()
 	case configReloadInvalidRecovery, configReloadReplay:
 		writeLiveConfig(t, path, `
@@ -5854,7 +5854,7 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 		right = []
 	`)
 	settleLiveConfig(t, self)
-	self.show(editor)
+	self.show(inputLine)
 	if scenario != configReloadReplay {
 		return screenOutput.String()
 	}
@@ -7161,9 +7161,9 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 	homePath := stableGrantGoldenPath(t, "user", true)
 	t.Setenv("HOME", homePath)
 
-	editor := edit.NewInput(nil)
-	self.editor = editor
-	self.show(editor)
+	inputLine := edit.NewInput(nil)
+	self.inputLine = inputLine
+	self.show(inputLine)
 
 	switch scenario {
 	case pathGrantPending:
@@ -7226,14 +7226,14 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 		}
 		self.queuePathGrantChange(correction)
 		self.notifyFailure("Temporary access could not be restored: path does not exist")
-		self.show(editor)
+		self.show(inputLine)
 		self.refreshPendingMessages()
 		if scenario == pathGrantRestoreSettled {
 			self.start("continue")
 			self.waitForCurrentTurn()
 		}
 	}
-	self.show(editor)
+	self.show(inputLine)
 
 	stream := screenOutput.String()
 	stream = strings.ReplaceAll(stream, referencePath, "/reference")
@@ -7351,16 +7351,16 @@ func TestUnknownSlashCommandShowsOneErrorWhileReturnRepeatsAndKeepsTheInput(t *t
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
 	self.commands = fixtureCommandRegistry(t)
-	editor := edit.NewInput(nil)
+	inputLine := edit.NewInput(nil)
 	for _, value := range "/unknown" {
-		editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
+		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, false)
 	}
 
 	for range 100 {
-		self.apply(editor, nil, key.Key{Code: key.Enter})
+		self.apply(inputLine, nil, key.Key{Code: key.Enter})
 	}
 
-	if got := editor.Text(); got != "/unknown" {
+	if got := inputLine.Text(); got != "/unknown" {
 		t.Errorf("got input %q", got)
 	}
 	if len(self.events) != 0 {
@@ -7379,12 +7379,12 @@ func TestUnknownSlashCommandDoesNotInterruptARunningTurn(t *testing.T) {
 	self.commands = fixtureCommandRegistry(t)
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: "still working"})
-	editor := edit.NewInput(nil)
+	inputLine := edit.NewInput(nil)
 	for _, value := range "/unknown" {
-		editor.Apply(key.Key{Code: key.Rune, Value: value}, true)
+		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, true)
 	}
 
-	self.acceptInput(editor, nil)
+	self.acceptInput(inputLine, nil)
 
 	if self.currentTurn.Cancelled() {
 		t.Error("expected the running turn not to be interrupted")
@@ -7413,11 +7413,11 @@ func TestSnippetKeepsItsInvocationInHistoryAndQueuesItsRenderedPrompt(t *testing
 
 	historyPath := filepath.Join(t.TempDir(), "history")
 	history := edit.NewHistory(historyPath, historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 	for _, value := range "//add review this" {
-		editor.Apply(key.Key{Code: key.Rune, Value: value}, true)
+		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, true)
 	}
-	self.acceptInput(editor, history)
+	self.acceptInput(inputLine, history)
 
 	pending := self.queuedTurn.Peek()
 	if !pending.Replacement || pending.Message != "Add the following:\n\nreview this" {
@@ -7430,8 +7430,8 @@ func TestSnippetKeepsItsInvocationInHistoryAndQueuesItsRenderedPrompt(t *testing
 	if string(body) != "//add review this\n" {
 		t.Errorf("got history %q", body)
 	}
-	if editor.Text() != "" {
-		t.Errorf("got editor text %q", editor.Text())
+	if inputLine.Text() != "" {
+		t.Errorf("got input text %q", inputLine.Text())
 	}
 }
 
@@ -7444,21 +7444,21 @@ func TestSnippetKeepsTheLayoutOfAPastedArgument(t *testing.T) {
 
 	historyPath := filepath.Join(t.TempDir(), "history")
 	history := edit.NewHistory(historyPath, historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 	for _, value := range "//add " {
-		editor.Apply(key.Key{Code: key.Rune, Value: value}, true)
+		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, true)
 	}
 
-	editor.Apply(key.Key{Code: key.PasteStart}, true)
+	inputLine.Apply(key.Key{Code: key.PasteStart}, true)
 	for _, value := range "review this\n\n- one\n- two" {
 		if value == '\n' {
-			editor.Apply(key.Key{Code: key.Enter}, true)
+			inputLine.Apply(key.Key{Code: key.Enter}, true)
 			continue
 		}
-		editor.Apply(key.Key{Code: key.Rune, Value: value}, true)
+		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, true)
 	}
-	editor.Apply(key.Key{Code: key.PasteEnd}, true)
-	self.acceptInput(editor, history)
+	inputLine.Apply(key.Key{Code: key.PasteEnd}, true)
+	self.acceptInput(inputLine, history)
 
 	pending := self.queuedTurn.Peek()
 	want := "Add the following:\n\nreview this\n\n- one\n- two"
@@ -7481,15 +7481,15 @@ func TestSnippetWithoutArgumentsShowsUsageAndKeepsTheInput(t *testing.T) {
 		"add": {Prompt: "Add the following:\n\n{{ .Arg }}", Arguments: snippets.ArgumentsRequired},
 	})
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 	for _, value := range "//add" {
-		editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
+		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, false)
 	}
 
-	self.acceptInput(editor, history)
+	self.acceptInput(inputLine, history)
 
-	if editor.Text() != "//add" {
-		t.Errorf("got editor text %q", editor.Text())
+	if inputLine.Text() != "//add" {
+		t.Errorf("got input text %q", inputLine.Text())
 	}
 	if len(self.events) != 0 {
 		t.Errorf("snippet usage entered conversation events: %+v", self.events)
@@ -7553,14 +7553,14 @@ func TestUnknownSnippetShowsAnErrorAndKeepsTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
 	self.commands = fixtureSnippetRegistry(t, nil)
-	editor := edit.NewInput(nil)
+	inputLine := edit.NewInput(nil)
 	for _, value := range "//unknown" {
-		editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
+		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, false)
 	}
 
-	self.acceptInput(editor, nil)
+	self.acceptInput(inputLine, nil)
 
-	if got := editor.Text(); got != "//unknown" {
+	if got := inputLine.Text(); got != "//unknown" {
 		t.Errorf("got input %q", got)
 	}
 	want := "Snippet not found: //unknown (alt+enter sends as message)"
@@ -7596,12 +7596,12 @@ func TestTabCompletionKeepsCommandNamespacesSeparate(t *testing.T) {
 		"//": "//help",
 	} {
 		self.completion.Reset()
-		editor := edit.NewInput(nil)
+		inputLine := edit.NewInput(nil)
 		for _, value := range input {
-			editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
+			inputLine.Apply(key.Key{Code: key.Rune, Value: value}, false)
 		}
-		self.apply(editor, nil, key.Key{Code: key.Rune, Value: '\t'})
-		if got := editor.Text(); got != want {
+		self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: '\t'})
+		if got := inputLine.Text(); got != want {
 			t.Errorf("completion for %q got %q, want %q", input, got, want)
 		}
 	}
@@ -7615,14 +7615,14 @@ func TestTabCompletesAUniqueSlashCommand(t *testing.T) {
 		slash.Command{Name: "copy", Run: slashTestHandler},
 		slash.Command{Name: "open", Run: slashTestHandler},
 	)
-	editor := edit.NewInput(nil)
+	inputLine := edit.NewInput(nil)
 	for _, value := range "/op" {
-		editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
+		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, false)
 	}
 
-	self.apply(editor, nil, key.Key{Code: key.Rune, Value: '\t'})
+	self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: '\t'})
 
-	if got := editor.Text(); got != "/open" {
+	if got := inputLine.Text(); got != "/open" {
 		t.Errorf("got completion %q", got)
 	}
 }
@@ -7735,18 +7735,18 @@ func TestConsecutiveTabsCycleCommandArguments(t *testing.T) {
 		t,
 		slash.Command{Name: "copy", Run: slashTestHandler}.WithArguments("session-name", "session-id", "session-dir"),
 	)
-	editor := edit.NewInput(nil)
+	inputLine := edit.NewInput(nil)
 	for _, value := range "/copy " {
-		editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
+		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, false)
 	}
 
-	self.apply(editor, nil, key.Key{Code: key.Rune, Value: '\t'})
-	if got := editor.Text(); got != "/copy session-dir" {
+	self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: '\t'})
+	if got := inputLine.Text(); got != "/copy session-dir" {
 		t.Errorf("got first completion %q", got)
 	}
 
-	self.apply(editor, nil, key.Key{Code: key.Rune, Value: '\t'})
-	if got := editor.Text(); got != "/copy session-id" {
+	self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: '\t'})
+	if got := inputLine.Text(); got != "/copy session-id" {
 		t.Errorf("got second completion %q", got)
 	}
 }
@@ -7820,14 +7820,14 @@ func TestARefusedCommandKeepsWhatWasTypedAndSaysWhy(t *testing.T) {
 		},
 	})
 
-	editor := edit.NewInput(nil)
+	inputLine := edit.NewInput(nil)
 	for _, value := range "/new opus" {
-		editor.Apply(key.Key{Code: key.Rune, Value: value}, false)
+		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, false)
 	}
 
-	self.acceptInput(editor, edit.NewHistory("", historyLimit))
+	self.acceptInput(inputLine, edit.NewHistory("", historyLimit))
 
-	if got := editor.Text(); got != "/new opus" {
+	if got := inputLine.Text(); got != "/new opus" {
 		t.Errorf("expected the refused command to survive, got %q", got)
 	}
 
@@ -8572,13 +8572,13 @@ func runSessionGoldenTurn(
 	}
 	defer cancel(nil)
 	testHarness.currentTurn.Stream = testRunningTurnStreamWithCancel(cancel)
-	editor := edit.NewInput(nil)
+	inputLine := edit.NewInput(nil)
 	stopKey := key.Key{Code: key.Escape}
 	if turn.CancelWithCtrlD {
 		stopKey = key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
 	}
 	interruptWithStopKey := func() {
-		if !testHarness.apply(editor, nil, stopKey) {
+		if !testHarness.apply(inputLine, nil, stopKey) {
 			t.Fatal("the stop key closed the harness")
 		}
 	}
@@ -9220,14 +9220,14 @@ func TestOrdinaryTabDrawsWhatItDrewBefore(t *testing.T) {
 		self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 
 		history := edit.NewHistory("", historyLimit)
-		editor := edit.NewInput(history)
-		editor.SetText("ordinary input")
+		inputLine := edit.NewInput(history)
+		inputLine.SetText("ordinary input")
 
 		self.screen.Line("conversation remains in scrollback")
-		self.show(editor)
-		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: '\t'})
+		self.show(inputLine)
+		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: '\t'})
 		for _, value := range "after tab" {
-			self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: value})
+			self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: value})
 		}
 
 		return screenOutput.String()
@@ -9244,20 +9244,20 @@ func TestAPasteIsDrawnOnlyWhenItHasFinished(t *testing.T) {
 	self.screen = output.NewTerminalOfSize(writer, replayColumns, replayLines)
 
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
-	self.show(editor)
+	inputLine := edit.NewInput(history)
+	self.show(inputLine)
 	framesBeforePaste := len(writer.frames)
 
-	self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.PasteStart})
+	self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.PasteStart})
 	for _, value := range "pasted text" {
-		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: value})
+		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: value})
 	}
 
 	if drawn := len(writer.frames) - framesBeforePaste; drawn != 0 {
 		t.Errorf("the input was drawn %d times while the paste arrived, want 0", drawn)
 	}
 
-	self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.PasteEnd})
+	self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.PasteEnd})
 
 	visible := strings.Join(visibleScreen(t, writer.stream.String(), replayColumns), "\n")
 	if !strings.Contains(visible, "pasted text") {
@@ -9307,26 +9307,26 @@ func pasteStream(t *testing.T, text string, stage pasteStage) string {
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 
 	self.screen.Line("conversation remains in scrollback")
-	self.show(editor)
+	self.show(inputLine)
 
 	if stage == pasteNotStarted {
 		return screenOutput.String()
 	}
 
-	self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.PasteStart})
+	self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.PasteStart})
 	for _, value := range text {
 		if value == '\n' {
-			self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Enter})
+			self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Enter})
 			continue
 		}
-		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: value})
+		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: value})
 	}
 
 	if stage == pasteFinished {
-		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.PasteEnd})
+		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.PasteEnd})
 	}
 
 	return screenOutput.String()
@@ -9368,17 +9368,17 @@ func clearingStream(t *testing.T, written string, keypresses ...key.Key) string 
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
+	inputLine := edit.NewInput(history)
 
 	self.screen.Line("conversation remains in scrollback")
-	self.show(editor)
+	self.show(inputLine)
 
 	for _, value := range written {
-		self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Rune, Value: value})
+		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: value})
 	}
 
 	for _, keypress := range keypresses {
-		self.handleKeypressAndShowInput(editor, history, keypress)
+		self.handleKeypressAndShowInput(inputLine, history, keypress)
 	}
 
 	return screenOutput.String()
@@ -9415,14 +9415,14 @@ func helpDuringReasoningFrames(t *testing.T) []string {
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 
 	history := edit.NewHistory("", historyLimit)
-	editor := edit.NewInput(history)
-	self.editor = editor
-	editor.SetText("/help")
-	self.show(editor)
+	inputLine := edit.NewInput(history)
+	self.inputLine = inputLine
+	inputLine.SetText("/help")
+	self.show(inputLine)
 	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: "thinking about it"})
 	framesBeforeHelp := len(writer.frames)
 
-	self.handleKeypressAndShowInput(editor, history, key.Key{Code: key.Enter})
+	self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Enter})
 
 	frames := slices.Clone(writer.frames[framesBeforeHelp:])
 	self.currentTurn.painter.Close(dynamic.Cancelled)

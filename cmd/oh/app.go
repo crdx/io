@@ -94,7 +94,7 @@ type App struct {
 	recorder            *record.Recorder
 	barConfiguration    bar.Configuration
 	configObserver      *config.Observer
-	editor              *edit.Input
+	inputLine           *edit.Input
 	editorConfiguration *editor.Configuration
 	mode                *caps.Mode
 	pathGrants          *pathgrant.Grants
@@ -134,8 +134,8 @@ func (self *App) begin(message string) cycle.Transition {
 	self.initialiseAccess()
 
 	history := edit.NewHistory(location.GetHistoryPath(), historyLimit)
-	editor := edit.NewInput(history)
-	self.editor = editor
+	inputLine := edit.NewInput(history)
+	self.inputLine = inputLine
 
 	restoreTTY, err := tty.Raw(os.Stdin, os.Stdout)
 	if err != nil {
@@ -163,7 +163,7 @@ func (self *App) begin(message string) cycle.Transition {
 
 	defer self.dropPendingInput()
 
-	self.show(editor)
+	self.show(inputLine)
 	if len(self.pending.items) > 0 {
 		self.refreshPendingMessages()
 	}
@@ -180,7 +180,7 @@ func (self *App) begin(message string) cycle.Transition {
 
 	interaction.Run(os.Stdin, self.nextBarRefresh, interaction.Handler{
 		Events: func() <-chan turn.Event { return self.currentTurn.Events() },
-		Key:    func(keypress key.Key) bool { return self.handleKeypressAndShowInput(editor, history, keypress) },
+		Key:    func(keypress key.Key) bool { return self.handleKeypressAndShowInput(inputLine, history, keypress) },
 		Turn:   self.takeTurn,
 		TurnFinished: func() bool {
 			self.finish()
@@ -190,7 +190,7 @@ func (self *App) begin(message string) cycle.Transition {
 		Beat:    self.screen.RefreshProgress,
 		Changes: self.configObserver.Changes(),
 		Change:  self.reloadConfig,
-		Draw:    func() { self.show(editor) },
+		Draw:    func() { self.show(inputLine) },
 	})
 
 	return self.transition
@@ -203,25 +203,25 @@ func restoreTerminalState(screen *output.Screen, isPersisted bool, restorers ...
 	}
 }
 
-func (self *App) handleKeypressAndShowInput(editor *edit.Input, history *edit.History, keypress key.Key) bool {
+func (self *App) handleKeypressAndShowInput(inputLine *edit.Input, history *edit.History, keypress key.Key) bool {
 	shouldContinue := true
 	self.screen.Sync(func() {
-		shouldContinue = self.apply(editor, history, keypress)
+		shouldContinue = self.apply(inputLine, history, keypress)
 		if shouldContinue {
-			self.show(editor)
+			self.show(inputLine)
 		}
 	})
 	return shouldContinue
 }
 
-func (self *App) apply(editor *edit.Input, history *edit.History, keypress key.Key) bool {
+func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress key.Key) bool {
 	if keypress.Code == key.FocusIn || keypress.Code == key.FocusOut {
 		return true
 	}
 
-	previousText := editor.Text()
-	action := editor.Apply(keypress, self.currentTurn.Running())
-	if editor.Text() != previousText {
+	previousText := inputLine.Text()
+	action := inputLine.Apply(keypress, self.currentTurn.Running())
+	if inputLine.Text() != previousText {
 		self.clearFeedback(commandFeedback)
 	}
 	if action != edit.Complete {
@@ -230,13 +230,13 @@ func (self *App) apply(editor *edit.Input, history *edit.History, keypress key.K
 
 	switch action {
 	case edit.Accept:
-		self.acceptInput(editor, history)
+		self.acceptInput(inputLine, history)
 
 	case edit.ForceAccept:
-		self.submitInput(editor, history, strings.TrimSpace(editor.Text()))
+		self.submitInput(inputLine, history, strings.TrimSpace(inputLine.Text()))
 
 	case edit.Continue:
-		self.submitInput(editor, history, self.continueMessage)
+		self.submitInput(inputLine, history, self.continueMessage)
 
 	case edit.Cancel:
 		self.cancelTurn(stopKeyReason(keypress))
@@ -245,8 +245,8 @@ func (self *App) apply(editor *edit.Input, history *edit.History, keypress key.K
 		return false
 
 	case edit.Complete:
-		if completion, found := self.completion.Next(self.commands, editor.Text()); found {
-			editor.SetText(completion)
+		if completion, found := self.completion.Next(self.commands, inputLine.Text()); found {
+			inputLine.SetText(completion)
 		}
 
 	case edit.ToggleWrite:
@@ -325,21 +325,21 @@ func (self *App) sendCommandPrompt(message string) {
 	self.start(message)
 }
 
-func (self *App) acceptInput(editor *edit.Input, history *edit.History) {
-	message := strings.TrimSpace(editor.Text())
+func (self *App) acceptInput(inputLine *edit.Input, history *edit.History) {
+	message := strings.TrimSpace(inputLine.Text())
 	switch self.handleCommand(message) {
 	case dispatch.Handled:
 		history.Add(message)
-		editor.Reset()
+		inputLine.Reset()
 	case dispatch.Ordinary:
-		self.submitInput(editor, history, message)
+		self.submitInput(inputLine, history, message)
 	case dispatch.Rejected:
 	}
 }
 
-func (self *App) submitInput(editor *edit.Input, history *edit.History, message string) {
+func (self *App) submitInput(inputLine *edit.Input, history *edit.History, message string) {
 	history.Add(message)
-	editor.Reset()
+	inputLine.Reset()
 
 	if message == "" {
 		return
@@ -519,13 +519,13 @@ func (self *App) interruptTurn(reason string) {
 	self.currentTurn.Interrupt(stop.Because(reason))
 }
 
-func (self *App) show(editor *edit.Input) {
-	if editor.IsPasting() {
+func (self *App) show(inputLine *edit.Input) {
+	if inputLine.IsPasting() {
 		return
 	}
 
 	columns := self.screen.Columns()
-	frame := editor.Frame(columns)
+	frame := inputLine.Frame(columns)
 
 	topRight := self.renderBar(segment.TopRight, frame)
 	bottomRight := self.renderBar(segment.BottomRight, frame)
@@ -667,7 +667,7 @@ func (self *App) getPathGrants() []pathgrant.Grant {
 }
 
 func (self *App) isPrefixPending() bool {
-	return self.editor != nil && self.editor.IsPrefixPending()
+	return self.inputLine != nil && self.inputLine.IsPrefixPending()
 }
 
 func (self *App) plainly(history *edit.History, initialMessage string) {
