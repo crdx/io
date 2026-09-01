@@ -47,7 +47,7 @@ func TestCompletionMatchesGolden(t *testing.T) {
 			if !found {
 				t.Fatalf("expected completion for %q", current)
 			}
-			fmt.Fprintf(&output, " -> %s", completed)
+			fmt.Fprintf(&output, " → %s", completed)
 			current = completed
 		}
 		output.WriteByte('\n')

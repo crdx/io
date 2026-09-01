@@ -1,16 +1,16 @@
-/ -> /conf -> /copy -> /edit -> /fork -> /grant -> /grants -> /help -> /new -> /open -> /revoke
-/c -> /conf -> /copy
-/g -> /grant -> /grants
-/grant  -> /grant read -> /grant write
-/r -> /revoke
-/revoke  -> /revoke /reference
-/copy  -> /copy agents-file -> /copy config-dir -> /copy config-file
-/copy l -> /copy last-message
-/copy sn -> /copy snippets-dir
-/edit  -> /edit agents-file -> /edit config-dir -> /edit config-file
-/edit sn -> /edit snippets-dir
-/open  -> /open agents-file -> /open config-dir -> /open config-file -> /open home-dir -> /open scratch-dir -> /open session-chat-file -> /open session-dir -> /open session-log-file -> /open skills-dir -> /open snippets-dir -> /open system-prompt-file -> /open workspace-dir
-/open sn -> /open snippets-dir
-// -> //add -> //ask -> //help -> //note
-//a -> //add -> //ask -> //add
-//h -> //help
+/ → /conf → /copy → /edit → /fork → /grant → /grants → /help → /new → /open → /revoke
+/c → /conf → /copy
+/g → /grant → /grants
+/grant  → /grant read → /grant write
+/r → /revoke
+/revoke  → /revoke /reference
+/copy  → /copy agents-file → /copy config-dir → /copy config-file
+/copy l → /copy last-message
+/copy sn → /copy snippets-dir
+/edit  → /edit agents-file → /edit config-dir → /edit config-file
+/edit sn → /edit snippets-dir
+/open  → /open agents-file → /open config-dir → /open config-file → /open home-dir → /open scratch-dir → /open session-chat-file → /open session-dir → /open session-log-file → /open skills-dir → /open snippets-dir → /open system-prompt-file → /open workspace-dir
+/open sn → /open snippets-dir
+// → //add → //ask → //help → //note
+//a → //add → //ask → //add
+//h → //help
