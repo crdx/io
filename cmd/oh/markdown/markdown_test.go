@@ -344,6 +344,17 @@ func FuzzMermaidFenceStreaming(fuzzer *testing.F) {
 	})
 }
 
+func TestAFileIsHighlightedFromItsNameAcrossLines(t *testing.T) {
+	source := "package main\n\nfunc main() {}\n"
+	highlighted := HighlightFile("main.go", source)
+	if style.Plain(highlighted) != source {
+		t.Errorf("highlighting changed the text to %q", style.Plain(highlighted))
+	}
+	if highlighted == source || !strings.Contains(highlighted, style.Keyword("package")) {
+		t.Errorf("expected Go highlighting, got %q", highlighted)
+	}
+}
+
 func TestCodeIsHighlightedWhereTheLanguageIsKnown(t *testing.T) {
 	known := Render("```go\nfunc main() {}\n```", columns)
 	unknown := Render("```nosuchlanguage\nfunc main() {}\n```", columns)

@@ -10,7 +10,7 @@ ntext.\e[0m\r
 \e[?7l\r\e[KReading the target before the process\r
 \r\e[Krestarts.\r
 \r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe target is now safely recorded.\r
 \e[?25h\e[?2026l
@@ -217,7 +217,7 @@ The target is now safely recorded.
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KRead\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the targ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target befor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before the pr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before the proces\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before the process re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before the process restar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before the process restarts.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe targ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now sa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely rec\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely recorde\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely recorded.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -230,7 +230,7 @@ The target is now safely recorded.
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KReading the target before the process restarts.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe target is now safely recorded.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -243,7 +243,7 @@ The target is now safely recorded.
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KRead\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the targ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target befor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before the pr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before the proces\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before the process re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before the process restar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KReading the target before the process restarts.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe targ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target i\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is no\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now sa\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely rec\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely recorde\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe target is now safely recorded.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -267,7 +267,7 @@ nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;15
 \r\e[Kprocess\r
 \r\e[Krestarts.\r
 \r
-\r\e[Kread \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe target\r
 \r\e[Kis now\r
@@ -282,7 +282,7 @@ nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;15
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KReading the target before the process restarts.
 
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 \r\e[KThe target is now safely recorded.
 \e[?25h\e[?2026l
@@ -295,7 +295,7 @@ nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;15
 \r
 \e[?7l\r\e[KReading the target before the process restarts.\r
 \r
-\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe target is now safely recorded.\r
 \e[?25h\e[?2026l

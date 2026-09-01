@@ -96,16 +96,18 @@ func (self *Block) FinaliseRow(
 	summary string,
 	stats string,
 ) {
-	self.change(func() {
-		if rowIndex < 0 || rowIndex >= len(self.rows) || self.rows[rowIndex].state != Running {
-			return
-		}
+	self.finaliseRow(rowIndex, nil, state, timeTaken, summary, stats)
+}
 
-		self.rows[rowIndex].state = state
-		self.rows[rowIndex].timeTaken = timeTaken
-		self.rows[rowIndex].stats = stats
-		self.rows[rowIndex].summary = summarise(summary)
-	})
+func (self *Block) FinaliseRowWithLabel(
+	rowIndex int,
+	label Label,
+	state RowState,
+	timeTaken time.Duration,
+	summary string,
+	stats string,
+) {
+	self.finaliseRow(rowIndex, label, state, timeTaken, summary, stats)
 }
 
 const widestSummaryRead = 1024
@@ -135,6 +137,29 @@ func (self *Block) Close(state RowState) {
 		}
 
 		self.isSlow = false
+	})
+}
+
+func (self *Block) finaliseRow(
+	rowIndex int,
+	label Label,
+	state RowState,
+	timeTaken time.Duration,
+	summary string,
+	stats string,
+) {
+	self.change(func() {
+		if rowIndex < 0 || rowIndex >= len(self.rows) || self.rows[rowIndex].state != Running {
+			return
+		}
+
+		if label != nil {
+			self.rows[rowIndex].label = label
+		}
+		self.rows[rowIndex].state = state
+		self.rows[rowIndex].timeTaken = timeTaken
+		self.rows[rowIndex].stats = stats
+		self.rows[rowIndex].summary = summarise(summary)
 	})
 }
 

@@ -1,0 +1,268 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m show every tool result link state      \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call%2Fa%3F%26&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150m[\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mregex parse error: [ ^ error…\e[0m\r
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe command was stopped …\e[0m\r
+\r
+\r\e[KThe textual success, failure, and\r
+\r\e[Kcancellation have result links; the\r
+\r\e[Kempty result does not.\r
+\e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+h\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+w\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+v\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+y\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+o\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+r\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+u\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+l\e[0m\r
+\e[48;2;52;53;65m \r
+i\e[0m\r
+\e[48;2;52;53;65m \r
+n\e[0m\r
+\e[48;2;52;53;65m \r
+k\e[0m\r
+\e[48;2;52;53;65m \r
+s\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+a\e[0m\r
+\e[48;2;52;53;65m \r
+t\e[0m\r
+\e[48;2;52;53;65m \r
+e\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[?7l\r\e[K\e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;204;102;102m✗\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;129;162;190m\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r
+\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Kx\r
+\r\e[Kt\r
+\r\e[Ku\r
+\r\e[Ka\r
+\r\e[Kl\r
+\r\e[Ks\r
+\r\e[Ku\r
+\r\e[Kc\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ks\r
+\r\e[K,\r
+\r\e[Kf\r
+\r\e[Ka\r
+\r\e[Ki\r
+\r\e[Kl\r
+\r\e[Ku\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[K,\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kd\r
+\r\e[Kc\r
+\r\e[Ka\r
+\r\e[Kn\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[Kl\r
+\r\e[Kl\r
+\r\e[Ka\r
+\r\e[Kt\r
+\r\e[Ki\r
+\r\e[Ko\r
+\r\e[Kn\r
+\r\e[Kh\r
+\r\e[Ka\r
+\r\e[Kv\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ku\r
+\r\e[Kl\r
+\r\e[Kt\r
+\r\e[Kl\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kk\r
+\r\e[Ks\r
+\r\e[K;\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Ke\r
+\r\e[Km\r
+\r\e[Kp\r
+\r\e[Kt\r
+\r\e[Ky\r
+\r\e[Kr\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ku\r
+\r\e[Kl\r
+\r\e[Kt\r
+\r\e[Kd\r
+\r\e[Ko\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Kn\r
+\r\e[Ko\r
+\r\e[Kt\r
+\r\e[K.\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m show every tool result link state\e[0m
+\e[48;2;52;53;65m\e[0m
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+grep \e[38;2;150;152;150m[\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mregex parse error: [ ^ error: unclosed character class\e[0m
+ls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0L\e[0m
+\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe command was stopped because the user pressed escape\e[0m
+
+The textual success, failure, and cancellation have result links; the empty result does not.
+
+=== streamed asap ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show every tool result link state                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kgrep \e[38;2;150;152;150m[\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[K\e]8;;oh://tool-result?call=call%2Fa%3F%26&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150m[\e[0m\r
+\r\e[Kls\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150m[\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mregex parse error: [ ^ error: unclosed character class\e[0m\r
+\r\e[Kls\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0L\e[0m\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe command was stopped because the user pressed escape\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe text\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual succ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, fai\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and ca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancel\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellati\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have resu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result l\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the em\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the empty\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the empty resu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the empty result d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the empty result does\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the empty result does not.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show every tool result link state                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kgrep \e[38;2;150;152;150m[\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[K\e]8;;oh://tool-result?call=call%2Fa%3F%26&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150m[\e[0m\r
+\r\e[Kls\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150m[\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mregex parse error: [ ^ error: unclosed character class\e[0m\r
+\r\e[Kls\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0L\e[0m\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe command was stopped because the user pressed escape\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the empty result does not.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed paced ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show every tool result link state                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kgrep \e[38;2;150;152;150m[\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[K\e]8;;oh://tool-result?call=call%2Fa%3F%26&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150m[\e[0m\r
+\r\e[Kls\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150m[\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mregex parse error: [ ^ error: unclosed character class\e[0m\r
+\r\e[Kls\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0L\e[0m\r
+\r\e[K\e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe command was stopped because the user pressed escape\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe text\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual succ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, fai\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, an\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and ca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancel\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellati\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation h\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have resu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result l\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the em\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the empty\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the empty resu\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the empty result d\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the empty result does\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe textual success, failure, and cancellation have result links; the empty result does not.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m show every \e[0m\r
+\e[48;2;52;53;65m tool result\e[0m\r
+\e[48;2;52;53;65m link state \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call%2Fa%3F%26&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\gr…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mreg…\e[0m\r
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190m…\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe…\e[0m\r
+\r
+\r\e[KThe textual\r
+\r\e[Ksuccess,\r
+\r\e[Kfailure, and\r
+\r\e[Kcancellation\r
+\r\e[Khave result\r
+\r\e[Klinks; the\r
+\r\e[Kempty result\r
+\r\e[Kdoes not.\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m show every tool result link state\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call%2Fa%3F%26&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150m[\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mregex parse error: [ ^ error: unclosed character class\e[0m\r
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe command was stopped because the user pressed escape\e[0m
+
+\r\e[KThe textual success, failure, and cancellation have result links; the empty result does not.
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show every tool result link state                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call%2Fa%3F%26&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150m[\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mregex parse error: [ ^ error: unclosed character class\e[0m\r
+\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m0L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m10\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe command was stopped because the user pressed escape\e[0m\r
+\r
+\r\e[KThe textual success, failure, and cancellation have result links; the empty result does not.\r
+\e[?25h\e[?2026l

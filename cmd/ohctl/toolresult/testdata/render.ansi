@@ -1,0 +1,183 @@
+=== read source range ===
+\e[38;2;207;173;0mread\e[0m · \e[38;2;192;128;80mcmd/main.go\e[0m · \e[38;2;150;152;150mlines 8–11\e[0m
+
+\e[38;2;201;166;212mpackage\e[0m main
+
+\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mmain\e[0m() {
+\t\e[38;2;129;162;190mrun\e[0m()
+}
+
+
+=== read image ===
+\e[38;2;207;173;0mread\e[0m · \e[38;2;192;128;80mshot.png\e[0m
+
+\e[38;2;150;152;150mimage/png image (48217 bytes)\e[0m
+
+=== read failure ===
+\e[38;2;207;173;0mread\e[0m · \e[38;2;192;128;80mmissing.go\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mmissing.go: no such file or directory\e[0m
+
+=== write file ===
+\e[38;2;207;173;0mwrite\e[0m · \e[38;2;192;128;80mconfig.yaml\e[0m · \e[38;2;150;152;150m25B\e[0m
+
+name: \e[38;2;181;189;104mdove\e[0m
+enabled: \e[38;2;201;166;212mtrue\e[0m
+
+
+=== write failure ===
+\e[38;2;207;173;0mwrite\e[0m · \e[38;2;192;128;80mconfig.yaml\e[0m · \e[38;2;150;152;150m15B\e[0m
+
+enabled: \e[38;2;201;166;212mfalse\e[0m
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mthe filesystem is read-only\e[0m
+
+=== edit with context ===
+\e[38;2;207;173;0medit\e[0m · \e[38;2;192;128;80mmain.go\e[0m
+
+\e[38;2;204;102;102m--- main.go\e[0m
+\e[38;2;76;154;44m+++ main.go\e[0m
+\e[38;2;129;162;190m@@ -2,7 +2,7 @@\e[0m
+\e[38;2;150;152;150m two\e[0m
+\e[38;2;150;152;150m three\e[0m
+\e[38;2;150;152;150m four\e[0m
+\e[38;2;204;102;102m-oldCall()\e[0m
+\e[38;2;76;154;44m+newCall()\e[0m
+\e[38;2;150;152;150m six\e[0m
+\e[38;2;150;152;150m seven\e[0m
+\e[38;2;150;152;150m eight\e[0m
+
+=== edit failure ===
+\e[38;2;207;173;0medit\e[0m · \e[38;2;192;128;80mmain.go\e[0m
+
+\e[38;2;204;102;102m--- main.go\e[0m
+\e[38;2;76;154;44m+++ main.go\e[0m
+\e[38;2;129;162;190m@@ -1,1 +1,1 @@\e[0m
+\e[38;2;204;102;102m-old\e[0m
+\e[38;2;76;154;44m+new\e[0m
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mold_text does not appear in the file\e[0m
+
+=== shell success ===
+\e[38;2;192;128;80m$ \e[0m\e[38;2;129;162;190mgo\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mtest\e[0m\e[38;2;150;152;150m ./...\e[0m
+\e[38;2;192;128;80m> \e[0m\e[38;2;129;162;190mprintf\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m'done\\n'\e[0m
+
+ok  crdx.org/io
+done
+
+
+=== shell failure ===
+\e[38;2;192;128;80m$ \e[0m\e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mcheck\e[0m
+
+\e[38;2;204;102;102mlint1  ✗
+main.go:12: undefined: run
+\e[0m
+
+=== shell without output ===
+\e[38;2;192;128;80m$ \e[0m\e[38;2;129;162;190mtrue\e[0m
+
+\e[38;2;150;152;150m(no output)\e[0m
+
+=== shell cancelled ===
+\e[38;2;192;128;80m$ \e[0m\e[38;2;129;162;190msleep\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m30\e[0m
+
+\e[38;2;207;173;0mthe command was stopped because the user pressed escape\e[0m
+
+=== list directory ===
+\e[38;2;207;173;0mls\e[0m · \e[38;2;192;128;80mcmd\e[0m
+
+\e[38;2;192;128;80moh/\e[0m
+\e[38;2;192;128;80mohctl/\e[0m
+\e[38;2;192;128;80msimple/\e[0m
+
+
+=== empty directory ===
+\e[38;2;207;173;0mls\e[0m · \e[38;2;192;128;80mempty\e[0m
+
+(empty)
+
+=== find files ===
+\e[38;2;207;173;0mfind\e[0m · \e[38;2;192;128;80m**/*.go · cmd\e[0m
+
+\e[38;2;192;128;80mcmd/oh/main.go\e[0m
+\e[38;2;192;128;80mcmd/ohctl/main.go\e[0m
+
+
+=== find without matches ===
+\e[38;2;207;173;0mfind\e[0m · \e[38;2;192;128;80m**/*.cobol\e[0m
+
+(no matches)
+
+=== grep source ===
+\e[38;2;207;173;0mgrep\e[0m · \e[38;2;150;152;150mfunc \e[0m\e[38;2;150;152;150m(\e[0m\e[38;2;150;152;150mRun\e[0m\e[38;2;138;190;183m|\e[0m\e[38;2;150;152;150mOpen\e[0m\e[38;2;150;152;150m)\e[0m · \e[38;2;150;152;150mcmd **/*.go\e[0m
+
+\e[38;2;150;152;150mcmd/oh/main.go:12:\e[0m\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mRun\e[0m() \e[38;2;240;198;116merror\e[0m {
+\e[38;2;150;152;150mcmd/ohctl/open.go:8:\e[0m\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mOpen\e[0m() {
+
+
+=== grep failure ===
+\e[38;2;207;173;0mgrep\e[0m · \e[38;2;150;152;150m[\e[0m · \e[38;2;150;152;150mcmd\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mregex parse error: unclosed character class\e[0m
+
+=== web search ===
+\e[38;2;207;173;0msearch\e[0m · \e[38;2;192;128;80mmodern Go release\e[0m
+
+\e[1m\e[38;2;207;173;0mResult\e[0m\e[0m
+
+Go has a new release. \e[38;2;129;162;190mSource\e[0m\e[38;2;150;152;150m (https://example.test/release)\e[0m.
+
+=== web fetch markdown ===
+\e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/article\e[0m · \e[38;2;150;152;150mmarkdown\e[0m
+
+\e[1m\e[38;2;207;173;0mArticle\e[0m\e[0m
+
+\e[38;2;192;128;80m• \e[0mfirst
+\e[38;2;192;128;80m• \e[0msecond
+
+=== web fetch html ===
+\e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/raw\e[0m · \e[38;2;150;152;150mraw\e[0m
+
+\e[38;2;150;152;150m<!DOCTYPE html>\e[0m
+<title>\e[38;2;150;152;150mHello\e[0m</title>
+
+
+=== web fetch failure ===
+\e[38;2;207;173;0mfetch\e[0m · \e[38;2;192;128;80mhttps://example.test/missing\e[0m · \e[38;2;150;152;150mtext\e[0m
+
+
+
+\e[38;2;204;102;102mError\e[0m
+\e[38;2;204;102;102mweb fetch failed with status 404: page not found\e[0m
+
+=== title ===
+\e[38;2;207;173;0mtitle\e[0m · \e[38;2;192;128;80mrender-useful-results\e[0m
+
+the session is now titled "render-useful-results"
+
+=== notification ===
+\e[38;2;207;173;0mnotify\e[0m · \e[38;2;192;128;80mChecks passed\e[0m
+
+Everything is green
+
+\e[38;2;150;152;150msuccess\e[0m
+
+=== unknown tool ===
+\e[38;2;207;173;0mweather\e[0m
+
+{
+    "city": \e[38;2;181;189;104m"London"\e[0m,
+    "days": \e[38;2;192;128;80m3\e[0m
+}
+
+Rain, then sun.
+

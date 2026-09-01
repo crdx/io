@@ -4640,9 +4640,10 @@ func readJournal(t *testing.T, path string) []replayEntry {
 }
 
 type replayRig struct {
-	chat      *App
-	written   *strings.Builder
-	workspace *work.Space
+	chat        *App
+	written     *strings.Builder
+	workspace   *work.Space
+	sessionName string
 }
 
 func newReplayRig(t *testing.T, columns int) *replayRig {
@@ -4688,15 +4689,17 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 		notify.New(screen.WriteEscape),
 	)
 	tools = append(tools, web.New(func() bool { return true }, sessionGoldenSearcher{})...)
+	log := testLog(t)
 
 	return &replayRig{
-		written:   &written,
-		workspace: workspace,
+		written:     &written,
+		workspace:   workspace,
+		sessionName: log.Name(),
 		chat: &App{
 			agent:     agent.New("", quietProvider{}, tools),
 			screen:    screen,
 			workspace: workspace,
-			recorder:  record.New(testLog(t)),
+			recorder:  record.New(log),
 		},
 	}
 }
@@ -4708,7 +4711,8 @@ func (self *replayRig) load(entries []replayEntry) {
 }
 
 func (self *replayRig) drawn() string {
-	return strings.ReplaceAll(self.written.String(), self.workspace.GetDir(), workspaceMarker)
+	drawn := strings.ReplaceAll(self.written.String(), self.workspace.GetDir(), workspaceMarker)
+	return strings.ReplaceAll(drawn, self.sessionName, "brave-otter")
 }
 
 func replayAtWidth(t *testing.T, entries []replayEntry, columns int) string {
@@ -9095,6 +9099,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	}
 
 	for extension, drawn := range outputs {
+		drawn = strings.ReplaceAll(drawn, sessionName, "brave-otter")
 		if scenario.CredentialsPath != "" {
 			pendingCredentialsPattern := regexp.MustCompile(regexp.QuoteMeta(scenario.CredentialsPath) + `\.[0-9]+`)
 			drawn = pendingCredentialsPattern.ReplaceAllString(drawn, "auth.json.pending")

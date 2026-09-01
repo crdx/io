@@ -806,7 +806,11 @@ func (self *App) restore(storedSession *store.Session) {
 }
 
 func (self *App) newPainter(isRunning bool) *painter.Picasso {
-	return painter.New(self.screen, isRunning, self.agent.Tool, self.workspace, self.streamingMode)
+	picasso := painter.New(self.screen, isRunning, self.agent.Tool, self.workspace, self.streamingMode)
+	if self.screen.IsTerminal() && self.recorder != nil {
+		picasso.LinkToolResults(self.recorder.Name())
+	}
+	return picasso
 }
 
 func (self *App) replay() {

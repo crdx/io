@@ -12,23 +12,23 @@ ntext.\e[0m\r
 \r
 \r\e[KLet me get the shape of this first.\r
 \r
-\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m\r
 \r
 \r\e[KNow to find where the drawing happens.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KOne more pair, and one of them will not\r
 \r\e[Kbe there.\r
 \r
-\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[Kread \e[38;2;192;128;80mnowhere/at…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_10&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;192;128;80mnowhere/at…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.…\e[0m\r
 \r
 \r\e[KThat is the lot: four together, then\r
 \r\e[Kthree together, then a pair where only\r
@@ -465,29 +465,29 @@ That is the lot: four together, then three together, then a pair where only one 
 \e[?2026h\e[?25l\r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThre\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree se\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree search\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches,\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches, all\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at o\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KNow\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find wher\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the dr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawing ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawing happen\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawing happens.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KOne\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pai\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not be t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not be there\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not be there.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\r
+\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_10&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: fou\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four togeth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then thr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three toget\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair whe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them coul\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be ans\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be\r
 \r\e[Kanswere\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kanswered.\e[?25h\e[?2026l\r
@@ -506,29 +506,29 @@ That is the lot: four together, then three together, then a pair where only one 
 \e[?2026h\e[?25l\r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KNow to find where the drawing happens.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not be there.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\r
+\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_10&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kanswered.\e[?25h\e[?2026l\r
@@ -547,29 +547,29 @@ That is the lot: four together, then three together, then a pair where only one 
 \e[?2026h\e[?25l\r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[3A\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m\r
 \r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThre\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree se\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree search\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches,\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches, all\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at o\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KNow\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to f\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find wher\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the dr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawing ha\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawing happen\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNow to find where the drawing happens.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[2A\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KOne\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pai\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not be t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not be there\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KOne more pair, and one of them will not be there.\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[Kls\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\r
+\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_10&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThat\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot:\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: fou\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four to\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four togeth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then thr\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three toget\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair whe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where o\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of t\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them coul\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be ans\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be\r
 \r\e[Kanswere\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kanswered.\e[?25h\e[?2026l\r
@@ -599,10 +599,10 @@ nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;15
 \r\e[Kthe shape of\r
 \r\e[Kthis first.\r
 \r
-\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[Kfind \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[Kfind \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThree\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150msearches,\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mall at once.\e[0m\e[0m\r
@@ -612,9 +612,9 @@ nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;15
 \r\e[Kdrawing\r
 \r\e[Khappens.\r
 \r
-\r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KOne more\r
 \r\e[Kpair, and\r
@@ -622,8 +622,8 @@ nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;15
 \r\e[Kwill not be\r
 \r\e[Kthere.\r
 \r
-\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[Kr… \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mn…\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_10&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\r…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mn…\e[0m\r
 \r
 \r\e[KThat is the\r
 \r\e[Klot: four\r
@@ -646,22 +646,22 @@ nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;15
 
 \r\e[KLet me get the shape of this first.
 
-\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m
 \r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m
 
 \r\e[KNow to find where the drawing happens.
 
-\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 \r\e[KOne more pair, and one of them will not be there.
 
-\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_10&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m
 
 \r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be answered.
 \e[?25h\e[?2026l
@@ -676,22 +676,22 @@ nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;15
 \r
 \r\e[KLet me get the shape of this first.\r
 \r
-\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[Kfind \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[Kfind \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m\r
 \r
 \r\e[KNow to find where the drawing happens.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[Kgrep \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KOne more pair, and one of them will not be there.\r
 \r
-\r\e[Kls \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
-\r\e[Kread \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_10&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\r
 \r
 \r\e[KThat is the lot: four together, then three together, then a pair where only one of them could be\r
 \r\e[Kanswered.\r

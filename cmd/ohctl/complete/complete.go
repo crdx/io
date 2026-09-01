@@ -17,7 +17,7 @@ const (
 	kindArchived = "archived"
 )
 
-var commands = []string{"analyse", "migrate", "regen", "restore", "sessions"}
+var commands = []string{"analyse", "migrate", "regen", "restore", "sessions", "tool-result"}
 
 func Write(out io.Writer, args []string) bool {
 	kind, word, isWanted := request(args)

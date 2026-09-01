@@ -1,6 +1,7 @@
 package call_test
 
 import (
+	"strings"
 	"testing"
 
 	"crdx.org/io/agent"
@@ -28,6 +29,17 @@ func check(t *testing.T, room int, name string, subject string, qualifier string
 func TestALabelThatFitsIsLeftAlone(t *testing.T) {
 	check(t, 22, "grep", "hello", "in internal")
 	check(t, 80, "grep", "hello", "in internal")
+}
+
+func TestAResultLinkWrapsOnlyTheCallName(t *testing.T) {
+	resultURI := "oh://tool-result?call=one&session=brave-otter"
+	rendered := call.Label{Name: "read", Subject: "main.go", ResultURI: resultURI}.Render()
+	if !strings.Contains(rendered, "\x1b]8;;"+resultURI+"\x1b\\") {
+		t.Errorf("result URI is missing from %q", rendered)
+	}
+	if strings.Index(rendered, "\x1b]8;;\x1b\\") > strings.Index(rendered, "main.go") {
+		t.Errorf("subject is inside the result link in %q", rendered)
+	}
 }
 
 func TestWhatQualifiesTheArgumentsIsCutFirst(t *testing.T) {

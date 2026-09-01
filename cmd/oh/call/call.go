@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"crdx.org/io/cmd/oh/dynamic"
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
@@ -30,6 +31,7 @@ type Label struct {
 	NameStyle       style.Style
 	Accent          string
 	AccentStyle     style.Style
+	ResultURI       string
 	renderedSubject string
 }
 
@@ -62,7 +64,11 @@ func (self Label) Elide(room int) dynamic.Label {
 }
 
 func (self Label) Render() string {
-	line := self.style()(self.Name)
+	name := self.style()(self.Name)
+	if self.ResultURI != "" && self.Name != "" {
+		name = link.RenderURL(name, self.ResultURI)
+	}
+	line := name
 
 	if self.Subject != "" {
 		line += " " + self.renderSubject()

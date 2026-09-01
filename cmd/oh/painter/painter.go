@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/toolresult"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
@@ -27,14 +28,16 @@ type Picasso struct {
 	screen         *output.Screen
 	toolBlock      *dynamic.Block
 	rows           map[string]int
+	labels         map[string]call.Label
 	answer         liveText
 	answerRenderer markdown.IncrementalRenderer
 	reasoning      liveText
 	previousKind   agent.Kind
 
-	isStale       bool
-	isRunning     bool
-	streamingMode output.StreamingMode
+	isStale               bool
+	isRunning             bool
+	streamingMode         output.StreamingMode
+	resultLinkSessionName string
 
 	getTool   func(string) (tool.Tool, bool)
 	workspace *work.Space
@@ -59,6 +62,10 @@ func New(
 	self.reasoning.streamingMode = streamingMode
 
 	return self
+}
+
+func (self *Picasso) LinkToolResults(sessionName string) {
+	self.resultLinkSessionName = sessionName
 }
 
 func (self *Picasso) DrawDelta(delta agent.Delta) {
@@ -124,9 +131,12 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 			self.toolBlock = dynamic.NewBlock(self.screen.Refresh)
 			self.screen.Open(self.toolBlock)
 			self.rows = map[string]int{}
+			self.labels = map[string]call.Label{}
 		}
 
-		self.rows[event.ID] = self.toolBlock.Add(call.LabelFor(event, self.getTool, self.workspace))
+		label := call.LabelFor(event, self.getTool, self.workspace)
+		self.rows[event.ID] = self.toolBlock.Add(label)
+		self.labels[event.ID] = label
 
 	case agent.ToolCallResultEvent:
 		self.mark(event)
@@ -266,6 +276,7 @@ func (self *Picasso) Close(state dynamic.RowState) {
 		self.toolBlock.Close(state)
 		self.toolBlock = nil
 		self.rows = nil
+		self.labels = nil
 
 		self.screen.Seal()
 	}
@@ -280,6 +291,7 @@ func (self *Picasso) Stop() {
 		self.toolBlock.Stop()
 		self.toolBlock = nil
 		self.rows = nil
+		self.labels = nil
 
 		self.screen.Seal()
 	}
@@ -380,9 +392,15 @@ func (self *Picasso) mark(event agent.Event) {
 	}
 
 	delete(self.rows, event.ID)
+	label := self.labels[event.ID]
+	delete(self.labels, event.ID)
+	if self.resultLinkSessionName != "" && event.Text != "" {
+		label.ResultURI = toolresult.URL(self.resultLinkSessionName, event.ID)
+	}
 
-	self.toolBlock.FinaliseRow(
+	self.toolBlock.FinaliseRowWithLabel(
 		index,
+		label,
 		getState(event.Status),
 		event.Took,
 		call.Summary(event),

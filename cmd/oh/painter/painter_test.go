@@ -150,6 +150,30 @@ func drawsNothingButErases(frame string) bool {
 
 var cursorMotion = regexp.MustCompile(`\x1b\[[0-9]*[ABCDJK]`)
 
+func TestToolResultLinksAreOptIn(t *testing.T) {
+	for name, test := range map[string]struct {
+		sessionName string
+		resultText  string
+		shouldLink  bool
+	}{
+		"linked":       {sessionName: "brave-otter", resultText: "output", shouldLink: true},
+		"plain":        {resultText: "output"},
+		"empty result": {sessionName: "brave-otter"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			var screenOutput bytes.Buffer
+			paint := New(output.NewTerminalOfSize(&screenOutput, 80, 24), false, nil, nil, output.StreamingModeLine)
+			paint.LinkToolResults(test.sessionName)
+			paint.DrawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "call-1", Name: "read"})
+			paint.DrawEvent(agent.Event{Kind: agent.ToolCallResultEvent, ID: "call-1", Status: agent.SuccessStatus, Text: test.resultText})
+			hasLink := strings.Contains(screenOutput.String(), "\x1b]8;;oh://tool-result?")
+			if hasLink != test.shouldLink {
+				t.Errorf("link presence = %t in %q", hasLink, screenOutput.String())
+			}
+		})
+	}
+}
+
 func TestNewQuestionClosesOldToolBlockAndResetsRows(t *testing.T) {
 	paint := New(output.New(&bytes.Buffer{}), false, nil, nil, output.StreamingModeLine)
 	paint.DrawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}})

@@ -10,7 +10,7 @@ ntext.\e[0m\r
 \e[?7l\r\e[KSearching the target before the process\r
 \r\e[Krestarts.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe matching target is now safely\r
 \r\e[Krecorded.\r
@@ -228,7 +228,7 @@ The matching target is now safely recorded.
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KSear\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearchin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the ta\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target bef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the proc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the process\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the process rest\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the process restarts\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the process restarts.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching tar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is now s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is now safel\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is now safely re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is now safely record\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is now safely recorded.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -241,7 +241,7 @@ The matching target is now safely recorded.
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KSearching the target before the process restarts.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe matching target is now safely recorded.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -254,7 +254,7 @@ The matching target is now safely recorded.
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[KSear\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearchin\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the ta\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target bef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the proc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the process\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the process rest\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the process restarts\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KSearching the target before the process restarts.\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matc\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching tar\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is now s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is now safel\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is now safely re\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is now safely record\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe matching target is now safely recorded.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
@@ -278,7 +278,7 @@ nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;15
 \r\e[Kprocess\r
 \r\e[Krestarts.\r
 \r
-\r\e[Kgrep \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe matching\r
 \r\e[Ktarget is\r
@@ -293,7 +293,7 @@ nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;15
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[KSearching the target before the process restarts.
 
-\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 \r\e[KThe matching target is now safely recorded.
 \e[?25h\e[?2026l
@@ -306,7 +306,7 @@ nippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;15
 \r
 \e[?7l\r\e[KSearching the target before the process restarts.\r
 \r
-\r\e[Kgrep \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtarget.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe matching target is now safely recorded.\r
 \e[?25h\e[?2026l

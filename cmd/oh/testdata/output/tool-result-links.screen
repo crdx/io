@@ -1,0 +1,188 @@
+=== narrow ===
+
+ show every tool result link state
+
+
+read README.md ✓ 1L
+grep [ ✗ regex parse error: [ ^ error…
+ls ✓ 0L
+$ sleep 10 – the command was stopped …
+
+The textual success, failure, and
+cancellation have result links; the
+empty result does not.
+=== one column ===
+
+
+s
+
+h
+
+o
+
+w
+
+e
+
+v
+
+e
+
+r
+
+y
+
+t
+
+o
+
+o
+
+l
+
+r
+
+e
+
+s
+
+u
+
+l
+
+t
+
+l
+
+i
+
+n
+
+k
+
+s
+
+t
+
+a
+
+t
+
+e
+
+
+✓
+✗
+✓
+
+
+T
+h
+e
+t
+e
+x
+t
+u
+a
+l
+s
+u
+c
+c
+e
+s
+s
+,
+f
+a
+i
+l
+u
+r
+e
+,
+a
+n
+d
+c
+a
+n
+c
+e
+l
+l
+a
+t
+i
+o
+n
+h
+a
+v
+e
+r
+e
+s
+u
+l
+t
+l
+i
+n
+k
+s
+;
+t
+h
+e
+e
+m
+p
+t
+y
+r
+e
+s
+u
+l
+t
+d
+o
+e
+s
+n
+o
+t
+.
+=== tiny ===
+
+ show every
+ tool result
+ link state
+
+
+read ✓ 1L
+gr… ✗ reg…
+ls ✓ 0L
+$ … – the…
+
+The textual
+success,
+failure, and
+cancellation
+have result
+links; the
+empty result
+does not.
+=== wide ===
+
+ show every tool result link state
+
+
+read README.md ✓ 1L
+grep [ ✗ regex parse error: [ ^ error: unclosed character class
+ls ✓ 0L
+$ sleep 10 – the command was stopped because the user pressed escape
+
+The textual success, failure, and cancellation have result links; the empty result does not.

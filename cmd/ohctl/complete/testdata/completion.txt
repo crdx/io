@@ -4,6 +4,7 @@ migrate
 regen
 restore
 sessions
+tool-result
 === commands beginning with a word ===
 regen
 restore
