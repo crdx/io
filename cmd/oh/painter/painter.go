@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/call"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/dynamic"
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/pathgrant"
@@ -98,7 +99,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		self.answer.Reset()
 		self.Close(dynamic.Cancelled)
 		self.screen.Blank()
-		self.screen.Line(self.renderSubmittedMessage(event.Text))
+		self.screen.Line(self.renderUserMessage(event.Text))
 		self.screen.End()
 		self.screen.Blank()
 
@@ -191,14 +192,14 @@ func RenderRetry(event agent.Event) string {
 }
 
 func RenderSubmittedMessage(text string, columns int) string {
-	return renderSubmittedMessage(text, columns, false)
+	return renderSubmittedMessage(text, columns, false, "")
 }
 
 func RenderSubmittedMessageWithHyperlinks(text string, columns int) string {
-	return renderSubmittedMessage(text, columns, true)
+	return renderSubmittedMessage(text, columns, true, "")
 }
 
-func renderSubmittedMessage(text string, columns int, shouldRenderHyperlinks bool) string {
+func renderSubmittedMessage(text string, columns int, shouldRenderHyperlinks bool, workspace string) string {
 	contentColumns := columns
 	if contentColumns > 1 {
 		contentColumns--
@@ -211,6 +212,9 @@ func renderSubmittedMessage(text string, columns int, shouldRenderHyperlinks boo
 		content = markdown.Render(strutil.StripControl(text), contentColumns)
 	}
 	for i, row := range content {
+		if shouldRenderHyperlinks && workspace != "" {
+			row = link.Render(row, workspace)
+		}
 		content[i] = " " + row
 	}
 
@@ -303,6 +307,14 @@ func (self *Picasso) renderSubmittedMessage(text string) string {
 	}
 
 	return RenderSubmittedMessage(text, self.screen.Columns())
+}
+
+func (self *Picasso) renderUserMessage(text string) string {
+	if !self.screen.IsTerminal() {
+		return RenderSubmittedMessage(text, self.screen.Columns())
+	}
+
+	return renderSubmittedMessage(text, self.screen.Columns(), true, self.workspace.GetDir())
 }
 
 func (self *Picasso) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldResetAnswerRenderer bool) {

@@ -2924,6 +2924,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"ordinary-tab":          {".ansi", ".screen"},
 		"path-grant-lifecycle":  {".ansi", ".screen"},
 		"path-message":          {".ansi", ".screen"},
+		"user-path-links":       {".ansi", ".screen"},
 		"workspace-paths":       {".ansi", ".screen"},
 		"pending-mode-messages": {".ansi", ".screen"},
 		"paste":                 {".ansi", ".screen"},
@@ -5860,6 +5861,7 @@ func drawExistingPathMessage(t *testing.T) string {
 	self.agent = agent.New("", quietProvider{}, nil)
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 	self.commands = fixtureCommandRegistry(t)
+	self.workspace = work.At(t.TempDir())
 
 	inputLine := edit.NewInput(nil)
 	self.inputLine = inputLine
@@ -5870,6 +5872,41 @@ func drawExistingPathMessage(t *testing.T) string {
 	self.show(inputLine)
 
 	return screenOutput.String()
+}
+
+func TestUserMessagePathsAreLinkedAtConversationWidths(t *testing.T) {
+	passes := map[string]func() string{}
+	columnsByName := map[string]int{
+		"wide":       replayColumns,
+		"narrow":     narrowColumns,
+		"tiny":       tinyColumns,
+		"one column": oneColumn,
+	}
+	for name, columns := range columnsByName {
+		passes[name] = func() string { return drawUserPathLinks(t, columns) }
+	}
+
+	compareWithGolden(t, "user-path-links", ".ansi", passes)
+
+	screenPasses := map[string]func() string{}
+	for name, pass := range passes {
+		columns := columnsByName[name]
+		screenPasses[name] = func() string { return shown(t, pass(), columns) }
+	}
+	compareWithGolden(t, "user-path-links", ".screen", screenPasses)
+}
+
+func drawUserPathLinks(t *testing.T, columns int) string {
+	t.Helper()
+
+	rig := newReplayRig(t, columns)
+	rig.chat.events = []agent.Event{{
+		Kind: agent.UserMessageEvent,
+		Text: "read target.txt and cmd/oh/line/render.go:12:3; also /etc/hosts and [the target](https://example.test).",
+	}}
+	rig.chat.replay()
+
+	return rig.drawn()
 }
 
 type feedbackScenario int

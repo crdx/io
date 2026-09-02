@@ -1,0 +1,212 @@
+=== narrow ===
+
+ read target.txt and
+ cmd/oh/line/render.go:12:3; also
+ /etc/hosts and the target
+ (https://example.test).
+=== one column ===
+
+
+r
+
+e
+
+a
+
+d
+
+t
+
+a
+
+r
+
+g
+
+e
+
+t
+
+.
+
+t
+
+x
+
+t
+
+a
+
+n
+
+d
+
+c
+
+m
+
+d
+
+/
+
+o
+
+h
+
+/
+
+l
+
+i
+
+n
+
+e
+
+/
+
+r
+
+e
+
+n
+
+d
+
+e
+
+r
+
+.
+
+g
+
+o
+
+:
+
+1
+
+2
+
+:
+
+3
+
+;
+
+a
+
+l
+
+s
+
+o
+
+/
+
+e
+
+t
+
+c
+
+/
+
+h
+
+o
+
+s
+
+t
+
+s
+
+a
+
+n
+
+d
+
+t
+
+h
+
+e
+
+t
+
+a
+
+r
+
+g
+
+e
+
+t
+
+(
+
+h
+
+t
+
+t
+
+p
+
+s
+
+:
+
+/
+
+/
+
+e
+
+x
+
+a
+
+m
+
+p
+
+l
+
+e
+
+.
+
+t
+
+e
+
+s
+
+t
+
+)
+
+.
+=== tiny ===
+
+ read
+ target.txt
+ and
+ cmd/oh/line
+ /render.go:
+ 12:3; also
+ /etc/hosts
+ and the
+ target
+ (https://ex
+ ample.test)
+ .
+=== wide ===
+
+ read target.txt and cmd/oh/line/render.go:12:3; also /etc/hosts and the target
+ (https://example.test).
