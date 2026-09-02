@@ -23,17 +23,17 @@ Usage:
     $0 [options] [-t <tool>]... [<prompt>...]
 
 Options:
-    -L, --login                 Log in to a provider, choosing when omitted
-    -r, --resume [<session>]    Open the session picker, or resume a session by name
-    -m, --model [<model>]       Open the model picker, or set the provider, model, effort, and optional +fast mode
-    -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: %s)
-    -t, --tool <tool>           Set exclusive tool selection; may be repeated
-    -p, --print                 Answer the prompt without an interface, then exit
-        --yolo                  Live dangerously and don't sandbox anything
-    -U, --usage                 Show subscription usage, then exit
-    -J, --json                  Write the usage as JSON rather than drawing it
-    -l, --list                  List the available models, then exit
-    -u, --update                Update the cached model list, then exit
+    -L, --login                 Auth to a provider
+    -r, --resume [<session>]    Resume a session
+    -m, --model [<model>]       Choose a mode
+    -c, --caps <flags>          Set capabilities (default: %s)
+    -t, --tool <tool>           Replace the toolbox
+    -p, --print                 Answer non-interactively
+        --yolo                  Don't sandbox anything
+    -U, --usage                 Show subscription usage
+    -J, --json                  Output as JSON
+    -l, --list                  List available models
+    -u, --update                Update model list cache
     -v, --version               Show version
     -h, --help                  Show this help
 `, defaultCapFlags)
