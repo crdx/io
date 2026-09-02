@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"slices"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -717,10 +716,10 @@ func cacheRow(name string, statistics CacheStatistics, appearance style.Style) r
 		appearance: appearance,
 		cells: []string{
 			name,
-			strconv.Itoa(statistics.Sessions),
-			strconv.Itoa(statistics.Requests),
-			strconv.Itoa(statistics.Hits),
-			strconv.Itoa(statistics.Misses),
+			util.FormatCount(statistics.Sessions),
+			util.FormatCount(statistics.Requests),
+			util.FormatCount(statistics.Hits),
+			util.FormatCount(statistics.Misses),
 			percentage(statistics.Hits, statistics.Requests),
 			percentage(statistics.CachedTokens, statistics.InputTokens),
 			formatTokenCount(statistics.CachedTokens),
@@ -792,14 +791,20 @@ func writeReportRow(writer io.Writer, row reportRow, columnWidths []int) error {
 	return err
 }
 
-const billionTokens = 1_000_000_000
+const (
+	billionTokens = 1_000_000_000
+	tokenUnit     = "t"
+)
 
 func formatTokenCount(tokens int64) string {
+	if tokens <= 0 {
+		return "0" + tokenUnit
+	}
 	if tokens < billionTokens {
-		return util.FormatTokenCount(tokens)
+		return util.FormatTokenCount(tokens) + tokenUnit
 	}
 	count := strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", float64(tokens)/billionTokens), "0"), ".")
-	return count + "B"
+	return count + "B" + tokenUnit
 }
 
 func percentage[Count ~int | ~int64](part Count, whole Count) string {

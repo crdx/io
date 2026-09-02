@@ -1,9 +1,9 @@
 Provider   Sessions  Requests  Hits  Misses  Hit Rate  Input Cached  Tokens Read
-Anthropic         2         8     6       2     75.0%         90.0%         450K
-Codex             3        10     7       3     70.0%         70.0%         175K
-Total             5        18    13       5     72.2%         83.3%         625K
+Anthropic         2         8     6       2     75.0%         90.0%        450Kt
+Codex             3        10     7       3     70.0%         70.0%        175Kt
+Total             5        18    13       5     72.2%         83.3%        625Kt
 
 Provider   Average Input  Peak Input  Total Input  Cache Reads  Cache Writes  Fresh Input
-Anthropic            62K        100K         500K         450K           25K          25K
-Codex                25K         40K         250K         175K           10K          65K
-Total                42K        100K         750K         625K           35K          90K
+Anthropic           62Kt       100Kt        500Kt        450Kt          25Kt         25Kt
+Codex               25Kt        40Kt        250Kt        175Kt          10Kt         65Kt
+Total               42Kt       100Kt        750Kt        625Kt          35Kt         90Kt

@@ -5,22 +5,19 @@ import (
 )
 
 const (
-	thousandTokens = 1000
-	millionTokens  = 1_000_000
-	bytesPerToken  = 2.8
-	tokenPrecision = 2
-	tokenUnit      = "t"
-	estimateMark   = "~"
-	noTokenUnit    = ""
-	noEstimate     = ""
+	bytesPerToken = 2.8
+	tokenUnit     = "t"
+	estimateMark  = "~"
+	noTokenUnit   = ""
+	noEstimate    = ""
 )
 
 func formatLargeTokenCount(tokens float64, prefix string, unit string) string {
-	if tokens >= millionTokens {
-		return formatScaledUnit(tokens/millionTokens, tokenPrecision, prefix, "M"+unit)
+	if tokens >= million {
+		return formatScaledUnit(tokens/million, countPrecision, prefix, "M"+unit)
 	}
 
-	return formatScaledUnit(tokens/thousandTokens, tokenPrecision, prefix, "K"+unit)
+	return formatScaledUnit(tokens/thousand, countPrecision, prefix, "K"+unit)
 }
 
 func EstimateTokenCount[Count count](bytes Count) int64 {
@@ -38,15 +35,15 @@ func FormatEstimatedTokenCount[Count count](tokens Count) string {
 
 	estimate := float64(tokens)
 	if estimate < 10 {
-		return formatScaledUnit(estimate, tokenPrecision, estimateMark, tokenUnit)
+		return formatScaledUnit(estimate, countPrecision, estimateMark, tokenUnit)
 	}
 
-	if estimate < thousandTokens {
+	if estimate < thousand {
 		estimate = max(math.Round(estimate/100)*100, 100)
 	}
 
-	if estimate < thousandTokens {
-		return formatScaledUnit(estimate, tokenPrecision, estimateMark, tokenUnit)
+	if estimate < thousand {
+		return formatScaledUnit(estimate, countPrecision, estimateMark, tokenUnit)
 	}
 
 	return formatLargeTokenCount(estimate, estimateMark, tokenUnit)
@@ -57,7 +54,7 @@ func FormatTokenCount[Count count](tokens Count) string {
 		return "0K"
 	}
 
-	return formatLargeTokenCount(max(float64(tokens), thousandTokens), noEstimate, noTokenUnit)
+	return formatLargeTokenCount(max(float64(tokens), thousand), noEstimate, noTokenUnit)
 }
 
 func EstimateImageTokenCount(width int, height int) int64 {

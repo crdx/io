@@ -175,6 +175,22 @@ func TestEveryPromptCacheReportWithoutATotalMatchesTheGolden(t *testing.T) {
 				},
 			}},
 		},
+		{
+			name: "counts in their thousands, tokens in their billions, and nothing written",
+			analysis: Analysis{PromptCache: PromptCacheAnalysis{
+				Providers: []CacheStatistics{{
+					Provider:        "codex",
+					Sessions:        186,
+					Requests:        22138,
+					Hits:            21803,
+					Misses:          335,
+					InputTokens:     3_810_000_000,
+					CachedTokens:    3_750_000_000,
+					WrittenTokens:   0,
+					PeakInputTokens: 614_000,
+				}},
+			}},
+		},
 	}
 
 	var drawn strings.Builder

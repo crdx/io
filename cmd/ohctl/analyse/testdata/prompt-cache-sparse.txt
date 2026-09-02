@@ -3,8 +3,15 @@ No cache usage was recorded.
 
 === one provider, which is its own total ===
 Provider  Sessions  Requests  Hits  Misses  Hit Rate  Input Cached  Tokens Read
-Codex            1         2     1       1     50.0%         66.7%           8K
+Codex            1         2     1       1     50.0%         66.7%          8Kt
 
 Provider  Average Input  Peak Input  Total Input  Cache Reads  Cache Writes  Fresh Input
-Codex                6K          9K          12K           8K            1K           3K
+Codex               6Kt         9Kt         12Kt          8Kt           1Kt          3Kt
+
+=== counts in their thousands, tokens in their billions, and nothing written ===
+Provider  Sessions  Requests  Hits  Misses  Hit Rate  Input Cached  Tokens Read
+Codex          186       22K   22K     335     98.5%         98.4%       3.75Bt
+
+Provider  Average Input  Peak Input  Total Input  Cache Reads  Cache Writes  Fresh Input
+Codex             172Kt       614Kt       3.81Bt       3.75Bt            0t         60Mt
 
