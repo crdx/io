@@ -9,14 +9,24 @@ import (
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/internal/util/strutil"
 )
 
 const (
 	unsentMark              = "⏳"
+	harnessMark             = "🤖"
 	unwrappedPreviewColumns = 1 << 16
 )
+
+func submittedMarker(isSent bool) string {
+	if isSent {
+		return harnessMark + " "
+	}
+
+	return unsentMark + " "
+}
 
 func RenderQueuedMessages(messages []string, columns int, shouldRenderHyperlinks bool) []string {
 	if len(messages) == 0 {
@@ -104,21 +114,20 @@ func (self *PendingMessages) Rows(columns int) []string {
 }
 
 func (self *PendingMessages) render(message string, columns int) string {
-	marker := ""
-	if !self.isSent {
-		marker = unsentMark + " "
-	}
-
-	return renderSubmittedMessage(message, columns, self.shouldRenderHyperlinks, "", marker)
+	return renderSubmittedMessage(
+		message, columns, self.shouldRenderHyperlinks, "", submittedMarker(self.isSent),
+	)
 }
 
-func renderAccessMessage(event agent.Event) (string, bool) {
+func HarnessNotice(event agent.Event) (string, bool) {
 	switch event.Kind {
 	case caps.ModeChange:
 		return caps.ModeNotice(event)
 	case pathgrant.Change:
 		return pathgrant.Notice(event)
-	case agent.StartupEvent, agent.UserMessageEvent, agent.HarnessMessageEvent,
+	case turn.HarnessPoke:
+		return turn.PokeNotice(event)
+	case agent.StartupEvent, agent.UserMessageEvent, agent.SilentTurnEvent,
 		agent.ModelReasoningEvent, agent.ModelMessageEvent, agent.ToolCallRequestEvent,
 		agent.ToolCallResultEvent, agent.StateChangeEvent, agent.InterruptionEvent,
 		agent.RetryingEvent, agent.FailureEvent:

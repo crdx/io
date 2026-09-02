@@ -10,7 +10,7 @@ long enough to back the redrawing off. A sentence of a model answer that goes on
 the redrawing off. A sentence of a model answer that goes on long enough to back the redrawing off.
 A sentence of a model answer that goes on long enough to back the redrawing off. and this is the
 very last word: pika.
-=== asap answer then a harness message ===
+=== asap answer then a notice ===
 A sentence of a model answer that goes on long enough to back the redrawing off. A sentence of a
 model answer that goes on long enough to back the redrawing off. A sentence of a model answer that
 goes on long enough to back the redrawing off. A sentence of a model answer that goes on long enough
@@ -23,7 +23,7 @@ the redrawing off. A sentence of a model answer that goes on long enough to back
 A sentence of a model answer that goes on long enough to back the redrawing off. and this is the
 very last word: pika.
 
-The turn was interrupted
+The model ended the turn without an answer.
 === asap reasoning closed ===
 
 === line answer closed ===
@@ -38,7 +38,7 @@ long enough to back the redrawing off. A sentence of a model answer that goes on
 the redrawing off. A sentence of a model answer that goes on long enough to back the redrawing off.
 A sentence of a model answer that goes on long enough to back the redrawing off. and this is the
 very last word: pika.
-=== line answer then a harness message ===
+=== line answer then a notice ===
 A sentence of a model answer that goes on long enough to back the redrawing off. A sentence of a
 model answer that goes on long enough to back the redrawing off. A sentence of a model answer that
 goes on long enough to back the redrawing off. A sentence of a model answer that goes on long enough
@@ -51,7 +51,7 @@ the redrawing off. A sentence of a model answer that goes on long enough to back
 A sentence of a model answer that goes on long enough to back the redrawing off. and this is the
 very last word: pika.
 
-The turn was interrupted
+The model ended the turn without an answer.
 === line reasoning closed ===
 
 === paced answer closed ===
@@ -66,7 +66,7 @@ long enough to back the redrawing off. A sentence of a model answer that goes on
 the redrawing off. A sentence of a model answer that goes on long enough to back the redrawing off.
 A sentence of a model answer that goes on long enough to back the redrawing off. and this is the
 very last word: pika.
-=== paced answer then a harness message ===
+=== paced answer then a notice ===
 A sentence of a model answer that goes on long enough to back the redrawing off. A sentence of a
 model answer that goes on long enough to back the redrawing off. A sentence of a model answer that
 goes on long enough to back the redrawing off. A sentence of a model answer that goes on long enough
@@ -79,6 +79,6 @@ the redrawing off. A sentence of a model answer that goes on long enough to back
 A sentence of a model answer that goes on long enough to back the redrawing off. and this is the
 very last word: pika.
 
-The turn was interrupted
+The model ended the turn without an answer.
 === paced reasoning closed ===
 

@@ -6,6 +6,8 @@
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe call was cancelled…\e[0m\r
 \r
+\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m one was all I needed                   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -57,6 +59,29 @@
 \e[?7l\r\e[K\e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e[38;2;150;152;150m–\e[0m\r
 \r
+\e[38;2;207;173;0mT\e[0m\r
+\e[38;2;207;173;0mh\e[0m\r
+\e[38;2;207;173;0me\e[0m\r
+\e[38;2;207;173;0mt\e[0m\r
+\e[38;2;207;173;0mu\e[0m\r
+\e[38;2;207;173;0mr\e[0m\r
+\e[38;2;207;173;0mn\e[0m\r
+\e[38;2;207;173;0mw\e[0m\r
+\e[38;2;207;173;0ma\e[0m\r
+\e[38;2;207;173;0ms\e[0m\r
+\e[38;2;207;173;0mi\e[0m\r
+\e[38;2;207;173;0mn\e[0m\r
+\e[38;2;207;173;0mt\e[0m\r
+\e[38;2;207;173;0me\e[0m\r
+\e[38;2;207;173;0mr\e[0m\r
+\e[38;2;207;173;0mr\e[0m\r
+\e[38;2;207;173;0mu\e[0m\r
+\e[38;2;207;173;0mp\e[0m\r
+\e[38;2;207;173;0mt\e[0m\r
+\e[38;2;207;173;0me\e[0m\r
+\e[38;2;207;173;0md\e[0m\r
+\e[38;2;207;173;0m.\e[0m\r
+\r
 \e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mo\e[0m\r
@@ -99,6 +124,8 @@
 read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe call was cancelled because the user pressed escape\e[0m
 
+\e[38;2;207;173;0mThe turn was interrupted.\e[0m
+
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m one was all I needed\e[0m
 \e[48;2;52;53;65m\e[0m
@@ -111,6 +138,8 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe call was cancelled because the user pressed escape\e[0m\e[?25h\e[?2026l\r
+\r
+\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m one was all I needed                                                                               \e[0m\r
@@ -125,6 +154,8 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe call was cancelled because the user pressed escape\e[0m\e[?25h\e[?2026l\r
 \r
+\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m one was all I needed                                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -137,6 +168,8 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \e[?2026h\e[?25l\e[?7l\r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\e[1A\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[Kread \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe call was cancelled because the user pressed escape\e[0m\e[?25h\e[?2026l\r
+\r
+\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m one was all I needed                                                                               \e[0m\r
@@ -152,6 +185,9 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\re…\e]8;;\e\\ \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe…\e[0m\r
 \r
+\e[38;2;207;173;0mThe turn was\e[0m\r
+\e[38;2;207;173;0minterrupted.\e[0m\r
+\r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m one was all\e[0m\r
 \e[48;2;52;53;65m I needed   \e[0m\r
@@ -164,6 +200,8 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe call was cancelled because the user pressed escape\e[0m
 
+\e[38;2;207;173;0mThe turn was interrupted.\e[0m
+
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m one was all I needed\e[0m
 \e[48;2;52;53;65m\e[0m
@@ -175,6 +213,8 @@ read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;15
 \r
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mone.txt\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mtwo.txt\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150mthe call was cancelled because the user pressed escape\e[0m\r
+\r
+\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m one was all I needed                                                                               \e[0m\r

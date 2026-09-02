@@ -1,9 +1,9 @@
-{"event": {"kind": "user_message", "text": "what am i allowed to do here?"}}
-{"event": {"kind": "mode_change", "text": "rx"}}
-{"event": {"kind": "model_message", "text": "Reading and running commands, but not writing."}}
-{"event": {"kind": "mode_change", "name": "w", "text": "rxw"}}
-{"event": {"kind": "user_message", "text": "now write it down"}}
-{"event": {"kind": "model_message", "text": "Writing it down."}}
-{"event": {"kind": "mode_change", "name": "x", "text": "rw"}}
-{"event": {"kind": "mode_change", "name": "?", "text": "rw"}}
-{"event": {"kind": "model_message", "text": "Done."}}
+{"event":{"kind":"user_message","text":"what am i allowed to do here?"}}
+{"event":{"kind":"mode_change","state":"rx"}}
+{"event":{"kind":"model_message","text":"Reading and running commands, but not writing."}}
+{"event":{"kind":"mode_change","name":"w","state":"rxw"}}
+{"event":{"kind":"user_message","text":"now write it down"}}
+{"event":{"kind":"model_message","text":"Writing it down."}}
+{"event":{"kind":"mode_change","name":"x","state":"rw"}}
+{"event":{"kind":"mode_change","name":"?","state":"rw"}}
+{"event":{"kind":"model_message","text":"Done."}}

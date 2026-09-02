@@ -1,7 +1,7 @@
-{"event": {"kind": "user_message", "text": "read both of those files"}}
-{"event": {"kind": "tool_call_request", "id": "call_1", "name": "read", "arguments": "{\"path\":\"one.txt\"}", "render": "one.txt", "read_only": true}}
-{"event": {"kind": "tool_call_request", "id": "call_2", "name": "read", "arguments": "{\"path\":\"two.txt\"}", "render": "two.txt", "read_only": true}}
-{"event": {"kind": "tool_call_result", "status": "success", "id": "call_1", "name": "read", "text": "one\n", "took": 0, "stats": {"kind": "read", "lines": 1, "bytes": 4, "total_bytes": 4}}}
-{"event": {"kind": "tool_call_result", "status": "cancelled", "id": "call_2", "name": "read", "text": "the call was cancelled because the user pressed escape", "took": 0}}
-{"event": {"kind": "interruption"}}
-{"event": {"kind": "user_message", "text": "one was all I needed"}}
+{"event":{"kind":"user_message","text":"read both of those files"}}
+{"event":{"kind":"tool_call_request","id":"call_1","name":"read","arguments":"{\"path\":\"one.txt\"}","render":"one.txt","read_only":true}}
+{"event":{"kind":"tool_call_request","id":"call_2","name":"read","arguments":"{\"path\":\"two.txt\"}","render":"two.txt","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"success","id":"call_1","name":"read","text":"one\n","took":0,"stats":{"kind":"read","lines":1,"bytes":4}}}
+{"event":{"kind":"tool_call_result","status":"cancelled","id":"call_2","name":"read","text":"the call was cancelled because the user pressed escape","took":0}}
+{"event":{"kind":"turn_interruption"}}
+{"event":{"kind":"user_message","text":"one was all I needed"}}

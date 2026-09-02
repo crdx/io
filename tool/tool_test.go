@@ -26,10 +26,9 @@ func TestOutputStats(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			got := tool.OutputStats(test.output)
 			want := tool.Stats{
-				Kind:       tool.StatsOutput,
-				Lines:      test.lines,
-				Bytes:      test.bytes,
-				TotalBytes: test.bytes,
+				Kind:  tool.StatsOutput,
+				Lines: test.lines,
+				Bytes: test.bytes,
 			}
 			if got != want {
 				t.Errorf("got %#v, want %#v", got, want)

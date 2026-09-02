@@ -1,11 +1,11 @@
-{"kind":"head","version":11,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"head","version":12,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"wait beyond the request deadline"}}
-{"kind":"event","event":{"kind":"failure","text":"context deadline exceeded"}}
+{"kind":"event","event":{"kind":"turn_failure","text":"context deadline exceeded"}}
 {"kind":"item","payload":{"role":"user","content":"wait beyond the request deadline"}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the timeout"}}
 {"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
 {"kind":"item","payload":{"role":"user","content":"continue after the timeout"}}
 {"kind":"item","payload":{"role":"assistant","content":"Resumed."}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}

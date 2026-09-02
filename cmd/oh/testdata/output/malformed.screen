@@ -35,9 +35,6 @@ Entities are resolved in prose — AT&T
 becomes AT&T — but left alone inside
 code, where &amp; and &lt;div&gt; stand
 as they are written.
-
-A warning that arrived with a carriage
-return in it
 === one column ===
 
 
@@ -477,49 +474,6 @@ t
 e
 n
 .
-
-A
-w
-a
-r
-n
-i
-n
-g
-t
-h
-a
-t
-a
-r
-r
-i
-v
-e
-d
-w
-i
-t
-h
-a
-c
-a
-r
-r
-i
-a
-g
-e
-r
-e
-t
-u
-r
-n
-i
-n
-i
-t
 === tiny ===
 
  draw the
@@ -581,12 +535,6 @@ code, where
 stand as
 they are
 written.
-
-A warning
-that arrived
-with a
-carriage
-return in it
 === wide ===
 
  draw the awkward markdown
@@ -617,5 +565,3 @@ in angle brackets https://example.com/bracketed, which are not the same thing.
 
 Entities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where &amp; and
 &lt;div&gt; stand as they are written.
-
-A warning that arrived with a carriage return in it

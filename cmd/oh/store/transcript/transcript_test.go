@@ -10,6 +10,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/tool"
@@ -392,44 +393,49 @@ func TestTranscriptRetainsTurnFailures(t *testing.T) {
 	}
 }
 
+func transcriptOfOneEvent(t *testing.T, event agent.Event) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(3, 4), event); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return string(stored)
+}
+
 func TestTranscriptNamesWhyATurnWasInterrupted(t *testing.T) {
 	for name, test := range map[string]struct {
-		reason string
-		want   string
+		cause interrupt.Cause
+		want  string
 	}{
-		"with a reason": {
-			reason: "the user pressed escape",
-			want:   "The turn was interrupted because the user pressed escape.",
+		"with a cause": {
+			cause: interrupt.Escape,
+			want:  "The turn was interrupted because the user pressed escape.",
 		},
-		"without a reason": {
-			reason: "",
-			want:   "The turn was interrupted.",
+		"without a cause": {
+			cause: "",
+			want:  "The turn was interrupted.",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			path := filepath.Join(t.TempDir(), "transcript.md")
-			recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2)})
-			if err != nil {
-				t.Fatal(err)
-			}
-			if err := recorder.Event(time.Unix(3, 4), agent.Event{
-				Kind: agent.InterruptionEvent,
-				Text: test.reason,
-			}); err != nil {
-				t.Fatal(err)
-			}
-			if err := recorder.Close(); err != nil {
-				t.Fatal(err)
-			}
+			written := transcriptOfOneEvent(t, interrupt.Event(test.cause))
 
-			stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
-			if err != nil {
-				t.Fatal(err)
-			}
-			transcript := string(stored)
 			for _, want := range []string{"## Interrupted", test.want} {
-				if !strings.Contains(transcript, want) {
-					t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)
+				if !strings.Contains(written, want) {
+					t.Errorf("expected %q in the transcript, got:\n%s", want, written)
 				}
 			}
 		})
@@ -467,31 +473,12 @@ func TestTranscriptOmitsDurableState(t *testing.T) {
 	}
 }
 
-func TestTranscriptRecordsWhatANoticeSaid(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2)})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind:   agent.HarnessMessageEvent,
-		Status: agent.ErrorStatus,
-		Text:   "the conversation could not be stored: no space left on device",
-	}); err != nil {
-		t.Fatal(err)
-	}
-	if err := recorder.Close(); err != nil {
-		t.Fatal(err)
-	}
+func TestTranscriptRecordsWhatASilentTurnSaid(t *testing.T) {
+	written := transcriptOfOneEvent(t, agent.Event{Kind: agent.SilentTurnEvent})
 
-	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
-	if err != nil {
-		t.Fatal(err)
-	}
-	transcript := string(stored)
-	for _, want := range []string{"## Notice · error", "no space left on device"} {
-		if !strings.Contains(transcript, want) {
-			t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)
+	for _, want := range []string{"## Silent turn", agent.SilentTurnNotice} {
+		if !strings.Contains(written, want) {
+			t.Errorf("expected %q in the transcript, got:\n%s", want, written)
 		}
 	}
 }
@@ -538,13 +525,11 @@ func TestTranscriptHoldsTheHeaderApartFromWhatFollowsIt(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind:   agent.HarnessMessageEvent,
-		Status: agent.WarningStatus,
-		Text:   "the turn was stopped",
+		Kind: agent.SilentTurnEvent,
 	}); err != nil {
 		t.Fatal(err)
 	}
-	if err := recorder.Event(time.Unix(5, 6), agent.Event{Kind: caps.ModeChange, Text: "rx"}); err != nil {
+	if err := recorder.Event(time.Unix(5, 6), caps.ModeEvent(caps.Read|caps.Shell)); err != nil {
 		t.Fatal(err)
 	}
 	if err := recorder.Event(time.Unix(7, 8), agent.Event{Kind: agent.UserMessageEvent, Text: "hi"}); err != nil {
@@ -560,7 +545,7 @@ func TestTranscriptHoldsTheHeaderApartFromWhatFollowsIt(t *testing.T) {
 	}
 	transcript := string(stored)
 	for _, want := range []string{
-		"- **Workspace:** `/workspace`\n- **Tool detail:** `jq 'select(.event.id == \"<id>\")' session.jsonl`, for the `[id]` of any call\n\n## Notice · warning · +2.0s\n",
+		"- **Workspace:** `/workspace`\n- **Tool detail:** `jq 'select(.event.id == \"<id>\")' session.jsonl`, for the `[id]` of any call\n\n## Silent turn · +2.0s\n",
 		"## Mode · rx · +4.0s\n\n## User · +6.0s\n",
 	} {
 		if !strings.Contains(transcript, want) {

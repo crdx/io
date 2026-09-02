@@ -20,6 +20,7 @@ import (
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/interaction"
+	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/metrics"
@@ -36,7 +37,7 @@ import (
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/cmd/oh/work"
-	"crdx.org/io/internal/stop"
+	"crdx.org/io/session"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox/title"
 )
@@ -44,8 +45,7 @@ import (
 type SessionLogger = record.Session
 
 type pendingMessage struct {
-	message agent.Event
-	state   agent.Event
+	state agent.Event
 }
 
 type pendingInput struct {
@@ -84,20 +84,22 @@ type feedbackState struct {
 	message feedbackMessage
 }
 
-func (self *pendingInput) add(message agent.Event, state agent.Event) {
-	self.items = append(self.items, pendingMessage{message: message, state: state})
+func (self *pendingInput) add(state agent.Event) {
+	self.items = append(self.items, pendingMessage{state: state})
 }
 
 func (self *pendingInput) takeBack(index int) {
 	self.items = slices.Delete(self.items, index, index+1)
 }
 
-func (self *pendingInput) texts() []string {
-	texts := make([]string, len(self.items))
-	for i, item := range self.items {
-		texts[i] = item.message.Text
+func (self *pendingInput) notices() []string {
+	var notices []string
+	for _, item := range self.items {
+		if notice, isSaid := painter.HarnessNotice(item.state); isSaid {
+			notices = append(notices, notice)
+		}
 	}
-	return texts
+	return notices
 }
 
 type App struct {
@@ -255,7 +257,7 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 
 	case edit.Cancel:
 		if !self.takeBackInterjection(inputLine) {
-			self.cancelTurn(stopKeyReason(keypress))
+			self.cancelTurn(stopKeyCause(keypress))
 		}
 
 	case edit.Quit:
@@ -291,7 +293,7 @@ func (self *App) isTransitionRequested() bool {
 func (self *App) requestTransition(transition cycle.Transition) error {
 	self.transition = transition
 	if self.currentTurn.Running() {
-		self.interruptTurn(transitionReason)
+		self.interruptTurn(interrupt.SessionClose)
 	}
 	return nil
 }
@@ -320,7 +322,7 @@ func (self *App) emitCommandEvent(event agent.Event) {
 	self.queuePathGrantChange(event)
 	if self.currentTurn.Running() {
 		self.queuedTurn.MarkAccessChange()
-		self.interruptTurn(accessReason)
+		self.interruptTurn(interrupt.AccessChange)
 		return
 	}
 	self.refreshPendingMessages()
@@ -335,11 +337,10 @@ func (self *App) queuePathGrantChange(event agent.Event) {
 		}
 	}
 
-	message, isShown := pathgrant.Notice(event)
-	if !isShown {
+	if _, isShown := pathgrant.Notice(event); !isShown {
 		return
 	}
-	self.pending.add(agent.Event{Kind: agent.UserMessageEvent, Text: message}, event)
+	self.pending.add(event)
 }
 
 func (self *App) pendingPathGrantChange(path string) (int, bool) {
@@ -452,7 +453,7 @@ func (self *App) toggleCap(whichCaps caps.Set) {
 
 	if self.currentTurn.Running() {
 		self.queuedTurn.MarkAccessChange()
-		self.interruptTurn(accessReason)
+		self.interruptTurn(interrupt.AccessChange)
 	}
 }
 
@@ -467,10 +468,7 @@ func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
 }
 
 func (self *App) showModeChange(whichCaps caps.Set) {
-	event := caps.ModeToggleEvent(whichCaps, self.mode.Current())
-	text, _ := caps.ModeNotice(event)
-	message := agent.Event{Kind: agent.UserMessageEvent, Text: text}
-	self.pending.add(message, event)
+	self.pending.add(caps.ModeToggleEvent(whichCaps, self.mode.Current()))
 
 	if !self.currentTurn.Running() {
 		self.refreshPendingMessages()
@@ -486,7 +484,6 @@ func (self *App) takeBackModeChange(index int, whichCaps caps.Set) {
 			continue
 		}
 		item.state = caps.ModeWithout(item.state, whichCaps)
-		item.message.Text, _ = caps.ModeNotice(item.state)
 	}
 
 	if self.currentTurn.Running() {
@@ -509,7 +506,7 @@ func (self *App) refreshPendingMessages() {
 		return
 	}
 
-	messages := self.pending.texts()
+	messages := self.pending.notices()
 	if self.pending.renderer == nil {
 		self.pending.renderer = painter.NewPendingMessages(messages, self.screen.IsTerminal())
 		self.screen.Blank()
@@ -550,15 +547,14 @@ func (self *App) settleAccess() {
 func (self *App) settlePendingInput() {
 	wasShown := self.pending.block != nil
 	for _, item := range self.pending.items {
-		if item.state.Kind != "" {
-			item.state.Name = ""
-			self.events = append(self.events, item.state)
-			self.storeEvent(item.state)
+		if item.state.Kind == "" {
+			continue
 		}
-		if wasShown {
-			self.metrics.Record(item.message)
-			self.events = append(self.events, item.message)
-			self.storeEvent(item.message)
+		self.metrics.Record(item.state)
+		self.events = append(self.events, item.state)
+		self.storeEvent(item.state)
+		if !wasShown {
+			self.noticePainter().DrawEvent(item.state)
 		}
 	}
 
@@ -581,37 +577,29 @@ func (self *App) recordModeEvent(event agent.Event) {
 	self.storeEvent(event)
 }
 
-const (
-	escapeReason     = "the user pressed escape"
-	ctrlDReason      = "the user pressed ctrl+d"
-	replacedReason   = "the user sent another message"
-	accessReason     = "the user changed what the harness is allowed to do"
-	transitionReason = "the session is being closed"
-)
-
-func stopKeyReason(keypress key.Key) string {
+func stopKeyCause(keypress key.Key) interrupt.Cause {
 	if keypress.Code == key.Escape {
-		return escapeReason
+		return interrupt.Escape
 	}
 
-	return ctrlDReason
+	return interrupt.ControlD
 }
 
-func (self *App) cancelTurn(reason string) {
+func (self *App) cancelTurn(cause interrupt.Cause) {
 	if self.currentTurn.Cancelled() {
 		self.queuedTurn.Drop()
 	}
 
-	self.interruptTurn(reason)
+	self.interruptTurn(cause)
 }
 
 func (self *App) replaceTurn(message string) {
 	self.queuedTurn.Replace(message)
-	self.interruptTurn(replacedReason)
+	self.interruptTurn(interrupt.Replacement)
 }
 
-func (self *App) interruptTurn(reason string) {
-	self.currentTurn.Interrupt(stop.Because(reason))
+func (self *App) interruptTurn(cause interrupt.Cause) {
+	self.currentTurn.Interrupt(interrupt.Because(cause))
 }
 
 func (self *App) show(inputLine *edit.Input) {
@@ -752,6 +740,13 @@ func (self *App) reloadConfig(watchFailure error) bool {
 	return true
 }
 
+func (self *App) turnSummary() session.TurnSummary {
+	inputTokens, _ := self.metrics.ContextUsage()
+	timing, _ := self.currentTurn.Timing()
+
+	return session.TurnSummary{Took: timing.ModelTurn, InputTokens: inputTokens}
+}
+
 func (self *App) turnTiming() turn.Timing {
 	if timing, isKnown := self.currentTurn.Timing(); isKnown {
 		return timing
@@ -867,7 +862,7 @@ func (self *App) restore(storedSession *store.Session) {
 		self.takeSessionTitle(event)
 	}
 
-	self.metrics.Restore(storedSession.Events, storedSession.TurnCompletions)
+	self.metrics.Restore(storedSession.Events, storedSession.Turns)
 
 	self.screen.Reset()
 	self.replay()
@@ -955,12 +950,20 @@ func (self *App) prelude() string {
 	return strings.Join(notes, " ")
 }
 
-func (self *App) accessMessage() string {
+func (self *App) accessTellers() access.Group {
 	tellers := []access.Teller{self.mode}
 	if self.pathGrants != nil {
 		tellers = append(tellers, self.pathGrants)
 	}
-	return access.NewGroup(tellers...).Inject()
+	return access.NewGroup(tellers...)
+}
+
+func (self *App) accessMessage() string {
+	return self.accessTellers().Inject()
+}
+
+func (self *App) untoldAccessMessage() string {
+	return self.accessTellers().Peek()
 }
 
 func (self *App) titleNote() string {
@@ -1005,6 +1008,12 @@ func (self *App) interruptionReason() string {
 	return ""
 }
 
+func (self *App) interruptionCause() interrupt.Cause {
+	cause, _ := interrupt.CauseOf(self.currentTurn.Reason())
+
+	return cause
+}
+
 func (self *App) takeTurn(turnEvent TurnEvent) {
 	if !self.currentTurn.Observe(turnEvent) {
 		return
@@ -1027,7 +1036,7 @@ func (self *App) recordEvent(event agent.Event) {
 	self.metrics.Record(event)
 	self.takeSessionTitle(event)
 
-	if isSilentTurnNotice(event) && self.wasCutShort() && !self.wasPoked() {
+	if event.Kind == agent.SilentTurnEvent && self.wasCutShort() && !self.wasPoked() {
 		self.queuedTurn.MarkSilentTurn()
 	}
 
@@ -1049,15 +1058,10 @@ func (self *App) storeEvent(event agent.Event) {
 }
 
 func (self *App) notifyFailure(text string) {
-	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text, Status: agent.ErrorStatus})
+	self.showFeedback(systemFeedback, feedbackMessage{text: text, status: agent.ErrorStatus})
 }
 
 func (self *App) notify(event agent.Event) {
-	if event.Kind == agent.HarnessMessageEvent {
-		self.showFeedback(systemFeedback, feedbackMessage{text: event.Text, status: event.Status})
-		return
-	}
-
 	self.events = append(self.events, event)
 	self.noticePainter().DrawEvent(event)
 
@@ -1072,10 +1076,6 @@ func (self *App) noticePainter() *painter.Picasso {
 	return self.newPainter(false)
 }
 
-func isSilentTurnNotice(event agent.Event) bool {
-	return event.Kind == agent.HarnessMessageEvent && event.Text == agent.SilentTurnNotice
-}
-
 func (self *App) wasCutShort() bool {
 	if len(self.events) == 0 {
 		return false
@@ -1086,8 +1086,11 @@ func (self *App) wasCutShort() bool {
 
 func (self *App) wasPoked() bool {
 	for _, event := range slices.Backward(self.events) {
+		if event.Kind == turn.HarnessPoke {
+			return true
+		}
 		if event.Kind == agent.UserMessageEvent {
-			return event.Text == turn.PokeMessage
+			return false
 		}
 	}
 
@@ -1100,13 +1103,13 @@ func (self *App) finish() {
 
 	var turnError error
 	if self.currentTurn.Cancelled() {
-		self.recordEvent(agent.Event{Kind: agent.InterruptionEvent, Text: self.interruptionReason()})
+		self.recordEvent(interrupt.Event(self.interruptionCause()))
 	} else if turnError = self.currentTurn.Error(); turnError != nil {
 		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: turnError.Error()})
 	}
 
 	if self.storeProviderState() {
-		if err := self.recorder.CompleteTurn(); err != nil {
+		if err := self.recorder.CompleteTurn(self.turnSummary()); err != nil {
 			self.notifyFailure("The turn completion could not be stored: " + err.Error())
 		}
 	}
@@ -1138,14 +1141,16 @@ func (self *App) finish() {
 		self.refreshPendingMessages()
 		self.start(message)
 	case turn.AccessChange:
-		if message := self.accessMessage(); message != "" {
-			self.start(message)
+		if self.untoldAccessMessage() != "" {
+			self.start("")
 		}
 	case turn.AccessNotice:
 		self.refreshPendingMessages()
 	case turn.Poke:
 		self.refreshPendingMessages()
-		self.start(message)
+		self.notify(turn.PokeEvent())
+		self.agent.AddUserMessage(message)
+		self.start("")
 	case turn.None:
 	}
 }

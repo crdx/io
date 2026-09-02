@@ -6,13 +6,12 @@
 
 Taking them together.
 
-read screen.go ✓ 3L
-grep spinner *.go ✓ 1L
+read screen.go –
+grep spinner *.go –
 
-Background processes killed (sleep).
-Copied to clipboard.
-The conversation could not be stored: no
-space left on device
+
+ 🤖 The workspace is now read-only.
+
 
 Both still mention the spinner.
 === one column ===
@@ -113,111 +112,67 @@ e
 r
 .
 
-✓
-✓
+–
+–
 
-B
-a
-c
-k
-g
-r
-o
-u
-n
-d
-p
-r
-o
-c
-e
-s
-s
-e
-s
-k
-i
-l
-l
-e
-d
-(
-s
-l
-e
-e
-p
-)
-.
-C
-o
-p
-i
-e
-d
-t
-o
-c
-l
-i
-p
-b
-o
-a
-r
-d
-.
+
+
+🤖
+
 T
+
 h
+
 e
-c
+
+w
+
 o
-n
-v
-e
+
 r
+
+k
+
 s
-a
-t
-i
-o
-n
-c
-o
-u
-l
-d
-n
-o
-t
-b
-e
-s
-t
-o
-r
-e
-d
-:
-n
-o
-s
+
 p
+
 a
+
 c
+
 e
-l
-e
-f
-t
-o
-n
-d
-e
-v
+
 i
-c
+
+s
+
+n
+
+o
+
+w
+
+r
+
 e
+
+a
+
+d
+
+-
+
+o
+
+n
+
+l
+
+y
+
+.
+
 
 B
 o
@@ -259,21 +214,16 @@ r
 Taking them
 together.
 
-read ✓ 3L
-grep ✓ 1L
+read sc… –
+grep sp… –
 
-Background
-processes
-killed
-(sleep).
-Copied to
-clipboard.
-The
-conversation
-could not be
-stored: no
-space left
-on device
+
+ 🤖 The
+    workspac
+    e is now
+    read-onl
+    y.
+
 
 Both still
 mention the
@@ -285,11 +235,11 @@ spinner.
 
 Taking them together.
 
-read screen.go ✓ 3L
-grep spinner *.go ✓ 1L
+read screen.go –
+grep spinner *.go –
 
-Background processes killed (sleep).
-Copied to clipboard.
-The conversation could not be stored: no space left on device
+
+ 🤖 The workspace is now read-only.
+
 
 Both still mention the spinner.

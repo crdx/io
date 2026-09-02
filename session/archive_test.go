@@ -19,7 +19,7 @@ func archivedSession(t *testing.T) (string, string) {
 	writer := storedSession(t, directory)
 	name := writer.Name()
 
-	if err := writer.CompleteTurn(); err != nil {
+	if err := writer.CompleteTurn(session.TurnSummary{}); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {

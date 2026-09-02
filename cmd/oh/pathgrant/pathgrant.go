@@ -103,6 +103,10 @@ func (self *Grants) IsTold(path string) bool {
 	return isKnown == isCurrent && knownGrant.Access == currentGrant.Access
 }
 
+func (self *Grants) Peek() string {
+	return self.state.Peek()
+}
+
 func (self *Grants) Inject() string {
 	return self.state.Inject()
 }

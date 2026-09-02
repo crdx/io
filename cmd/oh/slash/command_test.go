@@ -271,7 +271,7 @@ func TestUsageErrorIsRecognised(t *testing.T) {
 	}
 }
 
-func TestCommandErrorsAreFormattedForHarnessMessages(t *testing.T) {
+func TestCommandErrorsAreFormattedForFeedback(t *testing.T) {
 	invocation := slash.Invocation{Name: "/copy", Usage: "/copy {session-dir|session-id|session-name}"}
 	if got := slash.FormatError(invocation, slash.Usage()); got != "Usage: /copy {session-dir|session-id|session-name}" {
 		t.Errorf("got usage error %q", got)

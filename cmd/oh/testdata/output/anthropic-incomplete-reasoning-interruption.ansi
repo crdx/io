@@ -1,7 +1,9 @@
 \e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m think until interrupted                                                                            \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[?25h\e[?2026l\r
+\r
+\e[38;2;207;173;0mThe turn was interrupted because the user pressed escape.\e[0m\e[?25h\e[?2026l\r
+\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m continue after the interruption                                                                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

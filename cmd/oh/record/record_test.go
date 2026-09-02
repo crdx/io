@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/session"
 )
 
 type testSession struct {
@@ -36,7 +37,7 @@ func (self *testSession) Item(item json.RawMessage) error {
 	return nil
 }
 
-func (self *testSession) CompleteTurn() error {
+func (self *testSession) CompleteTurn(summary session.TurnSummary) error {
 	self.turnCompletions++
 	return nil
 }

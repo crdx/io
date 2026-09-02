@@ -14,17 +14,19 @@
 
 reason and then stop
 
-## Notice · warning · +0s
+## Silent turn · +0s
 
 ```
 The model ended the turn without an answer.
 ```
 
-## User · +0s
+## Poke · +0s
 
+```
 The previous response ended without a reply. Carry on from where it stopped.
+```
 
-## Notice · warning · +0s
+## Silent turn · +0s
 
 ```
 The model ended the turn without an answer.

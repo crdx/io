@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/req"
 	"crdx.org/io/session"
 
@@ -240,7 +241,7 @@ func TestWhatWasHeldBackIsWrittenInFrontOfTheFirstMessage(t *testing.T) {
 
 	held := []agent.Event{
 		{Kind: agent.StartupEvent, Took: time.Millisecond},
-		{Kind: agent.HarnessMessageEvent, Text: "the workspace is now read-write"},
+		{Kind: caps.ModeChange, Name: "w", Text: "rxwgs"},
 	}
 
 	for _, event := range held {
@@ -262,7 +263,7 @@ func TestWhatWasHeldBackIsWrittenInFrontOfTheFirstMessage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want := []agent.Kind{agent.StartupEvent, agent.HarnessMessageEvent, agent.UserMessageEvent}
+	want := []agent.Kind{agent.StartupEvent, caps.ModeChange, agent.UserMessageEvent}
 
 	got := make([]agent.Kind, 0, len(storedSession.Events))
 	for _, event := range storedSession.Events {

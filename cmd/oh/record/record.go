@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"crdx.org/io/session"
+
 	"crdx.org/io/agent"
 )
 
@@ -13,7 +15,7 @@ type Session interface {
 	Name() string
 	Event(event agent.Event) error
 	Item(item json.RawMessage) error
-	CompleteTurn() error
+	CompleteTurn(summary session.TurnSummary) error
 	TakeWarnings() []error
 }
 
@@ -57,8 +59,8 @@ func (self *Recorder) StoreItems(items []json.RawMessage) error {
 	return nil
 }
 
-func (self *Recorder) CompleteTurn() error {
-	return self.session.CompleteTurn()
+func (self *Recorder) CompleteTurn(summary session.TurnSummary) error {
+	return self.session.CompleteTurn(summary)
 }
 
 func (self *Recorder) TakeWarnings() []error {

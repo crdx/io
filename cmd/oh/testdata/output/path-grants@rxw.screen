@@ -4,53 +4,58 @@
 
 
 
- Granted temporary read-only access to
- /reference.
+ 🤖 Granted temporary read-only access
+    to /reference.
 
 
 I can read the external reference now.
 
 
- Granted temporary read and write access
- to /reference. Changes there follow the
- workspace write capability.
+ 🤖 Granted temporary read and write
+    access to /reference. Changes there
+    follow the workspace write
+    capability.
 
 
 I can also change it while workspace
 writing is granted.
 
 
- Granted temporary read and execute
- access to /tools. Execution there
- follows the shell capability.
+ 🤖 Granted temporary read and execute
+    access to /tools. Execution there
+    follows the shell capability.
 
 
 I can run what is in the tools directory
 now.
 
 
- Granted temporary read, write, and
- execute access to /build. Changes there
- follow the workspace write capability.
- Execution there follows the shell
- capability.
+ 🤖 Granted temporary read, write, and
+    execute access to /build. Changes
+    there follow the workspace write
+    capability. Execution there follows
+    the shell capability.
 
 
 I can build in place and run what comes
 out of it.
 
 
- Revoked temporary path access to
- /build. Revoked temporary path access
- to /tools.
+ 🤖 Revoked temporary path access to
+    /build.
+
+
+
+ 🤖 Revoked temporary path access to
+    /tools.
 
 
 I will use the reference alone from
 here.
 
 
- Revoked temporary path access to
- /reference.
+ 🤖 Revoked temporary path access to
+    /reference.
 
 
 I will no longer use it.
@@ -105,6 +110,8 @@ e
 
 
 
+
+🤖
 
 G
 
@@ -230,6 +237,8 @@ w
 
 
 
+🤖
+
 G
 
 r
@@ -467,6 +476,8 @@ d
 
 
 
+🤖
+
 G
 
 r
@@ -676,6 +687,8 @@ w
 .
 
 
+
+🤖
 
 G
 
@@ -996,6 +1009,8 @@ t
 
 
 
+🤖
+
 R
 
 e
@@ -1065,6 +1080,11 @@ l
 d
 
 .
+
+
+
+
+🤖
 
 R
 
@@ -1173,6 +1193,8 @@ e
 .
 
 
+
+🤖
 
 R
 
@@ -1280,11 +1302,14 @@ t
 
 
 
- Granted
- temporary
- read-only
- access to
- /reference.
+ 🤖 Granted
+    temporar
+    y
+    read-onl
+    y access
+    to
+    /referen
+    ce.
 
 
 I can read
@@ -1293,18 +1318,23 @@ reference
 now.
 
 
- Granted
- temporary
- read and
- write
- access to
- /reference.
- Changes
- there
- follow the
- workspace
- write
- capability.
+ 🤖 Granted
+    temporar
+    y read
+    and
+    write
+    access
+    to
+    /referen
+    ce.
+    Changes
+    there
+    follow
+    the
+    workspac
+    e write
+    capabili
+    ty.
 
 
 I can also
@@ -1315,17 +1345,21 @@ writing is
 granted.
 
 
- Granted
- temporary
- read and
- execute
- access to
- /tools.
- Execution
- there
- follows the
- shell
- capability.
+ 🤖 Granted
+    temporar
+    y read
+    and
+    execute
+    access
+    to
+    /tools.
+    Executio
+    n there
+    follows
+    the
+    shell
+    capabili
+    ty.
 
 
 I can run
@@ -1335,24 +1369,30 @@ directory
 now.
 
 
- Granted
- temporary
- read,
- write, and
- execute
- access to
- /build.
- Changes
- there
- follow the
- workspace
- write
- capability.
- Execution
- there
- follows the
- shell
- capability.
+ 🤖 Granted
+    temporar
+    y read,
+    write,
+    and
+    execute
+    access
+    to
+    /build.
+    Changes
+    there
+    follow
+    the
+    workspac
+    e write
+    capabili
+    ty.
+    Executio
+    n there
+    follows
+    the
+    shell
+    capabili
+    ty.
 
 
 I can build
@@ -1362,14 +1402,21 @@ comes out of
 it.
 
 
- Revoked
- temporary
- path access
- to /build.
- Revoked
- temporary
- path access
- to /tools.
+ 🤖 Revoked
+    temporar
+    y path
+    access
+    to
+    /build.
+
+
+
+ 🤖 Revoked
+    temporar
+    y path
+    access
+    to
+    /tools.
 
 
 I will use
@@ -1379,11 +1426,13 @@ alone from
 here.
 
 
- Revoked
- temporary
- path access
- to
- /reference.
+ 🤖 Revoked
+    temporar
+    y path
+    access
+    to
+    /referen
+    ce.
 
 
 I will no
@@ -1395,39 +1444,44 @@ it.
 
 
 
- Granted temporary read-only access to /reference.
+ 🤖 Granted temporary read-only access to /reference.
 
 
 I can read the external reference now.
 
 
- Granted temporary read and write access to /reference. Changes there follow the workspace write
- capability.
+ 🤖 Granted temporary read and write access to /reference. Changes there follow the workspace write
+    capability.
 
 
 I can also change it while workspace writing is granted.
 
 
- Granted temporary read and execute access to /tools. Execution there follows the shell capability.
+ 🤖 Granted temporary read and execute access to /tools. Execution there follows the shell
+    capability.
 
 
 I can run what is in the tools directory now.
 
 
- Granted temporary read, write, and execute access to /build. Changes there follow the workspace
- write capability. Execution there follows the shell capability.
+ 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace
+    write capability. Execution there follows the shell capability.
 
 
 I can build in place and run what comes out of it.
 
 
- Revoked temporary path access to /build. Revoked temporary path access to /tools.
+ 🤖 Revoked temporary path access to /build.
+
+
+
+ 🤖 Revoked temporary path access to /tools.
 
 
 I will use the reference alone from here.
 
 
- Revoked temporary path access to /reference.
+ 🤖 Revoked temporary path access to /reference.
 
 
 I will no longer use it.

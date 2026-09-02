@@ -139,6 +139,10 @@ func (self *Mode) Toggle(whichCaps Set) {
 	self.state.Change(func(currentCaps Set) Set { return currentCaps ^ whichCaps })
 }
 
+func (self *Mode) Peek() string {
+	return self.state.Peek()
+}
+
 func (self *Mode) Inject() string {
 	return self.state.Inject()
 }

@@ -191,10 +191,12 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 			return true
 		}
 
-		self.provider.AddUserMessage(message)
+		if message != "" {
+			self.provider.AddUserMessage(message)
 
-		if !yieldEvent(Event{Kind: UserMessageEvent, Text: message}, nil) {
-			return
+			if !yieldEvent(Event{Kind: UserMessageEvent, Text: message}, nil) {
+				return
+			}
 		}
 
 		for {
@@ -217,7 +219,7 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 					return
 				}
 				if !prose.hasAnswered {
-					yieldEvent(Event{Kind: HarnessMessageEvent, Text: SilentTurnNotice, Status: WarningStatus}, nil)
+					yieldEvent(Event{Kind: SilentTurnEvent}, nil)
 				}
 				return
 			}
@@ -502,6 +504,9 @@ func (self *Agent) runBatch(
 
 			var stats *tool.Stats
 			if executionResult.Stats.Kind != "" {
+				if executionResult.Stats.TotalBytes == executionResult.Stats.Bytes {
+					executionResult.Stats.TotalBytes = 0
+				}
 				stats = &executionResult.Stats
 			}
 

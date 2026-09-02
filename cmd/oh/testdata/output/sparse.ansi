@@ -3,13 +3,12 @@
 \e[48;2;52;53;65m run the thing that takes no arguments  \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
-\e[38;2;129;162;190mThe web search and fetch tools are now\e[0m\r
-\e[38;2;129;162;190mrefused.\e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are  \e[0m\r
+\e[48;2;52;53;65m    now refused.                        \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
 \r
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\r
-\r
-\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KNothing came back.\r
@@ -80,82 +79,90 @@
 \e[48;2;52;53;65ms\e[0m\r
 \e[48;2;52;53;65m \e[0m\r
 \r
-\e[38;2;129;162;190mT\e[0m\r
-\e[38;2;129;162;190mh\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mw\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mb\e[0m\r
-\e[38;2;129;162;190ms\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190ma\e[0m\r
-\e[38;2;129;162;190mr\e[0m\r
-\e[38;2;129;162;190mc\e[0m\r
-\e[38;2;129;162;190mh\e[0m\r
-\e[38;2;129;162;190ma\e[0m\r
-\e[38;2;129;162;190mn\e[0m\r
-\e[38;2;129;162;190md\e[0m\r
-\e[38;2;129;162;190mf\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mt\e[0m\r
-\e[38;2;129;162;190mc\e[0m\r
-\e[38;2;129;162;190mh\e[0m\r
-\e[38;2;129;162;190mt\e[0m\r
-\e[38;2;129;162;190mo\e[0m\r
-\e[38;2;129;162;190mo\e[0m\r
-\e[38;2;129;162;190ml\e[0m\r
-\e[38;2;129;162;190ms\e[0m\r
-\e[38;2;129;162;190ma\e[0m\r
-\e[38;2;129;162;190mr\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mn\e[0m\r
-\e[38;2;129;162;190mo\e[0m\r
-\e[38;2;129;162;190mw\e[0m\r
-\e[38;2;129;162;190mr\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mf\e[0m\r
-\e[38;2;129;162;190mu\e[0m\r
-\e[38;2;129;162;190ms\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190md\e[0m\r
-\e[38;2;129;162;190m.\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m🤖\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65mT\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
 \r
 \e[?7l\r\e[K\e[38;2;76;154;44m✓\e[0m\r
-\r
-\e[38;2;207;173;0mB\e[0m\r
-\e[38;2;207;173;0ma\e[0m\r
-\e[38;2;207;173;0mc\e[0m\r
-\e[38;2;207;173;0mk\e[0m\r
-\e[38;2;207;173;0mg\e[0m\r
-\e[38;2;207;173;0mr\e[0m\r
-\e[38;2;207;173;0mo\e[0m\r
-\e[38;2;207;173;0mu\e[0m\r
-\e[38;2;207;173;0mn\e[0m\r
-\e[38;2;207;173;0md\e[0m\r
-\e[38;2;207;173;0mp\e[0m\r
-\e[38;2;207;173;0mr\e[0m\r
-\e[38;2;207;173;0mo\e[0m\r
-\e[38;2;207;173;0mc\e[0m\r
-\e[38;2;207;173;0me\e[0m\r
-\e[38;2;207;173;0ms\e[0m\r
-\e[38;2;207;173;0ms\e[0m\r
-\e[38;2;207;173;0me\e[0m\r
-\e[38;2;207;173;0ms\e[0m\r
-\e[38;2;207;173;0mk\e[0m\r
-\e[38;2;207;173;0mi\e[0m\r
-\e[38;2;207;173;0ml\e[0m\r
-\e[38;2;207;173;0ml\e[0m\r
-\e[38;2;207;173;0me\e[0m\r
-\e[38;2;207;173;0md\e[0m\r
-\e[38;2;207;173;0m(\e[0m\r
-\e[38;2;207;173;0ms\e[0m\r
-\e[38;2;207;173;0ml\e[0m\r
-\e[38;2;207;173;0me\e[0m\r
-\e[38;2;207;173;0me\e[0m\r
-\e[38;2;207;173;0mp\e[0m\r
-\e[38;2;207;173;0m)\e[0m\r
-\e[38;2;207;173;0m.\e[0m\r
-\r
 \r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KN\r
@@ -179,12 +186,10 @@
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m run the thing that takes no arguments\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m
-
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.\e[0m
+\e[48;2;52;53;65m\e[0m
 status \e[38;2;76;154;44m✓\e[0m
-
-\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m
-
 \e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m
 
 Nothing came back.
@@ -194,12 +199,11 @@ Nothing came back.
 \e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[Kstatus\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
-\r
-\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KNoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came bac\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came back.\e[?25h\e[?2026l\r
@@ -209,12 +213,11 @@ Nothing came back.
 \e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[Kstatus\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
-\r
-\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KNothing came back.\e[?25h\e[?2026l\r
@@ -224,12 +227,11 @@ Nothing came back.
 \e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[Kstatus\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
-\r
-\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mnotify\e[0m \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KNoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came bac\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KNothing came back.\e[?25h\e[?2026l\r
@@ -242,19 +244,17 @@ Nothing came back.
 \e[48;2;52;53;65m arguments  \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
-\e[38;2;129;162;190mThe web\e[0m\r
-\e[38;2;129;162;190msearch and\e[0m\r
-\e[38;2;129;162;190mfetch tools\e[0m\r
-\e[38;2;129;162;190mare now\e[0m\r
-\e[38;2;129;162;190mrefused.\e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m 🤖 The web \e[0m\r
+\e[48;2;52;53;65m    search  \e[0m\r
+\e[48;2;52;53;65m    and     \e[0m\r
+\e[48;2;52;53;65m    fetch   \e[0m\r
+\e[48;2;52;53;65m    tools   \e[0m\r
+\e[48;2;52;53;65m    are now \e[0m\r
+\e[48;2;52;53;65m    refused.\e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
 \r
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\r
-\r
-\e[38;2;207;173;0mBackground\e[0m\r
-\e[38;2;207;173;0mprocesses\e[0m\r
-\e[38;2;207;173;0mkilled\e[0m\r
-\e[38;2;207;173;0m(sleep).\e[0m\r
-\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KNothing came\r
@@ -264,12 +264,10 @@ Nothing came back.
 \e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m run the thing that takes no arguments\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m
-
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.\e[0m
+\e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m
-
-\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m
-
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m
 
 \r\e[KNothing came back.
@@ -279,12 +277,11 @@ Nothing came back.
 \e[48;2;52;53;65m run the thing that takes no arguments                                                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\status\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m\r
-\r
-\e[38;2;207;173;0mBackground processes killed (sleep).\e[0m\r
-\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdone\e[0m \e[38;2;150;152;150mnothing to report\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KNothing came back.\r

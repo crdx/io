@@ -192,7 +192,7 @@ func TestNewQuestionClosesOldToolBlockAndResetsRows(t *testing.T) {
 func TestHarnessAsideKeepsToolBlockOpen(t *testing.T) {
 	paint := New(output.New(&bytes.Buffer{}), true, nil, nil, output.StreamingModeLine)
 	paint.DrawEvent(agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read"})
-	paint.DrawEvent(agent.Event{Kind: agent.HarnessMessageEvent, Text: "something happened"})
+	paint.DrawEvent(agent.Event{Kind: agent.SilentTurnEvent})
 	if paint.toolBlock == nil {
 		t.Fatal("aside closed the tool block")
 	}

@@ -22,13 +22,17 @@ Partial answer.
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
-## Mode · rxgs · +0s
+## Mode · rxgs · toggled w · +0s
 
-## Mode · rxs · +0s
+```
+The workspace is now read-only.
+```
 
-## User · +0s
+## Mode · rxs · toggled g · +0s
 
-The workspace is now read-only. The .git directory is now read-only.
+```
+The .git directory is now read-only.
+```
 
 ## Assistant · +0s
 

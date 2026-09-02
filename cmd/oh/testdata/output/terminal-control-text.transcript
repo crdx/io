@@ -13,14 +13,7 @@
 
 show terminal-active text safely
 
-## Notice · info · +2s
-
-```
-notice before\e[2J\e[H after
-second\tline\x07
-```
-
-## Failure · +3s
+## Failure · +2s
 
 ```
 failure before\e]2;stolen title\x07 after

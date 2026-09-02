@@ -10,7 +10,9 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 )
@@ -87,8 +89,8 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 	case agent.ToolCallResultEvent:
 		self.bufferToolResult(at, event)
 		return nil
-	case agent.StartupEvent, agent.UserMessageEvent, agent.HarnessMessageEvent, agent.ModelMessageEvent,
-		agent.InterruptionEvent, agent.RetryingEvent, agent.FailureEvent:
+	case agent.StartupEvent, agent.UserMessageEvent, agent.ModelMessageEvent,
+		agent.InterruptionEvent, agent.RetryingEvent, agent.FailureEvent, agent.SilentTurnEvent:
 	}
 
 	if err := self.flushToolCalls(); err != nil {
@@ -103,8 +105,14 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		if event.Text != "" {
 			output.paragraph(event.Text)
 		}
-	case agent.HarnessMessageEvent, agent.FailureEvent:
+	case agent.FailureEvent:
 		output.fence(event.Text)
+	case agent.SilentTurnEvent:
+		output.fence(agent.SilentTurnNotice)
+	case turn.HarnessPoke:
+		if notice, isSaid := turn.PokeNotice(event); isSaid {
+			output.fence(notice)
+		}
 	case caps.ModeChange:
 		if notice, isSaid := caps.ModeNotice(event); isSaid {
 			output.fence(notice)
@@ -114,7 +122,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 			output.fence(notice)
 		}
 	case agent.InterruptionEvent:
-		output.paragraph(interruptionSentence(event.Text))
+		output.paragraph(interrupt.Notice(event))
 	case agent.RetryingEvent:
 		output.fence(event.Text)
 		if event.Arguments != "" {
@@ -148,17 +156,16 @@ func heading(event agent.Event) []string {
 	}
 
 	switch event.Kind {
-	case agent.HarnessMessageEvent:
-		return []string{name, string(event.Status)}
 	case caps.ModeChange:
-		return []string{name, event.Text, prefixed("toggled ", event.Name)}
+		return []string{name, modeFlags(event), prefixed("toggled ", event.Name)}
 	case pathgrant.Change:
 		summary, _ := pathgrant.Summary(event)
 		return []string{name, summary, prefixed("changed ", event.Name)}
 	case agent.RetryingEvent:
 		return []string{name, "attempt " + strconv.Itoa(event.Attempt), prefixed("waited ", util.CompactDuration(event.Took))}
 	case agent.StartupEvent, agent.UserMessageEvent, agent.ModelMessageEvent, agent.InterruptionEvent, agent.FailureEvent,
-		agent.ModelReasoningEvent, agent.ToolCallRequestEvent, agent.ToolCallResultEvent, agent.StateChangeEvent:
+		agent.ModelReasoningEvent, agent.ToolCallRequestEvent, agent.ToolCallResultEvent, agent.StateChangeEvent,
+		agent.SilentTurnEvent:
 	}
 
 	return []string{name}
@@ -252,14 +259,6 @@ func plural(count int64, noun string) string {
 	return fmt.Sprintf("%d %ss", count, noun)
 }
 
-func interruptionSentence(reason string) string {
-	if reason == "" {
-		return "The turn was interrupted."
-	}
-
-	return "The turn was interrupted because " + reason + "."
-}
-
 func (self *Recorder) Close() error {
 	if self.file == nil {
 		return nil
@@ -331,14 +330,21 @@ func (self *Recorder) offset(at time.Time) string {
 	return "+" + util.CompactDuration(at.Sub(self.startedAt))
 }
 
+func modeFlags(event agent.Event) string {
+	grantedCaps, err := caps.GrantedBy(event)
+	if err != nil {
+		return ""
+	}
+
+	return grantedCaps.Flags()
+}
+
 func title(kind agent.Kind) string {
 	switch kind {
 	case agent.StartupEvent:
 		return "Startup"
 	case agent.UserMessageEvent:
 		return "User"
-	case agent.HarnessMessageEvent:
-		return "Notice"
 	case agent.ModelReasoningEvent:
 		return "Reasoning"
 	case agent.ModelMessageEvent:
@@ -351,6 +357,10 @@ func title(kind agent.Kind) string {
 		return "Mode"
 	case pathgrant.Change:
 		return "Path grant"
+	case turn.HarnessPoke:
+		return "Poke"
+	case agent.SilentTurnEvent:
+		return "Silent turn"
 	case agent.InterruptionEvent:
 		return "Interrupted"
 	case agent.RetryingEvent:

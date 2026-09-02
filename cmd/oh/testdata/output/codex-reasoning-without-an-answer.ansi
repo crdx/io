@@ -7,7 +7,7 @@
 \e[38;2;207;173;0mThe model ended the turn without an answer.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m The previous response ended without a reply. Carry on from where it stopped.                       \e[0m\r
+\e[48;2;52;53;65m 🤖 The previous response ended without a reply. Carry on from where it stopped.                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \r\e[K\e[3m\e[38;2;150;152;150mStill weighing it.\e[0m\e[0m\r

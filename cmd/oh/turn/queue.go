@@ -10,8 +10,6 @@ const (
 	Poke
 )
 
-const PokeMessage = "The previous response ended without a reply. Carry on from where it stopped."
-
 type Pending struct {
 	Message      string
 	Replacement  bool

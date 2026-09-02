@@ -11,6 +11,9 @@ summon plen… ✓ 900L+ ~700t (of ~321Kt)
 summon japanese ✓ 1L ~1.9Kt
 summon too … ✓ 900L+ ~4.4Kt (of ~21Kt)
 
+The turn was interrupted because the
+user asked something else.
+
 That is all of the awkward ones.
 === one column ===
 
@@ -58,6 +61,61 @@ s
 
 T
 h
+e
+t
+u
+r
+n
+w
+a
+s
+i
+n
+t
+e
+r
+r
+u
+p
+t
+e
+d
+b
+e
+c
+a
+u
+s
+e
+t
+h
+e
+u
+s
+e
+r
+a
+s
+k
+e
+d
+s
+o
+m
+e
+t
+h
+i
+n
+g
+e
+l
+s
+e
+.
+
+T
+h
 a
 t
 i
@@ -96,6 +154,13 @@ summon … ✓
 summon … ✓
 summon … ✓
 
+The turn was
+interrupted
+because the
+user asked
+something
+else.
+
 That is all
 of the
 awkward
@@ -112,5 +177,7 @@ summon nothing ✓ no output
 summon plenty ✓ 900L+ ~700t (of ~321Kt)
 summon japanese ✓ 1L ~1.9Kt
 summon too much ✓ 900L+ ~4.4Kt (of ~21Kt)
+
+The turn was interrupted because the user asked something else.
 
 That is all of the awkward ones.

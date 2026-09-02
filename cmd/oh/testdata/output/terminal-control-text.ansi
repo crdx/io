@@ -5,8 +5,6 @@
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after second line\e[0m\e[0m\r
 \r
-\e[38;2;129;162;190mNotice before after\e[0m\r
-second line \e[0m\r
 \e[38;2;204;102;102mFailure before after\e[0m\r
 second line\e[0m\r
 \e[?25h\e[?2026l
@@ -103,34 +101,6 @@ second line\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mn\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150me\e[0m\e[0m\r
 \r
-\e[38;2;129;162;190mN\e[0m\r
-\e[38;2;129;162;190mo\e[0m\r
-\e[38;2;129;162;190mt\e[0m\r
-\e[38;2;129;162;190mi\e[0m\r
-\e[38;2;129;162;190mc\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mb\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mf\e[0m\r
-\e[38;2;129;162;190mo\e[0m\r
-\e[38;2;129;162;190mr\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190ma\e[0m\r
-\e[38;2;129;162;190mf\e[0m\r
-\e[38;2;129;162;190mt\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mr\e[0m\r
-s\r
-e\r
-c\r
-o\r
-n\r
-d\r
-l\r
-i\r
-n\r
-e\r
-\e[0m\r
 \e[38;2;204;102;102mF\e[0m\r
 \e[38;2;204;102;102ma\e[0m\r
 \e[38;2;204;102;102mi\e[0m\r
@@ -166,8 +136,6 @@ e\e[0m\r
 \e[48;2;52;53;65m\e[0m
 \e[3m\e[38;2;150;152;150mreasoning before after second line\e[0m\e[0m
 
-\e[38;2;129;162;190mNotice before after
-second line \e[0m
 \e[38;2;204;102;102mFailure before after
 second line\e[0m
 
@@ -178,8 +146,6 @@ second line\e[0m
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mreas\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasonin\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning be\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before aft\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after s\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after secon\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after second li\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after second line\e[0m\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;129;162;190mNotice before after\e[0m\r
-second line \e[0m\r
 \e[38;2;204;102;102mFailure before after\e[0m\r
 second line\e[0m\r
 \e]9;4;0\e\\
@@ -190,8 +156,6 @@ second line\e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after second line\e[0m\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;129;162;190mNotice before after\e[0m\r
-second line \e[0m\r
 \e[38;2;204;102;102mFailure before after\e[0m\r
 second line\e[0m\r
 \e]9;4;0\e\\
@@ -202,8 +166,6 @@ second line\e[0m\r
 \r
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[3m\e[38;2;150;152;150mreas\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasonin\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning be\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before aft\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after s\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after secon\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after second li\e[0m\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after second line\e[0m\e[0m\e[?25h\e[?2026l\r
 \r
-\e[38;2;129;162;190mNotice before after\e[0m\r
-second line \e[0m\r
 \e[38;2;204;102;102mFailure before after\e[0m\r
 second line\e[0m\r
 \e]9;4;0\e\\
@@ -219,9 +181,6 @@ second line\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150mbefore after\e[0m\r
 \r\e[K\e[3m\e[38;2;150;152;150msecond line\e[0m\e[0m\r
 \r
-\e[38;2;129;162;190mNotice\e[0m\r
-\e[38;2;129;162;190mbefore after\e[0m\r
-second line \e[0m\r
 \e[38;2;204;102;102mFailure\e[0m\r
 \e[38;2;204;102;102mbefore after\e[0m\r
 second line\e[0m\r
@@ -232,8 +191,6 @@ second line\e[0m\r
 \e[48;2;52;53;65m\e[0m
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after second line\e[0m\e[0m
 
-\e[38;2;129;162;190mNotice before after
-second line \e[0m
 \e[38;2;204;102;102mFailure before after
 second line\e[0m
 \e[?25h\e[?2026l
@@ -244,8 +201,6 @@ second line\e[0m
 \r
 \e[?7l\r\e[K\e[3m\e[38;2;150;152;150mreasoning before after second line\e[0m\e[0m\r
 \r
-\e[38;2;129;162;190mNotice before after\e[0m\r
-second line \e[0m\r
 \e[38;2;204;102;102mFailure before after\e[0m\r
 second line\e[0m\r
 \e[?25h\e[?2026l

@@ -2,8 +2,8 @@
 person-at-example.test
 === pending message ===
 
- ⏳ read the pending reference
-    (https://example.test/pending)
+ ⏳ Granted temporary read-only access
+    to /reference.
 === pending message with a heading and a list ===
 
  ⏳ Heading

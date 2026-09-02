@@ -8,6 +8,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/painter"
+	"crdx.org/io/cmd/oh/pathgrant"
 )
 
 func TestSpecialLinksDrawWhatTheyDrewBefore(t *testing.T) {
@@ -56,10 +57,11 @@ func drawPendingLink(t *testing.T) string {
 	var screenOutput strings.Builder
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines)
-	self.pending.add(agent.Event{
-		Kind: agent.UserMessageEvent,
-		Text: "read [the pending reference](https://example.test/pending)",
-	}, agent.Event{})
+	grantEvent, err := pathgrant.ChangeEvent("/reference", []pathgrant.Grant{{Path: "/reference", Access: pathgrant.ReadAccess}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	self.pending.add(grantEvent)
 	self.refreshPendingMessages()
 
 	return screenOutput.String()
@@ -69,13 +71,10 @@ func drawPendingMarkdown(t *testing.T) string {
 	t.Helper()
 
 	var screenOutput strings.Builder
-	self := slashCommandFixture(t, caps.Read)
-	self.screen = output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines)
-	self.pending.add(agent.Event{
-		Kind: agent.UserMessageEvent,
-		Text: "# Heading\n\n- first item\n- second item",
-	}, agent.Event{})
-	self.refreshPendingMessages()
+	screen := output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines)
+	screen.Blank()
+	screen.OpenNotice(painter.NewPendingMessages([]string{"# Heading\n\n- first item\n- second item"}, true))
+	screen.Seal()
 
 	return screenOutput.String()
 }

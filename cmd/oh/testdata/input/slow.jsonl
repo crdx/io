@@ -2,6 +2,6 @@
 {"event":{"kind":"model_message","text":"That will take a moment."}}
 {"event":{"kind":"tool_call_request","id":"call_1","name":"grep","arguments":"{\"pattern\":\"spinner\",\"glob\":\"*.go\"}","read_only":true}}
 {"event":{"kind":"tool_call_request","id":"call_2","name":"find","arguments":"{\"pattern\":\"**/*.go\"}","read_only":true}}
-{"event":{"kind":"tool_call_result","status":"success","text":"screen.go:3:var spinner, footer, cursor string\n","id":"call_1","name":"grep","took":9500000000,"stats":{"kind":"output","lines":1,"bytes":44,"total_bytes":44}}}
+{"event":{"kind":"tool_call_result","status":"success","text":"screen.go:3:var spinner, footer, cursor string\n","id":"call_1","name":"grep","took":9500000000,"stats":{"kind":"output","lines":1,"bytes":44}}}
 {"event":{"kind":"tool_call_result","text":"the search went on too long","id":"call_2","name":"find","took":62000000000,"status":"error"}}
 {"event":{"kind":"model_message","text":"The grep took nine seconds and the find gave up after a minute."}}

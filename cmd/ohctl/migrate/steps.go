@@ -4,13 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"maps"
+	"slices"
 	"strconv"
 	"strings"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/store"
+	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/session"
 )
 
@@ -31,6 +35,11 @@ var steps = map[int]step{
 	8:  {migrateJournal: dropBackgroundCapability},
 	9:  {migrateJournal: dropUnrunModeChange},
 	10: {migrateLine: pathGrantFlagsReplaceWords},
+	11: {
+		migrateLine:    namedKindsReplaceBareNouns,
+		migrateJournal: harnessNoticesReplaceSubmittedProse,
+		finalise:       addSessionMeta,
+	},
 }
 
 var legacyGrantAccess = map[string]string{
@@ -109,9 +118,17 @@ func isTurnCompletion(line map[string]json.RawMessage) bool {
 }
 
 func announces(mode string, text string) bool {
+	grantedCaps, err := caps.Parse(mode)
+	if err != nil {
+		return false
+	}
+
 	for flag := range strings.SplitSeq(caps.AllFlags, "") {
-		notice, isSaid := caps.ModeNotice(agent.Event{Name: flag, Text: mode})
-		if isSaid && notice == text {
+		swappedCaps, isNamed := caps.Named(flag)
+		if !isNamed {
+			continue
+		}
+		if notice, isSaid := caps.Notice(swappedCaps, grantedCaps); isSaid && notice == text {
 			return true
 		}
 	}
@@ -162,7 +179,7 @@ func promptBytesReplaceContextFiles(lines []map[string]json.RawMessage) ([]map[s
 
 	for index, line := range lines {
 		err := with(line, func(event map[string]json.RawMessage) error {
-			if string(event["kind"]) != `"`+string(agent.StartupEvent)+`"` {
+			if string(event["kind"]) != `"startup"` {
 				return nil
 			}
 
@@ -314,7 +331,7 @@ func addLastMode(lines []map[string]json.RawMessage) ([]map[string]json.RawMessa
 		migratedLines = append(migratedLines, line)
 	}
 
-	encodedEvent, err := json.Marshal(caps.ModeEvent(currentCaps))
+	encodedEvent, err := json.Marshal(agent.Event{Kind: caps.ModeChange, Text: currentCaps.Flags()})
 	if err != nil {
 		return nil, err
 	}
@@ -473,7 +490,7 @@ func markMigratedTurnCompletion(lines []map[string]json.RawMessage, start int, e
 		}
 
 		event, hasEvent, err := eventOf(lines[index])
-		if err == nil && hasEvent && event.Kind == agent.HarnessMessageEvent && legacyEventFailed(lines[index]) &&
+		if err == nil && hasEvent && event.Kind == legacyHarnessMessage && legacyEventFailed(lines[index]) &&
 			strings.Contains(event.Text, "conversation state could not be stored") {
 			hasProviderStateFailure = true
 		}
@@ -533,6 +550,209 @@ func with(line map[string]json.RawMessage, visit func(map[string]json.RawMessage
 	if !bytes.Equal(before, after) {
 		line["event"] = after
 	}
+
+	return nil
+}
+
+func harnessNoticesReplaceSubmittedProse(
+	lines []map[string]json.RawMessage,
+) ([]map[string]json.RawMessage, error) {
+	migratedLines := make([]map[string]json.RawMessage, 0, len(lines))
+	knownPaths := map[string]bool{}
+
+	for index, line := range lines {
+		event, hasEvent, err := eventOf(line)
+		if err != nil {
+			return nil, fmt.Errorf("line %d: %w", index+1, err)
+		}
+
+		if hasEvent && event.Kind == pathgrant.Change {
+			for _, path := range grantedPaths(event) {
+				knownPaths[path] = true
+			}
+		}
+
+		if hasEvent && event.Kind == legacyHarnessMessage {
+			continue
+		}
+
+		if !hasEvent || event.Kind != agent.UserMessageEvent || len(migratedLines) == 0 {
+			migratedLines = append(migratedLines, line)
+			continue
+		}
+
+		previousLine := migratedLines[len(migratedLines)-1]
+		previousEvent, hasPreviousEvent, err := eventOf(previousLine)
+		if err != nil {
+			return nil, fmt.Errorf("line %d: %w", index, err)
+		}
+		if !hasPreviousEvent || !announcesItself(previousEvent.Kind) {
+			migratedLines = append(migratedLines, line)
+			continue
+		}
+
+		noticeEvent, isNamed := nameHarnessNotice(previousEvent, event.Text, knownPaths)
+		if !isNamed {
+			migratedLines = append(migratedLines, line)
+			continue
+		}
+
+		encodedEvent, err := json.Marshal(noticeEvent)
+		if err != nil {
+			return nil, err
+		}
+		previousLine["event"] = encodedEvent
+	}
+
+	return migratedLines, nil
+}
+
+func announcesItself(kind agent.Kind) bool {
+	return kind == caps.ModeChange || kind == pathgrant.Change
+}
+
+func nameHarnessNotice(event agent.Event, notice string, knownPaths map[string]bool) (agent.Event, bool) {
+	for _, name := range noticeNames(event, knownPaths) {
+		candidate := event
+		candidate.Name = name
+		if candidateNotice, isSaid := harnessNotice(candidate); isSaid && candidateNotice == notice {
+			return candidate, true
+		}
+	}
+
+	return event, false
+}
+
+func noticeNames(event agent.Event, knownPaths map[string]bool) []string {
+	if event.Kind == caps.ModeChange {
+		return strings.Split(caps.AllFlags, "")
+	}
+
+	return slices.Sorted(maps.Keys(knownPaths))
+}
+
+func harnessNotice(event agent.Event) (string, bool) {
+	if event.Kind == caps.ModeChange {
+		return caps.ModeNotice(event)
+	}
+
+	return pathgrant.Notice(event)
+}
+
+func grantedPaths(event agent.Event) []string {
+	var state struct {
+		Grants []struct {
+			Path string `json:"path"`
+		} `json:"grants"`
+	}
+	if err := json.Unmarshal(event.State, &state); err != nil {
+		return nil
+	}
+
+	paths := make([]string, 0, len(state.Grants))
+	for _, grant := range state.Grants {
+		paths = append(paths, grant.Path)
+	}
+
+	return paths
+}
+
+const legacyHarnessMessage agent.Kind = "harness_message"
+
+var renamedKinds = map[string]agent.Kind{
+	"startup":      agent.StartupEvent,
+	"interruption": agent.InterruptionEvent,
+	"retrying":     agent.RetryingEvent,
+	"failure":      agent.FailureEvent,
+}
+
+func namedKindsReplaceBareNouns(line map[string]json.RawMessage) error {
+	return with(line, func(event map[string]json.RawMessage) error {
+		var kind string
+		if err := json.Unmarshal(event["kind"], &kind); err != nil {
+			return fmt.Errorf("the event kind could not be read: %w", err)
+		}
+
+		if renamedKind, isRenamed := renamedKinds[kind]; isRenamed {
+			kind = string(renamedKind)
+			encodedKind, err := json.Marshal(kind)
+			if err != nil {
+				return err
+			}
+			event["kind"] = encodedKind
+		}
+
+		if err := dropEqualTotalBytes(event); err != nil {
+			return err
+		}
+
+		if kind == string(caps.ModeChange) {
+			if flags, hasFlags := event["text"]; hasFlags {
+				event["state"] = flags
+				delete(event, "text")
+			}
+		}
+
+		text := ""
+		if raw, hasText := event["text"]; hasText {
+			if err := json.Unmarshal(raw, &text); err != nil {
+				return fmt.Errorf("the event text could not be read: %w", err)
+			}
+		}
+
+		switch {
+		case kind == string(agent.InterruptionEvent) && text != "":
+			cause, isKnown := interrupt.CauseSaying(text)
+			if !isKnown {
+				return nil
+			}
+			encodedCause, err := json.Marshal(string(cause))
+			if err != nil {
+				return err
+			}
+			event["name"] = encodedCause
+			delete(event, "text")
+		case kind == string(agent.UserMessageEvent) && text == turn.PokeMessage:
+			encodedKind, err := json.Marshal(string(turn.HarnessPoke))
+			if err != nil {
+				return err
+			}
+			event["kind"] = encodedKind
+			delete(event, "text")
+		case kind == string(legacyHarnessMessage) && text == agent.SilentTurnNotice:
+			encodedKind, err := json.Marshal(string(agent.SilentTurnEvent))
+			if err != nil {
+				return err
+			}
+			event["kind"] = encodedKind
+			delete(event, "text")
+			delete(event, "status")
+		}
+
+		return nil
+	})
+}
+
+func dropEqualTotalBytes(event map[string]json.RawMessage) error {
+	raw, hasStats := event["stats"]
+	if !hasStats {
+		return nil
+	}
+
+	var stats map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &stats); err != nil {
+		return fmt.Errorf("the call measurements could not be read: %w", err)
+	}
+	if string(stats["total_bytes"]) != string(stats["bytes"]) {
+		return nil
+	}
+
+	delete(stats, "total_bytes")
+	encodedStats, err := json.Marshal(stats)
+	if err != nil {
+		return err
+	}
+	event["stats"] = encodedStats
 
 	return nil
 }

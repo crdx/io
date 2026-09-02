@@ -60,6 +60,16 @@ func (self *State[Value]) Replace(currentValue Value) {
 	self.currentValue = self.definition.Clone(currentValue)
 }
 
+func (self *State[Value]) Peek() string {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	return self.definition.Describe(
+		self.definition.Clone(self.knownValue),
+		self.definition.Clone(self.currentValue),
+	)
+}
+
 func (self *State[Value]) Inject() string {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -73,6 +83,7 @@ func (self *State[Value]) Inject() string {
 }
 
 type Teller interface {
+	Peek() string
 	Inject() string
 }
 
@@ -82,6 +93,16 @@ type Group struct {
 
 func NewGroup(tellers ...Teller) Group {
 	return Group{tellers: append([]Teller(nil), tellers...)}
+}
+
+func (self Group) Peek() string {
+	var messages []string
+	for _, teller := range self.tellers {
+		if message := teller.Peek(); message != "" {
+			messages = append(messages, message)
+		}
+	}
+	return strings.Join(messages, " ")
 }
 
 func (self Group) Inject() string {

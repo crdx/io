@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	JournalFormat = 11
+	JournalFormat = 12
 	MetaFormat    = 2
 )
 
@@ -42,6 +42,8 @@ type Line struct {
 	Time time.Time `json:"time"`
 
 	Version int `json:"version,omitempty"`
+
+	Turn *TurnSummary `json:"turn,omitempty"`
 
 	ID      string          `json:"id,omitempty"`
 	Name    string          `json:"name,omitempty"`
@@ -229,8 +231,13 @@ func (self *Writer) Item(payload json.RawMessage) error {
 	return writeMeta(self.directory, self.listingMeta)
 }
 
-func (self *Writer) CompleteTurn() error {
-	writtenAt, err := self.write(Line{Kind: TurnCompletion})
+type TurnSummary struct {
+	Took        time.Duration `json:"took,omitempty"`
+	InputTokens int           `json:"input_tokens,omitempty"`
+}
+
+func (self *Writer) CompleteTurn(summary TurnSummary) error {
+	writtenAt, err := self.write(Line{Kind: TurnCompletion, Turn: &summary})
 	if err != nil {
 		return err
 	}
@@ -357,6 +364,7 @@ type Session struct {
 	Events            []agent.Event
 	Items             []json.RawMessage
 	TurnCompletions   int
+	Turns             []TurnSummary
 	HasIncompleteTurn bool
 }
 
@@ -462,6 +470,9 @@ func (self *Session) take(line Line) {
 	case TurnCompletion:
 		self.TurnCompletions++
 		self.HasIncompleteTurn = false
+		if line.Turn != nil {
+			self.Turns = append(self.Turns, *line.Turn)
+		}
 	}
 }
 

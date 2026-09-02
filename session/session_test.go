@@ -183,7 +183,7 @@ func TestTurnCompletionIsReadBackSeparatelyFromEventsAndItems(t *testing.T) {
 	if err := writer.Item(json.RawMessage(`{"role":"user"}`)); err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.CompleteTurn(); err != nil {
+	if err := writer.CompleteTurn(session.TurnSummary{}); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {
@@ -241,7 +241,7 @@ func TestSeveralMessagesCanShareOneCompletedTurn(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if err := writer.CompleteTurn(); err != nil {
+	if err := writer.CompleteTurn(session.TurnSummary{}); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {
@@ -263,7 +263,7 @@ func TestAUserMessageAfterAnExtraCompletionIsStillIncomplete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.CompleteTurn(); err != nil {
+	if err := writer.CompleteTurn(session.TurnSummary{}); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "unfinished"}); err != nil {

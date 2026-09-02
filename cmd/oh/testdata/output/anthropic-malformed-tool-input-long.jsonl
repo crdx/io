@@ -1,13 +1,13 @@
-{"kind":"head","version":11,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"head","version":12,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"send malformed tool input too long to show"}}
-{"kind":"event","event":{"kind":"retrying","text":"the work tool call did not contain a JSON object","id":"toolu_long","name":"work","arguments":"{\"value\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",,}","attempt":1}}
+{"kind":"event","event":{"kind":"request_retry","text":"the work tool call did not contain a JSON object","id":"toolu_long","name":"work","arguments":"{\"value\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",,}","attempt":1}}
 {"kind":"event","event":{"kind":"model_message","text":"I corrected the malformed call."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"send malformed tool input too long to show"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"I corrected the malformed call."}]}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"carry on"}}
 {"kind":"event","event":{"kind":"model_message","text":"Carrying on."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"carry on"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Carrying on."}]}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}

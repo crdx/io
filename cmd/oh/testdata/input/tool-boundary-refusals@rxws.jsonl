@@ -1,4 +1,4 @@
-{"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
+{"event":{"kind":"session_startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
 {"event":{"kind":"user_message","text":"check every refused boundary"}}
 {"event":{"kind":"model_message","text":"I checked each boundary without crossing it."}}
 {"event":{"kind":"tool_call_request","id":"call_1","name":"read","arguments":"{\"path\":\"huge.log\"}","render":"huge.log","read_only":true}}

@@ -38,10 +38,4 @@ in angle brackets <https://example.com/bracketed>, which are not the same thing.
 Entities are resolved in prose — AT&amp;T becomes AT&T — but left alone inside code, where `&amp;` and `&lt;div&gt;` stand as they are written.
 
 
-## Notice · error · +3s
-
-```
-a warning that arrived with a carriage\rreturn in it
-```
-
 

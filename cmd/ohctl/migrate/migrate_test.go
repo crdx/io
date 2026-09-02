@@ -13,8 +13,10 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/store"
+	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/ohctl/migrate"
 	"crdx.org/io/session"
 )
@@ -432,16 +434,13 @@ func TestFormatFiveMigrationAddsEventStatuses(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := storedSession.Events[0].Status; got != agent.WarningStatus {
-		t.Errorf("got ordinary harness status %q", got)
+	if got := len(storedSession.Events); got != 2 {
+		t.Fatalf("kept %d events, want the tool results the notices left behind: %+v", got, storedSession.Events)
 	}
-	if got := storedSession.Events[1].Status; got != agent.ErrorStatus {
-		t.Errorf("got failed harness status %q", got)
-	}
-	if got := storedSession.Events[2].Status; got != agent.ErrorStatus {
+	if got := storedSession.Events[0].Status; got != agent.ErrorStatus {
 		t.Errorf("got failed tool status %q", got)
 	}
-	if got := storedSession.Events[3].Status; got != agent.SuccessStatus {
+	if got := storedSession.Events[1].Status; got != agent.SuccessStatus {
 		t.Errorf("got successful tool status %q", got)
 	}
 	for index, line := range journalLines(t, directory, name) {
@@ -633,8 +632,8 @@ func TestFormatNineMigrationKeepsTheMessagesOfACrashedTurn(t *testing.T) {
 	if storedSession.CanResume() {
 		t.Error("a crashed turn became resumable")
 	}
-	if got := len(storedSession.Events); got != 5 {
-		t.Errorf("kept %d events, want every one the crashed turn recorded", got)
+	if got := len(storedSession.Events); got != 4 {
+		t.Errorf("kept %d events, want every one the crashed turn recorded but the notice folded away", got)
 	}
 }
 
@@ -684,4 +683,65 @@ func startupState(t *testing.T, line map[string]json.RawMessage) map[string]json
 	}
 
 	return state
+}
+
+func TestFormatElevenMigrationKeepsTheFactAndDropsTheProse(t *testing.T) {
+	directory, name := storedJournal(t,
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","version":11,"id":"one","name":"brave-otter"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"startup","took":1000000}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"mode_change","text":"rxwgs"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"user_message","text":"begin"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:04Z","event":{"kind":"interruption","text":"the user pressed escape"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:05Z","payload":{"role":"user","content":"begin"}}`,
+		`{"kind":"turn_completion","time":"2026-08-01T00:00:06Z"}`,
+		`{"kind":"event","time":"2026-08-01T00:00:07Z","event":{"kind":"mode_change","text":"rxgs"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:08Z","event":{"kind":"user_message","text":"The workspace is now read-only."}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:09Z","event":{"kind":"harness_message","status":"warning","text":"`+agent.SilentTurnNotice+`"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:10Z","event":{"kind":"user_message","text":"`+turn.PokeMessage+`"}}`,
+		`{"kind":"item","time":"2026-08-01T00:00:11Z","payload":{"role":"user","content":"carry on"}}`,
+		`{"kind":"turn_completion","time":"2026-08-01T00:00:12Z"}`,
+	)
+
+	if _, err := migrate.Session(options(directory), name); err != nil {
+		t.Fatal(err)
+	}
+
+	storedSession, err := store.Read(directory, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var kinds []string
+	for _, event := range storedSession.Events {
+		kinds = append(kinds, string(event.Kind))
+	}
+	wantKinds := []string{
+		string(agent.StartupEvent),
+		string(caps.ModeChange),
+		string(agent.UserMessageEvent),
+		string(agent.InterruptionEvent),
+		string(caps.ModeChange),
+		string(agent.SilentTurnEvent),
+		string(turn.HarnessPoke),
+	}
+	if !slices.Equal(kinds, wantKinds) {
+		t.Errorf("got kinds %q, want %q", kinds, wantKinds)
+	}
+
+	for _, event := range storedSession.Events {
+		if event.Kind == agent.InterruptionEvent && interrupt.Reason(event) != interrupt.Sentence(interrupt.Escape) {
+			t.Errorf("the interruption lost its cause: %+v", event)
+		}
+		if event.Kind == caps.ModeChange && event.Name == "w" {
+			if notice, isSaid := caps.ModeNotice(event); !isSaid || notice != "The workspace is now read-only." {
+				t.Errorf("the mode change cannot say itself: %q %t", notice, isSaid)
+			}
+		}
+		isFactOnly := event.Kind == agent.InterruptionEvent ||
+			event.Kind == agent.SilentTurnEvent ||
+			event.Kind == turn.HarnessPoke
+		if isFactOnly && event.Text != "" {
+			t.Errorf("prose was kept on %+v", event)
+		}
+	}
 }

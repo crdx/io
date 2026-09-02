@@ -63,7 +63,7 @@ type canonicalWriter interface {
 type canonicalAppender interface {
 	Event(event agent.Event) (time.Time, error)
 	Item(item json.RawMessage) error
-	CompleteTurn() error
+	CompleteTurn(summary session.TurnSummary) error
 }
 
 type canonicalSession interface {
@@ -160,10 +160,10 @@ func (self *Writer) Item(item json.RawMessage) error {
 	return nil
 }
 
-func (self *Writer) CompleteTurn() error {
+func (self *Writer) CompleteTurn(summary session.TurnSummary) error {
 	self.writerMutex.Lock()
 	defer self.writerMutex.Unlock()
-	return self.innerWriter.CompleteTurn()
+	return self.innerWriter.CompleteTurn(summary)
 }
 
 func (self *Writer) Name() string { return self.innerWriter.Name() }
@@ -336,6 +336,7 @@ type Session struct {
 	Events            []agent.Event
 	Items             []json.RawMessage
 	TurnCompletions   int
+	Turns             []session.TurnSummary
 	HasIncompleteTurn bool
 }
 
@@ -380,6 +381,7 @@ func decode(storedSession *session.Session) (*Session, error) {
 		Events:            storedSession.Events,
 		Items:             storedSession.Items,
 		TurnCompletions:   storedSession.TurnCompletions,
+		Turns:             storedSession.Turns,
 		HasIncompleteTurn: storedSession.HasIncompleteTurn,
 	}, nil
 }

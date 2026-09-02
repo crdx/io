@@ -9,7 +9,7 @@
 \e[38;2;207;173;0mThe model ended the turn without an answer.\e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m The previous response ended without a reply. Carry on from where it stopped.                       \e[0m\r
+\e[48;2;52;53;65m 🤖 The previous response ended without a reply. Carry on from where it stopped.                    \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \r\e[KBoth cases are covered now.\e[?25h\e[?2026l\r

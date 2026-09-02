@@ -6,6 +6,8 @@
 read one.txt ✓ 1L
 read two.txt – the call was cancelled…
 
+The turn was interrupted.
+
 
  one was all I needed
 === one column ===
@@ -55,6 +57,29 @@ s
 ✓
 –
 
+T
+h
+e
+t
+u
+r
+n
+w
+a
+s
+i
+n
+t
+e
+r
+r
+u
+p
+t
+e
+d
+.
+
 
 
 o
@@ -98,6 +123,9 @@ d
 read ✓ 1L
 re… – the…
 
+The turn was
+interrupted.
+
 
  one was all
  I needed
@@ -108,6 +136,8 @@ re… – the…
 
 read one.txt ✓ 1L
 read two.txt – the call was cancelled because the user pressed escape
+
+The turn was interrupted.
 
 
  one was all I needed

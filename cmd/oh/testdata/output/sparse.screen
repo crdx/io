@@ -3,13 +3,12 @@
  run the thing that takes no arguments
 
 
-The web search and fetch tools are now
-refused.
+
+ 🤖 The web search and fetch tools are
+    now refused.
+
 
 status ✓
-
-Background processes killed (sleep).
-
 notify done nothing to report ✓
 
 Nothing came back.
@@ -79,82 +78,90 @@ t
 s
 
 
+
+
+🤖
+
 T
+
 h
+
 e
+
 w
+
 e
+
 b
+
 s
+
 e
+
 a
+
 r
+
 c
+
 h
+
 a
+
 n
+
 d
+
 f
+
 e
+
 t
+
 c
+
 h
+
 t
+
 o
+
 o
+
 l
+
 s
+
 a
+
 r
+
 e
+
 n
+
 o
+
 w
+
 r
+
 e
+
 f
+
 u
+
 s
+
 e
+
 d
+
 .
+
 
 ✓
-
-B
-a
-c
-k
-g
-r
-o
-u
-n
-d
-p
-r
-o
-c
-e
-s
-s
-e
-s
-k
-i
-l
-l
-e
-d
-(
-s
-l
-e
-e
-p
-)
-.
-
 
 
 N
@@ -181,19 +188,17 @@ k
  arguments
 
 
-The web
-search and
-fetch tools
-are now
-refused.
+
+ 🤖 The web
+    search
+    and
+    fetch
+    tools
+    are now
+    refused.
+
 
 status ✓
-
-Background
-processes
-killed
-(sleep).
-
 notify … ✓
 
 Nothing came
@@ -203,12 +208,11 @@ back.
  run the thing that takes no arguments
 
 
-The web search and fetch tools are now refused.
+
+ 🤖 The web search and fetch tools are now refused.
+
 
 status ✓
-
-Background processes killed (sleep).
-
 notify done nothing to report ✓
 
 Nothing came back.

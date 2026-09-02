@@ -49,6 +49,7 @@ import (
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/input"
+	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/location"
@@ -209,6 +210,21 @@ func TestAcceptedInputCanImmediatelyBeRecalled(t *testing.T) {
 	}
 }
 
+func submittedTexts(events []agent.Event) []string {
+	var texts []string
+	for _, event := range events {
+		if event.Kind == agent.UserMessageEvent {
+			texts = append(texts, event.Text)
+			continue
+		}
+		if notice, isSaid := painter.HarnessNotice(event); isSaid {
+			texts = append(texts, notice)
+		}
+	}
+
+	return texts
+}
+
 func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
@@ -239,12 +255,7 @@ func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.
 	}
 	self.finish()
 
-	var messages []string
-	for _, record := range self.events {
-		if record.Kind == agent.UserMessageEvent {
-			messages = append(messages, record.Text)
-		}
-	}
+	messages := submittedTexts(self.events)
 
 	wantMessages := []string{"first", workspaceNowReadOnly()}
 	if !slices.Equal(messages, wantMessages) {
@@ -384,7 +395,7 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 		}
 	}
 
-	self.interruptTurn(escapeReason)
+	self.interruptTurn(interrupt.Escape)
 
 	for report := range events {
 		self.takeTurn(report)
@@ -755,8 +766,8 @@ func TestAQueuedMessageOpensTheNextTurnWithoutInterruptingThisOne(t *testing.T) 
 	}
 	self.finish()
 
-	if strings.Contains(style.Plain(screenOutput.String()), "Interrupted") {
-		t.Errorf("expected the first turn to end silently, got %q", style.Plain(screenOutput.String()))
+	if strings.Contains(style.Plain(screenOutput.String()), "interrupted") {
+		t.Errorf("expected the replaced turn to end silently, got %q", style.Plain(screenOutput.String()))
 	}
 
 	if err := log.Close(); err != nil {
@@ -784,13 +795,13 @@ func TestAQueuedMessageOpensTheNextTurnWithoutInterruptingThisOne(t *testing.T) 
 func TestTheStopKeyNamesItselfAsTheInterruptionReason(t *testing.T) {
 	for name, test := range map[string]struct {
 		keypress key.Key
-		want     string
+		want     interrupt.Cause
 	}{
-		"escape": {keypress: key.Key{Code: key.Escape}, want: escapeReason},
-		"ctrl+d": {keypress: key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}, want: ctrlDReason},
+		"escape": {keypress: key.Key{Code: key.Escape}, want: interrupt.Escape},
+		"ctrl+d": {keypress: key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}, want: interrupt.ControlD},
 	} {
 		t.Run(name, func(t *testing.T) {
-			if got := stopKeyReason(test.keypress); got != test.want {
+			if got := stopKeyCause(test.keypress); got != test.want {
 				t.Errorf("got %q, want %q", got, test.want)
 			}
 		})
@@ -812,7 +823,7 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 	}
 
 	self.start("first")
-	self.interruptTurn(escapeReason)
+	self.interruptTurn(interrupt.Escape)
 
 	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
@@ -829,8 +840,8 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 
 	for _, event := range storedSession.Events {
 		if event.Kind == agent.InterruptionEvent {
-			if event.Text != escapeReason {
-				t.Errorf("got reason %q, want the one the turn was stopped with", event.Text)
+			if got := interrupt.Reason(event); got != interrupt.Sentence(interrupt.Escape) {
+				t.Errorf("got reason %q, want the one the turn was stopped with", got)
 			}
 			return
 		}
@@ -870,8 +881,8 @@ func TestEscapeTakesBackAQueuedMessageWithoutAnnouncingAnInterruption(t *testing
 		}
 	}
 
-	if strings.Contains(style.Plain(screenOutput.String()), "Interrupted") {
-		t.Errorf("expected the interruption to stay out of the scrollback, got %q", style.Plain(screenOutput.String()))
+	if strings.Contains(style.Plain(screenOutput.String()), "interrupted") {
+		t.Errorf("expected no interruption in the scrollback, got %q", style.Plain(screenOutput.String()))
 	}
 }
 
@@ -915,7 +926,7 @@ func TestCancellingTwiceDropsTheQueueAndCancellingOnceKeepsIt(t *testing.T) {
 			self.queuedTurn.Replace("later")
 			self.queuedTurn.MarkAccessChange()
 
-			self.cancelTurn(escapeReason)
+			self.cancelTurn(interrupt.Escape)
 
 			pending := self.queuedTurn.Peek()
 			wasKept := pending.Replacement && pending.AccessChange && pending.Message == "later"
@@ -992,13 +1003,7 @@ func TestAQueuedPromptStartsAndTakesTheQueuedModeChangeWithIt(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var messages []string
-	for _, event := range storedSession.Events {
-		if event.Kind == agent.UserMessageEvent {
-			messages = append(messages, event.Text)
-		}
-	}
-
+	messages := submittedTexts(storedSession.Events)
 	if !slices.Equal(messages, []string{"first", nowReadOnlyNote, "second"}) {
 		t.Errorf("expected the notice to be stored before the queued prompt, got %q", messages)
 	}
@@ -1022,7 +1027,7 @@ func TestAModeChangeDroppedByEscapeIsStillDrawnAndCarried(t *testing.T) {
 
 	self.start("first")
 	self.toggleCap(caps.Write)
-	self.cancelTurn(escapeReason)
+	self.cancelTurn(interrupt.Escape)
 
 	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
@@ -1058,13 +1063,7 @@ func TestAModeChangeDroppedByEscapeIsStillDrawnAndCarried(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var messages []string
-	for _, event := range storedSession.Events {
-		if event.Kind == agent.UserMessageEvent {
-			messages = append(messages, event.Text)
-		}
-	}
-
+	messages := submittedTexts(storedSession.Events)
 	if !slices.Equal(messages, []string{"first", nowReadOnlyNote, "second"}) {
 		t.Errorf("expected the notice to be stored before the next prompt, got %q", messages)
 	}
@@ -1239,12 +1238,13 @@ func countModeNotes(messages []string, note string) int {
 
 func TestPendingInputCanTakeBackAnyMessage(t *testing.T) {
 	var pending pendingInput
-	pending.add(agent.Event{Kind: agent.UserMessageEvent, Text: "first"}, agent.Event{})
-	pending.add(agent.Event{Kind: agent.HarnessMessageEvent, Text: "second"}, agent.Event{})
+	pending.add(agent.Event{Kind: caps.ModeChange, Text: "first"})
+	pending.add(agent.Event{Kind: pathgrant.Change, Text: "second"})
 
 	pending.takeBack(0)
 
-	if !slices.Equal(pending.texts(), []string{"second"}) || pending.items[0].message.Kind != agent.HarnessMessageEvent {
+	remaining := pending.items
+	if len(remaining) != 1 || remaining[0].state.Kind != pathgrant.Change || remaining[0].state.Text != "second" {
 		t.Errorf("got %+v", pending.items)
 	}
 }
@@ -1343,14 +1343,8 @@ func TestAQueuedModeChangeStartsWithItsDisplayedMessage(t *testing.T) {
 		t.Error("expected the completed mode-message turn to be resumable")
 	}
 
-	var messages []string
-	for _, event := range storedSession.Events {
-		if event.Kind == agent.UserMessageEvent {
-			messages = append(messages, event.Text)
-		}
-	}
-	if !slices.Equal(messages, []string{"first", modeMessage}) {
-		t.Errorf("got user messages %q", messages)
+	if messages := submittedTexts(storedSession.Events); !slices.Equal(messages, []string{"first", modeMessage}) {
+		t.Errorf("got submitted messages %q", messages)
 	}
 }
 
@@ -2000,7 +1994,7 @@ func TestLastMessageIsTheMostRecentModelMessage(t *testing.T) {
 		{Kind: agent.ModelMessageEvent, Text: "first answer"},
 		{Kind: agent.UserMessageEvent, Text: "follow up"},
 		{Kind: agent.ModelMessageEvent, Text: "latest answer"},
-		{Kind: agent.HarnessMessageEvent, Text: "saved"},
+		{Kind: agent.SilentTurnEvent},
 	}}
 
 	message, found := self.getLastMessage()
@@ -2028,12 +2022,12 @@ func TestReplayingSaysTheWholeConversationAgain(t *testing.T) {
 	testConversation.events = []agent.Event{
 		{Kind: agent.UserMessageEvent, Text: "what is the weather"},
 		{Kind: agent.ModelMessageEvent, Text: "it is raining"},
-		{Kind: agent.HarnessMessageEvent, Text: "Cancelled"},
+		{Kind: agent.SilentTurnEvent},
 	}
 
 	testConversation.replay()
 
-	for _, want := range []string{"what is the weather", "it is raining", "Cancelled"} {
+	for _, want := range []string{"what is the weather", "it is raining", agent.SilentTurnNotice} {
 		if !strings.Contains(screenOutput.String(), want) {
 			t.Errorf("expected %q to be drawn again, got %q", want, screenOutput.String())
 		}
@@ -2153,13 +2147,7 @@ func TestACallToAToolThatIsGoneKeepsWhatWasRecorded(t *testing.T) {
 	}
 }
 
-func notifyWarning(self *App, text string) {
-	self.notify(agent.Event{Kind: agent.HarnessMessageEvent, Text: text, Status: agent.WarningStatus})
-}
-
-func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
-	const notice = "The stored session could not be written (no space left on device)"
-
+func TestASilentTurnIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	var live strings.Builder
 	self := &App{
 		agent:    agent.New("", quietProvider{}, nil),
@@ -2173,7 +2161,7 @@ func TestAHarnessNoticeIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	self.events = append(self.events, call)
 	self.currentTurn.painter.DrawEvent(call)
 
-	notifyWarning(self, notice)
+	self.notify(agent.Event{Kind: agent.SilentTurnEvent})
 
 	self.currentTurn.painter.Close(dynamic.Cancelled)
 	self.currentTurn = Turn{}
@@ -2220,7 +2208,7 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 		self.events = append(self.events, event)
 		livePainter.DrawEvent(event)
 	}
-	notifyWarning(self, "The stored session could not be written (no space left)")
+	self.notifyFailure("The stored session could not be written (no space left)")
 
 	unansweredCall := agent.Event{Kind: agent.ToolCallRequestEvent, ID: "3", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "left.go"}}
 	self.events = append(self.events, unansweredCall)
@@ -2436,14 +2424,14 @@ func TestANonRetryableTurnErrorSendsADesktopNotification(t *testing.T) {
 	}
 }
 
-func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
+func TestAStoppedTurnSaysWhyItStoppedInTheScrollback(t *testing.T) {
 	var screenOutput bytes.Buffer
 
 	self := testConversation(t, &screenOutput)
 
 	self.start("are you there")
 	self.currentTurn.SetCancelled(true)
-	self.currentTurn.Interrupt(stop.Because(escapeReason))
+	self.currentTurn.Interrupt(interrupt.Because(interrupt.Escape))
 
 	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
@@ -2452,8 +2440,9 @@ func TestAStoppedTurnIsNotAnnouncedInTheScrollback(t *testing.T) {
 	self.finish()
 
 	plain := style.Plain(screenOutput.String())
-	if strings.Contains(plain, "Interrupted") {
-		t.Errorf("expected the interruption to stay out of the scrollback, got %q", plain)
+	want := interrupt.Notice(interrupt.Event(interrupt.Escape))
+	if !strings.Contains(plain, want) {
+		t.Errorf("expected %q in the scrollback, got %q", want, plain)
 	}
 
 	if strings.Contains(screenOutput.String(), "context canceled") {
@@ -2762,7 +2751,7 @@ func TestAnAsideStandsBetweenTheCallsItArrivedAmong(t *testing.T) {
 		Name:              "read",
 		FallbackRendering: agent.FallbackRendering{Subject: "one.txt"},
 	})
-	painter.DrawEvent(agent.Event{Kind: agent.HarnessMessageEvent, Text: "Something happened"})
+	painter.DrawEvent(agent.Event{Kind: agent.SilentTurnEvent})
 
 	painter.DrawEvent(agent.Event{Kind: agent.ToolCallResultEvent, ID: "1", Took: time.Second})
 
@@ -2775,7 +2764,7 @@ func TestAnAsideStandsBetweenTheCallsItArrivedAmong(t *testing.T) {
 	if !strings.Contains(rows[0], "one.txt") || !strings.Contains(rows[0], "✓") {
 		t.Errorf("expected the call to keep its result above the aside, got %q", rows[0])
 	}
-	if !strings.Contains(rows[1], "Something happened") {
+	if !strings.Contains(rows[1], agent.SilentTurnNotice) {
 		t.Errorf("expected the aside under the call, got %q", rows[1])
 	}
 }
@@ -2876,7 +2865,7 @@ func TestDiscardedReasoningLeavesTheSameScreenAsReplay(t *testing.T) {
 	}
 }
 
-func TestSuccessfulHarnessMessageUsesTheSuccessStyle(t *testing.T) {
+func TestASuccessfulNoticeUsesTheSuccessStyle(t *testing.T) {
 	got := painter.NoticeStyle(agent.SuccessStatus)("Copied to clipboard.")
 	want := style.Success("Copied to clipboard.")
 	if got != want {
@@ -3271,13 +3260,13 @@ func TestACapabilitySwappedBackLeavesTheOtherChangesSayingWhatTheySaid(t *testin
 	self.toggleCap(caps.Git)
 	self.toggleCap(caps.Write)
 
-	shown := self.pending.items[1].message.Text
-	if shown == "" {
+	shown, isSaid := caps.ModeNotice(self.pending.items[1].state)
+	if !isSaid {
 		t.Fatal("expected the second change to say something")
 	}
 
 	self.toggleCap(caps.Git)
-	if again := self.pending.items[0].message.Text; again != shown {
+	if again, _ := caps.ModeNotice(self.pending.items[0].state); again != shown {
 		t.Errorf("expected %q, got %q", shown, again)
 	}
 
@@ -3458,8 +3447,8 @@ func submittedModeMessagesStream() string {
 	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 	screen.Line(startup.RenderBanner(time.Millisecond, false, startup.Info{Session: "brave-otter"}, replayColumns, false))
 	picasso := painter.New(screen, false, nil, nil, defaultStreamingMode)
-	picasso.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: workspaceNowReadOnly()})
-	picasso.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "The .git directory is now read-write."})
+	picasso.DrawEvent(caps.ModeToggleEvent(caps.Write, caps.Read|caps.Shell|caps.Git))
+	picasso.DrawEvent(caps.ModeToggleEvent(caps.Git, caps.Read|caps.Shell|caps.Git))
 	return screenOutput.String()
 }
 
@@ -3566,13 +3555,13 @@ func interruptedStreamScreen(t *testing.T, kind agent.Kind, streamingMode output
 	return shown(t, screenOutput.String(), replayColumns)
 }
 
-func streamThenHarnessMessageScreen(t *testing.T, streamingMode output.StreamingMode) string {
+func streamThenNoticeScreen(t *testing.T, streamingMode output.StreamingMode) string {
 	t.Helper()
 
 	var screenOutput bytes.Buffer
 	painter := newStreamedTestPainter(output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines), true, streamingMode)
 	streamText(painter, agent.ModelMessageEvent)
-	painter.DrawEvent(agent.Event{Kind: agent.HarnessMessageEvent, Text: "the turn was interrupted"})
+	painter.DrawEvent(agent.Event{Kind: agent.SilentTurnEvent})
 
 	return shown(t, screenOutput.String(), replayColumns)
 }
@@ -3643,8 +3632,8 @@ func TestAStreamThatStopsStillShowsEverythingThatArrived(t *testing.T) {
 		passes[name+" answer closed"] = func() string {
 			return interruptedStreamScreen(t, agent.ModelMessageEvent, streamingMode)
 		}
-		passes[name+" answer then a harness message"] = func() string {
-			return streamThenHarnessMessageScreen(t, streamingMode)
+		passes[name+" answer then a notice"] = func() string {
+			return streamThenNoticeScreen(t, streamingMode)
 		}
 		passes[name+" reasoning closed"] = func() string {
 			return interruptedStreamScreen(t, agent.ModelReasoningEvent, streamingMode)
@@ -3657,8 +3646,8 @@ func TestAStreamThatStopsStillShowsEverythingThatArrived(t *testing.T) {
 func TestNoStreamedAnswerIsLeftOffTheScreenWhenTheStreamStops(t *testing.T) {
 	for name, streamingMode := range everyStreamingMode() {
 		for ending, drawn := range map[string]func() string{
-			"closed":                 func() string { return interruptedStreamScreen(t, agent.ModelMessageEvent, streamingMode) },
-			"then a harness message": func() string { return streamThenHarnessMessageScreen(t, streamingMode) },
+			"closed":        func() string { return interruptedStreamScreen(t, agent.ModelMessageEvent, streamingMode) },
+			"then a notice": func() string { return streamThenNoticeScreen(t, streamingMode) },
 		} {
 			if !strings.Contains(drawn(), streamedAnswerTail) {
 				t.Errorf("a %s answer %s dropped the end of what arrived:\n%s", name, ending, drawn())
@@ -3883,7 +3872,7 @@ func corruptedSessionFailure(t *testing.T, binary string, suffix string) string 
 	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "keep this message"}); err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.CompleteTurn(); err != nil {
+	if err := writer.CompleteTurn(session.TurnSummary{}); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {
@@ -5244,7 +5233,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 						Usage: &agent.Usage{InputTokens: inputTokens},
 					}},
 				}
-				held.metrics.Restore(held.events, 0)
+				held.metrics.Restore(held.events, nil)
 
 				built := goldenBarLayout(t, held)
 
@@ -5284,7 +5273,7 @@ func TestTheBarConfiguredByDefaultDrawsWhatItDrewBefore(t *testing.T) {
 							Usage: &agent.Usage{InputTokens: 42_000},
 						}},
 					}
-					held.metrics.Restore(held.events, 0)
+					held.metrics.Restore(held.events, nil)
 					held.currentTurn.Stream = testTimedTurnStream(
 						isRunning,
 						time.Now().Add(-turnSoFar),
@@ -5704,9 +5693,9 @@ func TestReloadingConfigChangesTheContinueMessage(t *testing.T) {
 		if event.Kind == agent.UserMessageEvent && event.Text == "carry on from the reloaded config" {
 			hasSentReloadedMessage = true
 		}
-		if event.Kind == agent.HarnessMessageEvent && event.Text != agent.SilentTurnNotice {
-			t.Errorf("successful reload entered conversation history: %+v", event)
-		}
+	}
+	if self.feedback.message.status == agent.ErrorStatus {
+		t.Errorf("successful reload complained: %+v", self.feedback.message)
 	}
 	if !hasSentReloadedMessage {
 		t.Error("the reloaded message was not sent")
@@ -7839,9 +7828,8 @@ func assertPendingPathGrants(t *testing.T, self *App, grants *pathgrant.Grants, 
 		}
 		pendingPaths[item.state.Name] = true
 
-		notice, isShown := pathgrant.Notice(item.state)
-		if !isShown || notice != item.message.Text {
-			t.Fatalf("a pending message says %q, and its event says %q", item.message.Text, notice)
+		if _, isShown := pathgrant.Notice(item.state); !isShown {
+			t.Fatalf("a pending path grant says nothing: %+v", item.state)
 		}
 		lastState = item.state
 	}
@@ -7916,7 +7904,7 @@ func TestAGrantChangedBeforeItIsSentReplacesItsNotice(t *testing.T) {
 	if len(self.pending.items) != 1 {
 		t.Fatalf("got pending items %#v", self.pending.items)
 	}
-	if text := self.pending.items[0].message.Text; !strings.Contains(text, "write access") {
+	if text, _ := pathgrant.Notice(self.pending.items[0].state); !strings.Contains(text, "write access") {
 		t.Errorf("got pending message %q", text)
 	}
 }
@@ -8406,18 +8394,14 @@ func TestATurnCutShortIsPokedAndWaitedForBeforeTheNextInput(t *testing.T) {
 		t.Error("the poked turn was left running")
 	}
 
-	var userMessages []string
 	var answers []string
 	for _, event := range self.events {
-		if event.Kind == agent.UserMessageEvent {
-			userMessages = append(userMessages, event.Text)
-		}
 		if event.Kind == agent.ModelMessageEvent {
 			answers = append(answers, event.Text)
 		}
 	}
-	if !slices.Equal(userMessages, []string{"get on with it", turn.PokeMessage}) {
-		t.Errorf("got user messages %q", userMessages)
+	if messages := submittedTexts(self.events); !slices.Equal(messages, []string{"get on with it", turn.PokeMessage}) {
+		t.Errorf("got submitted messages %q", messages)
 	}
 	if !slices.Equal(answers, []string{"Carrying on."}) {
 		t.Errorf("got answers %q", answers)
@@ -9870,7 +9854,7 @@ func runSessionGoldenTurn(
 		}
 	}
 	if turn.IsCancelled && !testHarness.currentTurn.Cancelled() {
-		testHarness.interruptTurn(stopKeyReason(stopKey))
+		testHarness.interruptTurn(stopKeyCause(stopKey))
 	}
 	testHarness.finish()
 
@@ -9988,16 +9972,25 @@ func canonicalSessionJournal(t *testing.T, directory string, name string) string
 			event = &canonicalEvent
 		}
 
+		var turnSummary *session.TurnSummary
+		if line.Turn != nil {
+			canonicalSummary := *line.Turn
+			canonicalSummary.Took = 0
+			turnSummary = &canonicalSummary
+		}
+
 		record := struct {
-			Kind    session.Kind    `json:"kind"`
-			Version int             `json:"version,omitempty"`
-			Meta    json.RawMessage `json:"meta,omitempty"`
-			Event   *agent.Event    `json:"event,omitempty"`
-			Payload json.RawMessage `json:"payload,omitempty"`
+			Kind    session.Kind         `json:"kind"`
+			Version int                  `json:"version,omitempty"`
+			Meta    json.RawMessage      `json:"meta,omitempty"`
+			Turn    *session.TurnSummary `json:"turn,omitempty"`
+			Event   *agent.Event         `json:"event,omitempty"`
+			Payload json.RawMessage      `json:"payload,omitempty"`
 		}{
 			Kind:    line.Kind,
 			Version: line.Version,
 			Meta:    line.Meta,
+			Turn:    turnSummary,
 			Event:   event,
 			Payload: canonicalImagePayload(t, line.Payload),
 		}
@@ -10077,12 +10070,12 @@ func (self *faultingConversationLog) Item(item json.RawMessage) error {
 	return self.SessionLogger.Item(item)
 }
 
-func (self *faultingConversationLog) CompleteTurn() error {
+func (self *faultingConversationLog) CompleteTurn(summary session.TurnSummary) error {
 	self.completionAttempts++
 	if self.completionFailure != nil {
 		return self.completionFailure
 	}
-	return self.SessionLogger.CompleteTurn()
+	return self.SessionLogger.CompleteTurn(session.TurnSummary{})
 }
 
 func (self *faultingConversationLog) TakeWarnings() []error {
@@ -10844,7 +10837,7 @@ func TestEveryWayOfStoppingATurnSaysWhy(t *testing.T) {
 		want     string
 	}{
 		"escape": {
-			stopTurn: func(self *App) { self.cancelTurn(escapeReason) },
+			stopTurn: func(self *App) { self.cancelTurn(interrupt.Escape) },
 			want:     "the user pressed escape",
 		},
 		"another message": {
@@ -11277,7 +11270,7 @@ func TestAModeChangeIsNotLostWhenItsQueuedTurnIsDropped(t *testing.T) {
 
 	self.start("first")
 	self.toggleCap(caps.Write)
-	self.cancelTurn(escapeReason)
+	self.cancelTurn(interrupt.Escape)
 	for report := range self.currentTurn.Events() {
 		self.takeTurn(report)
 	}

@@ -2,7 +2,7 @@
 still working
 
 
- The path /reference now has temporary read-only access.
+ 🤖 Granted temporary read-only access to /reference.
 
 
 The model ended the turn without an answer.
@@ -85,7 +85,7 @@ Temporary access could not be restored: path does not exist
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === restoration correction settled ===
 
- Revoked temporary path access to /missing.
+ 🤖 Revoked temporary path access to /missing.
 
 
 
@@ -106,7 +106,7 @@ message)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === settled into next turn ===
 
- Granted temporary read-only access to /reference.
+ 🤖 Granted temporary read-only access to /reference.
 
 
 

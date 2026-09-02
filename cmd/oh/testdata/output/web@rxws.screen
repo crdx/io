@@ -27,8 +27,10 @@ smaller allocation header.
  text
 
 
-The web search and fetch tools are now
-refused.
+
+ 🤖 The web search and fetch tools are
+    now refused.
+
 
 fetch https://go… ✗ web access is not…
 
@@ -510,45 +512,88 @@ x
 t
 
 
+
+
+🤖
+
 T
+
 h
+
 e
+
 w
+
 e
+
 b
+
 s
+
 e
+
 a
+
 r
+
 c
+
 h
+
 a
+
 n
+
 d
+
 f
+
 e
+
 t
+
 c
+
 h
+
 t
+
 o
+
 o
+
 l
+
 s
+
 a
+
 r
+
 e
+
 n
+
 o
+
 w
+
 r
+
 e
+
 f
+
 u
+
 s
+
 e
+
 d
+
 .
+
 
 
 
@@ -678,11 +723,15 @@ header.
  plain text
 
 
-The web
-search and
-fetch tools
-are now
-refused.
+
+ 🤖 The web
+    search
+    and
+    fetch
+    tools
+    are now
+    refused.
+
 
 fe… ✗ web…
 
@@ -716,7 +765,9 @@ go test, and a smaller allocation header.
  now read the release notes as plain text
 
 
-The web search and fetch tools are now refused.
+
+ 🤖 The web search and fetch tools are now refused.
+
 
 fetch https://go.dev/doc/go1.26 text ✗ web access is not granted; the user can grant it with ctrl…
 

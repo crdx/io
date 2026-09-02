@@ -1,13 +1,13 @@
-{"kind":"head","version":11,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"high","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"head","version":12,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"high","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":true}}}
 {"kind":"event","event":{"kind":"user_message","text":"answer quickly"}}
 {"kind":"event","event":{"kind":"model_message","text":"Fast answer."}}
 {"kind":"item","payload":{"role":"user","content":"answer quickly"}}
 {"kind":"item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Fast answer."}]}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"still fast?"}}
 {"kind":"event","event":{"kind":"model_message","text":"Still fast."}}
 {"kind":"item","payload":{"role":"user","content":"still fast?"}}
 {"kind":"item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Still fast."}]}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}

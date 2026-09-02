@@ -13,12 +13,14 @@ import (
 	"crdx.org/io/cmd/oh/call"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/dynamic"
+	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/cmd/oh/work"
 )
@@ -97,11 +99,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.UserMessageEvent:
 		self.discardProvisionalReasoning()
 		self.answer.Reset()
-		self.Close(dynamic.Cancelled)
-		self.screen.Blank()
-		self.screen.Line(self.renderUserMessage(event.Text))
-		self.screen.End()
-		self.screen.Blank()
+		self.drawSubmitted(event.Text, "")
 
 	case agent.ModelReasoningEvent:
 		self.answer.Reset()
@@ -142,13 +140,15 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.ToolCallResultEvent:
 		self.mark(event)
 
-	case agent.StartupEvent, agent.HarnessMessageEvent:
+	case agent.StartupEvent:
 		self.screen.Line(self.render(event))
 
-	case caps.ModeChange, pathgrant.Change:
-		if message, isSaid := renderAccessMessage(event); isSaid {
-			self.Close(dynamic.Cancelled)
-			self.screen.Line(self.renderSubmittedMessage(message))
+	case agent.SilentTurnEvent:
+		self.screen.Line(style.StoppedTurn(agent.SilentTurnNotice))
+
+	case caps.ModeChange, pathgrant.Change, turn.HarnessPoke:
+		if message, isSaid := HarnessNotice(event); isSaid {
+			self.drawSubmitted(message, submittedMarker(true))
 		}
 
 	case agent.RetryingEvent:
@@ -159,7 +159,13 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		self.Close(dynamic.Cancelled)
 		self.screen.Line(style.Failure(RenderFailure(event)))
 
-	case agent.StateChangeEvent, agent.InterruptionEvent:
+	case agent.InterruptionEvent:
+		if interrupt.IsAnnounced(event) {
+			self.Close(dynamic.Cancelled)
+			self.screen.Line(style.StoppedTurn(interrupt.Notice(event)))
+		}
+
+	case agent.StateChangeEvent:
 	}
 }
 
@@ -315,20 +321,20 @@ func (self *Picasso) Stop() {
 	}
 }
 
-func (self *Picasso) renderSubmittedMessage(text string) string {
-	if self.screen.IsTerminal() {
-		return RenderSubmittedMessageWithHyperlinks(text, self.screen.Columns())
-	}
-
-	return RenderSubmittedMessage(text, self.screen.Columns())
+func (self *Picasso) drawSubmitted(text string, marker string) {
+	self.Close(dynamic.Cancelled)
+	self.screen.Blank()
+	self.screen.Line(self.renderUserMessage(text, marker))
+	self.screen.End()
+	self.screen.Blank()
 }
 
-func (self *Picasso) renderUserMessage(text string) string {
+func (self *Picasso) renderUserMessage(text string, marker string) string {
 	if !self.screen.IsTerminal() {
-		return RenderSubmittedMessage(text, self.screen.Columns())
+		return renderSubmittedMessage(text, self.screen.Columns(), false, "", marker)
 	}
 
-	return renderSubmittedMessage(text, self.screen.Columns(), true, self.workspace.GetDir(), "")
+	return renderSubmittedMessage(text, self.screen.Columns(), true, self.workspace.GetDir(), marker)
 }
 
 func (self *Picasso) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldResetAnswerRenderer bool) {

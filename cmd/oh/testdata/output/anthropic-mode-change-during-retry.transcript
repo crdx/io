@@ -28,11 +28,11 @@ the stream ended before the response did
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
-## Mode · rxgs · +0s
+## Mode · rxgs · toggled w · +0s
 
-## User · +0s
-
+```
 The workspace is now read-only.
+```
 
 ## Retrying · attempt 1 · waited 1s · +0s
 

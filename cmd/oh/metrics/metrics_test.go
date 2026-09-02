@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/session"
 )
 
 func contextUsageAt(events []agent.Event, contextWindowTokens int) (int, int) {
 	tracker := New(contextWindowTokens)
-	tracker.Restore(events, 0)
+	tracker.Restore(events, nil)
 	return tracker.ContextUsage()
 }
 
@@ -50,9 +51,24 @@ func TestTrackerCountsEveryStartedTurn(t *testing.T) {
 
 func TestTrackerRestoresCompletedTurnsIndependentlyOfMessages(t *testing.T) {
 	tracker := New(0)
-	tracker.Restore([]agent.Event{{Kind: agent.UserMessageEvent}, {Kind: agent.UserMessageEvent}}, 1)
+	tracker.Restore(
+		[]agent.Event{{Kind: agent.UserMessageEvent}, {Kind: agent.UserMessageEvent}},
+		[]session.TurnSummary{{}},
+	)
 
 	if got := tracker.TurnCount(); got != 1 {
 		t.Errorf("expected one turn, got %d", got)
+	}
+}
+
+func TestTrackerPrefersTheContextTheLastTurnEndedOn(t *testing.T) {
+	tracker := New(0)
+	tracker.Restore(
+		[]agent.Event{{Kind: agent.ModelMessageEvent, Usage: &agent.Usage{InputTokens: 5000}}},
+		[]session.TurnSummary{{InputTokens: 12_000}},
+	)
+
+	if got, _ := tracker.ContextUsage(); got != 12_000 {
+		t.Errorf("expected the context the turn ended on, got %d", got)
 	}
 }

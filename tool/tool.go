@@ -61,10 +61,9 @@ func OutputStats(output string) Stats {
 	bytes := int64(len(output))
 
 	return Stats{
-		Kind:       StatsOutput,
-		Lines:      int64(len(strutil.Lines(output))),
-		Bytes:      bytes,
-		TotalBytes: bytes,
+		Kind:  StatsOutput,
+		Lines: int64(len(strutil.Lines(output))),
+		Bytes: bytes,
 	}
 }
 

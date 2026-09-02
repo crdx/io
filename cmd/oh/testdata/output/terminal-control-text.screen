@@ -5,8 +5,6 @@
 
 reasoning before after second line
 
-Notice before after
-second line
 Failure before after
 second line
 === one column ===
@@ -102,34 +100,6 @@ i
 n
 e
 
-N
-o
-t
-i
-c
-e
-b
-e
-f
-o
-r
-e
-a
-f
-t
-e
-r
-s
-e
-c
-o
-n
-d
-l
-i
-n
-e
-
 F
 a
 i
@@ -170,9 +140,6 @@ reasoning
 before after
 second line
 
-Notice
-before after
-second line
 Failure
 before after
 second line
@@ -183,7 +150,5 @@ second line
 
 reasoning before after second line
 
-Notice before after
-second line
 Failure before after
 second line

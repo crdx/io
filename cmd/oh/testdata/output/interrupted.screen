@@ -8,6 +8,8 @@ Reading it now.
 
 read cmd/oh/line/render.go –
 
+The turn was interrupted.
+
 
  never mind, what is in target.txt?
 
@@ -102,6 +104,29 @@ w
 .
 
 –
+
+T
+h
+e
+t
+u
+r
+n
+w
+a
+s
+i
+n
+t
+e
+r
+r
+u
+p
+t
+e
+d
+.
 
 
 
@@ -213,6 +238,9 @@ now.
 
 read cm… –
 
+The turn was
+interrupted.
+
 
  never mind,
  what is in
@@ -233,6 +261,8 @@ else.
 Reading it now.
 
 read cmd/oh/line/render.go –
+
+The turn was interrupted.
 
 
  never mind, what is in target.txt?

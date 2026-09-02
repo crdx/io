@@ -22,11 +22,11 @@ Half an ans
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
-## Mode · rxgs · +0s
+## Mode · rxgs · toggled w · +0s
 
-## User · +0s
-
+```
 The workspace is now read-only.
+```
 
 ## Assistant · +0s
 
@@ -36,11 +36,11 @@ The workspace is read-onl
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
-## Mode · rxs · +0s
+## Mode · rxs · toggled g · +0s
 
-## User · +0s
-
+```
 The .git directory is now read-only.
+```
 
 ## Assistant · +0s
 

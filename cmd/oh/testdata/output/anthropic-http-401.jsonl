@@ -1,11 +1,11 @@
-{"kind":"head","version":11,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"head","version":12,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"receive HTTP 401"}}
-{"kind":"event","event":{"kind":"failure","text":"request failed with status 401"}}
+{"kind":"event","event":{"kind":"turn_failure","text":"request failed with status 401"}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"receive HTTP 401"}]}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the transport failure"}}
 {"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"continue after the transport failure"}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Resumed."}]}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}

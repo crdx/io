@@ -67,7 +67,7 @@ func answer(assistant *agent.Agent, message string) {
 				fmt.Printf("\n· %s %s\n", update.Event.Name, update.Event.Arguments)
 			case agent.ToolCallResultEvent:
 				fmt.Printf("← %s\n", update.Event.Text)
-			case agent.StartupEvent, agent.UserMessageEvent, agent.HarnessMessageEvent, agent.ModelReasoningEvent,
+			case agent.StartupEvent, agent.UserMessageEvent, agent.SilentTurnEvent, agent.ModelReasoningEvent,
 				agent.StateChangeEvent, agent.InterruptionEvent, agent.RetryingEvent, agent.FailureEvent:
 			}
 		}

@@ -1,7 +1,7 @@
-{"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
+{"event":{"kind":"session_startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
 {"event":{"kind":"user_message","text":"have a look at that"}}
 {"event":{"kind":"model_message","text":"Searching the target before the process restarts."}}
 {"event":{"kind":"tool_call_request","id":"call_1","name":"grep","arguments":"{\"pattern\":\"one\",\"path\":\"target.txt\"}","render":"one","detail":"target.txt","emphasis":{"kind":"syntax","value":"regexp"},"read_only":true}}
 {"event":{"kind":"state_change","id":"call_1","name":"file_read","state":{"files":[{"path":"target.txt","sha256":"2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"}]}}}
-{"event":{"kind":"tool_call_result","status":"success","text":"target.txt:1:one","id":"call_1","name":"grep","took":0,"stats":{"kind":"output","lines":1,"bytes":16,"total_bytes":16}}}
+{"event":{"kind":"tool_call_result","status":"success","text":"target.txt:1:one","id":"call_1","name":"grep","took":0,"stats":{"kind":"output","lines":1,"bytes":16}}}
 {"event":{"kind":"model_message","text":"The matching target is now safely recorded."}}

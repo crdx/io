@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/session"
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/model"
@@ -164,7 +165,7 @@ func TestLoadingACompletedSessionSucceeds(t *testing.T) {
 	if err := writer.Item(json.RawMessage(`{"role":"user"}`)); err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.CompleteTurn(); err != nil {
+	if err := writer.CompleteTurn(session.TurnSummary{}); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {
@@ -199,7 +200,7 @@ func TestASessionRecordedThroughALinkResumesInTheWorkspaceItNames(t *testing.T) 
 	if err := writer.Item(json.RawMessage(`{"role":"user"}`)); err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.CompleteTurn(); err != nil {
+	if err := writer.CompleteTurn(session.TurnSummary{}); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.Close(); err != nil {
@@ -249,7 +250,7 @@ func TestARunningSessionIsRefused(t *testing.T) {
 	if err := writer.Item(json.RawMessage(`{"role":"user"}`)); err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.CompleteTurn(); err != nil {
+	if err := writer.CompleteTurn(session.TurnSummary{}); err != nil {
 		t.Fatal(err)
 	}
 

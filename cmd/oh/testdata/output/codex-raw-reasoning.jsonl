@@ -1,5 +1,5 @@
-{"kind":"head","version":11,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"head","version":12,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"reason without a summary"}}
 {"kind":"event","event":{"kind":"model_reasoning","text":"Raw reasoning."}}
@@ -7,9 +7,9 @@
 {"kind":"item","payload":{"role":"user","content":"reason without a summary"}}
 {"kind":"item","payload":{"id":"reasoning-1","type":"reasoning","content":[],"encrypted_content":"sealed-raw","summary":[]}}
 {"kind":"item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Done."}]}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{"input_tokens":5000}}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the first response"}}
 {"kind":"event","event":{"kind":"model_message","text":"Resumed.","usage":{"input_tokens":5100,"cache":{"read_tokens":5000,"write_tokens":100}}}}
 {"kind":"item","payload":{"role":"user","content":"continue after the first response"}}
 {"kind":"item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{"input_tokens":5100}}

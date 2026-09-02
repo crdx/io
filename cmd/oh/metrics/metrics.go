@@ -1,6 +1,9 @@
 package metrics
 
-import "crdx.org/io/agent"
+import (
+	"crdx.org/io/agent"
+	"crdx.org/io/session"
+)
 
 type Tracker struct {
 	contextWindowTokens int
@@ -22,9 +25,14 @@ func (self *Tracker) Record(event agent.Event) {
 	}
 }
 
-func (self *Tracker) Restore(events []agent.Event, completedTurns int) {
+func (self *Tracker) Restore(events []agent.Event, turns []session.TurnSummary) {
 	self.inputTokens = 0
-	self.turnsTaken = completedTurns
+	self.turnsTaken = len(turns)
+
+	if len(turns) > 0 && turns[len(turns)-1].InputTokens > 0 {
+		self.inputTokens = turns[len(turns)-1].InputTokens
+		return
+	}
 
 	for _, event := range events {
 		if event.Usage != nil && event.Usage.InputTokens > 0 {

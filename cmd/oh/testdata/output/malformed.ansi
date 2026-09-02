@@ -35,9 +35,6 @@
 \r\e[Kbecomes AT&T — but left alone inside\r
 \r\e[Kcode, where \e[38;2;192;128;80m&amp;\e[0m and \e[38;2;192;128;80m&lt;div&gt;\e[0m stand\r
 \r\e[Kas they are written.\r
-\r
-\e[38;2;204;102;102mA warning that arrived with a carriage\e[0m\r
-\e[38;2;204;102;102mreturn in it\e[0m\r
 \e[?25h\e[?2026l
 === one column ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
@@ -478,49 +475,6 @@
 \r\e[Ke\r
 \r\e[Kn\r
 \r\e[K.\r
-\r
-\e[38;2;204;102;102mA\e[0m\r
-\e[38;2;204;102;102mw\e[0m\r
-\e[38;2;204;102;102ma\e[0m\r
-\e[38;2;204;102;102mr\e[0m\r
-\e[38;2;204;102;102mn\e[0m\r
-\e[38;2;204;102;102mi\e[0m\r
-\e[38;2;204;102;102mn\e[0m\r
-\e[38;2;204;102;102mg\e[0m\r
-\e[38;2;204;102;102mt\e[0m\r
-\e[38;2;204;102;102mh\e[0m\r
-\e[38;2;204;102;102ma\e[0m\r
-\e[38;2;204;102;102mt\e[0m\r
-\e[38;2;204;102;102ma\e[0m\r
-\e[38;2;204;102;102mr\e[0m\r
-\e[38;2;204;102;102mr\e[0m\r
-\e[38;2;204;102;102mi\e[0m\r
-\e[38;2;204;102;102mv\e[0m\r
-\e[38;2;204;102;102me\e[0m\r
-\e[38;2;204;102;102md\e[0m\r
-\e[38;2;204;102;102mw\e[0m\r
-\e[38;2;204;102;102mi\e[0m\r
-\e[38;2;204;102;102mt\e[0m\r
-\e[38;2;204;102;102mh\e[0m\r
-\e[38;2;204;102;102ma\e[0m\r
-\e[38;2;204;102;102mc\e[0m\r
-\e[38;2;204;102;102ma\e[0m\r
-\e[38;2;204;102;102mr\e[0m\r
-\e[38;2;204;102;102mr\e[0m\r
-\e[38;2;204;102;102mi\e[0m\r
-\e[38;2;204;102;102ma\e[0m\r
-\e[38;2;204;102;102mg\e[0m\r
-\e[38;2;204;102;102me\e[0m\r
-\e[38;2;204;102;102mr\e[0m\r
-\e[38;2;204;102;102me\e[0m\r
-\e[38;2;204;102;102mt\e[0m\r
-\e[38;2;204;102;102mu\e[0m\r
-\e[38;2;204;102;102mr\e[0m\r
-\e[38;2;204;102;102mn\e[0m\r
-\e[38;2;204;102;102mi\e[0m\r
-\e[38;2;204;102;102mn\e[0m\r
-\e[38;2;204;102;102mi\e[0m\r
-\e[38;2;204;102;102mt\e[0m\r
 \e[?25h\e[?2026l
 === plain ===
 \e[48;2;52;53;65m\e[0m
@@ -542,8 +496,6 @@ A bare URL the renderer has to find for itself: \e[38;2;129;162;190mhttps://exam
 in angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which are not the same thing.
 
 Entities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and \e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.
-
-\e[38;2;204;102;102mA warning that arrived with a carriage return in it\e[0m
 
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -598,8 +550,6 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 \r
 \e[?2026h\e[?25l\r\e[KEnti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are res\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolve\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in pro\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T be\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T become\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but lef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone insi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, whe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `&amp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `<\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\r
 \r\e[K`<div&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m sta\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are writt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\e[?25h\e[?2026l\r
-\r
-\e[38;2;204;102;102mA warning that arrived with a carriage return in it\e[0m\r
 \e]9;4;0\e\\
 === streamed line ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -636,8 +586,6 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 \r
 \e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\e[?25h\e[?2026l\e[?2026h\e[?25l\r
 \r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\e[?25h\e[?2026l\r
-\r
-\e[38;2;204;102;102mA warning that arrived with a carriage return in it\e[0m\r
 \e]9;4;0\e\\
 === streamed paced ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -692,8 +640,6 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 \r
 \e[?2026h\e[?25l\r\e[KEnti\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are res\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolve\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in pro\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T be\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T become\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T —\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but lef\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left al\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone insi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside c\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code,\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, whe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where `&amp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and `<\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\r
 \r\e[K`<div&\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m sta\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as th\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they a\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are writt\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\e[?25h\e[?2026l\r
-\r
-\e[38;2;204;102;102mA warning that arrived with a carriage return in it\e[0m\r
 \e]9;4;0\e\\
 === tiny ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
@@ -756,12 +702,6 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 \r\e[Kstand as\r
 \r\e[Kthey are\r
 \r\e[Kwritten.\r
-\r
-\e[38;2;204;102;102mA warning\e[0m\r
-\e[38;2;204;102;102mthat arrived\e[0m\r
-\e[38;2;204;102;102mwith a\e[0m\r
-\e[38;2;204;102;102mcarriage\e[0m\r
-\e[38;2;204;102;102mreturn in it\e[0m\r
 \e[?25h\e[?2026l
 === unsized ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
@@ -783,8 +723,6 @@ Entities are resolved in prose — AT&T becomes AT&T — but left alone inside c
 in angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the same thing.
 
 \r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and \e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.
-
-\e[38;2;204;102;102mA warning that arrived with a carriage return in it\e[0m
 \e[?25h\e[?2026l
 === wide ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -816,6 +754,4 @@ in angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhtt
 \r
 \r\e[KEntities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\r
 \r\e[K\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\r
-\r
-\e[38;2;204;102;102mA warning that arrived with a carriage return in it\e[0m\r
 \e[?25h\e[?2026l

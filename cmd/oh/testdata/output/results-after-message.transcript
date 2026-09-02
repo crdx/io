@@ -24,37 +24,20 @@ read: screen.go [call_1]
 grep: spinner [call_2]
 ```
 
-## Notice · warning · +4s
+## Mode · rxgs · toggled w · +4s
 
 ```
-Background processes killed (sleep).
+The workspace is now read-only.
 ```
 
-## Notice · success · +5s
-
-```
-Copied to clipboard.
-```
-
-## Tool calls · +6s
+## Tool calls · +5s
 
 ```
 read [ok, 3 lines, 40B, call_1]
-```
-
-## Notice · error · +7s
-
-```
-the conversation could not be stored: no space left on device
-```
-
-## Tool calls · +8s
-
-```
 grep [ok, 1 line, 44B, call_2]
 ```
 
-## Assistant · +9s
+## Assistant · +7s
 
 Both still mention the spinner.
 

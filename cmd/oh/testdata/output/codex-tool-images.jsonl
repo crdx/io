@@ -1,5 +1,5 @@
-{"kind":"head","version":11,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"head","version":12,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
 {"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
 {"kind":"event","event":{"kind":"user_message","text":"show me both pictures"}}
 {"kind":"event","event":{"render":"snapshot","kind":"tool_call_request","id":"call-1","name":"snapshot","arguments":"{}"}}
@@ -15,9 +15,9 @@
 {"kind":"item","payload":{"call_id":"call-1","output":[{"text":"snapshot.png","type":"input_text"},{"detail":"high","image_url":"[image/png 2400x1200]","type":"input_image"}],"type":"function_call_output"}}
 {"kind":"item","payload":{"call_id":"call-2","output":[{"text":"thumbnail.png","type":"input_text"},{"detail":"high","image_url":"[image/png 800x600]","type":"input_image"}],"type":"function_call_output"}}
 {"kind":"item","payload":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"I can see both pictures."}]}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"describe the larger one"}}
 {"kind":"event","event":{"kind":"model_message","text":"The larger one is a plain blue field."}}
 {"kind":"item","payload":{"role":"user","content":"describe the larger one"}}
 {"kind":"item","payload":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"The larger one is a plain blue field."}]}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}

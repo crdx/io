@@ -5,7 +5,11 @@
 Partial answer.
 
 
- The workspace is now read-only. The .git directory is now read-only.
+ 🤖 The workspace is now read-only.
+
+
+
+ 🤖 The .git directory is now read-only.
 
 
 The workspace and history are read-only now.

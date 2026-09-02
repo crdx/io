@@ -23,11 +23,9 @@ Reading it now.
 read: cmd/oh/line/render.go [call_1]
 ```
 
-## Notice · warning · +4s
+## Interrupted · +4s
 
-```
 The turn was interrupted.
-```
 
 ## User · +5s
 
@@ -42,17 +40,5 @@ read: target.txt [ok, 1 line, 4B, call_2]
 ## Assistant · +8s
 
 It holds the word `one`, and nothing else.
-
-## Notice · warning · +9s
-
-```
-Background processes killed (sleep).
-```
-
-## Notice · error · +10s
-
-```
-the conversation could not be stored: no space left on device
-```
 
 

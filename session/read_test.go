@@ -34,7 +34,7 @@ func TestCompletingATurnSyncsTheJournalBeforeWritingMetadata(t *testing.T) {
 	}
 	defer func() { _ = writer.Close() }()
 
-	err = writer.CompleteTurn()
+	err = writer.CompleteTurn(TurnSummary{})
 	if err == nil || !strings.Contains(err.Error(), "sync session journal") {
 		t.Fatalf("got %v, want the pipe's sync failure", err)
 	}

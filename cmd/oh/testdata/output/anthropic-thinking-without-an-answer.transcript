@@ -20,15 +20,17 @@ audit the golden coverage
 audit: audit [ok, 1 line, 21B, toolu_1]
 ```
 
-## Notice · warning · +0s
+## Silent turn · +0s
 
 ```
 The model ended the turn without an answer.
 ```
 
-## User · +0s
+## Poke · +0s
 
+```
 The previous response ended without a reply. Carry on from where it stopped.
+```
 
 ## Assistant · +0s
 

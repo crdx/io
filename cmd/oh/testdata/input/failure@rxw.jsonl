@@ -1,12 +1,12 @@
-{"event":{"kind":"startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
+{"event":{"kind":"session_startup","took":0,"state":{"session":"000000000000000000000000","tools":2320}}}
 {"event":{"kind":"user_message","text":"have a look at that"}}
 {"event":{"kind":"model_reasoning","text":"This one stops halfway."}}
-{"event":{"kind":"failure","text":"the stream ended before the response did"}}
+{"event":{"kind":"turn_failure","text":"the stream ended before the response did"}}
 {"event":{"kind":"user_message","text":"have a look at that"}}
 {"event":{"kind":"model_message","text":"Let me think about that. "}}
-{"event":{"kind":"failure","text":"the model is overloaded"}}
+{"event":{"kind":"turn_failure","text":"the model is overloaded"}}
 {"event":{"kind":"user_message","text":"have a look at that"}}
 {"event":{"kind":"model_message","text":"I can only get so far before "}}
-{"event":{"kind":"failure","text":"the response was cut short"}}
+{"event":{"kind":"turn_failure","text":"the response was cut short"}}
 {"event":{"kind":"user_message","text":"have a look at that"}}
-{"event":{"kind":"failure","text":"the endpoint is having a moment"}}
+{"event":{"kind":"turn_failure","text":"the endpoint is having a moment"}}

@@ -2,6 +2,8 @@
  interrupt while forming a tool call
 
 
+The turn was interrupted because the user pressed escape.
+
 
  continue without the incomplete call
 

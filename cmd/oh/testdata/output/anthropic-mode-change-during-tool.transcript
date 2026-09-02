@@ -24,11 +24,11 @@ work: work [cancelled, 1 line, 88B, toolu_1]
 
 The turn was interrupted because the user changed what the harness is allowed to do.
 
-## Mode · rxgs · +0s
+## Mode · rxgs · toggled w · +0s
 
-## User · +0s
-
+```
 The workspace is now read-only.
+```
 
 ## Assistant · +0s
 

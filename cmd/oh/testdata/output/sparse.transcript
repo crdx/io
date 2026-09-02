@@ -13,7 +13,7 @@
 
 run the thing that takes no arguments
 
-## Notice · info · +1s
+## Mode · rxwg · toggled s · +1s
 
 ```
 The web search and fetch tools are now refused.
@@ -23,21 +23,10 @@ The web search and fetch tools are now refused.
 
 ```
 status [ok, call_1]
-```
-
-## Notice · warning · +4s
-
-```
-Background processes killed (sleep).
-```
-
-## Tool calls · +5s
-
-```
 notify: done [info, call_2]
 ```
 
-## Assistant · +7s
+## Assistant · +6s
 
 Nothing came back.
 

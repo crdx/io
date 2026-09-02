@@ -27,8 +27,10 @@
 \e[48;2;52;53;65m text                                   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
-\e[38;2;129;162;190mThe web search and fetch tools are now\e[0m\r
-\e[38;2;129;162;190mrefused.\e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are  \e[0m\r
+\e[48;2;52;53;65m    now refused.                        \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;192;128;80mhttps://go…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not…\e[0m\r
 \r
@@ -511,45 +513,88 @@
 \e[48;2;52;53;65mt\e[0m\r
 \e[48;2;52;53;65m \e[0m\r
 \r
-\e[38;2;129;162;190mT\e[0m\r
-\e[38;2;129;162;190mh\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mw\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mb\e[0m\r
-\e[38;2;129;162;190ms\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190ma\e[0m\r
-\e[38;2;129;162;190mr\e[0m\r
-\e[38;2;129;162;190mc\e[0m\r
-\e[38;2;129;162;190mh\e[0m\r
-\e[38;2;129;162;190ma\e[0m\r
-\e[38;2;129;162;190mn\e[0m\r
-\e[38;2;129;162;190md\e[0m\r
-\e[38;2;129;162;190mf\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mt\e[0m\r
-\e[38;2;129;162;190mc\e[0m\r
-\e[38;2;129;162;190mh\e[0m\r
-\e[38;2;129;162;190mt\e[0m\r
-\e[38;2;129;162;190mo\e[0m\r
-\e[38;2;129;162;190mo\e[0m\r
-\e[38;2;129;162;190ml\e[0m\r
-\e[38;2;129;162;190ms\e[0m\r
-\e[38;2;129;162;190ma\e[0m\r
-\e[38;2;129;162;190mr\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mn\e[0m\r
-\e[38;2;129;162;190mo\e[0m\r
-\e[38;2;129;162;190mw\e[0m\r
-\e[38;2;129;162;190mr\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190mf\e[0m\r
-\e[38;2;129;162;190mu\e[0m\r
-\e[38;2;129;162;190ms\e[0m\r
-\e[38;2;129;162;190me\e[0m\r
-\e[38;2;129;162;190md\e[0m\r
-\e[38;2;129;162;190m.\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m🤖\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65mT\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
 \r
 \r\e[K\e[38;2;204;102;102m\e[0m \e[38;2;204;102;102m✗\e[0m\r
 \r
@@ -640,8 +685,9 @@ Go \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;19
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m now read the release notes as plain text\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m
-
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.\e[0m
+\e[48;2;52;53;65m\e[0m
 \e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl+x s\e[0m
 
 The web tools are refused, so I cannot read the notes until you grant access again.
@@ -667,7 +713,9 @@ The web tools are refused, so I cannot read the notes until you grant access aga
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl…\e[0m\e[?25h\e[?2026l\r
 \r
@@ -694,7 +742,9 @@ The web tools are refused, so I cannot read the notes until you grant access aga
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl…\e[0m\e[?25h\e[?2026l\r
 \r
@@ -721,7 +771,9 @@ The web tools are refused, so I cannot read the notes until you grant access aga
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[?2026h\e[?25l\r\e[K\e[38;2;204;102;102mfetch\e[0m \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl…\e[0m\e[?25h\e[?2026l\r
 \r
@@ -785,11 +837,15 @@ The web tools are refused, so I cannot read the notes until you grant access aga
 \e[48;2;52;53;65m plain text \e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
-\e[38;2;129;162;190mThe web\e[0m\r
-\e[38;2;129;162;190msearch and\e[0m\r
-\e[38;2;129;162;190mfetch tools\e[0m\r
-\e[38;2;129;162;190mare now\e[0m\r
-\e[38;2;129;162;190mrefused.\e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m 🤖 The web \e[0m\r
+\e[48;2;52;53;65m    search  \e[0m\r
+\e[48;2;52;53;65m    and     \e[0m\r
+\e[48;2;52;53;65m    fetch   \e[0m\r
+\e[48;2;52;53;65m    tools   \e[0m\r
+\e[48;2;52;53;65m    are now \e[0m\r
+\e[48;2;52;53;65m    refused.\e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfe…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb…\e[0m\r
 \r
@@ -821,8 +877,9 @@ The web tools are refused, so I cannot read the notes until you grant access aga
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m now read the release notes as plain text\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m
-
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.\e[0m
+\e[48;2;52;53;65m\e[0m
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl+x s\e[0m
 
 \r\e[KThe web tools are refused, so I cannot read the notes until you grant access again.
@@ -848,7 +905,9 @@ The web tools are refused, so I cannot read the notes until you grant access aga
 \e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[38;2;129;162;190mThe web search and fetch tools are now refused.\e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl…\e[0m\r
 \r

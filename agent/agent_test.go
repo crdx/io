@@ -956,7 +956,7 @@ func silentTurnNotices(t *testing.T, assistant *agent.Agent) []agent.Event {
 		if err != nil {
 			continue
 		}
-		if update.Event != nil && update.Event.Kind == agent.HarnessMessageEvent {
+		if update.Event != nil && update.Event.Kind == agent.SilentTurnEvent {
 			notices = append(notices, *update.Event)
 		}
 	}
@@ -974,9 +974,6 @@ func TestATurnThatOnlyThinksSaysItEndedWithoutAnAnswer(t *testing.T) {
 
 	if len(notices) != 1 {
 		t.Fatalf("got %+v, want the turn to say it ended without an answer", notices)
-	}
-	if notices[0].Text != agent.SilentTurnNotice || notices[0].Status != agent.WarningStatus {
-		t.Errorf("got %+v", notices[0])
 	}
 }
 

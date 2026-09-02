@@ -2,7 +2,9 @@
 \e[48;2;52;53;65m interrupt the answer with ctrl+d                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?7l\r\e[KPartial answer.\e[?25h\e[?2026l\r
+\e[?7l\r\e[KPartial answer.\r
+\r
+\e[38;2;207;173;0mThe turn was interrupted because the user pressed ctrl+d.\e[0m\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m continue after the partial answer                                                                  \e[0m\r

@@ -103,17 +103,17 @@ type ToolCallResult struct {
 type Kind string
 
 const (
-	StartupEvent         Kind = "startup"
+	StartupEvent         Kind = "session_startup"
 	UserMessageEvent     Kind = "user_message"
-	HarnessMessageEvent  Kind = "harness_message"
+	SilentTurnEvent      Kind = "silent_turn"
 	ModelReasoningEvent  Kind = "model_reasoning"
 	ModelMessageEvent    Kind = "model_message"
 	ToolCallRequestEvent Kind = "tool_call_request"
 	ToolCallResultEvent  Kind = "tool_call_result"
 	StateChangeEvent     Kind = "state_change"
-	InterruptionEvent    Kind = "interruption"
-	RetryingEvent        Kind = "retrying"
-	FailureEvent         Kind = "failure"
+	InterruptionEvent    Kind = "turn_interruption"
+	RetryingEvent        Kind = "request_retry"
+	FailureEvent         Kind = "turn_failure"
 )
 
 const TitleStateKey = "title"

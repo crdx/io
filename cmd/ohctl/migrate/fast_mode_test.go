@@ -31,7 +31,7 @@ func storedFastModeSession(t *testing.T, directory string, providerName string, 
 			t.Fatal(err)
 		}
 	}
-	if err := writer.CompleteTurn(); err != nil {
+	if err := writer.CompleteTurn(session.TurnSummary{}); err != nil {
 		t.Fatal(err)
 	}
 	name := writer.Name()

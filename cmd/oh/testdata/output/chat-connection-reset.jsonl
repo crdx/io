@@ -1,49 +1,49 @@
-{"kind":"head","version":11,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
-{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"head","version":12,"meta":{"model":"deepseek-v4-pro","workspaceDir":"","provider":"chat","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
 {"kind":"event","event":{"kind":"user_message","text":"reset the connection until the attempts run out"}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":1}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":1}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":2}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":2}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":3}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":3}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":4}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":4}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":5}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":5}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":6}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":6}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":7}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":7}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":8}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":8}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":9}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":9}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":10}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":10}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":11}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":11}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":12}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":12}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":13}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":13}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":14}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":14}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":15}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":15}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":16}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":16}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":17}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":17}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"retrying","text":"unexpected EOF","attempt":18}}
+{"kind":"event","event":{"kind":"request_retry","text":"unexpected EOF","attempt":18}}
 {"kind":"event","event":{"kind":"model_message","text":"Partial answer."}}
-{"kind":"event","event":{"kind":"failure","text":"unexpected EOF"}}
+{"kind":"event","event":{"kind":"turn_failure","text":"unexpected EOF"}}
 {"kind":"item","payload":{"role":"user","content":"reset the connection until the attempts run out"}}
 {"kind":"item","payload":{"role":"assistant","content":"Partial answer."}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"continue after the transport failure"}}
 {"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
 {"kind":"item","payload":{"role":"user","content":"continue after the transport failure"}}
 {"kind":"item","payload":{"role":"assistant","content":"Resumed."}}
-{"kind":"turn_completion"}
+{"kind":"turn_completion","turn":{}}

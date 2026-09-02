@@ -13,63 +13,69 @@
 
 use the external reference
 
-## Path grant · 1 path · +1s
+## Path grant · 1 path · changed /reference · +1s
 
-## User · +2s
-
+```
 Granted temporary read-only access to /reference.
+```
 
-## Assistant · +3s
+## Assistant · +2s
 
 I can read the external reference now.
 
-## Path grant · 1 path · +4s
+## Path grant · 1 path · changed /reference · +3s
 
-## User · +5s
-
+```
 Granted temporary read and write access to /reference. Changes there follow the workspace write capability.
+```
 
-## Assistant · +6s
+## Assistant · +4s
 
 I can also change it while workspace writing is granted.
 
-## Path grant · 2 paths · +7s
+## Path grant · 2 paths · changed /tools · +5s
 
-## User · +8s
-
+```
 Granted temporary read and execute access to /tools. Execution there follows the shell capability.
+```
 
-## Assistant · +9s
+## Assistant · +6s
 
 I can run what is in the tools directory now.
 
-## Path grant · 3 paths · +10s
+## Path grant · 3 paths · changed /build · +7s
 
-## User · +11s
-
+```
 Granted temporary read, write, and execute access to /build. Changes there follow the workspace write capability. Execution there follows the shell capability.
+```
 
-## Assistant · +12s
+## Assistant · +8s
 
 I can build in place and run what comes out of it.
 
-## Path grant · 1 path · +13s
+## Path grant · 2 paths · changed /build · +9s
 
-## User · +14s
+```
+Revoked temporary path access to /build.
+```
 
-Revoked temporary path access to /build. Revoked temporary path access to /tools.
+## Path grant · 1 path · changed /tools · +10s
 
-## Assistant · +15s
+```
+Revoked temporary path access to /tools.
+```
+
+## Assistant · +11s
 
 I will use the reference alone from here.
 
-## Path grant · none · +16s
+## Path grant · none · changed /reference · +12s
 
-## User · +17s
-
+```
 Revoked temporary path access to /reference.
+```
 
-## Assistant · +18s
+## Assistant · +13s
 
 I will no longer use it.
 
