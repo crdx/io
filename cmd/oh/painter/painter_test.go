@@ -156,9 +156,10 @@ func TestToolResultLinksAreOptIn(t *testing.T) {
 		resultText  string
 		shouldLink  bool
 	}{
-		"linked":       {sessionName: "brave-otter", resultText: "output", shouldLink: true},
-		"plain":        {resultText: "output"},
-		"empty result": {sessionName: "brave-otter"},
+		"linked":             {sessionName: "brave-otter", resultText: "output", shouldLink: true},
+		"empty result":       {sessionName: "brave-otter", shouldLink: true},
+		"plain":              {resultText: "output"},
+		"plain empty result": {},
 	} {
 		t.Run(name, func(t *testing.T) {
 			var screenOutput bytes.Buffer

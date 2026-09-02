@@ -394,7 +394,7 @@ func (self *Picasso) mark(event agent.Event) {
 	delete(self.rows, event.ID)
 	label := self.labels[event.ID]
 	delete(self.labels, event.ID)
-	if self.resultLinkSessionName != "" && event.Text != "" {
+	if self.resultLinkSessionName != "" {
 		label.ResultURI = toolresult.URL(self.resultLinkSessionName, event.ID)
 	}
 

@@ -26,13 +26,15 @@ show every tool result link state
 
 ## Tool call — bash · `sleep 10` · +4s
 
-## Tool result — read · success, 1 line, 12B · +5s
+## Tool call — bash · `touch marker` · +5s
+
+## Tool result — read · success, 1 line, 12B · +6s
 
 ```
 # Workspace
 ```
 
-## Tool result — grep · error · +6s
+## Tool result — grep · error · +7s
 
 **Output preview (first 3 lines, up to 1 KiB)**
 
@@ -48,18 +50,20 @@ Full output, from the session directory:
 jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_2") | .event.text' session.jsonl
 ```
 
-## Tool result — ls · success · +7s
+## Tool result — ls · success · +8s
 
-## Tool result — bash · cancelled · +8s
+## Tool result — bash · cancelled · +9s
 
 ```
 the command was stopped because the user pressed escape
 ```
 
-## Assistant · +9s
+## Tool result — bash · success · +10s
+
+## Assistant · +11s
 
 ```
-The textual success, failure, and cancellation have result links; the empty result does not.
+Every finished call has a result link, whether or not it returned anything.
 ```
 
 

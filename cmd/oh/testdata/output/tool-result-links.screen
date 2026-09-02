@@ -7,10 +7,10 @@ read README.md ✓ 1L
 grep [ ✗ regex parse error: [ ^ error…
 ls ✓ 0L
 $ sleep 10 – the command was stopped …
+$ touch marker ✓ no output
 
-The textual success, failure, and
-cancellation have result links; the
-empty result does not.
+Every finished call has a result link,
+whether or not it returned anything.
 === one column ===
 
 
@@ -76,51 +76,28 @@ e
 ✓
 
 
-T
+
+E
+v
+e
+r
+y
+f
+i
+n
+i
+s
 h
 e
-t
-e
-x
-t
-u
-a
-l
-s
-u
-c
-c
-e
-s
-s
-,
-f
-a
-i
-l
-u
-r
-e
-,
-a
-n
 d
 c
 a
-n
-c
-e
 l
 l
-a
-t
-i
-o
-n
 h
 a
-v
-e
+s
+a
 r
 e
 s
@@ -131,29 +108,37 @@ l
 i
 n
 k
-s
-;
+,
+w
+h
+e
 t
 h
 e
-e
-m
-p
-t
-y
 r
-e
-s
-u
-l
-t
-d
 o
-e
-s
+r
 n
 o
 t
+i
+t
+r
+e
+t
+u
+r
+n
+e
+d
+a
+n
+y
+t
+h
+i
+n
+g
 .
 === tiny ===
 
@@ -166,15 +151,16 @@ read ✓ 1L
 gr… ✗ reg…
 ls ✓ 0L
 $ … – the…
+$ touch… ✓
 
-The textual
-success,
-failure, and
-cancellation
-have result
-links; the
-empty result
-does not.
+Every
+finished
+call has a
+result link,
+whether or
+not it
+returned
+anything.
 === wide ===
 
  show every tool result link state
@@ -184,5 +170,6 @@ read README.md ✓ 1L
 grep [ ✗ regex parse error: [ ^ error: unclosed character class
 ls ✓ 0L
 $ sleep 10 – the command was stopped because the user pressed escape
+$ touch marker ✓ no output
 
-The textual success, failure, and cancellation have result links; the empty result does not.
+Every finished call has a result link, whether or not it returned anything.
