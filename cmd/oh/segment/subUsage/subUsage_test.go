@@ -608,25 +608,6 @@ func TestAWindowIsMarkedByHowItsBurnComparesWithItsPace(t *testing.T) {
 	}
 }
 
-func TestAWindowIsLabelledByHowLongItRuns(t *testing.T) {
-	for _, test := range []struct {
-		duration time.Duration
-		want     string
-	}{
-		{duration: 90 * time.Minute, want: "90m"},
-		{duration: 5 * time.Hour, want: "5h"},
-		{duration: 7 * 24 * time.Hour, want: "7d"},
-		{duration: 30 * 24 * time.Hour, want: "30d"},
-		{duration: 36 * time.Hour, want: "36h"},
-	} {
-		t.Run(test.want, func(t *testing.T) {
-			if got := durationLabel(test.duration); got != test.want {
-				t.Errorf("got %q, want %q", got, test.want)
-			}
-		})
-	}
-}
-
 func TestAScopeIsMatchedAgainstTheModelHoweverItIsWritten(t *testing.T) {
 	for _, test := range []struct {
 		name      string

@@ -1,0 +1,26 @@
+=== windows on an even burn ===
+5[38;2;150;152;150mh [0m40[38;2;150;152;150m%[0m 7[38;2;150;152;150md [0m12[38;2;150;152;150m%[0m
+=== a window ahead of its pace ===
+[38;2;207;173;0m5h 28% ▲[0m
+=== a window far ahead of its pace ===
+[38;2;204;102;102m5h 60% ▲[0m
+=== a window near its limit ===
+[38;2;204;102;102m5h 95% ▲[0m
+=== a scoped window governing this model ===
+5[38;2;150;152;150mh [0m40[38;2;150;152;150m%[0m [38;2;150;152;150m⚡[0m [38;2;207;173;0m5h 70% ▲[0m
+=== a scoped window governing another model ===
+5[38;2;150;152;150mh [0m40[38;2;150;152;150m%[0m
+=== a window that is over its limit ===
+[38;2;204;102;102m30d 100% ✖[0m
+=== a window whose reset has passed ===
+[38;2;150;152;150m5h stale[0m
+=== a window with no reset at all ===
+5[38;2;150;152;150mh [0m40[38;2;150;152;150m%[0m
+=== a fetch under way ===
+5[38;2;150;152;150mh [0m40[38;2;150;152;150m%[0m [38;2;192;128;80m✦·[0m
+=== nothing fetched yet ===
+usage [38;2;150;152;150mpending[0m
+=== a fetch that was refused ===
+5[38;2;150;152;150mh [0m40[38;2;150;152;150m%[0m [38;2;204;102;102m429[0m
+=== nothing to show at all ===
+[38;2;150;152;150musage unavailable[0m

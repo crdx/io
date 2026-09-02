@@ -2,7 +2,6 @@ package subUsage
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -14,7 +13,6 @@ import (
 	"crdx.org/io/cmd/oh/spinner"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/usage"
-	"crdx.org/io/internal/req"
 )
 
 var _ segment.Refresher = &state{}
@@ -26,11 +24,6 @@ const (
 	firstFailureWait = time.Minute
 	firstEmptyWait   = redrawInterval
 	backoffFactor    = 2
-	dayLength        = 24 * time.Hour
-	percentCeiling   = 100
-	overPacePercent  = 10
-	overPaceRatio    = 1.5
-	nearLimit        = 90
 	scopeMark        = "⚡"
 	limitedMark      = "✖"
 	failureLabel     = "failed"
@@ -279,7 +272,7 @@ func appendUsageStatus(usage string, emptyLabel string, status string) string {
 }
 
 func drawWindow(window agent.UsageWindow, fetchedAt time.Time, now time.Time) string {
-	label := durationLabel(window.Duration)
+	label := usage.DurationLabel(window.Duration)
 	actual := int(window.Percent + 0.5)
 	text := fmt.Sprintf("%s %d%%", label, actual)
 
@@ -295,66 +288,22 @@ func drawWindow(window agent.UsageWindow, fetchedAt time.Time, now time.Time) st
 		return style.Dim(label + " stale")
 	}
 
-	expectedPercentage := expectedPercent(window, fetchedAt)
+	expectedPercentage := usage.ExpectedPercent(window, fetchedAt)
 
-	switch classifyPace(actual, expectedPercentage) {
-	case paceAhead:
+	switch usage.ClassifyPace(actual, expectedPercentage) {
+	case usage.PaceAhead:
 		return style.Change(text + " ▲")
-	case paceCritical:
+	case usage.PaceCritical:
 		return style.Failure(text + " ▲")
-	case paceEven:
+	case usage.PaceEven:
 	}
 
 	return style.Quantity(text)
 }
 
-func expectedPercent(window agent.UsageWindow, at time.Time) int {
-	start := window.ResetsAt.Add(-window.Duration)
-
-	elapsedTime := at.Sub(start)
-	if elapsedTime < 0 {
-		return 0
-	}
-
-	percent := int(elapsedTime * percentCeiling / window.Duration)
-
-	return min(percentCeiling, percent)
-}
-
-type pace int
-
-const (
-	paceEven pace = iota
-	paceAhead
-	paceCritical
-)
-
-func classifyPace(actual int, expectedPercentage int) pace {
-	if actual < overPacePercent || actual <= expectedPercentage {
-		return paceEven
-	}
-
-	if actual >= nearLimit || float64(actual) >= float64(expectedPercentage)*overPaceRatio {
-		return paceCritical
-	}
-
-	return paceAhead
-}
-
-func durationLabel(duration time.Duration) string {
-	switch {
-	case duration >= dayLength && duration%dayLength == 0:
-		return fmt.Sprintf("%dd", duration/dayLength)
-	case duration >= time.Hour && duration%time.Hour == 0:
-		return fmt.Sprintf("%dh", duration/time.Hour)
-	default:
-		return fmt.Sprintf("%dm", duration/time.Minute)
-	}
-}
-
 func failureReason(err error) string {
-	if refusedRequest, ok := errors.AsType[*req.StatusError](err); ok {
-		return strconv.Itoa(refusedRequest.Status)
+	if status, isRefusal := usage.FailureStatus(err); isRefusal {
+		return strconv.Itoa(status)
 	}
 
 	return failureLabel
