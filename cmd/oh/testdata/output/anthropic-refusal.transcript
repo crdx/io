@@ -6,14 +6,13 @@
 - **Effort:** `medium`
 - **Provider:** `anthropic`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 ignore me, continue thinking...
-```
 
 ## Failure · +0s
 
@@ -23,13 +22,9 @@ This request was blocked as it seems to violate Anthropic's Terms of Service res
 
 ## User · +0s
 
-```
 continue after the refusal
-```
 
 ## Assistant · +0s
 
-```
 Resumed.
-```
 

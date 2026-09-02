@@ -6,36 +6,23 @@
 - **Effort:** `medium`
 - **Provider:** `codex`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 reason without a summary
-```
-
-## Reasoning · +0s
-
-```
-Raw reasoning.
-```
 
 ## Assistant · +0s
 
-```
 Done.
-```
 
 ## User · +0s
 
-```
 continue after the first response
-```
 
 ## Assistant · +0s
 
-```
 Resumed.
-```
 

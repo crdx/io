@@ -6,38 +6,29 @@
 - **Effort:** `medium`
 - **Provider:** `codex`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 search the web, then answer
-```
 
-## Tool call — web_search · `latest Go release` · +0s
-
-→ success, 1 line, 71B · +0s
+## Tool calls · +0s
 
 ```
-Go 1.26 is the current release, per [the Go blog](https://go.dev/blog).
+web_search: latest Go release [ok, 1 line, 71B, call-1]
 ```
 
 ## Assistant · +0s
 
-```
 Go 1.26 is the current release.
-```
 
 ## User · +0s
 
-```
 continue after the search
-```
 
 ## Assistant · +0s
 
-```
 Resumed after the search.
-```
 

@@ -7,98 +7,40 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 have a look at that
-```
-
-## Reasoning · +2s
-
-```
-Writing the file the rest of this needs.
-```
 
 ## Assistant · +3s
 
-```
 I'll put a file down to work with.
-```
 
-## Tool call — write (26B) · `notes.md` · +4s
-
-→ error, 1 line, 27B · +5s
+## Tool calls · +4s
 
 ```
-the filesystem is read-only
-```
-
-## Reasoning · +6s
-
-```
-Reading, then writing, then reading what was written.
+write: notes.md [error, 1 line, 27B, call_2]
 ```
 
 ## Assistant · +7s
 
-```
 Now to read it, add to it, and read it back.
-```
 
-## Tool call — read · `notes.md` · +8s
-
-## Tool call — ls · +9s
-
-```json
-{"path":"."}
-```
-
-## Tool call — write (32B) · `notes.md` · +10s
-
-## Tool call — read · `notes.md` · +11s
-
-## Tool result — read · error, 1 line, 35B · +12s
+## Tool calls · +8s
 
 ```
-notes.md: no such file or directory
-```
-
-## Tool result — ls · success, 7 lines, 65B · +13s
-
-**Output preview (first 3 lines, up to 1 KiB)**
-
-```
-README.md
-cmd/
-screen.go
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_5") | .event.text' session.jsonl
-```
-
-## Tool result — write · error, 1 line, 27B · +14s
-
-```
-the filesystem is read-only
-```
-
-## Tool result — read · error, 1 line, 35B · +15s
-
-```
-notes.md: no such file or directory
+read: notes.md [error, 1 line, 35B, call_4]
+ls [ok, 7 lines, 65B, call_5]
+write: notes.md [error, 1 line, 27B, call_6]
+read: notes.md [error, 1 line, 35B, call_7]
 ```
 
 ## Assistant · +16s
 
-```
 The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. Every write was refused because the workspace is read-only, so nothing was there for the reads to find.
 
-```
 
 

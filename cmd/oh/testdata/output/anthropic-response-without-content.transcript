@@ -6,14 +6,13 @@
 - **Effort:** `medium`
 - **Provider:** `anthropic`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 answer with nothing at all
-```
 
 ## Notice · warning · +0s
 
@@ -23,13 +22,9 @@ The model ended the turn without an answer.
 
 ## User · +0s
 
-```
 try that again
-```
 
 ## Assistant · +0s
 
-```
 Sorry, here it is.
-```
 

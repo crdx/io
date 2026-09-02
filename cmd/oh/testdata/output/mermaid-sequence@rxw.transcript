@@ -7,24 +7,16 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 show the retry interaction
-```
-
-## Reasoning · +2s
-
-```
-Tracing the interaction.
-```
 
 ## Assistant · +3s
 
-````
 # Application retry
 
 ```mermaid
@@ -38,6 +30,5 @@ A-->>U: 📡 Update
 end
 ```
 
-````
 
 

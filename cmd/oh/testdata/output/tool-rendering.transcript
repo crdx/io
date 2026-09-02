@@ -7,50 +7,23 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 run a multiline command and notify me when it finishes
-```
 
-## Tool call — bash (stale qualifier) · `stale shell rendering` · +1s
-
-→ success, 2 lines, 11B · +2s
+## Tool calls · +1s
 
 ```
-alpha
-beta
-```
-
-## Tool call — notify (stale notification message) · `stale notification title` · +3s
-
-→ success, 1 line, 17B · +4s
-
-```
-notified the user
-```
-
-## Tool call — web_search (stale search qualifier) · `stale search rendering` · +5s
-
-→ success, 1 line, 63B · +6s
-
-```
-Quote it as "$NAME", per [the bash manual](https://gnu.org/bash).
-```
-
-## Tool call — web_fetch (stale fetch qualifier) · `stale fetch rendering` · +7s
-
-→ success, 1 line, 16B · +8s
-
-```
-<p>Quote it.</p>
+bash: stale shell rendering [ok, 2 lines, 11B, call_1]
+notify: stale notification title [ok, 1 line, 17B, call_2]
+web_search: stale search rendering [ok, 1 line, 63B, call_3]
+web_fetch: stale fetch rendering [ok, 1 line, 16B, call_4]
 ```
 
 ## Assistant · +9s
 
-```
 done.
-```
 
 

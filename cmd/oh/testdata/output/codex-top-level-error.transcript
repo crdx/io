@@ -6,14 +6,13 @@
 - **Effort:** `medium`
 - **Provider:** `codex`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 receive a top-level Responses API error
-```
 
 ## Failure · +0s
 
@@ -23,13 +22,9 @@ the prompt was refused
 
 ## User · +0s
 
-```
 continue after the endpoint error
-```
 
 ## Assistant · +0s
 
-```
 Resumed.
-```
 

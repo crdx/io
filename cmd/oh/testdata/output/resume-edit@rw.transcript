@@ -7,33 +7,26 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 have a look at that
-```
 
 ## Assistant · +2s
 
-```
 Editing the target without reading it again.
-```
 
-## Tool call — edit · `target.txt` · +3s
-
-→ error, 1 line, 75B · +4s
+## Tool calls · +3s
 
 ```
-file has not been read yet — ensure you read target.txt before editing it
+edit: target.txt [error, 1 line, 75B, call_1]
 ```
 
 ## Assistant · +5s
 
-```
 The resumed edit was refused because the file has not been read in this session.
-```
 
 

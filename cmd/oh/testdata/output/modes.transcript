@@ -7,20 +7,17 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 what am i allowed to do here?
-```
 
 ## Mode · rx · +1s
 
 ## Assistant · +2s
 
-```
 Reading and running commands, but not writing.
-```
 
 ## Mode · rxw · toggled w · +3s
 
@@ -30,15 +27,11 @@ The workspace is now read-write.
 
 ## User · +4s
 
-```
 now write it down
-```
 
 ## Assistant · +5s
 
-```
 Writing it down.
-```
 
 ## Mode · rw · toggled x · +6s
 
@@ -50,8 +43,6 @@ The bash tool is now refused, and will turn away every command until it is grant
 
 ## Assistant · +8s
 
-```
 Done.
-```
 
 

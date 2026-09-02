@@ -7,168 +7,53 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 have a look at that
-```
-
-## Reasoning · +2s
-
-```
-Taking the four of them together rather than one after another.
-```
 
 ## Assistant · +3s
 
-```
 Let me get the shape of this first.
-```
 
-## Tool call — ls · +4s
-
-```json
-{"path":"."}
-```
-
-## Tool call — find · `**/*.go` · +5s
-
-## Tool call — find · `**/*.toml` · +6s
-
-## Tool call — grep (*.go) · +7s
-
-```regexp
-package
-```
-
-## Tool result — ls · success, 7 lines, 65B · +8s
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool calls · +4s
 
 ```
-README.md
-cmd/
-screen.go
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_2") | .event.text' session.jsonl
-```
-
-## Tool result — find · success, 1 line, 13B · +9s
-
-```
-settings.toml
-```
-
-## Tool result — find · success, 2 lines, 31B · +10s
-
-```
-cmd/oh/line/render.go
-screen.go
-```
-
-## Tool result — grep · success, 2 lines, 63B · +12s
-
-```
-cmd/oh/line/render.go:1:package line
-screen.go:1:package output
-```
-
-## Reasoning · +13s
-
-```
-Three searches, all at once.
+ls [ok, 7 lines, 65B, call_2]
+find: **/*.go [ok, 2 lines, 31B, call_3]
+find: **/*.toml [ok, 1 line, 13B, call_4]
+grep: package [ok, 2 lines, 63B, call_5]
 ```
 
 ## Assistant · +14s
 
-```
 Now to find where the drawing happens.
-```
 
-## Tool call — grep (*.go) · +15s
-
-```regexp
-spinner
-```
-
-## Tool call — grep (*.go) · +16s
-
-```regexp
-footer
-```
-
-## Tool call — grep (*.go) · +17s
-
-```regexp
-cursor
-```
-
-→ success, 1 line, 46B · +19s
+## Tool calls · +15s
 
 ```
-screen.go:3:var spinner, footer, cursor string
-```
-
-## Tool result — grep · success, 1 line, 46B · +21s
-
-```
-screen.go:3:var spinner, footer, cursor string
-```
-
-## Tool result — grep · success, 1 line, 46B · +23s
-
-```
-screen.go:3:var spinner, footer, cursor string
+grep: spinner [ok, 1 line, 46B, call_7]
+grep: footer [ok, 1 line, 46B, call_8]
+grep: cursor [ok, 1 line, 46B, call_9]
 ```
 
 ## Assistant · +24s
 
-```
 One more pair, and one of them will not be there.
-```
 
-## Tool call — ls · +25s
-
-```json
-{"path":"."}
-```
-
-## Tool call — read · `nowhere/at/all.go` · +26s
-
-→ error, 1 line, 44B · +27s
+## Tool calls · +25s
 
 ```
-nowhere/at/all.go: no such file or directory
-```
-
-## Tool result — ls · success, 7 lines, 65B · +28s
-
-**Output preview (first 3 lines, up to 1 KiB)**
-
-```
-README.md
-cmd/
-screen.go
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_10") | .event.text' session.jsonl
+ls [ok, 7 lines, 65B, call_10]
+read: nowhere/at/all.go [error, 1 line, 44B, call_11]
 ```
 
 ## Assistant · +29s
 
-```
 That is the lot: four together, then three together, then a pair where only one of them could be answered.
 
-```
 
 

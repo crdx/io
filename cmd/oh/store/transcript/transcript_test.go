@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"unicode/utf8"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
@@ -16,13 +15,16 @@ import (
 	"crdx.org/io/tool"
 )
 
-func TestTranscriptPreservesReasoningFormatting(t *testing.T) {
+func TestTranscriptOmitsReasoningEntirely(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
 	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.ModelReasoningEvent, Text: "First. Second?\nThird!"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(5, 6), agent.Event{Kind: agent.ModelMessageEvent, Text: "answer"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := recorder.Close(); err != nil {
@@ -33,8 +35,12 @@ func TestTranscriptPreservesReasoningFormatting(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(stored), "First. Second?\nThird!") {
-		t.Errorf("reasoning formatting was not preserved:\n%s", stored)
+	transcript := string(stored)
+	if strings.Contains(transcript, "Reasoning") || strings.Contains(transcript, "First. Second?") || strings.Contains(transcript, "Third!") {
+		t.Errorf("expected no trace of reasoning at all, got:\n%s", transcript)
+	}
+	if !strings.Contains(transcript, "## Assistant · +4.0s\n\nanswer\n") {
+		t.Errorf("expected the reasoning to leave the next event untouched, got:\n%s", transcript)
 	}
 }
 
@@ -61,7 +67,7 @@ func TestTranscriptRoundsShortElapsedTimesToTenths(t *testing.T) {
 	}
 }
 
-func TestTranscriptNamesACallInItsHeadingAndReadsItsMeasurementsOut(t *testing.T) {
+func TestTranscriptLogsACallAndItsResultOnOneLine(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
 	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
@@ -91,73 +97,7 @@ func TestTranscriptNamesACallInItsHeadingAndReadsItsMeasurementsOut(t *testing.T
 	}); err != nil {
 		t.Fatal(err)
 	}
-	if err := recorder.Close(); err != nil {
-		t.Fatal(err)
-	}
-
-	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
-	if err != nil {
-		t.Fatal(err)
-	}
-	transcript := string(stored)
-	for _, want := range []string{
-		"## Tool call — bash · +2.0s\n\n```bash\nls\n```",
-		"→ success in 12s, 1 line, 2K of 4K, 2.5s CPU, 4M peak, truncated · +4.0s\n",
-	} {
-		if !strings.Contains(transcript, want) {
-			t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)
-		}
-	}
-	if strings.Contains(transcript, `{"command":"ls"}`) {
-		t.Errorf("expected the arguments to give way to the rendered call, got:\n%s", transcript)
-	}
-}
-
-func TestTranscriptFallsBackToTheArgumentsOfAnUnrenderedCall(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind:      agent.ToolCallRequestEvent,
-		ID:        "call-1",
-		Name:      "summon",
-		Arguments: `{"name":"one"}`,
-	}); err != nil {
-		t.Fatal(err)
-	}
-	if err := recorder.Close(); err != nil {
-		t.Fatal(err)
-	}
-
-	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(string(stored), "```json\n{\"name\":\"one\"}\n```") {
-		t.Errorf("expected the arguments to stand in for a call that renders nothing, got:\n%s", stored)
-	}
-}
-
-func TestTranscriptHoldsAShortRenderedCallOnItsHeadingAndShowsAWholeResultAlone(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "transcript.md")
-	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	request := agent.Event{Kind: agent.ToolCallRequestEvent, ID: "call-1", Name: "read"}
-	request.Subject = "draw.go"
-	if err := recorder.Event(time.Unix(3, 4), request); err != nil {
-		t.Fatal(err)
-	}
-	if err := recorder.Event(time.Unix(5, 6), agent.Event{
-		Kind:   agent.ToolCallResultEvent,
-		ID:     "call-1",
-		Name:   "read",
-		Status: agent.SuccessStatus,
-		Text:   "package main\n",
-	}); err != nil {
+	if err := recorder.Event(time.Unix(7, 8), agent.Event{Kind: agent.ModelMessageEvent, Text: "done"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := recorder.Close(); err != nil {
@@ -169,25 +109,33 @@ func TestTranscriptHoldsAShortRenderedCallOnItsHeadingAndShowsAWholeResultAlone(
 		t.Fatal(err)
 	}
 	transcript := string(stored)
-	if !strings.Contains(transcript, "## Tool call — read · `draw.go` · +2.0s\n\n→ success · +4.0s\n\n```\npackage main\n```") {
-		t.Errorf("expected the call and its answer to be held on two lines, got:\n%s", transcript)
+	want := "## Tool calls · +2.0s\n\n```\nbash: ls [ok in 12s, 1 line, 2K of 4K, 2.5s CPU, 4M peak, truncated, call-1]\n```"
+	if !strings.Contains(transcript, want) {
+		t.Errorf("expected one heading naming the call and its result folded onto one line, got:\n%s", transcript)
 	}
-	if strings.Contains(transcript, "preview") || strings.Contains(transcript, "jq") {
-		t.Errorf("expected nothing to point elsewhere for output that is all there, got:\n%s", transcript)
+	if strings.Contains(transcript, `{"command":"ls"}`) || strings.Contains(transcript, "## Tool call —") || strings.Contains(transcript, "## Tool result —") {
+		t.Errorf("expected no per-call heading and no raw arguments, got:\n%s", transcript)
 	}
 }
 
-func TestTranscriptFencesARenderedCallTooLongForAHeading(t *testing.T) {
+func TestTranscriptDoesNotAttributeToolCallsToTheUser(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
 	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	subject := "/home/alice/" + strings.Repeat("deeply/", 20) + "draw.go"
-	request := agent.Event{Kind: agent.ToolCallRequestEvent, ID: "call-1", Name: "read"}
-	request.Subject = subject
-	request.Note = "1-200"
-	if err := recorder.Event(time.Unix(3, 4), request); err != nil {
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.UserMessageEvent, Text: "check web"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(5, 6), agent.Event{Kind: agent.ToolCallRequestEvent, ID: "call-1", Name: "web_search"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(7, 8), agent.Event{
+		Kind: agent.ToolCallResultEvent, ID: "call-1", Name: "web_search", Status: agent.SuccessStatus,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(9, 10), agent.Event{Kind: agent.ModelMessageEvent, Text: "done"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := recorder.Close(); err != nil {
@@ -198,12 +146,14 @@ func TestTranscriptFencesARenderedCallTooLongForAHeading(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(stored), "## Tool call — read (1-200) · +2.0s\n\n```\n"+subject+"\n```") {
-		t.Errorf("expected a call too long to read on one line to be fenced, got:\n%s", stored)
+	transcript := string(stored)
+	want := "## User · +2.0s\n\ncheck web\n\n## Tool calls · +4.0s\n\n```\nweb_search [ok, call-1]\n```\n\n## Assistant · +8.0s"
+	if !strings.Contains(transcript, want) {
+		t.Errorf("expected the call log held under its own heading between the user and the answer, got:\n%s", transcript)
 	}
 }
 
-func TestTranscriptNamesTheToolOfAResultThatFollowsAnotherCall(t *testing.T) {
+func TestTranscriptLogsSeveralCallsInOneFencedBlock(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
 	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
@@ -235,25 +185,26 @@ func TestTranscriptNamesTheToolOfAResultThatFollowsAnotherCall(t *testing.T) {
 		t.Fatal(err)
 	}
 	transcript := string(stored)
-	if strings.Contains(transcript, "→") {
-		t.Errorf("expected no result to be taken for the answer to the call above it, got:\n%s", transcript)
+	want := "```\nread: call-1.go [ok, call-1]\nread: call-2.go [ok, call-2]\n```"
+	if !strings.Contains(transcript, want) {
+		t.Errorf("expected both calls folded into one block, in order, got:\n%s", transcript)
 	}
-	if strings.Count(transcript, "## Tool result — read · success · +4.0s") != 2 {
-		t.Errorf("expected both results to name the tool they answer for, got:\n%s", transcript)
+	if strings.Count(transcript, "```") != 2 {
+		t.Errorf("expected exactly one fenced block for both calls, got:\n%s", transcript)
 	}
 }
 
-func TestTranscriptStoresOnlyAToolResultPreview(t *testing.T) {
+func TestTranscriptFallsBackToTheArgumentsOfAnUnrenderedCall(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
 	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind: agent.ToolCallResultEvent,
-		ID:   "call-1",
-		Name: "read",
-		Text: "first\nsecond\nthird\nsecret fourth\nfifth",
+		Kind:      agent.ToolCallRequestEvent,
+		ID:        "call-1",
+		Name:      "summon",
+		Arguments: `{"name":"one"}`,
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -266,28 +217,23 @@ func TestTranscriptStoresOnlyAToolResultPreview(t *testing.T) {
 		t.Fatal(err)
 	}
 	transcript := string(stored)
-	if !strings.Contains(transcript, "**Output preview (first 3 lines, up to 1 KiB)**\n\n```\nfirst\nsecond\nthird\n```") {
-		t.Errorf("expected a three-line tool result preview, got:\n%s", transcript)
+	if !strings.Contains(transcript, "```\nsummon [call-1]\n```") {
+		t.Errorf("expected an unanswered call to be logged with what is known, got:\n%s", transcript)
 	}
-	if strings.Contains(transcript, "secret fourth") || strings.Contains(transcript, "fifth") {
-		t.Errorf("expected the full tool result to be omitted, got:\n%s", transcript)
-	}
-	if !strings.Contains(transcript, "```sh\njq -r 'select(.event.kind == \"tool_call_result\" and .event.id == \"call-1\") | .event.text' session.jsonl\n```") {
-		t.Errorf("expected a command that reads the complete result, got:\n%s", transcript)
+	if strings.Contains(transcript, `{"name":"one"}`) {
+		t.Errorf("expected the raw arguments to give way to the call log, got:\n%s", transcript)
 	}
 }
 
-func TestTranscriptDescribesAToolResultWithoutAnIDInProse(t *testing.T) {
+func TestTranscriptCollapsesAndTruncatesALongSubject(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
 	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind: agent.ToolCallResultEvent,
-		Name: "read",
-		Text: "first\nsecond\nthird\nfourth",
-	}); err != nil {
+	request := agent.Event{Kind: agent.ToolCallRequestEvent, ID: "call-1", Name: "bash"}
+	request.Subject = "for line in\n  one\n  two\ndo\n  " + strings.Repeat("echo hi; ", 20) + "\ndone"
+	if err := recorder.Event(time.Unix(3, 4), request); err != nil {
 		t.Fatal(err)
 	}
 	if err := recorder.Close(); err != nil {
@@ -299,25 +245,28 @@ func TestTranscriptDescribesAToolResultWithoutAnIDInProse(t *testing.T) {
 		t.Fatal(err)
 	}
 	transcript := string(stored)
-	if strings.Contains(transcript, "jq") {
-		t.Errorf("expected no command without an identifier to match on, got:\n%s", transcript)
+	start := strings.Index(transcript, "```\n") + len("```\n")
+	end := strings.Index(transcript[start:], "\n```")
+	block := transcript[start : start+end]
+	if strings.Contains(block, "\n") {
+		t.Errorf("expected the subject to collapse onto one line, got:\n%s", block)
 	}
-	if !strings.Contains(transcript, "[`session.jsonl`](session.jsonl)") || !strings.Contains(transcript, "`event.text`") {
-		t.Errorf("expected a pointer to the complete result, got:\n%s", transcript)
+	if !strings.Contains(block, "…") {
+		t.Errorf("expected a long subject to be truncated, got:\n%s", block)
 	}
 }
 
-func TestTranscriptCapsAToolResultPreviewAtOneKiB(t *testing.T) {
+func TestTranscriptLogsACallWithNoSubject(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
 	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := recorder.Event(time.Unix(3, 4), agent.Event{
-		Kind: agent.ToolCallResultEvent,
-		ID:   "call-1",
-		Name: "read",
-		Text: strings.Repeat("é", 600),
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.ToolCallRequestEvent, ID: "call-1", Name: "ls"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(5, 6), agent.Event{
+		Kind: agent.ToolCallResultEvent, ID: "call-1", Name: "ls", Status: agent.SuccessStatus,
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -329,15 +278,62 @@ func TestTranscriptCapsAToolResultPreviewAtOneKiB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !utf8.Valid(stored) {
-		t.Error("expected the capped transcript to remain valid UTF-8")
+	if !strings.Contains(string(stored), "```\nls [ok, call-1]\n```") {
+		t.Errorf("expected no colon where there is no subject to name, got:\n%s", stored)
+	}
+}
+
+func TestTranscriptLogsAResultWithoutAMatchingCallInTheSameRun(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{
+		Kind: agent.ToolCallResultEvent, ID: "call-1", Name: "read", Status: agent.SuccessStatus,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(stored), "```\nread [ok, call-1]\n```") {
+		t.Errorf("expected a stray result to still be logged by name, got:\n%s", stored)
+	}
+}
+
+func TestTranscriptWritesMessagesAsMarkdownRatherThanFencingThem(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	content := "**bold**, a [link](https://example.com), and:\n\n```go\nfunc main() {}\n```"
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.UserMessageEvent, Text: "please explain"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(5, 6), agent.Event{Kind: agent.ModelMessageEvent, Text: content}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
 	}
 	transcript := string(stored)
-	if !strings.Contains(transcript, "\n"+strings.Repeat("é", 512)+"\n```") {
-		t.Errorf("expected a one-KiB tool result preview, got:\n%s", transcript)
+	if !strings.Contains(transcript, "## User · +2.0s\n\nplease explain\n") {
+		t.Errorf("expected the user's message written as plain markdown, got:\n%s", transcript)
 	}
-	if strings.Contains(transcript, strings.Repeat("é", 513)) {
-		t.Errorf("expected the tool result preview to stop at one KiB, got:\n%s", transcript)
+	if !strings.Contains(transcript, "## Assistant · +4.0s\n\n"+content+"\n") {
+		t.Errorf("expected the answer written as its own markdown rather than fenced, got:\n%s", transcript)
 	}
 }
 
@@ -348,7 +344,7 @@ func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {
 		t.Fatal(err)
 	}
 	content := "before\n````\nafter"
-	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.ModelMessageEvent, Text: content}); err != nil {
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.FailureEvent, Text: content}); err != nil {
 		t.Fatal(err)
 	}
 	if err := recorder.Close(); err != nil {
@@ -363,7 +359,7 @@ func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {
 	if !strings.Contains(transcript, "`````\n"+content+"\n`````") {
 		t.Errorf("expected a five-backtick fence, got:\n%s", transcript)
 	}
-	if !strings.Contains(transcript, "# Conversation") || !strings.Contains(transcript, "## Assistant") {
+	if !strings.Contains(transcript, "# Conversation") || !strings.Contains(transcript, "## Failure") {
 		t.Errorf("expected the metadata and event headings, got:\n%s", transcript)
 	}
 }
@@ -564,7 +560,7 @@ func TestTranscriptHoldsTheHeaderApartFromWhatFollowsIt(t *testing.T) {
 	}
 	transcript := string(stored)
 	for _, want := range []string{
-		"- **Workspace:** `/workspace`\n\n## Notice · warning · +2.0s\n",
+		"- **Workspace:** `/workspace`\n- **Tool detail:** `jq 'select(.event.id == \"<id>\")' session.jsonl`, for the `[id]` of any call\n\n## Notice · warning · +2.0s\n",
 		"## Mode · rx · +4.0s\n\n## User · +6.0s\n",
 	} {
 		if !strings.Contains(transcript, want) {

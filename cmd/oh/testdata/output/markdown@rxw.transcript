@@ -7,24 +7,16 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 have a look at that
-```
-
-## Reasoning · +2s
-
-```
-Laying the answer out.
-```
 
 ## Assistant · +3s
 
-````
 # What the tools cost
 
 The **read** tool is cheap and `bash` is not, so the *order* matters. A run looks like this:
@@ -54,6 +46,5 @@ read[read] --> bash[bash]
 
 See [the notes](https://example.com/notes) for the rest.
 
-````
 
 

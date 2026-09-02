@@ -7,50 +7,27 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 have a look at that
-```
-
-## Reasoning · +2s
-
-```
-Reading the renderer before saying anything about it.
-```
 
 ## Assistant · +3s
 
-```
 Let me read the renderer.
-```
 
-## Tool call — read · `cmd/oh/line/render.go` · +4s
-
-→ success, 5 lines, 60B · +6s
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool calls · +4s
 
 ```
-package line
-
-func layout() string {
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_2") | .event.text' session.jsonl
+read: cmd/oh/line/render.go [ok, 5 lines, 60B, call_2]
 ```
 
 ## Assistant · +7s
 
-```
 The prompt is built in cmd/oh/line/render.go:4:9, and screen.go holds the spinner beside it. There is nothing about it in README.md, and nothing at all in cmd/oh/line/missing.go, which is where I looked first. settings.toml names the workspace and target.txt is the file everything else works on.
 
-```
 
 

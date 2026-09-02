@@ -7,92 +7,28 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 run each shape of command and load the skill
-```
 
-## Tool call — bash · +1s
-
-```bash
-if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else echo none; fi
-```
-
-→ success, 1 line, 2B · +2s
-
-## Tool call — bash · +3s
-
-```bash
-while read -r NAME; do echo "$NAME" > out.txt 2>&1; done < list.txt
-```
-
-→ success, 1 line, 2B · +4s
-
-## Tool call — bash · +5s
-
-```bash
-until [[ -z "$REST" ]]; do REST=""; done
-```
-
-→ success, 1 line, 2B · +6s
-
-## Tool call — bash · +7s
-
-```bash
-case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac
-```
-
-→ success, 1 line, 2B · +8s
-
-## Tool call — bash · +9s
-
-```bash
-select CHOICE in one two; do break; done
-```
-
-→ success, 1 line, 2B · +10s
-
-## Tool call — bash · +11s
-
-```bash
-ls -la | grep -v "^d" | wc -l
-```
-
-→ success, 1 line, 2B · +12s
-
-## Tool call — grep · +13s
-
-```regexp
-^\\p{Lu}\\w{2,8}(?:-\\d+)?$
-```
-
-→ success, 1 line, 24B · +14s
+## Tool calls · +1s
 
 ```
-screen.go:3:var spinner
-```
-
-## Tool call — read · `skills/tidy/SKILL.md` · +15s
-
-→ success, 8 lines, 72B · +16s
-
-```
-# Tidy
-```
-
-## Tool call — read (日本語 🎉) · `wide.md` · +17s
-
-→ success, 3 lines, 96B · +18s
-
-```
-# 見出し
+bash: if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else echo n… [ok, 1 line, 2B, call_1]
+bash: while read -r NAME; do echo "$NAME" > out.txt 2>&1; done < list.txt [ok, 1 line, 2B, call_2]
+bash: until [[ -z "$REST" ]]; do REST=""; done [ok, 1 line, 2B, call_3]
+bash: case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac [ok, 1 line, 2B, call_4]
+bash: select CHOICE in one two; do break; done [ok, 1 line, 2B, call_5]
+bash: ls -la | grep -v "^d" | wc -l [ok, 1 line, 2B, call_6]
+grep: ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ [ok, 1 line, 24B, call_7]
+read: skills/tidy/SKILL.md [ok, 8 lines, 72B, call_8]
+read: wide.md [ok, 3 lines, 96B, call_9]
 ```
 
 ## Assistant · +19s
 
-````
 The listing is `日本語のテキストと絵文字 🎉 が混ざった行`, which is wider on screen than it is long.
 
 I left a note in ~/README.md and the skill is at ~/skills/tidy/SKILL.md.
@@ -105,6 +41,5 @@ func count() int {
 }
 ```
 
-````
 
 

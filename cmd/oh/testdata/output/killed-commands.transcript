@@ -7,83 +7,22 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 run the linter, write the big file, then copy the readme over the host's hosts file
-```
 
-## Tool call — bash · +1s
-
-```bash
-just lint
-```
-
-→ error in 1m11s, 5 lines, 358B, 1h01m CPU, 1.12G peak · +2s
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool calls · +1s
 
 ```
-exit(137):
-error: recipe `lint` was terminated on line 104 by signal 9
-note: the shell reports that a process was killed by SIGKILL.
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_1") | .event.text' session.jsonl
-```
-
-## Tool call — bash · +3s
-
-```bash
-dd if=/dev/zero of=big bs=1M count=4096
-```
-
-→ error, 4 lines, 183B, 2.3s CPU, 8M peak · +4s
-
-**Output preview (first 3 lines, up to 1 KiB)**
-
-```
-exit(153):
-dd: writing 'big': File size limit exceeded
-note: the shell reports that a process was killed by SIGXFSZ.
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_2") | .event.text' session.jsonl
-```
-
-## Tool call — bash · +5s
-
-```bash
-cp README.md /etc/hosts
-```
-
-→ error, 6 lines, 289B, 2M peak · +6s
-
-**Output preview (first 3 lines, up to 1 KiB)**
-
-```
-exit(1):
-cp: cannot create regular file '/etc/hosts': Permission denied
-note: this command ran in a sandbox, and the failure may be the sandbox refusing it.
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_3") | .event.text' session.jsonl
+bash: just lint [error in 1m11s, 5 lines, 358B, 1h01m CPU, 1.12G peak, call_1]
+bash: dd if=/dev/zero of=big bs=1M count=4096 [error, 4 lines, 183B, 2.3s CPU, 8M peak, call_2]
+bash: cp README.md /etc/hosts [error, 6 lines, 289B, 2M peak, call_3]
 ```
 
 ## Assistant · +7s
 
-```
 The linter was killed for its processor time, the write for its size, and the copy refused.
-```
 
 

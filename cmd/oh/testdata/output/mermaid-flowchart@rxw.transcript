@@ -7,24 +7,16 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 show the request flow
-```
-
-## Reasoning · +2s
-
-```
-Mapping the request path.
-```
 
 ## Assistant · +3s
 
-````
 # Request processing
 
 ```mermaid
@@ -38,6 +30,5 @@ reject --> failed[⚠️ Record failure]
 end
 ```
 
-````
 
 

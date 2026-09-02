@@ -6,46 +6,30 @@
 - **Effort:** `high`
 - **Provider:** `chat`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 show me both pictures
-```
 
-## Tool call — snapshot · `snapshot` · +0s
-
-## Tool call — thumbnail · `thumbnail` · +0s
-
-## Tool result — snapshot · success, 10.9K, ~1.2Kt · +0s
+## Tool calls · +0s
 
 ```
-snapshot.png
-```
-
-## Tool result — thumbnail · success, 2.73K, ~500t · +0s
-
-```
-thumbnail.png
+snapshot: snapshot [ok, 10.9K, ~1.2Kt, call-1]
+thumbnail: thumbnail [ok, 2.73K, ~500t, call-2]
 ```
 
 ## Assistant · +0s
 
-```
 I can see both pictures.
-```
 
 ## User · +0s
 
-```
 describe the larger one
-```
 
 ## Assistant · +0s
 
-```
 The larger one is a plain blue field.
-```
 

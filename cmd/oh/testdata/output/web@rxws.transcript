@@ -7,64 +7,32 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 what is the current go release, and what does the blog say about it?
-```
-
-## Reasoning · +2s
-
-```
-Searching first, then reading the announcement the search cites.
-```
 
 ## Assistant · +3s
 
-```
 Let me search, then read the announcement.
-```
 
-## Tool call — web_search · `latest Go release` · +4s
-
-→ success, 1 line, 86B · +5s
+## Tool calls · +4s
 
 ```
-Go 1.26 is the current release, announced on [the Go blog](https://go.dev/blog/go1.26).
-```
-
-## Tool call — web_fetch (markdown) · `https://go.dev/blog/go1.26` · +6s
-
-→ success, 8 lines, 253B · +7s
-
-**Output preview (first 3 lines, up to 1 KiB)**
-
-```
-# Go 1.26 is released
-
-The **container/heap** package now takes an iterator, and `go test` reports
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_3") | .event.text' session.jsonl
+web_search: latest Go release [ok, 1 line, 86B, call_2]
+web_fetch: https://go.dev/blog/go1.26 [ok, 8 lines, 253B, call_3]
 ```
 
 ## Assistant · +8s
 
-```
 Go **1.26** is current. The announcement calls out iterators in `container/heap`, flaky-run reporting in `go test`, and a smaller allocation header.
-```
 
 ## User · +9s
 
-```
 now read the release notes as plain text
-```
 
 ## Notice · info · +10s
 
@@ -72,18 +40,14 @@ now read the release notes as plain text
 The web search and fetch tools are now refused.
 ```
 
-## Tool call — web_fetch (text) · `https://go.dev/doc/go1.26` · +11s
-
-→ error · +12s
+## Tool calls · +11s
 
 ```
-web access is not granted; the user can grant it with ctrl+x s
+web_fetch: https://go.dev/doc/go1.26 [error, call_4]
 ```
 
 ## Assistant · +13s
 
-```
 The web tools are refused, so I cannot read the notes until you grant access again.
-```
 
 

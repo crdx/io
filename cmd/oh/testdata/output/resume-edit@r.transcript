@@ -7,33 +7,26 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 have a look at that
-```
 
 ## Assistant · +2s
 
-```
 Editing the target without reading it again.
-```
 
-## Tool call — edit · `target.txt` · +3s
-
-→ error, 1 line, 27B · +4s
+## Tool calls · +3s
 
 ```
-the filesystem is read-only
+edit: target.txt [error, 1 line, 27B, call_1]
 ```
 
 ## Assistant · +5s
 
-```
 The resumed edit was refused because the workspace is read-only.
-```
 
 

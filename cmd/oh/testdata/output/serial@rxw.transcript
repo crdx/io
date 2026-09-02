@@ -7,118 +7,40 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 have a look at that
-```
-
-## Reasoning · +2s
-
-```
-Writing the file the rest of this needs.
-```
 
 ## Assistant · +3s
 
-```
 I'll put a file down to work with.
-```
 
-## Tool call — write (26B) · `notes.md` · +4s
-
-→ success, 5 lines, 26B · +5s
+## Tool calls · +4s
 
 ```
-wrote 26B to notes.md
-```
-
-## Reasoning · +6s
-
-```
-Reading, then writing, then reading what was written.
+write: notes.md [ok, 5 lines, 26B, call_2]
 ```
 
 ## Assistant · +7s
 
-```
 Now to read it, add to it, and read it back.
-```
 
-## Tool call — read · `notes.md` · +8s
-
-## Tool call — ls · +9s
-
-```json
-{"path":"."}
-```
-
-## Tool call — write (32B) · `notes.md` · +10s
-
-## Tool call — read · `notes.md` · +11s
-
-## Tool result — ls · success, 8 lines, 74B · +12s
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool calls · +8s
 
 ```
-README.md
-cmd/
-notes.md
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_5") | .event.text' session.jsonl
-```
-
-## Tool result — read · success, 5 lines, 26B · +14s
-
-**Output preview (first 3 lines, up to 1 KiB)**
-
-```
-# Notes
-
-One.
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_4") | .event.text' session.jsonl
-```
-
-## Tool result — write · success, 6 lines, 32B · +15s
-
-```
-wrote 32B to notes.md
-```
-
-## Tool result — read · success, 6 lines, 32B · +17s
-
-**Output preview (first 3 lines, up to 1 KiB)**
-
-```
-# Notes
-
-One.
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_7") | .event.text' session.jsonl
+read: notes.md [ok, 5 lines, 26B, call_4]
+ls [ok, 8 lines, 74B, call_5]
+write: notes.md [ok, 6 lines, 32B, call_6]
+read: notes.md [ok, 6 lines, 32B, call_7]
 ```
 
 ## Assistant · +18s
 
-```
 The reads went together, the write waited for them and ran on its own, and the read after it waited for the write. The last read has four lines, which it could only have if the write had finished first.
 
-```
 
 

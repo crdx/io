@@ -7,109 +7,27 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 check the tree, then build it
-```
 
-## Tool call — bash · +1s
-
-```bash
-git status --short
-```
-
-→ success, 2 lines, 47B, 4M peak · +2s
+## Tool calls · +1s
 
 ```
-M  cmd/oh/main.go
- M cmd/oh/dynamic/dynamic.go
-```
-
-## Tool call — bash · +3s
-
-```bash
-touch build.lock
-```
-
-→ success, 2M peak · +4s
-
-## Tool call — read · `cmd/oh/dynamic/dynamic.go` · +5s
-
-→ success, 1 line, 16B, ~4t · +6s
-
-```
-package dynamic
-```
-
-## Tool call — bash · +7s
-
-```bash
-printf 'one\\ttwo\\r\\n\\n\\tthree\\n'
-```
-
-→ success, 3 lines, 17B, 2M peak · +8s
-
-```
-one\ttwo\r
-
-\tthree
-```
-
-## Tool call — bash · +9s
-
-```bash
-ls /usr/bin
-```
-
-→ success, 1 line, 177B, 6M peak · +10s
-
-```
-awk basename bash cat chmod cp date diff du echo env find grep gzip head id join less ln ls mkdir mv nl od paste ps pwd rm sed seq sort stat tail tar tee touch tr uniq wc xargs
-```
-
-## Tool call — bash · +11s
-
-```bash
-for NAME in cmd/oh/dynamic cmd/oh/painter cmd/oh/call; do go vet ./$NAME; done
-```
-
-→ success, 1 line, 3B, 1.4s CPU, 400M peak · +12s
-
-```
-ok
-```
-
-## Tool call — bash · +13s
-
-```bash
-go build ./...
-```
-
-→ error, 2 lines, 51B, 0.9s CPU, 300M peak · +14s
-
-```
-exit(1):
-./cmd/oh/main.go:12:2: undefined: spinner
-```
-
-## Tool call — bash · +15s
-
-```bash
-just check
-```
-
-→ success, 1 line, 26B, 8M peak · +16s
-
-```
-\e[32mok\e[0m all six steps
+bash: git status --short [ok, 2 lines, 47B, 4M peak, call_1]
+bash: touch build.lock [ok, 2M peak, call_2]
+read: cmd/oh/dynamic/dynamic.go [ok, 1 line, 16B, ~4t, call_3]
+bash: printf 'one\\ttwo\\r\\n\\n\\tthree\\n' [ok, 3 lines, 17B, 2M peak, call_4]
+bash: ls /usr/bin [ok, 1 line, 177B, 6M peak, call_5]
+bash: for NAME in cmd/oh/dynamic cmd/oh/painter cmd/oh/call; do go vet ./$NAME; done [ok, 1 line, 3B, 1.4s CPU, 400M peak, call_6]
+bash: go build ./... [error, 2 lines, 51B, 0.9s CPU, 300M peak, call_7]
+bash: just check [ok, 1 line, 26B, 8M peak, call_8]
 ```
 
 ## Assistant · +17s
 
-```
 The tree is dirty and the build is broken.
-```
 
 

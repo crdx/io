@@ -7,75 +7,29 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 do one of everything so I can see what each call says about itself
-```
 
 ## Assistant · +1s
 
-```
 One of each, then.
-```
 
-## Tool call — bash · +2s
-
-```bash
-COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT
-```
-
-→ success, 3 lines, 96B, 2.4s CPU, 700M peak · +3s
-
-## Tool call — ls · +4s
-
-```json
-{"path":"."}
-```
-
-→ success, 2 lines · +5s
+## Tool calls · +2s
 
 ```
-README.md
-screen.go
-```
-
-## Tool call — read · `diagram.png` · +6s
-
-→ success, 180K, ~1.6Kt · +7s
-
-## Tool call — edit · `screen.go` · +8s
-
-→ success, +12 −5 · +9s
-
-```
-edited screen.go
-```
-
-## Tool call — grep · +10s
-
-```regexp
-^func\\s+(New|Draw)[A-Z]\\w{2,8}\\(
-```
-
-→ success, 7 lines, 240B of 9.38K, truncated · +11s
-
-```
-screen.go:3:var spinner
-```
-
-## Tool call — read · `README.md` · +12s
-
-→ success, 3 lines, 52B, ~100t · +13s
-
-```
-# The Workspace
+bash: COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT [ok, 3 lines, 96B, 2.4s CPU, 700M peak, call_1]
+ls [ok, 2 lines, call_2]
+read: diagram.png [ok, 180K, ~1.6Kt, call_3]
+edit: screen.go [ok, +12 −5, call_4]
+grep: ^func\\s+(New|Draw)[A-Z]\\w{2,8}\\( [ok, 7 lines, 240B of 9.38K, truncated, call_5]
+read: README.md [ok, 3 lines, 52B, ~100t, call_6]
 ```
 
 ## Assistant · +14s
 
-````
 Here is a script, and a pattern beside it:
 
 ```bash
@@ -89,12 +43,9 @@ done
 ^\\s*(func|type)\\s+\\w{3,12}\\(
 ```
 
-````
 
 ## Assistant · +15s
 
-```
 That is one call of every kind the harness knows how to measure.
-```
 
 

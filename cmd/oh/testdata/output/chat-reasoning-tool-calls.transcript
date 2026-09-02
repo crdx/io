@@ -6,52 +6,30 @@
 - **Effort:** `medium`
 - **Provider:** `chat`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 reason, then call two tools in fragments
-```
 
-## Reasoning · +0s
-
-```
-Use both tools.
-```
-
-## Tool call — alpha · `alpha` · +0s
-
-## Tool call — beta · `beta` · +0s
-
-## Tool result — alpha · success, 1 line, 12B · +0s
+## Tool calls · +0s
 
 ```
-alpha result
-```
-
-## Tool result — beta · success, 1 line, 11B · +0s
-
-```
-beta result
+alpha: alpha [ok, 1 line, 12B, call-1]
+beta: beta [ok, 1 line, 11B, call-2]
 ```
 
 ## Assistant · +0s
 
-```
 Tools done.
-```
 
 ## User · +0s
 
-```
 continue after both tool results
-```
 
 ## Assistant · +0s
 
-```
 Resumed.
-```
 

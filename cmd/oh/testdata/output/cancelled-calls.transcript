@@ -7,27 +7,17 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 read both of those files
-```
 
-## Tool call — read · `one.txt` · +1s
-
-## Tool call — read · `two.txt` · +2s
-
-## Tool result — read · success, 1 line, 4B · +3s
+## Tool calls · +1s
 
 ```
-one
-```
-
-## Tool result — read · cancelled · +4s
-
-```
-the call was cancelled because the user pressed escape
+read: one.txt [ok, 1 line, 4B, call_1]
+read: two.txt [cancelled, call_2]
 ```
 
 ## Interrupted · +5s
@@ -36,8 +26,6 @@ The turn was interrupted.
 
 ## User · +6s
 
-```
 one was all I needed
-```
 
 

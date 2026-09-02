@@ -6,44 +6,29 @@
 - **Effort:** `high`
 - **Provider:** `ollama`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 call a tool through Ollama
-```
 
-## Reasoning · +0s
-
-```
-Call the tool.
-```
-
-## Tool call — alpha · `alpha` · +0s
-
-→ success, 1 line, 12B · +0s
+## Tool calls · +0s
 
 ```
-alpha result
+alpha: alpha [ok, 1 line, 12B, call-1]
 ```
 
 ## Assistant · +0s
 
-```
 Ollama used the tool.
-```
 
 ## User · +0s
 
-```
 continue after the tool result
-```
 
 ## Assistant · +0s
 
-```
 Ollama resumed.
-```
 

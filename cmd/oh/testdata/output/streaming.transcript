@@ -7,22 +7,14 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 show me how to count the go files
-```
-
-## Reasoning · +1s
-
-```
-A loop over the listing is the shortest way to say it.
-```
 
 ## Assistant · +2s
 
-````
 Try this.
 
 ```bash
@@ -31,11 +23,9 @@ for NAME in $(ls *.go); do echo "$NAME is quite a long line indeed"; done
 
 That is all.
 
-````
 
 ## Assistant · +3s
 
-```
 And a table, which changes shape as its rows arrive:
 
 | Tool | What it does when it is asked to       |
@@ -45,11 +35,9 @@ And a table, which changes shape as its rows arrive:
 
 That is the lot.
 
-```
 
 ## Assistant · +4s
 
-```
 And a nested list, whose markers arrive before the items they introduce:
 
 - read takes a file and hands it back
@@ -59,6 +47,5 @@ And a nested list, whose markers arrive before the items they introduce:
 
 That is the lot.
 
-```
 
 

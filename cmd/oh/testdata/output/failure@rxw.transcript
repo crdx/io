@@ -7,20 +7,13 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 have a look at that
-```
-
-## Reasoning · +2s
-
-```
-This one stops halfway.
-```
 
 ## Failure · +3s
 
@@ -30,15 +23,11 @@ the stream ended before the response did
 
 ## User · +4s
 
-```
 have a look at that
-```
 
 ## Assistant · +5s
 
-```
 Let me think about that. 
-```
 
 ## Failure · +6s
 
@@ -48,15 +37,11 @@ the model is overloaded
 
 ## User · +7s
 
-```
 have a look at that
-```
 
 ## Assistant · +8s
 
-```
 I can only get so far before 
-```
 
 ## Failure · +9s
 
@@ -66,9 +51,7 @@ the response was cut short
 
 ## User · +10s
 
-```
 have a look at that
-```
 
 ## Failure · +11s
 

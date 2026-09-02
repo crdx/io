@@ -7,16 +7,14 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 compare [the references](https://example.test/question) with https://example.test/request
-```
 
 ## Assistant · +1s
 
-```
 # Terminal links
 
 A [label with **nested emphasis**](https://example.test/label), a bare secure URL https://example.test/bare, a bare ordinary URL http://example.test/plain, and a www URL www.example.test/path.
@@ -26,6 +24,5 @@ This [long linked label crosses narrow rows without leaking into its neighbours]
 Unsupported [script links](javascript:alert(1)), [relative links](docs/page.md), [hostless links](https:path), and FTP ftp://example.test/archive remain visible but inert.
 
 An image remains a fallback: ![diagram](diagram.png).
-```
 
 

@@ -6,21 +6,18 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 send another message while the tool is working
-```
 
-## Tool call — work · `work` · +0s
-
-→ cancelled, 1 line, 67B · +0s
+## Tool calls · +0s
 
 ```
-the call was stopped after 3s because the user sent another message
+work: work [cancelled, 1 line, 67B, call-1]
 ```
 
 ## Interrupted · +0s
@@ -29,25 +26,17 @@ The turn was interrupted because the user sent another message.
 
 ## User · +0s
 
-```
 stop that and read the file instead
-```
 
 ## Assistant · +0s
 
-```
 Reading it instead.
-```
 
 ## User · +0s
 
-```
 why did you stop the first one
-```
 
 ## Assistant · +0s
 
-```
 You sent another message while it was running.
-```
 

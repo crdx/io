@@ -7,25 +7,16 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 show me the loop again
-```
-
-## Reasoning · +1s
-
-```
-Writing it out.
-```
 
 ## Assistant · +2s
 
-````
 Try this.
 
 ```ba
-````
 
 

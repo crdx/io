@@ -7,33 +7,23 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 what does the accented file say? 🖊
-```
-
-## Reasoning · +1s
-
-```
-Reading the file with the combining marks in its name.
-```
 
 ## Assistant · +2s
 
-```
 The name is written `café` rather than `café`, so the accent is a mark of its own.
 
 A family 👨‍👩‍👧 is one glyph joined from several, and a heart ❤️ asks to be drawn in colour.
 
 Combining marks pile up too: á̂̃̄ is one letter under four of them.
 
-```
 
 ## Assistant · +3s
 
-```
 A styled wide rune has nowhere to go in one column: `日本` in code, **中文** in bold.
 
 And a result that came back with Windows line endings:\r
@@ -41,6 +31,5 @@ one\r
 two\r
 three\r
 
-```
 
 

@@ -7,26 +7,21 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 read the renderer and tell me what it does
-```
-
-## Reasoning · +1s
-
-```
-Reading the renderer before saying anything about it.
-```
 
 ## Assistant · +2s
 
-```
 Reading it now.
-```
 
-## Tool call — read · `cmd/oh/line/render.go` · +3s
+## Tool calls · +3s
+
+```
+read: cmd/oh/line/render.go [call_1]
+```
 
 ## Notice · warning · +4s
 
@@ -36,23 +31,17 @@ The turn was interrupted.
 
 ## User · +5s
 
-```
 never mind, what is in target.txt?
-```
 
-## Tool call — read · `target.txt` · +6s
-
-→ success, 1 line, 4B · +7s
+## Tool calls · +6s
 
 ```
-one
+read: target.txt [ok, 1 line, 4B, call_2]
 ```
 
 ## Assistant · +8s
 
-```
 It holds the word `one`, and nothing else.
-```
 
 ## Notice · warning · +9s
 

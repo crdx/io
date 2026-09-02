@@ -7,33 +7,26 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 have a look at that
-```
 
 ## Assistant · +2s
 
-```
 Reading the target before the process restarts.
-```
 
-## Tool call — read · `target.txt` · +3s
-
-→ success, 1 line, 4B · +5s
+## Tool calls · +3s
 
 ```
-one
+read: target.txt [ok, 1 line, 4B, call_1]
 ```
 
 ## Assistant · +6s
 
-```
 The target is now safely recorded.
-```
 
 

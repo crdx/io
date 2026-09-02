@@ -7,47 +7,25 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 search everything for the spinner
-```
 
 ## Assistant · +1s
 
-```
 That will take a moment.
-```
 
-## Tool call — grep · +2s
-
-```json
-{"pattern":"spinner","glob":"*.go"}
-```
-
-## Tool call — find · +3s
-
-```json
-{"pattern":"**/*.go"}
-```
-
-## Tool result — grep · success in 9.5s, 1 line, 44B · +4s
+## Tool calls · +2s
 
 ```
-screen.go:3:var spinner, footer, cursor string
-```
-
-## Tool result — find · error in 1m02s · +5s
-
-```
-the search went on too long
+grep [ok in 9.5s, 1 line, 44B, call_1]
+find [error in 1m02s, call_2]
 ```
 
 ## Assistant · +6s
 
-```
 The grep took nine seconds and the find gave up after a minute.
-```
 
 

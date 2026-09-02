@@ -7,22 +7,22 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 look at both of those and tell me what changed
-```
 
 ## Assistant · +1s
 
-```
 Taking them together.
+
+## Tool calls · +2s
+
 ```
-
-## Tool call — read · `screen.go` · +2s
-
-## Tool call — grep (*.go) · `spinner` · +3s
+read: screen.go [call_1]
+grep: spinner [call_2]
+```
 
 ## Notice · warning · +4s
 
@@ -36,10 +36,10 @@ Background processes killed (sleep).
 Copied to clipboard.
 ```
 
-## Tool result — read · success, 3 lines, 40B · +6s
+## Tool calls · +6s
 
 ```
-package output
+read [ok, 3 lines, 40B, call_1]
 ```
 
 ## Notice · error · +7s
@@ -48,16 +48,14 @@ package output
 the conversation could not be stored: no space left on device
 ```
 
-## Tool result — grep · success, 1 line, 44B · +8s
+## Tool calls · +8s
 
 ```
-screen.go:3:var spinner, footer, cursor string
+grep [ok, 1 line, 44B, call_2]
 ```
 
 ## Assistant · +9s
 
-```
 Both still mention the spinner.
-```
 
 

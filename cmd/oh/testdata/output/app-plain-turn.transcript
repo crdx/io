@@ -6,18 +6,15 @@
 - **Effort:** `medium`
 - **Provider:** `anthropic`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 say something
-```
 
 ## Assistant · +0s
 
-```
 Said it.
-```
 

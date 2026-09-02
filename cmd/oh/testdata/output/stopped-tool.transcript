@@ -7,27 +7,20 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 build it and tell me what broke
-```
 
 ## Assistant · +1s
 
-```
 Building now.
-```
 
-## Tool call — bash · `just build` · +2s
-
-→ cancelled, 3 lines, 96B, 11s CPU, 40M peak · +3s
+## Tool calls · +2s
 
 ```
-compiling agent
-compiling toolbox
-note: the command was stopped after 12s because the user sent a new message.
+bash: just build [cancelled, 3 lines, 96B, 11s CPU, 40M peak, call_1]
 ```
 
 ## Interrupted · +4s
@@ -36,14 +29,10 @@ The turn was interrupted.
 
 ## User · +5s
 
-```
 leave it, the build is broken anyway
-```
 
 ## Assistant · +6s
 
-```
 Left alone.
-```
 
 

@@ -7,16 +7,14 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 draw the awkward markdown
-```
 
 ## Assistant · +1s
 
-```
 A table whose rows do not all reach the end:
 
 | tool | what it does | cost |
@@ -34,14 +32,11 @@ A narrow table in a wide terminal:
 A bare URL the renderer has to find for itself: https://example.com/plain and one
 in angle brackets <https://example.com/bracketed>, which are not the same thing.
 
-```
 
 ## Assistant · +2s
 
-```
 Entities are resolved in prose — AT&amp;T becomes AT&T — but left alone inside code, where `&amp;` and `&lt;div&gt;` stand as they are written.
 
-```
 
 ## Notice · error · +3s
 

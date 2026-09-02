@@ -6,58 +6,31 @@
 - **Effort:** `medium`
 - **Provider:** `chat`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 name this session
-```
 
-## Tool call — title · `work out why the session picker clips a long title` · +0s
-
-→ error · +0s
+## Tool calls · +0s
 
 ```
-title must be at most 30 characters
-```
-
-## Tool call — title · +0s
-
-```json
-{"title":"   "}
-```
-
-→ error · +0s
-
-```
-title is required
-```
-
-## Tool call — title · `fix picker clipping` · +0s
-
-→ success, 1 line, 47B · +0s
-
-```
-the session is now titled "fix picker clipping"
+title: work out why the session picker clips a long title [error, call-1]
+title [error, call-2]
+title: fix picker clipping [ok, 1 line, 47B, call-3]
 ```
 
 ## Assistant · +0s
 
-```
 Third time lucky.
-```
 
 ## User · +0s
 
-```
 and what did the picker make of it
-```
 
 ## Assistant · +0s
 
-```
 It fits, with room to spare.
-```
 

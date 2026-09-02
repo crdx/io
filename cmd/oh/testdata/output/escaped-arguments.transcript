@@ -7,44 +7,18 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 run whatever you like
-```
 
-## Tool call — bash · +1s
-
-```bash
-echo \e[31mred\e[0m
-```
-
-→ success, 1 line, 12B, 2M peak · +2s
+## Tool calls · +1s
 
 ```
-\e[31mred\e[0m
-```
-
-## Tool call — screenshot (lines 1 to 40\x07) · `notes\e[2J\e[H.md` · +3s
-
-→ success, 1 line, 8B, ~2t · +4s
-
-```
-# Notes
-```
-
-## Tool call — grep · +5s
-
-```regexp
-one
-two
-```
-
-→ success, 1 line, 11B · +6s
-
-```
-a.go:1:one
+bash: echo \e[31mred\e[0m [ok, 1 line, 12B, 2M peak, call_1]
+screenshot: notes\e[2J\e[H.md [ok, 1 line, 8B, ~2t, call_2]
+grep: one two [ok, 1 line, 11B, call_3]
 ```
 
 ## Retrying · attempt 1 · waited 2s · +7s
@@ -56,8 +30,6 @@ and said it twice
 
 ## Assistant · +8s
 
-```
 Nothing moved.
-```
 
 

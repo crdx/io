@@ -6,20 +6,17 @@
 - **Effort:** `medium`
 - **Provider:** `anthropic`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 interrupt the answer with ctrl+d
-```
 
 ## Assistant · +0s
 
-```
 Partial answer.
-```
 
 ## Interrupted · +0s
 
@@ -27,13 +24,9 @@ The turn was interrupted because the user pressed ctrl+d.
 
 ## User · +0s
 
-```
 continue after the partial answer
-```
 
 ## Assistant · +0s
 
-```
 Resumed.
-```
 

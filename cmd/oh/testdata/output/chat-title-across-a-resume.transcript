@@ -6,54 +6,36 @@
 - **Effort:** `medium`
 - **Provider:** `chat`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 have a look at the picker
-```
 
-## Tool call — title · `fix the picker clipping` · +0s
-
-→ success, 1 line, 51B · +0s
+## Tool calls · +0s
 
 ```
-the session is now titled "fix the picker clipping"
+title: fix the picker clipping [ok, 1 line, 51B, call-1]
 ```
 
 ## Assistant · +0s
 
-```
 Named it, and the row is one cell short.
-```
 
 ## User · +0s
 
-```
 carry on
-```
 
-## Tool call — title · `fix the picker clipping` · +0s
-
-→ success, 1 line, 55B · +0s
+## Tool calls · +0s
 
 ```
-the session is already titled "fix the picker clipping"
-```
-
-## Tool call — title · `give sessions a title` · +0s
-
-→ success, 1 line, 49B · +0s
-
-```
-the session is now titled "give sessions a title"
+title: fix the picker clipping [ok, 1 line, 55B, call-2]
+title: give sessions a title [ok, 1 line, 49B, call-3]
 ```
 
 ## Assistant · +0s
 
-```
 The task turned out to be a wider one.
-```
 

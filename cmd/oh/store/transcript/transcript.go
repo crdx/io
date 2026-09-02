@@ -1,39 +1,29 @@
 package transcript
 
 import (
+	"errors"
 	"fmt"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/internal/util"
-	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
 )
 
 const (
-	toolResultPreviewLines = 3
-	toolResultPreviewBytes = 1 << 10
-
 	formattedBytePrecision = 3
-	maximumInlineSubject   = 120
+	maximumLogSubject      = 80
 
 	partSeparator = " · "
-	resultArrow   = "→ "
+	logSeparator  = ", "
 
 	patience    = 5 * time.Second
 	noTimeAtAll = "0s"
-)
-
-var (
-	safeSyntax = regexp.MustCompile(`^[A-Za-z0-9_+.-]+$`)
-	safeID     = regexp.MustCompile(`^[A-Za-z0-9_.:|-]+$`)
 )
 
 type Meta struct {
@@ -42,9 +32,20 @@ type Meta struct {
 }
 
 type Recorder struct {
-	file       *os.File
-	startedAt  time.Time
-	lastCallID string
+	file          *os.File
+	startedAt     time.Time
+	pendingCalls  []*toolCallEntry
+	pendingCallAt time.Time
+	callByID      map[string]*toolCallEntry
+}
+
+type toolCallEntry struct {
+	id           string
+	name         string
+	subject      string
+	hasResult    bool
+	outcome      string
+	measurements string
 }
 
 func Open(path string, meta Meta) (*Recorder, error) {
@@ -59,7 +60,11 @@ func Open(path string, meta Meta) (*Recorder, error) {
 		return nil, err
 	}
 	if info.Size() == 0 {
-		_, err = fmt.Fprintf(file, "# Conversation\n\n- **Session:** `%s`\n- **Started:** `%s`\n- **Model:** `%s`\n- **Effort:** `%s`\n- **Provider:** `%s`\n- **Workspace:** `%s`\n\n", meta.Name, meta.StartedAt.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace)
+		_, err = fmt.Fprintf(
+			file,
+			"# Conversation\n\n- **Session:** `%s`\n- **Started:** `%s`\n- **Model:** `%s`\n- **Effort:** `%s`\n- **Provider:** `%s`\n- **Workspace:** `%s`\n- **Tool detail:** `jq 'select(.event.id == \"<id>\")' session.jsonl`, for the `[id]` of any call\n\n",
+			meta.Name, meta.StartedAt.UTC().Format(time.RFC3339Nano), meta.Model, meta.Effort, meta.Provider, meta.Workspace,
+		)
 		if err != nil {
 			_ = file.Close()
 			return nil, err
@@ -72,73 +77,77 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 	if self.file == nil {
 		return os.ErrClosed
 	}
-	if event.Kind == agent.StateChangeEvent {
+
+	switch event.Kind {
+	case agent.StateChangeEvent, agent.ModelReasoningEvent:
 		return nil
+	case agent.ToolCallRequestEvent:
+		self.bufferToolCall(at, event)
+		return nil
+	case agent.ToolCallResultEvent:
+		self.bufferToolResult(at, event)
+		return nil
+	case agent.StartupEvent, agent.UserMessageEvent, agent.HarnessMessageEvent, agent.ModelMessageEvent,
+		agent.InterruptionEvent, agent.RetryingEvent, agent.FailureEvent:
 	}
 
-	isAnswerToTheCallAbove := event.Kind == agent.ToolCallResultEvent && event.ID != "" && event.ID == self.lastCallID
-	self.lastCallID = ""
-	if event.Kind == agent.ToolCallRequestEvent {
-		self.lastCallID = event.ID
+	if err := self.flushToolCalls(); err != nil {
+		return err
 	}
 
 	var output document
-	if isAnswerToTheCallAbove {
-		output.paragraph(joinParts(resultArrow+outcome(event), self.offset(at)))
-	} else {
-		output.paragraph("## " + joinParts(append(heading(event), self.offset(at))...))
-	}
+	output.paragraph("## " + joinParts(append(heading(event), self.offset(at))...))
 
 	switch event.Kind {
-	case agent.UserMessageEvent, agent.ModelReasoningEvent, agent.ModelMessageEvent, agent.HarnessMessageEvent, agent.FailureEvent:
-		output.fence(event.Text, "")
-	case agent.ToolCallRequestEvent:
-		if event.Subject != "" && inlineSubject(event) == "" {
-			output.fence(event.Subject, emphasisLanguage(event.Emphasis))
-		} else if event.Subject == "" && event.Arguments != "" {
-			output.fence(event.Arguments, "json")
-		}
-	case agent.ToolCallResultEvent:
+	case agent.UserMessageEvent, agent.ModelMessageEvent:
 		if event.Text != "" {
-			output.toolResultPreview(event.ID, event.Text, emphasisLanguage(event.Emphasis))
+			output.paragraph(event.Text)
 		}
+	case agent.HarnessMessageEvent, agent.FailureEvent:
+		output.fence(event.Text)
 	case caps.ModeChange:
 		if notice, isSaid := caps.ModeNotice(event); isSaid {
-			output.fence(notice, "")
+			output.fence(notice)
 		}
 	case pathgrant.Change:
 		if notice, isSaid := pathgrant.Notice(event); isSaid {
-			output.fence(notice, "")
+			output.fence(notice)
 		}
 	case agent.InterruptionEvent:
 		output.paragraph(interruptionSentence(event.Text))
 	case agent.RetryingEvent:
-		output.fence(event.Text, "")
+		output.fence(event.Text)
 		if event.Arguments != "" {
-			output.fence(event.Arguments, "")
+			output.fence(event.Arguments)
 		}
-	case agent.StartupEvent, agent.StateChangeEvent:
+	case agent.StartupEvent, agent.ModelReasoningEvent, agent.ToolCallRequestEvent,
+		agent.ToolCallResultEvent, agent.StateChangeEvent:
 	}
 
 	_, err := self.file.WriteString(output.String())
 	return err
 }
 
+func (self *toolCallEntry) line() string {
+	line := self.name
+	if self.subject != "" {
+		line += ": " + self.subject
+	}
+	brackets := joinWith(logSeparator, self.outcome, self.measurements, self.id)
+	if brackets != "" {
+		line += " [" + brackets + "]"
+	}
+
+	return line
+}
+
 func heading(event agent.Event) []string {
 	name := title(event.Kind)
-	if event.Name != "" && namesACall(event.Kind) {
+	if event.Name != "" && event.Kind == agent.RetryingEvent {
 		name += " — " + event.Name
 	}
 
 	switch event.Kind {
-	case agent.ToolCallRequestEvent:
-		if event.Note != "" {
-			name += " (" + event.Note + ")"
-		}
-
-		return []string{name, code(inlineSubject(event))}
-	case agent.ToolCallResultEvent:
-		return []string{name, outcome(event)}
 	case agent.HarnessMessageEvent:
 		return []string{name, string(event.Status)}
 	case caps.ModeChange:
@@ -148,40 +157,33 @@ func heading(event agent.Event) []string {
 		return []string{name, summary, prefixed("changed ", event.Name)}
 	case agent.RetryingEvent:
 		return []string{name, "attempt " + strconv.Itoa(event.Attempt), prefixed("waited ", util.CompactDuration(event.Took))}
-	case agent.StartupEvent, agent.UserMessageEvent, agent.ModelReasoningEvent, agent.ModelMessageEvent,
-		agent.StateChangeEvent, agent.InterruptionEvent, agent.FailureEvent:
+	case agent.StartupEvent, agent.UserMessageEvent, agent.ModelMessageEvent, agent.InterruptionEvent, agent.FailureEvent,
+		agent.ModelReasoningEvent, agent.ToolCallRequestEvent, agent.ToolCallResultEvent, agent.StateChangeEvent:
 	}
 
 	return []string{name}
 }
 
-func namesACall(kind agent.Kind) bool {
-	return kind == agent.ToolCallRequestEvent || kind == agent.ToolCallResultEvent || kind == agent.RetryingEvent
-}
-
-func inlineSubject(event agent.Event) string {
-	isTooLongToRead := len([]rune(event.Subject)) > maximumInlineSubject
-	if emphasisLanguage(event.Emphasis) != "" || isTooLongToRead || strings.ContainsAny(event.Subject, "\n`") {
-		return ""
+func logSubject(subject string) string {
+	subject = strings.Join(strings.Fields(subject), " ")
+	runes := []rune(subject)
+	if len(runes) > maximumLogSubject {
+		return string(runes[:maximumLogSubject]) + "…"
 	}
 
-	return event.Subject
+	return subject
 }
 
-func outcome(event agent.Event) string {
+func compactStatus(event agent.Event) string {
 	status := string(event.Status)
+	if event.Status == agent.SuccessStatus {
+		status = "ok"
+	}
 	if event.Took >= patience {
 		status = strings.TrimSpace(status + " in " + util.CompactDuration(event.Took))
 	}
 
-	var parts []string
-	for _, part := range []string{status, event.Note, measurements(event.Stats)} {
-		if part != "" {
-			parts = append(parts, part)
-		}
-	}
-
-	return strings.Join(parts, ", ")
+	return status
 }
 
 func measurements(stats *tool.Stats) string {
@@ -216,10 +218,14 @@ func measurements(stats *tool.Stats) string {
 		parts = append(parts, "truncated")
 	}
 
-	return strings.Join(parts, ", ")
+	return strings.Join(parts, logSeparator)
 }
 
 func joinParts(parts ...string) string {
+	return joinWith(partSeparator, parts...)
+}
+
+func joinWith(separator string, parts ...string) string {
 	var present []string
 	for _, part := range parts {
 		if part != "" {
@@ -227,7 +233,7 @@ func joinParts(parts ...string) string {
 		}
 	}
 
-	return strings.Join(present, partSeparator)
+	return strings.Join(present, separator)
 }
 
 func prefixed(prefix string, value string) string {
@@ -236,14 +242,6 @@ func prefixed(prefix string, value string) string {
 	}
 
 	return prefix + value
-}
-
-func code(value string) string {
-	if value == "" {
-		return ""
-	}
-
-	return "`" + value + "`"
 }
 
 func plural(count int64, noun string) string {
@@ -262,20 +260,66 @@ func interruptionSentence(reason string) string {
 	return "The turn was interrupted because " + reason + "."
 }
 
-func emphasisLanguage(emphasis tool.Emphasis) string {
-	if emphasis.Kind == tool.EmphasisSyntax {
-		return emphasis.Value
-	}
-
-	return ""
-}
-
 func (self *Recorder) Close() error {
 	if self.file == nil {
 		return nil
 	}
-	err := self.file.Close()
+	flushError := self.flushToolCalls()
+	closeError := self.file.Close()
 	self.file = nil
+	return errors.Join(flushError, closeError)
+}
+
+func (self *Recorder) bufferToolCall(at time.Time, event agent.Event) {
+	self.markPendingCallRun(at)
+	entry := &toolCallEntry{id: event.ID, name: event.Name, subject: logSubject(event.Subject)}
+	self.pendingCalls = append(self.pendingCalls, entry)
+	if event.ID == "" {
+		return
+	}
+	if self.callByID == nil {
+		self.callByID = map[string]*toolCallEntry{}
+	}
+	self.callByID[event.ID] = entry
+}
+
+func (self *Recorder) bufferToolResult(at time.Time, event agent.Event) {
+	entry := self.callByID[event.ID]
+	if entry == nil {
+		self.markPendingCallRun(at)
+		entry = &toolCallEntry{id: event.ID, name: event.Name}
+		self.pendingCalls = append(self.pendingCalls, entry)
+	}
+	entry.hasResult = true
+	entry.outcome = compactStatus(event)
+	entry.measurements = measurements(event.Stats)
+	delete(self.callByID, event.ID)
+}
+
+func (self *Recorder) markPendingCallRun(at time.Time) {
+	if len(self.pendingCalls) == 0 {
+		self.pendingCallAt = at
+	}
+}
+
+func (self *Recorder) flushToolCalls() error {
+	entries := self.pendingCalls
+	at := self.pendingCallAt
+	self.pendingCalls = nil
+	self.callByID = nil
+	if len(entries) == 0 {
+		return nil
+	}
+
+	lines := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		lines = append(lines, entry.line())
+	}
+
+	var output document
+	output.paragraph("## " + joinParts("Tool calls", self.offset(at)))
+	output.fence(strings.Join(lines, "\n"))
+	_, err := self.file.WriteString(output.String())
 	return err
 }
 
@@ -340,32 +384,7 @@ func (self *document) openBlock() {
 	}
 }
 
-func (self *document) toolResultPreview(id string, value string, syntax string) {
-	lines := strutil.Lines(value)
-	preview := strings.Join(lines[:min(len(lines), toolResultPreviewLines)], "\n")
-	if len(preview) > toolResultPreviewBytes {
-		end := toolResultPreviewBytes
-		for !utf8.RuneStart(preview[end]) {
-			end--
-		}
-		preview = preview[:end]
-	}
-	if preview == strings.TrimSuffix(value, "\n") {
-		self.fence(preview, syntax)
-		return
-	}
-
-	self.paragraph("**Output preview (first 3 lines, up to 1 KiB)**")
-	self.fence(preview, syntax)
-	if !safeID.MatchString(id) {
-		self.paragraph("Full output: [`session.jsonl`](session.jsonl), in the matching result event's `event.text` field.")
-		return
-	}
-	self.paragraph("Full output, from the session directory:")
-	self.fence(fmt.Sprintf("jq -r 'select(.event.kind == %q and .event.id == %q) | .event.text' session.jsonl", agent.ToolCallResultEvent, id), "sh")
-}
-
-func (self *document) fence(value string, syntax string) {
+func (self *document) fence(value string) {
 	longest := 0
 	for _, run := range strings.FieldsFunc(value, func(character rune) bool { return character != '`' }) {
 		if len(run) > longest {
@@ -374,9 +393,6 @@ func (self *document) fence(value string, syntax string) {
 	}
 	length := max(3, longest+1)
 	fence := strings.Repeat("`", length)
-	if !safeSyntax.MatchString(syntax) {
-		syntax = ""
-	}
 	self.openBlock()
-	fmt.Fprintf(&self.text, "%s%s\n%s\n%s\n", fence, syntax, value, fence)
+	fmt.Fprintf(&self.text, "%s\n%s\n%s\n", fence, value, fence)
 }

@@ -6,30 +6,23 @@
 - **Effort:** `medium`
 - **Provider:** `codex`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 finish with the done sentinel
-```
 
 ## Assistant · +0s
 
-```
 Done by sentinel.
-```
 
 ## User · +0s
 
-```
 continue after the first response
-```
 
 ## Assistant · +0s
 
-```
 Resumed.
-```
 

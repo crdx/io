@@ -7,74 +7,37 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 have a look at that
-```
-
-## Reasoning · +2s
-
-```
-Looking for where the prompt is drawn.
-```
 
 ## Assistant · +3s
 
-```
 I'll have a look at how the editor draws its prompt.
-```
 
-## Tool call — grep (*.go) · +4s
-
-```regexp
-prompt
-```
-
-→ success, 1 line, 44B · +6s
+## Tool calls · +4s
 
 ```
-cmd/oh/line/render.go:4:\treturn "the prompt"
-```
-
-## Reasoning · +7s
-
-```
-The prompt is drawn by the renderer, so that is the file to read.
+grep: prompt [ok, 1 line, 44B, call_2]
 ```
 
 ## Assistant · +8s
 
-```
 Found it. Reading the renderer now.
-```
 
-## Tool call — read · `cmd/oh/line/render.go` · +9s
-
-→ success, 5 lines, 60B · +11s
-
-**Output preview (first 3 lines, up to 1 KiB)**
+## Tool calls · +9s
 
 ```
-package line
-
-func layout() string {
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_4") | .event.text' session.jsonl
+read: cmd/oh/line/render.go [ok, 5 lines, 60B, call_4]
 ```
 
 ## Assistant · +12s
 
-```
 The prompt is drawn by `layout`, which wraps the buffer against the terminal width and reports where the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output layer instead.
 
-```
 
 

@@ -133,11 +133,15 @@ func backtickRun(line string) int {
 }
 
 func startsABlock(line string, previous string) bool {
+	trimmedPrevious := strings.TrimLeft(previous, " ")
+
 	switch {
-	case strings.HasPrefix(line, "#"), strings.HasPrefix(line, ">"), strings.HasPrefix(line, "**"):
+	case strings.HasPrefix(line, "#"), strings.HasPrefix(line, "**"):
 		return true
+	case strings.HasPrefix(line, ">"):
+		return !strings.HasPrefix(trimmedPrevious, ">")
 	case strings.HasPrefix(line, "- "):
-		return !strings.HasPrefix(previous, "- ")
+		return !strings.HasPrefix(trimmedPrevious, "- ")
 	default:
 		return false
 	}

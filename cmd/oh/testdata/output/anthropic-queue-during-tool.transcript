@@ -6,54 +6,41 @@
 - **Effort:** `medium`
 - **Provider:** `anthropic`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 queue a message while the tool is working
-```
 
-## Tool call — work · `work` · +0s
-
-→ success, 1 line, 11B · +0s
+## Tool calls · +0s
 
 ```
-first round
+work: work [ok, 1 line, 11B, toolu_1]
 ```
 
 ## User · +0s
 
-```
 check the other path too
 
 and mention what you find
-```
 
-## Tool call — work · `work` · +0s
-
-→ success, 1 line, 12B · +0s
+## Tool calls · +0s
 
 ```
-second round
+work: work [ok, 1 line, 12B, toolu_2]
 ```
 
 ## Assistant · +0s
 
-```
 I checked the other path and it agrees.
-```
 
 ## User · +0s
 
-```
 carry on
-```
 
 ## Assistant · +0s
 
-```
 Carrying on.
-```
 

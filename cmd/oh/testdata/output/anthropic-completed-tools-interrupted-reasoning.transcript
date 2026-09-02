@@ -6,41 +6,19 @@
 - **Effort:** `medium`
 - **Provider:** `anthropic`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 complete two tool rounds, then keep thinking
-```
 
-## Reasoning · +0s
-
-```
-Plan first.
-```
-
-## Tool call — work · `work` · +0s
-
-→ success, 1 line, 12B · +0s
+## Tool calls · +0s
 
 ```
-first result
-```
-
-## Reasoning · +0s
-
-```
-Plan second.
-```
-
-## Tool call — work · `work` · +0s
-
-→ success, 1 line, 13B · +0s
-
-```
-second result
+work: work [ok, 1 line, 12B, toolu_1]
+work: work [ok, 1 line, 13B, toolu_2]
 ```
 
 ## Interrupted · +0s
@@ -49,27 +27,15 @@ The turn was interrupted because the user pressed escape.
 
 ## User · +0s
 
-```
 continue from the last valid tool result
-```
 
-## Reasoning · +0s
-
-```
-Check restored state.
-```
-
-## Tool call — work · `work` · +0s
-
-→ success, 1 line, 14B · +0s
+## Tool calls · +0s
 
 ```
-resumed result
+work: work [ok, 1 line, 14B, toolu_3]
 ```
 
 ## Assistant · +0s
 
-```
 Recovered.
-```
 

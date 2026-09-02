@@ -7,63 +7,24 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## User · +0s
 
-```
 show every tool result link state
-```
 
-## Tool call — read · `README.md` · +1s
-
-## Tool call — grep · `[` · +2s
-
-## Tool call — ls · +3s
-
-```json
-{"path":"."}
-```
-
-## Tool call — bash · `sleep 10` · +4s
-
-## Tool call — bash · `touch marker` · +5s
-
-## Tool result — read · success, 1 line, 12B · +6s
+## Tool calls · +1s
 
 ```
-# Workspace
+read: README.md [ok, 1 line, 12B, call/a?&]
+grep: [ [error, call_2]
+ls [ok, call_3]
+bash: sleep 10 [cancelled, call_4]
+bash: touch marker [ok, call_5]
 ```
-
-## Tool result — grep · error · +7s
-
-**Output preview (first 3 lines, up to 1 KiB)**
-
-```
-regex parse error:
-    [
-    ^
-```
-
-Full output, from the session directory:
-
-```sh
-jq -r 'select(.event.kind == "tool_call_result" and .event.id == "call_2") | .event.text' session.jsonl
-```
-
-## Tool result — ls · success · +8s
-
-## Tool result — bash · cancelled · +9s
-
-```
-the command was stopped because the user pressed escape
-```
-
-## Tool result — bash · success · +10s
 
 ## Assistant · +11s
 
-```
 Every finished call has a result link, whether or not it returned anything.
-```
 
 

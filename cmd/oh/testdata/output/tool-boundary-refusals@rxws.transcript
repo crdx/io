@@ -7,61 +7,29 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 check every refused boundary
-```
 
 ## Assistant · +2s
 
-```
 I checked each boundary without crossing it.
-```
 
-## Tool call — read · `huge.log` · +3s
-
-→ error, 256M · +4s
+## Tool calls · +3s
 
 ```
-file is larger than the 20971520-byte limit
-```
-
-## Tool call — grep (linked) · +5s
-
-```regexp
-secret
-```
-
-→ error · +6s
-
-```
-linked: path escapes from parent
-```
-
-## Tool call — web_fetch (text) · `http://[2001:db8::1]/private` · +7s
-
-→ error · +8s
-
-```
-web fetch failed: Get "http://[2001:db8::1]/private": dial tcp [2001:db8::1]:80: 2001:db8::1 is documentation space, and the web tools reach only the public internet
-```
-
-## Tool call — bash · `echo ready` · +9s
-
-→ error · +10s
-
-```
-the shell cannot be confined: writable policy unsupported
+read: huge.log [error, 256M, call_1]
+grep: secret [error, call_2]
+web_fetch: http://[2001:db8::1]/private [error, call_3]
+bash: echo ready [error, call_4]
 ```
 
 ## Assistant · +11s
 
-```
 Each boundary stayed closed.
-```
 
 

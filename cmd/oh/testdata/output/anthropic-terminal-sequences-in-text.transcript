@@ -6,30 +6,23 @@
 - **Effort:** `medium`
 - **Provider:** `anthropic`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 read the page and tell me what it says
-```
 
 ## Assistant · +0s
 
-```
 The page said: paste aGVsbG8= and visit here, which I would not.
-```
 
 ## User · +0s
 
-```
 say that again [2J
-```
 
 ## Assistant · +0s
 
-```
 It asked to be pasted, and I would not.
-```
 

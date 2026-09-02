@@ -6,14 +6,13 @@
 - **Effort:** `medium`
 - **Provider:** `anthropic`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 send null as tool input
-```
 
 ## Retrying — work · attempt 1 · waited 1s · +0s
 
@@ -27,19 +26,13 @@ null
 
 ## Assistant · +0s
 
-```
 I sent an object that time.
-```
 
 ## User · +0s
 
-```
 carry on
-```
 
 ## Assistant · +0s
 
-```
 Carrying on.
-```
 

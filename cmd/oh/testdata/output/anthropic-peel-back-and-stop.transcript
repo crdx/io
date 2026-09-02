@@ -6,21 +6,18 @@
 - **Effort:** `medium`
 - **Provider:** `anthropic`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 queue two messages, take them back, then stop the turn
-```
 
-## Tool call — work · `work` · +0s
-
-→ cancelled, 1 line, 61B · +0s
+## Tool calls · +0s
 
 ```
-the call was stopped after 4s because the user pressed ctrl+d
+work: work [cancelled, 1 line, 61B, toolu_1]
 ```
 
 ## Interrupted · +0s
@@ -29,13 +26,9 @@ The turn was interrupted because the user pressed escape.
 
 ## User · +0s
 
-```
 carry on
-```
 
 ## Assistant · +0s
 
-```
 Carrying on.
-```
 

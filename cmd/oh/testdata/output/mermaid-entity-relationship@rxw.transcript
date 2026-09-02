@@ -7,24 +7,16 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 show the customer data model
-```
-
-## Reasoning · +2s
-
-```
-Sketching the data model.
-```
 
 ## Assistant · +3s
 
-````
 # Customer orders
 
 ```mermaid
@@ -40,6 +32,5 @@ int customer_id FK
 CUSTOMER ||--o{ ORDER : 1️⃣ places
 ```
 
-````
 
 

@@ -6,21 +6,18 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Mode · rxwgs · +0s
 
 ## User · +0s
 
-```
 send another message and change what I am allowed to do
-```
 
-## Tool call — work · `work` · +0s
-
-→ cancelled, 1 line, 88B · +0s
+## Tool calls · +0s
 
 ```
-the call was stopped after 3s because the user changed what the harness is allowed to do
+work: work [cancelled, 1 line, 88B, call-1]
 ```
 
 ## Interrupted · +0s
@@ -31,31 +28,21 @@ The turn was interrupted because the user changed what the harness is allowed to
 
 ## User · +0s
 
-```
 The workspace is now read-only.
-```
 
 ## User · +0s
 
-```
 do it read-only instead
-```
 
 ## Assistant · +0s
 
-```
 Read-only it is.
-```
 
 ## User · +0s
 
-```
 carry on
-```
 
 ## Assistant · +0s
 
-```
 Carrying on.
-```
 

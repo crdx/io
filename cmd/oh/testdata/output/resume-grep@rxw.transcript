@@ -7,37 +7,26 @@
 - **Effort:** `high`
 - **Provider:** `codex`
 - **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
 
 ## Startup · +0s
 
 ## User · +1s
 
-```
 have a look at that
-```
 
 ## Assistant · +2s
 
-```
 Searching the target before the process restarts.
-```
 
-## Tool call — grep (target.txt) · +3s
-
-```regexp
-one
-```
-
-→ success, 1 line, 16B · +5s
+## Tool calls · +3s
 
 ```
-target.txt:1:one
+grep: one [ok, 1 line, 16B, call_1]
 ```
 
 ## Assistant · +6s
 
-```
 The matching target is now safely recorded.
-```
 
 
