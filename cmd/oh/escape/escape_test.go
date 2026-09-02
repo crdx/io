@@ -116,3 +116,34 @@ func FuzzGetSequence(fuzzer *testing.F) {
 		}
 	})
 }
+
+func TestAStringSequenceEndsAtItsTerminator(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		sequence string
+	}{
+		{name: "a graphics command", sequence: "\x1b_Ga=T,f=32,m=1;AAmAKA\x1b\\"},
+		{name: "a device control string", sequence: "\x1bP+q544e\x1b\\"},
+		{name: "a privacy message", sequence: "\x1b^something\x1b\\"},
+		{name: "an application program command ended with a bell", sequence: "\x1b_Ga=q;OK\a"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			runes := []rune(test.sequence + "after")
+
+			got := GetSequence(runes, 0)
+			if got.End != len([]rune(test.sequence)) {
+				t.Errorf("ended at %d, want %d", got.End, len([]rune(test.sequence)))
+			}
+			if got.Cells != 0 {
+				t.Errorf("occupies %d cells, want none", got.Cells)
+			}
+		})
+	}
+}
+
+func TestAnUnterminatedStringSequenceTakesTheRest(t *testing.T) {
+	runes := []rune("\x1b_Ga=T,f=32;AAmAKA")
+	if got := GetEnd(runes, 0); got != len(runes) {
+		t.Errorf("GetEnd() = %d, want %d", got, len(runes))
+	}
+}

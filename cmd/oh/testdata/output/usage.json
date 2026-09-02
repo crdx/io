@@ -1,0 +1,64 @@
+{
+    "schema_version": 1,
+    "providers": [
+        {
+            "provider": {
+                "id": "codex",
+                "label": "OpenAI"
+            },
+            "status": "ok",
+            "measured_at": "2026-01-02T12:00:00Z",
+            "age_seconds": <age>,
+            "refresh_after_seconds": 300,
+            "fresh_within_seconds": 360,
+            "stale_after_seconds": 1800,
+            "is_self_refreshing": false,
+            "freshness": "waiting",
+            "limits": [
+                {
+                    "id": "5h",
+                    "label": "Session",
+                    "short_label": "5h",
+                    "window_seconds": 18000,
+                    "used_percent": 41,
+                    "expected_percent": 60,
+                    "pace_delta": -19,
+                    "resets_at": "2026-01-02T14:00:00Z",
+                    "remaining_seconds": 0,
+                    "is_active": true,
+                    "state": "stale",
+                    "severity": "normal"
+                },
+                {
+                    "id": "7d",
+                    "label": "Week",
+                    "short_label": "7d",
+                    "window_seconds": 604800,
+                    "used_percent": 64,
+                    "expected_percent": 64,
+                    "pace_delta": 0,
+                    "resets_at": "2026-01-05T00:00:00Z",
+                    "remaining_seconds": 0,
+                    "is_active": true,
+                    "state": "stale",
+                    "severity": "normal"
+                },
+                {
+                    "id": "scope/gpt-5.3-codex-spark/5h",
+                    "label": "Spark Session",
+                    "short_label": "Spark 5h",
+                    "scope": "gpt-5.3-codex-spark",
+                    "window_seconds": 18000,
+                    "used_percent": 12,
+                    "expected_percent": 60,
+                    "pace_delta": -48,
+                    "resets_at": "2026-01-02T14:00:00Z",
+                    "remaining_seconds": 0,
+                    "is_active": true,
+                    "state": "stale",
+                    "severity": "normal"
+                }
+            ]
+        }
+    ]
+}

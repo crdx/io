@@ -1523,7 +1523,7 @@ func TestResumeArgumentsMatchTheGolden(t *testing.T) {
 		)
 	}
 
-	compareArgumentsWithGolden(t, "resume-arguments.txt", output.String())
+	compareTextWithGolden(t, "resume-arguments.txt", output.String())
 }
 
 func TestModelArgumentsMatchTheGolden(t *testing.T) {
@@ -1551,10 +1551,77 @@ func TestModelArgumentsMatchTheGolden(t *testing.T) {
 		)
 	}
 
-	compareArgumentsWithGolden(t, "model-arguments.txt", output.String())
+	compareTextWithGolden(t, "model-arguments.txt", output.String())
 }
 
-func compareArgumentsWithGolden(t *testing.T, name string, got string) {
+func TestTheUsageArgumentsMatchTheGolden(t *testing.T) {
+	originalArgs := os.Args
+	t.Cleanup(func() { os.Args = originalArgs })
+
+	cases := [][]string{
+		{"-U"},
+		{"--usage"},
+		{"-U", "-J"},
+		{"--usage", "--json"},
+	}
+
+	var output strings.Builder
+	for _, arguments := range cases {
+		os.Args = append([]string{"oh"}, arguments...)
+		input := cli.Bind()
+		fmt.Fprintf(
+			&output,
+			"%-32q usage=%-5t json=%t\n",
+			strings.Join(arguments, " "),
+			input.Usage,
+			input.JSON,
+		)
+	}
+
+	compareTextWithGolden(t, "usage-arguments.txt", output.String())
+}
+
+func TestTheUsageReportMatchesTheGolden(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	cachePath := location.GetUsageCachePath("codex", false)
+	if err := os.MkdirAll(filepath.Dir(cachePath), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	cache := `{"version":1,"fetched_at":"2026-01-02T12:00:00Z","windows":[` +
+		`{"duration":18000000000000,"percent":41.2,"resets_at":"2026-01-02T14:00:00Z"},` +
+		`{"duration":604800000000000,"percent":63.9,"resets_at":"2026-01-05T00:00:00Z"},` +
+		`{"duration":18000000000000,"percent":12,"resets_at":"2026-01-02T14:00:00Z","scope":"gpt-5.3-codex-spark"}` +
+		`]}`
+	if err := os.WriteFile(cachePath, []byte(cache), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	var written strings.Builder
+	if err := usage.Show(t.Context(), &written, usage.Options{JSON: true}); err != nil {
+		t.Fatal(err)
+	}
+
+	var document bytes.Buffer
+	if err := json.Indent(&document, []byte(strings.TrimSpace(written.String())), "", "    "); err != nil {
+		t.Fatal(err)
+	}
+
+	written.Reset()
+	for line := range strings.SplitSeq(document.String(), "\n") {
+		if strings.HasPrefix(strings.TrimSpace(line), `"age_seconds":`) {
+			line = strings.Split(line, ":")[0] + `: <age>,`
+		}
+
+		written.WriteString(line)
+		written.WriteString("\n")
+	}
+
+	compareTextWithGolden(t, "usage.json", strings.TrimSuffix(written.String(), "\n"))
+}
+
+func compareTextWithGolden(t *testing.T, name string, got string) {
 	t.Helper()
 
 	goldenPath := filepath.Join("testdata", "output", name)
@@ -1570,7 +1637,7 @@ func compareArgumentsWithGolden(t *testing.T, name string, got string) {
 		t.Fatal(err)
 	}
 	if got != string(want) {
-		t.Errorf("arguments differ from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, got, want)
+		t.Errorf("what was written differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, got, want)
 	}
 }
 
@@ -2672,6 +2739,8 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"startup-sized":         {".ansi", ".screen"},
 		"startup-sized-output":  {".ansi", ".screen"},
 		"terminal-escape":       {".ansi", ".screen"},
+		"usage":                 {".json"},
+		"usage-arguments":       {".txt"},
 		"vertical-movement":     {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)

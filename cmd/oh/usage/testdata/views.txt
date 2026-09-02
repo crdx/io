@@ -1,0 +1,38 @@
+=== every provider ===
+● Anthropic
+Session         0% ░░░░░░░░░░░░░░░░       idle
+Week           51% ████████░░░┃░░░░ ▼ 20  1d23h
+Opus Session   88% ███████████┃██░░ ▲ 18  1h29m
+
+● OpenAI
+Session        41% ██████░░░┃░░░░░░ ▼ 19  1h59m
+Week           64% ██████████░┃░░░░ ▼ 7   1d23h
+Spark Session  12% █░░░░░░░░░░┃░░░░ ▼ 58  1h29m
+
+● OpenCode Go
+Session         3% ░░░░░░░░░┃░░░░░░ ▼ 57  1h59m
+Month         100% ████████████████       limited
+=== a provider that was refused ===
+✖ Anthropic refused with 429
+=== a scope nothing has been spent on ===
+● OpenAI
+Session  41% ██████░░░┃░░░░░░ ▼ 19  1h59m
+=== a window whose reset is unknown ===
+● OpenAI
+Session  37% █████░░░░░░░░░░░
+=== a provider with nothing to report ===
+○ OpenAI no usage data available
+=== a window that has run out ===
+● OpenAI
+Session  99% ███████████████┃       stale
+=== a snapshot past its refresh ===
+● OpenAI 10m00s
+Session  20% ███░░░░░░┃░░░░░░ ▼ 40  1h50m
+=== a snapshot long past its refresh ===
+● Anthropic 45m00s
+Session  20% ███░░░░░░┃░░░░░░ ▼ 40  1h15m
+=== a provider waiting on a turn of its own ===
+◷ OpenAI 45m00s
+Session  20% ███░░░░░░┃░░░░░░ ▼ 40  1h15m
+=== nothing to report at all ===
+no usage to report

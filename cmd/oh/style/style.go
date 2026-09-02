@@ -2,6 +2,7 @@ package style
 
 import (
 	"fmt"
+	"image/color"
 	"os"
 	"strconv"
 	"strings"
@@ -96,6 +97,13 @@ var (
 	Operator    Style = hex(teal)
 	Variable    Style = hex(none)
 	Punctuation Style = hex(none)
+)
+
+var (
+	InformationColour, _ = colour(steel)
+	ChangeColour, _      = colour(gold)
+	FailureColour, _     = colour(red)
+	DimColour, _         = colour(grey)
 )
 
 var (
@@ -247,22 +255,31 @@ func background(value string) Style {
 }
 
 func sgr(value string) string {
-	if len(value) != len("#rrggbb") || value[0] != '#' {
+	colourValue, isColour := colour(value)
+	if !isColour {
 		return ""
 	}
 
-	channels := make([]uint64, 3)
+	return fmt.Sprintf("38;2;%d;%d;%d", colourValue.R, colourValue.G, colourValue.B)
+}
 
-	for i := range channels {
+func colour(value string) (color.RGBA, bool) {
+	if len(value) != len("#rrggbb") || value[0] != '#' {
+		return color.RGBA{}, false
+	}
+
+	colourValue := color.RGBA{A: 0xff}
+
+	for i, channel := range []*uint8{&colourValue.R, &colourValue.G, &colourValue.B} {
 		at := 1 + i*2
 
 		channelValue, err := strconv.ParseUint(value[at:at+2], 16, 8)
 		if err != nil {
-			return ""
+			return color.RGBA{}, false
 		}
 
-		channels[i] = channelValue
+		*channel = uint8(channelValue)
 	}
 
-	return fmt.Sprintf("38;2;%d;%d;%d", channels[0], channels[1], channels[2])
+	return colourValue, true
 }

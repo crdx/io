@@ -44,6 +44,8 @@ func GetSequence(runes []rune, start int) Sequence {
 		}
 		text, cells := getTextSizing(sequence)
 		return Sequence{End: end, Text: text, Cells: cells}
+	case '_', 'P', '^', 'X':
+		return Sequence{End: getStringEnd(runes, start)}
 	default:
 		return Sequence{End: getLegacyEnd(runes, start)}
 	}
@@ -84,6 +86,19 @@ func getOSCEnd(runes []rune, start int) (int, bool) {
 		}
 	}
 	return len(runes), false
+}
+
+func getStringEnd(runes []rune, start int) int {
+	for end := start + 2; end < len(runes); end++ {
+		switch {
+		case runes[end] == '\a':
+			return end + 1
+		case runes[end] == '\x1b' && end+1 < len(runes) && runes[end+1] == '\\':
+			return end + 2
+		}
+	}
+
+	return len(runes)
 }
 
 func getLegacyEnd(runes []rune, start int) int {

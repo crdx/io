@@ -28,6 +28,7 @@ func TestWhatEachKindOfCharacterTakes(t *testing.T) {
 		"\x1b[31mred\x1b[0m":              3,
 		"\x1b[4C":                         4,
 		"\x1b]66;s=2:n=3:d=4:w=2;🐟\x1b\\": 4,
+		"\x1b_Ga=T,f=32,c=3;AAAA\x1b\\\U0010EEEE\u0305\u0305\U0010EEEE\U0010EEEE": 3,
 	} {
 		if got := Of(text); got != want {
 			t.Errorf("Of(%q) = %d, want %d", text, got, want)

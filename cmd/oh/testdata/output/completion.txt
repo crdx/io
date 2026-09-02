@@ -1,12 +1,14 @@
 === options ===
 --caps
 --help
+--json
 --list
 --login
 --model
 --resume
 --tool
 --update
+--usage
 --version
 --yolo
 === models ===

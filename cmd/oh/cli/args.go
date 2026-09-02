@@ -19,6 +19,7 @@ var usage = fmt.Sprintf(`oh — coding harness
 
 Usage:
     $0 -L [<login-provider>]
+    $0 -U [-J]
     $0 [options] [-t <tool>]... [<prompt>...]
 
 Options:
@@ -28,6 +29,8 @@ Options:
     -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: %s)
     -t, --tool <tool>           Set exclusive tool selection; may be repeated
         --yolo                  Live dangerously and don't sandbox anything
+    -U, --usage                 Show subscription usage, then exit
+    -J, --json                  Write the usage as JSON rather than drawing it
     -l, --list                  List the available models, then exit
     -u, --update                Update the cached model list, then exit
     -v, --version               Show version
@@ -44,6 +47,8 @@ type inputFlags struct {
 	IsModelPicker   bool     `docopt:"-m"`
 	Caps            string   `docopt:"--caps"`
 	Tools           []string `docopt:"--tool"`
+	Usage           bool     `docopt:"--usage"`
+	JSON            bool     `docopt:"--json"`
 	Yolo            bool     `docopt:"--yolo"`
 	List            bool     `docopt:"--list"`
 	Update          bool     `docopt:"--update"`

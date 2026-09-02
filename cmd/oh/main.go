@@ -46,6 +46,7 @@ import (
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/textsizing"
 	"crdx.org/io/cmd/oh/toolset"
+	"crdx.org/io/cmd/oh/usage"
 	"crdx.org/io/cmd/oh/work"
 )
 
@@ -132,6 +133,10 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			return "", nil
 		}
 		return "", err
+	}
+
+	if inputArgs.Usage {
+		return "", usage.Show(ctx, os.Stdout, usage.Options{JSON: inputArgs.JSON})
 	}
 
 	if inputArgs.List {

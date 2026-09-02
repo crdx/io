@@ -1,0 +1,4 @@
+"-U"                             usage=true  json=false
+"--usage"                        usage=true  json=false
+"-U -J"                          usage=true  json=true
+"--usage --json"                 usage=true  json=true

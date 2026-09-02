@@ -1,0 +1,199 @@
+{
+    "schema_version": 1,
+    "providers": [
+        {
+            "provider": {
+                "id": "anthropic",
+                "label": "Anthropic"
+            },
+            "status": "ok",
+            "measured_at": "2026-01-02T12:00:00Z",
+            "age_seconds": 0,
+            "refresh_after_seconds": 300,
+            "fresh_within_seconds": 360,
+            "stale_after_seconds": 1800,
+            "is_self_refreshing": true,
+            "freshness": "fresh",
+            "limits": [
+                {
+                    "id": "5h",
+                    "label": "Session",
+                    "short_label": "5h",
+                    "window_seconds": 18000,
+                    "used_percent": 0,
+                    "expected_percent": null,
+                    "pace_delta": null,
+                    "resets_at": null,
+                    "remaining_seconds": null,
+                    "is_active": false,
+                    "state": "idle",
+                    "severity": "normal"
+                },
+                {
+                    "id": "7d",
+                    "label": "Week",
+                    "short_label": "7d",
+                    "window_seconds": 604800,
+                    "used_percent": 51,
+                    "expected_percent": 71,
+                    "pace_delta": -20,
+                    "resets_at": "2026-01-04T12:00:00Z",
+                    "remaining_seconds": 172800,
+                    "is_active": true,
+                    "state": "active",
+                    "severity": "normal"
+                },
+                {
+                    "id": "scope/opus/5h",
+                    "label": "Opus Session",
+                    "short_label": "Opus 5h",
+                    "scope": "opus",
+                    "window_seconds": 18000,
+                    "used_percent": 88,
+                    "expected_percent": 70,
+                    "pace_delta": 18,
+                    "resets_at": "2026-01-02T13:30:00Z",
+                    "remaining_seconds": 5400,
+                    "is_active": true,
+                    "state": "active",
+                    "severity": "warning"
+                }
+            ]
+        },
+        {
+            "provider": {
+                "id": "codex",
+                "label": "OpenAI"
+            },
+            "status": "ok",
+            "measured_at": "2026-01-02T12:00:00Z",
+            "age_seconds": 0,
+            "refresh_after_seconds": 300,
+            "fresh_within_seconds": 360,
+            "stale_after_seconds": 1800,
+            "is_self_refreshing": false,
+            "freshness": "fresh",
+            "limits": [
+                {
+                    "id": "5h",
+                    "label": "Session",
+                    "short_label": "5h",
+                    "window_seconds": 18000,
+                    "used_percent": 41,
+                    "expected_percent": 60,
+                    "pace_delta": -19,
+                    "resets_at": "2026-01-02T14:00:00Z",
+                    "remaining_seconds": 7200,
+                    "is_active": true,
+                    "state": "active",
+                    "severity": "normal"
+                },
+                {
+                    "id": "7d",
+                    "label": "Week",
+                    "short_label": "7d",
+                    "window_seconds": 604800,
+                    "used_percent": 64,
+                    "expected_percent": 71,
+                    "pace_delta": -7,
+                    "resets_at": "2026-01-04T12:00:00Z",
+                    "remaining_seconds": 172800,
+                    "is_active": true,
+                    "state": "active",
+                    "severity": "normal"
+                },
+                {
+                    "id": "scope/gpt-5.3-codex-spark/5h",
+                    "label": "Spark Session",
+                    "short_label": "Spark 5h",
+                    "scope": "gpt-5.3-codex-spark",
+                    "window_seconds": 18000,
+                    "used_percent": 12,
+                    "expected_percent": 70,
+                    "pace_delta": -58,
+                    "resets_at": "2026-01-02T13:30:00Z",
+                    "remaining_seconds": 5400,
+                    "is_active": true,
+                    "state": "active",
+                    "severity": "normal"
+                }
+            ]
+        },
+        {
+            "provider": {
+                "id": "opencode-go",
+                "label": "OpenCode Go"
+            },
+            "status": "ok",
+            "measured_at": "2026-01-02T12:00:00Z",
+            "age_seconds": 0,
+            "refresh_after_seconds": 300,
+            "fresh_within_seconds": 360,
+            "stale_after_seconds": 1800,
+            "is_self_refreshing": true,
+            "freshness": "fresh",
+            "limits": [
+                {
+                    "id": "5h",
+                    "label": "Session",
+                    "short_label": "5h",
+                    "window_seconds": 18000,
+                    "used_percent": 3,
+                    "expected_percent": 60,
+                    "pace_delta": -57,
+                    "resets_at": "2026-01-02T14:00:00Z",
+                    "remaining_seconds": 7200,
+                    "is_active": true,
+                    "state": "active",
+                    "severity": "normal"
+                },
+                {
+                    "id": "30d",
+                    "label": "Month",
+                    "short_label": "30d",
+                    "window_seconds": 2592000,
+                    "used_percent": 100,
+                    "expected_percent": null,
+                    "pace_delta": null,
+                    "resets_at": null,
+                    "remaining_seconds": null,
+                    "is_active": false,
+                    "is_limited": true,
+                    "state": "limited",
+                    "severity": "error"
+                }
+            ]
+        },
+        {
+            "provider": {
+                "id": "anthropic",
+                "label": "Anthropic"
+            },
+            "status": "failed",
+            "message": "refused with 500",
+            "age_seconds": null,
+            "refresh_after_seconds": 300,
+            "fresh_within_seconds": 360,
+            "stale_after_seconds": 1800,
+            "is_self_refreshing": false,
+            "freshness": "fresh",
+            "limits": []
+        },
+        {
+            "provider": {
+                "id": "ollama",
+                "label": "Ollama"
+            },
+            "status": "unavailable",
+            "message": "no usage data available",
+            "measured_at": "2026-01-02T12:00:00Z",
+            "age_seconds": 0,
+            "refresh_after_seconds": 300,
+            "fresh_within_seconds": 360,
+            "stale_after_seconds": 1800,
+            "is_self_refreshing": false,
+            "freshness": "fresh",
+            "limits": []
+        }
+    ]
+}
