@@ -8,6 +8,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/text"
+
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/interrupt"
@@ -15,6 +19,43 @@ import (
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/tool"
 )
+
+var transcriptParser = goldmark.New().Parser()
+
+func transcriptWellFormedness(t *testing.T, source string) ast.Node {
+	t.Helper()
+
+	return transcriptParser.Parse(text.NewReader([]byte(source)))
+}
+
+func countHeadings(document ast.Node) int {
+	count := 0
+	_ = ast.Walk(document, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if entering && node.Kind() == ast.KindHeading {
+			count++
+		}
+
+		return ast.WalkContinue, nil
+	})
+
+	return count
+}
+
+func textNodesContain(t *testing.T, source string, want string) bool {
+	t.Helper()
+
+	sourceBytes := []byte(source)
+	var visibleText strings.Builder
+	_ = ast.Walk(transcriptWellFormedness(t, source), func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if textNode, isText := node.(*ast.Text); entering && isText {
+			visibleText.Write(textNode.Segment.Value(sourceBytes))
+		}
+
+		return ast.WalkContinue, nil
+	})
+
+	return strings.Contains(visibleText.String(), want)
+}
 
 func TestTranscriptOmitsReasoningEntirely(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "transcript.md")
@@ -336,6 +377,206 @@ func TestTranscriptWritesMessagesAsMarkdownRatherThanFencingThem(t *testing.T) {
 	if !strings.Contains(transcript, "## Assistant · +4.0s\n\n"+content+"\n") {
 		t.Errorf("expected the answer written as its own markdown rather than fenced, got:\n%s", transcript)
 	}
+}
+
+func TestTranscriptLetsUserTextCollideWithMarkdownSyntax(t *testing.T) {
+	for name, test := range map[string]struct {
+		text         string
+		wantHeadings int
+	}{
+		"a leading hash renders as a heading, not a comment banner": {
+			text:         "# ——— system journal errors ———\nnothing else follows",
+			wantHeadings: 3,
+		},
+		"a rule under a line turns it into a heading of its own": {
+			text:         "a rule\n---\nunderneath",
+			wantHeadings: 3,
+		},
+		"an indented continuation line stays part of the same paragraph": {
+			text:         "the instruction was:\n    do the thing\n    then stop",
+			wantHeadings: 2,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "transcript.md")
+			recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.UserMessageEvent, Text: test.text}); err != nil {
+				t.Fatal(err)
+			}
+			if err := recorder.Close(); err != nil {
+				t.Fatal(err)
+			}
+
+			stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+			if err != nil {
+				t.Fatal(err)
+			}
+			transcript := string(stored)
+			if !strings.Contains(transcript, "## User · +2.0s\n\n"+test.text+"\n") {
+				t.Errorf("expected the user's text written exactly as given, got:\n%s", transcript)
+			}
+			document := transcriptWellFormedness(t, transcript)
+			if headingCount := countHeadings(document); headingCount != test.wantHeadings {
+				t.Errorf("expected %d headings once parsed as markdown, got %d in:\n%s", test.wantHeadings, headingCount, transcript)
+			}
+		})
+	}
+}
+
+func TestTranscriptFencesAWholeMessageThatWouldOtherwiseSwallowWhatFollows(t *testing.T) {
+	for name, text := range map[string]string{
+		"an unclosed backtick fence":         "here's a snippet:\n```\nweird\nand it just keeps going",
+		"an unclosed tilde fence":            "~~~~\nfenced with tildes, and a stray ``` inside it",
+		"an unclosed script block":           "before\n\n<script>\nvar x = 1;",
+		"an unclosed html comment":           "before\n\n<!-- oops",
+		"an unclosed pre block":              "before\n\n<pre>\nstuff",
+		"an unclosed cdata section":          "before\n\n<![CDATA[\nstuff",
+		"an unclosed processing instruction": "before\n\n<?php\necho 1;",
+		"an unclosed declaration":            "before\n\n<!DOCTYPE html\nweird",
+	} {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "transcript.md")
+			recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.ModelMessageEvent, Text: text}); err != nil {
+				t.Fatal(err)
+			}
+			if err := recorder.Event(time.Unix(5, 6), agent.Event{Kind: agent.UserMessageEvent, Text: "canary reply"}); err != nil {
+				t.Fatal(err)
+			}
+			if err := recorder.Close(); err != nil {
+				t.Fatal(err)
+			}
+
+			stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+			if err != nil {
+				t.Fatal(err)
+			}
+			transcript := string(stored)
+			if !textNodesContain(t, transcript, "canary reply") {
+				t.Errorf("expected the canary to survive as real text rather than being swallowed, got:\n%s", transcript)
+			}
+		})
+	}
+}
+
+func TestTranscriptFencesAWholeUserMessageThatWouldOtherwiseSwallowWhatFollows(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "transcript.md")
+	recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(3, 4), agent.Event{
+		Kind: agent.UserMessageEvent,
+		Text: "does this look right:\n```go\nfunc broken() {",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Event(time.Unix(5, 6), agent.Event{Kind: agent.ModelMessageEvent, Text: "canary reply"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := recorder.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	transcript := string(stored)
+	if !textNodesContain(t, transcript, "canary reply") {
+		t.Errorf("expected the canary to survive as real text rather than being swallowed, got:\n%s", transcript)
+	}
+}
+
+func TestTranscriptLeavesASelfContainedMessageAlone(t *testing.T) {
+	for name, content := range map[string]string{
+		"a balanced fence":        "before:\n\n```go\nfunc main() {}\n```\n\nafter",
+		"a self-closing tag":      "before\n\n<div>\nstuff",
+		"a rule":                  "a rule\n---\nunderneath",
+		"a heading":               "# hello\nworld",
+		"a table":                 "| a | b |\n|---|---|\n| 1 | 2 |",
+		"a nested list":           "- one\n  - two\n- three",
+		"a blockquote":            "> line one\n> line two",
+		"an unbalanced code span": "some `code that never closes",
+	} {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "transcript.md")
+			recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.ModelMessageEvent, Text: content}); err != nil {
+				t.Fatal(err)
+			}
+			if err := recorder.Close(); err != nil {
+				t.Fatal(err)
+			}
+
+			stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(string(stored), "## Assistant · +2.0s\n\n"+content+"\n") {
+				t.Errorf("expected self-contained markdown left exactly as written rather than fenced, got:\n%s", stored)
+			}
+		})
+	}
+}
+
+func FuzzTranscriptMessageNeverSwallowsWhatFollows(f *testing.F) {
+	for _, seed := range []string{
+		"plain text",
+		"here's a snippet:\n```\nweird\nand it just keeps going",
+		"~~~~\nfenced with tildes, and a stray ``` inside it",
+		"before\n\n<script>\nvar x = 1;",
+		"before\n\n<!-- oops",
+		"before\n\n<pre>\nstuff",
+		"before\n\n<![CDATA[\nstuff",
+		"before\n\n<?php\necho 1;",
+		"before\n\n<!DOCTYPE html\nweird",
+		"before:\n\n```go\nfunc main() {}\n```\n\nafter",
+		"before\n\n<div>\nstuff",
+		"a rule\n---\nunderneath",
+		"# heading\ntext",
+		"| a | b |\n|---|---|\n| 1 | 2 |",
+		"- one\n  - two\n- three",
+		"> line one\n> line two",
+		"some `code that never closes",
+		"````\nnested ```\nstill open",
+	} {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, text string) {
+		path := filepath.Join(t.TempDir(), "transcript.md")
+		recorder, err := transcript.Open(path, transcript.Meta{Name: "brave-otter", StartedAt: time.Unix(1, 2), Model: "model"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := recorder.Event(time.Unix(3, 4), agent.Event{Kind: agent.UserMessageEvent, Text: text}); err != nil {
+			t.Fatal(err)
+		}
+		if err := recorder.Event(time.Unix(5, 6), agent.Event{Kind: agent.ModelMessageEvent, Text: "canary reply"}); err != nil {
+			t.Fatal(err)
+		}
+		if err := recorder.Close(); err != nil {
+			t.Fatal(err)
+		}
+
+		stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !textNodesContain(t, string(stored), "canary reply") {
+			t.Errorf("expected the canary to survive as real text rather than being swallowed, got:\n%s", stored)
+		}
+	})
 }
 
 func TestTranscriptUsesAFenceLongerThanItsContent(t *testing.T) {

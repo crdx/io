@@ -1,0 +1,4 @@
+{"event": {"kind": "user_message", "text": "show me the loop"}}
+{"event": {"kind": "model_message", "text": "Try this.\n\n```ba"}}
+{"event": {"kind": "user_message", "text": "did you mean bash?"}}
+{"event": {"kind": "model_message", "text": "yes — bash."}}

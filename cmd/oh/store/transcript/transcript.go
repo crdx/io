@@ -8,6 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/text"
+
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/interrupt"
@@ -26,7 +30,11 @@ const (
 
 	patience    = 5 * time.Second
 	noTimeAtAll = "0s"
+
+	containmentCanary = "2e49acc8-627d-4ba6-b7b6-50f24a4aeb2b"
 )
+
+var markdownSafetyParser = goldmark.New().Parser()
 
 type Meta struct {
 	Name, Model, Effort, Provider, Workspace string
@@ -103,7 +111,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 	switch event.Kind {
 	case agent.UserMessageEvent, agent.ModelMessageEvent:
 		if event.Text != "" {
-			output.paragraph(event.Text)
+			output.markdown(event.Text)
 		}
 	case agent.FailureEvent:
 		output.fence(event.Text)
@@ -405,4 +413,26 @@ func (self *document) fence(value string) {
 	fence := strings.Repeat("`", length)
 	self.openBlock()
 	fmt.Fprintf(&self.text, "%s\n%s\n%s\n", fence, value, fence)
+}
+
+func (self *document) markdown(value string) {
+	if couldSwallowWhatFollows(value) {
+		self.fence(value)
+		return
+	}
+	self.paragraph(value)
+}
+
+func couldSwallowWhatFollows(value string) bool {
+	probe := []byte(value + "\n\n" + containmentCanary + "\n")
+
+	var isSurvived bool
+	_ = ast.Walk(markdownSafetyParser.Parse(text.NewReader(probe)), func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if textNode, isText := node.(*ast.Text); entering && isText && string(textNode.Segment.Value(probe)) == containmentCanary {
+			isSurvived = true
+		}
+		return ast.WalkContinue, nil
+	})
+
+	return !isSurvived
 }

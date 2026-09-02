@@ -11,14 +11,22 @@
 
 ## User · +0s
 
-show me the loop again
+show me the loop
 
-## Assistant · +2s
+## Assistant · +1s
 
 ````
 Try this.
 
 ```ba
 ````
+
+## User · +2s
+
+did you mean bash?
+
+## Assistant · +3s
+
+yes — bash.
 
 
