@@ -5805,6 +5805,8 @@ const (
 	configReloadReplay
 	configReloadSettingThatIsNotLive
 	configReloadSnippets
+	configReloadDismissedConfirmation
+	configReloadPreservedFailure
 )
 
 func TestReloadingConfigDrawsEveryVisibleState(t *testing.T) {
@@ -5815,6 +5817,12 @@ func TestReloadingConfigDrawsEveryVisibleState(t *testing.T) {
 		"filesystem watch failure":         func() string { return configReloadStream(t, configReloadWatchFailure) },
 		"replayed failure and recovery":    func() string { return configReloadStream(t, configReloadReplay) },
 		"reloaded snippets":                func() string { return configReloadStream(t, configReloadSnippets) },
+		"confirmation dismissed by typing": func() string {
+			return configReloadStream(t, configReloadDismissedConfirmation)
+		},
+		"failure showing when the reload lands": func() string {
+			return configReloadStream(t, configReloadPreservedFailure)
+		},
 		"revision to a setting that only a restart picks up": func() string {
 			return configReloadStream(t, configReloadSettingThatIsNotLive)
 		},
@@ -6068,7 +6076,9 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 			left = [{ segment = "missing" }]
 		`)
 		settleLiveConfig(t, self)
-	case configReloadValid:
+	case configReloadPreservedFailure:
+		self.notifyFailure("The conversation could not be stored: no space left on device")
+	case configReloadValid, configReloadDismissedConfirmation:
 	}
 
 	writeLiveConfig(t, path, `
@@ -6086,6 +6096,10 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 		right = []
 	`)
 	settleLiveConfig(t, self)
+	if scenario == configReloadDismissedConfirmation || scenario == configReloadReplay {
+		self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: 'a'})
+		self.apply(inputLine, nil, key.Key{Code: key.Backspace})
+	}
 	self.show(inputLine)
 	if scenario != configReloadReplay {
 		return screenOutput.String()

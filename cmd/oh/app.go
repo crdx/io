@@ -60,7 +60,19 @@ const (
 	systemFeedback feedbackSource = iota
 	commandFeedback
 	configFeedback
+	confirmationFeedback
 )
+
+func (self feedbackSource) isDismissedByTyping() bool {
+	switch self {
+	case commandFeedback, confirmationFeedback:
+		return true
+	case systemFeedback, configFeedback:
+		return false
+	default:
+		return false
+	}
+}
 
 type feedbackMessage struct {
 	text   string
@@ -225,7 +237,7 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 	previousText := inputLine.Text()
 	action := inputLine.Apply(keypress, self.currentTurn.Running())
 	if inputLine.Text() != previousText {
-		self.clearFeedback(commandFeedback)
+		self.clearFeedbackOnTyping()
 	}
 	if action != edit.Complete {
 		self.completion.Reset()
@@ -621,6 +633,12 @@ func (self *App) clearFeedback(source feedbackSource) {
 	}
 }
 
+func (self *App) clearFeedbackOnTyping() {
+	if self.feedback.source.isDismissedByTyping() {
+		self.feedback = feedbackState{}
+	}
+}
+
 func (self *App) renderBar(position segment.Position, frame edit.Frame) string {
 	return self.barConfiguration.Render(position, getBarContext(frame))
 }
@@ -682,6 +700,12 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		self.toolOutputLimit.Replace(result.LiveConfig.ToolOutputBytes)
 		self.barConfiguration.ReplaceLayout(result.LiveConfig.SegmentLayout)
 		self.clearFeedback(configFeedback)
+		if self.feedback.message.status != agent.ErrorStatus {
+			self.showFeedback(confirmationFeedback, feedbackMessage{
+				text:   "The configuration was reloaded automatically",
+				status: agent.SuccessStatus,
+			})
+		}
 	}
 	return true
 }
