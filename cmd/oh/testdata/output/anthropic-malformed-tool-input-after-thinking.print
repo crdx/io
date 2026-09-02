@@ -1,0 +1,15 @@
+
+ think, then send malformed tool input
+
+
+The call wants an object.
+
+[#1] Request failed; retrying in 1s: The work tool call did not contain a JSON object: {"value":1,,}
+
+I corrected the malformed call.
+
+
+ carry on
+
+
+Carrying on.

@@ -692,6 +692,35 @@ Go \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;19
 
 The web tools are refused, so I cannot read the notes until you grant access again.
 
+=== printed ===
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what is the current go release, and what does the blog say about it?                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[3m\e[38;2;150;152;150mSearching first, then reading the announcement the search cites.\e[0m\e[0m\r
+\r
+Let me search, then read the announcement.\r
+\r
+\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;204;102;102msearch\e[0m\e]8;;\e\\ \e[38;2;192;128;80mlatest Go release\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/blog/go1.26\e[0m \e[38;2;150;152;150mmarkdown\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m8L\e[0m\r
+\r
+Go \e[1m1.26\e[0m is current. The announcement calls out iterators in \e[38;2;192;128;80mcontainer/heap\e[0m, flaky-run reporting in\r
+\e[38;2;192;128;80mgo test\e[0m, and a smaller allocation header.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m now read the release notes as plain text                                                           \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The web search and fetch tools are now refused.                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://go.dev/doc/go1.26\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb access is not granted; the user can grant it with ctrl…\e[0m\r
+\r
+The web tools are refused, so I cannot read the notes until you grant access again.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r

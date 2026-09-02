@@ -26,7 +26,8 @@ type Screen struct {
 	lastGroup        Group
 	hasPrinted       bool
 
-	isTTY                 bool
+	isTerminal            bool
+	canRepaint            bool
 	isTextSizingSupported bool
 	linkRoot              string
 	isProgressReported    bool
@@ -49,7 +50,8 @@ type Screen struct {
 }
 
 func New(writer io.Writer) *Screen {
-	self := &Screen{writer: writer, isTTY: tty.Is(writer)}
+	isTerminal := tty.Is(writer)
+	self := &Screen{writer: writer, isTerminal: isTerminal, canRepaint: isTerminal}
 
 	self.measureTerminal()
 
@@ -58,11 +60,17 @@ func New(writer io.Writer) *Screen {
 
 func NewTerminalOfSize(writer io.Writer, columns int, lines int) *Screen {
 	return &Screen{
-		writer:  writer,
-		isTTY:   true,
-		columns: columns,
-		lines:   lines,
+		writer:     writer,
+		isTerminal: true,
+		canRepaint: true,
+		columns:    columns,
+		lines:      lines,
 	}
+}
+
+func (self *Screen) AppendOnly() *Screen {
+	self.canRepaint = false
+	return self
 }
 
 func (self *Screen) SetTextSizingSupported(isSupported bool) {
@@ -74,7 +82,7 @@ func (self *Screen) IsTextSizingSupported() bool {
 }
 
 func (self *Screen) IsTerminal() bool {
-	return self.isTTY
+	return self.isTerminal
 }
 
 func (self *Screen) LinkPathsUnder(root string) *Screen {
@@ -231,7 +239,7 @@ func (self *Screen) at(text string) {
 }
 
 func (self *Screen) linkifyScrollback(text string) string {
-	if !self.isTTY || self.linkRoot == "" {
+	if !self.isTerminal || self.linkRoot == "" {
 		return text
 	}
 

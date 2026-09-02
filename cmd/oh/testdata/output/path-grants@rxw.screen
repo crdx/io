@@ -1294,6 +1294,53 @@ e
 i
 t
 .
+=== printed ===
+
+ use the external reference
+
+
+
+ 🤖 Granted temporary read-only access to /reference.
+
+
+I can read the external reference now.
+
+
+ 🤖 Granted temporary read and write access to /reference. Changes there follow the workspace write
+    capability.
+
+
+I can also change it while workspace writing is granted.
+
+
+ 🤖 Granted temporary read and execute access to /tools. Execution there follows the shell
+    capability.
+
+
+I can run what is in the tools directory now.
+
+
+ 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace
+    write capability. Execution there follows the shell capability.
+
+
+I can build in place and run what comes out of it.
+
+
+ 🤖 Revoked temporary path access to /build.
+
+
+
+ 🤖 Revoked temporary path access to /tools.
+
+
+I will use the reference alone from here.
+
+
+ 🤖 Revoked temporary path access to /reference.
+
+
+I will no longer use it.
 === tiny ===
 
  use the

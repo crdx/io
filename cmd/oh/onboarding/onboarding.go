@@ -30,6 +30,10 @@ import (
 
 var ErrCancelled = menu.ErrCancelled
 
+var ErrNobodyToAsk = errors.New(
+	"there is no model to print with yet; choose one with -m, or run oh once without -p to set one up",
+)
+
 const (
 	chatGPTName    = "ChatGPT"
 	anthropicName  = "Anthropic"
@@ -90,6 +94,7 @@ type Options struct {
 	EndpointURL    string
 	RequestedModel string
 	ResumedSession string
+	IsPrinting     bool
 }
 
 func PrepareConfig(options Options) (config.Config, error) {
@@ -97,6 +102,10 @@ func PrepareConfig(options Options) (config.Config, error) {
 	settings, err := config.Load(configPath)
 	if err != nil || !isRequired(options, settings.Model.RoundRobin) {
 		return settings, err
+	}
+
+	if options.IsPrinting {
+		return config.Config{}, ErrNobodyToAsk
 	}
 
 	modelCachePath := location.GetModelCachePath(options.EndpointURL != "")

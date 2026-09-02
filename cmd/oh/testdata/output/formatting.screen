@@ -1175,6 +1175,89 @@ d
 )
 ?
 $
+=== printed ===
+
+ show me every kind of formatting you can draw
+
+
+Laying out one of each.
+
+Everything the renderer knows
+
+A paragraph with bold, italic, struck through, code, a link (https://example.com/one),
+a bare autolink https://example.com/two, an image a diagram (diagram.png), and some <b>raw
+HTML</b> in the middle of it.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+An ordered list
+
+1. the first step
+2. the second step
+3. the third step
+
+A task list
+
+• [x] a thing already done
+• [ ] a thing still to do
+
+An indented code block
+
+plain = "indented four spaces, so it has no language"
+print(plain)
+
+An HTML block
+
+<div class="note">
+  <p>held as it stands</p>
+</div>
+
+A table that leans every way
+
+┌──────┬────────┬───────┬──────┐
+│ left │ centre │ right │ none │
+├──────┼────────┼───────┼──────┤
+│ a    │   b    │     c │ d    │
+├──────┼────────┼───────┼──────┤
+│ aa   │   bb   │    cc │ dd   │
+└──────┴────────┴───────┴──────┘
+
+│ a quotation, which the renderer sets in from the edge
+│ and which runs to a second line
+
+The end.
+
+A script with a bit of everything in it:
+
+if [[ -d "$DIR" ]]; then
+    echo "there"
+elif [[ -f "$DIR" ]]; then
+    echo "a file"
+else
+    echo "nowhere"
+fi
+
+while read -r NAME; do
+    echo "$NAME" > out.txt 2>&1
+done < list.txt
+
+until [[ -z "$REST" ]]; do
+    REST=""
+done
+
+case "$MODE" in
+    read)  echo reading ;;
+    write) echo writing ;;
+    *)     echo other ;;
+esac
+
+select CHOICE in one two; do break; done
+
+ls -la | grep -v '^d' | wc -l
+
+And a pattern with a unicode class in it:
+
+^\\p{Lu}\\w{2,8}(?:-\\d+)?$
 === tiny ===
 
  show me

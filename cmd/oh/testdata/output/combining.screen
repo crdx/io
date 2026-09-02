@@ -438,6 +438,25 @@ h
 r
 e
 e
+=== printed ===
+
+ what does the accented file say? 🖊
+
+
+Reading the file with the combining marks in its name.
+
+The name is written café rather than café, so the accent is a mark of its own.
+
+A family 👨‍👩‍👧 is one glyph joined from several, and a heart ❤️ asks to be drawn in colour.
+
+Combining marks pile up too: á̂̃̄ is one letter under four of them.
+
+A styled wide rune has nowhere to go in one column: 日本 in code, 中文 in bold.
+
+And a result that came back with Windows line endings:
+one
+two
+three
 === tiny ===
 
  what does

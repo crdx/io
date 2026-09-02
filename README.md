@@ -90,28 +90,11 @@ for update, err := range assistant.Stream(ctx, "what is the weather in London?")
 
 ### oh
 
-A coding harness. Pass `-r` without a name to choose and resume a stored session.
+A coding harness.
 
 ```bash
 go run ./cmd/oh
-go run ./cmd/oh -r
 ```
-
-Ollama uses `http://localhost:11434` by default. After upgrading, run `go run ./cmd/ohctl migrate`, then configure a network server in `config.toml`:
-
-```toml
-[provider.ollama]
-host = "http://ollama-server:11434"
-```
-
-After changing the host, refresh the model cache and select one of the installed models:
-
-```bash
-go run ./cmd/oh -u
-go run ./cmd/oh -m ollama/qwen3.8:27b-mtp-q8_0-256k@high
-```
-
-`OLLAMA_HOST` temporarily overrides the configured host. `OH_ENDPOINT_URL`, used by the simulator, overrides both.
 
 ### simulate
 

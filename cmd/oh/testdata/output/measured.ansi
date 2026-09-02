@@ -376,6 +376,31 @@ Here is a script, and a pattern beside it:
 
 That is one call of every kind the harness knows how to measure.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m do one of everything so I can see what each call says about itself                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+One of each, then.\r
+\r
+\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;150;152;150mCOUNT\e[0m\e[38;2;138;190;183m=\e[0m\e[38;2;150;152;150m0\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;201;166;212mfor\e[0m\e[38;2;150;152;150m NAME \e[0m\e[38;2;201;166;212min\e[0m\e[38;2;150;152;150m *.go; \e[0m\e[38;2;201;166;212mdo\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150mCOUNT\e[0m\e[38;2;138;190;183m=\e[0m\e[38;2;150;152;150m$((COUNT + 1))\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;201;166;212mdone\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m$COUNT\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2.4s 3L 700M\e[0m\r
+\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mdiagram.png\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m~1.6Kt\e[0m\r
+\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0medit\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;76;154;44m+12\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;204;102;102m−5\e[0m\r
+\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;201;166;212m^\e[0m\e[38;2;150;152;150mfunc\e[0m\e[38;2;201;166;212m\\s\e[0m\e[38;2;138;190;183m+\e[0m\e[38;2;150;152;150m(\e[0m\e[38;2;150;152;150mNew\e[0m\e[38;2;138;190;183m|\e[0m\e[38;2;150;152;150mDraw\e[0m\e[38;2;150;152;150m)[\e[0m\e[38;2;150;152;150mA\e[0m\e[38;2;138;190;183m-\e[0m\e[38;2;150;152;150mZ\e[0m\e[38;2;150;152;150m]\e[0m\e[38;2;201;166;212m\\w\e[0m\e[38;2;138;190;183m{2,8}\e[0m\e[38;2;201;166;212m\\(\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L+ ~100t (of ~3.4Kt)\e[0m\r
+\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mREADME.md\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
+\r
+Here is a script, and a pattern beside it:\r
+\r
+\e[38;2;201;166;212mfor\e[0m \e[38;2;150;152;150mNAME\e[0m \e[38;2;150;152;150min\e[0m \e[38;2;201;166;212m$(\e[0m\e[38;2;150;152;150mls\e[0m \e[38;2;150;152;150m*.go\e[0m\e[38;2;201;166;212m)\e[0m; \e[38;2;201;166;212mdo\e[0m\r
+    COUNT\e[38;2;138;190;183m=\e[0m\e[38;2;201;166;212m$(\e[0m\e[38;2;150;152;150mgrep\e[0m \e[38;2;150;152;150m-c\e[0m \e[38;2;181;189;104m"func"\e[0m \e[38;2;181;189;104m"\e[0m$NAME\e[38;2;181;189;104m"\e[0m\e[38;2;201;166;212m)\e[0m\r
+    \e[38;2;240;198;116mecho\e[0m \e[38;2;181;189;104m"\e[0m$NAME\e[38;2;181;189;104m has \e[0m$COUNT\e[38;2;181;189;104m"\e[0m\r
+\e[38;2;201;166;212mdone\e[0m\r
+\r
+\e[38;2;150;152;150m^\\s*(func|type)\\s+\\w{3,12}\\(\e[0m\r
+\r
+That is one call of every kind the harness knows how to measure.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m do one of everything so I can see what each call says about itself                                 \e[0m\r

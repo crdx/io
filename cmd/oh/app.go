@@ -134,6 +134,8 @@ type App struct {
 	queuedTurn  turn.Queue
 	currentTurn Turn
 	startedAt   time.Time
+	keyboard    *os.File
+	isPrinting  bool
 	isPlain     bool
 	isYolo      bool
 }
@@ -155,7 +157,12 @@ func (self *App) begin(message string) cycle.Transition {
 	inputLine := edit.NewInput(history)
 	self.inputLine = inputLine
 
-	restoreTTY, err := tty.Raw(os.Stdin, os.Stdout)
+	if self.isPrinting {
+		self.print(history, message)
+		return self.transition
+	}
+
+	restoreTTY, err := tty.Raw(self.getKeyboard(), os.Stdout)
 	if err != nil {
 		self.plainly(history, message)
 		return self.transition
@@ -196,7 +203,7 @@ func (self *App) begin(message string) cycle.Transition {
 		return self.transition
 	}
 
-	interaction.Run(os.Stdin, self.nextBarRefresh, interaction.Handler{
+	interaction.Run(self.getKeyboard(), self.nextBarRefresh, interaction.Handler{
 		Events: func() <-chan turn.Event { return self.currentTurn.Events() },
 		Key:    func(keypress key.Key) bool { return self.handleKeypressAndShowInput(inputLine, history, keypress) },
 		Turn:   self.takeTurn,
@@ -782,16 +789,32 @@ func (self *App) isPrefixPending() bool {
 	return self.inputLine != nil && self.inputLine.IsPrefixPending()
 }
 
+func (self *App) getKeyboard() *os.File {
+	if self.keyboard == nil {
+		return os.Stdin
+	}
+
+	return self.keyboard
+}
+
+func (self *App) print(history *edit.History, message string) {
+	self.isPlain = true
+	defer func() { self.isPlain = false }()
+	defer self.screen.End()
+
+	self.acceptPlainInput(history, message)
+}
+
 func (self *App) plainly(history *edit.History, initialMessage string) {
 	self.isPlain = true
 	defer func() { self.isPlain = false }()
 
-	if tty.Is(os.Stdin) {
-		self.acceptTypedLines(history, initialMessage, os.Stdin)
+	if keyboard := self.getKeyboard(); tty.Is(keyboard) {
+		self.acceptTypedLines(history, initialMessage, keyboard)
 		return
 	}
 
-	self.acceptPipedInput(history, initialMessage, os.Stdin)
+	self.acceptPlainInput(history, initialMessage)
 }
 
 func (self *App) acceptTypedLines(history *edit.History, initialMessage string, source io.Reader) {
@@ -811,29 +834,6 @@ func (self *App) acceptTypedLines(history *edit.History, initialMessage string, 
 
 	if err := reader.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "could not read input:", err)
-	}
-}
-
-func (self *App) acceptPipedInput(history *edit.History, initialMessage string, source io.Reader) {
-	pipedInput, err := io.ReadAll(source)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "could not read input:", err)
-		return
-	}
-
-	self.acceptPlainInput(history, joinPipedInput(initialMessage, string(pipedInput)))
-}
-
-func joinPipedInput(initialMessage string, pipedInput string) string {
-	trimmedInput := strings.TrimSpace(pipedInput)
-
-	switch {
-	case initialMessage == "":
-		return trimmedInput
-	case trimmedInput == "":
-		return initialMessage
-	default:
-		return initialMessage + "\n\n" + trimmedInput
 	}
 }
 

@@ -1,0 +1,13 @@
+
+ send fields without SSE data
+
+
+[#1] Request failed; retrying in 1s: The stream ended before the response did
+
+Answered on the second attempt.
+
+
+ continue after the transport failure
+
+
+Resumed.

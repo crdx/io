@@ -196,6 +196,23 @@ Building now.
 \e[48;2;52;53;65m\e[0m
 Left alone.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m build it and tell me what broke                                                                    \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+Building now.\r
+\r
+\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbuild\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150m11s 3L 40M\e[0m \e[38;2;150;152;150mcompiling agent compiling toolbox note: the command was stopped after 1…\e[0m\r
+\r
+\e[38;2;207;173;0mThe turn was interrupted.\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m leave it, the build is broken anyway                                                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+Left alone.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m build it and tell me what broke                                                                    \e[0m\r

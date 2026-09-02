@@ -1,0 +1,17 @@
+
+ recover from a bad gateway once the tool has run
+
+
+Use the tool.
+work work ✓ 1L
+
+[#1] Request failed; retrying in 1s: Request failed with status 502: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+
+The tool said: tool result.
+
+
+ continue after the bad gateway
+
+
+Resumed.

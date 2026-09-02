@@ -1,0 +1,13 @@
+
+ send malformed data after an answer fragment
+
+
+Partial answer.
+
+The endpoint sent something unreadable: this is not JSON
+
+
+ continue after the first response
+
+
+Resumed.

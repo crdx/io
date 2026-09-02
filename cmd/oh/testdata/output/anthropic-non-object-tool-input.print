@@ -1,0 +1,13 @@
+
+ send tool input that parses but is not an object
+
+
+[#1] Request failed; retrying in 1s: The work tool call did not contain a JSON object: [1, 2, 3]
+
+I sent an object that time.
+
+
+ carry on
+
+
+Carrying on.

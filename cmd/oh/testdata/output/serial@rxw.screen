@@ -450,6 +450,30 @@ r
 s
 t
 .
+=== printed ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ have a look at that
+
+
+Writing the file the rest of this needs.
+
+I'll put a file down to work with.
+
+write notes.md 26B ✓ 5L
+Reading, then writing, then reading what was written.
+
+Now to read it, add to it, and read it back.
+
+read notes.md ✓ 5L
+ls ✓ 8L
+write notes.md 32B ✓ 6L
+read notes.md ✓ 6L
+
+The reads went together, the write waited for them and ran on its own, and the read after it waited
+for the write. The last read has four lines, which it could only have if the write had finished
+first.
 === tiny ===
 Agent
 000000000000

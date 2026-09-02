@@ -2,6 +2,8 @@ package output_test
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -218,5 +220,60 @@ func TestNoticesInsideLiveWorkFollowTheSameGroupingRule(t *testing.T) {
 
 	if got, want := screenOutput.String(), "work\n\nnotice one\nnotice two"; got != want {
 		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+const (
+	appendOnlyColumns = 40
+	appendOnlyLines   = 24
+)
+
+func appendOnlyScreen(writer *bytes.Buffer) *output.Screen {
+	return output.NewTerminalOfSize(writer, appendOnlyColumns, appendOnlyLines).AppendOnly()
+}
+
+func TestAnAppendOnlyScreenWritesOnlyTheRowsTheLiveRegionSettledOn(t *testing.T) {
+	var screenOutput bytes.Buffer
+
+	screen := appendOnlyScreen(&screenOutput)
+	screen.DrawAnswer([]string{"one", "two"})
+	screen.DrawAnswer([]string{"one", "two", "three"})
+	screen.End()
+
+	if got := screenOutput.String(); got != "one\r\ntwo\r\nthree\r\n" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestAnAppendOnlyScreenWritesNoEscapeSequences(t *testing.T) {
+	var screenOutput bytes.Buffer
+
+	screen := appendOnlyScreen(&screenOutput)
+	screen.BeginEditing()
+	screen.ReportProgress(true)
+	screen.DrawReasoning([]string{"thinking"})
+	screen.DrawAnswer([]string{"answered"})
+	screen.Footer([]string{"input"}, 0, 0)
+	screen.End()
+	screen.Release(true)
+
+	if got := screenOutput.String(); strings.Contains(got, "\x1b[") {
+		t.Errorf("expected no control sequences, got %q", got)
+	}
+}
+
+func TestAnAppendOnlyTerminalStillLinksThePathsItNames(t *testing.T) {
+	workspaceDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(workspaceDir, "one.go"), nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	var screenOutput bytes.Buffer
+	screen := appendOnlyScreen(&screenOutput).LinkPathsUnder(workspaceDir)
+	screen.DrawAnswer([]string{"see one.go"})
+	screen.End()
+
+	if got := screenOutput.String(); !strings.Contains(got, "\x1b]8;;file://") {
+		t.Errorf("expected the answer to be linked, got %q", got)
 	}
 }

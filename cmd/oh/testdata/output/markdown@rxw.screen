@@ -655,6 +655,46 @@ e
 s
 t
 .
+=== printed ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ have a look at that
+
+
+Laying the answer out.
+
+What the tools cost
+
+The read tool is cheap and bash is not, so the order matters. A run looks like this:
+
+func main() {
+    fmt.Println("hello")
+}
+
+• read first, and read widely
+• run only what the reading could not answer
+  • a nested point, to show the indent
+
+┌──────┬─────────────────────────────────────────────┬──────┐
+│ Tool │ What it does                                │ Cost │
+├──────┼─────────────────────────────────────────────┼──────┤
+│ read │ takes a file and hands it back              │    1 │
+├──────┼─────────────────────────────────────────────┼──────┤
+│ grep │ walks the tree looking for a pattern        │    4 │
+├──────┼─────────────────────────────────────────────┼──────┤
+│ bash │ runs a command in a sandbox with no network │   40 │
+└──────┴─────────────────────────────────────────────┴──────┘
+
+┌──────┐     ┌──────┐
+│      │     │      │
+│ read ├────►│ bash │
+│      │     │      │
+└──────┘     └──────┘
+
+│ The costs are made up, and the table is here to be watched as it draws.
+
+See the notes (https://example.com/notes) for the rest.
 === tiny ===
 Agent
 000000000000

@@ -229,6 +229,18 @@ i
 o
 n
 .
+=== printed ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ have a look at that
+
+
+Editing the target without reading it again.
+
+edit target.txt ✗ 1L file has not been read yet — ensure you read target.txt before editing it
+
+The resumed edit was refused because the file has not been read in this session.
 === tiny ===
 Agent
 000000000000

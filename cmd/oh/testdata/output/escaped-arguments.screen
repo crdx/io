@@ -114,6 +114,18 @@ v
 e
 d
 .
+=== printed ===
+
+ run whatever you like
+
+
+$ echo red ✓ 1L 2M red
+screenshot notes.md lines 1 to 40  ✓ 1L
+grep one two ✓ 1L
+
+[#1] Request failed; retrying in 2s: Upstream said no
+
+Nothing moved.
 === tiny ===
 
  run

@@ -113,6 +113,18 @@ d
 e
 
 d
+=== printed ===
+
+ read both of those files
+
+
+read one.txt ✓ 1L
+read two.txt – the call was cancelled because the user pressed escape
+
+The turn was interrupted.
+
+
+ one was all I needed
 === tiny ===
 
  read both

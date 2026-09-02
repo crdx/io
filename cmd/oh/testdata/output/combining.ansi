@@ -459,6 +459,26 @@ one
 two
 three
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what does the accented file say? 🖊                                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[3m\e[38;2;150;152;150mReading the file with the combining marks in its name.\e[0m\e[0m\r
+\r
+The name is written \e[38;2;192;128;80mcafé\e[0m rather than \e[38;2;192;128;80mcafé\e[0m, so the accent is a mark of its own.\r
+\r
+A family 👨‍👩‍👧 is one glyph joined from several, and a heart ❤️ asks to be drawn in colour.\r
+\r
+Combining marks pile up too: á̂̃̄ is one letter under four of them.\r
+\r
+A styled wide rune has nowhere to go in one column: \e[38;2;192;128;80m日本\e[0m in code, \e[1m中文\e[0m in bold.\r
+\r
+And a result that came back with Windows line endings:\r
+one\r
+two\r
+three\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what does the accented file say? 🖊                                                                 \e[0m\r

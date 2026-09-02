@@ -1,0 +1,85 @@
+
+ close without the done sentinel
+
+
+Partial answer.
+
+[#1] Request failed; retrying in 1s: The stream ended before the response did
+
+Partial answer.
+
+[#2] Request failed; retrying in 5s: The stream ended before the response did
+
+Partial answer.
+
+[#3] Request failed; retrying in 10s: The stream ended before the response did
+
+Partial answer.
+
+[#4] Request failed; retrying in 30s: The stream ended before the response did
+
+Partial answer.
+
+[#5] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#6] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#7] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#8] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#9] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#10] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#11] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#12] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#13] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#14] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#15] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#16] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#17] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+[#18] Request failed; retrying in 1m00s: The stream ended before the response did
+
+Partial answer.
+
+The stream ended before the response did
+
+
+ continue after the first response
+
+
+Resumed.

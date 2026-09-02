@@ -1,0 +1,85 @@
+
+ reset the connection until the attempts run out
+
+
+Partial answer.
+
+[#1] Request failed; retrying in 1s: Unexpected EOF
+
+Partial answer.
+
+[#2] Request failed; retrying in 5s: Unexpected EOF
+
+Partial answer.
+
+[#3] Request failed; retrying in 10s: Unexpected EOF
+
+Partial answer.
+
+[#4] Request failed; retrying in 30s: Unexpected EOF
+
+Partial answer.
+
+[#5] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#6] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#7] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#8] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#9] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#10] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#11] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#12] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#13] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#14] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#15] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#16] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#17] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+[#18] Request failed; retrying in 1m00s: Unexpected EOF
+
+Partial answer.
+
+Unexpected EOF
+
+
+ continue after the transport failure
+
+
+Resumed.

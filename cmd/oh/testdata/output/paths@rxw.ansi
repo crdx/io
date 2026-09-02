@@ -470,6 +470,23 @@ read \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[3
 
 The prompt is built in cmd/oh/line/render.go:4:9, and screen.go holds the spinner beside it. There is nothing about it in README.md, and nothing at all in cmd/oh/line/missing.go, which is where I looked first. settings.toml names the workspace and target.txt is the file everything else works on.
 
+=== printed ===
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[3m\e[38;2;150;152;150mReading the renderer before saying anything about it.\e[0m\e[0m\r
+\r
+Let me read the renderer.\r
+\r
+\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mcmd/oh/line/\e[0m\e[38;2;192;128;80mrender.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r
+The prompt is built in \e]8;;file:///workspace/cmd/oh/line/render.go#4:9\e\\cmd/oh/line/render.go:4:9\e]8;;\e\\, and \e]8;;file:///workspace/screen.go\e\\screen.go\e]8;;\e\\ holds the spinner beside it. There\r
+is nothing about it in \e]8;;file:///workspace/README.md\e\\README.md\e]8;;\e\\, and nothing at all in cmd/oh/line/missing.go, which is where I\r
+looked first. \e]8;;file:///workspace/settings.toml\e\\settings.toml\e]8;;\e\\ names the workspace and \e]8;;file:///workspace/target.txt\e\\target.txt\e]8;;\e\\ is the file everything else works on.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r

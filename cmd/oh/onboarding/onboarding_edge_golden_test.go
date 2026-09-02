@@ -111,6 +111,20 @@ func TestOnboardingEdgeCasesMatchTheGoldens(t *testing.T) {
 			_, writeError := fmt.Fprintln(output, err)
 			return writeError
 		},
+		"first-run-printed": func(t *testing.T, output *bytes.Buffer) error {
+			t.Helper()
+
+			t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+			t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+			_, err := PrepareConfig(Options{Output: output, IsPrinting: true})
+			if !errors.Is(err, ErrNobodyToAsk) {
+				return fmt.Errorf("got %w", err)
+			}
+
+			_, writeError := fmt.Fprintln(output, err)
+			return writeError
+		},
 		"first-run-unnamed-model": func(t *testing.T, output *bytes.Buffer) error {
 			t.Helper()
 

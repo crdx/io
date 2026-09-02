@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"syscall"
@@ -46,6 +47,7 @@ import (
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/textsizing"
 	"crdx.org/io/cmd/oh/toolset"
+	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/usage"
 	"crdx.org/io/cmd/oh/work"
 )
@@ -118,6 +120,28 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}()
 
 	inputArgs := cli.Bind()
+
+	var pipedPrompt string
+	if !tty.Is(os.Stdin) {
+		prompt, err := startup.ReadPipedPrompt(os.Stdin)
+		if err != nil {
+			return "", err
+		}
+		pipedPrompt = prompt
+	}
+
+	if err := inputArgs.Check(pipedPrompt != ""); err != nil {
+		return "", err
+	}
+
+	keyboard, releaseKeyboard := tty.Keyboard(os.Stdin)
+	defer releaseKeyboard()
+
+	notices := io.Writer(os.Stdout)
+	if inputArgs.IsPrinting {
+		notices = os.Stderr
+	}
+
 	endpointURL := os.Getenv(backend.EndpointVariable)
 	modelCachePath := location.GetModelCachePath(endpointURL != "")
 	sessionsDir := location.GetSessionsDir()
@@ -128,7 +152,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	if inputArgs.Login {
-		err := onboarding.Login(inputArgs.LoginProvider, os.Stdin, os.Stdout)
+		err := onboarding.Login(inputArgs.LoginProvider, keyboard, os.Stdout)
 		if errors.Is(err, onboarding.ErrCancelled) {
 			return "", nil
 		}
@@ -151,15 +175,16 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	workspaceDir := workspace.GetDir()
 
 	if inputArgs.IsSessionPicker {
-		return sessions.Choose(sessionsDir, workspace, os.Stdin, os.Stdout)
+		return sessions.Choose(sessionsDir, workspace, keyboard, os.Stdout)
 	}
 
 	if _, err := onboarding.PrepareConfig(onboarding.Options{
-		Input:          os.Stdin,
+		Input:          keyboard,
 		Output:         os.Stdout,
 		EndpointURL:    endpointURL,
 		RequestedModel: inputArgs.Model,
 		ResumedSession: inputArgs.Session,
+		IsPrinting:     inputArgs.IsPrinting,
 	}); err != nil {
 		if errors.Is(err, onboarding.ErrCancelled) {
 			return "", nil
@@ -191,14 +216,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", model.Update(os.Stdout, endpointURL, modelCachePath, listProviderModels)
 	}
 
-	if err := model.Ensure(os.Stdout, endpointURL, modelCachePath, listProviderModels); err != nil {
+	if err := model.Ensure(notices, endpointURL, modelCachePath, listProviderModels); err != nil {
 		return "", err
 	}
 
 	if inputArgs.IsModelPicker {
 		var chosenModel model.Selection
 		var err error
-		startup.Wait(func() { chosenModel, err = model.Choose(modelCachePath, backend.IsLoggedIn, os.Stdin, os.Stdout) })
+		startup.Wait(func() { chosenModel, err = model.Choose(modelCachePath, backend.IsLoggedIn, keyboard, os.Stdout) })
 		if errors.Is(err, menu.ErrCancelled) {
 			return "", nil
 		}
@@ -217,7 +242,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	if err := sessions.RefreshListings(sessionsDir, os.Stdout); err != nil {
+	if err := sessions.RefreshListings(sessionsDir, notices); err != nil {
 		return "", err
 	}
 
@@ -320,7 +345,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	)
 	if err != nil {
 		startup.Wait(func() {
-			selection, err = model.ChooseWhenNoneSelected(err, modelCachePath, backend.IsLoggedIn, os.Stdin, os.Stdout)
+			selection, err = model.ChooseWhenNoneSelected(err, modelCachePath, backend.IsLoggedIn, keyboard, os.Stdout)
 		})
 	}
 	if errors.Is(err, menu.ErrCancelled) {
@@ -377,16 +402,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		}
 	}()
 
+	args.Message = startup.JoinPrompt(args.Message, pipedPrompt)
+
 	if len(args.AddedFiles) > 0 {
 		initialFilesMessage, err := startup.PrepareInitialFiles(args.AddedFiles, tmpDir)
 		if err != nil {
 			return "", err
 		}
-		if args.Message == "" {
-			args.Message = initialFilesMessage
-		} else {
-			args.Message = initialFilesMessage + "\n\n" + args.Message
-		}
+		args.Message = startup.JoinPrompt(initialFilesMessage, args.Message)
 	}
 
 	var systemPrompt string
@@ -431,7 +454,11 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	screen := output.New(os.Stdout).LinkPathsUnder(workspace.GetDir())
-	screen.SetTextSizingSupported(textsizing.Detect(os.Stdin, os.Stdout))
+	if args.IsPrinting {
+		screen.AppendOnly()
+	} else {
+		screen.SetTextSizingSupported(textsizing.Detect(keyboard, os.Stdout))
+	}
 
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
@@ -515,6 +542,8 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		pathGrants:          pathGrants,
 		configObserver:      configObserver,
 		startedAt:           time.Now(),
+		keyboard:            keyboard,
+		isPrinting:          args.IsPrinting,
 		isYolo:              args.Yolo,
 	}
 	if resumedSession == nil && model.SupportsFastMode(selection.Provider) {
@@ -536,7 +565,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		UsageReporter:         usageReporter,
 		UsageCachePath:        location.GetUsageCachePath(selection.Provider, endpointURL != ""),
 		UsageIsSelfRefreshing: backend.RefreshesOwnUsage(selection.Provider),
-		UsageGauges:           usage.TerminalGauges(os.Stdin, os.Stdout),
+		UsageGauges:           usage.TerminalGauges(keyboard, os.Stdout),
 		Sources:               chat.getBarSources(),
 	})
 	liveSettings, err := settings.BuildLive(barRegistry)
@@ -590,7 +619,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	hooks.EmitSessionStopping(ctx, cycle.SessionStopping{Session: sessionInfo, Reason: stopReason})
 
 	if log.IsPersisted() && transition.Kind == cycle.Quit {
-		fmt.Println(style.Subtle(sessions.ResumeCommand(os.Args[0], log.Name())))
+		_, _ = fmt.Fprintln(notices, style.Subtle(sessions.ResumeCommand(os.Args[0], log.Name())))
 	}
 
 	return "", nil

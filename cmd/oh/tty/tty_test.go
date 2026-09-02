@@ -61,6 +61,40 @@ func TestRawRestoresTheTerminalState(t *testing.T) {
 	}
 }
 
+func TestATerminalIsItsOwnKeyboard(t *testing.T) {
+	terminal := pty(t)
+
+	keyboard, release := Keyboard(terminal)
+	defer release()
+
+	if keyboard != terminal {
+		t.Error("expected a terminal to be read from directly")
+	}
+}
+
+func TestAPipedInputLooksElsewhereForItsKeyboard(t *testing.T) {
+	piped := pipe(t)
+
+	keyboard, release := Keyboard(piped)
+	defer release()
+
+	opened, err := os.Open(controllingTerminal)
+	if err != nil {
+		if keyboard != piped {
+			t.Error("expected the piped input back where there is no controlling terminal")
+		}
+		return
+	}
+	_ = opened.Close()
+
+	if keyboard == piped {
+		t.Error("expected the controlling terminal rather than the pipe")
+	}
+	if !Is(keyboard) {
+		t.Error("expected the controlling terminal to be a terminal")
+	}
+}
+
 func pty(t *testing.T) *os.File {
 	t.Helper()
 

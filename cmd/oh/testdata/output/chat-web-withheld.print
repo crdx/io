@@ -1,0 +1,13 @@
+
+ read a page while web access is withheld
+
+
+fetch https://example.com/news markdown ✗ 1L web access is not granted; the user can grant it wit…
+
+Web access is unavailable.
+
+
+ continue after the refused fetch
+
+
+Resumed after the refusal.

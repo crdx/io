@@ -179,6 +179,22 @@ o
 n
 e
 .
+=== printed ===
+
+ build it and tell me what broke
+
+
+Building now.
+
+$ just build – 11s 3L 40M compiling agent compiling toolbox note: the command was stopped after 1…
+
+The turn was interrupted.
+
+
+ leave it, the build is broken anyway
+
+
+Left alone.
 === tiny ===
 
  build it

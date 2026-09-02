@@ -147,6 +147,17 @@ u
 t
 e
 .
+=== printed ===
+
+ search everything for the spinner
+
+
+That will take a moment.
+
+grep spinner *.go ✓ 9.5s 1L
+find **/*.go ✗ 1m02s the search went on too long
+
+The grep took nine seconds and the find gave up after a minute.
 === tiny ===
 
  search

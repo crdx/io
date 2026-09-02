@@ -180,6 +180,19 @@ a
 c
 k
 .
+=== printed ===
+
+ run the thing that takes no arguments
+
+
+
+ 🤖 The web search and fetch tools are now refused.
+
+
+status ✓
+notify done nothing to report ✓
+
+Nothing came back.
 === tiny ===
 
  run the

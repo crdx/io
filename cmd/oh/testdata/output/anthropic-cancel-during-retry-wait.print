@@ -1,0 +1,14 @@
+
+ stop the turn while it is waiting to ask again
+
+
+Half an ans
+
+[#1] Request failed; retrying in 1s: The stream ended before the response did
+The turn was interrupted because the user pressed escape.
+
+
+ continue after the stopped wait
+
+
+Resumed.

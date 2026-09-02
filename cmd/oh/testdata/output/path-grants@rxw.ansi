@@ -1333,6 +1333,54 @@ I will use the reference alone from here.
 \e[48;2;52;53;65m\e[0m
 I will no longer use it.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m use the external reference                                                                         \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 Granted temporary read-only access to /reference.                                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+I can read the external reference now.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 Granted temporary read and write access to /reference. Changes there follow the workspace write \e[0m\r
+\e[48;2;52;53;65m    capability.                                                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+I can also change it while workspace writing is granted.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 Granted temporary read and execute access to /tools. Execution there follows the shell          \e[0m\r
+\e[48;2;52;53;65m    capability.                                                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+I can run what is in the tools directory now.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 Granted temporary read, write, and execute access to /build. Changes there follow the workspace \e[0m\r
+\e[48;2;52;53;65m    write capability. Execution there follows the shell capability.                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+I can build in place and run what comes out of it.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 Revoked temporary path access to /build.                                                        \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 Revoked temporary path access to /tools.                                                        \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+I will use the reference alone from here.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 Revoked temporary path access to /reference.                                                    \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+I will no longer use it.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m use the external reference                                                                         \e[0m\r

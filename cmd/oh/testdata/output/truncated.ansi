@@ -78,6 +78,15 @@
 
 Try this.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show me the loop again                                                                             \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[3m\e[38;2;150;152;150mWriting it out.\e[0m\e[0m\r
+\r
+Try this.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m show me the loop again                                                                             \e[0m\r

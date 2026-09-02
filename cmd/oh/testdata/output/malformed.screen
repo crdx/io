@@ -474,6 +474,36 @@ t
 e
 n
 .
+=== printed ===
+
+ draw the awkward markdown
+
+
+A table whose rows do not all reach the end:
+
+┌──────┬────────────────┬──────┐
+│ tool │ what it does   │ cost │
+├──────┼────────────────┼──────┤
+│ read │                │      │
+├──────┼────────────────┼──────┤
+│ grep │ walks the tree │ 4    │
+├──────┼────────────────┼──────┤
+│ bash │ runs a command │ 40   │
+└──────┴────────────────┴──────┘
+
+A narrow table in a wide terminal:
+
+┌───┬───┐
+│ a │ b │
+├───┼───┤
+│ 1 │ 2 │
+└───┴───┘
+
+A bare URL the renderer has to find for itself: https://example.com/plain and one
+in angle brackets https://example.com/bracketed, which are not the same thing.
+
+Entities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where &amp; and
+&lt;div&gt; stand as they are written.
 === tiny ===
 
  draw the

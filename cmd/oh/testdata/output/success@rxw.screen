@@ -473,6 +473,27 @@ e
 a
 d
 .
+=== printed ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ have a look at that
+
+
+Looking for where the prompt is drawn.
+
+I'll have a look at how the editor draws its prompt.
+
+grep prompt *.go ✓ 1L
+The prompt is drawn by the renderer, so that is the file to read.
+
+Found it. Reading the renderer now.
+
+read cmd/oh/line/render.go ✓ 5L
+
+The prompt is drawn by layout, which wraps the buffer against the terminal width and reports where
+the cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output
+layer instead.
 === tiny ===
 Agent
 000000000000

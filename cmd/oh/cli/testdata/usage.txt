@@ -11,6 +11,7 @@ Options:
     -m, --model [<model>]       Open the model picker, or set the provider, model, effort, and optional +fast mode
     -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: rx)
     -t, --tool <tool>           Set exclusive tool selection; may be repeated
+    -p, --print                 Answer the prompt without an interface, then exit
         --yolo                  Live dangerously and don't sandbox anything
     -U, --usage                 Show subscription usage, then exit
     -J, --json                  Write the usage as JSON rather than drawing it

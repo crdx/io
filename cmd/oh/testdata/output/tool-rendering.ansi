@@ -127,6 +127,18 @@
 
 done.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m run a multiline command and notify me when it finishes                                             \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;150;152;150mNAME\e[0m\e[38;2;138;190;183m=\e[0m\e[38;2;150;152;150malpha\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;201;166;212mcase\e[0m\e[38;2;150;152;150m "$NAME" \e[0m\e[38;2;201;166;212min\e[0m\e[38;2;150;152;150m alpha) \e[0m\e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190malpha\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;138;190;183m;;\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;201;166;212mesac\e[0m\e[38;2;138;190;183m;\e[0m\e[38;2;150;152;150m (\e[0m\e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mbeta\e[0m\e[38;2;150;152;150m)\e[0m \e[38;2;150;152;150m3L\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m \e[38;2;150;152;150malpha beta\e[0m\r
+\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mnotify\e[0m\e]8;;\e\\ \e[38;2;192;128;80mcommand finished\e[0m \e[38;2;150;152;150malpha and beta were printed\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;204;102;102msearch\e[0m\e]8;;\e\\ \e[38;2;192;128;80mhow to quote a shell variable\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttps://gnu.org/bash\e[0m \e[38;2;150;152;150mclean_html\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+done.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m run a multiline command and notify me when it finishes                                             \e[0m\r

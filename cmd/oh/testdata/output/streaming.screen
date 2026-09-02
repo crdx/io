@@ -557,6 +557,39 @@ l
 o
 t
 .
+=== printed ===
+
+ show me how to count the go files
+
+
+A loop over the listing is the shortest way to say it.
+
+Try this.
+
+for NAME in $(ls *.go); do echo "$NAME is quite a long line indeed"; done
+
+That is all.
+
+And a table, which changes shape as its rows arrive:
+
+┌──────┬────────────────────────────────────────────┐
+│ Tool │ What it does when it is asked to           │
+├──────┼────────────────────────────────────────────┤
+│ read │ takes a file and hands it back to you      │
+├──────┼────────────────────────────────────────────┤
+│ grep │ walks the whole tree looking for a pattern │
+└──────┴────────────────────────────────────────────┘
+
+That is the lot.
+
+And a nested list, whose markers arrive before the items they introduce:
+
+• read takes a file and hands it back
+  • and says how big it was
+  • and leaves it where it found it
+• grep walks the tree for a pattern
+
+That is the lot.
 === tiny ===
 
  show me how

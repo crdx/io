@@ -1722,6 +1722,50 @@ func TestResumeArgumentsMatchTheGolden(t *testing.T) {
 	compareTextWithGolden(t, "resume-arguments.txt", output.String())
 }
 
+func TestPrintArgumentsMatchTheGolden(t *testing.T) {
+	originalArgs := os.Args
+	t.Cleanup(func() { os.Args = originalArgs })
+
+	cases := []struct {
+		arguments     []string
+		isPromptPiped bool
+	}{
+		{arguments: []string{"have", "a", "look"}},
+		{arguments: []string{"-p", "have", "a", "look"}},
+		{arguments: []string{"--print", "have", "a", "look"}},
+		{arguments: []string{"-p"}},
+		{arguments: []string{"-p"}, isPromptPiped: true},
+		{arguments: []string{"-p", "-r"}},
+		{arguments: []string{"-p", "-m"}},
+		{arguments: []string{"-p", "-r"}, isPromptPiped: true},
+		{arguments: []string{"-p", "-r", "chosen-lobster", "have", "a", "look"}},
+		{arguments: []string{"-p", "-m", "codex/gpt-5.3-codex@high", "have", "a", "look"}},
+		{arguments: []string{"-p", "--from", "chosen-lobster"}},
+	}
+
+	var output strings.Builder
+	for _, testCase := range cases {
+		os.Args = append([]string{"oh"}, testCase.arguments...)
+		input := cli.Bind()
+
+		refusal := "allowed"
+		if err := input.Check(testCase.isPromptPiped); err != nil {
+			refusal = err.Error()
+		}
+
+		fmt.Fprintf(
+			&output,
+			"%-52q printing=%-5t piped=%-5t %s\n",
+			strings.Join(testCase.arguments, " "),
+			input.IsPrinting,
+			testCase.isPromptPiped,
+			refusal,
+		)
+	}
+
+	compareTextWithGolden(t, "print-arguments.txt", output.String())
+}
+
 func TestModelArgumentsMatchTheGolden(t *testing.T) {
 	originalArgs := os.Args
 	t.Cleanup(func() { os.Args = originalArgs })
@@ -2884,6 +2928,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		".ansi",
 		".jsonl",
 		".meta.json",
+		".print",
 		".requests.jsonl",
 		".screen",
 		".transcript",
@@ -2918,6 +2963,8 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"pending-mode-messages": {".ansi", ".screen"},
 		"paste":                 {".ansi", ".screen"},
 		"picker-menu":           {".ansi", ".screen"},
+		"plain-input":           {".ansi", ".screen"},
+		"print-arguments":       {".txt"},
 		"queued-messages":       {".ansi", ".screen"},
 		"readline-bindings":     {".ansi", ".screen"},
 		"resume-arguments":      {".txt"},
@@ -4532,6 +4579,7 @@ func TestEveryScenarioShowsWhatItShowedBefore(t *testing.T) {
 				"narrow":     func() string { return shownAtWidth(t, entries, narrowColumns) },
 				"tiny":       func() string { return shownAtWidth(t, entries, tinyColumns) },
 				"one column": func() string { return shownAtWidth(t, entries, oneColumn) },
+				"printed":    func() string { return shown(t, replayAsPrinted(t, entries), replayColumns) },
 			})
 		})
 	}
@@ -4576,7 +4624,23 @@ func TestEveryScenarioDrawsWhatItDrewBefore(t *testing.T) {
 				"streamed line":  func() string { return streamIntoBuffer(t, entries, output.StreamingModeLine) },
 				"streamed paced": func() string { return streamIntoBuffer(t, entries, output.StreamingModePaced) },
 				"plain":          func() string { return replayPlainly(t, entries) },
+				"printed":        func() string { return replayAsPrinted(t, entries) },
 			})
+		})
+	}
+}
+
+func TestAPrintedSessionShowsWhatTheInterfaceShowed(t *testing.T) {
+	for _, journal := range everyJournal(t) {
+		t.Run(journal.name, func(t *testing.T) {
+			entries := readJournal(t, journal.path)
+
+			requireSameVisibleScreen(
+				t,
+				"the printed session differs from what the interface drew",
+				replayAtWidth(t, entries, replayColumns),
+				replayAsPrinted(t, entries),
+			)
 		})
 	}
 }
@@ -4933,6 +4997,15 @@ func newPlainRig(t *testing.T) *replayRig {
 	})
 }
 
+func newPrintedRig(t *testing.T) *replayRig {
+	t.Helper()
+
+	return newRig(t, func(written *strings.Builder, workspaceDir string) *output.Screen {
+		screen := output.NewTerminalOfSize(written, replayColumns, replayLines)
+		return screen.AppendOnly().LinkPathsUnder(workspaceDir)
+	})
+}
+
 func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Screen) *replayRig {
 	t.Helper()
 
@@ -4990,6 +5063,17 @@ func replayPlainly(t *testing.T, entries []replayEntry) string {
 	t.Helper()
 
 	return replayInto(newPlainRig(t), entries)
+}
+
+func replayAsPrinted(t *testing.T, entries []replayEntry) string {
+	t.Helper()
+
+	rig := newPrintedRig(t)
+	rig.chat.isPrinting = true
+	drawn := replayInto(rig, entries)
+	requireNothingWasDrawnOver(t, drawn)
+
+	return drawn
 }
 
 func replayInto(rig *replayRig, entries []replayEntry) string {
@@ -6159,6 +6243,27 @@ func plainFeedback(t *testing.T) string {
 	self.handleCommand("/help")
 	self.screen.End()
 	return strings.TrimSuffix(style.Plain(screenOutput.String()), "\n")
+}
+
+func TestAPrintedSessionAnswersOneCommandAndStops(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines).AppendOnly()
+	self.isPrinting = true
+	self.commands = fixtureCommandRegistry(t, slash.Command{
+		Name: "help",
+		Run: func(context slash.Context, _ slash.Arguments) error {
+			context.Notice("Commands:\n  /help")
+			return nil
+		},
+	})
+
+	self.print(edit.NewHistory("", 0), "/help")
+
+	requireNothingWasDrawnOver(t, screenOutput.String())
+	if got := style.Plain(screenOutput.String()); got != "Commands:\r\n  /help\r\n" {
+		t.Errorf("got %q", got)
+	}
 }
 
 type configReloadScenario int
@@ -8181,6 +8286,95 @@ func TestPlainCommandFeedbackIsPrintedWithoutEnteringConversationHistory(t *test
 	}
 }
 
+const plainInputDiff = "diff --git a/agent/agent.go b/agent/agent.go\n" +
+	"index d483cf5..a478bfa 100644\n" +
+	"@@ -1,3 +1,3 @@\n" +
+	"-was\n" +
+	"+is\n"
+
+type plainInputScenario int
+
+const (
+	plainInputPiped plainInputScenario = iota
+	plainInputPipedAfterPrompt
+	plainInputPipedAndPrinted
+	plainInputTypedLines
+	plainInputPipedNothing
+	plainInputPipedUnsized
+)
+
+func TestPlainInputDrawsEveryVisibleState(t *testing.T) {
+	passes := map[string]func() string{
+		"a piped prompt asks once": func() string { return plainInputStream(t, plainInputPiped) },
+		"a piped prompt follows a given one": func() string {
+			return plainInputStream(t, plainInputPipedAfterPrompt)
+		},
+		"a piped prompt printed":   func() string { return plainInputStream(t, plainInputPipedAndPrinted) },
+		"typed lines ask one each": func() string { return plainInputStream(t, plainInputTypedLines) },
+		"an empty pipe asks nothing": func() string {
+			return plainInputStream(t, plainInputPipedNothing)
+		},
+		"a piped prompt with nothing to measure against": func() string {
+			return plainInputStream(t, plainInputPipedUnsized)
+		},
+	}
+
+	compareWithGolden(t, "plain-input", ".ansi", passes)
+	compareWithGolden(t, "plain-input", ".screen", shownPasses(t, passes))
+}
+
+func plainInputStream(t *testing.T, scenario plainInputScenario) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	self := slashCommandFixture(t, caps.Read)
+	self.agent = agent.New("", &plainTurnProvider{}, nil)
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	self.commands = fixtureSnippetRegistry(t, nil)
+
+	history := edit.NewHistory("", historyLimit)
+
+	givenPrompt := ""
+	pipedSource := plainInputDiff
+	switch scenario {
+	case plainInputPipedAfterPrompt:
+		givenPrompt = "review this"
+	case plainInputPipedNothing:
+		pipedSource = "\n\n"
+	case plainInputPipedUnsized:
+		self.screen = output.New(&screenOutput)
+	case plainInputPiped, plainInputPipedAndPrinted, plainInputTypedLines:
+	}
+
+	if scenario == plainInputTypedLines {
+		self.isPlain = true
+		self.acceptTypedLines(history, "", strings.NewReader("first question\nsecond question\n"))
+		self.screen.End()
+
+		return screenOutput.String()
+	}
+
+	pipedPrompt, err := startup.ReadPipedPrompt(strings.NewReader(pipedSource))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if scenario == plainInputPipedAndPrinted {
+		self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines).AppendOnly()
+		self.isPrinting = true
+		self.print(history, startup.JoinPrompt(givenPrompt, pipedPrompt))
+		requireNothingWasDrawnOver(t, screenOutput.String())
+
+		return screenOutput.String()
+	}
+
+	self.isPlain = true
+	self.acceptPlainInput(history, startup.JoinPrompt(givenPrompt, pipedPrompt))
+	self.screen.End()
+
+	return screenOutput.String()
+}
+
 func recordedUserMessages(events []agent.Event) []string {
 	var messages []string
 	for _, event := range events {
@@ -8191,28 +8385,20 @@ func recordedUserMessages(events []agent.Event) []string {
 	return messages
 }
 
-func TestPipedInputAsksOneQuestionOfEverythingItWasGiven(t *testing.T) {
+func TestAPipedPromptAsksOneQuestionOfEverythingItWasGiven(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	self.isPlain = true
 
 	piped := "diff --git a/agent/agent.go b/agent/agent.go\nindex d483cf5..a478bfa 100644\n"
-	self.acceptPipedInput(edit.NewHistory("", historyLimit), "", strings.NewReader(piped))
+	prompt, err := startup.ReadPipedPrompt(strings.NewReader(piped))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	self.acceptPlainInput(edit.NewHistory("", historyLimit), prompt)
 
 	want := []string{strings.TrimSpace(piped)}
-	if got := recordedUserMessages(self.events); !slices.Equal(got, want) {
-		t.Errorf("got user messages %q, want %q", got, want)
-	}
-}
-
-func TestPipedInputFollowsTheOpeningPromptAfterABlankLine(t *testing.T) {
-	var screenOutput bytes.Buffer
-	self := testConversation(t, &screenOutput)
-	self.isPlain = true
-
-	self.acceptPipedInput(edit.NewHistory("", historyLimit), "review this", strings.NewReader("one\ntwo\n"))
-
-	want := []string{"review this\n\none\ntwo"}
 	if got := recordedUserMessages(self.events); !slices.Equal(got, want) {
 		t.Errorf("got user messages %q, want %q", got, want)
 	}
@@ -8807,6 +8993,24 @@ type sessionGoldenTurn struct {
 	ToggleAfterToolRequest    string                  `toml:"toggle-after-tool-request"`
 	ToggleDuringModeTurn      string                  `toml:"toggle-during-mode-turn"`
 	CancelAfterToolToggle     bool                    `toml:"cancel-after-tool-toggle"`
+}
+
+const printedSessionIsImpossible = "this scenario drives the interface, which a printed session has none of\n"
+
+func (self sessionGoldenScenario) usesTheInterface() bool {
+	return self.ToggleBeforeFirst != "" || self.FirstTurn.usesTheInterface()
+}
+
+func (self sessionGoldenTurn) usesTheInterface() bool {
+	return self.ReplaceAfterToolRequest != "" ||
+		self.ToggleAfterMessageDelta != "" ||
+		self.ToggleAfterToolRequest != "" ||
+		self.ToggleDuringModeTurn != "" ||
+		self.FlushAfterToolRequest ||
+		self.CancelAfterQueueing ||
+		len(self.QueueAfterToolRequest) > 0 ||
+		len(self.QueueAfterEachToolRequest) > 0 ||
+		len(self.QueueAfterMessageDelta) > 0
 }
 
 type sessionGoldenTool struct {
@@ -9543,8 +9747,21 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		firstAssistant.AddUserMessage(firstHarness.mode.Inject())
 	}
 	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
-	runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
+	firstTurns := runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
 	firstHarness.dropPendingInput()
+
+	if !scenario.usesTheInterface() {
+		printedOutput := drawPrintedSessionGoldenTurn(
+			t, directory, scenario, firstHarness, nil, firstTurns,
+		)
+		requireNothingWasDrawnOver(t, printedOutput)
+		requireSameVisibleScreen(
+			t,
+			"printed session differs from what the interface drew",
+			firstScreenOutput.String(),
+			printedOutput,
+		)
+	}
 	if scenario.CredentialRecovery != nil {
 		scenario.CredentialRecovery()
 	}
@@ -9596,8 +9813,23 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	if note := resumedHarness.prelude(); note != "" {
 		resumedAssistant.AddUserMessage(note)
 	}
-	runSessionGoldenTurn(t, resumedHarness, scenario.ResumeTurn, cancelSignals)
+	resumeTurns := runSessionGoldenTurn(t, resumedHarness, scenario.ResumeTurn, cancelSignals)
 	resumedHarness.dropPendingInput()
+
+	printedScreen := printedSessionIsImpossible
+	if !scenario.usesTheInterface() && !scenario.ResumeTurn.usesTheInterface() {
+		printedOutput := drawPrintedSessionGoldenTurn(
+			t, directory, scenario, resumedHarness, storedSession.Events, resumeTurns,
+		)
+		requireNothingWasDrawnOver(t, printedOutput)
+		requireSameVisibleScreen(
+			t,
+			"printed resumed session differs from what the interface drew",
+			screenOutput.String(),
+			printedOutput,
+		)
+		printedScreen = strings.Join(visibleScreen(t, printedOutput, replayColumns), "\n") + "\n"
+	}
 
 	if err := log.Close(); err != nil {
 		t.Fatal(err)
@@ -9630,6 +9862,23 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		screenOutput.String(),
 		replayOutput.String(),
 	)
+
+	var printedReplayOutput bytes.Buffer
+	printedReplayHarness := &App{
+		agent:      resumedAssistant,
+		screen:     output.NewTerminalOfSize(&printedReplayOutput, replayColumns, replayLines).AppendOnly(),
+		events:     storedSession.Events,
+		isPrinting: true,
+	}
+	printedReplayHarness.replay()
+
+	requireNothingWasDrawnOver(t, printedReplayOutput.String())
+	requireSameVisibleScreen(
+		t,
+		"printed replay differs from what the interface drew",
+		replayOutput.String(),
+		printedReplayOutput.String(),
+	)
 	liveScreen := visibleScreen(t, screenOutput.String(), replayColumns)
 
 	ansi := strings.TrimRight(strutil.VisibleEscapes(screenOutput.String()), "\n") + "\n"
@@ -9647,6 +9896,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		".screen":         settledScreen,
 		".transcript":     canonicalSessionTranscript(string(transcript), sessionName),
 		".requests.jsonl": requests,
+		".print":          printedScreen,
 	}
 
 	for extension, drawn := range outputs {
@@ -9767,6 +10017,20 @@ func canonicalImagePayload(t *testing.T, payload json.RawMessage) json.RawMessag
 	return encoded
 }
 
+var repaintingSequence = regexp.MustCompile(`\x1b(\[[0-9?; ]*[ABCDHJKlhq]|\]9;4;)`)
+
+func requireNothingWasDrawnOver(t *testing.T, printedOutput string) {
+	t.Helper()
+
+	if found := repaintingSequence.FindString(printedOutput); found != "" {
+		t.Errorf(
+			"printed session used %q\n%s",
+			strutil.VisibleEscapes(found),
+			strutil.VisibleEscapes(printedOutput),
+		)
+	}
+}
+
 func requireSameVisibleScreen(t *testing.T, description string, firstOutput string, secondOutput string) {
 	t.Helper()
 
@@ -9809,13 +10073,89 @@ func toggleSessionGoldenCaps(t *testing.T, testHarness *App, flags string) {
 	}
 }
 
+type unaskedProvider struct{}
+
+func (unaskedProvider) Configure(string, []tool.Definition)   {}
+func (unaskedProvider) AddUserMessage(string)                 {}
+func (unaskedProvider) AddToolResults([]agent.ToolCallResult) {}
+func (unaskedProvider) Dump() []json.RawMessage               { return nil }
+func (unaskedProvider) Load([]json.RawMessage)                {}
+
+func (unaskedProvider) Send(ctx context.Context, _ agent.Yield) (agent.Reply, error) {
+	<-ctx.Done()
+
+	return agent.Reply{}, ctx.Err()
+}
+
+func drawPrintedSessionGoldenTurn(
+	t *testing.T,
+	directory string,
+	scenario sessionGoldenScenario,
+	liveHarness *App,
+	restoredEvents []agent.Event,
+	drawnTurns [][]TurnEvent,
+) string {
+	t.Helper()
+
+	log, err := store.Create(directory, store.Meta{
+		Model:        scenario.Model,
+		Provider:     scenario.Provider,
+		Effort:       scenario.Effort,
+		SystemPrompt: sessionGoldenSystemPrompt,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = log.Close() })
+
+	var screenOutput bytes.Buffer
+	printedHarness := &App{
+		agent:      agent.New(sessionGoldenSystemPrompt, unaskedProvider{}, nil),
+		screen:     output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines).AppendOnly(),
+		recorder:   record.New(log),
+		isPrinting: true,
+	}
+	if len(restoredEvents) > 0 {
+		printedHarness.events = slices.Clone(restoredEvents)
+		settleResumedSessionGoldenMode(printedHarness, restoredEvents)
+		printedHarness.currentTurn = Turn{Stream: testRunningTurnStream()}
+		printedHarness.replay()
+	} else {
+		settleSessionGoldenMode(printedHarness)
+	}
+	printedHarness.currentTurn = Turn{
+		Stream:  testRunningTurnStream(),
+		painter: printedHarness.newPainter(true),
+	}
+
+	for index, drawnTurnEvents := range drawnTurns {
+		for _, turnEvent := range drawnTurnEvents {
+			printedHarness.takeTurn(turnEvent)
+		}
+		if index == len(drawnTurns)-1 && liveHarness.currentTurn.Cancelled() {
+			printedHarness.interruptTurn(liveHarness.interruptionCause())
+		}
+		printedHarness.finish()
+	}
+	printedHarness.dropPendingInput()
+
+	drawn := screenOutput.String()
+	if printedHarness.currentTurn.Running() {
+		printedHarness.interruptTurn(interrupt.SessionClose)
+	}
+
+	return drawn
+}
+
 func runSessionGoldenTurn(
 	t *testing.T,
 	testHarness *App,
 	turn sessionGoldenTurn,
 	cancelSignals <-chan struct{},
-) {
+) [][]TurnEvent {
 	t.Helper()
+
+	var drawnTurnEvents []TurnEvent
 
 	var streamContext context.Context
 	var cancel context.CancelCauseFunc
@@ -9869,6 +10209,7 @@ func runSessionGoldenTurn(
 	toolRequests := 0
 	retryNotices := 0
 	for update, streamError := range testHarness.agent.Stream(streamContext, turn.Prompt, testHarness.currentTurn.Interjections()) {
+		drawnTurnEvents = append(drawnTurnEvents, TurnEvent{Update: update, Err: streamError})
 		testHarness.takeTurn(TurnEvent{Update: update, Err: streamError})
 		if update.Delta != nil {
 			switch update.Delta.Kind { //nolint:exhaustive // Only model prose event kinds can be deltas.
@@ -9909,7 +10250,9 @@ func runSessionGoldenTurn(
 	}
 	testHarness.finish()
 
-	runQueuedSessionGoldenTurns(t, testHarness, turn.ToggleDuringModeTurn)
+	drawnTurns := [][]TurnEvent{drawnTurnEvents}
+
+	return append(drawnTurns, runQueuedSessionGoldenTurns(t, testHarness, turn.ToggleDuringModeTurn)...)
 }
 
 func takeFirstSessionGoldenToolRequest(
@@ -9962,11 +10305,15 @@ func takeFirstSessionGoldenMessageDelta(t *testing.T, testHarness *App, turn ses
 	}
 }
 
-func runQueuedSessionGoldenTurns(t *testing.T, testHarness *App, toggleDuringModeTurn string) {
+func runQueuedSessionGoldenTurns(t *testing.T, testHarness *App, toggleDuringModeTurn string) [][]TurnEvent {
 	t.Helper()
 
+	var drawnTurns [][]TurnEvent
+
 	for testHarness.currentTurn.Running() {
+		var drawnTurnEvents []TurnEvent
 		for event := range testHarness.currentTurn.Events() {
+			drawnTurnEvents = append(drawnTurnEvents, event)
 			testHarness.takeTurn(event)
 			if toggleDuringModeTurn == "" || event.Update.Delta == nil {
 				continue
@@ -9977,7 +10324,10 @@ func runQueuedSessionGoldenTurns(t *testing.T, testHarness *App, toggleDuringMod
 			}
 		}
 		testHarness.finish()
+		drawnTurns = append(drawnTurns, drawnTurnEvents)
 	}
+
+	return drawnTurns
 }
 
 func canonicalSessionMeta(t *testing.T, directory string, name string) string {
@@ -11132,6 +11482,43 @@ func TestTheAppWritesAndResumesASessionOnItsOwn(t *testing.T) {
 	)
 
 	resumeAppPlainTurn(t, directory, sessionName)
+}
+
+func TestAPrintedAppAnswersThroughItsOwnStartingPath(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{
+		Model:        "claude-opus-5",
+		Provider:     "anthropic",
+		Effort:       "medium",
+		SystemPrompt: sessionGoldenSystemPrompt,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = log.Close() })
+
+	var screenOutput bytes.Buffer
+	self := &App{
+		agent:      agent.New(sessionGoldenSystemPrompt, &plainTurnProvider{}, nil),
+		screen:     output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines).AppendOnly(),
+		recorder:   record.New(log),
+		mode:       caps.NewMode(caps.All()),
+		isPrinting: true,
+	}
+
+	self.begin("say something")
+
+	requireNothingWasDrawnOver(t, screenOutput.String())
+
+	drawn := style.Plain(screenOutput.String())
+	if !strings.Contains(drawn, "say something") || !strings.Contains(drawn, "Said it.") {
+		t.Errorf("a printed session drew %q", drawn)
+	}
+	if got := recordedUserMessages(self.events); !slices.Equal(got, []string{"say something"}) {
+		t.Errorf("got user messages %q", got)
+	}
 }
 
 func resumeAppPlainTurn(t *testing.T, directory string, sessionName string) {

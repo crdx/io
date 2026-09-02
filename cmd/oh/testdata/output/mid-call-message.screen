@@ -274,6 +274,26 @@ l
 s
 e
 .
+=== printed ===
+
+ read the renderer and tell me what it does
+
+
+Reading the renderer before saying anything about it.
+
+Reading it now.
+
+read cmd/oh/line/render.go –
+
+The turn was interrupted.
+
+
+ never mind, what is in target.txt?
+
+
+read target.txt ✓ 1L
+
+It holds the word one, and nothing else.
 === tiny ===
 
  read the

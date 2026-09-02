@@ -1,0 +1,13 @@
+
+ lose the connection before it answers
+
+
+[#1] Request failed; retrying in 1s: Post "http://endpoint": EOF
+
+Through on the second attempt.
+
+
+ carry on
+
+
+Carrying on.

@@ -398,6 +398,29 @@ Writing it down.
 \e[48;2;52;53;65m\e[0m
 Done.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what am i allowed to do here?                                                                      \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+Reading and running commands, but not writing.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The workspace is now read-write.                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m now write it down                                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+Writing it down.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The bash tool is now refused, and will turn away every command until it is granted again.       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+Done.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m what am i allowed to do here?                                                                      \e[0m\r

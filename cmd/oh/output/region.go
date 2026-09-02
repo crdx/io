@@ -25,7 +25,7 @@ const (
 )
 
 func (self *Screen) BeginEditing() func() {
-	if !self.isTTY {
+	if !self.canRepaint {
 		return func() {}
 	}
 
@@ -34,7 +34,7 @@ func (self *Screen) BeginEditing() func() {
 }
 
 func (self *Screen) Sync(draw func()) {
-	if !self.isTTY {
+	if !self.canRepaint {
 		draw()
 		return
 	}
@@ -91,7 +91,7 @@ type footer struct {
 }
 
 func (self *Screen) Footer(rows []string, cursorRow int, cursorColumn int) {
-	if !self.isTTY {
+	if !self.canRepaint {
 		return
 	}
 
@@ -162,7 +162,7 @@ func plural(count int) string {
 }
 
 func (self *Screen) WriteEscape(escape string) bool {
-	if !self.isTTY {
+	if !self.canRepaint {
 		return false
 	}
 
@@ -175,7 +175,7 @@ func (self *Screen) WriteEscape(escape string) bool {
 }
 
 func (self *Screen) ReportProgress(isRunning bool) {
-	if !self.isTTY {
+	if !self.canRepaint {
 		return
 	}
 
@@ -186,7 +186,7 @@ func (self *Screen) ReportProgress(isRunning bool) {
 }
 
 func (self *Screen) RefreshProgress() {
-	if !self.isTTY {
+	if !self.canRepaint {
 		return
 	}
 
@@ -213,7 +213,7 @@ func (self *Screen) setProgress(isRunning bool) {
 }
 
 func (self *Screen) Release(shouldKeep bool) {
-	if !self.isTTY {
+	if !self.canRepaint {
 		return
 	}
 
@@ -241,7 +241,7 @@ func (self *Screen) Release(shouldKeep bool) {
 }
 
 func (self *Screen) Reset() {
-	if !self.isTTY {
+	if !self.canRepaint {
 		return
 	}
 

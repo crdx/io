@@ -688,6 +688,47 @@ bash\e[38;2;150;152;150m | \e[0mruns a command in a sandbox with no network\e[38
 
 See \e[38;2;129;162;190mthe notes\e[0m\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the rest.
 
+=== printed ===
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[3m\e[38;2;150;152;150mLaying the answer out.\e[0m\e[0m\r
+\r
+\e[1m\e[38;2;207;173;0mWhat the tools cost\e[0m\e[0m\r
+\r
+The \e[1mread\e[0m tool is cheap and \e[38;2;192;128;80mbash\e[0m is not, so the \e[3morder\e[0m matters. A run looks like this:\r
+\r
+\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mmain\e[0m() {\r
+    fmt.\e[38;2;129;162;190mPrintln\e[0m(\e[38;2;181;189;104m"hello"\e[0m)\r
+}\r
+\r
+\e[38;2;192;128;80m• \e[0mread first, and read widely\r
+\e[38;2;192;128;80m• \e[0mrun only what the reading could not answer\r
+  \e[38;2;192;128;80m• \e[0ma nested point, to show the indent\r
+\r
+\e[38;2;150;152;150m┌──────┬─────────────────────────────────────────────┬──────┐\e[0m\r
+\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does\e[0m                                \e[38;2;150;152;150m│\e[0m \e[1mCost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m├──────┼─────────────────────────────────────────────┼──────┤\e[0m\r
+\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back              \e[38;2;150;152;150m│\e[0m    1 \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m├──────┼─────────────────────────────────────────────┼──────┤\e[0m\r
+\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree looking for a pattern        \e[38;2;150;152;150m│\e[0m    4 \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m├──────┼─────────────────────────────────────────────┼──────┤\e[0m\r
+\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command in a sandbox with no network \e[38;2;150;152;150m│\e[0m   40 \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m└──────┴─────────────────────────────────────────────┴──────┘\e[0m\r
+\r
+┌──────┐     ┌──────┐\r
+│      │     │      │\r
+│ read ├────►│ bash │\r
+│      │     │      │\r
+└──────┘     └──────┘\r
+\r
+\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mThe costs are made up, and the table is here to be watched as it draws.\e[0m\r
+\r
+See \e]8;;https://example.com/notes\e\\\e[38;2;129;162;190mthe notes\e[0m\e]8;;\e\\\e[38;2;150;152;150m (https://example.com/notes)\e[0m for the rest.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r

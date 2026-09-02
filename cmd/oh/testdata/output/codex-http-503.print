@@ -1,0 +1,29 @@
+
+ receive HTTP 503
+
+
+[#1] Request failed; retrying in 1s: Request failed with status 503
+[#2] Request failed; retrying in 5s: Request failed with status 503
+[#3] Request failed; retrying in 10s: Request failed with status 503
+[#4] Request failed; retrying in 30s: Request failed with status 503
+[#5] Request failed; retrying in 1m00s: Request failed with status 503
+[#6] Request failed; retrying in 1m00s: Request failed with status 503
+[#7] Request failed; retrying in 1m00s: Request failed with status 503
+[#8] Request failed; retrying in 1m00s: Request failed with status 503
+[#9] Request failed; retrying in 1m00s: Request failed with status 503
+[#10] Request failed; retrying in 1m00s: Request failed with status 503
+[#11] Request failed; retrying in 1m00s: Request failed with status 503
+[#12] Request failed; retrying in 1m00s: Request failed with status 503
+[#13] Request failed; retrying in 1m00s: Request failed with status 503
+[#14] Request failed; retrying in 1m00s: Request failed with status 503
+[#15] Request failed; retrying in 1m00s: Request failed with status 503
+[#16] Request failed; retrying in 1m00s: Request failed with status 503
+[#17] Request failed; retrying in 1m00s: Request failed with status 503
+[#18] Request failed; retrying in 1m00s: Request failed with status 503
+Request failed with status 503
+
+
+ continue after the transport failure
+
+
+Resumed.

@@ -13,7 +13,7 @@ import (
 func region() (*Screen, *strings.Builder) {
 	screenOutput := &strings.Builder{}
 
-	return &Screen{writer: screenOutput, isTTY: true, columns: 40, lines: 24}, screenOutput
+	return &Screen{writer: screenOutput, isTerminal: true, canRepaint: true, columns: 40, lines: 24}, screenOutput
 }
 
 func TestOnlyTheAnswerIsLinked(t *testing.T) {
@@ -238,5 +238,22 @@ func TestDiscardingLiveReasoningLeavesNoScrollback(t *testing.T) {
 
 	if screenOutput.String() != "" {
 		t.Errorf("discarded reasoning reached scrollback: %q", screenOutput.String())
+	}
+}
+
+func TestAnAnswerAfterReasoningIsLinkedAsItIsPaintedButNotAsARegion(t *testing.T) {
+	workspace := t.TempDir()
+	if err := os.WriteFile(filepath.Join(workspace, "one.go"), nil, 0o600); err != nil {
+		t.Fatalf("prepare file: %v", err)
+	}
+
+	screen, screenOutput := region()
+	screen.LinkPathsUnder(workspace)
+	screen.DrawReasoning([]string{"looking at one.go"})
+	screen.DrawAnswer([]string{"looking at one.go", "the answer names one.go"})
+	screen.Seal()
+
+	if count := strings.Count(screenOutput.String(), "\x1b]8;;file://"); count != 1 {
+		t.Errorf("expected the painted answer row linked once, got %d links in %q", count, screenOutput)
 	}
 }

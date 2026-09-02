@@ -160,6 +160,18 @@ find \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;12
 
 The grep took nine seconds and the find gave up after a minute.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+That will take a moment.\r
+\r
+\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;192;128;80m9.5s\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m02s\e[0m \e[38;2;204;102;102mthe search went on too long\e[0m\r
+\r
+The grep took nine seconds and the find gave up after a minute.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m search everything for the spinner                                                                  \e[0m\r

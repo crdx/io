@@ -28,6 +28,7 @@ Options:
     -m, --model [<model>]       Open the model picker, or set the provider, model, effort, and optional +fast mode
     -c, --caps <flags>          Set capability flags: rxw gs (read, exec, write, git, web) (default: %s)
     -t, --tool <tool>           Set exclusive tool selection; may be repeated
+    -p, --print                 Answer the prompt without an interface, then exit
         --yolo                  Live dangerously and don't sandbox anything
     -U, --usage                 Show subscription usage, then exit
     -J, --json                  Write the usage as JSON rather than drawing it
@@ -47,6 +48,7 @@ type inputFlags struct {
 	IsModelPicker   bool     `docopt:"-m"`
 	Caps            string   `docopt:"--caps"`
 	Tools           []string `docopt:"--tool"`
+	IsPrinting      bool     `docopt:"--print"`
 	Usage           bool     `docopt:"--usage"`
 	JSON            bool     `docopt:"--json"`
 	Yolo            bool     `docopt:"--yolo"`
@@ -71,6 +73,7 @@ type Options struct {
 	Tools          []string
 	AddedFiles     []string
 	Yolo           bool
+	IsPrinting     bool
 }
 
 func Bind() *Input {
@@ -122,6 +125,7 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 		SourceSession: self.SourceSession,
 		Tools:         self.Tools,
 		Yolo:          self.Yolo,
+		IsPrinting:    self.IsPrinting,
 	}
 
 	if self.Model != "" {
@@ -149,6 +153,22 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 	}
 
 	return options, nil
+}
+
+func (self Input) Check(isPromptPiped bool) error {
+	if !self.IsPrinting {
+		return nil
+	}
+
+	if self.IsSessionPicker || self.IsModelPicker {
+		return errors.New("a printed session cannot open a picker; name the session or the model instead")
+	}
+
+	if len(self.Message) == 0 && self.SourceSession == "" && !isPromptPiped {
+		return errors.New("a printed session needs a prompt")
+	}
+
+	return nil
 }
 
 func InheritedOptions(arguments []string, kind cycle.TransitionKind) []string {

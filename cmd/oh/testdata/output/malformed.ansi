@@ -497,6 +497,37 @@ in angle brackets \e[38;2;129;162;190mhttps://example.com/bracketed\e[0m, which 
 
 Entities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and \e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m draw the awkward markdown                                                                          \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+A table whose rows do not all reach the end:\r
+\r
+\e[38;2;150;152;150m┌──────┬────────────────┬──────┐\e[0m\r
+\e[38;2;150;152;150m│\e[0m \e[1mtool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mwhat it does\e[0m   \e[38;2;150;152;150m│\e[0m \e[1mcost\e[0m \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m                \e[38;2;150;152;150m│\e[0m      \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the tree \e[38;2;150;152;150m│\e[0m 4    \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m├──────┼────────────────┼──────┤\e[0m\r
+\e[38;2;150;152;150m│\e[0m bash \e[38;2;150;152;150m│\e[0m runs a command \e[38;2;150;152;150m│\e[0m 40   \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m└──────┴────────────────┴──────┘\e[0m\r
+\r
+A narrow table in a wide terminal:\r
+\r
+\e[38;2;150;152;150m┌───┬───┐\e[0m\r
+\e[38;2;150;152;150m│\e[0m \e[1ma\e[0m \e[38;2;150;152;150m│\e[0m \e[1mb\e[0m \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m├───┼───┤\e[0m\r
+\e[38;2;150;152;150m│\e[0m 1 \e[38;2;150;152;150m│\e[0m 2 \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m└───┴───┘\e[0m\r
+\r
+A bare URL the renderer has to find for itself: \e]8;;https://example.com/plain\e\\\e[38;2;129;162;190mhttps://example.com/plain\e[0m\e]8;;\e\\ and one\r
+in angle brackets \e]8;;https://example.com/bracketed\e\\\e[38;2;129;162;190mhttps://example.com/bracketed\e[0m\e]8;;\e\\, which are not the same thing.\r
+\r
+Entities are resolved in prose — AT&T becomes AT&T — but left alone inside code, where \e[38;2;192;128;80m&amp;\e[0m and\r
+\e[38;2;192;128;80m&lt;div&gt;\e[0m stand as they are written.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m draw the awkward markdown                                                                          \e[0m\r

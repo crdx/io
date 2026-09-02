@@ -317,6 +317,30 @@ t
 a
 l
 }
+=== printed ===
+
+ run each shape of command and load the skill
+
+
+$ if [[ -d src ]]; then echo there; elif [[ -f src ]]; then echo file; else echo none; fi ✓ 1L
+$ while read -r NAME; do echo "$NAME" >out.txt 2>&1; done <list.txt ✓ 1L
+$ until [[ -z "$REST" ]]; do REST=""; done ✓ 1L
+$ case "$MODE" in read) echo r ;; write) echo w ;; *) echo o ;; esac ✓ 1L
+$ select CHOICE in one two; do break; done ✓ 1L
+$ ls -la | grep -v "^d" | wc -l ✓ 1L
+grep ^\\p{Lu}\\w{2,8}(?:-\\d+)?$ *.go ✓ 1L
+load skills/tidy/SKILL.md ✓ 8L
+read wide.md ✓ 3L
+
+The listing is 日本語のテキストと絵文字 🎉 が混ざった行, which is wider on screen than it is long.
+
+I left a note in ~/README.md and the skill is at ~/skills/tidy/SKILL.md.
+
+// count reports how many there were.
+func count() int {
+    var total int = 42
+    return total
+}
 === tiny ===
 
  run each

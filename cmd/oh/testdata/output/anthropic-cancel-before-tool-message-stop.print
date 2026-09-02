@@ -1,0 +1,11 @@
+
+ interrupt after a complete but uncommitted tool call
+
+
+The turn was interrupted because the user pressed escape.
+
+
+ continue without the uncommitted call
+
+
+Resumed.

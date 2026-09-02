@@ -307,6 +307,34 @@ e
 e
 n
 d
+=== printed ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ show the retry interaction
+
+
+Tracing the interaction.
+
+Application retry
+
+┌─────────┐     ┌────────┐
+│ 👩‍🚀 User │     │ ❤️ App │
+└────┬────┘     └────┬───┘
+     │               │
+     │ 1️⃣ Open       │
+     ├──────────────►│
+     │               │
+     │               │ ┌──────────┐
+     │               │ │ 🏳️‍🌈 Ready │
+     │               │ └──────────┘
+   ┌─[loop 🔁 Retry]───┐
+   │ │               │ │
+   │ │ 📡 Update     │ │
+   │ │◄┈┈┈┈┈┈┈┈┈┈┈┈┈┈┤ │
+   │ │               │ │
+   └───────────────────┘
+     │               │
 === tiny ===
 Agent
 000000000000

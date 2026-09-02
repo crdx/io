@@ -5,6 +5,7 @@
 --list
 --login
 --model
+--print
 --resume
 --tool
 --update

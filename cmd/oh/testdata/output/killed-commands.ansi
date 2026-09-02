@@ -243,6 +243,17 @@
 
 The linter was killed for its processor time, the write for its size, and the copy refused.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m run the linter, write the big file, then copy the readme over the host's hosts file                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mjust\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mlint\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;192;128;80m1m11s\e[0m \e[38;2;150;152;150m1h01m 5L ~100t 1144M\e[0m \e[38;2;204;102;102mexit(137): error: recipe `lint` was terminated on line 1…\e[0m\r
+\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mdd\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mif=/dev/zero\e[0m\e[38;2;150;152;150m of=big bs=1M count=4096\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m2.3s 4L 8M\e[0m \e[38;2;204;102;102mexit(153): dd: writing 'big': File size li…\e[0m\r
+\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mcp\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mREADME.md\e[0m\e[38;2;150;152;150m /etc/hosts\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m6L ~100t 2M\e[0m \e[38;2;204;102;102mexit(1): cp: cannot create regular file '/etc/hosts': Per…\e[0m\r
+\r
+The linter was killed for its processor time, the write for its size, and the copy refused.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m run the linter, write the big file, then copy the readme over the host's hosts file                \e[0m\r

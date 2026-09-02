@@ -451,6 +451,37 @@ read \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;
 
 That is the lot: four together, then three together, then a pair where only one of them could be answered.
 
+=== printed ===
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m have a look at that                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[3m\e[38;2;150;152;150mTaking the four of them together rather than one after another.\e[0m\e[0m\r
+\r
+Let me get the shape of this first.\r
+\r
+\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\find\e]8;;\e\\ \e[38;2;192;128;80m**/*.toml\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mpackage\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
+\e[3m\e[38;2;150;152;150mThree searches, all at once.\e[0m\e[0m\r
+\r
+Now to find where the drawing happens.\r
+\r
+\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e]8;;oh://tool-result?call=call_8&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mfooter\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e]8;;oh://tool-result?call=call_9&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150mcursor\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+One more pair, and one of them will not be there.\r
+\r
+\e]8;;oh://tool-result?call=call_10&session=brave-otter\e\\ls\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L\e[0m\r
+\e]8;;oh://tool-result?call=call_11&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150mnowhere/at/\e[0m\e[38;2;192;128;80mall.go\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102mnowhere/at/all.go: no such file or directory\e[0m\r
+\r
+That is the lot: four together, then three together, then a pair where only one of them could be\r
+answered.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r

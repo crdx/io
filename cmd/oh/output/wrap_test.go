@@ -8,7 +8,7 @@ import (
 )
 
 func TestTheConversationWrapsByCellsRatherThanCharacters(t *testing.T) {
-	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 5}
+	screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: 5}
 
 	if got := screen.fit("日本語"); got != "日本\r\n語" {
 		t.Errorf("expected a break after the second character, got %q", got)
@@ -20,7 +20,7 @@ func TestTheConversationWrapsByCellsRatherThanCharacters(t *testing.T) {
 }
 
 func TestTextPresentationEmojiDoesNotCreateAPhantomRow(t *testing.T) {
-	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 8}
+	screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: 8}
 
 	if got := screen.fit(" test 🖊 \n"); got != " test 🖊 \r\n" {
 		t.Errorf("expected the message to remain on one row, got %q", got)
@@ -32,7 +32,7 @@ func TestTextPresentationEmojiDoesNotCreateAPhantomRow(t *testing.T) {
 }
 
 func TestJoinedEmojiAreMeasuredAsOneGrapheme(t *testing.T) {
-	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 3}
+	screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: 3}
 
 	if got := screen.fit("👨‍👩‍👧x"); got != "👨‍👩‍👧x" {
 		t.Errorf("expected the joined emoji to remain on one row, got %q", got)
@@ -40,7 +40,7 @@ func TestJoinedEmojiAreMeasuredAsOneGrapheme(t *testing.T) {
 }
 
 func TestAnEscapeSequenceTakesNoRoomOnTheRow(t *testing.T) {
-	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 5}
+	screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: 5}
 
 	if got := screen.fit("\x1b[31mabcde\x1b[0m"); got != "\x1b[31mabcde\x1b[0m" {
 		t.Errorf("expected the colour not to count against the width, got %q", got)
@@ -48,7 +48,7 @@ func TestAnEscapeSequenceTakesNoRoomOnTheRow(t *testing.T) {
 }
 
 func TestSizedTextTakesItsDeclaredRoomOnTheRow(t *testing.T) {
-	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 5}
+	screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: 5}
 	fish := "\x1b]66;s=2:n=3:d=4:w=2;🐟\x1b\\"
 
 	if got := screen.fit("a " + fish); got != "a \r\n"+fish {
@@ -60,7 +60,7 @@ func TestSizedTextTakesItsDeclaredRoomOnTheRow(t *testing.T) {
 }
 
 func TestCursorMovementTakesItsDeclaredRoomOnTheRow(t *testing.T) {
-	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 10}
+	screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: 10}
 	text := "\x1b[4C  x"
 
 	if got := screen.fit(text); got != text {
@@ -86,7 +86,7 @@ func FuzzFittingTerminalTextKeepsAValidCursor(fuzzer *testing.F) {
 
 	fuzzer.Fuzz(func(t *testing.T, text string, rawColumns uint8) {
 		columns := int(rawColumns%80) + 1
-		screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: columns}
+		screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: columns}
 		_ = screen.fit(text)
 
 		if screen.column < 0 || screen.column > columns {
@@ -99,7 +99,7 @@ func FuzzFittingTerminalTextKeepsAValidCursor(fuzzer *testing.F) {
 }
 
 func TestASpaceAtTheRowEdgeIsDroppedRatherThanCarried(t *testing.T) {
-	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 5}
+	screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: 5}
 
 	if got := screen.fit("abcde fgh"); got != "abcde\r\nfgh" {
 		t.Errorf("expected the break to eat the space, got %q", got)
@@ -115,7 +115,7 @@ func TestASpaceAtTheRowEdgeIsDroppedRatherThanCarried(t *testing.T) {
 }
 
 func TestEverySpaceAtTheRowEdgeIsDropped(t *testing.T) {
-	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 5}
+	screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: 5}
 
 	if got := screen.fit("abcde   fgh"); got != "abcde\r\nfgh" {
 		t.Errorf("expected the break to eat every space, got %q", got)
@@ -123,7 +123,7 @@ func TestEverySpaceAtTheRowEdgeIsDropped(t *testing.T) {
 }
 
 func TestASpaceAtTheRowEdgeOpensNoRowOfItsOwn(t *testing.T) {
-	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 5}
+	screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: 5}
 
 	if got := screen.fit("abcde \nx"); got != "abcde\r\nx" {
 		t.Errorf("expected the newline to open the only new row, got %q", got)
@@ -142,7 +142,7 @@ func TestAStyledFailureBreakingOnItsLastSpaceLeavesNoLeadingSpace(t *testing.T) 
 			`10.0.0.2:52134->160.79.104.10:443: read: software caused connection abort`,
 	)
 
-	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: columns}
+	screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: columns}
 
 	for row := range strings.SplitSeq(screen.fit(failure), "\r\n") {
 		if strings.HasPrefix(style.Plain(row), " ") {
@@ -152,7 +152,7 @@ func TestAStyledFailureBreakingOnItsLastSpaceLeavesNoLeadingSpace(t *testing.T) 
 }
 
 func TestACharacterWiderThanTheTerminalStaysWhereItIs(t *testing.T) {
-	screen := &Screen{writer: &strings.Builder{}, isTTY: true, columns: 1}
+	screen := &Screen{writer: &strings.Builder{}, isTerminal: true, canRepaint: true, columns: 1}
 
 	if got := screen.fit("日"); got != "日" {
 		t.Errorf("expected no room to be made for it, got %q", got)

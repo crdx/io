@@ -1,0 +1,13 @@
+
+ recover from malformed tool input
+
+
+[#1] Request failed; retrying in 1s: The work tool call did not contain a JSON object: {"value":1,,}
+
+I corrected the malformed call.
+
+
+ carry on
+
+
+Carrying on.

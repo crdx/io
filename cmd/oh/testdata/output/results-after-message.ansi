@@ -217,6 +217,22 @@ grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;
 \e[48;2;52;53;65m\e[0m
 Both still mention the spinner.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m look at both of those and tell me what changed                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+Taking them together.\r
+\r
+read \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mscreen.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+grep \e[38;2;150;152;150mspinner\e[0m \e[38;2;150;152;150m*.go\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The workspace is now read-only.                                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+Both still mention the spinner.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m look at both of those and tell me what changed                                                     \e[0m\r

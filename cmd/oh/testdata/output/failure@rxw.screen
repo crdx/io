@@ -409,6 +409,38 @@ m
 e
 n
 t
+=== printed ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ have a look at that
+
+
+This one stops halfway.
+
+The stream ended before the response did
+
+
+ have a look at that
+
+
+Let me think about that.
+
+The model is overloaded
+
+
+ have a look at that
+
+
+I can only get so far before
+
+The response was cut short
+
+
+ have a look at that
+
+
+The endpoint is having a moment
 === tiny ===
 Agent
 000000000000

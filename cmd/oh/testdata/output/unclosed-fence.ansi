@@ -104,6 +104,19 @@ Try this.
 \e[48;2;52;53;65m\e[0m
 yes — bash.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show me the loop                                                                                   \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+Try this.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m did you mean bash?                                                                                 \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+yes — bash.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m show me the loop                                                                                   \e[0m\r

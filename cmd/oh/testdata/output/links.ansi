@@ -795,6 +795,26 @@ Unsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascrip
 
 An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150m (diagram.png)\e[0m.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m compare \e]8;;https://example.test/question\e\\\e[38;2;129;162;190mthe references\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m (https://example.test/question)\e[0m\e[48;2;52;53;65m with \e]8;;https://example.test/request\e\\\e[38;2;129;162;190mhttps://example.test/request\e[0m\e[48;2;52;53;65m\e]8;;\e\\           \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[1m\e[38;2;207;173;0mTerminal links\e[0m\e[0m\r
+\r
+A \e]8;;https://example.test/label\e\\\e[38;2;129;162;190mlabel with \e[1mnested emphasis\e[0m\e[0m\e]8;;\e\\\e[38;2;150;152;150m (https://example.test/label)\e[0m, a bare secure URL\r
+\e]8;;https://example.test/bare\e\\\e[38;2;129;162;190mhttps://example.test/bare\e[0m\e]8;;\e\\, a bare ordinary URL \e]8;;http://example.test/plain\e\\\e[38;2;129;162;190mhttp://example.test/plain\e[0m\e]8;;\e\\, and a www URL\r
+\e]8;;http://www.example.test/path\e\\\e[38;2;129;162;190mhttp://www.example.test/path\e[0m\e]8;;\e\\.\r
+\r
+This \e]8;;https://example.test/a-long-destination?first=one&second=two\e\\\e[38;2;129;162;190mlong linked label crosses narrow rows without leaking into its neighbours\e[0m\e]8;;\e\\\e[38;2;150;152;150m\e[0m\r
+\e[38;2;150;152;150m(https://example.test/a-long-destination?first=one&second=two)\e[0m, while \e]8;;https://example.test/case\e\\\e[38;2;129;162;190mmixed-case HTTPS\e[0m\e]8;;\e\\\e[38;2;150;152;150m\e[0m\r
+\e[38;2;150;152;150m(HTTPS://example.test/case)\e[0m is accepted too.\r
+\r
+Unsupported \e[38;2;129;162;190mscript links\e[0m\e[38;2;150;152;150m (javascript:alert(1))\e[0m, \e[38;2;129;162;190mrelative links\e[0m\e[38;2;150;152;150m (docs/page.md)\e[0m, \e[38;2;129;162;190mhostless links\e[0m\e[38;2;150;152;150m\e[0m\r
+\e[38;2;150;152;150m(https:path)\e[0m, and FTP \e[38;2;129;162;190mftp://example.test/archive\e[0m remain visible but inert.\r
+\r
+An image remains a fallback: \e[38;2;129;162;190mdiagram\e[0m\e[38;2;150;152;150m (diagram.png)\e[0m.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m compare \e]8;;https://example.test/question\e\\\e[38;2;129;162;190mthe references\e[0m\e[48;2;52;53;65m\e]8;;\e\\\e[38;2;150;152;150m (https://example.test/question)\e[0m\e[48;2;52;53;65m with \e]8;;https://example.test/request\e\\\e[38;2;129;162;190mhttps://example.test/request\e[0m\e[48;2;52;53;65m\e]8;;\e\\           \e[0m\r

@@ -230,6 +230,22 @@ grep \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlinked\e[0m \e[38;2;204
 
 Each boundary stayed closed.
 
+=== printed ===
+\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m check every refused boundary                                                                       \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+I checked each boundary without crossing it.\r
+\r
+\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\read\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhuge.log\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m0L ~96Mt\e[0m \e[38;2;204;102;102mfile is larger than the 20971520-byte limit\e[0m\r
+\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\grep\e]8;;\e\\ \e[38;2;150;152;150msecret\e[0m \e[38;2;150;152;150mlinked\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mlinked: path escapes from parent\e[0m\r
+\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;204;102;102mfetch\e[0m\e]8;;\e\\ \e[38;2;150;152;150m\e[0m\e[38;2;192;128;80mhttp://[2001:db8::1]/private\e[0m \e[38;2;150;152;150mtext\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb fetch failed: Get "http://[2001:db8::1]/private": d…\e[0m\r
+\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190mecho\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190mready\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe shell cannot be confined: writable policy unsupported\e[0m\r
+\r
+Each boundary stayed closed.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m\r
 \r

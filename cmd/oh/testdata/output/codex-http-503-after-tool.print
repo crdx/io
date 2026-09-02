@@ -1,0 +1,51 @@
+
+ complete a tool round before an upstream failure
+
+
+Use the tool.
+work work ✓ 1L
+
+[#1] Request failed; retrying in 1s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#2] Request failed; retrying in 5s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#3] Request failed; retrying in 10s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#4] Request failed; retrying in 30s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#5] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#6] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#7] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#8] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#9] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#10] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#11] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#12] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#13] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#14] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#15] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#16] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#17] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+[#18] Request failed; retrying in 1m00s: Request failed with status 503: upstream connect error or
+disconnect/reset before headers. reset reason: connection termination
+Request failed with status 503: upstream connect error or disconnect/reset before headers. reset
+reason: connection termination
+
+
+ continue after the upstream failure
+
+
+Resumed.

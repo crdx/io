@@ -32,6 +32,14 @@ type liveRegion struct {
 	hasOrigin              bool
 }
 
+func spansOneGroup(firstGroup Group, lastGroup Group, group Group) bool {
+	return firstGroup == group && lastGroup == group
+}
+
+func (self liveRegion) spans(group Group) bool {
+	return spansOneGroup(self.firstGroup, self.lastGroup, group)
+}
+
 func (self *Screen) DrawAnswer(rows []string) bool {
 	return self.draw(rows, AnswerGroup)
 }
@@ -51,7 +59,7 @@ func (self *Screen) DiscardLive() bool {
 	if self.liveRegion.topRowIndex > 0 {
 		return false
 	}
-	if self.isTTY {
+	if self.canRepaint {
 		self.repaint(0, []string{""}, false)
 		self.liveRegion = liveRegion{}
 		return false
@@ -68,7 +76,7 @@ func (self *Screen) discardBlock() bool {
 	if self.liveRegion.topRowIndex > 0 {
 		return false
 	}
-	if !self.isTTY {
+	if !self.canRepaint {
 		self.restoreDrawingState(self.liveRegion.origin)
 		self.liveRegion = liveRegion{}
 		return true
@@ -156,7 +164,7 @@ func (self *Screen) paintGroups(newRows []string, firstGroup Group, lastGroup Gr
 	}
 	self.liveRegion.lastGroup = lastGroup
 
-	if !self.isTTY {
+	if !self.canRepaint {
 		self.liveRegion.rows = newRows
 		self.liveRegion.currentContentRowCount = len(newRows)
 		return true
@@ -186,7 +194,7 @@ func (self *Screen) paintGroups(newRows []string, firstGroup Group, lastGroup Gr
 		self.liveRegion.originRowOffset += self.openedRows - openedRows
 	}
 
-	self.repaint(firstDifference, newRows, firstGroup == AnswerGroup && lastGroup == AnswerGroup)
+	self.repaint(firstDifference, newRows, spansOneGroup(firstGroup, lastGroup, AnswerGroup))
 	self.liveRegion.currentContentRowCount = contentRowCount
 	self.lastGroup = lastGroup
 
@@ -201,12 +209,18 @@ func (self *Screen) seal() {
 		return
 	}
 
-	if !self.isTTY {
+	if !self.canRepaint {
 		self.begin(self.liveRegion.firstGroup)
-		self.write(strings.Join(self.liveRegion.rows, "\n"))
+
+		text := strings.Join(self.liveRegion.rows, "\n")
+		if self.liveRegion.spans(AnswerGroup) {
+			text = self.linkifyScrollback(text)
+		}
+
+		self.write(text)
 	} else if self.liveRegion.currentContentRowCount < len(self.liveRegion.rows) && self.liveRegion.currentContentRowCount > self.liveRegion.topRowIndex {
 		rows := slices.Clone(self.liveRegion.rows[:self.liveRegion.currentContentRowCount])
-		self.repaint(len(rows)-1, rows, self.liveRegion.firstGroup == AnswerGroup && self.liveRegion.lastGroup == AnswerGroup)
+		self.repaint(len(rows)-1, rows, self.liveRegion.spans(AnswerGroup))
 	}
 
 	self.lastGroup = self.liveRegion.lastGroup

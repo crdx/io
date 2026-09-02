@@ -109,6 +109,21 @@ k
 e
 n
 .
+=== printed ===
+
+ check the tree, then build it
+
+
+$ git status --short ✓ 2L 4M M cmd/oh/main.go M cmd/oh/dynamic/dynamic.go
+$ touch build.lock ✓ no output 2M
+read cmd/oh/dynamic/dynamic.go ✓ 1L
+$ printf 'one\\ttwo\\r\\n\\n\\tthree\\n' ✓ 3L 2M one two three
+$ ls /usr/bin ✓ 1L 6M awk basename bash cat chmod cp date diff du echo env find grep gzip head id…
+$ for NAME in cmd/oh/dynamic cmd/oh/painter cmd/oh/call; do go vet ./$NAME; done ✓ 1.4s 1L 400M ok
+$ go build ./... ✗ 0.9s 2L 300M exit(1): ./cmd/oh/main.go:12:2: undefined: spinner
+$ just check ✓ 1L 8M ok all six steps
+
+The tree is dirty and the build is broken.
 === tiny ===
 
  check the

@@ -1256,6 +1256,90 @@ And a pattern with a unicode class in it:
 
 \e[38;2;150;152;150m^\\p{Lu}\\w{2,8}(?:-\\d+)?$\e[0m
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show me every kind of formatting you can draw                                                      \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[3m\e[38;2;150;152;150mLaying out one of each.\e[0m\e[0m\r
+\r
+\e[1m\e[38;2;207;173;0mEverything the renderer knows\e[0m\e[0m\r
+\r
+A paragraph with \e[1mbold\e[0m, \e[3mitalic\e[0m, \e[9mstruck through\e[0m, \e[38;2;192;128;80mcode\e[0m, a \e]8;;https://example.com/one\e\\\e[38;2;129;162;190mlink\e[0m\e]8;;\e\\\e[38;2;150;152;150m (https://example.com/one)\e[0m,\r
+a bare autolink \e]8;;https://example.com/two\e\\\e[38;2;129;162;190mhttps://example.com/two\e[0m\e]8;;\e\\, an image \e[38;2;129;162;190ma diagram\e[0m\e[38;2;150;152;150m (diagram.png)\e[0m, and some \e[38;2;150;152;150m<b>\e[0mraw\r
+HTML\e[38;2;150;152;150m</b>\e[0m in the middle of it.\r
+\r
+\e[38;2;150;152;150m────────────────────────────────────────────────────────────────────────────────────────────────────\e[0m\r
+\r
+\e[1m\e[38;2;207;173;0mAn ordered list\e[0m\e[0m\r
+\r
+\e[38;2;192;128;80m1. \e[0mthe first step\r
+\e[38;2;192;128;80m2. \e[0mthe second step\r
+\e[38;2;192;128;80m3. \e[0mthe third step\r
+\r
+\e[1m\e[38;2;207;173;0mA task list\e[0m\e[0m\r
+\r
+\e[38;2;192;128;80m• \e[0m\e[38;2;76;154;44m[x] \e[0ma thing already done\r
+\e[38;2;192;128;80m• \e[0m\e[38;2;150;152;150m[ ] \e[0ma thing still to do\r
+\r
+\e[1m\e[38;2;207;173;0mAn indented code block\e[0m\e[0m\r
+\r
+\e[38;2;150;152;150mplain = "indented four spaces, so it has no language"\e[0m\r
+\e[38;2;150;152;150mprint(plain)\e[0m\r
+\r
+\e[1m\e[38;2;207;173;0mAn HTML block\e[0m\e[0m\r
+\r
+\e[38;2;150;152;150m<div class="note">\e[0m\r
+\e[38;2;150;152;150m  <p>held as it stands</p>\e[0m\r
+\e[38;2;150;152;150m</div>\e[0m\r
+\r
+\e[1m\e[38;2;207;173;0mA table that leans every way\e[0m\e[0m\r
+\r
+\e[38;2;150;152;150m┌──────┬────────┬───────┬──────┐\e[0m\r
+\e[38;2;150;152;150m│\e[0m \e[1mleft\e[0m \e[38;2;150;152;150m│\e[0m \e[1mcentre\e[0m \e[38;2;150;152;150m│\e[0m \e[1mright\e[0m \e[38;2;150;152;150m│\e[0m \e[1mnone\e[0m \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m├──────┼────────┼───────┼──────┤\e[0m\r
+\e[38;2;150;152;150m│\e[0m a    \e[38;2;150;152;150m│\e[0m   b    \e[38;2;150;152;150m│\e[0m     c \e[38;2;150;152;150m│\e[0m d    \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m├──────┼────────┼───────┼──────┤\e[0m\r
+\e[38;2;150;152;150m│\e[0m aa   \e[38;2;150;152;150m│\e[0m   bb   \e[38;2;150;152;150m│\e[0m    cc \e[38;2;150;152;150m│\e[0m dd   \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m└──────┴────────┴───────┴──────┘\e[0m\r
+\r
+\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150ma quotation, which the renderer sets in from the edge\e[0m\r
+\e[38;2;150;152;150m│ \e[0m\e[38;2;150;152;150mand which runs to a second line\e[0m\r
+\r
+The end.\r
+\r
+A script with a bit of everything in it:\r
+\r
+\e[38;2;201;166;212mif\e[0m \e[38;2;138;190;183m[\e[0m\e[38;2;138;190;183m[\e[0m \e[38;2;150;152;150m-d\e[0m \e[38;2;181;189;104m"\e[0m$DIR\e[38;2;181;189;104m"\e[0m \e[38;2;138;190;183m]\e[0m\e[38;2;138;190;183m]\e[0m; \e[38;2;201;166;212mthen\e[0m\r
+    \e[38;2;240;198;116mecho\e[0m \e[38;2;181;189;104m"there"\e[0m\r
+\e[38;2;201;166;212melif\e[0m \e[38;2;138;190;183m[\e[0m\e[38;2;138;190;183m[\e[0m \e[38;2;150;152;150m-f\e[0m \e[38;2;181;189;104m"\e[0m$DIR\e[38;2;181;189;104m"\e[0m \e[38;2;138;190;183m]\e[0m\e[38;2;138;190;183m]\e[0m; \e[38;2;201;166;212mthen\e[0m\r
+    \e[38;2;240;198;116mecho\e[0m \e[38;2;181;189;104m"a file"\e[0m\r
+\e[38;2;201;166;212melse\e[0m\r
+    \e[38;2;240;198;116mecho\e[0m \e[38;2;181;189;104m"nowhere"\e[0m\r
+\e[38;2;201;166;212mfi\e[0m\r
+\r
+\e[38;2;201;166;212mwhile\e[0m \e[38;2;240;198;116mread\e[0m \e[38;2;150;152;150m-r\e[0m \e[38;2;150;152;150mNAME\e[0m; \e[38;2;201;166;212mdo\e[0m\r
+    \e[38;2;240;198;116mecho\e[0m \e[38;2;181;189;104m"\e[0m$NAME\e[38;2;181;189;104m"\e[0m \e[38;2;150;152;150m>\e[0m \e[38;2;150;152;150mout.txt\e[0m \e[38;2;150;152;150m2>\e[0m&\e[38;2;192;128;80m1\e[0m\r
+\e[38;2;201;166;212mdone\e[0m \e[38;2;150;152;150m<\e[0m \e[38;2;150;152;150mlist.txt\e[0m\r
+\r
+\e[38;2;201;166;212muntil\e[0m \e[38;2;138;190;183m[\e[0m\e[38;2;138;190;183m[\e[0m \e[38;2;150;152;150m-z\e[0m \e[38;2;181;189;104m"\e[0m$REST\e[38;2;181;189;104m"\e[0m \e[38;2;138;190;183m]\e[0m\e[38;2;138;190;183m]\e[0m; \e[38;2;201;166;212mdo\e[0m\r
+    REST\e[38;2;138;190;183m=\e[0m\e[38;2;181;189;104m""\e[0m\r
+\e[38;2;201;166;212mdone\e[0m\r
+\r
+\e[38;2;201;166;212mcase\e[0m \e[38;2;181;189;104m"\e[0m$MODE\e[38;2;181;189;104m"\e[0m \e[38;2;150;152;150min\e[0m\r
+    \e[38;2;240;198;116mread\e[0m\e[38;2;138;190;183m)\e[0m  \e[38;2;240;198;116mecho\e[0m \e[38;2;150;152;150mreading\e[0m ;;\r
+    \e[38;2;150;152;150mwrite\e[0m\e[38;2;138;190;183m)\e[0m \e[38;2;240;198;116mecho\e[0m \e[38;2;150;152;150mwriting\e[0m ;;\r
+    \e[38;2;150;152;150m*\e[0m\e[38;2;138;190;183m)\e[0m     \e[38;2;240;198;116mecho\e[0m \e[38;2;150;152;150mother\e[0m ;;\r
+\e[38;2;201;166;212mesac\e[0m\r
+\r
+\e[38;2;201;166;212mselect\e[0m \e[38;2;150;152;150mCHOICE\e[0m \e[38;2;150;152;150min\e[0m \e[38;2;150;152;150mone\e[0m \e[38;2;150;152;150mtwo\e[0m; \e[38;2;201;166;212mdo\e[0m \e[38;2;150;152;150mbreak\e[0m; \e[38;2;201;166;212mdone\e[0m\r
+\r
+\e[38;2;150;152;150mls\e[0m \e[38;2;150;152;150m-la\e[0m | \e[38;2;150;152;150mgrep\e[0m \e[38;2;150;152;150m-v\e[0m \e[38;2;181;189;104m'^d'\e[0m | \e[38;2;150;152;150mwc\e[0m \e[38;2;150;152;150m-l\e[0m\r
+\r
+And a pattern with a unicode class in it:\r
+\r
+\e[38;2;150;152;150m^\\p{Lu}\\w{2,8}(?:-\\d+)?$\e[0m\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m show me every kind of formatting you can draw                                                      \e[0m\r

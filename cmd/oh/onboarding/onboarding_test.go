@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -338,4 +339,28 @@ type writerFunc func([]byte) (int, error)
 
 func (self writerFunc) Write(piece []byte) (int, error) {
 	return self(piece)
+}
+
+func TestAPrintedFirstRunIsRefusedRatherThanAsked(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = reader.Close()
+		_ = writer.Close()
+	})
+
+	var shown strings.Builder
+	_, err = PrepareConfig(Options{Input: reader, Output: &shown, IsPrinting: true})
+
+	if !errors.Is(err, ErrNobodyToAsk) {
+		t.Fatalf("got %v, want a refusal to ask", err)
+	}
+	if shown.String() != "" {
+		t.Errorf("a printed first run drew %q", shown.String())
+	}
 }

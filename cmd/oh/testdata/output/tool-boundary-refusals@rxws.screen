@@ -213,6 +213,21 @@ s
 e
 d
 .
+=== printed ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ check every refused boundary
+
+
+I checked each boundary without crossing it.
+
+read huge.log ✗ 0L ~96Mt file is larger than the 20971520-byte limit
+grep secret linked ✗ linked: path escapes from parent
+fetch http://[2001:db8::1]/private text ✗ web fetch failed: Get "http://[2001:db8::1]/private": d…
+$ echo ready ✗ the shell cannot be confined: writable policy unsupported
+
+Each boundary stayed closed.
 === tiny ===
 Agent
 000000000000

@@ -300,6 +300,24 @@ a
 c
 e
 s
+=== printed ===
+Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
+
+
+ show the customer data model
+
+
+Sketching the data model.
+
+Customer orders
+
+┌────────────────────┐               ┌────────────────────────┐
+│    👩‍🚀 Customer     │               │        ❤️ Order        │
+├────────┬──────┬────┤               ├─────┬─────────────┬────┤
+│ int    │ id   │ PK │               │ int │ id          │ PK │
+│ string │ name │    │               │ int │ customer_id │ FK │
+└────────┴┬─────┴────┘               └─────┴──────┬──────┴────┘
+          └||─────────────1️⃣ places─────────────o{┘
 === tiny ===
 Agent
 000000000000

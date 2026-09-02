@@ -350,6 +350,30 @@ u
 r
 e
 .
+=== printed ===
+
+ do one of everything so I can see what each call says about itself
+
+
+One of each, then.
+
+$ COUNT=0; for NAME in *.go; do COUNT=$((COUNT + 1)); done; echo $COUNT ✓ 2.4s 3L 700M
+ls ✓ 2L
+read diagram.png ✓ ~1.6Kt
+edit screen.go ✓ +12 −5
+grep ^func\\s+(New|Draw)[A-Z]\\w{2,8}\\( *.go ✓ 7L+ ~100t (of ~3.4Kt)
+read README.md ✓ 3L
+
+Here is a script, and a pattern beside it:
+
+for NAME in $(ls *.go); do
+    COUNT=$(grep -c "func" "$NAME")
+    echo "$NAME has $COUNT"
+done
+
+^\\s*(func|type)\\s+\\w{3,12}\\(
+
+That is one call of every kind the harness knows how to measure.
 === tiny ===
 
  do one of

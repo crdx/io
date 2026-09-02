@@ -586,6 +586,40 @@ And a nested list, whose markers arrive before the items they introduce:
 
 That is the lot.
 
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m show me how to count the go files                                                                  \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[3m\e[38;2;150;152;150mA loop over the listing is the shortest way to say it.\e[0m\e[0m\r
+\r
+Try this.\r
+\r
+\e[38;2;201;166;212mfor\e[0m \e[38;2;150;152;150mNAME\e[0m \e[38;2;150;152;150min\e[0m \e[38;2;201;166;212m$(\e[0m\e[38;2;150;152;150mls\e[0m \e[38;2;150;152;150m*.go\e[0m\e[38;2;201;166;212m)\e[0m; \e[38;2;201;166;212mdo\e[0m \e[38;2;240;198;116mecho\e[0m \e[38;2;181;189;104m"\e[0m$NAME\e[38;2;181;189;104m is quite a long line indeed\e[0m\e[38;2;181;189;104m"\e[0m; \e[38;2;201;166;212mdone\e[0m\r
+\r
+That is all.\r
+\r
+And a table, which changes shape as its rows arrive:\r
+\r
+\e[38;2;150;152;150m┌──────┬────────────────────────────────────────────┐\e[0m\r
+\e[38;2;150;152;150m│\e[0m \e[1mTool\e[0m \e[38;2;150;152;150m│\e[0m \e[1mWhat it does when it is asked to\e[0m           \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m├──────┼────────────────────────────────────────────┤\e[0m\r
+\e[38;2;150;152;150m│\e[0m read \e[38;2;150;152;150m│\e[0m takes a file and hands it back to you      \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m├──────┼────────────────────────────────────────────┤\e[0m\r
+\e[38;2;150;152;150m│\e[0m grep \e[38;2;150;152;150m│\e[0m walks the whole tree looking for a pattern \e[38;2;150;152;150m│\e[0m\r
+\e[38;2;150;152;150m└──────┴────────────────────────────────────────────┘\e[0m\r
+\r
+That is the lot.\r
+\r
+And a nested list, whose markers arrive before the items they introduce:\r
+\r
+\e[38;2;192;128;80m• \e[0mread takes a file and hands it back\r
+  \e[38;2;192;128;80m• \e[0mand says how big it was\r
+  \e[38;2;192;128;80m• \e[0mand leaves it where it found it\r
+\e[38;2;192;128;80m• \e[0mgrep walks the tree for a pattern\r
+\r
+That is the lot.\r
+
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m show me how to count the go files                                                                  \e[0m\r

@@ -15,7 +15,8 @@ func screenWithInput() (*Screen, *strings.Builder) {
 
 	return &Screen{
 		writer:      screenOutput,
-		isTTY:       true,
+		isTerminal:  true,
+		canRepaint:  true,
 		column:      4,
 		hasPrinted:  true,
 		input:       shownFooter,
@@ -25,7 +26,7 @@ func screenWithInput() (*Screen, *strings.Builder) {
 
 func TestSynchronisingHoldsNestedFramesBackUntilDrawingFinishes(t *testing.T) {
 	screenOutput := &strings.Builder{}
-	screen := &Screen{writer: screenOutput, isTTY: true}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true}
 
 	screen.Sync(func() {
 		screen.Footer([]string{"> hi"}, 0, 3)
@@ -62,7 +63,7 @@ func TestAnEscapeCodeIsWrittenWholeAndReportsThatItReachedTheTerminal(t *testing
 	const escapeCode = "\x1b]99;i=1:d=0;VGl0bGU=\x1b\\\x1b]99;i=1;\x1b\\"
 
 	screenOutput := &strings.Builder{}
-	screen := &Screen{writer: screenOutput, isTTY: true}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true}
 
 	if !screen.WriteEscape(escapeCode) {
 		t.Error("expected a terminal to take the escape code")
@@ -77,7 +78,7 @@ func TestAnEscapeCodeIsHeldBackUntilTheDrawingAroundItFinishes(t *testing.T) {
 	const escapeCode = "\x1b]99;i=1;\x1b\\"
 
 	screenOutput := &strings.Builder{}
-	screen := &Screen{writer: screenOutput, isTTY: true}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true}
 
 	screen.Sync(func() {
 		screen.WriteEscape(escapeCode)
@@ -107,7 +108,7 @@ func TestAnEscapeCodeIsNotWrittenToRedirectedOutput(t *testing.T) {
 
 func TestProgressReportsAnIndeterminateTurnAndClearsIt(t *testing.T) {
 	screenOutput := &strings.Builder{}
-	screen := &Screen{writer: screenOutput, isTTY: true}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true}
 
 	screen.ReportProgress(true)
 	screen.ReportProgress(true)
@@ -120,7 +121,7 @@ func TestProgressReportsAnIndeterminateTurnAndClearsIt(t *testing.T) {
 
 func TestProgressIsAnnouncedAgainWhileATurnRuns(t *testing.T) {
 	screenOutput := &strings.Builder{}
-	screen := &Screen{writer: screenOutput, isTTY: true}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true}
 
 	screen.ReportProgress(true)
 	screenOutput.Reset()
@@ -134,7 +135,7 @@ func TestProgressIsAnnouncedAgainWhileATurnRuns(t *testing.T) {
 
 func TestProgressIsNotAnnouncedAgainBetweenTurns(t *testing.T) {
 	screenOutput := &strings.Builder{}
-	screen := &Screen{writer: screenOutput, isTTY: true}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true}
 
 	screen.RefreshProgress()
 
@@ -188,7 +189,7 @@ func TestReleasingAnUnusedConversationErasesItsLine(t *testing.T) {
 
 func TestReleasingAnUnusedConversationErasesEveryWrappedRow(t *testing.T) {
 	screenOutput := &strings.Builder{}
-	screen := &Screen{writer: screenOutput, isTTY: true, columns: 4}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true, columns: 4}
 
 	screen.Line("banner")
 	screen.Footer([]string{">"}, 0, 0)
@@ -203,7 +204,7 @@ func TestReleasingAnUnusedConversationErasesEveryWrappedRow(t *testing.T) {
 func TestTheInputTakesNoRowOfItsOwnUntilSomethingHasBeenSaid(t *testing.T) {
 	screenOutput := &strings.Builder{}
 
-	screen := &Screen{writer: screenOutput, isTTY: true}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true}
 
 	screen.Footer([]string{"> hi"}, 0, 3)
 
@@ -228,7 +229,7 @@ func TestTheInputTakesNoRowOfItsOwnUntilSomethingHasBeenSaid(t *testing.T) {
 
 func TestFinishingTheConversationKeepsTheFooterInPlace(t *testing.T) {
 	screenOutput := &strings.Builder{}
-	screen := &Screen{writer: screenOutput, isTTY: true}
+	screen := &Screen{writer: screenOutput, isTerminal: true, canRepaint: true}
 	screen.Footer([]string{"> hi"}, 0, 3)
 	screen.Line("thinking")
 	screenOutput.Reset()

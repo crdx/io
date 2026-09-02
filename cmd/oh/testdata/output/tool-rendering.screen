@@ -114,6 +114,17 @@ o
 n
 e
 .
+=== printed ===
+
+ run a multiline command and notify me when it finishes
+
+
+$ NAME=alpha; case "$NAME" in alpha) echo alpha ;; esac; (echo beta) 3L ✓ 2L alpha beta
+notify command finished alpha and beta were printed ✓ 1L
+search how to quote a shell variable ✓ 1L
+fetch https://gnu.org/bash clean_html ✓ 1L
+
+done.
 === tiny ===
 
  run a

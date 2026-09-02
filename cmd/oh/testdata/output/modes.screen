@@ -377,6 +377,28 @@ o
 n
 e
 .
+=== printed ===
+
+ what am i allowed to do here?
+
+
+Reading and running commands, but not writing.
+
+
+ 🤖 The workspace is now read-write.
+
+
+
+ now write it down
+
+
+Writing it down.
+
+
+ 🤖 The bash tool is now refused, and will turn away every command until it is granted again.
+
+
+Done.
 === tiny ===
 
  what am i

@@ -201,6 +201,21 @@ n
 e
 r
 .
+=== printed ===
+
+ look at both of those and tell me what changed
+
+
+Taking them together.
+
+read screen.go –
+grep spinner *.go –
+
+
+ 🤖 The workspace is now read-only.
+
+
+Both still mention the spinner.
 === tiny ===
 
  look at
