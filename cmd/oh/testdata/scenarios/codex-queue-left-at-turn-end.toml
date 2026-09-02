@@ -1,0 +1,34 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "high"
+
+[first]
+prompt = "queue a message the turn never reaches a boundary for"
+queue-after-message-delta = ["one more thing"]
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"That is done."}''',
+    '''{"type":"response.output_text.done","text":"That is done."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"That is done."}]}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"And the one more thing."}''',
+    '''{"type":"response.output_text.done","text":"And the one more thing."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"And the one more thing."}]}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]
+
+[resume]
+prompt = "carry on"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Carrying on."}''',
+    '''{"type":"response.output_text.done","text":"Carrying on."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-3","type":"message","role":"assistant","content":[{"type":"output_text","text":"Carrying on."}]}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]

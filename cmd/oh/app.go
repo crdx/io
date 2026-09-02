@@ -251,10 +251,12 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 		self.submitInput(inputLine, history, strings.TrimSpace(inputLine.Text()))
 
 	case edit.Continue:
-		self.submitInput(inputLine, history, self.continueMessage)
+		self.continueOrFlush(inputLine, history)
 
 	case edit.Cancel:
-		self.cancelTurn(stopKeyReason(keypress))
+		if !self.takeBackInterjection(inputLine) {
+			self.cancelTurn(stopKeyReason(keypress))
+		}
 
 	case edit.Quit:
 		return false
@@ -364,8 +366,7 @@ func (self *App) takeBackPathGrantChange(index int, path string) {
 }
 
 func (self *App) sendCommandPrompt(message string) {
-	if self.currentTurn.Running() {
-		self.replaceTurn(message)
+	if self.currentTurn.Interject(message) {
 		return
 	}
 	self.start(message)
@@ -391,11 +392,52 @@ func (self *App) submitInput(inputLine *edit.Input, history *edit.History, messa
 		return
 	}
 
+	if !self.currentTurn.Interject(message) {
+		self.start(message)
+	}
+}
+
+func (self *App) sendInput(inputLine *edit.Input, history *edit.History, message string) {
+	history.Add(message)
+	inputLine.Reset()
+
+	if message == "" {
+		return
+	}
+
 	if self.currentTurn.Running() {
 		self.replaceTurn(message)
 	} else {
 		self.start(message)
 	}
+}
+
+func (self *App) continueOrFlush(inputLine *edit.Input, history *edit.History) {
+	if message, isQueued := self.currentTurn.TakeInterjections(); isQueued {
+		self.replaceTurn(message)
+		return
+	}
+
+	self.sendInput(inputLine, history, self.continueMessage)
+}
+
+func (self *App) takeBackInterjection(inputLine *edit.Input) bool {
+	if inputLine == nil {
+		return false
+	}
+
+	message, isQueued := self.currentTurn.TakeLastInterjection()
+	if !isQueued {
+		return false
+	}
+
+	if typedText := inputLine.Text(); typedText != "" {
+		message += agent.InterjectionSeparator + typedText
+	}
+
+	inputLine.SetText(message)
+
+	return true
 }
 
 func (self *App) toggleCap(whichCaps caps.Set) {
@@ -594,7 +636,7 @@ func (self *App) show(inputLine *edit.Input) {
 			Center: self.renderBar(segment.BottomCenter, frame),
 			Right:  bottomRight,
 		},
-		Status: self.feedbackRows(columns),
+		Status: self.statusRows(columns),
 		Rule:   self.ruleStyle(),
 	}
 
@@ -609,9 +651,9 @@ func (self *App) ruleStyle() style.Style {
 	return style.Rule
 }
 
-func (self *App) feedbackRows(columns int) []string {
+func (self *App) statusRows(columns int) []string {
 	if self.feedback.message.text == "" {
-		return nil
+		return painter.RenderQueuedMessages(self.currentTurn.GetInterjections(), columns)
 	}
 
 	styledText := painter.NoticeStyle(self.feedback.message.status)(self.feedback.message.text)
@@ -1056,6 +1098,10 @@ func (self *App) finish() {
 
 	if self.isTransitionRequested() {
 		return
+	}
+
+	if message, isQueued := self.currentTurn.TakeInterjections(); isQueued {
+		self.queuedTurn.Replace(message)
 	}
 
 	queuedKind, message := self.queuedTurn.Take()

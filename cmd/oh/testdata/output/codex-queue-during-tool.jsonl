@@ -1,0 +1,25 @@
+{"kind":"head","version":11,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"high","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
+{"kind":"event","event":{"kind":"user_message","text":"queue a message while the tool is working"}}
+{"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"call-1","name":"work","arguments":"{}"}}
+{"kind":"event","event":{"kind":"state_change","id":"call-1","state":1}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"first round","id":"call-1","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":11,"total_bytes":11}}}
+{"kind":"event","event":{"kind":"user_message","text":"check the other path too\n\nand mention what you find"}}
+{"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"call-2","name":"work","arguments":"{}"}}
+{"kind":"event","event":{"kind":"state_change","id":"call-2","state":2}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"second round","id":"call-2","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":12,"total_bytes":12}}}
+{"kind":"event","event":{"kind":"model_message","text":"I checked the other path and it agrees."}}
+{"kind":"item","payload":{"role":"user","content":"queue a message while the tool is working"}}
+{"kind":"item","payload":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":"{}"}}
+{"kind":"item","payload":{"type":"function_call_output","call_id":"call-1","output":"first round"}}
+{"kind":"item","payload":{"role":"user","content":"check the other path too\n\nand mention what you find"}}
+{"kind":"item","payload":{"id":"call-item-2","type":"function_call","call_id":"call-2","name":"work","arguments":"{}"}}
+{"kind":"item","payload":{"type":"function_call_output","call_id":"call-2","output":"second round"}}
+{"kind":"item","payload":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"I checked the other path and it agrees."}]}}
+{"kind":"turn_completion"}
+{"kind":"event","event":{"kind":"user_message","text":"carry on"}}
+{"kind":"event","event":{"kind":"model_message","text":"Carrying on."}}
+{"kind":"item","payload":{"role":"user","content":"carry on"}}
+{"kind":"item","payload":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"Carrying on."}]}}
+{"kind":"turn_completion"}

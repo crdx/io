@@ -61,7 +61,7 @@ func collect(t *testing.T, assistant *agent.Agent) ([]agent.Event, error) {
 	var failure error
 
 	synctest.Test(t, func(t *testing.T) {
-		for update, err := range assistant.Stream(t.Context(), "go") {
+		for update, err := range assistant.Stream(t.Context(), "go", nil) {
 			if err != nil {
 				failure = err
 
@@ -225,7 +225,7 @@ func TestStoppingTheTurnDuringAWaitEndsItThereAndThen(t *testing.T) {
 
 	started := time.Now()
 
-	for update, err := range assistant.Stream(ctx, "go") {
+	for update, err := range assistant.Stream(ctx, "go", nil) {
 		if err != nil {
 			break
 		}
@@ -248,7 +248,7 @@ func TestNothingIsRepeatedOnceTheCallerHasStoppedListening(t *testing.T) {
 	provider := &failingProvider{failures: 100, err: wireDiedError{}}
 	assistant := agent.New("", provider, []tool.Tool{noop()})
 
-	for update := range assistant.Stream(t.Context(), "go") {
+	for update := range assistant.Stream(t.Context(), "go", nil) {
 		if update.Delta != nil && update.Delta.Kind == agent.ModelMessageEvent {
 			break
 		}

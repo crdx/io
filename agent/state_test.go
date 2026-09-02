@@ -132,7 +132,7 @@ func TestASuccessfulCallEmitsItsDurableStateBeforeItsResult(t *testing.T) {
 	assistant := agent.New("", provider, []tool.Tool{statefulTool(&restored)})
 	var events []agent.Event
 
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -178,7 +178,7 @@ func TestAFailedCallDoesNotEmitDurableState(t *testing.T) {
 	})
 	assistant := agent.New("", provider, []tool.Tool{failedTool})
 
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}

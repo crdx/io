@@ -1,0 +1,53 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## Mode · rxwgs · +0s
+
+## User · +0s
+
+```
+queue a message and then push it out at once
+```
+
+## Tool call — work · `work` · +0s
+
+→ cancelled, 1 line, 67B · +0s
+
+```
+the call was stopped after 4s because the user sent another message
+```
+
+## Interrupted · +0s
+
+The turn was interrupted because the user sent another message.
+
+## User · +0s
+
+```
+stop and do this instead
+```
+
+## Assistant · +0s
+
+```
+Stopping that and doing this instead.
+```
+
+## User · +0s
+
+```
+carry on
+```
+
+## Assistant · +0s
+
+```
+Carrying on.
+```
+

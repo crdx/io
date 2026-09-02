@@ -7,17 +7,13 @@ import (
 const maxRows = 10
 
 func window(rows []string, cursorRow int) Frame {
-	if len(rows) <= maxRows {
-		return Frame{Rows: rows, Row: cursorRow}
-	}
-
-	start := min(max(cursorRow-maxRows+1, 0), len(rows)-maxRows)
+	visibleRows := width.WindowRows(rows, maxRows, cursorRow)
 
 	return Frame{
-		Rows:             rows[start : start+maxRows],
-		Row:              cursorRow - start,
-		HiddenLinesAbove: start,
-		HiddenLinesBelow: len(rows) - start - maxRows,
+		Rows:             visibleRows.Rows,
+		Row:              visibleRows.Focus,
+		HiddenLinesAbove: visibleRows.HiddenLinesAbove,
+		HiddenLinesBelow: visibleRows.HiddenLinesBelow,
 	}
 }
 

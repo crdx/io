@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/width"
 )
 
 const (
@@ -96,6 +99,8 @@ func (self *Screen) Footer(rows []string, cursorRow int, cursorColumn int) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
+	rows, cursorRow = self.fitFooter(rows, cursorRow)
+
 	if slices.Equal(self.input.rows, rows) &&
 		self.input.cursorRow == cursorRow && self.input.cursorColumn == cursorColumn {
 		return
@@ -104,6 +109,57 @@ func (self *Screen) Footer(rows []string, cursorRow int, cursorColumn int) {
 	self.input = footer{rows: rows, cursorRow: cursorRow, cursorColumn: cursorColumn}
 
 	self.redraw("")
+}
+
+func (self *Screen) fitFooter(rows []string, cursorRow int) ([]string, int) {
+	if self.lines <= 0 || len(rows) <= self.lines {
+		return rows, cursorRow
+	}
+
+	visibleRows := width.WindowRows(rows, self.lines, cursorRow)
+	notices := 0
+	if visibleRows.HiddenLinesAbove > 0 {
+		notices++
+	}
+	if visibleRows.HiddenLinesBelow > 0 {
+		notices++
+	}
+
+	if notices == 0 || self.lines <= notices {
+		return visibleRows.Rows, visibleRows.Focus
+	}
+
+	visibleRows = width.WindowRows(rows, self.lines-notices, cursorRow)
+
+	footerRows := make([]string, 0, len(visibleRows.Rows)+notices)
+	focus := visibleRows.Focus
+
+	if visibleRows.HiddenLinesAbove > 0 {
+		footerRows = append(footerRows, self.hiddenRowsNotice(visibleRows.HiddenLinesAbove))
+		focus++
+	}
+
+	footerRows = append(footerRows, visibleRows.Rows...)
+
+	if visibleRows.HiddenLinesBelow > 0 {
+		footerRows = append(footerRows, self.hiddenRowsNotice(visibleRows.HiddenLinesBelow))
+	}
+
+	return footerRows, focus
+}
+
+func (self *Screen) hiddenRowsNotice(hiddenLines int) string {
+	notice := fmt.Sprintf("%s %d more %s", width.VerticalEllipsis, hiddenLines, plural(hiddenLines))
+
+	return style.Rule(self.fit(notice))
+}
+
+func plural(count int) string {
+	if count == 1 {
+		return "line"
+	}
+
+	return "lines"
 }
 
 func (self *Screen) WriteEscape(escape string) bool {

@@ -1,0 +1,46 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "high"
+
+[[tool]]
+name = "work"
+outputs = ["first round", "second round"]
+
+[first]
+prompt = "queue a message at each of two boundaries"
+queue-after-each-tool-request = ["the first note", "the second note"]
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_item.added","item":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":""}}''',
+    '''{"type":"response.function_call_arguments.done","item_id":"call-item-1","arguments":"{}"}''',
+    '''{"type":"response.output_item.done","item":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":"{}"}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_item.added","item":{"id":"call-item-2","type":"function_call","call_id":"call-2","name":"work","arguments":""}}''',
+    '''{"type":"response.function_call_arguments.done","item_id":"call-item-2","arguments":"{}"}''',
+    '''{"type":"response.output_item.done","item":{"id":"call-item-2","type":"function_call","call_id":"call-2","name":"work","arguments":"{}"}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Both notes taken."}''',
+    '''{"type":"response.output_text.done","text":"Both notes taken."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Both notes taken."}]}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]
+
+[resume]
+prompt = "carry on"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Carrying on."}''',
+    '''{"type":"response.output_text.done","text":"Carrying on."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"Carrying on."}]}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]

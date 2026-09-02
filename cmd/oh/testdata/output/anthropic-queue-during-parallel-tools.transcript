@@ -1,0 +1,57 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## Mode · rxwgs · +0s
+
+## User · +0s
+
+```
+queue a message while two tools run at once
+```
+
+## Tool call — work · `work` · +0s
+
+## Tool call — work · `work` · +0s
+
+## Tool result — work · success, 1 line, 12B · +0s
+
+```
+first result
+```
+
+## Tool result — work · success, 1 line, 13B · +0s
+
+```
+second result
+```
+
+## User · +0s
+
+```
+check the other path too
+```
+
+## Assistant · +0s
+
+```
+Both paths agree.
+```
+
+## User · +0s
+
+```
+carry on
+```
+
+## Assistant · +0s
+
+```
+Carrying on.
+```
+

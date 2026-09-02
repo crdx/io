@@ -954,7 +954,7 @@ func TestAThoughtIsReportedWholeAndStoredWithItsSeal(t *testing.T) {
 
 	var reasoningDeltas strings.Builder
 	var reasoning []string
-	for update, err := range assistant.Stream(t.Context(), "what is the weather?") {
+	for update, err := range assistant.Stream(t.Context(), "what is the weather?", nil) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -1456,7 +1456,7 @@ func TestACancelledTurnOrphansAThoughtTheScreenAlreadyShowed(t *testing.T) {
 
 	var shown []string
 
-	for update, err := range assistant.Stream(ctx, "what is the weather?") {
+	for update, err := range assistant.Stream(ctx, "what is the weather?", nil) {
 		if err != nil {
 			break
 		}

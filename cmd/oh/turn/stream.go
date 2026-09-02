@@ -23,9 +23,10 @@ type State struct {
 }
 
 type Stream struct {
-	events chan Event
-	cancel context.CancelCauseFunc
-	state  State
+	events        chan Event
+	cancel        context.CancelCauseFunc
+	state         State
+	interjections *agent.Interjections
 }
 
 type Timing struct {
@@ -40,7 +41,7 @@ func Start(assistant *agent.Agent, message string, timing Timing) *Stream {
 	go func() {
 		defer close(stream.events)
 		defer cancel(nil)
-		for update, err := range assistant.Stream(streamContext, message) {
+		for update, err := range assistant.Stream(streamContext, message, stream.interjections) {
 			stream.events <- Event{Update: update, Err: err}
 			if err != nil {
 				return
@@ -51,7 +52,12 @@ func Start(assistant *agent.Agent, message string, timing Timing) *Stream {
 }
 
 func Adopt(events chan Event, cancel context.CancelCauseFunc, state State) *Stream {
-	return &Stream{events: events, cancel: cancel, state: state}
+	return &Stream{
+		events:        events,
+		cancel:        cancel,
+		state:         state,
+		interjections: &agent.Interjections{},
+	}
 }
 
 func (self *Stream) Events() <-chan Event {
@@ -63,6 +69,33 @@ func (self *Stream) Events() <-chan Event {
 
 func (self *Stream) Running() bool   { return self != nil && self.state.Running }
 func (self *Stream) Cancelled() bool { return self != nil && self.state.IsCancelled }
+
+func (self *Stream) Interjections() *agent.Interjections {
+	if self == nil {
+		return nil
+	}
+	return self.interjections
+}
+
+func (self *Stream) Interject(text string) bool {
+	if !self.Running() {
+		return false
+	}
+
+	return self.interjections.Add(text)
+}
+
+func (self *Stream) GetInterjections() []string {
+	return self.Interjections().Peek()
+}
+
+func (self *Stream) TakeInterjections() (string, bool) {
+	return self.Interjections().Take()
+}
+
+func (self *Stream) TakeLastInterjection() (string, bool) {
+	return self.Interjections().TakeLast()
+}
 
 func (self *Stream) Error() error {
 	if self == nil {

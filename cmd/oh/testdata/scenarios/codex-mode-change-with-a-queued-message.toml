@@ -1,0 +1,41 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "high"
+
+[[tool]]
+name = "work"
+blocks = true
+stopped-output = "the call was stopped after 3s because the user changed what the harness is allowed to do"
+
+[first]
+prompt = "queue a message and then change what I am allowed to do"
+queue-after-tool-request = ["do this instead"]
+toggle-after-tool-request = "w"
+is-cancelled = true
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_item.added","item":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":""}}''',
+    '''{"type":"response.function_call_arguments.done","item_id":"call-item-1","arguments":"{}"}''',
+    '''{"type":"response.output_item.done","item":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":"{}"}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Doing that instead, read-only."}''',
+    '''{"type":"response.output_text.done","text":"Doing that instead, read-only."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Doing that instead, read-only."}]}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]
+
+[resume]
+prompt = "carry on"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Carrying on."}''',
+    '''{"type":"response.output_text.done","text":"Carrying on."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"Carrying on."}]}}''',
+    '''{"type":"response.completed","response":{"status":"completed"}}''',
+]

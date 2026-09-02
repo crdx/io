@@ -78,7 +78,7 @@ func TestStreamAnswersEveryCallOfAnAbandonedTurn(t *testing.T) {
 			provider := &callProvider{}
 			assistant := agent.New("", provider, []tool.Tool{noop()})
 
-			for update, err := range assistant.Stream(t.Context(), "go") {
+			for update, err := range assistant.Stream(t.Context(), "go", nil) {
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -105,7 +105,7 @@ func TestStreamAnswersWithWhateverRanBeforeTheTurnWasDropped(t *testing.T) {
 	provider := &callProvider{}
 	assistant := agent.New("", provider, []tool.Tool{noop()})
 
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -311,7 +311,7 @@ func TestAResultSaysHowLongItsCallTook(t *testing.T) {
 
 	timedResults := 0
 
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -338,7 +338,7 @@ func TestStreamAnswersEveryCallOfAFinishedTurn(t *testing.T) {
 	provider := &callProvider{}
 	assistant := agent.New("", provider, []tool.Tool{noop()})
 
-	for _, err := range assistant.Stream(t.Context(), "go") {
+	for _, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -393,7 +393,7 @@ func TestOnlyEnabledToolsAreOfferedAndCallable(t *testing.T) {
 		t.Fatalf("expected %s to remain known", disabledTool.Name())
 	}
 
-	for _, err := range assistant.Stream(t.Context(), "go") {
+	for _, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -410,7 +410,7 @@ func singleResult(t *testing.T, calledTool tool.Tool) agent.Event {
 	assistant := agent.New("", provider, []tool.Tool{calledTool})
 
 	var results []agent.Event
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -470,7 +470,7 @@ func TestAFailedCallIsHandedBackToTheModelAsAFailure(t *testing.T) {
 			}
 			assistant := agent.New("", provider, []tool.Tool{test.calledTool})
 
-			for _, err := range assistant.Stream(t.Context(), "go") {
+			for _, err := range assistant.Stream(t.Context(), "go", nil) {
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -507,7 +507,7 @@ func TestAReadOnlyCallStoresReadOnlyFallbackRendering(t *testing.T) {
 	}
 	assistant := agent.New("", provider, []tool.Tool{calledTool})
 
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -580,7 +580,7 @@ func TestACallTheUserStoppedIsMarkedApartFromOneThatFailed(t *testing.T) {
 	assistant := agent.New("", provider, []tool.Tool{stoppedTool})
 
 	var result *agent.Event
-	for update := range assistant.Stream(ctx, "go") {
+	for update := range assistant.Stream(ctx, "go", nil) {
 		if update.Event != nil && update.Event.Kind == agent.ToolCallResultEvent {
 			result = update.Event
 		}
@@ -659,7 +659,7 @@ func unparsedToolCallSubject(t *testing.T, tools []tool.Tool, name string, argum
 
 	var calls []agent.Event
 
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -817,7 +817,7 @@ func TestStreamAttachesUsageToOneExistingResponseEvent(t *testing.T) {
 	assistant := agent.New("", provider, nil)
 
 	var reported []agent.Event
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -845,7 +845,7 @@ func TestStreamSeparatesCompletedProseBlocksFromDeltas(t *testing.T) {
 	assistant := agent.New("", provider, nil)
 
 	var got []string
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -882,7 +882,7 @@ func TestStreamDiscardsIncompleteReasoning(t *testing.T) {
 	assistant := agent.New("", provider, nil)
 
 	var hasCompletedReasoning bool
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			if !errors.Is(err, failure) {
 				t.Fatalf("got %v, want %v", err, failure)
@@ -906,7 +906,7 @@ func TestStreamDropsIncompleteProseWhenItsKindChanges(t *testing.T) {
 	assistant := agent.New("", provider, nil)
 
 	var completed []agent.Event
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -930,7 +930,7 @@ func TestStreamPreservesAnIncompleteAnswerBeforeTheFailure(t *testing.T) {
 
 	var answer string
 	var reportedFailure error
-	for update, err := range assistant.Stream(t.Context(), "go") {
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
 		if err != nil {
 			reportedFailure = err
 			continue

@@ -41,7 +41,7 @@ func main() {
 }
 
 func answer(assistant *agent.Agent, message string) {
-	for update, err := range assistant.Stream(context.Background(), message) {
+	for update, err := range assistant.Stream(context.Background(), message, nil) {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "\n"+err.Error())
 			return

@@ -541,7 +541,7 @@ func TestStreamReportsEachTurnAsItHappens(t *testing.T) {
 
 	var eventStrings []string
 
-	for update, err := range assistant.Stream(t.Context(), "what is the weather in London?") {
+	for update, err := range assistant.Stream(t.Context(), "what is the weather in London?", nil) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -578,7 +578,7 @@ func TestStreamAttachesEachRequestsContextUsageToItsFinalEvent(t *testing.T) {
 	assistant := newAgent(t, server.URL, []tool.Tool{weatherTool(t, &callCount)})
 
 	var usages []agent.Usage
-	for update, err := range assistant.Stream(t.Context(), "what is the weather?") {
+	for update, err := range assistant.Stream(t.Context(), "what is the weather?", nil) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -607,7 +607,7 @@ func TestStreamStopsWhenTheCallerDoes(t *testing.T) {
 
 	var eventCount int
 
-	for update := range assistant.Stream(t.Context(), "what is the weather in London?") {
+	for update := range assistant.Stream(t.Context(), "what is the weather in London?", nil) {
 		eventCount++
 
 		if update.Delta != nil && update.Delta.Kind == agent.ModelMessageEvent {
@@ -649,7 +649,7 @@ func TestStreamReportsReasoningApartFromTheAnswer(t *testing.T) {
 	var reasoningSummaries []string
 	var answer strings.Builder
 
-	for update, err := range assistant.Stream(t.Context(), "what is the weather?") {
+	for update, err := range assistant.Stream(t.Context(), "what is the weather?", nil) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -814,7 +814,7 @@ func TestStreamReportsRawReasoningFromAModelThatDoesNotSummarise(t *testing.T) {
 	assistant := newAgent(t, server.URL, nil)
 
 	var reasoning strings.Builder
-	for update, err := range assistant.Stream(t.Context(), "what is the weather?") {
+	for update, err := range assistant.Stream(t.Context(), "what is the weather?", nil) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -847,7 +847,7 @@ func TestASummarisedThoughtIsNotAlsoReportedRaw(t *testing.T) {
 	assistant := newAgent(t, server.URL, nil)
 
 	var reasoning []string
-	for update, err := range assistant.Stream(t.Context(), "what is the weather?") {
+	for update, err := range assistant.Stream(t.Context(), "what is the weather?", nil) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

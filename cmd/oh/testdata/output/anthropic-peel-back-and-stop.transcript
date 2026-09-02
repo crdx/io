@@ -1,0 +1,41 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+
+## Mode · rxwgs · +0s
+
+## User · +0s
+
+```
+queue two messages, take them back, then stop the turn
+```
+
+## Tool call — work · `work` · +0s
+
+→ cancelled, 1 line, 61B · +0s
+
+```
+the call was stopped after 4s because the user pressed ctrl+d
+```
+
+## Interrupted · +0s
+
+The turn was interrupted because the user pressed escape.
+
+## User · +0s
+
+```
+carry on
+```
+
+## Assistant · +0s
+
+```
+Carrying on.
+```
+

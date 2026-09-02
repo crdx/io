@@ -1,0 +1,42 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "high"
+
+[[tool]]
+name = "work"
+outputs = ["first round", "second round"]
+
+[first]
+prompt = "queue a message while the tool is working"
+queue-after-tool-request = ["check the other path too", "and mention what you find"]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","type":"function","function":{"name":"work","arguments":"{}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-2","type":"function","function":{"name":"work","arguments":"{}"}}]}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
+    '''[DONE]''',
+]
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"I checked the other path and it agrees."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "carry on"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Carrying on."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''[DONE]''',
+]

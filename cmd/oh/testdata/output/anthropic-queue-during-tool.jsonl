@@ -1,0 +1,24 @@
+{"kind":"head","version":11,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"event","event":{"kind":"user_message","text":"queue a message while the tool is working"}}
+{"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"toolu_1","name":"work","arguments":"{}"}}
+{"kind":"event","event":{"kind":"state_change","id":"toolu_1","state":1}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"first round","id":"toolu_1","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":11,"total_bytes":11}}}
+{"kind":"event","event":{"kind":"user_message","text":"check the other path too\n\nand mention what you find"}}
+{"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"toolu_2","name":"work","arguments":"{}"}}
+{"kind":"event","event":{"kind":"state_change","id":"toolu_2","state":2}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"second round","id":"toolu_2","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":12,"total_bytes":12}}}
+{"kind":"event","event":{"kind":"model_message","text":"I checked the other path and it agrees."}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"queue a message while the tool is working"}]}}
+{"kind":"item","payload":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_1","name":"work","input":{}}]}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_1","content":"first round"}]}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"check the other path too\n\nand mention what you find"}]}}
+{"kind":"item","payload":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_2","name":"work","input":{}}]}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_2","content":"second round"}]}}
+{"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"I checked the other path and it agrees."}]}}
+{"kind":"turn_completion"}
+{"kind":"event","event":{"kind":"user_message","text":"carry on"}}
+{"kind":"event","event":{"kind":"model_message","text":"Carrying on."}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"carry on"}]}}
+{"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Carrying on."}]}}
+{"kind":"turn_completion"}

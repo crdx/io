@@ -164,7 +164,7 @@ func (self *proseStream) resetText() {
 	self.text.Reset()
 }
 
-func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update, error] {
+func (self *Agent) Stream(ctx context.Context, message string, interjections *Interjections) iter.Seq2[Update, error] {
 	return func(yield func(Update, error) bool) {
 		yieldEvent := func(event Event, err error) bool {
 			update := Update{}
@@ -222,8 +222,31 @@ func (self *Agent) Stream(ctx context.Context, message string) iter.Seq2[Update,
 			if !self.runCalls(ctx, reply.Calls, usage, yieldEvent) {
 				return
 			}
+
+			if !self.interject(ctx, interjections, yieldEvent) {
+				return
+			}
 		}
 	}
+}
+
+func (self *Agent) interject(
+	ctx context.Context,
+	interjections *Interjections,
+	yieldEvent func(Event, error) bool,
+) bool {
+	if ctx.Err() != nil {
+		return false
+	}
+
+	text, isQueued := interjections.Take()
+	if !isQueued {
+		return true
+	}
+
+	self.provider.AddUserMessage(text)
+
+	return yieldEvent(Event{Kind: UserMessageEvent, Text: text}, nil)
 }
 
 func (self *Agent) send(
@@ -287,7 +310,7 @@ func (self *Agent) Send(ctx context.Context, message string) (string, error) {
 	var answer strings.Builder
 	var failure error
 
-	for update, err := range self.Stream(ctx, message) {
+	for update, err := range self.Stream(ctx, message, nil) {
 		if err != nil {
 			failure = err
 			break

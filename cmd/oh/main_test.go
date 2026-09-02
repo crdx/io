@@ -403,34 +403,33 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 	}
 }
 
-func TestAcceptedReplacementDisappearsWhileCancelledTurnStillRuns(t *testing.T) {
+func TestAnAcceptedMessageDisappearsIntoTheQueueWithoutStoppingTheTurn(t *testing.T) {
 	self := &App{
 		currentTurn: Turn{Stream: testTurnStream(make(chan TurnEvent), func(error) {}, turn.State{Running: true})},
 	}
 	history := edit.NewHistory("", historyLimit)
 	inputLine := edit.NewInput(history)
 
-	for _, value := range "dfd" {
-		self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
-	}
-	self.apply(inputLine, history, key.Key{Code: key.Enter})
+	typeMessage(t, self, inputLine, history, "dfd")
 
 	if inputLine.Text() != "" {
 		t.Fatalf("expected accepted input to disappear, got %q", inputLine.Text())
 	}
 	if !self.currentTurn.Running() {
-		t.Fatal("expected cancelled turn to remain running until its event channel closes")
+		t.Fatal("expected the turn to keep running")
 	}
-	if !self.currentTurn.Cancelled() {
-		t.Fatal("expected the active turn to be marked cancelled")
+	if self.currentTurn.Cancelled() {
+		t.Fatal("expected a queued message to leave the turn alone")
 	}
-	pending := self.queuedTurn.Peek()
-	if !pending.Replacement || pending.Message != "dfd" {
-		t.Fatalf("expected dfd to exist only as an invisible queued prompt, got queued=%t prompt=%q", pending.Replacement, pending.Message)
+	if queued := self.currentTurn.GetInterjections(); !slices.Equal(queued, []string{"dfd"}) {
+		t.Fatalf("expected dfd to be queued for the running turn, got %q", queued)
+	}
+	if pending := self.queuedTurn.Peek(); pending.Replacement {
+		t.Fatal("expected nothing to be queued for a next turn")
 	}
 }
 
-func TestTheLatestOfTwoRapidReplacementsWins(t *testing.T) {
+func TestTwoRapidMessagesBothQueueInTheOrderTheyWereTyped(t *testing.T) {
 	cancellations := 0
 	self := &App{
 		currentTurn: Turn{
@@ -440,23 +439,225 @@ func TestTheLatestOfTwoRapidReplacementsWins(t *testing.T) {
 	history := edit.NewHistory("", historyLimit)
 	inputLine := edit.NewInput(history)
 
-	for _, replacement := range []string{"first replacement", "second replacement"} {
-		for _, value := range replacement {
-			self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
-		}
-		self.apply(inputLine, history, key.Key{Code: key.Enter})
+	for _, message := range []string{"first message", "second message"} {
+		typeMessage(t, self, inputLine, history, message)
 	}
 
-	pending := self.queuedTurn.Peek()
-	if pending.Message != "second replacement" || !pending.Replacement {
-		t.Errorf("unexpected queued turn: %+v", pending)
+	want := []string{"first message", "second message"}
+	if queued := self.currentTurn.GetInterjections(); !slices.Equal(queued, want) {
+		t.Errorf("queued %q, want %q", queued, want)
 	}
-	if cancellations != 2 {
-		t.Errorf("cancelled %d times, want 2", cancellations)
+	if cancellations != 0 {
+		t.Errorf("cancelled %d times, want none", cancellations)
 	}
 }
 
-func TestReplacementInputCancelsProvisionalReasoningAndStartsTheNextTurn(t *testing.T) {
+func TestADoubleEnterSendsTheQueueAtOnceAndStopsTheTurn(t *testing.T) {
+	cancellations := 0
+	self := &App{
+		currentTurn: Turn{
+			Stream: testTurnStream(nil, func(error) { cancellations++ }, turn.State{Running: true}),
+		},
+	}
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+
+	for _, message := range []string{"first message", "second message"} {
+		typeMessage(t, self, inputLine, history, message)
+	}
+
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+
+	pending := self.queuedTurn.Peek()
+	if !pending.Replacement || pending.Message != "first message\n\nsecond message" {
+		t.Errorf("unexpected queued turn: %+v", pending)
+	}
+	if cancellations != 1 {
+		t.Errorf("cancelled %d times, want 1", cancellations)
+	}
+	if queued := self.currentTurn.GetInterjections(); len(queued) != 0 {
+		t.Errorf("expected the queue to be emptied, got %q", queued)
+	}
+}
+
+func TestADoubleEnterWithNothingQueuedStillSendsTheContinueMessage(t *testing.T) {
+	cancellations := 0
+	self := &App{
+		continueMessage: "carry on",
+		currentTurn: Turn{
+			Stream: testTurnStream(nil, func(error) { cancellations++ }, turn.State{Running: true}),
+		},
+	}
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+
+	pending := self.queuedTurn.Peek()
+	if !pending.Replacement || pending.Message != "carry on" {
+		t.Errorf("unexpected queued turn: %+v", pending)
+	}
+	if cancellations != 1 {
+		t.Errorf("cancelled %d times, want 1", cancellations)
+	}
+}
+
+func TestAStopKeyTakesTheLastQueuedMessageBackIntoTheInputLine(t *testing.T) {
+	cancellations := 0
+	self := &App{
+		currentTurn: Turn{
+			Stream: testTurnStream(nil, func(error) { cancellations++ }, turn.State{Running: true}),
+		},
+	}
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+
+	for _, message := range []string{"first message", "second message"} {
+		typeMessage(t, self, inputLine, history, message)
+	}
+
+	self.apply(inputLine, history, key.Key{Code: key.Escape})
+
+	if inputLine.Text() != "second message" {
+		t.Errorf("took back %q, want the second message", inputLine.Text())
+	}
+	if queued := self.currentTurn.GetInterjections(); !slices.Equal(queued, []string{"first message"}) {
+		t.Errorf("left %q queued, want only the first message", queued)
+	}
+	if cancellations != 0 {
+		t.Errorf("cancelled %d times, want none", cancellations)
+	}
+}
+
+func TestPeelingWhileTypingKeepsWhatIsBeingTypedAtTheEnd(t *testing.T) {
+	cancellations := 0
+	self := &App{
+		currentTurn: Turn{
+			Stream: testTurnStream(nil, func(error) { cancellations++ }, turn.State{Running: true}),
+		},
+	}
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+
+	typeMessage(t, self, inputLine, history, "queued")
+	for _, value := range "half typed" {
+		self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
+	}
+
+	self.apply(inputLine, history, key.Key{Code: key.Escape})
+
+	if inputLine.Text() != "queued\n\nhalf typed" {
+		t.Errorf("input reads %q, want the taken-back message before what was being typed", inputLine.Text())
+	}
+	if cancellations != 0 {
+		t.Errorf("cancelled %d times, want none", cancellations)
+	}
+}
+
+func TestPeelingEveryQueuedMessageRebuildsWhatWouldHaveBeenSent(t *testing.T) {
+	messages := []string{"first", "second", "third"}
+
+	queueMessages := func(self *App) (*edit.Input, *edit.History) {
+		self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true})}
+		history := edit.NewHistory("", historyLimit)
+		inputLine := edit.NewInput(history)
+		for _, message := range messages {
+			typeMessage(t, self, inputLine, history, message)
+		}
+		return inputLine, history
+	}
+
+	sent := &App{}
+	queueMessages(sent)
+	wouldHaveBeenSent, isQueued := sent.currentTurn.TakeInterjections()
+	if !isQueued {
+		t.Fatal("expected the queue to have something to deliver")
+	}
+
+	peeled := &App{}
+	inputLine, history := queueMessages(peeled)
+	for range messages {
+		peeled.apply(inputLine, history, key.Key{Code: key.Escape})
+	}
+
+	if inputLine.Text() != wouldHaveBeenSent {
+		t.Errorf("peeled back %q, want what delivery would have sent, %q", inputLine.Text(), wouldHaveBeenSent)
+	}
+	if queued := peeled.currentTurn.GetInterjections(); len(queued) != 0 {
+		t.Errorf("left %q queued, want nothing", queued)
+	}
+}
+
+func TestAStopKeyStopsTheTurnOnceTheQueueIsEmpty(t *testing.T) {
+	for name, stopKey := range map[string]key.Key{
+		"escape": {Code: key.Escape},
+		"ctrl+d": {Code: key.Rune, Value: 'd', Mod: key.Ctrl},
+	} {
+		t.Run(name, func(t *testing.T) {
+			cancellations := 0
+			self := &App{
+				currentTurn: Turn{
+					Stream: testTurnStream(nil, func(error) { cancellations++ }, turn.State{Running: true}),
+				},
+			}
+			history := edit.NewHistory("", historyLimit)
+			inputLine := edit.NewInput(history)
+
+			typeMessage(t, self, inputLine, history, "queued")
+
+			self.apply(inputLine, history, stopKey)
+			if cancellations != 0 {
+				t.Fatalf("the first press cancelled %d times, want none", cancellations)
+			}
+			if inputLine.Text() != "queued" {
+				t.Fatalf("the first press left %q in the input, want the message back", inputLine.Text())
+			}
+
+			self.apply(inputLine, history, stopKey)
+			if cancellations != 1 {
+				t.Errorf("the second press cancelled %d times, want 1", cancellations)
+			}
+		})
+	}
+}
+
+func TestControlDTakesAQueuedMessageBackJustAsEscapeDoes(t *testing.T) {
+	cancellations := 0
+	self := &App{
+		currentTurn: Turn{
+			Stream: testTurnStream(nil, func(error) { cancellations++ }, turn.State{Running: true}),
+		},
+	}
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+
+	typeMessage(t, self, inputLine, history, "queued")
+
+	self.apply(inputLine, history, key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl})
+
+	if inputLine.Text() != "queued" {
+		t.Errorf("input reads %q, want the message back", inputLine.Text())
+	}
+	if cancellations != 0 {
+		t.Errorf("cancelled %d times, want none", cancellations)
+	}
+	if queued := self.currentTurn.GetInterjections(); len(queued) != 0 {
+		t.Errorf("left %q queued, want nothing", queued)
+	}
+}
+
+func typeMessage(t *testing.T, self *App, inputLine *edit.Input, history *edit.History, message string) {
+	t.Helper()
+
+	for _, value := range message {
+		self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
+	}
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
+}
+
+func TestFlushingTheQueueCancelsProvisionalReasoningAndStartsTheNextTurn(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{})
 	if err != nil {
@@ -483,9 +684,8 @@ func TestReplacementInputCancelsProvisionalReasoningAndStartsTheNextTurn(t *test
 			break
 		}
 	}
-	for _, value := range "replacement" {
-		self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
-	}
+	typeMessage(t, self, inputLine, history, "replacement")
+	self.apply(inputLine, history, key.Key{Code: key.Enter})
 	self.apply(inputLine, history, key.Key{Code: key.Enter})
 
 	for report := range interruptedEvents {
@@ -515,7 +715,7 @@ func TestReplacementInputCancelsProvisionalReasoningAndStartsTheNextTurn(t *test
 	}
 }
 
-func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
+func TestAQueuedMessageOpensTheNextTurnWithoutInterruptingThisOne(t *testing.T) {
 	directory := t.TempDir()
 	log, err := store.Create(directory, store.Meta{})
 	if err != nil {
@@ -533,20 +733,21 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	inputLine := edit.NewInput(history)
 
 	self.start("first")
-	interruptedEvents := self.currentTurn.Events()
+	firstTurnEvents := self.currentTurn.Events()
 
-	for _, value := range "follow up" {
-		self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
+	typeMessage(t, self, inputLine, history, "follow up")
+
+	if self.currentTurn.Cancelled() {
+		t.Fatal("expected the queued message to leave the turn alone")
 	}
-	self.apply(inputLine, history, key.Key{Code: key.Enter})
 
-	for report := range interruptedEvents {
+	for report := range firstTurnEvents {
 		self.takeTurn(report)
 	}
 	self.finish()
 
 	if !self.currentTurn.Running() {
-		t.Fatal("expected the accepted input to start another turn")
+		t.Fatal("expected the queued message to start another turn")
 	}
 
 	for report := range self.currentTurn.Events() {
@@ -555,7 +756,7 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	self.finish()
 
 	if strings.Contains(style.Plain(screenOutput.String()), "Interrupted") {
-		t.Errorf("expected the replaced turn to end silently, got %q", style.Plain(screenOutput.String()))
+		t.Errorf("expected the first turn to end silently, got %q", style.Plain(screenOutput.String()))
 	}
 
 	if err := log.Close(); err != nil {
@@ -573,10 +774,10 @@ func TestReturnSendsInputAfterTheInterruptedTurnFinishes(t *testing.T) {
 	}
 
 	if !wasSent {
-		t.Error("expected the accepted input to be sent after the interruption")
+		t.Error("expected the queued message to be sent once the turn finished")
 	}
-	if !wasInterruptionStored {
-		t.Error("expected the interruption to be stored in the session log")
+	if wasInterruptionStored {
+		t.Error("expected no interruption to be stored, because nothing was interrupted")
 	}
 }
 
@@ -638,33 +839,34 @@ func TestAStoppedTurnIsStoredAsAnInterruption(t *testing.T) {
 	t.Error("expected the interruption to be stored in the session log")
 }
 
-func TestEscapeTakesBackAQueuedReplacementWithoutAnnouncingTheInterruption(t *testing.T) {
+func TestEscapeTakesBackAQueuedMessageWithoutAnnouncingAnInterruption(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	history := edit.NewHistory("", historyLimit)
 	inputLine := edit.NewInput(history)
 
 	self.start("first")
-	interruptedEvents := self.currentTurn.Events()
+	turnEvents := self.currentTurn.Events()
 
-	for _, value := range "follow up" {
-		self.apply(inputLine, history, key.Key{Code: key.Rune, Value: value})
-	}
-	self.apply(inputLine, history, key.Key{Code: key.Enter})
+	typeMessage(t, self, inputLine, history, "follow up")
 	self.apply(inputLine, history, key.Key{Code: key.Escape})
 
-	for report := range interruptedEvents {
+	for report := range turnEvents {
 		self.takeTurn(report)
 	}
 	self.finish()
 
 	if self.currentTurn.Running() {
-		t.Error("expected the taken-back replacement to leave no turn running")
+		t.Error("expected the finished turn to leave no turn running")
+	}
+
+	if inputLine.Text() != "follow up" {
+		t.Errorf("input reads %q, want the taken-back message", inputLine.Text())
 	}
 
 	for _, record := range self.events {
 		if record.Kind == agent.UserMessageEvent && record.Text == "follow up" {
-			t.Error("expected the taken-back replacement not to be sent")
+			t.Error("expected the taken-back message not to be sent")
 		}
 	}
 
@@ -2726,6 +2928,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"pending-mode-messages": {".ansi", ".screen"},
 		"paste":                 {".ansi", ".screen"},
 		"picker-menu":           {".ansi", ".screen"},
+		"queued-messages":       {".ansi", ".screen"},
 		"readline-bindings":     {".ansi", ".screen"},
 		"resume-arguments":      {".txt"},
 		"resume-mode":           {".ansi"},
@@ -4559,13 +4762,16 @@ func TestATurnStillRunningDrawsWhatItDrewBefore(t *testing.T) {
 		"a call still running": func() string { return replayWhileRunning(t, entries) },
 		"discarded reasoning":  func() string { return drawDiscardedReasoning(t) },
 		"unknown command during answer": func() string {
-			return drawUnknownSlashInputDuringStream(t, "/unknown", agent.ModelMessageEvent)
+			return drawAcceptedInputDuringStream(t, "/unknown", agent.ModelMessageEvent)
 		},
 		"unknown command during reasoning": func() string {
-			return drawUnknownSlashInputDuringStream(t, "/unknown", agent.ModelReasoningEvent)
+			return drawAcceptedInputDuringStream(t, "/unknown", agent.ModelReasoningEvent)
 		},
 		"unknown snippet during reasoning": func() string {
-			return drawUnknownSlashInputDuringStream(t, "//unknown", agent.ModelReasoningEvent)
+			return drawAcceptedInputDuringStream(t, "//unknown", agent.ModelReasoningEvent)
+		},
+		"ordinary message during answer": func() string {
+			return drawAcceptedInputDuringStream(t, "check the other path too", agent.ModelMessageEvent)
 		},
 	}
 
@@ -4593,7 +4799,7 @@ func drawDiscardedReasoning(t *testing.T) string {
 	return strings.TrimSuffix(rig.drawn(), "\r\n")
 }
 
-func drawUnknownSlashInputDuringStream(t *testing.T, message string, kind agent.Kind) string {
+func drawAcceptedInputDuringStream(t *testing.T, message string, kind agent.Kind) string {
 	t.Helper()
 
 	writer := &frameRecordingWriter{}
@@ -5770,6 +5976,137 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 		self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelMessageEvent, Text: answer})
 		self.handleCommand("/unknown")
+		self.show(inputLine)
+	}
+
+	return screenOutput.String()
+}
+
+type queuedMessagesScenario int
+
+const (
+	queuedOne queuedMessagesScenario = iota
+	queuedTwo
+	queuedSeveral
+	queuedLongMessage
+	queuedMultilineMessage
+	queuedSnippet
+	queuedTakenBack
+	queuedTakenBackWhileTyping
+	queuedBehindFeedback
+	queuedDelivered
+	queuedTallerThanTheTerminal
+)
+
+func TestQueuedMessagesDrawEveryVisibleState(t *testing.T) {
+	passes := map[string]func() string{
+		"one queued":                 func() string { return queuedMessagesStream(t, queuedOne) },
+		"two queued":                 func() string { return queuedMessagesStream(t, queuedTwo) },
+		"several queued":             func() string { return queuedMessagesStream(t, queuedSeveral) },
+		"a snippet queued":           func() string { return queuedMessagesStream(t, queuedSnippet) },
+		"a long message elided":      func() string { return queuedMessagesStream(t, queuedLongMessage) },
+		"a multiline message":        func() string { return queuedMessagesStream(t, queuedMultilineMessage) },
+		"escape takes the last back": func() string { return queuedMessagesStream(t, queuedTakenBack) },
+		"taken back while typing":    func() string { return queuedMessagesStream(t, queuedTakenBackWhileTyping) },
+		"feedback takes the footer":  func() string { return queuedMessagesStream(t, queuedBehindFeedback) },
+		"delivered at the boundary":  func() string { return queuedMessagesStream(t, queuedDelivered) },
+		"taller than the terminal":   func() string { return queuedMessagesStream(t, queuedTallerThanTheTerminal) },
+	}
+
+	compareWithGolden(t, "queued-messages", ".ansi", passes)
+	compareWithGolden(t, "queued-messages", ".screen", shownPasses(t, passes))
+}
+
+func tallQueue() []string {
+	messages := make([]string, 20)
+	for i := range messages {
+		messages[i] = fmt.Sprintf("queued message %d", i+1)
+	}
+
+	return messages
+}
+
+const longQueuedMessage = "and while you are there please also look at the second path, " +
+	"which is the one that has been wrong all along"
+
+func queuedMessagesStream(t *testing.T, scenario queuedMessagesScenario) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	self := slashCommandFixture(t, caps.Read)
+	self.agent = agent.New("", quietProvider{}, nil)
+	terminalLines := replayLines
+	if scenario == queuedTallerThanTheTerminal {
+		terminalLines = 12
+	}
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, terminalLines)
+	self.commands = fixtureCommandRegistryWithSnippets(
+		t,
+		map[string]snippets.Definition{
+			"add": {Prompt: "Add the following:\n\n{{ .Arg }}", Arguments: snippets.ArgumentsRequired},
+		},
+		slash.Command{
+			Name: "help",
+			Run: func(context slash.Context, _ slash.Arguments) error {
+				context.Notice("Commands:\n  /conf\n  /copy")
+				return nil
+			},
+		},
+	)
+
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+	self.inputLine = inputLine
+	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
+	self.currentTurn.painter.DrawEvent(agent.Event{Kind: agent.UserMessageEvent, Text: "look at the first path"})
+	self.currentTurn.painter.DrawEvent(agent.Event{
+		Kind:              agent.ToolCallRequestEvent,
+		ID:                "call-1",
+		Name:              "work",
+		FallbackRendering: agent.FallbackRendering{Subject: "the first path"},
+	})
+	self.show(inputLine)
+
+	queued := map[queuedMessagesScenario][]string{
+		queuedOne:                   {"check the other path too"},
+		queuedTwo:                   {"check the other path too", "and mention what you find"},
+		queuedSeveral:               {"the first", "the second", "the third", "the fourth", "the fifth"},
+		queuedLongMessage:           {longQueuedMessage},
+		queuedMultilineMessage:      {"check the other path too\n\n- the first thing\n- the second thing"},
+		queuedTakenBack:             {"check the other path too", "and mention what you find"},
+		queuedTakenBackWhileTyping:  {"check the other path too"},
+		queuedBehindFeedback:        {"check the other path too"},
+		queuedDelivered:             {"check the other path too"},
+		queuedTallerThanTheTerminal: tallQueue(),
+	}[scenario]
+
+	for _, message := range queued {
+		typeMessage(t, self, inputLine, history, message)
+	}
+	self.show(inputLine)
+
+	switch scenario {
+	case queuedOne, queuedTwo, queuedSeveral, queuedLongMessage, queuedMultilineMessage,
+		queuedTallerThanTheTerminal:
+	case queuedSnippet:
+		self.handleCommand("//add review the second path")
+		self.show(inputLine)
+	case queuedTakenBack:
+		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Escape})
+	case queuedTakenBackWhileTyping:
+		for _, value := range "and one more" {
+			self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: value})
+		}
+		self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Escape})
+	case queuedBehindFeedback:
+		self.handleCommand("/help")
+		self.show(inputLine)
+		self.clearFeedback(commandFeedback)
+		self.show(inputLine)
+	case queuedDelivered:
+		delivered, _ := self.currentTurn.TakeInterjections()
+		event := agent.Event{Kind: agent.UserMessageEvent, Text: delivered}
+		self.takeTurn(TurnEvent{Update: agent.Update{Event: &event}})
 		self.show(inputLine)
 	}
 
@@ -7887,9 +8224,9 @@ func TestSnippetKeepsItsInvocationInHistoryAndQueuesItsRenderedPrompt(t *testing
 	}
 	self.acceptInput(inputLine, history)
 
-	pending := self.queuedTurn.Peek()
-	if !pending.Replacement || pending.Message != "Add the following:\n\nreview this" {
-		t.Errorf("got queued turn %+v", pending)
+	want := []string{"Add the following:\n\nreview this"}
+	if queued := self.currentTurn.GetInterjections(); !slices.Equal(queued, want) {
+		t.Errorf("queued %q, want %q", queued, want)
 	}
 	body, err := os.ReadFile(historyPath) //nolint:gosec // the path is the test's own history file
 	if err != nil {
@@ -7928,10 +8265,9 @@ func TestSnippetKeepsTheLayoutOfAPastedArgument(t *testing.T) {
 	inputLine.Apply(key.Key{Code: key.PasteEnd}, true)
 	self.acceptInput(inputLine, history)
 
-	pending := self.queuedTurn.Peek()
-	want := "Add the following:\n\nreview this\n\n- one\n- two"
-	if !pending.Replacement || pending.Message != want {
-		t.Errorf("got queued turn %+v, want message %q", pending, want)
+	want := []string{"Add the following:\n\nreview this\n\n- one\n- two"}
+	if queued := self.currentTurn.GetInterjections(); !slices.Equal(queued, want) {
+		t.Errorf("queued %q, want %q", queued, want)
 	}
 	body, err := os.ReadFile(historyPath) //nolint:gosec // the path is the test's own history file
 	if err != nil {
@@ -8335,6 +8671,11 @@ type sessionGoldenTurn struct {
 	CancelAfterToolRequest    int                     `toml:"cancel-after-tool-request"`
 	CancelAfterRetryNotice    int                     `toml:"cancel-after-retry-notice"`
 	ReplaceAfterToolRequest   string                  `toml:"replace-after-tool-request"`
+	QueueAfterToolRequest     []string                `toml:"queue-after-tool-request"`
+	QueueAfterEachToolRequest []string                `toml:"queue-after-each-tool-request"`
+	QueueAfterMessageDelta    []string                `toml:"queue-after-message-delta"`
+	FlushAfterToolRequest     bool                    `toml:"flush-after-tool-request"`
+	CancelAfterQueueing       bool                    `toml:"cancel-after-queueing"`
 	ToggleAfterMessageDelta   string                  `toml:"toggle-after-message-delta"`
 	ToggleAfterToolRequest    string                  `toml:"toggle-after-tool-request"`
 	ToggleDuringModeTurn      string                  `toml:"toggle-during-mode-turn"`
@@ -9387,17 +9728,11 @@ func runSessionGoldenTurn(
 		if toolRequests == turn.CancelAfterToolRequest {
 			interruptWithStopKey()
 		}
-		if toolRequests != 1 {
-			return
+		if toolRequests <= len(turn.QueueAfterEachToolRequest) {
+			testHarness.currentTurn.Interject(turn.QueueAfterEachToolRequest[toolRequests-1])
 		}
-		if turn.ReplaceAfterToolRequest != "" {
-			testHarness.replaceTurn(turn.ReplaceAfterToolRequest)
-		}
-		if turn.ToggleAfterToolRequest != "" {
-			toggleSessionGoldenCaps(t, testHarness, turn.ToggleAfterToolRequest)
-			if turn.CancelAfterToolToggle {
-				interruptWithStopKey()
-			}
+		if toolRequests == 1 {
+			takeFirstSessionGoldenToolRequest(t, testHarness, turn, inputLine, interruptWithStopKey)
 		}
 	}
 
@@ -9406,7 +9741,7 @@ func runSessionGoldenTurn(
 	messageDeltas := 0
 	toolRequests := 0
 	retryNotices := 0
-	for update, streamError := range testHarness.agent.Stream(streamContext, turn.Prompt) {
+	for update, streamError := range testHarness.agent.Stream(streamContext, turn.Prompt, testHarness.currentTurn.Interjections()) {
 		testHarness.takeTurn(TurnEvent{Update: update, Err: streamError})
 		if update.Delta != nil {
 			switch update.Delta.Kind { //nolint:exhaustive // Only model prose event kinds can be deltas.
@@ -9420,8 +9755,8 @@ func runSessionGoldenTurn(
 				if messageDeltas == turn.CancelAfterMessageDelta {
 					interruptWithStopKey()
 				}
-				if messageDeltas == 1 && turn.ToggleAfterMessageDelta != "" {
-					toggleSessionGoldenCaps(t, testHarness, turn.ToggleAfterMessageDelta)
+				if messageDeltas == 1 {
+					takeFirstSessionGoldenMessageDelta(t, testHarness, turn)
 				}
 			}
 		}
@@ -9448,6 +9783,56 @@ func runSessionGoldenTurn(
 	testHarness.finish()
 
 	runQueuedSessionGoldenTurns(t, testHarness, turn.ToggleDuringModeTurn)
+}
+
+func takeFirstSessionGoldenToolRequest(
+	t *testing.T,
+	testHarness *App,
+	turn sessionGoldenTurn,
+	inputLine *edit.Input,
+	interruptWithStopKey func(),
+) {
+	t.Helper()
+
+	if turn.ReplaceAfterToolRequest != "" {
+		testHarness.replaceTurn(turn.ReplaceAfterToolRequest)
+	}
+
+	for _, queued := range turn.QueueAfterToolRequest {
+		testHarness.currentTurn.Interject(queued)
+	}
+
+	if len(turn.QueueAfterToolRequest) > 0 && turn.CancelAfterQueueing {
+		for range len(turn.QueueAfterToolRequest) + 1 {
+			if testHarness.currentTurn.Cancelled() {
+				break
+			}
+			interruptWithStopKey()
+		}
+	}
+
+	if turn.FlushAfterToolRequest {
+		testHarness.continueOrFlush(inputLine, edit.NewHistory("", historyLimit))
+	}
+
+	if turn.ToggleAfterToolRequest != "" {
+		toggleSessionGoldenCaps(t, testHarness, turn.ToggleAfterToolRequest)
+		if turn.CancelAfterToolToggle {
+			interruptWithStopKey()
+		}
+	}
+}
+
+func takeFirstSessionGoldenMessageDelta(t *testing.T, testHarness *App, turn sessionGoldenTurn) {
+	t.Helper()
+
+	if turn.ToggleAfterMessageDelta != "" {
+		toggleSessionGoldenCaps(t, testHarness, turn.ToggleAfterMessageDelta)
+	}
+
+	for _, queued := range turn.QueueAfterMessageDelta {
+		testHarness.currentTurn.Interject(queued)
+	}
 }
 
 func runQueuedSessionGoldenTurns(t *testing.T, testHarness *App, toggleDuringModeTurn string) {

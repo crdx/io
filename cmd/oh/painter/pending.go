@@ -7,9 +7,49 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/internal/util/strutil"
 )
 
 const unsentMark = "⏳"
+
+func RenderQueuedMessages(messages []string, columns int) []string {
+	if len(messages) == 0 {
+		return nil
+	}
+
+	rows := make([]string, 0, len(messages)+2)
+	rows = append(rows, renderQueuedRow("", columns))
+
+	for _, message := range messages {
+		rows = append(rows, renderQueuedRow(unsentMark+" "+summariseQueuedMessage(message), columns))
+	}
+
+	return append(rows, renderQueuedRow("", columns))
+}
+
+func summariseQueuedMessage(message string) string {
+	firstLine := strutil.FirstLine(message)
+	if strings.Contains(strings.TrimSpace(message), "\n") {
+		firstLine += width.Ellipsis
+	}
+
+	return firstLine
+}
+
+func renderQueuedRow(text string, columns int) string {
+	row := ""
+	if text != "" {
+		row = width.Elide(" "+strutil.StripControl(text), columns)
+	}
+
+	if room := columns - style.Width(row); room > 0 {
+		row += strings.Repeat(" ", room)
+	}
+
+	return style.User(row)
+}
 
 type PendingMessages struct {
 	messages               []string

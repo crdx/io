@@ -1,0 +1,21 @@
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m queue a message and then change what I am allowed to do                                            \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call-1&session=brave-otter\e\\\e[38;2;207;173;0mwork\e[0m\e]8;;\e\\ \e[38;2;192;128;80mwork\e[0m \e[38;2;150;152;150m–\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;150;152;150mthe call was stopped after 3s because the user changed what the harness is allowed…\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m The workspace is now read-only.                                                                    \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m do this instead                                                                                    \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\r\e[KDoing that instead, read-only.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m carry on                                                                                           \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KCarrying on.\e[?25h\e[?2026l\r
