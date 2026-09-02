@@ -17,6 +17,7 @@ const (
 	markWidth        = 2
 	providerColumn   = 12
 	nameColumn       = 28
+	effortColumn     = 9
 	contextColumn    = 7
 	identifierColumn = 28
 )
@@ -28,7 +29,7 @@ type Effort struct {
 
 func (self Effort) String() string {
 	if self.IsFast {
-		return self.Level + fastMode.FastMark
+		return self.Level + " " + fastMode.FastMark
 	}
 
 	return self.Level
@@ -97,7 +98,7 @@ func modelTable() *table.Table {
 	return table.New(
 		table.Column{Title: "  Provider", Width: markWidth + providerColumn},
 		table.Column{Title: "Model", Width: nameColumn},
-		table.Column{Title: "Effort", Width: menu.EffortColumn},
+		table.Column{Title: "Effort", Width: effortColumn},
 		table.Column{Title: "Context", Width: contextColumn, Align: table.Right},
 		table.Column{Title: "Identifier", Width: identifierColumn, Style: style.Subtle},
 	)

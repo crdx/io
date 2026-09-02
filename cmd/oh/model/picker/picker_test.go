@@ -153,7 +153,7 @@ func TestAFastEffortIsWrittenWithTheFastMark(t *testing.T) {
 		t.Errorf("got %q", got)
 	}
 
-	if got := (Effort{Level: "high", IsFast: true}).String(); got != "high⚡" {
+	if got := (Effort{Level: "none", IsFast: true}).String(); got != "none ⚡" {
 		t.Errorf("got %q", got)
 	}
 }
