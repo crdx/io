@@ -11,11 +11,11 @@ func TestShortenWritesAPathTheWayTheUserWouldSayIt(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
 	tests := map[string]string{
-		"/home/alice/proj/io":       "~/proj/io",
+		"/home/alice/florp/io":      "~/florp/io",
 		"/home/alice":               "~",
 		"/home/alice-other/project": "/home/alice-other/project",
 		"/etc/hosts":                "/etc/hosts",
-		"proj/io":                   "proj/io",
+		"florp/io":                  "florp/io",
 		"":                          "",
 	}
 
@@ -29,7 +29,7 @@ func TestShortenWritesAPathTheWayTheUserWouldSayIt(t *testing.T) {
 func TestShortenLeavesAPathAloneWithoutAHome(t *testing.T) {
 	t.Setenv("HOME", "")
 
-	if got := pathutil.Shorten("/home/alice/proj"); got != "/home/alice/proj" {
+	if got := pathutil.Shorten("/home/alice/florp"); got != "/home/alice/florp" {
 		t.Errorf("got %q, want the path as it went in", got)
 	}
 }
@@ -38,11 +38,11 @@ func TestExpandReadsAPathTheWayTheUserWroteIt(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
 	tests := map[string]string{
-		"~/proj/io":  "/home/alice/proj/io",
+		"~/florp/io": "/home/alice/florp/io",
 		"~":          "/home/alice",
 		"~other/dir": "~other/dir",
 		"/etc/hosts": "/etc/hosts",
-		"proj/io":    "proj/io",
+		"florp/io":   "florp/io",
 		"":           "",
 	}
 
@@ -57,7 +57,7 @@ func TestExpandReadsAPathTheWayTheUserWroteIt(t *testing.T) {
 func TestExpandFailsWithoutAHome(t *testing.T) {
 	t.Setenv("HOME", "")
 
-	if _, err := pathutil.Expand("~/proj"); err == nil {
+	if _, err := pathutil.Expand("~/florp"); err == nil {
 		t.Error("expected a home path without a home to fail")
 	}
 	if got, err := pathutil.Expand("/etc/hosts"); err != nil || got != "/etc/hosts" {

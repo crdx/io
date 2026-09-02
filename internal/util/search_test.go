@@ -18,7 +18,7 @@ func TestASearchIsDescribedByItsPatternAndWhatQualifiesIt(t *testing.T) {
 }
 
 func TestASearchLeavesPathDisplayProcessingToThePainter(t *testing.T) {
-	const path = "/home/alice/proj/io"
+	const path = "/home/alice/florp/io"
 
 	if _, qualifier := util.DescribeSearch("func New", path, ""); qualifier != path {
 		t.Errorf("got %q, want the unprocessed path %q", qualifier, path)

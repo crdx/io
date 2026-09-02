@@ -145,6 +145,6 @@ project
 === workspace-dir / full ===
 \e[38;2;150;152;150m/workspace/\e[0mproject
 === workspace-dir / short below home ===
-\e[38;2;150;152;150m~/proj/\e[0mproject
+\e[38;2;150;152;150m~/florp/\e[0mproject
 === workspace-dir / short outside home ===
 \e[38;2;150;152;150m/workspace/\e[0mproject

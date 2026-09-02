@@ -145,6 +145,6 @@ project
 === workspace-dir / full ===
 /workspace/project
 === workspace-dir / short below home ===
-~/proj/project
+~/florp/project
 === workspace-dir / short outside home ===
 /workspace/project

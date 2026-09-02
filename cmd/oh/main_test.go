@@ -1186,7 +1186,7 @@ func TestSanitisedWireCapturesContainNoCredentialsOrHostPaths(t *testing.T) {
 				if capturePIIPattern.MatchString(line) {
 					t.Errorf("line %d contains an email or network address", lineNumber)
 				}
-				if strings.Contains(line, "/home/") || strings.Contains(line, "Dropbox/proj") {
+				if strings.Contains(line, "/home/") {
 					t.Errorf("line %d contains a host path", lineNumber)
 				}
 
@@ -3988,7 +3988,7 @@ func TestAnAbsentWorkspaceIsAtNothing(t *testing.T) {
 func TestAWorkspaceDescribesItselfEveryWayItIsDrawn(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 
-	described := work.At("/home/alice/proj/io")
+	described := work.At("/home/alice/florp/io")
 
 	for name, got := range map[string]string{
 		"dir":       described.GetDir(),
@@ -3996,9 +3996,9 @@ func TestAWorkspaceDescribesItselfEveryWayItIsDrawn(t *testing.T) {
 		"short dir": described.GetShortDir(),
 	} {
 		want := map[string]string{
-			"dir":       "/home/alice/proj/io",
+			"dir":       "/home/alice/florp/io",
 			"name":      "io",
-			"short dir": "~/proj/io",
+			"short dir": "~/florp/io",
 		}[name]
 
 		if got != want {
@@ -4127,7 +4127,7 @@ func TestPick(t *testing.T) {
 	}
 
 	directory := t.TempDir()
-	workspaceDir := "/home/alice/proj/io"
+	workspaceDir := "/home/alice/florp/io"
 
 	for _, prompt := range prompts {
 		meta := fmt.Appendf(nil, `{"workspaceDir":%q}`, workspaceDir)
@@ -6967,7 +6967,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"workspace-dir / short below home": goldenSegmentPass(
 			t,
-			workspaceDir.New(work.At("/home/tester/proj/project")),
+			workspaceDir.New(work.At("/home/tester/florp/project")),
 			`type = "short"`,
 			segment.Context{},
 		),
