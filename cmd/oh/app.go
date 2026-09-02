@@ -653,7 +653,7 @@ func (self *App) ruleStyle() style.Style {
 
 func (self *App) statusRows(columns int) []string {
 	if self.feedback.message.text == "" {
-		return painter.RenderQueuedMessages(self.currentTurn.GetInterjections(), columns)
+		return painter.RenderQueuedMessages(self.currentTurn.GetInterjections(), columns, self.screen.IsTerminal())
 	}
 
 	styledText := painter.NoticeStyle(self.feedback.message.status)(self.feedback.message.text)

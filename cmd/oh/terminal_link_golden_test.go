@@ -18,6 +18,9 @@ func TestSpecialLinksDrawWhatTheyDrewBefore(t *testing.T) {
 		"pending message": func() string {
 			return drawPendingLink(t)
 		},
+		"pending message with a heading and a list": func() string {
+			return drawPendingMarkdown(t)
+		},
 	}
 	compareWithGolden(t, "special-links", ".ansi", passes)
 
@@ -56,6 +59,21 @@ func drawPendingLink(t *testing.T) string {
 	self.pending.add(agent.Event{
 		Kind: agent.UserMessageEvent,
 		Text: "read [the pending reference](https://example.test/pending)",
+	}, agent.Event{})
+	self.refreshPendingMessages()
+
+	return screenOutput.String()
+}
+
+func drawPendingMarkdown(t *testing.T) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines)
+	self.pending.add(agent.Event{
+		Kind: agent.UserMessageEvent,
+		Text: "# Heading\n\n- first item\n- second item",
 	}, agent.Event{})
 	self.refreshPendingMessages()
 

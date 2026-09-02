@@ -3,4 +3,10 @@ person-at-example.test
 === pending message ===
 
  ⏳ read the pending reference
- (https://example.test/pending)
+    (https://example.test/pending)
+=== pending message with a heading and a list ===
+
+ ⏳ Heading
+
+    • first item
+    • second item

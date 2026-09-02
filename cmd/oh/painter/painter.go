@@ -192,17 +192,22 @@ func RenderRetry(event agent.Event) string {
 }
 
 func RenderSubmittedMessage(text string, columns int) string {
-	return renderSubmittedMessage(text, columns, false, "")
+	return renderSubmittedMessage(text, columns, false, "", "")
 }
 
 func RenderSubmittedMessageWithHyperlinks(text string, columns int) string {
-	return renderSubmittedMessage(text, columns, true, "")
+	return renderSubmittedMessage(text, columns, true, "", "")
 }
 
-func renderSubmittedMessage(text string, columns int, shouldRenderHyperlinks bool, workspace string) string {
+func renderSubmittedMessage(text string, columns int, shouldRenderHyperlinks bool, workspace string, marker string) string {
 	contentColumns := columns
 	if contentColumns > 1 {
 		contentColumns--
+	}
+
+	markerWidth := width.Of(marker)
+	if markerWidth > 0 && contentColumns > markerWidth {
+		contentColumns -= markerWidth
 	}
 
 	var content []string
@@ -215,7 +220,16 @@ func renderSubmittedMessage(text string, columns int, shouldRenderHyperlinks boo
 		if shouldRenderHyperlinks && workspace != "" {
 			row = link.Render(row, workspace)
 		}
-		content[i] = " " + row
+
+		prefix := " "
+		switch {
+		case marker == "":
+		case i == 0:
+			prefix += marker
+		default:
+			prefix += strings.Repeat(" ", markerWidth)
+		}
+		content[i] = prefix + row
 	}
 
 	rows := append([]string{""}, content...)
@@ -314,7 +328,7 @@ func (self *Picasso) renderUserMessage(text string) string {
 		return RenderSubmittedMessage(text, self.screen.Columns())
 	}
 
-	return renderSubmittedMessage(text, self.screen.Columns(), true, self.workspace.GetDir())
+	return renderSubmittedMessage(text, self.screen.Columns(), true, self.workspace.GetDir(), "")
 }
 
 func (self *Picasso) drawDeltaWithAnswerRendererReset(delta agent.Delta, shouldResetAnswerRenderer bool) {

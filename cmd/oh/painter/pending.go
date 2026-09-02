@@ -6,15 +6,19 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/internal/util/strutil"
 )
 
-const unsentMark = "⏳"
+const (
+	unsentMark              = "⏳"
+	unwrappedPreviewColumns = 1 << 16
+)
 
-func RenderQueuedMessages(messages []string, columns int) []string {
+func RenderQueuedMessages(messages []string, columns int, shouldRenderHyperlinks bool) []string {
 	if len(messages) == 0 {
 		return nil
 	}
@@ -23,25 +27,39 @@ func RenderQueuedMessages(messages []string, columns int) []string {
 	rows = append(rows, renderQueuedRow("", columns))
 
 	for _, message := range messages {
-		rows = append(rows, renderQueuedRow(unsentMark+" "+summariseQueuedMessage(message), columns))
+		summary := summariseQueuedMessage(message, shouldRenderHyperlinks)
+		rows = append(rows, renderQueuedRow(unsentMark+" "+summary, columns))
 	}
 
 	return append(rows, renderQueuedRow("", columns))
 }
 
-func summariseQueuedMessage(message string) string {
+func summariseQueuedMessage(message string, shouldRenderHyperlinks bool) string {
 	firstLine := strutil.FirstLine(message)
-	if strings.Contains(strings.TrimSpace(message), "\n") {
-		firstLine += width.Ellipsis
+
+	var renderedLines []string
+	if shouldRenderHyperlinks {
+		renderedLines = markdown.RenderWithHyperlinks(strutil.StripControl(firstLine), unwrappedPreviewColumns)
+	} else {
+		renderedLines = markdown.Render(strutil.StripControl(firstLine), unwrappedPreviewColumns)
 	}
 
-	return firstLine
+	summary := firstLine
+	if len(renderedLines) > 0 {
+		summary = renderedLines[0]
+	}
+
+	if strings.Contains(strings.TrimSpace(message), "\n") {
+		summary += width.Ellipsis
+	}
+
+	return summary
 }
 
 func renderQueuedRow(text string, columns int) string {
 	row := ""
 	if text != "" {
-		row = width.Elide(" "+strutil.StripControl(text), columns)
+		row = width.Elide(" "+text, columns)
 	}
 
 	if room := columns - style.Width(row); room > 0 {
@@ -86,14 +104,12 @@ func (self *PendingMessages) Rows(columns int) []string {
 }
 
 func (self *PendingMessages) render(message string, columns int) string {
+	marker := ""
 	if !self.isSent {
-		message = unsentMark + " " + message
-	}
-	if self.shouldRenderHyperlinks {
-		return RenderSubmittedMessageWithHyperlinks(message, columns)
+		marker = unsentMark + " "
 	}
 
-	return RenderSubmittedMessage(message, columns)
+	return renderSubmittedMessage(message, columns, self.shouldRenderHyperlinks, "", marker)
 }
 
 func renderAccessMessage(event agent.Event) (string, bool) {

@@ -6027,6 +6027,7 @@ const (
 	queuedSeveral
 	queuedLongMessage
 	queuedMultilineMessage
+	queuedMarkdownEmphasis
 	queuedSnippet
 	queuedTakenBack
 	queuedTakenBackWhileTyping
@@ -6043,6 +6044,7 @@ func TestQueuedMessagesDrawEveryVisibleState(t *testing.T) {
 		"a snippet queued":           func() string { return queuedMessagesStream(t, queuedSnippet) },
 		"a long message elided":      func() string { return queuedMessagesStream(t, queuedLongMessage) },
 		"a multiline message":        func() string { return queuedMessagesStream(t, queuedMultilineMessage) },
+		"a markdown emphasis":        func() string { return queuedMessagesStream(t, queuedMarkdownEmphasis) },
 		"escape takes the last back": func() string { return queuedMessagesStream(t, queuedTakenBack) },
 		"taken back while typing":    func() string { return queuedMessagesStream(t, queuedTakenBackWhileTyping) },
 		"feedback takes the footer":  func() string { return queuedMessagesStream(t, queuedBehindFeedback) },
@@ -6110,6 +6112,7 @@ func queuedMessagesStream(t *testing.T, scenario queuedMessagesScenario) string 
 		queuedSeveral:               {"the first", "the second", "the third", "the fourth", "the fifth"},
 		queuedLongMessage:           {longQueuedMessage},
 		queuedMultilineMessage:      {"check the other path too\n\n- the first thing\n- the second thing"},
+		queuedMarkdownEmphasis:      {"check the *other* path too"},
 		queuedTakenBack:             {"check the other path too", "and mention what you find"},
 		queuedTakenBackWhileTyping:  {"check the other path too"},
 		queuedBehindFeedback:        {"check the other path too"},
@@ -6124,7 +6127,7 @@ func queuedMessagesStream(t *testing.T, scenario queuedMessagesScenario) string 
 
 	switch scenario {
 	case queuedOne, queuedTwo, queuedSeveral, queuedLongMessage, queuedMultilineMessage,
-		queuedTallerThanTheTerminal:
+		queuedMarkdownEmphasis, queuedTallerThanTheTerminal:
 	case queuedSnippet:
 		self.handleCommand("//add review the second path")
 		self.show(inputLine)
