@@ -9,7 +9,7 @@ import (
 var namePattern = regexp.MustCompile(`^[a-z]+-[a-z]+$`)
 
 func newName(directory string) (string, error) {
-	names, err := storedNames(directory)
+	names, err := StoredNames(directory)
 	if err != nil {
 		return "", err
 	}

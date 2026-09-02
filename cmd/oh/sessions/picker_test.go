@@ -77,6 +77,59 @@ func TestLoadingSessionsRestoresFastModeFromTheJournal(t *testing.T) {
 	}
 }
 
+func TestLoadingOnlyTheNewestSessionsDoesNotInspectOlderOnes(t *testing.T) {
+	directory := t.TempDir()
+	older, err := store.Create(directory, store.Meta{Provider: model.CodexProvider, Model: "gpt-5.6-sol"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := older.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "older"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := older.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	root, err := os.OpenRoot(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = root.Close() }()
+	journal, err := root.OpenFile(filepath.Join(older.Name(), "session.jsonl"), os.O_WRONLY|os.O_APPEND, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := journal.WriteString("{broken}\n"); err != nil {
+		t.Fatal(err)
+	}
+	if err := journal.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	time.Sleep(2 * time.Millisecond)
+	newer, err := store.Create(directory, store.Meta{Provider: model.AnthropicProvider, Model: "claude-opus-5"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := newer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "newer"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := newer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	loadedSessions, total, err := LoadNewest(directory, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if total != 2 {
+		t.Errorf("loaded %d sessions in total, want 2", total)
+	}
+	if len(loadedSessions) != 1 || loadedSessions[0].Name != newer.Name() {
+		t.Errorf("loaded %+v, want only %s", loadedSessions, newer.Name())
+	}
+}
+
 func TestTheSessionAddedToLastIsOfferedFirstByThePicker(t *testing.T) {
 	directory := t.TempDir()
 	workspaceDir := t.TempDir()

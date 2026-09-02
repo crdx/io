@@ -276,7 +276,7 @@ func TestTheListingIsCappedUntilAFilterIsLongEnoughToLiftTheCap(t *testing.T) {
 
 	for name, test := range tests {
 		var failure strings.Builder
-		got := withinLimit(manyListings(listLimit+1), test.filter, &failure)
+		got := withinLimit(manyListings(listLimit+1), listLimit+1, test.filter, &failure)
 
 		if len(got) != test.wanted {
 			t.Errorf("%s: listed %d, want %d", name, len(got), test.wanted)

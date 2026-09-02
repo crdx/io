@@ -65,10 +65,10 @@ func TestAnEmptyListingMatchesTheGolden(t *testing.T) {
 func TestTheNoticeThatCapsTheListingMatchesTheGolden(t *testing.T) {
 	var failure strings.Builder
 
-	withinLimit(manyListings(listLimit+7), "", &failure)
-	withinLimit(manyListings(listLimit+7), "ses", &failure)
-	withinLimit(manyListings(listLimit+7), "sessions", &failure)
-	withinLimit(manyListings(listLimit), "", &failure)
+	withinLimit(manyListings(listLimit), listLimit+7, "", &failure)
+	withinLimit(manyListings(listLimit+7), listLimit+7, "ses", &failure)
+	withinLimit(manyListings(listLimit+7), listLimit+7, "sessions", &failure)
+	withinLimit(manyListings(listLimit), listLimit, "", &failure)
 
 	assertGolden(t, "capped.txt", failure.String())
 }

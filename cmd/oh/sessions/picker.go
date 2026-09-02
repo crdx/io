@@ -113,24 +113,77 @@ func RefreshListings(directory string, screen io.Writer) error {
 }
 
 func Load(directory string) ([]*picker.Session, error) {
+	metadata, err := loadMetadata(directory)
+	if err != nil {
+		return nil, err
+	}
+	if err := inspect(directory, metadata); err != nil {
+		return nil, err
+	}
+
+	return listings(metadata), nil
+}
+
+func LoadNewest(directory string, limit int) ([]*picker.Session, int, error) {
+	names, err := session.StoredNames(directory)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	metadata, err := loadNamedMetadata(directory, names)
+	if err != nil {
+		return nil, 0, err
+	}
+	total := len(metadata)
+	if limit >= 0 && len(metadata) > limit {
+		metadata = metadata[:limit]
+	}
+	if err := inspect(directory, metadata); err != nil {
+		return nil, 0, err
+	}
+
+	return listings(metadata), total, nil
+}
+
+type sessionMetadata struct {
+	listing        *picker.Session
+	provider       string
+	isRunningKnown bool
+}
+
+func loadMetadata(directory string) ([]sessionMetadata, error) {
 	entries, err := session.Entries(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	sessions := make([]*picker.Session, 0, len(entries))
+	names := make([]string, 0, len(entries))
 	for _, entry := range entries {
-		isRunning, err := session.IsInUse(directory, entry.Name)
-		if err != nil {
-			return nil, err
-		}
+		names = append(names, entry.Name)
+	}
+	return loadNamedMetadata(directory, names)
+}
 
-		storedMeta, err := session.ReadMeta(directory, entry.Name)
-		if err != nil && isRunning {
-			storedMeta, err = store.GetListingMeta(directory, entry.Name)
+func loadNamedMetadata(directory string, names []string) ([]sessionMetadata, error) {
+	metadata := make([]sessionMetadata, 0, len(names))
+
+	for _, name := range names {
+		storedMeta, metaError := session.ReadMeta(directory, name)
+		isRunning := false
+		isRunningKnown := false
+		if metaError != nil {
+			var err error
+			isRunning, err = session.IsInUse(directory, name)
+			if err != nil {
+				return nil, err
+			}
+			isRunningKnown = true
+			if isRunning {
+				storedMeta, metaError = store.GetListingMeta(directory, name)
+			}
 		}
-		if err != nil {
-			return nil, fmt.Errorf("could not read session %s metadata: %w", entry.Name, err)
+		if metaError != nil {
+			return nil, fmt.Errorf("could not read session %s metadata: %w", name, metaError)
 		}
 
 		listing, data, isDescribed := describe(storedMeta)
@@ -139,17 +192,45 @@ func Load(directory string) ([]*picker.Session, error) {
 		}
 		listing.IsRunning = isRunning
 
-		if model.SupportsFastMode(data.Provider) {
-			if listing.IsFast, err = getFastMode(directory, entry.Name); err != nil {
-				return nil, err
-			}
-		}
-
-		sessions = append(sessions, listing)
+		metadata = append(metadata, sessionMetadata{
+			listing:        listing,
+			provider:       data.Provider,
+			isRunningKnown: isRunningKnown,
+		})
 	}
 
-	newestFirst(sessions)
-	return sessions, nil
+	newestMetadataFirst(metadata)
+	return metadata, nil
+}
+
+func inspect(directory string, metadata []sessionMetadata) error {
+	for _, storedMetadata := range metadata {
+		if !storedMetadata.isRunningKnown {
+			isRunning, err := session.IsInUse(directory, storedMetadata.listing.Name)
+			if err != nil {
+				return err
+			}
+			storedMetadata.listing.IsRunning = isRunning
+		}
+
+		if model.SupportsFastMode(storedMetadata.provider) {
+			isFast, err := getFastMode(directory, storedMetadata.listing.Name)
+			if err != nil {
+				return err
+			}
+			storedMetadata.listing.IsFast = isFast
+		}
+	}
+
+	return nil
+}
+
+func listings(metadata []sessionMetadata) []*picker.Session {
+	sessions := make([]*picker.Session, 0, len(metadata))
+	for _, storedMetadata := range metadata {
+		sessions = append(sessions, storedMetadata.listing)
+	}
+	return sessions
 }
 
 func LoadArchived(directory string) ([]*picker.Session, error) {
@@ -205,12 +286,20 @@ func describe(storedMeta *session.Meta) (*picker.Session, listingData, bool) {
 }
 
 func newestFirst(sessions []*picker.Session) {
-	slices.SortFunc(sessions, func(first, second *picker.Session) int {
-		if order := second.TouchedAt.Compare(first.TouchedAt); order != 0 {
-			return order
-		}
-		return strings.Compare(second.Name, first.Name)
+	slices.SortFunc(sessions, newestOrder)
+}
+
+func newestMetadataFirst(metadata []sessionMetadata) {
+	slices.SortFunc(metadata, func(first, second sessionMetadata) int {
+		return newestOrder(first.listing, second.listing)
 	})
+}
+
+func newestOrder(first *picker.Session, second *picker.Session) int {
+	if order := second.TouchedAt.Compare(first.TouchedAt); order != 0 {
+		return order
+	}
+	return strings.Compare(second.Name, first.Name)
 }
 
 var errFastModeFound = errors.New("fast mode found")

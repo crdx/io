@@ -84,11 +84,7 @@ func Run() error {
 
 func run(options *inputOpts, output console.Output) error {
 	directory := location.GetSessionsDir()
-	if err := ohSessions.RefreshListings(directory, output.Failure); err != nil {
-		return err
-	}
-
-	storedSessions, err := loadSessions(directory, options.Archived)
+	storedSessions, unlistedCount, err := loadRequestedSessions(directory, options, output.Failure)
 	if err != nil {
 		if migrationError := ohSessions.ValidateFormats(directory); migrationError != nil {
 			return migrationError
@@ -107,11 +103,12 @@ func run(options *inputOpts, output console.Output) error {
 	storedSessions = matching(storedSessions, options.Filter)
 
 	listings := describe(directory, storedSessions, options.Running)
+	listingTotal := len(listings) + unlistedCount
 	if len(listings) == 0 {
 		_, _ = fmt.Fprintln(output.Failure, style.Subtle(nothingToList(options)))
 	}
 
-	listings = withinLimit(listings, options.Filter, output.Failure)
+	listings = withinLimit(listings, listingTotal, options.Filter, output.Failure)
 
 	if options.JSON {
 		return writeJSON(listings, output.Screen)
@@ -130,6 +127,35 @@ func nothingToList(options *inputOpts) string {
 	}
 
 	return "there are no " + kind + " sessions to list"
+}
+
+func loadRequestedSessions(directory string, options *inputOpts, failure io.Writer) ([]*picker.Session, int, error) {
+	if canLoadNewest(options) {
+		return loadNewestSessions(directory, failure)
+	}
+
+	if err := ohSessions.RefreshListings(directory, failure); err != nil {
+		return nil, 0, err
+	}
+	storedSessions, err := loadSessions(directory, options.Archived)
+	return storedSessions, 0, err
+}
+
+func loadNewestSessions(directory string, failure io.Writer) ([]*picker.Session, int, error) {
+	storedSessions, total, err := ohSessions.LoadNewest(directory, listLimit)
+	if err == nil {
+		return storedSessions, total - len(storedSessions), nil
+	}
+	if refreshError := ohSessions.RefreshListings(directory, failure); refreshError != nil {
+		return nil, 0, refreshError
+	}
+
+	storedSessions, total, err = ohSessions.LoadNewest(directory, listLimit)
+	return storedSessions, total - len(storedSessions), err
+}
+
+func canLoadNewest(options *inputOpts) bool {
+	return !options.Archived && !options.Running && options.Workspace == "" && options.Filter == ""
 }
 
 func loadSessions(directory string, isArchivedWanted bool) ([]*picker.Session, error) {
@@ -155,17 +181,17 @@ func matching(storedSessions []*picker.Session, filter string) []*picker.Session
 	return matches
 }
 
-func withinLimit(listings []Listing, filter string, failure io.Writer) []Listing {
-	if len(filter) > shortFilter || len(listings) <= listLimit {
+func withinLimit(listings []Listing, total int, filter string, failure io.Writer) []Listing {
+	if len(filter) > shortFilter || total <= listLimit {
 		return listings
 	}
 
 	_, _ = fmt.Fprintln(failure, style.Subtle(fmt.Sprintf(
 		"listing the newest %d of %d sessions, which a filter of more than %d characters lists in full",
-		listLimit, len(listings), shortFilter,
+		listLimit, total, shortFilter,
 	)))
 
-	return listings[:listLimit]
+	return listings[:min(listLimit, len(listings))]
 }
 
 func describe(directory string, storedSessions []*picker.Session, isRunningOnly bool) []Listing {

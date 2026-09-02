@@ -530,7 +530,7 @@ func decodeMeta(encodedMeta []byte, name string) (*Meta, error) {
 }
 
 func ListMeta(directory string) ([]*Meta, error) {
-	names, err := storedNames(directory)
+	names, err := StoredNames(directory)
 	if err != nil {
 		return nil, err
 	}
@@ -620,7 +620,7 @@ type Entry struct {
 }
 
 func Entries(directory string) ([]Entry, error) {
-	names, err := storedNames(directory)
+	names, err := StoredNames(directory)
 	if err != nil {
 		return nil, err
 	}
@@ -677,7 +677,7 @@ func namesInFormat(directory string, isWanted func(storedFormat int) bool) ([]st
 	return names, nil
 }
 
-func storedNames(directory string) ([]string, error) {
+func StoredNames(directory string) ([]string, error) {
 	found, err := os.ReadDir(directory)
 	if err != nil {
 		if os.IsNotExist(err) {
