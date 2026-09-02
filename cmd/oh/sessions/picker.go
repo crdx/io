@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strings"
 
+	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/sessions/picker"
@@ -31,15 +32,36 @@ func Choose(directory string, workspace *work.Space, terminal *os.File, screen i
 		return "", err
 	}
 	sessions = InWorkspace(sessions, workspace)
-	if len(sessions) == 0 {
+
+	archivedSessions, err := LoadArchived(directory)
+	if err != nil {
+		return "", err
+	}
+	archivedSessions = InWorkspace(archivedSessions, workspace)
+
+	if len(sessions) == 0 && len(archivedSessions) == 0 {
 		return "", errors.New("there are no stored conversations for this workspace")
 	}
 
-	archive := func(storedSession *picker.Session) error {
-		return session.Archive(directory, storedSession.Name)
+	store := picker.Store{
+		Sessions:         sessions,
+		ArchivedSessions: archivedSessions,
+		Archive: func(storedSession *picker.Session) error {
+			return session.Archive(directory, storedSession.Name)
+		},
+		Restore: func(storedSession *picker.Session) error {
+			return session.Restore(directory, storedSession.Name)
+		},
+		Delete: func(storedSession *picker.Session) error {
+			if err := session.Delete(directory, storedSession.Name); err != nil {
+				return err
+			}
+
+			return os.RemoveAll(location.GetTmpDir(storedSession.Name))
+		},
 	}
 
-	chosenSession, err := picker.Choose(sessions, archive, terminal, screen)
+	chosenSession, err := picker.Choose(store, terminal, screen)
 	if errors.Is(err, menu.ErrCancelled) {
 		return "", nil
 	}

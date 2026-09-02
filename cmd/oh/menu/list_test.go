@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 	"syscall"
 	"testing"
@@ -43,6 +44,7 @@ func (self *fakeList) Adjust(index int, direction int) {
 func listState(rows List, cursor int) *state {
 	self := newState(rows)
 	self.cursor = cursor
+	self.startWork = func(work func()) { work() }
 
 	return self
 }
@@ -325,13 +327,20 @@ type removableList struct {
 	failure error
 }
 
-func (self *removableList) IsRemovable(index int) bool { return self.IsChoosable(index) }
+func (self *removableList) Removal(index int, keypress key.Key) (Removal, bool) {
+	if !self.IsChoosable(index) || keypress != archiveKey() {
+		return Removal{}, false
+	}
 
-func (self *removableList) RemovalPrompt(index int) string {
-	return "Archive " + self.rows[index] + "?"
+	return Removal{
+		Prompt:  "Press ctrl+a again to archive",
+		Working: "Archiving…",
+		Perform: func() error { return self.perform(index) },
+		Apply:   func() { self.apply(index) },
+	}, true
 }
 
-func (self *removableList) Remove(index int) error {
+func (self *removableList) perform(index int) error {
 	if self.failure != nil {
 		return self.failure
 	}
@@ -339,32 +348,55 @@ func (self *removableList) Remove(index int) error {
 		return errors.New("the session is already open elsewhere")
 	}
 
+	return nil
+}
+
+func (self *removableList) apply(index int) {
 	self.removed = append(self.removed, self.rows[index])
 	self.rows = slices.Delete(self.rows, index, index+1)
+}
 
-	return nil
+type switchableList struct {
+	removableList
+
+	other      []string
+	isSwitched bool
+}
+
+func (self *switchableList) Switch(int) bool {
+	self.rows, self.other = self.other, self.rows
+	self.isSwitched = !self.isSwitched
+
+	return true
+}
+
+func archiveKey() key.Key {
+	return key.Key{Code: key.Rune, Value: 'a', Mod: key.Ctrl}
 }
 
 func removableRows(names ...string) *removableList {
 	return &removableList{fakeList: fakeList{rows: names}}
 }
 
-func TestARowIsRemovedOnlyOnceTheAnswerIsYes(t *testing.T) {
+func TestARowIsRemovedOnlyOnASecondPress(t *testing.T) {
 	rows := removableRows("first", "second", "third")
 	self := listState(rows, 1)
 
-	self.apply(key.Key{Code: key.Delete})
+	self.apply(archiveKey())
 	if self.removal.index != 1 {
 		t.Fatalf("expected the second row to be awaiting an answer, got %d", self.removal.index)
 	}
 
 	self.apply(key.Key{Code: key.Rune, Value: 'n'})
 	if self.removal.index != -1 || len(rows.removed) != 0 {
-		t.Fatalf("expected the refusal to leave the row alone, got %v", rows.removed)
+		t.Fatalf("expected any other key to leave the row alone, got %v", rows.removed)
+	}
+	if self.query != "" {
+		t.Errorf("expected the key that cancelled to be swallowed, got the filter %q", self.query)
 	}
 
-	self.apply(key.Key{Code: key.Delete})
-	self.apply(key.Key{Code: key.Rune, Value: 'y'})
+	self.apply(archiveKey())
+	self.apply(archiveKey())
 
 	if !slices.Equal(rows.removed, []string{"second"}) {
 		t.Fatalf("got the rows removed as %v", rows.removed)
@@ -381,15 +413,15 @@ func TestRemovingTheLastRowLeavesTheCursorOnTheOneBefore(t *testing.T) {
 	rows := removableRows("first", "second")
 	self := listState(rows, 1)
 
-	self.apply(key.Key{Code: key.Delete})
-	self.apply(key.Key{Code: key.Rune, Value: 'y'})
+	self.apply(archiveKey())
+	self.apply(archiveKey())
 
 	if self.cursor != 0 {
 		t.Errorf("expected the cursor to fall back a row, got %d", self.cursor)
 	}
 
-	self.apply(key.Key{Code: key.Delete})
-	self.apply(key.Key{Code: key.Rune, Value: 'y'})
+	self.apply(archiveKey())
+	self.apply(archiveKey())
 
 	if self.cursor != -1 {
 		t.Errorf("expected an empty list to have no cursor, got %d", self.cursor)
@@ -401,18 +433,9 @@ func TestARowThatCannotBeRemovedIsNotAskedAbout(t *testing.T) {
 	rows.unrunnable = []bool{false, true}
 	self := listState(rows, 1)
 
-	self.apply(key.Key{Code: key.Delete})
+	self.apply(archiveKey())
 	if self.removal.index != -1 {
 		t.Errorf("expected the running row to be left alone, got %d", self.removal.index)
-	}
-}
-
-func TestALisWithoutRemovalIgnoresTheDeleteKey(t *testing.T) {
-	self := defaultState()
-
-	self.apply(key.Key{Code: key.Delete})
-	if self.removal.index != -1 {
-		t.Errorf("expected nothing to be asked, got %d", self.removal.index)
 	}
 }
 
@@ -421,8 +444,8 @@ func TestAFailedRemovalIsReportedInPlaceOfTheFilter(t *testing.T) {
 	rows.failure = errors.New("the session is already open elsewhere")
 	self := listState(rows, 0)
 
-	self.apply(key.Key{Code: key.Delete})
-	self.apply(key.Key{Code: key.Rune, Value: 'y'})
+	self.apply(archiveKey())
+	self.apply(archiveKey())
 
 	if !strings.Contains(self.promptLine(80), rows.failure.Error()) {
 		t.Errorf("expected the failure on the prompt line, got %q", self.promptLine(80))
@@ -431,5 +454,173 @@ func TestAFailedRemovalIsReportedInPlaceOfTheFilter(t *testing.T) {
 	self.apply(key.Key{Code: key.Down})
 	if !strings.Contains(self.promptLine(80), filterPrompt) {
 		t.Errorf("expected the filter back on the prompt line, got %q", self.promptLine(80))
+	}
+}
+
+func TestSwitchingTheViewRefiltersAndTakesTheCursorToTheTop(t *testing.T) {
+	rows := &switchableList{
+		removableList: removableList{fakeList: fakeList{rows: []string{"first", "second", "third"}}},
+		other:         []string{"archived-otter"},
+	}
+	self := listState(rows, 2)
+
+	self.apply(key.Key{Code: key.Right})
+	if !rows.isSwitched || len(self.matches) != 1 {
+		t.Fatalf("expected the other view, got %d rows", len(self.matches))
+	}
+	if self.cursor != 0 || self.chosen() != 0 {
+		t.Errorf("expected the cursor at the top, got %d", self.cursor)
+	}
+
+	self.apply(key.Key{Code: key.Left})
+	if rows.isSwitched || len(self.matches) != 3 {
+		t.Fatalf("expected the first view back, got %d rows", len(self.matches))
+	}
+}
+
+func TestALisWithoutSwitchingStillAdjustsARow(t *testing.T) {
+	rows := rowsNamed("first", "second")
+	self := listState(rows, 1)
+
+	self.apply(key.Key{Code: key.Right})
+	if rows.adjusted == nil || rows.adjusted[1] != 1 {
+		t.Errorf("expected the row to be adjusted, got %v", rows.adjusted)
+	}
+}
+
+func TestTheRemovalKeyIsNotTypedIntoTheFilter(t *testing.T) {
+	rows := removableRows("first", "second")
+	self := listState(rows, 0)
+
+	self.apply(archiveKey())
+	self.apply(key.Key{Code: key.Escape})
+
+	if self.query != "" {
+		t.Errorf("expected nothing to have been typed, got %q", self.query)
+	}
+
+	self.apply(archiveKey())
+	if self.removal.index != 0 {
+		t.Fatalf("expected the removal to be asked about again, got %d", self.removal.index)
+	}
+	if self.query != "" {
+		t.Errorf("expected the removal key to stay out of the filter, got %q", self.query)
+	}
+}
+
+func TestALisWithoutRemovalIgnoresTheRemovalKey(t *testing.T) {
+	self := defaultState()
+
+	self.apply(archiveKey())
+	if self.removal.index != -1 {
+		t.Errorf("expected nothing to be asked, got %d", self.removal.index)
+	}
+	if self.query != "" {
+		t.Errorf("expected the key to be swallowed rather than typed, got %q", self.query)
+	}
+}
+
+func TestKeysAreDiscardedWhileTheWorkRuns(t *testing.T) {
+	rows := removableRows("first", "second")
+	self := listState(rows, 0)
+	self.removal = removal{index: -1, isWorking: true, working: Removal{Working: "Archiving…"}}
+
+	for _, keypress := range []key.Key{
+		{Code: key.Enter},
+		{Code: key.Down},
+		{Code: key.Escape},
+		{Code: key.Rune, Value: 'x'},
+		archiveKey(),
+	} {
+		if got := self.apply(keypress); got != continuePicking {
+			t.Errorf("expected %v to be discarded, got action %v", keypress, got)
+		}
+	}
+
+	if self.cursor != 0 {
+		t.Errorf("expected the cursor to stay put, got %d", self.cursor)
+	}
+	if self.query != "" {
+		t.Errorf("expected nothing to be typed, got %q", self.query)
+	}
+	if !strings.Contains(self.promptLine(40), "Archiving…") {
+		t.Errorf("expected the work to be named, got %q", self.promptLine(40))
+	}
+}
+
+func TestTheWorkIsNamedBeforeItStarts(t *testing.T) {
+	rows := removableRows("first", "second")
+
+	var drawnWhileWorking string
+	self := listState(rows, 0)
+	self.screen = &strings.Builder{}
+	self.startWork = func(work func()) {
+		drawnWhileWorking = self.promptLine(40)
+		work()
+	}
+
+	self.apply(archiveKey())
+	self.apply(archiveKey())
+
+	if !strings.Contains(drawnWhileWorking, "Archiving…") {
+		t.Errorf("expected the work to be named before it ran, got %q", drawnWhileWorking)
+	}
+	if !slices.Equal(rows.removed, []string{"first"}) {
+		t.Errorf("expected the work to have been done, got %v", rows.removed)
+	}
+	if strings.Contains(self.promptLine(40), "Archiving…") {
+		t.Errorf("expected the work to be over, got %q", self.promptLine(40))
+	}
+}
+
+func TestARemovalLeavesTheViewportWhereItWas(t *testing.T) {
+	rows := make([]string, 40)
+	for i := range rows {
+		rows[i] = "session-" + strconv.Itoa(i)
+	}
+
+	list := &removableList{fakeList: fakeList{rows: rows}}
+	self := listState(list, 25)
+	self.measure = func() (int, int) { return 80, 12 }
+	self.offset = 20
+
+	self.apply(archiveKey())
+	self.apply(archiveKey())
+
+	if !slices.Equal(list.removed, []string{"session-25"}) {
+		t.Fatalf("got the rows removed as %v", list.removed)
+	}
+	if self.offset != 20 {
+		t.Errorf("expected the viewport to stay at 20, got %d", self.offset)
+	}
+	if self.cursor != 25 {
+		t.Errorf("expected the cursor to hold its place, got %d", self.cursor)
+	}
+
+	self.draw()
+	if self.offset != 20 || self.cursor != 25 {
+		t.Errorf("expected the drawing to leave both alone, got offset %d and cursor %d", self.offset, self.cursor)
+	}
+}
+
+func TestRemovingFromTheEndPullsTheViewportBackToFillTheScreen(t *testing.T) {
+	rows := make([]string, 12)
+	for i := range rows {
+		rows[i] = "session-" + strconv.Itoa(i)
+	}
+
+	list := &removableList{fakeList: fakeList{rows: rows}}
+	self := listState(list, 11)
+	self.measure = func() (int, int) { return 80, 12 }
+	self.offset = 2
+
+	self.apply(archiveKey())
+	self.apply(archiveKey())
+
+	if self.offset != 1 {
+		t.Errorf("expected the viewport to pull back to 1, got %d", self.offset)
+	}
+	if self.cursor != 10 {
+		t.Errorf("expected the cursor to fall back a row, got %d", self.cursor)
 	}
 }

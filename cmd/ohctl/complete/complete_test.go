@@ -28,13 +28,13 @@ func TestOnlyACompletionRequestIsAnsweredAtAll(t *testing.T) {
 	if !Write(&out, []string{Flag, kindCommand}) {
 		t.Error("expected a completion request to be answered")
 	}
-	if !strings.Contains(out.String(), "restore\n") {
+	if !strings.Contains(out.String(), "sessions\n") {
 		t.Errorf("expected every command to be offered, got %q", out.String())
 	}
 }
 
 func TestEveryCommandIsOffered(t *testing.T) {
-	if got := completions(kindCommand, "re"); !slices.Equal(got, []string{"regen", "restore"}) {
+	if got := completions(kindCommand, "s"); !slices.Equal(got, []string{"sessions"}) {
 		t.Errorf("got the commands %v", got)
 	}
 	if got := completions("nonsense", ""); got != nil {
@@ -72,10 +72,9 @@ func TestWhatEachKindOffersMatchesTheGolden(t *testing.T) {
 		args []string
 	}{
 		{name: "commands", args: []string{Flag, kindCommand, ""}},
-		{name: "commands beginning with a word", args: []string{Flag, kindCommand, "re"}},
+		{name: "commands beginning with a word", args: []string{Flag, kindCommand, "se"}},
 		{name: "sessions", args: []string{Flag, kindSession, ""}},
 		{name: "sessions beginning with a word", args: []string{Flag, kindSession, "able"}},
-		{name: "archived sessions", args: []string{Flag, kindArchived, ""}},
 	}
 
 	var drawn strings.Builder
@@ -133,9 +132,6 @@ func TestAStoredSessionCompletesUntilItIsArchived(t *testing.T) {
 	if got := completions(kindSession, ""); !slices.Contains(got, name) {
 		t.Errorf("expected the stored session to be offered, got %v", got)
 	}
-	if got := completions(kindArchived, ""); len(got) != 0 {
-		t.Errorf("expected nothing archived, got %v", got)
-	}
 
 	if err := session.Archive(directory, name); err != nil {
 		t.Fatal(err)
@@ -143,8 +139,5 @@ func TestAStoredSessionCompletesUntilItIsArchived(t *testing.T) {
 
 	if got := completions(kindSession, ""); slices.Contains(got, name) {
 		t.Errorf("expected the archived session to be gone from the stored ones, got %v", got)
-	}
-	if got := completions(kindArchived, ""); !slices.Equal(got, []string{name}) {
-		t.Errorf("expected the archived session to be offered, got %v", got)
 	}
 }

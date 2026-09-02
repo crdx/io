@@ -3,6 +3,8 @@ package terminal
 import (
 	"io"
 
+	"crdx.org/io/cmd/oh/ansi"
+
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/work"
@@ -10,7 +12,7 @@ import (
 
 const writableMarker = "✱"
 
-const eraseDisplay = "\x1b[H\x1b[2J\x1b[3J"
+const eraseDisplay = ansi.EraseScreen + ansi.EraseScrollback
 
 func ResetScrollback(writer io.Writer) {
 	if tty.Is(writer) {

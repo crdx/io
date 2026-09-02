@@ -15,6 +15,11 @@ import (
 )
 
 const (
+	smallArchive = 64 << 20
+	largeArchive = 512 << 20
+)
+
+const (
 	ArchiveSuffix   = ".tgz"
 	archiveFileMode = 0o600
 	archiveDirMode  = 0o700
@@ -120,7 +125,15 @@ func writeArchive(directory string, name string) (string, error) {
 }
 
 func writeArchiveTo(writer io.Writer, sessionDir string, name string) error {
-	compressor := gzip.NewWriter(writer)
+	storedBytes, err := directorySize(sessionDir)
+	if err != nil {
+		return err
+	}
+
+	compressor, err := gzip.NewWriterLevel(writer, CompressionLevel(storedBytes))
+	if err != nil {
+		return err
+	}
 	archive := tar.NewWriter(compressor)
 
 	walk := func(candidate string, entry fs.DirEntry, err error) error {
@@ -150,6 +163,40 @@ func writeArchiveTo(writer io.Writer, sessionDir string, name string) error {
 	}
 
 	return compressor.Close()
+}
+
+func directorySize(sessionDir string) (int64, error) {
+	var storedBytes int64
+
+	err := filepath.WalkDir(sessionDir, func(_ string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !entry.Type().IsRegular() {
+			return nil
+		}
+
+		info, err := entry.Info()
+		if err != nil {
+			return err
+		}
+		storedBytes += info.Size()
+
+		return nil
+	})
+
+	return storedBytes, err
+}
+
+func CompressionLevel(storedBytes int64) int {
+	switch {
+	case storedBytes < smallArchive:
+		return gzip.BestCompression
+	case storedBytes < largeArchive:
+		return gzip.DefaultCompression
+	default:
+		return gzip.BestSpeed
+	}
 }
 
 func writeArchiveEntry(archive *tar.Writer, candidate string, storedName string, entry fs.DirEntry) error {
@@ -183,6 +230,24 @@ func writeArchiveEntry(archive *tar.Writer, candidate string, storedName string,
 	_, err = io.Copy(archive, file)
 
 	return err
+}
+
+func Delete(directory string, name string) error {
+	if err := validateName(name); err != nil {
+		return err
+	}
+
+	if IsArchived(directory, name) {
+		return os.Remove(ArchivePath(directory, name))
+	}
+
+	heldLock, err := AcquireLock(directory, name)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = heldLock.Release() }()
+
+	return os.RemoveAll(Dir(directory, name))
 }
 
 func Restore(directory string, name string) error {

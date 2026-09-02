@@ -285,5 +285,37 @@ func Elide(text string, cells int) string {
 
 	keptText, _ := Cut(text, cells-1)
 
-	return keptText + Ellipsis
+	return keptText + Ellipsis + closing(keptText)
+}
+
+func closing(text string) string {
+	isOpen := false
+
+	runes := []rune(text)
+	for i := 0; i < len(runes); {
+		if runes[i] != '\x1b' {
+			i++
+			continue
+		}
+
+		sequence := escape.GetSequence(runes, i)
+		if isSGR(string(runes[i:sequence.End])) {
+			isOpen = !isReset(string(runes[i:sequence.End]))
+		}
+		i = sequence.End
+	}
+
+	if isOpen {
+		return reset
+	}
+
+	return ""
+}
+
+func isSGR(sequence string) bool {
+	return strings.HasPrefix(sequence, "\x1b[") && strings.HasSuffix(sequence, "m")
+}
+
+func isReset(sequence string) bool {
+	return sequence == reset || sequence == "\x1b[m"
 }

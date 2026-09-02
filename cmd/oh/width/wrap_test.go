@@ -131,3 +131,78 @@ func plain(text string) string {
 
 	return out.String()
 }
+
+func TestElidingPlainText(t *testing.T) {
+	const text = "chewy-sardine"
+
+	tests := map[int]string{
+		0:  "",
+		1:  "…",
+		5:  "chew…",
+		12: "chewy-sardi…",
+		13: "chewy-sardine",
+		20: "chewy-sardine",
+	}
+
+	for cells, wanted := range tests {
+		if got := Elide(text, cells); got != wanted {
+			t.Errorf("Elide(%q, %d) = %q, want %q", text, cells, got, wanted)
+		}
+	}
+}
+
+func TestElidingStyledTextClosesTheStyleItCutsThrough(t *testing.T) {
+	const text = "\x1b[31mchewy-sardine\x1b[0m"
+
+	if got := Elide(text, 13); got != text {
+		t.Errorf("expected styled text that fits to be left alone, got %q", got)
+	}
+
+	got := Elide(text, 5)
+	if want := "\x1b[31mchew…\x1b[0m"; got != want {
+		t.Errorf("Elide(styled, 5) = %q, want %q", got, want)
+	}
+	if Of(got) != 5 {
+		t.Errorf("expected 5 cells, got %d in %q", Of(got), got)
+	}
+}
+
+func TestElidingLeavesAlreadyClosedStylingAlone(t *testing.T) {
+	const text = "\x1b[31mred\x1b[0m and more text"
+
+	got := Elide(text, 8)
+	if want := "\x1b[31mred\x1b[0m and…"; got != want {
+		t.Errorf("Elide(%q, 8) = %q, want %q", text, got, want)
+	}
+	if strings.Count(got, reset) != 1 {
+		t.Errorf("expected the one reset it already had, got %q", got)
+	}
+}
+
+func TestElidingNeverCutsThroughAnEscapeSequence(t *testing.T) {
+	const text = "abc\x1b[38;2;150;152;150mdefghij\x1b[0m"
+
+	for cells := range 12 {
+		got := Elide(text, cells)
+
+		if Of(got) > cells {
+			t.Errorf("Elide(%d) = %q, which is %d cells", cells, got, Of(got))
+		}
+
+		runes := []rune(got)
+		for i := 0; i < len(runes); i++ {
+			if runes[i] != '\x1b' {
+				continue
+			}
+
+			sequence := escape.GetSequence(runes, i)
+			if sequence.End > len(runes) || sequence.End == i {
+				t.Fatalf("Elide(%d) = %q, which holds a cut sequence at %d", cells, got, i)
+			}
+			if !strings.HasSuffix(string(runes[i:sequence.End]), "m") {
+				t.Errorf("Elide(%d) = %q, whose sequence at %d is incomplete", cells, got, i)
+			}
+			i = sequence.End - 1
+		}
+	}
+}

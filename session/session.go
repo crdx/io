@@ -100,7 +100,7 @@ func openSessionDir(directory string, name string) (*os.File, error) {
 
 func missing(directory string, name string) error {
 	if IsArchived(directory, name) {
-		return fmt.Errorf("%w %q, so restore it with: ohctl restore %s", ErrArchived, name, name)
+		return fmt.Errorf("%w %q, so restore it from the session picker: oh -r", ErrArchived, name)
 	}
 	return fmt.Errorf("%w %q", ErrNotFound, name)
 }

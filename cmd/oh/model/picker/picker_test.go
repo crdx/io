@@ -186,8 +186,7 @@ func TestTheRowsOfTheModelPickerMatchTheGolden(t *testing.T) {
 		_, _ = fmt.Fprintf(&output, "--- %d columns ---\n", room)
 		_, _ = fmt.Fprintln(&output, models.ColumnHeader(room))
 		for index, model := range models.models {
-			described, identifier := modelRow(model, index == 1, room)
-			_, _ = fmt.Fprintln(&output, described+identifier)
+			_, _ = fmt.Fprintln(&output, modelRow(model, index == 1, room))
 		}
 	}
 

@@ -347,3 +347,30 @@ func TestAnArchivedSessionIsListedOnlyWhenTheArchiveIsAskedFor(t *testing.T) {
 		t.Errorf("expected the archive path, got %q", listings[0].SessionDir)
 	}
 }
+
+func TestAShortConversationIsHeldBackInTheListing(t *testing.T) {
+	listings := []Listing{
+		{Name: "able-dolphin", Status: endedStatus, Messages: shortConversation - 1},
+		{Name: "brave-otter", Status: endedStatus, Messages: shortConversation},
+		{Name: "wild-scorpion", Status: runningStatus, IsRunning: true, Messages: 1},
+	}
+
+	var written strings.Builder
+	if err := writeTable(listings, &written); err != nil {
+		t.Fatal(err)
+	}
+
+	lines := strings.Split(strings.TrimRight(written.String(), "\n"), "\n")
+	if len(lines) != 4 {
+		t.Fatalf("expected a header and three rows, got %d", len(lines))
+	}
+	if got := lines[1]; got != style.Subtle(style.Plain(got)) {
+		t.Errorf("expected the short conversation to be held back, got %q", got)
+	}
+	if strings.Contains(lines[2], "\x1b") {
+		t.Errorf("expected the longer conversation to be drawn plainly, got %q", lines[2])
+	}
+	if got := lines[3]; got != style.Running(style.Plain(got)) {
+		t.Errorf("expected the running session to stay running, got %q", got)
+	}
+}

@@ -67,7 +67,7 @@ var (
 	Pending       Style = col.Underline
 	ScrolledInput Style = Dim
 	ChosenRow     Style = hex(copper)
-	Running       Style = decorate(col.Italic, Dim)
+	Running       Style = decorate(col.Italic, hex(steel))
 	Column        Style = decorate(col.Underline, Dim)
 	TypedInput    Style = Normal
 	User          Style = background("#343541")

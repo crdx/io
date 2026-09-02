@@ -90,13 +90,16 @@ func FuzzGraphemesMatchTheSegmenter(fuzzer *testing.F) {
 			t.Fatalf("Graphemes(%q) took %v cells, want %v", text, gotCells, wantCells)
 		}
 
-		if taken, took := Cut(text, len(text)*2); taken != text || took != sum(wantCells) {
-			t.Fatalf("Cut(%q, all) = %q, %d, want the whole of it and %d", text, taken, took, sum(wantCells))
+		if taken, _ := Cut(text, len(text)*2); taken != text {
+			t.Fatalf("Cut(%q, all) = %q, want the whole of it", text, taken)
 		}
 
 		if !strings.ContainsRune(text, '\x1b') {
 			if got := Of(text); got != sum(wantCells) {
 				t.Fatalf("Of(%q) = %d, want %d", text, got, sum(wantCells))
+			}
+			if _, took := Cut(text, len(text)*2); took != sum(wantCells) {
+				t.Fatalf("Cut(%q, all) took %d cells, want %d", text, took, sum(wantCells))
 			}
 		}
 	})
@@ -157,5 +160,30 @@ func TestCutStopsShortOfACharacterThatWouldNotFit(t *testing.T) {
 				test.text, test.cells, got, took, test.want, test.took,
 			)
 		}
+	}
+}
+
+func TestCuttingStyledTextKeepsWholeEscapeSequences(t *testing.T) {
+	const text = "abc\x1b[38;2;150;152;150mdefghij\x1b[0m"
+
+	tests := map[int]string{
+		0: "",
+		2: "ab",
+		3: "abc\x1b[38;2;150;152;150m",
+		5: "abc\x1b[38;2;150;152;150mde",
+	}
+
+	for cells, wanted := range tests {
+		got, took := Cut(text, cells)
+		if got != wanted {
+			t.Errorf("Cut(%d) = %q, want %q", cells, got, wanted)
+		}
+		if took != Of(got) {
+			t.Errorf("Cut(%d) took %d cells, want %d", cells, took, Of(got))
+		}
+	}
+
+	if got, took := Cut(text, 10); got != text || took != 10 {
+		t.Errorf("Cut(10) = %q and %d, want the whole of it and 10", got, took)
 	}
 }

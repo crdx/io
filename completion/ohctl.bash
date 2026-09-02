@@ -15,8 +15,6 @@ function _ohctl {
 
     if [[ -z $COMMAND || ( ${#TOKENS[@]} -eq 2 && -n $WORD ) ]]; then
         KIND=command
-    elif [[ $COMMAND == restore ]]; then
-        KIND=archived
     elif [[ $COMMAND == analyse || $COMMAND == regen || $COMMAND == migrate ]]; then
         KIND=session
     else

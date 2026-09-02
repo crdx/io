@@ -6,12 +6,13 @@ import (
 	"sync"
 	"unicode"
 
+	"crdx.org/io/cmd/oh/ansi"
 	"crdx.org/io/cmd/oh/tty"
 )
 
 const (
-	pushTitle = "\x1b[22;0t"
-	popTitle  = "\x1b[23;0t"
+	pushTitle = ansi.PushTitle
+	popTitle  = ansi.PopTitle
 )
 
 type title struct {

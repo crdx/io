@@ -1,7 +1,6 @@
 package picker
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"slices"
@@ -9,9 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/table"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/session"
@@ -24,6 +25,8 @@ const (
 	lengthColumn      = 6
 	lastMessageColumn = 12
 	roomForModel      = 100
+	shortConversation = 5
+	archiveKey        = 'a'
 	markWidth         = 2
 )
 
@@ -44,53 +47,84 @@ type Session struct {
 
 func (self *Session) Messages() int { return self.MessageCount }
 
-func Choose(
-	sessions []*Session,
-	archive func(*Session) error,
-	terminal *os.File,
-	screen io.Writer,
-) (*Session, error) {
-	rows := &sessionList{sessions: sessions, archive: archive}
+type Store struct {
+	Sessions         []*Session
+	ArchivedSessions []*Session
+	Archive          func(*Session) error
+	Restore          func(*Session) error
+	Delete           func(*Session) error
+}
+
+func Choose(store Store, terminal *os.File, screen io.Writer) (*Session, error) {
+	rows := &sessionList{store: store}
 
 	chosenIndex, err := menu.Choose(rows, terminal, screen)
 	if err != nil {
 		return nil, err
 	}
 
-	return rows.sessions[chosenIndex], nil
+	return rows.chosen(chosenIndex)
 }
 
 type sessionList struct {
-	sessions []*Session
-	archive  func(*Session) error
+	store          Store
+	isArchivedView bool
 }
 
-func (self *sessionList) Len() int { return len(self.sessions) }
+func (self *sessionList) Len() int { return len(self.rows()) }
 
-func (self *sessionList) IsChoosable(index int) bool { return !self.sessions[index].IsRunning }
+func (self *sessionList) IsChoosable(index int) bool { return !self.at(index).IsRunning }
 
 func (self *sessionList) Adjust(int, int) {}
 
+func (self *sessionList) Switch(int) bool {
+	self.isArchivedView = !self.isArchivedView
+	return true
+}
+
 func (self *sessionList) IsRemovable(index int) bool {
-	return self.archive != nil && !self.sessions[index].IsRunning
-}
-
-func (self *sessionList) RemovalPrompt(index int) string {
-	return "Archive " + sessionAnimal(self.sessions[index]) + "?"
-}
-
-func (self *sessionList) Remove(index int) error {
-	if err := self.archive(self.sessions[index]); err != nil {
-		return err
+	if self.isArchivedView {
+		return self.store.Restore != nil
 	}
 
-	self.sessions = slices.Delete(self.sessions, index, index+1)
+	return self.store.Archive != nil && !self.at(index).IsRunning
+}
 
-	return nil
+func (self *sessionList) Removal(index int, keypress key.Key) (menu.Removal, bool) {
+	movedSession := self.at(index)
+	if movedSession.IsRunning {
+		return menu.Removal{}, false
+	}
+
+	switch {
+	case isArchiveKey(keypress):
+		return self.archival(index, movedSession)
+	case isDeleteKey(keypress):
+		return self.deletion(index, movedSession)
+	default:
+		return menu.Removal{}, false
+	}
+}
+
+func isArchiveKey(keypress key.Key) bool {
+	return keypress.Code == key.Rune && keypress.Value == archiveKey && keypress.Mod.Has(key.Ctrl)
+}
+
+func isDeleteKey(keypress key.Key) bool {
+	return keypress.Code == key.Delete
+}
+
+func newestFirst(sessions []*Session) {
+	slices.SortFunc(sessions, func(first, second *Session) int {
+		if order := second.TouchedAt.Compare(first.TouchedAt); order != 0 {
+			return order
+		}
+		return strings.Compare(second.Name, first.Name)
+	})
 }
 
 func (self *sessionList) Text(index int) string {
-	return self.sessions[index].Text()
+	return self.at(index).Text()
 }
 
 func (self *Session) Text() string {
@@ -110,15 +144,11 @@ func (self *Session) Text() string {
 }
 
 func (self *sessionList) ColumnHeader(room int) string {
-	return menu.Columns(
-		leftColumns(strings.Repeat(" ", markWidth), "Agent", "Title"),
-		sessionColumns("Model", "Effort", "Messages", "Length", "Last Message", room),
-		room,
-	)
+	return sessionTable(self.agentColumn()).Header(room)
 }
 
 func (self *sessionList) Row(index int, isChosen bool, room int) string {
-	storedSession := self.sessions[index]
+	storedSession := self.at(index)
 	line := row(storedSession, isChosen, room)
 
 	if storedSession.IsRunning {
@@ -127,29 +157,129 @@ func (self *sessionList) Row(index int, isChosen bool, room int) string {
 	if isChosen {
 		return style.ChosenRow.Over(line)
 	}
+	if storedSession.Messages() < shortConversation {
+		return style.Subtle.Over(line)
+	}
 
 	return style.Answer.Over(line)
 }
 
-func row(storedSession *Session, isChosen bool, room int) string {
-	prefix := menu.Mark(isChosen) + " "
-	left := leftColumns(prefix, sessionAnimal(storedSession), sessionTitle(storedSession))
-	return menu.Columns(
-		left,
-		sessionColumns(
-			sessionModel(storedSession),
-			storedSession.Effort,
-			strconv.Itoa(storedSession.Messages()),
-			util.CoarseDuration(storedSession.TouchedAt.Sub(storedSession.StartedAt)),
-			util.Ago(storedSession.TouchedAt),
-			room,
-		),
-		room,
+func (self *sessionList) archival(index int, movedSession *Session) (menu.Removal, bool) {
+	if self.isArchivedView {
+		if self.store.Restore == nil {
+			return menu.Removal{}, false
+		}
+
+		return menu.Removal{
+			Prompt:  "Press ctrl+a again to restore " + movedSession.Name,
+			Working: "Restoring…",
+			Perform: func() error { return self.store.Restore(movedSession) },
+			Apply:   func() { self.restore(index, movedSession) },
+		}, true
+	}
+
+	if self.store.Archive == nil {
+		return menu.Removal{}, false
+	}
+
+	return menu.Removal{
+		Prompt:  "Press ctrl+a again to archive " + movedSession.Name,
+		Working: "Archiving…",
+		Perform: func() error { return self.store.Archive(movedSession) },
+		Apply:   func() { self.archive(index, movedSession) },
+	}, true
+}
+
+func (self *sessionList) deletion(index int, movedSession *Session) (menu.Removal, bool) {
+	if self.store.Delete == nil {
+		return menu.Removal{}, false
+	}
+
+	return menu.Removal{
+		Prompt:  "Press delete again to delete " + movedSession.Name + " for good",
+		Working: "Deleting…",
+		Perform: func() error { return self.store.Delete(movedSession) },
+		Apply:   func() { self.forget(index) },
+	}, true
+}
+
+func (self *sessionList) forget(index int) {
+	if self.isArchivedView {
+		self.store.ArchivedSessions = slices.Delete(self.store.ArchivedSessions, index, index+1)
+		return
+	}
+
+	self.store.Sessions = slices.Delete(self.store.Sessions, index, index+1)
+}
+
+func (self *sessionList) restore(index int, movedSession *Session) {
+	movedSession.IsArchived = false
+	self.store.ArchivedSessions = slices.Delete(self.store.ArchivedSessions, index, index+1)
+	self.store.Sessions = append(self.store.Sessions, movedSession)
+	newestFirst(self.store.Sessions)
+}
+
+func (self *sessionList) archive(index int, movedSession *Session) {
+	movedSession.IsArchived = true
+	self.store.Sessions = slices.Delete(self.store.Sessions, index, index+1)
+	self.store.ArchivedSessions = append(self.store.ArchivedSessions, movedSession)
+	newestFirst(self.store.ArchivedSessions)
+}
+
+func (self *sessionList) rows() []*Session {
+	if self.isArchivedView {
+		return self.store.ArchivedSessions
+	}
+
+	return self.store.Sessions
+}
+
+func (self *sessionList) at(index int) *Session { return self.rows()[index] }
+
+func (self *sessionList) agentColumn() string {
+	if self.isArchivedView {
+		return "Agent (archived)"
+	}
+
+	return "Agent"
+}
+
+func (self *sessionList) chosen(index int) (*Session, error) {
+	chosenSession := self.at(index)
+	if !chosenSession.IsArchived {
+		return chosenSession, nil
+	}
+
+	if err := self.store.Restore(chosenSession); err != nil {
+		return nil, err
+	}
+	chosenSession.IsArchived = false
+
+	return chosenSession, nil
+}
+
+func sessionTable(agentTitle string) *table.Table {
+	return table.New(
+		table.Column{Title: strings.Repeat(" ", markWidth) + agentTitle, Width: markWidth + animalColumn},
+		table.Column{Title: "Title", IsFlex: true},
+		table.Column{Title: "Model", Width: modelColumn, MinRoom: roomForModel},
+		table.Column{Title: "Effort", Width: menu.EffortColumn, Align: table.Right, MinRoom: roomForModel},
+		table.Column{Title: "Messages", Width: messageColumn, Align: table.Right},
+		table.Column{Title: "Length", Width: lengthColumn, Align: table.Right},
+		table.Column{Title: "Last Message", Width: lastMessageColumn, Align: table.Right},
 	)
 }
 
-func leftColumns(prefix string, animal string, title string) string {
-	return prefix + menu.Pad(animal, animalColumn) + strings.Repeat(" ", menu.ColumnGap) + title
+func row(storedSession *Session, isChosen bool, room int) string {
+	return sessionTable("Agent").Row([]string{
+		menu.Mark(isChosen) + " " + sessionAnimal(storedSession),
+		sessionTitle(storedSession),
+		sessionModel(storedSession),
+		storedSession.Effort,
+		strconv.Itoa(storedSession.Messages()),
+		util.CoarseDuration(storedSession.TouchedAt.Sub(storedSession.StartedAt)),
+		util.Ago(storedSession.TouchedAt),
+	}, room)
 }
 
 func sessionModel(storedSession *Session) string {
@@ -157,29 +287,8 @@ func sessionModel(storedSession *Session) string {
 	if storedSession.IsFast {
 		return fastMode.GetMark(true) + " " + name
 	}
+
 	return name
-}
-
-func sessionColumns(model string, effort string, messages string, length string, lastMessage string, room int) string {
-	countedText := fmt.Sprintf(
-		"%*s  %*s  %*s",
-		messageColumn,
-		messages,
-		lengthColumn,
-		length,
-		lastMessageColumn,
-		lastMessage,
-	)
-
-	if room >= roomForModel {
-		namedText := menu.Pad(model, modelColumn) +
-			strings.Repeat(" ", menu.ColumnGap) +
-			fmt.Sprintf("%*s", menu.EffortColumn, effort)
-
-		countedText = namedText + strings.Repeat(" ", menu.ColumnGap) + countedText
-	}
-
-	return countedText
 }
 
 func sessionAnimal(storedSession *Session) string {

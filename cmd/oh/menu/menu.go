@@ -10,16 +10,17 @@ import (
 
 	"golang.org/x/term"
 
+	"crdx.org/io/cmd/oh/ansi"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 )
 
 const (
-	clearLine               = "\r\x1b[2K"
-	hideCursor              = "\x1b[?25l"
-	showCursor              = "\x1b[?25h"
-	restoreMenuPresentation = "\x1b[0m" + showCursor
+	clearLine               = ansi.EraseRow
+	hideCursor              = ansi.HideCursor
+	showCursor              = ansi.ShowCursor
+	restoreMenuPresentation = ansi.Reset + showCursor
 )
 
 func ChooseIndex(terminal *os.File, output io.Writer, prompt string, labels []string) (int, error) {
@@ -86,7 +87,7 @@ func ChooseIndex(terminal *os.File, output io.Writer, prompt string, labels []st
 			continue
 		}
 
-		if _, err := fmt.Fprintf(output, "\x1b[%dA%s", menu.rows, menu.render(true)); err != nil {
+		if _, err := io.WriteString(output, ansi.Up(menu.rows)+menu.render(true)); err != nil {
 			return 0, err
 		}
 	}

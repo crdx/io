@@ -9,7 +9,6 @@ import (
 	"crdx.org/io/cmd/ohctl/complete"
 	"crdx.org/io/cmd/ohctl/migrate"
 	"crdx.org/io/cmd/ohctl/regen"
-	"crdx.org/io/cmd/ohctl/restore"
 	"crdx.org/io/cmd/ohctl/sessions"
 	"crdx.org/io/cmd/ohctl/toolresult"
 )
@@ -18,7 +17,6 @@ const usage = `ohctl — oh control
 
 Usage:
     ohctl sessions [options] [<filter>]
-    ohctl restore <session>...
     ohctl tool-result [--pager] <url>
     ohctl analyse [options] [<session>...]
     ohctl regen [<session>...]
@@ -26,7 +24,6 @@ Usage:
 
 Commands:
     sessions       List the stored sessions
-    restore        Restore archived sessions
     tool-result    Show a tool call's output
     analyse        Analyse stored sessions
     regen          Write stored transcripts again from their journals
@@ -53,8 +50,6 @@ func main() {
 		err = analyse.Run()
 	case "regen":
 		err = regen.Run()
-	case "restore":
-		err = restore.Run()
 	case "tool-result":
 		err = toolresult.Run()
 	case "migrate":

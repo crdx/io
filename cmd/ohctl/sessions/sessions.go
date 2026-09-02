@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/sessions/picker"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/table"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/cmd/ohctl/console"
@@ -42,13 +43,13 @@ lists every session it matches.
 `
 
 const (
-	runningStatus  = "running"
-	endedStatus    = "ended"
-	archivedStatus = "archived"
-	columnGap      = 2
-	titleColumn    = 40
-	listLimit      = 50
-	shortFilter    = 3
+	runningStatus     = "running"
+	endedStatus       = "ended"
+	archivedStatus    = "archived"
+	titleColumn       = 40
+	shortConversation = 5
+	listLimit         = 50
+	shortFilter       = 3
 )
 
 type inputOpts struct {
@@ -220,47 +221,49 @@ func writeJSON(listings []Listing, writer io.Writer) error {
 	return encoder.Encode(listings)
 }
 
-type tableRow struct {
-	cells     []string
-	isRunning bool
-}
-
 func writeTable(listings []Listing, writer io.Writer) error {
 	if len(listings) == 0 {
 		return nil
 	}
 
-	header := tableRow{cells: []string{
-		"Status", "Agent", "Title", "Messages", "Length", "Last Message", "Model", "Effort", "Workspace",
-	}}
-
-	rows := []tableRow{header}
+	rows := make([][]string, 0, len(listings))
 	for _, listing := range listings {
-		rows = append(rows, tableRow{
-			isRunning: listing.IsRunning,
-			cells: []string{
-				listing.Status,
-				listing.Name,
-				width.Elide(strutil.OrDash(listing.Title), titleColumn),
-				strconv.Itoa(listing.Messages),
-				util.CoarseDuration(listing.TouchedAt.Sub(listing.StartedAt)),
-				util.Ago(listing.TouchedAt),
-				modelName(listing),
-				strutil.OrDash(listing.Effort),
-				listing.WorkspaceDir,
-			},
+		rows = append(rows, []string{
+			listing.Status,
+			listing.Name,
+			width.Elide(strutil.OrDash(listing.Title), titleColumn),
+			strconv.Itoa(listing.Messages),
+			util.CoarseDuration(listing.TouchedAt.Sub(listing.StartedAt)),
+			util.Ago(listing.TouchedAt),
+			modelName(listing),
+			strutil.OrDash(listing.Effort),
+			listing.WorkspaceDir,
 		})
 	}
 
-	widths := columnWidths(rows)
-	for index, row := range rows {
-		line := joinColumns(row.cells, widths)
+	listingTable := table.New(
+		table.Column{Title: "Status"},
+		table.Column{Title: "Agent"},
+		table.Column{Title: "Title"},
+		table.Column{Title: "Messages"},
+		table.Column{Title: "Length"},
+		table.Column{Title: "Last Message"},
+		table.Column{Title: "Model"},
+		table.Column{Title: "Effort"},
+		table.Column{Title: "Workspace"},
+	).Fit(rows)
 
+	if _, err := fmt.Fprintln(writer, style.Subtle(listingTable.Header(0))); err != nil {
+		return err
+	}
+
+	for index, listing := range listings {
+		line := listingTable.Row(rows[index], 0)
 		switch {
-		case index == 0:
-			line = style.Subtle(line)
-		case row.isRunning:
+		case listing.IsRunning:
 			line = style.Running(line)
+		case listing.Messages < shortConversation:
+			line = style.Subtle(line)
 		}
 
 		if _, err := fmt.Fprintln(writer, line); err != nil {
@@ -278,31 +281,6 @@ func modelName(listing Listing) string {
 	}
 
 	return name
-}
-
-func columnWidths(rows []tableRow) []int {
-	widths := make([]int, len(rows[0].cells))
-	for _, row := range rows {
-		for index, cell := range row.cells {
-			widths[index] = max(widths[index], width.Of(cell))
-		}
-	}
-
-	return widths
-}
-
-func joinColumns(cells []string, widths []int) string {
-	var line strings.Builder
-	for index, cell := range cells {
-		line.WriteString(cell)
-
-		if index < len(cells)-1 {
-			padding := widths[index] - width.Of(cell) + columnGap
-			line.WriteString(strings.Repeat(" ", padding))
-		}
-	}
-
-	return line.String()
 }
 
 func oneLine(text string) string {

@@ -1,12 +1,12 @@
 package output
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"crdx.org/io/cmd/oh/ansi"
 	"crdx.org/io/cmd/oh/style"
 )
 
@@ -93,7 +93,7 @@ func TestARowRewrittenHigherUpIsReachedByMovingBackToIt(t *testing.T) {
 
 	got := screenOutput.String()
 
-	if want := fmt.Sprintf(up, 1); !strings.Contains(got, want) {
+	if want := ansi.Up(1); !strings.Contains(got, want) {
 		t.Errorf("expected the cursor to move back a row, got %q", got)
 	}
 

@@ -4423,7 +4423,7 @@ func TestPick(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	chosenSession, err := picker.Choose(sessions, nil, os.Stdin, os.Stdout)
+	chosenSession, err := picker.Choose(picker.Store{Sessions: sessions}, os.Stdin, os.Stdout)
 	screen := output.New(os.Stdout)
 
 	switch {

@@ -1,7 +1,7 @@
 === a wide terminal, where the columns stay to the left ===
 \e[H\e[38;2;150;152;150mFilter: \e[0m\e[K\r
 \e[4m\e[38;2;150;152;150m  Provider      Model                         Effort    Context  Identifier\e[0m\e[0m\e[K\r
-\e[38;2;192;128;80m› Anthropic     Sonnet 5                      medium       200K  \e[0m\e[38;2;150;152;150mclaude-sonnet-5\e[0m\e[K\r
+\e[38;2;192;128;80m› Anthropic     Sonnet 5                      medium       200K  \e[38;2;150;152;150mclaude-sonnet-5\e[0m\e[K\r
   Codex         Codex 5.3                     medium⚡     272K  \e[38;2;150;152;150mgpt-5.3-codex\e[0m\e[K\r
   OpenCode Go   DeepSeek Flash Vision Exp 4   high           1M  \e[38;2;150;152;150mdeepseek-v4-flash-vision-exp\e[0m\e[K\r
   Ollama        Qwen Coder 3 30B              medium          —  \e[38;2;150;152;150mqwen3-coder:30b\e[0m\e[K\r
@@ -27,7 +27,7 @@
 \e[H\e[38;2;150;152;150mFilter: \e[0m\e[K\r
 \e[4m\e[38;2;150;152;150m  Provider      Model                         Effort    Context  Identifier\e[0m\e[0m\e[K\r
   Anthropic     Sonnet 5                      medium       200K  \e[38;2;150;152;150mclaude-sonnet-5\e[0m\e[K\r
-\e[38;2;192;128;80m› Codex         Codex 5.3                     medium⚡     272K  \e[0m\e[38;2;150;152;150mgpt-5.3-codex\e[0m\e[K\r
+\e[38;2;192;128;80m› Codex         Codex 5.3                     medium⚡     272K  \e[38;2;150;152;150mgpt-5.3-codex\e[0m\e[K\r
   OpenCode Go   DeepSeek Flash Vision Exp 4   high           1M  \e[38;2;150;152;150mdeepseek-v4-fl…\e[0m\e[K\r
   Ollama        Qwen Coder 3 30B              medium          —  \e[38;2;150;152;150mqwen3-coder:30b\e[0m\e[K\r
 \e[K\r
@@ -51,7 +51,7 @@
 === no room for every row, so the list is scrolled to the cursor ===
 \e[H\e[38;2;150;152;150mFilter: \e[0m\e[K\r
 \e[4m\e[38;2;150;152;150m  Provider      Model                         Effort    Context  Identifier\e[0m\e[0m\e[K\r
-\e[38;2;192;128;80m› OpenCode Go   DeepSeek Flash Vision Exp 4   high           1M  \e[0m\e[38;2;150;152;150mdeepseek-v4-fl…\e[0m\e[K\e[J
+\e[38;2;192;128;80m› OpenCode Go   DeepSeek Flash Vision Exp 4   high           1M  \e[38;2;150;152;150mdeepseek-v4-fl…\e[0m\e[K\e[J
 === a narrow terminal, where the columns are clipped ===
 \e[H\e[38;2;150;152;150mFilter: \e[0m\e[K\r
 \e[4m\e[38;2;150;152;150m  Provider      Model                        …\e[0m\e[0m\e[K\r
@@ -80,7 +80,7 @@
 === a filter narrowing the list to one provider ===
 \e[H\e[38;2;150;152;150mFilter: \e[0mopencode\e[K\r
 \e[4m\e[38;2;150;152;150m  Provider      Model                         Effort    Context  Identifier\e[0m\e[0m\e[K\r
-\e[38;2;192;128;80m› OpenCode Go   DeepSeek Flash Vision Exp 4   high           1M  \e[0m\e[38;2;150;152;150mdeepseek-v4-fl…\e[0m\e[K\r
+\e[38;2;192;128;80m› OpenCode Go   DeepSeek Flash Vision Exp 4   high           1M  \e[38;2;150;152;150mdeepseek-v4-fl…\e[0m\e[K\r
 \e[K\r
 \e[K\r
 \e[K\r

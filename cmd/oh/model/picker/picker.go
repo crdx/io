@@ -1,7 +1,6 @@
 package picker
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"slices"
@@ -10,10 +9,12 @@ import (
 	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/table"
 	"crdx.org/io/internal/util"
 )
 
 const (
+	markWidth        = 2
 	providerColumn   = 12
 	nameColumn       = 28
 	contextColumn    = 7
@@ -80,57 +81,36 @@ func (self *modelList) Adjust(index int, direction int) {
 }
 
 func (self *modelList) ColumnHeader(room int) string {
-	describedModel, identifier := modelColumns(" ", "Provider", "Model", "Effort", "Context", "Identifier", room)
-
-	return describedModel + identifier
+	return modelTable().Header(room)
 }
 
 func (self *modelList) Row(index int, isChosen bool, room int) string {
-	describedModel, identifier := modelRow(self.models[index], isChosen, room)
-
 	paint := style.Answer
 	if isChosen {
 		paint = style.ChosenRow
 	}
-	if identifier == "" {
-		return paint(describedModel)
-	}
 
-	return paint(describedModel) + style.Subtle(identifier)
+	return paint.Over(modelRow(self.models[index], isChosen, room))
 }
 
-func modelRow(model *Model, isChosen bool, room int) (string, string) {
-	return modelColumns(
-		menu.Mark(isChosen),
-		model.Provider,
+func modelTable() *table.Table {
+	return table.New(
+		table.Column{Title: "  Provider", Width: markWidth + providerColumn},
+		table.Column{Title: "Model", Width: nameColumn},
+		table.Column{Title: "Effort", Width: menu.EffortColumn},
+		table.Column{Title: "Context", Width: contextColumn, Align: table.Right},
+		table.Column{Title: "Identifier", Width: identifierColumn, Style: style.Subtle},
+	)
+}
+
+func modelRow(model *Model, isChosen bool, room int) string {
+	return modelTable().Row([]string{
+		menu.Mark(isChosen) + " " + model.Provider,
 		model.Name,
 		model.Effort.String(),
 		contextWindow(model.ContextWindowTokens),
 		model.ID,
-		room,
-	)
-}
-
-func modelColumns(
-	prefix string,
-	providerName string,
-	name string,
-	effort string,
-	context string,
-	identifier string,
-	room int,
-) (string, string) {
-	columns := []string{
-		menu.Pad(providerName, providerColumn),
-		menu.Pad(name, nameColumn),
-		menu.Pad(effort, menu.EffortColumn),
-		fmt.Sprintf("%*s", contextColumn, context),
-	}
-
-	gap := strings.Repeat(" ", menu.ColumnGap)
-	describedRow := menu.Clip(prefix+" "+strings.Join(columns, gap)+gap, room)
-
-	return describedRow, menu.Clip(identifier, min(identifierColumn, room-style.Width(describedRow)))
+	}, room)
 }
 
 func contextWindow(tokens int) string {

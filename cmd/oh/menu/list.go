@@ -7,12 +7,15 @@ import (
 	"os/signal"
 	"slices"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"golang.org/x/term"
 
+	"crdx.org/io/cmd/oh/ansi"
 	"crdx.org/io/cmd/oh/interaction"
 	"crdx.org/io/cmd/oh/key"
+	"crdx.org/io/cmd/oh/spinner"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/width"
@@ -20,22 +23,14 @@ import (
 )
 
 const (
-	enterScreen = "\x1b[?1049h" + hideCursor
-	leaveScreen = showCursor + "\x1b[?1049l"
-	homeCursor  = "\x1b[H"
-	eraseLine   = "\x1b[K"
-	eraseBelow  = "\x1b[J"
+	enterScreen = ansi.EnterAltScreen + hideCursor
+	leaveScreen = showCursor + ansi.LeaveAltScreen
+	homeCursor  = ansi.Home
+	eraseLine   = ansi.EraseLine
+	eraseBelow  = ansi.EraseBelow
 )
 
-const (
-	ColumnGap = 2
-
-	RoomForModel      = 100
-	RoomForIdentifier = 140
-
-	IdentifierColumn = 24
-	EffortColumn     = 8
-)
+const EffortColumn = 8
 
 const (
 	minimumGap     = 2
@@ -43,10 +38,7 @@ const (
 	defaultRows    = 24
 )
 
-const (
-	filterPrompt   = "Filter: "
-	removalAnswers = "(y/n)"
-)
+const filterPrompt = "Filter: "
 
 var ErrCancelled = errors.New("cancelled")
 
@@ -59,10 +51,19 @@ type List interface {
 	Adjust(index int, direction int)
 }
 
+type Switchable interface {
+	Switch(direction int) bool
+}
+
 type Removable interface {
-	IsRemovable(index int) bool
-	RemovalPrompt(index int) string
-	Remove(index int) error
+	Removal(index int, keypress key.Key) (Removal, bool)
+}
+
+type Removal struct {
+	Prompt  string
+	Working string
+	Perform func() error
+	Apply   func()
 }
 
 func Choose(rows List, terminal *os.File, screen io.Writer) (int, error) {
@@ -80,10 +81,16 @@ func Choose(rows List, terminal *os.File, screen io.Writer) (int, error) {
 	keys, stopReading := interaction.Keypresses(terminal)
 	defer stopReading()
 
-	return choose(rows, keys, measuring(terminal), screen)
+	return choose(rows, keys, measuring(terminal), screen, nil)
 }
 
-func choose(rows List, keys <-chan key.Key, measure func() (int, int), screen io.Writer) (int, error) {
+func choose(
+	rows List,
+	keys <-chan key.Key,
+	measure func() (int, int),
+	screen io.Writer,
+	startWork func(func()),
+) (int, error) {
 	write(screen, enterScreen)
 	defer write(screen, leaveScreen)
 
@@ -91,6 +98,7 @@ func choose(rows List, keys <-chan key.Key, measure func() (int, int), screen io
 	self.keys = keys
 	self.measure = measure
 	self.screen = screen
+	self.startWork = startWork
 
 	return self.run()
 }
@@ -119,6 +127,8 @@ type state struct {
 	measure func() (int, int)
 	screen  io.Writer
 
+	startWork func(func())
+
 	query   string
 	matches []int
 	cursor  int
@@ -129,8 +139,14 @@ type state struct {
 }
 
 type removal struct {
-	index   int
-	failure string
+	index     int
+	keypress  key.Key
+	pending   Removal
+	failure   string
+	working   Removal
+	isWorking bool
+	spinnerAt int
+	done      chan error
 }
 
 func (self *state) run() (int, error) {
@@ -145,6 +161,10 @@ func (self *state) pick(resizeSignals <-chan os.Signal) (int, error) {
 		self.draw()
 
 		select {
+		case err := <-self.removal.done:
+			self.finishRemoval(err)
+		case <-self.spinnerTicks():
+			self.removal.spinnerAt++
 		case keypress, isOpen := <-self.keys:
 			if !isOpen {
 				return 0, ErrCancelled
@@ -172,12 +192,20 @@ const (
 )
 
 func (self *state) apply(keypress key.Key) action {
+	if self.removal.isWorking {
+		return continuePicking
+	}
+
 	if self.removal.index >= 0 {
 		self.answerRemoval(keypress)
 		return continuePicking
 	}
 
 	self.removal.failure = ""
+
+	if self.askToRemove(keypress) {
+		return continuePicking
+	}
 
 	switch keypress.Code {
 	case key.Up:
@@ -211,12 +239,27 @@ func (self *state) apply(keypress key.Key) action {
 		if isTypeable(keypress) {
 			self.narrow(self.query + string(keypress.Value))
 		}
-	case key.Delete:
-		self.askToRemove()
-	case key.PasteStart, key.PasteEnd, key.FocusIn, key.FocusOut, key.Unknown:
+	case key.Delete, key.PasteStart, key.PasteEnd, key.FocusIn, key.FocusOut, key.Unknown:
 	}
 
 	return continuePicking
+}
+
+func (self *state) spinnerTicks() <-chan time.Time {
+	if !self.removal.isWorking {
+		return nil
+	}
+
+	return time.After(spinner.Activity.RefreshInterval())
+}
+
+func (self *state) start(work func()) {
+	if self.startWork != nil {
+		self.startWork(work)
+		return
+	}
+
+	go work()
 }
 
 func (self *state) removableList() (Removable, bool) {
@@ -224,35 +267,62 @@ func (self *state) removableList() (Removable, bool) {
 	return rows, isRemovable
 }
 
-func (self *state) askToRemove() {
+func (self *state) askToRemove(keypress key.Key) bool {
 	rows, isRemovable := self.removableList()
-	if !isRemovable || self.cursor < 0 || !rows.IsRemovable(self.chosen()) {
-		return
+	if !isRemovable || self.cursor < 0 {
+		return false
 	}
 
-	self.removal.index = self.chosen()
+	index := self.chosen()
+	work, isBound := rows.Removal(index, keypress)
+	if !isBound {
+		return false
+	}
+
+	self.removal = removal{index: index, keypress: keypress, pending: work}
+
+	return true
 }
 
 func (self *state) answerRemoval(keypress key.Key) {
-	index := self.removal.index
+	confirmation, work := self.removal.keypress, self.removal.pending
 	self.removal = removal{index: -1}
 
-	if keypress.Code != key.Rune || keypress.Value != 'y' && keypress.Value != 'Y' {
+	if keypress != confirmation {
 		return
 	}
 
-	rows, isRemovable := self.removableList()
-	if !isRemovable {
-		return
+	self.beginRemoval(work)
+}
+
+func (self *state) beginRemoval(work Removal) {
+	self.removal = removal{index: -1, working: work, isWorking: true, done: make(chan error, 1)}
+	self.draw()
+
+	self.start(func() { self.removal.done <- work.Perform() })
+
+	select {
+	case err := <-self.removal.done:
+		self.finishRemoval(err)
+	default:
 	}
-	if err := rows.Remove(index); err != nil {
+}
+
+func (self *state) finishRemoval(err error) {
+	work := self.removal.working
+	self.removal = removal{index: -1}
+
+	if err != nil {
 		self.removal.failure = err.Error()
 		return
 	}
 
-	at := self.cursor
+	work.Apply()
+
+	at, offset := self.cursor, self.offset
 	self.refilter()
 	self.cursor = self.selectableFrom(at)
+	self.offset = min(offset, max(len(self.matches)-self.window, 0))
 }
 
 func (self *state) selectableFrom(at int) int {
@@ -341,6 +411,13 @@ func (self *state) page(direction int) {
 }
 
 func (self *state) adjust(direction int) {
+	if rows, isSwitchable := self.list.(Switchable); isSwitchable {
+		if rows.Switch(direction) {
+			self.refilter()
+			return
+		}
+	}
+
 	if self.cursor >= 0 {
 		self.list.Adjust(self.chosen(), direction)
 	}
@@ -367,14 +444,14 @@ func (self *state) lastSelectable() int {
 }
 
 func Paint(rows List, room int, height int, cursor int, query string) string {
-	return paint(rows, room, height, cursor, query, false)
+	return paint(rows, room, height, cursor, query, nil)
 }
 
-func PaintRemoval(rows List, room int, height int, cursor int, query string) string {
-	return paint(rows, room, height, cursor, query, true)
+func PaintRemoval(rows List, room int, height int, cursor int, query string, keypress key.Key) string {
+	return paint(rows, room, height, cursor, query, &keypress)
 }
 
-func paint(rows List, room int, height int, cursor int, query string, isRemovalAsked bool) string {
+func paint(rows List, room int, height int, cursor int, query string, removalKey *key.Key) string {
 	var screen strings.Builder
 
 	self := newState(rows)
@@ -382,8 +459,8 @@ func paint(rows List, room int, height int, cursor int, query string, isRemovalA
 	self.cursor = cursor
 	self.screen = &screen
 	self.measure = func() (int, int) { return room, height }
-	if isRemovalAsked {
-		self.askToRemove()
+	if removalKey != nil {
+		self.askToRemove(*removalKey)
 	}
 
 	self.draw()
@@ -435,8 +512,12 @@ func (self *state) scroll(rows int) {
 }
 
 func (self *state) promptLine(room int) string {
-	if rows, isRemovable := self.removableList(); isRemovable && self.removal.index >= 0 {
-		return style.Change(Clip(rows.RemovalPrompt(self.removal.index)+" "+removalAnswers, room))
+	if self.removal.isWorking {
+		frame := spinner.Activity.Frame(self.removal.spinnerAt)
+		return style.Change(Clip(frame+" "+self.removal.working.Working, room))
+	}
+	if self.removal.index >= 0 {
+		return style.Change(Clip(self.removal.pending.Prompt, room))
 	}
 	if self.removal.failure != "" {
 		return style.Failure(Clip(self.removal.failure, room))
@@ -449,17 +530,6 @@ func (self *state) filterLine(room int) string {
 	return style.Subtle(Clip(filterPrompt, room)) + style.Answer(Clip(self.query, room-len(filterPrompt)))
 }
 
-func Columns(left string, right string, room int) string {
-	leftRoom := room - width.Of(right) - minimumGap
-	if leftRoom <= 0 {
-		return Clip(left, room)
-	}
-
-	left = Clip(left, leftRoom)
-
-	return strings.TrimRight(left+strings.Repeat(" ", room-width.Of(left)-width.Of(right))+right, " ")
-}
-
 func Mark(isChosen bool) string {
 	if isChosen {
 		return "›"
@@ -468,23 +538,8 @@ func Mark(isChosen bool) string {
 	return " "
 }
 
-func Pad(text string, room int) string {
-	text = Clip(text, room)
-	return text + strings.Repeat(" ", room-width.Of(text))
-}
-
 func Clip(text string, room int) string {
-	if room <= 0 {
-		return ""
-	}
-
-	if width.Of(text) <= room {
-		return text
-	}
-
-	prefix, _ := width.Cut(text, room-1)
-
-	return prefix + "…"
+	return width.Elide(text, room)
 }
 
 func (self *state) size() (int, int) {
@@ -496,5 +551,9 @@ func (self *state) size() (int, int) {
 }
 
 func write(screen io.Writer, text string) {
+	if screen == nil {
+		return
+	}
+
 	_, _ = io.WriteString(screen, text)
 }

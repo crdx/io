@@ -5,22 +5,21 @@ import (
 	"slices"
 	"strings"
 
+	"crdx.org/io/cmd/oh/ansi"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 )
 
 const (
-	up                    = "\x1b[%dA"
-	right                 = "\x1b[%dC"
-	clearBelow            = "\x1b[J"
-	beginFrame            = "\x1b[?2026h"
-	endFrame              = "\x1b[?2026l"
-	hideCursor            = "\x1b[?25l"
-	showCursor            = "\x1b[?25h"
-	barCursor             = "\x1b[5 q"
-	defaultCursor         = "\x1b[0 q"
-	clearScreen           = "\x1b[H\x1b[2J"
-	clearScrollback       = "\x1b[3J"
+	clearBelow            = ansi.EraseBelow
+	beginFrame            = ansi.BeginFrame
+	endFrame              = ansi.EndFrame
+	hideCursor            = ansi.HideCursor
+	showCursor            = ansi.ShowCursor
+	barCursor             = ansi.BarCursor
+	defaultCursor         = ansi.DefaultCursor
+	clearScreen           = ansi.EraseScreen
+	clearScrollback       = ansi.EraseScrollback
 	progressIndeterminate = "\x1b]9;4;3\x1b\\"
 	progressClear         = "\x1b]9;4;0\x1b\\"
 )
@@ -342,7 +341,7 @@ func moveUp(rows int) string {
 		return ""
 	}
 
-	return fmt.Sprintf(up, rows)
+	return ansi.Up(rows)
 }
 
 func moveRight(columns int) string {
@@ -350,7 +349,7 @@ func moveRight(columns int) string {
 		return ""
 	}
 
-	return fmt.Sprintf(right, columns)
+	return ansi.Right(columns)
 }
 
 func (self *Screen) Columns() int {

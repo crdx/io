@@ -4,10 +4,11 @@ import (
 	"slices"
 	"strings"
 
+	"crdx.org/io/cmd/oh/ansi"
 	"crdx.org/io/cmd/oh/style"
 )
 
-const clearRow = "\x1b[K"
+const clearRow = ansi.EraseLine
 
 type drawingState struct {
 	column           int

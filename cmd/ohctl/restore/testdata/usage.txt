@@ -1,7 +1,0 @@
-ohctl restore — restore archived sessions
-
-Usage:
-    ohctl restore <session>...
-
-An archived session is unpacked back into the sessions directory, where oh can list and resume it
-again. List what has been archived with: ohctl sessions --archived

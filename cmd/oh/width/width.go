@@ -89,16 +89,42 @@ func Of(text string) int {
 }
 
 func Cut(text string, cells int) (string, int) {
-	takenCells := 0
-
-	for one := range graphemes(text) {
-		if takenCells+one.cells > cells {
-			return text[:one.at], takenCells
-		}
-		takenCells += one.cells
+	if plain, isPlain := plainWidth(text); isPlain && plain <= cells {
+		return text, plain
 	}
 
-	return text, takenCells
+	takenCells := 0
+	runes := []rune(text)
+	var keptText strings.Builder
+
+	for i := 0; i < len(runes); {
+		if runes[i] == '\x1b' {
+			sequence := escape.GetSequence(runes, i)
+			if takenCells+sequence.Cells > cells {
+				return keptText.String(), takenCells
+			}
+			keptText.WriteString(string(runes[i:sequence.End]))
+			takenCells += sequence.Cells
+			i = sequence.End
+			continue
+		}
+
+		end := i + 1
+		for end < len(runes) && runes[end] != '\x1b' {
+			end++
+		}
+
+		for one := range graphemes(string(runes[i:end])) {
+			if takenCells+one.cells > cells {
+				return keptText.String(), takenCells
+			}
+			keptText.WriteString(one.text)
+			takenCells += one.cells
+		}
+		i = end
+	}
+
+	return keptText.String(), takenCells
 }
 
 func Cells(text string) []string {

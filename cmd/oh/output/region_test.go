@@ -1,10 +1,11 @@
 package output
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 	"testing"
+
+	"crdx.org/io/cmd/oh/ansi"
 )
 
 func screenWithInput() (*Screen, *strings.Builder) {
@@ -245,7 +246,7 @@ func TestWritingToTheConversationPutsTheInputBackWithTheCursorInIt(t *testing.T)
 
 	screen.Line("thinking")
 
-	want := "\r\n\r\n> hi\r" + fmt.Sprintf(right, 3) + showCursor + endFrame
+	want := "\r\n\r\n> hi\r" + ansi.Right(3) + showCursor + endFrame
 
 	if got := screenOutput.String(); !strings.HasSuffix(got, want) {
 		t.Errorf("expected the input to be put back under it, got %q", got)
@@ -257,7 +258,7 @@ func TestTheInputIsTakenOffTheScreenBeforeTheConversationIsWrittenTo(t *testing.
 
 	screen.Line("thinking")
 
-	want := "\r" + clearBelow + fmt.Sprintf(up, apart) + fmt.Sprintf(right, 4)
+	want := "\r" + clearBelow + ansi.Up(apart) + ansi.Right(4)
 
 	got := screenOutput.String()
 
@@ -294,11 +295,11 @@ func TestAnInputOfSeveralRowsIsTakenOffAndPutBackWhole(t *testing.T) {
 
 	got := screenOutput.String()
 
-	if want := "\r" + fmt.Sprintf(up, 1) + clearBelow; !strings.Contains(got, want) {
+	if want := "\r" + ansi.Up(1) + clearBelow; !strings.Contains(got, want) {
 		t.Errorf("expected the erase to start at the top row of the input, got %q", got)
 	}
 
-	if want := "\r\n\r\n> one\r\ntwo\r\nthree" + fmt.Sprintf(up, 1); !strings.Contains(got, want) {
+	if want := "\r\n\r\n> one\r\ntwo\r\nthree" + ansi.Up(1); !strings.Contains(got, want) {
 		t.Errorf("expected every row back, cursor on the second, got %q", got)
 	}
 }

@@ -179,3 +179,72 @@ func TestAnArchiveCannotWriteOutsideTheSessionDirectory(t *testing.T) {
 		t.Errorf("expected nothing to have been written outside the session, got %v", err)
 	}
 }
+
+func TestTheCompressionLevelFollowsTheSizeOfTheSession(t *testing.T) {
+	tests := map[int64]int{
+		0:         gzip.BestCompression,
+		63 << 20:  gzip.BestCompression,
+		64 << 20:  gzip.DefaultCompression,
+		511 << 20: gzip.DefaultCompression,
+		512 << 20: gzip.BestSpeed,
+		4 << 30:   gzip.BestSpeed,
+	}
+
+	for storedBytes, wanted := range tests {
+		if got := session.CompressionLevel(storedBytes); got != wanted {
+			t.Errorf("a session of %d bytes compresses at level %d, want %d", storedBytes, got, wanted)
+		}
+	}
+}
+
+func TestDeletingASessionTakesTheWholeDirectory(t *testing.T) {
+	directory, name := archivedSession(t)
+
+	if err := session.Delete(directory, name); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(session.Dir(directory, name)); !os.IsNotExist(err) {
+		t.Errorf("expected the session directory to be gone, got %v", err)
+	}
+	if _, err := session.Read(directory, name); !errors.Is(err, session.ErrNotFound) {
+		t.Errorf("expected the session to be reported missing, got %v", err)
+	}
+}
+
+func TestDeletingAnArchivedSessionTakesTheArchive(t *testing.T) {
+	directory, name := archivedSession(t)
+
+	if err := session.Archive(directory, name); err != nil {
+		t.Fatal(err)
+	}
+	if err := session.Delete(directory, name); err != nil {
+		t.Fatal(err)
+	}
+
+	if session.IsArchived(directory, name) {
+		t.Error("expected the archive to be gone")
+	}
+	names, err := session.ArchivedNames(directory)
+	if err != nil || len(names) != 0 {
+		t.Errorf("got archived names %v and %v", names, err)
+	}
+}
+
+func TestARunningSessionCannotBeDeleted(t *testing.T) {
+	directory := t.TempDir()
+	writer := storedSession(t, directory)
+	defer func() { _ = writer.Close() }()
+
+	if err := session.Delete(directory, writer.Name()); !errors.Is(err, session.ErrInUse) {
+		t.Errorf("expected the open session to be refused, got %v", err)
+	}
+	if _, err := os.Stat(session.Dir(directory, writer.Name())); err != nil {
+		t.Errorf("expected the session to still be there, got %v", err)
+	}
+}
+
+func TestDeletingRefusesAPathLikeName(t *testing.T) {
+	if err := session.Delete(t.TempDir(), "../elsewhere"); err == nil {
+		t.Error("expected a path-like name to be refused")
+	}
+}

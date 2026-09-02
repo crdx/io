@@ -3,13 +3,14 @@ package output
 import (
 	"strings"
 
+	"crdx.org/io/cmd/oh/ansi"
 	"crdx.org/io/cmd/oh/escape"
 	"crdx.org/io/cmd/oh/width"
 )
 
 const (
-	noAutoWrap = "\x1b[?7l"
-	autoWrap   = "\x1b[?7h"
+	noAutoWrap = ansi.NoAutoWrap
+	autoWrap   = ansi.AutoWrap
 )
 
 func (self *Screen) fit(text string) string {

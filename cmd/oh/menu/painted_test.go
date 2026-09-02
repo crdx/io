@@ -28,6 +28,8 @@ func paintedRows() *fakeList {
 	}
 }
 
+func inline(work func()) { work() }
+
 func compareWithGolden(t *testing.T, name string, drawn string) {
 	t.Helper()
 
@@ -95,6 +97,7 @@ func TestTheCompleteMenuLifecycleMatchesTheGolden(t *testing.T) {
 		keys,
 		func() (int, int) { return 46, 6 },
 		&output,
+		inline,
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -121,13 +124,13 @@ func TestTheCompleteRemovalLifecycleMatchesTheGolden(t *testing.T) {
 	}
 
 	keypresses := []key.Key{
-		{Code: key.Delete},
+		archiveKey(),
 		{Code: key.Rune, Value: 'n'},
-		{Code: key.Delete},
-		{Code: key.Rune, Value: 'y'},
+		archiveKey(),
+		archiveKey(),
 		{Code: key.End},
-		{Code: key.Delete},
-		{Code: key.Rune, Value: 'y'},
+		archiveKey(),
+		archiveKey(),
 		{Code: key.Up},
 		{Code: key.Enter},
 	}
@@ -139,7 +142,7 @@ func TestTheCompleteRemovalLifecycleMatchesTheGolden(t *testing.T) {
 	close(keys)
 
 	var output strings.Builder
-	chosen, err := choose(rows, keys, func() (int, int) { return 46, 6 }, &output)
+	chosen, err := choose(rows, keys, func() (int, int) { return 46, 6 }, &output, inline)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -151,4 +154,46 @@ func TestTheCompleteRemovalLifecycleMatchesTheGolden(t *testing.T) {
 	}
 
 	compareWithGolden(t, "removal.ansi", strutil.VisibleEscapes(output.String()))
+}
+
+func TestTheCompleteSwitchingLifecycleMatchesTheGolden(t *testing.T) {
+	rows := &switchableList{
+		removableList: removableList{
+			fakeList: fakeList{
+				rows: []string{
+					"thick-poodle    add support for reasoning traces",
+					"funny-badger    the cancelled turn leaves a tool call unanswered",
+				},
+			},
+		},
+		other: []string{"brave-otter     rename the harness to oh"},
+	}
+
+	keypresses := []key.Key{
+		{Code: key.Right},
+		archiveKey(),
+		archiveKey(),
+		{Code: key.Left},
+		{Code: key.Enter},
+	}
+
+	keys := make(chan key.Key, len(keypresses))
+	for _, keypress := range keypresses {
+		keys <- keypress
+	}
+	close(keys)
+
+	var output strings.Builder
+	chosen, err := choose(rows, keys, func() (int, int) { return 46, 6 }, &output, inline)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if chosen != 0 {
+		t.Errorf("chose row %d, want 0", chosen)
+	}
+	if !slices.Equal(rows.removed, []string{"brave-otter     rename the harness to oh"}) {
+		t.Errorf("got the rows removed as %v", rows.removed)
+	}
+
+	compareWithGolden(t, "switching.ansi", strutil.VisibleEscapes(output.String()))
 }

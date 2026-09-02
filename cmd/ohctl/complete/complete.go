@@ -12,12 +12,11 @@ import (
 const Flag = "--complete"
 
 const (
-	kindCommand  = "command"
-	kindSession  = "session"
-	kindArchived = "archived"
+	kindCommand = "command"
+	kindSession = "session"
 )
 
-var commands = []string{"analyse", "migrate", "regen", "restore", "sessions", "tool-result"}
+var commands = []string{"analyse", "migrate", "regen", "sessions", "tool-result"}
 
 func Write(out io.Writer, args []string) bool {
 	kind, word, isWanted := request(args)
@@ -51,8 +50,6 @@ func completions(kind string, word string) []string {
 		return withPrefix(word, commands)
 	case kindSession:
 		return withPrefix(word, storedNames())
-	case kindArchived:
-		return withPrefix(word, archivedNames())
 	default:
 		return nil
 	}
@@ -79,15 +76,6 @@ func storedNames() []string {
 	names := make([]string, 0, len(entries))
 	for _, entry := range entries {
 		names = append(names, entry.Name)
-	}
-
-	return names
-}
-
-func archivedNames() []string {
-	names, err := session.ArchivedNames(location.GetSessionsDir())
-	if err != nil {
-		return nil
 	}
 
 	return names
