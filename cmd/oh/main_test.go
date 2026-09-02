@@ -8181,6 +8181,56 @@ func TestPlainCommandFeedbackIsPrintedWithoutEnteringConversationHistory(t *test
 	}
 }
 
+func recordedUserMessages(events []agent.Event) []string {
+	var messages []string
+	for _, event := range events {
+		if event.Kind == agent.UserMessageEvent {
+			messages = append(messages, event.Text)
+		}
+	}
+	return messages
+}
+
+func TestPipedInputAsksOneQuestionOfEverythingItWasGiven(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.isPlain = true
+
+	piped := "diff --git a/agent/agent.go b/agent/agent.go\nindex d483cf5..a478bfa 100644\n"
+	self.acceptPipedInput(edit.NewHistory("", historyLimit), "", strings.NewReader(piped))
+
+	want := []string{strings.TrimSpace(piped)}
+	if got := recordedUserMessages(self.events); !slices.Equal(got, want) {
+		t.Errorf("got user messages %q, want %q", got, want)
+	}
+}
+
+func TestPipedInputFollowsTheOpeningPromptAfterABlankLine(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.isPlain = true
+
+	self.acceptPipedInput(edit.NewHistory("", historyLimit), "review this", strings.NewReader("one\ntwo\n"))
+
+	want := []string{"review this\n\none\ntwo"}
+	if got := recordedUserMessages(self.events); !slices.Equal(got, want) {
+		t.Errorf("got user messages %q, want %q", got, want)
+	}
+}
+
+func TestTypedPlainLinesEachAskAQuestionOfTheirOwn(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.isPlain = true
+
+	self.acceptTypedLines(edit.NewHistory("", historyLimit), "", strings.NewReader("one\ntwo\n"))
+
+	want := []string{"one", "two"}
+	if got := recordedUserMessages(self.events); !slices.Equal(got, want) {
+		t.Errorf("got user messages %q, want %q", got, want)
+	}
+}
+
 func TestUnknownSlashCommandShowsOneErrorWhileReturnRepeatsAndKeepsTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})

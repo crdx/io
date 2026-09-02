@@ -107,6 +107,11 @@ capture: harness
     #!/bin/bash
     set -euo pipefail
 
+    function ask {
+        echo "have a look at that" |
+            (cd "$CAPTURE_WORKSPACE" && {{ OH }} "$@" >/dev/null 2>&1)
+    }
+
     declare -A UNDER=(
         [error]="rxw"
         [failure]="rxw"
@@ -158,13 +163,18 @@ capture: harness
 
         {{ OH }} -u >/dev/null 2>&1
 
-        for _ in $(seq 1 "${ASKED[$NAME]}"); do echo "have a look at that"; done |
-            (cd "$CAPTURE_WORKSPACE" && {{ OH }} -c "$CAPS" -m {{ MODEL }} >/dev/null 2>&1)
+        ask -c "$CAPS" -m {{ MODEL }}
+
+        JOURNAL=$(find "$CAPTURE_STATE" -name session.jsonl | head -n 1)
+        SESSION_ID=$(basename "$(dirname "$JOURNAL")")
+
+        for _ in $(seq 2 "${ASKED[$NAME]}"); do
+            ask -c "$CAPS" --resume "$SESSION_ID"
+        done
 
         kill $SIM_PID 2>/dev/null || true
         trap - EXIT
 
-        JOURNAL=$(find "$CAPTURE_STATE" -name session.jsonl | head -n 1)
         jq -c --arg blank 000000000000000000000000 'select(.kind == "event") |
                {event: (.event
                         | if .took then .took = 0 else . end

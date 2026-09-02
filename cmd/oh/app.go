@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"slices"
 	"strings"
@@ -785,12 +786,21 @@ func (self *App) plainly(history *edit.History, initialMessage string) {
 	self.isPlain = true
 	defer func() { self.isPlain = false }()
 
+	if tty.Is(os.Stdin) {
+		self.acceptTypedLines(history, initialMessage, os.Stdin)
+		return
+	}
+
+	self.acceptPipedInput(history, initialMessage, os.Stdin)
+}
+
+func (self *App) acceptTypedLines(history *edit.History, initialMessage string, source io.Reader) {
 	self.acceptPlainInput(history, initialMessage)
 	if self.isTransitionRequested() {
 		return
 	}
 
-	reader := bufio.NewScanner(os.Stdin)
+	reader := bufio.NewScanner(source)
 
 	for reader.Scan() {
 		self.acceptPlainInput(history, strings.TrimSpace(reader.Text()))
@@ -801,6 +811,29 @@ func (self *App) plainly(history *edit.History, initialMessage string) {
 
 	if err := reader.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "could not read input:", err)
+	}
+}
+
+func (self *App) acceptPipedInput(history *edit.History, initialMessage string, source io.Reader) {
+	pipedInput, err := io.ReadAll(source)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "could not read input:", err)
+		return
+	}
+
+	self.acceptPlainInput(history, joinPipedInput(initialMessage, string(pipedInput)))
+}
+
+func joinPipedInput(initialMessage string, pipedInput string) string {
+	trimmedInput := strings.TrimSpace(pipedInput)
+
+	switch {
+	case initialMessage == "":
+		return trimmedInput
+	case trimmedInput == "":
+		return initialMessage
+	default:
+		return initialMessage + "\n\n" + trimmedInput
 	}
 }
 
