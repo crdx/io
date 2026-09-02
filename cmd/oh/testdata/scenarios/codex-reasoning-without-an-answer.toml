@@ -1,0 +1,30 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[first]
+prompt = "reason and then stop"
+
+[[first.response]]
+event = [
+    '''{"type":"response.reasoning_summary_part.done","part":{"type":"summary_text","text":"Weighing what to do next."}}''',
+    '''{"type":"response.output_item.done","item":{"id":"reasoning-1","type":"reasoning","content":[],"encrypted_content":"sealed-1","summary":[{"type":"summary_text","text":"Weighing what to do next."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[[first.response]]
+event = [
+    '''{"type":"response.reasoning_summary_part.done","part":{"type":"summary_text","text":"Still weighing it."}}''',
+    '''{"type":"response.output_item.done","item":{"id":"reasoning-2","type":"reasoning","content":[],"encrypted_content":"sealed-2","summary":[{"type":"summary_text","text":"Still weighing it."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[resume]
+prompt = "say something this time"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Carrying on."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Carrying on."}]}}''',
+    '''{"type":"response.completed"}''',
+]

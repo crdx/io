@@ -3379,8 +3379,8 @@ func TestAModeChangeTheSessionClosesOnIsTakenBack(t *testing.T) {
 	if !storedSession.CanResume() {
 		t.Error("a session closed on a mode change was not resumable")
 	}
-	if got := len(storedSession.Events); got != 2 {
-		t.Errorf("stored %d events, want the mode it opened in and the message it ran: %v", got, storedSession.Events)
+	if got := len(storedSession.Events); got != 3 {
+		t.Errorf("stored %d events, want the mode it opened in, the message it ran, and the silent turn it got back: %v", got, storedSession.Events)
 	}
 	want := caps.Read | caps.Write
 	if got, said := caps.LastRecordedMode(storedSession.Events); !said || got != want {
@@ -5704,7 +5704,7 @@ func TestReloadingConfigChangesTheContinueMessage(t *testing.T) {
 		if event.Kind == agent.UserMessageEvent && event.Text == "carry on from the reloaded config" {
 			hasSentReloadedMessage = true
 		}
-		if event.Kind == agent.HarnessMessageEvent {
+		if event.Kind == agent.HarnessMessageEvent && event.Text != agent.SilentTurnNotice {
 			t.Errorf("successful reload entered conversation history: %+v", event)
 		}
 	}
@@ -8366,6 +8366,58 @@ func TestPlainSnippetInputWaitsForTheRenderedPrompt(t *testing.T) {
 	}
 	if string(body) != "//ask why now\n" {
 		t.Errorf("got history %q", body)
+	}
+}
+
+type cutShortProvider struct {
+	sent int
+}
+
+func (*cutShortProvider) Configure(string, []tool.Definition)   {}
+func (*cutShortProvider) AddUserMessage(string)                 {}
+func (*cutShortProvider) AddToolResults([]agent.ToolCallResult) {}
+func (*cutShortProvider) Dump() []json.RawMessage               { return nil }
+func (*cutShortProvider) Load([]json.RawMessage)                {}
+
+func (self *cutShortProvider) Send(_ context.Context, yield agent.Yield) (agent.Reply, error) {
+	if self.sent++; self.sent > 1 {
+		yield(agent.Output{Kind: agent.ModelMessageEvent, Text: "Carrying on."})
+		yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true})
+		return agent.Reply{}, nil
+	}
+
+	yield(agent.Output{Kind: agent.ModelReasoningEvent, Text: "Half a thought."})
+	yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true})
+
+	return agent.Reply{}, nil
+}
+
+func TestATurnCutShortIsPokedAndWaitedForBeforeTheNextInput(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.agent = agent.New("", &cutShortProvider{}, nil)
+
+	self.ask(edit.NewHistory("", historyLimit), "get on with it")
+
+	if self.currentTurn.Running() {
+		t.Error("the poked turn was left running")
+	}
+
+	var userMessages []string
+	var answers []string
+	for _, event := range self.events {
+		if event.Kind == agent.UserMessageEvent {
+			userMessages = append(userMessages, event.Text)
+		}
+		if event.Kind == agent.ModelMessageEvent {
+			answers = append(answers, event.Text)
+		}
+	}
+	if !slices.Equal(userMessages, []string{"get on with it", turn.PokeMessage}) {
+		t.Errorf("got user messages %q", userMessages)
+	}
+	if !slices.Equal(answers, []string{"Carrying on."}) {
+		t.Errorf("got answers %q", answers)
 	}
 }
 

@@ -1,0 +1,20 @@
+{"kind":"head","version":11,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","text":"rxwgs"}}
+{"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
+{"kind":"event","event":{"kind":"user_message","text":"reason and then stop"}}
+{"kind":"event","event":{"kind":"model_reasoning","text":"Weighing what to do next."}}
+{"kind":"event","event":{"kind":"harness_message","text":"The model ended the turn without an answer.","status":"warning"}}
+{"kind":"item","payload":{"role":"user","content":"reason and then stop"}}
+{"kind":"item","payload":{"id":"reasoning-1","type":"reasoning","content":[],"encrypted_content":"sealed-1","summary":[{"type":"summary_text","text":"Weighing what to do next."}]}}
+{"kind":"turn_completion"}
+{"kind":"event","event":{"kind":"user_message","text":"The previous response ended without a reply. Carry on from where it stopped."}}
+{"kind":"event","event":{"kind":"model_reasoning","text":"Still weighing it."}}
+{"kind":"event","event":{"kind":"harness_message","text":"The model ended the turn without an answer.","status":"warning"}}
+{"kind":"item","payload":{"role":"user","content":"The previous response ended without a reply. Carry on from where it stopped."}}
+{"kind":"item","payload":{"id":"reasoning-2","type":"reasoning","content":[],"encrypted_content":"sealed-2","summary":[{"type":"summary_text","text":"Still weighing it."}]}}
+{"kind":"turn_completion"}
+{"kind":"event","event":{"kind":"user_message","text":"say something this time"}}
+{"kind":"event","event":{"kind":"model_message","text":"Carrying on."}}
+{"kind":"item","payload":{"role":"user","content":"say something this time"}}
+{"kind":"item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Carrying on."}]}}
+{"kind":"turn_completion"}

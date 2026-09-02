@@ -87,6 +87,7 @@ type proseStream struct {
 	text             strings.Builder
 	pending          *Event
 	hasReportedUsage bool
+	hasAnswered      bool
 }
 
 func (self *proseStream) add(output Output) []Update {
@@ -99,6 +100,9 @@ func (self *proseStream) add(output Output) []Update {
 		}
 
 		event := Event{Kind: self.kind, Text: self.text.String()}
+		if self.kind == ModelMessageEvent {
+			self.hasAnswered = true
+		}
 		if output.Usage != nil && !self.hasReportedUsage {
 			event.Usage = output.Usage
 			self.hasReportedUsage = true
@@ -142,6 +146,7 @@ func (self *proseStream) interrupted() []Update {
 	updates := self.takePending()
 	if self.kind == ModelMessageEvent && self.text.Len() > 0 {
 		event := Event{Kind: self.kind, Text: self.text.String()}
+		self.hasAnswered = true
 		updates = append(updates, Update{Event: &event})
 	}
 	self.resetText()
@@ -163,6 +168,8 @@ func (self *proseStream) resetText() {
 	self.kind = ""
 	self.text.Reset()
 }
+
+const SilentTurnNotice = "The model ended the turn without an answer."
 
 func (self *Agent) Stream(ctx context.Context, message string, interjections *Interjections) iter.Seq2[Update, error] {
 	return func(yield func(Update, error) bool) {
@@ -206,7 +213,12 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 				yield(Update{}, err)
 				return
 			case len(reply.Calls) == 0:
-				yieldUpdates(prose.finish(reply.Usage))
+				if !yieldUpdates(prose.finish(reply.Usage)) {
+					return
+				}
+				if !prose.hasAnswered {
+					yieldEvent(Event{Kind: HarnessMessageEvent, Text: SilentTurnNotice, Status: WarningStatus}, nil)
+				}
 				return
 			}
 

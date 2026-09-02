@@ -831,10 +831,12 @@ func (self *App) ask(history *edit.History, message string) {
 }
 
 func (self *App) waitForCurrentTurn() {
-	for event := range self.currentTurn.Events() {
-		self.takeTurn(event)
+	for self.currentTurn.Running() {
+		for event := range self.currentTurn.Events() {
+			self.takeTurn(event)
+		}
+		self.finish()
 	}
-	self.finish()
 }
 
 func (self *App) getLastMessage() (string, bool) {
@@ -1025,6 +1027,10 @@ func (self *App) recordEvent(event agent.Event) {
 	self.metrics.Record(event)
 	self.takeSessionTitle(event)
 
+	if isSilentTurnNotice(event) && self.wasCutShort() && !self.wasPoked() {
+		self.queuedTurn.MarkSilentTurn()
+	}
+
 	self.events = append(self.events, event)
 	self.currentTurn.painter.DrawEvent(event)
 
@@ -1064,6 +1070,28 @@ func (self *App) noticePainter() *painter.Picasso {
 	}
 
 	return self.newPainter(false)
+}
+
+func isSilentTurnNotice(event agent.Event) bool {
+	return event.Kind == agent.HarnessMessageEvent && event.Text == agent.SilentTurnNotice
+}
+
+func (self *App) wasCutShort() bool {
+	if len(self.events) == 0 {
+		return false
+	}
+
+	return self.events[len(self.events)-1].Kind == agent.ModelReasoningEvent
+}
+
+func (self *App) wasPoked() bool {
+	for _, event := range slices.Backward(self.events) {
+		if event.Kind == agent.UserMessageEvent {
+			return event.Text == turn.PokeMessage
+		}
+	}
+
+	return false
 }
 
 func (self *App) finish() {
@@ -1115,6 +1143,9 @@ func (self *App) finish() {
 		}
 	case turn.AccessNotice:
 		self.refreshPendingMessages()
+	case turn.Poke:
+		self.refreshPendingMessages()
+		self.start(message)
 	case turn.None:
 	}
 }

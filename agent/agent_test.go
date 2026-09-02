@@ -947,3 +947,70 @@ func TestStreamPreservesAnIncompleteAnswerBeforeTheFailure(t *testing.T) {
 		t.Errorf("got failure %v, want %v", reportedFailure, failure)
 	}
 }
+
+func silentTurnNotices(t *testing.T, assistant *agent.Agent) []agent.Event {
+	t.Helper()
+
+	var notices []agent.Event
+	for update, err := range assistant.Stream(t.Context(), "go", nil) {
+		if err != nil {
+			continue
+		}
+		if update.Event != nil && update.Event.Kind == agent.HarnessMessageEvent {
+			notices = append(notices, *update.Event)
+		}
+	}
+
+	return notices
+}
+
+func TestATurnThatOnlyThinksSaysItEndedWithoutAnAnswer(t *testing.T) {
+	provider := &outputProvider{outputs: []agent.Output{
+		{Kind: agent.ModelReasoningEvent, Text: "a thought nobody asked for"},
+		{Kind: agent.ModelReasoningEvent, Done: true},
+	}}
+
+	notices := silentTurnNotices(t, agent.New("", provider, nil))
+
+	if len(notices) != 1 {
+		t.Fatalf("got %+v, want the turn to say it ended without an answer", notices)
+	}
+	if notices[0].Text != agent.SilentTurnNotice || notices[0].Status != agent.WarningStatus {
+		t.Errorf("got %+v", notices[0])
+	}
+}
+
+func TestATurnThatSaysNothingAtAllSaysItEndedWithoutAnAnswer(t *testing.T) {
+	notices := silentTurnNotices(t, agent.New("", &outputProvider{}, nil))
+
+	if len(notices) != 1 {
+		t.Fatalf("got %+v, want the turn to say it ended without an answer", notices)
+	}
+}
+
+func TestATurnThatAnswersSaysNothingMore(t *testing.T) {
+	provider := &outputProvider{outputs: []agent.Output{
+		{Kind: agent.ModelMessageEvent, Text: "an answer"},
+		{Kind: agent.ModelMessageEvent, Done: true},
+	}}
+
+	if notices := silentTurnNotices(t, agent.New("", provider, nil)); len(notices) != 0 {
+		t.Errorf("got %+v, want an answered turn to say nothing more", notices)
+	}
+}
+
+func TestAResponseThatSaysNothingAfterACallSaysTheTurnEndedWithoutAnAnswer(t *testing.T) {
+	assistant := agent.New("", &callProvider{}, []tool.Tool{noop()})
+
+	if notices := silentTurnNotices(t, assistant); len(notices) != 1 {
+		t.Errorf("got %+v, want the silent response after the calls to say so", notices)
+	}
+}
+
+func TestAFailedTurnIsNotAlsoCalledSilent(t *testing.T) {
+	provider := &outputProvider{err: errors.New("stream failed")}
+
+	if notices := silentTurnNotices(t, agent.New("", provider, nil)); len(notices) != 0 {
+		t.Errorf("got %+v, want a failed turn to be left to its failure", notices)
+	}
+}

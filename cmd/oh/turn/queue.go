@@ -7,13 +7,17 @@ const (
 	Replacement
 	AccessChange
 	AccessNotice
+	Poke
 )
+
+const PokeMessage = "The previous response ended without a reply. Carry on from where it stopped."
 
 type Pending struct {
 	Message      string
 	Replacement  bool
 	AccessChange bool
 	AccessNotice bool
+	Poke         bool
 }
 
 type Queue struct {
@@ -29,6 +33,10 @@ func (self *Queue) MarkAccessChange() {
 	self.pending.AccessChange = true
 }
 
+func (self *Queue) MarkSilentTurn() {
+	self.pending.Poke = true
+}
+
 func (self *Queue) Clear() {
 	self.pending = Pending{}
 }
@@ -38,7 +46,8 @@ func (self *Queue) Drop() {
 }
 
 func (self *Queue) Empty() bool {
-	return !self.pending.Replacement && !self.pending.AccessChange && !self.pending.AccessNotice
+	return !self.pending.Replacement && !self.pending.AccessChange &&
+		!self.pending.AccessNotice && !self.pending.Poke
 }
 
 func (self *Queue) Peek() Pending {
@@ -56,6 +65,8 @@ func (self *Queue) Take() (Kind, string) {
 		return AccessChange, ""
 	case pending.AccessNotice:
 		return AccessNotice, ""
+	case pending.Poke:
+		return Poke, PokeMessage
 	default:
 		return None, ""
 	}

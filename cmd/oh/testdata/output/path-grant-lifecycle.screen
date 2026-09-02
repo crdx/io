@@ -5,6 +5,8 @@ still working
  The path /reference now has temporary read-only access.
 
 
+The model ended the turn without an answer.
+
 ── ·✦· ─ r:reference ──────────────────────────────────────────────────────────────── brave-otter ──
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -90,6 +92,8 @@ Temporary access could not be restored: path does not exist
  continue
 
 
+The model ended the turn without an answer.
+
 Temporary access could not be restored: path does not exist
 ── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
 
@@ -108,6 +112,8 @@ message)
 
  continue
 
+
+The model ended the turn without an answer.
 
 ── ·✦· ─ r:reference ──────────────────────────────────────────────────────────────── brave-otter ──
 
