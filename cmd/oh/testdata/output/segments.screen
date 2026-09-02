@@ -122,6 +122,8 @@ usage 401
 ● 5h 39% █┃█░░░░░ wk 15% █┃░░░░░░ mo 13% █░┃░░░░░
 === subscription-usage / unreachable ===
 usage failed
+=== subscription-usage / updated by another session ===
+● 5h 60% ████┃░░░
 === subscription-usage / weekly plan window ===
 ● wk 6% ░┃░░░░░░
 === subscription-usage / window already elapsed ===

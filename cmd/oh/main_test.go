@@ -7333,6 +7333,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 				{Duration: 7 * 24 * time.Hour, Percent: 12, ResetsAt: at.Add(6 * 24 * time.Hour)},
 			},
 		),
+		"subscription-usage / updated by another session": goldenUsageUpdatedFromCache(t, at),
 		"subscription-usage / refreshing keeps the figures": goldenUsagePass(
 			t,
 			at,
@@ -10805,6 +10806,46 @@ func goldenUsageFromCache(
 	}
 
 	return func() string { return built.Render(segment.Context{}) }
+}
+
+func goldenUsageUpdatedFromCache(t *testing.T, at time.Time) func() string {
+	t.Helper()
+
+	var now atomic.Int64
+	now.Store(at.UnixNano())
+	readClock := func() time.Time { return time.Unix(0, now.Load()).UTC() }
+	cachePath := filepath.Join(t.TempDir(), "usage", "codex.json")
+
+	first := &scriptedUsageReporter{report: usageReport{windows: []agent.UsageWindow{{
+		Duration: 5 * time.Hour,
+		Percent:  40,
+		ResetsAt: at.Add(150 * time.Minute),
+	}}}}
+	firstShared := usage.Shared(first, cachePath, usage.DefaultRefresh, readClock)
+	if _, err := firstShared.UsageWindows(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	built, err := subUsage.New(subUsage.Settings{
+		Reporter:         &scriptedUsageReporter{},
+		CachePath:        cachePath,
+		ModelName:        "gpt-5.6-sol",
+		IsSelfRefreshing: true,
+		Now:              readClock,
+	})(goldenSegmentOptions(""))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return func() string {
+		now.Store(at.Add(usage.DefaultRefresh).UnixNano())
+		first.report.windows[0].Percent = 60
+		if _, err := firstShared.UsageWindows(t.Context()); err != nil {
+			t.Fatal(err)
+		}
+
+		return built.Render(segment.Context{})
+	}
 }
 
 func settleUsage(

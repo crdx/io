@@ -58,7 +58,7 @@ const (
 )
 
 type state struct {
-	reporter         agent.UsageReporter
+	windowTracker    *usage.WindowTracker
 	modelName        string
 	rate             time.Duration
 	isSelfRefreshing bool
@@ -95,10 +95,8 @@ func New(settings Settings) segment.Factory {
 			args.Rate = defaultRate
 		}
 
-		sharedUsage := usage.Shared(settings.Reporter, settings.CachePath, args.Rate, settings.Now)
-
 		self := &state{
-			reporter:         sharedUsage,
+			windowTracker:    usage.NewWindowTracker(settings.Reporter, settings.CachePath, args.Rate, settings.Now),
 			modelName:        strings.ToLower(settings.ModelName),
 			rate:             args.Rate,
 			isSelfRefreshing: settings.IsSelfRefreshing,
@@ -107,7 +105,7 @@ func New(settings Settings) segment.Factory {
 			status:           usagePending,
 		}
 
-		self.startFromSnapshot(sharedUsage)
+		self.refreshFromSnapshot()
 
 		return self, nil
 	}
@@ -131,9 +129,11 @@ func (self *state) NextRefresh(phase segment.Phase) time.Time {
 }
 
 func (self *state) Render(segment.Context) string {
-	if self.reporter == nil || !self.reporter.IsAvailable() {
+	if !self.windowTracker.IsAvailable() {
 		return style.Dim("usage n/a")
 	}
+
+	self.refreshFromSnapshot()
 
 	self.mutex.Lock()
 	shouldFetch := self.noteFetchStarting()
@@ -153,20 +153,17 @@ func (self *state) Render(segment.Context) string {
 	return self.draw(current)
 }
 
-func (self *state) startFromSnapshot(reporter agent.UsageReporter) {
-	snapshotter, ok := reporter.(usage.Snapshotter)
-	if !ok {
+func (self *state) refreshFromSnapshot() {
+	snapshot := self.windowTracker.ReadSnapshot()
+
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	if len(snapshot.Windows) == 0 || !snapshot.FetchedAt.After(self.fetchedAt) {
 		return
 	}
 
-	windows, fetchedAt := snapshotter.GetSnapshot()
-	if len(windows) == 0 || fetchedAt.IsZero() {
-		return
-	}
-
-	self.windows = windows
-	self.fetchedAt = fetchedAt
-	self.status = usageReady
+	self.keepReady(snapshot.Windows, snapshot.FetchedAt)
 }
 
 func (self *state) getVisibleStatus() usageStatus {
@@ -192,7 +189,7 @@ func (self *state) noteFetchStarting() bool {
 }
 
 func (self *state) fetch() {
-	windows, err := self.reporter.UsageWindows(context.Background())
+	snapshot, err := self.windowTracker.Fetch(context.Background())
 
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -207,19 +204,28 @@ func (self *state) fetch() {
 		return
 	}
 
-	if len(windows) == 0 {
+	if len(snapshot.Windows) == 0 {
 		self.status = usagePending
 		self.waitLonger(firstEmptyWait)
 
 		return
 	}
 
+	self.keepReady(snapshot.Windows, snapshot.FetchedAt)
+}
+
+func (self *state) keepReady(windows []agent.UsageWindow, fetchedAt time.Time) {
 	self.status = usageReady
 	self.failure = ""
-	self.windows = windows
-	self.fetchedAt = self.now()
 	self.retryAt = time.Time{}
 	self.waitedTime = 0
+
+	if fetchedAt.Before(self.fetchedAt) {
+		return
+	}
+
+	self.windows = windows
+	self.fetchedAt = fetchedAt
 }
 
 func (self *state) waitLonger(first time.Duration) {

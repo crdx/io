@@ -9,7 +9,10 @@ import (
 	"crdx.org/io/internal/state"
 )
 
-const cacheFormat = 1
+const (
+	cacheFormat          = 1
+	snapshotPollInterval = 15 * time.Second
+)
 
 type cache struct {
 	Version   int                 `json:"version"`
@@ -17,15 +20,16 @@ type cache struct {
 	Windows   []agent.UsageWindow `json:"windows"`
 }
 
-type shared struct {
+type sharedReporter struct {
 	reporter agent.UsageReporter
 	path     string
 	ttl      time.Duration
 	now      func() time.Time
 
-	mutex     sync.Mutex
-	windows   []agent.UsageWindow
-	fetchedAt time.Time
+	mutex              sync.Mutex
+	windows            []agent.UsageWindow
+	fetchedAt          time.Time
+	nextSnapshotReadAt time.Time
 }
 
 type Snapshotter interface {
@@ -41,7 +45,14 @@ func Shared(
 		return reporter
 	}
 
-	self := &shared{reporter: reporter, path: path, ttl: ttl, now: now}
+	readAt := now()
+	self := &sharedReporter{
+		reporter:           reporter,
+		path:               path,
+		ttl:                ttl,
+		now:                now,
+		nextSnapshotReadAt: readAt.Truncate(snapshotPollInterval).Add(snapshotPollInterval),
+	}
 
 	storedCache := self.stored()
 	self.windows, self.fetchedAt = storedCache.Windows, storedCache.FetchedAt
@@ -49,7 +60,7 @@ func Shared(
 	return self
 }
 
-func (self *shared) IsAvailable() bool {
+func (self *sharedReporter) IsAvailable() bool {
 	if self.reporter.IsAvailable() {
 		return true
 	}
@@ -60,14 +71,14 @@ func (self *shared) IsAvailable() bool {
 	return len(self.windows) > 0
 }
 
-func (self *shared) GetSnapshot() ([]agent.UsageWindow, time.Time) {
+func (self *sharedReporter) GetSnapshot() ([]agent.UsageWindow, time.Time) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
 	return self.windows, self.fetchedAt
 }
 
-func (self *shared) UsageWindows(ctx context.Context) ([]agent.UsageWindow, error) {
+func (self *sharedReporter) UsageWindows(ctx context.Context) ([]agent.UsageWindow, error) {
 	hasClaimed, err := state.TryUpdate(self.path, cacheFormat, func(storedCache *cache) error {
 		if self.isFresh(*storedCache) {
 			self.keep(storedCache.Windows, storedCache.FetchedAt)
@@ -106,11 +117,32 @@ func (self *shared) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 	return self.windows, nil
 }
 
-func (self *shared) isFresh(storedCache cache) bool {
+func (self *sharedReporter) readSnapshot() ([]agent.UsageWindow, time.Time) {
+	self.refreshSnapshot()
+
+	return self.GetSnapshot()
+}
+
+func (self *sharedReporter) refreshSnapshot() {
+	self.mutex.Lock()
+	readAt := self.now()
+	if readAt.Before(self.nextSnapshotReadAt) {
+		self.mutex.Unlock()
+
+		return
+	}
+	self.nextSnapshotReadAt = readAt.Truncate(snapshotPollInterval).Add(snapshotPollInterval)
+	self.mutex.Unlock()
+
+	storedCache := self.stored()
+	self.keep(storedCache.Windows, storedCache.FetchedAt)
+}
+
+func (self *sharedReporter) isFresh(storedCache cache) bool {
 	return !storedCache.FetchedAt.IsZero() && self.now().Sub(storedCache.FetchedAt) < self.ttl
 }
 
-func (self *shared) keep(windows []agent.UsageWindow, fetchedAt time.Time) {
+func (self *sharedReporter) keep(windows []agent.UsageWindow, fetchedAt time.Time) {
 	if len(windows) == 0 {
 		return
 	}
@@ -118,10 +150,14 @@ func (self *shared) keep(windows []agent.UsageWindow, fetchedAt time.Time) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
+	if !self.fetchedAt.IsZero() && !fetchedAt.After(self.fetchedAt) {
+		return
+	}
+
 	self.windows, self.fetchedAt = windows, fetchedAt
 }
 
-func (self *shared) stored() cache {
+func (self *sharedReporter) stored() cache {
 	var storedCache cache
 
 	if err := state.Read(self.path, cacheFormat, &storedCache); err != nil {

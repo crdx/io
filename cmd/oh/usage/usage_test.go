@@ -15,7 +15,10 @@ import (
 	"crdx.org/io/cmd/oh/usage"
 )
 
-const rate = 5 * time.Minute
+const (
+	rate         = 5 * time.Minute
+	pollInterval = 15 * time.Second
+)
 
 var testNow = time.Date(2026, 1, 2, 12, 0, 0, 0, time.UTC)
 
@@ -410,5 +413,51 @@ func TestASnapshotIsHandedBackWithoutAskingTheProvider(t *testing.T) {
 
 	if asked := second.asked.Load(); asked != 0 {
 		t.Errorf("the provider was asked %d times", asked)
+	}
+}
+
+func TestAWindowTrackerConvergesAfterLosingTheRefreshRace(t *testing.T) {
+	path := cachePath(t)
+	clock := &testClock{now: testNow}
+
+	first := &scriptedReporter{windows: windows(40), isAvailable: true}
+	firstShared := usage.Shared(first, path, rate, clock.read)
+	if _, err := firstShared.UsageWindows(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	second := &scriptedReporter{windows: windows(99), isAvailable: true}
+	tracker := usage.NewWindowTracker(second, path, rate, clock.read)
+
+	clock.set(testNow.Add(rate))
+	release := holdTheLock(t, path)
+	staleSnapshot, err := tracker.Fetch(t.Context())
+	release()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(staleSnapshot.Windows) != 1 || staleSnapshot.Windows[0].Percent != 40 {
+		t.Errorf("got stale snapshot %v", staleSnapshot.Windows)
+	}
+	if !staleSnapshot.FetchedAt.Equal(testNow) {
+		t.Errorf("the stale snapshot was restamped at %s", staleSnapshot.FetchedAt)
+	}
+	if asked := second.asked.Load(); asked != 0 {
+		t.Errorf("the second instance asked its provider %d times", asked)
+	}
+
+	first.windows = windows(60)
+	if _, err := firstShared.UsageWindows(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	clock.set(clock.read().Add(pollInterval))
+	freshSnapshot := tracker.ReadSnapshot()
+	if len(freshSnapshot.Windows) != 1 || freshSnapshot.Windows[0].Percent != 60 {
+		t.Errorf("got fresh snapshot %v", freshSnapshot.Windows)
+	}
+	if !freshSnapshot.FetchedAt.Equal(testNow.Add(rate)) {
+		t.Errorf("fetched at %s, want %s", freshSnapshot.FetchedAt, testNow.Add(rate))
 	}
 }
