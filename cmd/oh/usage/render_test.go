@@ -163,10 +163,9 @@ func TestADrawnGaugeTakesExactlyTheCellsItWasGiven(t *testing.T) {
 	expected := 40
 	limit := Limit{UsedPercent: 62, ExpectedPercent: &expected}
 
-	drawn, isDrawn := gaugePlacement(limit, PaceAhead, gaugeWidth, Graphics{CellWidth: 9, CellHeight: 18})
-	if !isDrawn {
-		t.Fatal("the gauge was not drawn")
-	}
+	gauges := FixedGauges(Graphics{CellWidth: 9, CellHeight: 18})
+
+	drawn := gauges.Draw(limit.UsedPercent, limit.ExpectedPercent, PaceAhead, gaugeWidth)
 
 	if got := width.Of(drawn); got != gaugeWidth {
 		t.Errorf("the gauge occupies %d cells, want %d", got, gaugeWidth)
@@ -184,11 +183,35 @@ func TestADrawnRowStillLinesUpWithTheRestOfTheReport(t *testing.T) {
 		Reporter: &scriptedReporter{windows: []agent.UsageWindow{sessionWindow(70), weeklyWindow(20)}},
 	}}, nowAt(collectedAt))
 
-	drawing := &Graphics{CellWidth: 9, CellHeight: 18}
+	gauges := FixedGauges(Graphics{CellWidth: 9, CellHeight: 18})
 
-	for _, line := range strings.Split(strings.TrimSuffix(Render(report, collectedAt, drawing), "\n"), "\n")[1:] {
+	for _, line := range strings.Split(strings.TrimSuffix(Render(report, collectedAt, gauges), "\n"), "\n")[1:] {
 		if got := width.Of(line); got != width.Of(style.Plain(line)) {
 			t.Errorf("the line %q measures %d", line, got)
 		}
+	}
+}
+
+func TestAPictureIsSentOnceHoweverOftenItIsDrawn(t *testing.T) {
+	expected := 40
+	gauges := FixedGauges(Graphics{CellWidth: 9, CellHeight: 18})
+
+	first := gauges.Draw(62, &expected, PaceAhead, gaugeWidth)
+	second := gauges.Draw(62, &expected, PaceAhead, gaugeWidth)
+
+	if !strings.Contains(first, "a=T") {
+		t.Error("the first drawing did not transmit the picture")
+	}
+
+	if strings.Contains(second, "a=T") {
+		t.Error("the second drawing transmitted the picture again")
+	}
+
+	if width.Of(second) != gaugeWidth {
+		t.Errorf("the second drawing occupies %d cells, want %d", width.Of(second), gaugeWidth)
+	}
+
+	if changed := gauges.Draw(63, &expected, PaceAhead, gaugeWidth); !strings.Contains(changed, "a=T") {
+		t.Error("a gauge that moved did not transmit a picture of its own")
 	}
 }

@@ -25,6 +25,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/workspaceDir"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/turn"
+	"crdx.org/io/cmd/oh/usage"
 	"crdx.org/io/cmd/oh/work"
 )
 
@@ -47,15 +48,17 @@ const (
 )
 
 type Options struct {
-	Workspace          *work.Space
-	CurrentSessionName string
-	ModelName          string
-	ModelEffort        string
-	ModelEffortLevels  []string
-	IsFast             bool
-	UsageReporter      agent.UsageReporter
-	UsageCachePath     string
-	Sources            Sources
+	Workspace             *work.Space
+	CurrentSessionName    string
+	ModelName             string
+	ModelEffort           string
+	ModelEffortLevels     []string
+	IsFast                bool
+	UsageReporter         agent.UsageReporter
+	UsageCachePath        string
+	UsageIsSelfRefreshing bool
+	UsageGauges           *usage.Gauges
+	Sources               Sources
 }
 
 type Sources struct {
@@ -86,7 +89,14 @@ func NewRegistry(options Options) segment.Registry {
 		turnTimerSegment:      turnTimer.New(options.Sources.GetTurnTiming, options.Sources.IsTurnRunning),
 		turnCountSegment:      turnCount.New(options.Sources.GetTurnCount),
 		gitBranchSegment:      gitBranch.New(options.Workspace.GetDir()),
-		subUsageSegment:       subUsage.New(options.UsageReporter, options.UsageCachePath, options.ModelName, time.Now),
+		subUsageSegment: subUsage.New(subUsage.Settings{
+			Reporter:         options.UsageReporter,
+			CachePath:        options.UsageCachePath,
+			ModelName:        options.ModelName,
+			IsSelfRefreshing: options.UsageIsSelfRefreshing,
+			Gauges:           options.UsageGauges,
+			Now:              time.Now,
+		}),
 	}
 }
 

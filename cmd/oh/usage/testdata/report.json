@@ -32,7 +32,7 @@
                 {
                     "id": "7d",
                     "label": "Week",
-                    "short_label": "7d",
+                    "short_label": "wk",
                     "window_seconds": 604800,
                     "used_percent": 51,
                     "expected_percent": 71,
@@ -91,7 +91,7 @@
                 {
                     "id": "7d",
                     "label": "Week",
-                    "short_label": "7d",
+                    "short_label": "wk",
                     "window_seconds": 604800,
                     "used_percent": 64,
                     "expected_percent": 71,
@@ -150,7 +150,7 @@
                 {
                     "id": "30d",
                     "label": "Month",
-                    "short_label": "30d",
+                    "short_label": "mo",
                     "window_seconds": 2592000,
                     "used_percent": 100,
                     "expected_percent": null,

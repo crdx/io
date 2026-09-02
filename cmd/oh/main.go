@@ -527,15 +527,17 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	usageReporter, _ := client.Client.(agent.UsageReporter)
 
 	barRegistry := bar.NewRegistry(bar.Options{
-		Workspace:          workspace,
-		CurrentSessionName: log.Name(),
-		ModelName:          selection.Model,
-		ModelEffort:        selection.Effort,
-		ModelEffortLevels:  choice.EffortLevels,
-		IsFast:             selection.IsFast,
-		UsageReporter:      usageReporter,
-		UsageCachePath:     location.GetUsageCachePath(selection.Provider, endpointURL != ""),
-		Sources:            chat.getBarSources(),
+		Workspace:             workspace,
+		CurrentSessionName:    log.Name(),
+		ModelName:             selection.Model,
+		ModelEffort:           selection.Effort,
+		ModelEffortLevels:     choice.EffortLevels,
+		IsFast:                selection.IsFast,
+		UsageReporter:         usageReporter,
+		UsageCachePath:        location.GetUsageCachePath(selection.Provider, endpointURL != ""),
+		UsageIsSelfRefreshing: backend.RefreshesOwnUsage(selection.Provider),
+		UsageGauges:           usage.TerminalGauges(os.Stdin, os.Stdout),
+		Sources:               chat.getBarSources(),
 	})
 	liveSettings, err := settings.BuildLive(barRegistry)
 	if err != nil {

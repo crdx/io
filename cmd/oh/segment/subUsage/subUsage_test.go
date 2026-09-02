@@ -3,6 +3,7 @@ package subUsage
 import (
 	"context"
 	"errors"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"sync/atomic"
@@ -85,12 +86,23 @@ func buildOnModel(
 ) segment.Segment {
 	t.Helper()
 
-	built, err := New(reporter, "", modelName, clock.read)(noOptions{})
+	built, err := New(Settings{
+		Reporter:         reporter,
+		ModelName:        modelName,
+		IsSelfRefreshing: true,
+		Now:              clock.read,
+	})(noOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	return built
+}
+
+func settle(t *testing.T, built segment.Segment) {
+	t.Helper()
+
+	renderSettled(t, built)
 }
 
 func renderSettled(t *testing.T, built segment.Segment) string {
@@ -128,12 +140,17 @@ func TestASharedSnapshotIsDrawnOnTheFirstPaint(t *testing.T) {
 
 	second := &scriptedReporter{}
 
-	built, err := New(second, path, "", clock.read)(noOptions{})
+	built, err := New(Settings{
+		Reporter:         second,
+		CachePath:        path,
+		IsSelfRefreshing: true,
+		Now:              clock.read,
+	})(noOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if got := style.Plain(built.Render(segment.Context{})); got != "5h 40%" {
+	if got := style.Plain(built.Render(segment.Context{})); got != "● 5h 40% ███░┃░░░" {
 		t.Errorf("first paint = %q", got)
 	}
 
@@ -177,7 +194,7 @@ func TestWindowsOnAnEvenBurnRenderPlainPercentages(t *testing.T) {
 		},
 	}})
 
-	if got := renderSettled(t, built); got != "5h 40% 7d 12%" {
+	if got := renderSettled(t, built); got != "● 5h 40% ███░┃░░░ wk 12% ░┃░░░░░░" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -189,7 +206,7 @@ func TestAWindowOverPaceIsMarked(t *testing.T) {
 		ResetsAt: testNow.Add(4 * time.Hour),
 	}}})
 
-	if got := renderSettled(t, built); got != "5h 28% ▲" {
+	if got := renderSettled(t, built); got != "● 5h 28% █┃░░░░░░" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -211,7 +228,7 @@ func TestScopedWindowsFollowTheirOwnMark(t *testing.T) {
 		},
 	}}, "gpt-5.3-codex-spark", &testClock{now: testNow})
 
-	if got := renderSettled(t, built); got != "5h 40% ⚡ 5h 8% 7d 3%" {
+	if got := renderSettled(t, built); got != "● 5h 40% ███░┃░░░ ⚡ 5h 8% ░░░░┃░░░ wk 3% ░┃░░░░░░" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -227,7 +244,7 @@ func TestAWindowMeteringAnotherModelIsNotDrawn(t *testing.T) {
 		},
 	}}, "gpt-5.6-sol", &testClock{now: testNow})
 
-	if got := renderSettled(t, built); got != "5h 40%" {
+	if got := renderSettled(t, built); got != "● 5h 40% ███░┃░░░" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -238,7 +255,7 @@ func TestAWindowWithoutAResetShowsItsFigureAnyway(t *testing.T) {
 		Percent:  6,
 	}}})
 
-	if got := renderSettled(t, built); got != "7d 6%" {
+	if got := renderSettled(t, built); got != "● wk 6% ░░░░░░░░" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -250,7 +267,7 @@ func TestAnExpiredWindowReadsAsStale(t *testing.T) {
 		ResetsAt: testNow.Add(-time.Minute),
 	}}})
 
-	if got := renderSettled(t, built); got != "5h stale" {
+	if got := renderSettled(t, built); got != "● 5h stale" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -287,12 +304,12 @@ func TestRefreshingASnapshotDelaysTheSpinnerAndKeepsTheFigures(t *testing.T) {
 		t.Fatal("refresh did not start")
 	}
 
-	if got := style.Plain(built.Render(segment.Context{})); got != "5h 40%" {
+	if got := style.Plain(built.Render(segment.Context{})); got != "● 5h 40% ███░┃░░░" {
 		t.Errorf("short refresh = %q", got)
 	}
 
 	clock.set(clock.read().Add(spinnerDelay))
-	want := "5h 40% " + built.spinnerFrame()
+	want := "● 5h 40% ███░┃░░░ " + built.spinnerFrame()
 	if got := style.Plain(built.Render(segment.Context{})); got != want {
 		t.Errorf("long refresh = %q, want %q", got, want)
 	}
@@ -306,7 +323,7 @@ func TestScopedWindowsAloneStillDrawTheLine(t *testing.T) {
 		Scope:    "opus",
 	}}}, "claude-opus-4-6", &testClock{now: testNow})
 
-	if got := renderSettled(t, built); got != "⚡ 7d 3%" {
+	if got := renderSettled(t, built); got != "● ⚡ wk 3% ░┃░░░░░░" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -519,7 +536,7 @@ func TestAFailedRefreshKeepsTheLastSnapshot(t *testing.T) {
 	clock.set(testNow.Add(defaultRate))
 	fetchNow(t, built)
 
-	if got := style.Plain(built.Render(segment.Context{})); got != "5h 40% failed" {
+	if got := style.Plain(built.Render(segment.Context{})); got != "● 5h 40% ███░┃░░░ failed" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -544,67 +561,78 @@ func TestASpentWindowIsMarked(t *testing.T) {
 		IsLimited: true,
 	}}})
 
-	if got := renderSettled(t, built); got != "5h 100% ✖" {
+	if got := renderSettled(t, built); got != "● 5h 100% ████████ ✖" {
 		t.Errorf("got %q", got)
 	}
 }
 
-func TestAWindowIsMarkedByHowItsBurnComparesWithItsPace(t *testing.T) {
+func TestAWindowIsColouredByHowItsBurnComparesWithItsPace(t *testing.T) {
 	for _, test := range []struct {
-		name     string
-		percent  float64
-		elapsed  time.Duration
-		duration time.Duration
-		want     string
+		name      string
+		percent   float64
+		elapsed   time.Duration
+		duration  time.Duration
+		wantStyle style.Style
 	}{
-		{name: "barely started", percent: 9, elapsed: 0, duration: 5 * time.Hour, want: "5h 9%"},
+		{name: "barely started", percent: 9, elapsed: 0, duration: 5 * time.Hour, wantStyle: usage.PaceStyle(usage.PaceEven)},
 		{
-			name:     "spent in step with the window",
-			percent:  50,
-			elapsed:  150 * time.Minute,
-			duration: 5 * time.Hour,
-			want:     "5h 50%",
+			name:      "spent in step with the window",
+			percent:   50,
+			elapsed:   150 * time.Minute,
+			duration:  5 * time.Hour,
+			wantStyle: usage.PaceStyle(usage.PaceEven),
 		},
 		{
-			name:     "a shade ahead",
-			percent:  28,
-			elapsed:  time.Hour,
-			duration: 5 * time.Hour,
-			want:     "5h 28% ▲",
+			name:      "a shade ahead",
+			percent:   28,
+			elapsed:   time.Hour,
+			duration:  5 * time.Hour,
+			wantStyle: usage.PaceStyle(usage.PaceAhead),
 		},
 		{
-			name:     "half as much again as the pace",
-			percent:  30,
-			elapsed:  time.Hour,
-			duration: 5 * time.Hour,
-			want:     "5h 30% ▲",
+			name:      "half as much again as the pace",
+			percent:   30,
+			elapsed:   time.Hour,
+			duration:  5 * time.Hour,
+			wantStyle: usage.PaceStyle(usage.PaceCritical),
 		},
 		{
-			name:     "near the limit however it got there",
-			percent:  90,
-			elapsed:  4 * time.Hour,
-			duration: 5 * time.Hour,
-			want:     "5h 90% ▲",
-		},
-		{
-			name:     "rounded to the nearest whole",
-			percent:  39.6,
-			elapsed:  4 * time.Hour,
-			duration: 5 * time.Hour,
-			want:     "5h 40%",
+			name:      "near the limit however it got there",
+			percent:   90,
+			elapsed:   4 * time.Hour,
+			duration:  5 * time.Hour,
+			wantStyle: usage.PaceStyle(usage.PaceCritical),
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			built := build(t, &scriptedReporter{windows: []agent.UsageWindow{{
+			clock := &testClock{now: testNow}
+			built := buildOnClock(t, &scriptedReporter{windows: []agent.UsageWindow{{
 				Duration: test.duration,
 				Percent:  test.percent,
 				ResetsAt: testNow.Add(test.duration - test.elapsed),
-			}}})
+			}}}, clock)
 
-			if got := renderSettled(t, built); got != test.want {
-				t.Errorf("got %q, want %q", got, test.want)
+			settle(t, built)
+
+			drawn := built.Render(segment.Context{})
+			want := test.wantStyle(fmt.Sprintf("%d%%", int(test.percent+0.5)))
+
+			if !strings.Contains(drawn, want) {
+				t.Errorf("drew %q, want it to hold %q", drawn, want)
 			}
 		})
+	}
+}
+
+func TestAFigureIsRoundedToTheNearestWhole(t *testing.T) {
+	built := build(t, &scriptedReporter{windows: []agent.UsageWindow{{
+		Duration: 5 * time.Hour,
+		Percent:  39.6,
+		ResetsAt: testNow.Add(time.Hour),
+	}}})
+
+	if got := renderSettled(t, built); got != "● 5h 40% ███░░░┃░" {
+		t.Errorf("got %q", got)
 	}
 }
 
@@ -655,7 +683,7 @@ func TestTheSegmentPollsOnWhetherATurnIsRunningOrNot(t *testing.T) {
 }
 
 func TestAnOptionTheLayoutGotWrongIsRefused(t *testing.T) {
-	if _, err := New(nil, "", "", testNowRead)(rateOptions{rate: -time.Second}); err == nil {
+	if _, err := New(Settings{Now: testNowRead})(rateOptions{rate: -time.Second}); err == nil {
 		t.Error("expected a rate shorter than nothing to be refused")
 	}
 }
@@ -688,13 +716,13 @@ func TestAWindowNotYetStartedIsMeasuredFromNothingSpent(t *testing.T) {
 		ResetsAt: testNow.Add(10 * time.Hour),
 	}}})
 
-	if got := renderSettled(t, built); got != "5h 20% ▲" {
+	if got := renderSettled(t, built); got != "● 5h 20% ┃░░░░░░░" {
 		t.Errorf("got %q", got)
 	}
 }
 
 func TestAnUnreadableOptionIsHandedBack(t *testing.T) {
-	if _, err := New(nil, "", "", testNowRead)(refusedOptions{}); err == nil {
+	if _, err := New(Settings{Now: testNowRead})(refusedOptions{}); err == nil {
 		t.Error("expected the unreadable option handed back")
 	}
 }

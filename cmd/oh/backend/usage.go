@@ -22,6 +22,10 @@ type UsageSource struct {
 	HasIdleSessionWindow bool
 }
 
+func RefreshesOwnUsage(providerName string) bool {
+	return providerName != model.CodexProvider
+}
+
 func UsageSources() []UsageSource {
 	return []UsageSource{
 		{

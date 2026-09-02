@@ -1,26 +1,34 @@
 === windows on an even burn ===
-5h 40% 7d 12%
+● 5h 40% ███░┃░░░ wk 12% ░┃░░░░░░
 === a window ahead of its pace ===
-5h 28% ▲
+● 5h 28% █┃░░░░░░
 === a window far ahead of its pace ===
-5h 60% ▲
+● 5h 60% █┃██░░░░
 === a window near its limit ===
-5h 95% ▲
+● 5h 95% ██████┃░
 === a scoped window governing this model ===
-5h 40% ⚡ 5h 70% ▲
+● 5h 40% ███░┃░░░ ⚡ 5h 70% ████┃░░░
 === a scoped window governing another model ===
-5h 40%
+● 5h 40% ███░┃░░░
 === a window that is over its limit ===
-30d 100% ✖
+● mo 100% ████████ ✖
 === a window whose reset has passed ===
-5h stale
+● 5h stale
 === a window with no reset at all ===
-5h 40%
+● 5h 40% ███░░░░░
 === a fetch under way ===
-5h 40% ✦·
+● 5h 40% ███░┃░░░ ✦·
 === nothing fetched yet ===
 usage pending
 === a fetch that was refused ===
-5h 40% 429
+● 5h 40% ███░┃░░░ 429
 === nothing to show at all ===
 usage unavailable
+=== a snapshot past its refresh ===
+10m ● 5h 40% ███┃░░░░
+=== a snapshot long past its refresh ===
+45m ● 5h 40% ██┃░░░░░
+=== a provider waiting on a turn of its own ===
+45m ⧗ 5h 40% ██┃░░░░░
+=== windows drawn as pictures ===
+● 5h 40% 􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮 wk 12% 􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮

@@ -1,8 +1,11 @@
 package usage
 
 import (
+	"fmt"
 	"image"
 	"image/color"
+	"os"
+	"sync"
 
 	"crdx.org/io/cmd/oh/graphics"
 	"crdx.org/io/cmd/oh/style"
@@ -13,6 +16,7 @@ const (
 	tickCells    = 8
 	tickDivisor  = 2
 	trackDivisor = 3
+	mostImages   = 64
 )
 
 type Graphics struct {
@@ -20,24 +24,108 @@ type Graphics struct {
 	CellHeight int
 }
 
-func gaugePlacement(limit Limit, pace Pace, cells int, drawing Graphics) (string, bool) {
-	return graphics.Place(gaugePicture(limit, pace, cells, drawing), cells)
+type Measure func() (Graphics, bool)
+
+type Gauges struct {
+	measure Measure
+
+	mutex  sync.Mutex
+	images map[string]int
 }
 
-func gaugePicture(limit Limit, pace Pace, cells int, drawing Graphics) *image.RGBA {
+func NewGauges(measure Measure) *Gauges {
+	return &Gauges{measure: measure, images: map[string]int{}}
+}
+
+func TerminalGauges(input *os.File, output *os.File) *Gauges {
+	cellWidth, cellHeight, hasGraphics := graphics.Detect(input, output)
+	if !hasGraphics {
+		return NewGauges(nil)
+	}
+
+	return NewGauges(func() (Graphics, bool) {
+		if width, height := graphics.CellSize(output); width > 0 && height > 0 {
+			return Graphics{CellWidth: width, CellHeight: height}, true
+		}
+
+		return Graphics{CellWidth: cellWidth, CellHeight: cellHeight}, true
+	})
+}
+
+func FixedGauges(drawing Graphics) *Gauges {
+	return NewGauges(func() (Graphics, bool) { return drawing, true })
+}
+
+func (self *Gauges) Draw(usedPercent int, expectedPercent *int, pace Pace, cells int) string {
+	if self != nil && self.measure != nil {
+		if drawing, hasGraphics := self.measure(); hasGraphics {
+			if placement, isPlaced := self.place(usedPercent, expectedPercent, pace, cells, drawing); isPlaced {
+				return placement
+			}
+		}
+	}
+
+	return blockGauge(usedPercent, expectedPercent, pace, cells)
+}
+
+func (self *Gauges) place(
+	usedPercent int, expectedPercent *int, pace Pace, cells int, drawing Graphics,
+) (string, bool) {
+	key := gaugeKey(usedPercent, expectedPercent, pace, cells, drawing)
+
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	if imageID, isKnown := self.images[key]; isKnown {
+		return graphics.Placement(imageID, cells), true
+	}
+
+	picture := gaugePicture(usedPercent, expectedPercent, pace, cells, drawing)
+
+	imageID, command, isTransmitted := graphics.Transmit(picture, cells)
+	if !isTransmitted {
+		return "", false
+	}
+
+	if len(self.images) >= mostImages {
+		clear(self.images)
+	}
+
+	self.images[key] = imageID
+
+	return command + graphics.Placement(imageID, cells), true
+}
+
+func gaugeKey(
+	usedPercent int, expectedPercent *int, pace Pace, cells int, drawing Graphics,
+) string {
+	pacePercent := -1
+	if expectedPercent != nil {
+		pacePercent = *expectedPercent
+	}
+
+	return fmt.Sprintf(
+		"%d/%d/%d/%d/%dx%d",
+		usedPercent, pacePercent, pace, cells, drawing.CellWidth, drawing.CellHeight,
+	)
+}
+
+func gaugePicture(
+	usedPercent int, expectedPercent *int, pace Pace, cells int, drawing Graphics,
+) *image.RGBA {
 	pixelWidth := cells * drawing.CellWidth
 	pixelHeight := drawing.CellHeight
 
 	picture := image.NewRGBA(image.Rect(0, 0, pixelWidth, pixelHeight))
 
 	padding := pixelHeight / barPadding
-	fillWidth := limit.UsedPercent * pixelWidth / percentCeiling
+	fillWidth := usedPercent * pixelWidth / percentCeiling
 
 	tickColumn := -1
 	tickHalf := max(1, drawing.CellWidth/tickCells)
 
-	if limit.ExpectedPercent != nil {
-		tickColumn = *limit.ExpectedPercent * pixelWidth / percentCeiling
+	if expectedPercent != nil {
+		tickColumn = *expectedPercent * pixelWidth / percentCeiling
 	}
 
 	fill := paceColour(pace)

@@ -4,15 +4,23 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/usage"
 )
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
+
+var (
+	payloadPattern    = regexp.MustCompile(`;[A-Za-z0-9+/=]+\x1b\\`)
+	identifierPattern = regexp.MustCompile(`i=\d+`)
+	colourPattern     = regexp.MustCompile(`38;2;\d+;\d+;\d+m\x{10EEEE}`)
+)
 
 func window(duration time.Duration, percent float64, remainingTime time.Duration) agent.UsageWindow {
 	return agent.UsageWindow{
@@ -36,6 +44,8 @@ type segmentCase struct {
 	status    usageStatus
 	failure   string
 	fetchedAt time.Time
+	isWaiting bool
+	hasImages bool
 }
 
 func segmentCases() []segmentCase {
@@ -79,6 +89,27 @@ func segmentCases() []segmentCase {
 			failure: "429",
 		},
 		{name: "nothing to show at all"},
+		{
+			name:      "a snapshot past its refresh",
+			windows:   []agent.UsageWindow{window(5*time.Hour, 40, 150*time.Minute)},
+			fetchedAt: testNow.Add(-10 * time.Minute),
+		},
+		{
+			name:      "a snapshot long past its refresh",
+			windows:   []agent.UsageWindow{window(5*time.Hour, 40, 150*time.Minute)},
+			fetchedAt: testNow.Add(-45 * time.Minute),
+		},
+		{
+			name:      "a provider waiting on a turn of its own",
+			windows:   []agent.UsageWindow{window(5*time.Hour, 40, 150*time.Minute)},
+			fetchedAt: testNow.Add(-45 * time.Minute),
+			isWaiting: true,
+		},
+		{
+			name:      "windows drawn as pictures",
+			windows:   []agent.UsageWindow{window(5*time.Hour, 40, 150*time.Minute), window(7*24*time.Hour, 12, 6*24*time.Hour)},
+			hasImages: true,
+		},
 	}
 }
 
@@ -90,11 +121,18 @@ func drawEachCase(t *testing.T, isPlain bool) string {
 	for _, test := range segmentCases() {
 		clock := &testClock{now: testNow}
 
+		gauges := usage.NewGauges(nil)
+		if test.hasImages {
+			gauges = usage.FixedGauges(usage.Graphics{CellWidth: 9, CellHeight: 18})
+		}
+
 		segment := &state{
-			modelName: strings.ToLower(test.modelName),
-			rate:      defaultRate,
-			now:       clock.read,
-			status:    test.status,
+			modelName:        strings.ToLower(test.modelName),
+			rate:             defaultRate,
+			isSelfRefreshing: !test.isWaiting,
+			gauges:           gauges,
+			now:              clock.read,
+			status:           test.status,
 		}
 
 		fetchedAt := test.fetchedAt
@@ -113,6 +151,8 @@ func drawEachCase(t *testing.T, isPlain bool) string {
 			text = style.Plain(text)
 		}
 
+		text = withoutPayload(text)
+
 		drawn.WriteString("=== ")
 		drawn.WriteString(test.name)
 		drawn.WriteString(" ===\n")
@@ -121,6 +161,13 @@ func drawEachCase(t *testing.T, isPlain bool) string {
 	}
 
 	return drawn.String()
+}
+
+func withoutPayload(drawn string) string {
+	drawn = payloadPattern.ReplaceAllString(drawn, ";<payload>\x1b\\")
+	drawn = identifierPattern.ReplaceAllString(drawn, "i=<identifier>")
+
+	return colourPattern.ReplaceAllString(drawn, "38;2;<identifier>m\U0010EEEE")
 }
 
 func TestEverySegmentMatchesTheGolden(t *testing.T) {

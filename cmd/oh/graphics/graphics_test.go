@@ -152,6 +152,24 @@ func TestAPictureWithNowhereToGoIsNotPlaced(t *testing.T) {
 	}
 }
 
+func TestAPlacementNamesItsPictureInItsColour(t *testing.T) {
+	placement := Placement(0x0a0b0c, 2)
+
+	if !strings.Contains(placement, "\x1b[38;2;10;11;12m") {
+		t.Errorf("placed as %q", placement)
+	}
+
+	if strings.Count(placement, placeholder) != 2 {
+		t.Errorf("placed %d cells, want 2", strings.Count(placement, placeholder))
+	}
+}
+
+func TestIdentifiersRunWellBeyondAByte(t *testing.T) {
+	if maximumImageID <= 0xff {
+		t.Errorf("identifiers stop at %d, which a long session would wrap", maximumImageID)
+	}
+}
+
 func TestSomethingThatIsNotATerminalDrawsNoPictures(t *testing.T) {
 	reader, writer, err := os.Pipe()
 	if err != nil {

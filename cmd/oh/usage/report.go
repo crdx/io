@@ -112,19 +112,35 @@ func (self Limit) ResetTime() (time.Time, bool) {
 }
 
 func (self Snapshot) FreshnessAt(age time.Duration) string {
-	freshWithin := time.Duration(self.FreshWithinSeconds) * time.Second
-	staleAfter := time.Duration(self.StaleAfterSeconds) * time.Second
+	return FreshnessWithin(
+		age,
+		time.Duration(self.FreshWithinSeconds)*time.Second,
+		time.Duration(self.StaleAfterSeconds)*time.Second,
+		self.IsSelfRefreshing,
+	)
+}
 
+func FreshnessWithin(
+	age time.Duration, freshWithin time.Duration, staleAfter time.Duration, isSelfRefreshing bool,
+) string {
 	switch {
 	case freshWithin <= 0 || age <= freshWithin:
 		return FreshnessFresh
 	case age <= staleAfter:
 		return FreshnessDue
-	case self.IsSelfRefreshing:
+	case isSelfRefreshing:
 		return FreshnessStale
 	default:
 		return FreshnessWaiting
 	}
+}
+
+func FreshWithin(refreshAfter time.Duration) time.Duration {
+	return refreshAfter + freshBuffer
+}
+
+func StaleAfter(refreshAfter time.Duration) time.Duration {
+	return staleFactor * refreshAfter
 }
 
 func (self Limit) StateAt(now time.Time) string {
@@ -281,10 +297,10 @@ func limitID(window agent.UsageWindow) string {
 
 func shortLabel(window agent.UsageWindow) string {
 	if window.Scope == "" {
-		return DurationLabel(window.Duration)
+		return ShortWindowLabel(window.Duration)
 	}
 
-	return ScopeLabel(window.Scope) + " " + DurationLabel(window.Duration)
+	return ScopeLabel(window.Scope) + " " + ShortWindowLabel(window.Duration)
 }
 
 func isUnspentScope(window agent.UsageWindow) bool {

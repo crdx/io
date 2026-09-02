@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/internal/util"
 )
 
 const (
@@ -17,7 +18,7 @@ const (
 	trackMark   = "░"
 	tickMark    = "┃"
 	freshMark   = "●"
-	waitingMark = "◷"
+	waitingMark = "⧗"
 	silentMark  = "○"
 	failureMark = "✖"
 	aheadMark   = "▲"
@@ -29,7 +30,7 @@ const (
 	limitedLabel = "limited"
 )
 
-func Render(report Report, now time.Time, drawing *Graphics) string {
+func Render(report Report, now time.Time, gauges *Gauges) string {
 	sections := make([]string, 0, len(report.Providers))
 
 	labelWidth := 0
@@ -44,7 +45,7 @@ func Render(report Report, now time.Time, drawing *Graphics) string {
 			continue
 		}
 
-		sections = append(sections, renderProvider(provider, now, labelWidth, drawing))
+		sections = append(sections, renderProvider(provider, now, labelWidth, gauges))
 	}
 
 	if len(sections) == 0 {
@@ -54,7 +55,7 @@ func Render(report Report, now time.Time, drawing *Graphics) string {
 	return strings.Join(sections, "\n\n") + "\n"
 }
 
-func renderProvider(provider Snapshot, now time.Time, labelWidth int, drawing *Graphics) string {
+func renderProvider(provider Snapshot, now time.Time, labelWidth int, gauges *Gauges) string {
 	lines := []string{renderHeader(provider, now)}
 
 	for _, limit := range provider.Limits {
@@ -62,8 +63,8 @@ func renderProvider(provider Snapshot, now time.Time, labelWidth int, drawing *G
 
 		parts := []string{
 			style.Normal(pad(limit.Label, labelWidth)),
-			paceStyle(pace)(fmt.Sprintf("%3d%%", limit.UsedPercent)),
-			renderGauge(limit, pace, gaugeWidth, drawing),
+			PaceStyle(pace)(fmt.Sprintf("%3d%%", limit.UsedPercent)),
+			gauges.Draw(limit.UsedPercent, limit.ExpectedPercent, pace, gaugeWidth),
 		}
 
 		reset := renderReset(limit, now)
@@ -72,10 +73,10 @@ func renderProvider(provider Snapshot, now time.Time, labelWidth int, drawing *G
 		case limit.StateAt(now) == StateStale:
 			parts = append(parts, pad("", paceWidth), reset)
 		case reset != "":
-			parts = append(parts, paceStyle(pace)(pad(paceText(limit), paceWidth)), reset)
+			parts = append(parts, PaceStyle(pace)(pad(paceText(limit), paceWidth)), reset)
 		default:
 			if text := paceText(limit); text != "" {
-				parts = append(parts, paceStyle(pace)(text))
+				parts = append(parts, PaceStyle(pace)(text))
 			}
 		}
 
@@ -106,7 +107,7 @@ func renderHeader(provider Snapshot, now time.Time) string {
 		return appearance(mark) + " " + name
 	}
 
-	return appearance(mark) + " " + name + " " + countdown(age)
+	return appearance(mark) + " " + name + " " + style.Normal(util.CoarseDuration(age))
 }
 
 func ageOf(provider Snapshot, now time.Time) (time.Duration, bool) {
@@ -119,7 +120,11 @@ func ageOf(provider Snapshot, now time.Time) (time.Duration, bool) {
 }
 
 func freshness(age time.Duration, provider Snapshot) (string, style.Style, bool) {
-	switch provider.FreshnessAt(age) {
+	return FreshnessMark(provider.FreshnessAt(age))
+}
+
+func FreshnessMark(freshness string) (string, style.Style, bool) {
+	switch freshness {
 	case FreshnessDue:
 		return freshMark, style.Change, true
 	case FreshnessStale:
@@ -131,18 +136,12 @@ func freshness(age time.Duration, provider Snapshot) (string, style.Style, bool)
 	}
 }
 
-func renderGauge(limit Limit, pace Pace, cells int, drawing *Graphics) string {
-	if drawing != nil {
-		if placement, isPlaced := gaugePlacement(limit, pace, cells, *drawing); isPlaced {
-			return placement
-		}
-	}
-
-	fillCells := limit.UsedPercent * cells / percentCeiling
+func blockGauge(usedPercent int, expectedPercent *int, pace Pace, cells int) string {
+	fillCells := usedPercent * cells / percentCeiling
 
 	tickColumn := -1
-	if limit.ExpectedPercent != nil {
-		tickColumn = min(cells-1, *limit.ExpectedPercent*cells/percentCeiling)
+	if expectedPercent != nil {
+		tickColumn = min(cells-1, *expectedPercent*cells/percentCeiling)
 	}
 
 	var gauge strings.Builder
@@ -157,7 +156,7 @@ func renderGauge(limit Limit, pace Pace, cells int, drawing *Graphics) string {
 		case column == tickColumn:
 			mark = tickMark
 		case column < fillCells:
-			mark, cellStyle = fillMark, paceStyle(pace)
+			mark, cellStyle = fillMark, PaceStyle(pace)
 		}
 
 		if run.Len() > 0 && !sameStyle(cellStyle, runStyle) {
@@ -240,7 +239,7 @@ func paceOf(limit Limit) Pace {
 	}
 }
 
-func paceStyle(pace Pace) style.Style {
+func PaceStyle(pace Pace) style.Style {
 	switch pace {
 	case PaceAhead:
 		return style.Change

@@ -21,7 +21,7 @@ var updateGoldens = flag.Bool("update", false, "write what was drawn back to the
 var (
 	payloadPattern    = regexp.MustCompile(`;[A-Za-z0-9+/=]+\x1b\\`)
 	identifierPattern = regexp.MustCompile(`i=\d+`)
-	colourPattern     = regexp.MustCompile(`38;5;\d+m`)
+	colourPattern     = regexp.MustCompile(`38;2;\d+;\d+;\d+m\x{10EEEE}`)
 )
 
 type drawnCase struct {
@@ -208,7 +208,11 @@ func TestEveryDrawnGaugeMatchesTheGolden(t *testing.T) {
 			cells: gaugeWidth / 2,
 		},
 	} {
-		placement, isPlaced := gaugePlacement(test.limit, test.pace, test.cells, drawing)
+		gauges := FixedGauges(drawing)
+
+		placement, isPlaced := gauges.place(
+			test.limit.UsedPercent, test.limit.ExpectedPercent, test.pace, test.cells, drawing,
+		)
 		if !isPlaced {
 			t.Fatalf("%s was not placed", test.name)
 		}
@@ -218,7 +222,9 @@ func TestEveryDrawnGaugeMatchesTheGolden(t *testing.T) {
 		drawn.WriteString(" ===\n")
 		drawn.WriteString(withoutPayload(placement))
 		drawn.WriteString("\n")
-		drawn.WriteString(describePicture(gaugePicture(test.limit, test.pace, test.cells, drawing)))
+		drawn.WriteString(describePicture(gaugePicture(
+			test.limit.UsedPercent, test.limit.ExpectedPercent, test.pace, test.cells, drawing,
+		)))
 	}
 
 	checkGolden(t, "gauges.txt", drawn.String())
@@ -319,7 +325,7 @@ func withoutPayload(placement string) string {
 	placement = payloadPattern.ReplaceAllString(placement, ";<payload>\x1b\\")
 	placement = identifierPattern.ReplaceAllString(placement, "i=<identifier>")
 
-	return colourPattern.ReplaceAllString(placement, "38;5;<identifier>m")
+	return colourPattern.ReplaceAllString(placement, "38;2;<identifier>m\U0010EEEE")
 }
 
 func checkGolden(t *testing.T, name string, drawn string) {

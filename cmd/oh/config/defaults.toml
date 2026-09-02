@@ -35,9 +35,11 @@ left = [
     { segment = "activity-spinner", idle = "·✦·", frames = ["✦··", "·✦·", "··✦", "··✦", "·✦·", "✦··"], rate = "125ms" },
     { segment = "path-grants", type = "base" },
 ]
-center = []
+center = [
+    { segment = "active-model" },
+    { segment = "context-usage" },
+]
 right = [
-    { segment = "session-name", emoji = true },
     { segment = "scroll-overflow", direction = "up" }
 ]
 
@@ -47,10 +49,9 @@ left = [
     { segment = "workspace-dir", type = "base" },
 ]
 center = [
-    { segment = "active-model" },
-    { segment = "context-usage" },
+    { segment = "subscription-usage" },
 ]
 right = [
-    { segment = "subscription-usage" },
+    { segment = "session-name", emoji = true },
     { segment = "scroll-overflow", direction = "down" }
 ]

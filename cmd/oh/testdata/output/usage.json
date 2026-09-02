@@ -32,7 +32,7 @@
                 {
                     "id": "7d",
                     "label": "Week",
-                    "short_label": "7d",
+                    "short_label": "wk",
                     "window_seconds": 604800,
                     "used_percent": 64,
                     "expected_percent": 64,

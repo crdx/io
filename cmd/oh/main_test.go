@@ -6855,7 +6855,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"subscription-usage / not applicable": goldenSegmentPass(
 			t,
-			subUsage.New(nil, "", "", func() time.Time { return at }),
+			subUsage.New(subUsage.Settings{Now: func() time.Time { return at }}),
 			"",
 			segment.Context{},
 		),
@@ -10271,7 +10271,12 @@ func goldenUsagePass(
 	reporter := &scriptedUsageReporter{report: report}
 	readClock := func() time.Time { return time.Unix(0, now.Load()).UTC() }
 
-	built, err := subUsage.New(reporter, "", modelName, readClock)(goldenSegmentOptions(""))
+	built, err := subUsage.New(subUsage.Settings{
+		Reporter:         reporter,
+		ModelName:        modelName,
+		IsSelfRefreshing: true,
+		Now:              readClock,
+	})(goldenSegmentOptions(""))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -10304,7 +10309,13 @@ func goldenUsageFromCache(
 
 	silent := &scriptedUsageReporter{}
 
-	built, err := subUsage.New(silent, cachePath, modelName, readClock)(goldenSegmentOptions(""))
+	built, err := subUsage.New(subUsage.Settings{
+		Reporter:         silent,
+		CachePath:        cachePath,
+		ModelName:        modelName,
+		IsSelfRefreshing: true,
+		Now:              readClock,
+	})(goldenSegmentOptions(""))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -10615,7 +10626,13 @@ func TestTheStartupUsageProbeLeavesNoSessionBehind(t *testing.T) {
 	client.ObserveHTTP(log.Observer())
 
 	cachePath := filepath.Join(t.TempDir(), "usage", "opencode-go.json")
-	built, err := subUsage.New(client, cachePath, "model", time.Now)(goldenSegmentOptions(""))
+	built, err := subUsage.New(subUsage.Settings{
+		Reporter:         client,
+		CachePath:        cachePath,
+		ModelName:        "model",
+		IsSelfRefreshing: true,
+		Now:              time.Now,
+	})(goldenSegmentOptions(""))
 	if err != nil {
 		t.Fatal(err)
 	}

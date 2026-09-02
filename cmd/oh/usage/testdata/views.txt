@@ -26,13 +26,13 @@ Session  37% █████░░░░░░░░░░░
 ● OpenAI
 Session  99% ███████████████┃       stale
 === a snapshot past its refresh ===
-● OpenAI 10m00s
+● OpenAI 10m
 Session  20% ███░░░░░░┃░░░░░░ ▼ 40  1h50m
 === a snapshot long past its refresh ===
-● Anthropic 45m00s
+● Anthropic 45m
 Session  20% ███░░░░░░┃░░░░░░ ▼ 40  1h15m
 === a provider waiting on a turn of its own ===
-◷ OpenAI 45m00s
+⧗ OpenAI 45m
 Session  20% ███░░░░░░┃░░░░░░ ▼ 40  1h15m
 === nothing to report at all ===
 no usage to report

@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/spinner"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/usage"
+	"crdx.org/io/internal/util"
 )
 
 var _ segment.Refresher = &state{}
@@ -24,10 +25,21 @@ const (
 	firstFailureWait = time.Minute
 	firstEmptyWait   = redrawInterval
 	backoffFactor    = 2
+	barCells         = 8
 	scopeMark        = "⚡"
 	limitedMark      = "✖"
+	staleLabel       = "stale"
 	failureLabel     = "failed"
 )
+
+type Settings struct {
+	Reporter         agent.UsageReporter
+	CachePath        string
+	ModelName        string
+	IsSelfRefreshing bool
+	Gauges           *usage.Gauges
+	Now              func() time.Time
+}
 
 type snapshot struct {
 	windows   []agent.UsageWindow
@@ -46,10 +58,12 @@ const (
 )
 
 type state struct {
-	reporter  agent.UsageReporter
-	modelName string
-	rate      time.Duration
-	now       func() time.Time
+	reporter         agent.UsageReporter
+	modelName        string
+	rate             time.Duration
+	isSelfRefreshing bool
+	gauges           *usage.Gauges
+	now              func() time.Time
 
 	mutex             sync.Mutex
 	windows           []agent.UsageWindow
@@ -63,7 +77,7 @@ type state struct {
 	shouldRedraw      bool
 }
 
-func New(reporter agent.UsageReporter, cachePath string, modelName string, now func() time.Time) segment.Factory {
+func New(settings Settings) segment.Factory {
 	return func(options segment.Options) (segment.Segment, error) {
 		var args struct {
 			Rate time.Duration `toml:"rate"`
@@ -81,14 +95,16 @@ func New(reporter agent.UsageReporter, cachePath string, modelName string, now f
 			args.Rate = defaultRate
 		}
 
-		sharedUsage := usage.Shared(reporter, cachePath, args.Rate, now)
+		sharedUsage := usage.Shared(settings.Reporter, settings.CachePath, args.Rate, settings.Now)
 
 		self := &state{
-			reporter:  sharedUsage,
-			modelName: strings.ToLower(modelName),
-			rate:      args.Rate,
-			now:       now,
-			status:    usagePending,
+			reporter:         sharedUsage,
+			modelName:        strings.ToLower(settings.ModelName),
+			rate:             args.Rate,
+			isSelfRefreshing: settings.IsSelfRefreshing,
+			gauges:           settings.Gauges,
+			now:              settings.Now,
+			status:           usagePending,
 		}
 
 		self.startFromSnapshot(sharedUsage)
@@ -219,7 +235,7 @@ func (self *state) draw(current snapshot) string {
 			continue
 		}
 
-		text := drawWindow(window, current.fetchedAt, self.now())
+		text := self.drawWindow(window, current.fetchedAt, self.now())
 
 		if window.Scope == "" {
 			parts = append(parts, text)
@@ -233,23 +249,41 @@ func (self *state) draw(current snapshot) string {
 		parts = append(parts, scopedParts...)
 	}
 
-	usage := strings.Join(parts, " ")
+	windows := strings.Join(parts, " ")
+
+	if windows != "" && !current.fetchedAt.IsZero() {
+		windows = self.drawFreshness(current.fetchedAt) + " " + windows
+	}
 
 	switch current.status {
 	case usageFetching:
-		return appendUsageStatus(usage, "usage", style.Spinner(self.spinnerFrame()))
+		return appendUsageStatus(windows, "usage", style.Spinner(self.spinnerFrame()))
 	case usagePending:
-		return appendUsageStatus(usage, "usage", style.Subtle("pending"))
+		return appendUsageStatus(windows, "usage", style.Subtle("pending"))
 	case usageRetrying:
-		return appendUsageStatus(usage, "usage", style.Failure(current.failure))
+		return appendUsageStatus(windows, "usage", style.Failure(current.failure))
 	case usageReady:
 	}
 
-	if usage == "" {
+	if windows == "" {
 		return style.Dim("usage unavailable")
 	}
 
-	return usage
+	return windows
+}
+
+func (self *state) drawFreshness(fetchedAt time.Time) string {
+	age := max(0, self.now().Sub(fetchedAt))
+
+	mark, appearance, isAgeWorthSaying := usage.FreshnessMark(usage.FreshnessWithin(
+		age, usage.FreshWithin(self.rate), usage.StaleAfter(self.rate), self.isSelfRefreshing,
+	))
+
+	if !isAgeWorthSaying {
+		return appearance(mark)
+	}
+
+	return style.Normal(util.CoarseDuration(age)) + " " + appearance(mark)
 }
 
 func (self *state) governsThisSession(window agent.UsageWindow) bool {
@@ -271,34 +305,39 @@ func appendUsageStatus(usage string, emptyLabel string, status string) string {
 	return usage + " " + status
 }
 
-func drawWindow(window agent.UsageWindow, fetchedAt time.Time, now time.Time) string {
-	label := usage.DurationLabel(window.Duration)
-	actual := int(window.Percent + 0.5)
-	text := fmt.Sprintf("%s %d%%", label, actual)
+func (self *state) drawWindow(
+	window agent.UsageWindow, fetchedAt time.Time, now time.Time,
+) string {
+	label := usage.ShortWindowLabel(window.Duration)
+	usedPercent := int(window.Percent + 0.5)
 
 	if window.IsLimited {
-		return style.Failure(text + " " + limitedMark)
+		return style.Failure(fmt.Sprintf("%s %d%%", label, usedPercent)) +
+			" " +
+			self.gauges.Draw(usedPercent, nil, usage.PaceCritical, barCells) +
+			" " +
+			style.Failure(limitedMark)
 	}
 
-	if window.ResetsAt.IsZero() {
-		return style.Quantity(text)
+	if !window.ResetsAt.IsZero() && !window.ResetsAt.After(now) {
+		return style.Dim(label + " " + staleLabel)
 	}
 
-	if !window.ResetsAt.After(now) {
-		return style.Dim(label + " stale")
+	var expectedPercent *int
+
+	pace := usage.PaceEven
+
+	if !window.ResetsAt.IsZero() {
+		pacePercent := usage.ExpectedPercent(window, fetchedAt)
+		expectedPercent = &pacePercent
+		pace = usage.ClassifyPace(usedPercent, pacePercent)
 	}
 
-	expectedPercentage := usage.ExpectedPercent(window, fetchedAt)
-
-	switch usage.ClassifyPace(actual, expectedPercentage) {
-	case usage.PaceAhead:
-		return style.Change(text + " ▲")
-	case usage.PaceCritical:
-		return style.Failure(text + " ▲")
-	case usage.PaceEven:
-	}
-
-	return style.Quantity(text)
+	return style.Dim(label) +
+		" " +
+		usage.PaceStyle(pace)(fmt.Sprintf("%d%%", usedPercent)) +
+		" " +
+		self.gauges.Draw(usedPercent, expectedPercent, pace, barCells)
 }
 
 func failureReason(err error) string {

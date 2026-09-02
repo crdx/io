@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"crdx.org/io/cmd/oh/backend"
-	"crdx.org/io/cmd/oh/graphics"
 	"crdx.org/io/cmd/oh/location"
 )
 
@@ -27,12 +26,9 @@ func Show(ctx context.Context, output io.Writer, options Options) error {
 		return err
 	}
 
-	var drawing *Graphics
-	if cellWidth, cellHeight, hasGraphics := graphics.Detect(os.Stdin, os.Stdout); hasGraphics {
-		drawing = &Graphics{CellWidth: cellWidth, CellHeight: cellHeight}
-	}
-
-	_, err := io.WriteString(output, Render(report, time.Now(), drawing))
+	_, err := io.WriteString(
+		output, Render(report, time.Now(), TerminalGauges(os.Stdin, os.Stdout)),
+	)
 
 	return err
 }

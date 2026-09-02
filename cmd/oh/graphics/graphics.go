@@ -5,6 +5,7 @@ import (
 	"compress/zlib"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"image"
 	"io"
 	"math"
@@ -36,7 +37,7 @@ const (
 	placeholder    = "\U0010EEEE"
 	originMark     = "\u0305"
 	chunkSize      = 4096
-	maximumImageID = 255
+	maximumImageID = 1<<24 - 1
 
 	defaultCellWidth  = 10
 	defaultCellHeight = 20
@@ -82,13 +83,22 @@ func CellSize(output *os.File) (int, int) {
 }
 
 func Place(picture *image.RGBA, cells int) (string, bool) {
-	if cells <= 0 || picture == nil || picture.Bounds().Empty() {
+	imageID, command, isTransmitted := Transmit(picture, cells)
+	if !isTransmitted {
 		return "", false
+	}
+
+	return command + Placement(imageID, cells), true
+}
+
+func Transmit(picture *image.RGBA, cells int) (int, string, bool) {
+	if cells <= 0 || picture == nil || picture.Bounds().Empty() {
+		return 0, "", false
 	}
 
 	payload, err := encode(picture)
 	if err != nil {
-		return "", false
+		return 0, "", false
 	}
 
 	imageID := nextImageID()
@@ -118,14 +128,24 @@ func Place(picture *image.RGBA, cells int) (string, bool) {
 		placement.WriteString(closeCommand)
 	}
 
-	placement.WriteString("\x1b[38;5;")
-	placement.WriteString(strconv.Itoa(imageID))
-	placement.WriteString("m")
+	return imageID, placement.String(), true
+}
+
+func Placement(imageID int, cells int) string {
+	if cells <= 0 {
+		return ""
+	}
+
+	var placement strings.Builder
+
+	fmt.Fprintf(
+		&placement, "\x1b[38;2;%d;%d;%dm", imageID>>16&0xff, imageID>>8&0xff, imageID&0xff,
+	)
 	placement.WriteString(placeholder + originMark + originMark)
 	placement.WriteString(strings.Repeat(placeholder, cells-1))
 	placement.WriteString("\x1b[39m")
 
-	return placement.String(), true
+	return placement.String()
 }
 
 func nextImageID() int {

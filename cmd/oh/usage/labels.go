@@ -19,12 +19,26 @@ var windowNames = map[time.Duration]string{
 	monthlyLength: "Month",
 }
 
+var shortWindowNames = map[time.Duration]string{
+	sessionLength: "5h",
+	weeklyLength:  "wk",
+	monthlyLength: "mo",
+}
+
 func WindowLabel(window agent.UsageWindow) string {
 	if window.Scope != "" {
 		return ScopeLabel(window.Scope) + " " + windowName(window.Duration)
 	}
 
 	return windowName(window.Duration)
+}
+
+func ShortWindowLabel(duration time.Duration) string {
+	if name, isNamed := shortWindowNames[duration]; isNamed {
+		return name
+	}
+
+	return DurationLabel(duration)
 }
 
 func windowName(duration time.Duration) string {
