@@ -128,8 +128,77 @@ func TestCompleteJournalUsageAvoidsTheWireTranscript(t *testing.T) {
 	}
 }
 
+func TestUsageMatchesTheGolden(t *testing.T) {
+	assertGolden(t, "usage.txt", strings.ReplaceAll(usage, "$0", "ohctl"))
+}
+
 func TestPromptCacheAnalysisMatchesTheGolden(t *testing.T) {
-	analysis := Analysis{PromptCache: PromptCacheAnalysis{
+	var output bytes.Buffer
+	if err := writeText(goldenAnalysis(), &output); err != nil {
+		t.Fatal(err)
+	}
+	assertGolden(t, "prompt-cache.txt", output.String())
+}
+
+func TestEveryPromptCacheReportWithoutATotalMatchesTheGolden(t *testing.T) {
+	reports := []struct {
+		name     string
+		analysis Analysis
+	}{
+		{
+			name:     "nothing was recorded",
+			analysis: Analysis{},
+		},
+		{
+			name: "one provider, which is its own total",
+			analysis: Analysis{PromptCache: PromptCacheAnalysis{
+				Providers: []CacheStatistics{{
+					Provider:        "codex",
+					Sessions:        1,
+					Requests:        2,
+					Hits:            1,
+					Misses:          1,
+					InputTokens:     12000,
+					CachedTokens:    8000,
+					WrittenTokens:   1000,
+					PeakInputTokens: 9000,
+				}},
+				Total: CacheStatistics{
+					Sessions:        1,
+					Requests:        2,
+					Hits:            1,
+					Misses:          1,
+					InputTokens:     12000,
+					CachedTokens:    8000,
+					WrittenTokens:   1000,
+					PeakInputTokens: 9000,
+				},
+			}},
+		},
+	}
+
+	var drawn strings.Builder
+	for _, report := range reports {
+		fmt.Fprintf(&drawn, "=== %s ===\n", report.name)
+		if err := writeText(report.analysis, &drawn); err != nil {
+			t.Fatal(err)
+		}
+		fmt.Fprintln(&drawn)
+	}
+
+	assertGolden(t, "prompt-cache-sparse.txt", drawn.String())
+}
+
+func TestTheJSONAnalysisMatchesTheGolden(t *testing.T) {
+	var output bytes.Buffer
+	if err := writeJSON(goldenAnalysis(), &output); err != nil {
+		t.Fatal(err)
+	}
+	assertGolden(t, "analysis.json", output.String())
+}
+
+func goldenAnalysis() Analysis {
+	return Analysis{PromptCache: PromptCacheAnalysis{
 		Providers: []CacheStatistics{
 			{
 				Provider:        "anthropic",
@@ -165,27 +234,6 @@ func TestPromptCacheAnalysisMatchesTheGolden(t *testing.T) {
 			PeakInputTokens: 100000,
 		},
 	}}
-
-	var output bytes.Buffer
-	if err := writeText(analysis, &output); err != nil {
-		t.Fatal(err)
-	}
-	assertGolden(t, "prompt-cache.txt", output.String())
-}
-
-func TestJSONKeepsAnalysisSectionsExpandable(t *testing.T) {
-	analysis := Analysis{PromptCache: PromptCacheAnalysis{
-		Providers: []CacheStatistics{{Provider: "codex", Requests: 2, Hits: 1, Misses: 1}},
-		Total:     CacheStatistics{Requests: 2, Hits: 1, Misses: 1},
-	}}
-
-	var output bytes.Buffer
-	if err := writeJSON(analysis, &output); err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(output.String(), `"promptCache"`) || !strings.Contains(output.String(), `"providers"`) {
-		t.Errorf("unexpected JSON: %s", output.String())
-	}
 }
 
 func writeTranscript(t *testing.T, directory string, name string, content string) {

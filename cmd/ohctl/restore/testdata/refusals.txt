@@ -1,0 +1,6 @@
+=== screen ===
+=== failure ===
+[38;2;204;102;102mabsent-heron: no archived session named "absent-heron"[0m
+[38;2;204;102;102m../elsewhere: invalid session name "../elsewhere"[0m
+=== error ===
+2 of 2 could not be restored

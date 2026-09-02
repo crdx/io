@@ -22,11 +22,38 @@ note: the shell reports that a process was killed by SIGKILL.
 the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
 every process this command started used 1h01m of processor time between them.
 
+=== a processor limit only the shell saw ===
+exit(152):
+/workspace/script: line 3:  41 Cpu time limit exceeded  ./spin
+note: the shell reports that a process was killed by SIGXCPU.
+the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
+every process this command started used 59m58s of processor time between them.
+
+=== a processor limit the sandbox saw itself ===
+exit(-1)
+note: the command was killed by SIGXCPU.
+the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
+every process this command started used 1h00m of processor time between them.
+
 === a kill for writing too large a file ===
 exit(153):
 dd: writing 'big': File size limit exceeded
 note: the shell reports that a process was killed by SIGXFSZ.
 the sandbox lets a command write no more than 1G to a single file.
+
+=== a kill for writing too large a file under a policy that sets no size ===
+exit(153):
+dd: writing 'big': File size limit exceeded
+note: the shell reports that a process was killed by SIGXFSZ.
+
+=== a fault with no limit behind it ===
+exit(-1):
+Segmentation fault
+note: the command was killed by SIGSEGV.
+
+=== a status above 128 that names no signal ===
+exit(200):
+the command chose its own status
 
 === a kill under a policy that sets no processor limit ===
 exit(137):
@@ -59,10 +86,41 @@ note: the shell reports that a process was killed by SIGKILL.
 the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
 every process this command started used 3s of processor time between them.
 
+=== a fork the task limit refused ===
+exit(1):
+/workspace/script: fork: retry: Resource temporarily unavailable
+note: the sandbox stopped this command for using too much.
+the sandbox lets no more than 1024 tasks run at once across everything the command started, counting each thread as one of them.
+
+=== a fork refused under a policy that sets no task limit ===
+exit(1):
+/workspace/script: fork: retry: Resource temporarily unavailable
+note: the sandbox stopped this command for using too much.
+
+=== a thread the task limit refused ===
+exit(2):
+runtime: failed to create new OS thread (have 12 already; errno=11)
+note: the sandbox stopped this command for using too much.
+the sandbox lets no more than 1024 tasks run at once across everything the command started, counting each thread as one of them.
+
+=== a file size limit no signal was reported for ===
+exit(1):
+dd: writing 'big': File size limit exceeded
+note: the sandbox stopped this command for using too much.
+the sandbox lets a command write no more than 1G to a single file.
+
+=== a processor limit no signal was reported for ===
+exit(1):
+/workspace/script: line 3: Cpu time limit exceeded
+note: the sandbox stopped this command for using too much.
+the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
+every process this command started used 59m00s of processor time between them.
+
 === a command that overran ===
 exit(1):
 go: writing cache: open /cache/go-build/x: Too many open files
 note: the sandbox stopped this command for using too much.
+the sandbox lets each process hold no more than 4096 files open at once.
 
 === a refusal with no sandbox to blame it on ===
 exit(1):

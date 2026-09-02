@@ -92,6 +92,7 @@ func goldenListings(now time.Time) []Listing {
 		{
 			Name:         "dewy-vole",
 			Status:       endedStatus,
+			IsFast:       true,
 			Title:        strings.Repeat("a-title-far-wider-than-its-column ", 3),
 			WorkspaceDir: "/home/agent/proj/io",
 			ScratchDir:   "/state/farm/dewy-vole",

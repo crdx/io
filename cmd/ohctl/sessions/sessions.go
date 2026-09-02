@@ -12,6 +12,7 @@ import (
 	"crdx.org/duckopt/v2"
 
 	"crdx.org/io/cmd/oh/location"
+	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/sessions/picker"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
@@ -64,6 +65,7 @@ type Listing struct {
 	Status       string    `json:"status"`
 	IsRunning    bool      `json:"isRunning"`
 	IsArchived   bool      `json:"isArchived"`
+	IsFast       bool      `json:"isFast"`
 	Title        string    `json:"title"`
 	WorkspaceDir string    `json:"workspaceDir"`
 	ScratchDir   string    `json:"scratchDir"`
@@ -177,6 +179,7 @@ func describe(directory string, storedSessions []*picker.Session, isRunningOnly 
 			Status:       status(storedSession),
 			IsRunning:    storedSession.IsRunning,
 			IsArchived:   storedSession.IsArchived,
+			IsFast:       storedSession.IsFast,
 			Title:        oneLine(storedSession.Title),
 			WorkspaceDir: storedSession.WorkspaceDir,
 			ScratchDir:   location.GetTmpDir(storedSession.Name),
@@ -242,7 +245,7 @@ func writeTable(listings []Listing, writer io.Writer) error {
 				strconv.Itoa(listing.Messages),
 				util.CoarseDuration(listing.TouchedAt.Sub(listing.StartedAt)),
 				util.Ago(listing.TouchedAt),
-				strutil.OrDash(listing.Model),
+				modelName(listing),
 				strutil.OrDash(listing.Effort),
 				listing.WorkspaceDir,
 			},
@@ -266,6 +269,15 @@ func writeTable(listings []Listing, writer io.Writer) error {
 	}
 
 	return nil
+}
+
+func modelName(listing Listing) string {
+	name := strutil.OrDash(listing.Model)
+	if listing.IsFast {
+		return fastMode.GetMark(true) + " " + name
+	}
+
+	return name
 }
 
 func columnWidths(rows []tableRow) []int {

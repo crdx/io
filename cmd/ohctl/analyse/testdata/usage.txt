@@ -1,0 +1,10 @@
+ohctl analyse — analyse stored sessions
+
+Usage:
+    ohctl analyse [options] [<session>...]
+
+Options:
+    -j, --json    Write the analysis as JSON
+    -h, --help    Show this help
+
+Sessions are named on the command line, or every stored session is analysed when none is.

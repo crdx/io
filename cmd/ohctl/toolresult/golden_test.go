@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -22,7 +23,9 @@ import (
 	"crdx.org/io/toolbox/write"
 )
 
-const renderGoldenPath = "testdata/render.ansi"
+func TestUsageMatchesTheGolden(t *testing.T) {
+	assertGolden(t, "usage.txt", strings.ReplaceAll(usage, "$0", "ohctl"))
+}
 
 func TestToolResultsRenderForTheUser(t *testing.T) {
 	cases := []struct {
@@ -155,7 +158,7 @@ func TestToolResultsRenderForTheUser(t *testing.T) {
 	for _, test := range cases {
 		fmt.Fprintf(&drawn, "=== %s ===\n%s\n\n", test.name, strutil.VisibleEscapes(render(test.exchange, 60)))
 	}
-	assertRenderGolden(t, drawn.String())
+	assertGolden(t, "render.ansi", drawn.String())
 }
 
 func resultExchange(name string, arguments any, status agent.Status, text string) internaltoolresult.Exchange {
@@ -169,24 +172,26 @@ func resultExchange(name string, arguments any, status agent.Status, text string
 	}
 }
 
-func assertRenderGolden(t *testing.T, drawn string) {
+func assertGolden(t *testing.T, name string, drawn string) {
 	t.Helper()
+
+	goldenPath := filepath.Join("testdata", name)
 
 	if *updateGoldens {
 		if err := os.MkdirAll("testdata", 0o700); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(renderGoldenPath, []byte(drawn), 0o600); err != nil {
+		if err := os.WriteFile(goldenPath, []byte(drawn), 0o600); err != nil {
 			t.Fatal(err)
 		}
 		return
 	}
 
-	want, err := os.ReadFile(renderGoldenPath)
+	want, err := os.ReadFile(goldenPath) //nolint:gosec // fixed testdata path
 	if err != nil {
 		t.Fatal(err)
 	}
 	if drawn != string(want) {
-		t.Errorf("rendering differs from %s\n--- got ---\n%s--- want ---\n%s", renderGoldenPath, drawn, want)
+		t.Errorf("output differs from %s\n--- got ---\n%s--- want ---\n%s", goldenPath, drawn, want)
 	}
 }

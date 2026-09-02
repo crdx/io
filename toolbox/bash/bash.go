@@ -242,14 +242,16 @@ func report(result sandbox.Result, policy sandbox.Policy) string {
 		parts = append(parts, output)
 	}
 
+	overrunNote := overran(result, policy)
+
 	switch killedNote := killed(result, policy); {
 	case killedNote != "":
 		parts = append(parts, killedNote)
 	case policy.Yolo:
 	case matches(output, denials):
 		parts = append(parts, note(policy))
-	case matches(output, overruns):
-		parts = append(parts, "note: the sandbox stopped this command for using too much.")
+	case overrunNote != "":
+		parts = append(parts, overrunNote)
 	}
 
 	return strings.Join(parts, "\n")
@@ -288,15 +290,31 @@ func killed(result sandbox.Result, policy sandbox.Policy) string {
 	case syscall.SIGKILL, syscall.SIGXCPU:
 		lines = append(lines, processorLimit(result, policy)...)
 	case syscall.SIGXFSZ:
-		if policy.FileSize > 0 {
-			lines = append(lines, fmt.Sprintf(
-				"the sandbox lets a command write no more than %s to a single file.",
-				util.FormatBytes(policy.FileSize, 3),
-			))
-		}
+		lines = append(lines, fileSizeLimit(policy)...)
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+func overran(result sandbox.Result, policy sandbox.Policy) string {
+	var lines []string
+
+	switch {
+	case matches(result.Output, fileSizeOverruns):
+		lines = fileSizeLimit(policy)
+	case matches(result.Output, processorOverruns):
+		lines = processorLimit(result, policy)
+	case matches(result.Output, openFileOverruns):
+		lines = openFileLimit(policy)
+	case matches(result.Output, processOverruns):
+		lines = processLimit(policy)
+	default:
+		return ""
+	}
+
+	opening := "note: the sandbox stopped this command for using too much."
+
+	return strings.Join(append([]string{opening}, lines...), "\n")
 }
 
 func processorLimit(result sandbox.Result, policy sandbox.Policy) []string {
@@ -317,16 +335,64 @@ func processorLimit(result sandbox.Result, policy sandbox.Policy) []string {
 	}
 }
 
+func fileSizeLimit(policy sandbox.Policy) []string {
+	if policy.FileSize <= 0 {
+		return nil
+	}
+
+	return []string{fmt.Sprintf(
+		"the sandbox lets a command write no more than %s to a single file.",
+		util.FormatBytes(policy.FileSize, 3),
+	)}
+}
+
+func openFileLimit(policy sandbox.Policy) []string {
+	if policy.OpenFiles <= 0 {
+		return nil
+	}
+
+	return []string{fmt.Sprintf(
+		"the sandbox lets each process hold no more than %d files open at once.",
+		policy.OpenFiles,
+	)}
+}
+
+func processLimit(policy sandbox.Policy) []string {
+	if policy.Processes <= 0 {
+		return nil
+	}
+
+	return []string{fmt.Sprintf(
+		"the sandbox lets no more than %d tasks run at once across everything the command started,"+
+			" counting each thread as one of them.",
+		policy.Processes,
+	)}
+}
+
 var denials = []string{
 	"Permission denied",
 	"Operation not permitted",
 	"Address family not supported",
 }
 
-var overruns = []string{
+var fileSizeOverruns = []string{
 	"File size limit exceeded",
+}
+
+var processorOverruns = []string{
 	"Cpu time limit exceeded",
+}
+
+var openFileOverruns = []string{
 	"Too many open files",
+}
+
+var processOverruns = []string{
+	"fork: retry",
+	"fork: Resource temporarily unavailable",
+	"Cannot fork",
+	"pthread_create failed",
+	"failed to create new OS thread",
 }
 
 func matches(output string, wordings []string) bool {

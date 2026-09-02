@@ -43,11 +43,13 @@ func compareWithGolden(t *testing.T, name string, reported string) {
 
 func goldenPolicy() sandbox.Policy {
 	return sandbox.Policy{
-		Timeout:  5 * time.Minute,
-		CPUTime:  time.Hour,
-		FileSize: 1024 << 20,
-		Read:     []string{"/etc/ssl/certs", "/nix/store"},
-		Write:    []string{"/workspace", "/tmp"},
+		Timeout:   5 * time.Minute,
+		CPUTime:   time.Hour,
+		FileSize:  1024 << 20,
+		OpenFiles: 4096,
+		Processes: 1024,
+		Read:      []string{"/etc/ssl/certs", "/nix/store"},
+		Write:     []string{"/workspace", "/tmp"},
 	}
 }
 
@@ -95,11 +97,51 @@ func TestEveryWholeReportACommandCanEndOnMatchesTheGolden(t *testing.T) {
 			policy: goldenPolicy(),
 		},
 		{
+			name: "a processor limit only the shell saw",
+			result: sandbox.Result{
+				Code:    152,
+				Output:  "/workspace/script: line 3:  41 Cpu time limit exceeded  ./spin",
+				CPUTime: 59*time.Minute + 58*time.Second,
+			},
+			policy: goldenPolicy(),
+		},
+		{
+			name: "a processor limit the sandbox saw itself",
+			result: sandbox.Result{
+				Code:    -1,
+				Signal:  syscall.SIGXCPU,
+				CPUTime: time.Hour,
+			},
+			policy: goldenPolicy(),
+		},
+		{
 			name: "a kill for writing too large a file",
 			result: sandbox.Result{
 				Code:   153,
 				Output: "dd: writing 'big': File size limit exceeded",
 			},
+			policy: goldenPolicy(),
+		},
+		{
+			name: "a kill for writing too large a file under a policy that sets no size",
+			result: sandbox.Result{
+				Code:   153,
+				Output: "dd: writing 'big': File size limit exceeded",
+			},
+			policy: sandbox.Policy{Timeout: time.Minute, Write: []string{"/workspace"}},
+		},
+		{
+			name: "a fault with no limit behind it",
+			result: sandbox.Result{
+				Code:   -1,
+				Signal: syscall.SIGSEGV,
+				Output: "Segmentation fault",
+			},
+			policy: goldenPolicy(),
+		},
+		{
+			name:   "a status above 128 that names no signal",
+			result: sandbox.Result{Code: 200, Output: "the command chose its own status"},
 			policy: goldenPolicy(),
 		},
 		{
@@ -137,6 +179,47 @@ func TestEveryWholeReportACommandCanEndOnMatchesTheGolden(t *testing.T) {
 				Code:    137,
 				Output:  "cp: cannot open 'x': Permission denied",
 				CPUTime: 3 * time.Second,
+			},
+			policy: goldenPolicy(),
+		},
+		{
+			name: "a fork the task limit refused",
+			result: sandbox.Result{
+				Code:   1,
+				Output: "/workspace/script: fork: retry: Resource temporarily unavailable",
+			},
+			policy: goldenPolicy(),
+		},
+		{
+			name: "a fork refused under a policy that sets no task limit",
+			result: sandbox.Result{
+				Code:   1,
+				Output: "/workspace/script: fork: retry: Resource temporarily unavailable",
+			},
+			policy: sandbox.Policy{Timeout: time.Minute, Write: []string{"/workspace"}},
+		},
+		{
+			name: "a thread the task limit refused",
+			result: sandbox.Result{
+				Code:   2,
+				Output: "runtime: failed to create new OS thread (have 12 already; errno=11)",
+			},
+			policy: goldenPolicy(),
+		},
+		{
+			name: "a file size limit no signal was reported for",
+			result: sandbox.Result{
+				Code:   1,
+				Output: "dd: writing 'big': File size limit exceeded",
+			},
+			policy: goldenPolicy(),
+		},
+		{
+			name: "a processor limit no signal was reported for",
+			result: sandbox.Result{
+				Code:    1,
+				Output:  "/workspace/script: line 3: Cpu time limit exceeded",
+				CPUTime: 59 * time.Minute,
 			},
 			policy: goldenPolicy(),
 		},

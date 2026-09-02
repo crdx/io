@@ -1,0 +1,10 @@
+=== nothing was recorded ===
+No cache usage was recorded.
+
+=== one provider, which is its own total ===
+Provider  Sessions  Requests  Hits  Misses  Hit Rate  Input Cached  Tokens Read
+Codex            1         2     1       1     50.0%         66.7%           8K
+
+Provider  Average Input  Peak Input  Total Input  Cache Reads  Cache Writes  Fresh Input
+Codex                6K          9K          12K           8K            1K           3K
+

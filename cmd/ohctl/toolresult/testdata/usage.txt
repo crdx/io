@@ -1,0 +1,8 @@
+ohctl tool-result — show a tool call's output
+
+Usage:
+    ohctl tool-result [--pager] <url>
+
+Options:
+    -p, --pager    Show output in a pager
+    -h, --help     Show this help

@@ -82,6 +82,26 @@ func TestAnArchivedSessionIsUnpackedAndNamedOnTheScreen(t *testing.T) {
 	}
 }
 
+func TestEveryRefusalMatchesTheGolden(t *testing.T) {
+	directory := t.TempDir()
+
+	var screen, failure strings.Builder
+	err := run(
+		directory,
+		[]string{"absent-heron", "../elsewhere"},
+		console.Output{Screen: &screen, Failure: &failure},
+	)
+	if err == nil {
+		t.Fatal("expected the refusals to be counted")
+	}
+
+	assertGolden(t, "refusals.txt", strings.Join([]string{
+		"=== screen ===\n", screen.String(),
+		"=== failure ===\n", failure.String(),
+		"=== error ===\n", err.Error(), "\n",
+	}, ""))
+}
+
 func TestASessionThatWasNeverArchivedIsReportedAndCounted(t *testing.T) {
 	directory := t.TempDir()
 	name := archivedSession(t, directory)
