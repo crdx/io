@@ -122,6 +122,8 @@ func declaredNames(file *ast.File) []*ast.Ident {
 			return typedNode.Tok != token.CONST
 		case *ast.InterfaceType:
 			return false
+		case *ast.TypeSpec:
+			add(typedNode.Name)
 		case *ast.ValueSpec:
 			if !isBooleanType(typedNode.Type) {
 				add(typedNode.Names...)

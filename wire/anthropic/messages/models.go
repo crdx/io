@@ -65,17 +65,17 @@ func generationOf(id string) (generation, bool) {
 	}
 }
 
-type supported struct {
+type effortSupport struct {
 	IsSupported bool `json:"supported"`
 }
 
 type effortCapability struct {
-	IsSupported bool      `json:"supported"`
-	Low         supported `json:"low"`
-	Medium      supported `json:"medium"`
-	High        supported `json:"high"`
-	XHigh       supported `json:"xhigh"`
-	Max         supported `json:"max"`
+	IsSupported bool          `json:"supported"`
+	Low         effortSupport `json:"low"`
+	Medium      effortSupport `json:"medium"`
+	High        effortSupport `json:"high"`
+	XHigh       effortSupport `json:"xhigh"`
+	Max         effortSupport `json:"max"`
 }
 
 func (self effortCapability) levels() []string {

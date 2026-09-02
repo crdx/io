@@ -19,6 +19,13 @@ func TestAnalyse(t *testing.T) {
 		"a compound name": {
 			source: "package example\n\nvar parsedValue value\n",
 		},
+		"an adjective type": {
+			source:   "package example\n\ntype parsed struct{}\n",
+			expected: []string{"example.go:3:6: parsed: say what was parsed, since a name is a noun rather than an adjective"},
+		},
+		"a compound type": {
+			source: "package example\n\ntype parsedValue struct{}\n",
+		},
 		"an explicitly typed boolean variable": {
 			source: "package example\n\nvar stopped bool\n",
 		},
