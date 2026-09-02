@@ -75,15 +75,14 @@ func Render(text string, workspace string) string {
 			continue
 		}
 
-		path := visible.text[match[2]:match[3]]
-		target, exists := resolve(path, workspace)
+		pathAt, target, exists := locate(visible.text[match[2]:match[3]], workspace)
 		if !exists {
 			continue
 		}
 
 		line := submatch(visible.text, match[4], match[5])
 		column := submatch(visible.text, match[6], match[7])
-		begin := visible.starts[match[0]]
+		begin := visible.starts[match[2]+pathAt]
 		end := visible.ends[match[1]]
 		output.WriteString(text[sourceAt:begin])
 		output.WriteString(openPrefix)
@@ -182,6 +181,21 @@ func submatch(text string, begin int, end int) string {
 	}
 
 	return text[begin:end]
+}
+
+func locate(candidate string, workspace string) (int, string, bool) {
+	if target, exists := resolve(candidate, workspace); exists {
+		return 0, target, true
+	}
+
+	assignedAt := strings.LastIndexByte(candidate, '=') + 1
+	if assignedAt > 0 && assignedAt < len(candidate) {
+		if target, exists := resolve(candidate[assignedAt:], workspace); exists {
+			return assignedAt, target, true
+		}
+	}
+
+	return 0, "", false
 }
 
 func resolve(path string, workspace string) (string, bool) {

@@ -125,6 +125,47 @@ func TestMultiDotAndHiddenFilenamesBecomeLinks(t *testing.T) {
 	}
 }
 
+func TestAPathAfterAnAssignmentIsLinkedWithoutItsName(t *testing.T) {
+	workspace := t.TempDir()
+	path := prepareFile(t, workspace, "changes.patch")
+
+	for _, test := range []struct {
+		name string
+		text string
+		lead string
+	}{
+		{name: "variable", text: "PATCH=" + path, lead: "PATCH="},
+		{name: "flag", text: "--output=" + path, lead: "--output="},
+		{name: "relative", text: "PATCH=changes.patch", lead: "PATCH="},
+	} {
+		got := Render(test.text, workspace)
+
+		if address := linkAddress(t, got); address.Path != filepath.ToSlash(path) {
+			t.Errorf("%s: got address %q", test.name, address)
+		}
+		if stripEscapes(got) != test.text {
+			t.Errorf("%s: expected the visible text unchanged, got %q", test.name, stripEscapes(got))
+		}
+		if before, _, _ := strings.Cut(got, openPrefix); before != test.lead {
+			t.Errorf("%s: expected the name outside the link, got %q", test.name, got)
+		}
+	}
+}
+
+func TestAFilenameHoldingAnEqualsSignIsLinkedWhole(t *testing.T) {
+	workspace := t.TempDir()
+	prepareFile(t, workspace, "a=b/c.txt")
+
+	got := Render("read a=b/c.txt", workspace)
+
+	if stripHyperlinks(got) != "read a=b/c.txt" {
+		t.Errorf("expected the visible text unchanged, got %q", stripHyperlinks(got))
+	}
+	if before, _, _ := strings.Cut(got, openPrefix); before != "read " {
+		t.Errorf("expected the whole name linked, got %q", got)
+	}
+}
+
 func TestMissingPathsAndOrdinaryDottedWordsStayPlain(t *testing.T) {
 	text := "missing.go and example.com are not files here"
 
