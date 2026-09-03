@@ -189,8 +189,10 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 	stub.Stderr = &output
 	stub.Env = append(
 		passedEnvironment(policy.Env),
-		envPolicy+"="+string(encodedPolicy),
-		envCommand+"="+command,
+		append(
+			[]string{envPolicy + "=" + string(encodedPolicy), envCommand + "=" + command},
+			unmappedTestEnvironment()...,
+		)...,
 	)
 
 	stub.SysProcAttr = namespaceAttributes()

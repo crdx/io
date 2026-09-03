@@ -27,6 +27,44 @@ fix:
 test:
     go test -cover ./...
 
+# run the sandbox tests without privs
+sandbox *args:
+    #!/bin/bash
+    set -euo pipefail
+    GREEN='\e[32m'
+    YELLOW='\e[33m'
+    NC='\e[0m'
+    if (exec 3>>/proc/self/uid_map) 2>/dev/null; then
+        echo -e "${GREEN}this machine can map a namespace, so the sandbox tests ran for real${NC}"
+        exit 0
+    fi
+    PACKAGES=(./internal/sandbox ./cmd/oh/shell ./toolbox/bash)
+    if [[ $# -gt 0 ]]; then
+        PACKAGES=("$@")
+    fi
+    NEEDS_PRIVILEGE=(
+        TestAPrivateProcessFilesystemContainsOnlySandboxProcesses
+        TestAReadPathInsideAWritePathIsNotWritable
+        TestARepositoryCannotBeClobbered
+        TestAnExactReadGrantInsideAWriteGrantRemainsReadOnly
+        TestAnExecutableBuiltInTmpMayRunWhenGranted
+        TestCommandsMayTalkOverAUnixSocketInTheScratch
+        TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted
+        TestCommandsSharingAScratchShareItsContents
+        TestCommandsWithDifferentScratchesCannotSeeEachOthersContents
+        TestDatagramsStayOnLoopback
+        TestEveryCommandGetsTheOtherNamespacesToo
+        TestLoopbackIsReachable
+        TestTheCommandCannotUndoWhatHoldsAPathBack
+        TestWhatACommandWritesToTmpLandsInTheScratch
+    )
+    SKIP="$(IFS='|'; echo "${NEEDS_PRIVILEGE[*]}")"
+    NOTE="an unmapped namespace holds no privilege, so the ${#NEEDS_PRIVILEGE[@]} tests"
+    NOTE="$NOTE needing a mount, a capability or the loopback are left out"
+    echo -e "${YELLOW}${NOTE}${NC}"
+    export IO_SANDBOX_TEST_UNMAPPED=1
+    go test -count=1 -skip "^(${SKIP})$" "${PACKAGES[@]}"
+
 # run a fuzzing campaign against one target, for a minute unless told otherwise
 fuzz package target time='1m':
     go test ./{{ package }} -run '^$' -fuzz '^{{ target }}$' -fuzztime {{ time }}
@@ -67,7 +105,7 @@ build:
     go build -trimpath -o dist/ohctl ./cmd/ohctl
 
 check:
-    steps fmt vet lint1 lint2 lint3 mega test
+    steps fmt vet lint1 lint2 lint3 mega test sandbox
 
 # download the API references for each wire format
 refs:

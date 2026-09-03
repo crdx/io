@@ -7,6 +7,10 @@ import (
 )
 
 func applyNetwork() error {
+	if isUnmappedTestNamespace() {
+		return nil
+	}
+
 	fd, err := unix.Socket(unix.AF_INET, unix.SOCK_DGRAM|unix.SOCK_CLOEXEC, 0)
 	if err != nil {
 		return fmt.Errorf("could not open the loopback control socket: %w", err)
