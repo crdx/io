@@ -34,6 +34,9 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/text"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/backend"
@@ -118,6 +121,258 @@ import (
 	"crdx.org/io/toolbox/web"
 	"crdx.org/io/wire/openai/chatcompletions"
 )
+
+const terminalInputColumns = 40
+
+func TestSpecialLinksDrawWhatTheyDrewBefore(t *testing.T) {
+	passes := map[string]func() string{
+		"email autolink": func() string {
+			return drawEmailLink(t)
+		},
+		"pending message": func() string {
+			return drawPendingLink(t)
+		},
+		"pending message with a heading and a list": func() string {
+			return drawPendingMarkdown(t)
+		},
+	}
+	compareWithGolden(t, "special-links", ".ansi", passes)
+
+	screenPasses := map[string]func() string{}
+	for name, pass := range passes {
+		screenPasses[name] = func() string {
+			return shown(t, pass(), terminalInputColumns)
+		}
+	}
+	compareWithGolden(t, "special-links", ".screen", screenPasses)
+}
+
+func drawEmailLink(t *testing.T) string {
+	t.Helper()
+
+	address := strings.Join([]string{"person", "example.test"}, "@")
+	var screenOutput strings.Builder
+	paint := painter.New(
+		output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines),
+		false,
+		nil,
+		nil,
+		output.StreamingModeLine,
+	)
+	paint.DrawEvent(agent.Event{Kind: agent.ModelMessageEvent, Text: address})
+
+	return strings.ReplaceAll(screenOutput.String(), address, "person-at-example.test")
+}
+
+func drawPendingLink(t *testing.T) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines)
+	grantEvent, err := pathgrant.ChangeEvent("/reference", []pathgrant.Grant{{Path: "/reference", Access: pathgrant.ReadAccess}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	self.pending.add(grantEvent)
+	self.refreshPendingMessages()
+
+	return screenOutput.String()
+}
+
+func drawPendingMarkdown(t *testing.T) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	screen := output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines)
+	screen.Blank()
+	screen.OpenNotice(painter.NewPendingMessages([]string{"# Heading\n\n- first item\n- second item"}, true))
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+func TestTerminalEscapeDrawsWhatItDrewBefore(t *testing.T) {
+	passes := map[string]func() string{
+		"bare escape keeps the following key": func() string {
+			return drawBareEscapeFollowedByKey(t)
+		},
+		"fragmented arrow remains one key": func() string {
+			return drawFragmentedArrow(t)
+		},
+	}
+
+	screenPasses := map[string]func() string{}
+	for name, pass := range passes {
+		screenPasses[name] = func() string {
+			return shown(t, pass(), terminalInputColumns)
+		}
+	}
+
+	compareWithGolden(t, "terminal-escape", ".ansi", passes)
+	compareWithGolden(t, "terminal-escape", ".screen", screenPasses)
+}
+
+func drawBareEscapeFollowedByKey(t *testing.T) string {
+	t.Helper()
+
+	self, editor, history, screenOutput := terminalInputFixture(t, "draft", nil)
+	terminalInput := newTerminalInput(t)
+	terminalInput.apply(t, self, editor, history, "\x1b")
+	terminalInput.apply(t, self, editor, history, "X")
+
+	if editor.Text() != "draftX" {
+		t.Fatalf("draft after Escape and X = %q", editor.Text())
+	}
+
+	return screenOutput.String()
+}
+
+func drawFragmentedArrow(t *testing.T) string {
+	t.Helper()
+
+	self, editor, history, screenOutput := terminalInputFixture(t, "draft", []string{"earlier"})
+	terminalInput := newTerminalInput(t)
+	terminalInput.apply(t, self, editor, history, "\x1b[A")
+
+	if editor.Text() != "earlier" {
+		t.Fatalf("draft after fragmented Up = %q", editor.Text())
+	}
+
+	return screenOutput.String()
+}
+
+func terminalInputFixture(t *testing.T, text string, historyLines []string) (*App, *edit.Input, *edit.History, *strings.Builder) {
+	t.Helper()
+
+	self := slashCommandFixture(t, caps.Read)
+	var screenOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines)
+
+	history := edit.NewHistory("", historyLimit)
+	for _, line := range historyLines {
+		history.Add(line)
+	}
+	editor := edit.NewInput(history)
+	editor.SetText(text)
+	self.show(editor)
+
+	return self, editor, history, &screenOutput
+}
+
+type oneByteReader struct {
+	reader io.Reader
+}
+
+func (self oneByteReader) Read(buffer []byte) (int, error) {
+	return self.reader.Read(buffer[:min(len(buffer), 1)])
+}
+
+type terminalInput struct {
+	decoder *key.Decoder
+	writer  *os.File
+}
+
+type decodedTerminalKey struct {
+	keypress key.Key
+	err      error
+}
+
+func newTerminalInput(t *testing.T) terminalInput {
+	t.Helper()
+
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = reader.Close() })
+	t.Cleanup(func() { _ = writer.Close() })
+
+	fragmentedReader := oneByteReader{reader: reader}
+	return terminalInput{
+		decoder: key.NewTerminalDecoder(bufio.NewReader(fragmentedReader), reader),
+		writer:  writer,
+	}
+}
+
+func (self terminalInput) apply(t *testing.T, app *App, editor *edit.Input, history *edit.History, input string) {
+	t.Helper()
+
+	if _, err := self.writer.WriteString(input); err != nil {
+		t.Fatal(err)
+	}
+	decoded := make(chan decodedTerminalKey, 1)
+	go func() {
+		keypress, err := self.decoder.Next()
+		decoded <- decodedTerminalKey{keypress: keypress, err: err}
+	}()
+
+	select {
+	case result := <-decoded:
+		if result.err != nil {
+			t.Fatal(result.err)
+		}
+		if !app.handleKeypressAndShowInput(editor, history, result.keypress) {
+			t.Fatal("terminal input unexpectedly closed the conversation")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("terminal input was not decoded")
+	}
+}
+
+func TestLegacyAltEnterDrawsWhatItDrewBefore(t *testing.T) {
+	compareWithGolden(t, "legacy-alt-enter", ".ansi", map[string]func() string{
+		"force sends an unknown command": func() string {
+			return drawLegacyAltEnter(t)
+		},
+	})
+	compareWithGolden(t, "legacy-alt-enter", ".screen", map[string]func() string{
+		"force sends an unknown command": func() string {
+			return shown(t, drawLegacyAltEnter(t), terminalInputColumns)
+		},
+	})
+}
+
+func drawLegacyAltEnter(t *testing.T) string {
+	t.Helper()
+
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	self.screen = output.NewTerminalOfSize(&screenOutput, terminalInputColumns, replayLines)
+	history := edit.NewHistory("", historyLimit)
+	editor := edit.NewInput(history)
+	editor.SetText("/nosuch")
+	self.show(editor)
+
+	terminalInput := newTerminalInput(t)
+	terminalInput.apply(t, self, editor, history, "\x1b\r")
+
+	for report := range self.currentTurn.Events() {
+		self.takeTurn(report)
+	}
+	self.finish()
+	self.show(editor)
+	self.screen.End()
+
+	if !hasUserMessage(self.events, "/nosuch") {
+		t.Fatal("legacy Alt+Enter did not send the unknown command")
+	}
+	if strings.Contains(screenOutput.String(), "Command not found") {
+		t.Fatalf("legacy Alt+Enter rejected the command: %q", screenOutput.String())
+	}
+
+	return screenOutput.String()
+}
+
+func hasUserMessage(events []agent.Event, text string) bool {
+	for _, event := range events {
+		if event.Kind == agent.UserMessageEvent && event.Text == text {
+			return true
+		}
+	}
+
+	return false
+}
 
 func TestEscapeAtRestDoesNotPanic(t *testing.T) {
 	self := &App{screen: output.New(&bytes.Buffer{})}
@@ -6079,7 +6334,8 @@ func drawWorkspacePathLabels(t *testing.T) string {
 
 	for at, call := range calls {
 		id := strconv.Itoa(at)
-		rig.chat.events = append(rig.chat.events,
+		rig.chat.events = append(
+			rig.chat.events,
 			agent.Event{
 				Kind:      agent.ToolCallRequestEvent,
 				ID:        id,
@@ -12073,5 +12329,141 @@ func TestAModeChangeIsNotLostWhenAMessageReplacesItsTurn(t *testing.T) {
 
 	if said := countModeNotes(provider.messages, nowReadOnlyNote); said != 1 {
 		t.Errorf("expected the replaced mode change to be said once, said %d in %q", said, provider.messages)
+	}
+}
+
+const shortestFence = 3
+
+var transcriptParser = goldmark.New().Parser()
+
+func TestEveryTranscriptIsWellFormedMarkdown(t *testing.T) {
+	for _, path := range everyTranscriptGolden(t) {
+		t.Run(strings.TrimSuffix(filepath.Base(path), ".transcript"), func(t *testing.T) {
+			source := readTranscriptGolden(t, path)
+
+			reportListItemsSpanningSeveralLines(t, source)
+			reportBlocksTouchingTheOneBefore(t, source)
+		})
+	}
+}
+
+func everyTranscriptGolden(t *testing.T) []string {
+	t.Helper()
+
+	paths, err := filepath.Glob(filepath.Join("testdata", "output", "*.transcript"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(paths) == 0 {
+		t.Fatal("expected the transcript goldens to be found")
+	}
+
+	return paths
+}
+
+func readTranscriptGolden(t *testing.T, path string) []byte {
+	t.Helper()
+
+	golden, err := os.ReadFile(path) //nolint:gosec // fixed testdata path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var transcript []string
+
+	for line := range strings.SplitSeq(string(golden), "\n") {
+		if !strings.HasPrefix(line, "=== ") {
+			transcript = append(transcript, line)
+		}
+	}
+
+	return []byte(strings.Join(transcript, "\n"))
+}
+
+func reportListItemsSpanningSeveralLines(t *testing.T, source []byte) {
+	t.Helper()
+
+	document := transcriptParser.Parse(text.NewReader(source))
+
+	err := ast.Walk(document, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering || node.Kind() != ast.KindListItem {
+			return ast.WalkContinue, nil
+		}
+
+		if item := itemText(node, source); strings.Contains(strings.TrimSuffix(item, "\n"), "\n") {
+			t.Errorf("a field swallowed the block below it:\n%s", item)
+		}
+
+		return ast.WalkContinue, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func itemText(node ast.Node, source []byte) string {
+	var item strings.Builder
+
+	writeLines(&item, node, source)
+
+	for child := node.FirstChild(); child != nil; child = child.NextSibling() {
+		writeLines(&item, child, source)
+	}
+
+	return item.String()
+}
+
+func writeLines(item *strings.Builder, node ast.Node, source []byte) {
+	lines := node.Lines()
+
+	for line := range lines.Len() {
+		segment := lines.At(line)
+		item.Write(segment.Value(source))
+	}
+}
+
+func reportBlocksTouchingTheOneBefore(t *testing.T, source []byte) {
+	t.Helper()
+
+	previous := ""
+	openFence := ""
+
+	for line := range strings.SplitSeq(string(source), "\n") {
+		switch {
+		case openFence != "":
+			if backtickRun(line) >= len(openFence) && strings.TrimRight(line, "`") == "" {
+				openFence = ""
+			}
+		case backtickRun(line) >= shortestFence:
+			openFence = line[:backtickRun(line)]
+
+			if previous != "" {
+				t.Errorf("a fence opened straight after %q", previous)
+			}
+		case previous != "" && startsABlock(line, previous):
+			t.Errorf("%q started straight after %q", line, previous)
+		}
+
+		previous = line
+	}
+}
+
+func backtickRun(line string) int {
+	return len(line) - len(strings.TrimLeft(line, "`"))
+}
+
+func startsABlock(line string, previous string) bool {
+	trimmedPrevious := strings.TrimLeft(previous, " ")
+
+	switch {
+	case strings.HasPrefix(line, "#"), strings.HasPrefix(line, "**"):
+		return true
+	case strings.HasPrefix(line, ">"):
+		return !strings.HasPrefix(trimmedPrevious, ">")
+	case strings.HasPrefix(line, "- "):
+		return !strings.HasPrefix(trimmedPrevious, "- ")
+	default:
+		return false
 	}
 }
