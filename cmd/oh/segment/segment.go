@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"crdx.org/io/cmd/oh/schedule"
 )
 
 type Position int
@@ -97,25 +99,15 @@ type Refresher interface {
 }
 
 func (self Layout) NextRefresh(phase Phase) time.Time {
-	var soonest time.Time
+	var due []time.Time
 
 	for _, instances := range self {
 		for _, instance := range instances {
-			refresher, ok := instance.(Refresher)
-			if !ok {
-				continue
-			}
-
-			at := refresher.NextRefresh(phase)
-			if at.IsZero() {
-				continue
-			}
-
-			if soonest.IsZero() || at.Before(soonest) {
-				soonest = at
+			if refresher, ok := instance.(Refresher); ok {
+				due = append(due, refresher.NextRefresh(phase))
 			}
 		}
 	}
 
-	return soonest
+	return schedule.Soonest(due...)
 }

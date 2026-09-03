@@ -1,9 +1,13 @@
+=== confirmation dismissed automatically ===
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+──────────────────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ────────────────────────────────────────
 === confirmation dismissed by typing ===
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 
 ──────────────────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ────────────────────────────────────────
 === deleted config restores defaults ===
-The configuration was reloaded automatically
+Configuration reloaded automatically (dismissing in 10s)
 ── ·✦· ──────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ─ ?% 0K/? ───────────────────────────────────
 
 ── rxw gs ─ workspace ────────────────────── usage n/a ─────────────────────────── brave-otter 🦦 ──
@@ -18,7 +22,7 @@ The configuration could not be reloaded: could not watch config: inotify stopped
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === invalid revision then recovery ===
-The configuration was reloaded automatically
+Configuration reloaded automatically (dismissing in 10s)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 
 ──────────────────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ────────────────────────────────────────
@@ -33,12 +37,12 @@ Snippets:
 
 ──────────────────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ────────────────────────────────────────
 === revision to a setting that only a restart picks up ===
-The configuration was reloaded automatically
+Configuration reloaded automatically (dismissing in 10s)
 ── brave-otter ─────────────────────────────────────────────────────────────────────────────────────
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === valid revision ===
-The configuration was reloaded automatically
+Configuration reloaded automatically (dismissing in 10s)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 
 ──────────────────────────────────────── GPT Sol 5.6 ▫▫▫▪·· ────────────────────────────────────────

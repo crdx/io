@@ -48,6 +48,7 @@ import (
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/feedback"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/key"
@@ -2275,8 +2276,8 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	if !strings.Contains(plain, "Need care.\n\nThe first") {
 		t.Errorf("expected a blank line between reasoning and the answer, got %q", plain)
 	}
-	if self.feedback.message.text != "The stored session could not be written (no space left)" {
-		t.Errorf("storage warning was not retained as interface feedback: %+v", self.feedback.message)
+	if self.feedback.Message().Text != "The stored session could not be written (no space left)" {
+		t.Errorf("storage warning was not retained as interface feedback: %+v", self.feedback.Message())
 	}
 
 	if live.String() != replayOutput.String() {
@@ -5960,8 +5961,8 @@ func TestReloadingConfigChangesTheContinueMessage(t *testing.T) {
 			hasSentReloadedMessage = true
 		}
 	}
-	if self.feedback.message.status == agent.ErrorStatus {
-		t.Errorf("successful reload complained: %+v", self.feedback.message)
+	if self.feedback.Message().Status == agent.ErrorStatus {
+		t.Errorf("successful reload complained: %+v", self.feedback.Message())
 	}
 	if !hasSentReloadedMessage {
 		t.Error("the reloaded message was not sent")
@@ -6175,6 +6176,36 @@ const (
 	feedbackStorageWarnings
 	feedbackTallAnswer
 )
+
+func TestConfirmationFeedbackSchedulesItsOwnDismissal(t *testing.T) {
+	self := &App{mode: caps.NewMode(caps.All())}
+	base := time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
+	self.now = func() time.Time { return base }
+	self.showFeedback(feedback.Confirmation, feedback.Message{
+		Text:         "done",
+		Status:       agent.SuccessStatus,
+		DismissAfter: configReloadConfirmationDuration,
+	})
+
+	dismissesAt := base.Add(configReloadConfirmationDuration)
+
+	if got, want := self.nextRefresh(base), base.Add(time.Second); !got.Equal(want) {
+		t.Errorf("next refresh = %s, want the next countdown tick %s", got, want)
+	}
+
+	if got := self.nextRefresh(dismissesAt.Add(-500 * time.Millisecond)); !got.Equal(dismissesAt) {
+		t.Errorf("next refresh = %s, want the dismissal time once within the last second", got)
+	}
+}
+
+func TestCommandFeedbackHasNoAutomaticDismissal(t *testing.T) {
+	self := &App{mode: caps.NewMode(caps.All())}
+	self.showFeedback(feedback.Command, feedback.Message{Text: "done", Status: agent.SuccessStatus})
+
+	if got := self.nextRefresh(time.Now()); !got.IsZero() {
+		t.Errorf("next refresh = %s, want none scheduled", got)
+	}
+}
 
 func TestFeedbackDrawsEveryVisibleState(t *testing.T) {
 	passes := map[string]func() string{
@@ -6396,7 +6427,7 @@ func queuedMessagesStream(t *testing.T, scenario queuedMessagesScenario) string 
 	case queuedBehindFeedback:
 		self.handleCommand("/help")
 		self.show(inputLine)
-		self.clearFeedback(commandFeedback)
+		self.feedback.Clear(feedback.Command)
 		self.show(inputLine)
 	case queuedDelivered:
 		delivered, _ := self.currentTurn.TakeInterjections()
@@ -6459,6 +6490,7 @@ const (
 	configReloadSettingThatIsNotLive
 	configReloadSnippets
 	configReloadDismissedConfirmation
+	configReloadAutoDismissedConfirmation
 	configReloadPreservedFailure
 )
 
@@ -6472,6 +6504,9 @@ func TestReloadingConfigDrawsEveryVisibleState(t *testing.T) {
 		"reloaded snippets":                func() string { return configReloadStream(t, configReloadSnippets) },
 		"confirmation dismissed by typing": func() string {
 			return configReloadStream(t, configReloadDismissedConfirmation)
+		},
+		"confirmation dismissed automatically": func() string {
+			return configReloadStream(t, configReloadAutoDismissedConfirmation)
 		},
 		"failure showing when the reload lands": func() string {
 			return configReloadStream(t, configReloadPreservedFailure)
@@ -6666,6 +6701,11 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
 	prepareLiveConfig(t, self, path)
 	inputLine := edit.NewInput(nil)
+
+	currentTime := time.Now()
+	if scenario == configReloadAutoDismissedConfirmation {
+		self.now = func() time.Time { return currentTime }
+	}
 	self.show(inputLine)
 
 	switch scenario {
@@ -6731,7 +6771,7 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 		settleLiveConfig(t, self)
 	case configReloadPreservedFailure:
 		self.notifyFailure("The conversation could not be stored: no space left on device")
-	case configReloadValid, configReloadDismissedConfirmation:
+	case configReloadValid, configReloadDismissedConfirmation, configReloadAutoDismissedConfirmation:
 	}
 
 	writeLiveConfig(t, path, `
@@ -6752,6 +6792,9 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 	if scenario == configReloadDismissedConfirmation || scenario == configReloadReplay {
 		self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: 'a'})
 		self.apply(inputLine, nil, key.Key{Code: key.Backspace})
+	}
+	if scenario == configReloadAutoDismissedConfirmation {
+		currentTime = currentTime.Add(configReloadConfirmationDuration)
 	}
 	self.show(inputLine)
 	if scenario != configReloadReplay {
@@ -7245,6 +7288,32 @@ func goldenClockSchedulePass(t *testing.T, format string, span time.Duration) fu
 	}
 }
 
+func goldenFeedbackSchedulePass(t *testing.T, span time.Duration) func() string {
+	t.Helper()
+
+	return func() string {
+		return drawnOnAStoppedClock(t, func(t *testing.T) string {
+			t.Helper()
+
+			startedAt := time.Now()
+
+			held := &App{mode: caps.NewMode(caps.All()), screen: output.New(&bytes.Buffer{})}
+			held.showFeedback(feedback.Confirmation, feedback.Message{
+				Text:         "Configuration reloaded automatically",
+				Status:       agent.SuccessStatus,
+				DismissAfter: configReloadConfirmationDuration,
+			})
+
+			return filmstrip(startedAt, span, 0, func() time.Time {
+				return held.nextRefresh(time.Now())
+			}, func() string {
+				held.feedback.ClearExpired(time.Now())
+				return strings.Join(held.statusRows(replayColumns), "\n")
+			})
+		})
+	}
+}
+
 func filmstrip(
 	startedAt time.Time,
 	span time.Duration,
@@ -7267,17 +7336,18 @@ func filmstrip(
 	}
 }
 
-func TestTheBarsRedrawScheduleRunsWhenItRanBefore(t *testing.T) {
+func TestTheRedrawScheduleRunsWhenItRanBefore(t *testing.T) {
 	t.Setenv("HOME", "/home/tester")
 
 	passes := map[string]func() string{
-		"running turn":                      goldenSchedulePass(t, true, 0, 2*time.Second),
-		"running turn with a slow pass":     goldenSchedulePass(t, true, 40*time.Millisecond, 2*time.Second),
-		"running turn with a pass past due": goldenSchedulePass(t, true, 200*time.Millisecond, 2*time.Second),
-		"waiting between turns":             goldenSchedulePass(t, false, 0, 3*time.Second),
-		"turn timer alone on a slow loop":   goldenTimerSchedulePass(t, 200*time.Millisecond, 3*time.Minute),
-		"clock alone to the minute":         goldenClockSchedulePass(t, "15:04", 3*time.Minute),
-		"clock alone to the second":         goldenClockSchedulePass(t, "15:04:05", 3*time.Second),
+		"running turn":                                      goldenSchedulePass(t, true, 0, 2*time.Second),
+		"running turn with a slow pass":                     goldenSchedulePass(t, true, 40*time.Millisecond, 2*time.Second),
+		"running turn with a pass past due":                 goldenSchedulePass(t, true, 200*time.Millisecond, 2*time.Second),
+		"waiting between turns":                             goldenSchedulePass(t, false, 0, 3*time.Second),
+		"turn timer alone on a slow loop":                   goldenTimerSchedulePass(t, 200*time.Millisecond, 3*time.Minute),
+		"clock alone to the minute":                         goldenClockSchedulePass(t, "15:04", 3*time.Minute),
+		"clock alone to the second":                         goldenClockSchedulePass(t, "15:04:05", 3*time.Second),
+		"confirmation feedback ticks down to its dismissal": goldenFeedbackSchedulePass(t, configReloadConfirmationDuration+time.Second),
 	}
 
 	compareWithGolden(t, "schedule", ".ansi", passes)
@@ -8420,26 +8490,9 @@ func pathGrantAccess(t *testing.T, mode *caps.Mode, workspace *work.Space) *shel
 }
 
 func TestSlashCommandCanAddFeedback(t *testing.T) {
-	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
-		Name: "fixture",
-		Run: func(context slash.Context, _ slash.Arguments) error {
-			context.Notice("fixture notice")
-			return nil
-		},
-	})
-
-	self := slashCommandFixture(t, caps.Read)
-	self.screen = output.New(&bytes.Buffer{})
-	self.commands = fixtureCommands
-	if got := self.handleCommand("/fixture"); got != dispatch.Handled {
-		t.Fatalf("got slash input result %d", got)
-	}
-	if len(self.events) != 0 {
-		t.Fatalf("command notice entered conversation events: %v", self.events)
-	}
-	if self.feedback.message.text != "fixture notice" || self.feedback.message.status != agent.InfoStatus {
-		t.Errorf("got feedback %v", self.feedback.message)
-	}
+	assertSlashCommandFeedback(t, func(context slash.Context) {
+		context.Notice("fixture notice")
+	}, feedback.Message{Text: "fixture notice", Status: agent.InfoStatus})
 }
 
 func TestPlainCommandFeedbackIsPrintedWithoutEnteringConversationHistory(t *testing.T) {
@@ -8619,8 +8672,8 @@ func TestUnknownSlashCommandShowsOneErrorWhileReturnRepeatsAndKeepsTheInput(t *t
 		t.Fatalf("repeated command errors entered conversation events: %v", self.events)
 	}
 	want := "Command not found: /unknown (alt+enter sends as message)"
-	if self.feedback.message.text != want || self.feedback.message.status != agent.ErrorStatus {
-		t.Errorf("got feedback %+v, want failed %q", self.feedback.message, want)
+	if self.feedback.Message().Text != want || self.feedback.Message().Status != agent.ErrorStatus {
+		t.Errorf("got feedback %+v, want failed %q", self.feedback.Message(), want)
 	}
 }
 
@@ -8645,8 +8698,8 @@ func TestUnknownSlashCommandDoesNotInterruptARunningTurn(t *testing.T) {
 	self.currentTurn.painter.DrawEvent(agent.Event{Kind: agent.ModelReasoningEvent, Text: "still working on it"})
 	self.screen.End()
 	plainOutput := style.Plain(screenOutput.String())
-	if self.feedback.message.text != "Command not found: /unknown (alt+enter sends as message)" {
-		t.Errorf("command error was not retained as interface feedback: %+v", self.feedback.message)
+	if self.feedback.Message().Text != "Command not found: /unknown (alt+enter sends as message)" {
+		t.Errorf("command error was not retained as interface feedback: %+v", self.feedback.Message())
 	}
 	if strings.Contains(plainOutput, "Command not found") {
 		t.Errorf("command error entered conversation scrollback: %q", plainOutput)
@@ -8745,8 +8798,8 @@ func TestSnippetWithoutArgumentsShowsUsageAndKeepsTheInput(t *testing.T) {
 	if len(self.events) != 0 {
 		t.Errorf("snippet usage entered conversation events: %+v", self.events)
 	}
-	if self.feedback.message.text != "Usage: //add <args> (alt+enter sends as message)" {
-		t.Errorf("got feedback %+v", self.feedback.message)
+	if self.feedback.Message().Text != "Usage: //add <args> (alt+enter sends as message)" {
+		t.Errorf("got feedback %+v", self.feedback.Message())
 	}
 }
 
@@ -8840,11 +8893,11 @@ func TestSnippetTemplateErrorsAreReportedAndKeepTheInput(t *testing.T) {
 	if len(self.events) != 0 {
 		t.Errorf("snippet error entered conversation events: %+v", self.events)
 	}
-	if !strings.HasPrefix(self.feedback.message.text, "//review: Could not render template:") {
-		t.Errorf("got feedback %+v", self.feedback.message)
+	if !strings.HasPrefix(self.feedback.Message().Text, "//review: Could not render template:") {
+		t.Errorf("got feedback %+v", self.feedback.Message())
 	}
-	if !strings.HasSuffix(self.feedback.message.text, " (alt+enter sends as message)") {
-		t.Errorf("expected the way out to be offered, got %q", self.feedback.message.text)
+	if !strings.HasSuffix(self.feedback.Message().Text, " (alt+enter sends as message)") {
+		t.Errorf("expected the way out to be offered, got %q", self.feedback.Message().Text)
 	}
 }
 
@@ -8866,8 +8919,8 @@ func TestUnknownSnippetShowsAnErrorAndKeepsTheInput(t *testing.T) {
 	if len(self.events) != 0 {
 		t.Errorf("snippet error entered conversation events: %+v", self.events)
 	}
-	if self.feedback.message.text != want || self.feedback.message.status != agent.ErrorStatus {
-		t.Errorf("got feedback %+v, want failed %q", self.feedback.message, want)
+	if self.feedback.Message().Text != want || self.feedback.Message().Status != agent.ErrorStatus {
+		t.Errorf("got feedback %+v, want failed %q", self.feedback.Message(), want)
 	}
 }
 
@@ -9065,10 +9118,18 @@ func TestARequestedTransitionStopsTheApp(t *testing.T) {
 }
 
 func TestSlashCommandCanAddSuccessFeedback(t *testing.T) {
+	assertSlashCommandFeedback(t, func(context slash.Context) {
+		context.Success("Copied to clipboard.")
+	}, feedback.Message{Text: "Copied to clipboard.", Status: agent.SuccessStatus})
+}
+
+func assertSlashCommandFeedback(t *testing.T, run func(slash.Context), want feedback.Message) {
+	t.Helper()
+
 	fixtureCommands := fixtureCommandRegistry(t, slash.Command{
 		Name: "fixture",
 		Run: func(context slash.Context, _ slash.Arguments) error {
-			context.Success("Copied to clipboard.")
+			run(context)
 			return nil
 		},
 	})
@@ -9080,10 +9141,10 @@ func TestSlashCommandCanAddSuccessFeedback(t *testing.T) {
 		t.Fatalf("got slash input result %d", got)
 	}
 	if len(self.events) != 0 {
-		t.Errorf("success feedback entered conversation events: %+v", self.events)
+		t.Errorf("command feedback entered conversation events: %+v", self.events)
 	}
-	if self.feedback.message.text != "Copied to clipboard." || self.feedback.message.status != agent.SuccessStatus {
-		t.Errorf("got feedback %+v", self.feedback.message)
+	if got := self.feedback.Message(); got != want {
+		t.Errorf("got feedback %+v, want %+v", got, want)
 	}
 }
 
@@ -9104,8 +9165,8 @@ func TestUsageErrorIsNotPrefixedWithTheCommandName(t *testing.T) {
 	if len(self.events) != 0 {
 		t.Errorf("usage feedback entered conversation events: %+v", self.events)
 	}
-	if self.feedback.message.text != want {
-		t.Errorf("got feedback %+v, want %q", self.feedback.message, want)
+	if self.feedback.Message().Text != want {
+		t.Errorf("got feedback %+v, want %q", self.feedback.Message(), want)
 	}
 }
 
@@ -9134,8 +9195,8 @@ func TestARefusedCommandKeepsWhatWasTypedAndSaysWhy(t *testing.T) {
 	if len(self.events) != 0 {
 		t.Errorf("command feedback entered conversation events: %+v", self.events)
 	}
-	if self.feedback.message.text != want {
-		t.Errorf("got feedback %+v, want %q", self.feedback.message, want)
+	if self.feedback.Message().Text != want {
+		t.Errorf("got feedback %+v, want %q", self.feedback.Message(), want)
 	}
 }
 
@@ -10793,8 +10854,8 @@ func TestProviderItemWriteFailureWarnsAndLeavesCanonicalJournalReadable(t *testi
 	if len(storedSession.Events) != 1 || storedSession.Events[0].Kind != agent.UserMessageEvent {
 		t.Errorf("unexpected canonical events: %+v", storedSession.Events)
 	}
-	if testHarness.feedback.message.status != agent.ErrorStatus || !strings.Contains(testHarness.feedback.message.text, "item write failed") {
-		t.Errorf("provider item failure was not retained as interface feedback: %+v", testHarness.feedback.message)
+	if testHarness.feedback.Message().Status != agent.ErrorStatus || !strings.Contains(testHarness.feedback.Message().Text, "item write failed") {
+		t.Errorf("provider item failure was not retained as interface feedback: %+v", testHarness.feedback.Message())
 	}
 }
 
@@ -10870,8 +10931,8 @@ func TestAuxiliaryRecorderWarningsAreShownOnceAndRemainCanonical(t *testing.T) {
 		t.Errorf("unexpected canonical events: %+v", storedSession.Events)
 	}
 	for _, want := range []string{"transcript append failed", "wire append failed"} {
-		if !strings.Contains(testHarness.feedback.message.text, want) {
-			t.Errorf("interface feedback omitted %q: %+v", want, testHarness.feedback.message)
+		if !strings.Contains(testHarness.feedback.Message().Text, want) {
+			t.Errorf("interface feedback omitted %q: %+v", want, testHarness.feedback.Message())
 		}
 	}
 }

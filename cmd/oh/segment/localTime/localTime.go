@@ -3,6 +3,7 @@ package localTime
 import (
 	"time"
 
+	"crdx.org/io/cmd/oh/schedule"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
 )
@@ -42,7 +43,7 @@ func New(now func() time.Time) segment.Factory {
 }
 
 func (self state) NextRefresh(phase segment.Phase) time.Time {
-	return phase.At.Truncate(self.granularity).Add(self.granularity)
+	return schedule.NextTick(phase.At, self.granularity)
 }
 
 func (self state) Render(segment.Context) string {

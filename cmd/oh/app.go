@@ -19,6 +19,7 @@ import (
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/edit"
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/feedback"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/interaction"
 	"crdx.org/io/cmd/oh/interrupt"
@@ -29,6 +30,7 @@ import (
 	"crdx.org/io/cmd/oh/painter"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/record"
+	"crdx.org/io/cmd/oh/schedule"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/store"
@@ -36,12 +38,13 @@ import (
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
-	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/session"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox/title"
 )
+
+const configReloadConfirmationDuration = 10 * time.Second
 
 type SessionLogger = record.Session
 
@@ -53,36 +56,6 @@ type pendingInput struct {
 	items    []pendingMessage
 	renderer *painter.PendingMessages
 	block    *output.BlockHandle
-}
-
-type feedbackSource int
-
-const (
-	systemFeedback feedbackSource = iota
-	commandFeedback
-	configFeedback
-	confirmationFeedback
-)
-
-func (self feedbackSource) isDismissedByTyping() bool {
-	switch self {
-	case commandFeedback, confirmationFeedback:
-		return true
-	case systemFeedback, configFeedback:
-		return false
-	default:
-		return false
-	}
-}
-
-type feedbackMessage struct {
-	text   string
-	status agent.Status
-}
-
-type feedbackState struct {
-	source  feedbackSource
-	message feedbackMessage
 }
 
 func (self *pendingInput) add(state agent.Event) {
@@ -117,7 +90,7 @@ type App struct {
 	pathGrants          *pathgrant.Grants
 	settledCaps         caps.Set
 	pending             pendingInput
-	feedback            feedbackState
+	feedback            feedback.State
 	terminal            terminal.Terminal
 	metrics             metrics.Tracker
 	toolOutputLimit     *truncate.Limit
@@ -135,6 +108,7 @@ type App struct {
 	currentTurn Turn
 	startedAt   time.Time
 	keyboard    *os.File
+	now         func() time.Time
 	isPrinting  bool
 	isPlain     bool
 	isYolo      bool
@@ -203,7 +177,7 @@ func (self *App) begin(message string) cycle.Transition {
 		return self.transition
 	}
 
-	interaction.Run(self.getKeyboard(), self.nextBarRefresh, interaction.Handler{
+	interaction.Run(self.getKeyboard(), self.nextRefresh, interaction.Handler{
 		Events: func() <-chan turn.Event { return self.currentTurn.Events() },
 		Key:    func(keypress key.Key) bool { return self.handleKeypressAndShowInput(inputLine, history, keypress) },
 		Turn:   self.takeTurn,
@@ -247,7 +221,7 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 	previousText := inputLine.Text()
 	action := inputLine.Apply(keypress, self.currentTurn.Running())
 	if inputLine.Text() != previousText {
-		self.clearFeedbackOnTyping()
+		self.feedback.ClearOnTyping()
 	}
 	if action != edit.Complete {
 		self.completion.Reset()
@@ -307,16 +281,16 @@ func (self *App) requestTransition(transition cycle.Transition) error {
 }
 
 func (self *App) handleCommand(message string) dispatch.Result {
-	self.clearFeedback(commandFeedback)
+	self.feedback.Clear(feedback.Command)
 	result, failure := dispatch.Handle(self.commands, dispatch.Actions{
 		EmitEvent:  self.emitCommandEvent,
 		SendPrompt: self.sendCommandPrompt,
 		ShowFeedback: func(text string, status agent.Status) {
-			self.showFeedback(commandFeedback, feedbackMessage{text: text, status: status})
+			self.showFeedback(feedback.Command, feedback.Message{Text: text, Status: status})
 		},
 	}, message)
 	if failure != "" {
-		self.showFeedback(commandFeedback, feedbackMessage{text: failure, status: agent.ErrorStatus})
+		self.showFeedback(feedback.Command, feedback.Message{Text: failure, Status: agent.ErrorStatus})
 	}
 	return result
 }
@@ -615,6 +589,8 @@ func (self *App) show(inputLine *edit.Input) {
 		return
 	}
 
+	self.feedback.ClearExpired(self.getNow())
+
 	columns := self.screen.Columns()
 	frame := inputLine.Frame(columns)
 
@@ -648,33 +624,20 @@ func (self *App) ruleStyle() style.Style {
 }
 
 func (self *App) statusRows(columns int) []string {
-	if self.feedback.message.text == "" {
+	if self.feedback.IsEmpty() {
 		return painter.RenderQueuedMessages(self.currentTurn.GetInterjections(), columns, self.screen.IsTerminal())
 	}
 
-	styledText := painter.NoticeStyle(self.feedback.message.status)(self.feedback.message.text)
-	return width.Wrap(styledText, columns)
+	return self.feedback.Render(columns, self.getNow())
 }
 
-func (self *App) showFeedback(source feedbackSource, message feedbackMessage) {
+func (self *App) showFeedback(source feedback.Source, message feedback.Message) {
 	if self.isPlain {
-		self.screen.Line(painter.NoticeStyle(message.status)(message.text))
+		self.screen.Line(painter.NoticeStyle(message.Status)(message.Text))
 		return
 	}
 
-	self.feedback = feedbackState{source: source, message: message}
-}
-
-func (self *App) clearFeedback(source feedbackSource) {
-	if self.feedback.message.text != "" && self.feedback.source == source {
-		self.feedback = feedbackState{}
-	}
-}
-
-func (self *App) clearFeedbackOnTyping() {
-	if self.feedback.source.isDismissedByTyping() {
-		self.feedback = feedbackState{}
-	}
+	self.feedback.Show(source, message, self.getNow())
 }
 
 func (self *App) renderBar(position segment.Position, frame edit.Frame) string {
@@ -712,22 +675,26 @@ func (self *App) nextBarRefresh(at time.Time) time.Time {
 	return self.barConfiguration.NextRefresh(segment.Phase{At: at, IsRunning: self.isTurnRunning()})
 }
 
+func (self *App) nextRefresh(at time.Time) time.Time {
+	return schedule.Soonest(self.nextBarRefresh(at), self.feedback.NextRefresh(at))
+}
+
 func (self *App) reloadConfig(watchFailure error) bool {
 	result := self.configObserver.Reload(watchFailure, self.barConfiguration.GetRegistry())
 	switch result.Status {
 	case config.ReloadUnchanged:
 		return false
 	case config.ReloadFailed:
-		self.showFeedback(configFeedback, feedbackMessage{
-			text:   "The configuration could not be reloaded: " + result.Failure.Error(),
-			status: agent.ErrorStatus,
+		self.showFeedback(feedback.Config, feedback.Message{
+			Text:   "The configuration could not be reloaded: " + result.Failure.Error(),
+			Status: agent.ErrorStatus,
 		})
 		return true
 	case config.ReloadApplied:
 		if err := self.commands.ReplaceCommandSet(result.LiveConfig.SnippetCommandSet); err != nil {
-			self.showFeedback(configFeedback, feedbackMessage{
-				text:   "The configuration could not be reloaded: could not replace snippets: " + err.Error(),
-				status: agent.ErrorStatus,
+			self.showFeedback(feedback.Config, feedback.Message{
+				Text:   "The configuration could not be reloaded: could not replace snippets: " + err.Error(),
+				Status: agent.ErrorStatus,
 			})
 			return true
 		}
@@ -737,11 +704,12 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		self.streamingMode = result.LiveConfig.StreamingMode
 		self.toolOutputLimit.Replace(result.LiveConfig.ToolOutputBytes)
 		self.barConfiguration.ReplaceLayout(result.LiveConfig.SegmentLayout)
-		self.clearFeedback(configFeedback)
-		if self.feedback.message.status != agent.ErrorStatus {
-			self.showFeedback(confirmationFeedback, feedbackMessage{
-				text:   "The configuration was reloaded automatically",
-				status: agent.SuccessStatus,
+		self.feedback.Clear(feedback.Config)
+		if self.feedback.Message().Status != agent.ErrorStatus {
+			self.showFeedback(feedback.Confirmation, feedback.Message{
+				Text:         "Configuration reloaded automatically",
+				Status:       agent.SuccessStatus,
+				DismissAfter: configReloadConfirmationDuration,
 			})
 		}
 	}
@@ -795,6 +763,14 @@ func (self *App) getKeyboard() *os.File {
 	}
 
 	return self.keyboard
+}
+
+func (self *App) getNow() time.Time {
+	if self.now == nil {
+		return time.Now()
+	}
+
+	return self.now()
 }
 
 func (self *App) print(history *edit.History, message string) {
@@ -1091,7 +1067,7 @@ func (self *App) storeEvent(event agent.Event) {
 }
 
 func (self *App) notifyFailure(text string) {
-	self.showFeedback(systemFeedback, feedbackMessage{text: text, status: agent.ErrorStatus})
+	self.showFeedback(feedback.System, feedback.Message{Text: text, Status: agent.ErrorStatus})
 }
 
 func (self *App) notify(event agent.Event) {
@@ -1152,7 +1128,7 @@ func (self *App) finish() {
 		self.redraw()
 	}
 	self.screen.End()
-	self.clearFeedback(commandFeedback)
+	self.feedback.Clear(feedback.Command)
 
 	self.currentTurn.Finish()
 
