@@ -11,7 +11,7 @@ prompt = "name this session"
 [[first.response]]
 event = [
     '''{"choices":[{"delta":{"role":"assistant","content":null}}]}''',
-    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","type":"function","function":{"name":"title","arguments":"{\"title\":\"work out why the session picker clips a long title\"}"}}]}}]}''',
+    '''{"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","type":"function","function":{"name":"title","arguments":"{\"title\":\"work out why the session picker clips a really very long title\"}"}}]}}]}''',
     '''{"choices":[{"delta":{},"finish_reason":"tool_calls"}]}''',
     '''[DONE]''',
 ]

@@ -116,7 +116,7 @@ func TestARestoredSessionRemembersItsTitle(t *testing.T) {
 }
 
 func TestAnUnusableTitleIsRefused(t *testing.T) {
-	const longestTitleLength = 30
+	const longestTitleLength = 50
 
 	titleTool := title.New()
 

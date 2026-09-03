@@ -16,7 +16,7 @@ import (
 
 const (
 	Name           = "title"
-	maxTitleLength = 30
+	maxTitleLength = 50
 )
 
 type Args struct {

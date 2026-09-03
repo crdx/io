@@ -17,7 +17,7 @@ name this session
 ## Tool calls · +0s
 
 ```
-title: work out why the session picker clips a long title [error, call-1]
+title: work out why the session picker clips a really very long title [error, call-1]
 title [error, call-2]
 title: fix picker clipping [ok, 1 line, 47B, call-3]
 ```
