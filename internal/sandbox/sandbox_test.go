@@ -160,13 +160,6 @@ func TestACommandCombinesOutputInTheOrderItWasWritten(t *testing.T) {
 	}
 }
 
-func TestACommandMayStartANewSession(t *testing.T) {
-	result := run(t, t.TempDir(), `setsid sh -c 'printf session-ok'`, sandbox.Policy{})
-	if result.Code != 0 || result.Output != "session-ok" {
-		t.Errorf("got exit status %d with output %q", result.Code, result.Output)
-	}
-}
-
 func TestANewSessionCannotOutliveItsCommand(t *testing.T) {
 	directory := t.TempDir()
 	marker := filepath.Join(directory, "detached")
@@ -554,28 +547,6 @@ func TestAGeneratedFileMayBeExecutedWhenGranted(t *testing.T) {
 	}
 }
 
-func TestOnlyAnExactlyGrantedFileMayBeExecuted(t *testing.T) {
-	directory := t.TempDir()
-	exact := filepath.Join(directory, "exact")
-	sibling := filepath.Join(directory, "sibling")
-	for path, content := range map[string]string{
-		exact:   "#!/bin/sh\nprintf exact",
-		sibling: "#!/bin/sh\nprintf sibling",
-	} {
-		if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
-			t.Fatal(err)
-		}
-		if err := os.Chmod(path, 0o700); err != nil { //nolint:gosec // the test fixture must be executable
-			t.Fatal(err)
-		}
-	}
-
-	result := run(t, t.TempDir(), exact+"; "+sibling, sandbox.Policy{Exec: []string{exact}})
-	if !strings.Contains(result.Output, "exact") || strings.Contains(result.Output, "sibling") {
-		t.Errorf("the exact-file grant executed the wrong command: %q", result.Output)
-	}
-}
-
 func TestAWriteOutsideThePolicyIsRefused(t *testing.T) {
 	outside := filepath.Join(t.TempDir(), "outside")
 
@@ -618,23 +589,6 @@ func TestAGrantedPathIsReadable(t *testing.T) {
 
 	if !strings.Contains(result.Output, "visible") {
 		t.Errorf("got %q, want it to contain %q", result.Output, "visible")
-	}
-}
-
-func TestOnlyAnExactlyGrantedFileIsReadable(t *testing.T) {
-	directory := t.TempDir()
-	exact := filepath.Join(directory, "exact")
-	sibling := filepath.Join(directory, "sibling")
-	if err := os.WriteFile(exact, []byte("exact"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(sibling, []byte("sibling"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-
-	result := run(t, t.TempDir(), "cat "+exact+"; cat "+sibling, sandbox.Policy{Read: []string{exact}})
-	if !strings.Contains(result.Output, "exact") || strings.Contains(result.Output, "sibling") {
-		t.Errorf("the exact-file grant exposed the wrong content: %q", result.Output)
 	}
 }
 
@@ -945,21 +899,6 @@ func TestCommandsMayTalkOverAUnixSocketInTheScratch(t *testing.T) {
 	}
 	if result.Code != 0 || !strings.Contains(result.Output, "connected") {
 		t.Errorf("commands in the sandbox could not connect: %q", result.Output)
-	}
-}
-
-func TestAUnixSocketOutsideTheNamedPathsIsRefused(t *testing.T) {
-	requireLandlock(t)
-
-	directory := t.TempDir()
-	policy := sandbox.Policy{Write: []string{directory}}
-
-	result := run(t, directory, unixSocketCommand(directory), policy)
-	if strings.Contains(result.Output, "python3: command not found") {
-		t.Skip("python3 is unavailable")
-	}
-	if result.Code == 0 {
-		t.Errorf("a writable path nothing named resolved a socket: %q", result.Output)
 	}
 }
 

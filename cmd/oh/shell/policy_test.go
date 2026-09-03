@@ -17,7 +17,10 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/util/pathutil"
 )
+
+const reachableDirPrefix = "io-shell-test-"
 
 func TestMain(testingMain *testing.M) {
 	sandbox.Init()
@@ -50,6 +53,35 @@ func createTestPolicy(
 		currentCaps,
 		func(context.Context) error { return nil },
 	)
+}
+
+func reachableDir(t *testing.T) string {
+	t.Helper()
+
+	directory := t.TempDir()
+	if _, isCovered := pathutil.RelativeTo(sandbox.TmpDir, directory); !isCovered {
+		return directory
+	}
+
+	base, err := os.UserCacheDir()
+	if err != nil {
+		t.Skipf("a scratch at %s covers %s and there is nowhere else to work: %v", sandbox.TmpDir, directory, err)
+	}
+	if _, isCovered := pathutil.RelativeTo(sandbox.TmpDir, base); isCovered {
+		t.Skipf("a scratch at %s covers both %s and %s", sandbox.TmpDir, directory, base)
+	}
+
+	created, err := os.MkdirTemp(base, reachableDirPrefix) //nolint:usetesting // the scratch covers what t.TempDir gives
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := os.RemoveAll(created); err != nil {
+			t.Error(err)
+		}
+	})
+
+	return created
 }
 
 func newTestPathAccess(t *testing.T, files *file.Root, mode *caps.Mode) *PathAccess {
@@ -118,7 +150,7 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 }
 
 func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
-	workspace := t.TempDir()
+	workspace := reachableDir(t)
 	workspaceRoot, err := os.OpenRoot(workspace)
 	if err != nil {
 		t.Fatal(err)
@@ -128,7 +160,7 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 	miseDataDir := t.TempDir()
 	t.Setenv("MISE_DATA_DIR", miseDataDir)
 
-	home := t.TempDir()
+	home := reachableDir(t)
 	tmp := t.TempDir()
 	if _, err := createPolicy(t.Context(), workspace, home, tmp, Paths{}, caps.Read|caps.Shell); err != nil {
 		t.Skipf("the sandbox cannot enforce a shell policy here: %v", err)
@@ -159,7 +191,7 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 }
 
 func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
-	workspace := t.TempDir()
+	workspace := reachableDir(t)
 	metadata := filepath.Join(workspace, ".git")
 	if err := os.Mkdir(metadata, 0o700); err != nil {
 		t.Fatal(err)
@@ -171,7 +203,7 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 	}
 	defer func() { _ = workspaceRoot.Close() }()
 
-	home := t.TempDir()
+	home := reachableDir(t)
 	tmp := t.TempDir()
 	initialCaps := caps.Read | caps.Write | caps.Shell
 	if _, err := createPolicy(t.Context(), workspace, home, tmp, Paths{}, initialCaps); err != nil {
@@ -203,16 +235,16 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 }
 
 func TestTemporaryPathAccessChangesTheNextShellCommand(t *testing.T) {
-	workspace := t.TempDir()
+	workspace := reachableDir(t)
 	workspaceRoot, err := os.OpenRoot(workspace)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer func() { _ = workspaceRoot.Close() }()
 
-	home := t.TempDir()
+	home := reachableDir(t)
 	tmp := t.TempDir()
-	externalDirectory := t.TempDir()
+	externalDirectory := reachableDir(t)
 	externalFile := filepath.Join(externalDirectory, "reference")
 	if err := os.WriteFile(externalFile, []byte("reference text"), 0o600); err != nil {
 		t.Fatal(err)

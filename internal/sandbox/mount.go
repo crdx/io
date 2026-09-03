@@ -82,11 +82,21 @@ func checkNamespaces(ctx context.Context) error {
 		}
 		return fmt.Errorf("this machine will not give the sandbox its namespaces: %w", err)
 	}
-	if message != probeSucceeded {
+	if !saysProbeSucceeded(output) {
 		return errors.New("the executable did not initialise the sandbox namespace probe")
 	}
 
 	return nil
+}
+
+func saysProbeSucceeded(output []byte) bool {
+	for line := range strings.SplitSeq(string(output), "\n") {
+		if strings.TrimSpace(strings.TrimPrefix(line, notice)) == probeSucceeded {
+			return true
+		}
+	}
+
+	return false
 }
 
 func namespaceProbeCommand(ctx context.Context) *exec.Cmd {

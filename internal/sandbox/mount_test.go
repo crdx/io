@@ -20,6 +20,32 @@ func TestTheNamespaceProbeCannotRunTestsIfInitIsMissing(t *testing.T) {
 	}
 }
 
+func TestTheProbeIsBelievedWhereItsChildSaysMoreThanTheNotice(t *testing.T) {
+	coverageWarning := "warning: GOCOVERDIR not set, no coverage data emitted"
+
+	for name, output := range map[string]string{
+		"a warning after the notice":  probeSucceeded + "\n" + coverageWarning + "\n",
+		"a warning before the notice": coverageWarning + "\n" + probeSucceeded + "\n",
+		"the notice alone":            probeSucceeded + "\n",
+		"the notice behind a prefix":  notice + probeSucceeded + "\n",
+	} {
+		if !saysProbeSucceeded([]byte(output)) {
+			t.Errorf("%s was not read as a probe that succeeded: %q", name, output)
+		}
+	}
+
+	for name, output := range map[string]string{
+		"nothing at all":       "",
+		"a warning alone":      coverageWarning + "\n",
+		"a refusal":            notice + "could not bring up the loopback interface\n",
+		"the notice cut short": "sandbox probe\n",
+	} {
+		if saysProbeSucceeded([]byte(output)) {
+			t.Errorf("%s was read as a probe that succeeded: %q", name, output)
+		}
+	}
+}
+
 func TestEveryCommandGetsAMountNamespace(t *testing.T) {
 	if namespaceAttributes().Cloneflags&syscall.CLONE_NEWNS == 0 {
 		t.Error("expected every command to be given a mount namespace of its own")
