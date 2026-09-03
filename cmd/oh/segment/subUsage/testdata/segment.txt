@@ -32,3 +32,8 @@ usage unavailable
 45m ⧗ 5h 40% ██┃░░░░░
 === windows drawn as pictures ===
 ● 5h 40% 􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮 wk 12% 􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮
+=== windows drawn as pictures a second time ===
+● 5h 40% 􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮 wk 12% 􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮
+● 5h 40% 􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮 wk 12% 􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮
+=== two windows standing at the same figure ===
+● 5h 40% 􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮 5h 40% 􎻮̅̅􎻮􎻮􎻮􎻮􎻮􎻮􎻮

@@ -181,10 +181,11 @@ func TestEveryDrawnGaugeMatchesTheGolden(t *testing.T) {
 	var drawn strings.Builder
 
 	for _, test := range []struct {
-		name  string
-		limit Limit
-		pace  Pace
-		cells int
+		name     string
+		limit    Limit
+		pace     Pace
+		cells    int
+		repaints int
 	}{
 		{name: "an idle limit", limit: Limit{}, cells: gaugeWidth},
 		{name: "a limit within its pace", limit: Limit{UsedPercent: 25, ExpectedPercent: &expected}, cells: gaugeWidth},
@@ -207,22 +208,33 @@ func TestEveryDrawnGaugeMatchesTheGolden(t *testing.T) {
 			pace:  PaceAhead,
 			cells: gaugeWidth / 2,
 		},
+		{
+			name:     "a gauge painted a second time",
+			limit:    Limit{UsedPercent: 62, ExpectedPercent: &expected},
+			pace:     PaceAhead,
+			cells:    gaugeWidth,
+			repaints: 1,
+		},
 	} {
 		gauges := FixedGauges(drawing)
-
-		placement, isPlaced := gauges.place(
-			test.limit.UsedPercent, test.limit.ExpectedPercent, test.pace, test.cells, drawing,
-		)
-		if !isPlaced {
-			t.Fatalf("%s was not placed", test.name)
-		}
 
 		drawn.WriteString("=== ")
 		drawn.WriteString(test.name)
 		drawn.WriteString(" ===\n")
-		drawn.WriteString(withoutPayload(placement))
-		drawn.WriteString("\n")
-		drawn.WriteString(describePicture(gaugePicture(
+
+		for range test.repaints + 1 {
+			placement, isPlaced := gauges.place(
+				test.limit.UsedPercent, test.limit.ExpectedPercent, test.pace, test.cells, drawing,
+			)
+			if !isPlaced {
+				t.Fatalf("%s was not placed", test.name)
+			}
+
+			drawn.WriteString(withoutPayload(placement))
+			drawn.WriteString("\n")
+		}
+
+		drawn.WriteString(describePicture(gaugeImage(
 			test.limit.UsedPercent, test.limit.ExpectedPercent, test.pace, test.cells, drawing,
 		)))
 	}

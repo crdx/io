@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	barPadding   = 5
-	tickCells    = 8
-	tickDivisor  = 2
-	trackDivisor = 3
-	mostImages   = 64
+	barPadding     = 5
+	tickCells      = 8
+	tickDivisor    = 2
+	trackDivisor   = 2
+	mostPlacements = 64
 )
 
 type Graphics struct {
@@ -29,12 +29,12 @@ type Measure func() (Graphics, bool)
 type Gauges struct {
 	measure Measure
 
-	mutex  sync.Mutex
-	images map[string]int
+	mutex      sync.Mutex
+	placements map[string]string
 }
 
 func NewGauges(measure Measure) *Gauges {
-	return &Gauges{measure: measure, images: map[string]int{}}
+	return &Gauges{measure: measure, placements: map[string]string{}}
 }
 
 func TerminalGauges(input *os.File, output *os.File) *Gauges {
@@ -76,29 +76,27 @@ func (self *Gauges) place(
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	if imageID, isKnown := self.images[key]; isKnown {
-		return graphics.Placement(imageID, cells), true
+	if placement, isKnown := self.placements[key]; isKnown {
+		return placement, true
 	}
 
-	picture := gaugePicture(usedPercent, expectedPercent, pace, cells, drawing)
-
-	imageID, command, isTransmitted := graphics.Transmit(picture, cells)
-	if !isTransmitted {
+	placement, isPlaced := graphics.Place(
+		gaugeImage(usedPercent, expectedPercent, pace, cells, drawing), cells,
+	)
+	if !isPlaced {
 		return "", false
 	}
 
-	if len(self.images) >= mostImages {
-		clear(self.images)
+	if len(self.placements) >= mostPlacements {
+		clear(self.placements)
 	}
 
-	self.images[key] = imageID
+	self.placements[key] = placement
 
-	return command + graphics.Placement(imageID, cells), true
+	return placement, true
 }
 
-func gaugeKey(
-	usedPercent int, expectedPercent *int, pace Pace, cells int, drawing Graphics,
-) string {
+func gaugeKey(usedPercent int, expectedPercent *int, pace Pace, cells int, drawing Graphics) string {
 	pacePercent := -1
 	if expectedPercent != nil {
 		pacePercent = *expectedPercent
@@ -110,9 +108,7 @@ func gaugeKey(
 	)
 }
 
-func gaugePicture(
-	usedPercent int, expectedPercent *int, pace Pace, cells int, drawing Graphics,
-) *image.RGBA {
+func gaugeImage(usedPercent int, expectedPercent *int, pace Pace, cells int, drawing Graphics) *image.RGBA {
 	pixelWidth := cells * drawing.CellWidth
 	pixelHeight := drawing.CellHeight
 

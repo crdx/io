@@ -192,7 +192,7 @@ func TestADrawnRowStillLinesUpWithTheRestOfTheReport(t *testing.T) {
 	}
 }
 
-func TestAPictureIsSentOnceHoweverOftenItIsDrawn(t *testing.T) {
+func TestEveryDrawingCarriesThePictureItPlaces(t *testing.T) {
 	expected := 40
 	gauges := FixedGauges(Graphics{CellWidth: 9, CellHeight: 18})
 
@@ -203,8 +203,8 @@ func TestAPictureIsSentOnceHoweverOftenItIsDrawn(t *testing.T) {
 		t.Error("the first drawing did not transmit the picture")
 	}
 
-	if strings.Contains(second, "a=T") {
-		t.Error("the second drawing transmitted the picture again")
+	if !strings.Contains(second, "a=T") {
+		t.Error("the second drawing placed the picture without transmitting it")
 	}
 
 	if width.Of(second) != gaugeWidth {
@@ -213,5 +213,41 @@ func TestAPictureIsSentOnceHoweverOftenItIsDrawn(t *testing.T) {
 
 	if changed := gauges.Draw(63, &expected, PaceAhead, gaugeWidth); !strings.Contains(changed, "a=T") {
 		t.Error("a gauge that moved did not transmit a picture of its own")
+	}
+}
+
+func TestOneImageIsHeldForEachGaugeHoweverOftenItIsDrawn(t *testing.T) {
+	expected := 40
+	gauges := FixedGauges(Graphics{CellWidth: 9, CellHeight: 18})
+
+	identifiers := map[string]struct{}{}
+
+	for range 3 {
+		drawn := gauges.Draw(62, &expected, PaceAhead, gaugeWidth)
+
+		matched := identifierPattern.FindString(drawn)
+		if matched == "" {
+			t.Fatalf("the drawing %q names no image", drawn)
+		}
+
+		identifiers[matched] = struct{}{}
+	}
+
+	if len(identifiers) != 1 {
+		t.Errorf("one gauge drawn three times took %d image identifiers", len(identifiers))
+	}
+}
+
+func TestThePlacementsHeldAreBounded(t *testing.T) {
+	gauges := FixedGauges(Graphics{CellWidth: 9, CellHeight: 18})
+
+	for usedPercent := range mostPlacements + 1 {
+		if drawn := gauges.Draw(usedPercent, nil, PaceEven, gaugeWidth); !strings.Contains(drawn, "a=T") {
+			t.Fatalf("the gauge at %d%% was drawn without its picture", usedPercent)
+		}
+	}
+
+	if held := len(gauges.placements); held > mostPlacements {
+		t.Errorf("%d placements are held, want no more than %d", held, mostPlacements)
 	}
 }

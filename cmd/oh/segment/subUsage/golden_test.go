@@ -46,6 +46,7 @@ type segmentCase struct {
 	fetchedAt time.Time
 	isWaiting bool
 	hasImages bool
+	repaints  int
 }
 
 func segmentCases() []segmentCase {
@@ -110,6 +111,17 @@ func segmentCases() []segmentCase {
 			windows:   []agent.UsageWindow{window(5*time.Hour, 40, 150*time.Minute), window(7*24*time.Hour, 12, 6*24*time.Hour)},
 			hasImages: true,
 		},
+		{
+			name:      "windows drawn as pictures a second time",
+			windows:   []agent.UsageWindow{window(5*time.Hour, 40, 150*time.Minute), window(7*24*time.Hour, 12, 6*24*time.Hour)},
+			hasImages: true,
+			repaints:  1,
+		},
+		{
+			name:      "two windows standing at the same figure",
+			windows:   []agent.UsageWindow{window(5*time.Hour, 40, 150*time.Minute), window(5*time.Hour, 40, 150*time.Minute)},
+			hasImages: true,
+		},
 	}
 }
 
@@ -140,24 +152,25 @@ func drawEachCase(t *testing.T, isPlain bool) string {
 			fetchedAt = testNow
 		}
 
-		text := segment.draw(snapshot{
-			windows:   test.windows,
-			fetchedAt: fetchedAt,
-			status:    test.status,
-			failure:   test.failure,
-		})
-
-		if isPlain {
-			text = style.Plain(text)
-		}
-
-		text = withoutPayload(text)
-
 		drawn.WriteString("=== ")
 		drawn.WriteString(test.name)
 		drawn.WriteString(" ===\n")
-		drawn.WriteString(text)
-		drawn.WriteString("\n")
+
+		for range test.repaints + 1 {
+			text := segment.draw(snapshot{
+				windows:   test.windows,
+				fetchedAt: fetchedAt,
+				status:    test.status,
+				failure:   test.failure,
+			})
+
+			if isPlain {
+				text = style.Plain(text)
+			}
+
+			drawn.WriteString(withoutPayload(text))
+			drawn.WriteString("\n")
+		}
 	}
 
 	return drawn.String()
