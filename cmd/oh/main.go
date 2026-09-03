@@ -206,7 +206,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	if inputArgs.Update {
-		return "", model.Update(os.Stdout, endpointURL, modelCachePath, listProviderModels)
+		return "", model.Update(os.Stdout, endpointURL, modelCachePath, listProviderModels, inputArgs.IsShowingIgnored)
 	}
 
 	if err := model.Ensure(notices, endpointURL, modelCachePath, listProviderModels); err != nil {

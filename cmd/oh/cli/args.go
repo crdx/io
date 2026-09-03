@@ -2,7 +2,6 @@ package cli
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"slices"
 	"strings"
@@ -13,50 +12,53 @@ import (
 	"crdx.org/io/cmd/oh/model"
 )
 
-const defaultCapFlags = "rx"
+const (
+	stdinMarker     = "-"
+	defaultCapFlags = "rx"
+)
 
-const stdinMarker = "-"
-
-var usage = fmt.Sprintf(`oh — coding harness
-
+var usage = `
 Usage:
     $0 -L [<login-provider>]
-    $0 -U [-J]
+    $0 -U [--json]
+    $0 -u [--ignored]
     $0 [options] [-t <tool>]... [<prompt>...]
 
 Options:
-    -L, --login                 Auth to a provider
     -r, --resume [<session>]    Resume a session
-    -m, --model [<model>]       Choose a mode
-    -c, --caps <flags>          Set capabilities (default: %s)
+    -m, --model [<model>]       Choose a model
+    -c, --caps <flags>          Set capabilities
     -t, --tool <tool>           Replace the toolbox
-    -p, --print                 Answer non-interactively
-        --yolo                  Don't sandbox anything
+    -p, --print                 Stream non-interactively
+        --yolo                  Disable sandbox
+    -l, --list                  List models
+    -u, --update                Update model cache
+    -L, --login                 Log in to a provider
     -U, --usage                 Show subscription usage
+    -I, --ignored               Show ignored items
     -J, --json                  Output as JSON
-    -l, --list                  List available models
-    -u, --update                Update model list cache
     -v, --version               Show version
     -h, --help                  Show this help
-`, defaultCapFlags)
+`
 
 type inputFlags struct {
-	Message         []string `docopt:"<prompt>"`
-	Login           bool     `docopt:"--login"`
-	LoginProvider   string   `docopt:"<login-provider>"`
-	Session         string   `docopt:"--resume"`
-	IsSessionPicker bool     `docopt:"-r"`
-	Model           string   `docopt:"--model"`
-	IsModelPicker   bool     `docopt:"-m"`
-	Caps            string   `docopt:"--caps"`
-	Tools           []string `docopt:"--tool"`
-	IsPrinting      bool     `docopt:"--print"`
-	Usage           bool     `docopt:"--usage"`
-	JSON            bool     `docopt:"--json"`
-	Yolo            bool     `docopt:"--yolo"`
-	List            bool     `docopt:"--list"`
-	Update          bool     `docopt:"--update"`
-	Version         bool     `docopt:"--version"`
+	Message          []string `docopt:"<prompt>"`
+	Login            bool     `docopt:"--login"`
+	LoginProvider    string   `docopt:"<login-provider>"`
+	Session          string   `docopt:"--resume"`
+	IsSessionPicker  bool     `docopt:"-r"`
+	Model            string   `docopt:"--model"`
+	IsModelPicker    bool     `docopt:"-m"`
+	Caps             string   `docopt:"--caps"`
+	Tools            []string `docopt:"--tool"`
+	IsPrinting       bool     `docopt:"--print"`
+	Usage            bool     `docopt:"--usage"`
+	JSON             bool     `docopt:"--json"`
+	Yolo             bool     `docopt:"--yolo"`
+	List             bool     `docopt:"--list"`
+	Update           bool     `docopt:"--update"`
+	IsShowingIgnored bool     `docopt:"--ignored"`
+	Version          bool     `docopt:"--version"`
 }
 
 type Input struct {

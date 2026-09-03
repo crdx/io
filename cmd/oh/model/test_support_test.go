@@ -38,7 +38,7 @@ func parseModelSelection(writtenSelection string) (string, string, string, error
 func updateModelsWithoutProviderListings(output io.Writer, endpoint string, path string) error {
 	return Update(output, endpoint, path, func(context.Context, string) ([]agent.Model, error) {
 		return nil, nil
-	})
+	}, true)
 }
 
 func ensureModelsWithoutProviderListings(output io.Writer, endpoint string, path string) error {

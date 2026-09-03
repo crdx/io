@@ -3865,6 +3865,7 @@ var optionsThatExitEarly = map[string][]string{
 	"--usage":   {"-U", "-J"},
 	"--list":    {"-l"},
 	"--update":  {"-u"},
+	"--ignored": {"-u", "-I"},
 	"--version": {"-v"},
 	"--help":    {"-h"},
 }

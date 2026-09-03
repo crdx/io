@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/modelsdev"
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/codex"
@@ -202,25 +203,36 @@ func getModelIteration(id string) (modelFamily, []int, bool) {
 	return family, iteration, true
 }
 
-func latestModelIterations(models []agent.Model) []agent.Model {
-	latest := make(map[modelFamily][]int)
+type latestIteration struct {
+	ID        string
+	Iteration []int
+}
+
+func latestModelIterations(models []agent.Model) map[modelFamily]latestIteration {
+	latest := make(map[modelFamily]latestIteration)
+
 	for _, model := range models {
 		family, iteration, hasIteration := getModelIteration(model.ID)
-		knownIteration, hasKnown := latest[family]
-		if hasIteration && (!hasKnown || slices.Compare(iteration, knownIteration) > 0) {
-			latest[family] = iteration
+		if !hasIteration {
+			continue
+		}
+
+		knownLatest, hasKnown := latest[family]
+		if !hasKnown || slices.Compare(iteration, knownLatest.Iteration) > 0 {
+			latest[family] = latestIteration{ID: model.ID, Iteration: iteration}
 		}
 	}
 
-	retainedModels := make([]agent.Model, 0, len(latest))
-	for _, model := range models {
-		family, iteration, hasIteration := getModelIteration(model.ID)
-		if !hasIteration || slices.Equal(iteration, latest[family]) {
-			retainedModels = append(retainedModels, model)
-		}
+	return latest
+}
+
+func supersededBy(latest map[modelFamily]latestIteration, id string) (string, bool) {
+	family, iteration, hasIteration := getModelIteration(id)
+	if !hasIteration || slices.Equal(iteration, latest[family].Iteration) {
+		return "", false
 	}
 
-	return retainedModels
+	return latest[family].ID, true
 }
 
 func isDrivable(providerName string, id string) bool {
@@ -236,26 +248,83 @@ func isDrivable(providerName string, id string) bool {
 	}
 }
 
-func drivableModels(providerName string, models []agent.Model) []agent.Model {
-	retainedModels := make([]agent.Model, 0, len(models))
+const undrivableReason = "unsupported request shape"
+
+type ignoredModel struct {
+	Name   string
+	Reason string
+}
+
+func recordableModels(providerName string, models []agent.Model) ([]agent.Model, []ignoredModel) {
+	latest := latestModelIterations(models)
+
+	recordable := make([]agent.Model, 0, len(models))
+
+	var ignoredModels []ignoredModel
+
 	for _, model := range models {
-		if isDrivable(providerName, model.ID) {
-			retainedModels = append(retainedModels, model)
+		supersedingID, isSuperseded := supersededBy(latest, model.ID)
+
+		switch {
+		case isSuperseded:
+			ignoredModels = append(ignoredModels, ignoredFor(model, "superseded by "+supersedingID))
+		case !isDrivable(providerName, model.ID):
+			ignoredModels = append(ignoredModels, ignoredFor(model, undrivableReason))
+		default:
+			recordable = append(recordable, model)
 		}
 	}
 
-	return retainedModels
+	return recordable, ignoredModels
+}
+
+func unselectableReason(model agent.Model) string {
+	switch {
+	case model.ID == "":
+		return "unknown id"
+	case len(model.EffortLevels) == 0:
+		return "unknown effort level"
+	case model.MaxOutputTokens <= 0:
+		return "unknown output limit"
+	default:
+		return ""
+	}
+}
+
+const unnamedModelName = "(unnamed)"
+
+func ignoredName(model agent.Model) string {
+	switch {
+	case model.ID != "":
+		return model.ID
+	case model.Name != "":
+		return model.Name
+	default:
+		return unnamedModelName
+	}
+}
+
+func ignoredFor(model agent.Model, reason string) ignoredModel {
+	return ignoredModel{Name: ignoredName(model), Reason: reason}
+}
+
+func unselectableModels(models []agent.Model) []ignoredModel {
+	var ignoredModels []ignoredModel
+
+	for _, model := range models {
+		if reason := unselectableReason(model); reason != "" {
+			ignoredModels = append(ignoredModels, ignoredFor(model, reason))
+		}
+	}
+
+	return ignoredModels
 }
 
 func choicesFor(providerName string, models []agent.Model) []Choice {
 	choices := make([]Choice, 0, len(models))
 
 	for _, model := range models {
-		if model.ID == "" || len(model.EffortLevels) == 0 || model.MaxOutputTokens <= 0 {
-			continue
-		}
-
-		if !isDrivable(providerName, model.ID) {
+		if unselectableReason(model) != "" || !isDrivable(providerName, model.ID) {
 			continue
 		}
 
@@ -307,14 +376,14 @@ func Ensure(output io.Writer, endpoint string, path string, listProviderModels P
 		return nil
 	}
 
-	_, _ = fmt.Fprintln(output, refreshMessage)
+	_, _ = fmt.Fprintln(output, style.Subtle(refreshMessage))
 
 	ctx, cancel := context.WithTimeout(context.Background(), refreshTimeout)
 	defer cancel()
 
 	var reportedText bytes.Buffer
 
-	err := updateModels(ctx, &reportedText, endpoint, path, listProviderModels)
+	err := updateModels(ctx, &reportedText, endpoint, path, listProviderModels, false)
 	if err == nil {
 		return nil
 	}
@@ -325,7 +394,7 @@ func Ensure(output io.Writer, endpoint string, path string, listProviderModels P
 		return err
 	}
 
-	_, _ = fmt.Fprintf(output, "model list not refreshed: %s\n", err)
+	_, _ = fmt.Fprintln(output, style.Change("model list not refreshed: %s", err))
 
 	cache.CheckedAt = time.Now()
 
@@ -340,11 +409,17 @@ func isCacheCurrent(cache modelCache, now time.Time) bool {
 	return now.Sub(cache.CheckedAt) < maximumCacheAge
 }
 
-func Update(output io.Writer, endpoint string, path string, listProviderModels ProviderLister) error {
+func Update(
+	output io.Writer,
+	endpoint string,
+	path string,
+	listProviderModels ProviderLister,
+	isShowingIgnored bool,
+) error {
 	ctx, cancel := context.WithTimeout(context.Background(), updateTimeout)
 	defer cancel()
 
-	return updateModels(ctx, output, endpoint, path, listProviderModels)
+	return updateModels(ctx, output, endpoint, path, listProviderModels, isShowingIgnored)
 }
 
 func updateModels(
@@ -353,38 +428,55 @@ func updateModels(
 	endpoint string,
 	path string,
 	listProviderModels ProviderLister,
+	isShowingIgnored bool,
 ) error {
 	registry, err := modelsdev.Fetch(ctx, registryAddress(endpoint), nil)
 	if err != nil {
-		_, _ = fmt.Fprintf(output, "models.dev: %s\n", err)
+		_, _ = fmt.Fprintln(output, style.Failure("models.dev: %s", err))
 		registry = modelsdev.Registry{}
 	}
 
 	cache := loadModelCache(path)
 
+	writeHeadings(output)
+
 	var describedCount int
+
+	reports := make([]providerReport, 0, len(ProviderNames()))
 
 	for _, providerName := range ProviderNames() {
 		registeredModels := registry.Provider(registryNames[providerName])
 
-		models, source, why := describeProviderModels(ctx, providerName, registeredModels, listProviderModels)
-		models = latestModelIterations(models)
-		models = drivableModels(providerName, models)
+		listedModels, source, why := describeProviderModels(ctx, providerName, registeredModels, listProviderModels)
+
+		models, ignoredModels := recordableModels(providerName, listedModels)
+		ignoredModels = append(ignoredModels, unselectableModels(models)...)
+
+		report := providerReport{
+			Provider:        providerName,
+			Source:          source,
+			RecordedCount:   len(models),
+			SelectableCount: pickable(models),
+			IgnoredModels:   ignoredModels,
+		}
+
 		if len(models) == 0 {
-			_, _ = fmt.Fprintf(output, "%-12s nothing to record: %s\n", providerName, why)
-
-			continue
+			report.Why = nothingRecordedReason(why, ignoredModels)
+		} else {
+			cache.Providers[providerName] = cachedModels{
+				FetchedAt: time.Now(),
+				Source:    source,
+				Models:    models,
+			}
+			describedCount++
 		}
 
-		cache.Providers[providerName] = cachedModels{
-			FetchedAt: time.Now(),
-			Source:    source,
-			Models:    models,
-		}
-		describedCount++
+		reports = append(reports, report)
+		writeProviderReport(output, report)
+	}
 
-		_, _ = fmt.Fprintf(output, "%-12s %3d models  %-19s %s\n",
-			providerName, len(models), source, pickable(models))
+	if isShowingIgnored {
+		writeIgnoredModels(output, reports)
 	}
 
 	if describedCount == 0 {
@@ -397,20 +489,37 @@ func updateModels(
 		return err
 	}
 
-	_, _ = fmt.Fprintln(output, "Stored model list in "+path)
+	_, _ = fmt.Fprintln(output)
+	_, _ = fmt.Fprintln(output, style.Subtle("Stored model list in ")+style.Normal(path))
+
+	if !isShowingIgnored {
+		writeIgnoredHint(output, reports)
+	}
 
 	return nil
 }
 
-func pickable(models []agent.Model) string {
+func pickable(models []agent.Model) int {
 	var count int
 	for _, model := range models {
-		if len(model.EffortLevels) > 0 {
+		if unselectableReason(model) == "" {
 			count++
 		}
 	}
 
-	return fmt.Sprintf("%d selectable", count)
+	return count
+}
+
+func nothingRecordedReason(why string, ignoredModels []ignoredModel) string {
+	if why != "" {
+		return why
+	}
+
+	if len(ignoredModels) == 1 {
+		return "the one model it offers is ignored"
+	}
+
+	return fmt.Sprintf("all %d models it offers are ignored", len(ignoredModels))
 }
 
 func describeProviderModels(

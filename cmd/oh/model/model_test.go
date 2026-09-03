@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/style"
 )
 
 func writeModelCache(t *testing.T, cache modelCache) {
@@ -266,10 +267,14 @@ func TestOnlyTheLatestIterationOfEachCurrentModelIsRetained(t *testing.T) {
 				models[i].ID = modelID
 			}
 
-			retained := latestModelIterations(models)
-			got := make([]string, len(retained))
-			for i, model := range retained {
-				got[i] = model.ID
+			latest := latestModelIterations(models)
+
+			var got []string
+
+			for _, model := range models {
+				if _, isSuperseded := supersededBy(latest, model.ID); !isSuperseded {
+					got = append(got, model.ID)
+				}
 			}
 
 			if !slices.Equal(got, test.want) {
@@ -335,7 +340,7 @@ func TestAModelTheClientCannotTalkToIsRefusedWithTheReasonRatherThanAnUpdate(t *
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	_, err := chosenModel(anthropicProvider, "claude-opus-4-5")
-	if err == nil || !strings.Contains(err.Error(), "not supported") {
+	if err == nil || !strings.Contains(err.Error(), undrivableReason) {
 		t.Errorf("expected the refusal to say the model cannot be spoken to, got %v", err)
 	}
 }
@@ -557,8 +562,8 @@ func TestAProviderThatListsNothingIsDescribedByTheRegistryAlone(t *testing.T) {
 		t.Fatalf("expected only the compatible latest model to be recorded, got %v", cached.Models)
 	}
 
-	wantRow := "codex          1 models  models.dev          1 selectable\n"
-	if !strings.Contains(output.String(), wantRow) {
+	wantRow := "Codex              1           1        2  models.dev\n"
+	if !strings.Contains(style.Plain(output.String()), wantRow) {
 		t.Errorf("expected the successful row not to carry the listing failure, got %q", output.String())
 	}
 
@@ -626,7 +631,7 @@ func TestACacheOlderThanAWeekIsRefreshed(t *testing.T) {
 		t.Fatalf("unexpected error: %v, output %q", err, output.String())
 	}
 
-	if output.String() != refreshMessage+"\n" {
+	if style.Plain(output.String()) != refreshMessage+"\n" {
 		t.Errorf("expected the refresh to say so and nothing more, got %q", output.String())
 	}
 
@@ -668,8 +673,10 @@ func TestARefreshThatFailsKeepsWhatIsCachedAndWaitsBeforeAskingAgain(t *testing.
 		t.Errorf("expected the failure to be reported, got %q", output.String())
 	}
 
-	if !strings.Contains(output.String(), "nothing to record") {
-		t.Errorf("expected a failure to show what each provider said, got %q", output.String())
+	for _, providerName := range ProviderNames() {
+		if !strings.Contains(output.String(), ProviderName(providerName)) {
+			t.Errorf("expected a failure to show what %s said, got %q", providerName, output.String())
+		}
 	}
 
 	cached := loadModelCache(modelCachePath()).Providers[codexProvider]

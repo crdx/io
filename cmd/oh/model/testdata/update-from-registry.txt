@@ -1,5 +1,0 @@
-codex          1 models  models.dev          1 selectable
-opencode-go  nothing to record: not logged in to OpenCode Go: run the login command with opencode-go
-anthropic    nothing to record: not logged in to Anthropic: run the login command with anthropic
-ollama       nothing to record: Get "http://localhost:11434/api/tags": connect: connection refused
-Stored model list in /state/models.json

@@ -66,6 +66,7 @@ func TestUpdatingAgainstAStandInEndpointDescribesEveryProvider(t *testing.T) {
 		address,
 		location.GetModelCachePath(os.Getenv(EndpointVariable) != ""),
 		listProviderModels,
+		false,
 	); err != nil {
 		t.Fatalf("unexpected error: %v, output %q", err, output.String())
 	}

@@ -126,7 +126,7 @@ func PrepareConfig(options Options) (config.Config, error) {
 			return model.Update(io.Discard, options.EndpointURL, modelCachePath,
 				func(ctx context.Context, providerName string) ([]agent.Model, error) {
 					return backend.ListModels(ctx, providerName, endpoints)
-				})
+				}, false)
 		},
 		getModels: func() []model.Choice { return model.Choices(modelCachePath) },
 		setInitialModel: func(selection string) error {

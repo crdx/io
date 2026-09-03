@@ -1,6 +1,7 @@
 === options ===
 --caps
 --help
+--ignored
 --json
 --list
 --login

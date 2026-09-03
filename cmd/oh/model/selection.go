@@ -24,10 +24,7 @@ func Chosen(path string, providerName string, model string) (Choice, error) {
 	}
 
 	if !isDrivable(providerName, model) {
-		return Choice{}, fmt.Errorf(
-			"%s/%s is not supported: it takes a request shape this build does not speak",
-			providerName, model,
-		)
+		return Choice{}, fmt.Errorf("%s/%s: %s", providerName, model, undrivableReason)
 	}
 
 	return Choice{}, fmt.Errorf(

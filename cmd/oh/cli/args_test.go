@@ -250,6 +250,15 @@ func TestAPrintedSessionNeedsMoreThanTheStdinMarker(t *testing.T) {
 	}
 }
 
+func TestTheIgnoredModelsAreAskedForAlongsideAnUpdate(t *testing.T) {
+	input := bind(t, "-u", "-I")
+
+	if !input.Update || !input.IsShowingIgnored {
+		t.Errorf("expected both flags to be read, got Update=%v IsShowingIgnored=%v",
+			input.Update, input.IsShowingIgnored)
+	}
+}
+
 func TestWhateverIsLeftOverIsTheFirstThingSaid(t *testing.T) {
 	parsedOptions := parseOptions(t, "why", "does", "the", "spinner", "stutter")
 

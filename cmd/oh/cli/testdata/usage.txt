@@ -1,21 +1,21 @@
-oh — coding harness
-
 Usage:
     oh -L [<login-provider>]
-    oh -U [-J]
+    oh -U [--json]
+    oh -u [--ignored]
     oh [options] [-t <tool>]... [<prompt>...]
 
 Options:
-    -L, --login                 Auth to a provider
     -r, --resume [<session>]    Resume a session
-    -m, --model [<model>]       Choose a mode
-    -c, --caps <flags>          Set capabilities (default: rx)
+    -m, --model [<model>]       Choose a model
+    -c, --caps <flags>          Set capabilities
     -t, --tool <tool>           Replace the toolbox
-    -p, --print                 Answer non-interactively
-        --yolo                  Don't sandbox anything
+    -p, --print                 Stream non-interactively
+        --yolo                  Disable sandbox
+    -l, --list                  List models
+    -u, --update                Update model cache
+    -L, --login                 Log in to a provider
     -U, --usage                 Show subscription usage
+    -I, --ignored               Show ignored items
     -J, --json                  Output as JSON
-    -l, --list                  List available models
-    -u, --update                Update model list cache
     -v, --version               Show version
     -h, --help                  Show this help

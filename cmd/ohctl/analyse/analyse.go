@@ -19,6 +19,7 @@ import (
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/table"
 	"crdx.org/io/cmd/ohctl/console"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/session"
@@ -668,8 +669,6 @@ type reportRow struct {
 	appearance style.Style
 }
 
-const reportColumnGap = 2
-
 func writeText(analysis Analysis, writer io.Writer) error {
 	restoreStyle := style.Init(writer)
 	defer restoreStyle()
@@ -750,45 +749,37 @@ func contextRow(name string, statistics CacheStatistics, appearance style.Style)
 	}
 }
 
-func writeReportTable(writer io.Writer, header []string, rows []reportRow) error {
-	columnWidths := make([]int, len(header))
-	for index, cell := range header {
-		columnWidths[index] = style.Width(cell)
-	}
-	for _, row := range rows {
-		for index, cell := range row.cells {
-			columnWidths[index] = max(columnWidths[index], style.Width(cell))
+func reportTable(header []string, rows []reportRow) *table.Table {
+	columns := make([]table.Column, len(header))
+	for index, title := range header {
+		columns[index] = table.Column{Title: title}
+		if index > 0 {
+			columns[index].Align = table.Right
 		}
 	}
 
-	if err := writeReportRow(writer, reportRow{cells: header, appearance: style.Column}, columnWidths); err != nil {
+	cells := make([][]string, len(rows))
+	for index, row := range rows {
+		cells[index] = row.cells
+	}
+
+	return table.New(columns...).Fit(cells)
+}
+
+func writeReportTable(writer io.Writer, header []string, rows []reportRow) error {
+	reportedTable := reportTable(header, rows)
+
+	if _, err := fmt.Fprintln(writer, style.Column(reportedTable.Header(0))); err != nil {
 		return err
 	}
+
 	for _, row := range rows {
-		if err := writeReportRow(writer, row, columnWidths); err != nil {
+		if _, err := fmt.Fprintln(writer, row.appearance(reportedTable.Row(row.cells, 0))); err != nil {
 			return err
 		}
 	}
-	return nil
-}
 
-func writeReportRow(writer io.Writer, row reportRow, columnWidths []int) error {
-	var line strings.Builder
-	for index, cell := range row.cells {
-		padding := columnWidths[index] - style.Width(cell)
-		if index == 0 {
-			line.WriteString(cell)
-			line.WriteString(strings.Repeat(" ", padding))
-		} else {
-			line.WriteString(strings.Repeat(" ", padding))
-			line.WriteString(cell)
-		}
-		if index < len(row.cells)-1 {
-			line.WriteString(strings.Repeat(" ", reportColumnGap))
-		}
-	}
-	_, err := fmt.Fprintln(writer, row.appearance(line.String()))
-	return err
+	return nil
 }
 
 const (

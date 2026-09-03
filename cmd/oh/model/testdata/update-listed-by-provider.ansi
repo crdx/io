@@ -1,0 +1,10 @@
+\e[4m\e[38;2;150;152;150mProvider      Models  Selectable  Ignored  Source\e[0m\e[0m
+Codex              1           \e[38;2;76;154;44m1\e[0m           \e[38;2;129;162;190mendpoint+models.dev\e[0m
+OpenCode Go        \e[38;2;150;152;150m—\e[0m                       \e[38;2;150;152;150mnot logged in to OpenCode Go: run the login command with opencode-go\e[0m
+Anthropic          \e[38;2;150;152;150m—\e[0m                       \e[38;2;150;152;150mthe endpoint lists no models\e[0m
+Ollama             2           \e[38;2;76;154;44m1\e[0m        \e[38;2;207;173;0m1\e[0m  \e[38;2;129;162;190mendpoint\e[0m
+
+\e[4m\e[38;2;150;152;150mProvider  Model                  Reason\e[0m\e[0m
+Ollama    an-unselectable-model  \e[38;2;150;152;150munknown effort level\e[0m
+
+\e[38;2;150;152;150mStored model list in \e[0m/state/models.json
