@@ -69,6 +69,9 @@ func run(inputArgs *inputOpts, output console.Output) error {
 	if err := sweepListingMeta(directory, inputArgs.DryRun, output); err != nil {
 		return err
 	}
+	if err := sweepArchivedListingMeta(directory, inputArgs.DryRun, output); err != nil {
+		return err
+	}
 	if err := sweepFastModes(directory, inputArgs.Sessions, inputArgs.DryRun, output); err != nil {
 		return err
 	}
@@ -200,6 +203,37 @@ func sweepListingMeta(directory string, isDryRun bool, output console.Output) er
 	}
 	if rebuilt > 0 {
 		_, _ = fmt.Fprintf(output.Screen, "%s listing metadata of %d\n", style.Subtle("rebuilt"), rebuilt)
+	}
+
+	return nil
+}
+
+func sweepArchivedListingMeta(directory string, isDryRun bool, output console.Output) error {
+	if isDryRun {
+		stale, err := store.StaleArchivedMeta(directory)
+		if err != nil {
+			return err
+		}
+		if len(stale) > 0 {
+			_, _ = fmt.Fprintf(
+				output.Screen,
+				"%s listing metadata of %d archived\n",
+				style.Subtle("would rebuild"), len(stale),
+			)
+		}
+		return nil
+	}
+
+	rebuilt, err := store.RebuildStaleArchivedMeta(directory)
+	if err != nil {
+		return err
+	}
+	if rebuilt > 0 {
+		_, _ = fmt.Fprintf(
+			output.Screen,
+			"%s listing metadata of %d archived\n",
+			style.Subtle("rebuilt"), rebuilt,
+		)
 	}
 
 	return nil

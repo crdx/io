@@ -23,7 +23,7 @@ import (
 
 const (
 	JournalFormat = 12
-	MetaFormat    = 2
+	MetaFormat    = 3
 )
 
 var ErrMetaOutOfDate = errors.New("listing metadata is in another format")

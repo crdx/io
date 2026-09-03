@@ -1,0 +1,4 @@
+=== screen ===
+[38;2;150;152;150mrebuilt[0m listing metadata of 1 archived
+[38;2;150;152;150mthere are no stored sessions in [0m/state/sessions
+=== failure ===

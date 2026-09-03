@@ -363,6 +363,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		WorkspaceDir: workspaceDir,
 		Provider:     selection.Provider,
 		Effort:       selection.Effort,
+		IsFast:       selection.IsFast,
 		Yolo:         args.Yolo,
 	}
 

@@ -52,9 +52,31 @@ func TestLoadingSessionsIdentifiesThoseThatAreRunning(t *testing.T) {
 	}
 }
 
-func TestLoadingSessionsRestoresFastModeFromTheJournal(t *testing.T) {
+func TestFastModeIsListedBesideTheRestOfTheSelection(t *testing.T) {
 	directory := t.TempDir()
-	writer, err := store.Create(directory, store.Meta{Provider: model.CodexProvider, Model: "gpt-5.6-sol", Effort: "high"})
+	writeIdleSession(t, directory, store.Meta{
+		Provider: model.CodexProvider,
+		Model:    "gpt-5.6-sol",
+		Effort:   "high",
+		IsFast:   true,
+	})
+
+	loadedSessions, err := Load(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(loadedSessions) != 1 || !loadedSessions[0].IsFast {
+		t.Errorf("got %+v", loadedSessions)
+	}
+}
+
+func TestAListingWrittenBeforeItHeldFastModeRecoversItFromTheJournal(t *testing.T) {
+	directory := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{
+		Provider: model.CodexProvider,
+		Model:    "gpt-5.6-sol",
+		Effort:   "high",
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,6 +86,7 @@ func TestLoadingSessionsRestoresFastModeFromTheJournal(t *testing.T) {
 	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
 		t.Fatal(err)
 	}
+	name := writer.Name()
 	if err := writer.Close(); err != nil {
 		t.Fatal(err)
 	}
@@ -72,8 +95,20 @@ func TestLoadingSessionsRestoresFastModeFromTheJournal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if len(loadedSessions) != 1 || loadedSessions[0].IsFast {
+		t.Fatalf("expected a listing without the flag to say nothing of fast mode, got %+v", loadedSessions)
+	}
+
+	if err := store.RebuildMeta(directory, name); err != nil {
+		t.Fatal(err)
+	}
+
+	loadedSessions, err = Load(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(loadedSessions) != 1 || !loadedSessions[0].IsFast {
-		t.Errorf("got %+v", loadedSessions)
+		t.Errorf("expected the rebuilt listing to recover fast mode, got %+v", loadedSessions)
 	}
 }
 
@@ -167,28 +202,25 @@ func TestTheSessionAddedToLastIsOfferedFirstByThePicker(t *testing.T) {
 	}
 }
 
-func TestCompletableNamesAreTakenFromTheListingWithoutReadingAJournal(t *testing.T) {
+func TestCompletableNamesComeFromTheListingRatherThanTheJournal(t *testing.T) {
 	directory := t.TempDir()
 	workspaceDir := t.TempDir()
 
 	names := make([]string, 0, 2)
 	for range cap(names) {
-		names = append(names, writeIdleSession(t, directory, store.Meta{
-			WorkspaceDir: workspaceDir,
-			Provider:     model.CodexProvider,
-			Model:        "gpt-5.6-sol",
-		}))
+		names = append(names, writeIdleSession(t, directory, store.Meta{WorkspaceDir: workspaceDir}))
 		time.Sleep(2 * time.Millisecond)
 	}
+	writeIdleSession(t, directory, store.Meta{WorkspaceDir: t.TempDir()})
 
-	elsewhere := writeIdleSession(t, directory, store.Meta{WorkspaceDir: t.TempDir()})
+	emptyJournal(t, directory, names[0])
 
-	for _, name := range append(slices.Clone(names), elsewhere) {
-		breakJournal(t, directory, name)
+	loadedSessions, err := Load(directory)
+	if err != nil {
+		t.Fatal(err)
 	}
-
-	if _, err := Load(directory); err == nil {
-		t.Fatal("expected a broken journal to stop the sessions being loaded in full")
+	if len(InWorkspace(loadedSessions, work.At(workspaceDir))) != 1 {
+		t.Fatalf("expected the picker to read a journal and drop the empty one, got %+v", loadedSessions)
 	}
 
 	got, err := NamesInWorkspace(directory, work.At(workspaceDir))
@@ -238,18 +270,10 @@ func writeIdleSession(t *testing.T, directory string, meta store.Meta) string {
 	return writer.Name()
 }
 
-func breakJournal(t *testing.T, directory string, name string) {
+func emptyJournal(t *testing.T, directory string, name string) {
 	t.Helper()
 
-	path := filepath.Join(directory, name, "session.jsonl")
-	journal, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, 0o600) //nolint:gosec // the test's own path
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := journal.WriteString("{broken}\n"); err != nil {
-		t.Fatal(err)
-	}
-	if err := journal.Close(); err != nil {
+	if err := os.WriteFile(filepath.Join(directory, name, "session.jsonl"), nil, 0o600); err != nil {
 		t.Fatal(err)
 	}
 }

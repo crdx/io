@@ -675,9 +675,73 @@ func TestTheTranscriptCountsTimeFromWhenTheSessionStarted(t *testing.T) {
 	}
 }
 
-func TestAListingWrittenBeforeTheModelWasInItIsRebuiltWithIt(t *testing.T) {
+func TestAnArchivedListingInAnOlderFormatIsRebuiltInPlace(t *testing.T) {
 	directory := t.TempDir()
 	name := write(t, directory)
+
+	putListingBehind(t, directory, name)
+
+	if err := session.Archive(directory, name); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := session.ArchivedMeta(directory, name); !errors.Is(err, session.ErrMetaOutOfDate) {
+		t.Fatalf("expected the archived listing to be out of date, got %v", err)
+	}
+
+	journalBefore := archivedJournal(t, directory, name)
+
+	rebuilt, err := store.RebuildStaleArchivedMeta(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rebuilt != 1 {
+		t.Errorf("rebuilt %d archived listings, want 1", rebuilt)
+	}
+
+	if !session.IsArchived(directory, name) {
+		t.Fatal("expected the session to be archived again")
+	}
+	meta, err := session.ArchivedMeta(directory, name)
+	if err != nil {
+		t.Fatalf("expected the rebuilt archived listing to be readable, got %v", err)
+	}
+
+	want := `{"workspaceDir":"/tmp/somewhere","provider":"codex","model":"gpt-5.6-sol","effort":"high"}`
+	if string(meta.Data) != want {
+		t.Errorf("expected the listing to come back from the journal, got %s", meta.Data)
+	}
+	if got := archivedJournal(t, directory, name); got != journalBefore {
+		t.Error("the journal inside the archive was not left alone")
+	}
+
+	stale, err := store.StaleArchivedMeta(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stale) != 0 {
+		t.Errorf("expected nothing left stale, got %v", stale)
+	}
+}
+
+func archivedJournal(t *testing.T, directory string, name string) string {
+	t.Helper()
+
+	if err := session.Restore(directory, name); err != nil {
+		t.Fatal(err)
+	}
+	journal, err := os.ReadFile(filepath.Join(directory, name, "session.jsonl")) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := session.Archive(directory, name); err != nil {
+		t.Fatal(err)
+	}
+
+	return string(journal)
+}
+
+func putListingBehind(t *testing.T, directory string, name string) {
+	t.Helper()
 
 	path := filepath.Join(directory, name, "meta.json")
 	stored, err := os.ReadFile(path) //nolint:gosec // the test's own path
@@ -698,6 +762,13 @@ func TestAListingWrittenBeforeTheModelWasInItIsRebuiltWithIt(t *testing.T) {
 	if err := os.WriteFile(path, behind, 0o600); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestAListingWrittenBeforeTheModelWasInItIsRebuiltWithIt(t *testing.T) {
+	directory := t.TempDir()
+	name := write(t, directory)
+
+	putListingBehind(t, directory, name)
 
 	rebuilt, err := store.RebuildStaleMeta(directory)
 	if err != nil {

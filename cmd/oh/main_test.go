@@ -10253,6 +10253,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		Model:        scenario.Model,
 		Provider:     scenario.Provider,
 		Effort:       scenario.Effort,
+		IsFast:       scenario.IsFast,
 		SystemPrompt: sessionGoldenSystemPrompt,
 	})
 	if err != nil {
@@ -10636,6 +10637,7 @@ func drawPrintedSessionGoldenTurn(
 		Model:        scenario.Model,
 		Provider:     scenario.Provider,
 		Effort:       scenario.Effort,
+		IsFast:       scenario.IsFast,
 		SystemPrompt: sessionGoldenSystemPrompt,
 	})
 	if err != nil {

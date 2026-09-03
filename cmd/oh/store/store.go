@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/internal/req"
 	"crdx.org/io/session"
 
+	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/cmd/oh/store/wire"
 )
@@ -22,6 +23,7 @@ type Meta struct {
 	WorkspaceDir string `json:"workspaceDir"`
 	Provider     string `json:"provider"`
 	Effort       string `json:"effort,omitempty"`
+	IsFast       bool   `json:"fast,omitempty"`
 	SystemPrompt string `json:"system_prompt,omitempty"`
 	Yolo         bool   `json:"yolo,omitempty"`
 }
@@ -31,6 +33,7 @@ type listingData struct {
 	Provider     string `json:"provider,omitempty"`
 	Model        string `json:"model,omitempty"`
 	Effort       string `json:"effort,omitempty"`
+	IsFast       bool   `json:"fast,omitempty"`
 }
 
 func encodeMeta(meta Meta) (json.RawMessage, json.RawMessage, error) {
@@ -43,6 +46,7 @@ func encodeMeta(meta Meta) (json.RawMessage, json.RawMessage, error) {
 		Provider:     meta.Provider,
 		Model:        meta.Model,
 		Effort:       meta.Effort,
+		IsFast:       meta.IsFast,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -409,12 +413,22 @@ func (self *Session) CanResume() bool {
 	return !self.HasIncompleteTurn
 }
 
+func listingDataOf(storedSession *Session) (json.RawMessage, error) {
+	meta := storedSession.Meta
+	if isFast, isFound := model.LastRecordedFastMode(storedSession.Events); isFound {
+		meta.IsFast = isFast
+	}
+
+	_, data, err := encodeMeta(meta)
+	return data, err
+}
+
 func GetListingMeta(directory string, name string) (*session.Meta, error) {
 	storedSession, err := Read(directory, name)
 	if err != nil {
 		return nil, err
 	}
-	_, data, err := encodeMeta(storedSession.Meta)
+	data, err := listingDataOf(storedSession)
 	if err != nil {
 		return nil, err
 	}
@@ -426,7 +440,7 @@ func RebuildMeta(directory string, name string) error {
 	if err != nil {
 		return err
 	}
-	_, data, err := encodeMeta(storedSession.Meta)
+	data, err := listingDataOf(storedSession)
 	if err != nil {
 		return err
 	}
@@ -464,6 +478,47 @@ func StaleMeta(directory string) ([]string, error) {
 	}
 
 	return stale, nil
+}
+
+func StaleArchivedMeta(directory string) ([]string, error) {
+	names, err := session.ArchivedNames(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	var stale []string
+	for _, name := range names {
+		if _, err := session.ArchivedMeta(directory, name); err != nil {
+			stale = append(stale, name)
+		}
+	}
+
+	return stale, nil
+}
+
+func RebuildArchivedMeta(directory string, name string) error {
+	if err := session.Restore(directory, name); err != nil {
+		return err
+	}
+	if err := RebuildMeta(directory, name); err != nil {
+		return err
+	}
+	return session.Archive(directory, name)
+}
+
+func RebuildStaleArchivedMeta(directory string) (int, error) {
+	stale, err := StaleArchivedMeta(directory)
+	if err != nil {
+		return 0, err
+	}
+
+	for at, name := range stale {
+		if err := RebuildArchivedMeta(directory, name); err != nil {
+			return at, fmt.Errorf("could not rebuild the listing metadata of archived %s: %w", name, err)
+		}
+	}
+
+	return len(stale), nil
 }
 
 func RebuildStaleMeta(directory string) (int, error) {

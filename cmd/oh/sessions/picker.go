@@ -96,7 +96,7 @@ func NamesInWorkspace(directory string, workspace *work.Space) ([]string, error)
 			continue
 		}
 
-		listing, _, isDescribed := describe(storedMeta)
+		listing, isDescribed := describe(storedMeta)
 		if !isDescribed {
 			continue
 		}
@@ -179,7 +179,6 @@ func LoadNewest(directory string, limit int) ([]*picker.Session, int, error) {
 
 type sessionMetadata struct {
 	listing        *picker.Session
-	provider       string
 	isRunningKnown bool
 }
 
@@ -218,7 +217,7 @@ func loadNamedMetadata(directory string, names []string) ([]sessionMetadata, err
 			return nil, fmt.Errorf("could not read session %s metadata: %w", name, metaError)
 		}
 
-		listing, data, isDescribed := describe(storedMeta)
+		listing, isDescribed := describe(storedMeta)
 		if !isDescribed {
 			continue
 		}
@@ -226,7 +225,6 @@ func loadNamedMetadata(directory string, names []string) ([]sessionMetadata, err
 
 		metadata = append(metadata, sessionMetadata{
 			listing:        listing,
-			provider:       data.Provider,
 			isRunningKnown: isRunningKnown,
 		})
 	}
@@ -243,14 +241,6 @@ func inspect(directory string, metadata []sessionMetadata) error {
 				return err
 			}
 			storedMetadata.listing.IsRunning = isRunning
-		}
-
-		if model.SupportsFastMode(storedMetadata.provider) {
-			isFast, err := getFastMode(directory, storedMetadata.listing.Name)
-			if err != nil {
-				return err
-			}
-			storedMetadata.listing.IsFast = isFast
 		}
 	}
 
@@ -278,7 +268,7 @@ func LoadArchived(directory string) ([]*picker.Session, error) {
 			return nil, fmt.Errorf("could not read archived session %s metadata: %w", name, err)
 		}
 
-		listing, _, isDescribed := describe(storedMeta)
+		listing, isDescribed := describe(storedMeta)
 		if !isDescribed {
 			continue
 		}
@@ -296,12 +286,13 @@ type listingData struct {
 	Provider     string `json:"provider"`
 	Model        string `json:"model"`
 	Effort       string `json:"effort"`
+	IsFast       bool   `json:"fast"`
 }
 
-func describe(storedMeta *session.Meta) (*picker.Session, listingData, bool) {
+func describe(storedMeta *session.Meta) (*picker.Session, bool) {
 	var data listingData
 	if len(storedMeta.Data) > 0 && json.Unmarshal(storedMeta.Data, &data) != nil {
-		return nil, data, false
+		return nil, false
 	}
 
 	return &picker.Session{
@@ -313,8 +304,9 @@ func describe(storedMeta *session.Meta) (*picker.Session, listingData, bool) {
 		Model:        strings.Join(model.DisplayName(data.Model), " "),
 		ModelID:      data.Model,
 		Effort:       data.Effort,
+		IsFast:       data.IsFast,
 		MessageCount: storedMeta.Messages,
-	}, data, true
+	}, true
 }
 
 func newestFirst(sessions []*picker.Session) {
@@ -332,26 +324,4 @@ func newestOrder(first *picker.Session, second *picker.Session) int {
 		return order
 	}
 	return strings.Compare(second.Name, first.Name)
-}
-
-var errFastModeFound = errors.New("fast mode found")
-
-func getFastMode(directory string, name string) (bool, error) {
-	isFast := false
-	err := session.Records(directory, name, func(line session.Line) error {
-		if line.Event == nil {
-			return nil
-		}
-
-		var isFound bool
-		isFast, isFound = model.FastModeFromEvent(*line.Event)
-		if isFound {
-			return errFastModeFound
-		}
-		return nil
-	})
-	if errors.Is(err, errFastModeFound) {
-		return isFast, nil
-	}
-	return isFast, err
 }

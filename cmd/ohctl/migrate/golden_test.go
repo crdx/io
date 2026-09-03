@@ -72,6 +72,37 @@ func TestAFastModeBackfillDryRunMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "fast-mode-dry-run.txt", migration(t, directory, &inputOpts{DryRun: true}))
 }
 
+func TestAnArchivedListingRebuildMatchesTheGolden(t *testing.T) {
+	directory := goldenSessions(t, currentCodexJournal()...)
+	archiveWithAnOldListing(t, directory)
+
+	assertGolden(t, "archived-listing.txt", migration(t, directory, &inputOpts{}))
+}
+
+func TestAnArchivedListingRebuildDryRunMatchesTheGolden(t *testing.T) {
+	directory := goldenSessions(t, currentCodexJournal()...)
+	archiveWithAnOldListing(t, directory)
+
+	assertGolden(t, "archived-listing-dry-run.txt", migration(t, directory, &inputOpts{DryRun: true}))
+}
+
+func archiveWithAnOldListing(t *testing.T, directory string) {
+	t.Helper()
+
+	meta := fmt.Sprintf(
+		`{"version":1,"name":%q,"data":{"workspaceDir":"/workspace"},`+
+			`"started":"2026-08-01T00:00:00Z","touched":"2026-08-01T00:00:00Z"}`+"\n",
+		goldenName,
+	)
+	path := filepath.Join(directory, goldenName, "meta.json")
+	if err := os.WriteFile(path, []byte(meta), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := session.Archive(directory, goldenName); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestAConfigMigrationMatchesTheGolden(t *testing.T) {
 	directory := goldenSessions(t)
 	storedConfig(t, `provider = "codex"

@@ -1,1 +1,1 @@
-{"data":{"workspaceDir":"","provider":"ollama","model":"qwen3.8:27b-mtp-q8_0-256k","effort":"high"},"messages":4,"name":"brave-otter","started":"2001-01-01T00:00:00Z","title":"answer through Ollama","touched":"2001-01-01T00:00:00Z","version":2}
+{"data":{"workspaceDir":"","provider":"ollama","model":"qwen3.8:27b-mtp-q8_0-256k","effort":"high"},"messages":4,"name":"brave-otter","started":"2001-01-01T00:00:00Z","title":"answer through Ollama","touched":"2001-01-01T00:00:00Z","version":3}
