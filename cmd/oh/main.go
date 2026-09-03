@@ -244,7 +244,8 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 	if forkSource != nil {
-		args.AddedFiles = append([]string{forkSource.InitialFilePath}, args.AddedFiles...)
+		forkFile := startup.InitialFile{SourcePath: forkSource.InitialFilePath, DisplayName: forkSource.InitialFileName}
+		args.AddedFiles = append([]startup.InitialFile{forkFile}, args.AddedFiles...)
 		args.Message = forkSource.InitialUserMessage
 	}
 

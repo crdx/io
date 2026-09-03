@@ -10,6 +10,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/model"
+	"crdx.org/io/cmd/oh/startup"
 )
 
 const (
@@ -75,7 +76,7 @@ type Options struct {
 	Caps           caps.Set
 	WereCapsChosen bool
 	Tools          []string
-	AddedFiles     []string
+	AddedFiles     []startup.InitialFile
 	Yolo           bool
 	IsPrinting     bool
 }

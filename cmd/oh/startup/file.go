@@ -9,16 +9,26 @@ import (
 
 const messageIntroduction = "The following files have been made available in this session's scratch directory:"
 
-func PrepareInitialFiles(sourcePaths []string, scratchDirectory string) (string, error) {
-	destinationPaths := make([]string, 0, len(sourcePaths))
-	for _, sourcePath := range sourcePaths {
-		content, err := os.ReadFile(sourcePath) //nolint:gosec // the path names a file selected by --add
+type InitialFile struct {
+	SourcePath  string
+	DisplayName string
+}
+
+func PrepareInitialFiles(files []InitialFile, scratchDirectory string) (string, error) {
+	destinationPaths := make([]string, 0, len(files))
+	for _, file := range files {
+		content, err := os.ReadFile(file.SourcePath)
 		if err != nil {
 			return "", fmt.Errorf("could not read the initial file: %w", err)
 		}
 
-		destinationPath := filepath.Join(scratchDirectory, filepath.Base(sourcePath))
-		if err := os.WriteFile(destinationPath, content, 0o600); err != nil { //nolint:gosec // a generated scratch directory receives the source basename
+		displayName := file.DisplayName
+		if displayName == "" {
+			displayName = filepath.Base(file.SourcePath)
+		}
+
+		destinationPath := filepath.Join(scratchDirectory, displayName)
+		if err := os.WriteFile(destinationPath, content, 0o600); err != nil { //nolint:gosec // a generated scratch directory receives the display name
 			return "", fmt.Errorf("could not copy the initial file: %w", err)
 		}
 		destinationPaths = append(destinationPaths, destinationPath)

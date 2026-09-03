@@ -3845,16 +3845,48 @@ func buildTestBinary(t *testing.T) string {
 	return binary
 }
 
-func runTestBinary(t *testing.T, binary string, environment []string, arguments ...string) string {
+func runTestBinary(t *testing.T, binary string, workspaceDir string, environment []string, arguments ...string) string {
 	t.Helper()
 
 	command := exec.CommandContext(t.Context(), binary, arguments...) //nolint:gosec // running the binary under test
 	command.Env = environment
+	command.Dir = workspaceDir
 	output, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("oh %s: %v\n%s", strings.Join(arguments, " "), err, output)
 	}
 	return string(output)
+}
+
+const reachableWorkspaceDirPrefix = "io-oh-test-"
+
+func reachableWorkspaceDir(t *testing.T) string {
+	t.Helper()
+
+	directory := t.TempDir()
+	if _, isCovered := pathutil.RelativeTo(sandbox.TmpDir, directory); !isCovered {
+		return directory
+	}
+
+	base, err := os.UserCacheDir()
+	if err != nil {
+		t.Skipf("a scratch at %s covers %s and there is nowhere else to work: %v", sandbox.TmpDir, directory, err)
+	}
+	if _, isCovered := pathutil.RelativeTo(sandbox.TmpDir, base); isCovered {
+		t.Skipf("a scratch at %s covers both %s and %s", sandbox.TmpDir, directory, base)
+	}
+
+	created, err := os.MkdirTemp(base, reachableWorkspaceDirPrefix) //nolint:usetesting // the scratch covers what t.TempDir gives
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := os.RemoveAll(created); err != nil {
+			t.Error(err)
+		}
+	})
+
+	return created
 }
 
 const earlyExitDeadline = 10 * time.Second
@@ -4057,7 +4089,7 @@ func TestVersionDispatchRunsThroughTheBinary(t *testing.T) {
 	binary := buildTestBinary(t)
 	stateDirectory := t.TempDir()
 
-	output := runTestBinary(t, binary, testBinaryEnvironment(t, stateDirectory), "--version")
+	output := runTestBinary(t, binary, reachableWorkspaceDir(t), testBinaryEnvironment(t, stateDirectory), "--version")
 	if strings.TrimSpace(output) == "" || strings.Count(output, "\n") != 1 {
 		t.Errorf("got %q, want one non-empty line", output)
 	}
@@ -4075,7 +4107,7 @@ func TestModelListDispatchRunsThroughTheBinary(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	output := runTestBinary(t, binary, testBinaryEnvironment(t, stateDirectory), "-l")
+	output := runTestBinary(t, binary, reachableWorkspaceDir(t), testBinaryEnvironment(t, stateDirectory), "-l")
 	if output != "codex/gpt-cli\n" {
 		t.Errorf("got %q", output)
 	}
@@ -4091,12 +4123,13 @@ func TestModelUpdateDispatchRunsThroughTheBinary(t *testing.T) {
 	stateDirectory := t.TempDir()
 	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
 
-	updated := runTestBinary(t, binary, environment, "-u")
+	workspaceDir := reachableWorkspaceDir(t)
+	updated := runTestBinary(t, binary, workspaceDir, environment, "-u")
 	if !strings.Contains(updated, "Stored model list") {
 		t.Errorf("update output did not report storage: %q", updated)
 	}
 
-	listed := runTestBinary(t, binary, environment, "-l")
+	listed := runTestBinary(t, binary, workspaceDir, environment, "-l")
 	for _, providerName := range model.ProviderNames() {
 		if !strings.Contains(listed, providerName+"/fake") {
 			t.Errorf("listing omitted %s: %q", providerName, listed)
@@ -4128,8 +4161,9 @@ func TestOpenCodeRequestsUseTheStoredSessionIdentifier(t *testing.T) {
 
 	address := endpoint.Addresses(server.URL)[sim.Completions]
 	stateDirectory := t.TempDir()
+	workspaceDir := reachableWorkspaceDir(t)
 	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
-	runTestBinary(t, binary, environment, "-p", "--yolo", "-m", "opencode-go/fake", "first question")
+	runTestBinary(t, binary, workspaceDir, environment, "-p", "--yolo", "-m", "opencode-go/fake", "first question")
 
 	sessionsDirectory := filepath.Join(stateDirectory, "org.crdx", "oh", "sessions")
 	storedSessions, err := store.List(sessionsDirectory)
@@ -4141,7 +4175,7 @@ func TestOpenCodeRequestsUseTheStoredSessionIdentifier(t *testing.T) {
 	}
 	storedSession := storedSessions[0]
 
-	runTestBinary(t, binary, environment, "-p", "-r", storedSession.Name, "second question")
+	runTestBinary(t, binary, workspaceDir, environment, "-p", "-r", storedSession.Name, "second question")
 
 	headerMutex.Lock()
 	capturedHeaders := slices.Clone(sessionHeaders)

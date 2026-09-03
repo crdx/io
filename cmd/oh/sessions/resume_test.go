@@ -120,7 +120,11 @@ func TestGettingAForkSourcePreparesTheNewConversation(t *testing.T) {
 	if forkSource.InitialFilePath != wantInitialFilePath {
 		t.Errorf("got initial file %q, want %q", forkSource.InitialFilePath, wantInitialFilePath)
 	}
-	wantMessage := forkSourcePrompt + "\n\nfocus on tests"
+	wantInitialFileName := writer.Name() + ".chat.md"
+	if forkSource.InitialFileName != wantInitialFileName {
+		t.Errorf("got initial file name %q, want %q", forkSource.InitialFileName, wantInitialFileName)
+	}
+	wantMessage := forkSourcePrompt(writer.Name()) + "\n\nfocus on tests"
 	if forkSource.InitialUserMessage != wantMessage {
 		t.Errorf("got message %q, want %q", forkSource.InitialUserMessage, wantMessage)
 	}
@@ -129,8 +133,8 @@ func TestGettingAForkSourcePreparesTheNewConversation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if forkSource.InitialUserMessage != forkSourcePrompt {
-		t.Errorf("got default message %q, want %q", forkSource.InitialUserMessage, forkSourcePrompt)
+	if forkSource.InitialUserMessage != forkSourcePrompt(writer.Name()) {
+		t.Errorf("got default message %q, want %q", forkSource.InitialUserMessage, forkSourcePrompt(writer.Name()))
 	}
 }
 
