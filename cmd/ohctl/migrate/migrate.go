@@ -69,9 +69,6 @@ func run(inputArgs *inputOpts, output console.Output) error {
 	if err := sweepListingMeta(directory, inputArgs.DryRun, output); err != nil {
 		return err
 	}
-	if err := sweepFastModes(directory, inputArgs.Sessions, inputArgs.DryRun, output); err != nil {
-		return err
-	}
 
 	names := inputArgs.Sessions
 	if len(names) == 0 {
@@ -132,52 +129,6 @@ func run(inputArgs *inputOpts, output console.Output) error {
 	}
 
 	_, _ = fmt.Fprintln(output.Screen, style.Subtle(fmt.Sprintf("%d of %d %s", migratedCount, len(names), summaryVerb(options.DryRun))))
-
-	return nil
-}
-
-func sweepFastModes(directory string, requestedSessionNames []string, isDryRun bool, output console.Output) error {
-	names, err := fastModeNames(directory, requestedSessionNames)
-	if err != nil {
-		return err
-	}
-
-	options := Options{
-		Directory: directory,
-		BackupDir: directory + "_pre_fast_mode",
-		DryRun:    isDryRun,
-	}
-	backfilledCount := 0
-	failureCount := 0
-	for _, name := range names {
-		wasBackfilled, err := backfillFastMode(options, name)
-		if errors.Is(err, session.ErrInUse) {
-			continue
-		}
-		if err != nil {
-			failureCount++
-			_, _ = fmt.Fprintln(output.Failure, style.Failure(name+": "+err.Error()))
-			continue
-		}
-		if wasBackfilled {
-			backfilledCount++
-		}
-	}
-
-	if failureCount > 0 {
-		return fmt.Errorf("%d of %d could not have fast mode backfilled", failureCount, len(names))
-	}
-	if backfilledCount == 0 {
-		return nil
-	}
-	if !isDryRun {
-		_, _ = fmt.Fprintln(output.Screen, style.Subtle("copies kept in ")+options.BackupDir)
-	}
-	action := "backfilled"
-	if isDryRun {
-		action = "would backfill"
-	}
-	_, _ = fmt.Fprintf(output.Screen, "%s fast mode in %d\n", style.Subtle(action), backfilledCount)
 
 	return nil
 }

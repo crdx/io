@@ -60,18 +60,6 @@ func TestNothingLeftToMigrateMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "nothing-to-do.txt", migration(t, directory, &inputOpts{}))
 }
 
-func TestAFastModeBackfillMatchesTheGolden(t *testing.T) {
-	directory := goldenSessions(t, currentCodexJournal()...)
-
-	assertGolden(t, "fast-mode.txt", migration(t, directory, &inputOpts{}))
-}
-
-func TestAFastModeBackfillDryRunMatchesTheGolden(t *testing.T) {
-	directory := goldenSessions(t, currentCodexJournal()...)
-
-	assertGolden(t, "fast-mode-dry-run.txt", migration(t, directory, &inputOpts{DryRun: true}))
-}
-
 func TestAnArchivedSessionIsMigratedLikeAnyOtherMatchingTheGolden(t *testing.T) {
 	directory := goldenSessions(t, currentCodexJournal()...)
 	archiveWithAnOldListing(t, directory)

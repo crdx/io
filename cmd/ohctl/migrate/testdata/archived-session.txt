@@ -1,6 +1,4 @@
 === screen ===
 [38;2;150;152;150mrebuilt[0m listing metadata of 1
-[38;2;150;152;150mcopies kept in [0m/state/sessions_pre_fast_mode
-[38;2;150;152;150mbackfilled[0m fast mode in 1
 [38;2;150;152;150mall 1 sessions are at format 12[0m
 === failure ===
