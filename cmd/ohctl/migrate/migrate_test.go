@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"slices"
@@ -743,5 +744,80 @@ func TestFormatElevenMigrationKeepsTheFactAndDropsTheProse(t *testing.T) {
 		if isFactOnly && event.Text != "" {
 			t.Errorf("prose was kept on %+v", event)
 		}
+	}
+}
+
+func firstFormatJournal() []string {
+	return []string{
+		`{"kind":"head","time":"2026-08-01T00:00:00Z","id":"one","name":"brave-otter",` +
+			`"meta":{"provider":"codex","model":"gpt-5.6-sol","workspaceDir":"/workspace",` +
+			`"system_prompt":"# State\n\n- Background processes are allowed to outlive shell commands\n- The bash tool is granted"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:01Z","event":{"kind":"mode_change","name":"b","text":"rxb"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:02Z","event":{"kind":"user_message","text":"look at this"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:03Z","event":{"kind":"tool_call","name":"read","highlight":{"kind":"syntax","value":"a.go"}}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:04Z","event":{"kind":"path_grant_change","state":{"grants":[{"path":"/tmp/x","access":"write"}]}}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:05Z","event":{"kind":"interruption","text":"the user pressed escape"}}`,
+		`{"kind":"event","time":"2026-08-01T00:00:06Z","event":{"kind":"model_message","text":"done"}}`,
+	}
+}
+
+func TestAJournalMigratesToTheSameBytesWhetherStoredOrArchived(t *testing.T) {
+	lines := firstFormatJournal()
+
+	storedDir, name := storedJournal(t, lines...)
+	if _, err := migrate.Session(options(storedDir), name); err != nil {
+		t.Fatalf("the stored session did not migrate: %v", err)
+	}
+	storedResult, err := os.ReadFile(filepath.Join(storedDir, name, "session.jsonl")) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	archivedDir, _ := storedJournal(t, lines...)
+	if err := store.RebuildMeta(archivedDir, name); err != nil {
+		t.Fatal(err)
+	}
+	if err := session.Archive(archivedDir, name); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := migrate.Session(options(archivedDir), name); err != nil {
+		t.Fatalf("the archived session did not migrate: %v", err)
+	}
+
+	if !session.IsArchived(archivedDir, name) {
+		t.Fatal("the migrated session was not archived again")
+	}
+	archivedResult, err := session.OpenJournal(archivedDir, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = archivedResult.Close() }()
+	archivedBody, err := io.ReadAll(archivedResult)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, wanted := range []string{
+		`"version":12`,
+		`"emphasis":{"kind":"syntax","value":"a.go"}`,
+		`"access":"rw"`,
+		`{"kind":"turn_interruption","name":"escape"}`,
+		`{"kind":"mode_change","state":"rx"}`,
+	} {
+		if !strings.Contains(string(storedResult), wanted) {
+			t.Errorf("the chain did not reach %s:\n%s", wanted, storedResult)
+		}
+	}
+
+	if string(storedResult) != string(archivedBody) {
+		t.Errorf("storage changed the migration\n--- stored ---\n%s\n--- archived ---\n%s", storedResult, archivedBody)
+	}
+
+	entries, err := session.Entries(archivedDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].Format != session.JournalFormat {
+		t.Errorf("the archived journal ended at %+v, want format %d", entries, session.JournalFormat)
 	}
 }

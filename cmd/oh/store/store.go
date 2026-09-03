@@ -448,20 +448,26 @@ func RebuildMeta(directory string, name string) error {
 }
 
 func RebuildMetaIfIdle(directory string, name string) (bool, error) {
-	heldLock, err := session.AcquireLock(directory, name)
-	if errors.Is(err, session.ErrInUse) {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
+	isRebuilt := false
+	err := session.Unarchived(directory, name, func() error {
+		heldLock, err := session.AcquireLock(directory, name)
+		if errors.Is(err, session.ErrInUse) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
 
-	rebuildError := RebuildMeta(directory, name)
-	releaseError := heldLock.Release()
-	if err := errors.Join(rebuildError, releaseError); err != nil {
-		return false, err
-	}
-	return true, nil
+		rebuildError := RebuildMeta(directory, name)
+		releaseError := heldLock.Release()
+		if err := errors.Join(rebuildError, releaseError); err != nil {
+			return err
+		}
+		isRebuilt = true
+		return nil
+	})
+
+	return isRebuilt, err
 }
 
 func StaleMeta(directory string) ([]string, error) {
@@ -480,47 +486,6 @@ func StaleMeta(directory string) ([]string, error) {
 	return stale, nil
 }
 
-func StaleArchivedMeta(directory string) ([]string, error) {
-	names, err := session.ArchivedNames(directory)
-	if err != nil {
-		return nil, err
-	}
-
-	var stale []string
-	for _, name := range names {
-		if _, err := session.ArchivedMeta(directory, name); err != nil {
-			stale = append(stale, name)
-		}
-	}
-
-	return stale, nil
-}
-
-func RebuildArchivedMeta(directory string, name string) error {
-	if err := session.Restore(directory, name); err != nil {
-		return err
-	}
-	if err := RebuildMeta(directory, name); err != nil {
-		return err
-	}
-	return session.Archive(directory, name)
-}
-
-func RebuildStaleArchivedMeta(directory string) (int, error) {
-	stale, err := StaleArchivedMeta(directory)
-	if err != nil {
-		return 0, err
-	}
-
-	for at, name := range stale {
-		if err := RebuildArchivedMeta(directory, name); err != nil {
-			return at, fmt.Errorf("could not rebuild the listing metadata of archived %s: %w", name, err)
-		}
-	}
-
-	return len(stale), nil
-}
-
 func RebuildStaleMeta(directory string) (int, error) {
 	stale, err := StaleMeta(directory)
 	if err != nil {
@@ -528,7 +493,8 @@ func RebuildStaleMeta(directory string) (int, error) {
 	}
 
 	for at, name := range stale {
-		if err := RebuildMeta(directory, name); err != nil {
+		err := session.Unarchived(directory, name, func() error { return RebuildMeta(directory, name) })
+		if err != nil {
 			return at, fmt.Errorf("could not rebuild the listing metadata of %s: %w", name, err)
 		}
 	}

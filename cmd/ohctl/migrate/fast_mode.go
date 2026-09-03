@@ -14,6 +14,21 @@ import (
 )
 
 func backfillFastMode(options Options, name string) (bool, error) {
+	if options.DryRun {
+		return backfillSessionFastMode(options, name)
+	}
+
+	wasBackfilled := false
+	err := session.Unarchived(options.Directory, name, func() error {
+		var err error
+		wasBackfilled, err = backfillSessionFastMode(options, name)
+		return err
+	})
+
+	return wasBackfilled, err
+}
+
+func backfillSessionFastMode(options Options, name string) (bool, error) {
 	if !options.DryRun {
 		heldLock, err := session.AcquireLock(options.Directory, name)
 		if err != nil {
@@ -23,7 +38,7 @@ func backfillFastMode(options Options, name string) (bool, error) {
 	}
 
 	journalPath := filepath.Join(options.Directory, name, "session.jsonl")
-	lines, storedFormat, err := readJournal(journalPath)
+	lines, storedFormat, err := readJournal(options.Directory, name)
 	if err != nil {
 		return false, err
 	}

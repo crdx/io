@@ -89,8 +89,18 @@ func TestAnArchivedSessionIsNoLongerListedButKeepsItsMetadata(t *testing.T) {
 	}
 
 	entries, err := session.Entries(directory)
-	if err != nil || len(entries) != 0 {
+	if err != nil || len(entries) != 1 || !entries[0].IsArchived {
 		t.Fatalf("got entries %v and %v", entries, err)
+	}
+
+	storedEntries, err := session.StoredEntries(directory)
+	if err != nil || len(storedEntries) != 0 {
+		t.Fatalf("got stored entries %v and %v", storedEntries, err)
+	}
+
+	storedNames, err := session.StoredNames(directory)
+	if err != nil || len(storedNames) != 0 {
+		t.Fatalf("got stored names %v and %v", storedNames, err)
 	}
 
 	meta, err := session.ArchivedMeta(directory, name)
@@ -102,15 +112,34 @@ func TestAnArchivedSessionIsNoLongerListedButKeepsItsMetadata(t *testing.T) {
 	}
 }
 
-func TestAnArchivedSessionSaysSoWhenSomethingOpensIt(t *testing.T) {
+func TestAnArchivedSessionIsReadWhereItLiesButNotWritten(t *testing.T) {
 	directory, name := archivedSession(t)
 
 	if err := session.Archive(directory, name); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := session.Read(directory, name); !errors.Is(err, session.ErrArchived) {
-		t.Errorf("expected the read to report an archived session, got %v", err)
+	storedSession, err := session.Read(directory, name)
+	if err != nil {
+		t.Fatalf("expected an archived session to be read, got %v", err)
+	}
+	if storedSession.Name != name || len(storedSession.Events) != 1 {
+		t.Errorf("read %#v", storedSession)
+	}
+	if _, err := session.ReadMeta(directory, name); err != nil {
+		t.Errorf("expected the archived listing to be read, got %v", err)
+	}
+
+	isInUse, err := session.IsInUse(directory, name)
+	if isInUse || err != nil {
+		t.Errorf("an archived session reported itself in use: %v, %v", isInUse, err)
+	}
+
+	if _, err := session.Open(directory, name); !errors.Is(err, session.ErrArchived) {
+		t.Errorf("expected a write to report an archived session, got %v", err)
+	}
+	if _, err := session.AcquireLock(directory, name); !errors.Is(err, session.ErrArchived) {
+		t.Errorf("expected a lock to report an archived session, got %v", err)
 	}
 	if err := session.Archive(directory, name); !errors.Is(err, session.ErrArchived) {
 		t.Errorf("expected a second archiving to be refused, got %v", err)

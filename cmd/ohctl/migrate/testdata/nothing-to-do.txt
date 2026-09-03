@@ -1,4 +1,4 @@
 === screen ===
 [38;2;150;152;150mrebuilt[0m listing metadata of 1
-[38;2;150;152;150mall 1 stored sessions are at format 12[0m
+[38;2;150;152;150mall 1 sessions are at format 12[0m
 === failure ===

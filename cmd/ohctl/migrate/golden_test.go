@@ -72,18 +72,39 @@ func TestAFastModeBackfillDryRunMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "fast-mode-dry-run.txt", migration(t, directory, &inputOpts{DryRun: true}))
 }
 
-func TestAnArchivedListingRebuildMatchesTheGolden(t *testing.T) {
+func TestAnArchivedSessionIsMigratedLikeAnyOtherMatchingTheGolden(t *testing.T) {
 	directory := goldenSessions(t, currentCodexJournal()...)
 	archiveWithAnOldListing(t, directory)
 
-	assertGolden(t, "archived-listing.txt", migration(t, directory, &inputOpts{}))
+	assertGolden(t, "archived-session.txt", migration(t, directory, &inputOpts{}))
 }
 
-func TestAnArchivedListingRebuildDryRunMatchesTheGolden(t *testing.T) {
+func TestAnArchivedSessionDryRunMatchesTheGolden(t *testing.T) {
 	directory := goldenSessions(t, currentCodexJournal()...)
 	archiveWithAnOldListing(t, directory)
 
-	assertGolden(t, "archived-listing-dry-run.txt", migration(t, directory, &inputOpts{DryRun: true}))
+	assertGolden(t, "archived-session-dry-run.txt", migration(t, directory, &inputOpts{DryRun: true}))
+}
+
+func TestAnArchivedSessionInAnOlderFormatIsMigratedAndPutBack(t *testing.T) {
+	directory := goldenSessions(t, oldJournal())
+	archiveWithAnOldListing(t, directory)
+
+	assertGolden(t, "archived-outdated.txt", migration(t, directory, &inputOpts{}))
+
+	if !session.IsArchived(directory, goldenName) {
+		t.Error("expected the migrated session to be archived again")
+	}
+	entries, err := session.Entries(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || !entries[0].IsArchived {
+		t.Fatalf("got entries %+v", entries)
+	}
+	if entries[0].Format != session.JournalFormat {
+		t.Errorf("the archived journal is at format %d, want %d", entries[0].Format, session.JournalFormat)
+	}
 }
 
 func archiveWithAnOldListing(t *testing.T, directory string) {

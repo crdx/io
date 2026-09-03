@@ -69,9 +69,6 @@ func run(inputArgs *inputOpts, output console.Output) error {
 	if err := sweepListingMeta(directory, inputArgs.DryRun, output); err != nil {
 		return err
 	}
-	if err := sweepArchivedListingMeta(directory, inputArgs.DryRun, output); err != nil {
-		return err
-	}
 	if err := sweepFastModes(directory, inputArgs.Sessions, inputArgs.DryRun, output); err != nil {
 		return err
 	}
@@ -208,37 +205,6 @@ func sweepListingMeta(directory string, isDryRun bool, output console.Output) er
 	return nil
 }
 
-func sweepArchivedListingMeta(directory string, isDryRun bool, output console.Output) error {
-	if isDryRun {
-		stale, err := store.StaleArchivedMeta(directory)
-		if err != nil {
-			return err
-		}
-		if len(stale) > 0 {
-			_, _ = fmt.Fprintf(
-				output.Screen,
-				"%s listing metadata of %d archived\n",
-				style.Subtle("would rebuild"), len(stale),
-			)
-		}
-		return nil
-	}
-
-	rebuilt, err := store.RebuildStaleArchivedMeta(directory)
-	if err != nil {
-		return err
-	}
-	if rebuilt > 0 {
-		_, _ = fmt.Fprintf(
-			output.Screen,
-			"%s listing metadata of %d archived\n",
-			style.Subtle("rebuilt"), rebuilt,
-		)
-	}
-
-	return nil
-}
-
 func sayNothingToDo(directory string, output console.Output) error {
 	entries, err := session.Entries(directory)
 	if err != nil {
@@ -246,11 +212,11 @@ func sayNothingToDo(directory string, output console.Output) error {
 	}
 
 	if len(entries) == 0 {
-		_, _ = fmt.Fprintln(output.Screen, style.Subtle("there are no stored sessions in ")+directory)
+		_, _ = fmt.Fprintln(output.Screen, style.Subtle("there are no sessions in ")+directory)
 		return nil
 	}
 
-	_, _ = fmt.Fprintln(output.Screen, style.Subtle(fmt.Sprintf("all %d stored sessions are at format %d", len(entries), session.JournalFormat)))
+	_, _ = fmt.Fprintln(output.Screen, style.Subtle(fmt.Sprintf("all %d sessions are at format %d", len(entries), session.JournalFormat)))
 
 	return nil
 }
@@ -278,6 +244,21 @@ type Options struct {
 }
 
 func Session(options Options, name string) (int, error) {
+	if options.DryRun {
+		return migrateSession(options, name)
+	}
+
+	fromFormat := 0
+	err := session.Unarchived(options.Directory, name, func() error {
+		var err error
+		fromFormat, err = migrateSession(options, name)
+		return err
+	})
+
+	return fromFormat, err
+}
+
+func migrateSession(options Options, name string) (int, error) {
 	directory := options.Directory
 	journalPath := filepath.Join(directory, name, "session.jsonl")
 
@@ -289,7 +270,7 @@ func Session(options Options, name string) (int, error) {
 		defer func() { _ = heldLock.Release() }()
 	}
 
-	lines, fromFormat, err := readJournal(journalPath)
+	lines, fromFormat, err := readJournal(directory, name)
 	if err != nil {
 		return 0, err
 	}
@@ -371,8 +352,8 @@ func backupDir(directory string) string {
 	return fmt.Sprintf("%s_pre_v%d", directory, session.JournalFormat)
 }
 
-func readJournal(path string) ([]map[string]json.RawMessage, int, error) {
-	file, err := os.Open(path) //nolint:gosec // a journal named by a validated session name
+func readJournal(directory string, name string) ([]map[string]json.RawMessage, int, error) {
+	file, err := session.OpenJournal(directory, name)
 	if err != nil {
 		return nil, 0, err
 	}

@@ -353,6 +353,26 @@ func writeUnpackedFile(archive io.Reader, unpackedPath string) error {
 	return file.Close()
 }
 
+func Unarchived(directory string, name string, change func() error) error {
+	if err := validateName(name); err != nil {
+		return err
+	}
+	if !IsArchived(directory, name) {
+		return change()
+	}
+
+	if err := Restore(directory, name); err != nil {
+		return err
+	}
+
+	changeError := change()
+	if archiveError := Archive(directory, name); archiveError != nil {
+		return errors.Join(changeError, archiveError)
+	}
+
+	return changeError
+}
+
 func ArchivedMeta(directory string, name string) (*Meta, error) {
 	if !IsArchived(directory, name) {
 		return nil, fmt.Errorf("%w %q", ErrNotArchived, name)
@@ -367,29 +387,51 @@ func ArchivedMeta(directory string, name string) (*Meta, error) {
 }
 
 func readArchivedFile(archivePath string, storedName string) ([]byte, error) {
+	archivedFile, err := openArchivedFile(archivePath, storedName)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = archivedFile.Close() }()
+
+	return io.ReadAll(io.LimitReader(archivedFile, maxHeadLine))
+}
+
+type archivedFile struct {
+	io.Reader
+
+	file       *os.File
+	decompress *gzip.Reader
+}
+
+func (self *archivedFile) Close() error {
+	return errors.Join(self.decompress.Close(), self.file.Close())
+}
+
+func openArchivedFile(archivePath string, storedName string) (io.ReadCloser, error) {
 	file, err := os.Open(archivePath) //nolint:gosec // a path built from a validated session name
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = file.Close() }()
 
-	reader, err := gzip.NewReader(file)
+	decompress, err := gzip.NewReader(file)
 	if err != nil {
+		_ = file.Close()
 		return nil, err
 	}
-	defer func() { _ = reader.Close() }()
 
-	archive := tar.NewReader(reader)
+	archive := tar.NewReader(decompress)
 	for {
 		header, err := archive.Next()
 		if errors.Is(err, io.EOF) {
-			return nil, fmt.Errorf("the archive holds no %q", storedName)
+			err = fmt.Errorf("the archive holds no %q", storedName)
 		}
 		if err != nil {
+			_ = decompress.Close()
+			_ = file.Close()
 			return nil, err
 		}
 		if path.Clean(header.Name) == storedName {
-			return io.ReadAll(io.LimitReader(archive, maxHeadLine))
+			return &archivedFile{Reader: archive, file: file, decompress: decompress}, nil
 		}
 	}
 }

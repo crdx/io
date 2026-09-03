@@ -690,12 +690,12 @@ func TestAnArchivedListingInAnOlderFormatIsRebuiltInPlace(t *testing.T) {
 
 	journalBefore := archivedJournal(t, directory, name)
 
-	rebuilt, err := store.RebuildStaleArchivedMeta(directory)
+	rebuilt, err := store.RebuildStaleMeta(directory)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if rebuilt != 1 {
-		t.Errorf("rebuilt %d archived listings, want 1", rebuilt)
+		t.Errorf("rebuilt %d listings, want 1", rebuilt)
 	}
 
 	if !session.IsArchived(directory, name) {
@@ -714,7 +714,7 @@ func TestAnArchivedListingInAnOlderFormatIsRebuiltInPlace(t *testing.T) {
 		t.Error("the journal inside the archive was not left alone")
 	}
 
-	stale, err := store.StaleArchivedMeta(directory)
+	stale, err := store.StaleMeta(directory)
 	if err != nil {
 		t.Fatal(err)
 	}

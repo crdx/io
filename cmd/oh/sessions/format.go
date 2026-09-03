@@ -45,5 +45,5 @@ func nameSessions(names []string) (string, string) {
 		return names[0] + " is", "it"
 	}
 
-	return fmt.Sprintf("%d stored sessions are", len(names)), "them"
+	return fmt.Sprintf("%d sessions are", len(names)), "them"
 }

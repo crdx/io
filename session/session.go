@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -115,6 +116,29 @@ func openJournal(directory string, name string, flag int) (*os.File, error) {
 	return file, err
 }
 
+func openStoredFile(directory string, name string, fileName string) (io.ReadCloser, error) {
+	file, err := os.Open(filepath.Join(Dir(directory, name), fileName)) //nolint:gosec // a path built from a validated session name
+	if err == nil {
+		return file, nil
+	}
+	if !errors.Is(err, fs.ErrNotExist) {
+		return nil, err
+	}
+	if IsArchived(directory, name) {
+		return openArchivedFile(ArchivePath(directory, name), path.Join(name, fileName))
+	}
+
+	return nil, fmt.Errorf("%w %q", ErrNotFound, name)
+}
+
+func OpenJournal(directory string, name string) (io.ReadCloser, error) {
+	if err := validateName(name); err != nil {
+		return nil, err
+	}
+
+	return openStoredFile(directory, name, journalName)
+}
+
 func AcquireLock(directory string, name string) (*Lock, error) {
 	return acquireLock(directory, name, os.O_RDONLY)
 }
@@ -152,6 +176,10 @@ func (self *Lock) Release() error {
 }
 
 func IsInUse(directory string, name string) (bool, error) {
+	if IsArchived(directory, name) {
+		return false, nil
+	}
+
 	heldLock, err := AcquireLock(directory, name)
 	if errors.Is(err, ErrInUse) {
 		return true, nil
@@ -384,7 +412,7 @@ func Records(directory string, name string, visit func(Line) error) error {
 		return err
 	}
 
-	file, err := openJournal(directory, name, os.O_RDONLY)
+	file, err := OpenJournal(directory, name)
 	if err != nil {
 		return err
 	}
@@ -511,7 +539,13 @@ func ReadMeta(directory string, name string) (*Meta, error) {
 		return nil, err
 	}
 
-	encodedMeta, err := os.ReadFile(metaPath(directory, name))
+	file, err := openStoredFile(directory, name, metaName)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = file.Close() }()
+
+	encodedMeta, err := io.ReadAll(io.LimitReader(file, maxHeadLine))
 	if err != nil {
 		return nil, err
 	}
@@ -624,36 +658,61 @@ func writeMeta(directory string, meta Meta) error {
 }
 
 type Entry struct {
-	Name      string
-	ID        string
-	StartedAt time.Time
-	Format    int
+	Name       string
+	ID         string
+	StartedAt  time.Time
+	Format     int
+	IsArchived bool
 }
 
 func Entries(directory string) ([]Entry, error) {
-	names, err := StoredNames(directory)
+	storedNames, err := StoredNames(directory)
+	if err != nil {
+		return nil, err
+	}
+	archivedNames, err := ArchivedNames(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	entries := make([]Entry, 0, len(names))
+	entries := make([]Entry, 0, len(storedNames)+len(archivedNames))
+	entries = appendEntries(entries, directory, storedNames, false)
+	entries = appendEntries(entries, directory, archivedNames, true)
+
+	slices.SortFunc(entries, func(first, second Entry) int {
+		if order := first.StartedAt.Compare(second.StartedAt); order != 0 {
+			return order
+		}
+		return strings.Compare(first.Name, second.Name)
+	})
+	return entries, nil
+}
+
+func appendEntries(entries []Entry, directory string, names []string, isArchived bool) []Entry {
 	for _, name := range names {
 		head, err := readHeadSummary(directory, name)
 		if err != nil {
 			continue
 		}
 		entries = append(entries, Entry{
-			Name:      name,
-			ID:        head.ID,
-			StartedAt: head.Time,
-			Format:    formatOf(head),
+			Name:       name,
+			ID:         head.ID,
+			StartedAt:  head.Time,
+			Format:     formatOf(head),
+			IsArchived: isArchived,
 		})
 	}
 
-	slices.SortFunc(entries, func(first, second Entry) int {
-		return first.StartedAt.Compare(second.StartedAt)
-	})
-	return entries, nil
+	return entries
+}
+
+func StoredEntries(directory string) ([]Entry, error) {
+	entries, err := Entries(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	return slices.DeleteFunc(entries, func(entry Entry) bool { return entry.IsArchived }), nil
 }
 
 func formatOf(head Line) int {
@@ -707,7 +766,7 @@ func StoredNames(directory string) ([]string, error) {
 }
 
 func readHeadSummary(directory string, name string) (Line, error) {
-	file, err := openJournal(directory, name, os.O_RDONLY)
+	file, err := OpenJournal(directory, name)
 	if err != nil {
 		return Line{}, err
 	}
@@ -750,7 +809,7 @@ func readHeadSummary(directory string, name string) (Line, error) {
 }
 
 func readHead(directory string, name string) (Line, error) {
-	file, err := openJournal(directory, name, os.O_RDONLY)
+	file, err := OpenJournal(directory, name)
 	if err != nil {
 		return Line{}, err
 	}

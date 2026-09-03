@@ -215,14 +215,6 @@ func TestCompletableNamesComeFromTheListingRatherThanTheJournal(t *testing.T) {
 
 	emptyJournal(t, directory, names[0])
 
-	loadedSessions, err := Load(directory)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(InWorkspace(loadedSessions, work.At(workspaceDir))) != 1 {
-		t.Fatalf("expected the picker to read a journal and drop the empty one, got %+v", loadedSessions)
-	}
-
 	got, err := NamesInWorkspace(directory, work.At(workspaceDir))
 	if err != nil {
 		t.Fatal(err)

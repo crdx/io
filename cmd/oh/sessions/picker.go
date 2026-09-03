@@ -183,15 +183,11 @@ type sessionMetadata struct {
 }
 
 func loadMetadata(directory string) ([]sessionMetadata, error) {
-	entries, err := session.Entries(directory)
+	names, err := session.StoredNames(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	names := make([]string, 0, len(entries))
-	for _, entry := range entries {
-		names = append(names, entry.Name)
-	}
 	return loadNamedMetadata(directory, names)
 }
 
