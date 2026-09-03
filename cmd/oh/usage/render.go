@@ -207,8 +207,8 @@ func countdown(remainingTime time.Duration) string {
 }
 
 func spans(major time.Duration, majorUnit string, minor int, minorUnit string) string {
-	return style.Normal(fmt.Sprintf("%d%s", major, majorUnit)) +
-		style.Dim(fmt.Sprintf("%02d%s", minor, minorUnit))
+	return style.Normal(fmt.Sprintf("%d%s", major, majorUnit)) + " " +
+		style.Dim(fmt.Sprintf("%d%s", minor, minorUnit))
 }
 
 func paceText(limit Limit) string {

@@ -42,13 +42,13 @@ func TestEveryGaugeIsDrawnAgainstTheSameColumn(t *testing.T) {
 
 	want := strings.Join([]string{
 		"● OpenAI",
-		"Session        70% █████████┃█░░░░░ ▲ 10  1h59m",
-		"Week           20% ███░░░░░░░░┃░░░░ ▼ 51  1d23h",
-		"Spark Session   8% █░░░░░░░░┃░░░░░░ ▼ 52  1h59m",
+		"Session        70% █████████┃█░░░░░ ▲ 10  1h 59m",
+		"Week           20% ███░░░░░░░░┃░░░░ ▼ 51  1d 23h",
+		"Spark Session   8% █░░░░░░░░┃░░░░░░ ▼ 52  1h 59m",
 		"",
 		"● Anthropic",
 		"Session         0% ░░░░░░░░░░░░░░░░       idle",
-		"Week           50% ████████░░░┃░░░░ ▼ 21  1d23h",
+		"Week           50% ████████░░░┃░░░░ ▼ 21  1d 23h",
 		"",
 	}, "\n")
 
@@ -139,9 +139,9 @@ func TestACountdownLeadsWithItsLargestUnit(t *testing.T) {
 		want          string
 	}{
 		{remainingTime: 45 * time.Second, want: "45s"},
-		{remainingTime: 90 * time.Second, want: "1m30s"},
-		{remainingTime: 3 * time.Hour, want: "3h00m"},
-		{remainingTime: 75*time.Hour + 57*time.Minute, want: "3d03h"},
+		{remainingTime: 90 * time.Second, want: "1m 30s"},
+		{remainingTime: 3 * time.Hour, want: "3h 0m"},
+		{remainingTime: 75*time.Hour + 57*time.Minute, want: "3d 3h"},
 	} {
 		t.Run(test.want, func(t *testing.T) {
 			if got := style.Plain(countdown(test.remainingTime)); got != test.want {
@@ -154,7 +154,7 @@ func TestACountdownLeadsWithItsLargestUnit(t *testing.T) {
 func TestACountdownDimsTheUnitAfterItsFirst(t *testing.T) {
 	drawn := countdown(75*time.Hour + 57*time.Minute)
 
-	if want := style.Normal("3d") + style.Dim("03h"); drawn != want {
+	if want := style.Normal("3d") + " " + style.Dim("3h"); drawn != want {
 		t.Errorf("drew %q, want %q", drawn, want)
 	}
 }
