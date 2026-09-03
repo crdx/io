@@ -66,7 +66,7 @@ fmt.Println(answer) // => "It's probably raining."
 `Stream` is the same turn as transient prose deltas and completed events. Deltas are suitable for live rendering; only events belong in durable history.
 
 ```go
-for update, err := range assistant.Stream(ctx, "what is the weather in London?") {
+for update, err := range assistant.Stream(ctx, "what is the weather in London?", nil) {
     if err != nil {
         return err
     }
@@ -119,7 +119,7 @@ The simulator deals in wire formats, not providers. A provider speaks one of the
 | `cmd/weather`   | A tool that answers questions about the weather   |
 | `cmd/streaming` | A prompt loop printing each event as it arrives   |
 | `cmd/simple`    | The same loop, with text fragments glued together |
-| `cmd/ohctl`     | Control of stored sessions, credentials, formats  |
+| `cmd/ohctl`     | Control of stored sessions, transcripts, formats  |
 
 ## Contributions
 
