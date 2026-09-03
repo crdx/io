@@ -12,6 +12,7 @@ import (
 
 	"crdx.org/io/internal/req"
 	"crdx.org/io/internal/sse"
+	"crdx.org/io/internal/useragent"
 )
 
 const (
@@ -151,7 +152,7 @@ func requestHeaders(token Token, session string) http.Header {
 	header.Set("Openai-Beta", "responses=experimental")
 	header.Set("Accept", "text/event-stream")
 	header.Set("Session_id", session)
-	header.Set("User-Agent", userAgent())
+	header.Set("User-Agent", useragent.Get())
 
 	return header
 }

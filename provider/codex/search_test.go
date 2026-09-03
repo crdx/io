@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -42,6 +43,7 @@ func TestSearchUsesTheCodexBackendAndAuthHeaders(t *testing.T) {
 		"Chatgpt-Account-Id": "account",
 		"Originator":         codex.Originator,
 		"Openai-Beta":        "responses=experimental",
+		"User-Agent":         fmt.Sprintf("oh (%s; %s)", runtime.GOOS, runtime.GOARCH),
 	} {
 		if got := requestHeader.Get(name); got != want {
 			t.Errorf("%s is %q, want %q", name, got, want)
