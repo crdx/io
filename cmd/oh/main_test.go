@@ -4102,6 +4102,56 @@ func TestModelUpdateDispatchRunsThroughTheBinary(t *testing.T) {
 	}
 }
 
+func TestOpenCodeRequestsUseTheStoredSessionIdentifier(t *testing.T) {
+	binary := buildTestBinary(t)
+	endpoint := sim.New(&sim.Scenario{
+		Model: "fake",
+		Turns: []sim.Turn{
+			{Say: "First answer."},
+			{Say: "Second answer."},
+		},
+	})
+
+	var headerMutex sync.Mutex
+	var sessionHeaders []string
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if sessionID := request.Header.Get("X-Opencode-Session"); sessionID != "" {
+			headerMutex.Lock()
+			sessionHeaders = append(sessionHeaders, sessionID)
+			headerMutex.Unlock()
+		}
+		endpoint.ServeHTTP(writer, request)
+	}))
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Completions]
+	stateDirectory := t.TempDir()
+	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
+	runTestBinary(t, binary, environment, "-p", "--yolo", "-m", "opencode-go/fake", "first question")
+
+	sessionsDirectory := filepath.Join(stateDirectory, "org.crdx", "oh", "sessions")
+	storedSessions, err := store.List(sessionsDirectory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(storedSessions) != 1 {
+		t.Fatalf("got %d stored sessions, want one", len(storedSessions))
+	}
+	storedSession := storedSessions[0]
+
+	runTestBinary(t, binary, environment, "-p", "-r", storedSession.Name, "second question")
+
+	headerMutex.Lock()
+	capturedHeaders := slices.Clone(sessionHeaders)
+	headerMutex.Unlock()
+	if !slices.Equal(capturedHeaders, []string{storedSession.ID, storedSession.ID}) {
+		t.Errorf("got OpenCode session headers %q, want the stored ID %q twice", capturedHeaders, storedSession.ID)
+	}
+	if slices.Contains(capturedHeaders, storedSession.Name) {
+		t.Errorf("sent the human-readable session name %q", storedSession.Name)
+	}
+}
+
 func TestAnEffortWrittenAsAnAliasInTheConfigIsResolved(t *testing.T) {
 	modelCachePath := useRoundRobinModelCache(t)
 	selections, err := model.ParseRoundRobin(modelCachePath, []string{"sol@off"})

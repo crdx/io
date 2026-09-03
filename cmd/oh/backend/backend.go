@@ -48,12 +48,12 @@ func (self *Connection) ObserveHTTP(observer req.Observer) {
 }
 
 type sessionScoped interface {
-	UseSession(name string)
+	UseSession(id string)
 }
 
-func (self *Connection) UseSession(name string) {
+func (self *Connection) UseSession(id string) {
 	if scopedClient, isScoped := self.Client.(sessionScoped); isScoped {
-		scopedClient.UseSession(name)
+		scopedClient.UseSession(id)
 	}
 }
 

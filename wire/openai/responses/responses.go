@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"runtime"
 	"slices"
 	"sync"
 	"time"
@@ -85,8 +84,8 @@ func New(tokens TokenSource, model string, effort string) (*Client, error) {
 	return client, nil
 }
 
-func (self *Client) UseSession(name string) {
-	self.session = sessionToken(name)
+func (self *Client) UseSession(id string) {
+	self.session = sessionToken(id)
 }
 
 func (self *Client) Configure(instructions string, tools []tool.Definition) {
@@ -217,10 +216,6 @@ func (self *Client) headers(token Token) http.Header {
 	return requestHeaders(token, self.session)
 }
 
-func userAgent() string {
-	return fmt.Sprintf("io (%s; %s)", runtime.GOOS, runtime.GOARCH)
-}
-
 type request struct {
 	Model             string         `json:"model"`
 	ServiceTier       string         `json:"service_tier,omitempty"`
@@ -297,8 +292,8 @@ func newToken() string {
 	return hex.EncodeToString(buffer)
 }
 
-func sessionToken(name string) string {
-	sum := sha256.Sum256([]byte(name))
+func sessionToken(id string) string {
+	sum := sha256.Sum256([]byte(id))
 
 	return hex.EncodeToString(sum[:])
 }

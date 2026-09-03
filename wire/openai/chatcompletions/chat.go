@@ -69,6 +69,10 @@ func cloneHeader(header http.Header) http.Header {
 	return header.Clone()
 }
 
+func (self *Client) SetRequestHeader(name string, value string) {
+	self.requestHeader.Set(name, value)
+}
+
 func (self *Client) Configure(instructions string, tools []tool.Definition) {
 	self.instructions = instructions
 	self.tools = describe(tools)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -40,10 +41,14 @@ func TestNewHandsBackAnAuthenticatedChatCompletionsClient(t *testing.T) {
 	}
 }
 
-func TestConversationsAreAuthorisedAndObserved(t *testing.T) {
+func TestConversationsAreIdentifiedAuthorisedScopedAndObserved(t *testing.T) {
 	var authorisation string
+	var session string
+	var userAgent string
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		authorisation = request.Header.Get("Authorization")
+		session = request.Header.Get("X-Opencode-Session")
+		userAgent = request.Header.Get("User-Agent")
 		writer.Header().Set("Content-Type", "text/event-stream")
 		_, _ = fmt.Fprint(writer, "data: [DONE]\n\n")
 	}))
@@ -51,6 +56,7 @@ func TestConversationsAreAuthorisedAndObserved(t *testing.T) {
 
 	client := newClient(t, server.URL)
 	observer := &countingObserver{}
+	client.UseSession("0123456789ABCDEFGHIJKL")
 	client.ObserveHTTP(observer)
 	client.AddUserMessage("hello")
 	if _, err := client.Send(t.Context(), func(agent.Output) bool { return true }); err != nil {
@@ -59,6 +65,12 @@ func TestConversationsAreAuthorisedAndObserved(t *testing.T) {
 
 	if authorisation != "Bearer secret" {
 		t.Errorf("got authorisation %q", authorisation)
+	}
+	if session != "0123456789ABCDEFGHIJKL" {
+		t.Errorf("got session %q", session)
+	}
+	if want := fmt.Sprintf("oh (%s; %s)", runtime.GOOS, runtime.GOARCH); userAgent != want {
+		t.Errorf("got user agent %q, want %q", userAgent, want)
 	}
 	if observer.requests != 1 {
 		t.Errorf("observed %d requests", observer.requests)

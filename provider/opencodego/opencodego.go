@@ -6,11 +6,15 @@ import (
 	"time"
 
 	"crdx.org/io/internal/req"
+	"crdx.org/io/internal/useragent"
 	"crdx.org/io/tool"
 	"crdx.org/io/wire/openai/chatcompletions"
 )
 
-const asideTimeout = 30 * time.Second
+const (
+	asideTimeout  = 30 * time.Second
+	sessionHeader = "X-Opencode-Session"
+)
 
 type Client struct {
 	*chatcompletions.Client
@@ -41,14 +45,16 @@ func New(
 		}
 	}
 
-	header := http.Header{}
-	header.Set("Authorization", "Bearer "+token)
-	conversation, err := chatcompletions.New(url, header, model, effort, maxOutputTokens)
+	conversation, err := chatcompletions.New(url, requestHeaders(token), model, effort, maxOutputTokens)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Client{Client: conversation, Token: token}, nil
+}
+
+func (self *Client) UseSession(id string) {
+	self.SetRequestHeader(sessionHeader, id)
 }
 
 func (self *Client) ObserveHTTP(observer req.Observer) {
@@ -66,8 +72,13 @@ func (self *Client) observedRequests() *req.Client {
 }
 
 func (self *Client) headers() http.Header {
+	return requestHeaders(self.Token)
+}
+
+func requestHeaders(token string) http.Header {
 	header := http.Header{}
-	header.Set("Authorization", "Bearer "+self.Token)
+	header.Set("Authorization", "Bearer "+token)
+	header.Set("User-Agent", useragent.Get())
 	return header
 }
 
