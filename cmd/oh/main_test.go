@@ -112,6 +112,7 @@ import (
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/bash"
 	"crdx.org/io/toolbox/notify"
+	"crdx.org/io/toolbox/read"
 	"crdx.org/io/toolbox/title"
 	"crdx.org/io/toolbox/web"
 	"crdx.org/io/wire/openai/chatcompletions"
@@ -9170,6 +9171,7 @@ type sessionGoldenTool struct {
 	WebAnswer     string   `toml:"web-answer"`
 	Blocks        bool     `toml:"blocks"`
 	StoppedOutput string   `toml:"stopped-output"`
+	IsLargeRead   bool     `toml:"large-read"`
 }
 
 type sessionGoldenScenario struct {
@@ -9394,6 +9396,11 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 
 	tools := make([]tool.Tool, 0, len(specifications))
 	for _, specification := range specifications {
+		if specification.IsLargeRead {
+			tools = append(tools, newSessionGoldenLargeReadTool(t))
+			continue
+		}
+
 		if specification.ShellWithheld {
 			tools = append(tools, newSessionGoldenWithheldShell(t))
 			continue
@@ -9442,6 +9449,36 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 		}))
 	}
 	return tools
+}
+
+func newSessionGoldenLargeReadTool(t *testing.T) tool.Tool {
+	t.Helper()
+
+	rootHandle, err := os.OpenRoot(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = rootHandle.Close() })
+
+	openedFile, err := rootHandle.OpenFile("large.txt", os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	content := "before\nselected one\nselected two\n" + strings.Repeat("padding\n", 64)
+	if _, err := openedFile.WriteString(content); err != nil {
+		_ = openedFile.Close()
+		t.Fatal(err)
+	}
+	if err := openedFile.Truncate(20*1024*1024 + 1); err != nil {
+		_ = openedFile.Close()
+		t.Fatal(err)
+	}
+	if err := openedFile.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	root := file.New(rootHandle, func(string) error { return nil })
+	return read.New(root, file.NewSnapshots())
 }
 
 func sessionGoldenImage(t *testing.T, size string) (tool.Image, tool.Stats) {

@@ -1,7 +1,10 @@
 package read
 
 import (
+	"bufio"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,6 +29,13 @@ type loadedFile struct {
 	data      []byte
 	mediaType string
 	size      int64
+}
+
+type loadedRange struct {
+	contentHash   string
+	output        string
+	selectedLines int64
+	totalLines    int64
 }
 
 type Args struct {
@@ -55,8 +65,8 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 		FocusPath().
 		IsEmbarrassinglyParallel().
 		ChangesNothing().
-		Run(func(_ context.Context, args Args) (tool.ToolCallResult, error) {
-			return exec(root, args)
+		Run(func(ctx context.Context, args Args) (tool.ToolCallResult, error) {
+			return exec(ctx, root, args)
 		})
 }
 
@@ -77,7 +87,7 @@ func span(offset int, limit int) string {
 	}
 }
 
-func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
+func exec(ctx context.Context, root *file.Root, args Args) (tool.ToolCallResult, error) {
 	if args.Path == "" {
 		return tool.ToolCallResult{}, errors.New("path is required")
 	}
@@ -90,21 +100,10 @@ func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 	loadedFile, err := load(root, name)
 	stats := tool.Stats{Kind: tool.StatsRead, Bytes: loadedFile.size}
 	if errors.Is(err, errFileTooLarge) {
-		if imageutil.IsSupported(loadedFile.mediaType) && (args.Offset > 0 || args.Limit > 0) {
-			return tool.ToolCallResult{Stats: stats}, errors.New("line ranges are not supported for images")
-		}
-		noun := "file"
-		if imageutil.IsSupported(loadedFile.mediaType) {
-			noun = "image"
-		}
-		return tool.ToolCallResult{Stats: stats}, fmt.Errorf("%s is larger than the %d-byte limit", noun, maxFileBytes)
+		return oversizedResult(ctx, root, name, args, loadedFile.mediaType, stats)
 	}
 	if err != nil {
-		if pathError, ok := errors.AsType[*fs.PathError](err); ok {
-			return tool.ToolCallResult{}, fmt.Errorf("%s: %w", args.Path, pathError.Err)
-		}
-
-		return tool.ToolCallResult{}, err
+		return tool.ToolCallResult{}, readFailure(args.Path, err)
 	}
 
 	data := loadedFile.data
@@ -135,7 +134,10 @@ func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 		return successfulResult(args.Path, data, string(data), tool.Image{}, stats), nil
 	}
 
-	start := max(args.Offset-1, 0)
+	start := 0
+	if args.Offset > 0 {
+		start = args.Offset - 1
+	}
 	if len(lines) == 0 {
 		return successfulResult(args.Path, data, "", tool.Image{}, stats), nil
 	}
@@ -154,6 +156,120 @@ func exec(root *file.Root, args Args) (tool.ToolCallResult, error) {
 	stats.Lines = int64(end - start)
 	stats.Bytes = int64(len(output))
 	return successfulResult(args.Path, data, output, tool.Image{}, stats), nil
+}
+
+func oversizedResult(
+	ctx context.Context,
+	root *file.Root,
+	name string,
+	args Args,
+	mediaType string,
+	stats tool.Stats,
+) (tool.ToolCallResult, error) {
+	isRange := args.Offset > 0 || args.Limit > 0
+	isImage := imageutil.IsSupported(mediaType)
+	if !isRange {
+		noun := "file"
+		if isImage {
+			noun = "image"
+		}
+		return tool.ToolCallResult{Stats: stats}, fmt.Errorf("%s is larger than the %d-byte limit", noun, maxFileBytes)
+	}
+	if isImage {
+		return tool.ToolCallResult{Stats: stats}, errors.New("line ranges are not supported for images")
+	}
+
+	loadedRange, err := loadRange(ctx, root, name, args)
+	if err != nil {
+		return tool.ToolCallResult{Stats: stats}, readFailure(args.Path, err)
+	}
+
+	stats.Lines = loadedRange.selectedLines
+	stats.Bytes = int64(len(loadedRange.output))
+	snapshot := file.ReadSnapshot{Path: args.Path, Hash: loadedRange.contentHash}
+	return successfulSnapshotResult(snapshot, loadedRange.output, tool.Image{}, stats), nil
+}
+
+func readFailure(path string, err error) error {
+	if pathError, ok := errors.AsType[*fs.PathError](err); ok {
+		return fmt.Errorf("%s: %w", path, pathError.Err)
+	}
+
+	return err
+}
+
+func loadRange(ctx context.Context, root *file.Root, name string, args Args) (loadedRange, error) {
+	openedFile, err := root.Open(name)
+	if err != nil {
+		return loadedRange{}, err
+	}
+	defer func() { _ = openedFile.Close() }()
+
+	contentHasher := sha256.New()
+	reader := bufio.NewReader(openedFile)
+	start := int64(max(args.Offset-1, 0))
+	lineIndex := int64(0)
+	isLineStart := true
+	var output strings.Builder
+	var result loadedRange
+
+	for {
+		if err := ctx.Err(); err != nil {
+			return loadedRange{}, err
+		}
+
+		fragment, readErr := reader.ReadSlice('\n')
+		if len(fragment) > 0 {
+			_, _ = contentHasher.Write(fragment)
+		}
+
+		hasLine := len(fragment) > 0 && (readErr == nil || errors.Is(readErr, io.EOF))
+		isSelected := lineIndex >= start && (args.Limit <= 0 || result.selectedLines < int64(args.Limit))
+		if isSelected && len(fragment) > 0 {
+			content := fragment
+			if readErr == nil {
+				content = content[:len(content)-1]
+			}
+			separatorBytes := 0
+			if isLineStart && result.selectedLines > 0 {
+				separatorBytes = 1
+			}
+			if output.Len()+separatorBytes+len(content) > maxFileBytes {
+				return loadedRange{}, fmt.Errorf("range is larger than the %d-byte limit", maxFileBytes)
+			}
+			if separatorBytes > 0 {
+				output.WriteByte('\n')
+			}
+			_, _ = output.Write(content)
+		}
+
+		if hasLine {
+			lineIndex++
+			isLineStart = true
+		} else {
+			isLineStart = false
+		}
+		if hasLine && isSelected {
+			result.selectedLines++
+		}
+		if readErr != nil && !errors.Is(readErr, bufio.ErrBufferFull) && !errors.Is(readErr, io.EOF) {
+			return loadedRange{}, readErr
+		}
+		if errors.Is(readErr, io.EOF) {
+			break
+		}
+	}
+
+	result.totalLines = lineIndex
+	if result.totalLines > 0 && start >= result.totalLines {
+		return result, fmt.Errorf(
+			"offset %d is past the end of the file (%d lines)", args.Offset, result.totalLines,
+		)
+	}
+
+	result.contentHash = hex.EncodeToString(contentHasher.Sum(nil))
+	result.output = output.String()
+	return result, nil
 }
 
 func load(root *file.Root, name string) (loadedFile, error) {
@@ -200,10 +316,17 @@ func successfulResult(
 	image tool.Image,
 	stats tool.Stats,
 ) tool.ToolCallResult {
-	state := file.EncodeReadState(file.NewReadSnapshot(path, data))
+	return successfulSnapshotResult(file.NewReadSnapshot(path, data), output, image, stats)
+}
 
+func successfulSnapshotResult(
+	snapshot file.ReadSnapshot,
+	output string,
+	image tool.Image,
+	stats tool.Stats,
+) tool.ToolCallResult {
 	return tool.ToolCallResult{
-		State:  state,
+		State:  file.EncodeReadState(snapshot),
 		Output: output,
 		Image:  image,
 		Stats:  stats,

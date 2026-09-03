@@ -1,0 +1,18 @@
+{"kind":"head","version":12,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
+{"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
+{"kind":"event","event":{"kind":"user_message","text":"read lines two and three from the large file"}}
+{"kind":"event","event":{"render":"large.txt","detail":"2-3","emphasis":{"kind":"focus","value":"large.txt"},"read_only":true,"kind":"tool_call_request","id":"call-1","name":"read","arguments":"{\"path\":\"large.txt\",\"offset\":2,\"limit\":2}"}}
+{"kind":"event","event":{"kind":"state_change","id":"call-1","name":"file_read","state":{"files":[{"path":"large.txt","sha256":"1dc7274477ea539f7f7b865df9f769f60122b4aa79be51ecd27bfebd0c17d7d9"}]}}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"selected one\nselected two","id":"call-1","name":"read","status":"success","stats":{"kind":"read","lines":2,"bytes":25}}}
+{"kind":"event","event":{"kind":"model_message","text":"The ranged read succeeded."}}
+{"kind":"item","payload":{"role":"user","content":"read lines two and three from the large file"}}
+{"kind":"item","payload":{"type":"function_call","call_id":"call-1","name":"read","arguments":"{\"path\":\"large.txt\",\"offset\":2,\"limit\":2}"}}
+{"kind":"item","payload":{"type":"function_call_output","call_id":"call-1","output":"selected one\nselected two"}}
+{"kind":"item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"The ranged read succeeded."}]}}
+{"kind":"turn_completion","turn":{}}
+{"kind":"event","event":{"kind":"user_message","text":"finish"}}
+{"kind":"event","event":{"kind":"model_message","text":"Done."}}
+{"kind":"item","payload":{"role":"user","content":"finish"}}
+{"kind":"item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Done."}]}}
+{"kind":"turn_completion","turn":{}}

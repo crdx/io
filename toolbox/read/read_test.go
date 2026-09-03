@@ -2,6 +2,10 @@ package read_test
 
 import (
 	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"image"
 	"image/png"
 	"os"
@@ -204,16 +208,138 @@ func TestAHugeFileIsNotCutShort(t *testing.T) {
 	}
 }
 
+func TestRangesOfFilesAboveTheReadLimit(t *testing.T) {
+	root, name := largeTextRoot(t)
+	execute := func(arguments string) (tool.ToolCallResult, error) {
+		call, err := read.New(root, file.NewSnapshots()).Parse(arguments)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return call.Exec(t.Context())
+	}
+
+	boundedResult, err := execute(fmt.Sprintf(`{"path":%q,"offset":2,"limit":1}`, name))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if boundedResult.Output != "wanted" {
+		t.Errorf("got %q, want %q", boundedResult.Output, "wanted")
+	}
+	if boundedResult.Stats.Bytes != 6 || boundedResult.Stats.Lines != 1 {
+		t.Errorf("unexpected stats: %+v", boundedResult.Stats)
+	}
+
+	openResult, err := execute(fmt.Sprintf(`{"path":%q,"offset":2}`, name))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if openResult.Output != "wanted" {
+		t.Errorf("got %q, want %q", openResult.Output, "wanted")
+	}
+
+	_, err = execute(fmt.Sprintf(`{"path":%q,"limit":1}`, name))
+	if err == nil || err.Error() != "range is larger than the 20971520-byte limit" {
+		t.Errorf("unexpected oversized range failure: %v", err)
+	}
+
+	_, err = execute(fmt.Sprintf(`{"path":%q,"offset":3,"limit":1}`, name))
+	if err == nil || err.Error() != "offset 3 is past the end of the file (2 lines)" {
+		t.Errorf("unexpected past-end failure: %v", err)
+	}
+
+	data, err := root.ReadFile(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var state file.ReadState
+	if err := json.Unmarshal(boundedResult.State, &state); err != nil {
+		t.Fatal(err)
+	}
+	wantSnapshot := file.NewReadSnapshot(name, data)
+	if len(state.Files) != 1 || state.Files[0] != wantSnapshot {
+		t.Errorf("got %+v, want %+v", state.Files, wantSnapshot)
+	}
+}
+
+func TestARangeOfALargeFileCanBeCancelled(t *testing.T) {
+	root, name := largeTextRoot(t)
+	call, err := read.New(root, file.NewSnapshots()).Parse(fmt.Sprintf(`{"path":%q,"limit":1}`, name))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+
+	_, err = call.Exec(ctx)
+	if !errors.Is(err, context.Canceled) {
+		t.Errorf("got %v, want a cancellation", err)
+	}
+}
+
+func largeTextRoot(t *testing.T) (*file.Root, string) {
+	t.Helper()
+
+	const fileBytes = 20*1024*1024 + 1
+
+	directory := t.TempDir()
+	opened, err := os.CreateTemp(directory, "large")
+	if err != nil {
+		t.Fatal(err)
+	}
+	name := filepath.Base(opened.Name())
+	chunk := strings.Repeat("a", 1024*1024)
+	remainingBytes := fileBytes
+	for remainingBytes > 0 {
+		writtenBytes := min(remainingBytes, len(chunk))
+		if _, err := opened.WriteString(chunk[:writtenBytes]); err != nil {
+			_ = opened.Close()
+			t.Fatal(err)
+		}
+		remainingBytes -= writtenBytes
+	}
+	if _, err := opened.WriteString("\nwanted\n"); err != nil {
+		_ = opened.Close()
+		t.Fatal(err)
+	}
+	if err := opened.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	rootHandle, err := os.OpenRoot(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = rootHandle.Close() })
+	return file.New(rootHandle, allowAll), name
+}
+
 func TestFilesAboveTheReadLimitAreRefusedBeforeTheirContentsAreLoaded(t *testing.T) {
 	const fileBytes = 256 * 1024 * 1024
 
 	tests := []struct {
-		name    string
-		header  string
-		failure string
+		name      string
+		header    string
+		arguments string
+		failure   string
 	}{
-		{name: "image", header: "\x89PNG\r\n\x1a\n", failure: "image is larger than the 20971520-byte limit"},
-		{name: "text", header: "plain text", failure: "file is larger than the 20971520-byte limit"},
+		{
+			name:      "image",
+			header:    "\x89PNG\r\n\x1a\n",
+			arguments: `{"path":"large"}`,
+			failure:   "image is larger than the 20971520-byte limit",
+		},
+		{
+			name:      "image range",
+			header:    "\x89PNG\r\n\x1a\n",
+			arguments: `{"path":"large","limit":1}`,
+			failure:   "line ranges are not supported for images",
+		},
+		{
+			name:      "text",
+			header:    "plain text",
+			arguments: `{"path":"large"}`,
+			failure:   "file is larger than the 20971520-byte limit",
+		},
 	}
 
 	for _, test := range tests {
@@ -242,7 +368,7 @@ func TestFilesAboveTheReadLimitAreRefusedBeforeTheirContentsAreLoaded(t *testing
 			}
 			defer func() { _ = rootHandle.Close() }()
 			root := file.New(rootHandle, allowAll)
-			call, err := read.New(root, file.NewSnapshots()).Parse(`{"path":"large"}`)
+			call, err := read.New(root, file.NewSnapshots()).Parse(test.arguments)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -1,0 +1,33 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[[tool]]
+name = "read"
+large-read = true
+
+[first]
+prompt = "read lines two and three from the large file"
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_item.done","item":{"type":"function_call","call_id":"call-1","name":"read","arguments":"{\"path\":\"large.txt\",\"offset\":2,\"limit\":2}"}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[[first.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"The ranged read succeeded."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"The ranged read succeeded."}]}}''',
+    '''{"type":"response.completed"}''',
+]
+
+[resume]
+prompt = "finish"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Done."}''',
+    '''{"type":"response.output_item.done","item":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Done."}]}}''',
+    '''{"type":"response.completed"}''',
+]

@@ -1,0 +1,13 @@
+
+ read lines two and three from the large file
+
+
+read large.txt 2-3 ✓ 2L
+
+The ranged read succeeded.
+
+
+ finish
+
+
+Done.
