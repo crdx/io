@@ -3,10 +3,13 @@ package tty
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
+	"golang.org/x/sys/unix"
 	"golang.org/x/term"
 )
 
@@ -72,27 +75,60 @@ func TestATerminalIsItsOwnKeyboard(t *testing.T) {
 	}
 }
 
-func TestAPipedInputLooksElsewhereForItsKeyboard(t *testing.T) {
+func TestAPipedInputTakesTheControllingTerminalForItsKeyboard(t *testing.T) {
 	piped := pipe(t)
+	useControllingTerminal(t, pseudoTerminalPath(t))
 
 	keyboard, release := Keyboard(piped)
 	defer release()
 
-	opened, err := os.Open(controllingTerminal)
-	if err != nil {
-		if keyboard != piped {
-			t.Error("expected the piped input back where there is no controlling terminal")
-		}
-		return
-	}
-	_ = opened.Close()
-
 	if keyboard == piped {
-		t.Error("expected the controlling terminal rather than the pipe")
+		t.Fatal("expected the controlling terminal rather than the pipe")
 	}
 	if !Is(keyboard) {
 		t.Error("expected the controlling terminal to be a terminal")
 	}
+}
+
+func TestAPipedInputKeepsItselfWhereThereIsNoControllingTerminal(t *testing.T) {
+	piped := pipe(t)
+	useControllingTerminal(t, filepath.Join(t.TempDir(), "absent"))
+
+	keyboard, release := Keyboard(piped)
+	defer release()
+
+	if keyboard != piped {
+		t.Error("expected the piped input back where there is no controlling terminal")
+	}
+}
+
+func useControllingTerminal(t *testing.T, path string) {
+	t.Helper()
+
+	previous := controllingTerminal
+	t.Cleanup(func() { controllingTerminal = previous })
+	controllingTerminal = path
+}
+
+func pseudoTerminalPath(t *testing.T) string {
+	t.Helper()
+
+	master, err := os.OpenFile("/dev/ptmx", os.O_RDWR, 0)
+	if err != nil {
+		t.Skipf("no pseudo-terminal to test against: %v", err)
+	}
+	t.Cleanup(func() { _ = master.Close() })
+
+	number, err := unix.IoctlGetInt(int(master.Fd()), unix.TIOCGPTN)
+	if err != nil {
+		t.Skipf("could not name the pseudo-terminal: %v", err)
+	}
+
+	if err := unix.IoctlSetPointerInt(int(master.Fd()), unix.TIOCSPTLCK, 0); err != nil {
+		t.Skipf("could not unlock the pseudo-terminal: %v", err)
+	}
+
+	return fmt.Sprintf("/dev/pts/%d", number)
 }
 
 func pty(t *testing.T) *os.File {

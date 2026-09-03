@@ -15,6 +15,8 @@ import (
 
 const defaultCapFlags = "rx"
 
+const stdinMarker = "-"
+
 var usage = fmt.Sprintf(`oh — coding harness
 
 Usage:
@@ -107,7 +109,16 @@ func Bind() *Input {
 	parsedFlags := duckopt.MustBind[inputFlags](usage, "$0")
 	parsedFlags.IsSessionPicker = isSessionPicker
 	parsedFlags.IsModelPicker = isModelPicker
+	parsedFlags.Message = promptAfterStdinMarker(parsedFlags.Message)
 	return &Input{inputFlags: *parsedFlags, SourceSession: sourceSession}
+}
+
+func promptAfterStdinMarker(words []string) []string {
+	if len(words) > 0 && words[0] == stdinMarker {
+		return words[1:]
+	}
+
+	return words
 }
 
 func (self Options) Resuming() bool {

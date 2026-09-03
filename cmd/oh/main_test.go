@@ -3856,6 +3856,102 @@ func runTestBinary(t *testing.T, binary string, environment []string, arguments 
 	return string(output)
 }
 
+const earlyExitDeadline = 10 * time.Second
+
+var usageOption = regexp.MustCompile(`(?m)^\s+(?:-[A-Za-z], )?(--[a-z-]+)`)
+
+var optionsThatExitEarly = map[string][]string{
+	"--login":   {"-L", "nobody"},
+	"--usage":   {"-U", "-J"},
+	"--list":    {"-l"},
+	"--update":  {"-u"},
+	"--version": {"-v"},
+	"--help":    {"-h"},
+}
+
+var optionsThatOpenASession = []string{
+	"--resume",
+	"--model",
+	"--caps",
+	"--tool",
+	"--print",
+	"--yolo",
+	"--json",
+}
+
+func TestFlagsThatExitEarlyNeverWaitOnStdin(t *testing.T) {
+	t.Parallel()
+
+	binary := buildTestBinary(t)
+
+	requireEveryOptionSaysWhetherItExits(t, binary)
+
+	for name, arguments := range optionsThatExitEarly {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			reader, writer, err := os.Pipe()
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				_ = reader.Close()
+				_ = writer.Close()
+			})
+
+			context, cancel := context.WithTimeout(t.Context(), earlyExitDeadline)
+			defer cancel()
+
+			command := exec.CommandContext(context, binary, arguments...) //nolint:gosec // running the binary under test
+			command.Env = testBinaryEnvironment(t, t.TempDir())
+			command.Stdin = reader
+
+			output, err := command.CombinedOutput()
+
+			if context.Err() != nil {
+				t.Fatalf(
+					"oh %s waited on a stdin nobody was going to close, having drawn %q",
+					strings.Join(arguments, " "), string(output),
+				)
+			}
+			if err != nil {
+				if _, isExit := errors.AsType[*exec.ExitError](err); !isExit {
+					t.Fatalf("oh %s: %v\n%s", strings.Join(arguments, " "), err, output)
+				}
+			}
+		})
+	}
+}
+
+func requireEveryOptionSaysWhetherItExits(t *testing.T, binary string) {
+	t.Helper()
+
+	command := exec.CommandContext(t.Context(), binary, "-h")
+	command.Env = testBinaryEnvironment(t, t.TempDir())
+	help, _ := command.CombinedOutput()
+
+	matches := usageOption.FindAllStringSubmatch(string(help), -1)
+	if len(matches) == 0 {
+		t.Fatalf("no options were named, in:\n%s", help)
+	}
+
+	for _, match := range matches {
+		option := match[1]
+		if _, doesExit := optionsThatExitEarly[option]; doesExit {
+			continue
+		}
+		if slices.Contains(optionsThatOpenASession, option) {
+			continue
+		}
+
+		t.Errorf(
+			"%s is neither known to exit early nor known to open a session, "+
+				"so nothing says whether it may wait on stdin",
+			option,
+		)
+	}
+}
+
 func testBinaryEnvironment(t *testing.T, stateDirectory string) []string {
 	t.Helper()
 

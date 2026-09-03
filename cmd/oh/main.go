@@ -121,16 +121,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	inputArgs := cli.Bind()
 
-	var pipedPrompt string
-	if !tty.Is(os.Stdin) {
-		prompt, err := startup.ReadPipedPrompt(os.Stdin)
-		if err != nil {
-			return "", err
-		}
-		pipedPrompt = prompt
-	}
+	isPromptPiped := !tty.Is(os.Stdin)
 
-	if err := inputArgs.Check(pipedPrompt != ""); err != nil {
+	if err := inputArgs.Check(isPromptPiped); err != nil {
 		return "", err
 	}
 
@@ -402,7 +395,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		}
 	}()
 
-	args.Message = startup.JoinPrompt(args.Message, pipedPrompt)
+	if isPromptPiped {
+		pipedPrompt, err := startup.ReadPipedPrompt(os.Stdin)
+		if err != nil {
+			return "", err
+		}
+		args.Message = startup.JoinPrompt(args.Message, pipedPrompt)
+	}
 
 	if len(args.AddedFiles) > 0 {
 		initialFilesMessage, err := startup.PrepareInitialFiles(args.AddedFiles, tmpDir)

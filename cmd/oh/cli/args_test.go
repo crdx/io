@@ -226,6 +226,30 @@ func TestAModelGivenToTheModelOptionIsNotThePicker(t *testing.T) {
 	}
 }
 
+func TestALeadingDashNamesThePipeRatherThanThePrompt(t *testing.T) {
+	if parsedOptions := parseOptions(t, "-"); parsedOptions.Message != "" {
+		t.Errorf("expected a bare dash to say nothing, got %q", parsedOptions.Message)
+	}
+
+	if parsedOptions := parseOptions(t, "-", "explain", "this"); parsedOptions.Message != "explain this" {
+		t.Errorf("expected the words beside the dash, got %q", parsedOptions.Message)
+	}
+
+	if parsedOptions := parseOptions(t, "what", "does", "-", "mean"); parsedOptions.Message != "what does - mean" {
+		t.Errorf("expected a dash within the prompt to be a word of it, got %q", parsedOptions.Message)
+	}
+}
+
+func TestAPrintedSessionNeedsMoreThanTheStdinMarker(t *testing.T) {
+	if err := bind(t, "-p", "-").Check(false); err == nil {
+		t.Error("expected a printed session with nothing piped to be refused")
+	}
+
+	if err := bind(t, "-p", "-").Check(true); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
 func TestWhateverIsLeftOverIsTheFirstThingSaid(t *testing.T) {
 	parsedOptions := parseOptions(t, "why", "does", "the", "spinner", "stutter")
 

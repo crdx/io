@@ -18,7 +18,7 @@ func Is(stream any) bool {
 	return ok && term.IsTerminal(int(file.Fd()))
 }
 
-const controllingTerminal = "/dev/tty"
+var controllingTerminal = "/dev/tty"
 
 func Keyboard(input *os.File) (*os.File, func()) {
 	if Is(input) {
