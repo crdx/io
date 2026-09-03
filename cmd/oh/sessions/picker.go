@@ -83,6 +83,38 @@ func InWorkspace(sessions []*picker.Session, workspace *work.Space) []*picker.Se
 	return chosenSessions
 }
 
+func NamesInWorkspace(directory string, workspace *work.Space) ([]string, error) {
+	storedNames, err := session.StoredNames(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	sessions := make([]*picker.Session, 0, len(storedNames))
+	for _, name := range storedNames {
+		storedMeta, metaError := session.ReadMeta(directory, name)
+		if metaError != nil {
+			continue
+		}
+
+		listing, _, isDescribed := describe(storedMeta)
+		if !isDescribed {
+			continue
+		}
+
+		sessions = append(sessions, listing)
+	}
+
+	newestFirst(sessions)
+
+	chosenSessions := InWorkspace(sessions, workspace)
+	names := make([]string, 0, len(chosenSessions))
+	for _, chosenSession := range chosenSessions {
+		names = append(names, chosenSession.Name)
+	}
+
+	return names, nil
+}
+
 func RefreshListings(directory string, screen io.Writer) error {
 	stale, err := store.StaleMeta(directory)
 	if err != nil {

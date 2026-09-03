@@ -68,14 +68,9 @@ func withPrefix(word string, candidates []string) []string {
 }
 
 func storedNames() []string {
-	entries, err := session.Entries(location.GetSessionsDir())
+	names, err := session.StoredNames(location.GetSessionsDir())
 	if err != nil {
 		return nil
-	}
-
-	names := make([]string, 0, len(entries))
-	for _, entry := range entries {
-		names = append(names, entry.Name)
 	}
 
 	return names

@@ -182,14 +182,9 @@ func sessionNames(directory string) []string {
 		return nil
 	}
 
-	storedSessions, err := sessions.Load(directory)
+	names, err := sessions.NamesInWorkspace(directory, workspace)
 	if err != nil {
 		return nil
-	}
-
-	names := make([]string, 0, len(storedSessions))
-	for _, storedSession := range sessions.InWorkspace(storedSessions, workspace) {
-		names = append(names, storedSession.Name)
 	}
 
 	return names

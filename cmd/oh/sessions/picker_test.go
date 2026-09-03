@@ -167,6 +167,93 @@ func TestTheSessionAddedToLastIsOfferedFirstByThePicker(t *testing.T) {
 	}
 }
 
+func TestCompletableNamesAreTakenFromTheListingWithoutReadingAJournal(t *testing.T) {
+	directory := t.TempDir()
+	workspaceDir := t.TempDir()
+
+	names := make([]string, 0, 2)
+	for range cap(names) {
+		names = append(names, writeIdleSession(t, directory, store.Meta{
+			WorkspaceDir: workspaceDir,
+			Provider:     model.CodexProvider,
+			Model:        "gpt-5.6-sol",
+		}))
+		time.Sleep(2 * time.Millisecond)
+	}
+
+	elsewhere := writeIdleSession(t, directory, store.Meta{WorkspaceDir: t.TempDir()})
+
+	for _, name := range append(slices.Clone(names), elsewhere) {
+		breakJournal(t, directory, name)
+	}
+
+	if _, err := Load(directory); err == nil {
+		t.Fatal("expected a broken journal to stop the sessions being loaded in full")
+	}
+
+	got, err := NamesInWorkspace(directory, work.At(workspaceDir))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	slices.Reverse(names)
+	if !slices.Equal(got, names) {
+		t.Errorf("completed %v, want the workspace's own sessions newest first: %v", got, names)
+	}
+}
+
+func TestASessionWithAnOlderListingDoesNotStopTheOthersCompleting(t *testing.T) {
+	directory := t.TempDir()
+	workspaceDir := t.TempDir()
+
+	behind := writeIdleSession(t, directory, store.Meta{WorkspaceDir: workspaceDir})
+	time.Sleep(2 * time.Millisecond)
+	current := writeIdleSession(t, directory, store.Meta{WorkspaceDir: workspaceDir})
+
+	putListingBehind(t, directory, behind)
+
+	got, err := NamesInWorkspace(directory, work.At(workspaceDir))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(got, []string{current}) {
+		t.Errorf("completed %v, want only %s", got, current)
+	}
+}
+
+func writeIdleSession(t *testing.T, directory string, meta store.Meta) string {
+	t.Helper()
+
+	writer, err := store.Create(directory, meta)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	return writer.Name()
+}
+
+func breakJournal(t *testing.T, directory string, name string) {
+	t.Helper()
+
+	path := filepath.Join(directory, name, "session.jsonl")
+	journal, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, 0o600) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := journal.WriteString("{broken}\n"); err != nil {
+		t.Fatal(err)
+	}
+	if err := journal.Close(); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestASessionRecordedThroughALinkBelongsToTheWorkspaceItNames(t *testing.T) {
 	directory := t.TempDir()
 	workspaceDir := t.TempDir()
