@@ -56,7 +56,7 @@ func TestAStoppedReaderLeavesTheTerminalToTheNextReader(t *testing.T) {
 func TestAReaderWithoutAWakePipeStillStops(t *testing.T) {
 	terminal := pty(t)
 
-	reader := &Reader{input: terminal, stopping: make(chan struct{})}
+	reader := &Reader{input: terminal, stopSignal: make(chan struct{})}
 	stopped := make(chan error, 1)
 
 	go func() {

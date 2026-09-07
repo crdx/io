@@ -58,16 +58,16 @@ func openGrantPath(path string, writableRoots []string) (int, error) {
 
 	roots := resolvedRoots(writableRoots)
 	currentDir := separator
-	remaining := pathComponents(filepath.Clean(path))
+	remainingComponents := pathComponents(filepath.Clean(path))
 
-	for steps := 0; len(remaining) > 0; steps++ {
+	for steps := 0; len(remainingComponents) > 0; steps++ {
 		if steps > maxResolutionSteps {
 			_ = unix.Close(fd)
 			return -1, fmt.Errorf("%s passes through too many symbolic links", path)
 		}
 
-		part := remaining[0]
-		remaining = remaining[1:]
+		part := remainingComponents[0]
+		remainingComponents = remainingComponents[1:]
 
 		next, err := unix.Openat(fd, part, unix.O_PATH|unix.O_CLOEXEC|unix.O_NOFOLLOW, 0)
 		if err != nil {
@@ -107,7 +107,7 @@ func openGrantPath(path string, writableRoots []string) (int, error) {
 			currentDir = separator
 		}
 
-		remaining = append(pathComponents(target), remaining...)
+		remainingComponents = append(pathComponents(target), remainingComponents...)
 	}
 
 	return fd, nil
@@ -150,15 +150,15 @@ func isBeneathAny(path string, roots []string) bool {
 func FirstSymlinkBeneath(path string, writableRoots []string) (string, bool) {
 	roots := resolvedRoots(writableRoots)
 	current := separator
-	remaining := pathComponents(filepath.Clean(path))
+	remainingComponents := pathComponents(filepath.Clean(path))
 
-	for steps := 0; len(remaining) > 0; steps++ {
+	for steps := 0; len(remainingComponents) > 0; steps++ {
 		if steps > maxResolutionSteps {
 			return "", false
 		}
 
-		part := remaining[0]
-		remaining = remaining[1:]
+		part := remainingComponents[0]
+		remainingComponents = remainingComponents[1:]
 		candidate := filepath.Join(current, part)
 
 		info, err := os.Lstat(candidate)
@@ -167,7 +167,7 @@ func FirstSymlinkBeneath(path string, writableRoots []string) (string, bool) {
 		}
 
 		if info.Mode()&os.ModeSymlink == 0 {
-			if len(remaining) > 0 && !info.IsDir() {
+			if len(remainingComponents) > 0 && !info.IsDir() {
 				return "", false
 			}
 
@@ -188,7 +188,7 @@ func FirstSymlinkBeneath(path string, writableRoots []string) (string, bool) {
 			current = separator
 		}
 
-		remaining = append(pathComponents(target), remaining...)
+		remainingComponents = append(pathComponents(target), remainingComponents...)
 	}
 
 	return "", false

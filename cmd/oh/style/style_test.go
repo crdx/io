@@ -119,7 +119,7 @@ func TestNothingIsPaintedWhereTheScreenIsNotATerminal(t *testing.T) {
 		}
 	}
 
-	if got := Pending(Read("r")); got != "r" {
+	if got := PendingPrefix(Read("r")); got != "r" {
 		t.Errorf("a style over another painted %q, want it left alone", got)
 	}
 }

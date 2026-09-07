@@ -10,7 +10,7 @@ const (
 	Poke
 )
 
-type Pending struct {
+type PendingEntry struct {
 	Message      string
 	Replacement  bool
 	AccessChange bool
@@ -19,51 +19,51 @@ type Pending struct {
 }
 
 type Queue struct {
-	pending Pending
+	pendingEntry PendingEntry
 }
 
 func (self *Queue) Replace(message string) {
-	self.pending.Message = message
-	self.pending.Replacement = true
+	self.pendingEntry.Message = message
+	self.pendingEntry.Replacement = true
 }
 
 func (self *Queue) MarkAccessChange() {
-	self.pending.AccessChange = true
+	self.pendingEntry.AccessChange = true
 }
 
 func (self *Queue) MarkSilentTurn() {
-	self.pending.Poke = true
+	self.pendingEntry.Poke = true
 }
 
 func (self *Queue) Clear() {
-	self.pending = Pending{}
+	self.pendingEntry = PendingEntry{}
 }
 
 func (self *Queue) Drop() {
-	self.pending = Pending{AccessNotice: self.pending.AccessChange || self.pending.AccessNotice}
+	self.pendingEntry = PendingEntry{AccessNotice: self.pendingEntry.AccessChange || self.pendingEntry.AccessNotice}
 }
 
 func (self *Queue) Empty() bool {
-	return !self.pending.Replacement && !self.pending.AccessChange &&
-		!self.pending.AccessNotice && !self.pending.Poke
+	return !self.pendingEntry.Replacement && !self.pendingEntry.AccessChange &&
+		!self.pendingEntry.AccessNotice && !self.pendingEntry.Poke
 }
 
-func (self *Queue) Peek() Pending {
-	return self.pending
+func (self *Queue) Peek() PendingEntry {
+	return self.pendingEntry
 }
 
 func (self *Queue) Take() (Kind, string) {
-	pending := self.pending
+	pendingEntry := self.pendingEntry
 	self.Clear()
 
 	switch {
-	case pending.Replacement:
-		return Replacement, pending.Message
-	case pending.AccessChange:
+	case pendingEntry.Replacement:
+		return Replacement, pendingEntry.Message
+	case pendingEntry.AccessChange:
 		return AccessChange, ""
-	case pending.AccessNotice:
+	case pendingEntry.AccessNotice:
 		return AccessNotice, ""
-	case pending.Poke:
+	case pendingEntry.Poke:
 		return Poke, PokeMessage
 	default:
 		return None, ""

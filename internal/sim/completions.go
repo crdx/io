@@ -111,8 +111,8 @@ func (self completionsDialect) Check(scenario *Scenario, askedRequest Request) s
 		return fmt.Sprintf("the model %q is not available", askedRequest.Model)
 	}
 
-	if hanging := unansweredCall(askedRequest.Input); hanging != "" {
-		return "No tool output found for function call " + hanging + "."
+	if hangingCall := unansweredCall(askedRequest.Input); hangingCall != "" {
+		return "No tool output found for function call " + hangingCall + "."
 	}
 
 	return ""

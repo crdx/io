@@ -17,7 +17,7 @@ func TestAStopDuringTheStartWindowIsNotClobbered(t *testing.T) {
 	manager.beginEnd(opening)
 
 	manager.mutex.Lock()
-	opening.running = nil
+	opening.runningCommand = nil
 	manager.mutex.Unlock()
 	if manager.settleStarted(opening, nil) {
 		t.Error("a job stopped while starting reported itself as freshly running")

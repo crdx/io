@@ -61,6 +61,30 @@ func TestAnalyse(t *testing.T) {
 		"an explicitly typed boolean named for an irregular participle": {
 			source: "package example\n\nvar held bool\n",
 		},
+		"a present participle": {
+			source:   "package example\n\nvar opening job\n",
+			expected: []string{"example.go:3:5: opening: say what is opening, since a name is a noun rather than an adjective"},
+		},
+		"a compound present participle": {
+			source: "package example\n\nvar openingJob job\n",
+		},
+		"a present participle type": {
+			source:   "package example\n\ntype pending struct{}\n",
+			expected: []string{"example.go:3:6: pending: say what is pending, since a name is a noun rather than an adjective"},
+		},
+		"a present participle parameter": {
+			source:   "package example\n\nfunc watch(ending job) {}\n",
+			expected: []string{"example.go:3:12: ending: say what is ending, since a name is a noun rather than an adjective"},
+		},
+		"an explicitly typed boolean named for a present participle": {
+			source: "package example\n\nvar running bool\n",
+		},
+		"a noun ending in ing": {
+			source: "package example\n\nvar listing []job\n",
+		},
+		"a short word ending in ing": {
+			source: "package example\n\nvar ring shape\n",
+		},
 	}
 
 	for name, test := range tests {

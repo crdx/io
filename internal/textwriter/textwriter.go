@@ -56,8 +56,8 @@ func (self *Writer) Newlines(count int) {
 		writtenNewlines++
 	}
 
-	if missing := count - writtenNewlines; missing > 0 {
-		_, _ = self.builder.WriteString(strings.Repeat("\n", missing))
+	if missingNewlines := count - writtenNewlines; missingNewlines > 0 {
+		_, _ = self.builder.WriteString(strings.Repeat("\n", missingNewlines))
 	}
 }
 

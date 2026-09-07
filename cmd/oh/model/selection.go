@@ -236,8 +236,8 @@ func RankedChoicesWithoutGuessing(query string, choices []Choice) []Choice {
 }
 
 func rankedChoices(query string, choices []Choice, tiers []matcher) []Choice {
-	for _, matching := range tiers {
-		if matches := matchingModels(query, choices, matching); len(matches) > 0 {
+	for _, matchTier := range tiers {
+		if matches := matchingModels(query, choices, matchTier); len(matches) > 0 {
 			return matches
 		}
 	}
@@ -245,7 +245,7 @@ func rankedChoices(query string, choices []Choice, tiers []matcher) []Choice {
 	return nil
 }
 
-func matchingModels(query string, choices []Choice, matching matcher) []Choice {
+func matchingModels(query string, choices []Choice, matchTier matcher) []Choice {
 	query = strings.ToLower(query)
 	namesProvider := strings.Contains(query, "/")
 
@@ -257,7 +257,7 @@ func matchingModels(query string, choices []Choice, matching matcher) []Choice {
 			candidate = strings.ToLower(choice.Provider + "/" + choice.ID)
 		}
 
-		if matching(candidate, query) {
+		if matchTier(candidate, query) {
 			matches = append(matches, choice)
 		}
 	}

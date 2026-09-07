@@ -95,12 +95,12 @@ type Keeper struct {
 	control *net.UnixConn
 	notice  notes
 
-	writing   sync.Mutex
-	waiting   sync.Mutex
-	waiters   map[uint64]chan reply
-	nextToken atomic.Uint64
-	isClosed  atomic.Bool
-	reading   sync.WaitGroup
+	writeMutex   sync.Mutex
+	waitersMutex sync.Mutex
+	waiters      map[uint64]chan reply
+	nextToken    atomic.Uint64
+	isClosed     atomic.Bool
+	readers      sync.WaitGroup
 }
 
 func Open(ctx context.Context) (*Keeper, error) {
@@ -137,7 +137,7 @@ func Open(ctx context.Context) (*Keeper, error) {
 		return nil, err
 	}
 
-	self.reading.Add(1)
+	self.readers.Add(1)
 
 	go self.receive()
 
@@ -154,7 +154,7 @@ func (self *Keeper) Spawn(
 		return nil, ErrClosed
 	}
 
-	reading, writing, err := os.Pipe()
+	readEnd, writeEnd, err := os.Pipe()
 	if err != nil {
 		return nil, fmt.Errorf("could not open the command's output: %w", err)
 	}
@@ -162,21 +162,21 @@ func (self *Keeper) Spawn(
 	token := self.nextToken.Add(1)
 	answers := make(chan reply, 2)
 
-	self.waiting.Lock()
+	self.waitersMutex.Lock()
 	self.waiters[token] = answers
-	self.waiting.Unlock()
+	self.waitersMutex.Unlock()
 
 	err = self.ask(request{
 		Kind:        requestSpawn,
 		Token:       token,
 		Directory:   directory,
 		Environment: environment,
-	}, writing)
-	_ = writing.Close()
+	}, writeEnd)
+	_ = writeEnd.Close()
 
 	if err != nil {
 		self.forget(token)
-		_ = reading.Close()
+		_ = readEnd.Close()
 
 		return nil, err
 	}
@@ -185,8 +185,8 @@ func (self *Keeper) Spawn(
 
 	go func() {
 		defer close(drainedOutput)
-		defer func() { _ = reading.Close() }()
-		_, _ = io.Copy(output, reading)
+		defer func() { _ = readEnd.Close() }()
+		_, _ = io.Copy(output, readEnd)
 	}()
 
 	var answer reply
@@ -221,7 +221,7 @@ func (self *Keeper) Close() error {
 	}
 
 	_ = self.control.Close()
-	self.reading.Wait()
+	self.readers.Wait()
 
 	if self.process.Process != nil {
 		_ = syscall.Kill(-self.process.Process.Pid, syscall.SIGKILL)
@@ -264,7 +264,7 @@ func (self *Keeper) refusal(err error) string {
 }
 
 func (self *Keeper) receive() {
-	defer self.reading.Done()
+	defer self.readers.Done()
 
 	message := make([]byte, messageBytes)
 
@@ -280,9 +280,9 @@ func (self *Keeper) receive() {
 			continue
 		}
 
-		self.waiting.Lock()
+		self.waitersMutex.Lock()
 		waiter, isWaiting := self.waiters[answer.Token]
-		self.waiting.Unlock()
+		self.waitersMutex.Unlock()
 
 		if isWaiting {
 			waiter <- answer
@@ -291,8 +291,8 @@ func (self *Keeper) receive() {
 }
 
 func (self *Keeper) abandon() {
-	self.waiting.Lock()
-	defer self.waiting.Unlock()
+	self.waitersMutex.Lock()
+	defer self.waitersMutex.Unlock()
 
 	for token, waiter := range self.waiters {
 		close(waiter)
@@ -318,8 +318,8 @@ func (self *Keeper) ask(instruction request, handover *os.File) error {
 		rights = unix.UnixRights(int(handover.Fd()))
 	}
 
-	self.writing.Lock()
-	defer self.writing.Unlock()
+	self.writeMutex.Lock()
+	defer self.writeMutex.Unlock()
 
 	if _, _, err := self.control.WriteMsgUnix(payload, rights, nil); err != nil {
 		return fmt.Errorf("could not reach the keeper: %w", err)
@@ -329,8 +329,8 @@ func (self *Keeper) ask(instruction request, handover *os.File) error {
 }
 
 func (self *Keeper) forget(token uint64) {
-	self.waiting.Lock()
-	defer self.waiting.Unlock()
+	self.waitersMutex.Lock()
+	defer self.waitersMutex.Unlock()
 	delete(self.waiters, token)
 }
 
@@ -369,13 +369,13 @@ func (self *Process) Signal(signal syscall.Signal) error {
 }
 
 type notes struct {
-	writing sync.Mutex
-	text    strings.Builder
+	writeMutex sync.Mutex
+	text       strings.Builder
 }
 
 func (self *notes) Write(data []byte) (int, error) {
-	self.writing.Lock()
-	defer self.writing.Unlock()
+	self.writeMutex.Lock()
+	defer self.writeMutex.Unlock()
 
 	if room := noticeBytes - self.text.Len(); room > 0 {
 		_, _ = self.text.Write(data[:min(room, len(data))])
@@ -385,8 +385,8 @@ func (self *notes) Write(data []byte) (int, error) {
 }
 
 func (self *notes) String() string {
-	self.writing.Lock()
-	defer self.writing.Unlock()
+	self.writeMutex.Lock()
+	defer self.writeMutex.Unlock()
 
 	return self.text.String()
 }
@@ -425,20 +425,20 @@ func serve() error {
 
 	service.accept()
 	service.abandonEverything()
-	service.running.Wait()
+	service.runners.Wait()
 
 	return nil
 }
 
 func (self *service) abandonEverything() {
-	self.tracking.Lock()
-	running := make([]*exec.Cmd, 0, len(self.commands))
+	self.commandsMutex.Lock()
+	runningCommands := make([]*exec.Cmd, 0, len(self.commands))
 	for _, command := range self.commands {
-		running = append(running, command)
+		runningCommands = append(runningCommands, command)
 	}
-	self.tracking.Unlock()
+	self.commandsMutex.Unlock()
 
-	for _, command := range running {
+	for _, command := range runningCommands {
 		if command.Process != nil {
 			_ = syscall.Kill(-command.Process.Pid, syscall.SIGKILL)
 		}
@@ -446,11 +446,11 @@ func (self *service) abandonEverything() {
 }
 
 type service struct {
-	control  *net.UnixConn
-	writing  sync.Mutex
-	tracking sync.Mutex
-	commands map[uint64]*exec.Cmd
-	running  sync.WaitGroup
+	control       *net.UnixConn
+	writeMutex    sync.Mutex
+	commandsMutex sync.Mutex
+	commands      map[uint64]*exec.Cmd
+	runners       sync.WaitGroup
 }
 
 func (self *service) accept() {
@@ -548,27 +548,27 @@ func (self *service) spawn(instruction request, output *os.File) {
 		return
 	}
 
-	self.tracking.Lock()
+	self.commandsMutex.Lock()
 	self.commands[instruction.Token] = command
-	self.tracking.Unlock()
+	self.commandsMutex.Unlock()
 
 	if err := self.send(reply{Kind: replySpawned, Token: instruction.Token}); err != nil {
 		return
 	}
 
-	self.running.Add(1)
+	self.runners.Add(1)
 
 	go self.reap(instruction.Token, command)
 }
 
 func (self *service) reap(token uint64, command *exec.Cmd) {
-	defer self.running.Done()
+	defer self.runners.Done()
 
 	err := command.Wait()
 
-	self.tracking.Lock()
+	self.commandsMutex.Lock()
 	delete(self.commands, token)
-	self.tracking.Unlock()
+	self.commandsMutex.Unlock()
 
 	answer := reply{Kind: replyFinished, Token: token}
 
@@ -593,8 +593,8 @@ func (self *service) reap(token uint64, command *exec.Cmd) {
 }
 
 func (self *service) kill(instruction request) {
-	self.tracking.Lock()
-	defer self.tracking.Unlock()
+	self.commandsMutex.Lock()
+	defer self.commandsMutex.Unlock()
 
 	command, isKnown := self.commands[instruction.Token]
 	if !isKnown || command.Process == nil || command.ProcessState != nil {
@@ -610,8 +610,8 @@ func (self *service) send(answer reply) error {
 		return err
 	}
 
-	self.writing.Lock()
-	defer self.writing.Unlock()
+	self.writeMutex.Lock()
+	defer self.writeMutex.Unlock()
 
 	_, _, err = self.control.WriteMsgUnix(payload, nil, nil)
 

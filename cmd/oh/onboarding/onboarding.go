@@ -435,13 +435,13 @@ func (self wizard) authenticate(chosenProvider provider, shouldSeparate bool) er
 }
 
 func choicesForProvider(choices []model.Choice, providerName string) []model.Choice {
-	matching := make([]model.Choice, 0, len(choices))
+	matchingChoices := make([]model.Choice, 0, len(choices))
 	for _, choice := range choices {
 		if choice.Provider == providerName {
-			matching = append(matching, choice)
+			matchingChoices = append(matchingChoices, choice)
 		}
 	}
-	return matching
+	return matchingChoices
 }
 
 func login(terminal *os.File, output io.Writer) func(provider, func(string)) error {

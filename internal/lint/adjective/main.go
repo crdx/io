@@ -78,6 +78,46 @@ var wordsEndingInEd = []string{
 	"wed",
 }
 
+var nounsEndingInIng = []string{
+	"building",
+	"ceiling",
+	"clothing",
+	"crossing",
+	"drawing",
+	"evening",
+	"greeting",
+	"grouping",
+	"heading",
+	"hearing",
+	"landing",
+	"listing",
+	"meaning",
+	"meeting",
+	"morning",
+	"offering",
+	"padding",
+	"painting",
+	"reasoning",
+	"rendering",
+	"setting",
+	"sibling",
+	"spring",
+	"streaming",
+	"string",
+	"thing",
+	"thinking",
+	"timing",
+	"training",
+	"warning",
+	"wedding",
+	"wording",
+}
+
+const (
+	pastTense    = "was"
+	presentTense = "is"
+)
+
 func main() {
 	runner.Main("adjective", analyse)
 }
@@ -86,24 +126,31 @@ func analyse(file runner.File) []runner.Diagnostic {
 	var diagnostics []runner.Diagnostic
 	for _, name := range declaredNames(file.Syntax) {
 		parts := words(name.Name)
-		if len(parts) != 1 || !isParticiple(parts[0]) {
+		if len(parts) != 1 {
+			continue
+		}
+		tense, isParticiple := participleTense(parts[0])
+		if !isParticiple {
 			continue
 		}
 		diagnostics = append(diagnostics, file.Report(name, fmt.Sprintf(
-			"%s: say what was %s, since a name is a noun rather than an adjective", name.Name, parts[0],
+			"%s: say what %s %s, since a name is a noun rather than an adjective", name.Name, tense, parts[0],
 		)))
 	}
 	return diagnostics
 }
 
-func isParticiple(word string) bool {
+func participleTense(word string) (string, bool) {
 	if slices.Contains(irregularParticiples, word) {
-		return true
+		return pastTense, true
 	}
-	if !strings.HasSuffix(word, "ed") || len(word) < 4 {
-		return false
+	if strings.HasSuffix(word, "ed") && len(word) >= 4 {
+		return pastTense, !slices.Contains(wordsEndingInEd, word)
 	}
-	return !slices.Contains(wordsEndingInEd, word)
+	if strings.HasSuffix(word, "ing") && len(word) >= 5 {
+		return presentTense, !slices.Contains(nounsEndingInIng, word)
+	}
+	return "", false
 }
 
 func declaredNames(file *ast.File) []*ast.Ident {

@@ -64,12 +64,12 @@ func (self runner) Run(ctx context.Context, directory string, command string, po
 		return runYolo(ctx, directory, command, policy)
 	}
 
-	running, err := self.Start(ctx, directory, command, policy, &boundedBuffer{})
+	runningCommand, err := self.Start(ctx, directory, command, policy, &boundedBuffer{})
 	if err != nil {
 		return Result{}, err
 	}
 
-	return running.Wait()
+	return runningCommand.Wait()
 }
 
 func (self runner) Start(

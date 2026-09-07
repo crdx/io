@@ -333,10 +333,10 @@ func (self *removableList) Removal(index int, keypress key.Key) (Removal, bool) 
 	}
 
 	return Removal{
-		Prompt:  "Press ctrl+a again to archive",
-		Working: "Archiving…",
-		Perform: func() error { return self.perform(index) },
-		Apply:   func() { self.apply(index) },
+		Prompt:   "Press ctrl+a again to archive",
+		Progress: "Archiving…",
+		Perform:  func() error { return self.perform(index) },
+		Apply:    func() { self.apply(index) },
 	}, true
 }
 
@@ -383,12 +383,12 @@ func TestARowIsRemovedOnlyOnASecondPress(t *testing.T) {
 	self := listState(rows, 1)
 
 	self.apply(archiveKey())
-	if self.removal.index != 1 {
-		t.Fatalf("expected the second row to be awaiting an answer, got %d", self.removal.index)
+	if self.removalState.index != 1 {
+		t.Fatalf("expected the second row to be awaiting an answer, got %d", self.removalState.index)
 	}
 
 	self.apply(key.Key{Code: key.Rune, Value: 'n'})
-	if self.removal.index != -1 || len(rows.removed) != 0 {
+	if self.removalState.index != -1 || len(rows.removed) != 0 {
 		t.Fatalf("expected any other key to leave the row alone, got %v", rows.removed)
 	}
 	if self.query != "" {
@@ -434,8 +434,8 @@ func TestARowThatCannotBeRemovedIsNotAskedAbout(t *testing.T) {
 	self := listState(rows, 1)
 
 	self.apply(archiveKey())
-	if self.removal.index != -1 {
-		t.Errorf("expected the running row to be left alone, got %d", self.removal.index)
+	if self.removalState.index != -1 {
+		t.Errorf("expected the running row to be left alone, got %d", self.removalState.index)
 	}
 }
 
@@ -500,8 +500,8 @@ func TestTheRemovalKeyIsNotTypedIntoTheFilter(t *testing.T) {
 	}
 
 	self.apply(archiveKey())
-	if self.removal.index != 0 {
-		t.Fatalf("expected the removal to be asked about again, got %d", self.removal.index)
+	if self.removalState.index != 0 {
+		t.Fatalf("expected the removal to be asked about again, got %d", self.removalState.index)
 	}
 	if self.query != "" {
 		t.Errorf("expected the removal key to stay out of the filter, got %q", self.query)
@@ -512,8 +512,8 @@ func TestALisWithoutRemovalIgnoresTheRemovalKey(t *testing.T) {
 	self := defaultState()
 
 	self.apply(archiveKey())
-	if self.removal.index != -1 {
-		t.Errorf("expected nothing to be asked, got %d", self.removal.index)
+	if self.removalState.index != -1 {
+		t.Errorf("expected nothing to be asked, got %d", self.removalState.index)
 	}
 	if self.query != "" {
 		t.Errorf("expected the key to be swallowed rather than typed, got %q", self.query)
@@ -523,7 +523,7 @@ func TestALisWithoutRemovalIgnoresTheRemovalKey(t *testing.T) {
 func TestKeysAreDiscardedWhileTheWorkRuns(t *testing.T) {
 	rows := removableRows("first", "second")
 	self := listState(rows, 0)
-	self.removal = removal{index: -1, isWorking: true, working: Removal{Working: "Archiving…"}}
+	self.removalState = removalState{index: -1, isWorking: true, work: Removal{Progress: "Archiving…"}}
 
 	for _, keypress := range []key.Key{
 		{Code: key.Enter},

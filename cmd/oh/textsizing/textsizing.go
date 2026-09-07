@@ -53,13 +53,13 @@ func readReplies(input *os.File) string {
 	buffer := make([]byte, maximumReply)
 
 	for strings.Count(reply.String(), "R") < 3 && reply.Len() < maximumReply {
-		remaining := time.Until(deadline)
-		if remaining <= 0 {
+		remainingTime := time.Until(deadline)
+		if remainingTime <= 0 {
 			break
 		}
 
 		pollDescriptors := []unix.PollFd{{Fd: int32(fileDescriptor), Events: unix.POLLIN}}
-		readyCount, err := unix.Poll(pollDescriptors, max(1, int(remaining.Milliseconds())))
+		readyCount, err := unix.Poll(pollDescriptors, max(1, int(remainingTime.Milliseconds())))
 		if err != nil {
 			if errors.Is(err, unix.EINTR) {
 				continue
@@ -100,19 +100,19 @@ func supports(reply string) bool {
 func getPositions(reply string) []position {
 	var positions []position
 
-	for remaining := reply; ; {
-		start := strings.Index(remaining, "\x1b[")
+	for remainingReply := reply; ; {
+		start := strings.Index(remainingReply, "\x1b[")
 		if start < 0 {
 			break
 		}
-		remaining = remaining[start+2:]
+		remainingReply = remainingReply[start+2:]
 
-		end := strings.IndexByte(remaining, 'R')
+		end := strings.IndexByte(remainingReply, 'R')
 		if end < 0 {
 			break
 		}
-		parameters := remaining[:end]
-		remaining = remaining[end+1:]
+		parameters := remainingReply[:end]
+		remainingReply = remainingReply[end+1:]
 
 		rowText, columnText, found := strings.Cut(parameters, ";")
 		if !found {

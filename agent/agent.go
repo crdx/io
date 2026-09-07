@@ -85,7 +85,7 @@ func (self *Agent) AddUserMessage(text string) {
 type proseStream struct {
 	kind             Kind
 	text             strings.Builder
-	pending          *Event
+	pendingEvent     *Event
 	hasReportedUsage bool
 	hasAnswered      bool
 }
@@ -112,7 +112,7 @@ func (self *proseStream) add(output Output) []Update {
 			return append(self.takePending(), Update{Event: &event})
 		}
 
-		self.pending = &event
+		self.pendingEvent = &event
 		return nil
 	}
 
@@ -134,8 +134,8 @@ func (self *proseStream) add(output Output) []Update {
 }
 
 func (self *proseStream) finish(usage Usage) []Update {
-	if self.pending != nil && usage.InputTokens > 0 && !self.hasReportedUsage {
-		self.pending.Usage = &usage
+	if self.pendingEvent != nil && usage.InputTokens > 0 && !self.hasReportedUsage {
+		self.pendingEvent.Usage = &usage
 		self.hasReportedUsage = true
 	}
 
@@ -155,12 +155,12 @@ func (self *proseStream) interrupted() []Update {
 }
 
 func (self *proseStream) takePending() []Update {
-	if self.pending == nil {
+	if self.pendingEvent == nil {
 		return nil
 	}
 
-	update := Update{Event: self.pending}
-	self.pending = nil
+	update := Update{Event: self.pendingEvent}
+	self.pendingEvent = nil
 	return []Update{update}
 }
 
@@ -202,10 +202,10 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 		for {
 			var prose proseStream
 
-			reply, listening, err := self.send(ctx, &prose, yieldUpdates, yieldEvent)
+			reply, isListening, err := self.send(ctx, &prose, yieldUpdates, yieldEvent)
 
 			switch {
-			case !listening:
+			case !isListening:
 				self.answer(cancelledResults(ctx, reply.Calls))
 				return
 			case err != nil:

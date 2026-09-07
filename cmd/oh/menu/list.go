@@ -60,10 +60,10 @@ type Removable interface {
 }
 
 type Removal struct {
-	Prompt  string
-	Working string
-	Perform func() error
-	Apply   func()
+	Prompt   string
+	Progress string
+	Perform  func() error
+	Apply    func()
 }
 
 func Choose(rows List, terminal *os.File, screen io.Writer) (int, error) {
@@ -104,7 +104,7 @@ func choose(
 }
 
 func newState(rows List) *state {
-	self := &state{list: rows, removal: removal{index: -1}}
+	self := &state{list: rows, removalState: removalState{index: -1}}
 	self.refilter()
 
 	return self
@@ -135,15 +135,14 @@ type state struct {
 	offset  int
 	window  int
 
-	removal removal
+	removalState removalState
 }
 
-type removal struct {
+type removalState struct {
 	index     int
 	keypress  key.Key
-	pending   Removal
+	work      Removal
 	failure   string
-	working   Removal
 	isWorking bool
 	spinnerAt int
 	done      chan error
@@ -161,10 +160,10 @@ func (self *state) pick(resizeSignals <-chan os.Signal) (int, error) {
 		self.draw()
 
 		select {
-		case err := <-self.removal.done:
+		case err := <-self.removalState.done:
 			self.finishRemoval(err)
 		case <-self.spinnerTicks():
-			self.removal.spinnerAt++
+			self.removalState.spinnerAt++
 		case keypress, isOpen := <-self.keys:
 			if !isOpen {
 				return 0, ErrCancelled
@@ -192,16 +191,16 @@ const (
 )
 
 func (self *state) apply(keypress key.Key) action {
-	if self.removal.isWorking {
+	if self.removalState.isWorking {
 		return continuePicking
 	}
 
-	if self.removal.index >= 0 {
+	if self.removalState.index >= 0 {
 		self.answerRemoval(keypress)
 		return continuePicking
 	}
 
-	self.removal.failure = ""
+	self.removalState.failure = ""
 
 	if self.askToRemove(keypress) {
 		return continuePicking
@@ -246,7 +245,7 @@ func (self *state) apply(keypress key.Key) action {
 }
 
 func (self *state) spinnerTicks() <-chan time.Time {
-	if !self.removal.isWorking {
+	if !self.removalState.isWorking {
 		return nil
 	}
 
@@ -279,14 +278,14 @@ func (self *state) askToRemove(keypress key.Key) bool {
 		return false
 	}
 
-	self.removal = removal{index: index, keypress: keypress, pending: work}
+	self.removalState = removalState{index: index, keypress: keypress, work: work}
 
 	return true
 }
 
 func (self *state) answerRemoval(keypress key.Key) {
-	confirmation, work := self.removal.keypress, self.removal.pending
-	self.removal = removal{index: -1}
+	confirmation, work := self.removalState.keypress, self.removalState.work
+	self.removalState = removalState{index: -1}
 
 	if keypress != confirmation {
 		return
@@ -296,24 +295,24 @@ func (self *state) answerRemoval(keypress key.Key) {
 }
 
 func (self *state) beginRemoval(work Removal) {
-	self.removal = removal{index: -1, working: work, isWorking: true, done: make(chan error, 1)}
+	self.removalState = removalState{index: -1, work: work, isWorking: true, done: make(chan error, 1)}
 	self.draw()
 
-	self.start(func() { self.removal.done <- work.Perform() })
+	self.start(func() { self.removalState.done <- work.Perform() })
 
 	select {
-	case err := <-self.removal.done:
+	case err := <-self.removalState.done:
 		self.finishRemoval(err)
 	default:
 	}
 }
 
 func (self *state) finishRemoval(err error) {
-	work := self.removal.working
-	self.removal = removal{index: -1}
+	work := self.removalState.work
+	self.removalState = removalState{index: -1}
 
 	if err != nil {
-		self.removal.failure = err.Error()
+		self.removalState.failure = err.Error()
 		return
 	}
 
@@ -512,15 +511,15 @@ func (self *state) scroll(rows int) {
 }
 
 func (self *state) promptLine(room int) string {
-	if self.removal.isWorking {
-		frame := spinner.Activity.Frame(self.removal.spinnerAt)
-		return style.Change(Clip(frame+" "+self.removal.working.Working, room))
+	if self.removalState.isWorking {
+		frame := spinner.Activity.Frame(self.removalState.spinnerAt)
+		return style.Change(Clip(frame+" "+self.removalState.work.Progress, room))
 	}
-	if self.removal.index >= 0 {
-		return style.Change(Clip(self.removal.pending.Prompt, room))
+	if self.removalState.index >= 0 {
+		return style.Change(Clip(self.removalState.work.Prompt, room))
 	}
-	if self.removal.failure != "" {
-		return style.Failure(Clip(self.removal.failure, room))
+	if self.removalState.failure != "" {
+		return style.Failure(Clip(self.removalState.failure, room))
 	}
 
 	return self.filterLine(room)

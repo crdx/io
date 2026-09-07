@@ -13,7 +13,7 @@ import (
 func TestARunningSessionIsColouredWithoutAMarker(t *testing.T) {
 	self := &sessionList{store: Store{Sessions: []*Session{{IsRunning: true, MessageCount: 40}, {}}}}
 	got := self.Row(0, false, 80)
-	want := style.Running(row(self.at(0), false, 80))
+	want := style.RunningSession(row(self.at(0), false, 80))
 
 	if got != want {
 		t.Errorf("expected a running row, got %q", got)
@@ -39,7 +39,7 @@ func TestAShortConversationIsHeldBackAndAChosenOneIsNot(t *testing.T) {
 	if got, want := self.Row(0, true, 80), style.ChosenRow(row(self.at(0), true, 80)); got != want {
 		t.Errorf("expected the chosen row to keep its own colour, got %q", got)
 	}
-	if got, want := self.Row(2, false, 80), style.Running(row(self.at(2), false, 80)); got != want {
+	if got, want := self.Row(2, false, 80), style.RunningSession(row(self.at(2), false, 80)); got != want {
 		t.Errorf("expected a running session to stay running whatever it holds, got %q", got)
 	}
 }

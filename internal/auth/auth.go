@@ -90,24 +90,24 @@ func Save(path string, credentials *Credentials) error {
 		return err
 	}
 
-	pending, err := os.CreateTemp(directory, filepath.Base(path)+".*")
+	pendingFile, err := os.CreateTemp(directory, filepath.Base(path)+".*")
 	if err != nil {
 		return fmt.Errorf("write credentials: %w", err)
 	}
 
-	defer func() { _ = os.Remove(pending.Name()) }()
+	defer func() { _ = os.Remove(pendingFile.Name()) }()
 
-	if _, err := pending.Write(data); err != nil {
-		_ = pending.Close()
+	if _, err := pendingFile.Write(data); err != nil {
+		_ = pendingFile.Close()
 
 		return fmt.Errorf("write credentials: %w", err)
 	}
 
-	if err := pending.Close(); err != nil {
+	if err := pendingFile.Close(); err != nil {
 		return fmt.Errorf("write credentials: %w", err)
 	}
 
-	if err := os.Rename(pending.Name(), path); err != nil {
+	if err := os.Rename(pendingFile.Name(), path); err != nil {
 		return fmt.Errorf("write credentials: %w", err)
 	}
 

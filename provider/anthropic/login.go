@@ -152,10 +152,10 @@ func waitForCallback(
 	go func() { _ = server.Serve(listener) }()
 
 	defer func() {
-		stopping, cancel := context.WithTimeout(context.WithoutCancel(ctx), time.Second)
+		shutdownContext, cancel := context.WithTimeout(context.WithoutCancel(ctx), time.Second)
 		defer cancel()
 
-		_ = server.Shutdown(stopping)
+		_ = server.Shutdown(shutdownContext)
 	}()
 
 	select {

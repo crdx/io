@@ -83,8 +83,8 @@ func hasTerminalInput(terminal *os.File, timeout time.Duration) bool {
 	deadline := time.Now().Add(timeout)
 
 	for {
-		remaining := time.Until(deadline)
-		if remaining <= 0 {
+		remainingTime := time.Until(deadline)
+		if remainingTime <= 0 {
 			return false
 		}
 
@@ -92,7 +92,7 @@ func hasTerminalInput(terminal *os.File, timeout time.Duration) bool {
 			Fd:     int32(terminal.Fd()), //nolint:gosec // Unix file descriptors fit PollFd
 			Events: unix.POLLIN,
 		}}
-		ready, err := unix.Poll(descriptors, max(1, int(remaining.Milliseconds())))
+		ready, err := unix.Poll(descriptors, max(1, int(remainingTime.Milliseconds())))
 		if errors.Is(err, syscall.EINTR) {
 			continue
 		}

@@ -84,18 +84,18 @@ func (self *Table) line(cells []string, room int, isPainted bool) string {
 		return clip(self.join(shownIndexes, cells, isPainted, -1), room)
 	}
 
-	trailing := self.join(shownIndexes[flexAt+1:], cells, isPainted, -1)
-	trailingRoom := width.Of(trailing)
+	trailingText := self.join(shownIndexes[flexAt+1:], cells, isPainted, -1)
+	trailingRoom := width.Of(trailingText)
 
 	leadingRoom := room - trailingRoom - self.gap
 	if leadingRoom <= 0 {
 		return clip(self.join(shownIndexes[:flexAt+1], cells, isPainted, -1), room)
 	}
 
-	leading := clip(self.join(shownIndexes[:flexAt+1], cells, isPainted, -1), leadingRoom)
-	padding := max(room-width.Of(leading)-trailingRoom, 0)
+	leadingText := clip(self.join(shownIndexes[:flexAt+1], cells, isPainted, -1), leadingRoom)
+	padding := max(room-width.Of(leadingText)-trailingRoom, 0)
 
-	return strings.TrimRight(leading+strings.Repeat(" ", padding)+trailing, " ")
+	return strings.TrimRight(leadingText+strings.Repeat(" ", padding)+trailingText, " ")
 }
 
 func (self *Table) shownColumns(room int) []int {

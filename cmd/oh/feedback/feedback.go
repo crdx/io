@@ -99,11 +99,11 @@ func (self *State) countdown(now time.Time) string {
 		return ""
 	}
 
-	remaining := self.expiresAt.Sub(now)
-	if remaining <= 0 {
+	remainingTime := self.expiresAt.Sub(now)
+	if remainingTime <= 0 {
 		return ""
 	}
 
-	secondsLeft := int((remaining + time.Second - 1) / time.Second)
+	secondsLeft := int((remainingTime + time.Second - 1) / time.Second)
 	return style.Subtle(fmt.Sprintf("(dismissing in %ds)", secondsLeft))
 }

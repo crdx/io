@@ -53,9 +53,9 @@ func (self *drawing) drawText(start drawingCoord, text string) {
 
 func (self *graph) drawLine(target *drawing, from drawingCoord, to drawingCoord, offsetFrom int, offsetTo int) []drawingCoord {
 	direction := determineDirection(genericCoord(from), genericCoord(to))
-	vertical, horizontal, rising, falling := "│", "─", "╱", "╲"
+	vertical, horizontal, risingDiagonal, fallingDiagonal := "│", "─", "╱", "╲"
 	if self.useAscii {
-		vertical, horizontal, rising, falling = "|", "-", "/", "\\"
+		vertical, horizontal, risingDiagonal, fallingDiagonal = "|", "-", "/", "\\"
 	}
 
 	drawnCoords := make([]drawingCoord, 0)
@@ -83,22 +83,22 @@ func (self *graph) drawLine(target *drawing, from drawingCoord, to drawingCoord,
 	case UpperLeft:
 		for x, y := from.x, from.y-offsetFrom; x >= to.x-offsetTo && y >= to.y-offsetTo; x, y = x-1, y-1 {
 			drawnCoords = append(drawnCoords, drawingCoord{x, y})
-			(*target)[x][y] = falling
+			(*target)[x][y] = fallingDiagonal
 		}
 	case UpperRight:
 		for x, y := from.x, from.y-offsetFrom; x <= to.x+offsetTo && y >= to.y-offsetTo; x, y = x+1, y-1 {
 			drawnCoords = append(drawnCoords, drawingCoord{x, y})
-			(*target)[x][y] = rising
+			(*target)[x][y] = risingDiagonal
 		}
 	case LowerLeft:
 		for x, y := from.x, from.y+offsetFrom; x >= to.x-offsetTo && y <= to.y+offsetTo; x, y = x-1, y+1 {
 			drawnCoords = append(drawnCoords, drawingCoord{x, y})
-			(*target)[x][y] = rising
+			(*target)[x][y] = risingDiagonal
 		}
 	case LowerRight:
 		for x, y := from.x, from.y+offsetFrom; x <= to.x+offsetTo && y <= to.y+offsetTo; x, y = x+1, y+1 {
 			drawnCoords = append(drawnCoords, drawingCoord{x, y})
-			(*target)[x][y] = falling
+			(*target)[x][y] = fallingDiagonal
 		}
 	}
 	return drawnCoords

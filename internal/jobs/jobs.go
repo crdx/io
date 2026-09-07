@@ -68,17 +68,17 @@ func (self Snapshot) Describe() string {
 }
 
 type job struct {
-	name      string
-	command   string
-	state     State
-	startedAt time.Time
-	endedAt   time.Time
-	code      int
-	failure   string
-	policy    sandbox.Policy
-	output    *spool
-	running   sandbox.Command
-	over      chan struct{}
+	name           string
+	command        string
+	state          State
+	startedAt      time.Time
+	endedAt        time.Time
+	code           int
+	failure        string
+	policy         sandbox.Policy
+	output         *spool
+	runningCommand sandbox.Command
+	over           chan struct{}
 }
 
 type Manager struct {
@@ -87,7 +87,7 @@ type Manager struct {
 	jobs     map[string]*job
 	order    []string
 	isClosed bool
-	watching sync.WaitGroup
+	watchers sync.WaitGroup
 }
 
 func New(runner sandbox.Runner) *Manager {
@@ -149,28 +149,28 @@ func (self *Manager) Start(
 	command string,
 	policy sandbox.Policy,
 ) (Snapshot, error) {
-	opening, err := self.claim(name, command, policy)
+	openingJob, err := self.claim(name, command, policy)
 	if err != nil {
 		return Snapshot{}, err
 	}
 
-	running, err := self.runner.Start(context.WithoutCancel(ctx), directory, command, policy, opening.output)
+	runningCommand, err := self.runner.Start(context.WithoutCancel(ctx), directory, command, policy, openingJob.output)
 	if err != nil {
-		self.conclude(opening, StateFailed, 0, err.Error())
-		close(opening.over)
+		self.conclude(openingJob, StateFailed, 0, err.Error())
+		close(openingJob.over)
 
-		return self.snapshot(opening), fmt.Errorf("the job could not be started: %w", err)
+		return self.snapshot(openingJob), fmt.Errorf("the job could not be started: %w", err)
 	}
 
-	if !self.settleStarted(opening, running) {
-		running.Stop()
+	if !self.settleStarted(openingJob, runningCommand) {
+		runningCommand.Stop()
 	}
 
-	self.watching.Add(1)
+	self.watchers.Add(1)
 
-	go self.watch(opening)
+	go self.watch(openingJob)
 
-	return self.snapshot(opening), nil
+	return self.snapshot(openingJob), nil
 }
 
 func (self *Manager) Stop(name string) (Snapshot, error) {
@@ -285,20 +285,20 @@ func (self *Manager) PruneFinished() []string {
 
 func (self *Manager) StopHolding(holds func(sandbox.Policy) bool) []string {
 	self.mutex.Lock()
-	var stopping []*job
+	var stoppingJobs []*job
 	for _, name := range self.order {
 		found := self.jobs[name]
 		if isLive(found.state) && holds(found.policy) {
-			stopping = append(stopping, found)
+			stoppingJobs = append(stoppingJobs, found)
 		}
 	}
 	self.mutex.Unlock()
 
-	names := make([]string, 0, len(stopping))
-	for _, ending := range stopping {
-		_ = self.beginEnd(ending)
-		self.watching.Go(func() { self.end(ending) })
-		names = append(names, ending.name)
+	names := make([]string, 0, len(stoppingJobs))
+	for _, endingJob := range stoppingJobs {
+		_ = self.beginEnd(endingJob)
+		self.watchers.Go(func() { self.end(endingJob) })
+		names = append(names, endingJob.name)
 	}
 
 	return names
@@ -315,35 +315,35 @@ func (self *Manager) Close() error {
 	}
 	self.mutex.Unlock()
 
-	var ending sync.WaitGroup
+	var endingJobs sync.WaitGroup
 	for _, found := range live {
-		ending.Go(func() { self.end(found) })
+		endingJobs.Go(func() { self.end(found) })
 	}
-	ending.Wait()
+	endingJobs.Wait()
 
-	self.watching.Wait()
+	self.watchers.Wait()
 
 	return nil
 }
 
-func (self *Manager) settleStarted(opening *job, running sandbox.Command) bool {
+func (self *Manager) settleStarted(openingJob *job, runningCommand sandbox.Command) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	opening.running = running
+	openingJob.runningCommand = runningCommand
 
-	if opening.state != StateStarting {
+	if openingJob.state != StateStarting {
 		return false
 	}
 
-	opening.state = StateRunning
+	openingJob.state = StateRunning
 
 	return true
 }
 
 func (self *Manager) remove(name string) {
 	delete(self.jobs, name)
-	self.order = slices.DeleteFunc(self.order, func(remaining string) bool { return remaining == name })
+	self.order = slices.DeleteFunc(self.order, func(remainingName string) bool { return remainingName == name })
 }
 
 func (self *Manager) claim(name string, command string, policy sandbox.Policy) (*job, error) {
@@ -362,7 +362,7 @@ func (self *Manager) claim(name string, command string, policy sandbox.Policy) (
 		return nil, ErrTaken
 	}
 
-	opening := &job{
+	openingJob := &job{
 		name:      name,
 		command:   command,
 		state:     StateStarting,
@@ -375,86 +375,86 @@ func (self *Manager) claim(name string, command string, policy sandbox.Policy) (
 	if !slices.Contains(self.order, name) {
 		self.order = append(self.order, name)
 	}
-	self.jobs[name] = opening
+	self.jobs[name] = openingJob
 
-	return opening, nil
+	return openingJob, nil
 }
 
-func (self *Manager) watch(ending *job) {
-	defer self.watching.Done()
-	defer close(ending.over)
+func (self *Manager) watch(endingJob *job) {
+	defer self.watchers.Done()
+	defer close(endingJob.over)
 
-	result, err := ending.running.Wait()
+	result, err := endingJob.runningCommand.Wait()
 
 	switch {
 	case err != nil:
-		self.conclude(ending, self.endingState(ending, StateFailed), result.Code, err.Error())
+		self.conclude(endingJob, self.endingState(endingJob, StateFailed), result.Code, err.Error())
 	case result.Code != 0:
-		self.conclude(ending, self.endingState(ending, StateFailed), result.Code, "")
+		self.conclude(endingJob, self.endingState(endingJob, StateFailed), result.Code, "")
 	default:
-		self.conclude(ending, self.endingState(ending, StateComplete), 0, "")
+		self.conclude(endingJob, self.endingState(endingJob, StateComplete), 0, "")
 	}
 }
 
-func (self *Manager) endingState(ending *job, natural State) State {
+func (self *Manager) endingState(endingJob *job, natural State) State {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	if ending.state == StateStopping {
+	if endingJob.state == StateStopping {
 		return StateStopped
 	}
 
 	return natural
 }
 
-func (self *Manager) conclude(ending *job, state State, code int, failure string) {
+func (self *Manager) conclude(endingJob *job, state State, code int, failure string) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	ending.state = state
-	ending.code = code
-	ending.failure = failure
-	ending.endedAt = time.Now()
+	endingJob.state = state
+	endingJob.code = code
+	endingJob.failure = failure
+	endingJob.endedAt = time.Now()
 }
 
-func (self *Manager) beginEnd(ending *job) bool {
+func (self *Manager) beginEnd(endingJob *job) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	if !isLive(ending.state) {
+	if !isLive(endingJob.state) {
 		return false
 	}
 
-	ending.state = StateStopping
+	endingJob.state = StateStopping
 
 	return true
 }
 
-func (self *Manager) end(ending *job) {
-	if !self.beginEnd(ending) {
+func (self *Manager) end(endingJob *job) {
+	if !self.beginEnd(endingJob) {
 		return
 	}
 
 	self.mutex.Lock()
-	running := ending.running
+	runningCommand := endingJob.runningCommand
 	self.mutex.Unlock()
 
-	if running == nil {
-		self.conclude(ending, StateStopped, 0, "")
+	if runningCommand == nil {
+		self.conclude(endingJob, StateStopped, 0, "")
 
 		return
 	}
 
-	_ = running.Signal(syscall.SIGTERM)
+	_ = runningCommand.Signal(syscall.SIGTERM)
 
 	select {
-	case <-ending.over:
+	case <-endingJob.over:
 		return
 	case <-time.After(gracePeriod):
 	}
 
-	running.Stop()
-	<-ending.over
+	runningCommand.Stop()
+	<-endingJob.over
 }
 
 func (self *Manager) snapshot(subject *job) Snapshot {

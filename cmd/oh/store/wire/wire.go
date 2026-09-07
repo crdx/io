@@ -281,8 +281,8 @@ func censorBody(body []byte, contentType string) []byte {
 			}
 
 			space := ""
-			if remaining, found := strings.CutPrefix(data, " "); found {
-				space, data = " ", remaining
+			if remainingData, found := strings.CutPrefix(data, " "); found {
+				space, data = " ", remainingData
 			}
 			lines[i] = "data:" + space + string(censorJSON([]byte(data)))
 		}

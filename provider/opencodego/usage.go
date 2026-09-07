@@ -37,9 +37,9 @@ func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 
 	var payload struct {
 		Usage struct {
-			Rolling usageLimit `json:"rolling"`
-			Weekly  usageLimit `json:"weekly"`
-			Monthly usageLimit `json:"monthly"`
+			RollingWindow usageLimit `json:"rolling"`
+			Weekly        usageLimit `json:"weekly"`
+			Monthly       usageLimit `json:"monthly"`
 		} `json:"usage"`
 	}
 
@@ -56,7 +56,7 @@ func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 		limit    usageLimit
 		duration time.Duration
 	}{
-		{limit: payload.Usage.Rolling, duration: rollingWindow},
+		{limit: payload.Usage.RollingWindow, duration: rollingWindow},
 		{limit: payload.Usage.Weekly, duration: weeklyWindow},
 		{limit: payload.Usage.Monthly, duration: monthlyWindow},
 	} {

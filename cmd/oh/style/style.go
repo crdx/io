@@ -41,39 +41,39 @@ var (
 )
 
 var (
-	Reasoning     Style = decorate(col.Italic, Dim)
-	Answer        Style = Normal
-	Call          Style = Normal
-	Change        Style = hex(gold)
-	Success       Style = hex(lime)
-	Information   Style = hex(steel)
-	CancelledCall Style = Dim
-	StoppedTurn   Style = hex(gold)
-	Failure       Style = hex(red)
-	Subject       Style = hex(copper)
-	Qualifier     Style = Dim
-	Result        Style = Dim
-	Spinner       Style = hex(copper)
-	Prompt        Style = hex(copper)
-	Rule          Style = Dim
-	Hazard        Style = hex(red)
-	Subtle        Style = Dim
-	Read          Style = hex(lime)
-	Write         Style = hex(gold)
-	Exec          Style = hex(red)
-	Shell         Style = hex(steel)
-	Skill         Style = hex(mauve)
-	History       Style = hex(mauve)
-	Pending       Style = col.Underline
-	ScrolledInput Style = Dim
-	ChosenRow     Style = hex(copper)
-	Running       Style = decorate(col.Italic, hex(steel))
-	Column        Style = decorate(col.Underline, Dim)
-	TypedInput    Style = Normal
-	User          Style = background("#343541")
-	Greeting      Style = col.Italic
-	Web           Style = hex(steel)
-	Network       Style = hex(red)
+	Reasoning      Style = decorate(col.Italic, Dim)
+	Answer         Style = Normal
+	Call           Style = Normal
+	Change         Style = hex(gold)
+	Success        Style = hex(lime)
+	Information    Style = hex(steel)
+	CancelledCall  Style = Dim
+	StoppedTurn    Style = hex(gold)
+	Failure        Style = hex(red)
+	Subject        Style = hex(copper)
+	Qualifier      Style = Dim
+	Result         Style = Dim
+	Spinner        Style = hex(copper)
+	Prompt         Style = hex(copper)
+	Rule           Style = Dim
+	Hazard         Style = hex(red)
+	Subtle         Style = Dim
+	Read           Style = hex(lime)
+	Write          Style = hex(gold)
+	Exec           Style = hex(red)
+	Shell          Style = hex(steel)
+	Skill          Style = hex(mauve)
+	History        Style = hex(mauve)
+	PendingPrefix  Style = col.Underline
+	ScrolledInput  Style = Dim
+	ChosenRow      Style = hex(copper)
+	RunningSession Style = decorate(col.Italic, hex(steel))
+	Column         Style = decorate(col.Underline, Dim)
+	TypedInput     Style = Normal
+	User           Style = background("#343541")
+	Greeting       Style = col.Italic
+	Web            Style = hex(steel)
+	Network        Style = hex(red)
 )
 
 var (
@@ -137,17 +137,17 @@ func apply(isEnabled bool) {
 func (self Style) Over(text string) string {
 	const marker = "\x00"
 
-	opening, closing, found := strings.Cut(self(marker), marker)
-	if !found || opening == "" {
+	openingSequence, closingSequence, found := strings.Cut(self(marker), marker)
+	if !found || openingSequence == "" {
 		return text
 	}
 
-	resumedText := strings.TrimSuffix(strings.ReplaceAll(text, reset, reset+opening), opening)
-	if strings.HasSuffix(resumedText, closing) {
-		return opening + resumedText
+	resumedText := strings.TrimSuffix(strings.ReplaceAll(text, reset, reset+openingSequence), openingSequence)
+	if strings.HasSuffix(resumedText, closingSequence) {
+		return openingSequence + resumedText
 	}
 
-	return opening + resumedText + closing
+	return openingSequence + resumedText + closingSequence
 }
 
 func (self Style) Join(parts ...string) string {

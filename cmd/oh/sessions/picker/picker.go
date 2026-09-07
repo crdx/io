@@ -152,7 +152,7 @@ func (self *sessionList) Row(index int, isChosen bool, room int) string {
 	line := row(storedSession, isChosen, room)
 
 	if storedSession.IsRunning {
-		return style.Running.Over(line)
+		return style.RunningSession.Over(line)
 	}
 	if isChosen {
 		return style.ChosenRow.Over(line)
@@ -171,10 +171,10 @@ func (self *sessionList) archival(index int, movedSession *Session) (menu.Remova
 		}
 
 		return menu.Removal{
-			Prompt:  "Press ctrl+a again to restore " + movedSession.Name,
-			Working: "Restoring…",
-			Perform: func() error { return self.store.Restore(movedSession) },
-			Apply:   func() { self.restore(index, movedSession) },
+			Prompt:   "Press ctrl+a again to restore " + movedSession.Name,
+			Progress: "Restoring…",
+			Perform:  func() error { return self.store.Restore(movedSession) },
+			Apply:    func() { self.restore(index, movedSession) },
 		}, true
 	}
 
@@ -183,10 +183,10 @@ func (self *sessionList) archival(index int, movedSession *Session) (menu.Remova
 	}
 
 	return menu.Removal{
-		Prompt:  "Press ctrl+a again to archive " + movedSession.Name,
-		Working: "Archiving…",
-		Perform: func() error { return self.store.Archive(movedSession) },
-		Apply:   func() { self.archive(index, movedSession) },
+		Prompt:   "Press ctrl+a again to archive " + movedSession.Name,
+		Progress: "Archiving…",
+		Perform:  func() error { return self.store.Archive(movedSession) },
+		Apply:    func() { self.archive(index, movedSession) },
 	}, true
 }
 
@@ -196,10 +196,10 @@ func (self *sessionList) deletion(index int, movedSession *Session) (menu.Remova
 	}
 
 	return menu.Removal{
-		Prompt:  "Press delete again to delete " + movedSession.Name + " for good",
-		Working: "Deleting…",
-		Perform: func() error { return self.store.Delete(movedSession) },
-		Apply:   func() { self.forget(index) },
+		Prompt:   "Press delete again to delete " + movedSession.Name + " for good",
+		Progress: "Deleting…",
+		Perform:  func() error { return self.store.Delete(movedSession) },
+		Apply:    func() { self.forget(index) },
 	}, true
 }
 

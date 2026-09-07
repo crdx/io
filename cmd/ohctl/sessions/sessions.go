@@ -287,7 +287,7 @@ func writeTable(listings []Listing, writer io.Writer) error {
 		line := listingTable.Row(rows[index], 0)
 		switch {
 		case listing.IsRunning:
-			line = style.Running(line)
+			line = style.RunningSession(line)
 		case listing.Messages < shortConversation:
 			line = style.Subtle(line)
 		}

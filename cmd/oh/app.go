@@ -110,7 +110,7 @@ type App struct {
 	hasRecordedJobs     bool
 	endedJobsNote       string
 	settledCaps         caps.Set
-	pending             pendingInput
+	pendingInput        pendingInput
 	feedback            feedback.State
 	terminal            terminal.Terminal
 	metrics             metrics.Tracker
@@ -185,7 +185,7 @@ func (self *App) begin(message string) cycle.Transition {
 	defer self.dropPendingInput()
 
 	self.show(inputLine)
-	if len(self.pending.items) > 0 {
+	if len(self.pendingInput.items) > 0 {
 		self.refreshPendingMessages()
 	}
 
@@ -344,11 +344,11 @@ func (self *App) queuePathGrantChange(event agent.Event) {
 	if _, isShown := pathgrant.Notice(event); !isShown {
 		return
 	}
-	self.pending.add(event)
+	self.pendingInput.add(event)
 }
 
 func (self *App) pendingPathGrantChange(path string) (int, bool) {
-	for index, item := range self.pending.items {
+	for index, item := range self.pendingInput.items {
 		if item.state.Kind == pathgrant.Change && item.state.Name == path {
 			return index, true
 		}
@@ -358,11 +358,11 @@ func (self *App) pendingPathGrantChange(path string) (int, bool) {
 }
 
 func (self *App) takeBackPathGrantChange(index int, path string) {
-	self.pending.takeBack(index)
+	self.pendingInput.takeBack(index)
 
 	grants := self.pathGrants.GetCurrent()
-	for other := range self.pending.items {
-		item := &self.pending.items[other]
+	for other := range self.pendingInput.items {
+		item := &self.pendingInput.items[other]
 		if item.state.Kind != pathgrant.Change {
 			continue
 		}
@@ -468,11 +468,11 @@ func (self *App) toggleCap(whichCaps caps.Set) {
 }
 
 func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
-	if self.pending.hasStoppedJobs(whichCaps) {
+	if self.pendingInput.hasStoppedJobs(whichCaps) {
 		return 0, false
 	}
 
-	for index, item := range self.pending.items {
+	for index, item := range self.pendingInput.items {
 		if item.state.Kind == caps.ModeChange && item.state.Name == whichCaps.Flag() {
 			return index, true
 		}
@@ -482,7 +482,7 @@ func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
 }
 
 func (self *App) showModeChange(whichCaps caps.Set) {
-	self.pending.add(caps.ModeToggleEvent(whichCaps, self.mode.Current()))
+	self.pendingInput.add(caps.ModeToggleEvent(whichCaps, self.mode.Current()))
 
 	if !self.currentTurn.Running() {
 		self.refreshPendingMessages()
@@ -490,10 +490,10 @@ func (self *App) showModeChange(whichCaps caps.Set) {
 }
 
 func (self *App) takeBackModeChange(index int, whichCaps caps.Set) {
-	self.pending.takeBack(index)
+	self.pendingInput.takeBack(index)
 
-	for other := index; other < len(self.pending.items); other++ {
-		item := &self.pending.items[other]
+	for other := index; other < len(self.pendingInput.items); other++ {
+		item := &self.pendingInput.items[other]
 		if item.state.Kind != caps.ModeChange {
 			continue
 		}
@@ -509,10 +509,10 @@ func (self *App) takeBackModeChange(index int, whichCaps caps.Set) {
 }
 
 func (self *App) refreshPendingMessages() {
-	if len(self.pending.items) == 0 {
-		handle := self.pending.block
-		self.pending.renderer = nil
-		self.pending.block = nil
+	if len(self.pendingInput.items) == 0 {
+		handle := self.pendingInput.block
+		self.pendingInput.renderer = nil
+		self.pendingInput.block = nil
 
 		if handle != nil && !self.screen.DiscardBlock(handle) {
 			self.redraw()
@@ -520,18 +520,18 @@ func (self *App) refreshPendingMessages() {
 		return
 	}
 
-	messages := self.pending.notices()
-	if self.pending.renderer == nil {
-		self.pending.renderer = painter.NewPendingMessages(messages, self.screen.IsTerminal())
+	messages := self.pendingInput.notices()
+	if self.pendingInput.renderer == nil {
+		self.pendingInput.renderer = painter.NewPendingMessages(messages, self.screen.IsTerminal())
 		self.screen.Blank()
-		self.pending.block = self.screen.OpenNotice(self.pending.renderer)
+		self.pendingInput.block = self.screen.OpenNotice(self.pendingInput.renderer)
 		return
 	}
 
-	self.pending.renderer.Replace(messages)
-	if !self.screen.RefreshBlock(self.pending.block) {
-		self.pending.renderer = nil
-		self.pending.block = nil
+	self.pendingInput.renderer.Replace(messages)
+	if !self.screen.RefreshBlock(self.pendingInput.block) {
+		self.pendingInput.renderer = nil
+		self.pendingInput.block = nil
 		self.redraw()
 	}
 }
@@ -559,8 +559,8 @@ func (self *App) settleAccess() {
 }
 
 func (self *App) settlePendingInput() {
-	wasShown := self.pending.block != nil
-	for _, item := range self.pending.items {
+	wasShown := self.pendingInput.block != nil
+	for _, item := range self.pendingInput.items {
 		if item.state.Kind == "" {
 			continue
 		}
@@ -572,19 +572,19 @@ func (self *App) settlePendingInput() {
 		}
 	}
 
-	if self.pending.block != nil {
-		self.pending.renderer.MarkSent()
-		self.screen.RefreshBlock(self.pending.block)
-		self.screen.SealBlock(self.pending.block)
+	if self.pendingInput.block != nil {
+		self.pendingInput.renderer.MarkSent()
+		self.screen.RefreshBlock(self.pendingInput.block)
+		self.screen.SealBlock(self.pendingInput.block)
 	}
-	self.pending = pendingInput{}
+	self.pendingInput = pendingInput{}
 }
 
 func (self *App) dropPendingInput() {
-	if self.pending.block != nil {
-		self.screen.DiscardBlock(self.pending.block)
+	if self.pendingInput.block != nil {
+		self.screen.DiscardBlock(self.pendingInput.block)
 	}
-	self.pending = pendingInput{}
+	self.pendingInput = pendingInput{}
 }
 
 func (self *App) recordModeEvent(event agent.Event) {
@@ -714,7 +714,7 @@ func (self *App) stopJobsHoldingPath(path string) {
 	}
 
 	for _, name := range self.jobs.StopHolding(shell.StoppedByPath(path)) {
-		self.pending.add(caps.JobStoppedForPathEvent(name, path))
+		self.pendingInput.add(caps.JobStoppedForPathEvent(name, path))
 	}
 }
 
@@ -729,7 +729,7 @@ func (self *App) stopJobsLosingAccess(withdrawnCaps caps.Set) {
 	}
 
 	for _, name := range self.jobs.StopHolding(holds) {
-		self.pending.add(caps.JobStopEvent(name, withdrawnCaps))
+		self.pendingInput.add(caps.JobStopEvent(name, withdrawnCaps))
 	}
 }
 
@@ -985,8 +985,8 @@ func (self *App) redraw() {
 	}
 
 	self.screen.Sync(func() {
-		self.pending.renderer = nil
-		self.pending.block = nil
+		self.pendingInput.renderer = nil
+		self.pendingInput.block = nil
 		self.screen.Reset()
 		self.replay()
 		if provisionalPainter.Text != "" {
@@ -1122,7 +1122,7 @@ func (self *App) restoreJobs(events []agent.Event) {
 	if note, isSaid := jobrecord.EndedWithSessionNotice(event); isSaid {
 		self.endedJobsNote = note
 	}
-	self.pending.add(event)
+	self.pendingInput.add(event)
 }
 
 func (self *App) interruptionNote() string {

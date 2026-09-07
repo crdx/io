@@ -178,7 +178,7 @@ func drawPendingLink(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	self.pending.add(grantEvent)
+	self.pendingInput.add(grantEvent)
 	self.refreshPendingMessages()
 
 	return screenOutput.String()
@@ -1537,8 +1537,8 @@ func TestAQueuedModeChangeCanBeTakenBackBeforeItStarts(t *testing.T) {
 	if self.currentTurn.Running() {
 		t.Error("a taken-back mode change started another turn")
 	}
-	if !self.queuedTurn.Empty() || len(self.pending.items) != 0 {
-		t.Errorf("taken-back mode change remained queued: %+v %v", self.queuedTurn.Peek(), self.pending.items)
+	if !self.queuedTurn.Empty() || len(self.pendingInput.items) != 0 {
+		t.Errorf("taken-back mode change remained queued: %+v %v", self.queuedTurn.Peek(), self.pendingInput.items)
 	}
 
 	storedSession, err := store.Read(directory, log.Name())
@@ -3599,16 +3599,16 @@ func TestACapabilitySwappedBackIsTakenBackRatherThanWrittenDown(t *testing.T) {
 	self, directory := modeFixture(t)
 
 	self.toggleCap(caps.Git)
-	if len(self.pending.items) != 1 {
-		t.Fatalf("expected the change to be shown, got %v", self.pending.items)
+	if len(self.pendingInput.items) != 1 {
+		t.Fatalf("expected the change to be shown, got %v", self.pendingInput.items)
 	}
 	if recorded := recordedModes(t, self, directory); len(recorded) != 1 {
 		t.Errorf("pending mode change was written down: %v", recorded)
 	}
 
 	self.toggleCap(caps.Git)
-	if len(self.pending.items) != 0 {
-		t.Errorf("expected the change to be taken back, got %v", self.pending.items)
+	if len(self.pendingInput.items) != 0 {
+		t.Errorf("expected the change to be taken back, got %v", self.pendingInput.items)
 	}
 
 	self.settleAccess()
@@ -3623,13 +3623,13 @@ func TestACapabilitySwappedBackLeavesTheOtherChangesSayingWhatTheySaid(t *testin
 	self.toggleCap(caps.Git)
 	self.toggleCap(caps.Write)
 
-	shown, isSaid := caps.ModeNotice(self.pending.items[1].state)
+	shown, isSaid := caps.ModeNotice(self.pendingInput.items[1].state)
 	if !isSaid {
 		t.Fatal("expected the second change to say something")
 	}
 
 	self.toggleCap(caps.Git)
-	if again, _ := caps.ModeNotice(self.pending.items[0].state); again != shown {
+	if again, _ := caps.ModeNotice(self.pendingInput.items[0].state); again != shown {
 		t.Errorf("expected %q, got %q", shown, again)
 	}
 
@@ -8725,8 +8725,8 @@ func TestPathGrantCommandBecomesPendingAccessAndUpdatesTheModel(t *testing.T) {
 	if got := self.handleCommand("/grant r " + directory); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
-	if len(self.pending.items) != 1 || self.pending.items[0].state.Kind != pathgrant.Change {
-		t.Fatalf("got pending input %#v", self.pending.items)
+	if len(self.pendingInput.items) != 1 || self.pendingInput.items[0].state.Kind != pathgrant.Change {
+		t.Fatalf("got pending input %#v", self.pendingInput.items)
 	}
 	if current := grants.GetCurrent(); len(current) != 1 || current[0].Path != directory {
 		t.Errorf("got grants %#v", current)
@@ -8833,10 +8833,10 @@ func TestARegrantedPathIsForgottenByEveryPendingMessage(t *testing.T) {
 	self.handleCommand("/grant rw " + firstPath)
 	self.handleCommand("/revoke " + firstPath)
 
-	if len(self.pending.items) != 1 {
-		t.Fatalf("got pending items %#v", self.pending.items)
+	if len(self.pendingInput.items) != 1 {
+		t.Fatalf("got pending items %#v", self.pendingInput.items)
 	}
-	recorded, found := pathgrant.LastRecorded([]agent.Event{self.pending.items[0].state})
+	recorded, found := pathgrant.LastRecorded([]agent.Event{self.pendingInput.items[0].state})
 	want := []pathgrant.Grant{{Path: secondPath, Access: pathgrant.ReadAccess}}
 	if !found || !slices.Equal(recorded, want) {
 		t.Errorf("got recorded grants %#v and %t", recorded, found)
@@ -8888,8 +8888,8 @@ func FuzzPendingPathGrantsSayWhatTheModelHasNotBeenTold(fuzzer *testing.F) {
 		self.settleAccess()
 		self.accessMessage()
 		assertPendingPathGrants(t, self, grants, paths)
-		if len(self.pending.items) != 0 {
-			t.Fatalf("a settled turn left %d pending messages", len(self.pending.items))
+		if len(self.pendingInput.items) != 0 {
+			t.Fatalf("a settled turn left %d pending messages", len(self.pendingInput.items))
 		}
 	})
 }
@@ -8900,7 +8900,7 @@ func assertPendingPathGrants(t *testing.T, self *App, grants *pathgrant.Grants, 
 	pendingPaths := map[string]bool{}
 	lastState := agent.Event{}
 
-	for _, item := range self.pending.items {
+	for _, item := range self.pendingInput.items {
 		if item.state.Kind != pathgrant.Change {
 			continue
 		}
@@ -8949,14 +8949,14 @@ func TestAGrantTakenBackBeforeItIsSentLeavesNothingBehind(t *testing.T) {
 	self.handleCommand("/grant r " + secondPath)
 	self.handleCommand("/revoke " + firstPath)
 
-	if len(self.pending.items) != 1 {
-		t.Fatalf("got pending items %#v", self.pending.items)
+	if len(self.pendingInput.items) != 1 {
+		t.Fatalf("got pending items %#v", self.pendingInput.items)
 	}
-	if name := self.pending.items[0].state.Name; name != secondPath {
+	if name := self.pendingInput.items[0].state.Name; name != secondPath {
 		t.Errorf("got pending path %q", name)
 	}
 
-	recorded, found := pathgrant.LastRecorded([]agent.Event{self.pending.items[0].state})
+	recorded, found := pathgrant.LastRecorded([]agent.Event{self.pendingInput.items[0].state})
 	want := []pathgrant.Grant{{Path: secondPath, Access: pathgrant.ReadAccess}}
 	if !found || !slices.Equal(recorded, want) {
 		t.Errorf("got recorded grants %#v and %t", recorded, found)
@@ -8966,8 +8966,8 @@ func TestAGrantTakenBackBeforeItIsSentLeavesNothingBehind(t *testing.T) {
 	}
 
 	self.handleCommand("/revoke " + secondPath)
-	if len(self.pending.items) != 0 {
-		t.Errorf("got pending items %#v", self.pending.items)
+	if len(self.pendingInput.items) != 0 {
+		t.Errorf("got pending items %#v", self.pendingInput.items)
 	}
 }
 
@@ -8982,10 +8982,10 @@ func TestAGrantChangedBeforeItIsSentReplacesItsNotice(t *testing.T) {
 	self.handleCommand("/grant r " + path)
 	self.handleCommand("/grant rw " + path)
 
-	if len(self.pending.items) != 1 {
-		t.Fatalf("got pending items %#v", self.pending.items)
+	if len(self.pendingInput.items) != 1 {
+		t.Fatalf("got pending items %#v", self.pendingInput.items)
 	}
-	if text, _ := pathgrant.Notice(self.pending.items[0].state); !strings.Contains(text, "write access") {
+	if text, _ := pathgrant.Notice(self.pendingInput.items[0].state); !strings.Contains(text, "write access") {
 		t.Errorf("got pending message %q", text)
 	}
 }
@@ -13000,7 +13000,7 @@ func TestAWithdrawalIsAnnouncedBeforeTheJobsItStopped(t *testing.T) {
 
 	self.toggleCap(caps.Write)
 
-	notices := self.pending.notices()
+	notices := self.pendingInput.notices()
 	if len(notices) != 2 {
 		t.Fatalf("got %d notices, want the change and the job it stopped: %v", len(notices), notices)
 	}
@@ -13018,7 +13018,7 @@ func TestGrantingACapabilityBackStopsNothing(t *testing.T) {
 	self.toggleCap(caps.Write)
 	self.toggleCap(caps.Write)
 
-	for _, notice := range self.pending.notices() {
+	for _, notice := range self.pendingInput.notices() {
 		if strings.Contains(notice, "read-write") && strings.Contains(notice, "stopped") {
 			t.Errorf("granting a capability stopped a job: %q", notice)
 		}
@@ -13031,7 +13031,7 @@ func TestAModeChangeThatStoppedAJobIsNotTakenBack(t *testing.T) {
 	self.toggleCap(caps.Write)
 	self.toggleCap(caps.Write)
 
-	notices := self.pending.notices()
+	notices := self.pendingInput.notices()
 	if len(notices) != 3 {
 		t.Fatalf("got %d notices, want both changes and the stop: %v", len(notices), notices)
 	}
@@ -13046,8 +13046,8 @@ func TestAModeChangeThatStoppedNothingIsStillTakenBack(t *testing.T) {
 	self.toggleCap(caps.Write)
 	self.toggleCap(caps.Write)
 
-	if len(self.pending.items) != 0 {
-		t.Errorf("a mode change with no consequence was not taken back: %v", self.pending.items)
+	if len(self.pendingInput.items) != 0 {
+		t.Errorf("a mode change with no consequence was not taken back: %v", self.pendingInput.items)
 	}
 }
 

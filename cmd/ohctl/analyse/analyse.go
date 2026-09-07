@@ -576,25 +576,25 @@ func (self *wireLine) report() (cacheReport, bool) {
 }
 
 func readNumber(fragment []byte, key []byte, current int64, hasCurrent bool) (int64, bool) {
-	remaining := fragment
+	remainingFragment := fragment
 	for {
-		index := bytes.Index(remaining, key)
+		index := bytes.Index(remainingFragment, key)
 		if index < 0 {
 			return current, hasCurrent
 		}
 		start := index + len(key)
-		for start < len(remaining) && (remaining[start] == ' ' || remaining[start] == '\t') {
+		for start < len(remainingFragment) && (remainingFragment[start] == ' ' || remainingFragment[start] == '\t') {
 			start++
 		}
-		if start < len(remaining) && remaining[start] >= '0' && remaining[start] <= '9' {
+		if start < len(remainingFragment) && remainingFragment[start] >= '0' && remainingFragment[start] <= '9' {
 			var number int64
-			for ; start < len(remaining) && remaining[start] >= '0' && remaining[start] <= '9'; start++ {
-				number = number*10 + int64(remaining[start]-'0')
+			for ; start < len(remainingFragment) && remainingFragment[start] >= '0' && remainingFragment[start] <= '9'; start++ {
+				number = number*10 + int64(remainingFragment[start]-'0')
 			}
 			current = number
 			hasCurrent = true
 		}
-		remaining = remaining[index+len(key):]
+		remainingFragment = remainingFragment[index+len(key):]
 	}
 }
 

@@ -87,20 +87,20 @@ func unlockConfig(lock *os.File) {
 }
 
 func writeConfig(path string, contents []byte) error {
-	pending, err := os.CreateTemp(filepath.Dir(path), filepath.Base(path)+".*")
+	pendingFile, err := os.CreateTemp(filepath.Dir(path), filepath.Base(path)+".*")
 	if err != nil {
 		return fmt.Errorf("write config: %w", err)
 	}
-	defer func() { _ = os.Remove(pending.Name()) }()
+	defer func() { _ = os.Remove(pendingFile.Name()) }()
 
-	if _, err := pending.Write(contents); err != nil {
-		_ = pending.Close()
+	if _, err := pendingFile.Write(contents); err != nil {
+		_ = pendingFile.Close()
 		return fmt.Errorf("write config: %w", err)
 	}
-	if err := pending.Close(); err != nil {
+	if err := pendingFile.Close(); err != nil {
 		return fmt.Errorf("write config: %w", err)
 	}
-	if err := os.Rename(pending.Name(), path); err != nil {
+	if err := os.Rename(pendingFile.Name(), path); err != nil {
 		return fmt.Errorf("write config: %w", err)
 	}
 

@@ -281,12 +281,12 @@ func killed(result sandbox.Result, policy sandbox.Policy) string {
 		return ""
 	}
 
-	opening := fmt.Sprintf("note: the shell reports that a process was killed by %s.", name)
+	openingNote := fmt.Sprintf("note: the shell reports that a process was killed by %s.", name)
 	if isObserved {
-		opening = fmt.Sprintf("note: the command was killed by %s.", name)
+		openingNote = fmt.Sprintf("note: the command was killed by %s.", name)
 	}
 
-	lines := []string{opening}
+	lines := []string{openingNote}
 
 	switch signal { //nolint:exhaustive // Only signals caused by quantified sandbox limits add detail.
 	case syscall.SIGKILL, syscall.SIGXCPU:
@@ -314,9 +314,9 @@ func overran(result sandbox.Result, policy sandbox.Policy) string {
 		return ""
 	}
 
-	opening := "note: the sandbox stopped this command for using too much."
+	openingNote := "note: the sandbox stopped this command for using too much."
 
-	return strings.Join(append([]string{opening}, lines...), "\n")
+	return strings.Join(append([]string{openingNote}, lines...), "\n")
 }
 
 func processorLimit(result sandbox.Result, policy sandbox.Policy) []string {

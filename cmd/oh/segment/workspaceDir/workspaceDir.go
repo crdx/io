@@ -56,13 +56,13 @@ func New(workspace *work.Space) segment.Factory {
 }
 
 func (self state) Render(segment.Context) string {
-	leading, name := splitLeadingPath(self.value)
+	leadingPath, name := splitLeadingPath(self.value)
 
-	if leading == "" {
+	if leadingPath == "" {
 		return style.Normal(name)
 	}
 
-	return style.Subtle(leading) + style.Normal(name)
+	return style.Subtle(leadingPath) + style.Normal(name)
 }
 
 func splitLeadingPath(path string) (string, string) {

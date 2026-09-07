@@ -145,13 +145,13 @@ func mountReadOnlyTextFile(path string, contents string) error {
 		return fmt.Errorf("could not resolve %s: %w", path, err)
 	}
 
-	backing, err := writeTemporaryFile(contents)
+	backingFile, err := writeTemporaryFile(contents)
 	if err != nil {
 		return fmt.Errorf("could not prepare the contents of %s: %w", path, err)
 	}
 
-	mountErr := attach(backing, target, &unix.MountAttr{Attr_set: unix.MOUNT_ATTR_RDONLY})
-	removeErr := os.Remove(backing)
+	mountErr := attach(backingFile, target, &unix.MountAttr{Attr_set: unix.MOUNT_ATTR_RDONLY})
+	removeErr := os.Remove(backingFile)
 
 	if mountErr != nil {
 		return fmt.Errorf("could not put the prepared contents at %s: %w", path, mountErr)

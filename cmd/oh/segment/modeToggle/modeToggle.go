@@ -40,7 +40,7 @@ func (self state) letter(caps caps.Set, isGranted bool, paint style.Style, isPre
 	}
 
 	if isPrefixPending {
-		return style.Pending(paint(caps.Flag()))
+		return style.PendingPrefix(paint(caps.Flag()))
 	}
 
 	return paint(caps.Flag())

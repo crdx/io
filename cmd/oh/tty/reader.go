@@ -14,15 +14,15 @@ import (
 const readPollInterval = 100 * time.Millisecond
 
 type Reader struct {
-	input     *os.File
-	wakeRead  *os.File
-	wakeWrite *os.File
-	stopping  chan struct{}
-	once      sync.Once
+	input      *os.File
+	wakeRead   *os.File
+	wakeWrite  *os.File
+	stopSignal chan struct{}
+	once       sync.Once
 }
 
 func NewReader(input *os.File) *Reader {
-	self := &Reader{input: input, stopping: make(chan struct{})}
+	self := &Reader{input: input, stopSignal: make(chan struct{})}
 
 	if wakeRead, wakeWrite, err := os.Pipe(); err == nil {
 		self.wakeRead, self.wakeWrite = wakeRead, wakeWrite
@@ -33,7 +33,7 @@ func NewReader(input *os.File) *Reader {
 
 func (self *Reader) Stop() {
 	self.once.Do(func() {
-		close(self.stopping)
+		close(self.stopSignal)
 
 		if self.wakeWrite != nil {
 			_, _ = self.wakeWrite.Write([]byte{0})
@@ -42,7 +42,7 @@ func (self *Reader) Stop() {
 }
 
 func (self *Reader) Stopping() <-chan struct{} {
-	return self.stopping
+	return self.stopSignal
 }
 
 func (self *Reader) Close() {
@@ -63,7 +63,7 @@ func (self *Reader) Read(buffer []byte) (int, error) {
 
 	for {
 		select {
-		case <-self.stopping:
+		case <-self.stopSignal:
 			return 0, io.EOF
 		default:
 		}

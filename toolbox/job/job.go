@@ -188,10 +188,10 @@ func act(
 }
 
 func waited(ctx context.Context, manager *jobs.Manager, name string, limit time.Duration) (string, error) {
-	waiting, stopWaiting := context.WithTimeout(ctx, limit)
+	waitContext, stopWaiting := context.WithTimeout(ctx, limit)
 	defer stopWaiting()
 
-	err := manager.Wait(waiting, name)
+	err := manager.Wait(waitContext, name)
 	if err != nil && (ctx.Err() != nil || !errors.Is(err, context.DeadlineExceeded)) {
 		return "", err
 	}

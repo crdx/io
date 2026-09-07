@@ -370,7 +370,7 @@ func TestAShortConversationIsHeldBackInTheListing(t *testing.T) {
 	if strings.Contains(lines[2], "\x1b") {
 		t.Errorf("expected the longer conversation to be drawn plainly, got %q", lines[2])
 	}
-	if got := lines[3]; got != style.Running(style.Plain(got)) {
+	if got := lines[3]; got != style.RunningSession(style.Plain(got)) {
 		t.Errorf("expected the running session to stay running, got %q", got)
 	}
 }

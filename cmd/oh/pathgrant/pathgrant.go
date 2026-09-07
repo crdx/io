@@ -126,7 +126,7 @@ func (self *Grants) Grant(path string, access Access) (agent.Event, error) {
 	}
 
 	current := self.state.GetCurrent()
-	if existing, found := findGrant(current, canonicalPath); found && existing.Access == access {
+	if existingGrant, found := findGrant(current, canonicalPath); found && existingGrant.Access == access {
 		return agent.Event{}, fmt.Errorf(
 			"%s already has temporary %s access", pathutil.Shorten(canonicalPath), access.Describe(),
 		)
