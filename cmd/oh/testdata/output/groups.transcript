@@ -1,0 +1,76 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## User · +0s
+
+walk every pair of groups so the spacing between them is written down
+
+## Silent turn · +1s
+
+```
+The model ended the turn without an answer.
+```
+
+## Retrying · attempt 1 · waited 0s · +2s
+
+```
+the stream ended before the response did
+```
+
+## Tool calls · +3s
+
+```
+read: target.txt [ok, 1 line, 4B, call_1]
+ls: . [ok, 2 lines, 21B, call_2]
+```
+
+## Assistant · +7s
+
+A tool ran, and an answer followed it.
+
+## Tool calls · +8s
+
+```
+read: README.md [ok, 1 line, 9B, call_3]
+ls: cmd [ok, 1 line, 3B, call_4]
+```
+
+## Silent turn · +13s
+
+```
+The model ended the turn without an answer.
+```
+
+## Assistant · +14s
+
+An answer after a notice.
+
+## Assistant · +15s
+
+A second answer after the first.
+
+## Assistant · +18s
+
+An answer after a thought.
+
+## Failure · +19s
+
+```
+the endpoint is having a moment
+```
+
+## Silent turn · +21s
+
+```
+The model ended the turn without an answer.
+```
+
+

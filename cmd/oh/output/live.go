@@ -45,7 +45,7 @@ func (self *Screen) DrawAnswer(rows []string) bool {
 }
 
 func (self *Screen) DrawReasoning(rows []string) bool {
-	return self.draw(rows, WorkGroup)
+	return self.draw(rows, ReasoningGroup)
 }
 
 func (self *Screen) DiscardLive() bool {

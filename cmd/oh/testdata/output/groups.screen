@@ -1,0 +1,702 @@
+=== narrow ===
+
+ walk every pair of groups so the
+ spacing between them is written down
+
+
+The model ended the turn without an
+answer.
+[#1] Request failed; retrying: The
+stream ended before the response did
+
+read target.txt ✓ 1L
+ls ✓ 2L
+
+A tool ran, and an answer followed it.
+
+read README.md ✓ 1L
+A thought after a tool call.
+ls cmd ✓ 1L
+
+The model ended the turn without an
+answer.
+
+An answer after a notice.
+
+A second answer after the first.
+
+A thought after an answer.
+A second thought after the first.
+
+An answer after a thought.
+
+The endpoint is having a moment
+
+A thought after a notice.
+
+The model ended the turn without an
+answer.
+=== one column ===
+
+
+w
+
+a
+
+l
+
+k
+
+e
+
+v
+
+e
+
+r
+
+y
+
+p
+
+a
+
+i
+
+r
+
+o
+
+f
+
+g
+
+r
+
+o
+
+u
+
+p
+
+s
+
+s
+
+o
+
+t
+
+h
+
+e
+
+s
+
+p
+
+a
+
+c
+
+i
+
+n
+
+g
+
+b
+
+e
+
+t
+
+w
+
+e
+
+e
+
+n
+
+t
+
+h
+
+e
+
+m
+
+i
+
+s
+
+w
+
+r
+
+i
+
+t
+
+t
+
+e
+
+n
+
+d
+
+o
+
+w
+
+n
+
+
+T
+h
+e
+m
+o
+d
+e
+l
+e
+n
+d
+e
+d
+t
+h
+e
+t
+u
+r
+n
+w
+i
+t
+h
+o
+u
+t
+a
+n
+a
+n
+s
+w
+e
+r
+.
+[
+#
+1
+]
+R
+e
+q
+u
+e
+s
+t
+f
+a
+i
+l
+e
+d
+;
+r
+e
+t
+r
+y
+i
+n
+g
+:
+T
+h
+e
+s
+t
+r
+e
+a
+m
+e
+n
+d
+e
+d
+b
+e
+f
+o
+r
+e
+t
+h
+e
+r
+e
+s
+p
+o
+n
+s
+e
+d
+i
+d
+
+✓
+✓
+
+A
+t
+o
+o
+l
+r
+a
+n
+,
+a
+n
+d
+a
+n
+a
+n
+s
+w
+e
+r
+f
+o
+l
+l
+o
+w
+e
+d
+i
+t
+.
+
+✓
+A
+t
+h
+o
+u
+g
+h
+t
+a
+f
+t
+e
+r
+a
+t
+o
+o
+l
+c
+a
+l
+l
+.
+✓
+
+T
+h
+e
+m
+o
+d
+e
+l
+e
+n
+d
+e
+d
+t
+h
+e
+t
+u
+r
+n
+w
+i
+t
+h
+o
+u
+t
+a
+n
+a
+n
+s
+w
+e
+r
+.
+
+A
+n
+a
+n
+s
+w
+e
+r
+a
+f
+t
+e
+r
+a
+n
+o
+t
+i
+c
+e
+.
+
+A
+s
+e
+c
+o
+n
+d
+a
+n
+s
+w
+e
+r
+a
+f
+t
+e
+r
+t
+h
+e
+f
+i
+r
+s
+t
+.
+
+A
+t
+h
+o
+u
+g
+h
+t
+a
+f
+t
+e
+r
+a
+n
+a
+n
+s
+w
+e
+r
+.
+A
+s
+e
+c
+o
+n
+d
+t
+h
+o
+u
+g
+h
+t
+a
+f
+t
+e
+r
+t
+h
+e
+f
+i
+r
+s
+t
+.
+
+A
+n
+a
+n
+s
+w
+e
+r
+a
+f
+t
+e
+r
+a
+t
+h
+o
+u
+g
+h
+t
+.
+
+T
+h
+e
+e
+n
+d
+p
+o
+i
+n
+t
+i
+s
+h
+a
+v
+i
+n
+g
+a
+m
+o
+m
+e
+n
+t
+
+A
+t
+h
+o
+u
+g
+h
+t
+a
+f
+t
+e
+r
+a
+n
+o
+t
+i
+c
+e
+.
+
+T
+h
+e
+m
+o
+d
+e
+l
+e
+n
+d
+e
+d
+t
+h
+e
+t
+u
+r
+n
+w
+i
+t
+h
+o
+u
+t
+a
+n
+a
+n
+s
+w
+e
+r
+.
+=== printed ===
+
+ walk every pair of groups so the spacing between them is written down
+
+
+The model ended the turn without an answer.
+[#1] Request failed; retrying: The stream ended before the response did
+
+read target.txt ✓ 1L
+ls ✓ 2L
+
+A tool ran, and an answer followed it.
+
+read README.md ✓ 1L
+A thought after a tool call.
+ls cmd ✓ 1L
+
+The model ended the turn without an answer.
+
+An answer after a notice.
+
+A second answer after the first.
+
+A thought after an answer.
+A second thought after the first.
+
+An answer after a thought.
+
+The endpoint is having a moment
+
+A thought after a notice.
+
+The model ended the turn without an answer.
+=== tiny ===
+
+ walk every
+ pair of
+ groups so
+ the spacing
+ between
+ them is
+ written
+ down
+
+
+The model
+ended the
+turn without
+an answer.
+[#1] Request
+failed;
+retrying:
+The stream
+ended before
+the response
+did
+
+read ✓ 1L
+ls ✓ 2L
+
+A tool ran,
+and an
+answer
+followed it.
+
+read ✓ 1L
+A thought
+after a tool
+call.
+ls c… ✓ 1L
+
+The model
+ended the
+turn without
+an answer.
+
+An answer
+after a
+notice.
+
+A second
+answer after
+the first.
+
+A thought
+after an
+answer.
+A second
+thought
+after the
+first.
+
+An answer
+after a
+thought.
+
+The endpoint
+is having a
+moment
+
+A thought
+after a
+notice.
+
+The model
+ended the
+turn without
+an answer.
+=== wide ===
+
+ walk every pair of groups so the spacing between them is written down
+
+
+The model ended the turn without an answer.
+[#1] Request failed; retrying: The stream ended before the response did
+
+read target.txt ✓ 1L
+ls ✓ 2L
+
+A tool ran, and an answer followed it.
+
+read README.md ✓ 1L
+A thought after a tool call.
+ls cmd ✓ 1L
+
+The model ended the turn without an answer.
+
+An answer after a notice.
+
+A second answer after the first.
+
+A thought after an answer.
+A second thought after the first.
+
+An answer after a thought.
+
+The endpoint is having a moment
+
+A thought after a notice.
+
+The model ended the turn without an answer.

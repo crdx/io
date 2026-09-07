@@ -767,6 +767,7 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		self.continueMessage = result.LiveConfig.ContinueMessage
 		self.editorConfiguration.ReplaceCommand(result.LiveConfig.EditorCommand)
 		self.streamingMode = result.LiveConfig.StreamingMode
+		self.screen.SetGrouping(result.LiveConfig.Grouping)
 		self.toolOutputLimit.Replace(result.LiveConfig.ToolOutputBytes)
 		self.barConfiguration.ReplaceLayout(result.LiveConfig.SegmentLayout)
 		self.feedback.Clear(feedback.Config)

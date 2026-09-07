@@ -31,6 +31,7 @@ type Screen struct {
 	isTextSizingSupported bool
 	linkRoot              string
 	isProgressReported    bool
+	grouping              Grouping
 
 	columns    int
 	lines      int
@@ -71,6 +72,13 @@ func NewTerminalOfSize(writer io.Writer, columns int, lines int) *Screen {
 func (self *Screen) AppendOnly() *Screen {
 	self.canRepaint = false
 	return self
+}
+
+func (self *Screen) SetGrouping(grouping Grouping) {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	self.grouping = grouping
 }
 
 func (self *Screen) SetTextSizingSupported(isSupported bool) {
@@ -184,7 +192,7 @@ func (self *Screen) emit(text string) {
 const apart = 2
 
 func (self *Screen) makeRoomFor(next Group) {
-	if self.lastGroup != next {
+	if !self.grouping.runsOn(self.lastGroup, next) {
 		self.isBlankOwed = self.hasPrinted
 	}
 

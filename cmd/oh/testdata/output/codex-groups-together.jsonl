@@ -1,0 +1,32 @@
+{"kind":"head","version":12,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
+{"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
+{"kind":"event","event":{"kind":"user_message","text":"reason, call tools, reason again, then answer"}}
+{"kind":"event","event":{"kind":"model_reasoning","text":"Use the tool twice."}}
+{"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"call-1","name":"work","arguments":"{}"}}
+{"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"call-2","name":"work","arguments":"{}"}}
+{"kind":"event","event":{"kind":"state_change","id":"call-1","name":"work-count","state":1}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"first result","id":"call-1","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":12}}}
+{"kind":"event","event":{"kind":"state_change","id":"call-2","name":"work-count","state":2}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"second result","id":"call-2","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":13}}}
+{"kind":"event","event":{"kind":"model_reasoning","text":"One more call."}}
+{"kind":"event","event":{"render":"work","kind":"tool_call_request","id":"call-3","name":"work","arguments":"{}"}}
+{"kind":"event","event":{"kind":"state_change","id":"call-3","name":"work-count","state":3}}
+{"kind":"event","event":{"kind":"tool_call_result","text":"third result","id":"call-3","name":"work","status":"success","stats":{"kind":"output","lines":1,"bytes":12}}}
+{"kind":"event","event":{"kind":"model_message","text":"All three calls are done."}}
+{"kind":"item","payload":{"role":"user","content":"reason, call tools, reason again, then answer"}}
+{"kind":"item","payload":{"id":"reasoning-1","type":"reasoning","content":[],"encrypted_content":"sealed","summary":[{"type":"summary_text","text":"Use the tool twice."}]}}
+{"kind":"item","payload":{"id":"call-item-1","type":"function_call","call_id":"call-1","name":"work","arguments":"{}"}}
+{"kind":"item","payload":{"id":"call-item-2","type":"function_call","call_id":"call-2","name":"work","arguments":"{}"}}
+{"kind":"item","payload":{"type":"function_call_output","call_id":"call-1","output":"first result"}}
+{"kind":"item","payload":{"type":"function_call_output","call_id":"call-2","output":"second result"}}
+{"kind":"item","payload":{"id":"reasoning-2","type":"reasoning","content":[],"encrypted_content":"sealed-2","summary":[{"type":"summary_text","text":"One more call."}]}}
+{"kind":"item","payload":{"id":"call-item-3","type":"function_call","call_id":"call-3","name":"work","arguments":"{}"}}
+{"kind":"item","payload":{"type":"function_call_output","call_id":"call-3","output":"third result"}}
+{"kind":"item","payload":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"All three calls are done."}]}}
+{"kind":"turn_completion","turn":{}}
+{"kind":"event","event":{"kind":"user_message","text":"continue after the tool results"}}
+{"kind":"event","event":{"kind":"model_message","text":"Resumed."}}
+{"kind":"item","payload":{"role":"user","content":"continue after the tool results"}}
+{"kind":"item","payload":{"id":"message-2","type":"message","role":"assistant","content":[{"type":"output_text","text":"Resumed."}]}}
+{"kind":"turn_completion","turn":{}}

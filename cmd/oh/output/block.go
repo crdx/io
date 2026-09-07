@@ -20,7 +20,7 @@ type groupedBlock struct {
 }
 
 func (self *Screen) Open(block Block) {
-	self.open(block, WorkGroup, nil)
+	self.open(block, ToolGroup, nil)
 }
 
 func (self *Screen) OpenNotice(block Block) *BlockHandle {
@@ -135,15 +135,15 @@ func (self *Screen) flushLiveRegion() {
 }
 
 func (self *Screen) paintBlocks() {
-	rows, firstGroup, lastGroup := renderGroupedBlocks(self.blocks, self.columns)
+	rows, firstGroup, lastGroup := renderGroupedBlocks(self.blocks, self.columns, self.grouping)
 	self.paintGroups(rows, firstGroup, lastGroup)
 }
 
-func renderGroupedBlocks(blocks []groupedBlock, columns int) ([]string, Group, Group) {
+func renderGroupedBlocks(blocks []groupedBlock, columns int, grouping Grouping) ([]string, Group, Group) {
 	var rows []string
 
 	for i, groupedBlock := range blocks {
-		if i > 0 && blocks[i-1].group != groupedBlock.group {
+		if i > 0 && !grouping.runsOn(blocks[i-1].group, groupedBlock.group) {
 			rows = append(rows, "")
 		}
 

@@ -8,6 +8,7 @@ continue = "yes"
 
 [ui]
 streaming = "line"
+grouping = ["notice", "reasoning tool", "answer"]
 
 [tool]
 output = "12K"

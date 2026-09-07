@@ -612,6 +612,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	chat.commands = commandRegistry
 	chat.continueMessage = liveSettings.ContinueMessage
 	chat.streamingMode = liveSettings.StreamingMode
+	screen.SetGrouping(liveSettings.Grouping)
 	chat.barConfiguration = bar.NewConfiguration(barRegistry, liveSettings.SegmentLayout)
 
 	if resumedSession != nil {

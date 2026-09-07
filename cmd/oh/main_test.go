@@ -3213,6 +3213,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"lifecycle":             {".ansi", ".screen"},
 		"line-resize":           {".screen"},
 		"streaming-modes":       {".screen"},
+		"groupings":             {".screen"},
 		"mermaid-streaming":     {".screen"},
 		"mode-takeback":         {".ansi", ".screen"},
 		"model-arguments":       {".txt"},
@@ -5038,6 +5039,100 @@ func TestEveryScenarioShowsWhatItShowedBefore(t *testing.T) {
 	}
 }
 
+const groupingScenario = "groups.jsonl"
+
+func everyGrouping() [][]string {
+	names := []string{"notice", "tool", "answer", "reasoning"}
+	memberships := make([]int, len(names))
+
+	var groupings [][]string
+
+	var walk func(int, int)
+	walk = func(at int, classCount int) {
+		if at == len(names) {
+			clauses := make([]string, classCount)
+			for member, class := range memberships {
+				if clauses[class] != "" {
+					clauses[class] += " "
+				}
+				clauses[class] += names[member]
+			}
+			groupings = append(groupings, clauses)
+
+			return
+		}
+
+		for class := range classCount + 1 {
+			memberships[at] = class
+			walk(at+1, max(classCount, class+1))
+		}
+	}
+	walk(0, 0)
+
+	return groupings
+}
+
+func newGroupedRig(t *testing.T, groups []string, isPrinted bool) *replayRig {
+	t.Helper()
+
+	grouping, err := output.ParseGrouping(groups)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rig := newRig(t, func(written *strings.Builder, workspaceDir string) *output.Screen {
+		screen := output.NewTerminalOfSize(written, replayColumns, replayLines)
+		if isPrinted {
+			screen.AppendOnly()
+		}
+
+		return screen.LinkPathsUnder(workspaceDir)
+	})
+	rig.chat.screen.SetGrouping(grouping)
+	rig.chat.isPrinting = isPrinted
+
+	return rig
+}
+
+func replayUnderGrouping(t *testing.T, groups []string, isPrinted bool) string {
+	t.Helper()
+
+	entries := readJournal(t, filepath.Join("testdata", "input", groupingScenario))
+
+	return replayInto(newGroupedRig(t, groups, isPrinted), entries)
+}
+
+func TestEveryGroupingSpacesTheOutputAsItSays(t *testing.T) {
+	passes := map[string]func() string{}
+
+	for _, groups := range everyGrouping() {
+		passes[strings.Join(groups, ", ")] = func() string {
+			return shown(t, replayUnderGrouping(t, groups, false), replayColumns)
+		}
+	}
+
+	if len(passes) != 15 {
+		t.Fatalf("there are %d groupings, want all 15 partitions of the four groups", len(passes))
+	}
+
+	compareWithGolden(t, "groupings", ".screen", passes)
+}
+
+func TestEveryGroupingPrintsWhatTheInterfaceShowed(t *testing.T) {
+	for _, groups := range everyGrouping() {
+		t.Run(strings.Join(groups, ", "), func(t *testing.T) {
+			printed := replayUnderGrouping(t, groups, true)
+			requireNothingWasDrawnOver(t, printed)
+			requireSameVisibleScreen(
+				t,
+				"the printed session differs from what the interface drew",
+				replayUnderGrouping(t, groups, false),
+				printed,
+			)
+		})
+	}
+}
+
 func shownAtWidth(t *testing.T, entries []replayEntry, columns int) string {
 	t.Helper()
 
@@ -6138,6 +6233,41 @@ func readlineInputStream(t *testing.T, historyLines []string, text string, keypr
 	return screenOutput.String()
 }
 
+func drawAThoughtThenACall(self *App, thought string) {
+	picasso := self.newPainter(false)
+	picasso.DrawEvent(agent.Event{Kind: agent.ModelReasoningEvent, Text: thought})
+	picasso.DrawEvent(agent.Event{
+		Kind:              agent.ToolCallRequestEvent,
+		ID:                thought,
+		Name:              "read",
+		FallbackRendering: agent.FallbackRendering{Subject: "one.go"},
+	})
+	picasso.Close(dynamic.Done)
+}
+
+func TestReloadingConfigChangesTheGroupingStraightAway(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, "[ui]\ngrouping = [\"notice\", \"reasoning tool\", \"answer\"]\n")
+
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	prepareLiveConfig(t, self, path)
+
+	drawAThoughtThenACall(self, "before")
+	if drawn := style.Plain(screenOutput.String()); !strings.Contains(drawn, "before\nread one.go") {
+		t.Errorf("a thought and its call drew %q, want them running together", drawn)
+	}
+
+	writeLiveConfig(t, path, "[ui]\ngrouping = [\"notice\", \"reasoning\", \"tool\", \"answer\"]\n")
+	settleLiveConfig(t, self)
+
+	screenOutput.Reset()
+	drawAThoughtThenACall(self, "after")
+	if drawn := style.Plain(screenOutput.String()); !strings.Contains(drawn, "after\n\nread one.go") {
+		t.Errorf("a thought and its call drew %q, want a blank row between them", drawn)
+	}
+}
+
 func writeLiveConfig(t *testing.T, path string, body string) {
 	t.Helper()
 
@@ -6176,6 +6306,7 @@ func prepareLiveConfig(t *testing.T, self *App, path string) {
 	}
 	self.continueMessage = live.ContinueMessage
 	self.streamingMode = live.StreamingMode
+	self.screen.SetGrouping(live.Grouping)
 	self.barConfiguration = bar.NewConfiguration(registry, live.SegmentLayout)
 }
 
@@ -9618,6 +9749,7 @@ type sessionGoldenScenario struct {
 	Effort             string              `toml:"effort"`
 	IsFast             bool                `toml:"fast"`
 	IdleAfter          string              `toml:"idle-after"`
+	Grouping           output.Grouping     `toml:"grouping"`
 	FirstTokenError    string              `toml:"first-token-error"`
 	CredentialRefresh  string              `toml:"credential-refresh"`
 	ToggleBeforeFirst  string              `toml:"toggle-before-first"`
@@ -9661,6 +9793,13 @@ func readSessionGoldenScenario(t *testing.T, path string) sessionGoldenScenario 
 
 	scenario.Name = strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 	return scenario
+}
+
+func (self sessionGoldenScenario) screen(writer io.Writer) *output.Screen {
+	screen := output.NewTerminalOfSize(writer, replayColumns, replayLines)
+	screen.SetGrouping(self.Grouping)
+
+	return screen
 }
 
 func compareScenarioGolden(t *testing.T, name string, got string) {
@@ -10356,7 +10495,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	var firstScreenOutput bytes.Buffer
 	firstHarness := &App{
 		agent:    firstAssistant,
-		screen:   output.NewTerminalOfSize(&firstScreenOutput, replayColumns, replayLines),
+		screen:   scenario.screen(&firstScreenOutput),
 		recorder: record.New(log),
 	}
 	if scenario.Provider == model.CodexProvider {
@@ -10419,7 +10558,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	resumedRecorder.Resume(len(storedSession.Items))
 	resumedHarness := &App{
 		agent:    resumedAssistant,
-		screen:   output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines),
+		screen:   scenario.screen(&screenOutput),
 		recorder: resumedRecorder,
 		events:   slices.Clone(storedSession.Events),
 	}
@@ -10473,7 +10612,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	var replayOutput bytes.Buffer
 	replayHarness := &App{
 		agent:  resumedAssistant,
-		screen: output.NewTerminalOfSize(&replayOutput, replayColumns, replayLines),
+		screen: scenario.screen(&replayOutput),
 		events: storedSession.Events,
 	}
 	replayHarness.replay()
@@ -10488,7 +10627,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	var printedReplayOutput bytes.Buffer
 	printedReplayHarness := &App{
 		agent:      resumedAssistant,
-		screen:     output.NewTerminalOfSize(&printedReplayOutput, replayColumns, replayLines).AppendOnly(),
+		screen:     scenario.screen(&printedReplayOutput).AppendOnly(),
 		events:     storedSession.Events,
 		isPrinting: true,
 	}
@@ -10734,7 +10873,7 @@ func drawPrintedSessionGoldenTurn(
 	var screenOutput bytes.Buffer
 	printedHarness := &App{
 		agent:      agent.New(sessionGoldenSystemPrompt, unaskedProvider{}, nil),
-		screen:     output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines).AppendOnly(),
+		screen:     scenario.screen(&screenOutput).AppendOnly(),
 		recorder:   record.New(log),
 		isPrinting: true,
 	}

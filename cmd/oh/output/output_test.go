@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -153,24 +154,24 @@ func TestAnAnswerKeepsTheBlankRowsInsideIt(t *testing.T) {
 	}
 }
 
-func TestOutputRunsTogetherExactlyWhenItsGroupMatches(t *testing.T) {
-	type kind struct {
-		name string
-		draw func(*output.Screen, string)
-	}
+type drawnKind struct {
+	name string
+	draw func(*output.Screen, string)
+}
 
-	kinds := []kind{
-		{
-			name: "work",
-			draw: func(screen *output.Screen, text string) {
-				screen.DrawReasoning([]string{text})
-				screen.Seal()
-			},
-		},
+func drawnKinds() []drawnKind {
+	return []drawnKind{
 		{
 			name: "notice",
 			draw: func(screen *output.Screen, text string) {
 				screen.Line(text)
+			},
+		},
+		{
+			name: "tool",
+			draw: func(screen *output.Screen, text string) {
+				screen.Open(fixedBlock(text))
+				screen.Seal()
 			},
 		},
 		{
@@ -180,19 +181,36 @@ func TestOutputRunsTogetherExactlyWhenItsGroupMatches(t *testing.T) {
 				screen.Seal()
 			},
 		},
+		{
+			name: "reasoning",
+			draw: func(screen *output.Screen, text string) {
+				screen.DrawReasoning([]string{text})
+				screen.Seal()
+			},
+		},
+	}
+}
+
+func requireGroupsRunOnAsNamed(t *testing.T, groups []string, together map[string][]string) {
+	t.Helper()
+
+	grouping, err := output.ParseGrouping(groups)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	for _, first := range kinds {
-		for _, second := range kinds {
+	for _, first := range drawnKinds() {
+		for _, second := range drawnKinds() {
 			t.Run(first.name+"-then-"+second.name, func(t *testing.T) {
 				var screenOutput bytes.Buffer
 				screen := output.New(&screenOutput)
+				screen.SetGrouping(grouping)
 
 				first.draw(screen, "one")
 				second.draw(screen, "two")
 
 				separator := "\n\n"
-				if first.name == second.name {
+				if first.name == second.name || slices.Contains(together[first.name], second.name) {
 					separator = "\n"
 				}
 				if got, want := screenOutput.String(), "one"+separator+"two"; got != want {
@@ -201,6 +219,30 @@ func TestOutputRunsTogetherExactlyWhenItsGroupMatches(t *testing.T) {
 			})
 		}
 	}
+}
+
+func TestOutputRunsTogetherExactlyWhenItsGroupMatches(t *testing.T) {
+	requireGroupsRunOnAsNamed(t, output.DefaultGroups, map[string][]string{
+		"reasoning": {"tool"},
+		"tool":      {"reasoning"},
+	})
+}
+
+func TestReasoningIsSpacedApartFromToolsWhenTheyAreNamedApart(t *testing.T) {
+	requireGroupsRunOnAsNamed(t, []string{"notice", "reasoning", "tool", "answer"}, nil)
+}
+
+func TestAnythingNamedTogetherRunsOnHoweverUnlikelyThePairing(t *testing.T) {
+	requireGroupsRunOnAsNamed(t, []string{"notice answer", "reasoning tool"}, map[string][]string{
+		"notice":    {"answer"},
+		"answer":    {"notice"},
+		"reasoning": {"tool"},
+		"tool":      {"reasoning"},
+	})
+}
+
+func TestNothingRunsOnWhenNoGroupsAreNamed(t *testing.T) {
+	requireGroupsRunOnAsNamed(t, nil, nil)
 }
 
 type fixedBlock string
@@ -219,6 +261,26 @@ func TestNoticesInsideLiveWorkFollowTheSameGroupingRule(t *testing.T) {
 	screen.Seal()
 
 	if got, want := screenOutput.String(), "work\n\nnotice one\nnotice two"; got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestNoticesInsideLiveWorkRunOnWhenTheyAreNamedTogether(t *testing.T) {
+	grouping, err := output.ParseGrouping([]string{"notice tool", "answer", "reasoning"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var screenOutput bytes.Buffer
+	screen := output.New(&screenOutput)
+	screen.SetGrouping(grouping)
+
+	screen.Open(fixedBlock("work"))
+	screen.Line("notice one")
+	screen.Line("notice two")
+	screen.Seal()
+
+	if got, want := screenOutput.String(), "work\nnotice one\nnotice two"; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }

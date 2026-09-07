@@ -4,6 +4,9 @@ type Group int
 
 const (
 	NoticeGroup Group = iota
-	WorkGroup
+	ToolGroup
 	AnswerGroup
+	ReasoningGroup
 )
+
+const groupCount = int(ReasoningGroup) + 1

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -815,5 +816,102 @@ func TestASizeThatIsNotOneIsRefused(t *testing.T) {
 		if err := size.UnmarshalText([]byte(written)); err == nil {
 			t.Errorf("%q was read as %d, want a complaint", written, size.Bytes)
 		}
+	}
+}
+
+func TestTheGroupingIsReadAsWritten(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[ui]\ngrouping = [\"notice\", \"reasoning\", \"tool\", \"answer\"]\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want, err := output.ParseGrouping([]string{"notice", "reasoning", "tool", "answer"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(config.Ui.Grouping, want) {
+		t.Errorf("got grouping %+v, want %+v", config.Ui.Grouping, want)
+	}
+}
+
+func TestAnUnknownGroupIsRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[ui]\ngrouping = [\"notice\", \"thinking\", \"answer\"]\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil {
+		t.Fatal("expected an unknown group to be refused")
+	}
+	for _, name := range []string{"thinking", "reasoning", "tool"} {
+		if !strings.Contains(err.Error(), name) {
+			t.Errorf("expected %q to be named, got %v", name, err)
+		}
+	}
+}
+
+func TestAGroupingThatIsNotAListIsRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[ui]\ngrouping = \"notice, tool\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := Load(path); err == nil {
+		t.Fatal("expected a grouping that is not a list to be refused")
+	}
+}
+
+func TestAGroupThatIsNotTextIsRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[ui]\ngrouping = [\"notice\", 3]\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := Load(path); err == nil {
+		t.Fatal("expected a group that is not text to be refused")
+	}
+}
+
+func TestTheGroupingDefaultsToReasoningRunningOnFromTools(t *testing.T) {
+	config, err := Load("")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want, err := output.ParseGrouping(output.DefaultGroups)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(config.Ui.Grouping, want) {
+		t.Errorf("got grouping %+v, want %+v", config.Ui.Grouping, want)
+	}
+}
+
+func TestAConfigWrittenBeforeTheGroupingExistedNeedsNoMigrating(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte("version = 10\n[input]\ncontinue = \"go on\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatalf("a config from before the setting existed was refused: %v", err)
+	}
+
+	want, err := output.ParseGrouping(output.DefaultGroups)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(config.Ui.Grouping, want) {
+		t.Errorf("got grouping %+v, want %+v", config.Ui.Grouping, want)
+	}
+	if err := config.ValidateConsumed(); err != nil {
+		t.Errorf("got %v", err)
 	}
 }

@@ -68,6 +68,7 @@ type Ollama struct {
 
 type Ui struct {
 	StreamingMode output.StreamingMode `toml:"streaming"`
+	Grouping      output.Grouping      `toml:"grouping"`
 }
 
 type Tool struct {
@@ -98,6 +99,7 @@ type LiveConfig struct {
 	SegmentLayout     segment.Layout
 	SnippetCommandSet slash.CommandSet
 	StreamingMode     output.StreamingMode
+	Grouping          output.Grouping
 	ToolOutputBytes   int
 }
 
@@ -123,6 +125,7 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 		SegmentLayout:     layout,
 		SnippetCommandSet: snippetCommandSet,
 		StreamingMode:     self.Ui.StreamingMode,
+		Grouping:          self.Ui.Grouping,
 		ToolOutputBytes:   self.Tool.Output.Bytes,
 	}, nil
 }

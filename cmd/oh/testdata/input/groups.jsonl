@@ -1,0 +1,22 @@
+{"event":{"kind":"user_message","text":"walk every pair of groups so the spacing between them is written down"}}
+{"event":{"kind":"silent_turn"}}
+{"event":{"kind":"request_retry","text":"the stream ended before the response did","attempt":1}}
+{"event":{"kind":"tool_call_request","id":"call_1","name":"read","arguments":"{\"path\":\"target.txt\"}","render":"target.txt","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"success","text":"one\n","id":"call_1","name":"read","took":0,"stats":{"kind":"read","lines":1,"bytes":4}}}
+{"event":{"kind":"tool_call_request","id":"call_2","name":"ls","arguments":"{\"path\":\".\"}","render":".","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"success","text":"README.md\ntarget.txt\n","id":"call_2","name":"ls","took":0,"stats":{"kind":"list","lines":2,"bytes":21}}}
+{"event":{"kind":"model_message","text":"A tool ran, and an answer followed it."}}
+{"event":{"kind":"tool_call_request","id":"call_3","name":"read","arguments":"{\"path\":\"README.md\"}","render":"README.md","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"success","text":"# Readme\n","id":"call_3","name":"read","took":0,"stats":{"kind":"read","lines":1,"bytes":9}}}
+{"event":{"kind":"model_reasoning","text":"A thought after a tool call."}}
+{"event":{"kind":"tool_call_request","id":"call_4","name":"ls","arguments":"{\"path\":\"cmd\"}","render":"cmd","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"success","text":"oh\n","id":"call_4","name":"ls","took":0,"stats":{"kind":"list","lines":1,"bytes":3}}}
+{"event":{"kind":"silent_turn"}}
+{"event":{"kind":"model_message","text":"An answer after a notice."}}
+{"event":{"kind":"model_message","text":"A second answer after the first."}}
+{"event":{"kind":"model_reasoning","text":"A thought after an answer."}}
+{"event":{"kind":"model_reasoning","text":"A second thought after the first."}}
+{"event":{"kind":"model_message","text":"An answer after a thought."}}
+{"event":{"kind":"turn_failure","text":"the endpoint is having a moment"}}
+{"event":{"kind":"model_reasoning","text":"A thought after a notice."}}
+{"event":{"kind":"silent_turn"}}
