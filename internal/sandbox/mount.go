@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
-	"testing"
 	"time"
 
 	"crdx.org/hereduck"
+	"crdx.org/io/internal/sandbox/unmapped"
 	"crdx.org/io/internal/util/pathutil"
 
 	"golang.org/x/sys/unix"
@@ -102,36 +102,13 @@ func saysProbeSucceeded(output []byte) bool {
 
 func namespaceProbeCommand(ctx context.Context) *exec.Cmd {
 	probe := exec.CommandContext(ctx, executable, "-test.run=^$")
-	probe.Env = append([]string{envProbe + "=1"}, unmappedTestEnvironment()...)
+	probe.Env = append([]string{envProbe + "=1"}, unmapped.Environment()...)
 	probe.SysProcAttr = namespaceAttributes()
 	return probe
 }
 
-const unmappedTestVariable = "IO_SANDBOX_TEST_UNMAPPED"
-
-func unmappedTestEnvironment() []string {
-	if os.Getenv(unmappedTestVariable) == "" {
-		return nil
-	}
-
-	return []string{unmappedTestVariable + "=1"}
-}
-
-func isUnmappedTestNamespace() bool {
-	if !testing.Testing() || os.Getenv(unmappedTestVariable) == "" {
-		return false
-	}
-
-	file, err := os.OpenFile("/proc/self/uid_map", os.O_WRONLY, 0)
-	if err != nil {
-		return true
-	}
-	_ = file.Close()
-	return false
-}
-
 func applyMounts(policy Policy) error {
-	if isUnmappedTestNamespace() {
+	if unmapped.IsTestNamespace() {
 		return nil
 	}
 
@@ -258,7 +235,7 @@ func attach(source string, target string, attributes *unix.MountAttr) error {
 const lastCapability = 63
 
 func dropCapabilities() error {
-	if isUnmappedTestNamespace() {
+	if unmapped.IsTestNamespace() {
 		return nil
 	}
 
@@ -277,7 +254,7 @@ func namespaceAttributes() *syscall.SysProcAttr {
 		syscall.CLONE_NEWUSER | syscall.CLONE_NEWNET | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
 	)
 
-	if isUnmappedTestNamespace() {
+	if unmapped.IsTestNamespace() {
 		return &syscall.SysProcAttr{
 			Setpgid:    true,
 			Pdeathsig:  syscall.SIGKILL,

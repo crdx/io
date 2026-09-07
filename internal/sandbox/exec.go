@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"crdx.org/io/internal/sandbox/unmapped"
 	"crdx.org/io/internal/stop"
 	"crdx.org/io/internal/util"
 )
@@ -191,7 +192,7 @@ func Run(ctx context.Context, directory string, command string, policy Policy) (
 		passedEnvironment(policy.Env),
 		append(
 			[]string{envPolicy + "=" + string(encodedPolicy), envCommand + "=" + command},
-			unmappedTestEnvironment()...,
+			unmapped.Environment()...,
 		)...,
 	)
 
