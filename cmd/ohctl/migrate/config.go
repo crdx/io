@@ -79,6 +79,47 @@ var configSteps = map[int]configStep{
 	config.RetiredTpsFormat:        migrateConfigFromVersionSix,
 	config.TurnTimerFormat:         migrateConfigFromVersionSeven,
 	config.OllamaHostFormat:        migrateConfigFromVersionEight,
+	config.ContinueMessageFormat:   migrateConfigFromVersionNine,
+}
+
+func migrateConfigFromVersionNine(data []byte) ([]byte, error) {
+	if _, _, err := readConfigDocument(data); err != nil {
+		return nil, err
+	}
+
+	migratedData := renameTableKey(data, "ui", "stream", "streaming")
+
+	return rewriteConfigVersion(migratedData, config.StreamingNameFormat), nil
+}
+
+func renameTableKey(data []byte, table string, oldKey string, newKey string) []byte {
+	text := string(data)
+	hasFinalNewline := strings.HasSuffix(text, "\n")
+	lines := strings.Split(strings.TrimSuffix(text, "\n"), "\n")
+
+	isInsideTable := false
+
+	for i, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmedLine, "[") {
+			isInsideTable = trimmedLine == "["+table+"]"
+			continue
+		}
+		if !isInsideTable {
+			continue
+		}
+		if found, hasKey := configLineKey(line); hasKey && found == oldKey {
+			lines[i] = rewriteLineKey(line, newKey)
+			break
+		}
+	}
+
+	joinedLines := strings.Join(lines, "\n")
+	if hasFinalNewline {
+		joinedLines += "\n"
+	}
+
+	return []byte(joinedLines)
 }
 
 func migrateConfigFromVersionEight(data []byte) ([]byte, error) {

@@ -10,6 +10,7 @@ import (
 	"github.com/BurntSushi/toml"
 
 	"crdx.org/io/cmd/oh/config"
+	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/ohctl/migrate"
 )
 
@@ -557,5 +558,82 @@ func TestAMissingConfigNeedsNoMigration(t *testing.T) {
 	}
 	if isPresent || from != config.Format {
 		t.Errorf("got present %t from format %d", isPresent, from)
+	}
+}
+
+func TestTheNinthConfigMigrationRenamesTheStreamKey(t *testing.T) {
+	original := `version = 9
+
+[ui]
+stream = "paced" # how an answer is laid out
+
+[bar.top]
+left = [{ segment = "jobs" }]
+`
+	path := configFile(t, original)
+
+	from, isPresent, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isPresent || from != config.ContinueMessageFormat {
+		t.Errorf("got present %t from format %d", isPresent, from)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	written := string(body)
+	for _, expected := range []string{
+		currentVersionLine(),
+		`streaming = "paced" # how an answer is laid out`,
+		`left = [{ segment = "jobs" }]`,
+	} {
+		if !strings.Contains(written, expected) {
+			t.Errorf("migration omitted %q from:\n%s", expected, written)
+		}
+	}
+	if strings.Contains(written, "stream =") {
+		t.Errorf("migration kept the old key in:\n%s", written)
+	}
+
+	loaded, err := config.Load(path)
+	if err != nil {
+		t.Fatalf("migrated config cannot be loaded: %v", err)
+	}
+	if loaded.Ui.StreamingMode != output.StreamingModePaced {
+		t.Errorf("got streaming mode %d after migrating, want paced", loaded.Ui.StreamingMode)
+	}
+
+	backup, err := os.ReadFile(backupPath(path))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(backup) != original {
+		t.Errorf("backup changed:\n%s", backup)
+	}
+}
+
+func TestTheNinthConfigMigrationLeavesAStreamKeyInAnotherTableAlone(t *testing.T) {
+	path := configFile(t, `version = 9
+
+[snippets.stream]
+prompt = "say it"
+
+[ui]
+stream = "asap"
+`)
+
+	if _, _, err := migrate.MigrateConfig(migrate.ConfigOptions{Path: path}); err != nil {
+		t.Fatal(err)
+	}
+
+	body, err := os.ReadFile(path) //nolint:gosec // the test's own path
+	if err != nil {
+		t.Fatal(err)
+	}
+	if written := string(body); !strings.Contains(written, "[snippets.stream]") {
+		t.Errorf("migration disturbed another table in:\n%s", written)
 	}
 }

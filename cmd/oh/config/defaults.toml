@@ -1,4 +1,4 @@
-version = 9
+version = 10
 
 [editor]
 command = []
@@ -7,7 +7,7 @@ command = []
 continue = "yes"
 
 [ui]
-stream = "line"
+streaming = "line"
 
 [tool]
 output = "12K"

@@ -67,7 +67,7 @@ type Ollama struct {
 }
 
 type Ui struct {
-	StreamingMode output.StreamingMode `toml:"stream"`
+	StreamingMode output.StreamingMode `toml:"streaming"`
 }
 
 type Tool struct {

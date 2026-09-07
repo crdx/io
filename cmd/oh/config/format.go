@@ -10,6 +10,7 @@ const (
 	TurnTimerFormat         = 7
 	OllamaHostFormat        = 8
 	ContinueMessageFormat   = 9
+	StreamingNameFormat     = 10
 
-	Format = ContinueMessageFormat
+	Format = StreamingNameFormat
 )

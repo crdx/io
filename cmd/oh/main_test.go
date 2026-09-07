@@ -6247,7 +6247,7 @@ func TestReloadingConfigChangesTheContinueMessage(t *testing.T) {
 
 func TestReloadingConfigChangesTheStreamingModeForTheNextTurn(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	writeLiveConfig(t, path, "[ui]\nstream = \"asap\"\n")
+	writeLiveConfig(t, path, "[ui]\nstreaming = \"asap\"\n")
 
 	self := testConversation(t, &bytes.Buffer{})
 	prepareLiveConfig(t, self, path)
@@ -6255,7 +6255,7 @@ func TestReloadingConfigChangesTheStreamingModeForTheNextTurn(t *testing.T) {
 		t.Fatalf("initial streaming mode is %d, want asap", self.streamingMode)
 	}
 
-	writeLiveConfig(t, path, "[ui]\nstream = \"paced\"\n")
+	writeLiveConfig(t, path, "[ui]\nstreaming = \"paced\"\n")
 	settleLiveConfig(t, self)
 	if self.streamingMode != output.StreamingModePaced {
 		t.Errorf("reloaded streaming mode is %d, want paced", self.streamingMode)

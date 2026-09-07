@@ -653,7 +653,7 @@ func TestEveryStreamingModeIsAccepted(t *testing.T) {
 		"paced": output.StreamingModePaced,
 	} {
 		path := filepath.Join(t.TempDir(), "config.toml")
-		if err := writeConfigFile(path, "[ui]\nstream = \""+name+"\"\n"); err != nil {
+		if err := writeConfigFile(path, "[ui]\nstreaming = \""+name+"\"\n"); err != nil {
 			t.Fatal(err)
 		}
 
@@ -662,14 +662,14 @@ func TestEveryStreamingModeIsAccepted(t *testing.T) {
 			t.Fatal(err)
 		}
 		if config.Ui.StreamingMode != want {
-			t.Errorf("stream = %q read as %d, want %d", name, config.Ui.StreamingMode, want)
+			t.Errorf("streaming = %q read as %d, want %d", name, config.Ui.StreamingMode, want)
 		}
 	}
 }
 
 func TestAnUnknownStreamingModeNamesTheOnesThatExist(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[ui]\nstream = \"instant\"\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\nstreaming = \"instant\"\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -686,7 +686,7 @@ func TestAnUnknownStreamingModeNamesTheOnesThatExist(t *testing.T) {
 
 func TestAStreamingModeThatIsNotTextIsRefused(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := writeConfigFile(path, "[ui]\nstream = 3\n"); err != nil {
+	if err := writeConfigFile(path, "[ui]\nstreaming = 3\n"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -707,7 +707,7 @@ func TestTheStreamingModeDefaultsToWholeLines(t *testing.T) {
 
 func TestAConfigWrittenBeforeTheStreamingModeExistedNeedsNoMigrating(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(path, []byte("version = 9\n[input]\ncontinue = \"go on\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte("version = 10\n[input]\ncontinue = \"go on\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -773,7 +773,7 @@ func TestAToolOutputLimitThatIsNotASizeIsRefused(t *testing.T) {
 
 func TestAConfigWrittenBeforeTheToolOutputLimitExistedNeedsNoMigrating(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(path, []byte("version = 9\n[input]\ncontinue = \"go on\"\n"), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte("version = 10\n[input]\ncontinue = \"go on\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
