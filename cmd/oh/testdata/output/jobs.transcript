@@ -19,12 +19,13 @@ start the docs server, check on it, then stop it
 job: stale job rendering [ok, 1 line, 20B, call_1]
 job: stale status rendering [ok, 1 line, 20B, call_2]
 job: stale output rendering [ok, 3 lines, 137B, call_3]
-job: stale retry rendering [error, 1 line, 37B, call_4]
-job: stale listing rendering [ok, 2 lines, 115B, call_5]
-job: stale stop rendering [ok, 1 line, 26B, call_6]
+job: stale wait rendering [ok, 3 lines, 129B, call_4]
+job: stale retry rendering [error, 1 line, 37B, call_5]
+job: stale listing rendering [ok, 2 lines, 122B, call_6]
+job: stale stop rendering [ok, 1 line, 28B, call_7]
 ```
 
-## Assistant · +13s
+## Assistant · +15s
 
 The docs server ran on `localhost:8080` and is stopped now. The `build` job had already failed with `exit(1)`.
 

@@ -84,6 +84,42 @@ func mustOutput(t *testing.T, manager *Manager, name string) string {
 	return text
 }
 
+func TestWaitingHoldsUntilARunningJobHasFinished(t *testing.T) {
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot be built here: %v", err)
+	}
+
+	runner, shut := openRunner(t)
+	defer shut()
+
+	manager := New(runner)
+	defer func() { _ = manager.Close() }()
+
+	if _, err := manager.Start(t.Context(), "brief", t.TempDir(), "sleep 1; echo over", sandbox.Policy{Env: []string{"PATH"}}); err != nil {
+		t.Fatalf("could not start the job: %v", err)
+	}
+
+	startedAt := time.Now()
+	if err := manager.Wait(t.Context(), "brief"); err != nil {
+		t.Fatalf("the wait failed: %v", err)
+	}
+	elapsed := time.Since(startedAt)
+
+	snapshot, err := manager.Status("brief")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if snapshot.State != StateComplete {
+		t.Errorf("got state %s, want the wait to return only once the job was complete", snapshot.State)
+	}
+	if elapsed < time.Second {
+		t.Errorf("the wait returned after %s, want it to have held for the second the job ran", elapsed)
+	}
+	if !strings.Contains(mustOutput(t, manager, "brief"), "over") {
+		t.Errorf("got %q, want everything the job printed to be there once the wait returns", mustOutput(t, manager, "brief"))
+	}
+}
+
 func TestClosingTheManagerKillsAJobThatIsStillRunning(t *testing.T) {
 	if err := sandbox.Supported(t.Context()); err != nil {
 		t.Skipf("the sandbox cannot be built here: %v", err)

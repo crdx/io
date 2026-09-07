@@ -7900,6 +7900,45 @@ func goldenClockSchedulePass(t *testing.T, format string, span time.Duration) fu
 	}
 }
 
+func goldenJobSchedulePass(t *testing.T, runsFor time.Duration, span time.Duration) func() string {
+	t.Helper()
+
+	return func() string {
+		return drawnOnAStoppedClock(t, func(t *testing.T) string {
+			t.Helper()
+
+			startedAt := time.Now()
+			endsAt := startedAt.Add(runsFor)
+
+			getJobs := func() []jobs.Snapshot {
+				if time.Now().Before(endsAt) {
+					return []jobs.Snapshot{{Name: "check", State: jobs.StateRunning, StartedAt: startedAt}}
+				}
+
+				return []jobs.Snapshot{{
+					Name:      "check",
+					State:     jobs.StateComplete,
+					StartedAt: startedAt,
+					EndedAt:   endsAt,
+				}}
+			}
+
+			built, err := jobNames.New(getJobs, time.Now)(goldenSegmentOptions(""))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			layout := segment.Layout{segment.TopRight: {built}}
+
+			return filmstrip(startedAt, span, 0, func() time.Time {
+				return layout.NextRefresh(segment.Phase{At: time.Now()})
+			}, func() string {
+				return renderBar(layout, segment.TopRight)
+			})
+		})
+	}
+}
+
 func goldenFeedbackSchedulePass(t *testing.T, span time.Duration) func() string {
 	t.Helper()
 
@@ -7960,6 +7999,7 @@ func TestTheRedrawScheduleRunsWhenItRanBefore(t *testing.T) {
 		"clock alone to the minute":                         goldenClockSchedulePass(t, "15:04", 3*time.Minute),
 		"clock alone to the second":                         goldenClockSchedulePass(t, "15:04:05", 3*time.Second),
 		"confirmation feedback ticks down to its dismissal": goldenFeedbackSchedulePass(t, configReloadConfirmationDuration+time.Second),
+		"a finished job lingers on the bar and then goes":   goldenJobSchedulePass(t, 3*time.Second, 40*time.Second),
 	}
 
 	compareWithGolden(t, "schedule", ".ansi", passes)
@@ -8374,7 +8414,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		),
 		"jobs / none": goldenSegmentPass(
 			t,
-			jobNames.New(jobsOf()),
+			jobNames.New(jobsOf(), clockAt(at)),
 			"",
 			segment.Context{},
 		),
@@ -8383,7 +8423,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			jobNames.New(jobsOf(
 				jobs.Snapshot{Name: "docs", State: jobs.StateRunning},
 				jobs.Snapshot{Name: "watch", State: jobs.StateRunning},
-			)),
+			), clockAt(at)),
 			"",
 			segment.Context{},
 		),
@@ -8393,16 +8433,16 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 				jobs.Snapshot{Name: "docs", State: jobs.StateRunning},
 				jobs.Snapshot{Name: "watch", State: jobs.StateRunning},
 				jobs.Snapshot{Name: "api", State: jobs.StateStopping},
-			)),
+			), clockAt(at)),
 			"",
 			segment.Context{},
 		),
-		"jobs / ghosts after a resume": goldenSegmentPass(
+		"jobs / nothing is left of a closed session": goldenSegmentPass(
 			t,
 			jobNames.New(jobsOf(
 				jobs.Snapshot{Name: "docs", State: jobs.StateEnded},
 				jobs.Snapshot{Name: "bridge", State: jobs.StateEnded},
-			)),
+			), clockAt(at)),
 			"",
 			segment.Context{},
 		),
@@ -8410,17 +8450,27 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			t,
 			jobNames.New(jobsOf(
 				jobs.Snapshot{Name: "docs", State: jobs.StateRunning},
-				jobs.Snapshot{Name: "builder", State: jobs.StateComplete},
-			)),
+				jobs.Snapshot{Name: "builder", State: jobs.StateComplete, EndedAt: at.Add(-5 * time.Second)},
+			), clockAt(at)),
+			"",
+			segment.Context{},
+		),
+		"jobs / a ghost whose linger is up": goldenSegmentPass(
+			t,
+			jobNames.New(jobsOf(
+				jobs.Snapshot{Name: "docs", State: jobs.StateRunning},
+				jobs.Snapshot{Name: "builder", State: jobs.StateComplete, EndedAt: at.Add(-time.Minute)},
+				jobs.Snapshot{Name: "check", State: jobs.StateFailed, EndedAt: at.Add(-time.Hour)},
+			), clockAt(at)),
 			"",
 			segment.Context{},
 		),
 		"jobs / failures alone": goldenSegmentPass(
 			t,
 			jobNames.New(jobsOf(
-				jobs.Snapshot{Name: "builder", State: jobs.StateFailed},
-				jobs.Snapshot{Name: "api", State: jobs.StateFailed},
-			)),
+				jobs.Snapshot{Name: "builder", State: jobs.StateFailed, EndedAt: at.Add(-time.Second)},
+				jobs.Snapshot{Name: "api", State: jobs.StateFailed, EndedAt: at.Add(-2 * time.Second)},
+			), clockAt(at)),
 			"",
 			segment.Context{},
 		),
@@ -8428,8 +8478,8 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			t,
 			jobNames.New(jobsOf(
 				jobs.Snapshot{Name: "docs", State: jobs.StateRunning},
-				jobs.Snapshot{Name: "builder", State: jobs.StateFailed},
-			)),
+				jobs.Snapshot{Name: "builder", State: jobs.StateFailed, EndedAt: at.Add(-time.Second)},
+			), clockAt(at)),
 			"",
 			segment.Context{},
 		),

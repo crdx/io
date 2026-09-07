@@ -159,6 +159,34 @@ Go has a new release. \e[38;2;129;162;190mSource\e[0m\e[38;2;150;152;150m (https
 \e[38;2;204;102;102mError\e[0m
 \e[38;2;204;102;102mweb fetch failed with status 404: page not found\e[0m
 
+=== job wait on a job that finished ===
+\e[38;2;207;173;0mjob\e[0m
+
+{
+    "action": \e[38;2;181;189;104m"wait"\e[0m,
+    "name": \e[38;2;181;189;104m"check"\e[0m,
+    "command": \e[38;2;181;189;104m""\e[0m
+}
+
+check: complete, ran for 37s
+ok  crdx.org/io
+lint1  ✓
+
+
+=== job wait that gave up on a job still running ===
+\e[38;2;207;173;0mjob\e[0m
+
+{
+    "action": \e[38;2;181;189;104m"wait"\e[0m,
+    "name": \e[38;2;181;189;104m"docs"\e[0m,
+    "command": \e[38;2;181;189;104m""\e[0m
+}
+
+docs: running, up 5m05s
+note: the wait gave up after 5m00s, and the job is still running.
+Serving HTTP on localhost port 8080 ...
+
+
 === title ===
 \e[38;2;207;173;0mtitle\e[0m · \e[38;2;192;128;80mrender-useful-results\e[0m
 

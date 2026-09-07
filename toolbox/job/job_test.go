@@ -110,6 +110,17 @@ func TestStartingAnUnknownNameWithNoCommandIsRefused(t *testing.T) {
 	}
 }
 
+func TestWaitingOnAFinishedJobReportsItAtOnce(t *testing.T) {
+	output, err := run(t, withFinishedJobs(t), map[string]string{"action": "wait", "name": "build"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.HasPrefix(output, "build: failed") {
+		t.Errorf("got %q, want the job reported without any waiting at all", output)
+	}
+}
+
 func TestAnUnknownActionIsRefused(t *testing.T) {
 	_, err := run(t, jobs.New(nil), map[string]string{"action": "frobnicate", "name": "docs"})
 	if err == nil || !strings.Contains(err.Error(), "wants to be one of") {
@@ -118,7 +129,7 @@ func TestAnUnknownActionIsRefused(t *testing.T) {
 }
 
 func TestEveryActionButListAndPruneNeedsAName(t *testing.T) {
-	for _, action := range []string{"status", "output", "stop", "discard", "start"} {
+	for _, action := range []string{"status", "output", "wait", "stop", "discard", "start"} {
 		if _, err := run(t, jobs.New(nil), map[string]string{"action": action}); err == nil ||
 			!strings.Contains(err.Error(), "name is required") {
 			t.Errorf("%s gave %v, want it to ask for a name", action, err)

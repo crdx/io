@@ -83,6 +83,8 @@ func TestAnInstalledFilterRefusesTheFamiliesItNames(t *testing.T) {
 
 	isUnixSocketScoped := os.Getenv(unixSocketsVariable) != ""
 
+	requireNoOuterSocketFilter(t, unix.AF_PACKET, unix.AF_NETLINK, unix.AF_INET, unix.AF_UNIX)
+
 	if err := applySeccomp(isUnixSocketScoped); err != nil {
 		t.Fatalf("could not install the filter: %v", err)
 	}
@@ -114,6 +116,8 @@ func TestAFilterWithoutUnixSocketIsolationRefusesThemOutright(t *testing.T) {
 		runAgainInChildProcess(t)
 		return
 	}
+
+	requireNoOuterSocketFilter(t, unix.AF_UNIX)
 
 	if err := applySeccomp(false); err != nil {
 		t.Fatalf("could not install the filter: %v", err)
@@ -208,5 +212,25 @@ func TestAnInstalledFilterRefusesTheX32ABI(t *testing.T) {
 	}
 	if errno != unix.ENOSYS {
 		t.Errorf("an x32 syscall got fd %d and %v, want the filter's refusal", fd, errno)
+	}
+}
+
+func requireNoOuterSocketFilter(t *testing.T, families ...int) {
+	t.Helper()
+
+	for _, family := range families {
+		descriptor, err := unix.Socket(family, unix.SOCK_DGRAM, 0)
+		if err == nil {
+			_ = unix.Close(descriptor)
+			continue
+		}
+
+		if errors.Is(err, unix.EAFNOSUPPORT) {
+			t.Skipf(
+				"family %d is already refused before this test installs anything, "+
+					"so an outer filter has decided it and a stacked one can only narrow further",
+				family,
+			)
+		}
 	}
 }

@@ -54,13 +54,15 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫\e[0m\e[38;
 \e[38;2;150;152;150m\e[0m
 === jobs / a ghost beside a live job ===
 \e[38;2;129;162;190m● docs\e[0m \e[38;2;150;152;150m○ builder\e[0m
+=== jobs / a ghost whose linger is up ===
+\e[38;2;129;162;190m● docs\e[0m
 === jobs / failures alone ===
 \e[38;2;204;102;102m✗ builder\e[0m \e[38;2;204;102;102m✗ api\e[0m
 === jobs / failures beside those running ===
 \e[38;2;129;162;190m● docs\e[0m \e[38;2;204;102;102m✗ builder\e[0m
-=== jobs / ghosts after a resume ===
-\e[38;2;150;152;150m○ docs\e[0m \e[38;2;150;152;150m○ bridge\e[0m
 === jobs / none ===
+
+=== jobs / nothing is left of a closed session ===
 
 === jobs / one being stopped among those running ===
 \e[38;2;129;162;190m● docs\e[0m \e[38;2;129;162;190m● watch\e[0m \e[38;2;207;173;0m● api\e[0m

@@ -1,0 +1,137 @@
+package job
+
+import (
+	"context"
+	"errors"
+	"io"
+	"strings"
+	"syscall"
+	"testing"
+	"time"
+
+	"crdx.org/io/internal/jobs"
+	"crdx.org/io/internal/sandbox"
+)
+
+func TestAWaitReportsTheJobAndItsOutputOnceItHasEnded(t *testing.T) {
+	manager := jobs.New(endingRunner{after: 50 * time.Millisecond, output: "all done\n"})
+	defer func() { _ = manager.Close() }()
+
+	if _, err := manager.Start(t.Context(), "build", t.TempDir(), "just build", sandbox.Policy{}); err != nil {
+		t.Fatal(err)
+	}
+
+	report, err := waited(t.Context(), manager, "build", time.Minute)
+	if err != nil {
+		t.Fatalf("the wait failed: %v", err)
+	}
+
+	if !strings.Contains(report, "build: complete") || !strings.Contains(report, "all done") {
+		t.Errorf("got %q, want the finished job described with what it printed", report)
+	}
+}
+
+func TestAWaitOnAJobThatKeepsRunningGivesUpAndSaysSo(t *testing.T) {
+	manager := jobs.New(endingRunner{after: time.Hour, output: "serving\n"})
+	defer func() { _ = manager.Close() }()
+
+	if _, err := manager.Start(t.Context(), "docs", t.TempDir(), "python3 -m http.server", sandbox.Policy{}); err != nil {
+		t.Fatal(err)
+	}
+
+	report, err := waited(t.Context(), manager, "docs", 100*time.Millisecond)
+	if err != nil {
+		t.Fatalf("the wait failed: %v", err)
+	}
+
+	if !strings.Contains(report, "docs: running") {
+		t.Errorf("got %q, want the job still described as running", report)
+	}
+	if !strings.Contains(report, "the wait gave up after 0.1s") {
+		t.Errorf("got %q, want it to say how long it waited", report)
+	}
+	if !strings.Contains(report, "serving") {
+		t.Errorf("got %q, want what the job has printed so far", report)
+	}
+}
+
+func TestAWaitEndsWhenTheTurnDoes(t *testing.T) {
+	manager := jobs.New(endingRunner{after: time.Hour})
+	defer func() { _ = manager.Close() }()
+
+	if _, err := manager.Start(t.Context(), "docs", t.TempDir(), "python3 -m http.server", sandbox.Policy{}); err != nil {
+		t.Fatal(err)
+	}
+
+	turn, endTurn := context.WithCancel(t.Context())
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		endTurn()
+	}()
+
+	if _, err := waited(turn, manager, "docs", time.Hour); !errors.Is(err, context.Canceled) {
+		t.Errorf("got %v, want the wait to end with the turn that asked for it", err)
+	}
+}
+
+func TestAWaitOnAnUnknownJobSaysSo(t *testing.T) {
+	if _, err := waited(t.Context(), jobs.New(nil), "ghost", time.Minute); !errors.Is(err, jobs.ErrNotFound) {
+		t.Errorf("got %v, want the job not to be found", err)
+	}
+}
+
+type endingRunner struct {
+	after  time.Duration
+	output string
+}
+
+func (endingRunner) Run(
+	context.Context,
+	string,
+	string,
+	sandbox.Policy,
+) (sandbox.Result, error) {
+	return sandbox.Result{}, errors.New("nothing is run outright here")
+}
+
+func (self endingRunner) Start(
+	_ context.Context,
+	_ string,
+	_ string,
+	_ sandbox.Policy,
+	output sandbox.Output,
+) (sandbox.Command, error) {
+	if self.output != "" {
+		_, _ = io.WriteString(output, self.output)
+	}
+
+	return &endingCommand{over: time.After(self.after), stopped: make(chan struct{})}, nil
+}
+
+type endingCommand struct {
+	over    <-chan time.Time
+	stopped chan struct{}
+}
+
+func (self *endingCommand) Wait() (sandbox.Result, error) {
+	select {
+	case <-self.over:
+	case <-self.stopped:
+	}
+
+	return sandbox.Result{}, nil
+}
+
+func (self *endingCommand) Signal(syscall.Signal) error {
+	self.Stop()
+
+	return nil
+}
+
+func (self *endingCommand) Stop() {
+	select {
+	case <-self.stopped:
+	default:
+		close(self.stopped)
+	}
+}

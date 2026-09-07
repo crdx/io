@@ -54,13 +54,15 @@ feature/bars
 
 === jobs / a ghost beside a live job ===
 ● docs ○ builder
+=== jobs / a ghost whose linger is up ===
+● docs
 === jobs / failures alone ===
 ✗ builder ✗ api
 === jobs / failures beside those running ===
 ● docs ✗ builder
-=== jobs / ghosts after a resume ===
-○ docs ○ bridge
 === jobs / none ===
+
+=== jobs / nothing is left of a closed session ===
 
 === jobs / one being stopped among those running ===
 ● docs ● watch ● api

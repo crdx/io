@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/toolbox/edit"
 	"crdx.org/io/toolbox/find"
 	"crdx.org/io/toolbox/grep"
+	"crdx.org/io/toolbox/job"
 	"crdx.org/io/toolbox/ls"
 	"crdx.org/io/toolbox/notify"
 	"crdx.org/io/toolbox/read"
@@ -136,6 +137,18 @@ func TestToolResultsRenderForTheUser(t *testing.T) {
 			name: "web fetch failure",
 			exchange: resultExchange("web_fetch", web.FetchArgs{URL: "https://example.test/missing", Type: "text"}, agent.ErrorStatus,
 				"web fetch failed with status 404: page not found"),
+		},
+		{
+			name: "job wait on a job that finished",
+			exchange: resultExchange("job", job.Args{Action: "wait", Name: "check"}, agent.SuccessStatus,
+				"check: complete, ran for 37s\nok  crdx.org/io\nlint1  \u2713\n"),
+		},
+		{
+			name: "job wait that gave up on a job still running",
+			exchange: resultExchange("job", job.Args{Action: "wait", Name: "docs"}, agent.SuccessStatus,
+				"docs: running, up 5m05s\n"+
+					"note: the wait gave up after 5m00s, and the job is still running.\n"+
+					"Serving HTTP on localhost port 8080 ...\n"),
 		},
 		{
 			name: "title",

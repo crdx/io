@@ -157,6 +157,8 @@ func (self *Manager) Start(
 	running, err := self.runner.Start(context.WithoutCancel(ctx), directory, command, policy, opening.output)
 	if err != nil {
 		self.conclude(opening, StateFailed, 0, err.Error())
+		close(opening.over)
+
 		return self.snapshot(opening), fmt.Errorf("the job could not be started: %w", err)
 	}
 
@@ -207,6 +209,28 @@ func (self *Manager) Output(name string) (string, Snapshot, error) {
 	}
 
 	return found.output.String(), self.snapshot(found), nil
+}
+
+func (self *Manager) Wait(ctx context.Context, name string) error {
+	self.mutex.Lock()
+	found, isKnown := self.jobs[name]
+	isWaitable := isKnown && isLive(found.state)
+	self.mutex.Unlock()
+
+	if !isKnown {
+		return ErrNotFound
+	}
+
+	if !isWaitable {
+		return nil
+	}
+
+	select {
+	case <-found.over:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
 
 func (self *Manager) List() []Snapshot {

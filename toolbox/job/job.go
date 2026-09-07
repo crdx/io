@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/jobs"
@@ -18,17 +19,30 @@ const (
 	actionStart   = "start"
 	actionStatus  = "status"
 	actionOutput  = "output"
+	actionWait    = "wait"
 	actionStop    = "stop"
 	actionList    = "list"
 	actionDiscard = "discard"
 	actionPrune   = "prune"
 )
 
-var actions = []string{actionStart, actionStatus, actionOutput, actionStop, actionDiscard, actionPrune, actionList}
+const waitLimit = 5 * time.Minute
+
+var actions = []string{
+	actionStart,
+	actionStatus,
+	actionOutput,
+	actionWait,
+	actionStop,
+	actionDiscard,
+	actionPrune,
+	actionList,
+}
 
 const description = "start and manage a long-running command that outlives the call which started it, " +
 	"and which every later bash call can reach on 127.0.0.1; " +
-	"a job is killed when the session ends, and holds the permissions it was started with"
+	"a job is killed when the session ends, and holds the permissions it was started with; " +
+	"wait blocks until a job ends and reports it, rather than sleeping for a guessed duration"
 
 type Args struct {
 	Action  string `json:"action"`
@@ -141,6 +155,9 @@ func act(
 
 		return withOutput(snapshot.Describe(), output, snapshot.DroppedBytes), nil
 
+	case actionWait:
+		return waited(ctx, manager, args.Name, waitLimit)
+
 	case actionDiscard:
 		discardedJob, err := manager.Discard(args.Name)
 		if err != nil {
@@ -168,6 +185,31 @@ func act(
 	default:
 		return listing(manager.List()), nil
 	}
+}
+
+func waited(ctx context.Context, manager *jobs.Manager, name string, limit time.Duration) (string, error) {
+	waiting, stopWaiting := context.WithTimeout(ctx, limit)
+	defer stopWaiting()
+
+	err := manager.Wait(waiting, name)
+	if err != nil && (ctx.Err() != nil || !errors.Is(err, context.DeadlineExceeded)) {
+		return "", err
+	}
+
+	output, snapshot, err := manager.Output(name)
+	if err != nil {
+		return "", err
+	}
+
+	status := snapshot.Describe()
+	if snapshot.IsLive() {
+		status += fmt.Sprintf(
+			"\nnote: the wait gave up after %s, and the job is still running.",
+			util.CompactDuration(limit),
+		)
+	}
+
+	return withOutput(status, output, snapshot.DroppedBytes), nil
 }
 
 func withOutput(status string, output string, droppedBytes int) string {

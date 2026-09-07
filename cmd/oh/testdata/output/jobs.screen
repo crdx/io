@@ -7,6 +7,7 @@
 job python3 -m http.server 8080 … ✓ 1L
 job docs status ✓ 1L
 job docs output ✓ 3L
+job docs wait ✓ 3L
 job python3 -m … ✗ 1L a job of that n…
 job list ✓ 2L
 job docs stop ✓ 1L
@@ -94,6 +95,7 @@ p
 i
 
 t
+
 
 
 
@@ -198,6 +200,7 @@ t
 job python3 -m http.server 8080 --bind localhost docs ✓ 1L
 job docs status ✓ 1L
 job docs output ✓ 3L
+job docs wait ✓ 3L
 job python3 -m http.server 8080 docs ✗ 1L a job of that name is already running
 job list ✓ 2L
 job docs stop ✓ 1L
@@ -216,6 +219,7 @@ exit(1).
 
 job … ✓ 1L
 job … ✓ 1L
+job … ✓ 3L
 job … ✓ 3L
 j… ✗ 1L a…
 job ✓ 2L
@@ -240,6 +244,7 @@ exit(1).
 job python3 -m http.server 8080 --bind localhost docs ✓ 1L
 job docs status ✓ 1L
 job docs output ✓ 3L
+job docs wait ✓ 3L
 job python3 -m http.server 8080 docs ✗ 1L a job of that name is already running
 job list ✓ 2L
 job docs stop ✓ 1L

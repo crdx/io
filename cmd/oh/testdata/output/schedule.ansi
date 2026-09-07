@@ -1,3 +1,9 @@
+=== a finished job lingers on the bar and then goes ===
+      +1s  \e[38;2;129;162;190m● check\e[0m
+      +2s  \e[38;2;129;162;190m● check\e[0m
+      +3s  \e[38;2;150;152;150m○ check\e[0m
+     +33s  
+
 === clock alone to the minute ===
     +1m0s  \e[38;2;150;152;150m00:01\e[0m
     +2m0s  \e[38;2;150;152;150m00:02\e[0m

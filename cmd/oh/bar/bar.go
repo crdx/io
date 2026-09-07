@@ -93,7 +93,7 @@ func NewRegistry(options Options) segment.Registry {
 		turnTimerSegment:      turnTimer.New(options.Sources.GetTurnTiming, options.Sources.IsTurnRunning),
 		turnCountSegment:      turnCount.New(options.Sources.GetTurnCount),
 		gitBranchSegment:      gitBranch.New(options.Workspace.GetDir()),
-		jobNamesSegment:       jobNames.New(options.Sources.GetJobs),
+		jobNamesSegment:       jobNames.New(options.Sources.GetJobs, time.Now),
 		subUsageSegment: subUsage.New(subUsage.Settings{
 			Reporter:         options.UsageReporter,
 			CachePath:        options.UsageCachePath,
