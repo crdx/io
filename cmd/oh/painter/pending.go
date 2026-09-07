@@ -6,6 +6,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/style"
@@ -123,6 +124,10 @@ func HarnessNotice(event agent.Event) (string, bool) {
 	switch event.Kind {
 	case caps.ModeChange:
 		return caps.ModeNotice(event)
+	case caps.JobStop:
+		return caps.JobStopNotice(event)
+	case jobrecord.EndedWithSession:
+		return jobrecord.EndedWithSessionNotice(event)
 	case pathgrant.Change:
 		return pathgrant.Notice(event)
 	case turn.HarnessPoke:

@@ -12,6 +12,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/jobs"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sandbox/keeper"
 	"crdx.org/io/tool/middleware/truncate"
@@ -61,6 +62,7 @@ var completableToolNames = []string{
 	"write",
 	"edit",
 	"bash",
+	"job",
 	"notify",
 	title.Name,
 	"web_search",
@@ -414,12 +416,15 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		args.Message = startup.JoinPrompt(initialFilesMessage, args.Message)
 	}
 
-	sandboxRunner, closeKeeper, keeperRefusal := openRunner(ctx, args.Yolo)
+	sandboxRunner, jobManager, closeKeeper, keeperRefusal := openRunner(ctx, args.Yolo)
 	defer closeKeeper()
 
+	if jobManager != nil {
+		defer func() { _ = jobManager.Close() }()
+	}
 	if keeperRefusal != nil {
 		_, _ = fmt.Fprintln(notices, style.Change(
-			"commands cannot reach one another: "+keeperRefusal.Error(),
+			"background jobs are unavailable, and commands cannot reach one another: "+keeperRefusal.Error(),
 		))
 	}
 
@@ -436,6 +441,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			CurrentCaps: args.Caps,
 			ExtraPaths:  settings.Sandbox,
 			Skills:      availableSkills,
+			JobsGranted: jobManager != nil,
 			Yolo:        args.Yolo,
 		})
 		if err != nil {
@@ -476,6 +482,12 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	shellTool := shell.New(workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo, sandboxRunner)
 
 	toolboxTools = append(toolboxTools, shellTool)
+
+	if jobManager != nil {
+		toolboxTools = append(toolboxTools, shell.NewJob(
+			jobManager, workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo,
+		))
+	}
 	if notify.IsAvailable() {
 		toolboxTools = append(toolboxTools, notify.New(screen.WriteEscape))
 	}
@@ -502,10 +514,19 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		Editor:           editorConfiguration,
 		Output:           os.Stdout,
 		PathGrants: commands.PathGrants{
-			Grant:      pathGrants.Grant,
-			Revoke:     pathGrants.Revoke,
+			Grant: pathGrants.Grant,
+			Revoke: func(path string) (agent.Event, error) {
+				event, err := pathGrants.Revoke(path)
+				if err != nil {
+					return event, err
+				}
+				chat.stopJobsHoldingPath(path)
+
+				return event, nil
+			},
 			GetCurrent: pathGrants.GetCurrent,
 		},
+		Jobs: managedJobs(jobManager),
 		Session: commands.Session{
 			Name:           log.Name(),
 			ID:             log.ID(),
@@ -551,6 +572,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		workspace:           workspace,
 		mode:                mode,
 		pathGrants:          pathGrants,
+		jobs:                jobManager,
 		configObserver:      configObserver,
 		startedAt:           time.Now(),
 		keyboard:            keyboard,
@@ -636,15 +658,39 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	return "", nil
 }
 
-func openRunner(ctx context.Context, isYolo bool) (sandbox.Runner, func(), error) {
+func openRunner(ctx context.Context, isYolo bool) (sandbox.Runner, *jobs.Manager, func(), error) {
 	if isYolo {
-		return sandbox.Direct(), func() {}, nil
+		return sandbox.Direct(), nil, func() {}, nil
 	}
 
 	keeperProcess, err := keeper.Open(ctx)
 	if err != nil {
-		return sandbox.Direct(), func() {}, err
+		return sandbox.Direct(), nil, func() {}, err
 	}
 
-	return sandbox.In(keeperProcess), func() { _ = keeperProcess.Close() }, nil
+	runner := sandbox.In(keeperProcess)
+
+	return runner, jobs.New(runner), func() { _ = keeperProcess.Close() }, nil
+}
+
+func managedJobs(manager *jobs.Manager) commands.Jobs {
+	if manager == nil {
+		return commands.Jobs{}
+	}
+
+	return commands.Jobs{
+		List:   manager.List,
+		Status: manager.Status,
+		Output: manager.Output,
+		Stop: func(name string) (agent.Event, error) {
+			snapshot, err := manager.Stop(name)
+			if err != nil {
+				return agent.Event{}, err
+			}
+
+			return caps.JobStoppedByUserEvent(snapshot.Name), nil
+		},
+		Discard:       manager.Discard,
+		PruneFinished: manager.PruneFinished,
+	}
 }

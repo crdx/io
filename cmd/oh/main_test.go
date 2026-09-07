@@ -54,6 +54,7 @@ import (
 	"crdx.org/io/cmd/oh/feedback"
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/interrupt"
+	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/location"
@@ -71,6 +72,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
+	"crdx.org/io/cmd/oh/segment/jobNames"
 	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/pathGrants"
@@ -98,6 +100,7 @@ import (
 	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/internal/auth"
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/jobs"
 	"crdx.org/io/internal/req"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sim"
@@ -115,6 +118,7 @@ import (
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/bash"
+	"crdx.org/io/toolbox/job"
 	"crdx.org/io/toolbox/notify"
 	"crdx.org/io/toolbox/read"
 	"crdx.org/io/toolbox/title"
@@ -3202,6 +3206,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"default-bar":           {".ansi", ".screen"},
 		"feedback":              {".ansi", ".screen", ".txt"},
 		"context":               {".prompt"},
+		"context-jobs":          {".prompt"},
 		"context-yolo":          {".prompt"},
 		"inputblock":            {".ansi", ".screen"},
 		"legacy-alt-enter":      {".ansi", ".screen"},
@@ -4912,15 +4917,24 @@ func TestPick(t *testing.T) {
 	screen.End()
 }
 
+type promptGolden struct {
+	isYolo       bool
+	areJobsGiven bool
+}
+
 func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
-	for name, isYolo := range map[string]bool{"context": false, "context-yolo": true} {
+	for name, shape := range map[string]promptGolden{
+		"context":      {},
+		"context-yolo": {isYolo: true},
+		"context-jobs": {areJobsGiven: true},
+	} {
 		t.Run(name, func(t *testing.T) {
-			compareSystemPromptWithGolden(t, name, isYolo)
+			compareSystemPromptWithGolden(t, name, shape)
 		})
 	}
 }
 
-func compareSystemPromptWithGolden(t *testing.T, name string, isYolo bool) {
+func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden) {
 	t.Helper()
 
 	workspaceDirectory := t.TempDir()
@@ -4957,7 +4971,8 @@ func compareSystemPromptWithGolden(t *testing.T, name string, isYolo bool) {
 			Description: "Exercise complete prompt assembly.",
 			Location:    "/skills/golden/SKILL.md",
 		}},
-		Yolo: isYolo,
+		JobsGranted: shape.areJobsGiven,
+		Yolo:        shape.isYolo,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -5464,6 +5479,11 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 			sandbox.Direct(),
 		),
 		notify.New(screen.WriteEscape),
+		job.New(
+			jobs.New(sandbox.Direct()),
+			files,
+			func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
+		),
 	)
 	tools = append(tools, web.New(func() bool { return true }, sessionGoldenSearcher{})...)
 	log := testLog(t)
@@ -7470,6 +7490,10 @@ func clockAt(at time.Time) func() time.Time {
 	return func() time.Time { return at }
 }
 
+func jobsOf(listing ...jobs.Snapshot) func() []jobs.Snapshot {
+	return func() []jobs.Snapshot { return listing }
+}
+
 func goldenSchedulePass(t *testing.T, isRunning bool, workPerPass time.Duration, span time.Duration) func() string {
 	t.Helper()
 
@@ -8014,6 +8038,67 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"fast-mode / standard": goldenSegmentPass(
 			t,
 			fastMode.New(false),
+			"",
+			segment.Context{},
+		),
+		"jobs / none": goldenSegmentPass(
+			t,
+			jobNames.New(jobsOf()),
+			"",
+			segment.Context{},
+		),
+		"jobs / running": goldenSegmentPass(
+			t,
+			jobNames.New(jobsOf(
+				jobs.Snapshot{Name: "docs", State: jobs.StateRunning},
+				jobs.Snapshot{Name: "watch", State: jobs.StateRunning},
+			)),
+			"",
+			segment.Context{},
+		),
+		"jobs / one being stopped among those running": goldenSegmentPass(
+			t,
+			jobNames.New(jobsOf(
+				jobs.Snapshot{Name: "docs", State: jobs.StateRunning},
+				jobs.Snapshot{Name: "watch", State: jobs.StateRunning},
+				jobs.Snapshot{Name: "api", State: jobs.StateStopping},
+			)),
+			"",
+			segment.Context{},
+		),
+		"jobs / ghosts after a resume": goldenSegmentPass(
+			t,
+			jobNames.New(jobsOf(
+				jobs.Snapshot{Name: "docs", State: jobs.StateEnded},
+				jobs.Snapshot{Name: "bridge", State: jobs.StateEnded},
+			)),
+			"",
+			segment.Context{},
+		),
+		"jobs / a ghost beside a live job": goldenSegmentPass(
+			t,
+			jobNames.New(jobsOf(
+				jobs.Snapshot{Name: "docs", State: jobs.StateRunning},
+				jobs.Snapshot{Name: "builder", State: jobs.StateComplete},
+			)),
+			"",
+			segment.Context{},
+		),
+		"jobs / failures alone": goldenSegmentPass(
+			t,
+			jobNames.New(jobsOf(
+				jobs.Snapshot{Name: "builder", State: jobs.StateFailed},
+				jobs.Snapshot{Name: "api", State: jobs.StateFailed},
+			)),
+			"",
+			segment.Context{},
+		),
+		"jobs / failures beside those running": goldenSegmentPass(
+			t,
+			jobNames.New(jobsOf(
+				jobs.Snapshot{Name: "docs", State: jobs.StateRunning},
+				jobs.Snapshot{Name: "builder", State: jobs.StateFailed},
+			)),
 			"",
 			segment.Context{},
 		),
@@ -12468,5 +12553,172 @@ func startsABlock(line string, previous string) bool {
 		return !strings.HasPrefix(trimmedPrevious, "- ")
 	default:
 		return false
+	}
+}
+
+type stoppableCommand struct {
+	outcome chan sandbox.Result
+}
+
+func (self stoppableCommand) Wait() (sandbox.Result, error) { return <-self.outcome, nil }
+func (self stoppableCommand) Signal(syscall.Signal) error   { return nil }
+func (self stoppableCommand) Stop()                         { self.outcome <- sandbox.Result{Code: 137} }
+
+type stoppableRunner struct{}
+
+func (stoppableRunner) Run(
+	context.Context,
+	string,
+	string,
+	sandbox.Policy,
+) (sandbox.Result, error) {
+	return sandbox.Result{}, nil
+}
+
+func (stoppableRunner) Start(
+	context.Context,
+	string,
+	string,
+	sandbox.Policy,
+	sandbox.Output,
+) (sandbox.Command, error) {
+	return stoppableCommand{outcome: make(chan sandbox.Result, 2)}, nil
+}
+
+func appWithOneWritableJob(t *testing.T) *App {
+	t.Helper()
+
+	manager := jobs.New(stoppableRunner{})
+	t.Cleanup(func() { _ = manager.Close() })
+
+	self := &App{
+		screen:    output.New(&bytes.Buffer{}),
+		mode:      caps.NewMode(caps.Read | caps.Write),
+		jobs:      manager,
+		workspace: work.At("/workspace"),
+	}
+
+	policy := sandbox.Policy{Write: []string{"/workspace"}}
+	if _, err := manager.Start(t.Context(), "web", ".", "webd", policy); err != nil {
+		t.Fatalf("the job did not start: %v", err)
+	}
+
+	return self
+}
+
+func TestAWithdrawalIsAnnouncedBeforeTheJobsItStopped(t *testing.T) {
+	self := appWithOneWritableJob(t)
+
+	self.toggleCap(caps.Write)
+
+	notices := self.pending.notices()
+	if len(notices) != 2 {
+		t.Fatalf("got %d notices, want the change and the job it stopped: %v", len(notices), notices)
+	}
+	if !strings.Contains(notices[0], "workspace is now read-only") {
+		t.Errorf("got %q first, want the change that caused the stop", notices[0])
+	}
+	if !strings.Contains(notices[1], "job web was stopped") {
+		t.Errorf("got %q second, want the job it stopped", notices[1])
+	}
+}
+
+func TestGrantingACapabilityBackStopsNothing(t *testing.T) {
+	self := appWithOneWritableJob(t)
+
+	self.toggleCap(caps.Write)
+	self.toggleCap(caps.Write)
+
+	for _, notice := range self.pending.notices() {
+		if strings.Contains(notice, "read-write") && strings.Contains(notice, "stopped") {
+			t.Errorf("granting a capability stopped a job: %q", notice)
+		}
+	}
+}
+
+func TestAModeChangeThatStoppedAJobIsNotTakenBack(t *testing.T) {
+	self := appWithOneWritableJob(t)
+
+	self.toggleCap(caps.Write)
+	self.toggleCap(caps.Write)
+
+	notices := self.pending.notices()
+	if len(notices) != 3 {
+		t.Fatalf("got %d notices, want both changes and the stop: %v", len(notices), notices)
+	}
+	if !strings.Contains(notices[2], "workspace is now read-write") {
+		t.Errorf("got %q last, want the capability being granted again", notices[2])
+	}
+}
+
+func TestAModeChangeThatStoppedNothingIsStillTakenBack(t *testing.T) {
+	self := &App{screen: output.New(&bytes.Buffer{}), mode: caps.NewMode(caps.Read | caps.Write)}
+
+	self.toggleCap(caps.Write)
+	self.toggleCap(caps.Write)
+
+	if len(self.pending.items) != 0 {
+		t.Errorf("a mode change with no consequence was not taken back: %v", self.pending.items)
+	}
+}
+
+func TestRemovingTheLastJobIsRecordedSoAResumeDoesNotBringItBack(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = log.Close() }()
+
+	manager := jobs.New(nil)
+	manager.Restore([]jobs.Snapshot{{Name: "docs", Command: "python3", State: jobs.StateFailed}})
+
+	self := &App{
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
+		jobs:     manager,
+	}
+
+	self.recordJobListing()
+	manager.PruneFinished()
+	self.recordJobListing()
+
+	restored, wasRecorded := jobrecord.LastRecorded(self.events)
+	if !wasRecorded {
+		t.Fatal("nothing was recorded at all")
+	}
+	if len(restored) != 0 {
+		t.Errorf("got %#v, want the emptied listing recorded so a resume restores nothing", restored)
+	}
+}
+
+func TestPruningRightAfterAResumeIsStillRecorded(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = log.Close() }()
+
+	manager := jobs.New(nil)
+	self := &App{
+		agent:    agent.New("", quietProvider{}, nil),
+		screen:   output.New(&bytes.Buffer{}),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.Read | caps.Write),
+		jobs:     manager,
+	}
+
+	self.restoreJobs([]agent.Event{
+		jobrecord.ListingEvent([]jobs.Snapshot{{Name: "docs", Command: "python3", State: jobs.StateFailed}}),
+	})
+	manager.PruneFinished()
+	self.recordJobListing()
+
+	restored, wasRecorded := jobrecord.LastRecorded(self.events)
+	if !wasRecorded || len(restored) != 0 {
+		t.Errorf("got %#v (recorded %v), want the emptied listing recorded", restored, wasRecorded)
 	}
 }

@@ -16,10 +16,12 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/internal/file"
+	"crdx.org/io/internal/jobs"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/tool"
 	"crdx.org/io/toolbox/bash"
+	"crdx.org/io/toolbox/job"
 )
 
 const (
@@ -338,28 +340,92 @@ func New(
 	runner sandbox.Runner,
 ) tool.Tool {
 	fresh := func(ctx context.Context) (sandbox.Policy, error) {
-		currentCaps := mode.Current()
+		return freshPolicy(ctx, workspaceDir, homeDir, tmpDir, pathAccess, mode, isYolo)
+	}
 
-		if !currentCaps.Has(caps.Shell) {
-			return sandbox.Policy{}, ErrWithheld
-		}
+	return bash.New(files, fresh, runner)
+}
 
-		if isYolo {
-			return YoloPolicy(homeDir, tmpDir), nil
-		}
-
-		policy, err := createPolicy(ctx, workspaceDir, homeDir, tmpDir, pathAccess.GetPaths(), currentCaps)
+func NewJob(
+	manager *jobs.Manager,
+	workspaceDir string,
+	homeDir string,
+	tmpDir string,
+	pathAccess *PathAccess,
+	mode *caps.Mode,
+	files *file.Root,
+	isYolo bool,
+) tool.Tool {
+	fresh := func(ctx context.Context) (sandbox.Policy, error) {
+		policy, err := freshPolicy(ctx, workspaceDir, homeDir, tmpDir, pathAccess, mode, isYolo)
 		if err != nil {
-			if ctx.Err() != nil {
-				return policy, ctx.Err()
-			}
-			return policy, fmt.Errorf("the shell cannot be confined: %w", err)
+			return policy, err
 		}
+
+		policy.Timeout = 0
+		policy.CPUTime = 0
 
 		return policy, nil
 	}
 
-	return bash.New(files, fresh, runner)
+	return job.New(manager, files, fresh)
+}
+
+func StoppedBy(withdrawnCaps caps.Set, workspaceDir string) (func(sandbox.Policy) bool, bool) {
+	if withdrawnCaps.Has(caps.Shell) {
+		return func(sandbox.Policy) bool { return true }, true
+	}
+
+	if withdrawnCaps.Has(caps.Write) || withdrawnCaps.Has(caps.Git) {
+		return StoppedByWritablePath(workspaceDir), true
+	}
+
+	return nil, false
+}
+
+func StoppedByWritablePath(path string) func(sandbox.Policy) bool {
+	return func(policy sandbox.Policy) bool {
+		return slices.Contains(policy.Write, path)
+	}
+}
+
+func StoppedByPath(path string) func(sandbox.Policy) bool {
+	return func(policy sandbox.Policy) bool {
+		return slices.Contains(policy.Read, path) ||
+			slices.Contains(policy.Write, path) ||
+			slices.Contains(policy.Exec, path)
+	}
+}
+
+func freshPolicy(
+	ctx context.Context,
+	workspaceDir string,
+	homeDir string,
+	tmpDir string,
+	pathAccess *PathAccess,
+	mode *caps.Mode,
+	isYolo bool,
+) (sandbox.Policy, error) {
+	currentCaps := mode.Current()
+
+	if !currentCaps.Has(caps.Shell) {
+		return sandbox.Policy{}, ErrWithheld
+	}
+
+	if isYolo {
+		return YoloPolicy(homeDir, tmpDir), nil
+	}
+
+	policy, err := createPolicy(ctx, workspaceDir, homeDir, tmpDir, pathAccess.GetPaths(), currentCaps)
+	if err != nil {
+		if ctx.Err() != nil {
+			return policy, ctx.Err()
+		}
+
+		return policy, fmt.Errorf("the shell cannot be confined: %w", err)
+	}
+
+	return policy, nil
 }
 
 func allWritablePaths(workspaceDir string, homeDir string, extraPaths []string, currentCaps caps.Set) []string {

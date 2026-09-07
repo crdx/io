@@ -14,6 +14,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/dynamic"
 	"crdx.org/io/cmd/oh/interrupt"
+	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
@@ -146,7 +147,7 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.SilentTurnEvent:
 		self.screen.Line(style.StoppedTurn(agent.SilentTurnNotice))
 
-	case caps.ModeChange, pathgrant.Change, turn.HarnessPoke:
+	case caps.ModeChange, caps.JobStop, jobrecord.EndedWithSession, pathgrant.Change, turn.HarnessPoke:
 		if message, isSaid := HarnessNotice(event); isSaid {
 			self.drawSubmitted(message, submittedMarker(true))
 		}

@@ -34,6 +34,7 @@ home = []
 left = [
     { segment = "activity-spinner", idle = "·✦·", frames = ["✦··", "·✦·", "··✦", "··✦", "·✦·", "✦··"], rate = "125ms" },
     { segment = "path-grants", type = "base" },
+    { segment = "jobs" },
 ]
 center = [
     { segment = "active-model" },

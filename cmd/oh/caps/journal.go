@@ -2,6 +2,7 @@ package caps
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/access"
@@ -72,4 +73,56 @@ func encodeFlags(grantedCaps Set) json.RawMessage {
 	}
 
 	return encodedFlags
+}
+
+const JobStop agent.Kind = "job_stop"
+
+func JobStopEvent(jobName string, withdrawnCaps Set) agent.Event {
+	return agent.Event{Kind: JobStop, Name: jobName, State: encodeFlags(withdrawnCaps)}
+}
+
+type jobStopReason struct {
+	Path string `json:"path,omitempty"`
+}
+
+func JobStoppedForPathEvent(jobName string, path string) agent.Event {
+	encodedReason, err := json.Marshal(jobStopReason{Path: path})
+	if err != nil {
+		return agent.Event{}
+	}
+
+	return agent.Event{Kind: JobStop, Name: jobName, State: encodedReason}
+}
+
+func JobStoppedByUserEvent(jobName string) agent.Event {
+	return agent.Event{Kind: JobStop, Name: jobName}
+}
+
+func JobStopNotice(event agent.Event) (string, bool) {
+	if event.Name == "" {
+		return "", false
+	}
+
+	if len(event.State) == 0 {
+		return fmt.Sprintf("The job %s was stopped from the keyboard.", event.Name), true
+	}
+
+	var stopReason jobStopReason
+	if err := json.Unmarshal(event.State, &stopReason); err == nil && stopReason.Path != "" {
+		return fmt.Sprintf(
+			"The job %s was stopped because access to %s was revoked.", event.Name, stopReason.Path,
+		), true
+	}
+
+	withdrawnCaps, err := GrantedBy(event)
+	if err != nil {
+		return "", false
+	}
+
+	reason := withdrawal(withdrawnCaps)
+	if reason == "" {
+		return "", false
+	}
+
+	return fmt.Sprintf("The job %s was stopped because %s.", event.Name, reason), true
 }

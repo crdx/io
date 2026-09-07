@@ -1,0 +1,493 @@
+=== narrow ===
+
+ start the docs server and keep it up
+
+
+job python3 -m http.server 8080 … ✓ 1L
+
+The docs server is up.
+
+
+ 🤖 The job docs was stopped because the
+    workspace was made read-only.
+
+
+
+ what happened to it
+
+
+job docs status ✓ 1L
+
+
+ 🤖 The job docs was stopped from the
+    keyboard.
+
+
+job docs discard ✓ 1L
+job prune ✓ 1L
+
+It was stopped when write access was
+withdrawn.
+=== one column ===
+
+
+s
+
+t
+
+a
+
+r
+
+t
+
+t
+
+h
+
+e
+
+d
+
+o
+
+c
+
+s
+
+s
+
+e
+
+r
+
+v
+
+e
+
+r
+
+a
+
+n
+
+d
+
+k
+
+e
+
+e
+
+p
+
+i
+
+t
+
+u
+
+p
+
+
+
+
+T
+h
+e
+d
+o
+c
+s
+s
+e
+r
+v
+e
+r
+i
+s
+u
+p
+.
+
+
+
+🤖
+
+T
+
+h
+
+e
+
+j
+
+o
+
+b
+
+d
+
+o
+
+c
+
+s
+
+w
+
+a
+
+s
+
+s
+
+t
+
+o
+
+p
+
+p
+
+e
+
+d
+
+b
+
+e
+
+c
+
+a
+
+u
+
+s
+
+e
+
+t
+
+h
+
+e
+
+w
+
+o
+
+r
+
+k
+
+s
+
+p
+
+a
+
+c
+
+e
+
+w
+
+a
+
+s
+
+m
+
+a
+
+d
+
+e
+
+r
+
+e
+
+a
+
+d
+
+-
+
+o
+
+n
+
+l
+
+y
+
+.
+
+
+
+
+w
+
+h
+
+a
+
+t
+
+h
+
+a
+
+p
+
+p
+
+e
+
+n
+
+e
+
+d
+
+t
+
+o
+
+i
+
+t
+
+
+
+
+
+
+🤖
+
+T
+
+h
+
+e
+
+j
+
+o
+
+b
+
+d
+
+o
+
+c
+
+s
+
+w
+
+a
+
+s
+
+s
+
+t
+
+o
+
+p
+
+p
+
+e
+
+d
+
+f
+
+r
+
+o
+
+m
+
+t
+
+h
+
+e
+
+k
+
+e
+
+y
+
+b
+
+o
+
+a
+
+r
+
+d
+
+.
+
+
+
+
+
+I
+t
+w
+a
+s
+s
+t
+o
+p
+p
+e
+d
+w
+h
+e
+n
+w
+r
+i
+t
+e
+a
+c
+c
+e
+s
+s
+w
+a
+s
+w
+i
+t
+h
+d
+r
+a
+w
+n
+.
+=== printed ===
+
+ start the docs server and keep it up
+
+
+job python3 -m http.server 8080 docs ✓ 1L
+
+The docs server is up.
+
+
+ 🤖 The job docs was stopped because the workspace was made read-only.
+
+
+
+ what happened to it
+
+
+job docs status ✓ 1L
+
+
+ 🤖 The job docs was stopped from the keyboard.
+
+
+job docs discard ✓ 1L
+job prune ✓ 1L
+
+It was stopped when write access was withdrawn.
+=== tiny ===
+
+ start the
+ docs server
+ and keep it
+ up
+
+
+job … ✓ 1L
+
+The docs
+server is
+up.
+
+
+ 🤖 The job
+    docs was
+    stopped
+    because
+    the
+    workspac
+    e was
+    made
+    read-onl
+    y.
+
+
+
+ what
+ happened to
+ it
+
+
+job … ✓ 1L
+
+
+ 🤖 The job
+    docs was
+    stopped
+    from the
+    keyboard
+    .
+
+
+job … ✓ 1L
+job ✓ 1L
+
+It was
+stopped when
+write access
+was
+withdrawn.
+=== wide ===
+
+ start the docs server and keep it up
+
+
+job python3 -m http.server 8080 docs ✓ 1L
+
+The docs server is up.
+
+
+ 🤖 The job docs was stopped because the workspace was made read-only.
+
+
+
+ what happened to it
+
+
+job docs status ✓ 1L
+
+
+ 🤖 The job docs was stopped from the keyboard.
+
+
+job docs discard ✓ 1L
+job prune ✓ 1L
+
+It was stopped when write access was withdrawn.

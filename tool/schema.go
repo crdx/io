@@ -21,6 +21,7 @@ type Parameter struct {
 	Name        string
 	Type        DataType
 	Description string
+	Values      []string
 
 	isOptional bool
 }
@@ -38,9 +39,14 @@ func Integer(name string, description string) Parameter {
 	return Parameter{Name: name, Type: TypeInteger, Description: description}
 }
 
+func Enum(name string, description string, values ...string) Parameter {
+	return Parameter{Name: name, Type: TypeString, Description: description, Values: values}
+}
+
 type property struct {
 	Type        DataType `json:"type"`
 	Description string   `json:"description"`
+	Values      []string `json:"enum,omitempty"`
 }
 
 type object struct {
@@ -60,6 +66,7 @@ func (self Schema) MarshalJSON() ([]byte, error) {
 		renderedSchema.Properties[parameter.Name] = property{
 			Type:        parameter.Type,
 			Description: parameter.Description,
+			Values:      parameter.Values,
 		}
 
 		if !parameter.isOptional {

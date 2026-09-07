@@ -1,6 +1,7 @@
 package caps
 
 import (
+	"strings"
 	"testing"
 
 	"crdx.org/io/agent"
@@ -73,5 +74,22 @@ func TestAChangeTakenBackLeavesTheOnesAfterItSayingWhatTheySaid(t *testing.T) {
 
 	if grantedCaps, _ := LastRecordedMode([]agent.Event{event}); grantedCaps != Read {
 		t.Errorf("expected r, got %s", grantedCaps.Flags())
+	}
+}
+
+func TestAJobStoppedForARevokedPathNamesThePath(t *testing.T) {
+	notice, isShown := JobStopNotice(JobStoppedForPathEvent("docs", "/reference"))
+	if !isShown {
+		t.Fatal("a job stopped for a revoked path said nothing")
+	}
+	if !strings.Contains(notice, "docs") || !strings.Contains(notice, "/reference") {
+		t.Errorf("got %q, want it to name the job and the path", notice)
+	}
+}
+
+func TestAJobStoppedForACapabilityStillNamesTheCapability(t *testing.T) {
+	notice, isShown := JobStopNotice(JobStopEvent("docs", Write))
+	if !isShown || !strings.Contains(notice, "read-only") {
+		t.Errorf("got %q (shown %v), want the capability reason preserved", notice, isShown)
 	}
 }

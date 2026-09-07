@@ -52,6 +52,20 @@ GPT Sol 5.6 ▫▫▫▫▪▫
 feature/bars
 === git-branch / outside a repository ===
 
+=== jobs / a ghost beside a live job ===
+● docs ○ builder
+=== jobs / failures alone ===
+✗ builder ✗ api
+=== jobs / failures beside those running ===
+● docs ✗ builder
+=== jobs / ghosts after a resume ===
+○ docs ○ bridge
+=== jobs / none ===
+
+=== jobs / one being stopped among those running ===
+● docs ● watch ● api
+=== jobs / running ===
+● docs ● watch
 === local-time / custom format ===
 14:32:09
 === local-time / default format ===

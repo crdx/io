@@ -1032,3 +1032,20 @@ func TestTheProcessLimitClearsAConcurrentBuild(t *testing.T) {
 		)
 	}
 }
+
+func TestWithdrawingWriteLeavesAReadOnlyJobAlone(t *testing.T) {
+	holds, doesStop := StoppedBy(caps.Write, "/workspace")
+	if !doesStop {
+		t.Fatal("withdrawing write stopped nothing at all")
+	}
+
+	readOnly := sandbox.Policy{Read: []string{"/workspace"}, Write: []string{"/state/home/.cache"}}
+	if holds(readOnly) {
+		t.Error("a read-only job was stopped by a write withdrawal")
+	}
+
+	writable := sandbox.Policy{Write: []string{"/workspace", "/state/home/.cache"}}
+	if !holds(writable) {
+		t.Error("a job holding the writable workspace was not stopped")
+	}
+}

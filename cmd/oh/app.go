@@ -23,6 +23,7 @@ import (
 	"crdx.org/io/cmd/oh/input"
 	"crdx.org/io/cmd/oh/interaction"
 	"crdx.org/io/cmd/oh/interrupt"
+	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/metrics"
@@ -32,6 +33,7 @@ import (
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/schedule"
 	"crdx.org/io/cmd/oh/segment"
+	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/slash"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
@@ -39,6 +41,7 @@ import (
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/oh/work"
+	"crdx.org/io/internal/jobs"
 	"crdx.org/io/session"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox/title"
@@ -66,6 +69,20 @@ func (self *pendingInput) takeBack(index int) {
 	self.items = slices.Delete(self.items, index, index+1)
 }
 
+func (self *pendingInput) hasStoppedJobs(whichCaps caps.Set) bool {
+	for _, item := range self.items {
+		if item.state.Kind != caps.JobStop {
+			continue
+		}
+
+		if withdrawnCaps, err := caps.GrantedBy(item.state); err == nil && withdrawnCaps.Has(whichCaps) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (self *pendingInput) notices() []string {
 	var notices []string
 	for _, item := range self.items {
@@ -88,6 +105,10 @@ type App struct {
 	editorConfiguration *editor.Configuration
 	mode                *caps.Mode
 	pathGrants          *pathgrant.Grants
+	jobs                *jobs.Manager
+	recordedJobListing  string
+	hasRecordedJobs     bool
+	endedJobsNote       string
 	settledCaps         caps.Set
 	pending             pendingInput
 	feedback            feedback.State
@@ -427,10 +448,16 @@ func (self *App) toggleCap(whichCaps caps.Set) {
 	self.mode.Toggle(whichCaps)
 	self.terminal.SetMode(self.mode.Current())
 
+	isWithdrawn := !self.mode.Current().Has(whichCaps)
+
 	if i, isPending := self.pendingModeChange(whichCaps); isPending {
 		self.takeBackModeChange(i, whichCaps)
 	} else {
 		self.showModeChange(whichCaps)
+	}
+
+	if isWithdrawn {
+		self.stopJobsLosingAccess(whichCaps)
 	}
 
 	if self.currentTurn.Running() {
@@ -440,8 +467,12 @@ func (self *App) toggleCap(whichCaps caps.Set) {
 }
 
 func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
+	if self.pending.hasStoppedJobs(whichCaps) {
+		return 0, false
+	}
+
 	for index, item := range self.pending.items {
-		if item.state.Name == whichCaps.Flag() {
+		if item.state.Kind == caps.ModeChange && item.state.Name == whichCaps.Flag() {
 			return index, true
 		}
 	}
@@ -664,6 +695,40 @@ func (self *App) getBarSources() bar.Sources {
 		IsPrefixPending: self.isPrefixPending,
 		GetTurnTiming:   self.turnTiming,
 		GetTurnCount:    self.turnCount,
+		GetJobs:         self.getJobs,
+	}
+}
+
+func (self *App) getJobs() []jobs.Snapshot {
+	if self.jobs == nil {
+		return nil
+	}
+
+	return self.jobs.List()
+}
+
+func (self *App) stopJobsHoldingPath(path string) {
+	if self.jobs == nil {
+		return
+	}
+
+	for _, name := range self.jobs.StopHolding(shell.StoppedByPath(path)) {
+		self.pending.add(caps.JobStoppedForPathEvent(name, path))
+	}
+}
+
+func (self *App) stopJobsLosingAccess(withdrawnCaps caps.Set) {
+	if self.jobs == nil {
+		return
+	}
+
+	holds, doesStop := shell.StoppedBy(withdrawnCaps, self.workspace.GetDir())
+	if !doesStop {
+		return
+	}
+
+	for _, name := range self.jobs.StopHolding(holds) {
+		self.pending.add(caps.JobStopEvent(name, withdrawnCaps))
 	}
 }
 
@@ -872,6 +937,7 @@ func (self *App) restore(storedSession *store.Session) {
 	}
 
 	self.metrics.Restore(storedSession.Events, storedSession.Turns)
+	self.restoreJobs(storedSession.Events)
 
 	self.screen.Reset()
 	self.replay()
@@ -952,7 +1018,7 @@ func (self *App) takeSessionTitle(event agent.Event) {
 
 func (self *App) prelude() string {
 	notes := slices.DeleteFunc(
-		[]string{self.interruptionNote(), self.accessMessage(), self.titleNote()},
+		[]string{self.interruptionNote(), self.endedJobsMessage(), self.accessMessage(), self.titleNote()},
 		func(note string) bool { return note == "" },
 	)
 
@@ -994,6 +1060,65 @@ func (self *App) titleNote() string {
 	}
 
 	return "This session has no title yet. Name the task with the " + title.Name + " tool."
+}
+
+func (self *App) endedJobsMessage() string {
+	note := self.endedJobsNote
+	self.endedJobsNote = ""
+
+	return note
+}
+
+func (self *App) recordJobListing() {
+	if self.jobs == nil {
+		return
+	}
+
+	listing := self.jobs.List()
+	if len(listing) == 0 && !self.hasRecordedJobs {
+		return
+	}
+
+	event := jobrecord.ListingEvent(listing)
+	if string(event.State) == self.recordedJobListing {
+		return
+	}
+
+	self.recordedJobListing = string(event.State)
+	self.hasRecordedJobs = true
+	self.events = append(self.events, event)
+	self.storeEvent(event)
+}
+
+func (self *App) restoreJobs(events []agent.Event) {
+	if self.jobs == nil {
+		return
+	}
+
+	rememberedJobs, wasRecorded := jobrecord.LastRecorded(events)
+	if !wasRecorded {
+		return
+	}
+
+	self.jobs.Restore(rememberedJobs)
+	self.hasRecordedJobs = true
+
+	var live []string
+	for _, snapshot := range rememberedJobs {
+		if snapshot.IsLive() {
+			live = append(live, snapshot.Name)
+		}
+	}
+
+	if len(live) == 0 {
+		return
+	}
+
+	event := jobrecord.EndedWithSessionEvent(live)
+	if note, isSaid := jobrecord.EndedWithSessionNotice(event); isSaid {
+		self.endedJobsNote = note
+	}
+	self.pending.add(event)
 }
 
 func (self *App) interruptionNote() string {
@@ -1116,6 +1241,8 @@ func (self *App) finish() {
 	} else if turnError = self.currentTurn.Error(); turnError != nil {
 		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: turnError.Error()})
 	}
+
+	self.recordJobListing()
 
 	if self.storeProviderState() {
 		if err := self.recorder.CompleteTurn(self.turnSummary()); err != nil {

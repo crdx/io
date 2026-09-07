@@ -85,6 +85,7 @@ type harnessContextTemplateData struct {
 	GitWritable       bool
 	ShellGranted      bool
 	WebGranted        bool
+	JobsGranted       bool
 	Yolo              bool
 }
 
@@ -110,6 +111,7 @@ type Config struct {
 	CurrentCaps caps.Set
 	ExtraPaths  shell.Paths
 	Skills      []skill.Skill
+	JobsGranted bool
 	Yolo        bool
 }
 
@@ -201,6 +203,7 @@ func harnessContext(config Config) string {
 		WorkspaceWritable: currentCaps.Has(caps.Write),
 		GitWritable:       currentCaps.Has(caps.Git),
 		ShellGranted:      currentCaps.Has(caps.Shell),
+		JobsGranted:       config.JobsGranted,
 		WebGranted:        currentCaps.Has(caps.Web),
 		Yolo:              config.Yolo,
 	}
@@ -305,14 +308,24 @@ func networkRules(data harnessContextTemplateData) string {
 		}, "\n")
 	}
 
-	return strings.Join([]string{
+	lines := []string{
 		"- Networking is limited to the sandbox's private loopback interface",
 		"- Processes in the same sandbox can communicate over 127.0.0.1 and ::1",
+	}
+
+	if data.JobsGranted {
+		lines = append(
+			lines,
+			"- A service started with the job tool stays up, and a later bash call reaches it on 127.0.0.1",
+		)
+	}
+
+	return strings.Join(append(lines,
 		"- A Unix socket works beneath /tmp, and is refused beneath the workspace",
 		"- The host's loopback interface and external networks are unreachable",
-		"- The web search and fetch tools are " + webAccess(data.WebGranted),
+		"- The web search and fetch tools are "+webAccess(data.WebGranted),
 		"- Anything else that requires external networking must be asked of the user",
-	}, "\n")
+	), "\n")
 }
 
 func scratchRules(tmpDir string, isYolo bool) string {

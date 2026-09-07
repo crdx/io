@@ -7,6 +7,8 @@ Commands:
   /grant {r|rw|rx|rwx} <path>
   /grants
   /revoke <path>
+  /jobs
+  /job {status|output|stop|discard} <name> | prune
   /fork [model]
 
 Targets:

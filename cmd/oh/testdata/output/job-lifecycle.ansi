@@ -1,0 +1,630 @@
+=== narrow ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m start the docs server and keep it up   \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\r\e[KThe docs server is up.\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped because the\e[0m\r
+\e[48;2;52;53;65m    workspace was made read-only.       \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m what happened to it                    \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped from the   \e[0m\r
+\e[48;2;52;53;65m    keyboard.                           \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mprune\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\r\e[KIt was stopped when write access was\r
+\r\e[Kwithdrawn.\r
+\e[?25h\e[?2026l
+=== one column ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mv\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mk\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[?7l\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r
+\r\e[KT\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[Ko\r
+\r\e[Kc\r
+\r\e[Ks\r
+\r\e[Ks\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Kv\r
+\r\e[Ke\r
+\r\e[Kr\r
+\r\e[Ki\r
+\r\e[Ks\r
+\r\e[Ku\r
+\r\e[Kp\r
+\r\e[K.\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m🤖\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65mT\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mj\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mk\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mm\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m-\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65my\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m🤖\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65mT\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mj\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mm\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mk\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65my\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\r
+\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r
+\r\e[KI\r
+\r\e[Kt\r
+\r\e[Kw\r
+\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Ks\r
+\r\e[Kt\r
+\r\e[Ko\r
+\r\e[Kp\r
+\r\e[Kp\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[Kw\r
+\r\e[Kh\r
+\r\e[Ke\r
+\r\e[Kn\r
+\r\e[Kw\r
+\r\e[Kr\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Ke\r
+\r\e[Ka\r
+\r\e[Kc\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ks\r
+\r\e[Kw\r
+\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Kw\r
+\r\e[Ki\r
+\r\e[Kt\r
+\r\e[Kh\r
+\r\e[Kd\r
+\r\e[Kr\r
+\r\e[Ka\r
+\r\e[Kw\r
+\r\e[Kn\r
+\r\e[K.\r
+\e[?25h\e[?2026l
+=== plain ===
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m start the docs server and keep it up\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+
+The docs server is up.
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m what happened to it\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The job docs was stopped from the keyboard.\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mprune\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+
+It was stopped when write access was withdrawn.
+
+=== printed ===
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+The docs server is up.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what happened to it                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped from the keyboard.                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mprune\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+It was stopped when write access was withdrawn.\r
+
+=== streamed asap ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what happened to it                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped from the keyboard.                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mprune\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mprune\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KIt w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when writ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write ac\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was wit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was withdra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was withdrawn.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed line ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what happened to it                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped from the keyboard.                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mprune\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mprune\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KIt was stopped when write access was withdrawn.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== streamed paced ===
+\e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what happened to it                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped from the keyboard.                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mprune\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mprune\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\r
+\e[?2026h\e[?25l\r\e[KIt w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when writ\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write ac\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was wit\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was withdra\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KIt was stopped when write access was withdrawn.\e[?25h\e[?2026l\r
+\e]9;4;0\e\\
+=== tiny ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m start the  \e[0m\r
+\e[48;2;52;53;65m docs server\e[0m\r
+\e[48;2;52;53;65m and keep it\e[0m\r
+\e[48;2;52;53;65m up         \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\r\e[KThe docs\r
+\r\e[Kserver is\r
+\r\e[Kup.\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m 🤖 The job \e[0m\r
+\e[48;2;52;53;65m    docs was\e[0m\r
+\e[48;2;52;53;65m    stopped \e[0m\r
+\e[48;2;52;53;65m    because \e[0m\r
+\e[48;2;52;53;65m    the     \e[0m\r
+\e[48;2;52;53;65m    workspac\e[0m\r
+\e[48;2;52;53;65m    e was   \e[0m\r
+\e[48;2;52;53;65m    made    \e[0m\r
+\e[48;2;52;53;65m    read-onl\e[0m\r
+\e[48;2;52;53;65m    y.      \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m what       \e[0m\r
+\e[48;2;52;53;65m happened to\e[0m\r
+\e[48;2;52;53;65m it         \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m 🤖 The job \e[0m\r
+\e[48;2;52;53;65m    docs was\e[0m\r
+\e[48;2;52;53;65m    stopped \e[0m\r
+\e[48;2;52;53;65m    from the\e[0m\r
+\e[48;2;52;53;65m    keyboard\e[0m\r
+\e[48;2;52;53;65m    .       \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
+\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\r\e[KIt was\r
+\r\e[Kstopped when\r
+\r\e[Kwrite access\r
+\r\e[Kwas\r
+\r\e[Kwithdrawn.\r
+\e[?25h\e[?2026l
+=== unsized ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m start the docs server and keep it up\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+
+\r\e[KThe docs server is up.
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m what happened to it\e[0m
+\e[48;2;52;53;65m\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The job docs was stopped from the keyboard.\e[0m
+\e[48;2;52;53;65m\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mprune\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+
+\r\e[KIt was stopped when write access was withdrawn.
+\e[?25h\e[?2026l
+=== wide ===
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\r\e[KThe docs server is up.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m what happened to it                                                                                \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstatus\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job docs was stopped from the keyboard.                                                     \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mdiscard\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mprune\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\r
+\r\e[KIt was stopped when write access was withdrawn.\r
+\e[?25h\e[?2026l

@@ -583,6 +583,7 @@ func testSegments() segment.Registry {
 		"turn-timer":         inertFactory,
 		"turn-count":         inertFactory,
 		"git-branch":         inertFactory,
+		"jobs":               inertFactory,
 		"subscription-usage": inertFactory,
 	}
 }

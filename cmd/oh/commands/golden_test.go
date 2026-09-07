@@ -22,7 +22,7 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		prefix string
 		steps  int
 	}{
-		{prefix: "/", steps: 10},
+		{prefix: "/", steps: 12},
 		{prefix: "/c", steps: 2},
 		{prefix: "/g", steps: 2},
 		{prefix: "/grant ", steps: 4},
@@ -83,7 +83,8 @@ func fixtureEnvironment(t *testing.T) commandEnvironment {
 	}
 	grants, current := fixturePathGrants()
 	*current = []pathgrant.Grant{{Path: "/reference", Access: pathgrant.ReadAccess}}
-	return commandEnvironment{configDir: configDirectory, pathGrants: grants}
+	managedJobs, _ := fixtureJobs()
+	return commandEnvironment{configDir: configDirectory, pathGrants: grants, jobs: managedJobs}
 }
 
 func fixtureSnippets() map[string]snippets.Definition {

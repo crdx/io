@@ -166,6 +166,19 @@ func lexicalDiff(changedCaps Set, currentCaps Set) string {
 	return strings.Join(clauses, " ")
 }
 
+func withdrawal(withdrawnCaps Set) string {
+	switch {
+	case withdrawnCaps.Has(Shell):
+		return "the bash tool was refused"
+	case withdrawnCaps.Has(Write):
+		return "the workspace was made read-only"
+	case withdrawnCaps.Has(Git):
+		return "the .git directory was made read-only"
+	default:
+		return ""
+	}
+}
+
 func workspaceIs(writable bool) string {
 	if writable {
 		return "The workspace is now read-write."

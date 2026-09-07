@@ -1,0 +1,507 @@
+=== narrow ===
+
+ start the docs server and a watcher
+
+
+job python3 -m http.server 8080 … ✓ 1L
+
+Both are up.
+
+
+ 🤖 The jobs docs and watch are no
+    longer running, having been stopped
+    when the session last closed. Start
+    one again by name to run its command
+    afresh.
+
+
+
+ carry on
+
+
+job list ✓ 2L
+job docs start ✓ 1L
+
+Restarted docs from the command it was
+remembered with.
+=== one column ===
+
+
+s
+
+t
+
+a
+
+r
+
+t
+
+t
+
+h
+
+e
+
+d
+
+o
+
+c
+
+s
+
+s
+
+e
+
+r
+
+v
+
+e
+
+r
+
+a
+
+n
+
+d
+
+a
+
+w
+
+a
+
+t
+
+c
+
+h
+
+e
+
+r
+
+
+
+
+B
+o
+t
+h
+a
+r
+e
+u
+p
+.
+
+
+
+🤖
+
+T
+
+h
+
+e
+
+j
+
+o
+
+b
+
+s
+
+d
+
+o
+
+c
+
+s
+
+a
+
+n
+
+d
+
+w
+
+a
+
+t
+
+c
+
+h
+
+a
+
+r
+
+e
+
+n
+
+o
+
+l
+
+o
+
+n
+
+g
+
+e
+
+r
+
+r
+
+u
+
+n
+
+n
+
+i
+
+n
+
+g
+
+,
+
+h
+
+a
+
+v
+
+i
+
+n
+
+g
+
+b
+
+e
+
+e
+
+n
+
+s
+
+t
+
+o
+
+p
+
+p
+
+e
+
+d
+
+w
+
+h
+
+e
+
+n
+
+t
+
+h
+
+e
+
+s
+
+e
+
+s
+
+s
+
+i
+
+o
+
+n
+
+l
+
+a
+
+s
+
+t
+
+c
+
+l
+
+o
+
+s
+
+e
+
+d
+
+.
+
+S
+
+t
+
+a
+
+r
+
+t
+
+o
+
+n
+
+e
+
+a
+
+g
+
+a
+
+i
+
+n
+
+b
+
+y
+
+n
+
+a
+
+m
+
+e
+
+t
+
+o
+
+r
+
+u
+
+n
+
+i
+
+t
+
+s
+
+c
+
+o
+
+m
+
+m
+
+a
+
+n
+
+d
+
+a
+
+f
+
+r
+
+e
+
+s
+
+h
+
+.
+
+
+
+
+c
+
+a
+
+r
+
+r
+
+y
+
+o
+
+n
+
+
+
+
+
+R
+e
+s
+t
+a
+r
+t
+e
+d
+d
+o
+c
+s
+f
+r
+o
+m
+t
+h
+e
+c
+o
+m
+m
+a
+n
+d
+i
+t
+w
+a
+s
+r
+e
+m
+e
+m
+b
+e
+r
+e
+d
+w
+i
+t
+h
+.
+=== printed ===
+
+ start the docs server and a watcher
+
+
+job python3 -m http.server 8080 docs ✓ 1L
+
+Both are up.
+
+
+ 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.
+    Start one again by name to run its command afresh.
+
+
+
+ carry on
+
+
+job list ✓ 2L
+job docs start ✓ 1L
+
+Restarted docs from the command it was remembered with.
+=== tiny ===
+
+ start the
+ docs server
+ and a
+ watcher
+
+
+job … ✓ 1L
+
+Both are up.
+
+
+ 🤖 The jobs
+    docs and
+    watch
+    are no
+    longer
+    running,
+    having
+    been
+    stopped
+    when the
+    session
+    last
+    closed.
+    Start
+    one
+    again by
+    name to
+    run its
+    command
+    afresh.
+
+
+
+ carry on
+
+
+job ✓ 2L
+job … ✓ 1L
+
+Restarted
+docs from
+the command
+it was
+remembered
+with.
+=== wide ===
+
+ start the docs server and a watcher
+
+
+job python3 -m http.server 8080 docs ✓ 1L
+
+Both are up.
+
+
+ 🤖 The jobs docs and watch are no longer running, having been stopped when the session last closed.
+    Start one again by name to run its command afresh.
+
+
+
+ carry on
+
+
+job list ✓ 2L
+job docs start ✓ 1L
+
+Restarted docs from the command it was remembered with.

@@ -41,6 +41,7 @@ type Options struct {
 	Editor       *editor.Configuration
 	Output       io.Writer
 	PathGrants   PathGrants
+	Jobs         Jobs
 	StartSession func(SessionStart) error
 }
 
@@ -71,6 +72,7 @@ type commandEnvironment struct {
 	openTarget   func([]string) error
 	copyText     func([]string) error
 	pathGrants   PathGrants
+	jobs         Jobs
 	startSession func(SessionStart) error
 }
 
@@ -115,6 +117,7 @@ func New(options Options) (slash.CommandSet, error) {
 			return terminal.Copy(options.Output, strings.Join(values, "\n"))
 		},
 		pathGrants:   options.PathGrants,
+		jobs:         options.Jobs,
 		startSession: options.StartSession,
 	})
 }
@@ -139,6 +142,9 @@ func buildCommands(environment commandEnvironment) (slash.CommandSet, error) {
 	}
 	if environment.pathGrants.isConfigured() {
 		commands = append(commands, pathGrantCommands(environment.pathGrants)...)
+	}
+	if environment.jobs.isConfigured() {
+		commands = append(commands, jobCommands(environment.jobs)...)
 	}
 	commands = append(commands, help)
 	commands = append(commands, commandsRequiringPersistedSession(

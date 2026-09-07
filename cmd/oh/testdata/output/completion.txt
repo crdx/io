@@ -38,6 +38,7 @@ grep
 write
 edit
 bash
+job
 notify
 title
 web_search

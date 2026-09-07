@@ -38,7 +38,7 @@ sandbox *args:
         echo -e "${GREEN}this machine can map a namespace, so the sandbox tests ran for real${NC}"
         exit 0
     fi
-    PACKAGES=(./internal/sandbox ./cmd/oh/shell ./toolbox/bash)
+    PACKAGES=(./internal/sandbox ./internal/jobs ./cmd/oh/shell ./toolbox/bash)
     if [[ $# -gt 0 ]]; then
         PACKAGES=("$@")
     fi
@@ -48,6 +48,7 @@ sandbox *args:
         TestARepositoryCannotBeClobbered
         TestAnExactReadGrantInsideAWriteGrantRemainsReadOnly
         TestAnExecutableBuiltInTmpMayRunWhenGranted
+        TestAnOrdinaryCommandReachesAListenerAJobLeftBehind
         TestCommandsMayTalkOverAUnixSocketInTheScratch
         TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted
         TestCommandsSharingAScratchShareItsContents

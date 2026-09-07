@@ -1,0 +1,248 @@
+=== narrow ===
+
+ start the docs server, check on it,
+ then stop it
+
+
+job python3 -m http.server 8080 … ✓ 1L
+job docs status ✓ 1L
+job docs output ✓ 3L
+job python3 -m … ✗ 1L a job of that n…
+job list ✓ 2L
+job docs stop ✓ 1L
+
+The docs server ran on localhost:8080
+and is stopped now. The build job had
+already failed with exit(1).
+=== one column ===
+
+
+s
+
+t
+
+a
+
+r
+
+t
+
+t
+
+h
+
+e
+
+d
+
+o
+
+c
+
+s
+
+s
+
+e
+
+r
+
+v
+
+e
+
+r
+
+,
+
+c
+
+h
+
+e
+
+c
+
+k
+
+o
+
+n
+
+i
+
+t
+
+,
+
+t
+
+h
+
+e
+
+n
+
+s
+
+t
+
+o
+
+p
+
+i
+
+t
+
+
+
+
+
+
+
+
+
+T
+h
+e
+d
+o
+c
+s
+s
+e
+r
+v
+e
+r
+r
+a
+n
+o
+n
+l
+o
+c
+a
+l
+h
+o
+s
+t
+:
+8
+0
+8
+0
+a
+n
+d
+i
+s
+s
+t
+o
+p
+p
+e
+d
+n
+o
+w
+.
+T
+h
+e
+b
+u
+i
+l
+d
+j
+o
+b
+h
+a
+d
+a
+l
+r
+e
+a
+d
+y
+f
+a
+i
+l
+e
+d
+w
+i
+t
+h
+e
+x
+i
+t
+(
+1
+)
+.
+=== printed ===
+
+ start the docs server, check on it, then stop it
+
+
+job python3 -m http.server 8080 --bind localhost docs ✓ 1L
+job docs status ✓ 1L
+job docs output ✓ 3L
+job python3 -m http.server 8080 docs ✗ 1L a job of that name is already running
+job list ✓ 2L
+job docs stop ✓ 1L
+
+The docs server ran on localhost:8080 and is stopped now. The build job had already failed with
+exit(1).
+=== tiny ===
+
+ start the
+ docs
+ server,
+ check on
+ it, then
+ stop it
+
+
+job … ✓ 1L
+job … ✓ 1L
+job … ✓ 3L
+j… ✗ 1L a…
+job ✓ 2L
+job … ✓ 1L
+
+The docs
+server ran
+on
+localhost:80
+80 and is
+stopped now.
+The build
+job had
+already
+failed with
+exit(1).
+=== wide ===
+
+ start the docs server, check on it, then stop it
+
+
+job python3 -m http.server 8080 --bind localhost docs ✓ 1L
+job docs status ✓ 1L
+job docs output ✓ 3L
+job python3 -m http.server 8080 docs ✗ 1L a job of that name is already running
+job list ✓ 2L
+job docs stop ✓ 1L
+
+The docs server ran on localhost:8080 and is stopped now. The build job had already failed with
+exit(1).

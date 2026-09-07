@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
+	"crdx.org/io/cmd/oh/segment/jobNames"
 	"crdx.org/io/cmd/oh/segment/localTime"
 	"crdx.org/io/cmd/oh/segment/modeToggle"
 	"crdx.org/io/cmd/oh/segment/pathGrants"
@@ -27,6 +28,7 @@ import (
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/oh/usage"
 	"crdx.org/io/cmd/oh/work"
+	"crdx.org/io/internal/jobs"
 )
 
 const (
@@ -45,6 +47,7 @@ const (
 	turnCountSegment       = "turn-count"
 	gitBranchSegment       = "git-branch"
 	subUsageSegment        = "subscription-usage"
+	jobNamesSegment        = "jobs"
 )
 
 type Options struct {
@@ -69,6 +72,7 @@ type Sources struct {
 	IsPrefixPending func() bool
 	GetTurnTiming   func() turn.Timing
 	GetTurnCount    func() int
+	GetJobs         func() []jobs.Snapshot
 }
 
 func NewRegistry(options Options) segment.Registry {
@@ -89,6 +93,7 @@ func NewRegistry(options Options) segment.Registry {
 		turnTimerSegment:      turnTimer.New(options.Sources.GetTurnTiming, options.Sources.IsTurnRunning),
 		turnCountSegment:      turnCount.New(options.Sources.GetTurnCount),
 		gitBranchSegment:      gitBranch.New(options.Workspace.GetDir()),
+		jobNamesSegment:       jobNames.New(options.Sources.GetJobs),
 		subUsageSegment: subUsage.New(subUsage.Settings{
 			Reporter:         options.UsageReporter,
 			CachePath:        options.UsageCachePath,
