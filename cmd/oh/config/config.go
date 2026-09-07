@@ -67,8 +67,9 @@ type Ollama struct {
 }
 
 type Ui struct {
-	StreamingMode output.StreamingMode `toml:"streaming"`
-	Grouping      output.Grouping      `toml:"grouping"`
+	StreamingMode      output.StreamingMode      `toml:"streaming"`
+	Grouping           output.Grouping           `toml:"grouping"`
+	ReasoningRendering output.ReasoningRendering `toml:"reasoning"`
 }
 
 type Tool struct {
@@ -94,13 +95,14 @@ type Rule struct {
 }
 
 type LiveConfig struct {
-	ContinueMessage   string
-	EditorCommand     editor.Command
-	SegmentLayout     segment.Layout
-	SnippetCommandSet slash.CommandSet
-	StreamingMode     output.StreamingMode
-	Grouping          output.Grouping
-	ToolOutputBytes   int
+	ContinueMessage    string
+	EditorCommand      editor.Command
+	SegmentLayout      segment.Layout
+	SnippetCommandSet  slash.CommandSet
+	StreamingMode      output.StreamingMode
+	Grouping           output.Grouping
+	ReasoningRendering output.ReasoningRendering
+	ToolOutputBytes    int
 }
 
 func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
@@ -120,13 +122,14 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 	}
 
 	return LiveConfig{
-		ContinueMessage:   self.Input.Continue,
-		EditorCommand:     self.Editor.Command,
-		SegmentLayout:     layout,
-		SnippetCommandSet: snippetCommandSet,
-		StreamingMode:     self.Ui.StreamingMode,
-		Grouping:          self.Ui.Grouping,
-		ToolOutputBytes:   self.Tool.Output.Bytes,
+		ContinueMessage:    self.Input.Continue,
+		EditorCommand:      self.Editor.Command,
+		SegmentLayout:      layout,
+		SnippetCommandSet:  snippetCommandSet,
+		StreamingMode:      self.Ui.StreamingMode,
+		Grouping:           self.Ui.Grouping,
+		ReasoningRendering: self.Ui.ReasoningRendering,
+		ToolOutputBytes:    self.Tool.Output.Bytes,
 	}, nil
 }
 

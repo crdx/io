@@ -2545,13 +2545,65 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 }
 
 func TestAThoughtHasMarkdownStripped(t *testing.T) {
-	rows := painter.RenderReasoning("## **Checking** `one.go`", 40)
+	rows := painter.RenderReasoning("## **Checking** `one.go`", 40, output.ReasoningPlain)
 	for i := range rows {
 		rows[i] = style.Plain(rows[i])
 	}
 
 	if got := strings.Join(rows, "\n"); got != "Checking one.go" {
 		t.Errorf("got reasoning %q with markdown stripped", got)
+	}
+}
+
+func TestAThoughtKeepsItsMarkdownWhenItIsAskedFor(t *testing.T) {
+	rows := painter.RenderReasoning("## **Checking** `one.go`\n\n- first\n- second\n", 40, output.ReasoningMarkdown)
+
+	if got := strings.Join(rows, "\n"); got == style.Plain(got) {
+		t.Errorf("got reasoning %q with nothing styled", got)
+	}
+	if got := style.Plain(strings.Join(rows, "\n")); !strings.Contains(got, "first") || !strings.Contains(got, "second") {
+		t.Errorf("got reasoning %q, want the list kept", got)
+	}
+	if got := style.Plain(strings.Join(rows, "\n")); strings.Count(got, "\n") < 2 {
+		t.Errorf("got reasoning %q flattened onto one line", got)
+	}
+}
+
+const (
+	italicSequence = "\x1b[3m"
+	dimSequence    = "\x1b[38;2;150;152;150m"
+	resetSequence  = "\x1b[0m"
+)
+
+func TestAThoughtIsItalicAndDimWhicheverWayItIsDrawn(t *testing.T) {
+	thought := "## Checking `one.go`\n\n- first\n- second\n"
+
+	for name, rendering := range map[string]output.ReasoningRendering{
+		"flattened": output.ReasoningPlain,
+		"kept":      output.ReasoningMarkdown,
+	} {
+		drawn := strings.Join(painter.RenderReasoning(thought, 40, rendering), "\n")
+		if !strings.Contains(drawn, italicSequence) {
+			t.Errorf("a %s thought drew %q without the italic that says it is a thought", name, drawn)
+		}
+		if !strings.Contains(drawn, dimSequence) {
+			t.Errorf("a %s thought drew %q without the dim that holds it back from the answer", name, drawn)
+		}
+	}
+}
+
+func TestAKeptThoughtResumesItsOwnStyleUnderTheMarkdown(t *testing.T) {
+	rows := painter.RenderReasoning("## Checking `one.go`\n\n- first\n", 40, output.ReasoningMarkdown)
+
+	for _, row := range rows {
+		if !strings.HasPrefix(row, italicSequence+dimSequence) {
+			t.Errorf("row %q does not open in the reasoning style", row)
+		}
+		for piece := range strings.SplitSeq(row, resetSequence) {
+			if piece != "" && !strings.HasPrefix(piece, "\x1b[") {
+				t.Errorf("row %q leaves %q unstyled after a reset", row, piece)
+			}
+		}
 	}
 }
 
@@ -2570,7 +2622,7 @@ func TestAThoughtRunsDirectlyIntoAToolCall(t *testing.T) {
 }
 
 func TestAThoughtWrapsAtWordBoundaries(t *testing.T) {
-	rows := painter.RenderReasoning("one two three four", 9)
+	rows := painter.RenderReasoning("one two three four", 9, output.ReasoningPlain)
 	for i := range rows {
 		rows[i] = style.Plain(rows[i])
 	}
@@ -3214,6 +3266,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"line-resize":           {".screen"},
 		"streaming-modes":       {".screen"},
 		"groupings":             {".screen"},
+		"reasonings":            {".ansi", ".screen"},
 		"mermaid-streaming":     {".screen"},
 		"mode-takeback":         {".ansi", ".screen"},
 		"model-arguments":       {".txt"},
@@ -5133,6 +5186,115 @@ func TestEveryGroupingPrintsWhatTheInterfaceShowed(t *testing.T) {
 	}
 }
 
+const reasoningScenario = "reasoning-markdown.jsonl"
+
+func everyReasoningRendering() map[string]output.ReasoningRendering {
+	return map[string]output.ReasoningRendering{
+		"markdown": output.ReasoningMarkdown,
+		"plain":    output.ReasoningPlain,
+	}
+}
+
+func newThinkingRig(t *testing.T, rendering output.ReasoningRendering, isPrinted bool, columns int) *replayRig {
+	t.Helper()
+
+	rig := newRig(t, func(written *strings.Builder, workspaceDir string) *output.Screen {
+		screen := output.NewTerminalOfSize(written, columns, replayLines)
+		if isPrinted {
+			screen.AppendOnly()
+		}
+
+		return screen.LinkPathsUnder(workspaceDir)
+	})
+	rig.chat.reasoningRendering = rendering
+	rig.chat.isPrinting = isPrinted
+
+	return rig
+}
+
+func thoughtEntries(t *testing.T) []replayEntry {
+	t.Helper()
+
+	return readJournal(t, filepath.Join("testdata", "input", reasoningScenario))
+}
+
+func replayThoughtsAtWidth(t *testing.T, rendering output.ReasoningRendering, isPrinted bool, columns int) string {
+	t.Helper()
+
+	return replayInto(newThinkingRig(t, rendering, isPrinted, columns), thoughtEntries(t))
+}
+
+func replayThoughts(t *testing.T, rendering output.ReasoningRendering, isPrinted bool) string {
+	t.Helper()
+
+	return replayThoughtsAtWidth(t, rendering, isPrinted, replayColumns)
+}
+
+func streamThoughts(t *testing.T, rendering output.ReasoningRendering, streamingMode output.StreamingMode) string {
+	t.Helper()
+
+	rig := newThinkingRig(t, rendering, false, replayColumns)
+	rig.chat.streamingMode = streamingMode
+
+	return streamThrough(t, rig, thoughtEntries(t))
+}
+
+func everyThinkingWidth() map[string]int {
+	return map[string]int{
+		"wide":       replayColumns,
+		"narrow":     narrowColumns,
+		"tiny":       tinyColumns,
+		"one column": oneColumn,
+	}
+}
+
+func TestEveryReasoningRenderingDrawsAThoughtAsItSays(t *testing.T) {
+	shownPasses := map[string]func() string{}
+	writtenPasses := map[string]func() string{}
+
+	for name, rendering := range everyReasoningRendering() {
+		for widthName, columns := range everyThinkingWidth() {
+			shownPasses[name+" "+widthName] = func() string {
+				return shown(t, replayThoughtsAtWidth(t, rendering, false, columns), columns)
+			}
+		}
+		shownPasses[name+" printed"] = func() string {
+			return shown(t, replayThoughts(t, rendering, true), replayColumns)
+		}
+
+		writtenPasses[name] = func() string { return replayThoughts(t, rendering, false) }
+		writtenPasses[name+" printed"] = func() string { return replayThoughts(t, rendering, true) }
+
+		for streamingName, streamingMode := range everyStreamingMode() {
+			shownPasses[name+" streamed "+streamingName] = func() string {
+				return shown(t, streamThoughts(t, rendering, streamingMode), replayColumns)
+			}
+			writtenPasses[name+" streamed "+streamingName] = func() string {
+				return streamThoughts(t, rendering, streamingMode)
+			}
+		}
+	}
+
+	compareWithGolden(t, "reasonings", ".screen", shownPasses)
+	compareWithGolden(t, "reasonings", ".ansi", writtenPasses)
+}
+
+func TestAKeptThoughtClosesEveryRowSoItCannotBleed(t *testing.T) {
+	for name, columns := range everyThinkingWidth() {
+		t.Run(name, func(t *testing.T) {
+			rows := painter.RenderReasoning(structuredThought, columns, output.ReasoningMarkdown)
+			if len(rows) == 0 {
+				t.Fatal("a thought drew nothing")
+			}
+			for _, row := range rows {
+				if !strings.HasSuffix(row, resetSequence) {
+					t.Errorf("row %q does not close its styling, so it bleeds into what follows", row)
+				}
+			}
+		})
+	}
+}
+
 func shownAtWidth(t *testing.T, entries []replayEntry, columns int) string {
 	t.Helper()
 
@@ -5642,6 +5804,13 @@ func streamIntoBuffer(t *testing.T, entries []replayEntry, streamingMode output.
 
 	rig := newReplayRig(t, replayColumns)
 	rig.chat.streamingMode = streamingMode
+
+	return streamThrough(t, rig, entries)
+}
+
+func streamThrough(t *testing.T, rig *replayRig, entries []replayEntry) string {
+	t.Helper()
+
 	rig.chat.currentTurn = Turn{Stream: testRunningTurnStream(), painter: rig.chat.newPainter(true)}
 	rig.chat.screen.ReportProgress(true)
 
@@ -6233,6 +6402,8 @@ func readlineInputStream(t *testing.T, historyLines []string, text string, keypr
 	return screenOutput.String()
 }
 
+const structuredThought = "## A heading\n\n- first\n- second\n"
+
 func drawAThoughtThenACall(self *App, thought string) {
 	picasso := self.newPainter(false)
 	picasso.DrawEvent(agent.Event{Kind: agent.ModelReasoningEvent, Text: thought})
@@ -6243,6 +6414,34 @@ func drawAThoughtThenACall(self *App, thought string) {
 		FallbackRendering: agent.FallbackRendering{Subject: "one.go"},
 	})
 	picasso.Close(dynamic.Done)
+}
+
+func TestReloadingConfigChangesTheReasoningRenderingForTheNextTurn(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	writeLiveConfig(t, path, "[ui]\nreasoning = \"plain\"\n")
+
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	prepareLiveConfig(t, self, path)
+	if self.reasoningRendering != output.ReasoningPlain {
+		t.Fatalf("initial reasoning rendering is %d, want plain", self.reasoningRendering)
+	}
+	drawAThoughtThenACall(self, structuredThought)
+	if drawn := style.Plain(screenOutput.String()); !strings.Contains(drawn, "A heading • first • second") {
+		t.Errorf("a flattened thought drew %q, want it on one line", drawn)
+	}
+
+	writeLiveConfig(t, path, "[ui]\nreasoning = \"markdown\"\n")
+	settleLiveConfig(t, self)
+	if self.reasoningRendering != output.ReasoningMarkdown {
+		t.Errorf("reloaded reasoning rendering is %d, want markdown", self.reasoningRendering)
+	}
+
+	screenOutput.Reset()
+	drawAThoughtThenACall(self, structuredThought)
+	if drawn := style.Plain(screenOutput.String()); !strings.Contains(drawn, "A heading\n\n• first\n• second") {
+		t.Errorf("the next turn drew %q, still flattening the thought", drawn)
+	}
 }
 
 func TestReloadingConfigChangesTheGroupingStraightAway(t *testing.T) {
@@ -6306,6 +6505,7 @@ func prepareLiveConfig(t *testing.T, self *App, path string) {
 	}
 	self.continueMessage = live.ContinueMessage
 	self.streamingMode = live.StreamingMode
+	self.reasoningRendering = live.ReasoningRendering
 	self.screen.SetGrouping(live.Grouping)
 	self.barConfiguration = bar.NewConfiguration(registry, live.SegmentLayout)
 }

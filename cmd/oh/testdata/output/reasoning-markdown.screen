@@ -1,0 +1,454 @@
+=== narrow ===
+
+ think about it in markdown before you
+ answer
+
+
+Checking one.go The first thing to
+settle is which of these holds: • the
+file was read before it was written •
+the file was written before it was read
+func main() { println("one") } So the
+read has to come first.
+read target.txt ✓ 1L
+A plain thought with no markup in it at
+all.
+┌───────┬────────┐ │ what │ when │
+├───────┼────────┤ │ read │ first │
+├───────┼────────┤ │ write │ second │
+└───────┴────────┘
+
+The read came first, and the file holds
+one.
+=== one column ===
+
+
+t
+
+h
+
+i
+
+n
+
+k
+
+a
+
+b
+
+o
+
+u
+
+t
+
+i
+
+t
+
+i
+
+n
+
+m
+
+a
+
+r
+
+k
+
+d
+
+o
+
+w
+
+n
+
+b
+
+e
+
+f
+
+o
+
+r
+
+e
+
+y
+
+o
+
+u
+
+a
+
+n
+
+s
+
+w
+
+e
+
+r
+
+
+C
+h
+e
+c
+k
+i
+n
+g
+o
+n
+e
+.
+g
+o
+T
+h
+e
+f
+i
+r
+s
+t
+t
+h
+i
+n
+g
+t
+o
+s
+e
+t
+t
+l
+e
+i
+s
+w
+h
+i
+c
+h
+o
+f
+t
+h
+e
+s
+e
+h
+o
+l
+d
+s
+:
+•
+t
+h
+e
+f
+i
+l
+e
+w
+a
+s
+r
+e
+a
+d
+b
+e
+f
+o
+r
+e
+i
+t
+w
+a
+s
+w
+r
+i
+t
+t
+e
+n
+•
+t
+h
+e
+f
+i
+l
+e
+w
+a
+s
+w
+r
+i
+t
+t
+e
+n
+b
+e
+f
+o
+r
+e
+i
+t
+w
+a
+s
+r
+e
+a
+d
+f
+u
+n
+c
+m
+a
+i
+n
+(
+)
+{
+p
+r
+i
+n
+t
+l
+n
+(
+"
+o
+n
+e
+"
+)
+}
+S
+o
+t
+h
+e
+r
+e
+a
+d
+h
+a
+s
+t
+o
+c
+o
+m
+e
+f
+i
+r
+s
+t
+.
+✓
+A
+p
+l
+a
+i
+n
+t
+h
+o
+u
+g
+h
+t
+w
+i
+t
+h
+n
+o
+m
+a
+r
+k
+u
+p
+i
+n
+i
+t
+a
+t
+a
+l
+l
+.
+w
+h
+a
+t
+|
+w
+h
+e
+n
+r
+e
+a
+d
+|
+f
+i
+r
+s
+t
+w
+r
+i
+t
+e
+|
+s
+e
+c
+o
+n
+d
+
+T
+h
+e
+r
+e
+a
+d
+c
+a
+m
+e
+f
+i
+r
+s
+t
+,
+a
+n
+d
+t
+h
+e
+f
+i
+l
+e
+h
+o
+l
+d
+s
+o
+n
+e
+.
+=== printed ===
+
+ think about it in markdown before you answer
+
+
+Checking one.go The first thing to settle is which of these holds: • the file was read before it was
+written • the file was written before it was read func main() { println("one") } So the read has to
+come first.
+read target.txt ✓ 1L
+A plain thought with no markup in it at all.
+┌───────┬────────┐ │ what │ when │ ├───────┼────────┤ │ read │ first │ ├───────┼────────┤ │ write │
+second │ └───────┴────────┘
+
+The read came first, and the file holds one.
+=== tiny ===
+
+ think about
+ it in
+ markdown
+ before you
+ answer
+
+
+Checking
+one.go The
+first thing
+to settle is
+which of
+these holds:
+• the file
+was read
+before it
+was written
+• the file
+was written
+before it
+was read
+func main()
+{ println(
+println("one
+") } So the
+read has to
+come first.
+read ✓ 1L
+A plain
+thought with
+no markup in
+it at all.
+┌─────┬────┐
+│ wha │ wh │
+│ t │ en │
+├─────┼────┤
+│ rea │ fi │
+│ d │ rs │ │
+│ t │
+├─────┼────┤
+│ wri │ se │
+│ te │ co │
+│ │ nd │
+└─────┴────┘
+
+The read
+came first,
+and the file
+holds one.
+=== wide ===
+
+ think about it in markdown before you answer
+
+
+Checking one.go The first thing to settle is which of these holds: • the file was read before it was
+written • the file was written before it was read func main() { println("one") } So the read has to
+come first.
+read target.txt ✓ 1L
+A plain thought with no markup in it at all.
+┌───────┬────────┐ │ what │ when │ ├───────┼────────┤ │ read │ first │ ├───────┼────────┤ │ write │
+second │ └───────┴────────┘
+
+The read came first, and the file holds one.

@@ -117,9 +117,10 @@ type App struct {
 	toolOutputLimit     *truncate.Limit
 	onFailure           func(failure error)
 
-	workspace       *work.Space
-	continueMessage string
-	streamingMode   output.StreamingMode
+	workspace          *work.Space
+	continueMessage    string
+	streamingMode      output.StreamingMode
+	reasoningRendering output.ReasoningRendering
 
 	commands   slash.Registry
 	completion slash.Completion
@@ -767,6 +768,7 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		self.continueMessage = result.LiveConfig.ContinueMessage
 		self.editorConfiguration.ReplaceCommand(result.LiveConfig.EditorCommand)
 		self.streamingMode = result.LiveConfig.StreamingMode
+		self.reasoningRendering = result.LiveConfig.ReasoningRendering
 		self.screen.SetGrouping(result.LiveConfig.Grouping)
 		self.toolOutputLimit.Replace(result.LiveConfig.ToolOutputBytes)
 		self.barConfiguration.ReplaceLayout(result.LiveConfig.SegmentLayout)
@@ -946,6 +948,7 @@ func (self *App) restore(storedSession *store.Session) {
 
 func (self *App) newPainter(isRunning bool) *painter.Picasso {
 	picasso := painter.New(self.screen, isRunning, self.agent.Tool, self.workspace, self.streamingMode)
+	picasso.RenderReasoningAs(self.reasoningRendering)
 	if self.screen.IsTerminal() && self.recorder != nil {
 		picasso.LinkToolResults(self.recorder.Name())
 	}

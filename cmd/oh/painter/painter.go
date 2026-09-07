@@ -41,6 +41,7 @@ type Picasso struct {
 	isStale               bool
 	isRunning             bool
 	streamingMode         output.StreamingMode
+	reasoningRendering    output.ReasoningRendering
 	resultLinkSessionName string
 
 	getTool   func(string) (tool.Tool, bool)
@@ -66,6 +67,10 @@ func New(
 	self.reasoning.streamingMode = streamingMode
 
 	return self
+}
+
+func (self *Picasso) RenderReasoningAs(rendering output.ReasoningRendering) {
+	self.reasoningRendering = rendering
 }
 
 func (self *Picasso) LinkToolResults(sessionName string) {
@@ -283,8 +288,17 @@ func getState(status agent.Status) dynamic.RowState {
 	}
 }
 
-func RenderReasoning(thought string, columns int) []string {
+func RenderReasoning(thought string, columns int, rendering output.ReasoningRendering) []string {
 	renderedRows := markdown.Render(thought, columns)
+
+	if rendering == output.ReasoningMarkdown {
+		for i, row := range renderedRows {
+			renderedRows[i] = style.Reasoning.Over(row)
+		}
+
+		return renderedRows
+	}
+
 	plain := style.Plain(strings.Join(renderedRows, "\n"))
 	strippedText := strings.Join(strings.Fields(plain), " ")
 
@@ -373,7 +387,7 @@ func (self *Picasso) settleAnswer() {
 }
 
 func (self *Picasso) drawReasoning(isSettled bool) {
-	rows := RenderReasoning(self.reasoning.Text(), self.screen.Columns())
+	rows := RenderReasoning(self.reasoning.Text(), self.screen.Columns(), self.reasoningRendering)
 
 	isTailHidden := !isSettled && self.streamingMode == output.StreamingModeLine
 

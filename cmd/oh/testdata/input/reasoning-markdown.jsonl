@@ -1,0 +1,7 @@
+{"event":{"kind":"user_message","text":"think about it in markdown before you answer"}}
+{"event":{"kind":"model_reasoning","text":"## Checking `one.go`\n\nThe **first** thing to settle is which of these holds:\n\n- the file was read before it was written\n- the file was written before it was read\n\n```go\nfunc main() {\n\tprintln(\"one\")\n}\n```\n\nSo the read has to come first."}}
+{"event":{"kind":"tool_call_request","id":"call_1","name":"read","arguments":"{\"path\":\"target.txt\"}","render":"target.txt","read_only":true}}
+{"event":{"kind":"tool_call_result","status":"success","text":"one\n","id":"call_1","name":"read","took":0,"stats":{"kind":"read","lines":1,"bytes":4}}}
+{"event":{"kind":"model_reasoning","text":"A plain thought with no markup in it at all."}}
+{"event":{"kind":"model_reasoning","text":"| what | when |\n| --- | --- |\n| read | first |\n| write | second |\n"}}
+{"event":{"kind":"model_message","text":"The read came first, and the file holds `one`."}}

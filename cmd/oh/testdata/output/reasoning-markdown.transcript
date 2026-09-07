@@ -1,0 +1,26 @@
+=== written down ===
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `high`
+- **Provider:** `codex`
+- **Workspace:** `/workspace`
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## User · +0s
+
+think about it in markdown before you answer
+
+## Tool calls · +2s
+
+```
+read: target.txt [ok, 1 line, 4B, call_1]
+```
+
+## Assistant · +6s
+
+The read came first, and the file holds `one`.
+
+
