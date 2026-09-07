@@ -11,44 +11,117 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+const separator = string(os.PathSeparator)
+
+const maxResolutionSteps = 64
+
+func pathComponents(path string) []string {
+	var parts []string
+
+	for part := range strings.SplitSeq(path, separator) {
+		if part != "" && part != "." {
+			parts = append(parts, part)
+		}
+	}
+
+	return parts
+}
+
+func resolvedPath(path string) string {
+	target, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		return path
+	}
+
+	return target
+}
+
+func resolvedRoots(roots []string) []string {
+	paths := make([]string, 0, len(roots))
+
+	for _, root := range roots {
+		paths = append(paths, resolvedPath(root))
+	}
+
+	return paths
+}
+
 func openGrantPath(path string, writableRoots []string) (int, error) {
 	if !filepath.IsAbs(path) {
 		return -1, fmt.Errorf("%s is not an absolute path", path)
 	}
 
-	fd, err := unix.Open("/", unix.O_PATH|unix.O_CLOEXEC, 0)
+	fd, err := unix.Open(separator, unix.O_PATH|unix.O_CLOEXEC, 0)
 	if err != nil {
 		return -1, err
 	}
 
-	currentDir := string(os.PathSeparator)
+	roots := resolvedRoots(writableRoots)
+	currentDir := separator
+	remaining := pathComponents(filepath.Clean(path))
 
-	for part := range strings.SplitSeq(filepath.Clean(path), string(os.PathSeparator)) {
-		if part == "" {
-			continue
+	for steps := 0; len(remaining) > 0; steps++ {
+		if steps > maxResolutionSteps {
+			_ = unix.Close(fd)
+			return -1, fmt.Errorf("%s passes through too many symbolic links", path)
 		}
 
-		flags := unix.O_PATH | unix.O_CLOEXEC
-		if isBeneathAny(currentDir, writableRoots) {
-			flags |= unix.O_NOFOLLOW
-		}
+		part := remaining[0]
+		remaining = remaining[1:]
 
-		next, err := unix.Openat(fd, part, flags, 0)
-		_ = unix.Close(fd)
+		next, err := unix.Openat(fd, part, unix.O_PATH|unix.O_CLOEXEC|unix.O_NOFOLLOW, 0)
 		if err != nil {
+			_ = unix.Close(fd)
 			return -1, err
 		}
 
-		fd = next
-		currentDir = filepath.Join(currentDir, part)
-
-		if flags&unix.O_NOFOLLOW != 0 && isSymbolicLink(fd) {
+		if !isSymbolicLink(next) {
 			_ = unix.Close(fd)
-			return -1, fmt.Errorf("%s is a symbolic link", currentDir)
+			fd = next
+			currentDir = filepath.Join(currentDir, part)
+			continue
 		}
+
+		_ = unix.Close(next)
+
+		if isBeneathAny(currentDir, roots) {
+			_ = unix.Close(fd)
+			return -1, fmt.Errorf("%s is a symbolic link", filepath.Join(currentDir, part))
+		}
+
+		target, err := readLinkAt(fd, part)
+		if err != nil {
+			_ = unix.Close(fd)
+			return -1, err
+		}
+
+		if filepath.IsAbs(target) {
+			root, err := unix.Open(separator, unix.O_PATH|unix.O_CLOEXEC, 0)
+			if err != nil {
+				_ = unix.Close(fd)
+				return -1, err
+			}
+
+			_ = unix.Close(fd)
+			fd = root
+			currentDir = separator
+		}
+
+		remaining = append(pathComponents(target), remaining...)
 	}
 
 	return fd, nil
+}
+
+func readLinkAt(directory int, name string) (string, error) {
+	buffer := make([]byte, unix.PathMax)
+
+	length, err := unix.Readlinkat(directory, name, buffer)
+	if err != nil {
+		return "", err
+	}
+
+	return string(buffer[:length]), nil
 }
 
 func isSymbolicLink(fd int) bool {
@@ -66,7 +139,7 @@ func isBeneathAny(path string, roots []string) bool {
 
 	for _, root := range roots {
 		root = filepath.Clean(root)
-		if path == root || root == "/" || strings.HasPrefix(path, root+string(os.PathSeparator)) {
+		if path == root || root == separator || strings.HasPrefix(path, root+separator) {
 			return true
 		}
 	}
@@ -74,24 +147,48 @@ func isBeneathAny(path string, roots []string) bool {
 	return false
 }
 
-func FirstSymlinkBeneath(path string, roots []string) (string, bool) {
-	current := string(os.PathSeparator)
+func FirstSymlinkBeneath(path string, writableRoots []string) (string, bool) {
+	roots := resolvedRoots(writableRoots)
+	current := separator
+	remaining := pathComponents(filepath.Clean(path))
 
-	for part := range strings.SplitSeq(filepath.Clean(path), string(os.PathSeparator)) {
-		if part == "" {
-			continue
+	for steps := 0; len(remaining) > 0; steps++ {
+		if steps > maxResolutionSteps {
+			return "", false
 		}
 
-		current = filepath.Join(current, part)
+		part := remaining[0]
+		remaining = remaining[1:]
+		candidate := filepath.Join(current, part)
 
-		info, err := os.Lstat(current)
+		info, err := os.Lstat(candidate)
 		if err != nil {
 			return "", false
 		}
 
-		if info.Mode()&os.ModeSymlink != 0 && isBeneathAny(filepath.Dir(current), roots) {
-			return current, true
+		if info.Mode()&os.ModeSymlink == 0 {
+			if len(remaining) > 0 && !info.IsDir() {
+				return "", false
+			}
+
+			current = candidate
+			continue
 		}
+
+		if isBeneathAny(current, roots) {
+			return candidate, true
+		}
+
+		target, err := os.Readlink(candidate)
+		if err != nil {
+			return "", false
+		}
+
+		if filepath.IsAbs(target) {
+			current = separator
+		}
+
+		remaining = append(pathComponents(target), remaining...)
 	}
 
 	return "", false

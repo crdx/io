@@ -1,0 +1,4 @@
+go test fuzz v1
+[]byte("01007010700z")
+[]byte("0")
+uint16(98)
