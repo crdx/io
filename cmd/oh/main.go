@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/sandbox/keeper"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/notify"
@@ -413,6 +414,15 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		args.Message = startup.JoinPrompt(initialFilesMessage, args.Message)
 	}
 
+	sandboxRunner, closeKeeper, keeperRefusal := openRunner(ctx, args.Yolo)
+	defer closeKeeper()
+
+	if keeperRefusal != nil {
+		_, _ = fmt.Fprintln(notices, style.Change(
+			"commands cannot reach one another: "+keeperRefusal.Error(),
+		))
+	}
+
 	var systemPrompt string
 	if resumedSession != nil && resumedSession.Meta.SystemPrompt != "" {
 		systemPrompt = resumedSession.Meta.SystemPrompt
@@ -463,7 +473,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	snapshots := file.NewSnapshots()
 	toolboxTools := toolbox.Rummage(files, snapshots)
-	shellTool := shell.New(workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo)
+	shellTool := shell.New(workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo, sandboxRunner)
 
 	toolboxTools = append(toolboxTools, shellTool)
 	if notify.IsAvailable() {
@@ -624,4 +634,17 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	return "", nil
+}
+
+func openRunner(ctx context.Context, isYolo bool) (sandbox.Runner, func(), error) {
+	if isYolo {
+		return sandbox.Direct(), func() {}, nil
+	}
+
+	keeperProcess, err := keeper.Open(ctx)
+	if err != nil {
+		return sandbox.Direct(), func() {}, err
+	}
+
+	return sandbox.In(keeperProcess), func() { _ = keeperProcess.Close() }, nil
 }

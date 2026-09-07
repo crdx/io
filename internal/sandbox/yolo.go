@@ -31,7 +31,15 @@ func runYolo(ctx context.Context, directory string, command string, policy Polic
 	}
 
 	err := child.Run()
-	result := collect(child, &output)
+
+	status := collect(child)
+	result := Result{
+		Output:     output.String(),
+		Code:       status.Code,
+		Signal:     status.Signal,
+		CPUTime:    status.CPUTime,
+		PeakMemory: status.PeakMemory,
+	}
 
 	if ctx.Err() != nil {
 		return stoppedResult(ctx, policy, result, startedAt)

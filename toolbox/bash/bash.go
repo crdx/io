@@ -28,6 +28,7 @@ type Args struct {
 func New(
 	root *file.Root,
 	fresh func(context.Context) (sandbox.Policy, error),
+	runner sandbox.Runner,
 ) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
@@ -46,7 +47,7 @@ func New(
 			if err != nil {
 				return "", tool.Stats{}, err
 			}
-			return exec(ctx, root, policy, args)
+			return exec(ctx, runner, root, policy, args)
 		})
 }
 
@@ -184,11 +185,12 @@ func spread(command string) string {
 
 func exec(
 	ctx context.Context,
+	runner sandbox.Runner,
 	root *file.Root,
 	policy sandbox.Policy,
 	args Args,
 ) (string, tool.Stats, error) {
-	result, err := sandbox.Run(ctx, root.Name(), args.Command, policy)
+	result, err := runner.Run(ctx, root.Name(), args.Command, policy)
 	stats := tool.Stats{
 		Kind:       tool.StatsResources,
 		CPUTime:    result.CPUTime,

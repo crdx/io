@@ -5461,6 +5461,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 		bash.New(
 			files,
 			func(context.Context) (sandbox.Policy, error) { return sandbox.Policy{}, nil },
+			sandbox.Direct(),
 		),
 		notify.New(screen.WriteEscape),
 	)
@@ -9899,7 +9900,7 @@ func newSessionGoldenWithheldShell(t *testing.T) tool.Tool {
 	}
 	t.Cleanup(pathAccess.Close)
 
-	return shell.New(workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files, false)
+	return shell.New(workspace, t.TempDir(), t.TempDir(), pathAccess, mode, files, false, sandbox.Direct())
 }
 
 func serveSessionGoldenResponse(

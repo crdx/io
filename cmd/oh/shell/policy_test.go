@@ -133,7 +133,7 @@ func TestAWithheldShellIsStillOfferedAndTurnsCommandsAway(t *testing.T) {
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read)
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), pathAccess, mode, files, false)
+	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), pathAccess, mode, files, false, sandbox.Direct())
 
 	if shell.Name() != "bash" {
 		t.Errorf("expected the shell to be offered as bash, got %q", shell.Name())
@@ -169,7 +169,7 @@ func TestCommandsKeepTheMiseDataDirectoryAfterACapabilityChange(t *testing.T) {
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read | caps.Shell)
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(workspace, home, tmp, pathAccess, mode, files, false)
+	shell := New(workspace, home, tmp, pathAccess, mode, files, false, sandbox.Direct())
 	run := func() {
 		call, parseErr := shell.Parse(`{"command":"printf %s \"$MISE_DATA_DIR\""}`)
 		if parseErr != nil {
@@ -213,7 +213,7 @@ func TestCommandsMayWriteRepositoryMetadataAfterGitIsGranted(t *testing.T) {
 	mode := caps.NewMode(initialCaps)
 	files := file.New(workspaceRoot, caps.RefuseWrite(mode))
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(workspace, home, tmp, pathAccess, mode, files, false)
+	shell := New(workspace, home, tmp, pathAccess, mode, files, false, sandbox.Direct())
 
 	run := func() error {
 		call, parseErr := shell.Parse(`{"command":"touch .git/proof"}`)
@@ -261,7 +261,7 @@ func TestTemporaryPathAccessChangesTheNextShellCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer access.Close()
-	shellTool := New(workspace, home, tmp, access, mode, files, false)
+	shellTool := New(workspace, home, tmp, access, mode, files, false, sandbox.Direct())
 	run := func() (string, error) {
 		arguments, marshalErr := json.Marshal(map[string]string{"command": "cat " + strconv.Quote(externalFile)})
 		if marshalErr != nil {
@@ -921,7 +921,7 @@ func TestASymlinkedCacheIsReportedToWhoeverAskedForTheCommand(t *testing.T) {
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Write | caps.Shell)
 	pathAccess := newTestPathAccess(t, files, mode)
-	shell := New(workspace, home, t.TempDir(), pathAccess, mode, files, false)
+	shell := New(workspace, home, t.TempDir(), pathAccess, mode, files, false, sandbox.Direct())
 
 	call, err := shell.Parse(`{"command":"echo one"}`)
 	if err != nil {
@@ -949,7 +949,7 @@ func TestAWaivedSandboxStillWithholdsAnUngrantedShell(t *testing.T) {
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read)
-	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), newTestPathAccess(t, files, mode), mode, files, true)
+	shell := New(t.TempDir(), t.TempDir(), t.TempDir(), newTestPathAccess(t, files, mode), mode, files, true, sandbox.Direct())
 
 	call, err := shell.Parse(`{"command":"echo one"}`)
 	if err != nil {
@@ -973,7 +973,7 @@ func TestAWaivedSandboxRunsACommandWhereTheSandboxCouldNot(t *testing.T) {
 
 	files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
 	mode := caps.NewMode(caps.Read | caps.Shell)
-	shell := New(workspace, home, tmp, newTestPathAccess(t, files, mode), mode, files, true)
+	shell := New(workspace, home, tmp, newTestPathAccess(t, files, mode), mode, files, true, sandbox.Direct())
 
 	call, err := shell.Parse(`{"command":"printf %s \"$HOME:$TMPDIR\""}`)
 	if err != nil {

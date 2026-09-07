@@ -335,6 +335,7 @@ func New(
 	mode *caps.Mode,
 	files *file.Root,
 	isYolo bool,
+	runner sandbox.Runner,
 ) tool.Tool {
 	fresh := func(ctx context.Context) (sandbox.Policy, error) {
 		currentCaps := mode.Current()
@@ -358,7 +359,7 @@ func New(
 		return policy, nil
 	}
 
-	return bash.New(files, fresh)
+	return bash.New(files, fresh, runner)
 }
 
 func allWritablePaths(workspaceDir string, homeDir string, extraPaths []string, currentCaps caps.Set) []string {

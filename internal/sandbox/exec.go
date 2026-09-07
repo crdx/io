@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	"crdx.org/io/internal/sandbox/unmapped"
+	"crdx.org/io/internal/sandbox/keeper"
 	"crdx.org/io/internal/stop"
 	"crdx.org/io/internal/util"
 )
@@ -37,6 +37,8 @@ const (
 )
 
 func Init() {
+	keeper.Init()
+
 	if os.Getenv(envProbe) != "" {
 		if err := applyNetwork(); err != nil {
 			fmt.Fprint(os.Stderr, notice, err, "\n")
@@ -161,85 +163,25 @@ type Result struct {
 }
 
 func Run(ctx context.Context, directory string, command string, policy Policy) (Result, error) {
-	if policy.Yolo {
-		return runYolo(ctx, directory, command, policy)
-	}
-
-	if err := validate(ctx, policy); err != nil {
-		return Result{}, err
-	}
-
-	encodedPolicy, err := json.Marshal(policy)
-	if err != nil {
-		return Result{}, fmt.Errorf("could not write the policy: %w", err)
-	}
-
-	if policy.Timeout > 0 {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, policy.Timeout)
-		defer cancel()
-	}
-
-	var output boundedBuffer
-
-	startedAt := time.Now()
-
-	stub := exec.CommandContext(ctx, executable)
-	stub.Dir = directory
-	stub.Stdout = &output
-	stub.Stderr = &output
-	stub.Env = append(
-		passedEnvironment(policy.Env),
-		append(
-			[]string{envPolicy + "=" + string(encodedPolicy), envCommand + "=" + command},
-			unmapped.Environment()...,
-		)...,
-	)
-
-	stub.SysProcAttr = namespaceAttributes()
-	stub.Cancel = func() error {
-		return syscall.Kill(-stub.Process.Pid, syscall.SIGKILL)
-	}
-
-	err = stub.Run()
-
-	result := collect(stub, &output)
-
-	if ctx.Err() != nil {
-		return stoppedResult(ctx, policy, result, startedAt)
-	}
-
-	var exitError *exec.ExitError
-	if err != nil && !errors.As(err, &exitError) {
-		return Result{}, fmt.Errorf("could not run the command: %w", err)
-	}
-
-	if result.Code == notStarted && strings.HasPrefix(output.String(), notice) {
-		return Result{}, fmt.Errorf(
-			"the sandbox could not start: %s",
-			strings.TrimSpace(strings.TrimPrefix(output.String(), notice)),
-		)
-	}
-
-	return result, nil
+	return Direct().Run(ctx, directory, command, policy)
 }
 
-func collect(child *exec.Cmd, output *boundedBuffer) Result {
-	result := Result{Output: output.String()}
+func collect(child *exec.Cmd) keeper.Status {
+	var status keeper.Status
 	if child.ProcessState == nil {
-		return result
+		return status
 	}
 
-	result.Code = child.ProcessState.ExitCode()
-	result.CPUTime = child.ProcessState.UserTime() + child.ProcessState.SystemTime()
-	if status, ok := child.ProcessState.Sys().(syscall.WaitStatus); ok && status.Signaled() {
-		result.Signal = status.Signal()
+	status.Code = child.ProcessState.ExitCode()
+	status.CPUTime = child.ProcessState.UserTime() + child.ProcessState.SystemTime()
+	if waitStatus, ok := child.ProcessState.Sys().(syscall.WaitStatus); ok && waitStatus.Signaled() {
+		status.Signal = waitStatus.Signal()
 	}
 	if usage, ok := child.ProcessState.SysUsage().(*syscall.Rusage); ok && usage.Maxrss > 0 {
-		result.PeakMemory = uint64(usage.Maxrss) * 1024
+		status.PeakMemory = uint64(usage.Maxrss) * 1024
 	}
 
-	return result
+	return status
 }
 
 func validate(ctx context.Context, policy Policy) error {
