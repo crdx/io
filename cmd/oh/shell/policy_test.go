@@ -1016,3 +1016,19 @@ func TestAWaivedSandboxBoundsNothingButTheDeadline(t *testing.T) {
 		}
 	}
 }
+
+func TestTheProcessLimitClearsAConcurrentBuild(t *testing.T) {
+	const observedPeakTasks = 687
+
+	policy, err := createTestPolicy(t, t.TempDir(), t.TempDir(), t.TempDir(), Paths{}, caps.Shell)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if policy.Processes < 2*observedPeakTasks {
+		t.Errorf(
+			"a limit of %d tasks leaves no room above the %d a concurrent build was measured to reach, "+
+				"and a build that runs out of them reports no failing test at all",
+			policy.Processes, observedPeakTasks,
+		)
+	}
+}

@@ -25,9 +25,9 @@ import (
 const (
 	shellTimeout    = 5 * time.Minute
 	shellCPUPercent = 80
-	shellFileSize   = 1024 << 20
-	shellOpenFiles  = 4096
-	shellProcesses  = 1024
+	shellFileSize   = 64 << 30
+	shellOpenFiles  = 1 << 20
+	shellProcesses  = 8192
 
 	goBuildCacheDir  = "go-build"
 	goModuleCacheDir = "go-mod"
