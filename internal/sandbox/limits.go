@@ -30,6 +30,11 @@ func applyLimits(policy Policy) error {
 
 		value := &unix.Rlimit{Cur: limit.value, Max: limit.value}
 
+		var ceiling unix.Rlimit
+		if err := unix.Getrlimit(limit.resource, &ceiling); err == nil && ceiling.Max < limit.value {
+			value = &unix.Rlimit{Cur: ceiling.Max, Max: ceiling.Max}
+		}
+
 		if err := unix.Setrlimit(limit.resource, value); err != nil {
 			return fmt.Errorf("could not limit resource %d: %w", limit.resource, err)
 		}

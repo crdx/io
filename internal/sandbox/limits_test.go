@@ -133,3 +133,26 @@ func TestAPolicyNamingNoLimitsLeavesThemAloneApartFromCores(t *testing.T) {
 		t.Errorf("got core limit %+v, want no core dump of a confined command", cores)
 	}
 }
+
+func TestALimitAboveTheInheritedCeilingIsClampedToIt(t *testing.T) {
+	var ceiling unix.Rlimit
+	if err := unix.Getrlimit(unix.RLIMIT_NPROC, &ceiling); err != nil {
+		t.Skipf("the task ceiling could not be read: %v", err)
+	}
+	if ceiling.Max == unix.RLIM_INFINITY {
+		t.Skip("there is no ceiling to clamp to")
+	}
+
+	//nolint:gosec // the ceiling is a count that fits
+	if err := applyLimits(Policy{Processes: int64(ceiling.Max) * 2}); err != nil {
+		t.Errorf("asking for more tasks than the ceiling allows failed instead of clamping: %v", err)
+	}
+
+	var applied unix.Rlimit
+	if err := unix.Getrlimit(unix.RLIMIT_NPROC, &applied); err != nil {
+		t.Fatal(err)
+	}
+	if applied.Cur != ceiling.Max {
+		t.Errorf("got a limit of %d tasks, want it clamped to the ceiling of %d", applied.Cur, ceiling.Max)
+	}
+}
