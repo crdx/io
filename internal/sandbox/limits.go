@@ -2,8 +2,11 @@ package sandbox
 
 import (
 	"fmt"
+	"path/filepath"
 	"slices"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	"crdx.org/io/internal/util/pathutil"
 
@@ -43,7 +46,43 @@ func applyLimits(policy Policy) error {
 	return nil
 }
 
+func namedPathSane(path string) error {
+	if !filepath.IsAbs(path) {
+		return fmt.Errorf("%q is not an absolute path, so it names nothing to grant", path)
+	}
+
+	if strings.ContainsRune(path, 0) {
+		return fmt.Errorf("%q carries a null byte, so no command can be told about it", path)
+	}
+
+	if !utf8.ValidString(path) {
+		return fmt.Errorf("%q is not valid UTF-8, so the command would be confined to another path", path)
+	}
+
+	return nil
+}
+
+func (self Policy) namedPathsSane() error {
+	paths := slices.Concat(self.Read, self.Write, self.Exec, self.Sockets)
+
+	if self.TmpDir != "" {
+		paths = append(paths, self.TmpDir)
+	}
+
+	for _, path := range paths {
+		if err := namedPathSane(path); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (self Policy) sane() error {
+	if err := self.namedPathsSane(); err != nil {
+		return err
+	}
+
 	if self.FileSize < 0 {
 		return fmt.Errorf("a file size limit of %d is not a size", self.FileSize)
 	}
