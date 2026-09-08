@@ -13,8 +13,13 @@ func CompactDuration(took time.Duration) string {
 		}
 		return fmt.Sprintf("%.1fs", tenths)
 	}
-	if took%time.Second == 0 && took < time.Minute {
+	switch {
+	case took%time.Second == 0 && took < time.Minute:
 		return fmt.Sprintf("%ds", int(took.Seconds()))
+	case took%time.Minute == 0 && took < time.Hour:
+		return fmt.Sprintf("%dm", int(took.Minutes()))
+	case took%time.Hour == 0 && took < 100*time.Hour:
+		return fmt.Sprintf("%dh", int(took.Hours()))
 	}
 	return FormatDuration(took)
 }

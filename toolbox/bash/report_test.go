@@ -100,9 +100,9 @@ func TestACommandKilledForItsProcessorTimeIsToldTheLimitAndWhatItUsed(t *testing
 
 	for _, want := range []string{
 		"killed by SIGKILL",
-		"each process 1h00m of processor time",
+		"each process 1h of processor time",
 		"counted across every thread it runs",
-		"after 5m00s of wall clock",
+		"after 5m of wall clock",
 		"used 1h30m of processor time between them",
 	} {
 		if !strings.Contains(got, want) {
@@ -160,7 +160,7 @@ func TestASignalTheCommandItselfDiedOfIsReportedWithoutHedging(t *testing.T) {
 	if strings.Contains(got, "the shell reports") {
 		t.Errorf("got %q, want no hedge where the kill was seen rather than inferred", got)
 	}
-	if !strings.Contains(got, "each process 1h00m of processor time") {
+	if !strings.Contains(got, "each process 1h of processor time") {
 		t.Errorf("got %q, want the processor limit named", got)
 	}
 }

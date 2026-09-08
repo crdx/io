@@ -12,28 +12,28 @@ exit(2)
 === a kill the sandbox saw itself ===
 exit(-1)
 note: the command was killed by SIGKILL.
-the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
+the sandbox gives each process 1h of processor time, counted across every thread it runs, and stops the whole command after 5m of wall clock.
 every process this command started used 1h30m of processor time between them.
 
 === a kill only the shell saw ===
 exit(137):
 error: recipe `lint` was terminated on line 104 by signal 9
 note: the shell reports that a process was killed by SIGKILL.
-the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
+the sandbox gives each process 1h of processor time, counted across every thread it runs, and stops the whole command after 5m of wall clock.
 every process this command started used 1h01m of processor time between them.
 
 === a processor limit only the shell saw ===
 exit(152):
 /workspace/script: line 3:  41 Cpu time limit exceeded  ./spin
 note: the shell reports that a process was killed by SIGXCPU.
-the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
+the sandbox gives each process 1h of processor time, counted across every thread it runs, and stops the whole command after 5m of wall clock.
 every process this command started used 59m58s of processor time between them.
 
 === a processor limit the sandbox saw itself ===
 exit(-1)
 note: the command was killed by SIGXCPU.
-the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
-every process this command started used 1h00m of processor time between them.
+the sandbox gives each process 1h of processor time, counted across every thread it runs, and stops the whole command after 5m of wall clock.
+every process this command started used 1h of processor time between them.
 
 === a kill for writing too large a file ===
 exit(153):
@@ -83,7 +83,7 @@ writable: /workspace
 exit(137):
 cp: cannot open 'x': Permission denied
 note: the shell reports that a process was killed by SIGKILL.
-the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
+the sandbox gives each process 1h of processor time, counted across every thread it runs, and stops the whole command after 5m of wall clock.
 every process this command started used 3s of processor time between them.
 
 === a fork the task limit refused ===
@@ -113,8 +113,8 @@ the sandbox lets a command write no more than 1G to a single file.
 exit(1):
 /workspace/script: line 3: Cpu time limit exceeded
 note: the sandbox stopped this command for using too much.
-the sandbox gives each process 1h00m of processor time, counted across every thread it runs, and stops the whole command after 5m00s of wall clock.
-every process this command started used 59m00s of processor time between them.
+the sandbox gives each process 1h of processor time, counted across every thread it runs, and stops the whole command after 5m of wall clock.
+every process this command started used 59m of processor time between them.
 
 === a command that overran ===
 exit(1):
