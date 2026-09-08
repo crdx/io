@@ -249,9 +249,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 	if forkSource != nil {
-		forkFile := startup.InitialFile{SourcePath: forkSource.InitialFilePath, DisplayName: forkSource.InitialFileName}
-		args.AddedFiles = append([]startup.InitialFile{forkFile}, args.AddedFiles...)
-		args.Message = forkSource.InitialUserMessage
+		args.Message = forkSource.GetInitialUserMessage(forkSource.DroppedChatName)
 	}
 
 	resumedSession, err := sessions.LoadForResume(sessionsDir, workspace, args.Session)
@@ -404,9 +402,28 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	closeDrops, areDropsMounted, err := drops.Mount(files, sessionInfo.Directory)
-	if err != nil {
-		return "", fmt.Errorf("mount clipboard images: %w", err)
+	closeDrops := func() error { return nil }
+	areDropsMounted := false
+	mountDrops := func(shouldExist bool) error {
+		if areDropsMounted {
+			return nil
+		}
+
+		nextCloseDrops, areNewDropsMounted, err := drops.Mount(files, sessionInfo.Directory)
+		if err != nil {
+			return err
+		}
+		if shouldExist && !areNewDropsMounted {
+			return errors.New("the drops directory disappeared")
+		}
+		if areNewDropsMounted {
+			closeDrops = nextCloseDrops
+			areDropsMounted = true
+		}
+		return nil
+	}
+	if err := mountDrops(false); err != nil {
+		return "", fmt.Errorf("mount drops: %w", err)
 	}
 	defer func() { _ = closeDrops() }()
 
@@ -472,6 +489,18 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		if err := log.SetMeta(meta); err != nil {
 			return "", err
 		}
+	}
+
+	if forkSource != nil {
+		transcriptPath, err := forkSource.CopyChat(sessionInfo.Directory, log.EnsurePersisted)
+		if err != nil {
+			return "", fmt.Errorf("copy the forked session chat: %w", err)
+		}
+		if err := mountDrops(true); err != nil {
+			_ = os.Remove(transcriptPath)
+			return "", fmt.Errorf("make the forked session chat readable: %w", err)
+		}
+		args.Message = forkSource.GetMessageWithChatAt(args.Message, transcriptPath)
 	}
 
 	tmpRoot, err := shell.MountTemporaryDirectory(files, tmpDir)
@@ -612,21 +641,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	app.saveClipboardImage = func() (string, error) {
 		path, err := clipboard.SaveImage(sessionInfo.Directory, log.EnsurePersisted)
-		if err != nil || areDropsMounted {
-			return path, err
+		if err != nil {
+			return "", err
 		}
-
-		nextCloseDrops, areNewDropsMounted, mountError := drops.Mount(files, sessionInfo.Directory)
-		if mountError != nil {
+		if err := mountDrops(true); err != nil {
 			_ = os.Remove(path)
-			return "", fmt.Errorf("make the clipboard image readable: %w", mountError)
+			return "", fmt.Errorf("make the clipboard image readable: %w", err)
 		}
-		if !areNewDropsMounted {
-			_ = os.Remove(path)
-			return "", errors.New("the clipboard image directory disappeared")
-		}
-		closeDrops = nextCloseDrops
-		areDropsMounted = true
 		return path, nil
 	}
 

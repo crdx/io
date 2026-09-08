@@ -3257,6 +3257,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"corrupt-session":       {".txt"},
 		"default-bar":           {".ansi", ".screen"},
 		"feedback":              {".ansi", ".screen", ".txt"},
+		"fork-message":          {".txt"},
 		"context":               {".prompt"},
 		"context-drops":         {".prompt"},
 		"context-jobs":          {".prompt"},
@@ -4970,6 +4971,31 @@ func TestPick(t *testing.T) {
 	}
 
 	screen.End()
+}
+
+func TestForkMessageMatchesGolden(t *testing.T) {
+	directory := t.TempDir()
+	workspaceDirectory := t.TempDir()
+	writer, err := store.Create(directory, store.Meta{WorkspaceDir: workspaceDirectory})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = writer.Close() }()
+	if err := writer.Event(agent.Event{Kind: agent.UserMessageEvent, Text: "begin"}); err != nil {
+		t.Fatal(err)
+	}
+
+	forkSource, err := sessions.GetForkSource(directory, work.At(workspaceDirectory), writer.Name(), "focus on tests")
+	if err != nil {
+		t.Fatal(err)
+	}
+	destinationPath := filepath.Join("/state/sessions/new-otter/drops", forkSource.DroppedChatName)
+	message := forkSource.GetInitialUserMessage(destinationPath)
+	message = strings.ReplaceAll(message, writer.Name(), "source-otter")
+
+	compareWithGolden(t, "fork-message", ".txt", map[string]func() string{
+		"forked chat in drops": func() string { return message },
+	})
 }
 
 type promptGolden struct {

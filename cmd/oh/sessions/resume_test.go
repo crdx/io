@@ -116,25 +116,53 @@ func TestGettingAForkSourcePreparesTheNewConversation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	wantInitialFilePath := filepath.Join(directory, writer.Name(), "chat.md")
-	if forkSource.InitialFilePath != wantInitialFilePath {
-		t.Errorf("got initial file %q, want %q", forkSource.InitialFilePath, wantInitialFilePath)
+	wantSourceChatPath := filepath.Join(directory, writer.Name(), "chat.md")
+	if forkSource.SourceChatPath != wantSourceChatPath {
+		t.Errorf("got initial file %q, want %q", forkSource.SourceChatPath, wantSourceChatPath)
 	}
-	wantInitialFileName := writer.Name() + ".chat.md"
-	if forkSource.InitialFileName != wantInitialFileName {
-		t.Errorf("got initial file name %q, want %q", forkSource.InitialFileName, wantInitialFileName)
+	wantDroppedChatName := writer.Name() + ".chat.md"
+	if forkSource.DroppedChatName != wantDroppedChatName {
+		t.Errorf("got initial file name %q, want %q", forkSource.DroppedChatName, wantDroppedChatName)
 	}
-	wantMessage := forkSourcePrompt(writer.Name()) + "\n\nfocus on tests"
-	if forkSource.InitialUserMessage != wantMessage {
-		t.Errorf("got message %q, want %q", forkSource.InitialUserMessage, wantMessage)
+	newSessionDirectory := filepath.Join(directory, "new-otter")
+	destinationPath, err := forkSource.CopyChat(newSessionDirectory, func() error {
+		return os.Mkdir(newSessionDirectory, 0o700)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantDestinationPath := filepath.Join(newSessionDirectory, "drops", wantDroppedChatName)
+	if destinationPath != wantDestinationPath {
+		t.Errorf("copied chat is %q, want %q", destinationPath, wantDestinationPath)
+	}
+	dropsRoot, err := os.OpenRoot(filepath.Dir(destinationPath))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = dropsRoot.Close() }()
+	copiedChat, err := dropsRoot.ReadFile(filepath.Base(destinationPath))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(copiedChat), "begin") {
+		t.Errorf("copied chat does not contain the source conversation: %q", copiedChat)
+	}
+	wantMessage := forkSourcePrompt(writer.Name(), destinationPath) + "\n\nfocus on tests"
+	initialUserMessage := forkSource.GetInitialUserMessage(forkSource.DroppedChatName)
+	initialUserMessage = "added files\n\n" + initialUserMessage + "\n\npiped prompt"
+	gotMessage := forkSource.GetMessageWithChatAt(initialUserMessage, destinationPath)
+	wantMessage = "added files\n\n" + wantMessage + "\n\npiped prompt"
+	if gotMessage != wantMessage {
+		t.Errorf("got message %q, want %q", gotMessage, wantMessage)
 	}
 
 	forkSource, err = GetForkSource(directory, work.At(workspaceDirectory), writer.Name(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if forkSource.InitialUserMessage != forkSourcePrompt(writer.Name()) {
-		t.Errorf("got default message %q, want %q", forkSource.InitialUserMessage, forkSourcePrompt(writer.Name()))
+	wantMessage = forkSourcePrompt(writer.Name(), destinationPath)
+	if got := forkSource.GetInitialUserMessage(destinationPath); got != wantMessage {
+		t.Errorf("got default message %q, want %q", got, wantMessage)
 	}
 }
 

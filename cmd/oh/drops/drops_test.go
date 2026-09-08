@@ -17,6 +17,60 @@ func TestDropsUseADirectoryInsideTheSession(t *testing.T) {
 	}
 }
 
+func TestAFileIsCopiedPrivatelyIntoDrops(t *testing.T) {
+	sourceDirectory := t.TempDir()
+	sourcePath := filepath.Join(sourceDirectory, "chat.md")
+	if err := os.WriteFile(sourcePath, []byte("conversation"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+	path, err := CopyFile(sessionDirectory, func() error {
+		return os.Mkdir(sessionDirectory, 0o700)
+	}, sourcePath, "oaken-elephant.chat.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantPath := filepath.Join(sessionDirectory, "drops", "oaken-elephant.chat.md")
+	if path != wantPath {
+		t.Errorf("copied path is %q, want %q", path, wantPath)
+	}
+
+	dropsRoot, err := os.OpenRoot(GetDirectory(sessionDirectory))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = dropsRoot.Close() }()
+	content, err := dropsRoot.ReadFile("oaken-elephant.chat.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != "conversation" {
+		t.Errorf("copied chat reads %q", content)
+	}
+	fileInfo, err := dropsRoot.Stat("oaken-elephant.chat.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fileInfo.Mode().Perm() != 0o600 {
+		t.Errorf("copied chat mode is %o, want 600", fileInfo.Mode().Perm())
+	}
+}
+
+func TestADropFileNameCannotLeaveDrops(t *testing.T) {
+	wasEnsured := false
+	_, err := CopyFile(t.TempDir(), func() error {
+		wasEnsured = true
+		return nil
+	}, filepath.Join(t.TempDir(), "chat.md"), "../chat.md")
+	if err == nil {
+		t.Fatal("escaping drop file name was accepted")
+	}
+	if wasEnsured {
+		t.Error("escaping drop file name persisted the session")
+	}
+}
+
 func TestExistingDropsAreMountedReadOnly(t *testing.T) {
 	sessionDirectory := t.TempDir()
 	directory := GetDirectory(sessionDirectory)

@@ -63,12 +63,9 @@ func SaveImage(sessionDirectory string, ensureSession func() error) (string, err
 			continue
 		}
 
-		if err := ensureSession(); err != nil {
-			return "", fmt.Errorf("prepare the session directory: %w", err)
-		}
-		directory := drops.GetDirectory(sessionDirectory)
-		if err := os.MkdirAll(directory, 0o700); err != nil {
-			return "", fmt.Errorf("prepare the image directory: %w", err)
+		directory, err := drops.Prepare(sessionDirectory, ensureSession)
+		if err != nil {
+			return "", err
 		}
 
 		path, err := save(ctx, availableSource, imageFormat, directory)

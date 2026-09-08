@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"crdx.org/io/session"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/drops"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/work"
@@ -16,23 +18,39 @@ import (
 const sessionTranscriptName = "chat.md"
 
 type ForkSource struct {
-	InitialFilePath    string
-	InitialFileName    string
-	InitialUserMessage string
+	SourceChatPath  string
+	DroppedChatName string
+	sourceName      string
+	userMessage     string
 }
 
 func forkedTranscriptName(sourceName string) string {
 	return sourceName + "." + sessionTranscriptName
 }
 
-func forkSourcePrompt(sourceName string) string {
-	transcriptName := forkedTranscriptName(sourceName)
+func forkSourcePrompt(sourceName string, transcriptPath string) string {
 	return fmt.Sprintf(
 		"This session was forked from %s.\n"+
 			"Check %s's size first, then read its head and tail before continuing.\n"+
 			"Its own opening message will say whether %s was forked from an earlier session.",
-		sourceName, transcriptName, sourceName,
+		sourceName, transcriptPath, sourceName,
 	)
+}
+
+func (self *ForkSource) GetInitialUserMessage(transcriptPath string) string {
+	initialUserMessage := forkSourcePrompt(self.sourceName, transcriptPath)
+	if self.userMessage != "" {
+		initialUserMessage += "\n\n" + self.userMessage
+	}
+	return initialUserMessage
+}
+
+func (self *ForkSource) GetMessageWithChatAt(message string, transcriptPath string) string {
+	return strings.Replace(message, self.DroppedChatName, transcriptPath, 1)
+}
+
+func (self *ForkSource) CopyChat(sessionDirectory string, ensureSession func() error) (string, error) {
+	return drops.CopyFile(sessionDirectory, ensureSession, self.SourceChatPath, self.DroppedChatName)
 }
 
 func GetForkSource(directory string, workspace *work.Space, name string, userMessage string) (*ForkSource, error) {
@@ -48,15 +66,11 @@ func GetForkSource(directory string, workspace *work.Space, name string, userMes
 		return nil, err
 	}
 
-	initialUserMessage := forkSourcePrompt(storedSession.Name)
-	if userMessage != "" {
-		initialUserMessage += "\n\n" + userMessage
-	}
-
 	return &ForkSource{
-		InitialFilePath:    filepath.Join(directory, storedSession.Name, sessionTranscriptName),
-		InitialFileName:    forkedTranscriptName(storedSession.Name),
-		InitialUserMessage: initialUserMessage,
+		SourceChatPath:  filepath.Join(directory, storedSession.Name, sessionTranscriptName),
+		DroppedChatName: forkedTranscriptName(storedSession.Name),
+		sourceName:      storedSession.Name,
+		userMessage:     userMessage,
 	}, nil
 }
 
