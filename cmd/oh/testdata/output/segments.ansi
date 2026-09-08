@@ -36,6 +36,18 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫\e[0m\e[38;
 \e[38;2;192;128;80m·✦\e[0m
 === activity-spinner / running second frame ===
 \e[38;2;192;128;80m·✦\e[0m
+=== cache-usage / every token read ===
+\e[38;2;129;162;190m1h\e[0m 100\e[38;2;150;152;150m%\e[0m
+=== cache-usage / mostly read ===
+\e[38;2;129;162;190m1h\e[0m 93\e[38;2;150;152;150m%\e[0m
+=== cache-usage / no lifetime declared ===
+93\e[38;2;150;152;150m%\e[0m
+=== cache-usage / nothing asked yet ===
+\e[38;2;129;162;190m1h\e[0m
+=== cache-usage / rebuilt from cold ===
+\e[38;2;129;162;190m1h\e[0m 1\e[38;2;150;152;150m%\e[0m
+=== cache-usage / the short lifetime ===
+\e[38;2;129;162;190m5m\e[0m 93\e[38;2;150;152;150m%\e[0m
 === context-usage / known ===
 91\e[38;2;150;152;150m% \e[0m182\e[38;2;150;152;150mK/\e[0m200\e[38;2;150;152;150mK\e[0m
 === context-usage / one million ===

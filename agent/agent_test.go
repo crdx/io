@@ -1149,3 +1149,51 @@ func TestAPromptCacheGapIsMeasuredFromWhenTheRequestWasMade(t *testing.T) {
 		t.Errorf("got a gap of %s, want 90s", notices[0].Took)
 	}
 }
+
+type longCacheProvider struct{ usageProvider }
+
+func (*longCacheProvider) CacheLifetime() time.Duration { return time.Hour }
+
+func TestTheCacheLifetimeIsTheOneTheProviderAsksFor(t *testing.T) {
+	replies := []agent.Usage{cachedAs(48000, 900), cachedAs(0, 49000)}
+
+	for name, test := range map[string]struct {
+		provider agent.Provider
+		want     agent.CacheCause
+	}{
+		"a provider that says nothing keeps the short lifetime": {
+			provider: &usageProvider{replies: replies},
+			want:     agent.CacheExpired,
+		},
+		"a provider that asks for an hour is believed": {
+			provider: &longCacheProvider{usageProvider{replies: replies}},
+			want:     agent.CacheRebuilt,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assistant := agent.New("", test.provider, nil)
+			moment := time.Unix(0, 0)
+			assistant.TakeTimeFrom(func() time.Time {
+				moment = moment.Add(20 * time.Minute)
+
+				return moment
+			})
+
+			var causes []agent.CacheCause
+			for range replies {
+				for update, err := range assistant.Stream(t.Context(), "go on", nil) {
+					if err != nil {
+						t.Fatal(err)
+					}
+					if update.Event != nil && update.Event.Kind == agent.CacheRebuildEvent {
+						causes = append(causes, agent.CacheCause(update.Event.Name))
+					}
+				}
+			}
+
+			if len(causes) != 1 || causes[0] != test.want {
+				t.Errorf("got %v, want one %q", causes, test.want)
+			}
+		})
+	}
+}

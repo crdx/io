@@ -43,6 +43,7 @@ func NewWithEnabledTools(systemPrompt string, provider Provider, tools []tool.To
 		registeredTools:  availableTools,
 		enabledToolNames: enabledNames,
 		owners:           stateOwners,
+		cacheLifetime:    reportedCacheLifetime(provider),
 		now:              time.Now,
 	}
 }
@@ -178,7 +179,7 @@ func (self *proseStream) resetText() {
 
 const SilentTurnNotice = "The model ended the turn without an answer."
 
-const cacheLifetime = 5 * time.Minute
+const defaultCacheLifetime = 5 * time.Minute
 
 type CacheCause string
 
@@ -217,15 +218,29 @@ func CacheRebuildNotice(event Event) string {
 	return fmt.Sprintf("The prompt cache was rebuilt: %s tokens were sent again.", tokens)
 }
 
-func cacheCause(gap time.Duration, previousRead int, rewrittenTokens int) CacheCause {
+func cacheCause(gap time.Duration, lifetime time.Duration, previousRead int, rewrittenTokens int) CacheCause {
 	switch {
-	case gap >= cacheLifetime:
+	case gap >= lifetime:
 		return CacheExpired
 	case gap <= cacheSettlingGap && rewrittenTokens*100 < previousRead:
 		return CacheSettling
 	}
 
 	return CacheRebuilt
+}
+
+func reportedCacheLifetime(provider Provider) time.Duration {
+	if reporter, isReported := provider.(CacheLifetimeReporter); isReported {
+		if lifetime := reporter.CacheLifetime(); lifetime > 0 {
+			return lifetime
+		}
+	}
+
+	return defaultCacheLifetime
+}
+
+func (self *Agent) CacheLifetime() time.Duration {
+	return self.cacheLifetime
 }
 
 func (self *Agent) readCache(usage Usage, at time.Time) (Event, bool) {
@@ -244,7 +259,7 @@ func (self *Agent) readCache(usage Usage, at time.Time) (Event, bool) {
 
 	return Event{
 		Kind: CacheRebuildEvent,
-		Name: string(cacheCause(gap, previous.readTokens, usage.Cache.WriteTokens)),
+		Name: string(cacheCause(gap, self.cacheLifetime, previous.readTokens, usage.Cache.WriteTokens)),
 		Took: gap,
 		Usage: &Usage{
 			Cache: &CacheUsage{ReadTokens: usage.Cache.ReadTokens, WriteTokens: usage.Cache.WriteTokens},

@@ -70,6 +70,14 @@ func (self *guardedProvider) Configure(systemPrompt string, tools []tool.Definit
 	self.provider.Configure(systemPrompt, tools)
 }
 
+func (self *guardedProvider) CacheLifetime() time.Duration {
+	if reporter, isReported := self.provider.(agent.CacheLifetimeReporter); isReported {
+		return reporter.CacheLifetime()
+	}
+
+	return 0
+}
+
 func (self *guardedProvider) AddUserMessage(text string) {
 	self.provider.AddUserMessage(text)
 }

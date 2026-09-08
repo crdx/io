@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 )
 
 func assistantItem(text string) json.RawMessage {
@@ -112,5 +113,21 @@ func TestACorrectionIsSaidInTheConversationRatherThanTheSystemPrompt(t *testing.
 	lastMessage := body.Messages[len(body.Messages)-1]
 	if !strings.Contains(string(lastMessage), "could not be used") {
 		t.Errorf("got %s", lastMessage)
+	}
+}
+
+func TestTheCacheLifetimeAgreesWithWhatIsAskedForOnTheWire(t *testing.T) {
+	asked := ephemeral()
+	if asked.TTL != cacheTTL {
+		t.Fatalf("the breakpoint asks for %q, want %q", asked.TTL, cacheTTL)
+	}
+
+	written, err := time.ParseDuration(asked.TTL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got := (&Client{}).CacheLifetime(); got != written {
+		t.Errorf("the client reports %s, but asks the endpoint for %s", got, written)
 	}
 }

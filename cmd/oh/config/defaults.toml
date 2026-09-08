@@ -41,6 +41,7 @@ left = [
 center = [
     { segment = "active-model" },
     { segment = "context-usage" },
+    { segment = "cache-usage" },
 ]
 right = [
     { segment = "scroll-overflow", direction = "up" }

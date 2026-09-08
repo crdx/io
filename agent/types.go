@@ -67,6 +67,10 @@ type UsageProbe struct {
 	RefreshAfter time.Duration
 }
 
+type CacheLifetimeReporter interface {
+	CacheLifetime() time.Duration
+}
+
 type UsageProber interface {
 	ProbeUsage(context context.Context) (UsageProbe, error)
 }
@@ -251,6 +255,7 @@ type Agent struct {
 	owners           map[string]tool.Tool
 	state            []json.RawMessage
 	cache            cacheReading
+	cacheLifetime    time.Duration
 	now              func() time.Time
 
 	retryWaitsPassAtOnce bool

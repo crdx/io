@@ -36,6 +36,18 @@ GPT Sol 5.6 ▫▫▫▫▪▫
 ·✦
 === activity-spinner / running second frame ===
 ·✦
+=== cache-usage / every token read ===
+1h 100%
+=== cache-usage / mostly read ===
+1h 93%
+=== cache-usage / no lifetime declared ===
+93%
+=== cache-usage / nothing asked yet ===
+1h
+=== cache-usage / rebuilt from cold ===
+1h 1%
+=== cache-usage / the short lifetime ===
+5m 93%
 === context-usage / known ===
 91% 182K/200K
 === context-usage / one million ===
