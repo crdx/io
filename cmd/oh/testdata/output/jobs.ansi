@@ -9,15 +9,16 @@
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150moutput\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpyth\e[0m\e[38;2;129;162;190m…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102ma job of that n…\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstop\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
 \r
 \r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m\r
-\r\e[Kand is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had\r
-\r\e[Kalready failed with \e[38;2;192;128;80mexit(1)\e[0m.\r
+\r\e[Kand is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was\r
+\r\e[Kkilled by \e[38;2;192;128;80mSIGXCPU\e[0m after exceeding its 2s\r
+\r\e[Kprocessor limit.\r
 \e[?25h\e[?2026l
 === one column ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m \e[0m\r
@@ -171,33 +172,57 @@
 \r\e[Kj\r
 \r\e[Ko\r
 \r\e[Kb\r
-\r\e[Kh\r
+\r\e[Kw\r
 \r\e[Ka\r
-\r\e[Kd\r
-\r\e[Ka\r
+\r\e[Ks\r
+\r\e[Kk\r
+\r\e[Ki\r
 \r\e[Kl\r
+\r\e[Kl\r
+\r\e[Ke\r
+\r\e[Kd\r
+\r\e[Kb\r
+\r\e[Ky\r
+\r\e[K\e[38;2;192;128;80mS\e[0m\r
+\r\e[K\e[38;2;192;128;80mI\e[0m\r
+\r\e[K\e[38;2;192;128;80mG\e[0m\r
+\r\e[K\e[38;2;192;128;80mX\e[0m\r
+\r\e[K\e[38;2;192;128;80mC\e[0m\r
+\r\e[K\e[38;2;192;128;80mP\e[0m\r
+\r\e[K\e[38;2;192;128;80mU\e[0m\r
+\r\e[Ka\r
+\r\e[Kf\r
+\r\e[Kt\r
+\r\e[Ke\r
 \r\e[Kr\r
 \r\e[Ke\r
-\r\e[Ka\r
-\r\e[Kd\r
-\r\e[Ky\r
-\r\e[Kf\r
-\r\e[Ka\r
-\r\e[Ki\r
-\r\e[Kl\r
+\r\e[Kx\r
+\r\e[Kc\r
+\r\e[Ke\r
 \r\e[Ke\r
 \r\e[Kd\r
-\r\e[Kw\r
+\r\e[Ki\r
+\r\e[Kn\r
+\r\e[Kg\r
 \r\e[Ki\r
 \r\e[Kt\r
-\r\e[Kh\r
-\r\e[K\e[38;2;192;128;80me\e[0m\r
-\r\e[K\e[38;2;192;128;80mx\e[0m\r
-\r\e[K\e[38;2;192;128;80mi\e[0m\r
-\r\e[K\e[38;2;192;128;80mt\e[0m\r
-\r\e[K\e[38;2;192;128;80m(\e[0m\r
-\r\e[K\e[38;2;192;128;80m1\e[0m\r
-\r\e[K\e[38;2;192;128;80m)\e[0m\r
+\r\e[Ks\r
+\r\e[K2\r
+\r\e[Ks\r
+\r\e[Kp\r
+\r\e[Kr\r
+\r\e[Ko\r
+\r\e[Kc\r
+\r\e[Ke\r
+\r\e[Ks\r
+\r\e[Ks\r
+\r\e[Ko\r
+\r\e[Kr\r
+\r\e[Kl\r
+\r\e[Ki\r
+\r\e[Km\r
+\r\e[Ki\r
+\r\e[Kt\r
 \r\e[K.\r
 \e[?25h\e[?2026l
 === plain ===
@@ -209,13 +234,13 @@
 \e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150moutput\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m
 \e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m
 \e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102ma job of that name is already running\e[0m
-\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m
-\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m
+\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m
+\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m
 \e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstop\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
-\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m
-\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
+\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m
+\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
 
-The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed with \e[38;2;192;128;80mexit(1)\e[0m.
+The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m after exceeding its 2s processor limit.
 
 === printed ===
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -227,14 +252,14 @@ The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now
 \e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150moutput\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102ma job of that name is already running\e[0m\r
-\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
+\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\r
+\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
 \e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstop\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\r
+\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
 \r
-The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed with\r
-\e[38;2;192;128;80mexit(1)\e[0m.\r
+The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m after\r
+exceeding its 2s processor limit.\r
 
 === streamed asap ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -246,14 +271,14 @@ The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150moutput\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150moutput\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102ma job of that name is already running\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mlist\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mlist\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstop\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstop\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `loca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `localhos\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `localhost:80\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The `bui\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had alre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already fail\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed with\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed with `exi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed with\r
-\r\e[K`exit(1)\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mexit(1)\e[0m.\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `loca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `localhos\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `localhost:80\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The `bui\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was kill\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by `S\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by `SIGXC\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m afte\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m after\r
+\r\e[Kex\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s proce\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor lim\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor limit.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed line ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -265,14 +290,14 @@ The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150moutput\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150moutput\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102ma job of that name is already running\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mlist\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mlist\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstop\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstop\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed with\e[?25h\e[?2026l\e[?2026h\e[?25l\r
-\r\e[K\e[38;2;192;128;80mexit(1)\e[0m.\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m after\e[?25h\e[?2026l\e[?2026h\e[?25l\r
+\r\e[Kexceeding its 2s processor limit.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === streamed paced ===
 \e]9;4;3\e\\\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -284,14 +309,14 @@ The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150moutput\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150moutput\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102ma job of that name is already running\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mlist\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;150;152;150mlist\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\e[?25h\e[?2026l\r
 \e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstop\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstop\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\e[?25h\e[?2026l\r
-\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\e[?25h\e[?2026l\r
 \r
-\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `loca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `localhos\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `localhost:80\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The `bui\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had alre\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already fail\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed w\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed with\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed with `exi\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed with\r
-\r\e[K`exit(1)\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e[38;2;192;128;80mexit(1)\e[0m.\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `loca\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `localhos\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on `localhost:80\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is s\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopp\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped n\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now.\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The `bui\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was kill\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed b\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by `S\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by `SIGXC\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m afte\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m after\r
+\r\e[Kex\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceed\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s p\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s proce\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor lim\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[Kexceeding its 2s processor limit.\e[?25h\e[?2026l\r
 \e]9;4;0\e\\
 === tiny ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m            \e[0m\r
@@ -308,11 +333,11 @@ The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mj…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102ma…\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
+\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\r
+\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\r
+\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
 \r
 \r\e[KThe docs\r
 \r\e[Kserver ran\r
@@ -321,10 +346,14 @@ The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now
 \r\e[K\e[38;2;192;128;80m80\e[0m and is\r
 \r\e[Kstopped now.\r
 \r\e[KThe \e[38;2;192;128;80mbuild\e[0m\r
-\r\e[Kjob had\r
-\r\e[Kalready\r
-\r\e[Kfailed with\r
-\r\e[K\e[38;2;192;128;80mexit(1)\e[0m.\r
+\r\e[Kjob was\r
+\r\e[Kkilled by\r
+\r\e[K\e[38;2;192;128;80mSIGXCPU\e[0m\r
+\r\e[Kafter\r
+\r\e[Kexceeding\r
+\r\e[Kits 2s\r
+\r\e[Kprocessor\r
+\r\e[Klimit.\r
 \e[?25h\e[?2026l
 === unsized ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
@@ -335,13 +364,13 @@ The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150moutput\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102ma job of that name is already running\e[0m
-\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m
-\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m
 \r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstop\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
-\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m
-\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m
+\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m
 
-\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed with \e[38;2;192;128;80mexit(1)\e[0m.
+\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m after exceeding its 2s processor limit.
 \e[?25h\e[?2026l
 === wide ===
 \e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -353,12 +382,12 @@ The docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150moutput\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102ma job of that name is already running\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mlist\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;150;152;150mstop\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m2L\e[0m\r
-\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbuild, docs\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs, build\e[0m \e[38;2;150;152;150mwait\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
 \r
-\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job had already failed with\r
-\r\e[K\e[38;2;192;128;80mexit(1)\e[0m.\r
+\r\e[KThe docs server ran on \e[38;2;192;128;80mlocalhost:8080\e[0m and is stopped now. The \e[38;2;192;128;80mbuild\e[0m job was killed by \e[38;2;192;128;80mSIGXCPU\e[0m after\r
+\r\e[Kexceeding its 2s processor limit.\r
 \e[?25h\e[?2026l

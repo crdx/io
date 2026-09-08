@@ -417,15 +417,26 @@ func (self *Manager) watch(endingJob *job) {
 	defer close(endingJob.over)
 
 	result, err := endingJob.runningCommand.Wait()
+	failure := resultFailure(result, endingJob.policy, err)
 
 	switch {
-	case err != nil:
-		self.conclude(endingJob, self.endingState(endingJob, StateFailed), result.ExitCode, err.Error())
-	case result.ExitCode != 0:
-		self.conclude(endingJob, self.endingState(endingJob, StateFailed), result.ExitCode, "")
+	case err != nil || result.ExitCode != 0:
+		self.conclude(endingJob, self.endingState(endingJob, StateFailed), result.ExitCode, failure)
 	default:
 		self.conclude(endingJob, self.endingState(endingJob, StateComplete), 0, "")
 	}
+}
+
+func resultFailure(result sandbox.Result, policy sandbox.Policy, waitFailure error) string {
+	var parts []string
+	if waitFailure != nil {
+		parts = append(parts, waitFailure.Error())
+	}
+	if killNotice := sandbox.KillNotice(result, policy); killNotice != "" {
+		parts = append(parts, killNotice)
+	}
+
+	return strings.Join(parts, "\n")
 }
 
 func (self *Manager) endingState(endingJob *job, natural State) State {

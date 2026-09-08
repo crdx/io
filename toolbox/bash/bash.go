@@ -8,14 +8,11 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
-	"syscall"
 
-	"golang.org/x/sys/unix"
 	"mvdan.cc/sh/v3/syntax"
 
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
-	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
@@ -260,9 +257,9 @@ func report(result sandbox.Result, policy sandbox.Policy) string {
 		parts = append(parts, output)
 	}
 
-	overrunNote := overran(result, policy)
+	overrunNote := sandbox.OverrunNotice(result, policy)
 
-	switch killedNote := killed(result, policy); {
+	switch killedNote := sandbox.KillNotice(result, policy); {
 	case killedNote != "":
 		parts = append(parts, killedNote)
 	case policy.Yolo:
@@ -275,142 +272,10 @@ func report(result sandbox.Result, policy sandbox.Policy) string {
 	return strings.Join(parts, "\n")
 }
 
-const signalled = 128
-
-func endingSignal(result sandbox.Result) (syscall.Signal, bool) {
-	if result.Signal != 0 {
-		return result.Signal, true
-	}
-
-	if result.ExitCode > signalled {
-		return syscall.Signal(result.ExitCode - signalled), false
-	}
-
-	return 0, false
-}
-
-func killed(result sandbox.Result, policy sandbox.Policy) string {
-	signal, isObserved := endingSignal(result)
-
-	name := unix.SignalName(signal)
-	if name == "" {
-		return ""
-	}
-
-	openingNote := fmt.Sprintf("note: the shell reports that a process was killed by %s.", name)
-	if isObserved {
-		openingNote = fmt.Sprintf("note: the command was killed by %s.", name)
-	}
-
-	lines := []string{openingNote}
-
-	switch signal { //nolint:exhaustive // Only signals caused by quantified sandbox limits add detail.
-	case syscall.SIGKILL, syscall.SIGXCPU:
-		lines = append(lines, processorLimit(result, policy)...)
-	case syscall.SIGXFSZ:
-		lines = append(lines, fileSizeLimit(policy)...)
-	}
-
-	return strings.Join(lines, "\n")
-}
-
-func overran(result sandbox.Result, policy sandbox.Policy) string {
-	var lines []string
-
-	switch {
-	case matches(result.Output, fileSizeOverruns):
-		lines = fileSizeLimit(policy)
-	case matches(result.Output, processorOverruns):
-		lines = processorLimit(result, policy)
-	case matches(result.Output, openFileOverruns):
-		lines = openFileLimit(policy)
-	case matches(result.Output, processOverruns):
-		lines = processLimit(policy)
-	default:
-		return ""
-	}
-
-	openingNote := "note: the sandbox stopped this command for using too much."
-
-	return strings.Join(append([]string{openingNote}, lines...), "\n")
-}
-
-func processorLimit(result sandbox.Result, policy sandbox.Policy) []string {
-	if policy.MaxCPUTime <= 0 {
-		return nil
-	}
-
-	return []string{
-		fmt.Sprintf(
-			"the sandbox gives each process %s of processor time, counted across every thread it runs,"+
-				" and stops the whole command after %s of wall clock.",
-			util.CompactDuration(policy.MaxCPUTime), util.CompactDuration(policy.Timeout),
-		),
-		fmt.Sprintf(
-			"every process this command started used %s of processor time between them.",
-			util.CompactDuration(result.CPUTime),
-		),
-	}
-}
-
-func fileSizeLimit(policy sandbox.Policy) []string {
-	if policy.MaxFileSize <= 0 {
-		return nil
-	}
-
-	return []string{fmt.Sprintf(
-		"the sandbox lets a command write no more than %s to a single file.",
-		util.FormatBytes(policy.MaxFileSize, 3),
-	)}
-}
-
-func openFileLimit(policy sandbox.Policy) []string {
-	if policy.MaxOpenFiles <= 0 {
-		return nil
-	}
-
-	return []string{fmt.Sprintf(
-		"the sandbox lets each process hold no more than %d files open at once.",
-		policy.MaxOpenFiles,
-	)}
-}
-
-func processLimit(policy sandbox.Policy) []string {
-	if policy.MaxProcesses <= 0 {
-		return nil
-	}
-
-	return []string{fmt.Sprintf(
-		"the sandbox lets no more than %d tasks run at once across everything the command started,"+
-			" counting each thread as one of them.",
-		policy.MaxProcesses,
-	)}
-}
-
 var denials = []string{
 	"Permission denied",
 	"Operation not permitted",
 	"Address family not supported",
-}
-
-var fileSizeOverruns = []string{
-	"File size limit exceeded",
-}
-
-var processorOverruns = []string{
-	"Cpu time limit exceeded",
-}
-
-var openFileOverruns = []string{
-	"Too many open files",
-}
-
-var processOverruns = []string{
-	"fork: retry",
-	"fork: Resource temporarily unavailable",
-	"Cannot fork",
-	"pthread_create failed",
-	"failed to create new OS thread",
 }
 
 func matches(output string, wordings []string) bool {

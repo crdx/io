@@ -9,15 +9,16 @@ job docs status ✓ 1L
 job docs output ✓ 3L
 job docs wait ✓ 3L
 job docs $ pyth… ✗ 1L a job of that n…
-job list ✓ 2L
-job docs, build wait ✓ 3L
+job list ✓ 4L ~100t
+job docs, build wait ✓ 5L ~100t
 job docs stop ✓ 1L
-job build, docs wait ✓ 2L
-job docs, build wait ✓ 5L
+job build, docs wait ✓ 4L ~100t
+job docs, build wait ✓ 7L ~100t
 
 The docs server ran on localhost:8080
-and is stopped now. The build job had
-already failed with exit(1).
+and is stopped now. The build job was
+killed by SIGXCPU after exceeding its 2s
+processor limit.
 === one column ===
 
 
@@ -170,33 +171,57 @@ d
 j
 o
 b
-h
+w
 a
-d
-a
+s
+k
+i
 l
+l
+e
+d
+b
+y
+S
+I
+G
+X
+C
+P
+U
+a
+f
+t
+e
 r
 e
-a
-d
-y
-f
-a
-i
-l
-e
-d
-w
-i
-t
-h
-e
 x
+c
+e
+e
+d
+i
+n
+g
 i
 t
-(
-1
-)
+s
+2
+s
+p
+r
+o
+c
+e
+s
+s
+o
+r
+l
+i
+m
+i
+t
 .
 === printed ===
 
@@ -208,14 +233,14 @@ job docs status ✓ 1L
 job docs output ✓ 3L
 job docs wait ✓ 3L
 job docs $ python3 -m http.server 8080 ✗ 1L a job of that name is already running
-job list ✓ 2L
-job docs, build wait ✓ 3L
+job list ✓ 4L ~100t
+job docs, build wait ✓ 5L ~100t
 job docs stop ✓ 1L
-job build, docs wait ✓ 2L
-job docs, build wait ✓ 5L
+job build, docs wait ✓ 4L ~100t
+job docs, build wait ✓ 7L ~100t
 
-The docs server ran on localhost:8080 and is stopped now. The build job had already failed with
-exit(1).
+The docs server ran on localhost:8080 and is stopped now. The build job was killed by SIGXCPU after
+exceeding its 2s processor limit.
 === tiny ===
 
  start the
@@ -231,11 +256,11 @@ job … ✓ 1L
 job … ✓ 3L
 job … ✓ 3L
 j… ✗ 1L a…
-job ✓ 2L
-job … ✓ 3L
+ ✓ 4L ~100t
+ ✓ 5L ~100t
 job … ✓ 1L
-job … ✓ 2L
-job … ✓ 5L
+ ✓ 4L ~100t
+ ✓ 7L ~100t
 
 The docs
 server ran
@@ -244,10 +269,14 @@ localhost:80
 80 and is
 stopped now.
 The build
-job had
-already
-failed with
-exit(1).
+job was
+killed by
+SIGXCPU
+after
+exceeding
+its 2s
+processor
+limit.
 === wide ===
 
  start the docs server, check on it, then stop it
@@ -258,11 +287,11 @@ job docs status ✓ 1L
 job docs output ✓ 3L
 job docs wait ✓ 3L
 job docs $ python3 -m http.server 8080 ✗ 1L a job of that name is already running
-job list ✓ 2L
-job docs, build wait ✓ 3L
+job list ✓ 4L ~100t
+job docs, build wait ✓ 5L ~100t
 job docs stop ✓ 1L
-job build, docs wait ✓ 2L
-job docs, build wait ✓ 5L
+job build, docs wait ✓ 4L ~100t
+job docs, build wait ✓ 7L ~100t
 
-The docs server ran on localhost:8080 and is stopped now. The build job had already failed with
-exit(1).
+The docs server ran on localhost:8080 and is stopped now. The build job was killed by SIGXCPU after
+exceeding its 2s processor limit.

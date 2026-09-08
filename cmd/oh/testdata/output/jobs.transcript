@@ -21,15 +21,15 @@ job: stale status rendering [ok, 1 line, 20B, call_2]
 job: stale output rendering [ok, 3 lines, 137B, call_3]
 job: stale wait rendering [ok, 3 lines, 129B, call_4]
 job: stale retry rendering [error, 1 line, 37B, call_5]
-job: stale listing rendering [ok, 2 lines, 122B, call_6]
-job: stale plural timeout rendering [ok, 3 lines, 124B, call_timeout]
+job: stale listing rendering [ok, 4 lines, 383B, call_6]
+job: stale plural timeout rendering [ok, 5 lines, 385B, call_timeout]
 job: stale stop rendering [ok, 1 line, 28B, call_7]
-job: stale plural any rendering [ok, 2 lines, 63B, call_any]
-job: stale plural all rendering [ok, 5 lines, 122B, call_all]
+job: stale plural any rendering [ok, 4 lines, 324B, call_any]
+job: stale plural all rendering [ok, 7 lines, 383B, call_all]
 ```
 
 ## Assistant · +21s
 
-The docs server ran on `localhost:8080` and is stopped now. The `build` job had already failed with `exit(1)`.
+The docs server ran on `localhost:8080` and is stopped now. The `build` job was killed by `SIGXCPU` after exceeding its 2s processor limit.
 
 
