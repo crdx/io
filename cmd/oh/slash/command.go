@@ -271,6 +271,9 @@ func (self Registry) CommandName(message string) (string, bool) {
 	if _, found := self.getSet(fields[0]); !found {
 		return "", false
 	}
+	if strings.Contains(strings.TrimLeft(fields[0], "/"), "/") {
+		return "", false
+	}
 	return fields[0], true
 }
 

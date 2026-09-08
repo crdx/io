@@ -2,19 +2,16 @@ package dispatch
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/slash"
-	"crdx.org/io/internal/util/pathutil"
 )
 
 type Result int
 
 const (
 	commandNotFoundMessage = "Command not found"
-	minimumPathParts       = 2
 	sendAsMessageHint      = " (alt+enter to send)"
 	snippetNotFoundMessage = "Snippet not found"
 	snippetPrefix          = "//"
@@ -33,10 +30,6 @@ type Actions struct {
 }
 
 func Handle(registry slash.Registry, actions Actions, message string) (Result, string) {
-	if isExistingPathMessage(message) {
-		return Proceed, ""
-	}
-
 	invocation, found := registry.Find(message)
 	if found {
 		if err := invocation.Command.Run(actions, invocation.Arguments); err != nil {
@@ -55,22 +48,6 @@ func Handle(registry slash.Registry, actions Actions, message string) (Result, s
 		notFoundMessage = snippetNotFoundMessage
 	}
 	return Rejected, fmt.Sprintf("%s: %s%s", notFoundMessage, name, sendAsMessageHint)
-}
-
-func isExistingPathMessage(message string) bool {
-	pathParts := 0
-	for pathPart := range strings.SplitSeq(filepath.Clean(message), string(filepath.Separator)) {
-		if pathPart == "" {
-			continue
-		}
-
-		pathParts++
-		if pathParts >= minimumPathParts {
-			return pathutil.Exists(message)
-		}
-	}
-
-	return false
 }
 
 func (self Actions) Emit(event agent.Event) {
