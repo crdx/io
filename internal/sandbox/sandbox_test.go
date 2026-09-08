@@ -68,7 +68,7 @@ func TestWithoutReadRemovesPathsWithoutChangingTheSourcePolicy(t *testing.T) {
 func requireLandlock(t *testing.T) {
 	t.Helper()
 
-	if err := sandbox.AvailableAtAll(); err != nil {
+	if err := sandbox.Available(); err != nil {
 		t.Skipf("landlock is unavailable: %v", err)
 	}
 }
@@ -146,8 +146,8 @@ func TestACommandRunsAndReportsItsOutput(t *testing.T) {
 		t.Errorf("got %q, want %q", result.Output, "hello")
 	}
 
-	if result.Code != 0 {
-		t.Errorf("got exit status %d, want 0", result.Code)
+	if result.ExitCode != 0 {
+		t.Errorf("got exit status %d, want 0", result.ExitCode)
 	}
 }
 
@@ -155,8 +155,8 @@ func TestACommandCombinesOutputInTheOrderItWasWritten(t *testing.T) {
 	command := "printf one; printf two >&2; printf three; printf four >&2"
 	result := run(t, t.TempDir(), command, sandbox.Policy{})
 
-	if result.Code != 0 || result.Output != "onetwothreefour" {
-		t.Errorf("got exit status %d with output %q", result.Code, result.Output)
+	if result.ExitCode != 0 || result.Output != "onetwothreefour" {
+		t.Errorf("got exit status %d with output %q", result.ExitCode, result.Output)
 	}
 }
 
@@ -168,8 +168,8 @@ func TestANewSessionCannotOutliveItsCommand(t *testing.T) {
 		"for _ in {1..100}; do test -s " + marker + " && break; sleep 0.01; done; test -s " + marker
 
 	result := run(t, directory, command, sandbox.Policy{})
-	if result.Code != 0 {
-		t.Fatalf("the detached session did not start: exit status %d with output %q", result.Code, result.Output)
+	if result.ExitCode != 0 {
+		t.Fatalf("the detached session did not start: exit status %d with output %q", result.ExitCode, result.Output)
 	}
 
 	content, err := os.ReadFile(marker) //nolint:gosec // reading the test's own marker is intended
@@ -188,8 +188,8 @@ func TestADetachedSessionCannotHoldCommandOutputOpen(t *testing.T) {
 	startedAt := time.Now()
 	result := run(t, t.TempDir(), "setsid sleep 30 & printf finished", sandbox.Policy{})
 
-	if result.Code != 0 || result.Output != "finished" {
-		t.Errorf("got exit status %d with output %q", result.Code, result.Output)
+	if result.ExitCode != 0 || result.Output != "finished" {
+		t.Errorf("got exit status %d with output %q", result.ExitCode, result.Output)
 	}
 	if duration := time.Since(startedAt); duration > 2*time.Second {
 		t.Errorf("the detached session held the command open for %s", duration)
@@ -202,8 +202,8 @@ func TestAFailedCommandCannotLeaveANewSessionBehind(t *testing.T) {
 	command := "setsid sh -c 'sleep 0.2; printf escaped > " + marker + "' & exit 23"
 
 	result := run(t, directory, command, sandbox.Policy{})
-	if result.Code != 23 {
-		t.Fatalf("got exit status %d with output %q, want 23", result.Code, result.Output)
+	if result.ExitCode != 23 {
+		t.Fatalf("got exit status %d with output %q, want 23", result.ExitCode, result.Output)
 	}
 
 	time.Sleep(400 * time.Millisecond)
@@ -387,8 +387,8 @@ func TestACommandMayOpenAPseudoterminal(t *testing.T) {
 	scratch := t.TempDir()
 	policy := sandbox.Policy{TmpDir: scratch, Write: []string{sandbox.TmpDir}}
 	result := run(t, t.TempDir(), "exec 3<>/dev/ptmx", policy)
-	if result.Code != 0 {
-		t.Errorf("got exit status %d with output %q", result.Code, result.Output)
+	if result.ExitCode != 0 {
+		t.Errorf("got exit status %d with output %q", result.ExitCode, result.Output)
 	}
 }
 
@@ -448,8 +448,8 @@ func TestConcurrentCommandsKeepIndependentFilesystemPolicies(t *testing.T) {
 		policies,
 	)
 	for i, result := range results {
-		if result.Code != 0 {
-			t.Errorf("command %d got exit status %d with output %q", i, result.Code, result.Output)
+		if result.ExitCode != 0 {
+			t.Errorf("command %d got exit status %d with output %q", i, result.ExitCode, result.Output)
 		}
 	}
 
@@ -486,20 +486,20 @@ func TestConcurrentCommandsKeepIndependentEnvironmentsAndLimits(t *testing.T) {
 	}
 	policies := [2]sandbox.Policy{
 		{
-			Write:     []string{coordinationDirectory},
-			Env:       []string{"PATH"},
-			SetEnv:    map[string]string{"NAME": "first"},
-			Timeout:   10 * time.Second,
-			OpenFiles: 64,
-			Processes: 32,
+			Write:        []string{coordinationDirectory},
+			Env:          []string{"PATH"},
+			SetEnv:       map[string]string{"NAME": "first"},
+			Timeout:      10 * time.Second,
+			MaxOpenFiles: 64,
+			MaxProcesses: 32,
 		},
 		{
-			Write:     []string{coordinationDirectory},
-			Env:       []string{"PATH"},
-			SetEnv:    map[string]string{"NAME": "second"},
-			Timeout:   10 * time.Second,
-			OpenFiles: 128,
-			Processes: 64,
+			Write:        []string{coordinationDirectory},
+			Env:          []string{"PATH"},
+			SetEnv:       map[string]string{"NAME": "second"},
+			Timeout:      10 * time.Second,
+			MaxOpenFiles: 128,
+			MaxProcesses: 64,
 		},
 	}
 
@@ -510,8 +510,8 @@ func TestConcurrentCommandsKeepIndependentEnvironmentsAndLimits(t *testing.T) {
 		policies,
 	)
 	for i, want := range []string{"first 64 32", "second 128 64"} {
-		if results[i].Code != 0 || results[i].Output != want {
-			t.Errorf("command %d got exit status %d with output %q, want %q", i, results[i].Code, results[i].Output, want)
+		if results[i].ExitCode != 0 || results[i].Output != want {
+			t.Errorf("command %d got exit status %d with output %q, want %q", i, results[i].ExitCode, results[i].Output, want)
 		}
 	}
 }
@@ -521,8 +521,8 @@ func TestTheWorkingDirectoryIsWritable(t *testing.T) {
 
 	result := run(t, directory, "echo written > file", sandbox.Policy{})
 
-	if result.Code != 0 {
-		t.Fatalf("got exit status %d with output %q", result.Code, result.Output)
+	if result.ExitCode != 0 {
+		t.Fatalf("got exit status %d with output %q", result.ExitCode, result.Output)
 	}
 
 	content, err := os.ReadFile(filepath.Join(directory, "file")) //nolint:gosec // the test's own path
@@ -542,7 +542,7 @@ func TestAGeneratedFileMayBeExecutedWhenGranted(t *testing.T) {
 		`printf '#!/bin/sh\necho ran\n' > built && chmod +x built && ./built`,
 		sandbox.Policy{Exec: []string{directory}})
 
-	if result.Code != 0 || !strings.Contains(result.Output, "ran") {
+	if result.ExitCode != 0 || !strings.Contains(result.Output, "ran") {
 		t.Errorf("the generated file did not run: %q", result.Output)
 	}
 }
@@ -552,7 +552,7 @@ func TestAWriteOutsideThePolicyIsRefused(t *testing.T) {
 
 	result := run(t, t.TempDir(), "echo leaked > "+outside, sandbox.Policy{})
 
-	if result.Code == 0 {
+	if result.ExitCode == 0 {
 		t.Fatalf("the write was allowed")
 	}
 
@@ -571,7 +571,7 @@ func TestAReadOutsideThePolicyIsRefused(t *testing.T) {
 
 	result := run(t, t.TempDir(), "cat "+secret, sandbox.Policy{})
 
-	if result.Code == 0 || strings.Contains(result.Output, "hidden") {
+	if result.ExitCode == 0 || strings.Contains(result.Output, "hidden") {
 		t.Errorf("the read was allowed: %q", result.Output)
 	}
 }
@@ -642,7 +642,7 @@ func TestAGrantedPathIsStillNotWritable(t *testing.T) {
 		Read: []string{grantedDirectory},
 	})
 
-	if result.Code == 0 {
+	if result.ExitCode == 0 {
 		t.Errorf("the write was allowed")
 	}
 }
@@ -693,7 +693,7 @@ func TestAReadPathInsideAWritePathIsNotWritable(t *testing.T) {
 	} {
 		result := run(t, directory, command, sandbox.Policy{Read: []string{protectedPath}})
 
-		if result.Code == 0 {
+		if result.ExitCode == 0 {
 			t.Errorf("%q was allowed", command)
 		}
 
@@ -702,7 +702,7 @@ func TestAReadPathInsideAWritePathIsNotWritable(t *testing.T) {
 		}
 	}
 
-	if result := run(t, directory, "mv held elsewhere", sandbox.Policy{Read: []string{protectedPath}}); result.Code == 0 {
+	if result := run(t, directory, "mv held elsewhere", sandbox.Policy{Read: []string{protectedPath}}); result.ExitCode == 0 {
 		t.Errorf("the held path was moved out of the way")
 	}
 
@@ -727,8 +727,8 @@ func TestTheRestOfTheWorkspaceIsStillWritable(t *testing.T) {
 	result := run(t, directory, "mkdir work && echo written > work/file && cat held/../work/file",
 		sandbox.Policy{Read: []string{protectedPath}})
 
-	if result.Code != 0 {
-		t.Fatalf("got exit status %d with output %q", result.Code, result.Output)
+	if result.ExitCode != 0 {
+		t.Fatalf("got exit status %d with output %q", result.ExitCode, result.Output)
 	}
 
 	if !strings.Contains(result.Output, "written") {
@@ -766,7 +766,7 @@ func TestTheCommandCannotUndoWhatHoldsAPathBack(t *testing.T) {
 	result := run(t, directory, "umount held; echo clobbered > held/kept",
 		sandbox.Policy{Read: []string{protectedPath}})
 
-	if result.Code == 0 || !strings.Contains(result.Output, readOnly) {
+	if result.ExitCode == 0 || !strings.Contains(result.Output, readOnly) {
 		t.Errorf("the mount was undone: %q", result.Output)
 	}
 
@@ -778,7 +778,7 @@ func TestTheCommandCannotUndoWhatHoldsAPathBack(t *testing.T) {
 func TestTheNetworkIsUnreachable(t *testing.T) {
 	result := run(t, t.TempDir(), "exec 3<>/dev/tcp/1.1.1.1/80", sandbox.Policy{})
 
-	if result.Code == 0 {
+	if result.ExitCode == 0 {
 		t.Errorf("the connection was allowed")
 	}
 }
@@ -804,7 +804,7 @@ func TestLoopbackIsReachable(t *testing.T) {
 		if address.family == "AF_INET6" && strings.Contains(result.Output, "Address family not supported") {
 			continue
 		}
-		if result.Code != 0 || !strings.Contains(result.Output, "connected") {
+		if result.ExitCode != 0 || !strings.Contains(result.Output, "connected") {
 			t.Errorf("loopback %s was unreachable: %q", address.host, result.Output)
 		}
 	}
@@ -820,7 +820,7 @@ func TestDatagramsStayOnLoopback(t *testing.T) {
 	if strings.Contains(result.Output, "python3: command not found") {
 		t.Skip("python3 is unavailable")
 	}
-	if result.Code != 0 || !strings.Contains(result.Output, "ping") {
+	if result.ExitCode != 0 || !strings.Contains(result.Output, "ping") {
 		t.Errorf("loopback datagram failed: %q", result.Output)
 	}
 }
@@ -840,7 +840,7 @@ func TestHostLoopbackIsUnreachable(t *testing.T) {
 	}
 
 	result := run(t, t.TempDir(), "exec 3<>/dev/tcp/"+host+"/"+port, sandbox.Policy{})
-	if result.Code == 0 {
+	if result.ExitCode == 0 {
 		t.Error("a service on the host loopback was reachable")
 	}
 }
@@ -865,7 +865,7 @@ func TestAUnixSocketCannotReachAHostService(t *testing.T) {
 		t.Skip("python3 is unavailable")
 	}
 
-	if result.Code == 0 {
+	if result.ExitCode == 0 {
 		t.Error("a service on a host Unix socket was reachable")
 	}
 }
@@ -897,7 +897,7 @@ func TestCommandsMayTalkOverAUnixSocketInTheScratch(t *testing.T) {
 	if strings.Contains(result.Output, "Address family not supported") {
 		t.Skip("this kernel refuses Unix sockets outright, having no way to isolate them")
 	}
-	if result.Code != 0 || !strings.Contains(result.Output, "connected") {
+	if result.ExitCode != 0 || !strings.Contains(result.Output, "connected") {
 		t.Errorf("commands in the sandbox could not connect: %q", result.Output)
 	}
 }
@@ -917,7 +917,7 @@ PY`
 	if strings.Contains(result.Output, "python3: command not found") {
 		t.Skip("python3 is unavailable")
 	}
-	if result.Code != 0 {
+	if result.ExitCode != 0 {
 		t.Errorf("a network control socket was allowed: %q", result.Output)
 	}
 }
@@ -930,7 +930,7 @@ func TestRawIPSocketsAreRefused(t *testing.T) {
 	if strings.Contains(result.Output, "python3: command not found") {
 		t.Skip("python3 is unavailable")
 	}
-	if result.Code == 0 {
+	if result.ExitCode == 0 {
 		t.Error("a raw IP socket was allowed")
 	}
 }
@@ -948,7 +948,7 @@ PY`
 	if strings.Contains(result.Output, "python3: command not found") {
 		t.Skip("python3 is unavailable")
 	}
-	if result.Code == 0 {
+	if result.ExitCode == 0 {
 		t.Error("the loopback interface was reconfigured")
 	}
 }
@@ -961,7 +961,7 @@ func TestALocalSocketPairStillWorks(t *testing.T) {
 		t.Skip("python3 is unavailable")
 	}
 
-	if result.Code != 0 || !strings.Contains(result.Output, "made") {
+	if result.ExitCode != 0 || !strings.Contains(result.Output, "made") {
 		t.Errorf("a local socket pair was refused: %q", result.Output)
 	}
 }
@@ -977,17 +977,17 @@ func TestAPrivateProcessFilesystemContainsOnlySandboxProcesses(t *testing.T) {
 	`, os.Getpid())
 
 	result := run(t, t.TempDir(), command, sandbox.Policy{})
-	if result.Code != 0 {
+	if result.ExitCode != 0 {
 		t.Errorf("the private process filesystem was not isolated and readable: %q", result.Output)
 	}
 }
 
 func TestOnlyTheNamedPartsOfEtcAreReachable(t *testing.T) {
-	if result := run(t, t.TempDir(), "cat /etc/passwd", sandbox.Policy{}); result.Code != 0 {
+	if result := run(t, t.TempDir(), "cat /etc/passwd", sandbox.Policy{}); result.ExitCode != 0 {
 		t.Errorf("a command cannot resolve a user: %q", result.Output)
 	}
 
-	if result := run(t, t.TempDir(), "ls /etc", sandbox.Policy{}); result.Code == 0 {
+	if result := run(t, t.TempDir(), "ls /etc", sandbox.Policy{}); result.ExitCode == 0 {
 		t.Errorf("the whole of /etc was listed: %q", result.Output)
 	}
 }
@@ -1021,7 +1021,7 @@ func TestTheVirtualResolverReplacesTheHostFiles(t *testing.T) {
 
 	for path, contents := range virtualResolverFiles {
 		result := run(t, t.TempDir(), "cat "+path, policy)
-		if result.Code != 0 {
+		if result.ExitCode != 0 {
 			t.Errorf("%s is unreadable: %q", path, result.Output)
 			continue
 		}
@@ -1050,10 +1050,10 @@ func TestTheVirtualResolverFilesCannotBeChanged(t *testing.T) {
 	policy := sandbox.Policy{}
 
 	for path := range virtualResolverFiles {
-		if result := run(t, t.TempDir(), "printf changed > "+path, policy); result.Code == 0 {
+		if result := run(t, t.TempDir(), "printf changed > "+path, policy); result.ExitCode == 0 {
 			t.Errorf("%s was overwritten: %q", path, result.Output)
 		}
-		if result := run(t, t.TempDir(), ": > "+path, policy); result.Code == 0 {
+		if result := run(t, t.TempDir(), ": > "+path, policy); result.ExitCode == 0 {
 			t.Errorf("%s was truncated: %q", path, result.Output)
 		}
 	}
@@ -1071,12 +1071,12 @@ func TestOpenSSLConfigurationIsReadableWithoutExposingItsDirectory(t *testing.T)
 	}
 
 	result := run(t, t.TempDir(), "cat "+opensslConfigurationPath+" >/dev/null", sandbox.Policy{})
-	if result.Code != 0 {
+	if result.ExitCode != 0 {
 		t.Errorf("OpenSSL configuration is unreadable: %q", result.Output)
 	}
 
 	result = run(t, t.TempDir(), "ls /etc/ssl", sandbox.Policy{})
-	if result.Code == 0 {
+	if result.ExitCode == 0 {
 		t.Errorf("the OpenSSL configuration directory was listed: %q", result.Output)
 	}
 }
@@ -1090,7 +1090,7 @@ func TestOpenSSLCanLoadItsSystemConfiguration(t *testing.T) {
 	}
 
 	result := run(t, t.TempDir(), "openssl list -providers", sandbox.Policy{})
-	if result.Code != 0 {
+	if result.ExitCode != 0 {
 		t.Fatalf("OpenSSL could not load its system configuration: %q", result.Output)
 	}
 	if !strings.Contains(result.Output, "default") {
@@ -1130,8 +1130,8 @@ func TestWhatACommandWritesToTmpLandsInTheScratch(t *testing.T) {
 	policy := sandbox.Policy{TmpDir: scratch, Write: []string{sandbox.TmpDir}}
 	result := run(t, t.TempDir(), "cat /tmp/kept && echo written > /tmp/file", policy)
 
-	if result.Code != 0 {
-		t.Fatalf("got exit status %d with output %q", result.Code, result.Output)
+	if result.ExitCode != 0 {
+		t.Fatalf("got exit status %d with output %q", result.ExitCode, result.Output)
 	}
 
 	content, err := os.ReadFile(filepath.Join(scratch, "file")) //nolint:gosec // the test's own path
@@ -1149,13 +1149,13 @@ func TestCommandsSharingAScratchShareItsContents(t *testing.T) {
 	policy := sandbox.Policy{TmpDir: scratch, Write: []string{sandbox.TmpDir}}
 
 	written := run(t, t.TempDir(), "printf durable > /tmp/state", policy)
-	if written.Code != 0 {
-		t.Fatalf("the first command failed with exit status %d and output %q", written.Code, written.Output)
+	if written.ExitCode != 0 {
+		t.Fatalf("the first command failed with exit status %d and output %q", written.ExitCode, written.Output)
 	}
 
 	read := run(t, t.TempDir(), "cat /tmp/state", policy)
-	if read.Code != 0 || read.Output != "durable" {
-		t.Errorf("the second command got exit status %d with output %q", read.Code, read.Output)
+	if read.ExitCode != 0 || read.Output != "durable" {
+		t.Errorf("the second command got exit status %d with output %q", read.ExitCode, read.Output)
 	}
 }
 
@@ -1164,18 +1164,18 @@ func TestCommandsWithDifferentScratchesCannotSeeEachOthersContents(t *testing.T)
 	secondPolicy := sandbox.Policy{TmpDir: t.TempDir(), Write: []string{sandbox.TmpDir}}
 
 	written := run(t, t.TempDir(), "printf private > /tmp/state", firstPolicy)
-	if written.Code != 0 {
-		t.Fatalf("the first command failed with exit status %d and output %q", written.Code, written.Output)
+	if written.ExitCode != 0 {
+		t.Fatalf("the first command failed with exit status %d and output %q", written.ExitCode, written.Output)
 	}
 
 	hidden := run(t, t.TempDir(), "test ! -e /tmp/state", secondPolicy)
-	if hidden.Code != 0 {
+	if hidden.ExitCode != 0 {
 		t.Errorf("the second command saw the first command's scratch: %q", hidden.Output)
 	}
 
 	kept := run(t, t.TempDir(), "cat /tmp/state", firstPolicy)
-	if kept.Code != 0 || kept.Output != "private" {
-		t.Errorf("the first scratch got exit status %d with output %q", kept.Code, kept.Output)
+	if kept.ExitCode != 0 || kept.Output != "private" {
+		t.Errorf("the first scratch got exit status %d with output %q", kept.ExitCode, kept.Output)
 	}
 }
 
@@ -1190,7 +1190,7 @@ func TestAnExecutableBuiltInTmpMayRunWhenGranted(t *testing.T) {
 	result := run(t, t.TempDir(),
 		`printf '#!/bin/sh\necho ran\n' > /tmp/built && chmod +x /tmp/built && /tmp/built`, policy)
 
-	if result.Code != 0 || !strings.Contains(result.Output, "ran") {
+	if result.ExitCode != 0 || !strings.Contains(result.Output, "ran") {
 		t.Errorf("the generated file did not run: %q", result.Output)
 	}
 }
@@ -1224,10 +1224,10 @@ func TestAFileMayNotGrowPastTheLimit(t *testing.T) {
 	directory := t.TempDir()
 
 	result := run(t, directory, "dd if=/dev/zero of=big bs=1024 count=64", sandbox.Policy{
-		FileSize: 8 * 1024,
+		MaxFileSize: 8 * 1024,
 	})
 
-	if result.Code == 0 {
+	if result.ExitCode == 0 {
 		t.Fatalf("the write was allowed")
 	}
 
@@ -1243,11 +1243,11 @@ func TestAFileMayNotGrowPastTheLimit(t *testing.T) {
 
 func TestACommandMayNotBurnMoreProcessorTimeThanTheLimit(t *testing.T) {
 	result := run(t, t.TempDir(), "while :; do :; done", sandbox.Policy{
-		CPUTime: time.Second,
-		Timeout: 30 * time.Second,
+		MaxCPUTime: time.Second,
+		Timeout:    30 * time.Second,
 	})
 
-	if result.Code == 0 {
+	if result.ExitCode == 0 {
 		t.Errorf("the command was allowed to run on")
 	}
 
@@ -1259,8 +1259,8 @@ func TestACommandMayNotBurnMoreProcessorTimeThanTheLimit(t *testing.T) {
 func TestACommandThatEndsOfItsOwnAccordReportsNoSignal(t *testing.T) {
 	result := run(t, t.TempDir(), "exit 3", sandbox.Policy{})
 
-	if result.Code != 3 {
-		t.Errorf("got exit status %d, want the one the command chose", result.Code)
+	if result.ExitCode != 3 {
+		t.Errorf("got exit status %d, want the one the command chose", result.ExitCode)
 	}
 
 	if result.Signal != 0 {
@@ -1269,7 +1269,7 @@ func TestACommandThatEndsOfItsOwnAccordReportsNoSignal(t *testing.T) {
 }
 
 func TestDescriptorsAreLimited(t *testing.T) {
-	result := run(t, t.TempDir(), "ulimit -n", sandbox.Policy{OpenFiles: 64})
+	result := run(t, t.TempDir(), "ulimit -n", sandbox.Policy{MaxOpenFiles: 64})
 
 	if strings.TrimSpace(result.Output) != "64" {
 		t.Errorf("got %q, want %q", result.Output, "64")
@@ -1290,8 +1290,8 @@ func TestCompletedCommandsLeakNoDescriptors(t *testing.T) {
 	before := openDescriptorCount(t)
 	for range 10 {
 		result, err := sandbox.Run(t.Context(), directory, "true", policy)
-		if err != nil || result.Code != 0 {
-			t.Fatalf("command got exit status %d with error %v and output %q", result.Code, err, result.Output)
+		if err != nil || result.ExitCode != 0 {
+			t.Fatalf("command got exit status %d with error %v and output %q", result.ExitCode, err, result.Output)
 		}
 	}
 	after := openDescriptorCount(t)
@@ -1312,7 +1312,7 @@ func openDescriptorCount(t *testing.T) int {
 }
 
 func TestProcessesAreLimited(t *testing.T) {
-	result := run(t, t.TempDir(), "ulimit -u", sandbox.Policy{Processes: 64})
+	result := run(t, t.TempDir(), "ulimit -u", sandbox.Policy{MaxProcesses: 64})
 
 	if strings.TrimSpace(result.Output) != "64" {
 		t.Errorf("got %q, want %q", result.Output, "64")
@@ -1325,8 +1325,8 @@ func TestOutputBeyondWhatIsKeptDoesNotStopTheCommand(t *testing.T) {
 	command := fmt.Sprintf("yes .........| head -c %d", 3*outputLimit)
 	result := run(t, t.TempDir(), command, sandbox.Policy{})
 
-	if result.Code != 0 {
-		t.Errorf("got exit status %d, want a command writing past the cap to finish", result.Code)
+	if result.ExitCode != 0 {
+		t.Errorf("got exit status %d, want a command writing past the cap to finish", result.ExitCode)
 	}
 
 	if len(result.Output) != outputLimit {
@@ -1340,8 +1340,8 @@ func TestALimitThatCouldNeverBeMetIsRefused(t *testing.T) {
 	directory := t.TempDir()
 
 	_, err := sandbox.Run(context.Background(), directory, "true", sandbox.Policy{
-		Write:   []string{directory},
-		CPUTime: time.Millisecond,
+		Write:      []string{directory},
+		MaxCPUTime: time.Millisecond,
 	})
 
 	if err == nil || !strings.Contains(err.Error(), "no time at all") {
@@ -1364,7 +1364,7 @@ func TestAPolicyNamingAMissingPathIsRefused(t *testing.T) {
 }
 
 func TestAPolicyWithALimitThatIsNotALimitIsRefusedBeforeAnythingRuns(t *testing.T) {
-	for _, policy := range []sandbox.Policy{{FileSize: -1}, {OpenFiles: -1}} {
+	for _, policy := range []sandbox.Policy{{MaxFileSize: -1}, {MaxOpenFiles: -1}} {
 		if _, err := sandbox.Run(t.Context(), t.TempDir(), "true", policy); err == nil {
 			t.Errorf("%+v was accepted", policy)
 		}
@@ -1407,8 +1407,8 @@ func TestARealCachePathStillGrantsWrite(t *testing.T) {
 	directory := t.TempDir()
 	kept := filepath.Join(cache, "kept")
 	result := run(t, directory, "printf kept > "+kept, sandbox.Policy{Write: []string{home, cache}})
-	if result.Code != 0 {
-		t.Fatalf("got exit status %d with output %q", result.Code, result.Output)
+	if result.ExitCode != 0 {
+		t.Fatalf("got exit status %d with output %q", result.ExitCode, result.Output)
 	}
 
 	content, err := os.ReadFile(kept) //nolint:gosec // the test's own path

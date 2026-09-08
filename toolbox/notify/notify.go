@@ -66,7 +66,7 @@ func New(writeEscape EscapeWriter) tool.Tool {
 			Schema: tool.Schema{
 				tool.String("title", "notification title"),
 				tool.String("message", "notification text"),
-				tool.String("icon", "notification icon: one of "+iconChoices),
+				tool.String("icon", "notification icon: (one of "+iconChoices+")"),
 			},
 		},
 		Describe,

@@ -39,7 +39,7 @@ func withFinishedJobs(t *testing.T) *jobs.Manager {
 
 	manager := jobs.New(nil)
 	manager.Restore([]jobs.Snapshot{
-		{Name: "build", Command: "just build", State: jobs.StateFailed, Code: 1},
+		{Name: "build", Command: "just build", State: jobs.StateFailed, ExitCode: 1},
 		{Name: "watch", Command: "just watch", State: jobs.StateComplete},
 	})
 

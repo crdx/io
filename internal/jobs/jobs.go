@@ -40,7 +40,7 @@ type Snapshot struct {
 	State        State     `json:"state"`
 	StartedAt    time.Time `json:"started_at"`
 	EndedAt      time.Time `json:"ended_at,omitzero"`
-	Code         int       `json:"code,omitempty"`
+	ExitCode     int       `json:"code,omitempty"`
 	Failure      string    `json:"failure,omitempty"`
 	DroppedBytes int       `json:"-"`
 }
@@ -56,8 +56,8 @@ func (self Snapshot) Describe() string {
 		parts = append(parts, "ran for "+util.CompactDuration(self.EndedAt.Sub(self.StartedAt).Round(time.Second)))
 	}
 
-	if self.Code != 0 {
-		parts = append(parts, fmt.Sprintf("exit(%d)", self.Code))
+	if self.ExitCode != 0 {
+		parts = append(parts, fmt.Sprintf("exit(%d)", self.ExitCode))
 	}
 
 	if self.Failure != "" {
@@ -114,7 +114,7 @@ func (self *Manager) Restore(rememberedJobs []Snapshot) {
 			state:     state,
 			startedAt: snapshot.StartedAt,
 			endedAt:   snapshot.EndedAt,
-			code:      snapshot.Code,
+			code:      snapshot.ExitCode,
 			failure:   snapshot.Failure,
 			output:    &spool{},
 			over:      closedChannel(),
@@ -388,9 +388,9 @@ func (self *Manager) watch(endingJob *job) {
 
 	switch {
 	case err != nil:
-		self.conclude(endingJob, self.endingState(endingJob, StateFailed), result.Code, err.Error())
-	case result.Code != 0:
-		self.conclude(endingJob, self.endingState(endingJob, StateFailed), result.Code, "")
+		self.conclude(endingJob, self.endingState(endingJob, StateFailed), result.ExitCode, err.Error())
+	case result.ExitCode != 0:
+		self.conclude(endingJob, self.endingState(endingJob, StateFailed), result.ExitCode, "")
 	default:
 		self.conclude(endingJob, self.endingState(endingJob, StateComplete), 0, "")
 	}
@@ -471,7 +471,7 @@ func (self *Manager) describe(subject *job) Snapshot {
 		State:        subject.state,
 		StartedAt:    subject.startedAt,
 		EndedAt:      subject.endedAt,
-		Code:         subject.code,
+		ExitCode:     subject.code,
 		Failure:      subject.failure,
 		DroppedBytes: subject.output.DroppedBytes(),
 	}

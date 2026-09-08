@@ -1,11 +1,11 @@
-package unmapped_test
+package testnamespace_test
 
 import (
 	"os"
 	"slices"
 	"testing"
 
-	"crdx.org/io/internal/sandbox/unmapped"
+	"crdx.org/io/internal/sandbox/testnamespace"
 )
 
 func canMapANamespace(t *testing.T) bool {
@@ -21,34 +21,34 @@ func canMapANamespace(t *testing.T) bool {
 }
 
 func TestNothingIsCarriedForwardWhenTheVariableIsUnset(t *testing.T) {
-	t.Setenv(unmapped.Variable, "")
+	t.Setenv(testnamespace.Variable, "")
 
-	if environment := unmapped.Environment(); environment != nil {
+	if environment := testnamespace.Environment(); environment != nil {
 		t.Errorf("got %q, want nothing carried into a child", environment)
 	}
 }
 
 func TestTheVariableIsCarriedForwardWhenItIsSet(t *testing.T) {
-	t.Setenv(unmapped.Variable, "1")
+	t.Setenv(testnamespace.Variable, "1")
 
-	environment := unmapped.Environment()
-	if !slices.Contains(environment, unmapped.Variable+"=1") {
+	environment := testnamespace.Environment()
+	if !slices.Contains(environment, testnamespace.Variable+"=1") {
 		t.Errorf("got %q, want the variable carried into a child", environment)
 	}
 }
 
 func TestAnOrdinaryTestRunNeverStandsTheNamespacesDown(t *testing.T) {
-	t.Setenv(unmapped.Variable, "")
+	t.Setenv(testnamespace.Variable, "")
 
-	if unmapped.IsTestNamespace() {
+	if testnamespace.IsUnmapped() {
 		t.Error("got a stood-down namespace, want a test run asking for nothing to be left alone")
 	}
 }
 
 func TestTheNamespaceStandsDownOnlyWhereItCannotBeMapped(t *testing.T) {
-	t.Setenv(unmapped.Variable, "1")
+	t.Setenv(testnamespace.Variable, "1")
 
-	isStoodDown := unmapped.IsTestNamespace()
+	isStoodDown := testnamespace.IsUnmapped()
 
 	if canMapANamespace(t) && isStoodDown {
 		t.Error("got a stood-down namespace, want a machine that can map one to test for real")

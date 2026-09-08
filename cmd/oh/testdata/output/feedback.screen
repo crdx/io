@@ -5,7 +5,7 @@ wire.http recording disabled: wire append failed
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === command error ===
-Command not found: /unknown (alt+enter sends as message)
+Command not found: /unknown (alt+enter to send)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 /unknown
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ Copied last message to clipboard
 06 foxtrot
 
 
-Command not found: /unknown (alt+enter sends as message)
+Command not found: /unknown (alt+enter to send)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 /unknown
 ────────────────────────────────────────────────────────────────────────────────────────────────────

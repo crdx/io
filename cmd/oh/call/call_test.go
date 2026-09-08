@@ -23,8 +23,8 @@ func elided(t *testing.T, label Label, room int) Label {
 	return elidedLabel
 }
 
-func measured(stats *tool.Stats) string {
-	text := Measurements(stats)
+func measured(metrics *tool.ToolCallMetrics) string {
+	text := Measurements(metrics)
 	if text == "" {
 		return "✓"
 	}
@@ -32,22 +32,22 @@ func measured(stats *tool.Stats) string {
 	return "✓ " + text
 }
 
-func TestStatsAreShownAfterCalls(t *testing.T) {
+func TestMetricsAreShownAfterCalls(t *testing.T) {
 	for name, test := range map[string]struct {
-		stats tool.Stats
-		want  []string
+		metrics tool.ToolCallMetrics
+		want    []string
 	}{
 		"output": {
-			stats: tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 1200, TotalBytes: 1200},
-			want:  []string{"4L ~400t"},
+			metrics: tool.ToolCallMetrics{Kind: tool.MetricOutput, Lines: 4, Bytes: 1200, TotalBytes: 1200},
+			want:    []string{"4L ~400t"},
 		},
 		"empty output": {
-			stats: tool.Stats{Kind: tool.StatsOutput},
-			want:  []string{"no output"},
+			metrics: tool.ToolCallMetrics{Kind: tool.MetricOutput},
+			want:    []string{"no output"},
 		},
 		"capped output": {
-			stats: tool.Stats{
-				Kind:        tool.StatsOutput,
+			metrics: tool.ToolCallMetrics{
+				Kind:        tool.MetricOutput,
 				Lines:       4,
 				Bytes:       1200,
 				TotalBytes:  1200,
@@ -56,8 +56,8 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 			want: []string{"4L+ ~400t"},
 		},
 		"resources": {
-			stats: tool.Stats{
-				Kind:       tool.StatsResources,
+			metrics: tool.ToolCallMetrics{
+				Kind:       tool.MetricResources,
 				CPUTime:    800 * time.Millisecond,
 				PeakMemory: 92 << 20,
 				Lines:      7,
@@ -66,44 +66,44 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 			want: []string{"0.8s 7L ~400t 92M"},
 		},
 		"resources spent on nothing": {
-			stats: tool.Stats{Kind: tool.StatsResources},
-			want:  []string{"no output"},
+			metrics: tool.ToolCallMetrics{Kind: tool.MetricResources},
+			want:    []string{"no output"},
 		},
 		"resources without a cost worth naming": {
-			stats: tool.Stats{Kind: tool.StatsResources, Lines: 3, Bytes: 40},
-			want:  []string{"3L"},
+			metrics: tool.ToolCallMetrics{Kind: tool.MetricResources, Lines: 3, Bytes: 40},
+			want:    []string{"3L"},
 		},
 		"read": {
-			stats: tool.Stats{Kind: tool.StatsRead, Lines: 42, Bytes: 1200},
-			want:  []string{"42L ~400t"},
+			metrics: tool.ToolCallMetrics{Kind: tool.MetricRead, Lines: 42, Bytes: 1200},
+			want:    []string{"42L ~400t"},
 		},
 		"list": {
-			stats: tool.Stats{Kind: tool.StatsList, Lines: 42},
-			want:  []string{"42L"},
+			metrics: tool.ToolCallMetrics{Kind: tool.MetricList, Lines: 42},
+			want:    []string{"42L"},
 		},
 		"image": {
-			stats: tool.Stats{Kind: tool.StatsImage, Bytes: 80_943, EstimatedTokens: 1536},
-			want:  []string{"~1.5Kt"},
+			metrics: tool.ToolCallMetrics{Kind: tool.MetricImage, Bytes: 80_943, EstimatedTokens: 1536},
+			want:    []string{"~1.5Kt"},
 		},
 		"small estimate hidden": {
-			stats: tool.Stats{Kind: tool.StatsWrite, Lines: 3, Bytes: 280},
-			want:  []string{"3L"},
+			metrics: tool.ToolCallMetrics{Kind: tool.MetricWrite, Lines: 3, Bytes: 280},
+			want:    []string{"3L"},
 		},
 		"estimate above threshold shown": {
-			stats: tool.Stats{Kind: tool.StatsWrite, Lines: 3, Bytes: 281},
-			want:  []string{"3L ~100t"},
+			metrics: tool.ToolCallMetrics{Kind: tool.MetricWrite, Lines: 3, Bytes: 281},
+			want:    []string{"3L ~100t"},
 		},
 		"diff": {
-			stats: tool.Stats{Kind: tool.StatsDiff, AddedLines: 3, RemovedLines: 2},
-			want:  []string{"+3 −2"},
+			metrics: tool.ToolCallMetrics{Kind: tool.MetricDiff, AddedLines: 3, RemovedLines: 2},
+			want:    []string{"+3 −2"},
 		},
 		"search": {
-			stats: tool.Stats{Kind: tool.StatsSearch, Lines: 17, Bytes: 1200},
-			want:  []string{"17L ~400t"},
+			metrics: tool.ToolCallMetrics{Kind: tool.MetricSearch, Lines: 17, Bytes: 1200},
+			want:    []string{"17L ~400t"},
 		},
 		"small capped output with a large total": {
-			stats: tool.Stats{
-				Kind:        tool.StatsSearch,
+			metrics: tool.ToolCallMetrics{
+				Kind:        tool.MetricSearch,
 				Lines:       2,
 				Bytes:       280,
 				TotalBytes:  1200,
@@ -112,8 +112,8 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 			want: []string{"2L+ ~100t (of ~400t)"},
 		},
 		"capped search": {
-			stats: tool.Stats{
-				Kind:        tool.StatsSearch,
+			metrics: tool.ToolCallMetrics{
+				Kind:        tool.MetricSearch,
 				Lines:       100,
 				Bytes:       32_000,
 				TotalBytes:  80_000,
@@ -123,7 +123,7 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := style.Plain(measured(&test.stats))
+			got := style.Plain(measured(&test.metrics))
 			for _, want := range test.want {
 				if !strings.Contains(got, want) {
 					t.Errorf("got %q, want %q", got, want)
@@ -133,51 +133,51 @@ func TestStatsAreShownAfterCalls(t *testing.T) {
 	}
 }
 
-func TestStatsUseTheirExpectedStyles(t *testing.T) {
-	output := measured(&tool.Stats{Kind: tool.StatsOutput, Lines: 4, Bytes: 951})
+func TestMetricsUseTheirExpectedStyles(t *testing.T) {
+	output := measured(&tool.ToolCallMetrics{Kind: tool.MetricOutput, Lines: 4, Bytes: 951})
 	if want := style.Subtle("4L ~300t"); !strings.Contains(output, want) {
-		t.Errorf("output stats got %q, want styled %q", output, want)
+		t.Errorf("output metrics got %q, want styled %q", output, want)
 	}
 
-	emptyOutput := measured(&tool.Stats{Kind: tool.StatsOutput})
+	emptyOutput := measured(&tool.ToolCallMetrics{Kind: tool.MetricOutput})
 	if want := style.Subtle("no output"); !strings.Contains(emptyOutput, want) {
-		t.Errorf("empty output stats got %q, want styled %q", emptyOutput, want)
+		t.Errorf("empty output metrics got %q, want styled %q", emptyOutput, want)
 	}
 
-	read := measured(&tool.Stats{Kind: tool.StatsRead, Lines: 45, Bytes: 951})
+	read := measured(&tool.ToolCallMetrics{Kind: tool.MetricRead, Lines: 45, Bytes: 951})
 	if want := style.Subtle("45L ~300t"); !strings.Contains(read, want) {
-		t.Errorf("read stats got %q, want styled %q", read, want)
+		t.Errorf("read metrics got %q, want styled %q", read, want)
 	}
 
-	write := measured(&tool.Stats{Kind: tool.StatsWrite, Lines: 12, Bytes: 1200})
+	write := measured(&tool.ToolCallMetrics{Kind: tool.MetricWrite, Lines: 12, Bytes: 1200})
 	if want := style.Subtle("12L ~400t"); !strings.Contains(write, want) {
-		t.Errorf("write stats got %q, want styled %q", write, want)
+		t.Errorf("write metrics got %q, want styled %q", write, want)
 	}
 
-	search := measured(&tool.Stats{
-		Kind:        tool.StatsSearch,
+	search := measured(&tool.ToolCallMetrics{
+		Kind:        tool.MetricSearch,
 		Lines:       23,
 		Bytes:       1200,
 		TotalBytes:  2400,
 		IsTruncated: true,
 	})
 	if want := style.Subtle("23L+ ~400t (of ~900t)"); !strings.Contains(search, want) {
-		t.Errorf("search stats got %q, want styled %q", search, want)
+		t.Errorf("search metrics got %q, want styled %q", search, want)
 	}
 
-	exec := measured(&tool.Stats{
-		Kind:       tool.StatsResources,
+	exec := measured(&tool.ToolCallMetrics{
+		Kind:       tool.MetricResources,
 		PeakMemory: 26 << 20,
 	})
 	wantExec := style.Subtle("no output 26M")
 	if !strings.Contains(exec, wantExec) {
-		t.Errorf("exec stats got %q, want styled %q", exec, wantExec)
+		t.Errorf("exec metrics got %q, want styled %q", exec, wantExec)
 	}
 
-	edit := measured(&tool.Stats{Kind: tool.StatsDiff, AddedLines: 2, RemovedLines: 1})
+	edit := measured(&tool.ToolCallMetrics{Kind: tool.MetricDiff, AddedLines: 2, RemovedLines: 1})
 	wantEdit := style.Success("+2") + style.Subtle(" ") + style.Failure("−1")
 	if !strings.Contains(edit, wantEdit) {
-		t.Errorf("edit stats got %q, want styled %q", edit, wantEdit)
+		t.Errorf("edit metrics got %q, want styled %q", edit, wantEdit)
 	}
 }
 

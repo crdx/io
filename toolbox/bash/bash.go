@@ -27,7 +27,7 @@ type Args struct {
 
 func New(
 	root *file.Root,
-	fresh func(context.Context) (sandbox.Policy, error),
+	buildPolicy func(context.Context) (sandbox.Policy, error),
 	runner sandbox.Runner,
 ) tool.Tool {
 	return tool.Implement(
@@ -42,10 +42,10 @@ func New(
 	).
 		Validate(validate).
 		SyntaxFrom("bash", emphasisSource).
-		Stats(func(ctx context.Context, args Args) (string, tool.Stats, error) {
-			policy, err := fresh(ctx)
+		Exec(func(ctx context.Context, args Args) (string, tool.ToolCallMetrics, error) {
+			policy, err := buildPolicy(ctx)
 			if err != nil {
-				return "", tool.Stats{}, err
+				return "", tool.ToolCallMetrics{}, err
 			}
 			return exec(ctx, runner, root, policy, args)
 		})
@@ -189,32 +189,32 @@ func exec(
 	root *file.Root,
 	policy sandbox.Policy,
 	args Args,
-) (string, tool.Stats, error) {
+) (string, tool.ToolCallMetrics, error) {
 	result, err := runner.Run(ctx, root.Name(), args.Command, policy)
-	stats := tool.Stats{
-		Kind:       tool.StatsResources,
+	metrics := tool.ToolCallMetrics{
+		Kind:       tool.MetricResources,
 		CPUTime:    result.CPUTime,
 		PeakMemory: result.PeakMemory,
 	}
 	if err != nil {
-		return measured(unfinished(result.Output, err), &stats), stats, err
+		return measured(unfinished(result.Output, err), &metrics), metrics, err
 	}
 
-	reportText := measured(report(result, policy), &stats)
+	reportText := measured(report(result, policy), &metrics)
 
-	if result.Code != 0 {
-		return reportText, stats, ErrCommandFailed
+	if result.ExitCode != 0 {
+		return reportText, metrics, ErrCommandFailed
 	}
 
-	return reportText, stats, nil
+	return reportText, metrics, nil
 }
 
 var ErrCommandFailed = errors.New("the command failed")
 
-func measured(reportText string, stats *tool.Stats) string {
-	stats.Lines = int64(len(strutil.Lines(reportText)))
-	stats.Bytes = int64(len(reportText))
-	stats.TotalBytes = stats.Bytes
+func measured(reportText string, metrics *tool.ToolCallMetrics) string {
+	metrics.Lines = int64(len(strutil.Lines(reportText)))
+	metrics.Bytes = int64(len(reportText))
+	metrics.TotalBytes = metrics.Bytes
 
 	return reportText
 }
@@ -230,11 +230,11 @@ func unfinished(output string, err error) string {
 func report(result sandbox.Result, policy sandbox.Policy) string {
 	output := result.Output
 
-	if result.Code == 0 {
+	if result.ExitCode == 0 {
 		return output
 	}
 
-	status := fmt.Sprintf("exit(%d)", result.Code)
+	status := fmt.Sprintf("exit(%d)", result.ExitCode)
 	if output != "" {
 		status += ":"
 	}
@@ -266,8 +266,8 @@ func endingSignal(result sandbox.Result) (syscall.Signal, bool) {
 		return result.Signal, true
 	}
 
-	if result.Code > signalled {
-		return syscall.Signal(result.Code - signalled), false
+	if result.ExitCode > signalled {
+		return syscall.Signal(result.ExitCode - signalled), false
 	}
 
 	return 0, false
@@ -320,7 +320,7 @@ func overran(result sandbox.Result, policy sandbox.Policy) string {
 }
 
 func processorLimit(result sandbox.Result, policy sandbox.Policy) []string {
-	if policy.CPUTime <= 0 {
+	if policy.MaxCPUTime <= 0 {
 		return nil
 	}
 
@@ -328,7 +328,7 @@ func processorLimit(result sandbox.Result, policy sandbox.Policy) []string {
 		fmt.Sprintf(
 			"the sandbox gives each process %s of processor time, counted across every thread it runs,"+
 				" and stops the whole command after %s of wall clock.",
-			util.CompactDuration(policy.CPUTime), util.CompactDuration(policy.Timeout),
+			util.CompactDuration(policy.MaxCPUTime), util.CompactDuration(policy.Timeout),
 		),
 		fmt.Sprintf(
 			"every process this command started used %s of processor time between them.",
@@ -338,36 +338,36 @@ func processorLimit(result sandbox.Result, policy sandbox.Policy) []string {
 }
 
 func fileSizeLimit(policy sandbox.Policy) []string {
-	if policy.FileSize <= 0 {
+	if policy.MaxFileSize <= 0 {
 		return nil
 	}
 
 	return []string{fmt.Sprintf(
 		"the sandbox lets a command write no more than %s to a single file.",
-		util.FormatBytes(policy.FileSize, 3),
+		util.FormatBytes(policy.MaxFileSize, 3),
 	)}
 }
 
 func openFileLimit(policy sandbox.Policy) []string {
-	if policy.OpenFiles <= 0 {
+	if policy.MaxOpenFiles <= 0 {
 		return nil
 	}
 
 	return []string{fmt.Sprintf(
 		"the sandbox lets each process hold no more than %d files open at once.",
-		policy.OpenFiles,
+		policy.MaxOpenFiles,
 	)}
 }
 
 func processLimit(policy sandbox.Policy) []string {
-	if policy.Processes <= 0 {
+	if policy.MaxProcesses <= 0 {
 		return nil
 	}
 
 	return []string{fmt.Sprintf(
 		"the sandbox lets no more than %d tasks run at once across everything the command started,"+
 			" counting each thread as one of them.",
-		policy.Processes,
+		policy.MaxProcesses,
 	)}
 }
 

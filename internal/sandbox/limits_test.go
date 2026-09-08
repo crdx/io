@@ -14,10 +14,10 @@ func TestALimitThatIsNotALimitIsRefused(t *testing.T) {
 		policy Policy
 		want   string
 	}{
-		{name: "a negative file size", policy: Policy{FileSize: -1}, want: "is not a size"},
-		{name: "a negative file count", policy: Policy{OpenFiles: -1}, want: "is not a count"},
-		{name: "a negative process count", policy: Policy{Processes: -1}, want: "is not a count"},
-		{name: "a sub-second cpu limit", policy: Policy{CPUTime: time.Millisecond}, want: "no time at all"},
+		{name: "a negative file size", policy: Policy{MaxFileSize: -1}, want: "is not a size"},
+		{name: "a negative file count", policy: Policy{MaxOpenFiles: -1}, want: "is not a count"},
+		{name: "a negative process count", policy: Policy{MaxProcesses: -1}, want: "is not a count"},
+		{name: "a sub-second cpu limit", policy: Policy{MaxCPUTime: time.Millisecond}, want: "no time at all"},
 	} {
 		err := test.policy.sane()
 		if err == nil || !strings.Contains(err.Error(), test.want) {
@@ -27,7 +27,7 @@ func TestALimitThatIsNotALimitIsRefused(t *testing.T) {
 }
 
 func TestALimitThatCanBeMetIsAccepted(t *testing.T) {
-	policy := Policy{FileSize: 1024, OpenFiles: 64, Processes: 64, CPUTime: time.Second}
+	policy := Policy{MaxFileSize: 1024, MaxOpenFiles: 64, MaxProcesses: 64, MaxCPUTime: time.Second}
 
 	if err := policy.sane(); err != nil {
 		t.Errorf("got %v, want a policy that can be met", err)
@@ -60,10 +60,10 @@ func TestTheLimitsAPolicyNamesAreTheOnesTheCommandGets(t *testing.T) {
 	}
 
 	policy := Policy{
-		CPUTime:   30 * time.Second,
-		FileSize:  coverableFileSize,
-		OpenFiles: 64,
-		Processes: 128,
+		MaxCPUTime:   30 * time.Second,
+		MaxFileSize:  coverableFileSize,
+		MaxOpenFiles: 64,
+		MaxProcesses: 128,
 	}
 	if err := applyLimits(policy); err != nil {
 		t.Fatalf("could not apply the limits: %v", err)
@@ -144,7 +144,7 @@ func TestALimitAboveTheInheritedCeilingIsClampedToIt(t *testing.T) {
 	}
 
 	//nolint:gosec // the ceiling is a count that fits
-	if err := applyLimits(Policy{Processes: int64(ceiling.Max) * 2}); err != nil {
+	if err := applyLimits(Policy{MaxProcesses: int64(ceiling.Max) * 2}); err != nil {
 		t.Errorf("asking for more tasks than the ceiling allows failed instead of clamping: %v", err)
 	}
 

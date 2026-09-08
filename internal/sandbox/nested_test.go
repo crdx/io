@@ -98,7 +98,7 @@ func commitUnderLandlock(t *testing.T) {
 	workspace := os.Getenv(workspaceVariable)
 	home := os.Getenv(homeVariable)
 
-	if err := AvailableAtAll(); err != nil {
+	if err := Available(); err != nil {
 		t.Fatal(err)
 	}
 

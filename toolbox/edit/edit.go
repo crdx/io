@@ -30,7 +30,7 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 			},
 		},
 		Describe,
-	).FocusPath().Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
+	).FocusPath().Exec(func(_ context.Context, args Args) (string, tool.ToolCallMetrics, error) {
 		return exec(root, snapshots, args)
 	})
 }
@@ -39,59 +39,59 @@ func Describe(args Args) (string, string) {
 	return args.Path, ""
 }
 
-func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.Stats, error) {
+func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.ToolCallMetrics, error) {
 	switch {
 	case args.Path == "":
-		return "", tool.Stats{}, errors.New("path is required")
+		return "", tool.ToolCallMetrics{}, errors.New("path is required")
 	case args.OldText == "":
-		return "", tool.Stats{}, errors.New("old_text is required")
+		return "", tool.ToolCallMetrics{}, errors.New("old_text is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 
 	if err := root.RefuseWrite(name); err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 
 	data, err := root.ReadFile(name)
 	if err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 	if err := snapshots.Check(root, name, data); err != nil {
-		return "", tool.Stats{}, fmt.Errorf("%w — ensure you read %s before editing it", err, args.Path)
+		return "", tool.ToolCallMetrics{}, fmt.Errorf("%w — ensure you read %s before editing it", err, args.Path)
 	}
 
 	content := string(data)
 
 	switch strings.Count(content, args.OldText) {
 	case 0:
-		return "", tool.Stats{}, errors.New("old_text does not appear in the file")
+		return "", tool.ToolCallMetrics{}, errors.New("old_text does not appear in the file")
 	case 1:
 	default:
-		return "", tool.Stats{}, errors.New(
+		return "", tool.ToolCallMetrics{}, errors.New(
 			"old_text appears more than once — include more context to disambiguate",
 		)
 	}
 
 	info, err := root.Stat(name)
 	if err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 
 	updatedContent := strings.Replace(content, args.OldText, args.NewText, 1)
 
 	updatedData := []byte(updatedContent)
 	if err := root.WriteFile(name, updatedData, info.Mode()); err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 	snapshots.Record(root, name, updatedData)
 
 	addedLines, removedLines := changedLines(args.OldText, args.NewText)
-	stats := tool.Stats{Kind: tool.StatsDiff, AddedLines: addedLines, RemovedLines: removedLines}
-	return "edited " + args.Path, stats, nil
+	metrics := tool.ToolCallMetrics{Kind: tool.MetricDiff, AddedLines: addedLines, RemovedLines: removedLines}
+	return "edited " + args.Path, metrics, nil
 }
 
 func changedLines(before string, after string) (int64, int64) {

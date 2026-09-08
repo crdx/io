@@ -29,7 +29,7 @@ func outputResult(output string) (tool.ToolCallResult, error) {
 		return tool.ToolCallResult{}, errors.New("the request returned no content")
 	}
 
-	return tool.ToolCallResult{Output: output, Stats: tool.OutputStats(output)}, nil
+	return tool.ToolCallResult{Output: output, Metrics: tool.GetMetrics(output)}, nil
 }
 
 func noQualifier[T any](describe func(T) string) tool.Describer[T] {

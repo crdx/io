@@ -55,21 +55,21 @@ type pendingMessage struct {
 	state agent.Event
 }
 
-type pendingInput struct {
+type pendingNotices struct {
 	items    []pendingMessage
 	renderer *painter.PendingMessages
 	block    *output.BlockHandle
 }
 
-func (self *pendingInput) add(state agent.Event) {
+func (self *pendingNotices) add(state agent.Event) {
 	self.items = append(self.items, pendingMessage{state: state})
 }
 
-func (self *pendingInput) takeBack(index int) {
+func (self *pendingNotices) takeBack(index int) {
 	self.items = slices.Delete(self.items, index, index+1)
 }
 
-func (self *pendingInput) hasStoppedJobs(whichCaps caps.Set) bool {
+func (self *pendingNotices) hasStoppedJobs(whichCaps caps.Set) bool {
 	for _, item := range self.items {
 		if item.state.Kind != caps.JobStop {
 			continue
@@ -83,7 +83,7 @@ func (self *pendingInput) hasStoppedJobs(whichCaps caps.Set) bool {
 	return false
 }
 
-func (self *pendingInput) notices() []string {
+func (self *pendingNotices) notices() []string {
 	var notices []string
 	for _, item := range self.items {
 		if notice, isSaid := painter.HarnessNotice(item.state); isSaid {
@@ -93,47 +93,60 @@ func (self *pendingInput) notices() []string {
 	return notices
 }
 
-type App struct {
-	agent               *agent.Agent
-	events              []agent.Event
-	openingEvents       []agent.Event
-	screen              *output.Screen
-	recorder            *record.Recorder
-	barConfiguration    bar.Configuration
-	configObserver      *config.Observer
-	inputLine           *edit.Input
-	editorConfiguration *editor.Configuration
-	mode                *caps.Mode
-	pathGrants          *pathgrant.Grants
-	jobs                *jobs.Manager
-	recordedJobListing  string
-	hasRecordedJobs     bool
-	endedJobsNote       string
-	settledCaps         caps.Set
-	pendingInput        pendingInput
-	feedback            feedback.State
-	terminal            terminal.Terminal
-	metrics             metrics.Tracker
-	toolOutputLimit     *truncate.Limit
-	onFailure           func(failure error)
+type jobState struct {
+	manager         *jobs.Manager
+	recordedListing string
+	hasRecorded     bool
+	restoredNote    string
+}
 
-	workspace          *work.Space
-	continueMessage    string
+type displayState struct {
+	bar                bar.Config
 	streamingMode      output.StreamingMode
 	reasoningRendering output.ReasoningRendering
+}
 
+type runMode struct {
+	isPrinting bool
+	isPlain    bool
+	isYolo     bool
+}
+
+type slashState struct {
 	commands   slash.Registry
 	completion slash.Completion
+}
 
-	transition  cycle.Transition
-	queuedTurn  turn.Queue
-	currentTurn Turn
-	startedAt   time.Time
-	keyboard    *os.File
-	now         func() time.Time
-	isPrinting  bool
-	isPlain     bool
-	isYolo      bool
+type App struct {
+	agent           *agent.Agent
+	recordedEvents  []agent.Event
+	openingEvents   []agent.Event
+	screen          *output.Screen
+	recorder        *record.Recorder
+	configObserver  *config.Observer
+	inputLine       *edit.Input
+	editorConfig    *editor.Config
+	mode            *caps.Mode
+	pathGrants      *pathgrant.Grants
+	jobs            jobState
+	settledCaps     caps.Set
+	pendingNotices  pendingNotices
+	feedback        feedback.State
+	terminal        terminal.Terminal
+	metrics         metrics.Tracker
+	toolOutputLimit *truncate.Limit
+	onFailure       func(failure error)
+	workspace       *work.Space
+	continueMessage string
+	display         displayState
+	runMode         runMode
+	slash           slashState
+	transition      cycle.Transition
+	queuedTurn      turn.Queue
+	currentTurn     Turn
+	startedAt       time.Time
+	keyboard        *os.File
+	now             func() time.Time
 }
 
 type Turn struct {
@@ -153,7 +166,7 @@ func (self *App) begin(message string) cycle.Transition {
 	inputLine := edit.NewInput(history)
 	self.inputLine = inputLine
 
-	if self.isPrinting {
+	if self.runMode.isPrinting {
 		self.print(history, message)
 		return self.transition
 	}
@@ -178,20 +191,18 @@ func (self *App) begin(message string) cycle.Transition {
 	}
 
 	defer restoreTerminal()
-
 	stopListening := tty.RestoreOnSignal(restoreTerminal)
 	defer stopListening()
-
 	defer self.dropPendingInput()
 
 	self.show(inputLine)
-	if len(self.pendingInput.items) > 0 {
+	if len(self.pendingNotices.items) > 0 {
 		self.refreshPendingMessages()
 	}
 
 	if message != "" {
 		history.Add(message)
-		if self.handleCommand(message) == dispatch.Ordinary {
+		if self.handleCommand(message) == dispatch.Proceed {
 			self.start(message)
 		}
 	}
@@ -245,30 +256,30 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 	if inputLine.Text() != previousText {
 		self.feedback.ClearOnTyping()
 	}
-	if action != edit.Complete {
-		self.completion.Reset()
+	if action != edit.CompleteCommand {
+		self.slash.completion.Reset()
 	}
 
 	switch action {
-	case edit.Accept:
+	case edit.AcceptInput:
 		self.acceptInput(inputLine, history)
 
-	case edit.ForceAccept:
+	case edit.ForceAcceptInput:
 		self.submitInput(inputLine, history, strings.TrimSpace(inputLine.Text()))
 
-	case edit.Continue:
+	case edit.ContinueTurn:
 		self.continueOrFlush(inputLine, history)
 
-	case edit.Cancel:
+	case edit.CancelTurn:
 		if !self.takeBackInterjection(inputLine) {
 			self.cancelTurn(stopKeyCause(keypress))
 		}
 
-	case edit.Quit:
+	case edit.QuitSession:
 		return false
 
-	case edit.Complete:
-		if completion, found := self.completion.Next(self.commands, inputLine.Text()); found {
+	case edit.CompleteCommand:
+		if completion, found := self.slash.completion.Next(self.slash.commands, inputLine.Text()); found {
 			inputLine.SetText(completion)
 		}
 
@@ -284,7 +295,7 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 	case edit.ToggleWeb:
 		self.toggleCap(caps.Web)
 
-	case edit.Draw:
+	case edit.DrawInput:
 	}
 
 	return !self.isTransitionRequested() || self.currentTurn.Running()
@@ -304,7 +315,7 @@ func (self *App) requestTransition(transition cycle.Transition) error {
 
 func (self *App) handleCommand(message string) dispatch.Result {
 	self.feedback.Clear(feedback.Command)
-	result, failure := dispatch.Handle(self.commands, dispatch.Actions{
+	result, failure := dispatch.Handle(self.slash.commands, dispatch.Actions{
 		EmitEvent:  self.emitCommandEvent,
 		SendPrompt: self.sendCommandPrompt,
 		ShowFeedback: func(text string, status agent.Status) {
@@ -344,11 +355,11 @@ func (self *App) queuePathGrantChange(event agent.Event) {
 	if _, isShown := pathgrant.Notice(event); !isShown {
 		return
 	}
-	self.pendingInput.add(event)
+	self.pendingNotices.add(event)
 }
 
 func (self *App) pendingPathGrantChange(path string) (int, bool) {
-	for index, item := range self.pendingInput.items {
+	for index, item := range self.pendingNotices.items {
 		if item.state.Kind == pathgrant.Change && item.state.Name == path {
 			return index, true
 		}
@@ -358,11 +369,11 @@ func (self *App) pendingPathGrantChange(path string) (int, bool) {
 }
 
 func (self *App) takeBackPathGrantChange(index int, path string) {
-	self.pendingInput.takeBack(index)
+	self.pendingNotices.takeBack(index)
 
 	grants := self.pathGrants.GetCurrent()
-	for other := range self.pendingInput.items {
-		item := &self.pendingInput.items[other]
+	for other := range self.pendingNotices.items {
+		item := &self.pendingNotices.items[other]
 		if item.state.Kind != pathgrant.Change {
 			continue
 		}
@@ -383,7 +394,7 @@ func (self *App) acceptInput(inputLine *edit.Input, history *edit.History) {
 	case dispatch.Handled:
 		history.Add(message)
 		inputLine.Reset()
-	case dispatch.Ordinary:
+	case dispatch.Proceed:
 		self.submitInput(inputLine, history, message)
 	case dispatch.Rejected:
 	}
@@ -468,11 +479,11 @@ func (self *App) toggleCap(whichCaps caps.Set) {
 }
 
 func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
-	if self.pendingInput.hasStoppedJobs(whichCaps) {
+	if self.pendingNotices.hasStoppedJobs(whichCaps) {
 		return 0, false
 	}
 
-	for index, item := range self.pendingInput.items {
+	for index, item := range self.pendingNotices.items {
 		if item.state.Kind == caps.ModeChange && item.state.Name == whichCaps.Flag() {
 			return index, true
 		}
@@ -482,7 +493,7 @@ func (self *App) pendingModeChange(whichCaps caps.Set) (int, bool) {
 }
 
 func (self *App) showModeChange(whichCaps caps.Set) {
-	self.pendingInput.add(caps.ModeToggleEvent(whichCaps, self.mode.Current()))
+	self.pendingNotices.add(caps.ModeToggleEvent(whichCaps, self.mode.Current()))
 
 	if !self.currentTurn.Running() {
 		self.refreshPendingMessages()
@@ -490,10 +501,10 @@ func (self *App) showModeChange(whichCaps caps.Set) {
 }
 
 func (self *App) takeBackModeChange(index int, whichCaps caps.Set) {
-	self.pendingInput.takeBack(index)
+	self.pendingNotices.takeBack(index)
 
-	for other := index; other < len(self.pendingInput.items); other++ {
-		item := &self.pendingInput.items[other]
+	for other := index; other < len(self.pendingNotices.items); other++ {
+		item := &self.pendingNotices.items[other]
 		if item.state.Kind != caps.ModeChange {
 			continue
 		}
@@ -509,10 +520,10 @@ func (self *App) takeBackModeChange(index int, whichCaps caps.Set) {
 }
 
 func (self *App) refreshPendingMessages() {
-	if len(self.pendingInput.items) == 0 {
-		handle := self.pendingInput.block
-		self.pendingInput.renderer = nil
-		self.pendingInput.block = nil
+	if len(self.pendingNotices.items) == 0 {
+		handle := self.pendingNotices.block
+		self.pendingNotices.renderer = nil
+		self.pendingNotices.block = nil
 
 		if handle != nil && !self.screen.DiscardBlock(handle) {
 			self.redraw()
@@ -520,18 +531,18 @@ func (self *App) refreshPendingMessages() {
 		return
 	}
 
-	messages := self.pendingInput.notices()
-	if self.pendingInput.renderer == nil {
-		self.pendingInput.renderer = painter.NewPendingMessages(messages, self.screen.IsTerminal())
+	messages := self.pendingNotices.notices()
+	if self.pendingNotices.renderer == nil {
+		self.pendingNotices.renderer = painter.NewPendingMessages(messages, self.screen.IsTerminal())
 		self.screen.Blank()
-		self.pendingInput.block = self.screen.OpenNotice(self.pendingInput.renderer)
+		self.pendingNotices.block = self.screen.OpenNotice(self.pendingNotices.renderer)
 		return
 	}
 
-	self.pendingInput.renderer.Replace(messages)
-	if !self.screen.RefreshBlock(self.pendingInput.block) {
-		self.pendingInput.renderer = nil
-		self.pendingInput.block = nil
+	self.pendingNotices.renderer.Replace(messages)
+	if !self.screen.RefreshBlock(self.pendingNotices.block) {
+		self.pendingNotices.renderer = nil
+		self.pendingNotices.block = nil
 		self.redraw()
 	}
 }
@@ -559,32 +570,32 @@ func (self *App) settleAccess() {
 }
 
 func (self *App) settlePendingInput() {
-	wasShown := self.pendingInput.block != nil
-	for _, item := range self.pendingInput.items {
+	wasShown := self.pendingNotices.block != nil
+	for _, item := range self.pendingNotices.items {
 		if item.state.Kind == "" {
 			continue
 		}
 		self.metrics.Record(item.state)
-		self.events = append(self.events, item.state)
+		self.recordedEvents = append(self.recordedEvents, item.state)
 		self.storeEvent(item.state)
 		if !wasShown {
 			self.noticePainter().DrawEvent(item.state)
 		}
 	}
 
-	if self.pendingInput.block != nil {
-		self.pendingInput.renderer.MarkSent()
-		self.screen.RefreshBlock(self.pendingInput.block)
-		self.screen.SealBlock(self.pendingInput.block)
+	if self.pendingNotices.block != nil {
+		self.pendingNotices.renderer.MarkSent()
+		self.screen.RefreshBlock(self.pendingNotices.block)
+		self.screen.SealBlock(self.pendingNotices.block)
 	}
-	self.pendingInput = pendingInput{}
+	self.pendingNotices = pendingNotices{}
 }
 
 func (self *App) dropPendingInput() {
-	if self.pendingInput.block != nil {
-		self.screen.DiscardBlock(self.pendingInput.block)
+	if self.pendingNotices.block != nil {
+		self.screen.DiscardBlock(self.pendingNotices.block)
 	}
-	self.pendingInput = pendingInput{}
+	self.pendingNotices = pendingNotices{}
 }
 
 func (self *App) recordModeEvent(event agent.Event) {
@@ -648,7 +659,7 @@ func (self *App) show(inputLine *edit.Input) {
 }
 
 func (self *App) ruleStyle() style.Style {
-	if self.isYolo {
+	if self.runMode.isYolo {
 		return style.Hazard
 	}
 
@@ -664,7 +675,7 @@ func (self *App) statusRows(columns int) []string {
 }
 
 func (self *App) showFeedback(source feedback.Source, message feedback.Message) {
-	if self.isPlain {
+	if self.runMode.isPlain {
 		self.screen.Line(painter.NoticeStyle(message.Status)(message.Text))
 		return
 	}
@@ -673,11 +684,11 @@ func (self *App) showFeedback(source feedback.Source, message feedback.Message) 
 }
 
 func (self *App) renderBar(position segment.Position, frame edit.Frame) string {
-	return self.barConfiguration.Render(position, getBarContext(frame))
+	return self.display.bar.Render(position, getBarContext(frame))
 }
 
 func (self *App) renderBarWithin(position segment.Position, frame edit.Frame, cells int) string {
-	return self.barConfiguration.RenderWithin(position, getBarContext(frame), cells)
+	return self.display.bar.RenderWithin(position, getBarContext(frame), cells)
 }
 
 func getBarContext(frame edit.Frame) segment.Context {
@@ -701,25 +712,25 @@ func (self *App) getBarSources() bar.Sources {
 }
 
 func (self *App) getJobs() []jobs.Snapshot {
-	if self.jobs == nil {
+	if self.jobs.manager == nil {
 		return nil
 	}
 
-	return self.jobs.List()
+	return self.jobs.manager.List()
 }
 
 func (self *App) stopJobsHoldingPath(path string) {
-	if self.jobs == nil {
+	if self.jobs.manager == nil {
 		return
 	}
 
-	for _, name := range self.jobs.StopHolding(shell.StoppedByPath(path)) {
-		self.pendingInput.add(caps.JobStoppedForPathEvent(name, path))
+	for _, name := range self.jobs.manager.StopHolding(shell.StoppedByPath(path)) {
+		self.pendingNotices.add(caps.JobStoppedForPathEvent(name, path))
 	}
 }
 
 func (self *App) stopJobsLosingAccess(withdrawnCaps caps.Set) {
-	if self.jobs == nil {
+	if self.jobs.manager == nil {
 		return
 	}
 
@@ -728,8 +739,8 @@ func (self *App) stopJobsLosingAccess(withdrawnCaps caps.Set) {
 		return
 	}
 
-	for _, name := range self.jobs.StopHolding(holds) {
-		self.pendingInput.add(caps.JobStopEvent(name, withdrawnCaps))
+	for _, name := range self.jobs.manager.StopHolding(holds) {
+		self.pendingNotices.add(caps.JobStopEvent(name, withdrawnCaps))
 	}
 }
 
@@ -738,7 +749,7 @@ func (self *App) isTurnRunning() bool {
 }
 
 func (self *App) nextBarRefresh(at time.Time) time.Time {
-	return self.barConfiguration.NextRefresh(segment.Phase{At: at, IsRunning: self.isTurnRunning()})
+	return self.display.bar.NextRefresh(segment.Phase{At: at, IsRunning: self.isTurnRunning()})
 }
 
 func (self *App) nextRefresh(at time.Time) time.Time {
@@ -746,7 +757,7 @@ func (self *App) nextRefresh(at time.Time) time.Time {
 }
 
 func (self *App) reloadConfig(watchFailure error) bool {
-	result := self.configObserver.Reload(watchFailure, self.barConfiguration.GetRegistry())
+	result := self.configObserver.Reload(watchFailure, self.display.bar.GetRegistry())
 	switch result.Status {
 	case config.ReloadUnchanged:
 		return false
@@ -757,21 +768,21 @@ func (self *App) reloadConfig(watchFailure error) bool {
 		})
 		return true
 	case config.ReloadApplied:
-		if err := self.commands.ReplaceCommandSet(result.LiveConfig.SnippetCommandSet); err != nil {
+		if err := self.slash.commands.ReplaceCommandSet(result.LiveConfig.SnippetCommandSet); err != nil {
 			self.showFeedback(feedback.Config, feedback.Message{
 				Text:   "The configuration could not be reloaded: could not replace snippets: " + err.Error(),
 				Status: agent.ErrorStatus,
 			})
 			return true
 		}
-		self.completion.Reset()
+		self.slash.completion.Reset()
 		self.continueMessage = result.LiveConfig.ContinueMessage
-		self.editorConfiguration.ReplaceCommand(result.LiveConfig.EditorCommand)
-		self.streamingMode = result.LiveConfig.StreamingMode
-		self.reasoningRendering = result.LiveConfig.ReasoningRendering
+		self.editorConfig.ReplaceCommand(result.LiveConfig.EditorCommand)
+		self.display.streamingMode = result.LiveConfig.StreamingMode
+		self.display.reasoningRendering = result.LiveConfig.ReasoningRendering
 		self.screen.SetGrouping(result.LiveConfig.Grouping)
 		self.toolOutputLimit.Replace(result.LiveConfig.ToolOutputBytes)
-		self.barConfiguration.ReplaceLayout(result.LiveConfig.SegmentLayout)
+		self.display.bar.ReplaceLayout(result.LiveConfig.SegmentLayout)
 		self.feedback.Clear(feedback.Config)
 		if self.feedback.Message().Status != agent.ErrorStatus {
 			self.showFeedback(feedback.Confirmation, feedback.Message{
@@ -842,16 +853,16 @@ func (self *App) getNow() time.Time {
 }
 
 func (self *App) print(history *edit.History, message string) {
-	self.isPlain = true
-	defer func() { self.isPlain = false }()
+	self.runMode.isPlain = true
+	defer func() { self.runMode.isPlain = false }()
 	defer self.screen.End()
 
 	self.acceptPlainInput(history, message)
 }
 
 func (self *App) plainly(history *edit.History, initialMessage string) {
-	self.isPlain = true
-	defer func() { self.isPlain = false }()
+	self.runMode.isPlain = true
+	defer func() { self.runMode.isPlain = false }()
 
 	if keyboard := self.getKeyboard(); tty.Is(keyboard) {
 		self.acceptTypedLines(history, initialMessage, keyboard)
@@ -885,7 +896,7 @@ func (self *App) acceptPlainInput(history *edit.History, message string) {
 	if message == "" {
 		return
 	}
-	if self.handleCommand(message) == dispatch.Ordinary {
+	if self.handleCommand(message) == dispatch.Proceed {
 		self.ask(history, message)
 		return
 	}
@@ -912,7 +923,7 @@ func (self *App) waitForCurrentTurn() {
 }
 
 func (self *App) getLastMessage() (string, bool) {
-	for _, event := range slices.Backward(self.events) {
+	for _, event := range slices.Backward(self.recordedEvents) {
 		if event.Kind == agent.ModelMessageEvent {
 			return event.Text, true
 		}
@@ -933,7 +944,7 @@ func (self *App) restore(storedSession *store.Session) {
 	}
 
 	self.recorder.Resume(len(storedSession.Items))
-	self.events = append(self.events, storedSession.Events...)
+	self.recordedEvents = append(self.recordedEvents, storedSession.Events...)
 
 	for _, event := range storedSession.Events {
 		self.takeSessionTitle(event)
@@ -947,8 +958,8 @@ func (self *App) restore(storedSession *store.Session) {
 }
 
 func (self *App) newPainter(isRunning bool) *painter.Picasso {
-	picasso := painter.New(self.screen, isRunning, self.agent.Tool, self.workspace, self.streamingMode)
-	picasso.RenderReasoningAs(self.reasoningRendering)
+	picasso := painter.New(self.screen, isRunning, self.agent.Tool, self.workspace, self.display.streamingMode)
+	picasso.RenderReasoningAs(self.display.reasoningRendering)
 	if self.screen.IsTerminal() && self.recorder != nil {
 		picasso.LinkToolResults(self.recorder.Name())
 	}
@@ -959,7 +970,7 @@ func (self *App) replay() {
 	self.screen.Sync(func() {
 		painter := self.newPainter(self.currentTurn.Running())
 
-		for _, event := range self.events {
+		for _, event := range self.recordedEvents {
 			painter.DrawEvent(event)
 		}
 
@@ -985,8 +996,8 @@ func (self *App) redraw() {
 	}
 
 	self.screen.Sync(func() {
-		self.pendingInput.renderer = nil
-		self.pendingInput.block = nil
+		self.pendingNotices.renderer = nil
+		self.pendingNotices.block = nil
 		self.screen.Reset()
 		self.replay()
 		if provisionalPainter.Text != "" {
@@ -1022,7 +1033,7 @@ func (self *App) takeSessionTitle(event agent.Event) {
 
 func (self *App) prelude() string {
 	notes := slices.DeleteFunc(
-		[]string{self.interruptionNote(), self.endedJobsMessage(), self.accessMessage(), self.titleNote()},
+		[]string{self.interruptionNote(), self.takeRestoredJobsNote(), self.accessMessage(), self.titleNote()},
 		func(note string) bool { return note == "" },
 	)
 
@@ -1051,7 +1062,7 @@ func (self *App) titleNote() string {
 	}
 
 	hasAnswered := false
-	for _, event := range self.events {
+	for _, event := range self.recordedEvents {
 		if _, isTitled := agent.TitleFromEvent(event); isTitled {
 			return ""
 		}
@@ -1066,36 +1077,36 @@ func (self *App) titleNote() string {
 	return "This session has no title yet. Name the task with the " + title.Name + " tool."
 }
 
-func (self *App) endedJobsMessage() string {
-	note := self.endedJobsNote
-	self.endedJobsNote = ""
+func (self *App) takeRestoredJobsNote() string {
+	note := self.jobs.restoredNote
+	self.jobs.restoredNote = ""
 
 	return note
 }
 
 func (self *App) recordJobListing() {
-	if self.jobs == nil {
+	if self.jobs.manager == nil {
 		return
 	}
 
-	listing := self.jobs.List()
-	if len(listing) == 0 && !self.hasRecordedJobs {
+	listing := self.jobs.manager.List()
+	if len(listing) == 0 && !self.jobs.hasRecorded {
 		return
 	}
 
 	event := jobrecord.ListingEvent(listing)
-	if string(event.State) == self.recordedJobListing {
+	if string(event.State) == self.jobs.recordedListing {
 		return
 	}
 
-	self.recordedJobListing = string(event.State)
-	self.hasRecordedJobs = true
-	self.events = append(self.events, event)
+	self.jobs.recordedListing = string(event.State)
+	self.jobs.hasRecorded = true
+	self.recordedEvents = append(self.recordedEvents, event)
 	self.storeEvent(event)
 }
 
 func (self *App) restoreJobs(events []agent.Event) {
-	if self.jobs == nil {
+	if self.jobs.manager == nil {
 		return
 	}
 
@@ -1104,8 +1115,8 @@ func (self *App) restoreJobs(events []agent.Event) {
 		return
 	}
 
-	self.jobs.Restore(rememberedJobs)
-	self.hasRecordedJobs = true
+	self.jobs.manager.Restore(rememberedJobs)
+	self.jobs.hasRecorded = true
 
 	var live []string
 	for _, snapshot := range rememberedJobs {
@@ -1120,9 +1131,9 @@ func (self *App) restoreJobs(events []agent.Event) {
 
 	event := jobrecord.EndedWithSessionEvent(live)
 	if note, isSaid := jobrecord.EndedWithSessionNotice(event); isSaid {
-		self.endedJobsNote = note
+		self.jobs.restoredNote = note
 	}
-	self.pendingInput.add(event)
+	self.pendingNotices.add(event)
 }
 
 func (self *App) interruptionNote() string {
@@ -1178,7 +1189,7 @@ func (self *App) recordEvent(event agent.Event) {
 		self.queuedTurn.MarkSilentTurn()
 	}
 
-	self.events = append(self.events, event)
+	self.recordedEvents = append(self.recordedEvents, event)
 	self.currentTurn.painter.DrawEvent(event)
 
 	if self.currentTurn.painter.Stale() {
@@ -1200,7 +1211,7 @@ func (self *App) notifyFailure(text string) {
 }
 
 func (self *App) notify(event agent.Event) {
-	self.events = append(self.events, event)
+	self.recordedEvents = append(self.recordedEvents, event)
 	self.noticePainter().DrawEvent(event)
 
 	_ = self.recorder.Event(event)
@@ -1215,15 +1226,15 @@ func (self *App) noticePainter() *painter.Picasso {
 }
 
 func (self *App) wasCutShort() bool {
-	if len(self.events) == 0 {
+	if len(self.recordedEvents) == 0 {
 		return false
 	}
 
-	return self.events[len(self.events)-1].Kind == agent.ModelReasoningEvent
+	return self.recordedEvents[len(self.recordedEvents)-1].Kind == agent.ModelReasoningEvent
 }
 
 func (self *App) wasPoked() bool {
-	for _, event := range slices.Backward(self.events) {
+	for _, event := range slices.Backward(self.recordedEvents) {
 		if event.Kind == turn.HarnessPoke {
 			return true
 		}

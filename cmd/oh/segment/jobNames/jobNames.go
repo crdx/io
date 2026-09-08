@@ -16,9 +16,9 @@ const (
 )
 
 const (
-	liveMark     = "\u25cf"
-	finishedMark = "\u25cb"
-	failedMark   = "\u2717"
+	liveMark     = "●"
+	finishedMark = "○"
+	failedMark   = "✗"
 )
 
 var _ segment.Refresher = state{}

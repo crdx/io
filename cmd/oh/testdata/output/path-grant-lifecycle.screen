@@ -16,7 +16,7 @@ The model ended the turn without an answer.
 
 
 /grant: /reference already has temporary read-only access
-(alt+enter sends as message)
+(alt+enter to send)
 ── ·✦· ─ r:reference ──────────────────────────────────────────────────────────────── brave-otter ──
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -56,13 +56,13 @@ The model ended the turn without an answer.
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === missing home path rejected ===
 /grant: Could not resolve ~/missing: lstat /user/missing: no such file
-or directory (alt+enter sends as message)
+or directory (alt+enter to send)
 ── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === missing path rejected ===
 /grant: Could not resolve /missing: lstat
-/missing: no such file or directory (alt+enter sends as message)
+/missing: no such file or directory (alt+enter to send)
 ── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -99,8 +99,7 @@ Temporary access could not be restored: path does not exist
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === revoke without grant rejected ===
-/revoke: /reference has no temporary grant (alt+enter sends as
-message)
+/revoke: /reference has no temporary grant (alt+enter to send)
 ── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -119,7 +118,7 @@ The model ended the turn without an answer.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === unknown access rejected ===
-Usage: /grant {r|rw|rx|rwx} <path> (alt+enter sends as message)
+Usage: /grant {r|rw|rx|rwx} <path> (alt+enter to send)
 ── ·✦· ────────────────────────────────────────────────────────────────────────────── brave-otter ──
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────

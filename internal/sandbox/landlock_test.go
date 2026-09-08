@@ -65,7 +65,7 @@ func TestAFileGrantReachesNothingAroundIt(t *testing.T) {
 	exact := os.Getenv(grantedVariable)
 	directory := filepath.Dir(exact)
 
-	if err := AvailableAtAll(); err != nil {
+	if err := Available(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
@@ -97,7 +97,7 @@ func TestAnOptionalPathTheMachineLacksDoesNotStopTheSandbox(t *testing.T) {
 		return
 	}
 
-	if err := AvailableAtAll(); err != nil {
+	if err := Available(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
@@ -114,7 +114,7 @@ func TestAPathThatIsNotThereIsNamedWhenItIsGranted(t *testing.T) {
 
 	absent := os.Getenv(grantedVariable)
 
-	if err := AvailableAtAll(); err != nil {
+	if err := Available(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
@@ -143,7 +143,7 @@ func TestAGrantThroughAModelSymlinkIsRefused(t *testing.T) {
 	writeRoot := os.Getenv(grantedVariable)
 	planted := filepath.Join(writeRoot, ".cache")
 
-	if err := AvailableAtAll(); err != nil {
+	if err := Available(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
@@ -182,7 +182,7 @@ func TestAGrantThroughAnAdminSymlinkIsFollowed(t *testing.T) {
 	linked := os.Getenv(grantedVariable)
 	root := filepath.Dir(linked)
 
-	if err := AvailableAtAll(); err != nil {
+	if err := Available(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
@@ -206,7 +206,7 @@ func TestAConfinedProcessCannotWriteThroughItsOwnProc(t *testing.T) {
 		return
 	}
 
-	if err := AvailableAtAll(); err != nil {
+	if err := Available(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 
@@ -234,7 +234,7 @@ func TestAGrantedBinaryCanBeExecutedWithinTheSandbox(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := AvailableAtAll(); err != nil {
+	if err := Available(); err != nil {
 		t.Skipf("landlock cannot be asked here: %v", err)
 	}
 

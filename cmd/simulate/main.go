@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"sort"
+	"slices"
 	"time"
 
 	"crdx.org/col"
@@ -131,7 +131,7 @@ func announce(endpoint *sim.Endpoint, base string, model string) {
 		formats = append(formats, format)
 	}
 
-	sort.Strings(formats)
+	slices.Sort(formats)
 
 	fmt.Printf("\n%s\n\n", col.Green("answering these wire formats:"))
 

@@ -1,8 +1,9 @@
 package call
 
 import (
+	"cmp"
 	"fmt"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -130,8 +131,8 @@ func (self Label) renderSubject() string {
 		return style.Subject(self.Subject)
 	}
 
-	sort.Slice(spans, func(i int, j int) bool {
-		return spans[i].start < spans[j].start
+	slices.SortFunc(spans, func(first span, second span) int {
+		return cmp.Compare(first.start, second.start)
 	})
 
 	var out strings.Builder
@@ -195,99 +196,99 @@ func (self Label) style() style.Style {
 	return style.Change
 }
 
-func Measurements(stats *tool.Stats) string {
-	if stats == nil {
+func Measurements(metrics *tool.ToolCallMetrics) string {
+	if metrics == nil {
 		return ""
 	}
 
-	switch stats.Kind {
-	case tool.StatsOutput:
-		return outputStatsText(stats)
-	case tool.StatsResources:
-		return resourcesStatsText(stats)
-	case tool.StatsRead:
-		return readStatsText(stats)
-	case tool.StatsList:
-		return listStatsText(stats)
-	case tool.StatsImage:
-		return imageStatsText(stats)
-	case tool.StatsWrite:
-		return writeStatsText(stats)
-	case tool.StatsDiff:
-		return diffStatsText(stats)
-	case tool.StatsSearch:
-		return searchStatsText(stats)
+	switch metrics.Kind {
+	case tool.MetricOutput:
+		return outputMetricsText(metrics)
+	case tool.MetricResources:
+		return resourcesMetricsText(metrics)
+	case tool.MetricRead:
+		return readMetricsText(metrics)
+	case tool.MetricList:
+		return listMetricsText(metrics)
+	case tool.MetricImage:
+		return imageMetricsText(metrics)
+	case tool.MetricWrite:
+		return writeMetricsText(metrics)
+	case tool.MetricDiff:
+		return diffMetricsText(metrics)
+	case tool.MetricSearch:
+		return searchMetricsText(metrics)
 	}
 
 	return ""
 }
 
-func outputStatsText(stats *tool.Stats) string {
-	return style.Subtle(outputMeasure(stats))
+func outputMetricsText(metrics *tool.ToolCallMetrics) string {
+	return style.Subtle(outputMeasure(metrics))
 }
 
-func outputMeasure(stats *tool.Stats) string {
-	if stats.Bytes == 0 && stats.Lines == 0 {
+func outputMeasure(metrics *tool.ToolCallMetrics) string {
+	if metrics.Bytes == 0 && metrics.Lines == 0 {
 		return "no output"
 	}
 
 	truncationMarker := ""
-	if stats.IsTruncated {
+	if metrics.IsTruncated {
 		truncationMarker = "+"
 	}
 
-	return util.JoinNonEmpty(fmt.Sprintf("%dL%s", stats.Lines, truncationMarker), tokenEstimate(stats))
+	return util.JoinNonEmpty(fmt.Sprintf("%dL%s", metrics.Lines, truncationMarker), tokenEstimate(metrics))
 }
 
-func resourcesStatsText(stats *tool.Stats) string {
-	cpuTime := util.CompactDuration(stats.CPUTime)
+func resourcesMetricsText(metrics *tool.ToolCallMetrics) string {
+	cpuTime := util.CompactDuration(metrics.CPUTime)
 	if cpuTime == noTimeAtAll {
 		cpuTime = ""
 	}
 
 	peakMemory := ""
-	if megabytes := stats.PeakMemory / bytesPerMegabyte; megabytes > 0 {
+	if megabytes := metrics.PeakMemory / bytesPerMegabyte; megabytes > 0 {
 		peakMemory = strconv.FormatUint(megabytes, 10) + "M"
 	}
 
-	return style.Subtle.Join(cpuTime, outputMeasure(stats), peakMemory)
+	return style.Subtle.Join(cpuTime, outputMeasure(metrics), peakMemory)
 }
 
-func readStatsText(stats *tool.Stats) string {
-	return style.Subtle.Join(strconv.FormatInt(stats.Lines, 10)+"L", tokenEstimate(stats))
+func readMetricsText(metrics *tool.ToolCallMetrics) string {
+	return style.Subtle.Join(strconv.FormatInt(metrics.Lines, 10)+"L", tokenEstimate(metrics))
 }
 
-func listStatsText(stats *tool.Stats) string {
-	return style.Subtle(strconv.FormatInt(stats.Lines, 10) + "L")
+func listMetricsText(metrics *tool.ToolCallMetrics) string {
+	return style.Subtle(strconv.FormatInt(metrics.Lines, 10) + "L")
 }
 
-func imageStatsText(stats *tool.Stats) string {
-	return style.Subtle(util.FormatEstimatedTokenCount(stats.EstimatedTokens))
+func imageMetricsText(metrics *tool.ToolCallMetrics) string {
+	return style.Subtle(util.FormatEstimatedTokenCount(metrics.EstimatedTokens))
 }
 
-func writeStatsText(stats *tool.Stats) string {
-	return style.Subtle.Join(strconv.FormatInt(stats.Lines, 10)+"L", tokenEstimate(stats))
+func writeMetricsText(metrics *tool.ToolCallMetrics) string {
+	return style.Subtle.Join(strconv.FormatInt(metrics.Lines, 10)+"L", tokenEstimate(metrics))
 }
 
-func diffStatsText(stats *tool.Stats) string {
-	return style.Success("+%d", stats.AddedLines) +
-		style.Subtle(" ") + style.Failure("−%d", stats.RemovedLines)
+func diffMetricsText(metrics *tool.ToolCallMetrics) string {
+	return style.Success("+%d", metrics.AddedLines) +
+		style.Subtle(" ") + style.Failure("−%d", metrics.RemovedLines)
 }
 
-func searchStatsText(stats *tool.Stats) string {
+func searchMetricsText(metrics *tool.ToolCallMetrics) string {
 	capMarker := ""
-	if stats.IsTruncated {
+	if metrics.IsTruncated {
 		capMarker = "+"
 	}
-	return style.Subtle.Join(fmt.Sprintf("%dL%s", stats.Lines, capMarker), tokenEstimate(stats))
+	return style.Subtle.Join(fmt.Sprintf("%dL%s", metrics.Lines, capMarker), tokenEstimate(metrics))
 }
 
-func tokenEstimate(stats *tool.Stats) string {
+func tokenEstimate(metrics *tool.ToolCallMetrics) string {
 	const maximumHiddenTokenEstimate = 100
 
-	returnedTokens := util.EstimateTokenCount(stats.Bytes)
-	isTotalSaid := stats.TotalBytes > stats.Bytes &&
-		util.EstimateTokenCount(stats.TotalBytes) > maximumHiddenTokenEstimate
+	returnedTokens := util.EstimateTokenCount(metrics.Bytes)
+	isTotalSaid := metrics.TotalBytes > metrics.Bytes &&
+		util.EstimateTokenCount(metrics.TotalBytes) > maximumHiddenTokenEstimate
 
 	if returnedTokens <= maximumHiddenTokenEstimate && !isTotalSaid {
 		return ""
@@ -295,7 +296,7 @@ func tokenEstimate(stats *tool.Stats) string {
 
 	returnedText := util.FormatEstimatedTokenCount(returnedTokens)
 	if isTotalSaid {
-		return returnedText + " (of " + util.FormatTokenEstimate(stats.TotalBytes) + ")"
+		return returnedText + " (of " + util.FormatTokenEstimate(metrics.TotalBytes) + ")"
 	}
 
 	return returnedText

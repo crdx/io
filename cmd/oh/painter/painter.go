@@ -451,7 +451,7 @@ func (self *Picasso) mark(event agent.Event) {
 		getState(event.Status),
 		event.Took,
 		call.Summary(event),
-		call.Measurements(event.Stats),
+		call.Measurements(event.Metrics),
 	)
 
 	if len(self.rows) == 0 {

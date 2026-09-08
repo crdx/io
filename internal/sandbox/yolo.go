@@ -35,7 +35,7 @@ func runYolo(ctx context.Context, directory string, command string, policy Polic
 	status := collect(child)
 	result := Result{
 		Output:     output.String(),
-		Code:       status.Code,
+		ExitCode:   status.ExitCode,
 		Signal:     status.Signal,
 		CPUTime:    status.CPUTime,
 		PeakMemory: status.PeakMemory,

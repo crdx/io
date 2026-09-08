@@ -57,43 +57,43 @@ func TestAnUnfinishedCommandKeepsItsOutputAndSaysWhyItEnded(t *testing.T) {
 }
 
 func TestWhatACommandProducedIsMeasured(t *testing.T) {
-	stats := tool.Stats{Kind: tool.StatsResources}
+	metrics := tool.ToolCallMetrics{Kind: tool.MetricResources}
 
-	if got := measured("one\ntwo\n", &stats); got != "one\ntwo\n" {
+	if got := measured("one\ntwo\n", &metrics); got != "one\ntwo\n" {
 		t.Errorf("got %q, want the text back unchanged", got)
 	}
-	if stats.Lines != 2 || stats.Bytes != 8 || stats.TotalBytes != 8 {
-		t.Errorf("got %+v, want 2 lines and 8 bytes", stats)
+	if metrics.Lines != 2 || metrics.Bytes != 8 || metrics.TotalBytes != 8 {
+		t.Errorf("got %+v, want 2 lines and 8 bytes", metrics)
 	}
-	if stats.Kind != tool.StatsResources {
-		t.Errorf("got kind %q, want what a command reports", stats.Kind)
+	if metrics.Kind != tool.MetricResources {
+		t.Errorf("got kind %q, want what a command reports", metrics.Kind)
 	}
 }
 
 func TestNothingProducedIsMeasuredAsNothing(t *testing.T) {
-	stats := tool.Stats{Kind: tool.StatsResources}
+	metrics := tool.ToolCallMetrics{Kind: tool.MetricResources}
 
-	measured("", &stats)
+	measured("", &metrics)
 
-	if stats.Lines != 0 || stats.Bytes != 0 {
-		t.Errorf("got %+v, want an empty report to measure as empty", stats)
+	if metrics.Lines != 0 || metrics.Bytes != 0 {
+		t.Errorf("got %+v, want an empty report to measure as empty", metrics)
 	}
 }
 
 func killTestPolicy() sandbox.Policy {
 	return sandbox.Policy{
-		Timeout:  5 * time.Minute,
-		CPUTime:  time.Hour,
-		FileSize: 1024 << 20,
-		Write:    []string{"/workspace"},
+		Timeout:     5 * time.Minute,
+		MaxCPUTime:  time.Hour,
+		MaxFileSize: 1024 << 20,
+		Write:       []string{"/workspace"},
 	}
 }
 
 func TestACommandKilledForItsProcessorTimeIsToldTheLimitAndWhatItUsed(t *testing.T) {
 	result := sandbox.Result{
-		Code:    137,
-		CPUTime: 90 * time.Minute,
-		Output:  "error: recipe `lint1` was terminated on line 104 by signal 9",
+		ExitCode: 137,
+		CPUTime:  90 * time.Minute,
+		Output:   "error: recipe `lint1` was terminated on line 104 by signal 9",
 	}
 
 	got := report(result, killTestPolicy())
@@ -112,7 +112,7 @@ func TestACommandKilledForItsProcessorTimeIsToldTheLimitAndWhatItUsed(t *testing
 }
 
 func TestACommandKilledForWritingTooMuchIsToldTheFileLimit(t *testing.T) {
-	result := sandbox.Result{Code: 153, Output: "dd: writing 'big': File size limit exceeded"}
+	result := sandbox.Result{ExitCode: 153, Output: "dd: writing 'big': File size limit exceeded"}
 
 	got := report(result, killTestPolicy())
 
@@ -125,7 +125,7 @@ func TestACommandKilledForWritingTooMuchIsToldTheFileLimit(t *testing.T) {
 }
 
 func TestAKillIsReportedEvenWhereTheOutputLooksLikeADenial(t *testing.T) {
-	result := sandbox.Result{Code: 137, Output: "cp: cannot open 'x': Permission denied"}
+	result := sandbox.Result{ExitCode: 137, Output: "cp: cannot open 'x': Permission denied"}
 
 	if got := report(result, killTestPolicy()); !strings.Contains(got, "killed by SIGKILL") {
 		t.Errorf("got %q, want a kill reported whatever else the output says", got)
@@ -138,7 +138,7 @@ func TestAnUnkilledFailureIsAccusedOfNothing(t *testing.T) {
 		"a status of the boundary":  128,
 		"a status above any signal": 255,
 	} {
-		got := report(sandbox.Result{Code: code, Output: "make: *** [all] Error 1"}, killTestPolicy())
+		got := report(sandbox.Result{ExitCode: code, Output: "make: *** [all] Error 1"}, killTestPolicy())
 		if strings.Contains(got, "killed by") {
 			t.Errorf("%s: got %q, want no kill claimed", name, got)
 		}
@@ -147,9 +147,9 @@ func TestAnUnkilledFailureIsAccusedOfNothing(t *testing.T) {
 
 func TestASignalTheCommandItselfDiedOfIsReportedWithoutHedging(t *testing.T) {
 	result := sandbox.Result{
-		Code:    -1,
-		Signal:  syscall.SIGKILL,
-		CPUTime: 90 * time.Minute,
+		ExitCode: -1,
+		Signal:   syscall.SIGKILL,
+		CPUTime:  90 * time.Minute,
 	}
 
 	got := report(result, killTestPolicy())
@@ -166,7 +166,7 @@ func TestASignalTheCommandItselfDiedOfIsReportedWithoutHedging(t *testing.T) {
 }
 
 func TestASignalOnlyTheShellSawIsReportedAsSuch(t *testing.T) {
-	result := sandbox.Result{Code: 137, Output: "Killed"}
+	result := sandbox.Result{ExitCode: 137, Output: "Killed"}
 
 	got := report(result, killTestPolicy())
 
@@ -176,7 +176,7 @@ func TestASignalOnlyTheShellSawIsReportedAsSuch(t *testing.T) {
 }
 
 func TestAnObservedSignalIsPreferredToTheExitStatus(t *testing.T) {
-	result := sandbox.Result{Code: 139, Signal: syscall.SIGXFSZ}
+	result := sandbox.Result{ExitCode: 139, Signal: syscall.SIGXFSZ}
 
 	got := report(result, killTestPolicy())
 
@@ -186,7 +186,7 @@ func TestAnObservedSignalIsPreferredToTheExitStatus(t *testing.T) {
 }
 
 func TestAKillUnderNoProcessorLimitNamesTheSignalAlone(t *testing.T) {
-	result := sandbox.Result{Code: 137, Output: "Killed"}
+	result := sandbox.Result{ExitCode: 137, Output: "Killed"}
 
 	got := report(result, sandbox.Policy{Timeout: time.Minute})
 

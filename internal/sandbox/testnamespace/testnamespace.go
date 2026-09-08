@@ -1,4 +1,4 @@
-package unmapped
+package testnamespace
 
 import (
 	"os"
@@ -15,7 +15,7 @@ func Environment() []string {
 	return []string{Variable + "=1"}
 }
 
-func IsTestNamespace() bool {
+func IsUnmapped() bool {
 	if !testing.Testing() || os.Getenv(Variable) == "" {
 		return false
 	}

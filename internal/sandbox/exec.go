@@ -105,7 +105,7 @@ func execSandboxed(encodedPolicy string, command string) error {
 	return syscall.Exec(shell, []string{shell, "-c", command}, environment)
 }
 
-func passedEnvironment(allowedNames []string) []string {
+func getEnvironment(allowedNames []string) []string {
 	return configuredEnvironment(allowedNames, nil)
 }
 
@@ -155,11 +155,11 @@ func (self *boundedBuffer) String() string {
 }
 
 type Result struct {
-	Output     string         `json:"-"`
-	Code       int            `json:"code"`
-	Signal     syscall.Signal `json:"signal"`
-	CPUTime    time.Duration  `json:"cpu_time"`
-	PeakMemory uint64         `json:"peak_memory"`
+	Output     string
+	ExitCode   int
+	Signal     syscall.Signal
+	CPUTime    time.Duration
+	PeakMemory uint64
 }
 
 func Run(ctx context.Context, directory string, command string, policy Policy) (Result, error) {
@@ -172,7 +172,7 @@ func collect(child *exec.Cmd) keeper.Status {
 		return status
 	}
 
-	status.Code = child.ProcessState.ExitCode()
+	status.ExitCode = child.ProcessState.ExitCode()
 	status.CPUTime = child.ProcessState.UserTime() + child.ProcessState.SystemTime()
 	if waitStatus, ok := child.ProcessState.Sys().(syscall.WaitStatus); ok && waitStatus.Signaled() {
 		status.Signal = waitStatus.Signal()

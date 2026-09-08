@@ -27,13 +27,13 @@ type ToolCall interface {
 }
 
 type ToolCallResult struct {
-	Output string
-	Image  Image
-	Stats  Stats
-	State  json.RawMessage
+	Output  string
+	Image   Image
+	Metrics ToolCallMetrics
+	State   json.RawMessage
 }
 
-type Stats struct {
+type ToolCallMetrics struct {
 	Kind            string        `json:"kind,omitempty"`
 	CPUTime         time.Duration `json:"cpu_time,omitempty"`
 	PeakMemory      uint64        `json:"peak_memory,omitempty"`
@@ -47,21 +47,21 @@ type Stats struct {
 }
 
 const (
-	StatsOutput    = "output"
-	StatsResources = "resources"
-	StatsRead      = "read"
-	StatsList      = "list"
-	StatsImage     = "image"
-	StatsWrite     = "write"
-	StatsDiff      = "diff"
-	StatsSearch    = "search"
+	MetricOutput    = "output"
+	MetricResources = "resources"
+	MetricRead      = "read"
+	MetricList      = "list"
+	MetricImage     = "image"
+	MetricWrite     = "write"
+	MetricDiff      = "diff"
+	MetricSearch    = "search"
 )
 
-func OutputStats(output string) Stats {
+func GetMetrics(output string) ToolCallMetrics {
 	bytes := int64(len(output))
 
-	return Stats{
-		Kind:  StatsOutput,
+	return ToolCallMetrics{
+		Kind:  MetricOutput,
 		Lines: int64(len(strutil.Lines(output))),
 		Bytes: bytes,
 	}
@@ -90,6 +90,4 @@ type Restorer func(state json.RawMessage) error
 
 type Executor[T any] func(ctx context.Context, args T) (string, error)
 
-type StatsExecutor[T any] func(ctx context.Context, args T) (string, Stats, error)
-
-type StatsWithImageExecutor[T any] func(ctx context.Context, args T) (string, Image, Stats, error)
+type MetricsExecutor[T any] func(ctx context.Context, args T) (string, ToolCallMetrics, error)

@@ -13,7 +13,7 @@ import (
 	"unicode/utf8"
 
 	"crdx.org/io/internal/sandbox/keeper"
-	"crdx.org/io/internal/sandbox/unmapped"
+	"crdx.org/io/internal/sandbox/testnamespace"
 )
 
 type Output interface {
@@ -38,9 +38,13 @@ type Command interface {
 	Stop()
 }
 
-func Direct() Runner { return runner{spawn: spawnAlone} }
+func Direct() Runner {
+	return runner{spawn: spawnAlone}
+}
 
-func In(keeperProcess *keeper.Keeper) Runner { return runner{spawn: spawnKept(keeperProcess)} }
+func Wrapped(keeperProcess *keeper.Keeper) Runner {
+	return runner{spawn: spawn(keeperProcess)}
+}
 
 type process interface {
 	Wait() (keeper.Status, error)
@@ -51,7 +55,6 @@ type spawner func(
 	ctx context.Context,
 	directory string,
 	environment []string,
-	command string,
 	output Output,
 ) (process, error)
 
@@ -83,7 +86,7 @@ func (self runner) Start(
 		return nil, err
 	}
 
-	if err := carriedSane(directory, command); err != nil {
+	if err := ensureSane(directory, command); err != nil {
 		return nil, err
 	}
 
@@ -104,7 +107,7 @@ func (self runner) Start(
 	return self.begin(ctx, cancel, directory, command, policy, string(encodedPolicy), output)
 }
 
-func carriedSane(directory string, command string) error {
+func ensureSane(directory string, command string) error {
 	for _, crossing := range []struct {
 		name  string
 		value string
@@ -126,6 +129,13 @@ func carriedSane(directory string, command string) error {
 	return nil
 }
 
+func commandEnvironment(policy Policy, encodedPolicy string, command string) []string {
+	environment := getEnvironment(policy.Env)
+	environment = append(environment, envPolicy+"="+encodedPolicy, envCommand+"="+command)
+
+	return append(environment, testnamespace.Environment()...)
+}
+
 func (self runner) begin(
 	ctx context.Context,
 	cancel context.CancelFunc,
@@ -137,15 +147,9 @@ func (self runner) begin(
 ) (Command, error) {
 	startedAt := time.Now()
 
-	environment := append(
-		passedEnvironment(policy.Env),
-		append(
-			[]string{envPolicy + "=" + encodedPolicy, envCommand + "=" + command},
-			unmapped.Environment()...,
-		)...,
-	)
+	environment := commandEnvironment(policy, encodedPolicy, command)
 
-	child, err := self.spawn(ctx, directory, environment, command, output)
+	child, err := self.spawn(ctx, directory, environment, output)
 	if err != nil {
 		defer cancel()
 
@@ -169,7 +173,7 @@ func (self runner) begin(
 
 type startedCommand struct {
 	process   process
-	ctx       context.Context //nolint:containedctx // the command outlives the call that child it
+	ctx       context.Context //nolint:containedctx // the command outlives the call that started it
 	cancel    context.CancelFunc
 	policy    Policy
 	output    Output
@@ -183,7 +187,7 @@ func (self *startedCommand) Wait() (Result, error) {
 
 	result := Result{
 		Output:     self.output.String(),
-		Code:       status.Code,
+		ExitCode:   status.ExitCode,
 		Signal:     status.Signal,
 		CPUTime:    status.CPUTime,
 		PeakMemory: status.PeakMemory,
@@ -197,7 +201,7 @@ func (self *startedCommand) Wait() (Result, error) {
 		return Result{}, fmt.Errorf("could not run the command: %w", err)
 	}
 
-	if result.Code == notStarted && strings.HasPrefix(result.Output, notice) {
+	if result.ExitCode == notStarted && strings.HasPrefix(result.Output, notice) {
 		return Result{}, fmt.Errorf(
 			"the sandbox could not start: %s",
 			strings.TrimSpace(strings.TrimPrefix(result.Output, notice)),
@@ -215,7 +219,6 @@ func spawnAlone(
 	ctx context.Context,
 	directory string,
 	environment []string,
-	_ string,
 	output Output,
 ) (process, error) {
 	stub := exec.CommandContext(ctx, executable)
@@ -259,12 +262,11 @@ func (self alone) Signal(signal syscall.Signal) error {
 	return syscall.Kill(-self.stub.Process.Pid, signal)
 }
 
-func spawnKept(keeperProcess *keeper.Keeper) spawner {
+func spawn(keeperProcess *keeper.Keeper) spawner {
 	return func(
 		ctx context.Context,
 		directory string,
 		environment []string,
-		command string,
 		output Output,
 	) (process, error) {
 		child, err := keeperProcess.Spawn(ctx, directory, environment, output)

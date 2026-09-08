@@ -16,7 +16,7 @@ import (
 	"syscall"
 	"time"
 
-	"crdx.org/io/internal/sandbox/unmapped"
+	"crdx.org/io/internal/sandbox/testnamespace"
 
 	"crdx.org/io/internal/util"
 
@@ -36,7 +36,7 @@ const (
 var ErrClosed = errors.New("the keeper is closed")
 
 type Status struct {
-	Code       int
+	ExitCode   int
 	Signal     syscall.Signal
 	CPUTime    time.Duration
 	PeakMemory uint64
@@ -45,7 +45,7 @@ type Status struct {
 func Attributes() *syscall.SysProcAttr {
 	flags := uintptr(syscall.CLONE_NEWUSER | syscall.CLONE_NEWNET)
 
-	if unmapped.IsTestNamespace() {
+	if testnamespace.IsUnmapped() {
 		return &syscall.SysProcAttr{
 			Setpgid:    true,
 			Pdeathsig:  syscall.SIGKILL,
@@ -63,7 +63,7 @@ func Attributes() *syscall.SysProcAttr {
 }
 
 func CommandAttributes() *syscall.SysProcAttr {
-	if unmapped.IsTestNamespace() {
+	if testnamespace.IsUnmapped() {
 		return &syscall.SysProcAttr{
 			Setpgid:   true,
 			Pdeathsig: syscall.SIGKILL,
@@ -96,9 +96,9 @@ type Keeper struct {
 	notice  notes
 
 	writeMutex   sync.Mutex
-	waitersMutex sync.Mutex
-	waiters      map[uint64]chan reply
-	nextToken    atomic.Uint64
+	answersMutex sync.Mutex
+	answers      map[uint64]chan reply
+	nextID       atomic.Uint64
 	isClosed     atomic.Bool
 	readers      sync.WaitGroup
 }
@@ -118,10 +118,10 @@ func Open(ctx context.Context) (*Keeper, error) {
 		return nil, err
 	}
 
-	self := &Keeper{control: control, waiters: make(map[uint64]chan reply)}
+	self := &Keeper{control: control, answers: make(map[uint64]chan reply)}
 
 	process := exec.CommandContext(context.WithoutCancel(ctx), executable)
-	process.Env = append([]string{envKeeper + "=1"}, unmapped.Environment()...)
+	process.Env = append([]string{envKeeper + "=1"}, testnamespace.Environment()...)
 	process.ExtraFiles = []*os.File{far}
 	process.SysProcAttr = Attributes()
 	process.Stderr = &self.notice
@@ -132,7 +132,7 @@ func Open(ctx context.Context) (*Keeper, error) {
 		return nil, fmt.Errorf("could not start the keeper: %w", err)
 	}
 
-	if err := self.await(); err != nil {
+	if err := self.awaitReady(); err != nil {
 		_ = self.Close()
 		return nil, err
 	}
@@ -159,23 +159,23 @@ func (self *Keeper) Spawn(
 		return nil, fmt.Errorf("could not open the command's output: %w", err)
 	}
 
-	token := self.nextToken.Add(1)
+	id := self.nextID.Add(1)
 	answers := make(chan reply, 2)
 
-	self.waitersMutex.Lock()
-	self.waiters[token] = answers
-	self.waitersMutex.Unlock()
+	self.answersMutex.Lock()
+	self.answers[id] = answers
+	self.answersMutex.Unlock()
 
 	err = self.ask(request{
 		Kind:        requestSpawn,
-		Token:       token,
+		Token:       id,
 		Directory:   directory,
 		Environment: environment,
 	}, writeEnd)
 	_ = writeEnd.Close()
 
 	if err != nil {
-		self.forget(token)
+		self.forget(id)
 		_ = readEnd.Close()
 
 		return nil, err
@@ -195,14 +195,14 @@ func (self *Keeper) Spawn(
 	select {
 	case answer, isOpen = <-answers:
 	case <-ctx.Done():
-		self.forget(token)
+		self.forget(id)
 		<-drainedOutput
 
 		return nil, ctx.Err()
 	}
 
 	if !isOpen || answer.Kind == replyRefused {
-		self.forget(token)
+		self.forget(id)
 		<-drainedOutput
 
 		if !isOpen {
@@ -212,7 +212,7 @@ func (self *Keeper) Spawn(
 		return nil, errors.New(answer.Failure)
 	}
 
-	return &Process{keeper: self, token: token, answers: answers, drainedOutput: drainedOutput}, nil
+	return &Process{keeper: self, token: id, answers: answers, drainedOutput: drainedOutput}, nil
 }
 
 func (self *Keeper) Close() error {
@@ -231,7 +231,7 @@ func (self *Keeper) Close() error {
 	return nil
 }
 
-func (self *Keeper) await() error {
+func (self *Keeper) awaitReady() error {
 	if err := self.control.SetReadDeadline(time.Now().Add(readyTimeout)); err != nil {
 		return err
 	}
@@ -280,23 +280,23 @@ func (self *Keeper) receive() {
 			continue
 		}
 
-		self.waitersMutex.Lock()
-		waiter, isWaiting := self.waiters[answer.Token]
-		self.waitersMutex.Unlock()
+		self.answersMutex.Lock()
+		answers, isAwaited := self.answers[answer.Token]
+		self.answersMutex.Unlock()
 
-		if isWaiting {
-			waiter <- answer
+		if isAwaited {
+			answers <- answer
 		}
 	}
 }
 
 func (self *Keeper) abandon() {
-	self.waitersMutex.Lock()
-	defer self.waitersMutex.Unlock()
+	self.answersMutex.Lock()
+	defer self.answersMutex.Unlock()
 
-	for token, waiter := range self.waiters {
-		close(waiter)
-		delete(self.waiters, token)
+	for token, answers := range self.answers {
+		close(answers)
+		delete(self.answers, token)
 	}
 }
 
@@ -329,9 +329,9 @@ func (self *Keeper) ask(instruction request, handover *os.File) error {
 }
 
 func (self *Keeper) forget(token uint64) {
-	self.waitersMutex.Lock()
-	defer self.waitersMutex.Unlock()
-	delete(self.waiters, token)
+	self.answersMutex.Lock()
+	defer self.answersMutex.Unlock()
+	delete(self.answers, token)
 }
 
 type Process struct {
@@ -351,7 +351,7 @@ func (self *Process) Wait() (Status, error) {
 	}
 
 	status := Status{
-		Code:       answer.Code,
+		ExitCode:   answer.ExitCode,
 		Signal:     syscall.Signal(answer.Signal),
 		CPUTime:    answer.CPUTime,
 		PeakMemory: answer.PeakMemory,
@@ -578,7 +578,7 @@ func (self *service) reap(token uint64, command *exec.Cmd) {
 	}
 
 	if state := command.ProcessState; state != nil {
-		answer.Code = state.ExitCode()
+		answer.ExitCode = state.ExitCode()
 		answer.CPUTime = state.UserTime() + state.SystemTime()
 
 		if status, isStatus := state.Sys().(syscall.WaitStatus); isStatus && status.Signaled() {

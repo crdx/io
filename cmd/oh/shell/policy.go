@@ -179,11 +179,11 @@ func createPolicyWithSupportProbe(
 			"TMPDIR":                  sandbox.TmpDir,
 		},
 
-		Timeout:   shellTimeout,
-		CPUTime:   shellCPUTime(),
-		FileSize:  shellFileSize,
-		OpenFiles: shellOpenFiles,
-		Processes: shellProcesses,
+		Timeout:      shellTimeout,
+		MaxCPUTime:   shellCPUTime(),
+		MaxFileSize:  shellFileSize,
+		MaxOpenFiles: shellOpenFiles,
+		MaxProcesses: shellProcesses,
 	}
 
 	policy = policy.WithSetEnv("GOPROXY", "off").WithSetEnv("GOSUMDB", "off")
@@ -363,7 +363,7 @@ func NewJob(
 		}
 
 		policy.Timeout = 0
-		policy.CPUTime = 0
+		policy.MaxCPUTime = 0
 
 		return policy, nil
 	}

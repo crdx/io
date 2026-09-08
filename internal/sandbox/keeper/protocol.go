@@ -24,7 +24,7 @@ type reply struct {
 	Kind       string        `json:"kind"`
 	Token      uint64        `json:"token"`
 	Failure    string        `json:"failure,omitempty"`
-	Code       int           `json:"code,omitempty"`
+	ExitCode   int           `json:"code,omitempty"`
 	Signal     int           `json:"signal,omitempty"`
 	CPUTime    time.Duration `json:"cpu_time,omitempty"`
 	PeakMemory uint64        `json:"peak_memory,omitempty"`

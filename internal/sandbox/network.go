@@ -3,13 +3,13 @@ package sandbox
 import (
 	"fmt"
 
-	"crdx.org/io/internal/sandbox/unmapped"
+	"crdx.org/io/internal/sandbox/testnamespace"
 
 	"golang.org/x/sys/unix"
 )
 
 func applyNetwork() error {
-	if unmapped.IsTestNamespace() {
+	if testnamespace.IsUnmapped() {
 		return nil
 	}
 

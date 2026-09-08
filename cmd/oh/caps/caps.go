@@ -19,8 +19,8 @@ const (
 )
 
 var capsMap = []struct {
-	grantedCaps Set
-	flag        string
+	flags Set
+	label string
 }{
 	{Read, "r"},
 	{Shell, "x"},
@@ -35,7 +35,7 @@ func All() Set {
 	var allCaps Set
 
 	for _, cap := range capsMap {
-		allCaps |= cap.grantedCaps
+		allCaps |= cap.flags
 	}
 
 	return allCaps
@@ -45,8 +45,8 @@ func (self Set) Flags() string {
 	var out strings.Builder
 
 	for _, cap := range capsMap {
-		if self.Has(cap.grantedCaps) {
-			out.WriteString(cap.flag)
+		if self.Has(cap.flags) {
+			out.WriteString(cap.label)
 		}
 	}
 
@@ -57,8 +57,8 @@ func (self Set) Has(want Set) bool { return self&want == want }
 
 func (self Set) Flag() string {
 	for _, cap := range capsMap {
-		if cap.grantedCaps == self {
-			return cap.flag
+		if cap.flags == self {
+			return cap.label
 		}
 	}
 
@@ -67,8 +67,8 @@ func (self Set) Flag() string {
 
 func Named(flag string) (Set, bool) {
 	for _, knownCap := range capsMap {
-		if knownCap.flag == flag {
-			return knownCap.grantedCaps, true
+		if knownCap.label == flag {
+			return knownCap.flags, true
 		}
 	}
 

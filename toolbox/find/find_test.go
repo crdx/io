@@ -42,15 +42,15 @@ func testRoot(t *testing.T, paths ...string) *file.Root {
 func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	t.Helper()
 
-	output, _, err := execWithStats(t, root, arguments)
+	output, _, err := execWithMetrics(t, root, arguments)
 	return output, err
 }
 
-func execWithStats(
+func execWithMetrics(
 	t *testing.T,
 	root *file.Root,
 	arguments string,
-) (string, tool.Stats, error) {
+) (string, tool.ToolCallMetrics, error) {
 	t.Helper()
 
 	call, err := find.New(root).Parse(arguments)
@@ -59,7 +59,7 @@ func execWithStats(
 	}
 
 	result, err := call.Exec(t.Context())
-	return result.Output, result.Stats, err
+	return result.Output, result.Metrics, err
 }
 
 func TestAGlobMatchesAcrossDirectories(t *testing.T) {
@@ -149,7 +149,7 @@ func TestHittingTheByteCapIsSaidOutLoud(t *testing.T) {
 	}
 	root := testRoot(t, paths...)
 
-	output, stats, err := execWithStats(t, root, `{"pattern":"**/*.txt"}`)
+	output, metrics, err := execWithMetrics(t, root, `{"pattern":"**/*.txt"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -160,10 +160,10 @@ func TestHittingTheByteCapIsSaidOutLoud(t *testing.T) {
 	if strings.Contains(output, paths[pathCount-1]) {
 		t.Errorf("expected later results to be omitted, got %q", output)
 	}
-	wantStats := tool.OutputStats(output)
-	wantStats.IsTruncated = true
-	if stats != wantStats {
-		t.Errorf("got stats %+v, want %+v", stats, wantStats)
+	wantMetrics := tool.GetMetrics(output)
+	wantMetrics.IsTruncated = true
+	if metrics != wantMetrics {
+		t.Errorf("got metrics %+v, want %+v", metrics, wantMetrics)
 	}
 }
 

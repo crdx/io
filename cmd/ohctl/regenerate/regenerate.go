@@ -1,4 +1,4 @@
-package regen
+package regenerate
 
 import (
 	"fmt"
@@ -11,17 +11,17 @@ import (
 	"crdx.org/io/session"
 )
 
-const usage = `ohctl regen — write stored transcripts again
+const usage = `ohctl regenerate — write stored transcripts again
 
 Usage:
-    $0 regen [<session>...]
+    $0 regenerate [<session>...]
 
 Sessions are named on the command line, or every stored session is done when none is.
 `
 
 type inputOpts struct {
-	Regen    bool     `docopt:"regen"`
-	Sessions []string `docopt:"<session>"`
+	Regenerate bool     `docopt:"regenerate"`
+	Sessions   []string `docopt:"<session>"`
 }
 
 func Run() error {

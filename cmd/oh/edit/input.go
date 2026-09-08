@@ -10,17 +10,17 @@ import (
 type Action int
 
 const (
-	Draw Action = iota
-	Accept
-	ForceAccept
-	Continue
-	Cancel
-	Quit
+	DrawInput Action = iota
+	AcceptInput
+	ForceAcceptInput
+	ContinueTurn
+	CancelTurn
+	QuitSession
 	ToggleWrite
 	ToggleShell
 	ToggleGit
 	ToggleWeb
-	Complete
+	CompleteCommand
 )
 
 type Input struct {
@@ -114,7 +114,7 @@ func (self *Input) Apply(keypress key.Key, isRunning bool) Action {
 	self.wasRunning = isRunning
 
 	if self.applyClearKey(keypress) {
-		return Draw
+		return DrawInput
 	}
 
 	self.isClearPending = false
@@ -122,15 +122,15 @@ func (self *Input) Apply(keypress key.Key, isRunning bool) Action {
 	if self.isPasting {
 		self.isEnterPending = false
 		self.paste(keypress)
-		return Draw
+		return DrawInput
 	}
 
 	if self.applySearchKey(keypress) {
-		return Draw
+		return DrawInput
 	}
 
 	if self.applyReadlineKey(keypress) {
-		return Draw
+		return DrawInput
 	}
 
 	if keypress.Code != key.Enter || keypress.Mod.Has(key.Shift) {
@@ -143,7 +143,7 @@ func (self *Input) Apply(keypress key.Key, isRunning bool) Action {
 
 	switch keypress.Code {
 	case key.Escape:
-		return Cancel
+		return CancelTurn
 
 	case key.Enter:
 		return self.enter(keypress)
@@ -198,7 +198,7 @@ func (self *Input) Apply(keypress key.Key, isRunning bool) Action {
 	case key.PageUp, key.PageDown, key.PasteEnd, key.FocusIn, key.FocusOut, key.Unknown:
 	}
 
-	return Draw
+	return DrawInput
 }
 
 func (self *Input) applyClearKey(keypress key.Key) bool {
@@ -302,7 +302,7 @@ const (
 func (self *Input) enter(keypress key.Key) Action {
 	if keypress.Mod.Has(key.Shift) {
 		self.buffer.Insert([]rune{'\n'})
-		return Draw
+		return DrawInput
 	}
 
 	if strings.TrimSpace(self.buffer.String()) != "" {
@@ -312,28 +312,28 @@ func (self *Input) enter(keypress key.Key) Action {
 
 		switch {
 		case isCoolingOff:
-			return Draw
+			return DrawInput
 		case keypress.Mod.Has(key.Alt):
-			return ForceAccept
+			return ForceAcceptInput
 		default:
-			return Accept
+			return AcceptInput
 		}
 	}
 
 	now := self.currentTime()
 	if now.Before(self.continueAfter) {
 		self.continueAfter = now.Add(continueCoolOff)
-		return Draw
+		return DrawInput
 	}
 
 	if self.isEnterPending {
 		self.isEnterPending = false
 		self.continueAfter = now.Add(continueCoolOff)
-		return Continue
+		return ContinueTurn
 	}
 
 	self.isEnterPending = true
-	return Draw
+	return DrawInput
 }
 
 const tabStop = 4
@@ -350,34 +350,34 @@ func (self *Input) insert(value rune) {
 func (self *Input) rune(keypress key.Key, isRunning bool) Action {
 	if !keypress.Mod.Has(key.Ctrl) {
 		if keypress.Value == '\t' && strings.HasPrefix(self.buffer.String(), "/") {
-			return Complete
+			return CompleteCommand
 		}
 		self.insert(keypress.Value)
-		return Draw
+		return DrawInput
 	}
 
 	switch keypress.Value {
 	case 'd':
 		if isRunning {
-			return Cancel
+			return CancelTurn
 		}
 
 		if self.buffer.Len() == 0 {
-			return Quit
+			return QuitSession
 		}
 
 	case 'x':
 		self.isPrefixPending = true
 	}
 
-	return Draw
+	return DrawInput
 }
 
 func (self *Input) toggleMode(button key.Key) Action {
 	self.isPrefixPending = false
 
 	if button.Code != key.Rune || button.Mod != 0 {
-		return Draw
+		return DrawInput
 	}
 
 	switch button.Value {
@@ -394,7 +394,7 @@ func (self *Input) toggleMode(button key.Key) Action {
 		return ToggleWeb
 	}
 
-	return Draw
+	return DrawInput
 }
 
 func (self *Input) paste(keypress key.Key) {

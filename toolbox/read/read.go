@@ -98,9 +98,9 @@ func exec(ctx context.Context, root *file.Root, args Args) (tool.ToolCallResult,
 	}
 
 	loadedFile, err := load(root, name)
-	stats := tool.Stats{Kind: tool.StatsRead, Bytes: loadedFile.size}
+	metrics := tool.ToolCallMetrics{Kind: tool.MetricRead, Bytes: loadedFile.size}
 	if errors.Is(err, errFileTooLarge) {
-		return oversizedResult(ctx, root, name, args, loadedFile.mediaType, stats)
+		return oversizedResult(ctx, root, name, args, loadedFile.mediaType, metrics)
 	}
 	if err != nil {
 		return tool.ToolCallResult{}, readFailure(args.Path, err)
@@ -110,12 +110,12 @@ func exec(ctx context.Context, root *file.Root, args Args) (tool.ToolCallResult,
 	mediaType := loadedFile.mediaType
 	if imageutil.IsSupported(mediaType) {
 		if args.Offset > 0 || args.Limit > 0 {
-			return tool.ToolCallResult{Stats: stats}, errors.New("line ranges are not supported for images")
+			return tool.ToolCallResult{Metrics: metrics}, errors.New("line ranges are not supported for images")
 		}
 
-		stats.Kind = tool.StatsImage
+		metrics.Kind = tool.MetricImage
 		if width, height, ok := imageutil.Dimensions(data); ok {
-			stats.EstimatedTokens = util.EstimateImageTokenCount(imageutil.Fit(width, height))
+			metrics.EstimatedTokens = util.EstimateImageTokenCount(imageutil.Fit(width, height))
 		}
 
 		return successfulResult(
@@ -123,15 +123,15 @@ func exec(ctx context.Context, root *file.Root, args Args) (tool.ToolCallResult,
 			data,
 			fmt.Sprintf("%s image (%d bytes)", mediaType, len(data)),
 			tool.Image{MediaType: mediaType, Data: data},
-			stats,
+			metrics,
 		), nil
 	}
 
 	lines := strutil.Lines(string(data))
-	stats.Lines = int64(len(lines))
+	metrics.Lines = int64(len(lines))
 
 	if args.Offset <= 0 && args.Limit <= 0 {
-		return successfulResult(args.Path, data, string(data), tool.Image{}, stats), nil
+		return successfulResult(args.Path, data, string(data), tool.Image{}, metrics), nil
 	}
 
 	start := 0
@@ -139,10 +139,10 @@ func exec(ctx context.Context, root *file.Root, args Args) (tool.ToolCallResult,
 		start = args.Offset - 1
 	}
 	if len(lines) == 0 {
-		return successfulResult(args.Path, data, "", tool.Image{}, stats), nil
+		return successfulResult(args.Path, data, "", tool.Image{}, metrics), nil
 	}
 	if start >= len(lines) {
-		return tool.ToolCallResult{Stats: stats}, fmt.Errorf(
+		return tool.ToolCallResult{Metrics: metrics}, fmt.Errorf(
 			"offset %d is past the end of the file (%d lines)", args.Offset, len(lines),
 		)
 	}
@@ -153,9 +153,9 @@ func exec(ctx context.Context, root *file.Root, args Args) (tool.ToolCallResult,
 	}
 
 	output := strings.Join(lines[start:end], "\n")
-	stats.Lines = int64(end - start)
-	stats.Bytes = int64(len(output))
-	return successfulResult(args.Path, data, output, tool.Image{}, stats), nil
+	metrics.Lines = int64(end - start)
+	metrics.Bytes = int64(len(output))
+	return successfulResult(args.Path, data, output, tool.Image{}, metrics), nil
 }
 
 func oversizedResult(
@@ -164,7 +164,7 @@ func oversizedResult(
 	name string,
 	args Args,
 	mediaType string,
-	stats tool.Stats,
+	metrics tool.ToolCallMetrics,
 ) (tool.ToolCallResult, error) {
 	isRange := args.Offset > 0 || args.Limit > 0
 	isImage := imageutil.IsSupported(mediaType)
@@ -173,21 +173,21 @@ func oversizedResult(
 		if isImage {
 			noun = "image"
 		}
-		return tool.ToolCallResult{Stats: stats}, fmt.Errorf("%s is larger than the %d-byte limit", noun, maxFileBytes)
+		return tool.ToolCallResult{Metrics: metrics}, fmt.Errorf("%s is larger than the %d-byte limit", noun, maxFileBytes)
 	}
 	if isImage {
-		return tool.ToolCallResult{Stats: stats}, errors.New("line ranges are not supported for images")
+		return tool.ToolCallResult{Metrics: metrics}, errors.New("line ranges are not supported for images")
 	}
 
 	loadedRange, err := loadRange(ctx, root, name, args)
 	if err != nil {
-		return tool.ToolCallResult{Stats: stats}, readFailure(args.Path, err)
+		return tool.ToolCallResult{Metrics: metrics}, readFailure(args.Path, err)
 	}
 
-	stats.Lines = loadedRange.selectedLines
-	stats.Bytes = int64(len(loadedRange.output))
+	metrics.Lines = loadedRange.selectedLines
+	metrics.Bytes = int64(len(loadedRange.output))
 	snapshot := file.ReadSnapshot{Path: args.Path, Hash: loadedRange.contentHash}
-	return successfulSnapshotResult(snapshot, loadedRange.output, tool.Image{}, stats), nil
+	return successfulSnapshotResult(snapshot, loadedRange.output, tool.Image{}, metrics), nil
 }
 
 func readFailure(path string, err error) error {
@@ -314,21 +314,21 @@ func successfulResult(
 	data []byte,
 	output string,
 	image tool.Image,
-	stats tool.Stats,
+	metrics tool.ToolCallMetrics,
 ) tool.ToolCallResult {
-	return successfulSnapshotResult(file.NewReadSnapshot(path, data), output, image, stats)
+	return successfulSnapshotResult(file.NewReadSnapshot(path, data), output, image, metrics)
 }
 
 func successfulSnapshotResult(
 	snapshot file.ReadSnapshot,
 	output string,
 	image tool.Image,
-	stats tool.Stats,
+	metrics tool.ToolCallMetrics,
 ) tool.ToolCallResult {
 	return tool.ToolCallResult{
-		State:  file.EncodeReadState(snapshot),
-		Output: output,
-		Image:  image,
-		Stats:  stats,
+		State:   file.EncodeReadState(snapshot),
+		Output:  output,
+		Image:   image,
+		Metrics: metrics,
 	}
 }

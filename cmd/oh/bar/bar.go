@@ -105,7 +105,7 @@ func NewRegistry(options Options) segment.Registry {
 	}
 }
 
-var segmentSeparator = " " + style.Subtle("\u2500") + " "
+var segmentSeparator = " " + style.Subtle("─") + " "
 
 func Render(layout segment.Layout, position segment.Position, context segment.Context) string {
 	return render(layout, position, context, -1)
@@ -146,31 +146,31 @@ func render(layout segment.Layout, position segment.Position, context segment.Co
 	return strings.Join(drawnSegments, segmentSeparator)
 }
 
-type Configuration struct {
+type Config struct {
 	registry segment.Registry
 	layout   segment.Layout
 }
 
-func NewConfiguration(registry segment.Registry, layout segment.Layout) Configuration {
-	return Configuration{registry: registry, layout: layout}
+func NewConfiguration(registry segment.Registry, layout segment.Layout) Config {
+	return Config{registry: registry, layout: layout}
 }
 
-func (self *Configuration) GetRegistry() segment.Registry {
+func (self *Config) GetRegistry() segment.Registry {
 	return self.registry
 }
 
-func (self *Configuration) ReplaceLayout(layout segment.Layout) {
+func (self *Config) ReplaceLayout(layout segment.Layout) {
 	self.layout = layout
 }
 
-func (self *Configuration) Render(position segment.Position, context segment.Context) string {
+func (self *Config) Render(position segment.Position, context segment.Context) string {
 	return Render(self.layout, position, context)
 }
 
-func (self *Configuration) RenderWithin(position segment.Position, context segment.Context, cells int) string {
+func (self *Config) RenderWithin(position segment.Position, context segment.Context, cells int) string {
 	return RenderWithin(self.layout, position, context, cells)
 }
 
-func (self *Configuration) NextRefresh(phase segment.Phase) time.Time {
+func (self *Config) NextRefresh(phase segment.Phase) time.Time {
 	return self.layout.NextRefresh(phase)
 }

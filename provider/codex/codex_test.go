@@ -431,11 +431,14 @@ func TestAnImageReturnedByAToolIsSentForTheModelToInspect(t *testing.T) {
 			Schema:      tool.Schema{},
 		},
 		func(nothing) (string, string) { return "picture.png", "" },
-	).StatsWithImage(func(context.Context, nothing) (string, tool.Image, tool.Stats, error) {
-		return "image/png image (3 bytes)", tool.Image{
-			MediaType: "image/png",
-			Data:      []byte{1, 2, 3},
-		}, tool.Stats{}, nil
+	).Run(func(context.Context, nothing) (tool.ToolCallResult, error) {
+		return tool.ToolCallResult{
+			Output: "image/png image (3 bytes)",
+			Image: tool.Image{
+				MediaType: "image/png",
+				Data:      []byte{1, 2, 3},
+			},
+		}, nil
 	})
 
 	assistant := newAgent(t, server.URL, []tool.Tool{viewTool})

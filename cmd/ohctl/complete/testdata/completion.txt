@@ -1,7 +1,7 @@
 === commands ===
 analyse
 migrate
-regen
+regenerate
 sessions
 tool-result
 === commands beginning with a word ===

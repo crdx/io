@@ -45,15 +45,15 @@ func testRoot(t *testing.T, files map[string]string) *file.Root {
 func exec(t *testing.T, root *file.Root, arguments string) (string, error) {
 	t.Helper()
 
-	output, _, err := execWithStats(t, root, arguments)
+	output, _, err := execWithMetrics(t, root, arguments)
 	return output, err
 }
 
-func execWithStats(
+func execWithMetrics(
 	t *testing.T,
 	root *file.Root,
 	arguments string,
-) (string, tool.Stats, error) {
+) (string, tool.ToolCallMetrics, error) {
 	t.Helper()
 
 	call, err := grep.New(root, file.NewSnapshots()).Parse(arguments)
@@ -62,7 +62,7 @@ func execWithStats(
 	}
 
 	result, err := call.Exec(t.Context())
-	return result.Output, result.Stats, err
+	return result.Output, result.Metrics, err
 }
 
 func TestAMatchIsReportedWithItsPathAndLine(t *testing.T) {
@@ -81,13 +81,13 @@ func TestAMatchIsReportedWithItsPathAndLine(t *testing.T) {
 func TestTheNumberOfMatchingLinesIsReported(t *testing.T) {
 	root := testRoot(t, map[string]string{"main.go": "hello\ngoodbye\nhello\n"})
 
-	output, stats, err := execWithStats(t, root, `{"pattern":"hello"}`)
+	output, metrics, err := execWithMetrics(t, root, `{"pattern":"hello"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if want := tool.OutputStats(output); stats != want {
-		t.Errorf("got stats %+v, want %+v", stats, want)
+	if want := tool.GetMetrics(output); metrics != want {
+		t.Errorf("got metrics %+v, want %+v", metrics, want)
 	}
 }
 
@@ -156,13 +156,13 @@ func TestMatchCountDoesNotCapSmallResults(t *testing.T) {
 		"big.txt": strings.Repeat("hello\n", matchCount),
 	})
 
-	output, stats, err := execWithStats(t, root, `{"pattern":"hello"}`)
+	output, metrics, err := execWithMetrics(t, root, `{"pattern":"hello"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if stats.Lines != matchCount || stats.IsTruncated {
-		t.Errorf("expected all %d small matches, got %+v", matchCount, stats)
+	if metrics.Lines != matchCount || metrics.IsTruncated {
+		t.Errorf("expected all %d small matches, got %+v", matchCount, metrics)
 	}
 	if strings.Contains(output, "narrow the search") {
 		t.Errorf("expected the complete result, got %q", output)
@@ -174,7 +174,7 @@ func TestHittingTheByteCapIsSaidOutLoud(t *testing.T) {
 		"big.txt": strings.Repeat(strings.Repeat("x", 100)+"\n", 500),
 	})
 
-	output, stats, err := execWithStats(t, root, `{"pattern":"x"}`)
+	output, metrics, err := execWithMetrics(t, root, `{"pattern":"x"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -182,10 +182,10 @@ func TestHittingTheByteCapIsSaidOutLoud(t *testing.T) {
 	if !strings.Contains(output, "matching output exceeded 16K") {
 		t.Errorf("expected the byte cap to be reported, got the last of %q", output[len(output)-100:])
 	}
-	wantStats := tool.OutputStats(output)
-	wantStats.IsTruncated = true
-	if stats != wantStats {
-		t.Errorf("got stats %+v, want %+v", stats, wantStats)
+	wantMetrics := tool.GetMetrics(output)
+	wantMetrics.IsTruncated = true
+	if metrics != wantMetrics {
+		t.Errorf("got metrics %+v, want %+v", metrics, wantMetrics)
 	}
 }
 

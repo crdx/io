@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"slices"
-	"sort"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/sse"
@@ -70,7 +69,7 @@ func (self *reply) orderedToolCalls() []toolCall {
 	for i := range self.tools {
 		indexes = append(indexes, i)
 	}
-	sort.Ints(indexes)
+	slices.Sort(indexes)
 
 	calls := make([]toolCall, 0, len(indexes))
 	for _, index := range indexes {

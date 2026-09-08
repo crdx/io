@@ -30,7 +30,7 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 			},
 		},
 		Describe,
-	).FocusPath().Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
+	).FocusPath().Exec(func(_ context.Context, args Args) (string, tool.ToolCallMetrics, error) {
 		return exec(root, snapshots, args)
 	})
 }
@@ -39,38 +39,38 @@ func Describe(args Args) (string, string) {
 	return args.Path, util.FormatBytes(len(args.Content), 3)
 }
 
-func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.Stats, error) {
+func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.ToolCallMetrics, error) {
 	if args.Path == "" {
-		return "", tool.Stats{}, errors.New("path is required")
+		return "", tool.ToolCallMetrics{}, errors.New("path is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 
 	if err := root.RefuseWrite(name); err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 
 	currentContent, err := root.ReadFile(name)
 	if err == nil {
 		if err := snapshots.Check(root, name, currentContent); err != nil {
-			return "", tool.Stats{}, fmt.Errorf("%w; read %s before overwriting it", err, args.Path)
+			return "", tool.ToolCallMetrics{}, fmt.Errorf("%w; read %s before overwriting it", err, args.Path)
 		}
 	} else if !errors.Is(err, fs.ErrNotExist) {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 
 	if directory := filepath.Dir(name); directory != "." {
 		if err := root.MkdirAll(directory, 0o755); err != nil {
-			return "", tool.Stats{}, err
+			return "", tool.ToolCallMetrics{}, err
 		}
 	}
 
 	writtenContent := []byte(args.Content)
 	if err := root.WriteFile(name, writtenContent, 0o644); err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 	snapshots.Record(root, name, writtenContent)
 
@@ -81,10 +81,10 @@ func exec(root *file.Root, snapshots *file.Snapshots, args Args) (string, tool.S
 			lines++
 		}
 	}
-	stats := tool.Stats{
-		Kind:  tool.StatsWrite,
+	metrics := tool.ToolCallMetrics{
+		Kind:  tool.MetricWrite,
 		Lines: lines,
 		Bytes: int64(len(args.Content)),
 	}
-	return fmt.Sprintf("wrote %s to %s", util.FormatBytes(len(args.Content), 3), args.Path), stats, nil
+	return fmt.Sprintf("wrote %s to %s", util.FormatBytes(len(args.Content), 3), args.Path), metrics, nil
 }

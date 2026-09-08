@@ -15,13 +15,13 @@ type Result int
 const (
 	commandNotFoundMessage = "Command not found"
 	minimumPathParts       = 2
-	sendAsMessageHint      = " (alt+enter sends as message)"
+	sendAsMessageHint      = " (alt+enter to send)"
 	snippetNotFoundMessage = "Snippet not found"
 	snippetPrefix          = "//"
 )
 
 const (
-	Ordinary Result = iota
+	Proceed Result = iota
 	Handled
 	Rejected
 )
@@ -34,7 +34,7 @@ type Actions struct {
 
 func Handle(registry slash.Registry, actions Actions, message string) (Result, string) {
 	if isExistingPathMessage(message) {
-		return Ordinary, ""
+		return Proceed, ""
 	}
 
 	invocation, found := registry.Find(message)
@@ -47,7 +47,7 @@ func Handle(registry slash.Registry, actions Actions, message string) (Result, s
 
 	name, isCommand := registry.CommandName(message)
 	if !isCommand {
-		return Ordinary, ""
+		return Proceed, ""
 	}
 
 	notFoundMessage := commandNotFoundMessage

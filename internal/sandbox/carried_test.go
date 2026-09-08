@@ -18,7 +18,7 @@ func TestWhatCrossesToTheKeeperMustSurviveTheCrossing(t *testing.T) {
 		{name: "invalid UTF-8 in the command", directory: "/work", command: "ls /\xffodd", wanted: "UTF-8"},
 	} {
 		t.Run(probe.name, func(t *testing.T) {
-			err := carriedSane(probe.directory, probe.command)
+			err := ensureSane(probe.directory, probe.command)
 			if err == nil {
 				t.Fatal("it was accepted, and would have been silently rewritten")
 			}
@@ -30,7 +30,7 @@ func TestWhatCrossesToTheKeeperMustSurviveTheCrossing(t *testing.T) {
 }
 
 func TestOrdinaryCommandsCrossUnchanged(t *testing.T) {
-	if err := carriedSane("/workspace/project", "echo hello \u2713"); err != nil {
+	if err := ensureSane("/workspace/project", "echo hello \u2713"); err != nil {
 		t.Errorf("an ordinary command was refused: %v", err)
 	}
 }

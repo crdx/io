@@ -8,7 +8,7 @@ import (
 	"crdx.org/io/cmd/ohctl/analyse"
 	"crdx.org/io/cmd/ohctl/complete"
 	"crdx.org/io/cmd/ohctl/migrate"
-	"crdx.org/io/cmd/ohctl/regen"
+	"crdx.org/io/cmd/ohctl/regenerate"
 	"crdx.org/io/cmd/ohctl/sessions"
 	"crdx.org/io/cmd/ohctl/toolresult"
 )
@@ -19,14 +19,14 @@ Usage:
     ohctl sessions [options] [<filter>]
     ohctl tool-result [--pager] <url>
     ohctl analyse [options] [<session>...]
-    ohctl regen [<session>...]
+    ohctl regenerate [<session>...]
     ohctl migrate [options] [<session>...]
 
 Commands:
     sessions       List the stored sessions
     tool-result    Show a tool call's output
     analyse        Analyse stored sessions
-    regen          Write stored transcripts again from their journals
+    regenerate     Write stored transcripts again from their journals
     migrate        Bring configuration and stored sessions up to their current formats
 `
 
@@ -48,8 +48,8 @@ func main() {
 		err = sessions.Run()
 	case "analyse":
 		err = analyse.Run()
-	case "regen":
-		err = regen.Run()
+	case "regenerate":
+		err = regenerate.Run()
 	case "tool-result":
 		err = toolresult.Run()
 	case "migrate":

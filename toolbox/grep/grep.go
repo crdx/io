@@ -51,11 +51,11 @@ func New(root *file.Root, snapshots *file.Snapshots) tool.Tool {
 		IsEmbarrassinglyParallel().
 		ChangesNothing().
 		Run(func(ctx context.Context, args Args) (tool.ToolCallResult, error) {
-			output, stats, err := run(ctx, root, args)
+			output, metrics, err := run(ctx, root, args)
 			return tool.ToolCallResult{
-				Output: output,
-				Stats:  stats,
-				State:  readStateForMatches(root, args, output),
+				Output:  output,
+				Metrics: metrics,
+				State:   readStateForMatches(root, args, output),
 			}, err
 		})
 }
@@ -76,18 +76,18 @@ func confined(root *file.Root, name string) error {
 	return nil
 }
 
-func run(ctx context.Context, root *file.Root, args Args) (string, tool.Stats, error) {
+func run(ctx context.Context, root *file.Root, args Args) (string, tool.ToolCallMetrics, error) {
 	if args.Pattern == "" {
-		return "", tool.Stats{}, errors.New("pattern is required")
+		return "", tool.ToolCallMetrics{}, errors.New("pattern is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 
 	if err := confined(root, name); err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 
 	arguments := []string{
@@ -115,14 +115,14 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.Stats, e
 
 	stdout, err := command.StdoutPipe()
 	if err != nil {
-		return "", tool.Stats{}, fmt.Errorf("could not read ripgrep output: %w", err)
+		return "", tool.ToolCallMetrics{}, fmt.Errorf("could not read ripgrep output: %w", err)
 	}
 
 	var stderr bytes.Buffer
 	command.Stderr = &stderr
 
 	if err := command.Start(); err != nil {
-		return "", tool.Stats{}, fmt.Errorf("could not start ripgrep: %w", err)
+		return "", tool.ToolCallMetrics{}, fmt.Errorf("could not start ripgrep: %w", err)
 	}
 
 	matches, isTruncated, readErr := readMatches(stdout, name == ".")
@@ -133,44 +133,44 @@ func run(ctx context.Context, root *file.Root, args Args) (string, tool.Stats, e
 	waitErr := command.Wait()
 
 	if ctx.Err() != nil {
-		return "", tool.Stats{}, stop.Error(ctx, "the search")
+		return "", tool.ToolCallMetrics{}, stop.Error(ctx, "the search")
 	}
 	if readErr != nil {
-		return "", tool.Stats{}, fmt.Errorf("could not read ripgrep output: %w", readErr)
+		return "", tool.ToolCallMetrics{}, fmt.Errorf("could not read ripgrep output: %w", readErr)
 	}
 
 	if isTruncated {
-		output, stats := searchReport(matches, true)
-		return output, stats, nil
+		output, metrics := searchReport(matches, true)
+		return output, metrics, nil
 	}
 	if waitErr != nil {
 		var exitError *exec.ExitError
 		if errors.As(waitErr, &exitError) && exitError.ExitCode() == 1 {
-			output, stats := searchReport(nil, false)
-			return output, stats, nil
+			output, metrics := searchReport(nil, false)
+			return output, metrics, nil
 		}
 
 		message := strings.TrimSpace(stderr.String())
 		if strings.HasPrefix(message, "rg: regex parse error:") {
-			return "", tool.Stats{}, fmt.Errorf("invalid pattern: %s", strings.TrimPrefix(message, "rg: "))
+			return "", tool.ToolCallMetrics{}, fmt.Errorf("invalid pattern: %s", strings.TrimPrefix(message, "rg: "))
 		}
 		if message != "" {
-			return "", tool.Stats{}, errors.New(message)
+			return "", tool.ToolCallMetrics{}, errors.New(message)
 		}
 
-		return "", tool.Stats{}, fmt.Errorf("grep failed: %w", waitErr)
+		return "", tool.ToolCallMetrics{}, fmt.Errorf("grep failed: %w", waitErr)
 	}
 
-	output, stats := searchReport(matches, false)
-	return output, stats, nil
+	output, metrics := searchReport(matches, false)
+	return output, metrics, nil
 }
 
-func searchReport(matches []string, isTruncated bool) (string, tool.Stats) {
+func searchReport(matches []string, isTruncated bool) (string, tool.ToolCallMetrics) {
 	output := util.ReportSearchResults(matches, isTruncated)
-	stats := tool.OutputStats(output)
-	stats.IsTruncated = isTruncated
+	metrics := tool.GetMetrics(output)
+	metrics.IsTruncated = isTruncated
 
-	return output, stats
+	return output, metrics
 }
 
 func readStateForMatches(root *file.Root, args Args, output string) json.RawMessage {

@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 func testRoot(t *testing.T) (*file.Root, string) {
 	t.Helper()
 
-	if err := sandbox.AvailableAtAll(); err != nil {
+	if err := sandbox.Available(); err != nil {
 		t.Skipf("landlock is unavailable: %v", err)
 	}
 
@@ -54,16 +54,16 @@ func fixedShell(root *file.Root, policy func() sandbox.Policy) tool.Tool {
 func exec(t *testing.T, root *file.Root, directory string, arguments string) (string, error) {
 	t.Helper()
 
-	output, _, err := execWithStats(t, root, directory, arguments)
+	output, _, err := execWithMetrics(t, root, directory, arguments)
 	return output, err
 }
 
-func execWithStats(
+func execWithMetrics(
 	t *testing.T,
 	root *file.Root,
 	directory string,
 	arguments string,
-) (string, tool.Stats, error) {
+) (string, tool.ToolCallMetrics, error) {
 	t.Helper()
 
 	policy := bash.ProtectedPolicy(sandbox.Policy{
@@ -82,7 +82,7 @@ func execWithStats(
 	}
 
 	result, err := call.Exec(t.Context())
-	return result.Output, result.Stats, err
+	return result.Output, result.Metrics, err
 }
 
 func TestTheToolIsCalledExec(t *testing.T) {
@@ -96,7 +96,7 @@ func TestTheToolIsCalledExec(t *testing.T) {
 func TestOutputIsReturned(t *testing.T) {
 	root, directory := testRoot(t)
 
-	output, stats, err := execWithStats(t, root, directory, `{"command": "echo hello"}`)
+	output, metrics, err := execWithMetrics(t, root, directory, `{"command": "echo hello"}`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -104,8 +104,8 @@ func TestOutputIsReturned(t *testing.T) {
 	if strings.TrimSpace(output) != "hello" {
 		t.Errorf("got %q, want %q", output, "hello")
 	}
-	if stats.Lines != 1 || stats.Bytes != int64(len(output)) || stats.TotalBytes != stats.Bytes {
-		t.Errorf("expected one line and %d returned and total bytes, got %+v", len(output), stats)
+	if metrics.Lines != 1 || metrics.Bytes != int64(len(output)) || metrics.TotalBytes != metrics.Bytes {
+		t.Errorf("expected one line and %d returned and total bytes, got %+v", len(output), metrics)
 	}
 }
 
@@ -471,11 +471,11 @@ func TestAStoppedCommandKeepsWhatItPrintedAndSaysWhyItEnded(t *testing.T) {
 			if !test.want.MatchString(result.Output) {
 				t.Errorf("got output %q, want %s", result.Output, test.want)
 			}
-			if result.Stats.Kind != tool.StatsResources {
-				t.Errorf("got stats %+v, want a stopped command to still report what it used", result.Stats)
+			if result.Metrics.Kind != tool.MetricResources {
+				t.Errorf("got metrics %+v, want a stopped command to still report what it used", result.Metrics)
 			}
-			if result.Stats.Bytes != int64(len(result.Output)) {
-				t.Errorf("got %d bytes measured, want %d", result.Stats.Bytes, len(result.Output))
+			if result.Metrics.Bytes != int64(len(result.Output)) {
+				t.Errorf("got %d bytes measured, want %d", result.Metrics.Bytes, len(result.Output))
 			}
 		})
 	}

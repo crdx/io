@@ -26,7 +26,7 @@ func openRunner(t *testing.T) (sandbox.Runner, func()) {
 		t.Fatalf("could not open the keeper: %v", err)
 	}
 
-	return sandbox.In(keeperProcess), func() { _ = keeperProcess.Close() }
+	return sandbox.Wrapped(keeperProcess), func() { _ = keeperProcess.Close() }
 }
 
 func TestTheKeeperRunsACommandAndReportsItsOutput(t *testing.T) {
@@ -43,8 +43,8 @@ func TestTheKeeperRunsACommandAndReportsItsOutput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("the command failed: %v", err)
 	}
-	if result.Code != 0 || strings.TrimSpace(result.Output) != "hello" {
-		t.Errorf("got exit %d with output %q", result.Code, result.Output)
+	if result.ExitCode != 0 || strings.TrimSpace(result.Output) != "hello" {
+		t.Errorf("got exit %d with output %q", result.ExitCode, result.Output)
 	}
 }
 

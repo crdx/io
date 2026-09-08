@@ -118,8 +118,8 @@ func TestOnlyACommandSaturatingTheMachineReachesTheProcessorLimit(t *testing.T) 
 		t.Fatalf("could not create the policy: %v", err)
 	}
 
-	if policy.CPUTime != limit {
-		t.Errorf("got %s, want the shell to carry the %s limit", policy.CPUTime, limit)
+	if policy.MaxCPUTime != limit {
+		t.Errorf("got %s, want the shell to carry the %s limit", policy.MaxCPUTime, limit)
 	}
 }
 
@@ -999,14 +999,14 @@ func TestAWaivedSandboxBoundsNothingButTheDeadline(t *testing.T) {
 		t.Errorf("got a deadline of %s, want %s", policy.Timeout, shellTimeout)
 	}
 	for name, bound := range map[string]int64{
-		"file size": policy.FileSize, "open files": policy.OpenFiles, "processes": policy.Processes,
+		"file size": policy.MaxFileSize, "open files": policy.MaxOpenFiles, "processes": policy.MaxProcesses,
 	} {
 		if bound != 0 {
 			t.Errorf("expected no %s limit, got %d", name, bound)
 		}
 	}
-	if policy.CPUTime != 0 {
-		t.Errorf("expected no processor limit, got %s", policy.CPUTime)
+	if policy.MaxCPUTime != 0 {
+		t.Errorf("expected no processor limit, got %s", policy.MaxCPUTime)
 	}
 	for name, granted := range map[string][]string{
 		"read": policy.Read, "write": policy.Write, "exec": policy.Exec,
@@ -1024,11 +1024,11 @@ func TestTheProcessLimitClearsAConcurrentBuild(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if policy.Processes < 2*observedPeakTasks {
+	if policy.MaxProcesses < 2*observedPeakTasks {
 		t.Errorf(
 			"a limit of %d tasks leaves no room above the %d a concurrent build was measured to reach, "+
 				"and a build that runs out of them reports no failing test at all",
-			policy.Processes, observedPeakTasks,
+			policy.MaxProcesses, observedPeakTasks,
 		)
 	}
 }

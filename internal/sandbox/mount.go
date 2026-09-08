@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"crdx.org/hereduck"
-	"crdx.org/io/internal/sandbox/unmapped"
+	"crdx.org/io/internal/sandbox/testnamespace"
 	"crdx.org/io/internal/util/pathutil"
 
 	"golang.org/x/sys/unix"
@@ -102,13 +102,13 @@ func saysProbeSucceeded(output []byte) bool {
 
 func namespaceProbeCommand(ctx context.Context) *exec.Cmd {
 	probe := exec.CommandContext(ctx, executable, "-test.run=^$")
-	probe.Env = append([]string{envProbe + "=1"}, unmapped.Environment()...)
+	probe.Env = append([]string{envProbe + "=1"}, testnamespace.Environment()...)
 	probe.SysProcAttr = namespaceAttributes()
 	return probe
 }
 
 func applyMounts(policy Policy) error {
-	if unmapped.IsTestNamespace() {
+	if testnamespace.IsUnmapped() {
 		return nil
 	}
 
@@ -235,7 +235,7 @@ func attach(source string, target string, attributes *unix.MountAttr) error {
 const lastCapability = 63
 
 func dropCapabilities() error {
-	if unmapped.IsTestNamespace() {
+	if testnamespace.IsUnmapped() {
 		return nil
 	}
 
@@ -254,7 +254,7 @@ func namespaceAttributes() *syscall.SysProcAttr {
 		syscall.CLONE_NEWUSER | syscall.CLONE_NEWNET | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
 	)
 
-	if unmapped.IsTestNamespace() {
+	if testnamespace.IsUnmapped() {
 		return &syscall.SysProcAttr{
 			Setpgid:    true,
 			Pdeathsig:  syscall.SIGKILL,

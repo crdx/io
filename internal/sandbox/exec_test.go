@@ -15,7 +15,7 @@ import (
 func TestOnlyTheNamedEnvironmentIsPassedOn(t *testing.T) {
 	t.Setenv("IO_SANDBOX_PRESENT", "value")
 
-	environment := passedEnvironment([]string{"IO_SANDBOX_PRESENT", "IO_SANDBOX_ABSENT"})
+	environment := getEnvironment([]string{"IO_SANDBOX_PRESENT", "IO_SANDBOX_ABSENT"})
 
 	if !slices.Equal(environment, []string{"IO_SANDBOX_PRESENT=value"}) {
 		t.Errorf("got %v, want only the variable that is set", environment)
@@ -51,17 +51,17 @@ func TestSetVariablesAreWrittenInAFixedOrder(t *testing.T) {
 
 func TestAPolicySurvivesBeingWrittenAndReadBack(t *testing.T) {
 	policy := Policy{
-		Read:      []string{"/read"},
-		Write:     []string{"/write"},
-		Exec:      []string{"/exec"},
-		TmpDir:    "/scratch",
-		Env:       []string{"PATH"},
-		SetEnv:    map[string]string{"NAME": "value"},
-		Timeout:   time.Second,
-		CPUTime:   2 * time.Second,
-		FileSize:  1024,
-		OpenFiles: 64,
-		Processes: 128,
+		Read:         []string{"/read"},
+		Write:        []string{"/write"},
+		Exec:         []string{"/exec"},
+		TmpDir:       "/scratch",
+		Env:          []string{"PATH"},
+		SetEnv:       map[string]string{"NAME": "value"},
+		Timeout:      time.Second,
+		MaxCPUTime:   2 * time.Second,
+		MaxFileSize:  1024,
+		MaxOpenFiles: 64,
+		MaxProcesses: 128,
 	}
 
 	encoded, err := json.Marshal(policy)
@@ -74,13 +74,13 @@ func TestAPolicySurvivesBeingWrittenAndReadBack(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got.TmpDir != policy.TmpDir || got.Timeout != policy.Timeout || got.CPUTime != policy.CPUTime {
+	if got.TmpDir != policy.TmpDir || got.Timeout != policy.Timeout || got.MaxCPUTime != policy.MaxCPUTime {
 		t.Errorf("got %+v, want %+v", got, policy)
 	}
-	if got.FileSize != policy.FileSize || got.OpenFiles != policy.OpenFiles {
+	if got.MaxFileSize != policy.MaxFileSize || got.MaxOpenFiles != policy.MaxOpenFiles {
 		t.Errorf("got %+v, want %+v", got, policy)
 	}
-	if got.Processes != policy.Processes {
+	if got.MaxProcesses != policy.MaxProcesses {
 		t.Errorf("got %+v, want %+v", got, policy)
 	}
 	if !slices.Equal(got.Read, policy.Read) || !slices.Equal(got.Write, policy.Write) {
@@ -187,8 +187,8 @@ func TestAYoloCommandRunsWithNothingAroundIt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.Code != 0 || result.Output != "yolo" {
-		t.Errorf("got exit %d and %q, want the command's own output", result.Code, result.Output)
+	if result.ExitCode != 0 || result.Output != "yolo" {
+		t.Errorf("got exit %d and %q, want the command's own output", result.ExitCode, result.Output)
 	}
 }
 
@@ -207,8 +207,8 @@ func TestAYoloCommandIsNotHeldToAPolicyItCannotKeep(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.Code != 3 {
-		t.Errorf("got exit %d, want the command's own status", result.Code)
+	if result.ExitCode != 3 {
+		t.Errorf("got exit %d, want the command's own status", result.ExitCode)
 	}
 }
 

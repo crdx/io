@@ -502,7 +502,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	var chat *App
+	var app *App
 	systemCommands, err := commands.New(commands.Options{
 		ConfigDir:        location.GetConfigDir(),
 		ConfigFile:       configPath,
@@ -520,7 +520,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 				if err != nil {
 					return event, err
 				}
-				chat.stopJobsHoldingPath(path)
+				app.stopJobsHoldingPath(path)
 
 				return event, nil
 			},
@@ -532,7 +532,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			ID:             log.ID(),
 			Directory:      filepath.Join(sessionsDir, log.Name()),
 			IsPersisted:    log.IsPersisted,
-			GetLastMessage: func() (string, bool) { return chat.getLastMessage() },
+			GetLastMessage: func() (string, bool) { return app.getLastMessage() },
 		},
 		StartSession: func(start commands.SessionStart) error {
 			var transition cycle.Transition
@@ -554,35 +554,34 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			if err != nil {
 				return err
 			}
-			return chat.requestTransition(transition)
+			return app.requestTransition(transition)
 		},
 	})
 	if err != nil {
 		return "", err
 	}
 
-	chat = &App{
-		agent:               agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
-		screen:              screen,
-		terminal:            terminal.New(os.Stdout, workspace),
-		metrics:             metrics.New(choice.ContextWindowTokens),
-		recorder:            record.New(log),
-		editorConfiguration: editorConfiguration,
-		toolOutputLimit:     toolOutputLimit,
-		workspace:           workspace,
-		mode:                mode,
-		pathGrants:          pathGrants,
-		jobs:                jobManager,
-		configObserver:      configObserver,
-		startedAt:           time.Now(),
-		keyboard:            keyboard,
-		isPrinting:          args.IsPrinting,
-		isYolo:              args.Yolo,
+	app = &App{
+		agent:           agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
+		screen:          screen,
+		terminal:        terminal.New(os.Stdout, workspace),
+		metrics:         metrics.New(choice.ContextWindowTokens),
+		recorder:        record.New(log),
+		editorConfig:    editorConfiguration,
+		toolOutputLimit: toolOutputLimit,
+		workspace:       workspace,
+		mode:            mode,
+		pathGrants:      pathGrants,
+		jobs:            jobState{manager: jobManager},
+		configObserver:  configObserver,
+		runMode:         runMode{isPrinting: args.IsPrinting, isYolo: args.Yolo},
+		startedAt:       time.Now(),
+		keyboard:        keyboard,
 	}
 	if resumedSession == nil && model.SupportsFastMode(selection.Provider) {
-		chat.openingEvents = []agent.Event{model.FastModeEvent(selection.IsFast)}
+		app.openingEvents = []agent.Event{model.FastModeEvent(selection.IsFast)}
 	}
-	chat.onFailure = func(failure error) {
+	app.onFailure = func(failure error) {
 		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspace, failure)
 	}
 
@@ -599,33 +598,33 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		UsageCachePath:        location.GetUsageCachePath(selection.Provider, endpointURL != ""),
 		UsageIsSelfRefreshing: backend.RefreshesOwnUsage(selection.Provider),
 		UsageGauges:           usage.TerminalGauges(keyboard, os.Stdout),
-		Sources:               chat.getBarSources(),
+		Sources:               app.getBarSources(),
 	})
-	liveSettings, err := settings.BuildLive(barRegistry)
+	liveConfig, err := settings.BuildLive(barRegistry)
 	if err != nil {
 		return "", err
 	}
-	commandRegistry, err := slash.NewRegistry(systemCommands, liveSettings.SnippetCommandSet)
+	commandRegistry, err := slash.NewRegistry(systemCommands, liveConfig.SnippetCommandSet)
 	if err != nil {
 		return "", err
 	}
-	chat.commands = commandRegistry
-	chat.continueMessage = liveSettings.ContinueMessage
-	chat.streamingMode = liveSettings.StreamingMode
-	chat.reasoningRendering = liveSettings.ReasoningRendering
-	screen.SetGrouping(liveSettings.Grouping)
-	chat.barConfiguration = bar.NewConfiguration(barRegistry, liveSettings.SegmentLayout)
+	app.slash.commands = commandRegistry
+	app.continueMessage = liveConfig.ContinueMessage
+	app.display.streamingMode = liveConfig.StreamingMode
+	app.display.reasoningRendering = liveConfig.ReasoningRendering
+	screen.SetGrouping(liveConfig.Grouping)
+	app.display.bar = bar.NewConfiguration(barRegistry, liveConfig.SegmentLayout)
 
 	if resumedSession != nil {
-		chat.restore(resumedSession)
+		app.restore(resumedSession)
 	}
 	for _, failure := range pathGrantRestoreResult.Failures {
 		correction, err := pathgrant.ChangeEvent(failure.Grant.Path, pathGrants.GetCurrent())
 		if err != nil {
 			return "", err
 		}
-		chat.queuePathGrantChange(correction)
-		chat.notifyFailure(fmt.Sprintf(
+		app.queuePathGrantChange(correction)
+		app.notifyFailure(fmt.Sprintf(
 			"Temporary access to %s could not be restored: %v",
 			failure.Grant.Path,
 			failure.Err,
@@ -643,12 +642,12 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		ToolBytes:     client.ToolsSize(enabledTools),
 	}
 	if resumedSession == nil {
-		chat.notify(startup.NewEvent(startupElapsed, startupInfo))
+		app.notify(startup.NewEvent(startupElapsed, startupInfo))
 	}
 
 	hasStarted = true
 	hooks.EmitSessionStarted(ctx, cycle.SessionStarted{Session: sessionInfo})
-	transition := chat.begin(args.Message)
+	transition := app.begin(args.Message)
 	*requestedTransition = transition
 	stopReason = transition.StopReason()
 	hooks.EmitSessionStopping(ctx, cycle.SessionStopping{Session: sessionInfo, Reason: stopReason})
@@ -670,7 +669,7 @@ func openRunner(ctx context.Context, isYolo bool) (sandbox.Runner, *jobs.Manager
 		return sandbox.Direct(), nil, func() {}, err
 	}
 
-	runner := sandbox.In(keeperProcess)
+	runner := sandbox.Wrapped(keeperProcess)
 
 	return runner, jobs.New(runner), func() { _ = keeperProcess.Close() }, nil
 }

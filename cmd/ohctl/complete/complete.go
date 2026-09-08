@@ -16,7 +16,7 @@ const (
 	kindSession = "session"
 )
 
-var commands = []string{"analyse", "migrate", "regen", "sessions", "tool-result"}
+var commands = []string{"analyse", "migrate", "regenerate", "sessions", "tool-result"}
 
 func Write(out io.Writer, args []string) bool {
 	kind, word, isWanted := request(args)

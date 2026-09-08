@@ -39,11 +39,6 @@ var actions = []string{
 	actionList,
 }
 
-const description = "start and manage a long-running command that outlives the call which started it, " +
-	"and which every later bash call can reach on 127.0.0.1; " +
-	"a job is killed when the session ends, and holds the permissions it was started with; " +
-	"wait blocks until a job ends and reports it, rather than sleeping for a guessed duration"
-
 type Args struct {
 	Action  string `json:"action"`
 	Name    string `json:"name"`
@@ -53,23 +48,23 @@ type Args struct {
 func New(
 	manager *jobs.Manager,
 	root *file.Root,
-	fresh func(context.Context) (sandbox.Policy, error),
+	buildPolicy func(context.Context) (sandbox.Policy, error),
 ) tool.Tool {
 	return tool.Implement(
 		tool.Definition{
 			Name:        "job",
-			Description: description,
+			Description: "run a shell command in the background, returning immediately",
 			Schema: tool.Schema{
 				tool.Enum("action", "what to do", actions...),
-				tool.String("name", "the name of the job, for every action but list and prune").Optional(),
-				tool.String("command", "the command line, for start; omitted, an earlier job of the same name is run again").Optional(),
+				tool.String("name", "short name for the job (for all actions except 'list', 'prune'); e.g. check, lint, build").Optional(),
+				tool.String("command", "the command line (for action 'start'); if omitted, re-runs previous job by name").Optional(),
 			},
 		},
 		Describe,
 	).
 		Validate(validate).
-		Stats(func(ctx context.Context, args Args) (string, tool.Stats, error) {
-			return run(ctx, manager, root, fresh, args)
+		Exec(func(ctx context.Context, args Args) (string, tool.ToolCallMetrics, error) {
+			return run(ctx, manager, root, buildPolicy, args)
 		})
 }
 
@@ -101,19 +96,19 @@ func run(
 	ctx context.Context,
 	manager *jobs.Manager,
 	root *file.Root,
-	fresh func(context.Context) (sandbox.Policy, error),
+	buildPolicy func(context.Context) (sandbox.Policy, error),
 	args Args,
-) (string, tool.Stats, error) {
-	report, err := act(ctx, manager, root, fresh, args)
+) (string, tool.ToolCallMetrics, error) {
+	report, err := act(ctx, manager, root, buildPolicy, args)
 
-	return report, tool.OutputStats(report), err
+	return report, tool.GetMetrics(report), err
 }
 
 func act(
 	ctx context.Context,
 	manager *jobs.Manager,
 	root *file.Root,
-	fresh func(context.Context) (sandbox.Policy, error),
+	buildPolicy func(context.Context) (sandbox.Policy, error),
 	args Args,
 ) (string, error) {
 	switch args.Action {
@@ -127,7 +122,7 @@ func act(
 			command = rememberedCommand
 		}
 
-		policy, err := fresh(ctx)
+		policy, err := buildPolicy(ctx)
 		if err != nil {
 			return "", err
 		}

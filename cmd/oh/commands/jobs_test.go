@@ -29,7 +29,7 @@ func fixtureJobs() (Jobs, *[]string) {
 			State:     jobs.StateFailed,
 			StartedAt: time.Now().Add(-90 * time.Second),
 			EndedAt:   time.Now().Add(-88 * time.Second),
-			Code:      1,
+			ExitCode:  1,
 		},
 	}
 

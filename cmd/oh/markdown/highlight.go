@@ -1,7 +1,8 @@
 package markdown
 
 import (
-	"sort"
+	"cmp"
+	"slices"
 	"strings"
 	"sync"
 	"unicode/utf8"
@@ -221,11 +222,11 @@ func bashCommandSpans(source string) ([]sourceSpan, error) {
 		return true
 	})
 
-	sort.Slice(spans, func(i int, j int) bool {
-		if spans[i].start == spans[j].start {
-			return spans[i].end < spans[j].end
+	slices.SortFunc(spans, func(first sourceSpan, second sourceSpan) int {
+		if first.start == second.start {
+			return cmp.Compare(first.end, second.end)
 		}
-		return spans[i].start < spans[j].start
+		return cmp.Compare(first.start, second.start)
 	})
 
 	return spans, nil

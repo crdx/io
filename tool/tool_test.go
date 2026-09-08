@@ -12,7 +12,7 @@ type Params struct {
 	City string `json:"city"`
 }
 
-func TestOutputStats(t *testing.T) {
+func TestOutputMetrics(t *testing.T) {
 	for name, test := range map[string]struct {
 		output string
 		lines  int64
@@ -24,9 +24,9 @@ func TestOutputStats(t *testing.T) {
 		"trailing newline": {output: "hello\nworld\n", lines: 2, bytes: 12},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := tool.OutputStats(test.output)
-			want := tool.Stats{
-				Kind:  tool.StatsOutput,
+			got := tool.GetMetrics(test.output)
+			want := tool.ToolCallMetrics{
+				Kind:  tool.MetricOutput,
 				Lines: test.lines,
 				Bytes: test.bytes,
 			}
@@ -206,7 +206,7 @@ func TestValidationRunsForAbsentArguments(t *testing.T) {
 	}
 }
 
-func TestDefineStatsValidatesDecodedArgumentsWhenAsked(t *testing.T) {
+func TestDefineMetricsValidatesDecodedArgumentsWhenAsked(t *testing.T) {
 	validationError := errors.New("London is unavailable")
 	wasRendered := false
 	wasExecuted := false
@@ -226,9 +226,9 @@ func TestDefineStatsValidatesDecodedArgumentsWhenAsked(t *testing.T) {
 			t.Fatalf("expected decoded arguments, got %#v", args)
 		}
 		return validationError
-	}).Stats(func(_ context.Context, _ Params) (string, tool.Stats, error) {
+	}).Exec(func(_ context.Context, _ Params) (string, tool.ToolCallMetrics, error) {
 		wasExecuted = true
-		return "", tool.Stats{}, nil
+		return "", tool.ToolCallMetrics{}, nil
 	})
 
 	call, err := subject.Parse(`{"city":"London"}`)
@@ -243,7 +243,7 @@ func TestDefineStatsValidatesDecodedArgumentsWhenAsked(t *testing.T) {
 	}
 }
 
-func TestDefineStatsDoesNotRequireValidation(t *testing.T) {
+func TestDefineMetricsDoesNotRequireValidation(t *testing.T) {
 	subject := tool.Implement(
 		tool.Definition{
 			Name:        "weather",
@@ -251,8 +251,8 @@ func TestDefineStatsDoesNotRequireValidation(t *testing.T) {
 			Schema:      tool.Schema{tool.String("city", "the city to look up")},
 		},
 		func(args Params) (string, string) { return args.City, "" },
-	).Stats(func(_ context.Context, args Params) (string, tool.Stats, error) {
-		return args.City, tool.Stats{}, nil
+	).Exec(func(_ context.Context, args Params) (string, tool.ToolCallMetrics, error) {
+		return args.City, tool.ToolCallMetrics{}, nil
 	})
 
 	call, err := subject.Parse(`{"city":"London"}`)

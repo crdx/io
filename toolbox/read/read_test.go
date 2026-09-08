@@ -87,8 +87,8 @@ func TestAnImageReportsAnEstimateFromItsDimensions(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if result.Stats.Kind != tool.StatsImage || result.Stats.EstimatedTokens != 4 {
-		t.Errorf("expected a four-token image estimate, got %#v", result.Stats)
+	if result.Metrics.Kind != tool.MetricImage || result.Metrics.EstimatedTokens != 4 {
+		t.Errorf("expected a four-token image estimate, got %#v", result.Metrics)
 	}
 }
 
@@ -108,8 +108,8 @@ func TestAnOversizedImageIsEstimatedAtTheSizeThatWillBeSent(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if result.Stats.EstimatedTokens != 49*5 {
-		t.Errorf("expected the estimate to follow the bounded size, got %#v", result.Stats)
+	if result.Metrics.EstimatedTokens != 49*5 {
+		t.Errorf("expected the estimate to follow the bounded size, got %#v", result.Metrics)
 	}
 }
 
@@ -161,10 +161,10 @@ func TestALineRangeMeasuresOnlyWhatComesBack(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if result.Stats.Lines != 2 || result.Stats.Bytes != int64(len(result.Output)) {
+	if result.Metrics.Lines != 2 || result.Metrics.Bytes != int64(len(result.Output)) {
 		t.Errorf(
 			"expected 2 lines and %d bytes, got %d lines and %d bytes",
-			len(result.Output), result.Stats.Lines, result.Stats.Bytes,
+			len(result.Output), result.Metrics.Lines, result.Metrics.Bytes,
 		)
 	}
 }
@@ -225,8 +225,8 @@ func TestRangesOfFilesAboveTheReadLimit(t *testing.T) {
 	if boundedResult.Output != "wanted" {
 		t.Errorf("got %q, want %q", boundedResult.Output, "wanted")
 	}
-	if boundedResult.Stats.Bytes != 6 || boundedResult.Stats.Lines != 1 {
-		t.Errorf("unexpected stats: %+v", boundedResult.Stats)
+	if boundedResult.Metrics.Bytes != 6 || boundedResult.Metrics.Lines != 1 {
+		t.Errorf("unexpected metrics: %+v", boundedResult.Metrics)
 	}
 
 	openResult, err := execute(fmt.Sprintf(`{"path":%q,"offset":2}`, name))
@@ -383,8 +383,8 @@ func TestFilesAboveTheReadLimitAreRefusedBeforeTheirContentsAreLoaded(t *testing
 			if err == nil || err.Error() != test.failure {
 				t.Fatalf("got %v, want %q", err, test.failure)
 			}
-			if result.Stats.Bytes != fileBytes {
-				t.Errorf("reported %d bytes, want %d", result.Stats.Bytes, fileBytes)
+			if result.Metrics.Bytes != fileBytes {
+				t.Errorf("reported %d bytes, want %d", result.Metrics.Bytes, fileBytes)
 			}
 			if allocated := after.TotalAlloc - before.TotalAlloc; allocated > 8*1024*1024 {
 				t.Errorf("allocated %d bytes before refusing the file", allocated)

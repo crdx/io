@@ -127,8 +127,8 @@ func TestTranscriptLogsACallAndItsResultOnOneLine(t *testing.T) {
 		Name:   "bash",
 		Status: agent.SuccessStatus,
 		Took:   12 * time.Second,
-		Stats: &tool.Stats{
-			Kind:        tool.StatsResources,
+		Metrics: &tool.ToolCallMetrics{
+			Kind:        tool.MetricResources,
 			Lines:       1,
 			Bytes:       2048,
 			TotalBytes:  4096,

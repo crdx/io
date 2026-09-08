@@ -30,17 +30,17 @@ Commands:
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === unknown command during answer ===
-Command not found: /unknown (alt+enter sends as message)
+Command not found: /unknown (alt+enter to send)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 /unknown
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === unknown command during reasoning ===
-Command not found: /unknown (alt+enter sends as message)
+Command not found: /unknown (alt+enter to send)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 /unknown
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 === unknown snippet during reasoning ===
-Snippet not found: //unknown (alt+enter sends as message)
+Snippet not found: //unknown (alt+enter to send)
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 //unknown
 ────────────────────────────────────────────────────────────────────────────────────────────────────

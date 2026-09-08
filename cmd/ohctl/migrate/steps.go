@@ -734,25 +734,25 @@ func namedKindsReplaceBareNouns(line map[string]json.RawMessage) error {
 }
 
 func dropEqualTotalBytes(event map[string]json.RawMessage) error {
-	raw, hasStats := event["stats"]
-	if !hasStats {
+	raw, hasMetrics := event["stats"]
+	if !hasMetrics {
 		return nil
 	}
 
-	var stats map[string]json.RawMessage
-	if err := json.Unmarshal(raw, &stats); err != nil {
+	var metrics map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &metrics); err != nil {
 		return fmt.Errorf("the call measurements could not be read: %w", err)
 	}
-	if string(stats["total_bytes"]) != string(stats["bytes"]) {
+	if string(metrics["total_bytes"]) != string(metrics["bytes"]) {
 		return nil
 	}
 
-	delete(stats, "total_bytes")
-	encodedStats, err := json.Marshal(stats)
+	delete(metrics, "total_bytes")
+	encodedMetrics, err := json.Marshal(metrics)
 	if err != nil {
 		return err
 	}
-	event["stats"] = encodedStats
+	event["stats"] = encodedMetrics
 
 	return nil
 }

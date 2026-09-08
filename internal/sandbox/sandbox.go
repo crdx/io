@@ -63,10 +63,10 @@ type Policy struct {
 	SetEnv  map[string]string `json:"set_env"`
 	Timeout time.Duration     `json:"timeout"`
 
-	CPUTime   time.Duration `json:"cpu_time"`
-	FileSize  int64         `json:"file_size"`
-	OpenFiles int64         `json:"open_files"`
-	Processes int64         `json:"processes"`
+	MaxCPUTime   time.Duration `json:"cpu_time"`
+	MaxFileSize  int64         `json:"file_size"`
+	MaxOpenFiles int64         `json:"open_files"`
+	MaxProcesses int64         `json:"processes"`
 }
 
 func (self Policy) WithRead(paths ...string) Policy {

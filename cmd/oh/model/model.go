@@ -2,6 +2,7 @@ package model
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -12,7 +13,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -88,7 +88,7 @@ func registryAddress(endpoint string) string {
 		wantedNames = append(wantedNames, name)
 	}
 
-	sort.Strings(wantedNames)
+	slices.Sort(wantedNames)
 
 	query := url.Values{simulatedRegistryQuery: {strings.Join(wantedNames, ",")}}
 
@@ -167,8 +167,8 @@ func fromRegistry(registeredModels map[string]agent.Model) []agent.Model {
 		models = append(models, model)
 	}
 
-	sort.Slice(models, func(first int, second int) bool {
-		return models[first].ID < models[second].ID
+	slices.SortFunc(models, func(first agent.Model, second agent.Model) int {
+		return cmp.Compare(first.ID, second.ID)
 	})
 
 	return models

@@ -1,4 +1,4 @@
-package regen
+package regenerate
 
 import (
 	"flag"

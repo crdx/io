@@ -61,8 +61,8 @@ func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
 			Schema:      tool.Schema{},
 		},
 		func(Args) (string, string) { return "measured", "" },
-	).Stats(func(context.Context, Args) (string, tool.Stats, error) {
-		return "done", tool.Stats{Kind: tool.StatsRead, Lines: 3, Bytes: 12}, nil
+	).Exec(func(context.Context, Args) (string, tool.ToolCallMetrics, error) {
+		return "done", tool.ToolCallMetrics{Kind: tool.MetricRead, Lines: 3, Bytes: 12}, nil
 	})
 
 	call, err := truncate.Tool(subject, limitBytes).Parse(`{}`)
@@ -74,8 +74,8 @@ func TestStatisticsPassThroughTheOutputCap(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if result.Stats.Lines != 3 || result.Stats.Bytes != 12 {
-		t.Errorf("got %+v", result.Stats)
+	if result.Metrics.Lines != 3 || result.Metrics.Bytes != 12 {
+		t.Errorf("got %+v", result.Metrics)
 	}
 }
 
@@ -89,8 +89,8 @@ func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
 			Schema:      tool.Schema{},
 		},
 		func(Args) (string, string) { return "measured", "" },
-	).Stats(func(context.Context, Args) (string, tool.Stats, error) {
-		return whole, tool.Stats{Kind: tool.StatsResources}, nil
+	).Exec(func(context.Context, Args) (string, tool.ToolCallMetrics, error) {
+		return whole, tool.ToolCallMetrics{Kind: tool.MetricResources}, nil
 	})
 
 	call, err := truncate.Tool(subject, limitBytes).Parse(`{}`)
@@ -102,7 +102,7 @@ func TestTruncatedStatisticsReportReturnedAndTotalOutput(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	statistics := result.Stats
+	statistics := result.Metrics
 	if statistics.Bytes <= 0 || statistics.Bytes > limitBytes || statistics.TotalBytes != int64(len(whole)) || !statistics.IsTruncated {
 		t.Errorf("expected returned and total output statistics, got %+v", statistics)
 	}
@@ -116,8 +116,11 @@ func TestAnAttachedImagePassesThroughTheOutputCap(t *testing.T) {
 			Schema:      tool.Schema{},
 		},
 		func(Args) (string, string) { return "image", "" },
-	).StatsWithImage(func(context.Context, Args) (string, tool.Image, tool.Stats, error) {
-		return "image/png image", tool.Image{MediaType: "image/png", Data: []byte{1}}, tool.Stats{}, nil
+	).Run(func(context.Context, Args) (tool.ToolCallResult, error) {
+		return tool.ToolCallResult{
+			Output: "image/png image",
+			Image:  tool.Image{MediaType: "image/png", Data: []byte{1}},
+		}, nil
 	})
 
 	call, err := truncate.Tool(subject, limitBytes).Parse(`{}`)

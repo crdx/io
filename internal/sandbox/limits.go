@@ -20,10 +20,10 @@ func applyLimits(policy Policy) error {
 		shouldApply bool
 	}{
 		{unix.RLIMIT_CORE, 0, true},
-		{unix.RLIMIT_CPU, uint64(policy.CPUTime.Seconds()), policy.CPUTime > 0},
-		{unix.RLIMIT_FSIZE, uint64(policy.FileSize), policy.FileSize > 0},    //nolint:gosec // sane rejects a negative
-		{unix.RLIMIT_NOFILE, uint64(policy.OpenFiles), policy.OpenFiles > 0}, //nolint:gosec // sane rejects a negative
-		{unix.RLIMIT_NPROC, uint64(policy.Processes), policy.Processes > 0},  //nolint:gosec // sane rejects a negative
+		{unix.RLIMIT_CPU, uint64(policy.MaxCPUTime.Seconds()), policy.MaxCPUTime > 0},
+		{unix.RLIMIT_FSIZE, uint64(policy.MaxFileSize), policy.MaxFileSize > 0},    //nolint:gosec // sane rejects a negative
+		{unix.RLIMIT_NOFILE, uint64(policy.MaxOpenFiles), policy.MaxOpenFiles > 0}, //nolint:gosec // sane rejects a negative
+		{unix.RLIMIT_NPROC, uint64(policy.MaxProcesses), policy.MaxProcesses > 0},  //nolint:gosec // sane rejects a negative
 	}
 
 	for _, limit := range limits {
@@ -83,20 +83,20 @@ func (self Policy) sane() error {
 		return err
 	}
 
-	if self.FileSize < 0 {
-		return fmt.Errorf("a file size limit of %d is not a size", self.FileSize)
+	if self.MaxFileSize < 0 {
+		return fmt.Errorf("a file size limit of %d is not a size", self.MaxFileSize)
 	}
 
-	if self.OpenFiles < 0 {
-		return fmt.Errorf("an open file limit of %d is not a count", self.OpenFiles)
+	if self.MaxOpenFiles < 0 {
+		return fmt.Errorf("an open file limit of %d is not a count", self.MaxOpenFiles)
 	}
 
-	if self.Processes < 0 {
-		return fmt.Errorf("a process limit of %d is not a count", self.Processes)
+	if self.MaxProcesses < 0 {
+		return fmt.Errorf("a process limit of %d is not a count", self.MaxProcesses)
 	}
 
-	if self.CPUTime > 0 && self.CPUTime < time.Second {
-		return fmt.Errorf("a cpu limit of %s rounds down to no time at all", self.CPUTime)
+	if self.MaxCPUTime > 0 && self.MaxCPUTime < time.Second {
+		return fmt.Errorf("a cpu limit of %s rounds down to no time at all", self.MaxCPUTime)
 	}
 
 	for _, path := range self.Sockets {

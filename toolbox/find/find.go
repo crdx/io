@@ -34,7 +34,7 @@ func New(root *file.Root) tool.Tool {
 		Focuses(util.SearchPath).
 		IsEmbarrassinglyParallel().
 		ChangesNothing().
-		Stats(func(_ context.Context, args Args) (string, tool.Stats, error) {
+		Exec(func(_ context.Context, args Args) (string, tool.ToolCallMetrics, error) {
 			return exec(root, args)
 		})
 }
@@ -43,14 +43,14 @@ func Describe(args Args) (string, string) {
 	return util.DescribeSearch(args.Pattern, args.Path, "")
 }
 
-func exec(root *file.Root, args Args) (string, tool.Stats, error) {
+func exec(root *file.Root, args Args) (string, tool.ToolCallMetrics, error) {
 	if args.Pattern == "" {
-		return "", tool.Stats{}, errors.New("pattern is required")
+		return "", tool.ToolCallMetrics{}, errors.New("pattern is required")
 	}
 
 	root, name, err := root.Resolve(args.Path)
 	if err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 
 	var matches []string
@@ -79,12 +79,12 @@ func exec(root *file.Root, args Args) (string, tool.Stats, error) {
 		return nil
 	})
 	if err != nil {
-		return "", tool.Stats{}, err
+		return "", tool.ToolCallMetrics{}, err
 	}
 
 	output := util.ReportSearchResults(matches, isTruncated)
-	stats := tool.OutputStats(output)
-	stats.IsTruncated = isTruncated
+	metrics := tool.GetMetrics(output)
+	metrics.IsTruncated = isTruncated
 
-	return output, stats, nil
+	return output, metrics, nil
 }

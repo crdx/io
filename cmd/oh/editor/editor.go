@@ -14,28 +14,28 @@ import (
 
 type Command []string
 
-type Configuration struct {
+type Config struct {
 	mutex   sync.RWMutex
 	command Command
 }
 
-func NewConfiguration(command Command) *Configuration {
-	return &Configuration{command: slices.Clone(command)}
+func NewConfiguration(command Command) *Config {
+	return &Config{command: slices.Clone(command)}
 }
 
-func (self *Configuration) GetCommand() Command {
+func (self *Config) GetCommand() Command {
 	self.mutex.RLock()
 	defer self.mutex.RUnlock()
 	return slices.Clone(self.command)
 }
 
-func (self *Configuration) ReplaceCommand(command Command) {
+func (self *Config) ReplaceCommand(command Command) {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 	self.command = slices.Clone(command)
 }
 
-func (self *Configuration) Open(paths ...string) error {
+func (self *Config) Open(paths ...string) error {
 	return Open(self.GetCommand(), paths...)
 }
 

@@ -180,17 +180,17 @@ const (
 type Event struct {
 	FallbackRendering
 
-	Kind      Kind            `json:"kind"`
-	Text      string          `json:"text,omitempty"`
-	ID        string          `json:"id,omitempty"`
-	Name      string          `json:"name,omitempty"`
-	Arguments string          `json:"arguments,omitempty"`
-	Status    Status          `json:"status,omitempty"`
-	Took      time.Duration   `json:"took,omitempty"`
-	Attempt   int             `json:"attempt,omitempty"`
-	Stats     *tool.Stats     `json:"stats,omitempty"`
-	State     json.RawMessage `json:"state,omitempty"`
-	Usage     *Usage          `json:"usage,omitempty"`
+	Kind      Kind                  `json:"kind"`
+	Text      string                `json:"text,omitempty"`
+	ID        string                `json:"id,omitempty"`
+	Name      string                `json:"name,omitempty"`
+	Arguments string                `json:"arguments,omitempty"`
+	Status    Status                `json:"status,omitempty"`
+	Took      time.Duration         `json:"took,omitempty"`
+	Attempt   int                   `json:"attempt,omitempty"`
+	Metrics   *tool.ToolCallMetrics `json:"stats,omitempty"`
+	State     json.RawMessage       `json:"state,omitempty"`
+	Usage     *Usage                `json:"usage,omitempty"`
 }
 
 type Agent struct {

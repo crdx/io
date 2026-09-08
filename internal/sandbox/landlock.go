@@ -187,13 +187,13 @@ func isDir(fd int) bool {
 	return stat.Mode&unix.S_IFMT == unix.S_IFDIR
 }
 
-func AvailableAtAll() error {
+func Available() error {
 	_, err := landlockVersion()
 	return err
 }
 
 func Supported(ctx context.Context) error {
-	if err := AvailableAtAll(); err != nil {
+	if err := Available(); err != nil {
 		return err
 	}
 

@@ -11,9 +11,10 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-const separator = string(os.PathSeparator)
-
-const maxResolutionSteps = 64
+const (
+	separator          = string(os.PathSeparator)
+	maxResolutionSteps = 64
+)
 
 func pathComponents(path string) []string {
 	var parts []string

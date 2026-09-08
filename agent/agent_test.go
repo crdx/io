@@ -531,37 +531,37 @@ func plainOutputTool(output string, executionError error) tool.Tool {
 	})
 }
 
-func statsOutputTool(output string, stats tool.Stats) tool.Tool {
+func metricsOutputTool(output string, metrics tool.ToolCallMetrics) tool.Tool {
 	return tool.Implement(
 		tool.Definition{Name: "output", Description: "", Schema: tool.Schema{}},
 		func(struct{}) (string, string) { return "", "" },
-	).Stats(func(context.Context, struct{}) (string, tool.Stats, error) {
-		return output, stats, nil
+	).Exec(func(context.Context, struct{}) (string, tool.ToolCallMetrics, error) {
+		return output, metrics, nil
 	})
 }
 
-func requireStats(t *testing.T, result agent.Event, want tool.Stats) {
+func requireMetrics(t *testing.T, result agent.Event, want tool.ToolCallMetrics) {
 	t.Helper()
 
-	if result.Stats == nil {
-		t.Fatal("expected result stats")
+	if result.Metrics == nil {
+		t.Fatal("expected result metrics")
 	}
-	if *result.Stats != want {
-		t.Errorf("got stats %#v, want %#v", *result.Stats, want)
+	if *result.Metrics != want {
+		t.Errorf("got metrics %#v, want %#v", *result.Metrics, want)
 	}
 }
 
-func TestAPlainCallReceivesOutputStats(t *testing.T) {
+func TestAPlainCallReceivesOutputMetrics(t *testing.T) {
 	const output = "one\ntwo\n"
 	result := singleResult(t, plainOutputTool(output, nil))
 
-	requireStats(t, result, tool.OutputStats(output))
+	requireMetrics(t, result, tool.GetMetrics(output))
 }
 
-func TestAnEmptyPlainCallReceivesEmptyOutputStats(t *testing.T) {
+func TestAnEmptyPlainCallReceivesEmptyOutputMetrics(t *testing.T) {
 	result := singleResult(t, plainOutputTool("", nil))
 
-	requireStats(t, result, tool.OutputStats(""))
+	requireMetrics(t, result, tool.GetMetrics(""))
 }
 
 func TestACallTheUserStoppedIsMarkedApartFromOneThatFailed(t *testing.T) {
@@ -594,38 +594,38 @@ func TestACallTheUserStoppedIsMarkedApartFromOneThatFailed(t *testing.T) {
 	}
 }
 
-func TestAFailedExecutedCallReceivesOutputStats(t *testing.T) {
+func TestAFailedExecutedCallReceivesOutputMetrics(t *testing.T) {
 	const output = "permission denied\nexit status 1"
 	result := singleResult(t, plainOutputTool(output, errors.New("failed")))
 
 	if result.Status != agent.ErrorStatus {
 		t.Error("expected the call to be marked as having failed")
 	}
-	requireStats(t, result, tool.OutputStats(output))
+	requireMetrics(t, result, tool.GetMetrics(output))
 }
 
-func TestSpecialisedStatsTakePrecedenceOverOutputStats(t *testing.T) {
-	want := tool.Stats{Kind: tool.StatsSearch, Lines: 17, Bytes: 1200, TotalBytes: 2400, IsTruncated: true}
-	result := singleResult(t, statsOutputTool("generic output", want))
+func TestSpecialisedMetricsTakePrecedenceOverOutputMetrics(t *testing.T) {
+	want := tool.ToolCallMetrics{Kind: tool.MetricSearch, Lines: 17, Bytes: 1200, TotalBytes: 2400, IsTruncated: true}
+	result := singleResult(t, metricsOutputTool("generic output", want))
 
-	requireStats(t, result, want)
+	requireMetrics(t, result, want)
 }
 
-func TestAnEmptySpecialisedMeasurementFallsBackToOutputStats(t *testing.T) {
+func TestAnEmptySpecialisedMeasurementFallsBackToOutputMetrics(t *testing.T) {
 	const output = "generic output"
-	result := singleResult(t, statsOutputTool(output, tool.Stats{}))
+	result := singleResult(t, metricsOutputTool(output, tool.ToolCallMetrics{}))
 
-	requireStats(t, result, tool.OutputStats(output))
+	requireMetrics(t, result, tool.GetMetrics(output))
 }
 
-func TestARefusedCallDoesNotReceiveOutputStats(t *testing.T) {
+func TestARefusedCallDoesNotReceiveOutputMetrics(t *testing.T) {
 	result := singleResult(t, refusingTool())
 
 	if result.Status != agent.ErrorStatus {
 		t.Error("expected the call to be marked as having failed")
 	}
-	if result.Stats != nil {
-		t.Errorf("refused call got stats %#v", result.Stats)
+	if result.Metrics != nil {
+		t.Errorf("refused call got metrics %#v", result.Metrics)
 	}
 }
 

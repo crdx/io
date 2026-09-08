@@ -39,7 +39,7 @@ type row struct {
 
 	timeTaken time.Duration
 	summary   string
-	stats     string
+	metrics   string
 }
 
 type Block struct {
@@ -94,9 +94,9 @@ func (self *Block) FinaliseRow(
 	state RowState,
 	timeTaken time.Duration,
 	summary string,
-	stats string,
+	metrics string,
 ) {
-	self.finaliseRow(rowIndex, nil, state, timeTaken, summary, stats)
+	self.finaliseRow(rowIndex, nil, state, timeTaken, summary, metrics)
 }
 
 func (self *Block) FinaliseRowWithLabel(
@@ -105,9 +105,9 @@ func (self *Block) FinaliseRowWithLabel(
 	state RowState,
 	timeTaken time.Duration,
 	summary string,
-	stats string,
+	metrics string,
 ) {
-	self.finaliseRow(rowIndex, label, state, timeTaken, summary, stats)
+	self.finaliseRow(rowIndex, label, state, timeTaken, summary, metrics)
 }
 
 const widestSummaryRead = 1024
@@ -146,7 +146,7 @@ func (self *Block) finaliseRow(
 	state RowState,
 	timeTaken time.Duration,
 	summary string,
-	stats string,
+	metrics string,
 ) {
 	self.change(func() {
 		if rowIndex < 0 || rowIndex >= len(self.rows) || self.rows[rowIndex].state != Running {
@@ -158,7 +158,7 @@ func (self *Block) finaliseRow(
 		}
 		self.rows[rowIndex].state = state
 		self.rows[rowIndex].timeTaken = timeTaken
-		self.rows[rowIndex].stats = stats
+		self.rows[rowIndex].metrics = metrics
 		self.rows[rowIndex].summary = summarise(summary)
 	})
 }
@@ -271,7 +271,7 @@ func (self *Block) getResult(row row) string {
 		return getResultText(self.getProgressIndicator(row), elapsedTime, "")
 	}
 
-	return getResultText(self.getProgressIndicator(row), row.timeTaken, row.stats)
+	return getResultText(self.getProgressIndicator(row), row.timeTaken, row.metrics)
 }
 
 func (self *Block) getProgressIndicator(row row) string {

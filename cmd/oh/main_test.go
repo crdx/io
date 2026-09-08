@@ -178,7 +178,7 @@ func drawPendingLink(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	self.pendingInput.add(grantEvent)
+	self.pendingNotices.add(grantEvent)
 	self.refreshPendingMessages()
 
 	return screenOutput.String()
@@ -358,7 +358,7 @@ func drawLegacyAltEnter(t *testing.T) string {
 	self.show(editor)
 	self.screen.End()
 
-	if !hasUserMessage(self.events, "/nosuch") {
+	if !hasUserMessage(self.recordedEvents, "/nosuch") {
 		t.Fatal("legacy Alt+Enter did not send the unknown command")
 	}
 	if strings.Contains(screenOutput.String(), "Command not found") {
@@ -446,7 +446,7 @@ func TestTwoReturnsOnAnEmptyIdleLineSendTheContinueMessage(t *testing.T) {
 	}
 	self.finish()
 
-	for _, record := range self.events {
+	for _, record := range self.recordedEvents {
 		if record.Kind == agent.UserMessageEvent && record.Text == "carry on" {
 			return
 		}
@@ -516,7 +516,7 @@ func TestChangingCapabilitiesRestartsTheTurnWithTheChangeAsItsPrompt(t *testing.
 	}
 	self.finish()
 
-	messages := submittedTexts(self.events)
+	messages := submittedTexts(self.recordedEvents)
 
 	wantMessages := []string{"first", workspaceNowReadOnly()}
 	if !slices.Equal(messages, wantMessages) {
@@ -566,7 +566,7 @@ func TestTwoReturnsOnAnEmptyLineReplaceTheRunningTurnWithTheContinueMessage(t *t
 
 	var messages []string
 	var wasInterrupted bool
-	for _, record := range self.events {
+	for _, record := range self.recordedEvents {
 		if record.Kind == agent.UserMessageEvent {
 			messages = append(messages, record.Text)
 		}
@@ -664,7 +664,7 @@ func TestCompletedEventsAreRenderedAfterCancellation(t *testing.T) {
 	self.finish()
 
 	messages := 0
-	for _, record := range self.events {
+	for _, record := range self.recordedEvents {
 		if record.Kind == agent.ModelMessageEvent {
 			messages++
 		}
@@ -971,7 +971,7 @@ func TestFlushingTheQueueCancelsProvisionalReasoningAndStartsTheNextTurn(t *test
 
 	var messages []string
 	var reasoningEvents int
-	for _, event := range self.events {
+	for _, event := range self.recordedEvents {
 		if event.Kind == agent.UserMessageEvent || event.Kind == agent.ModelMessageEvent {
 			messages = append(messages, event.Text)
 		}
@@ -1136,7 +1136,7 @@ func TestEscapeTakesBackAQueuedMessageWithoutAnnouncingAnInterruption(t *testing
 		t.Errorf("input reads %q, want the taken-back message", inputLine.Text())
 	}
 
-	for _, record := range self.events {
+	for _, record := range self.recordedEvents {
 		if record.Kind == agent.UserMessageEvent && record.Text == "follow up" {
 			t.Error("expected the taken-back message not to be sent")
 		}
@@ -1498,7 +1498,7 @@ func countModeNotes(messages []string, note string) int {
 }
 
 func TestPendingInputCanTakeBackAnyMessage(t *testing.T) {
-	var pending pendingInput
+	var pending pendingNotices
 	pending.add(agent.Event{Kind: caps.ModeChange, Text: "first"})
 	pending.add(agent.Event{Kind: pathgrant.Change, Text: "second"})
 
@@ -1537,8 +1537,8 @@ func TestAQueuedModeChangeCanBeTakenBackBeforeItStarts(t *testing.T) {
 	if self.currentTurn.Running() {
 		t.Error("a taken-back mode change started another turn")
 	}
-	if !self.queuedTurn.Empty() || len(self.pendingInput.items) != 0 {
-		t.Errorf("taken-back mode change remained queued: %+v %v", self.queuedTurn.Peek(), self.pendingInput.items)
+	if !self.queuedTurn.Empty() || len(self.pendingNotices.items) != 0 {
+		t.Errorf("taken-back mode change remained queued: %+v %v", self.queuedTurn.Peek(), self.pendingNotices.items)
 	}
 
 	storedSession, err := store.Read(directory, log.Name())
@@ -2295,7 +2295,7 @@ func TestRestoringAConversationRestoresStateBeforeReturning(t *testing.T) {
 }
 
 func TestLastMessageIsTheMostRecentModelMessage(t *testing.T) {
-	self := &App{events: []agent.Event{
+	self := &App{recordedEvents: []agent.Event{
 		{Kind: agent.ModelMessageEvent, Text: "first answer"},
 		{Kind: agent.UserMessageEvent, Text: "follow up"},
 		{Kind: agent.ModelMessageEvent, Text: "latest answer"},
@@ -2309,7 +2309,7 @@ func TestLastMessageIsTheMostRecentModelMessage(t *testing.T) {
 }
 
 func TestLastMessageIsUnavailableBeforeAModelMessage(t *testing.T) {
-	self := &App{events: []agent.Event{{Kind: agent.UserMessageEvent, Text: "hello"}}}
+	self := &App{recordedEvents: []agent.Event{{Kind: agent.UserMessageEvent, Text: "hello"}}}
 
 	if message, found := self.getLastMessage(); found || message != "" {
 		t.Errorf("got %q and %t", message, found)
@@ -2324,7 +2324,7 @@ func TestReplayingSaysTheWholeConversationAgain(t *testing.T) {
 		screen: output.New(&screenOutput),
 	}
 
-	testConversation.events = []agent.Event{
+	testConversation.recordedEvents = []agent.Event{
 		{Kind: agent.UserMessageEvent, Text: "what is the weather"},
 		{Kind: agent.ModelMessageEvent, Text: "it is raining"},
 		{Kind: agent.SilentTurnEvent},
@@ -2463,7 +2463,7 @@ func TestASilentTurnIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	call := agent.Event{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}}
 
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
-	self.events = append(self.events, call)
+	self.recordedEvents = append(self.recordedEvents, call)
 	self.currentTurn.painter.DrawEvent(call)
 
 	self.notify(agent.Event{Kind: agent.SilentTurnEvent})
@@ -2510,13 +2510,13 @@ func TestTheWholeConversationIsDrawnTheSameLiveAndReplayed(t *testing.T) {
 	}
 
 	for _, event := range events {
-		self.events = append(self.events, event)
+		self.recordedEvents = append(self.recordedEvents, event)
 		livePainter.DrawEvent(event)
 	}
 	self.notifyFailure("The stored session could not be written (no space left)")
 
 	unansweredCall := agent.Event{Kind: agent.ToolCallRequestEvent, ID: "3", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "left.go"}}
-	self.events = append(self.events, unansweredCall)
+	self.recordedEvents = append(self.recordedEvents, unansweredCall)
 	livePainter.DrawEvent(unansweredCall)
 	livePainter.Close(dynamic.Cancelled)
 	self.screen.End()
@@ -2643,7 +2643,7 @@ func TestAStoredCallIsShownTheWayItsToolShowsItNow(t *testing.T) {
 		screen: output.New(&screenOutput),
 	}
 
-	testConversation.events = []agent.Event{{
+	testConversation.recordedEvents = []agent.Event{{
 		Kind:              agent.ToolCallRequestEvent,
 		ID:                "1",
 		Name:              "read",
@@ -2671,7 +2671,7 @@ func TestACallWhoseToolIsGoneKeepsWhatItLookedLike(t *testing.T) {
 		screen: output.New(&screenOutput),
 	}
 
-	testConversation.events = []agent.Event{{
+	testConversation.recordedEvents = []agent.Event{{
 		Kind:              agent.ToolCallRequestEvent,
 		ID:                "1",
 		Name:              "divine",
@@ -2727,14 +2727,14 @@ func testConversation(t *testing.T, screenOutput *bytes.Buffer) *App {
 	settings := builtInConfig(t)
 
 	return &App{
-		agent:               agent.New("", backend, nil),
-		screen:              output.New(screenOutput),
-		recorder:            record.New(log),
-		mode:                caps.NewMode(caps.Read | caps.Write),
-		commands:            fixtureSnippetRegistry(t, nil),
-		continueMessage:     settings.Input.Continue,
-		editorConfiguration: editor.NewConfiguration(settings.Editor.Command),
-		toolOutputLimit:     truncate.NewLimit(settings.Tool.Output.Bytes),
+		agent:           agent.New("", backend, nil),
+		screen:          output.New(screenOutput),
+		recorder:        record.New(log),
+		mode:            caps.NewMode(caps.Read | caps.Write),
+		slash:           slashState{commands: fixtureSnippetRegistry(t, nil)},
+		continueMessage: settings.Input.Continue,
+		editorConfig:    editor.NewConfiguration(settings.Editor.Command),
+		toolOutputLimit: truncate.NewLimit(settings.Tool.Output.Bytes),
 	}
 }
 
@@ -2834,7 +2834,7 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 
 		testConversation.currentTurn = Turn{Stream: testRunningTurnStream(), painter: testConversation.newPainter(true)}
 
-		testConversation.events = []agent.Event{
+		testConversation.recordedEvents = []agent.Event{
 			{Kind: agent.UserMessageEvent, Text: "read it"},
 			{Kind: agent.ToolCallRequestEvent, ID: "1", Name: "read", FallbackRendering: agent.FallbackRendering{Subject: "one.go"}},
 		}
@@ -2858,9 +2858,9 @@ func TestARedrawDuringATurnHandsTheOpenBlockToTheTurn(t *testing.T) {
 func TestARedrawDuringProvisionalReasoningRestoresTheOpenBlock(t *testing.T) {
 	var screenOutput bytes.Buffer
 	testConversation := &App{
-		agent:  agent.New("", quietProvider{}, nil),
-		screen: output.New(&screenOutput),
-		events: []agent.Event{{Kind: agent.UserMessageEvent, Text: "think"}},
+		agent:          agent.New("", quietProvider{}, nil),
+		screen:         output.New(&screenOutput),
+		recordedEvents: []agent.Event{{Kind: agent.UserMessageEvent, Text: "think"}},
 	}
 	testConversation.currentTurn = Turn{Stream: testRunningTurnStream(), painter: testConversation.newPainter(true)}
 	testConversation.currentTurn.painter.DrawDelta(agent.Delta{
@@ -3514,7 +3514,7 @@ func TestAResumedConversationDrawsItsRecordedConfinement(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			resumedHarness := &App{isYolo: restoredYolo}
+			resumedHarness := &App{runMode: runMode{isYolo: restoredYolo}}
 			block := input.Block{
 				Top:    input.Ruler{Left: "oh"},
 				Input:  edit.Frame{Rows: []string{"> carry on"}},
@@ -3599,16 +3599,16 @@ func TestACapabilitySwappedBackIsTakenBackRatherThanWrittenDown(t *testing.T) {
 	self, directory := modeFixture(t)
 
 	self.toggleCap(caps.Git)
-	if len(self.pendingInput.items) != 1 {
-		t.Fatalf("expected the change to be shown, got %v", self.pendingInput.items)
+	if len(self.pendingNotices.items) != 1 {
+		t.Fatalf("expected the change to be shown, got %v", self.pendingNotices.items)
 	}
 	if recorded := recordedModes(t, self, directory); len(recorded) != 1 {
 		t.Errorf("pending mode change was written down: %v", recorded)
 	}
 
 	self.toggleCap(caps.Git)
-	if len(self.pendingInput.items) != 0 {
-		t.Errorf("expected the change to be taken back, got %v", self.pendingInput.items)
+	if len(self.pendingNotices.items) != 0 {
+		t.Errorf("expected the change to be taken back, got %v", self.pendingNotices.items)
 	}
 
 	self.settleAccess()
@@ -3623,13 +3623,13 @@ func TestACapabilitySwappedBackLeavesTheOtherChangesSayingWhatTheySaid(t *testin
 	self.toggleCap(caps.Git)
 	self.toggleCap(caps.Write)
 
-	shown, isSaid := caps.ModeNotice(self.pendingInput.items[1].state)
+	shown, isSaid := caps.ModeNotice(self.pendingNotices.items[1].state)
 	if !isSaid {
 		t.Fatal("expected the second change to say something")
 	}
 
 	self.toggleCap(caps.Git)
-	if again, _ := caps.ModeNotice(self.pendingInput.items[0].state); again != shown {
+	if again, _ := caps.ModeNotice(self.pendingNotices.items[0].state); again != shown {
 		t.Errorf("expected %q, got %q", shown, again)
 	}
 
@@ -5142,7 +5142,7 @@ func newGroupedRig(t *testing.T, groups []string, isPrinted bool) *replayRig {
 		return screen.LinkPathsUnder(workspaceDir)
 	})
 	rig.chat.screen.SetGrouping(grouping)
-	rig.chat.isPrinting = isPrinted
+	rig.chat.runMode.isPrinting = isPrinted
 
 	return rig
 }
@@ -5206,8 +5206,8 @@ func newThinkingRig(t *testing.T, rendering output.ReasoningRendering, isPrinted
 
 		return screen.LinkPathsUnder(workspaceDir)
 	})
-	rig.chat.reasoningRendering = rendering
-	rig.chat.isPrinting = isPrinted
+	rig.chat.display.reasoningRendering = rendering
+	rig.chat.runMode.isPrinting = isPrinted
 
 	return rig
 }
@@ -5234,7 +5234,7 @@ func streamThoughts(t *testing.T, rendering output.ReasoningRendering, streaming
 	t.Helper()
 
 	rig := newThinkingRig(t, rendering, false, replayColumns)
-	rig.chat.streamingMode = streamingMode
+	rig.chat.display.streamingMode = streamingMode
 
 	return streamThrough(t, rig, thoughtEntries(t))
 }
@@ -5569,7 +5569,7 @@ func drawAcceptedInputDuringStream(t *testing.T, message string, kind agent.Kind
 	writer := &frameRecordingWriter{}
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.NewTerminalOfSize(writer, replayColumns, replayLines)
-	self.commands = fixtureSnippetRegistry(t, nil)
+	self.slash.commands = fixtureSnippetRegistry(t, nil)
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 
 	history := edit.NewHistory("", historyLimit)
@@ -5760,7 +5760,7 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 
 func (self *replayRig) load(entries []replayEntry) {
 	for _, entry := range entries {
-		self.chat.events = append(self.chat.events, *entry.Event)
+		self.chat.recordedEvents = append(self.chat.recordedEvents, *entry.Event)
 	}
 }
 
@@ -5785,7 +5785,7 @@ func replayAsPrinted(t *testing.T, entries []replayEntry) string {
 	t.Helper()
 
 	rig := newPrintedRig(t)
-	rig.chat.isPrinting = true
+	rig.chat.runMode.isPrinting = true
 	drawn := replayInto(rig, entries)
 	requireNothingWasDrawnOver(t, drawn)
 
@@ -5803,7 +5803,7 @@ func streamIntoBuffer(t *testing.T, entries []replayEntry, streamingMode output.
 	t.Helper()
 
 	rig := newReplayRig(t, replayColumns)
-	rig.chat.streamingMode = streamingMode
+	rig.chat.display.streamingMode = streamingMode
 
 	return streamThrough(t, rig, entries)
 }
@@ -5822,7 +5822,7 @@ func streamThrough(t *testing.T, rig *replayRig, entries []replayEntry) string {
 			}
 		}
 
-		rig.chat.events = append(rig.chat.events, event)
+		rig.chat.recordedEvents = append(rig.chat.recordedEvents, event)
 		rig.chat.currentTurn.painter.DrawEvent(event)
 
 		if rig.chat.currentTurn.painter.Stale() {
@@ -6035,12 +6035,12 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 					mode:      caps.NewMode(caps.All()),
 					metrics:   metrics.New(200_000),
 					startedAt: time.Now().Add(-sessionSoFar),
-					events: []agent.Event{{
+					recordedEvents: []agent.Event{{
 						Kind:  agent.ModelMessageEvent,
 						Usage: &agent.Usage{InputTokens: inputTokens},
 					}},
 				}
-				held.metrics.Restore(held.events, nil)
+				held.metrics.Restore(held.recordedEvents, nil)
 
 				built := goldenBarLayout(t, held)
 
@@ -6075,12 +6075,12 @@ func TestTheBarConfiguredByDefaultDrawsWhatItDrewBefore(t *testing.T) {
 						mode:      caps.NewMode(caps.All()),
 						metrics:   metrics.New(200_000),
 						startedAt: time.Now().Add(-sessionSoFar),
-						events: []agent.Event{{
+						recordedEvents: []agent.Event{{
 							Kind:  agent.ModelMessageEvent,
 							Usage: &agent.Usage{InputTokens: 42_000},
 						}},
 					}
-					held.metrics.Restore(held.events, nil)
+					held.metrics.Restore(held.recordedEvents, nil)
 					held.currentTurn.Stream = testTimedTurnStream(
 						isRunning,
 						time.Now().Add(-turnSoFar),
@@ -6215,12 +6215,12 @@ func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 
 				time.Sleep(spinnerSoFar)
 
-				held := &App{mode: caps.NewMode(caps.All()), isYolo: isYolo}
+				held := &App{mode: caps.NewMode(caps.All()), runMode: runMode{isYolo: isYolo}}
 				held.currentTurn.Stream = testTimedTurnStream(true, time.Now().Add(-turnSoFar), time.Time{})
 
 				built := goldenBarLayout(t, held)
 
-				held.barConfiguration = bar.NewConfiguration(nil, built)
+				held.display.bar = bar.NewConfiguration(nil, built)
 
 				block := input.Block{
 					Top: input.Ruler{
@@ -6423,8 +6423,8 @@ func TestReloadingConfigChangesTheReasoningRenderingForTheNextTurn(t *testing.T)
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	prepareLiveConfig(t, self, path)
-	if self.reasoningRendering != output.ReasoningPlain {
-		t.Fatalf("initial reasoning rendering is %d, want plain", self.reasoningRendering)
+	if self.display.reasoningRendering != output.ReasoningPlain {
+		t.Fatalf("initial reasoning rendering is %d, want plain", self.display.reasoningRendering)
 	}
 	drawAThoughtThenACall(self, structuredThought)
 	if drawn := style.Plain(screenOutput.String()); !strings.Contains(drawn, "A heading • first • second") {
@@ -6433,8 +6433,8 @@ func TestReloadingConfigChangesTheReasoningRenderingForTheNextTurn(t *testing.T)
 
 	writeLiveConfig(t, path, "[ui]\nreasoning = \"markdown\"\n")
 	settleLiveConfig(t, self)
-	if self.reasoningRendering != output.ReasoningMarkdown {
-		t.Errorf("reloaded reasoning rendering is %d, want markdown", self.reasoningRendering)
+	if self.display.reasoningRendering != output.ReasoningMarkdown {
+		t.Errorf("reloaded reasoning rendering is %d, want markdown", self.display.reasoningRendering)
 	}
 
 	screenOutput.Reset()
@@ -6490,13 +6490,13 @@ func prepareLiveConfig(t *testing.T, self *App, path string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := self.commands.ReplaceCommandSet(live.SnippetCommandSet); err != nil {
+	if err := self.slash.commands.ReplaceCommandSet(live.SnippetCommandSet); err != nil {
 		t.Fatal(err)
 	}
-	if self.editorConfiguration == nil {
-		self.editorConfiguration = editor.NewConfiguration(live.EditorCommand)
+	if self.editorConfig == nil {
+		self.editorConfig = editor.NewConfiguration(live.EditorCommand)
 	} else {
-		self.editorConfiguration.ReplaceCommand(live.EditorCommand)
+		self.editorConfig.ReplaceCommand(live.EditorCommand)
 	}
 	if self.toolOutputLimit == nil {
 		self.toolOutputLimit = truncate.NewLimit(live.ToolOutputBytes)
@@ -6504,10 +6504,10 @@ func prepareLiveConfig(t *testing.T, self *App, path string) {
 		self.toolOutputLimit.Replace(live.ToolOutputBytes)
 	}
 	self.continueMessage = live.ContinueMessage
-	self.streamingMode = live.StreamingMode
-	self.reasoningRendering = live.ReasoningRendering
+	self.display.streamingMode = live.StreamingMode
+	self.display.reasoningRendering = live.ReasoningRendering
 	self.screen.SetGrouping(live.Grouping)
-	self.barConfiguration = bar.NewConfiguration(registry, live.SegmentLayout)
+	self.display.bar = bar.NewConfiguration(registry, live.SegmentLayout)
 }
 
 func settleLiveConfig(t *testing.T, self *App) {
@@ -6563,7 +6563,7 @@ func TestReloadingConfigChangesTheContinueMessage(t *testing.T) {
 	self.finish()
 
 	hasSentReloadedMessage := false
-	for _, event := range self.events {
+	for _, event := range self.recordedEvents {
 		if event.Kind == agent.UserMessageEvent && event.Text == "carry on from the reloaded config" {
 			hasSentReloadedMessage = true
 		}
@@ -6582,14 +6582,14 @@ func TestReloadingConfigChangesTheStreamingModeForTheNextTurn(t *testing.T) {
 
 	self := testConversation(t, &bytes.Buffer{})
 	prepareLiveConfig(t, self, path)
-	if self.streamingMode != output.StreamingModeASAP {
-		t.Fatalf("initial streaming mode is %d, want asap", self.streamingMode)
+	if self.display.streamingMode != output.StreamingModeASAP {
+		t.Fatalf("initial streaming mode is %d, want asap", self.display.streamingMode)
 	}
 
 	writeLiveConfig(t, path, "[ui]\nstreaming = \"paced\"\n")
 	settleLiveConfig(t, self)
-	if self.streamingMode != output.StreamingModePaced {
-		t.Errorf("reloaded streaming mode is %d, want paced", self.streamingMode)
+	if self.display.streamingMode != output.StreamingModePaced {
+		t.Errorf("reloaded streaming mode is %d, want paced", self.display.streamingMode)
 	}
 }
 
@@ -6615,7 +6615,7 @@ func TestReloadingConfigChangesTheEditorAndToolOutputLimit(t *testing.T) {
 	`)
 	settleLiveConfig(t, self)
 
-	if got := self.editorConfiguration.GetCommand(); !slices.Equal(got, editor.Command{"second-editor"}) {
+	if got := self.editorConfig.GetCommand(); !slices.Equal(got, editor.Command{"second-editor"}) {
 		t.Errorf("reloaded editor command is %v", got)
 	}
 	if got := self.toolOutputLimit.GetBytes(); got != 4*1024 {
@@ -6632,19 +6632,19 @@ func TestReloadingConfigReplacesSnippetsAtomically(t *testing.T) {
 
 	writeLiveConfig(t, path, "[snippets]\nbroken = \"{{\"\n")
 	settleLiveConfig(t, self)
-	if _, found := self.commands.Find("//old"); !found {
+	if _, found := self.slash.commands.Find("//old"); !found {
 		t.Error("an invalid revision replaced the working snippets")
 	}
-	if _, found := self.commands.Find("//broken"); found {
+	if _, found := self.slash.commands.Find("//broken"); found {
 		t.Error("the invalid snippet was registered")
 	}
 
 	writeLiveConfig(t, path, "[snippets]\nnew = \"Use the new snippet.\"\n")
 	settleLiveConfig(t, self)
-	if _, found := self.commands.Find("//old"); found {
+	if _, found := self.slash.commands.Find("//old"); found {
 		t.Error("the old snippet survived a valid replacement")
 	}
-	if _, found := self.commands.Find("//new"); !found {
+	if _, found := self.slash.commands.Find("//new"); !found {
 		t.Error("the reloaded snippet was not registered")
 	}
 
@@ -6686,8 +6686,8 @@ func drawWorkspacePathLabels(t *testing.T) string {
 
 	for at, call := range calls {
 		id := strconv.Itoa(at)
-		rig.chat.events = append(
-			rig.chat.events,
+		rig.chat.recordedEvents = append(
+			rig.chat.recordedEvents,
 			agent.Event{
 				Kind:      agent.ToolCallRequestEvent,
 				ID:        id,
@@ -6724,7 +6724,7 @@ func drawExistingPathMessage(t *testing.T) string {
 	self := slashCommandFixture(t, caps.Read)
 	self.agent = agent.New("", quietProvider{}, nil)
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
-	self.commands = fixtureCommandRegistry(t)
+	self.slash.commands = fixtureCommandRegistry(t)
 	self.workspace = work.At(t.TempDir())
 
 	inputLine := edit.NewInput(nil)
@@ -6764,7 +6764,7 @@ func drawUserPathLinks(t *testing.T, columns int) string {
 	t.Helper()
 
 	rig := newReplayRig(t, columns)
-	rig.chat.events = []agent.Event{{
+	rig.chat.recordedEvents = []agent.Event{{
 		Kind: agent.UserMessageEvent,
 		Text: "read target.txt and cmd/oh/line/render.go:12:3; also /etc/hosts and [the target](https://example.test).",
 	}}
@@ -6844,7 +6844,7 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		terminalLines = 8
 	}
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, terminalLines)
-	self.commands = fixtureCommandRegistry(
+	self.slash.commands = fixtureCommandRegistry(
 		t,
 		slash.Command{
 			Name: "help",
@@ -6973,7 +6973,7 @@ func queuedMessagesStream(t *testing.T, scenario queuedMessagesScenario) string 
 		terminalLines = 12
 	}
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, terminalLines)
-	self.commands = fixtureCommandRegistryWithSnippets(
+	self.slash.commands = fixtureCommandRegistryWithSnippets(
 		t,
 		map[string]snippets.Definition{
 			"add": {Prompt: "Add the following:\n\n{{ .Arg }}", Arguments: snippets.ArgumentsRequired},
@@ -7053,8 +7053,8 @@ func plainFeedback(t *testing.T) string {
 	var screenOutput bytes.Buffer
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&screenOutput)
-	self.isPlain = true
-	self.commands = fixtureCommandRegistry(t, slash.Command{
+	self.runMode.isPlain = true
+	self.slash.commands = fixtureCommandRegistry(t, slash.Command{
 		Name: "help",
 		Run: func(context slash.Context, _ slash.Arguments) error {
 			context.Notice("Commands:\n  /help")
@@ -7070,8 +7070,8 @@ func TestAPrintedSessionAnswersOneCommandAndStops(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines).AppendOnly()
-	self.isPrinting = true
-	self.commands = fixtureCommandRegistry(t, slash.Command{
+	self.runMode.isPrinting = true
+	self.slash.commands = fixtureCommandRegistry(t, slash.Command{
 		Name: "help",
 		Run: func(context slash.Context, _ slash.Arguments) error {
 			context.Notice("Commands:\n  /help")
@@ -7151,13 +7151,13 @@ func TestEphemeralInterfaceFeedbackStaysOutOfConversationHistory(t *testing.T) {
 		screen:   output.NewTerminalOfSize(&liveOutput, replayColumns, terminalLines),
 		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read),
-		commands: fixtureCommandRegistryWithSnippets(t, nil, slash.Command{
+		slash: slashState{commands: fixtureCommandRegistryWithSnippets(t, nil, slash.Command{
 			Name: "help",
 			Run: func(context slash.Context, _ slash.Arguments) error {
 				context.Notice("Commands:\n  /help")
 				return nil
 			},
-		}),
+		})},
 	}
 	prepareLiveConfig(t, self, path)
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
@@ -7181,8 +7181,8 @@ func TestEphemeralInterfaceFeedbackStaysOutOfConversationHistory(t *testing.T) {
 	if liveOutput.String() != beforeFeedback {
 		t.Error("ephemeral interface feedback changed conversation scrollback before the answer was sealed")
 	}
-	if len(self.events) != 1 || self.events[0].Kind != agent.UserMessageEvent {
-		t.Errorf("conversation events before the answer was sealed are %v, want [user_message]", getEventKinds(self.events))
+	if len(self.recordedEvents) != 1 || self.recordedEvents[0].Kind != agent.UserMessageEvent {
+		t.Errorf("conversation events before the answer was sealed are %v, want [user_message]", getEventKinds(self.recordedEvents))
 	}
 
 	completed := agent.Event{Kind: agent.ModelMessageEvent, Text: answer}
@@ -7205,9 +7205,9 @@ func TestEphemeralInterfaceFeedbackStaysOutOfConversationHistory(t *testing.T) {
 
 	var replayOutput bytes.Buffer
 	replayed := &App{
-		agent:  agent.New("", quietProvider{}, nil),
-		screen: output.NewTerminalOfSize(&replayOutput, replayColumns, terminalLines),
-		events: storedSession.Events,
+		agent:          agent.New("", quietProvider{}, nil),
+		screen:         output.NewTerminalOfSize(&replayOutput, replayColumns, terminalLines),
+		recordedEvents: storedSession.Events,
 	}
 	replayed.replay()
 
@@ -7265,9 +7265,9 @@ func TestRetryRemainsDurableConversationHistory(t *testing.T) {
 
 	var replayOutput bytes.Buffer
 	replayed := &App{
-		agent:  agent.New("", quietProvider{}, nil),
-		screen: output.NewTerminalOfSize(&replayOutput, replayColumns, replayLines),
-		events: storedSession.Events,
+		agent:          agent.New("", quietProvider{}, nil),
+		screen:         output.NewTerminalOfSize(&replayOutput, replayColumns, replayLines),
+		recordedEvents: storedSession.Events,
 	}
 	replayed.replay()
 
@@ -7413,7 +7413,7 @@ func configReloadStream(t *testing.T, scenario configReloadScenario) string {
 	replayed := testConversation(t, &replayOutput)
 	replayed.screen = output.NewTerminalOfSize(&replayOutput, replayColumns, replayLines)
 	prepareLiveConfig(t, replayed, path)
-	replayed.events = append(replayed.events, self.events...)
+	replayed.recordedEvents = append(replayed.recordedEvents, self.recordedEvents...)
 	replayed.replay()
 	replayed.show(edit.NewInput(nil))
 
@@ -7836,12 +7836,12 @@ func goldenSchedulePass(t *testing.T, isRunning bool, workPerPass time.Duration,
 
 			held := &App{mode: caps.NewMode(caps.All())}
 			held.currentTurn.Stream = testTimedTurnStream(isRunning, startedAt, startedAt)
-			held.barConfiguration = bar.NewConfiguration(nil, goldenBarLayout(t, held))
+			held.display.bar = bar.NewConfiguration(nil, goldenBarLayout(t, held))
 
 			return filmstrip(startedAt, span, workPerPass, func() time.Time {
 				return held.nextBarRefresh(time.Now())
 			}, func() string {
-				return held.barConfiguration.Render(segment.BottomLeft, segment.Context{})
+				return held.display.bar.Render(segment.BottomLeft, segment.Context{})
 			})
 		})
 	}
@@ -8706,7 +8706,7 @@ func TestSlashCommandRunsImmediately(t *testing.T) {
 	})
 
 	self := slashCommandFixture(t, caps.Read|caps.Shell)
-	self.commands = fixtureCommands
+	self.slash.commands = fixtureCommands
 	if got := self.handleCommand("/fixture one two"); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
@@ -8725,8 +8725,8 @@ func TestPathGrantCommandBecomesPendingAccessAndUpdatesTheModel(t *testing.T) {
 	if got := self.handleCommand("/grant r " + directory); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
-	if len(self.pendingInput.items) != 1 || self.pendingInput.items[0].state.Kind != pathgrant.Change {
-		t.Fatalf("got pending input %#v", self.pendingInput.items)
+	if len(self.pendingNotices.items) != 1 || self.pendingNotices.items[0].state.Kind != pathgrant.Change {
+		t.Fatalf("got pending input %#v", self.pendingNotices.items)
 	}
 	if current := grants.GetCurrent(); len(current) != 1 || current[0].Path != directory {
 		t.Errorf("got grants %#v", current)
@@ -8742,7 +8742,7 @@ func TestPathGrantCommandBecomesPendingAccessAndUpdatesTheModel(t *testing.T) {
 	self.finish()
 
 	hasGrantEvent := false
-	for _, event := range self.events {
+	for _, event := range self.recordedEvents {
 		hasGrantEvent = hasGrantEvent || event.Kind == pathgrant.Change
 	}
 	if !hasGrantEvent {
@@ -8777,7 +8777,7 @@ func TestRestoredGrantCorrectionRemainsPendingUntilATurnCanTellTheModel(t *testi
 	self.queuePathGrantChange(correction)
 	self.initialiseAccess()
 
-	for _, event := range self.events {
+	for _, event := range self.recordedEvents {
 		if event.Kind == pathgrant.Change {
 			t.Fatal("correction was recorded before a turn could tell the model")
 		}
@@ -8787,7 +8787,7 @@ func TestRestoredGrantCorrectionRemainsPendingUntilATurnCanTellTheModel(t *testi
 		t.Errorf("model access was not advanced: %q", message)
 	}
 	isFound := false
-	for _, event := range self.events {
+	for _, event := range self.recordedEvents {
 		isFound = isFound || event.Kind == pathgrant.Change
 	}
 	if !isFound {
@@ -8833,10 +8833,10 @@ func TestARegrantedPathIsForgottenByEveryPendingMessage(t *testing.T) {
 	self.handleCommand("/grant rw " + firstPath)
 	self.handleCommand("/revoke " + firstPath)
 
-	if len(self.pendingInput.items) != 1 {
-		t.Fatalf("got pending items %#v", self.pendingInput.items)
+	if len(self.pendingNotices.items) != 1 {
+		t.Fatalf("got pending items %#v", self.pendingNotices.items)
 	}
-	recorded, found := pathgrant.LastRecorded([]agent.Event{self.pendingInput.items[0].state})
+	recorded, found := pathgrant.LastRecorded([]agent.Event{self.pendingNotices.items[0].state})
 	want := []pathgrant.Grant{{Path: secondPath, Access: pathgrant.ReadAccess}}
 	if !found || !slices.Equal(recorded, want) {
 		t.Errorf("got recorded grants %#v and %t", recorded, found)
@@ -8888,8 +8888,8 @@ func FuzzPendingPathGrantsSayWhatTheModelHasNotBeenTold(fuzzer *testing.F) {
 		self.settleAccess()
 		self.accessMessage()
 		assertPendingPathGrants(t, self, grants, paths)
-		if len(self.pendingInput.items) != 0 {
-			t.Fatalf("a settled turn left %d pending messages", len(self.pendingInput.items))
+		if len(self.pendingNotices.items) != 0 {
+			t.Fatalf("a settled turn left %d pending messages", len(self.pendingNotices.items))
 		}
 	})
 }
@@ -8900,7 +8900,7 @@ func assertPendingPathGrants(t *testing.T, self *App, grants *pathgrant.Grants, 
 	pendingPaths := map[string]bool{}
 	lastState := agent.Event{}
 
-	for _, item := range self.pendingInput.items {
+	for _, item := range self.pendingNotices.items {
 		if item.state.Kind != pathgrant.Change {
 			continue
 		}
@@ -8949,14 +8949,14 @@ func TestAGrantTakenBackBeforeItIsSentLeavesNothingBehind(t *testing.T) {
 	self.handleCommand("/grant r " + secondPath)
 	self.handleCommand("/revoke " + firstPath)
 
-	if len(self.pendingInput.items) != 1 {
-		t.Fatalf("got pending items %#v", self.pendingInput.items)
+	if len(self.pendingNotices.items) != 1 {
+		t.Fatalf("got pending items %#v", self.pendingNotices.items)
 	}
-	if name := self.pendingInput.items[0].state.Name; name != secondPath {
+	if name := self.pendingNotices.items[0].state.Name; name != secondPath {
 		t.Errorf("got pending path %q", name)
 	}
 
-	recorded, found := pathgrant.LastRecorded([]agent.Event{self.pendingInput.items[0].state})
+	recorded, found := pathgrant.LastRecorded([]agent.Event{self.pendingNotices.items[0].state})
 	want := []pathgrant.Grant{{Path: secondPath, Access: pathgrant.ReadAccess}}
 	if !found || !slices.Equal(recorded, want) {
 		t.Errorf("got recorded grants %#v and %t", recorded, found)
@@ -8966,8 +8966,8 @@ func TestAGrantTakenBackBeforeItIsSentLeavesNothingBehind(t *testing.T) {
 	}
 
 	self.handleCommand("/revoke " + secondPath)
-	if len(self.pendingInput.items) != 0 {
-		t.Errorf("got pending items %#v", self.pendingInput.items)
+	if len(self.pendingNotices.items) != 0 {
+		t.Errorf("got pending items %#v", self.pendingNotices.items)
 	}
 }
 
@@ -8982,10 +8982,10 @@ func TestAGrantChangedBeforeItIsSentReplacesItsNotice(t *testing.T) {
 	self.handleCommand("/grant r " + path)
 	self.handleCommand("/grant rw " + path)
 
-	if len(self.pendingInput.items) != 1 {
-		t.Fatalf("got pending items %#v", self.pendingInput.items)
+	if len(self.pendingNotices.items) != 1 {
+		t.Fatalf("got pending items %#v", self.pendingNotices.items)
 	}
-	if text, _ := pathgrant.Notice(self.pendingInput.items[0].state); !strings.Contains(text, "write access") {
+	if text, _ := pathgrant.Notice(self.pendingNotices.items[0].state); !strings.Contains(text, "write access") {
 		t.Errorf("got pending message %q", text)
 	}
 }
@@ -9061,7 +9061,7 @@ func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) strin
 	if err != nil {
 		t.Fatal(err)
 	}
-	self.barConfiguration = bar.NewConfiguration(registry, live.SegmentLayout)
+	self.display.bar = bar.NewConfiguration(registry, live.SegmentLayout)
 	referencePath := stableGrantGoldenPath(t, "reference", true)
 	missingPath := stableGrantGoldenPath(t, "missing", false)
 	homePath := stableGrantGoldenPath(t, "user", true)
@@ -9222,8 +9222,8 @@ func TestPlainCommandFeedbackIsPrintedWithoutEnteringConversationHistory(t *test
 	var screenOutput bytes.Buffer
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&screenOutput)
-	self.isPlain = true
-	self.commands = fixtureCommandRegistry(t, slash.Command{
+	self.runMode.isPlain = true
+	self.slash.commands = fixtureCommandRegistry(t, slash.Command{
 		Name: "help",
 		Run: func(context slash.Context, _ slash.Arguments) error {
 			context.Notice("Commands:\n  /help")
@@ -9236,8 +9236,8 @@ func TestPlainCommandFeedbackIsPrintedWithoutEnteringConversationHistory(t *test
 	}
 	self.screen.End()
 
-	if len(self.events) != 0 {
-		t.Errorf("plain command feedback entered conversation events: %+v", self.events)
+	if len(self.recordedEvents) != 0 {
+		t.Errorf("plain command feedback entered conversation events: %+v", self.recordedEvents)
 	}
 	if !strings.Contains(style.Plain(screenOutput.String()), "Commands:\n  /help") {
 		t.Errorf("plain command feedback was not printed: %q", style.Plain(screenOutput.String()))
@@ -9288,7 +9288,7 @@ func plainInputStream(t *testing.T, scenario plainInputScenario) string {
 	self := slashCommandFixture(t, caps.Read)
 	self.agent = agent.New("", &plainTurnProvider{}, nil)
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
-	self.commands = fixtureSnippetRegistry(t, nil)
+	self.slash.commands = fixtureSnippetRegistry(t, nil)
 
 	history := edit.NewHistory("", historyLimit)
 
@@ -9305,7 +9305,7 @@ func plainInputStream(t *testing.T, scenario plainInputScenario) string {
 	}
 
 	if scenario == plainInputTypedLines {
-		self.isPlain = true
+		self.runMode.isPlain = true
 		self.acceptTypedLines(history, "", strings.NewReader("first question\nsecond question\n"))
 		self.screen.End()
 
@@ -9319,14 +9319,14 @@ func plainInputStream(t *testing.T, scenario plainInputScenario) string {
 
 	if scenario == plainInputPipedAndPrinted {
 		self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines).AppendOnly()
-		self.isPrinting = true
+		self.runMode.isPrinting = true
 		self.print(history, startup.JoinPrompt(givenPrompt, pipedPrompt))
 		requireNothingWasDrawnOver(t, screenOutput.String())
 
 		return screenOutput.String()
 	}
 
-	self.isPlain = true
+	self.runMode.isPlain = true
 	self.acceptPlainInput(history, startup.JoinPrompt(givenPrompt, pipedPrompt))
 	self.screen.End()
 
@@ -9346,7 +9346,7 @@ func recordedUserMessages(events []agent.Event) []string {
 func TestAPipedPromptAsksOneQuestionOfEverythingItWasGiven(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
-	self.isPlain = true
+	self.runMode.isPlain = true
 
 	piped := "diff --git a/agent/agent.go b/agent/agent.go\nindex d483cf5..a478bfa 100644\n"
 	prompt, err := startup.ReadPipedPrompt(strings.NewReader(piped))
@@ -9357,7 +9357,7 @@ func TestAPipedPromptAsksOneQuestionOfEverythingItWasGiven(t *testing.T) {
 	self.acceptPlainInput(edit.NewHistory("", historyLimit), prompt)
 
 	want := []string{strings.TrimSpace(piped)}
-	if got := recordedUserMessages(self.events); !slices.Equal(got, want) {
+	if got := recordedUserMessages(self.recordedEvents); !slices.Equal(got, want) {
 		t.Errorf("got user messages %q, want %q", got, want)
 	}
 }
@@ -9365,12 +9365,12 @@ func TestAPipedPromptAsksOneQuestionOfEverythingItWasGiven(t *testing.T) {
 func TestTypedPlainLinesEachAskAQuestionOfTheirOwn(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
-	self.isPlain = true
+	self.runMode.isPlain = true
 
 	self.acceptTypedLines(edit.NewHistory("", historyLimit), "", strings.NewReader("one\ntwo\n"))
 
 	want := []string{"one", "two"}
-	if got := recordedUserMessages(self.events); !slices.Equal(got, want) {
+	if got := recordedUserMessages(self.recordedEvents); !slices.Equal(got, want) {
 		t.Errorf("got user messages %q, want %q", got, want)
 	}
 }
@@ -9378,7 +9378,7 @@ func TestTypedPlainLinesEachAskAQuestionOfTheirOwn(t *testing.T) {
 func TestUnknownSlashCommandShowsOneErrorWhileReturnRepeatsAndKeepsTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.commands = fixtureCommandRegistry(t)
+	self.slash.commands = fixtureCommandRegistry(t)
 	inputLine := edit.NewInput(nil)
 	for _, value := range "/unknown" {
 		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, false)
@@ -9391,10 +9391,10 @@ func TestUnknownSlashCommandShowsOneErrorWhileReturnRepeatsAndKeepsTheInput(t *t
 	if got := inputLine.Text(); got != "/unknown" {
 		t.Errorf("got input %q", got)
 	}
-	if len(self.events) != 0 {
-		t.Fatalf("repeated command errors entered conversation events: %v", self.events)
+	if len(self.recordedEvents) != 0 {
+		t.Fatalf("repeated command errors entered conversation events: %v", self.recordedEvents)
 	}
-	want := "Command not found: /unknown (alt+enter sends as message)"
+	want := "Command not found: /unknown (alt+enter to send)"
 	if self.feedback.Message().Text != want || self.feedback.Message().Status != agent.ErrorStatus {
 		t.Errorf("got feedback %+v, want failed %q", self.feedback.Message(), want)
 	}
@@ -9404,7 +9404,7 @@ func TestUnknownSlashCommandDoesNotInterruptARunningTurn(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&screenOutput)
-	self.commands = fixtureCommandRegistry(t)
+	self.slash.commands = fixtureCommandRegistry(t)
 	self.currentTurn = Turn{Stream: testRunningTurnStream(), painter: self.newPainter(true)}
 	self.currentTurn.painter.DrawDelta(agent.Delta{Kind: agent.ModelReasoningEvent, Text: "still working"})
 	inputLine := edit.NewInput(nil)
@@ -9421,7 +9421,7 @@ func TestUnknownSlashCommandDoesNotInterruptARunningTurn(t *testing.T) {
 	self.currentTurn.painter.DrawEvent(agent.Event{Kind: agent.ModelReasoningEvent, Text: "still working on it"})
 	self.screen.End()
 	plainOutput := style.Plain(screenOutput.String())
-	if self.feedback.Message().Text != "Command not found: /unknown (alt+enter sends as message)" {
+	if self.feedback.Message().Text != "Command not found: /unknown (alt+enter to send)" {
 		t.Errorf("command error was not retained as interface feedback: %+v", self.feedback.Message())
 	}
 	if strings.Contains(plainOutput, "Command not found") {
@@ -9434,7 +9434,7 @@ func TestUnknownSlashCommandDoesNotInterruptARunningTurn(t *testing.T) {
 
 func TestSnippetKeepsItsInvocationInHistoryAndQueuesItsRenderedPrompt(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
-	self.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
+	self.slash.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
 		"add": {Prompt: "Add the following:\n\n{{ .Arg }}", Arguments: snippets.ArgumentsRequired},
 	})
 	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true})}
@@ -9465,7 +9465,7 @@ func TestSnippetKeepsItsInvocationInHistoryAndQueuesItsRenderedPrompt(t *testing
 
 func TestSnippetKeepsTheLayoutOfAPastedArgument(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
-	self.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
+	self.slash.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
 		"add": {Prompt: "Add the following:\n\n{{ .Arg }}", Arguments: snippets.ArgumentsRequired},
 	})
 	self.currentTurn = Turn{Stream: testTurnStream(nil, func(error) {}, turn.State{Running: true})}
@@ -9504,7 +9504,7 @@ func TestSnippetKeepsTheLayoutOfAPastedArgument(t *testing.T) {
 func TestSnippetWithoutArgumentsShowsUsageAndKeepsTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
+	self.slash.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
 		"add": {Prompt: "Add the following:\n\n{{ .Arg }}", Arguments: snippets.ArgumentsRequired},
 	})
 	history := edit.NewHistory("", historyLimit)
@@ -9518,10 +9518,10 @@ func TestSnippetWithoutArgumentsShowsUsageAndKeepsTheInput(t *testing.T) {
 	if inputLine.Text() != "//add" {
 		t.Errorf("got input text %q", inputLine.Text())
 	}
-	if len(self.events) != 0 {
-		t.Errorf("snippet usage entered conversation events: %+v", self.events)
+	if len(self.recordedEvents) != 0 {
+		t.Errorf("snippet usage entered conversation events: %+v", self.recordedEvents)
 	}
-	if self.feedback.Message().Text != "Usage: //add <args> (alt+enter sends as message)" {
+	if self.feedback.Message().Text != "Usage: //add <args> (alt+enter to send)" {
 		t.Errorf("got feedback %+v", self.feedback.Message())
 	}
 }
@@ -9529,7 +9529,7 @@ func TestSnippetWithoutArgumentsShowsUsageAndKeepsTheInput(t *testing.T) {
 func TestPlainSnippetInputWaitsForTheRenderedPrompt(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
-	self.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
+	self.slash.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
 		"ask": {Prompt: "Question: {{index .Args 0}} / {{.Arg}}", Arguments: snippets.ArgumentsRequired},
 	})
 
@@ -9538,7 +9538,7 @@ func TestPlainSnippetInputWaitsForTheRenderedPrompt(t *testing.T) {
 	self.acceptPlainInput(history, "//ask why now")
 
 	var userMessages []string
-	for _, event := range self.events {
+	for _, event := range self.recordedEvents {
 		if event.Kind == agent.UserMessageEvent {
 			userMessages = append(userMessages, event.Text)
 		}
@@ -9590,12 +9590,12 @@ func TestATurnCutShortIsPokedAndWaitedForBeforeTheNextInput(t *testing.T) {
 	}
 
 	var answers []string
-	for _, event := range self.events {
+	for _, event := range self.recordedEvents {
 		if event.Kind == agent.ModelMessageEvent {
 			answers = append(answers, event.Text)
 		}
 	}
-	if messages := submittedTexts(self.events); !slices.Equal(messages, []string{"get on with it", turn.PokeMessage}) {
+	if messages := submittedTexts(self.recordedEvents); !slices.Equal(messages, []string{"get on with it", turn.PokeMessage}) {
 		t.Errorf("got submitted messages %q", messages)
 	}
 	if !slices.Equal(answers, []string{"Carrying on."}) {
@@ -9606,20 +9606,20 @@ func TestATurnCutShortIsPokedAndWaitedForBeforeTheNextInput(t *testing.T) {
 func TestSnippetTemplateErrorsAreReportedAndKeepTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
+	self.slash.commands = fixtureSnippetRegistry(t, map[string]snippets.Definition{
 		"review": {Prompt: "{{index .Args 2}}", Arguments: snippets.ArgumentsRequired},
 	})
 
 	if got := self.handleCommand("//review only-one"); got != dispatch.Rejected {
 		t.Fatalf("got slash input result %d", got)
 	}
-	if len(self.events) != 0 {
-		t.Errorf("snippet error entered conversation events: %+v", self.events)
+	if len(self.recordedEvents) != 0 {
+		t.Errorf("snippet error entered conversation events: %+v", self.recordedEvents)
 	}
 	if !strings.HasPrefix(self.feedback.Message().Text, "//review: Could not render template:") {
 		t.Errorf("got feedback %+v", self.feedback.Message())
 	}
-	if !strings.HasSuffix(self.feedback.Message().Text, " (alt+enter sends as message)") {
+	if !strings.HasSuffix(self.feedback.Message().Text, " (alt+enter to send)") {
 		t.Errorf("expected the way out to be offered, got %q", self.feedback.Message().Text)
 	}
 }
@@ -9627,7 +9627,7 @@ func TestSnippetTemplateErrorsAreReportedAndKeepTheInput(t *testing.T) {
 func TestUnknownSnippetShowsAnErrorAndKeepsTheInput(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.commands = fixtureSnippetRegistry(t, nil)
+	self.slash.commands = fixtureSnippetRegistry(t, nil)
 	inputLine := edit.NewInput(nil)
 	for _, value := range "//unknown" {
 		inputLine.Apply(key.Key{Code: key.Rune, Value: value}, false)
@@ -9638,9 +9638,9 @@ func TestUnknownSnippetShowsAnErrorAndKeepsTheInput(t *testing.T) {
 	if got := inputLine.Text(); got != "//unknown" {
 		t.Errorf("got input %q", got)
 	}
-	want := "Snippet not found: //unknown (alt+enter sends as message)"
-	if len(self.events) != 0 {
-		t.Errorf("snippet error entered conversation events: %+v", self.events)
+	want := "Snippet not found: //unknown (alt+enter to send)"
+	if len(self.recordedEvents) != 0 {
+		t.Errorf("snippet error entered conversation events: %+v", self.recordedEvents)
 	}
 	if self.feedback.Message().Text != want || self.feedback.Message().Status != agent.ErrorStatus {
 		t.Errorf("got feedback %+v, want failed %q", self.feedback.Message(), want)
@@ -9664,13 +9664,13 @@ func TestTabCompletionKeepsCommandNamespacesSeparate(t *testing.T) {
 		t.Fatal(err)
 	}
 	self := slashCommandFixture(t, caps.Read)
-	self.commands = fixtureRegistry(t, systemSet, snippetSet)
+	self.slash.commands = fixtureRegistry(t, systemSet, snippetSet)
 
 	for input, want := range map[string]string{
 		"/":  "/conf",
 		"//": "//help",
 	} {
-		self.completion.Reset()
+		self.slash.completion.Reset()
 		inputLine := edit.NewInput(nil)
 		for _, value := range input {
 			inputLine.Apply(key.Key{Code: key.Rune, Value: value}, false)
@@ -9684,7 +9684,7 @@ func TestTabCompletionKeepsCommandNamespacesSeparate(t *testing.T) {
 
 func TestTabCompletesAUniqueSlashCommand(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
-	self.commands = fixtureCommandRegistry(
+	self.slash.commands = fixtureCommandRegistry(
 		t,
 		slash.Command{Name: "conf", Run: slashTestHandler},
 		slash.Command{Name: "copy", Run: slashTestHandler},
@@ -9784,7 +9784,7 @@ func preparePathGrantCommands(t *testing.T, self *App, workspace *work.Space) *p
 	if err != nil {
 		t.Fatal(err)
 	}
-	self.commands = fixtureRegistry(t, systemSet, snippetSet)
+	self.slash.commands = fixtureRegistry(t, systemSet, snippetSet)
 	self.pathGrants = grants
 	return grants
 }
@@ -9806,7 +9806,7 @@ func slashCommandFixture(t *testing.T, currentCaps caps.Set) *App {
 
 func TestConsecutiveTabsCycleCommandArguments(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
-	self.commands = fixtureCommandRegistry(
+	self.slash.commands = fixtureCommandRegistry(
 		t,
 		slash.Command{Name: "copy", Run: slashTestHandler}.WithArguments("session-name", "session-id", "session-dir"),
 	)
@@ -9859,12 +9859,12 @@ func assertSlashCommandFeedback(t *testing.T, run func(slash.Context), want feed
 
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.commands = fixtureCommands
+	self.slash.commands = fixtureCommands
 	if got := self.handleCommand("/fixture"); got != dispatch.Handled {
 		t.Fatalf("got slash input result %d", got)
 	}
-	if len(self.events) != 0 {
-		t.Errorf("command feedback entered conversation events: %+v", self.events)
+	if len(self.recordedEvents) != 0 {
+		t.Errorf("command feedback entered conversation events: %+v", self.recordedEvents)
 	}
 	if got := self.feedback.Message(); got != want {
 		t.Errorf("got feedback %+v, want %+v", got, want)
@@ -9874,7 +9874,7 @@ func assertSlashCommandFeedback(t *testing.T, run func(slash.Context), want feed
 func TestUsageErrorIsNotPrefixedWithTheCommandName(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.commands = fixtureCommandRegistry(t, slash.Command{
+	self.slash.commands = fixtureCommandRegistry(t, slash.Command{
 		Name: "copy",
 		Run: func(slash.Context, slash.Arguments) error {
 			return slash.Usage()
@@ -9884,9 +9884,9 @@ func TestUsageErrorIsNotPrefixedWithTheCommandName(t *testing.T) {
 	if got := self.handleCommand("/copy"); got != dispatch.Rejected {
 		t.Fatalf("got slash input result %d", got)
 	}
-	want := "Usage: /copy {session-dir|session-id|session-name} (alt+enter sends as message)"
-	if len(self.events) != 0 {
-		t.Errorf("usage feedback entered conversation events: %+v", self.events)
+	want := "Usage: /copy {session-dir|session-id|session-name} (alt+enter to send)"
+	if len(self.recordedEvents) != 0 {
+		t.Errorf("usage feedback entered conversation events: %+v", self.recordedEvents)
 	}
 	if self.feedback.Message().Text != want {
 		t.Errorf("got feedback %+v, want %q", self.feedback.Message(), want)
@@ -9896,7 +9896,7 @@ func TestUsageErrorIsNotPrefixedWithTheCommandName(t *testing.T) {
 func TestARefusedCommandKeepsWhatWasTypedAndSaysWhy(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.commands = fixtureCommandRegistry(t, slash.Command{
+	self.slash.commands = fixtureCommandRegistry(t, slash.Command{
 		Name: "new",
 		Run: func(slash.Context, slash.Arguments) error {
 			return errors.New(`model "opus" is ambiguous`)
@@ -9914,9 +9914,9 @@ func TestARefusedCommandKeepsWhatWasTypedAndSaysWhy(t *testing.T) {
 		t.Errorf("expected the refused command to survive, got %q", got)
 	}
 
-	want := `/new: Model "opus" is ambiguous (alt+enter sends as message)`
-	if len(self.events) != 0 {
-		t.Errorf("command feedback entered conversation events: %+v", self.events)
+	want := `/new: Model "opus" is ambiguous (alt+enter to send)`
+	if len(self.recordedEvents) != 0 {
+		t.Errorf("command feedback entered conversation events: %+v", self.recordedEvents)
 	}
 	if self.feedback.Message().Text != want {
 		t.Errorf("got feedback %+v, want %q", self.feedback.Message(), want)
@@ -10259,7 +10259,7 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 				return json.Unmarshal(state, &callCount)
 			})
 		}
-		attachment, attachmentStats := sessionGoldenImage(t, specification.Image)
+		attachment, attachmentMetrics := sessionGoldenImage(t, specification.Image)
 		tools = append(tools, builder.Run(func(context.Context, struct{}) (tool.ToolCallResult, error) {
 			if callCount >= len(specification.Outputs) {
 				return tool.ToolCallResult{}, fmt.Errorf("tool %s has no output for call %d", specification.Name, callCount+1)
@@ -10271,7 +10271,7 @@ func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []t
 			if err != nil {
 				return tool.ToolCallResult{}, err
 			}
-			return tool.ToolCallResult{Output: output, Image: attachment, Stats: attachmentStats, State: state}, nil
+			return tool.ToolCallResult{Output: output, Image: attachment, Metrics: attachmentMetrics, State: state}, nil
 		}))
 	}
 	return tools
@@ -10307,11 +10307,11 @@ func newSessionGoldenLargeReadTool(t *testing.T) tool.Tool {
 	return read.New(root, file.NewSnapshots())
 }
 
-func sessionGoldenImage(t *testing.T, size string) (tool.Image, tool.Stats) {
+func sessionGoldenImage(t *testing.T, size string) (tool.Image, tool.ToolCallMetrics) {
 	t.Helper()
 
 	if size == "" {
-		return tool.Image{}, tool.Stats{}
+		return tool.Image{}, tool.ToolCallMetrics{}
 	}
 
 	var width, height int
@@ -10327,13 +10327,13 @@ func sessionGoldenImage(t *testing.T, size string) (tool.Image, tool.Stats) {
 		t.Fatalf("could not encode the scenario image: %v", err)
 	}
 
-	stats := tool.Stats{
-		Kind:            tool.StatsImage,
+	imageMetrics := tool.ToolCallMetrics{
+		Kind:            tool.MetricImage,
 		Bytes:           int64(encoded.Len()),
 		EstimatedTokens: util.EstimateImageTokenCount(imageutil.Fit(width, height)),
 	}
 
-	return tool.Image{MediaType: "image/png", Data: encoded.Bytes()}, stats
+	return tool.Image{MediaType: "image/png", Data: encoded.Bytes()}, imageMetrics
 }
 
 var errSessionGoldenToolStopped = errors.New("the tool was stopped")
@@ -10807,10 +10807,10 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	resumedRecorder := record.New(log)
 	resumedRecorder.Resume(len(storedSession.Items))
 	resumedHarness := &App{
-		agent:    resumedAssistant,
-		screen:   scenario.screen(&screenOutput),
-		recorder: resumedRecorder,
-		events:   slices.Clone(storedSession.Events),
+		agent:          resumedAssistant,
+		screen:         scenario.screen(&screenOutput),
+		recorder:       resumedRecorder,
+		recordedEvents: slices.Clone(storedSession.Events),
 	}
 	settleResumedSessionGoldenMode(resumedHarness, storedSession.Events)
 	resumedHarness.currentTurn = Turn{Stream: testRunningTurnStream()}
@@ -10861,9 +10861,9 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	}
 	var replayOutput bytes.Buffer
 	replayHarness := &App{
-		agent:  resumedAssistant,
-		screen: scenario.screen(&replayOutput),
-		events: storedSession.Events,
+		agent:          resumedAssistant,
+		screen:         scenario.screen(&replayOutput),
+		recordedEvents: storedSession.Events,
 	}
 	replayHarness.replay()
 
@@ -10876,10 +10876,10 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 
 	var printedReplayOutput bytes.Buffer
 	printedReplayHarness := &App{
-		agent:      resumedAssistant,
-		screen:     scenario.screen(&printedReplayOutput).AppendOnly(),
-		events:     storedSession.Events,
-		isPrinting: true,
+		agent:          resumedAssistant,
+		screen:         scenario.screen(&printedReplayOutput).AppendOnly(),
+		recordedEvents: storedSession.Events,
+		runMode:        runMode{isPrinting: true},
 	}
 	printedReplayHarness.replay()
 
@@ -11122,13 +11122,13 @@ func drawPrintedSessionGoldenTurn(
 
 	var screenOutput bytes.Buffer
 	printedHarness := &App{
-		agent:      agent.New(sessionGoldenSystemPrompt, unaskedProvider{}, nil),
-		screen:     scenario.screen(&screenOutput).AppendOnly(),
-		recorder:   record.New(log),
-		isPrinting: true,
+		agent:    agent.New(sessionGoldenSystemPrompt, unaskedProvider{}, nil),
+		screen:   scenario.screen(&screenOutput).AppendOnly(),
+		recorder: record.New(log),
+		runMode:  runMode{isPrinting: true},
 	}
 	if len(restoredEvents) > 0 {
-		printedHarness.events = slices.Clone(restoredEvents)
+		printedHarness.recordedEvents = slices.Clone(restoredEvents)
 		settleResumedSessionGoldenMode(printedHarness, restoredEvents)
 		printedHarness.currentTurn = Turn{Stream: testRunningTurnStream()}
 		printedHarness.replay()
@@ -11872,7 +11872,7 @@ func TestVisual(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	held.barConfiguration = bar.NewConfiguration(nil, built)
+	held.display.bar = bar.NewConfiguration(nil, built)
 
 	held.begin("")
 }
@@ -12080,7 +12080,7 @@ func helpDuringReasoningFrames(t *testing.T) []string {
 	writer := &frameRecordingWriter{}
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.NewTerminalOfSize(writer, replayColumns, replayLines)
-	self.commands = fixtureCommandRegistry(t, slash.Command{
+	self.slash.commands = fixtureCommandRegistry(t, slash.Command{
 		Name: "help",
 		Run: func(context slash.Context, _ slash.Arguments) error {
 			context.Notice("Commands:\n  /conf\n  /copy")
@@ -12366,7 +12366,7 @@ func TestTheHarnessAsksForATitleOnlyOnceTheModelHasAnsweredWithoutGivingOne(t *t
 		t.Errorf("expected the opening turn to be left alone, got %q", note)
 	}
 
-	self.events = append(self.events, agent.Event{Kind: agent.ModelMessageEvent, Text: "done"})
+	self.recordedEvents = append(self.recordedEvents, agent.Event{Kind: agent.ModelMessageEvent, Text: "done"})
 	if note := self.titleNote(); !strings.Contains(note, title.Name) {
 		t.Errorf("expected an unanswered session to be asked for a title, got %q", note)
 	}
@@ -12378,7 +12378,7 @@ func TestTheHarnessAsksForATitleOnlyOnceTheModelHasAnsweredWithoutGivingOne(t *t
 		t.Errorf("the model was told %q", backend.told())
 	}
 
-	self.events = append(self.events, agent.Event{
+	self.recordedEvents = append(self.recordedEvents, agent.Event{
 		Kind:  agent.StateChangeEvent,
 		Name:  agent.TitleStateKey,
 		State: json.RawMessage(`{"title":"fix the picker clipping"}`),
@@ -12392,7 +12392,7 @@ func TestASessionWithoutTheTitleToolIsNeverAskedForATitle(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := testConversation(t, &screenOutput)
 	self.agent = agent.NewWithEnabledTools("", quietProvider{}, []tool.Tool{title.New()}, nil)
-	self.events = append(self.events, agent.Event{Kind: agent.ModelMessageEvent, Text: "done"})
+	self.recordedEvents = append(self.recordedEvents, agent.Event{Kind: agent.ModelMessageEvent, Text: "done"})
 
 	if note := self.titleNote(); note != "" {
 		t.Errorf("expected a session that cannot title itself to be left alone, got %q", note)
@@ -12513,11 +12513,11 @@ func TestAPrintedAppAnswersThroughItsOwnStartingPath(t *testing.T) {
 
 	var screenOutput bytes.Buffer
 	self := &App{
-		agent:      agent.New(sessionGoldenSystemPrompt, &plainTurnProvider{}, nil),
-		screen:     output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines).AppendOnly(),
-		recorder:   record.New(log),
-		mode:       caps.NewMode(caps.All()),
-		isPrinting: true,
+		agent:    agent.New(sessionGoldenSystemPrompt, &plainTurnProvider{}, nil),
+		screen:   output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines).AppendOnly(),
+		recorder: record.New(log),
+		mode:     caps.NewMode(caps.All()),
+		runMode:  runMode{isPrinting: true},
 	}
 
 	self.begin("say something")
@@ -12528,7 +12528,7 @@ func TestAPrintedAppAnswersThroughItsOwnStartingPath(t *testing.T) {
 	if !strings.Contains(drawn, "say something") || !strings.Contains(drawn, "Said it.") {
 		t.Errorf("a printed session drew %q", drawn)
 	}
-	if got := recordedUserMessages(self.events); !slices.Equal(got, []string{"say something"}) {
+	if got := recordedUserMessages(self.recordedEvents); !slices.Equal(got, []string{"say something"}) {
 		t.Errorf("got user messages %q", got)
 	}
 }
@@ -12951,7 +12951,7 @@ type stoppableCommand struct {
 
 func (self stoppableCommand) Wait() (sandbox.Result, error) { return <-self.outcome, nil }
 func (self stoppableCommand) Signal(syscall.Signal) error   { return nil }
-func (self stoppableCommand) Stop()                         { self.outcome <- sandbox.Result{Code: 137} }
+func (self stoppableCommand) Stop()                         { self.outcome <- sandbox.Result{ExitCode: 137} }
 
 type stoppableRunner struct{}
 
@@ -12983,7 +12983,7 @@ func appWithOneWritableJob(t *testing.T) *App {
 	self := &App{
 		screen:    output.New(&bytes.Buffer{}),
 		mode:      caps.NewMode(caps.Read | caps.Write),
-		jobs:      manager,
+		jobs:      jobState{manager: manager},
 		workspace: work.At("/workspace"),
 	}
 
@@ -13000,7 +13000,7 @@ func TestAWithdrawalIsAnnouncedBeforeTheJobsItStopped(t *testing.T) {
 
 	self.toggleCap(caps.Write)
 
-	notices := self.pendingInput.notices()
+	notices := self.pendingNotices.notices()
 	if len(notices) != 2 {
 		t.Fatalf("got %d notices, want the change and the job it stopped: %v", len(notices), notices)
 	}
@@ -13018,7 +13018,7 @@ func TestGrantingACapabilityBackStopsNothing(t *testing.T) {
 	self.toggleCap(caps.Write)
 	self.toggleCap(caps.Write)
 
-	for _, notice := range self.pendingInput.notices() {
+	for _, notice := range self.pendingNotices.notices() {
 		if strings.Contains(notice, "read-write") && strings.Contains(notice, "stopped") {
 			t.Errorf("granting a capability stopped a job: %q", notice)
 		}
@@ -13031,7 +13031,7 @@ func TestAModeChangeThatStoppedAJobIsNotTakenBack(t *testing.T) {
 	self.toggleCap(caps.Write)
 	self.toggleCap(caps.Write)
 
-	notices := self.pendingInput.notices()
+	notices := self.pendingNotices.notices()
 	if len(notices) != 3 {
 		t.Fatalf("got %d notices, want both changes and the stop: %v", len(notices), notices)
 	}
@@ -13046,8 +13046,8 @@ func TestAModeChangeThatStoppedNothingIsStillTakenBack(t *testing.T) {
 	self.toggleCap(caps.Write)
 	self.toggleCap(caps.Write)
 
-	if len(self.pendingInput.items) != 0 {
-		t.Errorf("a mode change with no consequence was not taken back: %v", self.pendingInput.items)
+	if len(self.pendingNotices.items) != 0 {
+		t.Errorf("a mode change with no consequence was not taken back: %v", self.pendingNotices.items)
 	}
 }
 
@@ -13067,14 +13067,14 @@ func TestRemovingTheLastJobIsRecordedSoAResumeDoesNotBringItBack(t *testing.T) {
 		screen:   output.New(&bytes.Buffer{}),
 		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
-		jobs:     manager,
+		jobs:     jobState{manager: manager},
 	}
 
 	self.recordJobListing()
 	manager.PruneFinished()
 	self.recordJobListing()
 
-	restored, wasRecorded := jobrecord.LastRecorded(self.events)
+	restored, wasRecorded := jobrecord.LastRecorded(self.recordedEvents)
 	if !wasRecorded {
 		t.Fatal("nothing was recorded at all")
 	}
@@ -13097,7 +13097,7 @@ func TestPruningRightAfterAResumeIsStillRecorded(t *testing.T) {
 		screen:   output.New(&bytes.Buffer{}),
 		recorder: record.New(log),
 		mode:     caps.NewMode(caps.Read | caps.Write),
-		jobs:     manager,
+		jobs:     jobState{manager: manager},
 	}
 
 	self.restoreJobs([]agent.Event{
@@ -13106,7 +13106,7 @@ func TestPruningRightAfterAResumeIsStillRecorded(t *testing.T) {
 	manager.PruneFinished()
 	self.recordJobListing()
 
-	restored, wasRecorded := jobrecord.LastRecorded(self.events)
+	restored, wasRecorded := jobrecord.LastRecorded(self.recordedEvents)
 	if !wasRecorded || len(restored) != 0 {
 		t.Errorf("got %#v (recorded %v), want the emptied listing recorded", restored, wasRecorded)
 	}

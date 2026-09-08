@@ -17,7 +17,7 @@ func TestHandleTreatsAValidPathAsAnOrdinaryMessage(t *testing.T) {
 
 	registry := newTestRegistry(t)
 	result, failure := dispatch.Handle(registry, dispatch.Actions{}, path)
-	if result != dispatch.Ordinary || failure != "" {
+	if result != dispatch.Proceed || failure != "" {
 		t.Errorf("got result %d and failure %q", result, failure)
 	}
 }
@@ -30,7 +30,7 @@ func TestHandleRejectsExistingPathsWithFewerThanTwoParts(t *testing.T) {
 		}
 
 		result, failure := dispatch.Handle(registry, dispatch.Actions{}, path)
-		wantFailure := "Command not found: " + path + " (alt+enter sends as message)"
+		wantFailure := "Command not found: " + path + " (alt+enter to send)"
 		if result != dispatch.Rejected || failure != wantFailure {
 			t.Errorf("Handle(%q) got result %d and failure %q, want %q", path, result, failure, wantFailure)
 		}

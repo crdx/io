@@ -201,35 +201,35 @@ func compactStatus(event agent.Event) string {
 	return status
 }
 
-func measurements(stats *tool.Stats) string {
-	if stats == nil {
+func measurements(metrics *tool.ToolCallMetrics) string {
+	if metrics == nil {
 		return ""
 	}
 
 	var parts []string
-	if stats.Lines > 0 {
-		parts = append(parts, plural(stats.Lines, "line"))
+	if metrics.Lines > 0 {
+		parts = append(parts, plural(metrics.Lines, "line"))
 	}
-	if stats.Bytes > 0 {
-		size := util.FormatBytes(stats.Bytes, formattedBytePrecision)
-		if stats.TotalBytes > stats.Bytes {
-			size += " of " + util.FormatBytes(stats.TotalBytes, formattedBytePrecision)
+	if metrics.Bytes > 0 {
+		size := util.FormatBytes(metrics.Bytes, formattedBytePrecision)
+		if metrics.TotalBytes > metrics.Bytes {
+			size += " of " + util.FormatBytes(metrics.TotalBytes, formattedBytePrecision)
 		}
 		parts = append(parts, size)
 	}
-	if stats.AddedLines > 0 || stats.RemovedLines > 0 {
-		parts = append(parts, fmt.Sprintf("+%d −%d", stats.AddedLines, stats.RemovedLines))
+	if metrics.AddedLines > 0 || metrics.RemovedLines > 0 {
+		parts = append(parts, fmt.Sprintf("+%d −%d", metrics.AddedLines, metrics.RemovedLines))
 	}
-	if stats.EstimatedTokens > 0 {
-		parts = append(parts, util.FormatEstimatedTokenCount(stats.EstimatedTokens))
+	if metrics.EstimatedTokens > 0 {
+		parts = append(parts, util.FormatEstimatedTokenCount(metrics.EstimatedTokens))
 	}
-	if cpuTime := util.CompactDuration(stats.CPUTime); stats.CPUTime > 0 && cpuTime != noTimeAtAll {
+	if cpuTime := util.CompactDuration(metrics.CPUTime); metrics.CPUTime > 0 && cpuTime != noTimeAtAll {
 		parts = append(parts, cpuTime+" CPU")
 	}
-	if stats.PeakMemory > 0 {
-		parts = append(parts, util.FormatBytes(stats.PeakMemory, formattedBytePrecision)+" peak")
+	if metrics.PeakMemory > 0 {
+		parts = append(parts, util.FormatBytes(metrics.PeakMemory, formattedBytePrecision)+" peak")
 	}
-	if stats.IsTruncated {
+	if metrics.IsTruncated {
 		parts = append(parts, "truncated")
 	}
 
@@ -299,7 +299,7 @@ func (self *Recorder) bufferToolResult(at time.Time, event agent.Event) {
 	}
 	entry.hasResult = true
 	entry.outcome = compactStatus(event)
-	entry.measurements = measurements(event.Stats)
+	entry.measurements = measurements(event.Metrics)
 	delete(self.callByID, event.ID)
 }
 

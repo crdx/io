@@ -498,28 +498,28 @@ func (self *Agent) runBatch(
 				IsError: !ok,
 			}
 
-			if item.parsedToolCall != nil && executionResult.Stats.Kind == "" {
-				executionResult.Stats = tool.OutputStats(executionResult.Output)
+			if item.parsedToolCall != nil && executionResult.Metrics.Kind == "" {
+				executionResult.Metrics = tool.GetMetrics(executionResult.Output)
 			}
 
-			var stats *tool.Stats
-			if executionResult.Stats.Kind != "" {
-				if executionResult.Stats.TotalBytes == executionResult.Stats.Bytes {
-					executionResult.Stats.TotalBytes = 0
+			var metrics *tool.ToolCallMetrics
+			if executionResult.Metrics.Kind != "" {
+				if executionResult.Metrics.TotalBytes == executionResult.Metrics.Bytes {
+					executionResult.Metrics.TotalBytes = 0
 				}
-				stats = &executionResult.Stats
+				metrics = &executionResult.Metrics
 			}
 
 			status := resultStatus(ctx, ok)
 
 			completion := completedToolCall{result: Event{
-				Kind:   ToolCallResultEvent,
-				ID:     item.rawToolCall.ID,
-				Name:   item.rawToolCall.Name,
-				Text:   executionResult.Output,
-				Status: status,
-				Took:   time.Since(startedAt),
-				Stats:  stats,
+				Kind:    ToolCallResultEvent,
+				ID:      item.rawToolCall.ID,
+				Name:    item.rawToolCall.Name,
+				Text:    executionResult.Output,
+				Status:  status,
+				Took:    time.Since(startedAt),
+				Metrics: metrics,
 			}}
 			if ok && len(executionResult.State) > 0 {
 				completion.state = Event{

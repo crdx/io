@@ -38,7 +38,7 @@ type Options struct {
 	HomeDir          string
 	Session          Session
 
-	Editor       *editor.Configuration
+	Editor       *editor.Config
 	Output       io.Writer
 	PathGrants   PathGrants
 	Jobs         Jobs

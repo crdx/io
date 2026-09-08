@@ -96,17 +96,10 @@ func (self Builder[T]) Plain(execute Executor[T]) Tool {
 	})
 }
 
-func (self Builder[T]) Stats(execute StatsExecutor[T]) Tool {
+func (self Builder[T]) Exec(execute MetricsExecutor[T]) Tool {
 	return self.Run(func(ctx context.Context, args T) (ToolCallResult, error) {
-		output, stats, err := execute(ctx, args)
-		return ToolCallResult{Output: output, Stats: stats}, err
-	})
-}
-
-func (self Builder[T]) StatsWithImage(execute StatsWithImageExecutor[T]) Tool {
-	return self.Run(func(ctx context.Context, args T) (ToolCallResult, error) {
-		output, image, stats, err := execute(ctx, args)
-		return ToolCallResult{Output: output, Image: image, Stats: stats}, err
+		output, metrics, err := execute(ctx, args)
+		return ToolCallResult{Output: output, Metrics: metrics}, err
 	})
 }
 

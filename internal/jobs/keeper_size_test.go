@@ -51,8 +51,8 @@ func TestALongCommandStillRuns(t *testing.T) {
 		if err != nil {
 			t.Errorf("a command of %d bytes failed: %v", size, err)
 		}
-		if result.Code != 0 {
-			t.Errorf("a command of %d bytes exited %d", size, result.Code)
+		if result.ExitCode != 0 {
+			t.Errorf("a command of %d bytes exited %d", size, result.ExitCode)
 		}
 	}
 }

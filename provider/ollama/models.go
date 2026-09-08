@@ -1,9 +1,9 @@
 package ollama
 
 import (
+	"cmp"
 	"context"
 	"slices"
-	"sort"
 
 	"crdx.org/io/agent"
 )
@@ -59,8 +59,8 @@ func (self *Client) Models(ctx context.Context) ([]agent.Model, error) {
 		})
 	}
 
-	sort.Slice(models, func(first int, second int) bool {
-		return models[first].ID < models[second].ID
+	slices.SortFunc(models, func(first agent.Model, second agent.Model) int {
+		return cmp.Compare(first.ID, second.ID)
 	})
 
 	return models, nil
