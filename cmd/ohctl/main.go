@@ -5,12 +5,12 @@ import (
 	"os"
 
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/toolresult"
 	"crdx.org/io/cmd/ohctl/analyse"
 	"crdx.org/io/cmd/ohctl/complete"
 	"crdx.org/io/cmd/ohctl/migrate"
 	"crdx.org/io/cmd/ohctl/regenerate"
 	"crdx.org/io/cmd/ohctl/sessions"
-	"crdx.org/io/cmd/ohctl/toolresult"
 )
 
 const usage = `ohctl — oh control
