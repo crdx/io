@@ -42,3 +42,7 @@ func (self cacheStore) read() cache {
 func (self cacheStore) tryUpdate(update func(*cache) error) (bool, error) {
 	return state.TryUpdate(self.path, cacheFormat, update)
 }
+
+func (self cacheStore) update(update func(*cache) error) error {
+	return state.Update(self.path, cacheFormat, update)
+}

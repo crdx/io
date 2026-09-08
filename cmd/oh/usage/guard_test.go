@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -19,6 +21,7 @@ type providerStub struct {
 	probe        agent.UsageProbe
 	probeErr     error
 	sendCount    int
+	sendStarted  chan struct{}
 	probeCount   int
 	probeStarted chan struct{}
 	releaseProbe chan struct{}
@@ -33,6 +36,9 @@ func (*providerStub) AddToolResults([]agent.ToolCallResult) {}
 
 func (self *providerStub) Send(context.Context, agent.Yield) (agent.Reply, error) {
 	self.sendCount++
+	if self.sendStarted != nil {
+		self.sendStarted <- struct{}{}
+	}
 
 	return agent.Reply{}, self.err
 }
@@ -100,6 +106,66 @@ func TestAProviderUsageLimitStopsOtherSessionsBeforeTheySend(t *testing.T) {
 	}
 	if second.sendCount != 0 {
 		t.Errorf("the second provider was sent %d requests", second.sendCount)
+	}
+}
+
+func TestAnObservedLimitWaitsBehindTheProbeAndIsThenShared(t *testing.T) {
+	path := cachePath(t)
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	clock := &testClock{now: testNow}
+	release := holdTheLock(t, path)
+	isReleased := false
+	defer func() {
+		if !isReleased {
+			release()
+		}
+	}()
+
+	window := agent.UsageWindow{
+		Duration:  time.Hour,
+		Percent:   100,
+		ResetsAt:  testNow.Add(time.Hour),
+		IsLimited: true,
+	}
+	limit := &agent.UsageLimitError{Cause: errors.New("limited"), Windows: []agent.UsageWindow{window}}
+	sendStarted := make(chan struct{})
+	first := &providerStub{err: limit, sendStarted: sendStarted}
+	result := make(chan error, 1)
+	go func() {
+		_, err := usage.Guard(stoppedContext(t), first, guardSettings(path, "gpt-5.6-sol", clock)).Send(
+			t.Context(), func(agent.Output) bool { return true },
+		)
+		result <- err
+	}()
+	<-sendStarted
+
+	timer := time.NewTimer(100 * time.Millisecond)
+	select {
+	case err := <-result:
+		timer.Stop()
+		t.Fatalf("the limit returned before the held probe ended: %v", err)
+	case <-timer.C:
+	}
+
+	release()
+	isReleased = true
+	select {
+	case err := <-result:
+		if !errors.Is(err, limit) {
+			t.Fatalf("got %v, want the provider limit", err)
+		}
+	case <-t.Context().Done():
+		t.Fatal(t.Context().Err())
+	}
+
+	second := &providerStub{}
+	_, err := usage.Guard(stoppedContext(t), second, guardSettings(path, "gpt-5.6-sol", clock)).Send(
+		t.Context(), func(agent.Output) bool { return true },
+	)
+	if err == nil || second.sendCount != 0 {
+		t.Fatalf("the shared limit was lost: err=%v sends=%d", err, second.sendCount)
 	}
 }
 

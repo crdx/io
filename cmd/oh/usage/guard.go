@@ -143,7 +143,7 @@ func (self *guardedProvider) recordLimit(windows []agent.UsageWindow) error {
 
 	now := self.settings.Now()
 
-	_, err := self.store.tryUpdate(func(storedCache *cache) error {
+	return self.store.update(func(storedCache *cache) error {
 		storedCache.Version = cacheFormat
 		storedCache.FetchedAt = now
 		storedCache.Windows = slices.Clone(windows)
@@ -154,8 +154,6 @@ func (self *guardedProvider) recordLimit(windows []agent.UsageWindow) error {
 
 		return nil
 	})
-
-	return err
 }
 
 func (self *guardedProvider) refreshIfDue(ctx context.Context) cache {
