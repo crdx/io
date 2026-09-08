@@ -157,7 +157,7 @@ func TestResolveFallsBackToTheConfig(t *testing.T) {
 	}
 }
 
-func TestResolvePrefersTheCommandLine(t *testing.T) {
+func TestResolveRefusesToSwapTheModelOfAResumedConversation(t *testing.T) {
 	resumed := model.Selection{
 		Provider: opencodeGoProvider,
 		Model:    "saved-model",
@@ -174,11 +174,18 @@ func TestResolvePrefersTheCommandLine(t *testing.T) {
 		[]model.Selection{{Provider: codexProvider, Model: "configured-model", Effort: "medium"}},
 		"",
 	)
-	if err != nil {
-		t.Fatal(err)
+	if err == nil || !strings.Contains(err.Error(), "a model is chosen when a session is created") {
+		t.Fatalf("got selection %s and error %v", selection, err)
 	}
-	if selection != requested {
-		t.Errorf("got %s", selection)
+}
+
+func TestResolveRefusesToSwapTheEffortOfAResumedConversation(t *testing.T) {
+	resumed := model.Selection{Provider: opencodeGoProvider, Model: "saved-model", Effort: "low"}
+	requested := model.Selection{Provider: opencodeGoProvider, Model: "saved-model", Effort: "high"}
+
+	selection, err := Resolve(requested, resumed, nil, "")
+	if err == nil || !strings.Contains(err.Error(), "a model is chosen when a session is created") {
+		t.Fatalf("got selection %s and error %v", selection, err)
 	}
 }
 
@@ -191,8 +198,20 @@ func TestResolveRefusesToResumeUnderAnotherProvider(t *testing.T) {
 		nil,
 		"",
 	)
-	if err == nil || !strings.Contains(err.Error(), "cannot resume a opencode-go session with codex") {
+	if err == nil || !strings.Contains(err.Error(), "cannot resume a conversation held with opencode-go/saved-model@") {
 		t.Fatalf("got selection %s and error %v", selection, err)
+	}
+}
+
+func TestResolveAcceptsTheModelAResumedConversationWasLeftOn(t *testing.T) {
+	resumed := model.Selection{Provider: opencodeGoProvider, Model: "saved-model", Effort: "low"}
+
+	selection, err := Resolve(resumed, resumed, nil, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if selection != resumed {
+		t.Errorf("got %s", selection)
 	}
 }
 

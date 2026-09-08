@@ -170,6 +170,12 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 }
 
 func (self Input) Check(isPromptPiped bool) error {
+	if self.isResuming() && self.isChoosingModel() {
+		return errors.New(
+			"a resumed conversation keeps the model it was left on; start a new session to choose another",
+		)
+	}
+
 	if !self.IsPrinting {
 		return nil
 	}
@@ -183,6 +189,14 @@ func (self Input) Check(isPromptPiped bool) error {
 	}
 
 	return nil
+}
+
+func (self Input) isResuming() bool {
+	return self.IsSessionPicker || self.Session != ""
+}
+
+func (self Input) isChoosingModel() bool {
+	return self.IsModelPicker || self.Model != ""
 }
 
 func InheritedOptions(arguments []string, kind cycle.TransitionKind) []string {

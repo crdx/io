@@ -2056,6 +2056,39 @@ func TestModelArgumentsMatchTheGolden(t *testing.T) {
 	compareTextWithGolden(t, "model-arguments.txt", output.String())
 }
 
+func TestRefusingAModelOnResumeMatchesTheGolden(t *testing.T) {
+	originalArgs := os.Args
+	t.Cleanup(func() { os.Args = originalArgs })
+
+	cases := [][]string{
+		{"-r"},
+		{"-r", "chosen-lobster"},
+		{"-m"},
+		{"-m", "codex/gpt-5.3-codex@high"},
+		{"-r", "-m"},
+		{"-r", "-m", "codex/gpt-5.3-codex@high"},
+		{"-r", "chosen-lobster", "-m"},
+		{"-r", "chosen-lobster", "-m", "codex/gpt-5.3-codex@high"},
+		{"--resume", "chosen-lobster", "--model", "codex/gpt-5.3-codex@high"},
+		{"--from", "chosen-lobster", "-m", "codex/gpt-5.3-codex@high"},
+	}
+
+	var output strings.Builder
+	for _, arguments := range cases {
+		os.Args = append([]string{"oh"}, arguments...)
+		input := cli.Bind()
+
+		refusal := "allowed"
+		if err := input.Check(false); err != nil {
+			refusal = err.Error()
+		}
+
+		fmt.Fprintf(&output, "%-56q %s\n", strings.Join(arguments, " "), refusal)
+	}
+
+	compareTextWithGolden(t, "resume-model-arguments.txt", output.String())
+}
+
 func TestTheUsageArgumentsMatchTheGolden(t *testing.T) {
 	originalArgs := os.Args
 	t.Cleanup(func() { os.Args = originalArgs })
@@ -3248,59 +3281,60 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		".transcript",
 	})
 	for name, extensions := range map[string][]string{
-		"app-plain-resume":      {".jsonl", ".transcript"},
-		"app-plain-turn":        {".jsonl", ".transcript"},
-		"authorisation-url":     {".ansi", ".screen"},
-		"banner":                {".ansi", ".screen"},
-		"clearing":              {".ansi", ".screen"},
-		"completion":            {".txt"},
-		"config-reload":         {".ansi", ".screen"},
-		"corrupt-session":       {".txt"},
-		"default-bar":           {".ansi", ".screen"},
-		"feedback":              {".ansi", ".screen", ".txt"},
-		"fork-message":          {".txt"},
-		"context":               {".prompt"},
-		"context-drops":         {".prompt"},
-		"context-jobs":          {".prompt"},
-		"context-yolo":          {".prompt"},
-		"inputblock":            {".ansi", ".screen"},
-		"legacy-alt-enter":      {".ansi", ".screen"},
-		"lifecycle":             {".ansi", ".screen"},
-		"line-resize":           {".screen"},
-		"streaming-modes":       {".screen"},
-		"groupings":             {".screen"},
-		"reasonings":            {".ansi", ".screen"},
-		"mermaid-streaming":     {".screen"},
-		"mode-takeback":         {".ansi", ".screen"},
-		"model-arguments":       {".txt"},
-		"new-session":           {".txt"},
-		"ordinary-tab":          {".ansi", ".screen"},
-		"path-grant-lifecycle":  {".ansi", ".screen"},
-		"path-message":          {".ansi", ".screen"},
-		"user-path-links":       {".ansi", ".screen"},
-		"workspace-paths":       {".ansi", ".screen"},
-		"pending-mode-messages": {".ansi", ".screen"},
-		"paste":                 {".ansi", ".screen"},
-		"picker-menu":           {".ansi", ".screen"},
-		"plain-input":           {".ansi", ".screen"},
-		"print-arguments":       {".txt"},
-		"queued-messages":       {".ansi", ".screen"},
-		"readline-bindings":     {".ansi", ".screen"},
-		"resume-arguments":      {".txt"},
-		"resume-mode":           {".ansi"},
-		"resume-confinement":    {".ansi"},
-		"running":               {".ansi", ".screen"},
-		"schedule":              {".ansi", ".screen"},
-		"segments":              {".ansi", ".screen"},
-		"signal-restoration":    {".ansi"},
-		"special-links":         {".ansi", ".screen"},
-		"startup":               {".ansi", ".screen"},
-		"startup-sized":         {".ansi", ".screen"},
-		"startup-sized-output":  {".ansi", ".screen"},
-		"terminal-escape":       {".ansi", ".screen"},
-		"usage":                 {".json"},
-		"usage-arguments":       {".txt"},
-		"vertical-movement":     {".ansi", ".screen"},
+		"app-plain-resume":       {".jsonl", ".transcript"},
+		"app-plain-turn":         {".jsonl", ".transcript"},
+		"authorisation-url":      {".ansi", ".screen"},
+		"banner":                 {".ansi", ".screen"},
+		"clearing":               {".ansi", ".screen"},
+		"completion":             {".txt"},
+		"config-reload":          {".ansi", ".screen"},
+		"corrupt-session":        {".txt"},
+		"default-bar":            {".ansi", ".screen"},
+		"feedback":               {".ansi", ".screen", ".txt"},
+		"fork-message":           {".txt"},
+		"context":                {".prompt"},
+		"context-drops":          {".prompt"},
+		"context-jobs":           {".prompt"},
+		"context-yolo":           {".prompt"},
+		"inputblock":             {".ansi", ".screen"},
+		"legacy-alt-enter":       {".ansi", ".screen"},
+		"lifecycle":              {".ansi", ".screen"},
+		"line-resize":            {".screen"},
+		"streaming-modes":        {".screen"},
+		"groupings":              {".screen"},
+		"reasonings":             {".ansi", ".screen"},
+		"mermaid-streaming":      {".screen"},
+		"mode-takeback":          {".ansi", ".screen"},
+		"model-arguments":        {".txt"},
+		"new-session":            {".txt"},
+		"ordinary-tab":           {".ansi", ".screen"},
+		"path-grant-lifecycle":   {".ansi", ".screen"},
+		"path-message":           {".ansi", ".screen"},
+		"user-path-links":        {".ansi", ".screen"},
+		"workspace-paths":        {".ansi", ".screen"},
+		"pending-mode-messages":  {".ansi", ".screen"},
+		"paste":                  {".ansi", ".screen"},
+		"picker-menu":            {".ansi", ".screen"},
+		"plain-input":            {".ansi", ".screen"},
+		"print-arguments":        {".txt"},
+		"queued-messages":        {".ansi", ".screen"},
+		"readline-bindings":      {".ansi", ".screen"},
+		"resume-arguments":       {".txt"},
+		"resume-model-arguments": {".txt"},
+		"resume-mode":            {".ansi"},
+		"resume-confinement":     {".ansi"},
+		"running":                {".ansi", ".screen"},
+		"schedule":               {".ansi", ".screen"},
+		"segments":               {".ansi", ".screen"},
+		"signal-restoration":     {".ansi"},
+		"special-links":          {".ansi", ".screen"},
+		"startup":                {".ansi", ".screen"},
+		"startup-sized":          {".ansi", ".screen"},
+		"startup-sized-output":   {".ansi", ".screen"},
+		"terminal-escape":        {".ansi", ".screen"},
+		"usage":                  {".json"},
+		"usage-arguments":        {".txt"},
+		"vertical-movement":      {".ansi", ".screen"},
 	} {
 		claimFixtureName(t, expected, "special replay", name, extensions)
 	}

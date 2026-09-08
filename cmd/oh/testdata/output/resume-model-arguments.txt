@@ -1,0 +1,10 @@
+"-r"                                                     allowed
+"-r chosen-lobster"                                      allowed
+"-m"                                                     allowed
+"-m codex/gpt-5.3-codex@high"                            allowed
+"-r -m"                                                  a resumed conversation keeps the model it was left on; start a new session to choose another
+"-r -m codex/gpt-5.3-codex@high"                         a resumed conversation keeps the model it was left on; start a new session to choose another
+"-r chosen-lobster -m"                                   a resumed conversation keeps the model it was left on; start a new session to choose another
+"-r chosen-lobster -m codex/gpt-5.3-codex@high"          a resumed conversation keeps the model it was left on; start a new session to choose another
+"--resume chosen-lobster --model codex/gpt-5.3-codex@high" a resumed conversation keeps the model it was left on; start a new session to choose another
+"--from chosen-lobster -m codex/gpt-5.3-codex@high"      allowed

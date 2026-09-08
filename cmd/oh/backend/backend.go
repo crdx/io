@@ -169,14 +169,14 @@ func ResolveAvailable(
 	isAvailable func(model.Selection) bool,
 ) (model.Selection, error) {
 	if resumedSelection != (model.Selection{}) {
-		if requestedSelection.Provider != "" && requestedSelection.Provider != resumedSelection.Provider {
+		if requestedSelection != (model.Selection{}) && requestedSelection != resumedSelection {
 			return model.Selection{}, fmt.Errorf(
-				"cannot resume a %s session with %s", resumedSelection.Provider, requestedSelection.Provider,
+				"cannot resume a conversation held with %s under %s: a model is chosen when a session is created",
+				resumedSelection, requestedSelection,
 			)
 		}
-		if requestedSelection.Model == "" {
-			return resumedSelection, nil
-		}
+
+		return resumedSelection, nil
 	}
 
 	if requestedSelection.Model != "" {
