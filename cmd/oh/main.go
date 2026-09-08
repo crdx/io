@@ -25,9 +25,11 @@ import (
 	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
+	"crdx.org/io/cmd/oh/clipboard"
 	"crdx.org/io/cmd/oh/commands"
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/cycle"
+	"crdx.org/io/cmd/oh/drops"
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/menu"
@@ -402,6 +404,12 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
+	closeDrops, areDropsMounted, err := drops.Mount(files, sessionInfo.Directory)
+	if err != nil {
+		return "", fmt.Errorf("mount clipboard images: %w", err)
+	}
+	defer func() { _ = closeDrops() }()
+
 	defer func() {
 		if !log.IsPersisted() {
 			_ = os.RemoveAll(tmpDir)
@@ -441,21 +449,23 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		systemPrompt = resumedSession.Meta.SystemPrompt
 	} else {
 		systemPrompt, _, err = prompt.Load(prompt.Config{
-			GlobalPath:  location.GetGlobalContextPath(),
-			Workspace:   workspace,
-			SessionName: log.Name(),
-			TmpDir:      tmpDir,
-			HomeDir:     homeDir,
-			CurrentCaps: args.Caps,
-			ExtraPaths:  settings.Sandbox,
-			Skills:      availableSkills,
-			JobsGranted: jobManager != nil,
-			Yolo:        args.Yolo,
+			GlobalPath:     location.GetGlobalContextPath(),
+			Workspace:      workspace,
+			SessionName:    log.Name(),
+			TmpDir:         tmpDir,
+			HomeDir:        homeDir,
+			CurrentCaps:    args.Caps,
+			ExtraPaths:     settings.Sandbox,
+			DropsDirectory: drops.GetDirectory(sessionInfo.Directory),
+			Skills:         availableSkills,
+			JobsGranted:    jobManager != nil,
+			Yolo:           args.Yolo,
 		})
 		if err != nil {
 			return "", err
 		}
 	}
+	systemPrompt = prompt.WithDropsDirectory(systemPrompt, drops.GetDirectory(sessionInfo.Directory))
 
 	if resumedSession == nil {
 		meta.SystemPrompt = systemPrompt
@@ -599,6 +609,25 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	app.onFailure = func(failure error) {
 		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspace, failure)
+	}
+	app.saveClipboardImage = func() (string, error) {
+		path, err := clipboard.SaveImage(sessionInfo.Directory, log.EnsurePersisted)
+		if err != nil || areDropsMounted {
+			return path, err
+		}
+
+		nextCloseDrops, areNewDropsMounted, mountError := drops.Mount(files, sessionInfo.Directory)
+		if mountError != nil {
+			_ = os.Remove(path)
+			return "", fmt.Errorf("make the clipboard image readable: %w", mountError)
+		}
+		if !areNewDropsMounted {
+			_ = os.Remove(path)
+			return "", errors.New("the clipboard image directory disappeared")
+		}
+		closeDrops = nextCloseDrops
+		areDropsMounted = true
+		return path, nil
 	}
 
 	usageReporter, _ := client.Client.(agent.UsageReporter)

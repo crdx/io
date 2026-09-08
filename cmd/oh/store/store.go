@@ -194,6 +194,17 @@ func (self *Writer) IsPersisted() bool {
 	return self.innerWriter.IsPersisted()
 }
 
+func (self *Writer) EnsurePersisted() error {
+	self.writerMutex.Lock()
+	err := self.innerWriter.EnsurePersisted()
+	self.writerMutex.Unlock()
+	if err != nil {
+		return err
+	}
+	self.startRecorders()
+	return nil
+}
+
 func (self *Writer) Observer() req.Observer { return writerObserver{writer: self} }
 
 func (self *Writer) TakeWarnings() []error {

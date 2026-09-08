@@ -3258,6 +3258,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"default-bar":           {".ansi", ".screen"},
 		"feedback":              {".ansi", ".screen", ".txt"},
 		"context":               {".prompt"},
+		"context-drops":         {".prompt"},
 		"context-jobs":          {".prompt"},
 		"context-yolo":          {".prompt"},
 		"inputblock":            {".ansi", ".screen"},
@@ -4972,15 +4973,17 @@ func TestPick(t *testing.T) {
 }
 
 type promptGolden struct {
-	isYolo       bool
-	areJobsGiven bool
+	isYolo            bool
+	areJobsGiven      bool
+	hasClipboardDrops bool
 }
 
 func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 	for name, shape := range map[string]promptGolden{
-		"context":      {},
-		"context-yolo": {isYolo: true},
-		"context-jobs": {areJobsGiven: true},
+		"context":       {},
+		"context-yolo":  {isYolo: true},
+		"context-jobs":  {areJobsGiven: true},
+		"context-drops": {hasClipboardDrops: true},
 	} {
 		t.Run(name, func(t *testing.T) {
 			compareSystemPromptWithGolden(t, name, shape)
@@ -5008,6 +5011,11 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 		t.Fatal(err)
 	}
 
+	dropsDirectory := ""
+	if shape.hasClipboardDrops {
+		dropsDirectory = "/state/sessions/brave-otter/drops"
+	}
+
 	got, _, err := prompt.Load(prompt.Config{
 		GlobalPath:  globalPath,
 		Workspace:   workspace,
@@ -5020,6 +5028,7 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 			Write: []string{"/output"},
 			Exec:  []string{"/commands"},
 		},
+		DropsDirectory: dropsDirectory,
 		Skills: []skill.Skill{{
 			Name:        "golden",
 			Description: "Exercise complete prompt assembly.",
@@ -11946,6 +11955,47 @@ func TestAPasteIsDrawnOnlyWhenItHasFinished(t *testing.T) {
 	}
 }
 
+func TestControlVInsertsTheSavedClipboardImagePath(t *testing.T) {
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.New(&bytes.Buffer{})
+	self.saveClipboardImage = func() (string, error) {
+		return "/state/sessions/brave-otter/drops/image-123.png", nil
+	}
+	inputLine := edit.NewInput(nil)
+	inputLine.SetText("look  now")
+	inputLine.Apply(key.Key{Code: key.Left}, false)
+	inputLine.Apply(key.Key{Code: key.Left}, false)
+	inputLine.Apply(key.Key{Code: key.Left}, false)
+	inputLine.Apply(key.Key{Code: key.Left}, false)
+
+	self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: 'v', Mod: key.Ctrl})
+
+	want := "look /state/sessions/brave-otter/drops/image-123.png now"
+	if inputLine.Text() != want {
+		t.Errorf("pasted input is %q, want %q", inputLine.Text(), want)
+	}
+}
+
+func TestAClipboardImageFailureIsShownWithoutChangingTheInput(t *testing.T) {
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.New(&bytes.Buffer{})
+	self.saveClipboardImage = func() (string, error) {
+		return "", errors.New("the clipboard does not contain an image")
+	}
+	inputLine := edit.NewInput(nil)
+	inputLine.SetText("draft")
+
+	self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: 'v', Mod: key.Ctrl})
+
+	if inputLine.Text() != "draft" {
+		t.Errorf("failed paste changed the input to %q", inputLine.Text())
+	}
+	want := "Could not paste clipboard image: the clipboard does not contain an image"
+	if self.feedback.Message().Text != want || self.feedback.Message().Status != agent.ErrorStatus {
+		t.Errorf("paste feedback is %+v, want error %q", self.feedback.Message(), want)
+	}
+}
+
 type pasteStage int
 
 const (
@@ -11974,10 +12024,58 @@ func TestAPasteDrawsWhatItDrewBefore(t *testing.T) {
 		"6 a paste wider than the screen": func() string {
 			return pasteStream(t, strings.Repeat("wide ", 40), pasteFinished)
 		},
+		"7 a clipboard image": func() string {
+			return clipboardImagePasteStream(t)
+		},
+		"8 a clipboard image failure": func() string {
+			return clipboardImageFailureStream(t)
+		},
 	}
 
 	compareWithGolden(t, "paste", ".ansi", passes)
 	compareWithGolden(t, "paste", ".screen", shownPasses(t, passes))
+}
+
+func clipboardImagePasteStream(t *testing.T) string {
+	t.Helper()
+
+	self := slashCommandFixture(t, caps.Read)
+	var screenOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	self.saveClipboardImage = func() (string, error) {
+		return "/state/sessions/brave-otter/drops/image-123.png", nil
+	}
+
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+	inputLine.SetText("review ")
+
+	self.screen.Line("conversation remains in scrollback")
+	self.show(inputLine)
+	self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: 'v', Mod: key.Ctrl})
+
+	return screenOutput.String()
+}
+
+func clipboardImageFailureStream(t *testing.T) string {
+	t.Helper()
+
+	self := slashCommandFixture(t, caps.Read)
+	var screenOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	self.saveClipboardImage = func() (string, error) {
+		return "", errors.New("the clipboard does not contain an image")
+	}
+
+	history := edit.NewHistory("", historyLimit)
+	inputLine := edit.NewInput(history)
+	inputLine.SetText("draft")
+
+	self.screen.Line("conversation remains in scrollback")
+	self.show(inputLine)
+	self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: 'v', Mod: key.Ctrl})
+
+	return screenOutput.String()
 }
 
 func pasteStream(t *testing.T, text string, stage pasteStage) string {

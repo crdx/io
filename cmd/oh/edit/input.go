@@ -21,6 +21,7 @@ const (
 	ToggleGit
 	ToggleWeb
 	CompleteCommand
+	PasteClipboardImage
 )
 
 type Input struct {
@@ -73,6 +74,11 @@ func (self *Input) Text() string {
 func (self *Input) SetText(text string) {
 	self.finishSearch()
 	self.buffer.Set(text)
+}
+
+func (self *Input) Insert(text string) {
+	self.finishSearch()
+	self.buffer.Insert([]rune(text))
 }
 
 func (self *Input) IsPasting() bool {
@@ -366,6 +372,8 @@ func (self *Input) rune(keypress key.Key, isRunning bool) Action {
 			return QuitSession
 		}
 
+	case 'v':
+		return PasteClipboardImage
 	case 'x':
 		self.isPrefixPending = true
 	}

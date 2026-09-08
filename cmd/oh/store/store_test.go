@@ -201,6 +201,25 @@ func TestASessionNothingWasSaidInIsNeverWritten(t *testing.T) {
 	}
 }
 
+func TestASessionMayBePersistedBeforeItsFirstMessageForAFile(t *testing.T) {
+	directory := t.TempDir()
+	log, err := store.Create(directory, store.Meta{Model: "gpt-5.6-sol"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = log.Close() }()
+
+	if err := log.EnsurePersisted(); err != nil {
+		t.Fatal(err)
+	}
+	if !log.IsPersisted() {
+		t.Error("explicitly persisted session is not persisted")
+	}
+	if _, err := os.Stat(filepath.Join(directory, log.Name(), "session.jsonl")); err != nil {
+		t.Errorf("persisted session has no journal: %v", err)
+	}
+}
+
 func TestWhatHappensBeforeTheFirstMessageDoesNotWriteTheSession(t *testing.T) {
 	directory := t.TempDir()
 

@@ -40,3 +40,16 @@ wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide 
 wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
+=== 7 a clipboard image ===
+conversation remains in scrollback
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+review /state/sessions/brave-otter/drops/image-123.png
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== 8 a clipboard image failure ===
+conversation remains in scrollback
+
+Could not paste clipboard image: the clipboard does not contain an image
+────────────────────────────────────────────────────────────────────────────────────────────────────
+draft
+────────────────────────────────────────────────────────────────────────────────────────────────────

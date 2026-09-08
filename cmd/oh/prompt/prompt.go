@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	defaultGlobalContext = "You are a helpful coding assistant."
-	globalContextName    = "SYSTEM.md"
+	clipboardDropsHeading = "# Clipboard Drops"
+	defaultGlobalContext  = "You are a helpful coding assistant."
+	globalContextName     = "SYSTEM.md"
 )
 
 var (
@@ -38,7 +39,7 @@ var (
 
 		- Your workspace is the current directory, {{ .WorkspaceDir }}
 		- Your session is named {{ .SessionName }}
-		{{ scopeRules .ExtraPaths .CurrentCaps }}
+		{{ scopeRules .ExtraPaths .CurrentCaps .DropsDirectory }}
 
 		# Personality
 
@@ -81,6 +82,7 @@ type harnessContextTemplateData struct {
 	HomeDir           string
 	CurrentCaps       caps.Set
 	ExtraPaths        shell.Paths
+	DropsDirectory    string
 	WorkspaceWritable bool
 	GitWritable       bool
 	ShellGranted      bool
@@ -103,16 +105,17 @@ type File struct {
 }
 
 type Config struct {
-	GlobalPath  string
-	Workspace   *work.Space
-	SessionName string
-	TmpDir      string
-	HomeDir     string
-	CurrentCaps caps.Set
-	ExtraPaths  shell.Paths
-	Skills      []skill.Skill
-	JobsGranted bool
-	Yolo        bool
+	GlobalPath     string
+	Workspace      *work.Space
+	SessionName    string
+	TmpDir         string
+	HomeDir        string
+	CurrentCaps    caps.Set
+	ExtraPaths     shell.Paths
+	DropsDirectory string
+	Skills         []skill.Skill
+	JobsGranted    bool
+	Yolo           bool
 }
 
 func Load(config Config) (string, []File, error) {
@@ -200,6 +203,7 @@ func harnessContext(config Config) string {
 		HomeDir:           config.HomeDir,
 		CurrentCaps:       currentCaps,
 		ExtraPaths:        config.ExtraPaths,
+		DropsDirectory:    config.DropsDirectory,
 		WorkspaceWritable: currentCaps.Has(caps.Write),
 		GitWritable:       currentCaps.Has(caps.Git),
 		ShellGranted:      currentCaps.Has(caps.Shell),
@@ -215,15 +219,36 @@ func harnessContext(config Config) string {
 	return strings.TrimSpace(renderedText.String())
 }
 
-func scopeRules(extraPaths shell.Paths, currentCaps caps.Set) string {
+func WithDropsDirectory(systemPrompt string, dropsDirectory string) string {
+	if dropsDirectory == "" {
+		return systemPrompt
+	}
+	rule := dropsRule(dropsDirectory)
+	if strings.Contains(systemPrompt, rule) {
+		return systemPrompt
+	}
+	return strings.TrimSpace(systemPrompt) + "\n\n" + clipboardDropsHeading + "\n\n- " + rule
+}
+
+func dropsRule(dropsDirectory string) string {
+	return "Clipboard images pasted with ctrl+v are stored under " + dropsDirectory + ", which path tools can read."
+}
+
+func scopeRules(extraPaths shell.Paths, currentCaps caps.Set, dropsDirectory string) string {
 	var lines []string
 
-	if len(extraPaths.Read)+len(extraPaths.Write) > 0 {
+	switch {
+	case dropsDirectory != "":
+		lines = append(lines, "- Tools that accept a path can access the workspace, private home, /tmp, and the paths listed here.")
+	case len(extraPaths.Read)+len(extraPaths.Write) > 0:
 		lines = append(lines, "- Tools that accept a path can access the workspace, private home, /tmp, and the configured paths listed here.")
-	} else {
+	default:
 		lines = append(lines, "- Tools that accept a path can only access the workspace, private home, and /tmp.")
 	}
 
+	if dropsDirectory != "" {
+		lines = append(lines, "- "+dropsRule(dropsDirectory))
+	}
 	for _, path := range extraPaths.Read {
 		lines = append(lines, "- The configured path "+path+" is read-only.")
 	}

@@ -619,6 +619,22 @@ func TestALetterNamingNoModeIsSwallowed(t *testing.T) {
 	}
 }
 
+func TestControlVRequestsAClipboardImage(t *testing.T) {
+	self := inputFromKeys(t, "beforeafter")
+	for range len("after") {
+		self.Apply(key.Key{Code: key.Left}, false)
+	}
+
+	if got := self.Apply(key.Key{Code: key.Rune, Value: 'v', Mod: key.Ctrl}, false); got != PasteClipboardImage {
+		t.Errorf("ctrl+v returned %v, want image paste", got)
+	}
+
+	self.Insert("/state/sessions/brave-otter/drops/image-123.png")
+	if got := self.Text(); got != "before/state/sessions/brave-otter/drops/image-123.pngafter" {
+		t.Errorf("image path was not inserted at the cursor: %q", got)
+	}
+}
+
 func TestControlDStopsARunningTurnWhateverIsTyped(t *testing.T) {
 	keypress := key.Key{Code: key.Rune, Value: 'd', Mod: key.Ctrl}
 

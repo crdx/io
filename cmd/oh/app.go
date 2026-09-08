@@ -118,35 +118,36 @@ type slashState struct {
 }
 
 type App struct {
-	agent           *agent.Agent
-	recordedEvents  []agent.Event
-	openingEvents   []agent.Event
-	screen          *output.Screen
-	recorder        *record.Recorder
-	configObserver  *config.Observer
-	inputLine       *edit.Input
-	editorConfig    *editor.Config
-	mode            *caps.Mode
-	pathGrants      *pathgrant.Grants
-	jobs            jobState
-	settledCaps     caps.Set
-	pendingNotices  pendingNotices
-	feedback        feedback.State
-	terminal        terminal.Terminal
-	metrics         metrics.Tracker
-	toolOutputLimit *truncate.Limit
-	onFailure       func(failure error)
-	workspace       *work.Space
-	continueMessage string
-	display         displayState
-	runMode         runMode
-	slash           slashState
-	transition      cycle.Transition
-	queuedTurn      turn.Queue
-	currentTurn     Turn
-	startedAt       time.Time
-	keyboard        *os.File
-	now             func() time.Time
+	agent              *agent.Agent
+	recordedEvents     []agent.Event
+	openingEvents      []agent.Event
+	screen             *output.Screen
+	recorder           *record.Recorder
+	configObserver     *config.Observer
+	inputLine          *edit.Input
+	editorConfig       *editor.Config
+	mode               *caps.Mode
+	pathGrants         *pathgrant.Grants
+	jobs               jobState
+	settledCaps        caps.Set
+	pendingNotices     pendingNotices
+	feedback           feedback.State
+	terminal           terminal.Terminal
+	metrics            metrics.Tracker
+	toolOutputLimit    *truncate.Limit
+	onFailure          func(failure error)
+	saveClipboardImage func() (string, error)
+	workspace          *work.Space
+	continueMessage    string
+	display            displayState
+	runMode            runMode
+	slash              slashState
+	transition         cycle.Transition
+	queuedTurn         turn.Queue
+	currentTurn        Turn
+	startedAt          time.Time
+	keyboard           *os.File
+	now                func() time.Time
 }
 
 type Turn struct {
@@ -283,6 +284,9 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 			inputLine.SetText(completion)
 		}
 
+	case edit.PasteClipboardImage:
+		self.pasteClipboardImage(inputLine)
+
 	case edit.ToggleWrite:
 		self.toggleCap(caps.Write)
 
@@ -299,6 +303,24 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 	}
 
 	return !self.isTransitionRequested() || self.currentTurn.Running()
+}
+
+func (self *App) pasteClipboardImage(inputLine *edit.Input) {
+	if self.saveClipboardImage == nil {
+		return
+	}
+
+	path, err := self.saveClipboardImage()
+	if err != nil {
+		self.showFeedback(feedback.Command, feedback.Message{
+			Text:   "Could not paste clipboard image: " + err.Error(),
+			Status: agent.ErrorStatus,
+		})
+		return
+	}
+
+	self.feedback.ClearOnTyping()
+	inputLine.Insert(path)
 }
 
 func (self *App) isTransitionRequested() bool {

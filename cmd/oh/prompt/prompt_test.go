@@ -167,6 +167,35 @@ func TestConfiguredPathsAreDisclosedInTheHarnessContext(t *testing.T) {
 	}
 }
 
+func TestClipboardDropsAreDisclosedInTheHarnessContext(t *testing.T) {
+	dropsDirectory := "/state/sessions/brave-otter/drops"
+	got := harnessContext(Config{
+		Workspace:      work.At("/workspace"),
+		SessionName:    "brave-otter",
+		TmpDir:         "/state/farm/session",
+		HomeDir:        "/state/home",
+		CurrentCaps:    caps.Read,
+		DropsDirectory: dropsDirectory,
+	})
+
+	want := "Clipboard images pasted with ctrl+v are stored under " + dropsDirectory + ", which path tools can read."
+	if !strings.Contains(got, want) {
+		t.Errorf("system prompt does not contain %q: %q", want, got)
+	}
+}
+
+func TestAStoredPromptLearnsAboutClipboardDropsOnce(t *testing.T) {
+	dropsDirectory := "/state/sessions/brave-otter/drops"
+	got := WithDropsDirectory("stored prompt", dropsDirectory)
+	want := "stored prompt\n\n# Clipboard Drops\n\n- " + dropsRule(dropsDirectory)
+	if got != want {
+		t.Errorf("updated prompt is %q, want %q", got, want)
+	}
+	if repeated := WithDropsDirectory(got, dropsDirectory); repeated != got {
+		t.Errorf("drops rule was repeated: %q", repeated)
+	}
+}
+
 func TestTheHarnessDisclosesTheSessionName(t *testing.T) {
 	got := harnessContext(Config{
 		Workspace:   work.At("/workspace"),
