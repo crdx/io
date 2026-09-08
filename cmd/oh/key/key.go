@@ -31,6 +31,7 @@ const (
 	Escape
 	PasteStart
 	PasteEnd
+	Clipboard
 	FocusIn
 	FocusOut
 	Unknown
@@ -49,9 +50,10 @@ func (self Modifier) Has(mask Modifier) bool {
 }
 
 type Key struct {
-	Code  Code
-	Value rune
-	Mod   Modifier
+	Code      Code
+	Value     rune
+	Mod       Modifier
+	Clipboard *ClipboardReport
 }
 
 type Decoder struct {
@@ -75,6 +77,7 @@ func newDecoder(reader *bufio.Reader, hasEscapeContinuation func() bool) *Decode
 
 const (
 	escapeByte            = '\x1b'
+	bellByte              = '\x07'
 	delByte               = '\x7f'
 	escapeSequenceTimeout = 25 * time.Millisecond
 )
@@ -105,8 +108,8 @@ func hasTerminalInput(terminal *os.File, timeout time.Duration) bool {
 }
 
 const (
-	Enable  = "\x1b[>1u\x1b[?2004h\x1b[?1004h"
-	Disable = "\x1b[?1004l\x1b[?2004l\x1b[<u"
+	Enable  = "\x1b[>1u\x1b[?2004h\x1b[?1004h\x1b[?5522h"
+	Disable = "\x1b[?5522l\x1b[?1004l\x1b[?2004l\x1b[<u"
 )
 
 func (self *Decoder) Next() (Key, error) {
@@ -170,9 +173,57 @@ func (self *Decoder) escape() (Key, error) {
 		return self.parameters()
 	case 'O':
 		return self.applicationCursor()
+	case ']':
+		return self.osCommand()
 	}
 
 	return self.alt(next), nil
+}
+
+const maxCommandBytes = 1 << 16
+
+func (self *Decoder) osCommand() (Key, error) {
+	var command strings.Builder
+	isOverlong := false
+
+	for {
+		next, _, err := self.reader.ReadRune()
+		if err != nil {
+			return Key{}, err
+		}
+
+		if next == bellByte {
+			break
+		}
+
+		if next == escapeByte {
+			terminator, _, err := self.reader.ReadRune()
+			if err != nil {
+				return Key{}, err
+			}
+			if terminator == '\\' {
+				break
+			}
+			return Key{Code: Unknown}, nil
+		}
+
+		if command.Len() >= maxCommandBytes {
+			isOverlong = true
+			continue
+		}
+
+		command.WriteRune(next)
+	}
+
+	if isOverlong {
+		return Key{Code: Unknown}, nil
+	}
+
+	if keypress, isClipboard := clipboardReport(command.String()); isClipboard {
+		return keypress, nil
+	}
+
+	return Key{Code: Unknown}, nil
 }
 
 func (self *Decoder) escapeContinues() bool {

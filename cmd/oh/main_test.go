@@ -11986,42 +11986,122 @@ func TestAPasteIsDrawnOnlyWhenItHasFinished(t *testing.T) {
 	}
 }
 
-func TestControlVInsertsTheSavedClipboardImagePath(t *testing.T) {
+func pasteReport(status key.ClipboardStatus, mediaType string, payload []byte) key.Key {
+	return key.Key{Code: key.Clipboard, Clipboard: &key.ClipboardReport{
+		Status:    status,
+		MediaType: mediaType,
+		Payload:   payload,
+	}}
+}
+
+func pasteEvent(mediaTypes string) []key.Key {
+	opened := key.Key{Code: key.Clipboard, Clipboard: &key.ClipboardReport{
+		Status:   key.ClipboardOpened,
+		Password: "one-time-token",
+	}}
+
+	return []key.Key{
+		opened,
+		pasteReport(key.ClipboardChunk, key.MediaTypeList, []byte(mediaTypes)),
+		pasteReport(key.ClipboardClosed, "", nil),
+	}
+}
+
+func pasteContent(mediaType string, payload []byte) []key.Key {
+	return []key.Key{
+		pasteReport(key.ClipboardOpened, "", nil),
+		pasteReport(key.ClipboardChunk, mediaType, payload),
+		pasteReport(key.ClipboardClosed, "", nil),
+	}
+}
+
+func TestAPastedImageIsSavedAndItsPathInsertedAtTheCursor(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.saveClipboardImage = func() (string, error) {
+
+	var savedType string
+	var savedData []byte
+	self.savePastedImage = func(mediaType string, data []byte) (string, error) {
+		savedType, savedData = mediaType, data
 		return "/state/sessions/brave-otter/drops/image-123.png", nil
 	}
+
 	inputLine := edit.NewInput(nil)
 	inputLine.SetText("look  now")
-	inputLine.Apply(key.Key{Code: key.Left}, false)
-	inputLine.Apply(key.Key{Code: key.Left}, false)
-	inputLine.Apply(key.Key{Code: key.Left}, false)
-	inputLine.Apply(key.Key{Code: key.Left}, false)
+	for range len(" now") {
+		inputLine.Apply(key.Key{Code: key.Left}, false)
+	}
 
-	self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: 'v', Mod: key.Ctrl})
+	for _, keypress := range slices.Concat(
+		pasteEvent("image/png"),
+		pasteContent("image/png", []byte("\x89PNG")),
+	) {
+		self.handleKeypressAndShowInput(inputLine, nil, keypress)
+	}
 
 	want := "look /state/sessions/brave-otter/drops/image-123.png now"
 	if inputLine.Text() != want {
 		t.Errorf("pasted input is %q, want %q", inputLine.Text(), want)
 	}
+	if savedType != "image/png" || string(savedData) != "\x89PNG" {
+		t.Errorf("saved %q of %q, want the pasted PNG", savedType, savedData)
+	}
 }
 
-func TestAClipboardImageFailureIsShownWithoutChangingTheInput(t *testing.T) {
+func TestAPastedImageIsAskedForWithTheOneTimeTokenTheTerminalGave(t *testing.T) {
+	self := slashCommandFixture(t, caps.Read)
+	var screenOutput strings.Builder
+	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+
+	inputLine := edit.NewInput(nil)
+	for _, keypress := range pasteEvent("text/html image/png text/plain") {
+		self.handleKeypressAndShowInput(inputLine, nil, keypress)
+	}
+
+	want := "\x1b]5522;type=read:pw=b25lLXRpbWUtdG9rZW4=:name=UGFzdGUgZXZlbnQ=;aW1hZ2UvcG5n\x1b\\"
+	if got := screenOutput.String(); !strings.Contains(got, want) {
+		t.Errorf("clipboard request is %q, want it to contain %q", got, want)
+	}
+}
+
+func TestAPastedTextIsInsertedWithoutAskingToSaveAnything(t *testing.T) {
 	self := slashCommandFixture(t, caps.Read)
 	self.screen = output.New(&bytes.Buffer{})
-	self.saveClipboardImage = func() (string, error) {
-		return "", errors.New("the clipboard does not contain an image")
+	self.savePastedImage = func(string, []byte) (string, error) {
+		t.Error("a text paste asked to save an image")
+		return "", nil
 	}
+
+	inputLine := edit.NewInput(nil)
+	inputLine.SetText("say ")
+
+	for _, keypress := range slices.Concat(
+		pasteEvent("text/plain"),
+		pasteContent("text/plain", []byte("    hello\n    world")),
+	) {
+		self.handleKeypressAndShowInput(inputLine, nil, keypress)
+	}
+
+	if got, want := inputLine.Text(), "say hello\nworld"; got != want {
+		t.Errorf("pasted input is %q, want %q", got, want)
+	}
+}
+
+func TestAPasteFailureIsShownWithoutChangingTheInput(t *testing.T) {
+	self := slashCommandFixture(t, caps.Read)
+	self.screen = output.New(&bytes.Buffer{})
 	inputLine := edit.NewInput(nil)
 	inputLine.SetText("draft")
 
-	self.apply(inputLine, nil, key.Key{Code: key.Rune, Value: 'v', Mod: key.Ctrl})
+	self.handleKeypressAndShowInput(inputLine, nil, key.Key{Code: key.Clipboard, Clipboard: &key.ClipboardReport{
+		Status:  key.ClipboardFailed,
+		Failure: "EPERM",
+	}})
 
 	if inputLine.Text() != "draft" {
 		t.Errorf("failed paste changed the input to %q", inputLine.Text())
 	}
-	want := "Could not paste clipboard image: the clipboard does not contain an image"
+	want := "Could not paste: permission to read the clipboard was refused"
 	if self.feedback.Message().Text != want || self.feedback.Message().Status != agent.ErrorStatus {
 		t.Errorf("paste feedback is %+v, want error %q", self.feedback.Message(), want)
 	}
@@ -12055,11 +12135,26 @@ func TestAPasteDrawsWhatItDrewBefore(t *testing.T) {
 		"6 a paste wider than the screen": func() string {
 			return pasteStream(t, strings.Repeat("wide ", 40), pasteFinished)
 		},
-		"7 a clipboard image": func() string {
-			return clipboardImagePasteStream(t)
+		"7 a pasted image": func() string {
+			return pastedImageStream(t)
 		},
-		"8 a clipboard image failure": func() string {
-			return clipboardImageFailureStream(t)
+		"8 an image arriving in chunks": func() string {
+			return chunkedImagePasteStream(t)
+		},
+		"9 a pasted text": func() string {
+			return pastedTextStream(t)
+		},
+		"a1 a paste from the primary selection": func() string {
+			return primarySelectionPasteStream(t)
+		},
+		"a2 a paste holding nothing usable": func() string {
+			return unusablePasteStream(t)
+		},
+		"a3 an image that could not be saved": func() string {
+			return unsavedImagePasteStream(t)
+		},
+		"a4 a paste the terminal refused": func() string {
+			return refusedPasteStream(t)
 		},
 	}
 
@@ -12067,46 +12162,109 @@ func TestAPasteDrawsWhatItDrewBefore(t *testing.T) {
 	compareWithGolden(t, "paste", ".screen", shownPasses(t, passes))
 }
 
-func clipboardImagePasteStream(t *testing.T) string {
+func pasteEventStream(t *testing.T, typed string, save func(string, []byte) (string, error), keys []key.Key) string {
 	t.Helper()
 
 	self := slashCommandFixture(t, caps.Read)
 	var screenOutput strings.Builder
 	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
-	self.saveClipboardImage = func() (string, error) {
-		return "/state/sessions/brave-otter/drops/image-123.png", nil
-	}
+	self.savePastedImage = save
 
 	history := edit.NewHistory("", historyLimit)
 	inputLine := edit.NewInput(history)
-	inputLine.SetText("review ")
+	inputLine.SetText(typed)
 
 	self.screen.Line("conversation remains in scrollback")
 	self.show(inputLine)
-	self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: 'v', Mod: key.Ctrl})
+
+	for _, keypress := range keys {
+		self.handleKeypressAndShowInput(inputLine, history, keypress)
+	}
 
 	return screenOutput.String()
 }
 
-func clipboardImageFailureStream(t *testing.T) string {
+func savedAs(path string) func(string, []byte) (string, error) {
+	return func(string, []byte) (string, error) { return path, nil }
+}
+
+func pastedImageStream(t *testing.T) string {
 	t.Helper()
 
-	self := slashCommandFixture(t, caps.Read)
-	var screenOutput strings.Builder
-	self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
-	self.saveClipboardImage = func() (string, error) {
-		return "", errors.New("the clipboard does not contain an image")
+	return pasteEventStream(t, "review ", savedAs("/state/sessions/brave-otter/drops/image-123.png"),
+		slices.Concat(
+			pasteEvent("image/png"),
+			pasteContent("image/png", []byte("\x89PNG")),
+		))
+}
+
+func chunkedImagePasteStream(t *testing.T) string {
+	t.Helper()
+
+	chunks := []key.Key{pasteReport(key.ClipboardOpened, "", nil)}
+	for range 4 {
+		chunks = append(chunks, pasteReport(key.ClipboardChunk, "image/png", make([]byte, 4096)))
+	}
+	chunks = append(chunks, pasteReport(key.ClipboardClosed, "", nil))
+
+	return pasteEventStream(t, "review ", savedAs("/state/sessions/brave-otter/drops/image-456.png"),
+		slices.Concat(pasteEvent("image/png"), chunks))
+}
+
+func pastedTextStream(t *testing.T) string {
+	t.Helper()
+
+	return pasteEventStream(t, "explain ", nil, slices.Concat(
+		pasteEvent("text/plain"),
+		pasteContent("text/plain", []byte("    if isReady {\n        begin()\n    }")),
+	))
+}
+
+func primarySelectionPasteStream(t *testing.T) string {
+	t.Helper()
+
+	opened := key.Key{Code: key.Clipboard, Clipboard: &key.ClipboardReport{
+		Status:   key.ClipboardOpened,
+		Password: "one-time-token",
+		Location: "primary",
+	}}
+
+	return pasteEventStream(t, "note ", nil, slices.Concat(
+		[]key.Key{
+			opened,
+			pasteReport(key.ClipboardChunk, key.MediaTypeList, []byte("text/plain")),
+			pasteReport(key.ClipboardClosed, "", nil),
+		},
+		pasteContent("text/plain", []byte("from the selection")),
+	))
+}
+
+func unusablePasteStream(t *testing.T) string {
+	t.Helper()
+
+	return pasteEventStream(t, "draft", nil, pasteEvent("application/x-nautilus-clipboard"))
+}
+
+func unsavedImagePasteStream(t *testing.T) string {
+	t.Helper()
+
+	save := func(string, []byte) (string, error) {
+		return "", errors.New("the drops path is not a directory")
 	}
 
-	history := edit.NewHistory("", historyLimit)
-	inputLine := edit.NewInput(history)
-	inputLine.SetText("draft")
+	return pasteEventStream(t, "draft", save, slices.Concat(
+		pasteEvent("image/png"),
+		pasteContent("image/png", []byte("\x89PNG")),
+	))
+}
 
-	self.screen.Line("conversation remains in scrollback")
-	self.show(inputLine)
-	self.handleKeypressAndShowInput(inputLine, history, key.Key{Code: key.Rune, Value: 'v', Mod: key.Ctrl})
+func refusedPasteStream(t *testing.T) string {
+	t.Helper()
 
-	return screenOutput.String()
+	return pasteEventStream(t, "draft", nil, []key.Key{{
+		Code:      key.Clipboard,
+		Clipboard: &key.ClipboardReport{Status: key.ClipboardFailed, Failure: "EPERM"},
+	}})
 }
 
 func pasteStream(t *testing.T, text string, stage pasteStage) string {

@@ -25,7 +25,6 @@ import (
 	"crdx.org/io/cmd/oh/bar"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/cli"
-	"crdx.org/io/cmd/oh/clipboard"
 	"crdx.org/io/cmd/oh/commands"
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/cycle"
@@ -639,14 +638,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	app.onFailure = func(failure error) {
 		_ = notification.SendTurnError(context.Background(), screen.WriteEscape, workspace, failure)
 	}
-	app.saveClipboardImage = func() (string, error) {
-		path, err := clipboard.SaveImage(sessionInfo.Directory, log.EnsurePersisted)
+	app.savePastedImage = func(mediaType string, data []byte) (string, error) {
+		path, err := drops.SaveImage(sessionInfo.Directory, log.EnsurePersisted, mediaType, data)
 		if err != nil {
 			return "", err
 		}
 		if err := mountDrops(true); err != nil {
 			_ = os.Remove(path)
-			return "", fmt.Errorf("make the clipboard image readable: %w", err)
+			return "", fmt.Errorf("make the pasted image readable: %w", err)
 		}
 		return path, nil
 	}

@@ -29,6 +29,7 @@ import (
 	"crdx.org/io/cmd/oh/metrics"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/painter"
+	"crdx.org/io/cmd/oh/paste"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/schedule"
@@ -118,36 +119,37 @@ type slashState struct {
 }
 
 type App struct {
-	agent              *agent.Agent
-	recordedEvents     []agent.Event
-	openingEvents      []agent.Event
-	screen             *output.Screen
-	recorder           *record.Recorder
-	configObserver     *config.Observer
-	inputLine          *edit.Input
-	editorConfig       *editor.Config
-	mode               *caps.Mode
-	pathGrants         *pathgrant.Grants
-	jobs               jobState
-	settledCaps        caps.Set
-	pendingNotices     pendingNotices
-	feedback           feedback.State
-	terminal           terminal.Terminal
-	metrics            metrics.Tracker
-	toolOutputLimit    *truncate.Limit
-	onFailure          func(failure error)
-	saveClipboardImage func() (string, error)
-	workspace          *work.Space
-	continueMessage    string
-	display            displayState
-	runMode            runMode
-	slash              slashState
-	transition         cycle.Transition
-	queuedTurn         turn.Queue
-	currentTurn        Turn
-	startedAt          time.Time
-	keyboard           *os.File
-	now                func() time.Time
+	agent           *agent.Agent
+	recordedEvents  []agent.Event
+	openingEvents   []agent.Event
+	screen          *output.Screen
+	recorder        *record.Recorder
+	configObserver  *config.Observer
+	inputLine       *edit.Input
+	editorConfig    *editor.Config
+	mode            *caps.Mode
+	pathGrants      *pathgrant.Grants
+	jobs            jobState
+	settledCaps     caps.Set
+	pendingNotices  pendingNotices
+	feedback        feedback.State
+	terminal        terminal.Terminal
+	metrics         metrics.Tracker
+	toolOutputLimit *truncate.Limit
+	onFailure       func(failure error)
+	savePastedImage func(mediaType string, data []byte) (string, error)
+	pasteExchange   paste.Exchange
+	workspace       *work.Space
+	continueMessage string
+	display         displayState
+	runMode         runMode
+	slash           slashState
+	transition      cycle.Transition
+	queuedTurn      turn.Queue
+	currentTurn     Turn
+	startedAt       time.Time
+	keyboard        *os.File
+	now             func() time.Time
 }
 
 type Turn struct {
@@ -237,6 +239,14 @@ func restoreTerminalState(screen *output.Screen, isPersisted bool, restorers ...
 }
 
 func (self *App) handleKeypressAndShowInput(inputLine *edit.Input, history *edit.History, keypress key.Key) bool {
+	if keypress.Code == key.Clipboard {
+		if self.receivePaste(inputLine, keypress.Clipboard) {
+			self.screen.Sync(func() { self.show(inputLine) })
+		}
+
+		return true
+	}
+
 	shouldContinue := true
 	self.screen.Sync(func() {
 		shouldContinue = self.apply(inputLine, history, keypress)
@@ -284,9 +294,6 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 			inputLine.SetText(completion)
 		}
 
-	case edit.PasteClipboardImage:
-		self.pasteClipboardImage(inputLine)
-
 	case edit.ToggleWrite:
 		self.toggleCap(caps.Write)
 
@@ -305,22 +312,56 @@ func (self *App) apply(inputLine *edit.Input, history *edit.History, keypress ke
 	return !self.isTransitionRequested() || self.currentTurn.Running()
 }
 
-func (self *App) pasteClipboardImage(inputLine *edit.Input) {
-	if self.saveClipboardImage == nil {
-		return
+func (self *App) receivePaste(inputLine *edit.Input, report *key.ClipboardReport) bool {
+	result := self.pasteExchange.Receive(report)
+
+	switch result.Kind {
+	case paste.Requested:
+		self.screen.WriteEscape(result.Sequence)
+
+	case paste.Text:
+		self.feedback.ClearOnTyping()
+		inputLine.InsertPasted(result.Text)
+
+		return true
+
+	case paste.Image:
+		return self.pasteImage(inputLine, result)
+
+	case paste.Failed:
+		self.showPasteFailure(result.Message)
+
+		return true
+
+	case paste.Ignored:
 	}
 
-	path, err := self.saveClipboardImage()
+	return false
+}
+
+func (self *App) pasteImage(inputLine *edit.Input, result paste.Result) bool {
+	if self.savePastedImage == nil {
+		return false
+	}
+
+	path, err := self.savePastedImage(result.MediaType, result.Data)
 	if err != nil {
-		self.showFeedback(feedback.Command, feedback.Message{
-			Text:   "Could not paste clipboard image: " + err.Error(),
-			Status: agent.ErrorStatus,
-		})
-		return
+		self.showPasteFailure(err.Error())
+
+		return true
 	}
 
 	self.feedback.ClearOnTyping()
 	inputLine.Insert(path)
+
+	return true
+}
+
+func (self *App) showPasteFailure(message string) {
+	self.showFeedback(feedback.Command, feedback.Message{
+		Text:   "Could not paste: " + message,
+		Status: agent.ErrorStatus,
+	})
 }
 
 func (self *App) isTransitionRequested() bool {

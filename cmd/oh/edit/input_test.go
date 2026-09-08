@@ -619,19 +619,29 @@ func TestALetterNamingNoModeIsSwallowed(t *testing.T) {
 	}
 }
 
-func TestControlVRequestsAClipboardImage(t *testing.T) {
+func TestAPastedTextIsInsertedAtTheCursorWithItsIndentationNormalised(t *testing.T) {
 	self := inputFromKeys(t, "beforeafter")
 	for range len("after") {
 		self.Apply(key.Key{Code: key.Left}, false)
 	}
 
-	if got := self.Apply(key.Key{Code: key.Rune, Value: 'v', Mod: key.Ctrl}, false); got != PasteClipboardImage {
-		t.Errorf("ctrl+v returned %v, want image paste", got)
+	self.InsertPasted("    if isReady {\n        begin()\n    }")
+
+	want := "beforeif isReady {\n    begin()\n}after"
+	if got := self.Text(); got != want {
+		t.Errorf("pasted text is %q, want %q", got, want)
+	}
+}
+
+func TestControlVIsNoLongerBoundNowThatTheTerminalReportsPastesItself(t *testing.T) {
+	self := inputFromKeys(t, "draft")
+
+	if got := self.Apply(key.Key{Code: key.Rune, Value: 'v', Mod: key.Ctrl}, false); got != DrawInput {
+		t.Errorf("ctrl+v returned %v, want a redraw and nothing else", got)
 	}
 
-	self.Insert("/state/sessions/brave-otter/drops/image-123.png")
-	if got := self.Text(); got != "before/state/sessions/brave-otter/drops/image-123.pngafter" {
-		t.Errorf("image path was not inserted at the cursor: %q", got)
+	if got := self.Text(); got != "draft" {
+		t.Errorf("ctrl+v changed the line to %q", got)
 	}
 }
 

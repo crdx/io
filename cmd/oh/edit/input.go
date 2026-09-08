@@ -21,7 +21,6 @@ const (
 	ToggleGit
 	ToggleWeb
 	CompleteCommand
-	PasteClipboardImage
 )
 
 type Input struct {
@@ -113,6 +112,10 @@ func (self *Input) Frame(width int) Frame {
 	return framedRows
 }
 
+func (self *Input) InsertPasted(text string) {
+	self.buffer.Insert([]rune(normaliseIndentation(text)))
+}
+
 func (self *Input) Apply(keypress key.Key, isRunning bool) Action {
 	if self.wasRunning != isRunning {
 		self.isEnterPending = false
@@ -201,7 +204,7 @@ func (self *Input) Apply(keypress key.Key, isRunning bool) Action {
 	case key.Rune:
 		return self.rune(keypress, isRunning)
 
-	case key.PageUp, key.PageDown, key.PasteEnd, key.FocusIn, key.FocusOut, key.Unknown:
+	case key.PageUp, key.PageDown, key.PasteEnd, key.Clipboard, key.FocusIn, key.FocusOut, key.Unknown:
 	}
 
 	return DrawInput
@@ -372,8 +375,6 @@ func (self *Input) rune(keypress key.Key, isRunning bool) Action {
 			return QuitSession
 		}
 
-	case 'v':
-		return PasteClipboardImage
 	case 'x':
 		self.isPrefixPending = true
 	}
@@ -420,8 +421,19 @@ func (self *Input) paste(keypress key.Key) {
 func (self *Input) normalisePasteIndentation() {
 	end := self.buffer.Cursor()
 	pastedText := string(self.buffer.Runes()[self.pasteStart:end])
-	lines := strings.Split(pastedText, "\n")
-	indentation := len(pastedText)
+
+	normalisedText := normaliseIndentation(pastedText)
+	if normalisedText == pastedText {
+		return
+	}
+
+	self.buffer.remove(self.pasteStart, end)
+	self.buffer.Insert([]rune(normalisedText))
+}
+
+func normaliseIndentation(text string) string {
+	lines := strings.Split(text, "\n")
+	indentation := len(text)
 
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" {
@@ -431,8 +443,8 @@ func (self *Input) normalisePasteIndentation() {
 		indentation = min(indentation, len(line)-len(strings.TrimLeft(line, " ")))
 	}
 
-	if indentation == 0 || indentation == len(pastedText) {
-		return
+	if indentation == 0 || indentation == len(text) {
+		return text
 	}
 
 	for i, line := range lines {
@@ -440,8 +452,7 @@ func (self *Input) normalisePasteIndentation() {
 		lines[i] = line[min(indentation, leadingSpaces):]
 	}
 
-	self.buffer.remove(self.pasteStart, end)
-	self.buffer.Insert([]rune(strings.Join(lines, "\n")))
+	return strings.Join(lines, "\n")
 }
 
 func (self *Input) walk(direction int) {

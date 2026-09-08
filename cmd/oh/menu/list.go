@@ -238,7 +238,7 @@ func (self *state) apply(keypress key.Key) action {
 		if isTypeable(keypress) {
 			self.narrow(self.query + string(keypress.Value))
 		}
-	case key.Delete, key.PasteStart, key.PasteEnd, key.FocusIn, key.FocusOut, key.Unknown:
+	case key.Delete, key.PasteStart, key.PasteEnd, key.Clipboard, key.FocusIn, key.FocusOut, key.Unknown:
 	}
 
 	return continuePicking

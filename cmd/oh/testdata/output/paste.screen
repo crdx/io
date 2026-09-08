@@ -40,16 +40,49 @@ wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide 
 wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide wide
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-=== 7 a clipboard image ===
+=== 7 a pasted image ===
 conversation remains in scrollback
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 review /state/sessions/brave-otter/drops/image-123.png
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-=== 8 a clipboard image failure ===
+=== 8 an image arriving in chunks ===
 conversation remains in scrollback
 
-Could not paste clipboard image: the clipboard does not contain an image
+────────────────────────────────────────────────────────────────────────────────────────────────────
+review /state/sessions/brave-otter/drops/image-456.png
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== 9 a pasted text ===
+conversation remains in scrollback
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+explain if isReady {
+    begin()
+}
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== a1 a paste from the primary selection ===
+conversation remains in scrollback
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+note from the selection
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== a2 a paste holding nothing usable ===
+conversation remains in scrollback
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+draft
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== a3 an image that could not be saved ===
+conversation remains in scrollback
+
+Could not paste: the drops path is not a directory
+────────────────────────────────────────────────────────────────────────────────────────────────────
+draft
+────────────────────────────────────────────────────────────────────────────────────────────────────
+=== a4 a paste the terminal refused ===
+conversation remains in scrollback
+
+Could not paste: permission to read the clipboard was refused
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 draft
 ────────────────────────────────────────────────────────────────────────────────────────────────────
