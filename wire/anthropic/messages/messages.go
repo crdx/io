@@ -51,15 +51,14 @@ type Client struct {
 	Effort          string
 	MaxOutputTokens int
 
-	tokens              TokenSource
-	instructions        string
-	tools               []functionTool
-	toolNames           []string
-	history             []json.RawMessage
-	requestHistory      imageHistory
-	toolInputCorrection string
-	requests            *req.Client
-	observer            req.Observer
+	tokens         TokenSource
+	instructions   string
+	tools          []functionTool
+	toolNames      []string
+	history        []json.RawMessage
+	requestHistory imageHistory
+	requests       *req.Client
+	observer       req.Observer
 }
 
 func New(tokens TokenSource, model string, effort string, maxOutputTokens int) (*Client, error) {
@@ -102,15 +101,10 @@ func (self *Client) Configure(instructions string, tools []tool.Definition) {
 }
 
 func (self *Client) AddUserMessage(text string) {
-	self.toolInputCorrection = ""
-	self.history = append(self.history, encodeItem(message{
-		Role:    userRole,
-		Content: []json.RawMessage{encodeItem(textBlock{Type: "text", Text: text})},
-	}))
+	self.addUserText(text)
 }
 
 func (self *Client) AddToolResults(results []agent.ToolCallResult) {
-	self.toolInputCorrection = ""
 	blocks := make([]json.RawMessage, 0, len(results))
 
 	for _, result := range results {
@@ -130,7 +124,6 @@ func (self *Client) Dump() []json.RawMessage {
 }
 
 func (self *Client) Load(items []json.RawMessage) {
-	self.toolInputCorrection = ""
 	self.history = slices.Clone(items)
 	self.requestHistory.reset()
 }
@@ -175,17 +168,18 @@ func (self invalidToolInputError) getCorrection() string {
 }
 
 func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
+	self.resumeInterruptedTurn()
+
 	reply, err := self.post(ctx, yield)
 	if err == nil {
-		self.toolInputCorrection = ""
 		err = reply.validateToolInputs()
-		if invalidInput, ok := errors.AsType[invalidToolInputError](err); ok {
-			self.toolInputCorrection = invalidInput.getCorrection()
-		}
 	}
 	if err != nil {
 		if prose := reply.prose(); prose != nil {
 			self.history = append(self.history, prose)
+		}
+		if invalidInput, ok := errors.AsType[invalidToolInputError](err); ok {
+			self.addUserText(invalidInput.getCorrection())
 		}
 
 		return agent.Reply{}, err
@@ -257,6 +251,19 @@ func (self *Client) post(ctx context.Context, yield agent.Yield) (reply, error) 
 	return readReply(stream, yield)
 }
 
+func (self *Client) addUserText(text string) {
+	self.history = append(self.history, encodeItem(message{
+		Role:    userRole,
+		Content: []json.RawMessage{encodeItem(textBlock{Type: "text", Text: text})},
+	}))
+}
+
+func (self *Client) resumeInterruptedTurn() {
+	if endsWithAssistantTurn(self.history) {
+		self.addUserText(continueInstruction)
+	}
+}
+
 func (self *Client) requestBody() request {
 	return request{
 		Model:           self.Model,
@@ -267,7 +274,7 @@ func (self *Client) requestBody() request {
 		Tools:           self.tools,
 		Thinking:        thinking{Type: "adaptive", Display: "summarized"},
 		Output:          outputConfig{Effort: self.Effort},
-		Messages:        encodeMessages(continued(merged(self.requestHistory.prepare(self.history)))),
+		Messages:        encodeMessages(merged(self.requestHistory.prepare(self.history))),
 	}
 }
 
@@ -276,9 +283,6 @@ func (self *Client) system() []textBlock {
 
 	if self.instructions != "" {
 		blocks = append(blocks, textBlock{Type: "text", Text: self.instructions, Cache: ephemeral()})
-	}
-	if self.toolInputCorrection != "" {
-		blocks = append(blocks, textBlock{Type: "text", Text: self.toolInputCorrection})
 	}
 
 	return blocks

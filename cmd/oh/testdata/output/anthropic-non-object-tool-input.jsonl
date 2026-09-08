@@ -4,6 +4,7 @@
 {"kind":"event","event":{"kind":"request_retry","text":"the work tool call did not contain a JSON object","id":"toolu_array","name":"work","arguments":"[1, 2, 3]","attempt":1}}
 {"kind":"event","event":{"kind":"model_message","text":"I sent an object that time."}}
 {"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"send tool input that parses but is not an object"}]}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"Your previous response could not be used because the \"work\" tool call did not contain a JSON object. Try again with a JSON object for its input."}]}}
 {"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"I sent an object that time."}]}}
 {"kind":"turn_completion","turn":{}}
 {"kind":"event","event":{"kind":"user_message","text":"carry on"}}

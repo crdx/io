@@ -840,8 +840,12 @@ func TestARetriedRequestEndsWithAUserMessage(t *testing.T) {
 		t.Errorf("expected the retried conversation to end with a user message, got %q", last.Role)
 	}
 
-	if !strings.Contains((*bodies)[1], "Continue from where you left off.") {
-		t.Errorf("expected the model to be asked to carry on, got %s", (*bodies)[1])
+	if !strings.Contains((*bodies)[1], "did not contain a JSON object") {
+		t.Errorf("expected the model to be told what was wrong, got %s", (*bodies)[1])
+	}
+
+	if strings.Contains(systemPrompt(t, (*bodies)[1]), "could not be used because") {
+		t.Errorf("expected the correction to stay out of the system prompt, got %s", (*bodies)[1])
 	}
 
 	state, err := assistant.Dump()
@@ -849,9 +853,27 @@ func TestARetriedRequestEndsWithAUserMessage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if held := heldConversation(state); strings.Contains(held, "Continue from where you left off.") {
-		t.Errorf("expected the instruction to stay out of the conversation, got %s", held)
+	if held := heldConversation(state); !strings.Contains(held, "did not contain a JSON object") {
+		t.Errorf("expected the correction to stay in the conversation, got %s", held)
 	}
+}
+
+func systemPrompt(t *testing.T, body string) string {
+	t.Helper()
+
+	var request struct {
+		System []map[string]any `json:"system"`
+	}
+	if err := json.Unmarshal([]byte(body), &request); err != nil {
+		t.Fatal(err)
+	}
+
+	written, err := json.Marshal(request.System)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return string(written)
 }
 
 func requestBlocks(t *testing.T, body string) []map[string]any {

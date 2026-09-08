@@ -1,6 +1,9 @@
 package messages
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"slices"
+)
 
 const (
 	userRole      = "user"
@@ -29,15 +32,17 @@ func merged(history []json.RawMessage) []message {
 	return joinedMessages
 }
 
-func continued(messages []message) []message {
-	if last := len(messages) - 1; last < 0 || messages[last].Role != assistantRole {
-		return messages
+func endsWithAssistantTurn(history []json.RawMessage) bool {
+	for _, item := range slices.Backward(history) {
+		var last message
+		if json.Unmarshal(item, &last) != nil || len(last.Content) == 0 {
+			continue
+		}
+
+		return last.Role == assistantRole
 	}
 
-	return append(messages, message{
-		Role:    userRole,
-		Content: []json.RawMessage{encodeItem(textBlock{Type: "text", Text: continueInstruction})},
-	})
+	return false
 }
 
 func encodeMessages(messages []message) []json.RawMessage {

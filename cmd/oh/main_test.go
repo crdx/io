@@ -13040,6 +13040,114 @@ func TestNoRecordedRequestMarksAThoughtForCaching(t *testing.T) {
 	}
 }
 
+func TestNoRecordedRequestRewritesWhatTheModelHasThoughtOver(t *testing.T) {
+	paths, err := filepath.Glob(filepath.Join("testdata", "output", "*.requests.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(paths) == 0 {
+		t.Fatal("no recorded requests")
+	}
+
+	var examined int
+
+	for _, path := range paths {
+		requests := boundRequests(t, path)
+		if len(requests) < 2 {
+			continue
+		}
+
+		examined++
+
+		t.Run(filepath.Base(path), func(t *testing.T) {
+			for at := 1; at < len(requests); at++ {
+				earlier, later := requests[at-1], requests[at]
+
+				if earlier.system != later.system {
+					t.Errorf("request %d rewrote the system prompt:\n%s\n%s", at, earlier.system, later.system)
+				}
+				if earlier.tools != later.tools {
+					t.Errorf("request %d rewrote the tools:\n%s\n%s", at, earlier.tools, later.tools)
+				}
+				if len(earlier.bound) > len(later.messages) {
+					t.Fatalf("request %d dropped %d messages", at, len(earlier.bound)-len(later.messages))
+				}
+
+				for position, sent := range earlier.bound {
+					if later.messages[position] != sent {
+						t.Errorf(
+							"request %d rewrote message %d:\n%s\n%s",
+							at, position, sent, later.messages[position],
+						)
+					}
+				}
+			}
+		})
+	}
+
+	if examined == 0 {
+		t.Fatal("no conversation was recorded over more than one request")
+	}
+}
+
+type boundRequest struct {
+	system   string
+	tools    string
+	messages []string
+	bound    []string
+}
+
+func boundRequests(t *testing.T, path string) []boundRequest {
+	t.Helper()
+
+	recorded, err := os.ReadFile(path) //nolint:gosec // fixed testdata path
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var requests []boundRequest
+
+	for line := range strings.SplitSeq(strings.TrimSpace(string(recorded)), "\n") {
+		var body map[string]any
+		if err := json.Unmarshal([]byte(line), &body); err != nil {
+			t.Fatal(err)
+		}
+
+		if _, isThinking := body["thinking"]; !isThinking {
+			continue
+		}
+
+		sentMessages, _ := body["messages"].([]any)
+		request := boundRequest{
+			system:   canonicalJSON(t, body["system"]),
+			tools:    canonicalJSON(t, body["tools"]),
+			messages: make([]string, 0, len(sentMessages)),
+		}
+
+		for _, sent := range sentMessages {
+			request.messages = append(request.messages, canonicalJSON(t, sent))
+			if turn, isTurn := sent.(map[string]any); isTurn && turn["role"] == "assistant" {
+				request.bound = slices.Clone(request.messages)
+			}
+		}
+
+		requests = append(requests, request)
+	}
+
+	return requests
+}
+
+func canonicalJSON(t *testing.T, node any) string {
+	t.Helper()
+
+	written, err := json.Marshal(node)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return string(written)
+}
+
 func markedThoughts(node any) []map[string]any {
 	var found []map[string]any
 
