@@ -1,0 +1,11 @@
+{"kind":"head","version":12,"meta":{"model":"claude-opus-5","workspaceDir":"","provider":"anthropic","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
+{"kind":"event","event":{"kind":"user_message","text":"reach the Anthropic usage limit"}}
+{"kind":"event","event":{"kind":"turn_failure","text":"This request would exceed your account's rate limit. Please try again later."}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"reach the Anthropic usage limit"}]}}
+{"kind":"turn_completion","turn":{}}
+{"kind":"event","event":{"kind":"user_message","text":"continue after the early reset"}}
+{"kind":"event","event":{"kind":"model_message","text":"Available after the reset."}}
+{"kind":"item","payload":{"role":"user","content":[{"type":"text","text":"continue after the early reset"}]}}
+{"kind":"item","payload":{"role":"assistant","content":[{"type":"text","text":"Available after the reset."}]}}
+{"kind":"turn_completion","turn":{}}

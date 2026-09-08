@@ -15,7 +15,10 @@ import (
 	"crdx.org/io/provider/opencodego"
 )
 
-var _ agent.UsageReporter = (*opencodego.Client)(nil)
+var (
+	_ agent.UsageReporter = (*opencodego.Client)(nil)
+	_ agent.UsageProber   = (*opencodego.Client)(nil)
+)
 
 func usageServer(t *testing.T, code int, payload string) *httptest.Server {
 	t.Helper()
@@ -43,6 +46,42 @@ func TestAClientWithNoUsageAddressReportsNothing(t *testing.T) {
 	windows, err := client.UsageWindows(t.Context())
 	if err != nil || windows != nil {
 		t.Errorf("expected no windows and no error, got %v and %v", windows, err)
+	}
+}
+
+func TestARealUsageLimitRefusalNamesItsWindowAndReset(t *testing.T) {
+	const wait = 165899 * time.Second
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "text/plain;charset=UTF-8")
+		writer.Header().Set("Retry-After", "165899")
+		writer.WriteHeader(http.StatusTooManyRequests)
+		_, _ = fmt.Fprint(writer, `{"type":"error","error":{"type":"GoUsageLimitError","message":"Monthly usage limit reached. Resets in 1 day."},"metadata":{"workspace":"workspace-1","limitName":"monthly"}}`)
+	}))
+	t.Cleanup(server.Close)
+
+	client := newClient(t, server.URL)
+	client.AddUserMessage("hello")
+	before := time.Now()
+	_, err := client.Send(t.Context(), func(agent.Output) bool { return true })
+
+	var limit *agent.UsageLimitError
+	if !errors.As(err, &limit) {
+		t.Fatalf("expected a usage limit, got %v", err)
+	}
+	if len(limit.Windows) != 1 {
+		t.Fatalf("got windows %+v", limit.Windows)
+	}
+	window := limit.Windows[0]
+	if window.Duration != 30*24*time.Hour || window.Percent != 100 || !window.IsLimited {
+		t.Errorf("got window %+v", window)
+	}
+	if window.ResetsAt.Before(before.Add(wait)) || window.ResetsAt.After(time.Now().Add(wait)) {
+		t.Errorf("got reset %s", window.ResetsAt)
+	}
+	var refusal *req.StatusError
+	if !errors.As(err, &refusal) || refusal.Code != "GoUsageLimitError" {
+		t.Errorf("the provider refusal was not preserved: %v", err)
 	}
 }
 

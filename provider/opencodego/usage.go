@@ -2,9 +2,13 @@ package opencodego
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"strings"
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/req"
 )
 
 const (
@@ -18,7 +22,10 @@ const (
 	monthlyWindow = 30 * 24 * time.Hour
 )
 
-const usageOK = "ok"
+const (
+	usageOK             = "ok"
+	usageLimitErrorCode = "GoUsageLimitError"
+)
 
 type usageLimit struct {
 	Status   string  `json:"status"`
@@ -26,13 +33,69 @@ type usageLimit struct {
 	ResetsAt string  `json:"resetsAt"`
 }
 
+func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, error) {
+	reply, err := self.Client.Send(ctx, yield)
+	window, isLimited := refusedUsageWindow(err, time.Now())
+	if !isLimited {
+		return reply, err
+	}
+
+	return reply, &agent.UsageLimitError{Cause: err, Windows: []agent.UsageWindow{window}}
+}
+
+func refusedUsageWindow(err error, now time.Time) (agent.UsageWindow, bool) {
+	refusal, isRefusal := errors.AsType[*req.StatusError](err)
+	if !isRefusal || refusal.Code != usageLimitErrorCode {
+		return agent.UsageWindow{}, false
+	}
+
+	var payload struct {
+		Metadata struct {
+			LimitName string `json:"limitName"`
+		} `json:"metadata"`
+	}
+	if json.Unmarshal([]byte(refusal.Body), &payload) != nil {
+		return agent.UsageWindow{}, false
+	}
+
+	var duration time.Duration
+	switch strings.ToLower(payload.Metadata.LimitName) {
+	case "rolling":
+		duration = rollingWindow
+	case "weekly":
+		duration = weeklyWindow
+	case "monthly":
+		duration = monthlyWindow
+	default:
+		return agent.UsageWindow{}, false
+	}
+
+	resetsAt := time.Time{}
+	if wait := refusal.RetryAfter(); wait > 0 {
+		resetsAt = now.Add(wait)
+	}
+
+	return agent.UsageWindow{
+		Duration:  duration,
+		Percent:   100,
+		ResetsAt:  resetsAt,
+		IsLimited: true,
+	}, true
+}
+
 func (self *Client) IsAvailable() bool {
 	return self.UsageURL != ""
 }
 
 func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, error) {
+	probe, err := self.ProbeUsage(ctx)
+
+	return probe.Windows, err
+}
+
+func (self *Client) ProbeUsage(ctx context.Context) (agent.UsageProbe, error) {
 	if self.UsageURL == "" {
-		return nil, nil
+		return agent.UsageProbe{}, nil
 	}
 
 	var payload struct {
@@ -46,8 +109,9 @@ func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 	header := self.headers()
 	header.Set("Accept", "application/json")
 
-	if err := self.observedRequests().Get(ctx, self.UsageURL, header, &payload); err != nil {
-		return nil, err
+	responseHeader, err := self.observedRequests().GetWithHeaders(ctx, self.UsageURL, header, &payload)
+	if err != nil {
+		return agent.UsageProbe{}, err
 	}
 
 	var windows []agent.UsageWindow
@@ -65,7 +129,22 @@ func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, erro
 		}
 	}
 
-	return windows, nil
+	availability := agent.UsageAvailabilityUnknown
+	if len(windows) > 0 {
+		availability = agent.UsageAvailabilityAllowed
+	}
+	for _, window := range windows {
+		if window.IsLimited {
+			availability = agent.UsageAvailabilityLimited
+			break
+		}
+	}
+
+	return agent.UsageProbe{
+		Windows:      windows,
+		Availability: availability,
+		RefreshAfter: req.CacheLifetime(responseHeader),
+	}, nil
 }
 
 func usageWindow(limit usageLimit, duration time.Duration) (agent.UsageWindow, bool) {

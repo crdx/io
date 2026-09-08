@@ -244,8 +244,12 @@ func (self *Client) post(ctx context.Context, yield agent.Yield) (reply, error) 
 		return reply{}, err
 	}
 
-	stream, _, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers(token))
+	stream, responseHeader, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers(token))
 	if err != nil {
+		if isUsageLimited(responseHeader) {
+			return reply{}, &agent.UsageLimitError{Cause: err, Windows: responseUsageWindows(responseHeader)}
+		}
+
 		return reply{}, err
 	}
 	defer func() { _ = stream.Close() }()

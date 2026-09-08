@@ -72,9 +72,17 @@ func (self *Client) JSON(ctx context.Context, address string, body any, target a
 }
 
 func (self *Client) Get(ctx context.Context, address string, header http.Header, target any) error {
+	_, err := self.GetWithHeaders(ctx, address, header, target)
+
+	return err
+}
+
+func (self *Client) GetWithHeaders(
+	ctx context.Context, address string, header http.Header, target any,
+) (http.Header, error) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, address, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if header != nil {
@@ -83,17 +91,17 @@ func (self *Client) Get(ctx context.Context, address string, header http.Header,
 
 	request.Header.Set("Accept", "application/json")
 
-	body, _, err := self.do(request, nil)
+	body, responseHeader, err := self.do(request, nil)
 	if err != nil {
-		return err
+		return responseHeader, err
 	}
 	defer func() { _ = body.Close() }()
 
 	if err := json.NewDecoder(body).Decode(target); err != nil {
-		return fmt.Errorf("parse the response: %w", err)
+		return responseHeader, fmt.Errorf("parse the response: %w", err)
 	}
 
-	return nil
+	return responseHeader, nil
 }
 
 func (self *Client) Form(ctx context.Context, address string, form url.Values, target any) error {
@@ -197,7 +205,7 @@ func (self *Client) do(request *http.Request, requestBody []byte) (io.ReadCloser
 	if response.StatusCode != http.StatusOK {
 		defer func() { _ = response.Body.Close() }()
 
-		return nil, nil, refusal(response)
+		return nil, response.Header, refusal(response)
 	}
 
 	return response.Body, response.Header, nil
@@ -299,6 +307,7 @@ func refusal(response *http.Response) error {
 		Error struct {
 			Message string `json:"message"`
 			Code    string `json:"code"`
+			Type    string `json:"type"`
 		} `json:"error"`
 
 		Detail string `json:"detail"`
@@ -309,6 +318,9 @@ func refusal(response *http.Response) error {
 	}
 
 	refusedRequest.Code = payload.Error.Code
+	if refusedRequest.Code == "" {
+		refusedRequest.Code = payload.Error.Type
+	}
 
 	for _, sentence := range []string{payload.Error.Message, payload.Detail} {
 		if sentence != "" {
@@ -319,6 +331,22 @@ func refusal(response *http.Response) error {
 	}
 
 	return refusedRequest
+}
+
+func CacheLifetime(header http.Header) time.Duration {
+	for directive := range strings.SplitSeq(header.Get("Cache-Control"), ",") {
+		value, found := strings.CutPrefix(strings.TrimSpace(directive), "max-age=")
+		if !found {
+			continue
+		}
+
+		seconds, err := strconv.Atoi(strings.Trim(value, `"`))
+		if err == nil {
+			return max(time.Duration(seconds)*time.Second, 0)
+		}
+	}
+
+	return 0
 }
 
 func retryAfter(header string) time.Duration {

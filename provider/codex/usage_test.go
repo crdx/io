@@ -1,6 +1,7 @@
 package codex_test
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -12,7 +13,10 @@ import (
 	"crdx.org/io/provider/codex"
 )
 
-var _ agent.UsageReporter = (*codex.Client)(nil)
+var (
+	_ agent.UsageReporter = (*codex.Client)(nil)
+	_ agent.UsageProber   = (*codex.Client)(nil)
+)
 
 func newUsageClient(t *testing.T, url string) *codex.Client {
 	t.Helper()
@@ -94,6 +98,51 @@ func reportedWindows(t *testing.T, header map[string]string) []agent.UsageWindow
 	}
 
 	return windows
+}
+
+func TestTheAccountUsageProbeReadsPermissionAndEveryWindow(t *testing.T) {
+	var askedPath string
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		askedPath = request.URL.Path
+		if got := request.Header.Get("Authorization"); got != "Bearer token" {
+			t.Errorf("got authorisation %q", got)
+		}
+		if got := request.Header.Get("Chatgpt-Account-Id"); got != "account" {
+			t.Errorf("got account %q", got)
+		}
+		writer.Header().Set("Cache-Control", "private, max-age=120")
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprint(writer, `{
+			"rate_limit": {
+				"allowed": true,
+				"primary_window": {"used_percent": 42, "limit_window_seconds": 18000, "reset_at": 1788277246}
+			},
+			"additional_rate_limits": [{
+				"limit_name": "codex_other",
+				"normal_model_slug": "gpt-5.3-codex-spark",
+				"rate_limit": {
+					"allowed": false,
+					"primary_window": {"used_percent": 100, "limit_window_seconds": 604800, "reset_at": 1788291993}
+				}
+			}]
+		}`)
+	}))
+	t.Cleanup(server.Close)
+
+	client := newUsageClient(t, server.URL+"/backend-api/codex/responses")
+	probe, err := client.ProbeUsage(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if askedPath != "/backend-api/wham/usage" {
+		t.Errorf("got path %q", askedPath)
+	}
+	if probe.Availability != agent.UsageAvailabilityAllowed || probe.RefreshAfter != 2*time.Minute {
+		t.Errorf("got probe %+v", probe)
+	}
+	if len(probe.Windows) != 2 || probe.Windows[0].IsLimited || !probe.Windows[1].IsLimited || probe.Windows[1].Scope != "gpt-5.3-codex-spark" {
+		t.Errorf("got windows %+v", probe.Windows)
+	}
 }
 
 func TestEveryShapeOfRateLimitHeaderIsReadTheSameWay(t *testing.T) {
@@ -319,6 +368,51 @@ func TestARelativeResetIsReadWhereNoAbsoluteOneArrived(t *testing.T) {
 	if windows[0].ResetsAt.Before(before.Add(time.Hour)) ||
 		windows[0].ResetsAt.After(time.Now().Add(time.Hour)) {
 		t.Errorf("expected a reset about an hour out, got %s", windows[0].ResetsAt)
+	}
+}
+
+func TestAnExplicitUsageLimitIsReportedWithTheActiveWindow(t *testing.T) {
+	header := theAccountsOwnHeaders()
+	header["X-Codex-Primary-Used-Percent"] = "100"
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		for name, value := range header {
+			writer.Header().Set(name, value)
+		}
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusTooManyRequests)
+		_, _ = fmt.Fprint(writer, `{"error":{"type":"usage_limit_reached","message":"usage is gone"}}`)
+	}))
+	t.Cleanup(server.Close)
+
+	client := newUsageClient(t, server.URL)
+	client.AddUserMessage("hello")
+	_, err := client.Send(t.Context(), func(agent.Output) bool { return true })
+
+	var limit *agent.UsageLimitError
+	if !errors.As(err, &limit) {
+		t.Fatalf("expected a usage limit, got %v", err)
+	}
+	if limit.Retriable() {
+		t.Error("expected an exhausted allowance not to be retried")
+	}
+	if len(limit.Windows) != 3 || !limit.Windows[0].IsLimited {
+		t.Fatalf("got windows %+v", limit.Windows)
+	}
+	for _, window := range limit.Windows[1:] {
+		if window.IsLimited {
+			t.Errorf("unrelated window was marked limited: %+v", window)
+		}
+	}
+}
+
+func TestAFullWindowOnASuccessfulResponseRemainsAvailable(t *testing.T) {
+	header := theAccountsOwnHeaders()
+	header["X-Codex-Primary-Used-Percent"] = "100"
+
+	windows := reportedWindows(t, header)
+	if len(windows) == 0 || windows[0].Percent != 100 || windows[0].IsLimited {
+		t.Errorf("got windows %+v", windows)
 	}
 }
 

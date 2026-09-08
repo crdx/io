@@ -37,6 +37,12 @@ var ErrNoSelection = errors.New(
 )
 
 func ReserveRoundRobin(path string, selections []Selection) (Selection, error) {
+	return ReserveAvailableRoundRobin(path, selections, func(Selection) bool { return true })
+}
+
+func ReserveAvailableRoundRobin(
+	path string, selections []Selection, isAvailable func(Selection) bool,
+) (Selection, error) {
 	if len(selections) == 0 {
 		return Selection{}, ErrNoSelection
 	}
@@ -50,7 +56,12 @@ func ReserveRoundRobin(path string, selections []Selection) (Selection, error) {
 			return fmt.Errorf("model round-robin state has version %d, expected %d", storedState.Version, roundRobinStateVersion)
 		}
 
-		selectedIndex := roundrobin.NextIndex(selections, storedState.Last, storedState.LastIndex)
+		selectedIndex := roundrobin.NextIndexWhere(
+			selections, storedState.Last, storedState.LastIndex, isAvailable,
+		)
+		if selectedIndex < 0 {
+			selectedIndex = roundrobin.NextIndex(selections, storedState.Last, storedState.LastIndex)
+		}
 		selectedModel = selections[selectedIndex]
 		*storedState = roundRobinState{
 			Version:   roundRobinStateVersion,

@@ -67,6 +67,50 @@ func TestRepeatedRoundRobinSelectionsWeightTheRotation(t *testing.T) {
 	}
 }
 
+func TestUnavailableSelectionsAreSkippedWithoutLosingTheirWeight(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "round-robin.json")
+	frequent := Selection{Provider: CodexProvider, Model: "frequent", Effort: "high"}
+	available := Selection{Provider: AnthropicProvider, Model: "available", Effort: "high"}
+	selections := []Selection{frequent, frequent, available}
+	isAvailable := func(selection Selection) bool { return selection == available }
+
+	for range 2 {
+		selected, err := ReserveAvailableRoundRobin(path, selections, isAvailable)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if selected != available {
+			t.Errorf("got %s, want %s", selected, available)
+		}
+	}
+
+	selected, err := ReserveAvailableRoundRobin(path, selections, func(Selection) bool { return true })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if selected != frequent {
+		t.Errorf("got %s, want %s after recovery", selected, frequent)
+	}
+}
+
+func TestARotationWithNothingAvailableKeepsItsOrdinaryPosition(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "round-robin.json")
+	selections := []Selection{
+		{Provider: CodexProvider, Model: "first", Effort: "high"},
+		{Provider: AnthropicProvider, Model: "second", Effort: "high"},
+	}
+
+	for i := range selections {
+		selected, err := ReserveAvailableRoundRobin(path, selections, func(Selection) bool { return false })
+		if err != nil {
+			t.Fatal(err)
+		}
+		if selected != selections[i] {
+			t.Errorf("got %s, want %s", selected, selections[i])
+		}
+	}
+}
+
 func TestNormalAndFastRoundRobinSelectionsAreDistinct(t *testing.T) {
 	useCachedModels(t)
 

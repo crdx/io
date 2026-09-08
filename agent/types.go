@@ -52,6 +52,45 @@ type UsageReporter interface {
 	UsageWindows(context context.Context) ([]UsageWindow, error)
 }
 
+type UsageAvailability int
+
+const (
+	UsageAvailabilityUnknown UsageAvailability = iota
+	UsageAvailabilityAllowed
+	UsageAvailabilityLimited
+)
+
+type UsageProbe struct {
+	Windows      []UsageWindow
+	Availability UsageAvailability
+	RefreshAfter time.Duration
+}
+
+type UsageProber interface {
+	ProbeUsage(context context.Context) (UsageProbe, error)
+}
+
+type UsageLimitError struct {
+	Cause   error
+	Windows []UsageWindow
+}
+
+func (self *UsageLimitError) Error() string {
+	return self.Cause.Error()
+}
+
+func (self *UsageLimitError) Unwrap() error {
+	return self.Cause
+}
+
+func (*UsageLimitError) Retriable() bool {
+	return false
+}
+
+func (*UsageLimitError) RetryAfter() time.Duration {
+	return 0
+}
+
 type Output struct {
 	Kind       Kind
 	Text       string

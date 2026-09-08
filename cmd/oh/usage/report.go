@@ -144,6 +144,10 @@ func StaleAfter(refreshAfter time.Duration) time.Duration {
 }
 
 func (self Limit) StateAt(now time.Time) string {
+	if resetsAt, hasReset := self.ResetTime(); hasReset && !resetsAt.After(now) {
+		return StateStale
+	}
+
 	switch {
 	case self.IsLimited:
 		return StateLimited
@@ -151,13 +155,9 @@ func (self Limit) StateAt(now time.Time) string {
 		return StateIdle
 	case !self.IsActive:
 		return StateUnknown
+	default:
+		return StateActive
 	}
-
-	if resetsAt, hasReset := self.ResetTime(); hasReset && !resetsAt.After(now) {
-		return StateStale
-	}
-
-	return StateActive
 }
 
 func (self Limit) IsSessionLimit() bool {
@@ -258,12 +258,11 @@ func buildLimit(window agent.UsageWindow, measuredAt time.Time, now time.Time) L
 		limit.Severity = severity(ClassifyPace(limit.UsedPercent, expectedPercent))
 	}
 
-	if window.IsLimited {
-		limit.IsLimited = true
+	limit.IsLimited = window.IsLimited
+	limit.State = limit.StateAt(now)
+	if limit.State == StateLimited {
 		limit.Severity = SeverityError
 	}
-
-	limit.State = limit.StateAt(now)
 
 	return limit
 }

@@ -2,10 +2,13 @@ package messages
 
 import (
 	"context"
+	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/req"
 )
 
 const (
@@ -16,6 +19,14 @@ const (
 const (
 	sessionWindow = 5 * time.Hour
 	weeklyWindow  = 7 * 24 * time.Hour
+)
+
+const (
+	unifiedLimitHeader = "Anthropic-Ratelimit-Unified"
+	limitResetSuffix   = "-Reset"
+	limitStatusSuffix  = "-Status"
+	utilisationSuffix  = "-Utili" + "zation"
+	limitRejected      = "rejected"
 )
 
 type usageLimit struct {
@@ -36,25 +47,38 @@ func (self *Client) IsAvailable() bool {
 }
 
 func (self *Client) UsageWindows(ctx context.Context) ([]agent.UsageWindow, error) {
-	address, reportable := usageAddress(self.URL)
-	if !reportable {
-		return nil, nil
+	probe, err := self.ProbeUsage(ctx)
+
+	return probe.Windows, err
+}
+
+func (self *Client) ProbeUsage(ctx context.Context) (agent.UsageProbe, error) {
+	address, isAvailable := usageAddress(self.URL)
+	if !isAvailable {
+		return agent.UsageProbe{}, nil
 	}
 
 	token, err := self.tokens.Token()
 	if err != nil {
-		return nil, err
+		return agent.UsageProbe{}, err
 	}
 
 	var payload struct {
 		Limits []usageLimit `json:"limits"`
 	}
 
-	if err := self.observedRequests().Get(ctx, address, self.headers(token), &payload); err != nil {
-		return nil, err
+	header, err := self.observedRequests().GetWithHeaders(ctx, address, self.headers(token), &payload)
+	if err != nil {
+		return agent.UsageProbe{}, err
 	}
 
-	return usageWindows(payload.Limits), nil
+	windows := usageWindows(payload.Limits)
+
+	return agent.UsageProbe{
+		Windows:      windows,
+		Availability: probedUsageAvailability(windows),
+		RefreshAfter: req.CacheLifetime(header),
+	}, nil
 }
 
 func usageWindows(limits []usageLimit) []agent.UsageWindow {
@@ -97,6 +121,62 @@ func usageWindows(limits []usageLimit) []agent.UsageWindow {
 	}
 
 	return append(unscopedWindows, scopedWindows...)
+}
+
+func probedUsageAvailability(windows []agent.UsageWindow) agent.UsageAvailability {
+	if len(windows) == 0 {
+		return agent.UsageAvailabilityUnknown
+	}
+
+	for _, window := range windows {
+		if window.IsLimited {
+			return agent.UsageAvailabilityLimited
+		}
+		if window.Percent >= 100 {
+			return agent.UsageAvailabilityUnknown
+		}
+	}
+
+	return agent.UsageAvailabilityAllowed
+}
+
+func responseUsageWindows(header http.Header) []agent.UsageWindow {
+	var windows []agent.UsageWindow
+
+	for _, reportedWindow := range []struct {
+		suffix   string
+		duration time.Duration
+	}{
+		{suffix: "-5h", duration: sessionWindow},
+		{suffix: "-7d", duration: weeklyWindow},
+	} {
+		prefix := unifiedLimitHeader + reportedWindow.suffix
+		utilisation, err := strconv.ParseFloat(header.Get(prefix+utilisationSuffix), 64)
+		if err != nil {
+			continue
+		}
+
+		resetSeconds, err := strconv.ParseInt(header.Get(prefix+limitResetSuffix), 10, 64)
+		if err != nil || resetSeconds <= 0 {
+			continue
+		}
+
+		windows = append(windows, agent.UsageWindow{
+			Duration:  reportedWindow.duration,
+			Percent:   utilisation * 100,
+			ResetsAt:  time.Unix(resetSeconds, 0).UTC(),
+			IsLimited: strings.EqualFold(header.Get(prefix+limitStatusSuffix), limitRejected),
+		})
+	}
+
+	return windows
+}
+
+func isUsageLimited(header http.Header) bool {
+	return strings.EqualFold(
+		strings.TrimSpace(header.Get(unifiedLimitHeader+limitStatusSuffix)),
+		limitRejected,
+	)
 }
 
 func usageAddress(turnAddress string) (string, bool) {

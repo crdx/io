@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"slices"
@@ -163,14 +164,24 @@ func (self *Client) post(ctx context.Context, yield agent.Yield) (reply, error) 
 	}
 
 	stream, responseHeader, err := self.requests.Stream(ctx, self.URL, self.requestBody(), self.headers(token))
+	isUsageLimited := usageLimitReached(err)
+	windows := self.recordUsageWindows(responseHeader, time.Now(), isUsageLimited)
 	if err != nil {
+		if isUsageLimited {
+			return reply{}, &agent.UsageLimitError{Cause: err, Windows: windows}
+		}
+
 		return reply{}, err
 	}
 	defer func() { _ = stream.Close() }()
 
-	self.recordUsageWindows(responseHeader, time.Now())
-
 	return readReply(stream, yield)
+}
+
+func usageLimitReached(err error) bool {
+	refusal, isRefusal := errors.AsType[*req.StatusError](err)
+
+	return isRefusal && refusal.Code == "usage_limit_reached"
 }
 
 func (self *Client) settled() error {

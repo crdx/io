@@ -152,6 +152,22 @@ func Resolve(
 	configuredSelections []model.Selection,
 	roundRobinPath string,
 ) (model.Selection, error) {
+	return ResolveAvailable(
+		requestedSelection,
+		resumedSelection,
+		configuredSelections,
+		roundRobinPath,
+		func(model.Selection) bool { return true },
+	)
+}
+
+func ResolveAvailable(
+	requestedSelection model.Selection,
+	resumedSelection model.Selection,
+	configuredSelections []model.Selection,
+	roundRobinPath string,
+	isAvailable func(model.Selection) bool,
+) (model.Selection, error) {
 	if resumedSelection != (model.Selection{}) {
 		if requestedSelection.Provider != "" && requestedSelection.Provider != resumedSelection.Provider {
 			return model.Selection{}, fmt.Errorf(
@@ -167,5 +183,5 @@ func Resolve(
 		return requestedSelection, nil
 	}
 
-	return model.ReserveRoundRobin(roundRobinPath, configuredSelections)
+	return model.ReserveAvailableRoundRobin(roundRobinPath, configuredSelections, isAvailable)
 }

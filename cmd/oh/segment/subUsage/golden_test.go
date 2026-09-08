@@ -30,6 +30,13 @@ func window(duration time.Duration, percent float64, remainingTime time.Duration
 	}
 }
 
+func limited(duration time.Duration, percent float64, remainingTime time.Duration) agent.UsageWindow {
+	built := window(duration, percent, remainingTime)
+	built.IsLimited = true
+
+	return built
+}
+
 func scoped(scope string, percent float64) agent.UsageWindow {
 	built := window(5*time.Hour, percent, 2*time.Hour)
 	built.Scope = scope
@@ -73,6 +80,7 @@ func segmentCases() []segmentCase {
 			windows: []agent.UsageWindow{{Duration: 30 * 24 * time.Hour, Percent: 100, IsLimited: true}},
 		},
 		{name: "a window whose reset has passed", windows: []agent.UsageWindow{window(5*time.Hour, 40, -time.Minute)}},
+		{name: "a limited window whose reset has passed", windows: []agent.UsageWindow{limited(5*time.Hour, 100, -time.Minute)}},
 		{
 			name:    "a window with no reset at all",
 			windows: []agent.UsageWindow{{Duration: 5 * time.Hour, Percent: 40}},

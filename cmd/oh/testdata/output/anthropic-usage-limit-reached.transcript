@@ -1,0 +1,30 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## Mode · rxwgs · +0s
+
+## User · +0s
+
+reach the Anthropic usage limit
+
+## Failure · +0s
+
+```
+This request would exceed your account's rate limit. Please try again later.
+```
+
+## User · +0s
+
+continue after the early reset
+
+## Assistant · +0s
+
+Available after the reset.
+

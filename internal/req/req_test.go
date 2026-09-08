@@ -118,6 +118,57 @@ func TestARefusalKeepsWhatItWasAsWellAsWhatItSaid(t *testing.T) {
 	}
 }
 
+func TestARefusalKeepsTheEndpointsErrorTypeWhenItHasNoCode(t *testing.T) {
+	url := refusingServer(
+		t,
+		http.StatusTooManyRequests,
+		`{"error":{"message":"usage is gone","type":"usage_limit_reached"}}`,
+	)
+
+	_, _, err := req.New(time.Second).Stream(t.Context(), url, map[string]string{}, nil)
+
+	var refused *req.StatusError
+	if !errors.As(err, &refused) {
+		t.Fatalf("expected a refusal the caller can read, got %v", err)
+	}
+	if refused.Code != "usage_limit_reached" {
+		t.Errorf("expected the endpoint's own type, got %q", refused.Code)
+	}
+}
+
+func TestARefusalReturnsItsResponseHeaders(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("X-Usage-Reset", "later")
+		writer.WriteHeader(http.StatusTooManyRequests)
+	}))
+	t.Cleanup(server.Close)
+
+	_, header, err := req.New(time.Second).Stream(t.Context(), server.URL, map[string]string{}, nil)
+	if err == nil {
+		t.Fatal("expected the refusal to be reported")
+	}
+	if got := header.Get("X-Usage-Reset"); got != "later" {
+		t.Errorf("got response header %q", got)
+	}
+}
+
+func TestCacheLifetimeReadsTheServersMaximumAge(t *testing.T) {
+	for _, test := range []struct {
+		header string
+		want   time.Duration
+	}{
+		{header: "private, max-age=120", want: 2 * time.Minute},
+		{header: `max-age="30"`, want: 30 * time.Second},
+		{header: "no-cache"},
+		{header: "max-age=not-a-number"},
+	} {
+		header := http.Header{"Cache-Control": {test.header}}
+		if got := req.CacheLifetime(header); got != test.want {
+			t.Errorf("header %q gave %s, want %s", test.header, got, test.want)
+		}
+	}
+}
+
 func TestAConnectionThatWasNeverMadeIsWorthAskingAgainAfter(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 	address := server.URL

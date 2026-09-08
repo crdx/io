@@ -317,16 +317,16 @@ func (self *state) drawWindow(
 	label := usage.ShortWindowLabel(window.Duration)
 	usedPercent := int(window.Percent + 0.5)
 
+	if !window.ResetsAt.IsZero() && !window.ResetsAt.After(now) {
+		return style.Dim(label + " " + staleLabel)
+	}
+
 	if window.IsLimited {
 		return style.Failure(fmt.Sprintf("%s %d%%", label, usedPercent)) +
 			" " +
 			self.gauges.Draw(usedPercent, nil, usage.PaceCritical, barCells) +
 			" " +
 			style.Failure(limitedMark)
-	}
-
-	if !window.ResetsAt.IsZero() && !window.ResetsAt.After(now) {
-		return style.Dim(label + " " + staleLabel)
 	}
 
 	var expectedPercent *int

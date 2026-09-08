@@ -1,6 +1,7 @@
 package anthropic_test
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -97,6 +98,76 @@ func TestTheUsageReportFollowsTheEndpointItWasGiven(t *testing.T) {
 	}
 }
 
+func TestAnExplicitUnifiedRejectionReportsTheLimitedWindow(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Anthropic-Ratelimit-Unified-Status", "rejected")
+		writer.Header().Set("Anthropic-Ratelimit-Unified-Representative-Claim", "five_hour")
+		writer.Header().Set("Anthropic-Ratelimit-Unified-5h-Status", "rejected")
+		writer.Header().Set("Anthropic-Ratelimit-Unified-5h-Utili"+"zation", "1.0")
+		writer.Header().Set("Anthropic-Ratelimit-Unified-5h-Reset", "1787652600")
+		writer.Header().Set("Anthropic-Ratelimit-Unified-7d-Status", "allowed")
+		writer.Header().Set("Anthropic-Ratelimit-Unified-7d-Utili"+"zation", "0.63")
+		writer.Header().Set("Anthropic-Ratelimit-Unified-7d-Reset", "1787648400")
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusTooManyRequests)
+		_, _ = fmt.Fprint(writer, `{"error":{"message":"account limit","type":"rate_limit_error"}}`)
+	}))
+	t.Cleanup(server.Close)
+
+	client := newClient(t, server.URL+"/v1/messages")
+	client.AddUserMessage("hello")
+	_, err := client.Send(t.Context(), func(agent.Output) bool { return true })
+
+	var limit *agent.UsageLimitError
+	if !errors.As(err, &limit) {
+		t.Fatalf("expected a usage limit, got %v", err)
+	}
+	if len(limit.Windows) != 2 {
+		t.Fatalf("got windows %+v", limit.Windows)
+	}
+	if limit.Windows[0].Percent != 100 || !limit.Windows[0].IsLimited {
+		t.Errorf("got five-hour window %+v", limit.Windows[0])
+	}
+	if limit.Windows[1].Percent != 63 || limit.Windows[1].IsLimited {
+		t.Errorf("got weekly window %+v", limit.Windows[1])
+	}
+}
+
+func TestTheUsageProbeTreatsSpareCapacityAsRecovery(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Cache-Control", "max-age=600")
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprint(writer, `{"limits":[{"group":"session","percent":42,"resets_at":"2026-01-02T15:00:00Z"}]}`)
+	}))
+	t.Cleanup(server.Close)
+
+	client := newClient(t, server.URL+"/v1/messages")
+	probe, err := client.ProbeUsage(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if probe.Availability != agent.UsageAvailabilityAllowed || probe.RefreshAfter != 10*time.Minute {
+		t.Errorf("got probe %+v", probe)
+	}
+}
+
+func TestTheUsageProbeDoesNotInferRecoveryFromAFullWindow(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprint(writer, `{"limits":[{"group":"session","percent":100,"resets_at":"2026-01-02T15:00:00Z"}]}`)
+	}))
+	t.Cleanup(server.Close)
+
+	client := newClient(t, server.URL+"/v1/messages")
+	probe, err := client.ProbeUsage(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if probe.Availability != agent.UsageAvailabilityUnknown {
+		t.Errorf("got availability %v", probe.Availability)
+	}
+}
+
 func TestAMalformedUsageLimitIsDroppedRatherThanGuessedAt(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(
 		func(writer http.ResponseWriter, _ *http.Request) {
@@ -135,4 +206,7 @@ func TestAUsageReportIsNotAttemptedAgainstAnUnrecognisedEndpoint(t *testing.T) {
 	}
 }
 
-var _ agent.UsageReporter = (*anthropic.Client)(nil)
+var (
+	_ agent.UsageReporter = (*anthropic.Client)(nil)
+	_ agent.UsageProber   = (*anthropic.Client)(nil)
+)

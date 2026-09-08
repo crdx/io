@@ -213,6 +213,40 @@ func TestResolveResumesUnderTheRecordedProvider(t *testing.T) {
 	}
 }
 
+func TestResolveAvailableRoutesAnAutomaticSelectionAroundAProvider(t *testing.T) {
+	configured := testModelSelections()
+	selection, err := ResolveAvailable(
+		model.Selection{},
+		model.Selection{},
+		configured,
+		filepath.Join(t.TempDir(), "round-robin.json"),
+		func(candidate model.Selection) bool { return candidate.Provider != opencodeGoProvider },
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if selection != configured[1] {
+		t.Errorf("got %s, want %s", selection, configured[1])
+	}
+}
+
+func TestResolveAvailableStillOpensARecordedProviderForReplay(t *testing.T) {
+	resumed := model.Selection{Provider: opencodeGoProvider, Model: "saved-model", Effort: "low"}
+	selection, err := ResolveAvailable(
+		model.Selection{},
+		resumed,
+		testModelSelections(),
+		"",
+		func(model.Selection) bool { return false },
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if selection != resumed {
+		t.Errorf("got %s", selection)
+	}
+}
+
 func TestResolveRequiresAModel(t *testing.T) {
 	selection, err := Resolve(model.Selection{}, model.Selection{}, nil, "")
 	if err == nil || !strings.Contains(err.Error(), "-m provider/model@effort") {

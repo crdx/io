@@ -1,0 +1,21 @@
+provider = "codex"
+model = "gpt-5.6-sol"
+effort = "medium"
+
+[first]
+prompt = "reach the Codex usage limit"
+
+[[first.response]]
+status = 429
+body = '''{"error":{"type":"usage_limit_reached","message":"The usage limit has been reached","plan_type":"prolite","resets_at":1788765388,"resets_in_seconds":319908}}'''
+headers = { Content-Type = "application/json", X-Codex-Active-Limit = "premium", X-Codex-Primary-Used-Percent = "100", X-Codex-Primary-Window-Minutes = "10080", X-Codex-Primary-Reset-At = "1788765388" }
+
+[resume]
+prompt = "continue after the early reset"
+
+[[resume.response]]
+event = [
+    '''{"type":"response.output_text.delta","delta":"Available after the reset."}''',
+    '''{"type":"response.output_item.done","item":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Available after the reset."}]}}''',
+    '''{"type":"response.completed"}''',
+]

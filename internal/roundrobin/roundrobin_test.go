@@ -58,3 +58,21 @@ func TestNextIndexFallsBackToTheFirstMatchWhenTheIndexIsStale(t *testing.T) {
 		t.Errorf("got %d, want 2", got)
 	}
 }
+
+func TestNextIndexWhereSkipsIneligibleEntriesWithoutChangingTheirPositions(t *testing.T) {
+	entries := []string{"frequent", "frequent", "available"}
+	isEligible := func(entry string) bool { return entry == "available" }
+
+	if got := NextIndexWhere(entries, "frequent", 0, isEligible); got != 2 {
+		t.Errorf("got %d, want 2", got)
+	}
+	if got := NextIndexWhere(entries, "available", 2, isEligible); got != 2 {
+		t.Errorf("got %d, want 2 after wrapping", got)
+	}
+}
+
+func TestNextIndexWhereReturnsMinusOneWhenNothingIsEligible(t *testing.T) {
+	if got := NextIndexWhere([]string{"first", "second"}, "", -1, func(string) bool { return false }); got != -1 {
+		t.Errorf("got %d, want -1", got)
+	}
+}

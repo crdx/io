@@ -10193,6 +10193,12 @@ func newSessionGoldenProvider(
 		client.URL = endpoint
 		client.IsFast = scenario.IsFast
 		return client
+	case "opencode-go":
+		client, err := opencodego.New(endpoint, "test-token", scenario.Model, scenario.Effort, 128_000)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return client
 	case "chat":
 		client, err := chatcompletions.New(
 			endpoint,

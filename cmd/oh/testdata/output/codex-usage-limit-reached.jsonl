@@ -1,0 +1,12 @@
+{"kind":"head","version":12,"meta":{"model":"gpt-5.6-sol","workspaceDir":"","provider":"codex","effort":"medium","system_prompt":"You are a test assistant."}}
+{"kind":"event","event":{"kind":"mode_change","state":"rxwgs"}}
+{"kind":"event","event":{"kind":"state_change","name":"fast-mode","state":{"fast":false}}}
+{"kind":"event","event":{"kind":"user_message","text":"reach the Codex usage limit"}}
+{"kind":"event","event":{"kind":"turn_failure","text":"The usage limit has been reached"}}
+{"kind":"item","payload":{"role":"user","content":"reach the Codex usage limit"}}
+{"kind":"turn_completion","turn":{}}
+{"kind":"event","event":{"kind":"user_message","text":"continue after the early reset"}}
+{"kind":"event","event":{"kind":"model_message","text":"Available after the reset."}}
+{"kind":"item","payload":{"role":"user","content":"continue after the early reset"}}
+{"kind":"item","payload":{"id":"message-1","type":"message","role":"assistant","content":[{"type":"output_text","text":"Available after the reset."}]}}
+{"kind":"turn_completion","turn":{}}

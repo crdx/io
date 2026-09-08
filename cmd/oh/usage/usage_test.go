@@ -159,6 +159,34 @@ func TestAnEmptyAnswerLeavesTheSharedSnapshotStanding(t *testing.T) {
 	}
 }
 
+func TestTheOrdinaryRefreshDoesNotPollWhileARecoveryProbeOwnsALimit(t *testing.T) {
+	path := cachePath(t)
+	clock := &testClock{now: testNow}
+	limitedWindow := agent.UsageWindow{
+		Duration:  time.Hour,
+		Percent:   100,
+		ResetsAt:  testNow.Add(time.Hour),
+		IsLimited: true,
+	}
+	seed := &providerStub{err: &agent.UsageLimitError{Cause: errors.New("limited"), Windows: []agent.UsageWindow{limitedWindow}}}
+	_, _ = usage.Guard(stoppedContext(t), seed, guardSettings(path, "gpt-5.6-sol", clock)).Send(
+		t.Context(), func(agent.Output) bool { return true },
+	)
+
+	clock.set(testNow.Add(rate))
+	reporter := &scriptedReporter{windows: windows(0), isAvailable: true}
+	got, err := usage.Shared(reporter, path, rate, clock.read).UsageWindows(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reporter.asked.Load() != 0 {
+		t.Errorf("the ordinary reporter was asked %d times", reporter.asked.Load())
+	}
+	if len(got) != 1 || !got[0].IsLimited {
+		t.Errorf("got windows %+v", got)
+	}
+}
+
 func TestARefusedRefreshIsReportedRatherThanSwallowed(t *testing.T) {
 	path := cachePath(t)
 	clock := &testClock{now: testNow}

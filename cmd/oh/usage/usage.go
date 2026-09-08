@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
-	"crdx.org/io/internal/state"
 )
 
 const (
@@ -14,15 +13,9 @@ const (
 	snapshotPollInterval = 15 * time.Second
 )
 
-type cache struct {
-	Version   int                 `json:"version"`
-	FetchedAt time.Time           `json:"fetched_at"`
-	Windows   []agent.UsageWindow `json:"windows"`
-}
-
 type sharedReporter struct {
 	reporter agent.UsageReporter
-	path     string
+	store    cacheStore
 	ttl      time.Duration
 	now      func() time.Time
 
@@ -48,13 +41,13 @@ func Shared(
 	readAt := now()
 	self := &sharedReporter{
 		reporter:           reporter,
-		path:               path,
+		store:              newCacheStore(path),
 		ttl:                ttl,
 		now:                now,
 		nextSnapshotReadAt: readAt.Truncate(snapshotPollInterval).Add(snapshotPollInterval),
 	}
 
-	storedCache := self.stored()
+	storedCache := self.store.read()
 	self.windows, self.fetchedAt = storedCache.Windows, storedCache.FetchedAt
 
 	return self
@@ -79,7 +72,7 @@ func (self *sharedReporter) GetSnapshot() ([]agent.UsageWindow, time.Time) {
 }
 
 func (self *sharedReporter) UsageWindows(ctx context.Context) ([]agent.UsageWindow, error) {
-	hasClaimed, err := state.TryUpdate(self.path, cacheFormat, func(storedCache *cache) error {
+	hasClaimed, err := self.store.tryUpdate(func(storedCache *cache) error {
 		if self.isFresh(*storedCache) {
 			self.keep(storedCache.Windows, storedCache.FetchedAt)
 
@@ -107,7 +100,7 @@ func (self *sharedReporter) UsageWindows(ctx context.Context) ([]agent.UsageWind
 	}
 
 	if !hasClaimed {
-		storedCache := self.stored()
+		storedCache := self.store.read()
 		self.keep(storedCache.Windows, storedCache.FetchedAt)
 	}
 
@@ -134,11 +127,15 @@ func (self *sharedReporter) refreshSnapshot() {
 	self.nextSnapshotReadAt = readAt.Truncate(snapshotPollInterval).Add(snapshotPollInterval)
 	self.mutex.Unlock()
 
-	storedCache := self.stored()
+	storedCache := self.store.read()
 	self.keep(storedCache.Windows, storedCache.FetchedAt)
 }
 
 func (self *sharedReporter) isFresh(storedCache cache) bool {
+	if hasActiveLimitedWindow(storedCache.Windows, self.now()) {
+		return true
+	}
+
 	return !storedCache.FetchedAt.IsZero() && self.now().Sub(storedCache.FetchedAt) < self.ttl
 }
 
@@ -155,14 +152,4 @@ func (self *sharedReporter) keep(windows []agent.UsageWindow, fetchedAt time.Tim
 	}
 
 	self.windows, self.fetchedAt = windows, fetchedAt
-}
-
-func (self *sharedReporter) stored() cache {
-	var storedCache cache
-
-	if err := state.Read(self.path, cacheFormat, &storedCache); err != nil {
-		return cache{}
-	}
-
-	return storedCache
 }

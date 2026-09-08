@@ -51,6 +51,14 @@ func passedWindow() agent.UsageWindow {
 	}
 }
 
+func passedLimitedWindow() agent.UsageWindow {
+	window := passedWindow()
+	window.Percent = 100
+	window.IsLimited = true
+
+	return window
+}
+
 func reporting(windows ...agent.UsageWindow) *scriptedReporter {
 	return &scriptedReporter{windows: windows}
 }
@@ -121,6 +129,11 @@ func drawnCases() []drawnCase {
 			at:      collectedAt.Add(2 * time.Minute),
 		},
 		{
+			name:    "a limited window whose reset has passed",
+			sources: []Source{{Provider: "codex", Label: "OpenAI", Reporter: reporting(passedLimitedWindow())}},
+			at:      collectedAt.Add(2 * time.Minute),
+		},
+		{
 			name:    "a snapshot past its refresh",
 			sources: []Source{{Provider: "codex", Label: "OpenAI", Reporter: reporting(sessionWindow(20))}},
 			at:      collectedAt.Add(10 * time.Minute),
@@ -172,6 +185,17 @@ func TestEveryViewMatchesTheGolden(t *testing.T) {
 
 func TestEveryStyledViewMatchesTheGolden(t *testing.T) {
 	checkGolden(t, "views.ansi", drawEachCase(t, false))
+}
+
+func TestProviderLimitFailuresMatchTheGolden(t *testing.T) {
+	windows := []agent.UsageWindow{
+		{Duration: 5 * time.Hour, ResetsAt: collectedAt.Add(time.Hour), IsLimited: true},
+		{Duration: 7 * 24 * time.Hour, ResetsAt: collectedAt.Add(2 * time.Hour), IsLimited: true},
+	}
+
+	text := limitedError("Codex", windows, collectedAt).Error() + "\n"
+	text += limitedError("Anthropic", []agent.UsageWindow{{IsLimited: true}}, collectedAt).Error() + "\n"
+	checkGolden(t, "limits.txt", text)
 }
 
 func TestEveryDrawnGaugeMatchesTheGolden(t *testing.T) {
@@ -262,6 +286,7 @@ func TestEveryGoldenIsClaimedByATest(t *testing.T) {
 	claimed := map[string]struct{}{
 		"views.txt":   {},
 		"views.ansi":  {},
+		"limits.txt":  {},
 		"gauges.txt":  {},
 		"report.json": {},
 	}

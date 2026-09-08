@@ -14,6 +14,8 @@
 ● mo 100% ████████ ✖
 === a window whose reset has passed ===
 ● 5h stale
+=== a limited window whose reset has passed ===
+● 5h stale
 === a window with no reset at all ===
 ● 5h 40% ███░░░░░
 === a fetch under way ===

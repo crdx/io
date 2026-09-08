@@ -334,11 +334,19 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer skill.Close(skillRoots)
 
-	selection, err := backend.Resolve(
+	selectionTime := time.Now()
+	selection, err := backend.ResolveAvailable(
 		args.Selection,
 		sessions.ModelSelection(resumedSession),
 		configuredModels,
 		location.GetModelRoundRobinPath(),
+		func(candidate model.Selection) bool {
+			return usage.IsSelectionAvailable(
+				location.GetUsageCachePath(candidate.Provider, endpointURL != ""),
+				candidate.Model,
+				selectionTime,
+			)
+		},
 	)
 	if err != nil {
 		startup.Wait(func() {
@@ -561,8 +569,16 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
+	usageCachePath := location.GetUsageCachePath(selection.Provider, endpointURL != "")
+	providerClient := usage.Guard(ctx, client.Client, usage.GuardSettings{
+		ProviderName: model.ProviderName(selection.Provider),
+		ModelName:    selection.Model,
+		CachePath:    usageCachePath,
+		Now:          time.Now,
+	})
+
 	app = &App{
-		agent:           agent.NewWithEnabledTools(systemPrompt, client, toolboxTools, enabledTools),
+		agent:           agent.NewWithEnabledTools(systemPrompt, providerClient, toolboxTools, enabledTools),
 		screen:          screen,
 		terminal:        terminal.New(os.Stdout, workspace),
 		metrics:         metrics.New(choice.ContextWindowTokens),
@@ -595,7 +611,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		ModelEffortLevels:     choice.EffortLevels,
 		IsFast:                selection.IsFast,
 		UsageReporter:         usageReporter,
-		UsageCachePath:        location.GetUsageCachePath(selection.Provider, endpointURL != ""),
+		UsageCachePath:        usageCachePath,
 		UsageIsSelfRefreshing: backend.RefreshesOwnUsage(selection.Provider),
 		UsageGauges:           usage.TerminalGauges(keyboard, os.Stdout),
 		Sources:               app.getBarSources(),
