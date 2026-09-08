@@ -13,7 +13,7 @@ import (
 
 const (
 	separator          = string(os.PathSeparator)
-	maxResolutionSteps = 64
+	maxResolutionSteps = 128
 )
 
 func pathComponents(path string) []string {
