@@ -177,7 +177,8 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.CacheRebuildEvent:
 		self.screen.Line(style.Change(agent.CacheRebuildNotice(event)))
 
-	case caps.ModeChange, caps.JobStop, jobrecord.EndedWithSession, pathgrant.Change, turn.HarnessPoke:
+	case caps.ModeChange, caps.JobStop, jobrecord.Ended, jobrecord.EndedWithSession, pathgrant.Change,
+		turn.HarnessPoke:
 		if message, isSaid := HarnessNotice(event); isSaid {
 			self.drawSubmitted(message, submittedMarker(true))
 		}

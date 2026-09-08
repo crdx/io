@@ -8,6 +8,12 @@
 \r\e[KThe docs server is up.\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after  \e[0m\r
+\e[48;2;52;53;65m    12s, exit(2). Read its output with  \e[0m\r
+\e[48;2;52;53;65m    the job tool.                       \e[0m\r
+\e[48;2;52;53;65m                                        \e[0m\r
+\r
+\e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the\e[0m\r
 \e[48;2;52;53;65m    workspace was made read-only.       \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -111,6 +117,149 @@
 \r\e[Ku\r
 \r\e[Kp\r
 \r\e[K.\r
+\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m🤖\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
+\e[48;2;52;53;65mT\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mj\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mx\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m:\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m1\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m2\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m,\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mx\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m(\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m2\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m)\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mR\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mp\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mj\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m \e[0m\r
 \r
 \e[48;2;52;53;65m \e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -396,6 +545,9 @@
 The docs server is up.
 
 \e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m\e[0m
@@ -419,6 +571,10 @@ It was stopped when write access was withdrawn.
 \e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 The docs server is up.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.             \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r
@@ -449,6 +605,10 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.             \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -477,6 +637,10 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.             \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
@@ -503,6 +667,10 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.             \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r
@@ -536,6 +704,21 @@ It was stopped when write access was withdrawn.\r
 \r\e[KThe docs\r
 \r\e[Kserver is\r
 \r\e[Kup.\r
+\r
+\e[48;2;52;53;65m            \e[0m\r
+\e[48;2;52;53;65m 🤖 The job \e[0m\r
+\e[48;2;52;53;65m    build   \e[0m\r
+\e[48;2;52;53;65m    exited: \e[0m\r
+\e[48;2;52;53;65m    failed  \e[0m\r
+\e[48;2;52;53;65m    after   \e[0m\r
+\e[48;2;52;53;65m    12s,    \e[0m\r
+\e[48;2;52;53;65m    exit(2).\e[0m\r
+\e[48;2;52;53;65m    Read its\e[0m\r
+\e[48;2;52;53;65m    output  \e[0m\r
+\e[48;2;52;53;65m    with the\e[0m\r
+\e[48;2;52;53;65m    job     \e[0m\r
+\e[48;2;52;53;65m    tool.   \e[0m\r
+\e[48;2;52;53;65m            \e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
 \e[48;2;52;53;65m 🤖 The job \e[0m\r
@@ -585,6 +768,9 @@ It was stopped when write access was withdrawn.\r
 \r\e[KThe docs server is up.
 
 \e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.\e[0m
+\e[48;2;52;53;65m\e[0m
+\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m\e[0m
@@ -608,6 +794,10 @@ It was stopped when write access was withdrawn.\r
 \e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe docs server is up.\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.             \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.                              \e[0m\r

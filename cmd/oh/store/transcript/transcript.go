@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/interrupt"
+	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/internal/util"
@@ -122,6 +123,10 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		output.fence(agent.CacheRebuildNotice(event))
 	case turn.HarnessPoke:
 		if notice, isSaid := turn.PokeNotice(event); isSaid {
+			output.fence(notice)
+		}
+	case jobrecord.Ended:
+		if notice, isSaid := jobrecord.EndedNotice(event); isSaid {
 			output.fence(notice)
 		}
 	case caps.ModeChange:

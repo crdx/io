@@ -222,3 +222,65 @@ func TestANilQueueIsSafeToUse(t *testing.T) {
 		t.Error("expected a nil queue to give nothing back")
 	}
 }
+
+func TestAHarnessNoteReachesTheModelWithoutBeingDrawnAsAUserMessage(t *testing.T) {
+	interjections := &agent.Interjections{}
+	provider := &interjectionProvider{rounds: 1, interjections: interjections}
+	assistant := agent.New("", provider, []tool.Tool{noop()})
+
+	var messages []string
+	isNoted := false
+	for update, err := range assistant.Stream(t.Context(), "go", interjections) {
+		if err != nil {
+			t.Fatal(err)
+		}
+		if update.Event == nil {
+			continue
+		}
+		if update.Event.Kind == agent.ToolCallRequestEvent && !isNoted {
+			isNoted = true
+			interjections.Note("the job build has finished")
+		}
+		if update.Event.Kind == agent.UserMessageEvent {
+			messages = append(messages, update.Event.Text)
+		}
+	}
+
+	want := []string{"user:go", "send", "result:a", "result:b", "user:the job build has finished", "send"}
+	if !slices.Equal(provider.history, want) {
+		t.Errorf("history %q, want %q", provider.history, want)
+	}
+	if !slices.Equal(messages, []string{"go"}) {
+		t.Errorf("drew %q, want the note to be drawn by whoever recorded it", messages)
+	}
+}
+
+func TestANoteOutlivesATurnThatEndsBeforeTheNextRound(t *testing.T) {
+	interjections := &agent.Interjections{}
+	provider := &interjectionProvider{rounds: 0, interjections: interjections}
+	assistant := agent.New("", provider, []tool.Tool{noop()})
+
+	interjections.Note("the job build has finished")
+
+	for _, err := range assistant.Stream(t.Context(), "go", interjections) {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	note, isNoted := interjections.TakeNotes()
+	if !isNoted || note != "the job build has finished" {
+		t.Errorf("took %q, want the note kept for the caller", note)
+	}
+}
+
+func TestAnEmptyNoteIsNotQueued(t *testing.T) {
+	interjections := &agent.Interjections{}
+
+	if interjections.Note("") {
+		t.Error("expected an empty note to be refused")
+	}
+	if _, isNoted := interjections.TakeNotes(); isNoted {
+		t.Error("expected no note to be queued")
+	}
+}

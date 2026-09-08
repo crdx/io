@@ -10,6 +10,7 @@ import (
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
+	"crdx.org/io/internal/jobs"
 )
 
 const (
@@ -27,6 +28,8 @@ type Handler struct {
 	Beat         func()
 	Changes      <-chan error
 	Change       func(error) bool
+	Endings      <-chan jobs.Snapshot
+	JobEnded     func(jobs.Snapshot)
 	Draw         func()
 }
 
@@ -48,6 +51,7 @@ func Run(terminal *os.File, getNextRefresh func(time.Time) time.Time, handler Ha
 
 func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan time.Time, schedule func(), beats <-chan time.Time, handler Handler) {
 	changes := handler.Changes
+	endings := handler.Endings
 	for {
 		schedule()
 
@@ -74,6 +78,12 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan t
 				continue
 			}
 		case <-refreshes:
+		case snapshot, isOpen := <-endings:
+			if !isOpen {
+				endings = nil
+				continue
+			}
+			handler.JobEnded(snapshot)
 		case failure, isOpen := <-changes:
 			if !isOpen {
 				changes = nil

@@ -49,13 +49,19 @@ type Snapshot struct {
 func (self Snapshot) IsLive() bool { return isLive(self.State) }
 
 func (self Snapshot) Describe() string {
-	parts := []string{self.Name + ": " + string(self.State)}
+	return self.Name + ": " + self.Outcome()
+}
+
+func (self Snapshot) Outcome() string {
+	stateWithDuration := string(self.State)
 
 	if self.IsLive() {
-		parts = append(parts, "up "+util.CompactDuration(time.Since(self.StartedAt).Round(time.Second)))
+		stateWithDuration += " for " + util.CompactDuration(time.Since(self.StartedAt).Round(time.Second))
 	} else if !self.EndedAt.IsZero() {
-		parts = append(parts, "ran for "+util.CompactDuration(self.EndedAt.Sub(self.StartedAt).Round(time.Second)))
+		stateWithDuration += " after " + util.CompactDuration(self.EndedAt.Sub(self.StartedAt).Round(time.Second))
 	}
+
+	parts := []string{stateWithDuration}
 
 	if self.ExitCode != 0 {
 		parts = append(parts, fmt.Sprintf("exit(%d)", self.ExitCode))
@@ -80,6 +86,7 @@ type job struct {
 	output         *spool
 	runningCommand sandbox.Command
 	over           chan struct{}
+	waiters        int
 }
 
 type Manager struct {
@@ -89,10 +96,21 @@ type Manager struct {
 	order    []string
 	isClosed bool
 	watchers sync.WaitGroup
+	endings  chan Snapshot
 }
 
+const endingsHeld = 64
+
 func New(runner sandbox.Runner) *Manager {
-	return &Manager{runner: runner, jobs: make(map[string]*job)}
+	return &Manager{
+		runner:  runner,
+		jobs:    make(map[string]*job),
+		endings: make(chan Snapshot, endingsHeld),
+	}
+}
+
+func (self *Manager) Endings() <-chan Snapshot {
+	return self.endings
 }
 
 func (self *Manager) Restore(rememberedJobs []Snapshot) {
@@ -231,6 +249,11 @@ func (self *Manager) Wait(ctx context.Context, names []string) (string, error) {
 		return "", errors.New("at least one job name is required")
 	}
 
+	for _, watchedJob := range watchedJobs {
+		watchedJob.waiters++
+	}
+	defer self.releaseWaiters(watchedJobs)
+
 	if endedName, isEnded := getFirstEndedName(watchedJobs); isEnded {
 		self.mutex.Unlock()
 		return endedName, nil
@@ -358,6 +381,15 @@ func (self *Manager) Close() error {
 	return nil
 }
 
+func (self *Manager) releaseWaiters(watchedJobs []*job) {
+	self.mutex.Lock()
+	defer self.mutex.Unlock()
+
+	for _, watchedJob := range watchedJobs {
+		watchedJob.waiters--
+	}
+}
+
 func (self *Manager) settleStarted(openingJob *job, runningCommand sandbox.Command) bool {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
@@ -424,6 +456,25 @@ func (self *Manager) watch(endingJob *job) {
 		self.conclude(endingJob, self.endingState(endingJob, StateFailed), result.ExitCode, failure)
 	default:
 		self.conclude(endingJob, self.endingState(endingJob, StateComplete), 0, "")
+	}
+
+	self.announceEnd(endingJob)
+}
+
+func (self *Manager) announceEnd(endedJob *job) {
+	self.mutex.Lock()
+	isAnnounced := endedJob.waiters == 0 &&
+		(endedJob.state == StateComplete || endedJob.state == StateFailed)
+	snapshot := self.describe(endedJob)
+	self.mutex.Unlock()
+
+	if !isAnnounced {
+		return
+	}
+
+	select {
+	case self.endings <- snapshot:
+	default:
 	}
 }
 

@@ -33,6 +33,26 @@ func LastRecorded(events []agent.Event) ([]jobs.Snapshot, bool) {
 	return access.LastRecorded(events, Listing, decodeListing)
 }
 
+const Ended agent.Kind = "job_ended"
+
+func EndedEvent(snapshot jobs.Snapshot) agent.Event {
+	encodedSnapshot, err := json.Marshal(snapshot)
+	if err != nil {
+		return agent.Event{}
+	}
+
+	return agent.Event{Kind: Ended, Name: snapshot.Name, State: encodedSnapshot}
+}
+
+func EndedNotice(event agent.Event) (string, bool) {
+	var snapshot jobs.Snapshot
+	if err := json.Unmarshal(event.State, &snapshot); err != nil || snapshot.Name == "" {
+		return "", false
+	}
+
+	return "The job " + snapshot.Name + " exited: " + snapshot.Outcome() + ". Read its output with the job tool.", true
+}
+
 const EndedWithSession agent.Kind = "jobs_ended_with_session"
 
 func EndedWithSessionEvent(names []string) agent.Event {

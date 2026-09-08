@@ -126,6 +126,8 @@ func HarnessNotice(event agent.Event) (string, bool) {
 		return caps.ModeNotice(event)
 	case caps.JobStop:
 		return caps.JobStopNotice(event)
+	case jobrecord.Ended:
+		return jobrecord.EndedNotice(event)
 	case jobrecord.EndedWithSession:
 		return jobrecord.EndedWithSessionNotice(event)
 	case pathgrant.Change:

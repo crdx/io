@@ -99,6 +99,7 @@ type jobState struct {
 	recordedListing string
 	hasRecorded     bool
 	restoredNote    string
+	endedNotes      []string
 }
 
 type displayState struct {
@@ -229,11 +230,13 @@ func (self *App) begin(message string) cycle.Transition {
 			self.finish()
 			return !self.isTransitionRequested()
 		},
-		Resize:  self.redraw,
-		Beat:    self.screen.RefreshProgress,
-		Changes: self.configObserver.Changes(),
-		Change:  self.reloadConfig,
-		Draw:    func() { self.show(inputLine) },
+		Resize:   self.redraw,
+		Beat:     self.screen.RefreshProgress,
+		Changes:  self.configObserver.Changes(),
+		Change:   self.reloadConfig,
+		Endings:  self.jobEndings(),
+		JobEnded: self.jobEnded,
+		Draw:     func() { self.show(inputLine) },
 	})
 
 	return self.transition
@@ -790,6 +793,33 @@ func (self *App) getJobs() []jobs.Snapshot {
 	return self.jobs.manager.List()
 }
 
+func (self *App) jobEndings() <-chan jobs.Snapshot {
+	if self.jobs.manager == nil {
+		return nil
+	}
+
+	return self.jobs.manager.Endings()
+}
+
+func (self *App) jobEnded(snapshot jobs.Snapshot) {
+	event := jobrecord.EndedEvent(snapshot)
+
+	notice, isSaid := jobrecord.EndedNotice(event)
+	if !isSaid {
+		return
+	}
+
+	if self.currentTurn.Note(notice) {
+		self.notify(event)
+
+		return
+	}
+
+	self.jobs.endedNotes = append(self.jobs.endedNotes, notice)
+	self.pendingNotices.add(event)
+	self.refreshPendingMessages()
+}
+
 func (self *App) stopJobsHoldingPath(path string) {
 	if self.jobs.manager == nil {
 		return
@@ -1112,7 +1142,13 @@ func (self *App) takeSessionTitle(event agent.Event) {
 
 func (self *App) prelude() string {
 	notes := slices.DeleteFunc(
-		[]string{self.interruptionNote(), self.takeRestoredJobsNote(), self.accessMessage(), self.titleNote()},
+		[]string{
+			self.interruptionNote(),
+			self.takeRestoredJobsNote(),
+			self.takeEndedJobsNote(),
+			self.accessMessage(),
+			self.titleNote(),
+		},
 		func(note string) bool { return note == "" },
 	)
 
@@ -1161,6 +1197,13 @@ func (self *App) takeRestoredJobsNote() string {
 	self.jobs.restoredNote = ""
 
 	return note
+}
+
+func (self *App) takeEndedJobsNote() string {
+	notes := self.jobs.endedNotes
+	self.jobs.endedNotes = nil
+
+	return strings.Join(notes, " ")
 }
 
 func (self *App) recordJobListing() {
@@ -1334,6 +1377,10 @@ func (self *App) finish() {
 		self.recordEvent(interrupt.Event(self.interruptionCause()))
 	} else if turnError = self.currentTurn.Error(); turnError != nil {
 		self.recordEvent(agent.Event{Kind: agent.FailureEvent, Text: turnError.Error()})
+	}
+
+	if note, isNoted := self.currentTurn.TakeNotes(); isNoted {
+		self.jobs.endedNotes = append(self.jobs.endedNotes, note)
 	}
 
 	self.recordJobListing()

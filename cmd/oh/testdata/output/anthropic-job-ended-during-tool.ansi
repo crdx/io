@@ -1,0 +1,17 @@
+\e[?2026h\e[?25l\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m get on with the refactor while the build runs                                                      \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?7l\r\e[K\e[38;2;207;173;0mwork\e[0m \e[38;2;192;128;80mwork\e[0m \e[38;2;150;152;150m–\e[0m\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.             \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\r\e[KThe refactor is done, and I will look at why the build failed.\e[?25h\e[?2026l\r
+\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\e[48;2;52;53;65m carry on                                                                                           \e[0m\r
+\e[48;2;52;53;65m                                                                                                    \e[0m\r
+\r
+\e[?2026h\e[?25l\r\e[KCarrying on.\e[?25h\e[?2026l\r

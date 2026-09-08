@@ -25,28 +25,34 @@ job: stale job rendering [ok, 1 line, 20B, call_1]
 
 The docs server is up.
 
-## job_stop · +5s
+## job_ended · +5s
 
-## User · +6s
+```
+The job build exited: failed after 12s, exit(2). Read its output with the job tool.
+```
+
+## job_stop · +6s
+
+## User · +7s
 
 what happened to it
 
-## Tool calls · +7s
+## Tool calls · +8s
 
 ```
 job: stale status rendering [ok, 1 line, 26B, call_2]
 ```
 
-## job_stop · +9s
+## job_stop · +10s
 
-## Tool calls · +10s
+## Tool calls · +11s
 
 ```
 job: stale discard rendering [ok, 1 line, 52B, call_3]
 job: stale prune rendering [ok, 1 line, 67B, call_4]
 ```
 
-## Assistant · +14s
+## Assistant · +15s
 
 It was stopped when write access was withdrawn.
 

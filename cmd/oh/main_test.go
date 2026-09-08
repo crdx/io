@@ -10112,12 +10112,13 @@ type sessionGoldenTurn struct {
 	ToggleAfterToolRequest    string                  `toml:"toggle-after-tool-request"`
 	ToggleDuringModeTurn      string                  `toml:"toggle-during-mode-turn"`
 	CancelAfterToolToggle     bool                    `toml:"cancel-after-tool-toggle"`
+	EndJobAfterToolRequest    string                  `toml:"end-job-after-tool-request"`
 }
 
 const printedSessionIsImpossible = "this scenario drives the interface, which a printed session has none of\n"
 
 func (self sessionGoldenScenario) usesTheInterface() bool {
-	return self.ToggleBeforeFirst != "" || self.FirstTurn.usesTheInterface()
+	return self.ToggleBeforeFirst != "" || self.EndJobBeforeFirst != "" || self.FirstTurn.usesTheInterface()
 }
 
 func (self sessionGoldenTurn) usesTheInterface() bool {
@@ -10125,6 +10126,7 @@ func (self sessionGoldenTurn) usesTheInterface() bool {
 		self.ToggleAfterMessageDelta != "" ||
 		self.ToggleAfterToolRequest != "" ||
 		self.ToggleDuringModeTurn != "" ||
+		self.EndJobAfterToolRequest != "" ||
 		self.FlushAfterToolRequest ||
 		self.CancelAfterQueueing ||
 		len(self.QueueAfterToolRequest) > 0 ||
@@ -10156,6 +10158,7 @@ type sessionGoldenScenario struct {
 	FirstTokenError    string              `toml:"first-token-error"`
 	CredentialRefresh  string              `toml:"credential-refresh"`
 	ToggleBeforeFirst  string              `toml:"toggle-before-first"`
+	EndJobBeforeFirst  string              `toml:"end-job-before-first"`
 	Tools              []sessionGoldenTool `toml:"tool"`
 	FirstTurn          sessionGoldenTurn   `toml:"first"`
 	ResumeTurn         sessionGoldenTurn   `toml:"resume"`
@@ -10916,6 +10919,11 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		firstHarness.settleAccess()
 		firstAssistant.AddUserMessage(firstHarness.mode.Inject())
 	}
+	if scenario.EndJobBeforeFirst != "" {
+		firstHarness.jobEnded(endedSessionGoldenJob(scenario.EndJobBeforeFirst))
+		firstHarness.settleAccess()
+		firstAssistant.AddUserMessage(firstHarness.takeEndedJobsNote())
+	}
 	firstHarness.currentTurn = Turn{Stream: testRunningTurnStream(), painter: firstHarness.newPainter(true)}
 	firstTurns := runSessionGoldenTurn(t, firstHarness, scenario.FirstTurn, cancelSignals)
 	firstHarness.dropPendingInput()
@@ -11461,6 +11469,23 @@ func takeFirstSessionGoldenToolRequest(
 		if turn.CancelAfterToolToggle {
 			interruptWithStopKey()
 		}
+	}
+
+	if turn.EndJobAfterToolRequest != "" {
+		testHarness.jobEnded(endedSessionGoldenJob(turn.EndJobAfterToolRequest))
+	}
+}
+
+func endedSessionGoldenJob(name string) jobs.Snapshot {
+	startedAt := time.Date(2026, time.August, 23, 14, 32, 9, 0, time.UTC)
+
+	return jobs.Snapshot{
+		Name:      name,
+		Command:   "just " + name,
+		State:     jobs.StateFailed,
+		StartedAt: startedAt,
+		EndedAt:   startedAt.Add(12 * time.Second),
+		ExitCode:  2,
 	}
 }
 

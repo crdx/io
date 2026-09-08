@@ -345,6 +345,10 @@ func (self *Agent) interject(
 		return false
 	}
 
+	if note, isNoted := interjections.TakeNotes(); isNoted {
+		self.provider.AddUserMessage(note)
+	}
+
 	text, isQueued := interjections.Take()
 	if !isQueued {
 		return true

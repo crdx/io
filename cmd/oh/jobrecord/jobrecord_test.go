@@ -103,3 +103,35 @@ func TestNoEndedJobsSayNothing(t *testing.T) {
 		t.Error("an empty list of ended jobs still said something")
 	}
 }
+
+func TestAJobThatFinishedOnItsOwnSaysHowItWent(t *testing.T) {
+	startedAt := time.Date(2026, time.August, 23, 14, 32, 9, 0, time.UTC)
+	event := jobrecord.EndedEvent(jobs.Snapshot{
+		Name:      "build",
+		Command:   "just build",
+		State:     jobs.StateFailed,
+		StartedAt: startedAt,
+		EndedAt:   startedAt.Add(12 * time.Second),
+		ExitCode:  2,
+	})
+
+	notice, isSaid := jobrecord.EndedNotice(event)
+	if !isSaid {
+		t.Fatal("a finished job said nothing")
+	}
+
+	expects := "The job build exited: failed after 12s, exit(2). " +
+		"Read its output with the job tool."
+	if notice != expects {
+		t.Errorf("got %q, want %q", notice, expects)
+	}
+	if event.Name != "build" {
+		t.Errorf("got %q, want the event to name the job", event.Name)
+	}
+}
+
+func TestANamelessJobSaysNothingWhenItEnds(t *testing.T) {
+	if _, isSaid := jobrecord.EndedNotice(jobrecord.EndedEvent(jobs.Snapshot{})); isSaid {
+		t.Error("a job with no name still said something")
+	}
+}

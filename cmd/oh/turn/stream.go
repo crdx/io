@@ -85,6 +85,18 @@ func (self *Stream) Interject(text string) bool {
 	return self.interjections.Add(text)
 }
 
+func (self *Stream) Note(text string) bool {
+	if !self.Running() {
+		return false
+	}
+
+	return self.interjections.Note(text)
+}
+
+func (self *Stream) TakeNotes() (string, bool) {
+	return self.Interjections().TakeNotes()
+}
+
 func (self *Stream) GetInterjections() []string {
 	return self.Interjections().Peek()
 }

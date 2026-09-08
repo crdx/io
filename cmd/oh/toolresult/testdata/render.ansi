@@ -168,7 +168,7 @@ Go has a new release. \e[38;2;129;162;190mSource\e[0m\e[38;2;150;152;150m (https
     "command": \e[38;2;181;189;104m""\e[0m
 }
 
-check: complete, ran for 37s
+check: complete after 37s
 ok  crdx.org/io
 lint1  ✓
 
@@ -186,7 +186,7 @@ lint1  ✓
     "command": \e[38;2;181;189;104m""\e[0m
 }
 
-lint: complete, ran for 22s
+lint: complete after 22s
 all checks passed
 
 
@@ -203,8 +203,8 @@ all checks passed
     "command": \e[38;2;181;189;104m""\e[0m
 }
 
-build: running, up 5m05s
-lint: running, up 5m01s
+build: running for 5m05s
+lint: running for 5m01s
 note: the wait gave up after 5m00s before any watched job ended.
 
 
@@ -222,10 +222,10 @@ note: the wait gave up after 5m00s before any watched job ended.
     "command": \e[38;2;181;189;104m""\e[0m
 }
 
-build: complete, ran for 37s
+build: complete after 37s
 ok  crdx.org/io
 
-lint: complete, ran for 22s
+lint: complete after 22s
 all checks passed
 
 
@@ -243,8 +243,8 @@ all checks passed
     "command": \e[38;2;181;189;104m""\e[0m
 }
 
-build: complete, ran for 37s
-lint: running, up 5m05s
+build: complete after 37s
+lint: running for 5m05s
 note: the wait gave up after 5m00s before all watched jobs ended.
 
 
@@ -257,7 +257,7 @@ note: the wait gave up after 5m00s before all watched jobs ended.
     "command": \e[38;2;181;189;104m""\e[0m
 }
 
-docs: running, up 5m05s
+docs: running for 5m05s
 note: the wait gave up after 5m00s, and the job is still running.
 Serving HTTP on localhost port 8080 ...
 

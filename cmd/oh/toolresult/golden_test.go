@@ -137,18 +137,18 @@ func TestToolResultsRenderForTheUser(t *testing.T) {
 		{
 			name: "job wait on a job that finished",
 			exchange: resultExchange("job", job.Args{Action: "wait", Name: "check"}, agent.SuccessStatus,
-				"check: complete, ran for 37s\nok  crdx.org/io\nlint1  \u2713\n"),
+				"check: complete after 37s\nok  crdx.org/io\nlint1  \u2713\n"),
 		},
 		{
 			name: "job wait on several jobs until any finishes",
 			exchange: resultExchange("job", job.Args{Action: "wait", Names: []string{"build", "lint"}}, agent.SuccessStatus,
-				"lint: complete, ran for 22s\nall checks passed\n"),
+				"lint: complete after 22s\nall checks passed\n"),
 		},
 		{
 			name: "job wait for any that reached its limit",
 			exchange: resultExchange("job", job.Args{Action: "wait", Names: []string{"build", "lint"}}, agent.SuccessStatus,
-				"build: running, up 5m05s\n"+
-					"lint: running, up 5m01s\n"+
+				"build: running for 5m05s\n"+
+					"lint: running for 5m01s\n"+
 					"note: the wait gave up after 5m00s before any watched job ended.\n"),
 		},
 		{
@@ -158,8 +158,8 @@ func TestToolResultsRenderForTheUser(t *testing.T) {
 				Names:   []string{"build", "lint"},
 				WaitFor: "all",
 			}, agent.SuccessStatus,
-				"build: complete, ran for 37s\nok  crdx.org/io\n\n"+
-					"lint: complete, ran for 22s\nall checks passed\n"),
+				"build: complete after 37s\nok  crdx.org/io\n\n"+
+					"lint: complete after 22s\nall checks passed\n"),
 		},
 		{
 			name: "job wait for all that reached its limit",
@@ -168,14 +168,14 @@ func TestToolResultsRenderForTheUser(t *testing.T) {
 				Names:   []string{"build", "lint"},
 				WaitFor: "all",
 			}, agent.SuccessStatus,
-				"build: complete, ran for 37s\n"+
-					"lint: running, up 5m05s\n"+
+				"build: complete after 37s\n"+
+					"lint: running for 5m05s\n"+
 					"note: the wait gave up after 5m00s before all watched jobs ended.\n"),
 		},
 		{
 			name: "job wait that gave up on a job still running",
 			exchange: resultExchange("job", job.Args{Action: "wait", Name: "docs"}, agent.SuccessStatus,
-				"docs: running, up 5m05s\n"+
+				"docs: running for 5m05s\n"+
 					"note: the wait gave up after 5m00s, and the job is still running.\n"+
 					"Serving HTTP on localhost port 8080 ...\n"),
 		},

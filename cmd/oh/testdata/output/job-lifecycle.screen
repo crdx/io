@@ -8,6 +8,12 @@ job docs $ python3 -m http.serve… ✓ 1L
 The docs server is up.
 
 
+ 🤖 The job build exited: failed after
+    12s, exit(2). Read its output with
+    the job tool.
+
+
+
  🤖 The job docs was stopped because the
     workspace was made read-only.
 
@@ -110,6 +116,149 @@ s
 u
 p
 .
+
+
+
+🤖
+
+T
+
+h
+
+e
+
+j
+
+o
+
+b
+
+b
+
+u
+
+i
+
+l
+
+d
+
+e
+
+x
+
+i
+
+t
+
+e
+
+d
+
+:
+
+f
+
+a
+
+i
+
+l
+
+e
+
+d
+
+a
+
+f
+
+t
+
+e
+
+r
+
+1
+
+2
+
+s
+
+,
+
+e
+
+x
+
+i
+
+t
+
+(
+
+2
+
+)
+
+.
+
+R
+
+e
+
+a
+
+d
+
+i
+
+t
+
+s
+
+o
+
+u
+
+t
+
+p
+
+u
+
+t
+
+w
+
+i
+
+t
+
+h
+
+t
+
+h
+
+e
+
+j
+
+o
+
+b
+
+t
+
+o
+
+o
+
+l
+
+.
+
 
 
 
@@ -395,6 +544,10 @@ job docs $ python3 -m http.server 8080 ✓ 1L
 The docs server is up.
 
 
+ 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.
+
+
+
  🤖 The job docs was stopped because the workspace was made read-only.
 
 
@@ -425,6 +578,21 @@ job … ✓ 1L
 The docs
 server is
 up.
+
+
+ 🤖 The job
+    build
+    exited:
+    failed
+    after
+    12s,
+    exit(2).
+    Read its
+    output
+    with the
+    job
+    tool.
+
 
 
  🤖 The job
@@ -472,6 +640,10 @@ withdrawn.
 job docs $ python3 -m http.server 8080 ✓ 1L
 
 The docs server is up.
+
+
+ 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.
+
 
 
  🤖 The job docs was stopped because the workspace was made read-only.
