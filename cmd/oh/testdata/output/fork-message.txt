@@ -4,3 +4,13 @@ Check /state/sessions/new-otter/drops/source-otter.chat.md's size first, then re
 Its own opening message will say whether source-otter was forked from an earlier session.
 
 focus on tests
+=== same-named added file ===
+added files
+
+- /tmp/source-otter.chat.md
+
+This session was forked from source-otter.
+Check /state/sessions/new-otter/drops/source-otter.chat.md's size first, then read its head and tail before continuing.
+Its own opening message will say whether source-otter was forked from an earlier session.
+
+focus on tests

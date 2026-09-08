@@ -149,9 +149,10 @@ func TestGettingAForkSourcePreparesTheNewConversation(t *testing.T) {
 	}
 	wantMessage := forkSourcePrompt(writer.Name(), destinationPath) + "\n\nfocus on tests"
 	initialUserMessage := forkSource.GetInitialUserMessage(forkSource.DroppedChatName)
-	initialUserMessage = "added files\n\n" + initialUserMessage + "\n\npiped prompt"
+	addedFilesMessage := "added files\n\n- /tmp/" + forkSource.DroppedChatName
+	initialUserMessage = addedFilesMessage + "\n\n" + initialUserMessage + "\n\npiped prompt"
 	gotMessage := forkSource.GetMessageWithChatAt(initialUserMessage, destinationPath)
-	wantMessage = "added files\n\n" + wantMessage + "\n\npiped prompt"
+	wantMessage = addedFilesMessage + "\n\n" + wantMessage + "\n\npiped prompt"
 	if gotMessage != wantMessage {
 		t.Errorf("got message %q, want %q", gotMessage, wantMessage)
 	}

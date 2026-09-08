@@ -21,11 +21,23 @@ func Prepare(sessionDirectory string, ensureSession func() error) (string, error
 	if err := ensureSession(); err != nil {
 		return "", fmt.Errorf("prepare the session directory: %w", err)
 	}
-	directory := GetDirectory(sessionDirectory)
-	if err := os.MkdirAll(directory, 0o700); err != nil {
-		return "", fmt.Errorf("prepare the drops directory: %w", err)
+	sessionRoot, err := os.OpenRoot(sessionDirectory)
+	if err != nil {
+		return "", fmt.Errorf("open the session directory: %w", err)
 	}
-	return directory, nil
+	defer func() { _ = sessionRoot.Close() }()
+
+	info, err := sessionRoot.Lstat(directoryName)
+	if errors.Is(err, fs.ErrNotExist) {
+		if err := sessionRoot.Mkdir(directoryName, 0o700); err != nil {
+			return "", fmt.Errorf("prepare the drops directory: %w", err)
+		}
+	} else if err != nil {
+		return "", fmt.Errorf("inspect the drops directory: %w", err)
+	} else if err := validateDirectory(info); err != nil {
+		return "", err
+	}
+	return GetDirectory(sessionDirectory), nil
 }
 
 func CopyFile(sessionDirectory string, ensureSession func() error, sourcePath string, fileName string) (string, error) {
@@ -71,15 +83,42 @@ func CopyFile(sessionDirectory string, ensureSession func() error, sourcePath st
 }
 
 func Mount(files *file.Root, sessionDirectory string) (func() error, bool, error) {
-	directory := GetDirectory(sessionDirectory)
-	root, err := os.OpenRoot(directory)
+	sessionRoot, err := os.OpenRoot(sessionDirectory)
 	if errors.Is(err, fs.ErrNotExist) {
 		return func() error { return nil }, false, nil
 	}
 	if err != nil {
 		return func() error { return nil }, false, err
 	}
+	defer func() { _ = sessionRoot.Close() }()
 
-	files.Mount(directory, file.New(root, func(string) error { return file.ErrReadOnly }))
-	return root.Close, true, nil
+	info, err := sessionRoot.Lstat(directoryName)
+	if errors.Is(err, fs.ErrNotExist) {
+		return func() error { return nil }, false, nil
+	}
+	if err != nil {
+		return func() error { return nil }, false, err
+	}
+	if err := validateDirectory(info); err != nil {
+		return func() error { return nil }, false, err
+	}
+	dropsRoot, err := sessionRoot.OpenRoot(directoryName)
+	if err != nil {
+		return func() error { return nil }, false, err
+	}
+
+	directory := GetDirectory(sessionDirectory)
+	files.Mount(directory, file.New(dropsRoot, func(string) error { return file.ErrReadOnly }))
+	return dropsRoot.Close, true, nil
+}
+
+func validateDirectory(info fs.FileInfo) error {
+	switch {
+	case info.Mode()&os.ModeSymlink != 0:
+		return errors.New("the drops path is a symbolic link")
+	case !info.IsDir():
+		return errors.New("the drops path is not a directory")
+	default:
+		return nil
+	}
 }

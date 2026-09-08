@@ -4990,11 +4990,16 @@ func TestForkMessageMatchesGolden(t *testing.T) {
 		t.Fatal(err)
 	}
 	destinationPath := filepath.Join("/state/sessions/new-otter/drops", forkSource.DroppedChatName)
-	message := forkSource.GetInitialUserMessage(destinationPath)
+	message := forkSource.GetInitialUserMessage(forkSource.DroppedChatName)
+	message = forkSource.GetMessageWithChatAt(message, destinationPath)
+	collisionMessage := "added files\n\n- /tmp/" + forkSource.DroppedChatName + "\n\n" + forkSource.GetInitialUserMessage(forkSource.DroppedChatName)
+	collisionMessage = forkSource.GetMessageWithChatAt(collisionMessage, destinationPath)
 	message = strings.ReplaceAll(message, writer.Name(), "source-otter")
+	collisionMessage = strings.ReplaceAll(collisionMessage, writer.Name(), "source-otter")
 
 	compareWithGolden(t, "fork-message", ".txt", map[string]func() string{
-		"forked chat in drops": func() string { return message },
+		"forked chat in drops":  func() string { return message },
+		"same-named added file": func() string { return collisionMessage },
 	})
 }
 

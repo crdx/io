@@ -17,6 +17,38 @@ func TestDropsUseADirectoryInsideTheSession(t *testing.T) {
 	}
 }
 
+func TestOnlyADirectoryCanBeDrops(t *testing.T) {
+	for name, prepareInvalidPath := range map[string]func(string) error{
+		"file": func(path string) error {
+			return os.WriteFile(path, []byte("not a directory"), 0o600)
+		},
+		"symbolic link": func(path string) error {
+			return os.Symlink(t.TempDir(), path)
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			sessionDirectory := t.TempDir()
+			if err := prepareInvalidPath(GetDirectory(sessionDirectory)); err != nil {
+				t.Fatal(err)
+			}
+
+			if _, err := Prepare(sessionDirectory, func() error { return nil }); err == nil {
+				t.Error("invalid drops path was prepared")
+			}
+
+			workspaceRoot, err := os.OpenRoot(t.TempDir())
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = workspaceRoot.Close() }()
+			files := file.New(workspaceRoot, func(string) error { return file.ErrReadOnly })
+			if _, _, err := Mount(files, sessionDirectory); err == nil {
+				t.Error("invalid drops path was mounted")
+			}
+		})
+	}
+}
+
 func TestAFileIsCopiedPrivatelyIntoDrops(t *testing.T) {
 	sourceDirectory := t.TempDir()
 	sourcePath := filepath.Join(sourceDirectory, "chat.md")

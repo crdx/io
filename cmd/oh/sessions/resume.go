@@ -46,7 +46,9 @@ func (self *ForkSource) GetInitialUserMessage(transcriptPath string) string {
 }
 
 func (self *ForkSource) GetMessageWithChatAt(message string, transcriptPath string) string {
-	return strings.Replace(message, self.DroppedChatName, transcriptPath, 1)
+	placeholderPrompt := forkSourcePrompt(self.sourceName, self.DroppedChatName)
+	resolvedPrompt := forkSourcePrompt(self.sourceName, transcriptPath)
+	return strings.Replace(message, placeholderPrompt, resolvedPrompt, 1)
 }
 
 func (self *ForkSource) CopyChat(sessionDirectory string, ensureSession func() error) (string, error) {
