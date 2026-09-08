@@ -31,6 +31,25 @@ func TestOptionalParametersAreLeftOutOfRequired(t *testing.T) {
 	}
 }
 
+func TestAStringArrayDescribesItsItems(t *testing.T) {
+	schema := tool.Schema{
+		tool.StringArray("names", "jobs to watch"),
+	}
+
+	schemaJSON, err := json.Marshal(schema)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expectedJSON := `{"type":"object","properties":{` +
+		`"names":{"type":"array","description":"jobs to watch","items":{"type":"string"}}},` +
+		`"required":["names"],"additionalProperties":false}`
+
+	if string(schemaJSON) != expectedJSON {
+		t.Errorf("expected %s, got %s", expectedJSON, schemaJSON)
+	}
+}
+
 func TestASchemaWithNoParametersIsStillAnObject(t *testing.T) {
 	schemaJSON, err := json.Marshal(tool.Schema{})
 	if err != nil {

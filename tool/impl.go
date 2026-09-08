@@ -51,11 +51,13 @@ type _call struct {
 	qualifier      string
 	emphasis       Emphasis
 	emphasisSource string
+	continuation   []CallRendering
 	exec           func(ctx context.Context) (ToolCallResult, error)
 }
 
-func (self _call) Subject() string    { return self.subject }
-func (self _call) Qualifier() string  { return self.qualifier }
-func (self _call) Emphasis() Emphasis { return self.emphasis }
+func (self _call) Subject() string               { return self.subject }
+func (self _call) Qualifier() string             { return self.qualifier }
+func (self _call) Emphasis() Emphasis            { return self.emphasis }
+func (self _call) Continuation() []CallRendering { return self.continuation }
 
 func (self _call) Exec(ctx context.Context) (ToolCallResult, error) { return self.exec(ctx) }

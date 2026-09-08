@@ -100,8 +100,12 @@ func TestWaitingHoldsUntilARunningJobHasFinished(t *testing.T) {
 	}
 
 	startedAt := time.Now()
-	if err := manager.Wait(t.Context(), "brief"); err != nil {
+	name, err := manager.Wait(t.Context(), []string{"brief"})
+	if err != nil {
 		t.Fatalf("the wait failed: %v", err)
+	}
+	if name != "brief" {
+		t.Errorf("got %q, want the finished job's name", name)
 	}
 	elapsed := time.Since(startedAt)
 

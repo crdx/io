@@ -226,6 +226,21 @@ func TestArgumentsWithSyntaxAreHighlighted(t *testing.T) {
 	}
 }
 
+func TestAContinuedBashCommandUsesTheOrdinaryBashLabel(t *testing.T) {
+	bashLabel := Label{
+		Name:      "$",
+		NameStyle: style.Shell,
+		Subject:   "cd /work && just check",
+		Emphasis:  tool.Emphasis{Kind: tool.EmphasisSyntax, Value: "bash"},
+	}
+	label := Label{Name: "job", Subject: "check", Continuation: []Label{bashLabel}}
+
+	want := style.Change("job") + " " + style.Subject("check") + " " + bashLabel.Render()
+	if got := label.Render(); got != want {
+		t.Errorf("got %q, want the exact bash label after the job name", got)
+	}
+}
+
 func TestSyntaxCanBeHighlightedFromSourceBeyondTheDisplayedSubject(t *testing.T) {
 	label := Label{
 		Name:    "bash",

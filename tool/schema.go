@@ -11,6 +11,7 @@ type DataType string
 
 const (
 	TypeObject  DataType = "object"
+	TypeArray   DataType = "array"
 	TypeString  DataType = "string"
 	TypeInteger DataType = "integer"
 )
@@ -20,6 +21,7 @@ type Schema []Parameter
 type Parameter struct {
 	Name        string
 	Type        DataType
+	ItemType    DataType
 	Description string
 	Values      []string
 
@@ -35,6 +37,10 @@ func String(name string, description string) Parameter {
 	return Parameter{Name: name, Type: TypeString, Description: description}
 }
 
+func StringArray(name string, description string) Parameter {
+	return Parameter{Name: name, Type: TypeArray, ItemType: TypeString, Description: description}
+}
+
 func Integer(name string, description string) Parameter {
 	return Parameter{Name: name, Type: TypeInteger, Description: description}
 }
@@ -43,10 +49,15 @@ func Enum(name string, description string, values ...string) Parameter {
 	return Parameter{Name: name, Type: TypeString, Description: description, Values: values}
 }
 
+type item struct {
+	Type DataType `json:"type"`
+}
+
 type property struct {
 	Type        DataType `json:"type"`
 	Description string   `json:"description"`
 	Values      []string `json:"enum,omitempty"`
+	Items       *item    `json:"items,omitempty"`
 }
 
 type object struct {
@@ -63,11 +74,15 @@ func (self Schema) MarshalJSON() ([]byte, error) {
 	}
 
 	for _, parameter := range self {
-		renderedSchema.Properties[parameter.Name] = property{
+		renderedProperty := property{
 			Type:        parameter.Type,
 			Description: parameter.Description,
 			Values:      parameter.Values,
 		}
+		if parameter.ItemType != "" {
+			renderedProperty.Items = &item{Type: parameter.ItemType}
+		}
+		renderedSchema.Properties[parameter.Name] = renderedProperty
 
 		if !parameter.isOptional {
 			renderedSchema.RequiredNames = append(renderedSchema.RequiredNames, parameter.Name)

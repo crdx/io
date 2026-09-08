@@ -3,7 +3,7 @@
  start the docs server and a watcher
 
 
-job python3 -m http.server 8080 … ✓ 1L
+job docs $ python3 -m http.serve… ✓ 1L
 
 Both are up.
 
@@ -418,7 +418,7 @@ h
  start the docs server and a watcher
 
 
-job python3 -m http.server 8080 docs ✓ 1L
+job docs $ python3 -m http.server 8080 ✓ 1L
 
 Both are up.
 
@@ -488,7 +488,7 @@ with.
  start the docs server and a watcher
 
 
-job python3 -m http.server 8080 docs ✓ 1L
+job docs $ python3 -m http.server 8080 ✓ 1L
 
 Both are up.
 

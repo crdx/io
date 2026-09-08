@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -13,42 +14,87 @@ func TestWaitingOnAFinishedJobReturnsAtOnce(t *testing.T) {
 	manager := New(nil)
 	manager.Restore([]Snapshot{{Name: "build", Command: "just build", State: StateComplete}})
 
-	if err := manager.Wait(t.Context(), "build"); err != nil {
+	name, err := manager.Wait(t.Context(), []string{"build"})
+	if err != nil {
 		t.Errorf("got %v, want a finished job to be waited on for no time at all", err)
+	}
+	if name != "build" {
+		t.Errorf("got %q, want the finished job's name", name)
+	}
+}
+
+func TestWaitingOnSeveralFinishedJobsUsesTheRequestedOrder(t *testing.T) {
+	manager := New(nil)
+	manager.Restore([]Snapshot{
+		{Name: "build", State: StateComplete},
+		{Name: "docs", State: StateFailed},
+	})
+
+	name, err := manager.Wait(t.Context(), []string{"docs", "build"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if name != "docs" {
+		t.Errorf("got %q, want the first requested finished job", name)
 	}
 }
 
 func TestWaitingOnAnUnknownJobSaysSo(t *testing.T) {
-	if err := New(nil).Wait(t.Context(), "ghost"); !errors.Is(err, ErrNotFound) {
+	if _, err := New(nil).Wait(t.Context(), []string{"ghost"}); !errors.Is(err, ErrNotFound) {
 		t.Errorf("got %v, want the job not to be found", err)
 	}
 }
 
-func TestWaitingReturnsAsSoonAsTheJobHasEnded(t *testing.T) {
+func TestWaitingWithoutAJobIsRefused(t *testing.T) {
+	if _, err := New(nil).Wait(t.Context(), nil); err == nil {
+		t.Error("a wait without a job was accepted")
+	}
+}
+
+func TestWaitingOnSeveralJobsRefusesAnUnknownNameBeforeReturning(t *testing.T) {
+	manager := New(nil)
+	manager.Restore([]Snapshot{{Name: "build", State: StateComplete}})
+
+	if _, err := manager.Wait(t.Context(), []string{"build", "ghost"}); !errors.Is(err, ErrNotFound) ||
+		!strings.Contains(err.Error(), "ghost") {
+		t.Errorf("got %v, want the unknown watched job to be named", err)
+	}
+}
+
+func TestWaitingOnSeveralJobsReturnsAsSoonAsAnyHasEnded(t *testing.T) {
 	manager := New(nil)
 
-	ending, err := manager.claim("docs", "python3", sandbox.Policy{})
+	build, err := manager.claim("build", "just build", sandbox.Policy{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	docs, err := manager.claim("docs", "python3", sandbox.Policy{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	result := make(chan string)
 	go func() {
-		time.Sleep(50 * time.Millisecond)
-		manager.conclude(ending, StateComplete, 0, "")
-		close(ending.over)
+		name, waitErr := manager.Wait(t.Context(), []string{"build", "docs"})
+		if waitErr != nil {
+			result <- waitErr.Error()
+			return
+		}
+		result <- name
 	}()
 
-	if err := manager.Wait(t.Context(), "docs"); err != nil {
-		t.Fatalf("the wait failed: %v", err)
+	manager.conclude(docs, StateComplete, 0, "")
+	close(docs.over)
+
+	if name := <-result; name != "docs" {
+		t.Errorf("got %q, want the job that ended first", name)
+	}
+	if snapshot, statusErr := manager.Status("build"); statusErr != nil || !snapshot.IsLive() {
+		t.Errorf("got %#v and %v, want the other job to remain live", snapshot, statusErr)
 	}
 
-	snapshot, err := manager.Status("docs")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if snapshot.IsLive() {
-		t.Errorf("got state %s, want the wait to have outlasted the job", snapshot.State)
-	}
+	manager.conclude(build, StateComplete, 0, "")
+	close(build.over)
 }
 
 func TestWaitingEndsWithTheContextThatAskedForIt(t *testing.T) {
@@ -61,7 +107,7 @@ func TestWaitingEndsWithTheContextThatAskedForIt(t *testing.T) {
 	waiting, stopWaiting := context.WithTimeout(t.Context(), 50*time.Millisecond)
 	defer stopWaiting()
 
-	if err := manager.Wait(waiting, "docs"); !errors.Is(err, context.DeadlineExceeded) {
+	if _, err := manager.Wait(waiting, []string{"docs"}); !errors.Is(err, context.DeadlineExceeded) {
 		t.Errorf("got %v, want the wait to end with its context", err)
 	}
 }
@@ -76,8 +122,12 @@ func TestWaitingOnAJobThatCouldNotBeStartedReturnsAtOnce(t *testing.T) {
 	waiting, stopWaiting := context.WithTimeout(t.Context(), time.Second)
 	defer stopWaiting()
 
-	if err := manager.Wait(waiting, "docs"); err != nil {
+	name, err := manager.Wait(waiting, []string{"docs"})
+	if err != nil {
 		t.Errorf("got %v, want a job that never ran to be waited on for no time at all", err)
+	}
+	if name != "docs" {
+		t.Errorf("got %q, want the failed job's name", name)
 	}
 }
 

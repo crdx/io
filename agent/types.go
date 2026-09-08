@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"slices"
 	"time"
 
 	"crdx.org/io/tool"
@@ -194,16 +195,18 @@ type CallFaulted interface {
 }
 
 type FallbackRendering struct {
-	Subject  string        `json:"render,omitempty"`
-	Note     string        `json:"detail,omitempty"`
-	Emphasis tool.Emphasis `json:"emphasis,omitzero"`
-	ReadOnly bool          `json:"read_only,omitempty"`
+	Subject      string               `json:"render,omitempty"`
+	Note         string               `json:"detail,omitempty"`
+	Emphasis     tool.Emphasis        `json:"emphasis,omitzero"`
+	Continuation []tool.CallRendering `json:"continuation,omitempty"`
+	ReadOnly     bool                 `json:"read_only,omitempty"`
 }
 
 func (self *FallbackRendering) Describe(toolCall tool.ToolCall) {
 	self.Subject = toolCall.Subject()
 	self.Note = toolCall.Qualifier()
 	self.Emphasis = toolCall.Emphasis()
+	self.Continuation = slices.Clone(toolCall.Continuation())
 }
 
 type Status string

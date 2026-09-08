@@ -216,6 +216,23 @@ func TestACommandRenderingIsMarkedAsBash(t *testing.T) {
 	}
 }
 
+func TestTheSharedCommandRenderingMatchesTheBashTool(t *testing.T) {
+	command := "echo one\necho two"
+	rendering := bash.DescribeCommand(command)
+
+	parsedCall, err := fixedShell(nil, func() sandbox.Policy { return sandbox.Policy{} }).Parse(
+		`{"command":"echo one\necho two"}`,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rendering.Name != "bash" || rendering.Subject != parsedCall.Subject() ||
+		rendering.Qualifier != parsedCall.Qualifier() || rendering.Emphasis != parsedCall.Emphasis() {
+		t.Errorf("got %#v, want the bash tool's complete rendering", rendering)
+	}
+}
+
 func TestCommandsAreFormattedOnOneLine(t *testing.T) {
 	for name, test := range map[string]struct {
 		command string

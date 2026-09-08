@@ -4,13 +4,16 @@
  then stop it
 
 
-job python3 -m http.server 8080 … ✓ 1L
+job docs $ python3 -m http.serve… ✓ 1L
 job docs status ✓ 1L
 job docs output ✓ 3L
 job docs wait ✓ 3L
-job python3 -m … ✗ 1L a job of that n…
+job docs $ pyth… ✗ 1L a job of that n…
 job list ✓ 2L
+job docs, build wait ✓ 3L
 job docs stop ✓ 1L
+job build, docs wait ✓ 2L
+job docs, build wait ✓ 5L
 
 The docs server ran on localhost:8080
 and is stopped now. The build job had
@@ -95,6 +98,9 @@ p
 i
 
 t
+
+
+
 
 
 
@@ -197,13 +203,16 @@ t
  start the docs server, check on it, then stop it
 
 
-job python3 -m http.server 8080 --bind localhost docs ✓ 1L
+job docs $ python3 -m http.server 8080; --bind localhost 2L ✓ 1L
 job docs status ✓ 1L
 job docs output ✓ 3L
 job docs wait ✓ 3L
-job python3 -m http.server 8080 docs ✗ 1L a job of that name is already running
+job docs $ python3 -m http.server 8080 ✗ 1L a job of that name is already running
 job list ✓ 2L
+job docs, build wait ✓ 3L
 job docs stop ✓ 1L
+job build, docs wait ✓ 2L
+job docs, build wait ✓ 5L
 
 The docs server ran on localhost:8080 and is stopped now. The build job had already failed with
 exit(1).
@@ -223,7 +232,10 @@ job … ✓ 3L
 job … ✓ 3L
 j… ✗ 1L a…
 job ✓ 2L
+job … ✓ 3L
 job … ✓ 1L
+job … ✓ 2L
+job … ✓ 5L
 
 The docs
 server ran
@@ -241,13 +253,16 @@ exit(1).
  start the docs server, check on it, then stop it
 
 
-job python3 -m http.server 8080 --bind localhost docs ✓ 1L
+job docs $ python3 -m http.server 8080; --bind localhost 2L ✓ 1L
 job docs status ✓ 1L
 job docs output ✓ 3L
 job docs wait ✓ 3L
-job python3 -m http.server 8080 docs ✗ 1L a job of that name is already running
+job docs $ python3 -m http.server 8080 ✗ 1L a job of that name is already running
 job list ✓ 2L
+job docs, build wait ✓ 3L
 job docs stop ✓ 1L
+job build, docs wait ✓ 2L
+job docs, build wait ✓ 5L
 
 The docs server ran on localhost:8080 and is stopped now. The build job had already failed with
 exit(1).

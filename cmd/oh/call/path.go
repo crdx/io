@@ -2,16 +2,34 @@ package call
 
 import (
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/internal/util/pathutil"
+	"crdx.org/io/tool"
 )
 
 func shortenPaths(rendering agent.FallbackRendering, workspace *work.Space) agent.FallbackRendering {
+	primary := shortenCallRendering(tool.CallRendering{
+		Subject:   rendering.Subject,
+		Qualifier: rendering.Note,
+		Emphasis:  rendering.Emphasis,
+	}, workspace)
+	rendering.Subject = primary.Subject
+	rendering.Note = primary.Qualifier
+	rendering.Emphasis = primary.Emphasis
+	rendering.Continuation = slices.Clone(rendering.Continuation)
+	for i := range rendering.Continuation {
+		rendering.Continuation[i] = shortenCallRendering(rendering.Continuation[i], workspace)
+	}
+	return rendering
+}
+
+func shortenCallRendering(rendering tool.CallRendering, workspace *work.Space) tool.CallRendering {
 	rendering.Subject = shortenPathPrefix(rendering.Subject, workspace)
-	rendering.Note = shortenPathPrefix(rendering.Note, workspace)
+	rendering.Qualifier = shortenPathPrefix(rendering.Qualifier, workspace)
 	rendering.Emphasis.Source = shortenPathPrefix(rendering.Emphasis.Source, workspace)
 	return rendering
 }

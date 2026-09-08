@@ -1,6 +1,8 @@
 package call
 
 import (
+	"slices"
+
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/skill"
 	"crdx.org/io/cmd/oh/style"
@@ -42,30 +44,39 @@ func Describe(event agent.Event, getTool ToolLookup, workspace *work.Space) agen
 }
 
 func plain(rendering agent.FallbackRendering) agent.FallbackRendering {
-	rendering.Subject = strutil.Printable(rendering.Subject)
-	rendering.Note = strutil.Printable(rendering.Note)
+	primary := printableCallRendering(tool.CallRendering{
+		Subject:   rendering.Subject,
+		Qualifier: rendering.Note,
+		Emphasis:  rendering.Emphasis,
+	})
+	rendering.Subject = primary.Subject
+	rendering.Note = primary.Qualifier
+	rendering.Emphasis = primary.Emphasis
+	rendering.Continuation = slices.Clone(rendering.Continuation)
+	for i := range rendering.Continuation {
+		rendering.Continuation[i] = printableCallRendering(rendering.Continuation[i])
+	}
 
+	return rendering
+}
+
+func printableCallRendering(rendering tool.CallRendering) tool.CallRendering {
+	rendering.Subject = strutil.Printable(rendering.Subject)
+	rendering.Qualifier = strutil.Printable(rendering.Qualifier)
 	return rendering
 }
 
 func LabelFor(event agent.Event, getTool ToolLookup, workspace *work.Space) Label {
 	rendering := Describe(event, getTool, workspace)
-	label := Label{
-		Name:      event.Name,
-		Subject:   rendering.Subject,
-		Emphasis:  rendering.Emphasis,
-		Qualifier: rendering.Note,
-		ReadOnly:  rendering.ReadOnly,
+	label := getLabel(event.Name, rendering.Subject, rendering.Note, rendering.Emphasis, rendering.ReadOnly)
+	label.Continuation = make([]Label, 0, len(rendering.Continuation))
+	for _, part := range rendering.Continuation {
+		label.Continuation = append(label.Continuation, getLabel(part.Name, part.Subject, part.Qualifier, part.Emphasis, false))
 	}
 
 	skillName, isSkillLoad := "", false
 	if event.Name == readTool {
 		skillName, isSkillLoad = skill.NameFromPath(rendering.Subject)
-	}
-
-	if toolLabel, isKnown := toolLabels[event.Name]; isKnown {
-		label.Name = toolLabel.name
-		label.NameStyle = toolLabel.style
 	}
 
 	if isSkillLoad {
@@ -75,6 +86,23 @@ func LabelFor(event agent.Event, getTool ToolLookup, workspace *work.Space) Labe
 		label.AccentStyle = style.Skill
 		label.Emphasis = tool.Emphasis{}
 	}
+	return label
+}
+
+func getLabel(name string, subject string, qualifier string, emphasis tool.Emphasis, isReadOnly bool) Label {
+	label := Label{
+		Name:      name,
+		Subject:   subject,
+		Emphasis:  emphasis,
+		Qualifier: qualifier,
+		ReadOnly:  isReadOnly,
+	}
+
+	if toolLabel, isKnown := toolLabels[name]; isKnown {
+		label.Name = toolLabel.name
+		label.NameStyle = toolLabel.style
+	}
+
 	return label
 }
 

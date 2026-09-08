@@ -19,6 +19,7 @@ type Builder[T any] struct {
 	restore        Restorer
 	emphasis       func(call ToolCall) Emphasis
 	emphasisSource func(args T, subject string) string
+	continuation   func(args T) []CallRendering
 }
 
 func Implement[T any](definition Definition, describe Describer[T]) Builder[T] {
@@ -85,6 +86,11 @@ func (self Builder[T]) FocusPath() Builder[T] {
 	})
 }
 
+func (self Builder[T]) ContinuesWith(render func(args T) []CallRendering) Builder[T] {
+	self.continuation = render
+	return self
+}
+
 func (self Builder[T]) Run(execute ResultExecutor[T]) Tool {
 	return self.build(execute)
 }
@@ -132,10 +138,15 @@ func (self Builder[T]) build(exec ResultExecutor[T]) Tool {
 			if self.emphasisSource != nil {
 				emphasisSource = self.emphasisSource(args, subject)
 			}
+			var continuation []CallRendering
+			if self.continuation != nil {
+				continuation = self.continuation(args)
+			}
 			return _call{
 				subject:        subject,
 				qualifier:      qualifier,
 				emphasisSource: emphasisSource,
+				continuation:   continuation,
 				exec: func(ctx context.Context) (ToolCallResult, error) {
 					return exec(ctx, args)
 				},

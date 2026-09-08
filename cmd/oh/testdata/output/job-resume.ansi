@@ -3,7 +3,7 @@
 \e[48;2;52;53;65m start the docs server and a watcher    \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.serve\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KBoth are up.\r
 \r
@@ -419,7 +419,7 @@
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m start the docs server and a watcher\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 Both are up.
 
@@ -439,7 +439,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.
 \e[48;2;52;53;65m start the docs server and a watcher                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 Both are up.\r
 \r
@@ -462,7 +462,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \e[48;2;52;53;65m start the docs server and a watcher                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are up.\e[?25h\e[?2026l\r
 \r
@@ -485,7 +485,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \e[48;2;52;53;65m start the docs server and a watcher                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KBoth are up.\e[?25h\e[?2026l\r
 \r
@@ -508,7 +508,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \e[48;2;52;53;65m start the docs server and a watcher                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KBoth\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KBoth are up.\e[?25h\e[?2026l\r
 \r
@@ -579,7 +579,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m start the docs server and a watcher\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 \r\e[KBoth are up.
 
@@ -599,7 +599,7 @@ Restarted \e[38;2;192;128;80mdocs\e[0m from the command it was remembered with.\
 \e[48;2;52;53;65m start the docs server and a watcher                                                                \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KBoth are up.\r
 \r

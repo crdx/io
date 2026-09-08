@@ -33,10 +33,67 @@ type Label struct {
 	Accent          string
 	AccentStyle     style.Style
 	ResultURI       string
+	Continuation    []Label
 	renderedSubject string
 }
 
 func (self Label) Elide(room int) dynamic.Label {
+	return self.elide(room)
+}
+
+func (self Label) Render() string {
+	name := self.style()(self.Name)
+	if self.ResultURI != "" && self.Name != "" {
+		name = link.RenderURL(name, self.ResultURI)
+	}
+	line := name
+
+	if self.Subject != "" {
+		line += " " + self.renderSubject()
+	}
+
+	if self.Qualifier != "" {
+		line += " " + self.renderQualifier()
+	}
+
+	for _, continuation := range self.Continuation {
+		if part := continuation.Render(); part != "" {
+			if line != "" {
+				line += " "
+			}
+			line += part
+		}
+	}
+
+	return line
+}
+
+func (self Label) Width() int {
+	total := width.Of(self.Name)
+
+	if self.Subject != "" {
+		total += 1 + width.Of(self.Subject)
+	}
+
+	if self.Qualifier != "" {
+		total += 1 + width.Of(self.Qualifier)
+	}
+
+	for _, continuation := range self.Continuation {
+		partWidth := continuation.Width()
+		if partWidth == 0 {
+			continue
+		}
+		if total > 0 {
+			total++
+		}
+		total += partWidth
+	}
+
+	return total
+}
+
+func (self Label) elide(room int) Label {
 	self.renderedSubject = ""
 	self.Name = width.Elide(self.Name, room)
 	room -= width.Of(self.Name) + 1
@@ -55,45 +112,31 @@ func (self Label) Elide(room int) dynamic.Label {
 		room = 0
 	}
 
-	if room > 0 {
+	if room > 0 && self.Qualifier != "" {
 		self.Qualifier = width.Elide(self.Qualifier, room)
+		room -= width.Of(self.Qualifier) + 1
 	} else {
 		self.Qualifier = ""
 	}
 
+	continuation := slices.Clone(self.Continuation)
+	self.Continuation = make([]Label, 0, len(continuation))
+	for _, part := range continuation {
+		if room <= 0 {
+			break
+		}
+
+		part = part.elide(room)
+		partWidth := part.Width()
+		if partWidth == 0 {
+			break
+		}
+
+		self.Continuation = append(self.Continuation, part)
+		room -= partWidth + 1
+	}
+
 	return self
-}
-
-func (self Label) Render() string {
-	name := self.style()(self.Name)
-	if self.ResultURI != "" && self.Name != "" {
-		name = link.RenderURL(name, self.ResultURI)
-	}
-	line := name
-
-	if self.Subject != "" {
-		line += " " + self.renderSubject()
-	}
-
-	if self.Qualifier != "" {
-		line += " " + self.renderQualifier()
-	}
-
-	return line
-}
-
-func (self Label) Width() int {
-	total := width.Of(self.Name)
-
-	if self.Subject != "" {
-		total += 1 + width.Of(self.Subject)
-	}
-
-	if self.Qualifier != "" {
-		total += 1 + width.Of(self.Qualifier)
-	}
-
-	return total
 }
 
 func (self Label) getSource() string {

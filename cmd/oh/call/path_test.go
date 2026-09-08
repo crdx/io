@@ -3,8 +3,28 @@ package call
 import (
 	"testing"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/work"
+	"crdx.org/io/tool"
 )
+
+func TestAContinuedCallHasItsPathPrefixesShortened(t *testing.T) {
+	const workspaceDir = "/home/alice/project"
+	rendering := agent.FallbackRendering{
+		Continuation: []tool.CallRendering{{
+			Name:      "bash",
+			Subject:   workspaceDir + "/check",
+			Qualifier: workspaceDir + "/detail",
+			Emphasis:  tool.Emphasis{Source: workspaceDir + "/source"},
+		}},
+	}
+
+	shortened := shortenPaths(rendering, work.At(workspaceDir))
+	part := shortened.Continuation[0]
+	if part.Subject != "check" || part.Qualifier != "detail" || part.Emphasis.Source != "source" {
+		t.Errorf("got %#v, want every continuation path shortened", part)
+	}
+}
 
 func TestWorkspacePathPrefixesAreShortened(t *testing.T) {
 	const workspaceDir = "/home/alice/project"

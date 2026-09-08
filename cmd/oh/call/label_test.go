@@ -7,6 +7,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/call"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/tool"
 )
 
 func label() call.Label {
@@ -100,6 +101,25 @@ func TestCallNamesAreDrawnFromTheTable(t *testing.T) {
 				t.Errorf("got %q, want %q", got, want)
 			}
 		})
+	}
+}
+
+func TestAContinuedShellCallUsesTheShellLabel(t *testing.T) {
+	event := agent.Event{
+		Name: "job",
+		FallbackRendering: agent.FallbackRendering{
+			Subject: "check",
+			Continuation: []tool.CallRendering{{
+				Name:     "bash",
+				Subject:  "just check",
+				Emphasis: tool.Emphasis{Kind: tool.EmphasisSyntax, Value: "bash"},
+			}},
+		},
+	}
+
+	label := call.LabelFor(event, nil, nil)
+	if len(label.Continuation) != 1 || label.Continuation[0].Name != "$" || label.Continuation[0].NameStyle == nil {
+		t.Fatalf("got %#v, want the ordinary shell label as the continuation", label.Continuation)
 	}
 }
 

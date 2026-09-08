@@ -23,7 +23,15 @@ type ToolCall interface {
 	Subject() string
 	Qualifier() string
 	Emphasis() Emphasis
+	Continuation() []CallRendering
 	Exec(ctx context.Context) (ToolCallResult, error)
+}
+
+type CallRendering struct {
+	Name      string   `json:"name"`
+	Subject   string   `json:"render,omitempty"`
+	Qualifier string   `json:"detail,omitempty"`
+	Emphasis  Emphasis `json:"emphasis,omitzero"`
 }
 
 type ToolCallResult struct {

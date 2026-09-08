@@ -3,7 +3,7 @@
 \e[48;2;52;53;65m start the docs server and keep it up   \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.serve\e[0m\e[38;2;150;152;150m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe docs server is up.\r
 \r
@@ -391,7 +391,7 @@
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m start the docs server and keep it up\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 The docs server is up.
 
@@ -416,7 +416,7 @@ It was stopped when write access was withdrawn.
 \e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 The docs server is up.\r
 \r
@@ -444,7 +444,7 @@ It was stopped when write access was withdrawn.\r
 \e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
 \r
@@ -472,7 +472,7 @@ It was stopped when write access was withdrawn.\r
 \e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
 \r
@@ -500,7 +500,7 @@ It was stopped when write access was withdrawn.\r
 \e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
+\e[?2026h\e[?25l\e[?7l\r\e[K\e[38;2;207;173;0mjob\e[0m \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\e[?25h\e[?2026l\r
 \r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
 \r
@@ -580,7 +580,7 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m start the docs server and keep it up\e[0m
 \e[48;2;52;53;65m\e[0m
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m
 
 \r\e[KThe docs server is up.
 
@@ -605,7 +605,7 @@ It was stopped when write access was withdrawn.\r
 \e[48;2;52;53;65m start the docs server and keep it up                                                               \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
-\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mpython3 -m http.server 8080\e[0m \e[38;2;150;152;150mdocs\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
+\e[?7l\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdocs\e[0m \e[38;2;129;162;190m$\e[0m \e[38;2;129;162;190mpython3\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;129;162;190m-m\e[0m\e[38;2;150;152;150m http.server 8080\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
 \r
 \r\e[KThe docs server is up.\r
 \r

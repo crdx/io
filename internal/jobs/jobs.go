@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"slices"
 	"strings"
 	"sync"
@@ -211,26 +212,57 @@ func (self *Manager) Output(name string) (string, Snapshot, error) {
 	return found.output.String(), self.snapshot(found), nil
 }
 
-func (self *Manager) Wait(ctx context.Context, name string) error {
+func (self *Manager) Wait(ctx context.Context, names []string) (string, error) {
 	self.mutex.Lock()
-	found, isKnown := self.jobs[name]
-	isWaitable := isKnown && isLive(found.state)
+	watchedJobs := make([]*job, 0, len(names))
+	for _, name := range names {
+		found, isKnown := self.jobs[name]
+		if !isKnown {
+			self.mutex.Unlock()
+			if len(names) == 1 {
+				return "", ErrNotFound
+			}
+			return "", fmt.Errorf("%w: %s", ErrNotFound, name)
+		}
+		watchedJobs = append(watchedJobs, found)
+	}
+	if len(watchedJobs) == 0 {
+		self.mutex.Unlock()
+		return "", errors.New("at least one job name is required")
+	}
+
+	if endedName, isEnded := getFirstEndedName(watchedJobs); isEnded {
+		self.mutex.Unlock()
+		return endedName, nil
+	}
+
+	cases := make([]reflect.SelectCase, 0, len(watchedJobs)+1)
+	for _, watchedJob := range watchedJobs {
+		cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(watchedJob.over)})
+	}
+	cases = append(cases, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(ctx.Done())})
 	self.mutex.Unlock()
 
-	if !isKnown {
-		return ErrNotFound
+	reflect.Select(cases)
+
+	self.mutex.Lock()
+	endedName, isEnded := getFirstEndedName(watchedJobs)
+	self.mutex.Unlock()
+	if isEnded {
+		return endedName, nil
 	}
 
-	if !isWaitable {
-		return nil
+	return "", ctx.Err()
+}
+
+func getFirstEndedName(watchedJobs []*job) (string, bool) {
+	for _, watchedJob := range watchedJobs {
+		if !isLive(watchedJob.state) {
+			return watchedJob.name, true
+		}
 	}
 
-	select {
-	case <-found.over:
-		return nil
-	case <-ctx.Done():
-		return ctx.Err()
-	}
+	return "", false
 }
 
 func (self *Manager) List() []Snapshot {

@@ -21,7 +21,7 @@ func TestAWaitReportsTheJobAndItsOutputOnceItHasEnded(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	report, err := waited(t.Context(), manager, "build", time.Minute)
+	report, err := waited(t.Context(), manager, []string{"build"}, waitForAny, time.Minute)
 	if err != nil {
 		t.Fatalf("the wait failed: %v", err)
 	}
@@ -39,7 +39,7 @@ func TestAWaitOnAJobThatKeepsRunningGivesUpAndSaysSo(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	report, err := waited(t.Context(), manager, "docs", 100*time.Millisecond)
+	report, err := waited(t.Context(), manager, []string{"docs"}, waitForAny, 100*time.Millisecond)
 	if err != nil {
 		t.Fatalf("the wait failed: %v", err)
 	}
@@ -52,6 +52,36 @@ func TestAWaitOnAJobThatKeepsRunningGivesUpAndSaysSo(t *testing.T) {
 	}
 	if !strings.Contains(report, "serving") {
 		t.Errorf("got %q, want what the job has printed so far", report)
+	}
+}
+
+func TestAWaitOnSeveralJobsReportsEveryStatusWhenItsLimitIsReached(t *testing.T) {
+	manager := jobs.New(endingRunner{after: time.Hour})
+	defer func() { _ = manager.Close() }()
+
+	for _, name := range []string{"build", "docs"} {
+		if _, err := manager.Start(t.Context(), name, t.TempDir(), name, sandbox.Policy{}); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	report, err := waited(t.Context(), manager, []string{"build", "docs"}, waitForAll, time.Millisecond)
+	if err != nil {
+		t.Fatalf("the wait failed: %v", err)
+	}
+
+	for _, wanted := range []string{"build: running", "docs: running", "before all watched jobs ended"} {
+		if !strings.Contains(report, wanted) {
+			t.Errorf("got %q, want it to carry %q", report, wanted)
+		}
+	}
+
+	report, err = waited(t.Context(), manager, []string{"build", "docs"}, waitForAny, time.Millisecond)
+	if err != nil {
+		t.Fatalf("the second wait failed: %v", err)
+	}
+	if !strings.Contains(report, "before any watched job ended") {
+		t.Errorf("got %q, want the any condition named", report)
 	}
 }
 
@@ -69,13 +99,13 @@ func TestAWaitEndsWhenTheTurnDoes(t *testing.T) {
 		endTurn()
 	}()
 
-	if _, err := waited(turn, manager, "docs", time.Hour); !errors.Is(err, context.Canceled) {
+	if _, err := waited(turn, manager, []string{"docs"}, waitForAny, time.Hour); !errors.Is(err, context.Canceled) {
 		t.Errorf("got %v, want the wait to end with the turn that asked for it", err)
 	}
 }
 
 func TestAWaitOnAnUnknownJobSaysSo(t *testing.T) {
-	if _, err := waited(t.Context(), jobs.New(nil), "ghost", time.Minute); !errors.Is(err, jobs.ErrNotFound) {
+	if _, err := waited(t.Context(), jobs.New(nil), []string{"ghost"}, waitForAny, time.Minute); !errors.Is(err, jobs.ErrNotFound) {
 		t.Errorf("got %v, want the job not to be found", err)
 	}
 }

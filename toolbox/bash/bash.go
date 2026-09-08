@@ -65,16 +65,32 @@ func ProtectedPolicy(policy sandbox.Policy) sandbox.Policy {
 }
 
 func Describe(args Args) (string, string) {
-	parsedScript, err := parse(args.Command)
-	if err != nil {
-		return oneLine(args.Command), spread(args.Command)
+	rendering := DescribeCommand(args.Command)
+	return rendering.Subject, rendering.Qualifier
+}
+
+func DescribeCommand(command string) tool.CallRendering {
+	var subject string
+	parsedScript, err := parse(command)
+	switch {
+	case err != nil:
+		subject = oneLine(command)
+	case hasHereDocument(parsedScript):
+		subject = strutil.FirstLine(command)
+	default:
+		subject = format(parsedScript)
 	}
 
-	if hasHereDocument(parsedScript) {
-		return strutil.FirstLine(args.Command), spread(args.Command)
+	return tool.CallRendering{
+		Name:      "bash",
+		Subject:   subject,
+		Qualifier: spread(command),
+		Emphasis: tool.Emphasis{
+			Kind:   tool.EmphasisSyntax,
+			Value:  "bash",
+			Source: emphasisSource(Args{Command: command}, subject),
+		},
 	}
-
-	return format(parsedScript), spread(args.Command)
 }
 
 func emphasisSource(args Args, subject string) string {

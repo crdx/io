@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
+	"crdx.org/io/toolbox/bash"
 )
 
 const (
@@ -24,6 +25,8 @@ const (
 	actionList    = "list"
 	actionDiscard = "discard"
 	actionPrune   = "prune"
+	waitForAny    = "any"
+	waitForAll    = "all"
 )
 
 const waitLimit = 5 * time.Minute
@@ -40,9 +43,11 @@ var actions = []string{
 }
 
 type Args struct {
-	Action  string `json:"action"`
-	Name    string `json:"name"`
-	Command string `json:"command"`
+	Action  string   `json:"action"`
+	Name    string   `json:"name"`
+	Names   []string `json:"names,omitempty"`
+	WaitFor string   `json:"wait_for,omitempty"`
+	Command string   `json:"command"`
 }
 
 func New(
@@ -57,12 +62,15 @@ func New(
 			Schema: tool.Schema{
 				tool.Enum("action", "what to do", actions...),
 				tool.String("name", "short name for the job (for all actions except 'list', 'prune'); e.g. check, lint, build").Optional(),
+				tool.StringArray("names", "the job names to watch for wait").Optional(),
+				tool.Enum("wait_for", "whether wait returns after any or all watched jobs end", waitForAny, waitForAll).Optional(),
 				tool.String("command", "the command line (for action 'start'); if omitted, re-runs previous job by name").Optional(),
 			},
 		},
 		Describe,
 	).
 		Validate(validate).
+		ContinuesWith(describeContinuation).
 		Exec(func(ctx context.Context, args Args) (string, tool.ToolCallMetrics, error) {
 			return run(ctx, manager, root, buildPolicy, args)
 		})
@@ -70,10 +78,21 @@ func New(
 
 func Describe(args Args) (string, string) {
 	if args.Action == actionStart && strings.TrimSpace(args.Command) != "" {
-		return strings.Join(strings.Fields(args.Command), " "), args.Name
+		return args.Name, ""
+	}
+	if args.Action == actionWait {
+		return strings.Join(getWaitNames(args), ", "), args.Action
 	}
 
 	return args.Name, args.Action
+}
+
+func describeContinuation(args Args) []tool.CallRendering {
+	if args.Action != actionStart || strings.TrimSpace(args.Command) == "" {
+		return nil
+	}
+
+	return []tool.CallRendering{bash.DescribeCommand(args.Command)}
 }
 
 func validate(args Args) error {
@@ -81,15 +100,71 @@ func validate(args Args) error {
 		return fmt.Errorf("action is %q, and wants to be one of: %s", args.Action, strings.Join(actions, ", "))
 	}
 
+	if args.Action == actionWait {
+		return validateWait(args)
+	}
+
+	if len(args.Names) > 0 {
+		return errors.New("names can only be used for wait")
+	}
+	if args.WaitFor != "" {
+		return errors.New("wait_for can only be used for wait")
+	}
 	if args.Action == actionList || args.Action == actionPrune {
 		return nil
 	}
-
 	if strings.TrimSpace(args.Name) == "" {
 		return errors.New("name is required")
 	}
 
 	return nil
+}
+
+func validateWait(args Args) error {
+	if strings.TrimSpace(args.Name) != "" && len(args.Names) > 0 {
+		return errors.New("name and names cannot both be used for wait")
+	}
+
+	names := getWaitNames(args)
+	if len(names) == 0 {
+		return errors.New("name or names is required for wait")
+	}
+
+	knownNames := make(map[string]bool, len(names))
+	for _, name := range names {
+		if strings.TrimSpace(name) == "" {
+			return errors.New("every name for wait must be non-empty")
+		}
+		if knownNames[name] {
+			return fmt.Errorf("name %q is repeated", name)
+		}
+		knownNames[name] = true
+	}
+
+	if !slices.Contains([]string{waitForAny, waitForAll}, getWaitFor(args)) {
+		return errors.New("wait_for wants to be either any or all")
+	}
+
+	return nil
+}
+
+func getWaitNames(args Args) []string {
+	if len(args.Names) > 0 {
+		return args.Names
+	}
+	if strings.TrimSpace(args.Name) == "" {
+		return nil
+	}
+
+	return []string{args.Name}
+}
+
+func getWaitFor(args Args) string {
+	if args.WaitFor == "" {
+		return waitForAny
+	}
+
+	return args.WaitFor
 }
 
 func run(
@@ -151,7 +226,7 @@ func act(
 		return withOutput(snapshot.Describe(), output, snapshot.DroppedBytes), nil
 
 	case actionWait:
-		return waited(ctx, manager, args.Name, waitLimit)
+		return waited(ctx, manager, getWaitNames(args), getWaitFor(args), waitLimit)
 
 	case actionDiscard:
 		discardedJob, err := manager.Discard(args.Name)
@@ -182,16 +257,31 @@ func act(
 	}
 }
 
-func waited(ctx context.Context, manager *jobs.Manager, name string, limit time.Duration) (string, error) {
+func waited(
+	ctx context.Context,
+	manager *jobs.Manager,
+	names []string,
+	waitFor string,
+	limit time.Duration,
+) (string, error) {
 	waitContext, stopWaiting := context.WithTimeout(ctx, limit)
 	defer stopWaiting()
 
-	err := manager.Wait(waitContext, name)
-	if err != nil && (ctx.Err() != nil || !errors.Is(err, context.DeadlineExceeded)) {
+	completedNames, err := waitForJobs(waitContext, manager, names, waitFor)
+	if err == nil {
+		if waitFor == waitForAll {
+			return getReports(manager, names)
+		}
+		return getReports(manager, completedNames)
+	}
+	if ctx.Err() != nil || !errors.Is(err, context.DeadlineExceeded) {
 		return "", err
 	}
+	if len(names) > 1 {
+		return getTimeoutReport(manager, names, waitFor, limit)
+	}
 
-	output, snapshot, err := manager.Output(name)
+	output, snapshot, err := manager.Output(names[0])
 	if err != nil {
 		return "", err
 	}
@@ -205,6 +295,61 @@ func waited(ctx context.Context, manager *jobs.Manager, name string, limit time.
 	}
 
 	return withOutput(status, output, snapshot.DroppedBytes), nil
+}
+
+func waitForJobs(ctx context.Context, manager *jobs.Manager, names []string, waitFor string) ([]string, error) {
+	remainingNames := slices.Clone(names)
+	completedNames := make([]string, 0, len(names))
+
+	for len(remainingNames) > 0 {
+		completedName, err := manager.Wait(ctx, remainingNames)
+		if err != nil {
+			return completedNames, err
+		}
+		completedNames = append(completedNames, completedName)
+		if waitFor == waitForAny {
+			return completedNames, nil
+		}
+		remainingNames = slices.DeleteFunc(remainingNames, func(name string) bool { return name == completedName })
+	}
+
+	return completedNames, nil
+}
+
+func getReports(manager *jobs.Manager, names []string) (string, error) {
+	reports := make([]string, 0, len(names))
+	for _, name := range names {
+		output, snapshot, err := manager.Output(name)
+		if err != nil {
+			return "", err
+		}
+		reports = append(reports, withOutput(snapshot.Describe(), output, snapshot.DroppedBytes))
+	}
+
+	return strings.Join(reports, "\n\n"), nil
+}
+
+func getTimeoutReport(manager *jobs.Manager, names []string, waitFor string, limit time.Duration) (string, error) {
+	statuses := make([]string, 0, len(names)+1)
+	for _, name := range names {
+		snapshot, err := manager.Status(name)
+		if err != nil {
+			return "", err
+		}
+		statuses = append(statuses, snapshot.Describe())
+	}
+
+	quantity := "any watched job"
+	if waitFor == waitForAll {
+		quantity = "all watched jobs"
+	}
+	statuses = append(statuses, fmt.Sprintf(
+		"note: the wait gave up after %s before %s ended.",
+		util.CompactDuration(limit),
+		quantity,
+	))
+
+	return strings.Join(statuses, "\n"), nil
 }
 
 func withOutput(status string, output string, droppedBytes int) string {
