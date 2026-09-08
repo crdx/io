@@ -62,7 +62,7 @@ func (self *renderer) cellsOf(row ast.Node) []string {
 	var cells []string
 
 	for cell := row.FirstChild(); cell != nil; cell = cell.NextSibling() {
-		cells = append(cells, self.inline(cell))
+		cells = append(cells, self.linkPaths(self.inline(cell)))
 	}
 
 	return cells

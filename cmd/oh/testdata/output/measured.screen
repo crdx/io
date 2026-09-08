@@ -404,8 +404,8 @@ for NAME in
 $(ls *.go);
 do
     COUNT=$(
-COUNT=$(grep
--c "func"
+grep -c
+"func"
 "$NAME")
     echo
 "$NAME has

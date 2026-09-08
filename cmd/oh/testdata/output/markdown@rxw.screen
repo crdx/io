@@ -729,8 +729,7 @@ like this:
 func main()
 {
     fmt.Prin
-fmt.Println(
-"hello")
+tln("hello")
 }
 
 • read

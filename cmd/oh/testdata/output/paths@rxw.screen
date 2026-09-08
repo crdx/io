@@ -23,6 +23,12 @@ cmd/oh/line/missing.go, which is where I
 looked first. settings.toml names the
 workspace and target.txt is the file
 everything else works on.
+
+A wrapped patch path looks like this:
+
+    cmd/oh/line/a-patch-path-that-is-lon
+g-enough-to-wrap-after-leading-indentati
+on-and-remain-clickable.patch
 === one column ===
 A
 g
@@ -454,6 +460,145 @@ s
 o
 n
 .
+
+A
+w
+r
+a
+p
+p
+e
+d
+p
+a
+t
+c
+h
+p
+a
+t
+h
+l
+o
+o
+k
+s
+l
+i
+k
+e
+t
+h
+i
+s
+:
+
+
+c
+m
+d
+/
+o
+h
+/
+l
+i
+n
+e
+/
+a
+-
+p
+a
+t
+c
+h
+-
+p
+a
+t
+h
+-
+t
+h
+a
+t
+-
+i
+s
+-
+l
+o
+n
+g
+-
+e
+n
+o
+u
+g
+h
+-
+t
+o
+-
+w
+r
+a
+p
+-
+a
+f
+t
+e
+r
+-
+l
+e
+a
+d
+i
+n
+g
+-
+i
+n
+d
+e
+n
+t
+a
+t
+i
+o
+n
+-
+a
+n
+d
+-
+r
+e
+m
+a
+i
+n
+-
+c
+l
+i
+c
+k
+a
+b
+l
+e
+.
+p
+a
+t
+c
+h
 === printed ===
 Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
 
@@ -470,6 +615,11 @@ read cmd/oh/line/render.go ✓ 5L
 The prompt is built in cmd/oh/line/render.go:4:9, and screen.go holds the spinner beside it. There
 is nothing about it in README.md, and nothing at all in cmd/oh/line/missing.go, which is where I
 looked first. settings.toml names the workspace and target.txt is the file everything else works on.
+
+A wrapped patch path looks like this:
+
+    cmd/oh/line/a-patch-path-that-is-long-enough-to-wrap-after-leading-indentation-and-remain-clicka
+ble.patch
 === tiny ===
 Agent
 000000000000
@@ -529,6 +679,22 @@ is the file
 everything
 else works
 on.
+
+A wrapped
+patch path
+looks like
+this:
+
+    cmd/oh/l
+ine/a-patch-
+path-that-is
+-long-enough
+-to-wrap-aft
+er-leading-i
+ndentation-a
+nd-remain-cl
+ickable.patc
+h
 === wide ===
 Agent 000000000000000000000000 ready in 0s with 0 skills ⧸ 0 snippets ⧸ ~800t context.
 
@@ -545,3 +711,8 @@ read cmd/oh/line/render.go ✓ 5L
 The prompt is built in cmd/oh/line/render.go:4:9, and screen.go holds the spinner beside it. There
 is nothing about it in README.md, and nothing at all in cmd/oh/line/missing.go, which is where I
 looked first. settings.toml names the workspace and target.txt is the file everything else works on.
+
+A wrapped patch path looks like this:
+
+    cmd/oh/line/a-patch-path-that-is-long-enough-to-wrap-after-leading-indentation-and-remain-clicka
+ble.patch

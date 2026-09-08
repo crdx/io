@@ -20,4 +20,10 @@ The prompt is built in cmd/oh/edit/render.go:4:9, and screen.go holds the spinne
 There is nothing about it in README.md, and nothing at all in cmd/oh/edit/missing.go, which is \
 where I looked first. settings.toml names the workspace and target.txt is the file everything \
 else works on.
+
+A wrapped patch path looks like this:
+
+```bash
+    cmd/oh/line/a-patch-path-that-is-long-enough-to-wrap-after-leading-indentation-and-remain-clickable.patch
+```
 """

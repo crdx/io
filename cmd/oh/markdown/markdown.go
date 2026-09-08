@@ -13,6 +13,7 @@ import (
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
 
+	"crdx.org/io/cmd/oh/link"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/internal/mermaid"
@@ -25,11 +26,15 @@ const mermaidLanguage = "mermaid"
 var markdownParser = goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser()
 
 func Render(markdown string, columns int) []string {
-	return render(markdown, columns, nil, false)
+	return render(markdown, columns, nil, false, "")
 }
 
 func RenderWithHyperlinks(markdown string, columns int) []string {
-	return render(markdown, columns, nil, true)
+	return render(markdown, columns, nil, true, "")
+}
+
+func RenderWithHyperlinksUnder(markdown string, columns int, linkRoot string) []string {
+	return render(markdown, columns, nil, true, linkRoot)
 }
 
 type StreamRenderer struct {
@@ -42,7 +47,7 @@ type StreamRenderer struct {
 }
 
 func (self *StreamRenderer) Render(markdown string, columns int) []string {
-	return self.render(markdown, columns, false)
+	return self.render(markdown, columns, false, "")
 }
 
 func (self *StreamRenderer) IsTailMermaid() bool {
@@ -58,17 +63,28 @@ func (self *StreamRenderer) Reset() {
 	self.hasStableCandidateStart = false
 }
 
-func (self *StreamRenderer) render(markdown string, columns int, shouldRenderHyperlinks bool) []string {
+func (self *StreamRenderer) render(
+	markdown string,
+	columns int,
+	shouldRenderHyperlinks bool,
+	linkRoot string,
+) []string {
 	self.isTailMermaid = false
 	self.hasMermaid = false
 	self.hasLinkReference = false
 	self.stableCandidateStart = 0
 	self.hasStableCandidateStart = false
 
-	return render(markdown, columns, self, shouldRenderHyperlinks)
+	return render(markdown, columns, self, shouldRenderHyperlinks, linkRoot)
 }
 
-func render(markdown string, columns int, stream *StreamRenderer, shouldRenderHyperlinks bool) []string {
+func render(
+	markdown string,
+	columns int,
+	stream *StreamRenderer,
+	shouldRenderHyperlinks bool,
+	linkRoot string,
+) []string {
 	source := []byte(strings.ReplaceAll(markdown, "\t", tab))
 	parserContext := parser.NewContext()
 	document := markdownParser.Parse(text.NewReader(source), parser.WithContext(parserContext))
@@ -89,6 +105,7 @@ func render(markdown string, columns int, stream *StreamRenderer, shouldRenderHy
 		mermaidBlock:           &mermaidBlock,
 		stream:                 stream,
 		shouldRenderHyperlinks: shouldRenderHyperlinks,
+		linkRoot:               linkRoot,
 	}
 	renderer.blocks(document)
 
@@ -118,6 +135,7 @@ type renderer struct {
 	rows                   []string
 	stream                 *StreamRenderer
 	shouldRenderHyperlinks bool
+	linkRoot               string
 }
 
 func (self *renderer) blocks(parent ast.Node) {
@@ -187,7 +205,15 @@ func (self *renderer) block(node ast.Node) {
 }
 
 func (self *renderer) appendWrapped(styledText string) {
-	self.rows = append(self.rows, width.Wrap(styledText, self.columns)...)
+	self.rows = append(self.rows, width.Wrap(self.linkPaths(styledText), self.columns)...)
+}
+
+func (self *renderer) linkPaths(text string) string {
+	if !self.shouldRenderHyperlinks || self.linkRoot == "" {
+		return text
+	}
+
+	return link.Render(text, self.linkRoot)
 }
 
 func (self *renderer) code(lines []string) {
@@ -197,7 +223,7 @@ func (self *renderer) code(lines []string) {
 			continue
 		}
 
-		self.rows = append(self.rows, width.Wrap(line, self.columns)...)
+		self.rows = append(self.rows, width.Wrap(self.linkPaths(line), self.columns)...)
 	}
 }
 
@@ -263,6 +289,7 @@ func (self *renderer) quote(node ast.Node) {
 		mermaidBlock:           self.mermaidBlock,
 		stream:                 self.stream,
 		shouldRenderHyperlinks: self.shouldRenderHyperlinks,
+		linkRoot:               self.linkRoot,
 	}
 	inner.blocks(node)
 
@@ -304,6 +331,7 @@ func (self *renderer) item(marker string, node ast.Node) {
 		isTight:                true,
 		stream:                 self.stream,
 		shouldRenderHyperlinks: self.shouldRenderHyperlinks,
+		linkRoot:               self.linkRoot,
 	}
 	inner.blocks(node)
 

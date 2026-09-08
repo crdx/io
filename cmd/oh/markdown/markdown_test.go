@@ -2,6 +2,8 @@ package markdown
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -139,6 +141,51 @@ func TestUnsupportedMarkdownDestinationsStayPlain(t *testing.T) {
 	if strings.Contains(got, "\x1b]8;;") {
 		t.Errorf("unsupported destination became a terminal hyperlink: %q", got)
 	}
+}
+
+func TestAPathIsLinkedBeforeItWraps(t *testing.T) {
+	linkRoot, relativePath := linkedPathFixture(t)
+	source := "```bash\n    " + relativePath + "\n```"
+	rows := RenderWithHyperlinksUnder(source, 12, linkRoot)
+
+	if got, want := style.Plain(strings.Join(rows, "")), "    "+relativePath; got != want {
+		t.Errorf("wrapped path drew %q, want %q", got, want)
+	}
+
+	for i, row := range rows {
+		if strings.Count(row, "\x1b]8;;file://") != 1 || strings.Count(row, "\x1b]8;;\x1b\\") != 1 {
+			t.Errorf("row %d does not contain one complete path hyperlink: %q", i, row)
+		}
+	}
+}
+
+func TestAPathInATableIsLinkedBeforeItWraps(t *testing.T) {
+	linkRoot, relativePath := linkedPathFixture(t)
+	source := "| Path |\n|---|\n| " + relativePath + " |"
+	rows := RenderWithHyperlinksUnder(source, 20, linkRoot)
+	linked := strings.Join(rows, "\n")
+	openings := strings.Count(linked, "\x1b]8;;file://")
+	closings := strings.Count(linked, "\x1b]8;;\x1b\\")
+
+	if openings < 2 || closings != openings {
+		t.Errorf("wrapped table path has %d openings and %d closings: %q", openings, closings, linked)
+	}
+}
+
+func linkedPathFixture(t *testing.T) (string, string) {
+	t.Helper()
+
+	linkRoot := t.TempDir()
+	relativePath := "somewhere/a-very-long-patch-file-name.patch"
+	path := filepath.Join(linkRoot, relativePath)
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	return linkRoot, relativePath
 }
 
 func TestANestedListKeepsItsChildrenWithTheirParent(t *testing.T) {

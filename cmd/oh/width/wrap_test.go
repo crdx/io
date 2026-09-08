@@ -19,6 +19,8 @@ func TestWrappingBreaksAtSpacesAndMidWordWhereThereAreNone(t *testing.T) {
 		{"hello!", 5, []string{"hello", "!"}},
 		{"one two three", 7, []string{"one two", "three"}},
 		{"one two three", 3, []string{"one", "two", "thr", "ee"}},
+		{"    unbroken", 8, []string{"    unbr", "oken"}},
+		{"  x", 1, []string{" ", "x"}},
 		{"日本語です", 4, []string{"日本", "語で", "す"}},
 		{"a日b", 2, []string{"a", "日", "b"}},
 		{"test 🖊 ", 7, []string{"test 🖊 "}},

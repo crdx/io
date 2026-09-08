@@ -121,7 +121,11 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 		self.answer.Write(event.Text)
 		var renderedAnswer []string
 		if self.screen.IsTerminal() {
-			renderedAnswer = markdown.RenderWithHyperlinks(self.answer.Text(), self.screen.Columns())
+			renderedAnswer = markdown.RenderWithHyperlinksUnder(
+				self.answer.Text(),
+				self.screen.Columns(),
+				self.workspace.GetDir(),
+			)
 		} else {
 			renderedAnswer = markdown.Render(self.answer.Text(), self.screen.Columns())
 		}
@@ -224,7 +228,7 @@ func renderSubmittedMessage(text string, columns int, shouldRenderHyperlinks boo
 
 	var content []string
 	if shouldRenderHyperlinks {
-		content = markdown.RenderWithHyperlinks(strutil.StripControl(text), contentColumns)
+		content = markdown.RenderWithHyperlinksUnder(strutil.StripControl(text), contentColumns, workspace)
 	} else {
 		content = markdown.Render(strutil.StripControl(text), contentColumns)
 	}
@@ -399,7 +403,11 @@ func (self *Picasso) drawReasoning(isSettled bool) {
 func (self *Picasso) drawAnswer(isSettled bool) {
 	var rows []string
 	if self.screen.IsTerminal() {
-		rows = self.answerRenderer.RenderWithHyperlinks(self.answer.Text(), self.screen.Columns())
+		rows = self.answerRenderer.RenderWithHyperlinksUnder(
+			self.answer.Text(),
+			self.screen.Columns(),
+			self.workspace.GetDir(),
+		)
 	} else {
 		rows = self.answerRenderer.Render(self.answer.Text(), self.screen.Columns())
 	}

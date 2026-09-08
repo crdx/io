@@ -97,6 +97,7 @@ func wrapLine(line string, cells int, base int) []Row {
 
 			if from == begin {
 				from = end
+				after = max(after, end)
 			}
 
 			rows = append(rows, row(begin, from, after))

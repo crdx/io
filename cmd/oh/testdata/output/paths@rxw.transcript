@@ -29,5 +29,11 @@ read: cmd/oh/line/render.go [ok, 5 lines, 60B, call_2]
 
 The prompt is built in cmd/oh/line/render.go:4:9, and screen.go holds the spinner beside it. There is nothing about it in README.md, and nothing at all in cmd/oh/line/missing.go, which is where I looked first. settings.toml names the workspace and target.txt is the file everything else works on.
 
+A wrapped patch path looks like this:
+
+```bash
+    cmd/oh/line/a-patch-path-that-is-long-enough-to-wrap-after-leading-indentation-and-remain-clickable.patch
+```
+
 
 

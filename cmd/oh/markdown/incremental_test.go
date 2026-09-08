@@ -47,7 +47,7 @@ func TestIncrementalHyperlinkRenderingMatchesTheCompleteStream(t *testing.T) {
 	var baseline StreamRenderer
 
 	for at := 1; at <= len(source); at++ {
-		want := baseline.render(source[:at], 24, true)
+		want := baseline.render(source[:at], 24, true, "")
 		got := incremental.RenderWithHyperlinks(source[:at], 24)
 		if !slices.Equal(got, want) {
 			t.Fatalf("byte %d produced different rows\nwant: %q\ngot:  %q", at, want, got)

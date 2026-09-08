@@ -534,8 +534,7 @@ these holds:
 func main()
 {
     println(
-println("one
-")
+"one")
 }
 
 So the read
@@ -1047,10 +1046,10 @@ before it
 was read
 func main()
 { println(
-println("one
-") } So the
-read has to
-come first.
+"one") } So
+the read has
+to come
+first.
 read ✓ 1L
 A plain
 thought with

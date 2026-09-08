@@ -1084,8 +1084,7 @@ See \e]8;;https://example.com/notes\e\\\e[38;2;129;162;190mthe notes\e[0m\e]8;;\
 \r\e[K\e[38;2;201;166;212mfunc\e[0m \e[38;2;129;162;190mmain\e[0m()\r
 \r\e[K{\r
 \r\e[K    fmt.\e[38;2;129;162;190mPrin\e[0m\r
-\r\e[Kfmt.\e[38;2;129;162;190mPrintln\e[0m(\e[38;2;181;189;104m\e[0m\r
-\r\e[K\e[38;2;181;189;104m"hello"\e[0m)\r
+\r\e[K\e[38;2;129;162;190mtln\e[0m(\e[38;2;181;189;104m"hello"\e[0m)\r
 \r\e[K}\r
 \r\e[K\r
 \r\e[K\e[38;2;192;128;80m• \e[0mread\r
