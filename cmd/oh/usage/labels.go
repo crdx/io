@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/cmd/oh/model"
 )
 
 const (
@@ -56,24 +57,11 @@ func ScopeLabel(scope string) string {
 		name = suffix
 	}
 
-	name = strings.TrimPrefix(name, "claude-")
+	name = strings.ReplaceAll(strings.TrimPrefix(name, "claude-"), "_", "-")
 
-	words := strings.FieldsFunc(name, func(character rune) bool {
-		return character == '-' || character == '_' || character == ' '
-	})
-
-	for i, word := range words {
-		if word == "gpt" {
-			words[i] = "GPT"
-			continue
-		}
-
-		words[i] = strings.ToUpper(word[:1]) + word[1:]
-	}
-
-	if len(words) == 0 {
+	if name == "" {
 		return scope
 	}
 
-	return strings.Join(words, " ")
+	return strings.Join(model.DisplayName(name), " ")
 }

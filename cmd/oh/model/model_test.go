@@ -258,6 +258,20 @@ func TestOnlyTheLatestIterationOfEachCurrentModelIsRetained(t *testing.T) {
 			},
 			[]string{"claude-fable-5", "claude-opus-5", "claude-sonnet-5"},
 		},
+		{
+			"anthropic with dated snapshots",
+			[]string{
+				"claude-fable-5", "claude-fable-5-1", "claude-fable-5-20260609",
+				"claude-opus-4-5-20251101", "claude-opus-5", "claude-sonnet-4-5-20250929",
+				"claude-sonnet-5",
+			},
+			[]string{"claude-fable-5-1", "claude-opus-5", "claude-sonnet-5"},
+		},
+		{
+			"anthropic snapshots of one iteration",
+			[]string{"claude-opus-4-5", "claude-opus-4-5-20251101"},
+			[]string{"claude-opus-4-5-20251101"},
+		},
 	}
 
 	for _, test := range tests {

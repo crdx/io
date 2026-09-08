@@ -35,6 +35,11 @@ func TestEveryModelIsWrittenForAPerson(t *testing.T) {
 		"claude-opus-5":                "Opus 5",
 		"claude-sonnet-5":              "Sonnet 5",
 		"claude-fable-5":               "Fable 5",
+		"claude-fable-5-1":             "Fable 5.1",
+		"claude-mythos-5-1":            "Claude Mythos 5.1",
+		"claude-opus-4-6":              "Opus 4.6",
+		"claude-sonnet-4-5-20250929":   "Sonnet 4.5",
+		"claude-3-7-sonnet-20250219":   "Sonnet 3.7",
 
 		"gemma4:12b":                 "Gemma 4 12B",
 		"gemma4:31b":                 "Gemma 4 31B",

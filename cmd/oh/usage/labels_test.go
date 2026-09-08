@@ -37,7 +37,9 @@ func TestAScopeIsNamedAsAPersonWouldSayIt(t *testing.T) {
 		want  string
 	}{
 		{scope: "gpt-5.3-codex-spark", want: "Spark"},
-		{scope: "claude-opus-4-6", want: "Opus 4 6"},
+		{scope: "claude-opus-4-6", want: "Opus 4.6"},
+		{scope: "claude-fable-5", want: "Fable 5"},
+		{scope: "claude-fable-5-1", want: "Fable 5.1"},
 		{scope: "opus", want: "Opus"},
 		{scope: "sonnet", want: "Sonnet"},
 		{scope: "gpt-5", want: "GPT 5"},

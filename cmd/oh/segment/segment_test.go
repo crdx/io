@@ -514,6 +514,8 @@ func TestTheActiveModelSegmentUsesFriendlyModelNames(t *testing.T) {
 		"anthropic/claude-opus-5":                  "Opus 5",
 		"anthropic/claude-sonnet-5":                "Sonnet 5",
 		"anthropic/claude-fable-5":                 "Fable 5",
+		"anthropic/claude-fable-5-1":               "Fable 5.1",
+		"anthropic/claude-opus-4-6":                "Opus 4.6",
 		"openrouter/vendor/custom:free":            "Custom",
 	}
 

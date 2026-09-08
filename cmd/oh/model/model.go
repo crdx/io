@@ -20,6 +20,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/internal/modelsdev"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/provider/anthropic"
 	"crdx.org/io/provider/codex"
 	"crdx.org/io/provider/opencodego"
@@ -181,10 +182,27 @@ type modelFamily struct {
 	Suffix string
 }
 
-func getModelIteration(id string) (modelFamily, []int, bool) {
+type modelIteration struct {
+	Numbers  []int
+	Snapshot int
+}
+
+func (self modelIteration) precedes(other modelIteration) bool {
+	if order := slices.Compare(self.Numbers, other.Numbers); order != 0 {
+		return order < 0
+	}
+
+	return self.Snapshot < other.Snapshot
+}
+
+func (self modelIteration) matches(other modelIteration) bool {
+	return self.Snapshot == other.Snapshot && slices.Equal(self.Numbers, other.Numbers)
+}
+
+func getModelIteration(id string) (modelFamily, modelIteration, bool) {
 	location := modelIterationPattern.FindStringIndex(id)
 	if location == nil {
-		return modelFamily{}, nil, false
+		return modelFamily{}, modelIteration{}, false
 	}
 
 	family := modelFamily{
@@ -192,12 +210,18 @@ func getModelIteration(id string) (modelFamily, []int, bool) {
 		Suffix: strings.TrimLeft(id[location[1]:], "-."),
 	}
 
-	parts := strings.FieldsFunc(id[location[0]:location[1]], func(character rune) bool {
+	var iteration modelIteration
+
+	for part := range strings.FieldsFuncSeq(id[location[0]:location[1]], func(character rune) bool {
 		return character == '.' || character == '-'
-	})
-	iteration := make([]int, len(parts))
-	for i, part := range parts {
-		iteration[i], _ = strconv.Atoi(part)
+	}) {
+		number, _ := strconv.Atoi(part)
+		if util.IsDatedSnapshot(part) {
+			iteration.Snapshot = number
+			continue
+		}
+
+		iteration.Numbers = append(iteration.Numbers, number)
 	}
 
 	return family, iteration, true
@@ -205,7 +229,7 @@ func getModelIteration(id string) (modelFamily, []int, bool) {
 
 type latestIteration struct {
 	ID        string
-	Iteration []int
+	Iteration modelIteration
 }
 
 func latestModelIterations(models []agent.Model) map[modelFamily]latestIteration {
@@ -218,7 +242,7 @@ func latestModelIterations(models []agent.Model) map[modelFamily]latestIteration
 		}
 
 		knownLatest, hasKnown := latest[family]
-		if !hasKnown || slices.Compare(iteration, knownLatest.Iteration) > 0 {
+		if !hasKnown || knownLatest.Iteration.precedes(iteration) {
 			latest[family] = latestIteration{ID: model.ID, Iteration: iteration}
 		}
 	}
@@ -228,7 +252,7 @@ func latestModelIterations(models []agent.Model) map[modelFamily]latestIteration
 
 func supersededBy(latest map[modelFamily]latestIteration, id string) (string, bool) {
 	family, iteration, hasIteration := getModelIteration(id)
-	if !hasIteration || slices.Equal(iteration, latest[family].Iteration) {
+	if !hasIteration || iteration.matches(latest[family].Iteration) {
 		return "", false
 	}
 

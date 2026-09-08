@@ -87,6 +87,8 @@ func ignoredModelListings() map[string][]agent.Model {
 			{ID: "claude-sonnet-4-5", EffortLevels: []string{"high"}, MaxOutputTokens: 64_000},
 			{ID: "claude-sonnet-4-6", EffortLevels: []string{"high"}, MaxOutputTokens: 64_000},
 			{ID: "claude-opus-4-5", EffortLevels: []string{"high"}, MaxOutputTokens: 32_000},
+			{ID: "claude-fable-5-20260609", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
+			{ID: "claude-fable-5-1", EffortLevels: []string{"high"}, MaxOutputTokens: 128_000},
 		},
 		OllamaProvider: {
 			{ID: "llama-3", EffortLevels: []string{"medium"}, MaxOutputTokens: 8_000},

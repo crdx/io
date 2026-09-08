@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
+
+	"crdx.org/io/internal/util"
 )
 
 var spellings = map[string]string{
@@ -101,6 +103,7 @@ func splitIdentifier(id string) (string, string) {
 func derivedName(base string, tag string) []string {
 	var words []string
 	var iteration string
+	var isFollowingIteration bool
 
 	for at, word := range strings.Split(base, "-") {
 		word = strings.TrimSpace(word)
@@ -108,10 +111,20 @@ func derivedName(base string, tag string) []string {
 			continue
 		}
 
+		if util.IsDatedSnapshot(word) {
+			isFollowingIteration = false
+			continue
+		}
+
 		if countedWord, isIteration := readIteration(word, at == 0); isIteration {
-			if iteration == "" {
+			switch {
+			case iteration == "":
 				iteration = countedWord
+			case isFollowingIteration:
+				iteration += "." + countedWord
 			}
+
+			isFollowingIteration = true
 
 			continue
 		}
@@ -122,10 +135,13 @@ func derivedName(base string, tag string) []string {
 				iteration = countedNumber
 			}
 
+			isFollowingIteration = countedNumber != ""
+
 			continue
 		}
 
 		words = append(words, capitalise(word))
+		isFollowingIteration = false
 	}
 
 	words = fromStandalone(words)
