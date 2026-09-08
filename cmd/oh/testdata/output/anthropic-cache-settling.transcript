@@ -1,0 +1,40 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## Mode · rxwgs · +0s
+
+## User · +0s
+
+barely miss the prompt cache
+
+## Tool calls · +0s
+
+```
+work: work [ok, 1 line, 4B, toolu_1]
+```
+
+## Assistant · +0s
+
+The cache very nearly held.
+
+## Cache rebuild · +0s
+
+```
+The prompt cache had not settled: 300 tokens were sent again 0s after the last request.
+```
+
+## User · +0s
+
+carry on
+
+## Assistant · +0s
+
+Carrying on.
+

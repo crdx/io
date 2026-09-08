@@ -98,7 +98,8 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		self.bufferToolResult(at, event)
 		return nil
 	case agent.StartupEvent, agent.UserMessageEvent, agent.ModelMessageEvent,
-		agent.InterruptionEvent, agent.RetryingEvent, agent.FailureEvent, agent.SilentTurnEvent:
+		agent.InterruptionEvent, agent.RetryingEvent, agent.FailureEvent, agent.SilentTurnEvent,
+		agent.CacheRebuildEvent:
 	}
 
 	if err := self.flushToolCalls(); err != nil {
@@ -117,6 +118,8 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		output.fence(event.Text)
 	case agent.SilentTurnEvent:
 		output.fence(agent.SilentTurnNotice)
+	case agent.CacheRebuildEvent:
+		output.fence(agent.CacheRebuildNotice(event))
 	case turn.HarnessPoke:
 		if notice, isSaid := turn.PokeNotice(event); isSaid {
 			output.fence(notice)
@@ -173,7 +176,7 @@ func heading(event agent.Event) []string {
 		return []string{name, "attempt " + strconv.Itoa(event.Attempt), prefixed("waited ", util.CompactDuration(event.Took))}
 	case agent.StartupEvent, agent.UserMessageEvent, agent.ModelMessageEvent, agent.InterruptionEvent, agent.FailureEvent,
 		agent.ModelReasoningEvent, agent.ToolCallRequestEvent, agent.ToolCallResultEvent, agent.StateChangeEvent,
-		agent.SilentTurnEvent:
+		agent.SilentTurnEvent, agent.CacheRebuildEvent:
 	}
 
 	return []string{name}
@@ -369,6 +372,8 @@ func title(kind agent.Kind) string {
 		return "Poke"
 	case agent.SilentTurnEvent:
 		return "Silent turn"
+	case agent.CacheRebuildEvent:
+		return "Cache rebuild"
 	case agent.InterruptionEvent:
 		return "Interrupted"
 	case agent.RetryingEvent:

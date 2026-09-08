@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"crdx.org/io/internal/stop"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/tool"
 )
@@ -37,7 +38,13 @@ func NewWithEnabledTools(systemPrompt string, provider Provider, tools []tool.To
 
 	provider.Configure(systemPrompt, definitions)
 
-	return &Agent{provider: provider, registeredTools: availableTools, enabledToolNames: enabledNames, owners: stateOwners}
+	return &Agent{
+		provider:         provider,
+		registeredTools:  availableTools,
+		enabledToolNames: enabledNames,
+		owners:           stateOwners,
+		now:              time.Now,
+	}
 }
 
 func (self *Agent) Dump() ([]json.RawMessage, error) {
@@ -171,6 +178,80 @@ func (self *proseStream) resetText() {
 
 const SilentTurnNotice = "The model ended the turn without an answer."
 
+const cacheLifetime = 5 * time.Minute
+
+type CacheCause string
+
+const (
+	CacheExpired  CacheCause = "expired"
+	CacheRebuilt  CacheCause = "rebuilt"
+	CacheSettling CacheCause = "settling"
+)
+
+const cacheSettlingGap = 30 * time.Second
+
+type cacheReading struct {
+	readTokens int
+	at         time.Time
+	wasRead    bool
+}
+
+func CacheRebuildNotice(event Event) string {
+	var rewrittenTokens int
+	if event.Usage != nil && event.Usage.Cache != nil {
+		rewrittenTokens = event.Usage.Cache.WriteTokens
+	}
+
+	tokens := util.FormatCount(int64(rewrittenTokens))
+	gap := util.CompactDuration(event.Took)
+
+	switch CacheCause(event.Name) {
+	case CacheExpired:
+		return fmt.Sprintf("The prompt cache had expired: %s tokens were sent again after %s.", tokens, gap)
+	case CacheSettling:
+		return fmt.Sprintf("The prompt cache had not settled: %s tokens were sent again %s after the last request.", tokens, gap)
+	case CacheRebuilt:
+		return fmt.Sprintf("The prompt cache was rebuilt: %s tokens were sent again %s after the last request.", tokens, gap)
+	}
+
+	return fmt.Sprintf("The prompt cache was rebuilt: %s tokens were sent again.", tokens)
+}
+
+func cacheCause(gap time.Duration, previousRead int, rewrittenTokens int) CacheCause {
+	switch {
+	case gap >= cacheLifetime:
+		return CacheExpired
+	case gap <= cacheSettlingGap && rewrittenTokens*100 < previousRead:
+		return CacheSettling
+	}
+
+	return CacheRebuilt
+}
+
+func (self *Agent) readCache(usage Usage, at time.Time) (Event, bool) {
+	if usage.Cache == nil {
+		return Event{}, false
+	}
+
+	previous := self.cache
+	self.cache = cacheReading{readTokens: usage.Cache.ReadTokens, at: at, wasRead: true}
+
+	if !previous.wasRead || usage.Cache.WriteTokens == 0 || usage.Cache.ReadTokens >= previous.readTokens {
+		return Event{}, false
+	}
+
+	gap := at.Sub(previous.at)
+
+	return Event{
+		Kind: CacheRebuildEvent,
+		Name: string(cacheCause(gap, previous.readTokens, usage.Cache.WriteTokens)),
+		Took: gap,
+		Usage: &Usage{
+			Cache: &CacheUsage{ReadTokens: usage.Cache.ReadTokens, WriteTokens: usage.Cache.WriteTokens},
+		},
+	}, true
+}
+
 func (self *Agent) Stream(ctx context.Context, message string, interjections *Interjections) iter.Seq2[Update, error] {
 	return func(yield func(Update, error) bool) {
 		yieldEvent := func(event Event, err error) bool {
@@ -202,6 +283,7 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 		for {
 			var prose proseStream
 
+			askedAt := self.now()
 			reply, isListening, err := self.send(ctx, &prose, yieldUpdates, yieldEvent)
 
 			switch {
@@ -218,6 +300,9 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 				if !yieldUpdates(prose.finish(reply.Usage)) {
 					return
 				}
+				if notice, wasRebuilt := self.readCache(reply.Usage, askedAt); wasRebuilt {
+					yieldEvent(notice, nil)
+				}
 				if !prose.hasAnswered {
 					yieldEvent(Event{Kind: SilentTurnEvent}, nil)
 				}
@@ -227,6 +312,13 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 			if !yieldUpdates(prose.finish(Usage{})) {
 				self.answer(cancelledResults(ctx, reply.Calls))
 				return
+			}
+
+			if notice, wasRebuilt := self.readCache(reply.Usage, askedAt); wasRebuilt {
+				if !yieldEvent(notice, nil) {
+					self.answer(cancelledResults(ctx, reply.Calls))
+					return
+				}
 			}
 
 			usage := reply.Usage

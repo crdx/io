@@ -1,0 +1,40 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## Mode · rxwgs · +0s
+
+## User · +0s
+
+rebuild the prompt cache halfway through the turn
+
+## Tool calls · +0s
+
+```
+work: work [ok, 1 line, 4B, toolu_1]
+```
+
+## Assistant · +0s
+
+The cache went cold on that request.
+
+## Cache rebuild · +0s
+
+```
+The prompt cache was rebuilt: 28K tokens were sent again 0s after the last request.
+```
+
+## User · +0s
+
+carry on
+
+## Assistant · +0s
+
+Carrying on.
+

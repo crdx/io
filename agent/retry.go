@@ -82,6 +82,10 @@ func (self *Agent) TakeRetryWaitsAtOnce() {
 	self.retryWaitsPassAtOnce = true
 }
 
+func (self *Agent) TakeTimeFrom(clock func() time.Time) {
+	self.now = clock
+}
+
 func (self *Agent) waitBeforeRetry(ctx context.Context, wait time.Duration) bool {
 	if self.retryWaitsPassAtOnce {
 		return ctx.Err() == nil

@@ -118,7 +118,7 @@ type Reply struct {
 }
 
 type Usage struct {
-	InputTokens int         `json:"input_tokens"`
+	InputTokens int         `json:"input_tokens,omitempty"`
 	Cache       *CacheUsage `json:"cache,omitempty"`
 }
 
@@ -146,6 +146,7 @@ const (
 	StartupEvent         Kind = "session_startup"
 	UserMessageEvent     Kind = "user_message"
 	SilentTurnEvent      Kind = "silent_turn"
+	CacheRebuildEvent    Kind = "cache_rebuild"
 	ModelReasoningEvent  Kind = "model_reasoning"
 	ModelMessageEvent    Kind = "model_message"
 	ToolCallRequestEvent Kind = "tool_call_request"
@@ -249,6 +250,8 @@ type Agent struct {
 	enabledToolNames map[string]struct{}
 	owners           map[string]tool.Tool
 	state            []json.RawMessage
+	cache            cacheReading
+	now              func() time.Time
 
 	retryWaitsPassAtOnce bool
 	storePicture         func(tool.Image) *Picture

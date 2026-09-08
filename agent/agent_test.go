@@ -1011,3 +1011,141 @@ func TestAFailedTurnIsNotAlsoCalledSilent(t *testing.T) {
 		t.Errorf("got %+v, want a failed turn to be left to its failure", notices)
 	}
 }
+
+type usageProvider struct {
+	replies []agent.Usage
+	sent    int
+}
+
+func (*usageProvider) Configure(string, []tool.Definition)   {}
+func (*usageProvider) AddUserMessage(string)                 {}
+func (*usageProvider) AddToolResults([]agent.ToolCallResult) {}
+func (*usageProvider) Dump() []json.RawMessage               { return nil }
+func (*usageProvider) Load([]json.RawMessage)                {}
+
+func (self *usageProvider) Send(_ context.Context, yield agent.Yield) (agent.Reply, error) {
+	if self.sent >= len(self.replies) {
+		return agent.Reply{}, nil
+	}
+
+	usage := self.replies[self.sent]
+	self.sent++
+	yield(agent.Output{Text: "said something", Kind: agent.ModelMessageEvent})
+
+	return agent.Reply{Usage: usage}, nil
+}
+
+func cachedAs(readTokens int, writeTokens int) agent.Usage {
+	return agent.Usage{
+		InputTokens: readTokens + writeTokens,
+		Cache:       &agent.CacheUsage{ReadTokens: readTokens, WriteTokens: writeTokens},
+	}
+}
+
+func cacheNotices(t *testing.T, replies []agent.Usage, gap time.Duration) []agent.Event {
+	t.Helper()
+
+	assistant := agent.New("", &usageProvider{replies: replies}, nil)
+
+	moment := time.Unix(0, 0)
+	assistant.TakeTimeFrom(func() time.Time {
+		moment = moment.Add(gap)
+
+		return moment
+	})
+
+	var notices []agent.Event
+	for range replies {
+		for update, err := range assistant.Stream(t.Context(), "go on", nil) {
+			if err != nil {
+				t.Fatal(err)
+			}
+			if update.Event != nil && update.Event.Kind == agent.CacheRebuildEvent {
+				notices = append(notices, *update.Event)
+			}
+		}
+	}
+
+	return notices
+}
+
+func TestEveryPromptCacheRebuildIsReportedWithItsCause(t *testing.T) {
+	for name, test := range map[string]struct {
+		replies []agent.Usage
+		gap     time.Duration
+		want    agent.CacheCause
+	}{
+		"a cache that expired between turns": {
+			replies: []agent.Usage{cachedAs(48000, 900), cachedAs(0, 49000)},
+			gap:     20 * time.Minute,
+			want:    agent.CacheExpired,
+		},
+		"a prefix rewritten within the lifetime": {
+			replies: []agent.Usage{cachedAs(48000, 900), cachedAs(21000, 28000)},
+			gap:     45 * time.Second,
+			want:    agent.CacheRebuilt,
+		},
+		"an entry that had not settled": {
+			replies: []agent.Usage{cachedAs(48000, 900), cachedAs(47900, 300)},
+			gap:     4 * time.Second,
+			want:    agent.CacheSettling,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			notices := cacheNotices(t, test.replies, test.gap)
+			if len(notices) != 1 {
+				t.Fatalf("got %d notices, want 1", len(notices))
+			}
+			if got := agent.CacheCause(notices[0].Name); got != test.want {
+				t.Errorf("got cause %q, want %q", got, test.want)
+			}
+			if agent.CacheRebuildNotice(notices[0]) == "" {
+				t.Error("the notice said nothing")
+			}
+		})
+	}
+}
+
+func TestAPromptCacheIsNotReportedWhenItHeld(t *testing.T) {
+	for name, test := range map[string]struct {
+		replies []agent.Usage
+		gap     time.Duration
+	}{
+		"the first request of the session": {
+			replies: []agent.Usage{cachedAs(0, 48000)},
+			gap:     time.Second,
+		},
+		"a conversation that only grew": {
+			replies: []agent.Usage{cachedAs(48000, 900), cachedAs(49000, 400)},
+			gap:     time.Second,
+		},
+		"a read that fell with nothing written": {
+			replies: []agent.Usage{cachedAs(48000, 900), cachedAs(21000, 0)},
+			gap:     time.Second,
+		},
+		"an endpoint that reports no cache at all": {
+			replies: []agent.Usage{{InputTokens: 100}, {InputTokens: 200}},
+			gap:     time.Second,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if notices := cacheNotices(t, test.replies, test.gap); len(notices) != 0 {
+				t.Errorf("got %d notices, want none", len(notices))
+			}
+		})
+	}
+}
+
+func TestAPromptCacheGapIsMeasuredFromWhenTheRequestWasMade(t *testing.T) {
+	notices := cacheNotices(
+		t,
+		[]agent.Usage{cachedAs(48000, 900), cachedAs(21000, 28000)},
+		90*time.Second,
+	)
+	if len(notices) != 1 {
+		t.Fatalf("got %d notices, want 1", len(notices))
+	}
+	if notices[0].Took != 90*time.Second {
+		t.Errorf("got a gap of %s, want 90s", notices[0].Took)
+	}
+}
