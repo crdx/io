@@ -4136,6 +4136,41 @@ func TestCodeIsShownLineByLineWhileADiagramIsShownWhole(t *testing.T) {
 	}
 }
 
+func TestATableKeepsItsShapeUntilARowIsWhole(t *testing.T) {
+	table := []string{"| tool | cost |\n", "|------|------|\n", "| read | 1 |\n"}
+	drawn := streamedAnswerScreen(t, output.StreamingModeLine, append(table, "| gr", "ep | 4")...)
+
+	if !strings.Contains(drawn, "│ read │ 1    │") {
+		t.Errorf("expected a settled table row to be shown, got:\n%s", drawn)
+	}
+	if strings.Contains(drawn, "grep") || strings.Contains(drawn, "│ gr") {
+		t.Errorf("expected the row still arriving to be held back, got:\n%s", drawn)
+	}
+	if !strings.Contains(drawn, "└") {
+		t.Errorf("expected the table to keep its closing edge, got:\n%s", drawn)
+	}
+}
+
+func TestATableRowIsOnScreenAsSoonAsItEnds(t *testing.T) {
+	table := []string{"| tool | cost |\n", "|------|------|\n", "| read | 1 |\n"}
+	drawn := streamedAnswerScreen(t, output.StreamingModeLine, append(table, "| grep", " | 4 |\n")...)
+
+	if !strings.Contains(drawn, "│ grep │ 4    │") {
+		t.Errorf("expected a table row to be shown the moment it ended, got:\n%s", drawn)
+	}
+}
+
+func TestALineOpeningWithAPipeOutsideATableIsHeldBackAsProse(t *testing.T) {
+	drawn := streamedAnswerScreen(t, output.StreamingModeLine, "one two three\n", "| four ", "five")
+
+	if !strings.Contains(drawn, "one two three") {
+		t.Errorf("expected the settled line to be shown, got:\n%s", drawn)
+	}
+	if strings.Contains(drawn, "four") {
+		t.Errorf("expected the line still arriving to be held back, got:\n%s", drawn)
+	}
+}
+
 func TestALineStillArrivingIsHeldBackUntilSomethingSettlesIt(t *testing.T) {
 	if drawn := streamedAnswerScreen(t, output.StreamingModeLine, "still ", "working"); strings.Contains(drawn, "still working") {
 		t.Errorf("expected the only line to be held back while it arrived, got:\n%s", drawn)

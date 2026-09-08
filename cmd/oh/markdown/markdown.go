@@ -37,6 +37,15 @@ func RenderWithHyperlinksUnder(markdown string, columns int, linkRoot string) []
 	return render(markdown, columns, nil, true, linkRoot)
 }
 
+func EndsWithTable(markdown string) bool {
+	source := []byte(strings.ReplaceAll(markdown, "\t", tab))
+	document := markdownParser.Parse(text.NewReader(source))
+
+	_, isTable := document.LastChild().(*extensionast.Table)
+
+	return isTable
+}
+
 type StreamRenderer struct {
 	mermaidRows             map[int][]string
 	isTailMermaid           bool

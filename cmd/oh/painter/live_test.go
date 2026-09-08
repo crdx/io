@@ -92,7 +92,12 @@ func TestHoldingTheUnfinishedRowBackNeverWithdrawsOneAlreadyDrawn(t *testing.T) 
 		t.Run(name, func(t *testing.T) {
 			text := liveText{streamingMode: output.StreamingModeLine, drawnRowCount: test.drawnRowCount}
 
-			if got := text.Take(test.rows, test.isTailHidden); !slices.Equal(got, test.want) {
+			rows := test.rows
+			if test.isTailHidden {
+				rows = text.WithoutLastRow(rows)
+			}
+
+			if got := text.Take(rows, test.isTailHidden); !slices.Equal(got, test.want) {
 				t.Errorf("Take(%q, %t) = %q, want %q", test.rows, test.isTailHidden, got, test.want)
 			}
 

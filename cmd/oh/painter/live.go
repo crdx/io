@@ -47,11 +47,11 @@ func (self *liveText) MarkDrawn() {
 	self.drawnBytes = self.arrivedText.Len()
 }
 
-func (self *liveText) Take(rows []string, isTailHidden bool) []string {
-	if isTailHidden {
-		rows = rows[:min(max(len(rows)-1, self.drawnRowCount), len(rows))]
-	}
+func (self *liveText) WithoutLastRow(rows []string) []string {
+	return rows[:min(max(len(rows)-1, self.drawnRowCount), len(rows))]
+}
 
+func (self *liveText) Take(rows []string, isTailHidden bool) []string {
 	self.drawnRowCount = len(rows)
 	self.isTailHidden = isTailHidden
 	self.MarkDrawn()

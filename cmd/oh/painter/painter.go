@@ -413,28 +413,39 @@ func (self *Picasso) settleAnswer() {
 }
 
 func (self *Picasso) drawReasoning(isSettled bool) {
-	rows := RenderReasoning(self.reasoning.Text(), self.screen.Columns(), self.reasoningRendering)
+	thought, isRowArriving := self.withoutArrivingTableRow(self.reasoning.Text(), isSettled)
+	rows := RenderReasoning(thought, self.screen.Columns(), self.reasoningRendering)
 
 	isTailHidden := !isSettled && self.streamingMode == output.StreamingModeLine
+	if isTailHidden {
+		rows = self.reasoning.WithoutLastRow(rows)
+	}
 
-	if !self.screen.DrawReasoning(self.reasoning.Take(rows, isTailHidden)) {
+	if !self.screen.DrawReasoning(self.reasoning.Take(rows, isTailHidden || isRowArriving)) {
 		self.isStale = true
 	}
 }
 
 func (self *Picasso) drawAnswer(isSettled bool) {
+	answerText, isRowArriving := self.withoutArrivingTableRow(self.answer.Text(), isSettled)
+
 	var rows []string
 	if self.screen.IsTerminal() {
 		rows = self.answerRenderer.RenderWithHyperlinksUnder(
-			self.answer.Text(),
+			answerText,
 			self.screen.Columns(),
 			self.workspace.GetDir(),
 		)
 	} else {
-		rows = self.answerRenderer.Render(self.answer.Text(), self.screen.Columns())
+		rows = self.answerRenderer.Render(answerText, self.screen.Columns())
 	}
 
-	if !self.screen.DrawAnswer(self.answer.Take(rows, self.isTailHeldBack(isSettled))) {
+	isTailHeldBack := !isRowArriving && self.isTailHeldBack(isSettled)
+	if isTailHeldBack {
+		rows = self.answer.WithoutLastRow(rows)
+	}
+
+	if !self.screen.DrawAnswer(self.answer.Take(rows, isTailHeldBack || isRowArriving)) {
 		self.isStale = true
 	}
 }
@@ -445,6 +456,21 @@ func (self *Picasso) isTailHeldBack(isSettled bool) bool {
 	}
 
 	return !strings.HasSuffix(self.answer.String(), "\n") && !self.answerRenderer.IsTailMermaid()
+}
+
+func (self *Picasso) withoutArrivingTableRow(text string, isSettled bool) (string, bool) {
+	if isSettled || self.streamingMode != output.StreamingModeLine {
+		return text, false
+	}
+
+	settledEnd := strings.LastIndex(text, "\n") + 1
+	arrivingRow := text[settledEnd:]
+
+	if !strings.Contains(arrivingRow, "|") || !markdown.EndsWithTable(text[:settledEnd]) {
+		return text, false
+	}
+
+	return text[:settledEnd], true
 }
 
 func (self *Picasso) discardProvisionalReasoning() {

@@ -636,6 +636,27 @@ func TestAStyleOverAnotherLeavesTextAloneWhereNothingIsPainted(t *testing.T) {
 	}
 }
 
+func TestMarkdownKnowsWhetherItEndsWithATable(t *testing.T) {
+	for name, test := range map[string]struct {
+		markdown      string
+		isTableEnding bool
+	}{
+		"nothing at all":     {markdown: ""},
+		"plain prose":        {markdown: "a paragraph with | a pipe in it"},
+		"a header alone":     {markdown: "| tool | cost |\n"},
+		"a delimited header": {markdown: "| tool | cost |\n|---|---|\n", isTableEnding: true},
+		"a table with rows":  {markdown: "| tool | cost |\n|---|---|\n| read | 1 |\n", isTableEnding: true},
+		"prose after one":    {markdown: "| tool | cost |\n|---|---|\n\nand then some prose\n"},
+		"a fenced pipe":      {markdown: "```\n| tool | cost |\n|---|---|\n"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := EndsWithTable(test.markdown); got != test.isTableEnding {
+				t.Errorf("EndsWithTable() = %t, want %t", got, test.isTableEnding)
+			}
+		})
+	}
+}
+
 func TestAStreamRendererKnowsWhetherItsTailIsMermaid(t *testing.T) {
 	for name, test := range map[string]struct {
 		markdown      string
