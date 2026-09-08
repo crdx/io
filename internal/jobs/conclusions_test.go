@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
@@ -12,6 +13,8 @@ import (
 type heldRunner struct {
 	release chan struct{}
 	result  sandbox.Result
+	printed string
+	spool   sandbox.Output
 }
 
 func (self *heldRunner) Run(context.Context, string, string, sandbox.Policy) (sandbox.Result, error) {
@@ -19,12 +22,14 @@ func (self *heldRunner) Run(context.Context, string, string, sandbox.Policy) (sa
 }
 
 func (self *heldRunner) Start(
-	context.Context,
-	string,
-	string,
-	sandbox.Policy,
-	sandbox.Output,
+	_ context.Context,
+	_ string,
+	_ string,
+	_ sandbox.Policy,
+	output sandbox.Output,
 ) (sandbox.Command, error) {
+	self.spool = output
+
 	return &heldCommand{runner: self}, nil
 }
 
@@ -34,6 +39,12 @@ type heldCommand struct {
 
 func (self *heldCommand) Wait() (sandbox.Result, error) {
 	<-self.runner.release
+
+	if self.runner.printed != "" {
+		if _, err := self.runner.spool.Write([]byte(self.runner.printed)); err != nil {
+			return sandbox.Result{}, err
+		}
+	}
 
 	return self.runner.result, nil
 }
@@ -50,19 +61,20 @@ func newHeldRunner(result sandbox.Result) *heldRunner {
 	return &heldRunner{release: make(chan struct{}), result: result}
 }
 
-func nextEnding(t *testing.T, manager *Manager) (Snapshot, bool) {
+func nextConclusion(t *testing.T, manager *Manager) (Conclusion, bool) {
 	t.Helper()
 
 	select {
-	case snapshot := <-manager.Endings():
-		return snapshot, true
+	case conclusion := <-manager.Conclusions():
+		return conclusion, true
 	case <-time.After(time.Second):
-		return Snapshot{}, false
+		return Conclusion{}, false
 	}
 }
 
 func TestAJobThatEndsOnItsOwnAnnouncesItself(t *testing.T) {
 	runner := newHeldRunner(sandbox.Result{ExitCode: 2})
+	runner.printed = "undefined: getWidth\nexit status 1\n"
 	manager := New(runner)
 
 	if _, err := manager.Start(t.Context(), "build", t.TempDir(), "just build", sandbox.Policy{}); err != nil {
@@ -71,12 +83,19 @@ func TestAJobThatEndsOnItsOwnAnnouncesItself(t *testing.T) {
 
 	close(runner.release)
 
-	snapshot, isAnnounced := nextEnding(t, manager)
+	conclusion, isAnnounced := nextConclusion(t, manager)
 	if !isAnnounced {
 		t.Fatal("a job that ended on its own announced nothing")
 	}
-	if snapshot.Name != "build" || snapshot.State != StateFailed || snapshot.ExitCode != 2 {
-		t.Errorf("got %#v, want the failed job", snapshot)
+	if conclusion.Snapshot.Name != "build" || conclusion.Snapshot.State != StateFailed || conclusion.Snapshot.ExitCode != 2 {
+		t.Errorf("got %#v, want the failed job", conclusion.Snapshot)
+	}
+	if conclusion.Output != runner.printed {
+		t.Errorf("got %q, want everything the job printed", conclusion.Output)
+	}
+	report := Report(conclusion.Snapshot.Describe(), conclusion.Output, conclusion.DroppedBytes)
+	if !strings.Contains(report, "undefined: getWidth") {
+		t.Errorf("got %q, want the report to carry the output nobody would otherwise ask for", report)
 	}
 }
 
@@ -93,8 +112,8 @@ func TestAJobStoppedFromTheKeyboardAnnouncesNothing(t *testing.T) {
 	}
 
 	select {
-	case snapshot := <-manager.Endings():
-		t.Errorf("got %#v, want a stopped job to announce nothing", snapshot)
+	case conclusion := <-manager.Conclusions():
+		t.Errorf("got %#v, want a stopped job to announce nothing", conclusion)
 	default:
 	}
 }
@@ -120,8 +139,8 @@ func TestAJobBeingWaitedOnAnnouncesNothing(t *testing.T) {
 	<-waiting
 
 	select {
-	case snapshot := <-manager.Endings():
-		t.Errorf("got %#v, want a job that was waited on to announce nothing", snapshot)
+	case conclusion := <-manager.Conclusions():
+		t.Errorf("got %#v, want a job that was waited on to announce nothing", conclusion)
 	default:
 	}
 }
@@ -143,11 +162,11 @@ func TestAJobThatEndsAfterAWaitGaveUpAnnouncesItself(t *testing.T) {
 
 	close(runner.release)
 
-	snapshot, isAnnounced := nextEnding(t, manager)
+	conclusion, isAnnounced := nextConclusion(t, manager)
 	if !isAnnounced {
 		t.Fatal("a job that ended after its wait gave up announced nothing")
 	}
-	if snapshot.Name != "build" {
-		t.Errorf("got %#v, want the job that ended", snapshot)
+	if conclusion.Snapshot.Name != "build" {
+		t.Errorf("got %#v, want the job that ended", conclusion.Snapshot)
 	}
 }

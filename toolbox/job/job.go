@@ -223,7 +223,7 @@ func act(
 			return "", err
 		}
 
-		return withOutput(snapshot.Describe(), output, snapshot.DroppedBytes), nil
+		return jobs.Report(snapshot.Describe(), output, snapshot.DroppedBytes), nil
 
 	case actionWait:
 		return waited(ctx, manager, getWaitNames(args), getWaitFor(args), waitLimit)
@@ -277,24 +277,7 @@ func waited(
 	if ctx.Err() != nil || !errors.Is(err, context.DeadlineExceeded) {
 		return "", err
 	}
-	if len(names) > 1 {
-		return getTimeoutReport(manager, names, waitFor, limit)
-	}
-
-	output, snapshot, err := manager.Output(names[0])
-	if err != nil {
-		return "", err
-	}
-
-	status := snapshot.Describe()
-	if snapshot.IsLive() {
-		status += fmt.Sprintf(
-			"\nnote: the wait gave up after %s, and the job is still running.",
-			util.CompactDuration(limit),
-		)
-	}
-
-	return withOutput(status, output, snapshot.DroppedBytes), nil
+	return getTimeoutReport(manager, names, waitFor, limit)
 }
 
 func waitForJobs(ctx context.Context, manager *jobs.Manager, names []string, waitFor string) ([]string, error) {
@@ -323,50 +306,54 @@ func getReports(manager *jobs.Manager, names []string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		reports = append(reports, withOutput(snapshot.Describe(), output, snapshot.DroppedBytes))
+		reports = append(reports, jobs.Report(snapshot.Describe(), output, snapshot.DroppedBytes))
 	}
 
 	return strings.Join(reports, "\n\n"), nil
 }
 
 func getTimeoutReport(manager *jobs.Manager, names []string, waitFor string, limit time.Duration) (string, error) {
-	statuses := make([]string, 0, len(names)+1)
-	for _, name := range names {
-		snapshot, err := manager.Status(name)
-		if err != nil {
-			return "", err
+	reports, err := getReports(manager, names)
+	if err != nil {
+		return "", err
+	}
+
+	note, isSaid := timeoutNote(manager, names, waitFor, limit)
+	if !isSaid {
+		return reports, nil
+	}
+
+	return reports + "\n\n" + note, nil
+}
+
+func timeoutNote(
+	manager *jobs.Manager,
+	names []string,
+	waitFor string,
+	limit time.Duration,
+) (string, bool) {
+	if len(names) == 1 {
+		snapshot, err := manager.Status(names[0])
+		if err != nil || !snapshot.IsLive() {
+			return "", false
 		}
-		statuses = append(statuses, snapshot.Describe())
+
+		return fmt.Sprintf(
+			"note: the wait gave up after %s, and the job is still running.",
+			util.CompactDuration(limit),
+		), true
 	}
 
 	quantity := "any watched job"
 	if waitFor == waitForAll {
 		quantity = "all watched jobs"
 	}
-	statuses = append(statuses, fmt.Sprintf(
+
+	return fmt.Sprintf(
 		"note: the wait gave up after %s before %s ended.",
 		util.CompactDuration(limit),
 		quantity,
-	))
-
-	return strings.Join(statuses, "\n"), nil
-}
-
-func withOutput(status string, output string, droppedBytes int) string {
-	lines := []string{status}
-
-	if droppedBytes > 0 {
-		lines = append(lines, fmt.Sprintf(
-			"note: the oldest %s of output was dropped to keep the spool bounded.",
-			util.FormatBytes(int64(droppedBytes), 3),
-		))
-	}
-
-	if strings.TrimSpace(output) == "" {
-		return strings.Join(append(lines, "the job has printed nothing."), "\n")
-	}
-
-	return strings.Join(append(lines, strings.TrimRight(output, "\n")), "\n")
+	), true
 }
 
 func listing(snapshots []jobs.Snapshot) string {

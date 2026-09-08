@@ -85,6 +85,28 @@ func TestAWaitOnSeveralJobsReportsEveryStatusWhenItsLimitIsReached(t *testing.T)
 	}
 }
 
+func TestAWaitOnSeveralJobsCarriesWhatEachHasPrintedWhenItGivesUp(t *testing.T) {
+	manager := jobs.New(endingRunner{after: time.Hour, output: "listening on 8080\n"})
+	defer func() { _ = manager.Close() }()
+
+	for _, name := range []string{"build", "docs"} {
+		if _, err := manager.Start(t.Context(), name, t.TempDir(), name, sandbox.Policy{}); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	time.Sleep(50 * time.Millisecond)
+
+	report, err := waited(t.Context(), manager, []string{"build", "docs"}, waitForAll, time.Millisecond)
+	if err != nil {
+		t.Fatalf("the wait failed: %v", err)
+	}
+
+	if strings.Count(report, "listening on 8080") != 2 {
+		t.Errorf("got %q, want what each job has printed rather than a call to fetch it", report)
+	}
+}
+
 func TestAWaitEndsWhenTheTurnDoes(t *testing.T) {
 	manager := jobs.New(endingRunner{after: time.Hour})
 	defer func() { _ = manager.Close() }()

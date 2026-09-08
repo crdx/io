@@ -4047,12 +4047,12 @@ func TestAStreamThatStopsStillShowsEverythingThatArrived(t *testing.T) {
 
 func TestNoStreamedAnswerIsLeftOffTheScreenWhenTheStreamStops(t *testing.T) {
 	for name, streamingMode := range everyStreamingMode() {
-		for ending, drawn := range map[string]func() string{
+		for conclusion, drawn := range map[string]func() string{
 			"closed":        func() string { return interruptedStreamScreen(t, agent.ModelMessageEvent, streamingMode) },
 			"then a notice": func() string { return streamThenNoticeScreen(t, streamingMode) },
 		} {
 			if !strings.Contains(drawn(), streamedAnswerTail) {
-				t.Errorf("a %s answer %s dropped the end of what arrived:\n%s", name, ending, drawn())
+				t.Errorf("a %s answer %s dropped the end of what arrived:\n%s", name, conclusion, drawn())
 			}
 		}
 	}
@@ -11476,16 +11476,19 @@ func takeFirstSessionGoldenToolRequest(
 	}
 }
 
-func endedSessionGoldenJob(name string) jobs.Snapshot {
+func endedSessionGoldenJob(name string) jobs.Conclusion {
 	startedAt := time.Date(2026, time.August, 23, 14, 32, 9, 0, time.UTC)
 
-	return jobs.Snapshot{
-		Name:      name,
-		Command:   "just " + name,
-		State:     jobs.StateFailed,
-		StartedAt: startedAt,
-		EndedAt:   startedAt.Add(12 * time.Second),
-		ExitCode:  2,
+	return jobs.Conclusion{
+		Snapshot: jobs.Snapshot{
+			Name:      name,
+			Command:   "just " + name,
+			State:     jobs.StateFailed,
+			StartedAt: startedAt,
+			EndedAt:   startedAt.Add(12 * time.Second),
+			ExitCode:  2,
+		},
+		Output: "go build ./...\ncmd/oh/draw.go:41:9: undefined: getWidth\nexit status 1",
 	}
 }
 
@@ -13532,6 +13535,55 @@ func appWithOneWritableJob(t *testing.T) *App {
 	}
 
 	return self
+}
+
+func TestAnEndedJobTellsTheModelWhatItPrintedWithoutBeingAsked(t *testing.T) {
+	self := &App{screen: output.New(&bytes.Buffer{}), mode: caps.NewMode(caps.Read)}
+
+	self.jobEnded(jobs.Conclusion{
+		Snapshot: jobs.Snapshot{Name: "build", State: jobs.StateFailed, ExitCode: 2},
+		Output:   "undefined: getWidth\nexit status 1\n",
+	})
+
+	notices := self.pendingNotices.notices()
+	if len(notices) != 1 {
+		t.Fatalf("got %d notices, want the one job that ended: %v", len(notices), notices)
+	}
+	if !strings.Contains(notices[0], "undefined: getWidth") {
+		t.Errorf("got %q, want what the job printed rather than an errand to fetch it", notices[0])
+	}
+	if note := self.takeEndedJobsNote(); note != notices[0] {
+		t.Errorf("told the model %q, want the notice it drew: %q", note, notices[0])
+	}
+	if note := self.takeEndedJobsNote(); note != "" {
+		t.Errorf("told the model %q twice, want it taken once", note)
+	}
+}
+
+func TestAnEndedJobsOutputIsCappedTheWayAToolCallIs(t *testing.T) {
+	t.Setenv("TMPDIR", t.TempDir())
+
+	self := &App{
+		screen:          output.New(&bytes.Buffer{}),
+		mode:            caps.NewMode(caps.Read),
+		toolOutputLimit: truncate.NewLimit(1024),
+	}
+
+	self.jobEnded(jobs.Conclusion{
+		Snapshot: jobs.Snapshot{Name: "build", State: jobs.StateComplete},
+		Output:   strings.Repeat("every line of a very talkative job\n", 200),
+	})
+
+	notices := self.pendingNotices.notices()
+	if len(notices) != 1 {
+		t.Fatalf("got %d notices, want the one job that ended: %v", len(notices), notices)
+	}
+	if !strings.Contains(notices[0], "truncated at") {
+		t.Errorf("got %q, want a talkative job capped the way a tool call is", notices[0])
+	}
+	if len(notices[0]) > 2048 {
+		t.Errorf("the notice is %d bytes, want it capped near the tool output limit", len(notices[0]))
+	}
 }
 
 func TestAWithdrawalIsAnnouncedBeforeTheJobsItStopped(t *testing.T) {

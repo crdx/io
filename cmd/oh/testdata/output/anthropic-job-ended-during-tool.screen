@@ -5,10 +5,13 @@
 work work –
 
 
- 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.
+ 🤖 The job build exited: failed after 12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined: getWidth
+    exit status 1
 
 
-The refactor is done, and I will look at why the build failed.
+The refactor is done. The build failed on an undefined getWidth, which I will fix next.
 
 
  carry on

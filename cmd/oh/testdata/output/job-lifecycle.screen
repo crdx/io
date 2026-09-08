@@ -9,8 +9,11 @@ The docs server is up.
 
 
  🤖 The job build exited: failed after
-    12s, exit(2). Read its output with
-    the job tool.
+    12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined:
+    getWidth
+    exit status 1
 
 
 
@@ -203,13 +206,109 @@ t
 
 .
 
-R
+g
 
-e
+o
+
+b
+
+u
+
+i
+
+l
+
+d
+
+.
+
+/
+
+.
+
+.
+
+.
+
+c
+
+m
+
+d
+
+/
+
+o
+
+h
+
+/
+
+d
+
+r
 
 a
 
+w
+
+.
+
+g
+
+o
+
+:
+
+4
+
+1
+
+:
+
+9
+
+:
+
+u
+
+n
+
 d
+
+e
+
+f
+
+i
+
+n
+
+e
+
+d
+
+:
+
+g
+
+e
+
+t
+
+W
+
+i
+
+d
+
+t
+
+h
+
+e
+
+x
 
 i
 
@@ -217,47 +316,17 @@ t
 
 s
 
-o
+t
+
+a
+
+t
 
 u
 
-t
+s
 
-p
-
-u
-
-t
-
-w
-
-i
-
-t
-
-h
-
-t
-
-h
-
-e
-
-j
-
-o
-
-b
-
-t
-
-o
-
-o
-
-l
-
-.
+1
 
 
 
@@ -544,7 +613,10 @@ job docs $ python3 -m http.server 8080 ✓ 1L
 The docs server is up.
 
 
- 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.
+ 🤖 The job build exited: failed after 12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined: getWidth
+    exit status 1
 
 
 
@@ -587,11 +659,16 @@ up.
     after
     12s,
     exit(2).
-    Read its
-    output
-    with the
-    job
-    tool.
+    go build
+    ./...
+    cmd/oh/d
+    raw.go:4
+    1:9:
+    undefine
+    d:
+    getWidth
+    exit
+    status 1
 
 
 
@@ -642,7 +719,10 @@ job docs $ python3 -m http.server 8080 ✓ 1L
 The docs server is up.
 
 
- 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.
+ 🤖 The job build exited: failed after 12s, exit(2).
+    go build ./...
+    cmd/oh/draw.go:41:9: undefined: getWidth
+    exit status 1
 
 
 

@@ -15,7 +15,10 @@ import (
 	"crdx.org/io/internal/util"
 )
 
-const gracePeriod = 5 * time.Second
+const (
+	gracePeriod           = 5 * time.Second
+	reportedBytePrecision = 3
+)
 
 type State string
 
@@ -74,6 +77,12 @@ func (self Snapshot) Outcome() string {
 	return strings.Join(parts, ", ")
 }
 
+type Conclusion struct {
+	Snapshot     Snapshot `json:"snapshot"`
+	Output       string   `json:"output,omitempty"`
+	DroppedBytes int      `json:"dropped_bytes,omitempty"`
+}
+
 type job struct {
 	name           string
 	command        string
@@ -90,27 +99,27 @@ type job struct {
 }
 
 type Manager struct {
-	runner   sandbox.Runner
-	mutex    sync.Mutex
-	jobs     map[string]*job
-	order    []string
-	isClosed bool
-	watchers sync.WaitGroup
-	endings  chan Snapshot
+	runner      sandbox.Runner
+	mutex       sync.Mutex
+	jobs        map[string]*job
+	order       []string
+	isClosed    bool
+	watchers    sync.WaitGroup
+	conclusions chan Conclusion
 }
 
-const endingsHeld = 64
+const conclusionsHeld = 64
 
 func New(runner sandbox.Runner) *Manager {
 	return &Manager{
-		runner:  runner,
-		jobs:    make(map[string]*job),
-		endings: make(chan Snapshot, endingsHeld),
+		runner:      runner,
+		jobs:        make(map[string]*job),
+		conclusions: make(chan Conclusion, conclusionsHeld),
 	}
 }
 
-func (self *Manager) Endings() <-chan Snapshot {
-	return self.endings
+func (self *Manager) Conclusions() <-chan Conclusion {
+	return self.conclusions
 }
 
 func (self *Manager) Restore(rememberedJobs []Snapshot) {
@@ -472,8 +481,14 @@ func (self *Manager) announceEnd(endedJob *job) {
 		return
 	}
 
+	conclusion := Conclusion{
+		Snapshot:     snapshot,
+		Output:       endedJob.output.String(),
+		DroppedBytes: snapshot.DroppedBytes,
+	}
+
 	select {
-	case self.endings <- snapshot:
+	case self.conclusions <- conclusion:
 	default:
 	}
 }
@@ -569,6 +584,23 @@ func (self *Manager) describe(subject *job) Snapshot {
 		Failure:      subject.failure,
 		DroppedBytes: subject.output.DroppedBytes(),
 	}
+}
+
+func Report(status string, output string, droppedBytes int) string {
+	lines := []string{status}
+
+	if droppedBytes > 0 {
+		lines = append(lines, fmt.Sprintf(
+			"note: the oldest %s of output was dropped to keep the spool bounded.",
+			util.FormatBytes(int64(droppedBytes), reportedBytePrecision),
+		))
+	}
+
+	if strings.TrimSpace(output) == "" {
+		return strings.Join(append(lines, "the job has printed nothing."), "\n")
+	}
+
+	return strings.Join(append(lines, strings.TrimRight(output, "\n")), "\n")
 }
 
 func isLive(state State) bool {

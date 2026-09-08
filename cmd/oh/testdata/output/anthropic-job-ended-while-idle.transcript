@@ -13,7 +13,10 @@
 ## job_ended · +0s
 
 ```
-The job build exited: failed after 12s, exit(2). Read its output with the job tool.
+The job build exited: failed after 12s, exit(2).
+go build ./...
+cmd/oh/draw.go:41:9: undefined: getWidth
+exit status 1
 ```
 
 ## User · +0s
@@ -22,7 +25,7 @@ what happened to the build
 
 ## Assistant · +0s
 
-It exited 2 after twelve seconds, so I will read what it printed.
+It failed after twelve seconds: getWidth is undefined in draw.go.
 
 ## User · +0s
 

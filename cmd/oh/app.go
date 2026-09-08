@@ -230,13 +230,13 @@ func (self *App) begin(message string) cycle.Transition {
 			self.finish()
 			return !self.isTransitionRequested()
 		},
-		Resize:   self.redraw,
-		Beat:     self.screen.RefreshProgress,
-		Changes:  self.configObserver.Changes(),
-		Change:   self.reloadConfig,
-		Endings:  self.jobEndings(),
-		JobEnded: self.jobEnded,
-		Draw:     func() { self.show(inputLine) },
+		Resize:      self.redraw,
+		Beat:        self.screen.RefreshProgress,
+		Changes:     self.configObserver.Changes(),
+		Change:      self.reloadConfig,
+		Conclusions: self.jobConclusions(),
+		JobEnded:    self.jobEnded,
+		Draw:        func() { self.show(inputLine) },
 	})
 
 	return self.transition
@@ -793,16 +793,17 @@ func (self *App) getJobs() []jobs.Snapshot {
 	return self.jobs.manager.List()
 }
 
-func (self *App) jobEndings() <-chan jobs.Snapshot {
+func (self *App) jobConclusions() <-chan jobs.Conclusion {
 	if self.jobs.manager == nil {
 		return nil
 	}
 
-	return self.jobs.manager.Endings()
+	return self.jobs.manager.Conclusions()
 }
 
-func (self *App) jobEnded(snapshot jobs.Snapshot) {
-	event := jobrecord.EndedEvent(snapshot)
+func (self *App) jobEnded(conclusion jobs.Conclusion) {
+	conclusion.Output = self.withinToolOutputLimit(conclusion.Output)
+	event := jobrecord.EndedEvent(conclusion)
 
 	notice, isSaid := jobrecord.EndedNotice(event)
 	if !isSaid {
@@ -818,6 +819,14 @@ func (self *App) jobEnded(snapshot jobs.Snapshot) {
 	self.jobs.endedNotes = append(self.jobs.endedNotes, notice)
 	self.pendingNotices.add(event)
 	self.refreshPendingMessages()
+}
+
+func (self *App) withinToolOutputLimit(output string) string {
+	if self.toolOutputLimit == nil {
+		return output
+	}
+
+	return truncate.Output(output, self.toolOutputLimit.GetBytes())
 }
 
 func (self *App) stopJobsHoldingPath(path string) {

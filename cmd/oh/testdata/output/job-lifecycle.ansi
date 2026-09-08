@@ -9,8 +9,11 @@
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
 \e[48;2;52;53;65m 🤖 The job build exited: failed after  \e[0m\r
-\e[48;2;52;53;65m    12s, exit(2). Read its output with  \e[0m\r
-\e[48;2;52;53;65m    the job tool.                       \e[0m\r
+\e[48;2;52;53;65m    12s, exit(2).                       \e[0m\r
+\e[48;2;52;53;65m    go build ./...                      \e[0m\r
+\e[48;2;52;53;65m    cmd/oh/draw.go:41:9: undefined:     \e[0m\r
+\e[48;2;52;53;65m    getWidth                            \e[0m\r
+\e[48;2;52;53;65m    exit status 1                       \e[0m\r
 \e[48;2;52;53;65m                                        \e[0m\r
 \r
 \e[48;2;52;53;65m                                        \e[0m\r
@@ -204,13 +207,109 @@
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65m.\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mR\e[0m\r
+\e[48;2;52;53;65mg\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mb\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ml\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m/\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mc\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mm\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m/\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m/\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mr\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65ma\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mw\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mg\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m:\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m4\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m1\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m:\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m9\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m:\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mu\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mf\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mn\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65m:\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mg\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mW\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mi\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65md\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mh\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65me\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mx\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mi\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
@@ -218,47 +317,17 @@
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65ms\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65ma\e[0m\r
+\e[48;2;52;53;65m\e[0m\r
+\e[48;2;52;53;65mt\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
 \e[48;2;52;53;65mu\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
+\e[48;2;52;53;65ms\e[0m\r
 \e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mp\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mu\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mw\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mi\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mh\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65me\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mj\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mb\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mt\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65mo\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65ml\e[0m\r
-\e[48;2;52;53;65m\e[0m\r
-\e[48;2;52;53;65m.\e[0m\r
+\e[48;2;52;53;65m1\e[0m\r
 \e[48;2;52;53;65m \e[0m\r
 \r
 \e[48;2;52;53;65m \e[0m\r
@@ -545,7 +614,10 @@
 The docs server is up.
 
 \e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.\e[0m
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2).
+go build ./...
+cmd/oh/draw.go:41:9: undefined: getWidth
+exit status 1\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.\e[0m
@@ -573,7 +645,10 @@ It was stopped when write access was withdrawn.
 The docs server is up.\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.             \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2).                                                \e[0m\r
+\e[48;2;52;53;65m    go build ./...                                                                                  \e[0m\r
+\e[48;2;52;53;65m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
+\e[48;2;52;53;65m    exit status 1                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -605,7 +680,10 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.             \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2).                                                \e[0m\r
+\e[48;2;52;53;65m    go build ./...                                                                                  \e[0m\r
+\e[48;2;52;53;65m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
+\e[48;2;52;53;65m    exit status 1                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -637,7 +715,10 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.             \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2).                                                \e[0m\r
+\e[48;2;52;53;65m    go build ./...                                                                                  \e[0m\r
+\e[48;2;52;53;65m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
+\e[48;2;52;53;65m    exit status 1                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -669,7 +750,10 @@ It was stopped when write access was withdrawn.\r
 \e[?2026h\e[?25l\r\e[KThe\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs ser\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is u\e[?25h\e[?2026l\e[?2026h\e[?25l\r\e[KThe docs server is up.\e[?25h\e[?2026l\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.             \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2).                                                \e[0m\r
+\e[48;2;52;53;65m    go build ./...                                                                                  \e[0m\r
+\e[48;2;52;53;65m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
+\e[48;2;52;53;65m    exit status 1                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
@@ -713,11 +797,16 @@ It was stopped when write access was withdrawn.\r
 \e[48;2;52;53;65m    after   \e[0m\r
 \e[48;2;52;53;65m    12s,    \e[0m\r
 \e[48;2;52;53;65m    exit(2).\e[0m\r
-\e[48;2;52;53;65m    Read its\e[0m\r
-\e[48;2;52;53;65m    output  \e[0m\r
-\e[48;2;52;53;65m    with the\e[0m\r
-\e[48;2;52;53;65m    job     \e[0m\r
-\e[48;2;52;53;65m    tool.   \e[0m\r
+\e[48;2;52;53;65m    go build\e[0m\r
+\e[48;2;52;53;65m    ./...   \e[0m\r
+\e[48;2;52;53;65m    cmd/oh/d\e[0m\r
+\e[48;2;52;53;65m    raw.go:4\e[0m\r
+\e[48;2;52;53;65m    1:9:    \e[0m\r
+\e[48;2;52;53;65m    undefine\e[0m\r
+\e[48;2;52;53;65m    d:      \e[0m\r
+\e[48;2;52;53;65m    getWidth\e[0m\r
+\e[48;2;52;53;65m    exit    \e[0m\r
+\e[48;2;52;53;65m    status 1\e[0m\r
 \e[48;2;52;53;65m            \e[0m\r
 \r
 \e[48;2;52;53;65m            \e[0m\r
@@ -768,7 +857,10 @@ It was stopped when write access was withdrawn.\r
 \r\e[KThe docs server is up.
 
 \e[48;2;52;53;65m\e[0m
-\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.\e[0m
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2).
+go build ./...
+cmd/oh/draw.go:41:9: undefined: getWidth
+exit status 1\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m\e[0m
 \e[48;2;52;53;65m 🤖 The job docs was stopped because the workspace was made read-only.\e[0m
@@ -796,7 +888,10 @@ It was stopped when write access was withdrawn.\r
 \r\e[KThe docs server is up.\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
-\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2). Read its output with the job tool.             \e[0m\r
+\e[48;2;52;53;65m 🤖 The job build exited: failed after 12s, exit(2).                                                \e[0m\r
+\e[48;2;52;53;65m    go build ./...                                                                                  \e[0m\r
+\e[48;2;52;53;65m    cmd/oh/draw.go:41:9: undefined: getWidth                                                        \e[0m\r
+\e[48;2;52;53;65m    exit status 1                                                                                   \e[0m\r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r
 \r
 \e[48;2;52;53;65m                                                                                                    \e[0m\r

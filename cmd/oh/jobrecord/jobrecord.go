@@ -35,22 +35,26 @@ func LastRecorded(events []agent.Event) ([]jobs.Snapshot, bool) {
 
 const Ended agent.Kind = "job_ended"
 
-func EndedEvent(snapshot jobs.Snapshot) agent.Event {
-	encodedSnapshot, err := json.Marshal(snapshot)
+func EndedEvent(conclusion jobs.Conclusion) agent.Event {
+	encodedConclusion, err := json.Marshal(conclusion)
 	if err != nil {
 		return agent.Event{}
 	}
 
-	return agent.Event{Kind: Ended, Name: snapshot.Name, State: encodedSnapshot}
+	return agent.Event{Kind: Ended, Name: conclusion.Snapshot.Name, State: encodedConclusion}
 }
 
 func EndedNotice(event agent.Event) (string, bool) {
-	var snapshot jobs.Snapshot
-	if err := json.Unmarshal(event.State, &snapshot); err != nil || snapshot.Name == "" {
+	var conclusion jobs.Conclusion
+	if err := json.Unmarshal(event.State, &conclusion); err != nil || conclusion.Snapshot.Name == "" {
 		return "", false
 	}
 
-	return "The job " + snapshot.Name + " exited: " + snapshot.Outcome() + ". Read its output with the job tool.", true
+	return jobs.Report(
+		"The job "+conclusion.Snapshot.Name+" exited: "+conclusion.Snapshot.Outcome()+".",
+		conclusion.Output,
+		conclusion.DroppedBytes,
+	), true
 }
 
 const EndedWithSession agent.Kind = "jobs_ended_with_session"
