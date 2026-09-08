@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/internal/jobs"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sandbox/keeper"
+	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/notify"
@@ -30,6 +31,7 @@ import (
 	"crdx.org/io/cmd/oh/cycle"
 	"crdx.org/io/cmd/oh/drops"
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/graphics"
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/metrics"
@@ -38,6 +40,7 @@ import (
 	"crdx.org/io/cmd/oh/onboarding"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/pictures"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/sessions"
@@ -122,6 +125,10 @@ func main() {
 
 	fmt.Fprintln(os.Stderr, "could not open the session:", err)
 	os.Exit(1)
+}
+
+func isTerminalLocal() bool {
+	return os.Getenv("SSH_CLIENT") == "" && os.Getenv("SSH_TTY") == "" && os.Getenv("SSH_CONNECTION") == ""
 }
 
 //nolint:gocyclo // lol no
@@ -661,6 +668,24 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			return "", fmt.Errorf("make the pasted image readable: %w", err)
 		}
 		return path, nil
+	}
+
+	if cellWidth, cellHeight, hasGraphics := graphics.Detect(keyboard, os.Stdout); hasGraphics {
+		app.display.pictures = pictureDisplay{
+			sessionDirectory: sessionInfo.Directory,
+			cellWidth:        cellWidth,
+			cellHeight:       cellHeight,
+			isLocal:          isTerminalLocal(),
+		}
+
+		app.agent.StorePicturesWith(func(picture tool.Image) *agent.Picture {
+			reference, err := pictures.Store(sessionInfo.Directory, log.EnsurePersisted, picture)
+			if err != nil {
+				return nil
+			}
+
+			return reference
+		})
 	}
 
 	usageReporter, _ := client.Client.(agent.UsageReporter)

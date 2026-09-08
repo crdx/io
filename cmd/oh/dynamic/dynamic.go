@@ -36,6 +36,7 @@ type row struct {
 	label     Label
 	state     RowState
 	startedAt time.Time
+	picture   *pictureRows
 
 	timeTaken time.Duration
 	summary   string
@@ -80,10 +81,14 @@ func (self *Block) Rows(columns int) []string {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 
-	rows := make([]string, len(self.rows))
+	rows := make([]string, 0, len(self.rows))
 
-	for at, item := range self.rows {
-		rows[at] = self.line(item, columns)
+	for _, item := range self.rows {
+		rows = append(rows, self.line(item, columns))
+
+		if item.picture != nil {
+			rows = append(rows, item.picture.render(columns)...)
+		}
 	}
 
 	return rows

@@ -105,6 +105,14 @@ type displayState struct {
 	bar                bar.Config
 	streamingMode      output.StreamingMode
 	reasoningRendering output.ReasoningRendering
+	pictures           pictureDisplay
+}
+
+type pictureDisplay struct {
+	sessionDirectory string
+	cellWidth        int
+	cellHeight       int
+	isLocal          bool
 }
 
 type runMode struct {
@@ -1025,6 +1033,14 @@ func (self *App) newPainter(isRunning bool) *painter.Picasso {
 	picasso.RenderReasoningAs(self.display.reasoningRendering)
 	if self.screen.IsTerminal() && self.recorder != nil {
 		picasso.LinkToolResults(self.recorder.Name())
+	}
+	if self.display.pictures.sessionDirectory != "" {
+		picasso.DrawPicturesFrom(
+			self.display.pictures.sessionDirectory,
+			self.display.pictures.cellWidth,
+			self.display.pictures.cellHeight,
+			self.display.pictures.isLocal,
+		)
 	}
 	return picasso
 }

@@ -55,7 +55,7 @@ func TestAPictureIsTransmittedAndPlacedWhereTheCellsAre(t *testing.T) {
 		t.Errorf("the placement holds %d cells, want 16", strings.Count(rest, placeholder))
 	}
 
-	if !strings.Contains(rest, placeholder+originMark+originMark) {
+	if !strings.Contains(rest, placeholder+string(rowMarks[0])+string(rowMarks[0])) {
 		t.Error("the first cell does not say where the picture starts")
 	}
 }

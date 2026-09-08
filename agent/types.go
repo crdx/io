@@ -231,8 +231,16 @@ type Event struct {
 	Took      time.Duration         `json:"took,omitempty"`
 	Attempt   int                   `json:"attempt,omitempty"`
 	Metrics   *tool.ToolCallMetrics `json:"stats,omitempty"`
+	Picture   *Picture              `json:"picture,omitempty"`
 	State     json.RawMessage       `json:"state,omitempty"`
 	Usage     *Usage                `json:"usage,omitempty"`
+}
+
+type Picture struct {
+	Digest    string `json:"digest"`
+	MediaType string `json:"mediaType"`
+	Width     int    `json:"width,omitempty"`
+	Height    int    `json:"height,omitempty"`
 }
 
 type Agent struct {
@@ -243,4 +251,9 @@ type Agent struct {
 	state            []json.RawMessage
 
 	retryWaitsPassAtOnce bool
+	storePicture         func(tool.Image) *Picture
+}
+
+func (self *Agent) StorePicturesWith(store func(tool.Image) *Picture) {
+	self.storePicture = store
 }

@@ -64,6 +64,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/painter"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/pictures"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/segment"
@@ -3314,6 +3315,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"workspace-paths":        {".ansi", ".screen"},
 		"pending-mode-messages":  {".ansi", ".screen"},
 		"paste":                  {".ansi", ".screen"},
+		"pictures":               {".ansi", ".screen"},
 		"picker-menu":            {".ansi", ".screen"},
 		"plain-input":            {".ansi", ".screen"},
 		"print-arguments":        {".txt"},
@@ -5748,7 +5750,7 @@ func compareWithGolden(t *testing.T, name string, suffix string, passes map[stri
 	var drawn strings.Builder
 
 	for _, pass := range slices.Sorted(maps.Keys(passes)) {
-		fmt.Fprintf(&drawn, "=== %s ===\n%s\n", pass, strutil.VisibleEscapes(passes[pass]()))
+		fmt.Fprintf(&drawn, "=== %s ===\n%s\n", pass, strutil.VisibleEscapes(anonymisePictures(passes[pass]())))
 	}
 
 	goldenPath := filepath.Join("testdata", "output", name+suffix)
@@ -5863,17 +5865,44 @@ func newRig(t *testing.T, openScreen func(*strings.Builder, string) *output.Scre
 	tools = append(tools, web.New(func() bool { return true }, sessionGoldenSearcher{})...)
 	log := testLog(t)
 
+	chat := &App{
+		agent:     agent.New("", quietProvider{}, tools),
+		screen:    screen,
+		workspace: workspace,
+		recorder:  record.New(log),
+	}
+	chat.display.pictures = pictureDisplay{
+		sessionDirectory: sessionDirectoryWithPictures(t),
+		cellWidth:        replayCellWidth,
+		cellHeight:       replayCellHeight,
+	}
+
 	return &replayRig{
 		written:     &written,
 		workspace:   workspace,
 		sessionName: log.Name(),
-		chat: &App{
-			agent:     agent.New("", quietProvider{}, tools),
-			screen:    screen,
-			workspace: workspace,
-			recorder:  record.New(log),
-		},
+		chat:        chat,
 	}
+}
+
+const (
+	replayCellWidth  = 10
+	replayCellHeight = 20
+)
+
+func sessionDirectoryWithPictures(t *testing.T) string {
+	t.Helper()
+
+	sessionDirectory := t.TempDir()
+
+	if err := os.CopyFS(
+		pictures.GetDirectory(sessionDirectory),
+		os.DirFS(filepath.Join("testdata", "input", "pictures")),
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	return sessionDirectory
 }
 
 func (self *replayRig) load(entries []replayEntry) {
@@ -7600,10 +7629,16 @@ func (self *screen) escape(stream string, at int) int {
 		return self.control(stream, at)
 	case ']':
 		return self.operatingSystemCommand(stream, at)
+	case '_':
+		return self.applicationCommand(stream, at)
 	default:
 		self.t.Fatalf("the screen was sent an escape it does not know: %q", stream[at:min(at+8, len(stream))])
 		return len(stream)
 	}
+}
+
+func (self *screen) applicationCommand(stream string, at int) int {
+	return skipUntilStringTerminator(stream, at)
 }
 
 func (self *screen) operatingSystemCommand(stream string, at int) int {
@@ -13589,4 +13624,300 @@ func TestPruningRightAfterAResumeIsStillRecorded(t *testing.T) {
 	if !wasRecorded || len(restored) != 0 {
 		t.Errorf("got %#v (recorded %v), want the emptied listing recorded", restored, wasRecorded)
 	}
+}
+
+func drawnPNGFor(t *testing.T, width int, height int) []byte {
+	t.Helper()
+
+	picture := image.NewRGBA(image.Rect(0, 0, width, height))
+	for y := range height {
+		for x := range width {
+			picture.Set(x, y, color.RGBA{R: uint8(x % 256), G: uint8(y % 256), B: 90, A: 255})
+		}
+	}
+
+	var encoded bytes.Buffer
+	if err := png.Encode(&encoded, picture); err != nil {
+		t.Fatal(err)
+	}
+
+	return encoded.Bytes()
+}
+
+func storedPictureFor(t *testing.T, width int, height int) (string, *agent.Picture) {
+	t.Helper()
+
+	sessionDirectory := filepath.Join(t.TempDir(), "brave-otter")
+
+	reference, err := pictures.Store(
+		sessionDirectory,
+		func() error { return os.MkdirAll(sessionDirectory, 0o700) },
+		tool.Image{MediaType: "image/png", Data: drawnPNGFor(t, width, height)},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return sessionDirectory, reference
+}
+
+func pictureCallEvents(reference *agent.Picture) []agent.Event {
+	return pictureCallEventsFor("call-1", "screenshot.png", reference)
+}
+
+func pictureCallEventsFor(id string, path string, reference *agent.Picture) []agent.Event {
+	return []agent.Event{
+		{
+			Kind:      agent.ToolCallRequestEvent,
+			ID:        id,
+			Name:      "read",
+			Arguments: fmt.Sprintf(`{"path":%q}`, path),
+		},
+		{
+			Kind:    agent.ToolCallResultEvent,
+			ID:      id,
+			Name:    "read",
+			Text:    "image/png image (4096 bytes)",
+			Status:  agent.SuccessStatus,
+			Picture: reference,
+		},
+	}
+}
+
+func paintPictureEvents(t *testing.T, sessionDirectory string, columns int, events []agent.Event) string {
+	t.Helper()
+
+	var screenOutput strings.Builder
+	screen := output.NewTerminalOfSize(&screenOutput, columns, replayLines)
+	picasso := newTestPainter(screen, false)
+	picasso.DrawPicturesFrom(sessionDirectory, 10, 20, false)
+
+	for _, event := range events {
+		picasso.DrawEvent(event)
+	}
+
+	picasso.Close(dynamic.Done)
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+func pictureAmongCallsStream(t *testing.T) string {
+	t.Helper()
+
+	sessionDirectory, reference := storedPictureFor(t, 400, 200)
+
+	events := []agent.Event{
+		{Kind: agent.ToolCallRequestEvent, ID: "before", Name: "ls", Arguments: `{"path":"."}`},
+		{Kind: agent.ToolCallRequestEvent, ID: "call-1", Name: "read", Arguments: `{"path":"screenshot.png"}`},
+		{Kind: agent.ToolCallRequestEvent, ID: "after", Name: "grep", Arguments: `{"pattern":"x"}`},
+		{Kind: agent.ToolCallResultEvent, ID: "before", Name: "ls", Text: "3 entries", Status: agent.SuccessStatus},
+		{
+			Kind: agent.ToolCallResultEvent, ID: "call-1", Name: "read",
+			Text: "image/png image (4096 bytes)", Status: agent.SuccessStatus, Picture: reference,
+		},
+		{Kind: agent.ToolCallResultEvent, ID: "after", Name: "grep", Text: "1 match", Status: agent.SuccessStatus},
+	}
+
+	return paintPictureEvents(t, sessionDirectory, replayColumns, events)
+}
+
+func twoPicturesStream(t *testing.T) string {
+	t.Helper()
+
+	sessionDirectory, first := storedPictureFor(t, 400, 200)
+
+	second, err := pictures.Store(
+		sessionDirectory,
+		func() error { return os.MkdirAll(sessionDirectory, 0o700) },
+		tool.Image{MediaType: "image/png", Data: drawnPNGFor(t, 200, 200)},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	events := slices.Concat(
+		pictureCallEventsFor("call-1", "wide.png", first),
+		pictureCallEventsFor("call-2", "square.png", second),
+	)
+
+	return paintPictureEvents(t, sessionDirectory, replayColumns, events)
+}
+
+func narrowPictureStream(t *testing.T) string {
+	t.Helper()
+
+	sessionDirectory, reference := storedPictureFor(t, 400, 200)
+
+	return paintPictureEvents(t, sessionDirectory, 20, pictureCallEvents(reference))
+}
+
+func tallPictureStream(t *testing.T) string {
+	t.Helper()
+
+	sessionDirectory, reference := storedPictureFor(t, 100, 4000)
+
+	return paintPictureEvents(t, sessionDirectory, replayColumns, pictureCallEvents(reference))
+}
+
+func pictureStream(t *testing.T, isLocal bool, repaints int, isPictureMissing bool) string {
+	t.Helper()
+
+	sessionDirectory, reference := storedPictureFor(t, 400, 200)
+	if isPictureMissing {
+		if err := os.RemoveAll(pictures.GetDirectory(sessionDirectory)); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	var screenOutput strings.Builder
+	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	picasso := newTestPainter(screen, false)
+	picasso.DrawPicturesFrom(sessionDirectory, 10, 20, isLocal)
+
+	for _, event := range pictureCallEvents(reference) {
+		picasso.DrawEvent(event)
+	}
+
+	for range repaints {
+		screen.Refresh()
+	}
+
+	picasso.Close(dynamic.Done)
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+func pictureWithoutGraphicsStream(t *testing.T) string {
+	t.Helper()
+
+	_, reference := storedPictureFor(t, 400, 200)
+
+	var screenOutput strings.Builder
+	screen := output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+	picasso := newTestPainter(screen, false)
+
+	for _, event := range pictureCallEvents(reference) {
+		picasso.DrawEvent(event)
+	}
+
+	picasso.Close(dynamic.Done)
+	screen.Seal()
+
+	return screenOutput.String()
+}
+
+var (
+	pictureIdentifier = regexp.MustCompile(`i=\d+`)
+	pictureColour     = regexp.MustCompile(`\x1b\[38;2;\d+;\d+;\d+m\x{10EEEE}`)
+	picturePath       = regexp.MustCompile(`(t=f,[^;]*;)[A-Za-z0-9+/=]+`)
+)
+
+func anonymisePictures(stream string) string {
+	stream = pictureIdentifier.ReplaceAllString(stream, "i=<identifier>")
+	stream = picturePath.ReplaceAllString(stream, "${1}<path>")
+
+	return pictureColour.ReplaceAllString(stream, "<picture>\U0010EEEE")
+}
+
+func rebuiltPictureStream(t *testing.T) string {
+	t.Helper()
+
+	sessionDirectory, reference := storedPictureFor(t, 400, 200)
+
+	drawing, isStored := pictures.Prepare(sessionDirectory, reference)
+	if !isStored {
+		t.Fatal("the drawn copy was never made")
+	}
+	if err := os.Remove(drawing.Path); err != nil {
+		t.Fatal(err)
+	}
+
+	return paintPictureEvents(t, sessionDirectory, replayColumns, pictureCallEvents(reference))
+}
+
+func resizedPictureRows(t *testing.T) string {
+	t.Helper()
+
+	block := dynamic.NewBlock(func() {})
+	t.Cleanup(block.Stop)
+
+	index := block.Add(call.LabelFor(agent.Event{
+		Kind:      agent.ToolCallRequestEvent,
+		ID:        "call-1",
+		Name:      "read",
+		Arguments: `{"path":"screenshot.png"}`,
+	}, nil, nil))
+
+	block.AttachPicture(index, dynamic.Picture{
+		Data:       drawnPNGFor(t, 400, 200),
+		Width:      400,
+		Height:     200,
+		CellWidth:  10,
+		CellHeight: 20,
+	})
+
+	var drawn strings.Builder
+	for _, columns := range []int{60, 30, 60} {
+		fmt.Fprintf(&drawn, "--- at %d columns ---\n", columns)
+		for _, row := range block.Rows(columns) {
+			drawn.WriteString(row)
+			drawn.WriteString("\n")
+		}
+	}
+
+	return drawn.String()
+}
+
+func TestAPictureRedrawnAtTheSameWidthIsNeverSentTwice(t *testing.T) {
+	sessionDirectory, reference := storedPictureFor(t, 400, 200)
+
+	live := anonymisePictures(paintPictureEvents(t, sessionDirectory, replayColumns, pictureCallEvents(reference)))
+	replayed := anonymisePictures(paintPictureEvents(t, sessionDirectory, replayColumns, pictureCallEvents(reference)))
+
+	if live != replayed {
+		t.Error("a replayed picture drew something other than the live one")
+	}
+}
+
+func TestAPictureIsDrawnUnderTheCallThatReadIt(t *testing.T) {
+	passes := map[string]func() string{
+		"1 a picture sent to the terminal": func() string {
+			return pictureStream(t, false, 0, false)
+		},
+		"2 a picture painted a second time": func() string {
+			return pictureStream(t, false, 1, false)
+		},
+		"3 a picture sent by path": func() string {
+			return pictureStream(t, true, 0, false)
+		},
+		"4 a picture no longer stored": func() string {
+			return pictureStream(t, false, 0, true)
+		},
+		"5 a terminal that draws no pictures": func() string {
+			return pictureWithoutGraphicsStream(t)
+		},
+		"6 a picture among other calls": func() string {
+			return pictureAmongCallsStream(t)
+		},
+		"7 two pictures in one block": func() string {
+			return twoPicturesStream(t)
+		},
+		"8 a picture wider than the screen": func() string {
+			return narrowPictureStream(t)
+		},
+		"9 a picture taller than a placement allows": func() string {
+			return tallPictureStream(t)
+		},
+		"a1 a picture laid out again for a new width": func() string {
+			return resizedPictureRows(t)
+		},
+		"a2 a drawn copy rebuilt from the original": func() string {
+			return rebuiltPictureStream(t)
+		},
+	}
+
+	compareWithGolden(t, "pictures", ".ansi", passes)
+	compareWithGolden(t, "pictures", ".screen", shownPasses(t, passes))
 }

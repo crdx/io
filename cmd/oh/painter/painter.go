@@ -19,6 +19,7 @@ import (
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/pictures"
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/turn"
@@ -46,6 +47,14 @@ type Picasso struct {
 
 	getTool   func(string) (tool.Tool, bool)
 	workspace *work.Space
+	pictures  pictureSource
+}
+
+type pictureSource struct {
+	sessionDirectory string
+	cellWidth        int
+	cellHeight       int
+	isLocal          bool
 }
 
 func New(
@@ -71,6 +80,15 @@ func New(
 
 func (self *Picasso) RenderReasoningAs(rendering output.ReasoningRendering) {
 	self.reasoningRendering = rendering
+}
+
+func (self *Picasso) DrawPicturesFrom(sessionDirectory string, cellWidth int, cellHeight int, isLocal bool) {
+	self.pictures = pictureSource{
+		sessionDirectory: sessionDirectory,
+		cellWidth:        cellWidth,
+		cellHeight:       cellHeight,
+		isLocal:          isLocal,
+	}
 }
 
 func (self *Picasso) LinkToolResults(sessionName string) {
@@ -462,9 +480,41 @@ func (self *Picasso) mark(event agent.Event) {
 		call.Measurements(event.Metrics),
 	)
 
+	self.attachPicture(index, event)
+
 	if len(self.rows) == 0 {
 		self.Close(dynamic.Done)
 	}
+}
+
+func (self *Picasso) attachPicture(index int, event agent.Event) {
+	if event.Picture == nil || self.pictures.sessionDirectory == "" || !self.screen.IsTerminal() {
+		return
+	}
+
+	drawing, isStored := pictures.Prepare(self.pictures.sessionDirectory, event.Picture)
+	if !isStored {
+		return
+	}
+
+	picture := dynamic.Picture{
+		Path:       drawing.Path,
+		Width:      drawing.Width,
+		Height:     drawing.Height,
+		CellWidth:  self.pictures.cellWidth,
+		CellHeight: self.pictures.cellHeight,
+		IsLocal:    self.pictures.isLocal,
+	}
+
+	if !self.pictures.isLocal {
+		data, isRead := pictures.Read(drawing.Path)
+		if !isRead {
+			return
+		}
+		picture.Data = data
+	}
+
+	self.toolBlock.AttachPicture(index, picture)
 }
 
 func (self *Picasso) render(event agent.Event) string {

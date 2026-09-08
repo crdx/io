@@ -521,6 +521,9 @@ func (self *Agent) runBatch(
 				Took:    time.Since(startedAt),
 				Metrics: metrics,
 			}}
+			if self.storePicture != nil && len(executionResult.Image.Data) > 0 {
+				completion.result.Picture = self.storePicture(executionResult.Image)
+			}
 			if ok && len(executionResult.State) > 0 {
 				completion.state = Event{
 					Kind:  StateChangeEvent,

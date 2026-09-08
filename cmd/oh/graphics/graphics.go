@@ -35,7 +35,6 @@ const (
 
 const (
 	placeholder    = "\U0010EEEE"
-	originMark     = "\u0305"
 	chunkSize      = 4096
 	maximumImageID = 1<<24 - 1
 
@@ -136,16 +135,13 @@ func Placement(imageID int, cells int) string {
 		return ""
 	}
 
-	var placement strings.Builder
+	return placementRow(imageID, cells, 0)
+}
 
-	fmt.Fprintf(
-		&placement, "\x1b[38;2;%d;%d;%dm", imageID>>16&0xff, imageID>>8&0xff, imageID&0xff,
+func identifyingColour(imageID int) string {
+	return fmt.Sprintf(
+		"\x1b[38;2;%d;%d;%dm", imageID>>16&0xff, imageID>>8&0xff, imageID&0xff,
 	)
-	placement.WriteString(placeholder + originMark + originMark)
-	placement.WriteString(strings.Repeat(placeholder, cells-1))
-	placement.WriteString("\x1b[39m")
-
-	return placement.String()
 }
 
 func nextImageID() int {
