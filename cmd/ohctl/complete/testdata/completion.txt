@@ -3,7 +3,6 @@ analyse
 migrate
 regenerate
 sessions
-tool-result
 === commands beginning with a word ===
 sessions
 === sessions ===

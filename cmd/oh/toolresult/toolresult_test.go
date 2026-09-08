@@ -13,14 +13,47 @@ import (
 
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
-func TestRunWritesSafeToolOutput(t *testing.T) {
+func TestAnInternalRequestIsParsed(t *testing.T) {
+	for name, test := range map[string]struct {
+		arguments []string
+		want      Request
+	}{
+		"direct": {arguments: []string{"--tool-result", "oh://tool-result?call=one"}, want: Request{URL: "oh://tool-result?call=one"}},
+		"pager":  {arguments: []string{"--tool-result", "oh://tool-result?call=one", "--pager"}, want: Request{URL: "oh://tool-result?call=one", ShouldPage: true}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			request, isRequested, err := ParseRequest(test.arguments)
+			if err != nil || !isRequested || request != test.want {
+				t.Errorf("got %+v, requested %v, error %v", request, isRequested, err)
+			}
+		})
+	}
+}
+
+func TestAnInternalRequestMustHaveItsExactShape(t *testing.T) {
+	for _, arguments := range [][]string{
+		{"--tool-result"},
+		{"--tool-result", "--pager"},
+		{"--tool-result", "oh://tool-result?call=one", "--other"},
+		{"--tool-result", "oh://tool-result?call=one", "--pager", "extra"},
+	} {
+		if _, isRequested, err := ParseRequest(arguments); !isRequested || err == nil {
+			t.Errorf("arguments %q produced requested %v and error %v", arguments, isRequested, err)
+		}
+	}
+}
+
+func TestAnOrdinaryInvocationIsNotAnInternalRequest(t *testing.T) {
+	if _, isRequested, err := ParseRequest([]string{"--help"}); isRequested || err != nil {
+		t.Errorf("got requested %v and error %v", isRequested, err)
+	}
+}
+
+func TestShowWritesSafeToolOutput(t *testing.T) {
 	directory, address := toolResultFixture(t)
 
 	var output strings.Builder
-	err := run(&inputOpts{
-		ToolResult: true,
-		URL:        address,
-	}, directory, &output, nil)
+	err := show(address, false, directory, &output, nil)
 	if err != nil {
 		t.Fatalf("unexpected run error: %v", err)
 	}
@@ -42,11 +75,7 @@ func TestPagerReceivesSafeToolOutput(t *testing.T) {
 	}
 
 	var output strings.Builder
-	err := run(&inputOpts{
-		ToolResult: true,
-		Pager:      true,
-		URL:        address,
-	}, directory, &output, openPager)
+	err := show(address, true, directory, &output, openPager)
 	if err != nil {
 		t.Fatalf("unexpected run error: %v", err)
 	}

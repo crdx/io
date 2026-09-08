@@ -8,43 +8,56 @@ import (
 	"os/exec"
 	"strings"
 
-	"crdx.org/duckopt/v2"
 	"golang.org/x/term"
 
 	"crdx.org/io/cmd/oh/location"
 	"crdx.org/io/internal/toolresult"
 )
 
-const usage = `ohctl tool-result — show a tool call's output
+const (
+	requestFlag = "--tool-result"
+	pagerFlag   = "--pager"
+)
 
-Usage:
-    $0 tool-result [--pager] <url>
-
-Options:
-    -p, --pager    Show output in a pager
-    -h, --help     Show this help
-`
-
-type inputOpts struct {
-	ToolResult bool   `docopt:"tool-result"`
-	Pager      bool   `docopt:"--pager"`
-	URL        string `docopt:"<url>"`
+type Request struct {
+	URL        string
+	ShouldPage bool
 }
 
 type pager func(string) error
 
-func Run() error {
-	return run(duckopt.MustBind[inputOpts](usage, "$0"), location.GetSessionsDir(), os.Stdout, page)
+func ParseRequest(arguments []string) (Request, bool, error) {
+	if len(arguments) == 0 || arguments[0] != requestFlag {
+		return Request{}, false, nil
+	}
+	if len(arguments) < 2 || strings.TrimSpace(arguments[1]) == "" || strings.HasPrefix(arguments[1], "--") {
+		return Request{}, true, fmt.Errorf("%s requires a URL", requestFlag)
+	}
+
+	request := Request{URL: arguments[1]}
+	if len(arguments) == 2 {
+		return request, true, nil
+	}
+	if len(arguments) == 3 && arguments[2] == pagerFlag {
+		request.ShouldPage = true
+		return request, true, nil
+	}
+
+	return Request{}, true, fmt.Errorf("%s accepts only %s beside its URL", requestFlag, pagerFlag)
 }
 
-func run(options *inputOpts, directory string, output io.Writer, openPager pager) error {
-	exchange, err := toolresult.Read(directory, options.URL)
+func Show(url string, shouldPage bool) error {
+	return show(url, shouldPage, location.GetSessionsDir(), os.Stdout, page)
+}
+
+func show(url string, shouldPage bool, directory string, output io.Writer, openPager pager) error {
+	exchange, err := toolresult.Read(directory, url)
 	if err != nil {
 		return err
 	}
 
 	result := render(exchange, getColumns(output))
-	if options.Pager {
+	if shouldPage {
 		return openPager(result)
 	}
 

@@ -105,6 +105,7 @@ import (
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sim"
 	"crdx.org/io/internal/stop"
+	"crdx.org/io/internal/toolresult"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/internal/util/imageutil"
 	"crdx.org/io/internal/util/pathutil"
@@ -4173,6 +4174,49 @@ func runTestBinary(t *testing.T, binary string, workspaceDir string, environment
 		t.Fatalf("oh %s: %v\n%s", strings.Join(arguments, " "), err, output)
 	}
 	return string(output)
+}
+
+func TestTheToolResultFlagUsesTheMainBinary(t *testing.T) {
+	stateDirectory := t.TempDir()
+	writer, err := session.Create(filepath.Join(stateDirectory, "sessions"), nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := writer.Event(agent.Event{
+		Kind:      agent.ToolCallRequestEvent,
+		ID:        "call-1",
+		Name:      "read",
+		Arguments: `{"path":"notes.txt"}`,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := writer.Event(agent.Event{
+		Kind:   agent.ToolCallResultEvent,
+		ID:     "call-1",
+		Name:   "read",
+		Status: agent.SuccessStatus,
+		Text:   "one\ntwo\n",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	binary := buildTestBinary(t)
+	environment := append(testBinaryEnvironment(t, t.TempDir()), location.StateDirVariable+"="+stateDirectory)
+	result := runTestBinary(
+		t,
+		binary,
+		t.TempDir(),
+		environment,
+		"--tool-result",
+		toolresult.URL(writer.Name(), "call-1"),
+	)
+
+	if result != "read · notes.txt\n\none\ntwo\n" {
+		t.Errorf("tool result is %q", result)
+	}
 }
 
 const reachableWorkspaceDirPrefix = "io-oh-test-"

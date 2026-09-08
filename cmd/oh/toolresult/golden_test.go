@@ -24,10 +24,6 @@ import (
 	"crdx.org/io/toolbox/write"
 )
 
-func TestUsageMatchesTheGolden(t *testing.T) {
-	assertGolden(t, "usage.txt", strings.ReplaceAll(usage, "$0", "ohctl"))
-}
-
 func TestToolResultsRenderForTheUser(t *testing.T) {
 	cases := []struct {
 		name     string

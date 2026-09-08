@@ -49,6 +49,7 @@ import (
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/terminal"
 	"crdx.org/io/cmd/oh/textsizing"
+	"crdx.org/io/cmd/oh/toolresult"
 	"crdx.org/io/cmd/oh/toolset"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/usage"
@@ -72,6 +73,18 @@ var completableToolNames = []string{
 
 func main() {
 	sandbox.Init()
+
+	if request, isRequested, err := toolresult.ParseRequest(os.Args[1:]); isRequested {
+		style.Init(os.Stdout)
+		if err == nil {
+			err = toolresult.Show(request.URL, request.ShouldPage)
+		}
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	if cli.WriteCompletions(os.Stdout, os.Args[1:], cli.Sources{
 		ModelCachePath: location.GetModelCachePath(os.Getenv(backend.EndpointVariable) != ""),
