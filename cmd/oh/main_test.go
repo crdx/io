@@ -70,6 +70,7 @@ import (
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
+	"crdx.org/io/cmd/oh/segment/cacheTTL"
 	"crdx.org/io/cmd/oh/segment/cacheUsage"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/segment/fastMode"
@@ -8236,39 +8237,45 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			spinnerOptions,
 			segment.Context{},
 		),
+		"cache-ttl / one hour": goldenSegmentPass(
+			t,
+			cacheTTL.New(func() time.Duration { return time.Hour }),
+			"",
+			segment.Context{},
+		),
+		"cache-ttl / five minutes": goldenSegmentPass(
+			t,
+			cacheTTL.New(func() time.Duration { return 5 * time.Minute }),
+			"",
+			segment.Context{},
+		),
+		"cache-ttl / none declared": goldenSegmentPass(
+			t,
+			cacheTTL.New(func() time.Duration { return 0 }),
+			"",
+			segment.Context{},
+		),
 		"cache-usage / nothing asked yet": goldenSegmentPass(
 			t,
-			cacheUsage.New(func() (int, int) { return 0, 0 }, func() time.Duration { return time.Hour }),
+			cacheUsage.New(func() (int, int) { return 0, 0 }),
 			"",
 			segment.Context{},
 		),
 		"cache-usage / every token read": goldenSegmentPass(
 			t,
-			cacheUsage.New(func() (int, int) { return 200_000, 200_000 }, func() time.Duration { return time.Hour }),
+			cacheUsage.New(func() (int, int) { return 200_000, 200_000 }),
 			"",
 			segment.Context{},
 		),
 		"cache-usage / mostly read": goldenSegmentPass(
 			t,
-			cacheUsage.New(func() (int, int) { return 186_400, 200_000 }, func() time.Duration { return time.Hour }),
-			"",
-			segment.Context{},
-		),
-		"cache-usage / the short lifetime": goldenSegmentPass(
-			t,
-			cacheUsage.New(func() (int, int) { return 186_400, 200_000 }, func() time.Duration { return 5 * time.Minute }),
-			"",
-			segment.Context{},
-		),
-		"cache-usage / no lifetime declared": goldenSegmentPass(
-			t,
-			cacheUsage.New(func() (int, int) { return 186_400, 200_000 }, func() time.Duration { return 0 }),
+			cacheUsage.New(func() (int, int) { return 186_400, 200_000 }),
 			"",
 			segment.Context{},
 		),
 		"cache-usage / rebuilt from cold": goldenSegmentPass(
 			t,
-			cacheUsage.New(func() (int, int) { return 1_604, 281_033 }, func() time.Duration { return time.Hour }),
+			cacheUsage.New(func() (int, int) { return 1_604, 281_033 }),
 			"",
 			segment.Context{},
 		),

@@ -10,6 +10,7 @@ import (
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
+	"crdx.org/io/cmd/oh/segment/cacheTTL"
 	"crdx.org/io/cmd/oh/segment/cacheUsage"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/segment/fastMode"
@@ -34,6 +35,7 @@ import (
 
 const (
 	activitySpinnerSegment = "activity-spinner"
+	cacheTTLSegment        = "cache-ttl"
 	cacheUsageSegment      = "cache-usage"
 	contextUsageSegment    = "context-usage"
 	modeToggleSegment      = "mode-toggle"
@@ -82,7 +84,8 @@ type Sources struct {
 func NewRegistry(options Options) segment.Registry {
 	return segment.Registry{
 		activitySpinnerSegment: activitySpinner.New(options.Sources.IsTurnRunning, time.Now),
-		cacheUsageSegment:      cacheUsage.New(options.Sources.GetCacheUsage, options.Sources.GetCacheLife),
+		cacheTTLSegment:        cacheTTL.New(options.Sources.GetCacheLife),
+		cacheUsageSegment:      cacheUsage.New(options.Sources.GetCacheUsage),
 		contextUsageSegment:    contextUsage.New(options.Sources.GetContextUsage),
 		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
 		pathGrantsSegment:      pathGrants.New(options.Sources.GetPathGrants),

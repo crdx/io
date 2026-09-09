@@ -2,12 +2,9 @@ package cacheUsage
 
 import (
 	"strconv"
-	"strings"
-	"time"
 
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
-	"crdx.org/io/internal/util"
 )
 
 const (
@@ -15,36 +12,27 @@ const (
 )
 
 type state struct {
-	usage    func() (readTokens int, askedTokens int)
-	lifetime func() time.Duration
+	usage func() (readTokens int, askedTokens int)
 }
 
-func New(
-	usage func() (readTokens int, askedTokens int),
-	lifetime func() time.Duration,
-) segment.Factory {
+func New(usage func() (readTokens int, askedTokens int)) segment.Factory {
 	return func(options segment.Options) (segment.Segment, error) {
 		if err := options.Read(&struct{}{}); err != nil {
 			return nil, err
 		}
 
-		return state{usage: usage, lifetime: lifetime}, nil
+		return state{usage: usage}, nil
 	}
 }
 
 func (self state) Render(segment.Context) string {
-	var parts []string
-
-	if lifetime := self.lifetime(); lifetime > 0 {
-		parts = append(parts, style.Information(util.CompactDuration(lifetime)))
-	}
-
 	readTokens, askedTokens := self.usage()
-	if share, isKnown := readShare(readTokens, askedTokens); isKnown {
-		parts = append(parts, style.Quantity(strconv.Itoa(share)+"%"))
+	share, isKnown := readShare(readTokens, askedTokens)
+	if !isKnown {
+		return ""
 	}
 
-	return strings.Join(parts, " ")
+	return style.Quantity(strconv.Itoa(share) + "%")
 }
 
 func readShare(readTokens int, askedTokens int) (int, bool) {
