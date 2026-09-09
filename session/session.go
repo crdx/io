@@ -679,13 +679,31 @@ func Entries(directory string) ([]Entry, error) {
 	entries = appendEntries(entries, directory, storedNames, false)
 	entries = appendEntries(entries, directory, archivedNames, true)
 
+	return sortedEntries(entries), nil
+}
+
+func AllNames(directory string) ([]string, error) {
+	storedNames, err := StoredNames(directory)
+	if err != nil {
+		return nil, err
+	}
+	archivedNames, err := ArchivedNames(directory)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(storedNames, archivedNames...), nil
+}
+
+func sortedEntries(entries []Entry) []Entry {
 	slices.SortFunc(entries, func(first, second Entry) int {
 		if order := first.StartedAt.Compare(second.StartedAt); order != 0 {
 			return order
 		}
 		return strings.Compare(first.Name, second.Name)
 	})
-	return entries, nil
+
+	return entries
 }
 
 func appendEntries(entries []Entry, directory string, names []string, isArchived bool) []Entry {
@@ -707,12 +725,14 @@ func appendEntries(entries []Entry, directory string, names []string, isArchived
 }
 
 func StoredEntries(directory string) ([]Entry, error) {
-	entries, err := Entries(directory)
+	storedNames, err := StoredNames(directory)
 	if err != nil {
 		return nil, err
 	}
 
-	return slices.DeleteFunc(entries, func(entry Entry) bool { return entry.IsArchived }), nil
+	entries := appendEntries(make([]Entry, 0, len(storedNames)), directory, storedNames, false)
+
+	return sortedEntries(entries), nil
 }
 
 func formatOf(head Line) int {
@@ -864,6 +884,18 @@ const (
 
 func Dir(directory string, name string) string {
 	return filepath.Join(directory, name)
+}
+
+func Exists(directory string, name string) bool {
+	if validateName(name) != nil {
+		return false
+	}
+
+	if journal, err := os.Stat(journalPath(directory, name)); err == nil && journal.Mode().IsRegular() {
+		return true
+	}
+
+	return IsArchived(directory, name)
 }
 
 func journalPath(directory string, name string) string {

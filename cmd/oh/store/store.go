@@ -484,19 +484,23 @@ func RebuildMetaIfIdle(directory string, name string) (bool, error) {
 }
 
 func StaleMeta(directory string) ([]string, error) {
-	entries, err := session.Entries(directory)
+	names, err := session.AllNames(directory)
 	if err != nil {
 		return nil, err
 	}
 
+	return StaleMetaOf(directory, names), nil
+}
+
+func StaleMetaOf(directory string, names []string) []string {
 	var stale []string
-	for _, entry := range entries {
-		if _, err := session.ReadMeta(directory, entry.Name); err != nil {
-			stale = append(stale, entry.Name)
+	for _, name := range names {
+		if _, err := session.ReadMeta(directory, name); err != nil {
+			stale = append(stale, name)
 		}
 	}
 
-	return stale, nil
+	return stale
 }
 
 func RebuildStaleMeta(directory string) (int, error) {

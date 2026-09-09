@@ -11,6 +11,20 @@ func ValidateFormats(directory string) error {
 	if err != nil {
 		return err
 	}
+
+	return validateEntries(entries)
+}
+
+func ValidateStoredFormats(directory string) error {
+	entries, err := session.StoredEntries(directory)
+	if err != nil {
+		return err
+	}
+
+	return validateEntries(entries)
+}
+
+func validateEntries(entries []session.Entry) error {
 	var ahead, outdatedNames []string
 	for _, entry := range entries {
 		if entry.Format > session.JournalFormat {

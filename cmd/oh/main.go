@@ -325,11 +325,11 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	applyDefaultCaps(&args, settings)
 
-	if err := sessions.ValidateFormats(sessionsDir); err != nil {
+	if err := sessions.ValidateStoredFormats(sessionsDir); err != nil {
 		return "", err
 	}
 
-	if err := sessions.RefreshListings(sessionsDir, notices); err != nil {
+	if err := sessions.RefreshListing(sessionsDir, notices, args.Session); err != nil {
 		return "", err
 	}
 

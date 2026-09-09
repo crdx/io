@@ -116,15 +116,34 @@ func NamesInWorkspace(directory string, workspace *work.Space) ([]string, error)
 }
 
 func RefreshListings(directory string, screen io.Writer) error {
-	stale, err := store.StaleMeta(directory)
+	names, err := session.AllNames(directory)
 	if err != nil {
 		return err
 	}
+
+	return refreshListings(directory, screen, names, ValidateFormats)
+}
+
+func RefreshListing(directory string, screen io.Writer, name string) error {
+	if name == "" || !session.Exists(directory, name) {
+		return nil
+	}
+
+	return refreshListings(directory, screen, []string{name}, ValidateStoredFormats)
+}
+
+func refreshListings(
+	directory string,
+	screen io.Writer,
+	names []string,
+	validate func(directory string) error,
+) error {
+	stale := store.StaleMetaOf(directory, names)
 	if len(stale) == 0 {
 		return nil
 	}
 
-	if formatError := ValidateFormats(directory); formatError != nil {
+	if formatError := validate(directory); formatError != nil {
 		return formatError
 	}
 

@@ -438,6 +438,61 @@ func TestAnOlderRunningSessionDoesNotKeepTriggeringListingRebuilds(t *testing.T)
 	}, ""))
 }
 
+func TestOnlyTheListingOfTheResumedSessionIsWrittenAgainAtStartup(t *testing.T) {
+	directory := t.TempDir()
+	workspaceDir := t.TempDir()
+	resumed := writeIdleSession(t, directory, store.Meta{WorkspaceDir: workspaceDir})
+	untouched := writeIdleSession(t, directory, store.Meta{WorkspaceDir: workspaceDir})
+	putListingBehind(t, directory, resumed)
+	putListingBehind(t, directory, untouched)
+
+	var startupOutput strings.Builder
+	if err := RefreshListing(directory, &startupOutput, resumed); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := session.ReadMeta(directory, resumed); err != nil {
+		t.Errorf("expected the resumed listing to be written again, got %v", err)
+	}
+	if _, err := session.ReadMeta(directory, untouched); err == nil {
+		t.Error("expected the listing of another session to be left as it was")
+	}
+
+	var pickerOutput strings.Builder
+	if err := RefreshListings(directory, &pickerOutput); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := session.ReadMeta(directory, untouched); err != nil {
+		t.Errorf("expected the picker to write the remaining listing again, got %v", err)
+	}
+
+	comparePickerGolden(t, "resumed-listing-refresh.txt", strings.Join([]string{
+		"=== startup, resuming one of two behind ===\n",
+		startupOutput.String(),
+		"=== picker ===\n",
+		pickerOutput.String(),
+	}, ""))
+}
+
+func TestStartupSaysNothingOfAListingItWasNotAskedFor(t *testing.T) {
+	directory := t.TempDir()
+	name := writeIdleSession(t, directory, store.Meta{WorkspaceDir: t.TempDir()})
+	putListingBehind(t, directory, name)
+
+	for _, asked := range []string{"", "brave-unicorn"} {
+		var drawn strings.Builder
+		if err := RefreshListing(directory, &drawn, asked); err != nil {
+			t.Errorf("expected %q to be left to the rest of startup, got %v", asked, err)
+		}
+		if drawn.String() != "" {
+			t.Errorf("expected nothing to be drawn for %q, got %q", asked, drawn.String())
+		}
+	}
+
+	if _, err := session.ReadMeta(directory, name); err == nil {
+		t.Error("expected the listing to be left as it was")
+	}
+}
+
 func comparePickerGolden(t *testing.T, name string, drawn string) {
 	t.Helper()
 
