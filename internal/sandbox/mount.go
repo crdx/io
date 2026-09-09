@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -70,7 +71,25 @@ var resolverFiles = []virtualFile{
 	{path: "/etc/nsswitch.conf", contents: nssContents},
 }
 
+var probedNamespaces sync.Map
+
 func checkNamespaces(ctx context.Context) error {
+	isUnmapped := testnamespace.IsUnmapped()
+
+	if _, wasProbed := probedNamespaces.Load(isUnmapped); wasProbed {
+		return nil
+	}
+
+	if err := probeNamespaces(ctx); err != nil {
+		return err
+	}
+
+	probedNamespaces.Store(isUnmapped, struct{}{})
+
+	return nil
+}
+
+func probeNamespaces(ctx context.Context) error {
 	probeContext, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
