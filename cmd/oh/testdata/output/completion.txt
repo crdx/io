@@ -1,5 +1,6 @@
 === options ===
 --caps
+--demo
 --help
 --ignored
 --json

@@ -482,9 +482,28 @@ func TestTheFastModeSegmentAlwaysShowsItsState(t *testing.T) {
 }
 
 func TestTheActiveModelSegmentMarksFastModeBeforeTheName(t *testing.T) {
-	got := drawn(t, activeModel.New("gpt-5.6-sol", "high", []string{"medium", "high"}, true))
+	got := drawn(t, activeModel.New(activeModel.Settings{Name: "gpt-5.6-sol", Effort: "high", EffortLevels: []string{"medium", "high"}, IsFast: true}))
 	if want := "⚡ GPT Sol 5.6 ··▫▪··"; got != want {
 		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestTheActiveModelSegmentPaintsASimulationInItsOwnColours(t *testing.T) {
+	settings := activeModel.Settings{Name: "simulation", Effort: "high", EffortLevels: []string{"medium", "high"}}
+
+	ordinary := painted(t, activeModel.New(settings))
+
+	settings.IsSimulated = true
+	simulated := painted(t, activeModel.New(settings))
+
+	if style.Plain(simulated) != style.Plain(ordinary) {
+		t.Errorf("a simulation drew %q, want the same words as %q", style.Plain(simulated), style.Plain(ordinary))
+	}
+	if simulated == ordinary {
+		t.Errorf("a simulation drew the ordinary colours: %q", simulated)
+	}
+	if !strings.Contains(simulated, style.Simulation("Simulation")) {
+		t.Errorf("a simulation drew %q, want the simulation colours", simulated)
 	}
 }
 
@@ -524,7 +543,7 @@ func TestTheActiveModelSegmentUsesFriendlyModelNames(t *testing.T) {
 
 	for modelName, want := range tests {
 		t.Run(modelName, func(t *testing.T) {
-			if got := drawn(t, activeModel.New(modelName, "medium", nil, false)); got != want {
+			if got := drawn(t, activeModel.New(activeModel.Settings{Name: modelName, Effort: "medium"})); got != want {
 				t.Errorf("got %q, want %q", got, want)
 			}
 		})
@@ -540,7 +559,7 @@ func TestTheActiveModelSegmentDrawsAFixedEffortScale(t *testing.T) {
 		"high":    "GPT 5.6 ▫▫▫▪··",
 	} {
 		t.Run(effort, func(t *testing.T) {
-			if got := drawn(t, activeModel.New("gpt-5.6", effort, levels, false)); got != want {
+			if got := drawn(t, activeModel.New(activeModel.Settings{Name: "gpt-5.6", Effort: effort, EffortLevels: levels})); got != want {
 				t.Errorf("got %q, want %q", got, want)
 			}
 		})
@@ -559,11 +578,22 @@ func TestTheActiveModelSegmentMarksUnsupportedEfforts(t *testing.T) {
 		"unknown ladder": {effort: "none", want: "DeepSeek Pro 4"},
 	} {
 		t.Run(name, func(t *testing.T) {
-			if got := drawn(t, activeModel.New("deepseek-v4-pro", test.effort, test.levels, false)); got != test.want {
+			if got := drawn(t, activeModel.New(activeModel.Settings{Name: "deepseek-v4-pro", Effort: test.effort, EffortLevels: test.levels})); got != test.want {
 				t.Errorf("got %q, want %q", got, test.want)
 			}
 		})
 	}
+}
+
+func painted(t *testing.T, factory segment.Factory) string {
+	t.Helper()
+
+	built, err := factory(tomlOptions(""))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return built.Render(segment.Context{})
 }
 
 func drawn(t *testing.T, factory segment.Factory) string {

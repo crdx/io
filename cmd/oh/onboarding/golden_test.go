@@ -272,6 +272,25 @@ func TestThePaintedWizardMatchesTheGolden(t *testing.T) {
 	assertANSIGolden(t, "first-run-painted", output.String())
 }
 
+func TestThePaintedSimulationRowMatchesTheGolden(t *testing.T) {
+	var output bytes.Buffer
+
+	harry := wizard{
+		isSimulationOffered: true,
+		output:              &output,
+		choose:              menuChoices(&output, len(providers)),
+		login: func(provider, func(string)) error {
+			t.Error("the simulation asked to sign in")
+			return nil
+		},
+	}
+
+	if err := harry.castSpell(); err != nil {
+		t.Fatal(err)
+	}
+	assertANSIGolden(t, "first-run-simulation-painted", output.String())
+}
+
 func TestThePaintedWizardShowsWhatWentWrongMatchingTheGolden(t *testing.T) {
 	var output bytes.Buffer
 

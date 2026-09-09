@@ -13,6 +13,7 @@ import (
 
 type Endpoint struct {
 	scenario *Scenario
+	respond  Responder
 	dialects []Dialect
 
 	mutex    sync.Mutex
@@ -23,8 +24,17 @@ type Endpoint struct {
 
 const exhausted = "The scenario has nothing more to say."
 
+type Responder func(Request) Turn
+
 func New(scenario *Scenario) *Endpoint {
 	return &Endpoint{scenario: scenario, dialects: Dialects(), sessions: map[string]int{}}
+}
+
+func NewResponder(scenario *Scenario, respond Responder) *Endpoint {
+	endpoint := New(scenario)
+	endpoint.respond = respond
+
+	return endpoint
 }
 
 const (
@@ -149,6 +159,9 @@ func (self *Endpoint) answer(writer http.ResponseWriter, request *http.Request, 
 	}
 
 	turn, found := self.scenario.turn(askedRequest.Turn)
+	if self.respond != nil {
+		turn, found = self.respond(askedRequest), true
+	}
 
 	if found && turn.Status != 0 {
 		if turn.RetryAfter.Duration > 0 {

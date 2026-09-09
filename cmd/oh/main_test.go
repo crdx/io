@@ -4366,8 +4366,32 @@ var optionsThatOpenASession = []string{
 	"--caps",
 	"--tool",
 	"--print",
+	"--demo",
 	"--yolo",
 	"--json",
+}
+
+func TestOnlyASessionThatOutlivesTheRunSaysHowToResume(t *testing.T) {
+	for _, testCase := range []struct {
+		name        string
+		isPersisted bool
+		isSimulated bool
+		kind        cycle.TransitionKind
+		wants       bool
+	}{
+		{name: "a stored session that quit", isPersisted: true, kind: cycle.Quit, wants: true},
+		{name: "a session that was never stored", kind: cycle.Quit},
+		{name: "a simulated session", isPersisted: true, isSimulated: true, kind: cycle.Quit},
+		{name: "a session that gave way to another", isPersisted: true, kind: cycle.NewSession},
+		{name: "a session that restarted", isPersisted: true, kind: cycle.Restart},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			got := isSessionLeftToResume(testCase.isPersisted, testCase.isSimulated, testCase.kind)
+			if got != testCase.wants {
+				t.Errorf("said %v, want %v", got, testCase.wants)
+			}
+		})
+	}
 }
 
 func TestFlagsThatExitEarlyNeverWaitOnStdin(t *testing.T) {
@@ -5115,6 +5139,17 @@ func TestTheCurrentDirectoryConfigOverridesTheGlobalConfig(t *testing.T) {
 	}
 	if !slices.Equal(got, want) {
 		t.Errorf("got %#v, want %#v", got, want)
+	}
+}
+
+func TestTheSimulationAnswersInPlaceOfTheConfiguredRotation(t *testing.T) {
+	settings := config.Config{Model: config.Model{RoundRobin: []string{"anthropic/claude-opus-5@medium"}}}
+
+	if got := configuredRotation(settings, false); !slices.Equal(got, settings.Model.RoundRobin) {
+		t.Errorf("an ordinary session was given %v", got)
+	}
+	if got := configuredRotation(settings, true); len(got) != 0 {
+		t.Errorf("the simulation was asked for %v, which it knows nothing about", got)
 	}
 }
 
@@ -9023,14 +9058,31 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 	for _, effort := range modelEffortLevels {
 		passes["active-model / "+effort+" effort"] = goldenSegmentPass(
 			t,
-			activeModel.New("gpt-5.6-sol", effort, modelEffortLevels, false),
+			activeModel.New(activeModel.Settings{Name: "gpt-5.6-sol", Effort: effort, EffortLevels: modelEffortLevels}),
 			"",
 			segment.Context{},
 		)
 	}
 	passes["active-model / fast"] = goldenSegmentPass(
 		t,
-		activeModel.New("gpt-5.6-sol", "high", modelEffortLevels, true),
+		activeModel.New(activeModel.Settings{Name: "gpt-5.6-sol", Effort: "high", EffortLevels: modelEffortLevels, IsFast: true}),
+		"",
+		segment.Context{},
+	)
+	passes["subscription-usage / boundless"] = goldenSegmentPass(
+		t,
+		subUsage.New(subUsage.Settings{IsSimulated: true}),
+		"",
+		segment.Context{},
+	)
+	passes["active-model / simulation"] = goldenSegmentPass(
+		t,
+		activeModel.New(activeModel.Settings{
+			Name:         "simulation",
+			Effort:       "high",
+			EffortLevels: modelEffortLevels,
+			IsSimulated:  true,
+		}),
 		"",
 		segment.Context{},
 	)
@@ -9050,7 +9102,7 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 	for _, ladder := range effortLadders {
 		passes["active-model / "+ladder.name] = goldenSegmentPass(
 			t,
-			activeModel.New(ladder.model, ladder.effort, ladder.levels, false),
+			activeModel.New(activeModel.Settings{Name: ladder.model, Effort: ladder.effort, EffortLevels: ladder.levels}),
 			"",
 			segment.Context{},
 		)
@@ -14290,15 +14342,7 @@ func twoPicturesStream(t *testing.T) string {
 	t.Helper()
 
 	sessionDirectory, first := storedPictureFor(t, 400, 200)
-
-	second, err := pictures.Store(
-		sessionDirectory,
-		func() error { return os.MkdirAll(sessionDirectory, 0o700) },
-		tool.Image{MediaType: "image/png", Data: drawnPNGFor(t, 200, 200)},
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
+	second := storedPictureIn(t, sessionDirectory, 200, 200)
 
 	events := slices.Concat(
 		pictureCallEventsFor("call-1", "wide.png", first),
@@ -14306,6 +14350,52 @@ func twoPicturesStream(t *testing.T) string {
 	)
 
 	return paintPictureEvents(t, sessionDirectory, replayColumns, events)
+}
+
+func storedPictureIn(t *testing.T, sessionDirectory string, width int, height int) *agent.Picture {
+	t.Helper()
+
+	reference, err := pictures.Store(
+		sessionDirectory,
+		func() error { return os.MkdirAll(sessionDirectory, 0o700) },
+		tool.Image{MediaType: "image/png", Data: drawnPNGFor(t, width, height)},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return reference
+}
+
+func unorderedPicturesStream(t *testing.T) string {
+	t.Helper()
+
+	sessionDirectory, first := storedPictureFor(t, 800, 600)
+	second := storedPictureIn(t, sessionDirectory, 700, 500)
+	third := storedPictureIn(t, sessionDirectory, 600, 450)
+
+	requests, results := pictureRoundEvents(map[string]*agent.Picture{
+		"call-1": first,
+		"call-2": second,
+		"call-3": third,
+	})
+
+	return paintPictureEvents(t, sessionDirectory, replayColumns, slices.Concat(requests, results))
+}
+
+func pictureRoundEvents(references map[string]*agent.Picture) ([]agent.Event, []agent.Event) {
+	var requests []agent.Event
+	var results []agent.Event
+
+	for _, id := range []string{"call-1", "call-2", "call-3"} {
+		requests = append(requests, pictureCallEventsFor(id, id+".png", references[id])[0])
+	}
+
+	for _, id := range []string{"call-3", "call-1", "call-2"} {
+		results = append(results, pictureCallEventsFor(id, id+".png", references[id])[1])
+	}
+
+	return requests, results
 }
 
 func narrowPictureStream(t *testing.T) string {
@@ -14479,6 +14569,9 @@ func TestAPictureIsDrawnUnderTheCallThatReadIt(t *testing.T) {
 		},
 		"a2 a drawn copy rebuilt from the original": func() string {
 			return rebuiltPictureStream(t)
+		},
+		"a3 pictures whose calls finish out of order": func() string {
+			return unorderedPicturesStream(t)
 		},
 	}
 

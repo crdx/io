@@ -33,6 +33,7 @@ import (
 	"crdx.org/io/cmd/oh/commands"
 	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/cycle"
+	"crdx.org/io/cmd/oh/demo"
 	"crdx.org/io/cmd/oh/drops"
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/graphics"
@@ -144,6 +145,14 @@ func getConfigSources(workspaceDir string) []config.Source {
 	}
 }
 
+func configuredRotation(settings config.Config, isSimulated bool) []string {
+	if isSimulated {
+		return nil
+	}
+
+	return settings.Model.RoundRobin
+}
+
 func applyDefaultCaps(options *cli.Options, settings config.Config) {
 	if !options.WereCapsChosen {
 		options.Caps = caps.Set(settings.Caps.Default)
@@ -216,20 +225,40 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	configSources := getConfigSources(workspaceDir)
 	configPath := configSources[0].Path
-	if _, err := onboarding.PrepareConfig(onboarding.Options{
-		Input:          keyboard,
-		Output:         os.Stdout,
-		EndpointURL:    endpointURL,
-		RequestedModel: inputArgs.Model,
-		ResumedSession: inputArgs.Session,
-		ConfigSources:  configSources,
-		IsPrinting:     inputArgs.IsPrinting,
-	}); err != nil {
-		if errors.Is(err, onboarding.ErrCancelled) {
-			return "", nil
+	isSimulated := inputArgs.IsDemoing
+
+	if !isSimulated {
+		_, isChosen, err := onboarding.PrepareConfig(onboarding.Options{
+			Input:          keyboard,
+			Output:         os.Stdout,
+			EndpointURL:    endpointURL,
+			RequestedModel: inputArgs.Model,
+			ResumedSession: inputArgs.Session,
+			ConfigSources:  configSources,
+			IsPrinting:     inputArgs.IsPrinting,
+		})
+		if err != nil {
+			if errors.Is(err, onboarding.ErrCancelled) {
+				return "", nil
+			}
+
+			return "", err
 		}
 
-		return "", err
+		isSimulated = isChosen
+	}
+
+	if isSimulated {
+		simulation, err := demo.Start()
+		if err != nil {
+			return "", err
+		}
+		defer simulation.Close()
+
+		endpointURL = simulation.EndpointURL
+		inputArgs.Model = simulation.Selection
+		modelCachePath = location.GetModelCachePath(true)
+		sessionsDir = location.GetSessionsDir()
 	}
 
 	settings, configObserver, err := config.ObserveSources(configSources...)
@@ -346,7 +375,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer func() { _ = homeRoot.Close() }()
 
-	configuredModels, err := model.ParseRoundRobin(modelCachePath, settings.Model.RoundRobin)
+	configuredModels, err := model.ParseRoundRobin(modelCachePath, configuredRotation(settings, isSimulated))
 	if err != nil {
 		return "", err
 	}
@@ -790,6 +819,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		ModelEffort:           selection.Effort,
 		ModelEffortLevels:     choice.EffortLevels,
 		IsFast:                selection.IsFast,
+		IsSimulated:           isSimulated,
 		UsageReporter:         usageReporter,
 		UsageCachePath:        usageCachePath,
 		UsageIsSelfRefreshing: backend.RefreshesOwnUsage(selection.Provider),
@@ -881,11 +911,15 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	stopReason = transition.StopReason()
 	hooks.EmitSessionStopping(ctx, cycle.SessionStopping{Session: sessionInfo, Reason: stopReason})
 
-	if log.IsPersisted() && transition.Kind == cycle.Quit {
+	if isSessionLeftToResume(log.IsPersisted(), isSimulated, transition.Kind) {
 		_, _ = fmt.Fprintln(notices, style.Subtle(sessions.ResumeCommand(os.Args[0], log.Name())))
 	}
 
 	return "", nil
+}
+
+func isSessionLeftToResume(isPersisted bool, isSimulated bool, kind cycle.TransitionKind) bool {
+	return isPersisted && !isSimulated && kind == cycle.Quit
 }
 
 func openRunner(

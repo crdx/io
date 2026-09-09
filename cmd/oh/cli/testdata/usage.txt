@@ -10,6 +10,7 @@ Options:
     -c, --caps <flags>          Set capabilities
     -t, --tool <tool>           Replace the toolbox
     -p, --print                 Stream non-interactively
+        --demo                  Enter the matrix
         --yolo                  Disable sandbox
     -l, --list                  List models
     -u, --update                Update model cache

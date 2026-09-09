@@ -69,10 +69,22 @@ type cachedModels struct {
 }
 
 const (
-	sourceEndpoint = "endpoint"
-	sourceRegistry = "models.dev"
-	sourceBoth     = "endpoint+models.dev"
+	sourceEndpoint   = "endpoint"
+	sourceRegistry   = "models.dev"
+	sourceBoth       = "endpoint+models.dev"
+	sourceSimulation = "simulation"
 )
+
+func StoreSimulated(path string, providerName string, models []agent.Model) error {
+	now := time.Now()
+
+	return saveModelCache(path, modelCache{
+		CheckedAt: now,
+		Providers: map[string]cachedModels{
+			providerName: {FetchedAt: now, Source: sourceSimulation, Models: models},
+		},
+	})
+}
 
 func registryAddress(endpoint string) string {
 	if endpoint == "" {

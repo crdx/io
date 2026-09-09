@@ -250,6 +250,24 @@ func TestAPrintedSessionNeedsMoreThanTheStdinMarker(t *testing.T) {
 	}
 }
 
+func TestTheSimulationIsRefusedBesideASessionOrAModel(t *testing.T) {
+	if err := bind(t, "--demo").Check(false); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	for _, arguments := range [][]string{
+		{"--demo", "-r", "earlier-session"},
+		{"--demo", "-r"},
+		{"--demo", "--from", "earlier-session"},
+		{"--demo", "-m", "codex/model"},
+		{"--demo", "-m"},
+	} {
+		if err := bind(t, arguments...).Check(false); err == nil {
+			t.Errorf("expected %v to be refused", arguments)
+		}
+	}
+}
+
 func TestTheIgnoredModelsAreAskedForAlongsideAnUpdate(t *testing.T) {
 	input := bind(t, "-u", "-I")
 

@@ -62,6 +62,7 @@ type Options struct {
 	ModelEffort           string
 	ModelEffortLevels     []string
 	IsFast                bool
+	IsSimulated           bool
 	UsageReporter         agent.UsageReporter
 	UsageCachePath        string
 	UsageIsSelfRefreshing bool
@@ -95,9 +96,13 @@ func NewRegistry(options Options) segment.Registry {
 			options.Sources.GetSandboxToHostPorts,
 		),
 		workspaceDirSegment: workspaceDir.New(options.Workspace),
-		activeModelSegment: activeModel.New(
-			options.ModelName, options.ModelEffort, options.ModelEffortLevels, options.IsFast,
-		),
+		activeModelSegment: activeModel.New(activeModel.Settings{
+			Name:         options.ModelName,
+			Effort:       options.ModelEffort,
+			EffortLevels: options.ModelEffortLevels,
+			IsFast:       options.IsFast,
+			IsSimulated:  options.IsSimulated,
+		}),
 		fastModeSegment:       fastMode.New(options.IsFast),
 		scrollOverflowSegment: scrollOverflow.New,
 		sessionNameSegment:    sessionName.New(options.CurrentSessionName),
@@ -112,6 +117,7 @@ func NewRegistry(options Options) segment.Registry {
 			CachePath:        options.UsageCachePath,
 			ModelName:        options.ModelName,
 			IsSelfRefreshing: options.UsageIsSelfRefreshing,
+			IsSimulated:      options.IsSimulated,
 			Gauges:           options.UsageGauges,
 			Now:              time.Now,
 		}),

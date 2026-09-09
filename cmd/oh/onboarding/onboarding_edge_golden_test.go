@@ -117,7 +117,7 @@ func TestOnboardingEdgeCasesMatchTheGoldens(t *testing.T) {
 			t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 			t.Setenv("XDG_STATE_HOME", t.TempDir())
 
-			_, err := PrepareConfig(Options{Output: output, IsPrinting: true})
+			_, _, err := PrepareConfig(Options{Output: output, IsPrinting: true})
 			if !errors.Is(err, ErrNobodyToAsk) {
 				return fmt.Errorf("got %w", err)
 			}
@@ -150,6 +150,30 @@ func TestOnboardingEdgeCasesMatchTheGoldens(t *testing.T) {
 				},
 			}
 			return harry.castSpell()
+		},
+		"first-run-simulation": func(t *testing.T, output *bytes.Buffer) error {
+			t.Helper()
+
+			harry := wizard{
+				isSimulationOffered: true,
+				output:              output,
+				choose:              menuChoices(output, len(providers)),
+				login: func(provider, func(string)) error {
+					t.Error("the simulation asked to sign in")
+					return nil
+				},
+				setInitialModel: func(string) error {
+					t.Error("the simulation wrote a model to the config")
+					return nil
+				},
+			}
+			if err := harry.castSpell(); err != nil {
+				return err
+			}
+			if !harry.isSimulationChosen {
+				return errors.New("the simulation was not taken up")
+			}
+			return nil
 		},
 		"first-run-config-write-failure": func(_ *testing.T, output *bytes.Buffer) error {
 			harry := wizard{

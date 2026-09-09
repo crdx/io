@@ -3,6 +3,8 @@ package sim
 import (
 	"encoding/json"
 	"net/http"
+
+	"crdx.org/io/agent"
 )
 
 const (
@@ -11,6 +13,16 @@ const (
 )
 
 var simulatedEfforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
+
+func OfferedModel(name string) agent.Model {
+	return agent.Model{
+		ID:                  name,
+		Name:                name,
+		EffortLevels:        simulatedEfforts,
+		ContextWindowTokens: simulatedContext,
+		MaxOutputTokens:     simulatedOutput,
+	}
+}
 
 type listing struct {
 	Data []listedModel `json:"data"`

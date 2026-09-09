@@ -30,6 +30,7 @@ const (
 	limitedMark      = "✖"
 	staleLabel       = "stale"
 	failureLabel     = "failed"
+	boundlessMark    = "∞"
 )
 
 type Settings struct {
@@ -37,8 +38,17 @@ type Settings struct {
 	CachePath        string
 	ModelName        string
 	IsSelfRefreshing bool
+	IsSimulated      bool
 	Gauges           *usage.Gauges
 	Now              func() time.Time
+}
+
+type boundless struct {
+	gauges *usage.Gauges
+}
+
+func (self boundless) Render(segment.Context) string {
+	return style.Simulation(boundlessMark) + " " + self.gauges.Draw(0, nil, usage.PaceEven, barCells)
 }
 
 type snapshot struct {
@@ -79,6 +89,10 @@ type state struct {
 
 func New(settings Settings) segment.Factory {
 	return func(options segment.Options) (segment.Segment, error) {
+		if settings.IsSimulated {
+			return boundless{gauges: settings.Gauges}, nil
+		}
+
 		var args struct {
 			Rate time.Duration `toml:"rate"`
 		}

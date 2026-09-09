@@ -31,6 +31,7 @@ Options:
     -c, --caps <flags>          Set capabilities
     -t, --tool <tool>           Replace the toolbox
     -p, --print                 Stream non-interactively
+        --demo                  Enter the matrix
         --yolo                  Disable sandbox
     -l, --list                  List models
     -u, --update                Update model cache
@@ -53,6 +54,7 @@ type inputFlags struct {
 	Caps             string   `docopt:"--caps"`
 	Tools            []string `docopt:"--tool"`
 	IsPrinting       bool     `docopt:"--print"`
+	IsDemoing        bool     `docopt:"--demo"`
 	Usage            bool     `docopt:"--usage"`
 	JSON             bool     `docopt:"--json"`
 	Yolo             bool     `docopt:"--yolo"`
@@ -180,6 +182,16 @@ func (self Input) Check(isPromptPiped bool) error {
 		return errors.New(
 			"a resumed conversation preserves its toolbox; start a new session to change them",
 		)
+	}
+
+	if self.IsDemoing {
+		if self.isResuming() || self.SourceSession != "" {
+			return errors.New("the simulation keeps nothing, so there is no session of its to resume")
+		}
+
+		if self.isChoosingModel() {
+			return errors.New("the simulation answers in place of a model, so there is none to choose")
+		}
 	}
 
 	if !self.IsPrinting {

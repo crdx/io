@@ -38,6 +38,9 @@ const (
 	chatGPTName    = "ChatGPT"
 	anthropicName  = "Anthropic"
 	openCodeGoName = "OpenCode Go"
+	simulationName = "Simulation"
+
+	simulationIdentifier = "simulation"
 
 	validationModel           = "validation"
 	validationEffort          = "none"
@@ -74,6 +77,7 @@ const (
 	openingBrowser   = "Opening your browser to shake hands with %s…"
 	signedIn         = "Signed in to %s"
 	signInFailure    = "Unable to sign in: %s"
+	simulationNote   = "The simulation matches a few words in what you say, and keeps nothing when you close it."
 )
 
 type provider struct {
@@ -88,6 +92,8 @@ var providers = []provider{
 	{name: openCodeGoName, identifier: model.OpencodeGoProvider, note: "Key"},
 }
 
+var simulation = provider{name: simulationName, identifier: simulationIdentifier, note: "No sign in"}
+
 type Options struct {
 	Input          *os.File
 	Output         io.Writer
@@ -98,7 +104,7 @@ type Options struct {
 	IsPrinting     bool
 }
 
-func PrepareConfig(options Options) (config.Config, error) {
+func PrepareConfig(options Options) (config.Config, bool, error) {
 	configPath := location.GetConfigFile()
 	configSources := options.ConfigSources
 	if len(configSources) == 0 {
@@ -106,15 +112,17 @@ func PrepareConfig(options Options) (config.Config, error) {
 	}
 	settings, err := config.LoadSources(configSources...)
 	if err != nil || !isRequired(options, settings.Model.RoundRobin) {
-		return settings, err
+		return settings, false, err
 	}
 
 	if options.IsPrinting {
-		return config.Config{}, ErrNobodyToAsk
+		return config.Config{}, false, ErrNobodyToAsk
 	}
 
 	modelCachePath := location.GetModelCachePath(options.EndpointURL != "")
 	harry := wizard{
+		isSimulationOffered: true,
+
 		output: options.Output,
 		pause:  typingPause(options.Output),
 		choose: func(prompt string, labels []string) (int, error) {
@@ -141,9 +149,14 @@ func PrepareConfig(options Options) (config.Config, error) {
 	}
 
 	if err := harry.castSpell(); err != nil {
-		return config.Config{}, err
+		return config.Config{}, false, err
 	}
-	return config.LoadSources(configSources...)
+	if harry.isSimulationChosen {
+		return config.Config{}, true, nil
+	}
+
+	settings, err = config.LoadSources(configSources...)
+	return settings, false, err
 }
 
 func isRequired(options Options, configuredModels []string) bool {
@@ -174,9 +187,12 @@ type wizard struct {
 	refreshModels   func() error
 	getModels       func() []model.Choice
 	setInitialModel func(string) error
+
+	isSimulationOffered bool
+	isSimulationChosen  bool
 }
 
-func (self wizard) castSpell() error {
+func (self *wizard) castSpell() error {
 	if err := self.openScreen(); err != nil {
 		return err
 	}
@@ -184,6 +200,16 @@ func (self wizard) castSpell() error {
 	chosenProvider, err := self.chooseProvider("")
 	if err != nil {
 		return err
+	}
+
+	if chosenProvider.identifier == simulationIdentifier {
+		self.isSimulationChosen = true
+
+		if _, err := fmt.Fprintf(self.output, "\n%s\n", style.Subtle(simulationNote)); err != nil {
+			return err
+		}
+
+		return self.sayFarewell()
 	}
 
 	if err := self.refreshModels(); err != nil {
@@ -211,11 +237,15 @@ func (self wizard) castSpell() error {
 		return err
 	}
 
-	_, err = fmt.Fprintf(self.output, "\n%s %s\n", style.Success(successMark), style.Subtle(farewell))
+	return self.sayFarewell()
+}
+
+func (self *wizard) sayFarewell() error {
+	_, err := fmt.Fprintf(self.output, "\n%s %s\n", style.Success(successMark), style.Subtle(farewell))
 	return err
 }
 
-func (self wizard) openScreen() error {
+func (self *wizard) openScreen() error {
 	width := max(style.Width(spoken(greeting, greetingAside)), style.Width(spoken(introduction, "")))
 
 	if err := self.speakOut(greeting, greetingAside); err != nil {
@@ -240,7 +270,7 @@ func spoken(text string, aside string) string {
 	return util.JoinNonEmpty(text, aside)
 }
 
-func (self wizard) speakOut(text string, aside string) error {
+func (self *wizard) speakOut(text string, aside string) error {
 	if err := self.typeOut(text, typingInterval); err != nil {
 		return err
 	}
@@ -269,13 +299,13 @@ func restAfter(character rune) time.Duration {
 	}
 }
 
-func (self wizard) rest(interval time.Duration) {
+func (self *wizard) rest(interval time.Duration) {
 	if self.pause != nil {
 		self.pause(interval)
 	}
 }
 
-func (self wizard) typeOut(text string, interval time.Duration) error {
+func (self *wizard) typeOut(text string, interval time.Duration) error {
 	runes := []rune(text)
 
 	for at := 0; at < len(runes); {
@@ -346,7 +376,7 @@ func alignedLabels(labels []string, notes []string) []string {
 	return alignedLabels
 }
 
-func (self wizard) chooseProvider(providerName string) (provider, error) {
+func (self *wizard) chooseProvider(providerName string) (provider, error) {
 	if providerName != "" {
 		chosenProvider, found := providerNamed(providerName)
 		if !found {
@@ -359,7 +389,8 @@ func (self wizard) chooseProvider(providerName string) (provider, error) {
 		return chosenProvider, self.authenticate(chosenProvider, false)
 	}
 
-	labels := providerLabels()
+	candidates := self.candidateProviders()
+	labels := providerLabels(candidates)
 
 	for {
 		chosenIndex, err := self.choose(style.Prompt(providerPrompt), labels)
@@ -367,7 +398,11 @@ func (self wizard) chooseProvider(providerName string) (provider, error) {
 			return provider{}, err
 		}
 
-		chosenProvider := providers[chosenIndex]
+		chosenProvider := candidates[chosenIndex]
+		if chosenProvider.identifier == simulationIdentifier {
+			return chosenProvider, nil
+		}
+
 		if err := self.authenticate(chosenProvider, true); err == nil {
 			return chosenProvider, nil
 		} else if _, writeErr := fmt.Fprintf(
@@ -380,12 +415,23 @@ func (self wizard) chooseProvider(providerName string) (provider, error) {
 	}
 }
 
-func providerLabels() []string {
-	labels := make([]string, len(providers))
-	notes := make([]string, len(providers))
+func (self *wizard) candidateProviders() []provider {
+	if !self.isSimulationOffered {
+		return providers
+	}
 
-	for i, candidate := range providers {
+	return append(append([]provider(nil), providers...), simulation)
+}
+
+func providerLabels(candidates []provider) []string {
+	labels := make([]string, len(candidates))
+	notes := make([]string, len(candidates))
+
+	for i, candidate := range candidates {
 		labels[i] = candidate.name
+		if candidate.identifier == simulationIdentifier {
+			labels[i] = style.Simulation(candidate.name)
+		}
 		notes[i] = candidate.note
 	}
 
@@ -401,7 +447,7 @@ func providerNamed(identifier string) (provider, bool) {
 	return provider{}, false
 }
 
-func (self wizard) authenticate(chosenProvider provider, shouldSeparate bool) error {
+func (self *wizard) authenticate(chosenProvider provider, shouldSeparate bool) error {
 	if shouldSeparate {
 		if _, err := fmt.Fprintln(self.output); err != nil {
 			return err

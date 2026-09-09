@@ -732,3 +732,30 @@ type refusedOptions struct{}
 func (refusedOptions) Read(any) error {
 	return errors.New("the layout wrote something else")
 }
+
+func TestASimulationHasNoLimitToReport(t *testing.T) {
+	built, err := New(Settings{IsSimulated: true, Reporter: &scriptedReporter{}})(noOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := style.Plain(built.Render(segment.Context{})), "∞ ░░░░░░░░"; got != want {
+		t.Errorf("a simulation drew %q, want %q", got, want)
+	}
+}
+
+func TestASimulationAsksNobodyAboutUsage(t *testing.T) {
+	reporter := &scriptedReporter{}
+
+	built, err := New(Settings{IsSimulated: true, Reporter: reporter})(noOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	built.Render(segment.Context{})
+	built.Render(segment.Context{})
+
+	if reporter.asked.Load() != 0 {
+		t.Errorf("a simulation asked for usage %d times", reporter.asked.Load())
+	}
+}

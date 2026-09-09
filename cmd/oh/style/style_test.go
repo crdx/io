@@ -159,3 +159,36 @@ func TestJoinPaintsNothingWhenEveryPartIsEmpty(t *testing.T) {
 		t.Errorf("got %q, want an empty string", got)
 	}
 }
+
+func TestAGradientPaintsEveryCharacterOnItsWayFromOneColourToTheOther(t *testing.T) {
+	enableColor(t)
+
+	painted := Simulation("Simulation")
+
+	if got := Plain(painted); got != "Simulation" {
+		t.Errorf("the gradient drew %q", got)
+	}
+	if !strings.Contains(painted, "\x1b["+italicCode+";") {
+		t.Errorf("the gradient drew no italics: %q", painted)
+	}
+
+	first, _ := colour(orchid)
+	last, _ := colour(aqua)
+	if !strings.Contains(painted, sequenceFor(first)) {
+		t.Errorf("the gradient does not start at %s: %q", orchid, painted)
+	}
+	if !strings.Contains(painted, sequenceFor(last)) {
+		t.Errorf("the gradient does not end at %s: %q", aqua, painted)
+	}
+	if Width(painted) != len("Simulation") {
+		t.Errorf("the gradient measures %d cells", Width(painted))
+	}
+}
+
+func TestAGradientLeavesTheWordsAloneWhereColourIsOff(t *testing.T) {
+	t.Cleanup(Init(&strings.Builder{}))
+
+	if got := Simulation("Simulation"); got != "Simulation" {
+		t.Errorf("a colourless gradient drew %q", got)
+	}
+}

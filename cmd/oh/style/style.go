@@ -27,12 +27,17 @@ const (
 	teal   = "#8abeb7"
 	steel  = "#81a2be"
 	mauve  = "#c9a6d4"
+	orchid = "#e6a8ff"
+	aqua   = "#7ff0dd"
 	grey   = "#969896"
 
 	none = ""
 )
 
-const reset = "\x1b[0m"
+const (
+	reset      = "\x1b[0m"
+	italicCode = "3"
+)
 
 var (
 	Accent Style = hex(copper)
@@ -74,6 +79,7 @@ var (
 	Greeting       Style = col.Italic
 	Web            Style = hex(steel)
 	Network        Style = hex(red)
+	Simulation     Style = gradient(orchid, aqua)
 )
 
 var (
@@ -214,6 +220,57 @@ func decorate(decoration Style, inner Style) Style {
 	}
 }
 
+func gradient(from string, to string) Style {
+	first, hasFirst := colour(from)
+	last, hasLast := colour(to)
+
+	return func(format any, args ...any) string {
+		text := fmt.Sprint(format)
+
+		if len(args) > 0 {
+			text = fmt.Sprintf(text, args...)
+		}
+
+		if !isColorEnabled || !hasFirst || !hasLast {
+			return text
+		}
+
+		var paint strings.Builder
+
+		runes := []rune(text)
+		for i, character := range runes {
+			paint.WriteString("\x1b[")
+			paint.WriteString(italicCode)
+			paint.WriteString(";")
+			paint.WriteString(sequenceFor(blend(first, last, i, len(runes))))
+			paint.WriteString("m")
+			paint.WriteRune(character)
+			paint.WriteString(reset)
+		}
+
+		return paint.String()
+	}
+}
+
+func blend(from color.RGBA, to color.RGBA, step int, steps int) color.RGBA {
+	if steps <= 1 {
+		return from
+	}
+
+	along := float64(step) / float64(steps-1)
+
+	return color.RGBA{
+		R: channelAlong(from.R, to.R, along),
+		G: channelAlong(from.G, to.G, along),
+		B: channelAlong(from.B, to.B, along),
+		A: 0xff,
+	}
+}
+
+func channelAlong(from uint8, to uint8, along float64) uint8 {
+	return uint8(float64(from) + (float64(to)-float64(from))*along)
+}
+
 func hex(value string) Style {
 	code := sgr(value)
 
@@ -260,7 +317,11 @@ func sgr(value string) string {
 		return ""
 	}
 
-	return fmt.Sprintf("38;2;%d;%d;%d", colourValue.R, colourValue.G, colourValue.B)
+	return sequenceFor(colourValue)
+}
+
+func sequenceFor(value color.RGBA) string {
+	return fmt.Sprintf("38;2;%d;%d;%d", value.R, value.G, value.B)
 }
 
 func colour(value string) (color.RGBA, bool) {

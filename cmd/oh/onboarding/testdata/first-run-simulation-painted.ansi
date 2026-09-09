@@ -1,0 +1,14 @@
+Oh, hello. \e[3m*yawns*\e[0m
+Yes? Oh, right. Let's get you signed in.
+\e[38;2;150;152;150m────────────────────────────────────────\e[0m
+
+\e[38;2;192;128;80mChoose your provider:\e[0m\r
+\r
+  ChatGPT      \e[38;2;150;152;150mOAuth\e[0m\r
+  Anthropic    \e[38;2;150;152;150mOAuth\e[0m\r
+  OpenCode Go  \e[38;2;150;152;150mKey\e[0m\r
+\e[38;2;192;128;80m› \e[3;38;2;201;166;212mS\e[0m\e[38;2;192;128;80m\e[3;38;2;194;168;208mi\e[0m\e[38;2;192;128;80m\e[3;38;2;187;171;205mm\e[0m\e[38;2;192;128;80m\e[3;38;2;180;174;202mu\e[0m\e[38;2;192;128;80m\e[3;38;2;173;176;199ml\e[0m\e[38;2;192;128;80m\e[3;38;2;166;179;195ma\e[0m\e[38;2;192;128;80m\e[3;38;2;159;182;192mt\e[0m\e[38;2;192;128;80m\e[3;38;2;152;184;189mi\e[0m\e[38;2;192;128;80m\e[3;38;2;145;187;186mo\e[0m\e[38;2;192;128;80m\e[3;38;2;138;190;183mn\e[0m\e[38;2;192;128;80m   \e[38;2;150;152;150mNo sign in\e[0m\r
+
+\e[38;2;150;152;150mThe simulation matches a few words in what you say, and keeps nothing when you close it.\e[0m
+
+\e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150mThanks. Transferring you…\e[0m

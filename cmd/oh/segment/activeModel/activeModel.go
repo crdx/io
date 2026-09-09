@@ -16,35 +16,48 @@ const (
 	unsupportedSquare = "·"
 )
 
-type state struct {
-	name         string
-	effort       string
-	effortLevels []string
-	isFast       bool
+type Settings struct {
+	Name         string
+	Effort       string
+	EffortLevels []string
+	IsFast       bool
+	IsSimulated  bool
 }
 
-func New(name string, effort string, effortLevels []string, isFast bool) segment.Factory {
+type state struct {
+	settings Settings
+}
+
+func New(settings Settings) segment.Factory {
 	return func(segment.Options) (segment.Segment, error) {
-		return state{name: name, effort: effort, effortLevels: effortLevels, isFast: isFast}, nil
+		return state{settings: settings}, nil
 	}
 }
 
 func (self state) Render(segment.Context) string {
-	name := model.DisplayName(self.name)
-	badge := style.Normal(name[0])
+	name := model.DisplayName(self.settings.Name)
+	badge := self.paint(name[0])
 	if len(name) > 1 {
 		badge += " " + style.Subtle(name[1])
 	}
-	if self.isFast {
+	if self.settings.IsFast {
 		badge = fastMode.GetMark(true) + " " + badge
 	}
 
-	squares := thinkingSquares(self.effort, self.effortLevels)
+	squares := thinkingSquares(self.settings.Effort, self.settings.EffortLevels)
 	if squares == "" {
 		return badge
 	}
 
 	return badge + " " + styleThinkingSquares(squares)
+}
+
+func (self state) paint(name string) string {
+	if self.settings.IsSimulated {
+		return style.Simulation(name)
+	}
+
+	return style.Normal(name)
 }
 
 func thinkingSquares(effort string, effortLevels []string) string {

@@ -190,6 +190,29 @@ func TestNamedLoginSkipsTheProviderPicker(t *testing.T) {
 	}
 }
 
+func TestTheSimulationIsOfferedOnlyWhereItCanBeStarted(t *testing.T) {
+	firstRun := wizard{isSimulationOffered: true}
+	offered := firstRun.candidateProviders()
+	if len(offered) != len(providers)+1 || offered[len(offered)-1].identifier != simulationIdentifier {
+		t.Errorf("a first run was offered %v", offered)
+	}
+
+	signingIn := wizard{}
+	for _, candidate := range signingIn.candidateProviders() {
+		if candidate.identifier == simulationIdentifier {
+			t.Error("signing in offered the simulation")
+		}
+	}
+}
+
+func TestTheSimulationIsNotAProviderToSignInTo(t *testing.T) {
+	harry := wizard{}
+	if _, err := harry.chooseProvider(simulationIdentifier); err == nil ||
+		!strings.Contains(err.Error(), "unknown provider") {
+		t.Errorf("got %v", err)
+	}
+}
+
 func TestNamedLoginRejectsAnUnknownProvider(t *testing.T) {
 	harry := wizard{}
 	if _, err := harry.chooseProvider("somewhere"); err == nil || !strings.Contains(err.Error(), "unknown provider") {
@@ -348,7 +371,7 @@ func TestALocalModelOverrideAvoidsFirstRunOnboarding(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	settings, err := PrepareConfig(Options{
+	settings, _, err := PrepareConfig(Options{
 		ConfigSources: []config.Source{
 			{Path: filepath.Join(directory, "missing.toml")},
 			{Path: overridePath, IsOverride: true},
@@ -377,7 +400,7 @@ func TestAPrintedFirstRunIsRefusedRatherThanAsked(t *testing.T) {
 	})
 
 	var shown strings.Builder
-	_, err = PrepareConfig(Options{Input: reader, Output: &shown, IsPrinting: true})
+	_, _, err = PrepareConfig(Options{Input: reader, Output: &shown, IsPrinting: true})
 
 	if !errors.Is(err, ErrNobodyToAsk) {
 		t.Fatalf("got %v, want a refusal to ask", err)
