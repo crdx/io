@@ -898,7 +898,6 @@ func inertFactory(segment.Options) (segment.Segment, error) {
 func testSegments() segment.Registry {
 	return segment.Registry{
 		"activity-spinner":   inertFactory,
-		"cache-ttl":          inertFactory,
 		"cache-usage":        inertFactory,
 		"context-usage":      inertFactory,
 		"fast-mode":          inertFactory,

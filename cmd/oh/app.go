@@ -808,7 +808,6 @@ func (self *App) getBarSources() bar.Sources {
 		IsTurnRunning:         self.isTurnRunning,
 		GetContextUsage:       self.contextUsage,
 		GetCacheUsage:         self.cacheUsage,
-		GetCacheLife:          self.cacheLifetime,
 		GetGrantedCaps:        self.grantedCaps,
 		GetPathGrants:         self.getPathGrants,
 		GetHostToSandboxPorts: self.getHostToSandboxPorts,
@@ -983,14 +982,6 @@ func (self *App) turnTiming() turn.Timing {
 
 func (self *App) turnCount() int {
 	return self.metrics.TurnCount()
-}
-
-func (self *App) cacheLifetime() time.Duration {
-	if self.agent == nil {
-		return 0
-	}
-
-	return self.agent.CacheLifetime()
 }
 
 func (self *App) cacheUsage() (int, int) {

@@ -2,9 +2,7 @@ package messages
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
-	"time"
 
 	"crdx.org/io/tool"
 )
@@ -17,24 +15,12 @@ type functionTool struct {
 	Schema tool.Schema `json:"input_schema"`
 }
 
-const cacheTTL = "1h"
-
-func (*Client) CacheLifetime() time.Duration {
-	lifetime, err := time.ParseDuration(cacheTTL)
-	if err != nil {
-		panic(fmt.Errorf("anthropic: read the cache lifetime %q: %w", cacheTTL, err))
-	}
-
-	return lifetime
-}
-
 type cacheControl struct {
 	Type string `json:"type"`
-	TTL  string `json:"ttl,omitempty"`
 }
 
 func ephemeral() *cacheControl {
-	return &cacheControl{Type: "ephemeral", TTL: cacheTTL}
+	return &cacheControl{Type: "ephemeral"}
 }
 
 var claudeCodeNames = map[string]string{

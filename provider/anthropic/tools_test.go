@@ -21,7 +21,7 @@ func TestAToolIsOfferedWithAnInputSchema(t *testing.T) {
 	}
 
 	toolsJSON := `"tools":[{"name":"weather","description":"report weather in a city",` +
-		`"cache_control":{"type":"ephemeral","ttl":"1h"},` +
+		`"cache_control":{"type":"ephemeral"},` +
 		`"input_schema":{"type":"object","properties":{"city":` +
 		`{"type":"string","description":"the city to look up"}},` +
 		`"required":["city"],"additionalProperties":false}}]`
@@ -76,7 +76,7 @@ func TestOnlyTheLastToolEndsACacheablePrefix(t *testing.T) {
 		t.Errorf("expected no breakpoint on the first tool, got %s", request.Tools[0].Cache)
 	}
 
-	if string(request.Tools[1].Cache) != `{"type":"ephemeral","ttl":"1h"}` {
+	if string(request.Tools[1].Cache) != `{"type":"ephemeral"}` {
 		t.Errorf("expected the last tool to end the prefix, got %s", request.Tools[1].Cache)
 	}
 }

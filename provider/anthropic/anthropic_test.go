@@ -588,7 +588,7 @@ func TestCacheBreakpointsAreAppliedOnTheWayOutAndNeverStored(t *testing.T) {
 		t.Errorf("expected the four breakpoints the endpoint allows, got %d in %s", got, (*bodies)[0])
 	}
 
-	if !strings.Contains((*bodies)[0], `"cache_control":{"type":"ephemeral","ttl":"1h"},"system"`) {
+	if !strings.Contains((*bodies)[0], `"cache_control":{"type":"ephemeral"},"system"`) {
 		t.Errorf("expected the conversation breakpoint to be left to the endpoint, got %s", (*bodies)[0])
 	}
 

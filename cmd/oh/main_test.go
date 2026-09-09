@@ -72,7 +72,6 @@ import (
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
-	"crdx.org/io/cmd/oh/segment/cacheTTL"
 	"crdx.org/io/cmd/oh/segment/cacheUsage"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/segment/exposedPorts"
@@ -8486,24 +8485,6 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			t,
 			activitySpinner.New(func() bool { return true }, clockAt(at.Add(190*time.Millisecond))),
 			spinnerOptions,
-			segment.Context{},
-		),
-		"cache-ttl / one hour": goldenSegmentPass(
-			t,
-			cacheTTL.New(func() time.Duration { return time.Hour }),
-			"",
-			segment.Context{},
-		),
-		"cache-ttl / five minutes": goldenSegmentPass(
-			t,
-			cacheTTL.New(func() time.Duration { return 5 * time.Minute }),
-			"",
-			segment.Context{},
-		),
-		"cache-ttl / none declared": goldenSegmentPass(
-			t,
-			cacheTTL.New(func() time.Duration { return 0 }),
-			"",
 			segment.Context{},
 		),
 		"cache-usage / nothing asked yet": goldenSegmentPass(

@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
-	"time"
+
+	"crdx.org/io/agent"
 )
 
 func assistantItem(text string) json.RawMessage {
@@ -116,18 +117,17 @@ func TestACorrectionIsSaidInTheConversationRatherThanTheSystemPrompt(t *testing.
 	}
 }
 
-func TestTheCacheLifetimeAgreesWithWhatIsAskedForOnTheWire(t *testing.T) {
-	asked := ephemeral()
-	if asked.TTL != cacheTTL {
-		t.Fatalf("the breakpoint asks for %q, want %q", asked.TTL, cacheTTL)
-	}
-
-	written, err := time.ParseDuration(asked.TTL)
+func TestTheCacheLifetimeIsLeftToTheEndpoint(t *testing.T) {
+	asked, err := json.Marshal(ephemeral())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if got := (&Client{}).CacheLifetime(); got != written {
-		t.Errorf("the client reports %s, but asks the endpoint for %s", got, written)
+	if string(asked) != `{"type":"ephemeral"}` {
+		t.Errorf("the breakpoint asks for %s, want nothing beyond an ephemeral breakpoint", asked)
+	}
+
+	if _, isReported := any(&Client{}).(agent.CacheLifetimeReporter); isReported {
+		t.Error("the client declares a cache lifetime it does not ask the endpoint for")
 	}
 }

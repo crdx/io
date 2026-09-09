@@ -11,7 +11,6 @@ import (
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
-	"crdx.org/io/cmd/oh/segment/cacheTTL"
 	"crdx.org/io/cmd/oh/segment/cacheUsage"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
 	"crdx.org/io/cmd/oh/segment/exposedPorts"
@@ -37,7 +36,6 @@ import (
 
 const (
 	activitySpinnerSegment = "activity-spinner"
-	cacheTTLSegment        = "cache-ttl"
 	cacheUsageSegment      = "cache-usage"
 	contextUsageSegment    = "context-usage"
 	modeToggleSegment      = "mode-toggle"
@@ -75,7 +73,6 @@ type Sources struct {
 	IsTurnRunning         func() bool
 	GetContextUsage       func() (int, int)
 	GetCacheUsage         func() (int, int)
-	GetCacheLife          func() time.Duration
 	GetGrantedCaps        func() caps.Set
 	GetPathGrants         func() []pathgrant.Grant
 	GetHostToSandboxPorts func() []uint16
@@ -89,7 +86,6 @@ type Sources struct {
 func NewRegistry(options Options) segment.Registry {
 	return segment.Registry{
 		activitySpinnerSegment: activitySpinner.New(options.Sources.IsTurnRunning, time.Now),
-		cacheTTLSegment:        cacheTTL.New(options.Sources.GetCacheLife),
 		cacheUsageSegment:      cacheUsage.New(options.Sources.GetCacheUsage),
 		contextUsageSegment:    contextUsage.New(options.Sources.GetContextUsage),
 		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),

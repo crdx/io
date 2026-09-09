@@ -36,12 +36,6 @@ GPT Sol 5.6 ▫▫▫▫▪▫
 ·✦
 === activity-spinner / running second frame ===
 ·✦
-=== cache-ttl / five minutes ===
-5m ttl
-=== cache-ttl / none declared ===
-
-=== cache-ttl / one hour ===
-1h ttl
 === cache-usage / every token read ===
 100%
 === cache-usage / mostly read ===
