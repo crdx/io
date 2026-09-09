@@ -33,6 +33,7 @@ type Config struct {
 	Input    Input                          `toml:"input"`
 	Model    Model                          `toml:"model"`
 	Provider Provider                       `toml:"provider"`
+	Ports    Ports                          `toml:"ports"`
 	Snippets map[string]snippets.Definition `toml:"snippets"`
 	Skills   SkillPaths                     `toml:"skills"`
 	Sandbox  sandbox                        `toml:"sandbox"`
@@ -64,6 +65,17 @@ type Provider struct {
 
 type Ollama struct {
 	Host string `toml:"host"`
+}
+
+type Ports struct {
+	Hostname string `toml:"hostname"`
+}
+
+func (self Ports) GetHostname(sessionName string, fallbackHostname string) string {
+	if self.Hostname == "" {
+		return fallbackHostname
+	}
+	return strings.ReplaceAll(self.Hostname, "{session}", sessionName)
 }
 
 type Ui struct {
@@ -202,7 +214,7 @@ func (self Config) ValidateConsumed() error {
 
 	slices.Sort(namedKeys)
 
-	return fmt.Errorf("%s: unknown: %s", self.filePath, strings.Join(namedKeys, ", "))
+	return fmt.Errorf("%s: nothing is done with: %s", self.filePath, strings.Join(namedKeys, ", "))
 }
 
 func (self Config) metaFor(position segment.Position) *toml.MetaData {
@@ -285,8 +297,13 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 		}
 	}
 	config.Provider.Ollama.Host = strings.TrimSpace(config.Provider.Ollama.Host)
-	if meta.IsDefined("provider", "ollama", "host") && config.Provider.Ollama.Host == "" {
-		return config, fmt.Errorf("%s: provider.ollama.host is empty", displayPath)
+	config.Ports.Hostname = strings.TrimSpace(config.Ports.Hostname)
+	if err := validateHostSettings(
+		config.Provider.Ollama.Host,
+		meta.IsDefined("provider", "ollama", "host"),
+		config.Ports.Hostname,
+	); err != nil {
+		return config, fmt.Errorf("%s: %w", displayPath, err)
 	}
 	config.Input.Continue = strings.TrimSpace(config.Input.Continue)
 	if meta.IsDefined("input", "continue") && config.Input.Continue == "" {
@@ -364,6 +381,16 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 	}
 
 	return config, nil
+}
+
+func validateHostSettings(ollamaHost string, hasOllamaHost bool, hostname string) error {
+	if hasOllamaHost && ollamaHost == "" {
+		return errors.New("provider.ollama.host is empty")
+	}
+	if hostname != "" && strings.Count(hostname, "{session}") != 1 {
+		return errors.New("ports.hostname must contain {session} exactly once")
+	}
+	return nil
 }
 
 func validateHostLoopbackPorts(ports []uint16) error {

@@ -10482,6 +10482,7 @@ type sessionGoldenScenario struct {
 	IsFast             bool                `toml:"fast"`
 	IdleAfter          string              `toml:"idle-after"`
 	Grouping           output.Grouping     `toml:"grouping"`
+	Hostname           string              `toml:"hostname"`
 	FirstTokenError    string              `toml:"first-token-error"`
 	CredentialRefresh  string              `toml:"credential-refresh"`
 	ToggleBeforeFirst  string              `toml:"toggle-before-first"`
@@ -10708,11 +10709,13 @@ func newSessionGoldenProvider(
 
 const goldenSessionName = "brave-otter"
 
-func newSessionGoldenPorts(sessionName string) *portgrant.HostToSandbox {
+func newSessionGoldenPorts(sessionName string, hostnameTemplate string) *portgrant.HostToSandbox {
+	address := portgrant.AddressFor(sessionName)
+	hostname := config.Ports{Hostname: hostnameTemplate}.GetHostname(sessionName, address)
 	return portgrant.NewHostToSandbox(portgrant.HostToSandboxExposer{
 		Expose: func(uint16) error { return nil },
 		Hide:   func(uint16) error { return nil },
-	}, portgrant.AddressFor(sessionName), nil)
+	}, hostname, nil)
 }
 
 func newSessionGoldenTools(
@@ -11239,7 +11242,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	if err != nil {
 		t.Fatal(err)
 	}
-	goldenPorts := newSessionGoldenPorts(goldenSessionName)
+	goldenPorts := newSessionGoldenPorts(goldenSessionName, scenario.Hostname)
 	firstAssistant := agent.New(
 		sessionGoldenSystemPrompt,
 		sessionGoldenProviderFor(

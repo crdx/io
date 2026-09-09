@@ -86,6 +86,45 @@ func TestConfiguredOllamaHostCannotBeEmpty(t *testing.T) {
 	}
 }
 
+func TestConfiguredHostnameNamesTheSession(t *testing.T) {
+	settings := configFrom(t, `
+		[ports]
+		hostname = "  preview-{session}.agent  "
+	`)
+
+	if got := settings.Ports.GetHostname("brave-otter", "127.27.192.223"); got != "preview-brave-otter.agent" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestTheDefaultHostnameIsTheSessionAddress(t *testing.T) {
+	settings := configFrom(t, "")
+
+	if got := settings.Ports.GetHostname("brave-otter", "127.27.192.223"); got != "127.27.192.223" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestConfiguredHostnameNeedsExactlyOneSessionPlaceholder(t *testing.T) {
+	for name, hostname := range map[string]string{
+		"missing":  "preview.agent",
+		"repeated": "{session}.{session}.agent",
+	} {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "config.toml")
+			contents := "[ports]\nhostname = \"" + hostname + "\"\n"
+			if err := writeConfigFile(path, contents); err != nil {
+				t.Fatal(err)
+			}
+
+			_, err := Load(path)
+			if err == nil || !strings.Contains(err.Error(), "ports.hostname must contain {session} exactly once") {
+				t.Errorf("got error %v", err)
+			}
+		})
+	}
+}
+
 func TestConfiguredEditorAcceptsArguments(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
 	if err := writeConfigFile(path, "[editor]\ncommand = [\"subl\", \"--wait\"]\n"); err != nil {

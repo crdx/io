@@ -526,6 +526,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 
 	hostToSandboxAddress := portgrant.AddressFor(log.Name())
+	hostToSandboxHostname := settings.Ports.GetHostname(log.Name(), hostToSandboxAddress)
 	hostToSandboxExposer := newHostToSandboxExposer(ctx, keeperProcess, hostToSandboxAddress)
 	var hostToSandbox *portgrant.HostToSandbox
 	sandboxToHostExposer := newSandboxToHostExposer(ctx, keeperProcess)
@@ -551,13 +552,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		}
 	}
 
-	hostToSandbox = portgrant.NewHostToSandbox(hostToSandboxExposer, hostToSandboxAddress, hostLoopback)
+	hostToSandbox = portgrant.NewHostToSandbox(hostToSandboxExposer, hostToSandboxHostname, hostLoopback)
 	hostToSandbox.SetSandboxToHostPorts(sandboxToHost.GetCurrent)
 	var hostToSandboxRestoreResult portgrant.HostToSandboxRestoreResult
 	if resumedSession != nil {
 		if recordedPorts, found := portgrant.LastRecordedHostToSandbox(resumedSession.Events); found {
 			hostToSandbox, hostToSandboxRestoreResult = portgrant.NewRestoredHostToSandbox(
-				hostToSandboxExposer, hostToSandboxAddress, hostLoopback, recordedPorts,
+				hostToSandboxExposer, hostToSandboxHostname, hostLoopback, recordedPorts,
 			)
 			hostToSandbox.SetSandboxToHostPorts(sandboxToHost.GetCurrent)
 		}

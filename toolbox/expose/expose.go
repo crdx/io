@@ -97,7 +97,8 @@ func run(ports Ports, args Args) (string, tool.ToolCallMetrics, error) {
 		}
 
 		return "Port " + strconv.Itoa(args.Port) + " is exposed at " + address +
-			", which the user can open on their own machine.", tool.ToolCallMetrics{}, nil
+			". Give the user this URL when referring to the service; use localhost inside the sandbox " +
+			"for your own checks.", tool.ToolCallMetrics{}, nil
 	case actionRemove:
 		if err := ports.Hide(port); err != nil {
 			return "", tool.ToolCallMetrics{}, err

@@ -23,13 +23,13 @@ expose: 8080 [toolu_1]
 ## Host → sandbox · 1 sandbox port · changed port 8080 · +0s
 
 ```
-Exposed sandbox port 8080 to the host at http://127.27.192.223:8080.
+Exposed sandbox port 8080 to the host at http://brave-otter.agent:8080.
 ```
 
 ## Tool calls · +0s
 
 ```
-expose [ok, 1 line, 159B, toolu_1]
+expose [ok, 1 line, 162B, toolu_1]
 ```
 
 ## Assistant · +0s

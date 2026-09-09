@@ -22,6 +22,9 @@ round_robin = []
 [provider.ollama]
 host = ""
 
+[ports]
+hostname = ""
+
 [skills]
 include = []
 exclude = []
