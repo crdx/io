@@ -75,6 +75,7 @@ func (self *Agent) Load(items []json.RawMessage) error {
 	}
 	state.Load(cloneState(items))
 	self.state = cloneState(items)
+	self.wasReopened = self.wasReopened || len(items) > 0
 	return nil
 }
 
@@ -184,6 +185,7 @@ const defaultCacheLifetime = 5 * time.Minute
 type CacheCause string
 
 const (
+	CacheReopened CacheCause = "reopened"
 	CacheExpired  CacheCause = "expired"
 	CacheRebuilt  CacheCause = "rebuilt"
 	CacheSettling CacheCause = "settling"
@@ -207,6 +209,8 @@ func CacheRebuildNotice(event Event) string {
 	gap := util.CompactDuration(event.Took)
 
 	switch CacheCause(event.Name) {
+	case CacheReopened:
+		return fmt.Sprintf("The prompt cache had gone by the time this conversation was reopened: %s tokens were sent again.", tokens)
 	case CacheExpired:
 		return fmt.Sprintf("The prompt cache had expired: %s tokens were sent again after %s.", tokens, gap)
 	case CacheSettling:
@@ -251,20 +255,36 @@ func (self *Agent) readCache(usage Usage, at time.Time) (Event, bool) {
 	previous := self.cache
 	self.cache = cacheReading{readTokens: usage.Cache.ReadTokens, at: util.WallClock(at), wasRead: true}
 
-	if !previous.wasRead || usage.Cache.WriteTokens == 0 || usage.Cache.ReadTokens >= previous.readTokens {
+	if usage.Cache.WriteTokens == 0 {
+		return Event{}, false
+	}
+
+	if !previous.wasRead {
+		if !self.wasReopened || usage.Cache.WriteTokens <= usage.Cache.ReadTokens {
+			return Event{}, false
+		}
+
+		return cacheRebuild(CacheReopened, 0, usage), true
+	}
+
+	if usage.Cache.ReadTokens >= previous.readTokens {
 		return Event{}, false
 	}
 
 	gap := util.WallClock(at).Sub(previous.at)
 
+	return cacheRebuild(cacheCause(gap, self.cacheLifetime, previous.readTokens, usage.Cache.WriteTokens), gap, usage), true
+}
+
+func cacheRebuild(cause CacheCause, gap time.Duration, usage Usage) Event {
 	return Event{
 		Kind: CacheRebuildEvent,
-		Name: string(cacheCause(gap, self.cacheLifetime, previous.readTokens, usage.Cache.WriteTokens)),
+		Name: string(cause),
 		Took: gap,
 		Usage: &Usage{
 			Cache: &CacheUsage{ReadTokens: usage.Cache.ReadTokens, WriteTokens: usage.Cache.WriteTokens},
 		},
-	}, true
+	}
 }
 
 func (self *Agent) Stream(ctx context.Context, message string, interjections *Interjections) iter.Seq2[Update, error] {

@@ -1197,3 +1197,53 @@ func TestTheCacheLifetimeIsTheOneTheProviderAsksFor(t *testing.T) {
 		})
 	}
 }
+
+func TestReopeningAConversationSaysWhetherItsCacheSurvived(t *testing.T) {
+	for name, test := range map[string]struct {
+		reply   agent.Usage
+		isFresh bool
+		want    []agent.CacheCause
+	}{
+		"a cache that had gone": {
+			reply: cachedAs(0, 280_000),
+			want:  []agent.CacheCause{agent.CacheReopened},
+		},
+		"a cache that held": {
+			reply: cachedAs(280_000, 400),
+			want:  nil,
+		},
+		"a session opened rather than reopened": {
+			reply:   cachedAs(0, 280_000),
+			isFresh: true,
+			want:    nil,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assistant := agent.New("", &usageProvider{replies: []agent.Usage{test.reply}}, nil)
+			if !test.isFresh {
+				if err := assistant.Load([]json.RawMessage{json.RawMessage(`{"role":"user"}`)}); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			var causes []agent.CacheCause
+			for update, err := range assistant.Stream(t.Context(), "go on", nil) {
+				if err != nil {
+					t.Fatal(err)
+				}
+				if update.Event != nil && update.Event.Kind == agent.CacheRebuildEvent {
+					causes = append(causes, agent.CacheCause(update.Event.Name))
+				}
+			}
+
+			if len(causes) != len(test.want) {
+				t.Fatalf("got %v, want %v", causes, test.want)
+			}
+			for at, cause := range causes {
+				if cause != test.want[at] {
+					t.Errorf("got %q, want %q", cause, test.want[at])
+				}
+			}
+		})
+	}
+}

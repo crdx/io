@@ -256,6 +256,7 @@ type Agent struct {
 	state            []json.RawMessage
 	cache            cacheReading
 	cacheLifetime    time.Duration
+	wasReopened      bool
 	now              func() time.Time
 
 	retryWaitsPassAtOnce bool

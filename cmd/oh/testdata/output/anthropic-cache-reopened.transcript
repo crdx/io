@@ -1,0 +1,34 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## Mode · rxwgs · +0s
+
+## User · +0s
+
+say something worth coming back to
+
+## Assistant · +0s
+
+Something worth coming back to.
+
+## User · +0s
+
+I am back a day later
+
+## Assistant · +0s
+
+Welcome back.
+
+## Cache rebuild · +0s
+
+```
+The prompt cache had gone by the time this conversation was reopened: 280K tokens were sent again.
+```
+
