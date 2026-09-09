@@ -10,4 +10,4 @@
 \r
 \e[?2026h\e[?25l\r\e[KWelcome back.\e[?25h\e[?2026l\r
 \r
-\e[38;2;207;173;0mThe prompt cache had gone by the time this conversation was reopened: 280K tokens were sent again.\e[0m\r
+\e[38;2;207;173;0mThe prompt cache was gone by the time this conversation was reopened: 280K tokens were sent again.\e[0m\r

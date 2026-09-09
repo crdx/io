@@ -212,11 +212,11 @@ func CacheRebuildNotice(event Event) string {
 
 	switch CacheCause(event.Name) {
 	case CacheReopened:
-		return fmt.Sprintf("The prompt cache had gone by the time this conversation was reopened: %s tokens were sent again.", tokens)
+		return fmt.Sprintf("The prompt cache was gone by the time this conversation was reopened: %s tokens were sent again.", tokens)
 	case CacheExpired:
-		return fmt.Sprintf("The prompt cache had expired: %s tokens were sent again after %s.", tokens, gap)
+		return fmt.Sprintf("The prompt cache expired: %s tokens were sent again after %s.", tokens, gap)
 	case CacheSettling:
-		return fmt.Sprintf("The prompt cache had not settled: %s tokens were sent again %s after the last request.", tokens, gap)
+		return fmt.Sprintf("The prompt cache did not settle: %s tokens were sent again %s after the last request.", tokens, gap)
 	case CacheRebuilt:
 		return fmt.Sprintf("The prompt cache was rebuilt: %s tokens were sent again %s after the last request.", tokens, gap)
 	}
