@@ -55,7 +55,9 @@ var (
 
 		{{ scratchRules .TmpDir .Yolo }}
 		- If you encounter a read-only workspace, follow this process:
-			- Copy the current workspace into your scratch space
+			- Clone it into your scratch space with: git clone --shared <workspace> <destination>
+			- Bring uncommitted work across with: git -C <workspace> diff HEAD | git -C <destination> apply
+			- Copy untracked files you need by hand, and use cp -r only where the workspace is not a repository
 			- Do the work there, then produce a *.patch file the user can apply to their repo
 			- Tell the user to apply it with: cd <workspace> && git apply <user's path to patch>
 
