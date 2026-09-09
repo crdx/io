@@ -70,6 +70,10 @@ func GetShellHomeDir() string {
 	return GetStateDir("home")
 }
 
+func GetFarmDir() string {
+	return GetStateDir("farm")
+}
+
 func GetTmpDir(name string) string {
-	return GetStateDir("farm", name)
+	return filepath.Join(GetFarmDir(), name)
 }

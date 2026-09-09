@@ -1,0 +1,9 @@
+ohctl gc — remove the caches sessions leave behind
+
+Usage:
+    ohctl gc [options]
+
+Options:
+    -a, --aggressive    Look through the whole of each directory rather than only its root
+    -n, --dry-run       Report what would be removed without removing it
+    -h, --help          Show this help

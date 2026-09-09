@@ -1,0 +1,3 @@
+=== screen ===
+[38;2;150;152;150m0 caches, 0B reclaimed[0m
+=== failure ===

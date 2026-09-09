@@ -7,6 +7,7 @@ import (
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/ohctl/analyse"
 	"crdx.org/io/cmd/ohctl/complete"
+	"crdx.org/io/cmd/ohctl/gc"
 	"crdx.org/io/cmd/ohctl/migrate"
 	"crdx.org/io/cmd/ohctl/regenerate"
 	"crdx.org/io/cmd/ohctl/sessions"
@@ -19,12 +20,14 @@ Usage:
     ohctl analyse [options] [<session>...]
     ohctl regenerate [<session>...]
     ohctl migrate [options] [<session>...]
+    ohctl gc [options]
 
 Commands:
     sessions      List the stored sessions
     analyse       Analyse stored sessions
     regenerate    Write stored transcripts again from their journals
     migrate       Bring configuration and stored sessions up to their current formats
+    gc            Remove the caches sessions leave behind
 `
 
 func main() {
@@ -49,6 +52,8 @@ func main() {
 		err = regenerate.Run()
 	case "migrate":
 		err = migrate.Run()
+	case "gc":
+		err = gc.Run()
 	default:
 		fmt.Print(usage)
 		os.Exit(2)
