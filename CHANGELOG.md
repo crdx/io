@@ -6,20 +6,20 @@
 
 A bunch of stuff.
 
-Wire Protocols:
+#### Wire Protocols
 
 - Anthropic Messages
 - OpenAI Chat Completions
 - OpenAI Responses
 
-Providers:
+#### Providers
 
 - Anthropic (Claude subscription)
 - Codex (ChatGPT subscription)
 - OpenCode Go
 - Ollama (local, network)
 
-Models:
+#### Models
 
 - Listing with `-l`
 - Caching, refreshed when stale
@@ -29,7 +29,7 @@ Models:
 - Effort levels
 - Fast mode
 
-Tools:
+#### Tools
 
 - `job`: run background commands
 - `notify`: send desktop notifications
@@ -43,7 +43,7 @@ Tools:
 - Batched concurrent calls
 - Stale-file edits refused
 
-Sandbox:
+#### Sandbox
 
 - Namespaces, Landlock, Seccomp
 - Virtual `/proc` and private `/tmp`
@@ -60,7 +60,7 @@ Sandbox:
 - Offline Go module proxy
 - Obviously, `--yolo` for the daring
 
-Capabilities:
+#### Capabilities
 
 - Read always granted
 - Shell execution opt-in
@@ -70,7 +70,7 @@ Capabilities:
 - Mid-session toggling with ctrl+x
 - Recorded in the session, restored on resume
 
-Interface:
+#### Interface
 
 - Configurable input block segments:
     - Model
@@ -107,13 +107,13 @@ Interface:
 - Pictures drawn with kitty graphics
 - Terminal title management
 
-TUIs:
+#### TUIs
 
 - Model picker
 - Session picker
 - Onboarding wizard
 
-Input:
+#### Input
 
 - Multi-line editing
 - Scrollable input
@@ -121,7 +121,7 @@ Input:
 - Pasted text handled sanely
 - Pasted images handled
 
-Commands:
+#### Commands
 
 - `/conf`: edit the configuration
 - `/copy`: copy a target
@@ -141,7 +141,7 @@ Commands:
 - Unknown commands rejected
 - Tab completion
 
-Agent Turns:
+#### Agent Turns
 
 - Message queueing
 - Mid-turn interjection
@@ -157,7 +157,7 @@ Agent Turns:
 - Notifications on turn finish
 - Notifications on session death
 
-Sessions:
+#### Sessions
 
 - Versioned journal
 - Migrations, locking
@@ -177,7 +177,7 @@ Sessions:
 - HTTP wire logs
 - Transcript regeneration
 
-Configuration:
+#### Configuration
 
 - Fully XDG compliant
 - Local `oh.toml` overrides (lists merged)
@@ -188,7 +188,7 @@ Configuration:
 - Live reloading
 - Skills, skill include and exclude patterns
 
-Command line:
+#### Command Line
 
 - Session resumption with `-r`
 - Model selection with `-m`
@@ -197,24 +197,28 @@ Command line:
 - Initial files with `--add`
 - Piped stdin joined with arguments
 - OAuth login with `-L`
-- Subscription usage reporting
-- Maintenance commands:
-    - `ohctl sessions`
-    - `ohctl analyse`
-    - `ohctl regenerate`
-    - `ohctl migrate`
-    - `ohctl gc`
+- Sub usage reporting
 
-Development:
+#### Maintenance
+
+- `ohctl sessions`
+- `ohctl analyse`
+- `ohctl regenerate`
+- `ohctl migrate`
+- `ohctl gc`
+
+#### Development
 
 - Replay-based test suite
 - Terminal goldens
-- Custom linters:
-    - `abbreviation`
-    - `adjective`
-    - `boolname`
-    - `receivername`
-    - `stdstream`
+
+#### Linters
+
+- `abbreviation`
+- `adjective`
+- `boolname`
+- `receivername`
+- `stdstream`
 
 ## [0.1.0] - 2026-08-17
 
