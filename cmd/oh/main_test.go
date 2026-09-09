@@ -6443,15 +6443,20 @@ func TestTheBarConfiguredByDefaultDrawsWhatItDrewBefore(t *testing.T) {
 }
 
 func TestTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
-	line := func(sessionName string, columns int, isTextSizingSupported bool) string {
-		event := startup.NewEvent(1500*time.Microsecond, startup.Info{
+	bannerInfo := func(sessionName string, localConfig *startup.LocalConfig) startup.Info {
+		return startup.Info{
 			Session:       sessionName,
 			PromptBytes:   740 + 3*1024,
 			ProjectSkills: 3,
 			GlobalSkills:  1,
 			Snippets:      2,
 			ToolBytes:     614,
-		})
+			LocalConfig:   localConfig,
+		}
+	}
+
+	line := func(sessionName string, columns int, isTextSizingSupported bool) string {
+		event := startup.NewEvent(1500*time.Microsecond, bannerInfo(sessionName, nil))
 		return startup.RenderEvent(event, columns, isTextSizingSupported)
 	}
 
@@ -6502,30 +6507,48 @@ func TestTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 		},
 	})
 
-	terminalStream := func(columns int) string {
+	terminalStream := func(columns int, localConfig *startup.LocalConfig) string {
 		var stream strings.Builder
 		screen := output.NewTerminalOfSize(&stream, columns, replayLines)
-		screen.Line(line("brave-otter", columns, true))
+		event := startup.NewEvent(1500*time.Microsecond, bannerInfo("brave-otter", localConfig))
+		screen.Line(startup.RenderEvent(event, columns, true))
 		screen.Line("Following output.")
 		screen.End()
 		return stream.String()
 	}
-	compareWithGolden(t, "startup-sized-output", ".ansi", map[string]func() string{
-		"wide then following output":            func() string { return terminalStream(replayColumns) },
-		"wrapped details then following output": func() string { return terminalStream(minimumColumns) },
-		"fallback then following output":        func() string { return terminalStream(minimumColumns - 1) },
-	})
-	compareWithGolden(t, "startup-sized-output", ".screen", map[string]func() string{
-		"wide then following output": func() string {
-			return shown(t, terminalStream(replayColumns), replayColumns)
+
+	wordyConfig := &startup.LocalConfig{Name: "oh.toml", Settings: []string{
+		"caps.default",
+		"editor.command",
+		"input.continue",
+		"model.round_robin",
+		"ports.hostname",
+		"sandbox.host_loopback",
+		"skills.include",
+		"ui.streaming",
+	}}
+
+	streamPasses := map[string]func() string{
+		"wide then following output":            func() string { return terminalStream(replayColumns, nil) },
+		"wrapped details then following output": func() string { return terminalStream(minimumColumns, nil) },
+		"fallback then following output":        func() string { return terminalStream(minimumColumns-1, nil) },
+		"wrapped local config then following output": func() string {
+			return terminalStream(replayColumns, wordyConfig)
 		},
-		"wrapped details then following output": func() string {
-			return shown(t, terminalStream(minimumColumns), minimumColumns)
-		},
-		"fallback then following output": func() string {
-			return shown(t, terminalStream(minimumColumns-1), minimumColumns-1)
-		},
-	})
+	}
+	compareWithGolden(t, "startup-sized-output", ".ansi", streamPasses)
+
+	streamColumns := map[string]int{
+		"wide then following output":                 replayColumns,
+		"wrapped details then following output":      minimumColumns,
+		"fallback then following output":             minimumColumns - 1,
+		"wrapped local config then following output": replayColumns,
+	}
+	shownStreamPasses := map[string]func() string{}
+	for name, pass := range streamPasses {
+		shownStreamPasses[name] = func() string { return shown(t, pass(), streamColumns[name]) }
+	}
+	compareWithGolden(t, "startup-sized-output", ".screen", shownStreamPasses)
 }
 
 func TestLocalConfigsDrawMegathoroughly(t *testing.T) {
@@ -7985,9 +8008,19 @@ func (self *screen) operatingSystemCommand(stream string, at int) int {
 		scale = prefixedNumber(option, "s=", scale)
 		declaredWidth = prefixedNumber(option, "w=", declaredWidth)
 	}
-	self.put(parts[2], scale*declaredWidth)
+
+	self.putSized(parts[2], scale*declaredWidth)
 
 	return end
+}
+
+func (self *screen) putSized(grapheme string, cells int) {
+	drawnCells := min(width.Of(grapheme), cells)
+	self.put(grapheme, drawnCells)
+
+	for range cells - drawnCells {
+		self.put(" ", 1)
+	}
 }
 
 func (self *screen) control(stream string, at int) int {

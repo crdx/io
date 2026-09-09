@@ -8,6 +8,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/style"
+	"crdx.org/io/cmd/oh/width"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/session"
 )
@@ -74,14 +75,17 @@ func RenderBanner(elapsedTime time.Duration, wasResumed bool, info Info, columns
 
 	emoji := session.Emoji(info.Session)
 	heading := renderHeading(elapsedTime, info, false)
-	headingRoom := columns - bannerLeftPadding - sizedEmojiCells - bannerGap
-	if emoji == "" || !isTextSizingSupported || style.Width(heading) > headingRoom {
+	bannerRoom := columns - bannerLeftPadding - sizedEmojiCells - bannerGap
+	if emoji == "" || !isTextSizingSupported || style.Width(heading) > bannerRoom {
 		return renderSentence(elapsedTime, info)
 	}
 
 	leftPadding := strings.Repeat(" ", bannerLeftPadding)
 	indent := "\x1b[" + strconv.Itoa(bannerLeftPadding+sizedEmojiCells) + "C" + strings.Repeat(" ", bannerGap)
-	return leftPadding + sizedEmoji(emoji) + style.Subtle(strings.Repeat(" ", bannerGap)) + heading + "\n" + indent + renderDetails(info, "", "")
+	details := width.Wrap(renderDetails(info, "", ""), bannerRoom)
+
+	return leftPadding + sizedEmoji(emoji) + style.Subtle(strings.Repeat(" ", bannerGap)) + heading +
+		"\n" + indent + strings.Join(details, "\n"+indent)
 }
 
 func renderSentence(elapsedTime time.Duration, info Info) string {

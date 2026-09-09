@@ -112,11 +112,11 @@ oml: (empty)
 === empty local config / ordinary / wide ===
 Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: (empty).
 === empty local config / sized / narrow ===
- 🦦  Agent brave-otter ready in 2ms
-       4 skills ⧸ 2 snippets ⧸ ~1.6Kt co
-ntext ⧸ oh.toml: (empty)
+ 🦦    Agent brave-otter ready in 2ms
+       4 skills ⧸ 2 snippets ⧸ ~1.6Kt
+       context ⧸ oh.toml: (empty)
 === empty local config / sized / wide ===
- 🦦  Agent brave-otter ready in 2ms
+ 🦦    Agent brave-otter ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: (empty)
 === many local settings / ordinary / narrow ===
 Agent brave-otter 🦦 ready in 2ms with 4
@@ -547,22 +547,27 @@ left, bar.top.center, caps.default, editor.command, input.continue, model.round_
 e, provider.ollama.host, sandbox.host_loopback, sandbox.read, sandbox.write, skills.exclude, skills.
 include, snippets.review, tool.output, ui.grouping, ui.reasoning, ui.streaming.
 === many local settings / sized / narrow ===
- 🦦  Agent brave-otter ready in 2ms
-       4 skills ⧸ 2 snippets ⧸ ~1.6Kt co
-ntext ⧸ oh.toml: bar.bottom.left, bar.to
-p.center, caps.default, editor.command,
-input.continue, model.round_robin, ports
-.hostname, provider.ollama.host, sandbox
-.host_loopback, sandbox.read, sandbox.wr
-ite, skills.exclude, skills.include, sni
-ppets.review, tool.output, ui.grouping,
-ui.reasoning, ui.streaming
+ 🦦    Agent brave-otter ready in 2ms
+       4 skills ⧸ 2 snippets ⧸ ~1.6Kt
+       context ⧸ oh.toml:
+       bar.bottom.left, bar.top.center,
+       caps.default, editor.command,
+       input.continue,
+       model.round_robin,
+       ports.hostname,
+       provider.ollama.host,
+       sandbox.host_loopback,
+       sandbox.read, sandbox.write,
+       skills.exclude, skills.include,
+       snippets.review, tool.output,
+       ui.grouping, ui.reasoning,
+       ui.streaming
 === many local settings / sized / wide ===
- 🦦  Agent brave-otter ready in 2ms
-       4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: bar.bottom.left, bar.top.center, caps.defau
-lt, editor.command, input.continue, model.round_robin, ports.hostname, provider.ollama.host, sandbox
-.host_loopback, sandbox.read, sandbox.write, skills.exclude, skills.include, snippets.review, tool.o
-utput, ui.grouping, ui.reasoning, ui.streaming
+ 🦦    Agent brave-otter ready in 2ms
+       4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: bar.bottom.left, bar.top.center,
+       caps.default, editor.command, input.continue, model.round_robin, ports.hostname,
+       provider.ollama.host, sandbox.host_loopback, sandbox.read, sandbox.write, skills.exclude,
+       skills.include, snippets.review, tool.output, ui.grouping, ui.reasoning, ui.streaming
 === mixed global and local settings / ordinary / narrow ===
 Agent brave-otter 🦦 ready in 2ms with 4
  skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸
@@ -721,14 +726,15 @@ iew.
 Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: input.conti
 nue, sandbox.write, snippets.review.
 === mixed global and local settings / sized / narrow ===
- 🦦  Agent brave-otter ready in 2ms
-       4 skills ⧸ 2 snippets ⧸ ~1.6Kt co
-ntext ⧸ oh.toml: input.continue, sandbox
-.write, snippets.review
+ 🦦    Agent brave-otter ready in 2ms
+       4 skills ⧸ 2 snippets ⧸ ~1.6Kt
+       context ⧸ oh.toml:
+       input.continue, sandbox.write,
+       snippets.review
 === mixed global and local settings / sized / wide ===
- 🦦  Agent brave-otter ready in 2ms
-       4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: input.continue, sandbox.write, snippets.rev
-iew
+ 🦦    Agent brave-otter ready in 2ms
+       4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: input.continue, sandbox.write,
+       snippets.review
 === no local config / ordinary / narrow ===
 Agent brave-otter 🦦 ready in 2ms with 4
  skills ⧸ 2 snippets ⧸ ~1.6Kt context.
@@ -821,11 +827,11 @@ ntext.
 === no local config / ordinary / wide ===
 Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context.
 === no local config / sized / narrow ===
- 🦦  Agent brave-otter ready in 2ms
-       4 skills ⧸ 2 snippets ⧸ ~1.6Kt co
-ntext
+ 🦦    Agent brave-otter ready in 2ms
+       4 skills ⧸ 2 snippets ⧸ ~1.6Kt
+       context
 === no local config / sized / wide ===
- 🦦  Agent brave-otter ready in 2ms
+ 🦦    Agent brave-otter ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt context
 === one local setting / ordinary / narrow ===
 Agent brave-otter 🦦 ready in 2ms with 4
@@ -947,9 +953,9 @@ fault.
 Agent brave-otter 🦦 ready in 2ms with 4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: caps.defaul
 t.
 === one local setting / sized / narrow ===
- 🦦  Agent brave-otter ready in 2ms
-       4 skills ⧸ 2 snippets ⧸ ~1.6Kt co
-ntext ⧸ oh.toml: caps.default
+ 🦦    Agent brave-otter ready in 2ms
+       4 skills ⧸ 2 snippets ⧸ ~1.6Kt
+       context ⧸ oh.toml: caps.default
 === one local setting / sized / wide ===
- 🦦  Agent brave-otter ready in 2ms
+ 🦦    Agent brave-otter ready in 2ms
        4 skills ⧸ 2 snippets ⧸ ~1.6Kt context ⧸ oh.toml: caps.default
