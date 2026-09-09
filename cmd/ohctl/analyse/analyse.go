@@ -147,22 +147,28 @@ func selectNames(directory string, requestedNames []string) ([]string, error) {
 		return nil, err
 	}
 
-	available := make(map[string]bool, len(entries))
+	isArchived := make(map[string]bool, len(entries))
 	for _, entry := range entries {
-		available[entry.Name] = true
+		isArchived[entry.Name] = entry.IsArchived
 	}
 
 	if len(requestedNames) == 0 {
 		names := make([]string, 0, len(entries))
 		for _, entry := range entries {
+			if entry.IsArchived {
+				continue
+			}
 			names = append(names, entry.Name)
 		}
 		return names, nil
 	}
 
 	for _, name := range requestedNames {
-		if !available[name] {
+		if _, exists := isArchived[name]; !exists {
 			return nil, fmt.Errorf("there is no stored session named %q", name)
+		}
+		if isArchived[name] {
+			return nil, fmt.Errorf("the session %q is archived", name)
 		}
 	}
 

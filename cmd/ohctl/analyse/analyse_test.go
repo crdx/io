@@ -13,6 +13,8 @@ import (
 	"crdx.org/io/session"
 )
 
+const journalProvider = "codex"
+
 var updateGoldens = flag.Bool("update", false, "write what was drawn back to the golden files")
 
 func TestCacheReportsAreReadFromEverySupportedWireShape(t *testing.T) {
@@ -60,7 +62,7 @@ func TestSessionsWithoutWireUsageDoNotAffectTheAnalysis(t *testing.T) {
 		"# provider: codex",
 		`data: {"type":"response.completed","response":{"usage":{"input_tokens":9000,"input_tokens_details":{"cached_tokens":0}}}}`,
 	}, "\n"))
-	writeJournal(t, directory, "without-usage", "codex")
+	writeJournal(t, directory, "without-usage")
 
 	analysis, err := analyseSessions(directory, []string{"with-usage", "without-usage"})
 	if err != nil {
@@ -115,7 +117,6 @@ func TestCompleteJournalUsageAvoidsTheWireTranscript(t *testing.T) {
 		t,
 		directory,
 		"journal-usage",
-		"codex",
 		`{"kind":"event","time":"2026-09-01T00:00:01Z","event":{"kind":"model_message","text":"hello","usage":{"input_tokens":9000,"cache":{"read_tokens":8000}}}}`,
 	)
 
@@ -213,6 +214,28 @@ func TestTheJSONAnalysisMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "analysis.json", output.String())
 }
 
+func TestArchivedSessionsAreNotAnalysed(t *testing.T) {
+	directory := t.TempDir()
+	writeJournal(t, directory, "quiet-otter")
+	writeJournal(t, directory, "packed-otter")
+	if err := session.Archive(directory, "packed-otter"); err != nil {
+		t.Fatal(err)
+	}
+
+	names, err := selectNames(directory, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(names, []string{"quiet-otter"}) {
+		t.Errorf("got names %#v, want only the stored session", names)
+	}
+
+	if _, err := selectNames(directory, []string{"packed-otter"}); err == nil ||
+		!strings.Contains(err.Error(), "archived") {
+		t.Errorf("got error %v, want an archived session refusal", err)
+	}
+}
+
 func goldenAnalysis() Analysis {
 	return Analysis{PromptCache: PromptCacheAnalysis{
 		Providers: []CacheStatistics{
@@ -254,14 +277,14 @@ func goldenAnalysis() Analysis {
 
 func writeTranscript(t *testing.T, directory string, name string, content string) {
 	t.Helper()
-	writeJournal(t, directory, name, "codex")
+	writeJournal(t, directory, name)
 	path := filepath.Join(directory, name, wireTranscriptName)
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func writeJournal(t *testing.T, directory string, name string, provider string, events ...string) {
+func writeJournal(t *testing.T, directory string, name string, events ...string) {
 	t.Helper()
 	path := filepath.Join(directory, name, "session.jsonl")
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
@@ -271,7 +294,7 @@ func writeJournal(t *testing.T, directory string, name string, provider string, 
 		`{"kind":"head","time":"2026-09-01T00:00:00Z","version":%d,"name":%q,"meta":{"provider":%q}}`,
 		session.JournalFormat,
 		name,
-		provider,
+		journalProvider,
 	)
 	content := strings.Join(append([]string{head}, events...), "\n") + "\n"
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
