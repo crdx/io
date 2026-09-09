@@ -24,13 +24,19 @@ func Wait(run func()) {
 	startedAt = startedAt.Add(time.Since(waitedFrom))
 }
 
+type LocalConfig struct {
+	Name     string   `json:"name,omitempty"`
+	Settings []string `json:"settings,omitempty"`
+}
+
 type Info struct {
-	Session       string `json:"session,omitempty"`
-	PromptBytes   int    `json:"prompt,omitempty"`
-	ProjectSkills int    `json:"project_skills,omitempty"`
-	GlobalSkills  int    `json:"global_skills,omitempty"`
-	Snippets      int    `json:"snippets,omitempty"`
-	ToolBytes     int    `json:"tools,omitempty"`
+	Session       string       `json:"session,omitempty"`
+	PromptBytes   int          `json:"prompt,omitempty"`
+	ProjectSkills int          `json:"project_skills,omitempty"`
+	GlobalSkills  int          `json:"global_skills,omitempty"`
+	Snippets      int          `json:"snippets,omitempty"`
+	ToolBytes     int          `json:"tools,omitempty"`
+	LocalConfig   *LocalConfig `json:"local_config,omitempty"`
 }
 
 func NewEvent(elapsedTime time.Duration, info Info) agent.Event {
@@ -107,7 +113,19 @@ func renderDetails(info Info, introduction string, conclusion string) string {
 	_, _ = line.WriteString(style.Normal(strconv.Itoa(info.Snippets)))
 	_, _ = line.WriteString(style.Subtle(" snippets ") + style.Accent(startupDetailsSeparator) + style.Subtle(" "))
 	_, _ = line.WriteString(startupContextTokens(info))
-	_, _ = line.WriteString(style.Subtle(" context" + conclusion))
+	if info.LocalConfig == nil || info.LocalConfig.Name == "" {
+		_, _ = line.WriteString(style.Subtle(" context" + conclusion))
+		return line.String()
+	}
+
+	_, _ = line.WriteString(style.Subtle(" context ") + style.Accent(startupDetailsSeparator) + style.Subtle(" "))
+	_, _ = line.WriteString(style.Change(info.LocalConfig.Name) + style.Subtle(": "))
+	if len(info.LocalConfig.Settings) == 0 {
+		_, _ = line.WriteString(style.Subtle("(empty)"))
+	} else {
+		_, _ = line.WriteString(style.Normal(strings.Join(info.LocalConfig.Settings, ", ")))
+	}
+	_, _ = line.WriteString(style.Subtle(conclusion))
 	return line.String()
 }
 

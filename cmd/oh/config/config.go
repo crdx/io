@@ -11,6 +11,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/editor"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
@@ -29,6 +30,7 @@ const minimumToolOutputBytes = 1024
 
 type Config struct {
 	Version  int                            `toml:"version"`
+	Caps     Caps                           `toml:"caps"`
 	Editor   Editor                         `toml:"editor"`
 	Input    Input                          `toml:"input"`
 	Model    Model                          `toml:"model"`
@@ -42,9 +44,34 @@ type Config struct {
 	Tool     Tool                           `toml:"tool"`
 
 	fallback             *toml.MetaData
-	user                 *toml.MetaData
-	filePath             string
+	sources              []sourceMetadata
 	snippetFileSnapshots map[string]snapshot
+}
+
+type sourceMetadata struct {
+	source Source
+	path   string
+	meta   *toml.MetaData
+}
+
+type Override struct {
+	Path     string
+	Settings []string
+}
+
+type Caps struct {
+	Default DefaultCaps `toml:"default"`
+}
+
+type DefaultCaps caps.Set
+
+func (self *DefaultCaps) UnmarshalText(text []byte) error {
+	grantedCaps, err := caps.Parse(string(text))
+	if err != nil {
+		return err
+	}
+	*self = DefaultCaps(grantedCaps)
+	return nil
 }
 
 type Editor struct {
@@ -124,10 +151,11 @@ func (self Config) BuildLive(registry segment.Registry) (LiveConfig, error) {
 	}
 	snippetCommandSet, err := snippets.New(self.Snippets)
 	if err != nil {
-		if self.filePath == "" {
+		path := self.getSourcePath("snippets")
+		if path == "" {
 			return LiveConfig{}, fmt.Errorf("snippets: %w", err)
 		}
-		return LiveConfig{}, fmt.Errorf("%s: snippets: %w", self.filePath, err)
+		return LiveConfig{}, fmt.Errorf("%s: snippets: %w", path, err)
 	}
 	if err := self.ValidateConsumed(); err != nil {
 		return LiveConfig{}, err
@@ -197,56 +225,177 @@ func (self segmentOptions) Read(into any) error {
 	return self.meta.PrimitiveDecode(self.entry, into)
 }
 
+func (self Config) GetOverride() (Override, bool) {
+	for _, source := range slices.Backward(self.sources) {
+		if !source.source.IsOverride {
+			continue
+		}
+
+		settings := make(map[string]struct{})
+		for _, key := range source.meta.Keys() {
+			if !source.meta.IsDefined(key...) || source.meta.Type(key...) == "Hash" || key.String() == "version" {
+				continue
+			}
+			if len(key) > 2 && key[0] == "snippets" {
+				key = key[:2]
+			}
+			settings[key.String()] = struct{}{}
+		}
+		return Override{Path: source.source.Path, Settings: slices.Sorted(maps.Keys(settings))}, true
+	}
+	return Override{}, false
+}
+
 func (self Config) ValidateConsumed() error {
-	if self.user == nil {
-		return nil
+	for sourceIndex, source := range self.sources {
+		unknown := source.meta.Undecoded()
+		namedKeys := make([]string, 0, len(unknown))
+		for _, key := range unknown {
+			if !self.isShadowed(sourceIndex, key) {
+				namedKeys = append(namedKeys, key.String())
+			}
+		}
+		if len(namedKeys) == 0 {
+			continue
+		}
+
+		slices.Sort(namedKeys)
+
+		return fmt.Errorf("%s: nothing is done with: %s", source.path, strings.Join(namedKeys, ", "))
 	}
 
-	unknown := self.user.Undecoded()
-	if len(unknown) == 0 {
-		return nil
+	return nil
+}
+
+func (self Config) isShadowed(sourceIndex int, key toml.Key) bool {
+	if len(key) < 3 || key[0] != "bar" {
+		return false
 	}
 
-	namedKeys := make([]string, 0, len(unknown))
-	for _, key := range unknown {
-		namedKeys = append(namedKeys, key.String())
+	setting := key[:3]
+	for _, source := range self.sources[sourceIndex+1:] {
+		if source.meta.IsDefined(setting...) {
+			return true
+		}
 	}
-
-	slices.Sort(namedKeys)
-
-	return fmt.Errorf("%s: nothing is done with: %s", self.filePath, strings.Join(namedKeys, ", "))
+	return false
 }
 
 func (self Config) metaFor(position segment.Position) *toml.MetaData {
 	side, end, _ := strings.Cut(position.String(), ".")
 
-	if self.user != nil && self.user.IsDefined("bar", side, end) {
-		return self.user
+	for _, source := range slices.Backward(self.sources) {
+		if source.meta.IsDefined("bar", side, end) {
+			return source.meta
+		}
 	}
 
 	return self.fallback
 }
 
-func readConfigVersion(data []byte) (int, error) {
+func (self Config) getSourcePath(keys ...string) string {
+	for _, source := range slices.Backward(self.sources) {
+		if source.meta.IsDefined(keys...) {
+			return source.path
+		}
+	}
+	return ""
+}
+
+func readConfigVersion(data []byte, isOverride bool) (int, error) {
 	version, err := format.ReadTOML(data)
 	if err != nil {
 		return 0, err
 	}
 	if version == 0 {
-		version = InitialFormat
+		if isOverride {
+			return Format, nil
+		}
+		return InitialFormat, nil
 	}
 
 	return version, nil
 }
 
-func Load(path string) (Config, error) {
-	if path == "" {
-		return loadSnapshot(path, snapshot{isMissing: true})
-	}
-	return loadSnapshot(path, readSnapshot(path))
+type Source struct {
+	Path       string
+	IsOverride bool
 }
 
-func loadSnapshot(path string, current snapshot) (Config, error) {
+func Load(path string) (Config, error) {
+	if path == "" {
+		return loadSnapshots(nil)
+	}
+	return LoadSources(Source{Path: path})
+}
+
+func LoadSources(sources ...Source) (Config, error) {
+	snapshots := make([]sourceSnapshot, 0, len(sources))
+	for _, source := range sources {
+		snapshots = append(snapshots, sourceSnapshot{source: source, snapshot: readSnapshot(source.Path)})
+	}
+	return loadSnapshots(snapshots)
+}
+
+type sourceSnapshot struct {
+	source   Source
+	snapshot snapshot
+}
+
+type additiveSettings struct {
+	skills  SkillPaths
+	sandbox sandbox
+}
+
+func getAdditiveSettings(config Config) additiveSettings {
+	return additiveSettings{
+		skills: SkillPaths{
+			Include: slices.Clone(config.Skills.Include),
+			Exclude: slices.Clone(config.Skills.Exclude),
+		},
+		sandbox: sandbox{
+			HostLoopback: slices.Clone(config.Sandbox.HostLoopback),
+			Read:         slices.Clone(config.Sandbox.Read),
+			Write:        slices.Clone(config.Sandbox.Write),
+			Exec:         slices.Clone(config.Sandbox.Exec),
+			Home:         slices.Clone(config.Sandbox.Home),
+		},
+	}
+}
+
+func mergeAdditiveSettings(config *Config, previous additiveSettings, meta toml.MetaData, displayPath string) error {
+	if meta.IsDefined("skills", "include") {
+		config.Skills.Include = append(previous.skills.Include, config.Skills.Include...)
+	}
+	if meta.IsDefined("skills", "exclude") {
+		config.Skills.Exclude = append(previous.skills.Exclude, config.Skills.Exclude...)
+	}
+	if meta.IsDefined("sandbox", "read") {
+		config.Sandbox.Read = append(previous.sandbox.Read, config.Sandbox.Read...)
+	}
+	if meta.IsDefined("sandbox", "write") {
+		config.Sandbox.Write = append(previous.sandbox.Write, config.Sandbox.Write...)
+	}
+	if meta.IsDefined("sandbox", "exec") {
+		config.Sandbox.Exec = append(previous.sandbox.Exec, config.Sandbox.Exec...)
+	}
+	if meta.IsDefined("sandbox", "home") {
+		config.Sandbox.Home = append(previous.sandbox.Home, config.Sandbox.Home...)
+	}
+	if !meta.IsDefined("sandbox", "host_loopback") {
+		return nil
+	}
+	if err := validateHostLoopbackPorts(config.Sandbox.HostLoopback); err != nil {
+		return fmt.Errorf("%s: sandbox.host_loopback: %w", displayPath, err)
+	}
+	config.Sandbox.HostLoopback = deduplicate(append(
+		previous.sandbox.HostLoopback,
+		config.Sandbox.HostLoopback...,
+	))
+	return nil
+}
+
+func loadSnapshots(sources []sourceSnapshot) (Config, error) {
 	var config Config
 
 	defaults, err := toml.Decode(defaultsTOML, &config)
@@ -256,43 +405,57 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 
 	config.fallback = &defaults
 
-	if path == "" || current.isMissing {
-		return config, nil
+	for _, source := range sources {
+		if source.snapshot.isMissing {
+			continue
+		}
+		if err := applySnapshot(&config, source); err != nil {
+			return config, err
+		}
 	}
 
-	displayPath := pathutil.Shorten(path)
-	config.filePath = displayPath
+	return config, nil
+}
 
-	if current.failure != nil {
-		return config, fmt.Errorf("%s: %w", displayPath, current.failure)
+func applySnapshot(config *Config, source sourceSnapshot) error {
+	displayPath := pathutil.Shorten(source.source.Path)
+
+	if source.snapshot.failure != nil {
+		return fmt.Errorf("%s: %w", displayPath, source.snapshot.failure)
 	}
 
-	version, err := readConfigVersion(current.data)
+	version, err := readConfigVersion(source.snapshot.data, source.source.IsOverride)
 	switch {
 	case err != nil:
-		return config, fmt.Errorf("%s: %w", displayPath, err)
+		return fmt.Errorf("%s: %w", displayPath, err)
 	case version < Format:
-		return config, fmt.Errorf("%s: config format %d needs migrating: run ohctl migrate", displayPath, version)
+		return fmt.Errorf("%s: config format %d needs migrating: run ohctl migrate", displayPath, version)
 	}
 
 	if err := format.Check(version, Format); err != nil {
-		return config, fmt.Errorf("%s: config %w: upgrade oh", displayPath, err)
+		return fmt.Errorf("%s: config %w: upgrade oh", displayPath, err)
 	}
 
-	meta, err := toml.Decode(string(current.data), &config)
+	previousSnippets := maps.Clone(config.Snippets)
+	previousAdditive := getAdditiveSettings(*config)
+	meta, err := toml.Decode(string(source.snapshot.data), config)
 	if err != nil {
-		return config, fmt.Errorf("%s: %w", displayPath, err)
+		return fmt.Errorf("%s: %w", displayPath, err)
 	}
 
-	config.user = &meta
+	config.sources = append(config.sources, sourceMetadata{source: source.source, path: displayPath, meta: &meta})
+
+	if err := mergeAdditiveSettings(config, previousAdditive, meta, displayPath); err != nil {
+		return err
+	}
 
 	if meta.IsDefined("model", "round_robin") {
 		if len(config.Model.RoundRobin) == 0 {
-			return config, fmt.Errorf("%s: model.round_robin is empty, so there is nothing to ask", displayPath)
+			return fmt.Errorf("%s: model.round_robin is empty, so there is nothing to ask", displayPath)
 		}
 		for _, selection := range config.Model.RoundRobin {
 			if strings.TrimSpace(selection) == "" {
-				return config, fmt.Errorf("%s: model.round_robin contains an empty selection", displayPath)
+				return fmt.Errorf("%s: model.round_robin contains an empty selection", displayPath)
 			}
 		}
 	}
@@ -303,24 +466,30 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 		meta.IsDefined("provider", "ollama", "host"),
 		config.Ports.Hostname,
 	); err != nil {
-		return config, fmt.Errorf("%s: %w", displayPath, err)
+		return fmt.Errorf("%s: %w", displayPath, err)
 	}
 	config.Input.Continue = strings.TrimSpace(config.Input.Continue)
 	if meta.IsDefined("input", "continue") && config.Input.Continue == "" {
-		return config, fmt.Errorf("%s: input.continue is empty", displayPath)
+		return fmt.Errorf("%s: input.continue is empty", displayPath)
 	}
 	if meta.IsDefined("tool", "output") && config.Tool.Output.Bytes < minimumToolOutputBytes {
-		return config, fmt.Errorf(
+		return fmt.Errorf(
 			"%s: tool.output is too small to say anything with; write at least %d bytes",
 			displayPath, minimumToolOutputBytes,
 		)
 	}
 	for _, name := range slices.Sorted(maps.Keys(config.Snippets)) {
+		if !meta.IsDefined("snippets", name) {
+			continue
+		}
+		if previous, exists := previousSnippets[name]; exists && previous.File != "" {
+			delete(config.snippetFileSnapshots, previous.File)
+		}
 		definition := config.Snippets[name]
 		if definition.File != "" {
-			resolvedPath, err := resolveConfigPath(path, definition.File)
+			resolvedPath, err := resolveConfigPath(source.source.Path, definition.File)
 			if err != nil {
-				return config, fmt.Errorf("%s: snippets.%s.file: %w", displayPath, name, err)
+				return fmt.Errorf("%s: snippets.%s.file: %w", displayPath, name, err)
 			}
 			definition.File = resolvedPath
 			config.Snippets[name] = definition
@@ -331,7 +500,7 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 			}
 			config.snippetFileSnapshots[resolvedPath] = current
 			if current.failure != nil {
-				return config, fmt.Errorf(
+				return fmt.Errorf(
 					"%s: snippets.%s: could not read %s: %w",
 					displayPath,
 					name,
@@ -340,7 +509,7 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 				)
 			}
 			if err := definition.LoadFileContents(resolvedPath, current.data); err != nil {
-				return config, fmt.Errorf("%s: snippets.%s: %w", displayPath, name, err)
+				return fmt.Errorf("%s: snippets.%s: %w", displayPath, name, err)
 			}
 		}
 		config.Snippets[name] = definition
@@ -358,29 +527,46 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 		{"sandbox.home", &config.Sandbox.Home},
 	}
 	for _, list := range lists {
+		if !meta.IsDefined(strings.Split(list.name, ".")...) {
+			continue
+		}
 		for i, writtenPath := range *list.values {
-			resolvedPath, err := resolveConfigPath(path, writtenPath)
+			resolvedPath, err := resolveConfigPath(source.source.Path, writtenPath)
 			if err != nil {
-				return config, fmt.Errorf("%s: %s: %w", displayPath, list.name, err)
+				return fmt.Errorf("%s: %s: %w", displayPath, list.name, err)
 			}
 			(*list.values)[i] = resolvedPath
 		}
+		*list.values = deduplicate(*list.values)
 	}
 
 	if err := validateHostLoopbackPorts(config.Sandbox.HostLoopback); err != nil {
-		return config, fmt.Errorf("%s: sandbox.host_loopback: %w", displayPath, err)
+		return fmt.Errorf("%s: sandbox.host_loopback: %w", displayPath, err)
 	}
 
 	for _, mappedPath := range config.Sandbox.Home {
 		if _, below := shell.HomeRelativePath(mappedPath); !below {
-			return config, fmt.Errorf(
+			return fmt.Errorf(
 				"%s: sandbox.home: %s is not below the home directory, so it has nowhere to land",
 				displayPath, mappedPath,
 			)
 		}
 	}
 
-	return config, nil
+	return nil
+}
+
+func deduplicate[Value comparable](values []Value) []Value {
+	seenValues := make(map[Value]struct{}, len(values))
+	result := make([]Value, 0, len(values))
+	for _, value := range values {
+		if _, exists := seenValues[value]; exists {
+			continue
+		}
+		seenValues[value] = struct{}{}
+		result = append(result, value)
+	}
+	return result
 }
 
 func validateHostSettings(ollamaHost string, hasOllamaHost bool, hostname string) error {

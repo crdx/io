@@ -41,13 +41,20 @@ func errorText(err error) string {
 }
 
 type revision struct {
-	configSnapshot       snapshot
+	sourceSnapshots      []sourceSnapshot
 	snippetFileSnapshots map[string]snapshot
 }
 
 func (self revision) equal(other revision) bool {
-	if !self.configSnapshot.equal(other.configSnapshot) || len(self.snippetFileSnapshots) != len(other.snippetFileSnapshots) {
+	if len(self.sourceSnapshots) != len(other.sourceSnapshots) ||
+		len(self.snippetFileSnapshots) != len(other.snippetFileSnapshots) {
 		return false
+	}
+	for i, source := range self.sourceSnapshots {
+		otherSource := other.sourceSnapshots[i]
+		if source.source != otherSource.source || !source.snapshot.equal(otherSource.snapshot) {
+			return false
+		}
 	}
 	for path, current := range self.snippetFileSnapshots {
 		previous, exists := other.snippetFileSnapshots[path]
@@ -58,21 +65,58 @@ func (self revision) equal(other revision) bool {
 	return true
 }
 
-func (self revision) getPaths(configPath string) []string {
-	paths := append([]string{configPath}, slices.Sorted(maps.Keys(self.snippetFileSnapshots))...)
-	return paths
+func (self revision) getPaths() []string {
+	paths := make([]string, 0, len(self.sourceSnapshots)+len(self.snippetFileSnapshots))
+	for _, source := range self.sourceSnapshots {
+		paths = append(paths, source.source.Path)
+	}
+	return append(paths, slices.Sorted(maps.Keys(self.snippetFileSnapshots))...)
 }
 
-func readRevision(path string) (Config, revision, error) {
-	current := readSnapshot(path)
-	settings, err := loadSnapshot(path, current)
-	return settings, revision{configSnapshot: current, snippetFileSnapshots: settings.snippetFileSnapshots}, err
+func readRevision(sources []Source) (Config, revision, error) {
+	snapshots := make([]sourceSnapshot, 0, len(sources))
+	for _, source := range sources {
+		snapshots = append(snapshots, sourceSnapshot{source: source, snapshot: readSnapshot(source.Path)})
+	}
+	settings, err := loadSnapshots(snapshots)
+	return settings, revision{sourceSnapshots: snapshots, snippetFileSnapshots: settings.snippetFileSnapshots}, err
 }
 
 type Observer struct {
-	path            string
+	sources         []Source
 	handledRevision revision
 	watcher         *fileWatcher
+}
+
+func Observe(path string) (Config, *Observer, error) {
+	return ObserveSources(Source{Path: path})
+}
+
+func ObserveSources(sources ...Source) (Config, *Observer, error) {
+	settings, current, err := readRevision(sources)
+	if err != nil {
+		return Config{}, nil, err
+	}
+
+	watcher, err := newFileWatcher(current.getPaths()...)
+	if err != nil {
+		return Config{}, nil, fmt.Errorf("could not watch config: %w", err)
+	}
+
+	latestSettings, latest, err := readRevision(sources)
+	if err == nil {
+		err = watcher.addPaths(latest.getPaths()...)
+	}
+	if err != nil {
+		watcher.close()
+		return Config{}, nil, err
+	}
+	if !latest.equal(current) {
+		settings = latestSettings
+		current = latest
+	}
+
+	return settings, &Observer{sources: slices.Clone(sources), handledRevision: current, watcher: watcher}, nil
 }
 
 type ReloadStatus int
@@ -87,33 +131,6 @@ type ReloadResult struct {
 	LiveConfig LiveConfig
 	Status     ReloadStatus
 	Failure    error
-}
-
-func Observe(path string) (Config, *Observer, error) {
-	settings, current, err := readRevision(path)
-	if err != nil {
-		return Config{}, nil, err
-	}
-
-	watcher, err := newFileWatcher(current.getPaths(path)...)
-	if err != nil {
-		return Config{}, nil, fmt.Errorf("could not watch config: %w", err)
-	}
-
-	latestSettings, latest, err := readRevision(path)
-	if err == nil {
-		err = watcher.addPaths(latest.getPaths(path)...)
-	}
-	if err != nil {
-		watcher.close()
-		return Config{}, nil, err
-	}
-	if !latest.equal(current) {
-		settings = latestSettings
-		current = latest
-	}
-
-	return settings, &Observer{path: path, handledRevision: current, watcher: watcher}, nil
 }
 
 func (self *Observer) Changes() <-chan error {
@@ -152,13 +169,13 @@ func (self *Observer) refresh(watchFailure error) (Config, bool, error) {
 		return Config{}, false, fmt.Errorf("could not watch config: %w", watchFailure)
 	}
 
-	settings, current, err := readRevision(self.path)
-	if watchErr := self.watcher.addPaths(current.getPaths(self.path)...); watchErr != nil {
+	settings, current, err := readRevision(self.sources)
+	if watchErr := self.watcher.addPaths(current.getPaths()...); watchErr != nil {
 		return Config{}, false, fmt.Errorf("could not watch config: %w", watchErr)
 	}
 
-	latestSettings, latest, latestErr := readRevision(self.path)
-	if watchErr := self.watcher.addPaths(latest.getPaths(self.path)...); watchErr != nil {
+	latestSettings, latest, latestErr := readRevision(self.sources)
+	if watchErr := self.watcher.addPaths(latest.getPaths()...); watchErr != nil {
 		return Config{}, false, fmt.Errorf("could not watch config: %w", watchErr)
 	}
 	if !latest.equal(current) {

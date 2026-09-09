@@ -3342,6 +3342,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"signal-restoration":     {".ansi"},
 		"special-links":          {".ansi", ".screen"},
 		"startup":                {".ansi", ".screen"},
+		"startup-local-config":   {".ansi", ".screen"},
 		"startup-sized":          {".ansi", ".screen"},
 		"startup-sized-output":   {".ansi", ".screen"},
 		"terminal-escape":        {".ansi", ".screen"},
@@ -5103,6 +5104,43 @@ func TestTheConfigIsInTheXDGConfigDirectory(t *testing.T) {
 	}
 }
 
+func TestTheCurrentDirectoryConfigOverridesTheGlobalConfig(t *testing.T) {
+	configRoot := t.TempDir()
+	workspaceDir := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", configRoot)
+
+	got := getConfigSources(workspaceDir)
+	want := []config.Source{
+		{Path: filepath.Join(configRoot, "org.crdx", "oh", "config.toml")},
+		{Path: filepath.Join(workspaceDir, "oh.toml"), IsOverride: true},
+	}
+	if !slices.Equal(got, want) {
+		t.Errorf("got %#v, want %#v", got, want)
+	}
+}
+
+func TestConfiguredCapabilitiesReplaceTheCommandLineDefault(t *testing.T) {
+	options := cli.Options{Caps: caps.Read | caps.Shell}
+	settings := config.Config{Caps: config.Caps{Default: config.DefaultCaps(caps.Read | caps.Write | caps.Git)}}
+
+	applyDefaultCaps(&options, settings)
+
+	if got := options.Caps.Flags(); got != "rwg" {
+		t.Errorf("got capabilities %q", got)
+	}
+}
+
+func TestExplicitCommandLineCapabilitiesOverrideTheConfig(t *testing.T) {
+	options := cli.Options{Caps: caps.Read | caps.Shell, WereCapsChosen: true}
+	settings := config.Config{Caps: config.Caps{Default: config.DefaultCaps(caps.Read | caps.Write | caps.Git)}}
+
+	applyDefaultCaps(&options, settings)
+
+	if got := options.Caps.Flags(); got != "rx" {
+		t.Errorf("got capabilities %q", got)
+	}
+}
+
 func TestTheGlobalContextIsInTheXDGConfigDirectory(t *testing.T) {
 	root := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", root)
@@ -6456,6 +6494,94 @@ func TestTheStartupLineDrawsWhatItDrewBefore(t *testing.T) {
 	})
 }
 
+func TestLocalConfigsDrawMegathoroughly(t *testing.T) {
+	profiles := map[string]startup.Info{
+		"no local config": {},
+		"empty local config": {
+			LocalConfig: &startup.LocalConfig{Name: "oh.toml"},
+		},
+		"one local setting": {
+			LocalConfig: &startup.LocalConfig{Name: "oh.toml", Settings: []string{"caps.default"}},
+		},
+		"mixed global and local settings": {
+			LocalConfig: &startup.LocalConfig{
+				Name:     "oh.toml",
+				Settings: []string{"input.continue", "sandbox.write", "snippets.review"},
+			},
+		},
+		"many local settings": {
+			LocalConfig: &startup.LocalConfig{
+				Name: "oh.toml",
+				Settings: []string{
+					"bar.bottom.left",
+					"bar.top.center",
+					"caps.default",
+					"editor.command",
+					"input.continue",
+					"model.round_robin",
+					"ports.hostname",
+					"provider.ollama.host",
+					"sandbox.host_loopback",
+					"sandbox.read",
+					"sandbox.write",
+					"skills.exclude",
+					"skills.include",
+					"snippets.review",
+					"tool.output",
+					"ui.grouping",
+					"ui.reasoning",
+					"ui.streaming",
+				},
+			},
+		},
+	}
+
+	render := func(info startup.Info, columns int, isTextSizingSupported bool) string {
+		info.Session = "brave-otter"
+		info.PromptBytes = 740 + 3*1024
+		info.ProjectSkills = 3
+		info.GlobalSkills = 1
+		info.Snippets = 2
+		info.ToolBytes = 614
+		event := startup.NewEvent(1500*time.Microsecond, info)
+		return startup.RenderEvent(event, columns, isTextSizingSupported)
+	}
+
+	ansiPasses := map[string]func() string{}
+	for profileName, info := range profiles {
+		ansiPasses[profileName+" / ordinary"] = func() string {
+			return render(info, replayColumns, false)
+		}
+		ansiPasses[profileName+" / sized"] = func() string {
+			return render(info, replayColumns, true)
+		}
+	}
+	compareWithGolden(t, "startup-local-config", ".ansi", ansiPasses)
+
+	screenPasses := map[string]func() string{}
+	for profileName, info := range profiles {
+		for widthName, columns := range map[string]int{
+			"wide":       replayColumns,
+			"narrow":     narrowColumns,
+			"tiny":       tinyColumns,
+			"one column": oneColumn,
+		} {
+			screenPasses[profileName+" / ordinary / "+widthName] = func() string {
+				return shown(t, render(info, columns, false), columns)
+			}
+		}
+		for widthName, columns := range map[string]int{
+			"wide":   replayColumns,
+			"narrow": narrowColumns,
+		} {
+			screenPasses[profileName+" / sized / "+widthName] = func() string {
+				return shown(t, render(info, columns, true), columns)
+			}
+		}
+	}
+	compareWithGolden(t, "startup-local-config", ".screen", screenPasses)
+}
+
 func TestTheInputBlockDrawsWhatItDrewBefore(t *testing.T) {
 	frames := map[string]edit.Frame{
 		"one row": {
@@ -6744,8 +6870,13 @@ func writeLiveConfig(t *testing.T, path string, body string) {
 
 func prepareLiveConfig(t *testing.T, self *App, path string) {
 	t.Helper()
+	prepareLiveConfigSources(t, self, config.Source{Path: path})
+}
 
-	settings, observer, err := config.Observe(path)
+func prepareLiveConfigSources(t *testing.T, self *App, sources ...config.Source) {
+	t.Helper()
+
+	settings, observer, err := config.ObserveSources(sources...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -6856,6 +6987,32 @@ func TestReloadingConfigChangesTheStreamingModeForTheNextTurn(t *testing.T) {
 	settleLiveConfig(t, self)
 	if self.display.streamingMode != output.StreamingModePaced {
 		t.Errorf("reloaded streaming mode is %d, want paced", self.display.streamingMode)
+	}
+}
+
+func TestDeletingALocalConfigLiveReloadsTheGlobalFallback(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	writeLiveConfig(t, globalPath, "[ui]\nstreaming = \"asap\"\n")
+	overridePath := filepath.Join(directory, "oh.toml")
+	if err := os.WriteFile(overridePath, []byte("[ui]\nstreaming = \"paced\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	self := testConversation(t, &bytes.Buffer{})
+	prepareLiveConfigSources(t, self,
+		config.Source{Path: globalPath},
+		config.Source{Path: overridePath, IsOverride: true},
+	)
+	if self.display.streamingMode != output.StreamingModePaced {
+		t.Fatalf("initial streaming mode is %d, want paced", self.display.streamingMode)
+	}
+	if err := os.Remove(overridePath); err != nil {
+		t.Fatal(err)
+	}
+	settleLiveConfig(t, self)
+	if self.display.streamingMode != output.StreamingModeASAP {
+		t.Errorf("reloaded streaming mode is %d, want global asap", self.display.streamingMode)
 	}
 }
 

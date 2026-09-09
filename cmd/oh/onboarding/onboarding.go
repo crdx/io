@@ -94,12 +94,17 @@ type Options struct {
 	EndpointURL    string
 	RequestedModel string
 	ResumedSession string
+	ConfigSources  []config.Source
 	IsPrinting     bool
 }
 
 func PrepareConfig(options Options) (config.Config, error) {
 	configPath := location.GetConfigFile()
-	settings, err := config.Load(configPath)
+	configSources := options.ConfigSources
+	if len(configSources) == 0 {
+		configSources = []config.Source{{Path: configPath}}
+	}
+	settings, err := config.LoadSources(configSources...)
 	if err != nil || !isRequired(options, settings.Model.RoundRobin) {
 		return settings, err
 	}
@@ -138,7 +143,7 @@ func PrepareConfig(options Options) (config.Config, error) {
 	if err := harry.castSpell(); err != nil {
 		return config.Config{}, err
 	}
-	return config.Load(configPath)
+	return config.LoadSources(configSources...)
 }
 
 func isRequired(options Options, configuredModels []string) bool {

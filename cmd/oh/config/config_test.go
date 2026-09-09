@@ -11,6 +11,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 
+	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
@@ -56,6 +57,18 @@ func TestConfiguredSkillDirectoriesResolvesAbsoluteRelativeAndHomePaths(t *testi
 		if directories[i] != want[i] {
 			t.Errorf("directory %d is %q, want %q", i, directories[i], want[i])
 		}
+	}
+}
+
+func TestConfiguredDefaultCapabilitiesRejectUnknownFlags(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[caps]\ndefault = \"rwz\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil || !strings.Contains(err.Error(), "unknown capability flag") {
+		t.Errorf("got error %v", err)
 	}
 }
 
@@ -155,6 +168,9 @@ func TestAMissingConfigFileIsAllowed(t *testing.T) {
 	if config.Input.Continue != "yes" {
 		t.Errorf("got default continue message %q", config.Input.Continue)
 	}
+	if got := caps.Set(config.Caps.Default).Flags(); got != "rx" {
+		t.Errorf("got default capabilities %q", got)
+	}
 	if config.Version != Format {
 		t.Errorf("got config format %d, want %d", config.Version, Format)
 	}
@@ -169,6 +185,210 @@ func TestAnUnversionedConfigNeedsMigrating(t *testing.T) {
 	_, err := Load(path)
 	if err == nil || !strings.Contains(err.Error(), "ohctl migrate") {
 		t.Fatalf("expected migration instructions, got %v", err)
+	}
+}
+
+func TestAnUnversionedOverrideReplacesOnlyWhatItMentions(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "global", "config.toml")
+	if err := os.Mkdir(filepath.Dir(globalPath), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n[model]\nround_robin = [\"anthropic/global\"]\n[sandbox]\nread = [\"shared\"]\n"); err != nil {
+		t.Fatal(err)
+	}
+	overridePath := filepath.Join(directory, "project", "oh.toml")
+	if err := os.Mkdir(filepath.Dir(overridePath), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(overridePath, []byte("[caps]\ndefault = \"rwg\"\n[input]\ncontinue = \"locally\"\n[sandbox]\nwrite = [\"output\"]\n[snippets]\nreview = { prompt = \"Review.\", arguments = \"none\" }\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := LoadSources(
+		Source{Path: globalPath},
+		Source{Path: overridePath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.Input.Continue != "locally" {
+		t.Errorf("got continue message %q", settings.Input.Continue)
+	}
+	if got := caps.Set(settings.Caps.Default).Flags(); got != "rwg" {
+		t.Errorf("got default capabilities %q", got)
+	}
+	if !slices.Equal(settings.Model.RoundRobin, []string{"anthropic/global"}) {
+		t.Errorf("got model rotation %#v", settings.Model.RoundRobin)
+	}
+	if !slices.Equal(settings.Sandbox.Read, []string{filepath.Join(filepath.Dir(globalPath), "shared")}) {
+		t.Errorf("got read paths %#v", settings.Sandbox.Read)
+	}
+	if !slices.Equal(settings.Sandbox.Write, []string{filepath.Join(filepath.Dir(overridePath), "output")}) {
+		t.Errorf("got write paths %#v", settings.Sandbox.Write)
+	}
+	override, exists := settings.GetOverride()
+	if !exists {
+		t.Fatal("local override was not reported")
+	}
+	if override.Path != overridePath {
+		t.Errorf("got override path %q, want %q", override.Path, overridePath)
+	}
+	wantSettings := []string{"caps.default", "input.continue", "sandbox.write", "snippets.review"}
+	if !slices.Equal(override.Settings, wantSettings) {
+		t.Errorf("got overridden settings %#v, want %#v", override.Settings, wantSettings)
+	}
+}
+
+func TestAnOverrideMergesAdditiveListsInSourceOrder(t *testing.T) {
+	directory := t.TempDir()
+	t.Setenv("HOME", directory)
+	globalDirectory := filepath.Join(directory, "global")
+	localDirectory := filepath.Join(directory, "local")
+	if err := os.MkdirAll(globalDirectory, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(localDirectory, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	sharedPath := filepath.Join(directory, "shared")
+	globalPath := filepath.Join(globalDirectory, "config.toml")
+	globalBody := fmt.Sprintf("[skills]\ninclude = [\"global-skills\", %q]\nexclude = [\"global-excluded\"]\n[sandbox]\nhost_loopback = [1111, 2222]\nread = [\"global-read\", %q]\nwrite = [\"global-write\"]\nexec = [\"global-exec\"]\nhome = [\"global-home\"]\n", sharedPath, sharedPath)
+	if err := writeConfigFile(globalPath, globalBody); err != nil {
+		t.Fatal(err)
+	}
+	localPath := filepath.Join(localDirectory, "oh.toml")
+	localBody := fmt.Sprintf("[skills]\ninclude = [\"local-skills\", %q]\nexclude = [\"local-excluded\"]\n[sandbox]\nhost_loopback = [2222, 3333]\nread = [\"local-read\", %q]\nwrite = [\"local-write\"]\nexec = [\"local-exec\"]\nhome = [\"local-home\"]\n", sharedPath, sharedPath)
+	if err := os.WriteFile(localPath, []byte(localBody), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := LoadSources(
+		Source{Path: globalPath},
+		Source{Path: localPath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	checks := []struct {
+		name string
+		got  []string
+		want []string
+	}{
+		{"skills.include", settings.Skills.Include, []string{filepath.Join(globalDirectory, "global-skills"), sharedPath, filepath.Join(localDirectory, "local-skills")}},
+		{"skills.exclude", settings.Skills.Exclude, []string{filepath.Join(globalDirectory, "global-excluded"), filepath.Join(localDirectory, "local-excluded")}},
+		{"sandbox.read", settings.Sandbox.Read, []string{filepath.Join(globalDirectory, "global-read"), sharedPath, filepath.Join(localDirectory, "local-read")}},
+		{"sandbox.write", settings.Sandbox.Write, []string{filepath.Join(globalDirectory, "global-write"), filepath.Join(localDirectory, "local-write")}},
+		{"sandbox.exec", settings.Sandbox.Exec, []string{filepath.Join(globalDirectory, "global-exec"), filepath.Join(localDirectory, "local-exec")}},
+		{"sandbox.home", settings.Sandbox.Home, []string{filepath.Join(globalDirectory, "global-home"), filepath.Join(localDirectory, "local-home")}},
+	}
+	for _, check := range checks {
+		if !slices.Equal(check.got, check.want) {
+			t.Errorf("%s = %#v, want %#v", check.name, check.got, check.want)
+		}
+	}
+	if want := []uint16{1111, 2222, 3333}; !slices.Equal(settings.Sandbox.HostLoopback, want) {
+		t.Errorf("sandbox.host_loopback = %#v, want %#v", settings.Sandbox.HostLoopback, want)
+	}
+}
+
+func TestAnEmptyLocalAdditiveListKeepsTheGlobalEntries(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(globalPath, "[skills]\ninclude = [\"global-skills\"]\n"); err != nil {
+		t.Fatal(err)
+	}
+	localPath := filepath.Join(directory, "oh.toml")
+	if err := os.WriteFile(localPath, []byte("[skills]\ninclude = []\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := LoadSources(
+		Source{Path: globalPath},
+		Source{Path: localPath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{filepath.Join(directory, "global-skills")}
+	if !slices.Equal(settings.Skills.Include, want) {
+		t.Errorf("skills.include = %#v, want %#v", settings.Skills.Include, want)
+	}
+}
+
+func TestAMissingOverrideKeepsTheGlobalConfig(t *testing.T) {
+	globalPath := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := LoadSources(
+		Source{Path: globalPath},
+		Source{Path: filepath.Join(t.TempDir(), "oh.toml"), IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.Input.Continue != "globally" {
+		t.Errorf("got continue message %q", settings.Input.Continue)
+	}
+	if override, exists := settings.GetOverride(); exists {
+		t.Errorf("missing override was reported as %#v", override)
+	}
+}
+
+func TestAnInvalidOverrideNamesTheLocalFile(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
+		t.Fatal(err)
+	}
+	overridePath := filepath.Join(directory, "oh.toml")
+	if err := os.WriteFile(overridePath, []byte("[input]\nmystery = \"locally\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := LoadSources(
+		Source{Path: globalPath},
+		Source{Path: overridePath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = settings.ValidateConsumed()
+	if err == nil || !strings.Contains(err.Error(), overridePath) || !strings.Contains(err.Error(), "input.mystery") {
+		t.Errorf("got error %v", err)
+	}
+}
+
+func TestAMalformedOverrideNamesTheLocalFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "oh.toml")
+	if err := os.WriteFile(path, []byte("not toml = ["), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := LoadSources(Source{Path: path, IsOverride: true})
+	if err == nil || !strings.Contains(err.Error(), path) {
+		t.Errorf("got error %v", err)
+	}
+}
+
+func TestAnEmptyOverrideIsReportedWithNoSettings(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "oh.toml")
+	if err := os.WriteFile(path, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := LoadSources(Source{Path: path, IsOverride: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	override, exists := settings.GetOverride()
+	if !exists {
+		t.Fatal("empty override was not reported")
+	}
+	if override.Path != path || len(override.Settings) != 0 {
+		t.Errorf("got override %#v", override)
 	}
 }
 
@@ -557,6 +777,40 @@ func TestWhatAConfigDoesNotMentionKeepsItsDefault(t *testing.T) {
 	}
 }
 
+func TestAnOverrideCanReplaceAGlobalBarPosition(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(globalPath, "[bar.top]\ncenter = [{ segment = \"scroll-overflow\", direction = \"up\" }]\n"); err != nil {
+		t.Fatal(err)
+	}
+	overridePath := filepath.Join(directory, "oh.toml")
+	if err := os.WriteFile(overridePath, []byte("[bar.top]\ncenter = [{ segment = \"workspace-dir\", type = \"base\" }]\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := LoadSources(
+		Source{Path: globalPath},
+		Source{Path: overridePath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	layout, err := settings.BuildLayout(testSegments())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := settings.ValidateConsumed(); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(layout[segment.TopCenter]); got != 1 {
+		t.Errorf("got %d segments", got)
+	}
+	override, exists := settings.GetOverride()
+	if !exists || !slices.Equal(override.Settings, []string{"bar.top.center"}) {
+		t.Errorf("got override %#v, exists=%t", override, exists)
+	}
+}
+
 func TestAnEmptyListClearsWhatTheDefaultPutThere(t *testing.T) {
 	layout := layoutFrom(t, "[bar.top]\nright = []\n")
 
@@ -623,7 +877,7 @@ func TestTheBuiltInDefaultsSetEverySettingThereIs(t *testing.T) {
 	}
 
 	for _, key := range []string{
-		"version", "editor", "input", "model", "snippets", "skills", "sandbox", "bar",
+		"version", "caps", "editor", "input", "model", "snippets", "skills", "sandbox", "bar",
 	} {
 		if _, ok := written[key]; !ok {
 			t.Errorf("expected the defaults to say what %q is", key)

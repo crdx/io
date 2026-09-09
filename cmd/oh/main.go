@@ -137,6 +137,19 @@ func isTerminalLocal() bool {
 	return os.Getenv("SSH_CLIENT") == "" && os.Getenv("SSH_TTY") == "" && os.Getenv("SSH_CONNECTION") == ""
 }
 
+func getConfigSources(workspaceDir string) []config.Source {
+	return []config.Source{
+		{Path: location.GetConfigFile()},
+		{Path: filepath.Join(workspaceDir, "oh.toml"), IsOverride: true},
+	}
+}
+
+func applyDefaultCaps(options *cli.Options, settings config.Config) {
+	if !options.WereCapsChosen {
+		options.Caps = caps.Set(settings.Caps.Default)
+	}
+}
+
 //nolint:gocyclo // lol no
 func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, error) {
 	ctx := context.Background()
@@ -201,12 +214,15 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return sessions.Choose(sessionsDir, workspace, keyboard, os.Stdout)
 	}
 
+	configSources := getConfigSources(workspaceDir)
+	configPath := configSources[0].Path
 	if _, err := onboarding.PrepareConfig(onboarding.Options{
 		Input:          keyboard,
 		Output:         os.Stdout,
 		EndpointURL:    endpointURL,
 		RequestedModel: inputArgs.Model,
 		ResumedSession: inputArgs.Session,
+		ConfigSources:  configSources,
 		IsPrinting:     inputArgs.IsPrinting,
 	}); err != nil {
 		if errors.Is(err, onboarding.ErrCancelled) {
@@ -216,9 +232,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
-	configPath := location.GetConfigFile()
-
-	settings, configObserver, err := config.Observe(configPath)
+	settings, configObserver, err := config.ObserveSources(configSources...)
 	if err != nil {
 		return "", err
 	}
@@ -260,6 +274,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
+	applyDefaultCaps(&args, settings)
 
 	if err := sessions.ValidateFormats(sessionsDir); err != nil {
 		return "", err
@@ -838,6 +853,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 	projectSkills, globalSkills := skill.Counts(availableSkills)
 	startupElapsed := startup.Elapsed()
+	configOverride, hasLocalConfig := settings.GetOverride()
+	var localConfig *startup.LocalConfig
+	if hasLocalConfig {
+		localConfig = &startup.LocalConfig{
+			Name:     filepath.Base(configOverride.Path),
+			Settings: configOverride.Settings,
+		}
+	}
 	startupInfo := startup.Info{
 		Session:       log.Name(),
 		PromptBytes:   len(systemPrompt),
@@ -845,6 +868,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		GlobalSkills:  globalSkills,
 		Snippets:      len(settings.Snippets),
 		ToolBytes:     client.ToolsSize(enabledTools),
+		LocalConfig:   localConfig,
 	}
 	if resumedSession == nil {
 		app.notify(startup.NewEvent(startupElapsed, startupInfo))

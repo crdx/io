@@ -196,6 +196,137 @@ func TestDeletingAnObservedConfigRestoresTheDefaults(t *testing.T) {
 	}
 }
 
+func TestCreatingAnObservedOverrideReplacesTheGlobalConfig(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
+		t.Fatal(err)
+	}
+	overridePath := filepath.Join(directory, "oh.toml")
+	settings, observer, err := ObserveSources(
+		Source{Path: globalPath},
+		Source{Path: overridePath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(observer.Close)
+	if settings.Input.Continue != "globally" {
+		t.Errorf("got initial message %q", settings.Input.Continue)
+	}
+	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"created\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err = awaitObservedConfig(t, observer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.Input.Continue != "created" {
+		t.Errorf("got overridden message %q", settings.Input.Continue)
+	}
+}
+
+func TestEditingAnObservedOverrideReplacesItsLiveSettings(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
+		t.Fatal(err)
+	}
+	overridePath := filepath.Join(directory, "oh.toml")
+	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"first\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, observer, err := ObserveSources(
+		Source{Path: globalPath},
+		Source{Path: overridePath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(observer.Close)
+	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"second\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := awaitObservedConfig(t, observer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.Input.Continue != "second" {
+		t.Errorf("got changed message %q", settings.Input.Continue)
+	}
+}
+
+func TestAtomicallyReplacingAnObservedOverrideLoadsItsNewSettings(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
+		t.Fatal(err)
+	}
+	overridePath := filepath.Join(directory, "oh.toml")
+	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"first\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, observer, err := ObserveSources(
+		Source{Path: globalPath},
+		Source{Path: overridePath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(observer.Close)
+	replacementPath := filepath.Join(directory, "replacement.toml")
+	if err := os.WriteFile(replacementPath, []byte("[input]\ncontinue = \"replacement\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(replacementPath, overridePath); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := awaitObservedConfig(t, observer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.Input.Continue != "replacement" {
+		t.Errorf("got replacement message %q", settings.Input.Continue)
+	}
+}
+
+func TestDeletingAnObservedOverrideRestoresTheGlobalConfig(t *testing.T) {
+	directory := t.TempDir()
+	globalPath := filepath.Join(directory, "config.toml")
+	if err := writeConfigFile(globalPath, "[input]\ncontinue = \"globally\"\n"); err != nil {
+		t.Fatal(err)
+	}
+	overridePath := filepath.Join(directory, "oh.toml")
+	if err := os.WriteFile(overridePath, []byte("[input]\ncontinue = \"locally\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	settings, observer, err := ObserveSources(
+		Source{Path: globalPath},
+		Source{Path: overridePath, IsOverride: true},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(observer.Close)
+	if settings.Input.Continue != "locally" {
+		t.Errorf("got initial message %q", settings.Input.Continue)
+	}
+	if err := os.Remove(overridePath); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err = awaitObservedConfig(t, observer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.Input.Continue != "globally" {
+		t.Errorf("got restored message %q", settings.Input.Continue)
+	}
+}
+
 func TestAnInvalidObservedRevisionIsReportedOnlyOnce(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
 	if err := writeConfigFile(path, "[input]\ncontinue = \"first\"\n"); err != nil {

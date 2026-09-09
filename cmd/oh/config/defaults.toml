@@ -1,5 +1,8 @@
 version = 10
 
+[caps]
+default = "rx"
+
 [editor]
 command = []
 

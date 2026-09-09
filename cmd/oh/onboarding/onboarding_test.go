@@ -341,6 +341,28 @@ func (self writerFunc) Write(piece []byte) (int, error) {
 	return self(piece)
 }
 
+func TestALocalModelOverrideAvoidsFirstRunOnboarding(t *testing.T) {
+	directory := t.TempDir()
+	overridePath := filepath.Join(directory, "oh.toml")
+	if err := os.WriteFile(overridePath, []byte("[model]\nround_robin = [\"anthropic/local\"]\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := PrepareConfig(Options{
+		ConfigSources: []config.Source{
+			{Path: filepath.Join(directory, "missing.toml")},
+			{Path: overridePath, IsOverride: true},
+		},
+		IsPrinting: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(settings.Model.RoundRobin, []string{"anthropic/local"}) {
+		t.Errorf("got model rotation %#v", settings.Model.RoundRobin)
+	}
+}
+
 func TestAPrintedFirstRunIsRefusedRatherThanAsked(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_STATE_HOME", t.TempDir())

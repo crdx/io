@@ -18,11 +18,18 @@ func TestAStartupEventKeepsItsFactsForReplay(t *testing.T) {
 		GlobalSkills:  3,
 		Snippets:      4,
 		ToolBytes:     3373,
+		LocalConfig: &LocalConfig{
+			Name:     "oh.toml",
+			Settings: []string{"input.continue", "sandbox.write"},
+		},
 	}
 
 	event := NewEvent(12*time.Millisecond, info)
+	if facts := string(event.State); !strings.Contains(facts, `"local_config":{"name":"oh.toml","settings":["input.continue","sandbox.write"]}`) {
+		t.Errorf("local config facts were not grouped in %s", facts)
+	}
 	got := style.Plain(RenderEvent(event, 80, false))
-	want := "Agent brave-otter 🦦 ready in 12ms with 5 skills ⧸ 4 snippets ⧸ ~13Kt context."
+	want := "Agent brave-otter 🦦 ready in 12ms with 5 skills ⧸ 4 snippets ⧸ ~13Kt context ⧸ oh.toml: input.continue, sandbox.write."
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
@@ -34,6 +41,29 @@ func TestStartupSeparatorsTakeTheAccentColour(t *testing.T) {
 
 	if count := strings.Count(line, separator); count != 2 {
 		t.Errorf("got %d accent separators in %q, want 2", count, line)
+	}
+}
+
+func TestALocalConfigAddsAnAccentSeparatorAndMutableFileColour(t *testing.T) {
+	line := RenderBanner(time.Millisecond, false, Info{
+		LocalConfig: &LocalConfig{Name: "oh.toml", Settings: []string{"ui.streaming"}},
+	}, 80, false)
+
+	if count := strings.Count(line, style.Accent(startupDetailsSeparator)); count != 3 {
+		t.Errorf("got %d accent separators in %q, want 3", count, line)
+	}
+	if !strings.Contains(line, style.Change("oh.toml")) {
+		t.Errorf("override file did not take the mutable colour in %q", line)
+	}
+}
+
+func TestAnEmptyLocalConfigShowsAsEmpty(t *testing.T) {
+	line := style.Plain(RenderBanner(time.Millisecond, false, Info{
+		LocalConfig: &LocalConfig{Name: "oh.toml"},
+	}, 80, false))
+	want := "Agent ready in 1ms with 0 skills ⧸ 0 snippets ⧸ 0t context ⧸ oh.toml: (empty)."
+	if line != want {
+		t.Errorf("got %q, want %q", line, want)
 	}
 }
 
