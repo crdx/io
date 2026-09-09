@@ -75,6 +75,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/cacheTTL"
 	"crdx.org/io/cmd/oh/segment/cacheUsage"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
+	"crdx.org/io/cmd/oh/segment/exposedPorts"
 	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
 	"crdx.org/io/cmd/oh/segment/jobNames"
@@ -8479,6 +8480,52 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			modeToggle.New(func() caps.Set { return caps.Read | caps.Web }, func() bool { return false }),
 			"",
 			segment.Context{},
+		),
+		"exposed-ports / empty": goldenSegmentPass(
+			t,
+			exposedPorts.New(
+				func() []uint16 { return nil },
+				func() []uint16 { return nil },
+			),
+			"",
+			segment.Context{},
+		),
+		"exposed-ports / host to sandbox": goldenSegmentPass(
+			t,
+			exposedPorts.New(
+				func() []uint16 { return []uint16{8000, 8080} },
+				func() []uint16 { return nil },
+			),
+			"",
+			segment.Context{},
+		),
+		"exposed-ports / sandbox to host": goldenSegmentPass(
+			t,
+			exposedPorts.New(
+				func() []uint16 { return nil },
+				func() []uint16 { return []uint16{3000, 6000} },
+			),
+			"",
+			segment.Context{},
+		),
+		"exposed-ports / both directions": goldenSegmentPass(
+			t,
+			exposedPorts.New(
+				func() []uint16 { return []uint16{8000} },
+				func() []uint16 { return []uint16{3000} },
+			),
+			"",
+			segment.Context{},
+		),
+		"exposed-ports / both directions constrained": goldenFittedSegmentPass(
+			t,
+			exposedPorts.New(
+				func() []uint16 { return []uint16{8000, 8080} },
+				func() []uint16 { return []uint16{3000, 6000} },
+			),
+			"",
+			segment.Context{},
+			16,
 		),
 		"path-grants / empty": goldenSegmentPass(
 			t,

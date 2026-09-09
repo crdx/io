@@ -56,6 +56,16 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫\e[0m\e[38;
 50\e[38;2;150;152;150m% \e[0m500\e[38;2;150;152;150mK/\e[0m1\e[38;2;150;152;150mM\e[0m
 === context-usage / unknown ===
 ?\e[38;2;150;152;150m% \e[0m0\e[38;2;150;152;150mK/\e[0m?
+=== exposed-ports / both directions ===
+\e[38;2;150;152;150m⇢ \e[0m8000\e[38;2;150;152;150m, \e[0m\e[38;2;150;152;150m⇠ \e[0m3000
+=== exposed-ports / both directions constrained ===
+\e[38;2;150;152;150m⇢ \e[0m8000\e[38;2;150;152;150m, \e[0m\e[38;2;150;152;150m+3\e[0m
+=== exposed-ports / empty ===
+
+=== exposed-ports / host to sandbox ===
+\e[38;2;150;152;150m⇢ \e[0m8000\e[38;2;150;152;150m, \e[0m\e[38;2;150;152;150m⇢ \e[0m8080
+=== exposed-ports / sandbox to host ===
+\e[38;2;150;152;150m⇠ \e[0m3000\e[38;2;150;152;150m, \e[0m\e[38;2;150;152;150m⇠ \e[0m6000
 === fast-mode / fast ===
 \e[38;2;192;128;80m⚡\e[0m
 === fast-mode / standard ===

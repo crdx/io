@@ -10,16 +10,28 @@ import (
 	"crdx.org/io/cmd/oh/width"
 )
 
+const (
+	hostToSandboxArrow = "⇢ "
+	sandboxToHostArrow = "⇠ "
+)
+
 type state struct {
-	getPorts func() []uint16
+	getHostToSandbox func() []uint16
+	getSandboxToHost func() []uint16
 }
 
-func New(getPorts func() []uint16) segment.Factory {
+func New(
+	getHostToSandbox func() []uint16,
+	getSandboxToHost func() []uint16,
+) segment.Factory {
 	return func(options segment.Options) (segment.Segment, error) {
 		if err := options.Read(&struct{}{}); err != nil {
 			return nil, err
 		}
-		return state{getPorts: getPorts}, nil
+		return state{
+			getHostToSandbox: getHostToSandbox,
+			getSandboxToHost: getSandboxToHost,
+		}, nil
 	}
 }
 
@@ -55,10 +67,16 @@ func (self state) RenderWithin(_ segment.Context, cells int) string {
 }
 
 func (self state) getParts() []string {
-	ports := self.getPorts()
-	parts := make([]string, 0, len(ports))
+	hostToSandbox := self.getHostToSandbox()
+	sandboxToHost := self.getSandboxToHost()
+	parts := make([]string, 0, len(hostToSandbox)+len(sandboxToHost))
+	parts = appendParts(parts, hostToSandboxArrow, hostToSandbox)
+	return appendParts(parts, sandboxToHostArrow, sandboxToHost)
+}
+
+func appendParts(parts []string, arrow string, ports []uint16) []string {
 	for _, port := range ports {
-		parts = append(parts, style.Subtle("⇢ ")+style.Normal(strconv.Itoa(int(port))))
+		parts = append(parts, style.Subtle(arrow)+style.Normal(strconv.Itoa(int(port))))
 	}
 	return parts
 }

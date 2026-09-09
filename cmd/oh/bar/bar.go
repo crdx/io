@@ -71,17 +71,18 @@ type Options struct {
 }
 
 type Sources struct {
-	IsTurnRunning   func() bool
-	GetContextUsage func() (int, int)
-	GetCacheUsage   func() (int, int)
-	GetCacheLife    func() time.Duration
-	GetGrantedCaps  func() caps.Set
-	GetPathGrants   func() []pathgrant.Grant
-	GetExposedPorts func() []uint16
-	IsPrefixPending func() bool
-	GetTurnTiming   func() turn.Timing
-	GetTurnCount    func() int
-	GetJobs         func() []jobs.Snapshot
+	IsTurnRunning         func() bool
+	GetContextUsage       func() (int, int)
+	GetCacheUsage         func() (int, int)
+	GetCacheLife          func() time.Duration
+	GetGrantedCaps        func() caps.Set
+	GetPathGrants         func() []pathgrant.Grant
+	GetHostToSandboxPorts func() []uint16
+	GetSandboxToHostPorts func() []uint16
+	IsPrefixPending       func() bool
+	GetTurnTiming         func() turn.Timing
+	GetTurnCount          func() int
+	GetJobs               func() []jobs.Snapshot
 }
 
 func NewRegistry(options Options) segment.Registry {
@@ -92,8 +93,11 @@ func NewRegistry(options Options) segment.Registry {
 		contextUsageSegment:    contextUsage.New(options.Sources.GetContextUsage),
 		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
 		pathGrantsSegment:      pathGrants.New(options.Sources.GetPathGrants),
-		exposedPortsSegment:    exposedPorts.New(options.Sources.GetExposedPorts),
-		workspaceDirSegment:    workspaceDir.New(options.Workspace),
+		exposedPortsSegment: exposedPorts.New(
+			options.Sources.GetHostToSandboxPorts,
+			options.Sources.GetSandboxToHostPorts,
+		),
+		workspaceDirSegment: workspaceDir.New(options.Workspace),
 		activeModelSegment: activeModel.New(
 			options.ModelName, options.ModelEffort, options.ModelEffortLevels, options.IsFast,
 		),
