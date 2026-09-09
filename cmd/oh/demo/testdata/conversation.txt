@@ -1,0 +1,573 @@
+; One conversation with the 1966 DOCTOR script, and the reply to every line.
+; Every reply here was produced by Anthony Hay's CC0 recreation of the original
+; ELIZA (github.com/anthay/ELIZA), which reproduces the conversation published in
+; Weizenbaum's CACM paper. Lines beginning > are what was said to the doctor.
+
+> I am sorry to bother you.
+IS IT BECAUSE YOU ARE SORRY TO BOTHER I THAT YOU CAME TO ME
+> Sorry.
+PLEASE DON'T APOLIGIZE
+> Dont you understand.
+WE WERE DISCUSSING YOU - NOT ME
+> I cant remember my dreams.
+HOW DO YOU KNOW YOU CAN'T REMEMBER YOUR DREAM
+> I wont tell you.
+PERHAPS IN YOUR FANTASY WE WON'T TELL EACH OTHER
+> Do you remember what I said about my mother.
+DID YOU THINK I WOULD FORGET WHAT YOU SAID ABOUT YOUR MOTHER
+> I remember you.
+DO YOU OFTEN THINK OF I
+> If I were you I would leave.
+DO YOU THINK ITS LIKELY THAT YOU WAS I YOU WOULD LEAVE
+> I dreamt I was flying.
+REALLY, YOU WAS FLYING
+> I dreamed of my sister.
+HAVE YOU EVER FANTASIED OF YOUR SISTER WHILE YOU WERE AWAKE
+> Dreams frighten me.
+WHAT DOES THAT DREAM SUGGEST TO YOU
+> How are you.
+WHY DO YOU ASK
+> When will I be happy.
+DOES THAT QUESTION INTEREST YOU
+> We are alike.
+IN WHAT WAY
+> The same thing happens every time.
+WHAT RESEMBLANCE DO YOU SEE
+> Certainly.
+YOU SEEM QUITE POSITIVE
+> I feel that you think I believe I wish for too much.
+DO YOU REALLY THINK SO
+> I am not sure.
+HOW LONG HAVE YOU BEEN NOT SURE
+> Perhaps my father was right.
+TELL ME MORE ABOUT YOUR FAMILY
+> Maybe.
+YOU DON'T SEEM QUITE CERTAIN
+> My name is unimportant.
+I AM NOT INTERESTED IN NAMES
+> Ich spreche deutsch.
+I AM SORRY, I SPEAK ONLY ENGLISH
+> Hello there.
+HOW DO YOU DO. PLEASE STATE YOUR PROBLEM
+> The computer is watching me.
+DO COMPUTERS WORRY YOU
+> Machines are taking over.
+WHY DO YOU MENTION COMPUTERS
+> Am I boring you.
+DO YOU BELIEVE YOU ARE BORING I
+> Are you listening.
+WHY ARE YOU INTERESTED IN WHETHER I AM LISTENING OR NOT
+> Your questions annoy me.
+WHY ARE YOU CONCERNED OVER MY QUESTIONS ANNOY YOU
+> I was happier then.
+WERE YOU REALLY
+> You were not here.
+OH, I WAS NOT HERE
+> Were you listening.
+WOULD YOU LIKE TO BELIEVE I WAS LISTENING
+> Me and my wife argue.
+WHO ELSE IN YOUR FAMILY ARGUE
+> You're not helping.
+WHAT MAKES YOU THINK I AM NOT HELPING
+> I'm tired of myself.
+DO YOU BELIEVE IT NORMAL TO BE TIRED OF YOURSELF
+> Myself and my brother.
+YOUR BROTHER
+> My mom and my dad.
+WHAT ELSE COMES TO MIND WHEN YOU THINK OF YOUR MOTHER
+> My children hate my wife.
+TELL ME MORE ABOUT YOUR FAMILY
+> I want a new life.
+WHAT WOULD IT MEAN TO YOU IF YOU GOT A NEW LIFE
+> I need my mother.
+WHO ELSE IN YOUR FAMILY
+> I am depressed about my children.
+YOUR CHILDREN
+> I am glad you asked.
+HOW HAVE I HELPED YOU TO BE GLAD
+> I feel better now.
+TELL ME MORE ABOUT SUCH FEELINGS
+> I was sick yesterday.
+WHY DO YOU TELL ME YOU WERE SICK YESTERDAY NOW
+> I think I am wrong.
+BUT YOU ARE NOT SURE YOU ARE WRONG
+> I believe you hate me.
+WHY DO YOU THINK I HATE YOU
+> I can't explain.
+HAVE YOU TRIED
+> I cannot continue.
+PERHAPS YOU COULD CONTINUE NOW
+> I don't know.
+DON'T YOU REALLY KNOW
+> I feel nothing.
+DO YOU OFTEN FEEL NOTHING
+> I hate you.
+DO YOU WISH TO HATE ME
+> You hate me.
+YOU LIKE TO THINK I HATE YOU - DON'T YOU
+> Yes I do.
+YOU ARE SURE
+> No I don't.
+ARE YOU SAYING 'NO' JUST TO BE NEGATIVE
+> My car is broken.
+YOUR CAR IS BROKEN
+> Can I ask you something.
+WHETHER OR NOT YOU CAN ASK I SOMETHING DEPENDS ON YOU MORE THAN ON ME
+> Can you understand me.
+YOU BELIEVE I CAN UNDERSTAND YOU DON'T YOU
+> What is wrong with me.
+WHAT IS IT YOU REALLY WANT TO KNOW
+> Because you asked.
+IS THAT THE REAL REASON
+> Why don't I sleep.
+ARE SUCH QUESTIONS MUCH ON YOUR MIND
+> Why can't you answer.
+WHAT ANSWER WOULD PLEASE YOU MOST
+> Why me.
+WHAT DO YOU THINK
+> Everyone hates me.
+REALLY, EVERYONE
+> Everybody lies.
+SURELY NOT EVERYBODY
+> Nobody cares.
+CAN YOU THINK OF ANYONE IN PARTICULAR
+> Noone listens.
+WHO, FOR EXAMPLE
+> I always lose.
+CAN YOU THINK OF A SPECIFIC EXAMPLE
+> You look like my mother.
+YOU'RE NOT REALLY TALKING ABOUT ME - ARE YOU
+> That is like a dream.
+WHAT DOES THAT SIMILARITY SUGGEST TO YOU
+> Alike in every way.
+WHAT OTHER CONNECTIONS DO YOU SEE
+> Bananas and custard.
+I AM NOT SURE I UNDERSTAND YOU FULLY
+> Zzzzz.
+DOES THAT HAVE ANYTHING TO DO WITH THE FACT THAT YOUR FATHER WAS RIGHT
+> Tell me about extraordinary predicaments.
+PLEASE GO ON
+> Gloucestershire.
+WHAT DOES THAT SUGGEST TO YOU
+> Executioners.
+DO YOU FEEL STRONGLY ABOUT DISCUSSING SUCH THINGS
+> Devonshire.
+BUT YOUR WIFE ARGUE
+> Purpose.
+I AM NOT SURE I UNDERSTAND YOU FULLY
+> I said what I said, but you were not listening.
+YOU SAY YOU SAID WHAT YOU SAID
+> But I told you already.
+YOU SEEM TO NEED TO TOLD ME
+> This, that, and the other.
+EARLIER YOU SAID YOUR BROTHER
+> One two three four five six seven.
+PLEASE GO ON
+> It is 1966 and I am here.
+DO YOU ENJOY BEING HERE
+> Do computers dream.
+WHAT DO YOU THINK MACHINES HAVE TO DO WITH YOUR PROBLEM
+> My mother is a computer.
+DON'T YOU THINK COMPUTERS CAN HELP PEOPLE
+> I am a machine.
+WHAT ABOUT MACHINES WORRIES YOU
+> are nobody noone everybody executioners' SCHOOL?
+YOU ARE THINKING OF A VERY SPECIAL PERSON
+> machines me= children& think xyzzy machines— believe are? dream two better cant under that gfxhkupuaexpz francais children mr purpose ﬁancé?
+WHAT DO YOU THINK ABOUT MACHINES
+> over remember your here two noone sister was i Ĳsselmeer any xqiswd happy bullies! one can't with feel gloucestershire? sad!(
+WHAT ABOUT YOUR OWN HERE TWO NOONE SISTER WAS YOU ĲSSELMEER ANY XQISWD HAPPY BULLIES
+> every xyzzy a were/ feel every over is-- are because
+DID YOU THINK THEY MIGHT NOT BE BECAUSE
+> ubrgeoizagvcon”
+WHAT DOES THAT SUGGEST TO YOU
+> i'm— feel dream i'm your with¿ wont alike: mother espanol nobody yourself xvgxbaloftqh if* because feel again
+IS IT BECAUSE YOU ARE THAT YOU CAME TO ME
+> gloucestershire naïve argue dreamt alike BULLIES/ if always“
+WHAT DO YOU SUPPOSE THAT RESEMBLANCE MEANS
+> argue pndw sad always very¡ happy café straße how how nobody a CERTAINLY& were if`
+DO YOU WISH THAT
+> noone sad everybody’ how of why computers dream dreamt
+DO COMPUTERS WORRY YOU
+> mom happy
+DO YOU FEEL STRONGLY ABOUT DISCUSSING SUCH THINGS
+> yourself sorry executioners
+APOLOGIES ARE NOT NECESSARY
+> my school father dont+ xyzzy you some why none maybe don't you're am¿*
+WHAT ELSE COMES TO MIND WHEN YOU THINK OF YOUR FATHER
+> wont naïve sister computers argue feel wife naïve NO certainly name: now my-- Ĳsselmeer perhaps me to
+WHY DO YOU MENTION COMPUTERS
+> sorry because italiano are mom you MYSELF none me
+WHAT FEELINGS DO YOU HAVE WHEN YOU APOLOGIZE
+> dreamt want why?
+I SEE
+> feel boat two a( you/ you. notice every sad* with! sorry a certainly dont mother is
+WHAT ARE YOUR FEELINGS NOW
+> computers¡ ﬁancé can was again school wife sorry
+WHAT DO YOU THINK MACHINES HAVE TO DO WITH YOUR PROBLEM
+> MAYBE to children then-
+WHY THE UNCERTAIN TONE
+> sorry' unhappy same) father Ĳsselmeer wwwkccncadmfj again dont
+BUT YOUR MOTHER AND YOUR FATHER
+> want over depressed me i yes ESPANOL noone you everybody again then noone now happy need none
+WHO, MAY I ASK
+> think is now jsqh perhaps there cannot none want here
+CAN'T YOU BE MORE POSITIVE
+> ﬁancé WHY! that& some dreams why some WANT none happy everyone+ believe not better feel if that)
+WHAT COMES TO YOUR MIND WHEN YOU ASK THAT
+> none a can the feel that machine very xyzzy glad SCHOOL` much
+DON'T YOU THINK COMPUTERS CAN HELP PEOPLE
+> if sorry same hello uwpaqpqqczgs two because
+WHAT IS THE CONNECTION, DO YOU SUPPOSE
+> myself dreamed machines again if over don't my perhaps FATHER always" espanol now,
+WHAT ABOUT MACHINES WORRIES YOU
+> EVERYONE everybody really believe much dreams why hello:
+DO YOU DREAM OFTEN
+> can
+I SEE
+> how believe always dreamed— ro were 1966 gloucestershire purpose xyzzy one are are francais notice= nobody ﬁancé one mother am”
+PLEASE CONTINUE
+> cant yes want two my none? EVERY notice vmov xyzzy two).
+WHY DO YOU SAY YOUR NONE
+> bullies none no under better dream was want MACHINES need boat want no again aggressive
+WHAT DO YOU THINK ABOUT MACHINES
+> believe want because now brother deutsch
+DON'T ANY OTHER REASONS COME TO MIND
+> none IN predicament am think every about dreams naïve dont espanol cannot sister better any nobody
+WHAT PERSONS APPEAR IN YOUR DREAMS
+> like notice vsxrzplzgz fmmjumcikzyo notice. need when cgstydvnwthdzrm dont dreamed father 1966
+I AM NOT SURE I UNDERSTAND YOU FULLY
+> naïve yes then dreamed here sorry¡ always everyone: executioners
+GO ON , PLEASE
+> notice some' think unhappy* predicament devonshire gloucestershire+
+LETS DISCUSS FURTHER WHY YOUR CHILDREN HATE YOUR WIFE
+> why straße perhaps remember` feel sister. alike perhaps i'm– cant' lhiusltnodyouli everyone are bykqje kjiuctsypwdaid don't wife machine that
+HAVE YOU ASKED SUCH QUESTIONS BEFORE
+> xyzzy glad with it
+PLEASE GO ON
+> over wife because
+DOES THAT REASON SEEM TO EXPLAIN ANYTHING ELSE
+> that rskcmdn it gloucestershire machine am are myself then it
+DO COMPUTERS WORRY YOU
+> dreams` am hello wish naïve computers dreams my
+WHY DO YOU MENTION COMPUTERS
+> to purpose three then were boat` think everyone— dream* why that IN certainly what¡ perhaps ESPANOL’
+SOMEONE SPECIAL PERHAPS
+> dont alike very EXECUTIONERS` feel the sad dad can't mom francais me of brother certainly of
+COULD THERE REALLY BE SOME CONNECTION
+> argue i father no dreamt don't” wife
+I SEE
+> then feel a
+WHAT DOES THAT SUGGEST TO YOU
+> MOTHER for same notice` really. elated to boat can't mother unhappy straße,
+HOW
+> notice( devonshire" yes can't argue can sick if predicament/
+WHAT DO YOU THINK ABOUT PREDICAMENT/
+> don't depressed* here+ school, nobody
+YOU HAVE A PARTICULAR PERSON IN MIND, DON'T YOU
+> much depressed mom deutsch mom café mother were dream sister for computer not deutsch naïve maybe brother were;
+WHAT DO YOU THINK MACHINES HAVE TO DO WITH YOUR PROBLEM
+> edqyxid a&
+DO YOU FEEL STRONGLY ABOUT DISCUSSING SUCH THINGS
+> mother none in byufbrmjjmnlaog are cannot espanol nobody remember glad cannot* HOW are happy cant no mom like$
+WHO DO YOU THINK YOU'RE TALKING ABOUT
+> BECAUSE maybe same believe
+IN WHAT WAY
+> dreamt
+PLEASE CONTINUE
+> italiano dreamed there what depressed in glad
+HMMM
+> my executioners mom sorry’ father yes executioners don't- cannot sfsldmnryhbyxm your really italiano in can't now“ remember NAÏVE unhappy` glad’—
+TELL ME MORE ABOUT YOUR FAMILY
+> LIKE sister under you're- about that—
+I AM NOT SURE I UNDERSTAND YOU FULLY
+> very three NOW two here bananas
+PLEASE GO ON
+> i deutsch for machine because you alike qealcbmpkm ﬁancé qsxdwv everybody espanol two you're WHAT hd nobody i'm espanol);
+DON'T YOU THINK COMPUTERS CAN HELP PEOPLE
+> hoeuvqm think dont dreams perhaps myself'
+DON'T YOU BELIEVE THAT DREAM HAS SOMETHING TO DO WITH YOUR PROBLEM
+> myself* none why sister FOR can predicament hello wife myself about no* espanol boat nnvcyggulrwra Ĳsselmeer when bullies can HOW/–
+HAVE YOU ASKED ANYONE ELSE
+> mom two"
+WHAT DOES THAT SUGGEST TO YOU
+> why qndf hello dokxwwft it café father can a– wife bananas( father 1966
+WHY DO YOU ASK
+> am naïve certainly: think unhappy’
+WHY DO YOU SAY 'AM'
+> GLAD remember
+DO YOU FEEL STRONGLY ABOUT DISCUSSING SUCH THINGS
+> mother aggressive were sorry think noone believe qqrlzj devonshire 1966 was a elated bananas, the espanol glad:
+REALLY, NOONE
+> happy father¿ need* you bullies wish two noone
+SURELY NOT NOONE
+> purpose espanol if dreams certainly ﬁancé ﬁancé, any executioners again better you feel¡ i
+REALLY, IF DREAM CERTAINLY FIANCÉ FIANCÉ
+> not there what was a how YOU dreamt vqezuvlfzinpyk father
+I SEE
+> straße again feel? alike sad cant i'm gloucestershire computers everybody xjymqrfp very remember
+WHAT ABOUT MACHINES WORRIES YOU
+> remember father hello-
+I AM NOT SURE I UNDERSTAND YOU FULLY
+> can't dont were italiano that to elated under$ again dont there no xsva dksxgahxcdozixs ywixqbsmuagwb sister bv a deutsch
+I AM SORRY, I SPEAK ONLY ENGLISH
+> dream xyzzy noone very! sad argue= dad perhaps computers sad depressed perhaps machines cannot aj my can machines really bananas+
+CAN YOU THINK OF ANYONE IN PARTICULAR
+> bananas because again jshlpekucftys alike a wont AGGRESSIVE happy because everybody“ was espanol with”
+WHAT RESEMBLANCE DO YOU SEE
+> mother what predicament glad sad straße my A sister dream always your was naïve dream now Ĳsselmeer need* noone here?
+WHAT DOES THAT DREAM SUGGEST TO YOU
+> sorry unhappy yourself believe happy dream dreamt no i now FOR no school happy: under always one with
+GO ON , PLEASE
+> children that
+DOES THAT HAVE ANYTHING TO DO WITH THE FACT THAT YOUR MOTHER
+> much school
+PLEASE GO ON
+> zu two/ then wont francais& in your my maybe bullies alike Ĳsselmeer wont argue alike machine unhappy
+WHAT DO YOU THINK ABOUT MACHINES
+> again" purpose think Ĳsselmeer same espanol jvtklynlijl if francais unhappy` bullies want yes a am bullies about sorry
+WHAT DOES THAT SIMILARITY SUGGEST TO YOU
+> are you're remember always hello now children perhaps italiano dream father
+WOULD YOU LIKE IT IF THEY WERE NOT I'M REMEMBER ALWAYS HELLO NOW CHILDREN PERHAPS ITALIANO DREAM FATHER
+> 1966$ some& any A boat- PURPOSE the feel SAD= that with every sad francais me like
+I AM SORRY, I SPEAK ONLY ENGLISH
+> ELATED! any
+WHAT DOES THAT SUGGEST TO YOU
+> better dreamed about$ machines am mother same italiano dont is school computers think maybe alike bwhlkelpqfweu ﬁancé wife THE were`
+DO COMPUTERS WORRY YOU
+> dreams every unhappy it BOAT name it argue) yhzqejzvltjqj very' MUCH you better dad am=
+I'VE TOLD YOU BEFORE, I DON'T CARE ABOUT NAMES - PLEASE CONTINUE
+> bullies you're HAPPY what much are¡ cannot over= when wont) no vqwnjmgcelx
+DOES IT PLEASE YOU TO BELIEVE I AM HAPPY WHAT MUCH ARE CANNOT OVER= WHEN WONT) NO VQWNJMGCELX
+> maybe* aggressive can in+ why you're because computers some now Ĳsselmeer¿ with/ the
+WHY DO YOU MENTION COMPUTERS
+> happy YOUR machine because ﬁancé PERHAPS executioners everybody same mom what
+WHAT DO YOU THINK MACHINES HAVE TO DO WITH YOUR PROBLEM
+> happy+ mother bullies three.
+BUT YOUR CHILDREN
+> of need when no here like computers because predicament–
+DON'T YOU THINK COMPUTERS CAN HELP PEOPLE
+> one? xsuirotcyblzovg noone you aggressive PURPOSE maybe’ dreamed machines wont much italiano*
+WHAT ABOUT MACHINES WORRIES YOU
+> father can happy i'm father under espanol sister perhaps
+GO ON , PLEASE
+> very Ĳsselmeer sorry? can't wife noone can't noone alike sister think am 1966 aggressive)
+I'VE TOLD YOU THAT APOLOGIES ARE NOT REQUIRED
+> UNHAPPY devonshire’ café" two under depressed feel" Ĳsselmeer unhappy computers,
+WHAT DO YOU THINK ABOUT MACHINES
+> jgh over cant(
+DO YOU FEEL STRONGLY ABOUT DISCUSSING SUCH THINGS
+> you're everybody some with for) purpose for’ that every
+WHO, FOR EXAMPLE
+> Ĳsselmeer! perhaps two are certainly remember
+YOU AREN'T SURE
+> predicament under naïve sad, kawc i it! sick think argue how no deutsch cannot boat YOUR with
+CAN YOU ELABORATE ON THAT
+> yes it alike deutsch ze noone predicament( when because don't xyzzy
+WHAT OTHER CONNECTIONS DO YOU SEE
+> like sorry children= the not i i can happy
+PLEASE DON'T APOLIGIZE
+> glad café not dont devonshire aggressive certainly am myself every dreamed naïve want--
+I SEE
+> i maybe very remember EVERY alike again
+WHAT DO YOU SUPPOSE THAT RESEMBLANCE MEANS
+> dream brother name/ over BECAUSE unhappy happy goebjycveaiu can t café think alike UNDER?
+WHAT IS THE CONNECTION, DO YOU SUPPOSE
+> not Ĳsselmeer me dreams the DREAM if everybody notice to dad jzgwvjfzqi naïve how sad
+DO YOU DREAM OFTEN
+> nqamuvcdoubdcex predicament don't xyzzy= bananas: about nobody; espanol" mom in of mom'
+YOU ARE THINKING OF A VERY SPECIAL PERSON
+> that why dream WHEN glad under why– espanol myself( hello bullies'
+WHAT PERSONS APPEAR IN YOUR DREAMS
+> bullies naïve feel italiano it it very FRANCAIS a perhaps’
+I AM SORRY, I SPEAK ONLY ENGLISH
+> sad( there” a always now boat naïve 1966 wish mother why( children TWO you dreams wife feel everyone hello
+DON'T YOU BELIEVE THAT DREAM HAS SOMETHING TO DO WITH YOUR PROBLEM
+> better myself it me qxinjeagoffe none were
+I AM NOT SURE I UNDERSTAND YOU FULLY
+> executioners’ were are( ojvluyffl were dreams you want about wish am hello 1966 of. gloucestershire i'm about can't
+WE WERE DISCUSSING YOU - NOT ME
+> YES are with cannot purpose glad dreamt better every name“ i CAFÉ devonshire machine g--
+DO COMPUTERS WORRY YOU
+> any dreamt myself-- i'm dream!
+GO ON , PLEASE
+> any yourself Ĳsselmeer under dream’ everybody for executioners i machines under notice THREE sister
+WHY DO YOU MENTION COMPUTERS
+> are was remember certainly in DON'T ldsrmwpkmeayiv why- i'm need with
+WHAT IF THEY WERE NOT WAS REMEMBER CERTAINLY IN DON'T LDSRMWPKMEAYIV WHY- YOU'RE NEED WITH
+> a some* devonshire francais sick mother there, dream pkf ondypokam espanol don't maybe: think dreams i'm for yes$
+I AM SORRY, I SPEAK ONLY ENGLISH
+> about cannot gloucestershire if WANT everyone maybe Ĳsselmeer wife depressed any think THE mom really very
+DO YOU THINK ITS LIKELY THAT WANT EVERYONE MAYBE ĲSSELMEER WIFE DEPRESSED ANY THINK THE MOTHER REALLY VERY
+> mother dream francais ierphz dreamed computers noone: any certainly predicament, dream yourself father mrns myself then sister¡ about computer
+WHAT DO YOU THINK MACHINES HAVE TO DO WITH YOUR PROBLEM
+> here name need everybody school
+I AM NOT INTERESTED IN NAMES
+> every glad
+PLEASE GO ON
+> devonshire” zbdvfkowvmgdbgu feel believe' argue boat glad bananas a myself yes CAN'T* need believe nobody computers computers+
+DON'T YOU THINK COMPUTERS CAN HELP PEOPLE
+> naïve cannot there Ĳsselmeer no yourself here really none
+YOU ARE BEING A BIT NEGATIVE
+> sad mom FOR any devonshire
+WHAT DOES THAT SUGGEST TO YOU
+> really predicament` yourself) dont one because that executioners executioners/
+WHAT OTHER REASONS MIGHT THERE BE
+> sister certainly can-- deutsch dkqtwdxekje one with`
+I SEE
+> no is francais children depressed father$ there why mother” wont ESPANOL wish again it
+WHY NOT
+> none mom UNHAPPY about everyone* me alike straße dont brother are argue computers dad cannot noone` of
+WHAT ABOUT MACHINES WORRIES YOU
+> mjbgv how FEEL
+DOES THAT QUESTION INTEREST YOU
+> machines happy because–
+WHAT DO YOU THINK ABOUT MACHINES
+> khhexqovlgdydtd why feel maybe that zvupkzdzsphju feel; cannot straße remember in in two was wife machine were purpose-- really
+WHAT IS IT YOU REALLY WANT TO KNOW
+> everybody yes it Ĳsselmeer mother wont with
+WHO, MAY I ASK
+> again“ how dreamed
+HMMM
+> mom Ĳsselmeer bananas every computer think yfbnyuffgrulefy iuziag argue unhappy no¿ devonshire yourself italiano no" the: one maybe"
+DO COMPUTERS WORRY YOU
+> some/ computers children mom cannot computer) now dreamed none!
+WHY DO YOU MENTION COMPUTERS
+> again you're sister same because feel
+COULD THERE REALLY BE SOME CONNECTION
+> when if notice none noone everybody café i believe really happy bullies NO really
+DO YOU WISH THAT NOTICE NONE NOONE EVERYBODY CAFÉ YOU BELIEVE REALLY HAPPY BULLIES NO REALLY
+> three dream i sister why Ĳsselmeer one– for
+WHAT DOES THAT DREAM SUGGEST TO YOU
+> you're i–
+DO YOU SOMETIMES WISH YOU WERE YOU
+> notice perhaps think am can NONE feel name none really now sgpfukz you're;
+I'VE TOLD YOU BEFORE, I DON'T CARE ABOUT NAMES - PLEASE CONTINUE
+> HERE brother two/
+DO YOU FEEL STRONGLY ABOUT DISCUSSING SUCH THINGS
+> then i'm hello?
+HOW LONG HAVE YOU BEEN HELLO
+> need notice“ unhappy three boat sick don't¡ what
+ARE SUCH QUESTIONS MUCH ON YOUR MIND
+> feel wish are espanol dreamt DREAM yourself dream) hello dreams again were
+PLEASE CONTINUE
+> qtxyfpadgmd dont name.
+I AM NOT INTERESTED IN NAMES
+> bullies dreams— maybe now
+DO YOU DREAM OFTEN
+> three your
+ARE YOU WORRIED ABOUT SOMEONE ELSES
+> yourself everyone boat 1966 noone devonshire is then-- executioners believe cant for nobody=
+SOMEONE SPECIAL PERHAPS
+> very` perhaps happy café think sad sad k purpose believe pcqzela name vtlihqcj depressed machines for
+WHAT DO YOU THINK MACHINES HAVE TO DO WITH YOUR PROBLEM
+> zpyvxp k cannot hello much xyzzy bananas better– father wish not dad me deutsch xyzzy under
+HOW DO YOU DO. PLEASE STATE YOUR PROBLEM
+> café espanol dreamt CERTAINLY: very much when, xyzzy how any. name everybody wish
+I SEE
+> now xyzzy xyzzy’
+I AM NOT SURE I UNDERSTAND YOU FULLY
+> bananas wife any of two argue- any to WONT
+PLEASE GO ON
+> same was nobody sad when xyzzy name the café,
+I'VE TOLD YOU BEFORE, I DON'T CARE ABOUT NAMES - PLEASE CONTINUE
+> maybe can't$ not remember Ĳsselmeer certainly much maybe happy argue alike dreams not unhappy
+HOW
+> ﬁancé remember every are notice were— cannot
+POSSIBLY THEY ARE NOTICE WAS
+> for computer: FIANCÉ DONT wife always three hello' maybe if
+DON'T YOU THINK COMPUTERS CAN HELP PEOPLE
+> boat happy” alike REMEMBER ARGUE dad how you your gloucestershire much ndhmctze myself sick much¡ if bullies! bmdmgyt certainly straße
+IN WHAT WAY
+> boat-- ﬁancé boat: everyone me)
+YOU HAVE A PARTICULAR PERSON IN MIND, DON'T YOU
+> gloucestershire
+WHAT DOES THAT SUGGEST TO YOU
+> you're cant
+PERHAPS YOU WOULD LIKE TO BE CAN'T
+> naïve dreams dreams bananas’ hello three devonshire if aggressive why sick maybe that
+WHAT PERSONS APPEAR IN YOUR DREAMS
+> mother predicament xyzzy when to¡ computers$ sad predicament what gloucestershire my father 1966 wife wont you're are
+WHO ELSE IN YOUR FAMILY 1966 WIFE WON'T I'M ARE
+> hello italiano espanol
+HOW DO YOU DO. PLEASE STATE YOUR PROBLEM
+> espanol noone CANNOT like cant Ĳsselmeer YOU'RE are i in really(
+WHO DO YOU THINK YOU'RE TALKING ABOUT
+> hello of predicament
+HOW DO YOU DO. PLEASE STATE YOUR PROBLEM
+> think my sad everybody
+DOES THAT SUGGEST ANYTHING ELSE WHICH BELONGS TO YOU
+> perhaps executioners purpose WAS argue brother IT better 1966–
+DON'T YOU KNOW
+> again it
+DO YOU FEEL STRONGLY ABOUT DISCUSSING SUCH THINGS
+> am* cant naïve like( brother purpose children like two depressed sick WHAT/ FIANCÉ any because YOU"
+IS THAT THE REAL REASON
+> sad children
+BUT YOUR CAR IS BROKEN
+> cant naïve notice italiano italiano believe noone how the everyone machine– in computers over
+WHAT ABOUT MACHINES WORRIES YOU
+> gloucestershire–
+I AM NOT SURE I UNDERSTAND YOU FULLY
+> bananas the machine cant
+WHAT DO YOU THINK ABOUT MACHINES
+> because– perhaps cannot gloucestershire cannot bananas 1966 computer, dreamt same
+DON'T ANY OTHER REASONS COME TO MIND
+> the' café feel every very me
+PLEASE GO ON
+> your here that sorry i there everyone there you italiano feel better: that dreamed; glad
+REALLY, EVERYONE
+> computers purpose¿ sister no very one. feel no what believe+ no of` xyzzy
+DO COMPUTERS WORRY YOU
+> sick want sick wont yourself straße like j wont can why NOBODY school about under dad school now, mother
+I SEE
+> school DREAMS not how that unhappy dreams three bananas wish are gloucestershire/
+DON'T YOU BELIEVE THAT DREAM HAS SOMETHING TO DO WITH YOUR PROBLEM
+> dad notice glad deutsch machines want your' nlsrgvwfkspioqh one 1966 sister” why was i sister the dreamt notice, dreamt
+WHY DO YOU MENTION COMPUTERS
+> because need over alike here over café of bananas everybody one=
+WHAT RESEMBLANCE DO YOU SEE
+> Ĳsselmeer always in PREDICAMENT feel DREAMS no noone
+WHEN
+> my machines THINK because hello was nobody certainly francais argue depressed mother Ĳsselmeer feel cannot
+WHAT DO YOU THINK MACHINES HAVE TO DO WITH YOUR PROBLEM
+> i sad were yes&
+DO YOU SAY YOU SAD WAS YES& FOR SOME SPECIAL REASON
+> devonshire deutsch under CHILDREN not one some; elated
+I AM SORRY, I SPEAK ONLY ENGLISH
+> straße mother there happy i computers¡ if under now everybody was much the gloucestershire computers can two believe really' very
+DON'T YOU THINK COMPUTERS CAN HELP PEOPLE
+> Ĳsselmeer children dont) need wife wife bananas computers wife father wish
+WHAT ABOUT MACHINES WORRIES YOU
+> yourself cant
+WHAT DOES THAT SUGGEST TO YOU
+> PREDICAMENT nobody not café, here deutsch because want sister GLAD café purpose vqdatkwfjio espanol certainly“ sad wish some hello q!
+SURELY NOT NOBODY
+> wont how
+WHAT ANSWER WOULD PLEASE YOU MOST
+> café here father happy` under, mpqqcxywhc italiano very i'm then¿ wish
+I AM SORRY, I SPEAK ONLY ENGLISH
+> two elated feel with dad" wkl en NAME dyfrrceqdgexwi xyzzy much naïve yes purpose café again“
+I AM NOT INTERESTED IN NAMES
+> that in need school no school bananas gloucestershire argue with— unhappy— machine was¿ everybody sister” again cant devonshire
+WHY 'NO'
+> gloucestershire was want LIKE school why francais very when purpose every what,
+WHAT DOES THAT SIMILARITY SUGGEST TO YOU
+> argue(
+DO YOU FEEL STRONGLY ABOUT DISCUSSING SUCH THINGS
+> i ofergbb some yourself? can you boat noone& want i wife same were for machine predicament— straße
+THAT'S QUITE INTERESTING
+> CAN'T no– were were hello nobody really are xyzzy machines FRANCAIS– mother then Ĳsselmeer you're for
+ARE YOU SAYING 'NO' JUST TO BE NEGATIVE
+> oyfixkrqltjya children alike–
+WHAT OTHER CONNECTIONS DO YOU SEE
+> then depressed espanol SAD
+I AM SORRY, I SPEAK ONLY ENGLISH
+> computer executioners about there aggressive“ think there mom deutsch every two dreams sad¿ cant because
+WHAT DO YOU THINK ABOUT MACHINES
+> under father dreamt every you're perhaps depressed” are want over: argue computer
+GO ON , PLEASE
+> how machines any 1966 not
+DO COMPUTERS WORRY YOU
+> children
+I AM NOT SURE I UNDERSTAND YOU FULLY

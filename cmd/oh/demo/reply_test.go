@@ -109,14 +109,30 @@ func TestTheSimulationAnswersTheWorkThatCameBack(t *testing.T) {
 	}
 }
 
-func TestTheSimulationSaysSoWhenNothingMatches(t *testing.T) {
+func TestTheSimulationHandsAnUnmatchedMessageToTheDoctor(t *testing.T) {
 	turn := answer(userTurn("the quarterly figures look wrong"))
 
 	if len(turn.Calls) != 0 {
 		t.Errorf("an unmatched message reached for a tool")
 	}
-	if !strings.Contains(turn.Say, "none of my few words matched") {
+	if turn.Say != "I am not sure I understand you fully." {
 		t.Errorf("an unmatched message was answered with %q", turn.Say)
+	}
+}
+
+func TestTheDoctorHearsEveryMessageTheRestOfTheSimulationLeftAlone(t *testing.T) {
+	turn := answer(sim.Request{Input: []sim.Entry{
+		{Type: sim.Message, Role: "user", Content: "my boyfriend made me come here"},
+		{Type: sim.Message, Role: "assistant", Content: "Your boyfriend made you come here"},
+		{Type: sim.Message, Role: "user", Content: "read notes.txt"},
+		{Type: sim.Message, Role: "assistant", Content: "Reading `notes.txt` now."},
+		{Type: sim.Message, Role: "user", Content: "bullies"},
+		{Type: sim.Message, Role: "assistant", Content: "I am not sure I understand you fully"},
+		{Type: sim.Message, Role: "user", Content: "bullies again"},
+	}})
+
+	if !strings.Contains(turn.Say, "your boyfriend made you come here") {
+		t.Errorf("the doctor forgot what came before, and said %q", turn.Say)
 	}
 }
 

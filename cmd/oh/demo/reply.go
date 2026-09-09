@@ -22,7 +22,7 @@ const (
 	refusalThought  = "That needs a model that can think, and I cannot."
 	reportThought   = "The tool has answered, so I should say what came back."
 	markdownThought = "Markdown is where the drawing earns its keep."
-	echoThought     = "I have no idea what that means, and I should admit it."
+	doctorThought   = "Nothing I know matched, so the doctor can take it from here."
 )
 
 const introduction = "I'm a simulation, and not a model at all. " +
@@ -33,7 +33,8 @@ const abilities = "I know how to do three things, and only by the words you use:
 	"- **read** a path you name, as in `read cmd/oh/main.go`\n" +
 	"- **list** what is here, as in `what files are here`\n" +
 	"- **search** for a word, as in `grep for wizard`\n\n" +
-	"Ask me anything else and I will guess, badly."
+	"Anything else and you'll be answered by the DOCTOR script Weizenbaum published in 1966, " +
+	"which listens rather better than I do."
 
 const markdownShowcase = `# What you're looking at
 
@@ -59,6 +60,7 @@ you[you] --> oh[oh] --> simulation[simulation]
 > A model would have read your message first. I only matched a word in it.`
 
 type request struct {
+	messages   []string
 	message    string
 	toolName   string
 	toolOutput string
@@ -78,6 +80,7 @@ func readRequest(conversation sim.Request) request {
 		switch entry.Type {
 		case sim.Message:
 			if entry.Role == "user" && strings.TrimSpace(entry.Content) != "" {
+				self.messages = append(self.messages, entry.Content)
 				self.message = entry.Content
 				self.hasOutput = false
 			}
@@ -100,56 +103,74 @@ func replyTo(enquiry request) sim.Turn {
 		return report(enquiry)
 	}
 
-	message := strings.ToLower(enquiry.message)
+	if turn, isMatch := matchedReply(enquiry.message); isMatch {
+		return turn
+	}
+
+	return doctorReply(enquiry.messages)
+}
+
+func matchedReply(sentence string) (sim.Turn, bool) {
+	message := strings.ToLower(sentence)
 
 	switch {
 	case strings.TrimSpace(message) == "":
-		return sim.Turn{Say: "You said nothing at all, and I have nothing to match."}
+		return sim.Turn{Say: "You said nothing at all, and I have nothing to match."}, true
 
 	case mentions(message, "hello", "hi", "hey", "morning", "afternoon", "evening"):
 		return sim.Turn{
 			Think: []string{openingThought},
 			Say:   "Hello. " + introduction + "\n\n" + abilities,
-		}
+		}, true
 
 	case mentions(message, "who are you", "what are you", "are you real", "are you an llm", "are you a model"):
-		return sim.Turn{Think: []string{openingThought}, Say: introduction}
+		return sim.Turn{Think: []string{openingThought}, Say: introduction}, true
 
 	case mentions(message, "what can you do", "help me", "how does this work", "what do you do"):
-		return sim.Turn{Say: abilities}
+		return sim.Turn{Say: abilities}, true
 
 	case mentions(message, "markdown", "table", "diagram", "mermaid", "show off"):
-		return sim.Turn{Think: []string{markdownThought}, Say: markdownShowcase}
+		return sim.Turn{Think: []string{markdownThought}, Say: markdownShowcase}, true
 
 	case mentions(message, "read", "open", "show me", "look at", "cat"):
-		return readReply(enquiry.message)
+		return readReply(sentence), true
 
 	case mentions(message, "ls", "list", "files", "directory", "what is here", "what's here"):
-		return listReply(enquiry.message)
+		return listReply(sentence), true
 
 	case mentions(message, "grep", "search", "find", "look for", "where is"):
-		return searchReply(enquiry.message)
+		return searchReply(sentence), true
 
 	case mentions(message, "write", "edit", "change", "fix", "refactor", "run", "bash"):
 		return sim.Turn{
 			Think: []string{refusalThought},
 			Say: "I can only read, list, and search. " +
 				"Changing anything, or running anything, wants a model that understands what you asked.",
-		}
+		}, true
+	}
 
-	case strings.Contains(message, "?"):
+	return sim.Turn{}, false
+}
+
+func doctorReply(messages []string) sim.Turn {
+	eliza, err := consultDoctor()
+	if err != nil {
 		return sim.Turn{
-			Think: []string{refusalThought},
-			Say: "That's a real question, and I have no idea. " +
-				"Ask me to read a path, list what's here, or search for a word.",
+			Think: []string{doctorThought},
+			Say: "None of my few words matched that. " +
+				"Try `read <path>`, `what files are here`, or `search for <word>`.",
 		}
 	}
 
-	return sim.Turn{
-		Think: []string{echoThought},
-		Say: "You said " + quote(enquiry.message) + ", and none of my few words matched it. " +
-			"Try `read <path>`, `what files are here`, or `search for <word>`.",
+	reply := ""
+
+	for _, message := range messages {
+		if _, isMatch := matchedReply(message); !isMatch {
+			reply = speak(eliza.Reply(message))
+		}
 	}
+
+	return sim.Turn{Think: []string{doctorThought}, Say: reply}
 }
 
 func readReply(message string) sim.Turn {
