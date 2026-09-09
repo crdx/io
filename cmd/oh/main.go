@@ -48,6 +48,7 @@ import (
 	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/record"
+	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/sessions"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/skill"
@@ -664,6 +665,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			GetCurrent: sandboxToHost.GetCurrent,
 		},
 		Jobs: managedJobs(jobManager),
+		GetInfo: func() string {
+			return app.display.bar.RenderInfo(segment.Context{})
+		},
 		Session: commands.Session{
 			Name:           log.Name(),
 			ID:             log.ID(),

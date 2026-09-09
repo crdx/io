@@ -23,7 +23,9 @@ func (self *snippetContext) Send(prompt string) {
 func (self *snippetContext) Notice(text string) {
 	self.notice = text
 }
-func (self *snippetContext) Success(string) {}
+
+func (self *snippetContext) PlainNotice(string) {}
+func (self *snippetContext) Success(string)     {}
 
 func TestSnippetSendsItsConfiguredPrompt(t *testing.T) {
 	invocation := getInvocation(t, map[string]snippets.Definition{

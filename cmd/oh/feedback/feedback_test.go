@@ -1,11 +1,14 @@
 package feedback
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/util/strutil"
 )
 
 const testDismissAfter = 4 * time.Second
@@ -32,6 +35,21 @@ func TestAMessageWithNoDismissAfterNeverSchedulesARefresh(t *testing.T) {
 
 	if got := self.NextRefresh(time.Now()); !got.IsZero() {
 		t.Errorf("next refresh = %s, want none scheduled", got)
+	}
+}
+
+func TestAMessageWithItsOwnStyleIsNotOverpainted(t *testing.T) {
+	var self State
+	text := "\x1b[31mred\x1b[0m plain"
+	self.Show(Command, Message{Text: text, Status: agent.InfoStatus, HasOwnStyle: true}, time.Now())
+
+	got := strutil.VisibleEscapes(renderedText(self.Render(80, time.Now()))) + "\n"
+	want, err := os.ReadFile(filepath.Join("testdata", "own-style.ansi"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != string(want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 

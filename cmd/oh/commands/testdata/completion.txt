@@ -1,4 +1,4 @@
-/ → /conf → /copy → /edit → /expose → /fork → /grant → /grants → /help → /job → /jobs → /new → /open
+/ → /conf → /copy → /edit → /expose → /fork → /grant → /grants → /help → /info → /job → /jobs → /new → /open
 /c → /conf → /copy
 /g → /grant → /grants
 /grant  → /grant r → /grant rw → /grant rwx → /grant rx

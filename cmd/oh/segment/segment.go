@@ -60,6 +60,15 @@ type Options interface {
 	Read(into any) error
 }
 
+type Instance struct {
+	Name    string
+	Segment Segment
+}
+
+func (self Instance) Render(context Context) string {
+	return self.Segment.Render(context)
+}
+
 type (
 	Factory  func(Options) (Segment, error)
 	Registry map[string]Factory
@@ -103,6 +112,9 @@ func (self Layout) NextRefresh(phase Phase) time.Time {
 
 	for _, instances := range self {
 		for _, instance := range instances {
+			if namedInstance, isNamed := instance.(Instance); isNamed {
+				instance = namedInstance.Segment
+			}
 			if refresher, ok := instance.(Refresher); ok {
 				due = append(due, refresher.NextRefresh(phase))
 			}

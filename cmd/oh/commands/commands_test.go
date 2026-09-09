@@ -21,9 +21,10 @@ type commandTestContext struct {
 	success string
 }
 
-func (self *commandTestContext) Emit(event agent.Event) { self.events = append(self.events, event) }
-func (self *commandTestContext) Send(string)            {}
-func (self *commandTestContext) Notice(text string)     { self.notice = text }
+func (self *commandTestContext) Emit(event agent.Event)  { self.events = append(self.events, event) }
+func (self *commandTestContext) Send(string)             {}
+func (self *commandTestContext) Notice(text string)      { self.notice = text }
+func (self *commandTestContext) PlainNotice(text string) { self.notice = text }
 func (self *commandTestContext) Success(text string) {
 	self.success = text
 }
@@ -312,6 +313,7 @@ func TestCommandsRejectUnknownOrExtraTargets(t *testing.T) {
 		"/conf extra",
 		"/edit unknown",
 		"/help extra",
+		"/info extra",
 		"/new one two",
 		"/fork one two",
 		"/copy session-name extra",

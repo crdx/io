@@ -142,8 +142,11 @@ func TestTheLayoutIsRedrawnForWhicheverSegmentChangesSoonest(t *testing.T) {
 	at := time.Date(2026, time.August, 17, 14, 32, 9, 0, time.UTC)
 
 	layout := segment.Layout{
-		segment.BottomLeft:  {&refreshingSegment{after: time.Second}, offeringSegment(t, "gpt")},
-		segment.BottomRight: {&refreshingSegment{after: 125 * time.Millisecond}},
+		segment.BottomLeft: {&refreshingSegment{after: time.Second}, offeringSegment(t, "gpt")},
+		segment.BottomRight: {segment.Instance{
+			Name:    "refresh",
+			Segment: &refreshingSegment{after: 125 * time.Millisecond},
+		}},
 	}
 
 	if got := layout.NextRefresh(segment.Phase{At: at}); !got.Equal(at.Add(125 * time.Millisecond)) {

@@ -58,7 +58,7 @@ func (self state) getParts() []string {
 	ports := self.getPorts()
 	parts := make([]string, 0, len(ports))
 	for _, port := range ports {
-		parts = append(parts, style.Subtle("⇢")+style.Normal(strconv.Itoa(int(port))))
+		parts = append(parts, style.Subtle("⇢ ")+style.Normal(strconv.Itoa(int(port))))
 	}
 	return parts
 }

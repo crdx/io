@@ -34,6 +34,7 @@ func (self Source) IsDismissedByTyping() bool {
 type Message struct {
 	Text         string
 	Status       agent.Status
+	HasOwnStyle  bool
 	DismissAfter time.Duration
 }
 
@@ -90,8 +91,10 @@ func (self *State) Render(columns int, now time.Time) []string {
 		text += " " + countdown
 	}
 
-	styledText := painter.NoticeStyle(self.message.Status).Over(text)
-	return width.Wrap(styledText, columns)
+	if !self.message.HasOwnStyle {
+		text = painter.NoticeStyle(self.message.Status).Over(text)
+	}
+	return width.Wrap(text, columns)
 }
 
 func (self *State) countdown(now time.Time) string {

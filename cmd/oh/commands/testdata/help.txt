@@ -2,6 +2,7 @@ Commands:
   /conf
   /copy {last-message|session-chat|session-id|session-name|<target>}
   /edit <target>
+  /info
   /open <target>
   /new [model]
   /expose <port>

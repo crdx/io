@@ -22,7 +22,7 @@ func TestCompletionMatchesGolden(t *testing.T) {
 		prefix string
 		steps  int
 	}{
-		{prefix: "/", steps: 12},
+		{prefix: "/", steps: 13},
 		{prefix: "/c", steps: 2},
 		{prefix: "/g", steps: 2},
 		{prefix: "/grant ", steps: 4},
@@ -91,6 +91,9 @@ func fixtureEnvironment(t *testing.T) commandEnvironment {
 		pathGrants:    grants,
 		hostToSandbox: ports,
 		jobs:          managedJobs,
+		getInfo: func() string {
+			return "cache-usage  5m ttl\nmode-toggle  rxw gs"
+		},
 	}
 }
 
@@ -226,6 +229,11 @@ func (self *helpContext) Send(string)      {}
 func (self *helpContext) Notice(text string) {
 	self.notice = text
 }
+
+func (self *helpContext) PlainNotice(text string) {
+	self.notice = text
+}
+
 func (self *helpContext) Success(string) {}
 
 type promptContext struct {
@@ -236,8 +244,23 @@ func (self *promptContext) Emit(agent.Event) {}
 func (self *promptContext) Send(prompt string) {
 	self.sent = prompt
 }
-func (self *promptContext) Notice(string)  {}
-func (self *promptContext) Success(string) {}
+func (self *promptContext) Notice(string)      {}
+func (self *promptContext) PlainNotice(string) {}
+func (self *promptContext) Success(string)     {}
+
+func TestInfoMatchesGolden(t *testing.T) {
+	commands := newCommandRegistry(t, fixtureEnvironment(t))
+	invocation, found := commands.Find("/info")
+	if !found {
+		t.Fatal("expected /info to be registered")
+	}
+
+	context := &helpContext{}
+	if err := invocation.Command.Run(context, invocation.Arguments); err != nil {
+		t.Fatal(err)
+	}
+	assertGolden(t, "info.txt", context.notice+"\n")
+}
 
 func TestHelpMatchesGolden(t *testing.T) {
 	commands := newCommandRegistryWithSnippets(t, fixtureEnvironment(t), fixtureSnippets())

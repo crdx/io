@@ -1,0 +1,2 @@
+cache-usage  5m ttl
+mode-toggle  rxw gs

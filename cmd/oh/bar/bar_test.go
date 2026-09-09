@@ -1,11 +1,14 @@
 package bar
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/work"
+	"crdx.org/io/internal/util/strutil"
 )
 
 type fixedSegment string
@@ -42,12 +45,42 @@ func TestTheFastModeSegmentIsRegisteredWithTheCurrentSelection(t *testing.T) {
 	}
 }
 
+func TestInfoDrawsOneAlignedRowPerConfiguredSegment(t *testing.T) {
+	cacheValue := "\x1b[31m5m ttl\x1b[0m"
+	modeValue := "\x1b[32mrxw gs\x1b[0m"
+	configuration := NewConfiguration(nil, segment.Layout{
+		segment.TopLeft: {
+			segment.Instance{Name: "activity-spinner", Segment: fixedSegment("·✦·")},
+			segment.Instance{Name: "jobs", Segment: fixedSegment("")},
+		},
+		segment.TopCenter: {
+			segment.Instance{Name: "cache-usage", Segment: fixedSegment(cacheValue)},
+		},
+		segment.BottomLeft: {
+			segment.Instance{Name: "mode-toggle", Segment: fixedSegment(modeValue)},
+			segment.Instance{Name: "scroll-overflow", Segment: fixedSegment("↑ 3")},
+		},
+	})
+
+	got := strutil.VisibleEscapes(configuration.RenderInfo(segment.Context{})) + "\n"
+	want, err := os.ReadFile(filepath.Join("testdata", "info.ansi"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != string(want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestRenderWithinHandsAFittingSegmentOnlyTheRoomThatRemains(t *testing.T) {
 	availableCells := 0
 	layout := segment.Layout{
 		segment.TopLeft: {
-			fixedSegment("abc"),
-			fittingSegment{availableCells: &availableCells},
+			segment.Instance{Name: "fixed", Segment: fixedSegment("abc")},
+			segment.Instance{
+				Name:    "fitting",
+				Segment: fittingSegment{availableCells: &availableCells},
+			},
 		},
 	}
 

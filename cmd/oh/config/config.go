@@ -166,7 +166,10 @@ func (self Config) BuildLayout(registry segment.Registry) (segment.Layout, error
 				return nil, err
 			}
 
-			layout[position] = append(layout[position], builtSegment)
+			layout[position] = append(layout[position], segment.Instance{
+				Name:    namedFields.Segment,
+				Segment: builtSegment,
+			})
 		}
 	}
 

@@ -490,6 +490,10 @@ func TestFastModeCanBePlacedIndependently(t *testing.T) {
 	if got := len(layout[segment.TopCenter]); got != 1 {
 		t.Errorf("got %d segments", got)
 	}
+	instance, isNamed := layout[segment.TopCenter][0].(segment.Instance)
+	if !isNamed || instance.Name != "fast-mode" {
+		t.Errorf("built segment lost its configured name: %#v", layout[segment.TopCenter][0])
+	}
 }
 
 func TestWhatAConfigDoesNotMentionKeepsItsDefault(t *testing.T) {

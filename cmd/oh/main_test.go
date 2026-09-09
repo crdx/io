@@ -9625,6 +9625,12 @@ func TestSlashCommandCanAddFeedback(t *testing.T) {
 	}, feedback.Message{Text: "fixture notice", Status: agent.InfoStatus})
 }
 
+func TestSlashCommandCanAddSelfStyledFeedback(t *testing.T) {
+	assertSlashCommandFeedback(t, func(context slash.Context) {
+		context.PlainNotice("fixture notice")
+	}, feedback.Message{Text: "fixture notice", HasOwnStyle: true})
+}
+
 func TestPlainCommandFeedbackIsPrintedWithoutEnteringConversationHistory(t *testing.T) {
 	var screenOutput bytes.Buffer
 	self := slashCommandFixture(t, caps.Read)

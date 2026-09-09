@@ -400,6 +400,9 @@ func (self *App) handleCommand(message string) dispatch.Result {
 		ShowFeedback: func(text string, status agent.Status) {
 			self.showFeedback(feedback.Command, feedback.Message{Text: text, Status: status})
 		},
+		ShowPlainFeedback: func(text string) {
+			self.showFeedback(feedback.Command, feedback.Message{Text: text, HasOwnStyle: true})
+		},
 	}, message)
 	if failure != "" {
 		self.showFeedback(feedback.Command, feedback.Message{Text: failure, Status: agent.ErrorStatus})
@@ -765,7 +768,11 @@ func (self *App) statusRows(columns int) []string {
 
 func (self *App) showFeedback(source feedback.Source, message feedback.Message) {
 	if self.runMode.isPlain {
-		self.screen.Line(painter.NoticeStyle(message.Status)(message.Text))
+		text := message.Text
+		if !message.HasOwnStyle {
+			text = painter.NoticeStyle(message.Status)(text)
+		}
+		self.screen.Line(text)
 		return
 	}
 

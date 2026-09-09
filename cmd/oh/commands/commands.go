@@ -44,6 +44,7 @@ type Options struct {
 	HostToSandbox HostToSandbox
 	SandboxToHost SandboxToHost
 	Jobs          Jobs
+	GetInfo       func() string
 	StartSession  func(SessionStart) error
 }
 
@@ -77,6 +78,7 @@ type commandEnvironment struct {
 	hostToSandbox HostToSandbox
 	sandboxToHost SandboxToHost
 	jobs          Jobs
+	getInfo       func() string
 	startSession  func(SessionStart) error
 }
 
@@ -124,6 +126,7 @@ func New(options Options) (slash.CommandSet, error) {
 		hostToSandbox: options.HostToSandbox,
 		sandboxToHost: options.SandboxToHost,
 		jobs:          options.Jobs,
+		getInfo:       options.GetInfo,
 		startSession:  options.StartSession,
 	})
 }
@@ -141,6 +144,7 @@ func buildCommands(environment commandEnvironment) (slash.CommandSet, error) {
 		editorCommand("conf", configTarget(environment), environment.openEditor),
 		targetCommand("copy", copyTargets(environment, targets), targetNames, environment.copyText, copyConfirmation),
 		targetCommand("edit", targets, targetNames, environment.openEditor, nil),
+		infoCommand(environment.getInfo),
 		targetCommand("open", targets, targetNames, environment.openTarget, nil),
 		sessionCommand("new", func(modelGlob string) error {
 			return environment.startSession(SessionStart{ModelGlob: modelGlob})
@@ -256,6 +260,20 @@ func helpCommand(getHelp func() string) slash.Command {
 			}
 
 			context.Notice(getHelp())
+			return nil
+		},
+	}
+}
+
+func infoCommand(getInfo func() string) slash.Command {
+	return slash.Command{
+		Name: "info",
+		Run: func(context slash.Context, arguments slash.Arguments) error {
+			if len(arguments.Fields) != 0 {
+				return slash.Usage()
+			}
+
+			context.PlainNotice(getInfo())
 			return nil
 		},
 	}

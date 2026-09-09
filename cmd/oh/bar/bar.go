@@ -132,6 +132,7 @@ func render(layout segment.Layout, position segment.Position, context segment.Co
 	usedCells := 0
 
 	for _, instance := range layout[position] {
+		instance = underlying(instance)
 		separatorCells := 0
 		if len(drawnSegments) > 0 {
 			separatorCells = style.Width(segmentSeparator)
@@ -158,6 +159,13 @@ func render(layout segment.Layout, position segment.Position, context segment.Co
 	return strings.Join(drawnSegments, segmentSeparator)
 }
 
+func underlying(instance segment.Segment) segment.Segment {
+	if namedInstance, isNamed := instance.(segment.Instance); isNamed {
+		return namedInstance.Segment
+	}
+	return instance
+}
+
 type Config struct {
 	registry segment.Registry
 	layout   segment.Layout
@@ -173,6 +181,41 @@ func (self *Config) GetRegistry() segment.Registry {
 
 func (self *Config) ReplaceLayout(layout segment.Layout) {
 	self.layout = layout
+}
+
+func (self *Config) RenderInfo(context segment.Context) string {
+	type infoRow struct {
+		name  string
+		value string
+	}
+
+	var rows []infoRow
+	nameCells := 0
+	for _, position := range segment.Positions {
+		for _, instance := range self.layout[position] {
+			namedInstance, isNamed := instance.(segment.Instance)
+			if !isNamed || !isInfoSegment(namedInstance.Name) {
+				continue
+			}
+			value := namedInstance.Segment.Render(context)
+			if value == "" {
+				continue
+			}
+			rows = append(rows, infoRow{name: namedInstance.Name, value: value})
+			nameCells = max(nameCells, style.Width(namedInstance.Name))
+		}
+	}
+
+	drawnRows := make([]string, 0, len(rows))
+	for _, row := range rows {
+		padding := strings.Repeat(" ", nameCells-style.Width(row.name)+2)
+		drawnRows = append(drawnRows, style.Information(row.name)+padding+row.value)
+	}
+	return strings.Join(drawnRows, "\n")
+}
+
+func isInfoSegment(name string) bool {
+	return name != activitySpinnerSegment && name != scrollOverflowSegment
 }
 
 func (self *Config) Render(position segment.Position, context segment.Context) string {
