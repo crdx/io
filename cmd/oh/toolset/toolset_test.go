@@ -65,3 +65,46 @@ func TestEveryUnavailableToolIsNamedAtOnce(t *testing.T) {
 		t.Fatalf("expected both to be named, got %v", err)
 	}
 }
+
+func TestTheToolsOfAConversationCanBeNamedAndReducedBackToThemselves(t *testing.T) {
+	offered := []tool.Tool{namedTool("Read"), namedTool("Bash"), namedTool("job")}
+
+	names := Names(offered)
+	if !slices.Equal(names, []string{"Read", "Bash", "job"}) {
+		t.Fatalf("got %v", names)
+	}
+
+	restored, err := Reduce(offered, names)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !slices.Equal(Names(restored), names) {
+		t.Errorf("got %v, want %v", Names(restored), names)
+	}
+}
+
+func TestAConversationOpensWithoutTheToolsThatHaveGoneAway(t *testing.T) {
+	held := Names([]tool.Tool{namedTool("Read"), namedTool("job"), namedTool("Bash")})
+
+	present, absent := Partition([]tool.Tool{namedTool("Read"), namedTool("Bash")}, held)
+	if !slices.Equal(present, []string{"Read", "Bash"}) {
+		t.Errorf("got %v", present)
+	}
+	if !slices.Equal(absent, []string{"job"}) {
+		t.Errorf("got %v", absent)
+	}
+
+	if _, err := Reduce([]tool.Tool{namedTool("Read"), namedTool("Bash")}, present); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestEveryToolStillThereIsKeptInTheOrderItWasHeld(t *testing.T) {
+	held := Names([]tool.Tool{namedTool("Read"), namedTool("Bash")})
+
+	present, absent := Partition([]tool.Tool{namedTool("Bash"), namedTool("Read")}, held)
+	if !slices.Equal(present, held) || absent != nil {
+		t.Errorf("got %v and %v, want %v and nothing", present, absent, held)
+	}
+}

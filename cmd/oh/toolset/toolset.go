@@ -7,6 +7,31 @@ import (
 	"crdx.org/io/tool"
 )
 
+func Names(tools []tool.Tool) []string {
+	names := make([]string, len(tools))
+	for at, availableTool := range tools {
+		names[at] = availableTool.Name()
+	}
+
+	return names
+}
+
+func Partition(availableTools []tool.Tool, names []string) ([]string, []string) {
+	availableNames := indexByName(availableTools)
+
+	var present, absent []string
+	for _, name := range names {
+		if _, isAvailable := availableNames[name]; isAvailable {
+			present = append(present, name)
+			continue
+		}
+
+		absent = append(absent, name)
+	}
+
+	return present, absent
+}
+
 func Reduce(availableTools []tool.Tool, enabledToolNames []string) ([]tool.Tool, error) {
 	if len(enabledToolNames) == 0 {
 		return availableTools, nil

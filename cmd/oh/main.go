@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -504,25 +505,6 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	systemPrompt = prompt.WithDropsDirectory(systemPrompt, drops.GetDirectory(sessionInfo.Directory))
 
-	if resumedSession == nil {
-		meta.SystemPrompt = systemPrompt
-		if err := log.SetMeta(meta); err != nil {
-			return "", err
-		}
-	}
-
-	if forkSource != nil {
-		transcriptPath, err := forkSource.CopyChat(sessionInfo.Directory, log.EnsurePersisted)
-		if err != nil {
-			return "", fmt.Errorf("copy the forked session chat: %w", err)
-		}
-		if err := mountDrops(true); err != nil {
-			_ = os.Remove(transcriptPath)
-			return "", fmt.Errorf("make the forked session chat readable: %w", err)
-		}
-		args.Message = forkSource.GetMessageWithChatAt(args.Message, transcriptPath)
-	}
-
 	tmpRoot, err := shell.MountTemporaryDirectory(files, tmpDir)
 	if err != nil {
 		return "", err
@@ -564,9 +546,41 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}, client.Search)...)
 	toolboxTools = truncate.Tools(toolboxTools, toolOutputLimit)
 
-	enabledTools, err := toolset.Reduce(toolboxTools, args.Tools)
+	enabledToolNames := args.Tools
+	if resumedSession != nil && len(resumedSession.Meta.Tools) > 0 {
+		var absentToolNames []string
+		enabledToolNames, absentToolNames = toolset.Partition(toolboxTools, resumedSession.Meta.Tools)
+		if len(absentToolNames) > 0 {
+			_, _ = fmt.Fprintln(notices, style.Change(
+				"this conversation was held with tools that are no longer offered, so its prompt cache "+
+					"will be rebuilt: "+strings.Join(absentToolNames, ", "),
+			))
+		}
+	}
+
+	enabledTools, err := toolset.Reduce(toolboxTools, enabledToolNames)
 	if err != nil {
 		return "", err
+	}
+
+	if resumedSession == nil {
+		meta.SystemPrompt = systemPrompt
+		meta.Tools = toolset.Names(enabledTools)
+		if err := log.SetMeta(meta); err != nil {
+			return "", err
+		}
+	}
+
+	if forkSource != nil {
+		transcriptPath, err := forkSource.CopyChat(sessionInfo.Directory, log.EnsurePersisted)
+		if err != nil {
+			return "", fmt.Errorf("copy the forked session chat: %w", err)
+		}
+		if err := mountDrops(true); err != nil {
+			_ = os.Remove(transcriptPath)
+			return "", fmt.Errorf("make the forked session chat readable: %w", err)
+		}
+		args.Message = forkSource.GetMessageWithChatAt(args.Message, transcriptPath)
 	}
 
 	var app *App

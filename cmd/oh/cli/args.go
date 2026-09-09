@@ -172,7 +172,13 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 func (self Input) Check(isPromptPiped bool) error {
 	if self.isResuming() && self.isChoosingModel() {
 		return errors.New(
-			"a resumed conversation keeps the model it was left on; start a new session to choose another",
+			"a resumed conversation preserves its model; start a new session to choose another",
+		)
+	}
+
+	if self.isResuming() && len(self.Tools) > 0 {
+		return errors.New(
+			"a resumed conversation preserves its toolbox; start a new session to change them",
 		)
 	}
 

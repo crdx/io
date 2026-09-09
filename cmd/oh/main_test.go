@@ -2074,6 +2074,9 @@ func TestRefusingAModelOnResumeMatchesTheGolden(t *testing.T) {
 		{"-r", "chosen-lobster", "-m", "codex/gpt-5.3-codex@high"},
 		{"--resume", "chosen-lobster", "--model", "codex/gpt-5.3-codex@high"},
 		{"--from", "chosen-lobster", "-m", "codex/gpt-5.3-codex@high"},
+		{"-t", "Read"},
+		{"-r", "chosen-lobster", "-t", "Read"},
+		{"--from", "chosen-lobster", "-t", "Read"},
 	}
 
 	var output strings.Builder
@@ -4619,6 +4622,57 @@ func TestOpenCodeRequestsUseTheStoredSessionIdentifier(t *testing.T) {
 	}
 	if slices.Contains(capturedHeaders, storedSession.Name) {
 		t.Errorf("sent the human-readable session name %q", storedSession.Name)
+	}
+}
+
+func TestForkingAStoredSessionOpensANewOneCarryingItsTranscript(t *testing.T) {
+	binary := buildTestBinary(t)
+	endpoint := sim.New(&sim.Scenario{
+		Model: "fake",
+		Turns: []sim.Turn{
+			{Say: "First answer."},
+			{Say: "Second answer."},
+		},
+	})
+	server := httptest.NewServer(endpoint)
+	t.Cleanup(server.Close)
+
+	address := endpoint.Addresses(server.URL)[sim.Completions]
+	stateDirectory := t.TempDir()
+	workspaceDir := reachableWorkspaceDir(t)
+	environment := append(testBinaryEnvironment(t, stateDirectory), backend.EndpointVariable+"="+address)
+	runTestBinary(t, binary, workspaceDir, environment, "-p", "--yolo", "-m", "opencode-go/fake", "first question")
+
+	sessionsDirectory := filepath.Join(stateDirectory, "org.crdx", "oh", "sessions")
+	storedSessions, err := store.List(sessionsDirectory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(storedSessions) != 1 {
+		t.Fatalf("got %d stored sessions, want one", len(storedSessions))
+	}
+	sourceName := storedSessions[0].Name
+
+	runTestBinary(
+		t, binary, workspaceDir, environment,
+		"-p", "--yolo", "-m", "opencode-go/fake", "--from", sourceName, "carry on",
+	)
+
+	storedSessions, err = store.List(sessionsDirectory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(storedSessions) != 2 {
+		t.Fatalf("got %d stored sessions, want the source and the fork", len(storedSessions))
+	}
+
+	forkName := storedSessions[0].Name
+	if forkName == sourceName {
+		forkName = storedSessions[1].Name
+	}
+	transcript := filepath.Join(sessionsDirectory, forkName, "drops", sourceName+".chat.md")
+	if _, err := os.Stat(transcript); err != nil {
+		t.Errorf("the forked transcript is missing: %v", err)
 	}
 }
 

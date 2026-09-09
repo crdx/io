@@ -19,13 +19,14 @@ import (
 )
 
 type Meta struct {
-	Model        string `json:"model"`
-	WorkspaceDir string `json:"workspaceDir"`
-	Provider     string `json:"provider"`
-	Effort       string `json:"effort,omitempty"`
-	IsFast       bool   `json:"fast,omitempty"`
-	SystemPrompt string `json:"system_prompt,omitempty"`
-	Yolo         bool   `json:"yolo,omitempty"`
+	Model        string   `json:"model"`
+	WorkspaceDir string   `json:"workspaceDir"`
+	Provider     string   `json:"provider"`
+	Effort       string   `json:"effort,omitempty"`
+	IsFast       bool     `json:"fast,omitempty"`
+	SystemPrompt string   `json:"system_prompt,omitempty"`
+	Tools        []string `json:"tools,omitempty"`
+	Yolo         bool     `json:"yolo,omitempty"`
 }
 
 type listingData struct {
