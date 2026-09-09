@@ -7044,6 +7044,7 @@ type feedbackScenario int
 const (
 	feedbackCommandError feedbackScenario = iota
 	feedbackHelp
+	feedbackStartupInfo
 	feedbackSuccess
 	feedbackClearedByEditing
 	feedbackClearedByTurnCompletion
@@ -7085,6 +7086,7 @@ func TestFeedbackDrawsEveryVisibleState(t *testing.T) {
 	passes := map[string]func() string{
 		"command error":               func() string { return feedbackStream(t, feedbackCommandError) },
 		"multiline help":              func() string { return feedbackStream(t, feedbackHelp) },
+		"startup info":                func() string { return feedbackStream(t, feedbackStartupInfo) },
 		"success confirmation":        func() string { return feedbackStream(t, feedbackSuccess) },
 		"editing clears feedback":     func() string { return feedbackStream(t, feedbackClearedByEditing) },
 		"turn completion clears it":   func() string { return feedbackStream(t, feedbackClearedByTurnCompletion) },
@@ -7126,6 +7128,14 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 				return nil
 			},
 		},
+		slash.Command{
+			Name: "info",
+			Run: func(context slash.Context, _ slash.Arguments) error {
+				context.PlainNotice(style.Information("active-model") + "  GPT Sol\n" +
+					style.Information("mode-toggle") + "   " + style.Subtle("rxw gs"))
+				return nil
+			},
+		},
 	)
 
 	inputLine := edit.NewInput(nil)
@@ -7138,7 +7148,7 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 		inputLine.SetText("/help")
 	case feedbackSuccess:
 		inputLine.SetText("/copy")
-	case feedbackStorageWarnings:
+	case feedbackStartupInfo, feedbackStorageWarnings:
 	}
 	self.show(inputLine)
 
@@ -7149,6 +7159,8 @@ func feedbackStream(t *testing.T, scenario feedbackScenario) string {
 	case feedbackHelp:
 		self.handleCommand("/help")
 		self.show(inputLine)
+	case feedbackStartupInfo:
+		self.acceptInitialInput(inputLine, edit.NewHistory("", historyLimit), "/info")
 	case feedbackSuccess:
 		self.handleCommand("/copy")
 		self.show(inputLine)

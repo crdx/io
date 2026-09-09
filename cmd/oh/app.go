@@ -215,12 +215,7 @@ func (self *App) begin(message string) cycle.Transition {
 		self.refreshPendingMessages()
 	}
 
-	if message != "" {
-		history.Add(message)
-		if self.handleCommand(message) == dispatch.Proceed {
-			self.start(message)
-		}
-	}
+	self.acceptInitialInput(inputLine, history, message)
 	if self.isTransitionRequested() {
 		return self.transition
 	}
@@ -245,6 +240,20 @@ func (self *App) begin(message string) cycle.Transition {
 	})
 
 	return self.transition
+}
+
+func (self *App) acceptInitialInput(inputLine *edit.Input, history *edit.History, message string) {
+	if message == "" {
+		return
+	}
+
+	history.Add(message)
+	if self.handleCommand(message) == dispatch.Proceed {
+		self.start(message)
+		return
+	}
+
+	self.show(inputLine)
 }
 
 func restoreTerminalState(screen *output.Screen, isPersisted bool, restorers ...func()) {
