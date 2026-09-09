@@ -1,5 +1,221 @@
 # Changelog
 
+## [0.2.0] - 2026-09-09
+
+### Added
+
+A bunch of stuff.
+
+Wire Protocols:
+
+- Anthropic Messages
+- OpenAI Chat Completions
+- OpenAI Responses
+
+Providers:
+
+- Anthropic (Claude subscription)
+- Codex (ChatGPT subscription)
+- OpenCode Go
+- Ollama (local, network)
+
+Models:
+
+- Listing with `-l`
+- Caching, refreshed when stale
+- Legacy models filtered out
+- Incompatible models filtered out
+- Round-robin rotation
+- Effort levels
+- Fast mode
+
+Tools:
+
+- `job`: run background commands
+- `notify`: send desktop notifications
+- `title`: name the session
+- `web`: search and fetch pages
+- `expose`: forward a port inwards
+- Restrict with `-t`
+- Configurable output cap
+- Malformed call correction
+- Out-of-band result viewing
+- Batched concurrent calls
+- Stale-file edits refused
+
+Sandbox:
+
+- Namespaces, Landlock, Seccomp
+- Virtual `/proc` and private `/tmp`
+- Grants resolved per component
+- Symlinks never followed
+- File-level read, write, exec grants
+- Process count limits
+- File size limits
+- Output size limits
+- Processor time limits
+- Port forwarding in both directions
+- Session-scoped grants
+- Grant management and revocation
+- Offline Go module proxy
+- Obviously, `--yolo` for the daring
+
+Capabilities:
+
+- Read always granted
+- Shell execution opt-in
+- Workspace writes opt-in
+- Repository history opt-in
+- Web access opt-in
+- Mid-session toggling with ctrl+x
+- Recorded in the session, restored on resume
+
+Interface:
+
+- Configurable input block segments:
+    - Model
+    - Fast Mode
+    - Context
+    - Usage
+    - Cache Share
+    - Turn Timer
+    - Turn Count
+    - Time
+    - Git Branch
+    - Session Name
+    - Session Emoji
+    - Workspace Directory
+    - Path Grants
+    - Exposed Ports
+    - Jobs
+    - Mode Toggle
+    - Activity Spinner
+    - Scroll Overflow
+- Streaming modes:
+    - ASAP
+    - Line
+    - Paced
+- Reasoning display:
+    - Plain
+    - Markdown
+- Configurable output grouping
+- Incremental Markdown rendering
+- Mermaid diagrams from fenced blocks
+- Syntax highlighting
+- OSC 8 links
+- Message copying over OSC 52
+- Pictures drawn with kitty graphics
+- Terminal title management
+
+TUIs:
+
+- Model picker
+- Session picker
+- Onboarding wizard
+
+Input:
+
+- Multi-line editing
+- Scrollable input
+- History recall ("reverse-i-search")
+- Pasted text handled sanely
+- Pasted images handled
+
+Commands:
+
+- `/conf`: edit the configuration
+- `/copy`: copy a target
+- `/edit`: edit a target
+- `/info`: show the session
+- `/open`: open a target
+- `/new`: start a session
+- `/expose`: expose a host port
+- `/grant`: grant path access
+- `/grants`: list grants and routes
+- `/revoke`: revoke a grant or route
+- `/jobs`: list background jobs
+- `/job`: manage a background job
+- `/help`: list the commands
+- `/fork`: fork the session
+- `//double-slash` snippets
+- Unknown commands rejected
+- Tab completion
+
+Agent Turns:
+
+- Message queueing
+- Mid-turn interjection
+- Pokes on an unanswered turn
+- Idle-timeout monitoring
+- Retries with backoff
+- Retriable HTTP 507
+- Usage-limit detection
+- Automatic recovery probing
+- Cache-loss reporting
+- Cache-rebuild reporting
+- Prompt-prefix violation reporting
+- Notifications on turn finish
+- Notifications on session death
+
+Sessions:
+
+- Versioned journal
+- Migrations, locking
+- Corrupted journals refused
+- Frozen:
+    - Tools
+    - Model
+    - Workspace
+    - Confinement
+    - Capabilities
+- Archiving
+- Restoring
+- Deletion
+- Forking
+- Source chat drops
+- Compact Markdown transcripts
+- HTTP wire logs
+- Transcript regeneration
+
+Configuration:
+
+- Fully XDG compliant
+- Local `oh.toml` overrides (lists merged)
+- Paths resolved per file
+- Ordered settings replaced
+- Local settings named at startup
+- Defaults with `caps.default`
+- Live reloading
+- Skills, skill include and exclude patterns
+
+Command line:
+
+- Session resumption with `-r`
+- Model selection with `-m`
+- Capability selection with `-c`
+- Print mode with `-p`
+- Initial files with `--add`
+- Piped stdin joined with arguments
+- OAuth login with `-L`
+- Subscription usage reporting
+- Maintenance commands:
+    - `ohctl sessions`
+    - `ohctl analyse`
+    - `ohctl regenerate`
+    - `ohctl migrate`
+    - `ohctl gc`
+
+Development:
+
+- Replay-based test suite
+- Terminal goldens
+- Custom linters:
+    - `abbreviation`
+    - `adjective`
+    - `boolname`
+    - `receivername`
+    - `stdstream`
+
 ## [0.1.0] - 2026-08-17
 
 ### Added
