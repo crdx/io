@@ -94,6 +94,9 @@ func TestPrintableRemovesWhatATerminalWouldActOn(t *testing.T) {
 		"a bell":          {text: "done\a", want: "done "},
 		"ordinary text":   {text: "grep -r 'func New' .", want: "grep -r 'func New' ."},
 		"nothing":         {text: "", want: ""},
+
+		"a multibyte space":     {text: "one\u00a0two", want: "one two"},
+		"a multibyte separator": {text: "one\u2028two", want: "one two"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			got := strutil.Printable(test.text)
@@ -133,6 +136,13 @@ func FuzzPrintable(f *testing.F) {
 
 		if utf8.ValidString(text) && len(printable) > len(text) {
 			t.Errorf("expected no more than %d bytes back, got %d in %q", len(text), len(printable), printable)
+		}
+
+		if utf8.ValidString(text) && utf8.RuneCountInString(printable) > utf8.RuneCountInString(text) {
+			t.Errorf(
+				"expected no more than %d characters back, got %d in %q",
+				utf8.RuneCountInString(text), utf8.RuneCountInString(printable), printable,
+			)
 		}
 	})
 }

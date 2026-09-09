@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -123,6 +124,55 @@ func TestAnUpdateNamesEveryModelItIgnoresAndWhy(t *testing.T) {
 	}
 
 	assertGolden(t, "update-ignoring-models.ansi", report(t, output.String()))
+}
+
+func TestEveryCountedRowAddsUpToTheModelsTheProviderOffered(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	var output bytes.Buffer
+	if err := Update(&output, serveRegistry(t, oneCodexModel), modelCachePath(), listingIgnoredModels(t), true); err != nil {
+		t.Fatal(err)
+	}
+
+	countedRow := regexp.MustCompile(`^(\S+(?: \S+)*) +(\d+) +(\d+) +(\d+|) `)
+
+	var counted int
+
+	for line := range strings.Lines(style.Plain(output.String())) {
+		fields := countedRow.FindStringSubmatch(line)
+		if fields == nil {
+			continue
+		}
+
+		listed, selectable, ignored := number(t, fields[2]), number(t, fields[3]), number(t, fields[4])
+		if listed != selectable+ignored {
+			t.Errorf(
+				"%s lists %d models, of which %d are selectable and %d ignored",
+				fields[1], listed, selectable, ignored,
+			)
+		}
+
+		counted++
+	}
+
+	if counted == 0 {
+		t.Fatal("expected at least one counted row")
+	}
+}
+
+func number(t *testing.T, field string) int {
+	t.Helper()
+
+	if field == "" {
+		return 0
+	}
+
+	value, err := strconv.Atoi(field)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return value
 }
 
 func TestAnUpdateWithoutTheFlagCountsWhatItIgnoredAndSaysHowToSeeIt(t *testing.T) {

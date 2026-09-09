@@ -1,8 +1,8 @@
 Provider      Models  Selectable  Ignored  Source
 Codex              1           1           models.dev
 OpenCode Go        —                       all 2 models it offers are ignored
-Anthropic          2           2        3  endpoint
-Ollama             4           0        5  endpoint
+Anthropic          5           2        3  endpoint
+Ollama             5           0        5  endpoint
 
 Provider     Model                                        Reason
 OpenCode Go  grok-4.6                                     unsupported request shape

@@ -8,6 +8,7 @@ import (
 	"crdx.org/io/cmd/oh/store"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/ohctl/console"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/session"
 )
 
@@ -55,7 +56,7 @@ func run(directory string, sessions []string, output console.Output) error {
 		return fmt.Errorf("%d of %d could not be written", failures, len(names))
 	}
 
-	_, _ = fmt.Fprintln(output.Screen, style.Subtle(fmt.Sprintf("%d transcripts written", len(names))))
+	_, _ = fmt.Fprintln(output.Screen, style.Subtle(util.Plural(len(names), "transcript")+" written"))
 	return nil
 }
 

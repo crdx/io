@@ -102,16 +102,16 @@
 \e[48;2;52;53;65mt\e[0m\r
 \e[48;2;52;53;65m \e[0m\r
 \r
-\e[?7l\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;204;102;102m✗\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\e[?7l\r\e[K\e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;204;102;102m✗\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KT\r
 \r\e[Kh\r
@@ -333,11 +333,11 @@ exceeding its 2s processor limit.\r
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m3L\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_5&session=brave-otter\e\\\e[38;2;207;173;0mj…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m1L\e[0m \e[38;2;204;102;102ma…\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m5L ~100t\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_6&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;150;152;150mli…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_timeout&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdoc…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_7&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80m…\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m1L\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m4L ~100t\e[0m\r
-\r\e[K\e[38;2;207;173;0m\e[0m \e[38;2;76;154;44m✓\e[0m \e[38;2;150;152;150m7L ~100t\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_any&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mbui…\e[0m \e[38;2;76;154;44m✓\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_all&session=brave-otter\e\\\e[38;2;207;173;0mjob\e[0m\e]8;;\e\\ \e[38;2;192;128;80mdoc…\e[0m \e[38;2;76;154;44m✓\e[0m\r
 \r
 \r\e[KThe docs\r
 \r\e[Kserver ran\r

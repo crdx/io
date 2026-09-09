@@ -18,6 +18,7 @@ import (
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/ohctl/console"
 	"crdx.org/io/internal/format"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/session"
 )
 
@@ -140,7 +141,7 @@ func sweepListingMeta(directory string, isDryRun bool, output console.Output) er
 			return err
 		}
 		if len(stale) > 0 {
-			_, _ = fmt.Fprintf(output.Screen, "%s listing metadata of %d\n", style.Subtle("would rebuild"), len(stale))
+			_, _ = fmt.Fprintf(output.Screen, "%s listing metadata of %s\n", style.Subtle("would rebuild"), util.Plural(len(stale), "session"))
 		}
 		return nil
 	}
@@ -150,7 +151,7 @@ func sweepListingMeta(directory string, isDryRun bool, output console.Output) er
 		return err
 	}
 	if rebuilt > 0 {
-		_, _ = fmt.Fprintf(output.Screen, "%s listing metadata of %d\n", style.Subtle("rebuilt"), rebuilt)
+		_, _ = fmt.Fprintf(output.Screen, "%s listing metadata of %s\n", style.Subtle("rebuilt"), util.Plural(rebuilt, "session"))
 	}
 
 	return nil
@@ -167,9 +168,17 @@ func sayNothingToDo(directory string, output console.Output) error {
 		return nil
 	}
 
-	_, _ = fmt.Fprintln(output.Screen, style.Subtle(fmt.Sprintf("all %d sessions are at format %d", len(entries), session.JournalFormat)))
+	_, _ = fmt.Fprintln(output.Screen, style.Subtle(fmt.Sprintf("%s at format %d", everySessionSubject(len(entries)), session.JournalFormat)))
 
 	return nil
+}
+
+func everySessionSubject(count int) string {
+	if count == 1 {
+		return "the one session is"
+	}
+
+	return fmt.Sprintf("all %d sessions are", count)
 }
 
 func verb(isDryRun bool) string {

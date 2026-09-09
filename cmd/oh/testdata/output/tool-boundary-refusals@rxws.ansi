@@ -186,8 +186,8 @@
 \r
 \r\e[K\e[38;2;204;102;102m✗\e[0m\r
 \r\e[K\e[38;2;204;102;102m✗\e[0m\r
-\r\e[K\e[38;2;204;102;102m\e[0m \e[38;2;204;102;102m✗\e[0m\r
-\r\e[K\e[38;2;129;162;190m\e[0m \e[38;2;204;102;102m✗\e[0m\r
+\r\e[K\e[38;2;204;102;102m✗\e[0m\r
+\r\e[K\e[38;2;204;102;102m✗\e[0m\r
 \r
 \r\e[KE\r
 \r\e[Ka\r
@@ -317,7 +317,7 @@ Each boundary stayed closed.\r
 \r\e[Kwithout\r
 \r\e[Kcrossing it.\r
 \r
-\r\e[K\e[38;2;204;102;102m✗\e[0m \e[38;2;150;152;150m0L ~96Mt\e[0m\r
+\r\e[K\e]8;;oh://tool-result?call=call_1&session=brave-otter\e\\re…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mfil…\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_2&session=brave-otter\e\\gr…\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mlin…\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_3&session=brave-otter\e\\\e[38;2;204;102;102mfe…\e[0m\e]8;;\e\\ \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mweb…\e[0m\r
 \r\e[K\e]8;;oh://tool-result?call=call_4&session=brave-otter\e\\\e[38;2;129;162;190m$\e[0m\e]8;;\e\\ \e[38;2;129;162;190m…\e[0m \e[38;2;204;102;102m✗\e[0m \e[38;2;204;102;102mthe…\e[0m\r

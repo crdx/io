@@ -491,7 +491,7 @@ func updateModels(
 		report := providerReport{
 			Provider:        providerName,
 			Source:          source,
-			RecordedCount:   len(models),
+			ListedCount:     len(listedModels),
 			SelectableCount: pickable(models),
 			IgnoredModels:   ignoredModels,
 		}

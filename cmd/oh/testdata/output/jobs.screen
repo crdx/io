@@ -101,16 +101,16 @@ i
 t
 
 
-
-
-
-
-
-
-
-
-
-
+✓
+✓
+✓
+✓
+✗
+✓
+✓
+✓
+✓
+✓
 
 T
 h
@@ -256,11 +256,11 @@ job … ✓ 1L
 job … ✓ 3L
 job … ✓ 3L
 j… ✗ 1L a…
- ✓ 4L ~100t
- ✓ 5L ~100t
+job li… ✓
+job doc… ✓
 job … ✓ 1L
- ✓ 4L ~100t
- ✓ 7L ~100t
+job bui… ✓
+job doc… ✓
 
 The docs
 server ran

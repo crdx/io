@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
-	"unicode/utf8"
 )
 
 func Capitalise(text string) string {
@@ -82,9 +81,7 @@ func Printable(text string) string {
 			continue
 		}
 
-		for range utf8.RuneLen(character) {
-			out.WriteByte(' ')
-		}
+		out.WriteByte(' ')
 	}
 
 	return out.String()

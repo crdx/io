@@ -290,7 +290,7 @@ func atRoot(next root) []cache {
 }
 
 func summary(count int, reclaimedBytes int64, runningCount int, isDryRun bool) string {
-	text := plural(count, "cache") + ", " + util.FormatBytes(reclaimedBytes, bytePrecision)
+	text := util.Plural(count, "cache") + ", " + util.FormatBytes(reclaimedBytes, bytePrecision)
 	if isDryRun {
 		text += " to reclaim"
 	} else {
@@ -298,18 +298,10 @@ func summary(count int, reclaimedBytes int64, runningCount int, isDryRun bool) s
 	}
 
 	if runningCount > 0 {
-		text += ", " + plural(runningCount, "running session") + " left alone"
+		text += ", " + util.Plural(runningCount, "running session") + " left alone"
 	}
 
 	return text
-}
-
-func plural(count int, noun string) string {
-	if count == 1 {
-		return "1 " + noun
-	}
-
-	return fmt.Sprintf("%d %ss", count, noun)
 }
 
 func skip(entry fs.DirEntry) error {

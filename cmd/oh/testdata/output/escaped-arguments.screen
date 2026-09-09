@@ -4,7 +4,7 @@
 
 
 $ echo red ✓ 1L 2M red
-screenshot notes.md lines 1 to 4… ✓ 1L
+screenshot notes.md lines 1 to 40 ✓ 1L
 grep one two ✓ 1L
 
 [#1] Request failed; retrying in 2s:
@@ -51,7 +51,7 @@ k
 e
 
 
-
+✓
 ✓
 ✓
 
@@ -120,7 +120,7 @@ d
 
 
 $ echo red ✓ 1L 2M red
-screenshot notes.md lines 1 to 40  ✓ 1L
+screenshot notes.md lines 1 to 40 ✓ 1L
 grep one two ✓ 1L
 
 [#1] Request failed; retrying in 2s: Upstream said no
@@ -151,7 +151,7 @@ moved.
 
 
 $ echo red ✓ 1L 2M red
-screenshot notes.md lines 1 to 40  ✓ 1L
+screenshot notes.md lines 1 to 40 ✓ 1L
 grep one two ✓ 1L
 
 [#1] Request failed; retrying in 2s: Upstream said no

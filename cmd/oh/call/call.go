@@ -42,9 +42,12 @@ func (self Label) Elide(room int) dynamic.Label {
 }
 
 func (self Label) Render() string {
-	name := self.style()(self.Name)
-	if self.ResultURI != "" && self.Name != "" {
-		name = link.RenderURL(name, self.ResultURI)
+	var name string
+	if self.Name != "" {
+		name = self.style()(self.Name)
+		if self.ResultURI != "" {
+			name = link.RenderURL(name, self.ResultURI)
+		}
 	}
 	line := name
 

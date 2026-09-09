@@ -206,7 +206,7 @@ const (
 )
 
 func (self *Block) line(row row, columns int) string {
-	result := self.fitResult(row, columns)
+	result := self.fitResult(row, columns, row.label.Width())
 
 	label := row.label
 	summary := row.summary
@@ -256,10 +256,10 @@ func resultSpacing(result string) int {
 	return 1
 }
 
-func (self *Block) fitResult(row row, columns int) string {
+func (self *Block) fitResult(row row, columns int, labelWidth int) string {
 	result := self.getResult(row)
 
-	if columns <= 0 || style.Width(result)+edgeGuard <= columns {
+	if columns <= 0 || style.Width(result)+edgeGuard+labelGuard(result, labelWidth) <= columns {
 		return result
 	}
 
@@ -268,6 +268,14 @@ func (self *Block) fitResult(row row, columns int) string {
 	}
 
 	return ""
+}
+
+func labelGuard(result string, labelWidth int) int {
+	if labelWidth == 0 {
+		return 0
+	}
+
+	return resultSpacing(result) + 1
 }
 
 func (self *Block) getResult(row row) string {

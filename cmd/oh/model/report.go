@@ -12,7 +12,7 @@ import (
 
 const (
 	providerColumn   = 12
-	recordedColumn   = 6
+	listedColumn     = 6
 	selectableColumn = 10
 	ignoredColumn    = 7
 )
@@ -23,7 +23,7 @@ type providerReport struct {
 	Provider        string
 	Source          string
 	Why             string
-	RecordedCount   int
+	ListedCount     int
 	SelectableCount int
 	IgnoredModels   []ignoredModel
 }
@@ -35,7 +35,7 @@ func (self providerReport) hasRecorded() bool {
 func updateTable() *table.Table {
 	return table.New(
 		table.Column{Title: "Provider", Width: providerColumn},
-		table.Column{Title: "Models", Width: recordedColumn, Align: table.Right},
+		table.Column{Title: "Models", Width: listedColumn, Align: table.Right},
 		table.Column{Title: "Selectable", Width: selectableColumn, Align: table.Right},
 		table.Column{Title: "Ignored", Width: ignoredColumn, Align: table.Right},
 		table.Column{Title: "Source"},
@@ -101,7 +101,7 @@ func providerCells(report providerReport) []string {
 
 	return []string{
 		ProviderName(report.Provider),
-		strconv.Itoa(report.RecordedCount),
+		strconv.Itoa(report.ListedCount),
 		selectableCount(report.SelectableCount),
 		ignoredCount(len(report.IgnoredModels)),
 		style.Information(report.Source),

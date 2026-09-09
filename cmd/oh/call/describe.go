@@ -2,6 +2,7 @@ package call
 
 import (
 	"slices"
+	"strings"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/skill"
@@ -61,8 +62,8 @@ func plain(rendering agent.FallbackRendering) agent.FallbackRendering {
 }
 
 func printableCallRendering(rendering tool.CallRendering) tool.CallRendering {
-	rendering.Subject = strutil.Printable(rendering.Subject)
-	rendering.Qualifier = strutil.Printable(rendering.Qualifier)
+	rendering.Subject = strings.TrimSpace(strutil.Printable(rendering.Subject))
+	rendering.Qualifier = strings.TrimSpace(strutil.Printable(rendering.Qualifier))
 	return rendering
 }
 

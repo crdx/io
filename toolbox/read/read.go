@@ -21,7 +21,10 @@ import (
 	"crdx.org/io/tool"
 )
 
-const maxFileBytes = 20 * 1024 * 1024
+const (
+	maxFileBytes  = 20 * 1024 * 1024
+	bytePrecision = 3
+)
 
 var errFileTooLarge = errors.New("file is too large to read")
 
@@ -121,7 +124,7 @@ func exec(ctx context.Context, root *file.Root, args Args) (tool.ToolCallResult,
 		return successfulResult(
 			args.Path,
 			data,
-			fmt.Sprintf("%s image (%d bytes)", mediaType, len(data)),
+			fmt.Sprintf("%s, %s", mediaType, util.FormatBytes(len(data), bytePrecision)),
 			tool.Image{MediaType: mediaType, Data: data},
 			metrics,
 		), nil

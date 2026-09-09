@@ -62,7 +62,7 @@ func TestAnImageIsAttachedForTheModel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result.Output != "image/png image (32 bytes)" {
+	if result.Output != "image/png, 32B" {
 		t.Errorf("expected an image description, got %q", result.Output)
 	}
 
