@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"crdx.org/io/agent"
+	"crdx.org/io/internal/prefixwatch"
 	"crdx.org/io/internal/req"
 	"crdx.org/io/tool"
 )
@@ -57,6 +58,8 @@ type Client struct {
 	toolNames      []string
 	history        []json.RawMessage
 	requestHistory imageHistory
+	prefix         prefixwatch.Watcher
+	rewrite        string
 	requests       *req.Client
 	observer       req.Observer
 }
@@ -190,8 +193,9 @@ func (self *Client) Send(ctx context.Context, yield agent.Yield) (agent.Reply, e
 	}
 
 	return agent.Reply{
-		Calls: reply.calls(self.toolNames),
-		Usage: reply.usage,
+		Calls:         reply.calls(self.toolNames),
+		Usage:         reply.usage,
+		PrefixRewrite: self.rewrite,
 	}, nil
 }
 
@@ -265,6 +269,13 @@ func (self *Client) resumeInterruptedTurn() {
 }
 
 func (self *Client) requestBody() request {
+	body := self.body()
+	self.rewrite = self.prefix.Look(body.Tools, body.System, body.Messages)
+
+	return body
+}
+
+func (self *Client) body() request {
 	return request{
 		Model:           self.Model,
 		MaxOutputTokens: self.MaxOutputTokens,

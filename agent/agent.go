@@ -178,9 +178,11 @@ func (self *proseStream) resetText() {
 	self.text.Reset()
 }
 
-const SilentTurnNotice = "The model ended the turn without an answer."
-
-const defaultCacheLifetime = 5 * time.Minute
+const (
+	SilentTurnNotice     = "The model ended the turn without an answer."
+	PrefixRewriteNotice  = "The request changed before what had already been sent: "
+	defaultCacheLifetime = 5 * time.Minute
+)
 
 type CacheCause string
 
@@ -335,6 +337,9 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 				if !yieldUpdates(prose.finish(reply.Usage)) {
 					return
 				}
+				if reply.PrefixRewrite != "" {
+					yieldEvent(Event{Kind: PrefixRewriteEvent, Text: reply.PrefixRewrite}, nil)
+				}
 				if notice, wasRebuilt := self.readCache(reply.Usage, askedAt); wasRebuilt {
 					yieldEvent(notice, nil)
 				}
@@ -347,6 +352,13 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 			if !yieldUpdates(prose.finish(Usage{})) {
 				self.answer(cancelledResults(ctx, reply.Calls))
 				return
+			}
+
+			if reply.PrefixRewrite != "" {
+				if !yieldEvent(Event{Kind: PrefixRewriteEvent, Text: reply.PrefixRewrite}, nil) {
+					self.answer(cancelledResults(ctx, reply.Calls))
+					return
+				}
 			}
 
 			if notice, wasRebuilt := self.readCache(reply.Usage, askedAt); wasRebuilt {

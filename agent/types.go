@@ -117,8 +117,9 @@ type Update struct {
 }
 
 type Reply struct {
-	Calls []ToolCall
-	Usage Usage
+	Calls         []ToolCall
+	Usage         Usage
+	PrefixRewrite string
 }
 
 type Usage struct {
@@ -150,6 +151,7 @@ const (
 	StartupEvent         Kind = "session_startup"
 	UserMessageEvent     Kind = "user_message"
 	SilentTurnEvent      Kind = "silent_turn"
+	PrefixRewriteEvent   Kind = "prefix_rewrite"
 	CacheRebuildEvent    Kind = "cache_rebuild"
 	ModelReasoningEvent  Kind = "model_reasoning"
 	ModelMessageEvent    Kind = "model_message"

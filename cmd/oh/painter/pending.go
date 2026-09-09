@@ -134,7 +134,7 @@ func HarnessNotice(event agent.Event) (string, bool) {
 		return pathgrant.Notice(event)
 	case turn.HarnessPoke:
 		return turn.PokeNotice(event)
-	case agent.StartupEvent, agent.UserMessageEvent, agent.SilentTurnEvent, agent.CacheRebuildEvent,
+	case agent.StartupEvent, agent.UserMessageEvent, agent.SilentTurnEvent, agent.CacheRebuildEvent, agent.PrefixRewriteEvent,
 		agent.ModelReasoningEvent, agent.ModelMessageEvent, agent.ToolCallRequestEvent,
 		agent.ToolCallResultEvent, agent.StateChangeEvent, agent.InterruptionEvent,
 		agent.RetryingEvent, agent.FailureEvent:

@@ -100,7 +100,7 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		return nil
 	case agent.StartupEvent, agent.UserMessageEvent, agent.ModelMessageEvent,
 		agent.InterruptionEvent, agent.RetryingEvent, agent.FailureEvent, agent.SilentTurnEvent,
-		agent.CacheRebuildEvent:
+		agent.CacheRebuildEvent, agent.PrefixRewriteEvent:
 	}
 
 	if err := self.flushToolCalls(); err != nil {
@@ -121,6 +121,8 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		output.fence(agent.SilentTurnNotice)
 	case agent.CacheRebuildEvent:
 		output.fence(agent.CacheRebuildNotice(event))
+	case agent.PrefixRewriteEvent:
+		output.fence(agent.PrefixRewriteNotice + event.Text)
 	case turn.HarnessPoke:
 		if notice, isSaid := turn.PokeNotice(event); isSaid {
 			output.fence(notice)
@@ -181,7 +183,7 @@ func heading(event agent.Event) []string {
 		return []string{name, "attempt " + strconv.Itoa(event.Attempt), prefixed("waited ", util.CompactDuration(event.Took))}
 	case agent.StartupEvent, agent.UserMessageEvent, agent.ModelMessageEvent, agent.InterruptionEvent, agent.FailureEvent,
 		agent.ModelReasoningEvent, agent.ToolCallRequestEvent, agent.ToolCallResultEvent, agent.StateChangeEvent,
-		agent.SilentTurnEvent, agent.CacheRebuildEvent:
+		agent.SilentTurnEvent, agent.CacheRebuildEvent, agent.PrefixRewriteEvent:
 	}
 
 	return []string{name}
@@ -379,6 +381,8 @@ func title(kind agent.Kind) string {
 		return "Silent turn"
 	case agent.CacheRebuildEvent:
 		return "Cache rebuild"
+	case agent.PrefixRewriteEvent:
+		return "Prefix rewrite"
 	case agent.InterruptionEvent:
 		return "Interrupted"
 	case agent.RetryingEvent:

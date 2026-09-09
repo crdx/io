@@ -174,6 +174,9 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.SilentTurnEvent:
 		self.screen.Line(style.StoppedTurn(agent.SilentTurnNotice))
 
+	case agent.PrefixRewriteEvent:
+		self.screen.Line(style.Failure(agent.PrefixRewriteNotice + event.Text))
+
 	case agent.CacheRebuildEvent:
 		self.screen.Line(style.Change(agent.CacheRebuildNotice(event)))
 
