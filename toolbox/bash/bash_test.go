@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/stop"
+	"crdx.org/io/internal/util/pathutil"
 	"crdx.org/io/tool"
 	"crdx.org/io/toolbox/bash"
 )
@@ -437,10 +438,32 @@ func TestTheToolAlwaysSaysItMayChangeSomething(t *testing.T) {
 	}
 }
 
-func TestAStoppedCommandKeepsWhatItPrintedAndSaysWhyItEnded(t *testing.T) {
-	root, directory := testRoot(t)
+const startedMarker = "started"
 
-	policy := sandbox.Policy{Write: []string{directory}, Env: []string{"PATH"}}
+func stopOnceUnderway(t *testing.T, directory string, cancel context.CancelCauseFunc) {
+	t.Helper()
+
+	markerPath := filepath.Join(directory, startedMarker)
+
+	go func() {
+		for range int(stopWaitLimit / stopPollInterval) {
+			if pathutil.Exists(markerPath) {
+				break
+			}
+
+			time.Sleep(stopPollInterval)
+		}
+
+		cancel(stop.Because("the user pressed escape"))
+	}()
+}
+
+const (
+	stopPollInterval = time.Millisecond
+	stopWaitLimit    = 30 * time.Second
+)
+
+func TestAStoppedCommandKeepsWhatItPrintedAndSaysWhyItEnded(t *testing.T) {
 	if err := sandbox.Supported(t.Context()); err != nil {
 		t.Skipf("the sandbox cannot enforce this policy: %v", err)
 	}
@@ -450,20 +473,23 @@ func TestAStoppedCommandKeepsWhatItPrintedAndSaysWhyItEnded(t *testing.T) {
 		want    *regexp.Regexp
 	}{
 		"a command that printed something": {
-			command: "echo working; sleep 60",
+			command: "echo working; touch " + startedMarker + "; sleep 60",
 			want: regexp.MustCompile(
 				`^working\nnote: the command was stopped after [0-9.]+s ` +
 					`because the user pressed escape\.$`,
 			),
 		},
 		"a command that printed nothing": {
-			command: "sleep 60",
+			command: "touch " + startedMarker + "; sleep 60",
 			want:    regexp.MustCompile(`^$`),
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			root, directory := testRoot(t)
+			policy := sandbox.Policy{Write: []string{directory}, Env: []string{"PATH"}}
+
 			ctx, cancel := context.WithCancelCause(t.Context())
 			defer cancel(nil)
 
@@ -476,9 +502,7 @@ func TestAStoppedCommandKeepsWhatItPrintedAndSaysWhyItEnded(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			time.AfterFunc(300*time.Millisecond, func() {
-				cancel(stop.Because("the user pressed escape"))
-			})
+			stopOnceUnderway(t, directory, cancel)
 
 			result, err := call.Exec(ctx)
 
