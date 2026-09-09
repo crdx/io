@@ -224,10 +224,11 @@ func (self *Screen) Release(shouldKeep bool) {
 
 	landing := ""
 	if self.shownFooter.hasContentAbove {
-		if shouldKeep {
-			landing = "\r\n"
-		} else {
+		switch {
+		case !shouldKeep:
 			landing = "\r" + moveUp(self.openedRows) + clearBelow
+		case self.column > 0:
+			landing = "\r\n"
 		}
 	}
 

@@ -64,8 +64,7 @@ The prompt is drawn by \e[38;2;192;128;80mlayout\e[0m, which wraps the buffer ag
 \r\e[Kthe cursor landed. Nothing there needs changing to make it sticky: the work belongs in the output\r
 \r\e[Klayer instead.\r
 \e[?25h\e[?2026l\e[?2026h\e[?25l\r
-> ask something else\r\e[20C\e[?25h\e[?2026l\e]9;4;0\e\\\r\e[J\e[1A\r
-\e[?7h\e[?25h
+> ask something else\r\e[20C\e[?25h\e[?2026l\e]9;4;0\e\\\r\e[J\e[1A\e[?7h\e[?25h
 === released and kept on a pipe ===
 \e[38;2;150;152;150mAgent\e[0m\e[38;2;150;152;150m \e[0m000000000000000000000000\e[38;2;150;152;150m ready in \e[0m0\e[38;2;150;152;150ms\e[0m\e[38;2;150;152;150m with \e[0m0\e[38;2;150;152;150m skills \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m0\e[38;2;150;152;150m snippets \e[0m\e[38;2;192;128;80m⧸\e[0m\e[38;2;150;152;150m \e[0m\e[38;2;150;152;150m~\e[0m800\e[38;2;150;152;150mt\e[0m\e[38;2;150;152;150m context.\e[0m
 

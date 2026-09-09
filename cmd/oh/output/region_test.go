@@ -177,6 +177,17 @@ func TestReleasingAUsedConversationComesDownBelowIt(t *testing.T) {
 	}
 }
 
+func TestReleasingAConversationThatEndedItsRowLeavesNoGapBelowIt(t *testing.T) {
+	screen, screenOutput := screenWithInput()
+	screen.column = 0
+
+	screen.Release(true)
+
+	if got := screenOutput.String(); strings.Contains(got, "\r\n") {
+		t.Errorf("expected nothing below the conversation, got %q", got)
+	}
+}
+
 func TestReleasingAnUnusedConversationErasesItsLine(t *testing.T) {
 	screen, screenOutput := screenWithInput()
 

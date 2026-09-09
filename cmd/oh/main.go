@@ -912,7 +912,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	hooks.EmitSessionStopping(ctx, cycle.SessionStopping{Session: sessionInfo, Reason: stopReason})
 
 	if isSessionLeftToResume(log.IsPersisted(), isSimulated, transition.Kind) {
-		_, _ = fmt.Fprintln(notices, style.Subtle(sessions.ResumeCommand(os.Args[0], log.Name())))
+		_, _ = fmt.Fprintf(notices, "\n%s\n", style.Subtle(sessions.ResumeCommand(os.Args[0], log.Name())))
 	}
 
 	return "", nil
