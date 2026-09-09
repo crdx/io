@@ -21,19 +21,19 @@ const (
 )
 
 type Handler struct {
-	Events                func() <-chan turn.Event
-	Key                   func(key.Key) bool
-	Turn                  func(turn.Event)
-	TurnFinished          func() bool
-	Resize                func()
-	Beat                  func()
+	GetTurnEvents         func() <-chan turn.Event
+	OnKey                 func(key.Key) bool
+	OnTurn                func(turn.Event)
+	OnTurnFinished        func() bool
+	OnResize              func()
+	OnBeat                func()
 	Changes               <-chan error
-	Change                func(error) bool
+	OnChange              func(error) bool
 	Conclusions           <-chan jobs.Conclusion
-	JobEnded              func(jobs.Conclusion)
+	OnJobEnded            func(jobs.Conclusion)
 	HostToSandboxChanges  <-chan agent.Event
 	OnHostToSandboxChange func(agent.Event)
-	Draw                  func()
+	OnDraw                func()
 }
 
 func Run(terminal *os.File, getNextRefresh func(time.Time) time.Time, handler Handler) {
@@ -61,20 +61,20 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan t
 
 		select {
 		case keypress, isOpen := <-keys:
-			if !isOpen || !handler.Key(keypress) {
+			if !isOpen || !handler.OnKey(keypress) {
 				return
 			}
-		case event, isRunning := <-handler.Events():
+		case event, isRunning := <-handler.GetTurnEvents():
 			if isRunning {
-				handler.Turn(event)
-			} else if !handler.TurnFinished() {
+				handler.OnTurn(event)
+			} else if !handler.OnTurnFinished() {
 				return
 			}
 		case <-resizeSignals:
 			Settle(resizeSignals)
-			handler.Resize()
+			handler.OnResize()
 		case <-beats:
-			handler.Beat()
+			handler.OnBeat()
 
 			select {
 			case <-refreshes:
@@ -87,7 +87,7 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan t
 				conclusions = nil
 				continue
 			}
-			handler.JobEnded(conclusion)
+			handler.OnJobEnded(conclusion)
 		case event, isOpen := <-hostToSandboxChanges:
 			if !isOpen {
 				hostToSandboxChanges = nil
@@ -99,12 +99,12 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan t
 				changes = nil
 				continue
 			}
-			if handler.Change != nil && !handler.Change(failure) {
+			if handler.OnChange != nil && !handler.OnChange(failure) {
 				continue
 			}
 		}
 
-		handler.Draw()
+		handler.OnDraw()
 	}
 }
 

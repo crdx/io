@@ -118,7 +118,7 @@ func TestRunStopsAndRedraws(t *testing.T) {
 		keys := make(chan key.Key, 1)
 		keys <- key.Key{Code: key.Escape}
 		wasHandled := false
-		run(keys, make(chan os.Signal), make(chan time.Time), func() {}, nil, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Key: func(key.Key) bool { wasHandled = true; return false }})
+		run(keys, make(chan os.Signal), make(chan time.Time), func() {}, nil, Handler{GetTurnEvents: func() <-chan turn.Event { return make(chan turn.Event) }, OnKey: func(key.Key) bool { wasHandled = true; return false }})
 		if !wasHandled {
 			t.Error("key not handled")
 		}
@@ -128,8 +128,8 @@ func TestRunStopsAndRedraws(t *testing.T) {
 		close(turnEvents)
 		hasFinished := false
 		run(make(chan key.Key), make(chan os.Signal), make(chan time.Time), func() {}, nil, Handler{
-			Events: func() <-chan turn.Event { return turnEvents },
-			TurnFinished: func() bool {
+			GetTurnEvents: func() <-chan turn.Event { return turnEvents },
+			OnTurnFinished: func() bool {
 				hasFinished = true
 				return false
 			},
@@ -143,7 +143,7 @@ func TestRunStopsAndRedraws(t *testing.T) {
 		refreshes := make(chan time.Time, 1)
 		refreshes <- time.Now()
 		scheduled, wasDrawn := 0, false
-		run(keys, make(chan os.Signal), refreshes, func() { scheduled++ }, nil, Handler{Events: func() <-chan turn.Event { return make(chan turn.Event) }, Draw: func() { wasDrawn = true; close(keys) }, Key: func(key.Key) bool { return false }})
+		run(keys, make(chan os.Signal), refreshes, func() { scheduled++ }, nil, Handler{GetTurnEvents: func() <-chan turn.Event { return make(chan turn.Event) }, OnDraw: func() { wasDrawn = true; close(keys) }, OnKey: func(key.Key) bool { return false }})
 		if scheduled < 2 || !wasDrawn {
 			t.Errorf("scheduled=%d drawn=%t", scheduled, wasDrawn)
 		}
@@ -154,14 +154,14 @@ func TestRunStopsAndRedraws(t *testing.T) {
 		changes <- nil
 		wasDrawn := false
 		run(keys, make(chan os.Signal), make(chan time.Time), func() {}, nil, Handler{
-			Events:  func() <-chan turn.Event { return make(chan turn.Event) },
-			Key:     func(key.Key) bool { return false },
-			Changes: changes,
-			Change: func(error) bool {
+			GetTurnEvents: func() <-chan turn.Event { return make(chan turn.Event) },
+			OnKey:         func(key.Key) bool { return false },
+			Changes:       changes,
+			OnChange: func(error) bool {
 				close(keys)
 				return false
 			},
-			Draw: func() { wasDrawn = true },
+			OnDraw: func() { wasDrawn = true },
 		})
 		if wasDrawn {
 			t.Error("ignored change was drawn")
@@ -174,10 +174,10 @@ func TestRunStopsAndRedraws(t *testing.T) {
 		refreshes := make(chan time.Time, 1)
 		wasBeaten, wasDrawn := false, false
 		run(keys, make(chan os.Signal), refreshes, func() {}, heartbeats, Handler{
-			Events: func() <-chan turn.Event { return make(chan turn.Event) },
-			Beat:   func() { wasBeaten = true; refreshes <- time.Now() },
-			Key:    func(key.Key) bool { return false },
-			Draw:   func() { wasDrawn = true; close(keys) },
+			GetTurnEvents: func() <-chan turn.Event { return make(chan turn.Event) },
+			OnBeat:        func() { wasBeaten = true; refreshes <- time.Now() },
+			OnKey:         func(key.Key) bool { return false },
+			OnDraw:        func() { wasDrawn = true; close(keys) },
 		})
 		if !wasBeaten || !wasDrawn {
 			t.Errorf("beaten=%t drawn=%t", wasBeaten, wasDrawn)
@@ -189,10 +189,10 @@ func TestRunStopsAndRedraws(t *testing.T) {
 		heartbeats <- time.Now()
 		wasBeaten, wasDrawn := false, false
 		run(keys, make(chan os.Signal), make(chan time.Time), func() {}, heartbeats, Handler{
-			Events: func() <-chan turn.Event { return make(chan turn.Event) },
-			Beat:   func() { wasBeaten = true; close(keys) },
-			Key:    func(key.Key) bool { return false },
-			Draw:   func() { wasDrawn = true },
+			GetTurnEvents: func() <-chan turn.Event { return make(chan turn.Event) },
+			OnBeat:        func() { wasBeaten = true; close(keys) },
+			OnKey:         func(key.Key) bool { return false },
+			OnDraw:        func() { wasDrawn = true },
 		})
 		if !wasBeaten || wasDrawn {
 			t.Errorf("beaten=%t drawn=%t", wasBeaten, wasDrawn)

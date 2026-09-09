@@ -226,22 +226,22 @@ func (self *App) begin(message string) cycle.Transition {
 	}
 
 	interaction.Run(self.getKeyboard(), self.nextRefresh, interaction.Handler{
-		Events: func() <-chan turn.Event { return self.currentTurn.Events() },
-		Key:    func(keypress key.Key) bool { return self.handleKeypressAndShowInput(inputLine, history, keypress) },
-		Turn:   self.takeTurn,
-		TurnFinished: func() bool {
+		GetTurnEvents: func() <-chan turn.Event { return self.currentTurn.Events() },
+		OnKey:         func(keypress key.Key) bool { return self.handleKeypressAndShowInput(inputLine, history, keypress) },
+		OnTurn:        self.takeTurn,
+		OnTurnFinished: func() bool {
 			self.finish()
 			return !self.isTransitionRequested()
 		},
-		Resize:                self.redraw,
-		Beat:                  self.screen.RefreshProgress,
+		OnResize:              self.redraw,
+		OnBeat:                self.screen.RefreshProgress,
 		Changes:               self.configObserver.Changes(),
-		Change:                self.reloadConfig,
+		OnChange:              self.reloadConfig,
 		Conclusions:           self.jobConclusions(),
-		JobEnded:              self.jobEnded,
+		OnJobEnded:            self.jobEnded,
 		HostToSandboxChanges:  self.hostToSandboxChanges(),
 		OnHostToSandboxChange: self.notify,
-		Draw:                  func() { self.show(inputLine) },
+		OnDraw:                func() { self.show(inputLine) },
 	})
 
 	return self.transition
