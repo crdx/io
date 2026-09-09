@@ -56,6 +56,7 @@ sandbox *args:
         TestDatagramsStayOnLoopback
         TestEveryCommandGetsTheOtherNamespacesToo
         TestLoopbackIsReachable
+        TestNamedHostLoopbackPortIsForwarded
         TestTheCommandCannotUndoWhatHoldsAPathBack
         TestWhatACommandWritesToTmpLandsInTheScratch
     )

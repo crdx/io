@@ -27,6 +27,7 @@ include = []
 exclude = []
 
 [sandbox]
+host_loopback = []
 read = []
 write = []
 exec = []

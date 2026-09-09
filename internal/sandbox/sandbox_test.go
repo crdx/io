@@ -17,6 +17,7 @@ import (
 
 	"crdx.org/hereduck"
 	"crdx.org/io/internal/sandbox"
+	"crdx.org/io/internal/sandbox/keeper"
 )
 
 const (
@@ -839,6 +840,57 @@ func TestDatagramsStayOnLoopback(t *testing.T) {
 	}
 	if result.ExitCode != 0 || !strings.Contains(result.Output, "ping") {
 		t.Errorf("loopback datagram failed: %q", result.Output)
+	}
+}
+
+func TestNamedHostLoopbackPortIsForwarded(t *testing.T) {
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	}
+
+	var listenConfig net.ListenConfig
+	host, err := listenConfig.Listen(t.Context(), "tcp4", "127.0.0.1:0")
+	if err != nil {
+		t.Skipf("host sockets are unavailable: %v", err)
+	}
+	defer func() { _ = host.Close() }()
+
+	_, portText, err := net.SplitHostPort(host.Addr().String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var port uint16
+	if _, err := fmt.Sscan(portText, &port); err != nil {
+		t.Fatal(err)
+	}
+	accepted := make(chan error, 1)
+	go func() {
+		connection, err := host.Accept()
+		if err == nil {
+			_, err = connection.Write([]byte("bridged\n"))
+			_ = connection.Close()
+		}
+		accepted <- err
+	}()
+
+	keeperProcess, err := keeper.Open(t.Context(), port)
+	if err != nil {
+		t.Fatalf("could not open keeper: %v", err)
+	}
+	defer func() { _ = keeperProcess.Close() }()
+
+	result, err := sandbox.Wrapped(keeperProcess).Run(
+		t.Context(), t.TempDir(),
+		"cat </dev/tcp/localhost/"+strconv.Itoa(int(port)), sandbox.Policy{},
+	)
+	if err != nil {
+		t.Fatalf("could not run command: %v", err)
+	}
+	if result.ExitCode != 0 || !strings.Contains(result.Output, "bridged") {
+		t.Errorf("host loopback was not forwarded: %q", result.Output)
+	}
+	if err := <-accepted; err != nil {
+		t.Errorf("host service did not accept the bridge: %v", err)
 	}
 }
 

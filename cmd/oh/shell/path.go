@@ -8,10 +8,11 @@ import (
 )
 
 type Paths struct {
-	Read  []string `toml:"read"`
-	Write []string `toml:"write"`
-	Exec  []string `toml:"exec"`
-	Home  []string `toml:"home"`
+	HostLoopback []uint16 `toml:"host_loopback"`
+	Read         []string `toml:"read"`
+	Write        []string `toml:"write"`
+	Exec         []string `toml:"exec"`
+	Home         []string `toml:"home"`
 }
 
 func HomeRelativePath(path string) (string, bool) {

@@ -3301,6 +3301,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"context":                {".prompt"},
 		"context-drops":          {".prompt"},
 		"context-jobs":           {".prompt"},
+		"context-loopback":       {".prompt"},
 		"context-yolo":           {".prompt"},
 		"inputblock":             {".ansi", ".screen"},
 		"legacy-alt-enter":       {".ansi", ".screen"},
@@ -5175,17 +5176,19 @@ func TestForkMessageMatchesGolden(t *testing.T) {
 }
 
 type promptGolden struct {
-	isYolo            bool
-	areJobsGiven      bool
-	hasClipboardDrops bool
+	isYolo              bool
+	areJobsGiven        bool
+	hasClipboardDrops   bool
+	hasHostLoopbackPort bool
 }
 
 func TestTheCompleteSystemPromptMatchesTheGolden(t *testing.T) {
 	for name, shape := range map[string]promptGolden{
-		"context":       {},
-		"context-yolo":  {isYolo: true},
-		"context-jobs":  {areJobsGiven: true},
-		"context-drops": {hasClipboardDrops: true},
+		"context":          {},
+		"context-yolo":     {isYolo: true},
+		"context-jobs":     {areJobsGiven: true},
+		"context-drops":    {hasClipboardDrops: true},
+		"context-loopback": {hasHostLoopbackPort: true},
 	} {
 		t.Run(name, func(t *testing.T) {
 			compareSystemPromptWithGolden(t, name, shape)
@@ -5218,6 +5221,11 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 		dropsDirectory = "/state/sessions/brave-otter/drops"
 	}
 
+	var hostLoopback []uint16
+	if shape.hasHostLoopbackPort {
+		hostLoopback = []uint16{3000}
+	}
+
 	got, _, err := prompt.Load(prompt.Config{
 		GlobalPath:  globalPath,
 		Workspace:   workspace,
@@ -5226,9 +5234,10 @@ func compareSystemPromptWithGolden(t *testing.T, name string, shape promptGolden
 		HomeDir:     "/state/home",
 		CurrentCaps: caps.Read | caps.Write | caps.Git | caps.Shell,
 		ExtraPaths: shell.Paths{
-			Read:  []string{"/reference"},
-			Write: []string{"/output"},
-			Exec:  []string{"/commands"},
+			HostLoopback: hostLoopback,
+			Read:         []string{"/reference"},
+			Write:        []string{"/output"},
+			Exec:         []string{"/commands"},
 		},
 		DropsDirectory: dropsDirectory,
 		Skills: []skill.Skill{{

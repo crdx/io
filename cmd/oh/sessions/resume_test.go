@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -300,6 +301,24 @@ func TestARunningSessionIsRefused(t *testing.T) {
 func TestResumeCommandNamesTheBinaryAndSession(t *testing.T) {
 	if got := ResumeCommand("/usr/local/bin/oh", "able-dolphin"); got != "oh -r able-dolphin" {
 		t.Errorf("got %q", got)
+	}
+}
+
+func TestAResumedConversationOpensWithItsHostLoopbackPortsItStartedWith(t *testing.T) {
+	configuredPorts := []uint16{80}
+	freshPorts := OpeningHostLoopback(configuredPorts, nil)
+	configuredPorts[0] = 81
+	if !slices.Equal(freshPorts, []uint16{80}) {
+		t.Errorf("fresh conversation got ports %v, want [80]", freshPorts)
+	}
+
+	storedPorts := []uint16{3000}
+	resumedPorts := OpeningHostLoopback([]uint16{4000}, &store.Session{
+		Meta: store.Meta{HostLoopback: storedPorts},
+	})
+	storedPorts[0] = 3001
+	if !slices.Equal(resumedPorts, []uint16{3000}) {
+		t.Errorf("resumed conversation got ports %v, want [3000]", resumedPorts)
 	}
 }
 

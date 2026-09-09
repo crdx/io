@@ -273,6 +273,26 @@ func TestTheHarnessDisclosesPrivateLoopbackNetworking(t *testing.T) {
 	}
 }
 
+func TestTheHarnessDisclosesForwardedHostLoopbackPorts(t *testing.T) {
+	got := harnessContext(Config{
+		Workspace:   work.At("/workspace"),
+		SessionName: "session-id",
+		TmpDir:      "/tmp/x",
+		HomeDir:     "/state/home",
+		CurrentCaps: caps.Read,
+		ExtraPaths:  shell.Paths{HostLoopback: []uint16{80, 3000}},
+	})
+
+	for _, want := range []string{
+		"host's loopback TCP ports 80, 3000 are reachable",
+		"All other host loopback traffic and external networks are unreachable",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("harness context does not contain %q: %q", want, got)
+		}
+	}
+}
+
 func TestTheScratchMappingIsWrittenInFull(t *testing.T) {
 	t.Setenv("HOME", "/home/alice")
 

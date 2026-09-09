@@ -347,6 +347,10 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 		}
 	}
 
+	if err := validateHostLoopbackPorts(config.Sandbox.HostLoopback); err != nil {
+		return config, fmt.Errorf("%s: sandbox.host_loopback: %w", displayPath, err)
+	}
+
 	for _, mappedPath := range config.Sandbox.Home {
 		if _, below := shell.HomeRelativePath(mappedPath); !below {
 			return config, fmt.Errorf(
@@ -357,6 +361,20 @@ func loadSnapshot(path string, current snapshot) (Config, error) {
 	}
 
 	return config, nil
+}
+
+func validateHostLoopbackPorts(ports []uint16) error {
+	seenPorts := make(map[uint16]struct{}, len(ports))
+	for _, port := range ports {
+		if port == 0 {
+			return errors.New("port 0 is invalid")
+		}
+		if _, exists := seenPorts[port]; exists {
+			return fmt.Errorf("port %d is repeated", port)
+		}
+		seenPorts[port] = struct{}{}
+	}
+	return nil
 }
 
 func resolveConfigPath(configPath string, writtenPath string) (string, error) {

@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	envKeeper  = "IO_KEEPER"
-	executable = "/proc/self/exe"
+	envKeeper       = "IO_KEEPER"
+	envForwardPorts = "IO_KEEPER_FORWARD_PORTS"
+	executable      = "/proc/self/exe"
 
 	controlDescriptor = 3
 	messageBytes      = 1 << 16
@@ -101,9 +102,10 @@ type Keeper struct {
 	nextID       atomic.Uint64
 	isClosed     atomic.Bool
 	readers      sync.WaitGroup
+	bridges      []*bridge
 }
 
-func Open(ctx context.Context) (*Keeper, error) {
+func Open(ctx context.Context, forwardPorts ...uint16) (*Keeper, error) {
 	descriptors, err := unix.Socketpair(unix.AF_UNIX, unix.SOCK_SEQPACKET|unix.SOCK_CLOEXEC, 0)
 	if err != nil {
 		return nil, fmt.Errorf("could not open the control socket: %w", err)
@@ -121,7 +123,10 @@ func Open(ctx context.Context) (*Keeper, error) {
 	self := &Keeper{control: control, answers: make(map[uint64]chan reply)}
 
 	process := exec.CommandContext(context.WithoutCancel(ctx), executable)
-	process.Env = append([]string{envKeeper + "=1"}, testnamespace.Environment()...)
+	process.Env = append([]string{
+		envKeeper + "=1",
+		envForwardPorts + "=" + encodeForwardPorts(forwardPorts),
+	}, testnamespace.Environment()...)
 	process.ExtraFiles = []*os.File{far}
 	process.SysProcAttr = Attributes()
 	process.Stderr = &self.notice
@@ -132,7 +137,7 @@ func Open(ctx context.Context) (*Keeper, error) {
 		return nil, fmt.Errorf("could not start the keeper: %w", err)
 	}
 
-	if err := self.awaitReady(); err != nil {
+	if err := self.awaitReady(ctx, forwardPorts); err != nil {
 		_ = self.Close()
 		return nil, err
 	}
@@ -221,6 +226,9 @@ func (self *Keeper) Close() error {
 	}
 
 	_ = self.control.Close()
+	for _, bridge := range self.bridges {
+		_ = bridge.Close()
+	}
 	self.readers.Wait()
 
 	if self.process.Process != nil {
@@ -231,21 +239,37 @@ func (self *Keeper) Close() error {
 	return nil
 }
 
-func (self *Keeper) awaitReady() error {
+func (self *Keeper) awaitReady(ctx context.Context, forwardPorts []uint16) error {
 	if err := self.control.SetReadDeadline(time.Now().Add(readyTimeout)); err != nil {
 		return err
 	}
 
 	message := make([]byte, messageBytes)
-
-	length, err := self.control.Read(message)
+	control := make([]byte, unix.CmsgSpace(4*len(forwardPorts)))
+	length, controlLength, flags, _, err := self.control.ReadMsgUnix(message, control)
 	if err != nil {
 		return fmt.Errorf("the keeper did not start: %s", self.refusal(err))
+	}
+	if flags&(unix.MSG_TRUNC|unix.MSG_CTRUNC) != 0 {
+		return errors.New("the keeper's ready message did not arrive whole")
 	}
 
 	var answer reply
 	if err := json.Unmarshal(message[:length], &answer); err != nil || answer.Kind != replyReady {
 		return fmt.Errorf("the keeper did not start: %s", self.refusal(err))
+	}
+
+	files := parseFiles(control[:controlLength])
+	defer closeFiles(files)
+	if len(files) != len(forwardPorts) {
+		return fmt.Errorf("the keeper passed %d loopback listeners, expected %d", len(files), len(forwardPorts))
+	}
+	for i, file := range files {
+		bridge, err := newForwardBridge(ctx, file, forwardPorts[i])
+		if err != nil {
+			return fmt.Errorf("could not bridge host loopback port %d: %w", forwardPorts[i], err)
+		}
+		self.bridges = append(self.bridges, bridge)
 	}
 
 	return self.control.SetReadDeadline(time.Time{})
@@ -417,9 +441,19 @@ func serve() error {
 	}
 	defer func() { _ = control.Close() }()
 
+	ports, err := decodeForwardPorts(os.Getenv(envForwardPorts))
+	if err != nil {
+		return err
+	}
+	listeners, err := openForwardListeners(ports)
+	if err != nil {
+		return err
+	}
+	defer closeFiles(listeners)
+
 	service := &service{control: control, commands: make(map[uint64]*exec.Cmd)}
 
-	if err := service.send(reply{Kind: replyReady}); err != nil {
+	if err := service.sendFiles(reply{Kind: replyReady}, listeners); err != nil {
 		return err
 	}
 
@@ -605,15 +639,27 @@ func (self *service) kill(instruction request) {
 }
 
 func (self *service) send(answer reply) error {
+	return self.sendFiles(answer, nil)
+}
+
+func (self *service) sendFiles(answer reply, files []*os.File) error {
 	payload, err := json.Marshal(answer)
 	if err != nil {
 		return err
 	}
 
+	var rights []byte
+	if len(files) > 0 {
+		descriptors := make([]int, len(files))
+		for i, file := range files {
+			descriptors[i] = int(file.Fd())
+		}
+		rights = unix.UnixRights(descriptors...)
+	}
+
 	self.writeMutex.Lock()
 	defer self.writeMutex.Unlock()
 
-	_, _, err = self.control.WriteMsgUnix(payload, nil, nil)
-
+	_, _, err = self.control.WriteMsgUnix(payload, rights, nil)
 	return err
 }

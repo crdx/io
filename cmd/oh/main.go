@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"syscall"
 	"time"
@@ -335,6 +336,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		return "", err
 	}
+	hostLoopback := sessions.OpeningHostLoopback(settings.Sandbox.HostLoopback, resumedSession)
 	pathAccess, err := shell.NewPathAccess(files, mode, settings.Sandbox)
 	if err != nil {
 		return "", err
@@ -396,6 +398,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		Provider:     selection.Provider,
 		Effort:       selection.Effort,
 		IsFast:       selection.IsFast,
+		HostLoopback: slices.Clone(hostLoopback),
 		Yolo:         args.Yolo,
 	}
 
@@ -470,7 +473,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		args.Message = startup.JoinPrompt(initialFilesMessage, args.Message)
 	}
 
-	sandboxRunner, jobManager, closeKeeper, keeperRefusal := openRunner(ctx, args.Yolo)
+	sandboxRunner, jobManager, closeKeeper, keeperRefusal := openRunner(ctx, args.Yolo, hostLoopback)
 	defer closeKeeper()
 
 	if jobManager != nil {
@@ -777,12 +780,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	return "", nil
 }
 
-func openRunner(ctx context.Context, isYolo bool) (sandbox.Runner, *jobs.Manager, func(), error) {
+func openRunner(
+	ctx context.Context, isYolo bool, hostLoopback []uint16,
+) (sandbox.Runner, *jobs.Manager, func(), error) {
 	if isYolo {
 		return sandbox.Direct(), nil, func() {}, nil
 	}
 
-	keeperProcess, err := keeper.Open(ctx)
+	keeperProcess, err := keeper.Open(ctx, hostLoopback...)
 	if err != nil {
 		return sandbox.Direct(), nil, func() {}, err
 	}

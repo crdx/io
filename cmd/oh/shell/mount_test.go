@@ -45,13 +45,17 @@ func TestMissingConfiguredPathsAreCreatedAndKept(t *testing.T) {
 
 	var warnings strings.Builder
 	filtered, err := PreparePaths(Paths{
-		Read:  []string{existingRead, missingRead},
-		Write: []string{existingWrite, missingWrite},
-		Exec:  []string{existingExec, missingExec},
-		Home:  []string{existingHome, missingHome},
+		HostLoopback: []uint16{80},
+		Read:         []string{existingRead, missingRead},
+		Write:        []string{existingWrite, missingWrite},
+		Exec:         []string{existingExec, missingExec},
+		Home:         []string{existingHome, missingHome},
 	}, &warnings)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if !slices.Equal(filtered.HostLoopback, []uint16{80}) {
+		t.Errorf("got host loopback ports %v, want [80]", filtered.HostLoopback)
 	}
 	if !slices.Equal(filtered.Read, []string{existingRead, missingRead}) {
 		t.Errorf("got read paths %v, want %v", filtered.Read, []string{existingRead, missingRead})

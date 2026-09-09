@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -345,9 +346,29 @@ func networkRules(data harnessContextTemplateData) string {
 		)
 	}
 
+	hostReachability := "- The host's loopback interface and external networks are unreachable"
+	if len(data.ExtraPaths.HostLoopback) > 0 {
+		ports := make([]string, len(data.ExtraPaths.HostLoopback))
+		for i, port := range data.ExtraPaths.HostLoopback {
+			ports[i] = strconv.Itoa(int(port))
+		}
+		subject := "TCP ports " + strings.Join(ports, ", ")
+		verb := " are"
+		destination := "ports"
+		if len(ports) == 1 {
+			subject = "TCP port " + ports[0]
+			verb = " is"
+			destination = "port"
+		}
+		lines = append(lines,
+			"- The host's loopback "+subject+verb+" reachable on the same sandbox loopback "+destination,
+		)
+		hostReachability = "- All other host loopback traffic and external networks are unreachable"
+	}
+
 	return strings.Join(append(lines,
 		"- A Unix socket works beneath /tmp, and is refused beneath the workspace",
-		"- The host's loopback interface and external networks are unreachable",
+		hostReachability,
 		"- The web search and fetch tools are "+webAccess(data.WebGranted),
 		"- Anything else that requires external networking must be asked of the user",
 	), "\n")

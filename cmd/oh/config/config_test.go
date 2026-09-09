@@ -432,6 +432,35 @@ func TestConfiguredAccessPathsAreResolved(t *testing.T) {
 	assertPaths("home", config.Sandbox.Home, []string{filepath.Join(home, ".gitconfig")})
 }
 
+func TestHostLoopbackPortsAreLoaded(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[sandbox]\nhost_loopback = [80, 3000]\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(config.Sandbox.HostLoopback, []uint16{80, 3000}) {
+		t.Errorf("got ports %v", config.Sandbox.HostLoopback)
+	}
+}
+
+func TestHostLoopbackPortsMustBeNonzeroAndUnique(t *testing.T) {
+	for _, ports := range []string{"[0]", "[80, 80]"} {
+		path := filepath.Join(t.TempDir(), "config.toml")
+		if err := writeConfigFile(path, "[sandbox]\nhost_loopback = "+ports+"\n"); err != nil {
+			t.Fatal(err)
+		}
+
+		_, err := Load(path)
+		if err == nil || !strings.Contains(err.Error(), "sandbox.host_loopback") {
+			t.Errorf("got %v for %s", err, ports)
+		}
+	}
+}
+
 func TestAPathMappedIntoTheShellHomeMustComeFromTheHomeDirectory(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
 	t.Setenv("HOME", t.TempDir())

@@ -158,15 +158,16 @@ func (self *PathAccess) install(path string, pathMount mountedPath) {
 
 func clonePaths(paths Paths) Paths {
 	return Paths{
-		Read:  slices.Clone(paths.Read),
-		Write: slices.Clone(paths.Write),
-		Exec:  slices.Clone(paths.Exec),
-		Home:  slices.Clone(paths.Home),
+		HostLoopback: slices.Clone(paths.HostLoopback),
+		Read:         slices.Clone(paths.Read),
+		Write:        slices.Clone(paths.Write),
+		Exec:         slices.Clone(paths.Exec),
+		Home:         slices.Clone(paths.Home),
 	}
 }
 
 func PreparePaths(paths Paths, warnings io.Writer) (Paths, error) {
-	filteredPaths := Paths{}
+	filteredPaths := Paths{HostLoopback: slices.Clone(paths.HostLoopback)}
 	lists := []struct {
 		source []string
 		target *[]string
