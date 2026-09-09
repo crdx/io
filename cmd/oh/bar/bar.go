@@ -1,6 +1,7 @@
 package bar
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -187,27 +188,35 @@ func (self *Config) ReplaceLayout(layout segment.Layout) {
 	self.layout = layout
 }
 
-func (self *Config) RenderInfo(context segment.Context) string {
+func (self *Config) RenderInfo(context segment.Context) (string, error) {
 	type infoRow struct {
 		name  string
 		value string
 	}
 
 	var rows []infoRow
+	var emptyNames []string
 	nameCells := 0
-	for _, position := range segment.Positions {
-		for _, instance := range self.layout[position] {
-			namedInstance, isNamed := instance.(segment.Instance)
-			if !isNamed || !isInfoSegment(namedInstance.Name) {
-				continue
-			}
-			value := namedInstance.Segment.Render(context)
-			if value == "" {
-				continue
-			}
-			rows = append(rows, infoRow{name: namedInstance.Name, value: value})
-			nameCells = max(nameCells, style.Width(namedInstance.Name))
+	for _, name := range self.registry.Available() {
+		if !isInfoSegment(name) {
+			continue
 		}
+		instance, err := self.getInfoSegment(name)
+		if err != nil {
+			return "", err
+		}
+		value := instance.Render(context)
+		if value == "" {
+			emptyNames = append(emptyNames, name)
+			continue
+		}
+		rows = append(rows, infoRow{name: name, value: value})
+		nameCells = max(nameCells, style.Width(name))
+	}
+	if len(emptyNames) > 0 {
+		const emptyName = "(empty)"
+		rows = append(rows, infoRow{name: emptyName, value: style.Subtle(strings.Join(emptyNames, ", "))})
+		nameCells = max(nameCells, style.Width(emptyName))
 	}
 
 	drawnRows := make([]string, 0, len(rows))
@@ -215,11 +224,7 @@ func (self *Config) RenderInfo(context segment.Context) string {
 		padding := strings.Repeat(" ", nameCells-style.Width(row.name)+2)
 		drawnRows = append(drawnRows, style.Information(row.name)+padding+row.value)
 	}
-	return strings.Join(drawnRows, "\n")
-}
-
-func isInfoSegment(name string) bool {
-	return name != activitySpinnerSegment && name != scrollOverflowSegment
+	return strings.Join(drawnRows, "\n"), nil
 }
 
 func (self *Config) Render(position segment.Position, context segment.Context) string {
@@ -232,4 +237,31 @@ func (self *Config) RenderWithin(position segment.Position, context segment.Cont
 
 func (self *Config) NextRefresh(phase segment.Phase) time.Time {
 	return self.layout.NextRefresh(phase)
+}
+
+func (self *Config) getInfoSegment(name string) (segment.Segment, error) {
+	for _, position := range segment.Positions {
+		for _, instance := range self.layout[position] {
+			namedInstance, isNamed := instance.(segment.Instance)
+			if isNamed && namedInstance.Name == name {
+				return namedInstance.Segment, nil
+			}
+		}
+	}
+
+	instance, err := self.registry[name](infoOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", name, err)
+	}
+	return instance, nil
+}
+
+func isInfoSegment(name string) bool {
+	return name != activitySpinnerSegment && name != scrollOverflowSegment
+}
+
+type infoOptions struct{}
+
+func (infoOptions) Read(any) error {
+	return nil
 }

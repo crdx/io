@@ -665,7 +665,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			GetCurrent: sandboxToHost.GetCurrent,
 		},
 		Jobs: managedJobs(jobManager),
-		GetInfo: func() string {
+		GetInfo: func() (string, error) {
 			return app.display.bar.RenderInfo(segment.Context{})
 		},
 		Session: commands.Session{

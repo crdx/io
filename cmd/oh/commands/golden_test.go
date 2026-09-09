@@ -91,8 +91,8 @@ func fixtureEnvironment(t *testing.T) commandEnvironment {
 		pathGrants:    grants,
 		hostToSandbox: ports,
 		jobs:          managedJobs,
-		getInfo: func() string {
-			return "cache-usage  5m ttl\nmode-toggle  rxw gs"
+		getInfo: func() (string, error) {
+			return "cache-usage  5m ttl\nmode-toggle  rxw gs", nil
 		},
 	}
 }

@@ -44,7 +44,7 @@ type Options struct {
 	HostToSandbox HostToSandbox
 	SandboxToHost SandboxToHost
 	Jobs          Jobs
-	GetInfo       func() string
+	GetInfo       func() (string, error)
 	StartSession  func(SessionStart) error
 }
 
@@ -78,7 +78,7 @@ type commandEnvironment struct {
 	hostToSandbox HostToSandbox
 	sandboxToHost SandboxToHost
 	jobs          Jobs
-	getInfo       func() string
+	getInfo       func() (string, error)
 	startSession  func(SessionStart) error
 }
 
@@ -265,7 +265,7 @@ func helpCommand(getHelp func() string) slash.Command {
 	}
 }
 
-func infoCommand(getInfo func() string) slash.Command {
+func infoCommand(getInfo func() (string, error)) slash.Command {
 	return slash.Command{
 		Name: "info",
 		Run: func(context slash.Context, arguments slash.Arguments) error {
@@ -273,7 +273,11 @@ func infoCommand(getInfo func() string) slash.Command {
 				return slash.Usage()
 			}
 
-			context.PlainNotice(getInfo())
+			info, err := getInfo()
+			if err != nil {
+				return err
+			}
+			context.PlainNotice(info)
 			return nil
 		},
 	}

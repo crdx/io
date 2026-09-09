@@ -17,6 +17,12 @@ func (self fixedSegment) Render(segment.Context) string {
 	return string(self)
 }
 
+func fixedFactory(value string) segment.Factory {
+	return func(segment.Options) (segment.Segment, error) {
+		return fixedSegment(value), nil
+	}
+}
+
 type fittingSegment struct {
 	availableCells *int
 }
@@ -45,24 +51,27 @@ func TestTheFastModeSegmentIsRegisteredWithTheCurrentSelection(t *testing.T) {
 	}
 }
 
-func TestInfoDrawsOneAlignedRowPerConfiguredSegment(t *testing.T) {
+func TestInfoDrawsEveryAvailableNonemptySegmentAndSummarisesTheEmptyOnes(t *testing.T) {
 	cacheValue := "\x1b[31m5m ttl\x1b[0m"
 	modeValue := "\x1b[32mrxw gs\x1b[0m"
-	configuration := NewConfiguration(nil, segment.Layout{
-		segment.TopLeft: {
-			segment.Instance{Name: "activity-spinner", Segment: fixedSegment("·✦·")},
-			segment.Instance{Name: "jobs", Segment: fixedSegment("")},
-		},
+	registry := segment.Registry{
+		activitySpinnerSegment: fixedFactory("·✦·"),
+		cacheUsageSegment:      fixedFactory("unused configured value"),
+		jobNamesSegment:        fixedFactory(""),
+		modeToggleSegment:      fixedFactory(modeValue),
+		scrollOverflowSegment:  fixedFactory("↑ 3"),
+	}
+	configuration := NewConfiguration(registry, segment.Layout{
 		segment.TopCenter: {
-			segment.Instance{Name: "cache-usage", Segment: fixedSegment(cacheValue)},
-		},
-		segment.BottomLeft: {
-			segment.Instance{Name: "mode-toggle", Segment: fixedSegment(modeValue)},
-			segment.Instance{Name: "scroll-overflow", Segment: fixedSegment("↑ 3")},
+			segment.Instance{Name: cacheUsageSegment, Segment: fixedSegment(cacheValue)},
 		},
 	})
 
-	got := strutil.VisibleEscapes(configuration.RenderInfo(segment.Context{})) + "\n"
+	info, err := configuration.RenderInfo(segment.Context{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := strutil.VisibleEscapes(info) + "\n"
 	want, err := os.ReadFile(filepath.Join("testdata", "info.ansi"))
 	if err != nil {
 		t.Fatal(err)
