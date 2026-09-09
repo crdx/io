@@ -202,7 +202,7 @@ func (self Config) ValidateConsumed() error {
 
 	slices.Sort(namedKeys)
 
-	return fmt.Errorf("%s: nothing is done with: %s", self.filePath, strings.Join(namedKeys, ", "))
+	return fmt.Errorf("%s: unknown: %s", self.filePath, strings.Join(namedKeys, ", "))
 }
 
 func (self Config) metaFor(position segment.Position) *toml.MetaData {

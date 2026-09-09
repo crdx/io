@@ -61,7 +61,7 @@ func (self *Definition) unmarshalTable(configuredTable map[string]any) error {
 	}
 	if len(unknown) > 0 {
 		slices.Sort(unknown)
-		return fmt.Errorf("nothing is done with: %s", strings.Join(unknown, ", "))
+		return fmt.Errorf("unknown: %s", strings.Join(unknown, ", "))
 	}
 
 	var err error
