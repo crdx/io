@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"syscall"
 	"testing"
@@ -22,6 +23,12 @@ const (
 	opensslConfigurationPath    = "/etc/ssl/openssl.cnf"
 	ownerDeathHelperVariable    = "IO_SANDBOX_OWNER_DEATH_HELPER"
 	ownerDeathDirectoryVariable = "IO_SANDBOX_OWNER_DEATH_DIRECTORY"
+)
+
+const (
+	detachedStartBudget = 2 * time.Second
+	detachedEscapeDelay = 500 * time.Millisecond
+	watchMargin         = 700 * time.Millisecond
 )
 
 func TestMain(m *testing.M) {
@@ -252,7 +259,7 @@ func TestACommandDiesWhenItsOwnerIsKilled(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not read the command's activity: %v", err)
 	}
-	assertFileContentsRemain(t, activity, string(content))
+	assertFileContentsRemain(t, activity, string(content), watchMargin)
 }
 
 func runOwnerDeathHelper(t *testing.T) {
@@ -308,7 +315,7 @@ func TestCancellingACommandKillsItsDetachedSessions(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	finished := make(chan error, 1)
 	go func() {
-		_, err := sandbox.Run(ctx, directory, delayedDetachedWrite(marker), policy)
+		_, err := sandbox.Run(ctx, directory, delayedDetachedWrite(marker, detachedEscapeDelay), policy)
 		finished <- err
 	}()
 
@@ -324,7 +331,7 @@ func TestCancellingACommandKillsItsDetachedSessions(t *testing.T) {
 		t.Fatal("the cancelled command did not stop")
 	}
 
-	assertFileContentsRemain(t, marker, "started")
+	assertFileContentsRemain(t, marker, "started", detachedEscapeDelay+watchMargin)
 }
 
 func TestTimingOutACommandKillsItsDetachedSessions(t *testing.T) {
@@ -333,24 +340,34 @@ func TestTimingOutACommandKillsItsDetachedSessions(t *testing.T) {
 	policy := sandbox.Policy{
 		Write:   []string{directory},
 		Env:     []string{"PATH"},
-		Timeout: 200 * time.Millisecond,
+		Timeout: detachedStartBudget,
 	}
 	if err := sandbox.Supported(t.Context()); err != nil {
 		t.Skipf("the sandbox cannot be built here: %v", err)
 	}
 
-	_, err := sandbox.Run(t.Context(), directory, delayedDetachedWrite(marker), policy)
-	if err == nil || !strings.Contains(err.Error(), "did not finish within 200ms") {
+	escapeDelay := detachedStartBudget + detachedEscapeDelay
+	_, err := sandbox.Run(t.Context(), directory, delayedDetachedWrite(marker, escapeDelay), policy)
+	if err == nil || !strings.Contains(err.Error(), "did not finish within "+detachedStartBudget.String()) {
 		t.Errorf("got %v, want the command to report its timeout", err)
 	}
 
+	if _, err := os.Stat(marker); errors.Is(err, os.ErrNotExist) {
+		t.Fatalf(
+			"the detached writer left no marker, so it had not started when the %s budget killed it; "+
+				"a start this slow says the machine is loaded rather than that the kill escaped",
+			detachedStartBudget,
+		)
+	}
+
 	waitForFileContents(t, marker, "started")
-	assertFileContentsRemain(t, marker, "started")
+	assertFileContentsRemain(t, marker, "started", detachedEscapeDelay+watchMargin)
 }
 
-func delayedDetachedWrite(marker string) string {
+func delayedDetachedWrite(marker string, escapeAfter time.Duration) string {
 	return "setsid sh -c 'printf started > " + marker +
-		"; sleep 0.5; printf escaped >> " + marker + "' & sleep 30"
+		"; sleep " + strconv.FormatFloat(escapeAfter.Seconds(), 'f', -1, 64) +
+		"; printf escaped >> " + marker + "' & sleep 30"
 }
 
 func waitForFileContents(t *testing.T, path string, want string) {
@@ -369,10 +386,10 @@ func waitForFileContents(t *testing.T, path string, want string) {
 	t.Fatalf("got marker %q, %v, want %q", content, err, want)
 }
 
-func assertFileContentsRemain(t *testing.T, path string, want string) {
+func assertFileContentsRemain(t *testing.T, path string, want string, window time.Duration) {
 	t.Helper()
 
-	time.Sleep(700 * time.Millisecond)
+	time.Sleep(window)
 	content, err := os.ReadFile(path) //nolint:gosec // reading the test's own marker is intended
 	if err != nil || string(content) != want {
 		t.Errorf("the detached session survived: got marker %q, %v", content, err)
