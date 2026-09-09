@@ -27,7 +27,7 @@ The cache went cold on that request.
 ## Cache rebuild · +0s
 
 ```
-The prompt cache was rebuilt: 28K tokens were sent again 0s after the last request.
+The prompt cache was rebuilt: 28K tokens sent again 0s later.
 ```
 
 ## User · +0s

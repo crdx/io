@@ -23,7 +23,7 @@ audit: audit [ok, 1 line, 21B, toolu_1]
 ## Silent turn · +0s
 
 ```
-The model ended the turn without an answer.
+The model ended the turn without answering.
 ```
 
 ## Poke · +0s

@@ -4,8 +4,6 @@
 
 ### Added
 
-A bunch of stuff.
-
 #### Wire Protocols
 
 - Anthropic Messages

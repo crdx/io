@@ -179,7 +179,7 @@ func (self *proseStream) resetText() {
 }
 
 const (
-	SilentTurnNotice     = "The model ended the turn without an answer."
+	SilentTurnNotice     = "The model ended the turn without answering."
 	PrefixRewriteNotice  = "The request changed before what had already been sent: "
 	defaultCacheLifetime = 5 * time.Minute
 )
@@ -212,16 +212,16 @@ func CacheRebuildNotice(event Event) string {
 
 	switch CacheCause(event.Name) {
 	case CacheReopened:
-		return fmt.Sprintf("The prompt cache was gone by the time this conversation was reopened: %s tokens were sent again.", tokens)
+		return fmt.Sprintf("The prompt cache was gone when this conversation reopened: %s tokens sent again.", tokens)
 	case CacheExpired:
-		return fmt.Sprintf("The prompt cache expired: %s tokens were sent again after %s.", tokens, gap)
+		return fmt.Sprintf("The prompt cache expired: %s tokens sent again after %s.", tokens, gap)
 	case CacheSettling:
-		return fmt.Sprintf("The prompt cache did not settle: %s tokens were sent again %s after the last request.", tokens, gap)
+		return fmt.Sprintf("The prompt cache did not settle: %s tokens sent again %s later.", tokens, gap)
 	case CacheRebuilt:
-		return fmt.Sprintf("The prompt cache was rebuilt: %s tokens were sent again %s after the last request.", tokens, gap)
+		return fmt.Sprintf("The prompt cache was rebuilt: %s tokens sent again %s later.", tokens, gap)
 	}
 
-	return fmt.Sprintf("The prompt cache was rebuilt: %s tokens were sent again.", tokens)
+	return fmt.Sprintf("The prompt cache was rebuilt: %s tokens sent again.", tokens)
 }
 
 func cacheCause(gap time.Duration, lifetime time.Duration, previousRead int, rewrittenTokens int) CacheCause {

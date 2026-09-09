@@ -499,7 +499,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	if keeperRefusal != nil {
 		_, _ = fmt.Fprintln(notices, style.Change(
-			"background jobs are unavailable, and commands cannot reach one another: "+keeperRefusal.Error(),
+			"background jobs and inter-command networking are unavailable: "+keeperRefusal.Error(),
 		))
 	}
 
@@ -615,8 +615,8 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		enabledToolNames, absentToolNames = toolset.Partition(toolboxTools, resumedSession.Meta.Tools)
 		if len(absentToolNames) > 0 {
 			_, _ = fmt.Fprintln(notices, style.Change(
-				"this conversation was held with tools that are no longer offered, so its prompt cache "+
-					"will be rebuilt: "+strings.Join(absentToolNames, ", "),
+				"tools used by this conversation are no longer offered, so its prompt cache will be "+
+					"rebuilt: "+strings.Join(absentToolNames, ", "),
 			))
 		}
 	}

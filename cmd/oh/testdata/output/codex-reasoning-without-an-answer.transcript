@@ -17,7 +17,7 @@ reason and then stop
 ## Silent turn · +0s
 
 ```
-The model ended the turn without an answer.
+The model ended the turn without answering.
 ```
 
 ## Poke · +0s
@@ -29,7 +29,7 @@ The previous response ended without a reply. Carry on from where it stopped.
 ## Silent turn · +0s
 
 ```
-The model ended the turn without an answer.
+The model ended the turn without answering.
 ```
 
 ## User · +0s

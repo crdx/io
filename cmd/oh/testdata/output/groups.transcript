@@ -16,7 +16,7 @@ walk every pair of groups so the spacing between them is written down
 ## Silent turn · +1s
 
 ```
-The model ended the turn without an answer.
+The model ended the turn without answering.
 ```
 
 ## Retrying · attempt 1 · waited 0s · +2s
@@ -46,7 +46,7 @@ ls: cmd [ok, 1 line, 3B, call_4]
 ## Silent turn · +13s
 
 ```
-The model ended the turn without an answer.
+The model ended the turn without answering.
 ```
 
 ## Assistant · +14s
@@ -70,7 +70,7 @@ the endpoint is having a moment
 ## Silent turn · +21s
 
 ```
-The model ended the turn without an answer.
+The model ended the turn without answering.
 ```
 
 
