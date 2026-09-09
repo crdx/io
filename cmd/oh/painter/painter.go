@@ -1,6 +1,8 @@
 package painter
 
 import (
+	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -49,6 +51,13 @@ type Picasso struct {
 	getTool   func(string) (tool.Tool, bool)
 	workspace *work.Space
 	pictures  pictureSource
+
+	heldPictures []heldPicture
+}
+
+type heldPicture struct {
+	index   int
+	picture dynamic.Picture
 }
 
 type pictureSource struct {
@@ -347,6 +356,7 @@ func (self *Picasso) Close(state dynamic.RowState) {
 	self.settleAnswer()
 
 	if self.toolBlock != nil {
+		self.attachPicturesAbove(math.MaxInt)
 		self.toolBlock.Close(state)
 		self.toolBlock = nil
 		self.rows = nil
@@ -528,14 +538,62 @@ func (self *Picasso) mark(event agent.Event) {
 		call.Measurements(event.Metrics),
 	)
 
-	self.attachPicture(index, event)
+	self.holdPicture(index, event)
+	self.attachSettledPictures()
 
 	if len(self.rows) == 0 {
 		self.Close(dynamic.Done)
 	}
 }
 
-func (self *Picasso) attachPicture(index int, event agent.Event) {
+func (self *Picasso) attachSettledPictures() {
+	self.attachPicturesAbove(self.firstRunningRow())
+}
+
+func (self *Picasso) firstRunningRow() int {
+	firstRow := math.MaxInt
+
+	for _, index := range self.rows {
+		firstRow = min(firstRow, index)
+	}
+
+	return firstRow
+}
+
+func (self *Picasso) attachPicturesAbove(firstRunningRow int) {
+	if self.toolBlock == nil {
+		return
+	}
+
+	var picturesAbove []heldPicture
+	var picturesBelow []heldPicture
+
+	for _, entry := range self.heldPictures {
+		if entry.index < firstRunningRow {
+			picturesAbove = append(picturesAbove, entry)
+		} else {
+			picturesBelow = append(picturesBelow, entry)
+		}
+	}
+
+	if len(picturesAbove) == 0 {
+		return
+	}
+
+	self.heldPictures = picturesBelow
+
+	slices.SortFunc(picturesAbove, func(one heldPicture, other heldPicture) int {
+		return one.index - other.index
+	})
+
+	self.screen.Sync(func() {
+		for _, entry := range picturesAbove {
+			self.toolBlock.AttachPicture(entry.index, entry.picture)
+		}
+	})
+}
+
+func (self *Picasso) holdPicture(index int, event agent.Event) {
 	if event.Picture == nil || self.pictures.sessionDirectory == "" || !self.screen.IsTerminal() {
 		return
 	}
@@ -562,7 +620,7 @@ func (self *Picasso) attachPicture(index int, event agent.Event) {
 		picture.Data = data
 	}
 
-	self.toolBlock.AttachPicture(index, picture)
+	self.heldPictures = append(self.heldPictures, heldPicture{index: index, picture: picture})
 }
 
 func (self *Picasso) render(event agent.Event) string {
