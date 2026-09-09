@@ -128,6 +128,20 @@ brave-otter
 brave-otter 🦦
 === session-name / retired animal ===
 brave-vulture 🦅
+=== session-spend / a currency without a symbol ===
+HUF 3564.00
+=== session-spend / a fraction of a cent ===
+$0.0004
+=== session-spend / a long session ===
+$42.50
+=== session-spend / converted to pounds ===
+£1.00
+=== session-spend / nothing spent yet ===
+$0.00
+=== session-spend / part way through a session ===
+$1.28
+=== session-spend / unpriced model ===
+
 === subscription-usage / ahead of pace ===
 ● 5h 28% █┃░░░░░░
 === subscription-usage / another session's snapshot ===

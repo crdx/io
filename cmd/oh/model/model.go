@@ -29,7 +29,7 @@ import (
 const refreshMessage = "Refreshing the model list..."
 
 const (
-	cacheVersion    = 3
+	cacheVersion    = 4
 	updateTimeout   = 90 * time.Second
 	refreshTimeout  = 20 * time.Second
 	maximumCacheAge = 7 * 24 * time.Hour
@@ -152,26 +152,35 @@ func supplement(listedModels []agent.Model, registeredModels map[string]agent.Mo
 	supplementedModels := make([]agent.Model, 0, len(listedModels))
 
 	for _, model := range listedModels {
-		knownModel, isFound := registeredModels[model.ID]
-		if isFound {
-			if model.Name == "" {
-				model.Name = knownModel.Name
-			}
-			if len(model.EffortLevels) == 0 {
-				model.EffortLevels = slices.Clone(knownModel.EffortLevels)
-			}
-			if model.ContextWindowTokens == 0 {
-				model.ContextWindowTokens = knownModel.ContextWindowTokens
-			}
-			if model.MaxOutputTokens == 0 {
-				model.MaxOutputTokens = knownModel.MaxOutputTokens
-			}
+		if knownModel, isFound := registeredModels[model.ID]; isFound {
+			model = supplemented(model, knownModel)
 		}
 
 		supplementedModels = append(supplementedModels, model)
 	}
 
 	return supplementedModels
+}
+
+func supplemented(model agent.Model, knownModel agent.Model) agent.Model {
+	if model.Name == "" {
+		model.Name = knownModel.Name
+	}
+	if len(model.EffortLevels) == 0 {
+		model.EffortLevels = slices.Clone(knownModel.EffortLevels)
+	}
+	if model.ContextWindowTokens == 0 {
+		model.ContextWindowTokens = knownModel.ContextWindowTokens
+	}
+	if model.MaxOutputTokens == 0 {
+		model.MaxOutputTokens = knownModel.MaxOutputTokens
+	}
+	if model.Prices == nil && knownModel.Prices != nil {
+		prices := *knownModel.Prices
+		model.Prices = &prices
+	}
+
+	return model
 }
 
 func fromRegistry(registeredModels map[string]agent.Model) []agent.Model {
@@ -371,6 +380,7 @@ func choicesFor(providerName string, models []agent.Model) []Choice {
 			EffortLevels:        model.EffortLevels,
 			ContextWindowTokens: model.ContextWindowTokens,
 			MaxOutputTokens:     model.MaxOutputTokens,
+			Prices:              model.Prices,
 		})
 	}
 

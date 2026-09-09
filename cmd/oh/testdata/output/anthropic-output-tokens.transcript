@@ -1,0 +1,28 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `claude-opus-5`
+- **Effort:** `medium`
+- **Provider:** `anthropic`
+- **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## Mode · rxwgs · +0s
+
+## User · +0s
+
+count what the answer cost
+
+## Assistant · +0s
+
+That cost a little.
+
+## User · +0s
+
+answer without thinking first
+
+## Assistant · +0s
+
+Answered.
+

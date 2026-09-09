@@ -33,6 +33,7 @@ func Call(index int, id string, name string, arguments string) string {
 func Usage(promptTokens int, cachedTokens int) string {
 	return fmt.Sprintf(
 		`{"object":"chat.completion.chunk","choices":[],"usage":{"prompt_tokens":%d,`+
+			`"completion_tokens":42,`+
 			`"prompt_tokens_details":{"cached_tokens":%d,"cache_write_tokens":0}}}`,
 		promptTokens,
 		cachedTokens,

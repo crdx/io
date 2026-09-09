@@ -8,7 +8,10 @@ import (
 	"strings"
 	"testing"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/menu"
+	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/internal/money"
 	"crdx.org/io/internal/util/strutil"
 )
 
@@ -65,6 +68,7 @@ func availableModels() []*Model {
 			EffortLevels:        levels("none", "low", "medium", "high"),
 			Effort:              Effort{Level: "medium"},
 			ContextWindowTokens: 200000,
+			Prices:              &agent.TokenPrices{Input: 3, Output: 15, CacheRead: 0.3, CacheWrite: 3.75},
 		},
 		{
 			Provider:            "Codex",
@@ -74,6 +78,7 @@ func availableModels() []*Model {
 			EffortLevels:        fastLadder("low", "medium", "high", "xhigh"),
 			Effort:              Effort{Level: "medium", IsFast: true},
 			ContextWindowTokens: 272000,
+			Prices:              &agent.TokenPrices{Input: 1.25, Output: 10, CacheRead: 0.125},
 		},
 		{
 			Provider:            "OpenCode Go",
@@ -83,6 +88,27 @@ func availableModels() []*Model {
 			EffortLevels:        levels("low", "medium", "high"),
 			Effort:              Effort{Level: "high"},
 			ContextWindowTokens: 1000000,
+			Prices:              &agent.TokenPrices{Input: 0.075, Output: 0.3},
+		},
+		{
+			Provider:            "Anthropic",
+			ProviderID:          "anthropic",
+			Name:                "Opus 5",
+			ID:                  "claude-opus-5",
+			EffortLevels:        levels("low", "medium", "high"),
+			Effort:              Effort{Level: "high"},
+			ContextWindowTokens: 200000,
+			Prices:              &agent.TokenPrices{Input: 15, Output: 75, CacheRead: 1.5, CacheWrite: 18.75},
+		},
+		{
+			Provider:            "Codex",
+			ProviderID:          "codex",
+			Name:                "Sol Pro",
+			ID:                  "gpt-5.3-sol-pro",
+			EffortLevels:        levels("medium", "high"),
+			Effort:              Effort{Level: "medium"},
+			ContextWindowTokens: 272000,
+			Prices:              &agent.TokenPrices{Input: 150, Output: 600},
 		},
 		{
 			Provider:            "Ollama",
@@ -179,15 +205,21 @@ func TestTheRowsOfTheModelPickerMatchTheGolden(t *testing.T) {
 
 	var output strings.Builder
 
-	for i, room := range []int{150, 80, 46} {
+	for i, room := range []int{150, 100, 80, 46} {
 		if i > 0 {
 			_, _ = fmt.Fprintln(&output)
 		}
 		_, _ = fmt.Fprintf(&output, "--- %d columns ---\n", room)
 		_, _ = fmt.Fprintln(&output, models.ColumnHeader(room))
 		for index, model := range models.models {
-			_, _ = fmt.Fprintln(&output, modelRow(model, index == 1, room))
+			_, _ = fmt.Fprintln(&output, modelRow(model, models.currency, index == 1, room))
 		}
+	}
+
+	_, _ = fmt.Fprintf(&output, "\n--- %d columns in pounds ---\n", 150)
+	pounds := money.In("GBP", 0.8)
+	for index, model := range models.models {
+		_, _ = fmt.Fprintln(&output, modelRow(model, pounds, index == 1, 150))
 	}
 
 	compareWithGolden(t, "rows.golden", output.String())
@@ -224,4 +256,12 @@ func TestWhatTheModelPickerPaintsMatchesTheGolden(t *testing.T) {
 	}
 
 	compareWithGolden(t, "painted.ansi", output.String())
+}
+
+func TestTheCostColumnFitsTheLongestTierItCanDraw(t *testing.T) {
+	for _, priceTier := range agent.PriceTiers() {
+		if got := width.Of(priceTier.String()); got > costColumn {
+			t.Errorf("%q needs %d cells, but the column holds %d", priceTier, got, costColumn)
+		}
+	}
 }

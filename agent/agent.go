@@ -92,11 +92,12 @@ func (self *Agent) AddUserMessage(text string) {
 }
 
 type proseStream struct {
-	kind             Kind
-	text             strings.Builder
-	pendingEvent     *Event
-	hasReportedUsage bool
-	hasAnswered      bool
+	kind              Kind
+	text              strings.Builder
+	pendingEvent      *Event
+	hasReportedUsage  bool
+	hasReportedOutput bool
+	hasAnswered       bool
 }
 
 func (self *proseStream) add(output Output) []Update {
@@ -115,6 +116,7 @@ func (self *proseStream) add(output Output) []Update {
 		if output.Usage != nil && !self.hasReportedUsage {
 			event.Usage = output.Usage
 			self.hasReportedUsage = true
+			self.hasReportedOutput = output.Usage.OutputTokens > 0
 		}
 		self.resetText()
 		if !output.AwaitUsage {
@@ -143,12 +145,27 @@ func (self *proseStream) add(output Output) []Update {
 }
 
 func (self *proseStream) finish(usage Usage) []Update {
-	if self.pendingEvent != nil && usage.InputTokens > 0 && !self.hasReportedUsage {
-		self.pendingEvent.Usage = &usage
-		self.hasReportedUsage = true
+	if self.pendingEvent != nil {
+		if remainder, isLeft := self.unreported(usage); isLeft {
+			self.pendingEvent.Usage = &remainder
+		}
 	}
 
 	return self.takePending()
+}
+
+func (self *proseStream) unreported(usage Usage) (Usage, bool) {
+	switch {
+	case usage.InputTokens > 0 && !self.hasReportedUsage:
+		self.hasReportedUsage = true
+		self.hasReportedOutput = usage.OutputTokens > 0
+		return usage, true
+	case usage.OutputTokens > 0 && !self.hasReportedOutput:
+		self.hasReportedOutput = true
+		return Usage{OutputTokens: usage.OutputTokens}, true
+	default:
+		return Usage{}, false
+	}
 }
 
 func (self *proseStream) interrupted() []Update {
@@ -368,8 +385,8 @@ func (self *Agent) Stream(ctx context.Context, message string, interjections *In
 				}
 			}
 
-			usage := reply.Usage
-			if prose.hasReportedUsage {
+			usage, isLeft := prose.unreported(reply.Usage)
+			if !isLeft {
 				usage = Usage{}
 			}
 			if !self.runCalls(ctx, reply.Calls, usage, yieldEvent) {
@@ -547,7 +564,7 @@ func (self *Agent) runCalls(
 				ReadOnly: self.readOnly(rawCall),
 			},
 		}
-		if i == len(calls)-1 && usage.InputTokens > 0 {
+		if i == len(calls)-1 && (usage.InputTokens > 0 || usage.OutputTokens > 0) {
 			event.Usage = &usage
 		}
 

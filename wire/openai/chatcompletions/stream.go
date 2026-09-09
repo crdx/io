@@ -85,8 +85,9 @@ type chunk struct {
 }
 
 type usage struct {
-	PromptTokens int                 `json:"prompt_tokens"`
-	Details      *promptCacheDetails `json:"prompt_tokens_details"`
+	PromptTokens     int                 `json:"prompt_tokens"`
+	CompletionTokens int                 `json:"completion_tokens"`
+	Details          *promptCacheDetails `json:"prompt_tokens_details"`
 }
 
 type promptCacheDetails struct {
@@ -95,7 +96,7 @@ type promptCacheDetails struct {
 }
 
 func (self usage) normalised() agent.Usage {
-	normalisedUsage := agent.Usage{InputTokens: self.PromptTokens}
+	normalisedUsage := agent.Usage{InputTokens: self.PromptTokens, OutputTokens: self.CompletionTokens}
 	if self.Details != nil {
 		normalisedUsage.Cache = &agent.CacheUsage{
 			ReadTokens:  self.Details.ReadTokens,

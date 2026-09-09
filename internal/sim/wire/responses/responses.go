@@ -8,7 +8,7 @@ const Done = "[DONE]"
 
 func CompletedResponse(inputTokens int, cachedTokens int) string {
 	return fmt.Sprintf(
-		`{"type":"response.completed","response":{"usage":{"input_tokens":%d,`+
+		`{"type":"response.completed","response":{"usage":{"input_tokens":%d,"output_tokens":42,`+
 			`"input_tokens_details":{"cached_tokens":%d,"cache_write_tokens":0}}}}`,
 		inputTokens,
 		cachedTokens,

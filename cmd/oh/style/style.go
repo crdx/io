@@ -72,6 +72,10 @@ var (
 	PendingPrefix  Style = col.Underline
 	ScrolledInput  Style = Dim
 	ChosenRow      Style = hex(copper)
+	LowPrice       Style = hex(lime)
+	MediumPrice    Style = hex(steel)
+	HighPrice      Style = hex(gold)
+	ExtremePrice   Style = hex(red)
 	RunningSession Style = decorate(col.Italic, hex(steel))
 	Column         Style = decorate(col.Underline, Dim)
 	TypedInput     Style = Normal

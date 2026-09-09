@@ -1,0 +1,28 @@
+# Conversation
+
+- **Session:** `brave-otter`
+- **Started:** `2001-01-01T00:00:00Z`
+- **Model:** `gpt-5.6-sol`
+- **Effort:** `medium`
+- **Provider:** `codex`
+- **Workspace:** ``
+- **Tool detail:** `jq 'select(.event.id == "<id>")' session.jsonl`, for the `[id]` of any call
+
+## Mode · rxwgs · +0s
+
+## User · +0s
+
+count what the answer cost
+
+## Assistant · +0s
+
+That cost a little.
+
+## User · +0s
+
+carry on
+
+## Assistant · +0s
+
+Carrying on.
+

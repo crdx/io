@@ -15,6 +15,13 @@ type registryEntry struct {
 		Context int `json:"context"`
 		Output  int `json:"output"`
 	} `json:"limit"`
+
+	Cost struct {
+		Input      float64 `json:"input"`
+		Output     float64 `json:"output"`
+		CacheRead  float64 `json:"cache_read"`
+		CacheWrite float64 `json:"cache_write"`
+	} `json:"cost"`
 }
 
 type registryReasoning struct {
@@ -39,6 +46,10 @@ func (self *Endpoint) serveRegistry(writer http.ResponseWriter, request *http.Re
 
 	entry.Limit.Context = simulatedContext
 	entry.Limit.Output = simulatedOutput
+	entry.Cost.Input = simulatedPrices.Input
+	entry.Cost.Output = simulatedPrices.Output
+	entry.Cost.CacheRead = simulatedPrices.CacheRead
+	entry.Cost.CacheWrite = simulatedPrices.CacheWrite
 
 	describedProvider := registryProvider{Models: map[string]registryEntry{self.scenario.Model: entry}}
 

@@ -808,6 +808,7 @@ func (self *App) getBarSources() bar.Sources {
 		IsTurnRunning:         self.isTurnRunning,
 		GetContextUsage:       self.contextUsage,
 		GetCacheUsage:         self.cacheUsage,
+		GetSessionSpend:       self.sessionSpend,
 		GetGrantedCaps:        self.grantedCaps,
 		GetPathGrants:         self.getPathGrants,
 		GetHostToSandboxPorts: self.getHostToSandboxPorts,
@@ -990,6 +991,10 @@ func (self *App) cacheUsage() (int, int) {
 
 func (self *App) contextUsage() (int, int) {
 	return self.metrics.ContextUsage()
+}
+
+func (self *App) sessionSpend() (float64, bool) {
+	return self.metrics.Spend()
 }
 
 func (self *App) grantedCaps() caps.Set {

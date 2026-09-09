@@ -128,6 +128,20 @@ GPT Sol \e[38;2;150;152;150m5.6\e[0m \e[38;2;150;152;150m▫▫▫▫\e[0m\e[38;
 \e[38;2;150;152;150mbrave-otter\e[0m 🦦
 === session-name / retired animal ===
 \e[38;2;150;152;150mbrave-vulture\e[0m 🦅
+=== session-spend / a currency without a symbol ===
+\e[38;2;150;152;150mHUF \e[0m3564.00
+=== session-spend / a fraction of a cent ===
+\e[38;2;150;152;150m$\e[0m0.0004
+=== session-spend / a long session ===
+\e[38;2;150;152;150m$\e[0m42.50
+=== session-spend / converted to pounds ===
+\e[38;2;150;152;150m£\e[0m1.00
+=== session-spend / nothing spent yet ===
+\e[38;2;150;152;150m$\e[0m0.00
+=== session-spend / part way through a session ===
+\e[38;2;150;152;150m$\e[0m1.28
+=== session-spend / unpriced model ===
+
 === subscription-usage / ahead of pace ===
 \e[38;2;76;154;44m●\e[0m \e[38;2;150;152;150m5h\e[0m \e[38;2;207;173;0m28%\e[0m \e[38;2;207;173;0m█\e[0m\e[38;2;150;152;150m┃░░░░░░\e[0m
 === subscription-usage / another session's snapshot ===

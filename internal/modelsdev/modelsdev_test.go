@@ -71,3 +71,39 @@ func TestFetchTakesTheContextWindowFromTheInputShareOfTheBudget(t *testing.T) {
 		t.Errorf("got %d, want the output limit 128000", got)
 	}
 }
+
+func TestFetchTakesThePriceOfEachTokenKind(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{
+			"anthropic": {"models": {
+				"priced": {"cost": {"input": 3, "output": 15, "cache_read": 0.3, "cache_write": 3.75}},
+				"free": {"cost": {"input": 0, "output": 0}},
+				"unpriced": {}
+			}}
+		}`))
+	}))
+	defer server.Close()
+
+	registry, err := Fetch(t.Context(), server.URL, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	anthropic := registry.Provider("anthropic")
+
+	prices := anthropic["priced"].Prices
+	if prices == nil {
+		t.Fatal("expected the priced model to carry its prices")
+	}
+	if prices.Input != 3 || prices.Output != 15 || prices.CacheRead != 0.3 || prices.CacheWrite != 3.75 {
+		t.Errorf("got %+v", *prices)
+	}
+
+	if anthropic["free"].Prices != nil {
+		t.Error("expected a model costing nothing to carry no prices")
+	}
+	if anthropic["unpriced"].Prices != nil {
+		t.Error("expected a model without costs to carry no prices")
+	}
+}

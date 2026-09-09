@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"crdx.org/io/agent"
 )
 
 type Choice struct {
@@ -14,6 +16,7 @@ type Choice struct {
 	EffortLevels        []string
 	ContextWindowTokens int
 	MaxOutputTokens     int
+	Prices              *agent.TokenPrices
 }
 
 func Chosen(path string, providerName string, model string) (Choice, error) {

@@ -23,6 +23,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
 	"crdx.org/io/cmd/oh/segment/sessionEmoji"
 	"crdx.org/io/cmd/oh/segment/sessionName"
+	"crdx.org/io/cmd/oh/segment/sessionSpend"
 	"crdx.org/io/cmd/oh/segment/subUsage"
 	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnTimer"
@@ -32,6 +33,7 @@ import (
 	"crdx.org/io/cmd/oh/usage"
 	"crdx.org/io/cmd/oh/work"
 	"crdx.org/io/internal/jobs"
+	"crdx.org/io/internal/money"
 )
 
 const (
@@ -51,6 +53,7 @@ const (
 	turnTimerSegment       = "turn-timer"
 	turnCountSegment       = "turn-count"
 	gitBranchSegment       = "git-branch"
+	sessionSpendSegment    = "session-spend"
 	subUsageSegment        = "subscription-usage"
 	jobNamesSegment        = "jobs"
 )
@@ -67,6 +70,7 @@ type Options struct {
 	UsageCachePath        string
 	UsageIsSelfRefreshing bool
 	UsageGauges           *usage.Gauges
+	Currency              money.Currency
 	Sources               Sources
 }
 
@@ -74,6 +78,7 @@ type Sources struct {
 	IsTurnRunning         func() bool
 	GetContextUsage       func() (int, int)
 	GetCacheUsage         func() (int, int)
+	GetSessionSpend       func() (float64, bool)
 	GetGrantedCaps        func() caps.Set
 	GetPathGrants         func() []pathgrant.Grant
 	GetHostToSandboxPorts func() []uint16
@@ -89,6 +94,7 @@ func NewRegistry(options Options) segment.Registry {
 		activitySpinnerSegment: activitySpinner.New(options.Sources.IsTurnRunning, time.Now),
 		cacheUsageSegment:      cacheUsage.New(options.Sources.GetCacheUsage),
 		contextUsageSegment:    contextUsage.New(options.Sources.GetContextUsage),
+		sessionSpendSegment:    sessionSpend.New(options.Sources.GetSessionSpend, options.Currency),
 		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
 		pathGrantsSegment:      pathGrants.New(options.Sources.GetPathGrants),
 		exposedPortsSegment: exposedPorts.New(

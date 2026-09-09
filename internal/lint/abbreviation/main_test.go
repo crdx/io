@@ -16,6 +16,10 @@ func TestAnalyse(t *testing.T) {
 			source:   "package example\n\nfunc read() {\n\tidx := 0\n\t_ = idx\n}\n",
 			expected: []string{`example.go:4:2: idx: write "idx" in full as "index"`},
 		},
+		"a shortened middle": {
+			source:   "package example\n\nfunc read() {\n\tmedPrice := 0\n\t_ = medPrice\n}\n",
+			expected: []string{`example.go:4:2: medPrice: write "med" in full as "medium"`},
+		},
 		"a word within a name": {
 			source:   "package example\n\nfunc read() {\n\tlineIdx := 0\n\t_ = lineIdx\n}\n",
 			expected: []string{`example.go:4:2: lineIdx: write "idx" in full as "index"`},

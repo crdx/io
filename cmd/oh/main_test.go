@@ -84,6 +84,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
 	"crdx.org/io/cmd/oh/segment/sessionEmoji"
 	"crdx.org/io/cmd/oh/segment/sessionName"
+	"crdx.org/io/cmd/oh/segment/sessionSpend"
 	"crdx.org/io/cmd/oh/segment/subUsage"
 	"crdx.org/io/cmd/oh/segment/turnCount"
 	"crdx.org/io/cmd/oh/segment/turnTimer"
@@ -106,6 +107,7 @@ import (
 	"crdx.org/io/internal/auth"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/jobs"
+	"crdx.org/io/internal/money"
 	"crdx.org/io/internal/req"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sim"
@@ -4244,7 +4246,7 @@ func completedInvalidMermaidScreen(t *testing.T) string {
 func checkedModelCache(providers string) []byte {
 	return fmt.Appendf(
 		nil,
-		`{"version":3,"checked":%q,"providers":%s}`, time.Now().Format(time.RFC3339), providers,
+		`{"version":4,"checked":%q,"providers":%s}`, time.Now().Format(time.RFC3339), providers,
 	)
 }
 
@@ -6371,7 +6373,7 @@ func TestTheBannerDrawsWhatItDrewBefore(t *testing.T) {
 
 				held := &App{
 					mode:      caps.NewMode(caps.All()),
-					metrics:   metrics.New(200_000),
+					metrics:   metrics.New(metrics.Settings{ContextWindowTokens: 200_000}),
 					startedAt: time.Now().Add(-sessionSoFar),
 					recordedEvents: []agent.Event{{
 						Kind:  agent.ModelMessageEvent,
@@ -6411,7 +6413,7 @@ func TestTheBarConfiguredByDefaultDrawsWhatItDrewBefore(t *testing.T) {
 
 					held := &App{
 						mode:      caps.NewMode(caps.All()),
-						metrics:   metrics.New(200_000),
+						metrics:   metrics.New(metrics.Settings{ContextWindowTokens: 200_000}),
 						startedAt: time.Now().Add(-sessionSoFar),
 						recordedEvents: []agent.Event{{
 							Kind:  agent.ModelMessageEvent,
@@ -8637,6 +8639,48 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 			t,
 			sessionName.New("brave-otter"),
 			"emoji = true",
+			segment.Context{},
+		),
+		"session-spend / unpriced model": goldenSegmentPass(
+			t,
+			sessionSpend.New(func() (float64, bool) { return 0, false }, money.Dollar()),
+			"",
+			segment.Context{},
+		),
+		"session-spend / nothing spent yet": goldenSegmentPass(
+			t,
+			sessionSpend.New(func() (float64, bool) { return 0, true }, money.Dollar()),
+			"",
+			segment.Context{},
+		),
+		"session-spend / a fraction of a cent": goldenSegmentPass(
+			t,
+			sessionSpend.New(func() (float64, bool) { return 0.000_42, true }, money.Dollar()),
+			"",
+			segment.Context{},
+		),
+		"session-spend / part way through a session": goldenSegmentPass(
+			t,
+			sessionSpend.New(func() (float64, bool) { return 1.284_5, true }, money.Dollar()),
+			"",
+			segment.Context{},
+		),
+		"session-spend / a long session": goldenSegmentPass(
+			t,
+			sessionSpend.New(func() (float64, bool) { return 42.5, true }, money.Dollar()),
+			"",
+			segment.Context{},
+		),
+		"session-spend / converted to pounds": goldenSegmentPass(
+			t,
+			sessionSpend.New(func() (float64, bool) { return 1.284_5, true }, money.In("GBP", 0.782)),
+			"",
+			segment.Context{},
+		),
+		"session-spend / a currency without a symbol": goldenSegmentPass(
+			t,
+			sessionSpend.New(func() (float64, bool) { return 10, true }, money.In("HUF", 356.4)),
+			"",
 			segment.Context{},
 		),
 		"session-emoji": goldenSegmentPass(

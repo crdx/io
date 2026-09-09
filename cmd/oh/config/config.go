@@ -109,6 +109,7 @@ type Ui struct {
 	StreamingMode      output.StreamingMode      `toml:"streaming"`
 	Grouping           output.Grouping           `toml:"grouping"`
 	ReasoningRendering output.ReasoningRendering `toml:"reasoning"`
+	Currency           string                    `toml:"currency"`
 }
 
 type Tool struct {

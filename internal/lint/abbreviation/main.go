@@ -20,6 +20,7 @@ var abbreviations = map[string]string{
 	"elem":  "element",
 	"ident": "identifier",
 	"idx":   "index",
+	"med":   "medium",
 	"pos":   "position",
 	"prev":  "previous",
 	"resp":  "response",

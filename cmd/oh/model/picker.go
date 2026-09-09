@@ -9,12 +9,14 @@ import (
 
 	"crdx.org/io/cmd/oh/model/picker"
 	"crdx.org/io/cmd/oh/tty"
+	"crdx.org/io/internal/money"
 )
 
 var ErrNotLoggedIn = errors.New("not logged in to any provider: run oh -L to sign in")
 
 func Choose(
 	path string,
+	currency money.Currency,
 	isLoggedIn func(providerName string) bool,
 	terminal *os.File,
 	screen io.Writer,
@@ -28,7 +30,7 @@ func Choose(
 		return Selection{}, ErrNotLoggedIn
 	}
 
-	chosenModel, err := picker.Choose(offered(choices, defaultEffort), terminal, screen)
+	chosenModel, err := picker.Choose(offered(choices, defaultEffort), currency, terminal, screen)
 	if err != nil {
 		return Selection{}, err
 	}
@@ -44,6 +46,7 @@ func Choose(
 func ChooseWhenNoneSelected(
 	reason error,
 	path string,
+	currency money.Currency,
 	isLoggedIn func(providerName string) bool,
 	terminal *os.File,
 	screen io.Writer,
@@ -52,7 +55,7 @@ func ChooseWhenNoneSelected(
 		return Selection{}, reason
 	}
 
-	return Choose(path, isLoggedIn, terminal, screen)
+	return Choose(path, currency, isLoggedIn, terminal, screen)
 }
 
 func signedInto(choices []Choice, isLoggedIn func(providerName string) bool) []Choice {
@@ -85,6 +88,7 @@ func offered(choices []Choice, currentEffort string) []*picker.Model {
 			EffortLevels:        effortLadder(efforts, SupportsFastMode(choice.Provider)),
 			Effort:              picker.Effort{Level: effort},
 			ContextWindowTokens: choice.ContextWindowTokens,
+			Prices:              choice.Prices,
 		})
 	}
 

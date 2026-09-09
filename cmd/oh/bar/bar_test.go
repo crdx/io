@@ -1,10 +1,12 @@
 package bar
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"crdx.org/io/cmd/oh/config"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/work"
@@ -99,5 +101,22 @@ func TestRenderWithinHandsAFittingSegmentOnlyTheRoomThatRemains(t *testing.T) {
 	}
 	if style.Plain(got) != "abc ─ +50" || style.Width(got) > 10 {
 		t.Errorf("got %q at width %d", style.Plain(got), style.Width(got))
+	}
+}
+
+func TestEverySegmentTheDefaultsNameIsRegistered(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, fmt.Appendf(nil, "version = %d\n", config.Format), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	settings, err := config.Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	registry := NewRegistry(Options{Workspace: work.At(t.TempDir())})
+	if _, err := settings.BuildLayout(registry); err != nil {
+		t.Fatalf("the built-in layout names a segment nothing supplies: %v", err)
 	}
 }

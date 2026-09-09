@@ -10,6 +10,7 @@ import (
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/model/picker"
+	"crdx.org/io/internal/money"
 )
 
 func TestTheEffortsOfferedRunFromLeastToMost(t *testing.T) {
@@ -67,7 +68,7 @@ func TestOnlyAProviderWithFastModeOffersItBesideEachEffort(t *testing.T) {
 }
 
 func TestThePickerOnlyOpensWhereItCanBeDrawn(t *testing.T) {
-	_, err := ChooseWhenNoneSelected(ErrNoSelection, t.TempDir()+"/models.json", everyoneSignedIn, nil, nil)
+	_, err := ChooseWhenNoneSelected(ErrNoSelection, t.TempDir()+"/models.json", money.Dollar(), everyoneSignedIn, nil, nil)
 
 	if !errors.Is(err, ErrNoSelection) {
 		t.Errorf("expected the reason nothing was selected to stand, got %v", err)
@@ -77,7 +78,7 @@ func TestThePickerOnlyOpensWhereItCanBeDrawn(t *testing.T) {
 func TestOnlyAnUnselectedModelOpensThePicker(t *testing.T) {
 	wanted := errors.New("something else went wrong")
 
-	_, err := ChooseWhenNoneSelected(wanted, t.TempDir()+"/models.json", everyoneSignedIn, os.Stdin, os.Stdout)
+	_, err := ChooseWhenNoneSelected(wanted, t.TempDir()+"/models.json", money.Dollar(), everyoneSignedIn, os.Stdin, os.Stdout)
 
 	if !errors.Is(err, wanted) {
 		t.Errorf("expected the original reason back, got %v", err)
@@ -85,7 +86,7 @@ func TestOnlyAnUnselectedModelOpensThePicker(t *testing.T) {
 }
 
 func TestNothingCanBeChosenWhenNoModelsAreKnown(t *testing.T) {
-	if _, err := Choose(t.TempDir()+"/models.json", everyoneSignedIn, nil, nil); err == nil {
+	if _, err := Choose(t.TempDir()+"/models.json", money.Dollar(), everyoneSignedIn, nil, nil); err == nil {
 		t.Error("expected the empty model list to be refused")
 	}
 }
@@ -93,7 +94,7 @@ func TestNothingCanBeChosenWhenNoModelsAreKnown(t *testing.T) {
 func TestThePickerRefusesToOpenWhereNoProviderIsSignedIntoAtAll(t *testing.T) {
 	path := writeChoosableModels(t)
 
-	_, err := Choose(path, func(string) bool { return false }, nil, nil)
+	_, err := Choose(path, money.Dollar(), func(string) bool { return false }, nil, nil)
 	if !errors.Is(err, ErrNotLoggedIn) {
 		t.Errorf("expected the picker to advise signing in, got %v", err)
 	}

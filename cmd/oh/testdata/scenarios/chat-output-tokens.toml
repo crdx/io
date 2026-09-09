@@ -1,0 +1,25 @@
+provider = "chat"
+model = "deepseek-v4-pro"
+effort = "medium"
+
+[first]
+prompt = "count what the answer cost"
+
+[[first.response]]
+event = [
+    '''{"choices":[{"delta":{"role":"assistant","content":"That cost a little."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''{"choices":[],"usage":{"prompt_tokens":5000,"completion_tokens":280,"prompt_tokens_details":{"cached_tokens":4000,"cache_write_tokens":500}}}''',
+    '''[DONE]''',
+]
+
+[resume]
+prompt = "carry on"
+
+[[resume.response]]
+event = [
+    '''{"choices":[{"delta":{"content":"Carrying on."}}]}''',
+    '''{"choices":[{"delta":{},"finish_reason":"stop"}]}''',
+    '''{"choices":[],"usage":{"prompt_tokens":5200,"completion_tokens":50,"prompt_tokens_details":{"cached_tokens":5000,"cache_write_tokens":0}}}''',
+    '''[DONE]''',
+]

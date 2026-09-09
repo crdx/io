@@ -908,6 +908,7 @@ func testSegments() segment.Registry {
 		"active-model":       inertFactory,
 		"scroll-overflow":    scrollOverflow.New,
 		"session-name":       inertFactory,
+		"session-spend":      inertFactory,
 		"local-time":         inertFactory,
 		"turn-timer":         inertFactory,
 		"turn-count":         inertFactory,

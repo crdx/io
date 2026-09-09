@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/internal/file"
 	"crdx.org/io/internal/jobs"
+	"crdx.org/io/internal/money"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sandbox/keeper"
 	"crdx.org/io/internal/util"
@@ -159,6 +160,21 @@ func applyDefaultCaps(options *cli.Options, settings config.Config) {
 	}
 }
 
+func ensureCurrency(ctx context.Context, output io.Writer, code string, isSimulated bool) money.Currency {
+	code = strings.ToUpper(strings.TrimSpace(code))
+	if code == "" || code == money.DollarCode || isSimulated {
+		return money.Dollar()
+	}
+
+	path := location.GetExchangeRateCachePath()
+
+	if err := money.Ensure(ctx, "", path, code); err != nil {
+		_, _ = fmt.Fprintln(output, style.Change("exchange rate not refreshed: %s", err))
+	}
+
+	return money.Load(path, code)
+}
+
 //nolint:gocyclo // lol no
 func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, error) {
 	ctx := context.Background()
@@ -286,10 +302,14 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		return "", err
 	}
 
+	currency := ensureCurrency(ctx, notices, settings.Ui.Currency, isSimulated)
+
 	if inputArgs.IsModelPicker {
 		var chosenModel model.Selection
 		var err error
-		startup.Wait(func() { chosenModel, err = model.Choose(modelCachePath, backend.IsLoggedIn, keyboard, os.Stdout) })
+		startup.Wait(func() {
+			chosenModel, err = model.Choose(modelCachePath, currency, backend.IsLoggedIn, keyboard, os.Stdout)
+		})
 		if errors.Is(err, menu.ErrCancelled) {
 			return "", nil
 		}
@@ -420,7 +440,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	)
 	if err != nil {
 		startup.Wait(func() {
-			selection, err = model.ChooseWhenNoneSelected(err, modelCachePath, backend.IsLoggedIn, keyboard, os.Stdout)
+			selection, err = model.ChooseWhenNoneSelected(
+				err, modelCachePath, currency, backend.IsLoggedIn, keyboard, os.Stdout,
+			)
 		})
 	}
 	if errors.Is(err, menu.ErrCancelled) {
@@ -756,10 +778,13 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	})
 
 	app = &App{
-		agent:           agent.NewWithEnabledTools(systemPrompt, providerClient, toolboxTools, enabledTools),
-		screen:          screen,
-		terminal:        terminal.New(os.Stdout, workspace),
-		metrics:         metrics.New(choice.ContextWindowTokens),
+		agent:    agent.NewWithEnabledTools(systemPrompt, providerClient, toolboxTools, enabledTools),
+		screen:   screen,
+		terminal: terminal.New(os.Stdout, workspace),
+		metrics: metrics.New(metrics.Settings{
+			ContextWindowTokens: choice.ContextWindowTokens,
+			Prices:              choice.Prices,
+		}),
 		recorder:        record.New(log),
 		editorConfig:    editorConfiguration,
 		toolOutputLimit: toolOutputLimit,
@@ -824,6 +849,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		UsageCachePath:        usageCachePath,
 		UsageIsSelfRefreshing: backend.RefreshesOwnUsage(selection.Provider),
 		UsageGauges:           usage.TerminalGauges(keyboard, os.Stdout),
+		Currency:              currency,
 		Sources:               app.getBarSources(),
 	})
 	liveConfig, err := settings.BuildLive(barRegistry)

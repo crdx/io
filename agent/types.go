@@ -29,11 +29,74 @@ type State interface {
 }
 
 type Model struct {
-	ID                  string   `json:"id"`
-	Name                string   `json:"name,omitempty"`
-	EffortLevels        []string `json:"efforts,omitempty"`
-	ContextWindowTokens int      `json:"context,omitempty"`
-	MaxOutputTokens     int      `json:"output,omitempty"`
+	ID                  string       `json:"id"`
+	Name                string       `json:"name,omitempty"`
+	EffortLevels        []string     `json:"efforts,omitempty"`
+	ContextWindowTokens int          `json:"context,omitempty"`
+	MaxOutputTokens     int          `json:"output,omitempty"`
+	Prices              *TokenPrices `json:"prices,omitempty"`
+}
+
+type TokenPrices struct {
+	Input      float64 `json:"input,omitempty"`
+	Output     float64 `json:"output,omitempty"`
+	CacheRead  float64 `json:"cache_read,omitempty"`
+	CacheWrite float64 `json:"cache_write,omitempty"`
+}
+
+func (self TokenPrices) IsKnown() bool {
+	return self.Input > 0 || self.Output > 0 || self.CacheRead > 0 || self.CacheWrite > 0
+}
+
+type PriceTier int
+
+const (
+	PriceUnknown PriceTier = iota
+	PriceLow
+	PriceMedium
+	PriceHigh
+	PriceExtreme
+)
+
+const (
+	inputTokensPerOutputToken = 3
+	mediumPriceFrom           = 2.0
+	highPriceFrom             = 10.0
+	extremePriceFrom          = 50.0
+)
+
+func (self TokenPrices) BlendedRate() float64 {
+	return (self.Input*inputTokensPerOutputToken + self.Output) / (inputTokensPerOutputToken + 1)
+}
+
+func (self TokenPrices) Tier() PriceTier {
+	switch rate := self.BlendedRate(); {
+	case !self.IsKnown():
+		return PriceUnknown
+	case rate >= extremePriceFrom:
+		return PriceExtreme
+	case rate >= highPriceFrom:
+		return PriceHigh
+	case rate >= mediumPriceFrom:
+		return PriceMedium
+	default:
+		return PriceLow
+	}
+}
+
+func PriceTiers() []PriceTier {
+	return []PriceTier{PriceLow, PriceMedium, PriceHigh, PriceExtreme}
+}
+
+var priceTierNames = map[PriceTier]string{
+	PriceLow:     "cheap",
+	PriceMedium:  "fair",
+	PriceHigh:    "costly",
+	PriceExtreme: "absurd",
+}
+
+func (self PriceTier) String() string {
+	return priceTierNames[self]
 }
 
 type Lister interface {
@@ -123,8 +186,9 @@ type Reply struct {
 }
 
 type Usage struct {
-	InputTokens int         `json:"input_tokens,omitempty"`
-	Cache       *CacheUsage `json:"cache,omitempty"`
+	InputTokens  int         `json:"input_tokens,omitempty"`
+	OutputTokens int         `json:"output_tokens,omitempty"`
+	Cache        *CacheUsage `json:"cache,omitempty"`
 }
 
 type CacheUsage struct {

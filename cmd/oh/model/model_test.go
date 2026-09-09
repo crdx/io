@@ -193,6 +193,7 @@ func TestTheRegistryFillsInWhatAListingLeftOut(t *testing.T) {
 			ID:           "claude-sonnet-5",
 			Name:         "Claude Sonnet 5",
 			EffortLevels: []string{"low", "high"},
+			Prices:       &agent.TokenPrices{Input: 3, Output: 15},
 		},
 	}
 
@@ -213,6 +214,14 @@ func TestTheRegistryFillsInWhatAListingLeftOut(t *testing.T) {
 
 	if supplemented[2].ID != "unknown-model" || supplemented[2].Name != "" {
 		t.Errorf("expected a model the registry does not know to be left alone, got %+v", supplemented[2])
+	}
+
+	if supplemented[1].Prices == nil || supplemented[1].Prices.Output != 15 {
+		t.Errorf("expected the registry to supply the missing prices, got %+v", supplemented[1].Prices)
+	}
+
+	if supplemented[0].Prices != nil {
+		t.Errorf("expected an unpriced model to stay unpriced, got %+v", supplemented[0].Prices)
 	}
 }
 
@@ -596,7 +605,8 @@ const oneCodexModel = `{
 		"gpt-5.6-sol": {
 			"id": "gpt-5.6-sol", "name": "GPT-5.6 Sol", "reasoning": true,
 			"reasoning_options": [{"type": "effort", "values": ["low", "high"]}],
-			"limit": {"context": 400000, "output": 128000}
+			"limit": {"context": 400000, "output": 128000},
+			"cost": {"input": 1.25, "output": 10, "cache_read": 0.125, "cache_write": 1.25}
 		}
 	}}
 }`
@@ -671,6 +681,29 @@ func TestNothingCachedIsFetchedRatherThanAskedFor(t *testing.T) {
 	choices := availableModelChoices(loadModelCache(modelCachePath()))
 	if len(choices) != 1 || choices[0].ID != "gpt-5.6-sol" {
 		t.Errorf("expected an empty cache to be filled, got %v", choices)
+	}
+}
+
+func TestAPriceSurvivesTheCacheAndReachesTheChoice(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	var output bytes.Buffer
+	endpoint := serveRegistry(t, oneCodexModel)
+	if err := ensureModelsWithoutProviderListings(&output, endpoint, modelCachePath()); err != nil {
+		t.Fatalf("unexpected error: %v, output %q", err, output.String())
+	}
+
+	choices := availableModelChoices(loadModelCache(modelCachePath()))
+	if len(choices) != 1 {
+		t.Fatalf("expected one choice, got %v", choices)
+	}
+
+	prices := choices[0].Prices
+	if prices == nil {
+		t.Fatal("expected the cached model to carry its prices")
+	}
+	if prices.Input != 1.25 || prices.Output != 10 || prices.CacheRead != 0.125 || prices.CacheWrite != 1.25 {
+		t.Errorf("got %+v", *prices)
 	}
 }
 

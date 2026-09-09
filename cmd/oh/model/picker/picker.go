@@ -6,10 +6,13 @@ import (
 	"slices"
 	"strings"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/menu"
 	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/table"
+	"crdx.org/io/cmd/oh/width"
+	"crdx.org/io/internal/money"
 	"crdx.org/io/internal/util"
 )
 
@@ -19,8 +22,35 @@ const (
 	nameColumn       = 28
 	effortColumn     = 9
 	contextColumn    = 7
+	inputColumn      = 9
+	outputColumn     = 9
 	identifierColumn = 28
 )
+
+const (
+	costGaps            = 6
+	rateGaps            = 7
+	shortenedIdentifier = 18
+)
+
+const costTitle = "Cost"
+
+var costColumn = widestPriceTier()
+
+func widestPriceTier() int {
+	widest := width.Of(costTitle)
+	for _, priceTier := range agent.PriceTiers() {
+		widest = max(widest, width.Of(priceTier.String()))
+	}
+
+	return widest
+}
+
+var costRoom = markWidth + providerColumn + nameColumn + effortColumn +
+	contextColumn + costColumn + shortenedIdentifier + costGaps*table.DefaultGap
+
+var rateRoom = markWidth + providerColumn + nameColumn + effortColumn + contextColumn +
+	costColumn + inputColumn + outputColumn + identifierColumn + rateGaps*table.DefaultGap
 
 type Effort struct {
 	Level  string
@@ -43,10 +73,16 @@ type Model struct {
 	EffortLevels        []Effort
 	Effort              Effort
 	ContextWindowTokens int
+	Prices              *agent.TokenPrices
 }
 
-func Choose(models []*Model, terminal *os.File, screen io.Writer) (*Model, error) {
-	chosenIndex, err := menu.Choose(&modelList{models: models}, terminal, screen)
+func Choose(
+	models []*Model,
+	currency money.Currency,
+	terminal *os.File,
+	screen io.Writer,
+) (*Model, error) {
+	chosenIndex, err := menu.Choose(&modelList{models: models, currency: currency}, terminal, screen)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +91,8 @@ func Choose(models []*Model, terminal *os.File, screen io.Writer) (*Model, error
 }
 
 type modelList struct {
-	models []*Model
+	models   []*Model
+	currency money.Currency
 }
 
 func (self *modelList) Len() int { return len(self.models) }
@@ -91,7 +128,7 @@ func (self *modelList) Row(index int, isChosen bool, room int) string {
 		paint = style.ChosenRow
 	}
 
-	return paint.Over(modelRow(self.models[index], isChosen, room))
+	return paint.Over(modelRow(self.models[index], self.currency, isChosen, room))
 }
 
 func modelTable() *table.Table {
@@ -100,24 +137,68 @@ func modelTable() *table.Table {
 		table.Column{Title: "Model", Width: nameColumn},
 		table.Column{Title: "Effort", Width: effortColumn},
 		table.Column{Title: "Context", Width: contextColumn, Align: table.Right},
+		table.Column{Title: costTitle, Width: costColumn, MinRoom: costRoom},
+		table.Column{Title: "Input", Width: inputColumn, Align: table.Right, MinRoom: rateRoom},
+		table.Column{Title: "Output", Width: outputColumn, Align: table.Right, MinRoom: rateRoom},
 		table.Column{Title: "Identifier", Width: identifierColumn, Style: style.Subtle},
 	)
 }
 
-func modelRow(model *Model, isChosen bool, room int) string {
+func modelRow(model *Model, currency money.Currency, isChosen bool, room int) string {
 	return modelTable().Row([]string{
 		menu.Mark(isChosen) + " " + model.Provider,
 		model.Name,
 		model.Effort.String(),
 		contextWindow(model.ContextWindowTokens),
+		tier(model.Prices),
+		price(model.Prices, currency, inputRate),
+		price(model.Prices, currency, outputRate),
 		model.ID,
 	}, room)
 }
 
+const unknownQuantity = "—"
+
 func contextWindow(tokens int) string {
 	if tokens <= 0 {
-		return "—"
+		return unknownQuantity
 	}
 
 	return util.FormatTokenCount(tokens)
+}
+
+func tier(prices *agent.TokenPrices) string {
+	if prices == nil {
+		return unknownQuantity
+	}
+
+	priceTier := prices.Tier()
+	if priceTier == agent.PriceUnknown {
+		return unknownQuantity
+	}
+
+	return priceTierStyles[priceTier](priceTier.String())
+}
+
+var priceTierStyles = map[agent.PriceTier]style.Style{
+	agent.PriceLow:     style.LowPrice,
+	agent.PriceMedium:  style.MediumPrice,
+	agent.PriceHigh:    style.HighPrice,
+	agent.PriceExtreme: style.ExtremePrice,
+}
+
+func inputRate(prices agent.TokenPrices) float64 {
+	return prices.Input
+}
+
+func outputRate(prices agent.TokenPrices) float64 {
+	return prices.Output
+}
+
+func price(prices *agent.TokenPrices, currency money.Currency, rate func(agent.TokenPrices) float64) string {
+	if prices == nil || !prices.IsKnown() {
+		return unknownQuantity
+	}
+
+	return currency.FormatRate(rate(*prices))
 }

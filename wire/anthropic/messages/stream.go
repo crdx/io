@@ -59,13 +59,15 @@ type reply struct {
 
 type usage struct {
 	InputTokens   int `json:"input_tokens"`
+	OutputTokens  int `json:"output_tokens"`
 	CacheRead     int `json:"cache_read_input_tokens"`
 	CacheCreation int `json:"cache_creation_input_tokens"`
 }
 
 func (self usage) normalised() agent.Usage {
 	return agent.Usage{
-		InputTokens: self.InputTokens + self.CacheRead + self.CacheCreation,
+		InputTokens:  self.InputTokens + self.CacheRead + self.CacheCreation,
+		OutputTokens: self.OutputTokens,
 		Cache: &agent.CacheUsage{
 			ReadTokens:  self.CacheRead,
 			WriteTokens: self.CacheCreation,
@@ -271,7 +273,7 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	switch event.Type {
 	case "message_start":
 		if event.Message != nil {
-			self.recordUsage(event.Message.Usage)
+			self.recordStartUsage(event.Message.Usage)
 		}
 
 	case "content_block_start":
@@ -313,6 +315,16 @@ func (self *reply) step(payload string, yield agent.Yield) (bool, error) {
 	return false, nil
 }
 
+func (self *reply) recordStartUsage(usage *usage) {
+	if usage == nil {
+		return
+	}
+
+	startUsage := *usage
+	startUsage.OutputTokens = 0
+	self.recordUsage(&startUsage)
+}
+
 func (self *reply) recordUsage(usage *usage) {
 	if usage == nil {
 		return
@@ -320,8 +332,22 @@ func (self *reply) recordUsage(usage *usage) {
 
 	normalisedUsage := usage.normalised()
 	if normalisedUsage.InputTokens > 0 {
+		outputTokens := self.usage.OutputTokens
 		self.usage = normalisedUsage
+		self.usage.OutputTokens = max(normalisedUsage.OutputTokens, outputTokens)
 	}
+	if normalisedUsage.OutputTokens > self.usage.OutputTokens {
+		self.usage.OutputTokens = normalisedUsage.OutputTokens
+	}
+}
+
+func (self *reply) reportedUsage() *agent.Usage {
+	if self.usage.InputTokens <= 0 {
+		return nil
+	}
+
+	usage := self.usage
+	return &usage
 }
 
 func (self *reply) open(event event) {
@@ -379,17 +405,11 @@ func (self *reply) close(event event, yield agent.Yield) bool {
 
 	heldBlock.isDone = true
 
-	var reportedUsage *agent.Usage
-	if self.usage.InputTokens > 0 {
-		usage := self.usage
-		reportedUsage = &usage
-	}
-
 	switch {
 	case heldBlock.kind == "text" && heldBlock.text.Len() > 0:
-		return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true, Usage: reportedUsage})
+		return !yield(agent.Output{Kind: agent.ModelMessageEvent, Done: true, AwaitUsage: true})
 	case heldBlock.kind == "thinking" && heldBlock.text.Len() > 0 && heldBlock.signature.Len() > 0:
-		return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true, Usage: reportedUsage})
+		return !yield(agent.Output{Kind: agent.ModelReasoningEvent, Done: true, Usage: self.reportedUsage()})
 	default:
 		return false
 	}

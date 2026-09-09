@@ -30,6 +30,13 @@ type entry struct {
 		MaxInputTokens      int `json:"input"`
 		MaxOutputTokens     int `json:"output"`
 	} `json:"limit"`
+
+	Cost struct {
+		Input      float64 `json:"input"`
+		Output     float64 `json:"output"`
+		CacheRead  float64 `json:"cache_read"`
+		CacheWrite float64 `json:"cache_write"`
+	} `json:"cost"`
 }
 
 func (self entry) getContextWindowTokens() int {
@@ -50,6 +57,21 @@ func (self entry) getEffortLevels() []string {
 	return nil
 }
 
+func (self entry) getPrices() *agent.TokenPrices {
+	prices := agent.TokenPrices{
+		Input:      self.Cost.Input,
+		Output:     self.Cost.Output,
+		CacheRead:  self.Cost.CacheRead,
+		CacheWrite: self.Cost.CacheWrite,
+	}
+
+	if !prices.IsKnown() {
+		return nil
+	}
+
+	return &prices
+}
+
 func (self entry) model(name string) agent.Model {
 	id := self.ID
 	if id == "" {
@@ -62,6 +84,7 @@ func (self entry) model(name string) agent.Model {
 		EffortLevels:        self.getEffortLevels(),
 		ContextWindowTokens: self.getContextWindowTokens(),
 		MaxOutputTokens:     self.Limit.MaxOutputTokens,
+		Prices:              self.getPrices(),
 	}
 }
 

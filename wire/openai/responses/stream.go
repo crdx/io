@@ -114,8 +114,9 @@ type eventResponse struct {
 }
 
 type responseUsage struct {
-	InputTokens int                   `json:"input_tokens"`
-	Details     *responseCacheDetails `json:"input_tokens_details"`
+	InputTokens  int                   `json:"input_tokens"`
+	OutputTokens int                   `json:"output_tokens"`
+	Details      *responseCacheDetails `json:"input_tokens_details"`
 }
 
 type responseCacheDetails struct {
@@ -124,7 +125,7 @@ type responseCacheDetails struct {
 }
 
 func (self responseUsage) normalised() agent.Usage {
-	usage := agent.Usage{InputTokens: self.InputTokens}
+	usage := agent.Usage{InputTokens: self.InputTokens, OutputTokens: self.OutputTokens}
 	if self.Details != nil {
 		usage.Cache = &agent.CacheUsage{
 			ReadTokens:  self.Details.ReadTokens,

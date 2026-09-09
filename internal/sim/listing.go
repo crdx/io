@@ -14,13 +14,23 @@ const (
 
 var simulatedEfforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
+var simulatedPrices = agent.TokenPrices{
+	Input:      3,
+	Output:     15,
+	CacheRead:  0.3,
+	CacheWrite: 3.75,
+}
+
 func OfferedModel(name string) agent.Model {
+	prices := simulatedPrices
+
 	return agent.Model{
 		ID:                  name,
 		Name:                name,
 		EffortLevels:        simulatedEfforts,
 		ContextWindowTokens: simulatedContext,
 		MaxOutputTokens:     simulatedOutput,
+		Prices:              &prices,
 	}
 }
 

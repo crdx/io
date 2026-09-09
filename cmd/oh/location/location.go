@@ -54,6 +54,10 @@ func GetAnalysisCachePath() string {
 	return xdg.CachePath(namespace, app, "analysis.json")
 }
 
+func GetExchangeRateCachePath() string {
+	return GetStateDir("rates.json")
+}
+
 func GetModelRoundRobinPath() string {
 	return GetStateDir("model-round-robin.json")
 }
