@@ -7,6 +7,7 @@ import (
 	"syscall"
 	"time"
 
+	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/key"
 	"crdx.org/io/cmd/oh/tty"
 	"crdx.org/io/cmd/oh/turn"
@@ -20,17 +21,19 @@ const (
 )
 
 type Handler struct {
-	Events       func() <-chan turn.Event
-	Key          func(key.Key) bool
-	Turn         func(turn.Event)
-	TurnFinished func() bool
-	Resize       func()
-	Beat         func()
-	Changes      <-chan error
-	Change       func(error) bool
-	Conclusions  <-chan jobs.Conclusion
-	JobEnded     func(jobs.Conclusion)
-	Draw         func()
+	Events                func() <-chan turn.Event
+	Key                   func(key.Key) bool
+	Turn                  func(turn.Event)
+	TurnFinished          func() bool
+	Resize                func()
+	Beat                  func()
+	Changes               <-chan error
+	Change                func(error) bool
+	Conclusions           <-chan jobs.Conclusion
+	JobEnded              func(jobs.Conclusion)
+	HostToSandboxChanges  <-chan agent.Event
+	OnHostToSandboxChange func(agent.Event)
+	Draw                  func()
 }
 
 func Run(terminal *os.File, getNextRefresh func(time.Time) time.Time, handler Handler) {
@@ -52,6 +55,7 @@ func Run(terminal *os.File, getNextRefresh func(time.Time) time.Time, handler Ha
 func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan time.Time, schedule func(), beats <-chan time.Time, handler Handler) {
 	changes := handler.Changes
 	conclusions := handler.Conclusions
+	hostToSandboxChanges := handler.HostToSandboxChanges
 	for {
 		schedule()
 
@@ -84,6 +88,12 @@ func run(keys <-chan key.Key, resizeSignals <-chan os.Signal, refreshes <-chan t
 				continue
 			}
 			handler.JobEnded(conclusion)
+		case event, isOpen := <-hostToSandboxChanges:
+			if !isOpen {
+				hostToSandboxChanges = nil
+				continue
+			}
+			handler.OnHostToSandboxChange(event)
 		case failure, isOpen := <-changes:
 			if !isOpen {
 				changes = nil

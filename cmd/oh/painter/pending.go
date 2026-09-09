@@ -9,6 +9,7 @@ import (
 	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/markdown"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/cmd/oh/width"
@@ -132,6 +133,10 @@ func HarnessNotice(event agent.Event) (string, bool) {
 		return jobrecord.EndedWithSessionNotice(event)
 	case pathgrant.Change:
 		return pathgrant.Notice(event)
+	case portgrant.SandboxToHostChange:
+		return portgrant.SandboxToHostNotice(event)
+	case portgrant.HostToSandboxChange:
+		return portgrant.HostToSandboxNotice(event)
 	case turn.HarnessPoke:
 		return turn.PokeNotice(event)
 	case agent.StartupEvent, agent.UserMessageEvent, agent.SilentTurnEvent, agent.CacheRebuildEvent, agent.PrefixRewriteEvent,

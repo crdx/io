@@ -1,12 +1,15 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/shell"
 	"crdx.org/io/cmd/oh/slash"
 )
@@ -21,12 +24,39 @@ func (self PathGrants) isConfigured() bool {
 	return self.Grant != nil && self.Revoke != nil && self.GetCurrent != nil
 }
 
-func pathGrantCommands(grants PathGrants) []slash.Command {
+func pathGrantCommands(
+	grants PathGrants,
+	hostToSandbox HostToSandbox,
+	sandboxToHost SandboxToHost,
+) []slash.Command {
 	return []slash.Command{
+		exposeCommand(sandboxToHost),
 		grantCommand(grants),
-		grantsCommand(grants),
-		revokeCommand(grants),
+		grantsCommand(grants, hostToSandbox, sandboxToHost),
+		revokeCommand(grants, hostToSandbox, sandboxToHost),
 	}
+}
+
+func exposeCommand(sandboxToHost SandboxToHost) slash.Command {
+	return slash.Command{
+		Name:        "expose",
+		Description: "Expose a host loopback port to the sandbox.",
+		Run: func(context slash.Context, arguments slash.Arguments) error {
+			port, err := portgrant.ParsePort(arguments.Text)
+			if err != nil {
+				return slash.Usage()
+			}
+			if !sandboxToHost.isConfigured() {
+				return errors.New("a host loopback port needs the sandbox's own network, which this session does not have")
+			}
+			event, err := sandboxToHost.Expose(port)
+			if err != nil {
+				return err
+			}
+			context.Emit(event)
+			return nil
+		},
+	}.WithArgumentUsage("<port>")
 }
 
 func grantCommand(grants PathGrants) slash.Command {
@@ -72,29 +102,29 @@ func grantFlagChoices() []string {
 	return flags
 }
 
-func grantsCommand(grants PathGrants) slash.Command {
+func grantsCommand(grants PathGrants, hostToSandbox HostToSandbox, sandboxToHost SandboxToHost) slash.Command {
 	return slash.Command{
 		Name:        "grants",
-		Description: "List temporary pathname grants.",
+		Description: "List temporary pathname grants and port routes in either direction.",
 		Run: func(context slash.Context, arguments slash.Arguments) error {
 			if arguments.Text != "" {
 				return slash.Usage()
 			}
-			context.Notice(formatPathGrants(grants.GetCurrent()))
+			context.Notice(formatGrants(grants.GetCurrent(), hostToSandbox, sandboxToHost))
 			return nil
 		},
 	}
 }
 
-func revokeCommand(grants PathGrants) slash.Command {
+func revokeCommand(grants PathGrants, hostToSandbox HostToSandbox, sandboxToHost SandboxToHost) slash.Command {
 	return slash.Command{
 		Name:        "revoke",
-		Description: "Revoke temporary pathname access.",
+		Description: "Revoke temporary pathname access or a port route.",
 		Run: func(context slash.Context, arguments slash.Arguments) error {
 			if arguments.Text == "" {
 				return slash.Usage()
 			}
-			event, err := grants.Revoke(arguments.Text)
+			event, err := revoke(grants, hostToSandbox, sandboxToHost, arguments.Text)
 			if err != nil {
 				return err
 			}
@@ -102,8 +132,43 @@ func revokeCommand(grants PathGrants) slash.Command {
 			return nil
 		},
 	}.
-		WithListedArguments(func() []string { return pathGrantPaths(grants.GetCurrent()) }).
-		WithArgumentUsage("<path>")
+		WithListedArguments(func() []string { return revocableSubjects(grants, hostToSandbox, sandboxToHost) }).
+		WithArgumentUsage("{<path>|<port>}")
+}
+
+func revoke(
+	grants PathGrants,
+	hostToSandbox HostToSandbox,
+	sandboxToHost SandboxToHost,
+	subject string,
+) (agent.Event, error) {
+	if port, err := portgrant.ParsePort(subject); err == nil {
+		if sandboxToHost.isConfigured() && slices.Contains(sandboxToHost.GetCurrent(), port) {
+			return sandboxToHost.Revoke(port)
+		}
+		if hostToSandbox.isConfigured() {
+			return hostToSandbox.Hide(port)
+		}
+		return agent.Event{}, fmt.Errorf("port %d is not exposed", port)
+	}
+
+	return grants.Revoke(subject)
+}
+
+func revocableSubjects(grants PathGrants, hostToSandbox HostToSandbox, sandboxToHost SandboxToHost) []string {
+	subjects := pathGrantPaths(grants.GetCurrent())
+	if hostToSandbox.isConfigured() {
+		for _, port := range hostToSandbox.GetCurrent() {
+			subjects = append(subjects, strconv.Itoa(int(port)))
+		}
+	}
+	if sandboxToHost.isConfigured() {
+		for _, port := range sandboxToHost.GetCurrent() {
+			subjects = append(subjects, strconv.Itoa(int(port)))
+		}
+	}
+
+	return subjects
 }
 
 func pathGrantPaths(grants []pathgrant.Grant) []string {
@@ -114,9 +179,60 @@ func pathGrantPaths(grants []pathgrant.Grant) []string {
 	return paths
 }
 
+func formatGrants(grants []pathgrant.Grant, hostToSandbox HostToSandbox, sandboxToHost SandboxToHost) string {
+	sections := make([]string, 0, 3)
+	if listing := formatPathGrants(grants); listing != "" {
+		sections = append(sections, listing)
+	}
+	if listing := formatHostToSandbox(hostToSandbox); listing != "" {
+		sections = append(sections, listing)
+	}
+	if listing := formatSandboxToHost(sandboxToHost); listing != "" {
+		sections = append(sections, listing)
+	}
+	if len(sections) == 0 {
+		return "No temporary grants."
+	}
+
+	return strings.Join(sections, "\n")
+}
+
+func formatHostToSandbox(hostToSandbox HostToSandbox) string {
+	if !hostToSandbox.isConfigured() {
+		return ""
+	}
+	current := hostToSandbox.GetCurrent()
+	if len(current) == 0 {
+		return ""
+	}
+
+	lines := make([]string, 0, len(current))
+	for _, port := range current {
+		lines = append(lines, fmt.Sprintf("  %-5d  %s", port, hostToSandbox.GetURL(port)))
+	}
+
+	return "Host → sandbox:\n" + strings.Join(lines, "\n")
+}
+
+func formatSandboxToHost(sandboxToHost SandboxToHost) string {
+	if !sandboxToHost.isConfigured() {
+		return ""
+	}
+	current := sandboxToHost.GetCurrent()
+	if len(current) == 0 {
+		return ""
+	}
+
+	lines := make([]string, 0, len(current))
+	for _, port := range current {
+		lines = append(lines, fmt.Sprintf("  %-5d  127.0.0.1:%d", port, port))
+	}
+	return "Sandbox → host:\n" + strings.Join(lines, "\n")
+}
+
 func formatPathGrants(grants []pathgrant.Grant) string {
 	if len(grants) == 0 {
-		return "No temporary path grants."
+		return ""
 	}
 
 	grantList := slices.Clone(grants)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -892,6 +893,181 @@ func TestNamedHostLoopbackPortIsForwarded(t *testing.T) {
 	if err := <-accepted; err != nil {
 		t.Errorf("host service did not accept the bridge: %v", err)
 	}
+}
+
+func TestAHostLoopbackPortCanBeExposedAfterTheKeeperStarts(t *testing.T) {
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	}
+
+	var listenConfig net.ListenConfig
+	host, err := listenConfig.Listen(t.Context(), "tcp4", "127.0.0.1:0")
+	if err != nil {
+		t.Skipf("host sockets are unavailable: %v", err)
+	}
+	defer func() { _ = host.Close() }()
+	_, portText, err := net.SplitHostPort(host.Addr().String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var port uint16
+	if _, err := fmt.Sscan(portText, &port); err != nil {
+		t.Fatal(err)
+	}
+
+	keeperProcess, err := keeper.Open(t.Context())
+	if err != nil {
+		t.Fatalf("could not open keeper: %v", err)
+	}
+	defer func() { _ = keeperProcess.Close() }()
+	if err := keeperProcess.OpenSandboxToHost(t.Context(), port); err != nil {
+		t.Fatalf("could not expose host port %d: %v", port, err)
+	}
+
+	accepted := make(chan error, 1)
+	go func() {
+		connection, err := host.Accept()
+		if err == nil {
+			_, err = connection.Write([]byte("bridged\n"))
+			_ = connection.Close()
+		}
+		accepted <- err
+	}()
+
+	result, err := sandbox.Wrapped(keeperProcess).Run(
+		t.Context(), t.TempDir(),
+		"cat </dev/tcp/localhost/"+strconv.Itoa(int(port)), sandbox.Policy{},
+	)
+	if err != nil {
+		t.Fatalf("could not run command: %v", err)
+	}
+	if result.ExitCode != 0 || !strings.Contains(result.Output, "bridged") {
+		t.Errorf("host loopback was not forwarded: %q", result.Output)
+	}
+	if err := <-accepted; err != nil {
+		t.Errorf("host service did not accept the bridge: %v", err)
+	}
+	if err := keeperProcess.CloseSandboxToHost(port); err != nil {
+		t.Fatalf("could not stop forwarding host port %d: %v", port, err)
+	}
+}
+
+func TestAnExposedPortReachesAListenerInsideTheSandbox(t *testing.T) {
+	if err := sandbox.Supported(t.Context()); err != nil {
+		t.Skipf("the sandbox cannot enforce this policy: %v", err)
+	}
+
+	keeperProcess, err := keeper.Open(t.Context())
+	if err != nil {
+		t.Fatalf("could not open keeper: %v", err)
+	}
+	defer func() { _ = keeperProcess.Close() }()
+
+	runner := sandbox.Wrapped(keeperProcess)
+	if probe, err := runner.Run(
+		t.Context(), t.TempDir(), "command -v python3", sandbox.Policy{},
+	); err != nil || probe.ExitCode != 0 {
+		t.Skip("python3 is unavailable")
+	}
+
+	port := freePort(t)
+	if err := keeperProcess.OpenHostToSandbox(t.Context(), "127.0.0.1", port); err != nil {
+		t.Fatalf("could not expose port %d: %v", port, err)
+	}
+	if published := keeperProcess.GetHostToSandboxPorts(); !slices.Equal(published, []uint16{port}) {
+		t.Errorf("got exposed ports %v, want [%d]", published, port)
+	}
+
+	served := make(chan error, 1)
+	go func() {
+		_, err := runner.Run(t.Context(), t.TempDir(), listenerScript(port), sandbox.Policy{})
+		served <- err
+	}()
+
+	address := net.JoinHostPort("127.0.0.1", strconv.Itoa(int(port)))
+	said, err := readWhenServed(t, address)
+	if err != nil {
+		t.Fatalf("the exposed port served nothing: %v", err)
+	}
+	if !strings.Contains(said, "served") {
+		t.Errorf("the exposed port said %q, want the sandbox listener", said)
+	}
+	<-served
+
+	if err := keeperProcess.CloseHostToSandbox(port); err != nil {
+		t.Fatalf("could not hide port %d: %v", port, err)
+	}
+	dialer := net.Dialer{Timeout: time.Second}
+	if _, err := dialer.DialContext(t.Context(), "tcp", address); err == nil {
+		t.Error("a hidden port was still reachable")
+	}
+}
+
+func listenerScript(port uint16) string {
+	return "python3 -c \"" + strings.Join([]string{
+		"import socket",
+		"server = socket.socket()",
+		"server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)",
+		"server.bind(('127.0.0.1', " + strconv.Itoa(int(port)) + "))",
+		"server.listen(1)",
+		"connection = server.accept()[0]",
+		"connection.sendall(b'served')",
+		"connection.close()",
+	}, "; ") + "\""
+}
+
+func freePort(t *testing.T) uint16 {
+	t.Helper()
+
+	var listenConfig net.ListenConfig
+	listener, err := listenConfig.Listen(t.Context(), "tcp4", "127.0.0.1:0")
+	if err != nil {
+		t.Skipf("host sockets are unavailable: %v", err)
+	}
+	address := listener.Addr()
+	if err := listener.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	_, portText, err := net.SplitHostPort(address.String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var port uint16
+	if _, err := fmt.Sscan(portText, &port); err != nil {
+		t.Fatal(err)
+	}
+	return port
+}
+
+func readWhenServed(t *testing.T, address string) (string, error) {
+	t.Helper()
+
+	deadline := time.Now().Add(10 * time.Second)
+	dialer := net.Dialer{Timeout: time.Second}
+	var lastErr error
+	for time.Now().Before(deadline) {
+		connection, err := dialer.DialContext(t.Context(), "tcp", address)
+		if err != nil {
+			lastErr = err
+			time.Sleep(50 * time.Millisecond)
+			continue
+		}
+		said, err := io.ReadAll(connection)
+		_ = connection.Close()
+		if err != nil {
+			lastErr = err
+			time.Sleep(50 * time.Millisecond)
+			continue
+		}
+		if len(said) == 0 {
+			lastErr = errors.New("the connection said nothing")
+			time.Sleep(50 * time.Millisecond)
+			continue
+		}
+		return string(said), nil
+	}
+	return "", lastErr
 }
 
 func TestHostLoopbackIsUnreachable(t *testing.T) {

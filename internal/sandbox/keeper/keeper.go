@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -24,9 +25,9 @@ import (
 )
 
 const (
-	envKeeper       = "IO_KEEPER"
-	envForwardPorts = "IO_KEEPER_FORWARD_PORTS"
-	executable      = "/proc/self/exe"
+	envKeeper             = "IO_KEEPER"
+	envSandboxToHostPorts = "IO_KEEPER_FORWARD_PORTS"
+	executable            = "/proc/self/exe"
 
 	controlDescriptor = 3
 	messageBytes      = 1 << 16
@@ -96,16 +97,26 @@ type Keeper struct {
 	control *net.UnixConn
 	notice  notes
 
-	writeMutex   sync.Mutex
-	answersMutex sync.Mutex
-	answers      map[uint64]chan reply
-	nextID       atomic.Uint64
-	isClosed     atomic.Bool
-	readers      sync.WaitGroup
-	bridges      []*bridge
+	writeMutex              sync.Mutex
+	answersMutex            sync.Mutex
+	answers                 map[uint64]chan arrival
+	nextID                  atomic.Uint64
+	isClosed                atomic.Bool
+	readers                 sync.WaitGroup
+	configuredSandboxToHost []*bridge
+
+	portDirectionsMutex          sync.Mutex
+	configuredSandboxToHostPorts []uint16
+	sandboxToHost                map[uint16]*bridge
+	hostToSandbox                map[uint16]*bridge
 }
 
-func Open(ctx context.Context, forwardPorts ...uint16) (*Keeper, error) {
+type arrival struct {
+	answer   reply
+	handover *os.File
+}
+
+func Open(ctx context.Context, sandboxToHostPorts ...uint16) (*Keeper, error) {
 	descriptors, err := unix.Socketpair(unix.AF_UNIX, unix.SOCK_SEQPACKET|unix.SOCK_CLOEXEC, 0)
 	if err != nil {
 		return nil, fmt.Errorf("could not open the control socket: %w", err)
@@ -120,12 +131,12 @@ func Open(ctx context.Context, forwardPorts ...uint16) (*Keeper, error) {
 		return nil, err
 	}
 
-	self := &Keeper{control: control, answers: make(map[uint64]chan reply)}
+	self := &Keeper{control: control, answers: make(map[uint64]chan arrival)}
 
 	process := exec.CommandContext(context.WithoutCancel(ctx), executable)
 	process.Env = append([]string{
 		envKeeper + "=1",
-		envForwardPorts + "=" + encodeForwardPorts(forwardPorts),
+		envSandboxToHostPorts + "=" + encodeSandboxToHostPorts(sandboxToHostPorts),
 	}, testnamespace.Environment()...)
 	process.ExtraFiles = []*os.File{far}
 	process.SysProcAttr = Attributes()
@@ -137,7 +148,7 @@ func Open(ctx context.Context, forwardPorts ...uint16) (*Keeper, error) {
 		return nil, fmt.Errorf("could not start the keeper: %w", err)
 	}
 
-	if err := self.awaitReady(ctx, forwardPorts); err != nil {
+	if err := self.awaitReady(ctx, sandboxToHostPorts); err != nil {
 		_ = self.Close()
 		return nil, err
 	}
@@ -165,7 +176,7 @@ func (self *Keeper) Spawn(
 	}
 
 	id := self.nextID.Add(1)
-	answers := make(chan reply, 2)
+	answers := make(chan arrival, 2)
 
 	self.answersMutex.Lock()
 	self.answers[id] = answers
@@ -194,11 +205,11 @@ func (self *Keeper) Spawn(
 		_, _ = io.Copy(output, readEnd)
 	}()
 
-	var answer reply
+	var packet arrival
 	var isOpen bool
 
 	select {
-	case answer, isOpen = <-answers:
+	case packet, isOpen = <-answers:
 	case <-ctx.Done():
 		self.forget(id)
 		<-drainedOutput
@@ -206,7 +217,7 @@ func (self *Keeper) Spawn(
 		return nil, ctx.Err()
 	}
 
-	if !isOpen || answer.Kind == replyRefused {
+	if !isOpen || packet.answer.Kind == replyRefused {
 		self.forget(id)
 		<-drainedOutput
 
@@ -214,7 +225,7 @@ func (self *Keeper) Spawn(
 			return nil, ErrClosed
 		}
 
-		return nil, errors.New(answer.Failure)
+		return nil, errors.New(packet.answer.Failure)
 	}
 
 	return &Process{keeper: self, token: id, answers: answers, drainedOutput: drainedOutput}, nil
@@ -226,7 +237,9 @@ func (self *Keeper) Close() error {
 	}
 
 	_ = self.control.Close()
-	for _, bridge := range self.bridges {
+	self.closeHostToSandbox()
+	self.closeSandboxToHost()
+	for _, bridge := range self.configuredSandboxToHost {
 		_ = bridge.Close()
 	}
 	self.readers.Wait()
@@ -239,13 +252,13 @@ func (self *Keeper) Close() error {
 	return nil
 }
 
-func (self *Keeper) awaitReady(ctx context.Context, forwardPorts []uint16) error {
+func (self *Keeper) awaitReady(ctx context.Context, sandboxToHostPorts []uint16) error {
 	if err := self.control.SetReadDeadline(time.Now().Add(readyTimeout)); err != nil {
 		return err
 	}
 
 	message := make([]byte, messageBytes)
-	control := make([]byte, unix.CmsgSpace(4*len(forwardPorts)))
+	control := make([]byte, unix.CmsgSpace(4*len(sandboxToHostPorts)))
 	length, controlLength, flags, _, err := self.control.ReadMsgUnix(message, control)
 	if err != nil {
 		return fmt.Errorf("the keeper did not start: %s", self.refusal(err))
@@ -261,16 +274,17 @@ func (self *Keeper) awaitReady(ctx context.Context, forwardPorts []uint16) error
 
 	files := parseFiles(control[:controlLength])
 	defer closeFiles(files)
-	if len(files) != len(forwardPorts) {
-		return fmt.Errorf("the keeper passed %d loopback listeners, expected %d", len(files), len(forwardPorts))
+	if len(files) != len(sandboxToHostPorts) {
+		return fmt.Errorf("the keeper passed %d loopback listeners, expected %d", len(files), len(sandboxToHostPorts))
 	}
 	for i, file := range files {
-		bridge, err := newForwardBridge(ctx, file, forwardPorts[i])
+		bridge, err := newSandboxToHostBridge(ctx, file, sandboxToHostPorts[i])
 		if err != nil {
-			return fmt.Errorf("could not bridge host loopback port %d: %w", forwardPorts[i], err)
+			return fmt.Errorf("could not bridge host loopback port %d: %w", sandboxToHostPorts[i], err)
 		}
-		self.bridges = append(self.bridges, bridge)
+		self.configuredSandboxToHost = append(self.configuredSandboxToHost, bridge)
 	}
+	self.configuredSandboxToHostPorts = slices.Clone(sandboxToHostPorts)
 
 	return self.control.SetReadDeadline(time.Time{})
 }
@@ -291,16 +305,20 @@ func (self *Keeper) receive() {
 	defer self.readers.Done()
 
 	message := make([]byte, messageBytes)
+	control := make([]byte, unix.CmsgSpace(4))
 
 	for {
-		length, err := self.control.Read(message)
+		length, controlLength, _, _, err := self.control.ReadMsgUnix(message, control)
 		if err != nil {
 			self.abandon()
 			return
 		}
 
+		files := parseFiles(control[:controlLength])
+
 		var answer reply
 		if err := json.Unmarshal(message[:length], &answer); err != nil {
+			closeFiles(files)
 			continue
 		}
 
@@ -308,9 +326,18 @@ func (self *Keeper) receive() {
 		answers, isAwaited := self.answers[answer.Token]
 		self.answersMutex.Unlock()
 
-		if isAwaited {
-			answers <- answer
+		if !isAwaited {
+			closeFiles(files)
+			continue
 		}
+
+		packet := arrival{answer: answer}
+		if len(files) > 0 {
+			packet.handover = files[0]
+			closeFiles(files[1:])
+		}
+
+		answers <- packet
 	}
 }
 
@@ -361,12 +388,12 @@ func (self *Keeper) forget(token uint64) {
 type Process struct {
 	keeper        *Keeper
 	token         uint64
-	answers       chan reply
+	answers       chan arrival
 	drainedOutput chan struct{}
 }
 
 func (self *Process) Wait() (Status, error) {
-	answer, isOpen := <-self.answers
+	packet, isOpen := <-self.answers
 	<-self.drainedOutput
 	self.keeper.forget(self.token)
 
@@ -374,6 +401,7 @@ func (self *Process) Wait() (Status, error) {
 		return Status{}, ErrClosed
 	}
 
+	answer := packet.answer
 	status := Status{
 		ExitCode:   answer.ExitCode,
 		Signal:     syscall.Signal(answer.Signal),
@@ -441,11 +469,11 @@ func serve() error {
 	}
 	defer func() { _ = control.Close() }()
 
-	ports, err := decodeForwardPorts(os.Getenv(envForwardPorts))
+	ports, err := decodeSandboxToHostPorts(os.Getenv(envSandboxToHostPorts))
 	if err != nil {
 		return err
 	}
-	listeners, err := openForwardListeners(ports)
+	listeners, err := openSandboxToHostListeners(ports)
 	if err != nil {
 		return err
 	}
@@ -485,6 +513,8 @@ type service struct {
 	commandsMutex sync.Mutex
 	commands      map[uint64]*exec.Cmd
 	runners       sync.WaitGroup
+	loopbackOnce  sync.Once
+	loopbackErr   error
 }
 
 func (self *service) accept() {
@@ -528,6 +558,10 @@ func (self *service) take(message []byte, flags int, output *os.File) {
 		self.spawn(instruction, output)
 	case requestSignal:
 		self.kill(instruction)
+	case requestHostToSandboxDial:
+		self.dialHostToSandbox(instruction)
+	case requestSandboxToHostListen:
+		self.listenSandboxToHost(instruction)
 	}
 }
 

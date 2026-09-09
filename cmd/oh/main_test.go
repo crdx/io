@@ -18,6 +18,7 @@ import (
 	"maps"
 	"net/http"
 	"net/http/httptest"
+	"net/netip"
 	"os"
 	"os/exec"
 	"path"
@@ -65,6 +66,7 @@ import (
 	"crdx.org/io/cmd/oh/painter"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/pictures"
+	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/segment"
@@ -122,6 +124,7 @@ import (
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
 	"crdx.org/io/toolbox/bash"
+	"crdx.org/io/toolbox/expose"
 	"crdx.org/io/toolbox/job"
 	"crdx.org/io/toolbox/notify"
 	"crdx.org/io/toolbox/read"
@@ -3316,6 +3319,7 @@ func TestFixtureOutputsAreCompleteAndOwned(t *testing.T) {
 		"new-session":            {".txt"},
 		"ordinary-tab":           {".ansi", ".screen"},
 		"path-grant-lifecycle":   {".ansi", ".screen"},
+		"port-directions":        {".ansi", ".screen"},
 		"path-message":           {".ansi", ".screen"},
 		"user-path-links":        {".ansi", ".screen"},
 		"workspace-paths":        {".ansi", ".screen"},
@@ -3449,12 +3453,22 @@ func TestFixtureSourceNamesAreUnique(t *testing.T) {
 	}
 }
 
+const hostAddressPattern = "host address"
+
+var dottedQuadPattern = regexp.MustCompile(`(?:\d{1,3}\.){3}\d{1,3}`)
+
+func isLoopbackAddress(match []byte) bool {
+	address, err := netip.ParseAddr(string(dottedQuadPattern.Find(match)))
+
+	return err == nil && address.IsLoopback()
+}
+
 func TestTestdataContainsNoPersonalOrSecretMaterial(t *testing.T) {
 	patterns := map[string]*regexp.Regexp{
 		"absolute home path": regexp.MustCompile(`/(?:home|Users)/[^\s"\\]+`),
 		"credential":         regexp.MustCompile(`(?i)(?:authorization|bearer[[:space:]]+[A-Za-z0-9._~+/-]{12,}|access_token|refresh_token|api[_-]?key|sk-[A-Za-z0-9]{12,}|eyJ[A-Za-z0-9_-]{12,}\.)`),
 		"email address":      regexp.MustCompile(`(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b`),
-		"host address":       regexp.MustCompile(`(?:^|[^0-9.])(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?`),
+		hostAddressPattern:   regexp.MustCompile(`(?:^|[^0-9.])(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?`),
 		"UUID":               regexp.MustCompile(`(?i)\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b`),
 	}
 
@@ -3470,7 +3484,11 @@ func TestTestdataContainsNoPersonalOrSecretMaterial(t *testing.T) {
 			return err
 		}
 		for name, pattern := range patterns {
-			if pattern.Match(contents) {
+			matches := pattern.FindAll(contents, -1)
+			if name == hostAddressPattern {
+				matches = slices.DeleteFunc(matches, isLoopbackAddress)
+			}
+			if len(matches) > 0 {
 				t.Errorf("%s contains %s", path, name)
 			}
 		}
@@ -9045,6 +9063,46 @@ func TestPathGrantCommandBecomesPendingAccessAndUpdatesTheModel(t *testing.T) {
 	}
 }
 
+func TestSandboxToHostChangeBecomesPendingAccessAndUpdatesTheModel(t *testing.T) {
+	var screenOutput bytes.Buffer
+	self := testConversation(t, &screenOutput)
+	var exposed []uint16
+	grants := portgrant.NewSandboxToHost(portgrant.SandboxToHostExposer{
+		Expose: func(port uint16) error {
+			exposed = append(exposed, port)
+			return nil
+		},
+		Hide: func(uint16) error { return nil },
+	}, nil)
+	self.sandboxToHost = grants
+	self.settleAccess()
+
+	event, err := grants.Expose(8080)
+	if err != nil {
+		t.Fatal(err)
+	}
+	self.emitCommandEvent(event)
+	if len(self.pendingNotices.items) != 1 || self.pendingNotices.items[0].state.Kind != portgrant.SandboxToHostChange {
+		t.Fatalf("got pending input %#v", self.pendingNotices.items)
+	}
+	for _, recordedEvent := range self.recordedEvents {
+		if recordedEvent.Kind == portgrant.SandboxToHostChange {
+			t.Fatal("the change was recorded before it could be sent to the model")
+		}
+	}
+
+	self.settleAccess()
+	if message := self.accessMessage(); !strings.Contains(message, "8080") {
+		t.Errorf("model access did not name the port: %q", message)
+	}
+	if message := grants.Inject(); message != "" {
+		t.Errorf("model access was not advanced: %q", message)
+	}
+	if self.recordedEvents[len(self.recordedEvents)-1].Kind != portgrant.SandboxToHostChange {
+		t.Errorf("got recorded events %#v", self.recordedEvents)
+	}
+}
+
 func TestRestoredGrantCorrectionRemainsPendingUntilATurnCanTellTheModel(t *testing.T) {
 	self := testConversation(t, &bytes.Buffer{})
 	workspace := openTestWorkspace(t, t.TempDir())
@@ -9327,6 +9385,60 @@ func TestPathGrantLifecycleDrawsEveryVisibleState(t *testing.T) {
 	}
 	compareWithGolden(t, "path-grant-lifecycle", ".ansi", passes)
 	compareWithGolden(t, "path-grant-lifecycle", ".screen", shownPasses(t, passes))
+}
+
+func TestPortDirectionNoticesMatchGolden(t *testing.T) {
+	passes := map[string]func() string{
+		"pending sandbox to host": func() string {
+			var screenOutput bytes.Buffer
+			self := testConversation(t, &screenOutput)
+			self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+			grants := portgrant.NewSandboxToHost(portgrant.SandboxToHostExposer{
+				Expose: func(uint16) error { return nil },
+				Hide:   func(uint16) error { return nil },
+			}, nil)
+			self.sandboxToHost = grants
+			self.settleAccess()
+			event, err := grants.Expose(3000)
+			if err != nil {
+				t.Fatal(err)
+			}
+			self.emitCommandEvent(event)
+			self.settlePendingInput()
+			self.screen.End()
+			return screenOutput.String()
+		},
+		"recorded directions": func() string {
+			var screenOutput bytes.Buffer
+			self := testConversation(t, &screenOutput)
+			self.screen = output.NewTerminalOfSize(&screenOutput, replayColumns, replayLines)
+
+			hostToSandbox, err := portgrant.HostToSandboxChangeEvent("127.9.9.9", 8080, []uint16{8080})
+			if err != nil {
+				t.Fatal(err)
+			}
+			sandboxToHost, err := portgrant.SandboxToHostChangeEvent(3000, []uint16{3000})
+			if err != nil {
+				t.Fatal(err)
+			}
+			self.notify(hostToSandbox)
+			self.notify(sandboxToHost)
+			sandboxToHost, err = portgrant.SandboxToHostChangeEvent(3000, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			hostToSandbox, err = portgrant.HostToSandboxChangeEvent("127.9.9.9", 8080, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			self.notify(sandboxToHost)
+			self.notify(hostToSandbox)
+			self.screen.End()
+			return screenOutput.String()
+		},
+	}
+	compareWithGolden(t, "port-directions", ".ansi", passes)
+	compareWithGolden(t, "port-directions", ".screen", shownPasses(t, passes))
 }
 
 func pathGrantGoldenStream(t *testing.T, scenario pathGrantGoldenScenario) string {
@@ -10257,9 +10369,17 @@ type sessionGoldenTurn struct {
 	EndJobAfterToolRequest    string                  `toml:"end-job-after-tool-request"`
 }
 
+const exposeToolName = "expose"
+
 const printedSessionIsImpossible = "this scenario drives the interface, which a printed session has none of\n"
 
 func (self sessionGoldenScenario) usesTheInterface() bool {
+	if slices.ContainsFunc(self.Tools, func(specification sessionGoldenTool) bool {
+		return specification.Name == exposeToolName
+	}) {
+		return true
+	}
+
 	return self.ToggleBeforeFirst != "" || self.EndJobBeforeFirst != "" || self.FirstTurn.usesTheInterface()
 }
 
@@ -10521,11 +10641,27 @@ func newSessionGoldenProvider(
 	}
 }
 
-func newSessionGoldenTools(t *testing.T, specifications []sessionGoldenTool) []tool.Tool {
+const goldenSessionName = "brave-otter"
+
+func newSessionGoldenPorts(sessionName string) *portgrant.HostToSandbox {
+	return portgrant.NewHostToSandbox(portgrant.HostToSandboxExposer{
+		Expose: func(uint16) error { return nil },
+		Hide:   func(uint16) error { return nil },
+	}, portgrant.AddressFor(sessionName), nil)
+}
+
+func newSessionGoldenTools(
+	t *testing.T, specifications []sessionGoldenTool, ports *portgrant.HostToSandbox,
+) []tool.Tool {
 	t.Helper()
 
 	tools := make([]tool.Tool, 0, len(specifications))
 	for _, specification := range specifications {
+		if specification.Name == exposeToolName {
+			tools = append(tools, expose.New(ports.ForModel()))
+			continue
+		}
+
 		if specification.IsLargeRead {
 			tools = append(tools, newSessionGoldenLargeReadTool(t))
 			continue
@@ -11038,19 +11174,21 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	if err != nil {
 		t.Fatal(err)
 	}
+	goldenPorts := newSessionGoldenPorts(goldenSessionName)
 	firstAssistant := agent.New(
 		sessionGoldenSystemPrompt,
 		sessionGoldenProviderFor(
 			t, scenario, server.URL, scenario.FirstTokenError, log.Name(),
 		),
-		newSessionGoldenTools(t, scenario.Tools),
+		newSessionGoldenTools(t, scenario.Tools, goldenPorts),
 	)
 	firstAssistant.TakeRetryWaitsAtOnce()
 	var firstScreenOutput bytes.Buffer
 	firstHarness := &App{
-		agent:    firstAssistant,
-		screen:   scenario.screen(&firstScreenOutput),
-		recorder: record.New(log),
+		agent:         firstAssistant,
+		screen:        scenario.screen(&firstScreenOutput),
+		recorder:      record.New(log),
+		hostToSandbox: goldenPorts,
 	}
 	if scenario.Provider == model.CodexProvider {
 		firstHarness.openingEvents = []agent.Event{model.FastModeEvent(scenario.IsFast)}
@@ -11098,7 +11236,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 	resumedAssistant := agent.New(
 		storedSession.Meta.SystemPrompt,
 		sessionGoldenProviderFor(t, scenario, server.URL, "", sessionName),
-		newSessionGoldenTools(t, scenario.Tools),
+		newSessionGoldenTools(t, scenario.Tools, goldenPorts),
 	)
 	resumedAssistant.TakeRetryWaitsAtOnce()
 	if err := resumedAssistant.RestoreState(storedSession.Events); err != nil {
@@ -11120,6 +11258,7 @@ func runSessionGoldenScenario(t *testing.T, scenario sessionGoldenScenario) map[
 		screen:         scenario.screen(&screenOutput),
 		recorder:       resumedRecorder,
 		recordedEvents: slices.Clone(storedSession.Events),
+		hostToSandbox:  goldenPorts,
 	}
 	settleResumedSessionGoldenMode(resumedHarness, storedSession.Events)
 	resumedHarness.currentTurn = Turn{Stream: testRunningTurnStream()}

@@ -31,6 +31,7 @@ import (
 	"crdx.org/io/cmd/oh/painter"
 	"crdx.org/io/cmd/oh/paste"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/schedule"
 	"crdx.org/io/cmd/oh/segment"
@@ -138,6 +139,8 @@ type App struct {
 	editorConfig    *editor.Config
 	mode            *caps.Mode
 	pathGrants      *pathgrant.Grants
+	hostToSandbox   *portgrant.HostToSandbox
+	sandboxToHost   *portgrant.SandboxToHost
 	jobs            jobState
 	settledCaps     caps.Set
 	pendingNotices  pendingNotices
@@ -230,13 +233,15 @@ func (self *App) begin(message string) cycle.Transition {
 			self.finish()
 			return !self.isTransitionRequested()
 		},
-		Resize:      self.redraw,
-		Beat:        self.screen.RefreshProgress,
-		Changes:     self.configObserver.Changes(),
-		Change:      self.reloadConfig,
-		Conclusions: self.jobConclusions(),
-		JobEnded:    self.jobEnded,
-		Draw:        func() { self.show(inputLine) },
+		Resize:                self.redraw,
+		Beat:                  self.screen.RefreshProgress,
+		Changes:               self.configObserver.Changes(),
+		Change:                self.reloadConfig,
+		Conclusions:           self.jobConclusions(),
+		JobEnded:              self.jobEnded,
+		HostToSandboxChanges:  self.hostToSandboxChanges(),
+		OnHostToSandboxChange: self.notify,
+		Draw:                  func() { self.show(inputLine) },
 	})
 
 	return self.transition
@@ -403,6 +408,16 @@ func (self *App) handleCommand(message string) dispatch.Result {
 }
 
 func (self *App) emitCommandEvent(event agent.Event) {
+	if event.Kind == portgrant.SandboxToHostChange {
+		self.pendingNotices.add(event)
+		if self.currentTurn.Running() {
+			self.queuedTurn.MarkAccessChange()
+			self.interruptTurn(interrupt.AccessChange)
+			return
+		}
+		self.refreshPendingMessages()
+		return
+	}
 	if event.Kind != pathgrant.Change {
 		self.notify(event)
 		return
@@ -780,6 +795,7 @@ func (self *App) getBarSources() bar.Sources {
 		GetCacheLife:    self.cacheLifetime,
 		GetGrantedCaps:  self.grantedCaps,
 		GetPathGrants:   self.getPathGrants,
+		GetExposedPorts: self.getExposedPorts,
 		IsPrefixPending: self.isPrefixPending,
 		GetTurnTiming:   self.turnTiming,
 		GetTurnCount:    self.turnCount,
@@ -793,6 +809,29 @@ func (self *App) getJobs() []jobs.Snapshot {
 	}
 
 	return self.jobs.manager.List()
+}
+
+func (self *App) hostToSandboxChanges() <-chan agent.Event {
+	if self.hostToSandbox == nil {
+		return nil
+	}
+
+	return self.hostToSandbox.Changes()
+}
+
+func (self *App) drainHostToSandboxChanges() {
+	if self.hostToSandbox == nil {
+		return
+	}
+
+	for {
+		select {
+		case event := <-self.hostToSandbox.Changes():
+			self.notify(event)
+		default:
+			return
+		}
+	}
 }
 
 func (self *App) jobConclusions() <-chan jobs.Conclusion {
@@ -954,6 +993,13 @@ func (self *App) getPathGrants() []pathgrant.Grant {
 		return nil
 	}
 	return self.pathGrants.GetCurrent()
+}
+
+func (self *App) getExposedPorts() []uint16 {
+	if self.hostToSandbox == nil {
+		return nil
+	}
+	return self.hostToSandbox.GetCurrent()
 }
 
 func (self *App) isPrefixPending() bool {
@@ -1183,6 +1229,12 @@ func (self *App) accessTellers() access.Group {
 	if self.pathGrants != nil {
 		tellers = append(tellers, self.pathGrants)
 	}
+	if self.hostToSandbox != nil {
+		tellers = append(tellers, self.hostToSandbox)
+	}
+	if self.sandboxToHost != nil {
+		tellers = append(tellers, self.sandboxToHost)
+	}
 	return access.NewGroup(tellers...)
 }
 
@@ -1309,6 +1361,8 @@ func (self *App) interruptionCause() interrupt.Cause {
 }
 
 func (self *App) takeTurn(turnEvent TurnEvent) {
+	self.drainHostToSandboxChanges()
+
 	if !self.currentTurn.Observe(turnEvent) {
 		return
 	}
@@ -1392,6 +1446,7 @@ func (self *App) wasPoked() bool {
 }
 
 func (self *App) finish() {
+	self.drainHostToSandboxChanges()
 	self.currentTurn.MarkFinished(time.Now())
 	self.screen.ReportProgress(false)
 

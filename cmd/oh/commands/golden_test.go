@@ -83,8 +83,15 @@ func fixtureEnvironment(t *testing.T) commandEnvironment {
 	}
 	grants, current := fixturePathGrants()
 	*current = []pathgrant.Grant{{Path: "/reference", Access: pathgrant.ReadAccess}}
+	ports, exposed := fixturePortGrants()
+	*exposed = []uint16{8080}
 	managedJobs, _ := fixtureJobs()
-	return commandEnvironment{configDir: configDirectory, pathGrants: grants, jobs: managedJobs}
+	return commandEnvironment{
+		configDir:     configDirectory,
+		pathGrants:    grants,
+		hostToSandbox: ports,
+		jobs:          managedJobs,
+	}
 }
 
 func fixtureSnippets() map[string]snippets.Definition {
@@ -105,21 +112,36 @@ func fixtureSnippets() map[string]snippets.Definition {
 	}
 }
 
-func TestPathGrantListingMatchesGolden(t *testing.T) {
+func TestGrantListingMatchesGolden(t *testing.T) {
 	var output strings.Builder
 	for _, test := range []struct {
-		label  string
-		grants []pathgrant.Grant
+		label         string
+		grants        []pathgrant.Grant
+		hostToSandbox []uint16
+		sandboxToHost []uint16
 	}{
-		{label: "grants configured", grants: []pathgrant.Grant{
+		{label: "paths and ports in both directions", grants: []pathgrant.Grant{
 			{Path: "/reference", Access: pathgrant.ReadAccess},
 			{Path: "/output", Access: pathgrant.ReadAccess | pathgrant.WriteAccess},
+		}, hostToSandbox: []uint16{3000}, sandboxToHost: []uint16{8080}},
+		{label: "paths alone", grants: []pathgrant.Grant{
+			{Path: "/reference", Access: pathgrant.ReadAccess},
 		}},
-		{label: "no grants configured"},
+		{label: "host to sandbox alone", hostToSandbox: []uint16{8080}},
+		{label: "sandbox to host alone", sandboxToHost: []uint16{3000}},
+		{label: "nothing granted"},
 	} {
 		pathGrants, current := fixturePathGrants()
 		*current = test.grants
-		commands := newCommandRegistry(t, commandEnvironment{pathGrants: pathGrants})
+		hostToSandbox, hostExposed := fixturePortGrants()
+		*hostExposed = test.hostToSandbox
+		sandboxToHost, sandboxExposed := fixtureSandboxToHost()
+		*sandboxExposed = test.sandboxToHost
+		commands := newCommandRegistry(t, commandEnvironment{
+			pathGrants:    pathGrants,
+			hostToSandbox: hostToSandbox,
+			sandboxToHost: sandboxToHost,
+		})
 		invocation, found := commands.Find("/grants")
 		if !found {
 			t.Fatal("expected /grants to be registered")
@@ -130,7 +152,7 @@ func TestPathGrantListingMatchesGolden(t *testing.T) {
 		}
 		fmt.Fprintf(&output, "=== %s ===\n%s\n", test.label, context.notice)
 	}
-	assertGolden(t, "path-grants.txt", output.String())
+	assertGolden(t, "grants.txt", output.String())
 }
 
 func TestSnippetHelpMatchesGolden(t *testing.T) {

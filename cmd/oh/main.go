@@ -21,6 +21,7 @@ import (
 	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
+	"crdx.org/io/toolbox/expose"
 	"crdx.org/io/toolbox/notify"
 	"crdx.org/io/toolbox/title"
 	"crdx.org/io/toolbox/web"
@@ -44,6 +45,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/pictures"
+	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/prompt"
 	"crdx.org/io/cmd/oh/record"
 	"crdx.org/io/cmd/oh/sessions"
@@ -473,7 +475,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		args.Message = startup.JoinPrompt(initialFilesMessage, args.Message)
 	}
 
-	sandboxRunner, jobManager, closeKeeper, keeperRefusal := openRunner(ctx, args.Yolo, hostLoopback)
+	sandboxRunner, jobManager, keeperProcess, closeKeeper, keeperRefusal := openRunner(ctx, args.Yolo, hostLoopback)
 	defer closeKeeper()
 
 	if jobManager != nil {
@@ -522,6 +524,44 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		}
 	}
 
+	hostToSandboxAddress := portgrant.AddressFor(log.Name())
+	hostToSandboxExposer := newHostToSandboxExposer(ctx, keeperProcess, hostToSandboxAddress)
+	var hostToSandbox *portgrant.HostToSandbox
+	sandboxToHostExposer := newSandboxToHostExposer(ctx, keeperProcess)
+	sandboxToHost := portgrant.NewSandboxToHost(sandboxToHostExposer, func() []uint16 {
+		if hostToSandbox == nil {
+			return nil
+		}
+		return hostToSandbox.GetCurrent()
+	})
+	var sandboxToHostRestoreResult portgrant.SandboxToHostRestoreResult
+	if resumedSession != nil {
+		if recordedPorts, found := portgrant.LastRecordedSandboxToHost(resumedSession.Events); found {
+			sandboxToHost, sandboxToHostRestoreResult = portgrant.NewRestoredSandboxToHost(
+				sandboxToHostExposer,
+				func() []uint16 {
+					if hostToSandbox == nil {
+						return nil
+					}
+					return hostToSandbox.GetCurrent()
+				},
+				recordedPorts,
+			)
+		}
+	}
+
+	hostToSandbox = portgrant.NewHostToSandbox(hostToSandboxExposer, hostToSandboxAddress, hostLoopback)
+	hostToSandbox.SetSandboxToHostPorts(sandboxToHost.GetCurrent)
+	var hostToSandboxRestoreResult portgrant.HostToSandboxRestoreResult
+	if resumedSession != nil {
+		if recordedPorts, found := portgrant.LastRecordedHostToSandbox(resumedSession.Events); found {
+			hostToSandbox, hostToSandboxRestoreResult = portgrant.NewRestoredHostToSandbox(
+				hostToSandboxExposer, hostToSandboxAddress, hostLoopback, recordedPorts,
+			)
+			hostToSandbox.SetSandboxToHostPorts(sandboxToHost.GetCurrent)
+		}
+	}
+
 	screen := output.New(os.Stdout).LinkPathsUnder(workspace.GetDir())
 	if args.IsPrinting {
 		screen.AppendOnly()
@@ -539,6 +579,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		toolboxTools = append(toolboxTools, shell.NewJob(
 			jobManager, workspace.GetDir(), homeDir, tmpDir, pathAccess, mode, files, args.Yolo,
 		))
+	}
+	if keeperProcess != nil {
+		toolboxTools = append(toolboxTools, expose.New(hostToSandbox.ForModel()))
 	}
 	if notify.IsAvailable() {
 		toolboxTools = append(toolboxTools, notify.New(screen.WriteEscape))
@@ -610,6 +653,16 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			},
 			GetCurrent: pathGrants.GetCurrent,
 		},
+		HostToSandbox: commands.HostToSandbox{
+			Hide:       hostToSandbox.Hide,
+			GetCurrent: hostToSandbox.GetCurrent,
+			GetURL:     hostToSandbox.URL,
+		},
+		SandboxToHost: commands.SandboxToHost{
+			Expose:     sandboxToHost.Expose,
+			Revoke:     sandboxToHost.Revoke,
+			GetCurrent: sandboxToHost.GetCurrent,
+		},
 		Jobs: managedJobs(jobManager),
 		Session: commands.Session{
 			Name:           log.Name(),
@@ -664,6 +717,8 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		workspace:       workspace,
 		mode:            mode,
 		pathGrants:      pathGrants,
+		hostToSandbox:   hostToSandbox,
+		sandboxToHost:   sandboxToHost,
 		jobs:            jobState{manager: jobManager},
 		configObserver:  configObserver,
 		runMode:         runMode{isPrinting: args.IsPrinting, isYolo: args.Yolo},
@@ -739,6 +794,30 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if resumedSession != nil {
 		app.restore(resumedSession)
 	}
+	for _, failure := range hostToSandboxRestoreResult.Failures {
+		correction, err := portgrant.HostToSandboxChangeEvent(
+			hostToSandboxAddress,
+			failure.Port,
+			hostToSandbox.GetCurrent(),
+		)
+		if err != nil {
+			return "", err
+		}
+		app.pendingNotices.add(correction)
+		app.notifyFailure(fmt.Sprintf(
+			"Port %d could not be exposed again: %v", failure.Port, failure.Err,
+		))
+	}
+	for _, failure := range sandboxToHostRestoreResult.Failures {
+		correction, err := portgrant.SandboxToHostChangeEvent(failure.Port, sandboxToHost.GetCurrent())
+		if err != nil {
+			return "", err
+		}
+		app.pendingNotices.add(correction)
+		app.notifyFailure(fmt.Sprintf(
+			"Host loopback port %d could not be exposed again: %v", failure.Port, failure.Err,
+		))
+	}
 	for _, failure := range pathGrantRestoreResult.Failures {
 		correction, err := pathgrant.ChangeEvent(failure.Grant.Path, pathGrants.GetCurrent())
 		if err != nil {
@@ -782,19 +861,43 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 
 func openRunner(
 	ctx context.Context, isYolo bool, hostLoopback []uint16,
-) (sandbox.Runner, *jobs.Manager, func(), error) {
+) (sandbox.Runner, *jobs.Manager, *keeper.Keeper, func(), error) {
 	if isYolo {
-		return sandbox.Direct(), nil, func() {}, nil
+		return sandbox.Direct(), nil, nil, func() {}, nil
 	}
 
 	keeperProcess, err := keeper.Open(ctx, hostLoopback...)
 	if err != nil {
-		return sandbox.Direct(), nil, func() {}, err
+		return sandbox.Direct(), nil, nil, func() {}, err
 	}
 
 	runner := sandbox.Wrapped(keeperProcess)
 
-	return runner, jobs.New(runner), func() { _ = keeperProcess.Close() }, nil
+	return runner, jobs.New(runner), keeperProcess, func() { _ = keeperProcess.Close() }, nil
+}
+
+func newHostToSandboxExposer(
+	ctx context.Context, keeperProcess *keeper.Keeper, host string,
+) portgrant.HostToSandboxExposer {
+	if keeperProcess == nil {
+		return portgrant.HostToSandboxExposer{}
+	}
+
+	return portgrant.HostToSandboxExposer{
+		Expose: func(port uint16) error { return keeperProcess.OpenHostToSandbox(ctx, host, port) },
+		Hide:   keeperProcess.CloseHostToSandbox,
+	}
+}
+
+func newSandboxToHostExposer(ctx context.Context, keeperProcess *keeper.Keeper) portgrant.SandboxToHostExposer {
+	if keeperProcess == nil {
+		return portgrant.SandboxToHostExposer{}
+	}
+
+	return portgrant.SandboxToHostExposer{
+		Expose: func(port uint16) error { return keeperProcess.OpenSandboxToHost(ctx, port) },
+		Hide:   keeperProcess.CloseSandboxToHost,
+	}
 }
 
 func managedJobs(manager *jobs.Manager) commands.Jobs {

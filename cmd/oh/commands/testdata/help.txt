@@ -4,9 +4,10 @@ Commands:
   /edit <target>
   /open <target>
   /new [model]
+  /expose <port>
   /grant {r|rw|rx|rwx} <path>
   /grants
-  /revoke <path>
+  /revoke {<path>|<port>}
   /jobs
   /job {status|output|stop|discard} <name> | prune
   /fork [model]

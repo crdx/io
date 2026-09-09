@@ -16,6 +16,7 @@ import (
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/store/transcript"
 	"crdx.org/io/tool"
 )
@@ -756,6 +757,40 @@ func TestTranscriptRendersPathGrantEventsFromStructuredState(t *testing.T) {
 		if !strings.Contains(transcript, want) {
 			t.Errorf("expected %q in the transcript, got:\n%s", want, transcript)
 		}
+	}
+}
+
+func TestTranscriptRecordsBothPortDirections(t *testing.T) {
+	hostToSandbox, err := portgrant.HostToSandboxChangeEvent("127.9.9.9", 8080, []uint16{8080})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sandboxToHost, err := portgrant.SandboxToHostChangeEvent(3000, []uint16{3000})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for name, test := range map[string]struct {
+		event agent.Event
+		want  []string
+	}{
+		"host to sandbox": {event: hostToSandbox, want: []string{
+			"## Host → sandbox · 1 sandbox port · changed port 8080",
+			"Exposed sandbox port 8080 to the host at http://127.9.9.9:8080.",
+		}},
+		"sandbox to host": {event: sandboxToHost, want: []string{
+			"## Sandbox → host · 1 host port · changed host port 3000",
+			"Exposed host loopback port 3000 to the sandbox.",
+		}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			written := transcriptOfOneEvent(t, test.event)
+			for _, want := range test.want {
+				if !strings.Contains(written, want) {
+					t.Errorf("expected %q in the transcript, got:\n%s", want, written)
+				}
+			}
+		})
 	}
 }
 

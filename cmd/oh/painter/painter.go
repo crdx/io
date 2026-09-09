@@ -20,6 +20,7 @@ import (
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/pathgrant"
 	"crdx.org/io/cmd/oh/pictures"
+	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/startup"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/turn"
@@ -180,8 +181,13 @@ func (self *Picasso) DrawEvent(event agent.Event) {
 	case agent.CacheRebuildEvent:
 		self.screen.Line(style.Change(agent.CacheRebuildNotice(event)))
 
-	case caps.ModeChange, caps.JobStop, jobrecord.Ended, jobrecord.EndedWithSession, pathgrant.Change,
-		turn.HarnessPoke:
+	case portgrant.HostToSandboxChange:
+		if message, isSaid := HarnessNotice(event); isSaid {
+			self.drawSubmittedBeforeResult(message, submittedMarker(true))
+		}
+
+	case caps.ModeChange, caps.JobStop, portgrant.SandboxToHostChange, jobrecord.Ended, jobrecord.EndedWithSession,
+		pathgrant.Change, turn.HarnessPoke:
 		if message, isSaid := HarnessNotice(event); isSaid {
 			self.drawSubmitted(message, submittedMarker(true))
 		}
@@ -367,10 +373,19 @@ func (self *Picasso) Stop() {
 
 func (self *Picasso) drawSubmitted(text string, marker string) {
 	self.Close(dynamic.Cancelled)
-	self.screen.Blank()
-	self.screen.Line(self.renderUserMessage(text, marker))
+	self.drawSubmittedLine(text, marker)
 	self.screen.End()
 	self.screen.Blank()
+}
+
+func (self *Picasso) drawSubmittedBeforeResult(text string, marker string) {
+	self.drawSubmittedLine(text, marker)
+	self.screen.Blank()
+}
+
+func (self *Picasso) drawSubmittedLine(text string, marker string) {
+	self.screen.Blank()
+	self.screen.Line(self.renderUserMessage(text, marker))
 }
 
 func (self *Picasso) renderUserMessage(text string, marker string) string {

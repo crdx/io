@@ -44,6 +44,8 @@ sandbox *args:
     fi
     NEEDS_PRIVILEGE=(
         TestAPrivateProcessFilesystemContainsOnlySandboxProcesses
+        TestAHostLoopbackPortCanBeExposedAfterTheKeeperStarts
+        TestAnExposedPortReachesAListenerInsideTheSandbox
         TestAReadPathInsideAWritePathIsNotWritable
         TestARepositoryCannotBeClobbered
         TestAnExactReadGrantInsideAWriteGrantRemainsReadOnly

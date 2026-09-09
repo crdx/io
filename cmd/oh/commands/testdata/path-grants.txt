@@ -1,6 +1,0 @@
-=== grants configured ===
-Temporary path grants:
-  rw   /output
-  r    /reference
-=== no grants configured ===
-No temporary path grants.

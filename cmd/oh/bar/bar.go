@@ -13,6 +13,7 @@ import (
 	"crdx.org/io/cmd/oh/segment/cacheTTL"
 	"crdx.org/io/cmd/oh/segment/cacheUsage"
 	"crdx.org/io/cmd/oh/segment/contextUsage"
+	"crdx.org/io/cmd/oh/segment/exposedPorts"
 	"crdx.org/io/cmd/oh/segment/fastMode"
 	"crdx.org/io/cmd/oh/segment/gitBranch"
 	"crdx.org/io/cmd/oh/segment/jobNames"
@@ -40,6 +41,7 @@ const (
 	contextUsageSegment    = "context-usage"
 	modeToggleSegment      = "mode-toggle"
 	pathGrantsSegment      = "path-grants"
+	exposedPortsSegment    = "exposed-ports"
 	workspaceDirSegment    = "workspace-dir"
 	activeModelSegment     = "active-model"
 	fastModeSegment        = "fast-mode"
@@ -75,6 +77,7 @@ type Sources struct {
 	GetCacheLife    func() time.Duration
 	GetGrantedCaps  func() caps.Set
 	GetPathGrants   func() []pathgrant.Grant
+	GetExposedPorts func() []uint16
 	IsPrefixPending func() bool
 	GetTurnTiming   func() turn.Timing
 	GetTurnCount    func() int
@@ -89,6 +92,7 @@ func NewRegistry(options Options) segment.Registry {
 		contextUsageSegment:    contextUsage.New(options.Sources.GetContextUsage),
 		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
 		pathGrantsSegment:      pathGrants.New(options.Sources.GetPathGrants),
+		exposedPortsSegment:    exposedPorts.New(options.Sources.GetExposedPorts),
 		workspaceDirSegment:    workspaceDir.New(options.Workspace),
 		activeModelSegment: activeModel.New(
 			options.ModelName, options.ModelEffort, options.ModelEffortLevels, options.IsFast,

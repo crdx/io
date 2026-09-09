@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strings"
 	"testing"
 )
 
@@ -56,6 +57,22 @@ func addressPort(t *testing.T, address net.Addr) uint16 {
 		t.Fatal(err)
 	}
 	return port
+}
+
+func TestAPortCannotCarryTrafficInBothDirections(t *testing.T) {
+	port := freeLoopbackPort(t)
+	keeperProcess := &Keeper{hostToSandbox: map[uint16]*bridge{port: {}}}
+
+	err := keeperProcess.OpenSandboxToHost(t.Context(), port)
+	if err == nil || !strings.Contains(err.Error(), "host to the sandbox") {
+		t.Errorf("got %v, want a directional conflict", err)
+	}
+
+	keeperProcess = &Keeper{sandboxToHost: map[uint16]*bridge{port: {}}}
+	err = keeperProcess.OpenHostToSandbox(t.Context(), testExposeHost, port)
+	if err == nil || !strings.Contains(err.Error(), "sandbox to the host") {
+		t.Errorf("got %v, want a directional conflict", err)
+	}
 }
 
 func TestABridgeBoundsItsConnections(t *testing.T) {

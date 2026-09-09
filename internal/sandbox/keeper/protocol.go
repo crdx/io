@@ -3,13 +3,17 @@ package keeper
 import "time"
 
 const (
-	requestSpawn  = "spawn"
-	requestSignal = "signal"
+	requestSpawn               = "spawn"
+	requestSignal              = "signal"
+	requestHostToSandboxDial   = "dial"
+	requestSandboxToHostListen = "listen"
 
-	replyReady    = "ready"
-	replySpawned  = "spawned"
-	replyRefused  = "refused"
-	replyFinished = "finished"
+	replyReady                  = "ready"
+	replySpawned                = "spawned"
+	replyRefused                = "refused"
+	replyFinished               = "finished"
+	replyHostToSandboxDialled   = "dialled"
+	replySandboxToHostListening = "listening"
 )
 
 type request struct {
@@ -18,6 +22,7 @@ type request struct {
 	Directory   string   `json:"directory,omitempty"`
 	Environment []string `json:"environment,omitempty"`
 	Signal      int      `json:"signal,omitempty"`
+	Port        uint16   `json:"port,omitempty"`
 }
 
 type reply struct {

@@ -38,11 +38,13 @@ type Options struct {
 	HomeDir          string
 	Session          Session
 
-	Editor       *editor.Config
-	Output       io.Writer
-	PathGrants   PathGrants
-	Jobs         Jobs
-	StartSession func(SessionStart) error
+	Editor        *editor.Config
+	Output        io.Writer
+	PathGrants    PathGrants
+	HostToSandbox HostToSandbox
+	SandboxToHost SandboxToHost
+	Jobs          Jobs
+	StartSession  func(SessionStart) error
 }
 
 type Session struct {
@@ -68,12 +70,14 @@ type commandEnvironment struct {
 	homeDir          string
 	session          commandSession
 
-	openEditor   func([]string) error
-	openTarget   func([]string) error
-	copyText     func([]string) error
-	pathGrants   PathGrants
-	jobs         Jobs
-	startSession func(SessionStart) error
+	openEditor    func([]string) error
+	openTarget    func([]string) error
+	copyText      func([]string) error
+	pathGrants    PathGrants
+	hostToSandbox HostToSandbox
+	sandboxToHost SandboxToHost
+	jobs          Jobs
+	startSession  func(SessionStart) error
 }
 
 type commandSession struct {
@@ -116,9 +120,11 @@ func New(options Options) (slash.CommandSet, error) {
 		copyText: func(values []string) error {
 			return terminal.Copy(options.Output, strings.Join(values, "\n"))
 		},
-		pathGrants:   options.PathGrants,
-		jobs:         options.Jobs,
-		startSession: options.StartSession,
+		pathGrants:    options.PathGrants,
+		hostToSandbox: options.HostToSandbox,
+		sandboxToHost: options.SandboxToHost,
+		jobs:          options.Jobs,
+		startSession:  options.StartSession,
 	})
 }
 
@@ -141,7 +147,11 @@ func buildCommands(environment commandEnvironment) (slash.CommandSet, error) {
 		}),
 	}
 	if environment.pathGrants.isConfigured() {
-		commands = append(commands, pathGrantCommands(environment.pathGrants)...)
+		commands = append(commands, pathGrantCommands(
+			environment.pathGrants,
+			environment.hostToSandbox,
+			environment.sandboxToHost,
+		)...)
 	}
 	if environment.jobs.isConfigured() {
 		commands = append(commands, jobCommands(environment.jobs)...)

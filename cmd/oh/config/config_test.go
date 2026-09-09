@@ -607,6 +607,7 @@ func testSegments() segment.Registry {
 		"fast-mode":          inertFactory,
 		"mode-toggle":        inertFactory,
 		"path-grants":        inertFactory,
+		"exposed-ports":      inertFactory,
 		"workspace-dir":      workspaceDir.New(work.At("/tmp/somewhere")),
 		"active-model":       inertFactory,
 		"scroll-overflow":    scrollOverflow.New,

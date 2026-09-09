@@ -17,6 +17,7 @@ import (
 	"crdx.org/io/cmd/oh/interrupt"
 	"crdx.org/io/cmd/oh/jobrecord"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/turn"
 	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
@@ -139,6 +140,14 @@ func (self *Recorder) Event(at time.Time, event agent.Event) error {
 		if notice, isSaid := pathgrant.Notice(event); isSaid {
 			output.fence(notice)
 		}
+	case portgrant.SandboxToHostChange:
+		if notice, isSaid := portgrant.SandboxToHostNotice(event); isSaid {
+			output.fence(notice)
+		}
+	case portgrant.HostToSandboxChange:
+		if notice, isSaid := portgrant.HostToSandboxNotice(event); isSaid {
+			output.fence(notice)
+		}
 	case agent.InterruptionEvent:
 		output.paragraph(interrupt.Notice(event))
 	case agent.RetryingEvent:
@@ -179,6 +188,12 @@ func heading(event agent.Event) []string {
 	case pathgrant.Change:
 		summary, _ := pathgrant.Summary(event)
 		return []string{name, summary, prefixed("changed ", event.Name)}
+	case portgrant.SandboxToHostChange:
+		summary, _ := portgrant.SandboxToHostSummary(event)
+		return []string{name, summary, prefixed("changed host port ", event.Name)}
+	case portgrant.HostToSandboxChange:
+		summary, _ := portgrant.HostToSandboxSummary(event)
+		return []string{name, summary, prefixed("changed port ", event.Name)}
 	case agent.RetryingEvent:
 		return []string{name, "attempt " + strconv.Itoa(event.Attempt), prefixed("waited ", util.CompactDuration(event.Took))}
 	case agent.StartupEvent, agent.UserMessageEvent, agent.ModelMessageEvent, agent.InterruptionEvent, agent.FailureEvent,
@@ -375,6 +390,10 @@ func title(kind agent.Kind) string {
 		return "Mode"
 	case pathgrant.Change:
 		return "Path grant"
+	case portgrant.SandboxToHostChange:
+		return "Sandbox → host"
+	case portgrant.HostToSandboxChange:
+		return "Host → sandbox"
 	case turn.HarnessPoke:
 		return "Poke"
 	case agent.SilentTurnEvent:
