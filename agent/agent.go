@@ -249,13 +249,13 @@ func (self *Agent) readCache(usage Usage, at time.Time) (Event, bool) {
 	}
 
 	previous := self.cache
-	self.cache = cacheReading{readTokens: usage.Cache.ReadTokens, at: at, wasRead: true}
+	self.cache = cacheReading{readTokens: usage.Cache.ReadTokens, at: util.WallClock(at), wasRead: true}
 
 	if !previous.wasRead || usage.Cache.WriteTokens == 0 || usage.Cache.ReadTokens >= previous.readTokens {
 		return Event{}, false
 	}
 
-	gap := at.Sub(previous.at)
+	gap := util.WallClock(at).Sub(previous.at)
 
 	return Event{
 		Kind: CacheRebuildEvent,

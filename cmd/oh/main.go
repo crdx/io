@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/internal/jobs"
 	"crdx.org/io/internal/sandbox"
 	"crdx.org/io/internal/sandbox/keeper"
+	"crdx.org/io/internal/util"
 	"crdx.org/io/tool"
 	"crdx.org/io/tool/middleware/truncate"
 	"crdx.org/io/toolbox"
@@ -649,7 +650,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		jobs:            jobState{manager: jobManager},
 		configObserver:  configObserver,
 		runMode:         runMode{isPrinting: args.IsPrinting, isYolo: args.Yolo},
-		startedAt:       time.Now(),
+		startedAt:       util.WallClock(time.Now()),
 		keyboard:        keyboard,
 	}
 	if resumedSession == nil && model.SupportsFastMode(selection.Provider) {

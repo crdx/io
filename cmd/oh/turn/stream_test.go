@@ -3,6 +3,7 @@ package turn
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"testing/synctest"
 	"time"
@@ -117,5 +118,25 @@ func TestAbsentStreamIsIdle(t *testing.T) {
 	}
 	if _, known := stream.Timing(); known {
 		t.Error("absent stream has timing")
+	}
+}
+
+func TestATurnIsTimedOnTheWallClockAcrossASuspendedMachine(t *testing.T) {
+	const monotonicReading = " m=+"
+
+	assistant := agent.New("", streamProvider{
+		send: func(context.Context, agent.Yield) (agent.Reply, error) { return agent.Reply{}, nil },
+	}, nil)
+
+	stream := Start(assistant, "go on", Timing{})
+	stream.MarkFinished(time.Now())
+
+	for name, at := range map[string]time.Time{
+		"the moment the turn started":  stream.state.StartedAt,
+		"the moment the turn finished": stream.state.FinishedAt,
+	} {
+		if got := at.String(); strings.Contains(got, monotonicReading) {
+			t.Errorf("%s: got %q, want no monotonic reading", name, got)
+		}
 	}
 }
