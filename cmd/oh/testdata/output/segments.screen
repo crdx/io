@@ -56,6 +56,8 @@ GPT Sol 5.6 ▫▫▫▫▪▫
 ⇢ 8000, ⇠ 3000
 === exposed-ports / both directions constrained ===
 ⇢ 8000, +3
+=== exposed-ports / configured hostname ===
+⇢ 8000
 === exposed-ports / empty ===
 
 === exposed-ports / host to sandbox ===

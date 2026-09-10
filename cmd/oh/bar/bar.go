@@ -8,6 +8,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/pathgrant"
+	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/activeModel"
 	"crdx.org/io/cmd/oh/segment/activitySpinner"
@@ -71,6 +72,7 @@ type Options struct {
 	UsageIsSelfRefreshing bool
 	UsageGauges           *usage.Gauges
 	Currency              money.Currency
+	SandboxHostname       string
 	Sources               Sources
 }
 
@@ -98,8 +100,14 @@ func NewRegistry(options Options) segment.Registry {
 		modeToggleSegment:      modeToggle.New(options.Sources.GetGrantedCaps, options.Sources.IsPrefixPending),
 		pathGrantsSegment:      pathGrants.New(options.Sources.GetPathGrants),
 		exposedPortsSegment: exposedPorts.New(
-			options.Sources.GetHostToSandboxPorts,
-			options.Sources.GetSandboxToHostPorts,
+			exposedPorts.Direction{
+				GetPorts: options.Sources.GetHostToSandboxPorts,
+				Hostname: options.SandboxHostname,
+			},
+			exposedPorts.Direction{
+				GetPorts: options.Sources.GetSandboxToHostPorts,
+				Hostname: portgrant.LocalHost,
+			},
 		),
 		workspaceDirSegment: workspaceDir.New(options.Workspace),
 		activeModelSegment: activeModel.New(activeModel.Settings{

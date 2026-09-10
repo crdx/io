@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"crdx.org/io/cmd/oh/link"
+	"crdx.org/io/cmd/oh/portgrant"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/style"
 	"crdx.org/io/cmd/oh/width"
@@ -15,22 +17,24 @@ const (
 	sandboxToHostArrow = "⇠ "
 )
 
-type state struct {
-	getHostToSandbox func() []uint16
-	getSandboxToHost func() []uint16
+type Direction struct {
+	GetPorts func() []uint16
+	Hostname string
 }
 
-func New(
-	getHostToSandbox func() []uint16,
-	getSandboxToHost func() []uint16,
-) segment.Factory {
+type state struct {
+	hostToSandbox Direction
+	sandboxToHost Direction
+}
+
+func New(hostToSandbox Direction, sandboxToHost Direction) segment.Factory {
 	return func(options segment.Options) (segment.Segment, error) {
 		if err := options.Read(&struct{}{}); err != nil {
 			return nil, err
 		}
 		return state{
-			getHostToSandbox: getHostToSandbox,
-			getSandboxToHost: getSandboxToHost,
+			hostToSandbox: hostToSandbox,
+			sandboxToHost: sandboxToHost,
 		}, nil
 	}
 }
@@ -67,16 +71,16 @@ func (self state) RenderWithin(_ segment.Context, cells int) string {
 }
 
 func (self state) getParts() []string {
-	hostToSandbox := self.getHostToSandbox()
-	sandboxToHost := self.getSandboxToHost()
-	parts := make([]string, 0, len(hostToSandbox)+len(sandboxToHost))
-	parts = appendParts(parts, hostToSandboxArrow, hostToSandbox)
-	return appendParts(parts, sandboxToHostArrow, sandboxToHost)
+	var parts []string
+	parts = appendParts(parts, hostToSandboxArrow, self.hostToSandbox)
+	return appendParts(parts, sandboxToHostArrow, self.sandboxToHost)
 }
 
-func appendParts(parts []string, arrow string, ports []uint16) []string {
-	for _, port := range ports {
-		parts = append(parts, style.Subtle(arrow)+style.Normal(strconv.Itoa(int(port))))
+func appendParts(parts []string, arrow string, direction Direction) []string {
+	for _, port := range direction.GetPorts() {
+		text := style.Subtle(arrow) + style.Normal(strconv.Itoa(int(port)))
+		parts = append(parts, link.RenderURL(text, portgrant.URL(direction.Hostname, port)))
 	}
+
 	return parts
 }

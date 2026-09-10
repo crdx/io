@@ -21,7 +21,7 @@ const (
 	HostToSandboxChange agent.Kind = "port_grant_change"
 	lowestPort          uint16     = 1024
 	maxExposedPorts                = 8
-	defaultHost                    = "127.0.0.1"
+	LocalHost                      = "127.0.0.1"
 )
 
 type HostToSandboxExposer struct {
@@ -157,7 +157,7 @@ func URL(host string, port uint16) string {
 func AddressFor(sessionName string) string {
 	digest := sha256.Sum256([]byte(sessionName))
 	address := netip.AddrFrom4([4]byte{127, digest[0], digest[1], digest[2]})
-	if address.As4()[3] == 0 || address.As4()[3] == 255 || address.String() == defaultHost {
+	if address.As4()[3] == 0 || address.As4()[3] == 255 || address.String() == LocalHost {
 		return netip.AddrFrom4([4]byte{127, digest[0], digest[1], 1 + digest[2]%254}).String()
 	}
 
@@ -196,7 +196,7 @@ func decodeState(event agent.Event) (hostToSandboxEventState, error) {
 		return state, errors.New("invalid port grant state")
 	}
 	if state.Host == "" {
-		state.Host = defaultHost
+		state.Host = LocalHost
 	}
 
 	return state, nil

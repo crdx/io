@@ -257,7 +257,7 @@ func TestAnAddressIsDerivedFromTheSessionNameAndIsAlwaysLoopback(t *testing.T) {
 		if last := address.As4()[3]; last == 0 || last == 255 {
 			t.Errorf("%q gave %s, want a usable host octet", sessionName, address)
 		}
-		if address.String() == defaultHost {
+		if address.String() == LocalHost {
 			t.Errorf("%q gave the standard loopback address, want one of its own", sessionName)
 		}
 		if again := AddressFor(sessionName); again != address.String() {

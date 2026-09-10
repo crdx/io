@@ -8746,8 +8746,8 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"exposed-ports / empty": goldenSegmentPass(
 			t,
 			exposedPorts.New(
-				func() []uint16 { return nil },
-				func() []uint16 { return nil },
+				goldenExposedPorts(),
+				goldenLocalPorts(),
 			),
 			"",
 			segment.Context{},
@@ -8755,8 +8755,8 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"exposed-ports / host to sandbox": goldenSegmentPass(
 			t,
 			exposedPorts.New(
-				func() []uint16 { return []uint16{8000, 8080} },
-				func() []uint16 { return nil },
+				goldenExposedPorts(8000, 8080),
+				goldenLocalPorts(),
 			),
 			"",
 			segment.Context{},
@@ -8764,8 +8764,8 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"exposed-ports / sandbox to host": goldenSegmentPass(
 			t,
 			exposedPorts.New(
-				func() []uint16 { return nil },
-				func() []uint16 { return []uint16{3000, 6000} },
+				goldenExposedPorts(),
+				goldenLocalPorts(3000, 6000),
 			),
 			"",
 			segment.Context{},
@@ -8773,8 +8773,20 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"exposed-ports / both directions": goldenSegmentPass(
 			t,
 			exposedPorts.New(
-				func() []uint16 { return []uint16{8000} },
-				func() []uint16 { return []uint16{3000} },
+				goldenExposedPorts(8000),
+				goldenLocalPorts(3000),
+			),
+			"",
+			segment.Context{},
+		),
+		"exposed-ports / configured hostname": goldenSegmentPass(
+			t,
+			exposedPorts.New(
+				exposedPorts.Direction{
+					GetPorts: func() []uint16 { return []uint16{8000} },
+					Hostname: "preview-" + goldenSessionName + ".test",
+				},
+				goldenLocalPorts(),
 			),
 			"",
 			segment.Context{},
@@ -8782,8 +8794,8 @@ func TestEverySegmentDrawsItsRepresentativeStates(t *testing.T) {
 		"exposed-ports / both directions constrained": goldenFittedSegmentPass(
 			t,
 			exposedPorts.New(
-				func() []uint16 { return []uint16{8000, 8080} },
-				func() []uint16 { return []uint16{3000, 6000} },
+				goldenExposedPorts(8000, 8080),
+				goldenLocalPorts(3000, 6000),
 			),
 			"",
 			segment.Context{},
@@ -10975,6 +10987,20 @@ func newSessionGoldenProvider(
 }
 
 const goldenSessionName = "brave-otter"
+
+func goldenExposedPorts(ports ...uint16) exposedPorts.Direction {
+	return exposedPorts.Direction{
+		GetPorts: func() []uint16 { return ports },
+		Hostname: portgrant.AddressFor(goldenSessionName),
+	}
+}
+
+func goldenLocalPorts(ports ...uint16) exposedPorts.Direction {
+	return exposedPorts.Direction{
+		GetPorts: func() []uint16 { return ports },
+		Hostname: portgrant.LocalHost,
+	}
+}
 
 func newSessionGoldenPorts(sessionName string, hostnameTemplate string) *portgrant.HostToSandbox {
 	address := portgrant.AddressFor(sessionName)

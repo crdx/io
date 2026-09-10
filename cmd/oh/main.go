@@ -850,6 +850,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		UsageIsSelfRefreshing: usageReporter != nil,
 		UsageGauges:           usage.TerminalGauges(keyboard, os.Stdout),
 		Currency:              currency,
+		SandboxHostname:       hostToSandboxHostname,
 		Sources:               app.getBarSources(),
 	})
 	liveConfig, err := settings.BuildLive(barRegistry)
