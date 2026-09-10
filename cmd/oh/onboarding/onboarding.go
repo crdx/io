@@ -77,7 +77,7 @@ const (
 	openingBrowser   = "Opening your browser to shake hands with %s…"
 	signedIn         = "Signed in to %s"
 	signInFailure    = "Unable to sign in: %s"
-	simulationNote   = "The simulation matches a few words in what you say, and keeps nothing when you close it."
+	simulationNote   = "The agent tries its best to figure out what you mean, with doctor ELIZA as fallback."
 )
 
 type provider struct {

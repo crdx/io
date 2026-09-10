@@ -92,9 +92,7 @@ for update, err := range assistant.Stream(ctx, "what is the weather in London?",
 
 A coding harness.
 
-```bash
-go run ./cmd/oh
-```
+See [oh](crdx.org/oh).
 
 ### simulate
 
