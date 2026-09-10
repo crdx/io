@@ -3,6 +3,8 @@ set -euo pipefail
 
 NEW_VERSION=$1
 
+sed -i "s/^## \[N\.N\.N\] - XXXX-XX-XX\$/&\n\n## [${NEW_VERSION}] - $(date +%F)/" CHANGELOG.md
+
 git add CHANGELOG.md
 
 if git diff --cached --quiet; then

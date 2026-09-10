@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.0.0] - XXXX-XX-XX
+## [N.N.N] - XXXX-XX-XX
 
 - Preview sessions in session picker
 - Name sandbox helper processes
