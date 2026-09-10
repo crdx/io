@@ -197,7 +197,7 @@ func TestTheRegistryFillsInWhatAListingLeftOut(t *testing.T) {
 		},
 	}
 
-	supplemented := supplement(listed, registered)
+	supplemented := supplement(AnthropicProvider, listed, registered)
 
 	if supplemented[0].Name != "Claude Opus 5" || supplemented[0].ContextWindowTokens != 274_000 ||
 		supplemented[0].MaxOutputTokens != 128_000 {
@@ -222,6 +222,29 @@ func TestTheRegistryFillsInWhatAListingLeftOut(t *testing.T) {
 
 	if supplemented[0].Prices != nil {
 		t.Errorf("expected an unpriced model to stay unpriced, got %+v", supplemented[0].Prices)
+	}
+}
+
+func TestTheRegistrySuppliesTheMaximumCodexContextWindow(t *testing.T) {
+	listed := []agent.Model{{
+		ID:                  "gpt-5.6-sol",
+		ContextWindowTokens: 272_000,
+	}}
+	registered := map[string]agent.Model{
+		"gpt-5.6-sol": {
+			ID:                  "gpt-5.6-sol",
+			ContextWindowTokens: 1_000_000,
+		},
+	}
+
+	codexModels := supplement(CodexProvider, listed, registered)
+	if codexModels[0].ContextWindowTokens != 1_000_000 {
+		t.Errorf("Codex got a context window of %d", codexModels[0].ContextWindowTokens)
+	}
+
+	anthropicModels := supplement(AnthropicProvider, listed, registered)
+	if anthropicModels[0].ContextWindowTokens != 272_000 {
+		t.Errorf("Anthropic got a context window of %d", anthropicModels[0].ContextWindowTokens)
 	}
 }
 

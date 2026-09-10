@@ -148,12 +148,16 @@ func saveModelCache(path string, cache modelCache) error {
 	return os.WriteFile(path, data, 0o600)
 }
 
-func supplement(listedModels []agent.Model, registeredModels map[string]agent.Model) []agent.Model {
+func supplement(
+	providerName string,
+	listedModels []agent.Model,
+	registeredModels map[string]agent.Model,
+) []agent.Model {
 	supplementedModels := make([]agent.Model, 0, len(listedModels))
 
 	for _, model := range listedModels {
 		if knownModel, isFound := registeredModels[model.ID]; isFound {
-			model = supplemented(model, knownModel)
+			model = supplemented(providerName, model, knownModel)
 		}
 
 		supplementedModels = append(supplementedModels, model)
@@ -162,14 +166,16 @@ func supplement(listedModels []agent.Model, registeredModels map[string]agent.Mo
 	return supplementedModels
 }
 
-func supplemented(model agent.Model, knownModel agent.Model) agent.Model {
+func supplemented(providerName string, model agent.Model, knownModel agent.Model) agent.Model {
 	if model.Name == "" {
 		model.Name = knownModel.Name
 	}
 	if len(model.EffortLevels) == 0 {
 		model.EffortLevels = slices.Clone(knownModel.EffortLevels)
 	}
-	if model.ContextWindowTokens == 0 {
+	if providerName == CodexProvider && knownModel.ContextWindowTokens > 0 {
+		model.ContextWindowTokens = knownModel.ContextWindowTokens
+	} else if model.ContextWindowTokens == 0 {
 		model.ContextWindowTokens = knownModel.ContextWindowTokens
 	}
 	if model.MaxOutputTokens == 0 {
@@ -588,7 +594,7 @@ func describeProviderModels(
 			return listedModels, sourceEndpoint, ""
 		}
 
-		return supplement(listedModels, registeredModels), sourceBoth, ""
+		return supplement(providerName, listedModels, registeredModels), sourceBoth, ""
 	}
 
 	if len(registeredModels) > 0 {

@@ -3,6 +3,7 @@ package model
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"os"
@@ -89,6 +90,19 @@ func TestAnUpdateAProviderListsItselfMatchesTheGolden(t *testing.T) {
 	}
 
 	assertGolden(t, "update-listed-by-provider.ansi", report(t, output.String()))
+	assertGolden(t, "update-listed-by-provider.models.json", cachedProviderModels(t, CodexProvider))
+}
+
+func cachedProviderModels(t *testing.T, providerName string) string {
+	t.Helper()
+
+	models := loadModelCache(modelCachePath()).Providers[providerName].Models
+	data, err := json.MarshalIndent(models, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return string(data) + "\n"
 }
 
 func ignoredModelListings() map[string][]agent.Model {
