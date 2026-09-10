@@ -47,6 +47,10 @@ func writeText(analysis Analysis, report presentation, writer io.Writer) error {
 	restoreStyle := style.Init(writer)
 	defer restoreStyle()
 
+	return drawText(analysis, report, writer)
+}
+
+func drawText(analysis Analysis, report presentation, writer io.Writer) error {
 	sections := []section{
 		cacheSection(analysis.PromptCache),
 		contextSection(analysis.PromptCache),

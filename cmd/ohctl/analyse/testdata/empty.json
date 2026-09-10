@@ -1,0 +1,75 @@
+{
+    "promptCache": {
+        "providers": [],
+        "total": {
+            "sessions": 0,
+            "requests": 0,
+            "hits": 0,
+            "misses": 0,
+            "inputTokens": 0,
+            "cachedTokens": 0,
+            "writtenTokens": 0,
+            "outputTokens": 0,
+            "peakInputTokens": 0
+        }
+    },
+    "models": {
+        "models": [],
+        "total": {
+            "provider": "",
+            "model": "",
+            "sessions": 0,
+            "requests": 0,
+            "inputTokens": 0,
+            "cachedTokens": 0,
+            "writtenTokens": 0,
+            "outputTokens": 0,
+            "spend": 0,
+            "isPriced": false
+        },
+        "unpricedModels": 0
+    },
+    "activity": {
+        "providers": [],
+        "total": {
+            "sessions": 0,
+            "turns": 0,
+            "turnTimings": 0,
+            "prompts": 0,
+            "replies": 0,
+            "reasoningBlocks": 0,
+            "toolCalls": 0,
+            "turnTime": 0,
+            "longestTurn": 0,
+            "sessionTime": 0
+        }
+    },
+    "faults": {
+        "providers": [],
+        "total": {
+            "sessions": 0,
+            "retries": 0,
+            "interruptions": 0,
+            "failures": 0,
+            "silentTurns": 0,
+            "prefixRewrites": 0,
+            "cacheRebuilds": {
+                "reopenings": 0,
+                "expiries": 0,
+                "settlements": 0,
+                "rebuilds": 0,
+                "writtenTokens": 0
+            }
+        }
+    },
+    "tools": {
+        "tools": [],
+        "total": {
+            "name": "",
+            "calls": 0,
+            "failures": 0,
+            "cancellations": 0,
+            "took": 0
+        }
+    }
+}

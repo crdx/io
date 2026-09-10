@@ -15,6 +15,7 @@ import (
 	"crdx.org/io/agent"
 	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/internal/money"
+	"crdx.org/io/internal/util/strutil"
 	"crdx.org/io/session"
 )
 
@@ -276,6 +277,94 @@ func TestTheWholeAnalysisMatchesTheGolden(t *testing.T) {
 	assertGolden(t, "report.txt", output.String())
 }
 
+func TestTheColouredAnalysisMatchesTheGolden(t *testing.T) {
+	var output bytes.Buffer
+	shown := presentation{currency: money.Dollar(), isPerSession: true}
+	if err := drawText(goldenAnalysis(), shown, &output); err != nil {
+		t.Fatal(err)
+	}
+	assertGolden(t, "report.ansi", strutil.VisibleEscapes(output.String()))
+}
+
+func TestOneOfEverythingNeedsNoTotalsAndDrawsNoFaults(t *testing.T) {
+	sessions := []SessionStatistics{{
+		Name:      "lone-marten",
+		Provider:  "codex",
+		Model:     "gpt-5.6-sol",
+		StartedAt: time.Date(2026, time.September, 1, 9, 0, 0, 0, time.UTC),
+		EndedAt:   time.Date(2026, time.September, 1, 9, 4, 0, 0, time.UTC),
+		Cache: CacheStatistics{
+			Sessions:        1,
+			Requests:        2,
+			Hits:            2,
+			InputTokens:     40_000,
+			CachedTokens:    30_000,
+			OutputTokens:    1_200,
+			PeakInputTokens: 25_000,
+		},
+		Activity: ActivityStatistics{
+			Sessions:    1,
+			Turns:       2,
+			TurnTimings: 2,
+			Prompts:     2,
+			Replies:     2,
+			ToolCalls:   3,
+			TurnTime:    50 * time.Second,
+			LongestTurn: 30 * time.Second,
+			SessionTime: 4 * time.Minute,
+		},
+		Faults: FaultStatistics{Sessions: 1},
+		Tools:  []ToolStatistics{{Name: "read", Calls: 3, Took: 300 * time.Millisecond}},
+	}}
+
+	var output bytes.Buffer
+	shown := presentation{currency: money.Dollar(), isPerSession: true}
+	if err := writeText(aggregate(sessions, goldenPricebook()), shown, &output); err != nil {
+		t.Fatal(err)
+	}
+
+	if strings.Contains(output.String(), "Faults") {
+		t.Error("a quiet analysis should draw no faults")
+	}
+	for line := range strings.SplitSeq(output.String(), "\n") {
+		if strings.HasPrefix(line, totalName) {
+			t.Errorf("a single row of each kind should need no total, got %q", line)
+		}
+	}
+	assertGolden(t, "one-of-everything.txt", output.String())
+}
+
+func TestSeveralUnpricedModelsAreCountedTogether(t *testing.T) {
+	sessions := []SessionStatistics{
+		{
+			Name:     "first-vole",
+			Provider: "openrouter",
+			Model:    "kimi-k2-thinking",
+			Activity: ActivityStatistics{Sessions: 1, Turns: 1, Prompts: 1},
+		},
+		{
+			Name:     "second-vole",
+			Provider: "ollama",
+			Model:    "qwen3.8:27b",
+			Activity: ActivityStatistics{Sessions: 1, Turns: 2, Prompts: 2},
+		},
+		{
+			Name:     "third-vole",
+			Provider: "codex",
+			Model:    "gpt-5.6-sol",
+			Activity: ActivityStatistics{Sessions: 1, Turns: 3, Prompts: 3},
+		},
+	}
+
+	var output bytes.Buffer
+	shown := presentation{currency: money.Dollar()}
+	if err := writeText(aggregate(sessions, goldenPricebook()), shown, &output); err != nil {
+		t.Fatal(err)
+	}
+
+	assertGolden(t, "unpriced-models.txt", output.String())
+}
+
 func TestNamedSessionsAreDrawnRowByRowInTheChosenCurrency(t *testing.T) {
 	var output bytes.Buffer
 	shown := presentation{currency: money.In("GBP", 0.8), isPerSession: true}
@@ -376,6 +465,14 @@ func TestTheJSONAnalysisMatchesTheGolden(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertGolden(t, "analysis.json", output.String())
+}
+
+func TestTheJSONOfAnEmptyAnalysisMatchesTheGolden(t *testing.T) {
+	var output bytes.Buffer
+	if err := writeJSON(aggregate(nil, pricebook{}), &output); err != nil {
+		t.Fatal(err)
+	}
+	assertGolden(t, "empty.json", output.String())
 }
 
 func TestArchivedSessionsAreNotAnalysed(t *testing.T) {
