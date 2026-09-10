@@ -30,7 +30,7 @@ func chosenModel(providerName string, model string) (Choice, error) {
 }
 
 func parseModelSelection(writtenSelection string) (string, string, string, error) {
-	selection, err := ParseSelection(modelCachePath(), writtenSelection)
+	selection, err := ParseSelection(modelCachePath(), writtenSelection, Defaults{})
 
 	return selection.Provider, selection.Model, selection.Effort, err
 }

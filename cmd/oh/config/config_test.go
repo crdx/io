@@ -12,6 +12,7 @@ import (
 	"github.com/BurntSushi/toml"
 
 	"crdx.org/io/cmd/oh/caps"
+	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/segment/scrollOverflow"
@@ -1243,5 +1244,36 @@ func TestAConfigWrittenBeforeTheGroupingExistedNeedsNoMigrating(t *testing.T) {
 	}
 	if reports := config.UnknownSettings(); len(reports) > 0 {
 		t.Errorf("got %v", reports)
+	}
+}
+
+func TestTheShippedModelDefaultsAreHighEffortWithoutFastMode(t *testing.T) {
+	defaults := configFrom(t, "").Model.GetDefaults()
+
+	if defaults != (model.Defaults{Effort: "high"}) {
+		t.Errorf("got %#v", defaults)
+	}
+}
+
+func TestModelDefaultsMayBeConfigured(t *testing.T) {
+	defaults := configFrom(t, `
+		[model]
+		effort = "low"
+		fast = false
+	`).Model.GetDefaults()
+
+	if defaults != (model.Defaults{Effort: "low"}) {
+		t.Errorf("got %#v", defaults)
+	}
+}
+
+func TestAnUnrecognisedDefaultEffortIsRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := writeConfigFile(path, "[model]\neffort = \"tremendous\"\n"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := Load(path); err == nil || !strings.Contains(err.Error(), "effort must be one of") {
+		t.Errorf("got %v", err)
 	}
 }

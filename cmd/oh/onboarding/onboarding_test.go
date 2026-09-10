@@ -70,11 +70,47 @@ func TestFirstRunOnboardingMatchesTheGolden(t *testing.T) {
 	if err := onboarding.castSpell(); err != nil {
 		t.Fatal(err)
 	}
-	if savedSelection != "codex/gpt-5.6-sol@medium" {
+	if savedSelection != "codex/gpt-5.6-sol@high" {
 		t.Errorf("saved %q", savedSelection)
 	}
 
 	assertScreenGolden(t, "first-run", output.String())
+}
+
+func TestOnboardingSavesTheConfiguredModelDefaults(t *testing.T) {
+	var savedSelection string
+	choices := []int{0, 0}
+	choiceIndex := 0
+
+	onboarding := wizard{
+		output: &bytes.Buffer{},
+		choose: func(_ string, _ []string) (int, error) {
+			chosen := choices[choiceIndex]
+			choiceIndex++
+			return chosen, nil
+		},
+		login:         func(provider, func(string)) error { return nil },
+		refreshModels: func() error { return nil },
+		getModels: func() []model.Choice {
+			return []model.Choice{{
+				Provider:     model.CodexProvider,
+				ID:           "gpt-5.6-sol",
+				EffortLevels: []string{"low", "medium", "high"},
+			}}
+		},
+		setInitialModel: func(selection string) error {
+			savedSelection = selection
+			return nil
+		},
+		defaults: model.Defaults{Effort: "medium", IsFast: true},
+	}
+
+	if err := onboarding.castSpell(); err != nil {
+		t.Fatal(err)
+	}
+	if savedSelection != "codex/gpt-5.6-sol@medium+fast" {
+		t.Errorf("saved %q", savedSelection)
+	}
 }
 
 func TestOnboardingWritesASelectionThatOrdinaryStartupCanLoad(t *testing.T) {
@@ -112,7 +148,7 @@ func TestOnboardingWritesASelectionThatOrdinaryStartupCanLoad(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"codex/gpt-5.6-sol@medium"}
+	want := []string{"codex/gpt-5.6-sol@high"}
 	if !slices.Equal(settings.Model.RoundRobin, want) {
 		t.Errorf("got model rotation %v, want %v", settings.Model.RoundRobin, want)
 	}

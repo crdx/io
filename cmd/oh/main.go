@@ -163,6 +163,10 @@ func configuredRotation(settings config.Config, isSimulated bool) []string {
 	return settings.Model.RoundRobin
 }
 
+func sessionDefaults(selection model.Selection) model.Defaults {
+	return model.Defaults{Effort: model.Effort(selection.Effort), IsFast: selection.IsFast}
+}
+
 func applyDefaultCaps(options *cli.Options, settings config.Config) {
 	if !options.WereCapsChosen {
 		options.Caps = caps.Set(settings.Caps.Default)
@@ -317,7 +321,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		var chosenModel model.Selection
 		var err error
 		startup.Wait(func() {
-			chosenModel, err = model.Choose(modelCachePath, currency, backend.IsLoggedIn, keyboard, os.Stdout)
+			chosenModel, err = model.Choose(
+				modelCachePath, currency, backend.IsLoggedIn, keyboard, os.Stdout, settings.Model.GetDefaults(),
+			)
 		})
 		if errors.Is(err, menu.ErrCancelled) {
 			return "", nil
@@ -328,7 +334,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 		inputArgs.Model = chosenModel.String()
 	}
 
-	args, err := inputArgs.Parse(modelCachePath)
+	args, err := inputArgs.Parse(modelCachePath, settings.Model.GetDefaults())
 	if err != nil {
 		return "", err
 	}
@@ -404,7 +410,9 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	}
 	defer func() { _ = homeRoot.Close() }()
 
-	configuredModels, err := model.ParseRoundRobin(modelCachePath, configuredRotation(settings, isSimulated))
+	configuredModels, err := model.ParseRoundRobin(
+		modelCachePath, configuredRotation(settings, isSimulated), settings.Model.GetDefaults(),
+	)
 	if err != nil {
 		return "", err
 	}
@@ -450,7 +458,7 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 	if err != nil {
 		startup.Wait(func() {
 			selection, err = model.ChooseWhenNoneSelected(
-				err, modelCachePath, currency, backend.IsLoggedIn, keyboard, os.Stdout,
+				err, modelCachePath, currency, backend.IsLoggedIn, keyboard, os.Stdout, settings.Model.GetDefaults(),
 			)
 		})
 	}
@@ -760,15 +768,15 @@ func run(hooks *cycle.Hooks, requestedTransition *cycle.Transition) (string, err
 			if start.SourceSessionName != "" {
 				transition, err = cycle.ForkedSessionTransition(
 					start.ModelGlob,
-					selection.Effort,
 					model.Choices(modelCachePath),
+					sessionDefaults(selection),
 					start.SourceSessionName,
 				)
 			} else {
 				transition, err = cycle.NewSessionTransition(
 					start.ModelGlob,
-					selection.Effort,
 					model.Choices(modelCachePath),
+					sessionDefaults(selection),
 				)
 			}
 			if err != nil {

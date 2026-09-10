@@ -347,7 +347,7 @@ func TestOpenCodeGoOnboardingMatchesTheGolden(t *testing.T) {
 			}}
 		},
 		setInitialModel: func(selection string) error {
-			if selection != "opencode-go/deepseek-v4-pro@medium" {
+			if selection != "opencode-go/deepseek-v4-pro@high" {
 				t.Errorf("saved %q", selection)
 			}
 			return nil

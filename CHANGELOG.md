@@ -3,6 +3,8 @@
 ## [N.N.N] - XXXX-XX-XX
 
 - Detect valid Codex models the right way
+- Default to high effort level, and make it configurable
+- Make fast mode default configurable
 - Remove stray blank line from incoming mid-round notices
 - Spell grant flags in capability order (`rxw`)
 - Warn when [sandbox.read] is used redundantly

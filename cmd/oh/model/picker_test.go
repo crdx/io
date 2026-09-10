@@ -27,7 +27,7 @@ func TestAModelIsOfferedAtTheEffortNearestTheOneWanted(t *testing.T) {
 		{Provider: "codex", ID: "gpt-5.3-codex", EffortLevels: []string{"xhigh", "low", "medium"}},
 		{Provider: "ollama", ID: "qwen3-coder:30b", EffortLevels: []string{"none"}},
 		{Provider: "ollama", ID: "unlevelled", EffortLevels: []string{"whatever"}},
-	}, "high")
+	}, Defaults{Effort: "high"})
 
 	if offers[0].Effort != (picker.Effort{Level: "xhigh"}) {
 		t.Errorf("expected the nearest effort above the one wanted, got %s", offers[0].Effort)
@@ -50,7 +50,7 @@ func TestOnlyAProviderWithFastModeOffersItBesideEachEffort(t *testing.T) {
 	offers := offered([]Choice{
 		{Provider: CodexProvider, ID: "gpt-5.6-sol", EffortLevels: []string{"low", "high"}},
 		{Provider: AnthropicProvider, ID: "claude-opus-5", EffortLevels: []string{"low", "high"}},
-	}, "high")
+	}, Defaults{Effort: "high"})
 
 	fastLadder := []picker.Effort{
 		{Level: "low"},
@@ -68,7 +68,7 @@ func TestOnlyAProviderWithFastModeOffersItBesideEachEffort(t *testing.T) {
 }
 
 func TestThePickerOnlyOpensWhereItCanBeDrawn(t *testing.T) {
-	_, err := ChooseWhenNoneSelected(ErrNoSelection, t.TempDir()+"/models.json", money.Dollar(), everyoneSignedIn, nil, nil)
+	_, err := ChooseWhenNoneSelected(ErrNoSelection, t.TempDir()+"/models.json", money.Dollar(), everyoneSignedIn, nil, nil, Defaults{})
 
 	if !errors.Is(err, ErrNoSelection) {
 		t.Errorf("expected the reason nothing was selected to stand, got %v", err)
@@ -78,7 +78,7 @@ func TestThePickerOnlyOpensWhereItCanBeDrawn(t *testing.T) {
 func TestOnlyAnUnselectedModelOpensThePicker(t *testing.T) {
 	wanted := errors.New("something else went wrong")
 
-	_, err := ChooseWhenNoneSelected(wanted, t.TempDir()+"/models.json", money.Dollar(), everyoneSignedIn, os.Stdin, os.Stdout)
+	_, err := ChooseWhenNoneSelected(wanted, t.TempDir()+"/models.json", money.Dollar(), everyoneSignedIn, os.Stdin, os.Stdout, Defaults{})
 
 	if !errors.Is(err, wanted) {
 		t.Errorf("expected the original reason back, got %v", err)
@@ -86,7 +86,7 @@ func TestOnlyAnUnselectedModelOpensThePicker(t *testing.T) {
 }
 
 func TestNothingCanBeChosenWhenNoModelsAreKnown(t *testing.T) {
-	if _, err := Choose(t.TempDir()+"/models.json", money.Dollar(), everyoneSignedIn, nil, nil); err == nil {
+	if _, err := Choose(t.TempDir()+"/models.json", money.Dollar(), everyoneSignedIn, nil, nil, Defaults{}); err == nil {
 		t.Error("expected the empty model list to be refused")
 	}
 }
@@ -94,7 +94,7 @@ func TestNothingCanBeChosenWhenNoModelsAreKnown(t *testing.T) {
 func TestThePickerRefusesToOpenWhereNoProviderIsSignedIntoAtAll(t *testing.T) {
 	path := writeChoosableModels(t)
 
-	_, err := Choose(path, money.Dollar(), func(string) bool { return false }, nil, nil)
+	_, err := Choose(path, money.Dollar(), func(string) bool { return false }, nil, nil, Defaults{})
 	if !errors.Is(err, ErrNotLoggedIn) {
 		t.Errorf("expected the picker to advise signing in, got %v", err)
 	}

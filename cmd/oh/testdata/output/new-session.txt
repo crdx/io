@@ -1,11 +1,11 @@
 === command line selections ===
-"opus-5"                     anthropic/claude-opus-5@medium
-"opus5"                      anthropic/claude-opus-5@medium
+"opus-5"                     anthropic/claude-opus-5@max
+"opus5"                      anthropic/claude-opus-5@max
 "sonnet"                     anthropic/claude-sonnet-5@high
 "sonnet5"                    anthropic/claude-sonnet-5@high
 "sol"                        codex/gpt-5.6-sol@high
 "deepseek"                   opencode-go/deepseek-v4-pro@medium
-"anthropic/claude-opus-5"    anthropic/claude-opus-5@medium
+"anthropic/claude-opus-5"    anthropic/claude-opus-5@max
 "opencode/deepseek"          opencode-go/deepseek-v4-pro@medium
 "anthropic"                  error: model "anthropic" does not match any known model
 "codex"                      error: model "codex" does not match any known model
@@ -51,6 +51,8 @@
 ""                           new --from able-dolphin
 "opus-5"                     new -m anthropic/claude-opus-5@medium --from able-dolphin
 "opus-5@max"                 new -m anthropic/claude-opus-5@max --from able-dolphin
+"gpt"                        new -m codex/gpt-5.6-sol@high+fast --from able-dolphin
+"gpt@high"                   new -m codex/gpt-5.6-sol@high --from able-dolphin
 "gpt@high+fast"              new -m codex/gpt-5.6-sol@high+fast --from able-dolphin
 "nope"                       error: model "nope" does not match any known model
 

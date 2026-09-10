@@ -4805,7 +4805,7 @@ func TestForkingAStoredSessionOpensANewOneCarryingItsTranscript(t *testing.T) {
 
 func TestAnEffortWrittenAsAnAliasInTheConfigIsResolved(t *testing.T) {
 	modelCachePath := useRoundRobinModelCache(t)
-	selections, err := model.ParseRoundRobin(modelCachePath, []string{"sol@off"})
+	selections, err := model.ParseRoundRobin(modelCachePath, []string{"sol@off"}, model.Defaults{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -4876,7 +4876,7 @@ func resolveCommandLineSelections(t *testing.T) string {
 		"claude",
 		"nope",
 	} {
-		chosen, err := model.ParseSelection(path, selection)
+		chosen, err := model.ParseSelection(path, selection, model.Defaults{})
 		if err != nil {
 			fmt.Fprintf(&written, "%-28q error: %v\n", selection, err)
 
@@ -4904,8 +4904,8 @@ func resolveForkedSessionGlobs(t *testing.T) string {
 	choices := newSessionFixtureChoices()
 	var written strings.Builder
 
-	for _, glob := range []string{"", "opus-5", "opus-5@max", "gpt@high+fast", "nope"} {
-		transition, err := cycle.ForkedSessionTransition(glob, "medium", choices, "able-dolphin")
+	for _, glob := range []string{"", "opus-5", "opus-5@max", "gpt", "gpt@high", "gpt@high+fast", "nope"} {
+		transition, err := cycle.ForkedSessionTransition(glob, choices, model.Defaults{Effort: "medium", IsFast: true}, "able-dolphin")
 		if err != nil {
 			fmt.Fprintf(&written, "%-28q error: %v\n", glob, err)
 
@@ -4944,7 +4944,7 @@ func resolveNewSessionGlobs(t *testing.T) string {
 		"nope",
 		"nonsense",
 	} {
-		transition, err := cycle.NewSessionTransition(glob, "medium", choices)
+		transition, err := cycle.NewSessionTransition(glob, choices, model.Defaults{Effort: "medium"})
 		if err != nil {
 			fmt.Fprintf(&written, "%-28q error: %v\n", glob, err)
 

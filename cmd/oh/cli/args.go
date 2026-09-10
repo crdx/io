@@ -134,7 +134,7 @@ func (self Options) StartingFromSession() bool {
 	return self.SourceSession != ""
 }
 
-func (self Input) Parse(modelCachePath string) (Options, error) {
+func (self Input) Parse(modelCachePath string, defaults model.Defaults) (Options, error) {
 	options := Options{
 		Message:       strings.Join(self.Message, " "),
 		Session:       self.Session,
@@ -145,7 +145,7 @@ func (self Input) Parse(modelCachePath string) (Options, error) {
 	}
 
 	if self.Model != "" {
-		selection, err := model.ParseSelection(modelCachePath, self.Model)
+		selection, err := model.ParseSelection(modelCachePath, self.Model, defaults)
 		if err != nil {
 			return options, err
 		}

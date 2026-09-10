@@ -72,7 +72,7 @@ func ListedPrices(path string) []PricedModel {
 	return pricedModels
 }
 
-func ParseSelection(path string, writtenSelection string) (Selection, error) {
+func ParseSelection(path string, writtenSelection string, defaults Defaults) (Selection, error) {
 	selectionQuery, isFast, err := splitFastMode(writtenSelection)
 	if err != nil {
 		return Selection{}, err
@@ -93,20 +93,23 @@ func ParseSelection(path string, writtenSelection string) (Selection, error) {
 		return Selection{}, fmt.Errorf("%s does not support fast mode", choice.Provider)
 	}
 
-	effort := DefaultEffort(choice.EffortLevels)
+	effort := defaults.EffortFor(choice.EffortLevels)
 
-	if hasEffort {
+	switch {
+	case hasEffort:
 		if effort, err = matchEffort(effortQuery, choice); err != nil {
 			return Selection{}, err
 		}
-	} else if effort == "" {
+	case effort == "":
 		return Selection{}, fmt.Errorf("model %s has no recognised effort levels", choice.ID)
+	default:
+		isFast = isFast || defaults.IsFastFor(choice.Provider)
 	}
 
 	return Selection{Provider: choice.Provider, Model: choice.ID, Effort: effort, IsFast: isFast}, nil
 }
 
-func ResolveQuery(query string, currentEffort string, choices []Choice) (Selection, error) {
+func ResolveQuery(query string, choices []Choice, defaults Defaults) (Selection, error) {
 	selectionQuery, isFast, err := splitFastMode(query)
 	if err != nil {
 		return Selection{}, err
@@ -125,14 +128,17 @@ func ResolveQuery(query string, currentEffort string, choices []Choice) (Selecti
 		return Selection{}, fmt.Errorf("%s does not support fast mode", choice.Provider)
 	}
 
-	effort := NearestEffort(currentEffort, choice.EffortLevels)
+	effort := defaults.EffortFor(choice.EffortLevels)
 
-	if hasEffort {
+	switch {
+	case hasEffort:
 		if effort, err = matchEffort(effortQuery, choice); err != nil {
 			return Selection{}, err
 		}
-	} else if effort == "" {
+	case effort == "":
 		return Selection{}, fmt.Errorf("model %s has no recognised effort levels", choice.ID)
+	default:
+		isFast = isFast || defaults.IsFastFor(choice.Provider)
 	}
 
 	return Selection{Provider: choice.Provider, Model: choice.ID, Effort: effort, IsFast: isFast}, nil
@@ -156,10 +162,36 @@ func SupportsFastMode(providerName string) bool {
 
 var EffortOrder = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
-const defaultEffort = "medium"
+var highestEffort = EffortOrder[len(EffortOrder)-1]
 
-func DefaultEffort(available []string) string {
-	return NearestEffort(defaultEffort, available)
+type Effort string
+
+func (self *Effort) UnmarshalText(text []byte) error {
+	level := ResolveEffort(strings.TrimSpace(string(text)))
+	if !slices.Contains(EffortOrder, level) {
+		return fmt.Errorf("effort must be one of: %s", strings.Join(EffortOrder, ", "))
+	}
+
+	*self = Effort(level)
+	return nil
+}
+
+type Defaults struct {
+	Effort Effort
+	IsFast bool
+}
+
+func (self Defaults) EffortFor(available []string) string {
+	wantedEffort := string(self.Effort)
+	if wantedEffort == "" {
+		wantedEffort = highestEffort
+	}
+
+	return NearestEffort(wantedEffort, available)
+}
+
+func (self Defaults) IsFastFor(providerName string) bool {
+	return self.IsFast && SupportsFastMode(providerName)
 }
 
 func NearestEffort(current string, available []string) string {

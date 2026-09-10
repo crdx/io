@@ -4,17 +4,17 @@ import "crdx.org/io/cmd/oh/model"
 
 const sourceSessionOption = "--from"
 
-func NewSessionTransition(modelGlob string, currentEffort string, choices []model.Choice) (Transition, error) {
-	return selectedModelTransition(modelGlob, currentEffort, choices)
+func NewSessionTransition(modelGlob string, choices []model.Choice, defaults model.Defaults) (Transition, error) {
+	return selectedModelTransition(modelGlob, choices, defaults)
 }
 
 func ForkedSessionTransition(
 	modelGlob string,
-	currentEffort string,
 	choices []model.Choice,
+	defaults model.Defaults,
 	sourceSessionName string,
 ) (Transition, error) {
-	transition, err := selectedModelTransition(modelGlob, currentEffort, choices)
+	transition, err := selectedModelTransition(modelGlob, choices, defaults)
 	if err != nil {
 		return Transition{}, err
 	}
@@ -23,13 +23,13 @@ func ForkedSessionTransition(
 	return transition, nil
 }
 
-func selectedModelTransition(modelGlob string, currentEffort string, choices []model.Choice) (Transition, error) {
+func selectedModelTransition(modelGlob string, choices []model.Choice, defaults model.Defaults) (Transition, error) {
 	transition := Transition{Kind: NewSession}
 	if modelGlob == "" {
 		return transition, nil
 	}
 
-	selection, err := model.ResolveQuery(modelGlob, currentEffort, choices)
+	selection, err := model.ResolveQuery(modelGlob, choices, defaults)
 	if err != nil {
 		return Transition{}, err
 	}

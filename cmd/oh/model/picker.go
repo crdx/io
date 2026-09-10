@@ -20,6 +20,7 @@ func Choose(
 	isLoggedIn func(providerName string) bool,
 	terminal *os.File,
 	screen io.Writer,
+	defaults Defaults,
 ) (Selection, error) {
 	choices := Choices(path)
 	if len(choices) == 0 {
@@ -30,7 +31,7 @@ func Choose(
 		return Selection{}, ErrNotLoggedIn
 	}
 
-	chosenModel, err := picker.Choose(offered(choices, defaultEffort), currency, terminal, screen)
+	chosenModel, err := picker.Choose(offered(choices, defaults), currency, terminal, screen)
 	if err != nil {
 		return Selection{}, err
 	}
@@ -50,12 +51,13 @@ func ChooseWhenNoneSelected(
 	isLoggedIn func(providerName string) bool,
 	terminal *os.File,
 	screen io.Writer,
+	defaults Defaults,
 ) (Selection, error) {
 	if !errors.Is(reason, ErrNoSelection) || !tty.Is(terminal) || !tty.Is(screen) {
 		return Selection{}, reason
 	}
 
-	return Choose(path, currency, isLoggedIn, terminal, screen)
+	return Choose(path, currency, isLoggedIn, terminal, screen, defaults)
 }
 
 func signedInto(choices []Choice, isLoggedIn func(providerName string) bool) []Choice {
@@ -70,12 +72,12 @@ func signedInto(choices []Choice, isLoggedIn func(providerName string) bool) []C
 	return available
 }
 
-func offered(choices []Choice, currentEffort string) []*picker.Model {
+func offered(choices []Choice, defaults Defaults) []*picker.Model {
 	models := make([]*picker.Model, 0, len(choices))
 
 	for _, choice := range choices {
 		efforts := orderedEfforts(choice.EffortLevels)
-		effort := NearestEffort(currentEffort, efforts)
+		effort := defaults.EffortFor(efforts)
 		if effort == "" {
 			effort = efforts[0]
 		}
@@ -86,7 +88,7 @@ func offered(choices []Choice, currentEffort string) []*picker.Model {
 			Name:                strings.Join(DisplayName(choice.ID), " "),
 			ID:                  choice.ID,
 			EffortLevels:        effortLadder(efforts, SupportsFastMode(choice.Provider)),
-			Effort:              picker.Effort{Level: effort},
+			Effort:              picker.Effort{Level: effort, IsFast: defaults.IsFastFor(choice.Provider)},
 			ContextWindowTokens: choice.ContextWindowTokens,
 			Prices:              choice.Prices,
 		})

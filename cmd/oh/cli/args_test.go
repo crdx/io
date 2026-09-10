@@ -84,7 +84,7 @@ func TestLoginProviderIsOptional(t *testing.T) {
 func parseOptions(t *testing.T, arguments ...string) Options {
 	t.Helper()
 
-	settledOptions, err := bind(t, arguments...).Parse(modelCachePath())
+	settledOptions, err := bind(t, arguments...).Parse(modelCachePath(), model.Defaults{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -145,7 +145,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 
 func TestModelSelectionRequiresModelAndEffort(t *testing.T) {
 	for _, selection := range []string{"model", "model@", "@high", "model@high@extra"} {
-		if _, err := (Input{inputFlags: inputFlags{Model: selection}}).Parse(modelCachePath()); err == nil {
+		if _, err := (Input{inputFlags: inputFlags{Model: selection}}).Parse(modelCachePath(), model.Defaults{}); err == nil {
 			t.Errorf("expected %q to be rejected", selection)
 		}
 	}
@@ -334,14 +334,14 @@ func TestReadingIsAlwaysGranted(t *testing.T) {
 
 func TestASessionCannotBeResumedAndUsedAsTheSourceTogether(t *testing.T) {
 	input := Input{inputFlags: inputFlags{Session: "one"}, SourceSession: "another"}
-	if _, err := input.Parse(modelCachePath()); err == nil {
+	if _, err := input.Parse(modelCachePath(), model.Defaults{}); err == nil {
 		t.Error("expected an error")
 	}
 }
 
 func TestAModeNamedOnTheCommandLineCountsAsChosen(t *testing.T) {
 	opts := Input{inputFlags: inputFlags{Session: "one", Caps: "rx"}}
-	settledOptions, err := opts.Parse(modelCachePath())
+	settledOptions, err := opts.Parse(modelCachePath(), model.Defaults{})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -355,7 +355,7 @@ func TestAModeNamedOnTheCommandLineCountsAsChosen(t *testing.T) {
 }
 
 func TestTheYoloFlagWaivesTheSandbox(t *testing.T) {
-	settledOptions, err := Input{inputFlags: inputFlags{Yolo: true}}.Parse(modelCachePath())
+	settledOptions, err := Input{inputFlags: inputFlags{Yolo: true}}.Parse(modelCachePath(), model.Defaults{})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -363,7 +363,7 @@ func TestTheYoloFlagWaivesTheSandbox(t *testing.T) {
 		t.Error("expected --yolo to waive the sandbox")
 	}
 
-	settledOptions, err = Input{}.Parse(modelCachePath())
+	settledOptions, err = Input{}.Parse(modelCachePath(), model.Defaults{})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}

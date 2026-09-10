@@ -95,7 +95,7 @@ func TestTheSimulationKnowsItsModelWithoutRefreshingTheList(t *testing.T) {
 		t.Errorf("starting the simulation said %q", notices.String())
 	}
 
-	selection, err := model.ParseSelection(cachePath, session.Selection)
+	selection, err := model.ParseSelection(cachePath, session.Selection, model.Defaults{})
 	if err != nil {
 		t.Fatal(err)
 	}

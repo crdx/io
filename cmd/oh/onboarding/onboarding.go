@@ -122,6 +122,7 @@ func PrepareConfig(options Options) (config.Config, bool, error) {
 	modelCachePath := location.GetModelCachePath(options.EndpointURL != "")
 	harry := wizard{
 		isSimulationOffered: true,
+		defaults:            settings.Model.GetDefaults(),
 
 		output: options.Output,
 		pause:  typingPause(options.Output),
@@ -187,6 +188,7 @@ type wizard struct {
 	refreshModels   func() error
 	getModels       func() []model.Choice
 	setInitialModel func(string) error
+	defaults        model.Defaults
 
 	isSimulationOffered bool
 	isSimulationChosen  bool
@@ -227,12 +229,17 @@ func (self *wizard) castSpell() error {
 	}
 
 	choice := choices[chosenIndex]
-	effort := model.DefaultEffort(choice.EffortLevels)
+	effort := self.defaults.EffortFor(choice.EffortLevels)
 	if effort == "" {
 		return fmt.Errorf("model %s has no recognised effort levels", choice.ID)
 	}
 
-	selection := model.Selection{Provider: choice.Provider, Model: choice.ID, Effort: effort}
+	selection := model.Selection{
+		Provider: choice.Provider,
+		Model:    choice.ID,
+		Effort:   effort,
+		IsFast:   self.defaults.IsFastFor(choice.Provider),
+	}
 	if err := self.setInitialModel(selection.String()); err != nil {
 		return err
 	}

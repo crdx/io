@@ -22,6 +22,8 @@ output = "12K"
 
 [model]
 round_robin = []
+effort = "high"
+fast = false
 
 [provider.ollama]
 host = ""

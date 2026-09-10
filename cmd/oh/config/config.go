@@ -13,6 +13,7 @@ import (
 
 	"crdx.org/io/cmd/oh/caps"
 	"crdx.org/io/cmd/oh/editor"
+	"crdx.org/io/cmd/oh/model"
 	"crdx.org/io/cmd/oh/output"
 	"crdx.org/io/cmd/oh/segment"
 	"crdx.org/io/cmd/oh/shell"
@@ -83,7 +84,13 @@ type Input struct {
 }
 
 type Model struct {
-	RoundRobin []string `toml:"round_robin"`
+	RoundRobin []string     `toml:"round_robin"`
+	Effort     model.Effort `toml:"effort"`
+	IsFast     bool         `toml:"fast"`
+}
+
+func (self Model) GetDefaults() model.Defaults {
+	return model.Defaults{Effort: self.Effort, IsFast: self.IsFast}
 }
 
 type Provider struct {

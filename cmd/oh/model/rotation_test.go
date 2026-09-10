@@ -15,7 +15,7 @@ func TestRoundRobinSelectionsResolveEveryEntry(t *testing.T) {
 	selections, err := ParseRoundRobin(modelCachePath(), []string{
 		"opencode/deepseek@hi",
 		"anth/opus-5@max",
-	})
+	}, Defaults{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +37,7 @@ func TestRoundRobinSelectionsKeepCanonicalDuplicates(t *testing.T) {
 	selections, err := ParseRoundRobin(modelCachePath(), []string{
 		"opencode-go/deepseek-v4-pro@high",
 		"opencode/deepseek@hi",
-	})
+	}, Defaults{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func TestARotationWithNothingAvailableKeepsItsOrdinaryPosition(t *testing.T) {
 func TestNormalAndFastRoundRobinSelectionsAreDistinct(t *testing.T) {
 	useCachedModels(t)
 
-	selections, err := ParseRoundRobin(modelCachePath(), []string{"sol@high", "sol@high+fast"})
+	selections, err := ParseRoundRobin(modelCachePath(), []string{"sol@high", "sol@high+fast"}, Defaults{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +179,7 @@ func TestRoundRobinSelectionsValidateEntriesThatAreNotFirst(t *testing.T) {
 	_, err := ParseRoundRobin(modelCachePath(), []string{
 		"sol@high",
 		"nothing-like-this@high",
-	})
+	}, Defaults{})
 	if err == nil || !strings.Contains(err.Error(), "nothing-like-this") {
 		t.Fatalf("expected the invalid selection to be named, got %v", err)
 	}
